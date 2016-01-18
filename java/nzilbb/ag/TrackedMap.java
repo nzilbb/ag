@@ -1,22 +1,22 @@
 //
-// Copyright 2015 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
-//    This file is part of LaBB-CAT.
+//    This file is part of nzilbb.ag.
 //
-//    LaBB-CAT is free software; you can redistribute it and/or modify
+//    nzilbb.ag is free software; you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
-//    the Free Software Foundation; either version 2 of the License, or
+//    the Free Software Foundation; either version 3 of the License, or
 //    (at your option) any later version.
 //
-//    LaBB-CAT is distributed in the hope that it will be useful,
+//    nzilbb.ag is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //    GNU General Public License for more details.
 //
 //    You should have received a copy of the GNU General Public License
-//    along with LaBB-CAT; if not, write to the Free Software
+//    along with nzilbb.ag; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 package nzilbb.ag;
@@ -31,7 +31,7 @@ import java.util.TreeSet;
  * Base class for annotation graph classes, which allows registered attributes to have their changes and original values tracked.
  * <p>Annotation graph classes (in particular {@link Annotation} and {@link Anchor} are defined as Maps not just to allow tracking of changes to registered attributes (key/value pairs), but also to allow them to easily be informally extended or tagged at runtime. This is with two particular possibilities in mind:
  * <ul>
- *  <li>An annotation is defined as a directed graph edge with a <var>label</var> and a <var>type</var> (which in this implementation is actually <var>layerId</var>), and an anchor is a  graph node with an optional <var>offset</var>, but there is scope of an annotation to include other attributes - not alternative annotation labels, but rather extra information about the annotation itself, which might include provenance, authorship, etc.  In particular, LaBB-CAT annotation graphs include, for both annotations and anchors, an indication of <var>confidence</var>; in LaBB-CAT all anchors are given offsets, but some offsets are more certain than others - an offset may have been manually aligned by a human annotator (high confidence), or may have been arrived at by an automated forced-alignment Process (lower confidence), or may simply have been calculated by linear interpolation between two more certain anchors (very low confidence).  Rather than include <var>confidence</var> as a formal attribute of the Annotation class, this is implemented by setting an attribute on the anchor (the same notion also applies to anchors), which is processed by LaBB-CAT annotators, but can be ignored by other processing. Such 'sticky' attributes, which should ideally be serialized if possible, for storage or transfer, are assumed to have keys that start with an alphabetic character - e.g. <var>"confidence"</var> - in contrast to 'transient' attributes mentioned below.</li>
+ *  <li>An annotation is defined as a directed graph edge with a <var>label</var> and a <var>type</var> (which in this implementation is actually <var>layerId</var>), and an anchor is a  graph node with an optional <var>offset</var>, but there is scope of an annotation to include other attributes - not alternative annotation labels, but rather extra information about the annotation itself, which might include provenance, authorship, etc.  In particular, nzilbb.ag annotation graphs include, for both annotations and anchors, an indication of <var>confidence</var>; in nzilbb.ag all anchors are given offsets, but some offsets are more certain than others - an offset may have been manually aligned by a human annotator (high confidence), or may have been arrived at by an automated forced-alignment Process (lower confidence), or may simply have been calculated by linear interpolation between two more certain anchors (very low confidence).  Rather than include <var>confidence</var> as a formal attribute of the Annotation class, this is implemented by setting an attribute on the anchor (the same notion also applies to anchors), which is processed by nzilbb.ag annotators, but can be ignored by other processing. Such 'sticky' attributes, which should ideally be serialized if possible, for storage or transfer, are assumed to have keys that start with an alphabetic character - e.g. <var>"confidence"</var> - in contrast to 'transient' attributes mentioned below.</li>
  *  <li>During processing, it may be desirable or necessary to tag annotations or anchors in some way, e.g. to mark them as 'already visited' or 'already processed' by some traversal process, or to link together entities during merging of graphs, etc. This can be easily achieved by simply setting ad-hoc attributes on the entity as required.  Such 'transient' attributes, which should ideally not be serialized for storage or transfer, are assumed to have keys that start with a non-alphabetic character - e.g. <var>"@otherGraphConterpart</var> - in contrast to 'sticky' attributes mentioned above.</li>
  * </ul>
  * @author Robert Fromont robert@fromont.net.nz
