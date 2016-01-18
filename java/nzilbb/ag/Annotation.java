@@ -1,0 +1,1263 @@
+//
+// Copyright 2015 New Zealand Institute of Language, Brain and Behaviour, 
+// University of Canterbury
+// Written by Robert Fromont - robert.fromont@canterbury.ac.nz
+//
+//    This file is part of LaBB-CAT.
+//
+//    LaBB-CAT is free software; you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation; either version 2 of the License, or
+//    (at your option) any later version.
+//
+//    LaBB-CAT is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with LaBB-CAT; if not, write to the Free Software
+//    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+package nzilbb.ag;
+
+import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.Vector;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+
+/**
+ * Annotation graph annotation - i.e. an edge of the graph.
+ * <br>TODO: we want a method that allows easy and automatic navigation of the annotation hierarchy by layer name, so we can get access to related annotations in a shorthand way - e.g. it would be nnice if <code>word.turn</code> accessed the word annotations turn. While such shorthandedness isn't going to be possible in a precompiled, type-safe language, a pair of methods would do it, something like: <br><code>word.my("turn")</code> or <code>word.the("turn")</code> <strike>or <code>word.first("turn")</code></strike> to get a single related annotation (either upward or downward in the hiararchy, or if an unrelated layer, but temporal overlap), and: <br><code>word.list("phone")</code> to get a list of related annotations (on the same principle). <br>Essentially <code>word.my("phone")</code> would be equivalent to <code>word.list("phone")[0]</code>.
+ * @author Robert Fromont robert@fromont.net.nz
+ */
+@SuppressWarnings("serial")
+public class Annotation
+   extends TrackedMap
+   implements Comparable<Annotation>
+{
+   // NB if this is updated, please also update the @return javadoc attribute on getTrackedAttributes()
+   private static String[] aTrackedAttributes = {"label", "startId", "endId", "parentId", "ordinal"};
+   /**
+    * Keys for attributes that are change-tracked - i.e. when a new value is set for any of these attributes, the original value is saved in the map with the given key prefixed by "original" - e.g. if "label" is changed, then "originalLabel" will contain its original value.
+    * <p>LinkedHashSet is used so that attributes are iterated in the order they're defined in aTrackedAttributes (which is the order shown in the documentation of {@link #getTrackedAttributes()}).
+    */
+   protected static final Set<String> trackedAttributes = new LinkedHashSet<String>(java.util.Arrays.asList(aTrackedAttributes));
+
+   /**
+    * Keys for attributes that are change-tracked - i.e. when a new value is set for any of these attributes, the original value is saved in the map with the given key prefixed by "original" - e.g. if "label" is changed, then "originalLabel" will contain its original value.
+    * @return "label", "startId", "endId", "parentId", "ordinal"
+    */
+   public Set<String> getTrackedAttributes() { return trackedAttributes; }
+
+   // NB if this is updated, please also update the @return javadoc attribute on getClonedAttributes()
+   private static String[] aClonedAttributes = {"id", "layerId", "label", "startId", "endId", "parentId", "ordinal"};
+   /**
+    * Keys for attributes that are cloned - i.e. when an object is cloned, only these attributes are copied into the clone.
+    * <p>LinkedHashSet is used so that attributes are iterated in the order they're defined in aClonedAttributes (which is the order shown in the documentation of {@link #getClonedAttributes()}).
+    */
+   protected static final Set<String> clonedAttributes = new LinkedHashSet<String>(java.util.Arrays.asList(aClonedAttributes));
+
+   /**
+    * Keys for attributes that are cloned - i.e. when an object is cloned, only these attributes are copied into the clone.
+    * @return "id", "layerId", "label", "startId", "endId", "parentId", "ordinal"
+    */
+   public Set<String> getClonedAttributes() { return clonedAttributes; }
+
+   // Attributes stored in HashMap:
+
+   /**
+    * Getter for <i>label</i>: The annotation's label.
+    * @return The annotation's label.
+    */
+   public String getLabel() { try { return (String)get("label"); } catch(ClassCastException exception) {return null;} }
+   /**
+    * Setter for <i>label</i>: The annotation's label.
+    * @param label The annotation's label.
+    * @return A list of changes, which will be empty if the label is being set for the first time, or is already set to this value.
+    */
+   public Vector<Change> setLabel(String label) 
+   { 
+      put("label", label); 
+      Vector<Change> changes = new Vector<Change>();
+      Change change = getLastChange();
+      if (change != null) changes.add(change);
+      return changes;
+   }
+
+   /**
+    * Getter for <i>layerId</i>: The identifier of the annotation's layer.
+    * @return The identifier of the annotation's layer.
+    */
+   public String getLayerId() { try { return (String)get("layerId"); } catch(ClassCastException exception) {return null;} }
+   /**
+    * Setter for <i>layerId</i>: The identifier of the annotation's layer.
+    * @param layerId The identifier of the annotation's layer.
+    */
+   public void setLayerId(String layerId) { put("layerId", layerId); }
+
+   /**
+    * Getter for <i>startId</i>: ID of the annotation's start anchor.
+    * @return ID of the annotation's start anchor.
+    */
+   public String getStartId() { try { return (String)get("startId"); } catch(ClassCastException exception) {return null;} }
+   /**
+    * Setter for <i>startId</i>: ID of the annotation's start anchor.
+    * @param startId ID of the annotation's start anchor.
+    * @return A list of changes, which will be empty if the startId is being set for the first time, or is already set to this value.
+    */
+   public synchronized Vector<Change> setStartId(String startId) 
+   { 
+      // unlink old start, if available
+      Anchor start = getStart();
+      if (start != null && !start.getId().equals(startId))
+      {
+	 start.startOf(getLayerId()).remove(this);
+      }
+
+      // set the ID
+      put("startId", startId); 
+      
+      // introduce ourselves to the new anchor, if available
+      start = getStart();
+      if (start != null)
+      {
+	 start.startOf(getLayerId()).add(this);
+      }
+      
+      // return change
+      Vector<Change> changes = new Vector<Change>();
+      Change change = getLastChange();
+      if (change != null) changes.add(change);
+      return changes;
+   }
+   
+   /**
+    * Getter for <i>endId</i>: ID of the annotation's end anchor.
+    * @return ID of the annotation's end anchor.
+    */
+   public String getEndId() { try { return (String)get("endId"); } catch(ClassCastException exception) {return null;} }
+   /**
+    * Setter for <i>endId</i>: ID of the annotation's end anchor.
+    * @param endId ID of the annotation's end anchor.
+    * @return A list of changes, which will be empty if the endId is being set for the first time, or is already set to this value.
+    */
+   public synchronized Vector<Change> setEndId(String endId) 
+   { 
+      // unlink old end, if available
+      Anchor end = getEnd();
+      if (end != null && !end.getId().equals(endId))
+      {
+	 end.endOf(getLayerId()).remove(this);
+      }
+
+      // set the ID
+      put("endId", endId); 
+      
+      // introduce ourselves to the new anchor, if available
+      end = getEnd();
+      if (end != null)
+      {
+	 end.endOf(getLayerId()).add(this);
+      }
+      
+      // return change
+      Vector<Change> changes = new Vector<Change>();
+      Change change = getLastChange();
+      if (change != null) changes.add(change);
+      return changes;
+   }
+   
+   /**
+    * Getter for <i>parentId</i>: The annotation's parent annotation ID, if any.
+    * @return The annotation's parent annotation ID, if any.
+    */
+   public String getParentId() { try { return (String)get("parentId"); } catch(ClassCastException exception) {return null;} }
+   /**
+    * Setter for <i>parentId</i>: The annotation's parent annotation ID, if any.
+    * @param parentId The annotation's parent annotation ID, if any.
+    * @return A list of changes, which will be empty if the parentId is being set for the first time, or is already set to this value.
+    */
+   public synchronized Vector<Change> setParentId(String parentId) 
+   { 
+      put("parentId", parentId);
+      Vector<Change> changes = new Vector<Change>();
+      Change change = getLastChange();
+      if (change != null) changes.add(change);
+      return changes;
+   }
+   
+   /**
+    * Getter for <i>ordinal</i>: The annotation's ordinal position amongst the parent's children.  Ordinal is 1-based - i.e. the first child has ordinal = 1.
+    * @return The annotation's ordinal position amongst the parent's children.
+    */
+   public int getOrdinal() 
+   { 
+      int ordinalToReturn = 0;
+      try 
+      { 
+	 Integer ordinalAttribute = (Integer)get("ordinal");
+	 Annotation parent = getParent();
+	 if (parent != null && parent.getAnnotations(getLayerId()).contains(this))
+	 { // deduce ordinal from position in parent's child collection instead of using attribute
+	    ordinalToReturn = 1;
+	    // find the index of this amongst the peers, ignoring deleted peers
+	    for (Annotation peer : parent.getAnnotations(getLayerId()))
+	    {
+	       if (peer == this) break;
+	       if (peer.getChange() == Change.Operation.Destroy) continue;
+	       ordinalToReturn++;
+	    }
+	    if (ordinalAttribute == null || ordinalAttribute.intValue() != ordinalToReturn)
+	    { // ordinal has changed so update it
+	       setOrdinal(ordinalToReturn);
+	    }
+	 }
+	 else if (ordinalAttribute != null)
+	 {
+	    ordinalToReturn = ordinalAttribute.intValue();
+	 }
+      } 
+      catch(ClassCastException cc) {} 
+      return ordinalToReturn;
+   }
+   /**
+    * Setter for <i>ordinal</i>: The annotation's ordinal position amongst the parent's children. Ordinal is 1-based - i.e. the first child has ordinal = 1.
+    * @param ordinal The annotation's ordinal position amongst the parent's children.
+    * @return A list of changes, which will be empty if the ordinal is being set for the first time, or is already set to this value.
+    */
+   public synchronized Vector<Change> setOrdinal(int ordinal) 
+   { 
+      Integer originalOrdinal = (Integer)get("ordinal");
+      Vector<Annotation> siblings = null;
+      Annotation parent = getParent();
+      if (parent != null)
+      {
+	 siblings = parent.getAnnotations(getLayerId());
+      }
+      if (siblings != null && siblings.size() < ordinal - 1) 
+      { // ordinal is too high - adjust it to fit
+	 ordinal = siblings.size();
+      }
+      put("ordinal", ordinal); 
+      Vector<Change> changes = new Vector<Change>();
+      Change change = getLastChange();
+      if (change != null)
+      { // actually changing ordinal
+	 changes.add(change);
+	 // if the peers are available
+	 if (siblings != null)
+	 {
+	    siblings.remove(this);
+	    siblings.add(ordinal - 1, this);
+
+	    // now we have to adjust sibling ordinals too
+	    int startFrom = ordinal;
+	    if (originalOrdinal != null && originalOrdinal.intValue() < ordinal)
+	    {
+	       startFrom = originalOrdinal;
+	    }
+	    for (int i = Math.min(originalOrdinal, ordinal); i < siblings.size(); i++)
+	    {
+	       Annotation sibling = siblings.elementAt(i);
+	       if (sibling.getChange() == Change.Operation.Destroy) continue; // ignore deletes
+	       if (sibling.containsKey("ordinal"))
+	       {
+		  Integer ordinalShouldBe = new Integer(i+1);
+		  if (!sibling.get("ordinal").equals(ordinalShouldBe))
+		  {
+
+		     sibling.put("ordinal", ordinalShouldBe); 
+		     change = sibling.getLastChange();
+		     if (change != null) changes.add(change);
+		  } // changing sibling ordinal
+	       } // ordinal is actually set
+	    } // next affected sibling
+	 } // there are known siblings
+      } // ordinal actually changing      
+      return changes;
+   }
+   
+
+   // Attributes stored outside HashMap, so that JSONifying the HashMap doesn't result in infinite recursion
+
+   /**
+    * Child annotations, keyed on layer id.
+    */
+   protected LinkedHashMap<String,Vector<Annotation>> annotations = new LinkedHashMap<String,Vector<Annotation>>();
+   /**
+    * Getter for <i>annotations</i>: Child annotations, keyed on layer id.
+    * @return Child annotations, keyed on layer id.
+    */
+   public LinkedHashMap<String,Vector<Annotation>> getAnnotations() { return annotations; }
+
+   
+   /**
+    * The annotation's annotation graph.
+    * @see #getGraph()
+    * @see #setGraph(Graph)
+    */
+   protected Graph graph;
+   /**
+    * Getter for {@link #graph}: The annotation's annotation graph.
+    * @return The annotation's annotation graph.
+    */
+   public Graph getGraph() { return graph; }
+   /**
+    * Setter for {@link #graph}: The annotation's annotation graph.
+    * @param newGraph The annotation's annotation graph.
+    */
+   public void setGraph(Graph newGraph) 
+   { 
+      graph = newGraph; 
+      if (graph != null)
+      {
+	 // now we have a graph, we may be able to introduce ourselves to related objects
+	 if (graph.getLayers().containsKey(getLayerId()))
+	 {
+	    setLayer(graph.getLayer(getLayerId()));
+	 }
+	 if (graph.getAnchors().containsKey(getStartId()))
+	 {
+	    setStart(graph.getAnchor(getStartId()));
+	 }
+	 if (graph.getAnchors().containsKey(getEndId()))
+	 {
+	    setEnd(graph.getAnchor(getEndId()));
+	 }
+      }
+   }
+   
+   /**
+    * Getter for <var>parent</var>: The annotation's parent annotation, if any.
+    * <em>NB:</em> An object will only be returned if {@link #setGraph(Graph)} has been called and the graph contains the parent annotation (as identified by by {@link #getParentId()}).
+    * @return The annotation's parent annotation, if any.
+    */
+   public Annotation getParent() 
+   {   
+      if (graph != null)
+      {
+	 return graph.getAnnotation(getParentId());
+      }
+      else
+      {
+	 return null;
+      }
+   }
+   /**
+    * Setter for <var>parent</var>: The annotation's parent annotation, if any.
+    * @param newParent The annotation's parent annotation, if any.
+    * @return A collection of resulting changes (which may be empty or may include an ordinal change)
+    */
+   public Vector<Change> setParent(Annotation newParent) 
+   { 
+      Vector<Change> changes = new Vector<Change>();
+      if (newParent == null)
+      {
+	 changes.addAll(
+	    setParentId(null));
+      }
+      else
+      {	 
+	 Annotation currentParent = getParent();
+	 if (currentParent != null && currentParent != newParent)
+	 {
+	    Vector<Annotation> currentSiblings = currentParent.getAnnotations(getLayerId());
+	    currentSiblings.remove(this);
+	 }
+	 changes.addAll(
+	    setParentId(newParent.getId()));
+	 Vector<Annotation> newSiblings = newParent.getAnnotations(getLayerId());
+	 newSiblings.remove(this); // just in case it's there
+	 Integer ordinal = (Integer)get("ordinal");
+	 if (ordinal != null && newSiblings.size() >= ordinal.intValue() - 1
+	     // only if we're not changing parent
+	     && currentParent == newParent) 
+	 { // insert where it thinks it should go 
+	    // ordinal is 1-based, vector index is 0-based, so subtract 1
+	    newSiblings.add(ordinal.intValue() - 1, this);
+	 }
+	 else
+	 { // append it
+	    newSiblings.add(this);
+	    // and set the ordinal 
+	    // ordinal is 1-based, vector index is 0-based, so size of list is ordinal of last one
+	    changes.addAll(
+	       setOrdinal(newSiblings.size()));
+	 }	 
+/* TODO this incurs a surprisingly huge performance hit 
+	 Layer layer = getLayer();
+	 if (layer != null && layer.getAlignment() == Constants.ALIGNMENT_NONE)
+	 { // annotation must share anchors with parent
+	    if (!getStartId().equals(newParent.getStartId()))
+	    {
+	       changes.addAll(
+		  setStart(newParent.getStart()));
+	    }
+	    if (!getEndId().equals(newParent.getEndId()))
+	    {
+	       changes.addAll(
+		  setEnd(newParent.getEnd()));
+	    }
+	 }
+*/
+      }      
+      return changes;
+   }   
+
+   /**
+    * Getter for <var>start</var>: The annotation's start anchor.
+    * <em>NB:</em> An object will only be returned if {@link #setGraph(Graph)} has been called and the graph contains the anchor (as identified by by {@link #getStartId()}).
+    * @return The annotation's start anchor.
+    */
+   public Anchor getStart() 
+   { 
+      if (graph != null)
+      {
+	 if (!containsKey("startId") && getLayer().getAlignment() == Constants.ALIGNMENT_NONE)
+	 { // tag layer - return parent's start anchor
+	    return getParent().getStart();
+	 }
+	 return graph.getAnchor(getStartId());
+      }
+      return null;
+   }
+
+   /**
+    * Setter for <var>start</var>: The annotation's start anchor.
+    * @param start The annotation's start anchor.
+    * @return A list of changes, which will be empty if the start anchor is being set for the first time, or is already set to this value.
+    */
+   public Vector<Change> setStart(Anchor start) 
+   { 
+      return setStartId(start.getId());
+   }
+
+   /**
+    * Getter for <var>end</var>: The annotation's end anchor.
+    * <em>NB:</em> An object will only be returned if {@link #setGraph(Graph)} has been called and the graph contains the anchor (as identified by by {@link #getEndId()}).
+    * @return The annotation's end anchor.
+    */
+   public Anchor getEnd() 
+   { 
+      if (graph != null)
+      {
+	 if (!containsKey("endId") && getLayer().getAlignment() == Constants.ALIGNMENT_NONE)
+	 { // tag layer - return parent's start anchor
+	    return getParent().getEnd();
+	 }
+	 return graph.getAnchor(getEndId());
+      }
+      return null;
+   }
+
+   /**
+    * Setter for <var>end</var>: The annotation's end anchor.
+    * @param end The annotation's end anchor.
+    * @return A list of changes, which will be empty if the end anchor is being set for the first time, or is already set to this value.
+    */
+   public Vector<Change> setEnd(Anchor end) 
+   { 
+      return setEndId(end.getId());
+   }
+   
+   /**
+    * Getter for <i>layer</i>: The annotation's layer definition.
+    * <em>NB:</em> An object will only be returned if {@link #setGraph(Graph)} has been called and the graph contains a definition for the annotation's layer (as returned by {@link #getLayerId()}).
+    * @return The annotation's layer definition.
+    */
+   public Layer getLayer() 
+   { 
+      if (graph != null)
+      {
+	 return graph.getLayer(getLayerId());
+      }
+      else
+      {
+	 return null;
+      }
+   }
+   /**
+    * Setter for <i>layer</i>: The annotation's layer definition.
+    * @param layer The annotation's layer definition.
+    */
+   public void setLayer(Layer layer) 
+   { 
+      Layer currentLayer = getLayer();
+      if (currentLayer != null && currentLayer != null)
+      {
+	 currentLayer.getAnnotations().remove(this);
+      }
+      if (layer != null)
+      {
+	 setLayerId(layer.getId());
+	 layer.getAnnotations().add(this);
+      }
+   }
+   
+   // Methods:
+      
+   /**
+    * Default constructor
+    */
+   public Annotation()
+   {
+   } // end of constructor
+
+   /**
+    * Basic constructor.
+    * @param id The annotation's identifier.
+    * @param label The annotation's label.
+    * @param layerId The identifier of the annotation's layer.
+    */
+   public Annotation(String id, String label, String layerId)
+   {
+      setId(id);
+      setLabel(label);
+      setLayerId(layerId);
+   } // end of constructor
+
+   /**
+    * Basic constructor including anchor ids.
+    * @param id The annotation's identifier.
+    * @param label The annotation's label.
+    * @param layerId The identifier of the annotation's layer.
+    * @param startId ID of the annotation's start anchor.
+    * @param endId ID of the annotation's end anchor.
+    */
+   public Annotation(String id, String label, String layerId, String startId, String endId)
+   {
+      setId(id);
+      setLabel(label);
+      setLayerId(layerId);
+      setStartId(startId);
+      setEndId(endId);
+   } // end of constructor
+
+   /**
+    * Basic constructor including anchor and parent ids.
+    * @param id The annotation's identifier.
+    * @param label The annotation's label.
+    * @param layerId The identifier of the annotation's layer.
+    * @param startId ID of the annotation's start anchor.
+    * @param endId ID of the annotation's end anchor.
+    * @param parentId The annotation's parent annotation ID.
+    */
+   public Annotation(String id, String label, String layerId, String startId, String endId, String parentId)
+   {
+      setId(id);
+      setLabel(label);
+      setLayerId(layerId);
+      setStartId(startId);
+      setEndId(endId);
+      setParentId(parentId);
+   } // end of constructor
+
+   /**
+    * Basic constructor including anchor and parent ids and ordinal.
+    * @param id The annotation's identifier.
+    * @param label The annotation's label.
+    * @param layerId The identifier of the annotation's layer.
+    * @param startId ID of the annotation's start anchor.
+    * @param endId ID of the annotation's end anchor.
+    * @param parentId The annotation's parent annotation ID.
+    * @param ordinal The annotation's ordinal position amongst the parent's children.
+    */
+   public Annotation(String id, String label, String layerId, String startId, String endId, String parentId, int ordinal)
+   {
+      setId(id);
+      setLabel(label);
+      setLayerId(layerId);
+      setStartId(startId);
+      setEndId(endId);
+      setParentId(parentId);
+      setOrdinal(ordinal);
+   } // end of constructor
+   
+   /**
+    * Gets the original label of the annotation, before any subsequent calls to {@link #setLabel(String)}, since the object was created or {@link #commit()} was called.
+    * <p>This method mirrors the map key "originalLabel" created by the TrackedMap.
+    * @return The original label.
+    */
+   public String getOriginalLabel()
+   {
+      try 
+      { 
+	 return (String)getOriginal("label"); 
+      }
+      catch(ClassCastException exception) 
+      {
+	 return getLabel();
+      } 
+   } // end of getOriginalLabel()
+   /**
+    * Gets the original startId of the annotation, before any subsequent calls to {@link #setStartId(String)}, since the object was created or {@link #commit()} was called.
+    * <p>This method mirrors the map key "originalStartId" created by the TrackedMap.
+    * @return The original label.
+    */
+   public String getOriginalStartId()
+   {
+      try 
+      { 
+	 return (String)getOriginal("startId"); 
+      }
+      catch(ClassCastException exception) 
+      {
+	 return getStartId();
+      } 
+   } // end of getOriginalStartId()
+   /**
+    * Gets the original endId of the annotation, before any subsequent calls to {@link #setEndId(String)}, since the object was created or {@link #commit()} was called.
+    * <p>This method mirrors the map key "originalEndId" created by the TrackedMap.
+    * @return The original endId.
+    */
+   public String getOriginalEndId()
+   {
+      try 
+      { 
+	 return (String)getOriginal("endId"); 
+      }
+      catch(ClassCastException exception) 
+      {
+	 return getEndId();
+      } 
+   } // end of getOriginalEndId()
+   /**
+    * Gets the original parentId of the annotation, before any subsequent calls to {@link #setParentId(String)}, since the object was created or {@link #commit()} was called.
+    * <p>This method mirrors the map key "originalParenId" created by the TrackedMap.
+    * @return The original parentId.
+    */
+   public String getOriginalParentId()
+   {
+      try 
+      { 
+	 return (String)getOriginal("parentId"); 
+      }
+      catch(ClassCastException exception) 
+      {
+	 return getParentId();
+      } 
+   } // end of getOriginalParentId()
+   /**
+    * Gets the original ordinal of the annotation, before any subsequent calls to {@link #setOrdinal(int)}, since the object was created or {@link #commit()} was called.
+    * <p>This method mirrors the map key "originalOrdinal" created by the TrackedMap.
+    * @return The original ordinal.
+    */
+   public int getOriginalOrdinal()
+   {
+      try 
+      { 
+	 return ((Integer)getOriginal("ordinal")).intValue(); 
+      }
+      catch(ClassCastException exception) 
+      {
+	 return getOrdinal();
+      } 
+   } // end of getOriginalOrdinal()
+   
+   /**
+    * Access the child annotations on a given layer.
+    * <p>This collection is also accessible in the Annotation's map with a key named after <var>layerId</var> - e.g. this.annotations("turn") == this.get("turn"). The only exception is when <var>layerId is a reserved word - i.e. "id" or one of the keys registered in {@link #getTrackedAttributes()}</var>
+    * @param layerId
+    * @return The child annotations on the given layer.
+    */
+   public Vector<Annotation> getAnnotations(String layerId)
+   {
+      if (!getAnnotations().containsKey(layerId))
+      {
+	 // add the child collection to children
+	 getAnnotations().put(layerId, new Vector<Annotation>());
+	 // also create an attribute named after the layer, as long as it's not otherwise in use
+	 if (!layerId.equals("id") && !getTrackedAttributes().contains(layerId))
+	 {
+	    put(layerId, getAnnotations(layerId));
+	 }
+      }
+      return getAnnotations().get(layerId);
+   } // end of getAnnotations()
+
+   /**
+    * Access the child annotations on a given layer, as an array (for environments that deal better with arrays than collections).
+    * @param layerId
+    * @return The child annotations on the given layer.
+    */
+   public Annotation[] annotations(String layerId)
+   {
+      return getAnnotations(layerId).toArray(new Annotation[0]);
+   } // end of annotations()
+
+   
+   /**
+    * Add a child annotation.
+    * @param annotation
+    */
+   public void addAnnotation(Annotation annotation)
+   {
+      getAnnotations(annotation.getLayerId()).add(annotation);
+      if (annotation.getParentId() == null || !annotation.getParentId().equals(getId()))
+      {
+	 annotation.setParentId(getId());
+      }
+   } // end of addAnnotation()
+
+   
+   /**
+    * Returns the annotation's previous sibling by ordinal, if any.
+    * @return The annotation before this one, among the parent's children, or null if the parent is not set of this is the first child.
+    */
+   public Annotation getPrevious()
+   {
+      int ordinal = getOrdinal();
+      if (ordinal == 1) return null; // first child
+      
+      Annotation parent = getParent();
+      if (parent == null) return null;
+
+      // ordinal is 1-based, vector index is 0-based, so we want element ordinal-1 - 1:
+      return parent.getAnnotations(getLayerId()).elementAt(ordinal - 2);
+   } // end of getPrevious()
+
+   /**
+    * Returns the annotation's next sibling by ordinal, if any.
+    * @return The annotation after this one, among the parent's children, or null if the parent is not set of this is the last child.
+    */
+   public Annotation getNext()
+   {
+      int ordinal = getOrdinal();
+      
+      Annotation parent = getParent();
+      if (parent == null) return null;
+
+      Vector<Annotation> siblings = parent.getAnnotations(getLayerId());
+      // ordinal is 1-based, vector index is 0-based, so list size is ordinal of last one
+      if (siblings.size() <= ordinal) return null; // last child
+
+      // ordinal is 1-based, vector index is 0-based, so we want element ordinal-1 + 1:
+      return parent.getAnnotations(getLayerId()).elementAt(ordinal);
+   } // end of getPrevious()
+
+   // query methods
+
+   
+   /**
+    * Determines whether the anchors have offsets or not.
+    * @return true if both #getStart() and #getEnd() anchors have non-null offsets, false otherwise.
+    */
+   public boolean getAnchored()
+   {
+      Anchor start = getStart();
+      if (start == null) return false;
+      if (start.getOffset() == null) return false;
+      Anchor end = getEnd();
+      if (end == null) return false;
+      if (end.getOffset() == null) return false;
+      return true;
+   } // end of getUnsetOffset()
+
+   
+   /**
+    * Determines whether the annotion's start/end offsets surround the given offset - i.e. whether the annotation t-includes the offset.
+    * <p>A precondition is that the annotation's {@link #graph} is set.
+    * @param offset
+    * @return true if getStart().getOffset() &le; offset &lt; getEnd().getOffset(), false otherwise.
+    */
+   public boolean includesOffset(Double offset)
+   {
+      if (offset == null) return false;
+      Anchor start = getStart();
+      if (start == null) return false;
+      Double startOffset = start.getOffset();
+      if (startOffset == null) return false;
+      Anchor end = getEnd();
+      if (end == null) return false;
+      Double endOffset = end.getOffset();
+      if (endOffset == null) return false;
+      return startOffset.doubleValue() <= offset.doubleValue() 
+	 && endOffset.doubleValue() > offset.doubleValue();
+   } // end of includesOffset()
+
+   
+   /**
+    * Determines whether this annotation t-includes the given annotation. Returns true if this annotation includes the other annotation's start and end offsets.
+    * <p><em>NB</em> If the start and end offsets of <var>other</var> are the same as the end offset of this annotation (i.e. <var>other</var> is instantaneous at the end of this annotation), this method will return false.
+    * <p>A precondition is that the annotation's {@link #graph} is set.
+    * @param other
+    * @return true if the other annotation's duration is wholly included within this annotation's duration, and false otherwise.
+    * @see #includesOffset(Double)
+    */
+   public boolean includes(Annotation other)
+   {
+      if (other.getStart() == null || other.getEnd() == null)
+      {
+	 return false;
+      }
+
+      // other.start must be included
+      return includesOffset(other.getStart().getOffset())
+	 // and other end must be included
+	 && (includesOffset(other.getEnd().getOffset())
+	     // or at least simultaneous with the end
+	     || this.getEnd().getOffset().equals(other.getEnd().getOffset()));
+   } // end of includes()
+   
+   
+   /**
+    * Determines whether this annotation includes the midpoint of the given annotation.
+    * <p>A precondition is that the annotation's {@link #graph} is set.
+    * @param other
+    * @return true if this annotation includes the midpoint of the given annotation, or if they share start/end anchors (even if there are null offsets), false otherwise.
+    */
+   public boolean includesMidpointOf(Annotation other)
+   {
+      if (!includesOffset(other.getMidpoint()))
+      {
+	 // special case: if the two annotations have the same anchors, even if there are unset offsets
+	 // we know that this includes the midpoint of the other
+	 if (getStartId().equals(other.getStartId())
+	     && getEndId().equals(other.getEndId()))
+	 {
+	    return true;
+	 }
+	 else
+	 {
+	    return false;
+	 }
+      }
+      else
+      {
+	 return true;
+      }
+   } // end of includesMidpointOf()
+
+   /**
+    * Determines the offset difference between this annotation and another - i.e. the minimum distance between any of the anchors.  If the annotations overlap, the returned difference will be negative, with a magnitude corresponding to the degree of overlap.
+    * @param other
+    * @return The minimum distance between any two of the annotations' anchors, or null if any anchors are unset.
+    */
+   public Double distance(Annotation other)
+   {
+      Anchor start = getStart();
+      if (start == null) return null;
+      Double startOffset = start.getOffset();
+      if (startOffset == null) return null;
+      Anchor end = getEnd();
+      if (end == null) return null;
+      Double endOffset = end.getOffset();
+      if (endOffset == null) return null;
+
+      Anchor otherStart = other.getStart();
+      if (otherStart == null) return null;
+      Double otherStartOffset = otherStart.getOffset();
+      if (otherStartOffset == null) return null;
+      Anchor otherEnd = other.getEnd();
+      if (otherEnd == null) return null;
+      Double otherEndOffset = otherEnd.getOffset();
+      if (otherEndOffset == null) return null;
+      
+      if (includes(other))
+      {
+	 return -other.getDuration();
+      }
+      else if (other.includes(this))
+      {
+	 return -getDuration();
+      }
+      else
+      {
+	 double dDifference = Math.abs(startOffset - otherEndOffset);
+	 dDifference = Math.min(dDifference, Math.abs(endOffset - otherStartOffset));
+	 // do they overlap?
+	 if (startOffset < otherEndOffset && endOffset > otherStartOffset) dDifference *= -1;
+	 return dDifference;
+      }
+   } // end of distance()
+
+   
+   /**
+    * Determines the offset halfway between the start offset and the end offset.
+    * <p>A precondition is that the annotation's {@link #graph} is set.
+    * @return The offset halfway between the start offset and the end offset, or null if either anchor or offset is null.
+    */
+   public Double getMidpoint()
+   {
+      Anchor start = getStart();
+      if (start == null) return null;
+      Double startOffset = start.getOffset();
+      if (startOffset == null) return null;
+      Anchor end = getEnd();
+      if (end == null) return null;
+      Double endOffset = end.getOffset();
+      if (endOffset == null) return null;
+      return startOffset + (getDuration() / 2);
+   } // end of getMidpoint()
+
+   
+   /**
+    * Determines the duration of the annotation - i.e. the difference between the start offset and the end offset.
+    * <p>A precondition is that the annotation's {@link #graph} is set.
+    * @return The duration of the annotation, or null if either start or end anchors or offsets are null.
+    */
+   public Double getDuration()
+   {
+      Anchor start = getStart();
+      if (start == null) return null;
+      Double startOffset = start.getOffset();
+      if (startOffset == null) return null;
+      Anchor end = getEnd();
+      if (end == null) return null;
+      Double endOffset = end.getOffset();
+      if (endOffset == null) return null;
+      return endOffset - startOffset;
+   } // end of getDuration()
+
+   
+   /**
+    * Determines whether this is a tag of the given annotation (or vice-versa), i.e. whether the two annotations share start/end anchors.
+    * @param other
+    * @return true if the start and end anchor IDs are the same for this and the other annotation, false otherwise.
+    */
+   public boolean tags(Annotation other)
+   {
+      return getStartId().equals(other.getStartId())
+	 && getEndId().equals(other.getEndId());
+   } // end of tags()
+
+   
+   /**
+    * Finds all annotations on the given layer that include this annotation. This uses {@link #includes(Annotation)} to determine inclusion. Annotations marked for deletion are ignored.
+    * <p>A precondition is that the annotation's {@link #graph} is set.
+    * @param layerId
+    * @return A list of annotations on the given layer that include this annotation. This uses {@link #includes(Annotation)} to determine inclusion.
+    */
+   public Annotation[] includingAnnotationsOn(String layerId)
+   {
+      Vector<Annotation> includingAnnotations = new Vector<Annotation>();
+      if (graph != null)
+      {
+	 for (Annotation other : graph.getAnnotations(layerId))
+	 {
+	    if (other.getChange() == Change.Operation.Destroy) continue;
+	    if (other == this) continue; // exclude ourselves
+	    if (other.includes(this))
+	    {
+	       includingAnnotations.add(other);
+	    }
+	 } // next annotation
+      }
+      return includingAnnotations.toArray(new Annotation[0]);
+   } // end of includingAnnotationsOn()
+
+   /**
+    * Finds all annotations on the given layer that this annotation includes. This uses {@link #includes(Annotation)} to determine inclusion. Annotations marked for deletion are ignored.
+    * <p>A precondition is that the annotation's {@link #graph} is set.
+    * @param layerId
+    * @return A list of annotations on the given layer that include this annotation. This uses {@link #includes(Annotation)} to determine inclusion.
+    */
+   public Annotation[] includedAnnotationsOn(String layerId)
+   {
+      Vector<Annotation> includedAnnotations = new Vector<Annotation>();
+      if (graph != null)
+      {
+	 for (Annotation other : graph.getAnnotations(layerId))
+	 {
+	    if (other.getChange() == Change.Operation.Destroy) continue;
+	    if (other == this) continue; // exclude ourselves
+	    if (this.includes(other))
+	    {
+	       includedAnnotations.add(other);
+	    }
+	 } // next annotation
+      }
+      return includedAnnotations.toArray(new Annotation[0]);
+   } // end of includingAnnotationsOn()
+
+   /**
+    * Finds all annotations on the given layer that include the midpoint of this annotation. This uses {@link #includesMidpointOf(Annotation)} to determine inclusion. Annotations marked for deletion are ignored.
+    * <p>A precondition is that the annotation's {@link #graph} is set.
+    * @param layerId
+    * @return A list of annotations on the given layer that include this annotation's midpoint. This uses {@link #includesMidpointOf(Annotation)} to determine inclusion.
+    */
+   public Annotation[] midpointIncludingAnnotationsOn(String layerId)
+   {
+      Vector<Annotation> includingAnnotations = new Vector<Annotation>();
+      if (graph != null)
+      {
+	 for (Annotation other : graph.getAnnotations(layerId))
+	 {
+	    if (other.getChange() == Change.Operation.Destroy) continue;
+	    if (other == this) continue; // exclude ourselves
+	    if (other.includesMidpointOf(this))
+	    {
+	       includingAnnotations.add(other);
+	    }
+	 } // next annotation
+      }
+      return includingAnnotations.toArray(new Annotation[0]);
+   } // end of includingAnnotationsOn()
+
+   /**
+    * Finds all annotations on the given layer that tag this annotation - i.e. where start and end anchors are shared. Annotations marked for deletion are ignored.
+    * <p>A precondition is that the annotation's {@link #graph} is set.
+    * @param layerId
+    * @return A list of annotations on the given layer that tag this annotation.
+    */
+   public Annotation[] tagsOn(String layerId)
+   {
+      Vector<Annotation> tags = new Vector<Annotation>();
+      Anchor start = getStart();
+      if (start != null)
+      {
+	 String endId = getEndId();
+	 for (Annotation other : start.startOf(layerId))
+	 {
+	    if (other.getChange() == Change.Operation.Destroy) continue;
+	    if (other == this) continue; // exclude ourselves
+	    if (other.getEndId().equals(endId))
+	    {
+	       tags.add(other);
+	    }
+	 } // next annotation
+      }
+      return tags.toArray(new Annotation[0]);
+   } // end of tagsOn()
+
+   
+   /**
+    * Determines the first ancestor annotation this annotation has in common with the given annotation. This may return the graph itself, if there are no earlier common ancestors. "Ancestors" is includsive in the sense that if either annotation is an ancestor of the other, it will be returned.
+    * <p>A precondition is that the annotation's {@link #graph} is set.
+    * @param other
+    * @return The first ancestor annotation this annotation has in common with the given annotation, or null if {@link #graph} is not set.
+    */
+   public Annotation getFirstCommonAncestor(Annotation other)
+   {
+      HashSet<Annotation> ourAncestors = new HashSet<Annotation>();
+      Annotation ancestor = this; // include ourselves in the list.
+      do
+      {
+	 ourAncestors.add(ancestor);
+	 ancestor = ancestor.getParent();
+      }
+      while (ancestor != null);
+      
+      ancestor = other; // include other annotation in the list.
+      do
+      {
+	 if (ourAncestors.contains(ancestor))
+	 {
+	    return ancestor;
+	 }
+	 ancestor = ancestor.getParent();
+      }
+      while (ancestor != null);
+      return null;
+   } // end of getFirstCommonAncestor()
+
+   
+   /**
+    * Returns a list of ancestor annotations (parent, grandparent, etc.).
+    * @return A set of ancestor annotations, ordered by distance from this annotation (i.e. parent first, then grandparent, etc.).
+    */
+   public LinkedHashSet<Annotation> getAncestors()
+   {
+      LinkedHashSet<Annotation> ancestors = new LinkedHashSet<Annotation>();
+      Annotation ancestor = getParent(); // don't include ourselves in the list.
+      while (ancestor != null  
+	     && !ancestors.contains(ancestor)) // (guard against cycles, just in case)
+      {
+	 ancestors.add(ancestor);
+	 ancestor = ancestor.getParent();
+      } // next ancestor
+      return ancestors;
+   } // end of getAncestors()
+
+
+   /**
+    * Returns the descendant annotation with the earliest start anchor, excluding tag layers (layer where {@link Layer#getAlignment()} == {@link Constants#ALIGNMENT_NONE}) and non-included layers.
+    * <p>Assumes that the annotation's graph has been set.
+    * @return The highest descendant annotation with the earliest start anchor, or null if there are no descendants.
+    */
+   public Annotation getEarliestDescendant()
+   {
+      if (graph == null) return null;
+      Annotation earliest = null;
+      for (String layerId : getAnnotations().keySet())
+      {
+	 Layer layer = graph.getLayer(layerId);
+	 if (layer == null) continue;
+	 for (Annotation child : getAnnotations(layerId))
+	 {
+	    if (child.getChange() == Change.Operation.Destroy) continue;
+	    if (layer.getAlignment() != Constants.ALIGNMENT_NONE
+		&& layer.getParentIncludes())
+	    {
+	       Anchor start = child.getStart();
+	       if (start == null) continue;
+	       if (start.getOffset() == null) continue;	    
+	       if (earliest == null
+		   || child.getStart().getOffset() < earliest.getStart().getOffset())
+	       {
+		  earliest = child;	       
+	       }
+	    }
+	    Annotation childsEarliest = child.getEarliestDescendant();
+	    if (childsEarliest != null)
+	    {
+	       if (earliest == null
+		   || childsEarliest.getStart().getOffset() < earliest.getStart().getOffset())
+	       {
+		  earliest = childsEarliest;
+	       }
+	    }
+	 } // next child
+      } // next child layer
+      return earliest;
+   } // end of getEarliestDescendant()
+
+   /**
+    * Returns the descendant annotation with the latest end anchor, excluding tag layers (layer where {@link Layer#getAlignment()} == {@link Constants#ALIGNMENT_NONE}) and non-included layers.
+    * <p>Assumes that the annotation's graph has been set.
+    * @return The highest descendant annotation with the latest end anchor, or null if there are no descendants.
+    */
+   public Annotation getLatestDescendant()
+   {
+      if (graph == null) return null;
+      Annotation latest = null;
+      for (String layerId : getAnnotations().keySet())
+      {
+	 Layer layer = graph.getLayer(layerId);
+	 if (layer == null) continue;
+	 for (Annotation child : getAnnotations(layerId))
+	 {
+	    if (child.getChange() == Change.Operation.Destroy) continue;
+	    if (layer.getAlignment() != Constants.ALIGNMENT_NONE
+		&& layer.getParentIncludes())
+	    {
+	       Anchor end = child.getEnd();
+	       if (end == null) continue;
+	       if (end.getOffset() == null) continue;	    
+	       if (latest == null
+		   || child.getEnd().getOffset() > latest.getEnd().getOffset())
+	       {
+		  latest = child;
+	       }
+	    }
+	    Annotation childsLatest = child.getLatestDescendant();
+	    if (childsLatest != null)
+	    {
+	       if (latest == null
+		   || childsLatest.getEnd().getOffset() < latest.getEnd().getOffset())
+	       {
+		  latest = childsLatest;
+	       }
+	    }
+	 } // next child
+      } // next child layer
+      return latest;
+   } // end of getEarliestDescendant()
+
+
+   /**
+    * Returns whether the annotation is formally instantaneous or not - i.e. whether or not its start anchor and end anchor are the same.
+    * <p><em>NB</em> If the anchors are different but their offsets are the same, this method will return <em>false</em>.
+    * @return true if #getStartId() equals #getEndId(), false otherwise.
+    */
+   public boolean getInstantaneous()
+   {
+      return getStartId().equals(getEndId());
+   } // end of getInstantaneous()
+
+
+   /* TODO
+    overlaps : function(annotation) { return this.start.offset < annotation.end.offset && this.end.offset > annotation.start.offset; },
+
+    sharesStart : function(layerId) { return this.start.startOf[layerId]; },
+    sharesEnd : function(layerId) { return this.end.endOf[layerId]; },
+    startsWith : function(annotation) { return this.startId == annotation.startId; },
+    endsWith : function(annotation) { return this.endId == annotation.endId; },
+    predecessorOf : function(annotation) { return this.endId == annotation.startId ; },
+    successorOf : function(annotation) { return annotation.endId == this.startId ; },
+
+    tagOn : function(layerId) 
+    {
+	var tags = [];
+	for (var i in this.start.startOf[layerId])
+	{
+	    var other = this.start.startOf[layerId][i];
+	    if (this.startsWith(other)) tags.push(other);
+	} // next annotation that starts here
+	return tags;
+    },
+   */
+
+   // annotation methods
+   
+   /**
+    * Tags this annotation with the given tag.
+    * @param layerId
+    * @param label
+    * @return The tag annotation created.
+    */
+   public Annotation createTag(String layerId, String label)
+   {
+      if (getGraph() == null) return null;
+
+      Annotation tag = new Annotation(null, label, layerId, getStartId(), getEndId());
+
+      if (getGraph().getLayer(tag.getLayerId()).getParent() == getLayer())
+      { // tag is child of this
+	 tag.setParent(this);
+      }
+      else if (getGraph().getLayer(tag.getLayerId()).getParent() == getLayer().getParent())
+      { // this layer and tag layer share a parent
+	 tag.setParent(getParent());
+	 if (getGraph().getLayer(tag.getLayerId()).getAlignment() == 0)
+	 { // it's a non-aligned layer, so the anchors must match the parent
+	    tag.setStartId(getParent().getStartId());
+	    tag.setEndId(getParent().getEndId());
+	 }
+      }
+
+      getGraph().addAnnotation(tag);
+      return tag;
+   } // end of createTag()
+
+   // java.lang.Object overrides:
+   
+   /**
+    * A string representation of the object.
+    * @return A string representation of the object.
+    */
+   public String toString()
+   {
+      if (!containsKey("label")) return "[" + getId() + "]";
+      return getLabel();
+   } // end of toString()   
+
+   // Comparable method
+
+   /**
+    * Compare two annotations. 
+    * <p> If both have the same parent, they're compared by ordinal.
+    * <p> Otherwise, if they're both on the same layer, they're compared by parent.
+    * <p> Otherwise, they're compared by id.
+    * @return A negative integer, zero, or a positive integer as this annotation is before than, equal to, or after the specified annotation. 
+    */ 
+   public int compareTo(Annotation o)
+   {
+      if (this.equals(o)) return 0;
+      if (getParentId() != null && getParentId().equals(o.getParentId())
+	  && getOrdinal() > 0 && o.getOrdinal() > 0)
+      {
+	 return new Integer(getOrdinal()).compareTo(new Integer(o.getOrdinal()));
+      }
+      if (getLayerId().equals(o.getLayerId())
+	  && getParent() != null && o.getParent() != null)
+      {
+	 return getParent().compareTo(o.getParent());
+      }
+      return getId().compareTo(o.getId());
+   }
+   
+} // end of class Annotation

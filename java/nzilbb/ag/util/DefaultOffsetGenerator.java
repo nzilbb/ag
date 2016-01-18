@@ -1,0 +1,572 @@
+//
+// Copyright 2015 New Zealand Institute of Language, Brain and Behaviour, 
+// University of Canterbury
+// Written by Robert Fromont - robert.fromont@canterbury.ac.nz
+//
+//    This file is part of LaBB-CAT.
+//
+//    LaBB-CAT is free software; you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation; either version 2 of the License, or
+//    (at your option) any later version.
+//
+//    LaBB-CAT is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with LaBB-CAT; if not, write to the Free Software
+//    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+package nzilbb.ag.util;
+
+import java.util.Vector;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.HashSet;
+import java.util.Iterator;
+
+import nzilbb.ag.*;
+
+/**
+ * Generates default anchor offsets. These are computed using linear interpolation between certain offsets. What counts as <q>certain</q> depends on how {@link #defaultOffsetThreshold} is set.
+ * @author Robert Fromont robert@fromont.net.nz
+ */
+public class DefaultOffsetGenerator
+  implements IGraphTransformer
+{
+   // Attributes:
+   
+   /**
+    * Fatal errors raised during the last {@link #transform(Graph)}.
+    * @see #getErrors()
+    * @see #setErrors(Vector)
+    */
+   protected Vector<String> errors;
+   /**
+    * Getter for {@link #errors}: Fatal errors raised during the last {@link #transform(Graph)}.
+    * @return Fatal errors raised during the last {@link #transform(Graph)}.
+    */
+   public Vector<String> getErrors() { return errors; }
+   /**
+    * Setter for {@link #errors}: Fatal errors raised during the last {@link #transform(Graph)}.
+    * @param newErrors Fatal errors raised during the last {@link #transform(Graph)}.
+    */
+   public void setErrors(Vector<String> newErrors) { errors = newErrors; }
+   
+   /**
+    * Whether a log of messages should be kept for reporting.
+    * @see #getDebug()
+    * @see #setDebug(boolean)
+    * @see #getLog()
+    * @see #log(String)
+    */
+   protected boolean debug = false;
+   /**
+    * Getter for {@link #debug}: Whether a log of messages should be kept for reporting.
+    * @return Whether a log of messages should be kept for reporting.
+    * @see #getLog()
+    * @see #log(String)
+    */
+   public boolean getDebug() { return debug; }
+   /**
+    * Setter for {@link #debug}: Whether a log of messages should be kept for reporting.
+    * @param newDebug Whether a log of messages should be kept for reporting.
+    * @see #getLog()
+    * @see #log(String)
+    */
+   public void setDebug(boolean newDebug) { debug = newDebug; }
+
+   /**
+    * Messages for debugging.
+    * @see #getLog()
+    * @see #setLog(Vector)
+    */
+   protected Vector<String> log;
+   /**
+    * Getter for {@link #log}: Messages for debugging.
+    * @return Messages for debugging.
+    */
+   public Vector<String> getLog() { return log; }
+   /**
+    * Setter for {@link #log}: Messages for debugging.
+    * @param newLog Messages for debugging.
+    */
+   protected void setLog(Vector<String> newLog) { log = newLog; }
+
+   /**
+    * Value to assume in the case of Anchors that have no value for "confidence".
+    * <p>The default value is {@link Constants#CONFIDENCE_MANUAL} - i.e. anchors with no "confidence" attribute are assumed to be manually aligned (high confidence). This means that the default behaviour on a graph that does not include "confidence" values on anchors is to only assign offsets to anchors that have none.
+    * @see #getDefaultAnchorConfidence()
+    * @see #setDefaultAnchorConfidence(int)
+    * @see Constants#CONFIDENCE
+    */
+   protected int defaultAnchorConfidence = Constants.CONFIDENCE_MANUAL;
+   /**
+    * Getter for {@link #defaultAnchorConfidence}: Value to assume in the case of Anchors that have no value for "confidence".
+    * @return Value to assume in the case of Anchors that have no value for "confidence".
+    */
+   public int getDefaultAnchorConfidence() { return defaultAnchorConfidence; }
+   /**
+    * Setter for {@link #defaultAnchorConfidence}: Value to assume in the case of Anchors that have no value for "confidence".
+    * @param newDefaultAnchorConfidence Value to assume in the case of Anchors that have no value for "confidence".
+    */
+   public void setDefaultAnchorConfidence(int newDefaultAnchorConfidence) { defaultAnchorConfidence = newDefaultAnchorConfidence; }
+   
+   /**
+    * The confidence threshold for default anchor offset computation.
+    * <p>Anchors with null offset, with no "confidence" attribute, or with the "confidence" attribute set to equal or below this value, may have their offset set to a default, computed value. Generally, the default value is determined by linear interpolation between parent start/end anchors, or between anchors with higher confidence.
+    * <p>The default value is {@link Constants#CONFIDENCE_DEFAULT}.
+    * @see #getDefaultOffsetThreshold()
+    * @see #setDefaultOffsetThreshold(int)
+    */
+   protected int defaultOffsetThreshold = Constants.CONFIDENCE_DEFAULT;
+   /**
+    * Getter for {@link #defaultOffsetThreshold}: The confidence threshold for default anchor offset computation, or null to skip default offset computation.
+    * @return The confidence threshold for default anchor offset computation, or null to skip default offset computation.
+    */
+   public int getDefaultOffsetThreshold() { return defaultOffsetThreshold; }
+   /**
+    * Setter for {@link #defaultOffsetThreshold}: The confidence threshold for default anchor offset computation, or null to skip default offset computation.
+    * @param newDefaultOffsetThreshold The confidence threshold for default anchor offset computation, or null to skip default offset computation.
+    */
+   public void setDefaultOffsetThreshold(int newDefaultOffsetThreshold) { defaultOffsetThreshold = newDefaultOffsetThreshold; }
+
+   
+   /**
+    * Value to set for <q>confidence</q> for anchors that have their offsets changed by this transformer.
+    * <p>The default value is {@link Constants#CONFIDENCE_DEFAULT}.
+    * @see #getConfidence()
+    * @see #setConfidence(int)
+    */
+   protected int confidence = Constants.CONFIDENCE_DEFAULT;
+   /**
+    * Getter for {@link #confidence}: Value to set for <q>confidence</q> for anchors that have their offsets changed by this transformer.
+    * @return Value to set for <q>confidence</q> for anchors that have their offsets changed by this transformer.
+    */
+   public int getConfidence() { return confidence; }
+   /**
+    * Setter for {@link #confidence}: Value to set for <q>confidence</q> for anchors that have their offsets changed by this transformer.
+    * @param newConfidence Value to set for <q>confidence</q> for anchors that have their offsets changed by this transformer.
+    */
+   public void setConfidence(int newConfidence) { confidence = newConfidence; }
+
+
+   // Methods:
+   
+   /**
+    * Default constructor.
+    */
+   public DefaultOffsetGenerator()
+   {
+   } // end of constructor
+
+   /**
+    * Constructor with attributes.
+    * @param defaultOffsetThreshold The confidence threshold for default anchor offset computation, or null to skip default offset computation.
+    * @param defaultAnchorConfidence Value to assume in the case of Anchors that have no value for "confidence".
+    * @throws TransformationException If the transformation cannot be completed.
+    */
+   public DefaultOffsetGenerator(int defaultOffsetThreshold, int defaultAnchorConfidence)
+      throws TransformationException
+   {
+      setDefaultAnchorConfidence(defaultAnchorConfidence);
+      setDefaultOffsetThreshold(defaultOffsetThreshold);
+   } // end of constructor
+
+   // IGraphTransformer method
+
+   /**
+    * Generates default anchor offsets.
+    * <p>Anchors with null offset, with no "confidence" attribute, or with the "confidence" attribute set to equal or below {@link #defaultOffsetThreshold}, may have their offset set to a default, computed value. 
+    * <p>Strings of candidate anchors are have their offsets set by linear interpolation between bounding anchors.
+    * <p>Strings are determined by:
+    * <ul>
+    *  <li>chaining annotations together by common {@link Annotation#getStart()}/{@link Annotation#getEnd()} anchors (on any layer) - e.g. words chained together with interspersed or bounding noise annotations, or</li>
+    *  <li>chaining annotations together by successive values of {@link Annotation#getOrdinal()} on a common layer and within a common parent - e.g. words within a turn, interspersed with discontinuties in the graph (i.e. pauses).</li>
+    * </ul>
+    * <p>Bounding anchors are determined by:
+    * <ul>
+    *  <li>having higher "confidence" than {@link #defaultOffsetThreshold} on the same layer and within a common parent - e.g. manually aligned words within a turn,</li>
+    *  <li>having higher "confidence" than {@link #defaultOffsetThreshold} on a different layer and within a common parent - e.g. manually aligned utterances within a turn partition the words in that turn, and</li>
+    *  <li>being a start or end anchor of a parent {@link #defaultOffsetThreshold} - e.g. a turn's start/end anchors bound the anchors of it's words.</li>
+    *  <li>or otherwise using the existing offsets of bounding candidate anchors.</li>
+    * </ul>
+    * @param graph The graph to transform.
+    * @return The changes introduced by the tranformation.
+    * @throws TransformationException If the transformation cannot be completed.
+    */
+   public Vector<Change> transform(Graph graph)
+      throws TransformationException
+   {
+      if (debug) setLog(new Vector<String>());
+      setErrors(new Vector<String>());
+
+      Vector<Change> changes = new Vector<Change>();
+
+      // before going to great effort, check there are any anchors at all that might be affected
+      boolean anchorsUnderThreshold = false;
+      for (Anchor a : graph.getAnchors().values())	 
+      {
+	 if (a.getOffset() == null || getConfidence(a) <= defaultOffsetThreshold)
+	 {
+	    anchorsUnderThreshold = true;
+	    break;
+	 }
+      } // next anchor
+      if (anchorsUnderThreshold)
+      {
+	 // we can't just sort the anchors of the graph all together before interpolation
+	 // because there may be independant spans that should be interpolated separately
+	 // e.g. the unaligned words of overlapping speech of two speakers
+	 // what we need to do is chunk the graph by parent annotations whose children
+	 // don't overlap (e.g. turns of words) and then interpolate their non-overlapping descendants
+	 // however, we're not going to do this for 'top level' layers - e.g. topic tags,
+	 // because their annotations may share anchors into other layers, and so changing those
+	 // offsets will disrupt the order of those other layers, being out of their context.
+	 
+	 // traverse the layer hiercharchy to get a list of the uppermost layers that
+	 // are not top-level, and are peersOverlap == false      
+	 LayerHierarchyTraversal<HashSet<Layer>> layerTraversal 
+	    = new LayerHierarchyTraversal<HashSet<Layer>>(new HashSet<Layer>(), graph)
+	    {
+	       protected void pre(Layer child)
+	       {
+		  Layer parent = child.getParent();
+		  // if the parent is not a top-level layer
+		  if (parent.getParentId() != null 
+		      && !parent.getParentId().equals("graph")
+		      // and children can have peers
+		      && child.getPeers()
+		      // and child peers cannot overlap
+		      && !child.getPeersOverlap()
+		      // and it's not a tag layer
+		      && child.getAlignment() != Constants.ALIGNMENT_NONE
+		      // and the parent temporally includes the children
+		      && child.getParentIncludes()
+		      // and we haven't already added this parent
+		      && !getResult().contains(parent))
+		  {
+		     // and we haven't already added an ancestor
+		     boolean includesAncestor = false;
+		     for (Layer ancestor : parent.getAncestors())
+		     {
+			if (getResult().contains(ancestor))
+			{
+			   includesAncestor = true;
+			   break;
+			}
+		     }
+		     if (!includesAncestor)
+		     {
+			getResult().add(parent); // add the *parent* layer
+		     }
+		  } // not top level and peers don't overlap
+	       }
+	    };
+	 
+	 // for each non-top-level children-don't-overlap parent layer
+	 for (Layer layer : layerTraversal.getResult())
+	 {
+	    // log("Layer " + layer);
+	    // for each parent annotation
+	    for (Annotation parent : layer.getAnnotations())
+	    {
+	       try
+	       {
+		  changes.addAll(
+		     // set the offsets of the descendants
+		     setOffsetsForDescendantsOf(parent));
+	       }
+	       catch (TransformationException x)
+	       {
+		  errors.add("Could not set descendant offsets for " + logAnnotation(parent) 
+			     + ": " + x.getMessage());
+	       }
+	    } // next parent annotation
+	    // log("Layer complete " + layer);
+	 } // next layer
+	 // log("Layers complete");
+      } // anchorsUnderThreshold
+      else
+      {
+	 log("There are no anchors with confidence <= " + defaultOffsetThreshold);
+      }
+      return changes;
+   }
+
+   
+   /**
+    * Sets the default offsets for anchors of all descendants of the given annotation.
+    * @param top
+    * @return The changes made during this operation.
+    * @throws TransformationException If the transformation cannot be completed.
+    */
+   public Vector<Change> setOffsetsForDescendantsOf(Annotation top)
+      throws TransformationException
+   {
+      // log("Top: " + logAnnotation(top));
+      Vector<Change> changes = new Vector<Change>();
+      if (!top.getInstantaneous())
+      {
+	 // avoid unbounded anchor chain problems by starting/ending the collection with
+	 // immovable start/end anchors - these come from graph.getSortedAnchors()
+	 // - which includes only anchors with offsets - instead of sortedAnchors
+	 // ensure that, no matter what, the bounding sentinels have offsets set
+	 Vector<Anchor> boundedAnchors = new Vector<Anchor>();
+	 Anchor startSentinel = new Anchor(top.getStart());
+	 startSentinel.put(Constants.CONFIDENCE, getDefaultOffsetThreshold() + 1);
+	 boundedAnchors.add(startSentinel);
+	 
+	 // get a list of all anchors for relevant descendant annotations, 
+	 // ordered by offset and also by using graph structure
+	 // to order anchors with equal offsets and anchors with no offsets
+	 TreeSet<Anchor> sortedAnchors = new TreeSet<Anchor>(new AnchorComparatorWithStructure());
+	 // recursively descend through children, gathering anchors for non-overlapping child layers
+	 descendantAnchors(top, sortedAnchors);
+	 // then add them to our bounded anchor list
+	 boundedAnchors.addAll(sortedAnchors);
+	 
+	 Anchor endSentinel = new Anchor(top.getEnd());
+	 endSentinel.put(Constants.CONFIDENCE, getDefaultOffsetThreshold() + 1);
+	 boundedAnchors.add(endSentinel);
+	 
+	 // crawl through the anchors looking for unset offsets
+	 Iterator<Anchor> anchors = boundedAnchors.iterator();
+	 Anchor lastSetAnchor = null;
+	 while (anchors.hasNext())
+	 {
+	    Anchor anchor = anchors.next();
+	    if (anchor.getOffset() != null && getConfidence(anchor) > defaultOffsetThreshold)
+	    {
+	       lastSetAnchor = anchor;
+	       // log("last set: " + logAnchor(lastSetAnchor));
+	    }
+	    else
+	    {
+	       if (lastSetAnchor == null)
+	       {
+		  String message = "Could not determine bounds, starting from " + logAnchor(top.getStart());
+		  log("ERROR: " + message);
+		  throw new TransformationException(this, message);
+	       }
+		  
+	       Vector<Anchor> unsetAnchors = new Vector<Anchor>();
+	       unsetAnchors.add(anchor);
+	       // log("first unset: " + logAnchor(anchor));
+	       
+	       // scan forward from here to find the next set Anchor
+	       Anchor nextSetAnchor = null;
+	       while (nextSetAnchor == null)
+	       {
+		  // check we haven't hit the end
+		  if (!anchors.hasNext())
+		  {
+		     if (anchor.getOffset() != null && getConfidence(anchor) > defaultOffsetThreshold)
+		     {
+			// the last one we saw actually has an offset,
+			// so we use that one as the last anchor
+			unsetAnchors.remove(anchor);
+			nextSetAnchor = anchor;
+			break;
+		     }
+		     else
+		     {
+			String message = "Could not determine bounds, starting from " + logAnchor(lastSetAnchor) 
+			   + " after " + logAnchor(unsetAnchors.lastElement());
+			log("ERROR: " + message);
+			throw new TransformationException(this, message);
+		     }
+		  }
+		  anchor = anchors.next();
+		  if (anchor.getOffset() == null 
+		      || getConfidence(anchor) <= defaultOffsetThreshold)
+		  {
+		     // add the unset anchor to the collection
+		     unsetAnchors.add(anchor);
+		     // log("unset: " + logAnchor(anchor));
+		  }
+		  else // offset is set
+		  {
+		     // stop
+		     nextSetAnchor = anchor;
+		     // log("next set: " + logAnchor(nextSetAnchor));
+		  }
+	       } // next anchor
+		  
+	       if (unsetAnchors.size() > 0)
+	       {
+		  // if there are no annotations between the last set anchor
+		  // and the first unset anchor, then give the unset anchor
+		  // the same offset as the last set anchor
+		  Anchor firstUnset = unsetAnchors.firstElement();
+		  if (lastSetAnchor.annotationTo(firstUnset) == null)
+		  {
+		     changes.addAll( // record change generated by:
+			firstUnset.setOffset(lastSetAnchor.getOffset()));
+		     firstUnset.put(Constants.CONFIDENCE, new Integer(getConfidence()));
+		     unsetAnchors.remove(firstUnset);
+		     lastSetAnchor = firstUnset;
+		     // log("revised last: " + logAnchor(lastSetAnchor));
+		  }
+	       }
+		  
+	       if (unsetAnchors.size() > 0)
+	       {
+		  // if there are no annotations between the next set anchor
+		  // and the last unset anchor, then give the unset anchor
+		  // the same offset as the next set anchor
+		  Anchor lastUnset = unsetAnchors.lastElement();
+		  if (lastUnset.annotationTo(nextSetAnchor) == null)
+		  {
+		     changes.addAll( // record change generated by:
+			lastUnset.setOffset(nextSetAnchor.getOffset()));
+		     lastUnset.put(Constants.CONFIDENCE, new Integer(getConfidence()));
+		     unsetAnchors.remove(lastUnset);
+		     nextSetAnchor = lastUnset;
+		     // log("revised next: " + logAnchor(nextSetAnchor));
+		  }
+		     
+		  if (unsetAnchors.size() > 0)
+		  {
+		     // spread out unset anchors evenly between the bounds
+		     double dStart = lastSetAnchor.getOffset();
+		     double dEnd = nextSetAnchor.getOffset();
+		     double dDuration = dEnd - dStart;
+		     double dIncrement = dDuration / (unsetAnchors.size() + 1);
+		     int i = 0;
+		     for (Anchor unset : unsetAnchors)
+		     {
+			i++;
+			double newOffset = dStart + i * dIncrement;
+			if (unset.getOffset() == null 
+			    || unset.getOffset().doubleValue() != newOffset
+			    // upgrade confidence even if unset.offset == newOffset
+			    || getConfidence(unset) < getConfidence())
+			{
+			   log("setting: " + logAnchor(unset) + " offset to " + newOffset);
+			   changes.addAll( // record change generated by:
+			      unset.setOffset(newOffset));
+			   unset.put(Constants.CONFIDENCE, new Integer(getConfidence()));
+			}
+		     } // next unset anchor
+		  } // unsetAnchors.size() > 0
+	       } // unsetAnchors.size() > 0
+		  
+	       // update the last set anchor 
+	       lastSetAnchor = nextSetAnchor;
+		  
+	    } // offset is not set
+	 } // next anchor
+      } // not an instant
+      return changes;
+   } // end of setOffsetsForDescendantsOf()
+   
+   
+   /**
+    * Recursively passes traverses child layers, adding anchors of children on non-peer-overlapping layers to the given set. Does not add the anchors of the parent (unless they're also anchors of some child).
+    * @param parent
+    * @param anchorCollection
+    */
+   protected void descendantAnchors(Annotation parent, TreeSet<Anchor> anchors)
+   {
+      // log("Descendant anchors for " + logAnnotation(parent));
+      for (String layerId : parent.getAnnotations().keySet())
+      {	 
+	 Layer layer = parent.getGraph().getLayer(layerId);
+	 if (layer == null) continue; // unknown layer
+	 // log("child layer: " + layer.getId());
+	 boolean addAnchors = layer.getPeers() 
+	    && !layer.getPeersOverlap() 
+	    && layer.getAlignment() != Constants.ALIGNMENT_NONE
+	    && layer.getParentIncludes();
+	 Anchor previousAnchor = parent.getStart(); 
+	 for (Annotation child : parent.getAnnotations(layerId))
+	 {
+	    if (addAnchors)
+	    {
+	       // add anchors from any leading chain between the last anchor and the start of the wchild
+	       AnnotationChain chain = new AnnotationChain(previousAnchor, child.getStart());
+	       for (Annotation link : chain)
+	       {
+		  // log("linked between: " + logAnnotation(link));
+		  anchors.add(link.getStart());
+		  anchors.add(link.getEnd());
+	       } // next link
+	       // log(" child: " + logAnnotation(child));
+	       anchors.add(child.getStart());
+	       // log("added start " + logAnchor(child.getStart()));
+	       anchors.add(child.getEnd());
+	       // log("added end " + logAnchor(child.getEnd()));
+	       previousAnchor = child.getEnd();
+	    } // add anchors
+	    // recurse into all layers regardless of layer definition, to catch interesting grandchildren
+	    // log("descendants for: " + logAnnotation(child));
+	    descendantAnchors(child, anchors);
+	 } // next child
+	 
+	 if (addAnchors && !previousAnchor.equals(parent.getStart()))
+	 { // add anchors from any trailing chain to the end of the parent
+	    // log("looking for trailing links");
+	    AnnotationChain chain = new AnnotationChain(previousAnchor, parent.getEnd());
+	    // log("chain of " + chain.size() + " annotations");
+	    for (Annotation link : chain)
+	    {
+	       // log("linked after: " + logAnnotation(link));
+	       anchors.add(link.getStart());
+	       anchors.add(link.getEnd());
+	    } // next link
+	 } // add anchors from any trailing chain to the end
+      } // next child layer
+   } // end of descendantAnchors()
+
+   /**
+    * Gets the confidence rating of a given anchor.  If no Integer confidence attribute is present, the #defaultAnchorConfidence is returned.
+    * @param anchor
+    * @return The confidence rating of a given annotation, or defaultAnchorConfidence if it could not be determined.
+    */
+   protected int getConfidence(Anchor anchor)
+   {
+      Object oConfidence = anchor.get("confidence");
+      if (oConfidence == null) return getDefaultAnchorConfidence();
+      if (!(oConfidence instanceof Integer)) return getDefaultAnchorConfidence();
+      return ((Integer)oConfidence).intValue();
+   } // end of getConfidence()
+   
+   /**
+    * Logs a debugging message.
+    * @param message
+    */
+   protected void log(String message)
+   {
+      if (debug)
+      {
+	 log.add(message);
+	 System.out.println(message);
+      }
+   } // end of log()
+
+   /**
+    * A representation of the given anchor for logging purposes.
+    * @param anchor
+    * @return A representation of the given anchor for logging purposes.
+    */
+   protected String logAnchor(Anchor anchor)
+   {
+      if (anchor == null) return "[null]";
+      return "[" + anchor.getId() + "]" + anchor.getOffset() + "(" + getConfidence(anchor) + ")";
+   } // end of logAnnotation()
+
+   /**
+    * A representation of the given annotation for logging purposes.
+    * @param annotation
+    * @return A representation of the given annotation for loggin purposes.
+    */
+   protected String logAnnotation(Annotation annotation)
+   {
+      if (annotation == null) return "[null]";
+      return "[" + annotation.getId() + "]" + annotation.get("ordinal") + "#" + annotation.getLabel();
+   } // end of logAnnotation()
+
+} // end of class Validator
