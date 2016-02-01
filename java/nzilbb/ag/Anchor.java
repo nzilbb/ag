@@ -190,7 +190,8 @@ public class Anchor
    } // end of constructor
 
    /**
-    * Copy constructor.  This copies all attributes of the anchor <em>except</em> <q>id</q>, tracked original values (<q>originalOffset</q>), and attributes whose keys do not begin with an alphanumeric (by convention these are transient attributes), the intention being to create a new anchor that has the same characteristics as <var>other</var> (<q>offset</q>, <q>confidence</q>, etc.), but which is a different anchor with different (initially, no) graph linkages,
+    * Copy constructor.  This copies all attributes of the anchor <em>except</em> <var>id</var>, tracked original values (<var>originalOffset</var>), and attributes whose keys do not begin with an alphanumeric (by convention these are transient attributes), the intention being to create a new anchor that has the same characteristics as <var>other</var> (<var>offset</var>, <var>confidence</var>, etc.), but which is a different anchor with different (initially, no) graph linkages,
+    * @param other The anchor to copy.
     */
    public Anchor(Anchor other)
    {
@@ -237,7 +238,7 @@ public class Anchor
       
    /**
     * Accesses a list of annotations on a given layer that start with this anchor.
-    * @param layerId
+    * @param layerId The given layer ID.
     * @return A list of annotations on the given layer that start here.
     */
    public LinkedHashSet<Annotation> startOf(String layerId)
@@ -265,7 +266,7 @@ public class Anchor
 
    /**
     * Accesses a list of annotations on a given layer that end with this anchor.
-    * @param layerId
+    * @param layerId The given layer ID.
     * @return A list of annotations on the given layer that end here.
     */
    public LinkedHashSet<Annotation> endOf(String layerId)
@@ -379,6 +380,7 @@ public class Anchor
 
    /**
     * Determines whether the given anchor is linked to this anchor via annotations <em>before</em> this one in the graph.
+    * @param other The other anchor.
     * @return True if the other anchor precedes this one in a chain, false otherwise.
     */
    public boolean follows(Anchor other)
@@ -387,6 +389,7 @@ public class Anchor
    }
    /**
     * Determines whether the given anchor is linked to this anchor via annotations <em>after</em> this one in the graph.
+    * @param other The other anchor.
     * @return True if the other anchor follows this one in a chain, false otherwise.
     */
    public boolean precedes(Anchor other)
@@ -445,7 +448,7 @@ public class Anchor
 
    /**
     * Finds an annotation for which this is the start anchor and the given anchor is the end anchor
-    * @param end
+    * @param end The returned annotation's end anchor.
     * @return An annotation for which this is the start anchor and the given anchor is the end anchor, or null if no such annotation exists.
     */
    public Annotation annotationTo(Anchor end)
@@ -462,8 +465,8 @@ public class Anchor
 
    /**
     * Finds an annotation for which this is the start anchor and the given anchor is the end anchor, on the given layer
-    * @param end
-    * @param layerId
+    * @param end The returned annotation's end anchor.
+    * @param layerId The returned annotation's layer.
     * @return An annotation for which this is the start anchor and the given anchor is the end anchor, or null if no such annotation exists.
     */
    public Annotation annotationTo(Anchor end, String layerId)
@@ -497,7 +500,7 @@ public class Anchor
    
    /**
     * Compares two anchors. By default, this is by the values of {@link #getOffset()}.  If either anchor has an unset anchor, or their anchors are equal, comparison is by {@link #getId()}.
-    * @param o
+    * @param o The other anchor.
     * @return A negative integer, zero, or a positive integer as this anchor has an offset that is less than, equal to, or greater than the offset of the specified anchor. If either anchor has an unset anchor, or their anchors are equal, comparison is by {@link #getId()}.
     */
    public int compareTo(Anchor o)

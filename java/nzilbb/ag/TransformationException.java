@@ -59,7 +59,7 @@ public class TransformationException
    /**
     * Constructor with message.
     * @param transformer The transformer rasing the exception.
-    * @param message
+    * @param message The error message.
     */
    public TransformationException(IGraphTransformer transformer, String message)
    {
@@ -69,7 +69,7 @@ public class TransformationException
    /**
     * Constructor with cause.
     * @param transformer The transformer rasing the exception.
-    * @param cause
+    * @param cause The root cause of the error.
     */
    public TransformationException(IGraphTransformer transformer, Throwable cause)
    {
@@ -79,8 +79,8 @@ public class TransformationException
    /**
     * Constructor with message and cause.
     * @param transformer The transformer rasing the exception.
-    * @param message
-    * @param cause
+    * @param message The error message.
+    * @param cause The root cause of the error.
     */
    public TransformationException(IGraphTransformer transformer, String message, Throwable cause)
    {

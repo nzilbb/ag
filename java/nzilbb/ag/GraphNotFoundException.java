@@ -65,7 +65,7 @@ public class GraphNotFoundException
    /**
     * Constructor with message.
     * @param id ID of the graph.
-    * @param message
+    * @param message The message to show.
     */
    public GraphNotFoundException(String id, String message)
    {
@@ -75,7 +75,7 @@ public class GraphNotFoundException
    /**
     * Constructor with cause.
     * @param id ID of the graph.
-    * @param cause
+    * @param cause The root cause of the Exception.
     */
    public GraphNotFoundException(String id, Throwable cause)
    {
@@ -85,8 +85,8 @@ public class GraphNotFoundException
    /**
     * Constructor with message and cause.
     * @param id ID of the graph.
-    * @param message
-    * @param cause
+    * @param message The message to show.
+    * @param cause The root cause of the exception.
     */
    public GraphNotFoundException(String id, String message, Throwable cause)
    {

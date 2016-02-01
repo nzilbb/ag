@@ -182,7 +182,7 @@ public class Change
    
    /**
     * Equality test.
-    * @param o
+    * @param o The other object to compare with.
     * @return true if the object is a Change with the same operation, key, and value on the same object as this one.
     */
    public boolean equals(Object o)

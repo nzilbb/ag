@@ -87,6 +87,7 @@ public class TrackedMap
    
    /**
     * Gets the original value of the given key, before any subsequent calls to {@link #put(String,Object)}, since the object was created or {@link #commit()} was called.
+    * @param key The attribute name.
     * @return The original label.
     */
    protected Object getOriginal(String key)
@@ -105,6 +106,7 @@ public class TrackedMap
    /**
     * Marks the object for deletion.
     * <p>This method is not called "delete()" because "delete" is a reserved word in Javascript, and we want these objects to be manipulable from Javascript.
+    * @return The changes made during this operation.
     */
    public Change destroy()
    {
@@ -114,6 +116,7 @@ public class TrackedMap
 
    /**
     * Marks the object for creation.
+    * @return The changes made during this operation.
     */
    public Change create()
    {
@@ -280,8 +283,8 @@ public class TrackedMap
    
    /**
     * Override of Map's put method to allow tracking of selected keys.
-    * @param key
-    * @param value
+    * @param key The attribute name.
+    * @param value The attribute value.
     * @return The previous value associated with key.
     */
    public Object put(String key, Object value)
@@ -339,7 +342,7 @@ public class TrackedMap
    
    /**
     * Indicates whether an object is "equal to" this one.  Equality is determined solely by the value of {@link #getId()}
-    * @param obj
+    * @param obj The object being compared to.
     * @return true if obj is a ChangedTrackedMap with the same id as this one, false otherwise.
     */
    public boolean equals(Object obj)

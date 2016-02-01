@@ -401,7 +401,7 @@ public class Graph
 
    /**
     * Adds an annotation to the graph.
-    * @param annotation
+    * @param annotation The annotation to add to the graph.
     */
    public void addAnnotation(Annotation annotation)
    {
@@ -472,7 +472,7 @@ public class Graph
 
    /**
     * Adds an anchor to the graph.
-    * @param anchor
+    * @param anchor The anchor to add to the graph.
     */
    public void addAnchor(Anchor anchor)
    {
@@ -489,7 +489,7 @@ public class Graph
 
    /**
     * Retrieves an anchor given an id.
-    * @param id
+    * @param id The ID of the anchor.
     * @return The identified anchor, if it's in the graph, and null otherwise.
     */
    public Anchor getAnchor(String id)
@@ -530,7 +530,7 @@ public class Graph
    
    /**
     * Adds a layer definition.
-    * @param layer
+    * @param layer The layer to add.
     */
    @SuppressWarnings("unchecked")
    public void addLayer(Layer layer)
@@ -563,9 +563,9 @@ public class Graph
 
    
    /**
-    * Get the definition of the given layer id.
-    * @param layerId
-    * @return The definition of the given layer id.
+    * Get the definition of the given layer ID.
+    * @param layerId The given layer ID.
+    * @return The definition of the given layer ID.
     */
    public Layer getLayer(String layerId)
    {
@@ -596,7 +596,7 @@ public class Graph
    
    /**
     * Returns the labels of the annotations on the given layer, as an array of Strings.
-    * @param layerId
+    * @param layerId The given layer ID.
     * @return The labels of the annotations on the given layer, as an array of Strings.
     */
    public String[] labels(String layerId)
@@ -634,9 +634,9 @@ public class Graph
    
    /**
     * Creates a tag annotation.
-    * @param toTag
-    * @param layerId
-    * @param label
+    * @param toTag The annotation to tag.
+    * @param layerId The tag layer ID.
+    * @param label The tag label.
     * @return The tag annotation created.
     */
    public Annotation createTag(Annotation toTag, String layerId, String label)
@@ -646,11 +646,11 @@ public class Graph
 
    /**
     * Creates a spanning annotation from the beginning of the start annotation to the ending of the end annotation.
-    * @param from
-    * @param to
-    * @param layerId
-    * @param label
-    * @param parent
+    * @param from The first annotation to span.
+    * @param to The last annotation to span.
+    * @param layerId The layer ID of the resulting annotation.
+    * @param label The label of the resulting annotation.
+    * @param parent The new annotation's parent.
     * @return The new annotation.
     */
    public Annotation createSpan(Annotation from, Annotation to, String layerId, String label, Annotation parent)
@@ -663,10 +663,10 @@ public class Graph
    
    /**
     * Creates a spanning annotation from the beginning of the start annotation to the ending of the end annotation. The parent annotation is guessed, if possible, from <var>from</var> or <var>to</var>
-    * @param from
-    * @param to
-    * @param layerId
-    * @param label
+    * @param from The first annotation to span.
+    * @param to The last annotation to span.
+    * @param layerId The layer ID of the resulting annotation.
+    * @param label The label of the resulting annotation.
     * @return The new annotation.
     */
    public Annotation createSpan(Annotation from, Annotation to, String layerId, String label)
@@ -724,7 +724,7 @@ public class Graph
    /**
     * Access the child annotations on a given layer.
     * <p>If this is a top-level layer, this collection is also accessible in the Annotation's map with a key named after <var>layerId</var> - e.g. this.annotations("turn") == this.get("turn"). The only exception is when <var>layerId is a reserved word - i.e. "id" or one of the keys registered in {@link #getTrackedAttributes()}</var>
-    * @param layerId
+    * @param layerId The given layer ID.
     * @return The child annotations on the given layer.
     */
    public Vector<Annotation> getAnnotations(String layerId)

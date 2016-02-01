@@ -55,7 +55,7 @@ public class PermissionException
    } // end of constructor
    /**
     * Constructor with message.
-    * @param message
+    * @param message The error message.
     */
    public PermissionException(String message)
    {
@@ -63,7 +63,7 @@ public class PermissionException
    } // end of constructor
    /**
     * Constructor with cause.
-    * @param cause
+    * @param cause The root cause of the error.
     */
    public PermissionException(Throwable cause)
    {
@@ -71,8 +71,8 @@ public class PermissionException
    } // end of constructor
    /**
     * Constructor with message and cause.
-    * @param message
-    * @param cause
+    * @param message The error message.
+    * @param cause The root cause of the error.
     */
    public PermissionException(String message, Throwable cause)
    {
@@ -82,7 +82,7 @@ public class PermissionException
    /**
     * Constructor with message.
     * @param user The user ID.
-    * @param message
+    * @param message The error message.
     */
    public PermissionException(String user, String message)
    { 
@@ -92,8 +92,8 @@ public class PermissionException
    /**
     * Constructor with message and cause.
     * @param user The user ID.
-    * @param message
-    * @param cause
+    * @param message The error message.
+    * @param cause The root cause of the error.
     */
    public PermissionException(String user, String message, Throwable cause)
    {

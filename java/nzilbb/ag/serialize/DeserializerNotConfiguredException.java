@@ -38,6 +38,7 @@ public class DeserializerNotConfiguredException
 
    /**
     * Constructor with message
+    * @param message The error message.
     */
    public DeserializerNotConfiguredException(String message)
    {
@@ -46,6 +47,7 @@ public class DeserializerNotConfiguredException
 
    /**
     * Constructor with exception
+    * @param exception The root cause of the error.
     */
    public DeserializerNotConfiguredException(Exception exception)
    {

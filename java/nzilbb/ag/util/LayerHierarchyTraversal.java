@@ -193,7 +193,7 @@ public class LayerHierarchyTraversal<R>
     * e.g. to achieve the reverse of the default ordering (see {@link #defaultComparator}),
     * set <var>comparator</var> to:
     * <pre>
-    * new Comparator<Layer>() { 
+    * new Comparator&lt;Layer&gt;() { 
     *    public int compare(Layer l1, Layer l2) { 
     *       return -LayerHierarchyTraversal.defaultComparator.compare(l1,l2); 
     *    } }
@@ -226,7 +226,7 @@ public class LayerHierarchyTraversal<R>
     * e.g. to achieve the reverse of the default ordering (see {@link #defaultComparator}),
     * set <var>comparator</var> to:
     * <pre>
-    * new Comparator<Layer>() { 
+    * new Comparator&lt;Layer&gt;() { 
     *    public int compare(Layer l1, Layer l2) { 
     *       return -LayerHierarchyTraversal.defaultComparator.compare(l1,l2); 
     *    } }
@@ -244,7 +244,7 @@ public class LayerHierarchyTraversal<R>
 
    /**
     * Traverses the given collection of layers.
-    * @param layers
+    * @param layers The layers to traverse.
     * @return Some result of the traversal, if required.
     */
    public R traverseLayers(Collection<Layer> layers)
@@ -270,7 +270,7 @@ public class LayerHierarchyTraversal<R>
   
    /**
     * Traverses the given graph.
-    * @param graph
+    * @param graph The graph to traverse.
     * @return Some result of the traversal, if required.
     */
    public R traverseGraph(Graph graph)
@@ -295,7 +295,7 @@ public class LayerHierarchyTraversal<R>
    
    /**
     * Depth-first recursive method that traverses the layer annotations using the layer hierarchy, calling {@link #pre(Layer)}, then calling itself for all children, then called {@link #post(Layer)}, before returning.
-    * @param layer
+    * @param layer The layer to traverse.
     */
    protected void traverseLayer(Layer layer)
    {
@@ -313,7 +313,7 @@ public class LayerHierarchyTraversal<R>
    /**
     * Operation to perform before processing children. Default implementation does nothing, subclasses should implement this to provide pre-order functionality.
     * <p>This method may call change {@link #result} in order to build up a result for the traversal.
-    * @param layer
+    * @param layer The layer to process.
     */
    protected void pre(Layer layer)
    {
@@ -322,7 +322,7 @@ public class LayerHierarchyTraversal<R>
    /**
     * Operation to perform after processing children. Default implementation does nothing, subclasses should implement this to provide post-order functionality.
     * <p>This method may call change {@link #result} in order to build up a result for the traversal.
-    * @param layer
+    * @param layer The layer to process.
     */
    protected void post(Layer layer)
    {

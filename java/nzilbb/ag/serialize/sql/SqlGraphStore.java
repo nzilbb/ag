@@ -93,8 +93,8 @@ public class SqlGraphStore
    
    /**
     * Sets parameters for deserializer as a whole.  This might include database connection parameters, locations of supporting files, etc.
-    * @param configuration
-    * @throws DeserializerNotConfiguredException
+    * @param configuration Configuration that includes either "connection", a connected database connection, or strings "dbConnectString", "dbUser", and "dbPassword".
+    * @throws DeserializerNotConfiguredException If a database connection could not be established.
     */
    public void configure(ParameterSet configuration)
       throws DeserializerNotConfiguredException
@@ -144,7 +144,7 @@ public class SqlGraphStore
     * Loads the serialized form of the graph, using the given identifier.
     * @param graphId Identifier for the graph to serialize.
     * @return A list of parameters that require setting before {@link IDeserializer#deserialize()} can be invoked. This may be an empty list, and may include parameters with the value already set to a workable default. If there are parameters, and user interaction is possible, then the user may be presented with an interface for setting/confirming these parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
-    * @throws Exception
+    * @throws Exception If the graph could not be loaded.
     */
    public ParameterSet load(String graphId)
       throws Exception
@@ -155,8 +155,8 @@ public class SqlGraphStore
    
    /**
     * Sets parameters for a given deserialization operation, after loading the serialized form of the graph. This might include mappings from format-specific objects like tiers to graph layers, etc.
-    * @param parameters
-    * @throws DeserializationParametersMissingException
+    * @param parameters The parameters for a given deserialization operation.
+    * @throws DeserializationParametersMissingException If not all required parameters are set.
     */
    public void setParameters(ParameterSet parameters) 
     throws DeserializationParametersMissingException

@@ -63,8 +63,8 @@ public class DeserializationException
    
    /**
     * Adds an error. If the given type of error has already been added, the description is appended to the existing description.
-    * @param type
-    * @param description
+    * @param type The error type.
+    * @param description The error's description.
     */
    public void addError(ErrorType type, String description)
    {

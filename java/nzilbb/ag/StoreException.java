@@ -37,7 +37,7 @@ public class StoreException
    } // end of constructor
    /**
     * Constructor with message.
-    * @param message
+    * @param message The error message.
     */
    public StoreException(String message)
    {
@@ -45,7 +45,7 @@ public class StoreException
    } // end of constructor
    /**
     * Constructor with cause.
-    * @param cause
+    * @param cause The root cause of the error.
     */
    public StoreException(Throwable cause)
    {
@@ -53,8 +53,8 @@ public class StoreException
    } // end of constructor
    /**
     * Constructor with message and cause.
-    * @param message
-    * @param cause
+    * @param message The error message.
+    * @param cause The root cause of the error.
     */
    public StoreException(String message, Throwable cause)
    {

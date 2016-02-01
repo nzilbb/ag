@@ -29,7 +29,7 @@ import java.util.HashSet;
  * <p>This base class handles the traversal. The pre-order and post-order operations (the actual work being done) can be implemented by subclassing to implement {@link #pre(Annotation)} and {@link #post(Annotation)}.
  * <p>For example, to print a list of annotations in hierarchy order:
  * <pre>
- * LayerTraversal<StringBuffer> t = new LayerTraversal<StringBuffer>(new StringBuffer(), graph)
+ * LayerTraversal&lt;StringBuffer&gt; t = new LayerTraversal&lt;StringBuffer&gt;(new StringBuffer(), graph)
  * {
  *   protected void pre(Annotation annotation)
  *   {
@@ -154,7 +154,7 @@ public class LayerTraversal<R>
   
    /**
     * Traverses the given graph.
-    * @param graph
+    * @param graph The graph to traverse.
     * @return Some result of the traversal, if required.
     */
    public R traverseGraph(Graph graph)
@@ -194,8 +194,9 @@ public class LayerTraversal<R>
    
    /**
     * Depth-first recursive method that traverses the layer annotations using the layer hierarchy, calling {@link #pre(Annotation)}, then calling itself for all children, then called {@link #post(Annotation)}, before returning.
-    * @param annotation
+    * @param annotation The annotation to traverse through.
     * @see #breadthFirst
+    * @return The results - i.e. {@link #getResult()}
     */
    protected R traverseAnnotation(Annotation annotation)
    {
@@ -223,7 +224,7 @@ public class LayerTraversal<R>
 
    /**
     * Breadth-first recursive method that traverses the layer annotations using the layer hierarchy, calling {@link #pre(Annotation)}, then calling itself for all children, then called {@link #post(Annotation)}, before returning.
-    * @param layer
+    * @param layer The layer to traverse.
     * @see #breadthFirst
     */
    protected void traverseLayer(Layer layer)
@@ -256,7 +257,7 @@ public class LayerTraversal<R>
    /**
     * Operation to perform before processing children. Default implementation does nothing, subclasses should implement this to provide pre-order functionality.
     * <p>This method may call change {@link #result} in order to build up a result for the traversal.
-    * @param annotation
+    * @param annotation The annotation that is about to be traversed.
     */
    protected void pre(Annotation annotation)
    {
@@ -265,7 +266,7 @@ public class LayerTraversal<R>
    /**
     * Operation to perform after processing children. Default implementation does nothing, subclasses should implement this to provide post-order functionality.
     * <p>This method may call change {@link #result} in order to build up a result for the traversal.
-    * @param annotation
+    * @param annotation The annotation that has just been traversed.
     */
    protected void post(Annotation annotation)
    {
@@ -274,7 +275,7 @@ public class LayerTraversal<R>
    /**
     * Operation to perform for annotations that were not visited by the main traversal. These will be annotations that are in the graph, but their layer is not in the graph's layer definition hierarchy, perhaps because a {@link Layer} was not added to the graph.
     * <p>This method may call change {@link #result} in order to build up a result for the traversal.
-    * @param annotation
+    * @param annotation An annotation that was not visited during the main traversal.
     */
    protected void except(Annotation annotation)
    {

@@ -54,6 +54,16 @@
     <delete dir="${build}"/>
   </target>
 
+  <target name="javadoc" depends="init,compile"
+        description="document the source" >
+    <javadoc destdir="."
+	     classpath="."
+	     Author="yes"
+	     >
+      <fileset dir="${src}" includes="${srcfiles}" excludes="nzilbb/ag/**/test/*.java" />
+    </javadoc>
+  </target>
+
   <target name="test" depends="dist" description="run nzilbb.ag annotation-graph unit tests">
     <javac srcdir="${src}" destdir="."
 	   includes="${srctests}"

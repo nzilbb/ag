@@ -91,8 +91,8 @@ public class SqlGraphStore
    /**
     * IGraphStore method and getter for {@link #id}: The store's ID.
     * @return The store's ID.
-    * @throws StoreException
-    * @throws PermissionException
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
     */
    public String getId() throws StoreException, PermissionException { return id; }
    /**
@@ -113,7 +113,7 @@ public class SqlGraphStore
 
    /**
     * Constructor with connection.
-    * @param connection
+    * @param connection An opened database connection.
     */
    public SqlGraphStore(Connection connection)
    {
@@ -122,10 +122,10 @@ public class SqlGraphStore
 
    /**
     * Constructor with connection parameters.
-    * @param connectString
-    * @param user
-    * @param password
-    * @throws SQLException
+    * @param connectString The database connection string.
+    * @param user The database username.
+    * @param password The databa password.
+    * @throws SQLException If an error occurs during connection.
     */
    public SqlGraphStore(String connectString, String user, String password)
       throws SQLException
@@ -150,8 +150,8 @@ public class SqlGraphStore
    /**
     * Gets a list of layer IDs (annotation 'types').
     * @return A list of layer IDs.
-    * @throws StoreException
-    * @throws PermissionException
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
     */
    public String[] getLayerIds() throws StoreException, PermissionException
    {
@@ -180,8 +180,8 @@ public class SqlGraphStore
    /**
     * Gets a list of layer definitions.
     * @return A list of layer definitions.
-    * @throws StoreException
-    * @throws PermissionException
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
     */
    public Layer[] getLayers() throws StoreException, PermissionException
    {
@@ -203,8 +203,8 @@ public class SqlGraphStore
     * Gets a layer definition.
     * @param id ID of the layer to get the definition for.
     * @return The definition of the given layer.
-    * @throws StoreException
-    * @throws PermissionException
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
     */
    public Layer getLayer(String id) throws StoreException, PermissionException
    {
@@ -411,8 +411,8 @@ public class SqlGraphStore
    /**
     * Gets a list of corpus IDs.
     * @return A list of corpus IDs.
-    * @throws StoreException
-    * @throws PermissionException
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
     */
    public String[] getCorpora() throws StoreException, PermissionException
    {
@@ -439,11 +439,11 @@ public class SqlGraphStore
    
    /**
     * Gets a graph given its ID.
-    * @param id
+    * @param id The given graph ID.
     * @return The identified graph.
-    * @throws StoreException
-    * @throws PermissionException
-    * @throws GraphNotFoundException
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
     */
    public Graph getGraph(String id) throws StoreException, PermissionException, GraphNotFoundException
 
@@ -472,12 +472,12 @@ public class SqlGraphStore
 
    /**
     * Gets a graph given its ID, containing only the given layers.
-    * @param id
+    * @param id The given graph ID.
     * @param layerIds The IDs of the layers to load, or null if only graph data is required.
     * @return The identified graph.
-    * @throws StoreException
-    * @throws PermissionException
-    * @throws GraphNotFoundException
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
     */
    public Graph getGraph(String id, String[] layerIds) throws StoreException, PermissionException, GraphNotFoundException
    {
@@ -706,11 +706,11 @@ public class SqlGraphStore
     * Saves the given graph. The graph can be partial e.g. include only some of the layers that the stored version of the graph contains.
     * <p>The graph deltas are assumed to be set correctly, so if this is a new graph, then {@link Graph#getChange()} should return Change.Operation.Create, if it's an update, Change.Operation.Update, and to delete, Change.Operation.Delete.  Correspondingly, all {@link Anchor}s and {@link Annotation}s should have their changes set also.  If {@link Graph#getChanges()} returns no changes, no action will be taken, and this method returns false.
     * <p>After this method has executed, {@link Graph#commit()} is <em>not</em> called - this must be done by the caller, if they want changes to be committed.
-    * @param graph
+    * @param graph The graph to save.
     * @return true if changes were saved, false if there were no changes to save.
-    * @throws StoreException
-    * @throws PermissionException
-    * @throws GraphNotFoundException
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
     */
    public boolean saveGraph(Graph graph) 
       throws StoreException, PermissionException, GraphNotFoundException
@@ -1048,7 +1048,7 @@ public class SqlGraphStore
    
    /**
     * Saves the changes to the given anchor, and updates related annotations if the anchor ID is changed.
-    * @param anchor
+    * @param anchor The anchor whose changes should be saved.
     * @param extraUpdates A set to add annotations which had no changes to save, but which now must be updated because the anchor's ID is changing.
     * @param sqlInsertAnchor Prepared statement for inserting an anchor row.
     * @param sqlLastId Prepared statement for retrieving the last database ID created.
@@ -1056,7 +1056,7 @@ public class SqlGraphStore
     * @param sqlCheckAnchor Prepared statement for counting the number of anchors currently using an anchor.
     * @param layerIds List of all layer_ids, for checking for annotations that use this anchor.
     * @param sqlDeleteAnchor Prepared statement for deleteing an anchor row.
-    * @throws SQLException
+    * @throws SQLException If a database error occurs.
     * @throws ParseException Shouldn't be thrown, assuming annotation ids have been checked
     */
    protected void saveAnchorChanges(Anchor anchor, HashSet<Annotation> extraUpdates, PreparedStatement sqlInsertAnchor, PreparedStatement sqlLastId, PreparedStatement sqlUpdateAnchor, PreparedStatement sqlCheckAnchor, HashSet<Integer> layerIds, PreparedStatement sqlDeleteAnchor) throws SQLException, ParseException
@@ -1195,7 +1195,7 @@ public class SqlGraphStore
 
    /**
     * Saves the changes to the given anchor, and updates related annotations if the anchor ID is changed.
-    * @param annotation
+    * @param annotation The annotation whose changes should be saved.
     * @param extraUpdates A set to add annotations which had no changes to save, but which now must be updated because the anchor's ID is changing.
     * @param sqlInsertFreeformAnnotation Prepared statement for inserting a freeform annotation row.
     * @param sqlInsertMetaAnnotation Prepared statement for inserting a meta annotation row.
@@ -1207,14 +1207,16 @@ public class SqlGraphStore
     * @param sqlUpdateSegmentAnnotationId Prepared statement for updating segment_annotation_id.
     * @param sqlUpdateFreeformAnnotation Prepared statement for updating a freeform annotation row.
     * @param sqlUpdateMetaAnnotation Prepared statement for updating a meta annotation row.
+    * @param sqlSelectWordFields Prepared statement for finding word field values.
+    * @param sqlSelectSegmentFields Prepared statement for finding segment field values.
     * @param sqlUpdateWordAnnotation Prepared statement for updating a word annotation row.
     * @param sqlUpdateSegmentAnnotation Prepared statement for updating a segment annotation row.
     * @param sqlDeleteAnnotation Prepared statement for deleteing an annotation row.
     * @param participantNameToNumber A lookup table for participant numbers, for turns/utterances
-    * @throws SQLException
+    * @throws SQLException If a database error occurs.
     * @throws ParseException Shouldn't be thrown, assuming annotation ids have been checked
-    * @throws StoreException
-    * @throws PermissionException
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
     */
    protected void saveAnnotationChanges(
       Annotation annotation, HashSet<Annotation> extraUpdates, 

@@ -660,7 +660,7 @@ public class Annotation
    /**
     * Access the child annotations on a given layer.
     * <p>This collection is also accessible in the Annotation's map with a key named after <var>layerId</var> - e.g. this.annotations("turn") == this.get("turn"). The only exception is when <var>layerId is a reserved word - i.e. "id" or one of the keys registered in {@link #getTrackedAttributes()}</var>
-    * @param layerId
+    * @param layerId The given layer ID.
     * @return The child annotations on the given layer.
     */
    public Vector<Annotation> getAnnotations(String layerId)
@@ -680,7 +680,7 @@ public class Annotation
 
    /**
     * Access the child annotations on a given layer, as an array (for environments that deal better with arrays than collections).
-    * @param layerId
+    * @param layerId The given layer ID.
     * @return The child annotations on the given layer.
     */
    public Annotation[] annotations(String layerId)
@@ -691,7 +691,7 @@ public class Annotation
    
    /**
     * Add a child annotation.
-    * @param annotation
+    * @param annotation The new child.
     */
    public void addAnnotation(Annotation annotation)
    {
@@ -760,7 +760,7 @@ public class Annotation
    /**
     * Determines whether the annotion's start/end offsets surround the given offset - i.e. whether the annotation t-includes the offset.
     * <p>A precondition is that the annotation's {@link #graph} is set.
-    * @param offset
+    * @param offset The given offset.
     * @return true if getStart().getOffset() &le; offset &lt; getEnd().getOffset(), false otherwise.
     */
    public boolean includesOffset(Double offset)
@@ -783,7 +783,7 @@ public class Annotation
     * Determines whether this annotation t-includes the given annotation. Returns true if this annotation includes the other annotation's start and end offsets.
     * <p><em>NB</em> If the start and end offsets of <var>other</var> are the same as the end offset of this annotation (i.e. <var>other</var> is instantaneous at the end of this annotation), this method will return false.
     * <p>A precondition is that the annotation's {@link #graph} is set.
-    * @param other
+    * @param other The given other annotation.
     * @return true if the other annotation's duration is wholly included within this annotation's duration, and false otherwise.
     * @see #includesOffset(Double)
     */
@@ -806,7 +806,7 @@ public class Annotation
    /**
     * Determines whether this annotation includes the midpoint of the given annotation.
     * <p>A precondition is that the annotation's {@link #graph} is set.
-    * @param other
+    * @param other The given other annotation.
     * @return true if this annotation includes the midpoint of the given annotation, or if they share start/end anchors (even if there are null offsets), false otherwise.
     */
    public boolean includesMidpointOf(Annotation other)
@@ -833,7 +833,7 @@ public class Annotation
 
    /**
     * Determines the offset difference between this annotation and another - i.e. the minimum distance between any of the anchors.  If the annotations overlap, the returned difference will be negative, with a magnitude corresponding to the degree of overlap.
-    * @param other
+    * @param other The given other annotation.
     * @return The minimum distance between any two of the annotations' anchors, or null if any anchors are unset.
     */
    public Double distance(Annotation other)
@@ -915,7 +915,7 @@ public class Annotation
    
    /**
     * Determines whether this is a tag of the given annotation (or vice-versa), i.e. whether the two annotations share start/end anchors.
-    * @param other
+    * @param other The given other annotation.
     * @return true if the start and end anchor IDs are the same for this and the other annotation, false otherwise.
     */
    public boolean tags(Annotation other)
@@ -928,7 +928,7 @@ public class Annotation
    /**
     * Finds all annotations on the given layer that include this annotation. This uses {@link #includes(Annotation)} to determine inclusion. Annotations marked for deletion are ignored.
     * <p>A precondition is that the annotation's {@link #graph} is set.
-    * @param layerId
+    * @param layerId The given layer ID.
     * @return A list of annotations on the given layer that include this annotation. This uses {@link #includes(Annotation)} to determine inclusion.
     */
    public Annotation[] includingAnnotationsOn(String layerId)
@@ -952,7 +952,7 @@ public class Annotation
    /**
     * Finds all annotations on the given layer that this annotation includes. This uses {@link #includes(Annotation)} to determine inclusion. Annotations marked for deletion are ignored.
     * <p>A precondition is that the annotation's {@link #graph} is set.
-    * @param layerId
+    * @param layerId The given layer ID.
     * @return A list of annotations on the given layer that include this annotation. This uses {@link #includes(Annotation)} to determine inclusion.
     */
    public Annotation[] includedAnnotationsOn(String layerId)
@@ -976,7 +976,7 @@ public class Annotation
    /**
     * Finds all annotations on the given layer that include the midpoint of this annotation. This uses {@link #includesMidpointOf(Annotation)} to determine inclusion. Annotations marked for deletion are ignored.
     * <p>A precondition is that the annotation's {@link #graph} is set.
-    * @param layerId
+    * @param layerId The given layer ID.
     * @return A list of annotations on the given layer that include this annotation's midpoint. This uses {@link #includesMidpointOf(Annotation)} to determine inclusion.
     */
    public Annotation[] midpointIncludingAnnotationsOn(String layerId)
@@ -1000,7 +1000,7 @@ public class Annotation
    /**
     * Finds all annotations on the given layer that tag this annotation - i.e. where start and end anchors are shared. Annotations marked for deletion are ignored.
     * <p>A precondition is that the annotation's {@link #graph} is set.
-    * @param layerId
+    * @param layerId The given layer ID.
     * @return A list of annotations on the given layer that tag this annotation.
     */
    public Annotation[] tagsOn(String layerId)
@@ -1027,7 +1027,7 @@ public class Annotation
    /**
     * Determines the first ancestor annotation this annotation has in common with the given annotation. This may return the graph itself, if there are no earlier common ancestors. "Ancestors" is includsive in the sense that if either annotation is an ancestor of the other, it will be returned.
     * <p>A precondition is that the annotation's {@link #graph} is set.
-    * @param other
+    * @param other The other annotation.
     * @return The first ancestor annotation this annotation has in common with the given annotation, or null if {@link #graph} is not set.
     */
    public Annotation getFirstCommonAncestor(Annotation other)
@@ -1195,8 +1195,8 @@ public class Annotation
    
    /**
     * Tags this annotation with the given tag.
-    * @param layerId
-    * @param label
+    * @param layerId The layer ID for the tag.
+    * @param label The layer for the tag.
     * @return The tag annotation created.
     */
    public Annotation createTag(String layerId, String label)

@@ -253,7 +253,7 @@ public class Validator
     * <p>Anchor sets are created by traversing the descendants of the highest-level layers which
     * are aligned.
     * <p>Processing anchors in peer sets catches all reversed annotations, but also catches anchors that are out of order for other reasons (e.g. overlapping peers, children outside the bounds of their children, etc.
-    * @param graph
+    * @param graph The graph to process.
     * @return The changes introduced by this phase.
     */
    protected Vector<Change> correctReversedAnchors(Graph graph)
@@ -642,7 +642,7 @@ public class Validator
    
    /**
     * Finds the best parent annotation for the given child annotation, giving priority to parents with the same speaker, with a common (non-graph) ancestor, and t-including or at least midpoint-t-including parent candidates.  A candidate is identified, but no changes are made to annotation.  null may be returned, if no suitable parent can be identified.
-    * @param child
+    * @param child The child annotation.
     * @return The best parent annotation available, or null if none can be found.
     */
    protected Annotation findBestParent(Annotation child)
@@ -1193,8 +1193,9 @@ public class Validator
 
    /**
     * Sets the Start Anchor of the given annotation, and also the start anchors of related annotations that start in the same place.
-    * @param annotation
-    * @param newStartAnchor
+    * @param annotation The annotation to change the start anchor of.
+    * @param newStartAnchor The new start anchor.
+    * @return The changes made during this operation.
     */
    public Vector<Change> changeStartWithRelatedAnnotations(Annotation annotation, Anchor newStartAnchor)
    {
@@ -1202,9 +1203,10 @@ public class Validator
    }
    /**
     * Sets the Start Anchor of the given annotation, and also the start anchors of related annotations that start in the same place.
-    * @param annotation
-    * @param newStartAnchor
-    * @param layerIdToExclude
+    * @param annotation The annotation whose start anchor will be changed.
+    * @param newStartAnchor The new start anchor.
+    * @param layerIdToExclude A layer to exclude when updating related annotations.
+    * @return The changes made during this operation.
     */
    public Vector<Change> changeStartWithRelatedAnnotations(Annotation annotation, Anchor newStartAnchor, String layerIdToExclude)
    {
@@ -1214,9 +1216,10 @@ public class Validator
    }
    /**
     * Sets the StartAnchor of the given annotation, and also the start anchors of related annotations that start in the same place.
-    * @param annotation
-    * @param newStartAnchor
-    * @param layerIdsToExclude
+    * @param annotation The annotation whose start anchor will be changed.
+    * @param newStartAnchor The new start anchor.
+    * @param layerIdsToExclude Layers to exclude when updating related annotations.
+    * @return The changes made during this operation.
     */
    public Vector<Change> changeStartWithRelatedAnnotations(Annotation annotation, Anchor newStartAnchor, Set<String> layerIdsToExclude)
    {
@@ -1336,8 +1339,9 @@ public class Validator
 
    /**
     * Sets the End Anchor of the given annotation, and also the end anchors of related annotations that end in the same place.
-    * @param annotation
-    * @param newEndAnchor
+    * @param annotation The annotation whose end anchor should be changed.
+    * @param newEndAnchor The new end anchor.
+    * @return The changes made during this operation.
     */
    public Vector<Change> changeEndWithRelatedAnnotations(Annotation annotation, Anchor newEndAnchor)
    {
@@ -1345,9 +1349,10 @@ public class Validator
    }
    /**
     * Sets the End Anchor of the given annotation, and also the end anchors of related annotations that end in the same place.
-    * @param annotation
-    * @param newEndAnchor
-    * @param layerIdToExclude
+    * @param annotation The annotation whose end anchor should be changed.
+    * @param newEndAnchor The new end anchor.
+    * @param layerIdToExclude A layer to exclude when updating related annotations.
+    * @return The changes made during this operation.
     */
    public Vector<Change> changeEndWithRelatedAnnotations(Annotation annotation, Anchor newEndAnchor, String layerIdToExclude)
    {
@@ -1357,9 +1362,10 @@ public class Validator
    }
    /**
     * Sets the End Anchor of the given annotation, and also the end anchors of related annotations that end in the same place.
-    * @param annotation
-    * @param newEndAnchor
-    * @param layerIdsToExclude
+    * @param annotation The annotation whose end anchor should be changed.
+    * @param newEndAnchor The new end anchor.
+    * @param layerIdsToExclude Layers to exclude when updating related annotations.
+    * @return The changes made during this operation.
     */
    public Vector<Change> changeEndWithRelatedAnnotations(Annotation annotation, Anchor newEndAnchor, Set<String> layerIdsToExclude)
    {
@@ -1490,8 +1496,10 @@ public class Validator
 
    /**
     * Corrects two child-bearing annotations that incorrectly overlap.
-    * @param anFirst
-    * @param anLast
+    * @param anFirst First annotation.
+    * @param anLast Last annotation.
+    * @param bShareAnchors true if <var>anFirst.end</var> should be the same anchor as <var>anLast.start</var>
+    * @return The changes made during this operation.
     */
    protected Vector<Change> teaseApart(Annotation anFirst, Annotation anLast, boolean bShareAnchors)
    {
@@ -1689,8 +1697,9 @@ public class Validator
     * end anchor), and all anchors that previously had an offset at or before the threshold 
     * will have the offset set to null and the {@link Constants#CONFIDENCE confidence} set to
     * {@link Constants#CONFIDENCE_NONE}. All changed anchors are new anchors.
-    * @param parent
-    * @param threshold
+    * @param parent The parent whose children should be changed.
+    * @param threshold The offset before which anchors will be reset.
+    * @return The changes made during this operation.
     */
    protected Vector<Change> resetChildAnchorsBefore(Annotation parent, double threshold)
    {
@@ -1797,8 +1806,9 @@ public class Validator
     * will be s-included (i.e. chained from the start anchor to the
     * end anchor), and all anchors that previously had an offset at or before the threshold 
     * will have the offset set to null and the {@link Constants#CONFIDENCE confidence} set to
-    * @param parent
-    * @param threshold
+    * @param parent The parent whose children should be changed.
+    * @param threshold The offset theshold after which anchors will be reset.
+    * @return The changes made during this operation.
     */
    protected Vector<Change> resetChildAnchorsAfter(Annotation parent, double threshold)
    {
@@ -1901,7 +1911,7 @@ public class Validator
    
    /**
     * A representation of the given annotation for logging purposes.
-    * @param annotation
+    * @param annotation The annotation to log.
     * @return A representation of the given annotation for loggin purposes.
     */
    protected String logAnnotation(Annotation annotation)
@@ -1912,7 +1922,7 @@ public class Validator
 
    /**
     * A representation of the given anchor for logging purposes.
-    * @param anchor
+    * @param anchor The anchor to log.
     * @return A representation of the given anchor for logging purposes.
     */
    protected String logAnchor(Anchor anchor)
@@ -1924,7 +1934,7 @@ public class Validator
    
    /**
     * Logs a debugging message.
-    * @param message
+    * @param message The debug message.
     */
    protected void log(String message)
    {

@@ -30,7 +30,7 @@ import java.util.Iterator;
 import nzilbb.ag.*;
 
 /**
- * Generates default anchor offsets. These are computed using linear interpolation between certain offsets. What counts as <q>certain</q> depends on how {@link #defaultOffsetThreshold} is set.
+ * Generates default anchor offsets. These are computed using linear interpolation between certain offsets. What counts as <var>certain</var> depends on how {@link #defaultOffsetThreshold} is set.
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class DefaultOffsetGenerator
@@ -135,20 +135,20 @@ public class DefaultOffsetGenerator
 
    
    /**
-    * Value to set for <q>confidence</q> for anchors that have their offsets changed by this transformer.
+    * Value to set for <var>confidence</var> for anchors that have their offsets changed by this transformer.
     * <p>The default value is {@link Constants#CONFIDENCE_DEFAULT}.
     * @see #getConfidence()
     * @see #setConfidence(int)
     */
    protected int confidence = Constants.CONFIDENCE_DEFAULT;
    /**
-    * Getter for {@link #confidence}: Value to set for <q>confidence</q> for anchors that have their offsets changed by this transformer.
-    * @return Value to set for <q>confidence</q> for anchors that have their offsets changed by this transformer.
+    * Getter for {@link #confidence}: Value to set for <var>confidence</var> for anchors that have their offsets changed by this transformer.
+    * @return Value to set for <var>confidence</var> for anchors that have their offsets changed by this transformer.
     */
    public int getConfidence() { return confidence; }
    /**
-    * Setter for {@link #confidence}: Value to set for <q>confidence</q> for anchors that have their offsets changed by this transformer.
-    * @param newConfidence Value to set for <q>confidence</q> for anchors that have their offsets changed by this transformer.
+    * Setter for {@link #confidence}: Value to set for <var>confidence</var> for anchors that have their offsets changed by this transformer.
+    * @param newConfidence Value to set for <var>confidence</var> for anchors that have their offsets changed by this transformer.
     */
    public void setConfidence(int newConfidence) { confidence = newConfidence; }
 
@@ -299,7 +299,7 @@ public class DefaultOffsetGenerator
    
    /**
     * Sets the default offsets for anchors of all descendants of the given annotation.
-    * @param top
+    * @param top The top of the annotation hierarchy to set anchor offsets of.
     * @return The changes made during this operation.
     * @throws TransformationException If the transformation cannot be completed.
     */
@@ -466,8 +466,8 @@ public class DefaultOffsetGenerator
    
    /**
     * Recursively passes traverses child layers, adding anchors of children on non-peer-overlapping layers to the given set. Does not add the anchors of the parent (unless they're also anchors of some child).
-    * @param parent
-    * @param anchorCollection
+    * @param parent The parent of the children to process.
+    * @param anchors The collection to add the anchors to.
     */
    protected void descendantAnchors(Annotation parent, TreeSet<Anchor> anchors)
    {
@@ -523,7 +523,7 @@ public class DefaultOffsetGenerator
 
    /**
     * Gets the confidence rating of a given anchor.  If no Integer confidence attribute is present, the #defaultAnchorConfidence is returned.
-    * @param anchor
+    * @param anchor The anchor to get the rating of.
     * @return The confidence rating of a given annotation, or defaultAnchorConfidence if it could not be determined.
     */
    protected int getConfidence(Anchor anchor)
@@ -536,7 +536,7 @@ public class DefaultOffsetGenerator
    
    /**
     * Logs a debugging message.
-    * @param message
+    * @param message The debuggin message.
     */
    protected void log(String message)
    {
@@ -549,7 +549,7 @@ public class DefaultOffsetGenerator
 
    /**
     * A representation of the given anchor for logging purposes.
-    * @param anchor
+    * @param anchor The anchor to log.
     * @return A representation of the given anchor for logging purposes.
     */
    protected String logAnchor(Anchor anchor)
@@ -560,7 +560,7 @@ public class DefaultOffsetGenerator
 
    /**
     * A representation of the given annotation for logging purposes.
-    * @param annotation
+    * @param annotation The annotation to log.
     * @return A representation of the given annotation for loggin purposes.
     */
    protected String logAnnotation(Annotation annotation)

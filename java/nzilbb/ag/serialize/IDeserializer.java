@@ -49,15 +49,15 @@ public interface IDeserializer
 
    /**
     * Sets parameters for deserializer as a whole.  This might include database connection parameters, locations of supporting files, etc.
-    * @param configuration
-    * @throws DeserializerNotConfiguredException
+    * @param configuration The configuration for the deserializer. 
+    * @throws DeserializerNotConfiguredException If the configuration is not sufficient for deserialization.
     */
    public void configure(ParameterSet configuration) throws DeserializerNotConfiguredException;
 
    /**
     * Sets parameters for a given deserialization operation, after loading the serialized form of the graph. This might include mappings from format-specific objects like tiers to graph layers, etc.
-    * @param parameters
-    * @throws DeserializationParametersMissingException
+    * @param parameters The configuration for a given deserialization operation.
+    * @throws DeserializationParametersMissingException If not all required parameters have a value.
     */
    public void setParameters(ParameterSet parameters) throws DeserializationParametersMissingException;
 

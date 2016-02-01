@@ -30,7 +30,7 @@ public class Utility
    /**
     * Gets the confidence rating of a given object.  If no Integer confidence attribute is present, the given default value is returned.
     * @param o The object to get the confidence rating for (most likely an {@link Annotation} or {@link Anchor})
-    * @param defaultConfidence
+    * @param defaultConfidence The default rating if no explicit value is set.
     * @return The confidence rating of a given object, or <var>defaultConfidence</var> if it could not be determined.
     */
    public static int getConfidence(TrackedMap o, int defaultConfidence)

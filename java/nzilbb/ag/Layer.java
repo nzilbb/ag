@@ -346,7 +346,7 @@ public class Layer
    
    /**
     * Indicates whether an object is "equal to" this one.
-    * @param obj
+    * @param obj The object to compare to.
     * @return true if obj is an Anchor with the same id as this one, false otherwise.
     */
    public boolean equals(Object obj)

@@ -36,11 +36,11 @@ public interface IGraphStore
     * Saves the given graph. The graph can be partial e.g. include only some of the layers that the stored version of the graph contains.
     * <p>The graph deltas are assumed to be set correctly, so if this is a new graph, then {@link Graph#getChange()} should return Change.Operation.Create, if it's an update, Change.Operation.Update, and to delete, Change.Operation.Delete.  Correspondingly, all {@link Anchor}s and {@link Annotation}s should have their changes set also.  If {@link Graph#getChanges()} returns no changes, no action will be taken, and this method returns false.
     * <p>After this method has executed, {@link Graph#commit()} is <em>not</em> called - this must be done by the caller, if they want changes to be committed.
-    * @param graph
+    * @param graph The graph to save.
     * @return true if changes were saved, false if there were no changes to save.
-    * @throws StoreException
-    * @throws PermissionException
-    * @throws GraphNotFoundException
+    * @throws StoreException If an error prevents the graph from being saved.
+    * @throws PermissionException If saving the graph is not permitted.
+    * @throws GraphNotFoundException If the graph doesn't exist.
     */
    public boolean saveGraph(Graph graph) throws StoreException, PermissionException, GraphNotFoundException;
 

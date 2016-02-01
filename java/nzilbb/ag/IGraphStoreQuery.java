@@ -34,24 +34,24 @@ public interface IGraphStoreQuery
    /**
     * Gets the store's ID.
     * @return The annotation store's ID.
-    * @throws StoreException
-    * @throws PermissionException
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
     */
    public String getId() throws StoreException, PermissionException;
    
    /**
     * Gets a list of layer IDs (annotation 'types').
     * @return A list of layer IDs.
-    * @throws StoreException
-    * @throws PermissionException
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
     */
    public String[] getLayerIds() throws StoreException, PermissionException; 
    
    /**
     * Gets a list of layer definitions.
     * @return A list of layer definitions.
-    * @throws StoreException
-    * @throws PermissionException
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
     */
    public Layer[] getLayers() throws StoreException, PermissionException;
 
@@ -59,38 +59,38 @@ public interface IGraphStoreQuery
     * Gets a layer definition.
     * @param id ID of the layer to get the definition for.
     * @return The definition of the given layer.
-    * @throws StoreException
-    * @throws PermissionException
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
     */
    public Layer getLayer(String id) throws StoreException, PermissionException;   
 
    /**
     * Gets a list of corpus IDs.
     * @return A list of corpus IDs.
-    * @throws StoreException
-    * @throws PermissionException
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
     */
    public String[] getCorpora() throws StoreException, PermissionException; 
 
    
    /**
     * Gets a graph given its ID.
-    * @param id
+    * @param id The given graph ID.
     * @return The identified graph.
-    * @throws StoreException
-    * @throws PermissionException
-    * @throws GraphNotFoundException
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
     */
    public Graph getGraph(String id) throws StoreException, PermissionException, GraphNotFoundException;
 
    /**
     * Gets a graph given its ID, containing only the given layers.
-    * @param id
+    * @param id The given graph ID.
     * @param layerIds The IDs of the layers to load, or null if only graph data is required.
     * @return The identified graph.
-    * @throws StoreException
-    * @throws PermissionException
-    * @throws GraphNotFoundException
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
     */
    public Graph getGraph(String id, String[] layerIds) throws StoreException, PermissionException, GraphNotFoundException;
 
