@@ -161,7 +161,6 @@ public class SqlGraphStore
 	    "SELECT short_description FROM layer ORDER BY short_description");
 	 ResultSet rs = sql.executeQuery();
 	 Vector<String> layerIds = new Vector<String>();
-	 layerIds.add("participant"); // parent of "turn" layer
 	 layerIds.add("main_participant"); // transcript_speaker.main_speaker
 	 while (rs.next())
 	 {
@@ -208,25 +207,6 @@ public class SqlGraphStore
     */
    public Layer getLayer(String id) throws StoreException, PermissionException
    {
-      if (id.equals("participant"))
-      { // special case - the participant layer is the parent of the turn layer
-	 // but isn't currently stored in the database
-	 return new Layer("participant", "Participants", Constants.ALIGNMENT_NONE, 
-			  true, // peers
-			  true, // peersOverlap
-			  true, // saturated
-			  "graph", // parentId
-			  true);  // parentIncludes
-      }
-      else if (id.equals("main_participant"))
-      { // special case - the main_participant layer is main-speaker marker
-	 return new Layer("main_participant", "Main Participant", Constants.ALIGNMENT_NONE, 
-			  false, // peers
-			  false, // peersOverlap
-			  true, // saturated
-			  "participant", // parentId
-			  true);  // parentIncludes
-      }
       try
       {
 	 PreparedStatement sqlParentId = getConnection().prepareStatement(
@@ -241,142 +221,18 @@ public class SqlGraphStore
 	    layer.setId(rs.getString("short_description"));
 	    layer.setDescription(rs.getString("description"));
 	    layer.setAlignment(rs.getInt("alignment"));
-	    if (rs.getInt("layer_id") == SqlConstants.LAYER_SEGMENT) // segment
+	    sqlParentId.setInt(1, rs.getInt("parent_id"));
+	    ResultSet rsParentId = sqlParentId.executeQuery();
+	    if (rsParentId.next())
 	    {
-	       sqlParentId.setInt(1, SqlConstants.LAYER_TRANSCRIPTION); // transcript
-	       ResultSet rsParentId = sqlParentId.executeQuery();
-	       if (rsParentId.next())
-	       {
-		  layer.setParentId(rsParentId.getString("short_description"));
-	       }
-	       layer.setParentIncludes(true);
-	       layer.setPeers(true);
-	       layer.setPeersOverlap(false);
-	       layer.setSaturated(true);
-	       rsParentId.close();
-	    } // segment
-	    else if (rs.getInt("layer_id") == SqlConstants.LAYER_TRANSCRIPTION) // transcription
-	    {
-	       sqlParentId.setInt(1, SqlConstants.LAYER_TURN); // turn
-	       ResultSet rsParentId = sqlParentId.executeQuery();
-	       if (rsParentId.next())
-	       {
-		  layer.setParentId(rsParentId.getString("short_description"));
-	       }
-	       layer.setParentIncludes(true);
-	       layer.setPeers(true);
-	       layer.setPeersOverlap(false);
-	       layer.setSaturated(false);
-	       rsParentId.close();
-	    } // transcription
-	    else if (rs.getInt("layer_id") == SqlConstants.LAYER_UTTERANCE) // utterance
-	    {
-	       sqlParentId.setInt(1, SqlConstants.LAYER_TURN); // turn
-	       ResultSet rsParentId = sqlParentId.executeQuery();
-	       if (rsParentId.next())
-	       {
-		  layer.setParentId(rsParentId.getString("short_description"));
-	       }
-	       layer.setParentIncludes(true);
-	       layer.setPeers(true);
-	       layer.setPeersOverlap(false);
-	       layer.setSaturated(true);
-	       layer.setAlignment(Constants.ALIGNMENT_INTERVAL);
-	       rsParentId.close();
-	    } // utterance
-	    else if (rs.getInt("layer_id") == SqlConstants.LAYER_TURN) // turn
-	    {
-	       layer.setParentId("participant");
-	       layer.setParentIncludes(true);
-	       layer.setPeers(true);
-	       layer.setPeersOverlap(true);
-	       layer.setSaturated(false);
-	    } // turn
-	    else if (rs.getString("scope").equalsIgnoreCase(SqlConstants.SCOPE_SEGMENT)) // segment scope
-	    {
-	       sqlParentId.setInt(1, SqlConstants.LAYER_SEGMENT); // segment
-	       ResultSet rsParentId = sqlParentId.executeQuery();
-	       if (rsParentId.next())
-	       {
-		  layer.setParentId(rsParentId.getString("short_description"));
-	       }
-	       layer.setParentIncludes(true);
-	       layer.setPeers(true);
-	       layer.setPeersOverlap(true);
-	       if (layer.getAlignment() == Constants.ALIGNMENT_NONE)
-	       {
-		  layer.setSaturated(true);
-	       }
-	       else
-	       {
-		  layer.setSaturated(false);
-	       }
-	       rsParentId.close();
-	    } // segment scope
-	    else if (rs.getString("scope").equalsIgnoreCase(SqlConstants.SCOPE_WORD)) // word scope
-	    {
-	       sqlParentId.setInt(1, SqlConstants.LAYER_TRANSCRIPTION); // transcript
-	       ResultSet rsParentId = sqlParentId.executeQuery();
-	       if (rsParentId.next())
-	       {
-		  layer.setParentId(rsParentId.getString("short_description"));
-	       }
-	       layer.setParentIncludes(true);
-	       if (rs.getInt("layer_id") == SqlConstants.LAYER_ORTHOGRAPHY) // orthography
-	       {
-		  layer.setPeers(false); // only one orthography per transcription word
-	       }
-	       else
-	       {
-		  layer.setPeers(true);
-	       }
-	       layer.setPeersOverlap(true);
-	       if (layer.getAlignment() == Constants.ALIGNMENT_NONE)
-	       {
-		  layer.setSaturated(true);
-	       }
-	       else
-	       {
-		  layer.setSaturated(false);
-	       }
-	       rsParentId.close();
-	    } // word scope
-	    else if (rs.getString("scope").equalsIgnoreCase(SqlConstants.SCOPE_META)) // meta scope
-	    {
-	       sqlParentId.setInt(1, SqlConstants.LAYER_TURN); // turn
-	       ResultSet rsParentId = sqlParentId.executeQuery();
-	       if (rsParentId.next())
-	       {
-		  layer.setParentId(rsParentId.getString("short_description"));
-	       }
-	       layer.setParentIncludes(true);
-	       layer.setPeers(true);
-	       layer.setPeersOverlap(true);
-	       // TODO for now, override alignment of meta layers to ensure they don't become
-	       // TODO merely turn tags
-	       layer.setAlignment(Constants.ALIGNMENT_INTERVAL);
-	       if (layer.getAlignment() == Constants.ALIGNMENT_NONE)
-	       {
-		  layer.setSaturated(true);
-	       }
-	       else
-	       {
-		  layer.setSaturated(false);
-	       }
-	       rsParentId.close();
-	    } // meta scope
-	    else // freeform scope
-	    {
-	       layer.setParentId("graph");
-	       layer.setParentIncludes(true);
-	       layer.setPeers(true);
-	       layer.setPeersOverlap(true);
-	       layer.setSaturated(false);
-	       // TODO for now, override alignment of freeform layers to ensure they don't become
-	       // TODO merely graph tags
-	       layer.setAlignment(Constants.ALIGNMENT_INTERVAL);
-	    } // freeform scope
-	 
+	       layer.setParentId(rsParentId.getString("short_description"));
+	    }
+	    rsParentId.close();
+	    layer.setParentIncludes(rs.getInt("parent_includes") == 1);
+	    layer.setPeers(rs.getInt("peers") == 1);
+	    layer.setPeersOverlap(rs.getInt("peers_overlap") == 1);
+	    layer.setSaturated(rs.getInt("saturated") == 1);
+
 	    // other attributes
 	    layer.put("@layer_id", new Integer(rs.getInt("layer_id")));
 	    layer.put("@type", rs.getString("type"));
@@ -407,7 +263,6 @@ public class SqlGraphStore
       }
    }
 
-
    /**
     * Gets a list of corpus IDs.
     * @return A list of corpus IDs.
@@ -435,7 +290,6 @@ public class SqlGraphStore
 	 throw new StoreException(exception);
       }
    }
-
    
    /**
     * Gets a graph given its ID.
@@ -516,37 +370,6 @@ public class SqlGraphStore
 
 	 if (layerIds != null)
 	 {
-	    // create participant layer...
-	    // thereby creating a lookup list of participant names
-	    Layer participantLayer = getLayer("participant");
-	    graph.addLayer(participantLayer);
-	    Layer mainParticipantLayer = getLayer("main_participant");
-	    graph.addLayer(mainParticipantLayer);
-	    PreparedStatement sqlParticipant = getConnection().prepareStatement(
-	       "SELECT speaker.speaker_number, speaker.name, transcript_speaker.main_speaker"
-	       +" FROM speaker"
-	       +" INNER JOIN transcript_speaker ON transcript_speaker.speaker_number = speaker.speaker_number"
-	       +" WHERE ag_id = ? ORDER BY speaker.name");
-	    sqlParticipant.setInt(1, iAgId);
-	    ResultSet rsParticipant = sqlParticipant.executeQuery();
-	    while (rsParticipant.next())
-	    {
-	       // add graph-tag annotation
-	       Annotation participant = new Annotation(
-		  "p_-1_"+rsParticipant.getString("speaker_number"), rsParticipant.getString("name"),
-		  "participant");
-	       graph.addAnnotation(participant);
-
-	       // are they a main participant?
-	       Annotation mainParticipant = new Annotation(
-		  "p_-2_"+rsParticipant.getString("speaker_number"), rsParticipant.getString("main_speaker"),
-		  "main_participant");
-	       mainParticipant.setParentId(participant.getId());
-	       graph.addAnnotation(mainParticipant);
-	    } // next participant
-	    rsParticipant.close();
-	    sqlParticipant.close();
-
 	    // load annotations
 	    PreparedStatement sqlAnnotation = getConnection().prepareStatement(
 	       "SELECT layer.*,"
@@ -559,7 +382,103 @@ public class SqlGraphStore
 	    sqlAnnotation.setInt(2, iAgId);
 	    for (String layerId : layerIds)
 	    {
-	       if (layerId.equals("participant")) continue; // already done this above
+	       if (layerId.equals("graph"))
+	       { // special case
+		  continue;
+	       }
+	       else if (layerId.equals("who"))
+	       {
+		  // create participant layer...
+		  // thereby creating a lookup list of participant names
+		  Layer participantLayer = getLayer(layerId);
+		  graph.addLayer(participantLayer);
+		  Layer mainParticipantLayer = getLayer("main_participant");
+		  graph.addLayer(mainParticipantLayer);
+		  PreparedStatement sqlParticipant = getConnection().prepareStatement(
+		     "SELECT speaker.speaker_number, speaker.name, transcript_speaker.main_speaker"
+		     +" FROM speaker"
+		     +" INNER JOIN transcript_speaker ON transcript_speaker.speaker_number = speaker.speaker_number"
+		     +" WHERE ag_id = ? ORDER BY speaker.name");
+		  sqlParticipant.setInt(1, iAgId);
+		  ResultSet rsParticipant = sqlParticipant.executeQuery();
+		  while (rsParticipant.next())
+		  {
+		     // add graph-tag annotation
+		     Annotation participant = new Annotation(
+			"m_"+participantLayer.get("@layer_id")+"_"+rsParticipant.getString("speaker_number"), rsParticipant.getString("name"),
+			participantLayer.getId());
+		     participant.setParentId(graph.getId());
+		     graph.addAnnotation(participant);
+		     
+		     // are they a main participant?
+		     if (rsParticipant.getInt("main_speaker") == 1)
+		     {
+			Annotation mainParticipant = new Annotation(
+			   "m_"+mainParticipantLayer.get("@layer_id")+"_"+rsParticipant.getString("speaker_number"), rsParticipant.getString("main_speaker"),
+			   "main_participant");
+			mainParticipant.setParentId(participant.getId());
+			graph.addAnnotation(mainParticipant);
+		     }
+		  } // next participant
+		  rsParticipant.close();
+		  sqlParticipant.close();
+		  
+		  continue;
+	       }
+	       else if (layerId.equals("main_participant"))
+	       { // loaded with "who"
+		  continue;
+	       }
+	       else if (layerId.equals("episode"))
+	       {
+		  Layer episodeLayer = getLayer(layerId);
+		  graph.addLayer(episodeLayer);
+		  PreparedStatement sqlEpisode = getConnection().prepareStatement(
+		     "SELECT t.family_id, e.name"
+		     +" FROM transcript t"
+		     +" INNER JOIN transcript_family e ON e.family_id = t.family_id"
+		     +" WHERE t.ag_id = ?");
+		  sqlEpisode.setInt(1, iAgId);
+		  ResultSet rsEpisode = sqlEpisode.executeQuery();
+		  if (rsEpisode.next())
+		  {
+		     // add graph-tag annotation
+		     Annotation episode = new Annotation(
+			"m_"+episodeLayer.get("@layer_id")+"_"+rsEpisode.getString("family_id"), rsEpisode.getString("name"),
+			episodeLayer.getId());
+		     episode.setParentId(graph.getId());
+		     graph.addAnnotation(episode);		     
+		  }
+		  rsEpisode.close();
+		  sqlEpisode.close();
+		  continue;
+	       }
+	       else if (layerId.equals("corpus"))
+	       {
+		  Layer corpusLayer = getLayer(layerId);
+		  graph.addLayer(corpusLayer);
+		  PreparedStatement sqlCorpus = getConnection().prepareStatement(
+		     "SELECT t.corpus_name, COALESCE(c.corpus_id, t.corpus_name) AS corpus_id"
+		     +" FROM transcript t"
+		     +" LEFT OUTER JOIN corpus c ON c.corpus_name = t.corpus_name"
+		     +" WHERE t.ag_id = ?");
+		  sqlCorpus.setInt(1, iAgId);
+		  ResultSet rsCorpus = sqlCorpus.executeQuery();
+		  if (rsCorpus.next())
+		  {
+		     // add graph-tag annotation
+		     Annotation corpus = new Annotation(
+			"m_"+corpusLayer.get("@layer_id")+"_"+rsCorpus.getString("corpus_id"), rsCorpus.getString("corpus_name"),
+			corpusLayer.getId());
+		     corpus.setParentId(graph.getId());
+		     graph.addAnnotation(corpus);
+		     
+		  }
+		  rsCorpus.close();
+		  sqlCorpus.close();
+		  continue;
+	       }
+	       
 	       Layer layer = getLayer(layerId);
 	       graph.addLayer(layer);
 	       int iLayerId = ((Integer)layer.get("@layer_id")).intValue();
@@ -576,7 +495,7 @@ public class SqlGraphStore
 		  if (iLayerId == SqlConstants.LAYER_TURN 
 		      || iLayerId == SqlConstants.LAYER_UTTERANCE) // turn or utterance
 		  { // convert speaker_number label into participant name
-		     turnParentId = "p_-1_"+rsAnnotation.getString("label");
+		     turnParentId = "m_-2_"+rsAnnotation.getString("label");
 		     Annotation participant = graph.getAnnotation(turnParentId);
 		     if (participant != null)
 		     {
@@ -682,12 +601,22 @@ public class SqlGraphStore
 	 {
 	    Anchor firstAnchor = anchors.first();
 	    Anchor lastAnchor = anchors.last();
-	    for (Annotation a : graph.getAnnotations("participant"))
+	    for (Annotation a : graph.getAnnotations("who"))
 	    {
 	       a.setStartId(firstAnchor.getId());
 	       a.setEndId(lastAnchor.getId());
 	    }
 	    for (Annotation a : graph.getAnnotations("main_participant"))
+	    {
+	       a.setStartId(firstAnchor.getId());
+	       a.setEndId(lastAnchor.getId());
+	    }
+	    for (Annotation a : graph.getAnnotations("corpus"))
+	    {
+	       a.setStartId(firstAnchor.getId());
+	       a.setEndId(lastAnchor.getId());
+	    }
+	    for (Annotation a : graph.getAnnotations("episode"))
 	    {
 	       a.setStartId(firstAnchor.getId());
 	       a.setEndId(lastAnchor.getId());
@@ -800,7 +729,7 @@ public class SqlGraphStore
 	    } // Anchor change
 	    else if (change.getObject() instanceof Annotation)
 	    {
-	       if (!change.getObject().getId().startsWith("p_")) // ignore participant changes for now
+	       if (!change.getObject().getId().startsWith("m_")) // ignore participant changes for now
 	       {
 		  try
 		  {
@@ -888,51 +817,59 @@ public class SqlGraphStore
 
 	 PreparedStatement sqlInsertFreeformAnnotation = getConnection().prepareStatement(
 	    "INSERT INTO annotation_layer_?"
-	    + " (ag_id, label, label_status, start_anchor_id, end_anchor_id)"
-	    + " VALUES (?, ?, ?, ?, ?)");
+	    + " (ag_id, label, label_status, start_anchor_id, end_anchor_id,"
+	    + " parent_id, ordinal)"
+	    + " VALUES (?, ?, ?, ?, ?, ?, ?)");
 	 sqlInsertFreeformAnnotation.setInt(2, iAgId);
 	 PreparedStatement sqlInsertMetaAnnotation = getConnection().prepareStatement(
 	    "INSERT INTO annotation_layer_?"
 	    + " (ag_id, label, label_status, start_anchor_id, end_anchor_id,"
+	    + " parent_id, ordinal,"
 	    + " turn_annotation_id)"
-	    + " VALUES (?, ?, ?, ?, ?, ?)");
+	    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 	 sqlInsertMetaAnnotation.setInt(2, iAgId);
 	 PreparedStatement sqlInsertWordAnnotation = getConnection().prepareStatement(
 	    "INSERT INTO annotation_layer_?"
 	    + " (ag_id, label, label_status, start_anchor_id, end_anchor_id,"
+	    + " parent_id, ordinal,"
 	    + " turn_annotation_id,"
 	    + " ordinal_in_turn, word_annotation_id)"
-	    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+	    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 	 sqlInsertWordAnnotation.setInt(2, iAgId);
 	 PreparedStatement sqlInsertSegmentAnnotation = getConnection().prepareStatement(
 	    "INSERT INTO annotation_layer_?"
 	    + " (ag_id, label, label_status, start_anchor_id, end_anchor_id,"
+	    + " parent_id, ordinal,"
 	    + " turn_annotation_id,"
 	    + " ordinal_in_turn, word_annotation_id,"
 	    + " ordinal_in_word, segment_annotation_id)"
-	    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ? ,?)");
+	    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 	 sqlInsertSegmentAnnotation.setInt(2, iAgId);
 	 PreparedStatement sqlUpdateFreeformAnnotation = getConnection().prepareStatement(
 	    "UPDATE annotation_layer_?"
-	    + " SET label = ?, label_status = ?, start_anchor_id = ?, end_anchor_id = ?"
+	    + " SET label = ?, label_status = ?, start_anchor_id = ?, end_anchor_id = ?,"
+	    + " parent_id = ?, ordinal = ?"
 	    + " WHERE annotation_id = ?");
 	 PreparedStatement sqlUpdateMetaAnnotation = getConnection().prepareStatement(
 	    "UPDATE annotation_layer_?"
 	    + " SET label = ?, label_status = ?, start_anchor_id = ?, end_anchor_id = ?,"
-	    + " turn_annotation_id = ?"
+	    + " turn_annotation_id = ?,"
+	    + " parent_id = ?, ordinal = ?"
 	    + " WHERE annotation_id = ?");
 	 PreparedStatement sqlUpdateWordAnnotation = getConnection().prepareStatement(
 	    "UPDATE annotation_layer_?"
 	    + " SET label = ?, label_status = ?, start_anchor_id = ?, end_anchor_id = ?,"
 	    + " turn_annotation_id = ?,"
-	    + " ordinal_in_turn = ?, word_annotation_id = ?"
+	    + " ordinal_in_turn = ?, word_annotation_id = ?,"
+	    + " parent_id = ?, ordinal = ?"
 	    + " WHERE annotation_id = ?");
 	 PreparedStatement sqlUpdateSegmentAnnotation = getConnection().prepareStatement(
 	    "UPDATE annotation_layer_?"
 	    + " SET label = ?, label_status = ?, start_anchor_id = ?,end_anchor_id = ?,"
 	    + " turn_annotation_id = ?,"
 	    + " ordinal_in_turn = ?, word_annotation_id = ?,"
-	    + " ordinal_in_word = ?, segment_annotation_id = ?" 
+	    + " ordinal_in_word = ?, segment_annotation_id = ?,"
+	    + " parent_id = ?, ordinal = ?" 
 	    + " WHERE annotation_id = ?");
 	 PreparedStatement sqlSelectWordFields = getConnection().prepareStatement(
 	    "SELECT turn_annotation_id, ordinal_in_turn"
@@ -1229,7 +1166,7 @@ public class SqlGraphStore
       PreparedStatement sqlDeleteAnnotation,
       HashMap<String,String> participantNameToNumber) throws SQLException, ParseException, PermissionException, StoreException
    {
-      if (annotation.getId().startsWith("p_")) return; // ignore participant changes for now
+      if (annotation.getId().startsWith("m_")) return; // ignore participant changes for now
 
       if (!annotation.containsKey("confidence")
 	  || (!(annotation.get("confidence") instanceof Integer)))
@@ -1297,13 +1234,32 @@ public class SqlGraphStore
 	       System.out.println("Error parsing end anchor for "+annotation.getId()+": " + annotation.getEndId());
 	       throw exception;
 	    }
+	    if (annotation.getParentId() == null)
+	    {
+	       sql.setNull(7, java.sql.Types.INTEGER);
+	    }
+	    else
+	    {
+	       try
+	       {
+		  Object[] o = fmtAnnotationId.parse(annotation.getParentId());
+		  sql.setLong(7, ((Long)o[2]).longValue());
+	       }
+	       catch(ParseException exception)
+	       {
+		  System.out.println("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId());
+		  throw exception;
+	       }
+	    }
+	    sql.setInt(8, annotation.getOrdinal());
+
 	    if (sql != sqlInsertFreeformAnnotation)
 	    { // meta, word, or segment annotation
 	       // must set turn_annotation_id too
 	       if (layerId.intValue() == SqlConstants.LAYER_TURN)
 	       {
 		  // turn_annotation_id = annotation_id
-		  sql.setNull(7, java.sql.Types.INTEGER); // turn_annotation_id - set it later...
+		  sql.setNull(9, java.sql.Types.INTEGER); // turn_annotation_id - set it later...
 	       }
 	       else if (sql == sqlInsertMetaAnnotation)
 	       {
@@ -1311,7 +1267,7 @@ public class SqlGraphStore
 		  try
 		  {
 		     Object[] o = fmtAnnotationId.parse(annotation.getParentId());
-		     sql.setLong(7, ((Long)o[2]).longValue()); // turn_annotation_id
+		     sql.setLong(9, ((Long)o[2]).longValue()); // turn_annotation_id
 		  }
 		  catch(ParseException exception)
 		  {
@@ -1326,15 +1282,15 @@ public class SqlGraphStore
 		     try
 		     {
 			Object[] o = fmtAnnotationId.parse(annotation.getParentId());
-			sql.setLong(7, ((Long)o[2]).longValue()); // turn_annotation_id
+			sql.setLong(9, ((Long)o[2]).longValue()); // turn_annotation_id
 		     }
 		     catch(ParseException exception)
 		     {
 			System.out.println("Error parsing turn id for "+annotation.getId()+": " + annotation.getParentId());
 			throw exception;
 		     }
-		     sql.setInt(8, annotation.getOrdinal()); // ordinal_in_turn
-		     sql.setNull(9, java.sql.Types.INTEGER); // word_annotation_id - set it later
+		     sql.setInt(10, annotation.getOrdinal()); // ordinal_in_turn
+		     sql.setNull(11, java.sql.Types.INTEGER); // word_annotation_id - set it later
 		  }
 		  else
 		  { // other word or segment annotation
@@ -1347,10 +1303,10 @@ public class SqlGraphStore
 			   sqlSelectWordFields.setLong(1, wordAnnotationId); // word_annotation_id
 			   ResultSet rs = sqlSelectWordFields.executeQuery();
 			   rs.next();
-			   sql.setLong(7, rs.getLong("turn_annotation_id"));
-			   sql.setInt(8, rs.getInt("ordinal_in_turn"));
+			   sql.setLong(9, rs.getLong("turn_annotation_id"));
+			   sql.setInt(10, rs.getInt("ordinal_in_turn"));
 			   rs.close();
-			   sql.setLong(9, wordAnnotationId); // word_annotation_id
+			   sql.setLong(11, wordAnnotationId); // word_annotation_id
 			}
 			catch(ParseException exception)
 			{
@@ -1369,12 +1325,12 @@ public class SqlGraphStore
 			      sqlSelectWordFields.setLong(1, wordAnnotationId); // word_annotation_id
 			      ResultSet rs = sqlSelectWordFields.executeQuery();
 			      rs.next();
-			      sql.setLong(7, rs.getLong("turn_annotation_id"));
-			      sql.setInt(8, rs.getInt("ordinal_in_turn"));
+			      sql.setLong(9, rs.getLong("turn_annotation_id"));
+			      sql.setInt(10, rs.getInt("ordinal_in_turn"));
 			      rs.close();
-			      sql.setLong(9, wordAnnotationId); // word_annotation_id
-			      sql.setInt(10, annotation.getOrdinal()); // ordinal_in_word
-			      sql.setNull(11, java.sql.Types.INTEGER); // segment_annotation_id - set it later
+			      sql.setLong(11, wordAnnotationId); // word_annotation_id
+			      sql.setInt(12, annotation.getOrdinal()); // ordinal_in_word
+			      sql.setNull(13, java.sql.Types.INTEGER); // segment_annotation_id - set it later
 			   }
 			   catch(ParseException exception)
 			   {
@@ -1391,10 +1347,10 @@ public class SqlGraphStore
 			      sqlSelectWordFields.setLong(1, wordAnnotationId); // word_annotation_id
 			      ResultSet rs = sqlSelectWordFields.executeQuery();
 			      rs.next();
-			      sql.setLong(7, rs.getLong("turn_annotation_id"));
-			      sql.setInt(8, rs.getInt("ordinal_in_turn"));
+			      sql.setLong(9, rs.getLong("turn_annotation_id"));
+			      sql.setInt(10, rs.getInt("ordinal_in_turn"));
 			      rs.close();
-			      sql.setLong(9, wordAnnotationId); // word_annotation_id
+			      sql.setLong(11, wordAnnotationId); // word_annotation_id
 			      
 			   }
 			   catch(ParseException exception)
@@ -1409,8 +1365,8 @@ public class SqlGraphStore
 			      sqlSelectSegmentFields.setLong(1, segmentAnnotationId); // segment_annotation_id
 			      ResultSet rs = sqlSelectSegmentFields.executeQuery();
 			      rs.next();
-			      sql.setInt(10, rs.getInt("ordinal_in_word")); // ordinal_in_word
-			      sql.setLong(11, segmentAnnotationId); // segment_annotation_id
+			      sql.setInt(12, rs.getInt("ordinal_in_word")); // ordinal_in_word
+			      sql.setLong(13, segmentAnnotationId); // segment_annotation_id
 			      rs.close();
 			   }
 			   catch(ParseException exception)
@@ -1554,7 +1510,25 @@ public class SqlGraphStore
 	    }
 	    if (sql == sqlUpdateFreeformAnnotation)
 	    {
-	       sql.setLong(6, annotationId);
+	       if (annotation.getParentId() == null)
+	       {
+		  sql.setNull(6, java.sql.Types.INTEGER);
+	       }
+	       else
+	       {
+		  try
+		  {
+		     Object[] o = fmtAnnotationId.parse(annotation.getParentId());
+		     sql.setLong(6, ((Long)o[2]).longValue());
+		  }
+		  catch(ParseException exception)
+		  {
+		     System.out.println("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId());
+		     throw exception;
+		  }
+	       }
+	       sql.setInt(7, annotation.getOrdinal());
+	       sql.setLong(8, annotationId);
 	    }
 	    else
 	    { // meta, word, or segment annotation
@@ -1563,8 +1537,26 @@ public class SqlGraphStore
 	       {
 		  // turn_annotation_id = annotation_id
 		  sql.setLong(6, annotationId); // turn_annotation_id
+		  if (annotation.getParentId() == null)
+		  {
+		     sql.setNull(7, java.sql.Types.INTEGER);
+		  }
+		  else
+		  {
+		     try
+		     {
+			Object[] o = fmtAnnotationId.parse(annotation.getParentId());
+			sql.setLong(7, ((Long)o[2]).longValue());
+		     }
+		     catch(ParseException exception)
+		     {
+			System.out.println("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId());
+			throw exception;
+		     }
+		  }
+		  sql.setInt(8, annotation.getOrdinal());
 		  // annotation_id
-		  sql.setLong(7, annotationId);
+		  sql.setLong(9, annotationId);
 	       }
 	       else if (sql == sqlUpdateMetaAnnotation)
 	       {
@@ -1579,8 +1571,26 @@ public class SqlGraphStore
 		     System.out.println("Error parsing turn ID for "+annotation.getId()+": " + annotation.getParentId());
 		     throw exception;
 		  }
+		  if (annotation.getParentId() == null)
+		  {
+		     sql.setNull(7, java.sql.Types.INTEGER);
+		  }
+		  else
+		  {
+		     try
+		     {
+			Object[] o = fmtAnnotationId.parse(annotation.getParentId());
+			sql.setLong(7, ((Long)o[2]).longValue());
+		     }
+		     catch(ParseException exception)
+		     {
+			System.out.println("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId());
+			throw exception;
+		     }
+		  }
+		  sql.setInt(8, annotation.getOrdinal());
 		  // annotation_id
-		  sql.setLong(7, annotationId);
+		  sql.setLong(9, annotationId);
 	       }
 	       else
 	       { // word or segment annotation
@@ -1598,7 +1608,25 @@ public class SqlGraphStore
 		     }
 		     sql.setInt(7, annotation.getOrdinal()); // ordinal_in_turn
 		     sql.setLong(8, annotationId); // word_annotation_id		     
-		     sql.setLong(9, annotationId); // annotation_id		     
+		     if (annotation.getParentId() == null)
+		     {
+			sql.setNull(9, java.sql.Types.INTEGER);
+		     }
+		     else
+		     {
+			try
+			{
+			   Object[] o = fmtAnnotationId.parse(annotation.getParentId());
+			   sql.setLong(9, ((Long)o[2]).longValue());
+			}
+			catch(ParseException exception)
+			{
+			   System.out.println("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId());
+			   throw exception;
+			}
+		     }
+		     sql.setInt(10, annotation.getOrdinal());
+		     sql.setLong(11, annotationId); // annotation_id		     
 		  }
 		  else
 		  { // other word or segment annotation
@@ -1614,7 +1642,25 @@ public class SqlGraphStore
 			   sql.setLong(6, rs.getLong("turn_annotation_id"));
 			   sql.setInt(7, rs.getInt("ordinal_in_turn"));
 			   sql.setLong(8, wordAnnotationId); // word_annotation_id
-			   sql.setLong(9, annotationId); // annotation_id
+			   if (annotation.getParentId() == null)
+			   {
+			      sql.setNull(9, java.sql.Types.INTEGER);
+			   }
+			   else
+			   {
+			      try
+			      {
+				 o = fmtAnnotationId.parse(annotation.getParentId());
+				 sql.setLong(9, ((Long)o[2]).longValue());
+			      }
+			      catch(ParseException exception)
+			      {
+				 System.out.println("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId());
+				 throw exception;
+			      }
+			   }
+			   sql.setInt(10, annotation.getOrdinal());
+			   sql.setLong(11, annotationId); // annotation_id
 			   rs.close();
 			}
 			catch(ParseException exception)
@@ -1640,7 +1686,25 @@ public class SqlGraphStore
 			      sql.setLong(8, wordAnnotationId); // word_annotation_id
 			      sql.setInt(9, annotation.getOrdinal()); // ordinal_in_word
 			      sql.setLong(10, annotationId); // segment_annotation_id
-			      sql.setLong(11, annotationId); // annotation_id
+			      if (annotation.getParentId() == null)
+			      {
+				 sql.setNull(11, java.sql.Types.INTEGER);
+			      }
+			      else
+			      {
+				 try
+				 {
+				    o = fmtAnnotationId.parse(annotation.getParentId());
+				    sql.setLong(11, ((Long)o[2]).longValue());
+				 }
+				 catch(ParseException exception)
+				 {
+				    System.out.println("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId());
+				    throw exception;
+				 }
+			      }
+			      sql.setInt(12, annotation.getOrdinal());
+			      sql.setLong(13, annotationId); // annotation_id
 			   }
 			   catch(ParseException exception)
 			   {
@@ -1683,7 +1747,25 @@ public class SqlGraphStore
 			      System.out.println("Error parsing segment ID for "+annotation.getId()+": " + annotation.getParentId());
 			      throw exception;
 			   }
-			   sql.setLong(11, annotationId); // annotation_id
+			   if (annotation.getParentId() == null)
+			   {
+			      sql.setNull(11, java.sql.Types.INTEGER);
+			   }
+			   else
+			   {
+			      try
+			      {
+				 Object[] o = fmtAnnotationId.parse(annotation.getParentId());
+				 sql.setLong(11, ((Long)o[2]).longValue());
+			      }
+			      catch(ParseException exception)
+			      {
+				 System.out.println("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId());
+				 throw exception;
+			      }
+			   }
+			   sql.setInt(12, annotation.getOrdinal());
+			   sql.setLong(13, annotationId); // annotation_id
 			} // other segment annotation
 		     } // segment annotation
 		  } // other word or segment annotation
