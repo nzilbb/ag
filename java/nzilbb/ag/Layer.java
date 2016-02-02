@@ -23,6 +23,7 @@ package nzilbb.ag;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.Vector;
 import java.util.Set;
 
@@ -307,6 +308,35 @@ public class Layer
       } // next ancestor
       return ancestors;
    } // end of getAncestors()
+
+   /**
+    * Determines the first ancestor layer this layer has in common with the given layer. This may return the graph layer itself, if there are no earlier common ancestors. "Ancestors" is inclusive in the sense that if either annotation is an ancestor of the other, it will be returned.
+    * @param other The other layer.
+    * @return The first ancestor layer this layer has in common with the given layer, or null if the hierarchy is incomplete and no common ancestor was found.
+    */
+   public Layer getFirstCommonAncestor(Layer other)
+   {
+      HashSet<Layer> ourAncestors = new HashSet<Layer>();
+      Layer ancestor = this; // include ourselves in the list.
+      do
+      {
+	 ourAncestors.add(ancestor);
+	 ancestor = ancestor.getParent();
+      }
+      while (ancestor != null);
+      
+      ancestor = other; // include other annotation in the list.
+      do
+      {
+	 if (ourAncestors.contains(ancestor))
+	 {
+	    return ancestor;
+	 }
+	 ancestor = ancestor.getParent();
+      }
+      while (ancestor != null);
+      return null;
+   } // end of getFirstCommonAncestor()
 
    
    // java.lang.Object overrides:

@@ -485,6 +485,21 @@ public class Graph
 
       // add to anchors collection
       getAnchors().put(anchor.getId(), anchor);
+
+      // look for annotations referencing that anchor
+      String id = anchor.getId();
+      for (Annotation annotation : getAnnotationsById().values())
+      {
+	 if (annotation.getStartId().equals(id))
+	 {
+	    annotation.setStart(anchor);
+	 }
+	 if (annotation.getEndId().equals(id))
+	 {
+	    annotation.setEnd(anchor);
+	 }
+      }
+
    } // end of addAnnotation()
 
    /**

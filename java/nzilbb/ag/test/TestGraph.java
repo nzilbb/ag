@@ -932,6 +932,10 @@ public class TestGraph
       assertEquals("ancestors - grandparent", turn1, order.next());
       assertEquals("ancestors - graph", g, order.next());
       assertFalse("ancestors", order.hasNext());
+      assertEquals("ancestors - parent", the, th.getAncestor("word"));
+      assertEquals("ancestors - grandparent", turn1, th.getAncestor("turn"));
+      assertEquals("ancestors - graph", g, th.getAncestor("graph"));
+      assertNull("ancestors - none", th.getAncestor("pos"));
 
       // getFirstCommonAncestor
       assertEquals("getFirstCommonAncestor - common parent", turn1, the.getFirstCommonAncestor(quick));
@@ -1419,6 +1423,145 @@ public class TestGraph
       assertFalse("unlinked - null anchors", g.getAnchor("start2").startOf("test").contains(test));
       assertFalse("unlinked - null anchors", g.getAnchor("end2").endOf("test").contains(test));
 
+   }
+
+   @Test public void myAndList() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");
+
+      g.addLayer(new Layer("topic", "Topics", 2, true, false, false));
+      g.addLayer(new Layer("corpus", "Corpus", 0, false, false, true));
+      g.addLayer(new Layer("who", "Participants", 0, true, true, true));
+      g.addLayer(new Layer("turn", "Speaker turns", 2, true, false, false, "who", true));
+      g.addLayer(new Layer("utterance", "Utterances", 2, true, false, true, "turn", true));
+      g.addLayer(new Layer("word", "Words", 2, true, false, false, "turn",true));
+      g.addLayer(new Layer("phone", "Phones", 2, true, false, true, "word",  true));
+      g.addLayer(new Layer("pos", "Part of speech", 0, false, false, true, "word", true));
+      g.addLayer(new Layer("phrase", "Phrase structure", 0, true, true, false, "turn", true));
+
+      g.addAnchor(new Anchor("turnStart", 0.0));
+      g.addAnchor(new Anchor("a1", 1.0));
+      g.addAnchor(new Anchor("a1.5", 1.5));
+       // include null offset anchor, it should still be added to the fragment
+      g.addAnchor(new Anchor("a2", null));
+      g.addAnchor(new Anchor("a2.2", 2.2));
+      g.addAnchor(new Anchor("a2.25", 2.25));
+      g.addAnchor(new Anchor("a2.5", 2.5));
+      g.addAnchor(new Anchor("a2.75", 2.75));
+      g.addAnchor(new Anchor("a3", 3.0));
+      g.addAnchor(new Anchor("a3.2", 3.2));
+      g.addAnchor(new Anchor("a4", 4.0));
+      g.addAnchor(new Anchor("a5", 5.0));
+      g.addAnchor(new Anchor("turnEnd", 6.0));
+
+      Annotation corpus = new Annotation("corpus1", "CC", "corpus", "turnStart", "turnEnd", "my graph");
+      Annotation who1 = new Annotation("who1", "john smith", "who", "turnStart", "turnEnd", "my graph");
+      Annotation who2 = new Annotation("who2", "jane doe", "who", "turnStart", "turnEnd", "my graph");
+
+      Annotation turn1 = new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "who1");
+      Annotation turn2 = new Annotation("turn2", "jane doe", "turn", "turnStart", "turnEnd", "who2");
+
+      Annotation utterance1 = new Annotation("utterance1", "john smith", "utterance", "turnStart", "a3", "turn1");
+      Annotation utterance2 = new Annotation("utterance2", "john smith", "utterance", "a3", "turnEnd", "turn1");
+
+      Annotation utterance3 = new Annotation("utterance3", "jane doe", "utterance", "startStart", "turnEnd", "turn2");
+
+      Annotation the = new Annotation("word1", "the", "word", "a1", "a2", "turn1");
+      Annotation DT = new Annotation("pos1", "DT", "pos", "a1", "a2", "word1");
+      Annotation th = new Annotation("phone1", "D", "phone", "a1", "a1.5", "word1");
+      Annotation e = new Annotation("phone2", "@", "phone", "a1.5", "a2", "word1");
+      Annotation quick = new Annotation("word2", "quick", "word", "a2", "a3", "turn1");
+      Annotation A = new Annotation("pos2", "A", "pos", "a2", "a3", "word2");
+      Annotation k = new Annotation("phone3", "k", "phone", "a2", "a2.25", "word2");
+      Annotation w = new Annotation("phone4", "w", "phone", "a2.25", "a2.5", "word2");
+      Annotation I = new Annotation("phone5", "I", "phone", "a2.5", "a2.75", "word2");
+      Annotation ck = new Annotation("phone6", "k", "phone", "a2.75", "a3", "word2");
+      Annotation brown = new Annotation("word3", "brown", "word", "a3", "a4", "turn1");
+      Annotation AP = new Annotation("phrase1", "AP", "phrase", "a2", "a4", "turn1");
+      Annotation fox = new Annotation("word4", "fox", "word", "a4", "a5", "turn1");
+      Annotation N = new Annotation("pos3", "N", "pos", "a4", "a5", "word4");
+      Annotation NP = new Annotation("phrase2", "NP", "phrase", "a1", "a5", "turn1");
+      // other speaker
+      Annotation yes = new Annotation("word5", "yes", "word", "a2.2", "a3.2", "turn2");
+
+      g.addAnnotation(corpus);
+      g.addAnnotation(who1);
+      g.addAnnotation(turn1);
+      g.addAnnotation(utterance1);
+      g.addAnnotation(utterance2);
+
+      g.addAnnotation(the);
+      g.addAnnotation(quick);
+      g.addAnnotation(brown);
+      g.addAnnotation(fox);
+
+      g.addAnnotation(th);
+      g.addAnnotation(e);
+      g.addAnnotation(k);
+      g.addAnnotation(w);
+      g.addAnnotation(I);
+      g.addAnnotation(ck);
+
+      g.addAnnotation(DT);
+      g.addAnnotation(A);
+      g.addAnnotation(N);
+
+      g.addAnnotation(AP);
+      g.addAnnotation(NP);
+
+      g.addAnnotation(who2);
+      g.addAnnotation(turn2);
+      g.addAnnotation(utterance3);
+      g.addAnnotation(yes);
+
+      assertEquals("my: parent", turn1, the.my("turn"));
+      assertEquals("my: ancestor", who1, the.my("who"));
+      assertEquals("my: graph", g, the.my("graph"));
+      assertEquals("my: child", th, the.my("phone"));
+      assertNull("my: none", fox.my("phone"));
+
+      assertEquals("my: parent - other speaker", turn2, yes.my("turn"));
+      assertEquals("my: ancestor - other speaker", who2, yes.my("who"));
+      assertEquals("my: graph - other speaker", g, yes.my("graph"));
+      assertEquals("my: child - other speaker", yes, turn2.my("word"));
+      assertNull("my: none - other speaker", yes.my("phone"));
+
+      assertEquals("my: ancestor child (peer layers)", utterance1, the.my("utterance"));
+      assertEquals("my: ancestor child (non-peers)", utterance1, th.my("utterance"));
+      assertEquals("my: ancestor child (child of graph)", corpus, the.my("corpus"));
+
+      Annotation[] list = the.list("turn");
+      assertEquals("list: parent", turn1, list[0]);
+      assertEquals("list: parent", 1, list.length);
+      list = the.list("who");
+      assertEquals("list: ancestor", who1, list[0]);
+      assertEquals("list: ancestor", 1, list.length);
+      list = the.list("graph");
+      assertEquals("list: graph", g, list[0]);
+      assertEquals("list: graph", 1, list.length);
+      assertEquals("list: child", the.annotations("phone"), the.list("phone"));
+      assertEquals("list: none", 0, fox.list("phone").length);
+
+      list = the.list("utterance");
+      assertEquals("my: ancestor child (peer layers)", utterance1, list[0]);
+      assertEquals("my: ancestor child (peer layers)", 1, list.length);
+      list = th.list("utterance");
+      assertEquals("my: ancestor child (non-peers)", utterance1, list[0]);
+      assertEquals("my: ancestor child (non-peers)", 1, list.length);
+      
+      list = yes.list("turn");
+      assertEquals("list: parent - other speaker", turn2, list[0]);
+      assertEquals("list: parent - other speaker", 1, list.length);
+      list = yes.list("who");
+      assertEquals("list: ancestor - other speaker", who2, list[0]);
+      assertEquals("list: ancestor - other speaker", 1, list.length);
+      list = yes.list("graph");
+      assertEquals("list: graph - other speaker", g, list[0]);
+      assertEquals("list: graph - other speaker", 1, list.length);
+      assertEquals("list: child - other speaker", turn2.annotations("word"), turn2.list("word"));
+      assertEquals("list: none - other speaker", 0, yes.list("phone").length);
    }
 
    public static void main(String args[]) 

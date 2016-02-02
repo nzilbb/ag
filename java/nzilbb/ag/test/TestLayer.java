@@ -240,6 +240,25 @@ public class TestLayer
       assertFalse("ancestor not self", ancestors.contains(g.getLayer("phone")));
       assertFalse("ancestor not grandparet peer", ancestors.contains(g.getLayer("utterance")));
       assertFalse("ancestor not other top-level layer", ancestors.contains(g.getLayer("topic")));
+
+      assertEquals("FirstCommonAncestor distal", g.getLayer("turn"), 
+		   g.getLayer("phone").getFirstCommonAncestor(g.getLayer("utterance")));
+      assertEquals("FirstCommonAncestor distal", g.getLayer("turn"), 
+		   g.getLayer("utterance").getFirstCommonAncestor(g.getLayer("phone")));
+      assertEquals("FirstCommonAncestor peer", g.getLayer("turn"), 
+		   g.getLayer("word").getFirstCommonAncestor(g.getLayer("utterance")));
+      assertEquals("FirstCommonAncestor peer", g.getLayer("turn"), 
+		   g.getLayer("utterance").getFirstCommonAncestor(g.getLayer("word")));
+      assertEquals("FirstCommonAncestor ancestor", g.getLayer("turn"), 
+		   g.getLayer("word").getFirstCommonAncestor(g.getLayer("turn")));
+      assertEquals("FirstCommonAncestor descendant", g.getLayer("turn"), 
+		   g.getLayer("turn").getFirstCommonAncestor(g.getLayer("word")));
+      assertEquals("FirstCommonAncestor unrelated", g.getLayer(), 
+		   g.getLayer("word").getFirstCommonAncestor(g.getLayer("topic")));
+      assertEquals("FirstCommonAncestor unrelated", g.getLayer(), 
+		   g.getLayer("topic").getFirstCommonAncestor(g.getLayer("word")));
+      assertEquals("FirstCommonAncestor reflexive", g.getLayer("word"), 
+		   g.getLayer("word").getFirstCommonAncestor(g.getLayer("word")));
    }
 
    @Test public void cloning() 

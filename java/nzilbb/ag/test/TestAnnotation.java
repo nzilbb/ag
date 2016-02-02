@@ -300,7 +300,11 @@ public class TestAnnotation
 
       Annotation inside = new Annotation("inside", "inside", "word", "afterStart", "beforeEnd", "parent", 99);
       Anchor afterStart = new Anchor("afterStart", 1.25);
+      Anchor betweenNoOffset = new Anchor("betweenNoOffset", null);
       Anchor beforeEnd = new Anchor("beforeEnd", 1.75);
+
+      Annotation insideUnanchoredEnd = new Annotation("insideUnanchoredEnd", "insideUnanchoredEnd", "word", "afterStart", "betweenNoOffset", "parent", 99);
+      Annotation insideUnanchoredStart = new Annotation("insideUnanchoredStart", "insideUnanchoredStart", "word", "betweenNoOffset", "beforeEnd", "parent", 99);
 
       Annotation outside = new Annotation("outside", "outside", "word", "before", "after", "parent", 99);
 
@@ -332,6 +336,8 @@ public class TestAnnotation
       graph.addAnnotation(previous);
       graph.addAnnotation(next);
       graph.addAnnotation(inside);
+      graph.addAnnotation(insideUnanchoredEnd);
+      graph.addAnnotation(insideUnanchoredStart);
       graph.addAnnotation(outside);
       graph.addAnnotation(startEdge);
       graph.addAnnotation(startEdgeInstant);
@@ -344,9 +350,12 @@ public class TestAnnotation
       
       assertFalse("includes - inside but unknown anchors", test.includes(inside));
       graph.addAnchor(afterStart);
+      graph.addAnchor(betweenNoOffset);
       graph.addAnchor(beforeEnd);
       assertFalse("tags - inside", test.tags(inside));
       assertTrue("includes - inside", test.includes(inside));
+      assertTrue("includes - insideUnanchoredEnd", test.includes(insideUnanchoredEnd));
+      assertTrue("includes - insideUnanchoredStart", test.includes(insideUnanchoredStart));
       assertFalse("tags - outside", test.tags(outside));
       assertFalse("includes - outside", test.includes(outside));
       assertFalse("tags - previous", test.tags(previous));
