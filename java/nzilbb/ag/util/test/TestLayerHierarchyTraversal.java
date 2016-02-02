@@ -163,6 +163,34 @@ public class TestLayerHierarchyTraversal
       
    }
 
+   @Test public void partialGraph() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");
+
+      // turn's parent is "who", which is missing
+      g.addLayer(new Layer("turn", "Speaker turns", 2, true, false, false, "who", true));
+      g.addLayer(new Layer("word", "Words", 2, true, false, false, "turn", true));
+      g.addLayer(new Layer("phone", "Phones", 2, true, false, true, "word", true));
+
+      LayerHierarchyTraversal<StringBuffer> t = new LayerHierarchyTraversal<StringBuffer>(new StringBuffer(), g)
+	 {
+	    protected void pre(Layer layer)
+	    {
+	       result.append("<" + layer.getId() + ">");
+	    }
+	    protected void post(Layer layer)
+	    {
+	       result.append("</" + layer.getId() + ">");
+	    }
+	 };
+      
+      assertEquals("<turn><word><phone></phone></word></turn>", t.getResult().toString());
+      
+   }
+
+
    public static void main(String args[]) 
    {
       org.junit.runner.JUnitCore.main("nzilbb.ag.util.test.TestLayerHierarchyTraversal");

@@ -279,10 +279,19 @@ public class LayerHierarchyTraversal<R>
       
       // sort the top level layers with the comparator
       TreeSet<Layer> orderedTopLevelLayers = new TreeSet<Layer>(getPeerComparator());
+      // a top level layer is any layer with "graph" as a parent, 
+      // or any layer whose parent is not in the graph 
+      // (this ensures all layers are included, even for partial graphs)
       // for each top-level layer
-      for (Layer layer : graph.getLayer("graph").getChildren().values())
+      for (Layer layer : graph.getLayers().values())
       {
-	 orderedTopLevelLayers.add(layer);
+	 if (layer.getParentId() != null
+	     && (layer.getParentId().equals("graph")
+		 || !graph.getLayers().containsKey(layer.getParentId()))
+	     && !layer.getId().equals("graph"))
+	 {
+	    orderedTopLevelLayers.add(layer);
+	 }
       } // next top level layer
       // for each top level layer
       for (Layer layer : orderedTopLevelLayers)

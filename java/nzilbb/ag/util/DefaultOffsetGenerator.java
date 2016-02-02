@@ -235,7 +235,8 @@ public class DefaultOffsetGenerator
 	       {
 		  Layer parent = child.getParent();
 		  // if the parent is not a top-level layer
-		  if (parent.getParentId() != null 
+		  if (parent != null // may be incomplete graph
+		      && parent.getParentId() != null 
 		      && !parent.getParentId().equals("graph")
 		      // and children can have peers
 		      && child.getPeers()

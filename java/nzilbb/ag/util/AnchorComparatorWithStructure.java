@@ -182,6 +182,9 @@ public class AnchorComparatorWithStructure
 	 for (Annotation a2Annotation : a2Annotations)
 	 {
 	    Annotation thisCommonAncestor = a1Annotation.getFirstCommonAncestor(a2Annotation);
+	    // if the graph is complete, thisCommonAncestor cannot be null
+	    // but if it's a partial graph, with layers missing, it may be
+	    if (thisCommonAncestor == null) continue;
 
 	    // we potentially compare lots of annotations on different layers
 	    // we want the deepest common ancestor amongst all of them 
