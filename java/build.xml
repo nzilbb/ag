@@ -3,6 +3,7 @@
   <description>Java implemetation for NZILBB's Annotation Graphs</description>
   <!-- set global properties for this build -->
   <property name="src"   location="."/>
+  <property name="javadoc"   location="javadoc"/>
   <property name="build" location="build_${ant.project.name}"/>
   <property name="dist"  location="../bin"/>
   <property name="srcfiles" value="nzilbb/ag/**/*.java"/> 
@@ -56,7 +57,8 @@
 
   <target name="javadoc" depends="init,compile"
         description="document the source" >
-    <javadoc destdir="."
+    <mkdir dir="${javadoc}"/>
+    <javadoc destdir="${javadoc}"
 	     classpath="."
 	     Author="yes"
 	     >
@@ -67,7 +69,7 @@
   <target name="test" depends="dist" description="run nzilbb.ag annotation-graph unit tests">
     <javac srcdir="${src}" destdir="."
 	   includes="${srctests}"
-	   classpath=".;${junitjar}"
+	   classpath=".;${junitjar};${dist}/${ant.project.name}.jar"
 	   listfiles="yes"
 	   target="6"
 	   source="6"
@@ -96,6 +98,7 @@
   <target name="clean" description="clean up" >
     <!-- Delete the ${build} and ${dist} directory trees -->
     <delete dir="${build}"/>
+    <delete dir="${javadoc}"/>
     <delete>
       <fileset dir="." includes="**/*.class"/>
       <fileset dir="." includes="**/*~" defaultexcludes="no"/>
