@@ -197,6 +197,9 @@ public class TestGraph
       assertTrue(g.getAnnotations("word").contains(brown));
       assertTrue(g.getAnnotations("word").contains(fox));
       assertTrue(g.getAnnotations("turn").contains(turn1));
+      // graph 'contains' itself
+      assertTrue(g.getAnnotations("graph").contains(g));
+      assertEquals(1, g.getAnnotations("graph").size());
       
       // top level layer is "graph", which is the parent of "turn"
       assertTrue(g.containsKey("turn"));

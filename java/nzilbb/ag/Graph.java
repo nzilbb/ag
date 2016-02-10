@@ -744,6 +744,12 @@ public class Graph
     */
    public Vector<Annotation> getAnnotations(String layerId)
    {
+      if (layerId.equals("graph"))
+      { // special case
+	 Vector<Annotation> annotations = new Vector<Annotation>();
+	 annotations.add(this);
+	 return annotations;
+      }
       if (!getAnnotations().containsKey(layerId))
       {
 	 // add the child collection to children
