@@ -908,7 +908,8 @@ public class SqlGraphStore
 				    sqlInsertAnchor, sqlLastId, sqlUpdateAnchor, 
 				    sqlCheckAnchor, layerIds, sqlDeleteAnchor);
 	       } // Anchor change
-	       else if (change.getObject() instanceof Annotation)
+	       else if (change.getObject() instanceof Annotation
+			&& !(change.getObject() instanceof Graph))
 	       {
 		  saveAnnotationChanges(
 		     (Annotation)change.getObject(), extraUpdates, 
@@ -1240,15 +1241,22 @@ public class SqlGraphStore
 	    }
 	    else
 	    {
-	       try
-	       {
-		  Object[] o = fmtAnnotationId.parse(annotation.getParentId());
-		  sql.setLong(7, ((Long)o[2]).longValue());
+	       if (scope.equalsIgnoreCase(SqlConstants.SCOPE_FREEFORM))
+	       { // freeform layers have the graph as the parent
+		  sql.setLong(7, ((Integer)annotation.getGraph().get("@ag_id")).longValue());
 	       }
-	       catch(ParseException exception)
+	       else
 	       {
-		  System.out.println("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId());
-		  throw exception;
+		  try
+		  {
+		     Object[] o = fmtAnnotationId.parse(annotation.getParentId());
+		     sql.setLong(7, ((Long)o[2]).longValue());
+		  }
+		  catch(ParseException exception)
+		  {
+		     System.out.println("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId() + " on " + annotation.getLayerId());
+		     throw exception;
+		  }
 	       }
 	    }
 	    sql.setInt(8, annotation.getOrdinal());
