@@ -490,11 +490,11 @@ public class Graph
       String id = anchor.getId();
       for (Annotation annotation : getAnnotationsById().values())
       {
-	 if (annotation.getStartId().equals(id))
+	 if (annotation.getStartId() != null && annotation.getStartId().equals(id))
 	 {
 	    annotation.setStart(anchor);
 	 }
-	 if (annotation.getEndId().equals(id))
+	 if (annotation.getEndId() != null && annotation.getEndId().equals(id))
 	 {
 	    annotation.setEnd(anchor);
 	 }
