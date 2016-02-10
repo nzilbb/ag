@@ -236,6 +236,7 @@ public class TestValidator
 
       Validator v = new Validator();
       // v.setDebug(true);
+      v.setFullValidation(true);
       v.setDefaultOffsetThreshold(null);
       try
       {
@@ -615,6 +616,7 @@ public class TestValidator
       g.addAnnotation(new Annotation("phone6", "k", "phone", "a2.75", "a3a", "word2"));
 
       Validator v = new Validator();
+      v.setFullValidation(true);
       // v.setDebug(true);
       v.setDefaultOffsetThreshold(null);
       try
