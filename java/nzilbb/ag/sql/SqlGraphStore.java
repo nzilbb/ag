@@ -269,7 +269,7 @@ public class SqlGraphStore
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getCorpora() throws StoreException, PermissionException
+   public String[] getCorpusIds() throws StoreException, PermissionException
    {
       try
       {
@@ -284,6 +284,129 @@ public class SqlGraphStore
 	 rs.close();
 	 sql.close();
 	 return corpora.toArray(new String[0]);
+      }
+      catch(SQLException exception)
+      {
+	 throw new StoreException(exception);
+      }
+   }
+
+   /**
+    * Gets a list of participant IDs.
+    * @return A list of participant IDs.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public String[] getParticipantIds() throws StoreException, PermissionException
+   {
+      try
+      {
+	 PreparedStatement sql = getConnection().prepareStatement(
+	    "SELECT name FROM speaker WHERE COALESCE(name,'') <> ''  ORDER BY name");
+	 ResultSet rs = sql.executeQuery();
+	 Vector<String> participants = new Vector<String>();
+	 while (rs.next())
+	 {
+	    participants.add(rs.getString("name"));
+	 } // next layer
+	 rs.close();
+	 sql.close();
+	 return participants.toArray(new String[0]);
+      }
+      catch(SQLException exception)
+      {
+	 throw new StoreException(exception);
+      }
+   }
+
+
+   /**
+    * Gets a list of graph IDs.
+    * @return A list of graph IDs.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public String[] getGraphIds() throws StoreException, PermissionException
+   {
+      try
+      {
+	 PreparedStatement sql = getConnection().prepareStatement(
+	    "SELECT transcript_id FROM transcript ORDER BY transcript_id");
+	 ResultSet rs = sql.executeQuery();
+	 Vector<String> graphs = new Vector<String>();
+	 while (rs.next())
+	 {
+	    graphs.add(rs.getString("transcript_id"));
+	 } // next layer
+	 rs.close();
+	 sql.close();
+	 return graphs.toArray(new String[0]);
+      }
+      catch(SQLException exception)
+      {
+	 throw new StoreException(exception);
+      }
+   }
+
+   /**
+    * Gets a list of graph IDs in the given corpus.
+    * @param corpus A corpus ID.
+    * @return A list of graph IDs.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public String[] getGraphIdsInCorpus(String corpus) throws StoreException, PermissionException
+   {
+      try
+      {
+	 PreparedStatement sql = getConnection().prepareStatement(
+	    "SELECT transcript_id FROM transcript WHERE corpus_name = ? ORDER BY transcript_id");
+	 sql.setString(1, corpus);
+	 ResultSet rs = sql.executeQuery();
+	 Vector<String> graphs = new Vector<String>();
+	 while (rs.next())
+	 {
+	    graphs.add(rs.getString("transcript_id"));
+	 } // next layer
+	 rs.close();
+	 sql.close();
+	 return graphs.toArray(new String[0]);
+      }
+      catch(SQLException exception)
+      {
+	 throw new StoreException(exception);
+      }
+   }
+
+
+   /**
+    * Gets a list of IDs of graphs that include the given participant.
+    * @param participant A participant ID.
+    * @return A list of graph IDs.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public String[] getGraphIdsWithParticipant(String participant) throws StoreException, PermissionException
+   {
+      try
+      {
+	 PreparedStatement sql = getConnection().prepareStatement(
+	    "SELECT transcript.transcript_id"
+	    +" FROM transcript"
+	    +" INNER JOIN transcript_speaker ON transcript.ag_id = transcript_speaker.ag_id"
+	    +" INNER JOIN speaker ON speaker.speaker_number = transcript_speaker.speaker_number"
+	    +" WHERE speaker.name = ? AND COALESCE(speaker.name,'') <> ''"
+	    +" ORDER BY transcript_id");
+	 sql.setString(1, participant);
+	 ResultSet rs = sql.executeQuery();
+	 Vector<String> graphs = new Vector<String>();
+	 while (rs.next())
+	 {
+	    graphs.add(rs.getString("transcript_id"));
+	 } // next layer
+	 rs.close();
+	 sql.close();
+	 return graphs.toArray(new String[0]);
       }
       catch(SQLException exception)
       {
@@ -340,8 +463,11 @@ public class SqlGraphStore
 	 Graph graph = new Graph();
 
 	 PreparedStatement sql = getConnection().prepareStatement(
-	    "SELECT transcript.*, transcript_family.name AS series FROM transcript"
+	    "SELECT transcript.*, transcript_family.name AS series,"
+	    +" transcript_type.transcript_type"
+	    +" FROM transcript"
 	    +" INNER JOIN transcript_family ON transcript.family_id = transcript.family_id"
+	    +" INNER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
 	    +" WHERE transcript_id = ?");
 	 sql.setString(1, id);
 	 ResultSet rs = sql.executeQuery();
@@ -350,8 +476,11 @@ public class SqlGraphStore
 	    rs.close();
 	    sql.close();
 	    sql = getConnection().prepareStatement(
-	       "SELECT transcript.*, transcript_family.name AS series FROM transcript"
+	       "SELECT transcript.*, transcript_family.name AS series,"
+	       +" transcript_type.transcript_type"
+	       +" FROM transcript"
 	       +" INNER JOIN transcript_family ON transcript.family_id = transcript.family_id"
+	       +" INNER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
 	       +" WHERE ag_id = ?");
 	    sql.setString(1, id);
 	    rs = sql.executeQuery();
@@ -362,6 +491,7 @@ public class SqlGraphStore
 	 int iAgId = rs.getInt("ag_id");
 	 graph.put("@ag_id", new Integer(iAgId));
 	 graph.setCorpus(rs.getString("corpus_name"));
+	 graph.put("@transcript_type", rs.getString("transcript_type"));
 	 graph.put("@series", rs.getString("series"));
 	 graph.setOrdinal(rs.getInt("family_sequence"));
 	 graph.put("@offset_in_series", new Double(rs.getInt("family_offset")));

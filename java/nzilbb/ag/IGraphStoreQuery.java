@@ -70,8 +70,41 @@ public interface IGraphStoreQuery
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getCorpora() throws StoreException, PermissionException; 
+   public String[] getCorpusIds() throws StoreException, PermissionException; 
 
+   /**
+    * Gets a list of participant IDs.
+    * @return A list of participant IDs.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public String[] getParticipantIds() throws StoreException, PermissionException; 
+
+   /**
+    * Gets a list of graph IDs.
+    * @return A list of graph IDs.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public String[] getGraphIds() throws StoreException, PermissionException; 
+
+   /**
+    * Gets a list of graph IDs in the given corpus.
+    * @param corpus A corpus ID.
+    * @return A list of graph IDs.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public String[] getGraphIdsInCorpus(String corpus) throws StoreException, PermissionException; 
+
+   /**
+    * Gets a list of IDs of graphs that include the given participant.
+    * @param participant A participant ID.
+    * @return A list of graph IDs.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public String[] getGraphIdsWithParticipant(String participant) throws StoreException, PermissionException; 
    
    /**
     * Gets a graph given its ID.
