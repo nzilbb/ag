@@ -1565,6 +1565,25 @@ public class TestGraph
       assertEquals("list: graph - other speaker", 1, list.length);
       assertEquals("list: child - other speaker", turn2.annotations("word"), turn2.list("word"));
       assertEquals("list: none - other speaker", 0, yes.list("phone").length);
+
+      list = turn1.list("word");
+      assertEquals("list: child", the, list[0]);
+      assertEquals("list: child", quick, list[1]);
+      assertEquals("list: child", brown, list[2]);
+      assertEquals("list: child", fox, list[3]);
+      assertEquals("list: child", 4, list.length);
+
+      list = turn1.list("pos");
+      assertEquals("list: grandchild", DT, list[0]);
+      assertEquals("list: grandchild", A, list[1]);
+      assertEquals("list: grandchild", N, list[2]);
+      assertEquals("list: grandchild", 3, list.length);
+
+      list = g.list("pos");
+      assertEquals("list: distant descenant", DT, list[0]);
+      assertEquals("list: distant descenant", A, list[1]);
+      assertEquals("list: distant descenant", N, list[2]);
+      assertEquals("list: distant descenant", 3, list.length);
    }
 
    public static void main(String args[]) 

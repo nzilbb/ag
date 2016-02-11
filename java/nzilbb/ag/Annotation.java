@@ -27,7 +27,7 @@ import java.util.Vector;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-
+import nzilbb.ag.util.LayerTraversal;
 /**
  * Annotation graph annotation - i.e. an edge of the graph.
  * @author Robert Fromont robert@fromont.net.nz
@@ -660,7 +660,7 @@ public class Annotation
    /**
     * Gets a single related annotation on the given layer.
     * <p>"Related" means that <var>layerId</var> identifies the parent layer, an ancestor layer,
-    * or a child layer.
+    * a child of an ancestor, or a child layer.
     * <p>This utility method makes navigating the layer hierarchy easier and with less prior
     * knowledge of it. e.g.:
     * <ul>
@@ -729,14 +729,15 @@ public class Annotation
    /**
     * Gets a list of related annotations on the given layer.
     * <p>"Related" means that <var>layerId</var> identifies the parent layer, an ancestor layer,
-    * or a child layer.
+    * a child of an ancestor, a child layer, or a desdendant layer.
     * <p>This utility method makes navigating the layer hierarchy easier and with less prior
     * knowledge of it. e.g.:
     * <ul>
     *  <li><code>word.list("turn")[0]</code> for the (parent) turn</li>
     *  <li><code>phone.list("turn")[0]</code> for the (grandparent) turn</li>
     *  <li><code>word.list("POS")</code> for all part of speech annotations</li>
-    *  <li><code>word.list("phone")</code> for all phones</li>
+    *  <li><code>word.list("phone")</code> for all phones in a word</li>
+    *  <li><code>turn.list("phone")</code> for all phones in a turn</li>
     *  <li><code>phone.list("POS")</code> for the all part of speech annotation, which are neither ancestors nor descendants, but rather children of an ancestor (<code>phone.my("word")</code>)</li>
     *  <li><code>word.list("who")[0]</code> for the speaker</li>
     *  <li><code>word.list("graph")[0]</code> for the graph</li>
@@ -747,14 +748,31 @@ public class Annotation
     * @param layerId The layer of the desired annotations.
     * @return The related annotations, or an empty array if none could be found on the given layer.
     */
-   public Annotation[] list(String layerId)
+   public Annotation[] list(final String layerId)
    {
       // is it a child layer?
       if (getAnnotations().containsKey(layerId))
       {
 	 return annotations(layerId);
       }
-      // TODO check for descendants
+      Layer layer = getGraph().getLayer(layerId);
+      Layer commonAncestorLayer = getLayer().getFirstCommonAncestor(layer);
+      // check for descendants
+      if (commonAncestorLayer.equals(getLayer()))
+      { // we are an ancestor of the target layer
+	 LayerTraversal<Vector<Annotation>> descendantTraversal 
+	    = new LayerTraversal<Vector<Annotation>>(new Vector<Annotation>(), this)
+	    {
+	       protected void pre(Annotation annotation)
+	       {
+		  if (annotation.getLayerId().equals(layerId))
+		  {
+		     result.add(annotation);
+		  }
+	       }
+	    };
+	 return descendantTraversal.getResult().toArray(new Annotation[0]);
+      }
       // is it the parent layer?
       if (layerId.equals(getParentId()))
       {
@@ -772,8 +790,6 @@ public class Annotation
       }
       // check for children of ancestors
       // so that word.list("utterance") works and so does word.list("corpus")
-      Layer layer = getGraph().getLayer(layerId);
-      Layer commonAncestorLayer = getLayer().getFirstCommonAncestor(layer);
       if (commonAncestorLayer != null)
       {
 	 if (layer.getParentId().equals(commonAncestorLayer.getId()))
