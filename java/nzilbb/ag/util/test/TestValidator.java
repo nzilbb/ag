@@ -115,6 +115,7 @@ public class TestValidator
       g.addAnnotation(new Annotation("phone6", "k", "phone", "a2.75", "a3", "word2"));
 
       Validator v = new Validator();
+      v.setFullValidation(true);
       // v.setDebug(true);
       v.setDefaultOffsetThreshold(null);
       try
@@ -371,6 +372,7 @@ public class TestValidator
       g.getAnnotation("word6").destroy();
 
       Validator v = new Validator();
+      v.setFullValidation(true);
       // v.setDebug(true);
       v.setDefaultOffsetThreshold(null);
       try
@@ -481,6 +483,7 @@ public class TestValidator
       assertEquals(new Integer(5), g.getAnnotation("word5").get("ordinal"));
 
       Validator v = new Validator();
+      v.setFullValidation(true);
       // v.setDebug(true);
       v.setDefaultOffsetThreshold(null);
       try
@@ -739,6 +742,7 @@ public class TestValidator
       g.addAnnotation(new Annotation("pos3", "A", "pos", "a2.6", "a4", "word3")); // brown
 
       Validator v = new Validator();
+      v.setFullValidation(true);
       // v.setDebug(true);
       v.setDefaultOffsetThreshold(null);
       try
@@ -933,6 +937,7 @@ public class TestValidator
       g.addAnnotation(new Annotation("phone6", "k", "phone", "a2.75", "a3a", "word2"));
 
       Validator v = new Validator();
+      v.setFullValidation(true);
       // v.setDebug(true);
       v.setDefaultOffsetThreshold(null);
       try
@@ -1109,6 +1114,7 @@ public class TestValidator
       g.addAnnotation(new Annotation("phone6", "k", "phone", "a2.0", "a2.25", "word2"));
 
       Validator v = new Validator();
+      v.setFullValidation(true);
       // v.setDebug(true);
       v.setDefaultOffsetThreshold(null);
       try
@@ -1227,6 +1233,7 @@ public class TestValidator
       g.addAnnotation(new Annotation("eah", "eah", "phone", "eahStart", "yeahEnd", "yeah"));
 
       Validator v = new Validator();
+      v.setFullValidation(true);
       // v.setDebug(true);
       v.setDefaultOffsetThreshold(null);
       try
@@ -1319,6 +1326,7 @@ public class TestValidator
       g.addAnnotation(new Annotation("eah", "eah", "phone", "eahStart", "yeahEnd", "yeah"));
 
       Validator v = new Validator();
+      v.setFullValidation(true);
       // v.setDebug(true);
       v.setDefaultOffsetThreshold(null);
       try
@@ -1411,6 +1419,7 @@ public class TestValidator
       g.addAnnotation(new Annotation("eah", "eah", "phone", "eahStart", "yeahEnd", "yeah"));
 
       Validator v = new Validator();
+      v.setFullValidation(true);
       // v.setDebug(true);
       v.setDefaultOffsetThreshold(null);
       try
@@ -1493,6 +1502,7 @@ public class TestValidator
       g.addAnnotation(new Annotation("n", "n", "phone", "nStart", "thatStart", "than"));
 
       Validator v = new Validator();
+      v.setFullValidation(true);
       // v.setDebug(true);
       v.setDefaultOffsetThreshold(null);
       try
@@ -1581,6 +1591,7 @@ public class TestValidator
       g.addAnnotation(new Annotation("eah", "eah", "phone", "eahStart", "yeahEnd", "yeah"));
 
       Validator v = new Validator();
+      v.setFullValidation(true);
       // v.setDebug(true);
       v.setDefaultOffsetThreshold(null);
       try
@@ -1688,6 +1699,7 @@ public class TestValidator
       g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
       Validator v = new Validator();
+      v.setFullValidation(true);
       // v.setDebug(true);
       v.setDefaultOffsetThreshold(null);
       try
@@ -1772,6 +1784,7 @@ public class TestValidator
       g.addAnnotation(new Annotation("dog",  "dog",    "word", "a44",  "a54", "turn1"));
 
       Validator v = new Validator();
+      v.setFullValidation(true);
       // v.setDebug(true);
       v.setDefaultOffsetThreshold(null);
       try
