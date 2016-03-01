@@ -50,7 +50,7 @@ public class Constants
    public static final int ALIGNMENT_NONE = 0;
 
    /** {@link Layer#getAlignment()} value - instant alignment (1). */
-   public static final int ALIGNMENT_INSTANT = 3;
+   public static final int ALIGNMENT_INSTANT = 1;
 
    /** {@link Layer#getAlignment()} value - interval alignment (2). */
    public static final int ALIGNMENT_INTERVAL = 2;
