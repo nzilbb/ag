@@ -1,0 +1,438 @@
+//
+// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// University of Canterbury
+// Written by Robert Fromont - robert.fromont@canterbury.ac.nz
+//
+//    This file is part of nzilbb.ag.
+//
+//    nzilbb.ag is free software; you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation; either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    nzilbb.ag is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with nzilbb.ag; if not, write to the Free Software
+//    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+package nzilbb.ag.util;
+
+import java.util.Vector;
+import java.util.HashMap;
+import java.util.regex.*;
+import nzilbb.ag.*;
+
+/**
+ * Transforms a text convention that spans possibly multiple annotations on a source layer into annotations on a destination layer.
+ * <p>Annotations on {@link #sourceLayerId} are scanned, and where a label matches the {@link #startPattern} regular expression, it and subsequent annotation labels, until a label that matches the {@link #endPattern} regular expression, are concatenated to form the label of an annotation on {@link #destinationLayer}. During concatenation, the start and end annotations are relabelled using {@link #destinationStartResult} and {@link #destinationEndResult}, respectively. The spanned annotation may or may not be deleted, depending on the value of {@link #deleteInSource}. If they are kept, the start and end annotations are relabelled using {@link #sourceStartResult} and {@link #sourceEndResult}, respectively.
+ * <p>Some examples:
+ * <p>To convert a sequence of words of the form <samp>{word1 word2 ... wordn}</samp> into a comment annotation:
+ * <ul>
+ *  <li><b>sourceLayerId</b>: <samp>word</samp></li>
+ *  <li><b>startPattern</b>: <samp>{(.*)</samp></li>
+ *  <li><b>endPattern</b>: <samp>(.*)}</samp></li>
+ *  <li><b>deleteInSource</b>: <samp>true</samp></li>
+ *  <li><b>destinationLayerId</b>: <samp>comment</samp></li>
+ *  <li><b>destinationStartResult</b>: <samp>$1</samp></li>
+ *  <li><b>destinationEndResult</b>: <samp>$1</samp></li>
+ * </ul>
+ * So a sequence of words "here {pointing to head} and there" will end up being the sequence "here and there" with a comment annotation labelled "pointing to head" between "here" and "and".
+ * <p>To extract the VP phrase from a sequence of words of the form <samp>[XP word1 word2 ... wordn]</samp>:
+ * <ul>
+ *  <li><b>sourceLayerId</b>: <samp>word</samp></li>
+ *  <li><b>startPattern</b>: <samp>[(.*)</samp></li>
+ *  <li><b>endPattern</b>: <samp>(.*)]</samp></li>
+ *  <li><b>deleteInSource</b>: <samp>false</samp></li>
+ *  <li><b>sourceStartResult</b>: <samp>null</samp></li>
+ *  <li><b>sourceEndResult</b>: <samp>$1</samp></li>
+ *  <li><b>destinationLayerId</b>: <samp>phrase</samp></li>
+ *  <li><b>destinationStartResult</b>: <samp>$1</samp></li>
+ *  <li><b>destinationEndResult</b>: <samp>null</samp></li>
+ * </ul>
+ * So a sequence of words "the fox [VP jumps over the dog]" will end up being the sequence "the fox jumps over the dog]" with a phrase annotation labelled "NP" spanning "jumps over the dog".
+ * <br>Note that in this case, having {@link #sourceStartResult} set to null indicates that the start source annotation should be deleted, and having {@link #destinationEndResult} set to null inicates that the last annotation should not be concatenated to the destination label.
+ * @author Robert Fromont robert@fromont.net.nz
+ */
+
+public class SpanningConventionTransformer // TODO implementation that handles nested extraction, for phrae structure
+  implements IGraphTransformer
+{
+   // Attributes:
+   
+   /**
+    * Layer ID of the annotations to transform.
+    * @see #getSourceLayerId()
+    * @see #setSourceLayerId(String)
+    */
+   protected String sourceLayerId;
+   /**
+    * Getter for {@link #sourceLayerId}: Layer ID of the annotations to transform.
+    * @return Layer ID of the annotations to transform.
+    */
+   public String getSourceLayerId() { return sourceLayerId; }
+   /**
+    * Setter for {@link #sourceLayerId}: Layer ID of the annotations to transform.
+    * @param newSourceLayerId Layer ID of the annotations to transform.
+    */
+   public void setSourceLayerId(String newSourceLayerId) { sourceLayerId = newSourceLayerId; }
+
+
+   /**
+    * A regular expression matching the label of the first source annotation in the span.
+    * @see #getStartPattern()
+    * @see #setStartPattern(String)
+    */
+   protected String startPattern;
+   /**
+    * Getter for {@link #startPattern}: A regular expression matching the label of the first source annotation in the span.
+    * @return A regular expression matching the label of the first source annotation in the span.
+    */
+   public String getStartPattern() { return startPattern; }
+   /**
+    * Setter for {@link #startPattern}: A regular expression matching the label of the first source annotation in the span.
+    * @param newStartPattern A regular expression matching the label of the first source annotation in the span.
+    */
+   public void setStartPattern(String newStartPattern) { startPattern = newStartPattern; }
+
+   /**
+    * A regular expression matching the label of the last source annotation in the span.
+    * @see #getEndPattern()
+    * @see #setEndPattern(String)
+    */
+   protected String endPattern;
+   /**
+    * Getter for {@link #endPattern}: A regular expression matching the label of the last source annotation in the span.
+    * @return A regular expression matching the label of the last source annotation in the span.
+    */
+   public String getEndPattern() { return endPattern; }
+   /**
+    * Setter for {@link #endPattern}: A regular expression matching the label of the last source annotation in the span.
+    * @param newEndPattern A regular expression matching the label of the last source annotation in the span.
+    */
+   public void setEndPattern(String newEndPattern) { endPattern = newEndPattern; }
+
+   /**
+    * Whether to delete the source annotations between the start and end source annotations (exclusive).
+    * @see #getDeleteInSource()
+    * @see #setDeleteInSource(boolean)
+    */
+   protected boolean deleteInSource;
+   /**
+    * Getter for {@link #deleteInSource}: Whether to delete the source annotations between the start and end source annotations (exclusive).
+    * @return Whether to delete the source annotations between the start and end source annotations (exclusive).
+    */
+   public boolean getDeleteInSource() { return deleteInSource; }
+   /**
+    * Setter for {@link #deleteInSource}: Whether to delete the source annotations between the start and end source annotations (exclusive).
+    * @param newDeleteInSource Whether to delete the source annotations between the start and end source annotations (exclusive).
+    */
+   public void setDeleteInSource(boolean newDeleteInSource) { deleteInSource = newDeleteInSource; }
+
+   /**
+    * The resulting label of the start source annotation, which may contain references to captured groups in {@link #startPattern}, or be null to delete the start annotation.
+    * @see #getSourceStartResult()
+    * @see #setSourceStartResult(String)
+    */
+   protected String sourceStartResult;
+   /**
+    * Getter for {@link #sourceStartResult}: The resulting label of the start source annotation, which may contain references to captured groups in {@link #startPattern}, or be null to delete the start annotation.
+    * @return The resulting label of the start source annotation, which may contain references to captured groups in {@link #startPattern}, or be null to delete the start annotation.
+    */
+   public String getSourceStartResult() { return sourceStartResult; }
+   /**
+    * Setter for {@link #sourceStartResult}: The resulting label of the start source annotation, which may contain references to captured groups in {@link #startPattern}, or be null to delete the start annotation.
+    * @param newSourceStartResult The resulting label of the start source annotation, which may contain references to captured groups in {@link #startPattern}, or be null to delete the start annotation.
+    */
+   public void setSourceStartResult(String newSourceStartResult) { sourceStartResult = newSourceStartResult; }
+
+   /**
+    * The resulting label of the end source annotation, which may contain references to captured groups in {@link #endPattern}, or be null to delete the end annotation.
+    * @see #getSourceEndResult()
+    * @see #setSourceEndResult(String)
+    */
+   protected String sourceEndResult;
+   /**
+    * Getter for {@link #sourceEndResult}: The resulting label of the end source annotation, which may contain references to captured groups in {@link #endPattern}, or be null to delete the end annotation.
+    * @return The resulting label of the end source annotation, which may contain references to captured groups in {@link #endPattern}, or be null to delete the end annotation.
+    */
+   public String getSourceEndResult() { return sourceEndResult; }
+   /**
+    * Setter for {@link #sourceEndResult}: The resulting label of the end source annotation, which may contain references to captured groups in {@link #endPattern}, or be null to delete the end annotation.
+    * @param newSourceEndResult The resulting label of the end source annotation, which may contain references to captured groups in {@link #endPattern}, or be null to delete the end annotation.
+    */
+   public void setSourceEndResult(String newSourceEndResult) { sourceEndResult = newSourceEndResult; }
+
+   /**
+    * Layer ID of the annotation created for each span.
+    * @see #getDestinationLayerId()
+    * @see #setDestinationLayerId(String)
+    */
+   protected String destinationLayerId;
+   /**
+    * Getter for {@link #destinationLayerId}: Layer ID of the annotation created for each span.
+    * @return Layer ID of the annotation created for each span.
+    */
+   public String getDestinationLayerId() { return destinationLayerId; }
+   /**
+    * Setter for {@link #destinationLayerId}: Layer ID of the annotation created for each span.
+    * @param newDestinationLayerId Layer ID of the annotation created for each span.
+    */
+   public void setDestinationLayerId(String newDestinationLayerId) { destinationLayerId = newDestinationLayerId; }
+
+   /**
+    * Delimiter to insert between source labels when concatenting them to for the destination label.  The default is <code>" "</code> (space).
+    * @see #getDelimiter()
+    * @see #setDelimiter(String)
+    */
+   protected String delimiter = " ";
+   /**
+    * Getter for {@link #delimiter}: Delimiter to insert between source labels when concatenting them to for the destination label.
+    * @return Delimiter to insert between source labels when concatenting them to for the destination label.
+    */
+   public String getDelimiter() { return delimiter; }
+   /**
+    * Setter for {@link #delimiter}: Delimiter to insert between source labels when concatenting them to for the destination label.
+    * @param newDelimiter Delimiter to insert between source labels when concatenting them to for the destination label.
+    */
+   public void setDelimiter(String newDelimiter) { delimiter = newDelimiter; }
+
+   /**
+    * The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #startPattern}, or be null to not include the start annotation.
+    * @see #getDestinationStartResult()
+    * @see #setDestinationStartResult(String)
+    */
+   protected String destinationStartResult;
+   /**
+    * Getter for {@link #destinationStartResult}: The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #startPattern}, or be null to not include the start annotation.
+    * @return The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #startPattern}, or be null to not include the start annotation.
+    */
+   public String getDestinationStartResult() { return destinationStartResult; }
+   /**
+    * Setter for {@link #destinationStartResult}: The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #startPattern}, or be null to not include the start annotation.
+    * @param newDestinationStartResult The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #startPattern}, or be null to not include the start annotation.
+    */
+   public void setDestinationStartResult(String newDestinationStartResult) { destinationStartResult = newDestinationStartResult; }
+
+   /**
+    * The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #endPattern}, or be null to not include the end annotation.
+    * @see #getDestinationEndResult()
+    * @see #setDestinationEndResult(String)
+    */
+   protected String destinationEndResult;
+   /**
+    * Getter for {@link #destinationEndResult}: The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #endPattern}, or be null to not include the end annotation.
+    * @return The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #endPattern}, or be null to not include the end annotation.
+    */
+   public String getDestinationEndResult() { return destinationEndResult; }
+   /**
+    * Setter for {@link #destinationEndResult}: The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #endPattern}, or be null to not include the end annotation.
+    * @param newDestinationEndResult The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #endPattern}, or be null to not include the end annotation.
+    */
+   public void setDestinationEndResult(String newDestinationEndResult) { destinationEndResult = newDestinationEndResult; }
+   
+
+   // Methods:
+   
+   /**
+    * Default constructor.
+    */
+   public SpanningConventionTransformer()
+   {
+   } // end of constructor
+
+   /**
+    * Constructor from attribute values.
+    * @param sourceLayerId Layer ID of the annotations to transform.
+    * @param startPattern A regular expression matching the label of the first source annotation in the span.
+    * @param endPattern A regular expression matching the label of the last source annotation in the span.
+    * @param deleteInSource Whether to delete the source annotations between the start and end source annotations (exclusive).
+    * @param sourceStartResult The resulting label of the start source annotation, which may contain references to captured groups in {@link #startPattern}, or be null to delete the start annotation.
+    * @param sourceEndResult The resulting label of the end source annotation, which may contain references to captured groups in {@link #endPattern}, or be null to delete the end annotation.
+    * @param destinationLayerId Layer ID of the annotation created for each span.
+    * @param delimiter Delimiter to insert between source labels when concatenting them to for the destination label.
+    * @param destinationStartResult The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #startPattern}, or be null to not include the start annotation.
+    * @param destinationEndResult The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #endPattern}, or be null to not include the end annotation.
+    */
+   public SpanningConventionTransformer(String sourceLayerId, String startPattern, String endPattern, boolean deleteInSource, String sourceStartResult, String sourceEndResult, String destinationLayerId, String delimiter, String destinationStartResult, String destinationEndResult)
+   {
+      setSourceLayerId(sourceLayerId);
+      setStartPattern(startPattern);
+      setEndPattern(endPattern);
+      setDeleteInSource(deleteInSource);
+      setSourceStartResult(sourceStartResult);
+      setSourceEndResult(sourceEndResult);
+      setDestinationLayerId(destinationLayerId);
+      setDelimiter(delimiter);
+      setDestinationStartResult(destinationStartResult);
+      setDestinationEndResult(destinationEndResult);
+   } // end of constructor
+
+   /**
+    * Constructor from attribute values. The {@link #delimiter} used is the default.
+    * @param sourceLayerId Layer ID of the annotations to transform.
+    * @param startPattern A regular expression matching the label of the first source annotation in the span.
+    * @param endPattern A regular expression matching the label of the last source annotation in the span.
+    * @param deleteInSource Whether to delete the source annotations between the start and end source annotations (exclusive).
+    * @param sourceStartResult The resulting label of the start source annotation, which may contain references to captured groups in {@link #startPattern}, or be null to delete the start annotation.
+    * @param sourceEndResult The resulting label of the end source annotation, which may contain references to captured groups in {@link #endPattern}, or be null to delete the end annotation.
+    * @param destinationLayerId Layer ID of the annotation created for each span.
+    * @param delimiter Delimiter to insert between source labels when concatenting them to for the destination label.
+    * @param destinationStartResult The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #startPattern}, or be null to not include the start annotation.
+    * @param destinationEndResult The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #endPattern}, or be null to not include the end annotation.
+    */
+   public SpanningConventionTransformer(String sourceLayerId, String startPattern, String endPattern, boolean deleteInSource, String sourceStartResult, String sourceEndResult, String destinationLayerId, String destinationStartResult, String destinationEndResult)
+   {
+      setSourceLayerId(sourceLayerId);
+      setStartPattern(startPattern);
+      setEndPattern(endPattern);
+      setDeleteInSource(deleteInSource);
+      setSourceStartResult(sourceStartResult);
+      setSourceEndResult(sourceEndResult);
+      setDestinationLayerId(destinationLayerId);
+      setDestinationStartResult(destinationStartResult);
+      setDestinationEndResult(destinationEndResult);
+   } // end of constructor
+
+   /**
+    * Transforms the graph.
+    * @param graph The graph to transform.
+    * @return The changes introduced by the tranformation.
+    * @throws TransformationException If the transformation cannot be completed.
+    */
+   public Vector<Change> transform(Graph graph) throws TransformationException
+   {
+      if (graph.getLayer(getSourceLayerId()) == null) 
+	 throw new TransformationException(this, "No source layer: " + getSourceLayerId());
+      if (graph.getLayer(getDestinationLayerId()) == null) 
+	 throw new TransformationException(this, "No destination layer: " + getDestinationLayerId());
+      if (getDestinationLayerId().equals(getSourceLayerId())) 
+	 throw new TransformationException(this, "Source and destination layer are the same: " + getDestinationLayerId());
+      try
+      {
+	 Pattern startRegexp = Pattern.compile(getStartPattern());
+	 Pattern endRegexp = Pattern.compile(getEndPattern());
+	 Vector<Change> changes = new Vector<Change>();
+	 // group the source annotations by parent...
+	 // for each parent
+	 for (Annotation parent : graph.getAnnotations(graph.getLayer(getSourceLayerId()).getParentId()))
+	 {
+	    Vector<Annotation> span = null;
+	    for (Annotation source : parent.getAnnotations(getSourceLayerId()))
+	    {
+	       // are we in a span?
+	       if (span == null)
+	       { // look for start
+		  Matcher matcher = startRegexp.matcher(source.getLabel());
+		  if (matcher.matches())
+		  {
+		     span = new Vector<Annotation>();
+		  } // label matches
+	       } // not in a span
+
+	       if (span != null)
+	       { // in a span
+		  span.add(source);
+		  // look for end
+		  Matcher endMatcher = endRegexp.matcher(source.getLabel());
+		  if (endMatcher.matches())
+		  { // found the end of the span
+		     Matcher startMatcher = startRegexp.matcher(span.elementAt(0).getLabel());
+
+		     // destination annotation:
+
+		     StringBuffer label = new StringBuffer();
+		     if (getDestinationStartResult() != null)
+		     { // add start annotation to label
+			label.append(startMatcher.replaceAll(getDestinationStartResult()));
+		     }
+		     if (span.size() == 1)
+		     { // special case: span a single source annotation
+			if (getDestinationEndResult() != null)
+			{
+			   endMatcher = endRegexp.matcher(label.toString());
+			   label = new StringBuffer();
+			   label.append(endMatcher.replaceAll(getDestinationEndResult()));
+			}
+		     }
+		     else
+		     {
+			if (getDeleteInSource())
+			{
+			   // for each annotation between the start and the end
+			   for (int i = 1; i < span.size() - 1; i++)
+			   {
+			      label.append(getDelimiter());
+			      label.append(span.elementAt(i).getLabel());
+			   }
+			}
+
+			// end annotation
+			if (getDestinationEndResult() != null)
+			{
+			   label.append(getDelimiter());
+			   label.append(endMatcher.replaceAll(getDestinationEndResult()));
+			}
+		     }
+		     Annotation annotation = graph.createSpan(
+			span.firstElement(), 
+			span.lastElement(), 
+			getDestinationLayerId(), label.toString(), 
+			span.firstElement().getParent()); // TODO check what should be the parent
+		     changes.addAll(annotation.getChanges());
+
+		     // source annotations: 
+
+		     if (getSourceStartResult() == null)
+		     { // delete start annotation
+			changes.add(span.firstElement().destroy());
+		     }
+		     else
+		     { // change the label
+			String l = startMatcher.replaceAll(getSourceStartResult());
+			if (!l.equals(span.firstElement().getLabel()))
+			{ // only change if it's different
+			   span.firstElement().setLabel(l);
+			   changes.add(span.firstElement().getLastChange());
+			}
+		     }
+		     
+		     if (getDeleteInSource())
+		     { // intervening annotations
+			// for each annotation between the start and the end
+			for (int i = 1; i < span.size() - 1; i++)
+			{
+			   changes.add(span.elementAt(i).destroy());
+			}
+		     } // intervening annotations
+
+		     if (getSourceEndResult() == null)
+		     { // delete end annotation
+			changes.add(span.lastElement().destroy());
+		     }
+		     else
+		     { // chang the label
+			String l = endMatcher.replaceAll(getSourceEndResult());
+			if (!l.equals(span.lastElement().getLabel()))
+			{ // only change if it's different
+			   span.lastElement().setLabel(l);
+			   changes.add(span.lastElement().getLastChange());
+			}
+		     }
+		     
+		     span = null;
+		  } // found the end of the span
+	       } // in a span
+	    } // next source annotation
+	 } // next parent
+	 return changes;
+      }
+      catch(PatternSyntaxException exception)
+      {
+	 throw new TransformationException(this, exception);
+      }
+   }
+} // end of class SpanningConventionTransformer
