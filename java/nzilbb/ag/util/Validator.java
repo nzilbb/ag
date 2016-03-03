@@ -237,7 +237,7 @@ public class Validator
 		  + annotation.getId() + " (\"" + annotation.getLabel() 
 		  + "\") on layer: " + annotation.getLayerId());
 	    }
-	    if (!needMoreValidation) // havne't found any interesting changes yet
+	    if (!needMoreValidation) // haven't found any interesting changes yet
 	    {
 	       // we don't validate if the only changes are to tag layers with no children etc.
 	       if (annotation.getParentId() == null)

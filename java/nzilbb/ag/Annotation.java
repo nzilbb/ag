@@ -431,6 +431,7 @@ public class Annotation
     */
    public Vector<Change> setStart(Anchor start) 
    { 
+      if (start == null) return new Vector<Change>(); // TODO text this behaviour
       return setStartId(start.getId());
    }
 
@@ -459,6 +460,7 @@ public class Annotation
     */
    public Vector<Change> setEnd(Anchor end) 
    { 
+      if (end == null) return new Vector<Change>(); // TODO text this behaviour
       return setEndId(end.getId());
    }
    
@@ -533,6 +535,21 @@ public class Annotation
       setLayerId(layerId);
       setStartId(startId);
       setEndId(endId);
+   } // end of constructor
+
+   /**
+    * Basic constructor including parent id.
+    * @param id The annotation's identifier.
+    * @param label The annotation's label.
+    * @param layerId The identifier of the annotation's layer.
+    * @param parentId The annotation's parent annotation ID.
+    */
+   public Annotation(String id, String label, String layerId, String parentId)
+   {
+      setId(id);
+      setLabel(label);
+      setLayerId(layerId);
+      setParentId(parentId);
    } // end of constructor
 
    /**
@@ -680,7 +697,7 @@ public class Annotation
    public Annotation my(String layerId)
    {
       // is it the parent layer?
-      if (layerId.equals(getParentId()))
+      if (layerId.equals(getParent().getLayerId()))
       {
 	 return getParent();
       }
@@ -852,14 +869,16 @@ public class Annotation
    /**
     * Add a child annotation.
     * @param annotation The new child.
+    * @return The annotation.
     */
-   public void addAnnotation(Annotation annotation)
+   public Annotation addAnnotation(Annotation annotation)
    {
       getAnnotations(annotation.getLayerId()).add(annotation);
       if (annotation.getParentId() == null || !annotation.getParentId().equals(getId()))
       {
 	 annotation.setParentId(getId());
       }
+      return annotation;
    } // end of addAnnotation()
 
    

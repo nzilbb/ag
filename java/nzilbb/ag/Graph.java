@@ -401,9 +401,13 @@ public class Graph
 
    /**
     * Adds an annotation to the graph.
+    * <p>If either of the anchor IDs is null, and the layer is aligned, then default anchors are
+    * created for the annotation. This allows {@link addAnnotation(new Annotation(null, label, layerId))} to be repeatedly invoked, allowing anchor offsets to be set later.
+    *
     * @param annotation The annotation to add to the graph.
+    * @return The annotation.
     */
-   public void addAnnotation(Annotation annotation)
+   public Annotation addAnnotation(Annotation annotation)
    {
       if (annotation.getId() == null)
       {
@@ -456,7 +460,8 @@ public class Graph
 	    // gather up new children
 	    for (Annotation otherAnnotation : getAnnotations(childLayer.getId()))
 	    {
-	       if (otherAnnotation.getParentId().equals(annotation.getId()))
+	       if (otherAnnotation.getParentId() != null
+		   && otherAnnotation.getParentId().equals(annotation.getId()))
 	       {
 		  newChildren.add(otherAnnotation);
 	       }
@@ -468,13 +473,29 @@ public class Graph
 	    } // next child
 	 } // next child layer
       } 
+
+      // check anchors
+      if (annotation.getLayer() == null // we don't know what the alignment should be
+	  || annotation.getLayer().getAlignment() != Constants.ALIGNMENT_NONE) // or it's aligned
+      { // should have an anchor
+	 if (annotation.getStartId() == null)
+	 { // no anchor, so create one TODO test this behaviour
+	    annotation.setStart(addAnchor(new Anchor()));
+	 }
+	 if (annotation.getEndId() == null)
+	 { // no anchor, so create one TODO test this behaviour
+	    annotation.setEnd(addAnchor(new Anchor()));
+	 }
+      }
+      return annotation;
    } // end of addAnnotation()
 
    /**
     * Adds an anchor to the graph.
     * @param anchor The anchor to add to the graph.
+    * @return The anchor.
     */
-   public void addAnchor(Anchor anchor)
+   public Anchor addAnchor(Anchor anchor)
    {
       anchor.setGraph(this);
       if (anchor.getId() == null)
@@ -499,7 +520,7 @@ public class Graph
 	    annotation.setEnd(anchor);
 	 }
       }
-
+      return anchor;
    } // end of addAnnotation()
 
    /**
@@ -511,6 +532,44 @@ public class Graph
    {
       return getAnchors().get(id);
    } // end of getAnchor()
+
+   
+   /**
+    * Gets an anchor at the given offset.
+    * @param offset
+    * @return An anchor that has the given offset, or null if there isn't one in the graph.
+    * @see #getOrCreateAnchorAt(double)
+    */
+   public Anchor getAnchorAt(double offset) // TODO test
+   {
+      for (Anchor anchor : getAnchors().values())
+      {
+	 if (anchor.getOffset() != null && anchor.getOffset().doubleValue() == offset)
+	 {
+	    return anchor;
+	 }
+      }
+      return null;
+   } // end of getAnchorAt()
+
+   /**
+    * Gets an anchor at the given offset. If there isn't already one in the graph, one is created.
+    * @param offset
+    * @return An anchor that has the given offset.
+    * @see #getAnchorAt(double)
+    */
+   public Anchor getOrCreateAnchorAt(double offset) // TODO test
+   {
+      Anchor anchor = getAnchorAt(offset);
+      if (anchor == null)
+      {
+	 anchor = new Anchor();
+	 anchor.setOffset(offset);
+	 addAnchor(anchor);
+      }
+      return anchor;
+   } // end of getAnchorAt()
+
 
    /**
     * Returns the anchors sorted by offset. This includes only anchors for which the offset is actually set.

@@ -60,6 +60,26 @@ public class DeserializationException
    {
    } // end of constructor
 
+   /**
+    * Constructor.
+    * @param cause The causing error.
+    */
+   public DeserializationException(Throwable cause)
+   {
+      super(cause);
+      addError(ErrorType.Other, cause.getMessage());
+   } // end of constructor
+
+   /**
+    * Constructor.
+    * @param cause The causing error.
+    */
+   public DeserializationException(String message)
+   {
+      super(message);
+      addError(ErrorType.Other, message);
+   } // end of constructor
+
    
    /**
     * Adds an error. If the given type of error has already been added, the description is appended to the existing description.

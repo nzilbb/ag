@@ -73,14 +73,14 @@ public interface IDeserializer
     * @throws DeserializationParametersMissingException if the parameters for this particular graph have not been set.
     * @throws DeserializationException if errors occur during deserialization.
     */
-   public Vector<Graph> deserialize() 
+   public Graph[] deserialize() 
       throws DeserializerNotConfiguredException, DeserializationParametersMissingException, DeserializationException;
 
    /**
     * Returns any warnings that may have arisen during the last execution of {@link #deserialize()}.
     * @return A possibly empty list of warnings.
     */
-   public Vector<String> getWarnings();
+   public String[] getWarnings();
 
 
 } // end of interface IDeserialize
