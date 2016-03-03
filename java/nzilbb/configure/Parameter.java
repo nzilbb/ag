@@ -114,6 +114,25 @@ public class Parameter
     * @param newValue The value (or default value) of the parameter.
     */
    public void setValue(Object newValue) { value = newValue; }
+
+   
+   /**
+    * Whether the parameter is required (true) or optional (false - the default).
+    * @see #getRequired()
+    * @see #setRequired(boolean)
+    */
+   protected boolean required = false;
+   /**
+    * Getter for {@link #required}: Whether the parameter is required (true) or optional (false - the default).
+    * @return Whether the parameter is required (true) or optional (false).
+    */
+   public boolean getRequired() { return required; }
+   /**
+    * Setter for {@link #required}: Whether the parameter is required (true) or optional (false).
+    * @param newRequired Whether the parameter is required (true) or optional (false).
+    */
+   public void setRequired(boolean newRequired) { required = newRequired; }
+
    
    // Methods:
    
@@ -124,6 +143,40 @@ public class Parameter
    {
    } // end of constructor
 
+   /**
+    * Constructor from attributes.
+    * @param name The paramater's name.
+    * @param label A label that might be presented to a user.
+    * @param hint A text hint that might be displayed to a user.
+    * @param type The type of the parameter.
+    * @param required Whether the parameter is required (true) or optional (false).
+    * @param value The value (or default value) of the parameter.
+    */
+   public Parameter(String name, String type, String label, String hint, boolean required, Object value)
+   {
+      setName(name);
+      setType(type);
+      setLabel(label);
+      setHint(hint);
+      setRequired(required);
+      setValue(value);
+   } // end of constructor
+   /**
+    * Constructor from attributes.
+    * @param name The paramater's name.
+    * @param label A label that might be presented to a user.
+    * @param hint A text hint that might be displayed to a user.
+    * @param type The type of the parameter.
+    * @param required Whether the parameter is required (true) or optional (false).
+    */
+   public Parameter(String name, String type, String label, String hint, boolean required)
+   {
+      setName(name);
+      setType(type);
+      setLabel(label);
+      setHint(hint);
+      setRequired(required);
+   } // end of constructor
    /**
     * Constructor from attributes.
     * @param name The paramater's name.
@@ -146,7 +199,6 @@ public class Parameter
     * @param label A label that might be presented to a user.
     * @param hint A text hint that might be displayed to a user.
     * @param type The type of the parameter.
-    * @param value The value (or default value) of the parameter.
     */
    public Parameter(String name, String type, String label, String hint)
    {
@@ -160,8 +212,6 @@ public class Parameter
     * @param name The paramater's name.
     * @param label A label that might be presented to a user.
     * @param hint A text hint that might be displayed to a user.
-    * @param type The type of the parameter.
-    * @param value The value (or default value) of the parameter.
     */
    public Parameter(String name, String type, String label)
    {
@@ -172,10 +222,7 @@ public class Parameter
    /**
     * Constructor from attributes.
     * @param name The paramater's name.
-    * @param label A label that might be presented to a user.
-    * @param hint A text hint that might be displayed to a user.
     * @param type The type of the parameter.
-    * @param value The value (or default value) of the parameter.
     */
    public Parameter(String name, String type)
    {
