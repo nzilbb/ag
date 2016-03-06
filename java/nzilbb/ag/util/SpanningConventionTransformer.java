@@ -233,7 +233,24 @@ public class SpanningConventionTransformer // TODO implementation that handles n
     * @param newDestinationEndResult The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #endPattern}, or be null to not include the end annotation.
     */
    public void setDestinationEndResult(String newDestinationEndResult) { destinationEndResult = newDestinationEndResult; }
+
    
+   /**
+    * Whether the destination annotation annotates the source token prior to the first matching source token (i.e. whether they should share start anchors).
+    * @see #getAnnotatePrevious()
+    * @see #setAnnotatePrevious(boolean)
+    */
+   protected boolean annotatePrevious = false;
+   /**
+    * Getter for {@link #annotatePrevious}: Whether the destination annotation annotates the source token prior to the first matching source token (i.e. whether they should share start anchors).
+    * @return Whether the destination annotation annotates the source token prior to the first matching source token (i.e. whether they should share start anchors).
+    */
+   public boolean getAnnotatePrevious() { return annotatePrevious; }
+   /**
+    * Setter for {@link #annotatePrevious}: Whether the destination annotation annotates the source token prior to the first matching source token (i.e. whether they should share start anchors).
+    * @param newAnnotatePrevious Whether the destination annotation annotates the source token prior to the first matching source token (i.e. whether they should share start anchors).
+    */
+   public void setAnnotatePrevious(boolean newAnnotatePrevious) { annotatePrevious = newAnnotatePrevious; }
 
    // Methods:
    
@@ -298,6 +315,63 @@ public class SpanningConventionTransformer // TODO implementation that handles n
    } // end of constructor
 
    /**
+    * Constructor from attribute values.
+    * @param sourceLayerId Layer ID of the annotations to transform.
+    * @param startPattern A regular expression matching the label of the first source annotation in the span.
+    * @param endPattern A regular expression matching the label of the last source annotation in the span.
+    * @param deleteInSource Whether to delete the source annotations between the start and end source annotations (exclusive).
+    * @param sourceStartResult The resulting label of the start source annotation, which may contain references to captured groups in {@link #startPattern}, or be null to delete the start annotation.
+    * @param sourceEndResult The resulting label of the end source annotation, which may contain references to captured groups in {@link #endPattern}, or be null to delete the end annotation.
+    * @param destinationLayerId Layer ID of the annotation created for each span.
+    * @param delimiter Delimiter to insert between source labels when concatenting them to for the destination label.
+    * @param destinationStartResult The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #startPattern}, or be null to not include the start annotation.
+    * @param destinationEndResult The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #endPattern}, or be null to not include the end annotation.
+    * @param annotatePrevious Whether the destination annotation annotates the source token prior to the first matching source token (i.e. whether they should share start anchors).
+    */
+   public SpanningConventionTransformer(String sourceLayerId, String startPattern, String endPattern, boolean deleteInSource, String sourceStartResult, String sourceEndResult, String destinationLayerId, String delimiter, String destinationStartResult, String destinationEndResult, boolean annotatePrevious)
+   {
+      setSourceLayerId(sourceLayerId);
+      setStartPattern(startPattern);
+      setEndPattern(endPattern);
+      setDeleteInSource(deleteInSource);
+      setSourceStartResult(sourceStartResult);
+      setSourceEndResult(sourceEndResult);
+      setDestinationLayerId(destinationLayerId);
+      setDelimiter(delimiter);
+      setDestinationStartResult(destinationStartResult);
+      setDestinationEndResult(destinationEndResult);
+      setAnnotatePrevious(annotatePrevious);
+   } // end of constructor
+
+   /**
+    * Constructor from attribute values. The {@link #delimiter} used is the default.
+    * @param sourceLayerId Layer ID of the annotations to transform.
+    * @param startPattern A regular expression matching the label of the first source annotation in the span.
+    * @param endPattern A regular expression matching the label of the last source annotation in the span.
+    * @param deleteInSource Whether to delete the source annotations between the start and end source annotations (exclusive).
+    * @param sourceStartResult The resulting label of the start source annotation, which may contain references to captured groups in {@link #startPattern}, or be null to delete the start annotation.
+    * @param sourceEndResult The resulting label of the end source annotation, which may contain references to captured groups in {@link #endPattern}, or be null to delete the end annotation.
+    * @param destinationLayerId Layer ID of the annotation created for each span.
+    * @param delimiter Delimiter to insert between source labels when concatenting them to for the destination label.
+    * @param destinationStartResult The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #startPattern}, or be null to not include the start annotation.
+    * @param destinationEndResult The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #endPattern}, or be null to not include the end annotation.
+    * @param annotatePrevious Whether the destination annotation annotates the source token prior to the first matching source token (i.e. whether they should share start anchors).
+    */
+   public SpanningConventionTransformer(String sourceLayerId, String startPattern, String endPattern, boolean deleteInSource, String sourceStartResult, String sourceEndResult, String destinationLayerId, String destinationStartResult, String destinationEndResult, boolean annotatePrevious)
+   {
+      setSourceLayerId(sourceLayerId);
+      setStartPattern(startPattern);
+      setEndPattern(endPattern);
+      setDeleteInSource(deleteInSource);
+      setSourceStartResult(sourceStartResult);
+      setSourceEndResult(sourceEndResult);
+      setDestinationLayerId(destinationLayerId);
+      setDestinationStartResult(destinationStartResult);
+      setDestinationEndResult(destinationEndResult);
+      setAnnotatePrevious(annotatePrevious);
+  } // end of constructor
+
+   /**
     * Transforms the graph.
     * @param graph The graph to transform.
     * @return The changes introduced by the tranformation.
@@ -307,10 +381,13 @@ public class SpanningConventionTransformer // TODO implementation that handles n
    {
       if (graph.getLayer(getSourceLayerId()) == null) 
 	 throw new TransformationException(this, "No source layer: " + getSourceLayerId());
-      if (graph.getLayer(getDestinationLayerId()) == null) 
+      Layer destinationLayer = graph.getLayer(getDestinationLayerId());
+      if (destinationLayer == null) 
 	 throw new TransformationException(this, "No destination layer: " + getDestinationLayerId());
       if (getDestinationLayerId().equals(getSourceLayerId())) 
 	 throw new TransformationException(this, "Source and destination layer are the same: " + getDestinationLayerId());
+      boolean sourceDestinationOfParent = destinationLayer.getParentId().equals(getSourceLayerId());
+      boolean graphDestinationOfParent = destinationLayer.getParentId().equals("graph");
       try
       {
 	 Pattern startRegexp = Pattern.compile(getStartPattern());
@@ -321,6 +398,8 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 	 for (Annotation parent : graph.getAnnotations(graph.getLayer(getSourceLayerId()).getParentId()))
 	 {
 	    Vector<Annotation> span = null;
+	    Annotation previousSource = null;
+	    Annotation newTarget = null;
 	    for (Annotation source : parent.getAnnotations(getSourceLayerId()))
 	    {
 	       // are we in a span?
@@ -331,6 +410,10 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 		  {
 		     span = new Vector<Annotation>();
 		  } // label matches
+		  else
+		  {
+		     if (source.getChange() != Change.Operation.Destroy) previousSource = source;
+		  }
 	       } // not in a span
 
 	       if (span != null)
@@ -365,23 +448,45 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 			   // for each annotation between the start and the end
 			   for (int i = 1; i < span.size() - 1; i++)
 			   {
-			      label.append(getDelimiter());
-			      label.append(span.elementAt(i).getLabel());
+			      // only append anything if the source label is set
+			      if (span.elementAt(i).getLabel().length() > 0)
+			      {
+				 // only append delimiter if destintation label is not empty
+				 if (label.length() > 0) label.append(getDelimiter());
+				 // append the source label to the destination
+				 label.append(span.elementAt(i).getLabel());
+			      }
 			   }
 			}
 
 			// end annotation
 			if (getDestinationEndResult() != null)
 			{
-			   label.append(getDelimiter());
-			   label.append(endMatcher.replaceAll(getDestinationEndResult()));
+			   String endResult = endMatcher.replaceAll(getDestinationEndResult());
+			   // only append anything if the source label is set
+			   if (endResult.length() > 0)
+			   {
+			      // only append delimiter if destintation label is not empty
+			      if (label.length() > 0) label.append(getDelimiter());
+			      // append the transformed end source label to the destination
+			      label.append(endResult);
+			   }
 			}
 		     }
+		     Annotation startSpan = span.firstElement();
+		     System.out.println("getAnnotatePrevious " + getAnnotatePrevious() + " previous " + previousSource);
+		     if (getAnnotatePrevious() && previousSource != null)
+		     {
+			startSpan = previousSource;
+		     }
+		     Annotation spanParent = sourceDestinationOfParent?startSpan
+			:graphDestinationOfParent?graph
+			:startSpan.getParent();
 		     Annotation annotation = graph.createSpan(
-			span.firstElement(), 
+			startSpan, 
 			span.lastElement(), 
 			getDestinationLayerId(), label.toString(), 
-			span.firstElement().getParent()); // TODO check what should be the parent
+			spanParent);
 		     changes.addAll(annotation.getChanges());
 
 		     // source annotations: 
@@ -414,7 +519,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 			changes.add(span.lastElement().destroy());
 		     }
 		     else
-		     { // chang the label
+		     { // change the label
 			String l = endMatcher.replaceAll(getSourceEndResult());
 			if (!l.equals(span.lastElement().getLabel()))
 			{ // only change if it's different
@@ -425,7 +530,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 		     
 		     span = null;
 		  } // found the end of the span
-	       } // in a span
+	       } // in a span	       
 	    } // next source annotation
 	 } // next parent
 	 return changes;
