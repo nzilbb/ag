@@ -438,20 +438,15 @@ public class Graph
       annotation.setLayer(getLayer(annotation.getLayerId()));
 
       // all annotations are taken to be 'children' of the whole graph
-      getAnnotations(annotation.getLayerId()).add(annotation);
-
-      if (annotation.getLayer() != null && annotation.getLayer().getParentId().equals("graph"))
-      {
-	 annotation.setParentId(getId());
+      if (annotation.getLayer() != null && !annotation.getLayer().getParentId().equals("graph"))
+      { // (but children of "graph" will be added by setParent below)
+	 getAnnotations(annotation.getLayerId()).add(annotation);
       }
-      else
-      {
-	 // add to the parent's collection
-	 if (annotation.getParent() != null)
-	 { // this ensures it's in the parent's child collection
-	    annotation.setParent(annotation.getParent());
-	 }	 
-      }
+      // add to the parent's collection
+      if (annotation.getParent() != null)
+      { // this ensures it's in the parent's child collection
+	 annotation.setParent(annotation.getParent());
+      }	 
       // find any children that might have already been added
       if (annotation.getLayer() != null)
       {

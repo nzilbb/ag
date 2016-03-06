@@ -1421,6 +1421,10 @@ public class Annotation
 	    tag.setEndId(getParent().getEndId());
 	 }
       }
+      else if (getGraph().getLayer(layerId).getParentId().equals("graph"))
+      { // the tag layer is a top level layer, so its parent is the whole graph
+	 tag.setParent(getGraph());
+      }
 
       getGraph().addAnnotation(tag);
       return tag;

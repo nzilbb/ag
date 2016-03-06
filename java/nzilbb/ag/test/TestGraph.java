@@ -513,6 +513,7 @@ public class TestGraph
       assertEquals("Update turn1: startId = turnStart", changes.elementAt(i++).toString());
       assertEquals("Update turn1: endId = turnEnd", changes.elementAt(i++).toString());
       assertEquals("Update turn1: parentId = my graph", changes.elementAt(i++).toString());
+      assertEquals("Update turn1: ordinal = 1", changes.elementAt(i++).toString());
       assertEquals("Create word1", changes.elementAt(i++).toString());
       assertEquals("Update word1: label = the", changes.elementAt(i++).toString());
       assertEquals("Update word1: startId = a1", changes.elementAt(i++).toString());
@@ -651,6 +652,7 @@ public class TestGraph
       assertEquals("Update newTurn: startId = turnStart", changes.elementAt(i++).toString());
       assertEquals("Update newTurn: endId = turnEnd", changes.elementAt(i++).toString());
       assertEquals("Update newTurn: parentId = my graph", changes.elementAt(i++).toString());
+      assertEquals("Update newTurn: ordinal = 2", changes.elementAt(i++).toString());
       // new child is created after its parent, and before its peers are changed
       assertEquals("Create word5", changes.elementAt(i++).toString());
       assertEquals("Update word5: label = jumps", changes.elementAt(i++).toString());
