@@ -91,7 +91,9 @@ public class TestSpanningConventionTransformer
 	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word3").getChange());
 	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word4").getChange());
 	 assertEquals("jumps", g.getAnnotation("word5").getLabel());
+	 assertEquals("ordinal corrected", 2, g.getAnnotation("word5").getOrdinal());
 	 assertEquals("over", g.getAnnotation("word6").getLabel());
+	 assertEquals("ordinal corrected", 3, g.getAnnotation("word6").getOrdinal());
 
 	 Annotation span = g.getAnnotations("comment").elementAt(0);
 	 assertEquals("quick brown fox", span.getLabel());
@@ -162,9 +164,11 @@ public class TestSpanningConventionTransformer
 	 assertEquals("the", g.getAnnotation("word1").getLabel());
 	 assertEquals("start = end", Change.Operation.Destroy, g.getAnnotation("word2").getChange());
 	 assertEquals("brown", g.getAnnotation("word3").getLabel());
+	 assertEquals("ordinal corrected", 2, g.getAnnotation("word3").getOrdinal());
 	 assertEquals("none between", Change.Operation.Destroy, g.getAnnotation("word4").getChange());
 	 assertEquals("none between", Change.Operation.Destroy, g.getAnnotation("word5").getChange());
 	 assertEquals("over", g.getAnnotation("word6").getLabel());
+	 assertEquals("ordinal corrected", 3, g.getAnnotation("word6").getOrdinal());
 
 	 Annotation span = g.getAnnotations("comment").elementAt(0);
 	 assertEquals("quick", span.getLabel());
@@ -393,11 +397,17 @@ public class TestSpanningConventionTransformer
 	    "word", "\\[(.*)", "(.*)\\]", false, null, "$1", "phrase", "$1", null);
 	 Vector<Change> changes = transformer.transform(g);
 	 assertEquals("the", g.getAnnotation("word1").getLabel());
+	 assertEquals("ordinal corrected", 1, g.getAnnotation("word1").getOrdinal());
 	 assertEquals("quick", g.getAnnotation("word2").getLabel());
+	 assertEquals("ordinal corrected", 2, g.getAnnotation("word2").getOrdinal());
 	 assertEquals("brown", g.getAnnotation("word3").getLabel());
+	 assertEquals("ordinal corrected", 3, g.getAnnotation("word3").getOrdinal());
 	 assertEquals("fox", g.getAnnotation("word4").getLabel());
+	 assertEquals("ordinal corrected", 4, g.getAnnotation("word4").getOrdinal());
 	 assertEquals("jumps", g.getAnnotation("word5").getLabel());
+	 assertEquals("ordinal corrected", 5, g.getAnnotation("word5").getOrdinal());
 	 assertEquals("over", g.getAnnotation("word6").getLabel());
+	 assertEquals("ordinal corrected", 6, g.getAnnotation("word6").getOrdinal());
 	 assertEquals(Change.Operation.Destroy, g.getAnnotation("NP").getChange());
 	 assertEquals(Change.Operation.Destroy, g.getAnnotation("VP").getChange());
 

@@ -400,8 +400,12 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 	    Vector<Annotation> span = null;
 	    Annotation previousSource = null;
 	    Annotation newTarget = null;
-	    for (Annotation source : parent.getAnnotations(getSourceLayerId()))
+	    int ordinal = 0;
+	    for (Annotation source : parent.annotations(getSourceLayerId()))
 	    {
+	       // set initial value of ordinal to the first ordinal
+	       if (ordinal == 0) ordinal = source.getOrdinal() - 1;
+
 	       // are we in a span?
 	       if (span == null)
 	       { // look for start
@@ -476,7 +480,6 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 			   }
 			} // span longer than 1
 			Annotation startSpan = span.firstElement();
-			System.out.println("getAnnotatePrevious " + getAnnotatePrevious() + " previous " + previousSource);
 			if (getAnnotatePrevious() && previousSource != null)
 			{
 			   startSpan = previousSource;
@@ -534,6 +537,16 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 		     span = null;
 		  } // found the end of the span
 	       } // in a span	       
+	       else
+	       { // not in a span
+		  ordinal++;
+
+		  // ensure ordinal is correct
+		  if (source.getOrdinal() != ordinal)
+		  {
+		     source.setOrdinal(ordinal);
+		  }
+	       } // not in a span
 	    } // next source annotation
 	 } // next parent
 	 return changes;
