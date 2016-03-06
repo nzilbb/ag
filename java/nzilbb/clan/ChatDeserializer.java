@@ -188,7 +188,6 @@ public class ChatDeserializer
     * @param newTranscribers List of names of transcribers.
     */
    public void setTranscribers(Vector<String> newTranscribers) { transcribers = newTranscribers; }
-
    
    /**
     * Map of layer IDs to layers.
@@ -326,7 +325,6 @@ public class ChatDeserializer
     * @param newCompletionLayerId Layer ID for completion layer.
     */
    public void setCompletionLayerId(String newCompletionLayerId) { completionLayerId = newCompletionLayerId; }
-
    
    /**
     * Layer ID for Gems
@@ -344,6 +342,58 @@ public class ChatDeserializer
     * @param newGemLayerId Layer ID for Gems
     */
    public void setGemLayerId(String newGemLayerId) { gemLayerId = newGemLayerId; }
+
+   
+   /**
+    * Layer ID for transcriber graph attributes.
+    * @see #getTranscriberLayerId()
+    * @see #setTranscriberLayerId(String)
+    */
+   protected String transcriberLayerId;
+   /**
+    * Getter for {@link #transcriberLayerId}: Layer ID for transcriber graph attributes.
+    * @return Layer ID for transcriber graph attributes.
+    */
+   public String getTranscriberLayerId() { return transcriberLayerId; }
+   /**
+    * Setter for {@link #transcriberLayerId}: Layer ID for transcriber graph attributes.
+    * @param newTranscriberLayerId Layer ID for transcriber graph attributes.
+    */
+   public void setTranscriberLayerId(String newTranscriberLayerId) { transcriberLayerId = newTranscriberLayerId; }
+
+   /**
+    * Layer ID for graph language.
+    * @see #getLanguagesLayerId()
+    * @see #setLanguagesLayerId(String)
+    */
+   protected String languagesLayerId;
+   /**
+    * Getter for {@link #languagesLayerId}: Layer ID for graph language.
+    * @return Layer ID for graph language.
+    */
+   public String getLanguagesLayerId() { return languagesLayerId; }
+   /**
+    * Setter for {@link #languagesLayerId}: Layer ID for graph language.
+    * @param newLanguagesLayerId Layer ID for graph language.
+    */
+   public void setLanguagesLayerId(String newLanguagesLayerId) { languagesLayerId = newLanguagesLayerId; }
+
+   /**
+    * Required participant meta-data layers.
+    * @see #getParticipantLayerIds()
+    * @see #setParticipantLayerIds(HashSet)
+    */
+   protected HashMap<String,String> participantLayerIds;
+   /**
+    * Getter for {@link #participantLayerIds}: Required participant meta-data layers.
+    * @return Required participant meta-data layers.
+    */
+   public HashMap<String,String> getParticipantLayerIds() { return participantLayerIds; }
+   /**
+    * Setter for {@link #participantLayerIds}: Required participant meta-data layers.
+    * @param newParticipantLayerIds Required participant meta-data layers.
+    */
+   public void setParticipantLayerIds(HashMap<String,String> newParticipantLayerIds) { participantLayerIds = newParticipantLayerIds; }
    
    /**
     * Utterance tokenizer.  The default is {@link SimpleTokenizer}.
@@ -391,9 +441,12 @@ public class ChatDeserializer
       utteranceLayerId = null;
       wordLayerId = null;
       gemLayerId = null;
+      transcriberLayerId = null;
+      languagesLayerId = null;
       expansionLayerId = null;
       completionLayerId = null;
       disfluencyLayerId = null;
+      participantLayerIds = new HashMap<String,String>();
    } // end of reset()
 
    // IStreamDeserializer methods:
@@ -460,6 +513,8 @@ public class ChatDeserializer
       boolean completionsFound = false;
       Pattern regexCompletion = Pattern.compile("\\(\\p{Alnum}+\\)");
       boolean gemsFound = false;
+      boolean transcribersFound = false;
+      boolean languagesFound = false;
 
       // read stream line by line
       boolean inHeader = true;
@@ -530,10 +585,15 @@ public class ChatDeserializer
 	       String value = header.substring(iColon + 1).trim();
 	       if (header.startsWith("@Languages:"))
 	       {
-		  StringTokenizer tokens = new StringTokenizer(value, ", ");
-		  while (tokens.hasMoreTokens())
+		  if (value.trim().length() > 0)
 		  {
-		     languages.add(tokens.nextToken());
+		     languagesFound = true;
+		     StringTokenizer tokens = new StringTokenizer(value, ", ");
+		     while (tokens.hasMoreTokens())
+		     {
+			languagesFound = true;
+			languages.add(tokens.nextToken());
+		     }
 		  }
 	       }
 	       else if (header.startsWith("@Participants:"))
@@ -561,40 +621,77 @@ public class ChatDeserializer
 			   {
 			      String role = participantTokens.nextToken();
 			      participants.get(id).put("role", role);
+			      participantLayerIds.put("role", null);
 			   }
 			}
 		     }
-		     if (participantTokens.hasMoreTokens())
-			languages.add(tokens.nextToken());
 		  }
 	       }
 	       else if (header.startsWith("@ID:"))
 	       {		  
 		  // @ID: language|corpus|code|age|sex|group|SES|role|education|custom|
-		  StringTokenizer tokens = new StringTokenizer(value, "|");
-		  String language = tokens.hasMoreTokens()?tokens.nextToken():"";
-		  String corpus = tokens.hasMoreTokens()?tokens.nextToken():"";
-		  String code = tokens.hasMoreTokens()?tokens.nextToken():"";
-		  String age = tokens.hasMoreTokens()?tokens.nextToken():"";
-		  String sex = tokens.hasMoreTokens()?tokens.nextToken():"";
-		  String group = tokens.hasMoreTokens()?tokens.nextToken():"";
-		  String SES = tokens.hasMoreTokens()?tokens.nextToken():"";
-		  String role = tokens.hasMoreTokens()?tokens.nextToken():"";
-		  String education = tokens.hasMoreTokens()?tokens.nextToken():"";
-		  String custom = tokens.hasMoreTokens()?tokens.nextToken():"";
+		  String[] tokens = value.split("\\|");
+		  String language = tokens.length<=0?"":tokens[0];
+		  String corpus = tokens.length<=1?"":tokens[1];
+		  String code = tokens.length<=2?"":tokens[2];
+		  String age = tokens.length<=3?"":tokens[3];
+		  String sex = tokens.length<=4?"":tokens[4];
+		  String group = tokens.length<=5?"":tokens[5];
+		  String SES = tokens.length<=6?"":tokens[6];
+		  String role = tokens.length<=7?"":tokens[7];
+		  String education = tokens.length<=8?"":tokens[8];
+		  String custom = tokens.length<=9?"":tokens[9];
 		  // ensure they're in the participants map
 		  if (!participants.containsKey(code))
 		  {
 		     participants.put(code, new HashMap<String,String>());
 		  }
+		  // set the attribute values and make sure we ask for layers if there are values
+		  if (language.length() > 0 && !participantLayerIds.containsKey("language"))
+		  {
+		     participantLayerIds.put("language", null);
+		  }
 		  participants.get(code).put("language", language);
+		  if (corpus.length() > 0 && !participantLayerIds.containsKey("corpus"))
+		  {
+		     participantLayerIds.put("corpus", null);
+		  }
 		  participants.get(code).put("corpus", corpus);
+		  if (age.length() > 0 && !participantLayerIds.containsKey("age"))
+		  {
+		     participantLayerIds.put("age", null);
+		  }
 		  participants.get(code).put("age", age);
+		  if (sex.length() > 0 && !participantLayerIds.containsKey("sex"))
+		  {
+		     participantLayerIds.put("sex", null);
+		  }
 		  participants.get(code).put("sex", sex);
+		  if (group.length() > 0 && !participantLayerIds.containsKey("group"))
+		  {
+		     participantLayerIds.put("group", null);
+		  }
 		  participants.get(code).put("group", group);
+		  if (SES.length() > 0 && !participantLayerIds.containsKey("SES"))
+		  {
+		     participantLayerIds.put("SES", null);
+		  }
 		  participants.get(code).put("SES", SES);
+		  if (role.length() > 0 && !participantLayerIds.containsKey("role"))
+		  {
+		     participantLayerIds.put("role", null);
+		     //TODO participants.get(code).put("role", role);
+		  }
 		  participants.get(code).put("role", role);
+		  if (education.length() > 0 && !participantLayerIds.containsKey("education"))
+		  {
+		     participantLayerIds.put("education", null);
+		  }
 		  participants.get(code).put("education", education);
+		  if (custom.length() > 0 && !participantLayerIds.containsKey("custom"))
+		  {
+		     participantLayerIds.put("custom", null);
+		  }
 		  participants.get(code).put("custom", custom);
 	       }
 	       else if (header.startsWith("@Media:"))
@@ -611,6 +708,7 @@ public class ChatDeserializer
 	       }
 	       else if (header.startsWith("@Transcriber:"))
 	       {
+		  transcribersFound = true;
 		  transcribers.add(value);
 	       }
 	    } // it's a key/value pair
@@ -749,6 +847,46 @@ public class ChatDeserializer
 	 }
 	 parameters.addParameter(p);
       }
+      if (transcribersFound)
+      {
+	 Parameter p = new Parameter("transcriberLayerId", "layerId", "Transcriber layer", "Layer for transcriber name");
+	 if (idToLayer.containsKey("transcriber"))
+	 {
+	    p.setValue("transcriber");
+	 }
+	 else if (idToLayer.containsKey("transcribers"))
+	 {
+	    p.setValue("transcribers");
+	 }
+	 parameters.addParameter(p);
+      }
+      if (languagesFound)
+      {
+	 Parameter p = new Parameter("languagesLayerId", "layerId", "Transcript language layer", "Layer for transcriber language");
+	 if (idToLayer.containsKey("languages"))
+	 {
+	    p.setValue("languages");
+	 }
+	 else if (idToLayer.containsKey("language"))
+	 {
+	    p.setValue("language");
+	 }
+	 parameters.addParameter(p);
+      }
+      // participant meta data layers
+      for (String attribute : participantLayerIds.keySet())
+      {
+	 Parameter p = new Parameter(attribute + "LayerId", "layerId", attribute + " layer", "Layer for " + attribute);
+	 // if we have a layer called that
+	 if (idToLayer.containsKey(attribute)
+	     // and it's a child of the participant layer
+	     && (idToLayer.get(attribute).getParentId().equals(getParticipantLayerId())
+		 || idToLayer.get(attribute).getParentId().equals("who")))
+	 {
+	    p.setValue(attribute);
+	 }
+	 parameters.addParameter(p);
+      }
 
       return parameters;
    }
@@ -792,9 +930,24 @@ public class ChatDeserializer
       {
 	 setGemLayerId((String)parameters.get("gemLayerId").getValue());
       }
+      if (parameters.containsKey("transcriberLayerId"))
+      {
+	 setTranscriberLayerId((String)parameters.get("transcriberLayerId").getValue());
+      }
+      if (parameters.containsKey("languagesLayerId"))
+      {
+	 setLanguagesLayerId((String)parameters.get("languagesLayerId").getValue());
+      }
       if (getParticipantLayerId() == null || getTurnLayerId() == null || getUtteranceLayerId() == null || getWordLayerId() == null)
       {
 	 throw new DeserializationParametersMissingException();
+      }
+      for (String attribute : participantLayerIds.keySet())
+      {
+	 if (parameters.containsKey(attribute + "LayerId"))
+	 {
+	    participantLayerIds.put(attribute, ((String)parameters.get(attribute + "LayerId").getValue()));
+	 }
       }
    }
 
@@ -826,18 +979,54 @@ public class ChatDeserializer
       if (getExpansionLayerId() != null) graph.addLayer(idToLayer.get(getExpansionLayerId()));
       if (getCompletionLayerId() != null) graph.addLayer(idToLayer.get(getCompletionLayerId()));
       if (getGemLayerId() != null) graph.addLayer(idToLayer.get(getGemLayerId()));
+      if (getTranscriberLayerId() != null) graph.addLayer(idToLayer.get(getTranscriberLayerId()));
+      if (getLanguagesLayerId() != null) graph.addLayer(idToLayer.get(getLanguagesLayerId()));
+      for (String attribute : participantLayerIds.keySet())
+      {
+	 String layerId = participantLayerIds.get(attribute);
+	 if (layerId != null)
+	 {
+	    graph.addLayer(idToLayer.get(layerId));
+	 }
+      } // next participant layer 
+
+      // graph meta data
+      if (getTranscriberLayerId() != null)
+      {
+	 for (String transcriber : transcribers)
+	 {
+	    graph.createTag(graph, getTranscriberLayerId(), transcriber);
+	 }
+      }
+      if (getLanguagesLayerId() != null)
+      {
+	 for (String language : languages)
+	 {
+	    graph.createTag(graph, getLanguagesLayerId(), language);
+	 }
+      }
       
       // participants
       for (String participantId : participants.keySet())
       {
 	 HashMap<String,String> attributes = participants.get(participantId);
-	 // TODO the rest of the participant info
 	 Annotation participant = new Annotation(
 	    participantId, 
 	    attributes.containsKey("name")?attributes.get("name"):participantId, 
 	    getParticipantLayerId());
 	 participant.setParentId(graph.getId());
 	 graph.addAnnotation(participant);
+
+	 // set the participant meta-data
+	 for (String attribute : participantLayerIds.keySet())
+	 {
+	    String layerId = participantLayerIds.get(attribute);
+	    if (layerId != null && attributes.containsKey(attribute))
+	    {
+	       graph.createTag(participant, layerId, attributes.get(attribute));
+	    }
+	 }
+	 
       }
 
       // ensure we have an utterance tokenizer

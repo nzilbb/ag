@@ -43,7 +43,12 @@ public class TestChatDeserializer
       throws Exception
    {
       Layer[] layers = {
+	 new Layer("transcriber", "Transcribers", 0, true, true, true),
+	 new Layer("languages", "Graph language", 0, true, true, true),
 	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("language", "Speaker language", 0, false, false, true, "who", true),
+	 new Layer("corpus", "Speaker corpus", 0, false, false, true, "who", true),
+	 new Layer("role", "Speaker role", 0, false, false, true, "who", true),
 	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
 	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
 	 new Layer("word", "Words", 2, true, false, false, "turn", true),
@@ -60,7 +65,7 @@ public class TestChatDeserializer
 
       // load the stream
       ParameterSet defaultParamaters = deserializer.load(streams, null, layers);
-//      for (Parameter p : defaultParamaters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      //for (Parameter p : defaultParamaters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
 
       // configure the deserialization
       deserializer.setParameters(defaultParamaters);
@@ -73,17 +78,35 @@ public class TestChatDeserializer
       {
 	 System.out.println(warning);
       }
-
+      
       assertEquals("8064.cha", g.getId());
+      String[] transcribers = g.labels("transcriber"); 
+      assertEquals(2, transcribers.length);
+      assertEquals("Hayley Besten", transcribers[0]);
+      assertEquals("Meredith Wesley", transcribers[1]);
+      String[] languages = g.labels("languages"); 
+      assertEquals(1, languages.length);
+      assertEquals("eng", languages[0]);
 
+      // participants     
       assertEquals(2, g.getAnnotations("who").size());
       assertEquals("8064", g.getAnnotation("SUB").getLabel());
       assertEquals("who", g.getAnnotation("SUB").getLayerId());
       assertEquals("Investigator", g.getAnnotation("EXA").getLabel());
       assertEquals("who", g.getAnnotation("EXA").getLayerId());
 
+      // participant meta data
+      assertEquals("eng", g.getAnnotation("SUB").my("language").getLabel());
+      assertEquals("eng", g.getAnnotation("EXA").my("language").getLabel());
+      assertEquals("G", g.getAnnotation("SUB").my("corpus").getLabel());
+      assertEquals("G", g.getAnnotation("EXA").my("corpus").getLabel());
+      assertEquals("Participant", g.getAnnotation("SUB").my("role").getLabel());
+      assertEquals("Investigator", g.getAnnotation("EXA").my("role").getLabel());
+
+      // turns
       assertEquals(1, g.getAnnotations("turn").size());
 
+      // utterances
       Vector<Annotation> utterances = g.getAnnotations("utterance");
       assertEquals(new Double(0.0), utterances.elementAt(0).getStart().getOffset());
       assertEquals(new Double(10.988), utterances.elementAt(0).getEnd().getOffset());
