@@ -478,9 +478,16 @@ public class TestGraph
       assertEquals("Update a1: offset = 0.5", changes.elementAt(0).toString());
       assertEquals("Update word1: label = The", changes.elementAt(1).toString());
 
+      Annotation jumps = new Annotation("word5", "jumps", "word", "a5", "a5", "turn1");
+      jumps.create();
+      g.addAnnotation(jumps);
+
       g.rollback();
       assertEquals(Change.Operation.NoChange, g.getChange());
+      System.out.println(""+g.getChanges());
       assertEquals(0, g.getChanges().size());
+
+      assertNull("ensure created annotations are removed by rollback", g.getAnnotation("word5"));
 
       g.create();
       assertEquals(Change.Operation.Create, g.getChange());
@@ -573,6 +580,7 @@ public class TestGraph
       g.addAnchor(new Anchor("a3", 3.0));
       g.addAnchor(new Anchor("a4", 4.0));
       g.addAnchor(new Anchor("a5", 5.0));
+      g.addAnchor(new Anchor("a7", 7.0));
       g.addAnchor(new Anchor("turnEnd", 6.0));
 
       Annotation turn1 = new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "my graph");
@@ -661,8 +669,15 @@ public class TestGraph
       // finally the old parent is deleted
       assertEquals("Destroy turn1", changes.elementAt(i++).toString());
       assertEquals(i, changes.size());
+
+      // delete an anchor
+      g.getAnchor("a7").destroy();
+
       g.commit();
       assertEquals(Change.Operation.NoChange, g.getChange());
+      assertNull("commit removes deleted annotations", g.getAnnotation("word2"));
+      assertNull("commit removes deleted annotations", g.getAnnotation("turn1"));
+      assertNull("commit removes deleted anchors", g.getAnchor("a7"));
    }
 
    @Test public void constructionOrder() 

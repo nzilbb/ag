@@ -353,6 +353,12 @@ public class Annotation
    public Vector<Change> setParent(Annotation newParent) 
    { 
       Vector<Change> changes = new Vector<Change>();
+      Annotation currentParent = getParent();
+      if (currentParent != null && currentParent != newParent)
+      {
+	 Vector<Annotation> currentSiblings = currentParent.getAnnotations(getLayerId());
+	 currentSiblings.remove(this);
+      }
       if (newParent == null)
       {
 	 changes.addAll(
@@ -360,12 +366,6 @@ public class Annotation
       }
       else
       {	 
-	 Annotation currentParent = getParent();
-	 if (currentParent != null && currentParent != newParent)
-	 {
-	    Vector<Annotation> currentSiblings = currentParent.getAnnotations(getLayerId());
-	    currentSiblings.remove(this);
-	 }
 	 changes.addAll(
 	    setParentId(newParent.getId()));
 	 Vector<Annotation> newSiblings = newParent.getAnnotations(getLayerId());

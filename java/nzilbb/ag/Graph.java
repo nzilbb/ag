@@ -28,6 +28,7 @@ import java.util.Vector;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Locale;
+import java.util.Iterator;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 
@@ -834,8 +835,37 @@ public class Graph
    public void commit()
    {
       super.commit();
-      for (Anchor a : getAnchors().values()) a.commit();
-      for (Annotation a : getAnnotationsById().values()) a.commit();
+
+      // anchors
+      Iterator<Anchor> iAnchor = getAnchors().values().iterator();
+      while (iAnchor.hasNext())
+      {
+	 Anchor a = iAnchor.next();
+	 if (a.getChange() == Change.Operation.Destroy)
+	 {
+	    iAnchor.remove();
+	 }
+	 else
+	 {
+	    a.commit();
+	 }
+      } // next 
+
+      // annotations
+      Iterator<Annotation> iAnnotation = getAnnotationsById().values().iterator();
+      while (iAnnotation.hasNext())
+      {
+	 Annotation a = iAnnotation.next();
+	 if (a.getChange() == Change.Operation.Destroy)
+	 {
+	    a.setParent(null);
+	    iAnnotation.remove();
+	 }
+	 else
+	 {
+	    a.commit();
+	 }
+      } // next 
    }
    /**
     * Rolls back changes since the object was create or {@link #commit()} was last called. The effect of this is to rollback all anchors and annotations.
@@ -844,8 +874,36 @@ public class Graph
    public void rollback()
    {
       super.rollback();
-      for (Anchor a : getAnchors().values()) a.rollback();
-      for (Annotation a : getAnnotationsById().values()) a.rollback();
+      // anchors
+      Iterator<Anchor> iAnchor = getAnchors().values().iterator();
+      while (iAnchor.hasNext())
+      {
+	 Anchor a = iAnchor.next();
+	 if (a.getChange() == Change.Operation.Create)
+	 {
+	    iAnchor.remove();
+	 }
+	 else
+	 {
+	    a.rollback();
+	 }
+      } // next 
+
+      // annotations
+      Iterator<Annotation> iAnnotation = getAnnotationsById().values().iterator();
+      while (iAnnotation.hasNext())
+      {
+	 Annotation a = iAnnotation.next();
+	 if (a.getChange() == Change.Operation.Create)
+	 {
+	    a.setParent(null);
+	    iAnnotation.remove();
+	 }
+	 else
+	 {
+	    a.rollback();
+	 }
+      } // next 
    } // end of rollback()
 
    /**
