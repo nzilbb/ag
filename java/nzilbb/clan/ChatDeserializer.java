@@ -31,6 +31,7 @@ import java.io.InputStreamReader;
 import nzilbb.ag.*;
 import nzilbb.ag.util.SimpleTokenizer;
 import nzilbb.ag.util.ConventionTransformer;
+import nzilbb.ag.util.SpanningConventionTransformer;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.configure.Parameter;
@@ -969,9 +970,13 @@ public class ChatDeserializer
 	     transformer.addDestinationResult(getDisfluencyLayerId(), "&");
 	  }
 	  transformer.transform(graph);
+	  graph.commit();
 	  
 	  // expansions
-	  //Pattern regexExpansion = Pattern.compile("\\[: ");
+	  SpanningConventionTransformer spanningTransformer = new SpanningConventionTransformer(
+	     "word", "\\[:", "(.*)\\]", true, null, null, getExpansionLayerId(), null, "$1", true);	  
+	  spanningTransformer.transform(graph);	
+	  graph.commit();
 	  
 	  
 	  // completions at the start
@@ -981,8 +986,9 @@ public class ChatDeserializer
 	  {
 	     transformer.addDestinationResult(getCompletionLayerId(), "$1$2");
 	  }
-	  transformer.transform(graph);
-	  
+	  transformer.transform(graph);	
+	  graph.commit();
+  
 	  // completions at the end
 	  transformer = new ConventionTransformer(getWordLayerId(), "(.+)\\((\\p{Alnum}+)\\)");
 	  transformer.addDestinationResult(getWordLayerId(), "$1");
@@ -991,6 +997,7 @@ public class ChatDeserializer
 	     transformer.addDestinationResult(getCompletionLayerId(), "$1$2");
 	  }
 	  transformer.transform(graph);
+	  graph.commit();
 	  
 	  Graph[] graphs = { graph };
 	  return graphs;

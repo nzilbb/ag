@@ -115,6 +115,33 @@ public class TestChatDeserializer
       assertEquals("trailing completion", "havin", words[133].getLabel());
       assertEquals("trailing completion", "having", words[133].my("completion").getLabel());
 
+      // expansions
+      Annotation[] expansions = g.annotations("expansion");
+      assertEquals(11, expansions.length);
+      assertEquals("going to", expansions[0].getLabel());
+      assertEquals("gonna", expansions[0].my("word").getLabel());
+      assertEquals("kind of", expansions[1].getLabel());
+      assertEquals("kinda", expansions[1].my("word").getLabel());
+      assertEquals("going to", expansions[2].getLabel());
+      assertEquals("gonna", expansions[2].my("word").getLabel());
+      assertEquals("going to", expansions[3].getLabel());
+      assertEquals("gonna", expansions[3].my("word").getLabel());
+      assertEquals("going to", expansions[4].getLabel());
+      assertEquals("gonna", expansions[4].my("word").getLabel());
+      assertEquals("going to", expansions[5].getLabel());
+      assertEquals("gonna", expansions[5].my("word").getLabel());
+      assertEquals("going to", expansions[6].getLabel());
+      assertEquals("gonna", expansions[6].my("word").getLabel());
+      assertEquals("got to", expansions[7].getLabel());
+      assertEquals("gotta", expansions[7].my("word").getLabel());
+      assertEquals("going to", expansions[8].getLabel());
+      assertEquals("gonna", expansions[8].my("word").getLabel());
+      assertEquals("kind of", expansions[9].getLabel());
+      assertEquals("kinda", expansions[9].my("word").getLabel());
+      assertEquals("want to", expansions[10].getLabel());
+      assertEquals("wanna", expansions[10].my("word").getLabel());
+
+      // gems
       Annotation[] gems = g.annotations("gem");
       assertEquals(11, gems.length);
       assertEquals(new Double(0.0), gems[0].getStart().getOffset());
