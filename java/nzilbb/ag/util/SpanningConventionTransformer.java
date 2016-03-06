@@ -382,12 +382,12 @@ public class SpanningConventionTransformer // TODO implementation that handles n
       if (graph.getLayer(getSourceLayerId()) == null) 
 	 throw new TransformationException(this, "No source layer: " + getSourceLayerId());
       Layer destinationLayer = graph.getLayer(getDestinationLayerId());
-      if (destinationLayer == null) 
-	 throw new TransformationException(this, "No destination layer: " + getDestinationLayerId());
-      if (getDestinationLayerId().equals(getSourceLayerId())) 
+      if (getSourceLayerId().equals(getDestinationLayerId())) 
 	 throw new TransformationException(this, "Source and destination layer are the same: " + getDestinationLayerId());
-      boolean sourceDestinationOfParent = destinationLayer.getParentId().equals(getSourceLayerId());
-      boolean graphDestinationOfParent = destinationLayer.getParentId().equals("graph");
+      boolean sourceDestinationOfParent = destinationLayer != null 
+	 && destinationLayer.getParentId().equals(getSourceLayerId());
+      boolean graphDestinationOfParent = destinationLayer != null 
+	 && destinationLayer.getParentId().equals("graph");
       try
       {
 	 Pattern startRegexp = Pattern.compile(getStartPattern());
@@ -425,69 +425,72 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 		  { // found the end of the span
 		     Matcher startMatcher = startRegexp.matcher(span.elementAt(0).getLabel());
 
-		     // destination annotation:
-
-		     StringBuffer label = new StringBuffer();
-		     if (getDestinationStartResult() != null)
-		     { // add start annotation to label
-			label.append(startMatcher.replaceAll(getDestinationStartResult()));
-		     }
-		     if (span.size() == 1)
-		     { // special case: span a single source annotation
-			if (getDestinationEndResult() != null)
-			{
-			   endMatcher = endRegexp.matcher(label.toString());
-			   label = new StringBuffer();
-			   label.append(endMatcher.replaceAll(getDestinationEndResult()));
-			}
-		     }
-		     else
+		     if (getDestinationLayerId() != null)
 		     {
-			if (getDeleteInSource())
-			{
-			   // for each annotation between the start and the end
-			   for (int i = 1; i < span.size() - 1; i++)
+			// destination annotation:
+			
+			StringBuffer label = new StringBuffer();
+			if (getDestinationStartResult() != null)
+			{ // add start annotation to label
+			   label.append(startMatcher.replaceAll(getDestinationStartResult()));
+			}
+			if (span.size() == 1)
+			{ // special case: span a single source annotation
+			   if (getDestinationEndResult() != null)
 			   {
+			      endMatcher = endRegexp.matcher(label.toString());
+			      label = new StringBuffer();
+			      label.append(endMatcher.replaceAll(getDestinationEndResult()));
+			   }
+			}
+			else
+			{ // span longer than 1
+			   if (getDeleteInSource())
+			   {
+			      // for each annotation between the start and the end
+			      for (int i = 1; i < span.size() - 1; i++)
+			      {
+				 // only append anything if the source label is set
+				 if (span.elementAt(i).getLabel().length() > 0)
+				 {
+				    // only append delimiter if destintation label is not empty
+				    if (label.length() > 0) label.append(getDelimiter());
+				    // append the source label to the destination
+				    label.append(span.elementAt(i).getLabel());
+				 }
+			      }
+			   }
+			   
+			   // end annotation
+			   if (getDestinationEndResult() != null)
+			   {
+			      String endResult = endMatcher.replaceAll(getDestinationEndResult());
 			      // only append anything if the source label is set
-			      if (span.elementAt(i).getLabel().length() > 0)
+			      if (endResult.length() > 0)
 			      {
 				 // only append delimiter if destintation label is not empty
 				 if (label.length() > 0) label.append(getDelimiter());
-				 // append the source label to the destination
-				 label.append(span.elementAt(i).getLabel());
+				 // append the transformed end source label to the destination
+				 label.append(endResult);
 			      }
 			   }
-			}
-
-			// end annotation
-			if (getDestinationEndResult() != null)
+			} // span longer than 1
+			Annotation startSpan = span.firstElement();
+			System.out.println("getAnnotatePrevious " + getAnnotatePrevious() + " previous " + previousSource);
+			if (getAnnotatePrevious() && previousSource != null)
 			{
-			   String endResult = endMatcher.replaceAll(getDestinationEndResult());
-			   // only append anything if the source label is set
-			   if (endResult.length() > 0)
-			   {
-			      // only append delimiter if destintation label is not empty
-			      if (label.length() > 0) label.append(getDelimiter());
-			      // append the transformed end source label to the destination
-			      label.append(endResult);
-			   }
+			   startSpan = previousSource;
 			}
-		     }
-		     Annotation startSpan = span.firstElement();
-		     System.out.println("getAnnotatePrevious " + getAnnotatePrevious() + " previous " + previousSource);
-		     if (getAnnotatePrevious() && previousSource != null)
-		     {
-			startSpan = previousSource;
-		     }
-		     Annotation spanParent = sourceDestinationOfParent?startSpan
-			:graphDestinationOfParent?graph
-			:startSpan.getParent();
-		     Annotation annotation = graph.createSpan(
-			startSpan, 
-			span.lastElement(), 
-			getDestinationLayerId(), label.toString(), 
-			spanParent);
-		     changes.addAll(annotation.getChanges());
+			Annotation spanParent = sourceDestinationOfParent?startSpan
+			   :graphDestinationOfParent?graph
+			   :startSpan.getParent();
+			Annotation annotation = graph.createSpan(
+			   startSpan, 
+			   span.lastElement(), 
+			   getDestinationLayerId(), label.toString(), 
+			   spanParent);
+			changes.addAll(annotation.getChanges());
+		     } // non-null destination
 
 		     // source annotations: 
 

@@ -494,6 +494,71 @@ public class TestSpanningConventionTransformer
       }
    }
 
+   @Test public void noDestination() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");
+
+      g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+			   true, // peers
+			   true, // peersOverlap
+			   true)); // saturated
+      g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "who", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "turn", // parentId
+			   true)); // parentIncludes
+
+      g.addAnchor(new Anchor("a0", 0.0)); // turn start
+      g.addAnchor(new Anchor("a1", 1.0)); // the
+      g.addAnchor(new Anchor("a2", 2.0)); // quick
+      g.addAnchor(new Anchor("a3", 3.0)); // brown
+      g.addAnchor(new Anchor("a4", 4.0)); // fox
+      // unset offsets
+      g.addAnchor(new Anchor("a?1", null)); // jumps
+      g.addAnchor(new Anchor("a?2", null)); // over
+      g.addAnchor(new Anchor("a5", 5.0)); // end of over
+      g.addAnchor(new Anchor("a6", 6.0)); // turn end
+
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "a0", "a6", "my graph"));
+
+      g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a6", "participant1"));
+
+      g.addAnnotation(new Annotation("word1", "the", "word", "a1", "a2", "turn1"));
+      g.addAnnotation(new Annotation("word2", "{quick", "word", "a2", "a3", "turn1"));
+      g.addAnnotation(new Annotation("word3", "brown", "word", "a3", "a4", "turn1"));
+      g.addAnnotation(new Annotation("word4", "fox}", "word", "a4", "a?1", "turn1"));
+      g.addAnnotation(new Annotation("word5", "jumps", "word", "a?1", "a?2", "turn1"));
+      g.addAnnotation(new Annotation("word6", "over", "word", "a?2", "a5", "turn1"));
+
+      try
+      {
+	 // delete span by setting destination layer to null
+	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
+	    "word", "\\{(.*)", "(.*)\\}", true, null, null, null, null, null);
+	 Vector<Change> changes = transformer.transform(g);
+	 assertEquals("the", g.getAnnotation("word1").getLabel());
+	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word2").getChange());
+	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word3").getChange());
+	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word4").getChange());
+	 assertEquals("jumps", g.getAnnotation("word5").getLabel());
+	 assertEquals("over", g.getAnnotation("word6").getLabel());
+
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+   }
+
    public static void main(String args[]) 
    {
       org.junit.runner.JUnitCore.main("nzilbb.ag.util.test.TestSpanningConventionTransformer");
