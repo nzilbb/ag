@@ -484,10 +484,10 @@ public class TestGraph
 
       g.rollback();
       assertEquals(Change.Operation.NoChange, g.getChange());
-      System.out.println(""+g.getChanges());
       assertEquals(0, g.getChanges().size());
 
       assertNull("ensure created annotations are removed by rollback", g.getAnnotation("word5"));
+      assertFalse("ensure created annotations are removed from layer by rollback", g.getLayer("word").getAnnotations().contains(jumps));
 
       g.create();
       assertEquals(Change.Operation.Create, g.getChange());
@@ -678,6 +678,7 @@ public class TestGraph
       assertNull("commit removes deleted annotations", g.getAnnotation("word2"));
       assertNull("commit removes deleted annotations", g.getAnnotation("turn1"));
       assertNull("commit removes deleted anchors", g.getAnchor("a7"));
+      assertFalse("commit removes deleted annotations from layer", g.getLayer("word").getAnnotations().contains(quick));
    }
 
    @Test public void constructionOrder() 

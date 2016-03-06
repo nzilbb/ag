@@ -859,6 +859,7 @@ public class Graph
 	 if (a.getChange() == Change.Operation.Destroy)
 	 {
 	    a.setParent(null);
+	    a.setLayer(null);
 	    iAnnotation.remove();
 	 }
 	 else
@@ -897,6 +898,7 @@ public class Graph
 	 if (a.getChange() == Change.Operation.Create)
 	 {
 	    a.setParent(null);
+	    a.setLayer(null);
 	    iAnnotation.remove();
 	 }
 	 else
