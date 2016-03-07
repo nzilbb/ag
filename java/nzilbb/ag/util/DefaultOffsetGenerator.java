@@ -229,7 +229,7 @@ public class DefaultOffsetGenerator
 	 // traverse the layer hiercharchy to get a list of the uppermost layers that
 	 // are not top-level, and are peersOverlap == false      
 	 LayerHierarchyTraversal<HashSet<Layer>> layerTraversal 
-	    = new LayerHierarchyTraversal<HashSet<Layer>>(new HashSet<Layer>(), graph)
+	    = new LayerHierarchyTraversal<HashSet<Layer>>(new HashSet<Layer>(), graph.getSchema())
 	    {
 	       protected void pre(Layer child)
 	       {

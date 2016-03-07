@@ -125,22 +125,24 @@ public class Graph
    public void setAnnotationsById(LinkedHashMap<String,Annotation> newAnnotationsById) { annotationsById = newAnnotationsById; }
 
 
+   
    /**
-    * A map of layer definitions, keyed on layerId.
-    * @see #getLayers()
-    * @see #setLayers(LinkedHashMap)
+    * The layer definitions and their interrelations.
+    * @see #getSchema()
+    * @see #setSchema(Schema)
     */
-   protected LinkedHashMap<String,Layer> layers = new LinkedHashMap<String,Layer>();
+   protected Schema schema = new Schema();
    /**
-    * Getter for {@link #layers}: A map of layer definitions, keyed on layerId.
-    * @return A map of layer definitions, keyed on layerId.
+    * Getter for {@link #schema}: The layer definitions and their interrelations.
+    * @return The layer definitions and their interrelations.
     */
-   public LinkedHashMap<String,Layer> getLayers() { return layers; }
+   public Schema getSchema() { return schema; }
    /**
-    * Setter for {@link #layers}: A map of layer definitions, keyed on layerId.
-    * @param newLayers A map of layer definitions, keyed on layerId.
+    * Setter for {@link #schema}: The layer definitions and their interrelations.
+    * @param newSchema The layer definitions and their interrelations.
     */
-   public void setLayers(LinkedHashMap<String,Layer> newLayers) { layers = newLayers; }   
+   public void setSchema(Schema newSchema) { schema = newSchema; }
+
    
    // Methods:
       
@@ -150,9 +152,7 @@ public class Graph
    public Graph()
    {
       graph = this;
-      // create the top-level 'whole graph' layer that is the descendant of all actual annotation layers
-      addLayer(new Layer("graph", "The graph as a whole", 2, false, false, true));
-      setLayerId("graph");
+      setLayerId(getSchema().getRoot().getId());
    } // end of constructor
 
    
@@ -222,7 +222,7 @@ public class Graph
 	    if (!ancestor.getLayerId().equals("graph")
 		&& !fragment.getAnnotationsById().containsKey(ancestor.getId()))
 	    {
-	       if (!fragment.layers.containsKey(ancestor.getLayerId()))
+	       if (!fragment.schema.getLayers().containsKey(ancestor.getLayerId()))
 	       { // add the ancestor's layer
 		  fragment.addLayer(getLayer(ancestor.getLayerId()));
 	       }
@@ -288,7 +288,7 @@ public class Graph
 	    if (!ancestor.getLayerId().equals("graph")
 		&& !fragment.getAnnotationsById().containsKey(ancestor.getId()))
 	    {
-	       if (!fragment.layers.containsKey(ancestor.getLayerId()))
+	       if (!fragment.schema.getLayers().containsKey(ancestor.getLayerId()))
 	       { // add the ancestor's layer
 		  fragment.addLayer(getLayer(ancestor.getLayerId()));
 	       }
@@ -362,7 +362,7 @@ public class Graph
 	       if (!anc.getLayerId().equals("graph")
 		   && !fragment.getAnnotationsById().containsKey(anc.getId()))
 	       {
-		  if (!fragment.layers.containsKey(anc.getLayerId()))
+		  if (!fragment.schema.getLayers().containsKey(anc.getLayerId()))
 		  { // add the ancestor's layer
 		     fragment.addLayer(getLayer(anc.getLayerId()));
 		  }
@@ -605,30 +605,7 @@ public class Graph
    @SuppressWarnings("unchecked")
    public void addLayer(Layer layer)
    {
-      getLayers().put(layer.getId(), layer);
-      if (layer.getParentId() != null)
-      {
-	 layer.setParent(getLayer(layer.getParentId()));
-      }
-      else
-      { // top level layer
-	 // add it to layers.children
-	 if (!containsKey("layers")) put("layers", new LinkedHashMap<String,Object>());
-	 LinkedHashMap<String,Object> layers = (LinkedHashMap<String,Object>)get("layers");
-	 if (!layers.containsKey("children")) layers.put("children", new LinkedHashMap<String, Layer>());
-	 LinkedHashMap<String, Layer> children = (LinkedHashMap<String, Layer>)layers.get("children");
-	 children.put(layer.getId(), layer);
-      }
-
-      // now check whether any child layers have already been added, and ensure they are added as children
-      for (Layer otherLayer : getLayers().values())
-      {
-	 if (otherLayer.getParentId() != null
-	     && otherLayer.getParentId().equals(layer.getId()))
-	 {
-	    otherLayer.setParent(layer);
-	 }
-      }
+      getSchema().addLayer(layer);
    } // end of addLayer()
 
    
@@ -639,7 +616,7 @@ public class Graph
     */
    public Layer getLayer(String layerId)
    {
-      return getLayers().get(layerId);
+      return getSchema().getLayer(layerId);
    } // end of getLayer()
 
    
@@ -650,7 +627,7 @@ public class Graph
    public Vector<Layer> getLayersTopDown()
    {
       LayerHierarchyTraversal<Vector<Layer>> topDown = new LayerHierarchyTraversal<Vector<Layer>>(
-	 new Vector<Layer>(), this)
+	 new Vector<Layer>(), getSchema())
 	 {
 	    protected void pre(Layer layer)
 	    {

@@ -1105,14 +1105,14 @@ public class TestGraph
       assertFalse("excluded layer", f.getAnnotationsById().containsKey("phrase2"));
 
       // check layers
-      assertFalse("excluded layer", f.getLayers().containsKey("topic"));
-      assertTrue("ancestor layer", f.getLayers().containsKey("who"));
-      assertTrue("ancestor layer", f.getLayers().containsKey("turn"));
-      assertTrue("included layer", f.getLayers().containsKey("utterance"));
-      assertTrue("included layer", f.getLayers().containsKey("word"));
-      assertFalse("excluded layer", f.getLayers().containsKey("phone"));
-      assertFalse("excluded layer", f.getLayers().containsKey("pos"));
-      assertFalse("excluded layer", f.getLayers().containsKey("phrase"));
+      assertFalse("excluded layer", f.getSchema().getLayers().containsKey("topic"));
+      assertTrue("ancestor layer", f.getSchema().getLayers().containsKey("who"));
+      assertTrue("ancestor layer", f.getSchema().getLayers().containsKey("turn"));
+      assertTrue("included layer", f.getSchema().getLayers().containsKey("utterance"));
+      assertTrue("included layer", f.getSchema().getLayers().containsKey("word"));
+      assertFalse("excluded layer", f.getSchema().getLayers().containsKey("phone"));
+      assertFalse("excluded layer", f.getSchema().getLayers().containsKey("pos"));
+      assertFalse("excluded layer", f.getSchema().getLayers().containsKey("phrase"));
 
    }
 
@@ -1242,14 +1242,14 @@ public class TestGraph
       assertFalse("excluded layer", f.getAnnotationsById().containsKey("phrase2"));
 
       // check layers
-      assertFalse("excluded layer", f.getLayers().containsKey("topic"));
-      assertTrue("ancestor layer", f.getLayers().containsKey("who"));
-      assertTrue("ancestor layer", f.getLayers().containsKey("turn"));
-      assertFalse("excluded", f.getLayers().containsKey("utterance"));
-      assertTrue("annotation layer", f.getLayers().containsKey("word"));
-      assertTrue("included layer", f.getLayers().containsKey("phone"));
-      assertTrue("included layer", f.getLayers().containsKey("pos"));
-      assertFalse("excluded layer", f.getLayers().containsKey("phrase"));
+      assertFalse("excluded layer", f.getSchema().getLayers().containsKey("topic"));
+      assertTrue("ancestor layer", f.getSchema().getLayers().containsKey("who"));
+      assertTrue("ancestor layer", f.getSchema().getLayers().containsKey("turn"));
+      assertFalse("excluded", f.getSchema().getLayers().containsKey("utterance"));
+      assertTrue("annotation layer", f.getSchema().getLayers().containsKey("word"));
+      assertTrue("included layer", f.getSchema().getLayers().containsKey("phone"));
+      assertTrue("included layer", f.getSchema().getLayers().containsKey("pos"));
+      assertFalse("excluded layer", f.getSchema().getLayers().containsKey("phrase"));
 
    }
 
@@ -1380,14 +1380,14 @@ public class TestGraph
       assertFalse("excluded layer", f.getAnnotationsById().containsKey("phrase2"));
 
       // check layers
-      assertFalse("excluded layer", f.getLayers().containsKey("topic"));
-      assertTrue("ancestor layer", f.getLayers().containsKey("who"));
-      assertTrue("ancestor layer", f.getLayers().containsKey("turn"));
-      assertTrue("included", f.getLayers().containsKey("utterance"));
-      assertTrue("ancestor layer", f.getLayers().containsKey("word"));
-      assertTrue("included layer", f.getLayers().containsKey("phone"));
-      assertTrue("included layer", f.getLayers().containsKey("pos"));
-      assertFalse("excluded layer", f.getLayers().containsKey("phrase"));
+      assertFalse("excluded layer", f.getSchema().getLayers().containsKey("topic"));
+      assertTrue("ancestor layer", f.getSchema().getLayers().containsKey("who"));
+      assertTrue("ancestor layer", f.getSchema().getLayers().containsKey("turn"));
+      assertTrue("included", f.getSchema().getLayers().containsKey("utterance"));
+      assertTrue("ancestor layer", f.getSchema().getLayers().containsKey("word"));
+      assertTrue("included layer", f.getSchema().getLayers().containsKey("phone"));
+      assertTrue("included layer", f.getSchema().getLayers().containsKey("pos"));
+      assertFalse("excluded layer", f.getSchema().getLayers().containsKey("phrase"));
 
    }
 

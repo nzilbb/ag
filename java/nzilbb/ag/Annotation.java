@@ -314,9 +314,10 @@ public class Annotation
       if (graph != null)
       {
 	 // now we have a graph, we may be able to introduce ourselves to related objects
-	 if (graph.getLayers().containsKey(getLayerId()))
+	 Layer layer = graph.getLayer(getLayerId());
+	 if (layer != null)
 	 {
-	    setLayer(graph.getLayer(getLayerId()));
+	    setLayer(layer);
 	 }
 	 if (graph.getAnchors().containsKey(getStartId()))
 	 {

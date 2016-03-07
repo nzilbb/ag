@@ -28,11 +28,11 @@ import java.util.Collection;
 import nzilbb.ag.*;
 
 /**
- * Traverses {@link Layer}s a {@link Graph}'s Layer hierarchy.
+ * Traverses {@link Layer}s a {@link Schema}'s Layer hierarchy.
  * <p>This base class handles the traversal. The pre-order and post-order operations (the actual work being done) can be implemented by subclassing to implement {@link #pre(Layer)} and {@link #post(Layer)}.
  * <p>For example, to print a list of layers in hierarchy order:
  * <pre>
- * LayerHierarchyTraversal&lt;StringBuffer&gt; t = new LayerHierarchyTraversal&lt;StringBuffer&gt;(new StringBuffer(), graph)
+ * LayerHierarchyTraversal&lt;StringBuffer&gt; t = new LayerHierarchyTraversal&lt;StringBuffer&gt;(new StringBuffer(), schema)
  * {
  *   protected void pre(Layer layer)
  *   {
@@ -124,22 +124,21 @@ public class LayerHierarchyTraversal<R>
    public void setPeerComparator(Comparator<Layer> newPeerComparator) { peerComparator = newPeerComparator; }
    
    /**
-    * The graph to be traversed.
-    * @see #getGraph()
-    * @see #setGraph(Graph)
+    * The schema to be traversed.
+    * @see #getSchema()
+    * @see #setSchema(Schema)
     */
-   protected Graph graph;
+   protected Schema schema;
    /**
-    * Getter for {@link #graph}: The graph to be traversed.
-    * @return The graph to be traversed.
+    * Getter for {@link #schema}: The schema to be traversed.
+    * @return The schema to be traversed.
     */
-   public Graph getGraph() { return graph; }
+   public Schema getSchema() { return schema; }
    /**
-    * Setter for {@link #graph}: The graph to be traversed.
-    * @param newGraph The graph to be traversed.
+    * Setter for {@link #schema}: The schema to be traversed.
+    * @param newSchema The schema to be traversed.
     */
-   public void setGraph(Graph newGraph) { graph = newGraph; }
-
+   public void setSchema(Schema newSchema) { schema = newSchema; }
    
    /**
     * The result of the traversal, if required.
@@ -177,18 +176,18 @@ public class LayerHierarchyTraversal<R>
    } // end of constructor
  
    /**
-    * Constructor with starting result and graph to immediately traverse.
+    * Constructor with starting result and schema to immediately traverse.
     * @param result The result of the traversal.
-    * @param graph The graph to be traversed.
+    * @param schema The schema to be traversed.
     */
-   public LayerHierarchyTraversal(R result, Graph graph)
+   public LayerHierarchyTraversal(R result, Schema schema)
    {
       setResult(result);
-      setResult(traverseGraph(graph));
+      setResult(traverseSchema(schema));
    } // end of constructor
 
    /**
-    * Constructor with starting result and graph to immediately traverse.
+    * Constructor with starting result and schema to immediately traverse.
     * The comparator supplied determines the ordering among peer layers.
     * e.g. to achieve the reverse of the default ordering (see {@link #defaultComparator}),
     * set <var>comparator</var> to:
@@ -200,13 +199,13 @@ public class LayerHierarchyTraversal<R>
     * </pre>
     * @param result The result of the traversal.
     * @param comparator Peer layer comparator.
-    * @param graph The graph to be traversed.
+    * @param schema The schema to be traversed.
     */
-   public LayerHierarchyTraversal(R result, Comparator<Layer> comparator, Graph graph)
+   public LayerHierarchyTraversal(R result, Comparator<Layer> comparator, Schema schema)
    {
       setResult(result);
       setPeerComparator(comparator);
-      setResult(traverseGraph(graph));
+      setResult(traverseSchema(schema));
    } // end of constructor
 
    /**
@@ -265,17 +264,17 @@ public class LayerHierarchyTraversal<R>
 	 traverseLayer(layer);
       }
       return getResult();
-   } // end of traverseGraph()
+   } // end of traverseLayers()
   
   
    /**
-    * Traverses the given graph.
-    * @param graph The graph to traverse.
+    * Traverses the given schema.
+    * @param schema The schema to traverse.
     * @return Some result of the traversal, if required.
     */
-   public R traverseGraph(Graph graph)
+   public R traverseSchema(Schema schema)
    {
-      setGraph(graph);
+      setSchema(schema);
       
       // sort the top level layers with the comparator
       TreeSet<Layer> orderedTopLevelLayers = new TreeSet<Layer>(getPeerComparator());
@@ -283,11 +282,11 @@ public class LayerHierarchyTraversal<R>
       // or any layer whose parent is not in the graph 
       // (this ensures all layers are included, even for partial graphs)
       // for each top-level layer
-      for (Layer layer : graph.getLayers().values())
+      for (Layer layer : schema.getLayers().values())
       {
 	 if (layer.getParentId() != null
 	     && (layer.getParentId().equals("graph")
-		 || !graph.getLayers().containsKey(layer.getParentId()))
+		 || !schema.getLayers().containsKey(layer.getParentId()))
 	     && !layer.getId().equals("graph"))
 	 {
 	    orderedTopLevelLayers.add(layer);
@@ -299,7 +298,7 @@ public class LayerHierarchyTraversal<R>
 	 traverseLayer(layer);
       }
       return getResult();
-   } // end of traverseGraph()
+   } // end of traverseSchema()
 
    
    /**

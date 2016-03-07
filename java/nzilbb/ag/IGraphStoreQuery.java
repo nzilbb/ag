@@ -56,6 +56,14 @@ public interface IGraphStoreQuery
    public Layer[] getLayers() throws StoreException, PermissionException;
 
    /**
+    * Gets the layer schema.
+    * @return A schema defining the layers and how they relate to each other.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public Schema getSchema() throws StoreException, PermissionException;
+
+   /**
     * Gets a layer definition.
     * @param id ID of the layer to get the definition for.
     * @return The definition of the given layer.

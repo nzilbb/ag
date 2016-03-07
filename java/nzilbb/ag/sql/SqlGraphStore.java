@@ -199,6 +199,37 @@ public class SqlGraphStore
    }
 
    /**
+    * Gets the layer schema.
+    * @return A schema defining the layers and how they relate to each other.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public Schema getSchema() throws StoreException, PermissionException
+   {
+      Schema schema = new Schema();
+      for (String layerId : getLayerIds())
+      {
+	 Layer layer = getLayer(layerId);
+	 schema.addLayer(layer);
+	 if (layer.get("@layer_id").equals(new Integer(11)))
+	 {
+	    schema.setTurnLayerId(layer.getId());
+	 }
+	 else if (layer.get("@layer_id").equals(new Integer(12)))
+	 {
+	    schema.setUtteranceLayerId(layer.getId());
+	 } 
+	 else if (layer.get("@layer_id").equals(new Integer(0)))
+	 {
+	    schema.setWordLayerId(layer.getId());
+	 } 
+      } // next layer
+      schema.setParticipantLayerId("who");
+      return schema;
+   }
+
+
+   /**
     * Gets a layer definition.
     * @param id ID of the layer to get the definition for.
     * @return The definition of the given layer.

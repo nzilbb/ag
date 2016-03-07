@@ -1,0 +1,299 @@
+//
+// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// University of Canterbury
+// Written by Robert Fromont - robert.fromont@canterbury.ac.nz
+//
+//    This file is part of nzilbb.ag.
+//
+//    nzilbb.ag is free software; you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation; either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    nzilbb.ag is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with nzilbb.ag; if not, write to the Free Software
+//    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+package nzilbb.ag;
+
+import java.util.HashMap;
+import java.util.Collection;
+
+/**
+ * Definition of layers and their interrelations.
+ * @author Robert Fromont robert@fromont.net.nz
+ */
+public class Schema
+{
+   // Attributes:
+
+   
+   /**
+    * The root of the layer hierarchy, representing the graph as a whole.
+    * @see #getRoot()
+    * @see #setRoot(Layer)
+    */
+   protected final Layer root = new Layer("graph", "The graph as a whole", 2, false, false, true);
+   /**
+    * Getter for {@link #root}: The root of the layer hierarchy, representing the graph as a whole.
+    * @return The root of the layer hierarchy, representing the graph as a whole.
+    */
+   public Layer getRoot() { return root; }
+
+   
+   /**
+    * Layers, indexed by ID.
+    * @see #getLayers()
+    * @see #setLayers(HashMap)
+    */
+   protected HashMap<String,Layer> layers = new HashMap<String,Layer>();
+   /**
+    * Getter for {@link #layers}: Layers, indexed by ID.
+    * @return Layers, indexed by ID.
+    */
+   public HashMap<String,Layer> getLayers() { return layers; }
+   /**
+    * Setter for {@link #layers}: Layers, indexed by ID.
+    * @param newLayers Layers, indexed by ID.
+    */
+   public void setLayers(HashMap<String,Layer> newLayers) { layers = newLayers; }
+
+   
+   /**
+    * ID of the layer that contains participants.
+    * @see #getParticipantLayerId()
+    * @see #setParticipantLayerId(String)
+    */
+   protected String participantLayerId;
+   /**
+    * Getter for {@link #participantLayerId}: ID of the layer that contains participants.
+    * @return ID of the layer that contains participants.
+    */
+   public String getParticipantLayerId() { return participantLayerId; }
+   /**
+    * Setter for {@link #participantLayerId}: ID of the layer that contains participants.
+    * @param newParticipantLayerId ID of the layer that contains participants.
+    */
+   public void setParticipantLayerId(String newParticipantLayerId) { participantLayerId = newParticipantLayerId; }
+
+   /**
+    * ID of the layer that contains speaker turns.
+    * @see #getTurnLayerId()
+    * @see #setTurnLayerId(String)
+    */
+   protected String turnLayerId;
+   /**
+    * Getter for {@link #turnLayerId}: ID of the layer that contains speaker turns.
+    * @return ID of the layer that contains speaker turns.
+    */
+   public String getTurnLayerId() { return turnLayerId; }
+   /**
+    * Setter for {@link #turnLayerId}: ID of the layer that contains speaker turns.
+    * @param newTurnLayerId ID of the layer that contains speaker turns.
+    */
+   public void setTurnLayerId(String newTurnLayerId) { turnLayerId = newTurnLayerId; }
+
+   /**
+    * ID of the layer that contains speaker utterances.
+    * @see #getUtteranceLayerId()
+    * @see #setUtteranceLayerId(String)
+    */
+   protected String utteranceLayerId;
+   /**
+    * Getter for {@link #utteranceLayerId}: ID of the layer that contains speaker utterances.
+    * @return ID of the layer that contains speaker utterances.
+    */
+   public String getUtteranceLayerId() { return utteranceLayerId; }
+   /**
+    * Setter for {@link #utteranceLayerId}: ID of the layer that contains speaker utterances.
+    * @param newUtteranceLayerId ID of the layer that contains speaker utterances.
+    */
+   public void setUtteranceLayerId(String newUtteranceLayerId) { utteranceLayerId = newUtteranceLayerId; }
+
+   /**
+    * ID of the layer that contains individual word tokens.
+    * @see #getWordLayerId()
+    * @see #setWordLayerId(String)
+    */
+   protected String wordLayerId;
+   /**
+    * Getter for {@link #wordLayerId}: ID of the layer that contains individual word tokens.
+    * @return ID of the layer that contains individual word tokens.
+    */
+   public String getWordLayerId() { return wordLayerId; }
+   /**
+    * Setter for {@link #wordLayerId}: ID of the layer that contains individual word tokens.
+    * @param newWordLayerId ID of the layer that contains individual word tokens.
+    */
+   public void setWordLayerId(String newWordLayerId) { wordLayerId = newWordLayerId; }
+
+   
+   // Methods:
+   
+   /**
+    * Default constructor.
+    */
+   public Schema()
+   {
+      addLayer(getRoot());
+   } // end of constructor
+
+   /**
+    * Constructor from array.
+    * @param layers Array of layers.
+    */
+   public Schema(Layer[] layers)
+   {
+      addLayer(getRoot());
+      for (Layer layer : layers)
+      {
+	 addLayer(layer);
+      } // next layer
+   } // end of constructor
+
+   /**
+    * Constructor from collection.
+    * @param layers Collection of layers.
+    */
+   public Schema(Collection<Layer> layers)
+   {
+      addLayer(getRoot());
+      for (Layer layer : layers)
+      {
+	 addLayer(layer);
+      } // next layer
+   } // end of constructor
+
+   /**
+    * Constructor from array and attributes.
+    * @param layers Array of layers.
+    * @param participantLayerId ID of the layer that contains participants.
+    * @param turnLayerId ID of the layer that contains speaker turns.
+    * @param utteranceLayerId ID of the layer that contains speaker utterances.
+    * @param wordLayerId ID of the layer that contains individual word tokens.
+    */
+   public Schema(Layer[] layers, String participantLayerId, String turnLayerId, String utteranceLayerId, String wordLayerId)
+   {
+      addLayer(getRoot());
+      for (Layer layer : layers)
+      {
+	 addLayer(layer);
+      } // next layer
+      setParticipantLayerId(participantLayerId);
+      setTurnLayerId(turnLayerId);
+      setUtteranceLayerId(utteranceLayerId);
+      setWordLayerId(wordLayerId);
+   } // end of constructor
+
+   /**
+    * Constructor from collection and attributes.
+    * @param layers Collection of layers.
+    * @param participantLayerId ID of the layer that contains participants.
+    * @param turnLayerId ID of the layer that contains speaker turns.
+    * @param utteranceLayerId ID of the layer that contains speaker utterances.
+    * @param wordLayerId ID of the layer that contains individual word tokens.
+    */
+   public Schema(Collection<Layer> layers, String participantLayerId, String turnLayerId, String utteranceLayerId, String wordLayerId)
+   {
+      addLayer(getRoot());
+      for (Layer layer : layers)
+      {
+	 addLayer(layer);
+      } // next layer
+      setParticipantLayerId(participantLayerId);
+      setTurnLayerId(turnLayerId);
+      setUtteranceLayerId(utteranceLayerId);
+      setWordLayerId(wordLayerId);
+   } // end of constructor
+   
+   /**
+    * Adds a layer.
+    * @param layer
+    * @return The layer added.
+    */
+   public Layer addLayer(Layer layer)
+   {
+      getLayers().put(layer.getId(), layer);
+
+      // set their parent
+      if (layer.getParentId() != null)
+      {
+	 layer.setParent(getLayer(layer.getParentId()));
+      }
+
+      // check whether any child layers have already been added
+      for (Layer otherLayer : getLayers().values())
+      {
+	 if (layer.getId().equals(otherLayer.getParentId()))
+	 {
+	    otherLayer.setParent(layer);
+	 }
+      }
+      return layer;
+   } // end of addLayer()
+
+   
+   /**
+    * Gets the named layer.
+    * @param id
+    * @return The named layer, or null if it's not in the schema.
+    */
+   public Layer getLayer(String id)
+   {
+      return getLayers().get(id);
+   } // end of getLayer()
+
+   
+   /**
+    * Get the layer specified by {@link #participantLayerId}
+    * @return The layer specified by {@link #participantLayerId}, or null if there is none.
+    */
+   public Layer getParticipantLayer()
+   {
+      return getLayer(getParticipantLayerId());
+   } // end of getParticipantLayer()
+
+   /**
+    * Get the layer specified by {@link #turnLayerId}
+    * @return The layer specified by {@link #turnLayerId}, or null if there is none.
+    */
+   public Layer getTurnLayer()
+   {
+      return getLayer(getTurnLayerId());
+   } // end of getTurnLayer()
+
+   /**
+    * Get the layer specified by {@link #utteranceLayerId}
+    * @return The layer specified by {@link #utteranceLayerId}, or null if there is none.
+    */
+   public Layer getUtteranceLayer()
+   {
+      return getLayer(getUtteranceLayerId());
+   } // end of getUtteranceLayer()
+
+   /**
+    * Get the layer specified by {@link #wordLayerId}
+    * @return The layer specified by {@link #wordLayerId}, or null if there is none.
+    */
+   public Layer getWordLayer()
+   {
+      return getLayer(getWordLayerId());
+   } // end of getWordLayer()
+
+   
+   /**
+    * Return the layers as an array.
+    * @return The layers as an array.
+    */
+   public Layer[] layers()
+   {
+      return layers.values().toArray(new Layer[0]);
+   } // end of layers()
+
+
+} // end of class Schema

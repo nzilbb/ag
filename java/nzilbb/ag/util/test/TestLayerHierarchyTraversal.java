@@ -41,7 +41,7 @@ public class TestLayerHierarchyTraversal
       g.addLayer(new Layer("word", "Words", 2, true, false, false, "turn", true));
       g.addLayer(new Layer("phone", "Phones", 2, true, false, true, "word", true));
 
-      LayerHierarchyTraversal<StringBuffer> t = new LayerHierarchyTraversal<StringBuffer>(new StringBuffer(), g)
+      LayerHierarchyTraversal<StringBuffer> t = new LayerHierarchyTraversal<StringBuffer>(new StringBuffer(), g.getSchema())
 	 {
 	    protected void pre(Layer layer)
 	    {
@@ -131,7 +131,7 @@ public class TestLayerHierarchyTraversal
 			   true)); // parentIncludes
 
       // top down
-      LayerHierarchyTraversal<StringBuffer> topDown = new LayerHierarchyTraversal<StringBuffer>(new StringBuffer(), g)
+      LayerHierarchyTraversal<StringBuffer> topDown = new LayerHierarchyTraversal<StringBuffer>(new StringBuffer(), g.getSchema())
 	 {
 	    protected void pre(Layer layer)
 	    {
@@ -150,7 +150,7 @@ public class TestLayerHierarchyTraversal
 	    public int compare(Layer l1, Layer l2) { 
 	       return -LayerHierarchyTraversal.defaultComparator.compare(l1,l2); 
 	    } },
-	 g)
+	 g.getSchema())
 	 {
 	    protected void post(Layer layer)
 	    {
@@ -174,7 +174,7 @@ public class TestLayerHierarchyTraversal
       g.addLayer(new Layer("word", "Words", 2, true, false, false, "turn", true));
       g.addLayer(new Layer("phone", "Phones", 2, true, false, true, "word", true));
 
-      LayerHierarchyTraversal<StringBuffer> t = new LayerHierarchyTraversal<StringBuffer>(new StringBuffer(), g)
+      LayerHierarchyTraversal<StringBuffer> t = new LayerHierarchyTraversal<StringBuffer>(new StringBuffer(), g.getSchema())
 	 {
 	    protected void pre(Layer layer)
 	    {

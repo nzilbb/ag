@@ -393,7 +393,7 @@ public class Validator
       // top down, and aligned layers only
       Vector<Layer> alignedLayersTopDown = new LayerHierarchyTraversal<Vector<Layer>>(
 	 new Vector<Layer>(), 
-	 graph)
+	 graph.getSchema())
 	 {
 	    protected void pre(Layer layer) 
 	    { 
@@ -676,7 +676,7 @@ public class Validator
    protected Vector<Change> reconcileOrphans(Graph graph)
    {
       Vector<Change> changes = new Vector<Change>();
-      Vector<Layer> layersTopDown = new LayerHierarchyTraversal<Vector<Layer>>(new Vector<Layer>(), graph)
+      Vector<Layer> layersTopDown = new LayerHierarchyTraversal<Vector<Layer>>(new Vector<Layer>(), graph.getSchema())
 	 {
 	    protected void pre(Layer layer) { result.add(layer); } // pre = parent before child
 	 }.getResult();
@@ -845,7 +845,7 @@ public class Validator
 	    public int compare(Layer l1, Layer l2) { 
 	       return -LayerHierarchyTraversal.defaultComparator.compare(l1,l2); 
 	    } },
-	 graph)
+	 graph.getSchema())
 	 {
 	    protected void post(Layer layer) { result.add(layer); } // post = child before parent
 	 }.getResult();
