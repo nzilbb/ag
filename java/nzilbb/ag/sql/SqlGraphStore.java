@@ -45,6 +45,15 @@ public class SqlGraphStore
    /** Format of annotation IDs, where {0} = scope, {1} = layer_id, and {2} = annotation_id */
    protected MessageFormat fmtAnnotationId = new MessageFormat("e{0}_{1,number,0}_{2,number,0}");
 
+   /** Format of annotation IDs for 'meta' layers, where {0} = layer_id and {1} = the id of the entity (corpus_id, family_id, speaker_number, etc.) */
+   protected MessageFormat fmtMetaAnnotationId = new MessageFormat("m_{0,number,0}_{1}");
+
+   /** Format of annotation IDs for transcript attributes, where {0} = attribute and {1} = ag_id */
+   protected MessageFormat fmtTranscriptAttributeId = new MessageFormat("t_{0}_{1,number,0}");
+
+   /** Format of annotation IDs for participant attributes, where {0} = attribute and {1} = speaker number */
+   protected MessageFormat fmtParticipantAttributeId = new MessageFormat("p_{0}_{1,number,0}");
+
    /** Format of anchor IDs, where {0} = anchor_id */
    protected MessageFormat fmtAnchorId = new MessageFormat("n_{0,number,0}");
 
@@ -157,6 +166,7 @@ public class SqlGraphStore
    {
       try
       {
+	 // temporal layers
 	 PreparedStatement sql = getConnection().prepareStatement(
 	    "SELECT short_description FROM layer ORDER BY short_description");
 	 ResultSet rs = sql.executeQuery();
@@ -168,6 +178,31 @@ public class SqlGraphStore
 	 } // next layer
 	 rs.close();
 	 sql.close();
+
+	 // graph layers
+	 sql = getConnection().prepareStatement(
+	    "SELECT attribute FROM attribute_definition"
+	    +" WHERE class_id = 'transcript' ORDER BY display_order, attribute");
+	 rs = sql.executeQuery();
+	 while (rs.next())
+	 {
+	    layerIds.add("transcript_"+rs.getString("attribute"));
+	 } // next layer
+	 rs.close();
+	 sql.close();
+
+	 // participant layers
+	 sql = getConnection().prepareStatement(
+	    "SELECT attribute FROM attribute_definition"
+	    +" WHERE class_id = 'speaker' ORDER BY display_order, attribute");
+	 rs = sql.executeQuery();
+	 while (rs.next())
+	 {
+	    layerIds.add("participant_"+rs.getString("attribute"));
+	 } // next layer
+	 rs.close();
+	 sql.close();
+
 	 return layerIds.toArray(new String[0]);
       }
       catch(SQLException exception)
@@ -285,8 +320,92 @@ public class SqlGraphStore
 	 }
 	 else
 	 {
-	    throw new StoreException("Layer not found: " + id);
-	 }
+	    rs.close();
+	    sql.close();
+	    sqlParentId.close();
+	    
+	    // maybe a transcript attribute
+	    sql = getConnection().prepareStatement(
+	       "SELECT * FROM attribute_definition WHERE CONCAT('transcript_', attribute) = ?");
+	    sql.setString(1, id);
+	    rs = sql.executeQuery();
+	    if (rs.next())
+	    {
+	       Layer layer = new Layer();
+	       layer.setId("transcript_" + rs.getString("attribute"));
+	       layer.setDescription(rs.getString("label"));
+	       layer.setAlignment(Constants.ALIGNMENT_NONE);
+	       layer.setParentId("graph");
+	       layer.setParentIncludes(true);
+	       layer.setPeers(false);
+	       layer.setPeersOverlap(false);
+	       layer.setSaturated(true);
+
+	       // other attributes
+	       layer.put("@class_id", rs.getString("class_id"));
+	       layer.put("@attribute", rs.getString("attribute"));
+	       layer.put("@category", rs.getString("category"));
+	       layer.put("@type", rs.getString("type"));
+	       layer.put("@style", rs.getString("style"));
+	       layer.put("@label", rs.getString("label"));
+	       layer.put("@description", rs.getString("description"));
+	       layer.put("@display_order", rs.getString("display_order"));
+	       layer.put("@searchable", rs.getString("searchable"));
+	       layer.put("@access", rs.getString("access"));
+	    
+	       rs.close();
+	       sql.close();
+	       sqlParentId.close();
+	       
+	       return layer;
+	    }
+	    else
+	    {
+	       rs.close();
+	       sql.close();
+	       sqlParentId.close();
+	       
+	       // maybe a participant attribute
+	       sql = getConnection().prepareStatement(
+		  "SELECT * FROM attribute_definition WHERE CONCAT('participant_', attribute) = ?");
+	       sql.setString(1, id);
+	       rs = sql.executeQuery();
+	       if (rs.next())
+	       {
+		  Layer layer = new Layer();
+		  layer.setId("participant_" + rs.getString("attribute"));
+		  layer.setDescription(rs.getString("label"));
+		  layer.setAlignment(Constants.ALIGNMENT_NONE);
+		  layer.setParentId("who");
+		  layer.setParentIncludes(true);
+		  layer.setPeers(false);
+		  layer.setPeersOverlap(false);
+		  layer.setSaturated(true);
+		  
+		  // other attributes
+		  layer.put("@class_id", rs.getString("class_id"));
+		  layer.put("@attribute", rs.getString("attribute"));
+		  layer.put("@category", rs.getString("category"));
+		  layer.put("@type", rs.getString("type"));
+		  layer.put("@style", rs.getString("style"));
+		  layer.put("@label", rs.getString("label"));
+		  layer.put("@description", rs.getString("description"));
+		  layer.put("@display_order", rs.getString("display_order"));
+		  layer.put("@searchable", rs.getString("searchable"));
+		  layer.put("@access", rs.getString("access"));
+		  
+		  rs.close();
+		  sql.close();
+		  sqlParentId.close();
+		  
+		  return layer;
+	       }
+	       else
+	       {
+		  throw new StoreException("Layer not found: " + id);
+	       }
+	    } // not a transcript attribute
+	 } // not a temporal layer
       }
       catch(SQLException exception)
       {
@@ -529,6 +648,8 @@ public class SqlGraphStore
 
 	 rs.close();
 
+	 Vector<String> setStartEndLayers = new Vector<String>();
+
 	 if (layerIds != null)
 	 {
 	    // load annotations
@@ -565,29 +686,35 @@ public class SqlGraphStore
 		  while (rsParticipant.next())
 		  {
 		     // add graph-tag annotation
+		     Object[] annotationIdParts = {
+			participantLayer.get("@layer_id"), rsParticipant.getString("speaker_number")};
 		     Annotation participant = new Annotation(
-			"m_"+participantLayer.get("@layer_id")+"_"+rsParticipant.getString("speaker_number"), rsParticipant.getString("name"),
-			participantLayer.getId());
+			fmtMetaAnnotationId.format(annotationIdParts), 
+			rsParticipant.getString("name"), participantLayer.getId());
 		     participant.setParentId(graph.getId());
 		     graph.addAnnotation(participant);
 		     
 		     // are they a main participant?
 		     if (rsParticipant.getInt("main_speaker") == 1)
 		     {
+			Object[] annotationIdParts2 = {
+			   mainParticipantLayer.get("@layer_id"), rsParticipant.getString("speaker_number")};
 			Annotation mainParticipant = new Annotation(
-			   "m_"+mainParticipantLayer.get("@layer_id")+"_"+rsParticipant.getString("speaker_number"), rsParticipant.getString("main_speaker"),
-			   "main_participant");
+			   fmtMetaAnnotationId.format(annotationIdParts2), 
+			   rsParticipant.getString("name"), "main_participant");
 			mainParticipant.setParentId(participant.getId());
 			graph.addAnnotation(mainParticipant);
 		     }
 		  } // next participant
 		  rsParticipant.close();
 		  sqlParticipant.close();
-		  
+
+		  setStartEndLayers.add(layerId);
 		  continue;
 	       }
 	       else if (layerId.equals("main_participant"))
 	       { // loaded with "who"
+		  setStartEndLayers.add(layerId);
 		  continue;
 	       }
 	       else if (layerId.equals("episode"))
@@ -604,14 +731,17 @@ public class SqlGraphStore
 		  if (rsEpisode.next())
 		  {
 		     // add graph-tag annotation
+		     Object[] annotationIdParts = {
+			episodeLayer.get("@layer_id"), rsEpisode.getString("family_id")};
 		     Annotation episode = new Annotation(
-			"m_"+episodeLayer.get("@layer_id")+"_"+rsEpisode.getString("family_id"), rsEpisode.getString("name"),
-			episodeLayer.getId());
+			fmtMetaAnnotationId.format(annotationIdParts), 
+			rsEpisode.getString("name"), episodeLayer.getId());
 		     episode.setParentId(graph.getId());
 		     graph.addAnnotation(episode);		     
 		  }
 		  rsEpisode.close();
 		  sqlEpisode.close();
+		  setStartEndLayers.add(layerId);
 		  continue;
 	       }
 	       else if (layerId.equals("corpus"))
@@ -628,17 +758,80 @@ public class SqlGraphStore
 		  if (rsCorpus.next())
 		  {
 		     // add graph-tag annotation
+		     Object[] annotationIdParts = {
+			corpusLayer.get("@layer_id"), rsCorpus.getString("corpus_id")};
 		     Annotation corpus = new Annotation(
-			"m_"+corpusLayer.get("@layer_id")+"_"+rsCorpus.getString("corpus_id"), rsCorpus.getString("corpus_name"),
-			corpusLayer.getId());
+			fmtMetaAnnotationId.format(annotationIdParts), 
+			rsCorpus.getString("corpus_name"), corpusLayer.getId());
 		     corpus.setParentId(graph.getId());
-		     graph.addAnnotation(corpus);
-		     
+		     graph.addAnnotation(corpus);		     
 		  }
 		  rsCorpus.close();
 		  sqlCorpus.close();
+		  setStartEndLayers.add(layerId);
 		  continue;
 	       }
+	       
+	       if (layerId.startsWith("transcript_"))
+	       { // probably a transcript attribute layer
+		  Layer attributeLayer = getLayer(layerId);
+		  if ("transcript".equals(attributeLayer.get("@class_id")))
+		  { // definitedly a transcript attribute layer
+		     graph.addLayer(attributeLayer);
+		     PreparedStatement sqlValue = getConnection().prepareStatement(
+			"SELECT value FROM transcript_attribute"
+			+" WHERE ag_id = ? AND name = ?");
+		     sqlValue.setInt(1, iAgId);
+		     sqlValue.setString(2, attributeLayer.get("@attribute").toString());
+		     ResultSet rsValue = sqlValue.executeQuery();
+		     if (rsValue.next())
+		     {
+			// add graph-tag annotation
+			Object[] annotationIdParts = {
+			   attributeLayer.get("@attribute"), new Integer(iAgId)};
+			Annotation attribute = new Annotation(
+			   fmtTranscriptAttributeId.format(annotationIdParts), 
+			   rsValue.getString("value"), attributeLayer.getId());
+			attribute.setParentId(graph.getId());
+			graph.addAnnotation(attribute);
+		     }
+		     rsValue.close();
+		     sqlValue.close();
+		     setStartEndLayers.add(layerId);
+		     continue;
+		  } // definitely a transcript attribute layer
+	       } // probably a transcript attribute layer
+	       
+	       if (layerId.startsWith("participant_"))
+	       { // probably a transcript attribute layer
+		  Layer attributeLayer = getLayer(layerId);
+		  if ("speaker".equals(attributeLayer.get("@class_id")))
+		  { // definitedly a participant attribute layer
+		     graph.addLayer(attributeLayer);
+		     PreparedStatement sqlValue = getConnection().prepareStatement(
+			"SELECT a.speaker_number, a.value FROM speaker_attribute a"
+			+" INNER JOIN transcript_speaker ts ON ts.speaker_number = a.speaker_number"
+			+" WHERE ts.ag_id = ? AND a.name = ?");
+		     sqlValue.setInt(1, iAgId);
+		     sqlValue.setString(2, attributeLayer.get("@attribute").toString());
+		     ResultSet rsValue = sqlValue.executeQuery();
+		     while (rsValue.next())
+		     {
+			// add graph-tag annotation
+			Object[] annotationIdParts = {
+			   attributeLayer.get("@attribute"), new Integer(rsValue.getInt("speaker_number"))};
+			Annotation attribute = new Annotation(
+			   fmtParticipantAttributeId.format(annotationIdParts), 
+			   rsValue.getString("value"), attributeLayer.getId());
+			attribute.setParentId("m_-2_"+rsValue.getString("speaker_number"));
+			graph.addAnnotation(attribute);
+		     }
+		     rsValue.close();
+		     sqlValue.close();
+		     setStartEndLayers.add(layerId);
+		     continue;
+		  } // definitely a transcript attribute layer
+	       } // probably a transcript attribute layer
 	       
 	       Layer layer = getLayer(layerId);
 	       graph.addLayer(layer);
@@ -649,7 +842,9 @@ public class SqlGraphStore
 	       while (rsAnnotation.next())
 	       {
 		  Annotation annotation = new Annotation();
-		  Object[] annotationIdParts = {scope.toLowerCase(), new Integer(iLayerId), new Long(rsAnnotation.getLong("annotation_id"))};
+		  Object[] annotationIdParts = {
+		     scope.toLowerCase(), new Integer(iLayerId), 
+		     new Long(rsAnnotation.getLong("annotation_id"))};
 		  if (scope.equalsIgnoreCase(SqlConstants.SCOPE_FREEFORM)) annotationIdParts[0] = "";
 		  annotation.setId(fmtAnnotationId.format(annotationIdParts));
 		  String turnParentId = null;
@@ -762,26 +957,14 @@ public class SqlGraphStore
 	 {
 	    Anchor firstAnchor = anchors.first();
 	    Anchor lastAnchor = anchors.last();
-	    for (Annotation a : graph.getAnnotations("who"))
+	    for (String layerId : setStartEndLayers)
 	    {
-	       a.setStartId(firstAnchor.getId());
-	       a.setEndId(lastAnchor.getId());
-	    }
-	    for (Annotation a : graph.getAnnotations("main_participant"))
-	    {
-	       a.setStartId(firstAnchor.getId());
-	       a.setEndId(lastAnchor.getId());
-	    }
-	    for (Annotation a : graph.getAnnotations("corpus"))
-	    {
-	       a.setStartId(firstAnchor.getId());
-	       a.setEndId(lastAnchor.getId());
-	    }
-	    for (Annotation a : graph.getAnnotations("episode"))
-	    {
-	       a.setStartId(firstAnchor.getId());
-	       a.setEndId(lastAnchor.getId());
-	    }
+	       for (Annotation a : graph.getAnnotations(layerId))
+	       {
+		  a.setStartId(firstAnchor.getId());
+		  a.setEndId(lastAnchor.getId());
+	       } // next annotation
+	    } // next layer
 	 } // there are anchors
 
 	 return graph;
@@ -810,7 +993,7 @@ public class SqlGraphStore
 	 // validate the graph before saving it
 	 // TODO ensure all layers are loaded before validation
 	 Validator v = new Validator();
-	 v.setDebug(true);
+	 //v.setDebug(true);
 	 Vector<Change> validationChanges = v.transform(graph);
 	 if (v.getErrors().size() != 0)
 	 {
@@ -827,7 +1010,15 @@ public class SqlGraphStore
 	 if (graph.getChange() == Change.Operation.Create)
 	 {
 	    // create the graph, to generate the ag_id
-	    throw new StoreException("Graph creation not yet implemented"); // TODO
+	    PreparedStatement sql = getConnection().prepareStatement(
+	       "INSERT INTO transcript (transcript_id) VALUES (?)");
+	    sql.setString(1, graph.getId());
+	    sql.executeUpdate();
+	    sql.close();
+	    sql = getConnection().prepareStatement("SELECT LAST_INSERT_ID()");
+	    ResultSet rs = sql.executeQuery();
+	    rs.next();
+	    graph.put("@ag_id", new Integer(rs.getInt(1)));
 	 }
 	 else
 	 {
