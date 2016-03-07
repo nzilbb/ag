@@ -189,22 +189,23 @@ public class ChatDeserializer
     */
    public void setTranscribers(Vector<String> newTranscribers) { transcribers = newTranscribers; }
    
+
    /**
-    * Map of layer IDs to layers.
-    * @see #getIdToLayer()
-    * @see #setIdToLayer(HashMap<String,Layer>)
+    * Layer schema.
+    * @see #getSchema()
+    * @see #setSchema(Schema)
     */
-   protected HashMap<String,Layer> idToLayer;
+   protected Schema schema;
    /**
-    * Getter for {@link #idToLayer}: Map of layer IDs to layers.
-    * @return Map of layer IDs to layers.
+    * Getter for {@link #schema}: Layer schema.
+    * @return Layer schema.
     */
-   public HashMap<String,Layer> getIdToLayer() { return idToLayer; }
+   public Schema getSchema() { return schema; }
    /**
-    * Setter for {@link #idToLayer}: Map of layer IDs to layers.
-    * @param newIdToLayer Map of layer IDs to layers.
+    * Setter for {@link #schema}: Layer schema.
+    * @param newSchema Layer schema.
     */
-   public void setIdToLayer(HashMap<String,Layer> newIdToLayer) { idToLayer = newIdToLayer; }
+   public void setSchema(Schema newSchema) { schema = newSchema; }
 
 
    /**
@@ -435,7 +436,6 @@ public class ChatDeserializer
       transcribers = new Vector<String>();
       lines = new Vector<String>();
       headers = new Vector<String>();
-      idToLayer = new HashMap<String,Layer>();
       participantLayerId = null;
       turnLayerId = null;
       utteranceLayerId = null;
@@ -473,10 +473,11 @@ public class ChatDeserializer
     * Loads the serialized form of the graph, using the given set of named streams.
     * @param annotationStreams A list of named streams that contain all the transcription/annotation data required.
     * @param mediaStreams An optional (may be null) list of named streams that contain the media annotated by the <var>annotationStreams</var>.
+    * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of parameters that require setting before {@link IDeserializer#deserialize()} can be invoked. This may be an empty list, and may include parameters with the value already set to a workable default. If there are parameters, and user interaction is possible, then the user may be presented with an interface for setting/confirming these parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
     * @throws Exception If the stream could not be loaded.
     */
-   public ParameterSet load(NamedStream[] annotationStreams, NamedStream[] mediaStreams, Layer[] layers) throws Exception
+   public ParameterSet load(NamedStream[] annotationStreams, NamedStream[] mediaStreams, Schema schema) throws Exception
    {
       ParameterSet parameters = new ParameterSet();
 
@@ -485,26 +486,11 @@ public class ChatDeserializer
       setName(cha.getName());
 
       reset();
-      for (Layer layer : layers) // TODO meta data for graph and participants
-      {
-	 idToLayer.put(layer.getId(), (Layer)layer.clone());
-	 if (layer.containsKey("@participantLayer")) // TODO formalise this convention
-	 {
-	    setParticipantLayerId(layer.getId());
-	 }
-	 if (layer.containsKey("@turnLayer")) // TODO formalise this convention
-	 {
-	    setTurnLayerId(layer.getId());
-	 }
-	 if (layer.containsKey("@utteranceLayer")) // TODO formalise this convention
-	 {
-	    setUtteranceLayerId(layer.getId());
-	 }
-	 if (layer.containsKey("@wordLayer")) // TODO formalise this convention
-	 {
-	    setWordLayerId(layer.getId());
-	 }
-      } // next layer
+      setSchema(schema);
+      setParticipantLayerId(schema.getParticipantLayerId());
+      setTurnLayerId(schema.getTurnLayerId());
+      setUtteranceLayerId(schema.getUtteranceLayerId());
+      setWordLayerId(schema.getWordLayerId());
 
       boolean disfluenciesFound = false;
       Pattern regexDisfluency = Pattern.compile("&\\p{Alnum}");
@@ -718,15 +704,15 @@ public class ChatDeserializer
       if (getParticipantLayerId() == null)
       {
 	 Parameter p = new Parameter("participantLayerId", "layerId", "Participant layer", "Layer for speaker/participant identification", true);
-	 if (idToLayer.containsKey("participant"))
+	 if (getSchema().getLayers().containsKey("participant"))
 	 {
 	    p.setValue("participant");
 	 }
-	 else if (idToLayer.containsKey("participants"))
+	 else if (getSchema().getLayers().containsKey("participants"))
 	 {
 	    p.setValue("participants");
 	 }
-	 else if (idToLayer.containsKey("who"))
+	 else if (getSchema().getLayers().containsKey("who"))
 	 {
 	    p.setValue("who");
 	 }
@@ -735,11 +721,11 @@ public class ChatDeserializer
       if (getTurnLayerId() == null)
       {
 	 Parameter p = new Parameter("turnLayerId", "layerId", "Turn layer", "Layer for speaker turns", true);
-	 if (idToLayer.containsKey("turn"))
+	 if (getSchema().getLayers().containsKey("turn"))
 	 {
 	    p.setValue("turn");
 	 }
-	 else if (idToLayer.containsKey("turns"))
+	 else if (getSchema().getLayers().containsKey("turns"))
 	 {
 	    p.setValue("turns");
 	 }
@@ -748,19 +734,19 @@ public class ChatDeserializer
       if (getUtteranceLayerId() == null)
       {
 	 Parameter p = new Parameter("utteranceLayerId", "layerId", "Utterance layer", "Layer for speaker utterances", true);
-	 if (idToLayer.containsKey("utterance"))
+	 if (getSchema().getLayers().containsKey("utterance"))
 	 {
 	    p.setValue("utterance");
 	 }
-	 else if (idToLayer.containsKey("utterances"))
+	 else if (getSchema().getLayers().containsKey("utterances"))
 	 {
 	    p.setValue("utterances");
 	 }
-	 else if (idToLayer.containsKey("line"))
+	 else if (getSchema().getLayers().containsKey("line"))
 	 {
 	    p.setValue("line");
 	 }
-	 else if (idToLayer.containsKey("lines"))
+	 else if (getSchema().getLayers().containsKey("lines"))
 	 {
 	    p.setValue("lines");
 	 }
@@ -769,19 +755,19 @@ public class ChatDeserializer
       if (getWordLayerId() == null)
       {
 	 Parameter p = new Parameter("wordLayerId", "layerId", "Word layer", "Layer for individual word tokens", true);
-	 if (idToLayer.containsKey("transcript"))
+	 if (getSchema().getLayers().containsKey("transcript"))
 	 {
 	    p.setValue("transcript");
 	 }
-	 else if (idToLayer.containsKey("word"))
+	 else if (getSchema().getLayers().containsKey("word"))
 	 {
 	    p.setValue("word");
 	 }
-	 else if (idToLayer.containsKey("words"))
+	 else if (getSchema().getLayers().containsKey("words"))
 	 {
 	    p.setValue("words");
 	 }
-	 else if (idToLayer.containsKey("w"))
+	 else if (getSchema().getLayers().containsKey("w"))
 	 {
 	    p.setValue("w");
 	 }
@@ -790,11 +776,11 @@ public class ChatDeserializer
       if (disfluenciesFound)
       {
 	 Parameter p = new Parameter("disfluencyLayerId", "layerId", "Disfluency layer", "Layer for disfluency annotations");
-	 if (idToLayer.containsKey("disfluency"))
+	 if (getSchema().getLayers().containsKey("disfluency"))
 	 {
 	    p.setValue("disfluency");
 	 }
-	 else if (idToLayer.containsKey("disfluencies"))
+	 else if (getSchema().getLayers().containsKey("disfluencies"))
 	 {
 	    p.setValue("disfluencies");
 	 }
@@ -803,11 +789,11 @@ public class ChatDeserializer
       if (expansionsFound)
       {
 	 Parameter p = new Parameter("expansionLayerId", "layerId", "Expansion layer", "Layer for expansion annotations");
-	 if (idToLayer.containsKey("expansion"))
+	 if (getSchema().getLayers().containsKey("expansion"))
 	 {
 	    p.setValue("expansion");
 	 }
-	 else if (idToLayer.containsKey("expansions"))
+	 else if (getSchema().getLayers().containsKey("expansions"))
 	 {
 	    p.setValue("expansions");
 	 }
@@ -816,11 +802,11 @@ public class ChatDeserializer
       if (completionsFound)
       {
 	 Parameter p = new Parameter("completionLayerId", "layerId", "Completion layer", "Layer for completion annotations");
-	 if (idToLayer.containsKey("completion"))
+	 if (getSchema().getLayers().containsKey("completion"))
 	 {
 	    p.setValue("completion");
 	 }
-	 else if (idToLayer.containsKey("completions"))
+	 else if (getSchema().getLayers().containsKey("completions"))
 	 {
 	    p.setValue("completions");
 	 }
@@ -829,19 +815,19 @@ public class ChatDeserializer
       if (gemsFound)
       {
 	 Parameter p = new Parameter("gemLayerId", "layerId", "Gem layer", "Layer for gems");
-	 if (idToLayer.containsKey("gem"))
+	 if (getSchema().getLayers().containsKey("gem"))
 	 {
 	    p.setValue("gem");
 	 }
-	 else if (idToLayer.containsKey("gems"))
+	 else if (getSchema().getLayers().containsKey("gems"))
 	 {
 	    p.setValue("gems");
 	 }
-	 else if (idToLayer.containsKey("topic"))
+	 else if (getSchema().getLayers().containsKey("topic"))
 	 {
 	    p.setValue("topic");
 	 }
-	 else if (idToLayer.containsKey("topics"))
+	 else if (getSchema().getLayers().containsKey("topics"))
 	 {
 	    p.setValue("topics");
 	 }
@@ -850,11 +836,11 @@ public class ChatDeserializer
       if (transcribersFound)
       {
 	 Parameter p = new Parameter("transcriberLayerId", "layerId", "Transcriber layer", "Layer for transcriber name");
-	 if (idToLayer.containsKey("transcriber"))
+	 if (getSchema().getLayers().containsKey("transcriber"))
 	 {
 	    p.setValue("transcriber");
 	 }
-	 else if (idToLayer.containsKey("transcribers"))
+	 else if (getSchema().getLayers().containsKey("transcribers"))
 	 {
 	    p.setValue("transcribers");
 	 }
@@ -863,11 +849,11 @@ public class ChatDeserializer
       if (languagesFound)
       {
 	 Parameter p = new Parameter("languagesLayerId", "layerId", "Transcript language layer", "Layer for transcriber language");
-	 if (idToLayer.containsKey("languages"))
+	 if (getSchema().getLayers().containsKey("languages"))
 	 {
 	    p.setValue("languages");
 	 }
-	 else if (idToLayer.containsKey("language"))
+	 else if (getSchema().getLayers().containsKey("language"))
 	 {
 	    p.setValue("language");
 	 }
@@ -878,10 +864,10 @@ public class ChatDeserializer
       {
 	 Parameter p = new Parameter(attribute + "LayerId", "layerId", attribute + " layer", "Layer for " + attribute);
 	 // if we have a layer called that
-	 if (idToLayer.containsKey(attribute)
+	 if (getSchema().getLayers().containsKey(attribute)
 	     // and it's a child of the participant layer
-	     && (idToLayer.get(attribute).getParentId().equals(getParticipantLayerId())
-		 || idToLayer.get(attribute).getParentId().equals("who")))
+	     && (getSchema().getLayers().get(attribute).getParentId().equals(getParticipantLayerId())
+		 || getSchema().getLayers().get(attribute).getParentId().equals("who")))
 	 {
 	    p.setValue(attribute);
 	 }
@@ -968,25 +954,28 @@ public class ChatDeserializer
    {
       Graph graph = new Graph();
       graph.setId(getName());
-      graph.addLayer(idToLayer.get(getParticipantLayerId()));
-      graph.addLayer(idToLayer.get(getTurnLayerId()));
-      graph.addLayer(idToLayer.get(getUtteranceLayerId()));
-      graph.addLayer(idToLayer.get(getWordLayerId()));
+      // add layers to the graph
+      // we don't just copy the whole schema, because that would imply that all the extra layers
+      // contained no annotations, which is not necessarily true
+      graph.addLayer(getSchema().getLayer(getParticipantLayerId()));
+      graph.addLayer(getSchema().getLayer(getTurnLayerId()));
+      graph.addLayer(getSchema().getLayer(getUtteranceLayerId()));
+      graph.addLayer(getSchema().getLayer(getWordLayerId()));
       if (getDisfluencyLayerId() != null)
       {
-	 graph.addLayer(idToLayer.get(getDisfluencyLayerId()));
+	 graph.addLayer(getSchema().getLayer(getDisfluencyLayerId()));
       }
-      if (getExpansionLayerId() != null) graph.addLayer(idToLayer.get(getExpansionLayerId()));
-      if (getCompletionLayerId() != null) graph.addLayer(idToLayer.get(getCompletionLayerId()));
-      if (getGemLayerId() != null) graph.addLayer(idToLayer.get(getGemLayerId()));
-      if (getTranscriberLayerId() != null) graph.addLayer(idToLayer.get(getTranscriberLayerId()));
-      if (getLanguagesLayerId() != null) graph.addLayer(idToLayer.get(getLanguagesLayerId()));
+      if (getExpansionLayerId() != null) graph.addLayer(getSchema().getLayer(getExpansionLayerId()));
+      if (getCompletionLayerId() != null) graph.addLayer(getSchema().getLayer(getCompletionLayerId()));
+      if (getGemLayerId() != null) graph.addLayer(getSchema().getLayer(getGemLayerId()));
+      if (getTranscriberLayerId() != null) graph.addLayer(getSchema().getLayer(getTranscriberLayerId()));
+      if (getLanguagesLayerId() != null) graph.addLayer(getSchema().getLayer(getLanguagesLayerId()));
       for (String attribute : participantLayerIds.keySet())
       {
 	 String layerId = participantLayerIds.get(attribute);
 	 if (layerId != null)
 	 {
-	    graph.addLayer(idToLayer.get(layerId));
+	    graph.addLayer(getSchema().getLayer(layerId));
 	 }
       } // next participant layer 
 

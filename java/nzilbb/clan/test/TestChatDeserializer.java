@@ -57,6 +57,7 @@ public class TestChatDeserializer
 	 new Layer("disfluency", "Disfluency", 0, false, false, true, "word", true),
 	 new Layer("gem", "Gems", 2, true, false, true)
       };
+      Schema schema = new Schema(layers, "who", "turn", "utterance", "word");
       // access file
       NamedStream[] streams = { new NamedStream(new File(getDir(), "8064.cha")) }; // TODO test griffin.cha
 
@@ -64,7 +65,7 @@ public class TestChatDeserializer
       ChatDeserializer deserializer = new ChatDeserializer();
 
       // load the stream
-      ParameterSet defaultParamaters = deserializer.load(streams, null, layers);
+      ParameterSet defaultParamaters = deserializer.load(streams, null, schema);
       //for (Parameter p : defaultParamaters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
 
       // configure the deserialization
