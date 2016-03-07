@@ -251,6 +251,28 @@ public class Anchor
    } // end of startOf()
 
    /**
+    * Determines whether the anchor is the start of an annotation on the given layer.
+    * @param layerId The ID of the layer to test for.
+    * @return true if the anchor is the start of an annotation on the given layer, and false otherwise.
+    */
+   public boolean isStartOn(String layerId)
+   {
+      if (!getStartOf().containsKey(layerId)) return false;
+      return getStartOf().get(layerId).size() > 0;
+   } // end of isStartOn()
+
+   /**
+    * Determines whether the anchor is the start of an annotation on the given layer.
+    * @param layerId The ID of the layer to test for.
+    * @return true if the anchor is the start of an annotation on the given layer, and false otherwise.
+    */
+   public boolean isEndOn(String layerId)
+   {
+      if (!getEndOf().containsKey(layerId)) return false;
+      return getEndOf().get(layerId).size() > 0;
+   } // end of isEndOn()
+
+   /**
     * Accesses a list of annotations on all layers that start with this anchor.
     * @return A list of annotations that start here.
     */
