@@ -48,6 +48,8 @@
       
       <!-- include source code -->
       <fileset dir="${src}" includes="${srcfiles} nzilbb/jsendpraat/nzilbb_jsendpraat_SendPraat.*" />
+      <!-- include images -->
+      <fileset dir="${src}" includes="nzilbb/**/*.svg" />
       <!-- include this build file -->
       <fileset dir="." includes="build.xml" />
       

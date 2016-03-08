@@ -1081,7 +1081,49 @@ public class SqlGraphStore
 	    } // Anchor change
 	    else if (change.getObject() instanceof Annotation)
 	    {
-	       if (!change.getObject().getId().startsWith("m_")) // ignore participant changes for now
+	       if (change.getObject().getId().startsWith("m_"))
+	       {
+		  try
+		  {
+		     if (change.getObject().getChange() != Change.Operation.Create)
+		     {
+			Object[] o = fmtMetaAnnotationId.parse(change.getObject().getId());
+		     }
+		  }
+		  catch(ParseException parseX)
+		  {
+		     throw new StoreException("Could not parse special annotation ID:" + change.getObject().getId());
+		  }
+	       }
+	       else if (change.getObject().getId().startsWith("t_"))
+	       {
+		  try
+		  {
+		     if (change.getObject().getChange() != Change.Operation.Create)
+		     {
+			Object[] o = fmtTranscriptAttributeId.parse(change.getObject().getId());
+		     }
+		  }
+		  catch(ParseException parseX)
+		  {
+		     throw new StoreException("Could not parse special annotation ID:" + change.getObject().getId());
+		  }
+	       }
+	       else if (change.getObject().getId().startsWith("p_"))
+	       {
+		  try
+		  {
+		     if (change.getObject().getChange() != Change.Operation.Create)
+		     {
+			Object[] o = fmtParticipantAttributeId.parse(change.getObject().getId());
+		     }
+		  }
+		  catch(ParseException parseX)
+		  {
+		     throw new StoreException("Could not parse special annotation ID:" + change.getObject().getId());
+		  }
+	       }
+	       else
 	       {
 		  try
 		  {
@@ -1240,6 +1282,22 @@ public class SqlGraphStore
 	 PreparedStatement sqlDeleteAnnotation = getConnection().prepareStatement(
 	    "DELETE FROM annotation_layer_? WHERE annotation_id = ?");
 
+	 PreparedStatement sqlInsertTranscriptAttribute = getConnection().prepareStatement(
+	    "INSERT INTO transcript_attribute (ag_id, name, value) VALUES (?,?,?)");
+	 sqlInsertTranscriptAttribute.setInt(1, iAgId);
+	 PreparedStatement sqlUpdateTranscriptAttribute = getConnection().prepareStatement(
+	    "UPDATE transcript_attribute SET value = ? WHERE ag_id = ? AND name = ?");
+	 sqlUpdateTranscriptAttribute.setInt(2, iAgId);
+	 PreparedStatement sqlDeleteTranscriptAttribute = getConnection().prepareStatement(
+	    "DELETE FROM transcript_attribute WHERE ag_id = ? AND name = ?");
+	 sqlDeleteTranscriptAttribute.setInt(1, iAgId);
+	 PreparedStatement sqlInsertParticipantAttribute = getConnection().prepareStatement(
+	    "INSERT INTO speaker_attribute (speaker_number, name, value) VALUES (?,?,?)");
+	 PreparedStatement sqlUpdateParticipantAttribute = getConnection().prepareStatement(
+	    "UPDATE speaker_attribute SET value = ? WHERE speaker_number = ? AND name = ?");
+	 PreparedStatement sqlDeleteParticipantAttribute = getConnection().prepareStatement(
+	    "DELETE FROM speaker_attribute WHERE speaker_number = ? AND name = ?");
+
 	 try
 	 {
 	    // there's a change for each changed attribute of each object
@@ -1263,16 +1321,39 @@ public class SqlGraphStore
 	       else if (change.getObject() instanceof Annotation
 			&& !(change.getObject() instanceof Graph))
 	       {
-		  saveAnnotationChanges(
-		     (Annotation)change.getObject(), extraUpdates, 
-		     sqlInsertFreeformAnnotation, sqlInsertMetaAnnotation, 
-		     sqlInsertWordAnnotation, sqlInsertSegmentAnnotation, sqlLastId, 
-		     sqlUpdateTurnAnnotationId, sqlUpdateWordAnnotationId, sqlUpdateSegmentAnnotationId, 
-		     sqlUpdateFreeformAnnotation, sqlUpdateMetaAnnotation, 
-		     sqlSelectWordFields, sqlSelectSegmentFields, 
-		     sqlUpdateWordAnnotation, sqlUpdateSegmentAnnotation, 
-		     sqlDeleteAnnotation,
-		     participantNameToNumber);
+		  if (change.getObject().getId().startsWith("m_"))
+		  { // special layer annotation
+		     saveSpecialAnnotationChanges((Annotation)change.getObject());
+		  }
+		  else if (change.getObject().getId().startsWith("t_"))
+		  { // transcript attribute
+		     saveTranscriptAttributeChanges(
+			(Annotation)change.getObject(), 
+			sqlInsertTranscriptAttribute, 
+			sqlUpdateTranscriptAttribute, 
+			sqlDeleteTranscriptAttribute);
+		  }
+		  else if (change.getObject().getId().startsWith("p_"))
+		  { // participant attribute
+		     saveParticipantAttributeChanges(
+			(Annotation)change.getObject(), 
+			sqlInsertParticipantAttribute, 
+			sqlUpdateParticipantAttribute, 
+			sqlDeleteParticipantAttribute);
+		  }
+		  else
+		  { // temporal annotation
+		     saveAnnotationChanges(
+			(Annotation)change.getObject(), extraUpdates, 
+			sqlInsertFreeformAnnotation, sqlInsertMetaAnnotation, 
+			sqlInsertWordAnnotation, sqlInsertSegmentAnnotation, sqlLastId, 
+			sqlUpdateTurnAnnotationId, sqlUpdateWordAnnotationId, sqlUpdateSegmentAnnotationId, 
+			sqlUpdateFreeformAnnotation, sqlUpdateMetaAnnotation, 
+			sqlSelectWordFields, sqlSelectSegmentFields, 
+			sqlUpdateWordAnnotation, sqlUpdateSegmentAnnotation, 
+			sqlDeleteAnnotation,
+			participantNameToNumber);
+		  }
 	       } // Annotation change
 	    } // next change
 
@@ -1318,6 +1399,12 @@ public class SqlGraphStore
 	    sqlUpdateWordAnnotation.close();
 	    sqlUpdateSegmentAnnotation.close();
 	    sqlDeleteAnnotation.close();
+	    sqlInsertTranscriptAttribute.close();
+	    sqlUpdateTranscriptAttribute.close();
+	    sqlDeleteTranscriptAttribute.close();
+	    sqlInsertParticipantAttribute.close();
+	    sqlUpdateParticipantAttribute.close();
+	    sqlDeleteParticipantAttribute.close();
 	 }
       }
       catch(ParseException shouldntBeThrown)
@@ -2159,5 +2246,278 @@ public class SqlGraphStore
       annotation.put("@SqlUpdated", Boolean.TRUE); // flag the anchor as having been updated
    } // end of saveAnchorChanges()
 
+   
+   /**
+    * Save changes to a 'special' annotation, e.g. corpus, series, etc.
+    * @param annotation The annotation whose changes should be saved.
+    * @throws SQLException If a database error occurs.
+    * @throws ParseException Shouldn't be thrown, assuming annotation ids have been checked
+    */
+   public void saveSpecialAnnotationChanges(Annotation annotation)
+    throws SQLException, ParseException
+   {
+      try
+      {
+	 if (annotation.getLayerId().equals("episode"))
+	 {
+	    switch (annotation.getChange())
+	    {
+	       case Create:
+	       case Update:
+	       {
+		  PreparedStatement sql = getConnection().prepareStatement(
+		     "SELECT family_id FROM transcript_family WHERE name = ?");
+		  sql.setString(1, annotation.getLabel());
+		  ResultSet rs = sql.executeQuery();
+		  if (rs.next())
+		  {
+		     int seriesId = rs.getInt("family_id");
+		     int agId = ((Integer)annotation.getGraph().get("@ag_id")).intValue();
+		     PreparedStatement sqlUpdate = getConnection().prepareStatement(
+			"UPDATE transcript SET family_id = ? WHERE ag_id = ?");
+		     sqlUpdate.setInt(1, seriesId);
+		     sqlUpdate.setInt(2, agId);
+		     sqlUpdate.executeUpdate();
+		     sqlUpdate.close();
+		  }
+		  rs.close();
+		  sql.close();
+		  break;
+	       }
+	    } // switch on change type
+	 }
+	 else if (annotation.getLayerId().equals("corpus"))
+	 {
+	    switch (annotation.getChange())
+	    {
+	       case Create:
+	       case Update:
+	       {
+		  int agId = ((Integer)annotation.getGraph().get("@ag_id")).intValue();
+		  PreparedStatement sqlUpdate = getConnection().prepareStatement(
+		     "UPDATE transcript SET corpus_name = ? WHERE ag_id = ?");
+		  sqlUpdate.setString(1, annotation.getLabel());
+		  sqlUpdate.setInt(2, agId);
+		  sqlUpdate.executeUpdate();
+		  sqlUpdate.close();
+		  break;
+	       }
+	    } // switch on change type
+	 }
+	 else if (annotation.getLayerId().equals("main_participant"))
+	 {
+	    int agId = ((Integer)annotation.getGraph().get("@ag_id")).intValue();
+	    Object[] o = fmtMetaAnnotationId.parse(annotation.getParentId());
+	    int speakerNumber = Integer.parseInt(o[1].toString());
+	    PreparedStatement sqlUpdate = getConnection().prepareStatement(
+	       "UPDATE transcript_speaker SET main_speaker = ?"
+	       +" WHERE ag_id = ? AND speaker_number = ?");
+	    sqlUpdate.setInt(2, agId);
+	    sqlUpdate.setInt(3, speakerNumber);
+	    switch (annotation.getChange())
+	    {
+	       case Create:
+	       case Update:
+		  sqlUpdate.setInt(1, 1); // is a main speaker
+		  break;
+	       case Destroy:
+		  sqlUpdate.setInt(1, 0); // isn't a main speaker
+		  break;
+	    } // switch on change type
+	    sqlUpdate.executeUpdate();
+	    sqlUpdate.close();
+	 }
+	 else if (annotation.getLayerId().equals("participant"))
+	 {
+	    int agId = ((Integer)annotation.getGraph().get("@ag_id")).intValue();
+	    switch (annotation.getChange())
+	    {
+	       case Create:
+	       {
+		  // ensure speaker exists
+		  int speakerNumber = -1;
+		  PreparedStatement sql = getConnection().prepareStatement(
+		     "SELECT speaker_number FROM speaker WHERE name = ?");
+		  sql.setString(1, annotation.getLabel());
+		  ResultSet rs = sql.executeQuery();
+		  if (rs.next())
+		  {
+		     speakerNumber = rs.getInt("speaker_number");
+		  }
+		  else
+		  {
+		     // create the speaker
+		     PreparedStatement sqlInsert = getConnection().prepareStatement(
+			"INSERT INTO speaker (name) VALUES (?)");
+		     sqlInsert.setString(1, annotation.getLabel());
+		     sqlInsert.executeUpdate();
+		     sqlInsert.close();
+		     sqlInsert = getConnection().prepareStatement("SELECT LAST_INSERT_ID()");
+		     ResultSet rsInsert = sqlInsert.executeQuery();
+		     rsInsert.next();
+		     speakerNumber = rsInsert.getInt(1);
+		     rsInsert.close();
+		     sqlInsert.close();
+		  }
+		  rs.close();
+		  sql.close();
+		  annotation.put("@speaker_number", new Integer(speakerNumber));
+
+		  // add the speaker to transcript_speaker
+		  sql = getConnection().prepareStatement(
+		     "INSERT INTO transcript_speaker (speaker_number, ag_id, name) VALUES (?,?,?)");
+		  sql.setInt(1, speakerNumber);
+		  sql.setInt(2, agId);
+		  sql.setString(3, annotation.getLabel());
+		  sql.executeUpdate();
+		  sql.close();
+		  break;
+	       } // Create
+	       case Update:
+	       {
+		  Object[] o = fmtTranscriptAttributeId.parse(annotation.getId());
+		  int speakerNumber = Integer.parseInt(o[1].toString());
+		  // update the label (the only possible change)
+		  PreparedStatement sql = getConnection().prepareStatement(
+		     "UPDATE speaker SET name = ? WHERE speaker_number = ?");
+		  sql.setString(1, annotation.getLabel());
+		  sql.setInt(2, speakerNumber);
+		  sql.executeUpdate();
+		  sql.close();
+		  break;
+	       }
+	       case Destroy:
+	       {
+		  Object[] o = fmtTranscriptAttributeId.parse(annotation.getId());
+		  int speakerNumber = Integer.parseInt(o[1].toString());
+		  // delete from transcript_speaker only
+		  PreparedStatement sql = getConnection().prepareStatement(
+		     "DELETE FROM transcript_speaker WHERE speaker_number = ? AND ag_id = ?");
+		  sql.setInt(1, speakerNumber);
+		  sql.setInt(2, agId);
+		  sql.executeUpdate();
+		  sql.close();
+		  break;
+	       } // Destroy
+	    } // switch on change type
+	 }
+	 annotation.put("@SqlUpdated", Boolean.TRUE); // flag the anchor as having been updated
+      }
+      catch(ParseException exception)
+      {
+	 System.out.println("Error parsing ID for special attribute: "+annotation.getId());
+	 throw exception;
+      }
+   } // end of saveSpecialAnnotationChanges()
+
+   
+   /**
+    * Saves changes to a transcript attribute annotation.
+    * @param annotation The annotation whose changes should be saved.
+    * @param sqlInsertTranscriptAttribute Prepared statement for inserting an attribute value.
+    * @param sqlUpdateTranscriptAttribute Prepared statement for updating an attribute value.
+    * @param sqlDeleteTranscriptAttribute Prepared statement for deleting an attribute value.
+    * @throws SQLException If a database error occurs.
+    * @throws ParseException Shouldn't be thrown, assuming annotation ids have been checked
+    */
+   public void saveTranscriptAttributeChanges(Annotation annotation, PreparedStatement sqlInsertTranscriptAttribute, PreparedStatement sqlUpdateTranscriptAttribute, PreparedStatement sqlDeleteTranscriptAttribute) throws SQLException, ParseException
+   {
+      try
+      {
+	 switch (annotation.getChange())
+	 {
+	    case Create:
+	    {
+	       String attribute = annotation.getLayerId().substring("transcript_".length());
+	       sqlInsertTranscriptAttribute.setString(2, attribute);
+	       sqlInsertTranscriptAttribute.setString(3, annotation.getLabel());
+	       sqlInsertTranscriptAttribute.executeUpdate();
+	       break;
+	    } // Create
+	    case Update:
+	    {
+	       Object[] o = fmtTranscriptAttributeId.parse(annotation.getId());
+	       String attribute = o[0].toString();
+	       sqlUpdateTranscriptAttribute.setString(1, annotation.getLabel());	    
+	       sqlUpdateTranscriptAttribute.setString(3, attribute);
+	       sqlUpdateTranscriptAttribute.executeUpdate();
+	       break;
+	    }
+	    case Destroy:
+	    {
+	       Object[] o = fmtTranscriptAttributeId.parse(annotation.getId());
+	       String attribute = o[0].toString();
+	       sqlDeleteTranscriptAttribute.setString(2, attribute);
+	       sqlDeleteTranscriptAttribute.executeUpdate();
+	       break;
+	    } // Destroy
+	 } // switch on change type
+	 
+	 annotation.put("@SqlUpdated", Boolean.TRUE); // flag the anchor as having been updated
+      }
+      catch(ParseException exception)
+      {
+	 System.out.println("Error parsing ID for transcript attribute: "+annotation.getId());
+	 throw exception;
+      }
+   } // end of saveTranscriptAttributeChanges()
+
+   /**
+    * Saves changes to a transcript attribute annotation.
+    * @param annotation The annotation whose changes should be saved.
+    * @param sqlInsertParticipantAttribute Prepared statement for inserting an attribute value.
+    * @param sqlUpdateParticipantAttribute Prepared statement for updating an attribute value.
+    * @param sqlDeleteParticipantAttribute Prepared statement for deleting an attribute value.
+    * @throws SQLException If a database error occurs.
+    * @throws ParseException Shouldn't be thrown, assuming annotation ids have been checked
+    */
+   public void saveParticipantAttributeChanges(Annotation annotation, PreparedStatement sqlInsertParticipantAttribute, PreparedStatement sqlUpdateParticipantAttribute, PreparedStatement sqlDeleteParticipantAttribute) throws SQLException, ParseException
+   {
+      try
+      {
+	 switch (annotation.getChange())
+	 {
+	    case Create:
+	    {
+	       String attribute = annotation.getLayerId().substring("participant_".length());
+	       Object[] o = fmtMetaAnnotationId.parse(annotation.getParentId());
+	       int speakerNumber = Integer.parseInt(o[1].toString());
+	       sqlInsertParticipantAttribute.setInt(1, speakerNumber);
+	       sqlInsertParticipantAttribute.setString(2, attribute);
+	       sqlInsertParticipantAttribute.setString(3, annotation.getLabel());
+	       sqlInsertParticipantAttribute.executeUpdate();
+	       break;
+	    } // Create
+	    case Update:
+	    {
+	       Object[] o = fmtParticipantAttributeId.parse(annotation.getId());
+	       String attribute = o[0].toString();
+	       int speakerNumber = ((Long)o[1]).intValue();
+	       sqlUpdateParticipantAttribute.setString(1, annotation.getLabel());	    
+	       sqlUpdateParticipantAttribute.setInt(2, speakerNumber);
+	       sqlUpdateParticipantAttribute.setString(3, attribute);
+	       sqlUpdateParticipantAttribute.executeUpdate();
+	       break;
+	    }
+	    case Destroy:
+	    {
+	       Object[] o = fmtParticipantAttributeId.parse(annotation.getId());
+	       String attribute = o[0].toString();
+	       int speakerNumber = ((Long)o[1]).intValue();
+	       sqlUpdateParticipantAttribute.setInt(1, speakerNumber);
+	       sqlDeleteParticipantAttribute.setString(2, attribute);
+	       sqlDeleteParticipantAttribute.executeUpdate();
+	       break;
+	    } // Destroy
+	 } // switch on change type
+	 
+	 annotation.put("@SqlUpdated", Boolean.TRUE); // flag the anchor as having been updated
+      }
+      catch(ParseException exception)
+      {
+	 System.out.println("Error parsing ID for transcript attribute: "+annotation.getId());
+	 throw exception;
+      }
+   } // end of saveParticipantAttributeChanges()
 
 } // end of class SqlGraphStore

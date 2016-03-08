@@ -43,7 +43,7 @@ import java.util.Set;
  * @author Robert Fromont robert@fromont.net.nz
  */
 @SuppressWarnings("serial")
-public class Layer
+public class Layer // TODO add type attribute
    extends TrackedMap
 {
    // NB if this is updated, please also update the @return javadoc attribute on getClonedAttributes()

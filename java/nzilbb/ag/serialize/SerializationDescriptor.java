@@ -21,6 +21,9 @@
 //
 package nzilbb.ag.serialize;
 
+import java.net.URL;
+import java.util.Vector;
+
 /**
  * A descriptor that describes the attributes of a serializer or deserializer.
  * @author Robert Fromont robert@fromont.net.nz
@@ -48,22 +51,38 @@ public class SerializationDescriptor
    public void setName(String newName) { name = newName; }
 
    /**
-    * The MIME type of the format, if any.
+    * The MIME type of the format.
     * @see #getMimeType()
     * @see #setMimeType(String)
     */
    protected String mimeType;
    /**
-    * Getter for {@link #mimeType}: The MIME type of the format, if any.
-    * @return The MIME type of the format, if any.
+    * Getter for {@link #mimeType}: The MIME type of the format.
+    * @return The MIME type of the format.
     */
    public String getMimeType() { return mimeType; }
    /**
-    * Setter for {@link #mimeType}: The MIME type of the format, if any.
-    * @param newMimeType The MIME type of the format, if any.
+    * Setter for {@link #mimeType}: The MIME type of the format.
+    * @param newMimeType The MIME type of the format.
     */
    public void setMimeType(String newMimeType) { mimeType = newMimeType; }
 
+   /**
+    * The normal file name suffixes (extensions) of this MIME type.
+    * @see #getFileSuffixes()
+    * @see #setFileSuffixes(String[])
+    */
+   protected Vector<String> fileSuffixes = new Vector<String>();
+   /**
+    * Getter for {@link #fileSuffixes}: The normal file name suffixes (extensions) of this MIME type.
+    * @return The normal file name suffixes (extensions) of this MIME type.
+    */
+   public Vector<String> getFileSuffixes() { return fileSuffixes; }
+   /**
+    * Setter for {@link #fileSuffixes}: The normal file name suffixes (extensions) of this MIME type.
+    * @param newFileSuffixes The normal file name suffixes (extensions) of this MIME type.
+    */
+   public void setFileSuffixes(Vector<String> newFileSuffixes) { fileSuffixes = newFileSuffixes; }
    /**
     * The version of the serializer/deserializer.
     * @see #getVersion()
@@ -81,6 +100,66 @@ public class SerializationDescriptor
     */
    public void setVersion(String newVersion) { version = newVersion; }
 
+   /**
+    * URL to an icon for this MIME type. It is recommended to provide an icon to an SVG image. 
+    * If none is explicitly provided, {@link #getIcon()} returns a generic icon.
+    * @see #getIcon()
+    * @see #setIcon(URL)
+    */
+   protected URL icon;
+   /**
+    * Getter for {@link #icon}: URL to an icon for this MIME type.
+    * @return URL to an icon for this MIME type.
+    */
+   public URL getIcon() 
+   { 
+      if (icon == null)
+      {
+	 // no specific icon, so return a generic one
+	 return getClass().getResource("text-x-generic.svg");
+      }
+      return icon; 
+   }
+   /**
+    * Setter for {@link #icon}: URL to an icon for this MIME type.
+    * @param newIcon URL to an icon for this MIME type.
+    */
+   public void setIcon(URL newIcon) { icon = newIcon; }
+
+   /**
+    * The (maximum) number of inputs required - e.g. the number of annotation files that make up a graph. Default is 1.
+    * @see #getNumberOfInputs()
+    * @see #setNumberOfInputs(int)
+    */
+   protected int numberOfInputs = 1;
+   /**
+    * Getter for {@link #numberOfInputs}: The (maximum) number of inputs required - e.g. the number of annotation files that make up a graph. Default is 1.
+    * @return The (maximum) number of inputs required - e.g. the number of annotation files that make up a graph. 
+    */
+   public int getNumberOfInputs() { return numberOfInputs; }
+   /**
+    * Setter for {@link #numberOfInputs}: The (maximum) number of inputs required - e.g. the number of annotation files that make up a graph.
+    * @param newNumberOfInputs The (maximum) number of inputs required - e.g. the number of annotation files that make up a graph.
+    */
+   public void setNumberOfInputs(int newNumberOfInputs) { numberOfInputs = newNumberOfInputs; }
+
+   /**
+    * Minimum version of the nzilbb.ag API supported by the serializer.
+    * @see #getMinimumApiVersion()
+    * @see #setMinimumApiVersion(String)
+    * @see Constants#VERSION
+    */
+   protected String minimumApiVersion = "20160308.0920";
+   /**
+    * Getter for {@link #minimumApiVersion}: Minimum version of the nzilbb.ag API supported by the serializer.
+    * @return Minimum version of the nzilbb.ag API supported by the serializer.
+    */
+   public String getMinimumApiVersion() { return minimumApiVersion; }
+   /**
+    * Setter for {@link #minimumApiVersion}: Minimum version of the nzilbb.ag API supported by the serializer.
+    * @param newMinimumApiVersion Minimum version of the nzilbb.ag API supported by the serializer.
+    */
+   public void setMinimumApiVersion(String newMinimumApiVersion) { minimumApiVersion = newMinimumApiVersion; }
    
    // Methods:
    
@@ -95,13 +174,111 @@ public class SerializationDescriptor
     * Attribute constructor.
     * @param name The name of the format or storage system that is used for serialization/deserialization.
     * @param version The version of the serializer/deserializer.
-    * @param mimeType The MIME type of the format, if any.
+    * @param mimeType The MIME type of the format.
+    * @param fileSuffixes The normal file name suffixes (extensions) of this MIME type.
+    * @param minimumApiVersion Minimum version of the nzilbb.ag API supported by the serializer.
+    * @param icon URL to an icon for this MIME type.
+    * @param numberOfInputs The (maximum) number of inputs required - e.g. the number of annotation files that make up a graph.
     */
-   public SerializationDescriptor(String name, String version, String mimeType)
+   public SerializationDescriptor(String name, String version, String mimeType, Vector<String> fileSuffixes, String minimumApiVersion, URL icon, int numberOfInputs)
    {
       setName(name);
       setVersion(version);
       setMimeType(mimeType);
+      getFileSuffixes().addAll(fileSuffixes);
+      setMinimumApiVersion(minimumApiVersion);
+      setIcon(icon);
+      setNumberOfInputs(numberOfInputs);
+   } // end of constructor
+
+   /**
+    * Attribute constructor.
+    * @param name The name of the format or storage system that is used for serialization/deserialization.
+    * @param version The version of the serializer/deserializer.
+    * @param mimeType The MIME type of the format.
+    * @param fileSuffix The normal file name suffix (extension) of this MIME type.
+    * @param minimumApiVersion Minimum version of the nzilbb.ag API supported by the serializer.
+    * @param icon URL to an icon for this MIME type.
+    * @param numberOfInputs The (maximum) number of inputs required - e.g. the number of annotation files that make up a graph.
+    */
+   public SerializationDescriptor(String name, String version, String mimeType, String fileSuffix, String minimumApiVersion, URL icon, int numberOfInputs)
+   {
+      setName(name);
+      setVersion(version);
+      setMimeType(mimeType);
+      getFileSuffixes().add(fileSuffix);
+      setMinimumApiVersion(minimumApiVersion);
+      setIcon(icon);
+      setNumberOfInputs(numberOfInputs);
+   } // end of constructor
+
+   /**
+    * Attribute constructor.
+    * @param name The name of the format or storage system that is used for serialization/deserialization.
+    * @param version The version of the serializer/deserializer.
+    * @param mimeType The MIME type of the format.
+    * @param fileSuffix The normal file name suffix (extension) of this MIME type.
+    * @param minimumApiVersion Minimum version of the nzilbb.ag API supported by the serializer.
+    * @param icon URL to an icon for this MIME type.
+    */
+   public SerializationDescriptor(String name, String version, String mimeType, String fileSuffix, String minimumApiVersion, URL icon)
+   {
+      setName(name);
+      setVersion(version);
+      setMimeType(mimeType);
+      getFileSuffixes().add(fileSuffix);
+      setMinimumApiVersion(minimumApiVersion);
+      setIcon(icon);
+   } // end of constructor
+
+   /**
+    * Attribute constructor.
+    * @param name The name of the format or storage system that is used for serialization/deserialization.
+    * @param version The version of the serializer/deserializer.
+    * @param mimeType The MIME type of the format.
+    * @param fileSuffix The normal file name suffix (extension) of this MIME type.
+    * @param icon URL to an icon for this MIME type.
+    */
+   public SerializationDescriptor(String name, String version, String mimeType, String fileSuffix, URL icon)
+   {
+      setName(name);
+      setVersion(version);
+      setMimeType(mimeType);
+      getFileSuffixes().add(fileSuffix);
+      setMinimumApiVersion(minimumApiVersion);
+      setIcon(icon);
+   } // end of constructor
+
+   /**
+    * Attribute constructor.
+    * @param name The name of the format or storage system that is used for serialization/deserialization.
+    * @param version The version of the serializer/deserializer.
+    * @param mimeType The MIME type of the format.
+    * @param fileSuffix The normal file name suffix (extension) of this MIME type.
+    * @param minimumApiVersion Minimum version of the nzilbb.ag API supported by the serializer.
+    */
+   public SerializationDescriptor(String name, String version, String mimeType, String fileSuffix, String minimumApiVersion)
+   {
+      setName(name);
+      setVersion(version);
+      setMimeType(mimeType);
+      getFileSuffixes().add(fileSuffix);
+      setMinimumApiVersion(minimumApiVersion);
+   } // end of constructor
+
+   /**
+    * Attribute constructor.
+    * @param name The name of the format or storage system that is used for serialization/deserialization.
+    * @param version The version of the serializer/deserializer.
+    * @param mimeType The MIME type of the format.
+    * @param fileSuffix The normal file name suffix (extension) of this MIME type.
+    */
+   public SerializationDescriptor(String name, String version, String mimeType, String fileSuffix)
+   {
+      setName(name);
+      setVersion(version);
+      setMimeType(mimeType);
+      getFileSuffixes().add(fileSuffix);
    } // end of constructor
 
    /**
@@ -115,4 +292,10 @@ public class SerializationDescriptor
       setVersion(version);
    } // end of constructor
 
+   /**
+    * Getter for {@link #fileSuffixes}: The normal file name suffixes (extensions) of this MIME type.
+    * @return The normal file name suffixes (extensions) of this MIME type, as an array of String.
+    */
+   public String[] getFileSuffixesArray() { return fileSuffixes.toArray(new String[0]); }
+   
 } // end of class SerializationDescriptor

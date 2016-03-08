@@ -21,8 +21,6 @@
 //
 package nzilbb.ag;
 
-import java.util.Vector;
-
 /**
  * Interface for querying and updating an annotation graph store, a database of graphs.
  * <p>In order to easily support access via scripting in other languages, methods that return lists use arrays rather than collection classes.

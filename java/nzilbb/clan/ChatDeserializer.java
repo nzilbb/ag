@@ -39,6 +39,14 @@ import nzilbb.configure.ParameterSet;
 
 /**
  * Deserializer for CHAT files produced by CLAN.
+ * <p><em>NB</em> the current implementation is <em>not exhaustive</em>; it only covers:
+ * <ul>
+ *  <li>Time synchronization codes</li>
+ *  <li>Disfluency marking with &amp; - e.g. <samp>so &amp;sund Sunday</samp></li>
+ *  <li>Non-standard form expansion - e.g. <samp>gonna [: going to]</samp></li>
+ *  <li>Incomplete word completion - e.g. <samp>dinner doin(g) all</samp></li>
+ *  <li>Acronym/proper name joining with _ - e.g. <samp>no T_V in my room</samp> - TODO</li>
+ * </ul>
  * @author Robert Fromont robert@fromont.net.nz
  */
 
@@ -457,7 +465,8 @@ public class ChatDeserializer
     */
    public SerializationDescriptor getDescriptor()
    {
-      return new SerializationDescriptor("CLAN CHAT transcript", "0.1", "text/x-chat");
+      return new SerializationDescriptor(
+	 "CLAN CHAT transcript", "0.1", "text/x-chat", ".cha", getClass().getResource("icon.gif"));
    }
 
    /**

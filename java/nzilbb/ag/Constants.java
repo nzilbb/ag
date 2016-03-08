@@ -28,6 +28,10 @@ package nzilbb.ag;
 
 public class Constants
 {
+
+   /** API version */
+   public static final String VERSION = "20160308.0920";
+
    /** Standardized attribute name (key) for anchor offset or annotation label confidence. Value is "confidence". */
    public static final String CONFIDENCE = "confidence";
 

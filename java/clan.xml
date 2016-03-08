@@ -8,6 +8,7 @@
   <property name="dist"  location="../bin"/>
   <property name="srcfiles" value="nzilbb/clan/**/*.java"/> 
   <property name="srctests" value="nzilbb/clan/test/Test*.java"/>
+  <property name="icon" value="nzilbb/clan/icon.gif"/>
   <property name="junitjar" value="/usr/share/java/junit4.jar"/>
   
   <target name="init">
@@ -53,6 +54,8 @@
 	       />
       <!-- include this build file -->
       <fileset dir="." includes="build.xml" />
+      <!-- include icon -->
+      <fileset dir="${src}" includes="${icon}" />
       
     </jar>
     <delete dir="${build}"/>
