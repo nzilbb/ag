@@ -21,16 +21,19 @@
 //
 package nzilbb.ag.sql;
 
-import nzilbb.ag.*;
-import nzilbb.ag.util.Validator;
 import java.sql.*;
+import java.io.File;
 import java.util.Vector;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.SortedSet;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.text.MessageFormat;
 import java.text.ParseException;
+
+import nzilbb.ag.*;
+import nzilbb.ag.util.Validator;
 
 /**
  * Graph store that uses a relational database as its back end.
@@ -56,6 +59,40 @@ public class SqlGraphStore
 
    /** Format of anchor IDs, where {0} = anchor_id */
    protected MessageFormat fmtAnchorId = new MessageFormat("n_{0,number,0}");
+   
+   /**
+    * URL prefix for file access, if any.
+    * @see #getBaseUrl()
+    * @see #setBaseUrl(String)
+    */
+   protected String baseUrl;
+   /**
+    * Getter for {@link #baseUrl}: URL prefix for file access, if any.
+    * @return URL prefix for file access, if any.
+    */
+   public String getBaseUrl() { return baseUrl; }
+   /**
+    * Setter for {@link #baseUrl}: URL prefix for file access, if any.
+    * @param newBaseUrl URL prefix for file access, if any.
+    */
+   public void setBaseUrl(String newBaseUrl) { baseUrl = newBaseUrl; }
+
+   /**
+    * Root directory for file structure.
+    * @see #getFiles()
+    * @see #setFiles(File)
+    */
+   protected File files;
+   /**
+    * Getter for {@link #files}: Root directory for file structure.
+    * @return Root directory for file structure.
+    */
+   public File getFiles() { return files; }
+   /**
+    * Setter for {@link #files}: Root directory for file structure.
+    * @param newFiles Root directory for file structure.
+    */
+   public void setFiles(File newFiles) { files = newFiles; }
 
    /**
     * Database connection.
@@ -180,6 +217,7 @@ public class SqlGraphStore
 	 sql.close();
 
 	 // graph layers
+	 layerIds.add("transcript_type"); // special case that's not in attribute_definition
 	 sql = getConnection().prepareStatement(
 	    "SELECT attribute FROM attribute_definition"
 	    +" WHERE class_id = 'transcript' ORDER BY display_order, attribute");
@@ -275,6 +313,22 @@ public class SqlGraphStore
    {
       try
       {
+	 if (id.equals("transcript_type"))
+	 { // special case that's not (yet) in the database
+	    Layer layer = new Layer(id, "Transcript type", Constants.ALIGNMENT_NONE, false, false, true, "graph", true);
+	    layer.setValidLabels(new LinkedHashMap<String,String>());
+	    PreparedStatement sql = getConnection().prepareStatement(
+	       "SELECT transcript_type FROM transcript_type ORDER BY type_id");
+	    ResultSet rs = sql.executeQuery();
+	    while (rs.next())
+	    {
+	       layer.getValidLabels().put(rs.getString("transcript_type"), rs.getString("transcript_type"));
+	    }	 
+	    rs.close();
+	    sql.close();
+	    return layer;
+	 }
+
 	 PreparedStatement sqlParentId = getConnection().prepareStatement(
 	    "SELECT short_description FROM layer WHERE layer_id = ?");
 	 PreparedStatement sql = getConnection().prepareStatement(
@@ -356,6 +410,25 @@ public class SqlGraphStore
 	       rs.close();
 	       sql.close();
 	       sqlParentId.close();
+
+	       // possible values
+	       sql = getConnection().prepareStatement(
+		  "SELECT value, description FROM attribute_option"
+		  +" WHERE class_id = 'transcript' AND attribute = ?"
+		  +" ORDER BY description");
+	       sql.setString(1, layer.get("@attribute").toString());
+	       rs = sql.executeQuery();
+	       if (rs.next())
+	       {
+		  layer.setValidLabels(new LinkedHashMap<String,String>());
+		  do
+		  {
+		     layer.getValidLabels().put(rs.getString("value"), rs.getString("description"));
+		  }	 
+		  while (rs.next());
+	       }
+	       rs.close();
+	       sql.close();
 	       
 	       return layer;
 	    }
@@ -397,6 +470,25 @@ public class SqlGraphStore
 		  rs.close();
 		  sql.close();
 		  sqlParentId.close();
+
+		  // possible values
+		  sql = getConnection().prepareStatement(
+		     "SELECT value, description FROM attribute_option"
+		     +" WHERE class_id = 'speaker' AND attribute = ?"
+		     +" ORDER BY description");
+		  sql.setString(1, layer.get("@attribute").toString());
+		  rs = sql.executeQuery();
+		  if (rs.next())
+		  {
+		     layer.setValidLabels(new LinkedHashMap<String,String>());
+		     do
+		     {
+			layer.getValidLabels().put(rs.getString("value"), rs.getString("description"));
+		     }	 
+		     while (rs.next());
+		  }
+		  rs.close();
+		  sql.close();
 		  
 		  return layer;
 	       }
@@ -768,6 +860,32 @@ public class SqlGraphStore
 		  }
 		  rsCorpus.close();
 		  sqlCorpus.close();
+		  setStartEndLayers.add(layerId);
+		  continue;
+	       }
+	       else if (layerId.equals("transcript_type"))
+	       {
+		  Layer typeLayer = getLayer(layerId);
+		  graph.addLayer(typeLayer);
+		  PreparedStatement sqlType = getConnection().prepareStatement(
+		     "SELECT transcript_type, t.type_id"
+		     +" FROM transcript t"
+		     +" INNER JOIN transcript_type tt ON tt.type_id = t.type_id"
+		     +" WHERE t.ag_id = ?");
+		  sqlType.setInt(1, iAgId);
+		  ResultSet rsType = sqlType.executeQuery();
+		  if (rsType.next())
+		  {
+		     // add graph-tag annotation
+		     Object[] annotationIdParts = {"type", new Integer(iAgId)};
+		     Annotation type = new Annotation(
+			fmtTranscriptAttributeId.format(annotationIdParts), 
+			rsType.getString("transcript_type"), typeLayer.getId());
+		     type.setParentId(graph.getId());
+		     graph.addAnnotation(type);
+		  }
+		  rsType.close();
+		  sqlType.close();
 		  setStartEndLayers.add(layerId);
 		  continue;
 	       }
@@ -1321,7 +1439,8 @@ public class SqlGraphStore
 	       else if (change.getObject() instanceof Annotation
 			&& !(change.getObject() instanceof Graph))
 	       {
-		  if (change.getObject().getId().startsWith("m_"))
+		  if (change.getObject().getId().startsWith("m_")
+		      || change.getObject().getId().startsWith("t_type"))
 		  { // special layer annotation
 		     saveSpecialAnnotationChanges((Annotation)change.getObject());
 		  }
@@ -2265,23 +2384,41 @@ public class SqlGraphStore
 	       case Create:
 	       case Update:
 	       {
+		  int familyId = -1;
 		  PreparedStatement sql = getConnection().prepareStatement(
 		     "SELECT family_id FROM transcript_family WHERE name = ?");
 		  sql.setString(1, annotation.getLabel());
 		  ResultSet rs = sql.executeQuery();
-		  if (rs.next())
-		  {
-		     int seriesId = rs.getInt("family_id");
-		     int agId = ((Integer)annotation.getGraph().get("@ag_id")).intValue();
-		     PreparedStatement sqlUpdate = getConnection().prepareStatement(
-			"UPDATE transcript SET family_id = ? WHERE ag_id = ?");
-		     sqlUpdate.setInt(1, seriesId);
-		     sqlUpdate.setInt(2, agId);
-		     sqlUpdate.executeUpdate();
-		     sqlUpdate.close();
+		  if (!rs.next())
+		  { // doesn't exist, so create it		     
+		     rs.close();
+		     sql.close();
+		     sql = getConnection().prepareStatement(
+			"SELECT MAX(family_id) + 1 AS family_id FROM transcript_family");
+		     rs = sql.executeQuery();
+		     rs.next();
+		     familyId = rs.getInt("family_id");
+		     rs.close();
+		     sql.close();
+		     sql = getConnection().prepareStatement(
+			"INSERT INTO transcript_family (family_id, name) VALUES (?, ?)");
+		     sql.setInt(1, familyId);
+		     sql.setString(2, annotation.getLabel());
+		     sql.executeUpdate();
 		  }
-		  rs.close();
+		  else
+		  {
+		     familyId = rs.getInt("family_id");
+		  }
+		  try { rs.close(); } catch(Exception exception) {}
 		  sql.close();
+		  int agId = ((Integer)annotation.getGraph().get("@ag_id")).intValue();
+		  PreparedStatement sqlUpdate = getConnection().prepareStatement(
+		     "UPDATE transcript SET family_id = ? WHERE ag_id = ?");
+		  sqlUpdate.setInt(1, familyId);
+		  sqlUpdate.setInt(2, agId);
+		  sqlUpdate.executeUpdate();
+		  sqlUpdate.close();
 		  break;
 	       }
 	    } // switch on change type
@@ -2300,6 +2437,34 @@ public class SqlGraphStore
 		  sqlUpdate.setInt(2, agId);
 		  sqlUpdate.executeUpdate();
 		  sqlUpdate.close();
+		  break;
+	       }
+	    } // switch on change type
+	 }
+	 else if (annotation.getLayerId().equals("transcript_type"))
+	 {
+	    switch (annotation.getChange())
+	    {
+	       case Create:
+	       case Update:
+	       {
+		  PreparedStatement sql = getConnection().prepareStatement(
+		     "SELECT type_id FROM transcript_type WHERE transcript_type = ?");
+		  sql.setString(1, annotation.getLabel());
+		  ResultSet rs = sql.executeQuery();
+		  if (rs.next())
+		  {
+		     int typeId = rs.getInt("type_id");
+		     int agId = ((Integer)annotation.getGraph().get("@ag_id")).intValue();
+		     PreparedStatement sqlUpdate = getConnection().prepareStatement(
+			"UPDATE transcript SET type_id = ? WHERE ag_id = ?");
+		     sqlUpdate.setInt(1, typeId);
+		     sqlUpdate.setInt(2, agId);
+		     sqlUpdate.executeUpdate();
+		     sqlUpdate.close();
+		  }
+		  rs.close();
+		  sql.close();
 		  break;
 	       }
 	    } // switch on change type
@@ -2519,5 +2684,33 @@ public class SqlGraphStore
 	 throw exception;
       }
    } // end of saveParticipantAttributeChanges()
+
+   /**
+    * List the predefined media tracks available for transcripts.
+    * @return An ordered list of media track definitions.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted. 
+    */
+   public MediaTrackDefinition[] getMediaTracks() throws StoreException, PermissionException
+   {
+      try
+      {
+	 PreparedStatement sql = getConnection().prepareStatement(
+	    "SELECT * FROM media_track ORDER BY display_order, suffix");
+	 ResultSet rs = sql.executeQuery();
+	 Vector<MediaTrackDefinition> tracks = new Vector<MediaTrackDefinition>();
+	 while (rs.next())
+	 {
+	    tracks.add(new MediaTrackDefinition(rs.getString("suffix"), rs.getString("description")));
+	 } // next layer
+	 rs.close();
+	 sql.close();
+	 return tracks.toArray(new MediaTrackDefinition[0]);
+      }
+      catch(SQLException exception)
+      {
+	 throw new StoreException(exception);
+      }
+   }
 
 } // end of class SqlGraphStore

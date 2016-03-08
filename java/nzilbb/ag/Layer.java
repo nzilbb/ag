@@ -228,6 +228,33 @@ public class Layer // TODO add type attribute
 	 parent.getChildren().put(getId(), this);
       }
    }
+   
+   /**
+    * List of valid label values for this layer, or null if the layer values are not restricted.
+    * <p>The 'key' is the possible label value, and each key is associated with a description of the value (e.g. for displaying to users).
+    * @see #getValidLabels()
+    * @see #setValidLabels(LinkedHashSet<String>)
+    */
+   protected LinkedHashMap<String,String> validLabels;
+   /**
+    * Getter for {@link #validLabels}: List of valid label values for this layer, or null if the layer values are not restricted.
+    * @return List of valid label values for this layer, or null if the layer values are not restricted.
+    */
+   public LinkedHashMap<String,String> getValidLabels() { return validLabels; }
+   /**
+    * Setter for {@link #validLabels}: List of valid label values for this layer, or null if the layer values are not restricted.
+    * @param newValidLabels List of valid label values for this layer, or null if the layer values are not restricted.
+    */
+   public void setValidLabels(LinkedHashMap<String,String> newValidLabels) { validLabels = newValidLabels; }
+   /**
+    * Getter for {@link #validLabels}: List of valid label values for this layer, or null if the layer values are not restricted.
+    * @return List of valid label values for this layer, or null if the layer values are not restricted.
+    */
+   public String[] getValidLabelsArray() 
+   { 
+      if (validLabels == null) return null; 
+      return validLabels.keySet().toArray(new String[0]); 
+   }
 
    // Methods:
       

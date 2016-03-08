@@ -134,7 +134,13 @@ public interface IGraphStoreQuery
     * @throws GraphNotFoundException If the graph was not found in the store.
     */
    public Graph getGraph(String id, String[] layerIds) throws StoreException, PermissionException, GraphNotFoundException;
-
    
+   /**
+    * List the predefined media tracks available for transcripts.
+    * @return An ordered list of media track definitions.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted. 
+    */
+   public MediaTrackDefinition[] getMediaTracks() throws StoreException, PermissionException;
 
 } // end of interface IGraphStoreQuery
