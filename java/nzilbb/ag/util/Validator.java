@@ -42,6 +42,7 @@ import nzilbb.ag.*;
  * to the graph and trying to localize validation accordingly. e.g. if the only change is that 
  * word tags have been added, then only the tag layer (and its children if any) need be validated -
  * no default anchor computation, etc. is necessary.
+ * <p>TODO validate Layer.validLabels
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class Validator
@@ -768,6 +769,7 @@ public class Validator
 		  else
 		  {
 		     errors.add("No new parent available for " + logAnnotation(child) 
+				+ " ("+child.getLayerId()+")"
 				+ " but " + parentLayer.getId() 
 				+ " " + logAnnotation(oldParent) 
 				+ (oldParent == null || oldParent.getChange() == Change.Operation.Destroy?

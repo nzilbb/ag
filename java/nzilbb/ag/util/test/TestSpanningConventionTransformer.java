@@ -492,6 +492,8 @@ public class TestSpanningConventionTransformer
 	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word4").getChange());
 	 assertEquals("jump", g.getAnnotation("word5").getLabel());
 	 assertEquals("over", g.getAnnotation("word6").getLabel());
+	 assertEquals("corrected ordinal", 2, g.getAnnotation("word5").getOrdinal());
+	 assertEquals("corrected ordinal", 3, g.getAnnotation("word6").getOrdinal());
 
 	 Annotation span = g.getAnnotations("expansion").elementAt(0);
 	 assertEquals("going to", span.getLabel());

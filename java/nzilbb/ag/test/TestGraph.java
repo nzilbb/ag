@@ -368,7 +368,7 @@ public class TestGraph
       g.addLayer(new Layer("word", "Words", 2, true, false, false, "turn", true));
       g.addLayer(new Layer("phone", "Phones", 2, true, false, true, "word", true));
       g.addLayer(new Layer("pos", "Part of speech", 0, false, false, true, "word", true));
-      g.addLayer(new Layer("phrase", "Phrase structure", 0, true, true, false, "turn", true));
+      g.addLayer(new Layer("phrase", "Phrase structure", 2, true, true, false, "turn", true));
 
       g.addAnchor(new Anchor("turnStart", 0.0));
       g.addAnchor(new Anchor("a1", 1.0));
@@ -815,7 +815,7 @@ public class TestGraph
       g.addLayer(new Layer("word", "Words", 2, true, false, false, "turn", true));
       g.addLayer(new Layer("phone", "Phones", 2, true, false, true, "word", true));
       g.addLayer(new Layer("pos", "Part of speech", 0, false, false, true, "word", true));
-      g.addLayer(new Layer("phrase", "Phrase structure", 0, true, true, false, "turn", true));
+      g.addLayer(new Layer("phrase", "Phrase structure", 2, true, true, false, "turn", true));
 
       g.addAnchor(new Anchor("turnStart", 0.0));
       g.addAnchor(new Anchor("a1", 1.0));

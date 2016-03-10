@@ -97,6 +97,18 @@ public class TestSchema
       assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("who").getParent());
       assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("topic").getParent());
 
+      // don't let existing layers be replaced
+      Layer originalLayer = s.getLayer("phone");
+      Layer newLayer = new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
+				 true, // peers
+				 false, // peersOverlap
+				 true, // saturated
+				 "word", // parentId
+				 true); // parentIncludes
+      s.addLayer(newLayer);
+      assertFalse("existing layers not replaced", s.getLayer("phone") == newLayer);
+      assertTrue("existing layers not replaced", s.getLayer("phone") == originalLayer);
+   
    }
 
    @Test public void arrayConstructor() 

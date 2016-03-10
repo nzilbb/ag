@@ -53,6 +53,24 @@ public class SqlGraphStoreAdministration
    public void setDeserializersByMimeType(HashMap<String,IDeserializer> newDeserializersByMimeType) { deserializersByMimeType = newDeserializersByMimeType; }
 
    
+   /**
+    * Registered deserializers, keyed by file suffix (extension).
+    * @see #getDeserializersBySuffix()
+    * @see #setDeserializersBySuffix(HashMap)
+    */
+   protected HashMap<String,IDeserializer> deserializersBySuffix = new HashMap<String,IDeserializer>();
+   /**
+    * Getter for {@link #deserializersBySuffix}: Registered deserializers, keyed by file suffix (extension).
+    * @return Registered deserializers, keyed by file suffix (extension).
+    */
+   public HashMap<String,IDeserializer> getDeserializersBySuffix() { return deserializersBySuffix; }
+   /**
+    * Setter for {@link #deserializersBySuffix}: Registered deserializers, keyed by file suffix (extension).
+    * @param newDeserializersBySuffix Registered deserializers, keyed by file suffix (extension).
+    */
+   public void setDeserializersBySuffix(HashMap<String,IDeserializer> newDeserializersBySuffix) { deserializersBySuffix = newDeserializersBySuffix; }
+
+   
    // Methods:
    
    /**
@@ -93,7 +111,12 @@ public class SqlGraphStoreAdministration
    public void registerDeserializer(IDeserializer deserializer)
        throws StoreException, PermissionException
    {
-      deserializersByMimeType.put(deserializer.getDescriptor().getMimeType(), deserializer);
+      SerializationDescriptor descriptor = deserializer.getDescriptor();
+      deserializersByMimeType.put(descriptor.getMimeType(), deserializer);
+      for (String suffix : descriptor.getFileSuffixes())
+      {
+	 deserializersBySuffix.put(suffix, deserializer);
+      } // next suffix
    }
 
    /**
@@ -105,7 +128,12 @@ public class SqlGraphStoreAdministration
    public void deregisterDeserializer(IDeserializer deserializer)
        throws StoreException, PermissionException
    {
-      deserializersByMimeType.remove(deserializer.getDescriptor().getMimeType());
+      SerializationDescriptor descriptor = deserializer.getDescriptor();
+      deserializersByMimeType.remove(descriptor.getMimeType());
+      for (String suffix : descriptor.getFileSuffixes())
+      {
+	 deserializersBySuffix.remove(suffix);
+      } // next suffix
    }
 
    /**
@@ -137,6 +165,18 @@ public class SqlGraphStoreAdministration
        throws StoreException, PermissionException
    {
       return deserializersByMimeType.get(mimeType);
+   }
+
+   /**
+    * Gets the deserializer for the given file suffix (extension).
+    * @param suffix
+    * @return The deserializer for the given suffix, or null if none is registered.
+    * @throws StoreException If an error prevents the graph from being saved.
+    * @throws PermissionException If saving the graph is not permitted.
+    */
+   public IDeserializer deserializerForFilesSuffix(String suffix) throws StoreException, PermissionException
+   {
+      return deserializersBySuffix.get(suffix);
    }
 
 } // end of class SqlGraphStoreAdministration

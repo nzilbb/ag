@@ -101,7 +101,26 @@ public class Annotation
     * Getter for <i>startId</i>: ID of the annotation's start anchor.
     * @return ID of the annotation's start anchor.
     */
-   public String getStartId() { try { return (String)get("startId"); } catch(ClassCastException exception) {return null;} }
+   public String getStartId() 
+   { 
+      if (graph != null)
+      {
+	 Layer layer = getLayer();
+	 if (layer != null && layer.getAlignment() == Constants.ALIGNMENT_NONE)
+	 { // tag layer - return parent's start anchor
+	    Annotation parent = getParent();
+	    if (parent != null) return parent.getStartId();
+	 }
+      }
+      try 
+      { 
+	 return (String)get("startId"); 
+      } 
+      catch(ClassCastException exception) 
+      {
+	 return null;
+      } 
+   }
    /**
     * Setter for <i>startId</i>: ID of the annotation's start anchor.
     * @param startId ID of the annotation's start anchor.
@@ -137,7 +156,26 @@ public class Annotation
     * Getter for <i>endId</i>: ID of the annotation's end anchor.
     * @return ID of the annotation's end anchor.
     */
-   public String getEndId() { try { return (String)get("endId"); } catch(ClassCastException exception) {return null;} }
+   public String getEndId() 
+   {
+      if (graph != null)
+      {
+	 Layer layer = getLayer();
+	 if (layer != null && layer.getAlignment() == Constants.ALIGNMENT_NONE)
+	 { // tag layer - return parent's start anchor
+	    Annotation parent = getParent();
+	    if (parent != null) return parent.getEndId();
+	 }
+      }
+      try
+      {
+	 return (String)get("endId");
+      }
+      catch (ClassCastException exception) 
+      {
+	 return null;
+      } 
+   }
    /**
     * Setter for <i>endId</i>: ID of the annotation's end anchor.
     * @param endId ID of the annotation's end anchor.
@@ -416,9 +454,11 @@ public class Annotation
    { 
       if (graph != null)
       {
-	 if (!containsKey("startId") && getLayer().getAlignment() == Constants.ALIGNMENT_NONE)
+	 Layer layer = getLayer();
+	 if (layer != null && layer.getAlignment() == Constants.ALIGNMENT_NONE)
 	 { // tag layer - return parent's start anchor
-	    return getParent().getStart();
+	    Annotation parent = getParent();
+	    if (parent != null) return parent.getStart();
 	 }
 	 return graph.getAnchor(getStartId());
       }
@@ -445,9 +485,11 @@ public class Annotation
    { 
       if (graph != null)
       {
-	 if (!containsKey("endId") && getLayer().getAlignment() == Constants.ALIGNMENT_NONE)
+	 Layer layer = getLayer();
+	 if (layer != null && layer.getAlignment() == Constants.ALIGNMENT_NONE)
 	 { // tag layer - return parent's start anchor
-	    return getParent().getEnd();
+	    Annotation parent = getParent();
+	    if (parent != null) return parent.getEnd();
 	 }
 	 return graph.getAnchor(getEndId());
       }

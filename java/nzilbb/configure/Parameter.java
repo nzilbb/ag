@@ -1,5 +1,5 @@
 //
-// Copyright 2015 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -21,11 +21,13 @@
 //
 package nzilbb.configure;
 
+import java.util.Collection;
+
 /**
  * A parameter that needs to be set for a some operation or configuration.
  * @author Robert Fromont robert@fromont.net.nz
  */
-
+@SuppressWarnings("rawtypes")
 public class Parameter
 {
    // Attributes:
@@ -86,17 +88,17 @@ public class Parameter
     * @see #getType()
     * @see #setType(String)
     */
-   protected String type;
+   protected Class type;
    /**
     * Getter for {@link #type}: The type of the parameter.
     * @return The type of the parameter.
     */
-   public String getType() { return type; }
+   public Class getType() { return type; }
    /**
     * Setter for {@link #type}: The type of the parameter.
     * @param newType The type of the parameter.
     */
-   public void setType(String newType) { type = newType; }
+   public void setType(Class newType) { type = newType; }
 
    /**
     * The value (or default value) of the parameter.
@@ -133,6 +135,33 @@ public class Parameter
     */
    public void setRequired(boolean newRequired) { required = newRequired; }
 
+
+   /**
+    * A list of possible values for {@link #value}, or null if the possible values is not a closed set.
+    * @see #getPossibleValues()
+    * @see #setPossibleValues(Vector)
+    */
+   protected Collection possibleValues;
+   /**
+    * Getter for {@link #possibleValues}: A list of possible values for {@link #value}, or null if the possible values is not a closed set.
+    * @return A list of possible values for {@link #value}, or null if the possible values is not a closed set.
+    */
+   public Collection getPossibleValues() { return possibleValues; }
+   /**
+    * Setter for {@link #possibleValues}: A list of possible values for {@link #value}, or null if the possible values is not a closed set.
+    * @param newPossibleValues A list of possible values for {@link #value}, or null if the possible values is not a closed set.
+    */
+   public void setPossibleValues(Collection newPossibleValues) { possibleValues = newPossibleValues; }
+   /**
+    * Array getter for {@link #possibleValues}: A list of possible values for {@link #value}, or null if the possible values is not a closed set.
+    * @return An array of possible values for {@link #value}, or null if the possible values is not a closed set.
+    */
+   @SuppressWarnings("unchecked")
+   public Object[] getPossibleValuesArray() 
+   { 
+      if (possibleValues == null) return null;
+      return possibleValues.toArray(new Object[0]); 
+   }
    
    // Methods:
    
@@ -152,7 +181,7 @@ public class Parameter
     * @param required Whether the parameter is required (true) or optional (false).
     * @param value The value (or default value) of the parameter.
     */
-   public Parameter(String name, String type, String label, String hint, boolean required, Object value)
+   public Parameter(String name, Class type, String label, String hint, boolean required, Object value)
    {
       setName(name);
       setType(type);
@@ -166,10 +195,27 @@ public class Parameter
     * @param name The paramater's name.
     * @param label A label that might be presented to a user.
     * @param hint A text hint that might be displayed to a user.
+    * @param required Whether the parameter is required (true) or optional (false).
+    * @param value The value (or default value) of the parameter.
+    */
+   public Parameter(String name, String label, String hint, boolean required, Object value)
+   {
+      setName(name);
+      setType(value.getClass());
+      setLabel(label);
+      setHint(hint);
+      setRequired(required);
+      setValue(value);
+   } // end of constructor
+   /**
+    * Constructor from attributes.
+    * @param name The paramater's name.
+    * @param label A label that might be presented to a user.
+    * @param hint A text hint that might be displayed to a user.
     * @param type The type of the parameter.
     * @param required Whether the parameter is required (true) or optional (false).
     */
-   public Parameter(String name, String type, String label, String hint, boolean required)
+   public Parameter(String name, Class type, String label, String hint, boolean required)
    {
       setName(name);
       setType(type);
@@ -185,7 +231,7 @@ public class Parameter
     * @param type The type of the parameter.
     * @param value The value (or default value) of the parameter.
     */
-   public Parameter(String name, String type, String label, String hint, Object value)
+   public Parameter(String name, Class type, String label, String hint, Object value)
    {
       setName(name);
       setType(type);
@@ -198,9 +244,24 @@ public class Parameter
     * @param name The paramater's name.
     * @param label A label that might be presented to a user.
     * @param hint A text hint that might be displayed to a user.
+    * @param value The value (or default value) of the parameter.
+    */
+   public Parameter(String name, String label, String hint, Object value)
+   {
+      setName(name);
+      setType(value.getClass());
+      setLabel(label);
+      setHint(hint);
+      setValue(value);
+   } // end of constructor
+   /**
+    * Constructor from attributes.
+    * @param name The paramater's name.
+    * @param label A label that might be presented to a user.
+    * @param hint A text hint that might be displayed to a user.
     * @param type The type of the parameter.
     */
-   public Parameter(String name, String type, String label, String hint)
+   public Parameter(String name, Class type, String label, String hint)
    {
       setName(name);
       setType(type);
@@ -213,7 +274,7 @@ public class Parameter
     * @param label A label that might be presented to a user.
     * @param hint A text hint that might be displayed to a user.
     */
-   public Parameter(String name, String type, String label)
+   public Parameter(String name, Class type, String label)
    {
       setName(name);
       setType(type);
@@ -224,9 +285,21 @@ public class Parameter
     * @param name The paramater's name.
     * @param type The type of the parameter.
     */
-   public Parameter(String name, String type)
+   public Parameter(String name, Class type)
    {
       setName(name);
       setType(type);
    } // end of constructor
+
+   
+   /**
+    * Add a value to {@link #possibleValues}.
+    * @param value
+    */
+   @SuppressWarnings("unchecked")
+   public void addPossibleValue(Object value)
+   {
+      getPossibleValues().add(value);
+   } // end of addPossibleValue()
+
 } // end of class SerializationParameter

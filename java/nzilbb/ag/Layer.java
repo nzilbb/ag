@@ -230,30 +230,26 @@ public class Layer // TODO add type attribute
    }
    
    /**
-    * List of valid label values for this layer, or null if the layer values are not restricted.
-    * <p>The 'key' is the possible label value, and each key is associated with a description of the value (e.g. for displaying to users).
-    * @see #getValidLabels()
-    * @see #setValidLabels(LinkedHashSet<String>)
-    */
-   protected LinkedHashMap<String,String> validLabels;
-   /**
     * Getter for {@link #validLabels}: List of valid label values for this layer, or null if the layer values are not restricted.
+    * <p>The 'key' is the possible label value, and each key is associated with a description of the value (e.g. for displaying to users).
     * @return List of valid label values for this layer, or null if the layer values are not restricted.
     */
-   public LinkedHashMap<String,String> getValidLabels() { return validLabels; }
+   @SuppressWarnings("unchecked")
+   public LinkedHashMap<String,String> getValidLabels() { try { return (LinkedHashMap<String,String>)get("validLabels"); } catch(ClassCastException exception) {return null;} }
    /**
     * Setter for {@link #validLabels}: List of valid label values for this layer, or null if the layer values are not restricted.
+    * <p>The 'key' is the possible label value, and each key is associated with a description of the value (e.g. for displaying to users).
     * @param newValidLabels List of valid label values for this layer, or null if the layer values are not restricted.
     */
-   public void setValidLabels(LinkedHashMap<String,String> newValidLabels) { validLabels = newValidLabels; }
+   public void setValidLabels(LinkedHashMap<String,String> newValidLabels) { put("validLabels", newValidLabels); }
    /**
     * Getter for {@link #validLabels}: List of valid label values for this layer, or null if the layer values are not restricted.
     * @return List of valid label values for this layer, or null if the layer values are not restricted.
     */
    public String[] getValidLabelsArray() 
    { 
-      if (validLabels == null) return null; 
-      return validLabels.keySet().toArray(new String[0]); 
+      if (getValidLabels() == null) return null; 
+      return getValidLabels().keySet().toArray(new String[0]); 
    }
 
    // Methods:
@@ -343,6 +339,7 @@ public class Layer // TODO add type attribute
     */
    public Layer getFirstCommonAncestor(Layer other)
    {
+      if (other == null) return null;
       HashSet<Layer> ourAncestors = new HashSet<Layer>();
       Layer ancestor = this; // include ourselves in the list.
       do

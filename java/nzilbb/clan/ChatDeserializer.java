@@ -22,7 +22,9 @@
 package nzilbb.clan;
 
 import java.util.Vector;
+import java.util.HashSet;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -51,7 +53,7 @@ import nzilbb.configure.ParameterSet;
  */
 
 public class ChatDeserializer
-  implements IStreamDeserializer
+  implements IDeserializer
 {
    // Attributes:
    protected Vector<String> warnings;
@@ -217,192 +219,192 @@ public class ChatDeserializer
 
 
    /**
-    * Layer ID for participant layer.
-    * @see #getParticipantLayerId()
-    * @see #setParticipantLayerId(String)
+    * Participant layer.
+    * @see #getParticipantLayer()
+    * @see #setParticipantLayer(Layer)
     */
-   protected String participantLayerId;
+   protected Layer participantLayer;
    /**
-    * Getter for {@link #participantLayerId}: Layer ID for participant layer.
-    * @return Layer ID for participant layer.
+    * Getter for {@link #participantLayer}: Participant layer.
+    * @return Participant layer.
     */
-   public String getParticipantLayerId() { return participantLayerId; }
+   public Layer getParticipantLayer() { return participantLayer; }
    /**
-    * Setter for {@link #participantLayerId}: Layer ID for participant layer.
-    * @param newParticipantLayerId Layer ID for participant layer.
+    * Setter for {@link #participantLayer}: Participant layer.
+    * @param newParticipantLayer Participant layer.
     */
-   public void setParticipantLayerId(String newParticipantLayerId) { participantLayerId = newParticipantLayerId; }
+   public void setParticipantLayer(Layer newParticipantLayer) { participantLayer = newParticipantLayer; }
    
    /**
-    * Layer ID for turn layer.
-    * @see #getTurnLayerId()
-    * @see #setTurnLayerId(String)
+    * Turn layer.
+    * @see #getTurnLayer()
+    * @see #setTurnLayer(Layer)
     */
-   protected String turnLayerId;
+   protected Layer turnLayer;
    /**
-    * Getter for {@link #turnLayerId}: Layer ID for turn layer.
-    * @return Layer ID for turn layer.
+    * Getter for {@link #turnLayer}: Turn layer.
+    * @return Turn layer.
     */
-   public String getTurnLayerId() { return turnLayerId; }
+   public Layer getTurnLayer() { return turnLayer; }
    /**
-    * Setter for {@link #turnLayerId}: Layer ID for turn layer.
-    * @param newTurnLayerId Layer ID for turn layer.
+    * Setter for {@link #turnLayer}: Turn layer.
+    * @param newTurnLayer Turn layer.
     */
-   public void setTurnLayerId(String newTurnLayerId) { turnLayerId = newTurnLayerId; }
+   public void setTurnLayer(Layer newTurnLayer) { turnLayer = newTurnLayer; }
 
    /**
-    * Layer ID for utterance layer.
-    * @see #getUtteranceLayerId()
-    * @see #setUtteranceLayerId(String)
+    * Utterance layer.
+    * @see #getUtteranceLayer()
+    * @see #setUtteranceLayer(Layer)
     */
-   protected String utteranceLayerId;
+   protected Layer utteranceLayer;
    /**
-    * Getter for {@link #utteranceLayerId}: Layer ID for utterance layer.
-    * @return Layer ID for utterance layer.
+    * Getter for {@link #utteranceLayer}: Utterance layer.
+    * @return Utterance layer.
     */
-   public String getUtteranceLayerId() { return utteranceLayerId; }
+   public Layer getUtteranceLayer() { return utteranceLayer; }
    /**
-    * Setter for {@link #utteranceLayerId}: Layer ID for utterance layer.
-    * @param newUtteranceLayerId Layer ID for utterance layer.
+    * Setter for {@link #utteranceLayer}: Utterance layer.
+    * @param newUtteranceLayer Utterance layer.
     */
-   public void setUtteranceLayerId(String newUtteranceLayerId) { utteranceLayerId = newUtteranceLayerId; }
+   public void setUtteranceLayer(Layer newUtteranceLayer) { utteranceLayer = newUtteranceLayer; }
 
    /**
-    * Layer ID for word layer.
-    * @see #getWordLayerId()
-    * @see #setWordLayerId(String)
+    * Word layer.
+    * @see #getWordLayer()
+    * @see #setWordLayer(Layer)
     */
-   protected String wordLayerId;
+   protected Layer wordLayer;
    /**
-    * Getter for {@link #wordLayerId}: Layer ID for word layer.
-    * @return Layer ID for word layer.
+    * Getter for {@link #wordLayer}: Word layer.
+    * @return Word layer.
     */
-   public String getWordLayerId() { return wordLayerId; }
+   public Layer getWordLayer() { return wordLayer; }
    /**
-    * Setter for {@link #wordLayerId}: Layer ID for word layer.
-    * @param newWordLayerId Layer ID for word layer.
+    * Setter for {@link #wordLayer}: Word layer.
+    * @param newWordLayer Word layer.
     */
-   public void setWordLayerId(String newWordLayerId) { wordLayerId = newWordLayerId; }
+   public void setWordLayer(Layer newWordLayer) { wordLayer = newWordLayer; }
 
    /**
-    * Layer ID for disfluency layer.
-    * @see #getDisfluencyLayerId()
-    * @see #setDisfluencyLayerId(String)
+    * Disfluency layer.
+    * @see #getDisfluencyLayer()
+    * @see #setDisfluencyLayer(Layer)
     */
-   protected String disfluencyLayerId;
+   protected Layer disfluencyLayer;
    /**
-    * Getter for {@link #disfluencyLayerId}: Layer ID for disfluency layer.
-    * @return Layer ID for disfluency layer.
+    * Getter for {@link #disfluencyLayer}: Disfluency layer.
+    * @return Disfluency layer.
     */
-   public String getDisfluencyLayerId() { return disfluencyLayerId; }
+   public Layer getDisfluencyLayer() { return disfluencyLayer; }
    /**
-    * Setter for {@link #disfluencyLayerId}: Layer ID for disfluency layer.
-    * @param newDisfluencyLayerId Layer ID for disfluency layer.
+    * Setter for {@link #disfluencyLayer}: Disfluency layer.
+    * @param newDisfluencyLayer Disfluency layer.
     */
-   public void setDisfluencyLayerId(String newDisfluencyLayerId) { disfluencyLayerId = newDisfluencyLayerId; }
+   public void setDisfluencyLayer(Layer newDisfluencyLayer) { disfluencyLayer = newDisfluencyLayer; }
 
    /**
-    * Layer ID for expansion layer.
-    * @see #getExpansionLayerId()
-    * @see #setExpansionLayerId(String)
+    * Expansion layer.
+    * @see #getExpansionLayer()
+    * @see #setExpansionLayer(Layer)
     */
-   protected String expansionLayerId;
+   protected Layer expansionLayer;
    /**
-    * Getter for {@link #expansionLayerId}: Layer ID for expansion layer.
-    * @return Layer ID for expansion layer.
+    * Getter for {@link #expansionLayer}: Expansion layer.
+    * @return Expansion layer.
     */
-   public String getExpansionLayerId() { return expansionLayerId; }
+   public Layer getExpansionLayer() { return expansionLayer; }
    /**
-    * Setter for {@link #expansionLayerId}: Layer ID for expansion layer.
-    * @param newExpansionLayerId Layer ID for expansion layer.
+    * Setter for {@link #expansionLayer}: Expansion layer.
+    * @param newExpansionLayer Expansion layer.
     */
-   public void setExpansionLayerId(String newExpansionLayerId) { expansionLayerId = newExpansionLayerId; }
+   public void setExpansionLayer(Layer newExpansionLayer) { expansionLayer = newExpansionLayer; }
 
    /**
-    * Layer ID for completion layer.
-    * @see #getCompletionLayerId()
-    * @see #setCompletionLayerId(String)
+    * Completion layer.
+    * @see #getCompletionLayer()
+    * @see #setCompletionLayer(Layer)
     */
-   protected String completionLayerId;
+   protected Layer completionLayer;
    /**
-    * Getter for {@link #completionLayerId}: Layer ID for completion layer.
-    * @return Layer ID for completion layer.
+    * Getter for {@link #completionLayer}: Completion layer.
+    * @return Completion layer.
     */
-   public String getCompletionLayerId() { return completionLayerId; }
+   public Layer getCompletionLayer() { return completionLayer; }
    /**
-    * Setter for {@link #completionLayerId}: Layer ID for completion layer.
-    * @param newCompletionLayerId Layer ID for completion layer.
+    * Setter for {@link #completionLayer}: Completion layer.
+    * @param newCompletionLayer Completion layer.
     */
-   public void setCompletionLayerId(String newCompletionLayerId) { completionLayerId = newCompletionLayerId; }
+   public void setCompletionLayer(Layer newCompletionLayer) { completionLayer = newCompletionLayer; }
    
    /**
-    * Layer ID for Gems
-    * @see #getGemLayerId()
-    * @see #setGemLayerId(String)
+    * Gems
+    * @see #getGemLayer()
+    * @see #setGemLayer(Layer)
     */
-   protected String gemLayerId;
+   protected Layer gemLayer;
    /**
-    * Getter for {@link #gemLayerId}: Layer ID for Gems
-    * @return Layer ID for Gems
+    * Getter for {@link #gemLayer}: Gems
+    * @return Gems
     */
-   public String getGemLayerId() { return gemLayerId; }
+   public Layer getGemLayer() { return gemLayer; }
    /**
-    * Setter for {@link #gemLayerId}: Layer ID for Gems
-    * @param newGemLayerId Layer ID for Gems
+    * Setter for {@link #gemLayer}: Gems
+    * @param newGemLayer Gems
     */
-   public void setGemLayerId(String newGemLayerId) { gemLayerId = newGemLayerId; }
+   public void setGemLayer(Layer newGemLayer) { gemLayer = newGemLayer; }
 
    
    /**
-    * Layer ID for transcriber graph attributes.
-    * @see #getTranscriberLayerId()
-    * @see #setTranscriberLayerId(String)
+    * Transcriber graph attributes.
+    * @see #getTranscriberLayer()
+    * @see #setTranscriberLayer(Layer)
     */
-   protected String transcriberLayerId;
+   protected Layer transcriberLayer;
    /**
-    * Getter for {@link #transcriberLayerId}: Layer ID for transcriber graph attributes.
-    * @return Layer ID for transcriber graph attributes.
+    * Getter for {@link #transcriberLayer}: Transcriber graph attributes.
+    * @return Transcriber graph attributes.
     */
-   public String getTranscriberLayerId() { return transcriberLayerId; }
+   public Layer getTranscriberLayer() { return transcriberLayer; }
    /**
-    * Setter for {@link #transcriberLayerId}: Layer ID for transcriber graph attributes.
-    * @param newTranscriberLayerId Layer ID for transcriber graph attributes.
+    * Setter for {@link #transcriberLayer}: Transcriber graph attributes.
+    * @param newTranscriberLayer Transcriber graph attributes.
     */
-   public void setTranscriberLayerId(String newTranscriberLayerId) { transcriberLayerId = newTranscriberLayerId; }
+   public void setTranscriberLayer(Layer newTranscriberLayer) { transcriberLayer = newTranscriberLayer; }
 
    /**
-    * Layer ID for graph language.
-    * @see #getLanguagesLayerId()
-    * @see #setLanguagesLayerId(String)
+    * Graph language.
+    * @see #getLanguagesLayer()
+    * @see #setLanguagesLayer(Layer)
     */
-   protected String languagesLayerId;
+   protected Layer languagesLayer;
    /**
-    * Getter for {@link #languagesLayerId}: Layer ID for graph language.
-    * @return Layer ID for graph language.
+    * Getter for {@link #languagesLayer}: Graph language.
+    * @return Graph language.
     */
-   public String getLanguagesLayerId() { return languagesLayerId; }
+   public Layer getLanguagesLayer() { return languagesLayer; }
    /**
-    * Setter for {@link #languagesLayerId}: Layer ID for graph language.
-    * @param newLanguagesLayerId Layer ID for graph language.
+    * Setter for {@link #languagesLayer}: Graph language.
+    * @param newLanguagesLayer Graph language.
     */
-   public void setLanguagesLayerId(String newLanguagesLayerId) { languagesLayerId = newLanguagesLayerId; }
+   public void setLanguagesLayer(Layer newLanguagesLayer) { languagesLayer = newLanguagesLayer; }
 
    /**
     * Required participant meta-data layers.
-    * @see #getParticipantLayerIds()
-    * @see #setParticipantLayerIds(HashSet)
+    * @see #getParticipantLayers()
+    * @see #setParticipantLayers(HashSet)
     */
-   protected HashMap<String,String> participantLayerIds;
+   protected HashMap<String,Layer> participantLayers;
    /**
-    * Getter for {@link #participantLayerIds}: Required participant meta-data layers.
+    * Getter for {@link #participantLayers}: Required participant meta-data layers.
     * @return Required participant meta-data layers.
     */
-   public HashMap<String,String> getParticipantLayerIds() { return participantLayerIds; }
+   public HashMap<String,Layer> getParticipantLayers() { return participantLayers; }
    /**
-    * Setter for {@link #participantLayerIds}: Required participant meta-data layers.
-    * @param newParticipantLayerIds Required participant meta-data layers.
+    * Setter for {@link #participantLayers}: Required participant meta-data layers.
+    * @param newParticipantLayers Required participant meta-data layers.
     */
-   public void setParticipantLayerIds(HashMap<String,String> newParticipantLayerIds) { participantLayerIds = newParticipantLayerIds; }
+   public void setParticipantLayers(HashMap<String,Layer> newParticipantLayers) { participantLayers = newParticipantLayers; }
    
    /**
     * Utterance tokenizer.  The default is {@link SimpleTokenizer}.
@@ -444,17 +446,17 @@ public class ChatDeserializer
       transcribers = new Vector<String>();
       lines = new Vector<String>();
       headers = new Vector<String>();
-      participantLayerId = null;
-      turnLayerId = null;
-      utteranceLayerId = null;
-      wordLayerId = null;
-      gemLayerId = null;
-      transcriberLayerId = null;
-      languagesLayerId = null;
-      expansionLayerId = null;
-      completionLayerId = null;
-      disfluencyLayerId = null;
-      participantLayerIds = new HashMap<String,String>();
+      participantLayer = null;
+      turnLayer = null;
+      utteranceLayer = null;
+      wordLayer = null;
+      gemLayer = null;
+      transcriberLayer = null;
+      languagesLayer = null;
+      expansionLayer = null;
+      completionLayer = null;
+      disfluencyLayer = null;
+      participantLayers = new HashMap<String,Layer>();
    } // end of reset()
 
    // IStreamDeserializer methods:
@@ -486,6 +488,7 @@ public class ChatDeserializer
     * @return A list of parameters that require setting before {@link IDeserializer#deserialize()} can be invoked. This may be an empty list, and may include parameters with the value already set to a workable default. If there are parameters, and user interaction is possible, then the user may be presented with an interface for setting/confirming these parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
     * @throws Exception If the stream could not be loaded.
     */
+   @SuppressWarnings({"rawtypes", "unchecked"})
    public ParameterSet load(NamedStream[] annotationStreams, NamedStream[] mediaStreams, Schema schema) throws Exception
    {
       ParameterSet parameters = new ParameterSet();
@@ -496,10 +499,10 @@ public class ChatDeserializer
 
       reset();
       setSchema(schema);
-      setParticipantLayerId(schema.getParticipantLayerId());
-      setTurnLayerId(schema.getTurnLayerId());
-      setUtteranceLayerId(schema.getUtteranceLayerId());
-      setWordLayerId(schema.getWordLayerId());
+      setParticipantLayer(schema.getParticipantLayer());
+      setTurnLayer(schema.getTurnLayer());
+      setUtteranceLayer(schema.getUtteranceLayer());
+      setWordLayer(schema.getWordLayer());
 
       boolean disfluenciesFound = false;
       Pattern regexDisfluency = Pattern.compile("&\\p{Alnum}");
@@ -616,7 +619,7 @@ public class ChatDeserializer
 			   {
 			      String role = participantTokens.nextToken();
 			      participants.get(id).put("role", role);
-			      participantLayerIds.put("role", null);
+			      participantLayers.put("role", null);
 			   }
 			}
 		     }
@@ -642,50 +645,50 @@ public class ChatDeserializer
 		     participants.put(code, new HashMap<String,String>());
 		  }
 		  // set the attribute values and make sure we ask for layers if there are values
-		  if (language.length() > 0 && !participantLayerIds.containsKey("language"))
+		  if (language.length() > 0 && !participantLayers.containsKey("language"))
 		  {
-		     participantLayerIds.put("language", null);
+		     participantLayers.put("language", null);
 		  }
 		  participants.get(code).put("language", language);
-		  if (corpus.length() > 0 && !participantLayerIds.containsKey("corpus"))
+		  if (corpus.length() > 0 && !participantLayers.containsKey("corpus"))
 		  {
-		     participantLayerIds.put("corpus", null);
+		     participantLayers.put("corpus", null);
 		  }
 		  participants.get(code).put("corpus", corpus);
-		  if (age.length() > 0 && !participantLayerIds.containsKey("age"))
+		  if (age.length() > 0 && !participantLayers.containsKey("age"))
 		  {
-		     participantLayerIds.put("age", null);
+		     participantLayers.put("age", null);
 		  }
 		  participants.get(code).put("age", age);
-		  if (sex.length() > 0 && !participantLayerIds.containsKey("sex"))
+		  if (sex.length() > 0 && !participantLayers.containsKey("sex"))
 		  {
-		     participantLayerIds.put("sex", null);
+		     participantLayers.put("sex", null);
 		  }
 		  participants.get(code).put("sex", sex);
-		  if (group.length() > 0 && !participantLayerIds.containsKey("group"))
+		  if (group.length() > 0 && !participantLayers.containsKey("group"))
 		  {
-		     participantLayerIds.put("group", null);
+		     participantLayers.put("group", null);
 		  }
 		  participants.get(code).put("group", group);
-		  if (SES.length() > 0 && !participantLayerIds.containsKey("SES"))
+		  if (SES.length() > 0 && !participantLayers.containsKey("SES"))
 		  {
-		     participantLayerIds.put("SES", null);
+		     participantLayers.put("SES", null);
 		  }
 		  participants.get(code).put("SES", SES);
-		  if (role.length() > 0 && !participantLayerIds.containsKey("role"))
+		  if (role.length() > 0 && !participantLayers.containsKey("role"))
 		  {
-		     participantLayerIds.put("role", null);
+		     participantLayers.put("role", null);
 		     //TODO participants.get(code).put("role", role);
 		  }
 		  participants.get(code).put("role", role);
-		  if (education.length() > 0 && !participantLayerIds.containsKey("education"))
+		  if (education.length() > 0 && !participantLayers.containsKey("education"))
 		  {
-		     participantLayerIds.put("education", null);
+		     participantLayers.put("education", null);
 		  }
 		  participants.get(code).put("education", education);
-		  if (custom.length() > 0 && !participantLayerIds.containsKey("custom"))
+		  if (custom.length() > 0 && !participantLayers.containsKey("custom"))
 		  {
-		     participantLayerIds.put("custom", null);
+		     participantLayers.put("custom", null);
 		  }
 		  participants.get(code).put("custom", custom);
 	       }
@@ -710,181 +713,206 @@ public class ChatDeserializer
 	 } // @ line
       } // next header
 
-      if (getParticipantLayerId() == null)
+      LinkedHashMap<String,Layer> possibleParticipantLayers = new LinkedHashMap<String,Layer>();
+      LinkedHashMap<String,Layer> possibleTurnLayers = new LinkedHashMap<String,Layer>();
+      LinkedHashMap<String,Layer> possibleTurnChildLayers = new LinkedHashMap<String,Layer>();
+      LinkedHashMap<String,Layer> wordTagLayers = new LinkedHashMap<String,Layer>();
+      LinkedHashMap<String,Layer> participantTagLayers = new LinkedHashMap<String,Layer>();
+      if (getParticipantLayer() == null || getTurnLayer() == null 
+	  || getUtteranceLayer() == null || getWordLayer() == null)
       {
-	 Parameter p = new Parameter("participantLayerId", "layerId", "Participant layer", "Layer for speaker/participant identification", true);
-	 if (getSchema().getLayers().containsKey("participant"))
+	 for (Layer top : schema.getRoot().getChildren().values())
 	 {
-	    p.setValue("participant");
-	 }
-	 else if (getSchema().getLayers().containsKey("participants"))
+	    if (top.getAlignment() == Constants.ALIGNMENT_NONE)
+	    {
+	       if (top.getChildren().size() == 0)
+	       { // unaligned childless children of graph
+		  participantTagLayers.put(top.getId(), top);
+	       }
+	       else
+	       { // unaligned children of graph, with children of their own
+		  possibleParticipantLayers.put(top.getId(), top);
+		  for (Layer turn : top.getChildren().values())
+		  {
+		     if (turn.getAlignment() == Constants.ALIGNMENT_INTERVAL
+			 && turn.getChildren().size() > 0)
+		     { // aligned children of who with their own children
+			possibleTurnLayers.put(turn.getId(), turn);
+			for (Layer turnChild : turn.getChildren().values())
+			{
+			   if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL)
+			   { // aligned children of turn
+			      possibleTurnChildLayers.put(turnChild.getId(), turnChild);
+			      for (Layer tag : turnChild.getChildren().values())
+			      {
+				 if (tag.getAlignment() == Constants.ALIGNMENT_NONE)
+				 { // unaligned children of word
+				    wordTagLayers.put(tag.getId(), tag);
+				 }
+			      } // next possible word tag layer
+			   }
+			} // next possible turn child layer
+		     }
+		  } // next possible turn layer
+	       } // with children
+	    } // unaligned
+	 } // next possible participant layer
+      } // missing special layers
+      else
+      {
+	 for (Layer tag : getWordLayer().getChildren().values())
 	 {
-	    p.setValue("participants");
-	 }
-	 else if (getSchema().getLayers().containsKey("who"))
+	    if (tag.getAlignment() == Constants.ALIGNMENT_NONE
+		&& tag.getChildren().size() == 0)
+	    {
+	       wordTagLayers.put(tag.getId(), tag);
+	    }
+	 } // next possible word tag layer
+	 for (Layer tag : getParticipantLayer().getChildren().values())
 	 {
-	    p.setValue("who");
-	 }
+	    if (tag.getAlignment() == Constants.ALIGNMENT_NONE
+		&& tag.getChildren().size() == 0)
+	    {
+	       participantTagLayers.put(tag.getId(), tag);
+	    }
+	 } // next possible word tag layer
+      }
+      participantTagLayers.remove("main_participant");
+
+      if (getParticipantLayer() == null)
+      {
+	 Parameter p = new Parameter("participantLayer", Layer.class, "Participant layer", "Layer for speaker/participant identification", true);
+	 String[] possibilities = {"participant","participants","who","speaker","speakers"};
+	 p.setValue(findLayerById(possibleParticipantLayers, possibilities));
+	 p.setPossibleValues(possibleParticipantLayers.values());
 	 parameters.addParameter(p);
       }
-      if (getTurnLayerId() == null)
+      if (getTurnLayer() == null)
       {
-	 Parameter p = new Parameter("turnLayerId", "layerId", "Turn layer", "Layer for speaker turns", true);
-	 if (getSchema().getLayers().containsKey("turn"))
-	 {
-	    p.setValue("turn");
-	 }
-	 else if (getSchema().getLayers().containsKey("turns"))
-	 {
-	    p.setValue("turns");
-	 }
+	 Parameter p = new Parameter("turnLayer", Layer.class, "Turn layer", "Layer for speaker turns", true);
+	 String[] possibilities = {"turn","turns"};
+	 p.setValue(findLayerById(possibleTurnLayers, possibilities));
+	 p.setPossibleValues(possibleTurnLayers.values());
 	 parameters.addParameter(p);
       }
-      if (getUtteranceLayerId() == null)
+      if (getUtteranceLayer() == null)
       {
-	 Parameter p = new Parameter("utteranceLayerId", "layerId", "Utterance layer", "Layer for speaker utterances", true);
-	 if (getSchema().getLayers().containsKey("utterance"))
-	 {
-	    p.setValue("utterance");
-	 }
-	 else if (getSchema().getLayers().containsKey("utterances"))
-	 {
-	    p.setValue("utterances");
-	 }
-	 else if (getSchema().getLayers().containsKey("line"))
-	 {
-	    p.setValue("line");
-	 }
-	 else if (getSchema().getLayers().containsKey("lines"))
-	 {
-	    p.setValue("lines");
-	 }
+	 Parameter p = new Parameter("utteranceLayer", Layer.class, "Utterance layer", "Layer for speaker utterances", true);
+	 String[] possibilities = {"utterance","utterances","line","lines"};
+	 p.setValue(findLayerById(possibleTurnChildLayers, possibilities));
+	 p.setPossibleValues(possibleTurnChildLayers.values());
 	 parameters.addParameter(p);
       }
-      if (getWordLayerId() == null)
+      if (getWordLayer() == null)
       {
-	 Parameter p = new Parameter("wordLayerId", "layerId", "Word layer", "Layer for individual word tokens", true);
-	 if (getSchema().getLayers().containsKey("transcript"))
-	 {
-	    p.setValue("transcript");
-	 }
-	 else if (getSchema().getLayers().containsKey("word"))
-	 {
-	    p.setValue("word");
-	 }
-	 else if (getSchema().getLayers().containsKey("words"))
-	 {
-	    p.setValue("words");
-	 }
-	 else if (getSchema().getLayers().containsKey("w"))
-	 {
-	    p.setValue("w");
-	 }
+	 Parameter p = new Parameter("wordLayer", Layer.class, "Word layer", "Layer for individual word tokens", true);
+	 String[] possibilities = {"transcript","word","words","w"};
+	 p.setValue(findLayerById(possibleTurnChildLayers, possibilities));
+	 p.setPossibleValues(possibleTurnChildLayers.values());
 	 parameters.addParameter(p);
       }
       if (disfluenciesFound)
       {
-	 Parameter p = new Parameter("disfluencyLayerId", "layerId", "Disfluency layer", "Layer for disfluency annotations");
-	 if (getSchema().getLayers().containsKey("disfluency"))
-	 {
-	    p.setValue("disfluency");
-	 }
-	 else if (getSchema().getLayers().containsKey("disfluencies"))
-	 {
-	    p.setValue("disfluencies");
-	 }
+	 Parameter p = new Parameter("disfluencyLayer", Layer.class, "Disfluency layer", "Layer for disfluency annotations");
+	 String[] possibilities = {"disfluency","disfluencies"};
+	 p.setValue(findLayerById(wordTagLayers, possibilities));
+	 p.setPossibleValues(wordTagLayers.values());
 	 parameters.addParameter(p);
       }
       if (expansionsFound)
       {
-	 Parameter p = new Parameter("expansionLayerId", "layerId", "Expansion layer", "Layer for expansion annotations");
-	 if (getSchema().getLayers().containsKey("expansion"))
-	 {
-	    p.setValue("expansion");
-	 }
-	 else if (getSchema().getLayers().containsKey("expansions"))
-	 {
-	    p.setValue("expansions");
-	 }
+	 Parameter p = new Parameter("expansionLayer", Layer.class, "Expansion layer", "Layer for expansion annotations");
+	 String[] possibilities = {"expansion","expansions"};
+	 p.setValue(findLayerById(wordTagLayers, possibilities));
+	 p.setPossibleValues(wordTagLayers.values());
 	 parameters.addParameter(p);
       }
       if (completionsFound)
       {
-	 Parameter p = new Parameter("completionLayerId", "layerId", "Completion layer", "Layer for completion annotations");
-	 if (getSchema().getLayers().containsKey("completion"))
-	 {
-	    p.setValue("completion");
-	 }
-	 else if (getSchema().getLayers().containsKey("completions"))
-	 {
-	    p.setValue("completions");
-	 }
+	 Parameter p = new Parameter("completionLayer", Layer.class, "Completion layer", "Layer for completion annotations");
+	 String[] possibilities = {"completion","completions"};
+	 p.setValue(findLayerById(wordTagLayers, possibilities));
+	 p.setPossibleValues(wordTagLayers.values());
 	 parameters.addParameter(p);
       }
       if (gemsFound)
       {
-	 Parameter p = new Parameter("gemLayerId", "layerId", "Gem layer", "Layer for gems");
-	 if (getSchema().getLayers().containsKey("gem"))
+	 LinkedHashMap<String,Layer> possibleLayers = new LinkedHashMap<String,Layer>();
+	 for (Layer top : schema.getRoot().getChildren().values())
 	 {
-	    p.setValue("gem");
-	 }
-	 else if (getSchema().getLayers().containsKey("gems"))
-	 {
-	    p.setValue("gems");
-	 }
-	 else if (getSchema().getLayers().containsKey("topic"))
-	 {
-	    p.setValue("topic");
-	 }
-	 else if (getSchema().getLayers().containsKey("topics"))
-	 {
-	    p.setValue("topics");
-	 }
+	    if (top.getAlignment() == Constants.ALIGNMENT_INTERVAL)
+	    { // aligned children of graph
+	       possibleLayers.put(top.getId(), top);
+	    }
+	 } // next top level layer
+	 Parameter p = new Parameter("gemLayer", Layer.class, "Gem layer", "Layer for gems");
+	 String[] possibilities = {"gem","gems","topic","topics"};
+	 p.setValue(findLayerById(possibleLayers, possibilities));
+	 p.setPossibleValues(possibleLayers.values());
 	 parameters.addParameter(p);
       }
+      LinkedHashMap<String,Layer> graphTagLayers = new LinkedHashMap<String,Layer>();
+      for (Layer top : schema.getRoot().getChildren().values())
+      {
+	 if (top.getAlignment() == Constants.ALIGNMENT_NONE
+	     && top.getChildren().size() == 0)
+	 { // unaligned childless children of graph
+	    graphTagLayers.put(top.getId(), top);
+	 }
+      } // next top level layer
+      graphTagLayers.remove("corpus");
+      graphTagLayers.remove("transcript_type");
       if (transcribersFound)
       {
-	 Parameter p = new Parameter("transcriberLayerId", "layerId", "Transcriber layer", "Layer for transcriber name");
-	 if (getSchema().getLayers().containsKey("transcriber"))
-	 {
-	    p.setValue("transcriber");
-	 }
-	 else if (getSchema().getLayers().containsKey("transcribers"))
-	 {
-	    p.setValue("transcribers");
-	 }
+	 Parameter p = new Parameter("transcriberLayer", Layer.class, "Transcriber layer", "Layer for transcriber name");
+	 String[] possibilities = {"transcriber","transcribers","transcript_transcriber","transcript_transcribers", "scribe","scribes", "transcript_scribe","transcript_scribes"};
+	 p.setValue(findLayerById(graphTagLayers, possibilities));
+	 p.setPossibleValues(graphTagLayers.values());
 	 parameters.addParameter(p);
       }
       if (languagesFound)
       {
-	 Parameter p = new Parameter("languagesLayerId", "layerId", "Transcript language layer", "Layer for transcriber language");
-	 if (getSchema().getLayers().containsKey("languages"))
-	 {
-	    p.setValue("languages");
-	 }
-	 else if (getSchema().getLayers().containsKey("language"))
-	 {
-	    p.setValue("language");
-	 }
+	 Parameter p = new Parameter("languagesLayer", Layer.class, "Transcript language layer", "Layer for transcriber language");
+	 String[] possibilities = {"transcript_language","transcript_languages","language","languages"};
+	 p.setValue(findLayerById(graphTagLayers, possibilities));
+	 p.setPossibleValues(graphTagLayers.values());
 	 parameters.addParameter(p);
       }
       // participant meta data layers
-      for (String attribute : participantLayerIds.keySet())
+      for (String attribute : participantLayers.keySet())
       {
-	 Parameter p = new Parameter(attribute + "LayerId", "layerId", attribute + " layer", "Layer for " + attribute);
+	 Parameter p = new Parameter(attribute + "Layer", Layer.class, attribute + " layer", "Layer for " + attribute);
 	 // if we have a layer called that
-	 if (getSchema().getLayers().containsKey(attribute)
-	     // and it's a child of the participant layer
-	     && (getSchema().getLayers().get(attribute).getParentId().equals(getParticipantLayerId())
-		 || getSchema().getLayers().get(attribute).getParentId().equals("who")))
-	 {
-	    p.setValue(attribute);
-	 }
+	 String[] possibilities = {"participant_"+attribute, attribute};
+	 p.setValue(findLayerById(participantTagLayers, possibilities));
+	 p.setPossibleValues(participantTagLayers.values());
 	 parameters.addParameter(p);
       }
 
       return parameters;
    }
+
+   
+   /**
+    * Tries to find a layer in the given map, using an ordered list of possible IDs.
+    * @param possibleLayers
+    * @param possibleIds
+    * @return The first matching layer, or null if none matched.
+    */
+   public Layer findLayerById(LinkedHashMap<String,Layer> possibleLayers, String[] possibleIds)
+   {
+      HashSet<String> possibleLayerIds = new HashSet<String>();
+      for (String id : possibleLayers.keySet()) possibleLayerIds.add(id.toLowerCase());
+      for (String id : possibleIds)
+      {
+	 if (possibleLayerIds.contains(id.toLowerCase()))
+	 {
+	    return possibleLayers.get(id);
+	 }
+      }
+      return null;
+   } // end of findLayerById()
+
 
    /**
     * Sets parameters for a given deserialization operation, after loading the serialized form of the graph. This might include mappings from format-specific objects like tiers to graph layers, etc.
@@ -893,55 +921,55 @@ public class ChatDeserializer
     */
    public void setParameters(ParameterSet parameters) throws DeserializationParametersMissingException
    {
-      if (parameters.containsKey("participantLayerId"))
+      if (parameters.containsKey("participantLayer"))
       {
-	 setParticipantLayerId((String)parameters.get("participantLayerId").getValue());
+	 setParticipantLayer((Layer)parameters.get("participantLayer").getValue());
       }
-      if (parameters.containsKey("turnLayerId"))
+      if (parameters.containsKey("turnLayer"))
       {
-	 setTurnLayerId((String)parameters.get("turnLayerId").getValue());
+	 setTurnLayer((Layer)parameters.get("turnLayer").getValue());
       }
-      if (parameters.containsKey("utteranceLayerId"))
+      if (parameters.containsKey("utteranceLayer"))
       {
-	 setUtteranceLayerId((String)parameters.get("utteranceLayerId").getValue());
+	 setUtteranceLayer((Layer)parameters.get("utteranceLayer").getValue());
       }
-      if (parameters.containsKey("wordLayerId"))
+      if (parameters.containsKey("wordLayer"))
       {
-	 setWordLayerId((String)parameters.get("wordLayerId").getValue());
+	 setWordLayer((Layer)parameters.get("wordLayer").getValue());
       }
-      if (parameters.containsKey("disfluencyLayerId"))
+      if (parameters.containsKey("disfluencyLayer"))
       {
-	 setDisfluencyLayerId((String)parameters.get("disfluencyLayerId").getValue());
+	 setDisfluencyLayer((Layer)parameters.get("disfluencyLayer").getValue());
       }
-      if (parameters.containsKey("expansionLayerId"))
+      if (parameters.containsKey("expansionLayer"))
       {
-	 setExpansionLayerId((String)parameters.get("expansionLayerId").getValue());
+	 setExpansionLayer((Layer)parameters.get("expansionLayer").getValue());
       }
-      if (parameters.containsKey("completionLayerId"))
+      if (parameters.containsKey("completionLayer"))
       {
-	 setCompletionLayerId((String)parameters.get("completionLayerId").getValue());
+	 setCompletionLayer((Layer)parameters.get("completionLayer").getValue());
       }
-      if (parameters.containsKey("gemLayerId"))
+      if (parameters.containsKey("gemLayer"))
       {
-	 setGemLayerId((String)parameters.get("gemLayerId").getValue());
+	 setGemLayer((Layer)parameters.get("gemLayer").getValue());
       }
-      if (parameters.containsKey("transcriberLayerId"))
+      if (parameters.containsKey("transcriberLayer"))
       {
-	 setTranscriberLayerId((String)parameters.get("transcriberLayerId").getValue());
+	 setTranscriberLayer((Layer)parameters.get("transcriberLayer").getValue());
       }
-      if (parameters.containsKey("languagesLayerId"))
+      if (parameters.containsKey("languagesLayer"))
       {
-	 setLanguagesLayerId((String)parameters.get("languagesLayerId").getValue());
+	 setLanguagesLayer((Layer)parameters.get("languagesLayer").getValue());
       }
-      if (getParticipantLayerId() == null || getTurnLayerId() == null || getUtteranceLayerId() == null || getWordLayerId() == null)
+      if (getParticipantLayer() == null || getTurnLayer() == null || getUtteranceLayer() == null || getWordLayer() == null)
       {
 	 throw new DeserializationParametersMissingException();
       }
-      for (String attribute : participantLayerIds.keySet())
+      for (String attribute : participantLayers.keySet())
       {
-	 if (parameters.containsKey(attribute + "LayerId"))
+	 if (parameters.containsKey(attribute + "Layer"))
 	 {
-	    participantLayerIds.put(attribute, ((String)parameters.get(attribute + "LayerId").getValue()));
+	    participantLayers.put(attribute, ((Layer)parameters.get(attribute + "Layer").getValue()));
 	 }
       }
    }
@@ -966,41 +994,42 @@ public class ChatDeserializer
       // add layers to the graph
       // we don't just copy the whole schema, because that would imply that all the extra layers
       // contained no annotations, which is not necessarily true
-      graph.addLayer(getSchema().getLayer(getParticipantLayerId()));
-      graph.addLayer(getSchema().getLayer(getTurnLayerId()));
-      graph.addLayer(getSchema().getLayer(getUtteranceLayerId()));
-      graph.addLayer(getSchema().getLayer(getWordLayerId()));
-      if (getDisfluencyLayerId() != null)
+      graph.addLayer(getParticipantLayer());
+      graph.getSchema().setParticipantLayerId(getParticipantLayer().getId());
+      graph.addLayer(getTurnLayer());
+      graph.getSchema().setTurnLayerId(getTurnLayer().getId());
+      graph.addLayer(getUtteranceLayer());
+      graph.getSchema().setUtteranceLayerId(getUtteranceLayer().getId());
+      graph.addLayer(getWordLayer());
+      graph.getSchema().setWordLayerId(getWordLayer().getId());
+      if (getDisfluencyLayer() != null) graph.addLayer(getDisfluencyLayer());
+      if (getExpansionLayer() != null) graph.addLayer(getExpansionLayer());
+      if (getCompletionLayer() != null) graph.addLayer(getCompletionLayer());
+      if (getGemLayer() != null) graph.addLayer(getGemLayer());
+      if (getTranscriberLayer() != null) graph.addLayer(getTranscriberLayer());
+      if (getLanguagesLayer() != null) graph.addLayer(getLanguagesLayer());
+      for (String attribute : participantLayers.keySet())
       {
-	 graph.addLayer(getSchema().getLayer(getDisfluencyLayerId()));
-      }
-      if (getExpansionLayerId() != null) graph.addLayer(getSchema().getLayer(getExpansionLayerId()));
-      if (getCompletionLayerId() != null) graph.addLayer(getSchema().getLayer(getCompletionLayerId()));
-      if (getGemLayerId() != null) graph.addLayer(getSchema().getLayer(getGemLayerId()));
-      if (getTranscriberLayerId() != null) graph.addLayer(getSchema().getLayer(getTranscriberLayerId()));
-      if (getLanguagesLayerId() != null) graph.addLayer(getSchema().getLayer(getLanguagesLayerId()));
-      for (String attribute : participantLayerIds.keySet())
-      {
-	 String layerId = participantLayerIds.get(attribute);
-	 if (layerId != null)
+	 Layer layer = participantLayers.get(attribute);
+	 if (layer != null)
 	 {
-	    graph.addLayer(getSchema().getLayer(layerId));
+	    graph.addLayer(layer);
 	 }
       } // next participant layer 
 
       // graph meta data
-      if (getTranscriberLayerId() != null)
+      if (getTranscriberLayer() != null)
       {
 	 for (String transcriber : transcribers)
 	 {
-	    graph.createTag(graph, getTranscriberLayerId(), transcriber);
+	    graph.createTag(graph, getTranscriberLayer().getId(), transcriber);
 	 }
       }
-      if (getLanguagesLayerId() != null)
+      if (getLanguagesLayer() != null)
       {
 	 for (String language : languages)
 	 {
-	    graph.createTag(graph, getLanguagesLayerId(), language);
+	    graph.createTag(graph, getLanguagesLayer().getId(), language);
 	 }
       }
       
@@ -1011,34 +1040,33 @@ public class ChatDeserializer
 	 Annotation participant = new Annotation(
 	    participantId, 
 	    attributes.containsKey("name")?attributes.get("name"):participantId, 
-	    getParticipantLayerId());
+	    getParticipantLayer().getId());
 	 participant.setParentId(graph.getId());
 	 graph.addAnnotation(participant);
 
 	 // set the participant meta-data
-	 for (String attribute : participantLayerIds.keySet())
+	 for (String attribute : participantLayers.keySet())
 	 {
-	    String layerId = participantLayerIds.get(attribute);
-	    if (layerId != null && attributes.containsKey(attribute))
+	    Layer layer = participantLayers.get(attribute);
+	    if (layer != null && attributes.containsKey(attribute))
 	    {
-	       graph.createTag(participant, layerId, attributes.get(attribute));
+	       graph.createTag(participant, layer.getId(), attributes.get(attribute));
 	    }
-	 }
-	 
+	 }	 
       }
 
       // ensure we have an utterance tokenizer
       if (getTokenizer() == null)
       {
-	 setTokenizer(new SimpleTokenizer(getUtteranceLayerId(), getWordLayerId()));
+	 setTokenizer(new SimpleTokenizer(getUtteranceLayer().getId(), getWordLayer().getId()));
       }
 
       // regular expressions
       Pattern synchronisedPattern = Pattern.compile("^(.*)([0-9]+)_([0-9]+)$");
 
       // lines
-      Annotation currentTurn = new Annotation(null, "", getTurnLayerId());
-      Annotation lastUtterance = new Annotation(null, "", getUtteranceLayerId());
+      Annotation currentTurn = new Annotation(null, "", getTurnLayer().getId());
+      Annotation lastUtterance = new Annotation(null, "", getUtteranceLayer().getId());
       Annotation gem = null;
       Anchor lastAnchor = new Anchor(null, 0.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
       graph.addAnchor(lastAnchor);
@@ -1053,7 +1081,7 @@ public class ChatDeserializer
 		  gem.setEnd(lastAnchor);
 		  graph.addAnnotation(gem);
 	       }
-	       if (getGemLayerId() != null)
+	       if (getGemLayer() != null)
 	       {
 		  String label = "gem";
 		  int iColon = line.indexOf(':');
@@ -1061,7 +1089,7 @@ public class ChatDeserializer
 		  { // it's a key/value pair
 		     label = line.substring(iColon + 1).trim();
 		  }
-		  gem = new Annotation(null, label, getGemLayerId(), graph.getId());
+		  gem = new Annotation(null, label, getGemLayer().getId(), graph.getId());
 	       }
 	    }
 	    else if (line.startsWith("@Eg") && gem != null)
@@ -1082,7 +1110,7 @@ public class ChatDeserializer
 	       {
 		  warnings.add("Undeclared participant: " + participantId);
 		  
-		  Annotation participant = new Annotation(participantId, participantId, getParticipantLayerId());
+		  Annotation participant = new Annotation(participantId, participantId, getParticipantLayer().getId());
 		  participant.setParentId(graph.getId());
 		  graph.addAnnotation(participant);
 	       } // undeclared participant
@@ -1091,15 +1119,16 @@ public class ChatDeserializer
 		  if (currentTurn.getEndId() == null)
 		  {
 		     currentTurn.setEnd(lastAnchor);
-		     currentTurn = new Annotation(null, participantId, getTurnLayerId());
+		     currentTurn = new Annotation(null, participantId, getTurnLayer().getId());
 		     currentTurn.setStartId(lastAnchor.getId());		  
+		     currentTurn.setParentId(participantId);
 		     graph.addAnnotation(currentTurn);
 		  }
 	       }
 	       line = line.substring(5);
 	    } // participant
 	    
-	    Annotation utterance = new Annotation(null, line, utteranceLayerId);
+	    Annotation utterance = new Annotation(null, line, getUtteranceLayer().getId());
 	    utterance.setStart(lastUtterance.getEnd());
 	    Matcher synchronisedMatcher = synchronisedPattern.matcher(line);
 	    if (synchronisedMatcher.matches())
@@ -1132,10 +1161,7 @@ public class ChatDeserializer
 	 gem.setEnd(lastAnchor);
 	 graph.addAnnotation(gem);
       }
-      if (currentTurn.getEndId() == null)
-      {
-	 currentTurn.setEndId(lastAnchor.getId());
-      }
+      currentTurn.setEndId(lastAnchor.getId());
 
       // tokenize utterances into words
       try
@@ -1149,45 +1175,46 @@ public class ChatDeserializer
 
       try
       {
-	  // disfluencies
-	  ConventionTransformer transformer = new ConventionTransformer(getWordLayerId(), "&(\\w+)");
-	  transformer.addDestinationResult(getWordLayerId(), "$1");
-	  if (getDisfluencyLayerId() != null)
-	  {
-	     transformer.addDestinationResult(getDisfluencyLayerId(), "&");
-	  }
-	  transformer.transform(graph);
-	  graph.commit();
-	  
-	  // expansions
-	  SpanningConventionTransformer spanningTransformer = new SpanningConventionTransformer(
-	     "word", "\\[:", "(.*)\\]", true, null, null, getExpansionLayerId(), null, "$1", true);	  
-	  spanningTransformer.transform(graph);	
-	  graph.commit();
-	  
-	  
-	  // completions at the start
-	  transformer = new ConventionTransformer(getWordLayerId(), "\\((\\p{Alnum}+)\\)(.+)");
-	  transformer.addDestinationResult(getWordLayerId(), "$2");
-	  if (getCompletionLayerId() != null)
-	  {
-	     transformer.addDestinationResult(getCompletionLayerId(), "$1$2");
-	  }
-	  transformer.transform(graph);	
-	  graph.commit();
-  
-	  // completions at the end
-	  transformer = new ConventionTransformer(getWordLayerId(), "(.+)\\((\\p{Alnum}+)\\)");
-	  transformer.addDestinationResult(getWordLayerId(), "$1");
-	  if (getCompletionLayerId() != null)
-	  {
-	     transformer.addDestinationResult(getCompletionLayerId(), "$1$2");
-	  }
-	  transformer.transform(graph);
-	  graph.commit();
-	  
-	  Graph[] graphs = { graph };
-	  return graphs;
+	 // disfluencies
+	 ConventionTransformer transformer = new ConventionTransformer(getWordLayer().getId(), "&(\\w+)");
+	 transformer.addDestinationResult(getWordLayer().getId(), "$1");
+	 if (getDisfluencyLayer() != null)
+	 {
+	    transformer.addDestinationResult(getDisfluencyLayer().getId(), "&");
+	 }
+	 transformer.transform(graph);
+	 graph.commit();
+	 
+	 // expansions
+	 String expansionLayerId = getExpansionLayer()!=null?getExpansionLayer().getId():null;
+	 SpanningConventionTransformer spanningTransformer = new SpanningConventionTransformer(
+	    getWordLayer().getId(), "\\[:", "(.*)\\]", true, null, null, 
+	    expansionLayerId, null, "$1", true);	  
+	 spanningTransformer.transform(graph);	
+	 graph.commit();
+	 
+	 // completions at the start
+	 transformer = new ConventionTransformer(getWordLayer().getId(), "\\((\\p{Alnum}+)\\)(.+)");
+	 transformer.addDestinationResult(getWordLayer().getId(), "$2");
+	 if (getCompletionLayer() != null)
+	 {
+	    transformer.addDestinationResult(getCompletionLayer().getId(), "$1$2");
+	 }
+	 transformer.transform(graph);	
+	 graph.commit();
+	 
+	 // completions at the end
+	 transformer = new ConventionTransformer(getWordLayer().getId(), "(.+)\\((\\p{Alnum}+)\\)");
+	 transformer.addDestinationResult(getWordLayer().getId(), "$1");
+	 if (getCompletionLayer() != null)
+	 {
+	    transformer.addDestinationResult(getCompletionLayer().getId(), "$1$2");
+	 }
+	 transformer.transform(graph);
+	 graph.commit();
+	 
+	 Graph[] graphs = { graph };
+	 return graphs;
       }
       catch(TransformationException exception)
       {

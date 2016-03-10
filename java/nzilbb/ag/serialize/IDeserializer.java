@@ -23,16 +23,17 @@ package nzilbb.ag.serialize;
 
 import java.util.Vector;
 import nzilbb.ag.Graph;
+import nzilbb.ag.Schema;
+import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 
 /**
- * Interface for deserializing a graph.
- * <p>Deserialization might be from a relational database, a file or set of files in a particular format, etc. There are derived interfaces that specify the possible sources for serialized data, e.g. {@link IStoreDeserializer}
+ * Interface for deserializing a graph from streams of data.
  * <p>Deserialization takes place in the following phases:
  * <ol>
  *  <li>Configure deserializer using {@link #configure(ParameterSet)}</li>
- *  <li>Load serialized form using one the derived interface's load() method (e.g. {@link IStoreDeserializer#load(String)}), which returns a list of parameters that should be set.</li>
+ *  <li>Load serialized form using {@link #load(String)}, which returns a list of parameters that should be set.</li>
  *  <li>Set deserialization parameters using {@link #setParameters(ParameterSet)}</li>
  *  <li>Generation graph(s) using {@link #deserialize()}</li>
  *  <li>Possibly display or log warnings returned by {@link #getWarnings()}</li>
@@ -60,6 +61,16 @@ public interface IDeserializer
     * @throws DeserializationParametersMissingException If not all required parameters have a value.
     */
    public void setParameters(ParameterSet parameters) throws DeserializationParametersMissingException;
+
+   /**
+    * Loads the serialized form of the graph, using the given set of named streams.
+    * @param annotationStreams A list of named streams that contain all the transcription/annotation data required.
+    * @param mediaStreams An optional (may be null) list of named streams that contain the media annotated by the <var>annotationStreams</var>.
+    * @param schema The layer schema, definining layers and the way they interrelate.
+    * @return A list of parameters that require setting before {@link IDeserializer#deserialize()} can be invoked. This may be an empty list, and may include parameters with the value already set to a workable default. If there are parameters, and user interaction is possible, then the user may be presented with an interface for setting/confirming these parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
+    * @throws Exception If the graph could not be loaded.
+    */
+   public ParameterSet load(NamedStream[] annotationStreams, NamedStream[] mediaStreams, Schema schema) throws Exception;
 
    /**
     * Deserializes the serialized data, generating one or more {@link Graph}s.

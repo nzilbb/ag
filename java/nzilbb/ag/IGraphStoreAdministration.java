@@ -34,24 +34,24 @@ public interface IGraphStoreAdministration
    /**
     * Registers a graph deserializer.
     * @param deserializer
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
     */
    public void registerDeserializer(IDeserializer deserializer) throws StoreException, PermissionException;
 
    /**
     * De-registers a graph deserializer.
     * @param deserializer
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
     */
    public void deregisterDeserializer(IDeserializer deserializer) throws StoreException, PermissionException;
 
    /**
     * Lists the descriptors of all registered deserializers.
     * @return A list of the descriptors of all registered deserializers.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
     */
    public SerializationDescriptor[] getDeserializerDescriptors() throws StoreException, PermissionException;
    
@@ -59,9 +59,18 @@ public interface IGraphStoreAdministration
     * Gets the deserializer for the given MIME type.
     * @param mimeType
     * @return The deserializer for the given MIME type, or null if none is registered.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
     */
    public IDeserializer deserializerForMimeType(String mimeType) throws StoreException, PermissionException;
+
+   /**
+    * Gets the deserializer for the given file suffix (extension).
+    * @param suffix
+    * @return The deserializer for the given suffix, or null if none is registered.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public IDeserializer deserializerForFilesSuffix(String suffix) throws StoreException, PermissionException;
 
 } // end of class IGraphStoreAdministration

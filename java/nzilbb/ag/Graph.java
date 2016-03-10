@@ -44,7 +44,7 @@ import nzilbb.ag.util.AnchorComparatorWithStructure;
  *   <li>be the root node of the annotation hierarchy - i.e. be the parent of annotations at the top of the layer hierarchy</li>
  *   <li>have start/end anchors</li>
  * </ul>
- * <p>In addition to this, the graphy also has:
+ * <p>In addition to this, the graph also has:
  * <ul>
  *  <li>a corpus attribute representing the collection to which it belongs (see {@link #getCorpus()}, {@link #setCorpus(String)}),</li>
  *  <li>definitions of annotation {@link Layer}s and their hierarchy</li>
@@ -450,7 +450,8 @@ public class Graph
       // find any children that might have already been added
       if (annotation.getLayer() != null)
       {
-	 for (Layer childLayer : annotation.getLayer().getChildren().values())
+	 Layer layer = annotation.getLayer();
+	 for (Layer childLayer : layer.getChildren().values())
 	 {
 	    SortedSet<Annotation> newChildren = new TreeSet<Annotation>();
 	    // gather up new children
@@ -468,6 +469,12 @@ public class Graph
 	       child.setParent(annotation);
 	    } // next child
 	 } // next child layer
+
+	 // also set the parent if it's a child of "graph"
+	 if (layer.getParentId().equals("graph"))
+	 {
+	    annotation.setParent(this);
+	 }
       } 
 
       // check anchors
@@ -767,6 +774,18 @@ public class Graph
     * @return ID of the anchor with the highest offset.
     */
    public String getEndId() { if (getAnchors().size() > 0) { return getSortedAnchors().last().getId(); } else { return null; } }
+
+   /**
+    * Getter for <i>start</i>: The anchor with the lowest offset.
+    * @return The anchor with the lowest offset.
+    */
+   public Anchor getStart() { if (getAnchors().size() > 0) { return getSortedAnchors().first(); } else { return null; } }
+
+   /**
+    * Getter for <i>end</i>: The anchor with the highest offset.
+    * @return The anchor with the highest offset.
+    */
+   public Anchor getEnd() { if (getAnchors().size() > 0) { return getSortedAnchors().last(); } else { return null; } }
 
    /**
     * Access the child annotations on a given layer.

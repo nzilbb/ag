@@ -132,6 +132,39 @@ public class Schema
     */
    public void setWordLayerId(String newWordLayerId) { wordLayerId = newWordLayerId; }
 
+   /**
+    * ID of the layer that tags the graph with its episode name, if any.
+    * @see #getEpisodeLayerId()
+    * @see #setEpisodeLayerId(String)
+    */
+   protected String episodeLayerId;
+   /**
+    * Getter for {@link #episodeLayerId}: ID of the layer that tags the graph with its episode name, if any.
+    * @return ID of the layer that tags the graph with its episode name, if any.
+    */
+   public String getEpisodeLayerId() { return episodeLayerId; }
+   /**
+    * Setter for {@link #episodeLayerId}: ID of the layer that tags the graph with its episode name, if any.
+    * @param newEpisodeLayerId ID of the layer that tags the graph with its episode name, if any.
+    */
+   public void setEpisodeLayerId(String newEpisodeLayerId) { episodeLayerId = newEpisodeLayerId; }
+
+   /**
+    * ID of the layer that tags the graph with its corpus name, if any.
+    * @see #getCorpusLayerId()
+    * @see #setCorpusLayerId(String)
+    */
+   protected String corpusLayerId;
+   /**
+    * Getter for {@link #corpusLayerId}: ID of the layer that tags the graph with its corpus name, if any.
+    * @return ID of the layer that tags the graph with its corpus name, if any.
+    */
+   public String getCorpusLayerId() { return corpusLayerId; }
+   /**
+    * Setter for {@link #corpusLayerId}: ID of the layer that tags the graph with its corpus name, if any.
+    * @param newCorpusLayerId ID of the layer that tags the graph with its corpus name, if any.
+    */
+   public void setCorpusLayerId(String newCorpusLayerId) { corpusLayerId = newCorpusLayerId; }
    
    // Methods:
    
@@ -210,14 +243,67 @@ public class Schema
       setUtteranceLayerId(utteranceLayerId);
       setWordLayerId(wordLayerId);
    } // end of constructor
+
+   /**
+    * Constructor from array and attributes.
+    * @param layers Array of layers.
+    * @param participantLayerId ID of the layer that contains participants.
+    * @param turnLayerId ID of the layer that contains speaker turns.
+    * @param utteranceLayerId ID of the layer that contains speaker utterances.
+    * @param wordLayerId ID of the layer that contains individual word tokens.
+    * @param episodeLayerId ID of the layer that tags the graph with its episode name, if any.
+    * @param corpusLayerId ID of the layer that tags the graph with its corpus name, if any.
+    */
+   public Schema(Layer[] layers, String participantLayerId, String turnLayerId, String utteranceLayerId, String wordLayerId, String episodeLayerId, String corpusLayerId)
+   {
+      addLayer(getRoot());
+      for (Layer layer : layers)
+      {
+	 addLayer(layer);
+      } // next layer
+      setParticipantLayerId(participantLayerId);
+      setTurnLayerId(turnLayerId);
+      setUtteranceLayerId(utteranceLayerId);
+      setWordLayerId(wordLayerId);
+      setEpisodeLayerId(episodeLayerId);
+      setCorpusLayerId(corpusLayerId);
+   } // end of constructor
+
+   /**
+    * Constructor from collection and attributes.
+    * @param layers Collection of layers.
+    * @param participantLayerId ID of the layer that contains participants.
+    * @param turnLayerId ID of the layer that contains speaker turns.
+    * @param utteranceLayerId ID of the layer that contains speaker utterances.
+    * @param wordLayerId ID of the layer that contains individual word tokens.
+    * @param episodeLayerId ID of the layer that tags the graph with its episode name, if any.
+    * @param corpusLayerId ID of the layer that tags the graph with its corpus name, if any.
+    */
+   public Schema(Collection<Layer> layers, String participantLayerId, String turnLayerId, String utteranceLayerId, String wordLayerId, String episodeLayerId, String corpusLayerId)
+   {
+      addLayer(getRoot());
+      for (Layer layer : layers)
+      {
+	 addLayer(layer);
+      } // next layer
+      setParticipantLayerId(participantLayerId);
+      setTurnLayerId(turnLayerId);
+      setUtteranceLayerId(utteranceLayerId);
+      setWordLayerId(wordLayerId);
+      setEpisodeLayerId(episodeLayerId);
+      setCorpusLayerId(corpusLayerId);
+   } // end of constructor
    
    /**
-    * Adds a layer.
-    * @param layer
-    * @return The layer added.
+    * Adds a layer. 
+    * <p>If the given layer was already in the schema, the original definition is not replaced.
+    * @param layer The layer to add.
+    * @return The layer in the schema - the given layer if it was not already in the schema, or the original layer object, if it was already in the schema.
     */
    public Layer addLayer(Layer layer)
    {
+      if (getLayers().containsKey(layer.getId())) return getLayer(layer.getId());
+
       getLayers().put(layer.getId(), layer);
 
       // set their parent

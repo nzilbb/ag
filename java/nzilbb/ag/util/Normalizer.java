@@ -31,15 +31,19 @@ import nzilbb.ag.*;
  *  <li>contiguous speaker turns by the same speaker are joined into one turn</li>
  *  <li>ordinal values are set so that they run from 1-<i>n</i> where <i>n</i> is the number of children in a given parent, for words</li>
  *  <li>words do not share anchors with turns nor utterances</li>
+ *  <li>turn and utterance labels are the participant names</li>
+ *  <li>Optionally, if the graph has a single un-named speaker, then the speaker renamed to be the same as the espisode name </li>
+ *  <li>TODO: fills in missing utterances</li>
+ *  <li>TODO: fills in missing turns</li>
  * </ul>
- * For this transformer to work, the {@link #Schema} of the graph must have its {@link Schema#turnLayerId}, {@link Schema#utteranceLayerId}, and {@link Schema#wordLayerId} set.
+ * For this transformer to work, the {@link #Schema} of the graph must have its {@link Schema#turnLayerId}, {@link Schema#utteranceLayerId}, {@link Schema#wordLayerId}, and {@link Schema#episodeLayerId} set.
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class Normalizer
   implements IGraphTransformer
 {
    // Attributes:
-   
+      
    // Methods:
    
    /**
@@ -58,6 +62,8 @@ public class Normalizer
    public Vector<Change> transform(Graph graph) throws TransformationException
    {
       Schema schema = graph.getSchema();
+      if (schema.getParticipantLayerId() == null) 
+	 throw new TransformationException(this, "No participant layer specified.");
       if (schema.getTurnLayerId() == null) 
 	 throw new TransformationException(this, "No turn layer specified.");
       if (schema.getUtteranceLayerId() == null) 
@@ -67,9 +73,45 @@ public class Normalizer
 
       Vector<Change> changes = new Vector<Change>();
 
+      if (schema.getEpisodeLayerId() != null)
+      {
+	 Vector<Annotation> episode = graph.getAnnotations(schema.getEpisodeLayerId());
+	 Vector<Annotation> participants = graph.getAnnotations(schema.getParticipantLayerId());
+	 if (participants.size() == 1 && episode.size() > 0)
+	 {
+	    Annotation onlyParticipant = participants.firstElement();
+	    if (onlyParticipant.getLabel() == null || onlyParticipant.getLabel().length() == 0)
+	    {
+	       changes.addAll( // record changes for:
+		  onlyParticipant.setLabel(episode.firstElement().getLabel()));
+	    }
+	 }
+      } // episode layer set
+
+      // ensure turns and utterances are labelled with participant labels
+      for (Annotation participant : graph.getAnnotations(schema.getParticipantLayerId()))
+      {
+	 for (Annotation turn : participant.getAnnotations(schema.getTurnLayerId()))
+	 {
+	    if (!participant.getLabel().equals(turn.getLabel()))
+	    {
+	       changes.addAll( // record changes for:
+		  turn.setLabel(participant.getLabel()));
+	    }
+	    for (Annotation utterance : turn.getAnnotations(schema.getUtteranceLayerId()))
+	    {
+	       if (!participant.getLabel().equals(utterance.getLabel()))
+	       {
+		  changes.addAll( // record changes for:
+		     utterance.setLabel(participant.getLabel()));
+	       }
+	    } // next utterance
+	 } // next turn
+      } // next participant
+
       // join subsequent turns by the same speaker...
       // for each participant (assumed to be parent of turn)
-      for (Annotation participant : graph.getAnnotations(schema.getTurnLayer().getParentId()))
+      for (Annotation participant : graph.getAnnotations(schema.getParticipantLayerId()))
       {
 	 Annotation[] turns = participant.annotations(schema.getTurnLayerId());
 	 // go back through all the turns, looking for a turn for the same speaker that is

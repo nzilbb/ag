@@ -196,8 +196,9 @@ public class TestValidator
       g.addAnchor(new Anchor("a5", 5.0)); // end of over
       g.addAnchor(new Anchor("a6", 6.0)); // turn3 end
 
-      g.addAnnotation(new Annotation("participant1", "john smith", "who", "a0", "a6", "my graph"));
-      g.addAnnotation(new Annotation("participant2", "jane doe", "who", "a0", "a6", "my graph"));
+      // null participant anchors - will be corrected below
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", null, null, "my graph"));
+      g.addAnnotation(new Annotation("participant2", "jane doe", "who", null, null, "my graph"));
 
       g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a3b", "participant1"));
       g.addAnnotation(new Annotation("turn2", "jane doe", "turn", "a3b", "a4.25", "participant2"));
@@ -235,6 +236,10 @@ public class TestValidator
       g.addAnnotation(new Annotation("phone5", "I", "phone", "a2.5", "a2.75", "word2"));
       g.addAnnotation(new Annotation("phone6", "k", "phone", "a2.75", "a3a", "word2"));
 
+      assertEquals("corrected participant start anchors: " + g.getChanges(), 4, g.getChanges().size());
+      g.commit(); // commit those changes before we validate
+      assertEquals("no initial changes to graph: " + g.getChanges(), 0, g.getChanges().size());
+
       Validator v = new Validator();
       // v.setDebug(true);
       v.setFullValidation(true);
@@ -269,7 +274,7 @@ public class TestValidator
 		      new Change(Change.Operation.Update, g.getAnnotation("word6"), "ordinal", new Integer(3)), 
 		      order.next());
 	 assertFalse(order.hasNext());
-	 assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
+	 assertEquals("no extra changes to graph - " + changes + " vs. " +g.getChanges(), changes.size(), g.getChanges().size());
       }
       catch(TransformationException exception)
       {

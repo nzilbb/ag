@@ -433,8 +433,8 @@ public class TestDefaultOffsetGenerator
       g.addAnchor(new Anchor("b12", null)); // end of blue
       g.addAnchor(new Anchor("turn2End", 12.5)); // turn end
 
-      g.addAnnotation(new Annotation("participant1", "john smith", "who", "turn1Start", "turn1End", "my graph"));
-      g.addAnnotation(new Annotation("participant2", "jane doe", "who", "turn2Start", "turn2End", "my graph"));
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "turn1Start", "turn2End", "my graph"));
+      g.addAnnotation(new Annotation("participant2", "jane doe", "who", "turn1Start", "turn2End", "my graph"));
       
       g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turn1Start", "turn1End", "participant1"));
       g.addAnnotation(new Annotation("turn2", "jane doe", "turn", "turn2Start", "turn2End", "participant2"));
@@ -722,8 +722,8 @@ public class TestDefaultOffsetGenerator
       g.addAnnotation(new Annotation("topic2", "dogs", "topic", "a6", "a9", "my graph"));
 
       // participants
-      g.addAnnotation(new Annotation("participant1", "john smith", "who", "turn1Start", "turn1End", "my graph"));
-      g.addAnnotation(new Annotation("participant2", "jane doe", "who", "turn2Start", "turn2End", "my graph"));
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "turn1Start", "turn2End", "my graph"));
+      g.addAnnotation(new Annotation("participant2", "jane doe", "who", "turn1Start", "turn2End", "my graph"));
       
       // turns
       g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turn1Start", "turn1End", "participant1"));
@@ -773,6 +773,8 @@ public class TestDefaultOffsetGenerator
       // dependency
       g.addAnnotation(new Annotation("jumpsObj", "OBJ", "dependency", "a8", "a9", "jumps"));
       g.addAnnotation(new Annotation("jumpsSubj",   "SUBJ",   "dependency", "a3", "a4", "jumps"));
+
+      assertEquals("no initial changes to graph: " + g.getChanges(), 0, g.getChanges().size());
 
       DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
       // generator.setDebug(true);
@@ -857,7 +859,8 @@ public class TestDefaultOffsetGenerator
 	 assertEquals(new Change(Change.Operation.Update, g.getAnchor("b13"), "offset", new Double(13.5)), 
 		      order.next());
 
-	 assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
+	 assertEquals("no extra changes to graph - " + changes + " vs. " +g.getChanges(), 
+		      changes.size(), g.getChanges().size());
 
       }
       catch(TransformationException exception)

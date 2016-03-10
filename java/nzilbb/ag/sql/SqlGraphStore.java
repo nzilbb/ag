@@ -284,17 +284,25 @@ public class SqlGraphStore
       {
 	 Layer layer = getLayer(layerId);
 	 schema.addLayer(layer);
-	 if (layer.get("@layer_id").equals(new Integer(11)))
+	 if (new Integer(11).equals(layer.get("@layer_id")))
 	 {
 	    schema.setTurnLayerId(layer.getId());
 	 }
-	 else if (layer.get("@layer_id").equals(new Integer(12)))
+	 else if (new Integer(12).equals(layer.get("@layer_id")))
 	 {
 	    schema.setUtteranceLayerId(layer.getId());
 	 } 
-	 else if (layer.get("@layer_id").equals(new Integer(0)))
+	 else if (new Integer(0).equals(layer.get("@layer_id")))
 	 {
 	    schema.setWordLayerId(layer.getId());
+	 } 
+	 else if (new Integer(-50).equals(layer.get("@layer_id")))
+	 {
+	    schema.setEpisodeLayerId(layer.getId());
+	 } 
+	 else if (new Integer(-100).equals(layer.get("@layer_id")))
+	 {
+	    schema.setCorpusLayerId(layer.getId());
 	 } 
       } // next layer
       schema.setParticipantLayerId("who");
@@ -1085,6 +1093,7 @@ public class SqlGraphStore
 	    } // next layer
 	 } // there are anchors
 
+	 graph.commit();
 	 return graph;
       }
       catch(SQLException exception)
@@ -1111,6 +1120,10 @@ public class SqlGraphStore
 	 // validate the graph before saving it
 	 // TODO ensure all layers are loaded before validation
 	 Validator v = new Validator();
+	 if (graph.getChange() == Change.Operation.Create)
+	 {
+	    v.setFullValidation(true);
+	 }
 	 //v.setDebug(true);
 	 Vector<Change> validationChanges = v.transform(graph);
 	 if (v.getErrors().size() != 0)
@@ -1122,7 +1135,15 @@ public class SqlGraphStore
 	       messages.append("\n");
 	       System.out.println(s);
 	    }
-	    System.out.println("Invalid graph (saving anyway): " + graph.getId() + "\n" + messages);
+	    System.out.println("Invalid graph: " + graph.getId() + "\n" + messages);
+	    if (graph.getChange() == Change.Operation.Create)
+	    {
+	       throw new StoreException("Invalid graph: " + graph.getId() + "\n" + messages);
+	    }
+	    else
+	    {
+	       System.out.println("Saving anyway..."); // TODO don't!
+	    }
 	 }
 
 	 if (graph.getChange() == Change.Operation.Create)
@@ -1137,6 +1158,7 @@ public class SqlGraphStore
 	    ResultSet rs = sql.executeQuery();
 	    rs.next();
 	    graph.put("@ag_id", new Integer(rs.getInt(1)));
+	    saveGraphChanges(graph);
 	 }
 	 else
 	 {
@@ -1416,6 +1438,26 @@ public class SqlGraphStore
 	 PreparedStatement sqlDeleteParticipantAttribute = getConnection().prepareStatement(
 	    "DELETE FROM speaker_attribute WHERE speaker_number = ? AND name = ?");
 
+	 PreparedStatement sqlAttributeLayers = getConnection().prepareStatement(
+	    "SELECT attribute FROM attribute_definition WHERE class_id = ?");
+	 HashSet<String> transcriptAttributeLayers = new HashSet<String>();
+	 sqlAttributeLayers.setString(1, "transcript");
+	 ResultSet rsAttributeLayers = sqlAttributeLayers.executeQuery();
+	 while (rsAttributeLayers.next())
+	 {
+	    transcriptAttributeLayers.add("transcript_"+rsAttributeLayers.getString("attribute"));
+	 } // next layer
+	 rsAttributeLayers.close();
+	 HashSet<String> participantAttributeLayers = new HashSet<String>();
+	 sqlAttributeLayers.setString(1, "speaker");
+	 rsAttributeLayers = sqlAttributeLayers.executeQuery();
+	 while (rsAttributeLayers.next())
+	 {
+	    participantAttributeLayers.add("transcript_"+rsAttributeLayers.getString("attribute"));
+	 } // next layer
+	 rsAttributeLayers.close();
+	 sqlAttributeLayers.close();
+
 	 try
 	 {
 	    // there's a change for each changed attribute of each object
@@ -1430,6 +1472,10 @@ public class SqlGraphStore
 	       if (change.getObject() == lastObject) continue; // already did this object
 	       lastObject = change.getObject();
 	       
+	       if (change.getObject() == graph)
+	       {
+		  saveGraphChanges(graph);
+	       } // Anchor change
 	       if (change.getObject() instanceof Anchor)
 	       {
 		  saveAnchorChanges((Anchor)change.getObject(), extraUpdates, 
@@ -1439,23 +1485,27 @@ public class SqlGraphStore
 	       else if (change.getObject() instanceof Annotation
 			&& !(change.getObject() instanceof Graph))
 	       {
-		  if (change.getObject().getId().startsWith("m_")
-		      || change.getObject().getId().startsWith("t_type"))
+		  Annotation annotation = (Annotation)change.getObject();
+		  if (annotation.getLayerId().equals("episode")
+		      || annotation.getLayerId().equals("corpus")
+		      || annotation.getLayerId().equals("transcript_type")
+		      || annotation.getLayerId().equals("main_participant")
+		      || annotation.getLayerId().equals("who"))
 		  { // special layer annotation
-		     saveSpecialAnnotationChanges((Annotation)change.getObject());
+		     saveSpecialAnnotationChanges(annotation, participantNameToNumber);
 		  }
-		  else if (change.getObject().getId().startsWith("t_"))
+		  else if (transcriptAttributeLayers.contains(annotation.getLayerId()))
 		  { // transcript attribute
 		     saveTranscriptAttributeChanges(
-			(Annotation)change.getObject(), 
+			annotation, 
 			sqlInsertTranscriptAttribute, 
 			sqlUpdateTranscriptAttribute, 
 			sqlDeleteTranscriptAttribute);
 		  }
-		  else if (change.getObject().getId().startsWith("p_"))
+		  else if (participantAttributeLayers.contains(annotation.getLayerId()))
 		  { // participant attribute
 		     saveParticipantAttributeChanges(
-			(Annotation)change.getObject(), 
+			annotation, 
 			sqlInsertParticipantAttribute, 
 			sqlUpdateParticipantAttribute, 
 			sqlDeleteParticipantAttribute);
@@ -1463,7 +1513,7 @@ public class SqlGraphStore
 		  else
 		  { // temporal annotation
 		     saveAnnotationChanges(
-			(Annotation)change.getObject(), extraUpdates, 
+			annotation, extraUpdates, 
 			sqlInsertFreeformAnnotation, sqlInsertMetaAnnotation, 
 			sqlInsertWordAnnotation, sqlInsertSegmentAnnotation, sqlLastId, 
 			sqlUpdateTurnAnnotationId, sqlUpdateWordAnnotationId, sqlUpdateSegmentAnnotationId, 
@@ -1541,7 +1591,18 @@ public class SqlGraphStore
       }
       return true;
    }
-   
+
+   /**
+    * Saves the changes to the given graph.
+    * @param graph The graph to save the changes of.
+    * @throws SQLException If a database error occurs.
+    */
+   protected void saveGraphChanges(Graph graph) throws SQLException
+   {
+      // TODO save ordinal as episode index
+      // TODO update offset in episode
+   }   
+
    /**
     * Saves the changes to the given anchor, and updates related annotations if the anchor ID is changed.
     * @param anchor The anchor whose changes should be saved.
@@ -1802,6 +1863,20 @@ public class SqlGraphStore
 	       if (scope.equalsIgnoreCase(SqlConstants.SCOPE_FREEFORM))
 	       { // freeform layers have the graph as the parent
 		  sql.setLong(7, ((Integer)annotation.getGraph().get("@ag_id")).longValue());
+	       }
+	       else if (annotation.getLayer().getParentId().equals("who"))
+	       { // turn layer
+		  try
+		  {
+		     // parent id has as a special layer format
+		     Object[] o = fmtMetaAnnotationId.parse(annotation.getParentId());
+		     sql.setLong(7, Long.parseLong(o[1].toString()));
+		  }
+		  catch(ParseException exception)
+		  {
+		     System.out.println("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId() + " on " + annotation.getLayerId());
+		     throw exception;
+		  }
 	       }
 	       else
 	       {
@@ -2372,7 +2447,7 @@ public class SqlGraphStore
     * @throws SQLException If a database error occurs.
     * @throws ParseException Shouldn't be thrown, assuming annotation ids have been checked
     */
-   public void saveSpecialAnnotationChanges(Annotation annotation)
+   public void saveSpecialAnnotationChanges(Annotation annotation, HashMap<String,String> participantNameToNumber)
     throws SQLException, ParseException
    {
       try
@@ -2492,7 +2567,7 @@ public class SqlGraphStore
 	    sqlUpdate.executeUpdate();
 	    sqlUpdate.close();
 	 }
-	 else if (annotation.getLayerId().equals("participant"))
+	 else if (annotation.getLayerId().equals("who"))
 	 {
 	    int agId = ((Integer)annotation.getGraph().get("@ag_id")).intValue();
 	    switch (annotation.getChange())
@@ -2527,6 +2602,19 @@ public class SqlGraphStore
 		  rs.close();
 		  sql.close();
 		  annotation.put("@speaker_number", new Integer(speakerNumber));
+		  participantNameToNumber.put(annotation.getLabel(), ""+speakerNumber);
+		  
+		  // reset the annotation ID
+		  Object[] args = { annotation.getLayer().get("@layer_id"), speakerNumber };
+		  annotation.setId(fmtMetaAnnotationId.format(args));
+		  // update all children parentIds
+		  for (String childLayerId : annotation.getAnnotations().keySet())
+		  {
+		     for (Annotation child : annotation.getAnnotations(childLayerId))
+		     {
+			child.setParentId(annotation.getId());
+		     }
+		  } // next child layer
 
 		  // add the speaker to transcript_speaker
 		  sql = getConnection().prepareStatement(
@@ -2540,7 +2628,7 @@ public class SqlGraphStore
 	       } // Create
 	       case Update:
 	       {
-		  Object[] o = fmtTranscriptAttributeId.parse(annotation.getId());
+		  Object[] o = fmtMetaAnnotationId.parse(annotation.getId());
 		  int speakerNumber = Integer.parseInt(o[1].toString());
 		  // update the label (the only possible change)
 		  PreparedStatement sql = getConnection().prepareStatement(
@@ -2553,7 +2641,7 @@ public class SqlGraphStore
 	       }
 	       case Destroy:
 	       {
-		  Object[] o = fmtTranscriptAttributeId.parse(annotation.getId());
+		  Object[] o = fmtMetaAnnotationId.parse(annotation.getId());
 		  int speakerNumber = Integer.parseInt(o[1].toString());
 		  // delete from transcript_speaker only
 		  PreparedStatement sql = getConnection().prepareStatement(
@@ -2570,7 +2658,7 @@ public class SqlGraphStore
       }
       catch(ParseException exception)
       {
-	 System.out.println("Error parsing ID for special attribute: "+annotation.getId());
+	 System.out.println("Error parsing ID for special attribute: "+annotation.getId() + " on layer " + annotation.getLayerId());
 	 throw exception;
       }
    } // end of saveSpecialAnnotationChanges()

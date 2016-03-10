@@ -259,6 +259,8 @@ public class TestLayer
 		   g.getLayer("topic").getFirstCommonAncestor(g.getLayer("word")));
       assertEquals("FirstCommonAncestor reflexive", g.getLayer("word"), 
 		   g.getLayer("word").getFirstCommonAncestor(g.getLayer("word")));
+      assertNull("FirstCommonAncestor with null", 
+		 g.getLayer("phone").getFirstCommonAncestor(null));
    }
 
    @Test public void cloning() 
