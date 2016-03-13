@@ -126,6 +126,12 @@ public class TestChatDeserializer
       assertEquals(new Double(22.676), utterances.elementAt(2).getEnd().getOffset());
       assertEquals("SUB", utterances.elementAt(2).getParent().getLabel());
 
+      assertEquals(new Double(22.676), utterances.elementAt(3).getStart().getOffset());
+      assertEquals(new Double(28.452), utterances.elementAt(3).getEnd().getOffset());
+
+      assertEquals("wrapped line", new Double(28.452), utterances.elementAt(4).getStart().getOffset());
+      assertEquals("wrapped line", new Double(40.360), utterances.elementAt(4).getEnd().getOffset());
+
       Annotation[] words = g.annotations("word");
       assertEquals("this", words[0].getLabel());
       assertEquals("family", words[1].getLabel());
@@ -133,6 +139,11 @@ public class TestChatDeserializer
       assertEquals("mice", words[3].getLabel());
       assertEquals("lived", words[4].getLabel());
       assertEquals("in", words[5].getLabel());
+
+      assertEquals("Pre expansion ordinal", "gonna", words[321].getLabel());
+      assertEquals("Pre expansion ordinal", 322, words[321].getOrdinal());
+      assertEquals("Post expansion ordinal", "lie", words[322].getLabel());
+      assertEquals("Post expansion ordinal", 323, words[322].getOrdinal());
 
       for (int i = 0; i < words.length; i++)
       {
@@ -142,10 +153,12 @@ public class TestChatDeserializer
       // disfluency
       assertEquals("i", words[48].getLabel());
       assertEquals("&", words[48].my("disfluency").getLabel());
+      assertEquals("word is parent", words[48], words[48].my("disfluency").getParent());
       
       // completion
       assertEquals("leading completion", "em", words[111].getLabel());
       assertEquals("leading completion", "them", words[111].my("completion").getLabel());
+      assertEquals("completion - word is parent", words[111], words[111].my("completion").getParent());
       assertEquals("trailing completion", "havin", words[133].getLabel());
       assertEquals("trailing completion", "having", words[133].my("completion").getLabel());
 
@@ -154,10 +167,11 @@ public class TestChatDeserializer
       assertEquals(11, expansions.length);
       assertEquals("going to", expansions[0].getLabel());
       assertEquals("gonna", expansions[0].my("word").getLabel());
+      assertEquals(expansions[0].my("word"), expansions[0].getParent());
       assertEquals("kind of", expansions[1].getLabel());
       assertEquals("kinda", expansions[1].my("word").getLabel());
       assertEquals("going to", expansions[2].getLabel());
-      assertEquals("gonna", expansions[2].my("word").getLabel());
+      assertEquals("gonna", expansions[2].getParent().getLabel());
       assertEquals("going to", expansions[3].getLabel());
       assertEquals("gonna", expansions[3].my("word").getLabel());
       assertEquals("going to", expansions[4].getLabel());
@@ -299,6 +313,10 @@ public class TestChatDeserializer
       assertEquals("mice", words[3].getLabel());
       assertEquals("lived", words[4].getLabel());
       assertEquals("in", words[5].getLabel());
+      assertEquals("the", words[6].getLabel());
+      assertEquals("forest.", words[7].getLabel());
+      assertEquals("and", words[8].getLabel());
+      assertEquals("they", words[9].getLabel());
 
       // disfluency
       assertEquals("i", words[48].getLabel());
@@ -311,10 +329,10 @@ public class TestChatDeserializer
       assertNull("trailing completion not tagged", words[133].my("completion"));
 
       // expansions
-      assertEquals("no expansions", 0, g.annotations("expansion").length);
+      assertNull("no expansions", g.annotations("expansion"));
 
       // gems
-      assertEquals("no gems", 0, g.annotations("gem").length);
+      assertNull("no gems", g.annotations("gem"));
       
    }
 

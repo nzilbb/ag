@@ -58,7 +58,6 @@ public class ChatDeserializer
    // Attributes:
    protected Vector<String> warnings;
 
-   
    /**
     * Name of the .cha file.
     * @see #getName()
@@ -546,7 +545,23 @@ public class ChatDeserializer
 	 }
 	 else
 	 { // transcript line
-	    lines.add(line);
+	    // is it the first line?
+	    if (lines.size() == 0 
+		// or the last line was time synchronized?
+		|| lines.lastElement().endsWith("")
+		// or the last line was a 'gem'?
+		|| lines.lastElement().startsWith("@")
+	       )
+	    { // this is a new utterance
+	       lines.add(line);
+	    }
+	    else
+	    { // last line was not time-sycnchronized, so append this line to it
+	       // remove the last line
+	       String lastLine = lines.remove(lines.size()-1);
+	       // append this line to it
+	       lines.add(lastLine + " " + line);
+	    }
 	    if (!disfluenciesFound)
 	    {
 	       if (regexDisfluency.matcher(line).find())
