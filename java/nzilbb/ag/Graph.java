@@ -22,6 +22,7 @@
 package nzilbb.ag;
 
 import java.util.List;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Vector;
@@ -61,6 +62,20 @@ public class Graph
     * New ID seed.
     */
    protected long lastId = 0;
+
+   /**
+    * The ID of the end anchor of the last annotation added using {@link #addAnnotation(Annotation)}, or the last anchor added using {@link #addAnchor(Anchor)}.
+    */
+   protected String lastAddedAnchorId;
+   /**
+    * Getter for lastAddedAnchorId: The ID of the end anchor of the last annotation added using {@link #addAnnotation(Annotation)}, or the last anchor added using {@link #addAnchor(Anchor)}.
+    * @return The ID of the end anchor of the last annotation added using {@link #addAnnotation(Annotation)}, or the last anchor added using {@link #addAnchor(Anchor)}.
+    */
+   public String getLastAddedAnchorId() { return lastAddedAnchorId; }
+
+   // keep a list of annotations whose anchors haven't been added yet
+   private HashMap<String,Vector<Annotation>> unknownStartAnchor = new HashMap<String,Vector<Annotation>>();
+   private HashMap<String,Vector<Annotation>> unknownEndAnchor = new HashMap<String,Vector<Annotation>>();
 
    /**
     * Getter for corpus: The name of the corpus the graph belongs to.
@@ -364,7 +379,7 @@ public class Graph
 	       {
 		  if (!fragment.schema.getLayers().containsKey(anc.getLayerId()))
 		  { // add the ancestor's layer
-		     fragment.addLayer(getLayer(anc.getLayerId()));
+		     fragment.addLayer((Layer)getLayer(anc.getLayerId()).clone());
 		  }
 		  // add the ancestor
 		  fragment.addAnnotation((Annotation)anc.clone());
@@ -437,11 +452,6 @@ public class Graph
       // add to the layer's collection
       annotation.setLayer(getLayer(annotation.getLayerId()));
 
-      // all annotations are taken to be 'children' of the whole graph
-      if (annotation.getLayer() != null && !annotation.getLayer().getParentId().equals("graph"))
-      { // (but children of "graph" will be added by setParent below)
-	 getAnnotations(annotation.getLayerId()).add(annotation);
-      }
       // add to the parent's collection
       if (annotation.getParent() != null)
       { // this ensures it's in the parent's child collection
@@ -455,7 +465,7 @@ public class Graph
 	 {
 	    SortedSet<Annotation> newChildren = new TreeSet<Annotation>();
 	    // gather up new children
-	    for (Annotation otherAnnotation : getAnnotations(childLayer.getId()))
+	    for (Annotation otherAnnotation : childLayer.getAnnotations())
 	    {
 	       if (otherAnnotation.getParentId() != null
 		   && otherAnnotation.getParentId().equals(annotation.getId()))
@@ -483,12 +493,36 @@ public class Graph
       { // should have an anchor
 	 if (annotation.getStartId() == null)
 	 { // no anchor, so create one TODO test this behaviour
-	    annotation.setStart(addAnchor(new Anchor()));
+	    if (lastAddedAnchorId != null)
+	    {
+	       annotation.setStart(getAnchor(lastAddedAnchorId));
+	    }
+	    else
+	    { // there was no last end anchor, so create a new anchor
+	       annotation.setStart(addAnchor(new Anchor()));
+	    }
+	 }
+	 else if (annotation.getStart() == null)
+	 { // there's a startId, but it references an anchor we don't yet know about
+	    if (!unknownStartAnchor.containsKey(annotation.getStartId()))
+	    {
+	       unknownStartAnchor.put(annotation.getStartId(), new Vector<Annotation>());
+	    }
+	    unknownStartAnchor.get(annotation.getStartId()).add(annotation);
 	 }
 	 if (annotation.getEndId() == null)
 	 { // no anchor, so create one TODO test this behaviour
 	    annotation.setEnd(addAnchor(new Anchor()));
 	 }
+	 else if (annotation.getEnd() == null)
+	 { // there's a endId, but it references an anchor we don't yet know about
+	    if (!unknownEndAnchor.containsKey(annotation.getEndId()))
+	    {
+	       unknownEndAnchor.put(annotation.getEndId(), new Vector<Annotation>());
+	    }
+	    unknownEndAnchor.get(annotation.getEndId()).add(annotation);
+	 }
+	 lastAddedAnchorId = annotation.getEndId();
       }
       return annotation;
    } // end of addAnnotation()
@@ -512,17 +546,29 @@ public class Graph
 
       // look for annotations referencing that anchor
       String id = anchor.getId();
-      for (Annotation annotation : getAnnotationsById().values())
+      if (unknownStartAnchor.containsKey(id))
       {
-	 if (annotation.getStartId() != null && annotation.getStartId().equals(id))
+	 for (Annotation annotation : unknownStartAnchor.get(id))
 	 {
-	    annotation.setStart(anchor);
-	 }
-	 if (annotation.getEndId() != null && annotation.getEndId().equals(id))
-	 {
-	    annotation.setEnd(anchor);
-	 }
+	    if (annotation.getStartId() != null && annotation.getStartId().equals(id))
+	    { // it still references this anchor
+	       annotation.setStart(anchor);
+	    }
+	 } // next annotation
+	 unknownStartAnchor.remove(id);
       }
+      if (unknownEndAnchor.containsKey(id))
+      {
+	 for (Annotation annotation : unknownEndAnchor.get(id))
+	 {
+	    if (annotation.getEndId() != null && annotation.getEndId().equals(id))
+	    { // it still references this anchor
+	       annotation.setEnd(anchor);
+	    }
+	 } // next annotation
+	 unknownEndAnchor.remove(id);
+      }
+      lastAddedAnchorId = anchor.getId();
       return anchor;
    } // end of addAnnotation()
 
@@ -609,10 +655,10 @@ public class Graph
     * Adds a layer definition.
     * @param layer The layer to add.
     */
-   @SuppressWarnings("unchecked")
    public void addLayer(Layer layer)
    {
       getSchema().addLayer(layer);
+      annotations.put(layer.getId(), layer.getAnnotations());
    } // end of addLayer()
 
    
@@ -764,6 +810,15 @@ public class Graph
    // Annotation overrides
 
    /**
+    * Setter for <i>id</i>: The annotation's identifier.
+    * @param id The annotation's identifier.
+    */
+   public void setId(String id) 
+   { 
+      put("id", id); 
+   }
+
+   /**
     * Getter for <i>startId</i>: ID of the anchor with the lowest offset.
     * @return ID of the anchor with the lowest offset.
     */
@@ -787,6 +842,7 @@ public class Graph
     */
    public Anchor getEnd() { if (getAnchors().size() > 0) { return getSortedAnchors().last(); } else { return null; } }
 
+
    /**
     * Access the child annotations on a given layer.
     * <p>If this is a top-level layer, this collection is also accessible in the Annotation's map with a key named after <var>layerId</var> - e.g. this.annotations("turn") == this.get("turn"). The only exception is when <var>layerId is a reserved word - i.e. "id" or one of the keys registered in {@link #getTrackedAttributes()}</var>
@@ -801,22 +857,20 @@ public class Graph
 	 annotations.add(this);
 	 return annotations;
       }
-      if (!getAnnotations().containsKey(layerId))
-      {
-	 // add the child collection to children
-	 getAnnotations().put(layerId, new Vector<Annotation>());
-	 // also create an attribute named after the layer, as long as it's not otherwise in use
-	 if (!layerId.equals("id") && !getTrackedAttributes().contains(layerId))
-	 {
-	    // and only if it's a top-level layer
-	    if (getLayer(layerId) != null && getLayerId().equals(getLayer(layerId).getParentId()))
-	    {
-	       put(layerId, getAnnotations().get(layerId));
-	    }
-	 }
-      }
-      return getAnnotations().get(layerId);
+      Layer layer = getLayer(layerId);
+      if (layer == null) return null;
+      return layer.getAnnotations();
    } // end of getAnnotations()
+
+   /**
+    * Gets a list of related annotations on the given layer.
+    * @param layerId The layer of the desired annotations.
+    * @return The related annotations, or an empty array if none could be found on the given layer.
+    */
+   public Annotation[] list(final String layerId)
+   {
+      return annotations(layerId);
+   }
 
    // TrackedMap methods
 
@@ -850,6 +904,7 @@ public class Graph
 	 if (a.getChange() == Change.Operation.Destroy)
 	 {
 	    a.setParent(null);
+	    a.getLayer().getAnnotations().remove(a);
 	    a.setLayer(null);
 	    iAnnotation.remove();
 	 }

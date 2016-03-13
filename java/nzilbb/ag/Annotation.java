@@ -288,7 +288,14 @@ public class Annotation
 	 if (siblings != null)
 	 {
 	    siblings.remove(this);
-	    siblings.add(ordinal - 1, this);
+	    try
+	    {
+	       siblings.add(ordinal - 1, this);
+	    }
+	    catch(ArrayIndexOutOfBoundsException exception)
+	    {
+	       siblings.add(this);
+	    }
 
 	    // now we have to adjust sibling ordinals too
 	    int startFrom = ordinal;
@@ -530,14 +537,17 @@ public class Annotation
    public void setLayer(Layer layer) 
    { 
       Layer currentLayer = getLayer();
-      if (currentLayer != null && currentLayer != null)
+      if (currentLayer != null && layer != currentLayer)
       {
 	 currentLayer.getAnnotations().remove(this);
       }
       if (layer != null)
       {
 	 setLayerId(layer.getId());
-	 layer.getAnnotations().add(this);
+	 if (!layer.getAnnotations().contains(this))
+	 {
+	    layer.getAnnotations().add(this);
+	 }
       }
    }
    
@@ -634,6 +644,33 @@ public class Annotation
       setParentId(parentId);
       setOrdinal(ordinal);
    } // end of constructor
+
+   /**
+    * Setter for <i>id</i>: The annotation's identifier.
+    * @param id The annotation's identifier.
+    */
+   public void setId(String id) 
+   {
+      // remove the old id from the graph index
+      String oldId = getId();
+      if (getGraph() != null) getGraph().getAnnotationsById().remove(oldId);
+      super.setId(id);
+      // add the new id from the graph index
+      if (getGraph() != null) getGraph().getAnnotationsById().put(id, this);
+	    
+      // update all child parentIds
+      for (Vector<Annotation> children : getAnnotations().values())
+      {
+	 for (Annotation child : children)
+	 {
+	    // check it still uses this id
+	    if (child.getParentId() != null && child.getParentId().equals(oldId))
+	    {
+	       child.setParentId(id);
+	    }
+	 } // next child
+      } // next child layer
+   }
    
    /**
     * Gets the original label of the annotation, before any subsequent calls to {@link #setLabel(String)}, since the object was created or {@link #commit()} was called.
@@ -905,7 +942,14 @@ public class Annotation
     */
    public Annotation[] annotations(String layerId)
    {
-      return getAnnotations(layerId).toArray(new Annotation[0]);
+      try
+      {
+	 return getAnnotations(layerId).toArray(new Annotation[0]);
+      }
+      catch(NullPointerException exception)
+      { // the layer doesn't exist
+	 return null;
+      }
    } // end of annotations()
 
    

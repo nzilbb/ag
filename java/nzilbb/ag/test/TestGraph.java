@@ -201,13 +201,9 @@ public class TestGraph
       assertTrue(g.getAnnotations("graph").contains(g));
       assertEquals(1, g.getAnnotations("graph").size());
       
-      // top level layer is "graph", which is the parent of "turn"
-      assertTrue(g.containsKey("turn"));
-      // and it's the same elements as the one in the annotations collection
-      assertTrue(g.getAnnotations("turn") == g.get("turn"));
       assertTrue(g.getAnnotations("turn").contains(turn1));
       // array version
-      assertTrue(g.annotations("turn")[0] == ((Vector<Annotation>)g.get("turn")).elementAt(0));
+      assertTrue(g.annotations("turn")[0] == g.getAnnotations("turn").elementAt(0));
 
       // word is not top-level
       assertFalse(g.containsKey("word"));
@@ -674,11 +670,15 @@ public class TestGraph
 
       // delete an anchor
       g.getAnchor("a7").destroy();
-
+      Annotation word2 = g.getAnnotation("word2");
+      assertTrue("commit will remove deleted annotations from layer", 
+		 g.getLayer("word").getAnnotations().contains(word2));
       g.commit();
       assertEquals(Change.Operation.NoChange, g.getChange());
       assertNull("commit removes deleted annotations", g.getAnnotation("word2"));
       assertNull("commit removes deleted annotations", g.getAnnotation("turn1"));
+      assertFalse("commit removes deleted annotations from layer", 
+		  g.getLayer("word").getAnnotations().contains(word2));
       assertNull("commit removes deleted anchors", g.getAnchor("a7"));
       assertFalse("commit removes deleted annotations from layer", g.getLayer("word").getAnnotations().contains(quick));
    }
@@ -797,10 +797,6 @@ public class TestGraph
       assertTrue(g.getAnnotations("word").contains(fox));
       assertTrue(g.getAnnotations("turn").contains(turn1));
       
-      // top level layer is "graph", which is the parent of "turn"
-      assertTrue(g.containsKey("turn"));
-      // and it's the same as the one in the annotations collection
-      assertTrue(g.getAnnotations("turn") == g.get("turn"));
       assertTrue(g.getAnnotations("turn").contains(turn1));
 
    }
@@ -1602,6 +1598,37 @@ public class TestGraph
       assertEquals("list: distant descenant", A, list[1]);
       assertEquals("list: distant descenant", N, list[2]);
       assertEquals("list: distant descenant", 3, list.length);
+   }
+
+   @Test public void easyAnchorChaining() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");
+      
+      g.addLayer(new Layer("test", "test", 2, true, false, false));
+      
+      g.addAnchor(new Anchor("start1", 0.0));
+      g.addAnnotation(new Annotation("the", "the", "test"));
+      g.addAnnotation(new Annotation("quick", "quick", "test"));
+      g.addAnnotation(new Annotation("brown", "brown", "test"));
+      g.addAnnotation(new Annotation("fox", "fox", "test"));
+      g.addAnchor(new Anchor("end2", 101.0));
+      
+      assertEquals("previous addAnchor becomes start anchor", 
+		   "start1", g.getAnnotation("the").getStartId());
+      assertEquals("chaining anchors automatically created", 
+		   g.getAnnotation("the").getEndId(), g.getAnnotation("quick").getStartId());
+      assertEquals("chaining anchors automatically created", 
+		   g.getAnnotation("quick").getEndId(), g.getAnnotation("brown").getStartId());
+      assertEquals("chaining anchors automatically created", 
+		   g.getAnnotation("brown").getEndId(), g.getAnnotation("fox").getStartId());
+
+      assertNull("chaining anchors with no offset", g.getAnnotation("the").getEnd().getOffset());
+      assertNull("chaining anchors with no offset", g.getAnnotation("quick").getEnd().getOffset());
+      assertNull("chaining anchors with no offset", g.getAnnotation("brown").getEnd().getOffset());
+      assertNull("chaining anchors with no offset", g.getAnnotation("fox").getEnd().getOffset());
+      
    }
 
    public static void main(String args[]) 

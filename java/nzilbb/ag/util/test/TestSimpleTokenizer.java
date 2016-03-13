@@ -237,7 +237,7 @@ public class TestSimpleTokenizer
 
       try
       {
-	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word", "|");
+	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word", "\\|");
 	 Vector<Change> changes = tokenizer.transform(g);
 	 Annotation[] words = g.getAnnotation("turn1").list("word");
 	 assertEquals(6, words.length);

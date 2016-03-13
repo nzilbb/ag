@@ -344,6 +344,10 @@ public class TestAnchorComparators
 		 comparator.compare(g.getAnchor("startW"), g.getAnchor("startM")) < 0);
       assertTrue("compare ancestry ordinals", 
 		 comparator.compare(g.getAnchor("startM"), g.getAnchor("startW")) > 0);
+      assertTrue("compare ancestor ordinals, ancestor parent is graph", 
+		 comparator.compare(g.getAnchor("startTurn1"), g.getAnchor("endDog")) < 0);
+      assertTrue("compare ancestor ordinals, ancestor parent is graph", 
+		 comparator.compare(g.getAnchor("endDog"), g.getAnchor("startTurn1")) > 0);
 
       assertTrue("fallback to id comparison", 
 		 comparator.compare(g.getAnchor("aaa-first"), g.getAnchor("startM")) < 0);

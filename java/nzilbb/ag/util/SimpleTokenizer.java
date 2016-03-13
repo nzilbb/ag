@@ -22,7 +22,7 @@
 package nzilbb.ag.util;
 
 import java.util.Vector;
-import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 import nzilbb.ag.*;
 
 /**
@@ -36,19 +36,19 @@ public class SimpleTokenizer
    // Attributes:
    
    /**
-    * Delimiters for tokenization - default is <code>" \n\r\t"</code>.
+    * Regular expression to match delimiters for tokenization - default is <code>"[ \n\r\t]"</code>.
     * @see #getDelimiters()
     * @see #setDelimiters(String)
     */
    protected String delimiters;
    /**
-    * Getter for {@link #delimiters}: Delimiters for tokenization.
-    * @return Delimiters for tokenization.
+    * Getter for {@link #delimiters}: Regular expression to match delimiters for tokenization.
+    * @return Regular expression to match delimiters for tokenization.
     */
-   public String getDelimiters() { if (delimiters == null) return " \n\r\t"; return delimiters; }
+   public String getDelimiters() { if (delimiters == null) return "[ \n\r\t]"; return delimiters; }
    /**
-    * Setter for {@link #delimiters}: Delimiters for tokenization.
-    * @param newDelimiters Delimiters for tokenization.
+    * Setter for {@link #delimiters}: Regular expression to match delimiters for tokenization.
+    * @param newDelimiters Regular expression to match delimiters for tokenization.
     */
    public void setDelimiters(String newDelimiters) { delimiters = newDelimiters; }
    
@@ -99,7 +99,7 @@ public class SimpleTokenizer
     * Constructor from attribute values.
     * @param sourceLayerId Layer ID of the layer to tokenize.
     * @param destinationLayerId Layer ID of the individual tokens.
-    * @param delimiters Delimiters for tokenization.
+    * @param delimiters Regular expression to match delimiters for tokenization.
     */
    public SimpleTokenizer(String sourceLayerId, String destinationLayerId, String delimiters)
    {
@@ -136,15 +136,17 @@ public class SimpleTokenizer
       Vector<Change> changes = new Vector<Change>();
       boolean sharedParent = graph.getLayer(getSourceLayerId()).getParentId()
 	 .equals(graph.getLayer(getDestinationLayerId()).getParentId());
+      Pattern regexDelimiters = Pattern.compile(getDelimiters());
       for (Annotation source : new AnnotationsByAnchor(graph.getAnnotations(getSourceLayerId())))
       {
-	 StringTokenizer tokens = new StringTokenizer(source.getLabel(), getDelimiters());
+	 String[] tokens = regexDelimiters.split(source.getLabel());
 	 Anchor start = source.getStart();
-	 while (tokens.hasMoreTokens())
+	 for (int t = 0; t < tokens.length; t++)
 	 {
-	    String sToken = tokens.nextToken();
+	    String sToken = tokens[t];
+	    if (sToken.length() == 0) continue;
 	    Anchor end = new Anchor();
-	    if (!tokens.hasMoreTokens())
+	    if (t == tokens.length - 1)
 	    { // last token
 	       // use the source annotation's end instead
 	       end = source.getEnd();

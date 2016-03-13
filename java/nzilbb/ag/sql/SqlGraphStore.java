@@ -1124,7 +1124,7 @@ public class SqlGraphStore
 	 {
 	    v.setFullValidation(true);
 	 }
-	 //v.setDebug(true);
+	 v.setDebug(true);
 	 Vector<Change> validationChanges = v.transform(graph);
 	 if (v.getErrors().size() != 0)
 	 {
@@ -1646,38 +1646,8 @@ public class SqlGraphStore
 	    rs.close();
 	    
 	    // change anchor ID
-	    anchor.getGraph().getAnchors().remove(oldId);
 	    anchor.setId(newId);
-	    anchor.getGraph().getAnchors().put(anchor.getId(), anchor);
 	    
-	    // update all annotations that use the anchor
-	    for (Annotation startsHere : anchor.getStartingAnnotations())
-	    {
-	       // check it still uses this anchor
-	       if (startsHere.getStartId().equals(oldId))
-	       {
-		  if (startsHere.getChange() == Change.Operation.NoChange
-		      || startsHere.containsKey("@SqlUpdated"))
-		  { // ensure the anchor change gets caught later
-		     extraUpdates.add(startsHere);
-		  }
-		  startsHere.setStartId(anchor.getId());
-	       }
-	    } // next annotation
-	    for (Annotation endsHere : anchor.getEndingAnnotations())
-	    {
-	       // check it still uses this anchor
-	       if (endsHere.getEndId().equals(oldId))
-	       {
-		  if (endsHere.getChange() == Change.Operation.NoChange
-		      || endsHere.containsKey("@SqlUpdated"))
-		  { // ensure the anchor change gets caught later
-		     extraUpdates.add(endsHere);
-		  }
-		  endsHere.setEndId(anchor.getId());
-		  }
-	    } // next annotation
-
 	    break;
 	 } // Create
 	 case Update:
@@ -2031,27 +2001,7 @@ public class SqlGraphStore
 	    rs.close();
 	    
 	    // change annotation ID
-	    annotation.getGraph().getAnnotationsById().remove(oldId);
 	    annotation.setId(newId);
-	    annotation.getGraph().getAnnotationsById().put(annotation.getId(), annotation);
-	    
-	    // update all child parentIds
-	    for (Vector<Annotation> children : annotation.getAnnotations().values())
-	    {
-	       for (Annotation child : children)
-	       {
-		  // check it still uses this anchor
-		  if (child.getParentId().equals(oldId))
-		  {
-		     if (child.getChange() == Change.Operation.NoChange
-			 || child.containsKey("@SqlUpdated"))
-		     { // ensure the anchor change gets caught later
-			extraUpdates.add(child);
-		     }
-		     child.setParentId(annotation.getId());
-		  }
-	       } // next child
-	    } // next child layer
 
 	    // does it need to update its own ID in the database?
 	    switch (layerId.intValue())
@@ -2607,14 +2557,6 @@ public class SqlGraphStore
 		  // reset the annotation ID
 		  Object[] args = { annotation.getLayer().get("@layer_id"), speakerNumber };
 		  annotation.setId(fmtMetaAnnotationId.format(args));
-		  // update all children parentIds
-		  for (String childLayerId : annotation.getAnnotations().keySet())
-		  {
-		     for (Annotation child : annotation.getAnnotations(childLayerId))
-		     {
-			child.setParentId(annotation.getId());
-		     }
-		  } // next child layer
 
 		  // add the speaker to transcript_speaker
 		  sql = getConnection().prepareStatement(

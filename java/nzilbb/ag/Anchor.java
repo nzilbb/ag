@@ -219,6 +219,37 @@ public class Anchor
       put("endOf", getEndOf());
    } // end of constructor
 
+   /**
+    * Setter for <i>id</i>: The anchor's identifier.
+    * @param id The anchor's identifier.
+    */
+   public void setId(String id) 
+   {
+      // remove the old id from the graph index
+      String oldId = getId();
+      if (getGraph() != null) getGraph().getAnchors().remove(oldId);
+      super.setId(id);
+      // add the new id from the graph index
+      if (getGraph() != null) getGraph().getAnchors().put(id, this);
+      
+      // update all annotations that use the anchor
+      for (Annotation startsHere : getStartingAnnotations())
+      {
+	 // check it still uses this anchor
+	 if (startsHere.getStartId().equals(oldId))
+	 {
+	    startsHere.setStartId(id);
+	 }
+      } // next annotation
+      for (Annotation endsHere : getEndingAnnotations())
+      {
+	 // check it still uses this anchor
+	 if (endsHere.getEndId().equals(oldId))
+	 {
+	    endsHere.setEndId(id);
+	 }
+      } // next annotation
+   }
    
 
    /**

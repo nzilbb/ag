@@ -499,6 +499,30 @@ public class TestSpanningConventionTransformer
 	 assertEquals("going to", span.getLabel());
 	 assertEquals("shares start with previous", "a1", span.getStartId());
 	 assertEquals("parent set", "word1", span.getParentId());
+
+	 Annotation word2 = g.getAnnotation("word2");
+	 Annotation word3 = g.getAnnotation("word3");
+	 Annotation word4 = g.getAnnotation("word4");
+	 assertNotNull("commit will remove annotations", g.getAnnotation("word2"));
+	 assertNotNull("commit will remove annotations", g.getAnnotation("word3"));
+	 assertNotNull("commit will remove annotations", g.getAnnotation("word4"));
+	 assertTrue("commit will remove annotations from layer", 
+		    g.getLayer("word").getAnnotations().contains(word2));
+	 assertTrue("commit will remove annotations from layer", 
+		    g.getLayer("word").getAnnotations().contains(word3));
+	 assertTrue("commit will remove annotations from layer", 
+		    g.getLayer("word").getAnnotations().contains(word4));
+	 g.commit();
+	 assertEquals("gonna", g.getAnnotation("word1").getLabel());
+	 assertNull("commit removes annotation", g.getAnnotation("word2"));
+	 assertNull("commit removes annotation", g.getAnnotation("word3"));
+	 assertNull("commit removes annotation", g.getAnnotation("word4"));
+	 assertFalse("commit removes annotation from layer", 
+		     g.getLayer("word").getAnnotations().contains(word2));
+	 assertFalse("commit removes annotation from layer", 
+		     g.getLayer("word").getAnnotations().contains(word3));
+	 assertFalse("commit removes annotation from layer", 
+		     g.getLayer("word").getAnnotations().contains(word4));
       }
       catch(TransformationException exception)
       {
