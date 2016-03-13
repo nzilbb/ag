@@ -1431,6 +1431,8 @@ public class SqlGraphStore
 	 PreparedStatement sqlDeleteTranscriptAttribute = getConnection().prepareStatement(
 	    "DELETE FROM transcript_attribute WHERE ag_id = ? AND name = ?");
 	 sqlDeleteTranscriptAttribute.setInt(1, iAgId);
+	 // participant attributes look like children of graph in the schema
+	 // but they're actually store-wide entities.
 	 PreparedStatement sqlInsertParticipantAttribute = getConnection().prepareStatement(
 	    "INSERT INTO speaker_attribute (speaker_number, name, value) VALUES (?,?,?)");
 	 PreparedStatement sqlUpdateParticipantAttribute = getConnection().prepareStatement(
@@ -1453,7 +1455,7 @@ public class SqlGraphStore
 	 rsAttributeLayers = sqlAttributeLayers.executeQuery();
 	 while (rsAttributeLayers.next())
 	 {
-	    participantAttributeLayers.add("transcript_"+rsAttributeLayers.getString("attribute"));
+	    participantAttributeLayers.add("participant_"+rsAttributeLayers.getString("attribute"));
 	 } // next layer
 	 rsAttributeLayers.close();
 	 sqlAttributeLayers.close();
@@ -1586,8 +1588,8 @@ public class SqlGraphStore
       }
       catch(TransformationException invalid)
       {
-	 System.out.println(invalid.toString());
-	 throw new StoreException("Graph was not valid", invalid);
+      	 System.out.println(invalid.toString());
+      	 throw new StoreException("Graph was not valid", invalid);
       }
       return true;
    }
@@ -1775,6 +1777,7 @@ public class SqlGraphStore
 	    }
 	    Integer layerId = (Integer)layer.get("@layer_id");
 	    String scope = (String)layer.get("@scope");
+	    assert scope != null : "scope != null - " + layer.getId() + " - " + layerId;
 
 	    PreparedStatement sql = sqlInsertFreeformAnnotation;
 	    if (scope.equalsIgnoreCase(SqlConstants.SCOPE_META))
