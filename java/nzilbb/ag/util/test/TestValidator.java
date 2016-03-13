@@ -1808,6 +1808,89 @@ public class TestValidator
       }
    }
 
+   @Test public void deleteExtraneousPeers() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");
+      
+      g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+			   true, // peers
+			   true, // peersOverlap
+			   true)); // saturated
+      g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "who", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "turn", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("orthography", "Orthography", Constants.ALIGNMENT_NONE,
+			   false, // peers
+			   false, // peersOverlap
+			   true, // saturated
+			   "word", // parentId
+			   true)); // parentIncludes
+
+      g.addAnchor(new Anchor("a0", 0.0)); // turn start
+      g.addAnchor(new Anchor("a1", 1.0)); // the & DT & D & NP
+      g.addAnchor(new Anchor("a1.5", 1.5)); // @
+      g.addAnchor(new Anchor("a2", 2.0)); // quick & A & k & AP
+      g.addAnchor(new Anchor("a2.25", 2.25)); // w
+      g.addAnchor(new Anchor("a2.5", 2.5)); // I
+      g.addAnchor(new Anchor("a2.75", 2.75)); // k
+      g.addAnchor(new Anchor("a3", 3.0)); // brown
+      g.addAnchor(new Anchor("a4", 4.0)); // fox & N
+      // unset offsets
+      g.addAnchor(new Anchor("a?1", null)); // jumps
+      g.addAnchor(new Anchor("a?2", null)); // over
+      g.addAnchor(new Anchor("a5", 5.0)); // end of over
+      g.addAnchor(new Anchor("a6", 6.0)); // turn end
+
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "a0", "a6", "my graph"));
+
+      g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a6", "participant1"));
+
+      g.addAnnotation(new Annotation("word1", "the", "word", "a1", "a2", "turn1"));
+      g.addAnnotation(new Annotation("word2", "quick", "word", "a2", "a3", "turn1"));
+      g.addAnnotation(new Annotation("word3", "brown", "word", "a3", "a4", "turn1"));
+      g.addAnnotation(new Annotation("word4", "fox", "word", "a4", "a?1", "turn1"));
+      g.addAnnotation(new Annotation("word5", "jumps", "word", "a?1", "a?2", "turn1"));
+      g.addAnnotation(new Annotation("word6", "over", "word", "a?2", "a5", "turn1"));
+
+      g.addAnnotation(new Annotation("orth1", "the", "orthography", null, null, "word1"));
+      g.addAnnotation(new Annotation("orth2", "quick", "orthography", null, null, "word2"));
+      g.addAnnotation(new Annotation("orth2.5", "deleteme", "orthography", null, null, "word2"));
+      g.addAnnotation(new Annotation("orth3", "willbedeleted", "orthography", null, null, "word3"));
+      g.addAnnotation(new Annotation("orth3.5", "brown", "orthography", null, null, "word3"));
+      g.addAnnotation(new Annotation("orth4", "fox", "orthography", null, null, "word4"));
+      g.addAnnotation(new Annotation("orth5", "jumps", "orthography", null, null, "word5"));
+      g.addAnnotation(new Annotation("orth6", "over", "orthography", null, null, "word6"));
+      
+      g.getAnnotation("orth3").destroy();
+
+      Validator v = new Validator();
+      v.setFullValidation(true);
+      // v.setDebug(true);
+      v.setDefaultOffsetThreshold(null);
+      try
+      {
+	 Vector<Change> changes = v.transform(g);
+	 if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
+	 assertNotEquals("changes applied", 0, changes.size());
+	 assertEquals("extra peer deleted", Change.Operation.Destroy, g.getAnnotation("orth2.5").getChange());
+	 assertNotEquals("deleted peers skipped", Change.Operation.Destroy, g.getAnnotation("orth3.5").getChange());
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+   }
 
    @Test public void validateHierarchyParentChildSynchronicity() // TODO saturated anchor sharing, and non-saturated by parent-including violations
    {
