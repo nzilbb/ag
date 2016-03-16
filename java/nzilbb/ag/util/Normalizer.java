@@ -33,6 +33,7 @@ import nzilbb.ag.*;
  *  <li>words do not share anchors with turns nor utterances</li>
  *  <li>turn and utterance labels are the participant names</li>
  *  <li>Optionally, if the graph has a single un-named speaker, then the speaker renamed to be the same as the espisode name </li>
+ *  <li>ensures that utterances within a turn are chained together</li>
  *  <li>TODO: fills in missing utterances</li>
  *  <li>TODO: fills in missing turns</li>
  * </ul>
@@ -98,6 +99,7 @@ public class Normalizer
 	       changes.addAll( // record changes for:
 		  turn.setLabel(participant.getLabel()));
 	    }
+	    Annotation lastUtterance = null;
 	    for (Annotation utterance : turn.getAnnotations(schema.getUtteranceLayerId()))
 	    {
 	       if (!participant.getLabel().equals(utterance.getLabel()))
@@ -105,6 +107,26 @@ public class Normalizer
 		  changes.addAll( // record changes for:
 		     utterance.setLabel(participant.getLabel()));
 	       }
+	       // check utterances are chained together
+	       if (lastUtterance != null 
+		   && !utterance.getStartId().equals(lastUtterance.getEndId()))
+	       { // not chained
+		  // change the last utterance end
+		  Anchor newEnd = utterance.getStart();
+		  // change all annotations with this turn that end there
+		  // to instead end at the start of this utterance
+		  // this will include lastUtterance itself, and any words/phones it might 
+		  // share anchors with
+		  for (Annotation ending : lastUtterance.getEnd().getEndingAnnotations())
+		  {
+		     if (turn == ending.my(schema.getTurnLayerId()))
+		     {
+			changes.addAll( // record changes for:
+			   ending.setEnd(newEnd));
+		     }
+		  } // next ending annotation
+	       }
+	       lastUtterance = utterance;
 	    } // next utterance
 	 } // next turn
       } // next participant

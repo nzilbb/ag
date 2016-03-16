@@ -131,7 +131,7 @@ public class TestChatDeserializer
 
       assertEquals("wrapped line", new Double(28.452), utterances.elementAt(4).getStart().getOffset());
       assertEquals("wrapped line", new Double(40.360), utterances.elementAt(4).getEnd().getOffset());
-
+      
       Annotation[] words = g.annotations("word");
       assertEquals("this", words[0].getLabel());
       assertEquals("family", words[1].getLabel());
@@ -225,7 +225,25 @@ public class TestChatDeserializer
       assertEquals(new Double(880.456), gems[10].getStart().getOffset());
       assertEquals("Christmas", gems[10].getLabel());
       assertEquals(new Double(950.711), gems[10].getEnd().getOffset());
-      
+
+      // we know about the overlapping boundary, but it will be repaired by Normalizer
+      assertNotEquals("overlapping utterance boundary not corrected", 
+		   utterances.elementAt(188).getEnd(), utterances.elementAt(189).getStart());
+      assertEquals("overlapping utterance boundary not corrected", 
+		   new Double(877.501), utterances.elementAt(188).getEnd().getOffset());
+      assertEquals("overlapping utterance boundary not corrected", 
+		   new Double(877.420), utterances.elementAt(189).getStart().getOffset());
+
+      assertEquals("wrapped line", new Double(28.452), utterances.elementAt(4).getStart().getOffset());
+      assertEquals("wrapped line", new Double(40.360), utterances.elementAt(4).getEnd().getOffset());
+
+      // check it really is repaired, as this deserializer relies on this behaviour:
+      new nzilbb.ag.util.Normalizer().transform(g);
+      assertEquals("overlapping utterance boundary corrected", 
+		   utterances.elementAt(188).getEnd(), utterances.elementAt(189).getStart());
+      assertEquals("overlapping utterance boundary corrected", 
+		   new Double(877.420), utterances.elementAt(188).getEnd().getOffset());
+
    }
 
    @Test public void minimalConversionWithoutAnnotations() 
