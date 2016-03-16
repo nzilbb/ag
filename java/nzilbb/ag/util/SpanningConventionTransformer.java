@@ -252,6 +252,25 @@ public class SpanningConventionTransformer // TODO implementation that handles n
     */
    public void setAnnotatePrevious(boolean newAnnotatePrevious) { annotatePrevious = newAnnotatePrevious; }
 
+   
+   /**
+    * Whether to close gaps in the source layer created by deleting span annotations, by setting the end of the previous annotation to the start of the following annotation.
+    * @see #getCloseGaps()
+    * @see #setCloseGaps(boolean)
+    */
+   protected boolean closeGaps = true;
+   /**
+    * Getter for {@link #closeGaps}: Whether to close gaps in the source layer created by deleting span annotations, by setting the end of the previous annotation to the start of the following annotation.
+    * @return Whether to close gaps in the source layer created by deleting span annotations, by setting the end of the previous annotation to the start of the following annotation.
+    */
+   public boolean getCloseGaps() { return closeGaps; }
+   /**
+    * Setter for {@link #closeGaps}: Whether to close gaps in the source layer created by deleting span annotations, by setting the end of the previous annotation to the start of the following annotation.
+    * @param newCloseGaps Whether to close gaps in the source layer created by deleting span annotations, by setting the end of the previous annotation to the start of the following annotation.
+    */
+   public void setCloseGaps(boolean newCloseGaps) { closeGaps = newCloseGaps; }
+
+
    // Methods:
    
    /**
@@ -369,6 +388,36 @@ public class SpanningConventionTransformer // TODO implementation that handles n
       setDestinationStartResult(destinationStartResult);
       setDestinationEndResult(destinationEndResult);
       setAnnotatePrevious(annotatePrevious);
+  } // end of constructor
+
+   /**
+    * Constructor from attribute values. The {@link #delimiter} used is the default.
+    * @param sourceLayerId Layer ID of the annotations to transform.
+    * @param startPattern A regular expression matching the label of the first source annotation in the span.
+    * @param endPattern A regular expression matching the label of the last source annotation in the span.
+    * @param deleteInSource Whether to delete the source annotations between the start and end source annotations (exclusive).
+    * @param sourceStartResult The resulting label of the start source annotation, which may contain references to captured groups in {@link #startPattern}, or be null to delete the start annotation.
+    * @param sourceEndResult The resulting label of the end source annotation, which may contain references to captured groups in {@link #endPattern}, or be null to delete the end annotation.
+    * @param destinationLayerId Layer ID of the annotation created for each span.
+    * @param delimiter Delimiter to insert between source labels when concatenting them to for the destination label.
+    * @param destinationStartResult The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #startPattern}, or be null to not include the start annotation.
+    * @param destinationEndResult The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #endPattern}, or be null to not include the end annotation.
+    * @param annotatePrevious Whether the destination annotation annotates the source token prior to the first matching source token (i.e. whether they should share start anchors).
+    * @param closeGaps Whether to close gaps in the source layer created by deleting span annotations, by setting the end of the previous annotation to the start of the following annotation.
+    */
+   public SpanningConventionTransformer(String sourceLayerId, String startPattern, String endPattern, boolean deleteInSource, String sourceStartResult, String sourceEndResult, String destinationLayerId, String destinationStartResult, String destinationEndResult, boolean annotatePrevious, boolean closeGaps)
+   {
+      setSourceLayerId(sourceLayerId);
+      setStartPattern(startPattern);
+      setEndPattern(endPattern);
+      setDeleteInSource(deleteInSource);
+      setSourceStartResult(sourceStartResult);
+      setSourceEndResult(sourceEndResult);
+      setDestinationLayerId(destinationLayerId);
+      setDestinationStartResult(destinationStartResult);
+      setDestinationEndResult(destinationEndResult);
+      setAnnotatePrevious(annotatePrevious);
+      setCloseGaps(closeGaps);
   } // end of constructor
 
    /**
@@ -492,14 +541,18 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 			   span.lastElement(), 
 			   getDestinationLayerId(), label.toString(), 
 			   spanParent);
-			changes.addAll(annotation.getChanges());
+			changes.addAll( // record changes of:
+			   annotation.getChanges());
 		     } // non-null destination
 
 		     // source annotations: 
+		     Anchor endOfGap = null;
 
 		     if (getSourceStartResult() == null)
 		     { // delete start annotation
-			changes.add(span.firstElement().destroy());
+			endOfGap = span.firstElement().getEnd();
+			changes.add( // record changes of:
+			   span.firstElement().destroy());
 		     }
 		     else
 		     { // change the label
@@ -507,7 +560,8 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 			if (!l.equals(span.firstElement().getLabel()))
 			{ // only change if it's different
 			   span.firstElement().setLabel(l);
-			   changes.add(span.firstElement().getLastChange());
+			   changes.add( // record changes of:
+			      span.firstElement().getLastChange());
 			}
 		     }
 		     
@@ -516,13 +570,17 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 			// for each annotation between the start and the end
 			for (int i = 1; i < span.size() - 1; i++)
 			{
-			   changes.add(span.elementAt(i).destroy());
+			   endOfGap = span.elementAt(i).getEnd();
+			   changes.add( // record changes of:
+			      span.elementAt(i).destroy());
 			}
 		     } // intervening annotations
 
 		     if (getSourceEndResult() == null)
 		     { // delete end annotation
-			changes.add(span.lastElement().destroy());
+			endOfGap = span.lastElement().getEnd();
+			changes.add( // record changes of:
+			   span.lastElement().destroy());
 		     }
 		     else
 		     { // change the label
@@ -530,8 +588,16 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 			if (!l.equals(span.lastElement().getLabel()))
 			{ // only change if it's different
 			   span.lastElement().setLabel(l);
-			   changes.add(span.lastElement().getLastChange());
+			   changes.add( // record changes of:
+			      span.lastElement().getLastChange());
 			}
+		     }
+
+		     if (getCloseGaps() && endOfGap != null && previousSource != null)
+		     {
+			// close the gap
+			changes.addAll( // record changes of:
+			   previousSource.setEnd(endOfGap));
 		     }
 		     
 		     span = null;
