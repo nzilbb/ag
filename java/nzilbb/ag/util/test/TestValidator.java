@@ -623,6 +623,8 @@ public class TestValidator
       g.addAnnotation(new Annotation("phone5", "I", "phone", "a2.5", "a2.75", "word2"));
       g.addAnnotation(new Annotation("phone6", "k", "phone", "a2.75", "a3a", "word2"));
 
+      assertEquals("no extra changes to graph", 0, g.getChanges().size());
+
       Validator v = new Validator();
       v.setFullValidation(true);
       // v.setDebug(true);
@@ -632,17 +634,24 @@ public class TestValidator
 	 Vector<Change> changes = v.transform(g);
 	 if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
 	 Iterator<Change> order = changes.iterator();
-	 assertEquals("word share start anchors - new anchor", 
+	 
+	 assertEquals("word share start anchors - new anchor: " + changes, 
 		      new Change(Change.Operation.Create, g.getAnchor("1")), 
 		      order.next());
-	 assertEquals("word share start anchors - new anchor copies offset", 
+	 assertEquals("word share start anchors - new anchor copies offset: " + changes, 
 		      new Change(Change.Operation.Update, g.getAnchor("1"), "offset", new Double(4.0)), 
 		      order.next());
-	 assertEquals("word share start anchors - new start", 
-		      new Change(Change.Operation.Update, g.getAnnotation("word6"), "startId", "1"), 
+	 assertNotEquals("word share start anchors - not shared any more: " + changes, 
+			 g.getAnnotation("word6").getStartId(), 
+			 g.getAnnotation("word4").getStartId());
+	 assertEquals("word share start anchors - new start: " + changes, 
+		      new Change(Change.Operation.Update, g.getAnnotation("word4"), "startId", "1"), 
 		      order.next());
-	 assertEquals("word share start anchors - new end", 
-		      new Change(Change.Operation.Update, g.getAnnotation("word5"), "endId", "1"), 
+	 assertNotEquals("word share end anchors - not shared any more: " + changes, 
+			 g.getAnnotation("word5").getEndId(), 
+			 g.getAnnotation("word4").getEndId());
+	 assertEquals("word share start anchors - new end: " + changes, 
+		      new Change(Change.Operation.Update, g.getAnnotation("word3"), "endId", "1"), 
 		      order.next());
 	 assertFalse(order.hasNext());
 	 assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());

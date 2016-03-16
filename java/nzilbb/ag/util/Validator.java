@@ -352,7 +352,6 @@ public class Validator
 	    log("Skipping default offset generation");
 	 }
       } // default offset threshold
-
       return changes;
    }
 
@@ -929,12 +928,12 @@ public class Validator
 	 )
       {
 	 // for each parent
-	 for (Annotation parent : new TreeSet<Annotation>(graph.getAnnotations(childLayer.getParentId())))
+	 for (Annotation parent : graph.getAnnotations(childLayer.getParentId()))
 	 { 
 	    if (parent.getChange() == Change.Operation.Destroy) continue; // ignore deleted annotations
 	    
 	    Vector<Annotation> children = new Vector<Annotation>(parent.getAnnotations(childLayer.getId()));
-	    AnnotationsByAnchor childrenByAnchor = new AnnotationsByAnchor(children);
+	    AnnotationsByAnchor childrenByAnchor = new AnnotationsByAnchor(children); // TODO this is intolerably slow
 	    
 	    // ensure the ordinals are in chronological order, and that they are set
 	    int iOrdinal = 1;
@@ -959,7 +958,8 @@ public class Validator
       // check anchors
       
       // for each parent
-      for (Annotation parent : new TreeSet<Annotation>(graph.getAnnotations(childLayer.getParentId())))
+      assert graph.getAnnotations(childLayer.getParentId()) != null : "graph.getAnnotations(childLayer.getParentId()) != null - " + childLayer + " parent: " + childLayer.getParentId();
+      for (Annotation parent : graph.getAnnotations(childLayer.getParentId()))
       { 
 	 if (parent.getChange() == Change.Operation.Destroy) continue; // ignore deleted annotations
 	 // log("Parent: " + logAnnotation(parent));

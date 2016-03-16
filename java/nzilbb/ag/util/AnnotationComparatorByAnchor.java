@@ -23,6 +23,7 @@ package nzilbb.ag.util;
 
 import java.util.Comparator;
 import nzilbb.ag.Annotation;
+import nzilbb.ag.Anchor;
 
 /**
  * Comparator that compares annotations by anchor offset, ordering start earliest, then end latest, then highest ordinal first, then highest ID first.
@@ -50,51 +51,60 @@ public class AnnotationComparatorByAnchor
 	 // System.out.println("" + o1 + " === " + o2);
 	 return 0;
       }
+
       try
       {
+	 Anchor o1Start = o1.getStart();
+	 Anchor o1End = o1.getEnd();
+	 Anchor o2Start = o2.getStart();
+	 Anchor o2End = o2.getEnd();
+	 double o1StartOffset = o1Start.getOffset().doubleValue();
+	 double o2StartOffset = o2Start.getOffset().doubleValue();
+	 
 	 // starts earlier, is lower
-	 if (o1.getStart().getOffset() < o2.getStart().getOffset())
+	 if (o1StartOffset < o2StartOffset)
 	 {
-	    // System.out.println("start: " + o1 + " < " + o2 + " (" + o1.getStart() + " < " + o2.getStart() + ")");
+	    // System.out.println("start: " + o1 + " < " + o2 + " (" + o1Start + " < " + o2Start + ")");
 	    return -6;
 	 }
 	 // starts later, is higher
-	 if (o1.getStart().getOffset() > o2.getStart().getOffset())
+	 if (o1StartOffset > o2StartOffset)
 	 {
-	    // System.out.println("start: " + o1 + " > " + o2 + " (" + o1.getStart() + " > " + o2.getStart() + ")");
+	    // System.out.println("start: " + o1 + " > " + o2 + " (" + o1Start + " > " + o2Start + ")");
 	    return 6;
 	 }
 
 	 // same start anchors...
 	 
 	 // special case - end anchors same as start
-	 if (o1.getStart().getOffset().doubleValue() == o1.getEnd().getOffset().doubleValue())
+	 double o1EndOffset = o1End.getOffset().doubleValue();
+	 double o2EndOffset = o2End.getOffset().doubleValue();
+	 if (o1StartOffset == o1EndOffset)
 	 {
-	    if (o2.getStart().getOffset().doubleValue() != o2.getEnd().getOffset().doubleValue())
+	    if (o2StartOffset != o2EndOffset)
 	    {
 	       return -9;
 	    }
 	 }
-	 else if (o2.getStart().getOffset().doubleValue() == o2.getEnd().getOffset().doubleValue())
+	 else if (o2StartOffset == o2EndOffset)
 	 {
 	    return 9;
 	 }
 
 	 // ends earlier, is higher
-	 if (o1.getEnd().getOffset() < o2.getEnd().getOffset())
+	 if (o1EndOffset < o2EndOffset)
 	 {
-	    // System.out.println("end: " + o1 + " > " + o2 + " (" + o1.getEnd() + " < " + o2.getEnd() + ")");
+	    // System.out.println("end: " + o1 + " > " + o2 + " (" + o1End + " < " + o2End + ")");
 	    return 8;
 	 }
 	 // ends later, is lower
-	 if (o1.getEnd().getOffset() > o2.getEnd().getOffset())
+	 if (o1EndOffset > o2EndOffset)
 	 {
-	    // System.out.println("end: " + o1 + " < " + o2 + " (" + o1.getEnd() + " > " + o2.getEnd() + ")");
+	    // System.out.println("end: " + o1 + " < " + o2 + " (" + o1End + " > " + o2End + ")");
 	    return -8;
 	 }
       }
       catch(Throwable t) {}
-
 
       // special case: if the start anchor of one is the end anchor of another, it's earlier
       if (o1.getEndId().equals(o2.getStartId()))
@@ -109,24 +119,27 @@ public class AnnotationComparatorByAnchor
       }
 
       // start anchors the same, compare layer id
-      if (o1.getLayerId().compareTo(o2.getLayerId()) > 0)
+      int o1LayerComparedToo2Layer = o1.getLayerId().compareTo(o2.getLayerId());
+      if (o1LayerComparedToo2Layer > 0)
       {
 	 // System.out.println("layer: " + o1 + " > " + o2 + " (" + o1.getLayerId() + " > " + o2.getLayerId() + ")");
 	 return 4;
       }
-      if (o1.getLayerId().compareTo(o2.getLayerId()) < 0)
+      if (o1LayerComparedToo2Layer < 0)
       {
 	 // System.out.println("layer: " + o1 + " < " + o2 + " (" + o1.getLayerId() + " < " + o2.getLayerId() + ")");
 	 return -4;
       }
 
       // anchors/layers the same, compare ordinal
-      if (o1.getOrdinal() < o2.getOrdinal())
+      int o1Ordinal = o1.getOrdinal();
+      int o2Ordinal = o2.getOrdinal();
+      if (o1Ordinal < o2Ordinal)
       {
 	 // System.out.println("ordinal: " + o1 + " < " + o2 + " (" + o1.getOrdinal() + " < " + o2.getOrdinal() + ")");
 	 return -3;
       }
-      if (o1.getOrdinal() > o2.getOrdinal())
+      if (o1Ordinal > o2Ordinal)
       {
 	 // System.out.println("ordinal: " + o1 + " > " + o2 + " (" + o1.getOrdinal() + " > " + o2.getOrdinal() + ")");
 	 return 3;
@@ -135,12 +148,13 @@ public class AnnotationComparatorByAnchor
       // anchors/layers/ordinals the same or null, compare id
       if (o1.getId() != null && o2.getId() != null)
       {
-	 if (o1.getId().compareTo(o2.getId()) < 0)
+	 int o1IdComparedToo2Id = o1.getId().compareTo(o2.getId());
+	 if (o1IdComparedToo2Id < 0)
 	 {
 	    // System.out.println("id: " + o1 + " < " + o2 + " (" + o1.getId() + " < " + o2.getId() + ")");
 	    return -1;
 	 }
-	 if (o1.getId().compareTo(o2.getId()) > 0)
+	 if (o1IdComparedToo2Id > 0)
 	 {
 	    // System.out.println("id: " + o1 + " > " + o2 + " (" + o1.getId() + " > " + o2.getId() + ")");
 	    return 1;
