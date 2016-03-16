@@ -1009,26 +1009,26 @@ public class ChatDeserializer
       // add layers to the graph
       // we don't just copy the whole schema, because that would imply that all the extra layers
       // contained no annotations, which is not necessarily true
-      graph.addLayer(getParticipantLayer());
+      graph.addLayer((Layer)getParticipantLayer().clone());
       graph.getSchema().setParticipantLayerId(getParticipantLayer().getId());
-      graph.addLayer(getTurnLayer());
+      graph.addLayer((Layer)getTurnLayer().clone());
       graph.getSchema().setTurnLayerId(getTurnLayer().getId());
-      graph.addLayer(getUtteranceLayer());
+      graph.addLayer((Layer)getUtteranceLayer().clone());
       graph.getSchema().setUtteranceLayerId(getUtteranceLayer().getId());
-      graph.addLayer(getWordLayer());
+      graph.addLayer((Layer)getWordLayer().clone());
       graph.getSchema().setWordLayerId(getWordLayer().getId());
-      if (getDisfluencyLayer() != null) graph.addLayer(getDisfluencyLayer());
-      if (getExpansionLayer() != null) graph.addLayer(getExpansionLayer());
-      if (getCompletionLayer() != null) graph.addLayer(getCompletionLayer());
-      if (getGemLayer() != null) graph.addLayer(getGemLayer());
-      if (getTranscriberLayer() != null) graph.addLayer(getTranscriberLayer());
-      if (getLanguagesLayer() != null) graph.addLayer(getLanguagesLayer());
+      if (getDisfluencyLayer() != null) graph.addLayer((Layer)getDisfluencyLayer().clone());
+      if (getExpansionLayer() != null) graph.addLayer((Layer)getExpansionLayer().clone());
+      if (getCompletionLayer() != null) graph.addLayer((Layer)getCompletionLayer().clone());
+      if (getGemLayer() != null) graph.addLayer((Layer)getGemLayer().clone());
+      if (getTranscriberLayer() != null) graph.addLayer((Layer)getTranscriberLayer().clone());
+      if (getLanguagesLayer() != null) graph.addLayer((Layer)getLanguagesLayer().clone());
       for (String attribute : participantLayers.keySet())
       {
 	 Layer layer = participantLayers.get(attribute);
 	 if (layer != null)
 	 {
-	    graph.addLayer(layer);
+	    graph.addLayer((Layer)layer.clone());
 	 }
       } // next participant layer 
 
@@ -1161,7 +1161,7 @@ public class ChatDeserializer
 	    graph.addAnnotation(utterance);
 	    utterance.setParent(currentTurn);
 
-	    // if a gem has jjust been started
+	    // if a gem has just been started
 	    if (gem != null && gem.getStartId() == null)
 	    { // set the gem's start anchor ID
 	       gem.setStartId(utterance.getStartId());
