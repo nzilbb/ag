@@ -37,7 +37,8 @@ public interface IGraphStoreQuery
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String getId() throws StoreException, PermissionException;
+   public String getId()
+      throws StoreException, PermissionException;
    
    /**
     * Gets a list of layer IDs (annotation 'types').
@@ -45,7 +46,8 @@ public interface IGraphStoreQuery
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getLayerIds() throws StoreException, PermissionException; 
+   public String[] getLayerIds()
+      throws StoreException, PermissionException; 
    
    /**
     * Gets a list of layer definitions.
@@ -53,7 +55,8 @@ public interface IGraphStoreQuery
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public Layer[] getLayers() throws StoreException, PermissionException;
+   public Layer[] getLayers()
+      throws StoreException, PermissionException;
 
    /**
     * Gets the layer schema.
@@ -61,7 +64,8 @@ public interface IGraphStoreQuery
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public Schema getSchema() throws StoreException, PermissionException;
+   public Schema getSchema()
+      throws StoreException, PermissionException;
 
    /**
     * Gets a layer definition.
@@ -70,7 +74,8 @@ public interface IGraphStoreQuery
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public Layer getLayer(String id) throws StoreException, PermissionException;   
+   public Layer getLayer(String id)
+      throws StoreException, PermissionException;   
 
    /**
     * Gets a list of corpus IDs.
@@ -78,15 +83,17 @@ public interface IGraphStoreQuery
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getCorpusIds() throws StoreException, PermissionException; 
-
+   public String[] getCorpusIds()
+      throws StoreException, PermissionException; 
+   
    /**
     * Gets a list of participant IDs.
     * @return A list of participant IDs.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getParticipantIds() throws StoreException, PermissionException; 
+   public String[] getParticipantIds()
+      throws StoreException, PermissionException; 
 
    /**
     * Gets a list of graph IDs.
@@ -94,7 +101,8 @@ public interface IGraphStoreQuery
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getGraphIds() throws StoreException, PermissionException; 
+   public String[] getGraphIds()
+      throws StoreException, PermissionException; 
 
    /**
     * Gets a list of graph IDs in the given corpus.
@@ -103,7 +111,8 @@ public interface IGraphStoreQuery
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getGraphIdsInCorpus(String corpus) throws StoreException, PermissionException; 
+   public String[] getGraphIdsInCorpus(String corpus)
+      throws StoreException, PermissionException; 
 
    /**
     * Gets a list of IDs of graphs that include the given participant.
@@ -112,7 +121,8 @@ public interface IGraphStoreQuery
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getGraphIdsWithParticipant(String participant) throws StoreException, PermissionException; 
+   public String[] getGraphIdsWithParticipant(String participant)
+      throws StoreException, PermissionException; 
    
    /**
     * Gets a graph given its ID.
@@ -122,7 +132,8 @@ public interface IGraphStoreQuery
     * @throws PermissionException If the operation is not permitted.
     * @throws GraphNotFoundException If the graph was not found in the store.
     */
-   public Graph getGraph(String id) throws StoreException, PermissionException, GraphNotFoundException;
+   public Graph getGraph(String id) 
+      throws StoreException, PermissionException, GraphNotFoundException;
 
    /**
     * Gets a graph given its ID, containing only the given layers.
@@ -133,7 +144,8 @@ public interface IGraphStoreQuery
     * @throws PermissionException If the operation is not permitted.
     * @throws GraphNotFoundException If the graph was not found in the store.
     */
-   public Graph getGraph(String id, String[] layerIds) throws StoreException, PermissionException, GraphNotFoundException;
+   public Graph getGraph(String id, String[] layerIds) 
+      throws StoreException, PermissionException, GraphNotFoundException;
    
    /**
     * List the predefined media tracks available for transcripts.
@@ -141,6 +153,31 @@ public interface IGraphStoreQuery
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted. 
     */
-   public MediaTrackDefinition[] getMediaTracks() throws StoreException, PermissionException;
+   public MediaTrackDefinition[] getMediaTracks() 
+      throws StoreException, PermissionException;
+   
+   /**
+    * List the media available for the given graph.
+    * @param graphId The graph ID.
+    * @return List of media files available for the given graph.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
+    */
+   public MediaFile[] getAvailableMedia(String graphId) 
+      throws StoreException, PermissionException, GraphNotFoundException;
 
+   /**
+    * Gets a given media track for a given graph.
+    * @param graphId The graph ID.
+    * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
+    * @param mimeType The MIME type of the media.
+    * @return A URL to the given media for the given graph, or null if the given media doesn't exist.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
+    */
+   public String getMedia(String graphId, String trackSuffix, String mimeType) 
+      throws StoreException, PermissionException, GraphNotFoundException;
+   
 } // end of interface IGraphStoreQuery

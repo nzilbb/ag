@@ -23,6 +23,12 @@ package nzilbb.ag.sql;
 
 import java.sql.*;
 import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Vector;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -34,6 +40,7 @@ import java.text.ParseException;
 
 import nzilbb.ag.*;
 import nzilbb.ag.util.Validator;
+import nzilbb.util.IO;
 
 /**
  * Graph store that uses a relational database as its back end.
@@ -377,6 +384,16 @@ public class SqlGraphStore
 	    rs.close();
 	    sql.close();
 	    sqlParentId.close();
+
+	    if (layer.getId().equals("corpus"))
+	    {
+	       LinkedHashMap<String,String> corpora = new LinkedHashMap<String,String>();
+	       for (String corpus : getCorpusIds())
+	       {
+		  corpora.put(corpus, corpus);
+	       }
+	       layer.setValidLabels(corpora);
+	    }
 
 	    return layer;
 	 }
@@ -1123,6 +1140,49 @@ public class SqlGraphStore
 	 if (graph.getChange() == Change.Operation.Create)
 	 {
 	    v.setFullValidation(true);
+
+	    // a new transcript must have corpus, episode, and transcript type
+
+	    Layer layer = graph.getLayer("corpus");
+	    if (layer == null)
+	    { // add the layer
+	       layer = getLayer("corpus");
+	       graph.addLayer(layer);
+	    }
+	    if (graph.my("corpus") == null)
+	    { // set to the first value
+	       graph.createTag(graph, layer.getId(), layer.getValidLabels().keySet().iterator().next())
+		  .put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+	    }
+
+	    layer = graph.getLayer("episode");
+	    if (layer == null)
+	    { // add the layer
+	       layer = getLayer("episode");
+	       graph.addLayer(layer);
+	    }
+	    if (graph.my("episode") == null)
+	    { // set to the graph name, without the extension
+	       graph.createTag(graph, layer.getId(), graph.getId().replaceAll("\\.[^.]*$",""))
+		  .put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+	    }
+	    else if (graph.my("episode").getLabel().length() == 0)
+	    {
+	       graph.my("corpus").setLabel(graph.getId().replaceAll("\\.[^.]*$",""));
+	       graph.my("corpus").put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+	    }
+
+	    layer = graph.getLayer("transcript_type");
+	    if (layer == null)
+	    { // add the layer
+	       layer = getLayer("transcript_type");
+	       graph.addLayer(layer);
+	    }
+	    if (graph.my("transcript_type") == null)
+	    { // set to the first value
+	       graph.createTag(graph, layer.getId(), layer.getValidLabels().keySet().iterator().next())
+		  .put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+	    }
 	 }
 	 //v.setDebug(true);	 
 	 Vector<Change> validationChanges = v.transform(graph);
@@ -2753,4 +2813,314 @@ public class SqlGraphStore
       }
    }
 
+   /**
+    * List the media available for the given graph.
+    * @param graphId The graph ID.
+    * @return List of media files available for the given graph.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
+    */
+   public MediaFile[] getAvailableMedia(String graphId) 
+      throws StoreException, PermissionException, GraphNotFoundException
+   {
+      Vector<MediaFile> files = new Vector<MediaFile>();
+      String[] layers = { "corpus", "episode" };
+      Graph graph = getGraph(graphId, layers);
+      File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
+      File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
+      MediaTrackDefinition[] tracks = getMediaTracks();
+      String baseName = graph.getId().replaceAll("\\.[^.]*$","");
+      File[] aDirs = episodeDir.listFiles(new FileFilter() 
+	 {
+	    public boolean accept(File file)
+	    {
+	       return file.isDirectory() && !file.getName().equals("trs");
+	    }
+	 });
+      if (aDirs != null)
+      {
+	 for (File dir : aDirs)
+	 {
+	    // look for a file with the same name as the transcript, and 
+	    // an extension that matches the directory name
+	    String extension = dir.getName();
+	    for (MediaTrackDefinition track : tracks)
+	    {
+	       String fileName = baseName + track.getSuffix() + "." + extension;
+	       File f = new File(dir, fileName);
+	       if (f.exists())
+	       {
+		  MediaFile mediaFile = new MediaFile(f, track.getSuffix());
+		  StringBuffer url = new StringBuffer(getBaseUrl());
+		  url.append("/files/");
+		  url.append(graph.my("corpus").getLabel());
+		  url.append("/");
+		  url.append(graph.my("episode").getLabel());
+		  url.append("/");
+		  url.append(f.getName());
+		  mediaFile.setUrl(url.toString());
+		  files.add(mediaFile);
+	       }
+	    } // next track
+	 } // next subdir
+      }
+      return files.toArray(new MediaFile[0]);
+   }
+
+   /**
+    * Gets a given media track for a given graph.
+    * @param graphId The graph ID.
+    * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
+    * @param mimeType The MIME type of the media.
+    * @return A URL to the given media for the given graph, or null if the given media doesn't exist.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
+    */
+   public String getMedia(String graphId, String trackSuffix, String mimeType) 
+      throws StoreException, PermissionException, GraphNotFoundException
+   {
+      String[] layers = { "corpus", "episode" };
+      Graph graph = getGraph(graphId, layers);
+      File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
+      File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
+      String extension = MediaFile.MimeTypeToSuffix().get(mimeType);
+      if (extension == null) throw new StoreException("Unknown MIME type: " + mimeType);
+      File mediaDir = new File(episodeDir, extension);
+      String fileName = graph.getId().replaceAll("\\.[^.]*$","") + trackSuffix + "." + extension;
+      File file = new File(mediaDir, fileName);
+      if (file.exists())
+      {
+	 StringBuffer url = new StringBuffer(getBaseUrl());
+	 url.append("/files/");
+	 url.append(graph.my("corpus").getLabel());
+	 url.append("/");
+	 url.append(graph.my("episode").getLabel());
+	 url.append("/");
+	 url.append(fileName);
+	 return url.toString();
+      }
+      else
+      {
+	 return null;
+      }
+   }
+
+   /**
+    * Saves the given media for the given graph.
+    * @param mediaUrl A URL to the media content.
+    * @param graphId The graph ID
+    * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
+    * @throws StoreException If an error prevents the media from being saved.
+    * @throws PermissionException If saving the media is not permitted.
+    * @throws GraphNotFoundException If the graph doesn't exist.
+    */
+   public void saveMedia(String graphId, String trackSuffix, String mediaUrl)
+      throws StoreException, PermissionException, GraphNotFoundException
+   {
+      try
+      {
+	 String[] layers = { "corpus", "episode" };
+	 Graph graph = getGraph(graphId, layers);
+	 File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
+	 if (!corpusDir.exists()) corpusDir.mkdir();
+	 File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
+	 if (!episodeDir.exists()) episodeDir.mkdir();
+	 
+	 // get the content
+	 if (mediaUrl.startsWith("file:")) 
+	 { // file URL
+	    File source = new File(new URI(mediaUrl));
+	    MediaFile mediaFile = new MediaFile(source, trackSuffix);
+	    File mediaDir = new File(
+	       episodeDir, mediaFile.getType().equals("other")?"doc":mediaFile.getExtension());
+	    if (!mediaDir.exists()) mediaDir.mkdir();
+	    String destinationName = graph.getId().replaceAll("\\.[^.]*$","") 
+	       + trackSuffix + "." + mediaFile.getExtension();
+	    File destination = new File(mediaDir, destinationName);
+	    if (!source.renameTo(destination))
+	    { // can't rename, have to copy the data TODO
+	       try
+	       {
+		  IO.Copy(source, destination);
+	       }
+	       catch(IOException exception)
+	       {
+		  throw new StoreException(
+		     "Could not copy " + source.getPath() + " to " + destination.getPath(), exception);
+	       }
+	    } // copy instead of rename
+	 } // file URL
+	 else
+	 { // not file URL
+	    URL url = new URL(mediaUrl);
+	    URLConnection connection = url.openConnection();
+	    String mimeType = connection.getContentType();
+	    String extension = MediaFile.MimeTypeToSuffix().get(mimeType);
+	    if (extension == null) throw new StoreException("Unknown MIME type: " + mimeType);
+	    File mediaDir = new File(episodeDir, extension);
+	    String destinationName = graph.getId().replaceAll("\\.[^.]*$","") 
+	       + trackSuffix + "." + extension;
+	    File destination = new File(mediaDir, destinationName);
+	    try
+	    {
+	       IO.SaveUrlConnectionToFile(connection, destination);
+	    }
+	    catch(IOException exception)
+	    {
+	       throw new StoreException(
+		  "Could not save " + url + " to " + destination.getPath(), exception);
+	    }	    
+	 } // not file URL
+      }
+      catch (URISyntaxException urix)
+      {
+	 throw new StoreException("Invalid URL: " + mediaUrl, urix);
+      }
+      catch (Throwable t)
+      {
+	 throw new StoreException(t);
+      }
+   }
+   /**
+    * Saves the given source file (transcript) for the given graph
+    * @param url A URL to the transcript.
+    * @param graphId The graph ID
+    * @throws StoreException If an error prevents the media from being saved.
+    * @throws PermissionException If saving the media is not permitted.
+    * @throws GraphNotFoundException If the graph doesn't exist.
+    */
+   public void saveSource(String graphId, String url)
+      throws StoreException, PermissionException, GraphNotFoundException
+   {
+      try
+      {
+	 String[] layers = { "corpus", "episode" };
+	 Graph graph = getGraph(graphId, layers);
+	 File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
+	 if (!corpusDir.exists()) corpusDir.mkdir();
+	 File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
+	 if (!episodeDir.exists()) episodeDir.mkdir();
+	 
+	 // get the content
+	 if (url.startsWith("file:")) 
+	 { // file URL
+	    File sourceDir = new File(episodeDir, "trs");
+	    if (!sourceDir.exists()) sourceDir.mkdir();
+	    File source = new File(new URI(url));
+	    String destinationName = graph.getId().replaceAll("\\.[^.]*$","") + "." + IO.Extension(source);
+	    File destination = new File(sourceDir, destinationName);
+	    if (!source.renameTo(destination))
+	    { // can't rename, have to copy the data TODO
+	       try
+	       {
+		  IO.Copy(source, destination);
+	       }
+	       catch(IOException exception)
+	       {
+		  throw new StoreException(
+		     "Could not copy " + source.getPath() + " to " + destination.getPath(), exception);
+	       }
+	    } // copy instead of rename
+	 } // file URL
+	 else
+	 { // not file URL
+	    String extension = url.substring(url.lastIndexOf('.') + 1);
+	    File sourceDir = new File(episodeDir, "trs");
+	    String destinationName = graph.getId().replaceAll("\\.[^.]*$","")  + "." + extension;
+	    File destination = new File(sourceDir, destinationName);
+	    try
+	    {
+	       IO.SaveUrlToFile(new URL(url), destination);
+	    }
+	    catch(IOException exception)
+	    {
+	       throw new StoreException(
+		  "Could not save " + url + " to " + destination.getPath(), exception);
+	    }	    
+	 } // not file URL
+      }
+      catch (URISyntaxException urix)
+      {
+	 throw new StoreException("Invalid URL: " + url, urix);
+      }
+      catch (Throwable t)
+      {
+	 throw new StoreException(t);
+      }
+   }
+
+   /**
+    * Saves the given document for the episode of the given graph.
+    * @param url A URL to the document.
+    * @param graphId The graph ID
+    * @throws StoreException If an error prevents the media from being saved.
+    * @throws PermissionException If saving the media is not permitted.
+    * @throws GraphNotFoundException If the graph doesn't exist.
+    */
+   public void saveEpisodeDocument(String graphId, String url)
+      throws StoreException, PermissionException, GraphNotFoundException
+   {
+      try
+      {
+	 String[] layers = { "corpus", "episode" };
+	 Graph graph = getGraph(graphId, layers);
+	 File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
+	 if (!corpusDir.exists()) corpusDir.mkdir();
+	 File episodeDir = new File(corpusDir, graph.my("episode").getLabel());	
+	 if (!episodeDir.exists()) episodeDir.mkdir();
+ 
+	 // get the content
+	 if (url.startsWith("file:")) 
+	 { // file URL
+	    File docDir = new File(episodeDir, "doc");
+	    if (!docDir.exists()) docDir.mkdir();
+	    File source = new File(new URI(url));
+	    // docs saved with their own name
+	    File destination = new File(docDir, source.getName());
+	    if (!source.renameTo(destination))
+	    { // can't rename, have to copy the data TODO
+	       try
+	       {
+		  IO.Copy(source, destination);
+	       }
+	       catch(IOException exception)
+	       {
+		  throw new StoreException(
+		     "Could not copy " + source.getPath() + " to " + destination.getPath(), exception);
+	       }
+	    } // copy instead of rename
+	 } // file URL
+	 else
+	 { // not file URL
+	    URL u = new URL(url);
+	    File docDir = new File(episodeDir, "doc");
+	    String destinationName = u.getPath();
+	    if (destinationName.indexOf('/') >= 0)
+	    {
+	       destinationName = destinationName.substring(destinationName.lastIndexOf('/') + 1);
+	       if (destinationName.length() == 0) destinationName = u.getPath();
+	    }
+	    File destination = new File(docDir, destinationName);
+	    try
+	    {
+	       IO.SaveUrlToFile(u, destination);
+	    }
+	    catch(IOException exception)
+	    {
+	       throw new StoreException(
+		  "Could not save " + url + " to " + destination.getPath(), exception);
+	    }	    
+	 } // not file URL
+      }
+      catch (URISyntaxException urix)
+      {
+	 throw new StoreException("Invalid URL: " + url, urix);
+      }
+      catch (Throwable t)
+      {
+	 throw new StoreException(t);
+      }
+   }
 } // end of class SqlGraphStore
