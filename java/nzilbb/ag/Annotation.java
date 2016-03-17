@@ -777,7 +777,7 @@ public class Annotation
    public Annotation my(String layerId)
    {
       // is it the parent layer?
-      if (layerId.equals(getParent().getLayerId()))
+      if (getParent() != null && layerId.equals(getParent().getLayerId()))
       {
 	 return getParent();
       }
