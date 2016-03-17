@@ -822,25 +822,55 @@ public class Graph
     * Getter for <i>startId</i>: ID of the anchor with the lowest offset.
     * @return ID of the anchor with the lowest offset.
     */
-   public String getStartId() { if (getAnchors().size() > 0) { return getSortedAnchors().first().getId(); } else { return null; } }
-
+   public String getStartId() 
+   {
+      Anchor earliest = null;
+      for (Anchor a : getAnchors().values())
+      {
+	 if (a.getOffset() != null)
+	 {
+	    if (earliest == null || a.compareTo(earliest) < 0)
+	    {
+	       earliest = a;
+	    }
+	 }
+      }
+      if (earliest == null) return null;
+      return earliest.getId();
+   }
+   
    /**
     * Getter for <i>endId</i>: ID of the anchor with the highest offset.
     * @return ID of the anchor with the highest offset.
     */
-   public String getEndId() { if (getAnchors().size() > 0) { return getSortedAnchors().last().getId(); } else { return null; } }
+   public String getEndId()
+   {
+      Anchor latest = null;
+      for (Anchor a : getAnchors().values())
+      {
+	 if (a.getOffset() != null)
+	 {
+	    if (latest == null || a.compareTo(latest) > 0)
+	    {
+	       latest = a;
+	    }
+	 }
+      }
+      if (latest == null) return null;
+      return latest.getId();
+   }
 
    /**
     * Getter for <i>start</i>: The anchor with the lowest offset.
     * @return The anchor with the lowest offset.
     */
-   public Anchor getStart() { if (getAnchors().size() > 0) { return getSortedAnchors().first(); } else { return null; } }
+   public Anchor getStart() { return getAnchors().get(getStartId()); }
 
    /**
     * Getter for <i>end</i>: The anchor with the highest offset.
     * @return The anchor with the highest offset.
     */
-   public Anchor getEnd() { if (getAnchors().size() > 0) { return getSortedAnchors().last(); } else { return null; } }
+   public Anchor getEnd() { return getAnchors().get(getEndId()); }
 
 
    /**
