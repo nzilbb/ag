@@ -68,19 +68,19 @@ public class SqlGraphStore
    protected MessageFormat fmtAnchorId = new MessageFormat("n_{0,number,0}");
    
    /**
-    * URL prefix for file access, if any.
+    * URL prefix for file access.
     * @see #getBaseUrl()
     * @see #setBaseUrl(String)
     */
    protected String baseUrl;
    /**
-    * Getter for {@link #baseUrl}: URL prefix for file access, if any.
-    * @return URL prefix for file access, if any.
+    * Getter for {@link #baseUrl}: URL prefix for file access.
+    * @return URL prefix for file access.
     */
    public String getBaseUrl() { return baseUrl; }
    /**
-    * Setter for {@link #baseUrl}: URL prefix for file access, if any.
-    * @param newBaseUrl URL prefix for file access, if any.
+    * Setter for {@link #baseUrl}: URL prefix for file access.
+    * @param newBaseUrl URL prefix for file access.
     */
    public void setBaseUrl(String newBaseUrl) { baseUrl = newBaseUrl; }
 
@@ -166,25 +166,34 @@ public class SqlGraphStore
 
    /**
     * Constructor with connection.
+    * @param baseUrl URL prefix for file access.
+    * @param files Root directory for file structure.
     * @param connection An opened database connection.
     */
-   public SqlGraphStore(Connection connection)
+   public SqlGraphStore(String baseUrl, File files, Connection connection)
    {
+      setId(baseUrl);
+      setBaseUrl(baseUrl);
+      setFiles(files);
       setConnection(connection);
    } // end of constructor
 
    /**
     * Constructor with connection parameters.
+    * @param baseUrl URL prefix for file access.
+    * @param files Root directory for file structure.
     * @param connectString The database connection string.
     * @param user The database username.
     * @param password The databa password.
     * @throws SQLException If an error occurs during connection.
     */
-   public SqlGraphStore(String connectString, String user, String password)
+   public SqlGraphStore(String baseUrl, File files, String connectString, String user, String password)
       throws SQLException
    {
+      setId(baseUrl);
+      setBaseUrl(baseUrl);
+      setFiles(files);
       setConnection(DriverManager.getConnection (connectString, user, password));
-      setId(connectString);
    } // end of constructor
 
    /**
@@ -617,18 +626,18 @@ public class SqlGraphStore
 
    /**
     * Gets a list of graph IDs in the given corpus.
-    * @param corpus A corpus ID.
+    * @param id A corpus ID.
     * @return A list of graph IDs.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getGraphIdsInCorpus(String corpus) throws StoreException, PermissionException
+   public String[] getGraphIdsInCorpus(String id) throws StoreException, PermissionException
    {
       try
       {
 	 PreparedStatement sql = getConnection().prepareStatement(
 	    "SELECT transcript_id FROM transcript WHERE corpus_name = ? ORDER BY transcript_id");
-	 sql.setString(1, corpus);
+	 sql.setString(1, id);
 	 ResultSet rs = sql.executeQuery();
 	 Vector<String> graphs = new Vector<String>();
 	 while (rs.next())
@@ -648,12 +657,12 @@ public class SqlGraphStore
 
    /**
     * Gets a list of IDs of graphs that include the given participant.
-    * @param participant A participant ID.
+    * @param id A participant ID.
     * @return A list of graph IDs.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getGraphIdsWithParticipant(String participant) throws StoreException, PermissionException
+   public String[] getGraphIdsWithParticipant(String id) throws StoreException, PermissionException
    {
       try
       {
@@ -664,7 +673,7 @@ public class SqlGraphStore
 	    +" INNER JOIN speaker ON speaker.speaker_number = transcript_speaker.speaker_number"
 	    +" WHERE speaker.name = ? AND COALESCE(speaker.name,'') <> ''"
 	    +" ORDER BY transcript_id");
-	 sql.setString(1, participant);
+	 sql.setString(1, id);
 	 ResultSet rs = sql.executeQuery();
 	 Vector<String> graphs = new Vector<String>();
 	 while (rs.next())
@@ -2815,18 +2824,18 @@ public class SqlGraphStore
 
    /**
     * List the media available for the given graph.
-    * @param graphId The graph ID.
+    * @param id The graph ID.
     * @return List of media files available for the given graph.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     * @throws GraphNotFoundException If the graph was not found in the store.
     */
-   public MediaFile[] getAvailableMedia(String graphId) 
+   public MediaFile[] getAvailableMedia(String id) 
       throws StoreException, PermissionException, GraphNotFoundException
    {
       Vector<MediaFile> files = new Vector<MediaFile>();
       String[] layers = { "corpus", "episode" };
-      Graph graph = getGraph(graphId, layers);
+      Graph graph = getGraph(id, layers);
       File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
       File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
       MediaTrackDefinition[] tracks = getMediaTracks();
@@ -2870,7 +2879,7 @@ public class SqlGraphStore
 
    /**
     * Gets a given media track for a given graph.
-    * @param graphId The graph ID.
+    * @param id The graph ID.
     * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
     * @param mimeType The MIME type of the media.
     * @return A URL to the given media for the given graph, or null if the given media doesn't exist.
@@ -2878,16 +2887,17 @@ public class SqlGraphStore
     * @throws PermissionException If the operation is not permitted.
     * @throws GraphNotFoundException If the graph was not found in the store.
     */
-   public String getMedia(String graphId, String trackSuffix, String mimeType) 
+   public String getMedia(String id, String trackSuffix, String mimeType) 
       throws StoreException, PermissionException, GraphNotFoundException
    {
       String[] layers = { "corpus", "episode" };
-      Graph graph = getGraph(graphId, layers);
+      Graph graph = getGraph(id, layers);
       File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
       File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
       String extension = MediaFile.MimeTypeToSuffix().get(mimeType);
       if (extension == null) throw new StoreException("Unknown MIME type: " + mimeType);
       File mediaDir = new File(episodeDir, extension);
+      if (trackSuffix == null) trackSuffix = getMediaTracks()[0].getSuffix();
       String fileName = graph.getId().replaceAll("\\.[^.]*$","") + trackSuffix + "." + extension;
       File file = new File(mediaDir, fileName);
       if (file.exists())
@@ -2909,20 +2919,20 @@ public class SqlGraphStore
 
    /**
     * Saves the given media for the given graph.
-    * @param mediaUrl A URL to the media content.
-    * @param graphId The graph ID
+    * @param id The graph ID
     * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
+    * @param mediaUrl A URL to the media content.
     * @throws StoreException If an error prevents the media from being saved.
     * @throws PermissionException If saving the media is not permitted.
     * @throws GraphNotFoundException If the graph doesn't exist.
     */
-   public void saveMedia(String graphId, String trackSuffix, String mediaUrl)
+   public void saveMedia(String id, String trackSuffix, String mediaUrl)
       throws StoreException, PermissionException, GraphNotFoundException
    {
       try
       {
 	 String[] layers = { "corpus", "episode" };
-	 Graph graph = getGraph(graphId, layers);
+	 Graph graph = getGraph(id, layers);
 	 File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
 	 if (!corpusDir.exists()) corpusDir.mkdir();
 	 File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
@@ -2985,19 +2995,19 @@ public class SqlGraphStore
    }
    /**
     * Saves the given source file (transcript) for the given graph
+    * @param id The graph ID
     * @param url A URL to the transcript.
-    * @param graphId The graph ID
     * @throws StoreException If an error prevents the media from being saved.
     * @throws PermissionException If saving the media is not permitted.
     * @throws GraphNotFoundException If the graph doesn't exist.
     */
-   public void saveSource(String graphId, String url)
+   public void saveSource(String id, String url)
       throws StoreException, PermissionException, GraphNotFoundException
    {
       try
       {
 	 String[] layers = { "corpus", "episode" };
-	 Graph graph = getGraph(graphId, layers);
+	 Graph graph = getGraph(id, layers);
 	 File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
 	 if (!corpusDir.exists()) corpusDir.mkdir();
 	 File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
@@ -3053,19 +3063,19 @@ public class SqlGraphStore
 
    /**
     * Saves the given document for the episode of the given graph.
+    * @param id The graph ID
     * @param url A URL to the document.
-    * @param graphId The graph ID
     * @throws StoreException If an error prevents the media from being saved.
     * @throws PermissionException If saving the media is not permitted.
     * @throws GraphNotFoundException If the graph doesn't exist.
     */
-   public void saveEpisodeDocument(String graphId, String url)
+   public void saveEpisodeDocument(String id, String url)
       throws StoreException, PermissionException, GraphNotFoundException
    {
       try
       {
 	 String[] layers = { "corpus", "episode" };
-	 Graph graph = getGraph(graphId, layers);
+	 Graph graph = getGraph(id, layers);
 	 File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
 	 if (!corpusDir.exists()) corpusDir.mkdir();
 	 File episodeDir = new File(corpusDir, graph.my("episode").getLabel());	

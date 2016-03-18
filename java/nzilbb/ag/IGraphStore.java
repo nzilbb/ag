@@ -45,36 +45,36 @@ public interface IGraphStore
 
    /**
     * Saves the given media for the given graph
-    * @param mediaUrl A URL to the media content.
-    * @param graphId The graph ID
+    * @param id The graph ID
     * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
+    * @param mediaUrl A URL to the media content.
     * @throws StoreException If an error prevents the media from being saved.
     * @throws PermissionException If saving the media is not permitted.
     * @throws GraphNotFoundException If the graph doesn't exist.
     */
-   public void saveMedia(String graphId, String trackSuffix, String mediaUrl)
+   public void saveMedia(String id, String trackSuffix, String mediaUrl)
       throws StoreException, PermissionException, GraphNotFoundException;
 
    /**
     * Saves the given source file (transcript) for the given graph.
+    * @param id The graph ID
     * @param url A URL to the transcript.
-    * @param graphId The graph ID
     * @throws StoreException If an error prevents the media from being saved.
     * @throws PermissionException If saving the media is not permitted.
     * @throws GraphNotFoundException If the graph doesn't exist.
     */
-   public void saveSource(String graphId, String url)
+   public void saveSource(String id, String url)
       throws StoreException, PermissionException, GraphNotFoundException;
 
    /**
     * Saves the given document for the episode of the given graph.
+    * @param id The graph ID
     * @param url A URL to the document.
-    * @param graphId The graph ID
     * @throws StoreException If an error prevents the media from being saved.
     * @throws PermissionException If saving the media is not permitted.
     * @throws GraphNotFoundException If the graph doesn't exist.
     */
-   public void saveEpisodeDocument(String graphId, String url)
+   public void saveEpisodeDocument(String id, String url)
       throws StoreException, PermissionException, GraphNotFoundException;
 
 } // end of interface IGraphStore

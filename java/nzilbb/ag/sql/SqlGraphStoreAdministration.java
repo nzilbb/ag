@@ -18,6 +18,7 @@
 package nzilbb.ag.sql;
 
 import java.util.HashMap;
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -82,24 +83,28 @@ public class SqlGraphStoreAdministration
 
    /**
     * Constructor with connection.
+    * @param baseUrl URL prefix for file access.
+    * @param files Root directory for file structure.
     * @param connection An opened database connection.
     */
-   public SqlGraphStoreAdministration(Connection connection)
+   public SqlGraphStoreAdministration(String baseUrl, File files, Connection connection)
    {
-      super(connection);
+      super(baseUrl, files, connection);
    } // end of constructor
 
    /**
     * Constructor with connection parameters.
+    * @param baseUrl URL prefix for file access.
+    * @param files Root directory for file structure.
     * @param connectString The database connection string.
     * @param user The database username.
     * @param password The databa password.
     * @throws SQLException If an error occurs during connection.
     */
-   public SqlGraphStoreAdministration(String connectString, String user, String password)
+   public SqlGraphStoreAdministration(String baseUrl, File files, String connectString, String user, String password)
       throws SQLException
    {
-      super(connectString, user, password);
+      super(baseUrl, files, connectString, user, password);
    } // end of constructor
 
    /**

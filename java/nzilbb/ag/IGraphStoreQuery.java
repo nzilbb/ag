@@ -106,22 +106,22 @@ public interface IGraphStoreQuery
 
    /**
     * Gets a list of graph IDs in the given corpus.
-    * @param corpus A corpus ID.
+    * @param id A corpus ID.
     * @return A list of graph IDs.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getGraphIdsInCorpus(String corpus)
+   public String[] getGraphIdsInCorpus(String id)
       throws StoreException, PermissionException; 
 
    /**
     * Gets a list of IDs of graphs that include the given participant.
-    * @param participant A participant ID.
+    * @param id A participant ID.
     * @return A list of graph IDs.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getGraphIdsWithParticipant(String participant)
+   public String[] getGraphIdsWithParticipant(String id)
       throws StoreException, PermissionException; 
    
    /**
@@ -138,13 +138,13 @@ public interface IGraphStoreQuery
    /**
     * Gets a graph given its ID, containing only the given layers.
     * @param id The given graph ID.
-    * @param layerIds The IDs of the layers to load, or null if only graph data is required.
+    * @param layerId The IDs of the layers to load, or null if only graph data is required.
     * @return The identified graph.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     * @throws GraphNotFoundException If the graph was not found in the store.
     */
-   public Graph getGraph(String id, String[] layerIds) 
+   public Graph getGraph(String id, String[] layerId) 
       throws StoreException, PermissionException, GraphNotFoundException;
    
    /**
@@ -158,18 +158,18 @@ public interface IGraphStoreQuery
    
    /**
     * List the media available for the given graph.
-    * @param graphId The graph ID.
+    * @param id The graph ID.
     * @return List of media files available for the given graph.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     * @throws GraphNotFoundException If the graph was not found in the store.
     */
-   public MediaFile[] getAvailableMedia(String graphId) 
+   public MediaFile[] getAvailableMedia(String id) 
       throws StoreException, PermissionException, GraphNotFoundException;
 
    /**
     * Gets a given media track for a given graph.
-    * @param graphId The graph ID.
+    * @param id The graph ID.
     * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
     * @param mimeType The MIME type of the media.
     * @return A URL to the given media for the given graph, or null if the given media doesn't exist.
@@ -177,7 +177,7 @@ public interface IGraphStoreQuery
     * @throws PermissionException If the operation is not permitted.
     * @throws GraphNotFoundException If the graph was not found in the store.
     */
-   public String getMedia(String graphId, String trackSuffix, String mimeType) 
+   public String getMedia(String id, String trackSuffix, String mimeType) 
       throws StoreException, PermissionException, GraphNotFoundException;
    
 } // end of interface IGraphStoreQuery
