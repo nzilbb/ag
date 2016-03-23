@@ -2949,8 +2949,12 @@ public class SqlGraphStore
 	    String destinationName = graph.getId().replaceAll("\\.[^.]*$","") 
 	       + trackSuffix + "." + mediaFile.getExtension();
 	    File destination = new File(mediaDir, destinationName);
+
+	    // backup old file if it exists
+	    IO.Backup(destination);
+
 	    if (!source.renameTo(destination))
-	    { // can't rename, have to copy the data TODO
+	    { // can't rename, have to copy the data
 	       try
 	       {
 		  IO.Copy(source, destination);
@@ -2973,6 +2977,10 @@ public class SqlGraphStore
 	    String destinationName = graph.getId().replaceAll("\\.[^.]*$","") 
 	       + trackSuffix + "." + extension;
 	    File destination = new File(mediaDir, destinationName);
+
+	    // backup old file if it exists
+	    IO.Backup(destination);
+
 	    try
 	    {
 	       IO.SaveUrlConnectionToFile(connection, destination);
@@ -3021,6 +3029,10 @@ public class SqlGraphStore
 	    File source = new File(new URI(url));
 	    String destinationName = graph.getId().replaceAll("\\.[^.]*$","") + "." + IO.Extension(source);
 	    File destination = new File(sourceDir, destinationName);
+
+	    // backup old file if it exists
+	    IO.Backup(destination);
+
 	    if (!source.renameTo(destination))
 	    { // can't rename, have to copy the data TODO
 	       try
@@ -3089,6 +3101,10 @@ public class SqlGraphStore
 	    File source = new File(new URI(url));
 	    // docs saved with their own name
 	    File destination = new File(docDir, source.getName());
+
+	    // backup old file if it exists
+	    IO.Backup(destination);
+
 	    if (!source.renameTo(destination))
 	    { // can't rename, have to copy the data TODO
 	       try
