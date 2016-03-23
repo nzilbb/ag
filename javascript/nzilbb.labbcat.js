@@ -2,7 +2,24 @@
  * @file nzilbb.labbcat module for communicating with a LaBB-CAT web application.
  *
  * @example
- * TODO
+ * var labbcat = new nzilbb.labbcat.Labbcat(baseUrl);
+ * // load corpora
+ * labbcat.getCorpusIds(function(result, errors, messages, call, id) {
+ *     if (errors) {
+ *        alert("Could not list corpora: " + errors[0]);
+ *     } else {
+ *       var corpora = document.getElementById("corpus");
+ *       for (var i in result) {
+ *         var option = document.createElement("option");
+ *         option.appendChild(document.createTextNode(result[i]));
+ *         if (result[i] == "${sessionScope['corpus']}") {
+ *           option.selected = "selected";
+ *         }
+ *         corpora.appendChild(option);
+ *       }
+ *       
+ *     }
+ *   });
  *
  * @author Robert Fromont robert.fromont@canterbury.ac.nz
  * @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&dn=gpl-3.0.txt GPL v3.0
