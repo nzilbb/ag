@@ -46,13 +46,17 @@ nzilbb.labbcat = nzilbb.labbcat || {};
  */
 
 function callComplete(evt) {
-    var response = JSON.parse(this.responseText);
-    var result = response.model.result;
-    var errors = response.errors;
-    if (errors.length == 0) errors = null
-    var messages = response.messages;
-    if (messages.length == 0) messages = null
-    evt.target.onResult(result, errors, messages, evt.target.call, evt.target.id);
+    try {
+	var response = JSON.parse(this.responseText);
+	var result = response.model.result || response.model;
+	var errors = response.errors;
+	if (errors.length == 0) errors = null
+	var messages = response.messages;
+	if (messages.length == 0) messages = null
+	evt.target.onResult(result, errors, messages, evt.target.call, evt.target.id);
+    } catch(exception) {
+	evt.target.onResult(null, ["" +exception+ ": " + this.responseText], evt.target.call, evt.target.id);
+    }
 }
 function callFailed(evt) {
     evt.target.onResult(null, ["failed: " + this.responseText], evt.target.call, evt.target.id);
@@ -79,7 +83,7 @@ nzilbb.labbcat.GraphStoreQuery.prototype = {
      * @callback {resultCallback} onResult Invoked when the request has returned a result.
      * @return {XMLHttpRequest} An open request.
      */
-    createRequest : function(call, parameters, onResult) {
+    createRequest : function(call, parameters, onResult, url) {
 	var xhr = new XMLHttpRequest();
 	xhr.call = call;
 	if (parameters && parameters.id) xhr.id = parameters.id;
@@ -90,16 +94,19 @@ nzilbb.labbcat.GraphStoreQuery.prototype = {
 	var queryString = "?call="+call;
 	if (parameters) {
 	    for (var key in parameters) {
-		if (parameters[key].constructor === Array) {
-		    for (var i in parameters[key]) {
-			queryString += "&"+key+"="+encodeURIComponent(parameters[key][i])
+		if (parameters[key]) {
+  		    if (parameters[key].constructor === Array) {
+			for (var i in parameters[key]) {
+			    queryString += "&"+key+"="+encodeURIComponent(parameters[key][i])
+			}
+		    } else {
+			queryString += "&"+key+"="+encodeURIComponent(parameters[key])
 		    }
-		} else {
-		    queryString += "&"+key+"="+encodeURIComponent(parameters[key])
 		}
-	    }
+	    } // next parameter
 	}
-	xhr.open("GET", this.url + queryString);
+	if (!url) url = this.url;
+	xhr.open("GET", url + queryString);
 	xhr.setRequestHeader("Accept", "application/json");
 	return xhr;
     },
@@ -347,6 +354,16 @@ nzilbb.labbcat.Labbcat.prototype.newTranscript = function(transcript, media, med
     xhr.open("POST", this.baseUrl + "edit/transcript/new");
     xhr.setRequestHeader("Accept", "application/json");
 	xhr.send(fd);
+};
+
+/**
+ * Uploads a new transcript.
+ * @param {string} id ID of the task.
+ * @callback {resultCallback} onResult Invoked when the request has returned a result.
+ */
+nzilbb.labbcat.Labbcat.prototype.taskStatus = function(id, onResult) {
+console.log("taskStatus " + id);
+    this.createRequest("taskStatus", { id : id, threadId : id}, onResult, this.baseUrl + "thread").send();
 };
 
 nzilbb.labbcat.Labbcat.prototype.constructor = nzilbb.labbcat.Labbcat;
