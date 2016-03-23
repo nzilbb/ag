@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.SimpleDateFormat;
 
 /**
  * Helper functions for Input/Output operations.
@@ -36,6 +37,28 @@ import java.net.URLConnection;
 public class IO
 {
    // Methods:
+
+   /**
+    * If the given file exists, it's renamed to a filename with the last modification timestamp included.
+    * @param f The file to backup.
+    * @throws IOException
+    */
+   public static void Backup(File f)
+      throws IOException
+   {
+      if (f.exists())
+      {
+	 // there's and older version of the file, take a backup
+	 File backup = new File(
+	    f.getParentFile(), f.getName()  + ".bak"
+	    + new SimpleDateFormat("-yyyy-MM-dd-HH-mm-ss")
+	    .format(new java.util.Date(f.lastModified())) + "." + Extension(f));
+	 if (!f.renameTo(backup))
+	 {
+	    Copy(f, backup);
+	 }
+      }
+   } // end of Backup()
 
    /**
     * Determines the file extension (not including the dot) of the given file.
