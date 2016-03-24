@@ -390,6 +390,6 @@ public class TestChatDeserializer
 
    public static void main(String args[]) 
    {
-      org.junit.runner.JUnitCore.main("nzilbb.ag.test.TestGraph");
+      org.junit.runner.JUnitCore.main("nzilbb.ag.test.TestChatDeserializer");
    }
 }

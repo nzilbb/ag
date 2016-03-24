@@ -74,7 +74,6 @@ public class ChatDeserializer
     * @param newName Name of the .cha file.
     */
    public void setName(String newName) { name = newName; }
-
    
    /**
     * List of languages.
@@ -109,7 +108,6 @@ public class ChatDeserializer
     * @param newParticipants Map of participant IDs to properties.
     */
    public void setParticipants(HashMap<String,HashMap<String,String>> newParticipants) { participants = newParticipants; }
-
    
    /**
     * Transcript lines.
@@ -127,7 +125,6 @@ public class ChatDeserializer
     * @param newLines Transcript lines.
     */
    public void setLines(Vector<String> newLines) { lines = newLines; }
-
    
    /**
     * Header lines
@@ -145,7 +142,6 @@ public class ChatDeserializer
     * @param newHeaders Header lines
     */
    public void setHeaders(Vector<String> newHeaders) { headers = newHeaders; }
-
    
    /**
     * Name of media file.
@@ -197,7 +193,6 @@ public class ChatDeserializer
     * @param newTranscribers List of names of transcribers.
     */
    public void setTranscribers(Vector<String> newTranscribers) { transcribers = newTranscribers; }
-   
 
    /**
     * Layer schema.
@@ -215,7 +210,6 @@ public class ChatDeserializer
     * @param newSchema Layer schema.
     */
    public void setSchema(Schema newSchema) { schema = newSchema; }
-
 
    /**
     * Participant layer.
@@ -352,7 +346,6 @@ public class ChatDeserializer
     * @param newGemLayer Gems
     */
    public void setGemLayer(Layer newGemLayer) { gemLayer = newGemLayer; }
-
    
    /**
     * Transcriber graph attributes.
@@ -421,7 +414,6 @@ public class ChatDeserializer
     * @param newTokenizer Utterance tokenizer.
     */
    public void setTokenizer(IGraphTransformer newTokenizer) { tokenizer = newTokenizer; }
-
    
    // Methods:
    
