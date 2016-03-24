@@ -27,7 +27,7 @@ import nzilbb.ag.Annotation;
 import nzilbb.ag.Change;
 
 /**
- * Convenience class implemeting a set of annotations ordered by anchor (using {@link AnnotationComparatorByAnchor}). The constructors from other Annotation collections also filter out Annotations marked for deletion.
+ * Convenience class implementing a set of annotations ordered by anchor (using {@link AnnotationComparatorByAnchor}). The constructors from other Annotation collections also filter out Annotations marked for deletion.
  * @author Robert Fromont robert@fromont.net.nz
  */
 @SuppressWarnings("serial")

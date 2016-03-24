@@ -46,12 +46,6 @@ public class AnnotationComparatorByAnchor
    
    public int compare(Annotation o1, Annotation o2)
    {
-      if (o1.equals(o2))
-      {
-	 // System.out.println("" + o1 + " === " + o2);
-	 return 0;
-      }
-
       try
       {
 	 Anchor o1Start = o1.getStart();
@@ -132,17 +126,20 @@ public class AnnotationComparatorByAnchor
       }
 
       // anchors/layers the same, compare ordinal
-      int o1Ordinal = o1.getOrdinal();
-      int o2Ordinal = o2.getOrdinal();
-      if (o1Ordinal < o2Ordinal)
+      if (o1.getParentId() != null && o1.getParentId().equals(o1.getParentId()))
       {
-	 // System.out.println("ordinal: " + o1 + " < " + o2 + " (" + o1.getOrdinal() + " < " + o2.getOrdinal() + ")");
-	 return -3;
-      }
-      if (o1Ordinal > o2Ordinal)
-      {
-	 // System.out.println("ordinal: " + o1 + " > " + o2 + " (" + o1.getOrdinal() + " > " + o2.getOrdinal() + ")");
-	 return 3;
+	 int o1Ordinal = o1.getOrdinal();
+	 int o2Ordinal = o2.getOrdinal();
+	 if (o1Ordinal < o2Ordinal)
+	 {
+	    // System.out.println("ordinal: " + o1 + " < " + o2 + " (" + o1.getOrdinal() + " < " + o2.getOrdinal() + ")");
+	    return -3;
+	 }
+	 if (o1Ordinal > o2Ordinal)
+	 {
+	    // System.out.println("ordinal: " + o1 + " > " + o2 + " (" + o1.getOrdinal() + " > " + o2.getOrdinal() + ")");
+	    return 3;
+	 }
       }
 
       // anchors/layers/ordinals the same or null, compare id

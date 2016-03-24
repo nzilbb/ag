@@ -1139,7 +1139,6 @@ public class Annotation
 	 return dDifference;
       }
    } // end of distance()
-
    
    /**
     * Determines the offset halfway between the start offset and the end offset.
@@ -1158,7 +1157,6 @@ public class Annotation
       if (endOffset == null) return null;
       return startOffset + (getDuration() / 2);
    } // end of getMidpoint()
-
    
    /**
     * Determines the duration of the annotation - i.e. the difference between the start offset and the end offset.

@@ -932,13 +932,13 @@ public class Validator
 	 { 
 	    if (parent.getChange() == Change.Operation.Destroy) continue; // ignore deleted annotations
 	    
-	    Vector<Annotation> children = new Vector<Annotation>(parent.getAnnotations(childLayer.getId()));
-	    AnnotationsByAnchor childrenByAnchor = new AnnotationsByAnchor(children); // TODO this is intolerably slow
-	    
+	    // we don't use AnnotationsByAnchor because it's too slow
+	    PeerAnnotationsByAnchor children = new PeerAnnotationsByAnchor(parent, childLayer.getId());
+	    	    
 	    // ensure the ordinals are in chronological order, and that they are set
 	    int iOrdinal = 1;
 	    // log("Parent " + parent);
-	    for (Annotation child : childrenByAnchor)
+	    for (Annotation child : children)
 	    {	       
 	       // log("Child " + logAnnotation(child));
 	       if (iOrdinal != child.getOrdinal())

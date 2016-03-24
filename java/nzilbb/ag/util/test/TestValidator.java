@@ -466,8 +466,8 @@ public class TestValidator
       g.addAnnotation(new Annotation("word1", "the", "word", "a1", "a2", "turn1", 1));
 
       // add words out of order to ensure their ordinals are corrected
-      g.addAnnotation(new Annotation("word3", "brown", "word", "a3", "a4", "turn1", 2));
-      g.addAnnotation(new Annotation("word2", "quick", "word", "a2", "a3", "turn1", 3));
+      g.addAnnotation(new Annotation("word3", "brown", "word", "a3", "a4", "turn1"));
+      g.addAnnotation(new Annotation("word2", "quick", "word", "a2", "a3", "turn1"));
 
       g.addAnnotation(new Annotation("word4", "fox", "word", "a4", "a?1", "turn1", 4));
       g.addAnnotation(new Annotation("word5", "jumps", "word", "a?1", "a?2", "turn1", 5));
