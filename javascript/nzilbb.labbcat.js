@@ -379,7 +379,6 @@ nzilbb.labbcat.Labbcat.prototype.newTranscript = function(transcript, media, med
  * @callback {resultCallback} onResult Invoked when the request has returned a result.
  */
 nzilbb.labbcat.Labbcat.prototype.taskStatus = function(id, onResult) {
-console.log("taskStatus " + id);
     this.createRequest("taskStatus", { id : id, threadId : id}, onResult, this.baseUrl + "thread").send();
 };
 
