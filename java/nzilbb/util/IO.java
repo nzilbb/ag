@@ -26,9 +26,17 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.InputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
+import java.util.Vector;
+import java.util.Enumeration;
+import java.util.jar.JarFile;
+import java.util.jar.JarEntry;
+import java.net.URLClassLoader;
 
 /**
  * Helper functions for Input/Output operations.
@@ -92,7 +100,6 @@ public class IO
    {
       SaveUrlToFile(source.toURI().toURL(), destination);
    } // end of copy()
-
    
    /**
     * Saves the content of a URL to a file.
@@ -148,6 +155,84 @@ public class IO
 
       return totalBytes;
    } // end of Pump()
+
+   
+   /**
+    * Scans the given jar file for instances of a particular class/interface.
+    * @param file
+    * @param parentLoader
+    * @param class
+    * @return A list of objects that implement the given class/interface, which may be empty.
+    */
+   @SuppressWarnings({"rawtypes","unchecked"})
+   public static Vector FindImplementorsInJar(File file, ClassLoader parentLoader, Class c)
+      throws IOException
+   {
+      Vector implementors = new Vector();
+      try
+      {
+	 JarFile jar = new JarFile(file);
+	 URL[] url = new URL[] { file.toURI().toURL() };
+	 Enumeration<JarEntry> enEntries = jar.entries();
+	 while (enEntries.hasMoreElements())
+	 {
+	    JarEntry entry = enEntries.nextElement();
+	    String sEntryFileName = entry.getName();
+	    if (sEntryFileName.endsWith(".class"))
+	    {
+	       String sClassName = sEntryFileName
+		  .substring(0, sEntryFileName.length() - 6) // no extension
+		  .replaceAll("\\/", ".");
+	       URLClassLoader classLoader = URLClassLoader.newInstance(url, parentLoader);
+	       try
+	       {
+		  Object instance = classLoader.loadClass(sClassName).newInstance();
+		  if (c.isInstance(instance))
+		  {
+		     implementors.add(instance);
+		  }
+	       }
+	       catch(ClassNotFoundException x) {}
+	       catch(InstantiationException x) {}
+	       catch(IllegalAccessException x) {}
+	    } // is a class
+	 } // next jar entry
+      }
+      catch(MalformedURLException x) {}
+      return implementors;
+   } // end of FindImplementorsInJar()
+
+   
+   /**
+    * Determines the jar file that the given class comes from.
+    * @param c The class implemented.
+    * @return The jar file the given class implementation comes from, or null if it's not from a jar file.
+    */
+   @SuppressWarnings("rawtypes")
+   public static File JarFileOfClass(Class c)
+   {
+      URL url = c.getResource(c.getSimpleName() + ".class");
+      String sUrl = url.toString();
+      if (!sUrl.startsWith("jar:"))
+      {
+	 return null;
+      }
+      else
+      {
+	 int iUriStart = 4;
+	 int iUriEnd = sUrl.indexOf("!");
+	 String sFileUri = sUrl.substring(iUriStart, iUriEnd);
+	 try
+	 {
+	    return new File(new URI(sFileUri));
+	 }
+	 catch(URISyntaxException exception)
+	 {
+	    return null;
+	 }
+      }
+   } // end of JarFileOfClass()
+
 
    
 } // end of class IO
