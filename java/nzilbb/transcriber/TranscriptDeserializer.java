@@ -146,6 +146,8 @@ public class TranscriptDeserializer
 
       Graph graph = new Graph();
       graph.setId(getId());
+      // creat the 0 anchor to prevent graph tagging from creating one with no confidence
+      graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
 
       // add layers to the graph
       // we don't just copy the whole schema, because that would imply that all the extra layers
@@ -236,8 +238,12 @@ public class TranscriptDeserializer
 	 if (sTopic != null && sTopic.length() > 0)
 	 {
 	    anTopic = new Annotation(null, sTopic, "topic");
-	    anTopic.setStart(graph.getOrCreateAnchorAt(section.getStartTimeAsDouble()));
-	    anTopic.setEnd(graph.getOrCreateAnchorAt(section.getEndTimeAsDouble()));
+	    anTopic.setStart(
+	       graph.getOrCreateAnchorAt(
+		  section.getStartTimeAsDouble(), Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+	    anTopic.setEnd(
+	       graph.getOrCreateAnchorAt(
+		  section.getEndTimeAsDouble(), Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
 	    graph.addAnnotation(anTopic);
 	 }
 	 
@@ -254,8 +260,12 @@ public class TranscriptDeserializer
 	       if (getSpeaker(sSpeakerId) != null) label = getSpeaker(sSpeakerId).getName();
 	       Annotation anTurn = new Annotation(null, label, schema.getTurnLayerId());
 	       anTurn.setParentId(graph.getAnnotation(sSpeakerId).getId());
-	       anTurn.setStart(graph.getOrCreateAnchorAt(turn.getStartTimeAsDouble()));
-	       anTurn.setEnd(graph.getOrCreateAnchorAt(turn.getEndTimeAsDouble()));
+	       anTurn.setStart(
+		  graph.getOrCreateAnchorAt(
+		     turn.getStartTimeAsDouble(), Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+	       anTurn.setEnd(
+		  graph.getOrCreateAnchorAt(
+		     turn.getEndTimeAsDouble(), Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
 	       htTurnAnnotations.put(sSpeakerId, anTurn);
 	       graph.addAnnotation(anTurn);
 	    }
@@ -282,7 +292,9 @@ public class TranscriptDeserializer
 		  Annotation anLine = new Annotation(
 		     null, anTurn.getLabel(), schema.getUtteranceLayerId());
 		  anLine.setParentId(anTurn.getId());
-		  anLine.setStart(graph.getOrCreateAnchorAt(thisSync.getTimeAsDouble()));
+		  anLine.setStart(
+		     graph.getOrCreateAnchorAt(
+			thisSync.getTimeAsDouble(), Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
 		  graph.addAnnotation(anLine);
 		  
 		  // force Events to assign to their given Words where poss.
@@ -443,7 +455,9 @@ public class TranscriptDeserializer
 		     }
 		  } // next word
 		  
-		  anLine.setEnd(graph.getOrCreateAnchorAt(thisSync.getEndTimeAsDouble()));
+		  anLine.setEnd(
+		     graph.getOrCreateAnchorAt(
+			thisSync.getEndTimeAsDouble(), Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
 		  
 		  if (lastWord != null)
 		  {
