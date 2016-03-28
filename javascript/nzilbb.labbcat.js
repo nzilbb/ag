@@ -239,6 +239,7 @@ nzilbb.labbcat.GraphStoreQuery.prototype = {
      * @return The identified graph.
      */
     getGraph : function (id, layerId, onResult) {
+	if (!layerId) layerId = ["graph"]; // if we pass null to the server, we get all layers back
 	this.createRequest("getGraph", { id : id, layerId : layerId }, onResult).send();
     },
     
@@ -335,7 +336,7 @@ nzilbb.labbcat.Labbcat.prototype = Object.create(nzilbb.labbcat.GraphStore.proto
 /**
  * Uploads a new transcript.
  * @param {file} transcript The transcript to upload.
- * @param {file} media The media to upload, if any.
+ * @param {file|file[]} media The media to upload, if any.
  * @param {string} mediaSuffix The media suffix for the media.
  * @param {string} transcriptType The transcript type.
  * @param {string} corpus The corpus for the transcript.
@@ -354,7 +355,13 @@ nzilbb.labbcat.Labbcat.prototype.newTranscript = function(transcript, media, med
     fd.append("uploadfile1_0", transcript);
     if (media) {
 	if (!mediaSuffix) mediaSuffix = "";
-	fd.append("uploadmedia"+mediaSuffix+"1", media);
+	if (media.constructor === Array) { // multiple files
+	    for (var f in media) {
+		fd.append("uploadmedia"+mediaSuffix+"1", media[f]);
+	    } // next file
+        } else { // a single file
+	    fd.append("uploadmedia"+mediaSuffix+"1", media);
+	}
     }
     
     // create HTTP request
@@ -374,12 +381,30 @@ nzilbb.labbcat.Labbcat.prototype.newTranscript = function(transcript, media, med
 };
 
 /**
- * Uploads a new transcript.
+ * Gets the status of a task.
+ * @param {string} id ID of the task.
+ * @callback {resultCallback} onResult Invoked when the request has returned a result.
+ */
+nzilbb.labbcat.Labbcat.prototype.getTasks = function(onResult) {
+    this.createRequest("getTasks", null, onResult, this.baseUrl + "threads").send();
+};
+
+/**
+ * Gets the status of a task.
  * @param {string} id ID of the task.
  * @callback {resultCallback} onResult Invoked when the request has returned a result.
  */
 nzilbb.labbcat.Labbcat.prototype.taskStatus = function(id, onResult) {
-    this.createRequest("taskStatus", { id : id, threadId : id}, onResult, this.baseUrl + "thread").send();
+    this.createRequest("taskStatus", { id : id, threadId : id }, onResult, this.baseUrl + "thread").send();
+};
+
+/**
+ * Releases a finished a task so it no longer uses resources on the server.
+ * @param {string} id ID of the task.
+ * @callback {resultCallback} onResult Invoked when the request has returned a result.
+ */
+nzilbb.labbcat.Labbcat.prototype.releaseTask = function(id, onResult) {
+    this.createRequest("releaseTask", { id : id, threadId : id, command : "release" }, onResult, this.baseUrl + "threads").send();
 };
 
 nzilbb.labbcat.Labbcat.prototype.constructor = nzilbb.labbcat.Labbcat;
