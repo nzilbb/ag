@@ -619,6 +619,31 @@ public class Graph
       return anchor;
    } // end of getAnchorAt()
 
+   /**
+    * Gets an anchor at the given offset. If there isn't already one in the graph, one is created.
+    * <p>This convenience method allows, for example, the creation of an anchor with
+    * a confidence value in one step:
+    * <pre>
+    * Anchor anchor = graph.getOrCreateAnchorAt(456.789, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+    * </pre>
+    * @param offset
+    * @param key An attribute to set the value of.
+    * @param value The value of the attribute identified by <var>key</var>
+    * @return An anchor that has the given offset.
+    * @see #getAnchorAt(double)
+    */
+   public Anchor getOrCreateAnchorAt(double offset, String key, Object value) // TODO test
+   {
+      Anchor anchor = getAnchorAt(offset);
+      if (anchor == null)
+      {
+	 anchor = new Anchor();
+	 anchor.setOffset(offset);
+	 anchor.put(key, value);
+	 addAnchor(anchor);
+      }
+      return anchor;
+   } // end of getAnchorAt()
 
    /**
     * Returns the anchors sorted by offset. This includes only anchors for which the offset is actually set.
