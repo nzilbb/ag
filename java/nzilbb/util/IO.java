@@ -192,9 +192,7 @@ public class IO
 		     implementors.add(instance);
 		  }
 	       }
-	       catch(ClassNotFoundException x) {}
-	       catch(InstantiationException x) {}
-	       catch(IllegalAccessException x) {}
+	       catch(Throwable t) {}
 	    } // is a class
 	 } // next jar entry
       }
