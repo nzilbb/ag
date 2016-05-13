@@ -2,9 +2,9 @@
  * @file nzilbb.labbcat module for communicating with a LaBB-CAT web application.
  *
  * @example
- * var labbcat = new nzilbb.labbcat.Labbcat(baseUrl);
+ * var store = new labbcat.Labbcat(baseUrl);
  * // load corpora
- * labbcat.getCorpusIds(function(result, errors, messages, call, id) {
+ * store.getCorpusIds(function(result, errors, messages, call, id) {
  *     if (errors) {
  *        alert("Could not list corpora: " + errors[0]);
  *     } else {
@@ -44,11 +44,16 @@
  * @lic-end
  */
 
-"use strict";
+(function(exports){
 
 // namespace
 var nzilbb = nzilbb || {};
 nzilbb.labbcat = nzilbb.labbcat || {};
+
+if (typeof(require) == "function") { // running on node.js
+    XMLHttpRequest = require('xhr2');
+    btoa = require('btoa');
+}
 
 /**
  * Callback invoked when the result of a request is available.
@@ -85,7 +90,7 @@ function callCancelled(evt) {
 // GraphStoreQuery class - read-only "view" access
 
 nzilbb.labbcat.GraphStoreQuery = function(baseUrl) {
-    if (!baseUrl.endsWith("/")) baseUrl += "/";
+    if (!/\/$/.test(baseUrl)) baseUrl += "/";
     this.url = baseUrl + "store";
 }
 
@@ -123,7 +128,10 @@ nzilbb.labbcat.GraphStoreQuery.prototype = {
 	    } // next parameter
 	}
 	if (!url) url = this.url;
-	xhr.open("GET", url + queryString);
+	xhr.open("GET", url + queryString, true, this.username, this.password);
+	if (this.username) {
+	    xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	}
 	xhr.setRequestHeader("Accept", "application/json");
 	return xhr;
     },
@@ -222,24 +230,13 @@ nzilbb.labbcat.GraphStoreQuery.prototype = {
     },
     
     /**
-     * Gets a graph given its ID.
-     * @param {string} id The given graph ID.
-     * @callback {resultCallback} onResult Invoked when the request has returned a result.
-     * @return The identified graph.
-     */
-    getGraph : function(resultCallback, id) {
-	this.createRequest("getGraph", { id : id }, onResult);
-    },
-    
-    /**
      * Gets a graph given its ID, containing only the given layers.
      * @param {string} id The given graph ID.
-     * @param {string[]} layerId The IDs of the layers to load, or null if only graph data is required.
+     * @param {string[]} layerId The IDs of the layers to load, or null for all layers. If only graph data is required, set this to ["graph"].
      * @callback {resultCallback} onResult Invoked when the request has returned a result.
      * @return The identified graph.
      */
     getGraph : function (id, layerId, onResult) {
-	if (!layerId) layerId = ["graph"]; // if we pass null to the server, we get all layers back
 	this.createRequest("getGraph", { id : id, layerId : layerId }, onResult).send();
     },
     
@@ -325,10 +322,12 @@ nzilbb.labbcat.GraphStore.prototype.constructor = nzilbb.labbcat.GraphStore;
 
 // Labbcat class - GraphStore plus some LaBB-CAT specific functions
 
-nzilbb.labbcat.Labbcat = function(baseUrl) {
+nzilbb.labbcat.Labbcat = function(baseUrl, username, password) {
     nzilbb.labbcat.GraphStore.call(this, baseUrl); 
-    if (!baseUrl.endsWith("/")) baseUrl += "/";
+    if (!/\/$/.test(baseUrl)) baseUrl += "/";
     this.baseUrl = baseUrl;
+    this.username = username;
+    this.password = password;
 }
 
 nzilbb.labbcat.Labbcat.prototype = Object.create(nzilbb.labbcat.GraphStore.prototype);
@@ -340,7 +339,7 @@ nzilbb.labbcat.Labbcat.prototype = Object.create(nzilbb.labbcat.GraphStore.proto
  * @param {string} mediaSuffix The media suffix for the media.
  * @param {string} transcriptType The transcript type.
  * @param {string} corpus The corpus for the transcript.
- * @param {string} episode The expisode the transcript belongs to.
+ * @param {string} episode The episode the transcript belongs to.
  * @callback {resultCallback} onResult Invoked when the request has returned a result.
  * @callback onProgress Invoked on XMLHttpRequest progress.
  */
@@ -376,8 +375,11 @@ nzilbb.labbcat.Labbcat.prototype.newTranscript = function(transcript, media, med
     xhr.upload.id = transcript.name; // for knowing what status to update during events
     
     xhr.open("POST", this.baseUrl + "edit/transcript/new");
+    if (this.username) {
+	xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+    }
     xhr.setRequestHeader("Accept", "application/json");
-	xhr.send(fd);
+    xhr.send(fd);
 };
 
 /**
@@ -408,3 +410,7 @@ nzilbb.labbcat.Labbcat.prototype.releaseTask = function(id, onResult) {
 };
 
 nzilbb.labbcat.Labbcat.prototype.constructor = nzilbb.labbcat.Labbcat;
+
+exports.Labbcat = nzilbb.labbcat.Labbcat;
+
+}(typeof exports === 'undefined' ? this.labbcat = {} : exports));
