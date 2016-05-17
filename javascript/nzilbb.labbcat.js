@@ -2,9 +2,9 @@
  * @file nzilbb.labbcat module for communicating with a LaBB-CAT web application.
  *
  * @example
- * var store = new labbcat.Labbcat(baseUrl);
+ * var labbcat = new nzilbb.labbcat.Labbcat(baseUrl);
  * // load corpora
- * store.getCorpusIds(function(result, errors, messages, call, id) {
+ * labbcat.getCorpusIds(function(result, errors, messages, call, id) {
  *     if (errors) {
  *        alert("Could not list corpora: " + errors[0]);
  *     } else {
@@ -52,7 +52,11 @@ nzilbb.labbcat = nzilbb.labbcat || {};
 
 if (typeof(require) == "function") { // running on node.js
     XMLHttpRequest = require('xhr2');
+    FormData = require('form-data');
+    fs = require('fs');
     btoa = require('btoa');
+    parseUrl = require('url').parse;
+    runningOnNode = true;
 }
 
 /**
@@ -351,35 +355,111 @@ nzilbb.labbcat.Labbcat.prototype.newTranscript = function(transcript, media, med
     if (transcriptType) fd.append("transcript_type", transcriptType);
     if (corpus) fd.append("corpus", corpus);
     if (episode) fd.append("episode", episode);
-    fd.append("uploadfile1_0", transcript);
-    if (media) {
-	if (!mediaSuffix) mediaSuffix = "";
-	if (media.constructor === Array) { // multiple files
-	    for (var f in media) {
-		fd.append("uploadmedia"+mediaSuffix+"1", media[f]);
-	    } // next file
-        } else { // a single file
-	    fd.append("uploadmedia"+mediaSuffix+"1", media);
+
+    if (!runningOnNode) {	
+
+	fd.append("uploadfile1_0", transcript);
+	if (media) {
+	    if (!mediaSuffix) mediaSuffix = "";
+	    if (media.constructor === Array) { // multiple files
+		for (var f in media) {
+		    fd.append("uploadmedia"+mediaSuffix+"1", media[f]);
+		} // next file
+            } else { // a single file
+		fd.append("uploadmedia"+mediaSuffix+"1", media);
+	    }
 	}
-    }
     
-    // create HTTP request
-    var xhr = new XMLHttpRequest();
-    xhr.call = "newTranscript";
-    xhr.id = transcript.name;
-    xhr.onResult = onResult;
-    xhr.addEventListener("load", callComplete, false);
-    xhr.addEventListener("error", callFailed, false);
-    xhr.addEventListener("abort", callCancelled, false);
-    xhr.upload.addEventListener("progress", onProgress, false);
-    xhr.upload.id = transcript.name; // for knowing what status to update during events
-    
-    xhr.open("POST", this.baseUrl + "edit/transcript/new");
-    if (this.username) {
-	xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	// create HTTP request
+	var xhr = new XMLHttpRequest();
+	xhr.call = "newTranscript";
+	xhr.id = transcript.name;
+	xhr.onResult = onResult;
+	xhr.addEventListener("load", callComplete, false);
+	xhr.addEventListener("error", callFailed, false);
+	xhr.addEventListener("abort", callCancelled, false);
+	xhr.upload.addEventListener("progress", onProgress, false);
+	xhr.upload.id = transcript.name; // for knowing what status to update during events
+	
+	xhr.open("POST", this.baseUrl + "edit/transcript/new");
+	if (this.username) {
+	    xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	}
+	xhr.setRequestHeader("Accept", "application/json");
+	xhr.send(fd);
+    } else { // runningOnNode
+	
+	// on node.js, files are actually paths
+	var transcriptName = transcript.replace(/.*\//g, "");
+	fd.append("uploadfile1_0", 
+		  fs.createReadStream(transcript).on('error', function(){
+		      onResult(null, ["Invalid transcript: " + transcriptName], "newTranscript", transcriptName);
+		  }), transcriptName);
+
+	if (media) {
+	    if (!mediaSuffix) mediaSuffix = "";
+	    if (media.constructor === Array) { // multiple files
+		for (var f in media) {
+		    var mediaName = media[f].replace(/.*\//g, "");
+		    try {
+			fd.append("uploadmedia"+mediaSuffix+"1", 
+				  fs.createReadStream(media[f]).on('error', function(){
+				      onResult(null, ["Invalid media: " + mediaName], "newTranscript", transcriptName);
+				  }), mediaName);
+		    } catch(error) {
+			onResult(null, ["Invalid media: " + mediaName], "newTranscript", transcriptName);
+			return;
+		    }
+		} // next file
+            } else { // a single file
+		var mediaName = media.replace(/.*\//g, "");
+		fd.append("uploadmedia"+mediaSuffix+"1", 
+			  fs.createReadStream(media).on('error', function(){
+			      onResult(null, ["Invalid media: " + mediaName], "newTranscript", transcriptName);
+			  }), mediaName);
+	    }
+	}
+	
+	var urlParts = parseUrl(this.baseUrl + "edit/transcript/new");
+	var requestParameters = {
+	    port: urlParts.port,
+	    path: urlParts.pathname,
+	    host: urlParts.hostname,
+	    headers: { "Accept" : "application/json" }
+	};
+	if (this.username && this.password) {
+	    requestParameters.auth = this.username+':'+this.password;
+	}
+	if (/^https.*/.test(this.baseUrl)) {
+	    requestParameters.protocol = "https:";
+	}
+	fd.submit(requestParameters, function(err, res) {
+	    var responseText = "";
+	    if (!err) {
+		res.on('data',function(buffer) {
+		    console.log('data ' + buffer);
+		    responseText += buffer;
+		});
+		res.on('end',function(){
+		    try {
+			var response = JSON.parse(responseText);
+			var result = response.model.result || response.model;
+			var errors = response.errors;
+			if (errors.length == 0) errors = null
+			var messages = response.messages;
+			if (messages.length == 0) messages = null
+			onResult(result, errors, messages, "newTranscript", transcriptName);
+		    } catch(exception) {
+			onResult(null, ["" +exception+ ": " + this.responseText], evt.target.call, evt.target.id);
+		    }
+		});
+	    } else {
+		onResult(null, ["" +err+ ": " + this.responseText], "newTranscript", transcriptName);
+	    }
+
+	    res.resume();
+	});
     }
-    xhr.setRequestHeader("Accept", "application/json");
-    xhr.send(fd);
 };
 
 /**
