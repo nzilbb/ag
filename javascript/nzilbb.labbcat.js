@@ -50,6 +50,8 @@
 var nzilbb = nzilbb || {};
 nzilbb.labbcat = nzilbb.labbcat || {};
 
+var runningOnNode = false;
+
 if (typeof(require) == "function") { // running on node.js
     XMLHttpRequest = require('xhr2');
     FormData = require('form-data');
