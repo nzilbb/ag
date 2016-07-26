@@ -459,7 +459,7 @@ public class ChatDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "CLAN CHAT transcript", "0.1", "text/x-chat", ".cha", getClass().getResource("icon.gif"));
+	 "CLAN CHAT transcript", "0.11", "text/x-chat", ".cha", getClass().getResource("icon.gif"));
    }
 
    /**
@@ -1148,11 +1148,11 @@ public class ChatDeserializer
 	       utterance.setStart(
 		  graph.getOrCreateAnchorAt(
 		     Double.parseDouble(synchronisedMatcher.group(2))
-		     / 1000));
+		     / 1000, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
 	       utterance.setEnd(
 		  graph.getOrCreateAnchorAt(
 		     Double.parseDouble(synchronisedMatcher.group(3))
-		     / 1000));
+		     / 1000, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
 	    }
 	    graph.addAnnotation(utterance);
 	    utterance.setParent(currentTurn);
