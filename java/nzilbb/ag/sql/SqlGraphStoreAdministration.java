@@ -305,7 +305,22 @@ public class SqlGraphStoreAdministration
    public IDeserializer deserializerForMimeType(String mimeType)
        throws StoreException, PermissionException
    {
-      return deserializersByMimeType.get(mimeType);
+      try
+      {
+	 return (IDeserializer)deserializersByMimeType.get(mimeType).getClass().newInstance();
+      }
+      catch(IllegalAccessException exception)
+      {
+	 return null;
+      }
+      catch(InstantiationException exception)
+      {
+	 return null;
+      }
+      catch(NullPointerException exception)
+      {
+	 return null;
+      }
    }
 
    /**
@@ -317,7 +332,22 @@ public class SqlGraphStoreAdministration
     */
    public IDeserializer deserializerForFilesSuffix(String suffix) throws StoreException, PermissionException
    {
-      return deserializersBySuffix.get(suffix);
+      try
+      {
+	 return (IDeserializer)deserializersBySuffix.get(suffix).getClass().newInstance();
+      }
+      catch(IllegalAccessException exception)
+      {
+	 return null;
+      }
+      catch(InstantiationException exception)
+      {
+	 return null;
+      }
+      catch(NullPointerException exception)
+      {
+	 return null;
+      }
    }
 
 } // end of class SqlGraphStoreAdministration
