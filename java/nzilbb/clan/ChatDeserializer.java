@@ -25,6 +25,7 @@ import java.util.Vector;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -43,11 +44,14 @@ import nzilbb.configure.ParameterSet;
  * Deserializer for CHAT files produced by CLAN.
  * <p><em>NB</em> the current implementation is <em>not exhaustive</em>; it only covers:
  * <ul>
- *  <li>Time synchronization codes</li>
+ *  <li>Time synchronization codes - TODO handle mid-line synchronization and gaps between utterances.</li>
  *  <li>Disfluency marking with &amp; - e.g. <samp>so &amp;sund Sunday</samp></li>
  *  <li>Non-standard form expansion - e.g. <samp>gonna [: going to]</samp></li>
  *  <li>Incomplete word completion - e.g. <samp>dinner doin(g) all</samp></li>
  *  <li>Acronym/proper name joining with _ - e.g. <samp>no T_V in my room</samp> - TODO</li>
+ *  <li>Retracing - e.g. <samp>&lt;some friends and I&gt; [//] uh</samp> or <samp>and sit [//] sets him</samp> - TODO</li>
+ *  <li>Stuttered false starts - e.g. <samp>the &lt;picnic&gt; [/] picnic</samp> or <samp>the Saturday [/] in the morning</samp> - TODO</li>
+ *  <li>Errors - e.g. <samp>they've &lt;work up a hunger&gt; [* s:r]</samp> or <samp>they got [* m] to</samp></li>
  * </ul>
  * @author Robert Fromont robert@fromont.net.nz
  */
@@ -314,6 +318,23 @@ public class ChatDeserializer
    public void setExpansionLayer(Layer newExpansionLayer) { expansionLayer = newExpansionLayer; }
 
    /**
+    * Errors layer.
+    * @see #getErrorsLayer()
+    * @see #setErrorsLayer(Layer)
+    */
+   protected Layer errorsLayer;
+   /**
+    * Getter for {@link #errorsLayer}: Errors layer.
+    * @return Errors layer.
+    */
+   public Layer getErrorsLayer() { return errorsLayer; }
+   /**
+    * Setter for {@link #expansionLayer}: Errors layer.
+    * @param newErrorsLayer Errors layer.
+    */
+   public void setErrorsLayer(Layer newErrorsLayer) { errorsLayer = newErrorsLayer; }
+
+   /**
     * Completion layer.
     * @see #getCompletionLayer()
     * @see #setCompletionLayer(Layer)
@@ -445,6 +466,7 @@ public class ChatDeserializer
       transcriberLayer = null;
       languagesLayer = null;
       expansionLayer = null;
+      errorsLayer = null;
       completionLayer = null;
       disfluencyLayer = null;
       participantLayers = new HashMap<String,Layer>();
@@ -459,7 +481,7 @@ public class ChatDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "CLAN CHAT transcript", "0.11", "text/x-chat", ".cha", getClass().getResource("icon.gif"));
+	 "CLAN CHAT transcript", "0.12", "text/x-chat", ".cha", getClass().getResource("icon.gif"));
    }
 
    /**
@@ -503,6 +525,8 @@ public class ChatDeserializer
       Pattern regexDisfluency = Pattern.compile("&\\p{Alnum}");
       boolean expansionsFound = false;
       Pattern regexExpansion = Pattern.compile("\\[: ");
+      boolean errorsFound = false;
+      Pattern regexErrors = Pattern.compile("\\[\\* ");
       boolean completionsFound = false;
       Pattern regexCompletion = Pattern.compile("\\(\\p{Alnum}+\\)");
       boolean gemsFound = false;
@@ -570,6 +594,13 @@ public class ChatDeserializer
 	       if (regexExpansion.matcher(line).find())
 	       {
 		  expansionsFound = true;
+	       }
+	    }
+	    if (!errorsFound)
+	    {
+	       if (regexErrors.matcher(line).find())
+	       {
+		  errorsFound = true;
 	       }
 	    }
 	    if (!completionsFound)
@@ -771,6 +802,13 @@ public class ChatDeserializer
       } // missing special layers
       else
       {
+	 for (Layer turnChild : getTurnLayer().getChildren().values())
+	 {
+	    if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL)
+	    {
+	       possibleTurnChildLayers.put(turnChild.getId(), turnChild);
+	    }
+	 } // next possible word tag layer
 	 for (Layer tag : getWordLayer().getChildren().values())
 	 {
 	    if (tag.getAlignment() == Constants.ALIGNMENT_NONE
@@ -836,6 +874,14 @@ public class ChatDeserializer
 	 String[] possibilities = {"expansion","expansions"};
 	 p.setValue(findLayerById(wordTagLayers, possibilities));
 	 p.setPossibleValues(wordTagLayers.values());
+	 parameters.addParameter(p);
+      }
+      if (errorsFound)
+      {
+	 Parameter p = new Parameter("errorsLayer", Layer.class, "Errors layer", "Layer for error  annotations");
+	 String[] possibilities = {"error","error"};
+	 p.setValue(findLayerById(possibleTurnChildLayers, possibilities));
+	 p.setPossibleValues(possibleTurnChildLayers.values());
 	 parameters.addParameter(p);
       }
       if (completionsFound)
@@ -956,6 +1002,10 @@ public class ChatDeserializer
       {
 	 setExpansionLayer((Layer)parameters.get("expansionLayer").getValue());
       }
+      if (parameters.containsKey("errorsLayer"))
+      {
+	 setErrorsLayer((Layer)parameters.get("errorsLayer").getValue());
+      }
       if (parameters.containsKey("completionLayer"))
       {
 	 setCompletionLayer((Layer)parameters.get("completionLayer").getValue());
@@ -1015,6 +1065,7 @@ public class ChatDeserializer
       graph.getSchema().setWordLayerId(getWordLayer().getId());
       if (getDisfluencyLayer() != null) graph.addLayer((Layer)getDisfluencyLayer().clone());
       if (getExpansionLayer() != null) graph.addLayer((Layer)getExpansionLayer().clone());
+      if (getErrorsLayer() != null) graph.addLayer((Layer)getErrorsLayer().clone());
       if (getCompletionLayer() != null) graph.addLayer((Layer)getCompletionLayer().clone());
       if (getGemLayer() != null) graph.addLayer((Layer)getGemLayer().clone());
       if (getTranscriberLayer() != null) graph.addLayer((Layer)getTranscriberLayer().clone());
@@ -1145,14 +1196,22 @@ public class ChatDeserializer
 	    if (synchronisedMatcher.matches())
 	    {
 	       utterance.setLabel(synchronisedMatcher.group(1).trim());
-	       utterance.setStart(
-		  graph.getOrCreateAnchorAt(
-		     Double.parseDouble(synchronisedMatcher.group(2))
-		     / 1000, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+	       Anchor start = graph.getOrCreateAnchorAt(
+		  Double.parseDouble(synchronisedMatcher.group(2))
+		  / 1000, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+	       utterance.setStart(start);
 	       utterance.setEnd(
 		  graph.getOrCreateAnchorAt(
 		     Double.parseDouble(synchronisedMatcher.group(3))
 		     / 1000, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+
+	       // is there a gap between this one and the last one?
+	       // if (lastUtterance.getEnd() != null && lastUtterance.getEnd().getOffset() != null
+	       // 	   && start.getOffset() - lastUtterance.getEnd().getOffset() > 0.1)
+	       // {
+	       // 	  // add an empty filler utterance
+	       // 	  graph.addAnnotation(new Annotation(null, "", getUtteranceLayer().getId(), lastUtterance.getEnd().getId(), start.getId(), currentTurn.getId()));
+	       // }
 	    }
 	    graph.addAnnotation(utterance);
 	    utterance.setParent(currentTurn);
@@ -1186,6 +1245,15 @@ public class ChatDeserializer
 
       try
       {
+
+	 // annotated spans marked by <...>
+	 graph.addLayer(new Layer("@span", "Annotation Spans", Constants.ALIGNMENT_INTERVAL, true, true, false, getTurnLayer().getId(), true));
+	 SpanningConventionTransformer spanningTransformer = new SpanningConventionTransformer(
+	    getWordLayer().getId(), "<(.*)", "(.*)>(.*)", false, "$1", "$1$2", 
+	    "@span", "-", "$1", "$1", false);	  
+	 spanningTransformer.transform(graph);	
+	 graph.commit();
+
 	 // disfluencies
 	 ConventionTransformer transformer = new ConventionTransformer(getWordLayer().getId(), "&(\\w+)");
 	 transformer.addDestinationResult(getWordLayer().getId(), "$1");
@@ -1198,10 +1266,41 @@ public class ChatDeserializer
 	 
 	 // expansions
 	 String expansionLayerId = getExpansionLayer()!=null?getExpansionLayer().getId():null;
-	 SpanningConventionTransformer spanningTransformer = new SpanningConventionTransformer(
+	 spanningTransformer = new SpanningConventionTransformer(
 	    getWordLayer().getId(), "\\[:", "(.*)\\]", true, null, null, 
 	    expansionLayerId, null, "$1", true);	  
 	 spanningTransformer.transform(graph);	
+	 graph.commit();
+
+	 // errors
+	 String errorsLayerId = getErrorsLayer()!=null?getErrorsLayer().getId():null;
+	 spanningTransformer = new SpanningConventionTransformer(
+	    getWordLayer().getId(), "\\[\\*", "(.*)\\](.*)", true, null, "$2", 
+	    errorsLayerId, "", "$1", true, true);	  
+	 spanningTransformer.transform(graph);	
+	 if (errorsLayerId != null)
+	 {
+	    // if they coincide with the ends of spans, then they annotate the span
+	    for (Annotation error : graph.getAnnotations(errorsLayerId))
+	    {
+	       LinkedHashSet<Annotation> endingSpans = error.getEnd().endOf("@span");
+	       if (endingSpans.size() > 0)
+	       {
+		  Annotation span = endingSpans.iterator().next();
+		  error.setStart(span.getStart());
+	       }
+	    } // next error
+	 } // errorsLayerId set
+	 graph.commit();
+	 
+	 // completions at the start and at the end
+	 transformer = new ConventionTransformer(getWordLayer().getId(), "\\((\\p{Alnum}+)\\)(.+)\\((\\p{Alnum}+)\\)");
+	 transformer.addDestinationResult(getWordLayer().getId(), "$2");
+	 if (getCompletionLayer() != null)
+	 {
+	    transformer.addDestinationResult(getCompletionLayer().getId(), "$1$2$3");
+	 }
+	 transformer.transform(graph);	
 	 graph.commit();
 	 
 	 // completions at the start
@@ -1223,7 +1322,14 @@ public class ChatDeserializer
 	 }
 	 transformer.transform(graph);
 	 graph.commit();
-	 
+
+	 // remove temporary span annotations
+	 for (Annotation span : graph.getAnnotations("@span"))
+	 {
+	    span.destroy();
+	 } // next span	
+	 graph.commit();
+
 	 Graph[] graphs = { graph };
 	 return graphs;
       }

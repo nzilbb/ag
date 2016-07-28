@@ -354,6 +354,199 @@ public class TestChatDeserializer
       
    }
 
+   @Test public void moreAnnotations() 
+      throws Exception
+   {
+      Layer[] layers = {
+	 new Layer("transcriber", "Transcribers", 0, true, true, true),
+	 new Layer("languages", "Graph language", 0, true, true, true),
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("language", "Speaker language", 0, false, false, true, "who", true),
+	 new Layer("corpus", "Speaker corpus", 0, false, false, true, "who", true),
+	 new Layer("role", "Speaker role", 0, false, false, true, "who", true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("error", "Errors", 2, true, false, false, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true),
+	 new Layer("completion", "Completion", 0, true, false, false, "word", true),
+	 new Layer("expansion", "Expansion", 0, false, false, true, "word", true),
+	 new Layer("disfluency", "Disfluency", 0, false, false, true, "word", true),
+	 new Layer("gem", "Gems", 2, true, false, true)
+      };
+      Schema schema = new Schema(layers, "who", "turn", "utterance", "word");
+      // access file
+      NamedStream[] streams = { new NamedStream(new File(getDir(), "2002.cha")) };
+
+      // create deserializer
+      ChatDeserializer deserializer = new ChatDeserializer();
+
+      // load the stream
+      ParameterSet defaultParamaters = deserializer.load(streams, null, schema);
+      //for (Parameter p : defaultParamaters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+
+      // configure the deserialization
+      deserializer.setParameters(defaultParamaters);
+
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+
+      for (String warning : deserializer.getWarnings())
+      {
+	 System.out.println(warning);
+      }
+      
+      assertEquals("2002.cha", g.getId());
+      String[] transcribers = g.labels("transcriber"); 
+      assertEquals(2, transcribers.length);
+      assertEquals("Ali Smith", transcribers[0]);
+      assertEquals("Erin Pryor", transcribers[1]);
+      String[] languages = g.labels("languages"); 
+      assertEquals(1, languages.length);
+      assertEquals("en", languages[0]);
+
+      // participants     
+      assertEquals(2, g.getAnnotations("who").size());
+      assertEquals("2002", g.getAnnotation("SUB").getLabel());
+      assertEquals("who", g.getAnnotation("SUB").getLayerId());
+      assertEquals("Investigator", g.getAnnotation("EXA").getLabel());
+      assertEquals("who", g.getAnnotation("EXA").getLayerId());
+
+      // participant meta data
+      assertEquals("en", g.getAnnotation("SUB").my("language").getLabel());
+      assertEquals("en", g.getAnnotation("EXA").my("language").getLabel());
+      assertEquals("W", g.getAnnotation("SUB").my("corpus").getLabel());
+      assertEquals("W", g.getAnnotation("EXA").my("corpus").getLabel());
+      assertEquals("Participant", g.getAnnotation("SUB").my("role").getLabel());
+      assertEquals("Investigator", g.getAnnotation("EXA").my("role").getLabel());
+
+      // turns
+      Vector<Annotation> turns = g.getAnnotations("turn");
+      assertEquals(1, turns.size());
+      assertEquals(new Double(0.0), turns.elementAt(0).getStart().getOffset());
+      assertEquals(new Double(682.824), turns.elementAt(0).getEnd().getOffset());
+      assertEquals(g.getAnnotation("SUB"), turns.elementAt(0).getParent());
+
+      // utterances
+      Vector<Annotation> utterances = g.getAnnotations("utterance");
+      assertEquals(new Double(0.001), utterances.elementAt(0).getStart().getOffset());
+      assertEquals(new Double(21.510), utterances.elementAt(0).getEnd().getOffset());
+      assertEquals("SUB", utterances.elementAt(0).getParent().getLabel());
+      assertEquals(turns.elementAt(0), utterances.elementAt(0).getParent());
+
+      assertEquals("wrapped line", new Double(21.510), utterances.elementAt(1).getStart().getOffset());
+      assertEquals("wrapped line", new Double(25.057), utterances.elementAt(1).getEnd().getOffset());
+      assertEquals("SUB", utterances.elementAt(1).getParent().getLabel());
+
+      assertEquals("simultaneous line", new Double(21.510), utterances.elementAt(2).getStart().getOffset());
+      assertEquals("simultaneous line", new Double(25.057), utterances.elementAt(2).getEnd().getOffset());
+      assertEquals("SUB", utterances.elementAt(2).getParent().getLabel());
+
+      assertEquals(new Double(25.057), utterances.elementAt(3).getStart().getOffset());
+      assertEquals(new Double(29.994), utterances.elementAt(3).getEnd().getOffset());
+
+      Annotation[] words = g.annotations("word");
+      assertEquals("ah", words[0].getLabel());
+      assertEquals("the", words[1].getLabel());
+      assertEquals("mother", words[2].getLabel());
+      assertEquals("says", words[3].getLabel());
+      assertEquals("goodbye", words[4].getLabel());
+      assertEquals("to", words[5].getLabel());
+
+      assertEquals("they've", words[268].getLabel());
+      assertEquals("work", words[269].getLabel());
+      assertEquals("up", words[270].getLabel());
+      assertEquals("a", words[271].getLabel());
+      assertEquals("hunger", words[272].getLabel());
+      assertEquals(".", words[273].getLabel());
+      assertEquals("so", words[274].getLabel());
+
+      assertEquals(turns.elementAt(0).getId(), words[268].getParentId());
+      assertEquals(turns.elementAt(0).getId(), words[269].getParentId());
+      assertEquals(turns.elementAt(0).getId(), words[270].getParentId());
+      assertEquals(turns.elementAt(0).getId(), words[271].getParentId());
+      assertEquals(turns.elementAt(0).getId(), words[272].getParentId());
+      assertEquals(turns.elementAt(0).getId(), words[273].getParentId());
+      assertEquals(turns.elementAt(0).getId(), words[274].getParentId());
+
+      for (int i = 0; i < words.length; i++)
+      {	 
+	 assertEquals("ordinals correct " + words[i], i+1, words[i].getOrdinal());
+      }
+
+      // errors
+      Annotation[] errors = g.annotations("error");
+      assertEquals(8, errors.length);
+
+      // tag marked span
+      assertEquals("s:r", errors[0].getLabel());
+      assertEquals("starts with span", "work", 
+		   errors[0].getStart().startOf("word").iterator().next().getLabel());
+      assertEquals("ends with span", "hunger", 
+		   errors[0].getEnd().endOf("word").iterator().next().getLabel());
+
+      // tag word
+      assertEquals("m", errors[1].getLabel());
+      assertEquals("starts with word", "got", 
+		   errors[1].getStart().startOf("word").iterator().next().getLabel());
+      assertEquals("ends with word", "got", 
+		   errors[1].getEnd().endOf("word").iterator().next().getLabel());
+
+      // tag marked word
+      assertEquals("f", errors[2].getLabel());
+      assertEquals("starts with span", "a", 
+		   errors[2].getStart().startOf("word").iterator().next().getLabel());
+      assertEquals("ends with span", "a", 
+		   errors[2].getEnd().endOf("word").iterator().next().getLabel());
+
+
+      // completion
+      assertEquals(1, g.annotations("completion").length);
+      assertEquals("leading/trailing completion", "fridge", words[279].getLabel());
+      assertEquals("leading/trailing completion", "refridgerator", words[279].my("completion").getLabel());
+
+      // gems
+      Annotation[] gems = g.annotations("gem");
+      assertEquals(11, gems.length);
+      assertEquals(new Double(0.001), gems[0].getStart().getOffset());
+      assertEquals("gdc", gems[0].getLabel());
+      assertEquals(new Double(180.068), gems[0].getEnd().getOffset());
+      assertEquals(new Double(180.068), gems[1].getStart().getOffset());
+      assertEquals("picnic", gems[1].getLabel());
+      assertEquals(new Double(347.077), gems[1].getEnd().getOffset());
+      assertEquals(new Double(347.077), gems[2].getStart().getOffset());
+      assertEquals("christmas", gems[2].getLabel());
+      assertEquals(new Double(403.531), gems[2].getEnd().getOffset());
+      assertEquals(new Double(403.531), gems[3].getStart().getOffset());
+      assertEquals("weekend", gems[3].getLabel());
+      assertEquals(new Double(455.432), gems[3].getEnd().getOffset());
+      assertEquals(new Double(455.398), gems[4].getStart().getOffset());
+      assertEquals("vacation", gems[4].getLabel());
+      assertEquals(new Double(502.431), gems[4].getEnd().getOffset());
+      assertEquals(new Double(507.270), gems[5].getStart().getOffset());
+      assertEquals("peanut", gems[5].getLabel());
+      assertEquals(new Double(536.950), gems[5].getEnd().getOffset());
+      assertEquals(new Double(536.700), gems[6].getStart().getOffset());
+      assertEquals("flower", gems[6].getLabel());
+      assertEquals(new Double(562.364), gems[6].getEnd().getOffset());
+      assertEquals(new Double(562.364), gems[7].getStart().getOffset());
+      assertEquals("birthday", gems[7].getLabel());
+      assertEquals(new Double(605.459), gems[7].getEnd().getOffset());
+      assertEquals(new Double(605.552), gems[8].getStart().getOffset());
+      assertEquals("directions", gems[8].getLabel());
+      assertEquals(new Double(630.083), gems[8].getEnd().getOffset());
+      assertEquals(new Double(629.970), gems[9].getStart().getOffset());
+      assertEquals("argument", gems[9].getLabel());
+      assertEquals(new Double(657.253), gems[9].getEnd().getOffset());
+      assertEquals(new Double(657.253), gems[10].getStart().getOffset());
+      assertEquals("cat", gems[10].getLabel());
+      assertEquals(new Double(682.824), gems[10].getEnd().getOffset());
+
+      // check it really is repaired, as this deserializer relies on this behaviour:
+      new nzilbb.ag.util.Normalizer().transform(g);
+
+   }
+
    /**
     * Directory for text files.
     * @see #getDir()
