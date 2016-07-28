@@ -49,8 +49,8 @@ import nzilbb.configure.ParameterSet;
  *  <li>Non-standard form expansion - e.g. <samp>gonna [: going to]</samp></li>
  *  <li>Incomplete word completion - e.g. <samp>dinner doin(g) all</samp></li>
  *  <li>Acronym/proper name joining with _ - e.g. <samp>no T_V in my room</samp> - TODO</li>
- *  <li>Retracing - e.g. <samp>&lt;some friends and I&gt; [//] uh</samp> or <samp>and sit [//] sets him</samp> - TODO</li>
- *  <li>Stuttered false starts - e.g. <samp>the &lt;picnic&gt; [/] picnic</samp> or <samp>the Saturday [/] in the morning</samp> - TODO</li>
+ *  <li>Retracing - e.g. <samp>&lt;some friends and I&gt; [//] uh</samp> or <samp>and sit [//] sets him</samp></li>
+ *  <li>Repetition/stuttered false starts - e.g. <samp>the &lt;picnic&gt; [/] picnic</samp> or <samp>the Saturday [/] in the morning</samp></li>
  *  <li>Errors - e.g. <samp>they've &lt;work up a hunger&gt; [* s:r]</samp> or <samp>they got [* m] to</samp></li>
  * </ul>
  * @author Robert Fromont robert@fromont.net.nz
@@ -329,10 +329,45 @@ public class ChatDeserializer
     */
    public Layer getErrorsLayer() { return errorsLayer; }
    /**
-    * Setter for {@link #expansionLayer}: Errors layer.
+    * Setter for {@link #errorsLayer}: Errors layer.
     * @param newErrorsLayer Errors layer.
     */
    public void setErrorsLayer(Layer newErrorsLayer) { errorsLayer = newErrorsLayer; }
+
+   /**
+    * Retracing layer.
+    * @see #getRetracingLayer()
+    * @see #setErrorsLayer(Layer)
+    */
+   protected Layer retracingLayer;
+   /**
+    * Getter for {@link #retracingLayer}: Retracing layer.
+    * @return Retracing layer.
+    */
+   public Layer getRetracingLayer() { return retracingLayer; }
+   /**
+    * Setter for {@link #retracingLayer}: Retracing layer.
+    * @param newRetracingLayer Retracing layer.
+    */
+   public void setRetracingLayer(Layer newRetracingLayer) { retracingLayer = newRetracingLayer; }
+
+   /**
+    * Repetitions layer.
+    * @see #getRepetitionsLayer()
+    * @see #setRepetitionsLayer(Layer)
+    */
+   protected Layer repetitionsLayer;
+   /**
+    * Getter for {@link #repetitionsLayer}: Repetitions layer.
+    * @return Repetitions layer.
+    */
+   public Layer getRepetitionsLayer() { return repetitionsLayer; }
+   /**
+    * Setter for {@link #repetitionsLayer}: Repetitions layer.
+    * @param newRepetitionsLayer Repetitions layer.
+    */
+   public void setRepetitionsLayer(Layer newRepetitionsLayer) { repetitionsLayer = newRepetitionsLayer; }
+
 
    /**
     * Completion layer.
@@ -467,6 +502,8 @@ public class ChatDeserializer
       languagesLayer = null;
       expansionLayer = null;
       errorsLayer = null;
+      retracingLayer = null;
+      repetitionsLayer = null;
       completionLayer = null;
       disfluencyLayer = null;
       participantLayers = new HashMap<String,Layer>();
@@ -527,6 +564,10 @@ public class ChatDeserializer
       Pattern regexExpansion = Pattern.compile("\\[: ");
       boolean errorsFound = false;
       Pattern regexErrors = Pattern.compile("\\[\\* ");
+      boolean repetitionsFound = false;
+      Pattern regexRepetitions = Pattern.compile("\\[/\\]");
+      boolean retracingFound = false;
+      Pattern regexRetracing = Pattern.compile("\\[//\\]");
       boolean completionsFound = false;
       Pattern regexCompletion = Pattern.compile("\\(\\p{Alnum}+\\)");
       boolean gemsFound = false;
@@ -601,6 +642,20 @@ public class ChatDeserializer
 	       if (regexErrors.matcher(line).find())
 	       {
 		  errorsFound = true;
+	       }
+	    }
+	    if (!repetitionsFound)
+	    {
+	       if (regexRepetitions.matcher(line).find())
+	       {
+		  repetitionsFound = true;
+	       }
+	    }
+	    if (!retracingFound)
+	    {
+	       if (regexRetracing.matcher(line).find())
+	       {
+		  retracingFound = true;
 	       }
 	    }
 	    if (!completionsFound)
@@ -884,6 +939,22 @@ public class ChatDeserializer
 	 p.setPossibleValues(possibleTurnChildLayers.values());
 	 parameters.addParameter(p);
       }
+      if (repetitionsFound)
+      {
+	 Parameter p = new Parameter("repetitionsLayer", Layer.class, "Repetitions layer", "Layer for repetition annotations");
+	 String[] possibilities = {"repetition","repetitions"};
+	 p.setValue(findLayerById(possibleTurnChildLayers, possibilities));
+	 p.setPossibleValues(possibleTurnChildLayers.values());
+	 parameters.addParameter(p);
+      }
+      if (retracingFound)
+      {
+	 Parameter p = new Parameter("retracingLayer", Layer.class, "Retracing layer", "Layer for retracing annotations");
+	 String[] possibilities = {"retrace","retracing","correction"};
+	 p.setValue(findLayerById(possibleTurnChildLayers, possibilities));
+	 p.setPossibleValues(possibleTurnChildLayers.values());
+	 parameters.addParameter(p);
+      }
       if (completionsFound)
       {
 	 Parameter p = new Parameter("completionLayer", Layer.class, "Completion layer", "Layer for completion annotations");
@@ -1006,6 +1077,14 @@ public class ChatDeserializer
       {
 	 setErrorsLayer((Layer)parameters.get("errorsLayer").getValue());
       }
+      if (parameters.containsKey("repetitionsLayer"))
+      {
+	 setRepetitionsLayer((Layer)parameters.get("repetitionsLayer").getValue());
+      }
+      if (parameters.containsKey("retracingLayer"))
+      {
+	 setRetracingLayer((Layer)parameters.get("retracingLayer").getValue());
+      }
       if (parameters.containsKey("completionLayer"))
       {
 	 setCompletionLayer((Layer)parameters.get("completionLayer").getValue());
@@ -1066,6 +1145,8 @@ public class ChatDeserializer
       if (getDisfluencyLayer() != null) graph.addLayer((Layer)getDisfluencyLayer().clone());
       if (getExpansionLayer() != null) graph.addLayer((Layer)getExpansionLayer().clone());
       if (getErrorsLayer() != null) graph.addLayer((Layer)getErrorsLayer().clone());
+      if (getRepetitionsLayer() != null) graph.addLayer((Layer)getRepetitionsLayer().clone());
+      if (getRetracingLayer() != null) graph.addLayer((Layer)getRetracingLayer().clone());
       if (getCompletionLayer() != null) graph.addLayer((Layer)getCompletionLayer().clone());
       if (getGemLayer() != null) graph.addLayer((Layer)getGemLayer().clone());
       if (getTranscriberLayer() != null) graph.addLayer((Layer)getTranscriberLayer().clone());
@@ -1291,6 +1372,48 @@ public class ChatDeserializer
 	       }
 	    } // next error
 	 } // errorsLayerId set
+	 graph.commit();
+
+	 // repetitions
+	 String repetitionsLayerId = getRepetitionsLayer()!=null?getRepetitionsLayer().getId():null;
+	 spanningTransformer = new SpanningConventionTransformer(
+	    getWordLayer().getId(), "\\[/\\].*", "\\[/\\]", true, null, null, 
+	    repetitionsLayerId, "/", "", true, true);	  
+	 spanningTransformer.transform(graph);	
+	 if (repetitionsLayerId != null)
+	 {
+	    // if they coincide with the ends of spans, then they annotate the span
+	    for (Annotation repetition : graph.getAnnotations(repetitionsLayerId))
+	    {
+	       LinkedHashSet<Annotation> endingSpans = repetition.getEnd().endOf("@span");
+	       if (endingSpans.size() > 0)
+	       {
+		  Annotation span = endingSpans.iterator().next();
+		  repetition.setStart(span.getStart());
+	       }
+	    } // next error
+	 } // repetitionsLayerId set
+	 graph.commit();
+	 
+	 // retracing
+	 String retracingLayerId = getRetracingLayer()!=null?getRetracingLayer().getId():null;
+	 spanningTransformer = new SpanningConventionTransformer(
+	    getWordLayer().getId(), "\\[//\\]", "\\[//\\]", true, null, null, 
+	    retracingLayerId, "//", "", true, true);	  
+	 spanningTransformer.transform(graph);	
+	 if (retracingLayerId != null)
+	 {
+	    // if they coincide with the ends of spans, then they annotate the span
+	    for (Annotation retrace : graph.getAnnotations(retracingLayerId))
+	    {
+	       LinkedHashSet<Annotation> endingSpans = retrace.getEnd().endOf("@span");
+	       if (endingSpans.size() > 0)
+	       {
+		  Annotation span = endingSpans.iterator().next();
+		  retrace.setStart(span.getStart());
+	       }
+	    } // next error
+	 } // retracingLayerId set
 	 graph.commit();
 	 
 	 // completions at the start and at the end

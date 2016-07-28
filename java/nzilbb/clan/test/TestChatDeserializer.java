@@ -367,6 +367,8 @@ public class TestChatDeserializer
 	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
 	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
 	 new Layer("error", "Errors", 2, true, false, false, "turn", true),
+	 new Layer("retracing", "Retracing", 2, true, false, false, "turn", true),
+	 new Layer("repetition", "Repetitions", 2, true, false, false, "turn", true),
 	 new Layer("word", "Words", 2, true, false, false, "turn", true),
 	 new Layer("completion", "Completion", 0, true, false, false, "word", true),
 	 new Layer("expansion", "Expansion", 0, false, false, true, "word", true),
@@ -453,21 +455,21 @@ public class TestChatDeserializer
       assertEquals("goodbye", words[4].getLabel());
       assertEquals("to", words[5].getLabel());
 
-      assertEquals("they've", words[268].getLabel());
-      assertEquals("work", words[269].getLabel());
-      assertEquals("up", words[270].getLabel());
-      assertEquals("a", words[271].getLabel());
-      assertEquals("hunger", words[272].getLabel());
-      assertEquals(".", words[273].getLabel());
-      assertEquals("so", words[274].getLabel());
+      assertEquals("they've", words[267].getLabel());
+      assertEquals("work", words[268].getLabel());
+      assertEquals("up", words[269].getLabel());
+      assertEquals("a", words[270].getLabel());
+      assertEquals("hunger", words[271].getLabel());
+      assertEquals(".", words[272].getLabel());
+      assertEquals("so", words[273].getLabel());
 
+      assertEquals(turns.elementAt(0).getId(), words[267].getParentId());
       assertEquals(turns.elementAt(0).getId(), words[268].getParentId());
       assertEquals(turns.elementAt(0).getId(), words[269].getParentId());
       assertEquals(turns.elementAt(0).getId(), words[270].getParentId());
       assertEquals(turns.elementAt(0).getId(), words[271].getParentId());
       assertEquals(turns.elementAt(0).getId(), words[272].getParentId());
       assertEquals(turns.elementAt(0).getId(), words[273].getParentId());
-      assertEquals(turns.elementAt(0).getId(), words[274].getParentId());
 
       for (int i = 0; i < words.length; i++)
       {	 
@@ -499,11 +501,60 @@ public class TestChatDeserializer
       assertEquals("ends with span", "a", 
 		   errors[2].getEnd().endOf("word").iterator().next().getLabel());
 
-
       // completion
       assertEquals(1, g.annotations("completion").length);
-      assertEquals("leading/trailing completion", "fridge", words[279].getLabel());
-      assertEquals("leading/trailing completion", "refridgerator", words[279].my("completion").getLabel());
+      assertEquals("leading/trailing completion", "fridge", words[278].getLabel());
+      assertEquals("leading/trailing completion", "refridgerator", words[278].my("completion").getLabel());
+
+      // retracing
+      Annotation[] retracing = g.annotations("retracing");
+      assertEquals(6, retracing.length);
+
+      // tag previous word
+      assertEquals("//", retracing[0].getLabel());
+      assertEquals("tag previous word", "sit", 
+		   retracing[0].getStart().startOf("word").iterator().next().getLabel());
+      assertEquals("tag previous word", "sit", 
+		   retracing[0].getEnd().endOf("word").iterator().next().getLabel());
+
+      // tag marked span
+      assertEquals("//", retracing[1].getLabel());
+      assertEquals("starts with span", "aten", 
+		   retracing[1].getStart().startOf("word").iterator().next().getLabel());
+      assertEquals("ends with span", "too", 
+		   retracing[1].getEnd().endOf("word").iterator().next().getLabel());
+
+      // tag marked word
+      assertEquals("//", retracing[3].getLabel());
+      assertEquals("starts with span", "Circus", 
+		   retracing[3].getStart().startOf("word").iterator().next().getLabel());
+      assertEquals("ends with span", "Circus", 
+		   retracing[3].getEnd().endOf("word").iterator().next().getLabel());
+
+      // repetition
+      Annotation[] repetition = g.annotations("repetition");
+      assertEquals(3, repetition.length);
+
+      // tag marked word
+      assertEquals("/", repetition[0].getLabel());
+      assertEquals("starts with span", "picnic", 
+		   repetition[0].getStart().startOf("word").iterator().next().getLabel());
+      assertEquals("ends with span", "picnic", 
+		   repetition[0].getEnd().endOf("word").iterator().next().getLabel());
+
+      // tag marked span
+      assertEquals("/", repetition[1].getLabel());
+      assertEquals("starts with span", "spent", 
+		   repetition[1].getStart().startOf("word").iterator().next().getLabel());
+      assertEquals("ends with span", "morning", 
+		   repetition[1].getEnd().endOf("word").iterator().next().getLabel());
+
+      // tag previous word
+      assertEquals("/", repetition[2].getLabel());
+      assertEquals("tag previous word", "Saturday", 
+		   repetition[2].getStart().startOf("word").iterator().next().getLabel());
+      assertEquals("tag previous word", "Saturday", 
+		   repetition[2].getEnd().endOf("word").iterator().next().getLabel());
 
       // gems
       Annotation[] gems = g.annotations("gem");
