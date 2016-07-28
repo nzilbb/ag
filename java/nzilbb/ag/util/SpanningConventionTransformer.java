@@ -618,15 +618,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 			      Anchor oldEnd = previousSource.getEnd();
 			      if (endOfGap != oldEnd)
 			      { // everything that ends here will now end at endOfGap
-				 for (LinkedHashSet<Annotation> layer : oldEnd.getEndOf().values())
-				 { 
-				    for (Annotation ending : layer)
-				    {
-				       // close the gap
-				       changes.addAll( // record changes of:
-					  ending.setEnd(endOfGap));
-				    } // next annotion ending here
-				 } // next layer
+				 oldEnd.moveEndingAnnotations(endOfGap);
 			      } // end of gap is elsewhere
 			   } // endOfGap != null && previousSource != null
 			}

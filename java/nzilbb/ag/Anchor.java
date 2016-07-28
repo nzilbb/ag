@@ -346,6 +346,38 @@ public class Anchor
    } // end of getStartingAnnotations()
 
    /**
+    * Sets the start of all annotations that start here, to the given anchor.
+    * @param newStart The new start anchor
+    * @return The resulting changes.
+    */
+   public Vector<Change> moveStartingAnnotations(Anchor newStart)
+   {
+      Vector<Change> changes = new Vector<Change>();
+      for (Annotation starting : getStartingAnnotations())
+      {
+	 changes.addAll( // record changes of:
+	    starting.setStart(newStart));
+      } // next annotion ending here
+      return changes;      
+   } // end of moveStartingAnnotations()
+   
+   /**
+    * Sets the end of all annotations that end here, to the given anchor.
+    * @param newEnd The new end anchor
+    * @return The resulting changes.
+    */
+   public Vector<Change> moveEndingAnnotations(Anchor newEnd)
+   {
+      Vector<Change> changes = new Vector<Change>();
+      for (Annotation ending : getEndingAnnotations())
+      {
+	 changes.addAll( // record changes of:
+	    ending.setEnd(newEnd));
+      } // next annotion ending here
+      return changes;      
+   } // end of moveEndingAnnotations()
+
+   /**
     * Returns the minimum possible offset for this anchor.  If the offset is set,
     * the minimum possible offset is the same as {@link #getOffset()}. Otherwise
     * the annotation graph is traversed to find the anchor with highest preceding offset.

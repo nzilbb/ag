@@ -54,6 +54,12 @@ public class TestSpanningConventionTransformer
 			   false, // saturated
 			   "turn", // parentId
 			   true)); // parentIncludes
+      g.addLayer(new Layer("span", "Spans", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "turn", // parentId
+			   true)); // parentIncludes
       g.addLayer(new Layer("comment", "Comment", Constants.ALIGNMENT_INTERVAL,
 			   true, // peers
 			   true, // peersOverlap
@@ -81,6 +87,9 @@ public class TestSpanningConventionTransformer
       g.addAnnotation(new Annotation("word5", "jumps", "word", "a?1", "a?2", "turn1"));
       g.addAnnotation(new Annotation("word6", "over", "word", "a?2", "a5", "turn1"));
 
+      // span for word1, to test its anchor moves with word1's
+      g.addAnnotation(new Annotation("span", "span", "span", "a1", "a2", "turn1"));
+
       try
       {
 	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
@@ -101,6 +110,11 @@ public class TestSpanningConventionTransformer
 	 assertEquals("a2", span.getStartId());
 	 assertEquals("a?1", span.getEndId());
 	 assertEquals("parent set", "my graph", span.getParentId());
+
+	 span = g.getAnnotations("span").elementAt(0);
+	 assertEquals("a1", span.getStartId());
+	 assertEquals("chained across gap with word", g.getAnnotation("word1").getEnd(), g.getAnnotation("span").getEnd());
+	 assertEquals("a?1", span.getEndId());
       }
       catch(TransformationException exception)
       {
