@@ -676,6 +676,8 @@ public class TestGraph
       g.commit();
       assertEquals(Change.Operation.NoChange, g.getChange());
       assertNull("commit removes deleted annotations", g.getAnnotation("word2"));
+      assertEquals("commit removes anchor references to deleted annotations", 0, g.getAnchor("a2").startOf("word").size());
+      assertEquals("commit removes anchor references to deleted annotations", 0, g.getAnchor("a3").endOf("word").size());
       assertNull("commit removes deleted annotations", g.getAnnotation("turn1"));
       assertFalse("commit removes deleted annotations from layer", 
 		  g.getLayer("word").getAnnotations().contains(word2));

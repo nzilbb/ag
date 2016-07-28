@@ -958,9 +958,11 @@ public class Graph
 	 Annotation a = iAnnotation.next();
 	 if (a.getChange() == Change.Operation.Destroy)
 	 {
-	    a.setParent(null);
-	    a.getLayer().getAnnotations().remove(a);
+	    a.setParent(null); // remove reference from parent
+	    a.getLayer().getAnnotations().remove(a); // remove reference from layer
 	    a.setLayer(null);
+	    a.setStartId(null); // remove reference from start anchor
+	    a.setEndId(null); // remove reference from end anchor
 	    iAnnotation.remove();
 	 }
 	 else
