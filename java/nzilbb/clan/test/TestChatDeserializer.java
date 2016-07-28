@@ -447,6 +447,13 @@ public class TestChatDeserializer
       assertEquals(new Double(25.057), utterances.elementAt(3).getStart().getOffset());
       assertEquals(new Double(29.994), utterances.elementAt(3).getEnd().getOffset());
 
+      assertEquals("linking utterance", "", utterances.elementAt(4).getLabel());
+      assertEquals("linking utterance", new Double(29.994), utterances.elementAt(4).getStart().getOffset());
+      assertEquals("linking utterance", new Double(34.723), utterances.elementAt(4).getEnd().getOffset());
+
+      assertEquals(new Double(34.723), utterances.elementAt(5).getStart().getOffset());
+      assertEquals(new Double(35.752), utterances.elementAt(5).getEnd().getOffset());
+
       Annotation[] words = g.annotations("word");
       assertEquals("ah", words[0].getLabel());
       assertEquals("the", words[1].getLabel());

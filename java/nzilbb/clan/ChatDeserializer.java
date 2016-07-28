@@ -1287,12 +1287,12 @@ public class ChatDeserializer
 		     / 1000, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
 
 	       // is there a gap between this one and the last one?
-	       // if (lastUtterance.getEnd() != null && lastUtterance.getEnd().getOffset() != null
-	       // 	   && start.getOffset() - lastUtterance.getEnd().getOffset() > 0.1)
-	       // {
-	       // 	  // add an empty filler utterance
-	       // 	  graph.addAnnotation(new Annotation(null, "", getUtteranceLayer().getId(), lastUtterance.getEnd().getId(), start.getId(), currentTurn.getId()));
-	       // }
+	       if (lastUtterance.getEnd() != null && lastUtterance.getEnd().getOffset() != null
+	       	   && start.getOffset() - lastUtterance.getEnd().getOffset() > 0.1)
+	       {
+	       	  // add an empty filler utterance
+	       	  graph.addAnnotation(new Annotation(null, "", getUtteranceLayer().getId(), lastUtterance.getEnd().getId(), start.getId(), currentTurn.getId()));
+	       }
 	    }
 	    graph.addAnnotation(utterance);
 	    utterance.setParent(currentTurn);
