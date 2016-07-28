@@ -617,6 +617,297 @@ public class TestSpanningConventionTransformer
       }
    }
 
+   @Test public void annotatePreviousEvenWithTrailingSuffix() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");
+
+      g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+			   true, // peers
+			   true, // peersOverlap
+			   true)); // saturated
+      g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "who", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "turn", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("expansion", "CLAN Expansion", Constants.ALIGNMENT_NONE,
+			   false, // peers
+			   true, // peersOverlap
+			   true, // saturated
+			   "word", // parentId
+			   true)); // parentIncludes
+
+      g.addAnchor(new Anchor("a0", 0.0)); // turn start
+      g.addAnchor(new Anchor("a1", 1.0)); // the
+      g.addAnchor(new Anchor("a2", 2.0)); // quick
+      g.addAnchor(new Anchor("a3", 3.0)); // brown
+      g.addAnchor(new Anchor("a4", 4.0)); // fox
+      // unset offsets
+      g.addAnchor(new Anchor("a?1", null)); // jumps
+      g.addAnchor(new Anchor("a?2", null)); // over
+      g.addAnchor(new Anchor("a5", 5.0)); // end of over
+      g.addAnchor(new Anchor("a6", 6.0)); // turn end
+
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "a0", "a6", "my graph"));
+
+      g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a6", "participant1"));
+
+      g.addAnnotation(new Annotation("word1", "gonna", "word", "a1", "a2", "turn1"));
+      g.addAnnotation(new Annotation("word2", "[:", "word", "a2", "a3", "turn1"));
+      g.addAnnotation(new Annotation("word3", "going", "word", "a3", "a4", "turn1"));
+      g.addAnnotation(new Annotation("word4", "to]...", "word", "a4", "a?1", "turn1"));
+      g.addAnnotation(new Annotation("word5", "jump", "word", "a?1", "a?2", "turn1"));
+      g.addAnnotation(new Annotation("word6", "over", "word", "a?2", "a5", "turn1"));
+
+      try
+      {
+	 // transformer allows suffix after closing ]
+	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
+	    "word", "\\[:", "(.*)\\](.*)", true, null, "$2", "expansion", null, "$1", true, true);
+	 Vector<Change> changes = transformer.transform(g);
+	 assertEquals("gonna", g.getAnnotation("word1").getLabel());
+	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word2").getChange());
+	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word3").getChange());
+	 assertEquals("...", g.getAnnotation("word4").getLabel());
+	 assertEquals("jump", g.getAnnotation("word5").getLabel());
+	 assertEquals("over", g.getAnnotation("word6").getLabel());
+	 assertEquals("corrected ordinal", 3, g.getAnnotation("word5").getOrdinal());
+	 assertEquals("corrected ordinal", 4, g.getAnnotation("word6").getOrdinal());
+	 assertEquals("chained across gap", g.getAnnotation("word1").getEnd(), g.getAnnotation("word4").getStart());
+
+	 Annotation span = g.getAnnotations("expansion").elementAt(0);
+	 assertEquals("going to", span.getLabel());
+	 assertEquals("shares start with previous", g.getAnnotation("word1").getStart(), span.getStart());
+	 assertEquals("shares start with previous", "a1", span.getStartId());
+	 assertEquals("shares end with previous", g.getAnnotation("word1").getEnd(), span.getEnd());
+	 assertEquals("shares end with previous", "a4", span.getEndId());
+	 assertEquals("parent set", "word1", span.getParentId());
+
+	 Annotation word2 = g.getAnnotation("word2");
+	 Annotation word3 = g.getAnnotation("word3");
+	 Annotation word4 = g.getAnnotation("word4");
+	 assertNotNull("commit will remove annotations", g.getAnnotation("word2"));
+	 assertNotNull("commit will remove annotations", g.getAnnotation("word3"));
+	 assertNotNull("commit will not remove all annotations", g.getAnnotation("word4"));
+	 assertTrue("commit will remove annotations from layer", 
+		    g.getLayer("word").getAnnotations().contains(word2));
+	 assertTrue("commit will remove annotations from layer", 
+		    g.getLayer("word").getAnnotations().contains(word3));
+	 g.commit();
+	 assertEquals("gonna", g.getAnnotation("word1").getLabel());
+	 assertNull("commit removes annotation", g.getAnnotation("word2"));
+	 assertNull("commit removes annotation", g.getAnnotation("word3"));
+	 assertNotNull("commit doesn't remove suffixed annotation", g.getAnnotation("word4"));
+	 assertFalse("commit removes annotation from layer", 
+		     g.getLayer("word").getAnnotations().contains(word2));
+	 assertFalse("commit removes annotation from layer", 
+		     g.getLayer("word").getAnnotations().contains(word3));
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+   }
+
+   @Test public void annotatePreviousWithNoTrailingSuffix() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");
+
+      g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+			   true, // peers
+			   true, // peersOverlap
+			   true)); // saturated
+      g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "who", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "turn", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("expansion", "CLAN Expansion", Constants.ALIGNMENT_NONE,
+			   false, // peers
+			   true, // peersOverlap
+			   true, // saturated
+			   "word", // parentId
+			   true)); // parentIncludes
+
+      g.addAnchor(new Anchor("a0", 0.0)); // turn start
+      g.addAnchor(new Anchor("a1", 1.0)); // the
+      g.addAnchor(new Anchor("a2", 2.0)); // quick
+      g.addAnchor(new Anchor("a3", 3.0)); // brown
+      g.addAnchor(new Anchor("a4", 4.0)); // fox
+      // unset offsets
+      g.addAnchor(new Anchor("a?1", null)); // jumps
+      g.addAnchor(new Anchor("a?2", null)); // over
+      g.addAnchor(new Anchor("a5", 5.0)); // end of over
+      g.addAnchor(new Anchor("a6", 6.0)); // turn end
+
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "a0", "a6", "my graph"));
+
+      g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a6", "participant1"));
+
+      g.addAnnotation(new Annotation("word1", "gonna", "word", "a1", "a2", "turn1"));
+      g.addAnnotation(new Annotation("word2", "[:", "word", "a2", "a3", "turn1"));
+      g.addAnnotation(new Annotation("word3", "going", "word", "a3", "a4", "turn1"));
+      g.addAnnotation(new Annotation("word4", "to]", "word", "a4", "a?1", "turn1"));
+      g.addAnnotation(new Annotation("word5", "jump", "word", "a?1", "a?2", "turn1"));
+      g.addAnnotation(new Annotation("word6", "over", "word", "a?2", "a5", "turn1"));
+
+      try
+      {
+	 // transformer allows suffix after closing ]
+	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
+	    "word", "\\[:", "(.*)\\](.*)", true, null, "$2", "expansion", null, "$1", true, true);
+	 Vector<Change> changes = transformer.transform(g);
+	 assertEquals("gonna", g.getAnnotation("word1").getLabel());
+	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word2").getChange());
+	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word3").getChange());
+	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word4").getChange());
+	 assertEquals("jump", g.getAnnotation("word5").getLabel());
+	 assertEquals("over", g.getAnnotation("word6").getLabel());
+	 assertEquals("corrected ordinal", 2, g.getAnnotation("word5").getOrdinal());
+	 assertEquals("corrected ordinal", 3, g.getAnnotation("word6").getOrdinal());
+	 assertEquals("chained across gap", g.getAnnotation("word1").getEnd(), g.getAnnotation("word5").getStart());
+
+	 Annotation span = g.getAnnotations("expansion").elementAt(0);
+	 assertEquals("going to", span.getLabel());
+	 assertEquals("shares start with previous", g.getAnnotation("word1").getStart(), span.getStart());
+	 assertEquals("shares start with previous", "a1", span.getStartId());
+	 assertEquals("shares end with previous", g.getAnnotation("word1").getEnd(), span.getEnd());
+	 assertEquals("shares end with previous", "a?1", span.getEndId());
+	 assertEquals("parent set", "word1", span.getParentId());
+
+	 Annotation word2 = g.getAnnotation("word2");
+	 Annotation word3 = g.getAnnotation("word3");
+	 Annotation word4 = g.getAnnotation("word4");
+	 assertNotNull("commit will remove annotations", g.getAnnotation("word2"));
+	 assertNotNull("commit will remove annotations", g.getAnnotation("word3"));
+	 assertNotNull("commit will remove annotations", g.getAnnotation("word4"));
+	 assertTrue("commit will remove annotations from layer", 
+		    g.getLayer("word").getAnnotations().contains(word2));
+	 assertTrue("commit will remove annotations from layer", 
+		    g.getLayer("word").getAnnotations().contains(word3));
+	 assertTrue("commit will remove annotations from layer", 
+		    g.getLayer("word").getAnnotations().contains(word4));
+	 g.commit();
+	 assertEquals("gonna", g.getAnnotation("word1").getLabel());
+	 assertNull("commit removes annotation", g.getAnnotation("word2"));
+	 assertNull("commit removes annotation", g.getAnnotation("word3"));
+	 assertNull("commit removes annotation", g.getAnnotation("word4"));
+	 assertFalse("commit removes annotation from layer", 
+		     g.getLayer("word").getAnnotations().contains(word2));
+	 assertFalse("commit removes annotation from layer", 
+		     g.getLayer("word").getAnnotations().contains(word3));
+	 assertFalse("commit removes annotation from layer", 
+		     g.getLayer("word").getAnnotations().contains(word4));
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+   }
+
+   @Test public void dontAnnotatePrevious() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");
+
+      g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+			   true, // peers
+			   true, // peersOverlap
+			   true)); // saturated
+      g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "who", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "turn", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("span", "CLAN Span", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "turn", // parentId
+			   true)); // parentIncludes
+
+      g.addAnchor(new Anchor("a0", 0.0)); // turn start
+      g.addAnchor(new Anchor("a1", 1.0)); // the
+      g.addAnchor(new Anchor("a2", 2.0)); // quick
+      g.addAnchor(new Anchor("a3", 3.0)); // brown
+      g.addAnchor(new Anchor("a4", 4.0)); // fox
+      // unset offsets
+      g.addAnchor(new Anchor("a?1", null)); // jumps
+      g.addAnchor(new Anchor("a?2", null)); // over
+      g.addAnchor(new Anchor("a5", 5.0)); // end of over
+      g.addAnchor(new Anchor("a6", 6.0)); // turn end
+
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "a0", "a6", "my graph"));
+
+      g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a6", "participant1"));
+
+      g.addAnnotation(new Annotation("word1", "we", "word", "a1", "a2", "turn1"));
+      g.addAnnotation(new Annotation("word2", "<are", "word", "a2", "a3", "turn1"));
+      g.addAnnotation(new Annotation("word3", "going", "word", "a3", "a4", "turn1"));
+      g.addAnnotation(new Annotation("word4", "to>", "word", "a4", "a?1", "turn1"));
+      g.addAnnotation(new Annotation("word5", "jump", "word", "a?1", "a?2", "turn1"));
+      g.addAnnotation(new Annotation("word6", "over", "word", "a?2", "a5", "turn1"));
+
+      try
+      {
+	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
+	    "word", "<(.*)", "(.*)>(.*)", false, "$1", "$1$2", "span", "-", "$1", "$1", false);
+	 Vector<Change> changes = transformer.transform(g);
+	 assertEquals("we", g.getAnnotation("word1").getLabel());
+	 assertEquals("are", g.getAnnotation("word2").getLabel());
+	 assertEquals("going", g.getAnnotation("word3").getLabel());
+	 assertEquals("to", g.getAnnotation("word4").getLabel());
+	 assertEquals("jump", g.getAnnotation("word5").getLabel());
+	 assertEquals("over", g.getAnnotation("word6").getLabel());
+
+	 assertEquals("correct ordinal", 1, g.getAnnotation("word1").getOrdinal());
+	 assertEquals("correct ordinal", 2, g.getAnnotation("word2").getOrdinal());
+	 assertEquals("correct ordinal", 3, g.getAnnotation("word3").getOrdinal());
+	 assertEquals("correct ordinal", 4, g.getAnnotation("word4").getOrdinal());
+	 assertEquals("correct ordinal", 5, g.getAnnotation("word5").getOrdinal());
+	 assertEquals("correct ordinal", 6, g.getAnnotation("word6").getOrdinal());
+
+	 Annotation span = g.getAnnotations("span").elementAt(0);
+	 assertEquals("are-to", span.getLabel());
+	 assertEquals("shares start with first", g.getAnnotation("word2").getStart(), span.getStart());
+	 assertEquals("shares start with first", "a2", span.getStartId());
+	 assertEquals("shares end with last", g.getAnnotation("word4").getEnd(), span.getEnd());
+	 assertEquals("shares end with last", "a?1", span.getEndId());
+	 assertEquals("parent set", "turn1", span.getParentId());
+
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+   }
+
    @Test public void noDestination() 
    {
       Graph g = new Graph();
@@ -682,6 +973,7 @@ public class TestSpanningConventionTransformer
 	 fail(exception.toString());
       }
    }
+
 
    public static void main(String args[]) 
    {

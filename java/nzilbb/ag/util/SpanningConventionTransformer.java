@@ -23,6 +23,7 @@ package nzilbb.ag.util;
 
 import java.util.Vector;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.regex.*;
 import nzilbb.ag.*;
 
@@ -449,12 +450,8 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 	    Vector<Annotation> span = null;
 	    Annotation previousSource = null;
 	    Annotation newTarget = null;
-	    int ordinal = 0;
 	    for (Annotation source : parent.annotations(getSourceLayerId()))
 	    {
-	       // set initial value of ordinal to the first ordinal
-	       if (ordinal == 0) ordinal = source.getOrdinal() - 1;
-
 	       // are we in a span?
 	       if (span == null)
 	       { // look for start
@@ -529,16 +526,17 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 			   }
 			} // span longer than 1
 			Annotation startSpan = span.firstElement();
+			Annotation endSpan = span.lastElement();
 			if (getAnnotatePrevious() && previousSource != null)
 			{
 			   startSpan = previousSource;
+			   endSpan = previousSource;
 			}
 			Annotation spanParent = sourceDestinationOfParent?startSpan
 			   :graphDestinationOfParent?graph
 			   :startSpan.getParent();
 			Annotation annotation = graph.createSpan(
-			   startSpan, 
-			   span.lastElement(), 
+			   startSpan, endSpan, 
 			   getDestinationLayerId(), label.toString(), 
 			   spanParent);
 			changes.addAll( // record changes of:
@@ -557,11 +555,20 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 		     else
 		     { // change the label
 			String l = startMatcher.replaceAll(getSourceStartResult());
-			if (!l.equals(span.firstElement().getLabel()))
-			{ // only change if it's different
-			   span.firstElement().setLabel(l);
+			if (l.length() == 0) // treat empty label as a delete
+			{
+			   endOfGap = span.firstElement().getEnd();
 			   changes.add( // record changes of:
-			      span.firstElement().getLastChange());
+			      span.firstElement().destroy());
+			}
+			else
+			{
+			   if (!l.equals(span.firstElement().getLabel()))
+			   { // only change if it's different
+			      span.firstElement().setLabel(l);
+			      changes.add( // record changes of:
+				 span.firstElement().getLastChange());
+			   }
 			}
 		     }
 		     
@@ -585,35 +592,70 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 		     else
 		     { // change the label
 			String l = endMatcher.replaceAll(getSourceEndResult());
-			if (!l.equals(span.lastElement().getLabel()))
-			{ // only change if it's different
-			   span.lastElement().setLabel(l);
+			if (l.length() == 0) // treat empty label as a delete
+			{
+			   endOfGap = span.lastElement().getEnd();
 			   changes.add( // record changes of:
-			      span.lastElement().getLastChange());
+			      span.lastElement().destroy());
+			}
+			else
+			{
+			   if (!l.equals(span.lastElement().getLabel()))
+			   { // only change if it's different
+			      span.lastElement().setLabel(l);
+			      changes.add( // record changes of:
+				 span.lastElement().getLastChange());
+			   }
 			}
 		     }
 
-		     if (getCloseGaps() && endOfGap != null && previousSource != null)
+		     if (getCloseGaps())
 		     {
-			// close the gap
-			changes.addAll( // record changes of:
-			   previousSource.setEnd(endOfGap));
-		     }
+			if (getDeleteInSource())
+			{
+			   if (endOfGap != null && previousSource != null)
+			   {
+			      Anchor oldEnd = previousSource.getEnd();
+			      if (endOfGap != oldEnd)
+			      { // everything that ends here will now end at endOfGap
+				 for (LinkedHashSet<Annotation> layer : oldEnd.getEndOf().values())
+				 { 
+				    for (Annotation ending : layer)
+				    {
+				       // close the gap
+				       changes.addAll( // record changes of:
+					  ending.setEnd(endOfGap));
+				    } // next annotion ending here
+				 } // next layer
+			      } // end of gap is elsewhere
+			   } // endOfGap != null && previousSource != null
+			}
+			// else // !deleteInSource TODO
+		     } // close gaps
 		     
 		     span = null;
 		  } // found the end of the span
 	       } // in a span	       
-	       else
-	       { // not in a span
-		  ordinal++;
+	    } // next source annotation
 
+	    // now ensure ordinals are correct
+	    int ordinal = 0;
+	    for (Annotation source : parent.annotations(getSourceLayerId()))
+	    {
+	       // set initial value of ordinal to the first ordinal
+	       if (ordinal == 0) ordinal = source.getOrdinal() - 1;
+
+	       if (source.getChange() != Change.Operation.Destroy)
+	       {
+		  ordinal++;		  
 		  // ensure ordinal is correct
 		  if (source.getOrdinal() != ordinal)
 		  {
 		     source.setOrdinal(ordinal);
 		  }
-	       } // not in a span
-	    } // next source annotation
+	       } // this annotation not deleted
+	    } // next child
+
 	 } // next parent
 	 return changes;
       }
