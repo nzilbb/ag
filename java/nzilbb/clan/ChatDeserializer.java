@@ -391,6 +391,23 @@ public class ChatDeserializer
     * @param newCompletionLayer Completion layer.
     */
    public void setCompletionLayer(Layer newCompletionLayer) { completionLayer = newCompletionLayer; }
+
+   /**
+    * C-Unit layer.
+    * @see #getCUnitLayer()
+    * @see #setCUnitLayer(Layer)
+    */
+   protected Layer cUnitLayer;
+   /**
+    * Getter for {@link #cUnitLayer}: C-Unit layer.
+    * @return C-Unit layer.
+    */
+   public Layer getCUnitLayer() { return cUnitLayer; }
+   /**
+    * Setter for {@link #cUnitLayer}: C-Unit layer.
+    * @param newCUnitLayer C-Unit layer.
+    */
+   public void setCUnitLayer(Layer newCUnitLayer) { cUnitLayer = newCUnitLayer; }
    
    /**
     * Gems
@@ -503,6 +520,7 @@ public class ChatDeserializer
       turnLayer = null;
       utteranceLayer = null;
       wordLayer = null;
+      cUnitLayer = null;
       gemLayer = null;
       transcriberLayer = null;
       languagesLayer = null;
@@ -923,6 +941,11 @@ public class ChatDeserializer
 	 p.setPossibleValues(possibleTurnChildLayers.values());
 	 parameters.addParameter(p);
       }
+      Parameter pC = new Parameter("cUnitLayer", Layer.class, "C-Unit layer", "Layer for marking c-units");
+      String[] possibilitiesC = {"c-unit","cunit","sentence"};
+      pC.setValue(findLayerById(possibleTurnChildLayers, possibilitiesC));
+      pC.setPossibleValues(possibleTurnChildLayers.values());
+      parameters.addParameter(pC);
       if (disfluenciesFound)
       {
 	 Parameter p = new Parameter("disfluencyLayer", Layer.class, "Disfluency layer", "Layer for disfluency annotations");
@@ -1101,6 +1124,10 @@ public class ChatDeserializer
       {
 	 setGemLayer((Layer)parameters.get("gemLayer").getValue());
       }
+      if (parameters.containsKey("cUnitLayer"))
+      {
+	 setCUnitLayer((Layer)parameters.get("cUnitLayer").getValue());
+      }
       if (parameters.containsKey("transcriberLayer"))
       {
 	 setTranscriberLayer((Layer)parameters.get("transcriberLayer").getValue());
@@ -1160,6 +1187,7 @@ public class ChatDeserializer
       if (getRetracingLayer() != null) graph.addLayer((Layer)getRetracingLayer().clone());
       if (getCompletionLayer() != null) graph.addLayer((Layer)getCompletionLayer().clone());
       if (getGemLayer() != null) graph.addLayer((Layer)getGemLayer().clone());
+      if (getCUnitLayer() != null) graph.addLayer((Layer)getCUnitLayer().clone());
       if (getTranscriberLayer() != null) graph.addLayer((Layer)getTranscriberLayer().clone());
       if (getLanguagesLayer() != null) graph.addLayer((Layer)getLanguagesLayer().clone());
       for (String attribute : participantLayers.keySet())
@@ -1218,6 +1246,9 @@ public class ChatDeserializer
       // regular expressions
       Pattern lineSplitPattern = Pattern.compile("([0-9]+)_([0-9]+)");
       Pattern synchronisedPattern = Pattern.compile("^(.*)([0-9]+)_([0-9]+)$");
+      Pattern specialTerminatorsPattern = Pattern.compile(
+	 "^.*((\\+\\.\\.\\.)|(\\+\\.\\.\\?)|(\\+!\\?)|(\\+/\\.)|(\\+/\\?)|(\\+//\\.)|(\\+//\\?)|(\\+\\.)|(\\+\"/\\.)|(\\+\"\\.))$");
+      Pattern basicTerminatorsPattern = Pattern.compile("^.*([.?!,;:])$");
 
       // any lines that contain mid-line synchronisation codes are split into two
       Vector<String> syncLines = new Vector<String>();
@@ -1241,6 +1272,7 @@ public class ChatDeserializer
       Annotation currentTurn = new Annotation(null, "", getTurnLayer().getId());
       Annotation lastUtterance = new Annotation(null, "", getUtteranceLayer().getId());
       Annotation gem = null;
+      Annotation cUnit = null;
       Anchor lastAnchor = new Anchor(null, 0.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
       graph.addAnchor(lastAnchor);
       for (String line : syncLines)
@@ -1276,6 +1308,25 @@ public class ChatDeserializer
 	 {
 	    if (line.startsWith("*"))
 	    { // setting the speaker, ID is 3 characters
+	       if (cUnit != null && getCUnitLayer() != null)
+	       { // add last c-unit
+		  cUnit.setEnd(lastAnchor);
+		  // try to match first the multi-character terminators, then the single-character ones
+		  Matcher terminator = specialTerminatorsPattern.matcher(lastUtterance.getLabel());
+		  if (!terminator.matches())
+		  {
+		     terminator = basicTerminatorsPattern.matcher(lastUtterance.getLabel());
+		  }
+		  if (terminator.matches())
+		  {
+		     // set the c-unit label as the terminator
+		     cUnit.setLabel(terminator.group(1));
+		     // strip the terminator off the utterance
+		     lastUtterance.setLabel(lastUtterance.getLabel().substring(0, terminator.start(1)));
+		  }
+		  graph.addAnnotation(cUnit);
+		  cUnit = null;
+	       } // c-unit to add
 	       // something like:
 	       // *SUB: ...
 	       String participantId = line.substring(1, 4);
@@ -1303,6 +1354,11 @@ public class ChatDeserializer
 	    
 	    Annotation utterance = new Annotation(null, line, getUtteranceLayer().getId());
 	    utterance.setStart(lastUtterance.getEnd());
+	    if (cUnit == null && getCUnitLayer() != null)
+	    {
+	       cUnit = new Annotation(null, "", getCUnitLayer().getId());
+	       cUnit.setStart(lastUtterance.getEnd());
+	    }
 	    Matcher synchronisedMatcher = synchronisedPattern.matcher(line);
 	    if (synchronisedMatcher.matches())
 	    {
@@ -1310,6 +1366,7 @@ public class ChatDeserializer
 	       Anchor start = graph.getOrCreateAnchorAt(
 		  Double.parseDouble(synchronisedMatcher.group(2))
 		  / 1000, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+	       if (cUnit != null && (cUnit.getStartId() == null || cUnit.getStartId().equals(utterance.getStartId()))) cUnit.setStart(start);
 	       utterance.setStart(start);
 	       Anchor end = graph.getOrCreateAnchorAt(
 		  Double.parseDouble(synchronisedMatcher.group(3))
@@ -1325,7 +1382,7 @@ public class ChatDeserializer
 	       }
 	       else
 	       {
-		  checkAlignmentAgainstLastUtterance(utterance, start, end, lastUtterance, currentTurn, utteranceLayer, graph);
+		  checkAlignmentAgainstLastUtterance(utterance, start, end, cUnit, lastUtterance, currentTurn, utteranceLayer, graph);
 	       }
 	    } // synchronised utterance
 	    graph.addAnnotation(utterance);
@@ -1346,6 +1403,25 @@ public class ChatDeserializer
 	 gem.setEnd(lastAnchor);
 	 graph.addAnnotation(gem);
       }
+      if (cUnit != null && getCUnitLayer() != null)
+      { // add last c-unit
+	 cUnit.setEnd(lastAnchor);
+	 // try to match first the multi-character terminators, then the single-character ones
+	 Matcher terminator = specialTerminatorsPattern.matcher(lastUtterance.getLabel());
+	 if (!terminator.matches())
+	 {
+	    terminator = basicTerminatorsPattern.matcher(lastUtterance.getLabel());
+	 }
+	 if (terminator.matches())
+	 {
+	    // set the c-unit label as the terminator
+	    cUnit.setLabel(terminator.group(1));
+	    // strip the terminator off the utterance
+	    lastUtterance.setLabel(lastUtterance.getLabel().substring(0, terminator.start(1)));
+	 }
+	 graph.addAnnotation(cUnit);
+	 cUnit = null;
+      } // c-unit to add
       currentTurn.setEndId(lastAnchor.getId());
 
       // tokenize utterances into words
@@ -1513,12 +1589,13 @@ public class ChatDeserializer
     * @param utterance Current utterance, which is not assumed to be in the graph yet.
     * @param start The utterance's start anchor, which is assumed to be in the graph.
     * @param end The utterance's end anchor, which is assumed to be in the graph.
+    * @param cUnit The current c-unit annotation, which is not assumed to be in the graph.
     * @param lastUtterance Last utterance, which is assumed to be in the graph.
     * @param currentTurn Current turn, which is assumed to be in the graph, and the parent of <var></var>utterance
     * @param utteranceLayer The utterance layer definition.
     * @param graph The annotation graph.
     */
-   public void checkAlignmentAgainstLastUtterance(Annotation utterance, Anchor start, Anchor end, Annotation lastUtterance, Annotation currentTurn, Layer utteranceLayer, Graph graph)
+   public void checkAlignmentAgainstLastUtterance(Annotation utterance, Anchor start, Anchor end, Annotation cUnit, Annotation lastUtterance, Annotation currentTurn, Layer utteranceLayer, Graph graph)
    {
       // is this utterance in the same turn as the last one?
       Anchor lastEnd = lastUtterance.getEnd();
@@ -1562,7 +1639,11 @@ public class ChatDeserializer
 		     Anchor middleAnchor = graph.addAnchor(
 			new Anchor(null, lastEnd.getOffset() + ((start.getOffset() - lastEnd.getOffset())/2), 
 				   Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-		     lastUtterance.setEnd(middleAnchor);
+		     lastUtterance.getEnd().moveEndingAnnotations(middleAnchor);
+		     if (cUnit != null && cUnit.getStartId().equals(start.getId()))
+		     {
+			cUnit.setStart(middleAnchor);
+		     }
 		     utterance.setStart(middleAnchor);
 		  }
 	       } // this utterance starts before the last one ends

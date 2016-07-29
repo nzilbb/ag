@@ -50,6 +50,7 @@ public class TestChatDeserializer
 	 new Layer("corpus", "Speaker corpus", 0, false, false, true, "who", true),
 	 new Layer("role", "Speaker role", 0, false, false, true, "who", true),
 	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("c-unit", "C-Units", 2, true, false, false, "turn", true),
 	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
 	 new Layer("error", "Errors", 2, true, false, false, "turn", true),
 	 new Layer("retracing", "Retracing", 2, true, false, false, "turn", true),
@@ -115,82 +116,82 @@ public class TestChatDeserializer
       assertEquals(g.getAnnotation("SUB"), turns.elementAt(0).getParent());
 
       // utterances
-      Vector<Annotation> utterances = g.getAnnotations("utterance");
-      assertEquals(new Double(0.001), utterances.elementAt(0).getStart().getOffset());
-      assertEquals(new Double(21.510), utterances.elementAt(0).getEnd().getOffset());
-      assertEquals("SUB", utterances.elementAt(0).getParent().getLabel());
-      assertEquals(turns.elementAt(0), utterances.elementAt(0).getParent());
+      Annotation[] utterances = g.annotations("utterance");
+      assertEquals(new Double(0.001), utterances[0].getStart().getOffset());
+      assertEquals(new Double(21.510), utterances[0].getEnd().getOffset());
+      assertEquals("SUB", utterances[0].getParent().getLabel());
+      assertEquals(turns.elementAt(0), utterances[0].getParent());
 
-      assertEquals("wrapped line", new Double(21.510), utterances.elementAt(1).getStart().getOffset());
+      assertEquals("wrapped line", new Double(21.510), utterances[1].getStart().getOffset());
       assertEquals("simultaneos with next line", 
-		   new Double(23.2835), utterances.elementAt(1).getEnd().getOffset());
+		   new Double(23.2835), utterances[1].getEnd().getOffset());
       assertEquals("simultaneos with next line", 
 		   new Integer(Constants.CONFIDENCE_DEFAULT), 
-		   utterances.elementAt(1).getEnd().get(Constants.CONFIDENCE));
-      assertEquals("SUB", utterances.elementAt(1).getParent().getLabel());
+		   utterances[1].getEnd().get(Constants.CONFIDENCE));
+      assertEquals("SUB", utterances[1].getParent().getLabel());
 
       assertEquals("simultaneous with previous line", 
-		   new Double(23.2835), utterances.elementAt(2).getStart().getOffset());
+		   new Double(23.2835), utterances[2].getStart().getOffset());
       assertEquals("simultaneous with previous line", 
 		   new Integer(Constants.CONFIDENCE_DEFAULT), 
-		   utterances.elementAt(2).getStart().get(Constants.CONFIDENCE));
-      assertEquals("simultaneous line", new Double(25.057), utterances.elementAt(2).getEnd().getOffset());
-      assertEquals("SUB", utterances.elementAt(2).getParent().getLabel());
+		   utterances[2].getStart().get(Constants.CONFIDENCE));
+      assertEquals("simultaneous line", new Double(25.057), utterances[2].getEnd().getOffset());
+      assertEquals("SUB", utterances[2].getParent().getLabel());
 
-      assertEquals(new Double(25.057), utterances.elementAt(3).getStart().getOffset());
-      assertEquals(new Double(29.994), utterances.elementAt(3).getEnd().getOffset());
+      assertEquals(new Double(25.057), utterances[3].getStart().getOffset());
+      assertEquals(new Double(29.994), utterances[3].getEnd().getOffset());
 
-      assertEquals("linking utterance", "", utterances.elementAt(4).getLabel());
-      assertEquals("linking utterance", new Double(29.994), utterances.elementAt(4).getStart().getOffset());
-      assertEquals("linking utterance", new Double(34.723), utterances.elementAt(4).getEnd().getOffset());
+      assertEquals("linking utterance", "", utterances[4].getLabel());
+      assertEquals("linking utterance", new Double(29.994), utterances[4].getStart().getOffset());
+      assertEquals("linking utterance", new Double(34.723), utterances[4].getEnd().getOffset());
 
-      assertEquals(new Double(34.723), utterances.elementAt(5).getStart().getOffset());
-      assertEquals(new Double(35.752), utterances.elementAt(5).getEnd().getOffset());
+      assertEquals(new Double(34.723), utterances[5].getStart().getOffset());
+      assertEquals(new Double(35.752), utterances[5].getEnd().getOffset());
 
       assertEquals("mid-line synchronisation - first utterance", 
-		   new Double(414.937), utterances.elementAt(142).getStart().getOffset());
+		   new Double(414.937), utterances[142].getStart().getOffset());
       assertEquals("mid-line synchronisation - first utterance", 
-		   new Double(418.673), utterances.elementAt(142).getEnd().getOffset());
+		   new Double(418.673), utterances[142].getEnd().getOffset());
       assertEquals("mid-line synchronisation - linking utterance", 
-		   new Double(418.673), utterances.elementAt(143).getStart().getOffset());
+		   new Double(418.673), utterances[143].getStart().getOffset());
       assertEquals("mid-line synchronisation - linking utterance", 
-		   new Double(418.809), utterances.elementAt(143).getEnd().getOffset());
+		   new Double(418.809), utterances[143].getEnd().getOffset());
       assertEquals("mid-line synchronisation - second utterance", 
-		   new Double(418.809), utterances.elementAt(144).getStart().getOffset());
+		   new Double(418.809), utterances[144].getStart().getOffset());
       assertEquals("mid-line synchronisation - second utterance", 
-		   new Double(420.631), utterances.elementAt(144).getEnd().getOffset());
+		   new Double(420.631), utterances[144].getEnd().getOffset());
 
       assertEquals("overlapping utterances - first start unchanged", 
-		   new Double(452.319), utterances.elementAt(159).getStart().getOffset());
+		   new Double(452.319), utterances[159].getStart().getOffset());
       assertEquals("overlapping utterances - first end unchanged", 
-		   new Double(455.432), utterances.elementAt(159).getEnd().getOffset());
+		   new Double(455.432), utterances[159].getEnd().getOffset());
       assertEquals("overlapping utterances - second start changed", 
-		   new Double(455.432), utterances.elementAt(160).getStart().getOffset());
+		   new Double(455.432), utterances[160].getStart().getOffset());
       assertEquals("overlapping utterances - second end unchanged", 
-		   new Double(460.584), utterances.elementAt(160).getEnd().getOffset());
+		   new Double(460.584), utterances[160].getEnd().getOffset());
 
       assertEquals("unsynchronised utterance - before", 
-		   new Double(489.467), utterances.elementAt(170).getStart().getOffset());
+		   new Double(489.467), utterances[170].getStart().getOffset());
       assertEquals("unsynchronised utterances - before", 
-		   new Double(493.327), utterances.elementAt(170).getEnd().getOffset());
+		   new Double(493.327), utterances[170].getEnd().getOffset());
       assertEquals("unsynchronised utterance", 
-		   new Double(493.327), utterances.elementAt(171).getStart().getOffset());
+		   new Double(493.327), utterances[171].getStart().getOffset());
       assertEquals("unsynchronised utterances", 
-		   new Double(493.327), utterances.elementAt(171).getEnd().getOffset());
+		   new Double(493.327), utterances[171].getEnd().getOffset());
       assertEquals("unsynchronised utterance - after", 
-		   new Double(493.327), utterances.elementAt(172).getStart().getOffset());
+		   new Double(493.327), utterances[172].getStart().getOffset());
       assertEquals("unsynchronised utterances - after", 
-		   new Double(496.813), utterances.elementAt(172).getEnd().getOffset());
+		   new Double(496.813), utterances[172].getEnd().getOffset());
 
       
       Annotation[] words = g.annotations("word");
-      String[] wordLabels = {
+      String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
 	 "ab", "abc", "abcdef", "abcd", "gonna", "lie", "abcd", "abc", "pet", "abcdefghij", 
-	 "abc", "abcde", "abc", "ab", "abcd", "ab", "abc", "worryin", "i", "abcd.",
-	 "she'll", "ab", "nd", "abcdefg.", 
-	 "abcd", "abcdefg", "ab", "abc", "abcdef", "abcde", "abc", "ab", "abc", "abcdefgh", "abc", "abcdef", "abc.", 
+	 "abc", "abcde", "abc", "ab", "abcd", "ab", "abc", "worryin", "i", "abcd",
+	 "she'll", "ab", "nd", "abcdefg", 
+	 "abcd", "abcdefg", "ab", "abc", "abcdef", "abcde", "abc", "ab", "abc", "abcdefgh", "abc", "abcdef", "abc",
 	 "ab", "abcde", "until", "she's", "abc", "ab", "abcde", "abcdef", "abcde", "ab", "abc", "baby's", "crib", 
-	 "abc", "abcdefg", "abc", "abcd", "abcde", "abc", "abcd", "abc", "abcd."};
+	 "abc", "abcdefg", "abc", "abcd", "abcde", "abc", "abcd", "abc", "abcd"};
       for (int i = 0; i < wordLabels.length; i++)
       {
 	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
@@ -206,8 +207,7 @@ public class TestChatDeserializer
       assertEquals("ab", words[269].getLabel());
       assertEquals("a", words[270].getLabel());
       assertEquals("hunger", words[271].getLabel());
-      assertEquals(".", words[272].getLabel());
-      assertEquals("ab", words[273].getLabel());
+      assertEquals("ab", words[272].getLabel());
 
       assertEquals(turns.elementAt(0).getId(), words[267].getParentId());
       assertEquals(turns.elementAt(0).getId(), words[268].getParentId());
@@ -222,6 +222,23 @@ public class TestChatDeserializer
 	 assertEquals("ordinals correct " + words[i], i+1, words[i].getOrdinal());
 	 assertEquals("tagged as manual: " + words[i], 
 		      new Integer(Constants.CONFIDENCE_MANUAL), words[i].get(Constants.CONFIDENCE));
+      }
+
+      // c-units
+      Annotation[] cUnits = g.annotations("c-unit");
+      assertEquals(148, cUnits.length);
+      assertEquals(".", cUnits[0].getLabel());
+      assertEquals(utterances[0].getStart(), cUnits[0].getStart());
+      assertEquals(utterances[1].getEnd(), cUnits[0].getEnd());
+      assertEquals(utterances[2].getStart(), cUnits[1].getStart());
+      assertEquals(utterances[2].getEnd(), cUnits[1].getEnd());
+      assertEquals("+//?", cUnits[2].getLabel());
+      assertEquals(utterances[3].getStart(), cUnits[2].getStart());
+      assertEquals(utterances[3].getEnd(), cUnits[2].getEnd());
+      for (Annotation a : cUnits)
+      {
+	 assertEquals("tagged as manual: " + a, 
+		      new Integer(Constants.CONFIDENCE_MANUAL), a.get(Constants.CONFIDENCE));
       }
 
       // disfluency
@@ -296,8 +313,8 @@ public class TestChatDeserializer
       assertEquals("trailing completion", "worryin", words[17].getLabel());
       assertEquals("trailing completion", "worrying", words[17].my("completion").getLabel());
 
-      assertEquals("leading/trailing completion", "fridge", words[278].getLabel());
-      assertEquals("leading/trailing completion", "refridgerator", words[278].my("completion").getLabel());
+      assertEquals("leading/trailing completion", "fridge", words[277].getLabel());
+      assertEquals("leading/trailing completion", "refridgerator", words[277].my("completion").getLabel());
 
       // retracing
       Annotation[] retracing = g.annotations("retracing");
@@ -476,67 +493,67 @@ public class TestChatDeserializer
       assertEquals(g.getAnnotation("SUB"), turns.elementAt(0).getParent());
 
       // utterances
-      Vector<Annotation> utterances = g.getAnnotations("utterance");
-      assertEquals(new Double(0.001), utterances.elementAt(0).getStart().getOffset());
-      assertEquals(new Double(21.510), utterances.elementAt(0).getEnd().getOffset());
-      assertEquals("SUB", utterances.elementAt(0).getParent().getLabel());
-      assertEquals(turns.elementAt(0), utterances.elementAt(0).getParent());
+      Annotation[] utterances = g.annotations("utterance");
+      assertEquals(new Double(0.001), utterances[0].getStart().getOffset());
+      assertEquals(new Double(21.510), utterances[0].getEnd().getOffset());
+      assertEquals("SUB", utterances[0].getParent().getLabel());
+      assertEquals(turns.elementAt(0), utterances[0].getParent());
 
-      assertEquals("wrapped line", new Double(21.510), utterances.elementAt(1).getStart().getOffset());
+      assertEquals("wrapped line", new Double(21.510), utterances[1].getStart().getOffset());
       assertEquals("simultaneos with next line", 
-		   new Double(23.2835), utterances.elementAt(1).getEnd().getOffset());
+		   new Double(23.2835), utterances[1].getEnd().getOffset());
       assertEquals("simultaneos with next line", 
 		   new Integer(Constants.CONFIDENCE_DEFAULT), 
-		   utterances.elementAt(1).getEnd().get(Constants.CONFIDENCE));
-      assertEquals("SUB", utterances.elementAt(1).getParent().getLabel());
+		   utterances[1].getEnd().get(Constants.CONFIDENCE));
+      assertEquals("SUB", utterances[1].getParent().getLabel());
 
       assertEquals("simultaneous with previous line", 
-		   new Double(23.2835), utterances.elementAt(2).getStart().getOffset());
+		   new Double(23.2835), utterances[2].getStart().getOffset());
       assertEquals("simultaneous with previous line", 
 		   new Integer(Constants.CONFIDENCE_DEFAULT), 
-		   utterances.elementAt(2).getStart().get(Constants.CONFIDENCE));
-      assertEquals("simultaneous line", new Double(25.057), utterances.elementAt(2).getEnd().getOffset());
-      assertEquals("SUB", utterances.elementAt(2).getParent().getLabel());
+		   utterances[2].getStart().get(Constants.CONFIDENCE));
+      assertEquals("simultaneous line", new Double(25.057), utterances[2].getEnd().getOffset());
+      assertEquals("SUB", utterances[2].getParent().getLabel());
 
-      assertEquals(new Double(25.057), utterances.elementAt(3).getStart().getOffset());
-      assertEquals(new Double(29.994), utterances.elementAt(3).getEnd().getOffset());
+      assertEquals(new Double(25.057), utterances[3].getStart().getOffset());
+      assertEquals(new Double(29.994), utterances[3].getEnd().getOffset());
 
-      assertEquals("linking utterance", "", utterances.elementAt(4).getLabel());
-      assertEquals("linking utterance", new Double(29.994), utterances.elementAt(4).getStart().getOffset());
-      assertEquals("linking utterance", new Double(34.723), utterances.elementAt(4).getEnd().getOffset());
+      assertEquals("linking utterance", "", utterances[4].getLabel());
+      assertEquals("linking utterance", new Double(29.994), utterances[4].getStart().getOffset());
+      assertEquals("linking utterance", new Double(34.723), utterances[4].getEnd().getOffset());
 
-      assertEquals(new Double(34.723), utterances.elementAt(5).getStart().getOffset());
-      assertEquals(new Double(35.752), utterances.elementAt(5).getEnd().getOffset());
+      assertEquals(new Double(34.723), utterances[5].getStart().getOffset());
+      assertEquals(new Double(35.752), utterances[5].getEnd().getOffset());
 
       assertEquals("mid-line synchronisation - first utterance", 
-		   new Double(414.937), utterances.elementAt(142).getStart().getOffset());
+		   new Double(414.937), utterances[142].getStart().getOffset());
       assertEquals("mid-line synchronisation - first utterance", 
-		   new Double(418.673), utterances.elementAt(142).getEnd().getOffset());
+		   new Double(418.673), utterances[142].getEnd().getOffset());
       assertEquals("mid-line synchronisation - linking utterance", 
-		   new Double(418.673), utterances.elementAt(143).getStart().getOffset());
+		   new Double(418.673), utterances[143].getStart().getOffset());
       assertEquals("mid-line synchronisation - linking utterance", 
-		   new Double(418.809), utterances.elementAt(143).getEnd().getOffset());
+		   new Double(418.809), utterances[143].getEnd().getOffset());
       assertEquals("mid-line synchronisation - second utterance", 
-		   new Double(418.809), utterances.elementAt(144).getStart().getOffset());
+		   new Double(418.809), utterances[144].getStart().getOffset());
       assertEquals("mid-line synchronisation - second utterance", 
-		   new Double(420.631), utterances.elementAt(144).getEnd().getOffset());
+		   new Double(420.631), utterances[144].getEnd().getOffset());
 
       assertEquals("overlapping utterances - first start unchanged", 
-		   new Double(452.319), utterances.elementAt(159).getStart().getOffset());
+		   new Double(452.319), utterances[159].getStart().getOffset());
       assertEquals("overlapping utterances - first end unchanged", 
-		   new Double(455.432), utterances.elementAt(159).getEnd().getOffset());
+		   new Double(455.432), utterances[159].getEnd().getOffset());
       assertEquals("overlapping utterances - second start changed", 
-		   new Double(455.432), utterances.elementAt(160).getStart().getOffset());
+		   new Double(455.432), utterances[160].getStart().getOffset());
       assertEquals("overlapping utterances - second end unchanged", 
-		   new Double(460.584), utterances.elementAt(160).getEnd().getOffset());
+		   new Double(460.584), utterances[160].getEnd().getOffset());
 
       
       Annotation[] words = g.annotations("word");
-      String[] wordLabels = {
+      String[] wordLabels = { // NB we have no c-unit layer, so terminators are still present
 	 "ab", "abc", "abcdef", "abcd", "gonna", "lie", "abcd", "abc", "pet", "abcdefghij", 
 	 "abc", "abcde", "abc", "ab", "abcd", "ab", "abc", "worryin", "i", "abcd.",
 	 "she'll", "ab", "nd", "abcdefg.", 
-	 "abcd", "abcdefg", "ab", "abc", "abcdef", "abcde", "abc", "ab", "abc", "abcdefgh", "abc", "abcdef", "abc.", 
+	 "abcd", "abcdefg", "ab", "abc", "abcdef", "abcde", "abc", "ab", "abc", "abcdefgh", "abc", "abcdef", "abc", "+//?",
 	 "ab", "abcde", "until", "she's", "abc", "ab", "abcde", "abcdef", "abcde", "ab", "abc", "baby's", "crib", 
 	 "abc", "abcdefg", "abc", "abcd", "abcde", "abc", "abcd", "abc", "abcd."};
       for (int i = 0; i < wordLabels.length; i++)
@@ -564,13 +581,13 @@ public class TestChatDeserializer
       // errors
       assertNull("errors not tagged", g.annotations("error"));
 
-      assertEquals("they've", words[267].getLabel());
-      assertEquals("work", words[268].getLabel());
-      assertEquals("ab", words[269].getLabel());
-      assertEquals("a", words[270].getLabel());
-      assertEquals("hunger", words[271].getLabel());
-      assertEquals(".", words[272].getLabel());
-      assertEquals("ab", words[273].getLabel());
+      assertEquals("they've", words[268].getLabel());
+      assertEquals("work", words[269].getLabel());
+      assertEquals("ab", words[270].getLabel());
+      assertEquals("a", words[271].getLabel());
+      assertEquals("hunger", words[272].getLabel());
+      assertEquals(".", words[273].getLabel());
+      assertEquals("ab", words[274].getLabel());
 
       assertEquals(turns.elementAt(0).getId(), words[267].getParentId());
       assertEquals(turns.elementAt(0).getId(), words[268].getParentId());
