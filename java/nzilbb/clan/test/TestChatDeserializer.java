@@ -131,7 +131,6 @@ public class TestChatDeserializer
 
       assertEquals("wrapped line", new Double(28.452), utterances.elementAt(4).getStart().getOffset());
       assertEquals("wrapped line", new Double(40.360), utterances.elementAt(4).getEnd().getOffset());
-      
       Annotation[] words = g.annotations("word");
       assertEquals("this", words[0].getLabel());
       assertEquals("family", words[1].getLabel());
@@ -445,15 +444,29 @@ public class TestChatDeserializer
       assertEquals(new Double(34.723), utterances.elementAt(5).getStart().getOffset());
       assertEquals(new Double(35.752), utterances.elementAt(5).getEnd().getOffset());
 
-      assertEquals("overlapping utterances - first start unchanged", 
-		   new Double(452.319), utterances.elementAt(158).getStart().getOffset());
-      assertEquals("overlapping utterances - first end unchanged", 
-		   new Double(455.432), utterances.elementAt(158).getEnd().getOffset());
-      assertEquals("overlapping utterances - second start changed", 
-		   new Double(455.432), utterances.elementAt(159).getStart().getOffset());
-      assertEquals("overlapping utterances - second end unchanged", 
-		   new Double(460.584), utterances.elementAt(159).getEnd().getOffset());
+      assertEquals("mid-line synchronisation - first utterance", 
+		   new Double(414.937), utterances.elementAt(142).getStart().getOffset());
+      assertEquals("mid-line synchronisation - first utterance", 
+		   new Double(418.673), utterances.elementAt(142).getEnd().getOffset());
+      assertEquals("mid-line synchronisation - linking utterance", 
+		   new Double(418.673), utterances.elementAt(143).getStart().getOffset());
+      assertEquals("mid-line synchronisation - linking utterance", 
+		   new Double(418.809), utterances.elementAt(143).getEnd().getOffset());
+      assertEquals("mid-line synchronisation - second utterance", 
+		   new Double(418.809), utterances.elementAt(144).getStart().getOffset());
+      assertEquals("mid-line synchronisation - second utterance", 
+		   new Double(420.631), utterances.elementAt(144).getEnd().getOffset());
 
+      assertEquals("overlapping utterances - first start unchanged", 
+		   new Double(452.319), utterances.elementAt(159).getStart().getOffset());
+      assertEquals("overlapping utterances - first end unchanged", 
+		   new Double(455.432), utterances.elementAt(159).getEnd().getOffset());
+      assertEquals("overlapping utterances - second start changed", 
+		   new Double(455.432), utterances.elementAt(160).getStart().getOffset());
+      assertEquals("overlapping utterances - second end unchanged", 
+		   new Double(460.584), utterances.elementAt(160).getEnd().getOffset());
+
+      
       Annotation[] words = g.annotations("word");
       assertEquals("ah", words[0].getLabel());
       assertEquals("the", words[1].getLabel());

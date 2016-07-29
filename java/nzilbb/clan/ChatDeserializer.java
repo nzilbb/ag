@@ -44,7 +44,7 @@ import nzilbb.configure.ParameterSet;
  * Deserializer for CHAT files produced by CLAN.
  * <p><em>NB</em> the current implementation is <em>not exhaustive</em>; it only covers:
  * <ul>
- *  <li>Time synchronization codes - TODO handle mid-line synchronization
+ *  <li>Time synchronization codes, including mid-line synchronization.
  *    <br>Overlapping utterances in the same speaker turn are handled as follows:
  *    <ul>
  *      <li>If overlap is partial, the start of the second utterance is set to the end of the first</li>
@@ -623,7 +623,7 @@ public class ChatDeserializer
 	       lines.add(line);
 	    }
 	    else
-	    { // last line was not time-sycnchronized, so append this line to it
+	    { // last line was not time-synchronized, so append this line to it
 	       // remove the last line
 	       String lastLine = lines.remove(lines.size()-1);
 	       // append this line to it
@@ -1214,15 +1214,34 @@ public class ChatDeserializer
       }
 
       // regular expressions
+      Pattern lineSplitPattern = Pattern.compile("([0-9]+)_([0-9]+)");
       Pattern synchronisedPattern = Pattern.compile("^(.*)([0-9]+)_([0-9]+)$");
 
-      // lines
+      // any lines that contain mid-line synchronisation codes are split into two
+      Vector<String> syncLines = new Vector<String>();
+      for (String line : getLines())
+      {
+	 Matcher matcher = lineSplitPattern.matcher(line);
+	 // nibble off matching parts
+	 int begin = 0;
+	 while (matcher.find())
+	 {
+	    syncLines.add(line.substring(begin, matcher.end()));
+	    begin = matcher.end();
+	 } // next match
+	 if (begin < line.length() - 1)
+	 {
+	    syncLines.add(line.substring(begin));
+	 }
+      }
+
+      // utterances
       Annotation currentTurn = new Annotation(null, "", getTurnLayer().getId());
       Annotation lastUtterance = new Annotation(null, "", getUtteranceLayer().getId());
       Annotation gem = null;
       Anchor lastAnchor = new Anchor(null, 0.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
       graph.addAnchor(lastAnchor);
-      for (String line : getLines())
+      for (String line : syncLines)
       {
 	 if (line.startsWith("@"))
 	 {
