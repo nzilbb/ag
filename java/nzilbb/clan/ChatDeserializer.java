@@ -1520,11 +1520,17 @@ public class ChatDeserializer
 	       { // this utterance starts before the last one ends
 		  if (end.getOffset() > lastEnd.getOffset())
 		  { // partial overlap
+		     warnings.add("Utterance at " + start + "-" + end 
+				  + " overlaps previous at " + lastUtterance.getStart() + "-" + lastEnd
+				  + ": using " + lastEnd + " as start time.");
 		     // use the later time
 		     utterance.setStartId(lastEnd.getId());
 		  }
 		  else
 		  { // full overlap - this should probably be an error, but instead:
+		     warnings.add("Utterance at " + start + "-" + end 
+				  + " completely overlaps previous at " + lastUtterance.getStart() + "-" + lastEnd
+				  + ": end time of first and start time of second undefined.");
 		     // chain this utterance to the last one with an unaligned anchor
 		     Anchor middleAnchor = graph.addAnchor(new Anchor());
 		     lastUtterance.setEnd(middleAnchor);
