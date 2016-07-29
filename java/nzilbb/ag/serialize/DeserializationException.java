@@ -30,7 +30,7 @@ import java.util.LinkedHashMap;
 public class DeserializationException
    extends Exception
 {
-   public enum ErrorType { Other };
+   public enum ErrorType { Alignment, Tokenization, Other };
 
    // Attributes:
    

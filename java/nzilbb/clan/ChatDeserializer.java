@@ -44,7 +44,13 @@ import nzilbb.configure.ParameterSet;
  * Deserializer for CHAT files produced by CLAN.
  * <p><em>NB</em> the current implementation is <em>not exhaustive</em>; it only covers:
  * <ul>
- *  <li>Time synchronization codes - TODO handle mid-line synchronization and gaps between utterances.</li>
+ *  <li>Time synchronization codes - TODO handle mid-line synchronization
+ *    <br>Overlapping utterances in the same speaker turn are handled as follows:
+ *    <ul>
+ *      <li>If overlap is partial, the start of the second utterance is set to the end of the first</li>
+ *      <li>If overlap is total, the two utterances are chained together with a non-aligned anchor between them.</li>
+ *    </ul>
+ *  </li>
  *  <li>Disfluency marking with &amp; - e.g. <samp>so &amp;sund Sunday</samp></li>
  *  <li>Non-standard form expansion - e.g. <samp>gonna [: going to]</samp></li>
  *  <li>Incomplete word completion - e.g. <samp>dinner doin(g) all</samp></li>
@@ -1129,6 +1135,9 @@ public class ChatDeserializer
    public Graph[] deserialize() 
       throws DeserializerNotConfiguredException, DeserializationParametersMissingException, DeserializationException
    {
+      // if there are errors, accumlate as many as we can before throwing DeserializationException
+      DeserializationException errors = null;
+
       Graph graph = new Graph();
       graph.setId(getName());
       // add layers to the graph
@@ -1281,19 +1290,23 @@ public class ChatDeserializer
 		  Double.parseDouble(synchronisedMatcher.group(2))
 		  / 1000, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
 	       utterance.setStart(start);
-	       utterance.setEnd(
-		  graph.getOrCreateAnchorAt(
-		     Double.parseDouble(synchronisedMatcher.group(3))
-		     / 1000, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
-
-	       // is there a gap between this one and the last one?
-	       if (lastUtterance.getEnd() != null && lastUtterance.getEnd().getOffset() != null
-	       	   && start.getOffset() - lastUtterance.getEnd().getOffset() > 0.1)
-	       {
-	       	  // add an empty filler utterance
-	       	  graph.addAnnotation(new Annotation(null, "", getUtteranceLayer().getId(), lastUtterance.getEnd().getId(), start.getId(), currentTurn.getId()));
+	       Anchor end = graph.getOrCreateAnchorAt(
+		  Double.parseDouble(synchronisedMatcher.group(3))
+		  / 1000, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+	       utterance.setEnd(end);
+	       
+	       if (start.getOffset() > end.getOffset())
+	       { // start and end in reverse order 
+		  if (errors == null) errors = new DeserializationException();
+		  errors.addError(DeserializationException.ErrorType.Alignment, 
+				  "Utterance start is after end: " 
+				  + synchronisedMatcher.group(2) + "_" + synchronisedMatcher.group(3));
 	       }
-	    }
+	       else
+	       {
+		  checkAlignmentAgainstLastUtterance(utterance, start, end, lastUtterance, currentTurn, utteranceLayer, graph);
+	       }
+	    } // synchronised utterance
 	    graph.addAnnotation(utterance);
 	    utterance.setParent(currentTurn);
 
@@ -1321,7 +1334,9 @@ public class ChatDeserializer
       }
       catch(TransformationException exception)
       {
-	 throw new DeserializationException(exception);
+	 if (errors == null) errors = new DeserializationException();
+	 if (errors.getCause() == null) errors.initCause(exception);
+	 errors.addError(DeserializationException.ErrorType.Tokenization, exception.getMessage());
       }
 
       try
@@ -1453,14 +1468,73 @@ public class ChatDeserializer
 	 } // next span	
 	 graph.commit();
 
-	 Graph[] graphs = { graph };
-	 return graphs;
       }
       catch(TransformationException exception)
       {
-	 throw new DeserializationException(exception);
+	 if (errors == null) errors = new DeserializationException();
+	 if (errors.getCause() == null) errors.initCause(exception);
+	 errors.addError(DeserializationException.ErrorType.Other, exception.getMessage());
       }
+      if (errors != null) throw errors;
+      Graph[] graphs = { graph };
+      return graphs;
    }
+
+
+   /**
+    * Check the alignment of the given utterance against the given last utterance, to ensure there are no gaps if there shouldn't be, and that the anchors are in the right order.
+    * @param utterance Current utterance, which is not assumed to be in the graph yet.
+    * @param start The utterance's start anchor, which is assumed to be in the graph.
+    * @param end The utterance's end anchor, which is assumed to be in the graph.
+    * @param lastUtterance Last utterance, which is assumed to be in the graph.
+    * @param currentTurn Current turn, which is assumed to be in the graph, and the parent of <var></var>utterance
+    * @param utteranceLayer The utterance layer definition.
+    * @param graph The annotation graph.
+    */
+   public void checkAlignmentAgainstLastUtterance(Annotation utterance, Anchor start, Anchor end, Annotation lastUtterance, Annotation currentTurn, Layer utteranceLayer, Graph graph)
+   {
+      // is this utterance in the same turn as the last one?
+      Anchor lastEnd = lastUtterance.getEnd();
+      if (currentTurn.getId().equals(lastUtterance.getParentId()) && lastEnd != null)
+      {
+	 if (lastEnd.getOffset() == null)
+	 { // last utterance was not aligned
+	    // set its end time to the last of this one
+	    lastUtterance.setEndId(start.getId());
+	 }
+	 else
+	 { // we can check the alignment against the last one
+	    if (utteranceLayer.getSaturated())
+	    { // check for a gap between this one and the last one
+	       if (start.getOffset() - lastEnd.getOffset() > 0.01)
+	       { // add an empty filler utterance
+		  graph.addAnnotation(
+		     new Annotation(null, "", getUtteranceLayer().getId(), 
+				    lastEnd.getId(), start.getId(), currentTurn.getId()));
+	       } // gap between last utterance and this one
+	    } // utterance layer should be saturated
+	    
+	    if (!utteranceLayer.getPeersOverlap())
+	    { // check there's no overlap
+	       if (start.getOffset() < lastEnd.getOffset())
+	       { // this utterance starts before the last one ends
+		  if (end.getOffset() > lastEnd.getOffset())
+		  { // partial overlap
+		     // use the later time
+		     utterance.setStartId(lastEnd.getId());
+		  }
+		  else
+		  { // full overlap - this should probably be an error, but instead:
+		     // chain this utterance to the last one with an unaligned anchor
+		     Anchor middleAnchor = graph.addAnchor(new Anchor());
+		     lastUtterance.setEnd(middleAnchor);
+		     utterance.setStart(middleAnchor);
+		  }
+	       } // this utterance starts before the last one ends
+	    } // check there's no overlap
+	 } // lastEnd offset is set
+      } // utterance the same turn as the last one
+   } // end of checkAlignmentAgainstLastUtterance()
 
    /**
     * Returns any warnings that may have arisen during the last execution of {@link #deserialize()}.

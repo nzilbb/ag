@@ -226,23 +226,14 @@ public class TestChatDeserializer
       assertEquals("Christmas", gems[10].getLabel());
       assertEquals(new Double(950.711), gems[10].getEnd().getOffset());
 
-      // we know about the overlapping boundary, but it will be repaired by Normalizer
-      assertNotEquals("overlapping utterance boundary not corrected", 
+      // correction of overlapping boundaries
+      assertEquals("overlapping utterance boundary corrected", 
 		   utterances.elementAt(188).getEnd(), utterances.elementAt(189).getStart());
-      assertEquals("overlapping utterance boundary not corrected", 
+      assertEquals("overlapping utterance boundary corrected", 
 		   new Double(877.501), utterances.elementAt(188).getEnd().getOffset());
-      assertEquals("overlapping utterance boundary not corrected", 
-		   new Double(877.420), utterances.elementAt(189).getStart().getOffset());
 
       assertEquals("wrapped line", new Double(28.452), utterances.elementAt(4).getStart().getOffset());
       assertEquals("wrapped line", new Double(40.360), utterances.elementAt(4).getEnd().getOffset());
-
-      // check it really is repaired, as this deserializer relies on this behaviour:
-      new nzilbb.ag.util.Normalizer().transform(g);
-      assertEquals("overlapping utterance boundary corrected", 
-		   utterances.elementAt(188).getEnd(), utterances.elementAt(189).getStart());
-      assertEquals("overlapping utterance boundary corrected", 
-		   new Double(877.420), utterances.elementAt(188).getEnd().getOffset());
 
    }
 
@@ -437,10 +428,10 @@ public class TestChatDeserializer
       assertEquals(turns.elementAt(0), utterances.elementAt(0).getParent());
 
       assertEquals("wrapped line", new Double(21.510), utterances.elementAt(1).getStart().getOffset());
-      assertEquals("wrapped line", new Double(25.057), utterances.elementAt(1).getEnd().getOffset());
+      assertNull("simulaneos with next line", utterances.elementAt(1).getEnd().getOffset());
       assertEquals("SUB", utterances.elementAt(1).getParent().getLabel());
 
-      assertEquals("simultaneous line", new Double(21.510), utterances.elementAt(2).getStart().getOffset());
+      assertNull("simultaneous with previous line", utterances.elementAt(2).getStart().getOffset());
       assertEquals("simultaneous line", new Double(25.057), utterances.elementAt(2).getEnd().getOffset());
       assertEquals("SUB", utterances.elementAt(2).getParent().getLabel());
 
@@ -453,6 +444,15 @@ public class TestChatDeserializer
 
       assertEquals(new Double(34.723), utterances.elementAt(5).getStart().getOffset());
       assertEquals(new Double(35.752), utterances.elementAt(5).getEnd().getOffset());
+
+      assertEquals("overlapping utterances - first start unchanged", 
+		   new Double(452.319), utterances.elementAt(158).getStart().getOffset());
+      assertEquals("overlapping utterances - first end unchanged", 
+		   new Double(455.432), utterances.elementAt(158).getEnd().getOffset());
+      assertEquals("overlapping utterances - second start changed", 
+		   new Double(455.432), utterances.elementAt(159).getStart().getOffset());
+      assertEquals("overlapping utterances - second end unchanged", 
+		   new Double(460.584), utterances.elementAt(159).getEnd().getOffset());
 
       Annotation[] words = g.annotations("word");
       assertEquals("ah", words[0].getLabel());
@@ -578,13 +578,15 @@ public class TestChatDeserializer
       assertEquals(new Double(403.531), gems[3].getStart().getOffset());
       assertEquals("weekend", gems[3].getLabel());
       assertEquals(new Double(455.432), gems[3].getEnd().getOffset());
-      assertEquals(new Double(455.398), gems[4].getStart().getOffset());
+      assertEquals("Shifted to end of previous utterance", 
+		   new Double(455.432), gems[4].getStart().getOffset());
       assertEquals("vacation", gems[4].getLabel());
       assertEquals(new Double(502.431), gems[4].getEnd().getOffset());
       assertEquals(new Double(507.270), gems[5].getStart().getOffset());
       assertEquals("peanut", gems[5].getLabel());
       assertEquals(new Double(536.950), gems[5].getEnd().getOffset());
-      assertEquals(new Double(536.700), gems[6].getStart().getOffset());
+      assertEquals("Shifted to end of previous utterance", 
+		   new Double(536.950), gems[6].getStart().getOffset());
       assertEquals("flower", gems[6].getLabel());
       assertEquals(new Double(562.364), gems[6].getEnd().getOffset());
       assertEquals(new Double(562.364), gems[7].getStart().getOffset());
@@ -593,7 +595,8 @@ public class TestChatDeserializer
       assertEquals(new Double(605.552), gems[8].getStart().getOffset());
       assertEquals("directions", gems[8].getLabel());
       assertEquals(new Double(630.083), gems[8].getEnd().getOffset());
-      assertEquals(new Double(629.970), gems[9].getStart().getOffset());
+      assertEquals("Shifted to end of previous utterance", 
+		   new Double(630.083), gems[9].getStart().getOffset());
       assertEquals("argument", gems[9].getLabel());
       assertEquals(new Double(657.253), gems[9].getEnd().getOffset());
       assertEquals(new Double(657.253), gems[10].getStart().getOffset());
