@@ -235,10 +235,22 @@ public class TestChatDeserializer
       assertEquals("+//?", cUnits[2].getLabel());
       assertEquals(utterances[3].getStart(), cUnits[2].getStart());
       assertEquals(utterances[3].getEnd(), cUnits[2].getEnd());
+
+      assertEquals("unsynchronised utterance - c-unit", 
+		   utterances[170].getStart(), cUnits[102].getStart());
+      assertEquals("unsynchronised utterances c-unit", 
+		   utterances[171].getEnd(), cUnits[102].getEnd());
+      assertEquals("unsynchronised utterance - c-unit after", 
+		   utterances[172].getStart(), cUnits[103].getStart());
+      assertEquals("unsynchronised utterances - c-unit after", 
+		   utterances[173].getEnd(), cUnits[103].getEnd());
+
       for (Annotation a : cUnits)
       {
-	 assertEquals("tagged as manual: " + a, 
+	 assertEquals("tagged as manual: " + a + " " + a.getStart() + "-" + a.getEnd(), 
 		      new Integer(Constants.CONFIDENCE_MANUAL), a.get(Constants.CONFIDENCE));
+	 assertEquals("parent set: " + a + " " + a.getStart() + "-" + a.getEnd(), 
+		      turns.elementAt(0), a.getParent());
       }
 
       // disfluency

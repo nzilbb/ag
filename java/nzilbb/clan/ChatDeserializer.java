@@ -1358,6 +1358,7 @@ public class ChatDeserializer
 	    {
 	       cUnit = new Annotation(null, "", getCUnitLayer().getId());
 	       cUnit.setStart(lastUtterance.getEnd());
+	       cUnit.setParent(currentTurn);
 	    }
 	    Matcher synchronisedMatcher = synchronisedPattern.matcher(line);
 	    if (synchronisedMatcher.matches())
@@ -1603,8 +1604,8 @@ public class ChatDeserializer
       {
 	 if (lastEnd.getOffset() == null)
 	 { // last utterance was not aligned
-	    // set its end time to the last of this one
-	    lastUtterance.setEndId(start.getId());
+	    // set its end time to the last of this one (and bring related annotions along)
+	    lastUtterance.getEnd().moveEndingAnnotations(start);
 	 }
 	 else
 	 { // we can check the alignment against the last one
@@ -1628,6 +1629,10 @@ public class ChatDeserializer
 				  + " overlaps previous at " + lastUtterance.getStart() + "-" + lastEnd
 				  + ": using " + lastEnd + " as start time.");
 		     // use the later time
+		     if (cUnit != null && cUnit.getStartId().equals(start.getId()))
+		     {
+			cUnit.setStartId(lastEnd.getId());
+		     }
 		     utterance.setStartId(lastEnd.getId());
 		  }
 		  else
@@ -1639,9 +1644,13 @@ public class ChatDeserializer
 		     Anchor middleAnchor = graph.addAnchor(
 			new Anchor(null, lastEnd.getOffset() + ((start.getOffset() - lastEnd.getOffset())/2), 
 				   Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+		     // set end
+		     // (and bring related annotions along)
 		     lastUtterance.getEnd().moveEndingAnnotations(middleAnchor);
+		     // set start
 		     if (cUnit != null && cUnit.getStartId().equals(start.getId()))
-		     {
+		     { // bring the c-unit along 
+			// (can't use moveStartingAnnotations() because utterance isn't in graph)
 			cUnit.setStart(middleAnchor);
 		     }
 		     utterance.setStart(middleAnchor);
