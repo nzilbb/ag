@@ -122,10 +122,18 @@ public class TestChatDeserializer
       assertEquals(turns.elementAt(0), utterances.elementAt(0).getParent());
 
       assertEquals("wrapped line", new Double(21.510), utterances.elementAt(1).getStart().getOffset());
-      assertNull("simulaneos with next line", utterances.elementAt(1).getEnd().getOffset());
+      assertEquals("simultaneos with next line", 
+		   new Double(23.2835), utterances.elementAt(1).getEnd().getOffset());
+      assertEquals("simultaneos with next line", 
+		   new Integer(Constants.CONFIDENCE_DEFAULT), 
+		   utterances.elementAt(1).getEnd().get(Constants.CONFIDENCE));
       assertEquals("SUB", utterances.elementAt(1).getParent().getLabel());
 
-      assertNull("simultaneous with previous line", utterances.elementAt(2).getStart().getOffset());
+      assertEquals("simultaneous with previous line", 
+		   new Double(23.2835), utterances.elementAt(2).getStart().getOffset());
+      assertEquals("simultaneous with previous line", 
+		   new Integer(Constants.CONFIDENCE_DEFAULT), 
+		   utterances.elementAt(2).getStart().get(Constants.CONFIDENCE));
       assertEquals("simultaneous line", new Double(25.057), utterances.elementAt(2).getEnd().getOffset());
       assertEquals("SUB", utterances.elementAt(2).getParent().getLabel());
 
@@ -160,6 +168,19 @@ public class TestChatDeserializer
 		   new Double(455.432), utterances.elementAt(160).getStart().getOffset());
       assertEquals("overlapping utterances - second end unchanged", 
 		   new Double(460.584), utterances.elementAt(160).getEnd().getOffset());
+
+      assertEquals("unsynchronised utterance - before", 
+		   new Double(489.467), utterances.elementAt(170).getStart().getOffset());
+      assertEquals("unsynchronised utterances - before", 
+		   new Double(493.327), utterances.elementAt(170).getEnd().getOffset());
+      assertEquals("unsynchronised utterance", 
+		   new Double(493.327), utterances.elementAt(171).getStart().getOffset());
+      assertEquals("unsynchronised utterances", 
+		   new Double(493.327), utterances.elementAt(171).getEnd().getOffset());
+      assertEquals("unsynchronised utterance - after", 
+		   new Double(493.327), utterances.elementAt(172).getStart().getOffset());
+      assertEquals("unsynchronised utterances - after", 
+		   new Double(496.813), utterances.elementAt(172).getEnd().getOffset());
 
       
       Annotation[] words = g.annotations("word");
@@ -199,12 +220,20 @@ public class TestChatDeserializer
       for (int i = 0; i < words.length; i++)
       {	 
 	 assertEquals("ordinals correct " + words[i], i+1, words[i].getOrdinal());
+	 assertEquals("tagged as manual: " + words[i], 
+		      new Integer(Constants.CONFIDENCE_MANUAL), words[i].get(Constants.CONFIDENCE));
       }
 
       // disfluency
       assertEquals("i", words[18].getLabel());
       assertEquals("&", words[18].my("disfluency").getLabel());
       assertEquals("word is parent", words[18], words[18].my("disfluency").getParent());
+      // ensure they're marked as manual annotations
+      for (Annotation a : g.annotations("disfluency"))
+      {
+	 assertEquals("tagged as manual: " + a, 
+		      new Integer(Constants.CONFIDENCE_MANUAL), a.get(Constants.CONFIDENCE));
+      }
 
       Annotation[] expansions = g.annotations("expansion");
       assertEquals(1, expansions.length);
@@ -216,6 +245,11 @@ public class TestChatDeserializer
       assertEquals("Pre expansion ordinal", 5, words[4].getOrdinal());
       assertEquals("Post expansion ordinal", "lie", words[5].getLabel());
       assertEquals("Post expansion ordinal", 6, words[5].getOrdinal());
+      for (Annotation a : expansions)
+      {
+	 assertEquals("tagged as manual: " + a, 
+		      new Integer(Constants.CONFIDENCE_MANUAL), a.get(Constants.CONFIDENCE));
+      }
 
       // errors
       Annotation[] errors = g.annotations("error");
@@ -241,9 +275,20 @@ public class TestChatDeserializer
 		   errors[2].getStart().startOf("word").iterator().next().getLabel());
       assertEquals("ends with span", "a", 
 		   errors[2].getEnd().endOf("word").iterator().next().getLabel());
+      for (Annotation a : errors)
+      {
+	 assertEquals("tagged as manual: " + a, 
+		      new Integer(Constants.CONFIDENCE_MANUAL), a.get(Constants.CONFIDENCE));
+      }
 
       // completion
-      assertEquals(3, g.annotations("completion").length);
+      Annotation[] completions = g.annotations("completion");
+      assertEquals(3, completions.length);
+      for (Annotation a : completions)
+      {
+	 assertEquals("tagged as manual: " + a, 
+		      new Integer(Constants.CONFIDENCE_MANUAL), a.get(Constants.CONFIDENCE));
+      }
 
       assertEquals("leading completion", "nd", words[22].getLabel());
       assertEquals("leading completion", "and", words[22].my("completion").getLabel());
@@ -257,6 +302,11 @@ public class TestChatDeserializer
       // retracing
       Annotation[] retracing = g.annotations("retracing");
       assertEquals(6, retracing.length);
+      for (Annotation a : retracing)
+      {
+	 assertEquals("tagged as manual: " + a, 
+		      new Integer(Constants.CONFIDENCE_MANUAL), a.get(Constants.CONFIDENCE));
+      }
 
       // tag previous word
       assertEquals("//", retracing[0].getLabel());
@@ -304,6 +354,12 @@ public class TestChatDeserializer
       assertEquals("tag previous word", "Saturday", 
 		   repetition[2].getEnd().endOf("word").iterator().next().getLabel());
 
+      for (Annotation a : repetition)
+      {
+	 assertEquals("tagged as manual: " + a, 
+		      new Integer(Constants.CONFIDENCE_MANUAL), a.get(Constants.CONFIDENCE));
+      }
+
       // gems
       Annotation[] gems = g.annotations("gem");
       assertEquals(11, gems.length);
@@ -343,9 +399,11 @@ public class TestChatDeserializer
       assertEquals(new Double(657.253), gems[10].getStart().getOffset());
       assertEquals("cat", gems[10].getLabel());
       assertEquals(new Double(682.824), gems[10].getEnd().getOffset());
-
-      // check it really is repaired, as this deserializer relies on this behaviour:
-      new nzilbb.ag.util.Normalizer().transform(g);
+      for (Annotation a : gems)
+      {
+	 assertEquals("tagged as manual: " + a, 
+		      new Integer(Constants.CONFIDENCE_MANUAL), a.get(Constants.CONFIDENCE));
+      }
 
    }
 
@@ -425,10 +483,18 @@ public class TestChatDeserializer
       assertEquals(turns.elementAt(0), utterances.elementAt(0).getParent());
 
       assertEquals("wrapped line", new Double(21.510), utterances.elementAt(1).getStart().getOffset());
-      assertNull("simulaneos with next line", utterances.elementAt(1).getEnd().getOffset());
+      assertEquals("simultaneos with next line", 
+		   new Double(23.2835), utterances.elementAt(1).getEnd().getOffset());
+      assertEquals("simultaneos with next line", 
+		   new Integer(Constants.CONFIDENCE_DEFAULT), 
+		   utterances.elementAt(1).getEnd().get(Constants.CONFIDENCE));
       assertEquals("SUB", utterances.elementAt(1).getParent().getLabel());
 
-      assertNull("simultaneous with previous line", utterances.elementAt(2).getStart().getOffset());
+      assertEquals("simultaneous with previous line", 
+		   new Double(23.2835), utterances.elementAt(2).getStart().getOffset());
+      assertEquals("simultaneous with previous line", 
+		   new Integer(Constants.CONFIDENCE_DEFAULT), 
+		   utterances.elementAt(2).getStart().get(Constants.CONFIDENCE));
       assertEquals("simultaneous line", new Double(25.057), utterances.elementAt(2).getEnd().getOffset());
       assertEquals("SUB", utterances.elementAt(2).getParent().getLabel());
 

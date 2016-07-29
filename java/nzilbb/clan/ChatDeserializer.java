@@ -524,7 +524,7 @@ public class ChatDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "CLAN CHAT transcript", "0.12", "text/x-chat", ".cha", getClass().getResource("icon.gif"));
+	 "CLAN CHAT transcript", "0.2", "text/x-chat", ".cha", getClass().getResource("icon.gif"));
    }
 
    /**
@@ -614,6 +614,8 @@ public class ChatDeserializer
 	 { // transcript line
 	    // is it the first line?
 	    if (lines.size() == 0 
+		// or this line starts with a speaker ID
+		|| line.startsWith("*")
 		// or the last line was time synchronized?
 		|| lines.lastElement().endsWith("")
 		// or the last line was a 'gem'?
@@ -1487,6 +1489,12 @@ public class ChatDeserializer
 	 } // next span	
 	 graph.commit();
 
+	 // set all annotations to manual confidence
+	 for (Annotation a : graph.getAnnotationsById().values())
+	 {
+	    a.put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+	 }
+
       }
       catch(TransformationException exception)
       {
@@ -1551,7 +1559,9 @@ public class ChatDeserializer
 				  + " completely overlaps previous at " + lastUtterance.getStart() + "-" + lastEnd
 				  + ": end time of first and start time of second undefined.");
 		     // chain this utterance to the last one with an unaligned anchor
-		     Anchor middleAnchor = graph.addAnchor(new Anchor());
+		     Anchor middleAnchor = graph.addAnchor(
+			new Anchor(null, lastEnd.getOffset() + ((start.getOffset() - lastEnd.getOffset())/2), 
+				   Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
 		     lastUtterance.setEnd(middleAnchor);
 		     utterance.setStart(middleAnchor);
 		  }
