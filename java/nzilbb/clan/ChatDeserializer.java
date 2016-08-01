@@ -1616,7 +1616,7 @@ public class ChatDeserializer
 	 } // there is a penultimate utterance
 	 warnings.add("Utterance at " + lastUtterance.getStart().getOffset() 
 		      + "-" + lastUtterance.getEnd().getOffset() + " is instantaneous"
-		      + ": start time moved to be during previous utterance - " + middleAnchor);
+		      + ": using " + middleAnchor + " as start time.");
 	 // move linking annotations to the middle anchor
 	 start.moveEndingAnnotations(middleAnchor);
 	 start.moveStartingAnnotations(middleAnchor);
@@ -1676,13 +1676,13 @@ public class ChatDeserializer
 		  }
 		  else
 		  { // full overlap - this should probably be an error, but instead:
-		     warnings.add("Utterance at " + start + "-" + end 
-				  + " completely overlaps previous at " + lastUtterance.getStart() + "-" + lastEnd
-				  + ": end time of first and start time of second undefined.");
 		     // chain this utterance to the last one with an unaligned anchor
 		     Anchor middleAnchor = graph.addAnchor(
 			new Anchor(null, lastEnd.getOffset() + ((start.getOffset() - lastEnd.getOffset())/2), 
 				   Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+		     warnings.add("Utterance at " + start + "-" + end 
+				  + " completely overlaps previous at " + lastUtterance.getStart() + "-" + lastEnd
+				  + ": using " + middleAnchor +" as end time of first and start time of second.");
 		     // set end
 		     // (and bring related annotions along)
 		     lastUtterance.getEnd().moveEndingAnnotations(middleAnchor);
