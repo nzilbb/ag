@@ -2634,7 +2634,7 @@ public class SqlGraphStore
 		  participantNameToNumber.put(annotation.getLabel(), ""+speakerNumber);
 		  
 		  // reset the annotation ID
-		  Object[] args = { getLayer(annotation.getLayerId()).get("@layer_id"), speakerNumber };
+		  Object[] args = { getLayer(annotation.getLayerId()).get("@layer_id"), ""+speakerNumber };
 		  annotation.setId(fmtMetaAnnotationId.format(args));
 
 		  // add the speaker to transcript_speaker
