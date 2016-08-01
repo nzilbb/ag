@@ -172,11 +172,14 @@ public class TestChatDeserializer
 
       assertEquals("unsynchronised utterance - before", 
 		   new Double(489.467), utterances[170].getStart().getOffset());
-      assertEquals("unsynchronised utterances - before", 
-		   new Double(493.327), utterances[170].getEnd().getOffset());
-      assertEquals("unsynchronised utterance", 
-		   new Double(493.327), utterances[171].getStart().getOffset());
-      assertEquals("unsynchronised utterances", 
+      assertEquals("unsynchronised utterances - before - end moved", 
+		   new Double(491.397), utterances[170].getEnd().getOffset());
+      assertEquals("unsynchronised utterances - before - low confidence", 
+		   Constants.CONFIDENCE_DEFAULT, utterances[170].getEnd().get(Constants.CONFIDENCE));
+      assertEquals("unsynchronised utterance - chained with utterance before", 
+		   utterances[170].getEnd(), utterances[171].getStart());
+
+      assertEquals("unsynchronised utterance - end original alignment", 
 		   new Double(493.327), utterances[171].getEnd().getOffset());
       assertEquals("unsynchronised utterance - after", 
 		   new Double(493.327), utterances[172].getStart().getOffset());

@@ -1368,6 +1368,8 @@ public class ChatDeserializer
 		  Double.parseDouble(synchronisedMatcher.group(2))
 		  / 1000, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
 	       if (cUnit != null && (cUnit.getStartId() == null || cUnit.getStartId().equals(utterance.getStartId()))) cUnit.setStart(start);
+	       // avoid creating instantaneous utterances
+	       avoidInstantaneousUtterance(start, lastUtterance, graph);
 	       utterance.setStart(start);
 	       Anchor end = graph.getOrCreateAnchorAt(
 		  Double.parseDouble(synchronisedMatcher.group(3))
@@ -1583,6 +1585,43 @@ public class ChatDeserializer
       Graph[] graphs = { graph };
       return graphs;
    }
+
+
+   /**
+    * Avoid the special case of a non-syncrhonised utterance sandwiched between two synchronised ones, where the third starts and the time the first ends.
+    * <p> e.g. 511.784 ...penultimateUtterance... 514.337 ...lastUtterance... 514.337 ...utterance... 517.092
+    * @param start The next start anchor.
+    * @param lastUtterance The last utterance.
+    * @param graph The annotation graph.
+    */
+   public void avoidInstantaneousUtterance(Anchor start, Annotation lastUtterance, Graph graph)
+   {
+      if (lastUtterance.getStart() == start 
+	  && lastUtterance.getEnd().getOffset() == null) // only for unaligned middle utterances
+      {
+	 Anchor middleAnchor = graph.addAnchor(new Anchor());
+	 // can we reach back a further utterance
+	 LinkedHashSet<Annotation> endingAtStart = start.endOf(getUtteranceLayer().getId());
+	 Annotation penultimateUtterance = null;
+	 if (endingAtStart.size() > 0)
+	 {
+	    penultimateUtterance = endingAtStart.iterator().next();
+	    if (penultimateUtterance.getStart().getOffset() != null)
+	    {
+	       middleAnchor.setOffset(
+		  penultimateUtterance.getStart().getOffset() 
+		  + ((start.getOffset() - penultimateUtterance.getStart().getOffset()) /2));
+	       middleAnchor.put(Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT);
+	    } // penultimateUtterance has a start offset
+	 } // there is a penultimate utterance
+	 warnings.add("Utterance at " + lastUtterance.getStart().getOffset() 
+		      + "-" + lastUtterance.getEnd().getOffset() + " is instantaneous"
+		      + ": start time moved to be during previous utterance - " + middleAnchor);
+	 // move linking annotations to the middle anchor
+	 start.moveEndingAnnotations(middleAnchor);
+	 start.moveStartingAnnotations(middleAnchor);
+      }
+   } // end of avoidInstantaneousUtterance()
 
 
    /**
