@@ -54,7 +54,7 @@ import nzilbb.configure.ParameterSet;
  *  <li>Disfluency marking with &amp; - e.g. <samp>so &amp;sund Sunday</samp></li>
  *  <li>Non-standard form expansion - e.g. <samp>gonna [: going to]</samp></li>
  *  <li>Incomplete word completion - e.g. <samp>dinner doin(g) all</samp></li>
- *  <li>Acronym/proper name joining with _ - e.g. <samp>no T_V in my room</samp> - TODO</li>
+ *  <li>Acronym/proper name joining with _ - e.g. <samp>no T_V in my room</samp></li>
  *  <li>Retracing - e.g. <samp>&lt;some friends and I&gt; [//] uh</samp> or <samp>and sit [//] sets him</samp></li>
  *  <li>Repetition/stuttered false starts - e.g. <samp>the &lt;picnic&gt; [/] picnic</samp> or <samp>the Saturday [/] in the morning</samp></li>
  *  <li>Errors - e.g. <samp>they've &lt;work up a hunger&gt; [* s:r]</samp> or <samp>they got [* m] to</samp></li>
@@ -393,6 +393,23 @@ public class ChatDeserializer
    public void setCompletionLayer(Layer newCompletionLayer) { completionLayer = newCompletionLayer; }
 
    /**
+    * Linkage layer.
+    * @see #getLinkageLayer()
+    * @see #setLinkageLayer(Layer)
+    */
+   protected Layer linkageLayer;
+   /**
+    * Getter for {@link #linkageLayer}: Linkage layer.
+    * @return Linkage layer.
+    */
+   public Layer getLinkageLayer() { return linkageLayer; }
+   /**
+    * Setter for {@link #linkageLayer}: Linkage layer.
+    * @param newLinkageLayer Linkage layer.
+    */
+   public void setLinkageLayer(Layer newLinkageLayer) { linkageLayer = newLinkageLayer; }
+
+   /**
     * C-Unit layer.
     * @see #getCUnitLayer()
     * @see #setCUnitLayer(Layer)
@@ -520,6 +537,7 @@ public class ChatDeserializer
       turnLayer = null;
       utteranceLayer = null;
       wordLayer = null;
+      linkageLayer = null;
       cUnitLayer = null;
       gemLayer = null;
       transcriberLayer = null;
@@ -594,6 +612,8 @@ public class ChatDeserializer
       Pattern regexRetracing = Pattern.compile("\\[//\\]");
       boolean completionsFound = false;
       Pattern regexCompletion = Pattern.compile("\\(\\p{Alnum}+\\)");
+      boolean linkagesFound = false;
+      Pattern regexLinkage = Pattern.compile("\\p{Alpha}_\\p{Alpha}");
       boolean gemsFound = false;
       boolean transcribersFound = false;
       boolean languagesFound = false;
@@ -654,6 +674,13 @@ public class ChatDeserializer
 	       if (regexDisfluency.matcher(line).find())
 	       {
 		  disfluenciesFound = true;
+	       }
+	    }
+	    if (!linkagesFound)
+	    {
+	       if (regexLinkage.matcher(line).find())
+	       {
+		  linkagesFound = true;
 	       }
 	    }
 	    if (!expansionsFound)
@@ -970,6 +997,14 @@ public class ChatDeserializer
 	 p.setPossibleValues(possibleTurnChildLayers.values());
 	 parameters.addParameter(p);
       }
+      if (linkagesFound)
+      {
+	 Parameter p = new Parameter("linkageLayer", Layer.class, "Linkages layer", "Layer for linkage annotations");
+	 String[] possibilities = {"linkage","linkages"};
+	 p.setValue(findLayerById(possibleTurnChildLayers, possibilities));
+	 p.setPossibleValues(possibleTurnChildLayers.values());
+	 parameters.addParameter(p);
+      }
       if (repetitionsFound)
       {
 	 Parameter p = new Parameter("repetitionsLayer", Layer.class, "Repetitions layer", "Layer for repetition annotations");
@@ -1124,6 +1159,10 @@ public class ChatDeserializer
       {
 	 setGemLayer((Layer)parameters.get("gemLayer").getValue());
       }
+      if (parameters.containsKey("linkageLayer"))
+      {
+	 setLinkageLayer((Layer)parameters.get("linkageLayer").getValue());
+      }
       if (parameters.containsKey("cUnitLayer"))
       {
 	 setCUnitLayer((Layer)parameters.get("cUnitLayer").getValue());
@@ -1187,6 +1226,7 @@ public class ChatDeserializer
       if (getRetracingLayer() != null) graph.addLayer((Layer)getRetracingLayer().clone());
       if (getCompletionLayer() != null) graph.addLayer((Layer)getCompletionLayer().clone());
       if (getGemLayer() != null) graph.addLayer((Layer)getGemLayer().clone());
+      if (getLinkageLayer() != null) graph.addLayer((Layer)getLinkageLayer().clone());
       if (getCUnitLayer() != null) graph.addLayer((Layer)getCUnitLayer().clone());
       if (getTranscriberLayer() != null) graph.addLayer((Layer)getTranscriberLayer().clone());
       if (getLanguagesLayer() != null) graph.addLayer((Layer)getLanguagesLayer().clone());
@@ -1441,6 +1481,14 @@ public class ChatDeserializer
 
       try
       {
+	 // split linkages?
+	 if (getLinkageLayer() != null)
+	 { 
+	    SimpleTokenizer linkageSplitter 
+	       = new SimpleTokenizer(getWordLayer().getId(), getLinkageLayer().getId(), "_", true);
+	    linkageSplitter.transform(graph);
+	    graph.commit();
+	 }
 
 	 // annotated spans marked by <...>
 	 graph.addLayer(new Layer("@span", "Annotation Spans", Constants.ALIGNMENT_INTERVAL, true, true, false, getTurnLayer().getId(), true));

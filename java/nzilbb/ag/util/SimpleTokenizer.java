@@ -26,7 +26,10 @@ import java.util.regex.Pattern;
 import nzilbb.ag.*;
 
 /**
- * Transformer that breaks annotation labels on one layer (e.g. utterance) into token annotations on another layer (e.g. word), based on a character delimiter (space by default).
+ * Transformer that breaks annotation labels on one layer (e.g. utterance) into token annotations
+ * on another layer (e.g. word), based on a character delimiter (space by default).
+ * <p> Can also be used to split annotations on the same source layer - e.g. to split CLAN linkages
+ * like <q>B_B_C</q> into three words <q>B B C</q>, by setting {@link #tokensInSourceLayer} to true.
  * @author Robert Fromont robert@fromont.net.nz
  */
 
@@ -86,6 +89,25 @@ public class SimpleTokenizer
     */
    public void setDestinationLayerId(String newDestinationLayerId) { destinationLayerId = newDestinationLayerId; }
    
+   /**
+    * Whether the tokens should be in the source layer (true) or the destination layer (false). The default is false.
+    * <p>When this is set to true, only annotations with multiple tokens will receive an annotation in the destination layer.
+    * @see #getTokensInSourceLayer()
+    * @see #setTokensInSourceLayer(boolean)
+    */
+   protected boolean tokensInSourceLayer = false;
+   /**
+    * Getter for {@link #tokensInSourceLayer}: Whether the tokens should be in the source layer (true) or the destination layer (false). The default is false.
+    * @return Whether the tokens should be in the source layer (true) or the destination layer (false).
+    */
+   public boolean getTokensInSourceLayer() { return tokensInSourceLayer; }
+   /**
+    * Setter for {@link #tokensInSourceLayer}: Whether the tokens should be in the source layer (true) or the destination layer (false).
+    * @param newTokensInSourceLayer Whether the tokens should be in the source layer (true) or the destination layer (false).
+    */
+   public void setTokensInSourceLayer(boolean newTokensInSourceLayer) { tokensInSourceLayer = newTokensInSourceLayer; }
+
+   
    // Methods:
    
    /**
@@ -106,6 +128,20 @@ public class SimpleTokenizer
       setSourceLayerId(sourceLayerId);
       setDestinationLayerId(destinationLayerId);
       setDelimiters(delimiters);
+   } // end of constructor
+
+   /**
+    * Constructor from attribute values.
+    * @param sourceLayerId Layer ID of the layer to tokenize.
+    * @param destinationLayerId Layer ID of the individual tokens.
+    * @param delimiters Regular expression to match delimiters for tokenization.
+    */
+   public SimpleTokenizer(String sourceLayerId, String destinationLayerId, String delimiters, boolean tokensInSourceLayer)
+   {
+      setSourceLayerId(sourceLayerId);
+      setDestinationLayerId(destinationLayerId);
+      setDelimiters(delimiters);
+      setTokensInSourceLayer(tokensInSourceLayer);
    } // end of constructor
 
    /**
@@ -133,42 +169,87 @@ public class SimpleTokenizer
 	 throw new TransformationException(this, "No destination layer: " + getDestinationLayerId());
       if (getDestinationLayerId().equals(getSourceLayerId())) 
 	 throw new TransformationException(this, "Source and destination layer are the same: " + getDestinationLayerId());
-      Vector<Change> changes = new Vector<Change>();
-      boolean sharedParent = graph.getLayer(getSourceLayerId()).getParentId()
-	 .equals(graph.getLayer(getDestinationLayerId()).getParentId());
-      Pattern regexDelimiters = Pattern.compile(getDelimiters());
-      for (Annotation source : new AnnotationsByAnchor(graph.getAnnotations(getSourceLayerId())))
-      {
-	 String[] tokens = regexDelimiters.split(source.getLabel());
-	 Anchor start = source.getStart();
-	 for (int t = 0; t < tokens.length; t++)
-	 {
-	    String sToken = tokens[t];
-	    if (sToken.length() == 0) continue;
-	    Anchor end = new Anchor();
-	    if (t == tokens.length - 1)
-	    { // last token
-	       // use the source annotation's end instead
-	       end = source.getEnd();
-	    }
-	    else
-	    { 
-	       // add the new end anchor to the graph
-	       graph.addAnchor(end);
-	       changes.addAll(end.getChanges());
-	    }
-	    Annotation token = new Annotation(
-	       null, sToken, 
-	       getDestinationLayerId(), 
-	       start.getId(), end.getId(), 
-	       sharedParent?source.getParentId():source.getId());
-	    graph.addAnnotation(token);
-	    changes.addAll(token.getChanges());
 
-	    // the next annotation's start will be this one's end
-	    start = end;
-	 } // next token
-      } // next source annotation
+      Vector<Change> changes = new Vector<Change>();
+
+      Layer sourceParent = graph.getLayer(graph.getLayer(getSourceLayerId()).getParentId());
+      boolean sharedParent = sourceParent.getId()
+	 .equals(graph.getLayer(getDestinationLayerId()).getParentId());
+      if (getTokensInSourceLayer()) sharedParent = true;
+      
+      Pattern regexDelimiters = Pattern.compile(getDelimiters());
+      // for each parent
+      for (Annotation parent : graph.getAnnotations(sourceParent.getId()))
+      {
+	 int ordinal = 0;
+	 for (Annotation source : new Vector<Annotation>(parent.getAnnotations(getSourceLayerId())))
+	 {
+	    if (ordinal == 0) ordinal = source.getOrdinal(); // start with first ordinal found
+	    String[] tokens = regexDelimiters.split(source.getLabel());
+	    
+	    if (getTokensInSourceLayer())
+	    {
+	       // if tokens go into the source layer, and there's only one token, ignore it
+	       if (tokens.length == 1)
+	       {
+		  // check the ordinal
+		  if (source.getOrdinal() != ordinal)
+		  {
+		     changes.addAll( // track changes of
+			source.setOrdinal(ordinal));
+		  }
+		  ordinal++;
+		  continue;
+	       }
+	       
+	       // the destination layer receives the original label
+	       Annotation span = new Annotation(
+		  null, source.getLabel(), 
+		  getDestinationLayerId(), 
+		  source.getStart().getId(), source.getEnd().getId(), 
+		  source.getParentId());
+	       graph.addAnnotation(span);
+	       changes.addAll(span.getChanges());
+	       
+	       // and the source gets deleted (to be replaced by individual tokens)
+	       source.destroy();
+	    } // tokens in source layer
+
+	    Anchor start = source.getStart();
+	    for (int t = 0; t < tokens.length; t++)
+	    {
+	       String sToken = tokens[t];
+	       if (sToken.length() == 0) continue;
+	       Anchor end = new Anchor();
+	       if (t == tokens.length - 1)
+	       { // last token
+		  // use the source annotation's end instead
+		  end = source.getEnd();
+	       }
+	       else
+	       { 
+		  // add the new end anchor to the graph
+		  graph.addAnchor(end);
+		  changes.addAll(end.getChanges());
+	       }
+	       Annotation token = new Annotation(
+		  null, sToken, 
+		  getTokensInSourceLayer()?getSourceLayerId():getDestinationLayerId(), 
+		  start.getId(), end.getId(), 
+		  sharedParent?source.getParentId():source.getId());
+	       if (getTokensInSourceLayer())
+	       {
+		  token.setOrdinal(ordinal);
+		  ordinal++;
+	       }
+	       graph.addAnnotation(token);
+	       changes.addAll(token.getChanges());
+
+	       // the next annotation's start will be this one's end
+	       start = end;
+	    } // next token
+	 } // next source annotation
+      } // next parent
       return changes;
    }
 

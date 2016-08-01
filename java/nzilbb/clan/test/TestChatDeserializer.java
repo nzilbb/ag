@@ -52,6 +52,7 @@ public class TestChatDeserializer
 	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
 	 new Layer("c-unit", "C-Units", 2, true, false, false, "turn", true),
 	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("linkage", "Linkages", 2, true, false, false, "turn", true),
 	 new Layer("error", "Errors", 2, true, false, false, "turn", true),
 	 new Layer("retracing", "Retracing", 2, true, false, false, "turn", true),
 	 new Layer("repetition", "Repetitions", 2, true, false, false, "turn", true),
@@ -187,14 +188,14 @@ public class TestChatDeserializer
 		   new Double(496.813), utterances[172].getEnd().getOffset());
 
       
-      Annotation[] words = g.annotations("word");
+      Annotation[] words = g.annotations("turn")[0].list("word");
       String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
 	 "ab", "abc", "abcdef", "abcd", "gonna", "lie", "abcd", "abc", "pet", "abcdefghij", 
 	 "abc", "abcde", "abc", "ab", "abcd", "ab", "abc", "worryin", "i", "abcd",
 	 "she'll", "ab", "nd", "abcdefg", 
 	 "abcd", "abcdefg", "ab", "abc", "abcdef", "abcde", "abc", "ab", "abc", "abcdefgh", "abc", "abcdef", "abc",
 	 "ab", "abcde", "until", "she's", "abc", "ab", "abcde", "abcdef", "abcde", "ab", "abc", "baby's", "crib", 
-	 "abc", "abcdefg", "abc", "abcd", "abcde", "abc", "abcd", "abc", "abcd"};
+	 "abc", "abcdefg", "abc", "abcd", "abcde", "abc", "abcd", "abc", "a", "b", "c", "d"};
       for (int i = 0; i < wordLabels.length; i++)
       {
 	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
@@ -205,20 +206,20 @@ public class TestChatDeserializer
 		      i+1, words[i].getOrdinal());
       }
 
-      assertEquals("they've", words[267].getLabel());
-      assertEquals("work", words[268].getLabel());
-      assertEquals("ab", words[269].getLabel());
-      assertEquals("a", words[270].getLabel());
-      assertEquals("hunger", words[271].getLabel());
+      assertEquals("they've", words[270].getLabel());
+      assertEquals("work", words[271].getLabel());
       assertEquals("ab", words[272].getLabel());
+      assertEquals("a", words[273].getLabel());
+      assertEquals("hunger", words[274].getLabel());
+      assertEquals("ab", words[275].getLabel());
 
-      assertEquals(turns.elementAt(0).getId(), words[267].getParentId());
-      assertEquals(turns.elementAt(0).getId(), words[268].getParentId());
-      assertEquals(turns.elementAt(0).getId(), words[269].getParentId());
-      assertEquals(turns.elementAt(0).getId(), words[270].getParentId());
       assertEquals(turns.elementAt(0).getId(), words[271].getParentId());
       assertEquals(turns.elementAt(0).getId(), words[272].getParentId());
       assertEquals(turns.elementAt(0).getId(), words[273].getParentId());
+      assertEquals(turns.elementAt(0).getId(), words[274].getParentId());
+      assertEquals(turns.elementAt(0).getId(), words[275].getParentId());
+      assertEquals(turns.elementAt(0).getId(), words[276].getParentId());
+      assertEquals(turns.elementAt(0).getId(), words[277].getParentId());
 
       for (int i = 0; i < words.length; i++)
       {	 
@@ -283,6 +284,11 @@ public class TestChatDeserializer
 		      new Integer(Constants.CONFIDENCE_MANUAL), a.get(Constants.CONFIDENCE));
       }
 
+      // linkages
+      Annotation[] linkages = g.annotations("linkage");
+      assertEquals(1, linkages.length);
+      assertEquals("a_b_c_d", linkages[0].getLabel());
+
       // errors
       Annotation[] errors = g.annotations("error");
       assertEquals(8, errors.length);
@@ -328,8 +334,8 @@ public class TestChatDeserializer
       assertEquals("trailing completion", "worryin", words[17].getLabel());
       assertEquals("trailing completion", "worrying", words[17].my("completion").getLabel());
 
-      assertEquals("leading/trailing completion", "fridge", words[277].getLabel());
-      assertEquals("leading/trailing completion", "refridgerator", words[277].my("completion").getLabel());
+      assertEquals("leading/trailing completion", "fridge", words[280].getLabel());
+      assertEquals("leading/trailing completion", "refridgerator", words[280].my("completion").getLabel());
 
       // retracing
       Annotation[] retracing = g.annotations("retracing");
@@ -564,13 +570,15 @@ public class TestChatDeserializer
 
       
       Annotation[] words = g.annotations("word");
-      String[] wordLabels = { // NB we have no c-unit layer, so terminators are still present
+      String[] wordLabels = { 
+	 // NB we have no c-unit layer, so terminators are still present
+	 // NB we have no linkage layer, so linkages are not split
 	 "ab", "abc", "abcdef", "abcd", "gonna", "lie", "abcd", "abc", "pet", "abcdefghij", 
 	 "abc", "abcde", "abc", "ab", "abcd", "ab", "abc", "worryin", "i", "abcd.",
 	 "she'll", "ab", "nd", "abcdefg.", 
 	 "abcd", "abcdefg", "ab", "abc", "abcdef", "abcde", "abc", "ab", "abc", "abcdefgh", "abc", "abcdef", "abc", "+//?",
 	 "ab", "abcde", "until", "she's", "abc", "ab", "abcde", "abcdef", "abcde", "ab", "abc", "baby's", "crib", 
-	 "abc", "abcdefg", "abc", "abcd", "abcde", "abc", "abcd", "abc", "abcd."};
+	 "abc", "abcdefg", "abc", "abcd", "abcde", "abc", "abcd", "abc", "a_b_c_d."};
       for (int i = 0; i < wordLabels.length; i++)
       {
 	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
