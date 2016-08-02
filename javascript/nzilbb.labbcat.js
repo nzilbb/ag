@@ -459,7 +459,7 @@ nzilbb.labbcat.Labbcat.prototype.newTranscript = function(transcript, media, med
 		onResult(null, ["" +err+ ": " + this.responseText], "newTranscript", transcriptName);
 	    }
 
-	    res.resume();
+	    if (res) res.resume();
 	});
     }
 };
