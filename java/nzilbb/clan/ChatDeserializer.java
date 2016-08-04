@@ -560,7 +560,7 @@ public class ChatDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "CLAN CHAT transcript", "0.2", "text/x-chat", ".cha", getClass().getResource("icon.gif"));
+	 "CLAN CHAT transcript", "0.3", "text/x-chat", ".cha", getClass().getResource("icon.gif"));
    }
 
    /**
@@ -1408,7 +1408,11 @@ public class ChatDeserializer
 	       Anchor start = graph.getOrCreateAnchorAt(
 		  Double.parseDouble(synchronisedMatcher.group(2))
 		  / 1000, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
-	       if (cUnit != null && (cUnit.getStartId() == null || cUnit.getStartId().equals(utterance.getStartId()))) cUnit.setStart(start);
+	       if (cUnit != null && (cUnit.getStartId() == null 
+				     || cUnit.getStartId().equals(utterance.getStartId()))) 
+	       {
+		  cUnit.setStart(start);
+	       }
 	       // avoid creating instantaneous utterances
 	       avoidInstantaneousUtterance(start, lastUtterance, graph);
 	       utterance.setStart(start);
@@ -1443,19 +1447,6 @@ public class ChatDeserializer
 	    lastAnchor = utterance.getEnd();
 	 } // transcript line
       } // next line
-      if (lastAnchor.getOffset() == null && lastAlignedAnchor != null)
-      {
-	 if (lastAlignedAnchor == lastUtterance.getStart())
-	 {
-	    avoidInstantaneousUtterance(lastAlignedAnchor, lastUtterance, graph);
-	    lastUtterance.setEnd(lastAlignedAnchor);
-	    lastAnchor = lastAlignedAnchor;
-	 }
-	 else
-	 {
-	    lastAnchor.setOffset(lastAlignedAnchor.getOffset());
-	 }
-      }
       if (gem != null)
       {
 	 gem.setEnd(lastAnchor);
@@ -1480,6 +1471,19 @@ public class ChatDeserializer
 	 graph.addAnnotation(cUnit);
 	 cUnit = null;
       } // c-unit to add
+      if (lastAnchor.getOffset() == null && lastAlignedAnchor != null)
+      {
+	 if (lastAlignedAnchor == lastUtterance.getStart())
+	 {
+	    avoidInstantaneousUtterance(lastAlignedAnchor, lastUtterance, graph);
+	    lastUtterance.getEnd().moveEndingAnnotations(lastAlignedAnchor);
+	    lastAnchor = lastUtterance.getEnd();
+	 }
+	 else
+	 {
+	    lastAnchor.setOffset(lastAlignedAnchor.getOffset());
+	 }
+      }
       currentTurn.setEndId(lastAnchor.getId());
 
       // tokenize utterances into words

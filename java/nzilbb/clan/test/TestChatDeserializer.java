@@ -227,7 +227,7 @@ public class TestChatDeserializer
       assertEquals("hunger", words[274].getLabel());
       assertEquals("ab", words[275].getLabel());
       assertEquals("Unaligned last utterance doesn't cause @End to be last word",
-		   "cat", words[words.length-1].getLabel());
+		   "test", words[words.length-1].getLabel());
 
       assertEquals(turns.elementAt(0).getId(), words[271].getParentId());
       assertEquals(turns.elementAt(0).getId(), words[272].getParentId());
@@ -246,7 +246,7 @@ public class TestChatDeserializer
 
       // c-units
       Annotation[] cUnits = g.annotations("c-unit");
-      assertEquals(148, cUnits.length);
+      assertEquals(150, cUnits.length);
       assertEquals(".", cUnits[0].getLabel());
       assertEquals(utterances[0].getStart(), cUnits[0].getStart());
       assertEquals(utterances[1].getEnd(), cUnits[0].getEnd());
@@ -264,6 +264,11 @@ public class TestChatDeserializer
 		   utterances[172].getStart(), cUnits[103].getStart());
       assertEquals("unsynchronised utterances - c-unit after", 
 		   utterances[173].getEnd(), cUnits[103].getEnd());
+
+      assertEquals("unsynchronised last utterance - last c-unit start", 
+		   utterances[utterances.length-1].getStart(), cUnits[cUnits.length-1].getStart());
+      assertEquals("unsynchronised last utterance - last c-unit end", 
+		   utterances[utterances.length-1].getEnd(), cUnits[cUnits.length-1].getEnd());
 
       for (Annotation a : cUnits)
       {
@@ -532,7 +537,6 @@ public class TestChatDeserializer
 
       // utterances
       Annotation[] utterances = g.annotations("utterance");
-      System.out.println(""+utterances.length);
       assertEquals(new Double(0.001), utterances[0].getStart().getOffset());
       assertEquals(new Double(21.510), utterances[0].getEnd().getOffset());
       assertEquals("SUB", utterances[0].getParent().getLabel());

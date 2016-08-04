@@ -260,7 +260,7 @@
 *SUB:	ab ab abcdefg ab abcde abc abcd ab abc the abc. 667728_670235
 *SUB:	abcde abcdefgh abc abcd ab abcdefgh abcd ab abc too abcd abc abcd ab 670235_673908
 	abc abcd abcde ab abc abcd. 673908_675337
-*SUB:	abc abc was abcdefg ab abc abcde abc was ab in abc abcd abcdef ab 675337_678341
-	abc abc abcd abcde abcdefg abcdef ab to abcd both abc man abc the 678341_681935
-	cat.
+*SUB:	abc abc was abcdefg ab abc abcde abc was ab in abc abcd abcdef ab. 675337_678341
+*SUB:	abc abc abcd abcde abcdefg abcdef ab to abcd both abc man abc the. 678341_681935
+*SUB:	cat test.
 @End
