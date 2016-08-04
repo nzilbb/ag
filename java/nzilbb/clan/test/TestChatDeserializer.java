@@ -226,6 +226,8 @@ public class TestChatDeserializer
       assertEquals("a", words[273].getLabel());
       assertEquals("hunger", words[274].getLabel());
       assertEquals("ab", words[275].getLabel());
+      assertEquals("Unaligned last utterance doesn't cause @End to be last word",
+		   "cat", words[words.length-1].getLabel());
 
       assertEquals(turns.elementAt(0).getId(), words[271].getParentId());
       assertEquals(turns.elementAt(0).getId(), words[272].getParentId());

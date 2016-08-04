@@ -648,7 +648,7 @@ public class ChatDeserializer
 	       headers.add(lastHeader + " " + line.trim());
 	    }
 	 }
-	 else
+	 else if (!line.equals("@End"))
 	 { // transcript line
 	    // is it the first line?
 	    if (lines.size() == 0 
