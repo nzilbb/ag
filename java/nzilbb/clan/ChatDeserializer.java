@@ -1315,6 +1315,7 @@ public class ChatDeserializer
       Annotation cUnit = null;
       Anchor lastAnchor = new Anchor(null, 0.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
       graph.addAnchor(lastAnchor);
+      Anchor lastAlignedAnchor = null;
       for (String line : syncLines)
       {
 	 if (line.startsWith("@"))
@@ -1415,6 +1416,7 @@ public class ChatDeserializer
 		  Double.parseDouble(synchronisedMatcher.group(3))
 		  / 1000, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
 	       utterance.setEnd(end);
+	       lastAlignedAnchor = end;
 	       
 	       if (start.getOffset() > end.getOffset())
 	       { // start and end in reverse order 
@@ -1441,6 +1443,19 @@ public class ChatDeserializer
 	    lastAnchor = utterance.getEnd();
 	 } // transcript line
       } // next line
+      if (lastAnchor.getOffset() == null && lastAlignedAnchor != null)
+      {
+	 if (lastAlignedAnchor == lastUtterance.getStart())
+	 {
+	    avoidInstantaneousUtterance(lastAlignedAnchor, lastUtterance, graph);
+	    lastUtterance.setEnd(lastAlignedAnchor);
+	    lastAnchor = lastAlignedAnchor;
+	 }
+	 else
+	 {
+	    lastAnchor.setOffset(lastAlignedAnchor.getOffset());
+	 }
+      }
       if (gem != null)
       {
 	 gem.setEnd(lastAnchor);

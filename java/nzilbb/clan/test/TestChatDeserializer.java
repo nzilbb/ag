@@ -113,7 +113,8 @@ public class TestChatDeserializer
       Vector<Annotation> turns = g.getAnnotations("turn");
       assertEquals(1, turns.size());
       assertEquals(new Double(0.0), turns.elementAt(0).getStart().getOffset());
-      assertEquals(new Double(682.824), turns.elementAt(0).getEnd().getOffset());
+      assertEquals("unaligned final utterance - turn has end time", 
+		   new Double(681.935), turns.elementAt(0).getEnd().getOffset());
       assertEquals(g.getAnnotation("SUB"), turns.elementAt(0).getParent());
 
       // utterances
@@ -187,6 +188,19 @@ public class TestChatDeserializer
       assertEquals("unsynchronised utterances - after", 
 		   new Double(496.813), utterances[172].getEnd().getOffset());
 
+      assertEquals("unaligned final utterance has end time", 
+		   new Double(681.935), utterances[utterances.length-1].getEnd().getOffset());
+      assertEquals("aligned penultimate utterance has original start time", 
+		   new Double(678.341), utterances[utterances.length-2].getStart().getOffset());
+      assertEquals("aligned penultimate utterance links to unaligned ultimate utterance", 
+		   utterances[utterances.length-2].getEnd(), 
+		   utterances[utterances.length-1].getStart());
+      assertEquals("aligned penultimate utterance has end time adjusted", 
+		   new Double(681.935 + ((678.341-681.935)/2)), 
+		   utterances[utterances.length-2].getEnd().getOffset());
+      assertEquals("aligned penultimate utterance has end confidence adjusted", 
+		   Constants.CONFIDENCE_DEFAULT, 
+		   utterances[utterances.length-2].getEnd().get(Constants.CONFIDENCE));
       
       Annotation[] words = g.annotations("turn")[0].list("word");
       String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
@@ -436,7 +450,7 @@ public class TestChatDeserializer
       assertEquals(new Double(657.253), gems[9].getEnd().getOffset());
       assertEquals(new Double(657.253), gems[10].getStart().getOffset());
       assertEquals("cat", gems[10].getLabel());
-      assertEquals(new Double(682.824), gems[10].getEnd().getOffset());
+      assertEquals(turns.elementAt(0).getEnd(), gems[10].getEnd());
       for (Annotation a : gems)
       {
 	 assertEquals("tagged as manual: " + a, 
@@ -510,11 +524,13 @@ public class TestChatDeserializer
       Vector<Annotation> turns = g.getAnnotations("turn");
       assertEquals(1, turns.size());
       assertEquals(new Double(0.0), turns.elementAt(0).getStart().getOffset());
-      assertEquals(new Double(682.824), turns.elementAt(0).getEnd().getOffset());
+      assertEquals("unaligned final utterance - turn has end time", 
+		   new Double(681.935), turns.elementAt(0).getEnd().getOffset());
       assertEquals(g.getAnnotation("SUB"), turns.elementAt(0).getParent());
 
       // utterances
       Annotation[] utterances = g.annotations("utterance");
+      System.out.println(""+utterances.length);
       assertEquals(new Double(0.001), utterances[0].getStart().getOffset());
       assertEquals(new Double(21.510), utterances[0].getEnd().getOffset());
       assertEquals("SUB", utterances[0].getParent().getLabel());
@@ -567,6 +583,20 @@ public class TestChatDeserializer
 		   new Double(455.432), utterances[160].getStart().getOffset());
       assertEquals("overlapping utterances - second end unchanged", 
 		   new Double(460.584), utterances[160].getEnd().getOffset());
+
+      assertEquals("unaligned final utterance has end time", 
+		   new Double(681.935), utterances[utterances.length-1].getEnd().getOffset());
+      assertEquals("aligned penultimate utterance has original start time", 
+		   new Double(678.341), utterances[utterances.length-2].getStart().getOffset());
+      assertEquals("aligned penultimate utterance links to unaligned ultimate utterance", 
+		   utterances[utterances.length-2].getEnd(), 
+		   utterances[utterances.length-1].getStart());
+      assertEquals("aligned penultimate utterance has end time adjusted", 
+		   new Double(681.935 + ((678.341-681.935)/2)), 
+		   utterances[utterances.length-2].getEnd().getOffset());
+      assertEquals("aligned penultimate utterance has end confidence adjusted", 
+		   Constants.CONFIDENCE_DEFAULT, 
+		   utterances[utterances.length-2].getEnd().get(Constants.CONFIDENCE));
 
       
       Annotation[] words = g.annotations("word");
