@@ -1289,6 +1289,7 @@ public class ChatDeserializer
       Pattern specialTerminatorsPattern = Pattern.compile(
 	 "^.*((\\+\\.\\.\\.)|(\\+\\.\\.\\?)|(\\+!\\?)|(\\+/\\.)|(\\+/\\?)|(\\+//\\.)|(\\+//\\?)|(\\+\\.)|(\\+\"/\\.)|(\\+\"\\.))$");
       Pattern basicTerminatorsPattern = Pattern.compile("^.*([.?!,;:])$");
+      Pattern speakerPattern = Pattern.compile("^\\*(\\p{Alnum}+):(.+)$");
 
       // any lines that contain mid-line synchronisation codes are split into two
       Vector<String> syncLines = new Vector<String>();
@@ -1347,7 +1348,8 @@ public class ChatDeserializer
 	 }
 	 else
 	 {
-	    if (line.startsWith("*"))
+	    Matcher speakerMatcher = speakerPattern.matcher(line);
+	    if (speakerMatcher.matches())
 	    { // setting the speaker, ID is 3 characters
 	       if (cUnit != null && getCUnitLayer() != null)
 	       { // add last c-unit
@@ -1370,7 +1372,7 @@ public class ChatDeserializer
 	       } // c-unit to add
 	       // something like:
 	       // *SUB: ...
-	       String participantId = line.substring(1, 4);
+	       String participantId = speakerMatcher.group(1);
 	       if (!participants.containsKey(participantId))
 	       {
 		  warnings.add("Undeclared participant: " + participantId);
@@ -1390,7 +1392,7 @@ public class ChatDeserializer
 		     graph.addAnnotation(currentTurn);
 		  }
 	       }
-	       line = line.substring(5);
+	       line = speakerMatcher.group(2);
 	    } // participant
 	    
 	    Annotation utterance = new Annotation(null, line, getUtteranceLayer().getId());
