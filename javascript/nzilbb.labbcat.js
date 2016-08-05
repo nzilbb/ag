@@ -452,7 +452,7 @@ nzilbb.labbcat.Labbcat.prototype.newTranscript = function(transcript, media, med
 			if (messages.length == 0) messages = null
 			onResult(result, errors, messages, "newTranscript", transcriptName);
 		    } catch(exception) {
-			onResult(null, ["" +exception+ ": " + this.responseText], evt.target.call, evt.target.id);
+			onResult(null, ["" +exception+ ": " + this.responseText], "newTranscript", transcript.name);
 		    }
 		});
 	    } else {
@@ -465,8 +465,16 @@ nzilbb.labbcat.Labbcat.prototype.newTranscript = function(transcript, media, med
 };
 
 /**
- * Gets the status of a task.
- * @param {string} id ID of the task.
+ * Delete a transcript.
+ * @param {string} id ID of the transcript.
+ * @callback {resultCallback} onResult Invoked when the request has returned a result.
+ */
+nzilbb.labbcat.Labbcat.prototype.deleteTranscript = function(id, onResult) {
+    this.createRequest("deleteTranscript", { transcript_id : id, btnConfirmDelete : true, chkDb : true }, onResult, this.baseUrl + "edit/transcript/delete").send();
+};
+
+/**
+ * Gets list of tasks.
  * @callback {resultCallback} onResult Invoked when the request has returned a result.
  */
 nzilbb.labbcat.Labbcat.prototype.getTasks = function(onResult) {
