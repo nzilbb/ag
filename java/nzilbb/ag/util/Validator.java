@@ -2098,7 +2098,7 @@ public class Validator
    protected String logAnnotation(Annotation annotation)
    {
       if (annotation == null) return "[null]";
-      return "[" + annotation.getId() + "]" + annotation.get("ordinal") + "#" + annotation.getLabel();
+      return "[" + annotation.getId() + "]" + annotation.get("ordinal") + "#" + annotation.getLabel() + "("+annotation.getStart()+"-"+annotation.getEnd()+")";
    } // end of logAnnotation()
 
    /**
