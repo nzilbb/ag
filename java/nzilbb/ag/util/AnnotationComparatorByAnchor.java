@@ -26,7 +26,7 @@ import nzilbb.ag.Annotation;
 import nzilbb.ag.Anchor;
 
 /**
- * Comparator that compares annotations by anchor offset, ordering start earliest, then end latest, then highest ordinal first, then highest ID first.
+ * Comparator that compares annotations by anchor offset, ordering start earliest, then end latest, then lowest ordinal first, then highest ID first.
  * <p>Ordering is by start ascending then end descending so that tree structures come out with a top-down traversal - i.e. earlier ancestors are first, and where ancestors start at the same time, widest ancestors are first.
  * @author Robert Fromont robert@fromont.net.nz
  */

@@ -41,4 +41,14 @@ public class Utility
       return ((Integer)oConfidence).intValue();
    } // end of getConfidence()
 
+   /**
+    * Gets the confidence rating of a given object.  If no Integer confidence attribute is present, {@link Constants#CONFIDENCE_MANUAL} is returned.
+    * @param o The object to get the confidence rating for (most likely an {@link Annotation} or {@link Anchor})
+    * @return The confidence rating of a given object, or {@link Constants#CONFIDENCE_MANUAL} if it could not be determined.
+    */
+   public static int getConfidence(TrackedMap o)
+   {      
+      return getConfidence(o, Constants.CONFIDENCE_MANUAL);
+   } // end of getConfidence()
+
 } // end of class Utility

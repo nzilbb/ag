@@ -1456,6 +1456,78 @@ public class Annotation
       return getStartId().equals(getEndId());
    } // end of getInstantaneous()
 
+   /**
+    * Determines the offset difference between this annotation and another
+    * - i.e. the maximum distance between the start and end anchors
+    * - MAX(ABS(this.start-other.start),ABS(this.end-other.end)).  
+    * If the annotations overlap, the returned difference will be negative, with a magnitude as defined above.
+    * @param other Annotation to compare to.
+    * @return The minimum distance between starts and ends of the annotations, or null if any anchors are unset.
+    */
+   public Double maximumPairedOffsetDifference(Annotation other) // TODO unit test
+   {
+      // are there anchors to compare
+      if (getStart() == null || getStart().getOffset() == null
+	  || getEnd() == null || getEnd().getOffset() == null
+	  || other == null
+	  || other.getStart() == null || other.getStart().getOffset() == null
+	  || other.getEnd() == null || other.getEnd().getOffset() == null)
+      {
+	 return null;
+      }
+
+      double dMyStart = getStart().getOffset();
+      double dMyEnd = getEnd().getOffset();
+      double dTheirStart = other.getStart().getOffset();
+      double dTheirEnd = other.getEnd().getOffset();
+      double dDifference = Math.max(Math.abs(dMyStart-dTheirStart), Math.abs(dMyEnd-dTheirEnd));
+
+      // do they overlap ?
+      if (dMyStart < dTheirEnd && dMyEnd > dTheirStart) dDifference *= -1;
+      return dDifference;
+   } // end of maximumPairedOffsetDifference()
+
+   /**
+    * Determines the offset difference between this annotation and another
+    * - i.e. the minimum distance between any of the anchors. 
+    * If the annotations overlap, the returned difference will be negative,
+    * with a magnitude corresponding to the degree of overlap.
+    * @param other
+    * @return The minimum distance between any two of the annotations' anchors, or null if any anchors are unset.
+    */
+   public Double minimumOffsetDifference(Annotation other) // TODO unit test
+   {
+      // are there anchors to compare
+      if (getStart() == null || getStart().getOffset() == null
+	  || getEnd() == null || getEnd().getOffset() == null
+	  || other == null
+	  || other.getStart() == null || other.getStart().getOffset() == null
+	  || other.getEnd() == null || other.getEnd().getOffset() == null)
+      {
+	 return null;
+      }
+
+      if (includes(other))
+      {
+	 return -other.getDuration();
+      }
+      else if (other.includes(this))
+      {
+	 return -getDuration();
+      }
+      else
+      {
+	 double dMyStart = getStart().getOffset();
+	 double dMyEnd = getEnd().getOffset();
+	 double dTheirStart = other.getStart().getOffset();
+	 double dTheirEnd = other.getEnd().getOffset();
+
+	 double dDifference = Math.abs(dMyStart-dTheirEnd);
+	 dDifference = Math.min(dDifference, Math.abs(dMyEnd-dTheirStart));
+	 if (dMyStart < dTheirEnd && dMyEnd > dTheirStart) dDifference *= -1;
+	 return dDifference;
+      }
+   } // end of minimumOffsetDifference()
 
    /* TODO
     overlaps : function(annotation) { return this.start.offset < annotation.end.offset && this.end.offset > annotation.start.offset; },

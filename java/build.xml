@@ -6,8 +6,9 @@
   <property name="javadoc"   location="javadoc"/>
   <property name="build" location="build_${ant.project.name}"/>
   <property name="dist"  location="../bin"/>
-  <property name="srcfiles" value="nzilbb/ag/**/*.java nzilbb/configure/**/*.java nzilbb/util/**/*.java"/> 
+  <property name="srcfiles" value="nzilbb/ag/**/*.java nzilbb/editpath/**/*.java nzilbb/configure/**/*.java nzilbb/util/**/*.java"/> 
   <property name="srctests" value="nzilbb/ag/**/Test*.java"/>
+  <property name="srctestseditpath" value="nzilbb/editpath/**/Test*.java"/>
   <property name="junitjar" value="/usr/share/java/junit4.jar"/>
   
   <target name="init">
@@ -26,7 +27,7 @@
     <javac srcdir="${src}" destdir="${build}"
 	   classpath=""
 	   includes="${srcfiles}"
-	   excludes="nzilbb/ag/**/test/*.java"
+	   excludes="${srctests} ${srctestseditpath}"
 	   listfiles="yes"
 	   includeantruntime="false"
 	   target="6"
@@ -64,13 +65,13 @@
 	     classpath="."
 	     Author="yes"
 	     >
-      <fileset dir="${src}" includes="${srcfiles}" excludes="nzilbb/ag/**/test/*.java" />
+      <fileset dir="${src}" includes="${srcfiles}" excludes="${srctests} ${srctestseditpath}" />
     </javadoc>
   </target>
 
   <target name="test" depends="dist" description="run nzilbb.ag annotation-graph unit tests">
     <javac srcdir="${src}" destdir="."
-	   includes="${srctests}"
+	   includes="${srctests} ${srctestseditpath}"
 	   classpath=".;${junitjar};${dist}/${ant.project.name}.jar"
 	   listfiles="yes"
 	   target="6"
@@ -92,6 +93,7 @@
       <batchtest>
         <fileset dir=".">
           <include name="${srctests}"/>
+          <include name="${srctestseditpath}"/>
         </fileset>
       </batchtest>
     </junit>
