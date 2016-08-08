@@ -116,6 +116,44 @@ public class Graph
     */
    public void setAnchors(LinkedHashMap<String,Anchor> anchors) { put("anchors", anchors); }
 
+   
+   /**
+    * Granularity of offsets - e.g. 0.001 if Anchor offsets are always set to the the nearest millisecond, or null for no particular granularity.
+    * @see #getOffsetGranularity()
+    * @see #setOffsetGranularity(Double)
+    */
+   protected Double offsetGranularity;
+   /**
+    * Getter for {@link #offsetGranularity}: Granularity of offsets - e.g. 0.001 if Anchor offsets are always set to the the nearest millisecond, or null for no particular granularity.
+    * @return Granularity of offsets - e.g. 0.001 if Anchor offsets are always set to the the nearest millisecond, or null for no particular granularity.
+    */
+   public Double getOffsetGranularity() { return offsetGranularity; }
+   /**
+    * Setter for {@link #offsetGranularity}: Granularity of offsets - e.g. 0.001 if Anchor offsets are always set to the the nearest millisecond, or null for no particular granularity.
+    * @param newOffsetGranularity Granularity of offsets - e.g. 0.001 if Anchor offsets are always set to the the nearest millisecond, or null for no particular granularity.
+    */
+   public void setOffsetGranularity(Double newOffsetGranularity) { offsetGranularity = newOffsetGranularity; }
+
+   /**
+    * The units for anchor offsets - e.g. "s" for seconds, "char" for characters, etc.  Preferably the value should be one of the Constants.UNIT_... constants. The default value is {@link Constants#UNIT_SECONDS}.
+    * @see #getOffsetUnits()
+    * @see #setOffsetUnits(String)
+    * @see Constants#UNIT_SECONDS
+    * @see Constants#UNIT_CHARACTERS
+    */
+   protected String offsetUnits = Constants.UNIT_SECONDS;
+   /**
+    * Getter for {@link #offsetUnits}: The units for anchor offsets - e.g. "s" for seconds, "char" for characters, etc.  Preferably the value should be one of the Constants.UNIT_... constants. The default value is {@link Constants#UNIT_SECONDS}.
+    * @return The units for anchor offsets - e.g. "s" for seconds, "char" for characters, etc.  Preferably the value should be one of the Constants.UNIT_... constants.
+    */
+   public String getOffsetUnits() { return offsetUnits; }
+   /**
+    * Setter for {@link #offsetUnits}: The units for anchor offsets - e.g. "s" for seconds, "char" for characters, etc.  Preferably the value should be one of the Constants.UNIT_... constants.
+    * @param newOffsetUnits The units for anchor offsets - e.g. "s" for seconds, "char" for characters, etc.  Preferably the value should be one of the Constants.UNIT_... constants.
+    */
+   public void setOffsetUnits(String newOffsetUnits) { offsetUnits = newOffsetUnits; }
+
+
    // TODO participants
    
    

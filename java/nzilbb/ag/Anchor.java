@@ -343,7 +343,7 @@ public class Anchor
 	 endingHere.addAll(layer);
       }
       return endingHere;
-   } // end of getStartingAnnotations()
+   } // end of getEndingAnnotations()
 
    /**
     * Sets the start of all annotations that start here, to the given anchor.
