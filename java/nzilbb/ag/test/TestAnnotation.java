@@ -440,7 +440,23 @@ public class TestAnnotation
       // we tolerate negative-zero even though it's silly
       assertEquals("distance startInstant", new Double(-0.0), test.distance(startInstant));
       assertEquals("distance endInstant", new Double(0.0), test.distance(endInstant));
-      assertNull("distance endInstant", test.distance(unknown));
+      assertNull("distance unknown", test.distance(unknown));
+
+      assertEquals("maxPairedDistance prior", new Double(1.5), test.maxPairedDistance(prior));
+      assertEquals("maxPairedDistance previous", new Double(1.0), test.maxPairedDistance(previous));
+      assertEquals("maxPairedDistance next", new Double(1.0), test.maxPairedDistance(next));
+      assertEquals("maxPairedDistance following", new Double(1.5), test.maxPairedDistance(following));
+      assertEquals("maxPairedDistance overStart", new Double(-0.75), test.maxPairedDistance(overStart));
+      assertEquals("maxPairedDistance overEnd", new Double(-0.75), test.maxPairedDistance(overEnd));
+      assertEquals("maxPairedDistance startEdge", new Double(-0.75), test.maxPairedDistance(startEdge));
+      assertEquals("maxPairedDistance endEdge", new Double(-0.75), test.maxPairedDistance(endEdge));
+      assertEquals("maxPairedDistance startInstant", new Double(1.0), test.maxPairedDistance(startInstant));
+      assertEquals("maxPairedDistance endInstant", new Double(1.0), test.maxPairedDistance(endInstant));
+      assertNull("maxPairedDistance unknown", test.maxPairedDistance(unknown));
+      // we tolerate negative-zero even though it's silly
+      assertEquals("maxPairedDistance reflexive", new Double(-0.0), test.maxPairedDistance(test));
+      assertEquals("maxPairedDistance parallel", new Double(-0.0), test.maxPairedDistance(parallel));
+      assertEquals("maxPairedDistance simultaneous", new Double(-0.0), test.maxPairedDistance(simultaneous));
 
       // anchored
       assertTrue("anchored", test.getAnchored());

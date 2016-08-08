@@ -269,7 +269,7 @@ public class Merger
 		  {
 		     dImportance *= 2.0;
 		  }
-		  Double dDistance = a1.maximumPairedOffsetDifference(a2);
+		  Double dDistance = a1.maxPairedDistance(a2);
 		  if (dDistance != null && dDistance != 0)
 		  {	
 		     // we want to ensure that overlapping annotations are selected over non-overlapping ones
@@ -284,7 +284,7 @@ public class Merger
 			{  // overlap
 			   // when choosing between fragments of a split-up annotation, choose the 
 			   // fragment that overlaps the most
-			   double dOverlapMagnitude = Math.abs(a1.minimumOffsetDifference(a2))
+			   double dOverlapMagnitude = Math.abs(a1.distance(a2))
 			      // but if the length difference is great, make it high cost anyway
 			      / ((a1.getDuration() + a2.getDuration())/2);
 			   dOverlapMagnitude *= 3; // soften the impact of this magically
