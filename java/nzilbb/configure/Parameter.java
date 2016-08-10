@@ -22,6 +22,8 @@
 package nzilbb.configure;
 
 import java.util.Collection;
+import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * A parameter that needs to be set for a some operation or configuration.
@@ -301,5 +303,24 @@ public class Parameter
    {
       getPossibleValues().add(value);
    } // end of addPossibleValue()
+
+   
+   /**
+    * Sets the value of the attribute named after {@link #name} of the given bean with the parameter's {@link value}.
+    * <p>e.g. if the parameter's name is "foo" and it's value is "bar", then the effect
+    * of this method is the same as invoking <code>bean.setFoo("bar")</code>.
+    * @param bean The object whose bean attribute should be set.
+    * @throws NoSuchMethodException If the bean has no setter named after {@link #name}.
+    * @throws SecurityException 
+    * @throws InvocationTargetException 
+    * @throws IllegalAccessException If the setter is no <code>public</code>.
+    */
+   public void apply(Object bean)
+      throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException
+   {
+      Method setter = bean.getClass().getMethod("set" + name.substring(0,1).toUpperCase() + name.substring(1), type);
+      setter.invoke(bean, value);
+   } // end of apply()
+
 
 } // end of class SerializationParameter
