@@ -47,10 +47,10 @@ public class DeserializerNotConfiguredException
 
    /**
     * Constructor with exception
-    * @param exception The root cause of the error.
+    * @param throwable The root cause of the error.
     */
-   public DeserializerNotConfiguredException(Exception exception)
+   public DeserializerNotConfiguredException(Throwable throwable)
    {
-      super(exception);
+      super(throwable);
    } // end of constructor
 } // end of class DeserializerNotConfiguredException
