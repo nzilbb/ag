@@ -307,7 +307,7 @@ public class Merger
 		  String s1 = a1.getLabel().replaceAll("[^\\p{javaLetter}\\p{javaDigit}]","").toLowerCase();
 		  String s2 = a2.getLabel().replaceAll("[^\\p{javaLetter}\\p{javaDigit}]","").toLowerCase();
 		  if (s1.length() <= 0 || s2.length() <= 0 
-		      || a1.getLayer().get("@type").equals("D")) // TODO formalise layer types and compare phonological comparison with more sophistication
+		      || a1.getLayer().get("@type").equals("D")) // phonological layer TODO formalise layer types
 		  {
 		     s1 = a1.getLabel();
 		     s2 = a2.getLabel(); // for all-punctuation annotations
@@ -594,6 +594,8 @@ public class Merger
 	     && a.getStartingAnnotations().size() == 0
 	     && a.getEndingAnnotations().size() == 0)
 	 {
+	    changes.add( // track changes of:
+	       a.destroy());
 	    graph.getAnchors().remove(a.getId());
 	 }
       } // next anchor
@@ -1685,7 +1687,7 @@ public class Merger
 	       } // found a counterpart anchor
 	       else
 	       {
-		  delta = new Anchor(anEdited.getStart()); // TODO what's this for?
+		  delta = new Anchor(anEdited.getStart());
 		  
 		  // create a new anchor for unrelated annotations that link to this one
 		  Anchor newAnchor = new Anchor(anOriginal.getStart());
@@ -1697,7 +1699,6 @@ public class Merger
 		  {
 		     if (previousAnnotation == anOriginal) continue; // instantaneous
 		     if (previousAnnotation.getChange() == Change.Operation.Destroy) continue; // not deleted annotations
-		     // TODO don't think this is now necessary if (previousAnnotation.getEnd() != anOriginal.getStart()) continue; // already changed
 		     Layer otherLayer = previousAnnotation.getLayer();
 		     // check for other possible end anchor, by following the edited graph structure
 		     Annotation editedPreviousAnnotation = getCounterpart(previousAnnotation);
@@ -1731,7 +1732,6 @@ public class Merger
 		  {
 		     if (parallelAnnotation == anOriginal) continue; // not ourselves
 		     if (parallelAnnotation.getChange() == Change.Operation.Destroy) continue; // not deleted annotations
-		     // TODO don't thing this is now necessary if (parallelAnnotation.getStart() != anOriginal.getStart()) continue; // already changed
 		     Layer otherLayer = parallelAnnotation.getLayer();
 		     // check for other possible start anchor, by following the edited graph structure
 		     Annotation editedParallelAnnotation = getCounterpart(parallelAnnotation);
@@ -1805,7 +1805,6 @@ public class Merger
 	       {
 		  if (previousAnnotation == anOriginal) continue; // instantaneous
 		  if (previousAnnotation.getChange() == Change.Operation.Destroy) continue; // not deleted annotations
-		  // TODO I don't think this is now necessary if (previousAnnotation.getEnd() != anOriginal.getStart()) continue; // already changed
 		  Layer otherLayer = previousAnnotation.getLayer();
 		  // check for other possible end anchor, by following the edited graph structure
 		  Annotation editedPreviousAnnotation = getCounterpart(previousAnnotation);
@@ -1891,7 +1890,6 @@ public class Merger
 		  if (anParallel.getChange() == Change.Operation.Destroy) continue;
 		  if (anParallel == anOriginal) continue;		  
 		  if (anParallel.getLayerId() == anOriginal.getLayerId()) continue;		  
-		  // TODO I'm not sure this is now necessary if (anParallel.getEnd() != anOriginal.getEnd()) continue; // aready changed
 		  if (hasCounterpart(anParallel))
 		  {
 		     Annotation anEditedParallel = getCounterpart(anParallel);
