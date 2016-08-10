@@ -1564,11 +1564,23 @@ public class TestGraph
       assertEquals("list: none", 0, fox.list("phone").length);
 
       list = the.list("utterance");
-      assertEquals("my: ancestor child (peer layers)", utterance1, list[0]);
-      assertEquals("my: ancestor child (peer layers)", 1, list.length);
+      assertEquals("list: ancestor child (peer layers)", utterance1, list[0]);
+      assertEquals("list: ancestor child (peer layers)", 1, list.length);
+      list = utterance1.list("word");
+      assertEquals("list: ancestor child (peer layers) - reflexive", 2, list.length);
+      assertEquals("list: ancestor child (peer layers) - reflexive", the, list[0]);
+      assertEquals("list: ancestor child (peer layers) - reflexive", quick, list[1]);
       list = th.list("utterance");
-      assertEquals("my: ancestor child (non-peers)", utterance1, list[0]);
-      assertEquals("my: ancestor child (non-peers)", 1, list.length);
+      assertEquals("list: ancestor child (non-peers)", utterance1, list[0]);
+      assertEquals("list: ancestor child (non-peers)", 1, list.length);
+      list = utterance1.list("phone");
+      assertEquals("list: ancestor child (non-peers) - reflexive", 6, list.length);
+      assertEquals("list: ancestor child (non-peers) - reflexive", th, list[0]);
+      assertEquals("list: ancestor child (non-peers) - reflexive", e, list[1]);
+      assertEquals("list: ancestor child (non-peers) - reflexive", k, list[2]);
+      assertEquals("list: ancestor child (non-peers) - reflexive", w, list[3]);
+      assertEquals("list: ancestor child (non-peers) - reflexive", I, list[4]);
+      assertEquals("list: ancestor child (non-peers) - reflexive", ck, list[5]);
       
       list = yes.list("turn");
       assertEquals("list: parent - other speaker", turn2, list[0]);

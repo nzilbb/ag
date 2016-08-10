@@ -832,14 +832,15 @@ public class Annotation
     * <ul>
     *  <li><code>word.list("turn")[0]</code> for the (parent) turn</li>
     *  <li><code>phone.list("turn")[0]</code> for the (grandparent) turn</li>
-    *  <li><code>word.list("POS")</code> for all part of speech annotations</li>
-    *  <li><code>word.list("phone")</code> for all phones in a word</li>
-    *  <li><code>turn.list("phone")</code> for all phones in a turn</li>
-    *  <li><code>phone.list("POS")</code> for the all part of speech annotation, which are neither ancestors nor descendants, but rather children of an ancestor (<code>phone.my("word")</code>)</li>
-    *  <li><code>word.list("who")[0]</code> for the speaker</li>
-    *  <li><code>word.list("graph")[0]</code> for the graph</li>
-    *  <li><code>word.list("utterance")[0]</code> for the utterance, which is neither an ancestor nor descendant, but rather is a child of an ancestor (<code>word.myo"turn")</code>)</li>
-    *  <li><code>word.list("corpus")[0]</code> for the graph's corpus, which is neither an ancestor nor descendant, but rather is a child of an ancestor (<code>word.my("graph")</code>)</li>
+    *  <li><code>word.list("POS")</code> for all (child) part of speech annotations</li>
+    *  <li><code>word.list("phone")</code> for all (child) phones in a word</li>
+    *  <li><code>turn.list("phone")</code> for all (grandchild) phones in a turn</li>
+    *  <li><code>phone.list("POS")</code> for the all (peer) part of speech annotation, which are neither ancestors nor descendants, but rather children of an ancestor (<code>phone.my("word")</code>)</li>
+    *  <li><code>word.list("who")[0]</code> for the (grandparent) speaker</li>
+    *  <li><code>word.list("graph")[0]</code> for the (great-grandparent) graph</li>
+    *  <li><code>word.list("utterance")[0]</code> for the (peer) utterance, which is neither an ancestor nor descendant, but rather is a child of an ancestor (<code>word.my"turn")</code>)</li>
+    *  <li><code>utterace.list("word")</code> for the utterance's (peer) words, which are neither an ancestors nor descendants, but rather are children of an ancestor (<code>utterance.my"turn")</code>)</li>
+    *  <li><code>word.list("corpus")[0]</code> for the graph's (child of grandparent) corpus, which is neither an ancestor nor descendant, but rather is a child of an ancestor (<code>word.my("graph")</code>)</li>
     * </ul>
     * <p>{@link #setGraph(Graph)} must have been previously called, and the graph must have a correct layer hierarchy for this method to work correctly.
     * @param layerId The layer of the desired annotations.
@@ -887,27 +888,23 @@ public class Annotation
       }
       // check for children of ancestors
       // so that word.list("utterance") works and so does word.list("corpus")
-      if (commonAncestorLayer != null)
+      Annotation commonAncestor = getAncestor(commonAncestorLayer.getId());
+      // return the first child that t-includes this annotation
+      if (commonAncestor != null 
+	  // common ancestor must be related - i.e. in the layer of commonAncestorLayer
+	  && commonAncestor.getLayerId() == commonAncestorLayer.getId())
       {
-	 if (layer.getParentId().equals(commonAncestorLayer.getId()))
+	 Vector<Annotation> annotations = new Vector<Annotation>();
+	 for (Annotation child : commonAncestor.list(layerId))
 	 {
-	    Annotation commonAncestor = getAncestor(commonAncestorLayer.getId());
-	    // return the first child that t-includes this annotation
-	    if (commonAncestor != null)
+	    if (child.includes(this) || this.includes(child))
 	    {
-	       Vector<Annotation> annotations = new Vector<Annotation>();
-	       for (Annotation child : commonAncestor.getAnnotations(layerId))
-	       {
-		  if (child.includes(this))
-		  {
-		     annotations.add(child);
-		  }
-	       } // next child of common ancestor
-	       if (annotations.size() > 0)
-	       {
-		  return annotations.toArray(new Annotation[0]);
-	       }
+	       annotations.add(child);
 	    }
+	 } // next child of common ancestor
+	 if (annotations.size() > 0)
+	 {
+	    return annotations.toArray(new Annotation[0]);
 	 }
       }
       return new Annotation[0];
