@@ -19,38 +19,39 @@
 //    along with nzilbb.ag; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.ag.serialize;
 
-/**
- * Exception thrown when a deserializer is asked to deserialize data, but it hasn't been configured.
- * @author Robert Fromont robert@fromont.net.nz
- */
-@SuppressWarnings("serial")
-public class DeserializerNotConfiguredException
-   extends Exception
-{
-   /**
-    * Default constructor
-    */
-   public DeserializerNotConfiguredException()
-   {
-   } // end of constructor
+package nzilbb.ag.util.test;
+	      
+import org.junit.*;
+import static org.junit.Assert.*;
 
-   /**
-    * Constructor with message
-    * @param message The error message.
-    */
-   public DeserializerNotConfiguredException(String message)
-   {
-      super(message);
-   } // end of constructor
+import java.util.Vector;
+import java.util.Iterator;
+import nzilbb.ag.util.*;
+import nzilbb.ag.*;
 
-   /**
-    * Constructor with exception
-    * @param throwable The root cause of the error.
-    */
-   public DeserializerNotConfiguredException(Throwable throwable)
+public class TestMerger
+{      
+   @Test public void identityMerge() 
    {
-      super(throwable);
-   } // end of constructor
-} // end of class DeserializerNotConfiguredException
+      Graph g = new Graph();
+      Merger m = new Merger();
+      m.setDebug(true);
+/*
+      try
+      {
+	 Vector<Change> changes = m.transform(g);
+	 if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+*/
+   }
+
+   public static void main(String args[]) 
+   {
+      org.junit.runner.JUnitCore.main("nzilbb.ag.util.test.TestMerger");
+   }
+}

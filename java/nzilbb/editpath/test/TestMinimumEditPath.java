@@ -116,6 +116,24 @@ public class TestMinimumEditPath
       assertEquals(path.get(4), path.get(5).getBackTrace());
       assertEquals(path.get(5), path.get(6).getBackTrace());
 
+      // fromIndices set
+      assertEquals(0, path.get(0).getFromIndex());
+      assertEquals(1, path.get(1).getFromIndex());
+      assertEquals(2, path.get(2).getFromIndex());
+      assertEquals(3, path.get(3).getFromIndex());
+      assertEquals(4, path.get(4).getFromIndex());
+      assertEquals(5, path.get(5).getFromIndex());
+      assertEquals(5, path.get(6).getFromIndex());
+
+      // toIndices set
+      assertEquals(0, path.get(0).getToIndex());
+      assertEquals(0, path.get(1).getToIndex());
+      assertEquals(1, path.get(2).getToIndex());
+      assertEquals(2, path.get(3).getToIndex());
+      assertEquals(2, path.get(4).getToIndex());
+      assertEquals(3, path.get(5).getToIndex());
+      assertEquals(4, path.get(6).getToIndex());
+
       // edit distance
       assertEquals(4, mp.minimumEditDistance(vFrom, vTo));
    }

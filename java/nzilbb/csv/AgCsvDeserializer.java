@@ -184,9 +184,9 @@ public class AgCsvDeserializer
     * {@link IDeserializer#setParameters()} can be invoked. If this is an empty list,
     * {@link IDeserializer#setParameters()} can be invoked. If it's not an empty list,
     * this method must be invoked again with the returned parameters' values set.
-    * @throws DeserializerNotConfiguredException If the configuration is not sufficient for deserialization.
+    * @throws SerializerNotConfiguredException If the configuration is not sufficient for deserialization.
     */
-   public ParameterSet configure(ParameterSet configuration, Schema schema) throws DeserializerNotConfiguredException
+   public ParameterSet configure(ParameterSet configuration, Schema schema) throws SerializerNotConfiguredException
    {
       s = schema;
       if (!configuration.containsKey("fieldDelimiter"))
@@ -201,11 +201,11 @@ public class AgCsvDeserializer
 	 try
 	 {
 	    configuration.get("fieldDelimiter").apply(this);
-	    if (getFieldDelimiter() == null) throw new DeserializerNotConfiguredException("fieldDelimiter must be set.");
+	    if (getFieldDelimiter() == null) throw new SerializerNotConfiguredException("fieldDelimiter must be set.");
 	 }
 	 catch(Throwable t)
 	 {
-	    throw new DeserializerNotConfiguredException(t);
+	    throw new SerializerNotConfiguredException(t);
 	 }
       }
       return new ParameterSet(); // all done
@@ -227,7 +227,7 @@ public class AgCsvDeserializer
       // take the first stream, ignore all others.
       NamedStream csv = annotationStreams[0];
       setName(csv.getName());
-      if (!getName().endsWith(".csv")) throw new DeserializationException("Invalid stream name: " + getName());
+      if (!getName().endsWith(".csv")) throw new SerializationException("Invalid stream name: " + getName());
       setName(getName().replaceFirst("\\.csv$","").replaceFirst("\\.ag$",""));
       
       reset();
@@ -294,9 +294,9 @@ public class AgCsvDeserializer
    /**
     * Sets parameters for a given deserialization operation, after loading the serialized form of the graph. This might include mappings from format-specific objects like tiers to graph layers, etc.
     * @param parameters The configuration for a given deserialization operation.
-    * @throws DeserializationParametersMissingException If not all required parameters have a value.
+    * @throws SerializationParametersMissingException If not all required parameters have a value.
     */
-   public void setParameters(ParameterSet parameters) throws DeserializationParametersMissingException
+   public void setParameters(ParameterSet parameters) throws SerializationParametersMissingException
    {
       for (String layerId : mDiscoveredLayers.keySet())
       {
@@ -307,15 +307,15 @@ public class AgCsvDeserializer
    /**
     * Deserializes the serialized data, generating one or more {@link Graph}s.
     * @return A list of valid (if incomplete) {@link Graph}s. 
-    * @throws DeserializerNotConfiguredException if the object has not been configured.
-    * @throws DeserializationParametersMissingException if the parameters for this particular graph have not been set.
-    * @throws DeserializationException if errors occur during deserialization.
+    * @throws SerializerNotConfiguredException if the object has not been configured.
+    * @throws SerializationParametersMissingException if the parameters for this particular graph have not been set.
+    * @throws SerializationException if errors occur during deserialization.
     */
    public Graph[] deserialize() 
-      throws DeserializerNotConfiguredException, DeserializationParametersMissingException, DeserializationException
+      throws SerializerNotConfiguredException, SerializationParametersMissingException, SerializationException
    {
-      // if there are errors, accumlate as many as we can before throwing DeserializationException
-      DeserializationException errors = null;
+      // if there are errors, accumlate as many as we can before throwing SerializationException
+      SerializationException errors = null;
 
       Graph graph = new Graph();
       graph.setId(getName());
@@ -353,7 +353,7 @@ public class AgCsvDeserializer
 	    {
 	       readAnnotations(mCsvData.get(originalId), mDiscoveredLayers.get(originalId), graph);
 	    }
-	    catch(DeserializationException exception)
+	    catch(SerializationException exception)
 	    {
 	       if (errors == null)
 	       {
@@ -361,7 +361,7 @@ public class AgCsvDeserializer
 	       }
 	       else
 	       {
-		  errors.addError(DeserializationException.ErrorType.Other, exception.getMessage());
+		  errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
 	       }
 	    }
 	 } // mapped to a schema layer
@@ -377,10 +377,10 @@ public class AgCsvDeserializer
     * @param lines
     * @param layer
     * @param graph
-    * @throws DeserializationException
+    * @throws SerializationException
     */
    public void readAnnotations(Vector<CSVRecord> lines, Layer layer, Graph graph)
-    throws DeserializationException
+    throws SerializationException
    {
       // map header columns
       HashMap<String,Integer> mHeadings = new HashMap<String,Integer>();

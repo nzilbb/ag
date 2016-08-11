@@ -569,9 +569,9 @@ public class ChatDeserializer
     * @param configuration The configuration for the deserializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of configuration parameters (still) must be set before {@link IDeserializer#setParameters()} can be invoked. If this is an empty list, {@link IDeserializer#setParameters()} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
-    * @throws DeserializerNotConfiguredException If the configuration is not sufficient for deserialization.
+    * @throws SerializerNotConfiguredException If the configuration is not sufficient for deserialization.
     */
-   public ParameterSet configure(ParameterSet configuration, Schema schema) throws DeserializerNotConfiguredException
+   public ParameterSet configure(ParameterSet configuration, Schema schema) throws SerializerNotConfiguredException
    {
       return new ParameterSet(); // TODO move layer discovery from load() to configure()
    }
@@ -1111,9 +1111,9 @@ public class ChatDeserializer
    /**
     * Sets parameters for a given deserialization operation, after loading the serialized form of the graph. This might include mappings from format-specific objects like tiers to graph layers, etc.
     * @param parameters The configuration for a given deserialization operation.
-    * @throws DeserializationParametersMissingException If not all required parameters have a value.
+    * @throws SerializationParametersMissingException If not all required parameters have a value.
     */
-   public void setParameters(ParameterSet parameters) throws DeserializationParametersMissingException
+   public void setParameters(ParameterSet parameters) throws SerializationParametersMissingException
    {
       if (parameters.containsKey("participantLayer"))
       {
@@ -1177,7 +1177,7 @@ public class ChatDeserializer
       }
       if (getParticipantLayer() == null || getTurnLayer() == null || getUtteranceLayer() == null || getWordLayer() == null)
       {
-	 throw new DeserializationParametersMissingException();
+	 throw new SerializationParametersMissingException();
       }
       for (String attribute : participantLayers.keySet())
       {
@@ -1196,15 +1196,15 @@ public class ChatDeserializer
     * (e.g. AGTK, Transana XML export), which is why this method
     * returns a list.
     * @return A list of valid (if incomplete) {@link Graph}s. 
-    * @throws DeserializerNotConfiguredException if the object has not been configured.
-    * @throws DeserializationParametersMissingException if the parameters for this particular graph have not been set.
-    * @throws DeserializationException if errors occur during deserialization.
+    * @throws SerializerNotConfiguredException if the object has not been configured.
+    * @throws SerializationParametersMissingException if the parameters for this particular graph have not been set.
+    * @throws SerializationException if errors occur during deserialization.
     */
    public Graph[] deserialize() 
-      throws DeserializerNotConfiguredException, DeserializationParametersMissingException, DeserializationException
+      throws SerializerNotConfiguredException, SerializationParametersMissingException, SerializationException
    {
-      // if there are errors, accumlate as many as we can before throwing DeserializationException
-      DeserializationException errors = null;
+      // if there are errors, accumlate as many as we can before throwing SerializationException
+      SerializationException errors = null;
 
       Graph graph = new Graph();
       graph.setId(getName());
@@ -1426,8 +1426,8 @@ public class ChatDeserializer
 	       
 	       if (start.getOffset() > end.getOffset())
 	       { // start and end in reverse order 
-		  if (errors == null) errors = new DeserializationException();
-		  errors.addError(DeserializationException.ErrorType.Alignment, 
+		  if (errors == null) errors = new SerializationException();
+		  errors.addError(SerializationException.ErrorType.Alignment, 
 				  "Utterance start is after end: " 
 				  + synchronisedMatcher.group(2) + "_" + synchronisedMatcher.group(3));
 	       }
@@ -1495,9 +1495,9 @@ public class ChatDeserializer
       }
       catch(TransformationException exception)
       {
-	 if (errors == null) errors = new DeserializationException();
+	 if (errors == null) errors = new SerializationException();
 	 if (errors.getCause() == null) errors.initCause(exception);
-	 errors.addError(DeserializationException.ErrorType.Tokenization, exception.getMessage());
+	 errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
       }
 
       try
@@ -1646,9 +1646,9 @@ public class ChatDeserializer
       }
       catch(TransformationException exception)
       {
-	 if (errors == null) errors = new DeserializationException();
+	 if (errors == null) errors = new SerializationException();
 	 if (errors.getCause() == null) errors.initCause(exception);
-	 errors.addError(DeserializationException.ErrorType.Other, exception.getMessage());
+	 errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
       }
       if (errors != null) throw errors;
       Graph[] graphs = { graph };

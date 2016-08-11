@@ -22,17 +22,35 @@
 package nzilbb.ag.serialize;
 
 /**
- * Exception thrown when a deserializer is asked to deserialize data, but it hasn't enough configuration parameters to proceed.
+ * Exception thrown when a deserializer is asked to deserialize data, but it hasn't been configured.
  * @author Robert Fromont robert@fromont.net.nz
  */
 @SuppressWarnings("serial")
-public class DeserializationParametersMissingException
+public class SerializerNotConfiguredException
    extends Exception
 {
    /**
     * Default constructor
     */
-   public DeserializationParametersMissingException()
+   public SerializerNotConfiguredException()
    {
    } // end of constructor
-} // end of class DeserializerNotConfiguredException
+
+   /**
+    * Constructor with message
+    * @param message The error message.
+    */
+   public SerializerNotConfiguredException(String message)
+   {
+      super(message);
+   } // end of constructor
+
+   /**
+    * Constructor with exception
+    * @param throwable The root cause of the error.
+    */
+   public SerializerNotConfiguredException(Throwable throwable)
+   {
+      super(throwable);
+   } // end of constructor
+} // end of class SerializerNotConfiguredException

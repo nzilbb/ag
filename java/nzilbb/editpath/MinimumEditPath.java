@@ -134,11 +134,30 @@ public class MinimumEditPath<T>
       Vector<EditStep<T>> vPath = new Vector<EditStep<T>>();
       // starts at the end of the 0th row
       EditStep<T> e = path[0][to.size()];
+      int f = from.size() - 1;
+      int t = to.size() - 1;
+      if (t < 0) t = 0;
+      if (f < 0) f = 0;
       if (e != null)
       {
 	 do
 	 {
 	    vPath.add(0,e);
+	    // set from/to indices
+	    switch(e.getOperation())
+	    {
+	       case DELETE:		  
+		  e.setFromToIndices(f--, t);
+		  break;
+	       case INSERT:
+		  e.setFromToIndices(f, t--);
+		  break;
+	       default:
+		  e.setFromToIndices(f--, t--);
+		  break;
+	    }
+	    if (t < 0) t = 0;
+	    if (f < 0) f = 0;
 	    e = e.getBackTrace();
 	 }
 	 while (e != null);

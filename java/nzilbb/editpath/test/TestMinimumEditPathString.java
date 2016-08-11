@@ -80,6 +80,18 @@ public class TestMinimumEditPathString
       assertEquals(path.get(1), path.get(2).getBackTrace());
       assertEquals(path.get(2), path.get(3).getBackTrace());
 
+      // fromIndices set
+      assertEquals(0, path.get(0).getFromIndex());
+      assertEquals(1, path.get(1).getFromIndex());
+      assertEquals(2, path.get(2).getFromIndex());
+      assertEquals(3, path.get(3).getFromIndex());
+
+      // toIndices set
+      assertEquals(0, path.get(0).getToIndex());
+      assertEquals(1, path.get(1).getToIndex());
+      assertEquals(2, path.get(2).getToIndex());
+      assertEquals(3, path.get(3).getToIndex());
+
       // edit distance
       assertEquals(0, mp.minimumEditDistance("this", "this"));
    }
@@ -130,6 +142,18 @@ public class TestMinimumEditPathString
       assertEquals(path.get(0), path.get(1).getBackTrace());
       assertEquals(path.get(1), path.get(2).getBackTrace());
       assertEquals(path.get(2), path.get(3).getBackTrace());
+
+      // fromIndices set
+      assertEquals(0, path.get(0).getFromIndex());
+      assertEquals(1, path.get(1).getFromIndex());
+      assertEquals(2, path.get(2).getFromIndex());
+      assertEquals(3, path.get(3).getFromIndex());
+
+      // toIndices set
+      assertEquals(0, path.get(0).getToIndex());
+      assertEquals(1, path.get(1).getToIndex());
+      assertEquals(2, path.get(2).getToIndex());
+      assertEquals(3, path.get(3).getToIndex());
 
       // edit distance
       assertEquals(2, mp.minimumEditDistance("this", "that"));
@@ -182,6 +206,18 @@ public class TestMinimumEditPathString
       assertEquals(path.get(1), path.get(2).getBackTrace());
       assertEquals(path.get(2), path.get(3).getBackTrace());
 
+      // fromIndices set
+      assertEquals(0, path.get(0).getFromIndex());
+      assertEquals(0, path.get(1).getFromIndex());
+      assertEquals(0, path.get(2).getFromIndex());
+      assertEquals(0, path.get(3).getFromIndex());
+
+      // toIndices set
+      assertEquals(0, path.get(0).getToIndex());
+      assertEquals(1, path.get(1).getToIndex());
+      assertEquals(2, path.get(2).getToIndex());
+      assertEquals(3, path.get(3).getToIndex());
+
       // edit distance
       assertEquals(4, mp.minimumEditDistance("", "that"));
    }
@@ -232,6 +268,18 @@ public class TestMinimumEditPathString
       assertEquals(path.get(0), path.get(1).getBackTrace());
       assertEquals(path.get(1), path.get(2).getBackTrace());
       assertEquals(path.get(2), path.get(3).getBackTrace());
+
+      // fromIndices set
+      assertEquals(0, path.get(0).getFromIndex());
+      assertEquals(1, path.get(1).getFromIndex());
+      assertEquals(2, path.get(2).getFromIndex());
+      assertEquals(3, path.get(3).getFromIndex());
+
+      // toIndices set
+      assertEquals(0, path.get(0).getToIndex());
+      assertEquals(0, path.get(1).getToIndex());
+      assertEquals(0, path.get(2).getToIndex());
+      assertEquals(0, path.get(3).getToIndex());
 
       // edit distance
       assertEquals(4, mp.minimumEditDistance("this", ""));
@@ -304,6 +352,21 @@ public class TestMinimumEditPathString
       assertEquals(path.get(1), path.get(2).getBackTrace());
       assertEquals(path.get(2), path.get(3).getBackTrace()); 
       assertEquals(path.get(3), path.get(4).getBackTrace());
+
+      // fromIndices set
+      assertEquals(0, path.get(0).getFromIndex());
+      assertEquals(1, path.get(1).getFromIndex());
+      assertEquals(2, path.get(2).getFromIndex());
+      assertEquals(3, path.get(3).getFromIndex());
+      assertEquals(4, path.get(4).getFromIndex());
+
+      // toIndices set
+      assertEquals(0, path.get(0).getToIndex());
+      assertEquals(0, path.get(1).getToIndex());
+      assertEquals(0, path.get(2).getToIndex());
+      assertEquals(1, path.get(3).getToIndex());
+      assertEquals(2, path.get(4).getToIndex());
+
    }
 
    @Test 
@@ -364,6 +427,22 @@ public class TestMinimumEditPathString
       assertEquals(path.get(2), path.get(3).getBackTrace()); 
       assertEquals(path.get(3), path.get(4).getBackTrace());
       assertEquals(path.get(4), path.get(5).getBackTrace());
+
+      // fromIndices set
+      assertEquals(0, path.get(0).getFromIndex());
+      assertEquals(1, path.get(1).getFromIndex());
+      assertEquals(2, path.get(2).getFromIndex());
+      assertEquals(2, path.get(3).getFromIndex());
+      assertEquals(3, path.get(4).getFromIndex());
+      assertEquals(4, path.get(5).getFromIndex());
+
+      // toIndices set
+      assertEquals(0, path.get(0).getToIndex());
+      assertEquals(0, path.get(1).getToIndex());
+      assertEquals(0, path.get(2).getToIndex());
+      assertEquals(1, path.get(3).getToIndex());
+      assertEquals(1, path.get(4).getToIndex());
+      assertEquals(2, path.get(5).getToIndex());
    }
 
    @Test 

@@ -73,6 +73,24 @@ public class EditStep<T>
     * @param oNewFrom The element in the start sequence.
     */
    public EditStep<T> setFrom(T oNewFrom) { oFrom = oNewFrom; return this; }
+
+
+   /**
+    * The index of "from".
+    * @see #getFromIndex()
+    * @see #setFromIndex(int)
+    */
+   protected int fromIndex = -1;
+   /**
+    * Getter for {@link #fromIndex}: The index of "from".
+    * @return The index of "from".
+    */
+   public int getFromIndex() { return fromIndex; }
+   /**
+    * Setter for {@link #fromIndex}: The index of "from".
+    * @param newFromIndex The index of "from".
+    */
+   public void setFromIndex(int newFromIndex) { fromIndex = newFromIndex; }
    
    
    /**
@@ -91,7 +109,23 @@ public class EditStep<T>
     * @param oNewTo The element in the end sequence.
     */
    public EditStep<T> setTo(T oNewTo) { oTo = oNewTo; return this; }
-   
+
+   /**
+    * The index of "to".
+    * @see #getToIndex()
+    * @see #setToIndex(int)
+    */
+   protected int toIndex = -1;
+   /**
+    * Getter for {@link #toIndex}: The index of "to".
+    * @return The index of "to".
+    */
+   public int getToIndex() { return toIndex; }
+   /**
+    * Setter for {@link #toIndex}: The index of "to".
+    * @param newToIndex The index of "to".
+    */
+   public void setToIndex(int newToIndex) { toIndex = newToIndex; }   
    
    /**
     * Backtrace to the previous (minimum) edit in the sequence.
@@ -196,6 +230,18 @@ public class EditStep<T>
    {
       return iBackTraceTotalDistance + iStepDistance;
    } // end of totalDistance()
+
+   
+   /**
+    * Sets both fromIndex and toIndex.
+    * @param fromIndex
+    * @param toIndex
+    */
+   public void setFromToIndices(int fromIndex, int toIndex)
+   {
+      setFromIndex(fromIndex);
+      setToIndex(toIndex);
+   } // end of setFromToIndices()
 
    
    /**

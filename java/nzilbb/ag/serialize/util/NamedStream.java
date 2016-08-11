@@ -24,6 +24,9 @@ package nzilbb.ag.serialize.util;
 import java.io.InputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import nzilbb.util.IO;
 
 /**
  * An InputStream with an associated Name
@@ -128,5 +131,22 @@ public class NamedStream
       setStream(new FileInputStream(f));
       setName(f.getName());
    } // end of constructor
+
+   
+   /**
+    * Saves the named stream as a file into the given directory.
+    * @param directory
+    * @return The number of bytes saved.
+    * @throws IOException
+    */
+   public long save(File directory)
+    throws IOException
+   {
+      if (!directory.exists()) throw new IOException("Does not exist: " + directory.getPath());
+      if (!directory.isDirectory()) throw new IOException("Not a directory: " + directory.getPath());
+      File f = new File(directory, getName());
+      FileOutputStream out = new FileOutputStream(f);
+      return IO.Pump(getStream(), out);      
+   } // end of save()
 
 } // end of class NamedStream

@@ -49,31 +49,49 @@ public interface IDeserializer
    public SerializationDescriptor getDescriptor();
 
    /**
-    * Sets parameters for deserializer as a whole.  This might include database connection parameters, locations of supporting files, etc.
-    * <p>When the deserializer is installed, this method should be invoked with an empty parameter set, to discover what (if any) general configuration is required. If parameters are returned, and user interaction is possible, then the user may be presented with an interface for setting/confirming these parameters.  Once the parameters are set, this method can be invoked again with the required values, resulting in an empty parameter set being returned to confirm that nothing further is required.
-    * @param configuration The configuration for the deserializer. 
+    * Sets parameters for deserializer as a whole.  This might include database connection
+    * parameters, locations of supporting files, standard layer mappings, etc.
+    * <p>When the deserializer is installed, this method should be invoked with an empty parameter
+    *  set, to discover what (if any) general configuration is required. If parameters are
+    *  returned, and user interaction is possible, then the user may be presented with an
+    *  interface for setting/confirming these parameters.  Once the parameters are set, this
+    *  method can be invoked again with the required values, resulting in an empty parameter
+    *  set being returned to confirm that nothing further is required.
+    * @param configuration The general configuration for the deserializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
-    * @return A list of configuration parameters (still) must be set before {@link IDeserializer#setParameters()} can be invoked. If this is an empty list, {@link IDeserializer#setParameters()} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
-    * @throws DeserializerNotConfiguredException If the configuration is not sufficient for deserialization.
+    * @return A list of configuration parameters (still) must be set before
+    *  {@link IDeserializer#setParameters()} can be invoked. If this is an empty list, 
+    *  {@link IDeserializer#setParameters()} can be invoked. If it's not an empty list,
+    *  this method must be invoked again with the returned parameters' values set.
+    * @throws SerializerNotConfiguredException If the configuration is not sufficient for deserialization.
     */
-   public ParameterSet configure(ParameterSet configuration, Schema schema) throws DeserializerNotConfiguredException;
-
-   /**
-    * Sets parameters for a given deserialization operation, after loading the serialized form of the graph. This might include mappings from format-specific objects like tiers to graph layers, etc.
-    * @param parameters The configuration for a given deserialization operation.
-    * @throws DeserializationParametersMissingException If not all required parameters have a value.
-    */
-   public void setParameters(ParameterSet parameters) throws DeserializationParametersMissingException;
+   public ParameterSet configure(ParameterSet configuration, Schema schema) throws SerializerNotConfiguredException;
 
    /**
     * Loads the serialized form of the graph, using the given set of named streams.
-    * @param annotationStreams A list of named streams that contain all the transcription/annotation data required.
-    * @param mediaStreams An optional (may be null) list of named streams that contain the media annotated by the <var>annotationStreams</var>.
+    * @param annotationStreams A list of named streams that contain all the
+    *  transcription/annotation data required.
+    * @param mediaStreams An optional (may be null) list of named streams that contain the media
+    *  annotated by the <var>annotationStreams</var>.
     * @param schema The layer schema, definining layers and the way they interrelate.
-    * @return A list of parameters that require setting before {@link IDeserializer#deserialize()} can be invoked. This may be an empty list, and may include parameters with the value already set to a workable default. If there are parameters, and user interaction is possible, then the user may be presented with an interface for setting/confirming these parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
+    * @return A list of parameters that require setting before {@link IDeserializer#deserialize()}
+    *  can be invoked. This may be an empty list, and may include parameters with the value
+    *  already set to a workable default. If there are parameters, and user interaction is
+    *  possible, then the user may be presented with an interface for setting/confirming these
+    *  parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
     * @throws Exception If the graph could not be loaded.
     */
    public ParameterSet load(NamedStream[] annotationStreams, NamedStream[] mediaStreams, Schema schema) throws Exception;
+
+   /**
+    * Sets parameters for a given deserialization operation, after loading the serialized form
+    * of the graph. This might include mappings from format-specific objects like tiers to graph
+    * layers, etc.
+    * @param parameters The configuration for a given deserialization operation.
+    * @throws SerializationParametersMissingException If not all required parameters have a value.
+    */
+   public void setParameters(ParameterSet parameters) throws SerializationParametersMissingException;
+
 
    /**
     * Deserializes the serialized data, generating one or more {@link Graph}s.
@@ -83,12 +101,12 @@ public interface IDeserializer
     * (e.g. AGTK, Transana XML export), which is why this method
     * returns a list.
     * @return A list of valid (if incomplete) {@link Graph}s. 
-    * @throws DeserializerNotConfiguredException if the object has not been configured.
-    * @throws DeserializationParametersMissingException if the parameters for this particular graph have not been set.
-    * @throws DeserializationException if errors occur during deserialization.
+    * @throws SerializerNotConfiguredException if the object has not been configured.
+    * @throws SerializationParametersMissingException if the parameters for this particular graph have not been set.
+    * @throws SerializationException if errors occur during deserialization.
     */
    public Graph[] deserialize() 
-      throws DeserializerNotConfiguredException, DeserializationParametersMissingException, DeserializationException;
+      throws SerializerNotConfiguredException, SerializationParametersMissingException, SerializationException;
 
    /**
     * Returns any warnings that may have arisen during the last execution of {@link #deserialize()}.

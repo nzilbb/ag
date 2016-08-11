@@ -27,7 +27,7 @@ import java.util.LinkedHashMap;
  * @author Robert Fromont robert@fromont.net.nz
  */
 @SuppressWarnings("serial")
-public class DeserializationException
+public class SerializationException
    extends Exception
 {
    public enum ErrorType { Alignment, Tokenization, Other };
@@ -56,7 +56,7 @@ public class DeserializationException
    /**
     * Default constructor
     */
-   public DeserializationException()
+   public SerializationException()
    {
    } // end of constructor
 
@@ -64,7 +64,7 @@ public class DeserializationException
     * Constructor.
     * @param cause The causing error.
     */
-   public DeserializationException(Throwable cause)
+   public SerializationException(Throwable cause)
    {
       super(cause);
       addError(ErrorType.Other, cause.getMessage());
@@ -74,7 +74,7 @@ public class DeserializationException
     * Constructor.
     * @param cause The causing error.
     */
-   public DeserializationException(String message)
+   public SerializationException(String message)
    {
       super(message);
       addError(ErrorType.Other, message);
@@ -98,4 +98,4 @@ public class DeserializationException
       }
    } // end of addError()
 
-} // end of class DeserializationException
+} // end of class SerializationException

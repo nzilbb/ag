@@ -92,8 +92,8 @@
       <formatter type="plain" usefile="false" />
       <batchtest>
         <fileset dir=".">
-          <include name="${srctests}"/>
           <include name="${srctestseditpath}"/>
+          <include name="${srctests}"/>
         </fileset>
       </batchtest>
     </junit>
