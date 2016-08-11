@@ -334,7 +334,10 @@ public class AgCsvDeserializer
       graph.getSchema().setWordLayerId(s.getWordLayer().getId());
       for (String layerId : mDiscoveredLayers.keySet())
       {
-	 graph.addLayer((Layer)mDiscoveredLayers.get(layerId).clone());
+	 if (mDiscoveredLayers.get(layerId) != null)
+	 {
+	    graph.addLayer((Layer)mDiscoveredLayers.get(layerId).clone());
+	 }
       } // next layer
       
       // anchors
@@ -422,7 +425,7 @@ public class AgCsvDeserializer
 	    layer.getId(), 
 	    line.get(mHeadings.get("startAnchor.id")), 
 	    line.get(mHeadings.get("endAnchor.id")));
-	 annotation.put(Constants.CONFIDENCE, line.get(new Integer(mHeadings.get("labelStatus"))));
+	 annotation.put(Constants.CONFIDENCE, new Integer(line.get(mHeadings.get("labelStatus"))));
 	 if (mHeadings.get("comment") < line.size())
 	 {
 	    String comment = line.get(mHeadings.get("comment"));

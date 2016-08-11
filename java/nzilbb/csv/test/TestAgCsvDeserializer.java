@@ -39,16 +39,17 @@ public class TestAgCsvDeserializer
    @Test public void deserialize() 
       throws Exception
    {
-      Layer[] layers = {
+      Schema schema = new Schema(
+	 "who", "turns", "utterances", "transcript",
 	 new Layer("who", "Participants", 0, true, true, true),
 	 new Layer("turns", "Speaker turns", 2, true, false, false, "who", true),
 	 new Layer("utterances", "Utterances", 2, true, false, true, "turns", true),
 	 new Layer("language", "Language", 2, true, false, true, "turns", true),
 	 new Layer("transcript", "Words", 2, true, false, false, "turns", true),
 	 new Layer("orthography", "Orthography", 0, false, false, false, "transcript", true),
+	 new Layer("lexical", "Lexical", 0, false, false, false, "transcript", true), // not present
 	 new Layer("segments", "Phones", 2, true, false, false, "transcript", true)
-      };
-      Schema schema = new Schema(layers, "who", "turns", "utterances", "transcript");
+	 );
       // access file
       NamedStream[] streams = { new NamedStream(new File(getDir(), "test.csv")) };
 
