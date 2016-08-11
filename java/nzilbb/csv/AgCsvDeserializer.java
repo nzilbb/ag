@@ -45,6 +45,7 @@ import nzilbb.configure.ParameterSet;
  *    <li>id (string) - UID</li>
  *    <li>offset (double)</li>
  *    <li>alignmentStatus (byte)</li>
+ *    <li>[comment (string)]</li>
  *   </ol>
  *  </dd>
  *  <dt>Layers</dt>
@@ -57,6 +58,7 @@ import nzilbb.configure.ParameterSet;
  *    <li>scope - S = segmnet W = word M = meta F = freeform </li>
  *    <li>alignment</li>
  *    <li>numeric layer ID</li>
+ *    <li>[comment (string)]</li>
  *   </ol>
  *   This header is followed by the annotations, with the following fields:
  *   <ol>
@@ -339,8 +341,17 @@ public class AgCsvDeserializer
       for (CSVRecord line : mCsvData.get("anchor"))
       {
 	 if (line.get(1).equals("offset")) continue; // skip header line
-	 graph.addAnchor(new Anchor(line.get(0), new Double(line.get(1)), 
-				Constants.CONFIDENCE, new Integer(line.get(2))));
+	 Anchor anchor = new Anchor(line.get(0), new Double(line.get(1)), 
+				    Constants.CONFIDENCE, new Integer(line.get(2)));
+	 graph.addAnchor(anchor);
+	 if (line.size() > 3)
+	 {
+	    String comment = line.get(3);
+	    if (comment.length() > 0)
+	    {
+	       anchor.put("comment", comment);
+	    }
+	 }
       } // next anchor
       mCsvData.remove("anchor");
 
@@ -398,6 +409,10 @@ public class AgCsvDeserializer
 	 else if (sHeader.equalsIgnoreCase("ordinalInWord"))  mHeadings.put("ordinalInWord", c);
 	 else if (sHeader.equalsIgnoreCase("segmentAnnotationId"))  mHeadings.put("segmentAnnotationId", c);
       } // next header
+      int highestHeaderIndex = 0;
+      for (Integer i : mHeadings.values()) highestHeaderIndex = Math.max(highestHeaderIndex, i);
+      mHeadings.put("comment", highestHeaderIndex + 1);
+
       for (int i = 2; i < lines.size(); i++)
       {
 	 CSVRecord line = lines.elementAt(i);
@@ -407,7 +422,15 @@ public class AgCsvDeserializer
 	    layer.getId(), 
 	    line.get(mHeadings.get("startAnchor.id")), 
 	    line.get(mHeadings.get("endAnchor.id")));
-	 annotation.put(Constants.CONFIDENCE, new Integer(mHeadings.get("labelStatus")));
+	 annotation.put(Constants.CONFIDENCE, line.get(new Integer(mHeadings.get("labelStatus"))));
+	 if (mHeadings.get("comment") < line.size())
+	 {
+	    String comment = line.get(mHeadings.get("comment"));
+	    if (comment.length() > 0)
+	    {
+	       annotation.put("comment", comment);
+	    }
+	 }
 
 	 // parent
 	 if (layer.getParentId().equals("graph"))

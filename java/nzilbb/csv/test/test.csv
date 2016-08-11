@@ -1,7 +1,7 @@
 id	offset	alignmentStatus
 n_10	10.0	100
-n_101	10.0	100
-n_11	11.0	50
+n_101	10.0	100	comment on anchor
+n_11	11.0	50	
 n_12	12.0	50
 n_20	20.0	50
 n_30	30.0	50
@@ -213,7 +213,7 @@ n_2339	2340.0	100
 n_2340	2340.0	100
 layer	transcript	transcript	R	W	2	0	
 id	startAnchor.id	endAnchor.id	label	labelStatus	turnAnnotationId	ordinalInTurn	wordAnnotationId
-ew_0_1	n_101	n_20	MID-LINE-CHANGES	100	em_11_0	1	ew_0_1
+ew_0_1	n_101	n_20	MID-LINE-CHANGES	100	em_11_0	1	ew_0_1	comment on first word
 ew_0_2	n_20	n_30	86-1-2	100	em_11_0	2	ew_0_2
 ew_0_3	n_30	n_39	86-1-3	100	em_11_0	3	ew_0_3
 ew_0_4	n_41	n_50	86-2-1	100	em_11_0	4	ew_0_4

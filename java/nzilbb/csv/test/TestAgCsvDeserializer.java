@@ -150,6 +150,12 @@ public class TestAgCsvDeserializer
 	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
       }
 
+      // comments
+      assertEquals("comment on first word", words[0].get("comment"));
+      assertNull("no comment on second word",words[1].get("comment"));
+      assertEquals("comment on anchor", words[0].getStart().get("comment"));
+      assertNull("no comment on first turn anchor",turns[0].get("comment"));
+
       Annotation[] language = g.annotations("language");
       assertEquals(4, language.length);
       assertEquals("spans 86-1-2 to 86-1-3", language[0].getLabel());
