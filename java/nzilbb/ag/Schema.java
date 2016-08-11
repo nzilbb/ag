@@ -224,6 +224,27 @@ public class Schema
    } // end of constructor
 
    /**
+    * Constructor from array and attributes.
+    * @param layers Array of layers.
+    * @param participantLayerId ID of the layer that contains participants.
+    * @param turnLayerId ID of the layer that contains speaker turns.
+    * @param utteranceLayerId ID of the layer that contains speaker utterances.
+    * @param wordLayerId ID of the layer that contains individual word tokens.
+    */
+   public Schema(String participantLayerId, String turnLayerId, String utteranceLayerId, String wordLayerId, Layer... layers)
+   {
+      addLayer(getRoot());
+      for (Layer layer : layers)
+      {
+	 addLayer(layer);
+      } // next layer
+      setParticipantLayerId(participantLayerId);
+      setTurnLayerId(turnLayerId);
+      setUtteranceLayerId(utteranceLayerId);
+      setWordLayerId(wordLayerId);
+   } // end of constructor
+
+   /**
     * Constructor from collection and attributes.
     * @param layers Collection of layers.
     * @param participantLayerId ID of the layer that contains participants.

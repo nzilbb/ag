@@ -232,6 +232,67 @@ public class TestSchema
       assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("topic").getParent());      
    }
 
+   @Test public void ellispisConstructor() 
+   {
+      Schema s = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("topic", "Topics", Constants.ALIGNMENT_INTERVAL, 
+		   true, // peers
+		   false, // peersOverlap
+		   false), // saturated
+	 new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+		   true, // peers
+		   true, // peersOverlap
+		   true), // saturated
+	 new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   false, // saturated
+		   "who", // parentId
+		   true), // parentIncludes
+	 new Layer("utterance", "Utterances", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   true, // saturated
+		   "turn", // parentId
+		   true), // parentIncludes
+	 new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   false, // saturated
+		   "turn", // parentId
+		   true), // parentIncludes
+	 new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   true, // saturated
+		   "word", // parentId
+		   true) // parentIncludes
+	 );
+      
+      assertEquals("getLayer", "Topics", s.getLayer("topic").getDescription());
+      assertEquals("getLayer", "Participants", s.getLayer("who").getDescription());
+      assertEquals("getLayer", "Speaker turns", s.getLayer("turn").getDescription());
+      assertEquals("getLayer", "Utterances", s.getLayer("utterance").getDescription());
+      assertEquals("getLayer", "Words", s.getLayer("word").getDescription());
+      assertEquals("getLayer", "Phones", s.getLayer("phone").getDescription());
+      
+      assertEquals("special layers", s.getLayer("who"), s.getParticipantLayer());
+      assertEquals("special layers", s.getLayer("turn"), s.getTurnLayer());
+      assertEquals("special layers", s.getLayer("utterance"), s.getUtteranceLayer());
+      assertEquals("special layers", s.getLayer("word"), s.getWordLayer());
+      
+      assertEquals("hierarchy", s.getLayer("who"), s.getLayer("turn").getParent());
+      assertEquals("hierarchy", s.getLayer("turn"), s.getLayer("word").getParent());
+      assertEquals("hierarchy", s.getLayer("turn"), s.getLayer("utterance").getParent());
+      assertEquals("hierarchy", s.getLayer("word"), s.getLayer("phone").getParent());
+      
+      assertEquals("graph layer", s.getRoot(), s.getLayer("graph"));
+
+      assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("who").getParent());
+      assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("topic").getParent());      
+   }
+
    public static void main(String args[]) 
    {
       org.junit.runner.JUnitCore.main("nzilbb.ag.test.TestSchema");
