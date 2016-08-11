@@ -34,7 +34,7 @@
   }
   "anchors":{
     "turnStart":	{"offset":0.0,	"confidence":100,},
-    "a1":	{"offset":1.0,	"confidence":50,},
+    "a1":	{"offset":1.0,	"confidence":50,	"comment":"anchor comment",},
     "a1.5":	{"offset":1.5,	"confidence":50,},
     "a2":	{"offset":2.0,	"confidence":50,},
     "a2.25":	{"offset":2.2,	"confidence":50,},
@@ -50,7 +50,7 @@
       "turn":[
         {"id":"turn1",	"label":"john smith",	"startId":"turnStart",	"endId":"turnEnd",	"confidence":100,
           "word":[
-            {"id":"word1",	"label":"the",	"startId":"a1",	"endId":"a2",	"confidence":100,
+            {"id":"word1",	"label":"the",	"startId":"a1",	"endId":"a2",	"confidence":100,	"comment":"word comment",
               "phone":[
                 {"id":"phone1",	"label":"D",	"startId":"a1",	"endId":"a1.5",	"confidence":100,},
                 {"id":"phone2",	"label":"@",	"startId":"a1.5",	"endId":"a2",	"confidence":100,},],

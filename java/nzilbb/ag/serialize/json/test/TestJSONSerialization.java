@@ -168,6 +168,10 @@ public class TestJSONSerialization
       g.addAnnotation(AP);
       g.addAnnotation(NP);
 
+      // add some comments
+      the.put("comment", "word comment");
+      the.getStart().put("comment", "anchor comment");
+      
       // create deserializer
       JSONSerialization s = new JSONSerialization();
 

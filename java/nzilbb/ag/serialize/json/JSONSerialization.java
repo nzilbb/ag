@@ -179,7 +179,6 @@ public class JSONSerialization
 
 	    for (String layerId : schema.getRoot().getChildren().keySet())
 	    {
-	       System.out.println(layerId + " " + graph.getAnnotations(layerId).size());
 	       serializeAnnotations(writer, 1, layerId, graph.getAnnotations(layerId));
 	    }
 	    
@@ -255,6 +254,11 @@ public class JSONSerialization
 	 writer.print("\t");
 	 writer.print(keyValue(0, Constants.CONFIDENCE, (Integer)anchor.get(Constants.CONFIDENCE)));
       }
+      if (anchor.containsKey("comment"))
+      {
+	 writer.print("\t");
+	 writer.print(keyValue(0, "comment", anchor.get("comment").toString()));
+      }
       writer.println("},");
    } // end of serializeLayer()
 
@@ -299,6 +303,11 @@ public class JSONSerialization
       {
 	 writer.print("\t");
 	 writer.print(keyValue(0, Constants.CONFIDENCE, (Integer)annotation.get(Constants.CONFIDENCE)));
+      }
+      if (annotation.containsKey("comment"))
+      {
+	 writer.print("\t");
+	 writer.print(keyValue(0, "comment", annotation.get("comment").toString()));
       }
       LinkedHashMap<String,Vector<Annotation>> childLayers = annotation.getAnnotations();
       for (String layerId : childLayers.keySet())
