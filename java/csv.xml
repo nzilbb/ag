@@ -10,6 +10,8 @@
   <property name="srctests" value="nzilbb/csv/test/Test*.java"/>
   <property name="icon" value="nzilbb/csv/AgCsvDeserializer.png"/>
   <property name="junitjar" value="/usr/share/java/junit4.jar"/>
+  <property name="mainclass" value="nzilbb.csv.CsvToJson"/>
+  <property name="classpath" value="nzilbb.ag.jar commons-csv.jar"/>
   
   <target name="init">
     <!-- Create the time stamp -->
@@ -46,6 +48,12 @@
     <!-- Put everything in ${build} into the ${ant.project.name}.jar file -->
     <jar jarfile="${dist}/${ant.project.name}.jar" 
 	 basedir="${build}">
+      <manifest>
+	<attribute name="Application-Name" value="LaBB-CAT Legacy CSV to JSON converter"/>
+	<attribute name="Permissions" value="all-permissions"/>
+	<attribute name="Main-Class" value="${mainclass}"/>
+	<attribute name="Class-Path" value="${classpath}"/>
+      </manifest>
       
       <!-- include source code -->
       <fileset dir="${src}" 
