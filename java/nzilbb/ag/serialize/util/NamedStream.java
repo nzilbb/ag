@@ -142,6 +142,7 @@ public class NamedStream
    public long save(File directory)
     throws IOException
    {
+      if (directory == null) throw new IOException("Directory is null.");
       if (!directory.exists()) throw new IOException("Does not exist: " + directory.getPath());
       if (!directory.isDirectory()) throw new IOException("Not a directory: " + directory.getPath());
       File f = new File(directory, getName());
