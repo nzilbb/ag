@@ -61,7 +61,7 @@ public class TestAgCsvDeserializer
       deserializer.configure(defaultConfiguration, schema);
 
       // load the stream
-      ParameterSet defaultParameters = deserializer.load(streams, null, schema);
+      ParameterSet defaultParameters = deserializer.load(streams, schema);
 //      for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
 
       // configure the deserialization

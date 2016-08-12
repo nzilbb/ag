@@ -57,5 +57,25 @@ public class Utility
       return streams;
    } // end of OneNamedStreamArray()
 
+   
+   /**
+    * Finds a single stream of the given type in the given list of streams.
+    * @param filenameSuffix The file extension to check the name for.
+    * @param mimeType The MIME type to match.
+    * @return The first stream whose {@link NamedStream#name} ends with <var>nameSuffix</var> or whose {@link NamedStream#mimeType} is the same as <var>mimeType</var>, or null if no such stream was found.
+    */
+   public static NamedStream findSingleStream(NamedStream[] streams, String nameSuffix, String mimeType)
+   {      
+      for (NamedStream stream : streams)
+      {	 
+	 if (stream.getName().toLowerCase().endsWith(nameSuffix) 
+	     || (mimeType != null && mimeType.equals(stream.getMimeType())))
+	 {
+	    return stream;
+	 }
+      } // next stream
+      return null;
+   } // end of findSingleStream()
+
 
 } // end of class Utility

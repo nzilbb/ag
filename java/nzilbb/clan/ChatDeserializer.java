@@ -585,12 +585,22 @@ public class ChatDeserializer
     * @throws Exception If the stream could not be loaded.
     */
    @SuppressWarnings({"rawtypes", "unchecked"})
-   public ParameterSet load(NamedStream[] annotationStreams, NamedStream[] mediaStreams, Schema schema) throws Exception
+   public ParameterSet load(NamedStream[] streams, Schema schema) throws Exception
    {
       ParameterSet parameters = new ParameterSet();
 
-      // take the first stream, ignore all others.
-      NamedStream cha = annotationStreams[0];
+      // take the first cha stream, ignore all others.
+      NamedStream cha = null;
+      for (NamedStream stream : streams)
+      {	 
+	 if (stream.getName().toLowerCase().endsWith(".cha") 
+	     || "text/x-chat".equals(stream.getMimeType()))
+	 {
+	    cha = stream;
+	    break;
+	 }
+      } // next stream
+      if (cha == null) throw new SerializationException("No CHAT stream found");
       setName(cha.getName());
 
       reset();

@@ -130,8 +130,6 @@ public class JSONSerialization
     * <p>{@link IDeserializer} method.
     * @param annotationStreams A list of named streams that contain all the
     *  transcription/annotation data required.
-    * @param mediaStreams An optional (may be null) list of named streams that contain the media
-    *  annotated by the <var>annotationStreams</var>.
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of parameters that require setting before {@link IDeserializer#deserialize()}
     *  can be invoked. This may be an empty list, and may include parameters with the value
@@ -140,16 +138,19 @@ public class JSONSerialization
     *  parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
     * @throws Exception If the graph could not be loaded.
     */
-   public ParameterSet load(NamedStream[] annotationStreams, NamedStream[] mediaStreams, Schema schema) throws Exception
+   public ParameterSet load(NamedStream[] streams, Schema schema) throws Exception
    {
       warnings = new Vector<String>();
       ParameterSet parameters = new ParameterSet();
       this.schema = schema;
 
       jsons = new LinkedHashMap<String, JSONObject>();
-      for (NamedStream stream : annotationStreams)
+      for (NamedStream stream : streams)
       {	 
-	 jsons.put(stream.getName(), new JSONObject(new JSONTokener(stream.getStream())));
+	 if (stream.getName().endsWith(".json") || "application/json".equals(stream.getMimeType()))
+	 {
+	    jsons.put(stream.getName(), new JSONObject(new JSONTokener(stream.getStream())));
+	 }
       } // next stream
 
       return parameters;

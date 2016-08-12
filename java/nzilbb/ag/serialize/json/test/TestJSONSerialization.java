@@ -231,7 +231,7 @@ public class TestJSONSerialization
       if (differences.length() > 0) fail(differences);
 
       // now deserialization
-      ParameterSet parameters = s.load(Utility.OneNamedStreamArray(new NamedStream(fActual)), null, schema);
+      ParameterSet parameters = s.load(Utility.OneNamedStreamArray(new NamedStream(fActual)), schema);
       s.setParameters(parameters); // run with default values
       Graph[] graphs = s.deserialize();
       Graph d = graphs[0];

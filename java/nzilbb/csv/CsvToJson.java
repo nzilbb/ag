@@ -89,7 +89,7 @@ public class CsvToJson extends CommandLineProgram
 	    try
 	    {
 	       // load the stream
-	       ParameterSet defaultParameters = fromCsv.load(streams, null, schema);
+	       ParameterSet defaultParameters = fromCsv.load(streams, schema);
 	       // configure the deserialization
 	       fromCsv.setParameters(defaultParameters);
 	       

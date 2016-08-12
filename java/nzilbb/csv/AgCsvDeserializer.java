@@ -32,6 +32,7 @@ import java.io.InputStreamReader;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
+import nzilbb.ag.serialize.util.Utility;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 
@@ -216,20 +217,19 @@ public class AgCsvDeserializer
    /**
     * Loads the serialized form of the graph, using the given set of named streams.
     * @param annotationStreams A list of named streams that contain all the transcription/annotation data required.
-    * @param mediaStreams An optional (may be null) list of named streams that contain the media annotated by the <var>annotationStreams</var>.
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of parameters that require setting before {@link IDeserializer#deserialize()} can be invoked. This may be an empty list, and may include parameters with the value already set to a workable default. If there are parameters, and user interaction is possible, then the user may be presented with an interface for setting/confirming these parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
     * @throws Exception If the stream could not be loaded.
     */
    @SuppressWarnings({"rawtypes", "unchecked"})
-   public ParameterSet load(NamedStream[] annotationStreams, NamedStream[] mediaStreams, Schema schema) throws Exception
+   public ParameterSet load(NamedStream[] streams, Schema schema) throws Exception
    {
       ParameterSet parameters = new ParameterSet();
 
-      // take the first stream, ignore all others.
-      NamedStream csv = annotationStreams[0];
+      // take the first csv stream, ignore all others.
+      NamedStream csv = Utility.findSingleStream(streams, ".csv", "text/csv");
+      if (csv == null) throw new SerializationException("No CSV stream found");
       setName(csv.getName());
-      if (!getName().endsWith(".csv")) throw new SerializationException("Invalid stream name: " + getName());
       setName(getName().replaceFirst("\\.csv$","").replaceFirst("\\.ag$",""));
       
       reset();
