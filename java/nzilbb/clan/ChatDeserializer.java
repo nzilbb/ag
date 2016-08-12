@@ -560,7 +560,7 @@ public class ChatDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "CLAN CHAT transcript", "0.3", "text/x-chat", ".cha", getClass().getResource("icon.gif"));
+	 "CLAN CHAT transcript", "0.4", "text/x-chat", ".cha", getClass().getResource("icon.gif"));
    }
 
    /**
