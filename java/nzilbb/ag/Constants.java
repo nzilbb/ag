@@ -65,5 +65,7 @@ public class Constants
    /** {@link Graph#offsetUnits} value for characters. Value is "char" */
    public static final String UNIT_CHARACTERS = "char";
 
+   /** Standardized attribute name (key) for a comment. Value is "comment". */
+   public static final String COMMENT = "comment";
 
 } // end of class Constants

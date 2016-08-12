@@ -43,59 +43,59 @@ import nzilbb.editpath.*;
 
 public class TestJSONSerialization
 {
-   @Test public void minimalSerialization() 
+   @Test public void minimalSerializationDeserialization() 
       throws Exception
    {
       Graph g = new Graph();
       g.setId("test");
 
-      Vector<Layer> layers = new Vector<Layer>();
-      layers.add(new Layer("topic", "Topics", Constants.ALIGNMENT_INTERVAL, 
-			   true, // peers
-			   false, // peersOverlap
-			   false)); // saturated
-      layers.add(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-			   true, // peers
-			   true, // peersOverlap
-			   true)); // saturated
-      layers.add(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-			   true, // peers
-			   false, // peersOverlap
-			   false, // saturated
-			   "who", // parentId
-			   true)); // parentIncludes
-      layers.add(new Layer("utterance", "Utterances", Constants.ALIGNMENT_INTERVAL,
-			   true, // peers
-			   false, // peersOverlap
-			   true, // saturated
-			   "turn", // parentId
-			   true)); // parentIncludes
-      layers.add(new Layer("phrase", "Phrase", Constants.ALIGNMENT_INTERVAL,
-			   true, // peers
-			   false, // peersOverlap
-			   false, // saturated
-			   "turn", // parentId
-			   true)); // parentIncludes
-      layers.add(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-			   true, // peers
-			   false, // peersOverlap
-			   false, // saturated
-			   "turn", // parentId
-			   true)); // parentIncludes
-      layers.add(new Layer("pos", "Part of speec", Constants.ALIGNMENT_NONE,
-			   false, // peers
-			   false, // peersOverlap
-			   true, // saturated
-			   "word", // parentId
-			   true)); // parentIncludes
-      layers.add(new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
-			   true, // peers
-			   false, // peersOverlap
-			   true, // saturated
-			   "word", // parentId
-			   true)); // parentIncludes
-      Schema schema = new Schema(layers, "who", "turn", "utterance", "word");
-      
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("topic", "Topics", Constants.ALIGNMENT_INTERVAL, 
+		   true, // peers
+		   false, // peersOverlap
+		   false), // saturated
+	 new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+		   true, // peers
+		   true, // peersOverlap
+		   true), // saturated
+	 new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   false, // saturated
+		   "who", // parentId
+		   true), // parentIncludes
+	 new Layer("utterance", "Utterances", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   true, // saturated
+		   "turn", // parentId
+		   true), // parentIncludes
+	 new Layer("phrase", "Phrase", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   false, // saturated
+		   "turn", // parentId
+		   true), // parentIncludes
+	 new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   false, // saturated
+		   "turn", // parentId
+		   true), // parentIncludes
+	 new Layer("pos", "Part of speec", Constants.ALIGNMENT_NONE,
+		   false, // peers
+		   false, // peersOverlap
+		   true, // saturated
+		   "word", // parentId
+		   true), // parentIncludes
+	 new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   true, // saturated
+		   "word", // parentId
+		   true) // parentIncludes
+	 );      
       g.setSchema(schema);
 
       g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
@@ -229,6 +229,84 @@ public class TestJSONSerialization
 	 }
       } // next step
       if (differences.length() > 0) fail(differences);
+
+      // now deserialization
+      ParameterSet parameters = s.load(Utility.OneNamedStreamArray(new NamedStream(fActual)), null, schema);
+      s.setParameters(parameters); // run with default values
+      Graph[] graphs = s.deserialize();
+      Graph d = graphs[0];
+
+      // compare d with g
+      
+      // attributes
+      assertEquals(g.getId(), d.getId());
+
+      // layers
+      for (Layer gLayer : g.getSchema().getLayers().values())
+      {
+	 Layer dLayer = d.getLayer(gLayer.getId());
+	 assertNotNull(gLayer.getId(), 
+		       dLayer);
+	 assertEquals(gLayer.getId(), 
+		      gLayer.getId(), dLayer.getId());
+	 assertEquals(gLayer.getId(), 
+		      gLayer.getParentId(), dLayer.getParentId());
+	 assertEquals(gLayer.getId(), 
+		      gLayer.getDescription(), dLayer.getDescription());
+	 assertEquals(gLayer.getId(), 
+		      gLayer.getAlignment(), dLayer.getAlignment());
+	 assertEquals(gLayer.getId(), 
+		      gLayer.getPeers(), dLayer.getPeers());
+	 assertEquals(gLayer.getId(), 
+		      gLayer.getPeersOverlap(), dLayer.getPeersOverlap());
+	 assertEquals(gLayer.getId(), 
+		      gLayer.getParentIncludes(), dLayer.getParentIncludes());
+	 assertEquals(gLayer.getId(), 
+		      gLayer.getSaturated(), dLayer.getSaturated());
+      } // next layer
+      assertEquals("No extra layers: " + d.getSchema().getLayers().values(),
+		   g.getSchema().getLayers().size(), d.getSchema().getLayers().size());
+
+      // anchors
+      for (Anchor gAnchor : g.getAnchors().values())
+      {
+	 Anchor dAnchor = d.getAnchor(gAnchor.getId());
+	 assertNotNull(gAnchor.getId(), 
+		       dAnchor);
+	 assertEquals(gAnchor.getId(), 
+		      gAnchor.getId(), dAnchor.getId());
+	 assertEquals(gAnchor.getId(), 
+		      gAnchor.getOffset(), dAnchor.getOffset());
+	 assertEquals(gAnchor.getId(), 
+		      gAnchor.get(Constants.CONFIDENCE), dAnchor.get(Constants.CONFIDENCE));
+	 assertEquals(gAnchor.getId(), 
+		      gAnchor.get(Constants.COMMENT), dAnchor.get(Constants.COMMENT));
+      } // next layer
+      assertEquals("No extra anchors: " + d.getAnchors().values(), 
+		   g.getAnchors().size(), d.getAnchors().size());
+
+      // annotations
+      for (Annotation gAnnotation : g.getAnnotationsById().values())
+      {
+	 Annotation dAnnotation = d.getAnnotation(gAnnotation.getId());
+	 assertNotNull(gAnnotation.getId(), 
+		       dAnnotation);
+	 assertEquals(gAnnotation.getId(), 
+		      gAnnotation.getId(), dAnnotation.getId());
+	 assertEquals(gAnnotation.getId(), 
+		      gAnnotation.getLabel(), dAnnotation.getLabel());
+	 assertEquals(gAnnotation.getId(), 
+		      gAnnotation.getStartId(), dAnnotation.getStartId());
+	 assertEquals(gAnnotation.getId(), 
+		      gAnnotation.getEndId(), dAnnotation.getEndId());
+	 assertEquals(gAnnotation.getId(), 
+		      gAnnotation.get(Constants.CONFIDENCE), dAnnotation.get(Constants.CONFIDENCE));
+	 assertEquals(gAnnotation.getId(), 
+		      gAnnotation.get(Constants.COMMENT), dAnnotation.get(Constants.COMMENT));
+      } // next layer
+      assertEquals("No extra annotations: " + d.getAnnotationsById().values(),
+		   g.getAnnotationsById().size(), d.getAnnotationsById().size());
+
    }
 
    /**

@@ -32,7 +32,7 @@ public class Utility
 {
    
    /**
-    * Creates an array of graphs from one graph. Handy for calling
+    * Creates an array of {@link Graph}s from one graph. Handy for calling
     * {@link ISerializer#serialize(Graph[])} when you have only one graph.
     * @param graph
     * @return A graph with one element.
@@ -43,5 +43,19 @@ public class Utility
       graphs[0] = graph;
       return graphs;
    } // end of OneGraphArray()
+
+   /**
+    * Creates an array of {@link NamedStream}s from one stream. Handy for calling
+    * {@link IDeserializer#load(NamedStream[],NamedStream[],Schema)} when you have only one graph.
+    * @param stream
+    * @return A graph with one element.
+    */
+   public static NamedStream[] OneNamedStreamArray(NamedStream stream)
+   {
+      NamedStream[] streams = new NamedStream[1];
+      streams[0] = stream;
+      return streams;
+   } // end of OneNamedStreamArray()
+
 
 } // end of class Utility

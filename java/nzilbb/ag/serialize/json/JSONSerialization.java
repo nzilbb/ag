@@ -30,6 +30,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import java.util.Vector;
 import java.util.LinkedHashMap;
+import org.json.*;
 import nzilbb.util.TempFileInputStream;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
@@ -41,17 +42,11 @@ import nzilbb.ag.serialize.util.NamedStream;
  * Annotation Graph serializer/deserializer for JSON.
  * @author Robert Fromont robert@fromont.net.nz
  */
-
 public class JSONSerialization
   implements ISerializer
 {
    // Attributes:
 
-   private DecimalFormat fmtOffset = new DecimalFormat(
-      // force the locale to something with . as the decimal separator
-      "0.0", new DecimalFormatSymbols(Locale.UK));
-
-   
    /**
     * String used for indenting.
     * @see #getIndenter()
@@ -69,7 +64,14 @@ public class JSONSerialization
     */
    public void setIndenter(String newIndenter) { indenter = newIndenter; }
 
+   private DecimalFormat fmtOffset = new DecimalFormat(
+      // force the locale to something with . as the decimal separator
+      "0.0#", new DecimalFormatSymbols(Locale.UK));
    
+   protected Vector<String> warnings;
+   private Schema schema;
+   private LinkedHashMap<String, JSONObject> jsons;
+
    // Methods:
    
    /**
@@ -80,13 +82,25 @@ public class JSONSerialization
    } // end of constructor
 
    /**
-    * Returns the deserializer's descriptor
+    * Returns the serialization descriptor.
+    * <p>{@link ISerializer} and {@link IDeserializer} method.
     * @return The deserializer's descriptor
     */
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "JSON (JavaScript Object Notation)", "0.1", "application/json", ".json");
+	 "JSON (JavaScript Object Notation)", "0.1", "application/json", ".json", 
+	 getClass().getResource(getClass().getSimpleName() + ".png"));
+   }
+
+   /**
+    * Returns any warnings that may have arisen during the last execution of {@link #deserialize()}.
+    * <p>{@link ISerializer} and {@link IDeserializer} method.
+    * @return A possibly empty list of warnings.
+    */
+   public String[] getWarnings()
+   {
+      return warnings.toArray(new String[0]);
    }
 
    /**
@@ -98,6 +112,7 @@ public class JSONSerialization
     *  interface for setting/confirming these parameters. Once the parameters are set, this
     *  method can be invoked again with the required values, resulting in an empty parameter
     *  set being returned to confirm that nothing further is required.
+    * <p>{@link ISerializer} and {@link IDeserializer} method.
     * @param configuration The general configuration for the serializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of configuration parameters (still) must be set before
@@ -111,7 +126,298 @@ public class JSONSerialization
    }
 
    /**
+    * Loads the serialized form of the graph, using the given set of named streams.
+    * <p>{@link IDeserializer} method.
+    * @param annotationStreams A list of named streams that contain all the
+    *  transcription/annotation data required.
+    * @param mediaStreams An optional (may be null) list of named streams that contain the media
+    *  annotated by the <var>annotationStreams</var>.
+    * @param schema The layer schema, definining layers and the way they interrelate.
+    * @return A list of parameters that require setting before {@link IDeserializer#deserialize()}
+    *  can be invoked. This may be an empty list, and may include parameters with the value
+    *  already set to a workable default. If there are parameters, and user interaction is
+    *  possible, then the user may be presented with an interface for setting/confirming these
+    *  parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
+    * @throws Exception If the graph could not be loaded.
+    */
+   public ParameterSet load(NamedStream[] annotationStreams, NamedStream[] mediaStreams, Schema schema) throws Exception
+   {
+      warnings = new Vector<String>();
+      ParameterSet parameters = new ParameterSet();
+      this.schema = schema;
+
+      jsons = new LinkedHashMap<String, JSONObject>();
+      for (NamedStream stream : annotationStreams)
+      {	 
+	 jsons.put(stream.getName(), new JSONObject(new JSONTokener(stream.getStream())));
+      } // next stream
+
+      return parameters;
+   }
+
+   /**
+    * Sets parameters for a given deserialization operation, after loading the serialized form
+    * of the graph. This might include mappings from format-specific objects like tiers to graph
+    * layers, etc.
+    * <p>{@link IDeserializer} method.
+    * @param parameters The configuration for a given deserialization operation.
+    * @throws SerializationParametersMissingException If not all required parameters have a value.
+    */
+   public void setParameters(ParameterSet parameters) throws SerializationParametersMissingException
+   {
+   }
+
+   /**
+    * Deserializes the serialized data, generating one or more {@link Graph}s.
+    * <p>Many data formats will only yield one graph (e.g. Transcriber
+    * transcript or Praat textgrid), however there are formats that
+    * are capable of storing multiple transcripts in the same file
+    * (e.g. AGTK, Transana XML export), which is why this method
+    * returns a list.
+    * <p>{@link IDeserializer} method.
+    * @return A list of valid (if incomplete) {@link Graph}s. 
+    * @throws SerializerNotConfiguredException if the object has not been configured.
+    * @throws SerializationParametersMissingException if the parameters for this particular graph have not been set.
+    * @throws SerializationException if errors occur during deserialization.
+    */
+   public Graph[] deserialize() 
+      throws SerializerNotConfiguredException, SerializationParametersMissingException, SerializationException
+   {
+      // if there are errors, accumlate as many as we can before throwing SerializationException
+      SerializationException errors = null;
+
+      Vector<Graph> graphs = new Vector<Graph>();
+
+      for (JSONObject o : jsons.values())
+      {
+	 try
+	 {
+	    graphs.add(jsonToGraph(o));
+	 }
+	 catch(SerializationException exception)
+	 {
+	    if (errors == null)
+	       errors = exception;
+	    else
+	       errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
+	 }
+      } // next JSON stream
+
+      if (errors != null) throw errors;
+      return graphs.toArray(new Graph[0]);
+   }
+   
+   /**
+    * Converts a JSON object to a Graph.
+    * @param json
+    * @return The graph
+    * @throws SerializationException
+    */
+   protected Graph jsonToGraph(JSONObject json)
+    throws SerializationException
+   {
+      try
+      {
+	 Graph graph = new Graph();
+	 graph.setId(json.getString("id"));
+
+	 // schema
+	 graph.setSchema(jsonToSchema(json.getJSONObject("schema")));
+
+	 // anchors
+	 JSONObject anchors = json.getJSONObject("anchors");
+	 for (String anchorId : anchors.keySet())
+	 {
+	    graph.addAnchor(jsonToAnchor(anchorId, anchors.getJSONObject(anchorId)));
+	 } // next child
+	 
+	 // annotations
+	 for (String topLevelId : graph.getSchema().getRoot().getChildren().keySet())
+	 {
+	    if (json.has(topLevelId))
+	    {
+	       jsonToAnnotations(graph, topLevelId, json.getJSONArray(topLevelId));
+	    }
+	 } // next top level layer
+	 return graph;
+      }
+      catch (JSONException x)
+      {
+	 throw new SerializationException(x);
+      }
+   } // end of jsonToGraph()
+
+   /**
+    * Converts a JSON object to a Schema.
+    * @param json
+    * @return The schema
+    * @throws SerializationException
+    */
+   protected Schema jsonToSchema(JSONObject json)
+    throws SerializationException
+   {
+      try
+      {
+	 Schema s = new Schema();
+	 if (json.has("participantLayerId")) 
+	    s.setParticipantLayerId(json.getString("participantLayerId"));
+	 if (json.has("turnLayerId")) 
+	    s.setTurnLayerId(json.getString("turnLayerId"));
+	 if (json.has("utteranceLayerId")) 
+	    s.setUtteranceLayerId(json.getString("utteranceLayerId"));
+	 if (json.has("wordLayerId")) 
+	    s.setWordLayerId(json.getString("wordLayerId"));
+	 if (json.has("episodeLayerId")) 
+	    s.setEpisodeLayerId(json.getString("episodeLayerId"));
+	 if (json.has("corpusLayerId")) 
+	    s.setCorpusLayerId(json.getString("corpusLayerId"));
+
+	 JSONObject root = json.getJSONObject("graph");
+	 JSONObject topLevel = root.getJSONObject("children");
+	 for (String childId : topLevel.keySet())
+	 {
+	    jsonToLayer(s, "graph", childId, topLevel.getJSONObject(childId));
+	 } // next child
+	 return s;
+      }
+      catch (JSONException x)
+      {
+	 throw new SerializationException(x);
+      }
+   } // end of jsonToSchema()
+
+   /**
+    * Converts a JSON object to a Layer definition.
+    * @param json
+    * @return The layer
+    * @throws SerializationException
+    */
+   protected Layer jsonToLayer(Schema s, String parentId, String layerId, JSONObject json)
+    throws SerializationException
+   {
+      try
+      {
+	 Layer l = new Layer();
+	 l.setId(layerId);
+	 l.setParentId(parentId);
+	 l.setDescription(json.getString("description"));
+	 l.setAlignment(json.getInt("alignment"));
+	 l.setPeers(json.getBoolean("peers"));
+	 l.setPeersOverlap(json.getBoolean("peersOverlap"));
+	 l.setParentIncludes(json.getBoolean("parentIncludes"));
+	 l.setSaturated(json.getBoolean("saturated"));
+	 s.addLayer(l);
+	 if (json.has("children"))
+	 {
+	    JSONObject children = json.getJSONObject("children");
+	    for (String childId : children.keySet())
+	    {
+	       jsonToLayer(s, layerId, childId, children.getJSONObject(childId));
+	    } // next child
+	 }
+	 return l;
+      }
+      catch (JSONException x)
+      {
+	 throw new SerializationException(x);
+      }
+   } // end of jsonToGraph()
+
+   /**
+    * Converts a JSON object to an Anchor.
+    * @param json
+    * @return The anchor
+    * @throws SerializationException
+    */
+   protected Anchor jsonToAnchor(String anchorId, JSONObject json)
+    throws SerializationException
+   {
+      try
+      {
+	 Anchor a = new Anchor();
+	 a.setId(anchorId);
+	 if (json.has("offset")) 
+	    a.setOffset(json.getDouble("offset"));
+	 if (json.has(Constants.CONFIDENCE)) 
+	    a.put(Constants.CONFIDENCE, json.getInt(Constants.CONFIDENCE));
+	 if (json.has(Constants.COMMENT)) 
+	    a.put(Constants.COMMENT, json.getString(Constants.COMMENT));
+	 return a;
+      }
+      catch (JSONException x)
+      {
+	 throw new SerializationException(x);
+      }
+   } // end of jsonToGraph()
+   
+   /**
+    * Converts a JSON object to an Anchor.
+    * @param json
+    * @return The anchor
+    * @throws SerializationException
+    */
+   protected void jsonToAnnotations(Graph g, String layerId, JSONArray json)
+      throws SerializationException
+   {
+      try
+      {
+	 for (int i = 0; i < json.length(); i++)
+	 {
+	    jsonToAnnotation(g, layerId, json.getJSONObject(i));
+	 } // next annotation
+      }
+      catch (JSONException x)
+      {
+	 throw new SerializationException(x);
+      }
+   } // end of jsonToGraph()
+
+   /**
+    * Converts a JSON object to an Annotation.
+    * @param json
+    * @return The anchor
+    * @throws SerializationException
+    */
+   protected Annotation jsonToAnnotation(Graph graph, String layerId, JSONObject json)
+    throws SerializationException
+   {
+      try
+      {
+	 Annotation a = new Annotation();
+	 a.setLayerId(layerId);
+	 if (json.has("id")) 
+	    a.setId(json.getString("id"));
+	 if (json.has("label")) 
+	    a.setLabel(json.getString("label"));
+	 if (json.has("startId")) 
+	    a.setStartId(json.getString("startId"));
+	 if (json.has("endId")) 
+	    a.setEndId(json.getString("endId"));
+	 if (json.has(Constants.CONFIDENCE)) 
+	    a.put(Constants.CONFIDENCE, json.getInt(Constants.CONFIDENCE));
+	 if (json.has(Constants.COMMENT)) 
+	    a.put(Constants.COMMENT, json.getString(Constants.COMMENT));
+	 graph.addAnnotation(a);
+
+	 // children
+	 for (String childLayerId : graph.getLayer(layerId).getChildren().keySet())
+	 {
+	    if (json.has(childLayerId))
+	    {
+	       jsonToAnnotations(graph, childLayerId, json.getJSONArray(childLayerId));
+	    }
+	 } // next top level layer
+	 return a;
+      }
+      catch (JSONException x)
+      {
+	 throw new SerializationException(x);
+      }
+   } // end of jsonToGraph()
+
+   /**
     * Determines which layers, if any, must be present in the graph that will be serialized.
+    * <p>{@link ISerializer} method.
     * @return A list of IDs of layers that must be present in the graph that will be serialized.
     * @throws SerializationParametersMissingException If not all required parameters have a value.
     */
@@ -127,6 +433,7 @@ public class JSONSerialization
     *  (e.g. XWaves, EmuR), which is why this method returns a list. There are formats that
     *  are capable of storing multiple transcripts in the same file (e.g. AGTK, Transana XML
     *  export), which is why this method accepts a list.
+    * <p>{@link ISerializer} method.
     * @param graph The graph to serialize.
     * @return A list of named streams that contain the serialization in the given format. 
     * @throws SerializerNotConfiguredException if the object has not been configured.
@@ -166,7 +473,7 @@ public class JSONSerialization
 	       writer.println(keyValue(2, "wordutteranceLayerId", schema.getWordLayerId()));
 	    serializeLayer(writer, 2, schema.getRoot());
 	    writer.println();
-	    writer.println(indent(1) + "}");
+	    writer.println(indent(1) + "},");
 	    
 	    // anchors
 	    LinkedHashMap<String,Anchor> anchors = graph.getAnchors();
@@ -175,7 +482,7 @@ public class JSONSerialization
 	    {
 	       serializeAnchor(writer, 2, anchor);
 	    } // next anchor
-	    writer.println(indent(1) + "}");
+	    writer.println(indent(1) + "},");
 
 	    for (String layerId : schema.getRoot().getChildren().keySet())
 	    {
@@ -200,7 +507,6 @@ public class JSONSerialization
       if (errors != null) throw errors;
       return streams.toArray(new NamedStream[0]);     
    }			
-
    
    /**
     * Recursively serializes the given layer's definition.
@@ -208,7 +514,7 @@ public class JSONSerialization
     * @param indent
     * @param layer
     */
-   public void serializeLayer(PrintWriter writer, int indent, Layer layer)
+   protected void serializeLayer(PrintWriter writer, int indent, Layer layer)
    {
       writer.println();
       writer.print(indent(indent) + q(layer.getId()) + ":{");
@@ -245,7 +551,7 @@ public class JSONSerialization
     * @param indent
     * @param anchor
     */
-   public void serializeAnchor(PrintWriter writer, int indent, Anchor anchor)
+   protected void serializeAnchor(PrintWriter writer, int indent, Anchor anchor)
    {
       writer.print(indent(indent) + q(anchor.getId()) + ":\t{");
       writer.print(keyValue(0, "offset", anchor.getOffset()));
@@ -268,7 +574,7 @@ public class JSONSerialization
     * @param indent
     * @param anchor
     */
-   public void serializeAnnotations(PrintWriter writer, int indent, String layerId, Vector<Annotation> annotations)
+   protected void serializeAnnotations(PrintWriter writer, int indent, String layerId, Vector<Annotation> annotations)
    {
       if (annotations.size() > 0)
       {
@@ -290,7 +596,7 @@ public class JSONSerialization
     * @param indent
     * @param anchor
     */
-   public void serializeAnnotation(PrintWriter writer, int indent, Annotation annotation)
+   protected void serializeAnnotation(PrintWriter writer, int indent, Annotation annotation)
    {
       writer.print(keyValue(0, "id", annotation.getId()));
       writer.print("\t");
@@ -317,7 +623,6 @@ public class JSONSerialization
 	 serializeAnnotations(writer, indent, layerId, children);
       } // next layer
    } // end of serializeLayer()
-
    
    /**
     * Expresses a key and simple string value as JSON.
@@ -326,7 +631,7 @@ public class JSONSerialization
     * @param value
     * @return A string of the form {indent}"{key}":"{value}",
     */
-   public String keyValue(int indent, String key, String value)
+   protected String keyValue(int indent, String key, String value)
    {
       StringBuffer s = new StringBuffer();
       for (int i = 0; i < indent; i++) s.append(indenter);
@@ -344,7 +649,7 @@ public class JSONSerialization
     * @param value
     * @return A string of the form {indent}{key} : {value},
     */
-   public String keyValue(int indent, String key, boolean value)
+   protected String keyValue(int indent, String key, boolean value)
    {
       StringBuffer s = new StringBuffer();
       for (int i = 0; i < indent; i++) s.append(indenter);
@@ -362,7 +667,7 @@ public class JSONSerialization
     * @param value
     * @return A string of the form {indent}{key} : {value},
     */
-   public String keyValue(int indent, String key, int value)
+   protected String keyValue(int indent, String key, int value)
    {
       StringBuffer s = new StringBuffer();
       for (int i = 0; i < indent; i++) s.append(indenter);
@@ -380,7 +685,7 @@ public class JSONSerialization
     * @param value
     * @return A string of the form {indent}{key} : {value},
     */
-   public String keyValue(int indent, String key, Double value)
+   protected String keyValue(int indent, String key, Double value)
    {
       StringBuffer s = new StringBuffer();
       for (int i = 0; i < indent; i++) s.append(indenter);
@@ -393,27 +698,25 @@ public class JSONSerialization
       s.append(",");
       return s.toString();
    } // end of keyValue()
-
    
    /**
     * Write indent characters to the given level.
     * @param indent
     * @return A string with the indent character repeated the indent level number of times.
     */
-   public String indent(int indent)
+   protected String indent(int indent)
    {
       StringBuffer s = new StringBuffer();
       for (int i = 0; i < indent; i++) s.append(indenter);
       return s.toString();
    } // end of indent()
-
    
    /**
     * Escapes the given string for expression as a JSON string, and wraps it in quotes.
     * @param s
     * @return The given string, in quotes and escaped for JSON.
     */
-   public String q(String s)
+   protected String q(String s)
    {
       if (s == null) return "null";
       return "\"" 
@@ -426,16 +729,5 @@ public class JSONSerialization
 	 .replaceAll("\f", "\\f")
 	 + "\"";
    } // end of q()
-
-
-   /**
-    * Returns any warnings that may have arisen during the last execution of {@link #deserialize()}.
-    * @return A possibly empty list of warnings.
-    */
-   public String[] getWarnings()
-   {
-      return new String[0];
-   }
-
 
 } // end of class JSONSerialization

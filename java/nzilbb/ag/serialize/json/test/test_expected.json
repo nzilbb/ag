@@ -31,20 +31,20 @@
               }},
           }},
       }},
-  }
+  },
   "anchors":{
     "turnStart":	{"offset":0.0,	"confidence":100,},
     "a1":	{"offset":1.0,	"confidence":50,	"comment":"anchor comment",},
     "a1.5":	{"offset":1.5,	"confidence":50,},
     "a2":	{"offset":2.0,	"confidence":50,},
-    "a2.25":	{"offset":2.2,	"confidence":50,},
+    "a2.25":	{"offset":2.25,	"confidence":50,},
     "a2.5":	{"offset":2.5,	"confidence":50,},
-    "a2.75":	{"offset":2.8,	"confidence":50,},
+    "a2.75":	{"offset":2.75,	"confidence":50,},
     "a3":	{"offset":3.0,	"confidence":50,},
     "a4":	{"offset":4.0,	"confidence":50,},
     "a5":	{"offset":5.0,	"confidence":50,},
     "turnEnd":	{"offset":6.0,	"confidence":100,},
-  }
+  },
   "who":[
     {"id":"who1",	"label":"john smith",	"startId":"turnStart",	"endId":"turnEnd",	"confidence":100,
       "turn":[
