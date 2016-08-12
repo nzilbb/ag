@@ -26,6 +26,7 @@ import java.util.HashMap;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
+import nzilbb.ag.serialize.util.Utility;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 
@@ -87,28 +88,29 @@ public class TranscriptDeserializer
     * @return A list of configuration parameters (still) must be set before {@link IDeserializer#setParameters()} can be invoked. If this is an empty list, {@link IDeserializer#setParameters()} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
     * @throws DeserializerNotConfiguredException If the configuration is not sufficient for deserialization.
     */
-   public ParameterSet configure(ParameterSet configuration, Schema schema) throws DeserializerNotConfiguredException
+   public ParameterSet configure(ParameterSet configuration, Schema schema) throws SerializerNotConfiguredException
    {
       return new ParameterSet(); // TODO configuration for topic, comment, noise, language, lexical, pronounce, entity layers
    }
 
    /**
     * Loads the serialized form of the graph, using the given set of named streams.
-    * @param annotationStreams A list of named streams that contain all the transcription/annotation data required.
-    * @param mediaStreams An optional (may be null) list of named streams that contain the media annotated by the <var>annotationStreams</var>.
+    * @param streams A list of named streams that contain all the
+    *  transcription/annotation data required, and possibly (a) stream(s) for the media annotated.
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of parameters that require setting before {@link IDeserializer#deserialize()} can be invoked. This may be an empty list, and may include parameters with the value already set to a workable default. If there are parameters, and user interaction is possible, then the user may be presented with an interface for setting/confirming these parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
     * @throws Exception If the stream could not be loaded.
     */
    @SuppressWarnings({"rawtypes", "unchecked"})
-   public ParameterSet load(NamedStream[] annotationStreams, NamedStream[] mediaStreams, Schema schema) throws Exception
+   public ParameterSet load(NamedStream[] streams, Schema schema) throws Exception
    {
       reset();
 
       ParameterSet parameters = new ParameterSet();
 
       // take the first stream, ignore all others.
-      NamedStream trs = annotationStreams[0];
+      NamedStream trs = Utility.findSingleStream(streams, ".trs", "text/xml-transcriber");
+      if (trs == null) throw new SerializationException("No Transciber transcript stream found");
       setId(trs.getName());
       load(trs.getStream());
 
@@ -120,9 +122,9 @@ public class TranscriptDeserializer
    /**
     * Sets parameters for a given deserialization operation, after loading the serialized form of the graph. This might include mappings from format-specific objects like tiers to graph layers, etc.
     * @param parameters The configuration for a given deserialization operation.
-    * @throws DeserializationParametersMissingException If not all required parameters have a value.
+    * @throws SerializationParametersMissingException If not all required parameters have a value.
     */
-   public void setParameters(ParameterSet parameters) throws DeserializationParametersMissingException
+   public void setParameters(ParameterSet parameters) throws SerializationParametersMissingException
    {
       // TODO
    }
@@ -135,12 +137,12 @@ public class TranscriptDeserializer
     * (e.g. AGTK, Transana XML export), which is why this method
     * returns a list.
     * @return A list of valid (if incomplete) {@link Graph}s. 
-    * @throws DeserializerNotConfiguredException if the object has not been configured.
-    * @throws DeserializationParametersMissingException if the parameters for this particular graph have not been set.
-    * @throws DeserializationException if errors occur during deserialization.
+    * @throws SerializerNotConfiguredException if the object has not been configured.
+    * @throws SerializationParametersMissingException if the parameters for this particular graph have not been set.
+    * @throws SerializationException if errors occur during deserialization.
     */
    public Graph[] deserialize() 
-      throws DeserializerNotConfiguredException, DeserializationParametersMissingException, DeserializationException
+      throws SerializerNotConfiguredException, SerializationParametersMissingException, SerializationException
    {
       validate();
 

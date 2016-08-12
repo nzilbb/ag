@@ -66,7 +66,7 @@ public class TestTranscriptDeserializer
       TranscriptDeserializer deserializer = new TranscriptDeserializer();
 
       // load the stream
-      ParameterSet defaultParamaters = deserializer.load(streams, null, schema);
+      ParameterSet defaultParamaters = deserializer.load(streams, schema);
       //for (Parameter p : defaultParamaters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
 
       // configure the deserialization
