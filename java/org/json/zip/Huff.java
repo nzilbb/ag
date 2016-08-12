@@ -321,7 +321,7 @@ public class Huff implements None, PostMortem {
      * @param bitreader
      *            The source of bits.
      * @return The integer value of the symbol.
-     * @throws JSONException
+     * @throws JSONException On error.
      */
     public int read(BitReader bitreader) throws JSONException {
         try {
@@ -391,7 +391,7 @@ public class Huff implements None, PostMortem {
      *            The number of the symbol to write
      * @param bitwriter
      *            The destination of the bits.
-     * @throws JSONException
+     * @throws JSONException On error.
      */
     public void write(int value, BitWriter bitwriter) throws JSONException {
         this.width = 0;

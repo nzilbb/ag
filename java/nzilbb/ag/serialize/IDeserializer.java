@@ -32,8 +32,8 @@ import nzilbb.configure.ParameterSet;
  * Interface for deserializing a graph from streams of data.
  * <p>Deserialization takes place in the following phases:
  * <ol>
- *  <li>Configure deserializer using {@link #configure(ParameterSet)}</li>
- *  <li>Load serialized form using {@link #load(String)}, which returns a list of parameters that should be set.</li>
+ *  <li>Configure deserializer using {@link #configure(ParameterSet,Schema)}</li>
+ *  <li>Load serialized form using {@link #load(NamedStream[],Schema)}, which returns a list of parameters that should be set.</li>
  *  <li>Set deserialization parameters using {@link #setParameters(ParameterSet)}</li>
  *  <li>Generation graph(s) using {@link #deserialize()}</li>
  *  <li>Possibly display or log warnings returned by {@link #getWarnings()}</li>
@@ -60,8 +60,8 @@ public interface IDeserializer
     * @param configuration The general configuration for the deserializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of configuration parameters (still) must be set before
-    *  {@link IDeserializer#setParameters()} can be invoked. If this is an empty list, 
-    *  {@link IDeserializer#setParameters()} can be invoked. If it's not an empty list,
+    *  {@link IDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty list, 
+    *  {@link IDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an empty list,
     *  this method must be invoked again with the returned parameters' values set.
     * @throws SerializerNotConfiguredException If the configuration is not sufficient for deserialization.
     */

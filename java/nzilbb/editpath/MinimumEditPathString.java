@@ -32,8 +32,6 @@ import java.util.Vector;
 public class MinimumEditPathString
    extends MinimumEditPath<Character>
 {
-   // Attributes:
-   
    // Methods:
    
    /**
@@ -55,8 +53,8 @@ public class MinimumEditPathString
 
    /**
     * Computes the minimum path from one sequence to another.
-    * @param sFrom
-    * @param sTo
+    * @param sFrom The source (original) string.
+    * @param sTo The destination (final) string.
     * @return The edit path between the two sequences that has the minimum edit distance.
     */
    public List<EditStep<Character>> minimumEditPath(String sFrom, String sTo)
@@ -69,8 +67,8 @@ public class MinimumEditPathString
    }
    /**
     * Computes the minimum edit distance between two sequences.
-    * @param sFrom
-    * @param sTo
+    * @param sFrom The source (original) string.
+    * @param sTo The destination (final) string.
     * @return The minimum edit distance between the two sequences.
     */
    public int minimumEditDistance(String sFrom, String sTo)
@@ -89,8 +87,8 @@ public class MinimumEditPathString
    /**
     * Computes the minimum edit distance between two sequences.
     * <p>Equivalent to <code>minimumEditDistance(sFrom, sTo)</code>
-    * @param sFrom
-    * @param sTo
+    * @param sFrom The source (original) string.
+    * @param sTo The destination (final) string.
     * @return The minimum edit distance between the two sequences.
     */
    public int levenshteinDistance(String sFrom, String sTo)
@@ -100,8 +98,8 @@ public class MinimumEditPathString
 
    /**
     * Computes the minimum edit distance between two strings.
-    * @param sFrom
-    * @param sTo
+    * @param sFrom The source (original) string.
+    * @param sTo The destination (final) string.
     * @return The minimum edit distance between the two strings.
     */
    public static int LevenshteinDistance(String sFrom, String sTo)
@@ -112,7 +110,7 @@ public class MinimumEditPathString
    /**
     * Prints the edit path, by displaying the from string on one line and the to string on the next line, vertically aligned to indicate changes, and marking inserts/deletes with a mid-dot '·' (a character unlikely to really appear in a string, so will likely unambiguously indicate a lack in one of the strings).
     <p> Each line is prefixed, and the second appended, with "\r\n" so that vertical alignment is visually more likely regardless of the surrounding context or the platform.
-    * @param path
+    * @param path The edit path to print.
     * @return A string representation of the edit path between two strings.
     */
    public static String printPath(List<EditStep<Character>> path)

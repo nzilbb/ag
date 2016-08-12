@@ -53,6 +53,7 @@ public class EditStep<T>
    /**
     * Setter for {@link #enOperation}: The operation represented by this step.
     * @param enNewOperation The operation represented by this step.
+    * @return this.
     */
    public EditStep<T> setOperation(StepOperation enNewOperation) { enOperation = enNewOperation; return this; }
 
@@ -60,7 +61,7 @@ public class EditStep<T>
    /**
     * The element in the start sequence.
     * @see #getFrom()
-    * @see #setFrom(T)
+    * @see #setFrom(Object)
     */
    protected T oFrom;
    /**
@@ -71,6 +72,7 @@ public class EditStep<T>
    /**
     * Setter for {@link #oFrom}: The element in the start sequence.
     * @param oNewFrom The element in the start sequence.
+    * @return this.
     */
    public EditStep<T> setFrom(T oNewFrom) { oFrom = oNewFrom; return this; }
 
@@ -96,7 +98,7 @@ public class EditStep<T>
    /**
     * The element in the end sequence.
     * @see #getTo()
-    * @see #setTo(T)
+    * @see #setTo(Object)
     */
    protected T oTo;
    /**
@@ -107,6 +109,7 @@ public class EditStep<T>
    /**
     * Setter for {@link #oTo}: The element in the end sequence.
     * @param oNewTo The element in the end sequence.
+    * @return this.
     */
    public EditStep<T> setTo(T oNewTo) { oTo = oNewTo; return this; }
 
@@ -130,7 +133,7 @@ public class EditStep<T>
    /**
     * Backtrace to the previous (minimum) edit in the sequence.
     * @see #getBackTrace()
-    * @see #setBackTrace(EditStep<T>)
+    * @see #setBackTrace(EditStep)
     */
    protected EditStep<T> eBackTrace;
    /**
@@ -141,6 +144,7 @@ public class EditStep<T>
    /**
     * Setter for {@link #eBackTrace}: Backtrace to the previous (minimum) edit in the sequence.
     * @param eNewBackTrace Backtrace to the previous (minimum) edit in the sequence.
+    * @return this.
     */
    public EditStep<T> setBackTrace(EditStep<T> eNewBackTrace) 
    { 
@@ -177,6 +181,7 @@ public class EditStep<T>
    /**
     * Setter for {@link #iStepDistance}: The distance represented by this single step.
     * @param iNewStepDistance The distance represented by this single step.
+    * @return this.
     */
    public EditStep<T> setStepDistance(int iNewStepDistance) { iStepDistance = iNewStepDistance; return this; }
 
@@ -192,10 +197,10 @@ public class EditStep<T>
 
    /**
     * Constructor
-    * @param from
-    * @param to
-    * @param stepDistance
-    * @param operation
+    * @param from Object in the source (original) list, or null.
+    * @param to Object in the destination (final) list, or null.
+    * @param stepDistance The distance represented by this single step.
+    * @param operation The operation represented by this step.
     */
    public EditStep(T from, T to, int stepDistance, StepOperation operation)
    {
@@ -207,10 +212,11 @@ public class EditStep<T>
 
    /**
     * Constructor
-    * @param from
-    * @param to
-    * @param stepDistance
-    * @param operation
+    * @param from Object in the source (original) list, or null.
+    * @param to Object in the destination (final) list, or null.
+    * @param stepDistance The distance represented by this single step.
+    * @param operation The operation represented by this step.
+    * @param backtrace The previous (minimum) edit in the sequence.
     */
    public EditStep(T from, T to, int stepDistance, StepOperation operation, EditStep<T> backtrace)
    {
@@ -234,8 +240,8 @@ public class EditStep<T>
    
    /**
     * Sets both fromIndex and toIndex.
-    * @param fromIndex
-    * @param toIndex
+    * @param fromIndex Value for {@link #fromIndex}
+    * @param toIndex Value for {@link #toIndex}
     */
    public void setFromToIndices(int fromIndex, int toIndex)
    {

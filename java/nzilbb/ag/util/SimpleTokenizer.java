@@ -29,7 +29,7 @@ import nzilbb.ag.*;
  * Transformer that breaks annotation labels on one layer (e.g. utterance) into token annotations
  * on another layer (e.g. word), based on a character delimiter (space by default).
  * <p> Can also be used to split annotations on the same source layer - e.g. to split CLAN linkages
- * like <q>B_B_C</q> into three words <q>B B C</q>, by setting {@link #tokensInSourceLayer} to true.
+ * like <tt>B_B_C</tt> into three words <tt>B B C</tt>, by setting {@link #tokensInSourceLayer} to true.
  * @author Robert Fromont robert@fromont.net.nz
  */
 
@@ -135,6 +135,7 @@ public class SimpleTokenizer
     * @param sourceLayerId Layer ID of the layer to tokenize.
     * @param destinationLayerId Layer ID of the individual tokens.
     * @param delimiters Regular expression to match delimiters for tokenization.
+    * @param tokensInSourceLayer Whether the tokens should be in the source layer (true) or the destination layer (false).
     */
    public SimpleTokenizer(String sourceLayerId, String destinationLayerId, String delimiters, boolean tokensInSourceLayer)
    {

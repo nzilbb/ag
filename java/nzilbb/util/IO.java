@@ -48,29 +48,29 @@ public class IO
 
    /**
     * If the given file exists, it's renamed to a filename with the last modification timestamp included.
-    * @param f The file to backup.
-    * @throws IOException
+    * @param file The file to backup.
+    * @throws IOException On IO error.
     */
-   public static void Backup(File f)
+   public static void Backup(File file)
       throws IOException
    {
-      if (f.exists())
+      if (file.exists())
       {
 	 // there's and older version of the file, take a backup
 	 File backup = new File(
-	    f.getParentFile(), f.getName()  + ".bak"
+	    file.getParentFile(), file.getName()  + ".bak"
 	    + new SimpleDateFormat("-yyyy-MM-dd-HH-mm-ss")
-	    .format(new java.util.Date(f.lastModified())) + "." + Extension(f));
-	 if (!f.renameTo(backup))
+	    .format(new java.util.Date(file.lastModified())) + "." + Extension(file));
+	 if (!file.renameTo(backup))
 	 {
-	    Copy(f, backup);
+	    Copy(file, backup);
 	 }
       }
    } // end of Backup()
 
    /**
     * Determines the file extension (not including the dot) of the given file.
-    * @param file
+    * @param file The file.
     * @return The extension (not including the dot) of the given file.
     */
    public static String Extension(File file)
@@ -81,7 +81,7 @@ public class IO
 
    /**
     * Determines the name of the given file without extension (not including the dot).
-    * @param file
+    * @param file The file.
     * @return The name of the given file without extension (not including the dot).
     */
    public static String WithoutExtension(File file)
@@ -91,9 +91,9 @@ public class IO
    
    /**
     * Copies a file.
-    * @param source
-    * @param destination
-    * @throws IOException
+    * @param source The original file.
+    * @param destination The new file.
+    * @throws IOException On file IO error.
     */
    public static void Copy(File source, File destination)
     throws IOException
@@ -106,7 +106,7 @@ public class IO
     * @param url The URL of the content.
     * @param file The file to save the content to.
     * @return The number size of the content in bytes.
-    * @throws IOException
+    * @throws IOException On file IO error.
     */
    public static long SaveUrlToFile(URL url, File file)
     throws IOException
@@ -119,7 +119,7 @@ public class IO
     * @param connection The URL connection to the content.
     * @param file The file to save the content to.
     * @return The number size of the content in bytes.
-    * @throws IOException
+    * @throws IOException On file IO error.
     */
    public static long SaveUrlConnectionToFile(URLConnection connection, File file)
     throws IOException
@@ -134,7 +134,7 @@ public class IO
     * @param input Source of data.
     * @param output Destination for data.
     * @return The number of bytes copied.
-    * @throws IOException
+    * @throws IOException On file IO error.
     */
    public static long Pump(InputStream input, OutputStream output)
     throws IOException
@@ -159,10 +159,11 @@ public class IO
    
    /**
     * Scans the given jar file for instances of a particular class/interface.
-    * @param file
-    * @param parentLoader
-    * @param class
+    * @param file The jar file.
+    * @param parentLoader The parent class loader.
+    * @param c The class/interface to search for.
     * @return A list of objects that implement the given class/interface, which may be empty.
+    * @throws IOException On file IO error.
     */
    @SuppressWarnings({"rawtypes","unchecked"})
    public static Vector FindImplementorsInJar(File file, ClassLoader parentLoader, Class c)

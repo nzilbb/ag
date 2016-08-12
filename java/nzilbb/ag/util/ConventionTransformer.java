@@ -32,8 +32,8 @@ import nzilbb.ag.*;
  * <p>Some examples:
  * <p>To convert words in the format <var>orthography</var>_<var>pos</var> into words with POS tags:
  * <ul>
- *  <li><b>sourceLayerId</b>: <samp>word</samp></li>
- *  <li><b>sourcePattern</b>: <samp>(.+)_(.+)</samp></li>
+ *  <li><b>sourceLayerId</b>: <tt>word</tt></li>
+ *  <li><b>sourcePattern</b>: <tt>(.+)_(.+)</tt></li>
  *  <li><b>destinationResults</b>:
  *    <ul>
  *      <li>"word" = "$1"</li>
@@ -42,10 +42,10 @@ import nzilbb.ag.*;
  *  </li>
  * </ul>
  * So a word labelled "the_DT" will end up being labelled "the" and tagged with "DT" on the "pos" layer.
- * <p>To convert words prepended with a disfluency marker of <samp>&amp;</samp> to words with the marker stripped, and tagged with <samp>DIS</samp> on the "disfluency" layer:
+ * <p>To convert words prepended with a disfluency marker of <tt>&amp;</tt> to words with the marker stripped, and tagged with <tt>DIS</tt> on the "disfluency" layer:
  * <ul>
- *  <li><b>sourceLayerId</b>: <samp>word</samp></li>
- *  <li><b>sourcePattern</b>: <samp>&amp;(.+)</samp></li>
+ *  <li><b>sourceLayerId</b>: <tt>word</tt></li>
+ *  <li><b>sourcePattern</b>: <tt>&amp;(.+)</tt></li>
  *  <li><b>destinationResults</b>:
  *    <ul>
  *      <li>"word" = "$1"</li>
@@ -56,8 +56,8 @@ import nzilbb.ag.*;
  * So a word labelled "&amp;th" will end up being labelled "th" and tagged with "DIS" on the "disfluency" layer.
  * <p>To convert words in square brackets into noise annotations:
  * <ul>
- *  <li><b>sourceLayerId</b>: <samp>word</samp></li>
- *  <li><b>sourcePattern</b>: <samp>&amp;\[(.+)\]</samp></li>
+ *  <li><b>sourceLayerId</b>: <tt>word</tt></li>
+ *  <li><b>sourcePattern</b>: <tt>&amp;\[(.+)\]</tt></li>
  *  <li><b>destinationResults</b>:
  *    <ul>
  *      <li>"noise" = "$1"</li>
@@ -116,12 +116,12 @@ public class ConventionTransformer
     */
    protected HashMap<String,String> destinationResults;
    /**
-    * Getter for {@link #DestinationResults}: A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.
+    * Getter for {@link #destinationResults}: A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.
     * @return A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.
     */
    public HashMap<String,String> getDestinationResults() { return destinationResults; }
    /**
-    * Setter for {@link #DestinationResults}: A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.
+    * Setter for {@link #destinationResults}: A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.
     * @param newDestinationResults A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.
     */
    public void setDestinationResults(HashMap<String,String> newDestinationResults) { destinationResults = newDestinationResults; }
@@ -151,7 +151,7 @@ public class ConventionTransformer
    } // end of constructor
 
    /**
-    * Constructor from attribute values. Destination results must be subsequently added using {@link #setDestinationResults(HashMap)} or {@link #addResult(String,String)}.
+    * Constructor from attribute values. Destination results must be subsequently added using {@link #setDestinationResults(HashMap)} or {@link #addDestinationResult(String,String)}.
     * @param sourceLayerId Layer ID of the annotations to transform.
     * @param sourcePattern Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
     */
@@ -164,14 +164,14 @@ public class ConventionTransformer
 
    /**
     * Utility constructor for the common scenario of identifying a pattern on one layer and, where it occurs, changing the label on the source label and adding an annotation on a second layer.
-    * <p>For example, to tag disfluencies marked with a leading <samp>&amp;</samp> with a label <samp>DIS</samp>: 
+    * <p>For example, to tag disfluencies marked with a leading <tt>&amp;</tt> with a label <tt>DIS</tt>: 
     * <code>new ConventionTransformer("word", "&amp;(.+)", "\\1", "disfluency", "DIS")</code>
     * <br>...which strips the word annotation of the leading &amp;, and tags the word on the "disfluency" layer.
     * @param sourceLayerId Layer ID of the annotations to transform.
     * @param sourcePattern Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
-    * @param sourceResult
-    * @param destinationLayerId
-    * @param destinationResult
+    * @param sourceResult The result on the source layer.
+    * @param destinationLayerId The ID of the destination layer.
+    * @param destinationResult The result on the destination layer.
     */
    public ConventionTransformer(String sourceLayerId, String sourcePattern, String sourceResult, String destinationLayerId, String destinationResult)
    {
@@ -192,7 +192,7 @@ public class ConventionTransformer
    public void addDestinationResult(String layerId, String label)
    {
       getDestinationResults().put(layerId, label);
-   } // end of addResult()
+   } // end of addDestinationResult()
 
 
    /**

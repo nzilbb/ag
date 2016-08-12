@@ -22,6 +22,7 @@
 package nzilbb.ag.serialize.util;
 
 import nzilbb.ag.Graph;
+import nzilbb.ag.serialize.*;
 
 /**
  * Useful functions for serialization.
@@ -34,7 +35,7 @@ public class Utility
    /**
     * Creates an array of {@link Graph}s from one graph. Handy for calling
     * {@link ISerializer#serialize(Graph[])} when you have only one graph.
-    * @param graph
+    * @param graph The graph.
     * @return A graph with one element.
     */
    public static Graph[] OneGraphArray(Graph graph)
@@ -46,8 +47,8 @@ public class Utility
 
    /**
     * Creates an array of {@link NamedStream}s from one stream. Handy for calling
-    * {@link IDeserializer#load(NamedStream[],NamedStream[],Schema)} when you have only one graph.
-    * @param stream
+    * {@link IDeserializer#load(NamedStream[],Schema)} when you have only one graph.
+    * @param stream The named stream.
     * @return A graph with one element.
     */
    public static NamedStream[] OneNamedStreamArray(NamedStream stream)
@@ -60,7 +61,8 @@ public class Utility
    
    /**
     * Finds a single stream of the given type in the given list of streams.
-    * @param filenameSuffix The file extension to check the name for.
+    * @param streams The streams to search.
+    * @param nameSuffix The file extension to check the name for.
     * @param mimeType The MIME type to match.
     * @return The first stream whose {@link NamedStream#name} ends with <var>nameSuffix</var> or whose {@link NamedStream#mimeType} is the same as <var>mimeType</var>, or null if no such stream was found.
     */

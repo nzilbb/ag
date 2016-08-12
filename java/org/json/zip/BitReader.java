@@ -8,6 +8,7 @@ public interface BitReader {
      * Read one bit.
      *
      * @return true if it is a 1 bit.
+     * @throws IOException On IO error.
      */
     public boolean bit() throws IOException;
 
@@ -26,7 +27,7 @@ public interface BitReader {
      *            8, 16, 32, 64, 128, 256, etc.
      * @return true if the block was zero padded, or false if the the padding
      *         contained any one bits.
-     * @throws IOException
+     * @throws IOException On IO error.
      */
     public boolean pad(int width) throws IOException;
 
@@ -35,7 +36,7 @@ public interface BitReader {
      *
      * @param width
      *            The number of bits to read. (0..32)
-     * @throws IOException
+     * @throws IOException On IO error.
      * @return the bits
      */
     public int read(int width) throws IOException;

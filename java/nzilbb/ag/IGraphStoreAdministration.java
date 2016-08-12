@@ -33,7 +33,7 @@ public interface IGraphStoreAdministration
 {   
    /**
     * Registers a graph deserializer.
-    * @param deserializer
+    * @param deserializer The deserializer to register.
     * @throws StoreException If an error prevents the operation.
     * @throws PermissionException If the operation is not permitted.
     */
@@ -41,7 +41,7 @@ public interface IGraphStoreAdministration
 
    /**
     * De-registers a graph deserializer.
-    * @param deserializer
+    * @param deserializer The deserializer to de-register.
     * @throws StoreException If an error prevents the operation.
     * @throws PermissionException If the operation is not permitted.
     */
@@ -57,7 +57,7 @@ public interface IGraphStoreAdministration
    
    /**
     * Gets the deserializer for the given MIME type.
-    * @param mimeType
+    * @param mimeType The MIME type.
     * @return The deserializer for the given MIME type, or null if none is registered.
     * @throws StoreException If an error prevents the operation.
     * @throws PermissionException If the operation is not permitted.
@@ -66,7 +66,7 @@ public interface IGraphStoreAdministration
 
    /**
     * Gets the deserializer for the given file suffix (extension).
-    * @param suffix
+    * @param suffix The file extension.
     * @return The deserializer for the given suffix, or null if none is registered.
     * @throws StoreException If an error prevents the operation.
     * @throws PermissionException If the operation is not permitted.

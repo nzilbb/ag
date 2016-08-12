@@ -97,6 +97,17 @@
       </batchtest>
     </junit>
   </target>
+
+  <target name="javadoc" depends="init,compile"
+          description="document the source" >
+    <mkdir dir="${javadoc}"/>
+    <javadoc destdir="${javadoc}"
+	     classpath=".;${dist}/nzilbb.ag.jar;lib/commons-csv.jar"
+	     Author="yes"
+	     >
+      <fileset dir="${src}" includes="${srcfiles}" excludes="${srctests}" />
+    </javadoc>
+  </target>
     
   <target name="clean" description="clean up" >
     <!-- Delete the ${build} and ${dist} directory trees -->

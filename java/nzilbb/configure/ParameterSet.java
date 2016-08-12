@@ -43,7 +43,7 @@ public class ParameterSet
    
    /**
     * Adds a parameter to the set.
-    * @param parameter
+    * @param parameter The parameter to add.
     */
    public void addParameter(Parameter parameter)
    {

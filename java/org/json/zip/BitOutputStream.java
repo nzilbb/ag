@@ -70,6 +70,7 @@ public class BitOutputStream implements BitWriter {
      * Returns the number of bits that have been written to this
      * bitOutputStream. This may include bits that have not yet been written
      * to the underlying outputStream.
+     * @return The number of bits that have been written to this bitOutputStream
      */
     public long nrBits() {
         return this.nrBits;
@@ -78,7 +79,7 @@ public class BitOutputStream implements BitWriter {
     /**
      * Write a 1 bit.
      *
-     * @throws IOException
+     * @throws IOException On IO error.
      */
     public void one() throws IOException {
         write(1, 1);
@@ -91,7 +92,7 @@ public class BitOutputStream implements BitWriter {
      * @param width
      *            The size of the block to pad in bits.
      *            This will typically be 8, 16, 32, 64, 128, 256, etc.
-     * @throws IOException
+     * @throws IOException On IO error.
      */
     public void pad(int width) throws IOException {
         int gap = (int)this.nrBits % width;
@@ -115,7 +116,7 @@ public class BitOutputStream implements BitWriter {
      *            The bits to be written.
      * @param width
      *            The number of bits to write. (0..32)
-     * @throws IOException
+     * @throws IOException On IO error.
      */
     public void write(int bits, int width) throws IOException {
         if (bits == 0 && width == 0) {
@@ -145,7 +146,7 @@ public class BitOutputStream implements BitWriter {
     /**
      * Write a 0 bit.
      *
-     * @throws IOException
+     * @throws IOException On IO error.
      */
     public void zero() throws IOException {
         write(0, 1);

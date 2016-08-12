@@ -23,6 +23,7 @@ package nzilbb.ag.serialize;
 
 import java.net.URL;
 import java.util.Vector;
+import nzilbb.ag.*;
 
 /**
  * A descriptor that describes the attributes of a serializer or deserializer.
@@ -70,7 +71,7 @@ public class SerializationDescriptor
    /**
     * The normal file name suffixes (extensions) of this MIME type.
     * @see #getFileSuffixes()
-    * @see #setFileSuffixes(String[])
+    * @see #setFileSuffixes(Vector)
     */
    protected Vector<String> fileSuffixes = new Vector<String>();
    /**

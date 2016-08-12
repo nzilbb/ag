@@ -27,7 +27,7 @@ import java.util.Comparator;
  * Implementation of IComparator that uses java.lang.Object.equals(Object) to determine equality or not.  This is used as a default comparison method for {@link DefaultEditComparator}, but can also be used as an adapter for customising the equals comparison, e.g.:
  * <pre>
  * // case-insensitive comparison
- * new EqualsComparator<String>()
+ * new EqualsComparator&lt;String&gt;()
  * {
  *   public int compare(String o1, String o2)
  *   {

@@ -116,7 +116,8 @@ public class DefaultEditComparator<T>
    } // end of constructor
 
    /**
-    * Constructor with custom comparator
+    * Constructor with custom comparator.
+    * @param comparator The custom comparator.
     */
    public DefaultEditComparator(Comparator<T> comparator)
    {
@@ -148,10 +149,10 @@ public class DefaultEditComparator<T>
    } // end of constructor
 
    /**
-    * {@link #IEditComparator} method: Compares two sequence elements, and evaluates the distance between them.
+    * {@link IEditComparator} method: Compares two sequence elements, and evaluates the distance between them.
     * @param from The element from the source sequence, which may be null.
     * @param to The element from the destination sequence, which may be null.
-    * @return An edit step between the two elements. {@link EditStep#getFrom()} is set to <var>from</var>, {@link EditStep#getTo()} is set to <var>to</var>, {@link EditStep#getDistance()} is set to the computed edit distance between these two elements, and {@link EditStep#getOperation()} is set to either <var>EditStep.StepOperation.NONE</var> or <var>EditStep.StepOperation.CHANGE</var>.
+    * @return An edit step between the two elements. {@link EditStep#getFrom()} is set to <var>from</var>, {@link EditStep#getTo()} is set to <var>to</var>, {@link EditStep#getStepDistance()} is set to the computed edit distance between these two elements, and {@link EditStep#getOperation()} is set to either <var>EditStep.StepOperation.NONE</var> or <var>EditStep.StepOperation.CHANGE</var>.
     */
    public EditStep<T> compare(T from, T to)
    {
@@ -181,7 +182,7 @@ public class DefaultEditComparator<T>
    /**
     * The distance for deleting the given element.
     * @param from The element that would be deleted, which may be null.
-    * @return An edit step with {@link EditStep#getDistance()} set to the distance for deleting the given element. {@link EditStep#getFrom()} is set to <var>from</var>, and {@link EditStep#getOperation()} is set to <var>EditStep.StepOperation.DELETE</var>
+    * @return An edit step with {@link EditStep#getStepDistance()} set to the distance for deleting the given element. {@link EditStep#getFrom()} is set to <var>from</var>, and {@link EditStep#getOperation()} is set to <var>EditStep.StepOperation.DELETE</var>
     */
    public EditStep<T> delete(T from) 
    {
@@ -190,8 +191,8 @@ public class DefaultEditComparator<T>
 
    /**
     * The distance for inserting the given element.
-    * @param from The element that would be inserted, which may be null.
-    * @return An edit step with {@link EditStep#getDistance()} set to the distance for inserting the given element. {@link EditStep#getTo()} is set to <var>to</var>, and {@link EditStep#getOperation()} is set to <var>EditStep.StepOperation.INSERT</var>
+    * @param to The element that would be inserted, which may be null.
+    * @return An edit step with {@link EditStep#getStepDistance()} set to the distance for inserting the given element. {@link EditStep#getTo()} is set to <var>to</var>, and {@link EditStep#getOperation()} is set to <var>EditStep.StepOperation.INSERT</var>
     */
    public EditStep<T> insert(T to)
    {

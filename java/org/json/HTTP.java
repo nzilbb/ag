@@ -53,12 +53,12 @@ public class HTTP {
      * In addition, the other parameters in the header will be captured, using
      * the HTTP field names as JSON names, so that <pre>
      *    Date: Sun, 26 May 2002 18:06:04 GMT
-     *    Cookie: Q=q2=PPEAsg--; B=677gi6ouf29bn&b=2&f=s
+     *    Cookie: Q=q2=PPEAsg--; B=677gi6ouf29bn&amp;b=2&amp;f=s
      *    Cache-Control: no-cache</pre>
      * become
      * <pre>{...
      *    Date: "Sun, 26 May 2002 18:06:04 GMT",
-     *    Cookie: "Q=q2=PPEAsg--; B=677gi6ouf29bn&b=2&f=s",
+     *    Cookie: "Q=q2=PPEAsg--; B=677gi6ouf29bn&amp;b=2&amp;f=s",
      *    "Cache-Control": "no-cache",
      * ...}</pre>
      * It does no further checking or conversion. It does not parse dates.
@@ -66,7 +66,7 @@ public class HTTP {
      * @param string An HTTP header string.
      * @return A JSONObject containing the elements and attributes
      * of the XML string.
-     * @throws JSONException
+     * @throws JSONException On error.
      */
     public static JSONObject toJSONObject(String string) throws JSONException {
         JSONObject     jo = new JSONObject();
@@ -121,7 +121,7 @@ public class HTTP {
      * The result will end with two CRLF pairs.
      * @param jo A JSONObject
      * @return An HTTP header string.
-     * @throws JSONException if the object does not contain enough
+     * @throws JSONException On error. if the object does not contain enough
      *  information.
      */
     public static String toString(JSONObject jo) throws JSONException {

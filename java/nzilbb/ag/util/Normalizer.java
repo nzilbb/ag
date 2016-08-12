@@ -37,7 +37,7 @@ import nzilbb.ag.*;
  *  <li>TODO: fills in missing utterances</li>
  *  <li>TODO: fills in missing turns</li>
  * </ul>
- * For this transformer to work, the {@link #Schema} of the graph must have its {@link Schema#turnLayerId}, {@link Schema#utteranceLayerId}, {@link Schema#wordLayerId}, and {@link Schema#episodeLayerId} set.
+ * For this transformer to work, the {@link Schema} of the graph must have its {@link Schema#turnLayerId}, {@link Schema#utteranceLayerId}, {@link Schema#wordLayerId}, and {@link Schema#episodeLayerId} set.
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class Normalizer

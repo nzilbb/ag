@@ -36,7 +36,6 @@ public class Schema
    /**
     * The root of the layer hierarchy, representing the graph as a whole.
     * @see #getRoot()
-    * @see #setRoot(Layer)
     */
    protected final Layer root = new Layer("graph", "The graph as a whole", 2, false, false, true);
    /**
@@ -347,7 +346,7 @@ public class Schema
    
    /**
     * Gets the named layer.
-    * @param id
+    * @param id The ID of the desired layer.
     * @return The named layer, or null if it's not in the schema.
     */
    public Layer getLayer(String id)

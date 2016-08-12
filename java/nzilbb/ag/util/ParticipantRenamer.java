@@ -28,7 +28,7 @@ import nzilbb.ag.*;
 /**
  * Renames participants in a graph.
  * <p>Annotations are re-labelled on the participant layer, the turn layer, and the utterance layer.
- * <p>For this transformer to work, the {@link #Schema} of the graph must have its {@link Schema#participantLayerId}, {@link Schema#turnLayerId}, and {@link Schema#utteranceLayerId} set.
+ * <p>For this transformer to work, the {@link Schema} of the graph must have its {@link Schema#participantLayerId}, {@link Schema#turnLayerId}, and {@link Schema#utteranceLayerId} set.
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class ParticipantRenamer
@@ -39,7 +39,7 @@ public class ParticipantRenamer
    /**
     * A map from old speaker names to new speaker names.
     * @see #getOldNameToNewName()
-    * @see #setOldNameToNewName(HashMap<String,String>)
+    * @see #setOldNameToNewName(HashMap)
     */
    protected HashMap<String,String> oldNameToNewName = new HashMap<String,String>();
    /**

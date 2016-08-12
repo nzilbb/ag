@@ -207,7 +207,7 @@ public class Merger
     * <p>i.e. if an anchor is exported as 3.33333333333 and re-imported as 3.333 then it counts
     * as equal, if the threshold is set to 0.001
     * @see #getOffsetComparisonThreshold()
-    * @see #setOffsetComparisonThreshold(double)
+    * @see #setOffsetComparisonThreshold(Double)
     * @see #compare(Anchor,Anchor)
     */
    protected Double offsetComparisonThreshold;
@@ -615,7 +615,7 @@ public class Merger
     * @param layer Layer definition to use.
     * @param these Annotations from one layer in the graph to be merged into.
     * @param those Annotations from the same layer in {@link #editedGraph}.
-    * @throws TransformationException
+    * @throws TransformationException On error.
     */
    public void mapAnnotationsForMerge(Layer layer, SortedSet<Annotation> these, SortedSet<Annotation> those)
       throws TransformationException
@@ -770,7 +770,7 @@ public class Merger
     * @param layer The layer to traverse.
     * @param graph The graph to add changes to.
     * @return The resulting Create/Destroy changes.
-    * @throws TransformationException
+    * @throws TransformationException On error.
     */
    protected Vector<Change> createDestroyAnnotationsForMerge(Layer layer, Graph graph)
       throws TransformationException
@@ -1409,7 +1409,7 @@ public class Merger
     * @param layer The layer to traverse.
     * @param graph The graph to make changes in.
     * @return The resulting label changes.
-    * @throws TransformationException
+    * @throws TransformationException On error.
     */
    protected Vector<Change> computeLabelDeltasForMerge(Layer layer, Graph graph)
       throws TransformationException
@@ -1435,7 +1435,7 @@ public class Merger
     * @param layer The layer to traverse.
     * @param graph The graph to change.
     * @return The resulting anchor changes.
-    * @throws TransformationException
+    * @throws TransformationException On error.
     */
    protected Vector<Change> computeAnchorDeltasForMerge(Layer layer, Graph graph)
       throws TransformationException
@@ -2093,7 +2093,7 @@ public class Merger
     * @param layer The (child) layer to check.
     * @param graph The graph to check.
     * @return The resulting changes.
-    * @throws TransformationException
+    * @throws TransformationException On error.
     */
    protected Vector<Change> checkChildrenForMerge(Layer layer, Graph graph)
       throws TransformationException
@@ -2820,6 +2820,9 @@ public class Merger
 
    /**
     * Compare two anchors, evaluating them as equal if the difference is less than {@link #offsetComparisonThreshold}.
+    * @param a1 The first anchor.
+    * @param a2 The second anchor.
+    * @return 0 if the anchore offsets are the same, or the difference is less than {@link #offsetComparisonThreshold}, 999 if a1.offset is null, -999 if a2.offset is null, or the value of Double.compareTo(Double) otherwise.
     */
    protected int compare(Anchor a1, Anchor a2)
    {
@@ -2848,8 +2851,8 @@ public class Merger
    
    /**
     * Sets the confidence of a given object.
-    * @param o
-    * @param confidence
+    * @param o The object to set the confidence rating for (most likely an {@link Annotation} or {@link Anchor})
+    * @param confidence The confidence rating of a given object.
     */
    protected void setConfidence(TrackedMap o, int confidence)
    {
@@ -2859,7 +2862,7 @@ public class Merger
    
    /**
     * Determines whether the given annotation has a mapped counterpart in the other graph.
-    * @param annotation
+    * @param annotation The annotation to test.
     * @return true if the annotation has an "@other" attribute, false otherwise.
     */
    protected boolean hasCounterpart(Annotation annotation)
@@ -2869,7 +2872,7 @@ public class Merger
 
    /**
     * Gets the given annotation's mapped counterpart in the other graph.
-    * @param annotation
+    * @param annotation The annotation to get the counterpart of.
     * @return The annotation in the other graph that has been mapped to the given annotation, or null if no mapping has been made.
     */
    protected Annotation getCounterpart(Annotation annotation)
@@ -2879,8 +2882,8 @@ public class Merger
 
    /**
     * Maps the given annotations to each other.
-    * @param a1
-    * @param a2
+    * @param a1 An annotation.
+    * @param a2 The mapped conterpart of <var>a1</var>.
     */
    protected void setCounterparts(Annotation a1, Annotation a2)
    {
@@ -2890,7 +2893,7 @@ public class Merger
 
    /**
     * Removes mapping between the given annotation and its counterpart.
-    * @param annotation
+    * @param annotation One of the counterpart annotations ({@link #getCounterpart(Annotation)} will be called to determine the other.).
     */
    protected void unsetCounterparts(Annotation annotation)
    {

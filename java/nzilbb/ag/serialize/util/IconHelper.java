@@ -42,10 +42,10 @@ public class IconHelper
    
    /**
     * Ensures the icon file for the given descriptor has been extracted to the given directory.
-    * @param descriptor
-    * @param directory
+    * @param descriptor Descriptor of serialization.
+    * @param directory Directory to unpack the icon into if it's not already there.
     * @return The icon file.
-    * @throws IOException
+    * @throws IOException On file IO error.
     */
    public static File EnsureIconFileExists(SerializationDescriptor descriptor, File directory)
       throws IOException
@@ -59,9 +59,9 @@ public class IconHelper
    } // end of EnsureIconFileExists()
 
    /**
-    * Transforms the givne MIME type name into something that is safe to use as a file name.
-    * @param sMimeType
-    * @return The MIME type name transformed into something that is safe to use as a file name.
+    * Transforms the given descriptor's MIME type name into something that is safe to use as a file name.
+    * @param descriptor Descriptor of serialization.
+    * @return The descriptor's MIME type name transformed into something that is safe to use as a file name.
     */
    public static String IconFilename(SerializationDescriptor descriptor)
    {
@@ -72,9 +72,9 @@ public class IconHelper
    
    /**
     * Extracts the configuration applet for the given layer manager from the given jar file
-    * @param jarUrl
-    * @param fDestination
-    * @throws IOException
+    * @param jarUrl The URL of the JAR.
+    * @param fDestination Destination file.
+    * @throws IOException On file IO error.
     */
    public static void ExtractFile(URL jarUrl, File fDestination)
       throws IOException
@@ -92,9 +92,9 @@ public class IconHelper
 
    /**
     * Reads all data from an input stream and writes it to an output stream.  Once finished, neither stream is closed.
-    * @param i
-    * @param o
-    * @throws IOException
+    * @param i Input stream.
+    * @param o Output stream.
+    * @throws IOException On IO error.
     */
    public static void PumpStream(InputStream i, OutputStream o)
       throws IOException

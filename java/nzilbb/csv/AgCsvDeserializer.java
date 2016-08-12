@@ -184,8 +184,8 @@ public class AgCsvDeserializer
     * @param configuration The configuration for the deserializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of configuration parameters (still) must be set before
-    * {@link IDeserializer#setParameters()} can be invoked. If this is an empty list,
-    * {@link IDeserializer#setParameters()} can be invoked. If it's not an empty list,
+    * {@link IDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty list,
+    * {@link IDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an empty list,
     * this method must be invoked again with the returned parameters' values set.
     * @throws SerializerNotConfiguredException If the configuration is not sufficient for deserialization.
     */
@@ -216,7 +216,7 @@ public class AgCsvDeserializer
 
    /**
     * Loads the serialized form of the graph, using the given set of named streams.
-    * @param annotationStreams A list of named streams that contain all the transcription/annotation data required.
+    * @param streams A list of named streams that contain all the transcription/annotation data required.
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of parameters that require setting before {@link IDeserializer#deserialize()} can be invoked. This may be an empty list, and may include parameters with the value already set to a workable default. If there are parameters, and user interaction is possible, then the user may be presented with an interface for setting/confirming these parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
     * @throws Exception If the stream could not be loaded.
@@ -388,10 +388,10 @@ public class AgCsvDeserializer
    
    /**
     * Create annotations from the given CSV rows.
-    * @param lines
-    * @param layer
-    * @param graph
-    * @throws SerializationException
+    * @param lines CSV records.
+    * @param layer Layer for the annotations.
+    * @param graph Graph to add the annotations to.
+    * @throws SerializationException On error.
     */
    public void readAnnotations(Vector<CSVRecord> lines, Layer layer, Graph graph)
     throws SerializationException

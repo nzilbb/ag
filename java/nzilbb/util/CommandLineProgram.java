@@ -134,6 +134,7 @@ public class CommandLineProgram
    /**
     * Main entrypoint if run as an application - this should be called by the
     * <code>public static void main(String argv[])</code> of the derived class.
+    * @param argv Command-line arguments.
     * @return true if all obligatory arguments were present, false otherwise
     */
    public boolean processArguments(String argv[])
@@ -423,7 +424,7 @@ public class CommandLineProgram
    
    /**
     * Display a message
-    * @param sMessage
+    * @param message The message to display.
     */
    public void message(String message)
    {
@@ -433,16 +434,16 @@ public class CommandLineProgram
    
    /**
     * Show error message
-    * @param sMessage
+    * @param message The error message.
     */
-   public void error(String sMessage)
+   public void error(String message)
    {
-      System.err.println(sMessage);
+      System.err.println(message);
    } // end of error()
 
    /**
     * Show error message
-    * @param t
+    * @param t The error.
     */
    public void error(Throwable t)
    {
@@ -451,16 +452,16 @@ public class CommandLineProgram
 
    /**
     * Show warning message
-    * @param sMessage
+    * @param message The warning message.
     */
-   public void warning(String sMessage)
+   public void warning(String message)
    {
-      System.err.println("WARNING: " + sMessage);
+      System.err.println("WARNING: " + message);
    } // end of error()
 
    /**
     * Show warning message
-    * @param t
+    * @param t The error.
     */
    public void warning(Throwable t)
    {

@@ -230,20 +230,20 @@ public class Layer // TODO add type attribute
    }
    
    /**
-    * Getter for {@link #validLabels}: List of valid label values for this layer, or null if the layer values are not restricted.
+    * Getter for <tt>validLabels</tt>: List of valid label values for this layer, or null if the layer values are not restricted.
     * <p>The 'key' is the possible label value, and each key is associated with a description of the value (e.g. for displaying to users).
     * @return List of valid label values for this layer, or null if the layer values are not restricted.
     */
    @SuppressWarnings("unchecked")
    public LinkedHashMap<String,String> getValidLabels() { try { return (LinkedHashMap<String,String>)get("validLabels"); } catch(ClassCastException exception) {return null;} }
    /**
-    * Setter for {@link #validLabels}: List of valid label values for this layer, or null if the layer values are not restricted.
+    * Setter for <tt>validLabels</tt>: List of valid label values for this layer, or null if the layer values are not restricted.
     * <p>The 'key' is the possible label value, and each key is associated with a description of the value (e.g. for displaying to users).
     * @param newValidLabels List of valid label values for this layer, or null if the layer values are not restricted.
     */
    public void setValidLabels(LinkedHashMap<String,String> newValidLabels) { put("validLabels", newValidLabels); }
    /**
-    * Getter for {@link #validLabels}: List of valid label values for this layer, or null if the layer values are not restricted.
+    * Getter for <tt>validLabels</tt>: List of valid label values for this layer, or null if the layer values are not restricted.
     * @return List of valid label values for this layer, or null if the layer values are not restricted.
     */
    public String[] getValidLabelsArray() 

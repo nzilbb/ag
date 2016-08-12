@@ -41,34 +41,34 @@ public class NamedStream
     * @see #getStream()
     * @see #setStream(InputStream)
     */
-   protected InputStream isStream;
+   protected InputStream inputStream;
    /**
-    * Getter for {@link #isStream}: The input stream
+    * Getter for {@link #inputStream}: The input stream
     * @return The input stream
     */
-   public InputStream getStream() { return isStream; }
+   public InputStream getStream() { return inputStream; }
    /**
-    * Setter for {@link #isStream}: The input stream
+    * Setter for {@link #inputStream}: The input stream
     * @param isNewStream The input stream
     */
-   public void setStream(InputStream isNewStream) { isStream = isNewStream; }
+   public void setStream(InputStream isNewStream) { inputStream = isNewStream; }
 
    /**
     * The name of the stream
     * @see #getName()
     * @see #setName(String)
     */
-   protected String sName;
+   protected String name;
    /**
-    * Getter for {@link #sName}: The name of the stream
+    * Getter for {@link #name}: The name of the stream
     * @return The name of the stream
     */
-   public String getName() { return sName; }
+   public String getName() { return name; }
    /**
-    * Setter for {@link #sName}: The name of the stream
+    * Setter for {@link #name}: The name of the stream
     * @param sNewName The name of the stream
     */
-   public void setName(String sNewName) { sName = sNewName; }
+   public void setName(String sNewName) { name = sNewName; }
 
    
    /**
@@ -76,32 +76,32 @@ public class NamedStream
     * @see #getMimeType()
     * @see #setMimeType(String)
     */
-   protected String sMimeType;
+   protected String mimeType;
    /**
-    * Getter for {@link #sMimeType}: Optional MIME Type for the stream.
+    * Getter for {@link #mimeType}: Optional MIME Type for the stream.
     * @return Optional MIME Type for the stream.
     */
-   public String getMimeType() { return sMimeType; }
+   public String getMimeType() { return mimeType; }
    /**
-    * Setter for {@link #sMimeType}: Optional MIME Type for the stream.
+    * Setter for {@link #mimeType}: Optional MIME Type for the stream.
     * @param sNewMimeType Optional MIME Type for the stream.
     */
-   public void setMimeType(String sNewMimeType) { sMimeType = sNewMimeType; }
+   public void setMimeType(String sNewMimeType) { mimeType = sNewMimeType; }
 
       
    // Methods:
       
    /**
-    * Default constructor
+    * Default constructor.
     */
    public NamedStream()
    {
    } // end of constructor
 
    /**
-    * Constructor
-    * @param stream
-    * @param name
+    * Constructor from attributes.
+    * @param stream Input stream.
+    * @param name Name for the stream.
     */
    public NamedStream(InputStream stream, String name)
    {
@@ -111,8 +111,9 @@ public class NamedStream
 
    /**
     * Constructor
-    * @param stream
-    * @param name
+    * @param stream Input stream.
+    * @param name Name for the stream.
+    * @param mimeType MIME type of the data.
     */
    public NamedStream(InputStream stream, String name, String mimeType)
    {
@@ -122,22 +123,23 @@ public class NamedStream
    } // end of constructor
 
    /**
-    * Constructor
-    * @param stream file
+    * Constructor from a file. The {@link #inputStream} will be set to a FileInputStream for the file, and {@link #name} will be set to the file's name.
+    * @param file File for the stream.
+    * @throws java.io.FileNotFoundException If <var>file</var> doesn't exist.
     */
-   public NamedStream(File f)
+   public NamedStream(File file)
       throws java.io.FileNotFoundException
    {
-      setStream(new FileInputStream(f));
-      setName(f.getName());
+      setStream(new FileInputStream(file));
+      setName(file.getName());
    } // end of constructor
 
    
    /**
     * Saves the named stream as a file into the given directory.
-    * @param directory
+    * @param directory Directory to save the file into.
     * @return The number of bytes saved.
-    * @throws IOException
+    * @throws IOException On IO error.
     */
    public long save(File directory)
     throws IOException

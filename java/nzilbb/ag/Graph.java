@@ -456,8 +456,9 @@ public class Graph
    /**
     * Adds an annotation to the graph.
     * <p>If either of the anchor IDs is null, and the layer is aligned, then default anchors are
-    * created for the annotation. This allows {@link addAnnotation(new Annotation(null, label, layerId))} to be repeatedly invoked, allowing anchor offsets to be set later.
-    *
+    * created for the annotation. This allows
+    * <code>addAnnotation(new Annotation(null, label, layerId))</code>
+    * to be repeatedly invoked, allowing anchor offsets to be set later.
     * @param annotation The annotation to add to the graph.
     * @return The annotation.
     */
@@ -623,7 +624,7 @@ public class Graph
    
    /**
     * Gets an anchor at the given offset.
-    * @param offset
+    * @param offset The anchor offset.
     * @return An anchor that has the given offset, or null if there isn't one in the graph.
     * @see #getOrCreateAnchorAt(double)
     */
@@ -641,7 +642,7 @@ public class Graph
 
    /**
     * Gets an anchor at the given offset. If there isn't already one in the graph, one is created.
-    * @param offset
+    * @param offset The anchor offset.
     * @return An anchor that has the given offset.
     * @see #getAnchorAt(double)
     */
@@ -664,7 +665,7 @@ public class Graph
     * <pre>
     * Anchor anchor = graph.getOrCreateAnchorAt(456.789, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
     * </pre>
-    * @param offset
+    * @param offset The anchor offset.
     * @param key An attribute to set the value of.
     * @param value The value of the attribute identified by <var>key</var>
     * @return An anchor that has the given offset.

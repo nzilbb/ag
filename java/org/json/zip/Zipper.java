@@ -97,7 +97,7 @@ public class Zipper extends JSONzip {
      * Finish the final byte and flush the bitwriter. This does the same thing
      * as pad(8).
      *
-     * @throws JSONException
+     * @throws JSONException On error.
      */
     public void flush() throws JSONException {
         pad(8);
@@ -119,7 +119,7 @@ public class Zipper extends JSONzip {
      *            The size of the bit allotment. A value of 8 will complete and
      *            flush the current byte. If you don't pad, then some of the
      *            last bits might not be sent to the Output Stream.
-     * @throws JSONException
+     * @throws JSONException On error.
      */
     public void pad(int width) throws JSONException {
         try {
@@ -462,7 +462,7 @@ public class Zipper extends JSONzip {
      * Encode a JSONObject.
      *
      * @param jsonobject The JSONObject.
-     * @throws JSONException
+     * @throws JSONException On error.
      */
     public void encode(JSONObject jsonobject) throws JSONException {
         generate();
@@ -473,7 +473,7 @@ public class Zipper extends JSONzip {
      * Encode a JSONArray.
      *
      * @param jsonarray The JSONArray.
-     * @throws JSONException
+     * @throws JSONException On error.
      */
     public void encode(JSONArray jsonarray) throws JSONException {
         generate();

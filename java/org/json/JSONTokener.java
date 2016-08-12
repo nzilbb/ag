@@ -225,7 +225,7 @@ public class JSONTokener {
 
     /**
      * Get the next char in the string, skipping whitespace.
-     * @throws JSONException
+     * @throws JSONException On error.
      * @return  A character, or 0 if there are no more characters.
      */
     public char nextClean() throws JSONException {

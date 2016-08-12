@@ -72,7 +72,7 @@ public class SerializationException
 
    /**
     * Constructor.
-    * @param cause The causing error.
+    * @param message The error message.
     */
    public SerializationException(String message)
    {

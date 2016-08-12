@@ -93,6 +93,7 @@ import java.util.Set;
  * @author JSON.org
  * @version 2014-05-03
  */
+@SuppressWarnings("overrides")
 public class JSONObject {
     /**
      * JSONObject.NULL is equivalent to the value that JavaScript calls null,
@@ -164,7 +165,7 @@ public class JSONObject {
      *            A JSONObject.
      * @param names
      *            An array of strings.
-     * @throws JSONException
+     * @throws JSONException On error.
      * @exception JSONException
      *                If a value is a non-finite number or if a name is
      *                duplicated.
@@ -240,7 +241,7 @@ public class JSONObject {
      * @param map
      *            A map object that can be used to initialize the contents of
      *            the JSONObject.
-     * @throws JSONException
+     * @throws JSONException On error.
      */
     public JSONObject(Map<String, Object> map) {
         this.map = new LinkedHashMap<String, Object>();
@@ -605,7 +606,7 @@ public class JSONObject {
 
     /**
      * Get an array of field names from a JSONObject.
-     *
+     * @param jo JSON object.
      * @return An array of field names, or null if there are no names.
      */
     public static String[] getNames(JSONObject jo) {
@@ -625,7 +626,7 @@ public class JSONObject {
 
     /**
      * Get an array of field names from an Object.
-     *
+     * @param object The object.
      * @return An array of field names, or null if there are no names.
      */
     public static String[] getNames(Object object) {
@@ -1054,7 +1055,7 @@ public class JSONObject {
      * @param value
      *            A Collection value.
      * @return this.
-     * @throws JSONException
+     * @throws JSONException On error.
      */
     public JSONObject put(String key, Collection<Object> value) throws JSONException {
         this.put(key, new JSONArray(value));
@@ -1118,7 +1119,7 @@ public class JSONObject {
      * @param value
      *            A Map value.
      * @return this.
-     * @throws JSONException
+     * @throws JSONException On error.
      */
     public JSONObject put(String key, Map<String, Object> value) throws JSONException {
         this.put(key, new JSONObject(value));
@@ -1196,7 +1197,7 @@ public class JSONObject {
 
     /**
      * Produce a string in double quotes with backslash sequences in all the
-     * right places. A backslash will be inserted within </, producing <\/,
+     * right places. A backslash will be inserted within &lt;/, producing &gt;\/,
      * allowing JSON text to be delivered in HTML. In JSON text, a string cannot
      * contain a control character or an unescaped quote or backslash.
      *
@@ -1589,9 +1590,9 @@ public class JSONObject {
      * compactness, no whitespace is added.
      * <p>
      * Warning: This method assumes that the data structure is acyclical.
-     *
+     * @param writer The writer.
      * @return The writer.
-     * @throws JSONException
+     * @throws JSONException On error.
      */
     public Writer write(Writer writer) throws JSONException {
         return this.write(writer, 0, 0);

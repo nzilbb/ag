@@ -51,13 +51,13 @@ import nzilbb.configure.ParameterSet;
  *      <li>If overlap is total, the two utterances are chained together with a non-aligned anchor between them.</li>
  *    </ul>
  *  </li>
- *  <li>Disfluency marking with &amp; - e.g. <samp>so &amp;sund Sunday</samp></li>
- *  <li>Non-standard form expansion - e.g. <samp>gonna [: going to]</samp></li>
- *  <li>Incomplete word completion - e.g. <samp>dinner doin(g) all</samp></li>
- *  <li>Acronym/proper name joining with _ - e.g. <samp>no T_V in my room</samp></li>
- *  <li>Retracing - e.g. <samp>&lt;some friends and I&gt; [//] uh</samp> or <samp>and sit [//] sets him</samp></li>
- *  <li>Repetition/stuttered false starts - e.g. <samp>the &lt;picnic&gt; [/] picnic</samp> or <samp>the Saturday [/] in the morning</samp></li>
- *  <li>Errors - e.g. <samp>they've &lt;work up a hunger&gt; [* s:r]</samp> or <samp>they got [* m] to</samp></li>
+ *  <li>Disfluency marking with &amp; - e.g. <tt>so &amp;sund Sunday</tt></li>
+ *  <li>Non-standard form expansion - e.g. <tt>gonna [: going to]</tt></li>
+ *  <li>Incomplete word completion - e.g. <tt>dinner doin(g) all</tt></li>
+ *  <li>Acronym/proper name joining with _ - e.g. <tt>no T_V in my room</tt></li>
+ *  <li>Retracing - e.g. <tt>&lt;some friends and I&gt; [//] uh</tt> or <tt>and sit [//] sets him</tt></li>
+ *  <li>Repetition/stuttered false starts - e.g. <tt>the &lt;picnic&gt; [/] picnic</tt> or <tt>the Saturday [/] in the morning</tt></li>
+ *  <li>Errors - e.g. <tt>they've &lt;work up a hunger&gt; [* s:r]</tt> or <tt>they got [* m] to</tt></li>
  * </ul>
  * @author Robert Fromont robert@fromont.net.nz
  */
@@ -88,7 +88,7 @@ public class ChatDeserializer
    /**
     * List of languages.
     * @see #getLanguages()
-    * @see #setLanguages(Vector<String>)
+    * @see #setLanguages(Vector)
     */
    protected Vector<String> languages;
    /**
@@ -139,7 +139,7 @@ public class ChatDeserializer
    /**
     * Header lines
     * @see #getHeaders()
-    * @see #setHeaders(Vector<String>)
+    * @see #setHeaders(Vector)
     */
    protected Vector<String> headers;
    /**
@@ -177,12 +177,12 @@ public class ChatDeserializer
     */
    protected String mediaType;
    /**
-    * Getter for {@link #MediaType}: Type of media.
+    * Getter for {@link #mediaType}: Type of media.
     * @return Type of media.
     */
    public String getMediaType() { return mediaType; }
    /**
-    * Setter for {@link #MediaType}: Type of media.
+    * Setter for {@link #mediaType}: Type of media.
     * @param newMediaType Type of media.
     */
    public void setMediaType(String newMediaType) { mediaType = newMediaType; }
@@ -190,7 +190,7 @@ public class ChatDeserializer
    /**
     * List of names of transcribers.
     * @see #getTranscribers()
-    * @see #setTranscribers(Vector<String>)
+    * @see #setTranscribers(Vector)
     */
    protected Vector<String> transcribers;
    /**
@@ -480,7 +480,7 @@ public class ChatDeserializer
    /**
     * Required participant meta-data layers.
     * @see #getParticipantLayers()
-    * @see #setParticipantLayers(HashSet)
+    * @see #setParticipantLayers(HashMap)
     */
    protected HashMap<String,Layer> participantLayers;
    /**
@@ -568,7 +568,10 @@ public class ChatDeserializer
     * <p>When the deserializer is installed, this method should be invoked with an empty parameter set, to discover what (if any) general configuration is required. If parameters are returned, and user interaction is possible, then the user may be presented with an interface for setting/confirming these parameters.  Once the parameters are set, this method can be invoked again with the required values, resulting in an empty parameter set being returned to confirm that nothing further is required.
     * @param configuration The configuration for the deserializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
-    * @return A list of configuration parameters (still) must be set before {@link IDeserializer#setParameters()} can be invoked. If this is an empty list, {@link IDeserializer#setParameters()} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
+    * @return A list of configuration parameters (still) must be set before
+    * {@link IDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty list,
+    * {@link IDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an empty list,
+    * this method must be invoked again with the returned parameters' values set.
     * @throws SerializerNotConfiguredException If the configuration is not sufficient for deserialization.
     */
    public ParameterSet configure(ParameterSet configuration, Schema schema) throws SerializerNotConfiguredException
@@ -578,8 +581,7 @@ public class ChatDeserializer
 
    /**
     * Loads the serialized form of the graph, using the given set of named streams.
-    * @param annotationStreams A list of named streams that contain all the transcription/annotation data required.
-    * @param mediaStreams An optional (may be null) list of named streams that contain the media annotated by the <var>annotationStreams</var>.
+    * @param streams A list of named streams that contain all the transcription/annotation data required.
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of parameters that require setting before {@link IDeserializer#deserialize()} can be invoked. This may be an empty list, and may include parameters with the value already set to a workable default. If there are parameters, and user interaction is possible, then the user may be presented with an interface for setting/confirming these parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
     * @throws Exception If the stream could not be loaded.
@@ -1099,8 +1101,8 @@ public class ChatDeserializer
    
    /**
     * Tries to find a layer in the given map, using an ordered list of possible IDs.
-    * @param possibleLayers
-    * @param possibleIds
+    * @param possibleLayers Collection of layers from which a possibility can be selected.
+    * @param possibleIds Guesses at possible layer IDs.
     * @return The first matching layer, or null if none matched.
     */
    public Layer findLayerById(LinkedHashMap<String,Layer> possibleLayers, String[] possibleIds)

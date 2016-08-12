@@ -149,7 +149,7 @@ public class SqlGraphStoreAdministration
 
    /**
     * Loads the registered serializers/deserializers.
-    * @throws SQLException
+    * @throws SQLException On SQL error.
     */
    protected void loadSerializers()
     throws SQLException
@@ -193,7 +193,7 @@ public class SqlGraphStoreAdministration
 
    /**
     * Registers a graph deserializer.
-    * @param deserializer
+    * @param deserializer The deserializer to register.
     * @throws StoreException If an error prevents the graph from being saved.
     * @throws PermissionException If saving the graph is not permitted.
     */
@@ -240,7 +240,7 @@ public class SqlGraphStoreAdministration
 
    /**
     * De-registers a graph deserializer.
-    * @param deserializer
+    * @param deserializer The deserializer to de-register.
     * @throws StoreException If an error prevents the graph from being saved.
     * @throws PermissionException If saving the graph is not permitted.
     */
@@ -297,7 +297,7 @@ public class SqlGraphStoreAdministration
    
    /**
     * Gets the deserializer for the given MIME type.
-    * @param mimeType
+    * @param mimeType The MIME type.
     * @return The deserializer for the given MIME type, or null if none is registered.
     * @throws StoreException If an error prevents the graph from being saved.
     * @throws PermissionException If saving the graph is not permitted.
@@ -325,7 +325,7 @@ public class SqlGraphStoreAdministration
 
    /**
     * Gets the deserializer for the given file suffix (extension).
-    * @param suffix
+    * @param suffix The file extension.
     * @return The deserializer for the given suffix, or null if none is registered.
     * @throws StoreException If an error prevents the graph from being saved.
     * @throws PermissionException If saving the graph is not permitted.

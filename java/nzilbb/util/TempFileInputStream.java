@@ -90,17 +90,20 @@ public class TempFileInputStream
    /**
     * Constructor. Doesn't open the file; that doesn't happen until some data is wanted.
     * <br>Side-effect: deleteOnExit() is called on the file.
+    * @param file The file.
+    * @throws FileNotFoundException If the file doesn't exist.
     */
-   public TempFileInputStream(File f)
+   public TempFileInputStream(File file)
       throws FileNotFoundException
    {
-      if (!f.exists()) throw new FileNotFoundException(f.getName());
-      setTempFile(f);
+      if (!file.exists()) throw new FileNotFoundException(file.getName());
+      setTempFile(file);
    } // end of constructor
 
    
    /**
     * Ensures the FileInputStream has been initialised.
+    * @throws FileNotFoundException If the temporary file no longer exists.
     */
    protected void checkFileInputStream()
       throws FileNotFoundException
@@ -109,7 +112,9 @@ public class TempFileInputStream
    } // end of checkFileInputStream()
 
 
-   /** Overridden to delete the file after closing the stream */
+   /** Overridden to delete the file after closing the stream
+    * @throws IOException On IO error.
+    */
    public void close()
       throws IOException
    {
@@ -118,48 +123,61 @@ public class TempFileInputStream
       fis = null;
    }
 
-   /** Overridden to pass through the call to {@link #fis} */
+   /** Overridden to pass through the call to {@link #fis}
+    * @throws IOException On IO error.
+    */
    public int read()
       throws IOException
    {
       checkFileInputStream();
       return fis.read();
    }
-   /** Overridden to pass through the call to {@link #fis} */
+   /** Overridden to pass through the call to {@link #fis} 
+    * @throws IOException On IO error.
+    */
    public int read(byte[] b)
       throws IOException
    {
       checkFileInputStream();
       return fis.read(b);
    }
-   /** Overridden to pass through the call to {@link #fis} */
+   /** Overridden to pass through the call to {@link #fis} 
+    * @throws IOException On IO error.
+    */
    public int read(byte[] b, int off, int len)
       throws IOException
    {
       checkFileInputStream();
       return fis.read(b, off, len);
    }
-   /** Overridden to pass through the call to {@link #fis} */
+   /** Overridden to pass through the call to {@link #fis} 
+    * @throws IOException On IO error.
+    */
    public long skip(long n)
       throws IOException
    {
       checkFileInputStream();
       return fis.skip(n);
    }
-   /** Overridden to pass through the call to {@link #fis} */
+   /** Overridden to pass through the call to {@link #fis} 
+    * @throws IOException On IO error.
+    */
    public int available()
       throws IOException
    {
       checkFileInputStream();
       return fis.available();
    }
-   /** Overridden to pass through the call to {@link #fis} */
+   /** Overridden to pass through the call to {@link #fis} 
+    */
    public void mark(int readlimit)
    {
       try { checkFileInputStream(); } catch(FileNotFoundException exception) {}
       fis.mark(readlimit);
    }
-   /** Overridden to pass through the call to {@link #fis} */
+   /** Overridden to pass through the call to {@link #fis} 
+    * @throws IOException On IO error.
+    */
    public void reset()
       throws IOException
    {

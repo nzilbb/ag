@@ -24,7 +24,7 @@ package nzilbb.util;
 import java.lang.annotation.*;
 
 /**
- * Annotation for a {@link UtilityApp} or {@link UtilityApplication} switch - used to inform command-line and applet parameter interpretation, and to product usage information.
+ * Annotation for a {@link CommandLineProgram} or {@link GuiProgram} switch - used to inform command-line and applet parameter interpretation, and to product usage information.
  * @author Robert Fromont robert@fromont.net.nz
  */
 @Documented
@@ -32,13 +32,26 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Switch
 {
-   /** 'Usage' description of the switch */
+   /**
+    * 'Usage' description of the switch.
+    * @return 'Usage' description of the switch.
+    */
    String value();
-   /** Whether or not the switch is compulsory */
+   /**
+    * Whether or not the switch is compulsory.
+    * @return true if the switch is compulsory, false otherwise.
+    */
    boolean compulsory() default false;
-   /** Whether or not the setting is persistent, and set during installation (true) or transitory, and specified for each invocation (false). */
+   /**
+    * Whether or not the setting is persistent, and set during installation (true)
+    * or transitory, and specified for each invocation (false).
+    * @return true if the setting is persistent, false otherwise.
+    */
    boolean persistent() default false;
-   /** A short label for the switch */
+   /**
+    * A short label for the switch.
+    * @return A short label for the switch.
+    */
    String label() default "";
 
 } // end of class Switch

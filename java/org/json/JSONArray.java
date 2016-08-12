@@ -162,7 +162,7 @@ public class JSONArray {
 
     /**
      * Construct a JSONArray from an array
-     *
+     * @param array The array.
      * @throws JSONException
      *             If not an array.
      */
@@ -903,7 +903,7 @@ public class JSONArray {
      *         object, beginning with <code>[</code>&nbsp;<small>(left
      *         bracket)</small> and ending with <code>]</code>
      *         &nbsp;<small>(right bracket)</small>.
-     * @throws JSONException
+     * @throws JSONException On error.
      */
     public String toString(int indentFactor) throws JSONException {
         StringWriter sw = new StringWriter();
@@ -917,9 +917,9 @@ public class JSONArray {
      * compactness, no whitespace is added.
      * <p>
      * Warning: This method assumes that the data structure is acyclical.
-     *
+     * @param writer The writer.
      * @return The writer.
-     * @throws JSONException
+     * @throws JSONException On error.
      */
     public Writer write(Writer writer) throws JSONException {
         return this.write(writer, 0, 0);
@@ -936,7 +936,7 @@ public class JSONArray {
      * @param indent
      *            The indention of the top level.
      * @return The writer.
-     * @throws JSONException
+     * @throws JSONException On error.
      */
     Writer write(Writer writer, int indentFactor, int indent)
             throws JSONException {

@@ -11,7 +11,7 @@ public interface BitWriter {
     /**
      * Write a 1 bit.
      *
-     * @throws IOException
+     * @throws IOException On IO error.
      */
     public void one() throws IOException;
 
@@ -21,7 +21,7 @@ public interface BitWriter {
      * @param width
      *            The size in bits of the block to pad. This will typically be
      *            8, 16, 32, 64, 128, 256, etc.
-     * @throws IOException
+     * @throws IOException On IO error.
      */
     public void pad(int width) throws IOException;
 
@@ -32,14 +32,14 @@ public interface BitWriter {
      *            The bits to be written.
      * @param width
      *            The number of bits to write. (0..32)
-     * @throws IOException
+     * @throws IOException On IO error.
      */
     public void write(int bits, int width) throws IOException;
 
     /**
      * Write a 0 bit.
      *
-     * @throws IOException
+     * @throws IOException On IO error.
      */
     public void zero() throws IOException;
 }

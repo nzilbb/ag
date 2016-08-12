@@ -166,7 +166,8 @@ public class MediaFile
 
    /**
     * Constructor from a file and suffix.
-    * @param file File
+    * @param file The file.
+    * @param trackSuffix The suffix.
     */
    public MediaFile(File file, String trackSuffix)
    {

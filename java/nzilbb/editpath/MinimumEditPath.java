@@ -28,7 +28,7 @@ import java.util.Vector;
  * Implementation of the
  * <a href="https://en.wikipedia.org/wiki/Wagner%E2%80%93Fischer_algorithm">Wagner-Fischer algorithm</a> 
  * to determine the minimum edit path (or distance) between two sequences. While traditionally this is between two strings (sequences of characters), the implementation uses templates to support sequences of any type, and interfaces for comparators, to support different settings and methods for determining edit distance.
- * <p>A traditional Levenstein distance calculation can be achieved with MinimumEditPath<Character>.
+ * <p>A traditional Levenstein distance calculation can be achieved with MinimumEditPath&lt;Character&gt;.
  * @author Robert Fromont robert@fromont.net.nz
  */
 
@@ -39,7 +39,7 @@ public class MinimumEditPath<T>
    /**
     * The comparator used when determining the distance between two sequence elements.
     * @see #getComparator()
-    * @see #setComparator(IEditComparator<T>)
+    * @see #setComparator(IEditComparator)
     */
    protected IEditComparator<T> comparator;
    /**
@@ -76,8 +76,8 @@ public class MinimumEditPath<T>
    
    /**
     * Computes the minimum path from one sequence to another.
-    * @param from
-    * @param to
+    * @param from The source (original) sequence.
+    * @param to The destination (final) sequence.
     * @return The edit path between the two sequences that has the minimum edit distance.
     */
    public List<EditStep<T>> minimumEditPath(List<T> from, List<T> to)
@@ -172,13 +172,13 @@ public class MinimumEditPath<T>
     * <p>This implementation, when faced with a change with the same distance as a delete or insert,
     * will favor the delete or insert over change. 
     * This is so you can favor delete/insert if desired, by simply upping the change distance to 2, i.e. with:
-    * <br><code>new MinimumEditPath<T>(new DefaultEditComparator<T>(2));</code>
+    * <br><code>new MinimumEditPath&lt;T&gt;(new DefaultEditComparator&lt;T&gt;(2));</code>
     * <p>It will also insert before deleting, given the same cost.
-    * @param left
-    * @param diagonal
-    * @param right
-    * @param lastFrom
-    * @param lastTo
+    * @param left The step to the 'left' in the edit matrix.
+    * @param diagonal The step to the 'left' and 'below' in the edit matrix.
+    * @param below The step 'below' in the edit matrix.
+    * @param from Object in the source (original) sequence.
+    * @param to Object in the destination (final) sequence.
     * @return The minimum edit
     */
    protected EditStep<T> minimumEdit(EditStep<T> left, EditStep<T> below, EditStep<T> diagonal, T from, T to)
@@ -198,8 +198,8 @@ public class MinimumEditPath<T>
    
    /**
     * Computes the minimum edit distance between two sequences.
-    * @param from
-    * @param to
+    * @param from The source (original) sequence.
+    * @param to The destination (final) sequence.
     * @return The minimum edit distance between the two sequences.
     */
    public int minimumEditDistance(List<T> from, List<T> to)

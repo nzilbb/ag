@@ -29,30 +29,30 @@ import nzilbb.ag.*;
 
 /**
  * Transforms a text convention that spans possibly multiple annotations on a source layer into annotations on a destination layer.
- * <p>Annotations on {@link #sourceLayerId} are scanned, and where a label matches the {@link #startPattern} regular expression, it and subsequent annotation labels, until a label that matches the {@link #endPattern} regular expression, are concatenated to form the label of an annotation on {@link #destinationLayer}. During concatenation, the start and end annotations are relabelled using {@link #destinationStartResult} and {@link #destinationEndResult}, respectively. The spanned annotation may or may not be deleted, depending on the value of {@link #deleteInSource}. If they are kept, the start and end annotations are relabelled using {@link #sourceStartResult} and {@link #sourceEndResult}, respectively.
+ * <p>Annotations on {@link #sourceLayerId} are scanned, and where a label matches the {@link #startPattern} regular expression, it and subsequent annotation labels, until a label that matches the {@link #endPattern} regular expression, are concatenated to form the label of an annotation on {@link #destinationLayerId}. During concatenation, the start and end annotations are relabelled using {@link #destinationStartResult} and {@link #destinationEndResult}, respectively. The spanned annotation may or may not be deleted, depending on the value of {@link #deleteInSource}. If they are kept, the start and end annotations are relabelled using {@link #sourceStartResult} and {@link #sourceEndResult}, respectively.
  * <p>Some examples:
- * <p>To convert a sequence of words of the form <samp>{word1 word2 ... wordn}</samp> into a comment annotation:
+ * <p>To convert a sequence of words of the form <tt>{word1 word2 ... wordn}</tt> into a comment annotation:
  * <ul>
- *  <li><b>sourceLayerId</b>: <samp>word</samp></li>
- *  <li><b>startPattern</b>: <samp>{(.*)</samp></li>
- *  <li><b>endPattern</b>: <samp>(.*)}</samp></li>
- *  <li><b>deleteInSource</b>: <samp>true</samp></li>
- *  <li><b>destinationLayerId</b>: <samp>comment</samp></li>
- *  <li><b>destinationStartResult</b>: <samp>$1</samp></li>
- *  <li><b>destinationEndResult</b>: <samp>$1</samp></li>
+ *  <li><b>sourceLayerId</b>: <tt>word</tt></li>
+ *  <li><b>startPattern</b>: <tt>{(.*)</tt></li>
+ *  <li><b>endPattern</b>: <tt>(.*)}</tt></li>
+ *  <li><b>deleteInSource</b>: <tt>true</tt></li>
+ *  <li><b>destinationLayerId</b>: <tt>comment</tt></li>
+ *  <li><b>destinationStartResult</b>: <tt>$1</tt></li>
+ *  <li><b>destinationEndResult</b>: <tt>$1</tt></li>
  * </ul>
  * So a sequence of words "here {pointing to head} and there" will end up being the sequence "here and there" with a comment annotation labelled "pointing to head" between "here" and "and".
- * <p>To extract the VP phrase from a sequence of words of the form <samp>[XP word1 word2 ... wordn]</samp>:
+ * <p>To extract the VP phrase from a sequence of words of the form <tt>[XP word1 word2 ... wordn]</tt>:
  * <ul>
- *  <li><b>sourceLayerId</b>: <samp>word</samp></li>
- *  <li><b>startPattern</b>: <samp>[(.*)</samp></li>
- *  <li><b>endPattern</b>: <samp>(.*)]</samp></li>
- *  <li><b>deleteInSource</b>: <samp>false</samp></li>
- *  <li><b>sourceStartResult</b>: <samp>null</samp></li>
- *  <li><b>sourceEndResult</b>: <samp>$1</samp></li>
- *  <li><b>destinationLayerId</b>: <samp>phrase</samp></li>
- *  <li><b>destinationStartResult</b>: <samp>$1</samp></li>
- *  <li><b>destinationEndResult</b>: <samp>null</samp></li>
+ *  <li><b>sourceLayerId</b>: <tt>word</tt></li>
+ *  <li><b>startPattern</b>: <tt>[(.*)</tt></li>
+ *  <li><b>endPattern</b>: <tt>(.*)]</tt></li>
+ *  <li><b>deleteInSource</b>: <tt>false</tt></li>
+ *  <li><b>sourceStartResult</b>: <tt>null</tt></li>
+ *  <li><b>sourceEndResult</b>: <tt>$1</tt></li>
+ *  <li><b>destinationLayerId</b>: <tt>phrase</tt></li>
+ *  <li><b>destinationStartResult</b>: <tt>$1</tt></li>
+ *  <li><b>destinationEndResult</b>: <tt>null</tt></li>
  * </ul>
  * So a sequence of words "the fox [VP jumps over the dog]" will end up being the sequence "the fox jumps over the dog]" with a phrase annotation labelled "NP" spanning "jumps over the dog".
  * <br>Note that in this case, having {@link #sourceStartResult} set to null indicates that the start source annotation should be deleted, and having {@link #destinationEndResult} set to null inicates that the last annotation should not be concatenated to the destination label.
@@ -317,7 +317,6 @@ public class SpanningConventionTransformer // TODO implementation that handles n
     * @param sourceStartResult The resulting label of the start source annotation, which may contain references to captured groups in {@link #startPattern}, or be null to delete the start annotation.
     * @param sourceEndResult The resulting label of the end source annotation, which may contain references to captured groups in {@link #endPattern}, or be null to delete the end annotation.
     * @param destinationLayerId Layer ID of the annotation created for each span.
-    * @param delimiter Delimiter to insert between source labels when concatenting them to for the destination label.
     * @param destinationStartResult The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #startPattern}, or be null to not include the start annotation.
     * @param destinationEndResult The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #endPattern}, or be null to not include the end annotation.
     */
@@ -372,7 +371,6 @@ public class SpanningConventionTransformer // TODO implementation that handles n
     * @param sourceStartResult The resulting label of the start source annotation, which may contain references to captured groups in {@link #startPattern}, or be null to delete the start annotation.
     * @param sourceEndResult The resulting label of the end source annotation, which may contain references to captured groups in {@link #endPattern}, or be null to delete the end annotation.
     * @param destinationLayerId Layer ID of the annotation created for each span.
-    * @param delimiter Delimiter to insert between source labels when concatenting them to for the destination label.
     * @param destinationStartResult The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #startPattern}, or be null to not include the start annotation.
     * @param destinationEndResult The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #endPattern}, or be null to not include the end annotation.
     * @param annotatePrevious Whether the destination annotation annotates the source token prior to the first matching source token (i.e. whether they should share start anchors).
@@ -400,7 +398,6 @@ public class SpanningConventionTransformer // TODO implementation that handles n
     * @param sourceStartResult The resulting label of the start source annotation, which may contain references to captured groups in {@link #startPattern}, or be null to delete the start annotation.
     * @param sourceEndResult The resulting label of the end source annotation, which may contain references to captured groups in {@link #endPattern}, or be null to delete the end annotation.
     * @param destinationLayerId Layer ID of the annotation created for each span.
-    * @param delimiter Delimiter to insert between source labels when concatenting them to for the destination label.
     * @param destinationStartResult The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #startPattern}, or be null to not include the start annotation.
     * @param destinationEndResult The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #endPattern}, or be null to not include the end annotation.
     * @param annotatePrevious Whether the destination annotation annotates the source token prior to the first matching source token (i.e. whether they should share start anchors).

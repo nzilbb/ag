@@ -218,6 +218,7 @@ public class GuiProgram
    /**
     * Main entrypoint if run as an application - this should be called by the
     * <code>public static void main(String argv[])</code> of the derived class.
+    * @param argv Command-line arguments.
     */
    public void mainRun(String argv[])
    {

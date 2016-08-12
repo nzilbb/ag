@@ -128,7 +128,7 @@ public class JSONSerialization
    /**
     * Loads the serialized form of the graph, using the given set of named streams.
     * <p>{@link IDeserializer} method.
-    * @param annotationStreams A list of named streams that contain all the
+    * @param streams A list of named streams that contain all the
     *  transcription/annotation data required.
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of parameters that require setting before {@link IDeserializer#deserialize()}
@@ -210,9 +210,9 @@ public class JSONSerialization
    
    /**
     * Converts a JSON object to a Graph.
-    * @param json
+    * @param json JSON object
     * @return The graph
-    * @throws SerializationException
+    * @throws SerializationException On error.
     */
    protected Graph jsonToGraph(JSONObject json)
     throws SerializationException
@@ -250,9 +250,9 @@ public class JSONSerialization
 
    /**
     * Converts a JSON object to a Schema.
-    * @param json
+    * @param json JSON object
     * @return The schema
-    * @throws SerializationException
+    * @throws SerializationException On error.
     */
    protected Schema jsonToSchema(JSONObject json)
     throws SerializationException
@@ -289,9 +289,12 @@ public class JSONSerialization
 
    /**
     * Converts a JSON object to a Layer definition.
-    * @param json
+    * @param s The schema to add te layer to.
+    * @param parentId The layer's parent ID.
+    * @param layerId The layer's ID.
+    * @param json JSON object
     * @return The layer
-    * @throws SerializationException
+    * @throws SerializationException On error.
     */
    protected Layer jsonToLayer(Schema s, String parentId, String layerId, JSONObject json)
     throws SerializationException
@@ -326,9 +329,10 @@ public class JSONSerialization
 
    /**
     * Converts a JSON object to an Anchor.
-    * @param json
+    * @param anchorId The ID of the anchor.
+    * @param json JSON object
     * @return The anchor
-    * @throws SerializationException
+    * @throws SerializationException On error.
     */
    protected Anchor jsonToAnchor(String anchorId, JSONObject json)
     throws SerializationException
@@ -352,19 +356,20 @@ public class JSONSerialization
    } // end of jsonToGraph()
    
    /**
-    * Converts a JSON object to an Anchor.
-    * @param json
-    * @return The anchor
-    * @throws SerializationException
+    * Recursively converts a JSON array of annotation definitions to Annotations, which are added to the graph.
+    * @param graph The graph to add the annotations to.
+    * @param layerId The ID of the layer to which the annotations should be added.
+    * @param json JSON array
+    * @throws SerializationException On error.
     */
-   protected void jsonToAnnotations(Graph g, String layerId, JSONArray json)
+   protected void jsonToAnnotations(Graph graph, String layerId, JSONArray json)
       throws SerializationException
    {
       try
       {
 	 for (int i = 0; i < json.length(); i++)
 	 {
-	    jsonToAnnotation(g, layerId, json.getJSONObject(i));
+	    jsonToAnnotation(graph, layerId, json.getJSONObject(i));
 	 } // next annotation
       }
       catch (JSONException x)
@@ -374,10 +379,12 @@ public class JSONSerialization
    } // end of jsonToGraph()
 
    /**
-    * Converts a JSON object to an Annotation.
-    * @param json
+    * Converts a JSON object to an Annotation, and recursively creates child annotations.
+    * @param graph The graph to add the annotation to.
+    * @param layerId The ID of the layer to which the annotation belongs.
+    * @param json JSON object
     * @return The anchor
-    * @throws SerializationException
+    * @throws SerializationException On error.
     */
    protected Annotation jsonToAnnotation(Graph graph, String layerId, JSONObject json)
     throws SerializationException
@@ -435,7 +442,7 @@ public class JSONSerialization
     *  are capable of storing multiple transcripts in the same file (e.g. AGTK, Transana XML
     *  export), which is why this method accepts a list.
     * <p>{@link ISerializer} method.
-    * @param graph The graph to serialize.
+    * @param graphs The graphs to serialize.
     * @return A list of named streams that contain the serialization in the given format. 
     * @throws SerializerNotConfiguredException if the object has not been configured.
     * @throws SerializationException if errors occur during deserialization.
@@ -511,9 +518,9 @@ public class JSONSerialization
    
    /**
     * Recursively serializes the given layer's definition.
-    * @param writer
-    * @param indent
-    * @param layer
+    * @param writer The writer to write to.
+    * @param indent The current indent level.
+    * @param layer The layer to serialize.
     */
    protected void serializeLayer(PrintWriter writer, int indent, Layer layer)
    {
@@ -548,9 +555,9 @@ public class JSONSerialization
 
    /**
     * Serializes the given anchor.
-    * @param writer
-    * @param indent
-    * @param anchor
+    * @param writer The writer to write to.
+    * @param indent The current indent level.
+    * @param anchor The anchor to serialize.
     */
    protected void serializeAnchor(PrintWriter writer, int indent, Anchor anchor)
    {
@@ -571,9 +578,10 @@ public class JSONSerialization
 
    /**
     * Serializes the given annotation.
-    * @param writer
-    * @param indent
-    * @param anchor
+    * @param writer The writer to write to.
+    * @param indent The current indent level.
+    * @param layerId The ID of the annotations.
+    * @param annotations A list of annotations on the same layer to serialize.
     */
    protected void serializeAnnotations(PrintWriter writer, int indent, String layerId, Vector<Annotation> annotations)
    {
@@ -593,9 +601,9 @@ public class JSONSerialization
 
    /**
     * Serializes the given annotation.
-    * @param writer
-    * @param indent
-    * @param anchor
+    * @param writer The writer to write to.
+    * @param indent The current indent level.
+    * @param annotation The annotation to serialize.
     */
    protected void serializeAnnotation(PrintWriter writer, int indent, Annotation annotation)
    {
@@ -627,9 +635,9 @@ public class JSONSerialization
    
    /**
     * Expresses a key and simple string value as JSON.
-    * @param indent
-    * @param key
-    * @param value
+    * @param indent The current indent level.
+    * @param key The key to serialize.
+    * @param value The value to serialize.
     * @return A string of the form {indent}"{key}":"{value}",
     */
    protected String keyValue(int indent, String key, String value)
@@ -645,9 +653,9 @@ public class JSONSerialization
 
    /**
     * Expresses a key and simple boolean value as JSON.
-    * @param indent
-    * @param key
-    * @param value
+    * @param indent The current indent level.
+    * @param key The key to serialize.
+    * @param value The value to serialize.
     * @return A string of the form {indent}{key} : {value},
     */
    protected String keyValue(int indent, String key, boolean value)
@@ -663,9 +671,9 @@ public class JSONSerialization
 
    /**
     * Expresses a key and simple integer value as JSON.
-    * @param indent
-    * @param key
-    * @param value
+    * @param indent The current indent level.
+    * @param key The key to serialize.
+    * @param value The value to serialize.
     * @return A string of the form {indent}{key} : {value},
     */
    protected String keyValue(int indent, String key, int value)
@@ -681,9 +689,9 @@ public class JSONSerialization
 
    /**
     * Expresses a key and Double object value as JSON.
-    * @param indent
-    * @param key
-    * @param value
+    * @param indent The current indent level.
+    * @param key The key to serialize.
+    * @param value The value to serialize.
     * @return A string of the form {indent}{key} : {value},
     */
    protected String keyValue(int indent, String key, Double value)
@@ -702,7 +710,7 @@ public class JSONSerialization
    
    /**
     * Write indent characters to the given level.
-    * @param indent
+    * @param indent The level to indent to.
     * @return A string with the indent character repeated the indent level number of times.
     */
    protected String indent(int indent)
@@ -714,7 +722,7 @@ public class JSONSerialization
    
    /**
     * Escapes the given string for expression as a JSON string, and wraps it in quotes.
-    * @param s
+    * @param s The string to quote.
     * @return The given string, in quotes and escaped for JSON.
     */
    protected String q(String s)

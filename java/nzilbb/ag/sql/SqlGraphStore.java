@@ -2471,6 +2471,7 @@ public class SqlGraphStore
    /**
     * Save changes to a 'special' annotation, e.g. corpus, series, etc.
     * @param annotation The annotation whose changes should be saved.
+    * @param participantNameToNumber A map of participant names to speaker numbers.
     * @throws PermissionException If there's a permission problem.
     * @throws SQLException If a database error occurs.
     * @throws ParseException Shouldn't be thrown, assuming annotation ids have been checked

@@ -32,10 +32,10 @@ import nzilbb.configure.ParameterSet;
  * Interface for serializing a graph to streams of data.
  * <p>Serialization takes place in the following phases:
  * <ol>
- *  <li>Configure serializer using {@link #configure(ParameterSet)}</li>
+ *  <li>Configure serializer using {@link #configure(ParameterSet,Schema)}</li>
  *  <li>Determine which (if any) layers are required for the serialization by calling
  *   {@link #getRequiredLayers()}, which returns a list of layer IDs.</li>
- *  <li>Serialize the graph using {@link #serialize()}</li>
+ *  <li>Serialize the graph using {@link #serialize(Graph[])}</li>
  *  <li>Possibly display or log warnings returned by {@link #getWarnings()}</li>
  * </ol>
  * @author Robert Fromont robert@fromont.net.nz
@@ -80,7 +80,7 @@ public interface ISerializer
     *  (e.g. XWaves, EmuR), which is why this method returns a list. There are formats that
     *  are capable of storing multiple transcripts in the same file (e.g. AGTK, Transana XML
     *  export), which is why this method accepts a list.
-    * @param graph The graph to serialize.
+    * @param graphs The graphs to serialize.
     * @return A list of named streams that contain the serialization in the given format. 
     * @throws SerializerNotConfiguredException if the object has not been configured.
     * @throws SerializationException if errors occur during deserialization.
@@ -89,7 +89,7 @@ public interface ISerializer
       throws SerializerNotConfiguredException, SerializationException;
 
    /**
-    * Returns any warnings that may have arisen during the last execution of {@link #deserialize()}.
+    * Returns any warnings that may have arisen during the last execution of {@link #serialize(Graph[])}.
     * @return A possibly empty list of warnings.
     */
    public String[] getWarnings();

@@ -110,7 +110,7 @@ public class Unzipper extends JSONzip {
      *
      * @param width The width of the pad field in bits.
      * @return true if all of the padding bits were zero.
-     * @throws JSONException
+     * @throws JSONException On error.
      */
     public boolean pad(int width) throws JSONException {
         try {

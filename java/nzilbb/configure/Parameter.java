@@ -88,7 +88,7 @@ public class Parameter
    /**
     * The type of the parameter.
     * @see #getType()
-    * @see #setType(String)
+    * @see #setType(Class)
     */
    protected Class type;
    /**
@@ -141,7 +141,7 @@ public class Parameter
    /**
     * A list of possible values for {@link #value}, or null if the possible values is not a closed set.
     * @see #getPossibleValues()
-    * @see #setPossibleValues(Vector)
+    * @see #setPossibleValues(Collection)
     */
    protected Collection possibleValues;
    /**
@@ -259,9 +259,9 @@ public class Parameter
    /**
     * Constructor from attributes.
     * @param name The paramater's name.
+    * @param type The type of the parameter.
     * @param label A label that might be presented to a user.
     * @param hint A text hint that might be displayed to a user.
-    * @param type The type of the parameter.
     */
    public Parameter(String name, Class type, String label, String hint)
    {
@@ -273,8 +273,8 @@ public class Parameter
    /**
     * Constructor from attributes.
     * @param name The paramater's name.
+    * @param type The type of the parameter.
     * @param label A label that might be presented to a user.
-    * @param hint A text hint that might be displayed to a user.
     */
    public Parameter(String name, Class type, String label)
    {
@@ -296,7 +296,7 @@ public class Parameter
    
    /**
     * Add a value to {@link #possibleValues}.
-    * @param value
+    * @param value The possible value to add.
     */
    @SuppressWarnings("unchecked")
    public void addPossibleValue(Object value)
@@ -311,8 +311,8 @@ public class Parameter
     * of this method is the same as invoking <code>bean.setFoo("bar")</code>.
     * @param bean The object whose bean attribute should be set.
     * @throws NoSuchMethodException If the bean has no setter named after {@link #name}.
-    * @throws SecurityException 
-    * @throws InvocationTargetException 
+    * @throws SecurityException On error.
+    * @throws InvocationTargetException On error.
     * @throws IllegalAccessException If the setter is no <code>public</code>.
     */
    public void apply(Object bean)

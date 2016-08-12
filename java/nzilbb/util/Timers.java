@@ -78,7 +78,7 @@ public class Timers
    
    /**
     * Start a timer.
-    * @param id
+    * @param id The ID of the timer.
     * @return The current time.
     */
    public long start(String id)
@@ -90,7 +90,7 @@ public class Timers
 
    /**
     * Ends a timer and adds the duration to the total for the given ID.
-    * @param id
+    * @param id The ID of the timer.
     * @return Duration for this timer.
     */
    public long end(String id)

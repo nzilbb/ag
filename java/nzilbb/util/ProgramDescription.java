@@ -24,7 +24,7 @@ package nzilbb.util;
 import java.lang.annotation.*;
 
 /**
- * Annotation for a {@link UtilityApp} - used to inform command-line and applet parameter interpretation, and to product usage information.
+ * Annotation for a {@link CommandLineProgram} or {@link GuiProgram} - used to inform command-line and applet parameter interpretation, and to product usage information.
  * @author Robert Fromont robert@fromont.net.nz
  */
 @Documented
@@ -32,8 +32,14 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ProgramDescription
 {
-   /** 'Usage' description of the application */
+   /**
+    * 'Usage' description of the application.
+    * @return 'Usage' description of the application.
+    */
    String value();
-   /** Arguments to show in usage information */
+   /**
+    * Arguments to show in usage information.
+    * @return Arguments to show in usage information.
+    */
    String arguments() default "";
 } // end of class Switch
