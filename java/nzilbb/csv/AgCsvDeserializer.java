@@ -29,6 +29,7 @@ import java.util.LinkedHashSet;
 import org.apache.commons.csv.*; 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.IOException;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
@@ -219,10 +220,11 @@ public class AgCsvDeserializer
     * @param streams A list of named streams that contain all the transcription/annotation data required.
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of parameters that require setting before {@link IDeserializer#deserialize()} can be invoked. This may be an empty list, and may include parameters with the value already set to a workable default. If there are parameters, and user interaction is possible, then the user may be presented with an interface for setting/confirming these parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
-    * @throws Exception If the stream could not be loaded.
+    * @throws SerializationException If the graph could not be loaded.
+    * @throws IOException On IO error.
     */
    @SuppressWarnings({"rawtypes", "unchecked"})
-   public ParameterSet load(NamedStream[] streams, Schema schema) throws Exception
+   public ParameterSet load(NamedStream[] streams, Schema schema) throws IOException, SerializationException
    {
       ParameterSet parameters = new ParameterSet();
 

@@ -22,6 +22,7 @@
 package nzilbb.ag.serialize;
 
 import java.util.Vector;
+import java.io.IOException;
 import nzilbb.ag.Graph;
 import nzilbb.ag.Schema;
 import nzilbb.ag.serialize.util.NamedStream;
@@ -38,6 +39,7 @@ import nzilbb.configure.ParameterSet;
  *  <li>Generation graph(s) using {@link #deserialize()}</li>
  *  <li>Possibly display or log warnings returned by {@link #getWarnings()}</li>
  * </ol>
+ * TODO it should be possible to not start with a schema.
  * @author Robert Fromont robert@fromont.net.nz
  */
 public interface IDeserializer
@@ -77,9 +79,10 @@ public interface IDeserializer
     *  already set to a workable default. If there are parameters, and user interaction is
     *  possible, then the user may be presented with an interface for setting/confirming these
     *  parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
-    * @throws Exception If the graph could not be loaded.
+    * @throws SerializationException If the graph could not be loaded.
+    * @throws IOException On IO error.
     */
-   public ParameterSet load(NamedStream[] streams, Schema schema) throws Exception;
+   public ParameterSet load(NamedStream[] streams, Schema schema) throws SerializationException, IOException;
 
    /**
     * Sets parameters for a given deserialization operation, after loading the serialized form

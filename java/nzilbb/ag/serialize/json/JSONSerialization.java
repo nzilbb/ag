@@ -22,6 +22,7 @@
 package nzilbb.ag.serialize.json;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -136,9 +137,10 @@ public class JSONSerialization
     *  already set to a workable default. If there are parameters, and user interaction is
     *  possible, then the user may be presented with an interface for setting/confirming these
     *  parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
-    * @throws Exception If the graph could not be loaded.
+    * @throws SerializationException If the graph could not be loaded.
+    * @throws IOException On IO error.
     */
-   public ParameterSet load(NamedStream[] streams, Schema schema) throws Exception
+   public ParameterSet load(NamedStream[] streams, Schema schema) throws IOException, SerializationException
    {
       warnings = new Vector<String>();
       ParameterSet parameters = new ParameterSet();

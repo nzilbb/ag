@@ -236,6 +236,9 @@ public class TestJSONSerialization
       Graph[] graphs = s.deserialize();
       Graph d = graphs[0];
 
+      assertEquals("Ensure deserialized graph has no changes", 
+		   0, d.getChanges().size());
+
       // compare d with g
       
       // attributes
