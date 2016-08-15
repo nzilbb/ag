@@ -52,10 +52,20 @@ public class TestMerger
       File f = new File(getDir(), "identity.json");
       
       Graph originalGraph = loadGraphFromJSON(f, schema);
-      Graph editedGraph = loadGraphFromJSON(f, schema);
 
-      Merger m = new Merger(editedGraph);
-//      m.setDebug(true);
+      Merger m = new Merger();
+
+      try
+      {
+	 Vector<Change> changes = m.transform(originalGraph);
+	 fail("Doesn't throw exception when editedGraph is unset: " + changes);
+      }
+      catch(TransformationException exception)
+      {  // TransformationException should be thrown
+      }
+      
+      m.setEditedGraph(loadGraphFromJSON(f, schema));
+      m.setDebug(true);
       m.setValidator(null);
 
       try

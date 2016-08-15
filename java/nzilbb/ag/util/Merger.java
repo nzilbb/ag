@@ -485,6 +485,8 @@ public class Merger
       if (debug) setLog(new Vector<String>());
       setErrors(new Vector<String>());
       schema = graph.getSchema();
+      if (graph == editedGraph) return changes;
+      if (editedGraph == null) throw new TransformationException(this, "Edited graph is no set.", new NullPointerException());
 
       // TODO maybe generated dummy turns in editedGraph
       // TODO maybe generated dummy participants in editedGraph
@@ -502,6 +504,7 @@ public class Merger
       } // next layer
 
       // phase 1. - map annotations in graph to annotations in editedGraph horizontally
+      log("phase 1: map annotations");
 
       // map graphs together manually, to help top-level parent determination
       setCounterparts(graph, editedGraph); 
@@ -520,6 +523,7 @@ public class Merger
       } // next layer
 
       // phase 2. - reconcile unmapped annotations
+      log("phase 2: reconcile unmapped annotations");
       
       for (Layer layer : topDownLayersInEditedGraph)
       {
@@ -528,6 +532,7 @@ public class Merger
       } // next layer
 
       // phase 3. - compute label deltas
+      log("phase 3: label deltas");
 
       for (Layer layer : topDownLayersInEditedGraph)
       {
@@ -536,6 +541,7 @@ public class Merger
       } // next layer
 
       // phase 4. - compute anchor deltas horizontally
+      log("phase 4: anchor deltas");
 
       // construct a bottom up list of layers, to ensure children unshare from parents, 
       // not vice-versa
@@ -568,6 +574,7 @@ public class Merger
       } // next layer
 
       // phase 5. - check new order by offset, and check new containment
+      log("phase 6: check hierarchy");
 
       // in this phase out-of-order children are detected and fixed
       // also the edited t-including of children is checked in the original graph, and
@@ -583,9 +590,14 @@ public class Merger
 
       if (validator != null)
       {
+	 log("phase 6: validate");
 	 validator.setDebug(getDebug());
 	 changes.addAll(
 	    validator.transform(graph));
+      }
+      else
+      {
+	 log("phase 6: no validator");
       }
 
       // remove any new but unreferenced anchors
