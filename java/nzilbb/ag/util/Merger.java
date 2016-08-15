@@ -307,7 +307,8 @@ public class Merger
 		  String s1 = a1.getLabel().replaceAll("[^\\p{javaLetter}\\p{javaDigit}]","").toLowerCase();
 		  String s2 = a2.getLabel().replaceAll("[^\\p{javaLetter}\\p{javaDigit}]","").toLowerCase();
 		  if (s1.length() <= 0 || s2.length() <= 0 
-		      || a1.getLayer().get("@type").equals("D")) // phonological layer TODO formalise layer types
+		      || (a1.getLayer().containsKey("@type") 
+			  && a1.getLayer().get("@type").equals("D"))) // phonological layer TODO formalise layer types
 		  {
 		     s1 = a1.getLabel();
 		     s2 = a2.getLabel(); // for all-punctuation annotations
@@ -2933,7 +2934,7 @@ public class Merger
       if (debug)
       {
 	 log.add(message);
-	 System.out.println(message);
+//	 System.out.println(message);
       }
    } // end of log()
 
