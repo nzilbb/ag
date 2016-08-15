@@ -306,6 +306,9 @@ public class TestJSONSerialization
 		      gAnnotation.get(Constants.CONFIDENCE), dAnnotation.get(Constants.CONFIDENCE));
 	 assertEquals(gAnnotation.getId(), 
 		      gAnnotation.get(Constants.COMMENT), dAnnotation.get(Constants.COMMENT));
+
+	 assertEquals(gAnnotation.getId(), 
+		      gAnnotation.getParentId(), dAnnotation.getParentId());
       } // next layer
       assertEquals("No extra annotations: " + d.getAnnotationsById().values(),
 		   g.getAnnotationsById().size(), d.getAnnotationsById().size());

@@ -239,7 +239,7 @@ public class JSONSerialization
 	 {
 	    if (json.has(topLevelId))
 	    {
-	       jsonToAnnotations(graph, topLevelId, json.getJSONArray(topLevelId));
+	       jsonToAnnotations(graph, topLevelId, graph.getId(), json.getJSONArray(topLevelId));
 	    }
 	 } // next top level layer
 	 return graph;
@@ -361,17 +361,18 @@ public class JSONSerialization
     * Recursively converts a JSON array of annotation definitions to Annotations, which are added to the graph.
     * @param graph The graph to add the annotations to.
     * @param layerId The ID of the layer to which the annotations should be added.
+    * @param parentId The ID of the parent of the annotations.
     * @param json JSON array
     * @throws SerializationException On error.
     */
-   protected void jsonToAnnotations(Graph graph, String layerId, JSONArray json)
+   protected void jsonToAnnotations(Graph graph, String layerId, String parentId, JSONArray json)
       throws SerializationException
    {
       try
       {
 	 for (int i = 0; i < json.length(); i++)
 	 {
-	    jsonToAnnotation(graph, layerId, json.getJSONObject(i));
+	    jsonToAnnotation(graph, layerId, parentId, json.getJSONObject(i));
 	 } // next annotation
       }
       catch (JSONException x)
@@ -384,17 +385,19 @@ public class JSONSerialization
     * Converts a JSON object to an Annotation, and recursively creates child annotations.
     * @param graph The graph to add the annotation to.
     * @param layerId The ID of the layer to which the annotation belongs.
+    * @param parentId The ID of the parent of the annotations.
     * @param json JSON object
     * @return The anchor
     * @throws SerializationException On error.
     */
-   protected Annotation jsonToAnnotation(Graph graph, String layerId, JSONObject json)
+   protected Annotation jsonToAnnotation(Graph graph, String layerId, String parentId, JSONObject json)
     throws SerializationException
    {
       try
       {
 	 Annotation a = new Annotation();
 	 a.setLayerId(layerId);
+	 a.setParentId(parentId);
 	 if (json.has("id")) 
 	    a.setId(json.getString("id"));
 	 if (json.has("label")) 
@@ -414,7 +417,7 @@ public class JSONSerialization
 	 {
 	    if (json.has(childLayerId))
 	    {
-	       jsonToAnnotations(graph, childLayerId, json.getJSONArray(childLayerId));
+	       jsonToAnnotations(graph, childLayerId, a.getId(), json.getJSONArray(childLayerId));
 	    }
 	 } // next top level layer
 	 return a;
