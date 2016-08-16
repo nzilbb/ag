@@ -27,10 +27,17 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FilenameFilter;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.util.Vector;
 import java.util.Iterator;
+import java.util.TreeSet;
+import java.util.List;
 import nzilbb.configure.ParameterSet;
 import nzilbb.configure.Parameter;
 import nzilbb.ag.util.*;
@@ -41,6 +48,8 @@ import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.ag.serialize.json.*;
 import nzilbb.ag.*;
+import nzilbb.editpath.MinimumEditPath;
+import nzilbb.editpath.EditStep;
 
 public class TestMerger
 {      
@@ -73,16 +82,164 @@ public class TestMerger
 	 Vector<Change> changes = m.transform(originalGraph);
 	 if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
 	 assertEquals("No changes - " + changes, 0, changes.size());
-
-	 assertEquals("Maxwell Smart", originalGraph.getAnnotation("em_11_0").getParentId());
-	 assertEquals(originalGraph.getAnnotation("Maxwell Smart"), originalGraph.getAnnotation("em_11_0").getParent());
-
       }
       catch(TransformationException exception)
       {
 	 fail(exception.toString());
       }
 
+   }
+
+   @Test public void identityMergeFragment() 
+      throws Exception
+   {
+      Schema schema = defaultSchema();
+
+      File f = new File(getDir(), "identity__10.000-70.000.json");
+      
+      Merger m = new Merger(loadGraphFromJSON(f, schema));
+      //m.setDebug(true);
+      m.setValidator(null);
+
+      Graph originalGraph = loadGraphFromJSON(f, schema);
+
+      try
+      {
+	 Vector<Change> changes = m.transform(originalGraph);
+	 if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
+	 assertEquals("No changes - " + changes, 0, changes.size());
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+
+   }
+
+   /**
+    * Basic edit operations that (mostly) affect a single layer.
+    * <ol>
+    *  <li>Label changes, both below and above original status</li>
+    *  <li>Annotation insertion</li>
+    *  <li>Annotation deletion</li>
+    *  <li>Anchor offset changes, both below and above original status</li>
+    *  <li>Connected graphs that become disconnected, on the same layer</li>
+    *  <li>Disconnected graphs that become connected, on the same layer</li>
+    *  <li>Annotation transposition</li>
+    *  <li>Merge graphs with no defining annotation</li>
+    *  <li>Merge graphs with partial hierarchy - e.g. an utterance - and check for correct ordinals</li>
+    * </ol>
+    */
+   @Test public void fragBasic()
+   {
+      fragmentTests("frag", "Basic", false);
+   }
+
+   /**
+    * Standardised method for running graph fragment tests based on files in the test directory.
+    * @param sPrefix The filename 'prefix' to use - not literally a prefix, as the test number appears
+    *                before it in the file name.
+    */ 
+   public void fragmentTests(String sDir, final String sPrefix, boolean bVerbosity)
+   {
+      // get a sorted list of tests
+      File dir = getDir();
+      File subdir = new File(dir, sDir);
+      File[] afTests = subdir.listFiles(new FilenameFilter()
+	 {
+	    public boolean accept(File dir, String name)
+	    {
+	       return name.matches("^\\d+-"+sPrefix+".*\\.json$");
+	    }
+	 });
+      TreeSet<String> fragments = new TreeSet<String>();
+      for (File fTest : afTests) fragments.add(fTest.getName().replace(".json",""));
+      // run the tests
+      for (String fragmentName : fragments)
+      {
+	 System.out.println("Test: " + fragmentName);
+	 Schema schema = defaultSchema();
+	 File fOriginal = new File(subdir, fragmentName + ".json");
+	 try
+	 {
+	    Graph originalGraph = loadGraphFromJSON(fOriginal, schema);
+	    File fEdited = new File(subdir, "edited_" + fragmentName + ".json");
+	    Graph editedGraph = loadGraphFromJSON(fEdited, schema);
+	    Merger m = new Merger(editedGraph);
+	    m.setDebug(bVerbosity);
+	    try
+	    {
+	       Vector<Change> changes = m.transform(originalGraph);
+	    }
+	    catch(TransformationException exception)
+	    {
+	       StringWriter sw = new StringWriter();
+	       PrintWriter pw = new PrintWriter(sw);
+	       exception.printStackTrace(pw);
+	       try { sw.close(); }
+	       catch(IOException x) {}
+	       pw.close();	
+	       fail(fragmentName + ": merge() failed" + exception.toString() + "\n" + sw);
+	    }
+	    if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
+
+	    // save the actual result
+	    File fActual = new File(subdir, "actual_" + fragmentName + ".json");
+	    saveGraphToJSON(fActual, originalGraph);
+	    
+	    // compare with what we expected
+	    Vector<String> actualLines = new Vector<String>();
+	    BufferedReader reader = new BufferedReader(new FileReader(fActual));
+	    String line = reader.readLine();
+	    while (line != null)
+	    {
+	       actualLines.add(line);
+	       line = reader.readLine();
+	    }
+	    File fExpected = new File(subdir, "expected_" + fragmentName + ".json");
+	    Vector<String> expectedLines = new Vector<String>();
+	    reader = new BufferedReader(new FileReader(fExpected));
+	    line = reader.readLine();
+	    while (line != null)
+	    {
+	       expectedLines.add(line);
+	       line = reader.readLine();
+	    }
+	    MinimumEditPath<String> comparator = new MinimumEditPath<String>();
+	    List<EditStep<String>> path = comparator.minimumEditPath(expectedLines, actualLines);
+	    String differences = "";
+	    for (EditStep<String> step : path)
+	    {
+	       switch (step.getOperation())
+	       {
+		  case CHANGE:
+		     differences += "\n"+fExpected.getPath()+":"+(step.getFromIndex()+1)+": Expected:\n" 
+			+ step.getFrom() 
+			+ "\n"+fActual.getPath()+":"+(step.getToIndex()+1)+": Found:\n" + step.getTo();
+		     break;
+		  case DELETE:
+		     differences += "\n"+fExpected.getPath()+":"+(step.getFromIndex()+1)+": Deleted:\n" 
+			+ step.getFrom();
+		     break;
+		  case INSERT:
+		     differences += "\n"+fActual.getPath()+":"+(step.getToIndex()+1)+": Inserted:\n" 
+			+ step.getTo();
+		     break;
+	       }
+	    } // next step
+	    if (differences.length() > 0) fail(differences);	 
+	 }
+	 catch(Exception exception)
+	 {
+	    StringWriter sw = new StringWriter();
+	    PrintWriter pw = new PrintWriter(sw);
+	    exception.printStackTrace(pw);
+	    try { sw.close(); }
+	    catch(IOException x) {}
+	    pw.close();	
+	    fail(fragmentName + ": failed" + exception.toString() + "\n" + sw);
+	 }
+      } // next test
    }
    
    /**
@@ -199,6 +356,28 @@ public class TestMerger
       s.setParameters(parameters); // run with default values
       // deserialize      
       return s.deserialize()[0];
+   } // end of loadGraphFromJSON()
+
+   /**
+    * Loads an annotation graph from a JSON file.
+    * @param file The JSON file.
+    * @param graph The graph to save.
+    * @return The annotation graph represented by the file.
+    * @throws SerializationException If the graph could not be loaded.
+    * @throws SerializerNotConfiguredException
+    * @throws IOException On IO error.
+    */
+   public void saveGraphToJSON(File file, Graph graph)
+      throws IOException, SerializationException, SerializerNotConfiguredException
+   {
+      // create deserializer
+      JSONSerialization s = new JSONSerialization();
+      // configure it with its default options
+      s.configure(s.configure(new ParameterSet(), graph.getSchema()), graph.getSchema());
+      // serialize      
+      NamedStream[] streams = s.serialize(Utility.OneGraphArray(graph));
+      streams[0].setName(file.getName());
+      streams[0].save(file.getParentFile());
    } // end of loadGraphFromJSON()
    
 
