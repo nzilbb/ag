@@ -490,9 +490,8 @@ public class JSONSerialization
 	    writer.println(indent(1) + "},");
 	    
 	    // anchors
-	    LinkedHashMap<String,Anchor> anchors = graph.getAnchors();
 	    writer.println(indent(1) + "\"anchors\":{");
-	    for (Anchor anchor : anchors.values())
+	    for (Anchor anchor : graph.getAnchorsOrderedByStructure())
 	    {
 	       serializeAnchor(writer, 2, anchor);
 	    } // next anchor
