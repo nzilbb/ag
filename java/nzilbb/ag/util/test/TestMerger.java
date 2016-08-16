@@ -65,14 +65,18 @@ public class TestMerger
       }
       
       m.setEditedGraph(loadGraphFromJSON(f, schema));
-      m.setDebug(true);
+      //m.setDebug(true);
       m.setValidator(null);
 
       try
       {
 	 Vector<Change> changes = m.transform(originalGraph);
-	 assertEquals("No changes - " + changes, 0, changes.size());
 	 if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
+	 assertEquals("No changes - " + changes, 0, changes.size());
+
+	 assertEquals("Maxwell Smart", originalGraph.getAnnotation("em_11_0").getParentId());
+	 assertEquals(originalGraph.getAnnotation("Maxwell Smart"), originalGraph.getAnnotation("em_11_0").getParent());
+
       }
       catch(TransformationException exception)
       {

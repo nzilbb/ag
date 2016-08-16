@@ -2130,7 +2130,12 @@ public class Merger
 	 // (transcription/segment, or utterance/transcription)
 	 // not between relationships of the same scope (turn/utterance)
 	 // ...and that this only affects saturated relationships
-	 boolean bNoInterSharingForChildren = !layer.getSaturated();
+	 boolean bNoInterSharingForChildren = layer.getSaturated() 
+	    && layer.getAlignment() != Constants.ALIGNMENT_NONE
+	    // essentially targeting segment and utterance: TODO maybe remove these?
+	    // && (parentLayerId.equals(schema.getWordLayerId())
+	    // 	|| parentLayerId.equals(schema.getTurnLayerId()))
+	    ;
 	 boolean editGraphHasChildLayer = editedGraph.getLayer(layerId) != null;
 	 HashSet<String> bothLayers = new HashSet<String>();
 	 bothLayers.add(layerId);
@@ -2158,7 +2163,7 @@ public class Merger
 	    SortedSet<Annotation> children = byOrdinalOrOffset;
 	    // special case:
 	    // if the child layer is in the original only
-	    if (editGraphHasChildLayer
+	    if (!editGraphHasChildLayer
 		// and the relationship is saturated
 		&& layer.getSaturated())
 	    {
@@ -2221,7 +2226,9 @@ public class Merger
 			   + logAnnotation(childrenStartingHere.elementAt(0)) 
 			   + " and " + logAnnotation(childrenStartingHere.elementAt(1));
 		     else if (childrenEndingHere.size() == 1
-			      && childrenEndingHere.firstElement() != anLastOriginalParentsLastChild) 
+			      && childrenEndingHere.firstElement() != anLastOriginalParentsLastChild
+			      // and not sharing start with parent
+			      && !anOriginalParent.getStartId().equals(anOriginalChild.getStartId())) 
 			sNewAnchorReason = "first child shares anchor with other child annotation end";
 		     else if (childrenEndingHere.size() > 2) 
 			sNewAnchorReason = "first child shares anchor with multiple child annotation ends";
