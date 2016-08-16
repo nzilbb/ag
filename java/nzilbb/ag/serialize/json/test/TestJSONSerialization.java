@@ -114,6 +114,8 @@ public class TestJSONSerialization
       who1.put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
       Annotation turn1 = new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "who1");
       turn1.put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+      Annotation line1 = new Annotation("line1", "john smith", "utterance", "turnStart", "turnEnd", "turn1");
+      line1.put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
 
       Annotation the = new Annotation("word1", "the", "word", "a1", "a2", "turn1");
       the.put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
@@ -148,6 +150,7 @@ public class TestJSONSerialization
 
       g.addAnnotation(who1);
       g.addAnnotation(turn1);
+      g.addAnnotation(line1);
       
       g.addAnnotation(the);
       g.addAnnotation(quick);
@@ -313,6 +316,128 @@ public class TestJSONSerialization
       assertEquals("No extra annotations: " + d.getAnnotationsById().values(),
 		   g.getAnnotationsById().size(), d.getAnnotationsById().size());
 
+   }
+
+   @Test public void childOrder() 
+      throws Exception
+   {
+      Graph g = new Graph();
+      g.setId("test");
+
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("topic", "Topics", Constants.ALIGNMENT_INTERVAL, 
+		   true, // peers
+		   false, // peersOverlap
+		   false), // saturated
+	 new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+		   true, // peers
+		   true, // peersOverlap
+		   true), // saturated
+	 new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   false, // saturated
+		   "who", // parentId
+		   true), // parentIncludes
+	 new Layer("utterance", "Utterances", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   true, // saturated
+		   "turn", // parentId
+		   true), // parentIncludes
+	 new Layer("phrase", "Phrase", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   false, // saturated
+		   "turn", // parentId
+		   true), // parentIncludes
+	 new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   false, // saturated
+		   "turn", // parentId
+		   true), // parentIncludes
+	 new Layer("pos", "Part of speec", Constants.ALIGNMENT_NONE,
+		   false, // peers
+		   false, // peersOverlap
+		   true, // saturated
+		   "word", // parentId
+		   true), // parentIncludes
+	 new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   true, // saturated
+		   "word", // parentId
+		   true) // parentIncludes
+	 );      
+
+      File dir = getDir();
+
+      // graph with shuffled layers
+      File fShuffled = new File(dir, "test_shuffled.json");
+
+      // create deserializer
+      JSONSerialization s = new JSONSerialization();
+
+      // double-call to configure is sufficient
+      assertEquals(0, s.configure(s.configure(new ParameterSet(), schema), schema).size());
+
+      // deserialize
+      ParameterSet parameters = s.load(Utility.OneNamedStreamArray(new NamedStream(fShuffled)), schema);
+      s.setParameters(parameters); // run with default values
+      Graph[] graphs = s.deserialize();
+      Graph d = graphs[0];
+
+      NamedStream[] streams = s.serialize(Utility.OneGraphArray(d));
+      File fCorrected = new File(dir, "test_corrected.json");
+      assertEquals(1, streams.length);
+      streams[0].setName(fCorrected.getName());
+      streams[0].save(dir);
+
+      // compare corrected with expected
+      File fExpected = new File(dir, "test_expected.json");
+
+      Vector<String> actualLines = new Vector<String>();
+      BufferedReader reader = new BufferedReader(new FileReader(fCorrected));
+      String line = reader.readLine();
+      while (line != null)
+      {
+	 actualLines.add(line);
+	 line = reader.readLine();
+      }
+      Vector<String> expectedLines = new Vector<String>();
+      reader = new BufferedReader(new FileReader(fExpected));
+      line = reader.readLine();
+      while (line != null)
+      {
+	 expectedLines.add(line);
+	 line = reader.readLine();
+      }
+      MinimumEditPath<String> comparator = new MinimumEditPath<String>();
+      List<EditStep<String>> path = comparator.minimumEditPath(expectedLines, actualLines);
+      String differences = "";
+      for (EditStep<String> step : path)
+      {
+	 switch (step.getOperation())
+	 {
+	    case CHANGE:
+	       differences += "\n"+fExpected.getPath()+":"+(step.getFromIndex()+1)+": Expected:\n" 
+		  + step.getFrom() 
+		  + "\n"+fCorrected.getPath()+":"+(step.getToIndex()+1)+": Found:\n" + step.getTo();
+	       break;
+	    case DELETE:
+	       differences += "\n"+fExpected.getPath()+":"+(step.getFromIndex()+1)+": Deleted:\n" 
+		  + step.getFrom();
+	       break;
+	    case INSERT:
+	       differences += "\n"+fCorrected.getPath()+":"+(step.getToIndex()+1)+": Inserted:\n" 
+		  + step.getTo();
+	       break;
+	 }
+      } // next step
+      if (differences.length() > 0) fail(differences);
+      
    }
 
    /**

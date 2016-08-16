@@ -18,16 +18,16 @@
               "children":{
                 "phrase":{"description":"Phrase", "alignment":2,
                   "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,},
-                "utterance":{"description":"Utterances", "alignment":2,
-                  "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true,},
                 "word":{"description":"Words", "alignment":2,
                   "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
                   "children":{
-                    "phone":{"description":"Phones", "alignment":2,
-                      "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true,},
                     "pos":{"description":"Part of speec", "alignment":0,
                       "peers":false, "peersOverlap":false, "parentIncludes":true, "saturated":true,},
+                    "phone":{"description":"Phones", "alignment":2,
+                      "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true,},
                   }},
+                "utterance":{"description":"Utterances", "alignment":2,
+                  "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true,},
               }},
           }},
       }},
@@ -49,11 +49,6 @@
     {"id":"who1",	"label":"john smith",	"startId":"turnStart",	"endId":"turnEnd",	"confidence":100,
       "turn":[
         {"id":"turn1",	"label":"john smith",	"startId":"turnStart",	"endId":"turnEnd",	"confidence":100,
-          "phrase":[
-            {"id":"phrase1",	"label":"AP",	"startId":"a2",	"endId":"a4",	"confidence":50,},
-            {"id":"phrase2",	"label":"NP",	"startId":"a1",	"endId":"a5",	"confidence":50,},],
-          "utterance":[
-            {"id":"line1",	"label":"john smith",	"startId":"turnStart",	"endId":"turnEnd",	"confidence":100,},],
           "word":[
             {"id":"word1",	"label":"the",	"startId":"a1",	"endId":"a2",	"confidence":100,	"comment":"word comment",
               "phone":[
@@ -72,5 +67,10 @@
             {"id":"word3",	"label":"brown",	"startId":"a3",	"endId":"a4",	"confidence":100,},
             {"id":"word4",	"label":"fox",	"startId":"a4",	"endId":"a5",	"confidence":100,
               "pos":[
-                {"id":"pos3",	"label":"N",	"startId":"a4",	"endId":"a5",	"confidence":50,},],},],},],},],
+                {"id":"pos3",	"label":"N",	"startId":"a4",	"endId":"a5",	"confidence":50,},],},],
+          "utterance":[
+            {"id":"line1",	"label":"john smith",	"startId":"turnStart",	"endId":"turnEnd",	"confidence":100,},],
+          "phrase":[
+            {"id":"phrase1",	"label":"AP",	"startId":"a2",	"endId":"a4",	"confidence":50,},
+            {"id":"phrase2",	"label":"NP",	"startId":"a1",	"endId":"a5",	"confidence":50,},],},],},],
 }

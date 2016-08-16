@@ -31,6 +31,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import java.util.Vector;
 import java.util.LinkedHashMap;
+import java.util.TreeSet;
 import org.json.*;
 import nzilbb.util.TempFileInputStream;
 import nzilbb.configure.Parameter;
@@ -483,7 +484,7 @@ public class JSONSerialization
 	    if (schema.getUtteranceLayerId() != null)
 	       writer.println(keyValue(2, "utteranceLayerId", schema.getUtteranceLayerId()));
 	    if (schema.getWordLayerId() != null)
-	       writer.println(keyValue(2, "wordutteranceLayerId", schema.getWordLayerId()));
+	       writer.println(keyValue(2, "wordLayerId", schema.getWordLayerId()));
 	    serializeLayer(writer, 2, schema.getRoot());
 	    writer.println();
 	    writer.println(indent(1) + "},");
@@ -497,7 +498,8 @@ public class JSONSerialization
 	    } // next anchor
 	    writer.println(indent(1) + "},");
 
-	    for (String layerId : schema.getRoot().getChildren().keySet())
+	    // layers in predictable (alphabetical) order
+	    for (String layerId : new TreeSet<String>(schema.getRoot().getChildren().keySet()))
 	    {
 	       serializeAnnotations(writer, 1, layerId, graph.getAnnotations(layerId));
 	    }
@@ -548,9 +550,10 @@ public class JSONSerialization
       {
 	 writer.println();
 	 writer.print(indent(indent+1) + "\"children\":{");
-	 for (Layer child : layer.getChildren().values())
+	 // layers in predictable (alphabetical) order
+	 for (String childId : new TreeSet<String>(layer.getChildren().keySet()))
 	 {
-	    serializeLayer(writer, indent+2, child);
+	    serializeLayer(writer, indent+2, layer.getChildren().get(childId));
 	 } // next child
 	 writer.println();
 	 writer.print(indent(indent+1) + "}");
@@ -630,7 +633,8 @@ public class JSONSerialization
 	 writer.print(keyValue(0, "comment", annotation.get("comment").toString()));
       }
       LinkedHashMap<String,Vector<Annotation>> childLayers = annotation.getAnnotations();
-      for (String layerId : childLayers.keySet())
+      // layers in predictable (alphabetical) order
+      for (String layerId : new TreeSet<String>(childLayers.keySet()))
       {
 	 Vector<Annotation> children = childLayers.get(layerId);
 	 writer.println();
