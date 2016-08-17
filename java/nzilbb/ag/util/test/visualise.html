@@ -67,6 +67,7 @@ function setLayerLevels(layers, level) {
 
 function loadGraph(f) {
   console.log("Load graph from " + f.name);
+  document.title = f.name;
   var reader = new FileReader();
 
   // Closure to capture the file information.
@@ -84,7 +85,6 @@ function loadGraph(f) {
 
 function visualiseAg(ag) {
   // assign levels to layers
-  document.title = ag.id;
   var level = 0;
   level = setLayerLevels(ag.layers.graph.children, 0);
   var yFactor = 1000/level;
@@ -97,7 +97,7 @@ function visualiseAg(ag) {
     nodeArray.push({
      id : a, 
      label: "[" + anchor.id + "]\n" + anchor.offset + "s",
-     title: "[" + anchor.id + "] " + anchor.offset + (anchor.confidence?" (" + anchor.confidence + "%)":""),
+     title: "[" + anchor.id + "] " + anchor.offset + (anchor.confidence?" (" + anchor.confidence + "%)":"") + (anchor.comment?" {" + anchor.comment + "}":""),
      x: anchor.offset * xFactor,
      y: level * yFactor,
      group: "anchor",
@@ -110,7 +110,7 @@ function visualiseAg(ag) {
     nodeArray.push({
      id : a, 
      label: "[" + annotation.id + "]\n" + annotation.label,
-     title: annotation.layerId + ": [" + annotation.id + "] " + annotation.label + (annotation.confidence?" (" + annotation.confidence + "%)":""),
+     title: annotation.layerId + ": [" + annotation.id + "] " + annotation.label + (annotation.confidence?" (" + annotation.confidence + "%)":"") + (annotation.comment?" {" + annotation.comment + "}":""),
      x: annotation.midpoint() * xFactor,
      y: annotation.layer.level * yFactor,
      group: annotation.layerId,

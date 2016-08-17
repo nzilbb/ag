@@ -130,15 +130,16 @@ public class TestMerger
     */
    @Test public void fragBasic()
    {
-      fragmentTests("frag", "Basic", false);
+      fragmentTests("frag", "Basic", "BasicWordInsert");
    }
 
    /**
     * Standardised method for running graph fragment tests based on files in the test directory.
-    * @param sPrefix The filename 'prefix' to use - not literally a prefix, as the test number appears
-    *                before it in the file name.
+    * @param sDir Subdirectory name
+    * @param sPrefix The filename 'prefix' to use - not literally a prefix, as the test number appears before it in the file name.
+    * @param logTestPrefix null, or a filename substring like "001" to identify a test for which to switch on debug logging.
     */ 
-   public void fragmentTests(String sDir, final String sPrefix, boolean bVerbosity)
+   public void fragmentTests(String sDir, final String sPrefix, String log)
    {
       // get a sorted list of tests
       File dir = getDir();
@@ -164,7 +165,7 @@ public class TestMerger
 	    File fEdited = new File(subdir, "edited_" + fragmentName + ".json");
 	    Graph editedGraph = loadGraphFromJSON(fEdited, schema);
 	    Merger m = new Merger(editedGraph);
-	    m.setDebug(bVerbosity);
+	    m.setDebug(log != null && fragmentName.indexOf(log) >= 0);
 	    try
 	    {
 	       Vector<Change> changes = m.transform(originalGraph);

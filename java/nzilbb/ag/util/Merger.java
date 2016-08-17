@@ -802,6 +802,9 @@ public class Merger
        // might need these later:
       String saturatedParentLayerId = layer.getSaturated()?layer.getParentId():null;
       String layerId = layer.getId();
+      HashSet<String> thisAndsaturatedParentLayerId = new HashSet<String>();
+      thisAndsaturatedParentLayerId.add(layerId);
+      if (saturatedParentLayerId != null) thisAndsaturatedParentLayerId.add(saturatedParentLayerId);
       
       // unmapped annotations of theirs are for addition
       Annotation anLastOriginal = null;
@@ -966,7 +969,7 @@ public class Merger
 			changeEndWithRelatedAnnotations(
 			   anPreviousEditedOther, start,
 			   // we don't re-link a related parent annotation - we might be inserting a new child
-			   saturatedParentLayerId);
+			   thisAndsaturatedParentLayerId);
 			break;
 		     }
 		  } // has counterpart
