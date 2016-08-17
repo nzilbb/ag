@@ -92,19 +92,32 @@ function visualiseAg(ag) {
   for (var a in ag.anchors) maxOffset = Math.max(maxOffset, ag.anchors[a].offset);
   var xFactor = 2000/maxOffset;
   var nodeArray = [];
+  // ensure simultaneous anchors aren't superimposed
+  var lastOffset = -1.0;
+  var nudge = 0;
+  var sortedAnchors = ag.getSortedAnchors();
+  for (var a in sortedAnchors) {
+    var anchor = sortedAnchors[a];
+    if (anchor.offset != lastOffset) nudge = 0;
+    anchor.nudge = nudge;
+    anchor.y = (level + (nudge++ / 3)) * yFactor;
+    lastOffset = anchor.offset;
+  }
+  // anchor nodes
   for (var a in ag.anchors) {
     var anchor = ag.anchors[a];
     nodeArray.push({
      id : a, 
      label: "[" + anchor.id + "]\n" + anchor.offset + "s",
      title: "[" + anchor.id + "] " + anchor.offset + (anchor.confidence?" (" + anchor.confidence + "%)":"") + (anchor.comment?" {" + anchor.comment + "}":""),
-     x: anchor.offset * xFactor,
-     y: level * yFactor,
+     x: (anchor.offset + (anchor.nudge/5)) * xFactor,
+     y: anchor.y,
      group: "anchor",
      level: level,
      color: "rgba("+(255-anchor.confidence)+","+(255-anchor.confidence)+","+(255-anchor.confidence)+",1)"
     });
   }
+  // annotation nodes
   for (var a in ag.annotations) {
     var annotation = ag.annotations[a];
     nodeArray.push({
