@@ -48,7 +48,7 @@ public class TestAgCsvDeserializer
 	 new Layer("transcript", "Words", 2, true, false, false, "turns", true),
 	 new Layer("orthography", "Orthography", 0, false, false, false, "transcript", true),
 	 new Layer("lexical", "Lexical", 0, false, false, false, "transcript", true), // not present
-	 new Layer("segments", "Phones", 2, true, false, false, "transcript", true)
+	 new Layer("segments", "Phones", 2, true, false, true, "transcript", true)
 	 );
       // access file
       NamedStream[] streams = { new NamedStream(new File(getDir(), "test.csv")) };
@@ -77,6 +77,22 @@ public class TestAgCsvDeserializer
       }
 
       assertEquals("test", g.getId());
+
+      // layers
+      for (Layer gLayer : g.getSchema().getLayers().values())
+      {
+	 Layer sLayer = schema.getLayer(gLayer.getId());
+	 System.out.println(gLayer.getId() + " " + gLayer.getSaturated());
+	 assertNotNull(gLayer.getId(), sLayer);
+	 assertEquals(sLayer.getId(), gLayer.getId());
+	 assertEquals(sLayer.getParentId(), gLayer.getParentId());
+	 assertEquals(sLayer.getDescription(), gLayer.getDescription());
+	 assertEquals(sLayer.getAlignment(), gLayer.getAlignment());
+	 assertEquals(sLayer.getPeers(), gLayer.getPeers());
+	 assertEquals(sLayer.getPeersOverlap(), gLayer.getPeersOverlap());
+	 assertEquals(sLayer.getParentIncludes(), gLayer.getParentIncludes());
+	 assertEquals(sLayer.getSaturated(), gLayer.getSaturated());
+      }
 
       // participants     
       Annotation[] who = g.annotations("who");
@@ -200,7 +216,7 @@ public class TestAgCsvDeserializer
 	 new Layer("turns", "Speaker turns", 2, true, false, false, "who", true),
 	 new Layer("utterances", "Utterances", 2, true, false, true, "turns", true),
 	 new Layer("transcript", "Words", 2, true, false, false, "turns", true),
-	 new Layer("segments", "Phones", 2, true, false, false, "transcript", true)
+	 new Layer("segments", "Phones", 2, true, false, true, "transcript", true)
 	 );
       // access file
       NamedStream[] streams = { new NamedStream(new File(getDir(), "test__10.000-70.000.csv")) };

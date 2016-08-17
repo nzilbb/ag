@@ -275,6 +275,10 @@ public class AgCsvDeserializer
 	       layer.setPeers(false);
 	       layer.setSaturated(true);
 	    }
+	    else if (layerId == 1) // segments
+	    {
+	       layer.setSaturated(true);
+	    }
 	    layer.put("@layer_id", layerId);
 	    layer.put("@type", line.get(3));
 	    layer.put("@scope", line.get(4));
