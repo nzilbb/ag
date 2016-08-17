@@ -130,7 +130,7 @@ public class TestMerger
     */
    @Test public void fragBasic()
    {
-      fragmentTests("frag", "Basic", "BasicWordInsert");
+      fragmentTests("frag", "Basic", null);
    }
 
    /**
@@ -181,6 +181,7 @@ public class TestMerger
 	       fail(fragmentName + ": merge() failed" + exception.toString() + "\n" + sw);
 	    }
 	    if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
+	    originalGraph.commit();
 
 	    // save the actual result
 	    File fActual = new File(subdir, "actual_" + fragmentName + ".json");
