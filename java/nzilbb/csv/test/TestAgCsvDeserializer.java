@@ -36,7 +36,7 @@ import nzilbb.csv.*;
 
 public class TestAgCsvDeserializer
 {      
-   @Test public void deserialize() 
+   @Test public void deserializeGraph() 
       throws Exception
    {
       Schema schema = new Schema(
@@ -189,6 +189,102 @@ public class TestAgCsvDeserializer
       assertEquals("86-2-1", words[1].getLabel());
       assertEquals("86-2-2", words[2].getLabel());
 
+   }
+
+   @Test public void deserializeFragment() 
+      throws Exception
+   {
+      Schema schema = new Schema(
+	 "who", "turns", "utterances", "transcript",
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("turns", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("utterances", "Utterances", 2, true, false, true, "turns", true),
+	 new Layer("transcript", "Words", 2, true, false, false, "turns", true),
+	 new Layer("segments", "Phones", 2, true, false, false, "transcript", true)
+	 );
+      // access file
+      NamedStream[] streams = { new NamedStream(new File(getDir(), "test__10.000-70.000.csv")) };
+
+      // create deserializer
+      AgCsvDeserializer deserializer = new AgCsvDeserializer();
+
+      // configure it
+      ParameterSet defaultConfiguration = deserializer.configure(new ParameterSet(), schema);
+      deserializer.configure(defaultConfiguration, schema);
+
+      // load the stream
+      ParameterSet defaultParameters = deserializer.load(streams, schema);
+//      for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+
+      // configure the deserialization
+      deserializer.setParameters(defaultParameters);
+
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+      for (String warning : deserializer.getWarnings())
+      {
+	 System.out.println(warning);
+      }
+
+      assertEquals("test__10.000-70.000", g.getId());
+
+      // participants     
+      Annotation[] who = g.annotations("who");
+      assertEquals(1, who.length);
+      assertEquals("Maxwell Smart", who[0].getLabel());
+      assertEquals(g, who[0].getParent());
+
+      // turns
+      Annotation[] turns = g.annotations("turns");
+      assertEquals(1, turns.length);
+      assertEquals("em_11_0", turns[0].getId());
+      assertEquals("n_100", turns[0].getStartId());
+      assertEquals("n_700", turns[0].getEndId());
+      assertEquals(new Double(10.0), turns[0].getStart().getOffset());
+      assertEquals(new Double(70.0), turns[0].getEnd().getOffset());
+      assertEquals(who[0], turns[0].getParent());
+
+      // utterances
+      Annotation[] utterances = g.annotations("utterances");
+      assertEquals(2, utterances.length);
+      assertEquals("em_12_1", utterances[0].getId());
+      assertEquals("n_100", utterances[0].getStartId());
+      assertEquals("n_400", utterances[0].getEndId());
+      assertEquals(new Double(10.0), utterances[0].getStart().getOffset());
+      assertEquals(new Double(40.0), utterances[0].getEnd().getOffset());
+      assertEquals("Maxwell Smart", utterances[0].getLabel());
+      assertEquals(turns[0], utterances[0].getParent());
+
+      assertEquals("em_12_2", utterances[1].getId());
+      assertEquals("n_400", utterances[1].getStartId());
+      assertEquals("n_700", utterances[1].getEndId());
+      assertEquals(new Double(40.0), utterances[1].getStart().getOffset());
+      assertEquals(new Double(70.0), utterances[1].getEnd().getOffset());
+      assertEquals("Maxwell Smart", utterances[1].getLabel());
+      assertEquals(turns[0], utterances[1].getParent());
+
+      Annotation[] words = g.annotations("transcript");
+      assertEquals(6, words.length);
+      String[] wordLabels = {
+	 "86-1-1", "86-1-2", "86-1-3", 
+	 "86-2-1", "86-2-2", "86-2-3"};
+      for (int i = 0; i < wordLabels.length; i++)
+      {
+	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
+      }
+
+      Annotation[] segments = g.annotations("segments");
+      assertEquals(7, segments.length);
+      String[] segmentLabels = {
+	 "86-1-1-1", "86-1-1-2", "86-1-1-3", 
+	 "86-1-3-1", "86-1-3-2", "86-1-3-3", "86-1-3-4"};
+      for (int i = 0; i < segmentLabels.length; i++)
+      {
+	 assertEquals("segment labels " + i, segmentLabels[i], segments[i].getLabel());
+      }
+
+      // TODO do we need to g.isFragment() to be true? What about absent parent annotations?
    }
 
    /**
