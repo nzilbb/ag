@@ -181,6 +181,15 @@ public class TestMerger
 	       fail(fragmentName + ": merge() failed" + exception.toString() + "\n" + sw);
 	    }
 	    if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
+	    // destroy any unreferenced anchors
+	    for (Anchor a : new Vector<Anchor>(originalGraph.getAnchors().values()))
+	    {
+	       if (a.getStartingAnnotations().size() == 0
+		   && a.getEndingAnnotations().size() == 0)
+	       {
+		  a.destroy();
+	       }
+	    } // next anchor
 	    originalGraph.commit();
 
 	    // save the actual result
@@ -219,10 +228,12 @@ public class TestMerger
 		     break;
 		  case DELETE:
 		     differences += "\n"+fExpected.getPath()+":"+(step.getFromIndex()+1)+": Deleted:\n" 
-			+ step.getFrom();
+			+ step.getFrom()
+			+ "\n"+fActual.getPath()+":"+(step.getToIndex()+1)+": Missing";
 		     break;
 		  case INSERT:
-		     differences += "\n"+fActual.getPath()+":"+(step.getToIndex()+1)+": Inserted:\n" 
+		     differences += "\n"+fExpected.getPath()+":"+(step.getFromIndex()+1)+": Missing" 
+			+ "\n"+fActual.getPath()+":"+(step.getToIndex()+1)+": Inserted:\n" 
 			+ step.getTo();
 		     break;
 	       }
