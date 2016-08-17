@@ -652,8 +652,11 @@ public class JSONSerialization
       for (String layerId : new TreeSet<String>(childLayers.keySet()))
       {
 	 Vector<Annotation> children = childLayers.get(layerId);
-	 writer.println(",");
-	 serializeAnnotations(writer, indent, layerId, children);
+	 if (children.size() > 0)
+	 {
+	    writer.println(",");
+	    serializeAnnotations(writer, indent, layerId, children);
+	 }
       } // next layer
    } // end of serializeAnnotation()
    
