@@ -2,9 +2,9 @@
  * @file nzilbb.labbcat module for communicating with a LaBB-CAT web application.
  *
  * @example
- * var labbcat = new nzilbb.labbcat.Labbcat(baseUrl);
+ * var lc = new labbcat.Labbcat(baseUrl);
  * // load corpora
- * labbcat.getCorpusIds(function(result, errors, messages, call, id) {
+ * lc.getCorpusIds(function(result, errors, messages, call, id) {
  *     if (errors) {
  *        alert("Could not list corpora: " + errors[0]);
  *     } else {
