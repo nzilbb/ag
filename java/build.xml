@@ -98,6 +98,35 @@
       </batchtest>
     </junit>
   </target>
+
+  <target name="testmerger" depends="dist" description="run nzilbb.ag.util.Merger unit tests">
+    <javac srcdir="${src}" destdir="."
+	   includes="nzilbb/ag/util/test/TestMerger.java"
+	   classpath=".;${junitjar};${dist}/${ant.project.name}.jar"
+	   listfiles="yes"
+	   target="6"
+	   source="6"
+	   debug="on"
+	   includeAntRuntime="false"
+	   >
+      <compilerarg value="-Xlint"/>
+    </javac>
+    <junit
+	haltonfailure="true"
+	fork="true"
+	>
+      <classpath>
+	<pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar}"/>
+      </classpath>
+      <jvmarg value="-ea"/>
+      <formatter type="plain" usefile="false" />
+      <batchtest>
+        <fileset dir=".">
+          <include name="nzilbb/ag/util/test/TestMerger.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
     
   <target name="clean" description="clean up" >
     <!-- Delete the ${build} and ${dist} directory trees -->
