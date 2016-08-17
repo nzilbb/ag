@@ -468,33 +468,39 @@ public class JSONSerialization
 	    PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, "utf-8"));
 	    
 	    writer.println("{");
-	    writer.println(keyValue(1, "id", graph.getId()));
+	    writer.println(keyValue(1, "id", graph.getId()) + ",");
 	    
 	    // layers
 	    Schema schema = graph.getSchema();
 	    writer.println(indent(1) + "\"schema\":{");
 	    if (schema.getCorpusLayerId() != null)
-	       writer.println(keyValue(2, "corpusLayerId", schema.getCorpusLayerId()));
+	       writer.println(keyValue(2, "corpusLayerId", schema.getCorpusLayerId()) + ",");
 	    if (schema.getEpisodeLayerId() != null)
-	       writer.println(keyValue(2, "episodeLayerId", schema.getEpisodeLayerId()));
+	       writer.println(keyValue(2, "episodeLayerId", schema.getEpisodeLayerId()) + ",");
 	    if (schema.getParticipantLayerId() != null)
-	       writer.println(keyValue(2, "participantLayerId", schema.getParticipantLayerId()));
+	       writer.println(keyValue(2, "participantLayerId", schema.getParticipantLayerId()) + ",");
 	    if (schema.getTurnLayerId() != null)
-	       writer.println(keyValue(2, "turnLayerId", schema.getTurnLayerId()));
+	       writer.println(keyValue(2, "turnLayerId", schema.getTurnLayerId()) + ",");
 	    if (schema.getUtteranceLayerId() != null)
-	       writer.println(keyValue(2, "utteranceLayerId", schema.getUtteranceLayerId()));
+	       writer.println(keyValue(2, "utteranceLayerId", schema.getUtteranceLayerId()) + ",");
 	    if (schema.getWordLayerId() != null)
-	       writer.println(keyValue(2, "wordLayerId", schema.getWordLayerId()));
+	       writer.println(keyValue(2, "wordLayerId", schema.getWordLayerId()) + ",");
 	    serializeLayer(writer, 2, schema.getRoot());
 	    writer.println();
 	    writer.println(indent(1) + "},");
 	    
 	    // anchors
 	    writer.println(indent(1) + "\"anchors\":{");
+	    boolean firstAnchor = true;
 	    for (Anchor anchor : graph.getAnchorsOrderedByStructure())
 	    {
+	       if (firstAnchor)
+		  firstAnchor = false;
+	       else
+		  writer.println(",");
 	       serializeAnchor(writer, 2, anchor);
 	    } // next anchor
+	    writer.println();
 	    writer.println(indent(1) + "},");
 
 	    // layers in predictable (alphabetical) order
@@ -535,29 +541,34 @@ public class JSONSerialization
       writer.print(keyValue(0, "description", layer.getDescription()));
       if (layer.getParentId() != null)
       {
-	 writer.print(" ");
-	 writer.println(keyValue(0, "alignment", layer.getAlignment()));
+	 writer.print(", ");
+	 writer.println(keyValue(0, "alignment", layer.getAlignment()) + ",");
 	 writer.print(keyValue(indent+1, "peers", layer.getPeers()));
-	 writer.print(" ");
+	 writer.print(", ");
 	 writer.print(keyValue(0, "peersOverlap", layer.getPeersOverlap()));
-	 writer.print(" ");
+	 writer.print(", ");
 	 writer.print(keyValue(0, "parentIncludes", layer.getParentIncludes()));
-	 writer.print(" ");
+	 writer.print(", ");
 	 writer.print(keyValue(0, "saturated", layer.getSaturated()));
       }
       if (layer.getChildren().size() > 0)
       {
-	 writer.println();
+	 writer.println(",");
 	 writer.print(indent(indent+1) + "\"children\":{");
 	 // layers in predictable (alphabetical) order
+	 boolean firstChild = true;
 	 for (String childId : new TreeSet<String>(layer.getChildren().keySet()))
 	 {
+	    if (firstChild)
+	       firstChild = false;
+	    else
+	       writer.print(",");
 	    serializeLayer(writer, indent+2, layer.getChildren().get(childId));
 	 } // next child
 	 writer.println();
 	 writer.print(indent(indent+1) + "}");
       }
-      writer.print("},");
+      writer.print("}");
    } // end of serializeLayer()
 
    /**
@@ -572,16 +583,16 @@ public class JSONSerialization
       writer.print(keyValue(0, "offset", anchor.getOffset()));
       if (anchor.containsKey(Constants.CONFIDENCE))
       {
-	 writer.print("\t");
+	 writer.print(",\t");
 	 writer.print(keyValue(0, Constants.CONFIDENCE, (Integer)anchor.get(Constants.CONFIDENCE)));
       }
       if (anchor.containsKey("comment"))
       {
-	 writer.print("\t");
+	 writer.print(",\t");
 	 writer.print(keyValue(0, "comment", anchor.get("comment").toString()));
       }
-      writer.println("},");
-   } // end of serializeLayer()
+      writer.print("}");
+   } // end of serializeAnchor()
 
    /**
     * Serializes the given annotation.
@@ -595,14 +606,19 @@ public class JSONSerialization
       if (annotations.size() > 0)
       {
 	 writer.print(indent(indent) + q(layerId) + ":[");
+	 boolean firstLayer = true;
 	 for (Annotation child : annotations) 
 	 {
+	    if (firstLayer)
+	       firstLayer = false;
+	    else
+	       writer.print(",");
 	    writer.println();
 	    writer.print(indent(indent+1) + "{");
 	    serializeAnnotation(writer, indent+2, child);
-	    writer.print("},");
+	    writer.print("}");
 	 } // next child
-	 writer.print("],");
+	 writer.print("]");
       } // there really are children
    }
 
@@ -615,20 +631,20 @@ public class JSONSerialization
    protected void serializeAnnotation(PrintWriter writer, int indent, Annotation annotation)
    {
       writer.print(keyValue(0, "id", annotation.getId()));
-      writer.print("\t");
+      writer.print(",\t");
       writer.print(keyValue(0, "label", annotation.getLabel()));
-      writer.print("\t");
+      writer.print(",\t");
       writer.print(keyValue(0, "startId", annotation.getStartId()));
-      writer.print("\t");
+      writer.print(",\t");
       writer.print(keyValue(0, "endId", annotation.getEndId()));
       if (annotation.containsKey(Constants.CONFIDENCE))
       {
-	 writer.print("\t");
+	 writer.print(",\t");
 	 writer.print(keyValue(0, Constants.CONFIDENCE, (Integer)annotation.get(Constants.CONFIDENCE)));
       }
       if (annotation.containsKey("comment"))
       {
-	 writer.print("\t");
+	 writer.print(",\t");
 	 writer.print(keyValue(0, "comment", annotation.get("comment").toString()));
       }
       LinkedHashMap<String,Vector<Annotation>> childLayers = annotation.getAnnotations();
@@ -636,10 +652,10 @@ public class JSONSerialization
       for (String layerId : new TreeSet<String>(childLayers.keySet()))
       {
 	 Vector<Annotation> children = childLayers.get(layerId);
-	 writer.println();
+	 writer.println(",");
 	 serializeAnnotations(writer, indent, layerId, children);
       } // next layer
-   } // end of serializeLayer()
+   } // end of serializeAnnotation()
    
    /**
     * Expresses a key and simple string value as JSON.
@@ -655,7 +671,6 @@ public class JSONSerialization
       s.append(q(key));
       s.append(":");
       s.append(q(value));
-      s.append(",");
       return s.toString();
    } // end of keyValue()
 
@@ -673,7 +688,6 @@ public class JSONSerialization
       s.append(q(key));
       s.append(":");
       s.append(value);
-      s.append(",");
       return s.toString();
    } // end of keyValue()
 
@@ -691,7 +705,6 @@ public class JSONSerialization
       s.append(q(key));
       s.append(":");
       s.append(value);
-      s.append(",");
       return s.toString();
    } // end of keyValue()
 
@@ -712,7 +725,6 @@ public class JSONSerialization
 	 s.append(fmtOffset.format(value));
       else
 	 s.append("null");
-      s.append(",");
       return s.toString();
    } // end of keyValue()
    
