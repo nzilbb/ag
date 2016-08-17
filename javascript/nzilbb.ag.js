@@ -47,12 +47,30 @@ nzilbb.ag.Graph = function(id)
     if (!this.id) this.id = id;
 
     // top level layer
-    if (!this.layers) this.layers = { id: "graph", description: "The graph as a whole", children: {}, annotations : []};
+    if (!this.schema) this.schema = { graph: { id: "graph", description: "The graph as a whole", children: {}, annotations : []}};
+    if (!this.schema.layers) this.schema.layers = {};
+    this.layers = this.schema.layers;
 
     // annotations collection
     if (!this.annotations) this.annotations = {};
+    // anchors collection
+    if (!this.anchors) this.anchors = {};
 }
 nzilbb.ag.Graph.prototype = {
+
+    /**
+     * The anchors sorted by offset. This includes only anchors for which the offset is actually set.
+     */
+    getSortedAnchors : function() { 
+	var sortedAnchors = [];
+	for (var a in this.anchors) {
+	    if (this.anchors[a].offset) {
+		sortedAnchors.push(this.anchors[a]);
+	    }
+	}
+	sortedAnchors.sort(function(a, b) { return a.offset-b.offset; });
+	return sortedAnchors; 
+    },
 
     labels : function(layerId) 
     {
