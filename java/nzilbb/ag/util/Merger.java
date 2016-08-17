@@ -920,9 +920,9 @@ public class Merger
 		  {
 		     Annotation anPreviousEditedOther = getCounterpart(anPreviousEdited);
 		     if (getConfidence(anPreviousEditedOther.getEnd())
-			 > getConfidence(newAnnotation.getStart())
+			 > getConfidence(start)
 			 && anPreviousEditedOther.getEnd().getOffset().doubleValue()
-			 != newAnnotation.getStart().getOffset().doubleValue())
+			 != start.getOffset().doubleValue())
 		     {
 			log(layerId
 			    + ": Use offset of end of prior: " + logAnnotation(anLastOriginal) 
@@ -964,7 +964,7 @@ public class Merger
 			   + " and new: " + logAnnotation(newAnnotation)
 			   + " using " + logAnchor(start));
 			changeEndWithRelatedAnnotations(
-			   anPreviousEditedOther, newAnnotation.getStart(),
+			   anPreviousEditedOther, start,
 			   // we don't re-link a related parent annotation - we might be inserting a new child
 			   saturatedParentLayerId);
 			break;
@@ -977,6 +977,7 @@ public class Merger
 	    log(layerId + ": Adding " + logAnnotation(newAnnotation));
 	    changes.addAll( // track changes for
 	       newAnnotation.getChanges());
+	    setCounterparts(newAnnotation, anEdited);
 	 } // new annotation
 	 else
 	 { // existing annotation
@@ -994,6 +995,7 @@ public class Merger
 	       // unlink the prior annotation from this one
 	       Anchor newPriorEndAnchor = new Anchor(anOriginal.getStart());
 	       newPriorEndAnchor.create();
+	       graph.addAnchor(newPriorEndAnchor);
 	       changes.addAll(newPriorEndAnchor.getChanges());
 	       log(
 		  layerId+": Unsharing end of prior: " 

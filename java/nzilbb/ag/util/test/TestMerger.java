@@ -75,7 +75,6 @@ public class TestMerger
       
       m.setEditedGraph(loadGraphFromJSON(f, schema));
       //m.setDebug(true);
-      m.setValidator(null);
 
       try
       {
@@ -85,7 +84,7 @@ public class TestMerger
       }
       catch(TransformationException exception)
       {
-	 fail(exception.toString());
+	 fail(" " + exception.toString());
       }
 
    }
@@ -99,7 +98,6 @@ public class TestMerger
       
       Merger m = new Merger(loadGraphFromJSON(f, schema));
       //m.setDebug(true);
-      m.setValidator(null);
 
       Graph originalGraph = loadGraphFromJSON(f, schema);
 
@@ -111,7 +109,7 @@ public class TestMerger
       }
       catch(TransformationException exception)
       {
-	 fail(exception.toString());
+	 fail(" " + exception.toString());
       }
 
    }
