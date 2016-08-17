@@ -1,0 +1,399 @@
+"use strict";
+/**
+ * @file nzilbb.ag module processing Annotation Graphs.
+ *
+ * @example
+ * ag.Graph.fromURL(jsonUrl, function(ag) {
+ *   var words = ag.labels("word");
+ *   for (var w in words) {
+ *     console.log(words[w]);
+ *   } // next word
+ * });
+ *
+ * @author Robert Fromont robert.fromont@canterbury.ac.nz
+ * @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&dn=gpl-3.0.txt GPL v3.0
+ * @copyright 2016 New Zealand Institute of Language, Brain and Behaviour, University of Canterbury
+ *
+ *    This file is part of nzilbb.ag
+ *
+ *    nzilbb.ag is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    nzilbb.ag is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with nzilbb.ag; if not, write to the Free Software
+ *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * @lic-end
+ */
+
+(function(exports){
+
+// namespace
+var nzilbb = nzilbb || {};
+nzilbb.ag = nzilbb.ag || {};
+nzilbb.ag._lastId = 0; // used to generate new IDs
+
+// AG class
+nzilbb.ag.Graph = function(id)
+{
+    // only set attribute values if they're not already set
+    if (!this.id) this.id = id;
+
+    // top level layer
+    if (!this.layers) this.layers = { id: "graph", description: "The graph as a whole", children: {}, annotations : []};
+
+    // annotations collection
+    if (!this.annotations) this.annotations = {};
+}
+nzilbb.ag.Graph.prototype = {
+
+    labels : function(layerId) 
+    {
+	var labels = [];
+	var annotations = this.layers[layerId].annotations;
+	for (var annotationid in annotations)
+	{
+	    var annotation = annotations[annotationid]
+	    labels.push(annotation.label);
+	}
+	return labels;
+    },
+
+    annotationsAt : function(offset, layerId) 
+    {
+	var annotations = [];
+	var layers = layerId?{layerId:this.layers[layerId]}:this.layers;
+	for (var l in layers)
+	{
+	    var layer = layers[l];
+	    for (var a in layer.annotations)
+	    {
+		var annotation = layer.annotations[a];
+		if (annotation.includesOffset(offset)) annotations.push(annotation);
+		if (annotation.start.offset > offset) break; // assuming the list is sorted, we can stop now
+	    } // next annotation
+	} // next layer
+	return (annotations.length > 0)?annotations:null;
+    },
+
+    addAnnotation : function(annotation)
+    {
+	annotation.graph = this;
+	if (!annotation.id) annotation.id = "+" + (++nzilbb.ag._lastId);
+	this.annotations[annotation.id] = annotation;
+	if (!this[annotation.layerId]) this[annotation.layerId] = [];
+	this[annotation.layerId].push(annotation);
+	if (annotation.parent)
+	{
+	    if (!annotation.parent[annotation.layerId]) annotation.parent[annotation.layerId] = [];
+	    annotation.parent[annotation.layerId].push(annotation);
+	}
+	if (!annotation.layer.annotations) annotation.layer.annotations = []
+	annotation.layer.annotations.push(annotation);
+    }
+} // Graph methods
+nzilbb.ag.Graph.coerce = function(obj)
+{
+    // call contructor
+    nzilbb.ag.Graph.call(obj);
+    // apply prototype
+    obj.__proto__ = nzilbb.ag.Graph.prototype;
+}
+nzilbb.ag.Graph.indexLayers = function(top, parent, layers)
+{
+    for (var layerId in layers)
+    {
+	var layer = layers[layerId];
+	layer.id = layerId;
+	if (parent) layer.parent = parent;
+	layer.annotations = []; // allow enumeration by layer
+	top[layerId] = layer;
+	if (top[layerId].children)
+	{
+	    nzilbb.ag.Graph.indexLayers(top, layer, layer.children);
+	}
+    } // next layer
+}
+nzilbb.ag.Graph.activateAnchors = function(anchors)
+{
+    for (var a in anchors) 
+    {
+	// set the id
+	nzilbb.ag.Anchor.coerce(anchors[a]);
+	anchors[a].id = a;
+    }    
+}
+nzilbb.ag.Graph.activateLayer = function(ag, parent, layerId, annotations)
+{
+    for (var i in annotations)
+    {
+	var annotation = annotations[i];
+
+	// data
+	annotation.graphId = ag.id;
+	annotation.graph = ag;
+	annotation.layerId = layerId;
+	if (parent)
+	{
+	    annotation.parentId = parent.id;
+	    annotation.parent = parent;
+	}
+
+	// make it into an Annotation object, with all the corresponding methods
+	nzilbb.ag.Annotation.coerce(annotation);
+
+	// indexing for easy lookup and iteration
+	ag.annotations[annotation.id] = annotation; // index annotations by id
+	annotation.layer.annotations.push(annotation); // allow enumeration by layer
+	var startAnchor = annotation.start;
+	if (!startAnchor.startOf[layerId]) startAnchor.startOf[layerId] = [];
+	startAnchor.startOf[layerId].push(annotation);
+	var endAnchor = annotation.end;
+	if (!endAnchor.endOf[layerId]) endAnchor.endOf[layerId] = [];
+	endAnchor.endOf[layerId].push(annotation);
+
+	// detect layers
+	for (var key in annotation)
+	{
+	    // is it an array?
+	    if (annotation[key] instanceof Array) // TODO we actually know what layers to look for, so should use that instead
+	    {
+		nzilbb.ag.Graph.activateLayer(ag, annotation, key, annotation[key]);
+	    }
+	} // next key
+
+    } // next annotation
+}
+
+/**
+ * Callback invoked when a graph has been loaded.
+ * @callback graphCallback
+ * @param graph The loaded Graph
+ */
+/**
+ * Callback invoked when a graph could not be loaded.
+ * @callback errorCallback
+ * @param xhr The XMLHttpRequest object for the request that failed.
+ */
+
+/**
+ * Loads an annotation Graph from a given URL, representing a JSON serialization of a graph.
+ * @param url URL to a JSON serialization of an annotation graph.
+ * @callback {graphCallback} success Invoked when the request has returned a result.
+ * @callback {errorCallback} error Invoked if the request fails.
+ */
+nzilbb.ag.Graph.fromURL = function(url, success, error) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+                if (success) {
+		    var jsonObject = JSON.parse(xhr.responseText);
+                    var graph = nzilbb.ag.Graph.activateObject(jsonObject);
+		    success(graph);
+		} else {
+		    if (error) error(xhr);
+		}		
+            } else {
+                if (error) error(xhr);
+            }
+        }
+    };
+    xhr.open("GET", url, true);
+    xhr.send();
+}
+
+/**
+ * Converts a JSON serialization of an Annotation Graph into a Graph object.
+ * @param graph The JSON-deserialized object representing the Annotation Rgaph.
+ */
+nzilbb.ag.Graph.activateObject = function(graph)
+{
+    // make it into an AG
+    nzilbb.ag.Graph.coerce(graph);
+
+    graph.schema.layers = {};
+    nzilbb.ag.Graph.indexLayers(graph.schema.layers, graph.schema.graph, { graph: graph.schema.graph } );
+    graph.layers = graph.schema.layers;
+    nzilbb.ag.Graph.activateAnchors(graph.anchors);
+
+    graph.annotations = {};
+    for (var key in graph)
+    {
+	if (graph[key] instanceof Array // TODO we actually know what layers to look for, so should use that instead
+	    && key != "layers" && key != "anchors" && key != "participants")
+	{
+	    nzilbb.ag.Graph.activateLayer(graph, null, key, graph[key]);
+	}
+    }    
+    return graph;
+}
+
+/**
+ * Converts an Annotation Graph (back) into a plain JSON-serializable object, removing any possible cyclic references, and methods.
+ * @param graph The Graph to deactivate.
+ */
+nzilbb.ag.Graph.deactivateObject = function(graph)
+{
+    // de-cyclicify annotations
+    for (var annotationId in graph.annotations)
+    {
+	var annotation = graph.annotations[annotationId];
+	delete annotation.graph;
+	delete annotation.graphId;
+	delete annotation.parentId;
+	delete annotation.parent;
+	delete annotation.layerId;
+	/*
+	annotation.layer = null;
+	annotation.ordinal = null;
+	annotation.previous = null;
+	annotation.next = null;
+	annotation.start = null;
+	annotation.end = null;
+	*/
+    } // next annotation
+    delete graph.annotations;
+
+    // de-cyclicify anchors
+    for (var anchorId in graph.anchors)
+    {
+	var anchor = graph.anchors[anchorId];
+	delete anchor.id;
+	delete anchor.graph;
+	delete anchor.graphId;
+	delete anchor.startOf;
+	delete anchor.endOf;
+    } // next annotation
+
+    // de-cyclicify layers
+    for (var layerId in graph.layers)
+    {
+	var layer = graph.layers[layerId];
+	if (layer.parent)
+	{ // not a top-level layer
+	    delete layer.id;
+	    delete layer.parent;
+	    delete graph.layers[layerId];
+	}
+	delete layer.annotations;
+    } // next annotation
+    var layerChildren = graph.layers.children;
+    graph.layers = {};
+    graph.layers.children = layerChildren;
+    return graph;
+}
+
+// Annotation class
+nzilbb.ag.Annotation = function(layerId, label, graph, startId, endId)
+{
+    // only set attribute values if they're not already set
+    if (!this.id) this.id = null;
+    if (!this.label) this.label = label;
+    if (!this.startId) this.startId = startId;
+    if (!this.endId) this.endId = endId;
+    if (!this.graph) this.graph = graph;    
+    if (!this.parent) this.parent = null;
+    if (!this.layerId) this.layerId = layerId;
+    return this;
+}
+nzilbb.ag.Annotation.prototype = {
+
+    // attributes
+    get layer() { return this.graph.layers[this.layerId]; },
+    get ordinal() { return this.parent && this.parent[this.layerId].indexOf(this); },
+    get previous() { return this.parent && this.parent[this.layerId][this.ordinal - 1]; },
+    get next() { return this.parent && this.parent[this.layerId][this.ordinal + 1]; },
+    get start() { return this.graph.anchors[this.startId]; },
+    get end() { return this.graph.anchors[this.endId]; },
+
+    // query methods
+    includesOffset : function(offset) { return this.start.offset <= offset && this.end.offset > offset; },
+    includes : function(annotation) { return this.includesOffset(annotation.start.offset) && this.includesOffset(annotation.end.offset); },
+    includesMidpoint : function(annotation) { return this.includesOffset(annotation.midpoint()); },
+    overlaps : function(annotation) { return this.start.offset < annotation.end.offset && this.end.offset > annotation.start.offset; },
+    duration : function() { return this.end.offset - this.start.offset; },
+    midpoint : function() { return this.start.offset + (this.duration() / 2); },
+    instantaneous : function() { return this.startId == this.endId; },
+    toString : function Annotation_toString() { return this.label; },
+
+    sharesStart : function(layerId) { return this.start.startOf[layerId]; },
+    sharesEnd : function(layerId) { return this.end.endOf[layerId]; },
+    startsWith : function(annotation) { return this.startId == annotation.startId; },
+    endsWith : function(annotation) { return this.endId == annotation.endId; },
+    tags : function(annotation) { return this.startsWith(annotation) && this.endsWith(annotation); },
+    predecessorOf : function(annotation) { return this.endId == annotation.startId ; },
+    successorOf : function(annotation) { return annotation.endId == this.startId ; },
+
+    tagOn : function(layerId) 
+    {
+	var tags = [];
+	for (var i in this.start.startOf[layerId])
+	{
+	    var other = this.start.startOf[layerId][i];
+	    if (this.startsWith(other)) tags.push(other);
+	} // next annotation that starts here
+	return tags;
+    },
+
+    // annotation methods
+
+    createTag : function(layerId, label)
+    {
+	var tag = new nzilbb.ag.Annotation(layerId, label, this.graph, this.startId, this.endId);
+	if (tag.layer.parent == this.layer)
+	{ // tag is child of this
+	    tag.parent = this;
+	}
+	else if (tag.layer.parent == this.layer.parent)
+	{ // this layer and tag layer share a parent
+	    tag.parent = this.parent;
+	}
+	this.graph.addAnnotation(tag);
+	return tag;
+    }
+
+} // Annotation methods
+nzilbb.ag.Annotation.coerce = function(obj)
+{
+    // call contructor
+    nzilbb.ag.Annotation.call(obj);
+    // apply prototype
+    obj.__proto__ = nzilbb.ag.Annotation.prototype;
+}
+
+// Anchor class
+nzilbb.ag.Anchor = function(offset, graph)
+{
+    // only set attribute values if they're not already set
+    if (!this.id) this.id = null;
+    if (!this.offset && offset) this.offset = offset;
+    if (!this.graph) this.graph = graph;    
+    this.startOf = {};
+    this.endOf = {};
+}
+nzilbb.ag.Anchor.prototype = {
+
+    toString : function Annotation_toString() { return this.offset; }
+
+} // Anchor methods
+nzilbb.ag.Anchor.coerce = function(obj)
+{
+    // call contructor
+    nzilbb.ag.Anchor.call(obj);
+    // apply prototype
+    obj.__proto__ = nzilbb.ag.Anchor.prototype;
+}
+
+exports.Graph = nzilbb.ag.Graph;
+exports.Annotation = nzilbb.ag.Annotation;
+exports.Anchor = nzilbb.ag.Anchor;
+
+}(typeof exports === 'undefined' ? this.ag = {} : exports));
