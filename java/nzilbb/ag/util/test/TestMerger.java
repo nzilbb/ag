@@ -130,7 +130,7 @@ public class TestMerger
     */
    @Test public void fragBasic()
    {
-      fragmentTests("frag", "Basic", null);
+      fragmentTests("frag", "Basic", "006");
    }
 
    /**
@@ -181,6 +181,7 @@ public class TestMerger
 	       fail(fragmentName + ": merge() failed" + exception.toString() + "\n" + sw);
 	    }
 	    if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
+	    originalGraph.commit();
 	    // destroy any unreferenced anchors
 	    for (Anchor a : new Vector<Anchor>(originalGraph.getAnchors().values()))
 	    {
@@ -193,7 +194,7 @@ public class TestMerger
 	    originalGraph.commit();
 
 	    // save the actual result
-	    File fActual = new File(subdir, "actual_" + fragmentName + ".json");
+	    File fActual = new File(subdir, "final_" + fragmentName + ".json");
 	    saveGraphToJSON(fActual, originalGraph);
 	    
 	    // compare with what we expected
