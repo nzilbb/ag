@@ -44,23 +44,30 @@ agvis.addEventListener('dragover', handleDragOver, false);
 agvis.addEventListener('drop', handleFileSelect, false);
 
 function setLayerLevels(layers, level) {
-   // childless layers higher than child layers
-   for (var l in layers) {
-      layer = layers[l];
-      var childCount = 0;
-      for (var c in layer.children) childCount++;
-      if (childCount == 0) {
-        layer.level = level++;
-      }
-   }
-   for (var l in layers) {
-      layer = layers[l];
-      var childCount = 0;
-      for (var c in layer.children) childCount++;
-      if (childCount > 0) {
-        layer.level = level++;
-        level = setLayerLevels(layer.children, level);
-      }
+   var aLayers = [];
+   for (var l in layers) aLayers.push(layers[l]);
+   if (aLayers.length == 0) return level;
+
+   // sort layers so that those with children are last, and those with fewer annotations are earlier
+   aLayers.sort(function(a,b) {
+      var childCountA = 0;
+      for (var c in a.children) childCountA++;
+      var childCountB = 0;
+      for (var c in b.children) childCountB++;
+      // all leaf nodes before any branch nodes
+      if (childCountA == 0 && childCountB > 0) return -1;
+      if (childCountB == 0 && childCountA > 0) return 1;
+      // those with fewer annotations before those with more
+      var annotationCountA = 0;
+      for (var c in a.annotations) annotationCountA++;
+      var annotationCountB = 0;
+      for (var c in b.annotations) annotationCountB++;							 return annotationCountA - annotationCountB;      
+   });
+
+   for (var l in aLayers) {
+      layer = aLayers[l];
+      layer.level = level++;
+      level = setLayerLevels(layer.children, level);
    }
    return level;
 }
