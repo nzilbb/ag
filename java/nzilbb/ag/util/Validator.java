@@ -413,7 +413,7 @@ public class Validator
       for (Layer layer : alignedLayersTopDown)
       {
 	 // log("Layer: " + layer);
-	 for (Annotation annotation : graph.getAnnotations(layer.getId()))
+	 for (Annotation annotation : graph.list(layer.getId()))
 	 {
 	    // log("Annotation: " + logAnnotation(annotation));
 
@@ -686,7 +686,7 @@ public class Validator
 	 if (childLayer.getParentId().equals("graph")) continue; // top level layer
 	 // log("reconcile orphans: " + parentLayer + "/" + childLayer);
 	 changes.addAll( // register changes of
-	    reconcileOrphans(childLayer));
+	    reconcileOrphans(childLayer, graph));
       } // next layer
       return changes;
    }
@@ -707,16 +707,17 @@ public class Validator
     * for {@link Layer#getParentIncludes()} layers, in cases like these, if there was
     * previously a parent assigned, this remains unchanged.
     * @param childLayer The child layer to check.
+    * @param graph The graph to transform.
     * @return The changes introduced by this phase.
     */
-   protected Vector<Change> reconcileOrphans(Layer childLayer)
+   protected Vector<Change> reconcileOrphans(Layer childLayer, Graph graph)
    {
       Vector<Change> changes = new Vector<Change>();
       if (childLayer.getParentIncludes())
       { // whole/part relationship, e.g. turn/word, word/syllable, word/segment
 	 Layer parentLayer = childLayer.getParent();
 	 // TODO not turn/utterance for some reason?
-	 for (Annotation child : childLayer.getAnnotations())
+	 for (Annotation child : graph.list(childLayer.getId()))
 	 {
 	    if (child.getChange() == Change.Operation.Destroy) continue; // ignore deleted
 	    
@@ -877,7 +878,7 @@ public class Validator
       if (!getFullValidation())
       {
 	 boolean childChanged = false;
-	 for (Annotation child : childLayer.getAnnotations())
+	 for (Annotation child : graph.list(childLayer.getId()))
 	 {
 	    if (child.getChange() != Change.Operation.NoChange)
 	    {
@@ -898,7 +899,7 @@ public class Validator
       if (!childLayer.getPeers())
       {
 	 // for each parent
-	 for (Annotation parent : graph.getAnnotations(childLayer.getParentId()))
+	 for (Annotation parent : graph.list(childLayer.getParentId()))
 	 { 
 	    if (parent.getChange() == Change.Operation.Destroy) continue; // ignore deleted annotations
 	    
@@ -927,7 +928,7 @@ public class Validator
 	 )
       {
 	 // for each parent
-	 for (Annotation parent : graph.getAnnotations(childLayer.getParentId()))
+	 for (Annotation parent : graph.list(childLayer.getParentId()))
 	 { 
 	    if (parent.getChange() == Change.Operation.Destroy) continue; // ignore deleted annotations
 	    
@@ -957,8 +958,7 @@ public class Validator
       // check anchors
       
       // for each parent
-      assert graph.getAnnotations(childLayer.getParentId()) != null : "graph.getAnnotations(childLayer.getParentId()) != null - " + childLayer + " parent: " + childLayer.getParentId();
-      for (Annotation parent : graph.getAnnotations(childLayer.getParentId()))
+      for (Annotation parent : graph.list(childLayer.getParentId()))
       { 
 	 if (parent.getChange() == Change.Operation.Destroy) continue; // ignore deleted annotations
 	 // log("Parent: " + logAnnotation(parent));

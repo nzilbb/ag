@@ -106,13 +106,13 @@ public class TestSpanningConventionTransformer
 	 assertEquals("ordinal corrected", 3, g.getAnnotation("word6").getOrdinal());
 	 assertEquals("chained across gap", g.getAnnotation("word1").getEnd(), g.getAnnotation("word5").getStart());
 
-	 Annotation span = g.getAnnotations("comment").first();
+	 Annotation span = g.list("comment")[0];
 	 assertEquals("quick brown fox", span.getLabel());
 	 assertEquals("a2", span.getStartId());
 	 assertEquals("a?1", span.getEndId());
 	 assertEquals("parent set", "my graph", span.getParentId());
 
-	 span = g.getAnnotations("span").first();
+	 span = g.list("span")[0];
 	 assertEquals("a1", span.getStartId());
 	 assertEquals("chained across gap with word", g.getAnnotation("word1").getEnd(), g.getAnnotation("span").getEnd());
 	 assertEquals("a?1", span.getEndId());
@@ -190,7 +190,7 @@ public class TestSpanningConventionTransformer
 	 assertEquals("not chained across gap", "a2", g.getAnnotation("word1").getEndId());
 	 assertEquals("not chained across gap", "a?1", g.getAnnotation("word5").getStartId());
 
-	 Annotation span = g.getAnnotations("comment").first();
+	 Annotation span = g.list("comment")[0];
 	 assertEquals("quick brown fox", span.getLabel());
 	 assertEquals("a2", span.getStartId());
 	 assertEquals("a?1", span.getEndId());
@@ -267,7 +267,7 @@ public class TestSpanningConventionTransformer
 	 assertEquals("ordinal corrected", 3, g.getAnnotation("word6").getOrdinal());
 	 assertEquals("chained across gap", g.getAnnotation("word3").getEnd(), g.getAnnotation("word6").getStart());
 
-	 Annotation[] comments = g.annotations("comment");
+	 Annotation[] comments = g.list("comment");
 	 Annotation span = comments[0];
 	 assertEquals("quick", span.getLabel());
 	 assertEquals("a2", span.getStartId());
@@ -349,7 +349,7 @@ public class TestSpanningConventionTransformer
 	 assertEquals("over", g.getAnnotation("word6").getLabel());
 	 assertEquals("chained across gap", g.getAnnotation("word1").getEnd(), g.getAnnotation("word6").getStart());
 
-	 Annotation span = g.getAnnotations("comment").first();
+	 Annotation span = g.list("comment")[0];
 	 assertEquals("empty results don't result in delimiter being added", "brown", span.getLabel());
 	 assertEquals("a2", span.getStartId());
 	 assertEquals("a?2", span.getEndId());
@@ -427,7 +427,7 @@ public class TestSpanningConventionTransformer
 	 assertEquals("over", g.getAnnotation("word6").getLabel());
 
 	 assertEquals("Different turns", 0, changes.size());
-	 assertEquals("Different turns", 0, g.getAnnotations("comment").size());
+	 assertEquals("Different turns", 0, g.list("comment").length);
 
       }
       catch(TransformationException exception)
@@ -510,7 +510,7 @@ public class TestSpanningConventionTransformer
 	 assertEquals(Change.Operation.Destroy, g.getAnnotation("NP").getChange());
 	 assertEquals(Change.Operation.Destroy, g.getAnnotation("VP").getChange());
 
-	 Annotation[] spans = g.annotations("phrase");
+	 Annotation[] spans = g.list("phrase");
 	 Annotation span = spans[0];
 	 assertEquals("NP", span.getLabel());
 	 assertEquals("a0", span.getStartId());
@@ -596,7 +596,7 @@ public class TestSpanningConventionTransformer
 	 assertEquals("corrected ordinal", 3, g.getAnnotation("word6").getOrdinal());
 	 assertEquals("chained across gap", g.getAnnotation("word1").getEnd(), g.getAnnotation("word5").getStart());
 
-	 Annotation span = g.getAnnotations("expansion").first();
+	 Annotation span = g.list("expansion")[0];
 	 assertEquals("going to", span.getLabel());
 	 assertEquals("shares start with previous", g.getAnnotation("word1").getStart(), span.getStart());
 	 assertEquals("shares start with previous", "a1", span.getStartId());
@@ -610,23 +610,11 @@ public class TestSpanningConventionTransformer
 	 assertNotNull("commit will remove annotations", g.getAnnotation("word2"));
 	 assertNotNull("commit will remove annotations", g.getAnnotation("word3"));
 	 assertNotNull("commit will remove annotations", g.getAnnotation("word4"));
-	 assertTrue("commit will remove annotations from layer", 
-		    g.getLayer("word").getAnnotations().contains(word2));
-	 assertTrue("commit will remove annotations from layer", 
-		    g.getLayer("word").getAnnotations().contains(word3));
-	 assertTrue("commit will remove annotations from layer", 
-		    g.getLayer("word").getAnnotations().contains(word4));
 	 g.commit();
 	 assertEquals("gonna", g.getAnnotation("word1").getLabel());
 	 assertNull("commit removes annotation", g.getAnnotation("word2"));
 	 assertNull("commit removes annotation", g.getAnnotation("word3"));
 	 assertNull("commit removes annotation", g.getAnnotation("word4"));
-	 assertFalse("commit removes annotation from layer", 
-		     g.getLayer("word").getAnnotations().contains(word2));
-	 assertFalse("commit removes annotation from layer", 
-		     g.getLayer("word").getAnnotations().contains(word3));
-	 assertFalse("commit removes annotation from layer", 
-		     g.getLayer("word").getAnnotations().contains(word4));
       }
       catch(TransformationException exception)
       {
@@ -701,7 +689,7 @@ public class TestSpanningConventionTransformer
 	 assertEquals("corrected ordinal", 4, g.getAnnotation("word6").getOrdinal());
 	 assertEquals("chained across gap", g.getAnnotation("word1").getEnd(), g.getAnnotation("word4").getStart());
 
-	 Annotation span = g.getAnnotations("expansion").first();
+	 Annotation span = g.list("expansion")[0];
 	 assertEquals("going to", span.getLabel());
 	 assertEquals("shares start with previous", g.getAnnotation("word1").getStart(), span.getStart());
 	 assertEquals("shares start with previous", "a1", span.getStartId());
@@ -715,27 +703,11 @@ public class TestSpanningConventionTransformer
 	 assertNotNull("commit will remove annotations", word2);
 	 assertNotNull("commit will remove annotations", word3);
 	 assertNotNull("commit will not remove all annotations", g.getAnnotation("word4"));
-	 assertTrue("commit will remove annotations from layer", 
-		    g.getLayer("word").getAnnotations().contains(word2));
-	 SortedSet<Annotation> children = g.getLayer("word").getAnnotations();
-	 for (Annotation a : children)
-	 {
-	    if (!children.contains(a))
-	    {
-	       System.out.println(" WORD " + a.getId() + " ISN'T IN IT'S OWN PEER COLLECTION");
-	    }
-	 }
-	 // TODO figure this out assertTrue("commit will remove annotations from layer ", 
-	 // 	    g.getLayer("word").getAnnotations().contains(word3));
 	 g.commit();
 	 assertEquals("gonna", g.getAnnotation("word1").getLabel());
 	 assertNull("commit removes annotation", g.getAnnotation("word2"));
 	 assertNull("commit removes annotation", g.getAnnotation("word3"));
 	 assertNotNull("commit doesn't remove suffixed annotation", g.getAnnotation("word4"));
-	 assertFalse("commit removes annotation from layer", 
-		     g.getLayer("word").getAnnotations().contains(word2));
-	 assertFalse("commit removes annotation from layer", 
-		     g.getLayer("word").getAnnotations().contains(word3));
       }
       catch(TransformationException exception)
       {
@@ -810,7 +782,7 @@ public class TestSpanningConventionTransformer
 	 assertEquals("corrected ordinal", 3, g.getAnnotation("word6").getOrdinal());
 	 assertEquals("chained across gap", g.getAnnotation("word1").getEnd(), g.getAnnotation("word5").getStart());
 
-	 Annotation span = g.getAnnotations("expansion").first();
+	 Annotation span = g.list("expansion")[0];
 	 assertEquals("going to", span.getLabel());
 	 assertEquals("shares start with previous", g.getAnnotation("word1").getStart(), span.getStart());
 	 assertEquals("shares start with previous", "a1", span.getStartId());
@@ -824,23 +796,11 @@ public class TestSpanningConventionTransformer
 	 assertNotNull("commit will remove annotations", g.getAnnotation("word2"));
 	 assertNotNull("commit will remove annotations", g.getAnnotation("word3"));
 	 assertNotNull("commit will remove annotations", g.getAnnotation("word4"));
-	 assertTrue("commit will remove annotations from layer", 
-		    g.getLayer("word").getAnnotations().contains(word2));
-	 assertTrue("commit will remove annotations from layer", 
-		    g.getLayer("word").getAnnotations().contains(word3));
-	 assertTrue("commit will remove annotations from layer", 
-		    g.getLayer("word").getAnnotations().contains(word4));
 	 g.commit();
 	 assertEquals("gonna", g.getAnnotation("word1").getLabel());
 	 assertNull("commit removes annotation", g.getAnnotation("word2"));
 	 assertNull("commit removes annotation", g.getAnnotation("word3"));
 	 assertNull("commit removes annotation", g.getAnnotation("word4"));
-	 assertFalse("commit removes annotation from layer", 
-		     g.getLayer("word").getAnnotations().contains(word2));
-	 assertFalse("commit removes annotation from layer", 
-		     g.getLayer("word").getAnnotations().contains(word3));
-	 assertFalse("commit removes annotation from layer", 
-		     g.getLayer("word").getAnnotations().contains(word4));
       }
       catch(TransformationException exception)
       {
@@ -918,7 +878,7 @@ public class TestSpanningConventionTransformer
 	 assertEquals("correct ordinal", 5, g.getAnnotation("word5").getOrdinal());
 	 assertEquals("correct ordinal", 6, g.getAnnotation("word6").getOrdinal());
 
-	 Annotation span = g.getAnnotations("span").first();
+	 Annotation span = g.list("span")[0];
 	 assertEquals("are-to", span.getLabel());
 	 assertEquals("shares start with first", g.getAnnotation("word2").getStart(), span.getStart());
 	 assertEquals("shares start with first", "a2", span.getStartId());

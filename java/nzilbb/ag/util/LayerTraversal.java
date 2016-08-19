@@ -136,7 +136,14 @@ public class LayerTraversal<R>
    public LayerTraversal(R result, Annotation annotation)
    {
       setResult(result);
-      setResult(traverseAnnotation(annotation));
+      if (annotation instanceof Graph)
+      {
+	 setResult(traverseGraph((Graph)annotation));
+      }
+      else
+      {
+	 setResult(traverseAnnotation(annotation));
+      }
    } // end of constructor
   
    /**
@@ -171,7 +178,7 @@ public class LayerTraversal<R>
 	 }
 	 else
 	 { // depth-first - go down through annotations	    
-	    for (Annotation annotation : layer.getAnnotations())
+	    for (Annotation annotation : graph.getAnnotations(layer.getId()))
 	    {
 	       traverseAnnotation(annotation);	    
 	    } // next annotation
@@ -229,7 +236,7 @@ public class LayerTraversal<R>
     */
    protected void traverseLayer(Layer layer)
    {
-      for (Annotation annotation : layer.getAnnotations())
+      for (Annotation annotation : graph.list(layer.getId()))
       {
 	 // only visit a node once (even if the parent/child hierarchy is corrupt)
 	 if (!visited.contains(annotation))
@@ -242,7 +249,7 @@ public class LayerTraversal<R>
       {
 	 traverseLayer(childLayer);
       } // next child layer
-      for (Annotation annotation : layer.getAnnotations())
+      for (Annotation annotation : graph.list(layer.getId()))
       {
 	 // only visit a node once (even if the parent/child hierarchy is corrupt)
 	 if (!visited.contains(annotation))

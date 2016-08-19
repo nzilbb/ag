@@ -214,7 +214,7 @@ public class ConventionTransformer
       {
 	 Pattern sourceRegexp = Pattern.compile(getSourcePattern());
 	 Vector<Change> changes = new Vector<Change>();
-	 for (Annotation source : graph.getAnnotations(getSourceLayerId()))
+	 for (Annotation source : graph.list(getSourceLayerId()))
 	 {
 	    Matcher matcher = sourceRegexp.matcher(source.getLabel());
 	    if (matcher.matches())

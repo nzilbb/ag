@@ -258,7 +258,7 @@ public class TestValidator
 	 assertEquals("moved to new turn - prefer same speaker", 
 		      new Change(Change.Operation.Update, g.getAnnotation("word4"), "parentId", "turn3"), 
 		      order.next());
-	 assertEquals("moved to new turn - update ordinal", 
+	  assertEquals("moved to new turn - update ordinal", 
 	 	      new Change(Change.Operation.Update, g.getAnnotation("word4"), "ordinal", new Integer(1)), 
 	 	      order.next());
 	 assertEquals("moved to new turn - same speaker", 
@@ -268,8 +268,8 @@ public class TestValidator
 	 	      new Change(Change.Operation.Update, g.getAnnotation("word5"), "ordinal", new Integer(2)), 
 	 	      order.next());
 	 assertEquals("parent on wrong layer", 
-		      new Change(Change.Operation.Update, g.getAnnotation("word6"), "parentId", "turn3"), 
-		      order.next());
+	 	      new Change(Change.Operation.Update, g.getAnnotation("word6"), "parentId", "turn3"), 
+	 	      order.next());
 	 assertEquals("parent on wrong layer - update ordinal", 
 	 	      new Change(Change.Operation.Update, g.getAnnotation("word6"), "ordinal", new Integer(3)), 
 	 	      order.next());
@@ -645,14 +645,14 @@ public class TestValidator
 			 g.getAnnotation("word6").getStartId(), 
 			 g.getAnnotation("word4").getStartId());
 	 assertEquals("word share start anchors - new start: " + changes, 
-		      new Change(Change.Operation.Update, g.getAnnotation("word4"), "startId", "1"), 
-		      order.next());
+	 	      new Change(Change.Operation.Update, g.getAnnotation("word4"), "startId", "1"), 
+	 	      order.next());
 	 assertNotEquals("word share end anchors - not shared any more: " + changes, 
 			 g.getAnnotation("word5").getEndId(), 
 			 g.getAnnotation("word4").getEndId());
 	 assertEquals("word share start anchors - new end: " + changes, 
-		      new Change(Change.Operation.Update, g.getAnnotation("word3"), "endId", "1"), 
-		      order.next());
+	 	      new Change(Change.Operation.Update, g.getAnnotation("word3"), "endId", "1"), 
+	 	      order.next());
 	 assertFalse(order.hasNext());
 	 assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
       }

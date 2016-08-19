@@ -21,6 +21,7 @@
 //
 package nzilbb.ag.util;
 
+import java.util.Arrays;
 import java.util.Vector;
 import java.util.Set;
 import java.util.SortedSet;
@@ -512,11 +513,11 @@ public class Merger
       {
 	 TreeSet<Annotation> uneditedAnnotations 
 	    = new TreeSet<Annotation>(new AnnotationComparatorByAnchor()); // TODO should these prioritise ordinal over anchor?
-	 uneditedAnnotations.addAll(graph.getAnnotations(layer.getId()));
+	 uneditedAnnotations.addAll(Arrays.asList(graph.list(layer.getId())));
 	 
 	 TreeSet<Annotation> editedAnnotations 
 	    = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
-	 editedAnnotations.addAll(editedGraph.getAnnotations(layer.getId()));
+	 editedAnnotations.addAll(Arrays.asList(editedGraph.list(layer.getId())));
 	 
 	 // (no changes to track:)
 	 mapAnnotationsForMerge(layer, uneditedAnnotations, editedAnnotations); 
@@ -792,7 +793,7 @@ public class Merger
       Vector<Change> changes = new Vector<Change>();
       String layerId = layer.getId();
       // unmapped annotations in graph are for deletion
-      for (Annotation an : graph.getAnnotations(layer.getId()))
+      for (Annotation an : graph.list(layer.getId()))
       {
 	 if (!hasCounterpart(an))
 	 {
@@ -810,7 +811,7 @@ public class Merger
       
       // unmapped annotations of theirs are for addition 
       Annotation anLastOriginal = null;
-      for (Annotation anEdited : editedGraph.getAnnotations(layerId))
+      for (Annotation anEdited : editedGraph.list(layerId))
       {
 	 if (!hasCounterpart(anEdited))
 	 {
@@ -901,7 +902,7 @@ public class Merger
 	       if (layerId.equals(schema.getTurnLayerId()) 
 		   && schema.getParticipantLayerId() != null)
 	       {
-		  for (Annotation participant : graph.getAnnotations(schema.getParticipantLayerId()))
+		  for (Annotation participant : graph.list(schema.getParticipantLayerId()))
 		  {
 		     if (participant.getLabel().equals(newAnnotation.getLabel()))
 		     {
@@ -1440,7 +1441,7 @@ public class Merger
       throws TransformationException
    {
       Vector<Change> changes = new Vector<Change>();
-      for (Annotation an : graph.getAnnotations(layer.getId()))
+      for (Annotation an : graph.list(layer.getId()))
       {
 	 Annotation anEdited = getCounterpart(an);
 	 if (anEdited == null) continue;
@@ -1493,7 +1494,7 @@ public class Merger
       Annotation anLastOriginal = null;
       // traverse the edited version of the graph, to ensure we're all in the new order
       TreeSet<Annotation> editedAnnotations = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
-      editedAnnotations.addAll(editedGraph.getAnnotations(layer.getId()));
+      editedAnnotations.addAll(Arrays.asList(editedGraph.list(layer.getId())));
       for (Annotation anEdited : editedAnnotations)
       {
 	 // get our mapped annotation
@@ -2154,7 +2155,7 @@ public class Merger
 	 bothLayers.add(parentLayerId);
 	 Annotation anLastOriginalParentsLastChild = null;
 	 // for each parent in the edited graph
-	 for (Annotation anParent : editedGraph.getAnnotations(parentLayerId))
+	 for (Annotation anParent : editedGraph.list(parentLayerId))
 	 {
 	    Annotation anOriginalParent = getCounterpart(anParent);
 	    log(layerId + ": Parent " + logAnnotation(anOriginalParent));
@@ -2295,6 +2296,8 @@ public class Merger
 		     changeStartWithRelatedAnnotations(anOriginalChild, anNewAnchor, bothLayers));
 		  log(layerId + ": New start anchor for: " + logAnnotation(anOriginalChild) + ": " + sNewAnchorReason);
 	       }
+	       assert anchors != null : "anchors != null";
+	       assert anOriginalChild != null : "anOriginalChild != null";
 	       if (!anchors.contains(anOriginalChild.getStart()))
 	       {
 		  anchors.add(anOriginalChild.getStart());
@@ -2965,7 +2968,7 @@ public class Merger
       if (debug)
       {
 	 log.add(message);
-//	 System.out.println(message);
+	 // System.out.println(message);
       }
    } // end of log()
 

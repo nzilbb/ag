@@ -272,7 +272,7 @@ public class DefaultOffsetGenerator
 	 {
 	    // log("Layer " + layer);
 	    // for each parent annotation
-	    for (Annotation parent : layer.getAnnotations())
+	    for (Annotation parent : graph.list(layer.getId()))
 	    {
 	       if (parent.getChange() == Change.Operation.Destroy) continue;
 	       try

@@ -108,7 +108,7 @@ public class ParticipantRenamer
 
       if (getOldNameToNewName().size() > 0)
       { // there is actually some work to do
-	 for (Annotation participant : graph.getAnnotations(schema.getParticipantLayerId()))
+	 for (Annotation participant : graph.list(schema.getParticipantLayerId()))
 	 {
 	    if (getOldNameToNewName().containsKey(participant.getLabel()))
 	    {

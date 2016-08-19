@@ -442,7 +442,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 	 Vector<Change> changes = new Vector<Change>();
 	 // group the source annotations by parent...
 	 // for each parent
-	 for (Annotation parent : graph.getAnnotations(graph.getLayer(getSourceLayerId()).getParentId()))
+	 for (Annotation parent : graph.list(graph.getLayer(getSourceLayerId()).getParentId()))
 	 {
 	    Vector<Annotation> span = null;
 	    Annotation previousSource = null;

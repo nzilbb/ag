@@ -180,7 +180,7 @@ public class SimpleTokenizer
       
       Pattern regexDelimiters = Pattern.compile(getDelimiters());
       // for each parent
-      for (Annotation parent : graph.getAnnotations(sourceParent.getId()))
+      for (Annotation parent : graph.list(sourceParent.getId()))
       {
 	 int ordinal = 0;
 	 for (Annotation source : new Vector<Annotation>(parent.getAnnotations(getSourceLayerId())))

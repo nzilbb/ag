@@ -26,6 +26,8 @@ import org.junit.*;
 import static org.junit.Assert.*;
 
 import java.util.LinkedHashMap;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Vector;
 import java.util.LinkedHashSet;
 import java.util.Iterator;
@@ -167,13 +169,6 @@ public class TestGraph
       assertEquals(word, brown.getLayer());
       assertEquals(word, fox.getLayer());
 
-      // layer contains annotation
-      assertTrue(word.getAnnotations().contains(the));
-      assertTrue(word.getAnnotations().contains(quick));
-      assertTrue(word.getAnnotations().contains(brown));
-      assertTrue(word.getAnnotations().contains(fox));
-      assertTrue(turn.getAnnotations().contains(turn1));
-
       // parents are set
       assertEquals(turn1, the.getParent());
       assertEquals(turn1, quick.getParent());
@@ -201,27 +196,22 @@ public class TestGraph
       assertNull(turn1.getNext());
 
       // graph's layer contains annotation
-      assertTrue(g.getAnnotations("word").contains(the));
-      assertTrue(g.getAnnotations("word").contains(quick));
-      assertTrue(g.getAnnotations("word").contains(brown));
-      assertTrue(g.getAnnotations("word").contains(fox));
-      assertTrue(g.getAnnotations("turn").contains(turn1));
-      // graph 'contains' itself
-      assertTrue(g.getAnnotations("graph").contains(g));
-      assertEquals(1, g.getAnnotations("graph").size());
+      List<Annotation> words = Arrays.asList(g.list("word"));
+      assertTrue(words.contains(the));
+      assertTrue(words.contains(quick));
+      assertTrue(words.contains(brown));
+      assertTrue(words.contains(fox));
+      assertTrue(words.size() == 4);
+      // TODO graph 'contains' itself
+      // assertEquals(g.list("graph")[0], g);
+      // assertEquals(1, g.list("graph").length);
       
-      assertTrue(g.getAnnotations("turn").contains(turn1));
-      // array version
-      assertTrue(g.annotations("turn")[0] == g.getAnnotations("turn").first());
+      List<Annotation> turns = Arrays.asList(g.list("turn"));
+      assertTrue(turns.contains(turn1));
 
-      // word is not top-level
-      assertFalse(g.containsKey("word"));
-      // however it is in the graph's "annotations" collection
-      assertTrue(g.getAnnotations("word").contains(the));
-      assertTrue(g.getAnnotations("word").contains(quick));
-      assertTrue(g.getAnnotations("word").contains(brown));
-      assertTrue(g.getAnnotations("word").contains(fox));
-      assertTrue(g.getAnnotations("word").size() == 4);
+      // array version for top level only
+      assertTrue(g.list("who")[0] == g.getAnnotations("who").first());
+
 
       // graph inherits from annotation, but some annotation behavrious are special
       assertNull(g.getLabel());
@@ -333,7 +323,7 @@ public class TestGraph
       assertEquals(the.getId(), posThe.getParentId());
       assertEquals(the, posThe.getParent());
       assertTrue(the.getAnnotations("pos").contains(posThe));
-      assertTrue(pos.getAnnotations().contains(posThe));
+      assertEquals(posThe, g.list("pos")[0]);
 
       // ID creation
       assertNotNull(posThe.getId());
@@ -358,8 +348,6 @@ public class TestGraph
       assertEquals(the.getId(), pronThe.getParentId());
       assertEquals(the, pronThe.getParent());
       assertTrue(the.getAnnotations("pron").contains(pronThe));
-      assertTrue(pron.getAnnotations().contains(pronThe));
-      assertEquals(pron.getAnnotations().first(), pron.annotations()[0]);
 
    }
 
@@ -492,7 +480,6 @@ public class TestGraph
       assertEquals(""+g.getChanges(), 0, g.getChanges().size());
 
       assertNull("ensure created annotations are removed by rollback", g.getAnnotation("word5"));
-      assertFalse("ensure created annotations are removed from layer by rollback", g.getLayer("word").getAnnotations().contains(jumps));
 
       g.create();
       assertEquals(Change.Operation.Create, g.getChange());
@@ -518,7 +505,7 @@ public class TestGraph
       assertEquals("Update turn1: startId = turnStart", changes.elementAt(i++).toString());
       assertEquals("Update turn1: endId = turnEnd", changes.elementAt(i++).toString());
       assertEquals("Update turn1: parentId = my graph", changes.elementAt(i++).toString());
-//      assertEquals("Update turn1: ordinal = 1", changes.elementAt(i++).toString());
+      assertEquals("Update turn1: ordinal = 1", changes.elementAt(i++).toString());
       assertEquals("Create word1", changes.elementAt(i++).toString());
       assertEquals("Update word1: label = the", changes.elementAt(i++).toString());
       assertEquals("Update word1: startId = a1", changes.elementAt(i++).toString());
@@ -636,8 +623,11 @@ public class TestGraph
       assertEquals("Destroy word2", changes.elementAt(i++).toString());
       assertEquals("" + changes, i, changes.size());
 
+      assertEquals(1, turn1.getOrdinal());
+
       // replace a parent
       Annotation newTurn = new Annotation("newTurn", "john smith", "turn", "turnStart", "turnEnd", "my graph");
+      assertNull(newTurn.get("ordinal"));
       newTurn.create();
       g.addAnnotation(newTurn);
       turn1.destroy();
@@ -658,7 +648,7 @@ public class TestGraph
       assertEquals("Update newTurn: startId = turnStart", changes.elementAt(i++).toString());
       assertEquals("Update newTurn: endId = turnEnd", changes.elementAt(i++).toString());
       assertEquals("Update newTurn: parentId = my graph", changes.elementAt(i++).toString());
-//      assertEquals(""+changes, "Update newTurn: ordinal = 2", changes.elementAt(i++).toString());
+      assertEquals("Update newTurn: ordinal = 1", changes.elementAt(i++).toString());
       // new child is created after its parent, and before its peers are changed
       assertEquals("Create word5", changes.elementAt(i++).toString());
       assertEquals("Update word5: label = jumps", changes.elementAt(i++).toString());
@@ -681,18 +671,13 @@ public class TestGraph
       // delete an anchor
       g.getAnchor("a7").destroy();
       Annotation word2 = g.getAnnotation("word2");
-      assertTrue("commit will remove deleted annotations from layer", 
-		 g.getLayer("word").getAnnotations().contains(word2));
       g.commit();
       assertEquals(Change.Operation.NoChange, g.getChange());
       assertNull("commit removes deleted annotations", g.getAnnotation("word2"));
       assertEquals("commit removes anchor references to deleted annotations", 0, g.getAnchor("a2").startOf("word").size());
       assertEquals("commit removes anchor references to deleted annotations", 0, g.getAnchor("a3").endOf("word").size());
       assertNull("commit removes deleted annotations", g.getAnnotation("turn1"));
-      assertFalse("commit removes deleted annotations from layer", 
-		  g.getLayer("word").getAnnotations().contains(word2));
       assertNull("commit removes deleted anchors", g.getAnchor("a7"));
-      assertFalse("commit removes deleted annotations from layer", g.getLayer("word").getAnnotations().contains(quick));
    }
 
    @Test public void constructionOrder() 
@@ -770,11 +755,13 @@ public class TestGraph
       assertEquals("Ordinals ignore insertion order:", 4, fox.getOrdinal());
 
       // layer contains annotation
-      assertTrue(word.getAnnotations().contains(the));
-      assertTrue(word.getAnnotations().contains(quick));
-      assertTrue(word.getAnnotations().contains(brown));
-      assertTrue(word.getAnnotations().contains(fox));
-      assertTrue(turn.getAnnotations().contains(turn1));
+      List<Annotation> words = Arrays.asList(g.list("word"));
+      assertTrue(words.contains(the));
+      assertTrue(words.contains(quick));
+      assertTrue(words.contains(brown));
+      assertTrue(words.contains(fox));
+      List<Annotation> turns = Arrays.asList(g.list("turn"));
+      assertTrue(turns.contains(turn1));
 
       // parents are set
       assertEquals(g, turn1.getParent());
@@ -810,16 +797,6 @@ public class TestGraph
       assertEquals(fox, brown.getNext());
       assertNull(fox.getNext());
       assertNull(turn1.getNext());
-
-      // graph's layer contains annotation
-      assertTrue(g.getAnnotations("word").contains(the));
-      assertTrue(g.getAnnotations("word").contains(quick));
-      assertTrue(g.getAnnotations("word").contains(brown));
-      assertTrue(g.getAnnotations("word").contains(fox));
-      assertTrue(g.getAnnotations("turn").contains(turn1));
-      
-      assertTrue(g.getAnnotations("turn").contains(turn1));
-
    }
 
    @Test public void annotationHierarchy() 

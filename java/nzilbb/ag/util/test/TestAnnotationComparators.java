@@ -82,7 +82,19 @@ public class TestAnnotationComparators
       g.addAnnotation(new Annotation("word5", "jumps", "word", "a?1", "a?2", "turn1"));
       g.addAnnotation(new Annotation("word6", "over", "word", "a?2", "a5", "turn1"));
 
-      TreeSet<Annotation> annotations = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
+      AnnotationComparatorByAnchor comparator = new AnnotationComparatorByAnchor();
+      for (Annotation a1 : g.getAnnotationsById().values())
+      {
+	 for (Annotation a2 : g.getAnnotationsById().values())
+	 {
+	    if (a1 != a2)
+	    {
+	       assertNotEquals("spurious equality", 0, comparator.compare(a1, a2));
+	    }
+	 }
+      }
+
+      TreeSet<Annotation> annotations = new TreeSet<Annotation>(comparator);
       annotations.addAll(g.getAnnotationsById().values());
       // System.out.println(""+annotations);
       Iterator<Annotation> order = annotations.iterator();

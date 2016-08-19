@@ -250,7 +250,7 @@ public class Graph
 	 if (layer != null)
 	 {
 	    fragment.addLayer((Layer)layer.clone());
-	    for (Annotation annotation : getAnnotations(layerId))
+	    for (Annotation annotation : list(layerId))
 	    {
 	       Double min = annotation.getStart().getOffsetMin();
 	       Double max = annotation.getEnd().getOffsetMax();
@@ -319,7 +319,7 @@ public class Graph
 	 if (layer != null)
 	 {
 	    fragment.addLayer((Layer)layer.clone());
-	    for (Annotation annotation : getAnnotations(layerId))
+	    for (Annotation annotation : list(layerId))
 	    {
 	       if (annotation.getAncestors().contains(definingAnnotation))
 	       {
@@ -389,7 +389,7 @@ public class Graph
 	    if (layer != null)
 	    {
 	       fragment.addLayer((Layer)layer.clone());
-	       for (Annotation annotation : getAnnotations(layerId))
+	       for (Annotation annotation : list(layerId))
 	       {
 		  Double min = annotation.getStart().getOffsetMin();
 		  Double max = annotation.getEnd().getOffsetMax();
@@ -496,7 +496,7 @@ public class Graph
       // add to the parent's collection
       if (annotation.getParent() != null)
       { // this ensures it's in the parent's child collection
-	 annotation.setParent(annotation.getParent());
+	 annotation.setParent(annotation.getParent(), false);
       }	 
       // find any children that might have already been added
       if (annotation.getLayer() != null)
@@ -504,9 +504,9 @@ public class Graph
 	 Layer layer = annotation.getLayer();
 	 for (Layer childLayer : layer.getChildren().values())
 	 {
-	    SortedSet<Annotation> newChildren = new TreeSet<Annotation>();
+	    Vector<Annotation> newChildren = new Vector<Annotation>();
 	    // gather up new children
-	    for (Annotation otherAnnotation : childLayer.getAnnotations())
+	    for (Annotation otherAnnotation : annotationsById.values()) // TODO too slow?
 	    {
 	       if (otherAnnotation.getParentId() != null
 		   && otherAnnotation.getParentId().equals(annotation.getId()))
@@ -517,14 +517,14 @@ public class Graph
 	    // add them in order
 	    for (Annotation child : newChildren)
 	    {
-	       child.setParent(annotation);
+	       child.setParent(annotation, false);
 	    } // next child
 	 } // next child layer
 
 	 // also set the parent if it's a child of "graph"
 	 if (layer.getParentId().equals("graph"))
 	 {
-	    annotation.setParent(this);
+	    annotation.setParent(this, false);
 	 }
       } 
 
@@ -724,7 +724,6 @@ public class Graph
    public void addLayer(Layer layer)
    {
       getSchema().addLayer(layer);
-      annotations.put(layer.getId(), layer.getAnnotations());
    } // end of addLayer()
 
    
@@ -767,8 +766,8 @@ public class Graph
     */
    public String[] labels(String layerId)
    {
-      SortedSet<Annotation> annotations = getAnnotations(layerId);
-      String[] labels = new String[annotations.size()];
+      Annotation[] annotations = list(layerId);
+      String[] labels = new String[annotations.length];
       int i = 0;
       for (Annotation annotation : annotations)
       {
@@ -977,38 +976,6 @@ public class Graph
    public Anchor getEnd() { return getAnchors().get(getEndId()); }
 
 
-   /**
-    * Access the child annotations on a given layer.
-    * <p>If this is a top-level layer, this collection is also accessible in the Annotation's map with a key named after <var>layerId</var> - e.g. this.annotations("turn") == this.get("turn"). The only exception is when <var>layerId is a reserved word - i.e. "id" or one of the keys registered in {@link #getTrackedAttributes()}</var>
-    * @param layerId The given layer ID.
-    * @return The child annotations on the given layer.
-    */
-   public SortedSet<Annotation> getAnnotations(String layerId)
-   {
-      if (layerId.equals("graph"))
-      { // special case
-	 TreeSet<Annotation> annotations = new TreeSet<Annotation>();
-	 annotations.add(this);
-	 return annotations;
-      }
-      Layer layer = getLayer(layerId);
-      if (layer == null) return null;
-      TreeSet<Annotation> annotations = new TreeSet<Annotation>(
-	 new AnnotationComparatorByOrdinal());
-      annotations.addAll(layer.getAnnotations());
-      return annotations;
-   } // end of getAnnotations()
-
-   /**
-    * Gets a list of related annotations on the given layer.
-    * @param layerId The layer of the desired annotations.
-    * @return The related annotations, or an empty array if none could be found on the given layer.
-    */
-   public Annotation[] list(final String layerId)
-   {
-      return annotations(layerId);
-   }
-
    // TrackedMap methods
 
    /**
@@ -1028,9 +995,8 @@ public class Graph
 	    a.setStartId(null); // remove reference from start anchor
 	    a.setEndId(null); // remove reference from end anchor
 	    a.setParent(null); // remove reference from parent
-	    a.getLayer().getAnnotations().remove(a); // remove reference from layer
+	    // a.getLayer().getAnnotations().remove(a); // remove reference from layer
 	    a.setLayer(null);
-System.out.println("REMOVING " + a.getId() + " " + a.getLabel() + " " + a.getOrdinal());
 	    iAnnotation.remove();
 	 }
 	 else
@@ -1087,7 +1053,6 @@ System.out.println("REMOVING " + a.getId() + " " + a.getLabel() + " " + a.getOrd
 	    a.setStartId(null); // remove reference from start anchor
 	    a.setEndId(null); // remove reference from end anchor
 	    a.setParent(null); // remove reference from parent
-	    a.getLayer().getAnnotations().remove(a); // remove reference from layer
 	    a.setLayer(null);
 	    iAnnotation.remove();
 	 }

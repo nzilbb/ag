@@ -158,24 +158,6 @@ public class Layer // TODO add type attribute
 
 
    /**
-    * List of annotations on this layer.
-    * @see #getAnnotations()
-    * @see #setAnnotations(TreeSet)
-    */
-   protected SortedSet<Annotation> annotations = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
-   /**
-    * Getter for {@link #annotations}: List of annotations on this layer.
-    * @return List of annotations on this layer.
-    */
-   public SortedSet<Annotation> getAnnotations() { return annotations; }
-   /**
-    * Setter for {@link #annotations}: List of annotations on this layer.
-    * @param newAnnotations List of annotations on this layer.
-    */
-   public void setAnnotations(SortedSet<Annotation> newAnnotations) { annotations = newAnnotations; }
-   
-
-   /**
     * Getter for <i>children</i>: Child layers.
     * @return Child layers.
     */
@@ -309,15 +291,6 @@ public class Layer // TODO add type attribute
 
 
    /**
-    * Access the annotations on this layer, as an array (for environments that deal better with arrays than collections).
-    * @return The annotations on this layer.
-    */
-   public Annotation[] annotations()
-   {
-      return getAnnotations().toArray(new Annotation[0]);
-   } // end of annotations()
-
-   /**
     * Returns a list of ancestor layers (parent, grandparent, etc.).
     * @return A set of ancestor layers, ordered by distance from this annotation (i.e. parent first, then grandparent, etc.).
     */
@@ -335,9 +308,13 @@ public class Layer // TODO add type attribute
    } // end of getAncestors()
 
    /**
-    * Determines the first ancestor layer this layer has in common with the given layer. This may return the graph layer itself, if there are no earlier common ancestors. "Ancestors" is inclusive in the sense that if either annotation is an ancestor of the other, it will be returned.
+    * Determines the first ancestor layer this layer has in common with the given layer.
+    * This may return the graph layer itself, if there are no earlier common ancestors.
+    * "Ancestors" is inclusive in the sense that if either annotation is an ancestor of
+    * the other, it will be returned.
     * @param other The other layer.
-    * @return The first ancestor layer this layer has in common with the given layer, or null if the hierarchy is incomplete and no common ancestor was found.
+    * @return The first ancestor layer this layer has in common with the given layer, or
+    * null if the hierarchy is incomplete and no common ancestor was found.
     */
    public Layer getFirstCommonAncestor(Layer other)
    {

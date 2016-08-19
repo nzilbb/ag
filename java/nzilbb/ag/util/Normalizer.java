@@ -77,21 +77,21 @@ public class Normalizer
 
       if (schema.getEpisodeLayerId() != null)
       {
-	 SortedSet<Annotation> episode = graph.getAnnotations(schema.getEpisodeLayerId());
-	 SortedSet<Annotation> participants = graph.getAnnotations(schema.getParticipantLayerId());
-	 if (participants.size() == 1 && episode.size() > 0)
+	 Annotation[] episode = graph.list(schema.getEpisodeLayerId());
+	 Annotation[] participants = graph.list(schema.getParticipantLayerId());
+	 if (participants.length == 1 && episode.length > 0)
 	 {
-	    Annotation onlyParticipant = participants.first();
+	    Annotation onlyParticipant = participants[0];
 	    if (onlyParticipant.getLabel() == null || onlyParticipant.getLabel().length() == 0)
 	    {
 	       changes.addAll( // record changes for:
-		  onlyParticipant.setLabel(episode.first().getLabel()));
+		  onlyParticipant.setLabel(episode[0].getLabel()));
 	    }
 	 }
       } // episode layer set
 
       // ensure turns and utterances are labelled with participant labels
-      for (Annotation participant : graph.getAnnotations(schema.getParticipantLayerId()))
+      for (Annotation participant : graph.list(schema.getParticipantLayerId()))
       {
 	 for (Annotation turn : participant.getAnnotations(schema.getTurnLayerId()))
 	 {
@@ -134,7 +134,7 @@ public class Normalizer
 
       // join subsequent turns by the same speaker...
       // for each participant (assumed to be parent of turn)
-      for (Annotation participant : graph.getAnnotations(schema.getParticipantLayerId()))
+      for (Annotation participant : graph.list(schema.getParticipantLayerId()))
       {
 	 Annotation[] turns = participant.annotations(schema.getTurnLayerId());
 	 // go back through all the turns, looking for a turn for the same speaker that is
@@ -155,7 +155,7 @@ public class Normalizer
       } // next turn parent
 
       // disconnect words from turns and utterances
-      for (Annotation word : graph.getAnnotations(schema.getWordLayerId()))
+      for (Annotation word : graph.list(schema.getWordLayerId()))
       {
 	 // check start anchor
 	 if (word.getStart().isStartOn(schema.getTurnLayerId())

@@ -386,11 +386,22 @@ public class Annotation
       }
    }
    /**
-    * Setter for <var>parent</var>: The annotation's parent annotation, if any.
+    * Setter for <var>parent</var>: The annotation's parent annotation, if any. A side-effect is that the annotation will be appended to the parent's collection of children.
     * @param newParent The annotation's parent annotation, if any.
     * @return A collection of resulting changes (which may be empty or may include an ordinal change)
     */
    public Vector<Change> setParent(Annotation newParent) 
+   { 
+      return setParent(newParent, true);
+   }   
+
+   /**
+    * Setter for <var>parent</var>: The annotation's parent annotation, if any.
+    * @param newParent The annotation's parent annotation, if any.
+    * @param append true if the annotation should be added to the end of the parent's existing children, false if it should keep its current ordinal.
+    * @return A collection of resulting changes (which may be empty or may include an ordinal change)
+    */
+   public Vector<Change> setParent(Annotation newParent, boolean append) 
    { 
       Vector<Change> changes = new Vector<Change>();
       Annotation currentParent = getParent();
@@ -415,14 +426,17 @@ public class Annotation
 	 { // ensure the collection exists
 	    newParent.getAnnotations(getLayerId());
 	 } // but we use the real collection, not the copy returned by getAnnotations(String)...
-	 Collection<Annotation> newSiblings = newParent.getAnnotations().get(getLayerId());
+	 SortedSet<Annotation> newSiblings = newParent.getAnnotations().get(getLayerId());
 	 // if it's still null, this must be the graph, so use the layer annotations collection
-	 if (newSiblings == null) newSiblings = newParent.getLayer().getAnnotations();
-	 if (!newSiblings.contains(this))
+	 // if (newSiblings == null) newSiblings = newParent.getLayer().getAnnotations();
+	 if (newSiblings != null && !newSiblings.contains(this))
 	 {
 	    newSiblings.add(this);
-	    changes.addAll(
-	       setOrdinal(newSiblings.size()));
+	    if (append || get("ordinal") == null)
+	    {
+	       changes.addAll(
+		  setOrdinal(newSiblings.size()));
+	    }
 	 }
 /* TODO this incurs a surprisingly huge performance hit 
 	 Layer layer = getLayer();
@@ -528,18 +542,9 @@ public class Annotation
     */
    public void setLayer(Layer layer) 
    { 
-      Layer currentLayer = getLayer();
-      if (currentLayer != null && layer != currentLayer)
-      {
-	 currentLayer.getAnnotations().remove(this);
-      }
       if (layer != null)
       {
 	 setLayerId(layer.getId());
-	 if (!layer.getAnnotations().contains(this))
-	 {
-	    layer.getAnnotations().add(this);
-	 }
       }
    }
    
@@ -840,15 +845,16 @@ public class Annotation
     */
    public Annotation[] list(final String layerId)
    {
-      // is it a child layer?
+      // is layerId a child layer?
       if (getAnnotations().containsKey(layerId))
       {
 	 return annotations(layerId);
       }
       Layer layer = getGraph().getLayer(layerId);
       Layer commonAncestorLayer = getLayer().getFirstCommonAncestor(layer);
-      // check for descendants
-      if (commonAncestorLayer.equals(getLayer()))
+      if (commonAncestorLayer == null) return new Annotation[0]; // invalid layer
+      // is our layer an ancestor of layerId
+      if (commonAncestorLayer.getId().equals(getLayer().getId()))
       { // we are an ancestor of the target layer
 	 LayerTraversal<Vector<Annotation>> descendantTraversal 
 	    = new LayerTraversal<Vector<Annotation>>(new Vector<Annotation>(), this)
@@ -917,11 +923,11 @@ public class Annotation
 	 TreeSet<Annotation> annotations = new TreeSet<Annotation>(
 	    new AnnotationComparatorByOrdinal());
 	 getAnnotations().put(layerId, annotations);
-	 // also create an attribute named after the layer, as long as it's not otherwise in use
-	 if (!layerId.equals("id") && !getTrackedAttributes().contains(layerId))
-	 {
-	    put(layerId, annotations);
-	 }
+	 // // also create an attribute named after the layer, as long as it's not otherwise in use
+	 // if (!layerId.equals("id") && !getTrackedAttributes().contains(layerId))
+	 // {
+	 //    put(layerId, annotations);
+	 // }
 	 return annotations;
       }
       else
@@ -1199,7 +1205,7 @@ public class Annotation
       Vector<Annotation> includingAnnotations = new Vector<Annotation>();
       if (graph != null)
       {
-	 for (Annotation other : graph.getAnnotations(layerId))
+	 for (Annotation other : graph.list(layerId))
 	 {
 	    if (other.getChange() == Change.Operation.Destroy) continue;
 	    if (other == this) continue; // exclude ourselves
@@ -1223,7 +1229,7 @@ public class Annotation
       Vector<Annotation> includedAnnotations = new Vector<Annotation>();
       if (graph != null)
       {
-	 for (Annotation other : graph.getAnnotations(layerId))
+	 for (Annotation other : graph.list(layerId))
 	 {
 	    if (other.getChange() == Change.Operation.Destroy) continue;
 	    if (other == this) continue; // exclude ourselves
@@ -1247,7 +1253,7 @@ public class Annotation
       Vector<Annotation> includingAnnotations = new Vector<Annotation>();
       if (graph != null)
       {
-	 for (Annotation other : graph.getAnnotations(layerId))
+	 for (Annotation other : graph.list(layerId))
 	 {
 	    if (other.getChange() == Change.Operation.Destroy) continue;
 	    if (other == this) continue; // exclude ourselves
