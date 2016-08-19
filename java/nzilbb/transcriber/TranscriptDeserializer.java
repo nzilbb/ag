@@ -23,6 +23,9 @@ package nzilbb.transcriber;
 
 import java.util.Vector;
 import java.util.HashMap;
+import java.io.IOException;
+import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXException;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
@@ -99,10 +102,11 @@ public class TranscriptDeserializer
     *  transcription/annotation data required, and possibly (a) stream(s) for the media annotated.
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of parameters that require setting before {@link IDeserializer#deserialize()} can be invoked. This may be an empty list, and may include parameters with the value already set to a workable default. If there are parameters, and user interaction is possible, then the user may be presented with an interface for setting/confirming these parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
-    * @throws Exception If the stream could not be loaded.
+    * @throws SerializationException If the graph could not be loaded.
+    * @throws IOException On IO error.
     */
    @SuppressWarnings({"rawtypes", "unchecked"})
-   public ParameterSet load(NamedStream[] streams, Schema schema) throws Exception
+   public ParameterSet load(NamedStream[] streams, Schema schema) throws SerializationException, IOException
    {
       reset();
 
@@ -112,7 +116,18 @@ public class TranscriptDeserializer
       NamedStream trs = Utility.findSingleStream(streams, ".trs", "text/xml-transcriber");
       if (trs == null) throw new SerializationException("No Transciber transcript stream found");
       setId(trs.getName());
-      load(trs.getStream());
+      try
+      {
+	 load(trs.getStream());
+      }
+      catch(ParserConfigurationException exception)
+      {
+	 throw new SerializationException(exception);
+      }
+      catch(SAXException exception)
+      {
+	 throw new SerializationException(exception);
+      }
 
       setSchema(schema);
 
