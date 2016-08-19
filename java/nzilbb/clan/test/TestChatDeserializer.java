@@ -26,7 +26,7 @@ import org.junit.*;
 import static org.junit.Assert.*;
 
 import java.util.LinkedHashMap;
-import java.util.Vector;
+import java.util.SortedSet;
 import java.util.LinkedHashSet;
 import java.util.Iterator;
 import java.io.File;
@@ -95,7 +95,7 @@ public class TestChatDeserializer
       assertEquals("en", languages[0]);
 
       // participants     
-      assertEquals(2, g.getAnnotations("who").size());
+      assertEquals(2, g.list("who").length);
       assertEquals("Nony_mouse", g.getAnnotation("SUB").getLabel());
       assertEquals("who", g.getAnnotation("SUB").getLayerId());
       assertEquals("Investigator", g.getAnnotation("EXA").getLabel());
@@ -110,19 +110,19 @@ public class TestChatDeserializer
       assertEquals("Investigator", g.getAnnotation("EXA").my("role").getLabel());
 
       // turns
-      Vector<Annotation> turns = g.getAnnotations("turn");
-      assertEquals(1, turns.size());
-      assertEquals(new Double(0.0), turns.elementAt(0).getStart().getOffset());
+      Annotation[] turns = g.list("turn");
+      assertEquals(1, turns.length);
+      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
       assertEquals("unaligned final utterance - turn has end time", 
-		   new Double(681.935), turns.elementAt(0).getEnd().getOffset());
-      assertEquals(g.getAnnotation("SUB"), turns.elementAt(0).getParent());
+		   new Double(681.935), turns[0].getEnd().getOffset());
+      assertEquals(g.getAnnotation("SUB"), turns[0].getParent());
 
       // utterances
-      Annotation[] utterances = g.annotations("utterance");
+      Annotation[] utterances = g.list("utterance");
       assertEquals(new Double(0.001), utterances[0].getStart().getOffset());
       assertEquals(new Double(21.510), utterances[0].getEnd().getOffset());
       assertEquals("SUB", utterances[0].getParent().getLabel());
-      assertEquals(turns.elementAt(0), utterances[0].getParent());
+      assertEquals(turns[0], utterances[0].getParent());
 
       assertEquals("wrapped line", new Double(21.510), utterances[1].getStart().getOffset());
       assertEquals("simultaneos with next line", 
@@ -202,7 +202,7 @@ public class TestChatDeserializer
 		   Constants.CONFIDENCE_DEFAULT, 
 		   utterances[utterances.length-2].getEnd().get(Constants.CONFIDENCE));
       
-      Annotation[] words = g.annotations("turn")[0].list("word");
+      Annotation[] words = g.list("turn")[0].list("word");
       String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
 	 "ab", "abc", "abcdef", "abcd", "gonna", "lie", "abcd", "abc", "pet", "abcdefghij", 
 	 "abc", "abcde", "abc", "ab", "abcd", "ab", "abc", "worryin", "i", "abcd",
@@ -212,12 +212,13 @@ public class TestChatDeserializer
 	 "abc", "abcdefg", "abc", "abcd", "abcde", "abc", "abcd", "abc", "a", "b", "c", "d"};
       for (int i = 0; i < wordLabels.length; i++)
       {
+	 System.out.println(words[i].getId() + " "  + words[i].getLabel() + " " + words[i].getParent() + " " + words[i].getOrdinal() + " " + words[i].getStart() + " " + words[i].getChange());
 	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
       }
       for (int i = 0; i < words.length; i++)
       {
 	 assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
-		      i+1, words[i].getOrdinal());
+	 	      i+1, words[i].getOrdinal());
       }
 
       assertEquals("they've", words[270].getLabel());
@@ -229,13 +230,13 @@ public class TestChatDeserializer
       assertEquals("Unaligned last utterance doesn't cause @End to be last word",
 		   "test", words[words.length-1].getLabel());
 
-      assertEquals(turns.elementAt(0).getId(), words[271].getParentId());
-      assertEquals(turns.elementAt(0).getId(), words[272].getParentId());
-      assertEquals(turns.elementAt(0).getId(), words[273].getParentId());
-      assertEquals(turns.elementAt(0).getId(), words[274].getParentId());
-      assertEquals(turns.elementAt(0).getId(), words[275].getParentId());
-      assertEquals(turns.elementAt(0).getId(), words[276].getParentId());
-      assertEquals(turns.elementAt(0).getId(), words[277].getParentId());
+      assertEquals(turns[0].getId(), words[271].getParentId());
+      assertEquals(turns[0].getId(), words[272].getParentId());
+      assertEquals(turns[0].getId(), words[273].getParentId());
+      assertEquals(turns[0].getId(), words[274].getParentId());
+      assertEquals(turns[0].getId(), words[275].getParentId());
+      assertEquals(turns[0].getId(), words[276].getParentId());
+      assertEquals(turns[0].getId(), words[277].getParentId());
 
       for (int i = 0; i < words.length; i++)
       {	 
@@ -245,7 +246,7 @@ public class TestChatDeserializer
       }
 
       // c-units
-      Annotation[] cUnits = g.annotations("c-unit");
+      Annotation[] cUnits = g.list("c-unit");
       assertEquals(150, cUnits.length);
       assertEquals(".", cUnits[0].getLabel());
       assertEquals(utterances[0].getStart(), cUnits[0].getStart());
@@ -275,7 +276,7 @@ public class TestChatDeserializer
 	 assertEquals("tagged as manual: " + a + " " + a.getStart() + "-" + a.getEnd(), 
 		      new Integer(Constants.CONFIDENCE_MANUAL), a.get(Constants.CONFIDENCE));
 	 assertEquals("parent set: " + a + " " + a.getStart() + "-" + a.getEnd(), 
-		      turns.elementAt(0), a.getParent());
+		      turns[0], a.getParent());
       }
 
       // disfluency
@@ -283,13 +284,13 @@ public class TestChatDeserializer
       assertEquals("&", words[18].my("disfluency").getLabel());
       assertEquals("word is parent", words[18], words[18].my("disfluency").getParent());
       // ensure they're marked as manual annotations
-      for (Annotation a : g.annotations("disfluency"))
+      for (Annotation a : g.list("disfluency"))
       {
 	 assertEquals("tagged as manual: " + a, 
 		      new Integer(Constants.CONFIDENCE_MANUAL), a.get(Constants.CONFIDENCE));
       }
 
-      Annotation[] expansions = g.annotations("expansion");
+      Annotation[] expansions = g.list("expansion");
       assertEquals(1, expansions.length);
       assertEquals("going to", expansions[0].getLabel());
       assertEquals("gonna", expansions[0].my("word").getLabel());
@@ -306,12 +307,12 @@ public class TestChatDeserializer
       }
 
       // linkages
-      Annotation[] linkages = g.annotations("linkage");
+      Annotation[] linkages = g.list("linkage");
       assertEquals(1, linkages.length);
       assertEquals("a_b_c_d", linkages[0].getLabel());
 
       // errors
-      Annotation[] errors = g.annotations("error");
+      Annotation[] errors = g.list("error");
       assertEquals(8, errors.length);
 
       // tag marked span
@@ -341,7 +342,7 @@ public class TestChatDeserializer
       }
 
       // completion
-      Annotation[] completions = g.annotations("completion");
+      Annotation[] completions = g.list("completion");
       assertEquals(3, completions.length);
       for (Annotation a : completions)
       {
@@ -359,7 +360,7 @@ public class TestChatDeserializer
       assertEquals("leading/trailing completion", "refridgerator", words[280].my("completion").getLabel());
 
       // retracing
-      Annotation[] retracing = g.annotations("retracing");
+      Annotation[] retracing = g.list("retracing");
       assertEquals(6, retracing.length);
       for (Annotation a : retracing)
       {
@@ -389,7 +390,7 @@ public class TestChatDeserializer
 		   retracing[3].getEnd().endOf("word").iterator().next().getLabel());
 
       // repetition
-      Annotation[] repetition = g.annotations("repetition");
+      Annotation[] repetition = g.list("repetition");
       assertEquals(3, repetition.length);
 
       // tag marked word
@@ -420,7 +421,7 @@ public class TestChatDeserializer
       }
 
       // gems
-      Annotation[] gems = g.annotations("gem");
+      Annotation[] gems = g.list("gem");
       assertEquals(11, gems.length);
       assertEquals(new Double(0.001), gems[0].getStart().getOffset());
       assertEquals("gdc", gems[0].getLabel());
@@ -457,7 +458,7 @@ public class TestChatDeserializer
       assertEquals(new Double(657.253), gems[9].getEnd().getOffset());
       assertEquals(new Double(657.253), gems[10].getStart().getOffset());
       assertEquals("cat", gems[10].getLabel());
-      assertEquals(turns.elementAt(0).getEnd(), gems[10].getEnd());
+      assertEquals(turns[0].getEnd(), gems[10].getEnd());
       for (Annotation a : gems)
       {
 	 assertEquals("tagged as manual: " + a, 
@@ -513,7 +514,7 @@ public class TestChatDeserializer
       assertEquals("en", languages[0]);
 
       // participants     
-      assertEquals(2, g.getAnnotations("who").size());
+      assertEquals(2, g.list("who").length);
       assertEquals("Nony_mouse", g.getAnnotation("SUB").getLabel());
       assertEquals("who", g.getAnnotation("SUB").getLayerId());
       assertEquals("Investigator", g.getAnnotation("EXA").getLabel());
@@ -528,19 +529,19 @@ public class TestChatDeserializer
       assertEquals("Investigator", g.getAnnotation("EXA").my("role").getLabel());
 
       // turns
-      Vector<Annotation> turns = g.getAnnotations("turn");
-      assertEquals(1, turns.size());
-      assertEquals(new Double(0.0), turns.elementAt(0).getStart().getOffset());
+      Annotation[] turns = g.list("turn");
+      assertEquals(1, turns.length);
+      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
       assertEquals("unaligned final utterance - turn has end time", 
-		   new Double(681.935), turns.elementAt(0).getEnd().getOffset());
-      assertEquals(g.getAnnotation("SUB"), turns.elementAt(0).getParent());
+		   new Double(681.935), turns[0].getEnd().getOffset());
+      assertEquals(g.getAnnotation("SUB"), turns[0].getParent());
 
       // utterances
-      Annotation[] utterances = g.annotations("utterance");
+      Annotation[] utterances = g.list("utterance");
       assertEquals(new Double(0.001), utterances[0].getStart().getOffset());
       assertEquals(new Double(21.510), utterances[0].getEnd().getOffset());
       assertEquals("SUB", utterances[0].getParent().getLabel());
-      assertEquals(turns.elementAt(0), utterances[0].getParent());
+      assertEquals(turns[0], utterances[0].getParent());
 
       assertEquals("wrapped line", new Double(21.510), utterances[1].getStart().getOffset());
       assertEquals("simultaneos with next line", 
@@ -605,7 +606,7 @@ public class TestChatDeserializer
 		   utterances[utterances.length-2].getEnd().get(Constants.CONFIDENCE));
 
       
-      Annotation[] words = g.annotations("word");
+      Annotation[] words = g.list("word");
       String[] wordLabels = { 
 	 // NB we have no c-unit layer, so terminators are still present
 	 // NB we have no linkage layer, so linkages are not split
@@ -622,23 +623,23 @@ public class TestChatDeserializer
       for (int i = 0; i < words.length; i++)
       {
 	 assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
-		      i+1, words[i].getOrdinal());
+	 	      i+1, words[i].getOrdinal());
       }
 
       // disfluency
       assertEquals("i", words[18].getLabel());
       assertNull("disfluency not tagged", words[18].my("disfluency"));
-      assertNull("no disfluencies", g.annotations("disfluency"));
+      assertEquals("no disfluencies", 0, g.list("disfluency").length);
 
       // expansions
-      assertNull("no expansions", g.annotations("expansion"));
+      assertEquals("no expansions", 0, g.list("expansion").length);
       assertEquals("Pre expansion ordinal", "gonna", words[4].getLabel());
       assertEquals("Pre expansion ordinal", 5, words[4].getOrdinal());
       assertEquals("Post expansion ordinal", "lie", words[5].getLabel());
       assertEquals("Post expansion ordinal", 6, words[5].getOrdinal());
 
       // errors
-      assertNull("errors not tagged", g.annotations("error"));
+      assertEquals("errors not tagged", 0, g.list("error").length);
 
       assertEquals("they've", words[268].getLabel());
       assertEquals("work", words[269].getLabel());
@@ -648,25 +649,25 @@ public class TestChatDeserializer
       assertEquals(".", words[273].getLabel());
       assertEquals("ab", words[274].getLabel());
 
-      assertEquals(turns.elementAt(0).getId(), words[267].getParentId());
-      assertEquals(turns.elementAt(0).getId(), words[268].getParentId());
-      assertEquals(turns.elementAt(0).getId(), words[269].getParentId());
-      assertEquals(turns.elementAt(0).getId(), words[270].getParentId());
-      assertEquals(turns.elementAt(0).getId(), words[271].getParentId());
-      assertEquals(turns.elementAt(0).getId(), words[272].getParentId());
-      assertEquals(turns.elementAt(0).getId(), words[273].getParentId());
+      assertEquals(turns[0].getId(), words[267].getParentId());
+      assertEquals(turns[0].getId(), words[268].getParentId());
+      assertEquals(turns[0].getId(), words[269].getParentId());
+      assertEquals(turns[0].getId(), words[270].getParentId());
+      assertEquals(turns[0].getId(), words[271].getParentId());
+      assertEquals(turns[0].getId(), words[272].getParentId());
+      assertEquals(turns[0].getId(), words[273].getParentId());
 
       // completion
-      assertNull("no completions", g.annotations("completion"));
+      assertEquals("no completions", 0, g.list("completion").length);
 
       // retracing
-      assertNull("no retracing", g.annotations("retracing"));
+      assertEquals("no retracing", 0, g.list("retracing").length);
 
       // repetition
-      assertNull("no repetitions", g.annotations("repetition"));
+      assertEquals("no repetitions", 0, g.list("repetition").length);
 
       // gems
-      assertNull("no gems", g.annotations("gem"));
+      assertEquals("no gems", 0, g.list("gem").length);
    }
 
    /**

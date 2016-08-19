@@ -82,7 +82,6 @@ public class TestAgCsvDeserializer
       for (Layer gLayer : g.getSchema().getLayers().values())
       {
 	 Layer sLayer = schema.getLayer(gLayer.getId());
-	 System.out.println(gLayer.getId() + " " + gLayer.getSaturated());
 	 assertNotNull(gLayer.getId(), sLayer);
 	 assertEquals(sLayer.getId(), gLayer.getId());
 	 assertEquals(sLayer.getParentId(), gLayer.getParentId());
@@ -95,13 +94,13 @@ public class TestAgCsvDeserializer
       }
 
       // participants     
-      Annotation[] who = g.annotations("who");
+      Annotation[] who = g.list("who");
       assertEquals(2, who.length);
       assertEquals("Maxwell Smart", who[0].getLabel());
       assertEquals("Agent 99", who[1].getLabel());
 
       // turns
-      Annotation[] turns = g.annotations("turns");
+      Annotation[] turns = g.list("turns");
       assertEquals(13, turns.length);
       assertEquals("em_11_0", turns[0].getId());
       assertEquals("n_10", turns[0].getStartId());
@@ -127,7 +126,7 @@ public class TestAgCsvDeserializer
       assertEquals("Agent 99", turns[12].getParent().getLabel());
 
       // utterances
-      Annotation[] utterances = g.annotations("utterances");
+      Annotation[] utterances = g.list("utterances");
       assertEquals(23, utterances.length);
       assertEquals("em_12_1", utterances[0].getId());
       assertEquals("n_10", utterances[0].getStartId());
@@ -153,7 +152,7 @@ public class TestAgCsvDeserializer
       assertEquals("Agent 99", utterances[22].getLabel());
       assertEquals(turns[12], utterances[22].getParent());
 
-      Annotation[] words = g.annotations("transcript");
+      Annotation[] words = g.list("transcript");
       assertEquals(82, words.length);
       String[] wordLabels = {
 	 "MID-LINE-CHANGES", "86-1-2", "86-1-3", 
@@ -173,7 +172,7 @@ public class TestAgCsvDeserializer
       assertEquals("comment on anchor", words[0].getStart().get("comment"));
       assertNull("no comment on first turn anchor",turns[0].get("comment"));
 
-      Annotation[] language = g.annotations("language");
+      Annotation[] language = g.list("language");
       assertEquals(4, language.length);
       assertEquals("spans 86-1-2 to 86-1-3", language[0].getLabel());
 
@@ -246,13 +245,13 @@ public class TestAgCsvDeserializer
       assertEquals("test__10.000-70.000", g.getId());
 
       // participants     
-      Annotation[] who = g.annotations("who");
+      Annotation[] who = g.list("who");
       assertEquals(1, who.length);
       assertEquals("Maxwell Smart", who[0].getLabel());
       assertEquals(g, who[0].getParent());
 
       // turns
-      Annotation[] turns = g.annotations("turns");
+      Annotation[] turns = g.list("turns");
       assertEquals(1, turns.length);
       assertEquals("em_11_0", turns[0].getId());
       assertEquals("n_100", turns[0].getStartId());
@@ -262,7 +261,7 @@ public class TestAgCsvDeserializer
       assertEquals(who[0], turns[0].getParent());
 
       // utterances
-      Annotation[] utterances = g.annotations("utterances");
+      Annotation[] utterances = g.list("utterances");
       assertEquals(2, utterances.length);
       assertEquals("em_12_1", utterances[0].getId());
       assertEquals("n_100", utterances[0].getStartId());
@@ -280,7 +279,7 @@ public class TestAgCsvDeserializer
       assertEquals("Maxwell Smart", utterances[1].getLabel());
       assertEquals(turns[0], utterances[1].getParent());
 
-      Annotation[] words = g.annotations("transcript");
+      Annotation[] words = g.list("transcript");
       assertEquals(6, words.length);
       String[] wordLabels = {
 	 "86-1-1", "86-1-2", "86-1-3", 
@@ -290,7 +289,7 @@ public class TestAgCsvDeserializer
 	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
       }
 
-      Annotation[] segments = g.annotations("segments");
+      Annotation[] segments = g.list("segments");
       assertEquals(7, segments.length);
       String[] segmentLabels = {
 	 "86-1-1-1", "86-1-1-2", "86-1-1-3", 

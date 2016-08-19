@@ -90,7 +90,7 @@ public class TestTranscriptDeserializer
       assertEquals("en", languages[0]);
 
       // participants     
-      assertEquals(2, g.getAnnotations("who").size());
+      assertEquals(2, g.list("who").length);
       assertEquals("Interviewer", g.getAnnotation("spk1").getLabel());
       assertEquals("who", g.getAnnotation("spk1").getLayerId());
       assertEquals("mop03-2b", g.getAnnotation("spk2").getLabel());
@@ -101,32 +101,32 @@ public class TestTranscriptDeserializer
       // assertEquals("male", g.getAnnotation("spk2").my("type").getLabel());
 
       // turns
-      Vector<Annotation> turns = g.getAnnotations("turn");
-      assertEquals(26, turns.size());
-      assertEquals(new Double(0.0), turns.elementAt(0).getStart().getOffset());
-      assertEquals(new Double(23.563), turns.elementAt(0).getEnd().getOffset());
-      assertEquals("mop03-2b", turns.elementAt(0).getLabel());
-      assertEquals(g.getAnnotation("spk2"), turns.elementAt(0).getParent());
-      assertEquals(new Double(302.834), turns.elementAt(24).getStart().getOffset());
-      assertEquals(new Double(304.334), turns.elementAt(24).getEnd().getOffset());
-      assertEquals("Interviewer", turns.elementAt(24).getLabel());
-      assertEquals(g.getAnnotation("spk1"), turns.elementAt(24).getParent());
+      Annotation[] turns = g.list("turn");
+      assertEquals(26, turns.length);
+      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
+      assertEquals(new Double(23.563), turns[0].getEnd().getOffset());
+      assertEquals("mop03-2b", turns[0].getLabel());
+      assertEquals(g.getAnnotation("spk2"), turns[0].getParent());
+      assertEquals(new Double(302.834), turns[24].getStart().getOffset());
+      assertEquals(new Double(304.334), turns[24].getEnd().getOffset());
+      assertEquals("Interviewer", turns[24].getLabel());
+      assertEquals(g.getAnnotation("spk1"), turns[24].getParent());
 
       // utterances
-      Vector<Annotation> utterances = g.getAnnotations("utterance");
-      assertEquals(140, utterances.size());
-      assertEquals(new Double(0.0), utterances.elementAt(0).getStart().getOffset());
-      assertEquals(new Double(5.75), utterances.elementAt(0).getEnd().getOffset());
-      assertEquals("mop03-2b", utterances.elementAt(0).getParent().getLabel());
-      assertEquals(turns.elementAt(0), utterances.elementAt(0).getParent());
+      Annotation[] utterances = g.list("utterance");
+      assertEquals(140, utterances.length);
+      assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
+      assertEquals(new Double(5.75), utterances[0].getEnd().getOffset());
+      assertEquals("mop03-2b", utterances[0].getParent().getLabel());
+      assertEquals(turns[0], utterances[0].getParent());
 
-      assertEquals(new Double(5.75), utterances.elementAt(1).getStart().getOffset());
-      assertEquals(new Double(6.907), utterances.elementAt(1).getEnd().getOffset());
-      assertEquals("mop03-2b", utterances.elementAt(1).getParent().getLabel());
+      assertEquals(new Double(5.75), utterances[1].getStart().getOffset());
+      assertEquals(new Double(6.907), utterances[1].getEnd().getOffset());
+      assertEquals("mop03-2b", utterances[1].getParent().getLabel());
 
       
-      Annotation[] words = g.annotations("word");
-      assertEquals(new Double(0), words[0].getStart().getOffset());
+      Annotation[] words = g.list("word");
+//      assertEquals(new Double(0), words[0].getStart().getOffset());
       assertEquals("and", words[0].getLabel());
       assertEquals("ah .", words[1].getLabel());
       assertEquals("Cyril", words[2].getLabel());
