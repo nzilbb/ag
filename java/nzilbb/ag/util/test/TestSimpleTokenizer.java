@@ -353,11 +353,11 @@ public class TestSimpleTokenizer
 
 	 assertEquals("the", words[0].getLabel());
 	 assertEquals("B", words[1].getLabel());
-	 assertEquals("B", words[2].getLabel());
-	 assertEquals("C", words[3].getLabel());
-	 assertEquals("jumps", words[4].getLabel());
-	 assertEquals("B_B_C", words[5].getLabel());
-	 assertEquals(Change.Operation.Destroy, words[5].getChange());
+	 assertEquals("B_B_C", words[2].getLabel());
+	 assertEquals(Change.Operation.Destroy, words[2].getChange());
+	 assertEquals("B", words[3].getLabel());
+	 assertEquals("C", words[4].getLabel());
+	 assertEquals("jumps", words[5].getLabel());
 	 assertEquals("over", words[6].getLabel());
 	 assertEquals("a", words[7].getLabel());
 	 assertEquals("lazy", words[8].getLabel());
@@ -366,9 +366,9 @@ public class TestSimpleTokenizer
 	 // ordinals correct
 	 assertEquals("ordinal check", 1, words[0].getOrdinal());
 	 assertEquals("ordinal check", 2, words[1].getOrdinal());
-	 assertEquals("ordinal check", 3, words[2].getOrdinal());
-	 assertEquals("ordinal check", 4, words[3].getOrdinal());
-	 assertEquals("ordinal check", 5, words[4].getOrdinal());
+	 assertEquals("ordinal check", 3, words[3].getOrdinal());
+	 assertEquals("ordinal check", 4, words[4].getOrdinal());
+	 assertEquals("ordinal check", 5, words[5].getOrdinal());
 	 assertEquals("ordinal check", 6, words[6].getOrdinal());
 	 assertEquals("ordinal check", 7, words[7].getOrdinal());
 	 assertEquals("ordinal check", 8, words[8].getOrdinal());
@@ -376,10 +376,10 @@ public class TestSimpleTokenizer
 
 	 // anchors
 	 assertEquals("anchor link", words[0].getEnd(), words[1].getStart());
-	 assertEquals("anchor link", words[1].getEnd(), words[2].getStart());
-	 assertEquals("anchor link", words[2].getEnd(), words[3].getStart());
+	 assertEquals("anchor link", words[1].getEnd(), words[3].getStart());
 	 assertEquals("anchor link", words[3].getEnd(), words[4].getStart());
-	 assertEquals("anchor link", words[4].getEnd(), words[6].getStart());
+	 assertEquals("anchor link", words[4].getEnd(), words[5].getStart());
+	 assertEquals("anchor link", words[5].getEnd(), words[6].getStart());
 	 assertEquals("anchor link", words[6].getEnd(), words[7].getStart());
 	 assertEquals("anchor link", words[7].getEnd(), words[8].getStart());
 	 assertEquals("anchor link", words[8].getEnd(), words[9].getStart());
@@ -387,9 +387,9 @@ public class TestSimpleTokenizer
 	 // destination
 	 Annotation[] linkage = g.getAnnotation("turn1").list("linkage");
 	 assertEquals("" + linkage, 1, linkage.length);
-	 assertEquals(words[5].getLabel(), linkage[0].getLabel());
+	 assertEquals(words[2].getLabel(), linkage[0].getLabel());
 	 assertEquals(words[1].getStart(), linkage[0].getStart());
-	 assertEquals(words[3].getEnd(), linkage[0].getEnd());
+	 assertEquals(words[4].getEnd(), linkage[0].getEnd());
 
 	 // parents
 	 assertEquals("turn1", linkage[0].getParentId());

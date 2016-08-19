@@ -24,8 +24,10 @@ package nzilbb.ag;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.HashSet;
-import java.util.Vector;
+import java.util.TreeSet;
+import java.util.SortedSet;
 import java.util.Set;
+import nzilbb.ag.util.AnnotationComparatorByOrdinal;
 
 /**
  * Annotation graph layer.
@@ -158,19 +160,19 @@ public class Layer // TODO add type attribute
    /**
     * List of annotations on this layer.
     * @see #getAnnotations()
-    * @see #setAnnotations(Vector)
+    * @see #setAnnotations(TreeSet)
     */
-   protected Vector<Annotation> annotations = new Vector<Annotation>();
+   protected SortedSet<Annotation> annotations = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
    /**
     * Getter for {@link #annotations}: List of annotations on this layer.
     * @return List of annotations on this layer.
     */
-   public Vector<Annotation> getAnnotations() { return annotations; }
+   public SortedSet<Annotation> getAnnotations() { return annotations; }
    /**
     * Setter for {@link #annotations}: List of annotations on this layer.
     * @param newAnnotations List of annotations on this layer.
     */
-   public void setAnnotations(Vector<Annotation> newAnnotations) { annotations = newAnnotations; }
+   public void setAnnotations(SortedSet<Annotation> newAnnotations) { annotations = newAnnotations; }
    
 
    /**

@@ -130,7 +130,7 @@ public class TestMerger
     */
    @Test public void fragBasic()
    {
-      fragmentTests("frag", "Basic", "006");
+      fragmentTests("frag", "Basic", null);
    }
 
    /**

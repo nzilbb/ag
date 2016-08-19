@@ -101,12 +101,14 @@ public class AnnotationComparatorByAnchor
       catch(Throwable t) {}
 
       // special case: if the start anchor of one is the end anchor of another, it's earlier
-      if (o1.getEndId().equals(o2.getStartId()))
+      if (o1.getEndId() != null 
+	  && o1.getEndId().equals(o2.getStartId()))
       {
 	 // System.out.println("linked: " + o1 + " < " + o2 + " (" + o1.getEndId() + ")");
 	 return -7;
       }
-      if (o1.getStartId().equals(o2.getEndId())) 
+      if (o1.getStartId() != null
+	  && o1.getStartId().equals(o2.getEndId())) 
       {
 	 // System.out.println("linked: " + o1 + " > " + o2 + " (" + o1.getStartId() + ")");
 	 return 7;
@@ -126,10 +128,11 @@ public class AnnotationComparatorByAnchor
       }
 
       // anchors/layers the same, compare ordinal
-      if (o1.getParentId() != null && o1.getParentId().equals(o1.getParentId()))
+      if (o1.getParentId() != null && o1.getParentId().equals(o1.getParentId())
+	  && o1.containsKey("ordinal") && o2.containsKey("ordinal"))
       {
-	 int o1Ordinal = o1.getOrdinal();
-	 int o2Ordinal = o2.getOrdinal();
+	 int o1Ordinal = ((Integer)o1.get("ordinal")).intValue();
+	 int o2Ordinal = ((Integer)o2.get("ordinal")).intValue();
 	 if (o1Ordinal < o2Ordinal)
 	 {
 	    // System.out.println("ordinal: " + o1 + " < " + o2 + " (" + o1.getOrdinal() + " < " + o2.getOrdinal() + ")");

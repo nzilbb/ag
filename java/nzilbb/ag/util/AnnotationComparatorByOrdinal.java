@@ -43,11 +43,13 @@ public class AnnotationComparatorByOrdinal // TODO unit test!
    
    public int compare(Annotation o1, Annotation o2)
    {
+      if (o1 == o2 || (o1.getId() != null && o1.getId().equals(o2.getId()))) return 0;
       // anchors/layers the same, compare ordinal
-      if (o1.getParentId() != null && o1.getParentId().equals(o1.getParentId()))
+      if (o1.getParentId() != null && o1.getParentId().equals(o2.getParentId())
+	  && o1.containsKey("ordinal") && o2.containsKey("ordinal"))
       {
-	 int o1Ordinal = o1.getOrdinal();
-	 int o2Ordinal = o2.getOrdinal();
+	 int o1Ordinal = ((Integer)o1.get("ordinal")).intValue();
+	 int o2Ordinal = ((Integer)o2.get("ordinal")).intValue();
 	 if (o1Ordinal < o2Ordinal)
 	 {
 	    return -3;
@@ -56,6 +58,31 @@ public class AnnotationComparatorByOrdinal // TODO unit test!
 	 {
 	    return 3;
 	 }
+      }
+      // if the parents are set, compare their start times
+      Annotation p1 = o1.getParent();
+      Annotation p2 = o2.getParent();
+      if (p1 != null && p2 != null)
+      {
+	 try
+	 {
+	    Anchor p1Start = p1.getStart();
+	    Anchor p2Start = p2.getStart();
+	    double p1StartOffset = p1Start.getOffset().doubleValue();
+	    double p2StartOffset = p2Start.getOffset().doubleValue();
+	    
+	    // starts earlier, is lower
+	    if (p1StartOffset < p2StartOffset)
+	    {
+	       return -6;
+	    }
+	    // starts later, is higher
+	    if (p1StartOffset > p2StartOffset)
+	    {
+	       return 6;
+	    }
+	 }
+	 catch(Throwable t) {}
       }
       return super.compare(o1, o2);
    }

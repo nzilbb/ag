@@ -22,6 +22,7 @@
 package nzilbb.ag.util;
 
 import java.util.Vector;
+import java.util.SortedSet;
 import nzilbb.ag.*;
 
 /**
@@ -76,15 +77,15 @@ public class Normalizer
 
       if (schema.getEpisodeLayerId() != null)
       {
-	 Vector<Annotation> episode = graph.getAnnotations(schema.getEpisodeLayerId());
-	 Vector<Annotation> participants = graph.getAnnotations(schema.getParticipantLayerId());
+	 SortedSet<Annotation> episode = graph.getAnnotations(schema.getEpisodeLayerId());
+	 SortedSet<Annotation> participants = graph.getAnnotations(schema.getParticipantLayerId());
 	 if (participants.size() == 1 && episode.size() > 0)
 	 {
-	    Annotation onlyParticipant = participants.firstElement();
+	    Annotation onlyParticipant = participants.first();
 	    if (onlyParticipant.getLabel() == null || onlyParticipant.getLabel().length() == 0)
 	    {
 	       changes.addAll( // record changes for:
-		  onlyParticipant.setLabel(episode.firstElement().getLabel()));
+		  onlyParticipant.setLabel(episode.first().getLabel()));
 	    }
 	 }
       } // episode layer set
@@ -239,10 +240,13 @@ public class Normalizer
       for (String childLayerId : following.getAnnotations().keySet())
       {
 	 // move everything from following to preceding
+	 int ordinal = preceding.getAnnotations().get(childLayerId).size() + 1;
 	 for (Annotation child : following.annotations(childLayerId))
 	 {
 	    changes.addAll( // record changes for:
 	       child.setParent(preceding));
+	    changes.addAll( // record changes for:
+	       child.setOrdinal(ordinal++));
 	 } // next child annotation
       } // next child layer
 

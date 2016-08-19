@@ -65,6 +65,8 @@ public class AnnotationChain
       // eliminate from the copy all the annotations whose start is the end of another one in the list
       for (Annotation a : other)
       {
+	 if (a.getChange() == Change.Operation.Destroy) continue;
+
 	 // instant?
 	 if (a.getInstantaneous())
 	 {
@@ -110,6 +112,7 @@ public class AnnotationChain
 	    bFound = false;
 	    for (Annotation maybeNext : last.getEnd().getStartingAnnotations())
 	    {
+	       if (maybeNext.getChange() == Change.Operation.Destroy) continue;
 	       if (maybeNext.getInstantaneous()) continue; // ignore instants for now
 	       if (other.contains(maybeNext))
 	       {
@@ -123,6 +126,7 @@ public class AnnotationChain
 	 // suffix any instants that end here
 	 for (Annotation instant : instants)
 	 {
+	    if (instant.getChange() == Change.Operation.Destroy) continue;
 	    if (instant.getStart().equals(last.getEnd()))
 	    {
 	       chain.add(instant);
@@ -181,6 +185,7 @@ public class AnnotationChain
       if (start.getId().equals(end.getId())) return;
       for (Annotation startsHere : start.getStartingAnnotations())
       {
+	 if (startsHere.getChange() == Change.Operation.Destroy) continue;
 	 if (excludeLayers.contains(startsHere.getLayerId())) continue;
 	 if (startsHere.getInstantaneous()) continue;
 	 if (startsHere.getEnd().equals(end))
@@ -188,6 +193,7 @@ public class AnnotationChain
 	    // prefix any instants that are at the start
 	    for (Annotation a : start.getStartingAnnotations()) 
 	    {
+	       if (a.getChange() == Change.Operation.Destroy) continue;
 	       if (a.getInstantaneous())
 	       {
 		  add(a);
@@ -197,6 +203,7 @@ public class AnnotationChain
 	    // suffix any instants that are at the end
 	    for (Annotation a : end.getStartingAnnotations()) 
 	    {
+	       if (a.getChange() == Change.Operation.Destroy) continue;
 	       if (a.getInstantaneous())
 	       {
 		  add(a);
@@ -210,6 +217,7 @@ public class AnnotationChain
       // there's no single-link chain, so recursively look for a multi-link chain
       for (Annotation startsHere : start.getStartingAnnotations())
       {
+	 if (startsHere.getChange() == Change.Operation.Destroy) continue;
 	 if (excludeLayers.contains(startsHere.getLayerId())) continue;
 	 if (startsHere.getInstantaneous()) continue;
 	 // don't follow tags (we'll already be following their parents)
@@ -224,6 +232,7 @@ public class AnnotationChain
 	    // prefix any instants that are at the start
 	    for (Annotation a : start.getStartingAnnotations()) 
 	    {
+	       if (a.getChange() == Change.Operation.Destroy) continue;
 	       if (a.getInstantaneous())
 	       {
 		  add(a);
@@ -272,6 +281,7 @@ public class AnnotationChain
       // recursively look for a multi-link chain until we hit the end offset
       for (Annotation startsHere : start.getStartingAnnotations())
       {
+	 if (startsHere.getChange() == Change.Operation.Destroy) continue;
 	 if (excludeLayers.contains(startsHere.getLayerId())) continue;
 	 if (startsHere.getInstantaneous()) continue;
 	 // don't follow tags (we'll already be following their parents)
@@ -286,6 +296,7 @@ public class AnnotationChain
 	    // prefix any instants that are at the start
 	    for (Annotation a : start.getStartingAnnotations()) 
 	    {
+	       if (a.getChange() == Change.Operation.Destroy) continue;
 	       if (a.getInstantaneous()) 
 	       {
 		  add(a);
@@ -304,6 +315,7 @@ public class AnnotationChain
 	    // prefix any instants that are at the start
 	    for (Annotation a : start.getStartingAnnotations()) 
 	    {
+	       if (a.getChange() == Change.Operation.Destroy) continue;
 	       if (a.getInstantaneous())
 	       {
 		  add(a);
@@ -313,6 +325,7 @@ public class AnnotationChain
 	    // suffix any instants that are at the end
 	    for (Annotation a : startsHere.getEnd().getStartingAnnotations()) 
 	    {
+	       if (a.getChange() == Change.Operation.Destroy) continue;
 	       if (a.getInstantaneous())
 	       {
 		  add(a);
@@ -358,6 +371,7 @@ public class AnnotationChain
       // recursively look for a multi-link chain until we hit the start offset
       for (Annotation endsHere : end.getEndingAnnotations())
       {
+	 if (endsHere.getChange() == Change.Operation.Destroy) continue;
 	 if (excludeLayers.contains(endsHere.getLayerId())) continue;
 	 if (endsHere.getInstantaneous()) continue;
 	 // guard against cycles, not all graphs are valid
@@ -371,6 +385,7 @@ public class AnnotationChain
 	    // suffix any instants that are at the end
 	    for (Annotation a : end.getEndingAnnotations()) 
 	    {
+	       if (a.getChange() == Change.Operation.Destroy) continue;
 	       if (a.getInstantaneous())
 	       {
 		  add(a);
@@ -387,6 +402,7 @@ public class AnnotationChain
 	    // prefix any instants that are at the start
 	    for (Annotation a : endsHere.getStart().getStartingAnnotations()) 
 	    {
+	       if (a.getChange() == Change.Operation.Destroy) continue;
 	       if (a.getInstantaneous())
 	       {
 		  add(a);
@@ -396,6 +412,7 @@ public class AnnotationChain
 	    // suffix any instants that are at the end
 	    for (Annotation a : end.getStartingAnnotations()) 
 	    {
+	       if (a.getChange() == Change.Operation.Destroy) continue;
 	       if (a.getInstantaneous())
 	       {
 		  add(a);
@@ -425,6 +442,7 @@ public class AnnotationChain
 	 boolean bFound = false;
 	 for (Annotation maybeNext : last.getEnd().getStartingAnnotations())
 	 {
+	    if (maybeNext.getChange() == Change.Operation.Destroy) continue;
 	    if (contains(maybeNext))
 	    {
 	       last = maybeNext;
@@ -454,6 +472,7 @@ public class AnnotationChain
 	 bFound = false;
 	 for (Annotation maybeNext : last.getEnd().getStartingAnnotations())
 	 {
+	    if (maybeNext.getChange() == Change.Operation.Destroy) continue;
 	    if (contains(maybeNext))
 	    {
 	       last = maybeNext;

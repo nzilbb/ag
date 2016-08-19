@@ -24,6 +24,7 @@ package nzilbb.ag.util;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.Vector;
+import java.util.SortedSet;
 import nzilbb.ag.Anchor;
 import nzilbb.ag.Graph;
 import nzilbb.ag.Annotation;
@@ -204,7 +205,7 @@ public class AnchorComparatorWithStructure
 		  { // ignore unaligned child layers - e.g. the participant layer
 		     continue;
 		  }
-		  Vector<Annotation> children = thisCommonAncestor.getAnnotations(layerId);
+		  SortedSet<Annotation> children = thisCommonAncestor.getAnnotations(layerId);
 		  Annotation a1LayerChild = null;
 		  Annotation a2LayerChild = null;
 		  for (Annotation child : children)

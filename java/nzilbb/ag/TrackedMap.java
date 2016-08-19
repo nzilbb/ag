@@ -330,7 +330,7 @@ public class TrackedMap
     */
    public int hashCode()
    {
-      if (containsKey("id"))
+      if (get("id") != null)
       {
 	 return get("id").hashCode();
       }

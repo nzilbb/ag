@@ -32,6 +32,8 @@ import java.util.Locale;
 import java.util.Vector;
 import java.util.LinkedHashMap;
 import java.util.TreeSet;
+import java.util.SortedSet;
+import java.util.Collection;
 import org.json.*;
 import nzilbb.util.TempFileInputStream;
 import nzilbb.configure.Parameter;
@@ -373,7 +375,7 @@ public class JSONSerialization
       {
 	 for (int i = 0; i < json.length(); i++)
 	 {
-	    jsonToAnnotation(graph, layerId, parentId, json.getJSONObject(i));
+	    jsonToAnnotation(graph, layerId, parentId, i+1, json.getJSONObject(i));
 	 } // next annotation
       }
       catch (JSONException x)
@@ -391,7 +393,7 @@ public class JSONSerialization
     * @return The anchor
     * @throws SerializationException On error.
     */
-   protected Annotation jsonToAnnotation(Graph graph, String layerId, String parentId, JSONObject json)
+   protected Annotation jsonToAnnotation(Graph graph, String layerId, String parentId, int ordinal, JSONObject json)
     throws SerializationException
    {
       try
@@ -399,6 +401,7 @@ public class JSONSerialization
 	 Annotation a = new Annotation();
 	 a.setLayerId(layerId);
 	 a.setParentId(parentId);
+	 a.setOrdinal(ordinal);
 	 if (json.has("id")) 
 	    a.setId(json.getString("id"));
 	 if (json.has("label")) 
@@ -601,7 +604,7 @@ public class JSONSerialization
     * @param layerId The ID of the annotations.
     * @param annotations A list of annotations on the same layer to serialize.
     */
-   protected void serializeAnnotations(PrintWriter writer, int indent, String layerId, Vector<Annotation> annotations)
+   protected void serializeAnnotations(PrintWriter writer, int indent, String layerId, Collection<Annotation> annotations)
    {
       if (annotations.size() > 0)
       {
@@ -647,11 +650,11 @@ public class JSONSerialization
 	 writer.print(",\t");
 	 writer.print(keyValue(0, "comment", annotation.get("comment").toString()));
       }
-      LinkedHashMap<String,Vector<Annotation>> childLayers = annotation.getAnnotations();
+      LinkedHashMap<String,SortedSet<Annotation>> childLayers = annotation.getAnnotations();
       // layers in predictable (alphabetical) order
       for (String layerId : new TreeSet<String>(childLayers.keySet()))
       {
-	 Vector<Annotation> children = childLayers.get(layerId);
+	 SortedSet<Annotation> children = childLayers.get(layerId);
 	 if (children.size() > 0)
 	 {
 	    writer.println(",");

@@ -22,6 +22,7 @@
 package nzilbb.ag;
 
 import java.util.List;
+import java.util.Set;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -36,6 +37,7 @@ import java.text.DecimalFormatSymbols;
 import nzilbb.ag.util.LayerTraversal;
 import nzilbb.ag.util.LayerHierarchyTraversal;
 import nzilbb.ag.util.AnchorComparatorWithStructure;
+import nzilbb.ag.util.AnnotationComparatorByOrdinal;
 
 /**
  * Linguistic annotation graph.
@@ -473,7 +475,7 @@ public class Graph
 	 if (annotation.getAnnotations().size() > 0)
 	 {
 	    // set the parentId for all children, now their parent has an ID
-	    for (Vector<Annotation> children : annotation.getAnnotations().values())
+	    for (SortedSet<Annotation> children : annotation.getAnnotations().values())
 	    {
 	       for (Annotation child : children)
 	       {
@@ -765,11 +767,12 @@ public class Graph
     */
    public String[] labels(String layerId)
    {
-      Vector<Annotation> annotations = getAnnotations(layerId);
+      SortedSet<Annotation> annotations = getAnnotations(layerId);
       String[] labels = new String[annotations.size()];
-      for (int i = 0; i < annotations.size(); i++)
+      int i = 0;
+      for (Annotation annotation : annotations)
       {
-	 labels[i] = annotations.elementAt(i).getLabel();
+	 labels[i++] = annotation.getLabel();
       }
       return labels;
    } // end of labels()
@@ -889,13 +892,36 @@ public class Graph
    public String getStartId() 
    {
       Anchor earliest = null;
+      int depth = Integer.MAX_VALUE;
       for (Anchor a : getAnchors().values())
       {
-	 if (a.getOffset() != null)
+	 // if its the first one
+	 if (earliest == null 
+	     // or the offset is set and our current candidate has no offset
+	     || (a.getOffset() != null && earliest.getOffset() == null)
+	     // or bother offsets are set and this offset is earlier
+	     || (a.getOffset() != null && earliest.getOffset() != null 
+		 && a.getOffset() < earliest.getOffset())
+	     // or neither offset is set and this ID is lower
+	     || (a.getOffset() == null && earliest.getOffset() == null
+		 && a.getId().compareTo(earliest.getId()) < 0))
 	 {
-	    if (earliest == null || a.compareTo(earliest) < 0)
+	    earliest = a;
+	    for (Annotation s : a.getStartingAnnotations())
+	       if (s.getLayer().getAlignment() != Constants.ALIGNMENT_NONE)
+		  depth = Math.min(depth, s.getAncestors().size());
+	 }
+	 else if (earliest.getOffset() != null && earliest.getOffset().equals(a.getOffset()))
+	 { // same offset
+	    // go with the anchor of the shallowest annotation
+	    int thisDepth = Integer.MAX_VALUE;
+	    for (Annotation s : a.getStartingAnnotations())
+	       if (s.getLayer().getAlignment() != Constants.ALIGNMENT_NONE)
+		  thisDepth = Math.min(thisDepth, s.getAncestors().size());
+	    if (thisDepth < depth)
 	    {
 	       earliest = a;
+	       depth = thisDepth;
 	    }
 	 }
       }
@@ -910,6 +936,7 @@ public class Graph
    public String getEndId()
    {
       Anchor latest = null;
+      int depth = Integer.MAX_VALUE;
       for (Anchor a : getAnchors().values())
       {
 	 if (a.getOffset() != null)
@@ -917,6 +944,19 @@ public class Graph
 	    if (latest == null || a.compareTo(latest) > 0)
 	    {
 	       latest = a;
+	    }
+	    else if (latest.getOffset() == null || latest.getOffset().equals(a.getOffset()))
+	    { // same offset
+	       // go with the anchor of the shallowest annotation
+	       int thisDepth = Integer.MAX_VALUE;
+	       for (Annotation s : a.getStartingAnnotations())
+		  if (s.getLayer().getAlignment() != Constants.ALIGNMENT_NONE)
+		     thisDepth = Math.min(thisDepth, s.getAncestors().size());
+	       if (thisDepth < depth)
+	       {
+		  latest = a;
+		  depth = thisDepth;
+	       }
 	    }
 	 }
       }
@@ -943,17 +983,20 @@ public class Graph
     * @param layerId The given layer ID.
     * @return The child annotations on the given layer.
     */
-   public Vector<Annotation> getAnnotations(String layerId)
+   public SortedSet<Annotation> getAnnotations(String layerId)
    {
       if (layerId.equals("graph"))
       { // special case
-	 Vector<Annotation> annotations = new Vector<Annotation>();
+	 TreeSet<Annotation> annotations = new TreeSet<Annotation>();
 	 annotations.add(this);
 	 return annotations;
       }
       Layer layer = getLayer(layerId);
       if (layer == null) return null;
-      return layer.getAnnotations();
+      TreeSet<Annotation> annotations = new TreeSet<Annotation>(
+	 new AnnotationComparatorByOrdinal());
+      annotations.addAll(layer.getAnnotations());
+      return annotations;
    } // end of getAnnotations()
 
    /**
@@ -975,6 +1018,27 @@ public class Graph
    {
       super.commit();
 
+      // annotations
+      Iterator<Annotation> iAnnotation = getAnnotationsById().values().iterator();
+      while (iAnnotation.hasNext())
+      {
+	 Annotation a = iAnnotation.next();
+	 if (a.getChange() == Change.Operation.Destroy)
+	 {
+	    a.setStartId(null); // remove reference from start anchor
+	    a.setEndId(null); // remove reference from end anchor
+	    a.setParent(null); // remove reference from parent
+	    a.getLayer().getAnnotations().remove(a); // remove reference from layer
+	    a.setLayer(null);
+System.out.println("REMOVING " + a.getId() + " " + a.getLabel() + " " + a.getOrdinal());
+	    iAnnotation.remove();
+	 }
+	 else
+	 {
+	    a.commit();
+	 }
+      } // next 
+
       // anchors
       Iterator<Anchor> iAnchor = getAnchors().values().iterator();
       while (iAnchor.hasNext())
@@ -990,25 +1054,6 @@ public class Graph
 	 }
       } // next 
 
-      // annotations
-      Iterator<Annotation> iAnnotation = getAnnotationsById().values().iterator();
-      while (iAnnotation.hasNext())
-      {
-	 Annotation a = iAnnotation.next();
-	 if (a.getChange() == Change.Operation.Destroy)
-	 {
-	    a.setParent(null); // remove reference from parent
-	    a.getLayer().getAnnotations().remove(a); // remove reference from layer
-	    a.setLayer(null);
-	    a.setStartId(null); // remove reference from start anchor
-	    a.setEndId(null); // remove reference from end anchor
-	    iAnnotation.remove();
-	 }
-	 else
-	 {
-	    a.commit();
-	 }
-      } // next 
    }
    /**
     * Rolls back changes since the object was create or {@link #commit()} was last called. The effect of this is to rollback all anchors and annotations.
@@ -1039,7 +1084,10 @@ public class Graph
 	 Annotation a = iAnnotation.next();
 	 if (a.getChange() == Change.Operation.Create)
 	 {
-	    a.setParent(null);
+	    a.setStartId(null); // remove reference from start anchor
+	    a.setEndId(null); // remove reference from end anchor
+	    a.setParent(null); // remove reference from parent
+	    a.getLayer().getAnnotations().remove(a); // remove reference from layer
 	    a.setLayer(null);
 	    iAnnotation.remove();
 	 }

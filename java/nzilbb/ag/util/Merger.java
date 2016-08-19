@@ -594,6 +594,7 @@ public class Merger
 	 validator.setDebug(getDebug());
 	 changes.addAll(
 	    validator.transform(graph));
+	 if (log != null) log.addAll(validator.getLog());
       }
       else
       {
@@ -789,11 +790,13 @@ public class Merger
       throws TransformationException
    {
       Vector<Change> changes = new Vector<Change>();
+      String layerId = layer.getId();
       // unmapped annotations in graph are for deletion
       for (Annotation an : graph.getAnnotations(layer.getId()))
       {
 	 if (!hasCounterpart(an))
 	 {
+	    log(layerId+": Deleting " + logAnnotation(an));
 	    changes.add( // track changes of:
 	       an.destroy());
 	 }
@@ -801,12 +804,11 @@ public class Merger
 
        // might need these later:
       String saturatedParentLayerId = layer.getSaturated()?layer.getParentId():null;
-      String layerId = layer.getId();
       HashSet<String> thisAndsaturatedParentLayerId = new HashSet<String>();
       thisAndsaturatedParentLayerId.add(layerId);
       if (saturatedParentLayerId != null) thisAndsaturatedParentLayerId.add(saturatedParentLayerId);
       
-      // unmapped annotations of theirs are for addition
+      // unmapped annotations of theirs are for addition 
       Annotation anLastOriginal = null;
       for (Annotation anEdited : editedGraph.getAnnotations(layerId))
       {
@@ -1033,12 +1035,17 @@ public class Merger
 		     	 && !bLastIsAnInstant)
 		     {
 			if (getConfidence(anLastOriginal.getStart()) // TODO should be original confidence, but we don't track that!
-			    < getConfidence(anOriginal.getStart()))
+			    < getConfidence(anOriginal.getStart())
+			    // don't go back before parent start
+			    && anLastOriginal.getParent().getStart().getOffset()
+			    <= anOriginal.getStart().getOffset() - smidgin)
 			{
 			   double dNewOffset = anOriginal.getStart().getOffset() - smidgin;
 			   log(
 			      layerId+": Moving start of : " 
-			      + logAnnotation(anLastOriginal) + " to " 
+			      + logAnnotation(anLastOriginal) + " (" 
+			      + getConfidence(anLastOriginal.getStart()) + "vs" 
+			      + getConfidence(anOriginal.getStart()) + ") to " 
 			      + dNewOffset + " to avoid non-positive length for " + logAnnotation(anLastOriginal));
 			   anLastOriginal.getStart().setOffset(dNewOffset);
 			   setConfidence(anLastOriginal.getStart(), Constants.CONFIDENCE_NONE);
@@ -1087,10 +1094,10 @@ public class Merger
 	 Annotation anOriginal = getCounterpart(anEdited);
 	 if (anOriginal.getOrdinal() != anEdited.getOrdinal())
 	 {
-	    log(
-	       layerId+": changing ordinal of: " + logAnnotation(anOriginal) 
-	       + " from " + anOriginal.getOrdinal() + " to " + anEdited.getOrdinal());
+	    log(layerId+": changing ordinal of: " + logAnnotation(anOriginal) 
+		+ " from " + anOriginal.getOrdinal() + " to " + anEdited.getOrdinal());
 	    anOriginal.setOrdinal(anEdited.getOrdinal());
+	    log(layerId+": ordinal now: " + anOriginal.getOrdinal());
 	 }
    
 	 anLastOriginal = anOriginal;

@@ -561,6 +561,102 @@ public class TestAnchorComparators
 
    }
 
+   @Test public void peerWordUtteranceCase()
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");
+
+      g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+			   true, // peers
+			   true, // peersOverlap
+			   true)); // saturated
+      g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "who", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("transcript", "Words", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "turn", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("utterance", "Utterances", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   true, // saturated
+			   "turn", // parentId
+			   true)); // parentIncludes
+
+      g.addAnchor(new Anchor("1", 10.0, // the
+			     Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("n_101", 10.0, // quick
+			     Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("n_100", 10.0, // turn start 
+			     Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("n_300", 25.0, // brown
+			     Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("n_399", 40.0, // brown end
+			     Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("n_400", 40.0, // utterance break
+			     Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("n_401", 40.0, // fox
+			     Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("4", 50.0, // jumps
+			     Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("n_500", 60.0, // over
+			     Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("n_600", 70.0, // over end
+			     Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("n_700", 70.0, // turn end
+			     Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "n_100", "n_700", "my graph"));
+      
+      g.addAnnotation(new Annotation("turn1", "john smith", "turn", "n_100", "n_700", "participant1"));
+
+      g.addAnnotation(new Annotation("utterance1", "john smith", "utterance", "n_100", "n_400", "turn1"));
+      g.addAnnotation(new Annotation("utterance2", "john smith", "utterance", "n_400", "n_700", "turn1"));
+      
+      g.addAnnotation(new Annotation("the", "the", "transcript", "1", "n_101", "turn1"));
+      g.addAnnotation(new Annotation("quick", "quick", "transcript", "n_101", "n_300", "turn1"));
+      g.addAnnotation(new Annotation("brown", "brown", "transcript", "n_300", "n_399", "turn1"));
+      g.addAnnotation(new Annotation("fox", "fox", "transcript", "n_401", "4", "turn1"));
+      g.addAnnotation(new Annotation("jumps", "jumps", "transcript", "4", "n_500", "turn1"));
+      g.addAnnotation(new Annotation("over", "over", "transcript", "n_500", "n_600", "turn1"));
+  
+      AnchorComparatorWithStructure comparator = new AnchorComparatorWithStructure();
+
+      assertTrue("parent start before child start", 
+		 comparator.compare(g.getAnchor("n_100"), g.getAnchor("1")) < 0);
+      assertTrue("parent start before child end", 
+		 comparator.compare(g.getAnchor("n_100"), g.getAnchor("n_101")) < 0);
+      assertTrue("parent end after child end", 
+		 comparator.compare(g.getAnchor("n_600"), g.getAnchor("n_700")) < 0);
+
+      // test sorting
+      TreeSet<Anchor> anchors = new TreeSet<Anchor>(comparator);
+      anchors.addAll(g.getAnchors().values());
+      // System.out.println(""+anchors);
+      Iterator<Anchor> order = anchors.iterator();
+      assertEquals("n_100", order.next().getId());
+      assertEquals("1", order.next().getId());
+      assertEquals("n_101", order.next().getId());
+      assertEquals("n_300", order.next().getId());
+      assertEquals("n_399", order.next().getId());
+      assertEquals("n_400", order.next().getId());
+      assertEquals("n_401", order.next().getId());
+      assertEquals("4", order.next().getId());
+      assertEquals("n_500", order.next().getId());
+      assertEquals("n_600", order.next().getId());
+      assertEquals("n_700", order.next().getId());
+      assertFalse(order.hasNext());
+
+   }
+
+
    public static void main(String args[]) 
    {
       org.junit.runner.JUnitCore.main("nzilbb.ag.util.test.TestAnchorComparators");

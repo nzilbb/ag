@@ -50,8 +50,8 @@
       "turn":[
         {"id":"turn1",	"label":"john smith",	"startId":"turnStart",	"endId":"turnEnd",	"confidence":100,
           "phrase":[
-            {"id":"phrase1",	"label":"AP",	"startId":"a2",	"endId":"a4",	"confidence":50},
-            {"id":"phrase2",	"label":"NP",	"startId":"a1",	"endId":"a5",	"confidence":50}],
+            {"id":"phrase2",	"label":"NP",	"startId":"a1",	"endId":"a5",	"confidence":50},
+            {"id":"phrase1",	"label":"AP",	"startId":"a2",	"endId":"a4",	"confidence":50}],
           "utterance":[
             {"id":"line1",	"label":"john smith",	"startId":"turnStart",	"endId":"turnEnd",	"confidence":100}],
           "word":[

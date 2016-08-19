@@ -274,6 +274,7 @@ public class DefaultOffsetGenerator
 	    // for each parent annotation
 	    for (Annotation parent : layer.getAnnotations())
 	    {
+	       if (parent.getChange() == Change.Operation.Destroy) continue;
 	       try
 	       {
 		  changes.addAll(
@@ -342,7 +343,7 @@ public class DefaultOffsetGenerator
 	    if (anchor.getOffset() != null && getConfidence(anchor) > defaultOffsetThreshold)
 	    {
 	       lastSetAnchor = anchor;
-	       // log("last set: " + logAnchor(lastSetAnchor));
+	       log("last set: " + logAnchor(lastSetAnchor));
 	    }
 	    else
 	    {
@@ -355,7 +356,7 @@ public class DefaultOffsetGenerator
 		  
 	       Vector<Anchor> unsetAnchors = new Vector<Anchor>();
 	       unsetAnchors.add(anchor);
-	       // log("first unset: " + logAnchor(anchor));
+	       log("first unset: " + logAnchor(anchor));
 	       
 	       // scan forward from here to find the next set Anchor
 	       Anchor nextSetAnchor = null;
@@ -386,13 +387,13 @@ public class DefaultOffsetGenerator
 		  {
 		     // add the unset anchor to the collection
 		     unsetAnchors.add(anchor);
-		     // log("unset: " + logAnchor(anchor));
+		     log("unset: " + logAnchor(anchor));
 		  }
 		  else // offset is set
 		  {
 		     // stop
 		     nextSetAnchor = anchor;
-		     // log("next set: " + logAnchor(nextSetAnchor));
+		     log("next set: " + logAnchor(nextSetAnchor));
 		  }
 	       } // next anchor
 		  
@@ -409,7 +410,7 @@ public class DefaultOffsetGenerator
 		     firstUnset.put(Constants.CONFIDENCE, new Integer(getConfidence()));
 		     unsetAnchors.remove(firstUnset);
 		     lastSetAnchor = firstUnset;
-		     // log("revised last: " + logAnchor(lastSetAnchor));
+		     log("revised last: " + logAnchor(lastSetAnchor));
 		  }
 	       }
 		  
@@ -426,7 +427,7 @@ public class DefaultOffsetGenerator
 		     lastUnset.put(Constants.CONFIDENCE, new Integer(getConfidence()));
 		     unsetAnchors.remove(lastUnset);
 		     nextSetAnchor = lastUnset;
-		     // log("revised next: " + logAnchor(nextSetAnchor));
+		     log("revised next: " + logAnchor(nextSetAnchor));
 		  }
 		     
 		  if (unsetAnchors.size() > 0)
@@ -485,6 +486,7 @@ public class DefaultOffsetGenerator
 	 Anchor previousAnchor = parent.getStart(); 
 	 for (Annotation child : parent.getAnnotations(layerId))
 	 {
+	    if (child.getChange() == Change.Operation.Destroy) continue;
 	    if (addAnchors)
 	    {
 	       // add anchors from any leading chain between the last anchor and the start of the wchild
@@ -495,11 +497,11 @@ public class DefaultOffsetGenerator
 		  anchors.add(link.getStart());
 		  anchors.add(link.getEnd());
 	       } // next link
-	       // log(" child: " + logAnnotation(child));
+	       log(" child: " + logAnnotation(child) + " " + logAnchor(child.getStart()) + "-" + logAnchor(child.getEnd()));
 	       anchors.add(child.getStart());
-	       // log("added start " + logAnchor(child.getStart()));
+	       //log("added start " + logAnchor(child.getStart()));
 	       anchors.add(child.getEnd());
-	       // log("added end " + logAnchor(child.getEnd()));
+	       //log("added end " + logAnchor(child.getEnd()));
 	       previousAnchor = child.getEnd();
 	    } // add anchors
 	    // recurse into all layers regardless of layer definition, to catch interesting grandchildren
@@ -544,7 +546,7 @@ public class DefaultOffsetGenerator
       if (debug)
       {
 	 log.add(message);
-	 System.out.println(message);
+	 // System.out.println(message);
       }
    } // end of log()
 

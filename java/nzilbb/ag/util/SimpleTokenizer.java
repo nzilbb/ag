@@ -238,12 +238,12 @@ public class SimpleTokenizer
 		  getTokensInSourceLayer()?getSourceLayerId():getDestinationLayerId(), 
 		  start.getId(), end.getId(), 
 		  sharedParent?source.getParentId():source.getId());
+	       graph.addAnnotation(token);
 	       if (getTokensInSourceLayer())
 	       {
 		  token.setOrdinal(ordinal);
 		  ordinal++;
 	       }
-	       graph.addAnnotation(token);
 	       changes.addAll(token.getChanges());
 
 	       // the next annotation's start will be this one's end

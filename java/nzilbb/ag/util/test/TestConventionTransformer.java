@@ -26,6 +26,7 @@ import org.junit.*;
 import static org.junit.Assert.*;
 
 import java.util.Vector;
+import java.util.SortedSet;
 import java.util.Iterator;
 import nzilbb.ag.util.*;
 import nzilbb.ag.*;
@@ -240,9 +241,9 @@ public class TestConventionTransformer
 	 Vector<Change> changes = transformer.transform(g);
 	 assertEquals("annotation is deleted", Change.Operation.Destroy, g.getAnnotation("word2").getChange());
 
-	 Vector<Annotation> noises = g.getAnnotations("noise");
+	 SortedSet<Annotation> noises = g.getAnnotations("noise");
 	 assertEquals(1, noises.size());
-	 Annotation cough = noises.elementAt(0);
+	 Annotation cough = noises.first();
 	 assertEquals("a2", cough.getStartId());
 	 assertEquals("a3", cough.getEndId());
 

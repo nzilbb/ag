@@ -21,13 +21,18 @@
 //
 package nzilbb.ag;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.TreeSet;
 import java.util.LinkedHashSet;
+import java.util.SortedSet;
+import java.util.Iterator;
 import nzilbb.ag.util.LayerTraversal;
+import nzilbb.ag.util.AnnotationComparatorByOrdinal;
 /**
  * Annotation graph annotation - i.e. an edge of the graph.
  * @author Robert Fromont robert@fromont.net.nz
@@ -236,25 +241,30 @@ public class Annotation
       try 
       { 
 	 Integer ordinalAttribute = (Integer)get("ordinal");
-	 Annotation parent = getParent();
-	 if (parent != null && parent.getAnnotations(getLayerId()).contains(this))
-	 { // deduce ordinal from position in parent's child collection instead of using attribute
-	    ordinalToReturn = 1;
-	    // find the index of this amongst the peers, ignoring deleted peers
-	    for (Annotation peer : parent.getAnnotations(getLayerId()))
+	 if (ordinalAttribute != null)
+	 {
+	    ordinalToReturn = ordinalAttribute;
+	 }
+	 else
+	 {
+	    Annotation parent = getParent();
+	    if (parent != null)
 	    {
-	       if (peer == this) break;
-	       if (peer.getChange() == Change.Operation.Destroy) continue;
-	       ordinalToReturn++;
-	    }
-	    if (ordinalAttribute == null || ordinalAttribute.intValue() != ordinalToReturn)
-	    { // ordinal has changed so update it
+	       // get all peers before this one
+	       SortedSet<Annotation> priorPeers = parent.getAnnotations(getLayerId()).headSet(this);
+	       // weed out the deleted one
+	       Iterator<Annotation> it = priorPeers.iterator();
+	       while (it.hasNext()) 
+	       {
+		  Annotation p = it.next();
+		  if (p.getChange() == Change.Operation.Destroy)
+		  {
+		     it.remove();
+		  }
+	       }
+	       ordinalToReturn = priorPeers.size() + 1;
 	       setOrdinal(ordinalToReturn);
 	    }
-	 }
-	 else if (ordinalAttribute != null)
-	 {
-	    ordinalToReturn = ordinalAttribute.intValue();
 	 }
       } 
       catch(ClassCastException cc) {} 
@@ -268,74 +278,58 @@ public class Annotation
    public synchronized Vector<Change> setOrdinal(int ordinal) 
    { 
       Integer originalOrdinal = (Integer)get("ordinal");
-      Vector<Annotation> siblings = null;
-      Annotation parent = getParent();
-      if (parent != null)
-      {
-	 siblings = parent.getAnnotations(getLayerId());
-      }
-      if (siblings != null && siblings.size() < ordinal - 1) 
-      { // ordinal is too high - adjust it to fit
-	 ordinal = siblings.size();
-      }
       put("ordinal", ordinal); 
       Vector<Change> changes = new Vector<Change>();
       Change change = getLastChange();
       if (change != null)
       { // actually changing ordinal
 	 changes.add(change);
-	 // if the peers are available
-	 if (siblings != null)
+	 Annotation parent = getParent();
+	 if (parent != null)
 	 {
-	    siblings.remove(this);
-	    try
-	    {
-	       siblings.add(ordinal - 1, this);
-	    }
-	    catch(ArrayIndexOutOfBoundsException exception)
-	    {
-	       siblings.add(this);
-	    }
-
-	    // now we have to adjust sibling ordinals too
-	    int startFrom = ordinal;
-	    if (originalOrdinal != null && originalOrdinal.intValue() < ordinal)
-	    {
-	       startFrom = originalOrdinal;
-	    }
-	    for (int i = Math.min(originalOrdinal, ordinal); i < siblings.size(); i++)
-	    {
-	       Annotation sibling = siblings.elementAt(i);
-	       if (sibling.getChange() == Change.Operation.Destroy) continue; // ignore deletes
-	       if (sibling.containsKey("ordinal"))
-	       {
-		  Integer ordinalShouldBe = new Integer(i+1);
-		  if (!sibling.get("ordinal").equals(ordinalShouldBe))
-		  {
-
-		     sibling.put("ordinal", ordinalShouldBe); 
-		     change = sibling.getLastChange();
-		     if (change != null) changes.add(change);
-		  } // changing sibling ordinal
-	       } // ordinal is actually set
-	    } // next affected sibling
-	 } // there are known siblings
+	    changes.addAll( // record changes of:
+	       correctOrdinals(parent.getAnnotations(getLayerId())));
+	 }
       } // ordinal actually changing      
       return changes;
    }
-   
+
+
+   /**
+    * Traverses the given list of annototations and ensures that the "ordinal" property corresponds to the index in the list.
+    * @param peers
+    * @return The resulting changes.
+    */
+   protected Vector<Change> correctOrdinals(SortedSet<Annotation> peers)
+   {
+      Vector<Change> changes = new Vector<Change>();
+      int o = 1;
+      for (Annotation peer : peers)
+      {
+	 if (peer.getChange() == Change.Operation.Destroy) continue;
+	 Integer originalOrdinal = (Integer)peer.get("ordinal");
+	 if (originalOrdinal == null || originalOrdinal.intValue() != o)
+	 {
+	    peer.put("ordinal", o); 
+	    Change change = peer.getLastChange();
+	    if (change != null) changes.add(change);
+	 }
+	 o++;
+      }
+      return changes;
+   } // end of correctOrdinals()
 
    // Attributes stored outside HashMap, so that JSONifying the HashMap doesn't result in infinite recursion
 
    /**
     * Child annotations, keyed on layer id.
     */
-   protected LinkedHashMap<String,Vector<Annotation>> annotations = new LinkedHashMap<String,Vector<Annotation>>();
+   protected LinkedHashMap<String,SortedSet<Annotation>> annotations = new LinkedHashMap<String,SortedSet<Annotation>>();
    /**
     * Getter for <i>annotations</i>: Child annotations, keyed on layer id.
     * @return Child annotations, keyed on layer id.
     */
-   public LinkedHashMap<String,Vector<Annotation>> getAnnotations() { return annotations; }
+   public LinkedHashMap<String,SortedSet<Annotation>> getAnnotations() { return annotations; }
 
    
    /**
@@ -402,8 +396,11 @@ public class Annotation
       Annotation currentParent = getParent();
       if (currentParent != null && currentParent != newParent)
       {
-	 Vector<Annotation> currentSiblings = currentParent.getAnnotations(getLayerId());
-	 currentSiblings.remove(this);
+	 if (currentParent.getAnnotations().containsKey(getLayerId()))
+	 {
+	    SortedSet<Annotation> currentSiblings = currentParent.getAnnotations().get(getLayerId());
+	    currentSiblings.remove(this);
+	 }
       }
       if (newParent == null)
       {
@@ -414,24 +411,19 @@ public class Annotation
       {	 
 	 changes.addAll(
 	    setParentId(newParent.getId()));
-	 Vector<Annotation> newSiblings = newParent.getAnnotations(getLayerId());
-	 newSiblings.remove(this); // just in case it's there
-	 Integer ordinal = (Integer)get("ordinal");
-	 if (ordinal != null && newSiblings.size() >= ordinal.intValue() - 1
-	     // only if we're not changing parent
-	     && currentParent == newParent) 
-	 { // insert where it thinks it should go 
-	    // ordinal is 1-based, vector index is 0-based, so subtract 1
-	    newSiblings.add(ordinal.intValue() - 1, this);
-	 }
-	 else
-	 { // append it
+	 if (!newParent.getAnnotations().containsKey(getLayerId()))
+	 { // ensure the collection exists
+	    newParent.getAnnotations(getLayerId());
+	 } // but we use the real collection, not the copy returned by getAnnotations(String)...
+	 Collection<Annotation> newSiblings = newParent.getAnnotations().get(getLayerId());
+	 // if it's still null, this must be the graph, so use the layer annotations collection
+	 if (newSiblings == null) newSiblings = newParent.getLayer().getAnnotations();
+	 if (!newSiblings.contains(this))
+	 {
 	    newSiblings.add(this);
-	    // and set the ordinal 
-	    // ordinal is 1-based, vector index is 0-based, so size of list is ordinal of last one
 	    changes.addAll(
 	       setOrdinal(newSiblings.size()));
-	 }	 
+	 }
 /* TODO this incurs a surprisingly huge performance hit 
 	 Layer layer = getLayer();
 	 if (layer != null && layer.getAlignment() == Constants.ALIGNMENT_NONE)
@@ -659,7 +651,7 @@ public class Annotation
       if (getGraph() != null) getGraph().getAnnotationsById().put(id, this);
 	    
       // update all child parentIds
-      for (Vector<Annotation> children : getAnnotations().values())
+      for (SortedSet<Annotation> children : getAnnotations().values())
       {
 	 for (Annotation child : children)
 	 {
@@ -790,10 +782,10 @@ public class Annotation
       // is it a child layer?
       if (getAnnotations().containsKey(layerId))
       {
-	 Vector<Annotation> children = getAnnotations(layerId);
+	 SortedSet<Annotation> children = getAnnotations(layerId);
 	 if (children.size() > 0)
 	 {
-	    return children.elementAt(0);
+	    return children.first();
 	 }
       }      
       // TODO check for descendants
@@ -917,19 +909,35 @@ public class Annotation
     * @param layerId The given layer ID.
     * @return The child annotations on the given layer.
     */
-   public Vector<Annotation> getAnnotations(String layerId)
+   public SortedSet<Annotation> getAnnotations(String layerId)
    {
       if (!getAnnotations().containsKey(layerId))
       {
 	 // add the child collection to children
-	 getAnnotations().put(layerId, new Vector<Annotation>());
+	 TreeSet<Annotation> annotations = new TreeSet<Annotation>(
+	    new AnnotationComparatorByOrdinal());
+	 getAnnotations().put(layerId, annotations);
 	 // also create an attribute named after the layer, as long as it's not otherwise in use
 	 if (!layerId.equals("id") && !getTrackedAttributes().contains(layerId))
 	 {
-	    put(layerId, getAnnotations(layerId));
+	    put(layerId, annotations);
 	 }
+	 return annotations;
       }
-      return getAnnotations().get(layerId);
+      else
+      { // we already have a collection - sort it by ordinal before returning it
+	 TreeSet<Annotation> annotations = new TreeSet<Annotation>(
+	    new AnnotationComparatorByOrdinal());
+	 annotations.addAll(getAnnotations().get(layerId));
+	 correctOrdinals(annotations);
+	 getAnnotations().put(layerId, annotations);
+	 // also create an attribute named after the layer, as long as it's not otherwise in use
+	 if (!layerId.equals("id") && !getTrackedAttributes().contains(layerId))
+	 {
+	    put(layerId, annotations);
+	 }
+	 return annotations;
+      }
    } // end of getAnnotations()
 
    /**
@@ -972,14 +980,11 @@ public class Annotation
     */
    public Annotation getPrevious()
    {
-      int ordinal = getOrdinal();
-      if (ordinal == 1) return null; // first child
-      
       Annotation parent = getParent();
-      if (parent == null) return null;
-
-      // ordinal is 1-based, vector index is 0-based, so we want element ordinal-1 - 1:
-      return parent.getAnnotations(getLayerId()).elementAt(ordinal - 2);
+      if (parent == null) return null;     
+      SortedSet<Annotation> prior = parent.getAnnotations(getLayerId()).headSet(this);
+      if (prior.size() == 0) return null;
+      return prior.last();
    } // end of getPrevious()
 
    /**
@@ -988,17 +993,14 @@ public class Annotation
     */
    public Annotation getNext()
    {
-      int ordinal = getOrdinal();
-      
       Annotation parent = getParent();
       if (parent == null) return null;
-
-      Vector<Annotation> siblings = parent.getAnnotations(getLayerId());
-      // ordinal is 1-based, vector index is 0-based, so list size is ordinal of last one
-      if (siblings.size() <= ordinal) return null; // last child
-
-      // ordinal is 1-based, vector index is 0-based, so we want element ordinal-1 + 1:
-      return parent.getAnnotations(getLayerId()).elementAt(ordinal);
+      SortedSet<Annotation> subsequent = parent.getAnnotations(getLayerId()).tailSet(this);
+      // the first element in subsequent is this annotation - we want the second.
+      if (subsequent.size() == 1) return null;
+      Iterator<Annotation> iSubsequent = subsequent.iterator();
+      iSubsequent.next(); // move past first
+      return iSubsequent.next();
    } // end of getPrevious()
 
    // query methods
@@ -1567,12 +1569,14 @@ public class Annotation
    {
       if (this.equals(o)) return 0;
       if (getParentId() != null && getParentId().equals(o.getParentId())
-	  && getOrdinal() > 0 && o.getOrdinal() > 0)
+	  && containsKey("ordinal") && o.containsKey("ordinal")
+	  && !get("ordinal").equals(o.get("ordinal")))
       {
-	 return new Integer(getOrdinal()).compareTo(new Integer(o.getOrdinal()));
+	 return ((Integer)get("ordinal")).compareTo((Integer)o.get("ordinal"));
       }
       if (getLayerId().equals(o.getLayerId())
-	  && getParent() != null && o.getParent() != null)
+	  && getParent() != null && o.getParent() != null
+	  && getParent() != o.getParent())
       {
 	 return getParent().compareTo(o.getParent());
       }

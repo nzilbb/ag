@@ -9,7 +9,7 @@
     "graph":{"description":"The graph as a whole",
       "children":{
         "topic":{"description":"Topics", "alignment":2,
-          "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,},
+          "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false},
         "who":{"description":"Participants", "alignment":0,
           "peers":true, "peersOverlap":true, "parentIncludes":true, "saturated":true,
           "children":{
@@ -17,33 +17,33 @@
               "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
               "children":{
                 "phrase":{"description":"Phrase", "alignment":2,
-                  "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,},
+                  "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false},
                 "word":{"description":"Words", "alignment":2,
                   "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
                   "children":{
                     "pos":{"description":"Part of speec", "alignment":0,
-                      "peers":false, "peersOverlap":false, "parentIncludes":true, "saturated":true,},
+                      "peers":false, "peersOverlap":false, "parentIncludes":true, "saturated":true},
                     "phone":{"description":"Phones", "alignment":2,
-                      "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true,},
+                      "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true},
                   }},
                 "utterance":{"description":"Utterances", "alignment":2,
-                  "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true,},
-              }},
-          }},
-      }},
+                  "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true},
+              }}
+          }}
+      }}
   },
   "anchors":{
-    "turnStart":	{"offset":0.0,	"confidence":100,},
-    "a1":	{"offset":1.0,	"confidence":50,	"comment":"anchor comment",},
-    "a1.5":	{"offset":1.5,	"confidence":50,},
-    "a2.25":	{"offset":2.25,	"confidence":50,},
-    "a2.5":	{"offset":2.5,	"confidence":50,},
-    "a2.75":	{"offset":2.75,	"confidence":50,},
-    "a3":	{"offset":3.0,	"confidence":50,},
-    "a4":	{"offset":4.0,	"confidence":50,},
-    "a2":	{"offset":2.0,	"confidence":50,},
-    "a5":	{"offset":5.0,	"confidence":50,},
-    "turnEnd":	{"offset":6.0,	"confidence":100,},
+    "turnStart":	{"offset":0.0,	"confidence":100},
+    "a1":	{"offset":1.0,	"confidence":50,	"comment":"anchor comment"},
+    "a1.5":	{"offset":1.5,	"confidence":50},
+    "a2.25":	{"offset":2.25,	"confidence":50},
+    "a2.5":	{"offset":2.5,	"confidence":50},
+    "a2.75":	{"offset":2.75,	"confidence":50},
+    "a3":	{"offset":3.0,	"confidence":50},
+    "a4":	{"offset":4.0,	"confidence":50},
+    "a2":	{"offset":2.0,	"confidence":50},
+    "a5":	{"offset":5.0,	"confidence":50},
+    "turnEnd":	{"offset":6.0,	"confidence":100}
   },
   "who":[
     {"id":"who1",	"label":"john smith",	"startId":"turnStart",	"endId":"turnEnd",	"confidence":100,
@@ -52,25 +52,25 @@
           "word":[
             {"id":"word1",	"label":"the",	"startId":"a1",	"endId":"a2",	"confidence":100,	"comment":"word comment",
               "phone":[
-                {"id":"phone1",	"label":"D",	"startId":"a1",	"endId":"a1.5",	"confidence":100,},
-                {"id":"phone2",	"label":"@",	"startId":"a1.5",	"endId":"a2",	"confidence":100,},],
+                {"id":"phone1",	"label":"D",	"startId":"a1",	"endId":"a1.5",	"confidence":100},
+                {"id":"phone2",	"label":"@",	"startId":"a1.5",	"endId":"a2",	"confidence":100}],
               "pos":[
-                {"id":"pos1",	"label":"DT",	"startId":"a1",	"endId":"a2",	"confidence":50,},],},
+                {"id":"pos1",	"label":"DT",	"startId":"a1",	"endId":"a2",	"confidence":50}]},
             {"id":"word2",	"label":"quick",	"startId":"a2",	"endId":"a3",	"confidence":100,
               "phone":[
-                {"id":"phone3",	"label":"k",	"startId":"a2",	"endId":"a2.25",	"confidence":100,},
-                {"id":"phone4",	"label":"w",	"startId":"a2.25",	"endId":"a2.5",	"confidence":100,},
-                {"id":"phone5",	"label":"I",	"startId":"a2.5",	"endId":"a2.75",	"confidence":100,},
-                {"id":"phone6",	"label":"k",	"startId":"a2.75",	"endId":"a3",	"confidence":100,},],
+                {"id":"phone3",	"label":"k",	"startId":"a2",	"endId":"a2.25",	"confidence":100},
+                {"id":"phone4",	"label":"w",	"startId":"a2.25",	"endId":"a2.5",	"confidence":100},
+                {"id":"phone5",	"label":"I",	"startId":"a2.5",	"endId":"a2.75",	"confidence":100},
+                {"id":"phone6",	"label":"k",	"startId":"a2.75",	"endId":"a3",	"confidence":100}],
               "pos":[
-                {"id":"pos2",	"label":"A",	"startId":"a2",	"endId":"a3",	"confidence":50,},],},
-            {"id":"word3",	"label":"brown",	"startId":"a3",	"endId":"a4",	"confidence":100,},
+                {"id":"pos2",	"label":"A",	"startId":"a2",	"endId":"a3",	"confidence":50}]},
+            {"id":"word3",	"label":"brown",	"startId":"a3",	"endId":"a4",	"confidence":100},
             {"id":"word4",	"label":"fox",	"startId":"a4",	"endId":"a5",	"confidence":100,
               "pos":[
-                {"id":"pos3",	"label":"N",	"startId":"a4",	"endId":"a5",	"confidence":50,},],},],
+                {"id":"pos3",	"label":"N",	"startId":"a4",	"endId":"a5",	"confidence":50}]}],
           "utterance":[
-            {"id":"line1",	"label":"john smith",	"startId":"turnStart",	"endId":"turnEnd",	"confidence":100,},],
+            {"id":"line1",	"label":"john smith",	"startId":"turnStart",	"endId":"turnEnd",	"confidence":100}],
           "phrase":[
-            {"id":"phrase1",	"label":"AP",	"startId":"a2",	"endId":"a4",	"confidence":50,},
-            {"id":"phrase2",	"label":"NP",	"startId":"a1",	"endId":"a5",	"confidence":50,},],},],},],
+            {"id":"phrase2",	"label":"NP",	"startId":"a1",	"endId":"a5",	"confidence":50},
+            {"id":"phrase1",	"label":"AP",	"startId":"a2",	"endId":"a4",	"confidence":50}]}]}]
 }
