@@ -839,7 +839,8 @@ public class Annotation
     *  <li><code>utterace.list("word")</code> for the utterance's (peer) words, which are neither an ancestors nor descendants, but rather are children of an ancestor (<code>utterance.my"turn")</code>)</li>
     *  <li><code>word.list("corpus")[0]</code> for the graph's (child of grandparent) corpus, which is neither an ancestor nor descendant, but rather is a child of an ancestor (<code>word.my("graph")</code>)</li>
     * </ul>
-    * <p>{@link #setGraph(Graph)} must have been previously called, and the graph must have a correct layer hierarchy for this method to work correctly.
+    * <p>{@link #setGraph(Graph)} must have been previously called, and the graph must have a
+    * correct layer hierarchy for this method to work correctly.
     * @param layerId The layer of the desired annotations.
     * @return The related annotations, or an empty array if none could be found on the given layer.
     */
