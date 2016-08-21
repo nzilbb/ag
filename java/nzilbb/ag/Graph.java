@@ -995,7 +995,6 @@ public class Graph
 	    a.setStartId(null); // remove reference from start anchor
 	    a.setEndId(null); // remove reference from end anchor
 	    a.setParent(null); // remove reference from parent
-	    // a.getLayer().getAnnotations().remove(a); // remove reference from layer
 	    a.setLayer(null);
 	    iAnnotation.remove();
 	 }

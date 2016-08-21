@@ -410,8 +410,9 @@ public class Annotation
       {
 	 if (currentParent.getAnnotations().containsKey(getLayerId()))
 	 {
-	    SortedSet<Annotation> currentSiblings = currentParent.getAnnotations().get(getLayerId());
+	    SortedSet<Annotation> currentSiblings = currentParent.getAnnotations(getLayerId());
 	    currentSiblings.remove(this);
+	    
 	 }
       }
       if (newParent == null)
@@ -848,7 +849,7 @@ public class Annotation
    public Annotation[] list(final String layerId)
    {
       // is layerId a child layer?
-      if (getAnnotations().containsKey(layerId))
+      if (getLayer().getChildren().containsKey(layerId))
       {
 	 return annotations(layerId);
       }
@@ -954,39 +955,24 @@ public class Annotation
    
    /**
     * Access the child annotations on a given layer.
-    * <p>This collection is also accessible in the Annotation's map with a key named after <var>layerId</var> - e.g. this.annotations("turn") == this.get("turn"). The only exception is when <var>layerId is a reserved word - i.e. "id" or one of the keys registered in {@link #getTrackedAttributes()}</var>
+    * <p>This method returns a new collection, with the annotations re-sorted by ordinal, on each invocation.
     * @param layerId The given layer ID.
-    * @return The child annotations on the given layer.
+    * @return The child annotations on the given layer, or null if <var>layerId</var> is not a child layer.
     */
    public SortedSet<Annotation> getAnnotations(String layerId)
    {
-      if (!getAnnotations().containsKey(layerId))
-      {
-	 // add the child collection to children
-	 TreeSet<Annotation> annotations = new TreeSet<Annotation>(
-	    new AnnotationComparatorByOrdinal());
-	 getAnnotations().put(layerId, annotations);
-	 // // also create an attribute named after the layer, as long as it's not otherwise in use
-	 // if (!layerId.equals("id") && !getTrackedAttributes().contains(layerId))
-	 // {
-	 //    put(layerId, annotations);
-	 // }
-	 return annotations;
-      }
-      else
+      // is it a valid child layer?
+      if (getGraph() != null && !getLayer().getChildren().containsKey(layerId)) return null;
+
+      TreeSet<Annotation> annotations = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
+      if (getAnnotations().containsKey(layerId))
       { // we already have a collection - sort it by ordinal before returning it
-	 TreeSet<Annotation> annotations = new TreeSet<Annotation>(
-	    new AnnotationComparatorByOrdinal());
 	 annotations.addAll(getAnnotations().get(layerId));
 	 correctOrdinals(annotations);
-	 getAnnotations().put(layerId, annotations);
-	 // also create an attribute named after the layer, as long as it's not otherwise in use
-	 if (!layerId.equals("id") && !getTrackedAttributes().contains(layerId))
-	 {
-	    put(layerId, annotations);
-	 }
-	 return annotations;
       }
+      // add the child collection to children
+      getAnnotations().put(layerId, annotations);
+      return annotations;
    } // end of getAnnotations()
 
    /**

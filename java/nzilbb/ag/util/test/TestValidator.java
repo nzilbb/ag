@@ -243,6 +243,7 @@ public class TestValidator
 
       assertEquals(4, g.getAnnotation("word4").getOrdinal());
       assertEquals("participant1", g.getAnnotation("word6").getParentId());
+      assertNull("parent on wrong layer - ordinal not set", g.getAnnotation("word6").get("ordinal"));
 
       Validator v = new Validator();
       // v.setDebug(true);
@@ -276,9 +277,11 @@ public class TestValidator
 	 assertEquals("parent on wrong layer", 
 	 	      new Change(Change.Operation.Update, g.getAnnotation("word6"), "parentId", "turn3"), 
 	 	      order.next());
-	 assertEquals("parent on wrong layer - update ordinal", 
-	 	      new Change(Change.Operation.Update, g.getAnnotation("word6"), "ordinal", new Integer(3)), 
-	 	      order.next());
+	 assertEquals(3, g.getAnnotation("word6").getOrdinal());
+	 // setting the ordinal doesn't count as a change, because ordinal is not set in the first place
+	 // assertEquals("parent on wrong layer - update ordinal", 
+	 // 	      new Change(Change.Operation.Update, g.getAnnotation("word6"), "ordinal", new Integer(3)), 
+	 // 	      order.next());
 	 assertFalse(order.hasNext());
 	 assertEquals("no extra changes to graph - " + changes + " vs. " +g.getChanges(), changes.size(), g.getChanges().size());
       }
