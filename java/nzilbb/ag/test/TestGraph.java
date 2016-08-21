@@ -872,8 +872,8 @@ public class TestGraph
       including = the.includingAnnotationsOn("phone");
       assertEquals(0, including.length);
       including = quick.includingAnnotationsOn("phrase");
-      assertEquals("earlier first", NP, including[0]);
-      assertEquals("later last", AP, including[1]);
+      assertEquals("earlier first", AP, including[0]);
+      assertEquals("later last", NP, including[1]);
       assertEquals(2, including.length);
       // own layer
       including = the.includingAnnotationsOn("word");
@@ -913,8 +913,8 @@ public class TestGraph
       assertEquals(e, including[0]);
       assertEquals(1, including.length);
       including = quick.midpointIncludingAnnotationsOn("phrase");
-      assertEquals("earlier first", NP, including[0]);
-      assertEquals("later last", AP, including[1]);
+      assertEquals("earlier first", AP, including[0]);
+      assertEquals("later last", NP, including[1]);
       assertEquals(2, including.length);
       // own layer
       including = the.midpointIncludingAnnotationsOn("word");
@@ -1462,6 +1462,9 @@ public class TestGraph
        // include null offset anchor, it should still be added to the fragment
       g.addAnchor(new Anchor("a2", null));
       g.addAnchor(new Anchor("a2.2", 2.2));
+      g.addAnchor(new Anchor("a2.22", 2.22));
+      g.addAnchor(new Anchor("a2.23", 2.23));
+      g.addAnchor(new Anchor("a2.24", 2.24));
       g.addAnchor(new Anchor("a2.25", 2.25));
       g.addAnchor(new Anchor("a2.5", 2.5));
       g.addAnchor(new Anchor("a2.75", 2.75));
@@ -1500,6 +1503,9 @@ public class TestGraph
       Annotation NP = new Annotation("phrase2", "NP", "phrase", "a1", "a5", "turn1");
       // other speaker
       Annotation yes = new Annotation("word5", "yes", "word", "a2.2", "a3.2", "turn2");
+      Annotation y = new Annotation("phone7", "y", "phone", "a2.2", "a2.22", "word5");
+      Annotation e2 = new Annotation("phone8", "e", "phone", "a2.22", "a2.23", "word5");
+      Annotation s = new Annotation("phone9", "s", "phone", "a2.24", "a3.2", "word5");
 
       g.addAnnotation(corpus);
       g.addAnnotation(who1);
@@ -1518,6 +1524,9 @@ public class TestGraph
       g.addAnnotation(w);
       g.addAnnotation(I);
       g.addAnnotation(ck);
+      g.addAnnotation(y);
+      g.addAnnotation(e2);
+      g.addAnnotation(s);
 
       g.addAnnotation(DT);
       g.addAnnotation(A);
@@ -1541,7 +1550,7 @@ public class TestGraph
       assertEquals("my: ancestor - other speaker", who2, yes.my("who"));
       assertEquals("my: graph - other speaker", g, yes.my("graph"));
       assertEquals("my: child - other speaker", yes, turn2.my("word"));
-      assertNull("my: none - other speaker", yes.my("phone"));
+      assertNull("my: none - other speaker", yes.my("pos"));
 
       assertEquals("my: ancestor child (peer layers)", utterance1, the.my("utterance"));
       assertEquals("my: ancestor child (non-peers)", utterance1, th.my("utterance"));
@@ -1588,14 +1597,17 @@ public class TestGraph
       assertEquals("list: graph - other speaker", g, list[0]);
       assertEquals("list: graph - other speaker", 1, list.length);
       assertEquals("list: child - other speaker", turn2.annotations("word"), turn2.list("word"));
-      assertEquals("list: none - other speaker", 0, yes.list("phone").length);
+      assertEquals("list: none - other speaker", 0, yes.list("pos").length);
 
       list = turn1.list("word");
-      assertEquals("list: child", the, list[0]);
-      assertEquals("list: child", quick, list[1]);
-      assertEquals("list: child", brown, list[2]);
-      assertEquals("list: child", fox, list[3]);
-      assertEquals("list: child", 4, list.length);
+
+      list = g.list("word");
+      assertEquals("list: graph", the, list[0]);
+      assertEquals("list: graph", quick, list[1]);
+      assertEquals("list: graph", brown, list[2]);
+      assertEquals("list: graph", fox, list[3]);
+      assertEquals("list: graph", yes, list[4]);
+      assertEquals("list: graph", 5, list.length);
 
       list = turn1.list("pos");
       assertEquals("list: grandchild", DT, list[0]);
@@ -1608,6 +1620,18 @@ public class TestGraph
       assertEquals("list: distant descenant", A, list[1]);
       assertEquals("list: distant descenant", N, list[2]);
       assertEquals("list: distant descenant", 3, list.length);
+
+      list = g.list("phone");
+      assertEquals("list: distant descenant", th, list[0]);
+      assertEquals("list: distant descenant", e, list[1]);
+      assertEquals("list: distant descenant", k, list[2]);
+      assertEquals("list: distant descenant", w, list[3]);
+      assertEquals("list: distant descenant", I, list[4]);
+      assertEquals("list: distant descenant", ck, list[5]);
+      assertEquals("list: distant descenant", y, list[6]);
+      assertEquals("list: distant descenant", e2, list[7]);
+      assertEquals("list: distant descenant", s, list[8]);
+      assertEquals("list: distant descenant", 9, list.length);
    }
 
    @Test public void easyAnchorChaining() 

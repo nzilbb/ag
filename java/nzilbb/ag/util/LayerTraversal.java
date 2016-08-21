@@ -205,7 +205,7 @@ public class LayerTraversal<R>
     * @see #breadthFirst
     * @return The results - i.e. {@link #getResult()}
     */
-   protected R traverseAnnotation(Annotation annotation)
+   public R traverseAnnotation(Annotation annotation)
    {
       // only visit a node once (even if the parent/child hierarchy is corrupt)
       if (!visited.contains(annotation))

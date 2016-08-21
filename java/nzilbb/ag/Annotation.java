@@ -858,21 +858,59 @@ public class Annotation
       // is our layer an ancestor of layerId
       if (commonAncestorLayer.getId().equals(getLayer().getId()))
       { // we are an ancestor of the target layer
-	 LayerTraversal<TreeSet<Annotation>> descendantTraversal 
+	 // annotations should come out in ordinal order when they have the same parent
+	 // and in ancestor start order otherwise, where the ancestor used comes from the
+	 // highest aligned layer in the hierarchy, which may be the layer itself. so:
+	 // - aligned topics (parent=graph) fall back to topic offset
+	 // - aligned turns (parent=who) fall back to turn offset
+	 // - aligned words (parent=turn) fall back to turn offset
+	 // - unaligned pos's (paren=word) fall back to turn offset
+	 String root = getGraph().getSchema().getRoot().getId();
+	 Layer highestAlignedLayer = layer;
+	 for (Layer ancestor : layer.getAncestors())
+	 {
+	    if (ancestor.getId().equals(root)) break;
+	    if (ancestor.getAlignment() != Constants.ALIGNMENT_NONE)
+	    {
+	       highestAlignedLayer = ancestor;
+	    }
+	 }
+	 final String highestAlignedLayerId = highestAlignedLayer.getId();
+	 LayerTraversal<TreeSet<Annotation>> highestAlignedTraversal 
 	    = new LayerTraversal<TreeSet<Annotation>>(
-	       // ensure they come out in anchor order so that e.g. turns from different speakers
-	       // come out in chronological order
 	       new TreeSet<Annotation>(new AnnotationComparatorByAnchor()), this)
 	    {
 	       protected void pre(Annotation annotation)
 	       {
-		  if (annotation.getLayerId().equals(layerId))
+		  if (annotation.getLayerId().equals(highestAlignedLayerId))
 		  {
 		     result.add(annotation);
 		  }
 	       }
 	    };
-	 return descendantTraversal.getResult().toArray(new Annotation[0]);
+	 if (layerId.equals(highestAlignedLayerId))
+	 {
+	    return highestAlignedTraversal.getResult().toArray(new Annotation[0]);
+	 }
+	 else
+	 { // layerId != highestAlignedLayerId
+	    LayerTraversal<Vector<Annotation>> descendantTraversal 
+	       = new LayerTraversal<Vector<Annotation>>(new Vector<Annotation>())
+	       {
+		  protected void pre(Annotation annotation)
+		  {
+		     if (annotation.getLayerId().equals(layerId))
+		     {
+			result.add(annotation);
+		     }
+		  }
+	       };
+	    for (Annotation highestAlignedAncestor : highestAlignedTraversal.getResult())
+	    {
+	       descendantTraversal.traverseAnnotation(highestAlignedAncestor);
+	    }
+	    return descendantTraversal.getResult().toArray(new Annotation[0]);
+	 }
       }
       // is it the parent layer?
       if (layerId.equals(getParentId()))
