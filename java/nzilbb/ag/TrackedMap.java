@@ -293,16 +293,18 @@ public class TrackedMap
       if (getTrackedAttributes().contains(key))
       { // tracked key
 	 String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
-	 if (containsKey(key) && !containsKey(originalValueKey) 
-	     && (
-		get(key) == null // current value is null
-		|| !get(key).equals(value) // or they're different
-		)
-	    )
-	 { // remember the original value
-	    super.put(originalValueKey, get(key));
+
+	 if (containsKey(key) 
+	     && (get(key) == null // current value is null
+		 || !get(key).equals(value))) // or they're different
+	 { // value is changing
 	    super.put("@lastChange", new Change(Change.Operation.Update, this, key, value));
-	 }	 
+	    // if this is the first time the value is being changed
+	    if (!containsKey(originalValueKey))
+	    { // remember the original value
+	       super.put(originalValueKey, get(key));
+	    }
+	 }
       }
       return super.put(key, value);
    } // end of put()

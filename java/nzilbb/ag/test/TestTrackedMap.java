@@ -56,9 +56,13 @@ public class TestTrackedMap
       assertEquals("123", m.getId());
       assertEquals("123", m.get("id"));
       assertEquals("value1", m.get("tracked1"));
+      assertNull("LastChange not set on first assignment", m.getLastChange());
       assertEquals("value2", m.get("tracked2"));
+      assertNull("LastChange not set on first assignment", m.getLastChange());
       assertEquals("value3", m.get("tracked3"));
+      assertNull("LastChange not set on first assignment", m.getLastChange());
       assertEquals("value4", m.get("notTracked"));
+      assertNull("LastChange not set on first assignment", m.getLastChange());
 
       // initial change tracking state
       assertFalse(m.containsKey("originalTracked1"));
@@ -79,6 +83,9 @@ public class TestTrackedMap
 
       m.put("tracked1", "newValue1");
       assertEquals("newValue1", m.get("tracked1"));
+      assertEquals("LastChange set with first tracked change", 
+		   new Change(Change.Operation.Update, m, "tracked1", "newValue1"), m.getLastChange());
+      assertNull("LastChange nulled after probing it", m.getLastChange());
       assertEquals("Original value in map:", "value1", m.get("originalTracked1"));
       assertEquals(Change.Operation.Update, m.getChange());
       assertEquals(1, m.getChanges().size());
@@ -105,6 +112,9 @@ public class TestTrackedMap
 
       m.put("tracked3", "newerValue3");
       assertEquals("newerValue3", m.get("tracked3"));
+      assertEquals("LastChange set with first tracked change", 
+		   new Change(Change.Operation.Update, m, "tracked3", "newerValue3"), m.getLastChange());
+      assertNull("LastChange nulled after probing it", m.getLastChange());
       assertEquals("Original value in map:", "value3", m.get("originalTracked3"));
       assertEquals(Change.Operation.Update, m.getChange());
       assertEquals(1, m.getChanges().size());
@@ -112,6 +122,9 @@ public class TestTrackedMap
 
       m.put("tracked3", "newestValue3");
       assertEquals("newestValue3", m.get("tracked3"));
+      assertEquals("LastChange set with subsequent tracked change", 
+		   new Change(Change.Operation.Update, m, "tracked3", "newestValue3"), m.getLastChange());
+      assertNull("LastChange nulled after probing it", m.getLastChange());
       assertEquals("First original value in map:", "value3", m.get("originalTracked3"));
       assertEquals(Change.Operation.Update, m.getChange());
       assertEquals("Only latest change is reported", 1, m.getChanges().size());
