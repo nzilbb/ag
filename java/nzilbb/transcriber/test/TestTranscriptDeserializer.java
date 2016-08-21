@@ -25,6 +25,7 @@ package nzilbb.transcriber.test;
 import org.junit.*;
 import static org.junit.Assert.*;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.LinkedHashSet;
@@ -126,7 +127,8 @@ public class TestTranscriptDeserializer
 
       
       Annotation[] words = g.list("word");
-//      assertEquals(new Double(0), words[0].getStart().getOffset());
+      assertEquals(new Double(0), words[0].getStart().getOffset());
+      // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
       assertEquals("and", words[0].getLabel());
       assertEquals("ah .", words[1].getLabel());
       assertEquals("Cyril", words[2].getLabel());

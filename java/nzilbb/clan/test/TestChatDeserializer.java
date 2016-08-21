@@ -42,7 +42,8 @@ public class TestChatDeserializer
    @Test public void minimalConversion() 
       throws Exception
    {
-      Layer[] layers = {
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
 	 new Layer("transcriber", "Transcribers", 0, true, true, true),
 	 new Layer("languages", "Graph language", 0, true, true, true),
 	 new Layer("who", "Participants", 0, true, true, true),
@@ -60,9 +61,7 @@ public class TestChatDeserializer
 	 new Layer("completion", "Completion", 0, true, false, false, "word", true),
 	 new Layer("expansion", "Expansion", 0, false, false, true, "word", true),
 	 new Layer("disfluency", "Disfluency", 0, false, false, true, "word", true),
-	 new Layer("gem", "Gems", 2, true, false, true)
-      };
-      Schema schema = new Schema(layers, "who", "turn", "utterance", "word");
+	 new Layer("gem", "Gems", 2, true, false, true));
       // access file
       NamedStream[] streams = { new NamedStream(new File(getDir(), "test.cha")) };
 
@@ -71,7 +70,7 @@ public class TestChatDeserializer
 
       // load the stream
       ParameterSet defaultParamaters = deserializer.load(streams, schema);
-      //for (Parameter p : defaultParamaters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      // for (Parameter p : defaultParamaters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
 
       // configure the deserialization
       deserializer.setParameters(defaultParamaters);
@@ -212,7 +211,6 @@ public class TestChatDeserializer
 	 "abc", "abcdefg", "abc", "abcd", "abcde", "abc", "abcd", "abc", "a", "b", "c", "d"};
       for (int i = 0; i < wordLabels.length; i++)
       {
-	 System.out.println(words[i].getId() + " "  + words[i].getLabel() + " " + words[i].getParent() + " " + words[i].getOrdinal() + " " + words[i].getStart() + " " + words[i].getChange());
 	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
       }
       for (int i = 0; i < words.length; i++)
@@ -604,7 +602,6 @@ public class TestChatDeserializer
       assertEquals("aligned penultimate utterance has end confidence adjusted", 
 		   Constants.CONFIDENCE_DEFAULT, 
 		   utterances[utterances.length-2].getEnd().get(Constants.CONFIDENCE));
-
       
       Annotation[] words = g.list("word");
       String[] wordLabels = { 
@@ -617,7 +614,7 @@ public class TestChatDeserializer
 	 "ab", "abcde", "until", "she's", "abc", "ab", "abcde", "abcdef", "abcde", "ab", "abc", "baby's", "crib", 
 	 "abc", "abcdefg", "abc", "abcd", "abcde", "abc", "abcd", "abc", "a_b_c_d."};
       for (int i = 0; i < wordLabels.length; i++)
-      {
+      {	 
 	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
       }
       for (int i = 0; i < words.length; i++)
