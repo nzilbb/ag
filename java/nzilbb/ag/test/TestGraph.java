@@ -872,8 +872,8 @@ public class TestGraph
       including = the.includingAnnotationsOn("phone");
       assertEquals(0, including.length);
       including = quick.includingAnnotationsOn("phrase");
-      assertEquals("earlier first", AP, including[0]);
-      assertEquals("later last", NP, including[1]);
+      assertEquals("earlier first", NP, including[0]);
+      assertEquals("later last", AP, including[1]);
       assertEquals(2, including.length);
       // own layer
       including = the.includingAnnotationsOn("word");
@@ -913,8 +913,8 @@ public class TestGraph
       assertEquals(e, including[0]);
       assertEquals(1, including.length);
       including = quick.midpointIncludingAnnotationsOn("phrase");
-      assertEquals("earlier first", AP, including[0]);
-      assertEquals("later last", NP, including[1]);
+      assertEquals("earlier first", NP, including[0]);
+      assertEquals("later last", AP, including[1]);
       assertEquals(2, including.length);
       // own layer
       including = the.midpointIncludingAnnotationsOn("word");

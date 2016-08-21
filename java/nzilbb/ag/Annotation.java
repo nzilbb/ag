@@ -33,6 +33,7 @@ import java.util.SortedSet;
 import java.util.Iterator;
 import nzilbb.ag.util.LayerTraversal;
 import nzilbb.ag.util.AnnotationComparatorByOrdinal;
+import nzilbb.ag.util.AnnotationComparatorByAnchor;
 /**
  * Annotation graph annotation - i.e. an edge of the graph.
  * @author Robert Fromont robert@fromont.net.nz
@@ -857,8 +858,11 @@ public class Annotation
       // is our layer an ancestor of layerId
       if (commonAncestorLayer.getId().equals(getLayer().getId()))
       { // we are an ancestor of the target layer
-	 LayerTraversal<Vector<Annotation>> descendantTraversal 
-	    = new LayerTraversal<Vector<Annotation>>(new Vector<Annotation>(), this)
+	 LayerTraversal<TreeSet<Annotation>> descendantTraversal 
+	    = new LayerTraversal<TreeSet<Annotation>>(
+	       // ensure they come out in anchor order so that e.g. turns from different speakers
+	       // come out in chronological order
+	       new TreeSet<Annotation>(new AnnotationComparatorByAnchor()), this)
 	    {
 	       protected void pre(Annotation annotation)
 	       {

@@ -651,13 +651,13 @@ public class TestValidator
 			 g.getAnnotation("word6").getStartId(), 
 			 g.getAnnotation("word4").getStartId());
 	 assertEquals("word share start anchors - new start: " + changes, 
-	 	      new Change(Change.Operation.Update, g.getAnnotation("word6"), "startId", "1"), 
+	 	      new Change(Change.Operation.Update, g.getAnnotation("word4"), "startId", "1"), 
 	 	      order.next());
 	 assertNotEquals("word share end anchors - not shared any more: " + changes, 
 			 g.getAnnotation("word5").getEndId(), 
 			 g.getAnnotation("word4").getEndId());
 	 assertEquals("word share start anchors - new end: " + changes, 
-	 	      new Change(Change.Operation.Update, g.getAnnotation("word5"), "endId", "1"), 
+	 	      new Change(Change.Operation.Update, g.getAnnotation("word3"), "endId", "1"), 
 	 	      order.next());
 	 assertFalse(order.hasNext());
 	 assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
