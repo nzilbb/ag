@@ -91,10 +91,12 @@
       <jvmarg value="-ea"/>
       <formatter type="plain" usefile="false" />
       <batchtest>
-        <fileset dir=".">
-          <include name="${srctestseditpath}"/>
-          <include name="${srctests}"/>
-        </fileset>
+        <fileset dir="." includes="${srctestseditpath}"/>
+        <fileset dir="." includes="nzilbb/ag/*/Test*.java"/>
+        <fileset dir="." includes="nzilbb/ag/util/**/Test*.java" excludes="nzilbb/ag/util/test/TestMerger.java"/>
+        <fileset dir="." includes="nzilbb/ag/serialize/**/Test*.java"/>
+        <fileset dir="." includes="nzilbb/ag/sql/**/Test*.java"/>        
+        <fileset dir="." includes="nzilbb/ag/util/test/TestMerger.java"/>
       </batchtest>
     </junit>
   </target>
@@ -121,9 +123,8 @@
       <jvmarg value="-ea"/>
       <formatter type="plain" usefile="false" />
       <batchtest>
-        <fileset dir=".">
-          <include name="nzilbb/ag/util/test/TestMerger.java"/>
-        </fileset>
+        <fileset dir="." includes="nzilbb/ag/util/test/TestAnchorComparators.java"/>
+        <fileset dir="." includes="nzilbb/ag/util/test/TestMerger.java"/>
       </batchtest>
     </junit>
   </target>
