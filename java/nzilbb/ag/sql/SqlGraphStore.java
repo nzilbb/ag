@@ -1111,7 +1111,7 @@ public class SqlGraphStore
 	    Anchor lastAnchor = anchors.last();
 	    for (String layerId : setStartEndLayers)
 	    {
-	       for (Annotation a : graph.getAnnotations(layerId))
+	       for (Annotation a : graph.list(layerId))
 	       {
 		  a.setStartId(firstAnchor.getId());
 		  a.setEndId(lastAnchor.getId());
