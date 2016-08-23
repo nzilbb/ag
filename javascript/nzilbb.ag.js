@@ -95,7 +95,7 @@ nzilbb.ag.Graph.prototype = {
 	    {
 		var annotation = layer.annotations[a];
 		if (annotation.includesOffset(offset)) annotations.push(annotation);
-		if (annotation.start.offset > offset) break; // assuming the list is sorted, we can stop now
+		if (annotation.start && annotation.start.offset > offset) break; // assuming the list is sorted, we can stop now
 	    } // next annotation
 	} // next layer
 	return (annotations.length > 0)?annotations:null;
@@ -171,11 +171,15 @@ nzilbb.ag.Graph.activateLayer = function(ag, parent, layerId, annotations)
 	ag.annotations[annotation.id] = annotation; // index annotations by id
 	annotation.layer.annotations.push(annotation); // allow enumeration by layer
 	var startAnchor = annotation.start;
-	if (!startAnchor.startOf[layerId]) startAnchor.startOf[layerId] = [];
-	startAnchor.startOf[layerId].push(annotation);
+	if (startAnchor) {
+	    if (!startAnchor.startOf[layerId]) startAnchor.startOf[layerId] = [];
+	    startAnchor.startOf[layerId].push(annotation);
+	}
 	var endAnchor = annotation.end;
-	if (!endAnchor.endOf[layerId]) endAnchor.endOf[layerId] = [];
-	endAnchor.endOf[layerId].push(annotation);
+	if (endAnchor) {
+	    if (!endAnchor.endOf[layerId]) endAnchor.endOf[layerId] = [];
+	    endAnchor.endOf[layerId].push(annotation);
+	}
 
 	// detect layers
 	for (var key in annotation)
@@ -333,17 +337,17 @@ nzilbb.ag.Annotation.prototype = {
     get end() { return this.graph.anchors[this.endId]; },
 
     // query methods
-    includesOffset : function(offset) { return this.start.offset <= offset && this.end.offset > offset; },
-    includes : function(annotation) { return this.includesOffset(annotation.start.offset) && this.includesOffset(annotation.end.offset); },
+    includesOffset : function(offset) { try { return this.start.offset <= offset && this.end.offset > offset; } catch(x) { return false; }},
+    includes : function(annotation) { try { return this.includesOffset(annotation.start.offset) && this.includesOffset(annotation.end.offset); } catch(x) { return false; }},
     includesMidpoint : function(annotation) { return this.includesOffset(annotation.midpoint()); },
-    overlaps : function(annotation) { return this.start.offset < annotation.end.offset && this.end.offset > annotation.start.offset; },
-    duration : function() { return this.end.offset - this.start.offset; },
-    midpoint : function() { return this.start.offset + (this.duration() / 2); },
+    overlaps : function(annotation) { try { return this.start.offset < annotation.end.offset && this.end.offset > annotation.start.offset; } catch(x) { return false; }},
+    duration : function() { try { return this.end.offset - this.start.offset; } catch(x) { return null; }},
+    midpoint : function() { try { return this.start.offset + (this.duration() / 2); } catch(x) {return null; }},
     instantaneous : function() { return this.startId == this.endId; },
     toString : function Annotation_toString() { return this.label; },
 
-    sharesStart : function(layerId) { return this.start.startOf[layerId]; },
-    sharesEnd : function(layerId) { return this.end.endOf[layerId]; },
+    sharesStart : function(layerId) { try { return this.start.startOf[layerId]; } catch(x) { return {}; }},
+    sharesEnd : function(layerId) { try { return this.end.endOf[layerId]; } catch(x) { return {}; }},
     startsWith : function(annotation) { return this.startId == annotation.startId; },
     endsWith : function(annotation) { return this.endId == annotation.endId; },
     tags : function(annotation) { return this.startsWith(annotation) && this.endsWith(annotation); },
