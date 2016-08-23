@@ -66,8 +66,7 @@ public class CsvToJson extends CommandLineProgram
 	 AgCsvDeserializer fromCsv = new AgCsvDeserializer();
 	 
 	 // configure it
-	 ParameterSet defaultConfiguration = fromCsv.configure(new ParameterSet(), schema);
-	 fromCsv.configure(defaultConfiguration, schema);
+	 fromCsv.configure(fromCsv.configure(new ParameterSet(), schema), schema);
 	    
 	 // create serializer
 	 JSONSerialization toJson = new JSONSerialization();
@@ -100,7 +99,7 @@ public class CsvToJson extends CommandLineProgram
 	       {
 		  System.out.println(warning);
 	       }
-	       
+
 	       // convert to JSON
 	       streams = toJson.serialize(Utility.OneGraphArray(g));
 	       streams[0].save(f.getParentFile());	    

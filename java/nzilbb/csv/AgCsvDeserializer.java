@@ -448,6 +448,33 @@ public class AgCsvDeserializer
 	 }
 	 else if (layer.getParentId().equals(graph.getSchema().getTurnLayerId()))
 	 {
+	    if (layer.getId().equals(graph.getSchema().getUtteranceLayerId()))
+	    {
+	       // make sure turn exists
+	       Annotation turn = graph.getAnnotation(line.get(mHeadings.get("turnAnnotationId")));
+	       if (turn == null)
+	       {
+		  
+		  // make sure participant exists
+		  Annotation participant = graph.getAnnotation(annotation.getLabel());
+		  if (participant == null)
+		  {
+		     participant = new Annotation(
+			annotation.getLabel(), annotation.getLabel(), 
+			graph.getSchema().getParticipantLayerId());
+		     graph.addAnnotation(participant);
+		  }
+
+		  turn = new Annotation(
+		     line.get(mHeadings.get("turnAnnotationId")), annotation.getLabel(), 
+		     graph.getSchema().getTurnLayerId(), 
+		     // start/end IDs are set, but the anchor's themselves aren't added
+		     line.get(mHeadings.get("turnAnnotationId")) + " start", 
+		     line.get(mHeadings.get("turnAnnotationId")) + " end",
+		     participant.getId());
+		  graph.addAnnotation(turn);
+	       } // turn isn't there
+	    } // utterance layer
 	    annotation.setParentId(line.get(mHeadings.get("turnAnnotationId")));
 	 }
 	 else if (layer.getParentId().equals(graph.getSchema().getWordLayerId()))

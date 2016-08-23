@@ -1,0 +1,38 @@
+id	offset	alignmentStatus
+n_100	10.0	100
+n_101	10.0	100
+n_110	11.0	50
+n_120	12.0	50
+n_200	20.0	50
+n_300	30.0	50
+n_325	32.5	10
+n_350	35.0	10
+n_375	37.5	10
+n_399	40.0	100
+n_400	40.0	100
+n_401	40.0	100
+n_500	50.0	50
+n_600	60.0	50
+n_699	70.0	100
+n_700	70.0	100
+layer	transcript	transcript		W	2	0	
+id	startAnchor.id	endAnchor.id	label	labelStatus	turnAnnotationId	ordinalInTurn	wordAnnotationId
+ew_0_1	n_101	n_200	86-1-1	100	em_11_0	1	ew_0_1
+ew_0_2	n_200	n_300	86-1-2	100	em_11_0	2	ew_0_2
+ew_0_3	n_300	n_399	86-1-3	100	em_11_0	3	ew_0_3
+ew_0_4	n_401	n_500	86-2-1	100	em_11_0	4	ew_0_4
+ew_0_5	n_500	n_600	86-2-2	100	em_11_0	5	ew_0_5
+ew_0_6	n_600	n_699	86-2-3	100	em_11_0	6	ew_0_6
+layer	segments	segments		S	2	1	
+id	startAnchor.id	endAnchor.id	label	labelStatus	turnAnnotationId	ordinalInTurn	wordAnnotationId	ordinalInWord	segmentAnnotationId
+es_1_1	n_101	n_110	86-1-1-1	100	em_11_0	1	ew_0_1	1	es_1_1
+es_1_2	n_110	n_120	86-1-1-2	100	em_11_0	1	ew_0_1	2	es_1_2
+es_1_3	n_120	n_200	86-1-1-3	100	em_11_0	1	ew_0_1	3	es_1_3
+es_1_4	n_300	n_325	86-1-3-1	50	em_11_0	3	ew_0_3	1	es_1_4
+es_1_5	n_325	n_350	86-1-3-2	50	em_11_0	3	ew_0_3	2	es_1_5
+es_1_6	n_350	n_375	86-1-3-3	50	em_11_0	3	ew_0_3	3	es_1_6
+es_1_7	n_375	n_399	86-1-3-4	50	em_11_0	3	ew_0_3	4	es_1_7
+layer	utterances	utterances		M	2	12	
+id	startAnchor.id	endAnchor.id	label	labelStatus	turnAnnotationId
+em_12_1	n_100	n_400	Maxwell Smart	100	em_11_0
+em_12_2	n_400	n_700	Maxwell Smart	100	em_11_0
