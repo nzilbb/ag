@@ -130,7 +130,7 @@ function visualiseAg(ag) {
     nodeArray.push({
      id : a, 
      label: "[" + annotation.id + "]\n" + annotation.label,
-     title: annotation.layerId + ": [" + annotation.id + "] " + annotation.label + (annotation.confidence?" (" + annotation.confidence + "%)":"") + (annotation.comment?" {" + annotation.comment + "}":""),
+     title: annotation.layerId + ": [" + annotation.id + "] " + annotation.label + (annotation.confidence?" (" + annotation.confidence + "%)":"") + " #" + annotation.ordinal + (annotation.comment?" {" + annotation.comment + "}":""),
      x: annotation.midpoint() * xFactor,
      y: annotation.layer.level * yFactor,
      group: annotation.layerId,
