@@ -332,77 +332,81 @@ public class Merger
 	       }
 	       else
 	       { // neither an instant, or both an instant
-		  // distance is as important as the reliability of the least reliable annotations anchors
-		  // i.e. if a1 & a2 have matching alignments (both default, both user-aligned, etc.)
-		  // then the weight of the alignment is as heavy as the alignment
-		  // but if a1 has default alignments and a2 has user-alignments, then importance is low
-		  // because this is probably an alignment update or an unaligned update of aligned annotations
-		  // alternatively, if the annotation has a mixture of trustworthyness, weight will be higher
-		  double dImportance = Math.min(
-		     (double)(getConfidence(a1.getStart()) + getConfidence(a1.getEnd())),
-		     (double)(getConfidence(a2.getStart()) + getConfidence(a2.getEnd())))
-		     // divided by CONFIDENCE_MANUAL, to make it near 1
-		     / (double)(Constants.CONFIDENCE_MANUAL * 2);
-		  // however, for "word" and "phone", which are frequently merged between aligned
-		  // and unaligned versions, and which should be merged by label only 
-		  // we ignore anchors
-		  if (a1.getLayerId().equals(schema.getWordLayerId()) // word layer
-		      // or (probably) phone layer
-		      || (a1.getLayer().getParentId().equals(schema.getWordLayerId())
-			  && a1.getLayer().getAlignment() == Constants.ALIGNMENT_INTERVAL))
+		  // are all offsets available?
+		  if (a1.getAnchored() && a2.getAnchored())
 		  {
-		     dImportance = 0.01;
-		  }			
-		  // instantaneous annotations need to have more similar offsets than intervals
-		  if (a1.getInstantaneous()) // && a2.getInstantaneous(), but we know it must be
-		  {
-		     dImportance *= 2.0;
-		  }
-		  Double dDistance = a1.maxPairedDistance(a2);
-		  if (dDistance != null && dDistance != 0)
-		  {	
-		     // we want to ensure that overlapping annotations are selected over non-overlapping ones
-		     if (dImportance > 0)
+		     // distance is as important as the reliability of the least reliable annotations anchors
+		     // i.e. if a1 & a2 have matching alignments (both default, both user-aligned, etc.)
+		     // then the weight of the alignment is as heavy as the alignment
+		     // but if a1 has default alignments and a2 has user-alignments, then importance is low
+		     // because this is probably an alignment update or an unaligned update of aligned annotations
+		     // alternatively, if the annotation has a mixture of trustworthyness, weight will be higher
+		     double dImportance = Math.min(
+			(double)(getConfidence(a1.getStart()) + getConfidence(a1.getEnd())),
+			(double)(getConfidence(a2.getStart()) + getConfidence(a2.getEnd())))
+			// divided by CONFIDENCE_MANUAL, to make it near 1
+			/ (double)(Constants.CONFIDENCE_MANUAL * 2);
+		     // however, for "word" and "phone", which are frequently merged between aligned
+		     // and unaligned versions, and which should be merged by label only 
+		     // we ignore anchors
+		     if (a1.getLayerId().equals(schema.getWordLayerId()) // word layer
+			 // or (probably) phone layer
+			 || (a1.getLayer().getParentId().equals(schema.getWordLayerId())
+			     && a1.getLayer().getAlignment() == Constants.ALIGNMENT_INTERVAL))
 		     {
-			if (dDistance > 0)
-			{ // no overlap
-			   // prefer overlap over none
-			   iWeight += (int)(dDistance * dImportance * 2);
-			}
-			else
-			{  // overlap
-			   // when choosing between fragments of a split-up annotation, choose the 
-			   // fragment that overlaps the most
-			   double dOverlapMagnitude = Math.abs(a1.distance(a2))
-			      // but if the length difference is great, make it high cost anyway
-			      / ((a1.getDuration() + a2.getDuration())/2);
-			   dOverlapMagnitude *= 3; // soften the impact of this magically
-			   iWeight += (int)
-			      (Math.min(
-				 (double)NO_WAY, // make sure this tops out at NO_WAY, to avoid overflow
-				 Math.abs((-dDistance * dImportance / dOverlapMagnitude))));
-			}
+			dImportance = 0.01;
+		     }			
+		     // instantaneous annotations need to have more similar offsets than intervals
+		     if (a1.getInstantaneous()) // && a2.getInstantaneous(), but we know it must be
+		     {
+			dImportance *= 2.0;
 		     }
-		     else 
-		     { 
-			// while distance doesn't contribute to the weight, REALLY BIG distances shouldn't map
-			if (dDistance > 0)
-			{ // no overlap
-			   if (dDistance > 30)
-			   {
-			      iWeight += NO_WAY;
+		     Double dDistance = a1.maxPairedDistance(a2);
+		     if (dDistance != null && dDistance != 0)
+		     {	
+			// we want to ensure that overlapping annotations are selected over non-overlapping ones
+			if (dImportance > 0)
+			{
+			   if (dDistance > 0)
+			   { // no overlap
+			      // prefer overlap over none
+			      iWeight += (int)(dDistance * dImportance * 2);
 			   }
-			   else if (Math.abs(a1.getDuration() - a2.getDuration()) > 10) // words differ in length by this much
-			   {
-			      iWeight += NO_WAY;
+			   else
+			   {  // overlap
+			      // when choosing between fragments of a split-up annotation, choose the 
+			      // fragment that overlaps the most
+			      double dOverlapMagnitude = Math.abs(a1.distance(a2))
+				 // but if the length difference is great, make it high cost anyway
+				 / ((a1.getDuration() + a2.getDuration())/2);
+			      dOverlapMagnitude *= 3; // soften the impact of this magically
+			      iWeight += (int)
+				 (Math.min(
+				    (double)NO_WAY, // make sure this tops out at NO_WAY, to avoid overflow
+				    Math.abs((-dDistance * dImportance / dOverlapMagnitude))));
 			   }
 			}
-			else
-			{ // overlap - should be too different at all
-			   if (-dDistance > 10)  iWeight += NO_WAY;
+			else 
+			{ 
+			   // while distance doesn't contribute to the weight, REALLY BIG distances shouldn't map
+			   if (dDistance > 0)
+			   { // no overlap
+			      if (dDistance > 30)
+			      {
+				 iWeight += NO_WAY;
+			      }
+			      else if (Math.abs(a1.getDuration() - a2.getDuration()) > 10) // words differ in length by this much
+			      {
+				 iWeight += NO_WAY;
+			      }
+			   }
+			   else
+			   { // overlap - should be too different at all
+			      if (-dDistance > 10)  iWeight += NO_WAY;
+			   }
 			}
-		     }
-		  } // distant annotation
+		     } // distant annotation
+		  } // all offsets are available
 	       } // neither an instant, or both an instant
 	    } // not already mapped
 
@@ -492,6 +496,40 @@ public class Merger
       // TODO maybe generated dummy turns in editedGraph
       // TODO maybe generated dummy participants in editedGraph
 
+      // ensure that all annotations have an anchor
+      HashSet<Anchor> dummyAnchors = new HashSet<Anchor>();
+      for (Annotation a : graph.getAnnotationsById().values())
+      {
+	 if (a.getStart() == null)
+	 {
+	    Anchor dummy = new Anchor(a.getStartId(), null, Constants.CONFIDENCE, Constants.CONFIDENCE_NONE);
+	    dummyAnchors.add(dummy);
+	    graph.addAnchor(dummy);
+	 }
+	 if (a.getEnd() == null)
+	 {
+	    Anchor dummy = new Anchor(a.getEndId(), null, Constants.CONFIDENCE, Constants.CONFIDENCE_NONE);
+	    dummyAnchors.add(dummy);
+	    graph.addAnchor(dummy);
+	 }
+      }
+      HashSet<Anchor> dummyEditedAnchors = new HashSet<Anchor>();
+      for (Annotation a : editedGraph.getAnnotationsById().values())
+      {
+	 if (a.getStart() == null)
+	 {
+	    Anchor dummy = new Anchor(a.getStartId(), null, Constants.CONFIDENCE, Constants.CONFIDENCE_NONE);
+	    dummyEditedAnchors.add(dummy);
+	    editedGraph.addAnchor(dummy);
+	 }
+	 if (a.getEnd() == null)
+	 {
+	    Anchor dummy = new Anchor(a.getEndId(), null, Constants.CONFIDENCE, Constants.CONFIDENCE_NONE);
+	    dummyEditedAnchors.add(dummy);
+	    editedGraph.addAnchor(dummy);
+	 }
+      }
+
       Vector<Layer> topDownLayersInEditedGraph = graph.getLayersTopDown();
       Iterator<Layer> iLayersTopDown = topDownLayersInEditedGraph.iterator();
       while (iLayersTopDown.hasNext())
@@ -543,7 +581,24 @@ public class Merger
 
       // phase 4. - compute anchor deltas horizontally
       log("phase 4: anchor deltas");
-
+      // take into account the granularities of the graphs when comparing offsets
+      if (graph.getOffsetGranularity() != null || editedGraph.getOffsetGranularity() != null)
+      {
+	 if (graph.getOffsetGranularity() == null)
+	 {
+	    setOffsetComparisonThreshold(editedGraph.getOffsetGranularity() / 2);
+	 }
+	 else if (editedGraph.getOffsetGranularity() == null)
+	 {
+	    setOffsetComparisonThreshold(graph.getOffsetGranularity() / 2);
+	 }
+	 else
+	 {
+	    setOffsetComparisonThreshold(
+	       Math.max(Math.abs(graph.getOffsetGranularity()), 
+			Math.abs(editedGraph.getOffsetGranularity())) / 2);
+	 }
+      }
       // construct a bottom up list of layers, to ensure children unshare from parents, 
       // not vice-versa
       // and also layers that are parents first
@@ -1468,25 +1523,6 @@ public class Merger
    {
       Vector<Change> changes = new Vector<Change>();
 
-      // take into account the granularities of the graphs when comparing offsets
-      if (graph.getOffsetGranularity() != null || editedGraph.getOffsetGranularity() != null)
-      {
-	 if (graph.getOffsetGranularity() == null)
-	 {
-	    setOffsetComparisonThreshold(editedGraph.getOffsetGranularity() / 2);
-	 }
-	 else if (editedGraph.getOffsetGranularity() == null)
-	 {
-	    setOffsetComparisonThreshold(graph.getOffsetGranularity() / 2);
-	 }
-	 else
-	 {
-	    setOffsetComparisonThreshold(
-	       Math.max(Math.abs(graph.getOffsetGranularity()), 
-			Math.abs(editedGraph.getOffsetGranularity())) / 2);
-	 }
-      }
-
       String layerId = layer.getId();
 
       // check for anchor changes between mapped annotations
@@ -1503,11 +1539,6 @@ public class Merger
 	 assert anOriginal.getChange() != Change.Operation.Destroy : "anOriginal.getChange() != Change.Operation.Destroy - " + anOriginal;
 	 
 	 // start anchor...
-	 assert anOriginal.getStart() != null : "anOriginal.getStart() != null: " + anOriginal;
-	 assert anEdited.getStart() != null : "anEdited.getStart() != null: " + anEdited;
-	 assert anOriginal.getStart().getOffset() != null : "anOriginal.getStart().getOffset() != null: " + anOriginal; // TODO??
-	 assert anEdited.getStart().getOffset() != null : "anEdited.getStart().getOffset() != null: " + anEdited; // TODO??
-	 
 	 boolean bCheckStartAnchorOffset = true;
 	 
 	 // there may be reasons to relink the annotation to another anchor
@@ -1559,7 +1590,11 @@ public class Merger
 	       if (hasCounterpart(anParallel))
 	       {
 		  Annotation anEditedParallel = getCounterpart(anParallel);
-		  if (anEdited.getStart() != anEditedParallel.getStart())
+		  // not shared in the edite graph
+		  if (anEdited.getStart() != anEditedParallel.getStart()
+		      // and there is some confidence in the edited anchors
+		      && getConfidence(anEdited.getStart()) > Constants.CONFIDENCE_NONE
+		      && getConfidence(anEditedParallel.getStart()) > Constants.CONFIDENCE_NONE)
 		  {
 		     // SHOULD they share? Is there a saturated relationship between the layers (annotation in the child layer)
 		     Layer parallelLayer = graph.getLayer(anEditedParallel.getLayerId());
@@ -1873,10 +1908,6 @@ public class Merger
 	 {
 	    assert anOriginal.getEnd() != null : "anOriginal.getEnd() != null: " + anOriginal;
 	    assert anEdited.getEnd() != null : "anEdited.getEnd() != null: " + anEdited;
-	    assert anOriginal.getEnd().getOffset() != null // TODO??
-	       : "anOriginal.getEnd().getOffset() != null: " + anOriginal; 
-	    assert anEdited.getEnd().getOffset() != null // TODO??
-	       : "anEdited.getEnd().getOffset() != null: " + anEdited;
 	    boolean bCheckEndAnchorOffset = true;
 	    
 	    // there may be reasons to relink the
@@ -2387,6 +2418,7 @@ public class Merger
 	    {
 	       Anchor anchor = itAnchors.next();
 	       log(layerId + ": anchor: " + anchor + " (" + predecessor + ")"); // TODO comment out
+	       if (anchor.getOffset() == null) continue; // ignore anchors with no offset
 	       if (predecessor != null)
 	       {
 		  if (anchor.getOffset() < predecessor.getOffset())
