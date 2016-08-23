@@ -38,7 +38,13 @@ import nzilbb.editpath.*;
 import nzilbb.ag.*;
 
 /**
- * Merges an editer version of a graph into the original verison of that graph.
+ * Merges an editer version of a graph into the original version of that graph.
+ * <p>The merger assumes that {@link #editedGraph} and the <var>graph</var> passed to
+ * {@link #transform(Graph)} really are versions of the same graph. {@link #editedGraph} needn't
+ * contain all the layers that <var>graph</var> does, but it must have a valid layer hierarchy;
+ * e.g. if it's a fragment representing an utterance, it must nevertheless have (possibly
+ * reconstructed) turn and participant annotations to link the utterance to the graph itself (if
+ * <var>graph</var> does). For more detailed assumption information, see {@link #transform(Graph)}.
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class Merger
@@ -439,6 +445,9 @@ public class Merger
 	 return new EditStep<Annotation>(null, a2, 1, EditStep.StepOperation.INSERT);
       }
    };
+
+   protected HashSet<Anchor> dummyAnchors;
+   protected HashSet<Anchor> dummyEditedAnchors;
    
    // Methods:
    
@@ -468,7 +477,7 @@ public class Merger
     * <ul>
     *  <li><var>editedGraph</var> represents a possibly partial 
     *   (i.e. with a subset of layers) version <var>graph</var> with some changes applied to it.</li>
-    *  <li>{@link #editedGraph} is valid
+    *  <li>{@link #editedGraph} is valid and has a valid layer hierarchy (e.g. no orphaned utterances)
     *   - e.g. that {@link Validator} has been applied to it before merging.</li>
     *  <li>{@link #editedGraph} has no proposed changes (i.e. {@link Graph#commit()} has been called)</li>
     *  <li>Participants are identified in both graphs using turn annotation labels,
@@ -493,11 +502,8 @@ public class Merger
       if (graph == editedGraph) return changes;
       if (editedGraph == null) throw new TransformationException(this, "Edited graph is no set.", new NullPointerException());
 
-      // TODO maybe generated dummy turns in editedGraph
-      // TODO maybe generated dummy participants in editedGraph
-
       // ensure that all annotations have an anchor
-      HashSet<Anchor> dummyAnchors = new HashSet<Anchor>();
+      dummyAnchors = new HashSet<Anchor>();
       for (Annotation a : graph.getAnnotationsById().values())
       {
 	 if (a.getStart() == null)
@@ -513,7 +519,7 @@ public class Merger
 	    graph.addAnchor(dummy);
 	 }
       }
-      HashSet<Anchor> dummyEditedAnchors = new HashSet<Anchor>();
+      dummyEditedAnchors = new HashSet<Anchor>();
       for (Annotation a : editedGraph.getAnnotationsById().values())
       {
 	 if (a.getStart() == null)
@@ -670,7 +676,9 @@ public class Merger
 	 }
       } // next anchor
 
-      // TODO remove dummy annotations if we added them
+      // remove any dummy anchors
+      for (Anchor dummy : dummyAnchors) graph.getAnchors().remove(dummy.getId());
+      for (Anchor dummy : dummyEditedAnchors) editedGraph.getAnchors().remove(dummy.getId());      
 
       // unlink counterparts, so that either graph can be garbage-collected with the other still referenced
       for (Annotation a : graph.getAnnotationsById().values()) unsetCounterparts(a);
@@ -1649,8 +1657,7 @@ public class Merger
 	     && compare(anEdited.getStart(), anOriginal.getStart()) != 0)
 	 {
 	    if (ignoreOffsetConfidence
-		|| getConfidence(anEdited.getStart())
-		>= getConfidence(anOriginal.getStart()))
+		|| getConfidence(anEdited.getStart()) >= getConfidence(anOriginal.getStart()))
 	    { // theirs is more trustworthy
 	       // look in the edited graph for a new start-anchor canditate
 	       // by looking at the end-anchor of previous annotations on this layer
@@ -1748,7 +1755,10 @@ public class Merger
 	       } // found a counterpart anchor
 	       else
 	       {
-		  delta = new Anchor(anEdited.getStart());
+		  if (!dummyEditedAnchors.contains(anEdited.getStart()))
+		  {
+		     delta = new Anchor(anEdited.getStart());
+		  }
 		  
 		  // create a new anchor for unrelated annotations that link to this one
 		  Anchor newAnchor = new Anchor(anOriginal.getStart());
@@ -2073,15 +2083,18 @@ public class Merger
 		     	}
 		     } // next following annotation
 		     
-		     if (bSplitFromFollowing)
+		     if (!dummyEditedAnchors.contains(anEdited.getEnd()))
 		     {
-		     	delta = new Anchor(anEdited.getEnd());
-			delta.create();
-		     }
-		     else
-		     {
-			// change this anchor
-			delta = new Anchor(anEdited.getEnd());
+			if (bSplitFromFollowing)
+			{
+			   delta = new Anchor(anEdited.getEnd());
+			   delta.create();
+			}
+			else
+			{
+			   // change this anchor
+			   delta = new Anchor(anEdited.getEnd());
+			}
 		     }
 		  } // change the anchor
 	       } // theirs is more trustworthy than ours
@@ -2640,7 +2653,9 @@ public class Merger
 	       { // edited graph includes child layer, children contains the edited version
 		  anOriginalChild = getCounterpart(anOriginalChild);
 	       }
-	       if (anOriginalParent.getStart() != anOriginalChild.getStart())
+	       if (anOriginalParent.getStart() != anOriginalChild.getStart()
+		   // but not if we reconstructed the parent's anchor
+		   && !dummyAnchors.contains(anOriginalParent.getStart()))
 	       {
 		  changes.addAll( // record changes for:
 		     changeStartWithRelatedAnnotations(anOriginalParent, anOriginalChild.getStart(), layerId));
@@ -2652,7 +2667,9 @@ public class Merger
 	       { // edited graph includes child layer, children contains the edited version
 		  anOriginalChild = getCounterpart(anOriginalChild);
 	       }
-	       if (anOriginalParent.getEnd() != anOriginalChild.getEnd())
+	       if (anOriginalParent.getEnd() != anOriginalChild.getEnd()
+		   // but not if we reconstructed the parent's anchor
+		   && !dummyAnchors.contains(anOriginalParent.getEnd()))
 	       {
 		  changes.addAll( // record changes for:
 		     changeEndWithRelatedAnnotations(anOriginalParent, anOriginalChild.getEnd(), layerId));
