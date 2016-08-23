@@ -115,7 +115,7 @@ public class TestMerger
    }
 
    /**
-    * Basic edit operations that (mostly) affect a single layer.
+    * "Basic" edit operations that (mostly) affect a single layer.
     * <ol>
     *  <li>Label changes, both below and above original status</li>
     *  <li>Annotation insertion</li>
@@ -124,22 +124,32 @@ public class TestMerger
     *  <li>Connected graphs that become disconnected, on the same layer</li>
     *  <li>Disconnected graphs that become connected, on the same layer</li>
     *  <li>Annotation transposition</li>
-    *  <li>Merge graphs with no defining annotation</li>
     *  <li>Merge graphs with partial hierarchy - e.g. an utterance - and check for correct ordinals</li>
     * </ol>
+    * Then "Rel" tests: edits that have inter-layer consequences.
+    * <ol>
+    *  <li>Parents - for saturated relationships, child anchors trump parent anchors</li>
+    *  <li>Label changes, with unaligned children</li>
+    *  <li>Label changes, with aligned children (to ensure they don't get given default alignments)</li>
+    *  <li>New annotations that share anchors with old annotations on another layer
+    *      - e.g. insert a word at the beginning of a language block </li>
+    *  <li>Peers - anchor changes on annotations are reflected in their unaligned peer tags, when
+    *      the peer layer <i>isn't</i> present in the edited fragment</li>
+    *  <li>Peers - anchor changes on annotations are reflected in their unaligned peer tags, when
+    *      the peer layer <i>is</i> present in the edited fragment</li>
+    * </ol>
     */
-   @Test public void fragBasic()
+   @Test public void fragmentTests()
    {
-      fragmentTests("frag", "Basic", null);
+      tests("frag", null);
    }
 
    /**
     * Standardised method for running graph fragment tests based on files in the test directory.
     * @param sDir Subdirectory name
-    * @param sPrefix The filename 'prefix' to use - not literally a prefix, as the test number appears before it in the file name.
     * @param logTestPrefix null, or a filename substring like "001" to identify a test for which to switch on debug logging.
     */ 
-   public void fragmentTests(String sDir, final String sPrefix, String log)
+   public void tests(String sDir, String log)
    {
       // get a sorted list of tests
       File dir = getDir();
@@ -148,7 +158,7 @@ public class TestMerger
 	 {
 	    public boolean accept(File dir, String name)
 	    {
-	       return name.matches("^\\d+-"+sPrefix+".*\\.json$");
+	       return name.matches("^\\d+-.*\\.json$");
 	    }
 	 });
       TreeSet<String> fragments = new TreeSet<String>();

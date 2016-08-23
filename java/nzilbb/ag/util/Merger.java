@@ -871,6 +871,8 @@ public class Merger
       HashSet<String> thisAndsaturatedParentLayerId = new HashSet<String>();
       thisAndsaturatedParentLayerId.add(layerId);
       if (saturatedParentLayerId != null) thisAndsaturatedParentLayerId.add(saturatedParentLayerId);
+      HashSet<String> thisLayerId = new HashSet<String>();
+      thisLayerId.add(layerId);
       
       // unmapped annotations of theirs are for addition 
       Annotation anLastOriginal = null;
@@ -1070,7 +1072,7 @@ public class Merger
 		  layerId+": Unsharing end of prior: " 
 		  + logAnnotation(anOriginalLinkedPrior) + " and start of " 
 		  + logAnnotation(anOriginal));
-	       changeEndWithRelatedAnnotations(anOriginalLinkedPrior, newPriorEndAnchor);
+	       changeEndWithRelatedAnnotations(anOriginalLinkedPrior, newPriorEndAnchor, thisLayerId);
 	    } // next prior linked annotation
 	    
 	    if (anLastOriginal != null && anLastOriginal.getChange() == Change.Operation.Create)
