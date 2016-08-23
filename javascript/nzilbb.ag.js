@@ -330,9 +330,9 @@ nzilbb.ag.Annotation.prototype = {
 
     // attributes
     get layer() { return this.graph.layers[this.layerId]; },
-    get ordinal() { return this.parent && this.parent[this.layerId].indexOf(this); },
-    get previous() { return this.parent && this.parent[this.layerId][this.ordinal - 1]; },
-    get next() { return this.parent && this.parent[this.layerId][this.ordinal + 1]; },
+    get ordinal() { return this.parent && this.parent[this.layerId].indexOf(this) + 1; },
+    get previous() { return this.parent && this.parent[this.layerId][this.ordinal - 2]; },
+    get next() { return this.parent && this.parent[this.layerId][this.ordinal]; },
     get start() { return this.graph.anchors[this.startId]; },
     get end() { return this.graph.anchors[this.endId]; },
 
