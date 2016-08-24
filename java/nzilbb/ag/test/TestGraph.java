@@ -227,9 +227,6 @@ public class TestGraph
       assertEquals("turnStart", g.getStartId());
       assertEquals("turnEnd", g.getEndId());
       
-      Layer phone = new Layer("phone", "Phones", 2, true, false, true, "word", true);
-      g.addLayer(phone);
-
       g.addAnchor(new Anchor("a51", null));
       g.addAnchor(new Anchor("a52", null));
       g.addAnchor(new Anchor("a53", null));
@@ -243,11 +240,23 @@ public class TestGraph
       Annotation m = new Annotation(null, "m", "phone", "a52", "a53");
       Annotation p = new Annotation(null, "p", "phone", "a53", "a54");
       Annotation s = new Annotation(null, "s", "phone", "a54", "a6");
+
+      // add annotations before adding layer
       jumps.addAnnotation(j);
       jumps.addAnnotation(u);
       jumps.addAnnotation(m);
       jumps.addAnnotation(p);
       jumps.addAnnotation(s);
+
+      // graph start/end anchor identification handles annotations with no layer
+      assertEquals("Can get graph startId with annotations on unknown layer", 
+		   "turnStart", g.getStartId());
+      assertEquals("Can get graph endId with annotations on unknown layer", 
+		   "turnEnd", g.getEndId());
+
+      // now add the layer
+      Layer phone = new Layer("phone", "Phones", 2, true, false, true, "word", true);
+      g.addLayer(phone);
 
       assertNull(jumps.getId());
       assertNull(j.getParentId());
