@@ -138,6 +138,20 @@ public class TestMerger
     *  <li>Peers - anchor changes on annotations are reflected in their unaligned peer tags, when
     *      the peer layer <i>is</i> present in the edited fragment</li>
     * </ol>
+    * Then "Align" tests: edits that have more complicated possible consequences.
+    * <ol>
+    *  <li>New annotations that share anchors with old annotations on another layer,
+    *      where new anchors are lower status than old ones
+    *      - e.g. insert a word at the beginning of a language block </li>
+    *  <li>Annotation insertion - works if the low-status new
+    *  offsets for surrounding anchors are a long way away from their
+    *  high-status originals 
+    *  (i.e. if a manually aligned utterance
+    *   has words clustered at the beginning,
+    *   and a new word is inserted as the second-to-last word,
+    *   and the edited annotations have default alignments,
+    *  it comes out in the wash) </li>
+    * </ol>
     */
    @Test public void fragmentTests()
    {
