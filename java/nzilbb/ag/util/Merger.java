@@ -1027,7 +1027,7 @@ public class Merger
 			      anPreviousEditedOther.getEnd().getOffset()));
 			setConfidence(start, newStatus);
 		     } // previous more reliable
-		     if (anPreviousEditedOther.getStart() != start)
+		     if (anPreviousEditedOther.getEnd() != start)
 		     {			
 			log(
 			   layerId
@@ -1064,6 +1064,7 @@ public class Merger
 	       // linked in the edited graph?
 	       if (getCounterpart(anOriginalLinkedPrior).getEnd() == anEdited.getStart()) continue;
 	       // unlink the prior annotation from this one
+	       Anchor originalStart = anOriginal.getStart();
 	       Anchor newPriorEndAnchor = new Anchor(anOriginal.getStart());
 	       newPriorEndAnchor.create();
 	       graph.addAnchor(newPriorEndAnchor);
@@ -1072,7 +1073,11 @@ public class Merger
 		  layerId+": Unsharing end of prior: " 
 		  + logAnnotation(anOriginalLinkedPrior) + " and start of " 
 		  + logAnnotation(anOriginal));
-	       changeEndWithRelatedAnnotations(anOriginalLinkedPrior, newPriorEndAnchor, thisLayerId);
+	       changeEndWithRelatedAnnotations(anOriginalLinkedPrior, newPriorEndAnchor);
+	       log(
+		  layerId+": Keeping original start anchor for: " 
+		  + logAnnotation(anOriginal) + " - " + logAnchor(originalStart));
+	       anOriginal.setStart(originalStart);
 	    } // next prior linked annotation
 	    
 	    if (anLastOriginal != null && anLastOriginal.getChange() == Change.Operation.Create)

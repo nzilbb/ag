@@ -895,6 +895,12 @@ public class TestValidator
 			   true, // saturated
 			   "word", // parentId
 			   true)); // parentIncludes
+      g.addLayer(new Layer("phrase", "Phrase structure", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   true, // peersOverlap
+			   false, // saturated
+			   "turn", // parentId
+			   true)); // parentIncludes
       
       g.addAnchor(new Anchor("a0", 0.0,  // turn start
 			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
@@ -1068,6 +1074,12 @@ public class TestValidator
 			   false, // peersOverlap
 			   true, // saturated
 			   "word", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("phrase", "Phrase structure", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   true, // peersOverlap
+			   false, // saturated
+			   "turn", // parentId
 			   true)); // parentIncludes
       
       g.addAnchor(new Anchor("a0", 0.0,  // turn start

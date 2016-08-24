@@ -34,12 +34,12 @@
     "10":	{"offset":53.0,	"confidence":50},
     "n_600":	{"offset":60.0,	"confidence":50},
     "n_699":	{"offset":70.0,	"confidence":50},
-    "n_700":	{"offset":70.0,	"confidence":100}
+    "13":	{"offset":70.0,	"confidence":100}
   },
   "who":[
-    {"id":"Bond",	"label":"Bond",	"startId":"n_100",	"endId":"n_700",
+    {"id":"Bond",	"label":"Bond",	"startId":"n_100",	"endId":"13",
       "turns":[
-        {"id":"em_11_0",	"label":"Bond",	"startId":"n_100",	"endId":"n_700",
+        {"id":"em_11_0",	"label":"Bond",	"startId":"n_100",	"endId":"13",
           "transcript":[
             {"id":"ew_0_2",	"label":"86-1-2-before",	"startId":"n_200",	"endId":"1",	"confidence":100,	"comment":"INSERT A WORD AFTER THIS"},
             {"id":"3",	"label":"86-1-2.5-new",	"startId":"1",	"endId":"n_300",	"confidence":100},
@@ -50,5 +50,5 @@
             {"id":"c",	"label":"86-2-2.3-new",	"startId":"10",	"endId":"n_600",	"confidence":100},
             {"id":"ew_0_6",	"label":"86-2-3",	"startId":"n_600",	"endId":"n_699",	"confidence":100,	"comment":"INSERT THREE WORDS BEFORE THIS"}],
           "utterances":[
-            {"id":"em_12_1",	"label":"Bond",	"startId":"n_100",	"endId":"n_700",	"confidence":100}]}]}]
+            {"id":"em_12_1",	"label":"Bond",	"startId":"n_100",	"endId":"13",	"confidence":100}]}]}]
 }
