@@ -898,7 +898,7 @@ public class Graph
 	 if (earliest == null 
 	     // or the offset is set and our current candidate has no offset
 	     || (a.getOffset() != null && earliest.getOffset() == null)
-	     // or bother offsets are set and this offset is earlier
+	     // or both offsets are set and this offset is earlier
 	     || (a.getOffset() != null && earliest.getOffset() != null 
 		 && a.getOffset() < earliest.getOffset())
 	     // or neither offset is set and this ID is lower
@@ -906,17 +906,12 @@ public class Graph
 		 && a.getId().compareTo(earliest.getId()) < 0))
 	 {
 	    earliest = a;
-	    for (Annotation s : a.getStartingAnnotations())
-	       if (s.getLayer().getAlignment() != Constants.ALIGNMENT_NONE)
-		  depth = Math.min(depth, s.getAncestors().size());
+	    depth = depth(a);
 	 }
 	 else if (earliest.getOffset() != null && earliest.getOffset().equals(a.getOffset()))
 	 { // same offset
 	    // go with the anchor of the shallowest annotation
-	    int thisDepth = Integer.MAX_VALUE;
-	    for (Annotation s : a.getStartingAnnotations())
-	       if (s.getLayer().getAlignment() != Constants.ALIGNMENT_NONE)
-		  thisDepth = Math.min(thisDepth, s.getAncestors().size());
+	    int thisDepth = depth(a);
 	    if (thisDepth < depth)
 	    {
 	       earliest = a;
@@ -938,30 +933,70 @@ public class Graph
       int depth = Integer.MAX_VALUE;
       for (Anchor a : getAnchors().values())
       {
-	 if (a.getOffset() != null)
+	 assert a != null : "a != null";
+	 // if its the first one
+	 if (latest == null 
+	     // or the offset is set and our current candidate has no offset
+	     || (a.getOffset() != null && latest.getOffset() == null)
+	     // or both offsets are set and this offset is earlier
+	     || (a.getOffset() != null && latest.getOffset() != null 
+		 && a.getOffset() > latest.getOffset())
+	     // or neither offset is set and this ID is higher
+	     || (a.getOffset() == null && latest.getOffset() == null
+		 && a.getId().compareTo(latest.getId()) > 0))
 	 {
-	    if (latest == null || a.compareTo(latest) > 0)
+	    latest = a;
+	    depth = depth(a);
+	 }
+	 else if (latest.getOffset() != null && latest.getOffset().equals(a.getOffset()))
+	 { // same offset
+	    // go with the anchor of the shallowest annotation
+	    int thisDepth = depth(a);
+	    if (thisDepth <= depth) // using <= means later anchors in the collection are preferred
 	    {
 	       latest = a;
-	    }
-	    else if (latest.getOffset() == null || latest.getOffset().equals(a.getOffset()))
-	    { // same offset
-	       // go with the anchor of the shallowest annotation
-	       int thisDepth = Integer.MAX_VALUE;
-	       for (Annotation s : a.getStartingAnnotations())
-		  if (s.getLayer().getAlignment() != Constants.ALIGNMENT_NONE)
-		     thisDepth = Math.min(thisDepth, s.getAncestors().size());
-	       if (thisDepth < depth)
-	       {
-		  latest = a;
-		  depth = thisDepth;
-	       }
+	       depth = thisDepth;
 	    }
 	 }
       }
       if (latest == null) return null;
       return latest.getId();
    }
+
+   
+   /**
+    * Returns the depth of an anchor - i.e. the depth of the shallowest non-aligned associated Annotation.
+    * @param a The anchor to get the depth of.
+    * @return The depth of the shallowest non-aligned associated Annotation.
+    */
+   protected int depth(Anchor a)
+   {
+      int depth = Integer.MAX_VALUE;
+      for (String layerId : a.getStartOf().keySet())
+      {
+	 Layer layer = getLayer(layerId);
+	 if (layer != null && layer.getAlignment() != Constants.ALIGNMENT_NONE)
+	 {
+	    for (Annotation s : a.getStartOf().get(layerId))
+	    {
+	       depth = Math.min(depth, s.getAncestors().size());
+	    }
+	 }
+      }
+      for (String layerId : a.getEndOf().keySet())
+      {
+	 Layer layer = getLayer(layerId);
+	 if (layer != null && layer.getAlignment() != Constants.ALIGNMENT_NONE)
+	 {
+	    for (Annotation s : a.getEndOf().get(layerId))
+	    {
+	       depth = Math.min(depth, s.getAncestors().size());
+	    }
+	 }
+      }
+      return depth;
+   } // end of depth()
+
 
    /**
     * Getter for <i>start</i>: The anchor with the lowest offset.
