@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.LinkedHashSet;
+import java.util.Iterator;
 
 /**
  * Annotation graph anchor - i.e. a node of the graph.
@@ -278,7 +279,25 @@ public class Anchor
       {
 	 getStartOf().put(layerId, new LinkedHashSet<Annotation>());
       }
-      return getStartOf().get(layerId);
+      LinkedHashSet<Annotation> annotations = getStartOf().get(layerId);
+      // check they still really are linked
+      Iterator<Annotation> iAnnotations = annotations.iterator();
+      String id = getId();
+      while (iAnnotations.hasNext())
+      {
+	 Annotation a = iAnnotations.next();
+	 if (a instanceof Graph) continue;
+	 if (!a.getStartId().equals(id))
+	 {
+	    iAnnotations.remove();
+	    if (!a.getStart().startOf.containsKey(a.getLayerId()))
+	    {
+	       a.getStart().startOf.put(a.getLayerId(), new LinkedHashSet<Annotation>());
+	    }
+	    a.getStart().startOf.get(a.getLayerId()).add(a);
+	 }
+      } // next annotation
+      return annotations;
    } // end of startOf()
 
    /**
@@ -310,9 +329,9 @@ public class Anchor
    public LinkedHashSet<Annotation> getStartingAnnotations()
    {
       LinkedHashSet<Annotation> startingHere = new LinkedHashSet<Annotation>();      
-      for (LinkedHashSet<Annotation> layer : getStartOf().values())
+      for (String layerId : getStartOf().keySet())
       {
-	 startingHere.addAll(layer);
+	 startingHere.addAll(startOf(layerId));
       }
       return startingHere;
    } // end of getStartingAnnotations()
@@ -328,7 +347,25 @@ public class Anchor
       {
 	 getEndOf().put(layerId, new LinkedHashSet<Annotation>());
       }
-      return getEndOf().get(layerId);
+      LinkedHashSet<Annotation> annotations = getEndOf().get(layerId);
+      // check they still really are linked
+      Iterator<Annotation> iAnnotations = annotations.iterator();
+      String id = getId();
+      while (iAnnotations.hasNext())
+      {
+	 Annotation a = iAnnotations.next();
+	 if (a instanceof Graph) continue;
+	 if (!a.getEndId().equals(id))
+	 {
+	    iAnnotations.remove();
+	    if (!a.getEnd().endOf.containsKey(a.getLayerId()))
+	    {
+	       a.getEnd().endOf.put(a.getLayerId(), new LinkedHashSet<Annotation>());
+	    }
+	    a.getEnd().endOf.get(a.getLayerId()).add(a);
+	 }
+      } // next annotation
+      return annotations;
    } // end of endOf()
 
    /**
@@ -338,9 +375,9 @@ public class Anchor
    public LinkedHashSet<Annotation> getEndingAnnotations()
    {
       LinkedHashSet<Annotation> endingHere = new LinkedHashSet<Annotation>();      
-      for (LinkedHashSet<Annotation> layer : getEndOf().values())
+      for (String layerId : getEndOf().keySet())
       {
-	 endingHere.addAll(layer);
+	 endingHere.addAll(endOf(layerId));
       }
       return endingHere;
    } // end of getEndingAnnotations()
