@@ -43,7 +43,7 @@
     "n_500":	{"offset":45.0,	"confidence":10},
     "4":	{"offset":50.0,	"confidence":10,	"comment":"ALIGNMENTS WILL BE RECOMPUTED"},
     "7":	{"offset":55.0,	"confidence":10,	"comment":"ALIGNMENTS WILL BE RECOMPUTED"},
-    "10":	{"offset":60.0,	"confidence":10,	"comment":"ALIGNMENTS WILL BE RECOMPUTED"},
+    "a":	{"offset":60.0,	"confidence":10,	"comment":"ALIGNMENTS WILL BE RECOMPUTED"},
     "n_600":	{"offset":65.0,	"confidence":10},
     "n_699":	{"offset":70.0,	"confidence":10},
     "n_700":	{"offset":70.0,	"confidence":100}
@@ -69,8 +69,8 @@
             {"id":"ew_0_4",	"label":"86-2-1",	"startId":"n_401",	"endId":"n_500",	"confidence":100},
             {"id":"ew_0_5",	"label":"86-2-2",	"startId":"n_500",	"endId":"4",	"confidence":100,	"comment":"INSERT THREE WORDS AFTER THIS"},
             {"id":"6",	"label":"86-2-2-plus-1",	"startId":"4",	"endId":"7",	"confidence":100},
-            {"id":"9",	"label":"86-2-2-plus-2",	"startId":"7",	"endId":"10",	"confidence":100},
-            {"id":"c",	"label":"86-2-2-plus-3",	"startId":"10",	"endId":"n_600",	"confidence":100},
+            {"id":"9",	"label":"86-2-2-plus-2",	"startId":"7",	"endId":"a",	"confidence":100},
+            {"id":"c",	"label":"86-2-2-plus-3",	"startId":"a",	"endId":"n_600",	"confidence":100},
             {"id":"ew_0_6",	"label":"86-2-3",	"startId":"n_600",	"endId":"n_699",	"confidence":100,	"comment":"INSERT THREE WORDS BEFORE THIS"}],
           "utterances":[
             {"id":"em_12_1",	"label":"Maxwell Smart",	"startId":"n_100",	"endId":"n_400",	"confidence":100},

@@ -152,6 +152,34 @@ public class TestMerger
     *   and the edited annotations have default alignments,
     *  it comes out in the wash) </li>
     * </ol>
+    * Then "Htk" tests: edits that simulate HTK
+    * <ol>
+    *  <li>simple alignment with no segments</li>
+    *  <li>simple alignment with no segments, but will parallel annotations on other layers</li>
+    *  <li>simple alignment with prior default segments</li>
+    *  <li>simple re-alignment with prior aligned segments</li>
+    *  <li>re-alignment with different segments - add/change/delete</li>
+    *  <li>re-alignment avoiding manual alignments</li>
+    *  <li>re-alignment avoiding manual alignments, where differences are big enough to create 
+    *      an invalid graph.
+    *      e.g. 
+    *      <ul>
+    *         <li><tt>original: .1.2.            !3!4!5.6.</tt> (manually aligned .4.5.6.)</li>
+    *         <li><tt>edited:   . .1.2.3.4. .5.6.         </tt> (order would be changed</li>
+    *         <li><tt>result:     .1.2.          !3!4!5.6.</tt> (keep order)</li>
+    *      <li><tt>not:<s>        .1.2.     .5.6.!3!4!    </s></tt> (keep alignments)</li>
+    *      </ul>
+    *  </li>
+    *  <li>also test conflicting alignments in the other direction.
+    *      e.g.
+    *      <ul>
+    *         <li><tt>original: .1.2.!3!4!            .5.6.</tt> (manually aligned .4.5.6.)</li>
+    *         <li><tt>edited:   .          .1.2.3.4. .5.6. </tt> (order would be changed</li>
+    *         <li><tt>result:   .1.2.!3!4!           .5.6. </tt> (keep order)</li>
+    *      <li><tt>not:<s>           !3!4! .1.2.     .5.6. </s></tt> (keep alignments)</li>
+    *      </ul>
+    * </li>
+    * </ol>
     */
    @Test public void fragmentTests()
    {

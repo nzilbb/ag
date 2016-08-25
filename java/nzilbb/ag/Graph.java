@@ -579,7 +579,7 @@ public class Graph
       if (anchor.getId() == null)
       {
 	 anchor.create();
-	 anchor.setId("" + (++lastId));
+	 anchor.setId(Long.toString(++lastId, Character.MAX_RADIX));
       }
 
       // add to anchors collection
