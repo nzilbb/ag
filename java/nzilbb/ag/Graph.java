@@ -63,7 +63,18 @@ public class Graph
    /**
     * New ID seed.
     */
-   protected long lastId = 0;
+   protected long lastId = 0;   
+   /**
+    * Generates a unique ID.
+    * @return A new ID that is unique within this graph.
+    */
+   protected String newId()
+   {      
+      String newId = null;
+      do { newId = Long.toString(++lastId, Character.MAX_RADIX); }
+      while(getAnnotationsById().containsKey(newId) || getAnchors().containsKey(newId));
+      return newId;
+   } // end of newId()
 
    /**
     * The ID of the end anchor of the last annotation added using {@link #addAnnotation(Annotation)}, or the last anchor added using {@link #addAnchor(Anchor)}.
@@ -469,7 +480,7 @@ public class Graph
       if (annotation.getId() == null)
       {
 	 annotation.create();
-	 annotation.setId(Long.toString(++lastId, Character.MAX_RADIX));
+	 annotation.setId(newId());
 	 
 	 // does the annotation have children?
 	 if (annotation.getAnnotations().size() > 0)
@@ -579,7 +590,7 @@ public class Graph
       if (anchor.getId() == null)
       {
 	 anchor.create();
-	 anchor.setId(Long.toString(++lastId, Character.MAX_RADIX));
+	 anchor.setId(newId());
       }
 
       // add to anchors collection
