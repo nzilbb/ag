@@ -56,7 +56,7 @@ public class CsvToJson extends CommandLineProgram
 	 new Layer("language", "Language", 2, true, false, false, "turns", true),
 	 new Layer("transcript", "transcript", 2, true, false, false, "turns", true),
 	 new Layer("lexical", "lexical", 0, false, false, true, "transcript", true),
-	 new Layer("pronounce", "pronounce", 0, false, false, false, "transcript", true),
+	 new Layer("pronounce", "pronounce", 0, false, false, true, "transcript", true),
 	 new Layer("segments", "segments", 2, true, false, true, "transcript", true)
 	 );      
       
