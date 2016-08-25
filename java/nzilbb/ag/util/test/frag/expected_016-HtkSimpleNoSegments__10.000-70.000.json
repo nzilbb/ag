@@ -1,0 +1,87 @@
+{
+  "id":"016-HtkSimpleNoSegments__10.000-70.000",
+  "schema":{
+    "participantLayerId":"who",
+    "turnLayerId":"turns",
+    "utteranceLayerId":"utterances",
+    "wordLayerId":"transcript",
+
+    "graph":{"description":"The graph as a whole",
+      "children":{
+        "who":{"description":"participants", "alignment":0,
+          "peers":true, "peersOverlap":true, "parentIncludes":true, "saturated":true,
+          "children":{
+            "turns":{"description":"turns", "alignment":2,
+              "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
+              "children":{
+                "transcript":{"description":"transcript", "alignment":2,
+                  "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
+                  "children":{
+                    "segments":{"description":"segments", "alignment":2,
+                      "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true}
+                  }},
+                "utterances":{"description":"utterances", "alignment":2,
+                  "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true}
+              }}
+          }}
+      }}
+  },
+  "anchors":{
+    "n_100":	{"offset":10.0,	"confidence":100},
+    "n_101":	{"offset":10.5,	"confidence":50},
+    "5":	{"offset":11.0,	"confidence":50},
+    "8":	{"offset":12.0,	"confidence":50},
+    "n_200":	{"offset":20.1,	"confidence":50},
+    "n_300":	{"offset":30.1,	"confidence":50},
+    "13":	{"offset":32.5,	"confidence":50},
+    "16":	{"offset":35.0,	"confidence":50},
+    "19":	{"offset":37.5,	"confidence":50},
+    "1":	{"offset":39.9,	"confidence":50},
+    "n_400":	{"offset":40.1,	"confidence":50},
+    "23":	{"offset":40.2,	"confidence":50},
+    "26":	{"offset":40.3,	"confidence":50},
+    "29":	{"offset":48.0,	"confidence":50},
+    "n_500":	{"offset":50.1,	"confidence":50},
+    "33":	{"offset":52.0,	"confidence":50},
+    "2":	{"offset":53.0,	"confidence":50},
+    "n_600":	{"offset":60.9,	"confidence":50},
+    "37":	{"offset":65.0,	"confidence":50},
+    "n_699":	{"offset":69.0,	"confidence":50},
+    "n_700":	{"offset":70.0,	"confidence":100}
+  },
+  "who":[
+    {"id":"Maxwell Smart",	"label":"Maxwell Smart",	"startId":"n_100",	"endId":"n_700",
+      "turns":[
+        {"id":"em_11_0",	"label":"Maxwell Smart",	"startId":"n_100",	"endId":"n_700",	"confidence":100,
+          "transcript":[
+            {"id":"ew_0_1",	"label":"86-1-1",	"startId":"n_101",	"endId":"n_200",	"confidence":100,
+              "segments":[
+                {"id":"4",	"label":"86-1-1-1",	"startId":"n_101",	"endId":"5",	"confidence":100},
+                {"id":"7",	"label":"86-1-1-2",	"startId":"5",	"endId":"8",	"confidence":100},
+                {"id":"9",	"label":"86-1-1-3",	"startId":"8",	"endId":"n_200",	"confidence":100}]},
+            {"id":"ew_0_2",	"label":"86-1-2",	"startId":"n_200",	"endId":"n_300",	"confidence":100,
+              "segments":[
+                {"id":"a",	"label":"86-1-2-1",	"startId":"n_200",	"endId":"n_300",	"confidence":100}]},
+            {"id":"ew_0_3",	"label":"86-1-3",	"startId":"n_300",	"endId":"1",	"confidence":100,
+              "segments":[
+                {"id":"c",	"label":"86-1-3-1",	"startId":"n_300",	"endId":"13",	"confidence":50},
+                {"id":"f",	"label":"86-1-3-2",	"startId":"13",	"endId":"16",	"confidence":50},
+                {"id":"i",	"label":"86-1-3-3",	"startId":"16",	"endId":"19",	"confidence":50},
+                {"id":"k",	"label":"86-1-3-4",	"startId":"19",	"endId":"1",	"confidence":50}]},
+            {"id":"ew_0_4",	"label":"86-1-4",	"startId":"n_400",	"endId":"n_500",	"confidence":100,
+              "segments":[
+                {"id":"m",	"label":"86-1-4-1",	"startId":"n_400",	"endId":"23",	"confidence":50},
+                {"id":"p",	"label":"86-1-4-2",	"startId":"23",	"endId":"26",	"confidence":50},
+                {"id":"s",	"label":"86-1-4-3",	"startId":"26",	"endId":"29",	"confidence":50},
+                {"id":"u",	"label":"86-1-4-4",	"startId":"29",	"endId":"n_500",	"confidence":50}]},
+            {"id":"ew_0_5",	"label":"86-1-5",	"startId":"n_500",	"endId":"2",	"confidence":100,
+              "segments":[
+                {"id":"w",	"label":"86-1-5-1",	"startId":"n_500",	"endId":"33",	"confidence":50},
+                {"id":"y",	"label":"86-1-5-2",	"startId":"33",	"endId":"2",	"confidence":50}]},
+            {"id":"ew_0_6",	"label":"86-1-6",	"startId":"n_600",	"endId":"n_699",	"confidence":100,
+              "segments":[
+                {"id":"10",	"label":"86-1-6-1",	"startId":"n_600",	"endId":"37",	"confidence":50},
+                {"id":"12",	"label":"86-1-6-2",	"startId":"37",	"endId":"n_699",	"confidence":50}]}],
+          "utterances":[
+            {"id":"em_12_1",	"label":"Maxwell Smart",	"startId":"n_100",	"endId":"n_700",	"confidence":100}]}]}]
+}
