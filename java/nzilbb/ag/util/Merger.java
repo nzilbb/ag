@@ -1354,9 +1354,10 @@ public class Merger
       {
 	 // also change end anchor of annotations on the same layer
 	 layerIdsToExclude.add(annotation.getLayerId()); // prevents infinite recursion
+	 Vector<Annotation> vRelatedAnnotations = removeDeleted(
+	    aOriginalStart.endOf(annotation.getLayerId()));
 	 for (Annotation anPrevious : vRelatedAnnotations)
 	 {
-	    if (anPrevious.getChange() == Change.Operation.Destroy) continue;
 	    // only if it really still follows
 	    if (!anPrevious.getEndId().equals(aOriginalStart.getId())) continue;
 
@@ -1468,16 +1469,13 @@ public class Merger
       {
 	 // also change start anchor of annotations on the same layer
 	 layerIdsToExclude.add(annotation.getLayerId()); // prevents infinite recursion
-	 Vector<Annotation> vRelatedAnnotations = new Vector<Annotation>();
-	 vRelatedAnnotations.addAll(aOriginalEnd.startOf(annotation.getLayerId()));
+	 Vector<Annotation> vRelatedAnnotations = removeDeleted(
+	    aOriginalEnd.startOf(annotation.getLayerId()));
 	 // vRelatedAnnotations.addAll(aOriginalEnd.getDeltaStartAnnotationsLayer(annotation.getLayerId()));
 	 if (vRelatedAnnotations.size() > 0)
 	 {
-	    int iNonDeletedCount = 0;
 	    for (Annotation anNext : vRelatedAnnotations)
 	    {
-	       if (anNext.getChange() == Change.Operation.Destroy) continue; // ignore deleted ones
-	       iNonDeletedCount++;
 	       // only if it really still follows
 	       if (!anNext.getStartId().equals(aOriginalEnd.getId())) continue;
 	       if (!anNext.getStartId().equals(anNext.getEndId())
@@ -1492,11 +1490,10 @@ public class Merger
 		  changeStartWithRelatedAnnotations(anNext, newEndAnchor, layerIdsToExclude));
 	    } // next starting annotation
 	    
-	    if (iNonDeletedCount == 0)
+	    if (vRelatedAnnotations.size() == 0)
 	    { // all the 'next' annotations on the same layer are deleted
 	       // ensure that annotations that start here on *other* layers come with us
 	       // find one related annotation on another layer
-	       vRelatedAnnotations.clear();
 	       vRelatedAnnotations.addAll(aOriginalEnd.getStartingAnnotations());
 	       for (Annotation anNext : vRelatedAnnotations)
 	       {
@@ -1574,9 +1571,8 @@ public class Merger
 	 
 	 boolean bChanged = false;
 	 // change for linking to a parallel annotations
-	 for (Annotation anParallel : anEdited.getStart().getStartingAnnotations())
+	 for (Annotation anParallel : removeDeleted(anEdited.getStart().getStartingAnnotations()))
 	 {
-	    if (anParallel.getChange() == Change.Operation.Destroy) continue;		  
 	    if (anParallel == anEdited) continue;		  
 	    if (hasCounterpart(anParallel))
 	    {
@@ -1609,9 +1605,8 @@ public class Merger
 	 if (!bChanged)
 	 {
 	    // or maybe its shared for us but *not* shared for them
-	    for (Annotation anParallel : anOriginal.getStart().getStartingAnnotations())
+	    for (Annotation anParallel : removeDeleted(anOriginal.getStart().getStartingAnnotations()))
 	    {
-	       if (anParallel.getChange() == Change.Operation.Destroy) continue;
 	       if (anParallel == anOriginal) continue;
 	       if (anParallel.getLayerId() == anOriginal.getLayerId()) continue;
 	       if (anParallel.getStart() != anOriginal.getStart()) continue; // aready changed
@@ -1787,10 +1782,10 @@ public class Merger
 		  graph.addAnchor(newAnchor);
 		  changes.addAll( // track changes of:
 		     newAnchor.getChanges());
-		  for (Annotation previousAnnotation : anOriginal.getStart().getEndingAnnotations())
+		  for (Annotation previousAnnotation 
+			  : removeDeleted(anOriginal.getStart().getEndingAnnotations()))
 		  {
 		     if (previousAnnotation == anOriginal) continue; // instantaneous
-		     if (previousAnnotation.getChange() == Change.Operation.Destroy) continue; // not deleted annotations
 		     Layer otherLayer = previousAnnotation.getLayer();
 		     // check for other possible end anchor, by following the edited graph structure
 		     Annotation editedPreviousAnnotation = getCounterpart(previousAnnotation);
@@ -1820,10 +1815,9 @@ public class Merger
 		  } // next anchor using this as an end anchor
 		  
 		  // do the same for annotations that start here
-		  for (Annotation parallelAnnotation : anOriginal.getStart().getStartingAnnotations())
+		  for (Annotation parallelAnnotation : removeDeleted(anOriginal.getStart().getStartingAnnotations()))
 		  {
 		     if (parallelAnnotation == anOriginal) continue; // not ourselves
-		     if (parallelAnnotation.getChange() == Change.Operation.Destroy) continue; // not deleted annotations
 		     Layer otherLayer = parallelAnnotation.getLayer();
 		     // check for other possible start anchor, by following the edited graph structure
 		     Annotation editedParallelAnnotation = getCounterpart(parallelAnnotation);
@@ -1893,10 +1887,10 @@ public class Merger
 	       graph.addAnchor(newAnchor);
 	       changes.addAll( // track changes of:
 		  newAnchor.getChanges());
-	       for (Annotation previousAnnotation : anOriginal.getStart().getEndingAnnotations())
+	       for (Annotation previousAnnotation 
+		       : removeDeleted(anOriginal.getStart().getEndingAnnotations()))
 	       {
 		  if (previousAnnotation == anOriginal) continue; // instantaneous
-		  if (previousAnnotation.getChange() == Change.Operation.Destroy) continue; // not deleted annotations
 		  Layer otherLayer = previousAnnotation.getLayer();
 		  // check for other possible end anchor, by following the edited graph structure
 		  Annotation editedPreviousAnnotation = getCounterpart(previousAnnotation);
@@ -1973,9 +1967,8 @@ public class Merger
 	    if (!bChanged)
 	    {
 	       // or maybe its shared for us but *not* shared for them
-	       for (Annotation anParallel : anOriginal.getEnd().getEndingAnnotations())
+	       for (Annotation anParallel : removeDeleted(anOriginal.getEnd().getEndingAnnotations()))
 	       {
-		  if (anParallel.getChange() == Change.Operation.Destroy) continue;
 		  if (anParallel == anOriginal) continue;		  
 		  if (anParallel.getLayerId() == anOriginal.getLayerId()) continue;		  
 		  if (hasCounterpart(anParallel))
@@ -2278,10 +2271,9 @@ public class Merger
 	    }
 	    // add all (original) child anchors
 	    Annotation lastChild = null;
-	    for (Annotation anChild : children)
+	    for (Annotation anChild : removeDeleted(children))
 	    {
 	       Annotation anOriginalChild = anChild;
-	       if (anChild.getChange() == Change.Operation.Destroy) continue;
 	       if (editGraphHasChildLayer)
 	       { // edited graph includes child layer, so use its annotations to get to the originals
 		  anOriginalChild = getCounterpart(anChild);
@@ -2294,11 +2286,9 @@ public class Merger
 	       if (bNoInterSharingForChildren)
 	       {
 		  Vector<Annotation> childrenStartingHere 
-		     = removeDeleted(
-			new Vector<Annotation>(anOriginalChild.getStart().startOf(layerId)));
+			= removeDeleted(anOriginalChild.getStart().startOf(layerId));
 		  Vector<Annotation> childrenEndingHere 
-		     = removeDeleted(
-			new Vector<Annotation>(anOriginalChild.getStart().endOf(layerId)));
+			= removeDeleted(anOriginalChild.getStart().endOf(layerId));
 		  if (lastChild == null)
 		  { // first child
 		     if (childrenStartingHere.size() > 1) 
@@ -2482,9 +2472,8 @@ public class Merger
 			   log(layerId + ": Out of order; changing offset: " + logAnchor(anchor) 
 			       + " (" + logAnchor(predecessor) + ")");
 			   // the offset is moving forward, so ending child annotations will be reset
-			   for (Annotation anStartingHere : anchor.startOf(layerId))
+			   for (Annotation anStartingHere : removeDeleted(anchor.startOf(layerId)))
 			   {
-			      if (anStartingHere.getChange() == Change.Operation.Destroy) continue; // not deleted annotations
 			      if (!myChildren.contains(anStartingHere))
 			      {
 				 continue; // ignore non-children
@@ -2709,20 +2698,20 @@ public class Merger
    
    /**
     * Removes elements from the collection that are marked for deletion.
-    * @param collection
-    * @return The same collection, with destroyed elements removed.
+    * @param collection The collection to use
+    * @return A new collection, all the elements of <var>collection</var> except those where {@link TrackedMap#getChange()} is {@link Change#Operation}.Destroy.
     */
-   public Vector<Annotation> removeDeleted(Vector<Annotation> collection)
+   public Vector<Annotation> removeDeleted(Collection<Annotation> collection)
    {
-      Iterator<Annotation> i = collection.iterator();
-      while (i.hasNext())
+      Vector<Annotation> annotations = new Vector<Annotation>();
+      for (Annotation a : collection)
       {
-	 if (i.next().getChange() == Change.Operation.Destroy)
+	 if (a.getChange() != Change.Operation.Destroy)
 	 {
-	    i.remove();
+	    annotations.add(a);
 	 }
       }
-      return collection;
+      return annotations;
    } // end of removeDeleted()
 
 
