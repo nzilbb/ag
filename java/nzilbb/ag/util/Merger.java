@@ -1745,8 +1745,8 @@ public class Merger
 		     if (an == anOriginal) continue;
 		     // unrelated layer?
 		     Layer otherLayer = an.getLayer();
-		     if (!layer.getParentId().equals(an.getLayerId())
-			 && otherLayer.getParentId().equals(layerId))
+		     if (!layer.getParentId().equals(otherLayer.getId())
+			 && !otherLayer.getParentId().equals(layerId))
 		     {
 		  	// if the layer is known to the edited graph,
 		  	// only re-link if they share anchors in the edited graph too
@@ -1760,7 +1760,7 @@ public class Merger
 		  	else // non-edited layer
 		  	{
 		  	   // if it's already been changed, skip it
-		  	   if (an.getStart() == anOriginal.getStart()) continue;
+		  	   if (an.getStart() != anOriginal.getStart()) continue;
 		  	}
 		  	log(layerId + ": Different start anchor for " + logAnnotation(anOriginal) 
 			    + ": linking parallel " + logAnnotation(an) + " too");
