@@ -2452,7 +2452,10 @@ public class Merger
 		  { // out of order
 		     log(layerId + ": Out of order: " + anchor + " (" + predecessor + ")"); // TODO comment out
 		     // which has the higher status?
-		     if (getConfidence(anchor) <= getConfidence(predecessor))
+		     if (getConfidence(anchor) <= getConfidence(predecessor)
+			 // but we also don't want to run past the end of the parent
+			 && (!layer.getParentIncludes() // ...if the layer is parentIncludes
+			     || anchor.getOffset() < anOriginalParent.getEnd().getOffset()))
 		     { // anchor.confidence < predecessor.confidence
 			// easy case - just change this anchor and keep going
 			// does unwinding the delta help?
