@@ -1105,6 +1105,7 @@ public class Annotation
    
    /**
     * Determines whether this annotation includes the midpoint of the given annotation.
+    * <p><em>NB</em> If the start and end offsets of <var>other</var> are the same as the end offset of this annotation (i.e. <var>other</var> is instantaneous at the end of this annotation), this method will return false.
     * <p>A precondition is that the annotation's {@link #graph} is set.
     * @param other The given other annotation.
     * @return true if this annotation includes the midpoint of the given annotation, or if they share start/end anchors (even if there are null offsets), false otherwise.
