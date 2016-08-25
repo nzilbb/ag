@@ -287,6 +287,7 @@ public class Anchor
       {
 	 Annotation a = iAnnotations.next();
 	 if (a instanceof Graph) continue;
+	 if (a.getStartId() == null) continue;
 	 if (!a.getStartId().equals(id))
 	 {
 	    iAnnotations.remove();
@@ -355,6 +356,7 @@ public class Anchor
       {
 	 Annotation a = iAnnotations.next();
 	 if (a instanceof Graph) continue;
+	 if (a.getEndId() == null) continue;
 	 if (!a.getEndId().equals(id))
 	 {
 	    iAnnotations.remove();
@@ -530,7 +532,7 @@ public class Anchor
 	    {
 	       return true;
 	    }
-	    if (!anchors.contains(next))
+	    if (next != null && !anchors.contains(next))
 	    { // haven't already visited this node
 	       anchors.add(next);
 	    }

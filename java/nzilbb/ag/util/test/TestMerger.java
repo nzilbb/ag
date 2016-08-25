@@ -180,6 +180,17 @@ public class TestMerger
     *      </ul>
     * </li>
     * </ol>
+    * Then "Reupload" tests: edits that simulate re-upload
+    * <ol>
+    *  <li>unaligned word edits to aligned words</li>
+    *  <li>unaligned word edits to aligned words with aligned segments</li>
+    *  <li>unaligned word/language edits to aligned words with aligned segments</li>
+    *  <li>move unaligned word to another utterance, with previously aligned words</li>
+    *  <li>change utterance alignments, with previously aligned words, to create mid-word utterance boundary</li>
+    *  <li>merge utterances</li>
+    *  <li>split utterances</li>
+    * </ol>
+
     */
    @Test public void fragmentTests()
    {
@@ -233,15 +244,32 @@ public class TestMerger
 	       fail(fragmentName + ": merge() failed" + exception.toString() + "\n" + sw);
 	    }
 	    if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
+	    for (String message : m.getErrors()) System.out.println("ERROR: " + message);
 	    originalGraph.commit();
 	    // destroy any unreferenced anchors
 	    for (Anchor a : new Vector<Anchor>(originalGraph.getAnchors().values()))
 	    {
-	       if (a.getStartingAnnotations().size() == 0
-		   && a.getEndingAnnotations().size() == 0)
+	       // we should just be able to check that the size of the collections is zero
+	       // but there may be disconnect between tag layer anchor Id attributes and 
+	       // the parents' anchors
+	       boolean destroy = true;
+	       for (Annotation an : a.getStartingAnnotations())
 	       {
-		  a.destroy();
+		  if (an.getChange() != Change.Operation.Destroy)
+		  {
+		     destroy = false;
+		     break;
+		  }
 	       }
+	       for (Annotation an : a.getEndingAnnotations())
+	       {
+		  if (an.getChange() != Change.Operation.Destroy)
+		  {
+		     destroy = false;
+		     break;
+		  }
+	       }
+	       if (destroy) a.destroy();
 	    } // next anchor
 	    originalGraph.commit();
 
@@ -292,6 +320,7 @@ public class TestMerger
 	       }
 	    } // next step
 	    if (differences.length() > 0) fail(differences);	 
+//TODO	    if (m.getErrors().size() > 0) fail(m.getErrors().toString());
 	 }
 	 catch(Exception exception)
 	 {

@@ -412,11 +412,11 @@ public class Annotation
 	 {
 	    SortedSet<Annotation> currentSiblings = currentParent.getAnnotations(getLayerId());
 	    currentSiblings.remove(this);
-	    
 	 }
       }
       if (newParent == null)
       {
+	 // if it's a tag layer its anchors depend on the parent...
 	 changes.addAll(
 	    setParentId(null));
       }

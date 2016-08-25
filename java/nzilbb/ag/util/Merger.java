@@ -658,6 +658,7 @@ public class Merger
 	 changes.addAll(
 	    validator.transform(graph));
 	 if (log != null) log.addAll(validator.getLog());
+	 errors.addAll(validator.getErrors());
       }
       else
       {

@@ -796,7 +796,10 @@ public class Validator
 
    
    /**
-    * Finds the best parent annotation for the given child annotation, giving priority to parents with the same speaker, with a common (non-graph) ancestor, and t-including or at least midpoint-t-including parent candidates.  A candidate is identified, but no changes are made to annotation.  null may be returned, if no suitable parent can be identified.
+    * Finds the best parent annotation for the given child annotation, giving priority to parents
+    * with the same speaker, with a common (non-graph) ancestor, and t-including or at least
+    * midpoint-t-including parent candidates.  A candidate is identified, but no changes are made
+    * to annotation.  null may be returned, if no suitable parent can be identified.
     * @param child The child annotation.
     * @return The best parent annotation available, or null if none can be found.
     */
@@ -818,6 +821,22 @@ public class Validator
       {
 	 // next try midpoint-including annotations
 	 candidates.addAll(Arrays.asList(child.midpointIncludingAnnotationsOn(parentLayerId)));
+      }
+      if (candidates.size() == 0)
+      {
+	 // finally try linked annotations
+	 
+	 // first start-to-start or end-to-end linkage, which might not necessarily include
+	 candidates.addAll(child.getStart().startOf(parentLayerId));
+	 candidates.addAll(child.getEnd().endOf(parentLayerId));
+
+	 // then preceding/following linkage
+	 candidates.addAll(child.getStart().endOf(parentLayerId));
+	 candidates.addAll(child.getEnd().startOf(parentLayerId));
+
+	 // remove deleted annotations 
+	 Iterator<Annotation> i = candidates.iterator();
+	 while (i.hasNext()) if (i.next().getChange() == Change.Operation.Destroy) i.remove();
       }
       for (Annotation candidate : candidates)
       {

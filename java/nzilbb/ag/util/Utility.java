@@ -51,4 +51,14 @@ public class Utility
       return getConfidence(o, Constants.CONFIDENCE_MANUAL);
    } // end of getConfidence()
 
+   /**
+    * Sets the confidence rating of a given object.
+    * @param o The object to get the confidence rating for (most likely an {@link Annotation} or {@link Anchor})
+    * @param confidence The confidence rating for a given object.
+    */
+   public static void setConfidence(TrackedMap o, int confidence)
+   {      
+      o.put(Constants.CONFIDENCE, confidence);
+   } // end of setConfidence()
+
 } // end of class Utility

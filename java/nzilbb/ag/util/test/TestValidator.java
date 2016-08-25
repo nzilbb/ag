@@ -394,6 +394,9 @@ public class TestValidator
 	 Vector<Change> changes = v.transform(g);
 	 if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
 	 Iterator<Change> order = changes.iterator();
+	 assertEquals("Delete word - manual child has new parent", 
+		      new Change(Change.Operation.Update, g.getAnnotation("pos4"), "parentId", "word5"), 
+		      order.next());
 	 assertEquals("Delete word - automatically generated child is deleted", 
 		      new Change(Change.Operation.Destroy, g.getAnnotation("pos5")), 
 		      order.next());
@@ -484,7 +487,6 @@ public class TestValidator
 
       g.addAnnotation(new Annotation("pos1", "DT", "pos", "a1", "a2", "word1"));
       g.addAnnotation(new Annotation("pos2", "A", "pos", "a2", "a3", "word2"));
-      g.addAnnotation(new Annotation("pos3", "N", "pos", "a4", "a?1", "word4"));
 
       // non-chronological dependencies do not have their ordinals corrected
       g.addAnnotation(new Annotation("role1", "object", "role", "a?2", "a5", "word5")); // over
