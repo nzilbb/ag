@@ -1074,24 +1074,24 @@ public class Merger
 		  + logAnnotation(anOriginalLinkedPrior) + " and start of " 
 		  + logAnnotation(anOriginal));
 	       // identify which annotations we DON'T want to change the anchor of
-	       LayerTraversal<Vector<Annotation>> revert = new LayerTraversal<Vector<Annotation>>(
-		  new Vector<Annotation>(), anOriginal)
-	       {
-		  protected void pre(Annotation annotation)
-		  {
-		     if (annotation.getStart().equals(originalStart)) result.add(annotation);
-		  }
-	       };
+	       // LayerTraversal<Vector<Annotation>> revert = new LayerTraversal<Vector<Annotation>>(
+	       // 	  new Vector<Annotation>(), anOriginal)
+	       // {
+	       // 	  protected void pre(Annotation annotation)
+	       // 	  {
+	       // 	     if (annotation.getStart().equals(originalStart)) result.add(annotation);
+	       // 	  }
+	       // };
 	       changes.addAll( // record changes for:
-		  changeEndWithRelatedAnnotations(anOriginalLinkedPrior, newPriorEndAnchor));
-	       for (Annotation a : revert.getResult())
-	       {
-		  log(
-		     layerId+": Keeping original start anchor for: " 
-		     + logAnnotation(a) + " - " + logAnchor(originalStart));
-		  changes.addAll( // record changes for:
-		     a.setStart(originalStart));
-	       } // next annotation to revert
+		  changeEndWithRelatedAnnotations(anOriginalLinkedPrior, newPriorEndAnchor, thisLayerId));
+	       // for (Annotation a : revert.getResult())
+	       // {
+	       // 	  log(
+	       // 	     layerId+": Keeping original start anchor for: " 
+	       // 	     + logAnnotation(a) + " - " + logAnchor(originalStart));
+	       // 	  changes.addAll( // record changes for:
+	       // 	     a.setStart(originalStart));
+	       // } // next annotation to revert
 	       
 	    } // next prior linked annotation
 	    
@@ -1646,33 +1646,34 @@ public class Merger
 			continue; // next parallel...
 		     }
 		     // new anchor - copy original, then below we might fix up the offset
-		     Anchor newAnchor = new Anchor(anOriginal.getStart());
-		     newAnchor.create();
-		     graph.addAnchor(newAnchor);
+		     Anchor newStart = new Anchor(anOriginal.getStart());
+		     newStart.create();
+		     graph.addAnchor(newStart);
 		     changes.addAll( // track changes of:
-			newAnchor.getChanges());
+			newStart.getChanges());
 		     // instant?
 		     if (anEdited.getInstantaneous())
 		     {
 			changes.addAll( // track changes of:
-			   changeEndWithRelatedAnnotations(anOriginal, newAnchor));
+			   changeEndWithRelatedAnnotations(anOriginal, newStart));
 		     }
 		     // we change related annotations, but not those related to the parallel layer
 		     HashSet<String> relatedToParallel = new HashSet<String>();
 		     relatedToParallel.addAll(parallelLayer.getChildren().keySet());
 		     relatedToParallel.add(parallelLayer.getParentId());
+		     relatedToParallel.add(parallelLayer.getId());
 		     changes.addAll( // track changes of:
-			changeStartWithRelatedAnnotations(anOriginal, newAnchor, relatedToParallel));
+			changeStartWithRelatedAnnotations(anOriginal, newStart, relatedToParallel));
 		     log(layerId + ": Different start anchor for " + logAnnotation(anOriginal) 
 			 + " unshared from " + logAnnotation(anParallel)
-			 + ": new anchor at " + newAnchor.getOffset());
+			 + ": new anchor at " + newStart.getOffset());
 		     bChanged = true;
 		     bCheckStartAnchorOffset = true;
 		     break;
 		  } // edited and parallel are not linked
 	       } // their-parallel has a counterpart
 	    } // next parallel
-	 } // !bChanged TODO this really the end???	 
+	 } // !bChanged
 	 Anchor delta = null;
 	 // are the offsets different?
 	 if (bCheckStartAnchorOffset
