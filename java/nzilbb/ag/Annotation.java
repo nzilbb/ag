@@ -848,6 +848,16 @@ public class Annotation
     */
    public Annotation[] list(final String layerId)
    {
+      // is it our own layer?
+      if (layerId.equals(getLayerId()))
+      {
+	 // for now, return ourself - this is true of "graph", and is probably generally true
+	 // whether it's true of, say "possible-pos" is debatable,
+	 // and whether it's true of tree-stuctured layers needs to be worked through TODO
+	 Annotation[] annotations = new Annotation[1];
+	 annotations[0] = this;
+	 return annotations;
+      }
       // is layerId a child layer?
       if (getLayer().getChildren().containsKey(layerId))
       {

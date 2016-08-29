@@ -1641,6 +1641,14 @@ public class TestGraph
       assertEquals("list: distant descenant", e2, list[7]);
       assertEquals("list: distant descenant", s, list[8]);
       assertEquals("list: distant descenant", 9, list.length);
+
+      list = the.list("graph");
+      assertEquals("annotation.list('graph') contains one element", 1, list.length);
+      assertEquals("annotation.list('graph') contains the graph", g, list[0]);
+
+      list = g.list("graph");
+      assertEquals("graph.list('graph') contains one element", 1, list.length);
+      assertEquals("graph.list('graph') contains the graph", g, list[0]);
    }
 
    @Test public void easyAnchorChaining() 
