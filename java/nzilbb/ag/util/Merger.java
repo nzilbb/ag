@@ -342,7 +342,7 @@ public class Merger
 		  // are all offsets available?
 		  if (a1.getAnchored() && a2.getAnchored())
 		  {
-		     // distance is as important as the reliability of the least reliable annotations anchors
+		     // distance is as important as the reliability of the least reliable anchors
 		     // i.e. if a1 & a2 have matching alignments (both default, both user-aligned, etc.)
 		     // then the weight of the alignment is as heavy as the alignment
 		     // but if a1 has default alignments and a2 has user-alignments, then importance is low
@@ -635,6 +635,8 @@ public class Merger
 	       computeAnchorDeltasForMerge(layer, graph));
 	 }
       } // next layer
+      // untag annotations tagged during this phase
+      for (Annotation a : graph.getAnnotationsById().values()) a.remove("@computeAnchorDeltasForMerge");
 
       // phase 5. - check new order by offset, and check new containment
       log("phase 6: check hierarchy");
@@ -1583,6 +1585,8 @@ public class Merger
 		   && getConfidence(anOriginal.getStart()) 
 		   <= getConfidence(anLinkedOriginalParallel.getStart()))
 	       { // link this annotation to the parallel one
+		  // only link to annotations that have been through this phase
+		  if (!anLinkedOriginalParallel.containsKey("@computeAnchorDeltasForMerge")) continue;
 		  // don't share this anchor if there's an annotation connected that we shouldn't share with
 		  if (layer.getSaturated() 
 		      || anLinkedOriginalParallel.getStart().startOf(layer.getParentId()).size() == 0)
@@ -1646,17 +1650,17 @@ public class Merger
 		     graph.addAnchor(newStart);
 		     changes.addAll( // track changes of:
 			newStart.getChanges());
+		     // we change related annotations, but not those related to the parallel layer
+		     HashSet<String> relatedToParallel = new HashSet<String>();
+		     relatedToParallel.addAll(parallelLayer.getChildren().keySet());
+		     relatedToParallel.add(parallelLayer.getParentId());
+		     relatedToParallel.add(parallelLayer.getId());
 		     // instant?
 		     if (anEdited.getInstantaneous())
 		     {
 			changes.addAll( // track changes of:
 			   changeEndWithRelatedAnnotations(anOriginal, newStart));
 		     }
-		     // we change related annotations, but not those related to the parallel layer
-		     HashSet<String> relatedToParallel = new HashSet<String>();
-		     relatedToParallel.addAll(parallelLayer.getChildren().keySet());
-		     relatedToParallel.add(parallelLayer.getParentId());
-		     relatedToParallel.add(parallelLayer.getId());
 		     changes.addAll( // track changes of:
 			changeStartWithRelatedAnnotations(anOriginal, newStart, relatedToParallel));
 		     log(layerId + ": Different start anchor for " + logAnnotation(anOriginal) 
@@ -1950,6 +1954,8 @@ public class Merger
 		      && getConfidence(anOriginal.getEnd())
 		      <= getConfidence(anLinkedOriginalParallel.getEnd()))
 		  { // link this annotation to the parallel one
+		     // only link to annotations that have been through this phase
+		     if (!anLinkedOriginalParallel.containsKey("@computeAnchorDeltasForMerge")) continue;
 		     // don't share this anchor if there's an annotation connected that we shouldn't share with
 		     if (layer.getSaturated() 
 			 || anLinkedOriginalParallel.getEnd().endOf(layer.getParentId()).size() == 0)
@@ -2163,7 +2169,8 @@ public class Merger
 	       }
 	    }
 	 } // not an instananeous annotation
-	 
+
+	 anOriginal.put("@computeAnchorDeltasForMerge", Boolean.TRUE);
 	 anLastOriginal = anOriginal;	 
       } // next edited annotation
       return changes;

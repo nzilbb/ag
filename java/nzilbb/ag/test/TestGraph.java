@@ -1256,6 +1256,147 @@ public class TestGraph
 
    }
 
+   @Test public void fragmentByUtterance() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");
+
+      g.addLayer(new Layer("topic", "Topics", 2, true, false, false));
+      g.addLayer(new Layer("who", "Participants", 0, true, true, true));
+      g.addLayer(new Layer("turn", "Speaker turns", 2, true, false, false, "who", true));
+      g.addLayer(new Layer("utterance", "Utterances", 2, true, false, true, "turn", true));
+      g.addLayer(new Layer("word", "Words", 2, true, false, false, "turn",true));
+      g.addLayer(new Layer("phone", "Phones", 2, true, false, true, "word",  true));
+      g.addLayer(new Layer("pos", "Part of speech", 0, false, false, true, "word", true));
+      g.addLayer(new Layer("phrase", "Phrase structure", 0, true, true, false, "turn", true));
+
+      g.addAnchor(new Anchor("turnStart", 0.0));
+      g.addAnchor(new Anchor("a1", 1.0));
+      g.addAnchor(new Anchor("a1.5", 1.5));
+      g.addAnchor(new Anchor("a2", 2.0));
+       // include null offset anchor, it should still be added to the fragment
+      g.addAnchor(new Anchor("a2.25", null));
+      g.addAnchor(new Anchor("a2.5", 2.5));
+      g.addAnchor(new Anchor("a2.75", 2.75));
+      g.addAnchor(new Anchor("a3", 3.0));
+      g.addAnchor(new Anchor("a4", 4.0));
+      g.addAnchor(new Anchor("a5", 5.0));
+      g.addAnchor(new Anchor("turnEnd", 6.0));
+
+      Annotation who1 = new Annotation("who1", "john smith", "who", "turnStart", "turnEnd", "my graph");
+      Annotation who2 = new Annotation("who1", "jane doe", "who", "turnStart", "turnEnd", "my graph");
+
+      Annotation turn1 = new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "who1");
+
+      Annotation utterance1 = new Annotation("utterance1", "john smith", "utterance", "turnStart", "a3", "turn1");
+      Annotation utterance2 = new Annotation("utterance2", "john smith", "utterance", "a3", "turnEnd", "turn1");
+
+      Annotation the = new Annotation("word1", "the", "word", "a1", "a2", "turn1");
+      Annotation DT = new Annotation("pos1", "DT", "pos", "a1", "a2", "word1");
+      Annotation th = new Annotation("phone1", "D", "phone", "a1", "a1.5", "word1");
+      Annotation e = new Annotation("phone2", "@", "phone", "a1.5", "a2", "word1");
+      Annotation quick = new Annotation("word2", "quick", "word", "a2", "a3", "turn1");
+      Annotation A = new Annotation("pos2", "A", "pos", "a2", "a3", "word2");
+      Annotation k = new Annotation("phone3", "k", "phone", "a2", "a2.25", "word2");
+      Annotation w = new Annotation("phone4", "w", "phone", "a2.25", "a2.5", "word2");
+      Annotation I = new Annotation("phone5", "I", "phone", "a2.5", "a2.75", "word2");
+      Annotation ck = new Annotation("phone6", "k", "phone", "a2.75", "a3", "word2");
+      Annotation brown = new Annotation("word3", "brown", "word", "a3", "a4", "turn1");
+      Annotation AP = new Annotation("phrase1", "AP", "phrase", "a2", "a4", "turn1");
+      Annotation fox = new Annotation("word4", "fox", "word", "a4", "a5", "turn1");
+      Annotation N = new Annotation("pos3", "N", "pos", "a4", "a5", "word4");
+      Annotation NP = new Annotation("phrase2", "NP", "phrase", "a1", "a5", "turn1");
+
+      g.addAnnotation(who1);
+      g.addAnnotation(turn1);
+      g.addAnnotation(utterance1);
+      g.addAnnotation(utterance2);
+
+      g.addAnnotation(the);
+      g.addAnnotation(quick);
+      g.addAnnotation(brown);
+      g.addAnnotation(fox);
+
+      g.addAnnotation(th);
+      g.addAnnotation(e);
+      g.addAnnotation(k);
+      g.addAnnotation(w);
+      g.addAnnotation(I);
+      g.addAnnotation(ck);
+
+      g.addAnnotation(DT);
+      g.addAnnotation(A);
+      g.addAnnotation(N);
+
+      g.addAnnotation(AP);
+      g.addAnnotation(NP);
+
+      assertFalse(g.isFragment());
+
+      // create fragment
+      Vector<String> layers = new Vector<String>();
+      layers.add("word");
+      layers.add("phone");
+      layers.add("pos");
+      Graph f = g.getFragment(utterance1, layers);
+      assertEquals("my graph__0.000-3.000", f.getId());
+      assertEquals(g, f.getGraph());
+      assertTrue(f.isFragment());
+
+      // check anchors
+      assertTrue(f.getAnchors().containsKey("turnStart")); 
+      assertTrue(f.getAnchors().containsKey("a1"));
+      assertTrue(f.getAnchors().containsKey("a1.5"));
+      assertTrue(f.getAnchors().containsKey("a2"));
+      assertTrue(f.getAnchors().containsKey("a2.25"));
+      assertTrue(f.getAnchors().containsKey("a2.5"));
+      assertTrue(f.getAnchors().containsKey("a2.75"));
+      assertTrue(f.getAnchors().containsKey("a3"));
+      assertFalse(f.getAnchors().containsKey("a4"));
+      assertFalse(f.getAnchors().containsKey("a5"));
+      assertFalse(f.getAnchors().containsKey("turnEnd"));
+
+      // check annotations
+      assertTrue("speaker", f.getAnnotationsById().containsKey("who1"));
+      assertTrue("turn", f.getAnnotationsById().containsKey("turn1"));
+      assertTrue("defining utterance", f.getAnnotationsById().containsKey("utterance1"));
+      assertFalse("utterance afterwards", f.getAnnotationsById().containsKey("utterance2"));
+
+      assertTrue("words", f.getAnnotationsById().containsKey("word1"));
+      assertTrue("words", f.getAnnotationsById().containsKey("word2"));
+      assertFalse("word after", f.getAnnotationsById().containsKey("word3"));
+      assertFalse("word after", f.getAnnotationsById().containsKey("word4"));
+
+      assertTrue("phones", f.getAnnotationsById().containsKey("phone1"));
+      assertTrue("phones", f.getAnnotationsById().containsKey("phone2"));
+      assertTrue("phones", f.getAnnotationsById().containsKey("phone3"));
+      assertTrue("phones", f.getAnnotationsById().containsKey("phone4"));
+      assertTrue("phones", f.getAnnotationsById().containsKey("phone5"));
+      assertTrue("phones", f.getAnnotationsById().containsKey("phone6"));
+
+      assertTrue("pos", f.getAnnotationsById().containsKey("pos1"));
+      assertTrue("pos", f.getAnnotationsById().containsKey("pos2"));
+      assertFalse("other parent", f.getAnnotationsById().containsKey("pos3"));
+
+      assertFalse("excluded layer", f.getAnnotationsById().containsKey("phrase1"));
+      assertFalse("excluded layer", f.getAnnotationsById().containsKey("phrase2"));
+
+      // check layers
+      assertFalse("excluded layer", f.getSchema().getLayers().containsKey("topic"));
+      assertTrue("ancestor layer", f.getSchema().getLayers().containsKey("who"));
+      assertTrue("ancestor layer", f.getSchema().getLayers().containsKey("turn"));
+      assertTrue("annotation layer", f.getSchema().getLayers().containsKey("utterance"));
+      assertTrue("included layer", f.getSchema().getLayers().containsKey("word"));
+      assertTrue("included layer", f.getSchema().getLayers().containsKey("phone"));
+      assertTrue("included layer", f.getSchema().getLayers().containsKey("pos"));
+      assertFalse("excluded layer", f.getSchema().getLayers().containsKey("phrase"));
+      
+      // check list
+      assertEquals(2, f.list("word").length);
+
+   }
+
    @Test public void fragmentByBoundingAndAncestorAnnotations() 
    {
       Graph g = new Graph();

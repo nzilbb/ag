@@ -320,7 +320,7 @@ public class TestMerger
 	       }
 	    } // next step
 	    if (differences.length() > 0) fail(differences);	 
-//TODO	    if (m.getErrors().size() > 0) fail(m.getErrors().toString());
+	    if (m.getErrors().size() > 0) fail(m.getErrors().toString());
 	 }
 	 catch(Exception exception)
 	 {

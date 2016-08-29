@@ -837,6 +837,20 @@ public class Validator
 	 // remove deleted annotations 
 	 Iterator<Annotation> i = candidates.iterator();
 	 while (i.hasNext()) if (i.next().getChange() == Change.Operation.Destroy) i.remove();
+
+	 if (candidates.size() == 0 && child.getParent() != null)
+	 {
+	    // or neighboring annotations
+	    Annotation neighbor = child.getParent().getPrevious();
+	    if (neighbor != null) candidates.add(neighbor);
+
+	    neighbor = child.getParent().getNext();
+	    if (neighbor != null) candidates.add(neighbor);
+ 
+	    // remove deleted annotations 
+	    i = candidates.iterator();
+	    while (i.hasNext()) if (i.next().getChange() == Change.Operation.Destroy) i.remove();
+	 }
       }
       for (Annotation candidate : candidates)
       {

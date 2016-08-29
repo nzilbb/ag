@@ -48,7 +48,7 @@
     "n_480":	{"offset":48.0,	"confidence":50},
     "n_500":	{"offset":50.1,	"confidence":50},
     "n_520":	{"offset":52.0,	"confidence":50},
-    "n_530":	{"offset":53.0,	"confidence":50},
+    "3":	{"offset":53.0,	"confidence":50},
     "n_600":	{"offset":60.9,	"confidence":50},
     "n_650":	{"offset":64.95,	"confidence":10,	"comment":"EDITED VERSION UPDATES STATUS ONLY, WHICH DOESN'T COUNT AS A CHANGED - TODO: fix this"},
     "n_699":	{"offset":69.0,	"confidence":50},
@@ -87,12 +87,12 @@
                 {"id":"es_1_42",	"label":"86-1-4-2",	"startId":"n_402",	"endId":"n_403",	"confidence":50},
                 {"id":"es_1_43",	"label":"86-1-4-3",	"startId":"n_403",	"endId":"n_480",	"confidence":50},
                 {"id":"es_1_44",	"label":"86-1-4-4",	"startId":"n_480",	"endId":"n_500",	"confidence":50}]},
-            {"id":"ew_0_5",	"label":"86-1-5",	"startId":"n_500",	"endId":"n_530",	"confidence":100,
+            {"id":"ew_0_5",	"label":"86-1-5",	"startId":"n_500",	"endId":"3",	"confidence":100,
               "lexical":[
-                {"id":"ew_22_5",	"label":"l-1-5",	"startId":"n_500",	"endId":"n_530",	"confidence":100}],
+                {"id":"ew_22_5",	"label":"l-1-5",	"startId":"n_500",	"endId":"3",	"confidence":100}],
               "segments":[
                 {"id":"es_1_51",	"label":"86-1-5-1",	"startId":"n_500",	"endId":"n_520",	"confidence":50},
-                {"id":"es_1_52",	"label":"86-1-5-2",	"startId":"n_520",	"endId":"n_530",	"confidence":50}]},
+                {"id":"es_1_52",	"label":"86-1-5-2",	"startId":"n_520",	"endId":"3",	"confidence":50}]},
             {"id":"ew_0_6",	"label":"86-1-6",	"startId":"n_600",	"endId":"n_699",	"confidence":100,
               "lexical":[
                 {"id":"ew_22_6",	"label":"l-1-6",	"startId":"n_600",	"endId":"n_699",	"confidence":100}],

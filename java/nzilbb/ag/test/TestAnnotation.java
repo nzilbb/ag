@@ -235,6 +235,7 @@ public class TestAnnotation
    {
       Annotation a = new Annotation("123", "LABEL", "word", "start", "end", "parent", 99);
       a.put("foo", "foo");
+      a.put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
       Annotation c = (Annotation)a.clone();
       assertEquals("123", c.getId());
       assertEquals("LABEL", c.getLabel());
@@ -243,6 +244,7 @@ public class TestAnnotation
       assertEquals("end", c.getEndId());
       assertEquals("parent", c.getParentId());
       assertEquals(99, c.getOrdinal());     
+      assertEquals(Constants.CONFIDENCE_AUTOMATIC, c.get(Constants.CONFIDENCE));
       assertFalse(c.containsKey("foo"));     
    }
 

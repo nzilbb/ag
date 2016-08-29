@@ -165,10 +165,11 @@ public class TestAnchor
 
    @Test public void cloning() 
    {
-      Anchor a = new Anchor("123", 99.0);
+      Anchor a = new Anchor("123", 99.0, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
       a.put("foo", "foo");
       Anchor c = (Anchor)a.clone();
       assertEquals("123", c.getId());
+      assertEquals(Constants.CONFIDENCE_AUTOMATIC, c.get(Constants.CONFIDENCE));
       assertEquals(new Double(99.0), c.getOffset());
       assertFalse(c.containsKey("foo"));     
    }

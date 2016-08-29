@@ -55,7 +55,7 @@ public class Anchor
    } // end of getTrackedAttributes()
 
    // NB if this is updated, please also update the @return javadoc attribute on getClonedAttributes()
-   private static String[] aClonedAttributes = {"id", "offset"};
+   private static String[] aClonedAttributes = {"id", "offset", "confidence"};
    /**
     * Keys for attributes that are cloned - i.e. when an object is cloned, only these attributes are copied into the clone.
     * <p>LinkedHashSet is used so that attributes are iterated in the order they're defined in aClonedAttributes (which is the order shown in the documentation of {@link #getClonedAttributes()}).
@@ -64,7 +64,7 @@ public class Anchor
 
    /**
     * Keys for attributes that are cloned - i.e. when an object is cloned, only these attributes are copied into the clone.
-    * @return "id", "offste"
+    * @return "id", "offset", "confidence"
     */
    public Set<String> getClonedAttributes()
    {
@@ -600,7 +600,7 @@ public class Anchor
       for (Annotation a : startOf.get(layerId))
       {
 	 // is the end anchor the same as endAnchor?
-	 if (a.getEnd().equals(end)) return a;
+	 if (a.getEnd() != null && a.getEnd().equals(end)) return a;
       } // next annotation
 	 
       return null;

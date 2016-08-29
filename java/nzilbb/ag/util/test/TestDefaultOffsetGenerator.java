@@ -869,6 +869,128 @@ public class TestDefaultOffsetGenerator
       }
    }
 
+   @Test public void fragmentWithMissingAnchors() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");
+
+      g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+			   true, // peers
+			   true, // peersOverlap
+			   true)); // saturated
+      g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "who", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("utterance", "Utterance", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   true, // saturated
+			   "turn", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "turn", // parentId
+			   true)); // parentIncludes
+
+      g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL)); // turn start
+
+      g.addAnchor(new Anchor("a0", 0.01, Constants.CONFIDENCE, Constants.CONFIDENCE_NONE)); // the
+      g.addAnchor(new Anchor("a01", 0.02, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT)); // quick
+      g.addAnchor(new Anchor("a02", 0.03, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT)); // brown
+      g.addAnchor(new Anchor("a03", 0.04, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT)); // fox
+      g.addAnchor(new Anchor("a04a", 0.04, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT)); // fox end
+
+      g.addAnchor(new Anchor("utteranceChange", 0.4, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+
+      g.addAnchor(new Anchor("a04b", 2.0, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC)); // jumps
+      g.addAnchor(new Anchor("a14", 3.3, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC)); // over
+      g.addAnchor(new Anchor("a24", 4.4, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC)); // a
+      g.addAnchor(new Anchor("a34", 5.0, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC)); // lazy
+      // no confidence set for a44 and a54
+      g.addAnchor(new Anchor("a44", 5.1)); // dog
+      g.addAnchor(new Anchor("a54", 5.2)); // end of dog
+
+      // no confidence set for a7
+      g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL)); // turn end
+
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+      
+      g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
+
+      g.addAnnotation(new Annotation("utterance1", "john smith", "utterance", "turnStart", "utteranceChange", "turn1"));
+      g.addAnnotation(new Annotation("utterance2", "john smith", "utterance", "utteranceChange", "turnEnd", "turn1"));
+      
+      g.addAnnotation(new Annotation("the",   "the",   "word", "a0",  "a01", "turn1"));
+      g.addAnnotation(new Annotation("quick", "quick", "word", "a01", "a02", "turn1"));
+      g.addAnnotation(new Annotation("brown", "brown", "word", "a02",  "a03", "turn1"));
+      g.addAnnotation(new Annotation("fox",   "fox",   "word", "a03", "a04a", "turn1"));
+
+      g.addAnnotation(new Annotation("jumps", "jumps", "word", "a04b",  "a14", "turn1"));
+      g.addAnnotation(new Annotation("over",  "over",  "word", "a14",  "a24", "turn1"));
+      g.addAnnotation(new Annotation("a",     "a",     "word", "a24",  "a34", "turn1"));
+      g.addAnnotation(new Annotation("lazy",  "lazy",  "word", "a34",  "a44", "turn1"));
+      g.addAnnotation(new Annotation("dog",  "dog",    "word", "a44",  "a54", "turn1"));
+
+      Vector<String> fragmentLayers = new Vector<String>();
+      fragmentLayers.add("word");
+      Graph f = g.getFragment(g.getAnnotation("utterance1"), fragmentLayers);
+
+      DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
+      generator.setDefaultAnchorConfidence(Constants.CONFIDENCE_NONE);
+      generator.setDefaultOffsetThreshold(Constants.CONFIDENCE_AUTOMATIC);
+      // generator.setDebug(true);
+      try
+      {
+	 Vector<Change> changes = generator.transform(f);
+	 if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
+	 for (String m : generator.getErrors()) System.out.println("ERROR: " + m);
+
+	 // test the values are what we expected
+
+	 // test the changes are recorded
+	 Iterator<Change> order = changes.iterator();
+	 assertEquals(new Double(0.0), f.getAnchor("a0").getOffset());
+	 assertEquals(new Double(0.1), f.getAnchor("a01").getOffset());
+	 assertEquals(new Double(0.2), f.getAnchor("a02").getOffset());
+	 // yay for inexact floating point representations!
+	 assertEquals(new Double(0.30000000000000004), f.getAnchor("a03").getOffset());
+	 assertEquals(new Double(0.4), f.getAnchor("a04a").getOffset());
+
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+
+      f = g.getFragment(g.getAnnotation("utterance2"), fragmentLayers);
+
+      // generator.setDebug(true);
+      try
+      {
+	 Vector<Change> changes = generator.transform(f);
+	 if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
+	 for (String m : generator.getErrors()) System.out.println("ERROR: " + m);
+
+	 // test the values are what we expected
+	 assertEquals(new Double(0.4), f.getAnchor("a04b").getOffset());
+	 assertEquals(new Double(1.4), f.getAnchor("a14").getOffset());
+	 assertEquals(new Double(2.4), f.getAnchor("a24").getOffset());
+	 assertEquals(new Double(3.4), f.getAnchor("a34").getOffset());
+	 assertEquals(new Double(4.4), f.getAnchor("a44").getOffset());
+	 assertEquals(new Double(5.4), f.getAnchor("a54").getOffset());
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+   }
+
    public static void main(String args[]) 
    {
       org.junit.runner.JUnitCore.main("nzilbb.ag.util.test.TestDefaultOffsetGenerator");

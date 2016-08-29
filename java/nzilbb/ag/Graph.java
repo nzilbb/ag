@@ -330,16 +330,15 @@ public class Graph
 	 if (layer != null)
 	 {
 	    fragment.addLayer((Layer)layer.clone());
-	    for (Annotation annotation : list(layerId))
+	    // TODO this could be more efficient by traversing definingAnnotation first
+	    // TODO and then using definingAnnotation.list(layerId) for any remaining layers
+	    for (Annotation annotation : definingAnnotation.list(layerId))
 	    {
-	       if (annotation.getAncestors().contains(definingAnnotation))
-	       {
-		  // add the anchors
-		  fragment.addAnchor((Anchor)annotation.getStart().clone());
-		  fragment.addAnchor((Anchor)annotation.getEnd().clone());
-		  // add the annotation
-		  fragment.addAnnotation((Annotation)annotation.clone());
-	       }
+	       // add the anchors
+	       fragment.addAnchor((Anchor)annotation.getStart().clone());
+	       fragment.addAnchor((Anchor)annotation.getEnd().clone());
+	       // add the annotation
+	       fragment.addAnnotation((Annotation)annotation.clone());
 	    } // next annotation
 	 } // layer exists
       } // next layer

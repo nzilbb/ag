@@ -147,7 +147,10 @@ public class AnnotationChain
     */
    public AnnotationChain(Anchor start, Anchor end)
    {
-      findChain(start,  end, new HashSet<String>(), new HashSet<Anchor>());
+      if (start != null && end != null)
+      {
+	 findChain(start, end, new HashSet<String>(), new HashSet<Anchor>());
+      }
    }
 
    /**
@@ -158,7 +161,10 @@ public class AnnotationChain
     */
    public AnnotationChain(Anchor start, Anchor end, Set<String> excludeLayers)
    {
-      findChain(start,  end, excludeLayers, new HashSet<Anchor>());
+      if (start != null && end != null)
+      {
+	 findChain(start,  end, excludeLayers, new HashSet<Anchor>());
+      }
    }
 
    /**
@@ -170,7 +176,10 @@ public class AnnotationChain
     */
    protected AnnotationChain(Anchor start, Anchor end, Set<String> excludeLayers, Set<Anchor> excludeAnchors)
    {
-      findChain(start,  end, excludeLayers, excludeAnchors);
+      if (start != null && end != null)
+      {
+	 findChain(start,  end, excludeLayers, excludeAnchors);
+      }
    }
 
    /**
@@ -186,6 +195,7 @@ public class AnnotationChain
       for (Annotation startsHere : start.getStartingAnnotations())
       {
 	 if (startsHere.getChange() == Change.Operation.Destroy) continue;
+	 if (startsHere.getEnd() == null) continue;
 	 if (excludeLayers.contains(startsHere.getLayerId())) continue;
 	 if (startsHere.getInstantaneous()) continue;
 	 if (startsHere.getEnd().equals(end))
@@ -218,6 +228,7 @@ public class AnnotationChain
       for (Annotation startsHere : start.getStartingAnnotations())
       {
 	 if (startsHere.getChange() == Change.Operation.Destroy) continue;
+	 if (startsHere.getEnd() == null) continue;
 	 if (excludeLayers.contains(startsHere.getLayerId())) continue;
 	 if (startsHere.getInstantaneous()) continue;
 	 // don't follow tags (we'll already be following their parents)
@@ -253,7 +264,10 @@ public class AnnotationChain
     */
    public AnnotationChain(Anchor start, double endOffset, Set<String> excludeLayers)
    {
-      findChain(start, endOffset, excludeLayers, new HashSet<Anchor>());
+      if (start != null)
+      {
+	 findChain(start, endOffset, excludeLayers, new HashSet<Anchor>());
+      }
    }
    /**
     * Constructor.
@@ -264,7 +278,10 @@ public class AnnotationChain
     */
    protected AnnotationChain(Anchor start, double endOffset, Set<String> excludeLayers, Set<Anchor> excludeAnchors)
    {
-      findChain(start, endOffset, excludeLayers, excludeAnchors);
+      if (start != null)
+      {
+	 findChain(start, endOffset, excludeLayers, excludeAnchors);
+      }
    }
    /**
     * Finds a chain between a start anchor up to an offset.
@@ -282,6 +299,7 @@ public class AnnotationChain
       for (Annotation startsHere : start.getStartingAnnotations())
       {
 	 if (startsHere.getChange() == Change.Operation.Destroy) continue;
+	 if (startsHere.getEnd() == null) continue;
 	 if (excludeLayers.contains(startsHere.getLayerId())) continue;
 	 if (startsHere.getInstantaneous()) continue;
 	 // don't follow tags (we'll already be following their parents)
@@ -343,7 +361,10 @@ public class AnnotationChain
     */
    public AnnotationChain(double startOffset, Anchor end, Set<String> excludeLayers)
    {
-      findChain(startOffset, end, excludeLayers, new HashSet<Anchor>());
+      if (end != null)
+      {
+	 findChain(startOffset, end, excludeLayers, new HashSet<Anchor>());
+      }
    }
    /**
     * Constructor.
@@ -354,7 +375,10 @@ public class AnnotationChain
     */
    protected AnnotationChain(double startOffset, Anchor end, Set<String> excludeLayers, Set<Anchor> excludeAnchors)
    {
-      findChain(startOffset, end, excludeLayers, excludeAnchors);
+      if (end != null)
+      {
+	 findChain(startOffset, end, excludeLayers, excludeAnchors);
+      }
    }
    /**
     * Finds a chain between a start offset and an anchor
@@ -372,6 +396,7 @@ public class AnnotationChain
       for (Annotation endsHere : end.getEndingAnnotations())
       {
 	 if (endsHere.getChange() == Change.Operation.Destroy) continue;
+	 if (endsHere.getStart() == null) continue;
 	 if (excludeLayers.contains(endsHere.getLayerId())) continue;
 	 if (endsHere.getInstantaneous()) continue;
 	 // guard against cycles, not all graphs are valid

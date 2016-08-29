@@ -1194,28 +1194,35 @@ public class SqlGraphStore
 	    }
 	 }
 	 //v.setDebug(true);	 
-	 Vector<Change> validationChanges = v.transform(graph);
-	 if (v.getErrors().size() != 0)
+	 if (graph.containsKey("@valid")) // TODO remove this workaround
 	 {
-	    StringBuffer messages = new StringBuffer();
-	    for (String s : v.getErrors())
-	    {
-	       messages.append(s);
-	       messages.append("\n");
-	    }
-	    System.err.println("Invalid graph: " + graph.getId() + "\n" + messages);
-	    if (graph.getChange() == Change.Operation.Create)
-	    {
-	       throw new StoreException("Invalid graph: " + graph.getId() + "\n" + messages);
-	    }
-	    else
-	    {
-	       System.err.println("Saving anyway..."); // TODO don't!
-	    }
+	    System.err.println("Graph " + graph.getId() + ": skipping validation");
 	 }
 	 else
 	 {
-	    System.err.println("Graph " + graph.getId() + " OK");
+	    Vector<Change> validationChanges = v.transform(graph);
+	    if (v.getErrors().size() != 0)
+	    {
+	       StringBuffer messages = new StringBuffer();
+	       for (String s : v.getErrors())
+	       {
+		  messages.append(s);
+		  messages.append("\n");
+	       }
+	       System.err.println("Invalid graph: " + graph.getId() + "\n" + messages);
+	       if (graph.getChange() == Change.Operation.Create)
+	       {
+		  throw new StoreException("Invalid graph: " + graph.getId() + "\n" + messages);
+	       }
+	       else
+	       {
+		  System.err.println("Saving anyway..."); // TODO don't!
+	       }
+	    }
+	    else
+	    {
+	       System.err.println("Graph " + graph.getId() + " OK");
+	    }
 	 }
 
 	 if (graph.getChange() == Change.Operation.Create)
