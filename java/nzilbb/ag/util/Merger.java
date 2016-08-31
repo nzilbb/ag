@@ -644,6 +644,9 @@ public class Merger
       // in this phase out-of-order children are detected and fixed
       // also the edited t-including of children is checked in the original graph, and
       // children moved accordingly
+      // also 'partition' peer layers are checked, to ensures that t-includes relationships
+      // that existed before merge exist afterwards - e.g. words are in the same utterance
+      // in both versions of the graph
       // top-down to ensure that words are checked before segments, otherwise segments
       // are internally ok, and then the words get changed afterwards
 
@@ -2180,6 +2183,23 @@ public class Merger
     * PHASE 5: Checks that, for each parent, the children are in the order (by offset)
     * specified in the edited graph, if <var>peersOverlap</var> is false, and that children
     * are t-included in their parents, if the <var>parentIncludes</var> is true.  
+    * <p>Also 'partition' peer layers are checked, to ensures that t-includes relationships
+    * that existed before merge exist afterwards - e.g. words are in the same utterance,
+    * and phones are in the same syllable
+    * in both versions of the graph.
+    * A layer is a 'partitition' of this <var>layer</var> iff:
+    * <ul>
+    *  <li>layer.peers == true</li>
+    *  <li>layer.peersOverlap == false</li>
+    *  <li>layer.parentIncludes == true</li>
+    *  <li>partition != layer</li>
+    *  <li>partition.parentIncludes == true</li>
+    *  <li>partition.parentId == layer.parentId</li>
+    *  <li>partition.alignment == ALIGNMENT_INTERVAL</li>
+    *  <li>partition.peers == true</li>
+    *  <li>partition.peersOverlap == false</li>
+    *  <li>partition.saturated == true</li>
+    * </ul>
     * In cases where child anchors are out of order (outside the bounds of their parents,
     * or earlier than preceding children) their anchors are changed to force them inside,
     * giving priority to higher alignment-status offsets.
@@ -2199,6 +2219,27 @@ public class Merger
 
       if (layer.getPeers() && !layer.getPeersOverlap())
       {
+	 boolean editGraphHasChildLayer = editedGraph.getLayer(layerId) != null;
+	 TreeSet<String> partitionIds = new TreeSet<String>();
+	 if (layer.getParentIncludes() && editGraphHasChildLayer)
+	 { // parentIncludes, so can be partitioned
+	    // identify partition layers
+	    for (Layer peerLayer : parentLayer.getChildren().values())
+	    {
+	       if (!peerLayer.getId().equals(layer.getId())
+		   && peerLayer.equals(editedGraph.getLayer(peerLayer.getId()))
+		   && peerLayer.getParentIncludes()
+		   && peerLayer.getAlignment() == Constants.ALIGNMENT_INTERVAL
+		   && peerLayer.getPeers()
+		   && !peerLayer.getPeersOverlap()
+		   && peerLayer.getSaturated())
+	       {
+		  partitionIds.add(peerLayer.getId());
+		  log("partition layer: " + peerLayer.getId());
+	       }
+	    } // next peer layer
+	 } // parentIncludes, so can be partitioned
+
 	 // whether or not to disallow anchor sharing between children and 
 	 //  - other children (except consecutive children), and
 	 //  - parent-layer annotations (except first/last children)
@@ -2216,7 +2257,6 @@ public class Merger
 	    // && (parentLayerId.equals(schema.getWordLayerId())
 	    // 	|| parentLayerId.equals(schema.getTurnLayerId()))
 	    ;
-	 boolean editGraphHasChildLayer = editedGraph.getLayer(layerId) != null;
 	 HashSet<String> bothLayers = new HashSet<String>();
 	 bothLayers.add(layerId);
 	 bothLayers.add(parentLayerId);
@@ -2239,6 +2279,21 @@ public class Merger
 	       byOrdinalOrOffset.addAll(anOriginalParent.getAnnotations(layerId));
 	       for (Annotation an : byOrdinalOrOffset) myChildren.add(an);
 	    }
+
+	    // gather up partitions, so we can sprinkle their annotations throughout the children
+	    HashMap<String,Annotation> currentPartition = new HashMap<String,Annotation>();
+	    HashMap<String,Iterator<Annotation>> partitionIterators = new HashMap<String,Iterator<Annotation>>();
+	    for (String partitionLayerId : partitionIds)
+	    {
+	       // get an iterator through the partitions
+	       Iterator<Annotation> i = anParent.getAnnotations(partitionLayerId).iterator();
+	       if (i.hasNext())
+	       {
+		  partitionIterators.put(partitionLayerId, i);
+		  // set current partition
+		  currentPartition.put(partitionLayerId, i.next());
+	       }
+	    } // next partition layer	    
 
 	    SortedSet<Annotation> children = byOrdinalOrOffset;
 	    // special case:
@@ -2288,6 +2343,36 @@ public class Merger
 		  anOriginalChild = getCounterpart(anChild);
 	       }
 	       log(layerId + ": Child " + logAnnotation(anOriginalChild)); // TODO comment out
+
+	       // check for new partition anchor
+	       for (String partitionLayerId : partitionIds)
+	       {
+		  Iterator<Annotation> i = partitionIterators.get(partitionLayerId);
+		  if (i == null) continue;
+		  Annotation currentPartitionEdited = currentPartition.get(partitionLayerId);
+		  Annotation currentPartitionOriginal = getCounterpart(currentPartitionEdited);
+		  assert currentPartitionOriginal != null : "currentPartitionOriginal != null";
+		  // assume that partition layer already saturates parent, and add end anchors
+		  // into the collection as appropriate
+		  while (anChild.getAnchored() && !currentPartitionEdited.includesMidpointOf(anChild))
+		  {
+		     Anchor possibleBoundary = new Anchor(null, currentPartitionOriginal.getEnd().getOffset(), 
+							  Constants.CONFIDENCE, Integer.MAX_VALUE);
+		     
+		     log("Partition end: " + logAnnotation(currentPartitionOriginal) 
+			 + " " + logAnchor(currentPartitionOriginal.getEnd()));
+		     currentPartitionEdited = i.next();
+		     currentPartition.put(partitionLayerId, currentPartitionEdited);
+		     if (currentPartitionEdited.includes(anChild))
+		     {
+			anchors.add(possibleBoundary);
+		     }
+		     else
+		     {
+			log("Skipping partition as " + logAnnotation(currentPartitionEdited) + " doesn't include " + logAnnotation(anChild) + " in edited graph");
+		     }
+		  } // next non-including partition		  
+	       } // next partition layer	    
 
 	       // start anchor
 	       String sShareLastAnchorReason = null;
