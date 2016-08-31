@@ -639,7 +639,7 @@ public class Merger
       for (Annotation a : graph.getAnnotationsById().values()) a.remove("@computeAnchorDeltasForMerge");
 
       // phase 5. - check new order by offset, and check new containment
-      log("phase 6: check hierarchy");
+      log("phase 5: check hierarchy");
 
       // in this phase out-of-order children are detected and fixed
       // also the edited t-including of children is checked in the original graph, and
