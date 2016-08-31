@@ -1827,6 +1827,7 @@ public class Merger
 		  for (Annotation parallelAnnotation : removeDeleted(anOriginal.getStart().getStartingAnnotations()))
 		  {
 		     if (parallelAnnotation == anOriginal) continue; // not ourselves
+		     if (parallelAnnotation == anOriginal.getParent()) continue; // not our parent
 		     Layer otherLayer = parallelAnnotation.getLayer();
 		     // check for other possible start anchor, by following the edited graph structure
 		     Annotation editedParallelAnnotation = getCounterpart(parallelAnnotation);
