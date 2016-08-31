@@ -98,6 +98,8 @@ public class TestJSONSerialization
 	 );      
       g.setSchema(schema);
 
+      g.setOffsetGranularity(0.001);
+
       g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
       g.addAnchor(new Anchor("a1", 1.0, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
       g.addAnchor(new Anchor("a1.5", 1.5, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
@@ -246,6 +248,7 @@ public class TestJSONSerialization
       
       // attributes
       assertEquals(g.getId(), d.getId());
+      assertEquals(g.getOffsetGranularity(), d.getOffsetGranularity());
 
       // layers
       for (Layer gLayer : g.getSchema().getLayers().values())
@@ -323,7 +326,6 @@ public class TestJSONSerialization
    {
       Graph g = new Graph();
       g.setId("test");
-
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
 	 new Layer("topic", "Topics", Constants.ALIGNMENT_INTERVAL, 

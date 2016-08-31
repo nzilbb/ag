@@ -1,5 +1,6 @@
 {
   "id":"test",
+  "offsetGranularity":0.001,
   "schema":{
     "participantLayerId":"who",
     "turnLayerId":"turn",

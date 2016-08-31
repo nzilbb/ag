@@ -70,7 +70,7 @@ public class JSONSerialization
 
    private DecimalFormat fmtOffset = new DecimalFormat(
       // force the locale to something with . as the decimal separator
-      "0.0#", new DecimalFormatSymbols(Locale.UK));
+      "0.0#########", new DecimalFormatSymbols(Locale.UK));
    
    protected Vector<String> warnings;
    private Schema schema;
@@ -226,6 +226,10 @@ public class JSONSerialization
       {
 	 Graph graph = new Graph();
 	 graph.setId(json.getString("id"));
+	 if (json.has("offsetGranularity"))
+	 {
+	    graph.setOffsetGranularity(json.getDouble("offsetGranularity"));
+	 }
 
 	 // schema
 	 graph.setSchema(jsonToSchema(json.getJSONObject("schema")));
@@ -472,6 +476,12 @@ public class JSONSerialization
 	    
 	    writer.println("{");
 	    writer.println(keyValue(1, "id", graph.getId()) + ",");
+
+	    // offsetGranularity
+	    if (graph.getOffsetGranularity() != null)
+	    {
+	       writer.println(keyValue(1, "offsetGranularity", graph.getOffsetGranularity()) + ",");
+	    }
 	    
 	    // layers
 	    Schema schema = graph.getSchema();
