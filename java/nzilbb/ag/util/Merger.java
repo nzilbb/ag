@@ -3143,7 +3143,7 @@ public class Merger
     * Logs a debugging message.
     * @param message The debug message.
     */
-   protected void log(String message)
+   protected void log(String message) // TODO turn this into a variable list of Object parameters which get concatenated together into a string only if debug == true, to save all the string concatenation above in non-debug environments
    {
       if (debug)
       {

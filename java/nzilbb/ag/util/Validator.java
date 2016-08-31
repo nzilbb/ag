@@ -415,6 +415,7 @@ public class Validator
 	 // log("Layer: " + layer);
 	 for (Annotation annotation : graph.list(layer.getId()))
 	 {
+	    if (annotation.getChange() == Change.Operation.Destroy) continue;
 	    // log("Annotation: " + logAnnotation(annotation));
 
 	    // we will build a list of anchors in structure order, including this annotation's
@@ -434,6 +435,7 @@ public class Validator
 	       anchors.add(annotation.getStart());
 	       for (Annotation child : annotation.getAnnotations(childLayer.getId()))
 	       {
+		  if (child.getChange() == Change.Operation.Destroy) continue;
 		  // add anchors of aligned descendants
 		  LayerTraversal<LinkedHashSet<Anchor>> traversal 
 		     = new LayerTraversal<LinkedHashSet<Anchor>>(anchors, child)

@@ -308,7 +308,7 @@ public class DefaultOffsetGenerator
    public Vector<Change> setOffsetsForDescendantsOf(Annotation top)
       throws TransformationException
    {
-      // log("Top: " + logAnnotation(top));
+      //log("Top: " + logAnnotation(top));
       Vector<Change> changes = new Vector<Change>();
       if (!top.getInstantaneous())
       {	 
@@ -336,8 +336,8 @@ public class DefaultOffsetGenerator
 	    for (Anchor a : sortedAnchors)
 	    {
 	       if (a.getOffset() != null
-		   && startSentinel.getOffset() == null
-		   || a.getOffset() < startSentinel.getOffset())
+		   && (startSentinel.getOffset() == null
+		       || a.getOffset() < startSentinel.getOffset()))
 	       {
 		  startSentinel.setOffset(a.getOffset());
 		  break;
@@ -361,8 +361,8 @@ public class DefaultOffsetGenerator
 	    for (Anchor a : sortedAnchors)
 	    {
 	       if (a.getOffset() != null
-		   && startSentinel.getOffset() == null
-		   || a.getOffset() > startSentinel.getOffset())
+		   && (endSentinel.getOffset() == null
+		       || a.getOffset() > endSentinel.getOffset()))
 	       {
 		  endSentinel.setOffset(a.getOffset());
 	       }
