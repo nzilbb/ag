@@ -190,7 +190,7 @@ public class TestMerger
     *  <li>merge utterances</li>
     *  <li>split utterances</li>
     * </ol>
-
+    * Then test merge of graphs with mismatched granularities, to simulate exporting to TextGrid and then re-importing.
     */
    @Test public void fragmentTests()
    {
