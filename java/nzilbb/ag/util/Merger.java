@@ -2393,7 +2393,8 @@ public class Merger
 			      && childrenEndingHere.firstElement() != anLastOriginalParentsLastChild
 			      // and not sharing start with parent
 			      && !anOriginalParent.getStartId().equals(anOriginalChild.getStartId())) 
-			sNewAnchorReason = "first child shares anchor with other child annotation end";
+			sNewAnchorReason = "first child shares anchor with other child annotation end - "
+			   + childrenEndingHere;
 		     else if (childrenEndingHere.size() > 2) 
 			sNewAnchorReason = "first child shares anchor with multiple child annotation ends";
 		  } // first child
@@ -2404,7 +2405,8 @@ public class Merger
 			sShareLastAnchorReason = "child shares anchor with other child annotation start";
 		     else if (childrenEndingHere.size() == 1
 			      && childrenEndingHere.firstElement() != lastChild) 
-			sShareLastAnchorReason = "child shares anchor with other child annotation end";
+			sShareLastAnchorReason = "child shares anchor with other child annotation end - "
+			   + childrenEndingHere;
 		     else if (childrenEndingHere.size() > 2) 
 			sShareLastAnchorReason = "child shares anchor with multiple child annotation ends";
 		  } // not first child
@@ -2459,9 +2461,9 @@ public class Merger
 	       if (bNoInterSharingForChildren)
 	       {
 		  Vector<Annotation> childrenStartingHere 
-		     = new Vector<Annotation>(anOriginalChild.getEnd().startOf(layerId));
+		     = removeDeleted(anOriginalChild.getEnd().startOf(layerId));
 		  Vector<Annotation> childrenEndingHere 
-		     = new Vector<Annotation>(anOriginalChild.getEnd().endOf(layerId));
+		     = removeDeleted(anOriginalChild.getEnd().endOf(layerId));
 		  Annotation anLastOriginalChild = children.last();
 		  if (editGraphHasChildLayer)
 		  { // edited graph includes child layer, children contains the edited version
