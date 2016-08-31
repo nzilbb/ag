@@ -52,7 +52,7 @@
     "8":	{"offset":53.0,	"confidence":50,	"comment":"WILL CREATE INSTANTANEOUS ANNOTATION, WHICH WE ALLOW"},
     "n_530":	{"offset":53.0,	"confidence":100},
     "n_600":	{"offset":60.9,	"confidence":50},
-    "b":	{"offset":65.0,	"confidence":50},
+    "n_650":	{"offset":65.0,	"confidence":50},
     "n_700":	{"offset":70.0,	"confidence":100}
   },
   "who":[
@@ -96,11 +96,11 @@
                 {"id":"es_1_51",	"label":"86-1-5-1",	"startId":"n_500",	"endId":"n_520",	"confidence":50},
                 {"id":"es_1_52",	"label":"86-1-5-2",	"startId":"n_520",	"endId":"8",	"confidence":50,	"comment":"APPEND ANOTHER"},
                 {"id":"9",	"label":"86-1-5-3-new",	"startId":"8",	"endId":"n_530",	"confidence":50}]},
-            {"id":"ew_0_6",	"label":"86-1-6",	"startId":"n_600",	"endId":"b",	"confidence":100,
+            {"id":"ew_0_6",	"label":"86-1-6",	"startId":"n_600",	"endId":"n_650",	"confidence":100,
               "lexical":[
-                {"id":"ew_22_6",	"label":"l-1-6",	"startId":"n_600",	"endId":"b",	"confidence":100}],
+                {"id":"ew_22_6",	"label":"l-1-6",	"startId":"n_600",	"endId":"n_650",	"confidence":100}],
               "segments":[
-                {"id":"es_1_61",	"label":"86-1-6-1",	"startId":"n_600",	"endId":"b",	"confidence":50}]}],
+                {"id":"es_1_61",	"label":"86-1-6-1",	"startId":"n_600",	"endId":"n_650",	"confidence":50}]}],
           "utterances":[
             {"id":"em_12_1",	"label":"Maxwell Smart",	"startId":"n_100",	"endId":"n_700",	"confidence":100}]}]}]
 }
