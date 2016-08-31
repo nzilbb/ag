@@ -34,7 +34,7 @@
   },
   "anchors":{
     "n_1010":	{"offset":10.0,	"confidence":100},
-    "n_1011":	{"offset":11.1,	"confidence":50},
+    "n_1011":	{"offset":11.1,	"confidence":50,	"comment":"Updated to manual confidence, but no offset change, so confidence isn't updated"},
     "n_1012":	{"offset":11.2,	"confidence":50},
     "n_1013":	{"offset":11.3,	"confidence":50},
     "n_1020":	{"offset":18.8,	"confidence":50},
