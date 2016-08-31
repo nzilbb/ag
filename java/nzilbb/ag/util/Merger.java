@@ -1985,7 +1985,8 @@ public class Merger
 		  if (hasCounterpart(anParallel))
 		  {
 		     Annotation anEditedParallel = getCounterpart(anParallel);
-		     if (anEdited.getEnd() != anEditedParallel.getEnd())
+		     if (anEdited.getEnd() != anEditedParallel.getEnd()
+			 && !dummyEditedAnchors.contains(anEdited.getEnd()))
 		     {
 			// SHOULD they share? Is there a saturated relationship between the layers (annotation in the child layer)
 			Layer parallelLayer = graph.getLayer(anEditedParallel.getLayerId());
