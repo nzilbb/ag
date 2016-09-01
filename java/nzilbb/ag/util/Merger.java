@@ -1113,14 +1113,16 @@ public class Merger
 		  // we prefer to use an original anchor (i.e. anOriginal.start)
 
 		  // however we avoid creating an inappropriate parallel annotation
-		  if (anLastOriginal.getStart() != anOriginal.getStart())
+		  if (anLastOriginal.getStart() != anOriginal.getStart()
+		      // but also will use last.end when parent start sharing mismatches
+		      && (anEdited.getStart() == anEdited.getParent().getStart()
+			  || anOriginal.getStart() != anOriginal.getParent().getStart()))
 		  {
 		     log(
 			layerId+": Share anchor with next: " 
 			+ logAnnotation(anLastOriginal) + " and " 
 			+ logAnnotation(anOriginal));
 
-		     // TODO or maybe instead of the above avoidance we should use the old anchor but change its offset
 		     boolean bLastIsAnInstant = anLastOriginal.getInstantaneous(); // TODO or maybe just by offset?
 		     // check we're not creating an instant or backward annotation
 		     if (anLastOriginal.getStart().getOriginalOffset()
