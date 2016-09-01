@@ -867,7 +867,7 @@ public class Merger
       {
 	 if (!hasCounterpart(an))
 	 {
-	    log(layerId+": Deleting " + logAnnotation(an));
+	    log(layerId, ": Deleting ", an);
 	    changes.add( // track changes of:
 	       an.destroy());
 	 }
@@ -925,8 +925,8 @@ public class Merger
 		  {
 		     Annotation otherParallel = getCounterpart(anParallel);
 		     start = otherParallel.getStart();
-		     log(layerId+": "+ newAnnotation.getLabel() 
-			 + " sharing start with linked " + logAnnotation(otherParallel));
+		     log(layerId, ": ", newAnnotation.getLabel(), 
+			 " sharing start with linked ", otherParallel);
 		     break;
 		  }
 	       }
@@ -940,8 +940,8 @@ public class Merger
 		  {
 		     Annotation otherParallel = getCounterpart(anParallel);
 		     end = otherParallel.getEnd();
-		     log(layerId+":" + newAnnotation.getLabel() 
-			 + " sharing end with linked " + logAnnotation(otherParallel));
+		     log(layerId, ":", newAnnotation.getLabel(),
+			 " sharing end with linked ", otherParallel);
 		     break;
 		  }
 	       } // next ending annotation
@@ -1002,11 +1002,10 @@ public class Merger
 			 && anPreviousEditedOther.getEnd().getOffset().doubleValue()
 			 != start.getOffset().doubleValue())
 		     {
-			log(layerId
-			    + ": Use offset of end of prior: " + logAnnotation(anLastOriginal) 
-			    + " (end "+logAnchor(anPreviousEditedOther.getEnd())+")"
-			    + " for start of new: " + logAnnotation(newAnnotation)
-			    + " (start "+logAnchor(newAnnotation.getStart())+")");
+			log(layerId, ": Use offset of end of prior: ", anLastOriginal,
+			    " (end ", anPreviousEditedOther.getEnd(), ")",
+			    " for start of new: ", newAnnotation,
+			    " (start ", newAnnotation.getStart(), ")");
 			int newStatus = Math.min(
 			   getConfidence(graph.getAnchor(anPreviousEditedOther.getOriginalEndId())),
 			   getConfidence(start));
@@ -1036,11 +1035,8 @@ public class Merger
 		     } // previous more reliable
 		     if (anPreviousEditedOther.getEnd() != start)
 		     {			
-			log(
-			   layerId
-			   + ": Share anchor with prior: " + logAnnotation(anLastOriginal) 
-			   + " and new: " + logAnnotation(newAnnotation)
-			   + " using " + logAnchor(start));
+			log(layerId, ": Share anchor with prior: ", anLastOriginal,
+			    " and new: ", newAnnotation, " using ", start);
 			changeEndWithRelatedAnnotations(
 			   anPreviousEditedOther, start,
 			   // we don't re-link a related parent annotation - we might be inserting a new child
@@ -1052,7 +1048,7 @@ public class Merger
 	    } // interval layer
 	    
 	    graph.addAnnotation(newAnnotation);
-	    log(layerId + ": Adding " + logAnnotation(newAnnotation));
+	    log(layerId, ": Adding ", newAnnotation);
 	    changes.addAll( // track changes for
 	       newAnnotation.getChanges());
 	    setCounterparts(newAnnotation, anEdited);
@@ -1076,11 +1072,9 @@ public class Merger
 	       newPriorEndAnchor.create();
 	       graph.addAnchor(newPriorEndAnchor);
 	       changes.addAll(newPriorEndAnchor.getChanges());
-	       log(
-		  layerId+": Unsharing end of prior: " 
-		  + logAnnotation(anOriginalLinkedPrior) + " and start of " 
-		  + logAnnotation(anOriginal));
-	       // identify which annotations we DON'T want to change the anchor of
+	       log(layerId, ": Unsharing end of prior: ", 
+		   anOriginalLinkedPrior, " and start of ", anOriginal);
+	    // identify which annotations we DON'T want to change the anchor of
 	       // LayerTraversal<Vector<Annotation>> revert = new LayerTraversal<Vector<Annotation>>(
 	       // 	  new Vector<Annotation>(), anOriginal)
 	       // {
@@ -1118,10 +1112,8 @@ public class Merger
 		      && (anEdited.getStart() == anEdited.getParent().getStart()
 			  || anOriginal.getStart() != anOriginal.getParent().getStart()))
 		  {
-		     log(
-			layerId+": Share anchor with next: " 
-			+ logAnnotation(anLastOriginal) + " and " 
-			+ logAnnotation(anOriginal));
+		     log(layerId, ": Share anchor with next: ",
+			 anLastOriginal, " and ", anOriginal);
 
 		     boolean bLastIsAnInstant = anLastOriginal.getInstantaneous(); // TODO or maybe just by offset?
 		     // check we're not creating an instant or backward annotation
@@ -1136,22 +1128,19 @@ public class Merger
 			    <= anOriginal.getStart().getOffset() - smidgin)
 			{
 			   double dNewOffset = anOriginal.getStart().getOffset() - smidgin;
-			   log(
-			      layerId+": Moving start of : " 
-			      + logAnnotation(anLastOriginal) + " (" 
-			      + getConfidence(anLastOriginal.getStart()) + "vs" 
-			      + getConfidence(anOriginal.getStart()) + ") to " 
-			      + dNewOffset + " to avoid non-positive length for " + logAnnotation(anLastOriginal));
+			   log(layerId, ": Moving start of : ", 
+			       anLastOriginal, " (",
+			       getConfidence(anLastOriginal.getStart()), "vs",
+			       getConfidence(anOriginal.getStart()), ") to ",
+			       dNewOffset, " to avoid non-positive length for ", anLastOriginal);
 			   anLastOriginal.getStart().setOffset(dNewOffset);
 			   setConfidence(anLastOriginal.getStart(), Constants.CONFIDENCE_NONE);
 			}
 			else
 			{
 			   double dNewOffset = anOriginal.getStart().getOffset() + smidgin;
-			   log(
-			      layerId + ": Moving start of : " 
-			      + logAnnotation(anOriginal) + " to " 
-			      + dNewOffset + " to avoid non-positive length for " + logAnnotation(anLastOriginal));
+			   log(layerId, ": Moving start of : ", anOriginal, " to ",
+			       dNewOffset, " to avoid non-positive length for ", anLastOriginal);
 			   anOriginal.getStart().setOffset(dNewOffset);
 			   setConfidence(anOriginal.getStart(), Constants.CONFIDENCE_NONE);
 			}
@@ -1171,10 +1160,7 @@ public class Merger
 		     // we don't generally do the following because it screws up annotation
 		     // insertion when the new, low-status anchors are far from the
 		     // old, high-status anchors
-		     log(
-			layerId+ ": Share anchor with previous: " 
-			+ logAnnotation(anLastOriginal) + " and " 
-			+ logAnnotation(anOriginal));
+		     log(layerId, ": Share anchor with previous: ", anLastOriginal, " and ", anOriginal);
 		     // we don't re-link a related parent annotation - we might be inserting a new child
 		     changeStartWithRelatedAnnotations(
 			anOriginal, anLastOriginal.getEnd(), saturatedParentLayerId);
@@ -1189,10 +1175,9 @@ public class Merger
 	 Annotation anOriginal = getCounterpart(anEdited);
 	 if (anOriginal.getOrdinal() != anEdited.getOrdinal())
 	 {
-	    log(layerId+": changing ordinal of: " + logAnnotation(anOriginal) 
-		+ " from " + anOriginal.getOrdinal() + " to " + anEdited.getOrdinal());
+	    log(layerId, ": changing ordinal of: ", anOriginal,
+		" from ", anOriginal.getOrdinal(), " to ", anEdited.getOrdinal());
 	    anOriginal.setOrdinal(anEdited.getOrdinal());
-	    log(layerId+": ordinal now: " + anOriginal.getOrdinal());
 	 }
    
 	 anLastOriginal = anOriginal;
@@ -1306,17 +1291,17 @@ public class Merger
    public Vector<Change> changeStartWithRelatedAnnotations(Annotation annotation, Anchor newStartAnchor, Set<String> layerIdsToExclude)
    {
       Vector<Change> changes = new Vector<Change>();
-      log("changeStartWithRelatedAnnotations " 
-	  + logAnnotation(annotation) + " to " + logAnchor(newStartAnchor) 
-	  + (layerIdsToExclude.size() > 0?" excluding layers " + layerIdsToExclude:""));
-
+      log("changeStartWithRelatedAnnotations ", 
+	  annotation, " to ", newStartAnchor,
+	  (layerIdsToExclude.size() > 0?" excluding layers ":""), layerIdsToExclude);
+      
       Anchor aOriginalStart = annotation.getStart();
       Anchor aOriginalEnd = annotation.getEnd();      
       changes.addAll( // record changes generated by:
 	 annotation.setStart(newStartAnchor));
       if (aOriginalStart == aOriginalEnd)
       {
-	 log(logAnnotation(annotation) + " is instantaneous, changing both anchors.");
+	 log(annotation, " is instantaneous, changing both anchors.");
 	 changes.addAll( // record changes generated by:
 	    annotation.setEnd(newStartAnchor));
       }
@@ -1349,7 +1334,8 @@ public class Merger
 	    }
 	 }
 	 boolean bInstant = anOther.getInstantaneous();
-	 log("Changing start" +(bInstant?" and end":"")+ " of related annotation " + logAnnotation(anOther) + " to " + logAnchor(newStartAnchor));
+	 log("Changing start", (bInstant?" and end":""), " of related annotation ", anOther, 
+	     " to ", newStartAnchor);
 	 changes.addAll( // record changes generated by:
 	    anOther.setStart(newStartAnchor));
 	 if (bInstant)
@@ -1373,18 +1359,18 @@ public class Merger
 	    if (!anPrevious.getStartId().equals(anPrevious.getEndId())
 		&& newStartAnchor.getId().equals(anPrevious.getStartId()))
 	    {
-	       log("Not changing end of related annotation " + logAnnotation(anPrevious) 
-		   + " to avoid creating new instant");
+	       log("Not changing end of related annotation ", anPrevious,
+		   " to avoid creating new instant");
 	       continue;
 	    }
 	    if (!anPrevious.getParentId().equals(annotation.getParentId()))
 	    {
-	       log("Not changing end of related annotation " + logAnnotation(anPrevious) 
-		   + " - different parents");
+	       log("Not changing end of related annotation ", anPrevious,
+		   " - different parents");
 	       continue;
 	    }
-	    log("Changing end of previous linked annotation " + logAnnotation(anPrevious) 
-		+ " to " + logAnchor(newStartAnchor));
+	    log("Changing end of previous linked annotation ", anPrevious,
+		" to ", newStartAnchor);
 	    changes.addAll( // record changes generated by:
 	       changeEndWithRelatedAnnotations(anPrevious, newStartAnchor));
 	 } // next ending annotation
@@ -1425,14 +1411,15 @@ public class Merger
    public Vector<Change> changeEndWithRelatedAnnotations(Annotation annotation, Anchor newEndAnchor, Set<String> layerIdsToExclude)
    {
       Vector<Change> changes = new Vector<Change>();
-      log("changeEndWithRelatedAnnotations " + logAnnotation(annotation) + " to " + logAnchor(newEndAnchor) + (layerIdsToExclude.size() > 0?" excluding layers " + layerIdsToExclude:""));
+      log("changeEndWithRelatedAnnotations ", annotation, " to ", newEndAnchor,
+	  (layerIdsToExclude.size() > 0?" excluding layers ":""), layerIdsToExclude);
       Anchor aOriginalEnd = annotation.getEnd();
       Anchor aOriginalStart = annotation.getStart();
       changes.addAll( // record changes generated by:
 	 annotation.setEnd(newEndAnchor));
       if (aOriginalStart == aOriginalEnd)
       {
-	 log(logAnnotation(annotation) + " is instantaneous, changing both anchors.");
+	 log(annotation, " is instantaneous, changing both anchors.");
 	 changes.addAll( // record changes generated by:
 	    annotation.setStart(newEndAnchor));
       }
@@ -1465,7 +1452,8 @@ public class Merger
 	    }
 	 }
 	 boolean bInstant = anOther.getInstantaneous();
-	 log("Changing end" +(bInstant?" and start":"")+ " of related annotation " + logAnnotation(anOther) + " to " + logAnchor(newEndAnchor));
+	 log("Changing end", (bInstant?" and start":""), " of related annotation ", anOther,
+	     " to ", newEndAnchor);
 	 changes.addAll( // record changes generated by:
 	    anOther.setEnd(newEndAnchor));
 	 if (bInstant)
@@ -1490,11 +1478,10 @@ public class Merger
 	       if (!anNext.getStartId().equals(anNext.getEndId())
 		   && newEndAnchor.getId().equals(anNext.getEndId()))
 	       {
-		  log("Not changing end of related annotation " + logAnnotation(anNext) 
-		      + " to avoid creating new instant");
+		  log("Not changing end of related annotation ", anNext, " to avoid creating new instant");
 		  continue; // if not shared in the other graph, not shared here
 	       }
-	       log("Changing start of next linked annotation " + logAnnotation(anNext) + " to " + logAnchor(newEndAnchor));
+	       log("Changing start of next linked annotation ", anNext, " to ", newEndAnchor);
 	       changes.addAll( // log the following change:
 		  changeStartWithRelatedAnnotations(anNext, newEndAnchor, layerIdsToExclude));
 	    } // next starting annotation
@@ -1507,7 +1494,7 @@ public class Merger
 	       for (Annotation anNext : vRelatedAnnotations)
 	       {
 		  if (layerIdsToExclude.contains(anNext.getLayerId())) continue;
-		  log("Next has been deleted, using " + logAnnotation(anNext) + " to bring starting annotations too");
+		  log("Next has been deleted, using ", anNext, " to bring starting annotations too");
 		  changes.addAll( // log the following change:
 		     changeStartWithRelatedAnnotations(anNext, newEndAnchor, layerIdsToExclude));
 		  break; // one should be sufficient to bring the rest along
@@ -1596,9 +1583,8 @@ public class Merger
 		  if (layer.getSaturated() 
 		      || anLinkedOriginalParallel.getStart().startOf(layer.getParentId()).size() == 0)
 		  {
-		     log(layerId+": Share start anchor of " 
-			 + logAnnotation(anOriginal) + " with parallel " 
-			 + logAnnotation(anLinkedOriginalParallel));
+		     log(layerId, ": Share start anchor of ", anOriginal, 
+			 " with parallel ", anLinkedOriginalParallel);
 		     // ensure that the end anchor for the last annotation is updated
 		     if (anEdited.getInstantaneous())
 		     {
@@ -1640,9 +1626,8 @@ public class Merger
 			if (!layer.getParentId().equals(anEditedParallel.getLayerId())) // parent layer
 			{
 			   bCheckStartAnchorOffset = false;
-			   log(layerId + ": For " + logAnnotation(anOriginal) 
-			       + " assuming that start of " + logAnnotation(anParallel)
-			       + " is correct");
+			   log(layerId, ": For ", anOriginal,
+			       " assuming that start of ", anParallel, " is correct");
 			   // i.e. if the edited graph has disconnection between words and segments
 			   // then the segment alignments trump the word aligments
 			}
@@ -1668,9 +1653,8 @@ public class Merger
 		     }
 		     changes.addAll( // track changes of:
 			changeStartWithRelatedAnnotations(anOriginal, newStart, relatedToParallel));
-		     log(layerId + ": Different start anchor for " + logAnnotation(anOriginal) 
-			 + " unshared from " + logAnnotation(anParallel)
-			 + ": new anchor at " + newStart.getOffset());
+		     log(layerId, ": Different start anchor for ", anOriginal,
+			 " unshared from ", anParallel, ": new anchor at ", newStart.getOffset());
 		     bChanged = true;
 		     bCheckStartAnchorOffset = true;
 		     break;
@@ -1707,8 +1691,8 @@ public class Merger
 		  if (compare(anOriginalPrevious.getEnd(), anEdited.getStart()) == 0)
 		  {
 		     matchingMergedAnchor = anOriginalPrevious.getEnd();
-		     log(layerId + ": Different start anchor for " + logAnnotation(anOriginal) 
-			 + ": linking to shared end of " + logAnnotation(anOriginalPrevious));
+		     log(layerId, ": Different start anchor for ", anOriginal,
+			 ": linking to shared end of ", anOriginalPrevious);
 		     break;
 		  }
 	       } // next possible end anchor annotation
@@ -1736,8 +1720,8 @@ public class Merger
 		     assert anEdited.getStart().getOffset() != null // TODO??
 			: "anEdited.getStart().getOffset() != null - " + anEdited;
 		     matchingMergedAnchor = anOriginalParallel.getStart();
-		     log(layerId + ": Different start anchor for " + logAnnotation(anOriginal) 
-			 + ": linking to shared start of " + logAnnotation(anOriginalParallel));
+		     log(layerId, ": Different start anchor for ", anOriginal,
+			 ": linking to shared start of ", anOriginalParallel);
 		     break;
 		  } // next possible start anchor annotation
 	       } // matchingMergedAnchor == null
@@ -1766,8 +1750,8 @@ public class Merger
 		  	   // if it's already been changed, skip it
 		  	   if (an.getStart() != anOriginal.getStart()) continue;
 		  	}
-		  	log(layerId + ": Different start anchor for " + logAnnotation(anOriginal) 
-			    + ": linking parallel " + logAnnotation(an) + " too");
+		  	log(layerId, ": Different start anchor for ", anOriginal,
+			    ": linking parallel ", an, " too");
 		  	if (an.getInstantaneous()) 
 			{
 			   changes.addAll( // track changes of:
@@ -1812,13 +1796,12 @@ public class Merger
 			      if (originalPrevious2.getEnd() != anOriginal.getStart())
 			      { // found a different but linked anchor via the edited graph structure
 				 newAnchor = originalPrevious2.getEnd();
-				 log(layerId + ": Found end anchor linked via "
-				     + logAnnotation(originalPrevious2));
+				 log(layerId, ": Found end anchor linked via ", originalPrevious2);
 				 break;
 			      }
 			   } // next annotation that's parallel to this parallel annotation
-			   log(layerId + ": Different start anchor for " + logAnnotation(anOriginal) 
-			       + ": new anchor for ending " + logAnnotation(previousAnnotation) + " - " + newAnchor);
+			   log(layerId, ": Different start anchor for ", anOriginal, 
+			       ": new anchor for ending ", previousAnnotation, " - ", newAnchor);
 			   changes.addAll( // track changes of:
 			      previousAnnotation.setEnd(newAnchor));
 			} // they shouldn't be linked
@@ -1845,14 +1828,13 @@ public class Merger
 			      if (originalParallel2.getStart() != anOriginal.getStart())
 			      { // found a different but linked anchor via the edited graph structure
 				 newAnchor = originalParallel2.getStart();
-				 log(layerId + ": Found start anchor linked via " 
-				     + logAnnotation(originalParallel2));
+				 log(layerId, ": Found start anchor linked via ", originalParallel2);
 				 break;
 			      }
 			   } // next annotation that's parallel to this parallel annotation
 			   parallelAnnotation.setStart(newAnchor);
-			   log(layerId + ": Different start anchor for " + logAnnotation(anOriginal) 
-			       + ": new anchor for starting " + logAnnotation(parallelAnnotation));
+			   log(layerId, ": Different start anchor for ", anOriginal,
+			       ": new anchor for starting ", parallelAnnotation);
 			} // they shouldn't be linked
 		     } // there is a corresponding edited parallel annotation
 		  } // next anchor using this as an end anchor
@@ -1862,8 +1844,8 @@ public class Merger
 	       {
 		  anOriginal.getStart().setOffset(delta.getOffset());
 		  setConfidence(anOriginal.getStart(), getConfidence(delta));
-		  log(layerId + ": Different start anchor for " + logAnnotation(anOriginal) 
-		      + ": changing offset to " + delta.getOffset());
+		  log(layerId, ": Different start anchor for ", anOriginal,
+		      ": changing offset to ", delta.getOffset());
 	       } // there is a delta to apply
 	    } // theirs is more trustworthy
 	 } // offsets are different
@@ -1879,8 +1861,7 @@ public class Merger
 		// are they currently two separate anchors?
 		&& anLastOriginal.getEnd() != anOriginal.getStart())
 	    {
-	       log(layerId + ": Share anchors between " + logAnnotation(anLastOriginal) 
-		   + " and " + logAnnotation(anOriginal));
+	       log(layerId, ": Share anchors between ", anLastOriginal, " and ", anOriginal);
 	       // ensure that the end anchor for the last annotation is updated
 	       changes.addAll( // track changes of:
 		  changeEndWithRelatedAnnotations(anLastOriginal, anOriginal.getStart()));
@@ -1890,8 +1871,7 @@ public class Merger
 		     // are they currently sharing anchors?
 		     && anLastOriginal.getEnd() == anOriginal.getStart())
 	    { // not sharing in editedGraph
-	       log(layerId + ": Un-share anchors between " + logAnnotation(anLastOriginal) 
-		   + " and " + logAnnotation(anOriginal));
+	       log(layerId, ": Un-share anchors between ", anLastOriginal, " and ", anOriginal);
 	       // create a new anchor for unrelated annotations that link to this one 
 	       // (this will include anLastOriginal)
 	       Anchor newAnchor = new Anchor(anOriginal.getStart());
@@ -1918,12 +1898,12 @@ public class Merger
 			   if (originalPrevious2.getEnd() != anOriginal.getStart())
 			   { // found a different but linked anchor via the edited graph structure
 			      newAnchor = originalPrevious2.getEnd();
-			      log(layerId + ": Found end anchor linked via " + logAnnotation(originalPrevious2));
+			      log(layerId, ": Found end anchor linked via ", originalPrevious2);
 			      break;
 			   }
 			} // next annotation that's parallel to this parallel annotation
-			log(layerId + ": Different start anchor for " + logAnnotation(anOriginal) 
-			    + ": new anchor for ending " + logAnnotation(previousAnnotation) + " -- " + newAnchor);
+			log(layerId, ": Different start anchor for ", anOriginal,
+			    ": new anchor for ending ", previousAnnotation, " -- ", newAnchor);
 			changes.addAll( // track changes of:
 			   changeEndWithRelatedAnnotations(previousAnnotation, newAnchor));
 		     } // they shouldn't be linked
@@ -1938,7 +1918,7 @@ public class Merger
 	    if (!anOriginal.getInstantaneous())
 	    {
 	       anOriginal.setEnd(anOriginal.getStart());
-	       log(layerId + ": Forcing instantaneity on " + logAnnotation(anOriginal));
+	       log(layerId, ": Forcing instantaneity on ", anOriginal);
 	    }
 	 }
 	 else
@@ -1966,9 +1946,8 @@ public class Merger
 		     if (layer.getSaturated() 
 			 || anLinkedOriginalParallel.getEnd().endOf(layer.getParentId()).size() == 0)
 		     {
-			log(layerId + ": Share end anchor of " 
-			    + logAnnotation(anOriginal) + " with parallel " 
-			    + logAnnotation(anLinkedOriginalParallel));
+			log(layerId, ": Share end anchor of ", anOriginal, 
+			    " with parallel ", anLinkedOriginalParallel);
 			// ensure that the end anchor for the last annotation is updated
 			if (anEdited.getInstantaneous()) anOriginal.setStart(anLinkedOriginalParallel.getEnd());
 			anOriginal.setEnd(anLinkedOriginalParallel.getEnd());
@@ -2001,9 +1980,8 @@ public class Merger
 			   if (!layer.getParentId().equals(anEditedParallel.getLayerId())) // parent layer
 			   {
 			      bCheckEndAnchorOffset = false;
-			      log(layerId + ": For " + logAnnotation(anOriginal) 
-				  + " assuming that end of " + logAnnotation(anParallel)
-				  + " is correct");
+			      log(layerId, ": For ", anOriginal,
+				  " assuming that end of ", anParallel, " is correct");
 			      // i.e. if the edited graph has disconnection between words and segments
 			      // then the segment alignments trump the word aligments
 			   }
@@ -2023,9 +2001,8 @@ public class Merger
 			relatedToParallel.addAll(parallelLayer.getChildren().keySet());
 			relatedToParallel.add(parallelLayer.getParentId());
 			changeEndWithRelatedAnnotations(anOriginal, newAnchor, relatedToParallel);
-			log(layerId + ": Different end anchor for " + logAnnotation(anOriginal) 
-			    + " unshared from " + logAnnotation(anParallel)
-			    + ": new anchor at " + newAnchor.getOffset());
+			log(layerId, ": Different end anchor for ", anOriginal,
+			    " unshared from ", anParallel, ": new anchor at ", newAnchor.getOffset());
 			bChanged = true;
 			bCheckEndAnchorOffset = true;
 			break;
@@ -2066,8 +2043,8 @@ public class Merger
 		     assert anEdited.getEnd().getOffset() != null // TODO??
 			: "anEdited.getEnd().getOffset() != null - " + anEdited;
 		     matchingMergedAnchor = anOriginalParallel.getEnd();
-		     log(layerId + ": Different end anchor for " + logAnnotation(anOriginal) 
-			 + ": linking to shared end of " + logAnnotation(anOriginalParallel));
+		     log(layerId, ": Different end anchor for ", anOriginal,
+			 ": linking to shared end of ", anOriginalParallel);
 		     break;
 		  } // next possible start anchor annotation
 		  if (matchingMergedAnchor != null)
@@ -2081,8 +2058,8 @@ public class Merger
 			if (!layer.getParentId().equals(an.getLayerId())
 			    && otherLayer.getParentId().equals(layerId))
 			{
-			   log(layerId + ": Different end anchor for " + logAnnotation(anOriginal) 
-			       + ": linking parallel " + logAnnotation(an) + " too");
+			   log(layerId, ": Different end anchor for ", anOriginal,
+			       ": linking parallel ", an, " too");
 			   if (an.getInstantaneous())
 			   { // instant
 			      changes.addAll( // track changes of:
@@ -2135,8 +2112,8 @@ public class Merger
 		  {
 		     anOriginal.getEnd().setOffset(delta.getOffset());
 		     setConfidence(anOriginal.getEnd(), getConfidence(delta));
-		     log(layerId + ": Different end anchor for " + logAnnotation(anOriginal) 
-			 + ": changing offset to  " + delta.getOffset());
+		     log(layerId, ": Different end anchor for ", anOriginal,
+			 ": changing offset to  ", delta.getOffset());
 		  }
 		  else // Create
 		  {
@@ -2148,8 +2125,8 @@ public class Merger
 		     Set<String> excludeLayers = new HashSet<String>();
 		     if (layer.getSaturated()) excludeLayers.add(layerId);
 		     changeEndWithRelatedAnnotations(anOriginal, newAnchor, excludeLayers);
-		     log(layerId + ": Different end anchor for " + logAnnotation(anOriginal) 
-			 + ": new anchor at " + delta.getOffset());
+		     log(layerId, ": Different end anchor for ", anOriginal,
+			 ": new anchor at ", delta.getOffset());
 		  }
 	       } // there's a delta
 	    } // offsets are different
@@ -2161,8 +2138,8 @@ public class Merger
 	       // is the start anchor for realignment anyway?
 	       if (getConfidence(anOriginal.getStart()) == Constants.CONFIDENCE_NONE)
 	       {
-		  log(layerId + ": Reversed anchors: " + logAnnotation(anOriginal) 
-		      + ": start is soft, so moving before end");
+		  log(layerId, ": Reversed anchors: ", anOriginal,
+		      ": start is soft, so moving before end");
 		  // reset the offset
 		  double dNewOffset = anOriginal.getEnd().getOffset() - smidgin;
 		  if (anLastOriginal != null)
@@ -2239,7 +2216,7 @@ public class Merger
 		   && peerLayer.getSaturated())
 	       {
 		  partitionIds.add(peerLayer.getId());
-		  log("partition layer: " + peerLayer.getId());
+		  log("partition layer: ", peerLayer.getId());
 	       }
 	    } // next peer layer
 	 } // parentIncludes, so can be partitioned
@@ -2269,7 +2246,7 @@ public class Merger
 	 for (Annotation anParent : editedGraph.list(parentLayerId))
 	 {
 	    Annotation anOriginalParent = getCounterpart(anParent);
-	    log(layerId + ": Parent " + logAnnotation(anOriginalParent));
+	    log(layerId, ": Parent ", anOriginalParent);
 
 	    TreeSet<Annotation> byOrdinalOrOffset = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
 	    HashSet<Annotation> myChildren = new HashSet<Annotation>();
@@ -2346,7 +2323,7 @@ public class Merger
 	       { // edited graph includes child layer, so use its annotations to get to the originals
 		  anOriginalChild = getCounterpart(anChild);
 	       }
-	       log(layerId + ": Child " + logAnnotation(anOriginalChild)); // TODO comment out
+	       //log(layerId, ": Child ", anOriginalChild); // TODO comment out
 
 	       // check for new partition anchor
 	       for (String partitionLayerId : partitionIds)
@@ -2363,8 +2340,7 @@ public class Merger
 		     Anchor possibleBoundary = new Anchor(null, currentPartitionOriginal.getEnd().getOffset(), 
 							  Constants.CONFIDENCE, Integer.MAX_VALUE);
 		     
-		     log("Partition end: " + logAnnotation(currentPartitionOriginal) 
-			 + " " + logAnchor(currentPartitionOriginal.getEnd()));
+		     log("Partition end: ", currentPartitionOriginal, " ", currentPartitionOriginal.getEnd());
 		     currentPartitionEdited = i.next();
 		     currentPartition.put(partitionLayerId, currentPartitionEdited);
 		     if (currentPartitionEdited.includes(anChild))
@@ -2373,7 +2349,8 @@ public class Merger
 		     }
 		     else
 		     {
-			log("Skipping partition as " + logAnnotation(currentPartitionEdited) + " doesn't include " + logAnnotation(anChild) + " in edited graph");
+			log("Skipping partition as ", currentPartitionEdited,
+			    " doesn't include ", anChild, " in edited graph");
 		     }
 		  } // next non-including partition		  
 	       } // next partition layer	    
@@ -2391,8 +2368,11 @@ public class Merger
 		  { // first child
 		     if (childrenStartingHere.size() > 1) 
 			sNewAnchorReason = "first child shares anchor with other child annotation start - "
-			   + logAnnotation(childrenStartingHere.elementAt(0)) 
-			   + " and " + logAnnotation(childrenStartingHere.elementAt(1));
+			   + "[" + childrenStartingHere.elementAt(0).getId() + "]"
+			   + childrenStartingHere.elementAt(0).getLabel()
+			   + " and " 
+			   + "[" + childrenStartingHere.elementAt(1).getId() + "]"
+			   + childrenStartingHere.elementAt(1).getLabel();
 		     else if (childrenEndingHere.size() == 1
 			      && childrenEndingHere.firstElement() != anLastOriginalParentsLastChild
 			      // and not sharing start with parent
@@ -2440,7 +2420,7 @@ public class Merger
 	       {
 		  changes.addAll( // record changes for:
 		     changeStartWithRelatedAnnotations(anOriginalChild, lastChild.getEnd(), bothLayers));
-		  log(layerId + ": Using end of previous child: " + logAnnotation(anOriginalChild) + ": " + sShareLastAnchorReason);
+		  log(layerId, ": Using end of previous child: ", anOriginalChild, ": ", sShareLastAnchorReason);
 	       }
 	       else if (sNewAnchorReason != null)
 	       {
@@ -2451,7 +2431,7 @@ public class Merger
 		     anNewAnchor.getChanges());
 		  changes.addAll( // record changes for:
 		     changeStartWithRelatedAnnotations(anOriginalChild, anNewAnchor, bothLayers));
-		  log(layerId + ": New start anchor for: " + logAnnotation(anOriginalChild) + ": " + sNewAnchorReason);
+		  log(layerId, ": New start anchor for: ", anOriginalChild, ": ", sNewAnchorReason);
 	       }
 	       assert anchors != null : "anchors != null";
 	       assert anOriginalChild != null : "anOriginalChild != null";
@@ -2518,7 +2498,7 @@ public class Merger
 		     anNewAnchor.getChanges());
 		  changes.addAll( // record changes for:
 		     changeEndWithRelatedAnnotations(anOriginalChild, anNewAnchor, bothLayers));
-		  log(layerId + ": New end anchor for: " + logAnnotation(anOriginalChild) + ": " + sNewAnchorReason);
+		  log(layerId, ": New end anchor for: ", anOriginalChild, ": ", sNewAnchorReason);
 	       }
 	       
 	       if (!anchors.contains(anOriginalChild.getEnd()))
@@ -2543,13 +2523,13 @@ public class Merger
 	    while (itAnchors.hasNext())
 	    {
 	       Anchor anchor = itAnchors.next();
-	       log(layerId + ": anchor: " + anchor + " (" + predecessor + ")"); // TODO comment out
+	       //log(layerId, ": anchor: ", anchor, " (", predecessor, ")"); // TODO comment out
 	       if (anchor.getOffset() == null) continue; // ignore anchors with no offset
 	       if (predecessor != null)
 	       {
 		  if (anchor.getOffset() < predecessor.getOffset())
 		  { // out of order
-		     log(layerId + ": Out of order: " + anchor + " (" + predecessor + ")"); // TODO comment out
+		     //log(layerId, ": Out of order: ", anchor, " (", predecessor, ")"); // TODO comment out
 		     // which has the higher status?
 		     if (getConfidence(anchor) <= getConfidence(predecessor)
 			 // but we also don't want to run past the end of the parent
@@ -2561,7 +2541,7 @@ public class Merger
 			if (anchor.getOriginalOffset() >= predecessor.getOffset())
 			{ // old value was ok, so just use that
 			   anchor.rollback(); // TODO track changes?
-			   log(layerId + ": Out of order, reverting change: " + anchor + " (" + predecessor + ")");
+			   log(layerId, ": Out of order, reverting change: ", anchor, " (", predecessor, ")");
 			}
 			else
 			{ 
@@ -2572,8 +2552,7 @@ public class Merger
 			   changes.addAll( // record changes for:
 			      anchor.setOffset(dNewOffset));
 			   setConfidence(anchor, Constants.CONFIDENCE_NONE);
-			   log(layerId + ": Out of order; changing offset: " + logAnchor(anchor) 
-			       + " (" + logAnchor(predecessor) + ")");
+			   log(layerId, ": Out of order; changing offset: ", anchor, " (", predecessor, ")");
 			   // the offset is moving forward, so ending child annotations will be reset
 			   for (Annotation anStartingHere : removeDeleted(anchor.startOf(layerId)))
 			   {
@@ -2587,8 +2566,7 @@ public class Merger
 				 changes.addAll( // record changes for:
 				    anStartingHere.getEnd().setOffset(dNewOffset + smidgin));
 				 setConfidence(anStartingHere.getEnd(), Constants.CONFIDENCE_NONE);
-				 log(layerId + ": Out of order, changing offset of end anchor: " 
-				     + logAnnotation(anStartingHere));
+				 log(layerId, ": Out of order, changing offset of end anchor: ", anStartingHere);
 			      }
 			      changes.addAll( // record changes for:
 				 resetChildAnchorsBefore(anStartingHere, dNewOffset));
@@ -2646,8 +2624,7 @@ public class Merger
 			{
 			   itAnchors.next(); // don't change the first anchor
 			   bChangeCurrentAnchor = true; // change anchor as well as those prior to it
-			   log(layerId + ": Out of order, hit beginning of list: " 
-			       + logAnchor(anchor) + " (" + logAnchor(predecessor) + ")");
+			   log(layerId, ": Out of order, hit beginning of list: ", anchor, " (", predecessor, ")");
 			}
 			// now itAnchors.next() is the first prior anchor to change
 			// and precedessor = the anchor before that
@@ -2658,13 +2635,12 @@ public class Merger
 			if (dDuration <= 0.0)
 			{
 			   dDuration = iChangeCount * smidgin;
-			   log(layerId + ": Out of order, nudging " 
-			       + iChangeCount + " forward from: " + dStartOffset);
+			   log(layerId, ": Out of order, nudging ", iChangeCount, " forward from: ", dStartOffset);
 			}
 			else
 			{
-			   log(layerId + ": Out of order, resetting " + iChangeCount 
-			       + " anchors between: " + dStartOffset + " and " + dEndOffset);
+			   log(layerId, ": Out of order, resetting ", iChangeCount,
+			       " anchors between: ", dStartOffset, " and ", dEndOffset);
 			}
 			
 			// move forward through the iterator until we hit anchor
@@ -2681,9 +2657,8 @@ public class Merger
 			      {
 				 anchorToChange.rollback(); // TODO track changes?
 			      }
-			      log(layerId + ": Out of order, reverting previous anchor ("
-				  +logAnchor(anchorToChange)+"): " + logAnchor(anchor) 
-				  + " (" + logAnchor(predecessor) + ")");
+			      log(layerId, ": Out of order, reverting previous anchor (",
+				  anchorToChange, "): ", anchor, " (", predecessor, ")");
 			   }
 			   else
 			   {
@@ -2729,9 +2704,8 @@ public class Merger
 				    // we defer this until after the next loop, in case the end
 				    // anchor needs changing first
 				 } // dOriginalOffset < dNewOffset
-				 log(layerId + ": Out of order, updated previous anchor ("
-				     +logAnchor(anchorToChange)+"): " + logAnchor(anchor)
-				     + " (" + logAnchor(predecessor) + ")");
+				 log(layerId, ": Out of order, updated previous anchor (",
+				     anchorToChange, "): ", anchor, " (", predecessor, ")");
 			      }
 			   }
 			   if (anchorToChange == anchor) break; // back where we were, so break out
@@ -2774,8 +2748,8 @@ public class Merger
 	       {
 		  changes.addAll( // record changes for:
 		     changeStartWithRelatedAnnotations(anOriginalParent, anOriginalChild.getStart(), layerId));
-		  log(layerId + ": Share start of  first child " + logAnnotation(anOriginalChild) 
-		      + " with parent "+logAnnotation(anOriginalParent));
+		  log(layerId, ": Share start of  first child ", anOriginalChild, 
+		      " with parent ", anOriginalParent);
 	       }
 	       anOriginalChild = children.last();
 	       if (editGraphHasChildLayer)
@@ -2788,8 +2762,8 @@ public class Merger
 	       {
 		  changes.addAll( // record changes for:
 		     changeEndWithRelatedAnnotations(anOriginalParent, anOriginalChild.getEnd(), layerId));
-		  log(layerId + ": Share end of last child " + logAnnotation(anOriginalChild) 
-		      + " with parent "+logAnnotation(anOriginalParent));
+		  log(layerId, ": Share end of last child ", anOriginalChild, 
+		      " with parent ", anOriginalParent);
 	       }
 	    }
 	    anLastOriginalParentsLastChild = lastChild;
@@ -2831,7 +2805,7 @@ public class Merger
     */
    protected Vector<Change> resetChildAnchorsBefore(Annotation parent, double threshold)
    {
-      log("resetChildAnchorsBefore "+logAnnotation(parent)+" "+threshold);
+      log("resetChildAnchorsBefore ", parent, " ", threshold);
       Vector<Change> changes = new Vector<Change>();
       for (String childLayerId : parent.getAnnotations().keySet())
       {
@@ -2853,7 +2827,7 @@ public class Merger
 	       if (!child.getStartId().equals(parent.getStartId()))
 	       {
 		  // first child - start anchor is shared with parent
-		  log("set first child "+logAnnotation(child)+" to share start with parent");
+		  log("set first child ", child, " to share start with parent");
 		  changes.addAll( // record changes for:
 		     child.setStartId(parent.getStartId()));
 	       }
@@ -2872,14 +2846,14 @@ public class Merger
 		      // and it's over the threshold
 		      && child.getStart().getOffset() > threshold)
 		  { // set the lastChild.end to be the same as child.start
-		     log("sharing end of last child "+logAnnotation(lastChild)+" with this child "+logAnnotation(child));
+		     log("sharing end of last child ", lastChild, " with this child ", child);
 		     changes.addAll( // record changes for for setting the end anchor:
 			lastChild.setEndId(child.getStartId()));
 		  }
 		  else
 		  { 
 		     // null lastChild's end
-		     log("new end for last child "+logAnnotation(child));
+		     log("new end for last child ", child);
 		     Anchor newAnchor = new Anchor();
 		     newAnchor.put(Constants.CONFIDENCE, Constants.CONFIDENCE_NONE);
 		     parent.getGraph().addAnchor(newAnchor);
@@ -2899,7 +2873,7 @@ public class Merger
 	       // now deal with start of this child, which must be the same as the last child
 	       if (!child.getStartId().equals(lastChild.getEndId()))
 	       {
-		  log("set start of child "+logAnnotation(child)+" to be end of last child " + logAnnotation(lastChild));
+		  log("set start of child ", child, " to be end of last child ", lastChild);
 		  changes.addAll( // record changes for setting the start anchor:
 		     child.setStartId(lastChild.getEndId()));
 	       }
@@ -2913,7 +2887,7 @@ public class Merger
 	    // the last one must share the end anchor with its parent
 	    if (!lastChild.getEndId().equals(parent.getEndId()))
 	    {
-	       log("set last child "+logAnnotation(lastChild)+" to share end with parent");
+	       log("set last child ", lastChild, " to share end with parent");
 	       changes.addAll( // record changes for setting the start anchor:
 		  lastChild.setStartId(parent.getEndId()));
 	    }
@@ -2940,7 +2914,7 @@ public class Merger
     */
    protected Vector<Change> resetChildAnchorsAfter(Annotation parent, double threshold)
    {
-      log("resetChildAnchorsAfter "+logAnnotation(parent)+" "+threshold);
+      log("resetChildAnchorsAfter ", parent, " ", threshold);
       Vector<Change> changes = new Vector<Change>();
       for (String childLayerId : parent.getAnnotations().keySet())
       {
@@ -2961,7 +2935,7 @@ public class Merger
 	    {
 	       if (!child.getStartId().equals(parent.getStartId()))
 	       {	       
-		  log("set first child "+logAnnotation(child)+" to share start with parent");
+		  log("set first child ", child, " to share start with parent");
 		  // first child - start anchor is shared with parent
 		  changes.addAll( // record changes for:
 		     child.setStartId(parent.getStartId()));
@@ -2981,14 +2955,14 @@ public class Merger
 		      // and it's over the threshold
 		      && child.getStart().getOffset() < threshold)
 		  { // set the lastChild.end to be the same as child.start
-		     log("sharing end of last child "+logAnnotation(lastChild)+" with this child "+logAnnotation(child));
+		     log("sharing end of last child ", lastChild, " with this child ", child);
 		     changes.addAll( // record changes for for setting the end anchor:
 			lastChild.setEndId(child.getStartId()));
 		  }
 		  else
 		  { 
 		     // null lastChild's end
-		     log("new end for last child "+logAnnotation(child));
+		     log("new end for last child ", child);
 		     Anchor newAnchor = new Anchor();
 		     newAnchor.put(Constants.CONFIDENCE, Constants.CONFIDENCE_NONE);
 		     parent.getGraph().addAnchor(newAnchor);
@@ -3008,7 +2982,7 @@ public class Merger
 	       // now deal with start of this child, which must be the same as the last child
 	       if (!child.getStartId().equals(lastChild.getEndId()))
 	       {
-		  log("set start of child "+logAnnotation(child)+" to be end of last child " + logAnnotation(lastChild));
+		  log("set start of child ", child, " to be end of last child ", lastChild);
 		  changes.addAll( // record changes for setting the start anchor:
 		     child.setStartId(lastChild.getEndId()));
 	       }
@@ -3022,7 +2996,7 @@ public class Merger
 	    // the last one must share the end anchor with its parent
 	    if (!lastChild.getEndId().equals(parent.getEndId()))
 	    {
-	       log("set last child "+logAnnotation(lastChild)+" to share end with parent");
+	       log("set last child ", lastChild, " to share end with parent");
 	       changes.addAll( // record changes for setting the start anchor:
 		  lastChild.setStartId(parent.getEndId()));
 	    }
@@ -3122,36 +3096,50 @@ public class Merger
    } // end of setCounterparts()
 
    /**
-    * A representation of the given annotation for logging purposes.
-    * @param annotation The annotation to log.
-    * @return A representation of the given annotation for loggin purposes.
-    */
-   protected String logAnnotation(Annotation annotation)
-   {
-      if (annotation == null) return "[null]";
-      return "[" + annotation.getId() + "]" + annotation.get("ordinal") + "#" + annotation.getLabel() + "("+annotation.getStart()+"-"+annotation.getEnd()+")";
-   } // end of logAnnotation()
-
-   /**
-    * A representation of the given anchor for logging purposes.
-    * @param anchor The anchor to log.
-    * @return A representation of the given anchor for logging purposes.
-    */
-   protected String logAnchor(Anchor anchor)
-   {
-      if (anchor == null) return "[null]";
-      return "[" + anchor.getId() + "]" + anchor.getOffset();
-   } // end of logAnnotation()
-   
-   /**
     * Logs a debugging message.
-    * @param message The debug message.
+    * @param messages The objects making up the log message.
     */
-   protected void log(String message) // TODO turn this into a variable list of Object parameters which get concatenated together into a string only if debug == true, to save all the string concatenation above in non-debug environments
+   protected void log(Object ... messages)
    {
       if (debug)
-      {
-	 log.add(message);
+      { // we only interpret arguments to log() if we're actually debugging...
+	 StringBuilder s = new StringBuilder();
+	 for (Object m : messages)
+	 {
+	    if (m instanceof Annotation)
+	    {
+	       if (m == null)
+	       {
+		  s.append("[null]");
+	       }
+	       else
+	       {
+		  Annotation annotation = (Annotation)m;
+		  s.append("[").append(annotation.getId()).append("]")
+		     .append(annotation.get("ordinal")).append("#")
+		     .append(annotation.getLabel())
+		     .append("(").append(annotation.getStart())
+		     .append("-").append(annotation.getEnd()).append(")");
+	       }
+	    }
+	    else if (m instanceof Anchor)
+	    {
+	       if (m == null)
+	       {
+		  s.append("[null]");
+	       }
+	       else
+	       {
+		  Anchor anchor = (Anchor)m;
+		  s.append("[").append(anchor.getId()).append("]").append(anchor.getOffset());
+	       }
+	    }
+	    else
+	    {
+	       s.append(m.toString());
+	    }
+	 }	 
+	 log.add(s.toString());
 	 // System.out.println(message);
       }
    } // end of log()
