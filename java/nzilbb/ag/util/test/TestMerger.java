@@ -23,6 +23,8 @@
 package nzilbb.ag.util.test;
 	      
 import org.junit.*;
+import org.junit.runners.MethodSorters;
+import org.junit.FixMethodOrder;
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -51,6 +53,7 @@ import nzilbb.ag.*;
 import nzilbb.editpath.MinimumEditPath;
 import nzilbb.editpath.EditStep;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestMerger
 {      
    @Test public void identityMerge() 
