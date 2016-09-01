@@ -198,6 +198,23 @@ public class TestMerger
    }
 
    /**
+    * Test edits that simulate re-upload
+    * <ol>
+    *  <li>Change turn alignments, with previously aligned words, to create mid-word turn boundary</li>
+    *  <li>Changing parents - move word to neighbouring turn with different speaker</li>
+    *  <li>Peers - parent changes on annotations are reflected in aligned and unaligned peers</li>
+    *  <li>Changing parents - move unaligned word to another turn, with previously aligned words</li>
+    *  <li>Changing parents - move unaligned word to a simultaneous turn</li>
+    *  <li>Changing parents - merge two turns (delete intervening other-speaker turn)</li>
+    *  <li>Changing parents - split a turn in two (insert intervening other-speaker turn)</li>
+    * </ol>
+    */
+   @Test public void graphTests()
+   {
+      tests("graph", null);
+   }
+
+   /**
     * Standardised method for running graph fragment tests based on files in the test directory.
     * @param sDir Subdirectory name
     * @param logTestPrefix null, or a filename substring like "001" to identify a test for which to switch on debug logging.
@@ -219,7 +236,7 @@ public class TestMerger
       // run the tests
       for (String fragmentName : fragments)
       {
-	 System.out.println("Test: " + fragmentName);
+	 System.out.println("Test "+sDir+": " + fragmentName);
 	 Schema schema = defaultSchema();
 	 File fOriginal = new File(subdir, fragmentName + ".json");
 	 try

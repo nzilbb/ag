@@ -1,0 +1,254 @@
+{
+  "id":"001-ReuploadNoChange",
+  "schema":{
+    "participantLayerId":"who",
+    "turnLayerId":"turns",
+    "utteranceLayerId":"utterances",
+    "wordLayerId":"transcript",
+
+    "graph":{"description":"The graph as a whole",
+      "children":{
+        "who":{"description":"participants", "alignment":0,
+          "peers":true, "peersOverlap":true, "parentIncludes":true, "saturated":true,
+          "children":{
+            "turns":{"description":"turns", "alignment":2,
+              "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
+              "children":{
+                "language":{"description":"Language", "alignment":2,
+                  "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false},
+                "transcript":{"description":"transcript", "alignment":2,
+                  "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
+                  "children":{
+                    "lexical":{"description":"lexical", "alignment":0,
+                      "peers":false, "peersOverlap":false, "parentIncludes":true, "saturated":true},
+                    "pronounce":{"description":"pronounce", "alignment":0,
+                      "peers":false, "peersOverlap":false, "parentIncludes":true, "saturated":true},
+                    "segments":{"description":"segments", "alignment":2,
+                      "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true}
+                  }},
+                "utterances":{"description":"utterances", "alignment":2,
+                  "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true}
+              }}
+          }}
+      }}
+  },
+  "anchors":{
+    "n_1010":	{"offset":1.0,	"confidence":100},
+    "n_1011":	{"offset":1.11,	"confidence":50},
+    "n_1012":	{"offset":1.12,	"confidence":50},
+    "n_1013":	{"offset":1.13,	"confidence":50},
+    "n_1020":	{"offset":1.88,	"confidence":50},
+    "n_1029":	{"offset":2.04,	"confidence":50},
+    "n_1030":	{"offset":2.44,	"confidence":50},
+    "n_1031":	{"offset":2.51,	"confidence":50},
+    "n_1032":	{"offset":2.52,	"confidence":50},
+    "n_1033":	{"offset":2.53,	"confidence":50},
+    "n_1039":	{"offset":2.99,	"confidence":50},
+    "n_1040":	{"offset":3.0,	"confidence":100},
+    "n_1041":	{"offset":3.11,	"confidence":50},
+    "n_1042":	{"offset":3.21,	"confidence":50},
+    "n_1043":	{"offset":3.31,	"confidence":50},
+    "n_1049":	{"offset":3.78,	"confidence":50},
+    "n_1050":	{"offset":3.88,	"confidence":50},
+    "n_1060":	{"offset":4.44,	"confidence":50},
+    "n_1061":	{"offset":4.51,	"confidence":50},
+    "n_1062":	{"offset":4.52,	"confidence":50},
+    "n_1063":	{"offset":4.53,	"confidence":50},
+    "n_1069":	{"offset":4.99,	"confidence":50},
+    "n_1070":	{"offset":5.0,	"confidence":100},
+    "n_1071":	{"offset":5.11,	"confidence":50},
+    "n_1072":	{"offset":5.2,	"confidence":50},
+    "n_1073":	{"offset":5.5,	"confidence":50},
+    "n_1079":	{"offset":5.87,	"confidence":50},
+    "n_1080":	{"offset":5.88,	"confidence":50},
+    "n_1089":	{"offset":6.34,	"confidence":50},
+    "n_1090":	{"offset":6.44,	"confidence":50},
+    "n_1091":	{"offset":6.51,	"confidence":50},
+    "n_1092":	{"offset":6.52,	"confidence":50},
+    "n_1093":	{"offset":6.53,	"confidence":50},
+    "n_1099":	{"offset":6.99,	"confidence":50},
+    "n_1100":	{"offset":7.0,	"confidence":100},
+    "n_1101":	{"offset":7.0,	"confidence":10},
+    "n_1120":	{"offset":8.0,	"confidence":10},
+    "n_1130":	{"offset":9.0,	"confidence":10},
+    "n_1149":	{"offset":10.0,	"confidence":10},
+    "n_1150":	{"offset":10.0,	"confidence":100},
+    "n_1151":	{"offset":10.0,	"confidence":10},
+    "n_1160":	{"offset":12.5,	"confidence":10},
+    "n_1170":	{"offset":15.0,	"confidence":10},
+    "n_1180":	{"offset":17.5,	"confidence":10},
+    "n_1199":	{"offset":20.0,	"confidence":10},
+    "n_1200":	{"offset":20.0,	"confidence":100},
+    "n_1211":	{"offset":21.11,	"confidence":50},
+    "n_1212":	{"offset":21.12,	"confidence":50},
+    "n_1213":	{"offset":21.13,	"confidence":50},
+    "n_1220":	{"offset":21.88,	"confidence":50},
+    "n_1229":	{"offset":22.04,	"confidence":50},
+    "n_1230":	{"offset":22.44,	"confidence":50},
+    "n_1231":	{"offset":22.51,	"confidence":50},
+    "n_1232":	{"offset":22.52,	"confidence":50},
+    "n_1233":	{"offset":22.53,	"confidence":50},
+    "n_1239":	{"offset":22.99,	"confidence":50},
+    "n_1300":	{"offset":30.0,	"confidence":100},
+    "n_1301":	{"offset":30.0,	"confidence":100},
+    "n_1302":	{"offset":30.0,	"confidence":10},
+    "n_1303":	{"offset":30.0,	"confidence":10},
+    "n_1320":	{"offset":32.0,	"confidence":10},
+    "n_1325":	{"offset":32.5,	"confidence":10},
+    "n_1340":	{"offset":34.0,	"confidence":10},
+    "n_1350":	{"offset":35.0,	"confidence":10},
+    "n_1360":	{"offset":36.0,	"confidence":10},
+    "n_1375":	{"offset":37.5,	"confidence":10},
+    "n_1380":	{"offset":38.0,	"confidence":10},
+    "n_1398":	{"offset":40.0,	"confidence":10},
+    "n_1399":	{"offset":40.0,	"confidence":10},
+    "n_1401":	{"offset":40.0,	"confidence":100},
+    "n_1400":	{"offset":40.0,	"confidence":100},
+    "n_1402":	{"offset":40.0,	"confidence":10},
+    "n_1425":	{"offset":42.5,	"confidence":10},
+    "n_1450":	{"offset":45.0,	"confidence":10},
+    "n_1475":	{"offset":47.5,	"confidence":10},
+    "n_1499":	{"offset":50.0,	"confidence":10},
+    "n_1500":	{"offset":50.0,	"confidence":100}
+  },
+  "who":[
+    {"id":"Maxwell Smart",	"label":"Maxwell Smart",	"startId":"n_1010",	"endId":"n_1500",
+      "turns":[
+        {"id":"em_11_1",	"label":"Maxwell Smart",	"startId":"n_1010",	"endId":"n_1100",	"confidence":100,
+          "language":[
+            {"id":"em_20_1",	"label":"es",	"startId":"n_1030",	"endId":"n_1060",	"confidence":100}],
+          "transcript":[
+            {"id":"ew_0_1101",	"label":"86-1-1",	"startId":"n_1011",	"endId":"n_1020",	"confidence":100,	"comment":"86 - JOINED TO NEXT",
+              "lexical":[
+                {"id":"ew_22_1101",	"label":"l-1-1",	"startId":"n_1011",	"endId":"n_1020",	"confidence":100}],
+              "pronounce":[
+                {"id":"ew_23_1101",	"label":"pos-1-1",	"startId":"n_1011",	"endId":"n_1020",	"confidence":50}],
+              "segments":[
+                {"id":"es_1_11011",	"label":"86-1-1-1",	"startId":"n_1011",	"endId":"n_1012",	"confidence":100},
+                {"id":"es_1_11012",	"label":"86-1-1-2",	"startId":"n_1012",	"endId":"n_1013",	"confidence":100},
+                {"id":"es_1_11013",	"label":"86-1-1-3",	"startId":"n_1013",	"endId":"n_1020",	"confidence":100}]},
+            {"id":"ew_0_1102",	"label":"86-1-2",	"startId":"n_1020",	"endId":"n_1029",	"confidence":100,	"comment":"SEPARATED FROM NEXT",
+              "lexical":[
+                {"id":"ew_22_1102",	"label":"l-1-2",	"startId":"n_1020",	"endId":"n_1029",	"confidence":100}],
+              "pronounce":[
+                {"id":"ew_23_1102",	"label":"pos-1-2",	"startId":"n_1020",	"endId":"n_1029",	"confidence":50}],
+              "segments":[
+                {"id":"es_1_11021",	"label":"86-1-2-1",	"startId":"n_1020",	"endId":"n_1029",	"confidence":100}]},
+            {"id":"ew_0_1103",	"label":"86-1-3",	"startId":"n_1030",	"endId":"n_1039",	"confidence":100,
+              "lexical":[
+                {"id":"ew_22_1103",	"label":"l-1-3",	"startId":"n_1030",	"endId":"n_1039",	"confidence":100}],
+              "pronounce":[
+                {"id":"ew_23_1103",	"label":"pos-1-3",	"startId":"n_1030",	"endId":"n_1039",	"confidence":50}],
+              "segments":[
+                {"id":"es_1_11031",	"label":"86-1-3-1",	"startId":"n_1030",	"endId":"n_1031",	"confidence":50},
+                {"id":"es_1_11032",	"label":"86-1-3-2",	"startId":"n_1031",	"endId":"n_1032",	"confidence":50},
+                {"id":"es_1_11033",	"label":"86-1-3-3",	"startId":"n_1032",	"endId":"n_1033",	"confidence":50},
+                {"id":"es_1_11034",	"label":"86-1-3-4",	"startId":"n_1033",	"endId":"n_1039",	"confidence":50}]},
+            {"id":"ew_0_1204",	"label":"86-2-1",	"startId":"n_1041",	"endId":"n_1049",	"confidence":100,
+              "lexical":[
+                {"id":"ew_22_1204",	"label":"l-2-1",	"startId":"n_1041",	"endId":"n_1049",	"confidence":100}],
+              "pronounce":[
+                {"id":"ew_23_1204",	"label":"pos-2-1",	"startId":"n_1041",	"endId":"n_1049",	"confidence":50}],
+              "segments":[
+                {"id":"es_1_12041",	"label":"86-2-1-1",	"startId":"n_1041",	"endId":"n_1042",	"confidence":100},
+                {"id":"es_1_12042",	"label":"86-2-1-2",	"startId":"n_1042",	"endId":"n_1043",	"confidence":100},
+                {"id":"es_1_12043",	"label":"86-2-1-3",	"startId":"n_1043",	"endId":"n_1049",	"confidence":100}]},
+            {"id":"ew_0_1205",	"label":"86-2-2",	"startId":"n_1050",	"endId":"n_1060",	"confidence":100,
+              "lexical":[
+                {"id":"ew_22_1205",	"label":"l-2-2",	"startId":"n_1050",	"endId":"n_1060",	"confidence":100}],
+              "pronounce":[
+                {"id":"ew_23_1205",	"label":"pos-2-2",	"startId":"n_1050",	"endId":"n_1060",	"confidence":50}],
+              "segments":[
+                {"id":"es_1_12051",	"label":"86-2-2-1",	"startId":"n_1050",	"endId":"n_1060",	"confidence":100}]},
+            {"id":"ew_0_1206",	"label":"86-2-3",	"startId":"n_1060",	"endId":"n_1069",	"confidence":100,
+              "lexical":[
+                {"id":"ew_22_1206",	"label":"l-2-3",	"startId":"n_1060",	"endId":"n_1069",	"confidence":100}],
+              "pronounce":[
+                {"id":"ew_23_1206",	"label":"pos-2-3",	"startId":"n_1060",	"endId":"n_1069",	"confidence":50}],
+              "segments":[
+                {"id":"es_1_12061",	"label":"86-2-3-1",	"startId":"n_1060",	"endId":"n_1061",	"confidence":50},
+                {"id":"es_1_12062",	"label":"86-2-3-2",	"startId":"n_1061",	"endId":"n_1062",	"confidence":50},
+                {"id":"es_1_12063",	"label":"86-2-3-3",	"startId":"n_1062",	"endId":"n_1063",	"confidence":50},
+                {"id":"es_1_12064",	"label":"86-2-3-4",	"startId":"n_1063",	"endId":"n_1069",	"confidence":50}]},
+            {"id":"ew_0_1307",	"label":"86-3-1",	"startId":"n_1071",	"endId":"n_1079",	"confidence":100,
+              "lexical":[
+                {"id":"ew_22_1307",	"label":"l-3-1",	"startId":"n_1071",	"endId":"n_1079",	"confidence":100}],
+              "pronounce":[
+                {"id":"ew_23_1307",	"label":"pos-3-1",	"startId":"n_1071",	"endId":"n_1079",	"confidence":50}],
+              "segments":[
+                {"id":"es_1_13071",	"label":"86-3-1-1",	"startId":"n_1071",	"endId":"n_1072",	"confidence":100},
+                {"id":"es_1_13072",	"label":"86-3-1-2",	"startId":"n_1072",	"endId":"n_1073",	"confidence":100},
+                {"id":"es_1_13073",	"label":"86-3-1-3",	"startId":"n_1073",	"endId":"n_1079",	"confidence":100}]},
+            {"id":"ew_0_1308",	"label":"86-3-2",	"startId":"n_1080",	"endId":"n_1089",	"confidence":100,
+              "lexical":[
+                {"id":"ew_22_1308",	"label":"l-3-2",	"startId":"n_1080",	"endId":"n_1089",	"confidence":100}],
+              "pronounce":[
+                {"id":"ew_23_1308",	"label":"pos-3-2",	"startId":"n_1080",	"endId":"n_1089",	"confidence":50}],
+              "segments":[
+                {"id":"es_1_13081",	"label":"86-3-2-1",	"startId":"n_1080",	"endId":"n_1089",	"confidence":100}]},
+            {"id":"ew_0_1309",	"label":"86-3-3",	"startId":"n_1090",	"endId":"n_1099",	"confidence":100,
+              "lexical":[
+                {"id":"ew_22_1309",	"label":"l-3-3",	"startId":"n_1090",	"endId":"n_1099",	"confidence":100}],
+              "pronounce":[
+                {"id":"ew_23_1309",	"label":"pos-3-3",	"startId":"n_1090",	"endId":"n_1099",	"confidence":50}],
+              "segments":[
+                {"id":"es_1_13091",	"label":"86-3-3-1",	"startId":"n_1090",	"endId":"n_1091",	"confidence":50},
+                {"id":"es_1_13092",	"label":"86-3-3-2",	"startId":"n_1091",	"endId":"n_1092",	"confidence":50},
+                {"id":"es_1_13093",	"label":"86-3-3-3",	"startId":"n_1092",	"endId":"n_1093",	"confidence":50},
+                {"id":"es_1_13094",	"label":"86-3-3-4",	"startId":"n_1093",	"endId":"n_1099",	"confidence":50}]}],
+          "utterances":[
+            {"id":"em_12_11",	"label":"Maxwell Smart",	"startId":"n_1010",	"endId":"n_1040",	"confidence":100},
+            {"id":"em_12_12",	"label":"Maxwell Smart",	"startId":"n_1040",	"endId":"n_1070",	"confidence":100},
+            {"id":"em_12_13",	"label":"Maxwell Smart",	"startId":"n_1070",	"endId":"n_1100",	"confidence":100}]},
+        {"id":"em_11_3",	"label":"Maxwell Smart",	"startId":"n_1200",	"endId":"n_1400",	"confidence":100,
+          "transcript":[
+            {"id":"ew_0_3101",	"label":"86-1-1",	"startId":"n_1211",	"endId":"n_1220",	"confidence":100,	"comment":"86 - ",
+              "segments":[
+                {"id":"es_1_31011",	"label":"86-1-1-1",	"startId":"n_1211",	"endId":"n_1212",	"confidence":100},
+                {"id":"es_1_31012",	"label":"86-1-1-2",	"startId":"n_1212",	"endId":"n_1213",	"confidence":100},
+                {"id":"es_1_31013",	"label":"86-1-1-3",	"startId":"n_1213",	"endId":"n_1220",	"confidence":100}]},
+            {"id":"ew_0_3102",	"label":"86-1-2",	"startId":"n_1220",	"endId":"n_1229",	"confidence":100,
+              "segments":[
+                {"id":"es_1_31021",	"label":"86-1-2-1",	"startId":"n_1220",	"endId":"n_1229",	"confidence":100}]},
+            {"id":"ew_0_3103",	"label":"86-1-3",	"startId":"n_1230",	"endId":"n_1239",	"confidence":100,
+              "segments":[
+                {"id":"es_1_31031",	"label":"86-1-3-1",	"startId":"n_1230",	"endId":"n_1231",	"confidence":50},
+                {"id":"es_1_31032",	"label":"86-1-3-2",	"startId":"n_1231",	"endId":"n_1232",	"confidence":50},
+                {"id":"es_1_31033",	"label":"86-1-3-3",	"startId":"n_1232",	"endId":"n_1233",	"confidence":50},
+                {"id":"es_1_31034",	"label":"86-1-3-4",	"startId":"n_1233",	"endId":"n_1239",	"confidence":50}]},
+            {"id":"ew_0_3204",	"label":"86-2-1",	"startId":"n_1302",	"endId":"n_1325",	"confidence":100,	"comment":"86 - SIMULTANEOUS SPEECH"},
+            {"id":"ew_0_3205",	"label":"86-2-2",	"startId":"n_1325",	"endId":"n_1350",	"confidence":100,	"comment":"86 - SIMULTANEOUS SPEECH"},
+            {"id":"ew_0_3206",	"label":"86-2-3",	"startId":"n_1350",	"endId":"n_1375",	"confidence":100,	"comment":"86 - SIMULTANEOUS SPEECH"},
+            {"id":"ew_0_3207",	"label":"86-2-4",	"startId":"n_1375",	"endId":"n_1399",	"confidence":100,	"comment":"86 - SIMULTANEOUS SPEECH"}],
+          "utterances":[
+            {"id":"em_12_31",	"label":"Maxwell Smart",	"startId":"n_1200",	"endId":"n_1300",	"confidence":100},
+            {"id":"em_12_32",	"label":"Maxwell Smart",	"startId":"n_1300",	"endId":"n_1400",	"confidence":100}]}]},
+    {"id":"Ninety Nine",	"label":"Ninety Nine",	"startId":"n_1010",	"endId":"n_1500",
+      "turns":[
+        {"id":"em_11_2",	"label":"Ninety Nine",	"startId":"n_1100",	"endId":"n_1200",	"confidence":100,
+          "transcript":[
+            {"id":"ew_0_2101",	"label":"99-1-1",	"startId":"n_1101",	"endId":"n_1120",	"confidence":100,	"comment":"99 - ALL JOINED, DEFAULT ALIGNMENTS, NO SEGMENTS..."},
+            {"id":"ew_0_2102",	"label":"99-1-2",	"startId":"n_1120",	"endId":"n_1130",	"confidence":100},
+            {"id":"ew_0_2103",	"label":"99-1-3",	"startId":"n_1130",	"endId":"n_1149",	"confidence":100},
+            {"id":"ew_0_2204",	"label":"99-2-1",	"startId":"n_1151",	"endId":"n_1160",	"confidence":100},
+            {"id":"ew_0_2205",	"label":"99-2-2",	"startId":"n_1160",	"endId":"n_1170",	"confidence":100},
+            {"id":"ew_0_2206",	"label":"99-2-3",	"startId":"n_1170",	"endId":"n_1180",	"confidence":100},
+            {"id":"ew_0_2207",	"label":"99-2-4",	"startId":"n_1180",	"endId":"n_1199",	"confidence":100}],
+          "utterances":[
+            {"id":"em_12_21",	"label":"Ninety Nine",	"startId":"n_1100",	"endId":"n_1150",	"confidence":100},
+            {"id":"em_12_22",	"label":"Ninety Nine",	"startId":"n_1150",	"endId":"n_1200",	"confidence":100}]},
+        {"id":"em_11_4",	"label":"Ninety Nine",	"startId":"n_1301",	"endId":"n_1500",	"confidence":100,
+          "transcript":[
+            {"id":"ew_0_4101",	"label":"99-1-1",	"startId":"n_1303",	"endId":"n_1320",	"confidence":100,	"comment":"99 - SIMULTANEOUS SPEECH"},
+            {"id":"ew_0_4102",	"label":"99-1-2",	"startId":"n_1320",	"endId":"n_1340",	"confidence":100,	"comment":"99 - SIMULTANEOUS SPEECH"},
+            {"id":"ew_0_4103",	"label":"99-1-3",	"startId":"n_1340",	"endId":"n_1360",	"confidence":100,	"comment":"99 - SIMULTANEOUS SPEECH"},
+            {"id":"ew_0_4104",	"label":"99-1-4",	"startId":"n_1360",	"endId":"n_1380",	"confidence":100,	"comment":"99 - SIMULTANEOUS SPEECH"},
+            {"id":"ew_0_4105",	"label":"99-1-5",	"startId":"n_1380",	"endId":"n_1398",	"confidence":100,	"comment":"99 - SIMULTANEOUS SPEECH"},
+            {"id":"ew_0_4206",	"label":"99-1-6",	"startId":"n_1402",	"endId":"n_1425",	"confidence":100,	"comment":"99 - ALL JOINED, DEFAULT ALIGNMENTS, NO SEGMENTS..."},
+            {"id":"ew_0_4207",	"label":"99-1-7",	"startId":"n_1425",	"endId":"n_1450",	"confidence":100},
+            {"id":"ew_0_4208",	"label":"99-1-8",	"startId":"n_1450",	"endId":"n_1475",	"confidence":100},
+            {"id":"ew_0_4209",	"label":"99-1-9",	"startId":"n_1475",	"endId":"n_1499",	"confidence":100}],
+          "utterances":[
+            {"id":"em_12_41",	"label":"Ninety Nine",	"startId":"n_1301",	"endId":"n_1401",	"confidence":100},
+            {"id":"em_12_42",	"label":"Ninety Nine",	"startId":"n_1400",	"endId":"n_1500",	"confidence":100}]}]}]
+}
