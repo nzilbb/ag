@@ -46,6 +46,7 @@ import nzilbb.ag.*;
  * e.g. if it's a fragment representing an utterance, it must nevertheless have (possibly
  * reconstructed) turn and participant annotations to link the utterance to the graph itself (if
  * <var>graph</var> does). For more detailed assumption information, see {@link #transform(Graph)}.
+ * <p>TODO handle graphs with null offset anchors.
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class Merger
@@ -997,10 +998,11 @@ public class Merger
 		  if (hasCounterpart(anPreviousEdited))
 		  {
 		     Annotation anPreviousEditedOther = getCounterpart(anPreviousEdited);
-		     if (getConfidence(anPreviousEditedOther.getEnd())
-			 > getConfidence(start)
-			 && anPreviousEditedOther.getEnd().getOffset().doubleValue()
-			 != start.getOffset().doubleValue())
+		     if (getConfidence(anPreviousEditedOther.getEnd()) > getConfidence(start)
+			 && anPreviousEditedOther.getEnd().getOffset() != null
+			 && (start.getOffset() == null
+			     || anPreviousEditedOther.getEnd().getOffset().doubleValue()
+			     != start.getOffset().doubleValue()))
 		     {
 			log(layerId, ": Use offset of end of prior: ", anLastOriginal,
 			    " (end ", anPreviousEditedOther.getEnd(), ")",
@@ -1117,7 +1119,9 @@ public class Merger
 
 		     boolean bLastIsAnInstant = anLastOriginal.getInstantaneous(); // TODO or maybe just by offset?
 		     // check we're not creating an instant or backward annotation
-		     if (anLastOriginal.getStart().getOriginalOffset()
+		     if (anLastOriginal.getStart().getOriginalOffset() != null
+		     	 && anOriginal.getStart().getOriginalOffset() != null
+			 && anLastOriginal.getStart().getOriginalOffset()
 		     	 >= anOriginal.getStart().getOriginalOffset()
 		     	 && !bLastIsAnInstant)
 		     {
@@ -1682,10 +1686,6 @@ public class Merger
 		  if (anOriginalPrevious == null) continue; 
 		  assert anOriginalPrevious.getEnd() != null 
 		     : "anOriginalPrevious.getEnd() != null - " + anOriginalPrevious;
-		  assert anOriginalPrevious.getEnd().getOffset() != null // TODO??
-		     : "anOriginalPrevious.getEnd().getOffset() != null - " + anOriginalPrevious;
-		  assert anEdited.getStart().getOffset() != null  // TODO??
-		     : "anEdited.getStart().getOffset() != null - " + anEdited;
 		  // is the new original end anchor offset the same time as the edited start anchor?
 		  // (we compare by offset because anchors don't have counterparts we can check)
 		  if (compare(anOriginalPrevious.getEnd(), anEdited.getStart()) == 0)
@@ -1708,8 +1708,6 @@ public class Merger
 		     if (anOriginalParallel == null) continue; 
 		     assert anOriginalParallel.getStart() != null 
 			: "anOriginalParallel.getStart() != null - " + anOriginalParallel;
-		     assert anOriginalParallel.getStart().getOffset() != null // TODO??
-			: "anOriginalParallel.getStart().getOffset() != null - " + anOriginalParallel;
 		     // no use linking to the very same anchor
 		     if (anOriginalParallel.getStart() == anOriginal.getStart()) continue;
 		     // offset should be the same
@@ -1717,8 +1715,6 @@ public class Merger
 			 // unless our offset is less trustworthy than theirs
 			 && getConfidence(anEditedParallel.getStart()) >= Constants.CONFIDENCE_AUTOMATIC
 			 && getConfidence(anOriginalParallel.getStart()) <= getConfidence(anEditedParallel.getStart())) continue;
-		     assert anEdited.getStart().getOffset() != null // TODO??
-			: "anEdited.getStart().getOffset() != null - " + anEdited;
 		     matchingMergedAnchor = anOriginalParallel.getStart();
 		     log(layerId, ": Different start anchor for ", anOriginal,
 			 ": linking to shared start of ", anOriginalParallel);
@@ -2030,8 +2026,6 @@ public class Merger
 		     if (anOriginalParallel == null) continue; 
 		     assert anOriginalParallel.getEnd() != null 
 			: "anOriginalParallel.getEnd() != null - " + anOriginalParallel;
-		     assert anOriginalParallel.getEnd().getOffset() != null // TODO??
-			: "anOriginalParallel.getEnd().getOffset() != null - " + anOriginalParallel;
 		     // no use linking to the very same anchor
 		     if (anOriginalParallel.getEnd() == anOriginal.getEnd()) continue;
 		     // offset should be the same
@@ -2040,8 +2034,6 @@ public class Merger
 			 && getConfidence(anEditedParallel.getEnd()) >= Constants.CONFIDENCE_AUTOMATIC
 			 && getConfidence(anOriginalParallel.getEnd()) 
 			 <= getConfidence(anEditedParallel.getEnd())) continue;
-		     assert anEdited.getEnd().getOffset() != null // TODO??
-			: "anEdited.getEnd().getOffset() != null - " + anEdited;
 		     matchingMergedAnchor = anOriginalParallel.getEnd();
 		     log(layerId, ": Different end anchor for ", anOriginal,
 			 ": linking to shared end of ", anOriginalParallel);
@@ -3033,11 +3025,22 @@ public class Merger
    }
 
    /**
-    * Gets the confidence rating of a given object.  If no Integer confidence attribute is present, {@link Constants#CONFIDENCE_MANUAL} is returned.
-    * @param o The object to get the confidence rating for (most likely an {@link Annotation} or {@link Anchor})
+    * Gets the confidence rating of a given anchor. If the anchor offset is not set, {@link Constants#CONFIDENCE_NONE} is returned. If no Integer confidence attribute is present, {@link Constants#CONFIDENCE_MANUAL} is returned.
+    * @param o The anchor to get the confidence rating for.
     * @return The confidence rating of a given object, or {@link Constants#CONFIDENCE_MANUAL} if it could not be determined.
     */
-   protected int getConfidence(TrackedMap o)
+   protected int getConfidence(Anchor o)
+   {
+      if (o.getOffset() == null) return Constants.CONFIDENCE_NONE;
+      return Utility.getConfidence(o);
+   } // end of getConfidence()
+
+   /**
+    * Gets the confidence rating of a given object.  If no Integer confidence attribute is present, {@link Constants#CONFIDENCE_MANUAL} is returned.
+    * @param o The annotation to get the confidence rating for.
+    * @return The confidence rating of a given object, or {@link Constants#CONFIDENCE_MANUAL} if it could not be determined.
+    */
+   protected int getConfidence(Annotation o)
    {      
       return Utility.getConfidence(o);
    } // end of getConfidence()
@@ -3105,34 +3108,24 @@ public class Merger
       { // we only interpret arguments to log() if we're actually debugging...
 	 StringBuilder s = new StringBuilder();
 	 for (Object m : messages)
-	 {
-	    if (m instanceof Annotation)
+	 {	
+	    if (m == null)
 	    {
-	       if (m == null)
-	       {
-		  s.append("[null]");
-	       }
-	       else
-	       {
-		  Annotation annotation = (Annotation)m;
-		  s.append("[").append(annotation.getId()).append("]")
-		     .append(annotation.get("ordinal")).append("#")
-		     .append(annotation.getLabel())
-		     .append("(").append(annotation.getStart())
-		     .append("-").append(annotation.getEnd()).append(")");
-	       }
+	       s.append("[null]");
+	    }
+	    else if (m instanceof Annotation)
+	    {
+	       Annotation annotation = (Annotation)m;
+	       s.append("[").append(annotation.getId()).append("]")
+		  .append(annotation.get("ordinal")).append("#")
+		  .append(annotation.getLabel())
+		  .append("(").append(annotation.getStart())
+		  .append("-").append(annotation.getEnd()).append(")");
 	    }
 	    else if (m instanceof Anchor)
 	    {
-	       if (m == null)
-	       {
-		  s.append("[null]");
-	       }
-	       else
-	       {
-		  Anchor anchor = (Anchor)m;
-		  s.append("[").append(anchor.getId()).append("]").append(anchor.getOffset());
-	       }
+	       Anchor anchor = (Anchor)m;
+	       s.append("[").append(anchor.getId()).append("]").append(anchor.getOffset());
 	    }
 	    else
 	    {
