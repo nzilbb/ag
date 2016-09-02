@@ -43,7 +43,7 @@
     "a3":	{"offset":3.0,	"confidence":50},
     "a4":	{"offset":4.0,	"confidence":50},
     "a2":	{"offset":2.0,	"confidence":50},
-    "a5":	{"offset":5.0,	"confidence":50},
+    "a5":	{"offset":null},
     "turnEnd":	{"offset":6.0,	"confidence":100}
   },
   "who":[

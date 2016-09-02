@@ -109,7 +109,8 @@ public class TestJSONSerialization
       g.addAnchor(new Anchor("a2.75", 2.75, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
       g.addAnchor(new Anchor("a3", 3.0, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
       g.addAnchor(new Anchor("a4", 4.0, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
-      g.addAnchor(new Anchor("a5", 5.0, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+      // null offset handled
+      g.addAnchor(new Anchor("a5", null));
       g.addAnchor(new Anchor("turnEnd", 6.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
 
       Annotation who1 = new Annotation("who1", "john smith", "who", "turnStart", "turnEnd", "test");

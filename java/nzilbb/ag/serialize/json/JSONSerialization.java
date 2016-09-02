@@ -350,7 +350,7 @@ public class JSONSerialization
       {
 	 Anchor a = new Anchor();
 	 a.setId(anchorId);
-	 if (json.has("offset")) 
+	 if (json.has("offset") && !json.isNull("offset")) 
 	    a.setOffset(json.getDouble("offset"));
 	 if (json.has(Constants.CONFIDENCE)) 
 	    a.put(Constants.CONFIDENCE, json.getInt(Constants.CONFIDENCE));
