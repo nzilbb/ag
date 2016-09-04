@@ -2315,37 +2315,44 @@ public class Merger
 	       { // edited graph includes child layer, so use its annotations to get to the originals
 		  anOriginalChild = getCounterpart(anChild);
 	       }
-	       //log(layerId, ": Child ", anOriginalChild); // TODO comment out
+	       // log(layerId, ": Child ", anOriginalChild); // TODO comment out
 
 	       // check for new partition anchor
-	       for (String partitionLayerId : partitionIds)
+	       Double minStart = anChild.getStart().getOffsetMin();
+	       Double maxEnd = anChild.getEnd().getOffsetMax();
+	       // log(layerId, ": Edited child between ", minStart, " and ", maxEnd); // TODO comment out
+	       if (minStart != null && maxEnd != null)
 	       {
-		  Iterator<Annotation> i = partitionIterators.get(partitionLayerId);
-		  if (i == null) continue;
-		  Annotation currentPartitionEdited = currentPartition.get(partitionLayerId);
-		  Annotation currentPartitionOriginal = getCounterpart(currentPartitionEdited);
-		  assert currentPartitionOriginal != null : "currentPartitionOriginal != null";
-		  // assume that partition layer already saturates parent, and add end anchors
-		  // into the collection as appropriate
-		  while (anChild.getAnchored() && !currentPartitionEdited.includesMidpointOf(anChild))
+		  for (String partitionLayerId : partitionIds)
 		  {
-		     Anchor possibleBoundary = new Anchor(null, currentPartitionOriginal.getEnd().getOffset(), 
-							  Constants.CONFIDENCE, Integer.MAX_VALUE);
-		     
-		     log("Partition end: ", currentPartitionOriginal, " ", currentPartitionOriginal.getEnd());
-		     currentPartitionEdited = i.next();
-		     currentPartition.put(partitionLayerId, currentPartitionEdited);
-		     if (currentPartitionEdited.includes(anChild))
+		     Iterator<Annotation> i = partitionIterators.get(partitionLayerId);
+		     if (i == null) continue;
+		     Annotation currentPartitionEdited = currentPartition.get(partitionLayerId);
+		     Annotation currentPartitionOriginal = getCounterpart(currentPartitionEdited);
+		     assert currentPartitionOriginal != null : "currentPartitionOriginal != null";
+		     // assume that partition layer already saturates parent, and add end anchors
+		     // into the collection as appropriate
+		     double midPoint = minStart + ((maxEnd-minStart) / 2);
+		     while (!currentPartitionEdited.includesOffset(midPoint))
 		     {
-			anchors.add(possibleBoundary);
-		     }
-		     else
-		     {
-			log("Skipping partition as ", currentPartitionEdited,
-			    " doesn't include ", anChild, " in edited graph");
-		     }
-		  } // next non-including partition		  
-	       } // next partition layer	    
+			Anchor possibleBoundary = new Anchor(null, currentPartitionOriginal.getEnd().getOffset(), 
+							     Constants.CONFIDENCE, Integer.MAX_VALUE);
+			
+			log("Partition end: ", currentPartitionOriginal, " ", currentPartitionOriginal.getEnd());
+			currentPartitionEdited = i.next();
+			currentPartition.put(partitionLayerId, currentPartitionEdited);
+			if (currentPartitionEdited.includes(anChild))
+			{
+			   anchors.add(possibleBoundary);
+			}
+			else
+			{
+			   log("Skipping partition as ", currentPartitionEdited,
+			       " doesn't include edited version of ", anChild, " between ", minStart, "-", maxEnd);
+			}
+		     } // next non-including partition		  
+		  } // next partition layer	    
+	       } // child bounds are known
 
 	       // start anchor
 	       String sShareLastAnchorReason = null;
