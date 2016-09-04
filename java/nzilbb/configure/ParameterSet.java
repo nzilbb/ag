@@ -44,10 +44,12 @@ public class ParameterSet
    /**
     * Adds a parameter to the set.
     * @param parameter The parameter to add.
+    * @return The parmeter added.
     */
-   public void addParameter(Parameter parameter)
+   public Parameter addParameter(Parameter parameter)
    {
       put(parameter.getName(), parameter);
+      return parameter;
    } // end of addParameter()
 
 } // end of class ParameterSet

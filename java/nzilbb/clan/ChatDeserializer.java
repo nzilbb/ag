@@ -519,6 +519,16 @@ public class ChatDeserializer
     */
    public ChatDeserializer()
    {
+      participantLayers = new HashMap<String,Layer>();
+      participantLayers.put("language", null);
+      participantLayers.put("corpus", null);
+      participantLayers.put("age", null);
+      participantLayers.put("sex", null);
+      participantLayers.put("group", null);
+      participantLayers.put("SES", null);
+      participantLayers.put("role", null);
+      participantLayers.put("education", null);
+      participantLayers.put("custom", null);
    } // end of constructor
    
    /**
@@ -534,22 +544,6 @@ public class ChatDeserializer
       transcribers = new Vector<String>();
       lines = new Vector<String>();
       headers = new Vector<String>();
-      participantLayer = null;
-      turnLayer = null;
-      utteranceLayer = null;
-      wordLayer = null;
-      linkageLayer = null;
-      cUnitLayer = null;
-      gemLayer = null;
-      transcriberLayer = null;
-      languagesLayer = null;
-      expansionLayer = null;
-      errorsLayer = null;
-      retracingLayer = null;
-      repetitionsLayer = null;
-      completionLayer = null;
-      disfluencyLayer = null;
-      participantLayers = new HashMap<String,Layer>();
    } // end of reset()
 
    // IStreamDeserializer methods:
@@ -565,317 +559,110 @@ public class ChatDeserializer
    }
 
    /**
-    * Sets parameters for deserializer as a whole.  This might include database connection parameters, locations of supporting files, etc.
-    * <p>When the deserializer is installed, this method should be invoked with an empty parameter set, to discover what (if any) general configuration is required. If parameters are returned, and user interaction is possible, then the user may be presented with an interface for setting/confirming these parameters.  Once the parameters are set, this method can be invoked again with the required values, resulting in an empty parameter set being returned to confirm that nothing further is required.
+    * Sets parameters for deserializer as a whole.  This might include database connection
+    * parameters, locations of supporting files, etc.
+    * <p>When the deserializer is installed, this method should be invoked with an empty parameter
+    * set, to discover what (if any) general configuration is required. If parameters are returned,
+    * and user interaction is possible, then the user may be presented with an interface for
+    * setting/confirming these parameters. Once the parameters are set, this method can be
+    * invoked again with the required values. Unlike the {@link #load(NamedStream[],Schema)}
+    * method, this always returns th}e required parameters, whether or not they are fulfilled.
     * @param configuration The configuration for the deserializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
-    * @return A list of configuration parameters (still) must be set before
+    * @return A list of configuration parameters that must be set before
     * {@link IDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty list,
     * {@link IDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an empty list,
     * this method must be invoked again with the returned parameters' values set.
-    * @throws SerializerNotConfiguredException If the configuration is not sufficient for deserialization.
     */
-   public ParameterSet configure(ParameterSet configuration, Schema schema) throws SerializerNotConfiguredException
+   public ParameterSet configure(ParameterSet configuration, Schema schema)
    {
-      return new ParameterSet(); // TODO move layer discovery from load() to configure()
-   }
-
-   /**
-    * Loads the serialized form of the graph, using the given set of named streams.
-    * @param streams A list of named streams that contain all the transcription/annotation data required.
-    * @param schema The layer schema, definining layers and the way they interrelate.
-    * @return A list of parameters that require setting before {@link IDeserializer#deserialize()} can be invoked. This may be an empty list, and may include parameters with the value already set to a workable default. If there are parameters, and user interaction is possible, then the user may be presented with an interface for setting/confirming these parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
-    * @throws SerializationException If the graph could not be loaded.
-    * @throws IOException On IO error.
-    */
-   @SuppressWarnings({"rawtypes", "unchecked"})
-   public ParameterSet load(NamedStream[] streams, Schema schema) throws IOException, SerializationException
-   {
-      ParameterSet parameters = new ParameterSet();
-
-      // take the first cha stream, ignore all others.
-      NamedStream cha = null;
-      for (NamedStream stream : streams)
-      {	 
-	 if (stream.getName().toLowerCase().endsWith(".cha") 
-	     || "text/x-chat".equals(stream.getMimeType()))
-	 {
-	    cha = stream;
-	    break;
-	 }
-      } // next stream
-      if (cha == null) throw new SerializationException("No CHAT stream found");
-      setName(cha.getName());
-
-      reset();
       setSchema(schema);
       setParticipantLayer(schema.getParticipantLayer());
       setTurnLayer(schema.getTurnLayer());
       setUtteranceLayer(schema.getUtteranceLayer());
       setWordLayer(schema.getWordLayer());
+      linkageLayer = null;
+      cUnitLayer = null;
+      gemLayer = null;
+      transcriberLayer = null;
+      languagesLayer = null;
+      expansionLayer = null;
+      errorsLayer = null;
+      retracingLayer = null;
+      repetitionsLayer = null;
+      completionLayer = null;
+      disfluencyLayer = null;
 
-      boolean disfluenciesFound = false;
-      Pattern regexDisfluency = Pattern.compile("&\\p{Alnum}");
-      boolean expansionsFound = false;
-      Pattern regexExpansion = Pattern.compile("\\[: ");
-      boolean errorsFound = false;
-      Pattern regexErrors = Pattern.compile("\\[\\* ");
-      boolean repetitionsFound = false;
-      Pattern regexRepetitions = Pattern.compile("\\[/\\]");
-      boolean retracingFound = false;
-      Pattern regexRetracing = Pattern.compile("\\[//\\]");
-      boolean completionsFound = false;
-      Pattern regexCompletion = Pattern.compile("\\(\\p{Alnum}+\\)");
-      boolean linkagesFound = false;
-      Pattern regexLinkage = Pattern.compile("\\p{Alpha}_\\p{Alpha}");
-      boolean gemsFound = false;
-      boolean transcribersFound = false;
-      boolean languagesFound = false;
-
-      // read stream line by line
-      boolean inHeader = true;
-      BufferedReader reader = new BufferedReader(new InputStreamReader(cha.getStream(), "UTF-8"));
-      String line = reader.readLine();
-      while (line != null)
+      if (configuration.size() > 0)
       {
-	 if (line.startsWith("@G") || line.startsWith("@Bg") || line.startsWith("*"))
+	 if (configuration.containsKey("participantLayer"))
 	 {
-	    inHeader = false;
-	    if (!gemsFound && 
-		(line.startsWith("@G") || line.startsWith("@Bg")))
-	    {
-	       gemsFound = true;
-	    }
+	    setParticipantLayer((Layer)configuration.get("participantLayer").getValue());
 	 }
-
-	 if (inHeader)
+	 if (configuration.containsKey("turnLayer"))
 	 {
-	    if (line.startsWith("@"))
-	    { // new header
-	       headers.add(line);
-	    }
-	    else
-	    { // continuation of last header line
-	       // remove the last header
-	       String lastHeader = headers.remove(headers.size()-1);
-	       // append this line to it
-	       headers.add(lastHeader + " " + line.trim());
+	    setTurnLayer((Layer)configuration.get("turnLayer").getValue());
+	 }
+	 if (configuration.containsKey("utteranceLayer"))
+	 {
+	    setUtteranceLayer((Layer)configuration.get("utteranceLayer").getValue());
+	 }
+	 if (configuration.containsKey("wordLayer"))
+	 {
+	    setWordLayer((Layer)configuration.get("wordLayer").getValue());
+	 }
+	 if (configuration.containsKey("disfluencyLayer"))
+	 {
+	    setDisfluencyLayer((Layer)configuration.get("disfluencyLayer").getValue());
+	 }
+	 if (configuration.containsKey("expansionLayer"))
+	 {
+	    setExpansionLayer((Layer)configuration.get("expansionLayer").getValue());
+	 }
+	 if (configuration.containsKey("errorsLayer"))
+	 {
+	    setErrorsLayer((Layer)configuration.get("errorsLayer").getValue());
+	 }
+	 if (configuration.containsKey("repetitionsLayer"))
+	 {
+	    setRepetitionsLayer((Layer)configuration.get("repetitionsLayer").getValue());
+	 }
+	 if (configuration.containsKey("retracingLayer"))
+	 {
+	    setRetracingLayer((Layer)configuration.get("retracingLayer").getValue());
+	 }
+	 if (configuration.containsKey("completionLayer"))
+	 {
+	    setCompletionLayer((Layer)configuration.get("completionLayer").getValue());
+	 }
+	 if (configuration.containsKey("gemLayer"))
+	 {
+	    setGemLayer((Layer)configuration.get("gemLayer").getValue());
+	 }
+	 if (configuration.containsKey("linkageLayer"))
+	 {
+	    setLinkageLayer((Layer)configuration.get("linkageLayer").getValue());
+	 }
+	 if (configuration.containsKey("cUnitLayer"))
+	 {
+	    setCUnitLayer((Layer)configuration.get("cUnitLayer").getValue());
+	 }
+	 if (configuration.containsKey("transcriberLayer"))
+	 {
+	    setTranscriberLayer((Layer)configuration.get("transcriberLayer").getValue());
+	 }
+	 if (configuration.containsKey("languagesLayer"))
+	 {
+	    setLanguagesLayer((Layer)configuration.get("languagesLayer").getValue());
+	 }
+	 for (String attribute : participantLayers.keySet())
+	 {
+	    if (configuration.containsKey(attribute + "Layer"))
+	    {
+	       participantLayers.put(attribute, ((Layer)configuration.get(attribute + "Layer").getValue()));
 	    }
 	 }
-	 else if (!line.equals("@End"))
-	 { // transcript line
-	    // is it the first line?
-	    if (lines.size() == 0 
-		// or this line starts with a speaker ID
-		|| line.startsWith("*")
-		// or the last line was time synchronized?
-		|| lines.lastElement().endsWith("")
-		// or the last line was a 'gem'?
-		|| lines.lastElement().startsWith("@")
-	       )
-	    { // this is a new utterance
-	       lines.add(line);
-	    }
-	    else
-	    { // last line was not time-synchronized, so append this line to it
-	       // remove the last line
-	       String lastLine = lines.remove(lines.size()-1);
-	       // append this line to it
-	       lines.add(lastLine + " " + line);
-	    }
-	    if (!disfluenciesFound)
-	    {
-	       if (regexDisfluency.matcher(line).find())
-	       {
-		  disfluenciesFound = true;
-	       }
-	    }
-	    if (!linkagesFound)
-	    {
-	       if (regexLinkage.matcher(line).find())
-	       {
-		  linkagesFound = true;
-	       }
-	    }
-	    if (!expansionsFound)
-	    {
-	       if (regexExpansion.matcher(line).find())
-	       {
-		  expansionsFound = true;
-	       }
-	    }
-	    if (!errorsFound)
-	    {
-	       if (regexErrors.matcher(line).find())
-	       {
-		  errorsFound = true;
-	       }
-	    }
-	    if (!repetitionsFound)
-	    {
-	       if (regexRepetitions.matcher(line).find())
-	       {
-		  repetitionsFound = true;
-	       }
-	    }
-	    if (!retracingFound)
-	    {
-	       if (regexRetracing.matcher(line).find())
-	       {
-		  retracingFound = true;
-	       }
-	    }
-	    if (!completionsFound)
-	    {
-	       if (regexCompletion.matcher(line).find())
-	       {
-		  completionsFound = true;
-	       }
-	    }
-	 }
-
-	 line = reader.readLine();
-      } // next line
-
-      for (String header : headers)
-      {
-	 if (header.startsWith("@"))
-	 { // @ line
-	    int iColon = header.indexOf(':');
-	    if (iColon >= 0)
-	    { // it's a key/value pair
-	       String value = header.substring(iColon + 1).trim();
-	       if (header.startsWith("@Languages:"))
-	       {
-		  if (value.trim().length() > 0)
-		  {
-		     languagesFound = true;
-		     StringTokenizer tokens = new StringTokenizer(value, ", ");
-		     while (tokens.hasMoreTokens())
-		     {
-			languagesFound = true;
-			languages.add(tokens.nextToken());
-		     }
-		  }
-	       }
-	       else if (header.startsWith("@Participants:"))
-	       {
-		  // something like:
-		  // @Participants:	SUB 2001 Participant, EXA Investigator Investigator
-		  StringTokenizer tokens = new StringTokenizer(value, ",");
-		  while (tokens.hasMoreTokens())
-		  {
-		     String sParticipant = tokens.nextToken();
-		     StringTokenizer participantTokens = new StringTokenizer(sParticipant.trim());
-		     if (participantTokens.hasMoreTokens())
-		     {
-			String id = participantTokens.nextToken();
-			// ensure they're in the participants map
-			if (!participants.containsKey(id))
-			{
-			   participants.put(id, new HashMap<String,String>());
-			}
-			if (participantTokens.hasMoreTokens())
-			{
-			   String name = participantTokens.nextToken();
-			   participants.get(id).put("name", name);
-			   if (participantTokens.hasMoreTokens())
-			   {
-			      String role = participantTokens.nextToken();
-			      participants.get(id).put("role", role);
-			      participantLayers.put("role", null);
-			   }
-			}
-		     }
-		  }
-	       }
-	       else if (header.startsWith("@ID:"))
-	       {		  
-		  // @ID: language|corpus|code|age|sex|group|SES|role|education|custom|
-		  String[] tokens = value.split("\\|");
-		  String language = tokens.length<=0?"":tokens[0];
-		  String corpus = tokens.length<=1?"":tokens[1];
-		  String code = tokens.length<=2?"":tokens[2];
-		  String age = tokens.length<=3?"":tokens[3];
-		  String sex = tokens.length<=4?"":tokens[4];
-		  String group = tokens.length<=5?"":tokens[5];
-		  String SES = tokens.length<=6?"":tokens[6];
-		  String role = tokens.length<=7?"":tokens[7];
-		  String education = tokens.length<=8?"":tokens[8];
-		  String custom = tokens.length<=9?"":tokens[9];
-		  // ensure they're in the participants map
-		  if (!participants.containsKey(code))
-		  {
-		     participants.put(code, new HashMap<String,String>());
-		  }
-		  // set the attribute values and make sure we ask for layers if there are values
-		  if (language.length() > 0 && !participantLayers.containsKey("language"))
-		  {
-		     participantLayers.put("language", null);
-		  }
-		  participants.get(code).put("language", language);
-		  if (corpus.length() > 0 && !participantLayers.containsKey("corpus"))
-		  {
-		     participantLayers.put("corpus", null);
-		  }
-		  participants.get(code).put("corpus", corpus);
-		  if (age.length() > 0 && !participantLayers.containsKey("age"))
-		  {
-		     participantLayers.put("age", null);
-		  }
-		  participants.get(code).put("age", age);
-		  if (sex.length() > 0 && !participantLayers.containsKey("sex"))
-		  {
-		     participantLayers.put("sex", null);
-		  }
-		  participants.get(code).put("sex", sex);
-		  if (group.length() > 0 && !participantLayers.containsKey("group"))
-		  {
-		     participantLayers.put("group", null);
-		  }
-		  participants.get(code).put("group", group);
-		  if (SES.length() > 0 && !participantLayers.containsKey("SES"))
-		  {
-		     participantLayers.put("SES", null);
-		  }
-		  participants.get(code).put("SES", SES);
-		  if (role.length() > 0 && !participantLayers.containsKey("role"))
-		  {
-		     participantLayers.put("role", null);
-		     //TODO participants.get(code).put("role", role);
-		  }
-		  participants.get(code).put("role", role);
-		  if (education.length() > 0 && !participantLayers.containsKey("education"))
-		  {
-		     participantLayers.put("education", null);
-		  }
-		  participants.get(code).put("education", education);
-		  if (custom.length() > 0 && !participantLayers.containsKey("custom"))
-		  {
-		     participantLayers.put("custom", null);
-		  }
-		  participants.get(code).put("custom", custom);
-	       }
-	       else if (header.startsWith("@Media:"))
-	       {
-		  StringTokenizer tokens = new StringTokenizer(value, ", ");
-		  if (tokens.hasMoreTokens())
-		  {
-		     setMediaName(tokens.nextToken());
-		     if (tokens.hasMoreTokens())
-		     {
-			setMediaType(tokens.nextToken());
-		     }
-		  }
-	       }
-	       else if (header.startsWith("@Transcriber:"))
-	       {
-		  transcribersFound = true;
-		  transcribers.add(value);
-	       }
-	    } // it's a key/value pair
-	 } // @ line
-      } // next header
+      }
 
       LinkedHashMap<String,Layer> possibleParticipantLayers = new LinkedHashMap<String,Layer>();
       LinkedHashMap<String,Layer> possibleTurnLayers = new LinkedHashMap<String,Layer>();
@@ -949,116 +736,114 @@ public class ChatDeserializer
 	 } // next possible word tag layer
       }
       participantTagLayers.remove("main_participant");
-
+      
       if (getParticipantLayer() == null)
       {
-	 Parameter p = new Parameter("participantLayer", Layer.class, "Participant layer", "Layer for speaker/participant identification", true);
+	 Parameter p = configuration.containsKey("participantLayer")?configuration.get("participantLayer")
+	    :configuration.addParameter(
+	       new Parameter("participantLayer", Layer.class, "Participant layer", "Layer for speaker/participant identification", true));
 	 String[] possibilities = {"participant","participants","who","speaker","speakers"};
-	 p.setValue(findLayerById(possibleParticipantLayers, possibilities));
+	 if (p.getValue() == null) p.setValue(findLayerById(possibleParticipantLayers, possibilities));
 	 p.setPossibleValues(possibleParticipantLayers.values());
-	 parameters.addParameter(p);
       }
       if (getTurnLayer() == null)
       {
-	 Parameter p = new Parameter("turnLayer", Layer.class, "Turn layer", "Layer for speaker turns", true);
+	 Parameter p = configuration.containsKey("turnLayer")?configuration.get("turnLayer")
+	    :configuration.addParameter(
+	       new Parameter("turnLayer", Layer.class, "Turn layer", "Layer for speaker turns", true));
 	 String[] possibilities = {"turn","turns"};
-	 p.setValue(findLayerById(possibleTurnLayers, possibilities));
+	 if (p.getValue() == null) p.setValue(findLayerById(possibleTurnLayers, possibilities));
 	 p.setPossibleValues(possibleTurnLayers.values());
-	 parameters.addParameter(p);
       }
       if (getUtteranceLayer() == null)
       {
-	 Parameter p = new Parameter("utteranceLayer", Layer.class, "Utterance layer", "Layer for speaker utterances", true);
+	 Parameter p = configuration.containsKey("utteranceLayer")?configuration.get("utteranceLayer")
+	    :configuration.addParameter(
+	       new Parameter("utteranceLayer", Layer.class, "Utterance layer", "Layer for speaker utterances", true));
 	 String[] possibilities = {"utterance","utterances","line","lines"};
-	 p.setValue(findLayerById(possibleTurnChildLayers, possibilities));
+	 if (p.getValue() == null) p.setValue(findLayerById(possibleTurnChildLayers, possibilities));
 	 p.setPossibleValues(possibleTurnChildLayers.values());
-	 parameters.addParameter(p);
       }
       if (getWordLayer() == null)
       {
-	 Parameter p = new Parameter("wordLayer", Layer.class, "Word layer", "Layer for individual word tokens", true);
+	 Parameter p = configuration.containsKey("wordLayer")?configuration.get("wordLayer")
+	    :configuration.addParameter(
+	       new Parameter("wordLayer", Layer.class, "Word layer", "Layer for individual word tokens", true));
 	 String[] possibilities = {"transcript","word","words","w"};
-	 p.setValue(findLayerById(possibleTurnChildLayers, possibilities));
+	 if (p.getValue() == null) p.setValue(findLayerById(possibleTurnChildLayers, possibilities));
 	 p.setPossibleValues(possibleTurnChildLayers.values());
-	 parameters.addParameter(p);
       }
-      Parameter pC = new Parameter("cUnitLayer", Layer.class, "C-Unit layer", "Layer for marking c-units");
+      Parameter pC = configuration.containsKey("cUnitLayer")?configuration.get("cUnitLayer")
+	 :configuration.addParameter(
+	    new Parameter("cUnitLayer", Layer.class, "C-Unit layer", "Layer for marking c-units"));
       String[] possibilitiesC = {"c-unit","cunit","sentence"};
       pC.setValue(findLayerById(possibleTurnChildLayers, possibilitiesC));
       pC.setPossibleValues(possibleTurnChildLayers.values());
-      parameters.addParameter(pC);
-      if (disfluenciesFound)
+
+      Parameter p = configuration.containsKey("disfluencyLayer")?configuration.get("disfluencyLayer")
+	 :configuration.addParameter(
+	    new Parameter("disfluencyLayer", Layer.class, "Disfluency layer", "Layer for disfluency annotations"));
+      String[] possibilities_disfluency = {"disfluency","disfluencies"};
+      if (p.getValue() == null) p.setValue(findLayerById(wordTagLayers, possibilities_disfluency));
+      p.setPossibleValues(wordTagLayers.values());
+
+      p = configuration.containsKey("expansionLayer")?configuration.get("expansionLayer")
+	 :configuration.addParameter(
+	    new Parameter("expansionLayer", Layer.class, "Expansion layer", "Layer for expansion annotations"));
+      String[] possibilities_expansion = {"expansion","expansions"};
+      if (p.getValue() == null) p.setValue(findLayerById(wordTagLayers, possibilities_expansion));
+      p.setPossibleValues(wordTagLayers.values());
+
+      p = configuration.containsKey("errorsLayer")?configuration.get("errorsLayer")
+	 :configuration.addParameter(
+	    new Parameter("errorsLayer", Layer.class, "Errors layer", "Layer for error  annotations"));
+      String[] possibilities_error = {"error","error"};
+      if (p.getValue() == null) p.setValue(findLayerById(possibleTurnChildLayers, possibilities_error));
+      p.setPossibleValues(possibleTurnChildLayers.values());
+
+      p = configuration.containsKey("linkageLayer")?configuration.get("linkageLayer")
+	 :configuration.addParameter(
+	    new Parameter("linkageLayer", Layer.class, "Linkages layer", "Layer for linkage annotations"));
+      String[] possibilities_linkage = {"linkage","linkages"};
+      if (p.getValue() == null) p.setValue(findLayerById(possibleTurnChildLayers, possibilities_linkage));
+      p.setPossibleValues(possibleTurnChildLayers.values());
+
+      p = configuration.containsKey("repetitionsLayer")?configuration.get("repetitionsLayer")
+	 :configuration.addParameter(
+	    new Parameter("repetitionsLayer", Layer.class, "Repetitions layer", "Layer for repetition annotations"));
+      String[] possibilities_repetition = {"repetition","repetitions"};
+      if (p.getValue() == null) p.setValue(findLayerById(possibleTurnChildLayers, possibilities_repetition));
+      p.setPossibleValues(possibleTurnChildLayers.values());
+
+      p = configuration.containsKey("retracingLayer")?configuration.get("retracingLayer")
+	 :configuration.addParameter(
+	    new Parameter("retracingLayer", Layer.class, "Retracing layer", "Layer for retracing annotations"));
+      String[] possibilities_retrace = {"retrace","retracing","correction"};
+      if (p.getValue() == null) p.setValue(findLayerById(possibleTurnChildLayers, possibilities_retrace));
+      p.setPossibleValues(possibleTurnChildLayers.values());
+
+      p = configuration.containsKey("completionLayer")?configuration.get("completionLayer")
+	 :configuration.addParameter(
+	    new Parameter("completionLayer", Layer.class, "Completion layer", "Layer for completion annotations"));
+      String[] possibilities_completion = {"completion","completions"};
+      if (p.getValue() == null) p.setValue(findLayerById(wordTagLayers, possibilities_completion));
+      p.setPossibleValues(wordTagLayers.values());
+
+      LinkedHashMap<String,Layer> possibleLayers = new LinkedHashMap<String,Layer>();
+      for (Layer top : schema.getRoot().getChildren().values())
       {
-	 Parameter p = new Parameter("disfluencyLayer", Layer.class, "Disfluency layer", "Layer for disfluency annotations");
-	 String[] possibilities = {"disfluency","disfluencies"};
-	 p.setValue(findLayerById(wordTagLayers, possibilities));
-	 p.setPossibleValues(wordTagLayers.values());
-	 parameters.addParameter(p);
-      }
-      if (expansionsFound)
-      {
-	 Parameter p = new Parameter("expansionLayer", Layer.class, "Expansion layer", "Layer for expansion annotations");
-	 String[] possibilities = {"expansion","expansions"};
-	 p.setValue(findLayerById(wordTagLayers, possibilities));
-	 p.setPossibleValues(wordTagLayers.values());
-	 parameters.addParameter(p);
-      }
-      if (errorsFound)
-      {
-	 Parameter p = new Parameter("errorsLayer", Layer.class, "Errors layer", "Layer for error  annotations");
-	 String[] possibilities = {"error","error"};
-	 p.setValue(findLayerById(possibleTurnChildLayers, possibilities));
-	 p.setPossibleValues(possibleTurnChildLayers.values());
-	 parameters.addParameter(p);
-      }
-      if (linkagesFound)
-      {
-	 Parameter p = new Parameter("linkageLayer", Layer.class, "Linkages layer", "Layer for linkage annotations");
-	 String[] possibilities = {"linkage","linkages"};
-	 p.setValue(findLayerById(possibleTurnChildLayers, possibilities));
-	 p.setPossibleValues(possibleTurnChildLayers.values());
-	 parameters.addParameter(p);
-      }
-      if (repetitionsFound)
-      {
-	 Parameter p = new Parameter("repetitionsLayer", Layer.class, "Repetitions layer", "Layer for repetition annotations");
-	 String[] possibilities = {"repetition","repetitions"};
-	 p.setValue(findLayerById(possibleTurnChildLayers, possibilities));
-	 p.setPossibleValues(possibleTurnChildLayers.values());
-	 parameters.addParameter(p);
-      }
-      if (retracingFound)
-      {
-	 Parameter p = new Parameter("retracingLayer", Layer.class, "Retracing layer", "Layer for retracing annotations");
-	 String[] possibilities = {"retrace","retracing","correction"};
-	 p.setValue(findLayerById(possibleTurnChildLayers, possibilities));
-	 p.setPossibleValues(possibleTurnChildLayers.values());
-	 parameters.addParameter(p);
-      }
-      if (completionsFound)
-      {
-	 Parameter p = new Parameter("completionLayer", Layer.class, "Completion layer", "Layer for completion annotations");
-	 String[] possibilities = {"completion","completions"};
-	 p.setValue(findLayerById(wordTagLayers, possibilities));
-	 p.setPossibleValues(wordTagLayers.values());
-	 parameters.addParameter(p);
-      }
-      if (gemsFound)
-      {
-	 LinkedHashMap<String,Layer> possibleLayers = new LinkedHashMap<String,Layer>();
-	 for (Layer top : schema.getRoot().getChildren().values())
-	 {
-	    if (top.getAlignment() == Constants.ALIGNMENT_INTERVAL)
-	    { // aligned children of graph
-	       possibleLayers.put(top.getId(), top);
-	    }
-	 } // next top level layer
-	 Parameter p = new Parameter("gemLayer", Layer.class, "Gem layer", "Layer for gems");
-	 String[] possibilities = {"gem","gems","topic","topics"};
-	 p.setValue(findLayerById(possibleLayers, possibilities));
-	 p.setPossibleValues(possibleLayers.values());
-	 parameters.addParameter(p);
-      }
+	 if (top.getAlignment() == Constants.ALIGNMENT_INTERVAL)
+	 { // aligned children of graph
+	    possibleLayers.put(top.getId(), top);
+	 }
+      } // next top level layer
+      p = configuration.containsKey("gemLayer")?configuration.get("gemLayer")
+	 :configuration.addParameter(
+	    new Parameter("gemLayer", Layer.class, "Gem layer", "Layer for gems"));
+      String[] possibilities_gem = {"gem","gems","topic","topics"};
+      if (p.getValue() == null) p.setValue(findLayerById(possibleLayers, possibilities_gem));
+      p.setPossibleValues(possibleLayers.values());
+
       LinkedHashMap<String,Layer> graphTagLayers = new LinkedHashMap<String,Layer>();
       for (Layer top : schema.getRoot().getChildren().values())
       {
@@ -1070,34 +855,214 @@ public class ChatDeserializer
       } // next top level layer
       graphTagLayers.remove("corpus");
       graphTagLayers.remove("transcript_type");
-      if (transcribersFound)
-      {
-	 Parameter p = new Parameter("transcriberLayer", Layer.class, "Transcriber layer", "Layer for transcriber name");
-	 String[] possibilities = {"transcriber","transcribers","transcript_transcriber","transcript_transcribers", "scribe","scribes", "transcript_scribe","transcript_scribes"};
-	 p.setValue(findLayerById(graphTagLayers, possibilities));
-	 p.setPossibleValues(graphTagLayers.values());
-	 parameters.addParameter(p);
-      }
-      if (languagesFound)
-      {
-	 Parameter p = new Parameter("languagesLayer", Layer.class, "Transcript language layer", "Layer for transcriber language");
-	 String[] possibilities = {"transcript_language","transcript_languages","language","languages"};
-	 p.setValue(findLayerById(graphTagLayers, possibilities));
-	 p.setPossibleValues(graphTagLayers.values());
-	 parameters.addParameter(p);
-      }
+      p = configuration.containsKey("transcriberLayer")?configuration.get("transcriberLayer")
+	 :configuration.addParameter(
+	    new Parameter("transcriberLayer", Layer.class, "Transcriber layer", "Layer for transcriber name"));
+      String[] possibilities_transcriber = {"transcriber","transcribers","transcript_transcriber","transcript_transcribers", "scribe","scribes", "transcript_scribe","transcript_scribes"};
+      if (p.getValue() == null) p.setValue(findLayerById(graphTagLayers, possibilities_transcriber));
+      p.setPossibleValues(graphTagLayers.values());
+
+      p = configuration.containsKey("languagesLayer")?configuration.get("languagesLayer")
+	 :configuration.addParameter(
+	    new Parameter("languagesLayer", Layer.class, "Transcript language layer", "Layer for transcriber language"));
+      String[] possibilities_transcript = {"transcript_language","transcript_languages","language","languages"};
+      if (p.getValue() == null) p.setValue(findLayerById(graphTagLayers, possibilities_transcript));
+      p.setPossibleValues(graphTagLayers.values());
+
       // participant meta data layers
       for (String attribute : participantLayers.keySet())
       {
-	 Parameter p = new Parameter(attribute + "Layer", Layer.class, attribute + " layer", "Layer for " + attribute);
+	 p = configuration.containsKey(attribute + "Layer")?configuration.get(attribute + "Layer")
+	    :configuration.addParameter(
+	       new Parameter(attribute + "Layer", Layer.class, attribute + " layer", "Layer for " + attribute));
 	 // if we have a layer called that
-	 String[] possibilities = {"participant_"+attribute, attribute};
-	 p.setValue(findLayerById(participantTagLayers, possibilities));
+	 String[] possibilities_participant = {"participant_"+attribute, attribute};
+	 if (p.getValue() == null) p.setValue(findLayerById(participantTagLayers, possibilities_participant));
 	 p.setPossibleValues(participantTagLayers.values());
-	 parameters.addParameter(p);
       }
+      
+      return configuration;
+   }
 
-      return parameters;
+   /**
+    * Loads the serialized form of the graph, using the given set of named streams.
+    * @param streams A list of named streams that contain all the transcription/annotation data required.
+    * @param schema The layer schema, definining layers and the way they interrelate.
+    * @return A list of parameters that require setting before {@link IDeserializer#deserialize()} can be invoked. This may be an empty list, and may include parameters with the value already set to a workable default. If there are parameters, and user interaction is possible, then the user may be presented with an interface for setting/confirming these parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
+    * @throws SerializationException If the graph could not be loaded.
+    * @throws IOException On IO error.
+    * @throws SerializerNotConfiguredException If the configuration is not sufficient for deserialization.
+    */
+   @SuppressWarnings({"rawtypes", "unchecked"})
+   public ParameterSet load(NamedStream[] streams, Schema schema) throws IOException, SerializationException, SerializerNotConfiguredException
+   {
+      // take the first cha stream, ignore all others.
+      NamedStream cha = null;
+      for (NamedStream stream : streams)
+      {	 
+	 if (stream.getName().toLowerCase().endsWith(".cha") 
+	     || "text/x-chat".equals(stream.getMimeType()))
+	 {
+	    cha = stream;
+	    break;
+	 }
+      } // next stream
+      if (cha == null) throw new SerializationException("No CHAT stream found");
+      setName(cha.getName());
+
+      reset();
+
+      // read stream line by line
+      boolean inHeader = true;
+      BufferedReader reader = new BufferedReader(new InputStreamReader(cha.getStream(), "UTF-8"));
+      String line = reader.readLine();
+      while (line != null)
+      {
+	 if (line.startsWith("@G") || line.startsWith("@Bg") || line.startsWith("*"))
+	 {
+	    inHeader = false;
+	 }
+
+	 if (inHeader)
+	 {
+	    if (line.startsWith("@"))
+	    { // new header
+	       headers.add(line);
+	    }
+	    else
+	    { // continuation of last header line
+	       // remove the last header
+	       String lastHeader = headers.remove(headers.size()-1);
+	       // append this line to it
+	       headers.add(lastHeader + " " + line.trim());
+	    }
+	 }
+	 else if (!line.equals("@End"))
+	 { // transcript line
+	    // is it the first line?
+	    if (lines.size() == 0 
+		// or this line starts with a speaker ID
+		|| line.startsWith("*")
+		// or the last line was time synchronized?
+		|| lines.lastElement().endsWith("")
+		// or the last line was a 'gem'?
+		|| lines.lastElement().startsWith("@")
+	       )
+	    { // this is a new utterance
+	       lines.add(line);
+	    }
+	    else
+	    { // last line was not time-synchronized, so append this line to it
+	       // remove the last line
+	       String lastLine = lines.remove(lines.size()-1);
+	       // append this line to it
+	       lines.add(lastLine + " " + line);
+	    }
+	 }
+
+	 line = reader.readLine();
+      } // next line
+
+      for (String header : headers)
+      {
+	 if (header.startsWith("@"))
+	 { // @ line
+	    int iColon = header.indexOf(':');
+	    if (iColon >= 0)
+	    { // it's a key/value pair
+	       String value = header.substring(iColon + 1).trim();
+	       if (header.startsWith("@Languages:"))
+	       {
+		  if (value.trim().length() > 0)
+		  {
+		     StringTokenizer tokens = new StringTokenizer(value, ", ");
+		     while (tokens.hasMoreTokens())
+		     {
+			languages.add(tokens.nextToken());
+		     }
+		  }
+	       }
+	       else if (header.startsWith("@Participants:"))
+	       {
+		  // something like:
+		  // @Participants:	SUB 2001 Participant, EXA Investigator Investigator
+		  StringTokenizer tokens = new StringTokenizer(value, ",");
+		  while (tokens.hasMoreTokens())
+		  {
+		     String sParticipant = tokens.nextToken();
+		     StringTokenizer participantTokens = new StringTokenizer(sParticipant.trim());
+		     if (participantTokens.hasMoreTokens())
+		     {
+			String id = participantTokens.nextToken();
+			// ensure they're in the participants map
+			if (!participants.containsKey(id))
+			{
+			   participants.put(id, new HashMap<String,String>());
+			}
+			if (participantTokens.hasMoreTokens())
+			{
+			   String name = participantTokens.nextToken();
+			   participants.get(id).put("name", name);
+			   if (participantTokens.hasMoreTokens())
+			   {
+			      String role = participantTokens.nextToken();
+			      participants.get(id).put("role", role);
+			   }
+			}
+		     }
+		  }
+	       }
+	       else if (header.startsWith("@ID:"))
+	       {		  
+		  // @ID: language|corpus|code|age|sex|group|SES|role|education|custom|
+		  String[] tokens = value.split("\\|");
+		  String language = tokens.length<=0?"":tokens[0];
+		  String corpus = tokens.length<=1?"":tokens[1];
+		  String code = tokens.length<=2?"":tokens[2];
+		  String age = tokens.length<=3?"":tokens[3];
+		  String sex = tokens.length<=4?"":tokens[4];
+		  String group = tokens.length<=5?"":tokens[5];
+		  String SES = tokens.length<=6?"":tokens[6];
+		  String role = tokens.length<=7?"":tokens[7];
+		  String education = tokens.length<=8?"":tokens[8];
+		  String custom = tokens.length<=9?"":tokens[9];
+		  // ensure they're in the participants map
+		  if (!participants.containsKey(code))
+		  {
+		     participants.put(code, new HashMap<String,String>());
+		  }
+		  // set the attribute values and make sure we ask for layers if there are values
+		  participants.get(code).put("language", language);
+		  participants.get(code).put("corpus", corpus);
+		  participants.get(code).put("age", age);
+		  participants.get(code).put("sex", sex);
+		  participants.get(code).put("group", group);
+		  participants.get(code).put("SES", SES);
+		  participants.get(code).put("role", role);
+		  participants.get(code).put("education", education);
+		  participants.get(code).put("custom", custom);
+	       }
+	       else if (header.startsWith("@Media:"))
+	       {
+		  StringTokenizer tokens = new StringTokenizer(value, ", ");
+		  if (tokens.hasMoreTokens())
+		  {
+		     setMediaName(tokens.nextToken());
+		     if (tokens.hasMoreTokens())
+		     {
+			setMediaType(tokens.nextToken());
+		     }
+		  }
+	       }
+	       else if (header.startsWith("@Transcriber:"))
+	       {
+		  transcribers.add(value);
+	       }
+	    } // it's a key/value pair
+	 } // @ line
+      } // next header
+
+      return new ParameterSet(); // everything is in configure()
    }
 
    
@@ -1129,76 +1094,9 @@ public class ChatDeserializer
     */
    public void setParameters(ParameterSet parameters) throws SerializationParametersMissingException
    {
-      if (parameters.containsKey("participantLayer"))
-      {
-	 setParticipantLayer((Layer)parameters.get("participantLayer").getValue());
-      }
-      if (parameters.containsKey("turnLayer"))
-      {
-	 setTurnLayer((Layer)parameters.get("turnLayer").getValue());
-      }
-      if (parameters.containsKey("utteranceLayer"))
-      {
-	 setUtteranceLayer((Layer)parameters.get("utteranceLayer").getValue());
-      }
-      if (parameters.containsKey("wordLayer"))
-      {
-	 setWordLayer((Layer)parameters.get("wordLayer").getValue());
-      }
-      if (parameters.containsKey("disfluencyLayer"))
-      {
-	 setDisfluencyLayer((Layer)parameters.get("disfluencyLayer").getValue());
-      }
-      if (parameters.containsKey("expansionLayer"))
-      {
-	 setExpansionLayer((Layer)parameters.get("expansionLayer").getValue());
-      }
-      if (parameters.containsKey("errorsLayer"))
-      {
-	 setErrorsLayer((Layer)parameters.get("errorsLayer").getValue());
-      }
-      if (parameters.containsKey("repetitionsLayer"))
-      {
-	 setRepetitionsLayer((Layer)parameters.get("repetitionsLayer").getValue());
-      }
-      if (parameters.containsKey("retracingLayer"))
-      {
-	 setRetracingLayer((Layer)parameters.get("retracingLayer").getValue());
-      }
-      if (parameters.containsKey("completionLayer"))
-      {
-	 setCompletionLayer((Layer)parameters.get("completionLayer").getValue());
-      }
-      if (parameters.containsKey("gemLayer"))
-      {
-	 setGemLayer((Layer)parameters.get("gemLayer").getValue());
-      }
-      if (parameters.containsKey("linkageLayer"))
-      {
-	 setLinkageLayer((Layer)parameters.get("linkageLayer").getValue());
-      }
-      if (parameters.containsKey("cUnitLayer"))
-      {
-	 setCUnitLayer((Layer)parameters.get("cUnitLayer").getValue());
-      }
-      if (parameters.containsKey("transcriberLayer"))
-      {
-	 setTranscriberLayer((Layer)parameters.get("transcriberLayer").getValue());
-      }
-      if (parameters.containsKey("languagesLayer"))
-      {
-	 setLanguagesLayer((Layer)parameters.get("languagesLayer").getValue());
-      }
       if (getParticipantLayer() == null || getTurnLayer() == null || getUtteranceLayer() == null || getWordLayer() == null)
       {
 	 throw new SerializationParametersMissingException();
-      }
-      for (String attribute : participantLayers.keySet())
-      {
-	 if (parameters.containsKey(attribute + "Layer"))
-	 {
-	    participantLayers.put(attribute, ((Layer)parameters.get(attribute + "Layer").getValue()));
-	 }
       }
    }
 
@@ -1279,7 +1177,6 @@ public class ChatDeserializer
 	    getParticipantLayer().getId());
 	 participant.setParentId(graph.getId());
 	 graph.addAnnotation(participant);
-
 	 // set the participant meta-data
 	 for (String attribute : participantLayers.keySet())
 	 {

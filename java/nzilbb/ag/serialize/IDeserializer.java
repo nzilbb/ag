@@ -57,17 +57,17 @@ public interface IDeserializer
     *  set, to discover what (if any) general configuration is required. If parameters are
     *  returned, and user interaction is possible, then the user may be presented with an
     *  interface for setting/confirming these parameters.  Once the parameters are set, this
-    *  method can be invoked again with the required values, resulting in an empty parameter
-    *  set being returned to confirm that nothing further is required.
+    *  method can be invoked again with the required values. Unlike the
+    *  {@link #load(NamedStream[],Schema)} method, this always returns th}e required parameters, 
+    *  whether or not they are fulfilled.
     * @param configuration The general configuration for the deserializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of configuration parameters (still) must be set before
     *  {@link IDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty list, 
     *  {@link IDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an empty list,
     *  this method must be invoked again with the returned parameters' values set.
-    * @throws SerializerNotConfiguredException If the configuration is not sufficient for deserialization.
     */
-   public ParameterSet configure(ParameterSet configuration, Schema schema) throws SerializerNotConfiguredException;
+   public ParameterSet configure(ParameterSet configuration, Schema schema);
 
    /**
     * Loads the serialized form of the graph, using the given set of named streams.
@@ -81,8 +81,9 @@ public interface IDeserializer
     *  parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
     * @throws SerializationException If the graph could not be loaded.
     * @throws IOException On IO error.
+    * @throws SerializerNotConfiguredException If the configuration is not sufficient for deserialization.
     */
-   public ParameterSet load(NamedStream[] streams, Schema schema) throws SerializationException, IOException;
+   public ParameterSet load(NamedStream[] streams, Schema schema) throws SerializationException, IOException, SerializerNotConfiguredException;
 
    /**
     * Sets parameters for a given deserialization operation, after loading the serialized form

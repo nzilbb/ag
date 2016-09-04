@@ -113,9 +113,9 @@ public class JSONSerialization
     * <p>When the serializer is installed, this method should be invoked with an empty parameter
     *  set, to discover what (if any) general configuration is required. If parameters are
     *  returned, and user interaction is possible, then the user may be presented with an
-    *  interface for setting/confirming these parameters. Once the parameters are set, this
-    *  method can be invoked again with the required values, resulting in an empty parameter
-    *  set being returned to confirm that nothing further is required.
+    *  interface for setting/confirming these parameters. Unlike the
+    *  {@link #load(NamedStream[],Schema)} method, this always returns th}e required parameters, 
+    *  whether or not they are fulfilled.
     * <p>{@link ISerializer} and {@link IDeserializer} method.
     * @param configuration The general configuration for the serializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
@@ -142,11 +142,11 @@ public class JSONSerialization
     *  parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
     * @throws SerializationException If the graph could not be loaded.
     * @throws IOException On IO error.
+    * @throws SerializerNotConfiguredException If the configuration is not sufficient for deserialization.
     */
-   public ParameterSet load(NamedStream[] streams, Schema schema) throws IOException, SerializationException
+   public ParameterSet load(NamedStream[] streams, Schema schema) throws IOException, SerializationException, SerializerNotConfiguredException
    {
       warnings = new Vector<String>();
-      ParameterSet parameters = new ParameterSet();
       this.schema = schema;
 
       jsons = new LinkedHashMap<String, JSONObject>();
@@ -158,7 +158,7 @@ public class JSONSerialization
 	 }
       } // next stream
 
-      return parameters;
+      return new ParameterSet();
    }
 
    /**

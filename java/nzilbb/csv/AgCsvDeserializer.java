@@ -179,18 +179,17 @@ public class AgCsvDeserializer
     * <p>When the deserializer is installed, this method should be invoked with an empty parameter
     * set, to discover what (if any) general configuration is required. If parameters are
     * returned, and user interaction is possible, then the user may be presented with an interface
-    * for setting/confirming these parameters.  Once the parameters are set, this method can be
-    * invoked again with the required values, resulting in an empty parameter set being returned
-    * to confirm that nothing further is required.
+    * for setting/confirming these parameters.  Unlike the
+    * {@link #load(NamedStream[],Schema)} method, this always returns th}e required parameters, 
+    * whether or not they are fulfilled.
     * @param configuration The configuration for the deserializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of configuration parameters (still) must be set before
     * {@link IDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty list,
     * {@link IDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an empty list,
     * this method must be invoked again with the returned parameters' values set.
-    * @throws SerializerNotConfiguredException If the configuration is not sufficient for deserialization.
     */
-   public ParameterSet configure(ParameterSet configuration, Schema schema) throws SerializerNotConfiguredException
+   public ParameterSet configure(ParameterSet configuration, Schema schema)
    {
       s = schema;
       if (!configuration.containsKey("fieldDelimiter"))
@@ -202,15 +201,8 @@ public class AgCsvDeserializer
       }
       else
       {
-	 try
-	 {
-	    configuration.get("fieldDelimiter").apply(this);
-	    if (getFieldDelimiter() == null) throw new SerializerNotConfiguredException("fieldDelimiter must be set.");
-	 }
-	 catch(Throwable t)
-	 {
-	    throw new SerializerNotConfiguredException(t);
-	 }
+	 try {configuration.get("fieldDelimiter").apply(this);} 
+	 catch(Exception exception) {}
       }
       return new ParameterSet(); // all done
    }
@@ -222,10 +214,12 @@ public class AgCsvDeserializer
     * @return A list of parameters that require setting before {@link IDeserializer#deserialize()} can be invoked. This may be an empty list, and may include parameters with the value already set to a workable default. If there are parameters, and user interaction is possible, then the user may be presented with an interface for setting/confirming these parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
     * @throws SerializationException If the graph could not be loaded.
     * @throws IOException On IO error.
+    * @throws SerializerNotConfiguredException If the configuration is not sufficient for deserialization.
     */
    @SuppressWarnings({"rawtypes", "unchecked"})
-   public ParameterSet load(NamedStream[] streams, Schema schema) throws IOException, SerializationException
+   public ParameterSet load(NamedStream[] streams, Schema schema) throws IOException, SerializationException, SerializerNotConfiguredException
    {
+      if (getFieldDelimiter() == null) throw new SerializerNotConfiguredException("fieldDelimiter must be set.");
       ParameterSet parameters = new ParameterSet();
 
       // take the first csv stream, ignore all others.

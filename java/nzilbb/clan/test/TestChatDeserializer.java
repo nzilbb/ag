@@ -68,6 +68,11 @@ public class TestChatDeserializer
       // create deserializer
       ChatDeserializer deserializer = new ChatDeserializer();
 
+      // general configuration
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals(20, deserializer.configure(configuration, schema).size());
+
       // load the stream
       ParameterSet defaultParamaters = deserializer.load(streams, schema);
       // for (Parameter p : defaultParamaters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
@@ -485,6 +490,11 @@ public class TestChatDeserializer
 
       // create deserializer
       ChatDeserializer deserializer = new ChatDeserializer();
+
+      // general configuration
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals(20, deserializer.configure(configuration, schema).size());
 
       // load the stream
       ParameterSet defaultParamaters = deserializer.load(streams, schema);

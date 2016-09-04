@@ -54,9 +54,9 @@ public interface ISerializer
     * <p>When the serializer is installed, this method should be invoked with an empty parameter
     *  set, to discover what (if any) general configuration is required. If parameters are
     *  returned, and user interaction is possible, then the user may be presented with an
-    *  interface for setting/confirming these parameters. Once the parameters are set, this
-    *  method can be invoked again with the required values, resulting in an empty parameter
-    *  set being returned to confirm that nothing further is required.
+    *  interface for setting/confirming these parameters. Unlike the
+    *  {@link #load(NamedStream[],Schema)} method, this always returns th}e required parameters, 
+    *  whether or not they are fulfilled.
     * @param configuration The general configuration for the serializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of configuration parameters (still) must be set before
