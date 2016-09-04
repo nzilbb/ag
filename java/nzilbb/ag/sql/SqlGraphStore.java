@@ -2628,7 +2628,7 @@ public class SqlGraphStore
 
 		  // add the speaker to transcript_speaker
 		  sql = getConnection().prepareStatement(
-		     "INSERT INTO transcript_speaker (speaker_number, ag_id, name) VALUES (?,?,?)");
+		     "REPLACE INTO transcript_speaker (speaker_number, ag_id, name) VALUES (?,?,?)");
 		  sql.setInt(1, speakerNumber);
 		  sql.setInt(2, agId);
 		  sql.setString(3, annotation.getLabel());
