@@ -226,6 +226,9 @@ public class Anchor
     */
    public void setId(String id) 
    {
+      LinkedHashSet<Annotation> starting = getStartingAnnotations();
+      LinkedHashSet<Annotation> ending = getEndingAnnotations();
+
       // remove the old id from the graph index
       String oldId = getId();
       if (getGraph() != null) getGraph().getAnchors().remove(oldId);
@@ -234,7 +237,7 @@ public class Anchor
       if (getGraph() != null) getGraph().getAnchors().put(id, this);
       
       // update all annotations that use the anchor
-      for (Annotation startsHere : getStartingAnnotations())
+      for (Annotation startsHere : starting)
       {
 	 // check it still uses this anchor
 	 if (startsHere.getStartId().equals(oldId))
@@ -242,7 +245,7 @@ public class Anchor
 	    startsHere.setStartId(id);
 	 }
       } // next annotation
-      for (Annotation endsHere : getEndingAnnotations())
+      for (Annotation endsHere : ending)
       {
 	 // check it still uses this anchor
 	 if (endsHere.getEndId().equals(oldId))
@@ -291,11 +294,14 @@ public class Anchor
 	 if (!a.getStartId().equals(id))
 	 {
 	    iAnnotations.remove();
-	    if (!a.getStart().startOf.containsKey(a.getLayerId()))
+	    if (a.getStart() != null)
 	    {
-	       a.getStart().startOf.put(a.getLayerId(), new LinkedHashSet<Annotation>());
+	       if (!a.getStart().startOf.containsKey(a.getLayerId()))
+	       {
+		  a.getStart().startOf.put(a.getLayerId(), new LinkedHashSet<Annotation>());
+	       }
+	       a.getStart().startOf.get(a.getLayerId()).add(a);
 	    }
-	    a.getStart().startOf.get(a.getLayerId()).add(a);
 	 }
       } // next annotation
       return annotations;
@@ -360,11 +366,14 @@ public class Anchor
 	 if (!a.getEndId().equals(id))
 	 {
 	    iAnnotations.remove();
-	    if (!a.getEnd().endOf.containsKey(a.getLayerId()))
+	    if (a.getEnd() != null)
 	    {
-	       a.getEnd().endOf.put(a.getLayerId(), new LinkedHashSet<Annotation>());
+	       if (!a.getEnd().endOf.containsKey(a.getLayerId()))
+	       {
+		  a.getEnd().endOf.put(a.getLayerId(), new LinkedHashSet<Annotation>());
+	       }
+	       a.getEnd().endOf.get(a.getLayerId()).add(a);
 	    }
-	    a.getEnd().endOf.get(a.getLayerId()).add(a);
 	 }
       } // next annotation
       return annotations;

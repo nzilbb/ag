@@ -1470,14 +1470,16 @@ public class Validator
 	 Layer otherLayer = annotation.getGraph().getLayer(anOther.getLayerId());
 	 if (layer != null && otherLayer != null)
 	 {
-	    if (layer.getParentId().equals(otherLayer.getId()))
+	    if (layer.getParentId() != null
+		&& layer.getParentId().equals(otherLayer.getId()))
 	    { // other is parent layer to this
 	       if (!layer.getSaturated()) continue; // sparse
 
 	       // this belongs to another parent
 	       if (!anOther.getId().equals(annotation.getParentId())) continue;
 	    }
-	    else if (otherLayer.getParentId().equals(layer.getId()))
+	    else if (otherLayer.getParentId() != null
+		     && otherLayer.getParentId().equals(layer.getId()))
 	    { // this is parent layer to other
 	       if (!otherLayer.getSaturated()) continue; // sparse
 	       

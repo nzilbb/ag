@@ -77,7 +77,7 @@ public class Annotation
     * Getter for <i>label</i>: The annotation's label.
     * @return The annotation's label.
     */
-   public String getLabel() { try { return (String)get("label"); } catch(ClassCastException exception) {return null;} }
+   public String getLabel() { try { return (String)get("label"); } catch(ClassCastException exception) {return null;} } // TODO maybe this should be Object, and return something determined by annotaiton.layer.type
    /**
     * Setter for <i>label</i>: The annotation's label.
     * @param label The annotation's label.
