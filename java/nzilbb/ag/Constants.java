@@ -68,4 +68,16 @@ public class Constants
    /** Standardized attribute name (key) for a comment. Value is "comment". */
    public static final String COMMENT = "comment";
 
+   /** Possible value for {@link Layer#getType()} representing a string of text - "string". */
+   public static final String TYPE_STRING = "string";
+   /** Possible value for {@link Layer#getType()} representing a string of phonemes using unicode IPA - "ipa". */
+   public static final String TYPE_IPA = "ipa";
+   /** Possible value for {@link Layer#getType()} representing a number - "number". */
+   public static final String TYPE_NUMBER = "number";
+   /** Possible value for {@link Layer#getType()} representing a string value select from a closed set of possibilities - "select". 
+    * @see Layer#getValidLabels()
+    */
+   public static final String TYPE_SELECT = "select";
+   
+
 } // end of class Constants
