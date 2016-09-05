@@ -558,11 +558,11 @@ public class Merger
       for (Layer layer : topDownLayersInEditedGraph)
       {
 	 TreeSet<Annotation> uneditedAnnotations 
-	    = new TreeSet<Annotation>(new AnnotationComparatorByAnchor()); // TODO should these prioritise ordinal over anchor?
+	    = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
 	 uneditedAnnotations.addAll(Arrays.asList(graph.list(layer.getId())));
 	 
 	 TreeSet<Annotation> editedAnnotations 
-	    = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
+	    = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
 	 editedAnnotations.addAll(Arrays.asList(editedGraph.list(layer.getId())));
 	 
 	 // (no changes to track:)
@@ -834,12 +834,14 @@ public class Merger
 	    MinimumEditPath<Annotation> mp = new MinimumEditPath<Annotation>(defaultComparator);
 	    List<EditStep<Annotation>> path = mp.minimumEditPath(theseAnnotations, thoseAnnotations);
 	    // introduce mapped annotations to each other
+	    // log("PATH");
 	    for (EditStep<Annotation> step : path)
 	    {
 	       if (step.getFrom() != null && step.getTo() != null)
 	       {
 		  setCounterparts(step.getFrom(), step.getTo());
 	       }
+	       // log(step.getFrom(), " ", step.getOperation(), " ", step.getTo());
 	    }
 	 } // next chunk pair
       } // next who
@@ -2559,7 +2561,8 @@ public class Merger
 			      {
 				 continue; // ignore non-children
 			      }
-			      if (anStartingHere.getEnd().getOffset() < dNewOffset)
+			      if (anStartingHere.getEnd().getOffset() != null
+				  && anStartingHere.getEnd().getOffset() < dNewOffset)
 			      {
 				 // if the end anchor is in the past, it will need moving too
 				 changes.addAll( // record changes for:
@@ -2586,8 +2589,9 @@ public class Merger
 			{
 			   predecessor = itAnchors.previous();
 			   if (predecessor == anchor) continue; // skip the one we just got
+			   if (predecessor.getOffset() == null) continue; // skip no-offset anchors
 
-			   dLowestOriginalOffset = Math.min(dLowestOriginalOffset, predecessor.getOriginalOffset());
+ 			   dLowestOriginalOffset = Math.min(dLowestOriginalOffset, predecessor.getOriginalOffset());
 
 			   // if we get to anchor that has a higher confidence than anchor.confidence, we stop
 			   if (getConfidence(predecessor) > getConfidence(anchor))
@@ -2648,6 +2652,7 @@ public class Merger
 			while (itAnchors.hasNext()) // (we should never get to the end)
 			{
 			   Anchor anchorToChange = itAnchors.next();
+			   if (anchorToChange.getOffset() == null) continue;
 			   if (bRevertWouldSolve)
 			   {
 			      if (bChangeCurrentAnchor // if some prior anchors have status >= anchor.status

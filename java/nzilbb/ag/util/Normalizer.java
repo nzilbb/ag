@@ -240,7 +240,11 @@ public class Normalizer
       for (String childLayerId : following.getAnnotations().keySet())
       {
 	 // move everything from following to preceding
-	 int ordinal = preceding.getAnnotations().get(childLayerId).size() + 1;
+	 int ordinal = 1;
+	 if (preceding.getAnnotations().containsKey(childLayerId))
+	 {
+	    ordinal = preceding.getAnnotations().get(childLayerId).size() + 1;
+	 }
 	 for (Annotation child : following.annotations(childLayerId))
 	 {
 	    changes.addAll( // record changes for:
