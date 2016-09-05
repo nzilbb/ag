@@ -21,7 +21,11 @@
 //
 package nzilbb.ag.serialize.util;
 
+import java.util.LinkedHashMap;
+import java.util.HashSet;
+import java.util.List;
 import nzilbb.ag.Graph;
+import nzilbb.ag.Layer;
 import nzilbb.ag.serialize.*;
 
 /**
@@ -66,7 +70,7 @@ public class Utility
     * @param mimeType The MIME type to match.
     * @return The first stream whose {@link NamedStream#name} ends with <var>nameSuffix</var> or whose {@link NamedStream#mimeType} is the same as <var>mimeType</var>, or null if no such stream was found.
     */
-   public static NamedStream findSingleStream(NamedStream[] streams, String nameSuffix, String mimeType)
+   public static NamedStream FindSingleStream(NamedStream[] streams, String nameSuffix, String mimeType)
    {      
       for (NamedStream stream : streams)
       {	 
@@ -78,6 +82,30 @@ public class Utility
       } // next stream
       return null;
    } // end of findSingleStream()
+
+   /**
+    * Tries to find a layer in the given map, using an ordered list of possible IDs. Spaces, 
+    * underscores, and case are ignored when looking for matching layer IDs.
+    * @param possibleLayers Collection of layers from which a possibility can be selected.
+    * @param possibleIds Guesses at possible layer IDs.
+    * @return The first matching layer, or null if none matched.
+    */
+   public static Layer FindLayerById(LinkedHashMap<String,Layer> possibleLayers, List<String> possibleIds)
+   {
+      LinkedHashMap<String,Layer> possibleLayersSimplifiedIds = new LinkedHashMap<String,Layer>();
+      for (String id : possibleLayers.keySet())
+      {
+	 possibleLayersSimplifiedIds.put(id.toLowerCase().replaceAll("[ _]",""), possibleLayers.get(id));
+      }
+      for (String id : possibleIds)
+      {
+	 if (possibleLayersSimplifiedIds.containsKey(id.toLowerCase().replaceAll("[ _]","")))
+	 {
+	    return possibleLayersSimplifiedIds.get(id);
+	 }
+      }
+      return null;
+   } // end of findLayerById()
 
 
 } // end of class Utility
