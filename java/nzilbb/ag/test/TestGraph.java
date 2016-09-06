@@ -112,6 +112,7 @@ public class TestGraph
       Annotation quick = new Annotation("word2", "quick", "word", "a2", "a3", "turn1");
       Annotation brown = new Annotation("word3", "brown", "word", "a3", "a4", "turn1");
       Annotation fox = new Annotation("word4", "fox", "word", "a4", "a5", "turn1");
+      Annotation orphan = new Annotation("orphan", "orphan", "word", "a3", "a4");
 
       g.addAnnotation(who1);
       g.addAnnotation(turn1);
@@ -119,6 +120,7 @@ public class TestGraph
       g.addAnnotation(quick);
       g.addAnnotation(brown);
       g.addAnnotation(fox);
+      g.addAnnotation(orphan);
 
       assertEquals(g, who1.getGraph());
       assertEquals(g, turn1.getGraph());
@@ -201,7 +203,8 @@ public class TestGraph
       assertTrue(words.contains(quick));
       assertTrue(words.contains(brown));
       assertTrue(words.contains(fox));
-      assertTrue(words.size() == 4);
+      assertTrue("graph lists orphans", words.contains(orphan));
+      assertTrue(words.size() == 5);
       // TODO graph 'contains' itself
       // assertEquals(g.list("graph")[0], g);
       // assertEquals(1, g.list("graph").length);

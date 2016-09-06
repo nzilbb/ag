@@ -414,14 +414,27 @@ public class Annotation
 	    currentSiblings.remove(this);
 	 }
       }
+      else if (currentParent == null && newParent != null)
+      {
+	 // no longer an orphan
+	 if (graph != null && getLayerId() != null && graph.orphans.containsKey(getLayerId()))
+	 {
+	    graph.orphans.get(getLayerId()).remove(this);
+	 }
+      }
       if (newParent == null)
       {
 	 // if it's a tag layer its anchors depend on the parent...
 	 changes.addAll(
 	    setParentId(null));
+	 // now an orphan
+	 if (graph != null && getLayerId() != null && graph.orphans.containsKey(getLayerId()))
+	 {
+	    graph.orphans.get(getLayerId()).add(this);
+	 }
       }
       else
-      {	 
+      {
 	 changes.addAll(
 	    setParentId(newParent.getId()));
 	 if (!newParent.getAnnotations().containsKey(getLayerId()))
@@ -643,6 +656,32 @@ public class Annotation
       setParentId(parentId);
       setOrdinal(ordinal);
    } // end of constructor
+
+   /**
+    * Copy constructor.  This copies all attributes of the anchor <em>except</em> <var>id</var>, tracked original values (e.g. <var>originalLabel</var>), and attributes whose keys do not begin with an alphanumeric (by convention these are transient attributes), the intention being to create a new annotation that has the same characteristics as <var>other</var> (<var>label</var>, <var>confidence</var>, etc.), but which is a different annotation with different (initially, no) graph linkages,
+    * @param other The annotation to copy.
+    */
+   public Annotation(Annotation other)
+   {
+      putAll(other);
+      Vector<String> keysToRemove = new Vector<String>();
+      keysToRemove.add("id");
+      for (String key : keySet())
+      {
+	 // remove tracked original attributes
+	 if (getTrackedAttributes().contains(key))
+	 {
+	    String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
+	    keysToRemove.add(originalValueKey);
+	 }
+	 else if (key.length() > 0 && !Character.isLetterOrDigit(key.charAt(0)))
+	 { // starts with non-alphanumeric
+	    keysToRemove.add(key);
+	 }
+      } // next key
+      for (String key : keysToRemove) remove(key);
+   } // end of constructor
+
 
    /**
     * Setter for <i>id</i>: The annotation's identifier.

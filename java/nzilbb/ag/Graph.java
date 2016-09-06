@@ -21,6 +21,7 @@
 //
 package nzilbb.ag;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.HashMap;
@@ -89,6 +90,8 @@ public class Graph
    // keep a list of annotations whose anchors haven't been added yet
    private HashMap<String,Vector<Annotation>> unknownStartAnchor = new HashMap<String,Vector<Annotation>>();
    private HashMap<String,Vector<Annotation>> unknownEndAnchor = new HashMap<String,Vector<Annotation>>();
+   // keep a list of orphaned annotations, keyed on layerId
+   HashMap<String,LinkedHashSet<Annotation>> orphans = new HashMap<String,LinkedHashSet<Annotation>>();
 
    /**
     * Getter for corpus: The name of the corpus the graph belongs to.
@@ -507,28 +510,36 @@ public class Graph
       if (annotation.getParent() != null)
       { // this ensures it's in the parent's child collection
 	 annotation.setParent(annotation.getParent(), false);
-      }	 
+      }
+      else
+      { // keep track of orphans
+	 if (!orphans.containsKey(annotation.getLayerId()))
+	 {
+	    orphans.put(annotation.getLayerId(), new LinkedHashSet<Annotation>());
+	 }
+	 orphans.get(annotation.getLayerId()).add(annotation);
+      }
       // find any children that might have already been added
       if (annotation.getLayer() != null)
       {
 	 Layer layer = annotation.getLayer();
 	 for (Layer childLayer : layer.getChildren().values())
 	 {
-	    Vector<Annotation> newChildren = new Vector<Annotation>();
-	    // gather up new children
-	    for (Annotation otherAnnotation : annotationsById.values()) // TODO too slow?
+	    if (orphans.containsKey(childLayer.getId()))
 	    {
-	       if (otherAnnotation.getParentId() != null
-		   && otherAnnotation.getParentId().equals(annotation.getId()))
+	       Iterator<Annotation> orphansOnLayer = orphans.get(childLayer.getId()).iterator();
+	       while (orphansOnLayer.hasNext())
 	       {
-		  newChildren.add(otherAnnotation);
-	       }
-	    } // next possible child annotation
-	    // add them in order
-	    for (Annotation child : newChildren)
-	    {
-	       child.setParent(annotation, false);
-	    } // next child
+		  Annotation orphan = orphansOnLayer.next();
+		  if (orphan.getParentId() != null
+		      && orphan.getParentId().equals(annotation.getId()))
+		  {
+		     orphan.setParent(annotation, false);
+		     orphansOnLayer.remove();
+		  }
+	       } // next possible child annotation
+	       if (orphans.get(childLayer.getId()).size() == 0) orphans.remove(childLayer.getId());
+	    } // there are orphaned children on this layer
 	 } // next child layer
 
 	 // also set the parent if it's a child of "graph"
@@ -1020,6 +1031,62 @@ public class Graph
     */
    public Anchor getEnd() { return getAnchors().get(getEndId()); }
 
+   /**
+    * Gets a list of related annotations on the given layer.
+    * <p>"Related" means that <var>layerId</var> identifies the parent layer, an ancestor layer,
+    * a child of an ancestor, a child layer, or a desdendant layer.
+    * <p>This utility method makes navigating the layer hierarchy easier and with less prior
+    * knowledge of it. e.g.:
+    * <ul>
+    *  <li><code>word.list("turn")[0]</code> for the (parent) turn</li>
+    *  <li><code>phone.list("turn")[0]</code> for the (grandparent) turn</li>
+    *  <li><code>word.list("POS")</code> for all (child) part of speech annotations</li>
+    *  <li><code>word.list("phone")</code> for all (child) phones in a word</li>
+    *  <li><code>turn.list("phone")</code> for all (grandchild) phones in a turn</li>
+    *  <li><code>phone.list("POS")</code> for the all (peer) part of speech annotation, which are neither ancestors nor descendants, but rather children of an ancestor (<code>phone.my("word")</code>)</li>
+    *  <li><code>word.list("who")[0]</code> for the (grandparent) speaker</li>
+    *  <li><code>word.list("graph")[0]</code> for the (great-grandparent) graph</li>
+    *  <li><code>word.list("utterance")[0]</code> for the (peer) utterance, which is neither an ancestor nor descendant, but rather is a child of an ancestor (<code>word.my"turn")</code>)</li>
+    *  <li><code>utterace.list("word")</code> for the utterance's (peer) words, which are neither an ancestors nor descendants, but rather are children of an ancestor (<code>utterance.my"turn")</code>)</li>
+    *  <li><code>word.list("corpus")[0]</code> for the graph's (child of grandparent) corpus, which is neither an ancestor nor descendant, but rather is a child of an ancestor (<code>word.my("graph")</code>)</li>
+    * </ul>
+    * <p>{@link #setGraph(Graph)} must have been previously called, and the graph must have a
+    * correct layer hierarchy for this method to work correctly.
+    * <p>This override of {@link Annotation#list(String)} ensures that even orphaned annotations 
+    * on the given layer are returned.
+    * @param layerId The layer of the desired annotations.
+    * @return The related annotations, or an empty array if none could be found on the given layer.
+    */
+   public Annotation[] list(final String layerId)
+   {
+      Annotation[] annotations = super.list(layerId);
+      if (orphans.containsKey(layerId))
+      {
+	 Vector<Annotation> orphansToAdd = new Vector<Annotation>();
+	 Iterator<Annotation> orphansOnLayer = orphans.get(layerId).iterator();
+	 while (orphansOnLayer.hasNext())
+	 {
+	    Annotation orphan = orphansOnLayer.next();
+	    // double-check it's still an orphan
+	    if (orphan.getParent() == null)
+	    {
+	       orphansToAdd.add(orphan);
+	    }
+	    else
+	    {
+	       orphansOnLayer.remove();
+	    }
+	 } // next orphan
+	 if (orphans.get(layerId).size() == 0) orphans.remove(layerId);
+	 if (orphansToAdd.size() > 0)
+	 {
+	    Vector<Annotation> annotationList = new Vector<Annotation>(Arrays.asList(annotations));
+	    annotationList.addAll(orphansToAdd);
+	    return annotationList.toArray(new Annotation[0]);
+	 }
+      } // there are orphans
+      return annotations;
+   }
 
    // TrackedMap methods
 
@@ -1039,7 +1106,10 @@ public class Graph
 	 {
 	    a.setStartId(null); // remove reference from start anchor
 	    a.setEndId(null); // remove reference from end anchor
+	    Annotation p = a.getParent();
 	    a.setParent(null); // remove reference from parent
+	    // ensure it doesn't linger in the orphans list
+	    if (orphans.containsKey(a.getLayerId())) orphans.get(a.getLayerId()).remove(a);
 	    a.setLayer(null);
 	    iAnnotation.remove();
 	 }
