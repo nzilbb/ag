@@ -1,0 +1,660 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 306.92 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "participant" 
+        xmin = 0 
+        xmax = 306.92 
+        intervals: size = 129 
+        intervals [1]:
+            xmin = 0 
+            xmax = 5.75 
+            text = "and äh . [throatclear] Cyril[sIr@l] would arrive at the door" 
+        intervals [2]:
+            xmin = 5.75 
+            xmax = 6.907 
+            text = "with this letter for Mum" 
+        intervals [3]:
+            xmin = 6.907 
+            xmax = 9.126 
+            text = "and and then there was a message ." 
+        intervals [4]:
+            xmin = 9.126 
+            xmax = 12.126 
+            text = "and I think they both had telephones ." 
+        intervals [5]:
+            xmin = 12.126 
+            xmax = 13.22 
+            text = "ah at that time" 
+        intervals [6]:
+            xmin = 13.22 
+            xmax = 16.033 
+            text = "we certainly had a telephone at our place --" 
+        intervals [7]:
+            xmin = 16.033 
+            xmax = 18.315 
+            text = "and I think Molly always had a telephone so ." 
+        intervals [8]:
+            xmin = 18.315 
+            xmax = 19.236 
+            text = "then I suppose" 
+        intervals [9]:
+            xmin = 19.236 
+            xmax = 20.423 
+            text = "there was a phone call to say" 
+        intervals [10]:
+            xmin = 20.423 
+            xmax = 21.985 
+            text = "oh yeah yeah and we'll see you there" 
+        intervals [11]:
+            xmin = 21.985 
+            xmax = 23.563 
+            text = "or whatever <mmm> you know -" 
+        intervals [12]:
+            xmin = 23.563 
+            xmax = 25.501 
+            text = "but then Molly walked in ." 
+        intervals [13]:
+            xmin = 25.501 
+            xmax = 27.533 
+            text = "and immediately I grabbed Molly" 
+        intervals [14]:
+            xmin = 27.533 
+            xmax = 30.44 
+            text = "because I knew se she was so close ." 
+        intervals [15]:
+            xmin = 30.44 
+            xmax = 32.003 
+            text = "and I told her all about it ." 
+        intervals [16]:
+            xmin = 32.003 
+            xmax = 34.535 
+            text = "<yeah> and ah -" 
+        intervals [17]:
+            xmin = 34.535 
+            xmax = 37.567 
+            text = "ah . and I said come quick come quick ." 
+        intervals [18]:
+            xmin = 37.567 
+            xmax = 38.786 
+            text = "Dad's at home" 
+        intervals [19]:
+            xmin = 38.786 
+            xmax = 40.473 
+            text = "and he's a hell of a mess" 
+        intervals [20]:
+            xmin = 40.473 
+            xmax = 42.223 
+            text = "<yeah> sort of words you know ? <yeah>" 
+        intervals [21]:
+            xmin = 42.223 
+            xmax = 44.255 
+            text = "which he was he was beside himself" 
+        intervals [22]:
+            xmin = 44.255 
+            xmax = 45.505 
+            text = "" 
+        intervals [23]:
+            xmin = 45.505 
+            xmax = 50.006 
+            text = "he was you know -- so -" 
+        intervals [24]:
+            xmin = 50.006 
+            xmax = 51.631 
+            text = "I don't know how we got back there" 
+        intervals [25]:
+            xmin = 51.631 
+            xmax = 53.225 
+            text = "whether we got a taxi or ." 
+        intervals [26]:
+            xmin = 53.225 
+            xmax = 54.319 
+            text = "the priests ran us up ." 
+        intervals [27]:
+            xmin = 54.319 
+            xmax = 55.444 
+            text = "you know because ." 
+        intervals [28]:
+            xmin = 55.444 
+            xmax = 60.101 
+            text = "the township's quite a long from where we lived in {unclear} --" 
+        intervals [29]:
+            xmin = 60.101 
+            xmax = 64.851 
+            text = "and ah -- shit --" 
+        intervals [30]:
+            xmin = 64.851 
+            xmax = 66.664 
+            text = "and I remember -" 
+        intervals [31]:
+            xmin = 66.664 
+            xmax = 70.195 
+            text = "she came home and tried to console Dad and -" 
+        intervals [32]:
+            xmin = 70.195 
+            xmax = 72.633 
+            text = "he said oh she's just cooked me a cake" 
+        intervals [33]:
+            xmin = 72.633 
+            xmax = 74.039 
+            text = "for my fiftieth birthday" 
+        intervals [34]:
+            xmin = 74.039 
+            xmax = 76.476 
+            text = "which was on the bench <mmm> -" 
+        intervals [35]:
+            xmin = 76.476 
+            xmax = 79.726 
+            text = "and um --" 
+        intervals [36]:
+            xmin = 79.726 
+            xmax = 81.101 
+            text = "at a certain stage ." 
+        intervals [37]:
+            xmin = 81.101 
+            xmax = 82.538 
+            text = "I had to go ." 
+        intervals [38]:
+            xmin = 82.538 
+            xmax = 83.975 
+            text = "the same night I think" 
+        intervals [39]:
+            xmin = 83.975 
+            xmax = 85.163 
+            text = "after I'd seen Molly" 
+        intervals [40]:
+            xmin = 85.163 
+            xmax = 86.726 
+            text = "I think she went -" 
+        intervals [41]:
+            xmin = 86.726 
+            xmax = 88.07 
+            text = "to my to our place" 
+        intervals [42]:
+            xmin = 88.07 
+            xmax = 89.508 
+            text = "to k try to find ." 
+        intervals [43]:
+            xmin = 89.508 
+            xmax = 92.367 
+            text = "pop and . console him --" 
+        intervals [44]:
+            xmin = 92.367 
+            xmax = 95.461 
+            text = "and I . had to go back with the police ." 
+        intervals [45]:
+            xmin = 95.461 
+            xmax = 98.742 
+            text = "to . to um --" 
+        intervals [46]:
+            xmin = 98.742 
+            xmax = 101.398 
+            text = "to identify Mum - <right> -" 
+        intervals [47]:
+            xmin = 101.398 
+            xmax = 105.929 
+            text = "and um --" 
+        intervals [48]:
+            xmin = 105.929 
+            xmax = 107.804 
+            text = "and that was very difficult -" 
+        intervals [49]:
+            xmin = 107.804 
+            xmax = 110.335 
+            text = "" 
+        intervals [50]:
+            xmin = 110.335 
+            xmax = 112.397 
+            text = "but later I got back home ." 
+        intervals [51]:
+            xmin = 112.397 
+            xmax = 114.021 
+            text = "and I remember --" 
+        intervals [52]:
+            xmin = 114.021 
+            xmax = 117.942 
+            text = "Molly had gone and Dad was --" 
+        intervals [53]:
+            xmin = 117.942 
+            xmax = 121.629 
+            text = "there but s you know . very -" 
+        intervals [54]:
+            xmin = 121.629 
+            xmax = 123.754 
+            text = "depressed as shit and so on -" 
+        intervals [55]:
+            xmin = 123.754 
+            xmax = 126.566 
+            text = "and Barry was just coming back from -" 
+        intervals [56]:
+            xmin = 126.566 
+            xmax = 129.425 
+            text = "camp he was at Ohakia . as a -" 
+        intervals [57]:
+            xmin = 129.425 
+            xmax = 132.268 
+            text = "he was in the . air force -" 
+        intervals [58]:
+            xmin = 132.268 
+            xmax = 133.174 
+            text = "at that time ." 
+        intervals [59]:
+            xmin = 133.174 
+            xmax = 136.673 
+            text = "he did air force training as an eighteen year old and ." 
+        intervals [60]:
+            xmin = 136.673 
+            xmax = 138.642 
+            text = "he . he was there -" 
+        intervals [61]:
+            xmin = 138.642 
+            xmax = 140.111 
+            text = "and he arrived back -" 
+        intervals [62]:
+            xmin = 140.111 
+            xmax = 141.579 
+            text = "with one of his friends ." 
+        intervals [63]:
+            xmin = 141.579 
+            xmax = 145.61 
+            text = "and I remember going out to the . front -" 
+        intervals [64]:
+            xmin = 145.61 
+            xmax = 146.891 
+            text = "ah of the house" 
+        intervals [65]:
+            xmin = 146.891 
+            xmax = 147.797 
+            text = "beside the garage" 
+        intervals [66]:
+            xmin = 147.797 
+            xmax = 149.828 
+            text = "and of course you know he'd just come in ." 
+        intervals [67]:
+            xmin = 149.828 
+            xmax = 151.734 
+            text = "to Wanganui and ." 
+        intervals [68]:
+            xmin = 151.734 
+            xmax = 152.796 
+            text = "didn't know a bloody thing" 
+        intervals [69]:
+            xmin = 152.796 
+            xmax = 153.796 
+            text = "and I said to him" 
+        intervals [70]:
+            xmin = 153.796 
+            xmax = 155.14 
+            text = "Barry Barry come in ." 
+        intervals [71]:
+            xmin = 155.14 
+            xmax = 158.264 
+            text = "Dad wants to talk to you --" 
+        intervals [72]:
+            xmin = 158.264 
+            xmax = 160.108 
+            text = "and so his friend said oh . well ." 
+        intervals [73]:
+            xmin = 160.108 
+            xmax = 161.951 
+            text = "oh see you later you know and ." 
+        intervals [74]:
+            xmin = 161.951 
+            xmax = 164.2 
+            text = "rode away on his bike or whatever he had ." 
+        intervals [75]:
+            xmin = 164.2 
+            xmax = 165.7 
+            text = "a motorbike or something -" 
+        intervals [76]:
+            xmin = 165.7 
+            xmax = 167.012 
+            text = "or a car -" 
+        intervals [77]:
+            xmin = 167.012 
+            xmax = 168.887 
+            text = "and of course . you know ." 
+        intervals [78]:
+            xmin = 168.887 
+            xmax = 170.074 
+            text = "it was just Barry and I" 
+        intervals [79]:
+            xmin = 170.074 
+            xmax = 174.168 
+            text = "there were no other children at that time - <mmm> --" 
+        intervals [80]:
+            xmin = 174.168 
+            xmax = 177.59 
+            text = "so he came in and - [interviewer: clears throat] --" 
+        intervals [81]:
+            xmin = 177.59 
+            xmax = 181.652 
+            text = "learned all the . disaster --" 
+        intervals [82]:
+            xmin = 181.652 
+            xmax = 183.995 
+            text = "" 
+        intervals [83]:
+            xmin = 183.995 
+            xmax = 185.339 
+            text = "and have you got all that ? [both laugh]" 
+        intervals [84]:
+            xmin = 185.339 
+            xmax = 189.464 
+            text = "" 
+        intervals [85]:
+            xmin = 189.464 
+            xmax = 191.682 
+            text = "did you switch it off or what ?" 
+        intervals [86]:
+            xmin = 191.682 
+            xmax = 197.181 
+            text = "" 
+        intervals [87]:
+            xmin = 197.181 
+            xmax = 198.275 
+            text = "I must go and have a leak you know" 
+        intervals [88]:
+            xmin = 198.275 
+            xmax = 199.213 
+            text = "if you'll excuse me" 
+        intervals [89]:
+            xmin = 199.213 
+            xmax = 205.415 
+            text = "" 
+        intervals [90]:
+            xmin = 205.415 
+            xmax = 206.415 
+            text = "well I think you should ." 
+        intervals [91]:
+            xmin = 206.415 
+            xmax = 207.79 
+            text = "listen to it because o~(often)" 
+        intervals [92]:
+            xmin = 207.79 
+            xmax = 209.977 
+            text = "very often when you're recording -" 
+        intervals [93]:
+            xmin = 209.977 
+            xmax = 211.837 
+            text = "if you don't listen to them pretty quickly" 
+        intervals [94]:
+            xmin = 211.837 
+            xmax = 212.806 
+            text = "you bloody find out" 
+        intervals [95]:
+            xmin = 212.806 
+            xmax = 214.822 
+            text = "that the microphone is malfunctioning" 
+        intervals [96]:
+            xmin = 214.822 
+            xmax = 218.29 
+            text = "or some and there's nothing much on it or  {unclear}" 
+        intervals [97]:
+            xmin = 218.29 
+            xmax = 220.696 
+            text = "now where is it in the back left ?" 
+        intervals [98]:
+            xmin = 220.696 
+            xmax = 229.852 
+            text = "" 
+        intervals [99]:
+            xmin = 229.852 
+            xmax = 233.727 
+            text = "that - Mum and Dad had looked at a house." 
+        intervals [100]:
+            xmin = 233.727 
+            xmax = 236.946 
+            text = "in the country [microphone movement noise] --" 
+        intervals [101]:
+            xmin = 236.946 
+            xmax = 239.039 
+            text = "on the main road which" 
+        intervals [102]:
+            xmin = 239.039 
+            xmax = 242.788 
+            text = "was driving towards Taranaki --" 
+        intervals [103]:
+            xmin = 242.788 
+            xmax = 245.069 
+            text = "and it was a . country house -" 
+        intervals [104]:
+            xmin = 245.069 
+            xmax = 246.413 
+            text = "with a long drive in" 
+        intervals [105]:
+            xmin = 246.413 
+            xmax = 248.834 
+            text = "you know over the field and ." 
+        intervals [106]:
+            xmin = 248.834 
+            xmax = 250.522 
+            text = "into the house . and ." 
+        intervals [107]:
+            xmin = 250.522 
+            xmax = 253.147 
+            text = "and I'd said to Barry once or twice gosh ." 
+        intervals [108]:
+            xmin = 253.147 
+            xmax = 256.928 
+            text = "if they'd bought that house --" 
+        intervals [109]:
+            xmin = 256.928 
+            xmax = 259.053 
+            text = "when they first looked at it -" 
+        intervals [110]:
+            xmin = 259.053 
+            xmax = 260.741 
+            text = "she'd still be alive today" 
+        intervals [111]:
+            xmin = 260.741 
+            xmax = 262.491 
+            text = "because well this is years ago" 
+        intervals [112]:
+            xmin = 262.491 
+            xmax = 264.459 
+            text = "of course I made these comments -" 
+        intervals [113]:
+            xmin = 264.459 
+            xmax = 266.866 
+            text = "because . that would have removed ." 
+        intervals [114]:
+            xmin = 266.866 
+            xmax = 270.584 
+            text = "her from the danger that was present on that ." 
+        intervals [115]:
+            xmin = 270.584 
+            xmax = 272.834 
+            text = "main road Somme parade <hm>" 
+        intervals [116]:
+            xmin = 272.834 
+            xmax = 275.427 
+            text = "well it wasn't a main road it was --" 
+        intervals [117]:
+            xmin = 275.427 
+            xmax = 277.708 
+            text = "a feeder road --" 
+        intervals [118]:
+            xmin = 277.708 
+            xmax = 280.114 
+            text = "ah and we'd have all lived in the country and ." 
+        intervals [119]:
+            xmin = 280.114 
+            xmax = 281.239 
+            text = "ah well not that it wa~" 
+        intervals [120]:
+            xmin = 281.239 
+            xmax = 282.77 
+            text = "you know it wasn't that far out -" 
+        intervals [121]:
+            xmin = 282.77 
+            xmax = 284.458 
+            text = "it was up by Virginia Lake ." 
+        intervals [122]:
+            xmin = 284.458 
+            xmax = 285.864 
+            text = "I don't know whether you know Wanganui much but" 
+        intervals [123]:
+            xmin = 285.864 
+            xmax = 295.115 
+            text = "" 
+        intervals [124]:
+            xmin = 295.115 
+            xmax = 298.678 
+            text = "oh well . he . of course people ." 
+        intervals [125]:
+            xmin = 298.678 
+            xmax = 300.553 
+            text = "al~ always come forward." 
+        intervals [126]:
+            xmin = 300.553 
+            xmax = 301.678 
+            text = "and offer to take ." 
+        intervals [127]:
+            xmin = 301.678 
+            xmax = 302.834 
+            text = "some of the children" 
+        intervals [128]:
+            xmin = 302.834 
+            xmax = 304.334 
+            text = "" 
+        intervals [129]:
+            xmin = 304.334 
+            xmax = 306.92 
+            text = "well there was five of us <five>" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "interviewer" 
+        xmin = 0 
+        xmax = 306.92 
+        intervals: size = 31 
+        intervals [1]:
+            xmin = 0 
+            xmax = 44.255 
+            text = "" 
+        intervals [2]:
+            xmin = 44.255 
+            xmax = 45.505 
+            text = "well inconsolable I imagine" 
+        intervals [3]:
+            xmin = 45.505 
+            xmax = 107.804 
+            text = "" 
+        intervals [4]:
+            xmin = 107.804 
+            xmax = 110.335 
+            text = "yeah --" 
+        intervals [5]:
+            xmin = 110.335 
+            xmax = 181.652 
+            text = "" 
+        intervals [6]:
+            xmin = 181.652 
+            xmax = 183.995 
+            text = "goodness" 
+        intervals [7]:
+            xmin = 183.995 
+            xmax = 185.339 
+            text = "" 
+        intervals [8]:
+            xmin = 185.339 
+            xmax = 188.932 
+            text = "well the funny light hasn't gone on -" 
+        intervals [9]:
+            xmin = 188.932 
+            xmax = 189.464 
+            text = "again" 
+        intervals [10]:
+            xmin = 189.464 
+            xmax = 191.682 
+            text = "" 
+        intervals [11]:
+            xmin = 191.682 
+            xmax = 193.65 
+            text = "well I turned it over --" 
+        intervals [12]:
+            xmin = 193.65 
+            xmax = 195.025 
+            text = "I thought it might be something to do with" 
+        intervals [13]:
+            xmin = 195.025 
+            xmax = 197.181 
+            text = "where it was on the tape" 
+        intervals [14]:
+            xmin = 197.181 
+            xmax = 199.213 
+            text = "" 
+        intervals [15]:
+            xmin = 199.213 
+            xmax = 201.775 
+            text = "okay --" 
+        intervals [16]:
+            xmin = 201.775 
+            xmax = 205.415 
+            text = "see if I can figure out what that light was" 
+        intervals [17]:
+            xmin = 205.415 
+            xmax = 214.822 
+            text = "" 
+        intervals [18]:
+            xmin = 214.822 
+            xmax = 218.29 
+            text = "yeah yeah {unclear} yeah -- well that's right" 
+        intervals [19]:
+            xmin = 218.29 
+            xmax = 220.696 
+            text = "" 
+        intervals [20]:
+            xmin = 220.696 
+            xmax = 223.227 
+            text = "ah yeah just turn left there {break in recording} [cough]" 
+        intervals [21]:
+            xmin = 223.227 
+            xmax = 229.852 
+            text = "" 
+        intervals [22]:
+            xmin = 229.852 
+            xmax = 285.864 
+            text = "" 
+        intervals [23]:
+            xmin = 285.864 
+            xmax = 287.177 
+            text = "I don't really know it at all {participant: sits down}" 
+        intervals [24]:
+            xmin = 287.177 
+            xmax = 288.646 
+            text = "--" 
+        intervals [25]:
+            xmin = 288.646 
+            xmax = 289.677 
+            text = "so after all that you said that ." 
+        intervals [26]:
+            xmin = 289.677 
+            xmax = 290.709 
+            text = "you said that ." 
+        intervals [27]:
+            xmin = 290.709 
+            xmax = 292.49 
+            text = "grandpop didn't let you." 
+        intervals [28]:
+            xmin = 292.49 
+            xmax = 295.115 
+            text = "like he kept the family together - how" 
+        intervals [29]:
+            xmin = 295.115 
+            xmax = 302.834 
+            text = "" 
+        intervals [30]:
+            xmin = 302.834 
+            xmax = 304.334 
+            text = "yeah . how many of . how many were there ? {interviewer: unclear}" 
+        intervals [31]:
+            xmin = 304.334 
+            xmax = 306.92 
+            text = "" 

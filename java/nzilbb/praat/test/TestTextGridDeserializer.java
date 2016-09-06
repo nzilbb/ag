@@ -256,6 +256,231 @@ public class TestTextGridDeserializer
       assertEquals(1, lexical.length);
    }
 
+   @Test public void utterance_utf8() 
+      throws Exception
+   {
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("comment", "Comment", 2, true, false, true),
+	 new Layer("noise", "Noise", 2, true, false, true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true),
+	 new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
+	 new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
+      // access file
+      NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance_utf-8.TextGrid")) };
+      
+      // create deserializer
+      TextGridDeserializer deserializer = new TextGridDeserializer();
+      
+      // general configuration
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      assertEquals(6, deserializer.configure(configuration, schema).size());
+
+      // load the stream
+      ParameterSet defaultParamaters = deserializer.load(streams, schema);
+      //for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+      assertEquals(2, defaultParamaters.size());
+
+      // configure the deserialization
+      deserializer.setParameters(defaultParamaters);
+      
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+
+      for (String warning : deserializer.getWarnings())
+      {
+	 System.out.println(warning);
+      }
+      
+      assertEquals("test_utterance_utf-8.TextGrid", g.getId());
+
+      // participants     
+      Annotation[] who = g.list("who");
+      assertEquals(2, who.length);
+      assertEquals("participant", who[0].getLabel());
+      assertEquals(g, who[0].getParent());
+      assertEquals("interviewer", who[1].getLabel());
+      assertEquals(g, who[1].getParent());
+      
+      // turns
+      Annotation[] turns = g.list("turn");
+      assertEquals(20, turns.length);
+      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
+      assertEquals(new Double(44.255), turns[0].getEnd().getOffset());
+      assertEquals("participant", turns[0].getLabel());
+      assertEquals(who[0], turns[0].getParent());
+      
+      Annotation[] words = g.list("word");
+      String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
+	 "and", "äh .", "Cyril", "would", "arrive", "at", "the", "door",
+	 "with", "this", "letter", "for", "Mum", 
+	 "and", "and", "then", "there", "was", "a", "message .", 
+	 "and", "I", "think", "they", "both", "had", "telephones ."
+      };
+      for (int i = 0; i < wordLabels.length; i++)
+      {
+	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
+	 assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
+	 	      i+1, words[i].getOrdinal());
+	 assertEquals(turns[0].getId(), words[i].getParentId());
+      }
+   }
+
+   @Test public void utterance_utf16() 
+      throws Exception
+   {
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("comment", "Comment", 2, true, false, true),
+	 new Layer("noise", "Noise", 2, true, false, true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true),
+	 new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
+	 new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
+      // access file
+      NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance_utf-16.TextGrid")) };
+      
+      // create deserializer
+      TextGridDeserializer deserializer = new TextGridDeserializer();
+      
+      // general configuration
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      assertEquals(6, deserializer.configure(configuration, schema).size());
+
+      // load the stream
+      ParameterSet defaultParamaters = deserializer.load(streams, schema);
+      //for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+      assertEquals(2, defaultParamaters.size());
+
+      // configure the deserialization
+      deserializer.setParameters(defaultParamaters);
+      
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+
+      for (String warning : deserializer.getWarnings())
+      {
+	 System.out.println(warning);
+      }
+      
+      assertEquals("test_utterance_utf-16.TextGrid", g.getId());
+
+      // participants     
+      Annotation[] who = g.list("who");
+      assertEquals(2, who.length);
+      assertEquals("participant", who[0].getLabel());
+      assertEquals(g, who[0].getParent());
+      assertEquals("interviewer", who[1].getLabel());
+      assertEquals(g, who[1].getParent());
+      
+      // turns
+      Annotation[] turns = g.list("turn");
+      assertEquals(20, turns.length);
+      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
+      assertEquals(new Double(44.255), turns[0].getEnd().getOffset());
+      assertEquals("participant", turns[0].getLabel());
+      assertEquals(who[0], turns[0].getParent());
+      
+      Annotation[] words = g.list("word");
+      String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
+	 "and", "äh .", "Cyril", "would", "arrive", "at", "the", "door",
+	 "with", "this", "letter", "for", "Mum", 
+	 "and", "and", "then", "there", "was", "a", "message .", 
+	 "and", "I", "think", "they", "both", "had", "telephones ."
+      };
+      for (int i = 0; i < wordLabels.length; i++)
+      {
+	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
+	 assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
+	 	      i+1, words[i].getOrdinal());
+	 assertEquals(turns[0].getId(), words[i].getParentId());
+      }
+   }
+
+   @Test public void utterance_latin1() 
+      throws Exception
+   {
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("comment", "Comment", 2, true, false, true),
+	 new Layer("noise", "Noise", 2, true, false, true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true),
+	 new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
+	 new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
+      // access file
+      NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance_latin1.TextGrid")) };
+      
+      // create deserializer
+      TextGridDeserializer deserializer = new TextGridDeserializer();
+      
+      // general configuration
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      assertEquals(6, deserializer.configure(configuration, schema).size());
+
+      // load the stream
+      ParameterSet defaultParamaters = deserializer.load(streams, schema);
+      //for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+      assertEquals(2, defaultParamaters.size());
+
+      // configure the deserialization
+      deserializer.setParameters(defaultParamaters);
+      
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+
+      for (String warning : deserializer.getWarnings())
+      {
+	 System.out.println(warning);
+      }
+      
+      assertEquals("test_utterance_latin1.TextGrid", g.getId());
+
+      // participants     
+      Annotation[] who = g.list("who");
+      assertEquals(2, who.length);
+      assertEquals("participant", who[0].getLabel());
+      assertEquals(g, who[0].getParent());
+      assertEquals("interviewer", who[1].getLabel());
+      assertEquals(g, who[1].getParent());
+      
+      // turns
+      Annotation[] turns = g.list("turn");
+      assertEquals(20, turns.length);
+      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
+      assertEquals(new Double(44.255), turns[0].getEnd().getOffset());
+      assertEquals("participant", turns[0].getLabel());
+      assertEquals(who[0], turns[0].getParent());
+      
+      Annotation[] words = g.list("word");
+      String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
+	 "and", "äh .", "Cyril", "would", "arrive", "at", "the", "door",
+	 "with", "this", "letter", "for", "Mum", 
+	 "and", "and", "then", "there", "was", "a", "message .", 
+	 "and", "I", "think", "they", "both", "had", "telephones ."
+      };
+      for (int i = 0; i < wordLabels.length; i++)
+      {
+	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
+	 assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
+	 	      i+1, words[i].getOrdinal());
+	 assertEquals(turns[0].getId(), words[i].getParentId());
+      }
+   }
+
    @Test public void utterance_word() 
       throws Exception
    {
@@ -405,6 +630,112 @@ public class TestTextGridDeserializer
 
       assertEquals("phone simultaneous speech", "8", phones[12].getLabel());
       assertEquals("phone parent simultaneous speech", "yeah --", phones[12].getParent().getLabel());
+   }
+
+   @Test public void utterance_word_ignorePhones() 
+      throws Exception
+   {
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true),
+	 new Layer("phone", "Phones", 2, true, true, true, "word", true));
+      // access file
+      NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance_word.TextGrid")) };
+      
+      // create deserializer
+      TextGridDeserializer deserializer = new TextGridDeserializer();
+      
+      // general configuration
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      assertEquals(6, deserializer.configure(configuration, schema).size());
+
+      // load the stream
+      ParameterSet defaultParamaters = deserializer.load(streams, schema);
+      //for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+      assertEquals(6, defaultParamaters.size());
+
+      // configure the deserialization
+      defaultParamaters.get("tier4").setValue(null);
+      defaultParamaters.get("tier5").setValue(null);
+      deserializer.setParameters(defaultParamaters);
+      
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+
+      for (String warning : deserializer.getWarnings())
+      {
+	 System.out.println(warning);
+      }
+      
+      assertEquals("test_utterance_word.TextGrid", g.getId());
+
+      // participants     
+      Annotation[] who = g.list("who");
+      assertEquals(2, who.length);
+      assertEquals("participant", who[0].getLabel());
+      assertEquals(g, who[0].getParent());
+      assertEquals("interviewer", who[1].getLabel());
+      assertEquals(g, who[1].getParent());
+      
+      // turns
+      Annotation[] turns = g.list("turn");
+      assertEquals(20, turns.length);
+      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
+      assertEquals(new Double(44.255), turns[0].getEnd().getOffset());
+      assertEquals("participant", turns[0].getLabel());
+      assertEquals(who[0], turns[0].getParent());
+      
+      assertEquals(new Double(44.255), turns[1].getStart().getOffset());
+      assertEquals(new Double(45.505), turns[1].getEnd().getOffset());
+      assertEquals("interviewer", turns[1].getLabel());
+      assertEquals(who[1], turns[1].getParent());
+
+      // utterances
+      Annotation[] utterances = g.list("utterance");
+      assertEquals(139, utterances.length);
+      assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
+      assertEquals(new Double(5.75), utterances[0].getEnd().getOffset());
+      assertEquals("participant", utterances[0].getParent().getLabel());
+      assertEquals(turns[0], utterances[0].getParent());
+
+      assertEquals(new Double(5.75), utterances[1].getStart().getOffset());
+      assertEquals(new Double(6.907), utterances[1].getEnd().getOffset());
+      assertEquals("participant", utterances[1].getParent().getLabel());
+      assertEquals(turns[0], utterances[1].getParent());
+
+      assertEquals(new Double(44.255), utterances[21].getStart().getOffset());
+      assertEquals(new Double(45.505), utterances[21].getEnd().getOffset());
+      assertEquals("interviewer", utterances[21].getParent().getLabel());
+      assertEquals(turns[1], utterances[21].getParent());
+
+      Annotation[] words = g.list("word");
+      String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
+	 "and", "ah .", "Cyril", "would", "arrive", "at", "the", "door",
+	 "with", "this", "letter", "for", "Mum", 
+	 "and", "and", "then", "there", "was", "a", "message .", 
+	 "and", "I", "think", "they", "both", "had", "telephones ."
+      };
+      for (int i = 0; i < wordLabels.length; i++)
+      {
+	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
+	 assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
+	 	      i+1, words[i].getOrdinal());
+	 assertEquals(turns[0].getId(), words[i].getParentId());
+      }
+
+      // no convention annotations, because the utterances are not tokenized
+      assertEquals("no conventional comments", 0, g.list("comment").length);
+      assertEquals("no conventional noises", 0, g.list("noise").length);
+      assertEquals("no conventional pronounce annotations", 0, g.list("pronounce").length);
+      assertEquals("no conventional lexical annotations", 0, g.list("lexical").length);
+
+      // phones
+      assertEquals("no phones", 0, g.list("phone").length);
    }
 
    @Test public void turn_utterance_word() 

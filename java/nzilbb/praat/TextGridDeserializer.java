@@ -534,11 +534,11 @@ public class TextGridDeserializer
 	 iBytesRead = in.read(aBytes);
       } // next chunk	
       in.close();
-      ByteBuffer bytes = ByteBuffer.wrap(oBytes.toByteArray());
-      Charset latin1 = Charset.forName("ISO-8859-1");
-      CharBuffer utf8Buffer = latin1.decode(bytes);
       try
       { // first try as latin1
+	 ByteBuffer bytes = ByteBuffer.wrap(oBytes.toByteArray());
+	 CharsetDecoder utf8Decoder = Charset.forName("UTF-8").newDecoder();
+	 CharBuffer utf8Buffer = utf8Decoder.decode(bytes);
       	 readText(new BufferedReader(new CharArrayReader(utf8Buffer.array())));
       }
       catch (Throwable t)
@@ -546,19 +546,18 @@ public class TextGridDeserializer
 	 reset();
 	 try
 	 {
+	    ByteBuffer bytes = ByteBuffer.wrap(oBytes.toByteArray());	    
 	    // is there a byte-order mark for UTF-16? i.e. FEFF
 	    if (bytes.get(0) == (byte)0xFE && bytes.get(1) == (byte)0xFF)
 	    {
-	       bytes = ByteBuffer.wrap(oBytes.toByteArray());
 	       Charset utf16 = Charset.forName("UTF-16");
-	       utf8Buffer = utf16.decode(bytes);
+	       CharBuffer utf8Buffer = utf16.decode(bytes);
 	       readText(new BufferedReader(new CharArrayReader(utf8Buffer.array())));
 	    }
 	    else
 	    { // assume UTF-8
-	       bytes = ByteBuffer.wrap(oBytes.toByteArray());
-	       Charset utf8 = Charset.forName("UTF-8");
-	       utf8Buffer = utf8.decode(bytes);
+	       Charset latin1 = Charset.forName("ISO-8859-1");
+	       CharBuffer utf8Buffer = latin1.decode(bytes);
 	       readText(new BufferedReader(new CharArrayReader(utf8Buffer.array())));
 	    }
 	    
