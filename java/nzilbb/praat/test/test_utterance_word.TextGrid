@@ -4,7 +4,7 @@ Object class = "TextGrid"
 xmin = 0 
 xmax = 306.92 
 tiers? <exists> 
-size = 4 
+size = 6 
 item []: 
     item [1]:
         class = "IntervalTier" 
@@ -3892,5 +3892,89 @@ item []:
             text = "there ?" 
         intervals [105]:
             xmin = 304.334 
+            xmax = 306.92 
+            text = "" 
+    item [5]:
+        class = "IntervalTier" 
+        name = "phone participant" 
+        xmin = 0 
+        xmax = 306.92 
+        intervals: size = 10 
+        intervals [1]:
+            xmin = 0 
+            xmax = 214.0156 
+            text = "" 
+        intervals [2]:
+            xmin = 214.0156 
+            xmax = 214.17570843023893 
+            text = "I" 
+        intervals [3]:
+            xmin = 214.17570843023893 
+            xmax = 214.4188 
+            text = "z" 
+        intervals [4]:
+            xmin = 214.4188 
+            xmax = 214.822 
+            text = "" 
+        intervals [5]:
+            xmin = 214.822 
+            xmax = 215.20733333333334 
+            text = "$" 
+        intervals [6]:
+            xmin = 215.20733333333334 
+            xmax = 215.33505047561601 
+            text = "s" 
+        intervals [7]:
+            xmin = 215.33505047561601 
+            xmax = 215.43664230433464 
+            text = "V" 
+        intervals [8]:
+            xmin = 215.43664230433464 
+            xmax = 215.59266666666667 
+            text = "m" 
+        intervals [9]:
+            xmin = 215.59266666666667 
+            xmax = 215.978 
+            text = "n" 
+        intervals [10]:
+            xmin = 215.978 
+            xmax = 306.92 
+            text = "" 
+    item [6]:
+        class = "IntervalTier" 
+        name = "phone interviewer" 
+        xmin = 0 
+        xmax = 306.92 
+        intervals: size = 8 
+        intervals [1]:
+            xmin = 0 
+            xmax = 214.822 
+            text = "" 
+        intervals [2]:
+            xmin = 214.822 
+            xmax = 215.20733333333334 
+            text = "j" 
+        intervals [3]:
+            xmin = 215.20733333333334 
+            xmax = 215.4 
+            text = "8" 
+        intervals [4]:
+            xmin = 215.4 
+            xmax = 215.59266666666667 
+            text = "j" 
+        intervals [5]:
+            xmin = 215.59266666666667 
+            xmax = 215.978 
+            text = "8" 
+        intervals [6]:
+            xmin = 215.978 
+            xmax = 216.36333333333334 
+            text = "j" 
+        intervals [7]:
+            xmin = 216.36333333333334 
+            xmax = 216.55599999999998 
+            text = "8" 
+        intervals [8]:
+            xmin = 216.55599999999998 
             xmax = 306.92 
             text = "" 

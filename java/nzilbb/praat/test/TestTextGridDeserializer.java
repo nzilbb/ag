@@ -267,6 +267,7 @@ public class TestTextGridDeserializer
 	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
 	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
 	 new Layer("word", "Words", 2, true, false, false, "turn", true),
+	 new Layer("phone", "Phones", 2, true, true, true, "word", true),
 	 new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
 	 new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
       // access file
@@ -283,7 +284,7 @@ public class TestTextGridDeserializer
       // load the stream
       ParameterSet defaultParamaters = deserializer.load(streams, schema);
       //for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
-      assertEquals(4, defaultParamaters.size());
+      assertEquals(6, defaultParamaters.size());
 
       // configure the deserialization
       deserializer.setParameters(defaultParamaters);
@@ -358,6 +359,52 @@ public class TestTextGridDeserializer
       assertEquals("no conventional noises", 0, g.list("noise").length);
       assertEquals("no conventional pronounce annotations", 0, g.list("pronounce").length);
       assertEquals("no conventional lexical annotations", 0, g.list("lexical").length);
+
+      // phones
+      Annotation[] phones = g.list("phone");
+      assertEquals("phones", 13, phones.length);
+
+      // participant
+
+      assertEquals("phone", "I", phones[0].getLabel());
+      assertEquals("phone parent", "is", phones[0].getParent().getLabel());
+      assertEquals("phone", "z", phones[1].getLabel());
+      assertEquals("phone parent", "is", phones[1].getParent().getLabel());
+
+      assertEquals("phone simultaneous speech", "$", phones[2].getLabel());
+      assertEquals("phone parent simultaneous speech", "or", phones[2].getParent().getLabel());
+
+      assertEquals("phone simultaneous speech", "s", phones[3].getLabel());
+      assertEquals("phone parent simultaneous speech", "some", phones[3].getParent().getLabel());
+
+      assertEquals("phone simultaneous speech", "V", phones[4].getLabel());
+      assertEquals("phone parent simultaneous speech", "some", phones[4].getParent().getLabel());
+
+      assertEquals("phone simultaneous speech", "m", phones[5].getLabel());
+      assertEquals("phone parent simultaneous speech", "some", phones[5].getParent().getLabel());
+
+      assertEquals("phone simultaneous speech", "n", phones[6].getLabel());
+      assertEquals("phone parent simultaneous speech", "and", phones[6].getParent().getLabel());
+      
+      // interviewer
+
+      assertEquals("phone simultaneous speech", "j", phones[7].getLabel());
+      assertEquals("phone parent simultaneous speech", "yeah", phones[7].getParent().getLabel());
+
+      assertEquals("phone simultaneous speech", "8", phones[8].getLabel());
+      assertEquals("phone parent simultaneous speech", "yeah", phones[8].getParent().getLabel());
+
+      assertEquals("phone simultaneous speech", "j", phones[9].getLabel());
+      assertEquals("phone parent simultaneous speech", "yeah", phones[9].getParent().getLabel());
+
+      assertEquals("phone simultaneous speech", "8", phones[10].getLabel());
+      assertEquals("phone parent simultaneous speech", "yeah", phones[10].getParent().getLabel());
+
+      assertEquals("phone simultaneous speech", "j", phones[11].getLabel());
+      assertEquals("phone parent simultaneous speech", "yeah --", phones[11].getParent().getLabel());
+
+      assertEquals("phone simultaneous speech", "8", phones[12].getLabel());
+      assertEquals("phone parent simultaneous speech", "yeah --", phones[12].getParent().getLabel());
    }
 
    @Test public void turn_utterance_word() 

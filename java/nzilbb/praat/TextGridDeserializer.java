@@ -1086,6 +1086,50 @@ public class TextGridDeserializer
       // and utterances with parents
       // and words with parents
 
+      // need to ensure that another other required parents are set
+      for (Annotation a : graph.getAnnotationsById().values())
+      {
+	 if (a.getParentId() == null)
+	 {
+	    Annotation[] possibleParents = a.includingAnnotationsOn(a.getLayer().getParentId());
+	    if (possibleParents.length == 1)
+	    { // must be this one
+	       a.setParent(possibleParents[0]);
+	    }
+	    else if (possibleParents.length > 1)
+	    { // multiple possible parents
+	       // use the turn whose label is included in the utterance's tier name
+	       // e.g. the turn might be "John Smith" and the utterance tier might be "utterance - John Smith"
+	       Tier tier = (Tier)a.get("@tier");
+	       assert tier != null : "tier != null - " + a;
+	       Annotation parent = null;
+	       for (Annotation possibleParent : possibleParents)
+	       {
+		  // is the label (the speaker) a part of the utterance's tier name?
+		  Annotation who = possibleParent.my("who");
+		  if (who != null)
+		  {
+		     if (tier.getName().indexOf(who.getLabel()) >= 0)
+		     {
+			// multiple parents could match 
+			// e.g. "sp1" and "Interviewer sp1" both are suffixes of "segment - Interviewer sp1"
+			// so we go with the longest one
+			if (parent == null
+			    || possibleParent.getLabel().length() > parent.getLabel().length())
+			{
+			   parent = possibleParent;
+			} // longest match so far
+		     } // label is a part of the tier name
+		  } // there is a speaker
+	       } // next possible parent
+	       if (parent != null) a.setParent(parent);
+	    } // multiple possible parents
+	 } // parent not set
+      } // next annotation      
+
+      // remove references to tiers
+      for (Annotation a : graph.getAnnotationsById().values()) a.remove("@tier");
+
       if (errors != null) throw errors;
 
       Graph[] graphs = { graph };
