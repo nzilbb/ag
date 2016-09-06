@@ -179,9 +179,7 @@ public class AgCsvDeserializer
     * <p>When the deserializer is installed, this method should be invoked with an empty parameter
     * set, to discover what (if any) general configuration is required. If parameters are
     * returned, and user interaction is possible, then the user may be presented with an interface
-    * for setting/confirming these parameters.  Unlike the
-    * {@link #load(NamedStream[],Schema)} method, this always returns th}e required parameters, 
-    * whether or not they are fulfilled.
+    * for setting/confirming these parameters.  
     * @param configuration The configuration for the deserializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of configuration parameters (still) must be set before

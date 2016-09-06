@@ -35,4 +35,11 @@ public class SerializationParametersMissingException
    public SerializationParametersMissingException()
    {
    } // end of constructor
+   /**
+    * Default constructor
+    */
+   public SerializationParametersMissingException(String message)
+   {
+      super(message);
+   } // end of constructor
 } // end of class DeserializerNotConfiguredException

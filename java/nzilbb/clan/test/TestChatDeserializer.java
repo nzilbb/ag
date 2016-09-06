@@ -713,6 +713,6 @@ public class TestChatDeserializer
 
    public static void main(String args[]) 
    {
-      org.junit.runner.JUnitCore.main("nzilbb.ag.test.TestChatDeserializer");
+      org.junit.runner.JUnitCore.main("nzilbb.clan.test.TestChatDeserializer");
    }
 }

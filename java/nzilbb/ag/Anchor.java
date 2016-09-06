@@ -191,7 +191,7 @@ public class Anchor
    } // end of constructor
 
    /**
-    * Copy constructor.  This copies all attributes of the anchor <em>except</em> <var>id</var>, tracked original values (<var>originalOffset</var>), and attributes whose keys do not begin with an alphanumeric (by convention these are transient attributes), the intention being to create a new anchor that has the same characteristics as <var>other</var> (<var>offset</var>, <var>confidence</var>, etc.), but which is a different anchor with different (initially, no) graph linkages,
+    * Copy constructor.  This copies all attributes of the anchor <em>except</em> <var>id</var>, tracked original values (<var>originalOffset</var>), and attributes whose keys do not begin with an alphanumeric (by convention these are transient attributes), the intention being to create a new anchor that has the same characteristics as <var>other</var> (<var>offset</var>, <var>confidence</var>, etc.), but which is a different anchor with different (initially, no) graph linkages.
     * @param other The anchor to copy.
     */
    public Anchor(Anchor other)
@@ -212,10 +212,7 @@ public class Anchor
 	    keysToRemove.add(key);
 	 }
       } // next key
-      for (String key : keysToRemove)
-      {
-	 remove(key);
-      } // next key to remove
+      for (String key : keysToRemove) remove(key);
       put("startOf", getStartOf());
       put("endOf", getEndOf());
    } // end of constructor

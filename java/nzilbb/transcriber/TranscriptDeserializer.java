@@ -65,7 +65,6 @@ public class TranscriptDeserializer
     */
    public void setSchema(Schema newSchema) { schema = newSchema; }
 
-
    /**
     * Participant information layer.
     * @see #getParticipantLayer()
@@ -467,9 +466,7 @@ public class TranscriptDeserializer
     * <p>When the deserializer is installed, this method should be invoked with an empty parameter
     *  set, to discover what (if any) general configuration is required. If parameters are
     *  returned, and user interaction is possible, then the user may be presented with an
-    *  interface for setting/confirming these parameters.  Unlike the
-    *  {@link #load(NamedStream[],Schema)} method, this always returns th}e required parameters, 
-    *  whether or not they are fulfilled.
+    *  interface for setting/confirming these parameters.  
     * @param configuration The configuration for the deserializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of configuration parameters (still) must be set before {@link IDeserializer#setParameters()} can be invoked. If this is an empty list, {@link IDeserializer#setParameters()} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
@@ -843,6 +840,8 @@ public class TranscriptDeserializer
       if (accentLayer != null) graph.addLayer((Layer)accentLayer.clone());
       if (scopeLayer != null) graph.addLayer((Layer)scopeLayer.clone());
 
+      graph.setOffsetUnits(Constants.UNIT_SECONDS);
+
       // attributes
       if (getScribe().length() > 0 && scribeLayer != null)
       {
@@ -1171,7 +1170,7 @@ public class TranscriptDeserializer
 
    /**
     * Returns any warnings that may have arisen during the last execution of {@link #deserialize()}.
-    * @return A possibly empty lilayersst of warnings.
+    * @return A possibly empty list of warnings.
     */
    public String[] getWarnings()
    {

@@ -565,9 +565,7 @@ public class ChatDeserializer
     * set, to discover what (if any) general configuration is required. If parameters are returned,
     * and user interaction is possible, then the user may be presented with an interface for
     * setting/confirming these parameters. Once the parameters are set, this method can be
-    * invoked again with the required values. Unlike the {@link #load(NamedStream[],Schema)}
-    * method, this always returns th}e required parameters, whether or not they are fulfilled.
-    * @param configuration The configuration for the deserializer. 
+    * invoked again with the required values. 
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of configuration parameters that must be set before
     * {@link IDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty list,

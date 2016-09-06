@@ -65,6 +65,9 @@ public class Constants
    /** {@link Graph#offsetUnits} value for characters. Value is "char" */
    public static final String UNIT_CHARACTERS = "char";
 
+   /** {@link Graph#offsetGranularity} value for millisecond accuracy. Value is 0.001 */
+   public static final Double GRANULARITY_MILLISECONDS = 0.001;
+
    /** Standardized attribute name (key) for a comment. Value is "comment". */
    public static final String COMMENT = "comment";
 
