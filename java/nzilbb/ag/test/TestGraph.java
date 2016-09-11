@@ -1069,7 +1069,7 @@ public class TestGraph
       layers.add("word");
       Graph f = g.getFragment(0.0, 3.0, layers);
       assertEquals("my graph__0.000-3.000", f.getId());
-      assertEquals(g, f.getGraph());
+      assertEquals("fragment's graph is itself", f, f.getGraph());
       assertTrue(f.isFragment());
 
       // check anchors
@@ -1119,6 +1119,15 @@ public class TestGraph
       assertFalse("excluded layer", f.getSchema().getLayers().containsKey("phone"));
       assertFalse("excluded layer", f.getSchema().getLayers().containsKey("pos"));
       assertFalse("excluded layer", f.getSchema().getLayers().containsKey("phrase"));
+
+      // check hierarchy traversal
+      Annotation[] words = f.list("word");
+      assertEquals("list words", "word1", words[0].getId());
+      assertEquals("list words", "word2", words[1].getId());
+      assertEquals("list all and only words", 2, words.length);
+
+      // check layer identification
+      assertTrue("fragment layer correct", f.getLayer() == f.getSchema().getRoot());
 
    }
 
@@ -1206,7 +1215,7 @@ public class TestGraph
       layers.add("pos");
       Graph f = g.getFragment(quick, layers);
       assertEquals("my graph__2.000-3.000", f.getId());
-      assertEquals(g, f.getGraph());
+      assertEquals("fragment's graph is itself", f, f.getGraph());
       assertTrue(f.isFragment());
 
       // check anchors
@@ -1344,7 +1353,7 @@ public class TestGraph
       layers.add("pos");
       Graph f = g.getFragment(utterance1, layers);
       assertEquals("my graph__0.000-3.000", f.getId());
-      assertEquals(g, f.getGraph());
+      assertEquals("fragment's graph is itself", f, f.getGraph());
       assertTrue(f.isFragment());
 
       // check anchors
@@ -1485,7 +1494,7 @@ public class TestGraph
       layers.add("pos");
       Graph f = g.getFragment(utterance1, turn1, layers);
       assertEquals("my graph__0.000-3.000", f.getId());
-      assertEquals(g, f.getGraph());
+      assertEquals("fragment's graph is itself", f, f.getGraph());
       assertTrue(f.isFragment());
 
       // check anchors

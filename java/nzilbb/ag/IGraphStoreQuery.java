@@ -146,6 +146,33 @@ public interface IGraphStoreQuery
     */
    public Graph getGraph(String id, String[] layerId) 
       throws StoreException, PermissionException, GraphNotFoundException;
+
+   /**
+    * Gets a fragment of a graph, given its ID and the ID of an annotation in it that defines the 
+    * desired fragment.
+    * @param graphId The ID of the graph.
+    * @param annotationId The ID of an annotation that defines the bounds of the fragment.
+    * @return The identified graph fragment.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
+    */
+   public Graph getFragment(String graphId, String annotationId) 
+      throws StoreException, PermissionException, GraphNotFoundException;
+
+   /**
+    * Gets a fragment of a graph, given its ID and the ID of an annotation in it that defines the 
+    * desired fragment, and containing only the given layers.
+    * @param graphId The ID of the graph.
+    * @param annotationId The ID of an annotation that defines the bounds of the fragment.
+    * @param layerId The IDs of the layers to load, or null if only graph data is required.
+    * @return The identified graph fragment.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
+    */
+   public Graph getFragment(String graphId, String annotationId, String[] layerId) 
+      throws StoreException, PermissionException, GraphNotFoundException;
    
    /**
     * List the predefined media tracks available for transcripts.

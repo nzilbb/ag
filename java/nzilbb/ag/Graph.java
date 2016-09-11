@@ -238,7 +238,33 @@ public class Graph
    private static DecimalFormat offsetFormat = new DecimalFormat(
       // force the locale to something with . as the decimal separator
       "0.000", new DecimalFormatSymbols(Locale.UK));
+
    
+   /**
+    * Computes a graph fragment ID, given a graph and bounding anchors.
+    * @param graph
+    * @param startOffset
+    * @param endOffset
+    * @return The ID of the fragment, formatted <var>graphId</var>__<var>startOffset</var>-<var>endOffset</var>
+    */
+   public static String FragmentId(Graph graph, Double startOffset, Double endOffset)
+   {
+      return graph.getId() + "__" + offsetFormat.format(startOffset) 
+	 + "-" + offsetFormat.format(endOffset);
+   } // end of FragmentId()
+   
+   /**
+    * Computes a graph fragment ID, given a graph and bounding anchors.
+    * @param graph
+    * @param start
+    * @param end
+    * @return The ID of the fragment, formatted <var>graphId</var>__<var>startOffset</var>-<var>endOffset</var>
+    */
+   public static String FragmentId(Graph graph, Anchor start, Anchor end)
+   {
+      return FragmentId(graph, start.getOffset(), end.getOffset());
+   } // end of FragmentId()
+      
    /**
     * Creates a fragment of this graph, copying into it annotations that fall within the given bounds, on the given layers. 
     * Ancestors which do not fall into the interval are also added to the fragment, so that turns/speakers/etc. are accessible, but their anchors are not added to the fragment.
@@ -254,9 +280,7 @@ public class Graph
       fragment.graph = this;
       if (getId() != null)
       {
-	 fragment.setId(getId() 
-			+ "__" + offsetFormat.format(startOffset) 
-			+ "-" + offsetFormat.format(endOffset));
+	 fragment.setId(FragmentId(this, startOffset, endOffset));
       }
       for (String layerId : layerIds)
       {
@@ -370,9 +394,7 @@ public class Graph
 	 // (don't need to check for lastAnchor: if there's a first, there's a last)
       {
 	 Anchor lastAnchor = fragment.getEnd();
-	 fragment.setId(getId() 
-			+ "__" + offsetFormat.format(firstAnchor.getOffset()) 
-			+ "-" + offsetFormat.format(lastAnchor.getOffset()));
+	 fragment.setId(FragmentId(this, firstAnchor, lastAnchor));
       }
       return fragment;
    } // end of getFragment()
@@ -444,9 +466,7 @@ public class Graph
 	    // (don't need to check for lastAnchor: if there's a first, there's a last)
 	 {
 	    Anchor lastAnchor = fragment.getEnd();
-	    fragment.setId(getId() 
-			   + "__" + offsetFormat.format(firstAnchor.getOffset()) 
-			   + "-" + offsetFormat.format(lastAnchor.getOffset()));
+	    fragment.setId(FragmentId(this, firstAnchor, lastAnchor));
 	 }
       }
       return fragment;
@@ -1087,6 +1107,27 @@ public class Graph
       } // there are orphans
       return annotations;
    }
+
+   /**
+    * Getter for <i>layer</i>: The graph's layer definition, which is by definition the root of its schema.
+    * @return The annotation's layer definition.
+    * @see #getSchema()
+    * @see Schema#getRoot()
+    */
+   public Layer getLayer() 
+   { 
+      return schema.getRoot();
+   }
+
+   /**
+    * Getter for {@link #graph}: The annotation's annotation graph.
+    * @return The annotation's annotation graph.
+    */
+   public Graph getGraph() 
+   { 
+      return this;
+   }
+
 
    // TrackedMap methods
 

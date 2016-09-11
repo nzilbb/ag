@@ -442,8 +442,8 @@ public class Annotation
 	    newParent.getAnnotations(getLayerId());
 	 } // but we use the real collection, not the copy returned by getAnnotations(String)...
 	 SortedSet<Annotation> newSiblings = newParent.getAnnotations().get(getLayerId());
-	 // if it's still null, this must be the graph, so use the layer annotations collection
-	 // if (newSiblings == null) newSiblings = newParent.getLayer().getAnnotations();
+	 // if the collection isn't there yet, create and add it...
+	 if (newSiblings == null) newSiblings = newParent.getAnnotations(getLayerId());
 	 if (newSiblings != null && !newSiblings.contains(this))
 	 {
 	    newSiblings.add(this);
