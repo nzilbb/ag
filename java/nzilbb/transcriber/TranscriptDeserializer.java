@@ -458,7 +458,7 @@ public class TranscriptDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Transcriber transcript", "1.421", "text/xml-transcriber", ".trs", "20160905.1252", getClass().getResource("icon.png"));
+	 "Transcriber transcript", "1.422", "text/xml-transcriber", ".trs", "20160905.1252", getClass().getResource("icon.png"));
    }
 
    /**
@@ -843,27 +843,27 @@ public class TranscriptDeserializer
       graph.setOffsetUnits(Constants.UNIT_SECONDS);
 
       // attributes
-      if (getScribe().length() > 0 && scribeLayer != null)
+      if (getScribe() != null && getScribe().length() > 0 && scribeLayer != null)
       {
 	 graph.createTag(graph, scribeLayer.getId(), getScribe());
       }
-      if (getVersion().length() > 0 && versionLayer != null)
+      if (getVersion() != null && getVersion().length() > 0 && versionLayer != null)
       {
 	 graph.createTag(graph, versionLayer.getId(), getVersion());
       }
-      if (getVersionDate().length() > 0 && versionDateLayer != null)
+      if (getVersionDate() != null && getVersionDate().length() > 0 && versionDateLayer != null)
       {
 	 graph.createTag(graph, versionDateLayer.getId(), getVersionDate());
       }
-      if (getProgram().length() > 0 && programLayer != null)
+      if (getProgram() != null && getProgram().length() > 0 && programLayer != null)
       {
 	 graph.createTag(graph, programLayer.getId(), getProgram());
       }
-      if (getAirDate().length() > 0 && airDateLayer != null)
+      if (getAirDate() != null && getAirDate().length() > 0 && airDateLayer != null)
       {
 	 graph.createTag(graph, airDateLayer.getId(), getAirDate());
       }
-      if (getLanguage().length() > 0 && transcriptLanguageLayer != null)
+      if (getLanguage() != null && getLanguage().length() > 0 && transcriptLanguageLayer != null)
       {
 	 graph.createTag(graph, transcriptLanguageLayer.getId(), getLanguage());
       }
