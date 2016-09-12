@@ -254,7 +254,7 @@ public class TextGridDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Praat TextGrid", "1.81", "text/praat-textgrid", ".textgrid", "20160905.1252", getClass().getResource("icon.png"));
+	 "Praat TextGrid", "1.811", "text/praat-textgrid", ".textgrid", "20160905.1252", getClass().getResource("icon.png"));
    }
    
    /**
@@ -876,7 +876,6 @@ public class TextGridDeserializer
 
       // ensure both turns and utterances exist, and parents are set
       // if (!turnLayerMapped && !utteranceLayerMapped && wordLayerMapped) TODO construct utterances
-      
       if (wordLayerMapped && !turnLayerMapped && !utteranceLayerMapped)
       { // create utterances and turns from words	 
 	 // given there are no utterance/turn intervals, 
@@ -1014,6 +1013,7 @@ public class TextGridDeserializer
 
       if (!wordLayerMapped)
       { // tokenize utterances and apply conventions
+
 	 // ensure we have an utterance tokenizer
 	 if (getTokenizer() == null)
 	 {
@@ -1080,6 +1080,8 @@ public class TextGridDeserializer
 	 // ensure word parent turns are set
 	 for (Annotation word : graph.list(wordLayer.getId()))
 	 {
+	    if (word.getParent() != null) continue;
+
 	    Annotation[] possibleTurns = word.includingAnnotationsOn(turnLayer.getId());
 	    if (possibleTurns.length == 1)
 	    { // must be this one
