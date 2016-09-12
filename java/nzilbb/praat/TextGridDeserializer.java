@@ -742,7 +742,7 @@ public class TextGridDeserializer
       Graph graph = new Graph();
       graph.setId(getId());
       // creat the 0 anchor to prevent graph tagging from creating one with no confidence
-      graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+      Anchor graphStart = graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
 
       // add layers to the graph
       // we don't just copy the whole schema, because that would imply that all the extra layers
@@ -762,9 +762,11 @@ public class TextGridDeserializer
       boolean turnLayerMapped = false;
       boolean utteranceLayerMapped = false;
       boolean wordLayerMapped = false;
+      double highestXmax = 0.0;
       for (int t = 0; t < getTiers().size(); t++)
       {
 	 Tier tier = getTiers().elementAt(t);
+	 highestXmax = Math.max(highestXmax, tier.getXmax());
 	 // is there a mapping for this tier?
 	 Layer layer = (Layer)mappings.get("tier"+t).getValue();
 	 if (layer != null && !layer.getId().equals("[ignore tier]"))
@@ -870,9 +872,39 @@ public class TextGridDeserializer
 	 } // layer is mapped
       } // next tier
 
+      Anchor graphEnd = graph.getOrCreateAnchorAt(highestXmax, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+
       // ensure both turns and utterances exist, and parents are set
       // if (!turnLayerMapped && !utteranceLayerMapped && wordLayerMapped) TODO construct utterances
-      if (turnLayerMapped && !utteranceLayerMapped)
+      
+      if (wordLayerMapped && !turnLayerMapped && !utteranceLayerMapped)
+      { // create utterances and turns from words	 
+	 // given there are no utterance/turn intervals, 
+	 // we assume that the tier name for words is the speaker name	 
+	 HashMap<String,Annotation> turnsByName = new HashMap<String,Annotation>();
+	 for (Annotation word : graph.list(wordLayer.getId()))
+	 {
+	    String tierName = ((Tier)word.get("@tier")).getName();
+	    Annotation turn = turnsByName.get(tierName);
+	    if (turn == null)
+	    {
+	       // create turn 
+	       turn = new Annotation(
+		  null, tierName, turnLayer.getId(), graphStart.getId(), graphEnd.getId());
+	       graph.addAnnotation(turn);
+	       turnsByName.put(tierName, turn);
+
+	       // create utterance
+	       Annotation utterance = new Annotation(turn);
+	       utterance.setLayerId(utteranceLayer.getId());
+	       utterance.setParentId(turn.getId());
+	       graph.addAnnotation(utterance);
+	    }
+	    // set parent of word
+	    word.setParent(turn);
+	 } // next turn
+      } 
+      else if (turnLayerMapped && !utteranceLayerMapped)
       { // create utterances from turns
 	 for (Annotation turn : graph.list(turnLayer.getId()))
 	 {

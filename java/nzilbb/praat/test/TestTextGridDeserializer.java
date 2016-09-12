@@ -1147,6 +1147,141 @@ public class TestTextGridDeserializer
       assertEquals("Ohakia .", entities[5].tagsOn("word")[0].getLabel());
    }
 
+   @Test public void basFragment() 
+      throws Exception
+   {
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("comment", "Comment", 2, true, false, true),
+	 new Layer("noise", "Noise", 2, true, false, true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true),
+	 new Layer("phone", "Phones", 2, true, true, true, "word", true),
+	 new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
+	 new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
+      // access file
+      NamedStream[] streams = { new NamedStream(new File(getDir(), "fragment__1_890-3_830.TextGrid")) };
+      
+      // create deserializer
+      TextGridDeserializer deserializer = new TextGridDeserializer();
+      
+      // general configuration
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      assertEquals(6, deserializer.configure(configuration, schema).size());
+
+      // load the stream
+      ParameterSet parameters = deserializer.load(streams, schema);
+      //for (Parameter p : parameters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+      assertEquals(3, parameters.size());
+
+      parameters.get("tier0").setValue(schema.getWordLayer()); // ORT
+      parameters.get("tier1").setValue(null); // KAN
+      parameters.get("tier2").setValue(schema.getLayer("phone")); // MAU TODO configurable
+      // for (Parameter p : parameters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+
+      // configure the deserialization
+      deserializer.setParameters(parameters);
+      
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+
+      for (String warning : deserializer.getWarnings())
+      {
+	 System.out.println(warning);
+      }
+      
+      assertEquals("fragment__1_890-3_830.TextGrid", g.getId());
+
+      // participants     
+      Annotation[] who = g.list("who");
+      assertEquals(1, who.length);
+      assertEquals("ORT", who[0].getLabel());
+      assertEquals(g, who[0].getParent());
+      
+      // turns
+      Annotation[] turns = g.list("turn");
+      assertEquals(1, turns.length);
+      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
+      assertEquals(new Double(1.93), turns[0].getEnd().getOffset());
+      assertEquals("ORT", turns[0].getLabel());
+      assertEquals(who[0], turns[0].getParent());
+
+      // utterances
+      Annotation[] utterances = g.list("utterance");
+      assertEquals(1, utterances.length);
+      assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
+      assertEquals(new Double(1.93), utterances[0].getEnd().getOffset());
+      assertEquals("ORT", utterances[0].getParent().getLabel());
+      assertEquals(turns[0], utterances[0].getParent());
+
+      Annotation[] words = g.list("word");
+      String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
+	 "so", "what", "is", "your", "name"
+      };
+      for (int i = 0; i < wordLabels.length; i++)
+      {
+	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
+	 assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
+	 	      i+1, words[i].getOrdinal());
+	 assertEquals(turns[0].getId(), words[i].getParentId());
+      }
+
+      // no convention annotations, because the utterances are not tokenized
+      assertEquals("no conventional comments", 0, g.list("comment").length);
+      assertEquals("no conventional noises", 0, g.list("noise").length);
+      assertEquals("no conventional pronounce annotations", 0, g.list("pronounce").length);
+      assertEquals("no conventional lexical annotations", 0, g.list("lexical").length);
+
+      // phones
+      Annotation[] phones = g.list("phone");
+      assertEquals("phones", 14, phones.length);
+
+      // participant
+
+      assertEquals("phone", "s", phones[0].getLabel());
+      assertEquals("phone parent", "so", phones[0].getParent().getLabel());
+      assertEquals("phone", "@U", phones[1].getLabel());
+      assertEquals("phone parent", "so", phones[1].getParent().getLabel());
+
+      assertEquals("phone", "w", phones[2].getLabel());
+      assertEquals("phone parent", "what", phones[2].getParent().getLabel());
+      assertEquals("phone", "Q", phones[3].getLabel());
+      assertEquals("phone parent", "what", phones[3].getParent().getLabel());
+      assertEquals("phone", "t", phones[4].getLabel());
+      assertEquals("phone parent", "what", phones[4].getParent().getLabel());
+
+      assertEquals("phone", "I", phones[5].getLabel());
+      assertEquals("phone parent", "is", phones[5].getParent().getLabel());
+      assertEquals("phone", "z", phones[6].getLabel());
+      assertEquals("phone parent", "is", phones[6].getParent().getLabel());
+
+      assertEquals("phone", "j", phones[7].getLabel());
+      assertEquals("phone parent", "your", phones[7].getParent().getLabel());
+      assertEquals("phone", "@", phones[8].getLabel());
+      assertEquals("phone parent", "your", phones[8].getParent().getLabel());
+
+      assertEquals("phone", "n", phones[9].getLabel());
+      assertEquals("phone parent", "name", phones[9].getParent().getLabel());
+      assertEquals("phone", "eI", phones[10].getLabel());
+      assertEquals("phone parent", "name", phones[10].getParent().getLabel());
+      assertEquals("phone", "m", phones[11].getLabel());
+      assertEquals("phone parent", "name", phones[11].getParent().getLabel());
+
+      // orphans
+      assertEquals("orphan phone", "<p:>", phones[12].getLabel());
+      assertNull("no phone parent", phones[12].getParent());
+
+      assertEquals("orphan phone", "<p:>", phones[13].getLabel());
+      assertNull("no phone parent", phones[13].getParent());
+
+
+   }
+
+
    /**
     * Directory for text files.
     * @see #getDir()
