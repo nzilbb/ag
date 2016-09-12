@@ -47,11 +47,6 @@
     <jar jarfile="${dist}/${ant.project.name}.jar" 
 	 basedir="${build}">
       
-      <!-- include source code -->
-      <fileset dir="${src}" 
-	       includes="${srcfiles} nzilbb/jsendpraat/nzilbb_jsendpraat_SendPraat.*"
-	       excludes="nzilbb/clan/**/test/*.java"
-	       />
       <!-- include this build file -->
       <fileset dir="." includes="build.xml" />
       <!-- include icon -->
