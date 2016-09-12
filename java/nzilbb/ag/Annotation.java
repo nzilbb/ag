@@ -24,6 +24,7 @@ package nzilbb.ag;
 import java.util.Collection;
 import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Vector;
 import java.util.Set;
 import java.util.HashSet;
@@ -304,18 +305,21 @@ public class Annotation
    protected Vector<Change> correctOrdinals(SortedSet<Annotation> peers)
    {
       Vector<Change> changes = new Vector<Change>();
-      int o = 1;
-      for (Annotation peer : peers)
+      if (peers.size() > 0) 
       {
-	 if (peer.getChange() == Change.Operation.Destroy) continue;
-	 Integer originalOrdinal = (Integer)peer.get("ordinal");
-	 if (originalOrdinal == null || originalOrdinal.intValue() != o)
+	 int o = ordinalMinimum(peers.iterator().next().getLayerId());
+	 for (Annotation peer : peers)
 	 {
-	    peer.put("ordinal", o); 
-	    Change change = peer.getLastChange();
-	    if (change != null) changes.add(change);
+	    if (peer.getChange() == Change.Operation.Destroy) continue;
+	    Integer originalOrdinal = (Integer)peer.get("ordinal");
+	    if (originalOrdinal == null || originalOrdinal.intValue() != o)
+	    {
+	       peer.put("ordinal", o); 
+	       Change change = peer.getLastChange();
+	       if (change != null) changes.add(change);
+	    }
+	    o++;
 	 }
-	 o++;
       }
       return changes;
    } // end of correctOrdinals()
@@ -331,7 +335,12 @@ public class Annotation
     * @return Child annotations, keyed on layer id.
     */
    public LinkedHashMap<String,SortedSet<Annotation>> getAnnotations() { return annotations; }
-
+   
+   /**
+    * The minimum ordinals for each child layer, used for when a fragment includes only some of
+    * the children of a parent (otherwise their child ordinals would be forced to start at 1).
+    */
+   protected HashMap<String,Integer> ordinalMinima = new HashMap<String,Integer>();
    
    /**
     * The annotation's annotation graph.
@@ -450,7 +459,7 @@ public class Annotation
 	    if (append || get("ordinal") == null)
 	    {
 	       changes.addAll(
-		  setOrdinal(newSiblings.size()));
+		  setOrdinal(newSiblings.size() + ordinalMinimum(getLayerId()) - 1));
 	    }
 	 }
 /* TODO this incurs a surprisingly huge performance hit 
@@ -812,18 +821,26 @@ public class Annotation
     * @param layerId The layer of the desired annotation.
     * @return The related annotation (or the first one if there are many), or null if none could be found on the given layer.
     */
-   public Annotation my(String layerId)
+   public Annotation my(final String layerId)
    {
+      // is it our own layer?
+      if (layerId.equals(getLayerId()))
+      {
+	 // for now, return ourself - this is true of "graph", and is probably generally true
+	 // whether it's true of, say "possible-pos" is debatable,
+	 // and whether it's true of tree-stuctured layers needs to be worked through TODO
+	 return this;
+      }
       // is it the parent layer?
       if (getParent() != null && layerId.equals(getParent().getLayerId()))
       {
 	 return getParent();
       }
       // is it an ancestor layer?
-      Annotation ancestor = getAncestor(layerId);
-      if (ancestor != null)
+      Annotation anc = getAncestor(layerId);
+      if (anc != null)
       {
-	 return ancestor;
+	 return anc;
       }
       // is it a child layer?
       if (getAnnotations().containsKey(layerId))
@@ -833,33 +850,89 @@ public class Annotation
 	 {
 	    return children.first();
 	 }
-      }      
-      // TODO check for descendants
-      // check for children of ancestors
-      // so that word.my("utterance") works and so does word.my("corpus")
+      }
       Layer layer = getGraph().getLayer(layerId);
       Layer commonAncestorLayer = getLayer().getFirstCommonAncestor(layer);
-      if (commonAncestorLayer != null)
-      {
-	 if (layer.getParentId().equals(commonAncestorLayer.getId()))
+      if (commonAncestorLayer == null) return null; // invalid layer
+      // is our layer an ancestor of layerId
+      if (commonAncestorLayer.getId().equals(getLayer().getId()))
+      { // we are an ancestor of the target layer
+	 // annotations should come out in ordinal order when they have the same parent
+	 // and in ancestor start order otherwise, where the ancestor used comes from the
+	 // highest aligned layer in the hierarchy, which may be the layer itself. so:
+	 // - aligned topics (parent=graph) fall back to topic offset
+	 // - aligned turns (parent=who) fall back to turn offset
+	 // - aligned words (parent=turn) fall back to turn offset
+	 // - unaligned pos's (paren=word) fall back to turn offset
+	 String root = getGraph().getSchema().getRoot().getId();
+	 Layer highestAlignedLayer = layer;
+	 for (Layer ancestor : layer.getAncestors())
 	 {
-	    Annotation commonAncestor = getAncestor(commonAncestorLayer.getId());
-	    // return the first child that t-includes this annotation
-	    if (commonAncestor != null)
+	    if (ancestor.getId().equals(root)) break;
+	    if (ancestor.getAlignment() != Constants.ALIGNMENT_NONE)
 	    {
-	       for (Annotation child : commonAncestor.getAnnotations(layerId))
-	       {
-		  if (child.includes(this))
-		  {
-		     return child;
-		  }
-	       } // next child of common ancestor
+	       highestAlignedLayer = ancestor;
 	    }
+	 }
+	 final String highestAlignedLayerId = highestAlignedLayer.getId();
+	 LayerTraversal<TreeSet<Annotation>> highestAlignedTraversal 
+	    = new LayerTraversal<TreeSet<Annotation>>(
+	       new TreeSet<Annotation>(new AnnotationComparatorByAnchor()), this)
+	    {
+	       protected void pre(Annotation annotation)
+	       {
+		  if (annotation.getLayerId().equals(highestAlignedLayerId))
+		  {
+		     result.add(annotation);
+		  }
+	       }
+	    };
+	 if (layerId.equals(highestAlignedLayerId))
+	 {
+	    return highestAlignedTraversal.getResult().first();
+	 }
+	 else
+	 { // layerId != highestAlignedLayerId
+	    LayerTraversal<Vector<Annotation>> descendantTraversal 
+	       = new LayerTraversal<Vector<Annotation>>(new Vector<Annotation>())
+	       {
+		  protected void pre(Annotation annotation)
+		  {
+		     if (annotation.getLayerId().equals(layerId))
+		     {
+			result.add(annotation);
+		     }
+		  }
+	       };
+	    for (Annotation highestAlignedAncestor : highestAlignedTraversal.getResult())
+	    {
+	       descendantTraversal.traverseAnnotation(highestAlignedAncestor);
+	    }
+	    if (descendantTraversal.getResult().size() == 0) return null;
+	    return descendantTraversal.getResult().firstElement();
+	 }
+      }
+      // check for children of ancestors
+      // so that word.my("utterance") works and so does word.my("corpus")
+      Annotation commonAncestor = getAncestor(commonAncestorLayer.getId());
+      if (commonAncestorLayer != null 
+	  // common ancestor must be related - i.e. in the layer of commonAncestorLayer
+	  && commonAncestor.getLayerId() == commonAncestorLayer.getId())
+      {
+	 // return the first child that t-includes this annotation
+	 if (commonAncestor != null)
+	 {
+	    for (Annotation child : commonAncestor.list(layerId))
+	    {
+	       if (child.includes(this))
+	       {
+		  return child;
+	       }
+	    } // next child of common ancestor
 	 }
       }
       return null;
    } // end of my()
-
    
    /**
     * Gets a list of related annotations on the given layer.
@@ -1023,6 +1096,29 @@ public class Annotation
       getAnnotations().put(layerId, annotations);
       return annotations;
    } // end of getAnnotations()
+
+   /**
+    * The minimum ordinal for the given child layer. Used for when a fragment includes only some of
+    * the children of a parent (otherwise their child ordinals would be forced to start at 1).
+    * @param layerId The child layer ID.
+    * @return The minimum ordinal for the given child layer, whic defaults to 1.
+    */
+   public int ordinalMinimum(String layerId)
+   {
+      if (ordinalMinima.containsKey(layerId)) return ordinalMinima.get(layerId);
+      return 1;
+   } // end of ordinalMinimum()
+   /**
+    * Set the minimum ordinal for the given child layer. Used for when a fragment includes only 
+    * some of the children of a parent (otherwise their child ordinals would be forced to start
+    * at 1).
+    * @param layerId The child layer ID.
+    * @param minimumOrdinal The minimum ordinal for the given child layer.
+    */
+   public void setOrdinalMinimum(String layerId, int minimumOrdinal)
+   {
+      ordinalMinima.put(layerId, minimumOrdinal);
+   } // end of ordinalMinimum()
 
    /**
     * Access the child annotations on a given layer, as an array (for environments that deal better with arrays than collections).

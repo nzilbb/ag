@@ -1185,17 +1185,20 @@ public class SqlGraphStore
 	 final Annotation definingAnnotation = annotationFromResult(rsAnnotation, definingLayer, fragment);
 	 final Anchor definingStart = anchorFromResult(rsAnnotation, "start_");
 	 final Anchor definingEnd = anchorFromResult(rsAnnotation, "end_");
+	 int definingOrdinal = definingAnnotation.getOrdinal();
 	 fragment.addAnchor(definingStart);
 	 fragment.addAnchor(definingEnd);
 	 rsAnnotation.close();
-	 if (definingStart.getOffset() == 0) throw new StoreException("Fragment for " + annotationId + ": start has no offset");
-	 if (definingEnd.getOffset() == 0) throw new StoreException("Fragment for " + annotationId + ": end has no offset");	 
+	 if (definingStart.getOffset() == null) throw new StoreException("Fragment for " + annotationId + ": start has no offset");
+	 if (definingEnd.getOffset() == null) throw new StoreException("Fragment for " + annotationId + ": end has no offset");	 
 	 fragment.setId(Graph.FragmentId(graph, definingStart, definingEnd));
 	 fragment.addAnnotation(definingAnnotation);
 	 
 	 // get all ancestors too
 	 Layer ancestorLayer = getLayer(definingLayer.getParentId());
 	 String ancestorId = definingAnnotation.getParentId();
+	 String childLayerId = definingLayer.getId();
+	 int childOrdinal = definingOrdinal;
 	 while (!ancestorLayer.getId().equals(fragment.getSchema().getRoot().getId()))
 	 {
 	    // add layer to schema
@@ -1234,12 +1237,16 @@ public class SqlGraphStore
 	       ResultSet rsParticipant = sqlParticipant.executeQuery();
 	       if (rsParticipant.next())
 	       {
-		  // add graph-tag annotation
+		  // add participant annotation
 		  Annotation participant = new Annotation(
 		     ancestorId, rsParticipant.getString("name"), ancestorLayer.getId());
 		  participant.setParentId(fragment.getId());
+		  participant.setOrdinalMinimum(childLayerId, childOrdinal);
 		  fragment.addAnnotation(participant);
 		  ancestorId = participant.getParentId();
+
+		  childLayerId = ancestorLayer.getId();
+		  childOrdinal = participant.getOrdinal();
 	       } // participant found
 
 	       rsParticipant.close();
@@ -1252,8 +1259,14 @@ public class SqlGraphStore
 	       rsAnnotation = sqlAnnotation.executeQuery();
 	       if (!rsAnnotation.next()) break;
 	       Annotation annotation = annotationFromResult(rsAnnotation, ancestorLayer, fragment);
+
+	       annotation.setOrdinalMinimum(childLayerId, childOrdinal);
+
 	       fragment.addAnnotation(annotation);
 	       ancestorId = annotation.getParentId();
+
+	       childLayerId = ancestorLayer.getId();
+	       childOrdinal = annotation.getOrdinal();
 	       
 	       // add anchors?
 	       Anchor ancestorStart = anchorFromResult(rsAnnotation, "start_");
@@ -1377,9 +1390,17 @@ public class SqlGraphStore
 			   if (annotation_id == null) continue;
 			   sql.setLong(3, annotation_id);
 			   ResultSet rs = sql.executeQuery();
+			   boolean setOrdinalMinimum = true;
 			   while (rs.next())
 			   {
 			      Annotation annotation = annotationFromResult(rs, layer, fragment);
+
+			      if (setOrdinalMinimum)
+			      {
+				 parent.setOrdinalMinimum(layer.getId(), annotation.getOrdinal());
+				 setOrdinalMinimum = false;
+			      }
+
 			      fragment.addAnnotation(annotation);
 			      
 			      // add anchors?
@@ -1416,6 +1437,19 @@ public class SqlGraphStore
 	    sqlAnnotationsByOffset.close();
 	 } // layerIds specified
 
+	 // ensure that turn and utterance labels are set to the participant name
+	 for (Annotation a : fragment.list(fragment.getSchema().getTurnLayerId()))
+	 {
+	    Annotation who = a.my(fragment.getSchema().getParticipantLayerId());
+	    if (who != null) a.setLabel(who.getLabel());
+	 }
+	 for (Annotation a : fragment.list(fragment.getSchema().getUtteranceLayerId()))
+	 {
+	    Annotation who = a.my(fragment.getSchema().getParticipantLayerId());
+	    if (who != null) a.setLabel(who.getLabel());
+	 }
+
+	 fragment.commit();
 	 return fragment;
       }
       catch(SQLException exception)
@@ -2022,7 +2056,6 @@ public class SqlGraphStore
       annotation.setLayerId(layer.getId());
       
       // parent:
-System.out.println("WORD annotation " + annotation.getId() + " scope " + scope + " layer " + iLayerId);
       if (iLayerId == SqlConstants.LAYER_SEGMENT) // segment
       {
 	 annotationIdParts[0] = SqlConstants.SCOPE_WORD;
@@ -2059,7 +2092,6 @@ System.out.println("WORD annotation " + annotation.getId() + " scope " + scope +
       } // segment scope
       else if (scope.equalsIgnoreCase(SqlConstants.SCOPE_WORD)) // word scope
       {
-System.out.println("WORD annotation " + rsAnnotation.getLong("word_annotation_id"));
 	 annotationIdParts[0] = SqlConstants.SCOPE_WORD;
 	 annotationIdParts[1] = new Integer(SqlConstants.LAYER_TRANSCRIPTION); // transcription word
 	 annotationIdParts[2] = new Long(rsAnnotation.getLong("word_annotation_id"));
@@ -3313,14 +3345,21 @@ System.out.println("WORD annotation " + rsAnnotation.getLong("word_annotation_id
       File file = new File(mediaDir, fileName);
       if (file.exists())
       {
-	 StringBuffer url = new StringBuffer(getBaseUrl());
-	 url.append("/files/");
-	 url.append(graph.my("corpus").getLabel());
-	 url.append("/");
-	 url.append(graph.my("episode").getLabel());
-	 url.append("/");
-	 url.append(fileName);
-	 return url.toString();
+	 if (getBaseUrl() == null) // TODO check this isn't a security risk
+	 {
+	    return file.toURI().toString();
+	 }
+	 else
+	 {
+	    StringBuffer url = new StringBuffer(getBaseUrl());
+	    url.append("/files/");
+	    url.append(graph.my("corpus").getLabel());
+	    url.append("/");
+	    url.append(graph.my("episode").getLabel());
+	    url.append("/");
+	    url.append(fileName);
+	    return url.toString();
+	 }
       }
       else
       {

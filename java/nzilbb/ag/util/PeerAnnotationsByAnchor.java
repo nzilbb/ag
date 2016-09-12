@@ -89,7 +89,8 @@ public class PeerAnnotationsByAnchor
 	    }
 	    lastSetIndex++;
 	 } // out of order
-	 else if (annotation.getStart().getOffset() != null || annotation.getEnd().getOffset() != null)
+	 else if ((annotation.getStart() != null && annotation.getStart().getOffset() != null)
+		  || (annotation.getEnd() != null && annotation.getEnd().getOffset() != null))
 	 {
 	    lastSetIndex = c;
 	 } // in order
@@ -100,7 +101,7 @@ public class PeerAnnotationsByAnchor
       {
 	 Annotation annotation = elementAt(c);
 	 Anchor end = annotation.getEnd();
-	 //if (end.getOffset() == null)
+	 if (end != null)
 	 { // no offset
 	    // is this end the start of a peer?
 	    int i = c;
@@ -134,20 +135,25 @@ public class PeerAnnotationsByAnchor
       Anchor a1End = a1.getEnd();
       Anchor a2Start = a2.getStart();
       Anchor a2End = a2.getEnd();
-      if (a1End.getOffset() != null)
-      {
-	 if (a2Start.getOffset() != null && a1End.getOffset() <= a2Start.getOffset())
+      if (a1End != null
+	  && a1End.getOffset() != null)
+      {	 
+	 if (a2Start != null
+	     && a2Start.getOffset() != null && a1End.getOffset() <= a2Start.getOffset())
 	 {
 	    return true;
 	 }
       }
-      if (a1Start.getOffset() != null)
+      if (a1Start != null
+	  && a1Start.getOffset() != null)
       {
-	 if (a2Start.getOffset() != null && a1Start.getOffset() < a2Start.getOffset())
+	 if (a2Start != null 
+	     && a2Start.getOffset() != null && a1Start.getOffset() < a2Start.getOffset())
 	 {
 	    return true;
 	 }
-	 if (a2End.getOffset() != null && a1Start.getOffset() < a2End.getOffset())
+	 if (a2End != null
+	     && a2End.getOffset() != null && a1Start.getOffset() < a2End.getOffset())
 	 {
 	    return true;
 	 }

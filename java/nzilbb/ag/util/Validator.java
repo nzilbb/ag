@@ -196,48 +196,12 @@ public class Validator
       if (getFullValidation())
       {
 	 needMoreValidation = true;
-	 // all anchors must be available
-	 for (Annotation annotation : graph.getAnnotationsById().values())
-	 {
-	    if (annotation.getStart() == null)
-	    {
-	       throw new TransformationException(
-		  this,
-		  "Start anchor (" + annotation.getStartId() + ") unavailable for annotation " 
-		  + annotation.getId() + " (\"" + annotation.getLabel() 
-		  + "\") on layer: " + annotation.getLayerId());
-	    }
-	    if (annotation.getEnd() == null)
-	    {
-	       throw new TransformationException(
-		  this,
-		  "End anchor (" + annotation.getEndId() + ") unavailable for annotation " 
-		  + annotation.getId() + " (\"" + annotation.getLabel() 
-		  + "\") on layer: " + annotation.getLayerId());
-	    }
-	 } // next annotation
       }
       else
       {
 	 // all anchors must be available
 	 for (Annotation annotation : graph.getAnnotationsById().values())
 	 {
-	    if (annotation.getStart() == null)
-	    {
-	       throw new TransformationException(
-		  this,
-		  "Start anchor (" + annotation.getStartId() + ") unavailable for annotation " 
-		  + annotation.getId() + " (\"" + annotation.getLabel() 
-		  + "\") on layer: " + annotation.getLayerId());
-	    }
-	    if (annotation.getEnd() == null)
-	    {
-	       throw new TransformationException(
-		  this,
-		  "End anchor (" + annotation.getEndId() + ") unavailable for annotation " 
-		  + annotation.getId() + " (\"" + annotation.getLabel() 
-		  + "\") on layer: " + annotation.getLayerId());
-	    }
 	    if (!needMoreValidation) // haven't found any interesting changes yet
 	    {
 	       // we don't validate if the only changes are to tag layers with no children etc.
@@ -432,7 +396,8 @@ public class Validator
 	    {
 	       // log("Child layer: ", childLayer);
 	       LinkedHashSet<Anchor> anchors = new LinkedHashSet<Anchor>();
-	       anchors.add(annotation.getStart());
+	       if (annotation.getStart() != null) 
+		  anchors.add(annotation.getStart());
 	       for (Annotation child : annotation.getAnnotations(childLayer.getId()))
 	       {
 		  if (child.getChange() == Change.Operation.Destroy) continue;
@@ -448,7 +413,8 @@ public class Validator
 			       && !layer.getPeersOverlap())
 			   {
 			      // log("Visiting: ", annotation);
-			      getResult().add(annotation.getStart());
+			      if (annotation.getStart() != null) 
+				 getResult().add(annotation.getStart());
 			   }
 			}
 			protected void post(Annotation annotation)
@@ -458,17 +424,19 @@ public class Validator
 			       && layer.getParentIncludes()
 			       && !layer.getPeersOverlap())
 			   {
-			      getResult().add(annotation.getEnd());
+			      if (annotation.getEnd() != null) 
+				 getResult().add(annotation.getEnd());
 			   }
 			}
 			
 		     };
 	       } // next child on this layer
-	       anchors.add(annotation.getEnd());
+	       if (annotation.getEnd() != null) 
+		  anchors.add(annotation.getEnd());
 
 	       Stack<Anchor> lastOffsetAnchors = new Stack<Anchor>();
 	       lastOffsetAnchors.push(new Anchor(null, Double.MIN_VALUE));
-	       Double start = annotation.getStart().getOffsetMin();
+	       Double start = annotation.getStart()==null?null:annotation.getStart().getOffsetMin();
 	       if (start != null)
 	       {
 		  lastOffsetAnchors.peek().setOffset(start);
@@ -830,12 +798,16 @@ public class Validator
 	 // finally try linked annotations
 	 
 	 // first start-to-start or end-to-end linkage, which might not necessarily include
-	 candidates.addAll(child.getStart().startOf(parentLayerId));
-	 candidates.addAll(child.getEnd().endOf(parentLayerId));
+	 if (child.getStart() != null) 
+	    candidates.addAll(child.getStart().startOf(parentLayerId));
+	 if (child.getEnd() != null) 
+	    candidates.addAll(child.getEnd().endOf(parentLayerId));
 
 	 // then preceding/following linkage
-	 candidates.addAll(child.getStart().endOf(parentLayerId));
-	 candidates.addAll(child.getEnd().startOf(parentLayerId));
+	 if (child.getStart() != null) 
+	    candidates.addAll(child.getStart().endOf(parentLayerId));
+	 if (child.getEnd() != null) 
+	    candidates.addAll(child.getEnd().startOf(parentLayerId));
 
 	 // remove deleted annotations 
 	 Iterator<Annotation> i = candidates.iterator();
@@ -985,11 +957,11 @@ public class Validator
 	    PeerAnnotationsByAnchor children = new PeerAnnotationsByAnchor(parent, childLayer.getId());
 	    	    
 	    // ensure the ordinals are in chronological order, and that they are set
-	    int iOrdinal = 1;
-	    // log("Parent ", parent);
+	    int iOrdinal = parent.ordinalMinimum(childLayer.getId());
+	    log("Parent ", parent);
 	    for (Annotation child : children)
 	    {	       
-	       // log("Child ", child);
+	       log("Child ", child);
 	       if (iOrdinal != child.getOrdinal())
 	       {
 		  // set the attribute
@@ -1018,7 +990,8 @@ public class Validator
 	 for (Annotation child : parent.getAnnotations(childLayer.getId()))
 	 {
 	    if (child.getChange() == Change.Operation.Destroy) continue; // ignore deleted annotations
-	    if (!child.getParentId().equals(parent.getId())) continue; // no longer the parent
+	    if (!parent.getId().equals(child.getParentId())) continue; // no longer the parent
+	    if (child.getStart() == null) continue;
 	    // log(" child: ", child);
 	    if (!childLayer.getPeersOverlap() 
 		// ignore tag layers, whose anchors will follow their parents
@@ -1044,6 +1017,8 @@ public class Validator
 		     break; // we only need to find one of these
 		  } // not already split
 	       } // next possibly parallel annotation
+
+	       if (child.getEnd() == null) continue;
 	       
 	       if (child.getStart().getOffset() != null)
 	       {
@@ -1221,31 +1196,35 @@ public class Validator
 		  {
 		     if (lastChild == null)
 		     { // first child
-			if (parent.getStart().getOffset() == null
-			    || child.getStart().getOffset() > parent.getStart().getOffset())
+			if (child.getStart() != null && parent.getStart() != null)
 			{
-			   // narrow parent
-			   String sOriginal = logAnnotation(parent);
-			   HashSet<String> layersNotToMove = new HashSet<String>();
-			   // this prevents the previous parent end (which may have already been 
-			   // moved) from coming with us
-			   layersNotToMove.add(parentLayer.getId()); 
-			   if (childLayer.getPeersOverlap()) layersNotToMove.add(child.getLayerId());
-			   changes.addAll( // record changes generated by:
-			      changeStartWithRelatedAnnotations(parent, child.getStart(), layersNotToMove));
-			   log("Narrowed ", sOriginal, " -> ", parent,
-			       " to remove gap before ", child);
-			}
-			else if (!child.getStartId().equals(parent.getStartId()))
-			{
-			   changes.addAll( // record changes generated by:
-			      changeStartWithRelatedAnnotations(child, parent.getStart()));
-			   log("Changed ", child, " to share start anchor with ", parent);
+			   if (parent.getStart().getOffset() == null
+			       || child.getStart().getOffset() > parent.getStart().getOffset())
+			   {
+			      // narrow parent
+			      String sOriginal = logAnnotation(parent);
+			      HashSet<String> layersNotToMove = new HashSet<String>();
+			      // this prevents the previous parent end (which may have already been 
+			      // moved) from coming with us
+			      layersNotToMove.add(parentLayer.getId()); 
+			      if (childLayer.getPeersOverlap()) layersNotToMove.add(child.getLayerId());
+			      changes.addAll( // record changes generated by:
+				 changeStartWithRelatedAnnotations(parent, child.getStart(), layersNotToMove));
+			      log("Narrowed ", sOriginal, " -> ", parent,
+				  " to remove gap before ", child);
+			   }
+			   else if (!child.getStartId().equals(parent.getStartId()))
+			   {
+			      changes.addAll( // record changes generated by:
+				 changeStartWithRelatedAnnotations(child, parent.getStart()));
+			      log("Changed ", child, " to share start anchor with ", parent);
+			   }
 			}
 		     }
 		     else
 		     { // subsequent children
-			if (child.getStart().getOffset() != dLastOffset)
+			if (child.getStart() != null &&
+			    child.getStart().getOffset() != dLastOffset)
 			{
 			   // widen last child
 			   changes.addAll( // record changes generated by:
@@ -1287,7 +1266,7 @@ public class Validator
 	    // we tolerate instantaneous annotations - HTK produces them - so don't check for it
 	    
 	    // this after any child changes above, to avoid unnecessary widening
-	    if (childLayer.getParentIncludes())
+	    if (childLayer.getParentIncludes() && child.getStart() != null)
 	    {	
 	       if (childLayer.getAlignment() == Constants.ALIGNMENT_NONE)
 	       { // tag 
@@ -1307,7 +1286,8 @@ public class Validator
 	       }
 	       else
 	       { // t-included parts, not a tag
-		  if (child.getStart().getOffset() != null
+		  if (parent.getStart() != null
+		      && child.getStart().getOffset() != null
 		      && parent.getStart().getOffset() != null)
 		  {
 		     // check start anchors
@@ -1333,7 +1313,8 @@ public class Validator
 		     } // start anchor
 		  } // start anchors have offsets
 		  
-		  if (child.getEnd().getOffset() != null
+		  if (parent.getEnd() != null
+		      && child.getEnd().getOffset() != null
 		      && parent.getEnd().getOffset() != null)
 		  {
 		     // check end anchors
@@ -1375,31 +1356,35 @@ public class Validator
 	 { // there were some children
 	    if (childLayer.getSaturated())
 	    { // check last anchor
-	       if (lastChild.getEnd().getOffset() != null)
+	       if (lastChild.getEnd() != null
+		   && lastChild.getEnd().getOffset() != null)
 	       {
-		  if (parent.getEnd().getOffset() == null
-		      || parent.getEnd().getOffset() > lastChild.getEnd().getOffset())
+		  if (parent.getEnd() != null)
 		  {
-		     // narrow parent
-		     String sOriginal = logAnnotation(parent);
-		     Anchor originalEndAnchor = parent.getEnd();
-		     changes.addAll( // record changes generated by:
-			changeEndWithRelatedAnnotations(parent, lastChild.getEnd(), lastChild.getLayerId()));
-		     log("Narrowed ", sOriginal, " -> ", parent, " to close gap after ", lastChild);
-		     // check for shared following annotations on the parent's layer
-		     for (Annotation followingParent : originalEndAnchor.startOf(parentLayer.getId()))
+		     if(parent.getEnd().getOffset() == null
+			|| parent.getEnd().getOffset() > lastChild.getEnd().getOffset())
 		     {
-			log("Resetting start of following annotation too ", followingParent);
+			// narrow parent
+			String sOriginal = logAnnotation(parent);
+			Anchor originalEndAnchor = parent.getEnd();
 			changes.addAll( // record changes generated by:
-			   changeStartWithRelatedAnnotations(followingParent, lastChild.getEnd()));
-		     } // next shared following annotations on the parent's layer
-		  }
-		  else if (!parent.getEndId().equals(lastChild.getEndId()))
-		  {
-		     changes.addAll( // record changes generated by:
-			lastChild.setEndId(parent.getEndId()));
-		     log("Changed ", lastChild, " to share end anchor with ", parent);
-		  }
+			   changeEndWithRelatedAnnotations(parent, lastChild.getEnd(), lastChild.getLayerId()));
+			log("Narrowed ", sOriginal, " -> ", parent, " to close gap after ", lastChild);
+			// check for shared following annotations on the parent's layer
+			for (Annotation followingParent : originalEndAnchor.startOf(parentLayer.getId()))
+			{
+			   log("Resetting start of following annotation too ", followingParent);
+			   changes.addAll( // record changes generated by:
+			      changeStartWithRelatedAnnotations(followingParent, lastChild.getEnd()));
+			} // next shared following annotations on the parent's layer
+		     }
+		     else if (!parent.getEndId().equals(lastChild.getEndId()))
+		     {
+			changes.addAll( // record changes generated by:
+			   lastChild.setEndId(parent.getEndId()));
+			log("Changed ", lastChild, " to share end anchor with ", parent);
+		     }
+		  } // parent end is set
 	       } // end anchors are set
 	    } // Saturated
 	 } // there were children

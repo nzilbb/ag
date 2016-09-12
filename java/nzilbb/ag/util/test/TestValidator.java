@@ -1924,6 +1924,123 @@ public class TestValidator
       }
    }
 
+   @Test public void canValidateFragment() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");
+
+      g.addLayer(new Layer("topic", "Topics", 2, true, false, false));
+      g.addLayer(new Layer("who", "Participants", 0, true, true, true));
+      g.addLayer(new Layer("turn", "Speaker turns", 2, true, false, false, "who", true));
+      g.addLayer(new Layer("utterance", "Utterances", 2, true, false, true, "turn", true));
+      g.addLayer(new Layer("word", "Words", 2, true, false, false, "turn",true));
+      g.addLayer(new Layer("phone", "Phones", 2, true, false, true, "word",  true));
+      g.addLayer(new Layer("pos", "Part of speech", 0, false, false, true, "word", true));
+      g.addLayer(new Layer("phrase", "Phrase structure", 0, true, true, false, "turn", true));
+
+      g.addAnchor(new Anchor("turnStart", 0.0));
+      g.addAnchor(new Anchor("a1", 1.0));
+      g.addAnchor(new Anchor("a1.5", 1.5));
+      g.addAnchor(new Anchor("a2", 2.0));
+       // include null offset anchor, it should still be added to the fragment
+      g.addAnchor(new Anchor("a2.25", null));
+      g.addAnchor(new Anchor("a2.5", 2.5));
+      g.addAnchor(new Anchor("a2.75", 2.75));
+      g.addAnchor(new Anchor("a3", 3.0));
+      g.addAnchor(new Anchor("a4", 4.0));
+      g.addAnchor(new Anchor("a5", 5.0));
+      g.addAnchor(new Anchor("turnEnd", 6.0));
+
+      Annotation who1 = new Annotation("who1", "john smith", "who", "turnStart", "turnEnd", "my graph");
+      Annotation who2 = new Annotation("who2", "jane doe", "who", "turnStart", "turnEnd", "my graph");
+
+      Annotation turn1 = new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "who1");
+
+      Annotation utterance1 = new Annotation("utterance1", "john smith", "utterance", "turnStart", "a3", "turn1");
+      Annotation utterance2 = new Annotation("utterance2", "john smith", "utterance", "a3", "turnEnd", "turn1");
+
+      Annotation the = new Annotation("word1", "the", "word", "a1", "a2", "turn1");
+      Annotation DT = new Annotation("pos1", "DT", "pos", "a1", "a2", "word1");
+      Annotation th = new Annotation("phone1", "D", "phone", "a1", "a1.5", "word1");
+      Annotation e = new Annotation("phone2", "@", "phone", "a1.5", "a2", "word1");
+      Annotation quick = new Annotation("word2", "quick", "word", "a2", "a3", "turn1");
+      Annotation A = new Annotation("pos2", "A", "pos", "a2", "a3", "word2");
+      Annotation k = new Annotation("phone3", "k", "phone", "a2", "a2.25", "word2");
+      Annotation w = new Annotation("phone4", "w", "phone", "a2.25", "a2.5", "word2");
+      Annotation I = new Annotation("phone5", "I", "phone", "a2.5", "a2.75", "word2");
+      Annotation ck = new Annotation("phone6", "k", "phone", "a2.75", "a3", "word2");
+      Annotation brown = new Annotation("word3", "brown", "word", "a3", "a4", "turn1");
+      Annotation AP = new Annotation("phrase1", "AP", "phrase", "a2", "a4", "turn1");
+      Annotation fox = new Annotation("word4", "fox", "word", "a4", "a5", "turn1");
+      Annotation N = new Annotation("pos3", "N", "pos", "a4", "a5", "word4");
+      Annotation NP = new Annotation("phrase2", "NP", "phrase", "a1", "a5", "turn1");
+
+      g.addAnnotation(who1);
+      g.addAnnotation(turn1);
+      g.addAnnotation(utterance1);
+      g.addAnnotation(utterance2);
+
+      g.addAnnotation(the);
+      g.addAnnotation(quick);
+      g.addAnnotation(brown);
+      g.addAnnotation(fox);
+
+      g.addAnnotation(th);
+      g.addAnnotation(e);
+      g.addAnnotation(k);
+      g.addAnnotation(w);
+      g.addAnnotation(I);
+      g.addAnnotation(ck);
+
+      g.addAnnotation(DT);
+      g.addAnnotation(A);
+      g.addAnnotation(N);
+
+      g.addAnnotation(AP);
+      g.addAnnotation(NP);
+
+      assertFalse(g.isFragment());
+
+      // create fragment
+      Vector<String> layers = new Vector<String>();
+      layers.add("utterance");
+      layers.add("word");
+      layers.add("phone");
+      assertEquals(2, g.getAnnotation("utterance2").getOrdinal());
+      Graph f = g.getFragment(utterance2, layers);
+      assertEquals(2, f.getAnnotation("utterance2").getOrdinal());
+      f.getAnnotation("turn1").getAnnotations("word");
+      assertEquals("word ordinal before validation",
+		   3, f.getAnnotation("word3").getOrdinal());
+      assertEquals("word ordinal before validation",
+		   4, f.getAnnotation("word4").getOrdinal());
+      assertNotEquals(f.getAnnotation("turn1").getStart(), 
+		      f.getAnnotation("utterance2").getStart());
+      assertTrue(f.isFragment());
+
+      Validator v = new Validator();
+      v.setFullValidation(true);
+      v.setDebug(true);
+      try
+      {
+	 Vector<Change> changes = v.transform(f);
+	 if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
+	 assertEquals(2, f.getAnnotation("utterance2").getOrdinal());
+	 assertNotEquals(f.getAnnotation("turn1").getStart(), 
+			 f.getAnnotation("utterance2").getStart());
+	 assertEquals("word ordinal after validation",
+		      3, f.getAnnotation("word3").getOrdinal());
+	 assertEquals("word ordinal after validation",
+		      4, f.getAnnotation("word4").getOrdinal());
+	 assertEquals("no changes applied", 0, changes.size());
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+   }
+
    @Test public void validateHierarchyParentChildSynchronicity() // TODO saturated anchor sharing, and non-saturated by parent-including violations
    {
    }

@@ -1566,210 +1566,314 @@ public class Merger
 	 assert anOriginal.getChange() != Change.Operation.Destroy : "anOriginal.getChange() != Change.Operation.Destroy - " + anOriginal;
 	 
 	 // start anchor...
-	 boolean bCheckStartAnchorOffset = true;
-	 
-	 // there may be reasons to relink the annotation to another anchor
-	 // - i.e. it's linked differently in the edited graph
-	 
-	 boolean bChanged = false;
-	 // change for linking to a parallel annotations
-	 for (Annotation anParallel : removeDeleted(anEdited.getStart().getStartingAnnotations()))
+	 if (!dummyAnchors.contains(anOriginal.getStart()))
 	 {
-	    if (anParallel == anEdited) continue;		  
-	    if (hasCounterpart(anParallel))
+	    boolean bCheckStartAnchorOffset = true;
+	    
+	    // there may be reasons to relink the annotation to another anchor
+	    // - i.e. it's linked differently in the edited graph
+	    
+	    boolean bChanged = false;
+	    // change for linking to a parallel annotations
+	    for (Annotation anParallel : removeDeleted(anEdited.getStart().getStartingAnnotations()))
 	    {
-	       Annotation anLinkedOriginalParallel = getCounterpart(anParallel);
-	       if (anOriginal.getStart() != anLinkedOriginalParallel.getStart()
-		   && getConfidence(anOriginal.getStart()) 
-		   <= getConfidence(anLinkedOriginalParallel.getStart()))
-	       { // link this annotation to the parallel one
-		  // only link to annotations that have been through this phase
-		  if (!anLinkedOriginalParallel.containsKey("@computeAnchorDeltasForMerge")) continue;
-		  // don't share this anchor if there's an annotation connected that we shouldn't share with
-		  if (layer.getSaturated() 
-		      || anLinkedOriginalParallel.getStart().startOf(layer.getParentId()).size() == 0)
-		  {
-		     log(layerId, ": Share start anchor of ", anOriginal, 
-			 " with parallel ", anLinkedOriginalParallel);
-		     // ensure that the end anchor for the last annotation is updated
-		     if (anEdited.getInstantaneous())
-		     {
-			changes.addAll( // track changes of:
-			   anOriginal.setEnd(anLinkedOriginalParallel.getStart()));
-		     }
-		     changes.addAll( // track changes of:
-			anOriginal.setStart(anLinkedOriginalParallel.getStart())); // TODO changeStartWithRelatedAnnotations()?
-		     bChanged = true;
-		     break;
-		  } // bShare
-	       } // link this annotation to the parallel one
-	    } // their-parallel has a counterpart
-	 } // next parallel their-annotation
-	 if (!bChanged)
-	 {
-	    // or maybe its shared for us but *not* shared for them
-	    for (Annotation anParallel : removeDeleted(anOriginal.getStart().getStartingAnnotations()))
-	    {
-	       if (anParallel == anOriginal) continue;
-	       if (anParallel.getLayerId() == anOriginal.getLayerId()) continue;
-	       if (anParallel.getStart() != anOriginal.getStart()) continue; // aready changed
+	       if (anParallel == anEdited) continue;		  
 	       if (hasCounterpart(anParallel))
 	       {
-		  Annotation anEditedParallel = getCounterpart(anParallel);
-		  // not shared in the edite graph
-		  if (anEdited.getStart() != anEditedParallel.getStart()
-		      // and there is some confidence in the edited anchors
-		      && getConfidence(anEdited.getStart()) > Constants.CONFIDENCE_NONE
-		      && getConfidence(anEditedParallel.getStart()) > Constants.CONFIDENCE_NONE)
-		  {
-		     // SHOULD they share? Is there a saturated relationship between the layers (annotation in the child layer)
-		     Layer parallelLayer = graph.getLayer(anEditedParallel.getLayerId());
-		     if ((layer.getParentId().equals(anEditedParallel.getLayerId())
-			  && layer.getSaturated())
-			 || (parallelLayer != null && parallelLayer.getParentId().equals(layerId)
-			     && parallelLayer.getSaturated()))
+		  Annotation anLinkedOriginalParallel = getCounterpart(anParallel);
+		  if (anOriginal.getStart() != anLinkedOriginalParallel.getStart()
+		      && getConfidence(anOriginal.getStart()) 
+		      <= getConfidence(anLinkedOriginalParallel.getStart()))
+		  { // link this annotation to the parallel one
+		     // only link to annotations that have been through this phase
+		     if (!anLinkedOriginalParallel.containsKey("@computeAnchorDeltasForMerge")) continue;
+		     // don't share this anchor if there's an annotation connected that we shouldn't share with
+		     if (layer.getSaturated() 
+			 || anLinkedOriginalParallel.getStart().startOf(layer.getParentId()).size() == 0)
 		     {
-			if (!layer.getParentId().equals(anEditedParallel.getLayerId())) // parent layer
-			{
-			   bCheckStartAnchorOffset = false;
-			   log(layerId, ": For ", anOriginal,
-			       " assuming that start of ", anParallel, " is correct");
-			   // i.e. if the edited graph has disconnection between words and segments
-			   // then the segment alignments trump the word aligments
-			}
-			// otherwise it's a child - simply don't unlink it, but allow it to change
-			continue; // next parallel...
-		     }
-		     // new anchor - copy original, then below we might fix up the offset
-		     Anchor newStart = new Anchor(anOriginal.getStart());
-		     newStart.create();
-		     graph.addAnchor(newStart);
-		     changes.addAll( // track changes of:
-			newStart.getChanges());
-		     // we change related annotations, but not those related to the parallel layer
-		     HashSet<String> relatedToParallel = new HashSet<String>();
-		     relatedToParallel.addAll(parallelLayer.getChildren().keySet());
-		     relatedToParallel.add(parallelLayer.getParentId());
-		     relatedToParallel.add(parallelLayer.getId());
-		     // instant?
-		     if (anEdited.getInstantaneous())
-		     {
-			changes.addAll( // track changes of:
-			   changeEndWithRelatedAnnotations(anOriginal, newStart));
-		     }
-		     changes.addAll( // track changes of:
-			changeStartWithRelatedAnnotations(anOriginal, newStart, relatedToParallel));
-		     log(layerId, ": Different start anchor for ", anOriginal,
-			 " unshared from ", anParallel, ": new anchor at ", newStart.getOffset());
-		     bChanged = true;
-		     bCheckStartAnchorOffset = true;
-		     break;
-		  } // edited and parallel are not linked
-	       } // their-parallel has a counterpart
-	    } // next parallel
-	 } // !bChanged
-	 Anchor delta = null;
-	 // are the offsets different?
-	 if (bCheckStartAnchorOffset
-	     && compare(anEdited.getStart(), anOriginal.getStart()) != 0)
-	 {
-	    if (ignoreOffsetConfidence
-		|| getConfidence(anEdited.getStart()) >= getConfidence(anOriginal.getStart()))
-	    { // theirs is more trustworthy
-	       // look in the edited graph for a new start-anchor canditate
-	       // by looking at the end-anchor of previous annotations on this layer
-	       Anchor matchingMergedAnchor = null;
-	       for (Annotation anEditedPrevious : anEdited.getStart().endOf(layer.getId()))
-	       {
-		  // skip instantaneous annotations
-		  if (anEditedPrevious == anEdited) continue; 
-		  Annotation anOriginalPrevious = getCounterpart(anEditedPrevious);
-		  // skip unmerged annotations from a neighboring fragments (TODO not sure there can be any)
-		  if (anOriginalPrevious == null) continue; 
-		  assert anOriginalPrevious.getEnd() != null 
-		     : "anOriginalPrevious.getEnd() != null - " + anOriginalPrevious;
-		  // is the new original end anchor offset the same time as the edited start anchor?
-		  // (we compare by offset because anchors don't have counterparts we can check)
-		  if (compare(anOriginalPrevious.getEnd(), anEdited.getStart()) == 0)
-		  {
-		     matchingMergedAnchor = anOriginalPrevious.getEnd();
-		     log(layerId, ": Different start anchor for ", anOriginal,
-			 ": linking to shared end of ", anOriginalPrevious);
-		     break;
-		  }
-	       } // next possible end anchor annotation
-	       if (matchingMergedAnchor == null)
-	       {
-		  // try for parallel annotations on another layer
-		  for (Annotation anEditedParallel : anEdited.getStart().getStartingAnnotations())
-		  {		     
-		     if (anEditedParallel == anEdited) continue; // skip ourselves
-		     if (anEditedParallel.getLayerId() == anEdited.getLayerId()) continue; // on our own layer
-		     Annotation anOriginalParallel = getCounterpart(anEditedParallel);
-		     // skip unmerged annotations from a neighboring fragments (TODO not sure there can be any)
-		     if (anOriginalParallel == null) continue; 
-		     assert anOriginalParallel.getStart() != null 
-			: "anOriginalParallel.getStart() != null - " + anOriginalParallel;
-		     // no use linking to the very same anchor
-		     if (anOriginalParallel.getStart() == anOriginal.getStart()) continue;
-		     // offset should be the same
-		     if (compare(anOriginalParallel.getStart(), anEditedParallel.getStart()) != 0
-			 // unless our offset is less trustworthy than theirs
-			 && getConfidence(anEditedParallel.getStart()) >= Constants.CONFIDENCE_AUTOMATIC
-			 && getConfidence(anOriginalParallel.getStart()) <= getConfidence(anEditedParallel.getStart())) continue;
-		     matchingMergedAnchor = anOriginalParallel.getStart();
-		     log(layerId, ": Different start anchor for ", anOriginal,
-			 ": linking to shared start of ", anOriginalParallel);
-		     break;
-		  } // next possible start anchor annotation
-	       } // matchingMergedAnchor == null
-	       if (matchingMergedAnchor != null)
-	       { // use the existing anchor
-		  // this, and all parallel annotation on *unrelated* layers come with us
-		  for (Annotation an : anOriginal.getStart().getStartingAnnotations())
-		  {
-		     if (an == anOriginal) continue;
-		     // unrelated layer?
-		     Layer otherLayer = an.getLayer();
-		     if (!layer.getParentId().equals(otherLayer.getId())
-			 && !otherLayer.getParentId().equals(layerId))
-		     {
-		  	// if the layer is known to the edited graph,
-		  	// only re-link if they share anchors in the edited graph too
-		  	if (editedGraph.getLayer(an.getLayerId()) != null)
-		  	{
-		  	   Annotation anEditedParallel = getCounterpart(an);
-		  	   if (anEditedParallel == null
-		  	       || anEditedParallel.getStart() != anEdited.getStart()) 
-		  	      continue;
-		  	}
-		  	else // non-edited layer
-		  	{
-		  	   // if it's already been changed, skip it
-		  	   if (an.getStart() != anOriginal.getStart()) continue;
-		  	}
-		  	log(layerId, ": Different start anchor for ", anOriginal,
-			    ": linking parallel ", an, " too");
-		  	if (an.getInstantaneous()) 
+			log(layerId, ": Share start anchor of ", anOriginal, 
+			    " with parallel ", anLinkedOriginalParallel);
+			// ensure that the end anchor for the last annotation is updated
+			if (anEdited.getInstantaneous())
 			{
 			   changes.addAll( // track changes of:
-			      an.setEnd(matchingMergedAnchor)); 
+			      anOriginal.setEnd(anLinkedOriginalParallel.getStart()));
 			}
-		  	changes.addAll( // track changes of:
-			   an.setStart(matchingMergedAnchor));
-		     } // unrelated layer
-		  } // next annotation starting here
-		  changes.addAll( // track changes of:
-		     anOriginal.setStart(matchingMergedAnchor));
-	       } // found a counterpart anchor
-	       else
+			changes.addAll( // track changes of:
+			   anOriginal.setStart(anLinkedOriginalParallel.getStart())); // TODO changeStartWithRelatedAnnotations()?
+			bChanged = true;
+			break;
+		     } // bShare
+		  } // link this annotation to the parallel one
+	       } // their-parallel has a counterpart
+	    } // next parallel their-annotation
+	    if (!bChanged)
+	    {
+	       // or maybe its shared for us but *not* shared for them
+	       for (Annotation anParallel : removeDeleted(anOriginal.getStart().getStartingAnnotations()))
 	       {
-		  if (!dummyEditedAnchors.contains(anEdited.getStart()))
+		  if (anParallel == anOriginal) continue;
+		  if (anParallel.getLayerId() == anOriginal.getLayerId()) continue;
+		  if (anParallel.getStart() != anOriginal.getStart()) continue; // aready changed
+		  if (hasCounterpart(anParallel))
 		  {
-		     delta = new Anchor(anEdited.getStart());
-		  }
-		  
-		  // create a new anchor for unrelated annotations that link to this one
+		     Annotation anEditedParallel = getCounterpart(anParallel);
+		     // not shared in the edite graph
+		     if (anEdited.getStart() != anEditedParallel.getStart()
+			 // and there is some confidence in the edited anchors
+			 && getConfidence(anEdited.getStart()) > Constants.CONFIDENCE_NONE
+			 && getConfidence(anEditedParallel.getStart()) > Constants.CONFIDENCE_NONE)
+		     {
+			// SHOULD they share? Is there a saturated relationship between the layers (annotation in the child layer)
+			Layer parallelLayer = graph.getLayer(anEditedParallel.getLayerId());
+			if ((layer.getParentId().equals(anEditedParallel.getLayerId())
+			     && layer.getSaturated())
+			    || (parallelLayer != null && parallelLayer.getParentId().equals(layerId)
+				&& parallelLayer.getSaturated()))
+			{
+			   if (!layer.getParentId().equals(anEditedParallel.getLayerId())) // parent layer
+			   {
+			      bCheckStartAnchorOffset = false;
+			      log(layerId, ": For ", anOriginal,
+				  " assuming that start of ", anParallel, " is correct");
+			      // i.e. if the edited graph has disconnection between words and segments
+			      // then the segment alignments trump the word aligments
+			   }
+			   // otherwise it's a child - simply don't unlink it, but allow it to change
+			   continue; // next parallel...
+			}
+			// new anchor - copy original, then below we might fix up the offset
+			Anchor newStart = new Anchor(anOriginal.getStart());
+			newStart.create();
+			graph.addAnchor(newStart);
+			changes.addAll( // track changes of:
+			   newStart.getChanges());
+			// we change related annotations, but not those related to the parallel layer
+			HashSet<String> relatedToParallel = new HashSet<String>();
+			relatedToParallel.addAll(parallelLayer.getChildren().keySet());
+			relatedToParallel.add(parallelLayer.getParentId());
+			relatedToParallel.add(parallelLayer.getId());
+			// instant?
+			if (anEdited.getInstantaneous())
+			{
+			   changes.addAll( // track changes of:
+			      changeEndWithRelatedAnnotations(anOriginal, newStart));
+			}
+			changes.addAll( // track changes of:
+			   changeStartWithRelatedAnnotations(anOriginal, newStart, relatedToParallel));
+			log(layerId, ": Different start anchor for ", anOriginal,
+			    " unshared from ", anParallel, ": new anchor at ", newStart.getOffset());
+			bChanged = true;
+			bCheckStartAnchorOffset = true;
+			break;
+		     } // edited and parallel are not linked
+		  } // their-parallel has a counterpart
+	       } // next parallel
+	    } // !bChanged
+	    Anchor delta = null;
+	    // are the offsets different?
+	    if (bCheckStartAnchorOffset
+		&& compare(anEdited.getStart(), anOriginal.getStart()) != 0)
+	    {
+	       if (ignoreOffsetConfidence
+		   || getConfidence(anEdited.getStart()) >= getConfidence(anOriginal.getStart()))
+	       { // theirs is more trustworthy
+		  // look in the edited graph for a new start-anchor canditate
+		  // by looking at the end-anchor of previous annotations on this layer
+		  Anchor matchingMergedAnchor = null;
+		  for (Annotation anEditedPrevious : anEdited.getStart().endOf(layer.getId()))
+		  {
+		     // skip instantaneous annotations
+		     if (anEditedPrevious == anEdited) continue; 
+		     Annotation anOriginalPrevious = getCounterpart(anEditedPrevious);
+		     // skip unmerged annotations from a neighboring fragments (TODO not sure there can be any)
+		     if (anOriginalPrevious == null) continue; 
+		     assert anOriginalPrevious.getEnd() != null 
+			: "anOriginalPrevious.getEnd() != null - " + anOriginalPrevious;
+		     // is the new original end anchor offset the same time as the edited start anchor?
+		     // (we compare by offset because anchors don't have counterparts we can check)
+		     if (compare(anOriginalPrevious.getEnd(), anEdited.getStart()) == 0)
+		     {
+			matchingMergedAnchor = anOriginalPrevious.getEnd();
+			log(layerId, ": Different start anchor for ", anOriginal,
+			    ": linking to shared end of ", anOriginalPrevious);
+			break;
+		     }
+		  } // next possible end anchor annotation
+		  if (matchingMergedAnchor == null)
+		  {
+		     // try for parallel annotations on another layer
+		     for (Annotation anEditedParallel : anEdited.getStart().getStartingAnnotations())
+		     {		     
+			if (anEditedParallel == anEdited) continue; // skip ourselves
+			if (anEditedParallel.getLayerId() == anEdited.getLayerId()) continue; // on our own layer
+			Annotation anOriginalParallel = getCounterpart(anEditedParallel);
+			// skip unmerged annotations from a neighboring fragments (TODO not sure there can be any)
+			if (anOriginalParallel == null) continue; 
+			assert anOriginalParallel.getStart() != null 
+			   : "anOriginalParallel.getStart() != null - " + anOriginalParallel;
+			// no use linking to the very same anchor
+			if (anOriginalParallel.getStart() == anOriginal.getStart()) continue;
+			// offset should be the same
+			if (compare(anOriginalParallel.getStart(), anEditedParallel.getStart()) != 0
+			    // unless our offset is less trustworthy than theirs
+			    && getConfidence(anEditedParallel.getStart()) >= Constants.CONFIDENCE_AUTOMATIC
+			    && getConfidence(anOriginalParallel.getStart()) <= getConfidence(anEditedParallel.getStart())) continue;
+			matchingMergedAnchor = anOriginalParallel.getStart();
+			log(layerId, ": Different start anchor for ", anOriginal,
+			    ": linking to shared start of ", anOriginalParallel);
+			break;
+		     } // next possible start anchor annotation
+		  } // matchingMergedAnchor == null
+		  if (matchingMergedAnchor != null)
+		  { // use the existing anchor
+		     // this, and all parallel annotation on *unrelated* layers come with us
+		     for (Annotation an : anOriginal.getStart().getStartingAnnotations())
+		     {
+			if (an == anOriginal) continue;
+			// unrelated layer?
+			Layer otherLayer = an.getLayer();
+			if (!layer.getParentId().equals(otherLayer.getId())
+			    && !otherLayer.getParentId().equals(layerId))
+			{
+			   // if the layer is known to the edited graph,
+			   // only re-link if they share anchors in the edited graph too
+			   if (editedGraph.getLayer(an.getLayerId()) != null)
+			   {
+			      Annotation anEditedParallel = getCounterpart(an);
+			      if (anEditedParallel == null
+				  || anEditedParallel.getStart() != anEdited.getStart()) 
+				 continue;
+			   }
+			   else // non-edited layer
+			   {
+			      // if it's already been changed, skip it
+			      if (an.getStart() != anOriginal.getStart()) continue;
+			   }
+			   log(layerId, ": Different start anchor for ", anOriginal,
+			       ": linking parallel ", an, " too");
+			   if (an.getInstantaneous()) 
+			   {
+			      changes.addAll( // track changes of:
+				 an.setEnd(matchingMergedAnchor)); 
+			   }
+			   changes.addAll( // track changes of:
+			      an.setStart(matchingMergedAnchor));
+			} // unrelated layer
+		     } // next annotation starting here
+		     changes.addAll( // track changes of:
+			anOriginal.setStart(matchingMergedAnchor));
+		  } // found a counterpart anchor
+		  else
+		  {
+		     if (!dummyEditedAnchors.contains(anEdited.getStart()))
+		     {
+			delta = new Anchor(anEdited.getStart());
+		     }
+		     
+		     // create a new anchor for unrelated annotations that link to this one
+		     Anchor newAnchor = new Anchor(anOriginal.getStart());
+		     newAnchor.create();
+		     graph.addAnchor(newAnchor);
+		     changes.addAll( // track changes of:
+			newAnchor.getChanges());
+		     for (Annotation previousAnnotation 
+			     : removeDeleted(anOriginal.getStart().getEndingAnnotations()))
+		     {
+			if (previousAnnotation == anOriginal) continue; // instantaneous
+			Layer otherLayer = previousAnnotation.getLayer();
+			// check for other possible end anchor, by following the edited graph structure
+			Annotation editedPreviousAnnotation = getCounterpart(previousAnnotation);
+			if (editedPreviousAnnotation != null)
+			{
+			   // only if they're not linked in the edited graph
+			   if (editedPreviousAnnotation.getEnd() != anEdited.getStart())
+			   {
+			      for (Annotation editedPrevious2 : editedPreviousAnnotation.getEnd().getEndingAnnotations())
+			      {
+				 if (!hasCounterpart(editedPrevious2)) continue;
+				 Annotation originalPrevious2 = getCounterpart(editedPrevious2);
+				 if (originalPrevious2.getEnd() != anOriginal.getStart())
+				 { // found a different but linked anchor via the edited graph structure
+				    newAnchor = originalPrevious2.getEnd();
+				    log(layerId, ": Found end anchor linked via ", originalPrevious2);
+				    break;
+				 }
+			      } // next annotation that's parallel to this parallel annotation
+			      log(layerId, ": Different start anchor for ", anOriginal, 
+				  ": new anchor for ending ", previousAnnotation, " - ", newAnchor);
+			      changes.addAll( // track changes of:
+				 previousAnnotation.setEnd(newAnchor));
+			   } // they shouldn't be linked
+			} // there is a corresponding edited parallel annotation
+		     } // next anchor using this as an end anchor
+		     
+		     // do the same for annotations that start here
+		     for (Annotation parallelAnnotation : removeDeleted(anOriginal.getStart().getStartingAnnotations()))
+		     {
+			if (parallelAnnotation == anOriginal) continue; // not ourselves
+			if (parallelAnnotation == anOriginal.getParent()) continue; // not our parent
+			Layer otherLayer = parallelAnnotation.getLayer();
+			// check for other possible start anchor, by following the edited graph structure
+			Annotation editedParallelAnnotation = getCounterpart(parallelAnnotation);
+			if (editedParallelAnnotation != null)
+			{
+			   // only if they're not linked in the edited graph
+			   if (editedParallelAnnotation.getStart() != anEdited.getStart())
+			   {
+			      for (Annotation editedParallel2 
+				      : editedParallelAnnotation.getStart().getStartingAnnotations())
+			      {
+				 Annotation originalParallel2 = getCounterpart(editedParallel2);
+				 if (originalParallel2.getStart() != anOriginal.getStart())
+				 { // found a different but linked anchor via the edited graph structure
+				    newAnchor = originalParallel2.getStart();
+				    log(layerId, ": Found start anchor linked via ", originalParallel2);
+				    break;
+				 }
+			      } // next annotation that's parallel to this parallel annotation
+			      parallelAnnotation.setStart(newAnchor);
+			      log(layerId, ": Different start anchor for ", anOriginal,
+				  ": new anchor for starting ", parallelAnnotation);
+			   } // they shouldn't be linked
+			} // there is a corresponding edited parallel annotation
+		     } // next anchor using this as an end anchor
+		  } 
+		  // are we changing this anchor?
+		  if (delta != null)
+		  {
+		     anOriginal.getStart().setOffset(delta.getOffset());
+		     setConfidence(anOriginal.getStart(), getConfidence(delta));
+		     log(layerId, ": Different start anchor for ", anOriginal,
+			 ": changing offset to ", delta.getOffset());
+		  } // there is a delta to apply
+	       } // theirs is more trustworthy
+	    } // offsets are different
+	    
+	    // is there a previous annotation?
+	    if (anLastOriginal != null
+		// are the offsets the same in our graph?
+		&& compare(anLastOriginal.getEnd(), anOriginal.getStart()) == 0)
+	    { // previous annotation ending where this one starts
+	       // do they share anchors in the edited version of the graph?
+	       Annotation anLastEdited = getCounterpart(anLastOriginal);
+	       if (anLastEdited.getEnd() == anEdited.getStart()
+		   // are they currently two separate anchors?
+		   && anLastOriginal.getEnd() != anOriginal.getStart())
+	       {
+		  log(layerId, ": Share anchors between ", anLastOriginal, " and ", anOriginal);
+		  // ensure that the end anchor for the last annotation is updated
+		  changes.addAll( // track changes of:
+		     changeEndWithRelatedAnnotations(anLastOriginal, anOriginal.getStart()));
+	       }
+	       // do they *not* share anchors in the edited version of the graph?
+	       else if (anLastEdited.getEnd() != anEdited.getStart()
+			// are they currently sharing anchors?
+			&& anLastOriginal.getEnd() == anOriginal.getStart())
+	       { // not sharing in editedGraph
+		  log(layerId, ": Un-share anchors between ", anLastOriginal, " and ", anOriginal);
+		  // create a new anchor for unrelated annotations that link to this one 
+		  // (this will include anLastOriginal)
 		  Anchor newAnchor = new Anchor(anOriginal.getStart());
 		  newAnchor.create();
 		  graph.addAnchor(newAnchor);
@@ -1787,9 +1891,9 @@ public class Merger
 			// only if they're not linked in the edited graph
 			if (editedPreviousAnnotation.getEnd() != anEdited.getStart())
 			{
-			   for (Annotation editedPrevious2 : editedPreviousAnnotation.getEnd().getEndingAnnotations())
+			   for (Annotation editedPrevious2 
+				   : editedPreviousAnnotation.getEnd().getEndingAnnotations())
 			   {
-			      if (!hasCounterpart(editedPrevious2)) continue;
 			      Annotation originalPrevious2 = getCounterpart(editedPrevious2);
 			      if (originalPrevious2.getEnd() != anOriginal.getStart())
 			      { // found a different but linked anchor via the edited graph structure
@@ -1798,355 +1902,258 @@ public class Merger
 				 break;
 			      }
 			   } // next annotation that's parallel to this parallel annotation
-			   log(layerId, ": Different start anchor for ", anOriginal, 
-			       ": new anchor for ending ", previousAnnotation, " - ", newAnchor);
-			   changes.addAll( // track changes of:
-			      previousAnnotation.setEnd(newAnchor));
-			} // they shouldn't be linked
-		     } // there is a corresponding edited parallel annotation
-		  } // next anchor using this as an end anchor
-		  
-		  // do the same for annotations that start here
-		  for (Annotation parallelAnnotation : removeDeleted(anOriginal.getStart().getStartingAnnotations()))
-		  {
-		     if (parallelAnnotation == anOriginal) continue; // not ourselves
-		     if (parallelAnnotation == anOriginal.getParent()) continue; // not our parent
-		     Layer otherLayer = parallelAnnotation.getLayer();
-		     // check for other possible start anchor, by following the edited graph structure
-		     Annotation editedParallelAnnotation = getCounterpart(parallelAnnotation);
-		     if (editedParallelAnnotation != null)
-		     {
-			// only if they're not linked in the edited graph
-			if (editedParallelAnnotation.getStart() != anEdited.getStart())
-			{
-			   for (Annotation editedParallel2 
-				   : editedParallelAnnotation.getStart().getStartingAnnotations())
-			   {
-			      Annotation originalParallel2 = getCounterpart(editedParallel2);
-			      if (originalParallel2.getStart() != anOriginal.getStart())
-			      { // found a different but linked anchor via the edited graph structure
-				 newAnchor = originalParallel2.getStart();
-				 log(layerId, ": Found start anchor linked via ", originalParallel2);
-				 break;
-			      }
-			   } // next annotation that's parallel to this parallel annotation
-			   parallelAnnotation.setStart(newAnchor);
 			   log(layerId, ": Different start anchor for ", anOriginal,
-			       ": new anchor for starting ", parallelAnnotation);
+			       ": new anchor for ending ", previousAnnotation, " -- ", newAnchor);
+			   changes.addAll( // track changes of:
+			      changeEndWithRelatedAnnotations(previousAnnotation, newAnchor));
 			} // they shouldn't be linked
 		     } // there is a corresponding edited parallel annotation
-		  } // next anchor using this as an end anchor
-	       } 
-	       // are we changing this anchor?
-	       if (delta != null)
-	       {
-		  anOriginal.getStart().setOffset(delta.getOffset());
-		  setConfidence(anOriginal.getStart(), getConfidence(delta));
-		  log(layerId, ": Different start anchor for ", anOriginal,
-		      ": changing offset to ", delta.getOffset());
-	       } // there is a delta to apply
-	    } // theirs is more trustworthy
-	 } // offsets are different
+		  } // next anchor using this as an end anchor	       
+	       } // not sharing in editedGraph
+	    } // previous annotation ending where this one starts
 
-	 // is there a previous annotation?
-	 if (anLastOriginal != null
-	     // are the offsets the same in our graph?
-	     && compare(anLastOriginal.getEnd(), anOriginal.getStart()) == 0)
-	 { // previous annotation ending where this one starts
-	    // do they share anchors in the edited version of the graph?
-	    Annotation anLastEdited = getCounterpart(anLastOriginal);
-	    if (anLastEdited.getEnd() == anEdited.getStart()
-		// are they currently two separate anchors?
-		&& anLastOriginal.getEnd() != anOriginal.getStart())
-	    {
-	       log(layerId, ": Share anchors between ", anLastOriginal, " and ", anOriginal);
-	       // ensure that the end anchor for the last annotation is updated
-	       changes.addAll( // track changes of:
-		  changeEndWithRelatedAnnotations(anLastOriginal, anOriginal.getStart()));
-	    }
-	    // do they *not* share anchors in the edited version of the graph?
-	    else if (anLastEdited.getEnd() != anEdited.getStart()
-		     // are they currently sharing anchors?
-		     && anLastOriginal.getEnd() == anOriginal.getStart())
-	    { // not sharing in editedGraph
-	       log(layerId, ": Un-share anchors between ", anLastOriginal, " and ", anOriginal);
-	       // create a new anchor for unrelated annotations that link to this one 
-	       // (this will include anLastOriginal)
-	       Anchor newAnchor = new Anchor(anOriginal.getStart());
-	       newAnchor.create();
-	       graph.addAnchor(newAnchor);
-	       changes.addAll( // track changes of:
-		  newAnchor.getChanges());
-	       for (Annotation previousAnnotation 
-		       : removeDeleted(anOriginal.getStart().getEndingAnnotations()))
-	       {
-		  if (previousAnnotation == anOriginal) continue; // instantaneous
-		  Layer otherLayer = previousAnnotation.getLayer();
-		  // check for other possible end anchor, by following the edited graph structure
-		  Annotation editedPreviousAnnotation = getCounterpart(previousAnnotation);
-		  if (editedPreviousAnnotation != null)
-		  {
-		     // only if they're not linked in the edited graph
-		     if (editedPreviousAnnotation.getEnd() != anEdited.getStart())
-		     {
-			for (Annotation editedPrevious2 
-				: editedPreviousAnnotation.getEnd().getEndingAnnotations())
-			{
-			   Annotation originalPrevious2 = getCounterpart(editedPrevious2);
-			   if (originalPrevious2.getEnd() != anOriginal.getStart())
-			   { // found a different but linked anchor via the edited graph structure
-			      newAnchor = originalPrevious2.getEnd();
-			      log(layerId, ": Found end anchor linked via ", originalPrevious2);
-			      break;
-			   }
-			} // next annotation that's parallel to this parallel annotation
-			log(layerId, ": Different start anchor for ", anOriginal,
-			    ": new anchor for ending ", previousAnnotation, " -- ", newAnchor);
-			changes.addAll( // track changes of:
-			   changeEndWithRelatedAnnotations(previousAnnotation, newAnchor));
-		     } // they shouldn't be linked
-		  } // there is a corresponding edited parallel annotation
-	       } // next anchor using this as an end anchor	       
-	    } // not sharing in editedGraph
-	 } // previous annotation ending where this one starts
+	 } // start is not a dummy anchor
 
-	 // end anchor
-	 if (anEdited.getInstantaneous())
-	 { // instantaneous annotation
-	    if (!anOriginal.getInstantaneous())
-	    {
-	       anOriginal.setEnd(anOriginal.getStart());
-	       log(layerId, ": Forcing instantaneity on ", anOriginal);
-	    }
-	 }
-	 else
+	 if (!dummyAnchors.contains(anOriginal.getEnd()))
 	 {
-	    assert anOriginal.getEnd() != null : "anOriginal.getEnd() != null: " + anOriginal;
-	    assert anEdited.getEnd() != null : "anEdited.getEnd() != null: " + anEdited;
-	    boolean bCheckEndAnchorOffset = true;
-	    
-	    // there may be reasons to relink the
-	    // annotation to another anchor - i.e. it's linked differently in the edited graph
-	    bChanged = false;
-	    for (Annotation anParallel : anEdited.getEnd().getEndingAnnotations())
-	    {
-	       if (anParallel == anEdited) continue;		  
-	       if (hasCounterpart(anParallel))
+	    // end anchor
+	    if (anEdited.getInstantaneous())
+	    { // instantaneous annotation
+	       if (!anOriginal.getInstantaneous())
 	       {
-		  Annotation anLinkedOriginalParallel = getCounterpart(anParallel);
-		  if (anOriginal.getEnd() != anLinkedOriginalParallel.getEnd()
-		      && getConfidence(anOriginal.getEnd())
-		      <= getConfidence(anLinkedOriginalParallel.getEnd()))
-		  { // link this annotation to the parallel one
-		     // only link to annotations that have been through this phase
-		     if (!anLinkedOriginalParallel.containsKey("@computeAnchorDeltasForMerge")) continue;
-		     // don't share this anchor if there's an annotation connected that we shouldn't share with
-		     if (layer.getSaturated() 
-			 || anLinkedOriginalParallel.getEnd().endOf(layer.getParentId()).size() == 0)
-		     {
-			log(layerId, ": Share end anchor of ", anOriginal, 
-			    " with parallel ", anLinkedOriginalParallel);
-			// ensure that the end anchor for the last annotation is updated
-			if (anEdited.getInstantaneous()) anOriginal.setStart(anLinkedOriginalParallel.getEnd());
-			anOriginal.setEnd(anLinkedOriginalParallel.getEnd());
-			bChanged = true;
-			break;
-		     } // bShare
-		  }
-	       } // their-parallel has a counterpart
-	    } // next parallel their-annotation
-	    if (!bChanged)
+		  anOriginal.setEnd(anOriginal.getStart());
+		  log(layerId, ": Forcing instantaneity on ", anOriginal);
+	       }
+	    }
+	    else
 	    {
-	       // or maybe its shared for us but *not* shared for them
-	       for (Annotation anParallel : removeDeleted(anOriginal.getEnd().getEndingAnnotations()))
+	       assert anOriginal.getEnd() != null : "anOriginal.getEnd() != null: " + anOriginal;
+	       assert anEdited.getEnd() != null : "anEdited.getEnd() != null: " + anEdited;
+	       boolean bCheckEndAnchorOffset = true;
+	       
+	       // there may be reasons to relink the
+	       // annotation to another anchor - i.e. it's linked differently in the edited graph
+	       boolean bChanged = false;
+	       for (Annotation anParallel : anEdited.getEnd().getEndingAnnotations())
 	       {
-		  if (anParallel == anOriginal) continue;		  
-		  if (anParallel.getLayerId() == anOriginal.getLayerId()) continue;		  
+		  if (anParallel == anEdited) continue;		  
 		  if (hasCounterpart(anParallel))
 		  {
-		     Annotation anEditedParallel = getCounterpart(anParallel);
-		     if (anEdited.getEnd() != anEditedParallel.getEnd()
-			 && !dummyEditedAnchors.contains(anEdited.getEnd()))
-		     {
-			// SHOULD they share? Is there a saturated relationship between the layers (annotation in the child layer)
-			Layer parallelLayer = graph.getLayer(anEditedParallel.getLayerId());
-			if ((layer.getParentId().equals(anEditedParallel.getLayerId())
-			     && layer.getSaturated())
-			    || (parallelLayer != null && parallelLayer.getParentId().equals(layerId)
-				&& parallelLayer.getSaturated()))
+		     Annotation anLinkedOriginalParallel = getCounterpart(anParallel);
+		     if (anOriginal.getEnd() != anLinkedOriginalParallel.getEnd()
+			 && getConfidence(anOriginal.getEnd())
+			 <= getConfidence(anLinkedOriginalParallel.getEnd()))
+		     { // link this annotation to the parallel one
+			// only link to annotations that have been through this phase
+			if (!anLinkedOriginalParallel.containsKey("@computeAnchorDeltasForMerge")) continue;
+			// don't share this anchor if there's an annotation connected that we shouldn't share with
+			if (layer.getSaturated() 
+			    || anLinkedOriginalParallel.getEnd().endOf(layer.getParentId()).size() == 0)
 			{
-			   if (!layer.getParentId().equals(anEditedParallel.getLayerId())) // parent layer
+			   log(layerId, ": Share end anchor of ", anOriginal, 
+			       " with parallel ", anLinkedOriginalParallel);
+			   // ensure that the end anchor for the last annotation is updated
+			   if (anEdited.getInstantaneous()) anOriginal.setStart(anLinkedOriginalParallel.getEnd());
+			   anOriginal.setEnd(anLinkedOriginalParallel.getEnd());
+			   bChanged = true;
+			   break;
+			} // bShare
+		     }
+		  } // their-parallel has a counterpart
+	       } // next parallel their-annotation
+	       if (!bChanged)
+	       {
+		  // or maybe its shared for us but *not* shared for them
+		  for (Annotation anParallel : removeDeleted(anOriginal.getEnd().getEndingAnnotations()))
+		  {
+		     if (anParallel == anOriginal) continue;		  
+		     if (anParallel.getLayerId() == anOriginal.getLayerId()) continue;		  
+		     if (hasCounterpart(anParallel))
+		     {
+			Annotation anEditedParallel = getCounterpart(anParallel);
+			if (anEdited.getEnd() != anEditedParallel.getEnd()
+			    && !dummyEditedAnchors.contains(anEdited.getEnd()))
+			{
+			   // SHOULD they share? Is there a saturated relationship between the layers (annotation in the child layer)
+			   Layer parallelLayer = graph.getLayer(anEditedParallel.getLayerId());
+			   if ((layer.getParentId().equals(anEditedParallel.getLayerId())
+				&& layer.getSaturated())
+			       || (parallelLayer != null && parallelLayer.getParentId().equals(layerId)
+				   && parallelLayer.getSaturated()))
 			   {
-			      bCheckEndAnchorOffset = false;
-			      log(layerId, ": For ", anOriginal,
-				  " assuming that end of ", anParallel, " is correct");
-			      // i.e. if the edited graph has disconnection between words and segments
-			      // then the segment alignments trump the word aligments
+			      if (!layer.getParentId().equals(anEditedParallel.getLayerId())) // parent layer
+			      {
+				 bCheckEndAnchorOffset = false;
+				 log(layerId, ": For ", anOriginal,
+				     " assuming that end of ", anParallel, " is correct");
+				 // i.e. if the edited graph has disconnection between words and segments
+				 // then the segment alignments trump the word aligments
+			      }
+			      // otherwise it's a child - simply don't unlink it, but allow it to change
+			      continue; // next parallel...
 			   }
-			   // otherwise it's a child - simply don't unlink it, but allow it to change
-			   continue; // next parallel...
+			   
+			   // new anchor - copy the original, then later we'll check the offset
+			   Anchor newAnchor = new Anchor(anOriginal.getEnd());
+			   newAnchor.create();
+			   graph.addAnchor(newAnchor);
+			   changes.addAll( // track changes of:
+			      newAnchor.getChanges());
+			   
+			   // we change related annotations, but not those related to the parallel layer
+			   HashSet<String> relatedToParallel = new HashSet<String>();
+			   relatedToParallel.addAll(parallelLayer.getChildren().keySet());
+			   relatedToParallel.add(parallelLayer.getParentId());
+			   changeEndWithRelatedAnnotations(anOriginal, newAnchor, relatedToParallel);
+			   log(layerId, ": Different end anchor for ", anOriginal,
+			       " unshared from ", anParallel, ": new anchor at ", newAnchor.getOffset());
+			   bChanged = true;
+			   bCheckEndAnchorOffset = true;
+			   break;
+			} // they don't share in the edited graph
+		     } // their-parallel has a counterpart
+		  } // next possible parallel
+	       }	    
+	       
+	       Anchor delta = null;
+	       if (bCheckEndAnchorOffset
+		   && compare(anEdited.getEnd(), anOriginal.getEnd()) != 0)
+	       {
+		  if (ignoreOffsetConfidence
+		      || getConfidence(anEdited.getEnd()) 
+		      >= getConfidence(anOriginal.getEnd()))
+		  {
+		     Anchor matchingMergedAnchor = null;
+		     // try for parallel annotations on another layer
+		     for (Annotation anEditedParallel : anEdited.getEnd().getEndingAnnotations())
+		     {		     
+			if (anEditedParallel == anEdited) continue; // skip ourselves
+			if (anEditedParallel.getLayerId() == anEdited.getLayerId()) continue; // on our own layer
+			Annotation anOriginalParallel = getCounterpart(anEditedParallel);
+			// skip unmerged annotations from a neighboring fragments (TODO not sure there can be any)
+			if (anOriginalParallel == null) continue; 
+			assert anOriginalParallel.getEnd() != null 
+			   : "anOriginalParallel.getEnd() != null - " + anOriginalParallel;
+			// no use linking to the very same anchor
+			if (anOriginalParallel.getEnd() == anOriginal.getEnd()) continue;
+			// offset should be the same
+			if (compare(anOriginalParallel.getEnd(), anEditedParallel.getEnd()) != 0
+			    // unless our offset is less trustworthy than theirs
+			    && getConfidence(anEditedParallel.getEnd()) >= Constants.CONFIDENCE_AUTOMATIC
+			    && getConfidence(anOriginalParallel.getEnd()) 
+			    <= getConfidence(anEditedParallel.getEnd())) continue;
+			matchingMergedAnchor = anOriginalParallel.getEnd();
+			log(layerId, ": Different end anchor for ", anOriginal,
+			    ": linking to shared end of ", anOriginalParallel);
+			break;
+		     } // next possible start anchor annotation
+		     if (matchingMergedAnchor != null)
+		     {
+			// this, and all parallel annotation on *unrelated* layers come with us
+			for (Annotation an : anOriginal.getEnd().getEndingAnnotations())
+			{
+			   if (an == anOriginal) continue;
+			   // unrelated layer?
+			   Layer otherLayer = an.getLayer();
+			   if (!layer.getParentId().equals(an.getLayerId())
+			       && otherLayer.getParentId().equals(layerId))
+			   {
+			      log(layerId, ": Different end anchor for ", anOriginal,
+				  ": linking parallel ", an, " too");
+			      if (an.getInstantaneous())
+			      { // instant
+				 changes.addAll( // track changes of:
+				    an.setStart(matchingMergedAnchor));
+			      }
+			      changes.addAll( // track changes of:
+				 an.setEnd(matchingMergedAnchor));
+			   }
 			}
-
-			// new anchor - copy the original, then later we'll check the offset
-			Anchor newAnchor = new Anchor(anOriginal.getEnd());
-			newAnchor.create();
+			changes.addAll( // track changes of:
+			   anOriginal.setEnd(matchingMergedAnchor));
+		     }
+		     else
+		     { // no already-merged anchor we can use
+			// we might need a new anchor, if this is also the start anchor for
+			// another annotation with a different edited offset
+			
+			boolean bSplitFromFollowing = false;
+			for (Annotation anFollowing : anOriginal.getEnd().startOf(layerId))
+			{
+			   Annotation anEditedFollowing = getCounterpart(anFollowing);
+			   if (anEditedFollowing != null
+			       && anEditedFollowing.getStart() != anEdited.getEnd())
+			   {
+			      bSplitFromFollowing = true;
+			      break;
+			   }
+			} // next following annotation
+			
+			if (!dummyEditedAnchors.contains(anEdited.getEnd()))
+			{
+			   if (bSplitFromFollowing)
+			   {
+			      delta = new Anchor(anEdited.getEnd());
+			      delta.create();
+			   }
+			   else
+			   {
+			      // change this anchor
+			      delta = new Anchor(anEdited.getEnd());
+			   }
+			}
+		     } // change the anchor
+		  } // theirs is more trustworthy than ours
+		  
+		  // applying change to anchor?
+		  if (delta != null)
+		  {
+		     if (delta.getChange() != Change.Operation.Create)
+		     {
+			anOriginal.getEnd().setOffset(delta.getOffset());
+			setConfidence(anOriginal.getEnd(), getConfidence(delta));
+			log(layerId, ": Different end anchor for ", anOriginal,
+			    ": changing offset to  ", delta.getOffset());
+		     }
+		     else // Create
+		     {
+			Anchor newAnchor = delta;
 			graph.addAnchor(newAnchor);
 			changes.addAll( // track changes of:
 			   newAnchor.getChanges());
-
-			// we change related annotations, but not those related to the parallel layer
-			HashSet<String> relatedToParallel = new HashSet<String>();
-			relatedToParallel.addAll(parallelLayer.getChildren().keySet());
-			relatedToParallel.add(parallelLayer.getParentId());
-			changeEndWithRelatedAnnotations(anOriginal, newAnchor, relatedToParallel);
+			
+			Set<String> excludeLayers = new HashSet<String>();
+			if (layer.getSaturated()) excludeLayers.add(layerId);
+			changeEndWithRelatedAnnotations(anOriginal, newAnchor, excludeLayers);
 			log(layerId, ": Different end anchor for ", anOriginal,
-			    " unshared from ", anParallel, ": new anchor at ", newAnchor.getOffset());
-			bChanged = true;
-			bCheckEndAnchorOffset = true;
-			break;
-		     } // they don't share in the edited graph
-		  } // their-parallel has a counterpart
-	       } // next possible parallel
-	    }	    
-
-	    delta = null;
-	    if (bCheckEndAnchorOffset
-		&& compare(anEdited.getEnd(), anOriginal.getEnd()) != 0)
-	    {
-	       if (ignoreOffsetConfidence
-		   || getConfidence(anEdited.getEnd()) 
-		   >= getConfidence(anOriginal.getEnd()))
-	       {
-		  Anchor matchingMergedAnchor = null;
-		  // try for parallel annotations on another layer
-		  for (Annotation anEditedParallel : anEdited.getEnd().getEndingAnnotations())
-		  {		     
-		     if (anEditedParallel == anEdited) continue; // skip ourselves
-		     if (anEditedParallel.getLayerId() == anEdited.getLayerId()) continue; // on our own layer
-		     Annotation anOriginalParallel = getCounterpart(anEditedParallel);
-		     // skip unmerged annotations from a neighboring fragments (TODO not sure there can be any)
-		     if (anOriginalParallel == null) continue; 
-		     assert anOriginalParallel.getEnd() != null 
-			: "anOriginalParallel.getEnd() != null - " + anOriginalParallel;
-		     // no use linking to the very same anchor
-		     if (anOriginalParallel.getEnd() == anOriginal.getEnd()) continue;
-		     // offset should be the same
-		     if (compare(anOriginalParallel.getEnd(), anEditedParallel.getEnd()) != 0
-			 // unless our offset is less trustworthy than theirs
-			 && getConfidence(anEditedParallel.getEnd()) >= Constants.CONFIDENCE_AUTOMATIC
-			 && getConfidence(anOriginalParallel.getEnd()) 
-			 <= getConfidence(anEditedParallel.getEnd())) continue;
-		     matchingMergedAnchor = anOriginalParallel.getEnd();
-		     log(layerId, ": Different end anchor for ", anOriginal,
-			 ": linking to shared end of ", anOriginalParallel);
-		     break;
-		  } // next possible start anchor annotation
-		  if (matchingMergedAnchor != null)
-		  {
-		     // this, and all parallel annotation on *unrelated* layers come with us
-		     for (Annotation an : anOriginal.getEnd().getEndingAnnotations())
-		     {
-			if (an == anOriginal) continue;
-			// unrelated layer?
-			Layer otherLayer = an.getLayer();
-			if (!layer.getParentId().equals(an.getLayerId())
-			    && otherLayer.getParentId().equals(layerId))
-			{
-			   log(layerId, ": Different end anchor for ", anOriginal,
-			       ": linking parallel ", an, " too");
-			   if (an.getInstantaneous())
-			   { // instant
-			      changes.addAll( // track changes of:
-				 an.setStart(matchingMergedAnchor));
-			   }
-			   changes.addAll( // track changes of:
-			      an.setEnd(matchingMergedAnchor));
-			}
+			    ": new anchor at ", delta.getOffset());
 		     }
-		     changes.addAll( // track changes of:
-			anOriginal.setEnd(matchingMergedAnchor));
-		  }
-		  else
-		  { // no already-merged anchor we can use
-		     // we might need a new anchor, if this is also the start anchor for
-		     // another annotation with a different edited offset
-
-		     boolean bSplitFromFollowing = false;
-		     for (Annotation anFollowing : anOriginal.getEnd().startOf(layerId))
-		     {
-		     	Annotation anEditedFollowing = getCounterpart(anFollowing);
-		     	if (anEditedFollowing != null
-		     	    && anEditedFollowing.getStart() != anEdited.getEnd())
-		     	{
-		     	   bSplitFromFollowing = true;
-		     	   break;
-		     	}
-		     } // next following annotation
-		     
-		     if (!dummyEditedAnchors.contains(anEdited.getEnd()))
-		     {
-			if (bSplitFromFollowing)
-			{
-			   delta = new Anchor(anEdited.getEnd());
-			   delta.create();
-			}
-			else
-			{
-			   // change this anchor
-			   delta = new Anchor(anEdited.getEnd());
-			}
+		  } // there's a delta
+	       } // offsets are different
+	       
+	       // check for reversed anchors
+	       if (anOriginal.getEnd().getOffset() != null && anOriginal.getStart().getOffset() != null
+		   && anOriginal.getEnd().getOffset() < anOriginal.getStart().getOffset())
+	       {
+		  // is the start anchor for realignment anyway?
+		  if (getConfidence(anOriginal.getStart()) == Constants.CONFIDENCE_NONE)
+		  {
+		     log(layerId, ": Reversed anchors: ", anOriginal,
+			 ": start is soft, so moving before end");
+		     // reset the offset
+		     double dNewOffset = anOriginal.getEnd().getOffset() - smidgin;
+		     if (anLastOriginal != null)
+		     { // halfway through the previous
+			dNewOffset = anLastOriginal.getStart().getOffset()
+			   + ((anOriginal.getEnd().getOffset() 
+			       - anLastOriginal.getStart().getOffset())/2);
 		     }
-		  } // change the anchor
-	       } // theirs is more trustworthy than ours
-
-	       // applying change to anchor?
-	       if (delta != null)
-	       {
-		  if (delta.getChange() != Change.Operation.Create)
-		  {
-		     anOriginal.getEnd().setOffset(delta.getOffset());
-		     setConfidence(anOriginal.getEnd(), getConfidence(delta));
-		     log(layerId, ": Different end anchor for ", anOriginal,
-			 ": changing offset to  ", delta.getOffset());
+		     anOriginal.getStart().setOffset(dNewOffset);
+		     setConfidence(anOriginal.getStart(), Constants.CONFIDENCE_NONE);
 		  }
-		  else // Create
-		  {
-		     Anchor newAnchor = delta;
-		     graph.addAnchor(newAnchor);
-		     changes.addAll( // track changes of:
-			newAnchor.getChanges());
-
-		     Set<String> excludeLayers = new HashSet<String>();
-		     if (layer.getSaturated()) excludeLayers.add(layerId);
-		     changeEndWithRelatedAnnotations(anOriginal, newAnchor, excludeLayers);
-		     log(layerId, ": Different end anchor for ", anOriginal,
-			 ": new anchor at ", delta.getOffset());
-		  }
-	       } // there's a delta
-	    } // offsets are different
-	    
-	    // check for reversed anchors
-	    if (anOriginal.getEnd().getOffset() != null && anOriginal.getStart().getOffset() != null
-		&& anOriginal.getEnd().getOffset() < anOriginal.getStart().getOffset())
-	    {
-	       // is the start anchor for realignment anyway?
-	       if (getConfidence(anOriginal.getStart()) == Constants.CONFIDENCE_NONE)
-	       {
-		  log(layerId, ": Reversed anchors: ", anOriginal,
-		      ": start is soft, so moving before end");
-		  // reset the offset
-		  double dNewOffset = anOriginal.getEnd().getOffset() - smidgin;
-		  if (anLastOriginal != null)
-		  { // halfway through the previous
-		     dNewOffset = anLastOriginal.getStart().getOffset()
-			+ ((anOriginal.getEnd().getOffset() 
-			    - anLastOriginal.getStart().getOffset())/2);
-		  }
-		  anOriginal.getStart().setOffset(dNewOffset);
-		  setConfidence(anOriginal.getStart(), Constants.CONFIDENCE_NONE);
 	       }
-	    }
-	 } // not an instananeous annotation
+	    } // not an instananeous annotation
+	 } // end is not a dummy anchor
 
 	 anOriginal.put("@computeAnchorDeltasForMerge", Boolean.TRUE);
 	 anLastOriginal = anOriginal;	 

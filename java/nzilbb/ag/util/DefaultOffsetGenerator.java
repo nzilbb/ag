@@ -548,7 +548,8 @@ public class DefaultOffsetGenerator
 	    descendantAnchors(child, anchors);
 	 } // next child
 	 
-	 if (addAnchors && !previousAnchor.equals(parent.getStart()))
+	 if (parent.getStart() != null
+	     && addAnchors && !previousAnchor.equals(parent.getStart()))
 	 { // add anchors from any trailing chain to the end of the parent
 	    // log("looking for trailing links");
 	    AnnotationChain chain = new AnnotationChain(previousAnchor, parent.getEnd());

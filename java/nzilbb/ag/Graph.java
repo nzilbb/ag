@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Vector;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -282,22 +283,24 @@ public class Graph
       {
 	 fragment.setId(FragmentId(this, startOffset, endOffset));
       }
-      for (String layerId : layerIds)
-      {
-	 Layer layer = getLayer(layerId);
-	 if (layer != null)
+      for (Layer layer : getLayersTopDown()) // ensure parents are added before children
+      {	 
+	 if (layerIds.contains(layer.getId()))
 	 {
 	    fragment.addLayer((Layer)layer.clone());
-	    for (Annotation annotation : list(layerId))
+	    for (Annotation annotation : list(layer.getId()))
 	    {
 	       Double min = annotation.getStart().getOffsetMin();
 	       Double max = annotation.getEnd().getOffsetMax();
 	       if (min != null && min >= startOffset
 		   && max != null && max <= endOffset)
 	       {
+		  ensureAllAncestorsPresentInFragment(annotation, fragment);
+
 		  // add the anchors
 		  fragment.addAnchor((Anchor)annotation.getStart().clone());
 		  fragment.addAnchor((Anchor)annotation.getEnd().clone());
+
 		  // add the annotation
 		  fragment.addAnnotation((Annotation)annotation.clone());
 	       }
@@ -305,25 +308,6 @@ public class Graph
 	 } // layer exists
       } // next layer
 
-      // now that we have the temporal slice, add missing ancestors (but not their anchors)
-      Vector<Annotation> annotations = new Vector<Annotation>(fragment.getAnnotationsById().values());
-      for (Annotation fragAnnotation : annotations)
-      {
-	 Annotation graphAnnotation = getAnnotation(fragAnnotation.getId());
-	 for (Annotation ancestor : graphAnnotation.getAncestors())
-	 {
-	    if (!ancestor.getLayerId().equals("graph")
-		&& !fragment.getAnnotationsById().containsKey(ancestor.getId()))
-	    {
-	       if (!fragment.schema.getLayers().containsKey(ancestor.getLayerId()))
-	       { // add the ancestor's layer
-		  fragment.addLayer(getLayer(ancestor.getLayerId()));
-	       }
-	       // add the ancestor
-	       fragment.addAnnotation((Annotation)ancestor.clone());
-	    }
-	 }
-      } // next annotation
       return fragment;
    } // end of getFragment()
 
@@ -341,12 +325,15 @@ public class Graph
       fragment.graph = this;
       Layer layer = getLayer(definingAnnotation.getLayerId());
       if (layer != null)
-      {
+      {	 
 	 // add the layer
 	 fragment.addLayer((Layer)layer.clone());
 	 // add the anchors
 	 fragment.addAnchor((Anchor)definingAnnotation.getStart().clone());
 	 fragment.addAnchor((Anchor)definingAnnotation.getEnd().clone());
+	 
+	 ensureAllAncestorsPresentInFragment(definingAnnotation, fragment);
+
 	 // add the annotation
 	 fragment.addAnnotation((Annotation)definingAnnotation.clone());
       }
@@ -361,6 +348,7 @@ public class Graph
 	    // TODO and then using definingAnnotation.list(layerId) for any remaining layers
 	    for (Annotation annotation : definingAnnotation.list(layerId))
 	    {
+	       ensureAllAncestorsPresentInFragment(annotation, fragment);
 	       // add the anchors
 	       fragment.addAnchor((Anchor)annotation.getStart().clone());
 	       fragment.addAnchor((Anchor)annotation.getEnd().clone());
@@ -369,31 +357,11 @@ public class Graph
 	    } // next annotation
 	 } // layer exists
       } // next layer
-
-      // now that we have the temporal slice, add missing ancestors (but not their anchors)
-      Vector<Annotation> annotations = new Vector<Annotation>(fragment.getAnnotationsById().values());
-      for (Annotation fragAnnotation : annotations)
+      
+      Anchor firstAnchor = definingAnnotation.getStart();
+      Anchor lastAnchor = definingAnnotation.getEnd();
+      if (getId() != null) 
       {
-	 Annotation graphAnnotation = getAnnotation(fragAnnotation.getId());
-	 for (Annotation ancestor : graphAnnotation.getAncestors())
-	 {
-	    if (!ancestor.getLayerId().equals("graph")
-		&& !fragment.getAnnotationsById().containsKey(ancestor.getId()))
-	    {
-	       if (!fragment.schema.getLayers().containsKey(ancestor.getLayerId()))
-	       { // add the ancestor's layer
-		  fragment.addLayer(getLayer(ancestor.getLayerId()));
-	       }
-	       // add the ancestor
-	       fragment.addAnnotation((Annotation)ancestor.clone());
-	    }
-	 }
-      } // next annotation
-      Anchor firstAnchor = fragment.getStart();
-      if (getId() != null && firstAnchor != null) 
-	 // (don't need to check for lastAnchor: if there's a first, there's a last)
-      {
-	 Anchor lastAnchor = fragment.getEnd();
 	 fragment.setId(FragmentId(this, firstAnchor, lastAnchor));
       }
       return fragment;
@@ -432,6 +400,7 @@ public class Graph
 		      && max != null && max <= endOffset
 		      && annotation.getAncestors().contains(ancestor))
 		  {
+		     ensureAllAncestorsPresentInFragment(annotation, fragment);
 		     // add the anchors
 		     fragment.addAnchor((Anchor)annotation.getStart().clone());
 		     fragment.addAnchor((Anchor)annotation.getEnd().clone());
@@ -442,35 +411,70 @@ public class Graph
 	    } // layer exists
 	 } // next layer
 	 
-	 // now that we have the temporal slice, add missing ancestors (but not their anchors)
-	 Vector<Annotation> annotations = new Vector<Annotation>(fragment.getAnnotationsById().values());
-	 for (Annotation fragAnnotation : annotations)
+	 Anchor firstAnchor = bounds.getStart();
+	 Anchor lastAnchor = bounds.getEnd();
+	 if (getId() != null) 
 	 {
-	    Annotation graphAnnotation = getAnnotation(fragAnnotation.getId());
-	    for (Annotation anc : graphAnnotation.getAncestors())
-	    {
-	       if (!anc.getLayerId().equals("graph")
-		   && !fragment.getAnnotationsById().containsKey(anc.getId()))
-	       {
-		  if (!fragment.schema.getLayers().containsKey(anc.getLayerId()))
-		  { // add the ancestor's layer
-		     fragment.addLayer((Layer)getLayer(anc.getLayerId()).clone());
-		  }
-		  // add the ancestor
-		  fragment.addAnnotation((Annotation)anc.clone());
-	       }
-	    }
-	 } // next annotation
-	 Anchor firstAnchor = fragment.getStart();
-	 if (getId() != null && firstAnchor != null) 
-	    // (don't need to check for lastAnchor: if there's a first, there's a last)
-	 {
-	    Anchor lastAnchor = fragment.getEnd();
 	    fragment.setId(FragmentId(this, firstAnchor, lastAnchor));
 	 }
       }
       return fragment;
    } // end of getFragment()
+
+
+   /**
+    * Ensures all the given annotation's ancestors are in the given fragment, and that they're ordinal minima are correct.
+    * @param annotation
+    * @param fragment
+    */
+   protected void ensureAllAncestorsPresentInFragment(Annotation annotation, Graph fragment)
+   {
+      // have ancestors been added? Top-down check
+      Iterator<Annotation> ancestors 
+	 = new LinkedList<Annotation>(annotation.getAncestors()).descendingIterator();
+      while(ancestors.hasNext()) 
+      {
+	 Annotation ancestor = ancestors.next();
+	 if (!ancestor.getLayerId().equals(schema.getRoot().getId())) // not the graph
+	 {
+	    if (fragment.getAnnotation(ancestor.getId()) == null)
+	    { // add the parent
+	       if (!fragment.schema.getLayers().containsKey(ancestor.getLayerId()))
+	       { // add the ancestor's layer
+		  fragment.addLayer(getLayer(ancestor.getLayerId()));
+	       }
+	       // ensure it's ordinal ends up correct
+	       ensureMinimumOrdinalSpecified(ancestor, fragment);
+	       // add the ancestor (but not its anchors)
+	       fragment.addAnnotation((Annotation)ancestor.clone());
+	    }
+	 }
+      } // next ancestor
+      ensureMinimumOrdinalSpecified(annotation, fragment);
+   } // end of ensureAllAncestorsPresentInFragment()
+
+   
+   /**
+    * Ensures that the minimum ordinal for the parent is set for this annotation.
+    * @param graphAnnotation
+    * @param fragment
+    */
+   protected void ensureMinimumOrdinalSpecified(Annotation graphAnnotation, Graph fragment)
+   {
+      // ensure it's ordinal ends up correct
+      Annotation ancestorParent = fragment.getAnnotation(graphAnnotation.getParentId());
+      if (ancestorParent == null 
+	  && graphAnnotation.getLayer().getParentId().equals(schema.getRoot().getId()))
+      {
+	 ancestorParent = fragment;
+      }
+      if (!ancestorParent.ordinalMinima.containsKey(graphAnnotation.getLayerId()))
+      {
+	 ancestorParent.ordinalMinima.put(
+	    graphAnnotation.getLayerId(), graphAnnotation.getOrdinal());
+      }
+   } // end of ensureMinimumOrdinalSpecified()
+
 
    
    /**
@@ -756,7 +760,25 @@ public class Graph
       return sortedAnchors;
    } // end of getAnchorsOrderedByStructure()
 
-
+   
+   /**
+    * Increments all (set) anchor offsets by the given amount.
+    * @param offset
+    * @return The changes.
+    */
+   public Vector<Change> shiftAnchors(double offset)
+   {
+      Vector<Change> changes = new Vector<Change>();
+      for (Anchor a : getAnchors().values())
+      {
+	 if (a.getOffset() != null)
+	 {
+	    changes.addAll( // record changes of:
+	       a.setOffset(a.getOffset() + offset));
+	 }
+      } // next anchor
+      return changes;
+   } // end of shiftAnchors()
    
    /**
     * Adds a layer definition.
@@ -1051,6 +1073,50 @@ public class Graph
     */
    public Anchor getEnd() { return getAnchors().get(getEndId()); }
 
+   /**
+    * Gets a single related annotation on the given layer.
+    * <p>"Related" means that <var>layerId</var> identifies the parent layer, an ancestor layer,
+    * a child of an ancestor, or a child layer.
+    * <p>This utility method makes navigating the layer hierarchy easier and with less prior
+    * knowledge of it. e.g.:
+    * <ul>
+    *  <li><code>word.my("turn")</code> for the (parent) turn</li>
+    *  <li><code>phone.my("turn")</code> for the (grandparent) turn</li>
+    *  <li><code>word.my("POS")</code> for the (first) part of speech annotation</li>
+    *  <li><code>phone.my("POS")</code> for the (first) part of speech annotation, which is neither an ancestor nor descendant, but rather is a child of an ancestor (<code>phone.my("word")</code>)</li>
+    *  <li><code>word.my("who")</code> for the speaker</li>
+    *  <li><code>word.my("graph")</code> for the graph</li>
+    *  <li><code>word.my("utterance")</code> for the utterance, which is neither an ancestor nor descendant, but rather is a child of an ancestor (<code>word.my("turn")</code>)</li>
+    *  <li><code>word.my("corpus")</code> for the graph's corpus, which is neither an ancestor nor descendant, but rather is a child of an ancestor (<code>word.my("graph")</code>)</li>
+    * </ul>
+    * <p>{@link #setGraph(Graph)} must have been previously called, and the graph must have a correct layer hierarchy for this method to work correctly.
+    * <p>This override of {@link Annotation#my(String)} ensures that even orphaned annotations 
+    * on the given layer are returned.
+    * @param layerId The layer of the desired annotation.
+    * @return The related annotation (or the first one if there are many), or null if none could be found on the given layer.
+    */
+   public Annotation my(final String layerId)
+   {
+      Annotation my = super.my(layerId);
+      if (my == null && orphans.containsKey(layerId))
+      {
+	 Iterator<Annotation> orphansOnLayer = orphans.get(layerId).iterator();
+	 while (orphansOnLayer.hasNext())
+	 {
+	    Annotation orphan = orphansOnLayer.next();
+	    // double-check it's still an orphan
+	    if (orphan.getParent() == null)
+	    {
+	       return orphan;
+	    }
+	    else
+	    {
+	       orphansOnLayer.remove();
+	    }
+	 } // next orphan
+      }
+      return my;
+   }
    /**
     * Gets a list of related annotations on the given layer.
     * <p>"Related" means that <var>layerId</var> identifies the parent layer, an ancestor layer,

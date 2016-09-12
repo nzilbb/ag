@@ -1129,6 +1129,27 @@ public class TestGraph
       // check layer identification
       assertTrue("fragment layer correct", f.getLayer() == f.getSchema().getRoot());
 
+      // offset anchors
+      assertEquals("before offset change", 
+		   new Double(0.0), f.getAnchors().get("turnStart").getOffset()); 
+      assertEquals("before offset change", 
+		   new Double(1.0), f.getAnchors().get("a1").getOffset());
+      assertNull("before offset change", 
+		 f.getAnchors().get("a2").getOffset());
+      assertEquals("before offset change", 
+		   new Double(3.0), f.getAnchors().get("a3").getOffset());
+      
+      assertEquals("shiftAnchors", 3, f.shiftAnchors(100.0).size());
+
+      assertEquals("after offset change", 
+		   new Double(100.0), f.getAnchors().get("turnStart").getOffset()); 
+      assertEquals("after offset change", 
+		   new Double(101.0), f.getAnchors().get("a1").getOffset());
+      assertNull("after offset change", 
+		 f.getAnchors().get("a2").getOffset());
+      assertEquals("after offset change", 
+		   new Double(103.0), f.getAnchors().get("a3").getOffset());
+
    }
 
    @Test public void fragmentByAnnotation() 
@@ -1213,6 +1234,7 @@ public class TestGraph
       Vector<String> layers = new Vector<String>();
       layers.add("phone");
       layers.add("pos");
+      assertEquals(2, quick.getOrdinal());
       Graph f = g.getFragment(quick, layers);
       assertEquals("my graph__2.000-3.000", f.getId());
       assertEquals("fragment's graph is itself", f, f.getGraph());
@@ -1239,6 +1261,7 @@ public class TestGraph
 
       assertFalse("word before", f.getAnnotationsById().containsKey("word1"));
       assertTrue("annotation word", f.getAnnotationsById().containsKey("word2"));
+      assertEquals("annotation word ordinal", 2, f.getAnnotation("word2").getOrdinal());
       assertFalse("word after", f.getAnnotationsById().containsKey("word3"));
       assertFalse("word after", f.getAnnotationsById().containsKey("word4"));
 
