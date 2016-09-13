@@ -2021,7 +2021,7 @@ public class TestValidator
 
       Validator v = new Validator();
       v.setFullValidation(true);
-      v.setDebug(true);
+      // v.setDebug(true);
       try
       {
 	 Vector<Change> changes = v.transform(f);

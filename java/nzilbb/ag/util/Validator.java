@@ -713,9 +713,9 @@ public class Validator
 	       
 	       String parentChangeReason = null;
 	       if (oldParent == null) parentChangeReason = "missing";
-	       if (oldParent.getChange() == Change.Operation.Destroy) parentChangeReason = "deleted";
+	       else if (oldParent.getChange() == Change.Operation.Destroy) parentChangeReason = "deleted";
 	       // or not temporally included in the parent (excluding tags)
-	       if (childLayer.getAlignment() != Constants.ALIGNMENT_NONE 
+	       else if (childLayer.getAlignment() != Constants.ALIGNMENT_NONE 
 		   && child.getAnchored() && oldParent.getAnchored())
 	       {
 		  if(!oldParent.includesMidpointOf(child)
@@ -729,7 +729,7 @@ public class Validator
 		  }
 	       }
 	       // or the parent is on the wrong layer
-	       if (!oldParent.getLayerId().equals(parentLayer.getId())) parentChangeReason = "wrong layer";
+	       if (oldParent != null && !oldParent.getLayerId().equals(parentLayer.getId())) parentChangeReason = "wrong layer";
 	       if (parentChangeReason != null)
 	       { // parent is gone or wrong
 		  if (Utility.getConfidence(child, Constants.CONFIDENCE_MANUAL) <= Constants.CONFIDENCE_AUTOMATIC)
@@ -2145,33 +2145,23 @@ public class Validator
 	 StringBuilder s = new StringBuilder();
 	 for (Object m : messages)
 	 {
-	    if (m instanceof Annotation)
+	    if (m == null)
 	    {
-	       if (m == null)
-	       {
-		  s.append("[null]");
-	       }
-	       else
-	       {
-		  Annotation annotation = (Annotation)m;
-		  s.append("[").append(annotation.getId()).append("]")
-		     .append(annotation.get("ordinal")).append("#")
-		     .append(annotation.getLabel())
-		     .append("(").append(annotation.getStart())
-		     .append("-").append(annotation.getEnd()).append(")");
-	       }
+	       s.append("[null]");
+	    }
+	    else if (m instanceof Annotation)
+	    {
+	       Annotation annotation = (Annotation)m;
+	       s.append("[").append(annotation.getId()).append("]")
+		  .append(annotation.get("ordinal")).append("#")
+		  .append(annotation.getLabel())
+		  .append("(").append(annotation.getStart())
+		  .append("-").append(annotation.getEnd()).append(")");
 	    }
 	    else if (m instanceof Anchor)
 	    {
-	       if (m == null)
-	       {
-		  s.append("[null]");
-	       }
-	       else
-	       {
-		  Anchor anchor = (Anchor)m;
-		  s.append("[").append(anchor.getId()).append("]").append(anchor.getOffset());
-	       }
+	       Anchor anchor = (Anchor)m;
+	       s.append("[").append(anchor.getId()).append("]").append(anchor.getOffset());
 	    }
 	    else
 	    {

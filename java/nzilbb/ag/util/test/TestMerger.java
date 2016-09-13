@@ -40,6 +40,7 @@ import java.util.Vector;
 import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.List;
+import java.util.Arrays;
 import nzilbb.configure.ParameterSet;
 import nzilbb.configure.Parameter;
 import nzilbb.ag.util.*;
@@ -114,6 +115,208 @@ public class TestMerger
       {
 	 fail(" " + exception.toString());
       }
+
+   }
+
+   @Test public void selectiveMerge()
+   {
+      Graph g = new Graph();
+      g.setSchema(new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("who", "participants", Constants.ALIGNMENT_NONE, 
+		   true, // peers
+		   true, // peersOverlap
+		   true), // saturated
+	 new Layer("turn", "turns", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   false, // saturated
+		   "who", // parentId
+		   true), // parentIncludes
+	 new Layer("utterance", "utterances", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   true, // saturated
+		   "turn", // parentId
+		   true), // parentIncludes
+	 new Layer("phrase", "phrase", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   true, // peersOverlap
+		   false, // saturated
+		   "turn", // parentId
+		   true), // parentIncludes
+	 new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   false, // saturated
+		   "turn", // parentId
+		   true), // parentIncludes
+	 new Layer("pos", "Part of speech", Constants.ALIGNMENT_NONE,
+		   false, // peers
+		   false, // peersOverlap
+		   true, // saturated
+		   "word", // parentId
+		   true), // parentIncludes
+	 new Layer("phone", "segments", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   true, // saturated
+		   "word", // parentId
+		   true) // parentIncludes
+	 ));
+      g.setId("my graph");
+
+      g.addAnchor(new Anchor("turnStart", 0.0));
+      g.addAnchor(new Anchor("a1", 0.0));
+      g.addAnchor(new Anchor("a2", null));
+      g.addAnchor(new Anchor("a3a", 3.0));
+      g.addAnchor(new Anchor("utterance", 3.0));
+      g.addAnchor(new Anchor("a3b", 3.0));
+      g.addAnchor(new Anchor("a4", null));
+      g.addAnchor(new Anchor("a5", 6.0));
+      g.addAnchor(new Anchor("turnEnd", 6.0));
+
+      g.addAnnotation(new Annotation("who1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+      g.addAnnotation(new Annotation("who2", "jane doe", "who", "turnStart", "turnEnd", "my graph"));
+
+      g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "who1"));
+
+      g.addAnnotation(new Annotation("utterance1", "john smith", "utterance", "turnStart", "utterance", "turn1"));
+      g.addAnnotation(new Annotation("utterance2", "john smith", "utterance", "utterance", "turnEnd", "turn1"));
+
+      g.addAnnotation(new Annotation("word1", "the", "word", "a1", "a2", "turn1"));
+      g.addAnnotation(new Annotation("pos1", "DT", "pos", "a1", "a2", "word1"));
+      g.addAnnotation(new Annotation("word2", "quick", "word", "a2", "a3a", "turn1"));
+      g.addAnnotation(new Annotation("pos2", "A", "pos", "a2", "a3a", "word2"));
+      g.addAnnotation(new Annotation("word3", "brown", "word", "a3b", "a4", "turn1"));
+      g.addAnnotation(new Annotation("phrase1", "AP", "phrase", "a2", "a4", "turn1"));
+      g.addAnnotation(new Annotation("word4", "fox", "word", "a4", "a5", "turn1"));
+      g.addAnnotation(new Annotation("pos3", "N", "pos", "a4", "a5", "word4"));
+      g.addAnnotation(new Annotation("phrase2", "NP", "phrase", "a1", "a5", "turn1"));
+      // no phones
+
+      Graph e = new Graph();
+      e.setSchema(new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("who", "participants", Constants.ALIGNMENT_NONE, 
+		   true, // peers
+		   true, // peersOverlap
+		   true), // saturated
+	 new Layer("turn", "turns", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   false, // saturated
+		   "who", // parentId
+		   true), // parentIncludes
+	 new Layer("utterance", "utterances", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   true, // saturated
+		   "turn", // parentId
+		   true), // parentIncludes
+	 new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   false, // saturated
+		   "turn", // parentId
+		   true), // parentIncludes
+	 new Layer("phone", "segments", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   true, // saturated
+		   "word", // parentId
+		   true) // parentIncludes
+	 ));
+      e.setId("my graph");
+      
+      e.addAnchor(new Anchor("turnStart", 0.0));
+      e.addAnchor(new Anchor("a1", 1.0));
+      e.addAnchor(new Anchor("a1.5", 1.5));
+      e.addAnchor(new Anchor("a2", 2.0));
+      e.addAnchor(new Anchor("a2.25", 2.25));
+      e.addAnchor(new Anchor("a2.5", 2.5));
+      e.addAnchor(new Anchor("a2.75", 2.75));
+      e.addAnchor(new Anchor("a3a", 3.0));
+      e.addAnchor(new Anchor("utterance", 3.0));
+      e.addAnchor(new Anchor("a3b", 3.0));
+      e.addAnchor(new Anchor("a4", 4.0));
+      e.addAnchor(new Anchor("a5", 5.0));
+      e.addAnchor(new Anchor("a6", 6.0));
+      e.addAnchor(new Anchor("turnEnd", 6.0));
+
+      e.addAnnotation(new Annotation("who1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+      // no who2
+
+      e.addAnnotation(new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "who1"));
+
+      e.addAnnotation(new Annotation("utterance1", "john smith", "utterance", "turnStart", "utterance", "turn1"));
+      e.addAnnotation(new Annotation("utterance2", "john smith", "utterance", "utterance", "turnEnd", "turn1"));
+
+      e.addAnnotation(new Annotation("word1", "the", "word", "a1", "a2", "turn1"));
+      e.addAnnotation(new Annotation("phone1", "D", "phone", "a1", "a1.5", "word1"));
+      e.addAnnotation(new Annotation("phone2", "@", "phone", "a1.5", "a2", "word1"));
+      // quick -> fast
+      e.addAnnotation(new Annotation("word2", "fast", "word", "a2", "a3a", "turn1"));
+      e.addAnnotation(new Annotation("phone3", "k", "phone", "a2", "a2.25", "word2"));
+      e.addAnnotation(new Annotation("phone4", "w", "phone", "a2.25", "a2.5", "word2"));
+      e.addAnnotation(new Annotation("phone5", "I", "phone", "a2.5", "a2.75", "word2"));
+      e.addAnnotation(new Annotation("phone6", "k", "phone", "a2.75", "a3a", "word2"));
+      // brown deleted
+      e.addAnnotation(new Annotation("word4", "fox", "word", "a4", "a5", "turn1"));
+      e.addAnnotation(new Annotation("word5", "ah", "word", "a5", "a6", "turn1"));
+      e.addAnnotation(new Annotation("phrase2", "NP", "phrase", "a1", "a5", "turn1"));
+      // no pos nor phrase
+
+      Merger m = new Merger(e);
+      // m.setDebug(true);
+      m.getNoChangeLayers().add("who");
+      m.getNoChangeLayers().add("word");
+      try
+      {
+	 Vector<Change> changes = m.transform(g);
+	 if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
+	 g.commit();
+
+	 Annotation[] phones = g.list("phone");
+	 assertEquals("phones have been added - " + Arrays.asList(phones), 6, phones.length);
+	 assertEquals("D", phones[0].getLabel());
+	 assertEquals("@", phones[1].getLabel());
+	 assertEquals("k", phones[2].getLabel());
+	 assertEquals("w", phones[3].getLabel());
+	 assertEquals("I", phones[4].getLabel());
+	 assertEquals("k", phones[5].getLabel());
+
+	 Annotation[] words = g.list("word");
+	 assertEquals("words are unchanged - " + Arrays.asList(words), 4, words.length);
+	 assertEquals("the", words[0].getLabel());
+	 assertEquals("word not changed", "quick", words[1].getLabel());
+	 assertEquals("brown", words[2].getLabel());
+	 assertEquals("fox", words[3].getLabel());
+
+	 assertTrue("speakers are unchanged", g.getAnnotationsById().containsKey("who1"));
+	 assertTrue("speakers are unchanged", g.getAnnotationsById().containsKey("who2"));
+
+	 assertEquals("word alignments updated", new Double(1.0), words[0].getStart().getOffset());
+	 assertEquals("word alignments updated", new Double(2.0), words[0].getEnd().getOffset());
+	 assertEquals("word alignments updated", new Double(2.0), words[1].getStart().getOffset());
+	 assertEquals("word alignments updated", new Double(3.0), words[1].getEnd().getOffset());
+	 assertEquals("word alignments updated", new Double(3.0), words[2].getStart().getOffset());
+	 assertEquals("word alignments updated", new Double(4.0), words[2].getEnd().getOffset());
+	 assertEquals("word alignments updated", new Double(4.0), words[3].getStart().getOffset());
+	 assertEquals("word alignments updated", new Double(5.0), words[3].getEnd().getOffset());
+
+      }
+      catch(TransformationException exception)
+      {
+	 StringWriter sw = new StringWriter();
+	 PrintWriter pw = new PrintWriter(sw);
+	 exception.printStackTrace(pw);
+	 try { sw.close(); }
+	       catch(IOException x) {}
+	 pw.close();	
+	 fail("merge() failed" + exception.toString() + "\n" + sw);
+      }
+      
 
    }
 
@@ -407,7 +610,7 @@ public class TestMerger
 		   true, // saturated
 		   "word", // parentId
 		   true) // parentIncludes
-	 );      
+	 );
    } // end of defaultSchema()
 
 

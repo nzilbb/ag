@@ -241,6 +241,17 @@ public class Merger
       if (newOffsetComparisonThreshold == null) offsetComparisonThreshold = null;
       else offsetComparisonThreshold = newOffsetComparisonThreshold + 0.00000000001; 
    }
+
+   /**
+    * Set of IDs of layers for which annotations may not be added, changed, or deleted.
+    * @see #getNoChangeLayers()
+    */
+   protected HashSet<String> noChangeLayers = new HashSet<String>();
+   /**
+    * Getter for {@link #noChangeLayers}: Set of IDs of layers for which annotations may not be added, changed, or deleted.
+    * @return Set of IDs of layers for which annotations may not be added, changed, or deleted.
+    */
+   public HashSet<String> getNoChangeLayers() { return noChangeLayers; }
    
 
    /**
@@ -434,7 +445,8 @@ public class Merger
        */
       public EditStep<Annotation> delete(Annotation a1)
       {
-	 return new EditStep<Annotation>(a1, null, 1, EditStep.StepOperation.DELETE);
+	 int distance = a1.getLayer().containsKey("@noChange")?5:1;
+	 return new EditStep<Annotation>(a1, null, distance, EditStep.StepOperation.DELETE);
       }
 
       /**
@@ -444,7 +456,8 @@ public class Merger
        */
       public EditStep<Annotation> insert(Annotation a2)
       {
-	 return new EditStep<Annotation>(null, a2, 1, EditStep.StepOperation.INSERT);
+	 int distance = a2.getLayer().containsKey("@noChange")?5:1;
+	 return new EditStep<Annotation>(null, a2, distance, EditStep.StepOperation.INSERT);
       }
    };
 
@@ -538,6 +551,15 @@ public class Merger
 	 }
       }
 
+      // ensure changes are ignored for selected layers
+      for (String layerId : getNoChangeLayers())
+      {
+	 if (graph.getLayer(layerId) != null) 
+	    graph.getLayer(layerId).put("@noChange", Boolean.TRUE);
+	 if (editedGraph.getLayer(layerId) != null) 
+	    editedGraph.getLayer(layerId).put("@noChange", Boolean.TRUE);
+      }
+
       Vector<Layer> topDownLayersInEditedGraph = graph.getLayersTopDown();
       Iterator<Layer> iLayersTopDown = topDownLayersInEditedGraph.iterator();
       while (iLayersTopDown.hasNext())
@@ -574,8 +596,15 @@ public class Merger
       
       for (Layer layer : topDownLayersInEditedGraph)
       {
-	 changes.addAll( // track changes of:
-	    createDestroyAnnotationsForMerge(layer, graph));
+	 if (!getNoChangeLayers().contains(layer.getId()))
+	 { // creation/destruction is allowed on this layer
+	    changes.addAll( // track changes of:
+	       createDestroyAnnotationsForMerge(layer, graph));
+	 }
+	 else
+	 {
+	    log("Skipping ", layer);
+	 }
       } // next layer
 
       // phase 3. - compute label deltas
@@ -583,8 +612,15 @@ public class Merger
 
       for (Layer layer : topDownLayersInEditedGraph)
       {
-	 changes.addAll( // track changes of:
-	    computeLabelDeltasForMerge(layer, graph));
+	 if (!getNoChangeLayers().contains(layer.getId()))
+	 { // changing labels is allowed on this layer
+	    changes.addAll( // track changes of:
+	       computeLabelDeltasForMerge(layer, graph));
+	 }
+	 else
+	 {
+	    log("Skipping ", layer);
+	 }
       } // next layer
 
       // phase 4. - compute anchor deltas horizontally
@@ -690,6 +726,15 @@ public class Merger
 
       // unlink counterparts, so that either graph can be garbage-collected with the other still referenced
       for (Annotation a : graph.getAnnotationsById().values()) unsetCounterparts(a);
+
+      // remove layer tags
+      for (String layerId : getNoChangeLayers())
+      {
+	 if (graph.getLayer(layerId) != null) 
+	    graph.getLayer(layerId).remove("@noChange");
+	 if (editedGraph.getLayer(layerId) != null) 
+	    editedGraph.getLayer(layerId).remove("@noChange");
+      }
 
       return changes;
    }
@@ -1562,7 +1607,10 @@ public class Merger
       {
 	 // get our mapped annotation
 	 Annotation anOriginal = getCounterpart(anEdited);
-	 
+
+	 // an original may not have been added because it was forbidden by noChangeLayers
+	 if (anOriginal == null) continue;
+
 	 assert anOriginal.getChange() != Change.Operation.Destroy : "anOriginal.getChange() != Change.Operation.Destroy - " + anOriginal;
 	 
 	 // start anchor...
@@ -2248,6 +2296,8 @@ public class Merger
 	 {
 	    Annotation anOriginalParent = getCounterpart(anParent);
 	    log(layerId, ": Parent ", anOriginalParent);
+	    // there may be no original parent because noChangeLayers forbade its addition
+	    if (anOriginalParent == null) continue;
 
 	    TreeSet<Annotation> byOrdinalOrOffset = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
 	    HashSet<Annotation> myChildren = new HashSet<Annotation>();
@@ -2325,6 +2375,9 @@ public class Merger
 		  anOriginalChild = getCounterpart(anChild);
 	       }
 	       // log(layerId, ": Child ", anOriginalChild); // TODO comment out
+	       // there may be no counterpart in the original graph
+	       // because adding was forbidden by noChangeLayers
+	       if (anOriginalChild == null) continue;
 
 	       // check for new partition anchor
 	       Double minStart = anChild.getStart().getOffsetMin();
@@ -2533,7 +2586,7 @@ public class Merger
 	       Anchor anchor = itAnchors.next();
 	       //log(layerId, ": anchor: ", anchor, " (", predecessor, ")"); // TODO comment out
 	       if (anchor.getOffset() == null) continue; // ignore anchors with no offset
-	       if (predecessor != null)
+	       if (predecessor != null && predecessor.getOffset() != null)
 	       {
 		  if (anchor.getOffset() < predecessor.getOffset())
 		  { // out of order
