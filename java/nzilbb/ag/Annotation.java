@@ -889,6 +889,7 @@ public class Annotation
 	    };
 	 if (layerId.equals(highestAlignedLayerId))
 	 {
+	    if (highestAlignedTraversal.getResult().size() == 0) return null;
 	    return highestAlignedTraversal.getResult().first();
 	 }
 	 else
