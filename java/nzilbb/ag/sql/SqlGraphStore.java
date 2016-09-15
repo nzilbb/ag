@@ -949,6 +949,28 @@ public class SqlGraphStore
 			   rsValue.getString("value"), attributeLayer.getId());
 			attribute.setParentId(graph.getId());
 			graph.addAnnotation(attribute);
+		     } 
+		     else if (attributeLayer.getId().equals("transcript_language"))
+		     { // transcript_language can magically inherit from corpus
+			PreparedStatement sqlCorpusLanguage = getConnection().prepareStatement(
+			   "SELECT corpus_language FROM corpus"
+			   +" INNER JOIN transcript ON transcript.corpus_name = corpus.corpus_name"
+			   +" WHERE ag_id = ?");
+			sqlCorpusLanguage.setInt(1, iAgId);
+			ResultSet rsCorpusLanguage = sqlCorpusLanguage.executeQuery();
+			if (rsCorpusLanguage.next())
+			{
+			   Object[] annotationIdParts = {
+			      attributeLayer.get("@attribute"), new Integer(iAgId)};
+			   Annotation attribute = new Annotation(
+			      fmtTranscriptAttributeId.format(annotationIdParts),
+			      rsCorpusLanguage.getString("corpus_language"), 
+			      attributeLayer.getId());
+			   attribute.setParentId(graph.getId());
+			   graph.addAnnotation(attribute);
+			}
+			rsCorpusLanguage.close();
+			sqlCorpusLanguage.close();
 		     }
 		     rsValue.close();
 		     sqlValue.close();
@@ -1070,26 +1092,7 @@ public class SqlGraphStore
    public Graph getFragment(String graphId, String annotationId) 
       throws StoreException, PermissionException, GraphNotFoundException
    {
-      try
-      {
-	 // in layer_id order, to ensure that comment parents (transcript & turn) are loaded first
-	 PreparedStatement sql = getConnection().prepareStatement(
-	    "SELECT short_description FROM layer ORDER BY layer_id");
-	 ResultSet rs = sql.executeQuery();
-	 Vector<String> layerIds = new Vector<String>();
-	 while (rs.next())
-	 {
-	    layerIds.add(rs.getString("short_description"));
-	 } // next layer
-	 rs.close();
-	 sql.close();
-
-	 return getFragment(graphId, annotationId, layerIds.toArray(new String[0]));
-      }
-      catch (SQLException x)
-      {
-	 throw new StoreException(x);
-      }
+      return getFragment(graphId, annotationId, getLayerIds());
    }
 
    /**
@@ -1125,7 +1128,7 @@ public class SqlGraphStore
       try
       {
 	 Graph graph = getGraph(graphId, null); // load just basic information
-	 int ag_id = (Integer)graph.get("@ag_id");
+	 final int ag_id = (Integer)graph.get("@ag_id");
 	 Schema schema = getSchema();
 
 	 final Graph fragment = new Graph();
@@ -1299,10 +1302,7 @@ public class SqlGraphStore
 	    {
 	       if (loadedLayers.contains(layerId)) continue;
 	       Layer layer = getLayer(layerId);
-	       if (layer.get("@layer_id") != null && (Integer)layer.get("@layer_id") >= 0) // TODO support all layers
-	       {
-		  fragment.addLayer(layer);
-	       }
+	       fragment.addLayer(layer);
 	    }
 	    // we also need to add any missing layers to ensure the hierarchy is complete
 	    // this is because we can't tell a grandchild is a descendant of the defining 
@@ -1344,6 +1344,15 @@ public class SqlGraphStore
 	       +" ORDER BY start.offset, end.offset DESC, annotation_id");
 	    sqlAnnotationsByOffset.setInt(2, ag_id);
 
+	    final PreparedStatement sqlTranscriptAttribute = getConnection().prepareStatement(
+	       "SELECT value FROM transcript_attribute WHERE ag_id = ? AND name = ?");
+	    sqlTranscriptAttribute.setInt(1, ag_id);
+	    final PreparedStatement sqlCorpusLanguage = getConnection().prepareStatement(
+	       "SELECT corpus_language FROM corpus"
+	       +" INNER JOIN transcript ON transcript.corpus_name = corpus.corpus_name"
+	       +" WHERE ag_id = ?");
+	    sqlCorpusLanguage.setInt(1, ag_id);
+
 	    // now we've got a complete schema, we traverse top-down through it, adding annotations
 	    new LayerHierarchyTraversal<HashSet<String>>(loadedLayers, fragment.getSchema())
 	    {
@@ -1353,75 +1362,138 @@ public class SqlGraphStore
 		  {
 		     try
 		     {
-			PreparedStatement sql = sqlAnnotationsByParent;
-			if (!layer.getAncestors().contains(definingLayer))
-			{ // not a descendant of defining annotation
-			   // has to be t-included as well
-			   sql = sqlAnnotationsByOffset;
-			   sql.setDouble(4, definingStart.getOffset());
-			   sql.setDouble(5, definingEnd.getOffset());
-			} // not a descendant of defining annotation
-			// load all annotations on this layer that are children of known annotations
-			sql.setInt(1, (Integer)layer.get("@layer_id"));
-			for (Annotation parent : fragment.list(layer.getParentId()))
+			if (layer.get("@layer_id") != null)
 			{
-			   String scope = null;
-			   Integer layer_id = null;
-			   Long annotation_id = null;
-			   if (layer.getParent().equals(fragment.getSchema().getRoot()))
+			   PreparedStatement sql = sqlAnnotationsByParent;
+			   if (!layer.getAncestors().contains(definingLayer))
+			   { // not a descendant of defining annotation
+			      // has to be t-included as well
+			      sql = sqlAnnotationsByOffset;
+			      sql.setDouble(4, definingStart.getOffset());
+			      sql.setDouble(5, definingEnd.getOffset());
+			   } // not a descendant of defining annotation
+			   // load all annotations on this layer that are children of known annotations
+			   Integer layer_id = (Integer)layer.get("@layer_id");
+			   if (layer_id >= 0)
 			   {
-			      annotation_id = ((Integer)fragment.get("@ag_id")).longValue();
-			      scope = (String)layer.get("@scope");
-			   }
-			   else
-			   {
-			      try
-			      { // most likely a spanning annotation like 'utterance'
-				 Object[] o = fmtAnnotationId.parse(parent.getId());
-				 scope = o[0].toString();
-				 layer_id = ((Long)o[1]).intValue();
-				 annotation_id = (Long)o[2];
-			      }
-			      catch(ParseException exception)
+			      sql.setInt(1, layer_id);
+			      for (Annotation parent : fragment.list(layer.getParentId()))
 			      {
-				 System.err.println("Could not parse parent ID " + parent.getId() + " on layer "+layer+": " + exception);
-			      }
-			   }
-			   if (annotation_id == null) continue;
-			   sql.setLong(3, annotation_id);
-			   ResultSet rs = sql.executeQuery();
-			   boolean setOrdinalMinimum = true;
-			   while (rs.next())
+				 String scope = null;
+				 layer_id = null;
+				 Long annotation_id = null;
+				 if (layer.getParent().equals(fragment.getSchema().getRoot()))
+				 {
+				    annotation_id = ((Integer)fragment.get("@ag_id")).longValue();
+				    scope = (String)layer.get("@scope");
+				 }
+				 else
+				 {
+				    try
+				    { // most likely a spanning annotation like 'utterance'
+				       Object[] o = fmtAnnotationId.parse(parent.getId());
+				       scope = o[0].toString();
+				       layer_id = ((Long)o[1]).intValue();
+				       annotation_id = (Long)o[2];
+				    }
+				    catch(ParseException exception)
+				    {
+				       System.err.println("Could not parse parent ID " + parent.getId() + " on layer "+layer+": " + exception);
+				    }
+				 }
+				 if (annotation_id == null) continue;
+				 sql.setLong(3, annotation_id);
+				 ResultSet rs = sql.executeQuery();
+				 boolean setOrdinalMinimum = true;
+				 while (rs.next())
+				 {
+				    Annotation annotation = annotationFromResult(rs, layer, fragment);
+				    
+				    if (setOrdinalMinimum)
+				    {
+				       parent.setOrdinalMinimum(layer.getId(), annotation.getOrdinal());
+				       setOrdinalMinimum = false;
+				    }
+				    
+				    fragment.addAnnotation(annotation);
+				    
+				    // add anchors?
+				    Anchor start = anchorFromResult(rs, "start_");
+				    Anchor end = anchorFromResult(rs, "end_");
+				    if (definingAnnotation.includesOffset(start.getOffset())
+					&& (definingAnnotation.includesOffset(end.getOffset())
+					    || definingEnd.getOffset().equals(end.getOffset())))
+				    { // add anchors too
+				       if (fragment.getAnchor(start.getId()) == null)
+				       { // start anchor isn't in graph yet
+					  fragment.addAnchor(start);
+				       }
+				       if (fragment.getAnchor(end.getId()) == null)
+				       { // end anchor isn't in graph yet
+					  fragment.addAnchor(end);
+				       }
+				    } // add anchors too
+				 } // next child
+				 rs.close();
+			      } // next parent
+			   } // layer_id >= 0
+			   // TODO 'system' layers
+			} // temporal layer
+			else if (layer.getId().equals("transcript_type"))
+			{ // transcript type
+			   PreparedStatement sqlType = getConnection().prepareStatement(
+			      "SELECT transcript_type, t.type_id FROM transcript t"
+			      +" INNER JOIN transcript_type tt ON tt.type_id = t.type_id"
+			      +" WHERE t.ag_id = ?");
+			   sqlType.setInt(1, ag_id);
+			   ResultSet rsType = sqlType.executeQuery();
+			   if (rsType.next())
 			   {
-			      Annotation annotation = annotationFromResult(rs, layer, fragment);
-
-			      if (setOrdinalMinimum)
+			      // add graph-tag annotation
+			      Object[] annotationIdParts = {"type", new Integer(ag_id)};
+			      Annotation type = new Annotation(
+				 fmtTranscriptAttributeId.format(annotationIdParts), 
+				 rsType.getString("transcript_type"), layer.getId());
+			      type.setParentId(fragment.getId());
+			      fragment.addAnnotation(type);
+			   }
+			   rsType.close();
+			   sqlType.close();
+			}
+			else if (layer.getId().startsWith("transcript_"))
+			{ // transcript attribute
+			   sqlTranscriptAttribute.setString(2, layer.get("@attribute").toString());
+			   ResultSet rs = sqlTranscriptAttribute.executeQuery();
+			   if (rs.next() && rs.getString("value").length() > 0)
+			   {
+			      Object[] annotationIdParts = {
+				 layer.get("@attribute"), new Integer(ag_id)};
+			      Annotation attribute = new Annotation(
+				 fmtTranscriptAttributeId.format(annotationIdParts),
+				 rs.getString("value"), layer.getId());
+			      attribute.setParentId(fragment.getId());
+			      fragment.addAnnotation(attribute);
+			   } 
+			   else if (layer.getId().equals("transcript_language"))
+			   { // transcript_language can magically inherit from corpus
+			      rs.close();
+			      rs = sqlCorpusLanguage.executeQuery();
+			      if (rs.next())
 			      {
-				 parent.setOrdinalMinimum(layer.getId(), annotation.getOrdinal());
-				 setOrdinalMinimum = false;
+				 Object[] annotationIdParts = {
+				    layer.get("@attribute"), new Integer(ag_id)};
+				 Annotation attribute = new Annotation(
+				    fmtTranscriptAttributeId.format(annotationIdParts),
+				    rs.getString("corpus_language"), layer.getId());
+				 attribute.setParentId(fragment.getId());
+				 fragment.addAnnotation(attribute);
 			      }
-
-			      fragment.addAnnotation(annotation);
-			      
-			      // add anchors?
-			      Anchor start = anchorFromResult(rs, "start_");
-			      Anchor end = anchorFromResult(rs, "end_");
-			      if (definingAnnotation.includesOffset(start.getOffset())
-				  && (definingAnnotation.includesOffset(end.getOffset())
-				      || definingEnd.getOffset().equals(end.getOffset())))
-			      { // add anchors too
-				 if (fragment.getAnchor(start.getId()) == null)
-				 { // start anchor isn't in graph yet
-				    fragment.addAnchor(start);
-				 }
-				 if (fragment.getAnchor(end.getId()) == null)
-				 { // end anchor isn't in graph yet
-				    fragment.addAnchor(end);
-				 }
-			      } // add anchors too
-			   } // next child
+			   }			  
 			   rs.close();
-			} // next parent			
+			}
+			else if (layer.getId().startsWith("participant_")) // TODO
+			{ // participant attribute
+			}
 		     }
 		     catch(SQLException exception)
 		     {
@@ -1433,10 +1505,12 @@ public class SqlGraphStore
 		  } // not already loaded
 	       }
 	    };
+	    sqlCorpusLanguage.close();
+	    sqlTranscriptAttribute.close();
 	    sqlAnnotationsByParent.close();
 	    sqlAnnotationsByOffset.close();
 	 } // layerIds specified
-
+	 
 	 // ensure that turn and utterance labels are set to the participant name
 	 for (Annotation a : fragment.list(fragment.getSchema().getTurnLayerId()))
 	 {
