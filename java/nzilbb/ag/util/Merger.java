@@ -445,8 +445,7 @@ public class Merger
        */
       public EditStep<Annotation> delete(Annotation a1)
       {
-	 int distance = a1.getLayer().containsKey("@noChange")?5:1;
-	 return new EditStep<Annotation>(a1, null, distance, EditStep.StepOperation.DELETE);
+	 return new EditStep<Annotation>(a1, null, 1, EditStep.StepOperation.DELETE);
       }
 
       /**
@@ -456,8 +455,7 @@ public class Merger
        */
       public EditStep<Annotation> insert(Annotation a2)
       {
-	 int distance = a2.getLayer().containsKey("@noChange")?5:1;
-	 return new EditStep<Annotation>(null, a2, distance, EditStep.StepOperation.INSERT);
+	 return new EditStep<Annotation>(null, a2, 1, EditStep.StepOperation.INSERT);
       }
    };
 
@@ -879,6 +877,11 @@ public class Merger
 	    MinimumEditPath<Annotation> mp = new MinimumEditPath<Annotation>(defaultComparator);
 	    List<EditStep<Annotation>> path = mp.minimumEditPath(theseAnnotations, thoseAnnotations);
 	    // introduce mapped annotations to each other
+	    if (layer.containsKey("@noChange"))
+	    {
+	       // log("Collapsing edit path for " + layer);
+	       mp.collapse(path);
+	    }
 	    // log("PATH");
 	    for (EditStep<Annotation> step : path)
 	    {
