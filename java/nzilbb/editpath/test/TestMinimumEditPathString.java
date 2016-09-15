@@ -443,6 +443,48 @@ public class TestMinimumEditPathString
       assertEquals(1, path.get(3).getToIndex());
       assertEquals(1, path.get(4).getToIndex());
       assertEquals(2, path.get(5).getToIndex());
+
+      // collapse
+      mp.collapse(path);
+
+      // right number of steps
+      assertEquals("PATH " + path, 5, path.size());
+
+      // changes
+      assertEquals(EditStep.StepOperation.DELETE, path.get(0).getOperation());
+      assertEquals(EditStep.StepOperation.DELETE, path.get(1).getOperation());
+      assertEquals(EditStep.StepOperation.NONE, path.get(2).getOperation());
+      assertEquals(EditStep.StepOperation.CHANGE, path.get(3).getOperation());
+      assertEquals(EditStep.StepOperation.NONE, path.get(4).getOperation());
+
+      // 'from' set
+      assertEquals(new Character('p'), path.get(0).getFrom()); // delete p
+      assertEquals(new Character('l'), path.get(1).getFrom()); // delete l
+      assertEquals(new Character('o'), path.get(2).getFrom()); 
+      assertEquals(new Character('m'), path.get(3).getFrom()); // change m to r
+      assertEquals(new Character('o'), path.get(4).getFrom());
+
+      // 'to' set
+      assertNull(path.get(0).getTo());                       // delete p
+      assertNull(path.get(1).getTo());                       // delete l
+      assertEquals(new Character('o'), path.get(2).getTo());
+      assertEquals(new Character('r'), path.get(3).getTo()); // change m to r
+      assertEquals(new Character('o'), path.get(4).getTo());
+
+      // distances set
+      assertEquals(1, path.get(0).getStepDistance()); // delete p
+      assertEquals(1, path.get(1).getStepDistance()); // delete l
+      assertEquals(0, path.get(2).getStepDistance());
+      assertEquals(2, path.get(3).getStepDistance()); // change m to r
+      assertEquals(0, path.get(4).getStepDistance());
+
+      // total distances set
+      assertEquals(1, path.get(0).totalDistance()); // delete p
+      assertEquals(2, path.get(1).totalDistance()); // delete l
+      assertEquals(2, path.get(2).totalDistance());
+      assertEquals(4, path.get(3).totalDistance()); // chaneg m to r
+      assertEquals(4, path.get(4).totalDistance());
+
    }
 
    @Test 

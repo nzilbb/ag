@@ -22,6 +22,7 @@
 package nzilbb.editpath;
 
 import java.util.List;
+import java.util.Iterator;
 import java.util.Vector;
 
 /**
@@ -207,6 +208,47 @@ public class MinimumEditPath<T>
       List<EditStep<T>> path = minimumEditPath(from, to);
       return path.get(path.size() - 1).totalDistance();
    } // end of minimumDistance()
+
+   
+   /**
+    * Collapses edit path so that subsequent delete/create steps are collapsed into a single change step.
+    * @param path The path to collapse
+    * @return The given path, with possibly fewer steps.
+    */
+   public List<EditStep<T>> collapse(List<EditStep<T>> path)
+   {
+      Iterator<EditStep<T>> steps = path.iterator();
+      EditStep<T> lastStep = null;
+      while (steps.hasNext())
+      {
+	 EditStep<T> thisStep = steps.next();
+	 if (lastStep != null)
+	 {
+	    if (lastStep.getOperation() == EditStep.StepOperation.DELETE
+		&& thisStep.getOperation() == EditStep.StepOperation.INSERT)
+	    {
+	       lastStep.setOperation(EditStep.StepOperation.CHANGE);
+	       lastStep.setTo(thisStep.getTo());
+	       lastStep.setToIndex(thisStep.getToIndex());
+	       lastStep.setStepDistance(lastStep.getStepDistance() + thisStep.getStepDistance());
+	       steps.remove();
+	       thisStep = lastStep;
+	    }
+	    else if (lastStep.getOperation() == EditStep.StepOperation.INSERT
+		&& thisStep.getOperation() == EditStep.StepOperation.DELETE)
+	    {
+	       lastStep.setOperation(EditStep.StepOperation.CHANGE);
+	       lastStep.setFrom(thisStep.getFrom());
+	       lastStep.setFromIndex(thisStep.getFromIndex());
+	       lastStep.setStepDistance(lastStep.getStepDistance() + thisStep.getStepDistance());
+	       steps.remove();
+	       thisStep = lastStep;
+	    }
+	 }
+	 lastStep = thisStep;
+      }
+      return path;
+   } // end of Collapse()
 
    
 } // end of class MinimumEditPath
