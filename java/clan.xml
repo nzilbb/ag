@@ -10,6 +10,7 @@
   <property name="srctests" value="nzilbb/clan/test/Test*.java"/>
   <property name="icon" value="nzilbb/clan/icon.gif"/>
   <property name="junitjar" value="/usr/share/java/junit4.jar"/>
+  <property name="nzilbb-ag-serialize-IDeserializer" value="nzilbb.clan.ChatDeserializer" />
   
   <target name="init">
     <!-- Create the time stamp -->
@@ -46,6 +47,7 @@
     <!-- Put everything in ${build} into the ${ant.project.name}.jar file -->
     <jar jarfile="${dist}/${ant.project.name}.jar" 
 	 basedir="${build}">
+      <manifest><attribute name="nzilbb-ag-serialize-IDeserializer" value="${nzilbb-ag-serialize-IDeserializer}"/></manifest>
       
       <!-- include this build file -->
       <fileset dir="." includes="build.xml" />

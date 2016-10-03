@@ -35,6 +35,8 @@ import java.text.SimpleDateFormat;
 import java.util.Vector;
 import java.util.Enumeration;
 import java.util.jar.JarFile;
+import java.util.jar.Manifest;
+import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.net.URLClassLoader;
 
@@ -159,6 +161,15 @@ public class IO
    
    /**
     * Scans the given jar file for instances of a particular class/interface.
+    * The implementors must be registered in the jar file, by way of a manifest attribute named
+    * after the class (with dots converted to hyphens to meet the attribute name requirements of
+    * jar manifests). e.g. if <var>c</var> = <code>nzilbb.ag.serialize.IDeserializer</code> and
+    * <var>file</var> contains a class called <code>nzilbb.praat.TextGridDeserializer</code> that
+    * implements <code>nzilbb.ag.serialize.IDeserializer</code>, in order to be returned by this
+    * method, <var>file</var> must also have a manifest attribute called 
+    * <q>nzilbb-ag-serialize-IDeserializer</q> whose value is <q>nzilbb.praat.TextGridDeserializer</q>.
+    * <p>There can be multiple implementing classes registered in the <var>file</var>; the value of
+    * the manifest attribute is assumed to be a space-delimited list.
     * @param file The jar file.
     * @param parentLoader The parent class loader.
     * @param c The class/interface to search for.
@@ -174,33 +185,32 @@ public class IO
       {
 	 JarFile jar = new JarFile(file);
 	 URL[] url = new URL[] { file.toURI().toURL() };
-	 Enumeration<JarEntry> enEntries = jar.entries();
-	 while (enEntries.hasMoreElements())
+	 Manifest manifest = jar.getManifest();
+	 if (manifest != null)
 	 {
-	    JarEntry entry = enEntries.nextElement();
-	    String sEntryFileName = entry.getName();
-	    if (sEntryFileName.endsWith(".class"))
+	    Attributes attributes = manifest.getMainAttributes();
+	    Object convertersAtt = attributes.get(new Attributes.Name(c.getName().replace('.','-')));
+	    if (convertersAtt != null)
 	    {
-	       String sClassName = sEntryFileName
-		  .substring(0, sEntryFileName.length() - 6) // no extension
-		  .replaceAll("\\/", ".");
-	       URLClassLoader classLoader = URLClassLoader.newInstance(url, parentLoader);
-	       try
+	       for (String className : convertersAtt.toString().split(" "))
 	       {
-		  Object instance = classLoader.loadClass(sClassName).newInstance();
-		  if (c.isInstance(instance))
+		  URLClassLoader classLoader = URLClassLoader.newInstance(url, parentLoader);
+		  try
 		  {
-		     implementors.add(instance);
+		     Object instance = classLoader.loadClass(className).newInstance();
+		     if (c.isInstance(instance))
+		     {
+			implementors.add(instance);
+		     }
 		  }
-	       }
-	       catch(Throwable t) {}
-	    } // is a class
-	 } // next jar entry
+		  catch(Throwable t) {}
+	       } // next class
+	    }
+	 }
       }
       catch(MalformedURLException x) {}
       return implementors;
    } // end of FindImplementorsInJar()
-
    
    /**
     * Determines the jar file that the given class comes from.
