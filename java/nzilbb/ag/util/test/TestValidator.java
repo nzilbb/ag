@@ -400,7 +400,13 @@ public class TestValidator
 	 assertEquals("Delete word - automatically generated child is deleted", 
 		      new Change(Change.Operation.Destroy, g.getAnnotation("pos5")), 
 		      order.next());
-	 assertFalse("Delete word - manual child is not deleted", order.hasNext());
+	 assertEquals("Delete word - manual child shares start", 
+		      new Change(Change.Operation.Update, g.getAnnotation("pos4"), "startId", "a?1"), 
+		      order.next());
+	 assertEquals("Delete word - manual child shares end", 
+		      new Change(Change.Operation.Update, g.getAnnotation("pos4"), "endId", "a?2"), 
+		      order.next());
+	 assertFalse("Delete word - manual child is not deleted " + changes, order.hasNext());
 	 assertEquals("one extra change in graph - the word deletion", 
 		      changes.size() + 1, g.getChanges().size());
       }
@@ -655,6 +661,9 @@ public class TestValidator
 	 assertNotEquals("word share start anchors - not shared any more: " + changes, 
 			 g.getAnnotation("word6").getStartId(), 
 			 g.getAnnotation("word4").getStartId());
+	 assertEquals("word share start anchors - tag not shared any more either: " + changes, 
+		      g.getAnnotation("word4").get("startId"), 
+		      g.getAnnotation("pos3").get("startId"));
 	 assertEquals("word share start anchors - new start: " + changes, 
 	 	      new Change(Change.Operation.Update, g.getAnnotation("word4"), "startId", "1"), 
 	 	      order.next());
@@ -664,7 +673,12 @@ public class TestValidator
 	 assertEquals("word share start anchors - new end: " + changes, 
 	 	      new Change(Change.Operation.Update, g.getAnnotation("word3"), "endId", "1"), 
 	 	      order.next());
-	 assertFalse(order.hasNext());
+
+	 assertEquals("word tag share start anchors - new start: " + changes, 
+	 	      new Change(Change.Operation.Update, g.getAnnotation("pos3"), "startId", "1"), 
+	 	      order.next());
+
+	 assertFalse("no more changes " + changes, order.hasNext());
 	 assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
       }
       catch(TransformationException exception)
