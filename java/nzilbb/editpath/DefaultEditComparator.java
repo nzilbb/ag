@@ -38,7 +38,7 @@ public class DefaultEditComparator<T>
     * @see #getChangeDistance()
     * @see #setChangeDistance(int)
     */
-   protected int iChangeDistance = 1;
+   protected int iChangeDistance = 1; // TODO make distances Double
    /**
     * Getter for {@link #iChangeDistance}: The distance represented by a change.
     * @return The distance represented by a change.

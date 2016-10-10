@@ -34,7 +34,7 @@ public class EditStep<T>
     * Enumarator for representing the operation represented by a step 
     * @see #getOperation()
     */
-   public enum StepOperation { NONE, DELETE, CHANGE, INSERT };
+   public enum StepOperation { NONE, DELETE, CHANGE, INSERT }; // TODO Add the possiblity of merge? i.e. two subsequent symbols converting to one symbol
 
    // Attributes:
 
@@ -172,7 +172,7 @@ public class EditStep<T>
     * @see #getStepDistance()
     * @see #setStepDistance(int)
     */
-   protected int iStepDistance;
+   protected int iStepDistance; // TODO make distances Double
    /**
     * Getter for {@link #iStepDistance}: The distance represented by this single step.
     * @return The distance represented by this single step.
