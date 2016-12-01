@@ -751,6 +751,20 @@ public class SqlGraphStore
 	 sql.setString(1, id);
 	 ResultSet rs = sql.executeQuery();
 	 if (!rs.next())
+	 { // graph not found - maybe we've been given a name with a mismatching extension?
+	    rs.close();
+	    sql.close();
+	    sql = getConnection().prepareStatement(
+	       "SELECT transcript.*, transcript_family.name AS series,"
+	       +" transcript_type.transcript_type"
+	       +" FROM transcript"
+	       +" INNER JOIN transcript_family ON transcript.family_id = transcript.family_id"
+	       +" INNER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
+	       +" WHERE transcript_id REGEXP ?");
+	    sql.setString(1, "^" + id.replaceAll("\\.[^.]+$","") + "\\.[^.]+$");
+	    rs = sql.executeQuery();
+	 }
+	 if (!rs.next())
 	 { // graph not found - maybe we've been given an ag_id?
 	    rs.close();
 	    sql.close();
