@@ -352,7 +352,7 @@ nzilbb.labbcat.Labbcat.prototype = Object.create(nzilbb.labbcat.GraphStore.proto
 nzilbb.labbcat.Labbcat.prototype.newTranscript = function(transcript, media, mediaSuffix, transcriptType, corpus, episode, onResult, onProgress) {
     // create form
     var fd = new FormData();
-    fd.append("todo", "upload");
+    fd.append("todo", "new");
     fd.append("auto", "true");
     if (transcriptType) fd.append("transcript_type", transcriptType);
     if (corpus) fd.append("corpus", corpus);
@@ -421,6 +421,90 @@ nzilbb.labbcat.Labbcat.prototype.newTranscript = function(transcript, media, med
 			  }), mediaName);
 	    }
 	}
+	
+	var urlParts = parseUrl(this.baseUrl + "edit/transcript/new");
+	var requestParameters = {
+	    port: urlParts.port,
+	    path: urlParts.pathname,
+	    host: urlParts.hostname,
+	    headers: { "Accept" : "application/json" }
+	};
+	if (this.username && this.password) {
+	    requestParameters.auth = this.username+':'+this.password;
+	}
+	if (/^https.*/.test(this.baseUrl)) {
+	    requestParameters.protocol = "https:";
+	}
+	fd.submit(requestParameters, function(err, res) {
+	    var responseText = "";
+	    if (!err) {
+		res.on('data',function(buffer) {
+		    console.log('data ' + buffer);
+		    responseText += buffer;
+		});
+		res.on('end',function(){
+		    try {
+			var response = JSON.parse(responseText);
+			var result = response.model.result || response.model;
+			var errors = response.errors;
+			if (errors.length == 0) errors = null
+			var messages = response.messages;
+			if (messages.length == 0) messages = null
+			onResult(result, errors, messages, "newTranscript", transcriptName);
+		    } catch(exception) {
+			onResult(null, ["" +exception+ ": " + this.responseText], "newTranscript", transcript.name);
+		    }
+		});
+	    } else {
+		onResult(null, ["" +err+ ": " + this.responseText], "newTranscript", transcriptName);
+	    }
+
+	    if (res) res.resume();
+	});
+    }
+};
+
+/**
+ * Uploads a new transcript.
+ * @param {file} transcript The transcript to upload.
+ * @callback {resultCallback} onResult Invoked when the request has returned a result.
+ * @callback onProgress Invoked on XMLHttpRequest progress.
+ */
+nzilbb.labbcat.Labbcat.prototype.updateTranscript = function(transcript, onResult, onProgress) {
+    // create form
+    var fd = new FormData();
+    fd.append("todo", "update");
+    fd.append("auto", "true");
+
+    if (!runningOnNode) {	
+
+	fd.append("uploadfile1_0", transcript);
+    
+	// create HTTP request
+	var xhr = new XMLHttpRequest();
+	xhr.call = "newTranscript";
+	xhr.id = transcript.name;
+	xhr.onResult = onResult;
+	xhr.addEventListener("load", callComplete, false);
+	xhr.addEventListener("error", callFailed, false);
+	xhr.addEventListener("abort", callCancelled, false);
+	xhr.upload.addEventListener("progress", onProgress, false);
+	xhr.upload.id = transcript.name; // for knowing what status to update during events
+	
+	xhr.open("POST", this.baseUrl + "edit/transcript/new");
+	if (this.username) {
+	    xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	}
+	xhr.setRequestHeader("Accept", "application/json");
+	xhr.send(fd);
+    } else { // runningOnNode
+	
+	// on node.js, files are actually paths
+	var transcriptName = transcript.replace(/.*\//g, "");
+	fd.append("uploadfile1_0", 
+		  fs.createReadStream(transcript).on('error', function(){
+		      onResult(null, ["Invalid transcript: " + transcriptName], "newTranscript", transcriptName);
+		  }), transcriptName);
 	
 	var urlParts = parseUrl(this.baseUrl + "edit/transcript/new");
 	var requestParameters = {
