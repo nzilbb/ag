@@ -227,22 +227,38 @@ public class MinimumEditPath<T>
 	    if (lastStep.getOperation() == EditStep.StepOperation.DELETE
 		&& thisStep.getOperation() == EditStep.StepOperation.INSERT)
 	    {
-	       lastStep.setOperation(EditStep.StepOperation.CHANGE);
-	       lastStep.setTo(thisStep.getTo());
-	       lastStep.setToIndex(thisStep.getToIndex());
-	       lastStep.setStepDistance(lastStep.getStepDistance() + thisStep.getStepDistance());
-	       steps.remove();
-	       thisStep = lastStep;
+	       EditStep<T> change = comparator.compare(lastStep.getFrom(), thisStep.getTo());
+	       if (change.getStepDistance() <= 3 * (lastStep.getStepDistance() + thisStep.getStepDistance()))
+	       {
+		  lastStep.setOperation(EditStep.StepOperation.CHANGE);
+		  lastStep.setTo(thisStep.getTo());
+		  lastStep.setToIndex(thisStep.getToIndex());
+		  lastStep.setStepDistance(lastStep.getStepDistance() + thisStep.getStepDistance());
+		  steps.remove();
+		  thisStep = lastStep;
+	       }
+	       else
+	       {
+		  System.out.println("change " + change.getStepDistance() + " delete/insert " + (lastStep.getStepDistance() + thisStep.getStepDistance()));
+	       }
 	    }
 	    else if (lastStep.getOperation() == EditStep.StepOperation.INSERT
 		&& thisStep.getOperation() == EditStep.StepOperation.DELETE)
 	    {
-	       lastStep.setOperation(EditStep.StepOperation.CHANGE);
-	       lastStep.setFrom(thisStep.getFrom());
-	       lastStep.setFromIndex(thisStep.getFromIndex());
-	       lastStep.setStepDistance(lastStep.getStepDistance() + thisStep.getStepDistance());
-	       steps.remove();
-	       thisStep = lastStep;
+	       EditStep<T> change = comparator.compare(thisStep.getFrom(), lastStep.getTo());
+	       if (change.getStepDistance() <= 3 * (lastStep.getStepDistance() + thisStep.getStepDistance()))
+	       {
+		  lastStep.setOperation(EditStep.StepOperation.CHANGE);
+		  lastStep.setFrom(thisStep.getFrom());
+		  lastStep.setFromIndex(thisStep.getFromIndex());
+		  lastStep.setStepDistance(lastStep.getStepDistance() + thisStep.getStepDistance());
+		  steps.remove();
+		  thisStep = lastStep;
+	       }
+	       else
+	       {
+		  System.out.println("change " + change.getStepDistance() + " insert/delete " + (lastStep.getStepDistance() + thisStep.getStepDistance()));
+	       }
 	    }
 	 }
 	 lastStep = thisStep;
