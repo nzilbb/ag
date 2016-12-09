@@ -741,6 +741,8 @@ public class Validator
 		  } // automatically generated, so can be deleted
 		  else
 		  { // cannot delete child, need a new parent
+		     log("Need new parent for ", child, 
+			 " (", oldParent, " ", parentChangeReason, ")");
 		     Annotation newParent = findBestParent(child);
 		     if (newParent != null)
 		     {
@@ -843,7 +845,8 @@ public class Validator
 	    // keep looking - an equal child.grandparent = candidate.parent would be better
 	 }
 	 if (nearestCandidate == null
-	     || child.distance(candidate) < child.distance(nearestCandidate))
+	     || (nearestCandidate.getAnchored()
+		 && child.distance(candidate) < child.distance(nearestCandidate)))
 	 {
 	    nearestCandidate = candidate;
 	 }
@@ -1121,6 +1124,8 @@ public class Validator
 			   }
 			   if (affectedGrandchild == null
 			       // and we're not creating an annotation of non-positive length
+			       && lastAnchoredChild.getEnd().getOffset() != null
+			       && child.getEnd().getOffset() != null
 			       && lastAnchoredChild.getEnd().getOffset() < child.getEnd().getOffset())
 			   { // we can narrow the child to directly follow the last child
 			      log("Overlapping annotations: ", lastAnchoredChild,
@@ -2171,7 +2176,7 @@ public class Validator
 	    }
 	 }	 
 	 log.add(s.toString());
-	 // System.out.println(message);
+	 System.out.println(s.toString());
       }
    } // end of log()
 

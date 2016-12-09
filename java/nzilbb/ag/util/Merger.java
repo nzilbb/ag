@@ -825,6 +825,26 @@ public class Merger
 	 Vector<Annotation> theseForWho = theseByParticipant.get(who);
 	 Vector<Annotation> thoseForWho = thoseByParticipant.get(who);
 
+	 // if it's a graph tag layer, sort annotations by label
+	 // this ensures, e.g., that mapping the "who" layer lines the speakers up by name
+	 if (layer.getParentId().equals("graph") && layer.getAlignment() == Constants.ALIGNMENT_NONE)
+	 {
+	    AnnotationComparatorByOrdinal byLabel = new AnnotationComparatorByOrdinal() {
+		  public int compare(Annotation o1, Annotation o2)
+		  {
+		     int labelComparison = o1.getLabel().compareTo(o2.getLabel());
+		     if (labelComparison != 0) return labelComparison;
+		     return super.compare(o1, o2);
+		  }
+	       };
+	    TreeSet<Annotation> annotationsByLabel = new TreeSet<Annotation>(byLabel);
+	    annotationsByLabel.addAll(theseByParticipant.get(who));
+	    theseForWho = new Vector<Annotation>(annotationsByLabel);
+	    annotationsByLabel.clear();
+	    annotationsByLabel.addAll(thoseByParticipant.get(who));
+	    thoseForWho = new Vector<Annotation>(annotationsByLabel);
+	 }
+
 	 // break collections into overlapping chunks to conserve memory
 
 	 // two lists of lists of annotations
@@ -879,17 +899,17 @@ public class Merger
 	    // introduce mapped annotations to each other
 	    if (layer.containsKey("@noChange"))
 	    {
-	       // log("Collapsing edit path for " + layer);
+	       log("Collapsing edit path for " + layer);
 	       mp.collapse(path);
 	    }
-	    // log("PATH");
+	    log("PATH " + layer);
 	    for (EditStep<Annotation> step : path)
 	    {
 	       if (step.getFrom() != null && step.getTo() != null)
 	       {
 		  setCounterparts(step.getFrom(), step.getTo());
 	       }
-	       // log(step.getFrom(), " ", step.getOperation(), " ", step.getTo());
+	       log(step.getFrom(), " ", step.getOperation(), " ", step.getTo());
 	    }
 	 } // next chunk pair
       } // next who
@@ -1876,6 +1896,7 @@ public class Merger
 				      : editedParallelAnnotation.getStart().getStartingAnnotations())
 			      {
 				 Annotation originalParallel2 = getCounterpart(editedParallel2);
+				 if (originalParallel2 == null) continue;
 				 if (originalParallel2.getStart() != anOriginal.getStart())
 				 { // found a different but linked anchor via the edited graph structure
 				    newAnchor = originalParallel2.getStart();
@@ -2377,7 +2398,7 @@ public class Merger
 	       { // edited graph includes child layer, so use its annotations to get to the originals
 		  anOriginalChild = getCounterpart(anChild);
 	       }
-	       // log(layerId, ": Child ", anOriginalChild); // TODO comment out
+	       log(layerId, ": Child ", anOriginalChild); // TODO comment out
 	       // there may be no counterpart in the original graph
 	       // because adding was forbidden by noChangeLayers
 	       if (anOriginalChild == null) continue;
@@ -2385,7 +2406,7 @@ public class Merger
 	       // check for new partition anchor
 	       Double minStart = anChild.getStart().getOffsetMin();
 	       Double maxEnd = anChild.getEnd().getOffsetMax();
-	       // log(layerId, ": Edited child between ", minStart, " and ", maxEnd); // TODO comment out
+	       log(layerId, ": Edited child between ", minStart, " and ", maxEnd); // TODO comment out
 	       if (minStart != null && maxEnd != null)
 	       {
 		  for (String partitionLayerId : partitionIds)
@@ -2404,6 +2425,11 @@ public class Merger
 							     Constants.CONFIDENCE, Integer.MAX_VALUE);
 			
 			log("Partition end: ", currentPartitionOriginal, " ", currentPartitionOriginal.getEnd());
+			// if (!i.hasNext())
+			// {
+			//    log("No more partitions on: ", partitionLayerId);
+			//    break;
+			// }
 			currentPartitionEdited = i.next();
 			currentPartition.put(partitionLayerId, currentPartitionEdited);
 			if (currentPartitionEdited.includes(anChild))
@@ -2587,13 +2613,13 @@ public class Merger
 	    while (itAnchors.hasNext())
 	    {
 	       Anchor anchor = itAnchors.next();
-	       //log(layerId, ": anchor: ", anchor, " (", predecessor, ")"); // TODO comment out
+	       log(layerId, ": anchor: ", anchor, " (", predecessor, ")"); // TODO comment out
 	       if (anchor.getOffset() == null) continue; // ignore anchors with no offset
 	       if (predecessor != null && predecessor.getOffset() != null)
 	       {
 		  if (anchor.getOffset() < predecessor.getOffset())
 		  { // out of order
-		     //log(layerId, ": Out of order: ", anchor, " (", predecessor, ")"); // TODO comment out
+		     log(layerId, ": Out of order: ", anchor, " (", predecessor, ")"); // TODO comment out
 		     // which has the higher status?
 		     if (getConfidence(anchor) <= getConfidence(predecessor)
 			 // but we also don't want to run past the end of the parent
@@ -3208,7 +3234,7 @@ public class Merger
 	    }
 	 }	 
 	 log.add(s.toString());
-	 // System.out.println(message);
+	 System.out.println(s.toString());
       }
    } // end of log()
 
