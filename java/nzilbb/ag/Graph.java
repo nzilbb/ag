@@ -31,6 +31,7 @@ import java.util.LinkedList;
 import java.util.Vector;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Iterator;
 import java.text.DecimalFormat;
@@ -901,7 +902,7 @@ public class Graph
    public Annotation createSpan(Annotation from, Annotation to, String layerId, String label)
    {
       Layer spanLayer = getLayer(layerId);
-      Annotation parent = null;
+      Annotation parent = null; // TODO can't we just use from.my(spanLayer.getParentId()) || to.my(spanLayer.getParentId()); ??
       if (spanLayer.getParentId().equals(from.getLayer().getParentId()))
       { // "from" layer and span layer share a parent
 	 parent = from.getParent();
@@ -1173,6 +1174,50 @@ public class Graph
       } // there are orphans
       return annotations;
    }
+
+   // Maintain a set of indexes to narrow down search space when looking for t-includin annotations
+   // Key is the layerId, Value is a map of nearest-integer offsets to annotations that are nearby
+   HashMap<String,HashMap<Integer,Set<Annotation>>> indicesByLayer = new HashMap<String,HashMap<Integer,Set<Annotation>>>();
+   /**
+    * Determine which annotations on the given layer are 'near' the given offset. 'Near' means that the annotations t-include within 1.0 of the given offset. 
+    * <p> The first time this is called for a given layer, an index is constructed so that subsequent calls on the same layer return quicker.
+    * <p> The index is rebuild after any of {@link Anchor#setOffset(Double)}, {@link Annotation#setStartId(String)}, {@link Annotation#setEndId(String)}, or {@link Annotation#setGraph(Graph)} are called, to ensure it's up-to-date with graph changes.
+    * @param layerId The layer for the returned annotations.
+    * @param offset The offset to look near.
+    * @return A list of annotations on the given layer which are near the given offset.
+    */
+   Set<Annotation> listNear(String layerId, double offset)
+   {
+      // System.out.println("listNear " + layerId + " " + offset);
+      if (!indicesByLayer.containsKey(layerId))
+      { // build the index for this layer
+	 // System.out.println("Build index for " + layerId);
+	 HashMap<Integer,Set<Annotation>> index = new HashMap<Integer,Set<Annotation>>();
+	 indicesByLayer.put(layerId, index);
+	 for (Annotation a : list(layerId))
+	 {
+	    if (a.getAnchored())
+	    {
+	       // add this annotation to the index, from just before the start, to just after the end
+	       int from = a.getStart().getOffset().intValue();
+	       int to = a.getEnd().getOffset().intValue() + 1;
+	       // System.out.println(" " + a + " from " + from + " to " + to);
+	       for (int o = from; o <= to; o++)
+	       { // for each integer in the range
+		  if (!index.containsKey(o)) index.put(o, new HashSet<Annotation>());
+		  index.get(o).add(a);
+	       } // next integer in the range
+	    } // offsets set
+	 } // next annotation
+      } // build the index for this layer
+      HashMap<Integer,Set<Annotation>> index = indicesByLayer.get(layerId);
+      HashSet<Annotation> nearby = new HashSet<Annotation>();
+      if (index.containsKey((int)offset)) nearby.addAll(index.get((int)offset));
+      offset = offset + 1.0;
+      if (index.containsKey((int)offset)) nearby.addAll(index.get((int)offset));
+      return nearby;
+   } // end of listNear()
+
 
    /**
     * Getter for <i>layer</i>: The graph's layer definition, which is by definition the root of its schema.

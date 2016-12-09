@@ -89,6 +89,14 @@ public class Anchor
       Vector<Change> changes = new Vector<Change>();
       Change change = getLastChange();
       if (change != null) changes.add(change);
+
+      // reset indices of related layers
+      if (graph != null)
+      {
+	 for (String layerId : startOf.keySet()) graph.indicesByLayer.remove(layerId);
+	 for (String layerId : endOf.keySet()) graph.indicesByLayer.remove(layerId);
+      }
+      
       return changes;
    }
 

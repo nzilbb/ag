@@ -150,6 +150,8 @@ public class Annotation
       if (start != null)
       {
 	 start.startOf(getLayerId()).add(this);
+	 // reset index for layer
+	 graph.indicesByLayer.remove(getLayerId());
       }
       
       // return change
@@ -205,6 +207,8 @@ public class Annotation
       if (end != null)
       {
 	 end.endOf(getLayerId()).add(this);
+	 // reset index for layer
+	 graph.indicesByLayer.remove(getLayerId());
       }
       
       // return change
@@ -376,6 +380,8 @@ public class Annotation
 	 {
 	    setEnd(graph.getAnchor(getEndId()));
 	 }
+	 // reset index for layer
+	 graph.indicesByLayer.remove(getLayerId());
       }
    }
    
@@ -1379,9 +1385,9 @@ public class Annotation
    public Annotation[] includingAnnotationsOn(String layerId)
    {
       Vector<Annotation> includingAnnotations = new Vector<Annotation>();
-      if (graph != null)
+      if (graph != null && getAnchored())
       {
-	 for (Annotation other : graph.list(layerId))
+	 for (Annotation other : graph.listNear(layerId, getStart().getOffset()))
 	 {
 	    if (other.getChange() == Change.Operation.Destroy) continue;
 	    if (other == this) continue; // exclude ourselves
@@ -1403,7 +1409,7 @@ public class Annotation
    public Annotation[] includedAnnotationsOn(String layerId)
    {
       Vector<Annotation> includedAnnotations = new Vector<Annotation>();
-      if (graph != null)
+      if (graph != null && getAnchored())
       {
 	 for (Annotation other : graph.list(layerId))
 	 {
@@ -1427,9 +1433,9 @@ public class Annotation
    public Annotation[] midpointIncludingAnnotationsOn(String layerId)
    {
       Vector<Annotation> includingAnnotations = new Vector<Annotation>();
-      if (graph != null)
+      if (graph != null && getAnchored())
       {
-	 for (Annotation other : graph.list(layerId))
+	 for (Annotation other : graph.listNear(layerId, getMidpoint()))
 	 {
 	    if (other.getChange() == Change.Operation.Destroy) continue;
 	    if (other == this) continue; // exclude ourselves
