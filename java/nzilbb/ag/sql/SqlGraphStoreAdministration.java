@@ -334,7 +334,7 @@ public class SqlGraphStoreAdministration
    {
       try
       {
-	 return (IDeserializer)deserializersBySuffix.get(suffix).getClass().newInstance();
+	 return (IDeserializer)deserializersBySuffix.get(suffix.toLowerCase()).getClass().newInstance();
       }
       catch(IllegalAccessException exception)
       {
