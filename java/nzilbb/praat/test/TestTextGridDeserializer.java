@@ -1247,8 +1247,10 @@ public class TestTextGridDeserializer
       assertEquals("phone", "@U", phones[1].getLabel());
       assertEquals("phone parent", "so", phones[1].getParent().getLabel());
 
-      assertEquals("phone", "w", phones[2].getLabel());
-      assertEquals("phone parent", "what", phones[2].getParent().getLabel());
+      assertEquals("phone - word doesn't quite t-include phone", "w", phones[2].getLabel());
+      assertEquals("phone parent - doesn't t-include", "what", phones[2].getParent().getLabel());
+      assertEquals("phone parent - share anchors despite offset mismatch",
+		   phones[2].getParent().getStart(), phones[2].getStart());
       assertEquals("phone", "Q", phones[3].getLabel());
       assertEquals("phone parent", "what", phones[3].getParent().getLabel());
       assertEquals("phone", "t", phones[4].getLabel());
@@ -1279,6 +1281,55 @@ public class TestTextGridDeserializer
       assertNull("no phone parent", phones[13].getParent());
 
 
+   }
+
+   @Test public void performance() 
+      throws Exception
+   {
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "tranascript",
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("middle-750", "middle-750", 2, true, false, true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("disfluency", "disfluency", 2, true, false, false, "turn", true),
+	 new Layer("IntS", "IntS", 2, true, false, false, "turn", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("transcript", "Words", 2, true, false, false, "turn", true),
+	 new Layer("segments", "Phones", 2, true, false, true, "transcript", true),
+	 new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
+      // access file
+      NamedStream[] streams = { new NamedStream(new File(getDir(), "s1402a.TextGrid")) };
+      
+      // create deserializer
+      TextGridDeserializer deserializer = new TextGridDeserializer();
+      deserializer.setTimers(new nzilbb.util.Timers());
+      
+      // general configuration
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      assertEquals(7, deserializer.configure(configuration, schema).size());
+
+      // load the stream
+      ParameterSet defaultParamaters = deserializer.load(streams, schema);
+      // for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+      assertEquals(8, defaultParamaters.size());
+
+      // configure the deserialization
+      deserializer.setParameters(defaultParamaters);
+      
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+
+      for (String warning : deserializer.getWarnings())
+      {
+	 System.out.println(warning);
+      }
+
+      assertEquals("s1402a.TextGrid", g.getId());
+
+      assertTrue("Deserialization too slow:\n" + deserializer.getTimers().toString(),
+		 6000 > deserializer.getTimers().getTotals().get("deserialize"));
    }
 
 

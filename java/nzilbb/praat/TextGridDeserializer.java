@@ -38,6 +38,7 @@ import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
+import nzilbb.util.Timers;
 
 /**
  * Converter that converts Praat TextGrids to/from AnnotationGraphs
@@ -254,7 +255,7 @@ public class TextGridDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Praat TextGrid", "1.811", "text/praat-textgrid", ".textgrid", "20160905.1252", getClass().getResource("icon.png"));
+	 "Praat TextGrid", "1.82", "text/praat-textgrid", ".textgrid", "20160905.1252", getClass().getResource("icon.png"));
    }
    
    /**
@@ -290,6 +291,25 @@ public class TextGridDeserializer
     * @param newTokenizer Utterance tokenizer.
     */
    public void setTokenizer(IGraphTransformer newTokenizer) { tokenizer = newTokenizer; }
+
+   
+   /**
+    * Timers for measuring performance.
+    * @see #getTimers()
+    * @see #setTimers(Timers)
+    */
+   protected Timers timers;
+   /**
+    * Getter for {@link #timers}: Timers for measuring performance.
+    * @return Timers for measuring performance.
+    */
+   public Timers getTimers() { return timers; }
+   /**
+    * Setter for {@link #timers}: Timers for measuring performance.
+    * @param newTimers Timers for measuring performance.
+    */
+   public void setTimers(Timers newTimers) { timers = newTimers; }
+
    
    // Methods:
    
@@ -515,6 +535,7 @@ public class TextGridDeserializer
    @SuppressWarnings({"rawtypes", "unchecked"})
    public ParameterSet load(NamedStream[] streams, Schema schema) throws SerializationException, IOException
    {
+      if (timers != null) timers.start("load");
       reset();
       setSchema(schema);
 
@@ -668,6 +689,7 @@ public class TextGridDeserializer
 	 mappings.addParameter(p);
       } // next tier
 
+      if (timers != null) timers.end("load");
       return mappings;
    }
 
@@ -728,6 +750,7 @@ public class TextGridDeserializer
    public Graph[] deserialize() 
       throws SerializerNotConfiguredException, SerializationParametersMissingException, SerializationException
    {
+      if (timers != null) timers.start("deserialize");
       if (participantLayer == null) throw new SerializerNotConfiguredException("Participant layer not set");
       if (turnLayer == null) throw new SerializerNotConfiguredException("Turn layer not set");
       if (utteranceLayer == null) throw new SerializerNotConfiguredException("Utterance layer not set");
@@ -811,6 +834,7 @@ public class TextGridDeserializer
 	 Layer layer = (Layer)mappings.get("tier"+t).getValue();
 	 if (layer != null && !layer.getId().equals("[ignore tier]"))
 	 {
+	    if (timers != null) timers.start("tier " + tier.getName());
 	    // what type of tier is it?
 	    if (tier instanceof IntervalTier)
 	    {
@@ -869,6 +893,7 @@ public class TextGridDeserializer
 		  "Tier \"" + tier.getName() + "\" - Unknown tier type: " 
 		  + tier.getClass().getName());
 	    }
+	    if (timers != null) timers.end("tier " + tier.getName());
 	 } // layer is mapped
       } // next tier
 
@@ -880,6 +905,7 @@ public class TextGridDeserializer
       { // create utterances and turns from words	 
 	 // given there are no utterance/turn intervals, 
 	 // we assume that the tier name for words is the speaker name	 
+	 if (timers != null) timers.start("create turns/utterances");
 	 HashMap<String,Annotation> turnsByName = new HashMap<String,Annotation>();
 	 for (Annotation word : graph.list(wordLayer.getId()))
 	 {
@@ -902,9 +928,11 @@ public class TextGridDeserializer
 	    // set parent of word
 	    word.setParent(turn);
 	 } // next turn
+	 if (timers != null) timers.end("create turns/utterances");
       } 
       else if (turnLayerMapped && !utteranceLayerMapped)
       { // create utterances from turns
+	 if (timers != null) timers.start("create utterances from turns");
 	 for (Annotation turn : graph.list(turnLayer.getId()))
 	 {
 	    Annotation utterance = new Annotation(turn);
@@ -917,9 +945,11 @@ public class TextGridDeserializer
 	    }
 	    graph.addAnnotation(utterance);
 	 } // next turn
+	 if (timers != null) timers.end("create utterances from turns");
       }
       else if (utteranceLayerMapped && !turnLayerMapped)
       { // create turns from utterances
+	 if (timers != null) timers.start("create turns from utterances");
 	 for (Annotation utterance : graph.list(utteranceLayer.getId()))
 	 {
 	    Annotation turn = new Annotation(utterance);
@@ -930,10 +960,12 @@ public class TextGridDeserializer
 	    // now turn will have an ID, and we can set it to be the parent of utterance
 	    utterance.setParent(turn);
 	 } // next utterance
+	 if (timers != null) timers.end("create turns from utterances");
       }
       else if (utteranceLayerMapped && turnLayerMapped)
       {
 	 // ensure utterance parent turns are set
+	 if (timers != null) timers.start("set utterance turns");
 	 for (Annotation utterance : graph.list(utteranceLayer.getId()))
 	 {
 	    Annotation[] possibleTurns = utterance.includingAnnotationsOn(turnLayer.getId());
@@ -966,6 +998,7 @@ public class TextGridDeserializer
 	       if (turn != null) utterance.setParent(turn);
 	    } // multiple possible turns
 	 } // next utterance
+	 if (timers != null) timers.end("set utterance turns");
       } // both utterance and turn layers mapped
 
       // now we have turns with participant name labels, 
@@ -973,6 +1006,8 @@ public class TextGridDeserializer
 
       // ensure participants are set
       HashMap<String,Annotation> participantsByName = new HashMap<String,Annotation>();
+      if (timers != null) timers.start("set turn participants");
+      int ordinal = 1;
       for (Annotation turn : graph.list(turnLayer.getId()))
       {
 	 if (!participantsByName.containsKey(turn.getLabel()))
@@ -981,11 +1016,17 @@ public class TextGridDeserializer
 	    graph.addAnnotation(who);
 	    participantsByName.put(turn.getLabel(), who);
 	 }
-	 turn.setParent(participantsByName.get(turn.getLabel()));
-      } // next turn
+	 if (timers != null) timers.start("set turn parent");
+	 // set ordinal first, then don't allow appending in setParent, to save a performance hit
+	 turn.setOrdinal(participantsByName.get(turn.getLabel()).getAnnotations(turnLayer.getId()).size() + 1);
+	 turn.setParent(participantsByName.get(turn.getLabel()), false);
+	 if (timers != null) timers.end("set turn parent"); 
+     } // next turn
+      if (timers != null) timers.end("set turn participants");
 
       // join subsequent turns by the same speaker...
       // for each participant (assumed to be parent of turn)
+      if (timers != null) timers.start("join subsequent turns");
       for (Annotation participant : graph.list(participantLayer.getId()))
       {
 	 TreeSet<Annotation> annotations = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
@@ -1006,6 +1047,7 @@ public class TextGridDeserializer
 	 } // next preceding turn
       } // next turn parent
       graph.commit();
+      if (timers != null) timers.end("join subsequent turns");
       
       // now we have participants,
       // and rationalized turns with participant name labels and parents, 
@@ -1013,7 +1055,7 @@ public class TextGridDeserializer
 
       if (!wordLayerMapped)
       { // tokenize utterances and apply conventions
-
+	 if (timers != null) timers.start("tokenize");
 	 // ensure we have an utterance tokenizer
 	 if (getTokenizer() == null)
 	 {
@@ -1030,8 +1072,10 @@ public class TextGridDeserializer
 	    errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
 	 }
 	 graph.commit();
+	 if (timers != null) timers.end("tokenize");
 	 if (getUseConventions())
 	 {
+	    if (timers != null) timers.start("conventions");
 	    try
 	    {
 	       // word {comment comment} word
@@ -1073,45 +1117,82 @@ public class TextGridDeserializer
 	       if (errors.getCause() == null) errors.initCause(exception);
 	       errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
 	    }
+	    if (timers != null) timers.end("conventions");
 	 } // apply transcription conventions
       } // tokenize utterances
       else
       { // word layer mapped
+	 if (timers != null) timers.start("set word turns");
 	 // ensure word parent turns are set
 	 for (Annotation word : graph.list(wordLayer.getId()))
 	 {
-	    if (word.getParent() != null) continue;
-
-	    Annotation[] possibleTurns = word.includingAnnotationsOn(turnLayer.getId());
-	    if (possibleTurns.length == 1)
-	    { // must be this one
-	       word.setParent(possibleTurns[0]);
-	    }
-	    else if (possibleTurns.length > 1)
-	    { // multiple possible turns
-	       // use the turn whose label is included in the utterance's tier name
-	       // e.g. the turn might be "John Smith" and the utterance tier might be "utterance - John Smith"
-	       Tier wordTier = (Tier)word.get("@tier");
-	       assert wordTier != null : "wordTier != null - " + word;
-	       Annotation turn = null;
-	       for (Annotation possibleTurn : possibleTurns)
-	       {
-		  // is the label (the speaker) a part of the utterance's tier name?
-		  if (wordTier.getName().indexOf(possibleTurn.getLabel()) >= 0)
+	    if (word.getParent() == null)
+	    {
+	       Annotation[] possibleTurns = word.includingAnnotationsOn(turnLayer.getId());
+	       if (possibleTurns.length == 1)
+	       { // must be this one
+		  word.setParent(possibleTurns[0]);
+	       }
+	       else if (possibleTurns.length > 1)
+	       { // multiple possible turns
+		  // use the turn whose label is included in the utterance's tier name
+		  // e.g. the turn might be "John Smith" and the utterance tier might be "utterance - John Smith"
+		  Tier wordTier = (Tier)word.get("@tier");
+		  assert wordTier != null : "wordTier != null - " + word;
+		  Annotation turn = null;
+		  for (Annotation possibleTurn : possibleTurns)
 		  {
-		     // multiple parents could match 
-		     // e.g. "sp1" and "Interviewer sp1" both are suffixes of "word - Interviewer sp1"
-		     // so we go with the longest one
-		     if (turn == null
-			 || possibleTurn.getLabel().length() > turn.getLabel().length())
+		     // is the label (the speaker) a part of the utterance's tier name?
+		     if (wordTier.getName().indexOf(possibleTurn.getLabel()) >= 0)
 		     {
-			turn = possibleTurn;
-		     } // longest match so far
-		  } // label is a part of the tier name
-	       } // next possible turn
-	       if (turn != null) word.setParent(turn);
-	    } // multiple possible turns
+			// multiple parents could match 
+			// e.g. "sp1" and "Interviewer sp1" both are suffixes of "word - Interviewer sp1"
+			// so we go with the longest one
+			if (turn == null
+			    || possibleTurn.getLabel().length() > turn.getLabel().length())
+			{
+			   turn = possibleTurn;
+			} // longest match so far
+		     } // label is a part of the tier name
+		  } // next possible turn
+		  if (turn != null) word.setParent(turn);
+	       } // multiple possible turns
+	    } // parent not set
+	    if (word.getParent() == null)
+	    { // parent still not set
+	       // maybe children don't quite line up with parents, so use midpoint-including instead
+	       Annotation[] possibleTurns = word.midpointIncludingAnnotationsOn(turnLayer.getId());
+	       if (possibleTurns.length == 1)
+	       { // must be this one
+		  word.setParent(possibleTurns[0]);
+	       }
+	       else if (possibleTurns.length > 1)
+	       { // multiple possible turns
+		  // use the turn whose label is included in the utterance's tier name
+		  // e.g. the turn might be "John Smith" and the utterance tier might be "utterance - John Smith"
+		  Tier wordTier = (Tier)word.get("@tier");
+		  assert wordTier != null : "wordTier != null - " + word;
+		  Annotation turn = null;
+		  for (Annotation possibleTurn : possibleTurns)
+		  {
+		     // is the label (the speaker) a part of the utterance's tier name?
+		     if (wordTier.getName().indexOf(possibleTurn.getLabel()) >= 0)
+		     {
+			// multiple parents could match 
+			// e.g. "sp1" and "Interviewer sp1" both are suffixes of "word - Interviewer sp1"
+			// so we go with the longest one
+			if (turn == null
+			    || possibleTurn.getLabel().length() > turn.getLabel().length())
+			{
+			   turn = possibleTurn;
+			} // longest match so far
+		     } // label is a part of the tier name
+		  } // next possible turn
+		  if (turn != null) word.setParent(turn);
+	       } // multiple possible turns
+	    } // parent still not set
 	 } // next utterance
+	 if (timers != null) timers.end("set word turns");
       } // word layer mapped
 
       // now we have participants,
@@ -1120,11 +1201,14 @@ public class TextGridDeserializer
       // and words with parents
 
       // need to ensure that another other required parents are set
+      if (timers != null) timers.start("set parents");
       for (Annotation a : graph.getAnnotationsById().values())
       {
 	 if (a.getParentId() == null)
 	 {
+	    if (timers != null) timers.start("includingAnnotationsOn");
 	    Annotation[] possibleParents = a.includingAnnotationsOn(a.getLayer().getParentId());
+	    if (timers != null) timers.end("includingAnnotationsOn");
 	    if (possibleParents.length == 1)
 	    { // must be this one
 	       a.setParent(possibleParents[0]);
@@ -1158,14 +1242,84 @@ public class TextGridDeserializer
 	       if (parent != null) a.setParent(parent);
 	    } // multiple possible parents
 	 } // parent not set
-      } // next annotation      
+
+	 if (a.getParentId() == null)
+	 { // still not set
+	    // maybe children don't quite line up with parents, so use midpoint-including instead
+	    if (timers != null) timers.start("midpointIncludingAnnotationsOn");
+	    Annotation[] possibleParents = a.midpointIncludingAnnotationsOn(a.getLayer().getParentId());
+	    if (timers != null) timers.end("midpointIncludingAnnotationsOn");
+	    if (possibleParents.length == 1)
+	    { // must be this one
+	       a.setParent(possibleParents[0]);
+	    }
+	    else if (possibleParents.length > 1)
+	    { // multiple possible parents
+	       // use the turn whose label is included in the utterance's tier name
+	       // e.g. the turn might be "John Smith" and the utterance tier might be "utterance - John Smith"
+	       Tier tier = (Tier)a.get("@tier");
+	       assert tier != null : "tier != null - " + a;
+	       Annotation parent = null;
+	       for (Annotation possibleParent : possibleParents)
+	       {
+		  // is the label (the speaker) a part of the utterance's tier name?
+		  Annotation who = possibleParent.my("who");
+		  if (who != null)
+		  {
+		     if (tier.getName().indexOf(who.getLabel()) >= 0)
+		     {
+			// multiple parents could match 
+			// e.g. "sp1" and "Interviewer sp1" both are suffixes of "segment - Interviewer sp1"
+			// so we go with the longest one
+			if (parent == null
+			    || possibleParent.getLabel().length() > parent.getLabel().length())
+			{
+			   parent = possibleParent;
+			} // longest match so far
+		     } // label is a part of the tier name
+		  } // there is a speaker
+	       } // next possible parent
+	       if (parent != null) a.setParent(parent);
+	    } // multiple possible parents
+	 } // parent still not set
+
+      } // next annotation
+      if (timers != null) timers.end("set parents");
+
+      // ensure anchors are shared between children and parents where required
+      if (timers != null) timers.start("anchor sharing");
+      Vector<Layer> layers = graph.getLayersTopDown();
+      // (bottom up to propagate changes from below)
+      Collections.reverse(layers);
+      for (Layer l : layers)
+      {
+	 if (l.getSaturated() && l.getAlignment() == Constants.ALIGNMENT_INTERVAL)
+	 {
+	    for (Annotation parent : graph.list(l.getParentId()))
+	    {
+	       SortedSet<Annotation> children = parent.getAnnotations(l.getId());
+	       if (children.size() > 0)
+	       {
+		  if (children.first().getStart() != null)
+		     parent.setStart(children.first().getStart());
+		  if (children.last().getEnd() != null)
+		     parent.setEnd(children.last().getEnd());
+	       }
+	    } // next parent
+	 }
+      }
+      graph.commit();
+      if (timers != null) timers.end("anchor sharing");
 
       // remove references to tiers
+      if (timers != null) timers.start("remove tier references");
       for (Annotation a : graph.getAnnotationsById().values()) a.remove("@tier");
+      if (timers != null) timers.end("remove tier references");
 
       if (errors != null) throw errors;
 
       Graph[] graphs = { graph };
+      if (timers != null) timers.end("deserialize");
       return graphs;
    }
 

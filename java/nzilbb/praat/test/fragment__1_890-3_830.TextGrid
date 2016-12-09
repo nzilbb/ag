@@ -90,10 +90,10 @@ item []:
             text = "s" 
         intervals [3]:
             xmin = 0.39 
-            xmax = 0.51 
+            xmax = 0.5048308236017209 
             text = "@U" 
         intervals [4]:
-            xmin = 0.51 
+            xmin = 0.5048308236017209 
             xmax = 0.64 
             text = "w" 
         intervals [5]:
