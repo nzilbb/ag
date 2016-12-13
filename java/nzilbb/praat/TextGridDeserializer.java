@@ -852,11 +852,13 @@ public class TextGridDeserializer
 		  Interval interval = itIntervals.next();
 		  // ignore empty intervals...
 		  if (interval.getText() == null || interval.getText().trim().length() == 0) continue;
-
+		  
+		  if (timers != null) timers.start("getOrCreateAnchorAt " + tier.getName());
 		  Anchor start = graph.getOrCreateAnchorAt(
 		     interval.getXmin(), Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
 		  Anchor end = graph.getOrCreateAnchorAt(
 		     interval.getXmax(), Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+		  if (timers != null) timers.end("getOrCreateAnchorAt " + tier.getName());
 		  Annotation annotation = new Annotation(
 		     null, interval.getText(), layer.getId(), start.getId(), end.getId());
 		  annotation.put("@tier", tier);
@@ -1220,6 +1222,7 @@ public class TextGridDeserializer
 	       Tier tier = (Tier)a.get("@tier");
 	       assert tier != null : "tier != null - " + a;
 	       Annotation parent = null;
+	       Annotation parentWho = null;
 	       for (Annotation possibleParent : possibleParents)
 	       {
 		  // is the label (the speaker) a part of the utterance's tier name?
@@ -1232,9 +1235,10 @@ public class TextGridDeserializer
 			// e.g. "sp1" and "Interviewer sp1" both are suffixes of "segment - Interviewer sp1"
 			// so we go with the longest one
 			if (parent == null
-			    || possibleParent.getLabel().length() > parent.getLabel().length())
+			    || who.getLabel().length() > parentWho.getLabel().length())
 			{
 			   parent = possibleParent;
+			   parentWho = who;
 			} // longest match so far
 		     } // label is a part of the tier name
 		  } // there is a speaker
