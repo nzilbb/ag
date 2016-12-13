@@ -844,6 +844,8 @@ public class Validator
 	    newParent = candidate;
 	    // keep looking - an equal child.grandparent = candidate.parent would be better
 	 }
+	 assert child.getAnchored() : "child.getAnchored() " + child + " " + child.getStart() + " - " + child.getEnd();
+	 assert candidate.getAnchored() : "candidate.getAnchored() " + candidate + " " + candidate.getStart() + " - " + candidate.getEnd();
 	 if (nearestCandidate == null
 	     || (nearestCandidate.getAnchored()
 		 && child.distance(candidate) < child.distance(nearestCandidate)))
@@ -1533,7 +1535,7 @@ public class Validator
 	       log("Not changing end of related annotation ", anPrevious, " to avoid creating new instant");
 	       continue;
 	    }
-	    if (!anPrevious.getParentId().equals(annotation.getParentId()))
+	    if (anPrevious.getParentId() == null || !anPrevious.getParentId().equals(annotation.getParentId()))
 	    {
 	       log("Not changing end of related annotation ", anPrevious, " - different parents");
 	       continue;
