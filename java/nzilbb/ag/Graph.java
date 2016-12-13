@@ -631,6 +631,13 @@ public class Graph
       // add to anchors collection
       getAnchors().put(anchor.getId(), anchor);
 
+      // add to offset index
+      if (anchor.getOffset() != null)
+      {
+	 if (!offsetIndex.containsKey(anchor.getOffset())) offsetIndex.put(anchor.getOffset(), new Vector<Anchor>());
+	 offsetIndex.get(anchor.getOffset()).add(anchor);
+      }
+
       // look for annotations referencing that anchor
       String id = anchor.getId();
       if (unknownStartAnchor.containsKey(id))
@@ -669,7 +676,7 @@ public class Graph
       return getAnchors().get(id);
    } // end of getAnchor()
 
-   
+   HashMap<Double,Vector<Anchor>> offsetIndex = new HashMap<Double,Vector<Anchor>>();
    /**
     * Gets an anchor at the given offset.
     * @param offset The anchor offset.
@@ -678,12 +685,24 @@ public class Graph
     */
    public Anchor getAnchorAt(double offset) // TODO test
    {
-      for (Anchor anchor : getAnchors().values())
+      // for (Anchor anchor : getAnchors().values())
+      // {
+      // 	 if (anchor.getOffset() != null && anchor.getOffset().doubleValue() == offset)
+      // 	 {
+      // 	    return anchor;
+      // 	 }
+      // }
+      Double o = new Double(offset);
+      if (offsetIndex.containsKey(o))
       {
-	 if (anchor.getOffset() != null && anchor.getOffset().doubleValue() == offset)
+	 for (Anchor anchor : offsetIndex.get(o))
 	 {
-	    return anchor;
-	 }
+	    // check the offset is still this one
+	    if (anchor.getOffset() != null && anchor.getOffset().doubleValue() == offset)
+	    { 
+	       return anchor;
+	    }
+	 } // next anchor indexed at this offset
       }
       return null;
    } // end of getAnchorAt()

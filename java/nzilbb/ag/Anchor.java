@@ -88,15 +88,27 @@ public class Anchor
       put("offset", offset); 
       Vector<Change> changes = new Vector<Change>();
       Change change = getLastChange();
-      if (change != null) changes.add(change);
-
-      // reset indices of related layers
-      if (graph != null)
+      if (change != null)
       {
+	 // record the change
+	 changes.add(change);
+
+	 if (graph != null)
+	 {
+	    // add this to offsetIndex
+	    if (offset != null)
+	    {
+	       if (!graph.offsetIndex.containsKey(offset)) graph.offsetIndex.put(offset, new Vector<Anchor>());
+	       graph.offsetIndex.get(offset).add(this); // TODO should probably remove it from the old position.
+	    }
+	    
+	 // reset indices of related layers
 	 for (String layerId : startOf.keySet()) graph.indicesByLayer.remove(layerId);
-	 for (String layerId : endOf.keySet()) graph.indicesByLayer.remove(layerId);
-      }
+	    for (String layerId : endOf.keySet()) graph.indicesByLayer.remove(layerId);
+	 }
       
+      }
+
       return changes;
    }
 
