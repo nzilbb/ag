@@ -1,0 +1,1220 @@
+//
+// Copyright 2017 New Zealand Institute of Language, Brain and Behaviour, 
+// University of Canterbury
+// Written by Robert Fromont - robert.fromont@canterbury.ac.nz
+//
+//    This file is part of nzilbb.ag.
+//
+//    nzilbb.ag is free software; you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation; either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    nzilbb.ag is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with nzilbb.ag; if not, write to the Free Software
+//    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+package nzilbb.tei;
+
+import java.util.Vector;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.StringTokenizer;
+import java.io.IOException;
+import java.net.URL;
+import org.w3c.dom.*;
+import org.xml.sax.*;
+import javax.xml.parsers.*;
+import javax.xml.xpath.*;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.*;
+import javax.xml.transform.stream.*;
+import nzilbb.ag.*;
+import nzilbb.ag.serialize.*;
+import nzilbb.ag.serialize.util.NamedStream;
+import nzilbb.ag.serialize.util.Utility;
+import nzilbb.configure.Parameter;
+import nzilbb.configure.ParameterSet;
+
+/**
+ * Deserializer for trs files produced with Transcriber.
+ * @author Robert Fromont robert@fromont.net.nz
+ */
+
+public class TEIDeserializer
+   implements IDeserializer
+{
+   // Attributes:
+   protected Vector<String> warnings;
+
+   /** XPATH processor */
+   protected XPath xpath;
+
+   /** TEI root node */
+   protected Node root;
+
+   /** Header node */
+   protected Node header;
+   
+   /** Main text node node */
+   protected Node text;
+   
+   /**
+    * Name of the file.
+    * @see #getName()
+    * @see #setName(String)
+    */
+   protected String name;
+   /**
+    * Getter for {@link #name}: Name of the file.
+    * @return Name of the file.
+    */
+   public String getName() { return name; }
+   /**
+    * Setter for {@link #name}: Name of the file.
+    * @param newName Name of the file.
+    */
+   public void setName(String newName) { name = newName; }
+
+   /**
+    * Layer schema.
+    * @see #getSchema()
+    * @see #setSchema(Schema)
+    */
+   protected Schema schema;
+   /**
+    * Getter for {@link #schema}: Layer schema.
+    * @return Layer schema.
+    */
+   public Schema getSchema() { return schema; }
+   /**
+    * Setter for {@link #schema}: Layer schema.
+    * @param newSchema Layer schema.
+    */
+   public void setSchema(Schema newSchema) { schema = newSchema; }
+
+   /**
+    * Participant information layer.
+    * @see #getParticipantLayer()
+    * @see #setParticipantLayer(Layer)
+    */
+   protected Layer participantLayer;
+   /**
+    * Getter for {@link #participantLayer}: Participant information layer.
+    * @return Participant information layer.
+    */
+   public Layer getParticipantLayer() { return participantLayer; }
+   /**
+    * Setter for {@link #participantLayer}: Participant information layer.
+    * @param newParticipantLayer Participant information layer.
+    */
+   public void setParticipantLayer(Layer newParticipantLayer) { participantLayer = newParticipantLayer; }
+
+   /**
+    * Turn layer.
+    * @see #getTurnLayer()
+    * @see #setTurnLayer(Layer)
+    */
+   protected Layer turnLayer;
+   /**
+    * Getter for {@link #turnLayer}: Turn layer.
+    * @return Turn layer.
+    */
+   public Layer getTurnLayer() { return turnLayer; }
+   /**
+    * Setter for {@link #turnLayer}: Turn layer.
+    * @param newTurnLayer Turn layer.
+    */
+   public void setTurnLayer(Layer newTurnLayer) { turnLayer = newTurnLayer; }
+
+   /**
+    * Utterance layer.
+    * @see #getUtteranceLayer()
+    * @see #setUtteranceLayer(Layer)
+    */
+   protected Layer utteranceLayer;
+   /**
+    * Getter for {@link #utteranceLayer}: Utterance layer.
+    * @return Utterance layer.
+    */
+   public Layer getUtteranceLayer() { return utteranceLayer; }
+   /**
+    * Setter for {@link #utteranceLayer}: Utterance layer.
+    * @param newUtteranceLayer Utterance layer.
+    */
+   public void setUtteranceLayer(Layer newUtteranceLayer) { utteranceLayer = newUtteranceLayer; }
+
+   /**
+    * Word token layer.
+    * @see #getWordLayer()
+    * @see #setWordLayer(Layer)
+    */
+   protected Layer wordLayer;
+   /**
+    * Getter for {@link #wordLayer}: Word token layer.
+    * @return Word token layer.
+    */
+   public Layer getWordLayer() { return wordLayer; }
+   /**
+    * Setter for {@link #wordLayer}: Word token layer.
+    * @param newWordLayer Word token layer.
+    */
+   public void setWordLayer(Layer newWordLayer) { wordLayer = newWordLayer; }
+
+   /**
+    * Layer for language tags.
+    * @see #getLanguageLayer()
+    * @see #setLanguageLayer(Layer)
+    */
+   protected Layer languageLayer;
+   /**
+    * Getter for {@link #languageLayer}: Layer for language tags.
+    * @return Layer for language tags.
+    */
+   public Layer getLanguageLayer() { return languageLayer; }
+   /**
+    * Setter for {@link #languageLayer}: Layer for language tags.
+    * @param newLanguageLayer Layer for language tags.
+    */
+   public void setLanguageLayer(Layer newLanguageLayer) { languageLayer = newLanguageLayer; }
+
+   /**
+    * Layer for lexical word tags.
+    * @see #getLexicalLayer()
+    * @see #setLexicalLayer(Layer)
+    */
+   protected Layer lexicalLayer;
+   /**
+    * Getter for {@link #lexicalLayer}: Layer for lexical word tags.
+    * @return Layer for lexical word tags.
+    */
+   public Layer getLexicalLayer() { return lexicalLayer; }
+   /**
+    * Setter for {@link #lexicalLayer}: Layer for lexical word tags.
+    * @param newLexicalLayer Layer for lexical word tags.
+    */
+   public void setLexicalLayer(Layer newLexicalLayer) { lexicalLayer = newLexicalLayer; }
+
+   /**
+    * Layer for named entities.
+    * @see #getEntityLayer()
+    * @see #setEntityLayer(Layer)
+    */
+   protected Layer entityLayer;
+   /**
+    * Getter for {@link #entityLayer}: Layer for named entities.
+    * @return Layer for named entities.
+    */
+   public Layer getEntityLayer() { return entityLayer; }
+   /**
+    * Setter for {@link #entityLayer}: Layer for named entities.
+    * @param newEntityLayer Layer for named entities.
+    */
+   public void setEntityLayer(Layer newEntityLayer) { entityLayer = newEntityLayer; }
+
+   /**
+    * Layer for commentary.
+    * @see #getCommentLayer()
+    * @see #setCommentLayer(Layer)
+    */
+   protected Layer commentLayer;
+   /**
+    * Getter for {@link #commentLayer}: Layer for commentary.
+    * @return Layer for commentary.
+    */
+   public Layer getCommentLayer() { return commentLayer; }
+   /**
+    * Setter for {@link #commentLayer}: Layer for commentary.
+    * @param newCommentLayer Layer for commentary.
+    */
+   public void setCommentLayer(Layer newCommentLayer) { commentLayer = newCommentLayer; }
+
+   /**
+    * Transcript tag layer for name of trascriber.
+    * @see #getScribeLayer()
+    * @see #setScribeLayer(Layer)
+    */
+   protected Layer scribeLayer;
+   /**
+    * Getter for {@link #scribeLayer}: Transcript tag layer for name of trascriber.
+    * @return Transcript tag layer for name of trascriber.
+    */
+   public Layer getScribeLayer() { return scribeLayer; }
+   /**
+    * Setter for {@link #scribeLayer}: Transcript tag layer for name of trascriber.
+    * @param newScribeLayer Transcript tag layer for name of trascriber.
+    */
+   public void setScribeLayer(Layer newScribeLayer) { scribeLayer = newScribeLayer; }
+   
+   /**
+    * Transcript/document title layer.
+    * @see #getTitleLayer()
+    * @see #setTitleLayer(Layer)
+    */
+   protected Layer titleLayer;
+   /**
+    * Getter for {@link #titleLayer}: Transcript/document title layer.
+    * @return Transcript/document title layer.
+    */
+   public Layer getTitleLayer() { return titleLayer; }
+   /**
+    * Setter for {@link #titleLayer}: Transcript/document title layer.
+    * @param newTitleLayer Transcript/document title layer.
+    */
+   public void setTitleLayer(Layer newTitleLayer) { titleLayer = newTitleLayer; }
+
+
+   /**
+    * Transcript tag layer for version date.
+    * @see #getVersionDateLayer()
+    * @see #setVersionDateLayer(Layer)
+    */
+   protected Layer versionDateLayer;
+   /**
+    * Getter for {@link #versionDateLayer}: Transcript tag layer for version date.
+    * @return Transcript tag layer for version date.
+    */
+   public Layer getVersionDateLayer() { return versionDateLayer; }
+   /**
+    * Setter for {@link #versionDateLayer}: Transcript tag layer for version date.
+    * @param newVersionDateLayer Transcript tag layer for version date.
+    */
+   public void setVersionDateLayer(Layer newVersionDateLayer) { versionDateLayer = newVersionDateLayer; }
+
+   /**
+    * Transcript tag layer for air date.
+    * @see #getPublicationDateLayer()
+    * @see #setPublicationDateLayer(Layer)
+    */
+   protected Layer publicationDateLayer;
+   /**
+    * Getter for {@link #publicationDateLayer}: Transcript tag layer for air date.
+    * @return Transcript tag layer for air date.
+    */
+   public Layer getPublicationDateLayer() { return publicationDateLayer; }
+   /**
+    * Setter for {@link #publicationDateLayer}: Transcript tag layer for air date.
+    * @param newPublicationDateLayer Transcript tag layer for air date.
+    */
+   public void setPublicationDateLayer(Layer newPublicationDateLayer) { publicationDateLayer = newPublicationDateLayer; }
+
+   /**
+    * Transcript tag layer for trascript language.
+    * @see #getTranscriptLanguageLayer()
+    * @see #setTranscriptLanguageLayer(Layer)
+    */
+   protected Layer transcriptLanguageLayer;
+   /**
+    * Getter for {@link #transcriptLanguageLayer}: Transcript tag layer for trascript language.
+    * @return Transcript tag layer for trascript language.
+    */
+   public Layer getTranscriptLanguageLayer() { return transcriptLanguageLayer; }
+   /**
+    * Setter for {@link #transcriptLanguageLayer}: Transcript tag layer for trascript language.
+    * @param newTranscriptLanguageLayer Transcript tag layer for trascript language.
+    */
+   public void setTranscriptLanguageLayer(Layer newTranscriptLanguageLayer) { transcriptLanguageLayer = newTranscriptLanguageLayer; }
+
+   /**
+    * Parameters and mappings for the next deserialization.
+    * @see #getParameters()
+    * @see #setParameters(ParameterSet)
+    */
+   protected ParameterSet parameters;
+   /**
+    * Getter for {@link #parameters}: Parameters and mappings for the next deserialization.
+    * @return Parameters and mappings for the next deserialization.
+    */
+   public ParameterSet getParameters() { return parameters; }
+   /**
+    * Setter for {@link #parameters}: Sets parameters for a given deserialization operation, after loading the serialized form of the graph. This might include mappings from format-specific objects like tiers to graph layers, etc.
+    * @param newParameters The configuration for a given deserialization operation.
+    * @throws SerializationParametersMissingException If not all required parameters have a value.
+    */
+   public void setParameters(ParameterSet newParameters)
+       throws SerializationParametersMissingException
+   {
+      parameters = newParameters;
+   }
+
+   // Methods:
+   
+   /**
+    * Default constructor.
+    */
+   public TEIDeserializer()
+   {
+   } // end of constructor
+   
+   // IStreamDeserializer methods:
+   
+   /**
+    * Returns the deserializer's descriptor
+    * @return The deserializer's descriptor
+    */
+   public SerializationDescriptor getDescriptor()
+   {
+      return new SerializationDescriptor(
+	 "TEI Document", "0.01", "application/tei+xml", ".xml", "20160905.1252", getClass().getResource("icon.png"));
+   }
+
+   /**
+    * Sets parameters for deserializer as a whole.  This might include database connection parameters, locations of supporting files, etc.
+    * <p>When the deserializer is installed, this method should be invoked with an empty parameter
+    *  set, to discover what (if any) general configuration is required. If parameters are
+    *  returned, and user interaction is possible, then the user may be presented with an
+    *  interface for setting/confirming these parameters.  
+    * @param configuration The configuration for the deserializer. 
+    * @param schema The layer schema, definining layers and the way they interrelate.
+    * @return A list of configuration parameters (still) must be set before {@link IDeserializer#setParameters()} can be invoked. If this is an empty list, {@link IDeserializer#setParameters()} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
+    */
+   public ParameterSet configure(ParameterSet configuration, Schema schema)
+   {
+      setSchema(schema);
+      setParticipantLayer(schema.getParticipantLayer());
+      setTurnLayer(schema.getTurnLayer());
+      setUtteranceLayer(schema.getUtteranceLayer());
+      setWordLayer(schema.getWordLayer());
+
+      // set any values that have been passed in
+      for (Parameter p : configuration.values()) try { p.apply(this); } catch(Exception x) {}
+
+      // create a list of layers we need and possible matching layer names
+      LinkedHashMap<Parameter,List<String>> layerToPossibilities = new LinkedHashMap<Parameter,List<String>>();
+      HashMap<String,LinkedHashMap<String,Layer>> layerToCandidates = new HashMap<String,LinkedHashMap<String,Layer>>();
+
+      // do we need to ask for participant/turn/utterance/word layers?
+      LinkedHashMap<String,Layer> possibleParticipantLayers = new LinkedHashMap<String,Layer>();
+      LinkedHashMap<String,Layer> possibleTurnLayers = new LinkedHashMap<String,Layer>();
+      LinkedHashMap<String,Layer> possibleTurnChildLayers = new LinkedHashMap<String,Layer>();
+      LinkedHashMap<String,Layer> wordTagLayers = new LinkedHashMap<String,Layer>();
+      LinkedHashMap<String,Layer> participantTagLayers = new LinkedHashMap<String,Layer>();
+      if (getParticipantLayer() == null || getTurnLayer() == null 
+	  || getUtteranceLayer() == null || getWordLayer() == null)
+      {
+	 for (Layer top : schema.getRoot().getChildren().values())
+	 {
+	    if (top.getAlignment() == Constants.ALIGNMENT_NONE)
+	    {
+	       if (top.getChildren().size() == 0)
+	       { // unaligned childless children of graph
+		  participantTagLayers.put(top.getId(), top);
+	       }
+	       else
+	       { // unaligned children of graph, with children of their own
+		  possibleParticipantLayers.put(top.getId(), top);
+		  for (Layer turn : top.getChildren().values())
+		  {
+		     if (turn.getAlignment() == Constants.ALIGNMENT_INTERVAL
+			 && turn.getChildren().size() > 0)
+		     { // aligned children of who with their own children
+			possibleTurnLayers.put(turn.getId(), turn);
+			for (Layer turnChild : turn.getChildren().values())
+			{
+			   if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL)
+			   { // aligned children of turn
+			      possibleTurnChildLayers.put(turnChild.getId(), turnChild);
+			      for (Layer tag : turnChild.getChildren().values())
+			      {
+				 if (tag.getAlignment() == Constants.ALIGNMENT_NONE)
+				 { // unaligned children of word
+				    wordTagLayers.put(tag.getId(), tag);
+				 }
+			      } // next possible word tag layer
+			   }
+			} // next possible turn child layer
+		     }
+		  } // next possible turn layer
+	       } // with children
+	    } // unaligned
+	 } // next possible participant layer
+      } // missing special layers
+      else
+      {
+	 for (Layer turnChild : getTurnLayer().getChildren().values())
+	 {
+	    if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL)
+	    {
+	       possibleTurnChildLayers.put(turnChild.getId(), turnChild);
+	    }
+	 } // next possible word tag layer
+	 for (Layer tag : getWordLayer().getChildren().values())
+	 {
+	    if (tag.getAlignment() == Constants.ALIGNMENT_NONE
+		&& tag.getChildren().size() == 0)
+	    {
+	       wordTagLayers.put(tag.getId(), tag);
+	    }
+	 } // next possible word tag layer
+	 for (Layer tag : getParticipantLayer().getChildren().values())
+	 {
+	    if (tag.getAlignment() == Constants.ALIGNMENT_NONE
+		&& tag.getChildren().size() == 0)
+	    {
+	       participantTagLayers.put(tag.getId(), tag);
+	    }
+	 } // next possible word tag layer
+      }
+      participantTagLayers.remove("main_participant");
+      if (getParticipantLayer() == null)
+      {
+	 layerToPossibilities.put(
+	    new Parameter("participantLayer", Layer.class, "Participant layer", 
+			  "Layer for speaker/participant identification", true), 
+	    Arrays.asList("participant","participants","who","speaker","speakers"));
+	 layerToCandidates.put("participantLayer", possibleParticipantLayers);
+      }
+      if (getTurnLayer() == null)
+      {
+	 layerToPossibilities.put(
+	    new Parameter("turnLayer", Layer.class, "Turn layer", "Layer for speaker turns", true),
+	    Arrays.asList("turn","turns"));
+	 layerToCandidates.put("turnLayer", possibleTurnLayers);
+      }
+      if (getUtteranceLayer() == null)
+      {
+	 layerToPossibilities.put(
+	    new Parameter("utteranceLayer", Layer.class, "Utterance layer", 
+			  "Layer for speaker utterances", true), 
+	    Arrays.asList("utterance","utterances","line","lines"));
+	 layerToCandidates.put("utteranceLayer", possibleTurnChildLayers);
+      }
+      if (getWordLayer() == null)
+      {
+	 layerToPossibilities.put(
+	    new Parameter("wordLayer", Layer.class, "Word layer", 
+			  "Layer for individual word tokens", true), 
+	    Arrays.asList("transcript","word","words","w"));
+	 layerToCandidates.put("wordLayer", possibleTurnChildLayers);
+      }
+
+      LinkedHashMap<String,Layer> topLevelLayers = new LinkedHashMap<String,Layer>();
+      for (Layer top : schema.getRoot().getChildren().values())
+      {
+	 if (top.getAlignment() == Constants.ALIGNMENT_INTERVAL)
+	 { // aligned children of graph
+	    topLevelLayers.put(top.getId(), top);
+	 }
+      } // next top level layer
+
+      LinkedHashMap<String,Layer> graphTagLayers = new LinkedHashMap<String,Layer>();
+      for (Layer top : schema.getRoot().getChildren().values())
+      {
+	 if (top.getAlignment() == Constants.ALIGNMENT_NONE
+	     && top.getChildren().size() == 0)
+	 { // unaligned childless children of graph
+	    graphTagLayers.put(top.getId(), top);
+	 }
+      } // next top level layer
+      graphTagLayers.remove("corpus");
+      graphTagLayers.remove("transcript_type");
+
+      // other layers...
+
+      layerToPossibilities.put(
+	 new Parameter("commentLayer", Layer.class, "Comment layer", "Commentary"), 
+	 Arrays.asList("comment","commentary","note","notes"));
+      layerToCandidates.put("commentLayer", topLevelLayers);
+
+      layerToPossibilities.put(
+	 new Parameter("languageLayer", Layer.class, "Language layer", "Inline language tags"), 
+	 Arrays.asList("language","lang"));
+      layerToCandidates.put("languageLayer", possibleTurnChildLayers);
+
+      layerToPossibilities.put(
+	 new Parameter("lexicalLayer", Layer.class, "Lexical layer", "Lexical tags"), 
+	 Arrays.asList("lexical"));
+      layerToCandidates.put("lexicalLayer", wordTagLayers);
+
+      layerToPossibilities.put(
+	 new Parameter("entityLayer", Layer.class, "Entity layer", "Named entities"), 
+	 Arrays.asList("entity","namedentity","entities","namedentities"));
+      layerToCandidates.put("entityLayer", possibleTurnChildLayers);
+
+      layerToPossibilities.put(
+	 new Parameter("titleLayer", Layer.class, "Title layer", "Title of transcript/document"), 
+	 Arrays.asList("title","transcripttitle"));
+      layerToCandidates.put("titleLayer", graphTagLayers);
+
+      layerToPossibilities.put(
+	 new Parameter("scribeLayer", Layer.class, "Scribe layer", "Name of transcriber"), 
+	 Arrays.asList("transcripttranscriber","transcriptscribe", "scribe","transcriber"));
+      layerToCandidates.put("scribeLayer", graphTagLayers);
+
+      layerToPossibilities.put(
+	 new Parameter("versionDateLayer", Layer.class, "Version Date layer", "Version date of transcriber"), 
+	 Arrays.asList("transcriptversiondate","versiondate"));
+      layerToCandidates.put("versionDateLayer", graphTagLayers);
+
+      layerToPossibilities.put(
+	 new Parameter("publicationDateLayer", Layer.class, "Publication date layer", "Date the source document was published"), 
+	 Arrays.asList("publicationdate","airdate", "transcriptrecordingdate","recordingdate"));
+      layerToCandidates.put("publicationDateLayer", graphTagLayers);
+
+      layerToPossibilities.put(
+	 new Parameter("transcriptLanguageLayer", Layer.class, "Transcript Language layer", 
+		       "The language of the whole transcript"), 
+	 Arrays.asList("transcriptlanguage","language"));
+      layerToCandidates.put("transcriptLanguageLayer", graphTagLayers);
+
+      // add parameters that aren't in the configuration yet, and set possibile/default values
+      for (Parameter p : layerToPossibilities.keySet())
+      {
+	 List<String> possibleNames = layerToPossibilities.get(p);
+	 LinkedHashMap<String,Layer> candidateLayers = layerToCandidates.get(p.getName());
+	 if (configuration.containsKey(p.getName()))
+	 {
+	    p = configuration.get(p.getName());
+	 }
+	 else
+	 {
+	    configuration.addParameter(p);
+	 }
+	 if (p.getValue() == null)
+	 {
+	    p.setValue(Utility.FindLayerById(candidateLayers, possibleNames));
+	 }
+	 p.setPossibleValues(candidateLayers.values());
+      }
+
+      return configuration;
+   }
+
+   /**
+    * Loads the serialized form of the graph, using the given set of named streams.
+    * @param streams A list of named streams that contain all the
+    *  transcription/annotation data required, and possibly (a) stream(s) for the media annotated.
+    * @param schema The layer schema, definining layers and the way they interrelate.
+    * @return A list of parameters that require setting before {@link IDeserializer#deserialize()}
+    * can be invoked. This may be an empty list, and may include parameters with the value already
+    * set to a workable default. If there are parameters, and user interaction is possible, then
+    * the user may be presented with an interface for setting/confirming these parameters, before
+    * they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
+    * @throws SerializationException If the graph could not be loaded.
+    * @throws IOException On IO error.
+    */
+   @SuppressWarnings({"rawtypes", "unchecked"})
+   public ParameterSet load(NamedStream[] streams, Schema schema) throws SerializationException, IOException
+   {
+      // take the first stream, ignore all others.
+      NamedStream tei = Utility.FindSingleStream(streams, ".xml", "application/tei+xml");
+      if (tei == null) throw new SerializationException("No TEI document stream found");
+      setName(tei.getName());
+      
+      // Document factory
+      DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+      try
+      {
+	 DocumentBuilder builder = builderFactory.newDocumentBuilder();   
+	 builder.setEntityResolver(new EntityResolver()
+	    {
+	       public InputSource resolveEntity(String publicId, String systemId)
+		  throws SAXException, IOException
+	       {
+		  // Get DTDs locally, to prevent not found errors
+		  String sName = systemId.substring(
+		     systemId.lastIndexOf('/') + 1);
+		  URL url = getClass().getResource(sName);
+		  if (url != null)
+		     return new InputSource(url.openStream());
+		  else
+		     return null;
+	       }
+	    }
+	    );
+	 
+	 // parse
+	 Document document = builder.parse(new InputSource(tei.getStream()));
+	 XPathFactory xpathFactory = XPathFactory.newInstance();
+	 xpath = xpathFactory.newXPath();
+	 root = (Node) xpath.evaluate("/TEI", document, XPathConstants.NODE);
+	 if (root == null)
+	 {
+	    throw new SerializationException("XML root is not TEI: " + root.getNodeName());
+	 }
+	 header = (Node) xpath.evaluate("//teiHeader", document, XPathConstants.NODE);
+	 text = (Node) xpath.evaluate("//text", document, XPathConstants.NODE);
+	 
+	 if (text == null)
+	 {
+	    throw new SerializationException("Document has no text node");
+	 }
+	 
+	 setSchema(schema);
+
+	 // create a list of layers we need and possible matching layer names
+	 LinkedHashMap<Parameter,List<String>> layerToPossibilities = new LinkedHashMap<Parameter,List<String>>();
+	 HashMap<String,LinkedHashMap<String,Layer>> layerToCandidates = new HashMap<String,LinkedHashMap<String,Layer>>();	 
+
+	 LinkedHashMap<String,Layer> graphTagLayers = new LinkedHashMap<String,Layer>();
+	 for (Layer layer : schema.getRoot().getChildren().values())
+	 {
+	    if (layer.getAlignment() == Constants.ALIGNMENT_NONE)
+	    {
+	       graphTagLayers.put(layer.getId(), layer);
+	    }
+	 } // next turn child layer
+
+	 LinkedHashMap<String,Layer> intervalTurnChildLayers = new LinkedHashMap<String,Layer>();
+	 for (Layer layer : schema.getTurnLayer().getChildren().values())
+	 {
+	    if (layer.getAlignment() == Constants.ALIGNMENT_INTERVAL)
+	    {
+	       intervalTurnChildLayers.put(layer.getId(), layer);
+	    }
+	 } // next turn child layer
+
+	 LinkedHashMap<String,Layer> wordTagLayers = new LinkedHashMap<String,Layer>();
+	 for (Layer layer : schema.getWordLayer().getChildren().values())
+	 {
+	    if (layer.getAlignment() == Constants.ALIGNMENT_NONE)
+	    {
+	       wordTagLayers.put(layer.getId(), layer);
+	    }
+	 } // next turn child layer
+
+	 // look for possible word tag layers - i.e. attributes on <w> tags
+	 //  e.g.  in the case of <w lemma="Niitty" msd="Nom SG" type="Noun">Niittykin</w>
+	 //  potential extra layers are lemma, msd, and type
+	 NodeList items = (NodeList) xpath.evaluate("//w", text, XPathConstants.NODESET);
+	 if (items != null)	    
+	 {
+	    for (int w = 0; w < items.getLength(); w++)
+	    {
+	       Node item = items.item(w);
+	       NamedNodeMap attributes = item.getAttributes();
+	       for (int a = 0; a < attributes.getLength(); a++)
+	       {
+		  Attr attribute = (Attr)attributes.item(a);
+		  if (!layerToCandidates.containsKey(attribute.getName()))
+		  {
+		     Vector<String> possibleMatches = new Vector<String>();
+		     possibleMatches.add(attribute.getName());
+		     if (attribute.getName().equals("type"))
+		     {
+			possibleMatches.add("pos");
+			possibleMatches.add("partofspeech");
+		     }
+		     layerToPossibilities.put(
+			new Parameter("w_"+attribute.getName(), Layer.class, "Attribute: " + attribute.getName()), 
+			possibleMatches);
+		     layerToCandidates.put("w_"+attribute.getName(), wordTagLayers);
+		  }
+	       } // next attribute
+	    } // next w
+	 } // there are w's
+	 
+	 // default to namedEntitiesLayer for nodes
+	 for (String sType : distinctNonPWNodeTypes(text))
+	 {
+	    // these are automatically mapped...
+	    if (sType.equals("note") // comment
+		|| sType.equals("l")) // utterance
+	    {
+	       continue;
+	    }
+	    else
+	    {
+	       Vector<String> possibleMatches = new Vector<String>();
+	       if (sType.equals("foreign") && getLanguageLayer() != null)
+	       {
+		  possibleMatches.add(getLanguageLayer().getId());
+	       }
+	       possibleMatches.add(sType);
+	       possibleMatches.add(getEntityLayer().getId());
+	       layerToPossibilities.put(
+		  new Parameter(sType, Layer.class, "Tag: " + sType), possibleMatches);
+	       layerToCandidates.put(sType, intervalTurnChildLayers);
+	    }
+	 } // next tag type	    
+
+	 items = (NodeList) xpath.evaluate("//ab/@type", text, XPathConstants.NODESET);
+	 if (items != null && items.getLength() > 0)
+	 {
+	    Vector<String> possibleMatches = new Vector<String>();
+	    if (intervalTurnChildLayers.containsKey("type"))
+	    {
+	       possibleMatches.add("type");
+	    }
+	    possibleMatches.add(getEntityLayer().getId());
+	    layerToPossibilities.put(
+	       new Parameter("ab_type", Layer.class, "Block Type"), possibleMatches);
+	    layerToCandidates.put("ab_type", intervalTurnChildLayers);
+	 } // there are instances of <ab type="...">
+
+	 items = (NodeList) xpath.evaluate("//pc/@type", text, XPathConstants.NODESET);
+	 if (items != null && items.getLength() > 0)
+	 {
+	    // typed <pc>s (punctuation characters) can be mapped to their own layer
+	    for (int p = 0; p < items.getLength(); p++)
+	    {
+	       Attr pcType = (Attr)items.item(p);
+	       String keyName = "pc_type_"+pcType.getValue();
+	       if (!layerToCandidates.containsKey(keyName))
+	       {
+		  Vector<String> possibleMatches = new Vector<String>();
+		  possibleMatches.add(pcType.getValue());
+		  possibleMatches.add(getEntityLayer().getId());
+		  layerToPossibilities.put(
+		     new Parameter(keyName, Layer.class, "PunctuationType: " + pcType.getValue()), 
+		     possibleMatches);
+		  layerToCandidates.put(keyName, intervalTurnChildLayers);
+	       } // not already specified
+	    } // next pc type
+	 } // there are pc types
+	 
+	 ParameterSet parameters = new ParameterSet();
+	 // add parameters that aren't in the configuration yet, and set possibile/default values
+	 for (Parameter p : layerToPossibilities.keySet())
+	 {
+	    List<String> possibleNames = layerToPossibilities.get(p);
+	    LinkedHashMap<String,Layer> candidateLayers = layerToCandidates.get(p.getName());
+	    parameters.addParameter(p);
+	    p.setValue(Utility.FindLayerById(candidateLayers, possibleNames));
+	    p.setPossibleValues(candidateLayers.values());
+	 }
+	 return parameters;
+      }
+      catch(ParserConfigurationException x) { throw new SerializationException(x); }
+      catch(SAXException x) { throw new SerializationException(x); }
+      catch(XPathExpressionException x) { throw new SerializationException(x); }
+   }
+
+   /**
+    * Traverses the given node recursively to build a set of distinct node types that are not text, nor &lt;p&gt; (nor &lt;div&gt; )
+    * @param n
+    * @return Set of node type names
+    */
+   protected HashSet<String> distinctNonPWNodeTypes(Node n)
+   {
+      HashSet<String> types = new HashSet<String>();
+      String sType = n.getNodeName();
+      if (!sType.equals("w") 
+	  && !sType.equals("p") 
+	  && !sType.equals("ab") 
+	  && !sType.equals("div") 
+	  && !sType.equals("body") 
+	  && !sType.equals("text") 
+	  && !sType.equals("#comment")
+	  // choice/orig/reg constructions have special handling, mapping just "orig" is sufficient
+	  && !sType.equals("choice") && !sType.equals("reg")) 
+      {
+	 types.add(sType);
+      }
+      NodeList children = n.getChildNodes();
+      for (int c = 0; c < children.getLength(); c++)
+      {
+	 Node child = children.item(c);
+	 if (!(child instanceof Text))
+	 {	    
+	    types.addAll(distinctNonPWNodeTypes(child));
+	 }
+      } // next child
+      return types;
+   } // end of distinctNonPWNodeTypes()
+
+   /**
+    * Deserializes the serialized data, generating one or more {@link Graph}s.
+    * <p>Many data formats will only yield one graph (e.g. Transcriber
+    * transcript or Praat textgrid), however there are formats that
+    * are capable of storing multiple transcripts in the same file
+    * (e.g. AGTK, Transana XML export), which is why this method
+    * returns a list.
+    * @return A list of valid (if incomplete) {@link Graph}s. 
+    * @throws SerializerNotConfiguredException if the object has not been configured.
+    * @throws SerializationParametersMissingException if the parameters for this particular graph have not been set.
+    * @throws SerializationException if errors occur during deserialization.
+    */
+   public Graph[] deserialize() 
+      throws SerializerNotConfiguredException, SerializationParametersMissingException, SerializationException
+   {
+      if (participantLayer == null) throw new SerializerNotConfiguredException("Participant layer not set");
+      if (turnLayer == null) throw new SerializerNotConfiguredException("Turn layer not set");
+      if (utteranceLayer == null) throw new SerializerNotConfiguredException("Utterance layer not set");
+      if (wordLayer == null) throw new SerializerNotConfiguredException("Word layer not set");
+      if (schema == null) throw new SerializerNotConfiguredException("Layer schema not set");
+
+      validate();
+
+      Graph graph = new Graph();
+      graph.setId(getName());
+      graph.setOffsetUnits(Constants.UNIT_CHARACTERS); // TODO look for timeline
+      
+      // creat the 0 anchor to prevent graph tagging from creating one with no confidence
+      graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+
+      // add layers to the graph
+      // we don't just copy the whole schema, because that would imply that all the extra layers
+      // contained no annotations, which is not necessarily true
+      graph.addLayer((Layer)participantLayer.clone());
+      graph.getSchema().setParticipantLayerId(participantLayer.getId());
+      graph.addLayer((Layer)turnLayer.clone());
+      graph.getSchema().setTurnLayerId(turnLayer.getId());
+      graph.addLayer((Layer)utteranceLayer.clone());
+      graph.getSchema().setUtteranceLayerId(utteranceLayer.getId());
+      graph.addLayer((Layer)wordLayer.clone());
+      graph.getSchema().setWordLayerId(wordLayer.getId());
+      if (languageLayer != null) graph.addLayer((Layer)languageLayer.clone());
+      if (lexicalLayer != null) graph.addLayer((Layer)lexicalLayer.clone());
+      if (entityLayer != null) graph.addLayer((Layer)entityLayer.clone());
+      if (commentLayer != null) graph.addLayer((Layer)commentLayer.clone());
+      if (titleLayer != null) graph.addLayer((Layer)titleLayer.clone());
+      if (scribeLayer != null) graph.addLayer((Layer)scribeLayer.clone());
+      if (versionDateLayer != null) graph.addLayer((Layer)versionDateLayer.clone());
+      if (publicationDateLayer != null) graph.addLayer((Layer)publicationDateLayer.clone());
+      if (transcriptLanguageLayer != null) graph.addLayer((Layer)transcriptLanguageLayer.clone());
+      for (Parameter p : parameters.values())
+      {
+	 Layer layer = (Layer)p.getValue();
+	 if (layer != null && graph.getLayer(layer.getId()) == null)
+	 { // haven't added this layer yet
+	    graph.addLayer((Layer)layer.clone());
+	 }
+      }
+
+      graph.setOffsetUnits(Constants.UNIT_SECONDS);
+
+      try
+      {
+	 // attributes
+	 String sResult = xpath.evaluate("fileDesc/titleStmt/respStmt/name/text()", header);
+	 if (sResult != null && sResult.length() > 0 && scribeLayer != null)
+	 {
+	    graph.createTag(graph, scribeLayer.getId(), sResult);
+	 }
+	 sResult = xpath.evaluate("revisionDesc/change/respStmt/name/text()", header);
+	 if (sResult != null && sResult.length() > 0 && scribeLayer != null)
+	 {
+	    graph.createTag(graph, scribeLayer.getId(), sResult);
+	 }
+	 sResult = xpath.evaluate("fileDesc/titleStmt/title/text()", header);
+	 if (sResult != null && sResult.length() > 0 && titleLayer != null)
+	 {
+	    graph.createTag(graph, titleLayer.getId(), sResult);
+	 }
+	 sResult = xpath.evaluate("revisionDesc/change/date/text()", header);
+	 if (sResult != null && sResult.length() > 0 && versionDateLayer != null)
+	 {
+	    graph.createTag(graph, versionDateLayer.getId(), sResult);
+	 }
+	 sResult = xpath.evaluate("profileDesc/creation/date/text()", header);
+	 if (sResult != null && sResult.length() > 0 && publicationDateLayer != null)
+	 {
+	    graph.createTag(graph, publicationDateLayer.getId(), sResult);
+	 }
+	 sResult = xpath.evaluate("profileDesc/langUsage/language/@ident", header);
+	 if (sResult != null && sResult.length() > 0 && transcriptLanguageLayer != null)
+	 {
+	    graph.createTag(graph, transcriptLanguageLayer.getId(), sResult);
+	 }
+	 Attr lang = (Attr)text.getAttributes().getNamedItem("lang");
+	 if (lang != null)
+	 {
+	    graph.createTag(graph, transcriptLanguageLayer.getId(), lang.getValue().toLowerCase());
+	 }
+	 // TODO title layer
+	 
+	 // participants TODO
+	 
+	 // author
+	 Annotation participant = new Annotation(null, "author", schema.getParticipantLayerId());
+	 // maybe the author is named
+	 sResult = xpath.evaluate("fileDesc/sourceDesc/biblStruct/monogr/author/text()", header);
+	 if (sResult != null && sResult.length() > 0)
+	 {
+	    participant.setLabel(sResult);
+	 }
+	 else
+	 {
+	    sResult = xpath.evaluate("fileDesc/titleStmt/author/text()", header);
+	    if (sResult != null && sResult.length() > 0) participant.setLabel(sResult);
+	 }
+	 participant.setParentId(graph.getId());
+	 graph.addAnnotation(participant);
+	 
+	 // graph
+	 Annotation turn = new Annotation(null, participant.getLabel(), getTurnLayer().getId());
+	 graph.addAnnotation(turn);
+	 turn.setParent(participant);
+	 turn.setStart(
+	    graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+	 Annotation line = new Annotation(null, participant.getLabel(), getUtteranceLayer().getId());
+	 line.setParentId(turn.getId());
+	 line.setStart(turn.getStart());
+	 int iLastPosition = 0;
+	 
+	 Vector<Node> vNodes = flattenToWords(text);      
+	 HashMap<Node,Annotation> mFoundEntities = new HashMap<Node,Annotation>();
+	 // for each word or text chunk
+	 String wordLayerId = getWordLayer().getId();
+	 int w = 1;
+	 Annotation anLastWord = null;
+	 Anchor aChoiceStarted = null;
+	 Annotation anCurrentOrig = null;
+	 for (Node n : vNodes)
+	 {
+	    boolean finishHere = false;
+	    if (n instanceof Text)
+	    {
+	       StringTokenizer words = new StringTokenizer(n.getNodeValue()); // TODO use configured tokenizer
+	       while (words.hasMoreTokens())
+	       {
+		  Annotation anWord = new Annotation(null, words.nextToken(), wordLayerId, turn.getId());
+		  anWord.setOrdinal(w++);
+		  //TODO anWord.setLabelStatus(Labbcat.LABEL_STATUS_USER);
+		  anWord.setStartId(graph.getOrCreateAnchorAt(
+				       (double)iLastPosition, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL).getId());
+		  iLastPosition += anWord.getLabel().length() + 1; // include inter-word space
+		  anWord.setEndId(graph.getOrCreateAnchorAt(
+				     (double)iLastPosition, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL).getId());
+		  
+		  graph.addAnnotation(anWord);
+		  
+		  anLastWord = anWord;
+	       } // next word
+	    }
+	    else if (n.getNodeName().equals("p")
+		     || n.getNodeName().equals("div")
+		     || n.getNodeName().equals("ab")
+		     || n.getNodeName().equals("l"))
+	    {
+	       // end the last line
+	       line.setEnd(graph.getOrCreateAnchorAt(
+			      (double)iLastPosition, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+	       if (!line.getStartId().equals(line.getEndId()))
+	       { // if we have <div><p>... don't create an instantaneous, empty line
+		  graph.addAnnotation(line);
+	       }
+	       
+	       // start a new line
+	       line = new Annotation(null, participant.getLabel(), getUtteranceLayer().getId());
+	       line.setParentId(turn.getId());
+	       graph.addAnnotation(line);
+	       line.setStart(graph.getOrCreateAnchorAt(
+				(double)iLastPosition, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+	    } // line
+	    else
+	    { // some other entity
+	       if (!mFoundEntities.containsKey(n))
+	       { // new named entity
+		  Layer layer = (Layer)parameters.get(n.getNodeName()).getValue();
+		  if (n.getNodeName().equals("pc"))
+		  { // <pc> tags can be mapped by type attribute
+		     Attr att = (Attr)n.getAttributes().getNamedItem("type");
+		     if (att != null && parameters.containsKey("pc_type_" + att.getValue()))
+		     {		     
+			layer = (Layer)parameters.get("pc_type_" + att.getValue()).getValue();
+		     }
+		  }
+		  if (layer != null)
+		  {
+		     String label = n.getNodeName();
+		     if (n.getChildNodes().getLength() > 0)
+		     {
+			label = n.getChildNodes().item(0).getNodeValue();
+		     }
+		     Annotation anEntity = new Annotation(null, label, layer.getId());
+		     anEntity.setStart(
+			graph.getOrCreateAnchorAt(
+			   (double)iLastPosition, Constants.CONFIDENCE, Constants.CONFIDENCE));
+		     if (n.getNodeName().equals("orig"))
+		     {
+			if (aChoiceStarted != null)
+			{
+			   anEntity.setStart(aChoiceStarted);
+			   anCurrentOrig = anEntity;
+			}
+		     }
+		     else if (n.getNodeName().equals("note"))
+		     {
+			finishHere = true;			
+		     }
+		     else if (n.getNodeName().equals("pc"))
+		     {
+			finishHere = true;
+		     }
+		     else if (n.getNodeName().equals("pb"))
+		     { // page break
+			finishHere = true;
+		     }
+		     else if (n.getNodeName().equals("foreign"))
+		     {
+			Attr att = (Attr)n.getAttributes().getNamedItem("xml:lang");
+			if (att != null)
+			{
+			   // the label is the language
+			   anEntity.setLabel(att.getValue());
+			}
+		     }
+		     else if (n.getNodeName().equals("unclear"))
+		     {
+			anEntity.setLabel(n.getNodeName());
+			Attr att = (Attr)n.getAttributes().getNamedItem("reason");
+			if (att != null)
+			{
+			   if (!layer.getId().equals(getEntityLayer().getId()))
+			   { // tags have their own layer, so the label doesn't need the tag name
+			      anEntity.setLabel(att.getValue());
+			   }
+			   else
+			   {
+			      anEntity.setLabel(anEntity.getLabel() + ": " + att.getValue());
+			   }
+			}
+			att = (Attr)n.getAttributes().getNamedItem("cert");
+			if (att != null)
+			{
+			   anEntity.setLabel(anEntity.getLabel() + " (" + att.getValue() + ")");
+			}
+		     }
+		     else
+		     { // everything that's not "orig" nor "note" nor "foreign" nor "unclear"
+			anEntity.setLabel(n.getNodeName());
+			Attr att = (Attr)n.getAttributes().getNamedItem("type");
+			if (att != null)
+			{
+			   if (!layer.getId().equals(getEntityLayer()))
+			   { // tags have their own layer, so the label doesn't need the tag name
+			      anEntity.setLabel(att.getValue());
+			   }
+			   else
+			   {
+			      anEntity.setLabel(anEntity.getLabel() + ": " + att.getValue());
+			   }
+			}
+		     } // not "orig" nor "note" nor "foreign" nor "unclear"
+		     anEntity.put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+		     if (layer.getParentId().equals(getTurnLayer().getId()))
+		     {
+			anEntity.setParentId(turn.getId());
+		     }
+		     else if (layer.getParentId().equals(schema.getRoot().getId()))
+		     {
+			anEntity.setParentId(graph.getId());
+		     }
+		     mFoundEntities.put(n, anEntity);
+		  }
+	       } // new entity
+	       else // previously started entity
+	       {
+		  finishHere = true;
+	       }
+	       
+	       if (finishHere)
+	       { // close the entity
+		  Annotation anEntity = mFoundEntities.get(n);
+		  anEntity.setEnd(
+		     graph.getOrCreateAnchorAt(
+			(double)iLastPosition, Constants.CONFIDENCE, Constants.CONFIDENCE));
+		  graph.addAnnotation(anEntity);
+		  mFoundEntities.remove(n);
+	       }
+	    }  // some other entity
+	 } // next node
+	 
+	 turn.setEnd(graph.getOrCreateAnchorAt(
+			(double)iLastPosition, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+	 line.setEnd(turn.getEnd());
+	 if (!line.getStartId().equals(line.getEndId()))
+	 { // don't create an instantaneous, empty line
+	    graph.addAnnotation(line);
+	 }
+	 
+	 Graph[] graphs = { graph };
+	 return graphs;
+      }
+      catch(XPathExpressionException x) { throw new SerializationException(x); }
+   }
+
+   /**
+    * Traverses the given node recursively to build a list of words and intervening structures.
+    * @param n
+    * @return An ordered list of Node objects that are either &lt;w&gt; nodes, or character data nodes that correspond to words, or &lt;p&gt; or &lt;s&gt; nodes
+    */
+   protected Vector<Node> flattenToWords(Node n)
+   {
+      Vector<Node> vNodes = new Vector<Node>();
+      NodeList children = n.getChildNodes();
+      for (int c = 0; c < children.getLength(); c++)
+      {
+	 Node child = children.item(c);
+	 if (child instanceof Text)
+	 {	    
+	    if (child.getNodeValue().trim().length() > 0) vNodes.add(child);
+	 }
+	 else if (child instanceof Element)
+	 {
+	    if (child.getNodeName().equals("w"))
+	    {
+	       vNodes.add(child);
+	    }
+	    else
+	    {
+	       if (child.getNodeName().equals("p")
+		   || child.getNodeName().equals("div")
+		   || child.getNodeName().equals("ab")
+		   || child.getNodeName().equals("lg")
+		   || child.getNodeName().equals("l")
+		   // we need the start (and end) of "choice" tags to correctly handle "orig" tags
+		   || child.getNodeName().equals("choice")
+		   // we need the node of "orig" tags
+		   || child.getNodeName().equals("orig")
+		   // and other spans
+		   || parameters.containsKey(child.getNodeName()))
+	       {
+		  vNodes.add(child);
+	       }
+	       // we don't pass back the children of "orig" nor "note" nor "pc"
+	       if (!child.getNodeName().equals("orig")
+		   && !child.getNodeName().equals("note")
+		   && !child.getNodeName().equals("pc"))
+	       {
+		  vNodes.addAll(flattenToWords(child));
+	       }
+	       // we need the (start and) end of "choice" tags to correctly handle "orig" tags
+	       if (child.getNodeName().equals("choice")
+		   // and other spans (but not note and pc, which are instantaneous)
+		   || (parameters.containsKey(child.getNodeName())
+		       && !child.getNodeName().equals("note")
+		       && !child.getNodeName().equals("pc")
+		       && !child.getNodeName().equals("pb"))) // page break
+	       {
+		  vNodes.add(child);
+	       }
+	    }
+	 }
+      } // next child
+      return vNodes;
+   } // end of getWords()
+
+   /**
+    * Returns any warnings that may have arisen during the last execution of {@link #deserialize()}.
+    * @return A possibly empty list of warnings.
+    */
+   public String[] getWarnings()
+   {
+      return warnings.toArray(new String[0]);
+   }
+
+   /**
+    * Validates the input and returns a list of errors that would
+    * prevent the input from being converted into an {@link AnnotationGraph}
+    * when {@link #toAnnotationGraphs(LinkedHashMap)} is called.
+    * <p>This implementation checks for simultaneous speaker turns that have the same speaker mentioned more than once, speakers that have the same name, and mismatched start/end events.
+    * @return A list of errors, which will be empty if there were no validation errors.
+    */
+   public Vector<String> validate()
+   {     
+      warnings = new Vector<String>();
+      return warnings;
+   }
+
+} // end of class TEIDeserializer
