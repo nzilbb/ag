@@ -172,9 +172,6 @@ public class Graph
    public void setOffsetUnits(String newOffsetUnits) { offsetUnits = newOffsetUnits; }
 
 
-   // TODO participants
-   
-   
    // Attributes stored outside HashMap, so that JSONifying the HashMap doesn't result in infinite recursion
 
 

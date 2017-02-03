@@ -1202,7 +1202,7 @@ public class TextGridDeserializer
       // and utterances with parents
       // and words with parents
 
-      // need to ensure that another other required parents are set
+      // need to ensure that other required parents are set
       if (timers != null) timers.start("set parents");
       for (Annotation a : graph.getAnnotationsById().values())
       {
