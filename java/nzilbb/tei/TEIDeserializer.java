@@ -46,11 +46,20 @@ import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 
 /**
- * Deserializer for trs files produced with Transcriber.
+ * Deserializer for TEI P5 XML files.
+ * <p>TEI tag support is basic at this stage, and many tags are not explicitly interpreted, but most can be mapped to arbitrary annotation layers.
  * <p>This deserializer supports part of the
  * <a href="http://jtei.revues.org/476">schema for Representation of Computer-mediated Communication</a> 
  * proposed by Michael Beißwenger, Maria Ermakova, Alexander Geyken, Lothar Lemnitzer, 
- * and Angelika Storrer (2012)
+ * and Angelika Storrer (2012), with the exception of the following:
+ * <ul>
+ *  <li>When &lt;posting&gt; tags are sychronised to a &lt;when&gt; tag inside a &lt;timeline&gt;, the time synchronisation is ignored.</li>
+ *  <li>The &lt;addressingTerm&gt;, &lt;addressMarker&gt; and &lt;addressee&gt; tags are not explicitly supported.</li>
+ *  <li>The <tt>type</tt> attribute of the &lt;div&gt; tag is ignored.</li>
+ *  <li>The <tt>revisedWhen</tt>, <tt>revisedBy</tt>, and <tt>indentLevel</tt> attributes of the &lt;posting&gt; tag are ignored</li>
+ *  <li>The &lt;interactionTemplate&gt;, &lt;interactionTerm&gt;, &lt;interactionWord&gt;, and &lt;emoticon&gt; tags are not explicitly supported.</li>
+ *  <li>The &lt;autoSignature&gt; and &lt;signatureContent&gt; tags are not explicitly supported.</li>
+ * </ul>
  * @author Robert Fromont robert@fromont.net.nz
  */
 
