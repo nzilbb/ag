@@ -70,7 +70,7 @@ public class TestTEIDeserializer
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals("Configuration parameters" + configuration, 9, deserializer.configure(configuration, schema).size());      
+      assertEquals("Configuration parameters" + configuration, 12, deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertEquals("language", "language", 
@@ -87,10 +87,13 @@ public class TestTEIDeserializer
 		   ((Layer)configuration.get("publicationDateLayer").getValue()).getId());
       assertEquals("transcript_language", "transcript_language", 
 		   ((Layer)configuration.get("transcriptLanguageLayer").getValue()).getId());
+      assertNull("sex", configuration.get("sexLayer").getValue());
+      assertNull("age", configuration.get("ageLayer").getValue());
+      assertNull("birth", configuration.get("birthLayer").getValue());
 
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
-      for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
       assertEquals(1, defaultParameters.size());
       assertEquals("lg", "lg", 
 		   ((Layer)defaultParameters.get("lg").getValue()).getId());
@@ -190,6 +193,210 @@ public class TestTEIDeserializer
       assertEquals("lg with type is labelled with type", "chorus", verses[3].getLabel());
       assertEquals(turns[0], verses[3].getParent());
 
+      assertEquals(0, g.list("entities").length);
+      assertEquals(0, g.list("language").length);
+      assertEquals(0, g.list("lexical").length);
+
+   }
+
+   @Test public void cdc() 
+      throws Exception
+   {
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("scribe", "Transcriber", 0, true, true, true),
+	 new Layer("transcript_language", "Graph language", 0, false, false, true),
+	 new Layer("transcript_version_date", "Version Date", 0, false, false, true),
+	 new Layer("publication_date", "Publication Date", 0, false, false, true),
+	 new Layer("transcript_program", "Program", 0, false, false, true),
+	 new Layer("title", "Title", 0, false, false, true),
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("sex", "Sex", 0, false, false, true, "who", true),
+	 new Layer("age", "Age", 0, false, false, true, "who", true),
+	 new Layer("dob", "Birth Date", 0, false, false, true, "who", true),
+	 new Layer("topic", "Topic", 2, true, false, false),
+	 new Layer("comment", "Comment", 2, true, false, true),
+	 new Layer("noise", "Noise", 2, true, false, true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("entities", "Entities", 2, true, false, false, "turn", true),
+	 new Layer("language", "Language", 2, true, false, false, "turn", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true),
+	 new Layer("lexical", "Lexical", 0, true, false, false, "word", true));
+
+      // access file
+      NamedStream[] streams = { new NamedStream(new File(getDir(), "test-cmc.xml")) };
+      
+      // create deserializer
+      TEIDeserializer deserializer = new TEIDeserializer();
+
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals("Configuration parameters" + configuration, 12, deserializer.configure(configuration, schema).size());      
+      assertEquals("comment", "comment", 
+		   ((Layer)configuration.get("commentLayer").getValue()).getId());
+      assertEquals("language", "language", 
+		   ((Layer)configuration.get("languageLayer").getValue()).getId());
+      assertEquals("lexical", "lexical", 
+		   ((Layer)configuration.get("lexicalLayer").getValue()).getId());
+      assertEquals("entities", "entities", 
+		   ((Layer)configuration.get("entityLayer").getValue()).getId());
+      assertEquals("scribe", "scribe", 
+		   ((Layer)configuration.get("scribeLayer").getValue()).getId());
+      assertEquals("transcript_version_date", "transcript_version_date", 
+		   ((Layer)configuration.get("versionDateLayer").getValue()).getId());
+      assertEquals("publication_date", "publication_date", 
+		   ((Layer)configuration.get("publicationDateLayer").getValue()).getId());
+      assertEquals("transcript_language", "transcript_language", 
+		   ((Layer)configuration.get("transcriptLanguageLayer").getValue()).getId());
+      assertEquals("sex", "sex", 
+		   ((Layer)configuration.get("sexLayer").getValue()).getId());
+      assertEquals("age", "age", 
+		   ((Layer)configuration.get("ageLayer").getValue()).getId());
+      assertEquals("birthdate", "dob", 
+		   ((Layer)configuration.get("birthLayer").getValue()).getId());
+
+      // load the stream
+      ParameterSet defaultParameters = deserializer.load(streams, schema);
+      for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals(0, defaultParameters.size());
+      
+      // configure the deserialization
+      deserializer.setParameters(defaultParameters);
+
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+
+      for (String warning : deserializer.getWarnings())
+      {
+	 System.out.println(warning);
+      }
+      
+      assertEquals("test-cmc.xml", g.getId());
+      String[] title = g.labels("title"); 
+      assertEquals(1, title.length);
+      assertEquals("Computer-Mediated Communication Example", title[0]);
+
+      // participants     
+      Annotation[] author = g.list("who"); 
+      assertEquals(3, author.length);
+      assertEquals("Rachael Tatman", author[0].getLabel());
+      assertEquals("rctatman", author[0].getId());
+      assertEquals("Lauren Ackerman", author[1].getLabel());
+      assertEquals("VerbingNouns", author[1].getId());
+      assertEquals("Allison", author[2].getLabel());
+      assertEquals("allisons", author[2].getId());
+
+      // participant attributes - sex
+      assertEquals("F", author[0].my("sex").getLabel());
+      assertEquals("F", author[1].my("sex").getLabel());
+      assertNull("Missing attribute", author[2].my("sex"));
+
+      // participant attributes - age
+      assertEquals("1", author[0].my("age").getLabel());
+      assertEquals("10", author[1].my("age").getLabel());
+      assertEquals("100", author[2].my("age").getLabel());
+
+      // participant attributes - birth
+      assertEquals("2016-02-20", author[0].my("dob").getLabel());
+      assertEquals("2007-02-20", author[1].my("dob").getLabel());
+      assertEquals("1917-02-20", author[2].my("dob").getLabel());
+
+      // turns
+      Annotation[] turns = g.list("turn");
+      assertEquals(9, turns.length);
+      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
+      //assertEquals(new Double(23.563), turns[0].getEnd().getOffset()); // TODO
+      assertEquals("Rachael Tatman", turns[0].getLabel());
+      assertEquals(g.getAnnotation("rctatman"), turns[0].getParent());
+      assertEquals("Rachael Tatman", turns[1].getLabel());
+      assertEquals("Rachael Tatman", turns[2].getLabel());
+      assertEquals("Lauren Ackerman", turns[3].getLabel());
+      assertEquals("Rachael Tatman", turns[4].getLabel());
+      assertEquals("Lauren Ackerman", turns[5].getLabel());
+      assertEquals("Allison", turns[6].getLabel());
+      assertEquals("Rachael Tatman", turns[7].getLabel());
+      assertEquals("Allison", turns[8].getLabel());
+
+      // utterances
+      Annotation[] utterances = g.list("utterance");
+      assertEquals(11, utterances.length);
+      assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
+      assertEquals("inter-line space", new Double(38.0), utterances[0].getEnd().getOffset());
+      assertEquals("Rachael Tatman", utterances[0].getParent().getLabel());
+      assertEquals(turns[0], utterances[0].getParent());
+
+      assertEquals("inter-line space", new Double(38.0), utterances[1].getStart().getOffset());
+      assertEquals("inter-line space", new Double(80.0), utterances[1].getEnd().getOffset());
+      assertEquals("Rachael Tatman", utterances[1].getParent().getLabel());
+      assertEquals(turns[0], utterances[1].getParent());
+
+      assertEquals("inter-line space", new Double(80.0), utterances[2].getStart().getOffset());
+      assertEquals("inter-line space", new Double(136.0), utterances[2].getEnd().getOffset());
+      assertEquals("Rachael Tatman", utterances[2].getParent().getLabel());
+      assertEquals(turns[0], utterances[2].getParent());
+
+      assertEquals("inter-line space", new Double(136.0), utterances[3].getStart().getOffset());
+      assertEquals("inter-line space", new Double(259.0), utterances[3].getEnd().getOffset());
+      assertEquals("Rachael Tatman", utterances[3].getParent().getLabel());
+      assertEquals("Turn change", turns[1], utterances[3].getParent());
+
+      assertEquals("inter-line space", new Double(259.0), utterances[4].getStart().getOffset());
+      assertEquals("inter-line space", new Double(366.0), utterances[4].getEnd().getOffset());
+      assertEquals("Rachael Tatman", utterances[4].getParent().getLabel());
+      assertEquals("Turn change", turns[2], utterances[4].getParent());
+
+      assertEquals("inter-line space", new Double(366.0), utterances[5].getStart().getOffset());
+      assertEquals("inter-line space", new Double(380.0), utterances[5].getEnd().getOffset());
+      assertEquals("Lauren Ackerman", utterances[5].getParent().getLabel());
+      assertEquals("Turn change", turns[3], utterances[5].getParent());
+
+      Annotation[] words = g.list("word");
+      assertEquals(new Double(0), words[0].getStart().getOffset());
+      // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
+      assertEquals("Two", words[0].getLabel());
+      assertEquals("inter-word space", new Double(4), words[0].getEnd().getOffset());
+      assertEquals("next word start where last ends",
+		   new Double(4), words[1].getStart().getOffset());
+      assertEquals("next word linked to last", words[0].getEnd(), words[1].getStart());
+      assertEquals("things", words[1].getLabel());
+      assertEquals("inter-word space", new Double(11), words[1].getEnd().getOffset());
+      assertEquals("next word linked to last", words[1].getEnd(), words[2].getStart());
+      assertEquals("that", words[2].getLabel());
+      assertEquals("inter-word space", new Double(16), words[2].getEnd().getOffset());
+      assertEquals("next word linked to last", words[2].getEnd(), words[3].getStart());
+      assertEquals("drive", words[3].getLabel());
+      
+      assertEquals("me", words[4].getLabel());
+      assertEquals("up", words[5].getLabel());
+      assertEquals("the", words[6].getLabel());
+      assertEquals("wall: -", words[7].getLabel());
+      assertEquals("being", words[8].getLabel());
+      assertEquals("told", words[9].getLabel());
+      assertEquals("my", words[10].getLabel());
+      assertEquals("voice", words[11].getLabel());
+      assertEquals("is", words[12].getLabel());
+      assertEquals("too", words[13].getLabel());
+      assertEquals("high", words[14].getLabel());
+      assertEquals("pitched -", words[15].getLabel());
+      assertEquals("people", words[16].getLabel());
+      assertEquals("*familiar", words[17].getLabel());
+      assertEquals("w/", words[18].getLabel());
+      assertEquals("my", words[19].getLabel());
+      assertEquals("work*", words[20].getLabel());
+      assertEquals("assuming", words[21].getLabel());
+      assertEquals("I", words[22].getLabel());
+      assertEquals("can't", words[23].getLabel());
+      assertEquals("program", words[24].getLabel());
+      assertEquals("Here", words[25].getLabel());
+      assertEquals("is", words[26].getLabel());
+      assertEquals("a", words[27].getLabel());
+      assertEquals("fun", words[28].getLabel());
+      assertEquals("fact", words[29].getLabel());
+      assertEquals("from", words[30].getLabel());
+      assertEquals("me,", words[31].getLabel());
+      
       assertEquals(0, g.list("entities").length);
       assertEquals(0, g.list("language").length);
       assertEquals(0, g.list("lexical").length);

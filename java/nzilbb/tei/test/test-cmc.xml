@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://www.tei-c.org/release/xml/tei/custom/schema/relaxng/tei_all.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<?xml-model href="http://www.tei-c.org/release/xml/tei/custom/schema/relaxng/tei_all.rng" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+  <teiHeader>
+    <fileDesc>
+      <titleStmt>
+	<title>Computer-Mediated Communication Example</title>
+      </titleStmt>
+      <publicationStmt>
+	<publisher>New Zealand Institute of Language, Brain and Behaviour</publisher>
+	<availability status="free">
+	  <p>Open source document for testing handling of Computer-Mediated Communication (CMC), a la http://jtei.revues.org/476</p>
+	  <p>Content used with permission from https://twitter.com/rctatman</p>
+	</availability>
+      </publicationStmt>
+      <sourceDesc>
+	<msDesc>
+	  <msIdentifier>
+	    <repository>Twitter</repository>
+	    <idno type="URL">https://twitter.com/rctatman/status/832653356292198406</idno>
+	     </msIdentifier>
+	</msDesc>	   
+      </sourceDesc>
+    </fileDesc>
+    <profileDesc>
+      <textClass>
+	<classCode scheme="https://labbcat.canterbury.ac.nz/labbcat/transcriptTypes">tweet</classCode>
+      </textClass>	
+      <particDesc>
+	<listPerson>
+	  <person sex="F" xml:id="rctatman">
+	    <persName>Rachael Tatman</persName>
+	    <idno>rctatman</idno>
+	    <age>1</age>
+	    <birth when="2016-02-20"/>
+	  </person>
+	  <person sex="F" xml:id="VerbingNouns">
+	    <persName>Lauren Ackerman</persName>
+	    <idno>VerbingNouns</idno>
+	    <age>10</age>
+	    <birth when="2007-02-20"/>
+	  </person>
+	  <person xml:id="allisons">
+	    <persName>Allison</persName>
+	    <idno>allisons</idno>
+	    <age>100</age>
+	    <birth when="1917-02-20"/>
+	  </person>
+	</listPerson>
+      </particDesc>
+      <creation><date>2017-02-17</date></creation>
+      <langUsage><language ident="en">English</language></langUsage>
+    </profileDesc>
+  </teiHeader>
+  <text>
+    <front>
+      <timeline>
+	<when xml:id="a1" absolute="2017-02-17T10:10" />
+	<when xml:id="a2" absolute="2017-02-17T10:11" />
+	<when xml:id="a3" absolute="2017-02-17T10:12" />
+	<when xml:id="a4" absolute="2017-02-17T10:13" />
+	<when xml:id="a5" absolute="2017-02-17T10:14" />
+	<when xml:id="a6" absolute="2017-02-17T10:15" />
+	<when xml:id="a7" absolute="2017-02-17T10:40" />
+	<when xml:id="a8" absolute="2017-02-17T10:48" />
+	<when xml:id="a9" absolute="2017-02-17T10:50" />
+      </timeline>
+    </front>
+    <body>
+      <div type="thread">
+	<posting who="#rctatman" synch="#a1">
+	  <p>Two things that drive me up the wall:</p>
+	  <p>- being told my voice is too high pitched</p>
+	  <p>- people *familiar w/ my work* assuming I can't program</p>
+	</posting>
+	<posting who="#rctatman" synch="#a2">
+	  <p>Here is a fun fact from me, someone who studies the human voice: my pitch is slightly below average for a woman in the US.</p>
+	</posting>
+	<posting who="#rctatman" synch="#a3">
+	  <p>Why would anyone assume, knowing my research interests, that I don't program? (JK, I absolutely know why.)</p>
+	</posting>
+	<posting who="#VerbingNouns" synch="#a4">
+	  <p>@rctatman D:&lt;</p>
+	</posting>
+	<posting who="#rctatman" synch="#a5">
+	  <p>@VerbingNouns like, I would let it slide, but this is the 3RD TIME THIS (school) YEAR. By three diff men at three diff events. I'm over it.</p>
+	</posting>
+	<posting who="#VerbingNouns" synch="#a6">
+	  <p>@rctatman you shouldn't even have to let it slide once, and three times is WAY too many. (ง'̀-'́)ง</p>
+	</posting>
+	<posting who="#allisons" synch="#a7">
+	  <p>@rctatman Why would anyone tell anyone about the *pitch of their voice* - what do they expect you to do about it?  Wear a vocoder?</p>
+	</posting>
+	<posting who="#rctatman" synch="#a8">
+	  <p>@allisons I mostly get it as feedback on public speaking/teaching :\</p>
+	</posting>
+	<posting who="#allisons" synch="#a9">
+	  <p>@rctatman Maybe that's a compliment then they can't come up with anything else but they feel pragmatically required to say something?</p>
+	</posting>
+      </div>
+    </body>
+  </text>
+</TEI>
