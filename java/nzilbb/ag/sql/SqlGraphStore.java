@@ -765,18 +765,27 @@ public class SqlGraphStore
 	    rs = sql.executeQuery();
 	    if (!rs.next())
 	    { // graph not found - maybe we've been given an ag_id?
-	       rs.close();
-	       sql.close();
-	       sql = getConnection().prepareStatement(
-		  "SELECT transcript.*, transcript_family.name AS series,"
-		  +" transcript_type.transcript_type"
-		  +" FROM transcript"
-		  +" INNER JOIN transcript_family ON transcript.family_id = transcript.family_id"
-		  +" INNER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
-		  +" WHERE ag_id = ?");
-	       sql.setString(1, id);
-	       rs = sql.executeQuery();
-	       if (!rs.next()) throw new GraphNotFoundException(id);
+	       try
+	       {
+		  rs.close();
+		  sql.close();
+		  int iAgId = Integer.parseInt(id);
+		  sql = getConnection().prepareStatement(
+		     "SELECT transcript.*, transcript_family.name AS series,"
+		     +" transcript_type.transcript_type"
+		     +" FROM transcript"
+		     +" INNER JOIN transcript_family ON transcript.family_id = transcript.family_id"
+		     +" INNER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
+		     +" WHERE ag_id = ?");
+		  sql.setInt(1, iAgId);
+		  rs = sql.executeQuery();
+		  if (!rs.next()) throw new GraphNotFoundException(id);
+		  
+	       }
+	       catch(NumberFormatException exception)
+	       {
+		  throw new GraphNotFoundException(id);
+	       }
 	    }
 	 }
 	 
@@ -3037,9 +3046,20 @@ public class SqlGraphStore
 		     sql.close();
 		     sql = getConnection().prepareStatement(
 			"INSERT INTO transcript_family (family_id, name) VALUES (?, ?)");
-		     sql.setInt(1, familyId);
 		     sql.setString(2, annotation.getLabel());
-		     sql.executeUpdate();
+		     while (true) // until we succeed in adding the family
+		     {
+			try
+			{
+			   sql.setInt(1, familyId);
+			   sql.executeUpdate();
+			   break;
+			}
+			catch(SQLException exception)
+			{ // somebody else got the ID first, so try the next one
+			   familyId++;
+			}
+		     }
 		  }
 		  else
 		  {
