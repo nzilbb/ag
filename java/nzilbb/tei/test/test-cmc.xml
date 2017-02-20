@@ -81,22 +81,22 @@
 	  <p>Why would anyone assume, knowing my research interests, that I don't program? (JK, I absolutely know why.)</p>
 	</posting>
 	<posting who="#VerbingNouns" synch="#a4">
-	  <p>@rctatman D:&lt;</p>
+	  <p><addressingTerm><addressMarker>@</addressMarker><addressee who="#rctatman">rctatman</addressee></addressingTerm> D:&lt;</p>
 	</posting>
 	<posting who="#rctatman" synch="#a5">
-	  <p>@VerbingNouns like, I would let it slide, but this is the 3RD TIME THIS (school) YEAR. By three diff men at three diff events. I'm over it.</p>
+	  <p><addressingTerm><addressMarker>@</addressMarker><addressee who="#VerbingNouns">VerbingNouns</addressee></addressingTerm> like, I would let it slide, but this is the 3RD TIME THIS (school) YEAR. By three diff men at three diff events. I'm over it.</p>
 	</posting>
 	<posting who="#VerbingNouns" synch="#a6">
-	  <p>@rctatman you shouldn't even have to let it slide once, and three times is WAY too many. (ง'̀-'́)ง</p>
+	  <p><addressingTerm><addressMarker>@</addressMarker><addressee who="#rctatman">rctatman</addressee></addressingTerm> you shouldn't even have to let it slide once, and three times is WAY too many. (ง'̀-'́)ง</p>
 	</posting>
 	<posting who="#allisons" synch="#a7">
-	  <p>@rctatman Why would anyone tell anyone about the *pitch of their voice* - what do they expect you to do about it?  Wear a vocoder?</p>
+	  <p><addressingTerm><addressMarker>@</addressMarker><addressee who="#rctatman">rctatman</addressee></addressingTerm> Why would anyone tell anyone about the *pitch of their voice* - what do they expect you to do about it?  Wear a vocoder?</p>
 	</posting>
 	<posting who="#rctatman" synch="#a8">
-	  <p>@allisons I mostly get it as feedback on public speaking/teaching :\</p>
+	  <p><addressingTerm><addressMarker>@</addressMarker><addressee who="#allisons">allisons</addressee></addressingTerm> I mostly get it as feedback on public speaking/teaching :\</p>
 	</posting>
 	<posting who="#allisons" synch="#a9">
-	  <p>@rctatman Maybe that's a compliment then they can't come up with anything else but they feel pragmatically required to say something?</p>
+	  <p><addressingTerm><addressMarker>@</addressMarker><addressee who="#rctatman">rctatman</addressee></addressingTerm> Maybe that's a compliment then they can't come up with anything else but they feel pragmatically required to say something?</p>
 	</posting>
       </div>
     </body>

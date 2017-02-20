@@ -54,7 +54,7 @@ import nzilbb.configure.ParameterSet;
  * and Angelika Storrer (2012), with the exception of the following:
  * <ul>
  *  <li>When &lt;posting&gt; tags are sychronised to a &lt;when&gt; tag inside a &lt;timeline&gt;, the time synchronisation is ignored.</li>
- *  <li>The &lt;addressingTerm&gt;, &lt;addressMarker&gt; and &lt;addressee&gt; tags are not explicitly supported.</li>
+ *  <li>The &lt;addressingTerm&gt;, &lt;addressMarker&gt; and &lt;addressee&gt; tags supported, and mapped to "entities" layer by default, but the <tt>who</tt> attribute of &lt;addressee&gt; is ignored.</li>
  *  <li>The <tt>type</tt> attribute of the &lt;div&gt; tag is ignored.</li>
  *  <li>The <tt>revisedWhen</tt>, <tt>revisedBy</tt>, and <tt>indentLevel</tt> attributes of the &lt;posting&gt; tag are ignored</li>
  *  <li>The &lt;interactionTemplate&gt;, &lt;interactionTerm&gt;, &lt;interactionWord&gt;, and &lt;emoticon&gt; tags are not explicitly supported.</li>
@@ -1347,7 +1347,10 @@ public class TEIDeserializer
 	    graph.addAnnotation(line);
 	 }
 
-	 OrthographyClumper clumper = new OrthographyClumper(wordLayer.getId());	  
+	 OrthographyClumper clumper = new OrthographyClumper(wordLayer.getId());
+	 // orthographic characters include not only letters and numbers,
+	 // but also @, so that tweet addressee annotations aren't clumped
+	 clumper.setNonOrthoCharacterPattern("[^\\p{javaLetter}\\p{javaDigit}@]");
 	 try
 	 {
 	    // clump non-orthographic 'words' with real words

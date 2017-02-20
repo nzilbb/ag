@@ -258,8 +258,14 @@ public class TestTEIDeserializer
 
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
-      for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(0, defaultParameters.size());
+      // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals(3, defaultParameters.size());
+      assertEquals("addressingTerm", "entities", 
+		   ((Layer)defaultParameters.get("addressingTerm").getValue()).getId());
+      assertEquals("addressee", "entities", 
+		   ((Layer)defaultParameters.get("addressee").getValue()).getId());
+      assertEquals("addressMarker", "entities", 
+		   ((Layer)defaultParameters.get("addressMarker").getValue()).getId());
       
       // configure the deserialization
       deserializer.setParameters(defaultParameters);
@@ -348,7 +354,7 @@ public class TestTEIDeserializer
       assertEquals("Turn change", turns[2], utterances[4].getParent());
 
       assertEquals("inter-line space", new Double(366.0), utterances[5].getStart().getOffset());
-      assertEquals("inter-line space", new Double(380.0), utterances[5].getEnd().getOffset());
+      assertEquals("inter-line space", new Double(381.0), utterances[5].getEnd().getOffset());
       assertEquals("Lauren Ackerman", utterances[5].getParent().getLabel());
       assertEquals("Turn change", turns[3], utterances[5].getParent());
 
@@ -396,8 +402,54 @@ public class TestTEIDeserializer
       assertEquals("fact", words[29].getLabel());
       assertEquals("from", words[30].getLabel());
       assertEquals("me,", words[31].getLabel());
+
+
+      // addressee tags
+      Annotation[] entities = g.list("entities");
+      assertEquals(18, entities.length);
       
-      assertEquals(0, g.list("entities").length);
+      Annotation at = words[67];
+      Annotation addressee = words[68];
+      assertEquals("addressing words", "@", at.getLabel());
+      assertEquals("addressing words", "rctatman", addressee.getLabel());      
+      assertEquals("addressMarker", entities[0].getLabel());
+      assertTrue("addressMarker tags @", entities[0].tags(at));
+      assertEquals("addressee", entities[1].getLabel());
+      assertTrue("addressee tags person", entities[1].tags(addressee));
+      assertEquals("addressingTerm", entities[2].getLabel());
+      assertEquals("addressingTerm starts at addressMarker",
+		   at.getStart(), entities[2].getStart());
+      assertEquals("addressingTerm ends at addressee",
+		   addressee.getEnd(), entities[2].getEnd());
+
+      at = words[70];
+      addressee = words[71];
+      assertEquals("addressing words", "@", at.getLabel());
+      assertEquals("addressing words", "VerbingNouns", addressee.getLabel());      
+      assertEquals("addressMarker", entities[3].getLabel());
+      assertTrue("addressMarker tags @", entities[3].tags(at));
+      assertEquals("addressee", entities[4].getLabel());
+      assertTrue("addressee tags person", entities[4].tags(addressee));
+      assertEquals("addressingTerm", entities[5].getLabel());
+      assertEquals("addressingTerm starts at addressMarker",
+		   at.getStart(), entities[5].getStart());
+      assertEquals("addressingTerm ends at addressee",
+		   addressee.getEnd(), entities[5].getEnd());
+
+      at = words[98];
+      addressee = words[99];
+      assertEquals("addressing words", "@", at.getLabel());
+      assertEquals("addressing words", "rctatman", addressee.getLabel());      
+      assertEquals("addressMarker", entities[6].getLabel());
+      assertTrue("addressMarker tags @", entities[6].tags(at));
+      assertEquals("addressee", entities[7].getLabel());
+      assertTrue("addressee tags person", entities[7].tags(addressee));
+      assertEquals("addressingTerm", entities[8].getLabel());
+      assertEquals("addressingTerm starts at addressMarker",
+		   at.getStart(), entities[8].getStart());
+      assertEquals("addressingTerm ends at addressee",
+		   addressee.getEnd(), entities[8].getEnd());
+
       assertEquals(0, g.list("language").length);
       assertEquals(0, g.list("lexical").length);
 
