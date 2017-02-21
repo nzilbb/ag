@@ -329,16 +329,16 @@ public class TestTEIDeserializer
       Annotation[] utterances = g.list("utterance");
       assertEquals(11, utterances.length);
       assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
-      assertEquals("inter-line space", new Double(38.0), utterances[0].getEnd().getOffset());
+      assertEquals("inter-line space", new Double(40.0), utterances[0].getEnd().getOffset());
       assertEquals("Rachael Tatman", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
 
-      assertEquals("inter-line space", new Double(38.0), utterances[1].getStart().getOffset());
-      assertEquals("inter-line space", new Double(80.0), utterances[1].getEnd().getOffset());
+      assertEquals("inter-line space", new Double(40.0), utterances[1].getStart().getOffset());
+      assertEquals("inter-line space", new Double(82.0), utterances[1].getEnd().getOffset());
       assertEquals("Rachael Tatman", utterances[1].getParent().getLabel());
       assertEquals(turns[0], utterances[1].getParent());
 
-      assertEquals("inter-line space", new Double(80.0), utterances[2].getStart().getOffset());
+      assertEquals("inter-line space", new Double(82.0), utterances[2].getStart().getOffset());
       assertEquals("inter-line space", new Double(136.0), utterances[2].getEnd().getOffset());
       assertEquals("Rachael Tatman", utterances[2].getParent().getLabel());
       assertEquals(turns[0], utterances[2].getParent());
@@ -452,6 +452,266 @@ public class TestTEIDeserializer
 
       assertEquals(0, g.list("language").length);
       assertEquals(0, g.list("lexical").length);
+
+   }
+
+   @Test public void writing() 
+      throws Exception
+   {
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("scribe", "Transcriber", 0, true, true, true),
+	 new Layer("transcript_language", "Graph language", 0, false, false, true),
+	 new Layer("transcript_version_date", "Version Date", 0, false, false, true),
+	 new Layer("transcript_type", "Transcript Type", 0, false, false, true),
+	 new Layer("publication_date", "Publication Date", 0, false, false, true),
+	 new Layer("transcript_program", "Program", 0, false, false, true),
+	 new Layer("title", "Title", 0, false, false, true),
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("sex", "Sex", 0, false, false, true, "who", true),
+	 new Layer("age", "Age", 0, false, false, true, "who", true),
+	 new Layer("dob", "Birth Date", 0, false, false, true, "who", true),
+	 new Layer("education", "Level of Education", 0, false, false, true, "who", true),
+	 new Layer("topic", "Topic", 2, true, false, false),
+	 new Layer("comment", "Comment", 2, true, false, true),
+	 new Layer("noise", "Noise", 2, true, false, true),
+	 new Layer("figure", "Picture", 2, true, false, false),
+	 new Layer("pb", "Page Break", 1, true, false, false),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("entities", "Entities", 2, true, false, false, "turn", true),
+	 new Layer("type", "Writing type", 2, true, false, false, "turn", true),
+	 new Layer("q", "Speech Bubble Text", 2, true, false, false, "turn", true),
+	 new Layer("pc", "Punctuation", 2, true, false, false, "turn", true),
+	 new Layer("emoticon", "Emoticon", 2, true, false, false, "turn", true),
+	 new Layer("unclear", "Unclear", 2, true, false, false, "turn", true),
+	 new Layer("sic", "Error", 2, true, false, false, "turn", true),
+	 new Layer("orig", "Pre-correction Form", 2, true, false, false, "turn", true),
+	 new Layer("quote", "Quote", 2, true, false, false, "turn", true),
+	 new Layer("language", "Language", 2, true, false, false, "turn", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true),
+	 new Layer("lexical", "Lexical", 0, true, false, false, "word", true));
+
+      // access file
+      NamedStream[] streams = { new NamedStream(new File(getDir(), "test-writing.xml")) };
+      
+      // create deserializer
+      TEIDeserializer deserializer = new TEIDeserializer();
+
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals("Configuration parameters" + configuration, 12, deserializer.configure(configuration, schema).size());      
+      assertEquals("comment", "comment", 
+		   ((Layer)configuration.get("commentLayer").getValue()).getId());
+      assertEquals("language", "language", 
+		   ((Layer)configuration.get("languageLayer").getValue()).getId());
+      assertEquals("lexical", "lexical", 
+		   ((Layer)configuration.get("lexicalLayer").getValue()).getId());
+      assertEquals("entities", "entities", 
+		   ((Layer)configuration.get("entityLayer").getValue()).getId());
+      assertEquals("scribe", "scribe", 
+		   ((Layer)configuration.get("scribeLayer").getValue()).getId());
+      assertEquals("transcript_version_date", "transcript_version_date", 
+		   ((Layer)configuration.get("versionDateLayer").getValue()).getId());
+      assertEquals("publication_date", "publication_date", 
+		   ((Layer)configuration.get("publicationDateLayer").getValue()).getId());
+      assertEquals("transcript_language", "transcript_language", 
+		   ((Layer)configuration.get("transcriptLanguageLayer").getValue()).getId());
+      assertEquals("sex", "sex", 
+		   ((Layer)configuration.get("sexLayer").getValue()).getId());
+      assertEquals("age", "age", 
+		   ((Layer)configuration.get("ageLayer").getValue()).getId());
+      assertEquals("birthdate", "dob", 
+		   ((Layer)configuration.get("birthLayer").getValue()).getId());
+
+      // load the stream
+      ParameterSet defaultParameters = deserializer.load(streams, schema);
+      // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals(14, defaultParameters.size());
+      assertEquals("q", "q", 
+		   ((Layer)defaultParameters.get("q").getValue()).getId());
+      assertEquals("figure", "figure", 
+		   ((Layer)defaultParameters.get("figure").getValue()).getId());
+      assertEquals("pb", "pb", 
+		   ((Layer)defaultParameters.get("pb").getValue()).getId());
+      assertEquals("pc", "pc", 
+		   ((Layer)defaultParameters.get("pc").getValue()).getId());
+      assertEquals("quote", "quote", 
+		   ((Layer)defaultParameters.get("quote").getValue()).getId());
+      assertEquals("orig", "orig", 
+		   ((Layer)defaultParameters.get("orig").getValue()).getId());
+      assertEquals("unclear", "unclear", 
+		   ((Layer)defaultParameters.get("unclear").getValue()).getId());
+      assertEquals("name", "entities", 
+		   ((Layer)defaultParameters.get("name").getValue()).getId());
+      assertEquals("sic", "sic", 
+		   ((Layer)defaultParameters.get("sic").getValue()).getId());
+      assertEquals("foreign", "language", 
+		   ((Layer)defaultParameters.get("foreign").getValue()).getId());
+      assertEquals("text type", "type", 
+		   ((Layer)defaultParameters.get("ab_type").getValue()).getId());
+      assertEquals("emoticon", "emoticon", 
+		   ((Layer)defaultParameters.get("pc_type_emoticon").getValue()).getId());
+      assertEquals("education", "education", 
+		   ((Layer)defaultParameters.get("person_education").getValue()).getId());
+      assertEquals("note", "comment", 
+		   ((Layer)defaultParameters.get("note").getValue()).getId());
+      
+      // configure the deserialization
+      deserializer.setParameters(defaultParameters);
+
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+
+      for (String warning : deserializer.getWarnings())
+      {
+	 System.out.println(warning);
+      }
+      
+      assertEquals("test-writing.xml", g.getId());
+      String[] title = g.labels("title"); 
+      assertEquals(1, title.length);
+      assertEquals("Writing Transcription Example", title[0]);
+      assertEquals("mi", g.my("transcript_language").getLabel());
+      assertEquals("2017-02-20", g.my("publication_date").getLabel());
+      //assertEquals("writing", g.my("transcript_type").getLabel());
+
+      // participants     
+      Annotation[] author = g.list("who"); 
+      assertEquals(1, author.length);
+      assertEquals("ABCD", author[0].getId());
+      assertEquals("Participant name defaults to ID", "ABCD", author[0].getLabel());
+
+      // participant attributes - age
+      assertEquals("44", author[0].my("age").getLabel());
+
+      // participant attributes - education
+      assertEquals("year 3", author[0].my("education").getLabel());
+
+      // turns
+      Annotation[] turns = g.list("turn");
+      assertEquals(1, turns.length);
+      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
+      //assertEquals(new Double(23.563), turns[0].getEnd().getOffset()); // TODO
+      assertEquals("ABCD", turns[0].getLabel());
+      assertEquals(g.getAnnotation("ABCD"), turns[0].getParent());
+
+      // utterances
+      Annotation[] utterances = g.list("utterance");
+      assertEquals(5, utterances.length);
+      assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
+      assertEquals("inter-line space", new Double(41.0), utterances[0].getEnd().getOffset());
+      assertEquals("ABCD", utterances[0].getParent().getLabel());
+      assertEquals(turns[0], utterances[0].getParent());
+
+      assertEquals("inter-line space", new Double(41.0), utterances[1].getStart().getOffset());
+      assertEquals("inter-line space", new Double(60.0), utterances[1].getEnd().getOffset());
+      assertEquals("ABCD", utterances[1].getParent().getLabel());
+      assertEquals(turns[0], utterances[1].getParent());
+
+
+      Annotation[] words = g.list("word");
+      assertEquals(28, words.length);
+      assertEquals(new Double(0), words[0].getStart().getOffset());
+      // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
+      assertEquals("I", words[0].getLabel());
+      assertEquals("inter-word space", new Double(2), words[0].getEnd().getOffset());
+      assertEquals("next word start where last ends",
+		   new Double(2), words[1].getStart().getOffset());
+      assertEquals("next word linked to last", words[0].getEnd(), words[1].getStart());
+      assertEquals("xi", words[1].getLabel());
+      assertEquals("inter-word space", new Double(5), words[1].getEnd().getOffset());
+      assertEquals("next word linked to last", words[1].getEnd(), words[2].getStart());
+      assertEquals("xaixi", words[2].getLabel());
+      assertEquals("inter-word space", new Double(11), words[2].getEnd().getOffset());
+      assertEquals("next word linked to last", words[2].getEnd(), words[3].getStart());
+      assertEquals("a", words[3].getLabel());
+      
+      assertEquals("FRIEND", words[4].getLabel()); // name
+      assertEquals("xāua", words[5].getLabel());
+      assertEquals("xo", words[6].getLabel());
+      assertEquals("FRIEND", words[7].getLabel()); // name
+      assertEquals("xi", words[8].getLabel());
+      assertEquals("xā", words[9].getLabel());
+      // pc: xxx
+      assertEquals("wxāxaxi", words[10].getLabel());
+      // pc: :-)
+      assertEquals("xaxaxixi .", words[11].getLabel()); // regularized
+
+      // figure / free writing / q
+      assertEquals("Text", words[12].getLabel());
+      assertEquals("in", words[13].getLabel());
+      assertEquals("a", words[14].getLabel());
+      assertEquals("balloon", words[15].getLabel());
+
+      // free writing
+      assertEquals("I", words[16].getLabel());
+      assertEquals("xi", words[17].getLabel());
+      assertEquals("xaixi", words[18].getLabel());
+      assertEquals("a", words[19].getLabel());
+      assertEquals("something", words[20].getLabel()); // unclear
+      assertEquals("es", words[21].getLabel());    // foreign
+      assertEquals("medio", words[22].getLabel()); // foreign
+      assertEquals("rara", words[23].getLabel()); // sic
+      assertEquals("xi", words[24].getLabel());
+      assertEquals("xā", words[25].getLabel());
+      // quote
+      assertEquals("wxāxaxi", words[26].getLabel());
+      assertEquals("xaxaxixi .", words[27].getLabel());
+
+      // entities
+      Annotation[] entities = g.list("entities");
+      assertEquals(2, entities.length);
+      
+      assertEquals("name", entities[0].getLabel());
+      assertTrue(entities[0].tags(words[4]));
+
+      assertEquals("name", entities[1].getLabel());
+      assertTrue(entities[1].tags(words[7]));
+
+      Annotation[] pc = g.list("pc");
+      assertEquals(1, pc.length);
+      assertEquals("xxx", pc[0].getLabel());
+      assertEquals(words[9].getEnd(), pc[0].getStart());
+
+      Annotation[] emoticon = g.list("emoticon");
+      assertEquals(1, emoticon.length);
+      assertEquals(":-)", emoticon[0].getLabel());
+      assertEquals(words[10].getEnd(), emoticon[0].getStart());
+
+      Annotation[] comment = g.list("comment");
+      assertEquals(1, comment.length);
+      assertEquals("This is a comment", comment[0].getLabel());
+      assertEquals(words[11].getEnd(), comment[0].getStart());
+
+      Annotation[] figure = g.list("figure");
+      assertEquals(1, figure.length);
+      assertEquals("photo", figure[0].getLabel());
+      assertEquals(words[12].getStart(), figure[0].getStart());
+
+      Annotation[] unclear = g.list("unclear");
+      assertEquals(1, unclear.length);
+      assertEquals("unclear (medium)", unclear[0].getLabel());
+      assertEquals(words[20].getStart(), unclear[0].getStart());
+
+      Annotation[] language = g.list("language");
+      assertEquals(1, language.length);
+      assertEquals("es", language[0].getLabel());
+      Annotation[] languageWords = language[0].includedAnnotationsOn("word");
+      assertEquals(2, languageWords.length);
+      assertEquals("es", languageWords[0].getLabel());
+      assertEquals("medio", languageWords[1].getLabel());
+
+      Annotation[] sic = g.list("sic");
+      assertEquals(1, sic.length);
+      assertEquals("sic", sic[0].getLabel());
+      assertEquals(words[23].getStart(), sic[0].getStart());
+
+      Annotation[] orig = g.list("orig");
+      assertEquals(1, orig.length);
+      assertEquals("xuxaxixi", orig[0].getLabel());
+      assertTrue("orig choice tags corrected word", orig[0].tags(words[11]));
 
    }
 

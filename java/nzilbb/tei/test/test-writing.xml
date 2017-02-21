@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://www.tei-c.org/release/xml/tei/custom/schema/relaxng/tei_all.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<?xml-model href="http://www.tei-c.org/release/xml/tei/custom/schema/relaxng/tei_all.rng" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+  <teiHeader>
+      <fileDesc>
+         <titleStmt>
+	   <title>Writing Transcription Example</title>
+	   <respStmt><resp>transcribed by</resp><name>Robert Fromont</name></respStmt>
+	 </titleStmt>
+         <publicationStmt>
+	   <publisher>New Zealand Institute of Language, Brain and Behaviour</publisher>
+	   <availability status="restricted"><p>Available under licence from the publishers.</p></availability>
+	 </publicationStmt>
+         <sourceDesc>
+	   <msDesc>
+	     <msIdentifier>
+	       <institution>New Zealand Institute of Language, Brain and Behaviour</institution>
+	       <repository>Test Files</repository>
+	       <idno>test-writing</idno>
+	     </msIdentifier>
+	   </msDesc>
+	   <bibl>
+	     <biblScope>2</biblScope>
+	     <figure><graphic url="test-writing.jpg"/></figure>
+	   </bibl>
+	 </sourceDesc>
+      </fileDesc>
+      <profileDesc>
+	<textClass>
+	  <classCode scheme="https://labbcat.canterbury.ac.nz/tuhingamahorahora/transcriptTypes">writing</classCode>
+	</textClass>	
+        <particDesc>
+	  <person>
+	    <idno>ABCD</idno>
+	    <age>44</age>
+	    <education>year 3</education>
+	  </person>
+	</particDesc>
+        <creation><date>2017-02-20</date></creation>
+        <langUsage><language ident="mi">Māori</language></langUsage>
+      </profileDesc>
+      <encodingDesc>
+      <appInfo>
+	<application ident="P5ize.sed" version="1" when-iso="2017-02-20T08:41+1200">
+	  <desc>Created by a sed script for transforming P4-style text files into P5 XML files.</desc>
+	</application>
+      </appInfo>
+      </encodingDesc>
+  </teiHeader>
+  <text>
+   <body>
+     <ab type="dictated writing">
+       I xi xaixi a <name>FRIEND</name>xāua xo <name>FRIEND</name> xi xā <pc>xxx</pc> <lb/>
+       wxāxaxi <pc type="emoticon">:-)</pc> <choice><orig>xuxaxixi</orig><reg>xaxaxixi</reg></choice>. <note>This is a comment</note>
+     </ab>
+     <figure type="photo">
+       <ab type="free writing"><q type="balloon">Text in a balloon</q></ab>       
+     </figure>
+     <pb/>
+     <ab type="free writing">
+       <l>I xi xaixi a <unclear cert="medium">something</unclear> <foreign xml:lang="es">es medio</foreign> <sic>rara</sic> xi xā</l>
+       <l><quote>wxāxaxi xaxaxixi</quote>.</l>
+     </ab>
+   </body>
+  </text>
+</TEI>
