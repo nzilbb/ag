@@ -119,13 +119,13 @@ public class OrthographyClumper implements IGraphTransformer
 		  changes.addAll( // register change of:
 		     last.setLabel(last.getLabel() + " " + token.getLabel()));
 
+		  Anchor oldEnd = last.getEnd();
 		  // move all annotations that end at last.end to token.end
 		  changes.addAll( // register change of:
-		     last.getEnd().moveEndingAnnotations(token.getEnd()));
-		  
+		     oldEnd.moveEndingAnnotations(token.getEnd()));		  
 		  // move all annotations that start at last.end to token.end
 		  changes.addAll( // register change of:
-		     last.getEnd().moveStartingAnnotations(token.getEnd()));
+		     oldEnd.moveStartingAnnotations(token.getEnd()));
 
 		  // move childen to last token
 		  for (String childLayerId : token.getAnnotations().keySet())
@@ -151,8 +151,13 @@ public class OrthographyClumper implements IGraphTransformer
 		     { // add this to what's already to be prepended
 			changes.addAll( // register change of:
 			   toPrepend.setLabel(toPrepend.getLabel() + " " + token.getLabel()));
+			Anchor oldEnd = toPrepend.getEnd();
+			// move all annotations that end at last.end to token.end
 			changes.addAll( // register change of:
-			   toPrepend.setEnd(token.getEnd()));
+			   oldEnd.moveEndingAnnotations(token.getEnd()));			
+			// move all annotations that start at last.end to token.end
+			changes.addAll( // register change of:
+			   oldEnd.moveStartingAnnotations(token.getEnd()));
 
 			// move childen to token
 			for (String childLayerId : token.getAnnotations().keySet())
@@ -188,13 +193,13 @@ public class OrthographyClumper implements IGraphTransformer
 		     changes.addAll( // register change of:
 			token.setOrdinal(toPrepend.getOrdinal()));
 
+		     Anchor oldStart = token.getStart();
 		     // move all annotations that end at last.end to token.end
 		     changes.addAll( // register change of:
-			token.getStart().moveEndingAnnotations(toPrepend.getStart()));
-		     
+			oldStart.moveEndingAnnotations(toPrepend.getStart()));		     
 		     // move all annotations that start at last.end to token.end
 		     changes.addAll( // register change of:
-			token.getStart().moveStartingAnnotations(toPrepend.getStart()));
+			oldStart.moveStartingAnnotations(toPrepend.getStart()));
 		     
 		     // move childen to last token
 		     for (String childLayerId : toPrepend.getAnnotations().keySet())

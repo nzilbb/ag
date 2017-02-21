@@ -316,6 +316,7 @@ public class TestOrthographyClumper
 
       g.addAnnotation(new Annotation("tqbf", "THE FOX", "entity", "a3", "a9", "turn1"));
       g.addAnnotation(new Annotation("qbf", "FOX", "entity", "a5", "a9", "turn1"));
+      g.addAnnotation(new Annotation("jo", "JUMPING", "entity", "a9", "a12", "turn1"));
 
       try
       {
@@ -323,12 +324,24 @@ public class TestOrthographyClumper
 	 Vector<Change> changes = transformer.transform(g);
 	 g.commit();
 	 Annotation words[] = g.list("word");
+	 assertEquals("a1", words[0].getStartId());
 	 assertEquals("- \" the '", words[0].getLabel());
+	 assertEquals("a5", words[0].getEndId());
+	 assertEquals("a5", words[1].getStartId());
 	 assertEquals("quick '", words[1].getLabel());
+	 assertEquals("a7", words[1].getEndId());
+	 assertEquals("a7", words[2].getStartId());
 	 assertEquals("brown", words[2].getLabel());
+	 assertEquals("a8", words[2].getEndId());
+	 assertEquals("a8", words[3].getStartId());
 	 assertEquals("fox --", words[3].getLabel());
+	 assertEquals("a10", words[3].getEndId());
+	 assertEquals("a10", words[4].getStartId());
 	 assertEquals("jumps", words[4].getLabel());
+	 assertEquals("a11", words[4].getEndId());
+	 assertEquals("a11", words[5].getStartId());
 	 assertEquals("over . \"", words[5].getLabel());
+	 assertEquals("a14", words[5].getEndId());
 	 assertEquals(6, words.length);
 
 	 Annotation[] entity = g.list("entity");
@@ -339,6 +352,10 @@ public class TestOrthographyClumper
 	 assertEquals("FOX", entity[1].getLabel());
 	 assertEquals("entity start - unchanged", words[1].getStart(), entity[1].getStart());
 	 assertEquals("entity end - appended", words[3].getEnd(), entity[1].getEnd());
+
+	 assertEquals("JUMPING", entity[2].getLabel());
+	 assertEquals("entity start - moved by previous move", words[4].getStart(), entity[2].getStart());
+	 assertEquals("entity end - appended", words[5].getEnd(), entity[2].getEnd());
 
       }
       catch(TransformationException exception)
