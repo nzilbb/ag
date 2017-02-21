@@ -186,10 +186,16 @@ public class OrthographyClumper implements IGraphTransformer
 		     changes.addAll( // register change of:
 			token.setLabel(toPrepend.getLabel() + " " + token.getLabel()));
 		     changes.addAll( // register change of:
-			token.setStart(toPrepend.getStart()));
-		     changes.addAll( // register change of:
 			token.setOrdinal(toPrepend.getOrdinal()));
 
+		     // move all annotations that end at last.end to token.end
+		     changes.addAll( // register change of:
+			token.getStart().moveEndingAnnotations(toPrepend.getStart()));
+		     
+		     // move all annotations that start at last.end to token.end
+		     changes.addAll( // register change of:
+			token.getStart().moveStartingAnnotations(toPrepend.getStart()));
+		     
 		     // move childen to last token
 		     for (String childLayerId : toPrepend.getAnnotations().keySet())
 		     {

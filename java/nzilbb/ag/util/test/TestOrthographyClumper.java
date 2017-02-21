@@ -314,6 +314,7 @@ public class TestOrthographyClumper
       g.addAnnotation(new Annotation("fullstop", ".", "word", "a12", "a13", "turn1"));
       g.addAnnotation(new Annotation("closequote", "\"", "word", "a13", "a14", "turn1"));
 
+      g.addAnnotation(new Annotation("tqbf", "THE FOX", "entity", "a3", "a9", "turn1"));
       g.addAnnotation(new Annotation("qbf", "FOX", "entity", "a5", "a9", "turn1"));
 
       try
@@ -331,8 +332,13 @@ public class TestOrthographyClumper
 	 assertEquals(6, words.length);
 
 	 Annotation[] entity = g.list("entity");
-	 assertEquals("entity start", words[1].getStart(), entity[0].getStart());
-	 assertEquals("entity end", words[3].getEnd(), entity[0].getEnd());
+	 assertEquals("THE FOX", entity[0].getLabel());
+	 assertEquals("entity start - prepended", words[0].getStart(), entity[0].getStart());
+	 assertEquals("entity end - appended", words[3].getEnd(), entity[0].getEnd());
+	 
+	 assertEquals("FOX", entity[1].getLabel());
+	 assertEquals("entity start - unchanged", words[1].getStart(), entity[1].getStart());
+	 assertEquals("entity end - appended", words[3].getEnd(), entity[1].getEnd());
 
       }
       catch(TransformationException exception)
