@@ -48,7 +48,11 @@ import nzilbb.configure.ParameterSet;
 /**
  * Deserializer for TEI P5 XML files.
  * <p>TEI tag support is basic at this stage, and many tags are not explicitly interpreted, but most can be mapped to arbitrary annotation layers.
- * <p>This deserializer supports part of the
+ * <p>Special support for regularization is used; for a construction like this: <br>
+ * <code>&lt;choice&gt;&lt;orig&gt;color&lt;/orig&gt;&lt;reg&gt;colour&lt;/reg&gt;&lt;/choice&gt;</code> <br>
+ * The contents of &lt;reg&gt;...&lt;/reg&gt; is used on the words layer, and it is annotated
+ * on a layer mapped to "orig" with the contents of the 
+ * <p>This deserializer supports part of the &lt;orig&gt;...&lt;/orig&gt; tag.
  * <a href="http://jtei.revues.org/476">schema for Representation of Computer-mediated Communication</a> 
  * proposed by Michael Beißwenger, Maria Ermakova, Alexander Geyken, Lothar Lemnitzer, 
  * and Angelika Storrer (2012), with the exception of the following:
@@ -441,7 +445,7 @@ public class TEIDeserializer
     *  interface for setting/confirming these parameters.  
     * @param configuration The configuration for the deserializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
-    * @return A list of configuration parameters (still) must be set before {@link IDeserializer#setParameters()} can be invoked. If this is an empty list, {@link IDeserializer#setParameters()} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
+    * @return A list of configuration parameters (still) must be set before {@link IDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty list, {@link IDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
     */
    public ParameterSet configure(ParameterSet configuration, Schema schema)
    {
@@ -935,7 +939,7 @@ public class TEIDeserializer
 
    /**
     * Traverses the given node recursively to build a set of distinct node types that are not text, nor &lt;p&gt; (nor &lt;div&gt;, etc. )
-    * @param n
+    * @param n Node to traverse.
     * @return Set of node type names
     */
    protected HashSet<String> distinctNonPWNodeTypes(Node n)
@@ -973,7 +977,7 @@ public class TEIDeserializer
 
    /**
     * Traverses the given node recursively to build a set of distinct node types that are children of a &lt;person&gt; node, excluding idno, persName, sex, age, and birth, which are globally configured.
-    * @param n
+    * @param n Note to traverse.
     * @return Set of node type names
     */
    protected HashSet<String> distinctPersonNodes(Node n)
@@ -1528,7 +1532,7 @@ public class TEIDeserializer
 
    /**
     * Traverses the given node recursively to build a list of words and intervening structures.
-    * @param n
+    * @param n Node to traverse.
     * @return An ordered list of Node objects that are either &lt;w&gt; nodes, or character data nodes that correspond to words, or &lt;p&gt; or &lt;s&gt; nodes
     */
    protected Vector<Node> flattenToWords(Node n)
@@ -1603,8 +1607,8 @@ public class TEIDeserializer
 
    /**
     * Validates the input and returns a list of errors that would
-    * prevent the input from being converted into an {@link AnnotationGraph}
-    * when {@link #toAnnotationGraphs(LinkedHashMap)} is called.
+    * prevent the input from being converted into a {@link Graph}
+    * when {@link #deserialize()} is called.
     * <p>This implementation checks for simultaneous speaker turns that have the same speaker mentioned more than once, speakers that have the same name, and mismatched start/end events.
     * @return A list of errors, which will be empty if there were no validation errors.
     */
