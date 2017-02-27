@@ -224,11 +224,11 @@ public class TestValidator
       assertEquals("participant1", g.getAnnotation("word6").getParentId());
 
       g.addAnnotation(new Annotation("pos1", "DT", "pos", "a1", "a2", "word1"));
-      g.getAnnotation("pos1").put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+      g.getAnnotation("pos1").setConfidence(Constants.CONFIDENCE_AUTOMATIC);
       g.addAnnotation(new Annotation("pos2", "A", "pos", "a2", "a3a", "word2"));
-      g.getAnnotation("pos2").put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+      g.getAnnotation("pos2").setConfidence(Constants.CONFIDENCE_AUTOMATIC);
       g.addAnnotation(new Annotation("pos3", "N", "pos", "a4c", "a4.125", "word4"));
-      g.getAnnotation("pos3").put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+      g.getAnnotation("pos3").setConfidence(Constants.CONFIDENCE_AUTOMATIC);
 
       g.addAnnotation(new Annotation("phone1", "D", "phone", "a1", "a1.5", "word1"));
       g.addAnnotation(new Annotation("phone2", "@", "phone", "a1.5", "a2", "word1"));
@@ -362,18 +362,18 @@ public class TestValidator
       g.addAnnotation(new Annotation("word6", "over", "word", "a?2", "a5", "turn1"));
 
       g.addAnnotation(new Annotation("pos1", "DT", "pos", "a1", "a2", "word1"));
-      g.getAnnotation("pos1").put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+      g.getAnnotation("pos1").setConfidence(Constants.CONFIDENCE_AUTOMATIC);
       g.addAnnotation(new Annotation("pos2", "A", "pos", "a2", "a3", "word2"));
-      g.getAnnotation("pos2").put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+      g.getAnnotation("pos2").setConfidence(Constants.CONFIDENCE_AUTOMATIC);
       g.addAnnotation(new Annotation("pos3", "N", "pos", "a4", "a?1", "word4"));
-      g.getAnnotation("pos3").put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+      g.getAnnotation("pos3").setConfidence(Constants.CONFIDENCE_AUTOMATIC);
 
       // manual child - not deleted
       g.addAnnotation(new Annotation("pos4", "ADV", "pos", "a?2", "a5", "word6"));
-      g.getAnnotation("pos4").put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+      g.getAnnotation("pos4").setConfidence(Constants.CONFIDENCE_MANUAL);
       // automatic child - deleted
       g.addAnnotation(new Annotation("pos5", "deleteme", "pos", "a?2", "a5", "word6"));
-      g.getAnnotation("pos5").put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+      g.getAnnotation("pos5").setConfidence(Constants.CONFIDENCE_AUTOMATIC);
 
       g.addAnnotation(new Annotation("phone1", "D", "phone", "a1", "a1.5", "word1"));
       g.addAnnotation(new Annotation("phone2", "@", "phone", "a1.5", "a2", "word1"));
@@ -919,40 +919,40 @@ public class TestValidator
 			   true)); // parentIncludes
       
       g.addAnchor(new Anchor("a0", 0.0,  // turn start
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
       g.addAnchor(new Anchor("a1", 1.0,  // the & DT & D & NP
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
       g.addAnchor(new Anchor("a1.5", 1.5,  // @
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
       g.addAnchor(new Anchor("a2a", 2.0,  // end of the
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
 
       // quick has reversed anchors
       // phones are manually aligned, so should be kept as-is
       g.addAnchor(new Anchor("a2b", 3.0,  // quick & A & k & AP
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
       g.addAnchor(new Anchor("a2.25", 2.25,  // w
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+			     Constants.CONFIDENCE_MANUAL));
       g.addAnchor(new Anchor("a2.5", 2.5,  // I
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+			     Constants.CONFIDENCE_MANUAL));
       g.addAnchor(new Anchor("a2.75", 2.75,  // k
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+			     Constants.CONFIDENCE_MANUAL));
       g.addAnchor(new Anchor("a3a", 2.0,  // end of quick
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
 
       g.addAnchor(new Anchor("a3b", 3.0,  // brown
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
       g.addAnchor(new Anchor("a4", 4.0,  // fox & N
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
       // jumps is reversed, all same confidences (first anchor will be kept)
       g.addAnchor(new Anchor("a4.75", 4.75, // jumps
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
       g.addAnchor(new Anchor("a4.25", 4.25, // over
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
       g.addAnchor(new Anchor("a5", 5.0,  // end of over
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
       g.addAnchor(new Anchor("a6", 6.0,  // turn end
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
 
       g.addAnnotation(new Annotation("participant1", "john smith", "who", "a0", "a6", "my graph"));
 
@@ -997,21 +997,21 @@ public class TestValidator
 	 // word start has been reset
 	 assertNull(g.getAnchor("a2b").getOffset());
 	 assertEquals(new Integer(Constants.CONFIDENCE_NONE), 
-		      g.getAnchor("a2b").get(Constants.CONFIDENCE));
+		      g.getAnchor("a2b").getConfidence());
 	 // phones are the same as before
 	 assertEquals(new Double(2.25), g.getAnchor("a2.25").getOffset());
 	 assertEquals(new Integer(Constants.CONFIDENCE_MANUAL), 
-		      g.getAnchor("a2.25").get(Constants.CONFIDENCE));
+		      g.getAnchor("a2.25").getConfidence());
 	 assertEquals(new Double(2.5), g.getAnchor("a2.5").getOffset());
 	 assertEquals(new Integer(Constants.CONFIDENCE_MANUAL), 
-		      g.getAnchor("a2.5").get(Constants.CONFIDENCE));
+		      g.getAnchor("a2.5").getConfidence());
 	 assertEquals(new Double(2.75), g.getAnchor("a2.75").getOffset());
 	 assertEquals(new Integer(Constants.CONFIDENCE_MANUAL), 
-		      g.getAnchor("a2.75").get(Constants.CONFIDENCE));
+		      g.getAnchor("a2.75").getConfidence());
 	 // word end has been reset
 	 assertNull(g.getAnchor("a3a").getOffset());
 	 assertEquals(new Integer(Constants.CONFIDENCE_NONE), 
-		      g.getAnchor("a3a").get(Constants.CONFIDENCE));
+		      g.getAnchor("a3a").getConfidence());
 
 	 // annotations still linked as before
 	 assertEquals("a2b", g.getAnnotation("word2").getStartId());
@@ -1030,12 +1030,12 @@ public class TestValidator
 		    g.getAnchor("a4.75").getOffset());
 	 assertEquals("same confidence - start reset", 
 		      new Integer(Constants.CONFIDENCE_NONE), 
-		      g.getAnchor("a4.75").get(Constants.CONFIDENCE));
+		      g.getAnchor("a4.75").getConfidence());
 	 assertEquals("same confidence - end kept", 
 		      new Double(4.25), g.getAnchor("a4.25").getOffset());
 	 assertEquals("same confidence - end reset", 
 		      new Integer(Constants.CONFIDENCE_AUTOMATIC), 
-		      g.getAnchor("a4.25").get(Constants.CONFIDENCE));
+		      g.getAnchor("a4.25").getConfidence());
 
 	 assertEquals("a4.75", g.getAnnotation("word5").getStartId());
 	 assertEquals("a4.25", g.getAnnotation("word5").getEndId());
@@ -1099,38 +1099,38 @@ public class TestValidator
 			   true)); // parentIncludes
       
       g.addAnchor(new Anchor("a0", 0.0,  // turn start
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
       g.addAnchor(new Anchor("a1", 1.0,  // the & DT & D & NP
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
       g.addAnchor(new Anchor("a1.5", 1.5,  // @
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
       g.addAnchor(new Anchor("a2a", 2.0,  // end of the
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
 
       // quick has reversed anchors and reversed children, all anchors have the same confidence
       // two sequences are good, the 2.5/2.75/3.0 sequnce is kept
       g.addAnchor(new Anchor("a2.5", 2.5,  // quick & A & k & AP
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
       g.addAnchor(new Anchor("a2.75", 2.75,  // w
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
       g.addAnchor(new Anchor("a3.0", 3.0,  // I
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
       g.addAnchor(new Anchor("a2.0", 2.0,  // k
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
       g.addAnchor(new Anchor("a2.25", 2.25,  // end of quick
 
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
       g.addAnchor(new Anchor("a3b", 3.0,  // brown
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
       g.addAnchor(new Anchor("a4", 4.0,  // fox & N
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
       // unset offsets
       g.addAnchor(new Anchor("a?1", null)); // jumps
       g.addAnchor(new Anchor("a?2", null)); // over
       g.addAnchor(new Anchor("a5", 5.0,  // end of over
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
       g.addAnchor(new Anchor("a6", 6.0,  // turn end
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			     Constants.CONFIDENCE_AUTOMATIC));
 
       g.addAnnotation(new Annotation("participant1", "john smith", "who", "a0", "a6", "my graph"));
 
@@ -1178,21 +1178,21 @@ public class TestValidator
 	 // start the same as before
 	 assertEquals(new Double(2.5), g.getAnchor("a2.5").getOffset());
 	 assertEquals(new Integer(Constants.CONFIDENCE_AUTOMATIC), 
-		      g.getAnchor("a2.5").get(Constants.CONFIDENCE));
+		      g.getAnchor("a2.5").getConfidence());
 	 assertEquals(new Double(2.75), g.getAnchor("a2.75").getOffset());
 	 assertEquals(new Integer(Constants.CONFIDENCE_AUTOMATIC), 
-		      g.getAnchor("a2.75").get(Constants.CONFIDENCE));
+		      g.getAnchor("a2.75").getConfidence());
 	 assertEquals(new Double(3.0), g.getAnchor("a3.0").getOffset());
 	 assertEquals(new Integer(Constants.CONFIDENCE_AUTOMATIC), 
-		      g.getAnchor("a3.0").get(Constants.CONFIDENCE));
+		      g.getAnchor("a3.0").getConfidence());
 
 	 // last two have been reset
 	 assertNull(g.getAnchor("a2.0").getOffset());
 	 assertEquals(new Integer(Constants.CONFIDENCE_NONE), 
-		      g.getAnchor("a2.0").get(Constants.CONFIDENCE));
+		      g.getAnchor("a2.0").getConfidence());
 	 assertNull(g.getAnchor("a2.25").getOffset());
 	 assertEquals(new Integer(Constants.CONFIDENCE_NONE), 
-		      g.getAnchor("a2.25").get(Constants.CONFIDENCE));
+		      g.getAnchor("a2.25").getConfidence());
 
 	 // annotations still linked as before
 	 assertEquals("a2.5", g.getAnnotation("word2").getStartId());
@@ -1252,19 +1252,19 @@ public class TestValidator
 			   "word", // parentId
 			   true)); // parentIncludes
 
-      g.addAnchor(new Anchor("turnStart", 120.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("turnStart", 120.0, Constants.CONFIDENCE_MANUAL));
       // than has out of sequence phones
-      g.addAnchor(new Anchor("thanStart", 129.1, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
-      g.addAnchor(new Anchor("a1Start", 130.6, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("nStart", 131.3, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("thanStart", 129.1, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("a1Start", 130.6, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("nStart", 131.3, Constants.CONFIDENCE_DEFAULT));
       // that is backwards
-      g.addAnchor(new Anchor("thatStart", 131.4, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("a2Start", 129.5, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("tStart", 129.6, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("yeahStart", 129.7, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("eahStart", 129.8, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("yeahEnd", 129.9, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
-      g.addAnchor(new Anchor("turnEnd", 140.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL)); // turn end
+      g.addAnchor(new Anchor("thatStart", 131.4, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("a2Start", 129.5, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("tStart", 129.6, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("yeahStart", 129.7, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("eahStart", 129.8, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("yeahEnd", 129.9, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("turnEnd", 140.0, Constants.CONFIDENCE_MANUAL)); // turn end
 
       g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
       
@@ -1345,19 +1345,19 @@ public class TestValidator
 			   "word", // parentId
 			   true)); // parentIncludes
 
-      g.addAnchor(new Anchor("turnStart", 120.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("turnStart", 120.0, Constants.CONFIDENCE_MANUAL));
       // than has out of sequence phones
-      g.addAnchor(new Anchor("thanStart", 129.1, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
-      g.addAnchor(new Anchor("a1Start", 130.6, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
-      g.addAnchor(new Anchor("nStart", 131.3, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("thanStart", 129.1, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("a1Start", 130.6, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("nStart", 131.3, Constants.CONFIDENCE_DEFAULT));
       // that is backwards
-      g.addAnchor(new Anchor("thatStart", 131.4, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("a2Start", 129.5, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("tStart", 129.6, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("yeahStart", 129.7, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("eahStart", 129.8, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("yeahEnd", 129.9, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("turnEnd", 140.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL)); // turn end
+      g.addAnchor(new Anchor("thatStart", 131.4, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("a2Start", 129.5, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("tStart", 129.6, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("yeahStart", 129.7, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("eahStart", 129.8, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("yeahEnd", 129.9, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("turnEnd", 140.0, Constants.CONFIDENCE_MANUAL)); // turn end
 
       g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
       
@@ -1438,19 +1438,19 @@ public class TestValidator
 			   "word", // parentId
 			   true)); // parentIncludes
 
-      g.addAnchor(new Anchor("turnStart", 120.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("turnStart", 120.0, Constants.CONFIDENCE_MANUAL));
       // than has out of sequence phones
-      g.addAnchor(new Anchor("thanStart", 129.1, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
-      g.addAnchor(new Anchor("a1Start", 130.6, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("nStart", 131.3, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("thanStart", 129.1, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("a1Start", 130.6, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("nStart", 131.3, Constants.CONFIDENCE_DEFAULT));
       // that is backwards
-      g.addAnchor(new Anchor("thatStart", 131.4, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("a2Start", 129.5, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("tStart", 129.6, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("yeahStart", 129.7, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("eahStart", 129.8, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("yeahEnd", 129.9, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("turnEnd", 140.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL)); // turn end
+      g.addAnchor(new Anchor("thatStart", 131.4, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("a2Start", 129.5, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("tStart", 129.6, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("yeahStart", 129.7, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("eahStart", 129.8, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("yeahEnd", 129.9, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("turnEnd", 140.0, Constants.CONFIDENCE_MANUAL)); // turn end
 
       g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
       
@@ -1531,15 +1531,15 @@ public class TestValidator
 			   "word", // parentId
 			   true)); // parentIncludes
 
-      g.addAnchor(new Anchor("turnStart", 120.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("turnStart", 120.0, Constants.CONFIDENCE_MANUAL));
       // than has out of sequence phones
-      g.addAnchor(new Anchor("thanStart", 129.1, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("a1Start", 130.6, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("nStart", 131.3, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("thanStart", 129.1, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("a1Start", 130.6, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("nStart", 131.3, Constants.CONFIDENCE_DEFAULT));
       // that is backwards
-      g.addAnchor(new Anchor("thatStart", 131.4, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("thatEnd", 129.7, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("turnEnd", 140.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL)); // turn end
+      g.addAnchor(new Anchor("thatStart", 131.4, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("thatEnd", 129.7, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("turnEnd", 140.0, Constants.CONFIDENCE_MANUAL)); // turn end
 
       g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
       
@@ -1610,19 +1610,19 @@ public class TestValidator
 			   "word", // parentId
 			   true)); // parentIncludes
 
-      g.addAnchor(new Anchor("turnStart", 120.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("turnStart", 120.0, Constants.CONFIDENCE_MANUAL));
       // than has out of sequence phones
-      g.addAnchor(new Anchor("thanStart", 129.1, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
-      g.addAnchor(new Anchor("a1Start", 129.6, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
-      g.addAnchor(new Anchor("nStart", 131.3, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("thanStart", 129.1, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("a1Start", 129.6, Constants.CONFIDENCE_AUTOMATIC));
+      g.addAnchor(new Anchor("nStart", 131.3, Constants.CONFIDENCE_DEFAULT));
       // that is backwards
-      g.addAnchor(new Anchor("thatStart", 131.4, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("a2Start", 129.5, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("tStart", 129.6, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
-      g.addAnchor(new Anchor("yeahStart", 129.7, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
-      g.addAnchor(new Anchor("eahStart", 129.8, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
-      g.addAnchor(new Anchor("yeahEnd", 129.9, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
-      g.addAnchor(new Anchor("turnEnd", 140.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL)); // turn end
+      g.addAnchor(new Anchor("thatStart", 131.4, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("a2Start", 129.5, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("tStart", 129.6, Constants.CONFIDENCE_AUTOMATIC));
+      g.addAnchor(new Anchor("yeahStart", 129.7, Constants.CONFIDENCE_AUTOMATIC));
+      g.addAnchor(new Anchor("eahStart", 129.8, Constants.CONFIDENCE_AUTOMATIC));
+      g.addAnchor(new Anchor("yeahEnd", 129.9, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("turnEnd", 140.0, Constants.CONFIDENCE_MANUAL)); // turn end
 
       g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
       
@@ -1709,24 +1709,24 @@ public class TestValidator
 			   "word", // parentId
 			   true)); // parentIncludes
 
-      g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL)); // turn start
+      g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
 
-      g.addAnchor(new Anchor("a0", 0.01, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT)); // the
-      g.addAnchor(new Anchor("a01", 0.02, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT)); // quick
-      g.addAnchor(new Anchor("a02", 0.03, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT)); // brown
-      g.addAnchor(new Anchor("a03", 0.04, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT)); // fox
-      g.addAnchor(new Anchor("a04a", 0.04, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT)); // fox end
+      g.addAnchor(new Anchor("a0", 0.01, Constants.CONFIDENCE_DEFAULT)); // the
+      g.addAnchor(new Anchor("a01", 0.02, Constants.CONFIDENCE_DEFAULT)); // quick
+      g.addAnchor(new Anchor("a02", 0.03, Constants.CONFIDENCE_DEFAULT)); // brown
+      g.addAnchor(new Anchor("a03", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox
+      g.addAnchor(new Anchor("a04a", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox end
 
-      g.addAnchor(new Anchor("utteranceChange", 0.4, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+      g.addAnchor(new Anchor("utteranceChange", 0.4, Constants.CONFIDENCE_MANUAL)); // utterance boundary
 
-      g.addAnchor(new Anchor("a04b", 2.0, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC)); // jumps
-      g.addAnchor(new Anchor("a14", 3.3, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC)); // over
-      g.addAnchor(new Anchor("a24", 4.4, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC)); // a
-      g.addAnchor(new Anchor("a34", 5.0, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC)); // lazy
-      g.addAnchor(new Anchor("a44", 5.1, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC)); // dog
+      g.addAnchor(new Anchor("a04b", 2.0, Constants.CONFIDENCE_AUTOMATIC)); // jumps
+      g.addAnchor(new Anchor("a14", 3.3, Constants.CONFIDENCE_AUTOMATIC)); // over
+      g.addAnchor(new Anchor("a24", 4.4, Constants.CONFIDENCE_AUTOMATIC)); // a
+      g.addAnchor(new Anchor("a34", 5.0, Constants.CONFIDENCE_AUTOMATIC)); // lazy
+      g.addAnchor(new Anchor("a44", 5.1, Constants.CONFIDENCE_AUTOMATIC)); // dog
       g.addAnchor(new Anchor("a54", null)); // end of dog
 
-      g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL)); // turn end
+      g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE_MANUAL)); // turn end
 
       g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
       
@@ -1795,26 +1795,26 @@ public class TestValidator
 			   "turn", // parentId
 			   true)); // parentIncludes
 
-      g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL)); // turn start
+      g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
 
       // "the" reversed
-      g.addAnchor(new Anchor("a0", 0.02, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT)); // the
-      g.addAnchor(new Anchor("a01", 0.01, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT)); // quick
-      g.addAnchor(new Anchor("a02", 0.03, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT)); // brown
-      g.addAnchor(new Anchor("a03", 0.04, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT)); // fox
-      g.addAnchor(new Anchor("a04a", 0.04, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT)); // fox end
+      g.addAnchor(new Anchor("a0", 0.02, Constants.CONFIDENCE_DEFAULT)); // the
+      g.addAnchor(new Anchor("a01", 0.01, Constants.CONFIDENCE_DEFAULT)); // quick
+      g.addAnchor(new Anchor("a02", 0.03, Constants.CONFIDENCE_DEFAULT)); // brown
+      g.addAnchor(new Anchor("a03", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox
+      g.addAnchor(new Anchor("a04a", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox end
 
-      g.addAnchor(new Anchor("utteranceChange", 0.4, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+      g.addAnchor(new Anchor("utteranceChange", 0.4, Constants.CONFIDENCE_MANUAL)); // utterance boundary
 
-      g.addAnchor(new Anchor("a04b", 2.0, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC)); // jumps
-      g.addAnchor(new Anchor("a14", 3.3, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC)); // over
-      g.addAnchor(new Anchor("a24", 4.4, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC)); // a
+      g.addAnchor(new Anchor("a04b", 2.0, Constants.CONFIDENCE_AUTOMATIC)); // jumps
+      g.addAnchor(new Anchor("a14", 3.3, Constants.CONFIDENCE_AUTOMATIC)); // over
+      g.addAnchor(new Anchor("a24", 4.4, Constants.CONFIDENCE_AUTOMATIC)); // a
       // "lazy" reversed
-      g.addAnchor(new Anchor("a34", 5.1, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC)); // lazy
-      g.addAnchor(new Anchor("a44", 5.0, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC)); // dog
+      g.addAnchor(new Anchor("a34", 5.1, Constants.CONFIDENCE_AUTOMATIC)); // lazy
+      g.addAnchor(new Anchor("a44", 5.0, Constants.CONFIDENCE_AUTOMATIC)); // dog
       g.addAnchor(new Anchor("a54", null)); // end of dog
 
-      g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL)); // turn end
+      g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE_MANUAL)); // turn end
 
       g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
       

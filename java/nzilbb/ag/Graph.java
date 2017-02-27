@@ -172,6 +172,9 @@ public class Graph
    public void setOffsetUnits(String newOffsetUnits) { offsetUnits = newOffsetUnits; }
 
 
+   // TODO participants
+   
+   
    // Attributes stored outside HashMap, so that JSONifying the HashMap doesn't result in infinite recursion
 
 
@@ -956,12 +959,20 @@ public class Graph
    // Annotation overrides
 
    /**
+    * Keys for attributes that are change-tracked - in the case of Graph, there are none.
+    * @return An empty set.
+    */
+   public Set<String> getTrackedAttributes() { return new HashSet<String>(); }
+
+
+   /**
     * Setter for <i>id</i>: The annotation's identifier.
     * @param id The annotation's identifier.
     */
    public void setId(String id) 
-   { 
-      put("id", id); 
+   {
+      // we don't want the graph or child re-hooking...
+      this.id = id;
    }
 
    /**

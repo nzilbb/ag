@@ -501,19 +501,19 @@ public class TestAnchorComparators
 			   "word", // parentId
 			   true)); // parentIncludes
 
-      g.addAnchor(new Anchor("turnStart", 120.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("turnStart", 120.0, Constants.CONFIDENCE_MANUAL));
       // than has out of sequence phones
-      g.addAnchor(new Anchor("thanStart", 129.1, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
-      g.addAnchor(new Anchor("a1Start", 130.6, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("nStart", 131.3, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("thanStart", 129.1, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("a1Start", 130.6, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("nStart", 131.3, Constants.CONFIDENCE_DEFAULT));
       // that is backwards
-      g.addAnchor(new Anchor("thatStart", 129.9, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("thatStart", 129.9, Constants.CONFIDENCE_DEFAULT));
       g.addAnchor(new Anchor("a2Start", null));
       g.addAnchor(new Anchor("tStart", null));
-      g.addAnchor(new Anchor("yeahStart", 129.5, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("eahStart", 129.6, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("yeahEnd", 129.7, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
-      g.addAnchor(new Anchor("turnEnd", 140.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL)); // turn end
+      g.addAnchor(new Anchor("yeahStart", 129.5, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("eahStart", 129.6, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("yeahEnd", 129.7, Constants.CONFIDENCE_DEFAULT));
+      g.addAnchor(new Anchor("turnEnd", 140.0, Constants.CONFIDENCE_MANUAL)); // turn end
 
       g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
       
@@ -591,27 +591,27 @@ public class TestAnchorComparators
 			   true)); // parentIncludes
 
       g.addAnchor(new Anchor("1", 10.0, // the
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+			     Constants.CONFIDENCE_DEFAULT));
       g.addAnchor(new Anchor("n_101", 10.0, // quick
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+			     Constants.CONFIDENCE_DEFAULT));
       g.addAnchor(new Anchor("n_100", 10.0, // turn start 
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+			     Constants.CONFIDENCE_MANUAL));
       g.addAnchor(new Anchor("n_300", 25.0, // brown
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+			     Constants.CONFIDENCE_DEFAULT));
       g.addAnchor(new Anchor("n_399", 40.0, // brown end
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+			     Constants.CONFIDENCE_DEFAULT));
       g.addAnchor(new Anchor("n_400", 40.0, // utterance break
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+			     Constants.CONFIDENCE_MANUAL));
       g.addAnchor(new Anchor("n_401", 40.0, // fox
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+			     Constants.CONFIDENCE_DEFAULT));
       g.addAnchor(new Anchor("4", 50.0, // jumps
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+			     Constants.CONFIDENCE_DEFAULT));
       g.addAnchor(new Anchor("n_500", 60.0, // over
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+			     Constants.CONFIDENCE_DEFAULT));
       g.addAnchor(new Anchor("n_600", 70.0, // over end
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+			     Constants.CONFIDENCE_DEFAULT));
       g.addAnchor(new Anchor("n_700", 70.0, // turn end
-			     Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+			     Constants.CONFIDENCE_MANUAL));
 
       g.addAnnotation(new Annotation("participant1", "john smith", "who", "n_100", "n_700", "my graph"));
       

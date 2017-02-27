@@ -43,40 +43,24 @@ public class TestLayer
       l.setParentIncludes(true);
       l.setSaturated(false);
       assertEquals("word", l.getId());
-      assertEquals("word", l.get("id"));
       assertEquals("Words", l.getDescription());
-      assertEquals("Words", l.get("description"));
       assertEquals("turn", l.getParentId());
-      assertEquals("turn", l.get("parentId"));
       assertEquals(2, l.getAlignment());
-      assertEquals(new Integer(2), l.get("alignment"));
       assertEquals(true, l.getPeers());
-      assertEquals(Boolean.TRUE, l.get("peers"));
       assertEquals(false, l.getPeersOverlap());
-      assertEquals(Boolean.FALSE, l.get("peersOverlap"));
       assertEquals(true, l.getParentIncludes());
-      assertEquals(Boolean.TRUE, l.get("parentIncludes"));
       assertEquals(false, l.getSaturated());
-      assertEquals(Boolean.FALSE, l.get("saturated"));
 
       // attribute constructor
       l = new Layer("word", "Words", 2, true, false, false, "turn", true);
       assertEquals("word", l.getId());
-      assertEquals("word", l.get("id"));
       assertEquals("Words", l.getDescription());
-      assertEquals("Words", l.get("description"));
       assertEquals("turn", l.getParentId());
-      assertEquals("turn", l.get("parentId"));
       assertEquals(2, l.getAlignment());
-      assertEquals(new Integer(2), l.get("alignment"));
       assertEquals(true, l.getPeers());
-      assertEquals(Boolean.TRUE, l.get("peers"));
       assertEquals(false, l.getPeersOverlap());
-      assertEquals(Boolean.FALSE, l.get("peersOverlap"));
       assertEquals(true, l.getParentIncludes());
-      assertEquals(Boolean.TRUE, l.get("parentIncludes"));
       assertEquals(false, l.getSaturated());
-      assertEquals(Boolean.FALSE, l.get("saturated"));
    }
 
    @Test public void extendedAttributes() 

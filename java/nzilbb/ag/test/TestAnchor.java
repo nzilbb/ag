@@ -38,17 +38,17 @@ public class TestAnchor
       a.setId("123");
       a.setOffset(456.789);
       assertEquals("123", a.getId());
-      assertEquals("123", a.get("id"));
+      assertNull("not using attributes", a.get("id"));
       assertEquals(new Double(456.789), a.getOffset());
-      assertEquals(new Double(456.789), a.get("offset"));
+      assertNull("not using attributes", a.get("offset"));
       assertEquals("456.789", a.toString());
 
       // Basic constructor
       a = new Anchor("123", 456.789);
       assertEquals("123", a.getId());
-      assertEquals("123", a.get("id"));
+      assertNull("not using attributes", a.get("id"));
       assertEquals(new Double(456.789), a.getOffset());
-      assertEquals(new Double(456.789), a.get("offset"));
+      assertNull("not using attributes", a.get("offset"));
       assertEquals("456.789", a.toString());
    }
 
@@ -74,7 +74,6 @@ public class TestAnchor
       Anchor newA = new Anchor(a);
       assertNull("id not copied", newA.getId());
       assertEquals("offset copied", new Double(123.456), newA.getOffset());
-      assertNull("originalOffset not copied", newA.get("originalOffset"));      
       assertEquals("originalOffset not copied", new Double(123.456), newA.getOriginalOffset());
       assertEquals("other attribute copied", Boolean.TRUE, newA.get("copy"));
       assertNull("transient attribute not copied", newA.get("@dontCopy"));      
@@ -137,7 +136,6 @@ public class TestAnchor
 
       a.setOffset(123.456);
       assertEquals(new Double(123.456), a.getOffset());
-      assertEquals("Original offset remembers first offset:", new Double(456.789), a.get("originalOffset"));
       assertEquals("Original offset remembers first offset:", new Double(456.789), a.getOriginalOffset());
       assertEquals(Change.Operation.Update, a.getChange());
 
@@ -165,13 +163,30 @@ public class TestAnchor
 
    @Test public void cloning() 
    {
-      Anchor a = new Anchor("123", 99.0, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+      Anchor a = new Anchor("123", 99.0, Constants.CONFIDENCE_AUTOMATIC);
       a.put("foo", "foo");
       Anchor c = (Anchor)a.clone();
+      assertNotNull(c);
       assertEquals("123", c.getId());
-      assertEquals(Constants.CONFIDENCE_AUTOMATIC, c.get(Constants.CONFIDENCE));
+      assertEquals(new Integer(Constants.CONFIDENCE_AUTOMATIC), c.getConfidence());
       assertEquals(new Double(99.0), c.getOffset());
       assertFalse(c.containsKey("foo"));     
+   }
+
+   @Test public void nullInitialOffset() 
+   {
+      Anchor a = new Anchor("123", null);
+      assertEquals("123", a.getId());
+      assertNull(a.getOffset());
+      assertEquals("no change registered when offset is initialised as null",
+		   0, a.getChanges().size());
+      assertEquals("change is registered by setter", 1,
+		   a.setOffset(new Double(99.0)).size());
+      assertEquals(new Double(99.0), a.getOffset());
+      assertTrue(a.containsKey("originalOffset"));     
+      assertNull(a.get("originalOffset"));
+      assertEquals("a change registered when offset is initialised as null and then is changed",
+		   1, a.getChanges().size());
    }
 
    @Test public void offsetMinMaxAndPrecedingFollowing() 

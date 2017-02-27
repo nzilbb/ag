@@ -58,7 +58,7 @@ public class Utility
     */
    public static void setConfidence(TrackedMap o, int confidence)
    {      
-      o.put(Constants.CONFIDENCE, confidence);
+      o.setConfidence(confidence);
    } // end of setConfidence()
 
 } // end of class Utility

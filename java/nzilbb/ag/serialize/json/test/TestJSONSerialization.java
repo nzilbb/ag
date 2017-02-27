@@ -100,56 +100,56 @@ public class TestJSONSerialization
 
       g.setOffsetGranularity(0.001);
 
-      g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
-      g.addAnchor(new Anchor("a1", 1.0, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
-      g.addAnchor(new Anchor("a1.5", 1.5, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
-      g.addAnchor(new Anchor("a2", 2.0, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
-      g.addAnchor(new Anchor("a2.25", 2.25, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
-      g.addAnchor(new Anchor("a2.5", 2.5, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
-      g.addAnchor(new Anchor("a2.75", 2.75, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
-      g.addAnchor(new Anchor("a3", 3.0, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
-      g.addAnchor(new Anchor("a4", 4.0, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+      g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("a1", 1.0, Constants.CONFIDENCE_AUTOMATIC));
+      g.addAnchor(new Anchor("a1.5", 1.5, Constants.CONFIDENCE_AUTOMATIC));
+      g.addAnchor(new Anchor("a2", 2.0, Constants.CONFIDENCE_AUTOMATIC));
+      g.addAnchor(new Anchor("a2.25", 2.25, Constants.CONFIDENCE_AUTOMATIC));
+      g.addAnchor(new Anchor("a2.5", 2.5, Constants.CONFIDENCE_AUTOMATIC));
+      g.addAnchor(new Anchor("a2.75", 2.75, Constants.CONFIDENCE_AUTOMATIC));
+      g.addAnchor(new Anchor("a3", 3.0, Constants.CONFIDENCE_AUTOMATIC));
+      g.addAnchor(new Anchor("a4", 4.0, Constants.CONFIDENCE_AUTOMATIC));
       // null offset handled
       g.addAnchor(new Anchor("a5", null));
-      g.addAnchor(new Anchor("turnEnd", 6.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("turnEnd", 6.0, Constants.CONFIDENCE_MANUAL));
 
       Annotation who1 = new Annotation("who1", "john smith", "who", "turnStart", "turnEnd", "test");
-      who1.put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+      who1.setConfidence(Constants.CONFIDENCE_MANUAL);
       Annotation turn1 = new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "who1");
-      turn1.put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+      turn1.setConfidence(Constants.CONFIDENCE_MANUAL);
       Annotation line1 = new Annotation("line1", "john smith", "utterance", "turnStart", "turnEnd", "turn1");
-      line1.put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+      line1.setConfidence(Constants.CONFIDENCE_MANUAL);
 
       Annotation the = new Annotation("word1", "the", "word", "a1", "a2", "turn1");
-      the.put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+      the.setConfidence(Constants.CONFIDENCE_MANUAL);
       Annotation DT = new Annotation("pos1", "DT", "pos", "a1", "a2", "word1");
-      DT.put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+      DT.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
       Annotation th = new Annotation("phone1", "D", "phone", "a1", "a1.5", "word1");
-      th.put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+      th.setConfidence(Constants.CONFIDENCE_MANUAL);
       Annotation e = new Annotation("phone2", "@", "phone", "a1.5", "a2", "word1");
-      e.put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+      e.setConfidence(Constants.CONFIDENCE_MANUAL);
       Annotation quick = new Annotation("word2", "quick", "word", "a2", "a3", "turn1");
-      quick.put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+      quick.setConfidence(Constants.CONFIDENCE_MANUAL);
       Annotation A = new Annotation("pos2", "A", "pos", "a2", "a3", "word2");
-      A.put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+      A.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
       Annotation k = new Annotation("phone3", "k", "phone", "a2", "a2.25", "word2");
-      k.put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+      k.setConfidence(Constants.CONFIDENCE_MANUAL);
       Annotation w = new Annotation("phone4", "w", "phone", "a2.25", "a2.5", "word2");
-      w.put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+      w.setConfidence(Constants.CONFIDENCE_MANUAL);
       Annotation I = new Annotation("phone5", "I", "phone", "a2.5", "a2.75", "word2");
-      I.put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+      I.setConfidence(Constants.CONFIDENCE_MANUAL);
       Annotation ck = new Annotation("phone6", "k", "phone", "a2.75", "a3", "word2");
-      ck.put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+      ck.setConfidence(Constants.CONFIDENCE_MANUAL);
       Annotation brown = new Annotation("word3", "brown", "word", "a3", "a4", "turn1");
-      brown.put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+      brown.setConfidence(Constants.CONFIDENCE_MANUAL);
       Annotation AP = new Annotation("phrase1", "AP", "phrase", "a2", "a4", "turn1");
-      AP.put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+      AP.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
       Annotation fox = new Annotation("word4", "fox", "word", "a4", "a5", "turn1");
-      fox.put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+      fox.setConfidence(Constants.CONFIDENCE_MANUAL);
       Annotation N = new Annotation("pos3", "N", "pos", "a4", "a5", "word4");
-      N.put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+      N.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
       Annotation NP = new Annotation("phrase2", "NP", "phrase", "a1", "a5", "turn1");
-      NP.put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+      NP.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
 
       g.addAnnotation(who1);
       g.addAnnotation(turn1);
@@ -288,7 +288,7 @@ public class TestJSONSerialization
 	 assertEquals(gAnchor.getId(), 
 		      gAnchor.getOffset(), dAnchor.getOffset());
 	 assertEquals(gAnchor.getId(), 
-		      gAnchor.get(Constants.CONFIDENCE), dAnchor.get(Constants.CONFIDENCE));
+		      gAnchor.getConfidence(), dAnchor.getConfidence());
 	 assertEquals(gAnchor.getId(), 
 		      gAnchor.get(Constants.COMMENT), dAnchor.get(Constants.COMMENT));
       } // next layer
@@ -310,7 +310,7 @@ public class TestJSONSerialization
 	 assertEquals(gAnnotation.getId(), 
 		      gAnnotation.getEndId(), dAnnotation.getEndId());
 	 assertEquals(gAnnotation.getId(), 
-		      gAnnotation.get(Constants.CONFIDENCE), dAnnotation.get(Constants.CONFIDENCE));
+		      gAnnotation.getConfidence(), dAnnotation.getConfidence());
 	 assertEquals(gAnnotation.getId(), 
 		      gAnnotation.get(Constants.COMMENT), dAnnotation.get(Constants.COMMENT));
 

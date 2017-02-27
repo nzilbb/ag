@@ -75,10 +75,14 @@ public class Annotation
    // Attributes stored in HashMap:
 
    /**
+    * The annotation's label.
+    */
+   protected String label;
+   /**
     * Getter for <i>label</i>: The annotation's label.
     * @return The annotation's label.
     */
-   public String getLabel() { try { return (String)get("label"); } catch(ClassCastException exception) {return null;} } // TODO maybe this should be Object, and return something determined by annotaiton.layer.type
+   public String getLabel() { return label; }
    /**
     * Setter for <i>label</i>: The annotation's label.
     * @param label The annotation's label.
@@ -86,24 +90,35 @@ public class Annotation
     */
    public Vector<Change> setLabel(String label) 
    { 
-      put("label", label); 
       Vector<Change> changes = new Vector<Change>();
-      Change change = getLastChange();
-      if (change != null) changes.add(change);
+      if (this.label != null && !this.label.equals(label))  // is it actually changing?
+      {
+	 changes.add(registerChange("label", label));
+      }
+
+      this.label = label; 
       return changes;
    }
 
    /**
+    * The identifier of the annotation's layer.
+    */
+   protected String layerId;
+   /**
     * Getter for <i>layerId</i>: The identifier of the annotation's layer.
     * @return The identifier of the annotation's layer.
     */
-   public String getLayerId() { try { return (String)get("layerId"); } catch(ClassCastException exception) {return null;} }
+   public String getLayerId() { return layerId; }
    /**
     * Setter for <i>layerId</i>: The identifier of the annotation's layer.
     * @param layerId The identifier of the annotation's layer.
     */
-   public void setLayerId(String layerId) { put("layerId", layerId); }
+   public void setLayerId(String layerId) { this.layerId = layerId; }
 
+   /**
+    * ID of the annotation's start anchor.
+    */
+   protected String startId;
    /**
     * Getter for <i>startId</i>: ID of the annotation's start anchor.
     * @return ID of the annotation's start anchor.
@@ -119,14 +134,7 @@ public class Annotation
 	    if (parent != null) return parent.getStartId();
 	 }
       }
-      try 
-      { 
-	 return (String)get("startId"); 
-      } 
-      catch(ClassCastException exception) 
-      {
-	 return null;
-      } 
+      return startId; 
    }
    /**
     * Setter for <i>startId</i>: ID of the annotation's start anchor.
@@ -142,8 +150,14 @@ public class Annotation
 	 start.startOf(getLayerId()).remove(this);
       }
 
+      Vector<Change> changes = new Vector<Change>();
+      if (this.startId != null && !this.startId.equals(startId))  // is it actually changing?
+      {
+	 changes.add(registerChange("startId", startId));
+      }
+
       // set the ID
-      put("startId", startId); 
+      this.startId = startId; 
       
       // introduce ourselves to the new anchor, if available
       start = getStart();
@@ -154,13 +168,13 @@ public class Annotation
 	 graph.indicesByLayer.remove(getLayerId());
       }
       
-      // return change
-      Vector<Change> changes = new Vector<Change>();
-      Change change = getLastChange();
-      if (change != null) changes.add(change);
       return changes;
    }
    
+   /**
+    * ID of the annotation's end anchor.
+    */
+   protected String endId;
    /**
     * Getter for <i>endId</i>: ID of the annotation's end anchor.
     * @return ID of the annotation's end anchor.
@@ -176,14 +190,7 @@ public class Annotation
 	    if (parent != null) return parent.getEndId();
 	 }
       }
-      try
-      {
-	 return (String)get("endId");
-      }
-      catch (ClassCastException exception) 
-      {
-	 return null;
-      } 
+      return endId;
    }
    /**
     * Setter for <i>endId</i>: ID of the annotation's end anchor.
@@ -199,8 +206,14 @@ public class Annotation
 	 end.endOf(getLayerId()).remove(this);
       }
 
+      Vector<Change> changes = new Vector<Change>();
+      if (this.endId != null && !this.endId.equals(endId))  // is it actually changing?
+      {
+	 changes.add(registerChange("endId", endId));
+      }
+
       // set the ID
-      put("endId", endId); 
+      this.endId = endId; 
       
       // introduce ourselves to the new anchor, if available
       end = getEnd();
@@ -211,18 +224,18 @@ public class Annotation
 	 graph.indicesByLayer.remove(getLayerId());
       }
       
-      // return change
-      Vector<Change> changes = new Vector<Change>();
-      Change change = getLastChange();
-      if (change != null) changes.add(change);
       return changes;
    }
    
    /**
+    * The annotation's parent annotation ID, if any.
+    */
+   protected String parentId;
+   /**
     * Getter for <i>parentId</i>: The annotation's parent annotation ID, if any.
     * @return The annotation's parent annotation ID, if any.
     */
-   public String getParentId() { try { return (String)get("parentId"); } catch(ClassCastException exception) {return null;} }
+   public String getParentId() { return parentId; }
    /**
     * Setter for <i>parentId</i>: The annotation's parent annotation ID, if any.
     * @param parentId The annotation's parent annotation ID, if any.
@@ -230,13 +243,19 @@ public class Annotation
     */
    public synchronized Vector<Change> setParentId(String parentId) 
    { 
-      put("parentId", parentId);
       Vector<Change> changes = new Vector<Change>();
-      Change change = getLastChange();
-      if (change != null) changes.add(change);
+      if (this.parentId != null && !this.parentId.equals(parentId))  // is it actually changing?
+      {
+	 changes.add(registerChange("parentId", parentId));
+      }
+      this.parentId = parentId;
       return changes;
    }
    
+   /**
+    * The annotation's ordinal position amongst the parent's children.  Ordinal is 1-based - i.e. the first child has ordinal = 1.
+    */
+   protected int ordinal = 0;
    /**
     * Getter for <i>ordinal</i>: The annotation's ordinal position amongst the parent's children.  Ordinal is 1-based - i.e. the first child has ordinal = 1.
     * @return The annotation's ordinal position amongst the parent's children.
@@ -244,36 +263,31 @@ public class Annotation
    public int getOrdinal() 
    { 
       int ordinalToReturn = 0;
-      try 
-      { 
-	 Integer ordinalAttribute = (Integer)get("ordinal");
-	 if (ordinalAttribute != null)
+      if (ordinal > 0)
+      {
+	 ordinalToReturn = ordinal;
+      }
+      else
+      {
+	 Annotation parent = getParent();
+	 if (parent != null)
 	 {
-	    ordinalToReturn = ordinalAttribute;
-	 }
-	 else
-	 {
-	    Annotation parent = getParent();
-	    if (parent != null)
+	    // get all peers before this one
+	    SortedSet<Annotation> priorPeers = parent.getAnnotations(getLayerId()).headSet(this);
+	    // weed out the deleted one
+	    Iterator<Annotation> it = priorPeers.iterator();
+	    while (it.hasNext()) 
 	    {
-	       // get all peers before this one
-	       SortedSet<Annotation> priorPeers = parent.getAnnotations(getLayerId()).headSet(this);
-	       // weed out the deleted one
-	       Iterator<Annotation> it = priorPeers.iterator();
-	       while (it.hasNext()) 
+	       Annotation p = it.next();
+	       if (p.getChange() == Change.Operation.Destroy)
 	       {
-		  Annotation p = it.next();
-		  if (p.getChange() == Change.Operation.Destroy)
-		  {
-		     it.remove();
-		  }
+		  it.remove();
 	       }
-	       ordinalToReturn = priorPeers.size() + 1;
-	       setOrdinal(ordinalToReturn);
 	    }
+	    ordinalToReturn = priorPeers.size() + 1;
+	    setOrdinal(ordinalToReturn);
 	 }
-      } 
-      catch(ClassCastException cc) {} 
+      }
       return ordinalToReturn;
    }
    /**
@@ -283,13 +297,14 @@ public class Annotation
     */
    public synchronized Vector<Change> setOrdinal(int ordinal) 
    { 
-      Integer originalOrdinal = (Integer)get("ordinal");
-      put("ordinal", ordinal); 
       Vector<Change> changes = new Vector<Change>();
-      Change change = getLastChange();
-      if (change != null)
-      { // actually changing ordinal
-	 changes.add(change);
+      if (this.ordinal != ordinal)  // is it actually changing?
+      {
+	 if (this.ordinal != 0)
+	 {
+	    changes.add(registerChange("ordinal", new Integer(ordinal)));
+	 }
+	 this.ordinal = ordinal; 
 	 Annotation parent = getParent();
 	 if (parent != null)
 	 {
@@ -315,12 +330,11 @@ public class Annotation
 	 for (Annotation peer : peers)
 	 {
 	    if (peer.getChange() == Change.Operation.Destroy) continue;
-	    Integer originalOrdinal = (Integer)peer.get("ordinal");
-	    if (originalOrdinal == null || originalOrdinal.intValue() != o)
+	    int originalOrdinal = peer.ordinal;
+	    if (originalOrdinal == 0 || originalOrdinal != o)
 	    {
-	       peer.put("ordinal", o); 
-	       Change change = peer.getLastChange();
-	       if (change != null) changes.add(change);
+	       changes.add(peer.registerChange("ordinal", o));
+	       peer.ordinal = o; 
 	    }
 	    o++;
 	 }
@@ -418,7 +432,7 @@ public class Annotation
     * @return A collection of resulting changes (which may be empty or may include an ordinal change)
     */
    public Vector<Change> setParent(Annotation newParent, boolean append) 
-   { 
+   {
       Vector<Change> changes = new Vector<Change>();
       Annotation currentParent = getParent();
       if (currentParent != null && currentParent != newParent)
@@ -462,7 +476,7 @@ public class Annotation
 	 if (newSiblings != null && !newSiblings.contains(this))
 	 {
 	    newSiblings.add(this);
-	    if (append || get("ordinal") == null)
+	    if (append || this.ordinal == 0)
 	    {
 	       changes.addAll(
 		  setOrdinal(newSiblings.size() + ordinalMinimum(getLayerId()) - 1));
@@ -805,6 +819,17 @@ public class Annotation
 	 return getOrdinal();
       } 
    } // end of getOriginalOrdinal()
+
+   
+   /**
+    * Returns the ordinal that has previously been explicitly assigned.
+    * <p>This method differs from {@link #getOrdinal()} in that if {@link #setOrdinal(int)} has not been specifically invoked previously, {@link #getOrdinal()} will try to figure out the ordinal from the position in the parent, etc., where this method will simply returne 0.
+    * @return The ordinal last set by a call to {@link #setOrdinal(int)}, or 0 if it hasn't been previously called.
+    */
+   public int getAssignedOrdinal()
+   {
+      return ordinal;
+   } // end of getAssignedOrdinal()
 
    
    /**
@@ -1740,7 +1765,7 @@ public class Annotation
     */
    public String toString()
    {
-      if (!containsKey("label")) return "[" + getId() + "]";
+      if (label == null) return "[" + getId() + "]";
       return getLabel();
    } // end of toString()   
 
@@ -1757,10 +1782,10 @@ public class Annotation
    {
       if (this.equals(o)) return 0;
       if (getParentId() != null && getParentId().equals(o.getParentId())
-	  && containsKey("ordinal") && o.containsKey("ordinal")
-	  && !get("ordinal").equals(o.get("ordinal")))
+	  && this.ordinal != 0 && o.ordinal != 0
+	  && this.ordinal != o.ordinal)
       {
-	 return ((Integer)get("ordinal")).compareTo((Integer)o.get("ordinal"));
+	 return new Integer(this.ordinal).compareTo(new Integer(o.ordinal));
       }
       if (getLayerId().equals(o.getLayerId())
 	  && getParent() != null && o.getParent() != null

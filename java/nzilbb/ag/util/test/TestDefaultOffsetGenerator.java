@@ -73,15 +73,21 @@ public class TestDefaultOffsetGenerator
       
       g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
       
-      g.addAnnotation(new Annotation("the", "the", "word", "a0", "a1", "turn1"));
-      g.addAnnotation(new Annotation("quick", "quick", "word", "a1", "a2", "turn1"));
-      g.addAnnotation(new Annotation("brown", "brown", "word", "a2", "a3", "turn1"));
-      g.addAnnotation(new Annotation("fox", "fox", "word", "a3", "a4", "turn1"));
-      g.addAnnotation(new Annotation("jumps", "jumps", "word", "a4", "a5", "turn1"));
-      g.addAnnotation(new Annotation("over", "over", "word", "a5", "a6", "turn1"));
-      g.addAnnotation(new Annotation("a", "a", "word", "a6", "a7", "turn1"));
-      g.addAnnotation(new Annotation("lazy", "lazy", "word", "a7", "a8", "turn1"));
-      g.addAnnotation(new Annotation("dog", "dog", "word", "a8", "a9", "turn1"));
+      g.addAnnotation(new Annotation("the", "the", "word", "a0", "a1", "turn1", 1));
+      g.addAnnotation(new Annotation("quick", "quick", "word", "a1", "a2", "turn1", 2));
+      g.addAnnotation(new Annotation("brown", "brown", "word", "a2", "a3", "turn1", 3));
+      g.addAnnotation(new Annotation("fox", "fox", "word", "a3", "a4", "turn1", 4));
+      g.addAnnotation(new Annotation("jumps", "jumps", "word", "a4", "a5", "turn1", 5));
+      g.addAnnotation(new Annotation("over", "over", "word", "a5", "a6", "turn1", 6));
+      g.addAnnotation(new Annotation("a", "a", "word", "a6", "a7", "turn1", 7));
+      g.addAnnotation(new Annotation("lazy", "lazy", "word", "a7", "a8", "turn1", 8));
+      g.addAnnotation(new Annotation("dog", "dog", "word", "a8", "a9", "turn1", 9));
+
+      System.out.println(" ord: " + g.getAnnotation("a").getOrdinal());
+      g.getChanges();
+      System.out.println(" ord now: " + g.getAnnotation("a").getOrdinal());
+      assertEquals("no extra changes at the beginning: " + g.getChanges(),
+		   0, g.getChanges().size());
 
       DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
       // generator.setDebug(true);
@@ -128,7 +134,7 @@ public class TestDefaultOffsetGenerator
 		      order.next());
 	 assertEquals(new Change(Change.Operation.Update, g.getAnchor("a8"), "offset", new Double(8.0)), 
 		      order.next());
-	 assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
+	 assertEquals("no extra changes to graph: " + g.getChanges(), changes.size(), g.getChanges().size());
 
       }
       catch(TransformationException exception)
@@ -161,29 +167,29 @@ public class TestDefaultOffsetGenerator
 			   true)); // parentIncludes
 
       g.addAnchor(new Anchor("turnStart", 0.0)); // turn start
-      g.getAnchor("turnStart").put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+      g.getAnchor("turnStart").setConfidence(Constants.CONFIDENCE_MANUAL);
       g.addAnchor(new Anchor("a0", 0.1)); // the
-      g.getAnchor("a0").put(Constants.CONFIDENCE, Constants.CONFIDENCE_NONE);
+      g.getAnchor("a0").setConfidence(Constants.CONFIDENCE_NONE);
       g.addAnchor(new Anchor("a05", 0.2)); // quick
-      g.getAnchor("a05").put(Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT);
+      g.getAnchor("a05").setConfidence(Constants.CONFIDENCE_DEFAULT);
       g.addAnchor(new Anchor("a1", 1.3)); // brown
-      g.getAnchor("a1").put(Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT);
+      g.getAnchor("a1").setConfidence(Constants.CONFIDENCE_DEFAULT);
       g.addAnchor(new Anchor("a15", 1.4)); // fox
-      g.getAnchor("a15").put(Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT);
+      g.getAnchor("a15").setConfidence(Constants.CONFIDENCE_DEFAULT);
       g.addAnchor(new Anchor("a2", 2.0)); // jumps
-      g.getAnchor("a2").put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+      g.getAnchor("a2").setConfidence(Constants.CONFIDENCE_MANUAL);
       g.addAnchor(new Anchor("a3", 3.3)); // over
-      g.getAnchor("a3").put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+      g.getAnchor("a3").setConfidence(Constants.CONFIDENCE_AUTOMATIC);
       g.addAnchor(new Anchor("a4", 4.4)); // a
-      g.getAnchor("a4").put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+      g.getAnchor("a4").setConfidence(Constants.CONFIDENCE_AUTOMATIC);
       g.addAnchor(new Anchor("a5", 5.5)); // lazy
-      g.getAnchor("a5").put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+      g.getAnchor("a5").setConfidence(Constants.CONFIDENCE_AUTOMATIC);
       g.addAnchor(new Anchor("a6", 6.6)); // dog
       // no confidence set for a6
       g.addAnchor(new Anchor("a7", null)); // end of dog
       // no confidence set for a7
       g.addAnchor(new Anchor("turnEnd", 7.0)); // turn end
-      g.getAnchor("turnEnd").put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+      g.getAnchor("turnEnd").setConfidence(Constants.CONFIDENCE_MANUAL);
 
       g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
       
@@ -283,26 +289,26 @@ public class TestDefaultOffsetGenerator
 			   "turn", // parentId
 			   true)); // parentIncludes
 
-      g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL)); // turn start
+      g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
 
-      g.addAnchor(new Anchor("a0", 0.01, Constants.CONFIDENCE, Constants.CONFIDENCE_NONE)); // the
-      g.addAnchor(new Anchor("a01", 0.02, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT)); // quick
-      g.addAnchor(new Anchor("a02", 0.03, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT)); // brown
-      g.addAnchor(new Anchor("a03", 0.04, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT)); // fox
-      g.addAnchor(new Anchor("a04a", 0.04, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT)); // fox end
+      g.addAnchor(new Anchor("a0", 0.01, Constants.CONFIDENCE_NONE)); // the
+      g.addAnchor(new Anchor("a01", 0.02, Constants.CONFIDENCE_DEFAULT)); // quick
+      g.addAnchor(new Anchor("a02", 0.03, Constants.CONFIDENCE_DEFAULT)); // brown
+      g.addAnchor(new Anchor("a03", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox
+      g.addAnchor(new Anchor("a04a", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox end
 
-      g.addAnchor(new Anchor("utteranceChange", 0.4, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+      g.addAnchor(new Anchor("utteranceChange", 0.4, Constants.CONFIDENCE_MANUAL)); // utterance boundary
 
-      g.addAnchor(new Anchor("a04b", 2.0, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC)); // jumps
-      g.addAnchor(new Anchor("a14", 3.3, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC)); // over
-      g.addAnchor(new Anchor("a24", 4.4, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC)); // a
-      g.addAnchor(new Anchor("a34", 5.0, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC)); // lazy
+      g.addAnchor(new Anchor("a04b", 2.0, Constants.CONFIDENCE_AUTOMATIC)); // jumps
+      g.addAnchor(new Anchor("a14", 3.3, Constants.CONFIDENCE_AUTOMATIC)); // over
+      g.addAnchor(new Anchor("a24", 4.4, Constants.CONFIDENCE_AUTOMATIC)); // a
+      g.addAnchor(new Anchor("a34", 5.0, Constants.CONFIDENCE_AUTOMATIC)); // lazy
       // no confidence set for a44 and a54
       g.addAnchor(new Anchor("a44", 5.1)); // dog
       g.addAnchor(new Anchor("a54", null)); // end of dog
 
       // no confidence set for a7
-      g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL)); // turn end
+      g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE_MANUAL)); // turn end
 
       g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
       
@@ -898,26 +904,26 @@ public class TestDefaultOffsetGenerator
 			   "turn", // parentId
 			   true)); // parentIncludes
 
-      g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL)); // turn start
+      g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
 
-      g.addAnchor(new Anchor("a0", 0.01, Constants.CONFIDENCE, Constants.CONFIDENCE_NONE)); // the
-      g.addAnchor(new Anchor("a01", 0.02, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT)); // quick
-      g.addAnchor(new Anchor("a02", 0.03, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT)); // brown
-      g.addAnchor(new Anchor("a03", 0.04, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT)); // fox
-      g.addAnchor(new Anchor("a04a", 0.04, Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT)); // fox end
+      g.addAnchor(new Anchor("a0", 0.01, Constants.CONFIDENCE_NONE)); // the
+      g.addAnchor(new Anchor("a01", 0.02, Constants.CONFIDENCE_DEFAULT)); // quick
+      g.addAnchor(new Anchor("a02", 0.03, Constants.CONFIDENCE_DEFAULT)); // brown
+      g.addAnchor(new Anchor("a03", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox
+      g.addAnchor(new Anchor("a04a", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox end
 
-      g.addAnchor(new Anchor("utteranceChange", 0.4, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+      g.addAnchor(new Anchor("utteranceChange", 0.4, Constants.CONFIDENCE_MANUAL)); // utterance boundary
 
-      g.addAnchor(new Anchor("a04b", 2.0, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC)); // jumps
-      g.addAnchor(new Anchor("a14", 3.3, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC)); // over
-      g.addAnchor(new Anchor("a24", 4.4, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC)); // a
-      g.addAnchor(new Anchor("a34", 5.0, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC)); // lazy
+      g.addAnchor(new Anchor("a04b", 2.0, Constants.CONFIDENCE_AUTOMATIC)); // jumps
+      g.addAnchor(new Anchor("a14", 3.3, Constants.CONFIDENCE_AUTOMATIC)); // over
+      g.addAnchor(new Anchor("a24", 4.4, Constants.CONFIDENCE_AUTOMATIC)); // a
+      g.addAnchor(new Anchor("a34", 5.0, Constants.CONFIDENCE_AUTOMATIC)); // lazy
       // no confidence set for a44 and a54
       g.addAnchor(new Anchor("a44", 5.1)); // dog
       g.addAnchor(new Anchor("a54", 5.2)); // end of dog
 
       // no confidence set for a7
-      g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL)); // turn end
+      g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE_MANUAL)); // turn end
 
       g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
       

@@ -46,10 +46,10 @@ public class AnnotationComparatorByOrdinal // TODO unit test!
       if (o1 == o2 || (o1.getId() != null && o1.getId().equals(o2.getId()))) return 0;
       // anchors/layers the same, compare ordinal
       if (o1.getParentId() != null && o1.getParentId().equals(o2.getParentId())
-	  && o1.containsKey("ordinal") && o2.containsKey("ordinal"))
+	  && o1.getAssignedOrdinal() != 0 && o2.getAssignedOrdinal() != 0)
       {
-	 int o1Ordinal = ((Integer)o1.get("ordinal")).intValue();
-	 int o2Ordinal = ((Integer)o2.get("ordinal")).intValue();
+	 int o1Ordinal = o1.getAssignedOrdinal();
+	 int o2Ordinal = o2.getAssignedOrdinal();
 	 if (o1Ordinal < o2Ordinal)
 	 {
 	    return -3;
