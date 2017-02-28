@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2017 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -3029,8 +3029,17 @@ public class SqlGraphStore
 	       case Update:
 	       {
 		  int familyId = -1;
+		  int familySequence = 1;
+		  double familyOffset = 0.0;
 		  PreparedStatement sql = getConnection().prepareStatement(
-		     "SELECT family_id FROM transcript_family WHERE name = ?");
+		     "SELECT transcript_family.family_id,"
+		     + " COALESCE(MAX(family_sequence) + 1, 1) AS family_sequence,"
+		     + " COALESCE(MAX(anchor.offset), 0.0) AS family_offset"
+		     + " FROM transcript_family"
+		     + " LEFT OUTER JOIN transcript ON transcript.family_id = transcript_family.family_id"
+		     + " LEFT OUTER JOIN anchor ON anchor.ag_id = transcript.ag_id"
+		     + " WHERE name = ?"
+		     + " GROUP BY transcript_family.family_id");
 		  sql.setString(1, annotation.getLabel());
 		  ResultSet rs = sql.executeQuery();
 		  if (!rs.next())
@@ -3064,14 +3073,19 @@ public class SqlGraphStore
 		  else
 		  {
 		     familyId = rs.getInt("family_id");
+		     familySequence = rs.getInt("family_sequence");
+		     familyOffset = rs.getInt("family_offset");
 		  }
 		  try { rs.close(); } catch(Exception exception) {}
 		  sql.close();
 		  int agId = ((Integer)annotation.getGraph().get("@ag_id")).intValue();
 		  PreparedStatement sqlUpdate = getConnection().prepareStatement(
-		     "UPDATE transcript SET family_id = ? WHERE ag_id = ?");
+		     "UPDATE transcript SET family_id = ?, family_sequence = ?, family_offset = ?"
+		     + " WHERE ag_id = ?");
 		  sqlUpdate.setInt(1, familyId);
-		  sqlUpdate.setInt(2, agId);
+		  sqlUpdate.setInt(2, familySequence);
+		  sqlUpdate.setDouble(3, familyOffset);
+		  sqlUpdate.setInt(4, agId);
 		  sqlUpdate.executeUpdate();
 		  sqlUpdate.close();
 		  break;
