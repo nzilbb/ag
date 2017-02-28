@@ -1298,7 +1298,7 @@ public class TestTextGridDeserializer
 	 new Layer("segments", "Phones", 2, true, false, true, "transcript", true),
 	 new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
       // access file
-      NamedStream[] streams = { new NamedStream(new File(getDir(), "s1402a.TextGrid")) };
+      NamedStream[] streams = { new NamedStream(new File(getDir(), "performance.TextGrid")) };
       
       // create deserializer
       TextGridDeserializer deserializer = new TextGridDeserializer();
@@ -1326,7 +1326,7 @@ public class TestTextGridDeserializer
 	 System.out.println(warning);
       }
 
-      assertEquals("s1402a.TextGrid", g.getId());
+      assertEquals("performance.TextGrid", g.getId());
 
       assertTrue("Deserialization too slow:\n" + deserializer.getTimers().toString(),
 		 1500 > deserializer.getTimers().getTotals().get("deserialize"));
