@@ -72,12 +72,16 @@ public class Anchor
    } // end of getClonedAttributes()
 
    // Attributes stored in HashMap:
-   
+
+   /**
+    * The anchor's time/character offset.
+    */
+   protected Double offset;
    /**
     * Getter for <i>offset</i>: The anchor's time/character offset.
     * @return The anchor's time/character offset.
     */
-   public Double getOffset() { try { return (Double)get("offset"); } catch(ClassCastException cc) {return null;} }
+   public Double getOffset() { return offset; }
    /**
     * Setter for <i>offset</i>: The anchor's time/character offset.
     * @param offset The anchor's time/character offset.
@@ -85,14 +89,20 @@ public class Anchor
     */
    public synchronized Vector<Change> setOffset(Double offset) 
    { 
-      put("offset", offset); 
       Vector<Change> changes = new Vector<Change>();
-      Change change = getLastChange();
-      if (change != null)
+      if (containsKey("originalOffset")
+	  || (this.offset != null && !this.offset.equals(offset)))
       {
+	 Change change = registerChange("offset", offset);
+
 	 // record the change
 	 changes.add(change);
+      }
 
+      this.offset = offset;
+
+      if (offset != null || changes.size() > 0)
+      {
 	 if (graph != null)
 	 {
 	    // add this to offsetIndex
@@ -102,13 +112,12 @@ public class Anchor
 	       graph.offsetIndex.get(offset).add(this); // TODO should probably remove it from the old position.
 	    }
 	    
-	 // reset indices of related layers
-	 for (String layerId : startOf.keySet()) graph.indicesByLayer.remove(layerId);
+	    // reset indices of related layers
+	    for (String layerId : startOf.keySet()) graph.indicesByLayer.remove(layerId);
 	    for (String layerId : endOf.keySet()) graph.indicesByLayer.remove(layerId);
 	 }
-      
       }
-
+      
       return changes;
    }
 
@@ -185,27 +194,28 @@ public class Anchor
    {
       setId(id);
       setOffset(offset);
+      if (offset == null) put("originalOffset", null);
       put("startOf", getStartOf()); // TODO these violate the principle of having only simple values
       put("endOf", getEndOf());
    } // end of constructor
 
    /**
-    * Constructor with extra attribute.
+    * Constructor with confidence.
     * <p>This convenience constructor allows, for example, the creation of an anchor with
     * a confidence value in one step:
     * <pre>
-    * Anchor anchor = new Anchor("123", 456.789, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+    * Anchor anchor = new Anchor("123", 456.789, Constants.CONFIDENCE_AUTOMATIC);
     * </pre>
     * @param id The anchor's identifier.
     * @param offset The anchor's time/character offset.
-    * @param key An attribute to set the value of.
-    * @param value The value of the attribute identified by <var>key</var>
+    * @param confidence Confidence rating.
     */
-   public Anchor(String id, Double offset, String key, Object value)
+   public Anchor(String id, Double offset, Integer confidence)
    {
       setId(id);
       setOffset(offset);
-      put(key, value);
+      if (offset == null) put("originalOffset", null);
+      setConfidence(confidence);
       put("startOf", getStartOf());
       put("endOf", getEndOf());
    } // end of constructor
@@ -218,23 +228,22 @@ public class Anchor
    {
       putAll(other);
       Vector<String> keysToRemove = new Vector<String>();
-      keysToRemove.add("id");
+      for (String key : getTrackedAttributes())
+      {
+	 String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
+	 keysToRemove.add(originalValueKey);
+      }
       for (String key : keySet())
       {
-	 // remove tracked original attributes
-	 if (getTrackedAttributes().contains(key))
-	 {
-	    String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
-	    keysToRemove.add(originalValueKey);
-	 }
-	 else if (key.length() > 0 && !Character.isLetterOrDigit(key.charAt(0)))
-	 { // starts with non-alphanumeric
-	    keysToRemove.add(key);
-	 }
+      	 if (key.length() > 0 && !Character.isLetterOrDigit(key.charAt(0)))
+      	 { // starts with non-alphanumeric
+      	    keysToRemove.add(key);
+      	 }
       } // next key
       for (String key : keysToRemove) remove(key);
       put("startOf", getStartOf());
       put("endOf", getEndOf());
+      cloneAttributesFrom(other, "id");
    } // end of constructor
 
    /**

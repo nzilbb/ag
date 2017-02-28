@@ -68,21 +68,29 @@ public class Layer // TODO add type attribute
    // Attributes stored in HashMap:
    
    /**
+    * The layer's parent layer id
+    */
+   protected String parentId;
+   /**
     * Getter for <i>parentId</i>: The layer's parent layer id
     * @return The layer's parent layer id
     */
-   public String getParentId() { try { return (String)get("parentId"); } catch(ClassCastException exception) {return null;} }
+   public String getParentId() { return parentId; }
    /**
     * Setter for <i>parentId</i>: The layer's parent layer id
     * @param parentId The layer's parent layer id
     */
-   public void setParentId(String parentId) { put("parentId", parentId); }
+   public void setParentId(String parentId) { this.parentId = parentId; }
 
+   /**
+    * The description of the layer.
+    */
+   protected String description;
    /**
     * Getter for <i>description</i>: The description of the layer.
     * @return The description of the layer.
     */
-   public String getDescription() { try { return (String)get("description"); } catch(ClassCastException exception) {return null;} }
+   public String getDescription() { return description; }
    /**
     * Setter for <i>description</i>: The description of the layer.
     * @param description The description of the layer.
@@ -90,8 +98,15 @@ public class Layer // TODO add type attribute
     * @see Constants#ALIGNMENT_INSTANT
     * @see Constants#ALIGNMENT_INTERVAL
     */
-   public void setDescription(String description) { put("description", description); }
+   public void setDescription(String description) { this.description = description; }
 
+   /**
+    * The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
+    * @see Constants#ALIGNMENT_NONE
+    * @see Constants#ALIGNMENT_INSTANT
+    * @see Constants#ALIGNMENT_INTERVAL
+    */
+   protected int alignment;
    /**
     * Getter for <i>alignment</i>: The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
     * @return The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
@@ -99,7 +114,7 @@ public class Layer // TODO add type attribute
     * @see Constants#ALIGNMENT_INSTANT
     * @see Constants#ALIGNMENT_INTERVAL
     */
-   public int getAlignment() { try { return ((Integer)get("alignment")).intValue(); } catch(ClassCastException cc) {return 0;} catch(NullPointerException np) {return 0;} }
+   public int getAlignment() { return alignment; }
    /**
     * Setter for <i>alignment</i>: The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
     * @param alignment The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
@@ -107,56 +122,72 @@ public class Layer // TODO add type attribute
     * @see Constants#ALIGNMENT_INSTANT
     * @see Constants#ALIGNMENT_INTERVAL
     */
-   public void setAlignment(int alignment) { put("alignment", alignment); }
+   public void setAlignment(int alignment) { this.alignment = alignment; }
 
+   /**
+    * Whether children have peers or not.
+    */
+   protected boolean peers;
    /**
     * Getter for <i>peers</i>: Whether children have peers or not.
     * @return Whether children have peers or not.
     */
-   public boolean getPeers() { try { return ((Boolean)get("peers")).booleanValue(); } catch(ClassCastException cc) {return false;} catch(NullPointerException np) {return false;} }
+   public boolean getPeers() { return peers; }
    /**
     * Setter for <i>peers</i>: Whether children have peers or not.
     * @param peers Whether children have peers or not.
     */
-   public void setPeers(boolean peers) { put("peers", peers); }
+   public void setPeers(boolean peers) { this.peers = peers; }
 
+   /**
+    * Whether child peers can overlap or not.
+    */
+   protected boolean peersOverlap;
    /**
     * Getter for <i>peersOverlap</i>: Whether child peers can overlap or not.
     * @return Whether child peers can overlap or not.
     */
-   public boolean getPeersOverlap() { try { return ((Boolean)get("peersOverlap")).booleanValue(); } catch(ClassCastException cc) {return false;} catch(NullPointerException np) {return false;} }
+   public boolean getPeersOverlap() { return peersOverlap; }
    /**
     * Setter for <i>peersOverlap</i>: Whether child peers can overlap or not.
     * @param peersOverlap Whether child peers can overlap or not.
     */
-   public void setPeersOverlap(boolean peersOverlap) { put("peersOverlap", peersOverlap); }
+   public void setPeersOverlap(boolean peersOverlap) { this.peersOverlap = peersOverlap; }
 
+   /**
+    * Whether the parent t-includes the child.
+    */
+   protected boolean parentIncludes;
    /**
     * Getter for <i>parentIncludes</i>: Whether the parent t-includes the child.
     * @return Whether the parent t-includes the child.
     */
-   public boolean getParentIncludes() { try { return ((Boolean)get("parentIncludes")).booleanValue(); } catch(ClassCastException cc) {return false;} catch(NullPointerException np) {return false;} }
+   public boolean getParentIncludes() { return parentIncludes; }
    /**
     * Setter for <i>parentIncludes</i>: Whether the parent t-includes the child.
     * @param parentIncludes Whether the parent t-includes the child.
     */
-   public void setParentIncludes(boolean parentIncludes) { put("parentIncludes", parentIncludes); }
+   public void setParentIncludes(boolean parentIncludes) { this.parentIncludes = parentIncludes; }
 
+   /**
+    * Whether children must temporally fill the entire parent duration (true) or not (false).
+    */
+   protected boolean saturated;
    /**
     * Getter for <i>saturated</i>: Whether children must temporally fill the entire parent duration (true) or not (false).
     * @return Whether children must temporally fill the entire parent duration (true) or not (false).
     */
-   public boolean getSaturated() { try { return ((Boolean)get("saturated")).booleanValue(); } catch(ClassCastException cc) {return false;} catch(NullPointerException np) {return false;} }
+   public boolean getSaturated() { return saturated; }
    /**
     * Setter for <i>saturated</i>: Whether children must temporally fill the entire parent duration (true) or not (false).
     * @param saturated Whether children must temporally fill the entire parent duration (true) or not (false).
     */
-   public void setSaturated(boolean saturated) { put("saturated", saturated); }
-
+   public void setSaturated(boolean saturated) { this.saturated = saturated; }
    
-   // Attributes stored outside HashMap, so that JSONifying the HashMap doesn't result in infinite recursion
-
-
+   /**
+    * Child layers.
+    */
+   protected LinkedHashMap<String,Layer> children;
    /**
     * Getter for <i>children</i>: Child layers.
     * @return Child layers.
@@ -164,27 +195,18 @@ public class Layer // TODO add type attribute
    @SuppressWarnings("unchecked")
    public LinkedHashMap<String,Layer> getChildren() 
    {
-      if (!containsKey("children"))
+      if (children == null)
       {
-	 setChildren(new LinkedHashMap<String,Layer>());
+	 children = new LinkedHashMap<String,Layer>();
       }
 
-      try 
-      { 
-	 return (LinkedHashMap<String,Layer>)get("children"); 
-      } 
-      catch(ClassCastException exception) 
-      { 
-	 LinkedHashMap<String,Layer> children = new LinkedHashMap<String,Layer>();
-	 setChildren(children); 
-	 return children; 
-      } 
+      return children; 
    }
    /**
     * Setter for <i>children</i>: Child layers.
     * @param children Child layers.
     */
-   public void setChildren(LinkedHashMap<String,Layer> children) { put("children", children); }
+   public void setChildren(LinkedHashMap<String,Layer> children) { this.children = children; }
 
 
    
@@ -214,6 +236,17 @@ public class Layer // TODO add type attribute
    }
 
    /**
+    * The type for labels on this layer.
+    * <p>Either a MIME type, or one of:
+    *  <ul>
+    *   <li>{@link Constants#TYPE_STRING}</li>
+    *   <li>{@link Constants#TYPE_IPA}</li>
+    *   <li>{@link Constants#TYPE_NUMBER}</li>
+    *   <li>{@link Constants#TYPE_SELECT}</li>
+    *  </ul>
+    */
+   protected String type;
+   /**
     * Getter for {@link #type}: The type for labels on this layer.
     * <p>Either a MIME type, or one of:
     *  <ul>
@@ -224,27 +257,31 @@ public class Layer // TODO add type attribute
     *  </ul>
     * @return The type for labels on this layer.
     */
-   public String getType() { try { return (String)get("type"); } catch(ClassCastException exception) {return null;} }
+   public String getType() { return type; }
    /**
     * Setter for {@link #type}: The type for labels on this layer.
     * @param type The type for labels on this layer.
     */
-   public void setType(String type) { put("type", type); }
+   public void setType(String type) { this.type = type; }
 
    
+   /**
+    * List of valid label values for this layer, or null if the layer values are not restricted.
+    * <p>The 'key' is the possible label value, and each key is associated with a description of the value (e.g. for displaying to users).
+    */
+   protected LinkedHashMap<String,String> validLabels;
    /**
     * Getter for <tt>validLabels</tt>: List of valid label values for this layer, or null if the layer values are not restricted.
     * <p>The 'key' is the possible label value, and each key is associated with a description of the value (e.g. for displaying to users).
     * @return List of valid label values for this layer, or null if the layer values are not restricted.
     */
-   @SuppressWarnings("unchecked")
-   public LinkedHashMap<String,String> getValidLabels() { try { return (LinkedHashMap<String,String>)get("validLabels"); } catch(ClassCastException exception) {return null;} }
+   public LinkedHashMap<String,String> getValidLabels() { return validLabels; }
    /**
     * Setter for <tt>validLabels</tt>: List of valid label values for this layer, or null if the layer values are not restricted.
     * <p>The 'key' is the possible label value, and each key is associated with a description of the value (e.g. for displaying to users).
     * @param newValidLabels List of valid label values for this layer, or null if the layer values are not restricted.
     */
-   public void setValidLabels(LinkedHashMap<String,String> newValidLabels) { put("validLabels", newValidLabels); }
+   public void setValidLabels(LinkedHashMap<String,String> newValidLabels) { this.validLabels = newValidLabels; }
    /**
     * Getter for <tt>validLabels</tt>: List of valid label values for this layer, or null if the layer values are not restricted.
     * @return List of valid label values for this layer, or null if the layer values are not restricted.
@@ -369,9 +406,9 @@ public class Layer // TODO add type attribute
     */
    public String toString()
    {
-      if (containsKey("id"))
+      if (getId() != null)
       {
-	 return get("id").toString();
+	 return getId();
       }
       else
       { // id isn't set, so we return the map's hashCode and hope for the best
@@ -386,9 +423,9 @@ public class Layer // TODO add type attribute
     */
    public int hashCode()
    {
-      if (containsKey("id"))
+      if (getId() != null)
       {
-	 return get("id").hashCode();
+	 return getId().hashCode();
       }
       else
       { // id isn't set, so we return the map's hashCode and hope for the best

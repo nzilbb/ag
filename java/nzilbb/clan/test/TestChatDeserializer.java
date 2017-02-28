@@ -133,14 +133,14 @@ public class TestChatDeserializer
 		   new Double(23.2835), utterances[1].getEnd().getOffset());
       assertEquals("simultaneos with next line", 
 		   new Integer(Constants.CONFIDENCE_DEFAULT), 
-		   utterances[1].getEnd().get(Constants.CONFIDENCE));
+		   utterances[1].getEnd().getConfidence());
       assertEquals("SUB", utterances[1].getParent().getLabel());
 
       assertEquals("simultaneous with previous line", 
 		   new Double(23.2835), utterances[2].getStart().getOffset());
       assertEquals("simultaneous with previous line", 
 		   new Integer(Constants.CONFIDENCE_DEFAULT), 
-		   utterances[2].getStart().get(Constants.CONFIDENCE));
+		   utterances[2].getStart().getConfidence());
       assertEquals("simultaneous line", new Double(25.057), utterances[2].getEnd().getOffset());
       assertEquals("SUB", utterances[2].getParent().getLabel());
 
@@ -181,7 +181,7 @@ public class TestChatDeserializer
       assertEquals("unsynchronised utterances - before - end moved", 
 		   new Double(491.397), utterances[170].getEnd().getOffset());
       assertEquals("unsynchronised utterances - before - low confidence", 
-		   Constants.CONFIDENCE_DEFAULT, utterances[170].getEnd().get(Constants.CONFIDENCE));
+		   Constants.CONFIDENCE_DEFAULT, utterances[170].getEnd().getConfidence().intValue());
       assertEquals("unsynchronised utterance - chained with utterance before", 
 		   utterances[170].getEnd(), utterances[171].getStart());
 
@@ -204,7 +204,7 @@ public class TestChatDeserializer
 		   utterances[utterances.length-2].getEnd().getOffset());
       assertEquals("aligned penultimate utterance has end confidence adjusted", 
 		   Constants.CONFIDENCE_DEFAULT, 
-		   utterances[utterances.length-2].getEnd().get(Constants.CONFIDENCE));
+		   utterances[utterances.length-2].getEnd().getConfidence().intValue());
       
       Annotation[] words = g.list("turn")[0].list("word");
       String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
@@ -245,7 +245,7 @@ public class TestChatDeserializer
       {	 
 	 assertEquals("ordinals correct " + words[i], i+1, words[i].getOrdinal());
 	 assertEquals("tagged as manual: " + words[i], 
-		      new Integer(Constants.CONFIDENCE_MANUAL), words[i].get(Constants.CONFIDENCE));
+		      new Integer(Constants.CONFIDENCE_MANUAL), words[i].getConfidence());
       }
 
       // c-units
@@ -277,7 +277,7 @@ public class TestChatDeserializer
       for (Annotation a : cUnits)
       {
 	 assertEquals("tagged as manual: " + a + " " + a.getStart() + "-" + a.getEnd(), 
-		      new Integer(Constants.CONFIDENCE_MANUAL), a.get(Constants.CONFIDENCE));
+		      new Integer(Constants.CONFIDENCE_MANUAL), a.getConfidence());
 	 assertEquals("parent set: " + a + " " + a.getStart() + "-" + a.getEnd(), 
 		      turns[0], a.getParent());
       }
@@ -290,7 +290,7 @@ public class TestChatDeserializer
       for (Annotation a : g.list("disfluency"))
       {
 	 assertEquals("tagged as manual: " + a, 
-		      new Integer(Constants.CONFIDENCE_MANUAL), a.get(Constants.CONFIDENCE));
+		      new Integer(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
 
       Annotation[] expansions = g.list("expansion");
@@ -306,7 +306,7 @@ public class TestChatDeserializer
       for (Annotation a : expansions)
       {
 	 assertEquals("tagged as manual: " + a, 
-		      new Integer(Constants.CONFIDENCE_MANUAL), a.get(Constants.CONFIDENCE));
+		      new Integer(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
 
       // linkages
@@ -341,7 +341,7 @@ public class TestChatDeserializer
       for (Annotation a : errors)
       {
 	 assertEquals("tagged as manual: " + a, 
-		      new Integer(Constants.CONFIDENCE_MANUAL), a.get(Constants.CONFIDENCE));
+		      new Integer(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
 
       // completion
@@ -350,7 +350,7 @@ public class TestChatDeserializer
       for (Annotation a : completions)
       {
 	 assertEquals("tagged as manual: " + a, 
-		      new Integer(Constants.CONFIDENCE_MANUAL), a.get(Constants.CONFIDENCE));
+		      new Integer(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
 
       assertEquals("leading completion", "nd", words[22].getLabel());
@@ -368,7 +368,7 @@ public class TestChatDeserializer
       for (Annotation a : retracing)
       {
 	 assertEquals("tagged as manual: " + a, 
-		      new Integer(Constants.CONFIDENCE_MANUAL), a.get(Constants.CONFIDENCE));
+		      new Integer(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
 
       // tag previous word
@@ -420,7 +420,7 @@ public class TestChatDeserializer
       for (Annotation a : repetition)
       {
 	 assertEquals("tagged as manual: " + a, 
-		      new Integer(Constants.CONFIDENCE_MANUAL), a.get(Constants.CONFIDENCE));
+		      new Integer(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
 
       // gems
@@ -465,7 +465,7 @@ public class TestChatDeserializer
       for (Annotation a : gems)
       {
 	 assertEquals("tagged as manual: " + a, 
-		      new Integer(Constants.CONFIDENCE_MANUAL), a.get(Constants.CONFIDENCE));
+		      new Integer(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
 
    }
@@ -556,14 +556,14 @@ public class TestChatDeserializer
 		   new Double(23.2835), utterances[1].getEnd().getOffset());
       assertEquals("simultaneos with next line", 
 		   new Integer(Constants.CONFIDENCE_DEFAULT), 
-		   utterances[1].getEnd().get(Constants.CONFIDENCE));
+		   utterances[1].getEnd().getConfidence());
       assertEquals("SUB", utterances[1].getParent().getLabel());
 
       assertEquals("simultaneous with previous line", 
 		   new Double(23.2835), utterances[2].getStart().getOffset());
       assertEquals("simultaneous with previous line", 
 		   new Integer(Constants.CONFIDENCE_DEFAULT), 
-		   utterances[2].getStart().get(Constants.CONFIDENCE));
+		   utterances[2].getStart().getConfidence());
       assertEquals("simultaneous line", new Double(25.057), utterances[2].getEnd().getOffset());
       assertEquals("SUB", utterances[2].getParent().getLabel());
 
@@ -611,7 +611,7 @@ public class TestChatDeserializer
 		   utterances[utterances.length-2].getEnd().getOffset());
       assertEquals("aligned penultimate utterance has end confidence adjusted", 
 		   Constants.CONFIDENCE_DEFAULT, 
-		   utterances[utterances.length-2].getEnd().get(Constants.CONFIDENCE));
+		   utterances[utterances.length-2].getEnd().getConfidence().intValue());
       
       Annotation[] words = g.list("word");
       String[] wordLabels = { 

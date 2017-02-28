@@ -765,7 +765,7 @@ public class TextGridDeserializer
       Graph graph = new Graph();
       graph.setId(getId());
       // creat the 0 anchor to prevent graph tagging from creating one with no confidence
-      Anchor graphStart = graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+      Anchor graphStart = graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL);
 
       // add layers to the graph
       // we don't just copy the whole schema, because that would imply that all the extra layers
@@ -855,14 +855,14 @@ public class TextGridDeserializer
 		  
 		  if (timers != null) timers.start("getOrCreateAnchorAt " + tier.getName());
 		  Anchor start = graph.getOrCreateAnchorAt(
-		     interval.getXmin(), Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+		     interval.getXmin(), Constants.CONFIDENCE_MANUAL);
 		  Anchor end = graph.getOrCreateAnchorAt(
-		     interval.getXmax(), Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+		     interval.getXmax(), Constants.CONFIDENCE_MANUAL);
 		  if (timers != null) timers.end("getOrCreateAnchorAt " + tier.getName());
 		  Annotation annotation = new Annotation(
 		     null, interval.getText(), layer.getId(), start.getId(), end.getId());
 		  annotation.put("@tier", tier);
-		  annotation.put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+		  annotation.setConfidence(Constants.CONFIDENCE_MANUAL);
 		  graph.addAnnotation(annotation);
 	       } // next interval
 	    } // interval tier 
@@ -881,11 +881,11 @@ public class TextGridDeserializer
 		  if (point.getMark() == null || point.getMark().trim().length() == 0) continue;
 
 		  Anchor anchor = graph.getOrCreateAnchorAt(
-		     point.getTime(), Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+		     point.getTime(), Constants.CONFIDENCE_MANUAL);
 		  Annotation annotation = new Annotation(
 		     null, point.getMark(), layer.getId(), anchor.getId(), anchor.getId());
 		  annotation.put("@tier", tier);
-		  annotation.put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+		  annotation.setConfidence(Constants.CONFIDENCE_MANUAL);
 		  graph.addAnnotation(annotation);
 	       } // next point
 	    } // point tier
@@ -899,7 +899,7 @@ public class TextGridDeserializer
 	 } // layer is mapped
       } // next tier
 
-      Anchor graphEnd = graph.getOrCreateAnchorAt(highestXmax, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+      Anchor graphEnd = graph.getOrCreateAnchorAt(highestXmax, Constants.CONFIDENCE_MANUAL);
 
       // ensure both turns and utterances exist, and parents are set
       // if (!turnLayerMapped && !utteranceLayerMapped && wordLayerMapped) TODO construct utterances

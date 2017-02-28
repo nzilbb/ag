@@ -1588,7 +1588,7 @@ public class SqlGraphStore
 	    if (graph.my("corpus") == null)
 	    { // set to the first value
 	       graph.createTag(graph, layer.getId(), layer.getValidLabels().keySet().iterator().next())
-		  .put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+		  .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
 	    }
 
 	    layer = graph.getLayer("episode");
@@ -1600,12 +1600,12 @@ public class SqlGraphStore
 	    if (graph.my("episode") == null)
 	    { // set to the graph name, without the extension
 	       graph.createTag(graph, layer.getId(), graph.getId().replaceAll("\\.[^.]*$",""))
-		  .put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+		  .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
 	    }
 	    else if (graph.my("episode").getLabel().length() == 0)
 	    {
 	       graph.my("corpus").setLabel(graph.getId().replaceAll("\\.[^.]*$",""));
-	       graph.my("corpus").put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+	       graph.my("corpus").setConfidence(Constants.CONFIDENCE_AUTOMATIC);
 	    }
 
 	    layer = graph.getLayer("transcript_type");
@@ -1617,7 +1617,7 @@ public class SqlGraphStore
 	    if (graph.my("transcript_type") == null)
 	    { // set to the first value
 	       graph.createTag(graph, layer.getId(), layer.getValidLabels().keySet().iterator().next())
-		  .put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+		  .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
 	    }
 	 }
 	 //v.setDebug(true);	 
@@ -2149,7 +2149,7 @@ public class SqlGraphStore
       {
 	 annotation.setLabel(rsAnnotation.getString("label"));
       }
-      annotation.put("confidence", new Integer(rsAnnotation.getInt("label_status")));
+      annotation.setConfidence(new Integer(rsAnnotation.getInt("label_status")));
       annotation.setLayerId(layer.getId());
       
       // parent:
@@ -2228,7 +2228,7 @@ public class SqlGraphStore
       Object[] anchorIdParts = { new Long(rsAnchor.getLong(prefix + "anchor_id"))};
       Anchor anchor = new Anchor(
 	 fmtAnchorId.format(anchorIdParts), new Double(rsAnchor.getDouble(prefix + "offset")));
-      anchor.put("confidence", new Integer(rsAnchor.getInt(prefix + "alignment_status")));
+      anchor.setConfidence(new Integer(rsAnchor.getInt(prefix + "alignment_status")));
       return anchor;
    } // end of anchorFromResult()
 
@@ -2248,10 +2248,9 @@ public class SqlGraphStore
     */
    protected void saveAnchorChanges(Anchor anchor, HashSet<Annotation> extraUpdates, PreparedStatement sqlInsertAnchor, PreparedStatement sqlLastId, PreparedStatement sqlUpdateAnchor, PreparedStatement sqlCheckAnchor, HashSet<Integer> layerIds, PreparedStatement sqlDeleteAnchor) throws SQLException, StoreException
    {
-      if (!anchor.containsKey("confidence")
-	  || (!(anchor.get("confidence") instanceof Integer)))
+      if (anchor.getConfidence() == null)
       {
-	 anchor.put("confidence", new Integer(Constants.CONFIDENCE_UNKNOWN));
+	 anchor.setConfidence(new Integer(Constants.CONFIDENCE_UNKNOWN));
       }
       switch (anchor.getChange())
       {
@@ -2266,7 +2265,7 @@ public class SqlGraphStore
 	    {
 	       sqlInsertAnchor.setNull(2, java.sql.Types.DOUBLE);
 	    }
-	    sqlInsertAnchor.setInt(3, ((Integer)anchor.get("confidence")).intValue());
+	    sqlInsertAnchor.setInt(3, anchor.getConfidence());
 	    sqlInsertAnchor.executeUpdate();
 	    ResultSet rs = sqlLastId.executeQuery();
 	    rs.next();
@@ -2295,7 +2294,7 @@ public class SqlGraphStore
 	       {
 		  sqlUpdateAnchor.setNull(1, java.sql.Types.DOUBLE);
 	       }
-	       sqlUpdateAnchor.setInt(2, ((Integer)anchor.get("confidence")).intValue());
+	       sqlUpdateAnchor.setInt(2, anchor.getConfidence());
 	       sqlUpdateAnchor.setLong(3, anchorId);
 	       sqlUpdateAnchor.executeUpdate();
 	       
@@ -2387,10 +2386,9 @@ public class SqlGraphStore
    {
       if (annotation.getId().startsWith("m_")) return; // ignore participant changes for now
 
-      if (!annotation.containsKey("confidence")
-	  || (!(annotation.get("confidence") instanceof Integer)))
+      if (annotation.getConfidence() == null)
       {
-	 annotation.put("confidence", new Integer(Constants.CONFIDENCE_UNKNOWN));
+	 annotation.setConfidence(new Integer(Constants.CONFIDENCE_UNKNOWN));
       }
       switch (annotation.getChange())
       {
@@ -2431,7 +2429,7 @@ public class SqlGraphStore
 	    {
 	       sql.setString(3, annotation.getLabel());
 	    }
-	    sql.setInt(4, ((Integer)annotation.get("confidence")).intValue());
+	    sql.setInt(4, annotation.getConfidence());
 	    try
 	    {
 	       Object[] o = fmtAnchorId.parse(annotation.getStartId());
@@ -2706,7 +2704,7 @@ public class SqlGraphStore
 	    {
 	       sql.setString(2, annotation.getLabel());
 	    }
-	    sql.setInt(3, ((Integer)annotation.get("confidence")).intValue());
+	    sql.setInt(3, annotation.getConfidence());
 	    try
 	    {
 	       Object[] o = fmtAnchorId.parse(annotation.getStartId());

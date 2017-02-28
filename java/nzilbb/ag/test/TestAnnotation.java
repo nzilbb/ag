@@ -42,68 +42,42 @@ public class TestAnnotation
       a.setParentId("parent");
       a.setOrdinal(99);
       assertEquals("123", a.getId());
-      assertEquals("123", a.get("id"));
-      assertEquals("word", a.get("layerId"));
-      assertEquals("LABEL", a.get("label"));
+      assertEquals("word", a.getLayerId());
       assertEquals("LABEL", a.toString());
       assertEquals("start", a.getStartId());
-      assertEquals("start", a.get("startId"));
       assertEquals("end", a.getEndId());
-      assertEquals("end", a.get("endId"));
       assertEquals("parent", a.getParentId());
-      assertEquals("parent", a.get("parentId"));
       assertEquals(99, a.getOrdinal());
-      assertEquals(new Integer(99), a.get("ordinal"));
 
       // basic constructor
       a = new Annotation("123", "LABEL", "word");
       assertEquals("123", a.getId());
-      assertEquals("123", a.get("id"));
-      assertEquals("word", a.get("layerId"));
-      assertEquals("LABEL", a.get("label"));
+      assertEquals("word", a.getLayerId());
       assertEquals("LABEL", a.toString());
 
       // ...with start/end
       a = new Annotation("123", "LABEL", "word", "start", "end");
       assertEquals("123", a.getId());
-      assertEquals("123", a.get("id"));
-      assertEquals("word", a.get("layerId"));
-      assertEquals("LABEL", a.get("label"));
       assertEquals("LABEL", a.toString());
       assertEquals("start", a.getStartId());
-      assertEquals("start", a.get("startId"));
       assertEquals("end", a.getEndId());
-      assertEquals("end", a.get("endId"));
 
       // ...and parent
       a = new Annotation("123", "LABEL", "word", "start", "end", "parent");
       assertEquals("123", a.getId());
-      assertEquals("123", a.get("id"));
-      assertEquals("word", a.get("layerId"));
-      assertEquals("LABEL", a.get("label"));
       assertEquals("LABEL", a.toString());
       assertEquals("start", a.getStartId());
-      assertEquals("start", a.get("startId"));
       assertEquals("end", a.getEndId());
-      assertEquals("end", a.get("endId"));
       assertEquals("parent", a.getParentId());
-      assertEquals("parent", a.get("parentId"));
 
       // ...and ordinal
       a = new Annotation("123", "LABEL", "word", "start", "end", "parent", 99);
       assertEquals("123", a.getId());
-      assertEquals("123", a.get("id"));
-      assertEquals("word", a.get("layerId"));
-      assertEquals("LABEL", a.get("label"));
       assertEquals("LABEL", a.toString());
       assertEquals("start", a.getStartId());
-      assertEquals("start", a.get("startId"));
       assertEquals("end", a.getEndId());
-      assertEquals("end", a.get("endId"));
       assertEquals("parent", a.getParentId());
-      assertEquals("parent", a.get("parentId"));
       assertEquals(99, a.getOrdinal());
-      assertEquals(new Integer(99), a.get("ordinal"));
    }
 
    @Test public void extendedAttributes() 
@@ -235,7 +209,7 @@ public class TestAnnotation
    {
       Annotation a = new Annotation("123", "LABEL", "word", "start", "end", "parent", 99);
       a.put("foo", "foo");
-      a.put(Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+      a.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
       Annotation c = (Annotation)a.clone();
       assertEquals("123", c.getId());
       assertEquals("LABEL", c.getLabel());
@@ -244,8 +218,27 @@ public class TestAnnotation
       assertEquals("end", c.getEndId());
       assertEquals("parent", c.getParentId());
       assertEquals(99, c.getOrdinal());     
-      assertEquals(Constants.CONFIDENCE_AUTOMATIC, c.get(Constants.CONFIDENCE));
+      assertEquals(new Integer(Constants.CONFIDENCE_AUTOMATIC), c.getConfidence());
       assertFalse(c.containsKey("foo"));     
+   }
+
+   @Test public void copyConstructor() 
+   {
+      Annotation a = new Annotation("123", "LABEL", "word", "start", "end", "parent", 99);
+      a.put("foo", "foo");
+      a.put("@bar", "bar");
+      a.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+      Annotation c = new Annotation(a);
+      assertNull(c.getId());
+      assertEquals("LABEL", c.getLabel());
+      assertEquals("word", c.getLayerId());
+      assertEquals("start", c.getStartId());
+      assertEquals("end", c.getEndId());
+      assertEquals("parent", c.getParentId());
+      assertEquals(99, c.getOrdinal());     
+      assertEquals(new Integer(Constants.CONFIDENCE_AUTOMATIC), c.getConfidence());
+      assertEquals("foo", c.get("foo"));     
+      assertFalse(c.containsKey("@bar"));     
    }
 
    @Test public void instantaneous() 

@@ -562,9 +562,8 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 			{
 			   if (!l.equals(span.firstElement().getLabel()))
 			   { // only change if it's different
-			      span.firstElement().setLabel(l);
-			      changes.add( // record changes of:
-				 span.firstElement().getLastChange());
+			      changes.addAll( // record changes of:
+				 span.firstElement().setLabel(l));
 			   }
 			}
 		     }
@@ -599,9 +598,8 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 			{
 			   if (!l.equals(span.lastElement().getLabel()))
 			   { // only change if it's different
-			      span.lastElement().setLabel(l);
-			      changes.add( // record changes of:
-				 span.lastElement().getLastChange());
+			      changes.addAll( // record changes of:
+				 span.lastElement().setLabel(l));
 			   }
 			}
 		     }

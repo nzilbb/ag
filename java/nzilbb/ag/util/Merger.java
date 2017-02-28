@@ -521,13 +521,13 @@ public class Merger
       {
 	 if (a.getStart() == null)
 	 {
-	    Anchor dummy = new Anchor(a.getStartId(), null, Constants.CONFIDENCE, Constants.CONFIDENCE_NONE);
+	    Anchor dummy = new Anchor(a.getStartId(), null, Constants.CONFIDENCE_NONE);
 	    dummyAnchors.add(dummy);
 	    graph.addAnchor(dummy);
 	 }
 	 if (a.getEnd() == null)
 	 {
-	    Anchor dummy = new Anchor(a.getEndId(), null, Constants.CONFIDENCE, Constants.CONFIDENCE_NONE);
+	    Anchor dummy = new Anchor(a.getEndId(), null, Constants.CONFIDENCE_NONE);
 	    dummyAnchors.add(dummy);
 	    graph.addAnchor(dummy);
 	 }
@@ -537,13 +537,13 @@ public class Merger
       {
 	 if (a.getStart() == null)
 	 {
-	    Anchor dummy = new Anchor(a.getStartId(), null, Constants.CONFIDENCE, Constants.CONFIDENCE_NONE);
+	    Anchor dummy = new Anchor(a.getStartId(), null, Constants.CONFIDENCE_NONE);
 	    dummyEditedAnchors.add(dummy);
 	    editedGraph.addAnchor(dummy);
 	 }
 	 if (a.getEnd() == null)
 	 {
-	    Anchor dummy = new Anchor(a.getEndId(), null, Constants.CONFIDENCE, Constants.CONFIDENCE_NONE);
+	    Anchor dummy = new Anchor(a.getEndId(), null, Constants.CONFIDENCE_NONE);
 	    dummyEditedAnchors.add(dummy);
 	    editedGraph.addAnchor(dummy);
 	 }
@@ -960,7 +960,7 @@ public class Merger
 	 {
 	    // create a new annotation
 	    Annotation newAnnotation = new Annotation(null, anEdited.getLabel(), layerId);
-	    newAnnotation.put(Constants.CONFIDENCE, anEdited.get(Constants.CONFIDENCE));
+	    newAnnotation.setConfidence(anEdited.getConfidence());
 	    newAnnotation.put("@other", anEdited);
 	    newAnnotation.create();
 
@@ -2387,7 +2387,7 @@ public class Merger
 	    if (layer.getParentIncludes())
 	    { // start with an immovable anchor at the beginning of the parent
 	       anchors.add(new Anchor(null, anOriginalParent.getStart().getOffset(), 
-				      Constants.CONFIDENCE, Integer.MAX_VALUE));
+				      Integer.MAX_VALUE));
 	    }
 	    // add all (original) child anchors
 	    Annotation lastChild = null;
@@ -2422,7 +2422,7 @@ public class Merger
 		     while (!currentPartitionEdited.includesOffset(midPoint))
 		     {
 			Anchor possibleBoundary = new Anchor(null, currentPartitionOriginal.getEnd().getOffset(), 
-							     Constants.CONFIDENCE, Integer.MAX_VALUE);
+							     Integer.MAX_VALUE);
 			
 			log("Partition end: ", currentPartitionOriginal, " ", currentPartitionOriginal.getEnd());
 			// if (!i.hasNext())
@@ -2602,7 +2602,7 @@ public class Merger
 	    if (layer.getParentIncludes())
 	    {  // end with an immovable anchor at the end of the parent
 	       anchors.add(new Anchor(null, anOriginalParent.getEnd().getOffset(), 
-				      Constants.CONFIDENCE, Integer.MAX_VALUE));
+				      Integer.MAX_VALUE));
 	    }
 
 	    // the anchors in our ordered set must be in offset order - i.e.
@@ -2948,7 +2948,7 @@ public class Merger
 		     // null lastChild's end
 		     log("new end for last child ", child);
 		     Anchor newAnchor = new Anchor();
-		     newAnchor.put(Constants.CONFIDENCE, Constants.CONFIDENCE_NONE);
+		     newAnchor.setConfidence(Constants.CONFIDENCE_NONE);
 		     parent.getGraph().addAnchor(newAnchor);
 		     changes.addAll( // record changes for new anchor:
 			newAnchor.getChanges());
@@ -3057,7 +3057,7 @@ public class Merger
 		     // null lastChild's end
 		     log("new end for last child ", child);
 		     Anchor newAnchor = new Anchor();
-		     newAnchor.put(Constants.CONFIDENCE, Constants.CONFIDENCE_NONE);
+		     newAnchor.setConfidence(Constants.CONFIDENCE_NONE);
 		     parent.getGraph().addAnchor(newAnchor);
 		     changes.addAll( // record changes for new anchor:
 			newAnchor.getChanges());
@@ -3153,7 +3153,7 @@ public class Merger
     */
    protected void setConfidence(TrackedMap o, int confidence)
    {
-      o.put(Constants.CONFIDENCE, confidence);
+      o.setConfidence(confidence);
    } // end of setConfidence()
 
    
@@ -3218,7 +3218,7 @@ public class Merger
 	    {
 	       Annotation annotation = (Annotation)m;
 	       s.append("[").append(annotation.getId()).append("]")
-		  .append(annotation.get("ordinal")).append("#")
+		  .append(annotation.getOrdinal()).append("#")
 		  .append(annotation.getLabel())
 		  .append("(").append(annotation.getStart())
 		  .append("-").append(annotation.getEnd()).append(")");

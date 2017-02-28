@@ -350,8 +350,8 @@ public class JSONSerialization
 	 a.setId(anchorId);
 	 if (json.has("offset") && !json.isNull("offset")) 
 	    a.setOffset(json.getDouble("offset"));
-	 if (json.has(Constants.CONFIDENCE)) 
-	    a.put(Constants.CONFIDENCE, json.getInt(Constants.CONFIDENCE));
+	 if (json.has("confidence")) 
+	    a.setConfidence(json.getInt("confidence"));
 	 if (json.has(Constants.COMMENT)) 
 	    a.put(Constants.COMMENT, json.getString(Constants.COMMENT));
 	 return a;
@@ -412,8 +412,8 @@ public class JSONSerialization
 	    a.setStartId(json.getString("startId"));
 	 if (json.has("endId")) 
 	    a.setEndId(json.getString("endId"));
-	 if (json.has(Constants.CONFIDENCE)) 
-	    a.put(Constants.CONFIDENCE, json.getInt(Constants.CONFIDENCE));
+	 if (json.has("confidence")) 
+	    a.setConfidence(json.getInt("confidence"));
 	 if (json.has(Constants.COMMENT)) 
 	    a.put(Constants.COMMENT, json.getString(Constants.COMMENT));
 	 graph.addAnnotation(a);
@@ -592,10 +592,10 @@ public class JSONSerialization
    {
       writer.print(indent(indent) + q(anchor.getId()) + ":\t{");
       writer.print(keyValue(0, "offset", anchor.getOffset()));
-      if (anchor.containsKey(Constants.CONFIDENCE))
+      if (anchor.getConfidence() != null)
       {
 	 writer.print(",\t");
-	 writer.print(keyValue(0, Constants.CONFIDENCE, (Integer)anchor.get(Constants.CONFIDENCE)));
+	 writer.print(keyValue(0, "confidence", anchor.getConfidence()));
       }
       if (anchor.containsKey("comment"))
       {
@@ -648,10 +648,10 @@ public class JSONSerialization
       writer.print(keyValue(0, "startId", annotation.getStartId()));
       writer.print(",\t");
       writer.print(keyValue(0, "endId", annotation.getEndId()));
-      if (annotation.containsKey(Constants.CONFIDENCE))
+      if (annotation.getConfidence() != null)
       {
 	 writer.print(",\t");
-	 writer.print(keyValue(0, Constants.CONFIDENCE, (Integer)annotation.get(Constants.CONFIDENCE)));
+	 writer.print(keyValue(0, "confidence", annotation.getConfidence()));
       }
       if (annotation.containsKey("comment"))
       {

@@ -172,6 +172,9 @@ public class Graph
    public void setOffsetUnits(String newOffsetUnits) { offsetUnits = newOffsetUnits; }
 
 
+   // TODO participants
+   
+   
    // Attributes stored outside HashMap, so that JSONifying the HashMap doesn't result in infinite recursion
 
 
@@ -727,22 +730,21 @@ public class Graph
     * <p>This convenience method allows, for example, the creation of an anchor with
     * a confidence value in one step:
     * <pre>
-    * Anchor anchor = graph.getOrCreateAnchorAt(456.789, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+    * Anchor anchor = graph.getOrCreateAnchorAt(456.789, Constants.CONFIDENCE_AUTOMATIC);
     * </pre>
     * @param offset The anchor offset.
-    * @param key An attribute to set the value of.
-    * @param value The value of the attribute identified by <var>key</var>
+    * @param confidence Confidence rating.
     * @return An anchor that has the given offset.
     * @see #getAnchorAt(double)
     */
-   public Anchor getOrCreateAnchorAt(double offset, String key, Object value) // TODO test
+   public Anchor getOrCreateAnchorAt(double offset, Integer confidence) // TODO test
    {
       Anchor anchor = getAnchorAt(offset);
       if (anchor == null)
       {
 	 anchor = new Anchor();
 	 anchor.setOffset(offset);
-	 anchor.put(key, value);
+	 anchor.setConfidence(confidence);
 	 addAnchor(anchor);
       }
       return anchor;
@@ -956,12 +958,20 @@ public class Graph
    // Annotation overrides
 
    /**
+    * Keys for attributes that are change-tracked - in the case of Graph, there are none.
+    * @return An empty set.
+    */
+   public Set<String> getTrackedAttributes() { return new HashSet<String>(); }
+
+
+   /**
     * Setter for <i>id</i>: The annotation's identifier.
     * @param id The annotation's identifier.
     */
    public void setId(String id) 
-   { 
-      put("id", id); 
+   {
+      // we don't want the graph or child re-hooking...
+      this.id = id;
    }
 
    /**

@@ -1045,7 +1045,7 @@ public class TEIDeserializer
       graph.setOffsetUnits(Constants.UNIT_CHARACTERS); // TODO look for timeline
       
       // creat the 0 anchor to prevent graph tagging from creating one with no confidence
-      graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+      graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL);
 
       // add layers to the graph
       // we don't just copy the whole schema, because that would imply that all the extra layers
@@ -1234,7 +1234,7 @@ public class TEIDeserializer
 	 graph.addAnnotation(turn);
 	 if (participant != null) turn.setParent(participant);
 	 turn.setStart(
-	    graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+	    graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL));
 	 Annotation line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
 	 line.setParentId(turn.getId());
 	 line.setStart(turn.getStart());
@@ -1261,10 +1261,10 @@ public class TEIDeserializer
 		  anWord.setOrdinal(w++);
 		  //TODO anWord.setLabelStatus(Labbcat.LABEL_STATUS_USER);
 		  anWord.setStartId(graph.getOrCreateAnchorAt(
-				       (double)iLastPosition, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL).getId());
+				       (double)iLastPosition, Constants.CONFIDENCE_MANUAL).getId());
 		  iLastPosition += anWord.getLabel().length() + 1; // include inter-word space
 		  anWord.setEndId(graph.getOrCreateAnchorAt(
-				     (double)iLastPosition, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL).getId());
+				     (double)iLastPosition, Constants.CONFIDENCE_MANUAL).getId());
 		  
 		  graph.addAnnotation(anWord);
 		  
@@ -1279,7 +1279,7 @@ public class TEIDeserializer
 	    {
 	       // end the last line
 	       line.setEnd(graph.getOrCreateAnchorAt(
-			      (double)iLastPosition, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+			      (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
 	       if (!line.getStartId().equals(line.getEndId()))
 	       { // if we have <div><p>... don't create an instantaneous, empty line
 		  graph.addAnnotation(line);
@@ -1290,7 +1290,7 @@ public class TEIDeserializer
 	       line.setParentId(turn.getId());
 	       //graph.addAnnotation(line);
 	       line.setStart(graph.getOrCreateAnchorAt(
-				(double)iLastPosition, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+				(double)iLastPosition, Constants.CONFIDENCE_MANUAL));
 	    } // line
 	    else if (n.getNodeName().equals("u")
 		     || n.getNodeName().equals("posting"))
@@ -1315,7 +1315,7 @@ public class TEIDeserializer
 	       { // new turn
 		  // "attributable" spans, utterance, etc.
 		  turn.setEnd(graph.getOrCreateAnchorAt(
-				 (double)iLastPosition, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+				 (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
 		  if (!turn.getStartId().equals(turn.getEndId()))
 		  { // don't create an instantaneous, empty turn
 		     graph.addAnnotation(turn);
@@ -1338,10 +1338,10 @@ public class TEIDeserializer
 		  turn.setParentId(participant.getId());
 		  graph.addAnnotation(turn);
 		  turn.setStart(graph.getOrCreateAnchorAt(
-				   (double)iLastPosition, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+				   (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
 		  // start a new line too
 		  line.setEnd(graph.getOrCreateAnchorAt(
-				 (double)iLastPosition, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+				 (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
 		  if (!line.getStartId().equals(line.getEndId()))
 		  { // if we have <div><p>... don't create an instantaneous, empty line
 		     graph.addAnnotation(line);
@@ -1349,7 +1349,7 @@ public class TEIDeserializer
 		  line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
 		  line.setParentId(turn.getId());
 		  line.setStart(graph.getOrCreateAnchorAt(
-				   (double)iLastPosition, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+				   (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
 	       }
 	    } // turn
 	    else if (n.getNodeName().equals("choice"))
@@ -1357,7 +1357,7 @@ public class TEIDeserializer
 	       if (aChoiceStarted == null)
 	       { // opening a new choice tag
 		  aChoiceStarted = graph.getOrCreateAnchorAt(
-		     (double)iLastPosition, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+		     (double)iLastPosition, Constants.CONFIDENCE_MANUAL);
 		  anCurrentOrig = null;
 	       }
 	       else
@@ -1366,7 +1366,7 @@ public class TEIDeserializer
 		  {
 		     anCurrentOrig.setEnd(
 			graph.getOrCreateAnchorAt(
-			   (double)iLastPosition, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+			   (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
 		     anCurrentOrig = null;
 		  }
 		  aChoiceStarted = null;
@@ -1395,7 +1395,7 @@ public class TEIDeserializer
 		     Annotation anEntity = new Annotation(null, label, layer.getId());
 		     anEntity.setStart(
 			graph.getOrCreateAnchorAt(
-			   (double)iLastPosition, Constants.CONFIDENCE, Constants.CONFIDENCE));
+			   (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
 		     if (n.getNodeName().equals("orig"))
 		     {
 			if (aChoiceStarted != null)
@@ -1464,7 +1464,7 @@ public class TEIDeserializer
 			   }
 			}
 		     } // not "orig" nor "note" nor "foreign" nor "unclear"
-		     anEntity.put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+		     anEntity.setConfidence(Constants.CONFIDENCE_MANUAL);
 		     if (layer.getParentId().equals(getTurnLayer().getId()))
 		     {
 			anEntity.setParentId(turn.getId());
@@ -1486,7 +1486,7 @@ public class TEIDeserializer
 		  Annotation anEntity = mFoundEntities.get(n);
 		  anEntity.setEnd(
 		     graph.getOrCreateAnchorAt(
-			(double)iLastPosition, Constants.CONFIDENCE, Constants.CONFIDENCE));
+			(double)iLastPosition, Constants.CONFIDENCE_MANUAL));
 		  graph.addAnnotation(anEntity);
 		  mFoundEntities.remove(n);
 	       }
@@ -1494,7 +1494,7 @@ public class TEIDeserializer
 	 } // next node
 	 
 	 turn.setEnd(graph.getOrCreateAnchorAt(
-			(double)iLastPosition, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL));
+			(double)iLastPosition, Constants.CONFIDENCE_MANUAL));
 	 if (!turn.getStartId().equals(turn.getEndId()))
 	 { // don't create an instantaneous, empty turn
 	    graph.addAnnotation(turn);

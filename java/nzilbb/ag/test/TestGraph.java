@@ -39,18 +39,13 @@ public class TestGraph
    {
       Graph g = new Graph();
       g.setId("my graph");
-      g.setCorpus("cc");
       assertEquals("my graph", g.getId());
-      assertEquals("my graph", g.get("id"));
-      assertEquals("cc", g.getCorpus());
-      assertEquals("cc", g.get("corpus"));
    }
 
    @Test public void extendedAttributes() 
    {
       Graph g = new Graph();
       g.setId("my graph");
-      g.setCorpus("cc");
       g.put("foo", "bar");
       assertEquals("bar", g.get("foo"));
    }
@@ -60,7 +55,6 @@ public class TestGraph
    {
       Graph g = new Graph();
       g.setId("my graph");
-      g.setCorpus("cc");
 
       Layer who = new Layer("who", "Speaker", 0, true, true, false);
       g.addLayer(who);
@@ -288,7 +282,6 @@ public class TestGraph
    {
       Graph g = new Graph();
       g.setId("my graph");
-      g.setCorpus("cc");
 
       Layer turn = new Layer("turn", "Speaker turns", 2, true, true, false);
       g.addLayer(turn);
@@ -367,7 +360,6 @@ public class TestGraph
    {
       Graph g = new Graph();
       g.setId("my graph");
-      g.setCorpus("cc");
 
       g.addLayer(new Layer("turn", "Speaker turns", 2, true, true, false, "graph", true));
       g.addLayer(new Layer("word", "Words", 2, true, false, false, "turn", true));
@@ -445,7 +437,6 @@ public class TestGraph
    {
       Graph g = new Graph();
       g.setId("my graph");
-      g.setCorpus("cc");
 
       g.addLayer(new Layer("turn", "Speaker turns", 2, true, true, false));
       g.addLayer(new Layer("word", "Words", 2, true, false, false, "turn", true));
@@ -574,7 +565,6 @@ public class TestGraph
    {
       Graph g = new Graph();
       g.setId("my graph");
-      g.setCorpus("cc");
 
       g.addLayer(new Layer("turn", "Speaker turns", 2, true, true, false));
       g.addLayer(new Layer("word", "Words", 2, true, false, false, "turn", true));
@@ -639,7 +629,7 @@ public class TestGraph
 
       // replace a parent
       Annotation newTurn = new Annotation("newTurn", "john smith", "turn", "turnStart", "turnEnd", "my graph");
-      assertNull(newTurn.get("ordinal"));
+      assertEquals(0, newTurn.getOrdinal());
       newTurn.create();
       g.addAnnotation(newTurn);
       turn1.destroy();
@@ -696,7 +686,6 @@ public class TestGraph
    {
       Graph g = new Graph();
       g.setId("my graph");
-      g.setCorpus("cc");
 
       // add word layer before its parent turn layer
       Layer word = new Layer("word", "Words", 2, true, false, false, "turn", true);
@@ -815,7 +804,6 @@ public class TestGraph
    {
       Graph g = new Graph();
       g.setId("my graph");
-      g.setCorpus("cc");
 
       g.addLayer(new Layer("turn", "Speaker turns", 2, true, true, false));
       g.addLayer(new Layer("word", "Words", 2, true, false, false, "turn", true));
@@ -989,7 +977,6 @@ public class TestGraph
    {
       Graph g = new Graph();
       g.setId("my graph");
-      g.setCorpus("cc");
 
       g.addLayer(new Layer("topic", "Topics", 2, true, false, false));
       g.addLayer(new Layer("who", "Participants", 0, true, true, true));
@@ -1156,7 +1143,6 @@ public class TestGraph
    {
       Graph g = new Graph();
       g.setId("my graph");
-      g.setCorpus("cc");
 
       g.addLayer(new Layer("topic", "Topics", 2, true, false, false));
       g.addLayer(new Layer("who", "Participants", 0, true, true, true));
@@ -1295,7 +1281,6 @@ public class TestGraph
    {
       Graph g = new Graph();
       g.setId("my graph");
-      g.setCorpus("cc");
 
       g.addLayer(new Layer("topic", "Topics", 2, true, false, false));
       g.addLayer(new Layer("who", "Participants", 0, true, true, true));
@@ -1436,7 +1421,6 @@ public class TestGraph
    {
       Graph g = new Graph();
       g.setId("my graph");
-      g.setCorpus("cc");
 
       g.addLayer(new Layer("topic", "Topics", 2, true, false, false));
       g.addLayer(new Layer("who", "Participants", 0, true, true, true));
@@ -1575,7 +1559,6 @@ public class TestGraph
    {
       Graph g = new Graph();
       g.setId("my graph");
-      g.setCorpus("cc");
 
       g.addLayer(new Layer("test", "test", 2, true, false, false));
 
@@ -1629,7 +1612,6 @@ public class TestGraph
    {
       Graph g = new Graph();
       g.setId("my graph");
-      g.setCorpus("cc");
 
       g.addLayer(new Layer("topic", "Topics", 2, true, false, false));
       g.addLayer(new Layer("corpus", "Corpus", 0, false, false, true));
@@ -1831,7 +1813,6 @@ public class TestGraph
    {
       Graph g = new Graph();
       g.setId("my graph");
-      g.setCorpus("cc");
       
       g.addLayer(new Layer("test", "test", 2, true, false, false));
       

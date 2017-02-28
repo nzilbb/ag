@@ -221,7 +221,7 @@ public class AgCsvDeserializer
       ParameterSet parameters = new ParameterSet();
 
       // take the first csv stream, ignore all others.
-      NamedStream csv = Utility.findSingleStream(streams, ".csv", "text/csv");
+      NamedStream csv = Utility.FindSingleStream(streams, ".csv", "text/csv");
       if (csv == null) throw new SerializationException("No CSV stream found");
       setName(csv.getName());
       setName(getName().replaceFirst("\\.csv$","").replaceFirst("\\.ag$",""));
@@ -343,7 +343,7 @@ public class AgCsvDeserializer
       {
 	 if (line.get(1).equals("offset")) continue; // skip header line
 	 Anchor anchor = new Anchor(line.get(0), new Double(line.get(1)), 
-				    Constants.CONFIDENCE, new Integer(line.get(2)));
+				    new Integer(line.get(2)));
 	 graph.addAnchor(anchor);
 	 if (line.size() > 3)
 	 {
@@ -423,7 +423,7 @@ public class AgCsvDeserializer
 	    layer.getId(), 
 	    line.get(mHeadings.get("startAnchor.id")), 
 	    line.get(mHeadings.get("endAnchor.id")));
-	 annotation.put(Constants.CONFIDENCE, new Integer(line.get(mHeadings.get("labelStatus"))));
+	 annotation.setConfidence(new Integer(line.get(mHeadings.get("labelStatus"))));
 	 if (mHeadings.get("comment") < line.size())
 	 {
 	    String comment = line.get(mHeadings.get("comment"));

@@ -129,10 +129,10 @@ public class AnnotationComparatorByAnchor
 
       // anchors/layers the same, compare ordinal
       if (o1.getParentId() != null && o1.getParentId().equals(o1.getParentId())
-	  && o1.containsKey("ordinal") && o2.containsKey("ordinal"))
+	  && o1.getAssignedOrdinal() != 0 && o2.getAssignedOrdinal() != 0)
       {
-	 int o1Ordinal = ((Integer)o1.get("ordinal")).intValue();
-	 int o2Ordinal = ((Integer)o2.get("ordinal")).intValue();
+	 int o1Ordinal = o1.getAssignedOrdinal();
+	 int o2Ordinal = o2.getAssignedOrdinal();
 	 if (o1Ordinal < o2Ordinal)
 	 {
 	    // System.out.println("ordinal: " + o1 + " < " + o2 + " (" + o1.getOrdinal() + " < " + o2.getOrdinal() + ")");

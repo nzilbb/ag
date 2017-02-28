@@ -35,10 +35,9 @@ public class Utility
     */
    public static int getConfidence(TrackedMap o, int defaultConfidence)
    {
-      Object oConfidence = o.get("confidence");
-      if (oConfidence == null) return defaultConfidence;
-      if (!(oConfidence instanceof Integer)) return defaultConfidence;
-      return ((Integer)oConfidence).intValue();
+      Integer c = o.getConfidence();
+      if (c == null) return defaultConfidence;
+      return c;
    } // end of getConfidence()
 
    /**
@@ -58,7 +57,7 @@ public class Utility
     */
    public static void setConfidence(TrackedMap o, int confidence)
    {      
-      o.put(Constants.CONFIDENCE, confidence);
+      o.setConfidence(confidence);
    } // end of setConfidence()
 
 } // end of class Utility

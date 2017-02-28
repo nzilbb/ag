@@ -230,9 +230,9 @@ public class ConventionTransformer
 			// check it's really a change
 			if (!label.equals(source.getLabel()))
 			{
-			   source.setLabel(label);
-			   changes.add(source.getLastChange());
-			}
+			   changes.addAll( // track changes
+			      source.setLabel(label));
+ 			}
 		     }
 		  }
 		  else

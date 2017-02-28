@@ -166,7 +166,7 @@ public class Normalizer
 	    final Anchor oldStart = word.getStart();
 
 	    // create a new anchor
-	    final Anchor newStart = new Anchor(null, word.getStart().getOffset(), Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT); 
+	    final Anchor newStart = new Anchor(null, word.getStart().getOffset(), Constants.CONFIDENCE_DEFAULT); 
 	    graph.addAnchor(newStart);
 	    changes.addAll(newStart.getChanges());
 
@@ -193,7 +193,7 @@ public class Normalizer
 	    final Anchor oldEnd = word.getEnd();
 
 	    // create a new anchor
-	    final Anchor newEnd = new Anchor(null, word.getEnd().getOffset(), Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT); 
+	    final Anchor newEnd = new Anchor(null, word.getEnd().getOffset(), Constants.CONFIDENCE_DEFAULT); 
 	    graph.addAnchor(newEnd);
 	    changes.addAll(newEnd.getChanges());
 
