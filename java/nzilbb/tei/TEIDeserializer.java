@@ -1395,7 +1395,7 @@ public class TEIDeserializer
 		     Annotation anEntity = new Annotation(null, label, layer.getId());
 		     anEntity.setStart(
 			graph.getOrCreateAnchorAt(
-			   (double)iLastPosition, Constants.CONFIDENCE));
+			   (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
 		     if (n.getNodeName().equals("orig"))
 		     {
 			if (aChoiceStarted != null)
@@ -1464,7 +1464,7 @@ public class TEIDeserializer
 			   }
 			}
 		     } // not "orig" nor "note" nor "foreign" nor "unclear"
-		     anEntity.put(Constants.CONFIDENCE_MANUAL);
+		     anEntity.setConfidence(Constants.CONFIDENCE_MANUAL);
 		     if (layer.getParentId().equals(getTurnLayer().getId()))
 		     {
 			anEntity.setParentId(turn.getId());
@@ -1486,7 +1486,7 @@ public class TEIDeserializer
 		  Annotation anEntity = mFoundEntities.get(n);
 		  anEntity.setEnd(
 		     graph.getOrCreateAnchorAt(
-			(double)iLastPosition, Constants.CONFIDENCE));
+			(double)iLastPosition, Constants.CONFIDENCE_MANUAL));
 		  graph.addAnnotation(anEntity);
 		  mFoundEntities.remove(n);
 	       }
