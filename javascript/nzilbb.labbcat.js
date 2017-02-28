@@ -554,7 +554,7 @@ nzilbb.labbcat.Labbcat.prototype.updateTranscript = function(transcript, onResul
  * @callback {resultCallback} onResult Invoked when the request has returned a result.
  */
 nzilbb.labbcat.Labbcat.prototype.deleteTranscript = function(id, onResult) {
-    this.createRequest("deleteTranscript", { transcript_id : id, btnConfirmDelete : true, chkDb : true }, onResult, this.baseUrl + "edit/transcript/delete").send();
+    this.createRequest("deleteTranscript", { id : id, transcript_id : id, btnConfirmDelete : true, chkDb : true }, onResult, this.baseUrl + "edit/transcript/delete").send();
 };
 
 /**
