@@ -83,9 +83,6 @@ public class TestDefaultOffsetGenerator
       g.addAnnotation(new Annotation("lazy", "lazy", "word", "a7", "a8", "turn1", 8));
       g.addAnnotation(new Annotation("dog", "dog", "word", "a8", "a9", "turn1", 9));
 
-      System.out.println(" ord: " + g.getAnnotation("a").getOrdinal());
-      g.getChanges();
-      System.out.println(" ord now: " + g.getAnnotation("a").getOrdinal());
       assertEquals("no extra changes at the beginning: " + g.getChanges(),
 		   0, g.getChanges().size());
 
