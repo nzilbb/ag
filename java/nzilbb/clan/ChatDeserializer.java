@@ -1223,7 +1223,7 @@ public class ChatDeserializer
       Annotation lastUtterance = new Annotation(null, "", getUtteranceLayer().getId());
       Annotation gem = null;
       Annotation cUnit = null;
-      Anchor lastAnchor = new Anchor(null, 0.0, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+      Anchor lastAnchor = new Anchor(null, 0.0, Constants.CONFIDENCE_MANUAL);
       graph.addAnchor(lastAnchor);
       Anchor lastAlignedAnchor = null;
       for (String line : syncLines)
@@ -1318,7 +1318,7 @@ public class ChatDeserializer
 	       utterance.setLabel(synchronisedMatcher.group(1).trim());
 	       Anchor start = graph.getOrCreateAnchorAt(
 		  Double.parseDouble(synchronisedMatcher.group(2))
-		  / 1000, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+		  / 1000, Constants.CONFIDENCE_MANUAL);
 	       if (cUnit != null && (cUnit.getStartId() == null 
 				     || cUnit.getStartId().equals(utterance.getStartId()))) 
 	       {
@@ -1329,7 +1329,7 @@ public class ChatDeserializer
 	       utterance.setStart(start);
 	       Anchor end = graph.getOrCreateAnchorAt(
 		  Double.parseDouble(synchronisedMatcher.group(3))
-		  / 1000, Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+		  / 1000, Constants.CONFIDENCE_MANUAL);
 	       utterance.setEnd(end);
 	       lastAlignedAnchor = end;
 	       
@@ -1549,7 +1549,7 @@ public class ChatDeserializer
 	 // set all annotations to manual confidence
 	 for (Annotation a : graph.getAnnotationsById().values())
 	 {
-	    a.put(Constants.CONFIDENCE, Constants.CONFIDENCE_MANUAL);
+	    a.setConfidence(Constants.CONFIDENCE_MANUAL);
 	 }
 
       }
@@ -1589,7 +1589,7 @@ public class ChatDeserializer
 	       middleAnchor.setOffset(
 		  penultimateUtterance.getStart().getOffset() 
 		  + ((start.getOffset() - penultimateUtterance.getStart().getOffset()) /2));
-	       middleAnchor.put(Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT);
+	       middleAnchor.setConfidence(Constants.CONFIDENCE_DEFAULT);
 	    } // penultimateUtterance has a start offset
 	 } // there is a penultimate utterance
 	 warnings.add("Utterance at " + lastUtterance.getStart().getOffset() 
@@ -1657,7 +1657,7 @@ public class ChatDeserializer
 		     // chain this utterance to the last one with an unaligned anchor
 		     Anchor middleAnchor = graph.addAnchor(
 			new Anchor(null, lastEnd.getOffset() + ((start.getOffset() - lastEnd.getOffset())/2), 
-				   Constants.CONFIDENCE, Constants.CONFIDENCE_DEFAULT));
+				   Constants.CONFIDENCE_DEFAULT));
 		     warnings.add("Utterance at " + start + "-" + end 
 				  + " completely overlaps previous at " + lastUtterance.getStart() + "-" + lastEnd
 				  + ": using " + middleAnchor +" as end time of first and start time of second.");

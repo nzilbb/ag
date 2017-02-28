@@ -808,7 +808,7 @@ public class TranscriptDeserializer
       Graph graph = new Graph();
       graph.setId(getId());
       // creat the 0 anchor to prevent graph tagging from creating one with no confidence
-      graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC);
+      graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_AUTOMATIC);
 
       // add layers to the graph
       // we don't just copy the whole schema, because that would imply that all the extra layers
@@ -913,10 +913,10 @@ public class TranscriptDeserializer
 	    anTopic = new Annotation(null, sTopic, topicLayer.getId());
 	    anTopic.setStart(
 	       graph.getOrCreateAnchorAt(
-		  section.getStartTimeAsDouble(), Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+		  section.getStartTimeAsDouble(), Constants.CONFIDENCE_AUTOMATIC));
 	    anTopic.setEnd(
 	       graph.getOrCreateAnchorAt(
-		  section.getEndTimeAsDouble(), Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+		  section.getEndTimeAsDouble(), Constants.CONFIDENCE_AUTOMATIC));
 	    graph.addAnnotation(anTopic);
 	 }
 	 
@@ -935,10 +935,10 @@ public class TranscriptDeserializer
 	       anTurn.setParentId(graph.getAnnotation(sSpeakerId).getId());
 	       anTurn.setStart(
 		  graph.getOrCreateAnchorAt(
-		     turn.getStartTimeAsDouble(), Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+		     turn.getStartTimeAsDouble(), Constants.CONFIDENCE_AUTOMATIC));
 	       anTurn.setEnd(
 		  graph.getOrCreateAnchorAt(
-		     turn.getEndTimeAsDouble(), Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+		     turn.getEndTimeAsDouble(), Constants.CONFIDENCE_AUTOMATIC));
 	       htTurnAnnotations.put(sSpeakerId, anTurn);
 	       graph.addAnnotation(anTurn);
 	    }
@@ -967,7 +967,7 @@ public class TranscriptDeserializer
 		  anLine.setParentId(anTurn.getId());
 		  anLine.setStart(
 		     graph.getOrCreateAnchorAt(
-			thisSync.getTimeAsDouble(), Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			thisSync.getTimeAsDouble(), Constants.CONFIDENCE_AUTOMATIC));
 		  graph.addAnnotation(anLine);
 		  
 		  // force Events to assign to their given Words where poss.
@@ -1142,7 +1142,7 @@ public class TranscriptDeserializer
 		  
 		  anLine.setEnd(
 		     graph.getOrCreateAnchorAt(
-			thisSync.getEndTimeAsDouble(), Constants.CONFIDENCE, Constants.CONFIDENCE_AUTOMATIC));
+			thisSync.getEndTimeAsDouble(), Constants.CONFIDENCE_AUTOMATIC));
 		  
 		  if (lastWord != null)
 		  {
