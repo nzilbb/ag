@@ -727,9 +727,9 @@ public class Annotation
     */
    public Annotation(Annotation other)
    {
+      cloneAttributesFrom(other, "id");
       putAll(other);
       Vector<String> keysToRemove = new Vector<String>();
-      keysToRemove.add("id");
       for (String key : keySet())
       {
 	 // remove tracked original attributes

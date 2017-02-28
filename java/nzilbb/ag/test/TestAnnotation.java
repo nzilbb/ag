@@ -222,6 +222,25 @@ public class TestAnnotation
       assertFalse(c.containsKey("foo"));     
    }
 
+   @Test public void copyConstructor() 
+   {
+      Annotation a = new Annotation("123", "LABEL", "word", "start", "end", "parent", 99);
+      a.put("foo", "foo");
+      a.put("@bar", "bar");
+      a.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+      Annotation c = new Annotation(a);
+      assertNull(c.getId());
+      assertEquals("LABEL", c.getLabel());
+      assertEquals("word", c.getLayerId());
+      assertEquals("start", c.getStartId());
+      assertEquals("end", c.getEndId());
+      assertEquals("parent", c.getParentId());
+      assertEquals(99, c.getOrdinal());     
+      assertEquals(new Integer(Constants.CONFIDENCE_AUTOMATIC), c.getConfidence());
+      assertEquals("foo", c.get("foo"));     
+      assertFalse(c.containsKey("@bar"));     
+   }
+
    @Test public void instantaneous() 
    {
       Annotation a = new Annotation("123", "LABEL", "word", "start", "end", "parent", 99);
