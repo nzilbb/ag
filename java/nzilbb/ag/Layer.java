@@ -406,9 +406,9 @@ public class Layer // TODO add type attribute
     */
    public String toString()
    {
-      if (containsKey("id"))
+      if (getId() != null)
       {
-	 return get("id").toString();
+	 return getId();
       }
       else
       { // id isn't set, so we return the map's hashCode and hope for the best
@@ -423,9 +423,9 @@ public class Layer // TODO add type attribute
     */
    public int hashCode()
    {
-      if (containsKey("id"))
+      if (getId() != null)
       {
-	 return get("id").hashCode();
+	 return getId().hashCode();
       }
       else
       { // id isn't set, so we return the map's hashCode and hope for the best
