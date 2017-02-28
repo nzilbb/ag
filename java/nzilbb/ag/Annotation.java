@@ -125,15 +125,6 @@ public class Annotation
     */
    public String getStartId() 
    { 
-      if (graph != null)
-      {
-	 Layer layer = getLayer();
-	 if (layer != null && layer.getAlignment() == Constants.ALIGNMENT_NONE)
-	 { // tag layer - return parent's start anchor
-	    Annotation parent = getParent();
-	    if (parent != null) return parent.getStartId();
-	 }
-      }
       return startId; 
    }
    /**
@@ -167,6 +158,25 @@ public class Annotation
 	 // reset index for layer
 	 graph.indicesByLayer.remove(getLayerId());
       }
+
+      if (graph != null && !(this instanceof Graph))
+      {
+	 // check for unaligned children and set their startIds
+	 for (String layerId : getAnnotations().keySet())
+	 {
+	    Layer layer = graph.getLayer(layerId);
+	    if (layer == null) continue;
+	    if (layer.getAlignment() == Constants.ALIGNMENT_NONE)
+	    {
+	       for (Annotation child : getAnnotations(layerId))
+	       {
+		  if (child.getChange() == Change.Operation.Destroy) continue;
+		  changes.addAll( // register changes:
+		     child.setStartId(startId));
+	       } // next tag child
+	    } // layer is not aligned
+	 } // next layer
+      } // we're in a graph
       
       return changes;
    }
@@ -181,15 +191,6 @@ public class Annotation
     */
    public String getEndId() 
    {
-      if (graph != null)
-      {
-	 Layer layer = getLayer();
-	 if (layer != null && layer.getAlignment() == Constants.ALIGNMENT_NONE)
-	 { // tag layer - return parent's start anchor
-	    Annotation parent = getParent();
-	    if (parent != null) return parent.getEndId();
-	 }
-      }
       return endId;
    }
    /**
@@ -223,7 +224,27 @@ public class Annotation
 	 // reset index for layer
 	 graph.indicesByLayer.remove(getLayerId());
       }
-      
+
+      // check for unaligned children and set their endIds
+      if (graph != null && !(this instanceof Graph))
+      {
+	 // check for unaligned children and set their startIds
+	 for (String layerId : getAnnotations().keySet())
+	 {
+	    Layer layer = graph.getLayer(layerId);
+	    if (layer == null) continue;
+	    if (layer.getAlignment() == Constants.ALIGNMENT_NONE)
+	    {
+	       for (Annotation child : getAnnotations(layerId))
+	       {
+		  if (child.getChange() == Change.Operation.Destroy) continue;
+		  changes.addAll( // register changes:
+		     child.setEndId(endId));
+	       } // next tag child
+	    } // layer is not aligned
+	 } // next layer
+      } // we're in a graph
+
       return changes;
    }
    
@@ -249,6 +270,20 @@ public class Annotation
 	 changes.add(registerChange("parentId", parentId));
       }
       this.parentId = parentId;
+      // if we're on an unaligned layer, set start/end Ids to match parent
+      Layer layer = getLayer();
+      Annotation parent = getParent();
+      if (layer != null && parent != null
+	  // not the top level, as Graph.getStartId()/endId() is costly, and it's not necessary
+	  && !(parent instanceof Graph)
+	  // unaligned (tag) layer
+	  && layer.getAlignment() == Constants.ALIGNMENT_NONE)
+      {
+	 changes.addAll( // register changes:
+	    setStartId(parent.getStartId()));
+	 changes.addAll( // register changes:
+	    setEndId(parent.getEndId()));
+      } // layer is not aligned
       return changes;
    }
    
@@ -823,14 +858,13 @@ public class Annotation
    
    /**
     * Returns the ordinal that has previously been explicitly assigned.
-    * <p>This method differs from {@link #getOrdinal()} in that if {@link #setOrdinal(int)} has not been specifically invoked previously, {@link #getOrdinal()} will try to figure out the ordinal from the position in the parent, etc., where this method will simply returne 0.
+    * <p>This method differs from {@link #getOrdinal()} in that if {@link #setOrdinal(int)} has not been specifically invoked previously, {@link #getOrdinal()} will try to figure out the ordinal from the position in the parent, etc., where this method will simply return 0.
     * @return The ordinal last set by a call to {@link #setOrdinal(int)}, or 0 if it hasn't been previously called.
     */
    public int getAssignedOrdinal()
    {
       return ordinal;
    } // end of getAssignedOrdinal()
-
    
    /**
     * Gets a single related annotation on the given layer.

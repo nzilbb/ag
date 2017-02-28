@@ -237,13 +237,12 @@ public class TestValidator
       g.addAnnotation(new Annotation("phone5", "I", "phone", "a2.5", "a2.75", "word2"));
       g.addAnnotation(new Annotation("phone6", "k", "phone", "a2.75", "a3a", "word2"));
 
-      assertEquals("corrected participant start anchors: " + g.getChanges(), 4, g.getChanges().size());
-      g.commit(); // commit those changes before we validate
       assertEquals("no initial changes to graph: " + g.getChanges(), 0, g.getChanges().size());
 
       assertEquals(4, g.getAnnotation("word4").getOrdinal());
       assertEquals("participant1", g.getAnnotation("word6").getParentId());
-      assertNull("parent on wrong layer - ordinal not set", g.getAnnotation("word6").get("ordinal"));
+      assertEquals("parent on wrong layer - ordinal not set",
+		   0, g.getAnnotation("word6").getAssignedOrdinal());
 
       Validator v = new Validator();
       // v.setDebug(true);
@@ -371,6 +370,8 @@ public class TestValidator
       // manual child - not deleted
       g.addAnnotation(new Annotation("pos4", "ADV", "pos", "a?2", "a5", "word6"));
       g.getAnnotation("pos4").setConfidence(Constants.CONFIDENCE_MANUAL);
+      assertEquals("a?2", g.getAnnotation("pos4").getStartId());
+      assertNull(g.getAnnotation("pos4").get("originalStartId"));
       // automatic child - deleted
       g.addAnnotation(new Annotation("pos5", "deleteme", "pos", "a?2", "a5", "word6"));
       g.getAnnotation("pos5").setConfidence(Constants.CONFIDENCE_AUTOMATIC);
@@ -393,12 +394,13 @@ public class TestValidator
       {
 	 Vector<Change> changes = v.transform(g);
 	 if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
+	 assertEquals("a?1", g.getAnnotation("pos4").getStartId());
+	 assertEquals("a?2", g.getAnnotation("pos4").get("originalStartId"));
+	 assertEquals("a?2", g.getAnnotation("pos4").getOriginalStartId());
+
 	 Iterator<Change> order = changes.iterator();
 	 assertEquals("Delete word - manual child has new parent", 
 		      new Change(Change.Operation.Update, g.getAnnotation("pos4"), "parentId", "word5"), 
-		      order.next());
-	 assertEquals("Delete word - automatically generated child is deleted", 
-		      new Change(Change.Operation.Destroy, g.getAnnotation("pos5")), 
 		      order.next());
 	 assertEquals("Delete word - manual child shares start", 
 		      new Change(Change.Operation.Update, g.getAnnotation("pos4"), "startId", "a?1"), 
@@ -406,8 +408,11 @@ public class TestValidator
 	 assertEquals("Delete word - manual child shares end", 
 		      new Change(Change.Operation.Update, g.getAnnotation("pos4"), "endId", "a?2"), 
 		      order.next());
+	 assertEquals("Delete word - automatically generated child is deleted", 
+		      new Change(Change.Operation.Destroy, g.getAnnotation("pos5")), 
+		      order.next());
 	 assertFalse("Delete word - manual child is not deleted " + changes, order.hasNext());
-	 assertEquals("one extra change in graph - the word deletion", 
+	 assertEquals("one extra change in graph - the word deletion - " + g.getChanges(), 
 		      changes.size() + 1, g.getChanges().size());
       }
       catch(TransformationException exception)
@@ -499,10 +504,10 @@ public class TestValidator
       g.addAnnotation(new Annotation("role2", "subject", "role", "a4", "a?1", "word5")); // fox
 
       // delete a word to ensure subsequent ordinals are updated
-      assertEquals(new Integer(5), g.getAnnotation("word5").get("ordinal"));
+      assertEquals(5, g.getAnnotation("word5").getAssignedOrdinal());
       assertEquals(5, g.getAnnotation("word5").getOrdinal());
       g.getAnnotation("word4").destroy();
-      assertEquals(new Integer(5), g.getAnnotation("word5").get("ordinal"));
+      assertEquals(5, g.getAnnotation("word5").getAssignedOrdinal());
 
       Validator v = new Validator();
       v.setFullValidation(true);
@@ -519,7 +524,7 @@ public class TestValidator
 	 // assertEquals("children out of order - update ordinal", 
 	 // 	      new Change(Change.Operation.Update, g.getAnnotation("word3"), "ordinal", new Integer(3)), 
 	 // 	      order.next());
-	 assertEquals(new Integer(4), g.getAnnotation("word5").get("ordinal"));
+	 assertEquals(4, g.getAnnotation("word5").getOrdinal());
 	 // deletion should cause updated ordinals of subsequent annotations, but this is actually
 	 // handled by Annotation itself before it gets to the Validator
 	 assertFalse("non-included children are not ordinal-corrected", order.hasNext());
@@ -670,12 +675,11 @@ public class TestValidator
 	 assertNotEquals("word share end anchors - not shared any more: " + changes, 
 			 g.getAnnotation("word5").getEndId(), 
 			 g.getAnnotation("word4").getEndId());
-	 assertEquals("word share start anchors - new end: " + changes, 
-	 	      new Change(Change.Operation.Update, g.getAnnotation("word3"), "endId", "1"), 
-	 	      order.next());
-
 	 assertEquals("word tag share start anchors - new start: " + changes, 
 	 	      new Change(Change.Operation.Update, g.getAnnotation("pos3"), "startId", "1"), 
+	 	      order.next());
+	 assertEquals("word share start anchors - new end: " + changes, 
+	 	      new Change(Change.Operation.Update, g.getAnnotation("word3"), "endId", "1"), 
 	 	      order.next());
 
 	 assertFalse("no more changes " + changes, order.hasNext());

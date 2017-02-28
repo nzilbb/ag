@@ -171,8 +171,8 @@ public class TestJSONSerialization
       g.addAnnotation(A);
       g.addAnnotation(N);
 
-      g.addAnnotation(AP);
       g.addAnnotation(NP);
+      g.addAnnotation(AP);
 
       // add some comments
       the.put("comment", "word comment");

@@ -3218,7 +3218,7 @@ public class Merger
 	    {
 	       Annotation annotation = (Annotation)m;
 	       s.append("[").append(annotation.getId()).append("]")
-		  .append(annotation.get("ordinal")).append("#")
+		  .append(annotation.getOrdinal()).append("#")
 		  .append(annotation.getLabel())
 		  .append("(").append(annotation.getStart())
 		  .append("-").append(annotation.getEnd()).append(")");

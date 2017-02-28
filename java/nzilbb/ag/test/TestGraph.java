@@ -629,7 +629,7 @@ public class TestGraph
 
       // replace a parent
       Annotation newTurn = new Annotation("newTurn", "john smith", "turn", "turnStart", "turnEnd", "my graph");
-      assertNull(newTurn.get("ordinal"));
+      assertEquals(0, newTurn.getOrdinal());
       newTurn.create();
       g.addAnnotation(newTurn);
       turn1.destroy();
