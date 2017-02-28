@@ -1329,7 +1329,7 @@ public class TestTextGridDeserializer
       assertEquals("s1402a.TextGrid", g.getId());
 
       assertTrue("Deserialization too slow:\n" + deserializer.getTimers().toString(),
-		 6000 > deserializer.getTimers().getTotals().get("deserialize"));
+		 1500 > deserializer.getTimers().getTotals().get("deserialize"));
    }
 
 
