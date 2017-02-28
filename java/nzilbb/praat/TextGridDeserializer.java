@@ -1,5 +1,5 @@
 //
-// Copyright 2004-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2004-2017 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -255,7 +255,7 @@ public class TextGridDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Praat TextGrid", "1.82", "text/praat-textgrid", ".textgrid", "20160905.1252", getClass().getResource("icon.png"));
+	 "Praat TextGrid", "1.82", "text/praat-textgrid", ".textgrid", "20170228.1353", getClass().getResource("icon.png"));
    }
    
    /**

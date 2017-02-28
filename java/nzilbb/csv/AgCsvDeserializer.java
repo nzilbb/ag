@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2017 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -130,7 +130,7 @@ public class AgCsvDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "LaBB-CAT legacy CSV files", "0.1", "text/csv", ".csv", getClass().getResource(getClass().getSimpleName() + ".png"));
+	 "LaBB-CAT legacy CSV files", "0.1", "text/csv", ".csv", "20170228.1353", getClass().getResource(getClass().getSimpleName() + ".png"));
    }
 
    /**
