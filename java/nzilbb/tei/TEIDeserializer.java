@@ -1079,8 +1079,6 @@ public class TEIDeserializer
 	 }
       }
 
-      graph.setOffsetUnits(Constants.UNIT_SECONDS);
-
       try
       {
 	 // attributes
