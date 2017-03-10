@@ -112,6 +112,100 @@ public class TestSimpleTokenizer
       }
    }
 
+   @Test public void characterAnchors() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+
+      // if anchor units are characters, then new anchors have offsets set.
+      g.setOffsetUnits(Constants.UNIT_CHARACTERS);
+
+      g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+			   true, // peers
+			   true, // peersOverlap
+			   true)); // saturated
+      g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "who", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("utterance", "Utterances", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "turn", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "turn", // parentId
+			   true)); // parentIncludes
+
+      g.addAnchor(new Anchor("a0", 0.0));
+      g.addAnchor(new Anchor("a1", 20.0));
+      g.addAnchor(new Anchor("a2", 31.0));
+      g.addAnchor(new Anchor("a3", 44.0));
+
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "my graph"));
+      g.addAnnotation(new Annotation("participant2", "jane doe", "who", "my graph"));
+
+      g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a3", "participant1"));
+      g.addAnnotation(new Annotation("turn2", "jane doe", "turn", "a2", "a3", "participant2"));
+
+      g.addAnnotation(new Annotation("utterance1", "the quick brown fox", "utterance", "a0", "a1", "turn1"));
+      g.addAnnotation(new Annotation("utterance2", "jumps over", "utterance", "a1", "a2", "turn1"));
+      g.addAnnotation(new Annotation("utterance3", "the lazy dog", "utterance", "a2", "a3", "turn2"));
+
+      try
+      {
+	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word");
+	 Vector<Change> changes = tokenizer.transform(g);
+	 Annotation[] words = g.getAnnotation("turn1").list("word");
+	 assertEquals(6, words.length);
+
+	 assertEquals("first word shares start with utterance", "a0", words[0].getStartId());
+
+	 assertEquals("the", words[0].getLabel());
+
+	 assertEquals("first anchors don't have null offsets", 
+		      new Double(0.0), words[0].getStart().getOffset());
+	 assertEquals("intermediate anchors don't have null offsets", 
+		      new Double(4.0), words[0].getEnd().getOffset());
+	 assertEquals("tokens chained together", words[0].getEndId(), words[1].getStartId());
+
+	 assertEquals("quick", words[1].getLabel());
+	 assertEquals("offsets set", new Double(10), words[1].getEnd().getOffset());
+	 assertEquals("brown", words[2].getLabel());
+	 assertEquals("offsets set", new Double(16), words[2].getEnd().getOffset());
+	 assertEquals("fox", words[3].getLabel());
+	 assertEquals("offsets set", new Double(20), words[3].getEnd().getOffset());
+	 assertEquals("last word shares end with utterance", "a1", words[3].getEndId());
+	 assertEquals("first word shares start with utterance", "a1", words[4].getStartId());
+	 assertEquals("jumps", words[4].getLabel());
+	 assertEquals("offsets set", new Double(26), words[4].getEnd().getOffset());
+	 assertEquals("over", words[5].getLabel());
+	 assertEquals("offsets set", new Double(31), words[5].getEnd().getOffset());
+	 assertEquals("last word shares end with utterance", "a2", words[5].getEndId());
+
+	 words = g.getAnnotation("turn2").list("word");
+	 assertEquals(3, words.length);
+	 assertEquals("first word shares start with utterance", "a2", words[0].getStartId());
+	 assertEquals("the", words[0].getLabel());
+	 assertEquals("offsets set", new Double(35), words[0].getEnd().getOffset());
+	 assertEquals("lazy", words[1].getLabel());
+	 assertEquals("offsets set", new Double(40), words[1].getEnd().getOffset());
+	 assertEquals("dog", words[2].getLabel());
+	 assertEquals("offsets set", new Double(44), words[2].getEnd().getOffset());
+	 assertEquals("first word shares end with utterance", "a3", words[2].getEndId());
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+   }
+
    @Test public void dirtyTranscription() 
    {
       Graph g = new Graph();
