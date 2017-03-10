@@ -1,0 +1,6 @@
+subreddit=exmormon
+url=https://www.reddit.com/r/exmormon/comments/2qyr1a#cnas8zv
+air_date=2015-01-01T00:00:00.000Z
+version_date=2015-02-28T11:51:22.000Z
+gender=?
+YoungModern: Most of us have some family members like this. *Most* of my family is like this. 

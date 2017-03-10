@@ -1,0 +1,8 @@
+app=Elicit Speech
+appVersion=1.0.0
+appPlatform=MacIntel
+appDevice=browser Chrome
+creation_date=2017-01-13T15:49:55.575Z
+speech_migraine=currently have migraine
+
+test: {Please read the following aloud:} The supermarket chain shut down because of poor management
