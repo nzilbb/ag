@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="nzilbb.elan" default="all" basedir=".">
+  <description>Elan TextGrid file serializer/deserializer for nzilbb.ag</description>
+  <!-- set global properties for this build -->
+  <property name="src"   location="."/>
+  <property name="javadoc"   location="javadoc"/>
+  <property name="build" location="build_${ant.project.name}"/>
+  <property name="dist"  location="../bin"/>
+  <property name="srcfiles" value="nzilbb/elan/**/*.java"/> 
+  <property name="srctests" value="nzilbb/elan/test/Test*.java"/>
+  <property name="icon" value="nzilbb/elan/icon.png"/>
+  <property name="junitjar" value="/usr/share/java/junit4.jar"/>
+  <property name="nzilbb-ag-serialize-IDeserializer" value="nzilbb.elan.EAFDeserializer" />
+  
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}"/>
+  </target>
+  
+  <target name="all" depends="compile,dist">
+  </target>
+  
+  <target name="compile" depends="init"
+          description="compile the source " >
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}"
+	   classpath="${dist}/nzilbb.ag.jar"
+	   includes="${srcfiles}"
+	   excludes="nzilbb/elan/**/test/*.java"
+	   listfiles="yes"
+	   includeantruntime="false"
+	   target="6"
+	   source="6"
+	   debug="on"
+	   >
+      <compilerarg value="-Xlint"/>
+    </javac>
+  </target>
+  
+  <target name="dist" depends="compile"
+          description="generate the distribution" >
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist}"/>
+    
+    <!-- Put everything in ${build} into the ${ant.project.name}.jar file -->
+    <jar jarfile="${dist}/${ant.project.name}.jar" 
+	 basedir="${build}">
+      <manifest><attribute name="nzilbb-ag-serialize-IDeserializer" value="${nzilbb-ag-serialize-IDeserializer}"/></manifest>
+      
+      <!-- include this build file -->
+      <fileset dir="." includes="build.xml" />
+      <!-- include icon -->
+      <fileset dir="${src}" includes="${icon}" />
+      
+    </jar>
+    <delete dir="${build}"/>
+  </target>
+  
+  <target name="test" depends="dist" description="run nzilbb.elan annotation-graph unit tests">
+    <javac srcdir="${src}" destdir="."
+	   includes="${srctests}"
+	   classpath=".;${junitjar};${dist}/${ant.project.name}.jar;${dist}/nzilbb.ag.jar"
+	   listfiles="yes"
+	   target="6"
+	   source="6"
+	   debug="on"
+	   includeAntRuntime="false"
+	   >
+      <compilerarg value="-Xlint"/>
+    </javac>
+    <junit
+	haltonfailure="true"
+	fork="true"
+	>
+      <classpath>
+	<pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar};${dist}/nzilbb.ag.jar"/>
+      </classpath>
+      <jvmarg value="-ea"/>
+      <formatter type="plain" usefile="false" />
+      <batchtest>
+        <fileset dir=".">
+          <include name="${srctests}"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+  <target name="javadoc" depends="init,compile"
+          description="document the source" >
+    <mkdir dir="${javadoc}"/>
+    <javadoc destdir="${javadoc}"
+	     classpath=".;${dist}/nzilbb.ag.jar"
+	     Author="yes"
+	     >
+      <fileset dir="${src}" includes="${srcfiles}" excludes="${srctests}" />
+    </javadoc>
+  </target>
+    
+  <target name="clean" description="clean up" >
+    <!-- Delete the ${build} and ${dist} directory trees -->
+    <delete dir="${build}"/>
+    <delete dir="${javadoc}"/>
+    <delete>
+      <fileset dir="." includes="**/*.class"/>
+      <fileset dir="." includes="**/*~" defaultexcludes="no"/>
+    </delete>    
+    <delete file="${dist}/${ant.project.name}.jar"/>
+  </target>
+</project>
