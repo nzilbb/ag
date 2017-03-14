@@ -30,7 +30,7 @@ import java.util.LinkedHashMap;
 public class SerializationException
    extends Exception
 {
-   public enum ErrorType { Alignment, Tokenization, Other };
+   public enum ErrorType { InvalidDocument, Alignment, Tokenization, Other };
 
    // Attributes:
    
@@ -79,7 +79,16 @@ public class SerializationException
       super(message);
       addError(ErrorType.Other, message);
    } // end of constructor
-
+   
+   /**
+    * Constructor.
+    * @param message The error message.
+    */
+   public SerializationException(ErrorType type, String message)
+   {
+      super(message);
+      addError(type, message);
+   } // end of constructor
    
    /**
     * Adds an error. If the given type of error has already been added, the description is appended to the existing description.
