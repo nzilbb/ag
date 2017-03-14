@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2017 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -222,6 +222,10 @@ public class SimpleTokenizer
 	       String sToken = tokens[t];
 	       if (sToken.length() == 0) continue;
 	       Anchor end = new Anchor();
+	       if (graph.getOffsetUnits() == Constants.UNIT_CHARACTERS) 
+	       {
+		  end.setOffset(start.getOffset() + (double)(sToken.length() + 1));
+	       }
 	       if (t == tokens.length - 1)
 	       { // last token
 		  // use the source annotation's end instead

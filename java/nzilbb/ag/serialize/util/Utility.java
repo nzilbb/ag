@@ -101,7 +101,7 @@ public class Utility
       {
 	 if (possibleLayersSimplifiedIds.containsKey(id.toLowerCase().replaceAll("[ _]","")))
 	 {
-	    return possibleLayersSimplifiedIds.get(id);
+	    return possibleLayersSimplifiedIds.get(id.toLowerCase().replaceAll("[ _]",""));
 	 }
       }
       return null;
