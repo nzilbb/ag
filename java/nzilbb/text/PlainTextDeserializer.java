@@ -42,6 +42,8 @@ import javax.sound.sampled.AudioFormat;
 import nzilbb.ag.*;
 import nzilbb.ag.util.OrthographyClumper;
 import nzilbb.ag.util.SimpleTokenizer;
+import nzilbb.ag.util.ConventionTransformer;
+import nzilbb.ag.util.SpanningConventionTransformer;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
@@ -675,6 +677,18 @@ public class PlainTextDeserializer
 	 p.setPossibleValues(candidateLayers.values());
       }
 
+      if (!configuration.containsKey("useConventions"))
+      {
+	 configuration.addParameter(
+	    new Parameter("useConventions", Boolean.class, 
+			  "Use Annotation Conventions",
+			  "Whether to use text conventions for comment, noise, lexical, and pronounce annotations", true));
+      }
+      if (configuration.get("useConventions").getValue() == null)
+      {
+	 configuration.get("useConventions").setValue(Boolean.TRUE);
+      }
+
       return configuration;
    }
 
@@ -1175,15 +1189,53 @@ public class PlainTextDeserializer
 	 errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
       }
       graph.commit();
-      
+
+      if (getUseConventions())
+      {
+	 try
+	 {
+	    // word {comment comment} word
+	    SpanningConventionTransformer commentTransformer = new SpanningConventionTransformer(
+	       getWordLayer().getId(), "\\{(.*)", "(.*)\\}", true, null, null, 
+	       commentLayer==null?null:commentLayer.getId(), "$1", "$1", false, false);
+	    commentTransformer.transform(graph);
+	    graph.commit();
+	    
+	    // word [noise noise] word
+	    SpanningConventionTransformer noiseTransformer = new SpanningConventionTransformer(
+	       getWordLayer().getId(), "\\[(.*)", "(.*)\\]", true, null, null, 
+	       noiseLayer==null?null:noiseLayer.getId(), "$1", "$1", false, false);
+	    noiseTransformer.transform(graph);
+	    graph.commit();
+	    
+	    // word[pronounce]
+	    ConventionTransformer pronounceTransformer = new ConventionTransformer(
+	       getWordLayer().getId(), "(.*)\\[(.*)\\]", "$1", 
+	       pronounceLayer==null?null:pronounceLayer.getId(), "$2");
+	    pronounceTransformer.transform(graph);
+	    graph.commit();
+	    
+	    // word(lexical)
+	    ConventionTransformer lexicalTransformer = new ConventionTransformer(
+	       getWordLayer().getId(), "(.*)\\((.*)\\)", "$1", 
+	       lexicalLayer==null?null:lexicalLayer.getId(), "$2");
+	    lexicalTransformer.transform(graph);
+	    graph.commit();
+	 }
+	 catch(TransformationException exception)
+	 {
+	    if (errors == null) errors = new SerializationException();
+	    if (errors.getCause() == null) errors.initCause(exception);
+	    errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
+	 }
+      } // apply transcription conventions
+
       OrthographyClumper clumper = new OrthographyClumper(wordLayer.getId());
       try
       {
 	 // clump non-orthographic 'words' with real words
 	 clumper.transform(graph);
 	 graph.commit();
-
-	 // TODO if units is characters, then set anchors to character offsets
       }
       catch(TransformationException exception)
       {

@@ -69,7 +69,7 @@ public class TestPlainTextDeserializer
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals("Configuration parameters" + configuration, 4, deserializer.configure(configuration, schema).size());      
+      assertEquals("Configuration parameters" + configuration, 5, deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertEquals("noise", "noise", 
@@ -78,6 +78,7 @@ public class TestPlainTextDeserializer
 		   ((Layer)configuration.get("lexicalLayer").getValue()).getId());
       assertEquals("pronounce", "pronounce", 
 		   ((Layer)configuration.get("pronounceLayer").getValue()).getId());
+      assertEquals("use conventions", Boolean.TRUE, configuration.get("useConventions").getValue());
 
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -107,6 +108,7 @@ public class TestPlainTextDeserializer
       }
       
       assertEquals("comment.txt", g.getId());
+      assertEquals("text units", Constants.UNIT_CHARACTERS, g.getOffsetUnits());
 
       // meta data
       assertEquals("graph meta data", 
@@ -171,6 +173,142 @@ public class TestPlainTextDeserializer
       assertEquals(0, g.list("entities").length);
       assertEquals(0, g.list("language").length);
       assertEquals(0, g.list("lexical").length);
+
+   }
+
+   @Test public void elicited() 
+      throws Exception
+   {
+      Schema schema = new Schema("who", "turn", "utterance", "word",
+	 new Layer("app", "App", 0, true, true, true),
+	 new Layer("appVersion", "Version", 0, false, false, true),
+	 new Layer("creation_date", "Version Date", 0, false, false, true),
+	 new Layer("speech_migraine", "Migraine", 0, false, false, true),
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("comment", "Comment", 2, true, false, true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true));
+
+      // access file
+      NamedStream[] streams = {
+	 new NamedStream(new File(getDir(), "elicited.txt")), // transcript
+	 new NamedStream(new File(getDir(), "elicited.wav")) // media file gives max anchor offset
+      };
+      
+      // create deserializer
+      PlainTextDeserializer deserializer = new PlainTextDeserializer();
+
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals("Configuration parameters" + configuration, 5, deserializer.configure(configuration, schema).size());      
+      assertEquals("comment", "comment", 
+		   ((Layer)configuration.get("commentLayer").getValue()).getId());
+      assertNull("noise", configuration.get("noiseLayer").getValue());
+      assertNull("lexical", configuration.get("lexicalLayer").getValue());
+      assertNull("pronounce", configuration.get("pronounceLayer").getValue());
+      assertEquals("use conventions", Boolean.TRUE, configuration.get("useConventions").getValue());
+
+      // load the stream
+      ParameterSet defaultParameters = deserializer.load(streams, schema);
+      // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals(6, defaultParameters.size());
+      assertEquals("app", "app", 
+		   ((Layer)defaultParameters.get("header_app").getValue()).getId());
+      assertEquals("appVersion", "appVersion", 
+		   ((Layer)defaultParameters.get("header_appVersion").getValue()).getId());
+      assertNull("no appPlatform", defaultParameters.get("header_appPlatform").getValue());
+      assertNull("no appDevice", defaultParameters.get("header_appDevice").getValue());
+      assertEquals("creation_date", "creation_date", 
+		   ((Layer)defaultParameters.get("header_creation_date").getValue()).getId());
+      assertEquals("speech_migraine", "speech_migraine", 
+		   ((Layer)defaultParameters.get("header_speech_migraine").getValue()).getId());
+
+      // configure the deserialization
+      deserializer.setParameters(defaultParameters);
+
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+
+      for (String warning : deserializer.getWarnings())
+      {
+	 System.out.println(warning);
+      }
+      
+      assertEquals("elicited.txt", g.getId());
+      assertEquals("time units", Constants.UNIT_SECONDS, g.getOffsetUnits());
+
+      // meta data
+      assertEquals("graph meta data", 
+		   "Elicit Speech", g.my("app").getLabel());
+      assertEquals("graph meta data", 
+		   "1.0.0", g.my("appVersion").getLabel());
+      assertEquals("graph meta data", 
+		   "2017-01-13T15:49:55.575Z", g.my("creation_date").getLabel());
+      assertEquals("graph meta data", 
+		   "currently have migraine", g.my("speech_migraine").getLabel());
+
+      // participants     
+      Annotation[] authors = g.list("who"); 
+      assertEquals(1, authors.length);
+      assertEquals("test", authors[0].getLabel());
+
+      // turns
+      Annotation[] turns = g.list("turn");
+      assertEquals(1, turns.length);
+      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
+      assertEquals("turn ends at end of recording",
+		   new Double(5.2941875), turns[0].getEnd().getOffset());
+      assertEquals("test", turns[0].getLabel());
+      assertEquals(g.my("who"), turns[0].getParent());
+
+      // utterances
+      Annotation[] utterances = g.list("utterance");
+      assertEquals(1, utterances.length);
+      assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
+      assertEquals("utterance ends at end of recording",
+		   new Double(5.2941875), utterances[0].getEnd().getOffset());
+      assertEquals("test", utterances[0].getParent().getLabel());
+      assertEquals(turns[0], utterances[0].getParent());
+      
+      Annotation[] words = g.list("word");
+      assertEquals(9, words.length);
+      assertNull("first word anchor unset because of preceding comment",
+		 words[0].getStart().getOffset());
+      // System.out.println("" + Arrays.asList(words));
+      assertEquals("The", words[0].getLabel());
+      assertNull("inter-word anchors are unset", words[0].getEnd().getOffset());
+      assertEquals("next word linked to last", words[0].getEnd(), words[1].getStart());
+      assertEquals("supermarket", words[1].getLabel());
+      assertNull("inter-word anchors are unset", words[1].getEnd().getOffset());
+      assertEquals("next word linked to last", words[1].getEnd(), words[2].getStart());
+      assertEquals("chain", words[2].getLabel());
+      assertNull("inter-word anchors are unset", words[2].getEnd().getOffset());
+      assertEquals("next word linked to last", words[2].getEnd(), words[3].getStart());
+      assertEquals("shut", words[3].getLabel());
+      assertNull("inter-word anchors are unset", words[3].getEnd().getOffset());
+      assertEquals("next word linked to last", words[3].getEnd(), words[4].getStart());
+      assertEquals("down", words[4].getLabel());
+      assertNull("inter-word anchors are unset", words[4].getEnd().getOffset());
+      assertEquals("next word linked to last", words[4].getEnd(), words[5].getStart());
+      assertEquals("because", words[5].getLabel());
+      assertNull("inter-word anchors are unset", words[5].getEnd().getOffset());
+      assertEquals("next word linked to last", words[5].getEnd(), words[6].getStart());
+      assertEquals("of", words[6].getLabel());
+      assertNull("inter-word anchors are unset", words[6].getEnd().getOffset());
+      assertEquals("next word linked to last", words[6].getEnd(), words[7].getStart());
+      assertEquals("poor", words[7].getLabel());
+      assertNull("inter-word anchors are unset", words[7].getEnd().getOffset());
+      assertEquals("next word linked to last", words[7].getEnd(), words[8].getStart());
+      assertEquals("management", words[8].getLabel());
+      assertEquals("last word ends at end of recording",
+		   new Double(5.2941875), words[8].getEnd().getOffset());
+
+      Annotation[] comments = g.list("comment");
+      assertEquals(1, comments.length);
+      assertEquals("Please read the following aloud:", comments[0].getLabel());
+      assertEquals(new Double(0), comments[0].getStart().getOffset());
 
    }
 
