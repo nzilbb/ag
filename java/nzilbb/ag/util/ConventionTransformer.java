@@ -179,19 +179,25 @@ public class ConventionTransformer
       setSourcePattern(sourcePattern);
       HashMap<String,String> destinationResults = new HashMap<String,String>();
       destinationResults.put(sourceLayerId, sourceResult);
-      destinationResults.put(destinationLayerId, destinationResult);
+      if (destinationLayerId != null)
+      {
+	 destinationResults.put(destinationLayerId, destinationResult);
+      }
       setDestinationResults(destinationResults);
    } // end of constructor
 
    
    /**
     * Add a destination result to {@link #destinationResults}.
-    * @param layerId The layer on which the annotation will be added.
+    * @param layerId The layer on which the annotation will be added. This can be null, in which case no destination is specified, resulting in the annotations being stripped out.
     * @param label The label for the destination annotation, which may include groups captured in {@link #sourcePattern}.
     */
    public void addDestinationResult(String layerId, String label)
    {
-      getDestinationResults().put(layerId, label);
+      if (layerId != null)
+      {
+	 getDestinationResults().put(layerId, label);
+      }
    } // end of addDestinationResult()
 
 
@@ -205,11 +211,6 @@ public class ConventionTransformer
    {
       if (graph.getLayer(getSourceLayerId()) == null) 
 	 throw new TransformationException(this, "No source layer: " + getSourceLayerId());
-      for (String destinationLayerId : getDestinationResults().keySet())
-      {
-	 if (graph.getLayer(destinationLayerId) == null) 
-	    throw new TransformationException(this, "No destination layer: " + destinationLayerId);
-      }
       try
       {
 	 Pattern sourceRegexp = Pattern.compile(getSourcePattern());
