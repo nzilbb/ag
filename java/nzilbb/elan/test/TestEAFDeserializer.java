@@ -105,6 +105,11 @@ public class TestEAFDeserializer
       
       assertEquals("test_utterance.eaf", g.getId());
 
+      // attributes
+      assertEquals("transcriber", "Robert", g.my("scribe").getLabel());
+      assertEquals("language", "eng", g.my("lang").getLabel());
+      assertEquals("version date", "2017-03-16T10:58:10-03:00", g.my("version_date").getLabel());
+
       // participants     
       Annotation[] who = g.list("who");
       assertEquals(2, who.length);
@@ -230,15 +235,13 @@ public class TestEAFDeserializer
       assertEquals(1, lexical.length);
    }
 
-
-   //@Test
-   public void utterance_word() 
+   @Test public void utterance_word() 
       throws Exception
    {
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
 	 new Layer("scribe", "Author", 0, true, true, true),
-	 new Layer("air_date", "Date", 0, true, true, true),
+	 new Layer("version_date", "Date", 0, true, true, true),
 	 new Layer("lang", "Language", 0, true, true, true),
 	 new Layer("who", "Participants", 0, true, true, true),
 	 new Layer("comment", "Comment", 2, true, false, true),
@@ -246,7 +249,6 @@ public class TestEAFDeserializer
 	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
 	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
 	 new Layer("word", "Words", 2, true, false, false, "turn", true),
-	 new Layer("phone", "Phones", 2, true, true, true, "word", true),
 	 new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
 	 new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
       // access file
@@ -257,13 +259,41 @@ public class TestEAFDeserializer
       
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
-      //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-      assertEquals(6, deserializer.configure(configuration, schema).size());
+      // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      assertEquals(8, deserializer.configure(configuration, schema).size());
+      assertEquals("comment", "comment", 
+		   ((Layer)configuration.get("commentLayer").getValue()).getId());
+      assertEquals("pronounce", "pronounce", 
+		   ((Layer)configuration.get("pronounceLayer").getValue()).getId());
+      assertEquals("lexical", "lexical", 
+		   ((Layer)configuration.get("lexicalLayer").getValue()).getId());
+      assertEquals("noise", "noise", 
+		   ((Layer)configuration.get("noiseLayer").getValue()).getId());
+      assertEquals("author", "scribe", 
+		   ((Layer)configuration.get("authorLayer").getValue()).getId());
+      assertEquals("version_date", "version_date", 
+		   ((Layer)configuration.get("dateLayer").getValue()).getId());
+      assertEquals("language", "lang", 
+		   ((Layer)configuration.get("languageLayer").getValue()).getId());
+      assertEquals("useConventions", Boolean.TRUE, 
+		   (Boolean)configuration.get("useConventions").getValue());
 
       // load the stream
       ParameterSet defaultParamaters = deserializer.load(streams, schema);
-      //for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+      // for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
       assertEquals(6, defaultParamaters.size());
+      assertEquals("utterance mapping", "utterance", 
+		   ((Layer)defaultParamaters.get("tier0").getValue()).getId());
+      assertEquals("utterance mapping", "utterance", 
+		   ((Layer)defaultParamaters.get("tier1").getValue()).getId());
+      assertEquals("noise mapping", "noise", 
+		   ((Layer)defaultParamaters.get("tier2").getValue()).getId());
+      assertEquals("comment mapping", "comment", 
+		   ((Layer)defaultParamaters.get("tier3").getValue()).getId());
+      assertEquals("word mapping", "word", 
+		   ((Layer)defaultParamaters.get("tier4").getValue()).getId());
+      assertEquals("word mapping", "word", 
+		   ((Layer)defaultParamaters.get("tier5").getValue()).getId());
 
       // configure the deserialization
       deserializer.setParameters(defaultParamaters);
@@ -279,76 +309,153 @@ public class TestEAFDeserializer
       
       assertEquals("test_utterance_word.eaf", g.getId());
 
+      // attributes
+      assertNull("no transcriber", g.my("scribe"));
+      assertNull("no language specified", g.my("lang"));
+      assertEquals("version date", "2017-03-16T11:20:04-03:00", g.my("version_date").getLabel());
+
       // participants     
       Annotation[] who = g.list("who");
       assertEquals(2, who.length);
-      assertEquals("participant", who[0].getLabel());
+      assertEquals("interviewer", who[0].getLabel());
       assertEquals(g, who[0].getParent());
-      assertEquals("interviewer", who[1].getLabel());
+      assertEquals("participant", who[1].getLabel());
       assertEquals(g, who[1].getParent());
       
       // turns
       Annotation[] turns = g.list("turn");
-      assertEquals(20, turns.length);
-      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
-      assertEquals(new Double(44.255), turns[0].getEnd().getOffset());
+      assertEquals(12, turns.length);
+      assertEquals(new Double(4.675), turns[0].getStart().getOffset());
+      assertEquals(new Double(14.889000000000001), turns[0].getEnd().getOffset());
       assertEquals("participant", turns[0].getLabel());
-      assertEquals(who[0], turns[0].getParent());
+      assertEquals(who[1], turns[0].getParent());
       
-      assertEquals(new Double(44.255), turns[1].getStart().getOffset());
-      assertEquals(new Double(45.505), turns[1].getEnd().getOffset());
+      assertEquals(new Double(14.889000000000001), turns[1].getStart().getOffset());
+      assertEquals(new Double(23.170), turns[1].getEnd().getOffset());
       assertEquals("interviewer", turns[1].getLabel());
-      assertEquals(who[1], turns[1].getParent());
+      assertEquals(who[0], turns[1].getParent());
+
+      assertEquals(new Double(17.983), turns[2].getStart().getOffset());
+      assertEquals(new Double(140.366), turns[2].getEnd().getOffset());
+      assertEquals("participant", turns[2].getLabel());
+
+      assertEquals(new Double(140.366), turns[3].getStart().getOffset());
+      assertEquals(new Double(159.457), turns[3].getEnd().getOffset());
+      assertEquals("interviewer", turns[3].getLabel());
+
+      assertEquals(new Double(159.457), turns[4].getStart().getOffset());
+      assertEquals(new Double(282.871), turns[4].getEnd().getOffset());
+      assertEquals("participant", turns[4].getLabel());
+
+      assertEquals(new Double(282.871), turns[5].getStart().getOffset());
+      assertEquals(new Double(283.96500000000003), turns[5].getEnd().getOffset());
+      assertEquals("interviewer", turns[5].getLabel());
+
+      assertEquals(new Double(283.96500000000003), turns[6].getStart().getOffset());
+      assertEquals(new Double(310.60200000000003), turns[6].getEnd().getOffset());
+      assertEquals("participant", turns[6].getLabel());
+
+      assertEquals("simultaneous speech",
+		   new Double(284.84000000000003), turns[7].getStart().getOffset());
+      assertEquals("simultaneous speech",
+		   new Double(285.34000000000003), turns[7].getEnd().getOffset());
+      assertEquals("interviewer", turns[7].getLabel());
+
+      assertEquals(new Double(310.60200000000003), turns[8].getStart().getOffset());
+      assertEquals(new Double(311.071), turns[8].getEnd().getOffset());
+      assertEquals("interviewer", turns[8].getLabel());
+
+      assertEquals(new Double(311.071), turns[9].getStart().getOffset());
+      assertEquals(new Double(316.258), turns[9].getEnd().getOffset());
+      assertEquals("participant", turns[9].getLabel());
+
+      assertEquals(new Double(316.258), turns[10].getStart().getOffset());
+      assertEquals(new Double(317.195), turns[10].getEnd().getOffset());
+      assertEquals("interviewer", turns[10].getLabel());
+
+      assertEquals(new Double(317.195), turns[11].getStart().getOffset());
+      assertEquals(new Double(321.240), turns[11].getEnd().getOffset());
+      assertEquals("participant", turns[11].getLabel());
 
       // utterances
       Annotation[] utterances = g.list("utterance");
-      assertEquals(139, utterances.length);
-      assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
-      assertEquals(new Double(5.75), utterances[0].getEnd().getOffset());
+      assertEquals(148, utterances.length);
+      assertEquals(new Double(4.675), utterances[0].getStart().getOffset());
+      assertEquals(new Double(6.752), utterances[0].getEnd().getOffset());
       assertEquals("participant", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
 
-      assertEquals(new Double(5.75), utterances[1].getStart().getOffset());
-      assertEquals(new Double(6.907), utterances[1].getEnd().getOffset());
+      assertEquals(new Double(6.752), utterances[1].getStart().getOffset());
+      assertEquals(new Double(10.515), utterances[1].getEnd().getOffset());
       assertEquals("participant", utterances[1].getParent().getLabel());
       assertEquals(turns[0], utterances[1].getParent());
 
-      assertEquals(new Double(44.255), utterances[21].getStart().getOffset());
-      assertEquals(new Double(45.505), utterances[21].getEnd().getOffset());
-      assertEquals("interviewer", utterances[21].getParent().getLabel());
-      assertEquals(turns[1], utterances[21].getParent());
+      assertEquals(new Double(14.889000000000001), utterances[4].getStart().getOffset());
+      assertEquals(new Double(15.639000000000001), utterances[4].getEnd().getOffset());
+      assertEquals("interviewer", utterances[4].getParent().getLabel());
+      assertEquals(turns[1], utterances[4].getParent());
 
       Annotation[] words = g.list("word");
-      String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
-	 "and", "ah .", "Cyril", "would", "arrive", "at", "the", "door",
-	 "with", "this", "letter", "for", "Mum", 
-	 "and", "and", "then", "there", "was", "a", "message .", 
-	 "and", "I", "think", "they", "both", "had", "telephones ."
+      String[] wordLabels = {
+	 "  . rest", "of", "that", "side", "of", "the", "family", "so", "he -- ",
+	 " generously", "agreed", "that", "she", "could", "go", "with", "him", "but ", 
+	 " there", "were", "so", "many", "people", "there ", 
+	 " that", "nothing", "was", "done", "constructively "
+      };
+      Double[] wordStarts = {
+	 4.675, 4.917, 5.074, 5.279, 5.539, 5.611, 5.665, 6.112, 6.414,
+	 6.752, 8.512, 8.872, 9.077, 9.222, 9.412, 9.662, 9.962, 10.202, 
+	 10.515, 10.791, 11.067, 11.343, 11.619, 11.895, 
+	 12.171, 12.451, 12.811, 13.031, 13.346
+      };
+      Double[] wordEnds = {
+	 4.917, 5.074, 5.279, 5.539, 5.611, 5.665, 6.112, 6.414, 6.752, 
+	 8.512, 8.872, 9.077, 9.222, 9.412, 9.662, 9.902000000000001, 10.202, 10.515,
+	 10.791, 11.067, 11.343, 11.619, 11.895, 12.171,
+	 12.411, 12.811, 12.991, 13.346, 14.889000000000001
       };
       for (int i = 0; i < wordLabels.length; i++)
       {
 	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
 	 	      i+1, words[i].getOrdinal());
+	 assertEquals("word starts " + i + " " + wordLabels[i],
+		      wordStarts[i], words[i].getStart().getOffset());
+	 assertEquals("word ends " + i + " " + wordLabels[i],
+		      wordEnds[i], words[i].getEnd().getOffset());
 	 assertEquals(turns[0].getId(), words[i].getParentId());
       }
 
-      // no convention annotations, because the utterances are not tokenized
-      assertEquals("no conventional comments", 0, g.list("comment").length);
-      assertEquals("no conventional noises", 0, g.list("noise").length);
-      assertEquals("no conventional pronounce annotations", 0, g.list("pronounce").length);
-      assertEquals("no conventional lexical annotations", 0, g.list("lexical").length);
+      // comment
+      Annotation[] comments = g.list("comment");
+      assertEquals(1, comments.length);
+      assertEquals("unclear", comments[0].getLabel());
+      assertEquals(new Double(102.164), comments[0].getStart().getOffset());
+      assertEquals(new Double(102.424), comments[0].getEnd().getOffset());
 
+      // noise
+      Annotation[] noises = g.list("noise");
+      assertEquals(1, noises.length);
+      assertEquals("click", noises[0].getLabel());
+      assertEquals(new Double(129.612), noises[0].getStart().getOffset());
+      assertEquals(new Double(130.242), noises[0].getEnd().getOffset());
+
+      // pronounce
+      Annotation[] pronounce = g.list("pronounce");
+      assertEquals(0, pronounce.length);
+
+      // lexical
+      Annotation[] lexical = g.list("lexical");
+      assertEquals(0, lexical.length);
    }
 
-   //@Test
-   public void utterance_word_phone() 
+   @Test public void utterance_word_phone() 
       throws Exception
    {
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
 	 new Layer("scribe", "Author", 0, true, true, true),
-	 new Layer("air_date", "Date", 0, true, true, true),
+	 new Layer("version_date", "Date", 0, true, true, true),
 	 new Layer("lang", "Language", 0, true, true, true),
 	 new Layer("who", "Participants", 0, true, true, true),
 	 new Layer("comment", "Comment", 2, true, false, true),
@@ -356,24 +463,57 @@ public class TestEAFDeserializer
 	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
 	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
 	 new Layer("word", "Words", 2, true, false, false, "turn", true),
-	 new Layer("phone", "Phones", 2, true, true, true, "word", true),
 	 new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
-	 new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
+	 new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true),
+	 new Layer("phone", "Phone", 2, true, false, true, "word", true));
       // access file
-      NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance_word.eaf")) };
+      NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance_word_phone.eaf")) };
       
       // create deserializer
       EAFDeserializer deserializer = new EAFDeserializer();
       
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
-      //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-      assertEquals(6, deserializer.configure(configuration, schema).size());
+      // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      assertEquals(8, deserializer.configure(configuration, schema).size());
+      assertEquals("comment", "comment", 
+		   ((Layer)configuration.get("commentLayer").getValue()).getId());
+      assertEquals("pronounce", "pronounce", 
+		   ((Layer)configuration.get("pronounceLayer").getValue()).getId());
+      assertEquals("lexical", "lexical", 
+		   ((Layer)configuration.get("lexicalLayer").getValue()).getId());
+      assertEquals("noise", "noise", 
+		   ((Layer)configuration.get("noiseLayer").getValue()).getId());
+      assertEquals("author", "scribe", 
+		   ((Layer)configuration.get("authorLayer").getValue()).getId());
+      assertEquals("version_date", "version_date", 
+		   ((Layer)configuration.get("dateLayer").getValue()).getId());
+      assertEquals("language", "lang", 
+		   ((Layer)configuration.get("languageLayer").getValue()).getId());
+      assertEquals("useConventions", Boolean.TRUE, 
+		   (Boolean)configuration.get("useConventions").getValue());
 
       // load the stream
       ParameterSet defaultParamaters = deserializer.load(streams, schema);
-      //for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+      // for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
       assertEquals(6, defaultParamaters.size());
+      assertEquals("utterance mapping", "utterance", 
+		   ((Layer)defaultParamaters.get("tier0").getValue()).getId());
+      assertEquals("utterance mapping", "utterance", 
+		   ((Layer)defaultParamaters.get("tier1").getValue()).getId());
+      assertEquals("word mapping", "word", 
+		   ((Layer)defaultParamaters.get("tier2").getValue()).getId());
+      assertEquals("word mapping", "word", 
+		   ((Layer)defaultParamaters.get("tier3").getValue()).getId());
+
+      // phones tiers doesn't automatically map to phone layer, because their names don't match
+      assertEquals("phone mapping default", "utterance", 
+		   ((Layer)defaultParamaters.get("tier4").getValue()).getId());
+      assertEquals("phone mapping default", "utterance", 
+		   ((Layer)defaultParamaters.get("tier5").getValue()).getId());
+      // but we set it 'manually'
+      defaultParamaters.get("tier4").setValue(schema.getLayer("phone"));
+      defaultParamaters.get("tier5").setValue(schema.getLayer("phone"));
 
       // configure the deserialization
       deserializer.setParameters(defaultParamaters);
@@ -387,113 +527,140 @@ public class TestEAFDeserializer
 	 System.out.println(warning);
       }
       
-      assertEquals("test_utterance_word.eaf", g.getId());
+      assertEquals("test_utterance_word_phone.eaf", g.getId());
+
+      // attributes
+      assertNull("no transcriber", g.my("scribe"));
+      assertNull("no language specified", g.my("lang"));
+      assertEquals("version date", "2017-03-16T11:45:39-03:00", g.my("version_date").getLabel());
 
       // participants     
       Annotation[] who = g.list("who");
       assertEquals(2, who.length);
-      assertEquals("participant", who[0].getLabel());
+      assertEquals("interviewer", who[0].getLabel());
       assertEquals(g, who[0].getParent());
-      assertEquals("interviewer", who[1].getLabel());
+      assertEquals("participant", who[1].getLabel());
       assertEquals(g, who[1].getParent());
       
       // turns
       Annotation[] turns = g.list("turn");
-      assertEquals(20, turns.length);
-      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
-      assertEquals(new Double(44.255), turns[0].getEnd().getOffset());
+      assertEquals(12, turns.length);
+      assertEquals(new Double(4.675), turns[0].getStart().getOffset());
+      assertEquals(new Double(14.889000000000001), turns[0].getEnd().getOffset());
       assertEquals("participant", turns[0].getLabel());
-      assertEquals(who[0], turns[0].getParent());
+      assertEquals(who[1], turns[0].getParent());
       
-      assertEquals(new Double(44.255), turns[1].getStart().getOffset());
-      assertEquals(new Double(45.505), turns[1].getEnd().getOffset());
+      assertEquals(new Double(14.889000000000001), turns[1].getStart().getOffset());
+      assertEquals(new Double(23.170), turns[1].getEnd().getOffset());
       assertEquals("interviewer", turns[1].getLabel());
-      assertEquals(who[1], turns[1].getParent());
+      assertEquals(who[0], turns[1].getParent());
+
+      assertEquals(new Double(17.983), turns[2].getStart().getOffset());
+      assertEquals(new Double(140.366), turns[2].getEnd().getOffset());
+      assertEquals("participant", turns[2].getLabel());
+
+      assertEquals(new Double(140.366), turns[3].getStart().getOffset());
+      assertEquals(new Double(159.457), turns[3].getEnd().getOffset());
+      assertEquals("interviewer", turns[3].getLabel());
+
+      assertEquals(new Double(159.457), turns[4].getStart().getOffset());
+      assertEquals(new Double(282.871), turns[4].getEnd().getOffset());
+      assertEquals("participant", turns[4].getLabel());
+
+      assertEquals(new Double(282.871), turns[5].getStart().getOffset());
+      assertEquals(new Double(283.96500000000003), turns[5].getEnd().getOffset());
+      assertEquals("interviewer", turns[5].getLabel());
+
+      assertEquals(new Double(283.96500000000003), turns[6].getStart().getOffset());
+      assertEquals(new Double(310.60200000000003), turns[6].getEnd().getOffset());
+      assertEquals("participant", turns[6].getLabel());
+
+      assertEquals("simultaneous speech",
+		   new Double(284.84000000000003), turns[7].getStart().getOffset());
+      assertEquals("simultaneous speech",
+		   new Double(285.34000000000003), turns[7].getEnd().getOffset());
+      assertEquals("interviewer", turns[7].getLabel());
+
+      assertEquals(new Double(310.60200000000003), turns[8].getStart().getOffset());
+      assertEquals(new Double(311.071), turns[8].getEnd().getOffset());
+      assertEquals("interviewer", turns[8].getLabel());
+
+      assertEquals(new Double(311.071), turns[9].getStart().getOffset());
+      assertEquals(new Double(316.258), turns[9].getEnd().getOffset());
+      assertEquals("participant", turns[9].getLabel());
+
+      assertEquals(new Double(316.258), turns[10].getStart().getOffset());
+      assertEquals(new Double(317.195), turns[10].getEnd().getOffset());
+      assertEquals("interviewer", turns[10].getLabel());
+
+      assertEquals(new Double(317.195), turns[11].getStart().getOffset());
+      assertEquals(new Double(321.240), turns[11].getEnd().getOffset());
+      assertEquals("participant", turns[11].getLabel());
 
       // utterances
       Annotation[] utterances = g.list("utterance");
-      assertEquals(139, utterances.length);
-      assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
-      assertEquals(new Double(5.75), utterances[0].getEnd().getOffset());
+      assertEquals(148, utterances.length);
+      assertEquals(new Double(4.675), utterances[0].getStart().getOffset());
+      assertEquals(new Double(6.752), utterances[0].getEnd().getOffset());
       assertEquals("participant", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
 
-      assertEquals(new Double(5.75), utterances[1].getStart().getOffset());
-      assertEquals(new Double(6.907), utterances[1].getEnd().getOffset());
+      assertEquals(new Double(6.752), utterances[1].getStart().getOffset());
+      assertEquals(new Double(10.515), utterances[1].getEnd().getOffset());
       assertEquals("participant", utterances[1].getParent().getLabel());
       assertEquals(turns[0], utterances[1].getParent());
 
-      assertEquals(new Double(44.255), utterances[21].getStart().getOffset());
-      assertEquals(new Double(45.505), utterances[21].getEnd().getOffset());
-      assertEquals("interviewer", utterances[21].getParent().getLabel());
-      assertEquals(turns[1], utterances[21].getParent());
+      assertEquals(new Double(14.889000000000001), utterances[4].getStart().getOffset());
+      assertEquals(new Double(15.639000000000001), utterances[4].getEnd().getOffset());
+      assertEquals("interviewer", utterances[4].getParent().getLabel());
+      assertEquals(turns[1], utterances[4].getParent());
 
       Annotation[] words = g.list("word");
-      String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
-	 "and", "ah .", "Cyril", "would", "arrive", "at", "the", "door",
-	 "with", "this", "letter", "for", "Mum", 
-	 "and", "and", "then", "there", "was", "a", "message .", 
-	 "and", "I", "think", "they", "both", "had", "telephones ."
+      String[] wordLabels = {
+	 "  . rest", "of", "that", "side", "of", "the", "family", "so", "he -- ",
+	 " generously", "agreed", "that", "she", "could", "go", "with", "him", "but ", 
+	 " there", "were", "so", "many", "people", "there ", 
+	 " that", "nothing", "was", "done", "constructively "
+      };
+      Double[] wordStarts = {
+	 4.675, 4.917, 5.074, 5.279, 5.539, 5.611, 5.665, 6.112, 6.414,
+	 6.752, 8.512, 8.872, 9.077, 9.222, 9.412, 9.662, 9.962, 10.202, 
+	 10.515, 10.791, 11.067, 11.343, 11.619, 11.895, 
+	 12.171, 12.451, 12.811, 13.031, 13.346
+      };
+      Double[] wordEnds = {
+	 4.917, 5.074, 5.279, 5.539, 5.611, 5.665, 6.112, 6.414, 6.752, 
+	 8.512, 8.872, 9.077, 9.222, 9.412, 9.662, 9.902000000000001, 10.202, 10.515,
+	 10.791, 11.067, 11.343, 11.619, 11.895, 12.171,
+	 12.411, 12.811, 12.991, 13.346, 14.889000000000001
       };
       for (int i = 0; i < wordLabels.length; i++)
       {
 	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
 	 	      i+1, words[i].getOrdinal());
+	 assertEquals("word starts " + i + " " + wordLabels[i],
+		      wordStarts[i], words[i].getStart().getOffset());
+	 assertEquals("word ends " + i + " " + wordLabels[i],
+		      wordEnds[i], words[i].getEnd().getOffset());
 	 assertEquals(turns[0].getId(), words[i].getParentId());
       }
 
-      // no convention annotations, because the utterances are not tokenized
-      assertEquals("no conventional comments", 0, g.list("comment").length);
-      assertEquals("no conventional noises", 0, g.list("noise").length);
-      assertEquals("no conventional pronounce annotations", 0, g.list("pronounce").length);
-      assertEquals("no conventional lexical annotations", 0, g.list("lexical").length);
+      // comment
+      Annotation[] comments = g.list("comment");
+      assertEquals(0, comments.length);
 
-      // phones
-      Annotation[] phones = g.list("phone");
-      assertEquals("phones", 13, phones.length);
+      // noise
+      Annotation[] noises = g.list("noise");
+      assertEquals(0, noises.length);
 
-      // participant
+      // pronounce
+      Annotation[] pronounce = g.list("pronounce");
+      assertEquals(0, pronounce.length);
 
-      assertEquals("phone", "I", phones[0].getLabel());
-      assertEquals("phone parent", "is", phones[0].getParent().getLabel());
-      assertEquals("phone", "z", phones[1].getLabel());
-      assertEquals("phone parent", "is", phones[1].getParent().getLabel());
-
-      assertEquals("phone simultaneous speech", "$", phones[2].getLabel());
-      assertEquals("phone parent simultaneous speech", "or", phones[2].getParent().getLabel());
-
-      assertEquals("phone simultaneous speech", "s", phones[3].getLabel());
-      assertEquals("phone parent simultaneous speech", "some", phones[3].getParent().getLabel());
-
-      assertEquals("phone simultaneous speech", "V", phones[4].getLabel());
-      assertEquals("phone parent simultaneous speech", "some", phones[4].getParent().getLabel());
-
-      assertEquals("phone simultaneous speech", "m", phones[5].getLabel());
-      assertEquals("phone parent simultaneous speech", "some", phones[5].getParent().getLabel());
-
-      assertEquals("phone simultaneous speech", "n", phones[6].getLabel());
-      assertEquals("phone parent simultaneous speech", "and", phones[6].getParent().getLabel());
-      
-      // interviewer
-
-      assertEquals("phone simultaneous speech", "j", phones[7].getLabel());
-      assertEquals("phone parent simultaneous speech", "yeah", phones[7].getParent().getLabel());
-
-      assertEquals("phone simultaneous speech", "8", phones[8].getLabel());
-      assertEquals("phone parent simultaneous speech", "yeah", phones[8].getParent().getLabel());
-
-      assertEquals("phone simultaneous speech", "j", phones[9].getLabel());
-      assertEquals("phone parent simultaneous speech", "yeah", phones[9].getParent().getLabel());
-
-      assertEquals("phone simultaneous speech", "8", phones[10].getLabel());
-      assertEquals("phone parent simultaneous speech", "yeah", phones[10].getParent().getLabel());
-
-      assertEquals("phone simultaneous speech", "j", phones[11].getLabel());
-      assertEquals("phone parent simultaneous speech", "yeah --", phones[11].getParent().getLabel());
-
-      assertEquals("phone simultaneous speech", "8", phones[12].getLabel());
-      assertEquals("phone parent simultaneous speech", "yeah --", phones[12].getParent().getLabel());
+      // lexical
+      Annotation[] lexical = g.list("lexical");
+      assertEquals(0, lexical.length);
    }
 
    /**
