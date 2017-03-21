@@ -14,4 +14,5 @@ and essentially defines an Annotation Graph as a directed acyclic graph where:
 This particular implementation, which is used for [LaBB-CAT](https://labbcat.canterbury.ac.nz), 
 developed by the [NZILBB](http://www.nzilbb.canterbury.ac.nz),
 includes extra features that allow tier hierarchies and parent/child constraints to be defined.
+More details on extra features are available in [http://dx.doi.org/10.1016/j.csl.2017.01.004](http://dx.doi.org/10.1016/j.csl.2017.01.004)
 
