@@ -943,7 +943,8 @@ public class PlainTextDeserializer
 	 :Constants.CONFIDENCE_DEFAULT;
       
       // creat the 0 anchor to prevent graph tagging from creating one with no confidence
-      Anchor lastAnchor = graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL);
+      Anchor firstAnchor = graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL);
+      Anchor lastAnchor = firstAnchor;
 
       // add layers to the graph
       // we don't just copy the whole schema, because that would imply that all the extra layers
@@ -1026,7 +1027,8 @@ public class PlainTextDeserializer
       Annotation lastLine = null;
       for (String sLine : getLines())
       {
-	 if (sLine.trim().length() == 0 && getHasSpeakers())
+	 sLine = sLine.trim();
+	 if (sLine.length() == 0 && getHasSpeakers())
 	 {
 	    // a blank line in a transcript is taken to be a break in speaker
 	    // subsequent lines with text but no speaker are taken to be notes/comments
@@ -1068,7 +1070,11 @@ public class PlainTextDeserializer
 	 line.setStart(lastAnchor);
 	 if (lastLine != null)
 	 {
-	    lastLine.setEnd(line.getStart());
+	    if (lastAnchor.getId() == null)
+	    {
+	       graph.addAnchor(lastAnchor);
+	    }
+	    lastLine.setEndId(lastAnchor.getId());
 	    graph.addAnnotation(lastLine);
 	 }
 	 
@@ -1082,13 +1088,6 @@ public class PlainTextDeserializer
 	       if (getMaxParticipantLength() == null
 		   || sSpeakerId.length() <= getMaxParticipantLength())
 	       {
-		  // finish old turn
-		  if (turn != null && turn.getStart() != lastAnchor)
-		  {
-		     turn.setEnd(lastAnchor);
-		     graph.addAnnotation(turn);
-		  }
-
 		  // speaker
 		  participant = participants.get(sSpeakerId);
 		  if (participant == null)
@@ -1097,22 +1096,39 @@ public class PlainTextDeserializer
 		     graph.addAnnotation(participant);
 		     participants.put(sSpeakerId, participant);
 		  }
-
-		  // new turn		  
-		  turn = new Annotation(null, participant.getLabel(), getTurnLayer().getId());
-		  turn.setParentId(participant.getId());
-		  graph.addAnnotation(turn);
-		  turn.setStart(lastAnchor);
-		  // start a new line too
-		  line.setEnd(lastAnchor);
-		  if (!line.getStartId().equals(line.getEndId()))
-		  { // if we have <div><p>... don't create an instantaneous, empty line
-		     graph.addAnnotation(line);
-		  }
-		  line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
-		  line.setParentId(turn.getId());
-		  line.setStart(lastAnchor);
 		  
+		  if (lastAnchor.getOffset().equals(0.0))
+		  { // just started, so recycle the turn and utterance we're already in
+		     turn.setLabel(participant.getLabel());
+		     turn.setParentId(participant.getId());
+		     line.setLabel(participant.getLabel());
+		     line.setParentId(turn.getId());
+		  }
+		  else
+		  {
+		     // finish old turn
+		     if (turn != null && turn.getStart() != lastAnchor)
+		     {
+			turn.setEnd(lastAnchor);
+			graph.addAnnotation(turn);
+		     }
+		     
+		     // new turn		  
+		     turn = new Annotation(null, participant.getLabel(), getTurnLayer().getId());
+		     turn.setParentId(participant.getId());
+		     graph.addAnnotation(turn);
+		     turn.setStart(lastAnchor);
+		     // start a new line too
+		     line.setEnd(lastAnchor);
+		     if (!line.getStartId().equals(line.getEndId()))
+		     { // if we have <div><p>... don't create an instantaneous, empty line
+			graph.addAnnotation(line);
+		     }
+		     line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
+		     line.setParentId(turn.getId());
+		     line.setStart(lastAnchor);
+
+		  }
 		  // consume the speaker ID
 		  sLine = sLine.substring(fmtSpeakerFormat.format(oSpeaker).length());
 	       } // speaker found
@@ -1122,7 +1138,7 @@ public class PlainTextDeserializer
 	 } // HasSpeakers
 	 
 	 // process text
-	 if (sLine.trim().length() > 0)
+	 if (sLine.length() > 0)
 	 {
 	    if (participant != null)
 	    { // speech or text
@@ -1157,7 +1173,11 @@ public class PlainTextDeserializer
       }
       if (lastLine != null)
       {
-	 lastLine.setEnd(lastAnchor);
+	 if (lastAnchor.getId() == null)
+	 {
+	    graph.addAnchor(lastAnchor);
+	 }
+	 lastLine.setEndId(lastAnchor.getId());
 	 graph.addAnnotation(lastLine);
       }
       if (turn != null)
@@ -1230,7 +1250,7 @@ public class PlainTextDeserializer
 	 }
       } // apply transcription conventions
 
-      OrthographyClumper clumper = new OrthographyClumper(wordLayer.getId());
+      OrthographyClumper clumper = new OrthographyClumper(wordLayer.getId(), utteranceLayer.getId());
       try
       {
 	 // clump non-orthographic 'words' with real words
@@ -1253,6 +1273,15 @@ public class PlainTextDeserializer
       } // next participant tag
       
       if (errors != null) throw errors;
+
+      // set end anchors of graph tags
+      for (Annotation a : graph.list(getParticipantLayer().getId()))
+      {
+	 a.setStartId(firstAnchor.getId());
+	 a.setEndId(lastAnchor.getId());
+      }
+
+      graph.commit();
       
       Graph[] graphs = { graph };
       return graphs;

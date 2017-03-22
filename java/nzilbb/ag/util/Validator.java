@@ -844,7 +844,7 @@ public class Validator
 	    newParent = candidate;
 	    // keep looking - an equal child.grandparent = candidate.parent would be better
 	 }
-	 assert child.getAnchored() : "child.getAnchored() " + child + " " + child.getStart() + " - " + child.getEnd();
+	 assert child.getAnchored() : "child.getAnchored() " + child.getLayerId() + ":" + child + " " + child.getStart() + " - " + child.getEnd();
 	 assert candidate.getAnchored() : "candidate.getAnchored() " + candidate + " " + candidate.getStart() + " - " + candidate.getEnd();
 	 if (nearestCandidate == null
 	     || (nearestCandidate.getAnchored()
@@ -1463,6 +1463,8 @@ public class Validator
 	 if (anOther.getLayerId() == annotation.getLayerId()) continue;
 	 if (layerIdsToExclude.contains(anOther.getLayerId())) continue;
 	 // has it already been changed?
+	 assert anOther != null : "anOther != null";
+	 assert anOther.getStartId() != null : "anOther.getStartId() != null - " + anOther.getLayerId() + ":" + anOther.getLabel();
 	 if (!anOther.getStartId().equals(aOriginalStart.getId())) continue;
 	 // do they have a relationship that would actually preclude sharing?
 	 Layer otherLayer = annotation.getGraph().getLayer(anOther.getLayerId());

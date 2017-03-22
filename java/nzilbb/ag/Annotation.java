@@ -1699,6 +1699,7 @@ public class Annotation
     */
    public boolean getInstantaneous()
    {
+      assert getStartId() != null : "getStartId() != null - " + getLayerId() + " " + getLabel();
       return getStartId().equals(getEndId());
    } // end of getInstantaneous()
 
@@ -1768,17 +1769,30 @@ public class Annotation
       if (getGraph() == null) return null;
 
       Annotation tag = new Annotation(null, label, layerId, getStartId(), getEndId());
-
+      assert getGraph() != null : "getGraph() != null";
+      assert tag.getLayerId() != null : "tag.getLayerId() != null";
+      assert getGraph().getLayer(tag.getLayerId()) != null : "getGraph().getLayer(tag.getLayerId()) != null - " + tag.getLayerId();
+      assert getGraph().getLayer(tag.getLayerId()).getParent() != null : "getGraph().getLayer(tag.getLayerId()).getParent() != null";
+      assert getLayer() != null : "getLayer() != null";
       if (getGraph().getLayer(tag.getLayerId()).getParent() == getLayer())
       { // tag is child of this
 	 tag.setParent(this);
+	 if (getGraph().getLayer(tag.getLayerId()).getAlignment() == 0)
+	 { // it's a non-aligned layer, so the anchors must match the parent
+	    assert getStartId() != null : "getStartId() != null " + getLayer() + ": " + getLabel();
+	    tag.setStartId(getStartId());
+	    assert getEndId() != null : "getEndId() != null " + getLayer() + ": " + getLabel();
+	    tag.setEndId(getEndId());
+	 }
       }
       else if (getGraph().getLayer(tag.getLayerId()).getParent() == getLayer().getParent())
       { // this layer and tag layer share a parent
 	 tag.setParent(getParent());
 	 if (getGraph().getLayer(tag.getLayerId()).getAlignment() == 0)
 	 { // it's a non-aligned layer, so the anchors must match the parent
+	    assert getParent().getStartId() != null : "getParent().getStartId() != null " + getParent().getLayer() + ": " + getParent().getLabel();
 	    tag.setStartId(getParent().getStartId());
+	    assert getParent().getEndId() != null : "getParent().getEndId() != null " + getParent().getLayer() + ": " + getParent().getLabel();
 	    tag.setEndId(getParent().getEndId());
 	 }
       }

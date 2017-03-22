@@ -35,6 +35,8 @@ import java.net.URL;
 import nzilbb.configure.ParameterSet;
 import nzilbb.configure.Parameter;
 import nzilbb.ag.*;
+import nzilbb.ag.util.Validator;
+import nzilbb.ag.util.Normalizer;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.text.*;
 
@@ -173,6 +175,188 @@ public class TestPlainTextDeserializer
       assertEquals(0, g.list("entities").length);
       assertEquals(0, g.list("language").length);
       assertEquals(0, g.list("lexical").length);
+
+   }
+
+   @Test public void comment2() 
+      throws Exception
+   {
+      Schema schema = new Schema("who", "turn", "utterance", "word",
+	 new Layer("scribe", "Transcriber", 0, true, true, true),
+	 new Layer("subreddit", "Subreddit name", 0, false, false, true),
+	 new Layer("parent_id", "Parent", 0, false, false, true),
+	 new Layer("publication_time", "Publication Date", 0, false, false, true),
+	 new Layer("transcript_program", "Program", 0, false, false, true),
+	 new Layer("url", "URL", 0, false, false, true),
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("topic", "Topic", 2, true, false, false),
+	 new Layer("comment", "Comment", 2, true, false, true),
+	 new Layer("noise", "Noise", 2, true, false, true),
+	 new Layer("main_participant", "Main", 0, false, false, true, "who", true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true),
+	 new Layer("pronounce", "Pronounce", 0, true, false, false, "word", true),
+	 new Layer("lexical", "Lexical", 0, true, false, false, "word", true));
+
+      // access file
+      NamedStream[] streams = { new NamedStream(new File(getDir(), "comment2.txt")) };
+      
+      // create deserializer
+      PlainTextDeserializer deserializer = new PlainTextDeserializer();
+
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals("Configuration parameters" + configuration, 5, deserializer.configure(configuration, schema).size());      
+      assertEquals("comment", "comment", 
+		   ((Layer)configuration.get("commentLayer").getValue()).getId());
+      assertEquals("noise", "noise", 
+		   ((Layer)configuration.get("noiseLayer").getValue()).getId());
+      assertEquals("lexical", "lexical", 
+		   ((Layer)configuration.get("lexicalLayer").getValue()).getId());
+      assertEquals("pronounce", "pronounce", 
+		   ((Layer)configuration.get("pronounceLayer").getValue()).getId());
+      assertEquals("use conventions", Boolean.TRUE, configuration.get("useConventions").getValue());
+
+      // load the stream
+      ParameterSet defaultParameters = deserializer.load(streams, schema);
+      // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals(4, defaultParameters.size());
+      assertEquals("url", "url", 
+		   ((Layer)defaultParameters.get("header_url").getValue()).getId());
+      assertEquals("subreddit", "subreddit", 
+		   ((Layer)defaultParameters.get("header_subreddit").getValue()).getId());
+      assertEquals("publication date", "publication_time", 
+		   ((Layer)defaultParameters.get("header_publication_time").getValue()).getId());
+      assertEquals("parent_id", "parent_id", 
+		   ((Layer)defaultParameters.get("header_parent_id").getValue()).getId());
+
+      // configure the deserialization
+      deserializer.setParameters(defaultParameters);
+
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+
+      for (String warning : deserializer.getWarnings())
+      {
+	 System.out.println(warning);
+      }
+      
+      assertEquals("comment2.txt", g.getId());
+      assertEquals("text units", Constants.UNIT_CHARACTERS, g.getOffsetUnits());
+
+      // meta data
+      assertEquals("graph meta data", 
+		   "StrangerThings", g.my("subreddit").getLabel());
+      assertEquals("graph meta data", 
+		   "https://www.reddit.com/r/StrangerThings/comments/5rxk10#ddb3r2n", g.my("url").getLabel());
+      assertEquals("graph meta data", 
+		   "2017-02-04T02:47:49.000Z", g.my("publication_time").getLabel());
+      assertEquals("graph meta data", 
+		   "t3_5rxk10", g.my("parent_id").getLabel());
+
+      // participants     
+      Annotation[] authors = g.list("who"); 
+      assertEquals(1, authors.length);
+      assertEquals("tgflp", authors[0].getLabel());
+      assertNotNull("start ID set", authors[0].getStartId());
+      assertEquals(new Double(0.0), authors[0].getStart().getOffset());
+
+      // tag participant as main one
+      g.addLayer(schema.getLayer("main_participant"));
+      g.createTag(authors[0], "main_participant", authors[0].getLabel());
+      
+      // turns
+      Annotation[] turns = g.list("turn");
+      //assertEquals(1, turns.length);
+      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
+      //assertEquals(new Double(23.563), turns[0].getEnd().getOffset()); // TODO
+      assertEquals("tgflp", turns[0].getLabel());
+      assertEquals(g.my("who"), turns[0].getParent());
+
+      // utterances
+      Annotation[] utterances = g.list("utterance");
+      assertEquals(5, utterances.length);
+      assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
+      assertEquals("tgflp", utterances[0].getParent().getLabel());
+      assertEquals(turns[0], utterances[0].getParent());
+      assertEquals(new Double(277.0), utterances[0].getEnd().getOffset());
+      
+      assertEquals(new Double(277.0), utterances[1].getStart().getOffset());
+      assertEquals("tgflp", utterances[1].getParent().getLabel());
+      assertEquals(turns[0], utterances[1].getParent());
+      assertEquals(new Double(343.0), utterances[1].getEnd().getOffset());
+
+      assertEquals(new Double(343.0), utterances[2].getStart().getOffset());
+      assertEquals("tgflp", utterances[2].getParent().getLabel());
+      assertEquals(turns[0], utterances[2].getParent());
+      assertEquals(new Double(345.0), utterances[2].getEnd().getOffset());
+
+      assertEquals(new Double(345.0), utterances[3].getStart().getOffset());
+      assertEquals("tgflp", utterances[3].getParent().getLabel());
+      assertEquals(turns[0], utterances[3].getParent());
+      assertEquals(new Double(417.0), utterances[3].getEnd().getOffset());
+
+      assertEquals(new Double(417.0), utterances[4].getStart().getOffset());
+      assertEquals("tgflp", utterances[4].getParent().getLabel());
+      assertEquals(turns[0], utterances[4].getParent());
+      assertEquals(new Double(454.0), utterances[4].getEnd().getOffset());
+      
+      Annotation[] words = g.list("word");
+      assertEquals(new Double(0), words[0].getStart().getOffset());
+      // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
+      assertEquals("Jesus", words[0].getLabel());
+      assertEquals("inter-word space", new Double(6), words[0].getEnd().getOffset());
+      assertEquals("next word start where last ends",
+		   new Double(6), words[1].getStart().getOffset());
+      assertEquals("next word linked to last", words[0].getEnd(), words[1].getStart());
+      assertEquals("christ,", words[1].getLabel());
+      assertEquals("inter-word space", new Double(14), words[1].getEnd().getOffset());
+      assertEquals("next word linked to last", words[1].getEnd(), words[2].getStart());
+      assertEquals("if", words[2].getLabel());
+      assertEquals("inter-word space", new Double(17), words[2].getEnd().getOffset());
+      assertEquals("next word linked to last", words[2].getEnd(), words[3].getStart());
+      assertEquals("an", words[3].getLabel());
+      assertEquals("inter-word space", new Double(20), words[3].getEnd().getOffset());
+      assertEquals("next word linked to last", words[3].getEnd(), words[4].getStart());
+      assertEquals("actor", words[4].getLabel());
+      assertEquals("inter-word space", new Double(26), words[4].getEnd().getOffset());
+      assertEquals("next word linked to last", words[4].getEnd(), words[5].getStart());
+      assertEquals("talking", words[5].getLabel());
+      assertEquals("inter-word space", new Double(34), words[5].getEnd().getOffset());
+      assertEquals("next word linked to last", words[5].getEnd(), words[6].getStart());
+      assertEquals("about", words[6].getLabel());
+      assertEquals("inter-word space", new Double(40), words[6].getEnd().getOffset());
+      assertEquals("next word linked to last", words[6].getEnd(), words[7].getStart());
+      assertEquals("politics", words[7].getLabel());
+      assertEquals(new Double(49), words[7].getEnd().getOffset());
+
+      assertEquals("line boundary",
+		   new Double(265), words[49].getStart().getOffset());
+      assertEquals("line boundary",
+		   "here", words[49].getLabel());
+      assertEquals("line boundary",
+		   new Double(277), words[49].getEnd().getOffset());
+
+      assertEquals("line boundary",
+		   new Double(277), words[50].getStart().getOffset());
+      assertEquals("line boundary",
+		   "< In -", words[50].getLabel());
+      assertEquals("line boundary",
+		   new Double(284), words[50].getEnd().getOffset());
+
+      assertEquals(0, g.list("entities").length);
+      assertEquals(0, g.list("language").length);
+      assertEquals(0, g.list("lexical").length);
+
+      // test validator runs
+      Normalizer normalizer = new Normalizer();
+      normalizer.transform(g);
+      g.commit();
+      g.create();
+      Validator v = new Validator();
+      v.transform(g);
 
    }
 
