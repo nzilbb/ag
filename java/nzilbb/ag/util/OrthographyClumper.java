@@ -68,6 +68,25 @@ public class OrthographyClumper implements IGraphTransformer
     * @param newWordLayerId ID of the layer to transform.
     */
    public void setWordLayerId(String newWordLayerId) { wordLayerId = newWordLayerId; }
+
+   
+   /**
+    * ID of a partition layer, such that words can't be clumped across partitions.
+    * @see #getPartitionLayerId()
+    * @see #setPartitionLayerId(String)
+    */
+   protected String partitionLayerId;
+   /**
+    * Getter for {@link #partitionLayerId}: ID of a partition layer, such that words can't be clumped across partitions.
+    * @return ID of a partition layer, such that words can't be clumped across partitions.
+    */
+   public String getPartitionLayerId() { return partitionLayerId; }
+   /**
+    * Setter for {@link #partitionLayerId}: ID of a partition layer, such that words can't be clumped across partitions.
+    * @param newPartitionLayerId ID of a partition layer, such that words can't be clumped across partitions.
+    */
+   public void setPartitionLayerId(String newPartitionLayerId) { partitionLayerId = newPartitionLayerId; }
+
    
    // Methods
 
@@ -86,7 +105,18 @@ public class OrthographyClumper implements IGraphTransformer
    {
       setWordLayerId(wordLayerId);
    }
-   
+
+   /** 
+    * Constructor.
+    * @param wordLayerId ID of the layer to transform.
+    * @param partitionLayerId ID of a partition layer, such that words can't be clumped across partitions.
+    */
+   public OrthographyClumper(String wordLayerId, String partitionLayerId)
+   {
+      setWordLayerId(wordLayerId);
+      setPartitionLayerId(partitionLayerId);
+   }
+
    /**
     * Transforms the graph.
     * @param graph The graph to transform.
@@ -111,10 +141,11 @@ public class OrthographyClumper implements IGraphTransformer
 	    {
 	       changes.add( // register change of:
 		  token.destroy());
-	       // System.out.println("to remove " + token);
 	       if (last != null 
 		   // if there are no intervening annotations or gaps
-		   && token.getStart() == last.getEnd())
+		   && token.getStart() == last.getEnd()
+		   // no partition annotations ending here
+		   && (partitionLayerId == null || !token.getStart().isEndOn(partitionLayerId)))
 	       {
 		  changes.addAll( // register change of:
 		     last.setLabel(last.getLabel() + " " + token.getLabel()));
@@ -147,7 +178,9 @@ public class OrthographyClumper implements IGraphTransformer
 		  else
 		  { // already something to prepend
 		     // if there are no intervening annotations or gaps
-		     if (toPrepend.getEnd() == token.getStart())
+		     if (toPrepend.getEnd() == token.getStart()
+			 // no partition annotations ending here
+			 && (partitionLayerId == null || !token.getStart().isEndOn(partitionLayerId)))
 		     { // add this to what's already to be prepended
 			changes.addAll( // register change of:
 			   toPrepend.setLabel(toPrepend.getLabel() + " " + token.getLabel()));
