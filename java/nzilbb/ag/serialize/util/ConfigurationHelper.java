@@ -74,7 +74,9 @@ public class ConfigurationHelper
    public static File LoadConfiguration(SerializationDescriptor descriptor, ParameterSet configuration, File directory, Schema schema)
       throws IOException
    {
+      System.out.println("LoadConfiguration: "+directory.getPath());
       File xmlFile = new File(directory, ConfigurationFilename(descriptor));
+      System.out.println("LoadConfiguration: "+xmlFile.getPath());
       if (xmlFile.exists())
       {
 	 Properties properties = new Properties();
@@ -97,8 +99,8 @@ public class ConfigurationHelper
 		  parameter.setValue(new Double(value));
 	       }
 	       else if (parameter.getType().equals(Boolean.class))
-	       { // if the parameter is set, it's ticked, so TRUE
-		  parameter.setValue(Boolean.TRUE);
+	       {
+		  parameter.setValue(new Boolean(value));
 	       }
 	       else
 	       { // everything else given a string
