@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2017 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -149,6 +149,38 @@ public class TestTrackedMap
       assertEquals("Create cannot be rolled back", Change.Operation.Create, m.getChange());
       assertEquals("Create reports all attributes", 4, m.getChanges().size());
 
+   }
+
+   @Test public void mapGetter() 
+   {
+      MapTest m = new MapTest();
+      m.setId("123");
+      m.setTracked1("value1");
+      m.setTracked2("value2");
+      m.setTracked3("value3");
+      m.setNotTracked("value4");
+      m.put("noGetter", "value5");
+      
+      // values set
+      assertEquals("123", m.getId());
+      assertEquals("value1", m.getTracked1());
+      assertEquals("value2", m.getTracked2());
+      assertEquals("value3", m.getTracked3());
+      assertEquals("value4", m.getNotTracked());
+
+      // containsKey is false
+      assertFalse(m.containsKey("tracked1"));
+      assertFalse(m.containsKey("tracked2"));
+      assertFalse(m.containsKey("tracked3"));
+      assertFalse(m.containsKey("notTracked"));
+
+      // get()
+      assertEquals("123", m.getId());
+      assertEquals("value1", m.get("tracked1"));
+      assertEquals("value2", m.get("tracked2"));
+      assertEquals("value3", m.get("tracked3"));
+      assertEquals("value4", m.get("notTracked"));
+      assertEquals("value5", m.get("noGetter"));
    }
 
    @Test public void cloning() 

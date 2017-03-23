@@ -38,17 +38,17 @@ public class TestAnchor
       a.setId("123");
       a.setOffset(456.789);
       assertEquals("123", a.getId());
-      assertNull("not using attributes", a.get("id"));
+      assertEquals("get() works", "123", a.get("id"));
       assertEquals(new Double(456.789), a.getOffset());
-      assertNull("not using attributes", a.get("offset"));
+      assertEquals("get() works", new Double(456.789), a.get("offset"));
       assertEquals("456.789", a.toString());
 
       // Basic constructor
       a = new Anchor("123", 456.789);
       assertEquals("123", a.getId());
-      assertNull("not using attributes", a.get("id"));
+      assertEquals("get() works", "123", a.get("id"));
       assertEquals(new Double(456.789), a.getOffset());
-      assertNull("not using attributes", a.get("offset"));
+      assertEquals("get() works", new Double(456.789), a.get("offset"));
       assertEquals("456.789", a.toString());
    }
 

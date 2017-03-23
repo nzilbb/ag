@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2017 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -119,7 +119,7 @@ public class TrackedMap
       String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
       if (containsKey(originalValueKey))
       {
-	 return get(originalValueKey);
+	 return super.get(originalValueKey);
       }
       else
       {
@@ -220,7 +220,7 @@ public class TrackedMap
 	    try
 	    {
 	       // set the current value to the original value
-	       setter(this, key).invoke(this, get(originalValueKey));
+	       setter(this, key).invoke(this, super.get(originalValueKey));
 	       // remove the original key
 	       remove(originalValueKey);
 	    }
@@ -245,7 +245,7 @@ public class TrackedMap
 	 try
 	 {
 	    // set the current value to the original value
-	    setter(this, key).invoke(this, get(originalValueKey));
+	    setter(this, key).invoke(this, super.get(originalValueKey));
 	    // remove the original key
 	    remove(originalValueKey);
 	 }
@@ -328,7 +328,7 @@ public class TrackedMap
 		  Object value = getter.invoke(this);
 		  if (containsKey(originalValueKey))
 		  {
-		     Object originalValue = get(originalValueKey);
+		     Object originalValue = super.get(originalValueKey);
 		     if ((value == null && originalValue != null)
 			 || (value != null && originalValue == null)
 			 || (value != null && !value.equals(originalValue)))
@@ -348,6 +348,69 @@ public class TrackedMap
       }
       return changes;
    } // end of getChanges()
+
+   /**
+    * Override of Map's put method to allow tracking of selected keys.
+    * @param key The attribute name.
+    * @param value The attribute value.
+    * @return The previous value associated with key.
+    */
+   public Change checkForChange(String key, Object value)
+      throws UnsupportedOperationException, ClassCastException, NullPointerException, IllegalArgumentException
+   {
+      Change change = null;
+      if (getTrackedAttributes().contains(key))
+      { // tracked key
+	 String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
+	 Method getter = getter(this, key);
+	 try
+	 {
+	    Object currentValue = getter.invoke(this);
+	    if (currentValue != null // current value is null
+		&& !currentValue.equals(value)) // or they're different
+	    { // value is changing
+	       change = new Change(Change.Operation.Update, this, key, value);
+	       // if this is the first time the value is being changed
+	       if (!containsKey(originalValueKey))
+	       { // remember the original value
+		  super.put(originalValueKey, currentValue);
+	       }
+	    }
+	 }
+	 catch(IllegalAccessException x1) {}
+	 catch(InvocationTargetException x2) {}
+	 
+      }
+      return change;
+   } // end of put()
+
+   
+   /**
+    * Overrides Map method so that if scripting environments like JSTL's EL exclusively use get() for retrieving attributes, bean attributes will be available.
+    * @param key The attribute key.
+    * @return The attribute value.
+    */
+   public Object get(Object key)
+   {
+      Object value = super.get(key);
+      if (value == null) // there's no value in the map
+      {
+	 String keyString = key.toString();
+	 // ...and we're not calling get("original...") for the original value of a tracked attribute
+	 if (!keyString.startsWith("original"))
+	 {
+	    Method getter = getter(this, keyString);
+	    // ...and there's a getter
+	    if (getter != null)
+	    { // use the getter
+	       try { value = getter.invoke(this); }
+	       catch(IllegalAccessException x1) {}
+	       catch(InvocationTargetException x2) {}
+	    }
+	 }
+      }
+      return value;
+   } // end of get()
 
 
    // Map overrides
@@ -395,42 +458,6 @@ public class TrackedMap
       }
    } // end of clone()
    
-
-   /**
-    * Override of Map's put method to allow tracking of selected keys.
-    * @param key The attribute name.
-    * @param value The attribute value.
-    * @return The previous value associated with key.
-    */
-   public Change checkForChange(String key, Object value)
-      throws UnsupportedOperationException, ClassCastException, NullPointerException, IllegalArgumentException
-   {
-      Change change = null;
-      if (getTrackedAttributes().contains(key))
-      { // tracked key
-	 String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
-	 Method getter = getter(this, key);
-	 try
-	 {
-	    Object currentValue = getter.invoke(this);
-	    if (currentValue != null // current value is null
-		&& !currentValue.equals(value)) // or they're different
-	    { // value is changing
-	       change = new Change(Change.Operation.Update, this, key, value);
-	       // if this is the first time the value is being changed
-	       if (!containsKey(originalValueKey))
-	       { // remember the original value
-		  super.put(originalValueKey, currentValue);
-	       }
-	    }
-	 }
-	 catch(IllegalAccessException x1) {}
-	 catch(InvocationTargetException x2) {}
-	 
-      }
-      return change;
-   } // end of put()
-
 
    // java.lang.Object overrides:
       
