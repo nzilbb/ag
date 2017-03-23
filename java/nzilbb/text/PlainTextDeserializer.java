@@ -394,19 +394,19 @@ public class PlainTextDeserializer
    public void setParticipantFormat(String newParticipantFormat) { participantFormat = newParticipantFormat; }
 
    /**
-    * The maximum length of a parsed participant ID/name.  Default is 50.
+    * The maximum length of a parsed participant ID/name.  Default is 20.
     * @see #getMaxParticipantLength()
     * @see #setMaxParticipantLength(Integer)
     */
    protected Integer maxParticipantLength;
    /**
-    * Getter for {@link #maxParticipantLength}: The maximum length of a parsed participant ID/name.  Default is 50.
-    * @return The maximum length of a parsed participant ID/name.  Default is 50.
+    * Getter for {@link #maxParticipantLength}: The maximum length of a parsed participant ID/name.  Default is 20.
+    * @return The maximum length of a parsed participant ID/name.  Default is 20.
     */
    public Integer getMaxParticipantLength() { return maxParticipantLength; }
    /**
-    * Setter for {@link #maxParticipantLength}: The maximum length of a parsed participant ID/name.  Default is 50.
-    * @param newMaxParticipantLength The maximum length of a parsed participant ID/name.  Default is 50.
+    * Setter for {@link #maxParticipantLength}: The maximum length of a parsed participant ID/name.  
+    * @param newMaxParticipantLength The maximum length of a parsed participant ID/name. 
     */
    public void setMaxParticipantLength(Integer newMaxParticipantLength) { maxParticipantLength = newMaxParticipantLength; }
 
@@ -687,6 +687,17 @@ public class PlainTextDeserializer
       if (configuration.get("useConventions").getValue() == null)
       {
 	 configuration.get("useConventions").setValue(Boolean.TRUE);
+      }
+      if (!configuration.containsKey("maxParticipantLength"))
+      {
+	 configuration.addParameter(
+	    new Parameter("maxParticipantLength", Integer.class, 
+			  "Max Participant Length",
+			  "The maximum length of a participant name", true));
+      }
+      if (configuration.get("maxParticipantLength").getValue() == null)
+      {
+	 configuration.get("maxParticipantLength").setValue(new Integer(20));
       }
 
       return configuration;
@@ -1028,13 +1039,13 @@ public class PlainTextDeserializer
       for (String sLine : getLines())
       {
 	 sLine = sLine.trim();
-	 if (sLine.length() == 0 && getHasSpeakers())
-	 {
-	    // a blank line in a transcript is taken to be a break in speaker
-	    // subsequent lines with text but no speaker are taken to be notes/comments
-	    participant = null;
-	    continue;
-	 }
+	 // if (sLine.length() == 0 && getHasSpeakers())
+	 // {
+	 //    // a blank line in a transcript is taken to be a break in speaker
+	 //    // subsequent lines with text but no speaker are taken to be notes/comments
+	 //    participant = null;
+	 //    continue;
+	 // }
 	 
 	 int iNumChars = sLine.length();
 	 line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
