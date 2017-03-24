@@ -94,7 +94,9 @@ public class TestTEIDeserializer
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
       // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(1, defaultParameters.size());
+      assertEquals(2, defaultParameters.size());
+      assertNull("no url layer",
+		 defaultParameters.get("idnoUrl").getValue());
       assertEquals("lg", "lg", 
 		   ((Layer)defaultParameters.get("lg").getValue()).getId());
 
@@ -116,9 +118,11 @@ public class TestTEIDeserializer
       assertEquals("Everything's Gonna Be Alright", title[0]);
 
       // participants     
-      String[] author = g.labels("who"); 
+      Annotation[] author = g.list("who"); 
       assertEquals(1, author.length);
-      assertEquals("Aaliyah", author[0]);
+      assertEquals("Aaliyah", author[0].getLabel());
+      assertNotNull("participant anchored", author[0].getStartId());
+      assertNotNull("participant anchored", author[0].getEndId());
 
       // turns
       Annotation[] turns = g.list("turn");
@@ -199,7 +203,7 @@ public class TestTEIDeserializer
 
    }
 
-   @Test public void cdc() 
+   @Test public void cmc() 
       throws Exception
    {
       Schema schema = new Schema(
@@ -259,7 +263,9 @@ public class TestTEIDeserializer
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
       // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(3, defaultParameters.size());
+      assertEquals(4, defaultParameters.size());
+      assertNull("no url layer",
+		   defaultParameters.get("idnoUrl").getValue());
       assertEquals("addressingTerm", "entities", 
 		   ((Layer)defaultParameters.get("addressingTerm").getValue()).getId());
       assertEquals("addressee", "entities", 
@@ -455,6 +461,133 @@ public class TestTEIDeserializer
 
    }
 
+   @Test public void cmcWithAttributes() 
+      throws Exception
+   {
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("scribe", "Transcriber", 0, true, true, true),
+	 new Layer("subreddit", "Subreddit", 0, false, false, true),
+	 new Layer("parent_id", "Parent", 0, false, false, true),
+	 new Layer("air_date", "Publication Date", 0, false, false, true),
+	 new Layer("url", "URL", 0, false, false, true),
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("comment", "Comment", 2, true, false, true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true));
+
+      // access file
+      NamedStream[] streams = { new NamedStream(new File(getDir(), "test-cmc-redditcomment.xml")) };
+      
+      // create deserializer
+      TEIDeserializer deserializer = new TEIDeserializer();
+
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals("Configuration parameters" + configuration, 12, deserializer.configure(configuration, schema).size());      
+      assertEquals("comment", "comment", 
+		   ((Layer)configuration.get("commentLayer").getValue()).getId());
+      assertNull("language not mapped",
+		 configuration.get("languageLayer").getValue());
+      assertNull("lexical not mapped", 
+		 configuration.get("lexicalLayer").getValue());
+      assertNull("entities not mapped",
+		 configuration.get("entityLayer").getValue());
+      assertEquals("scribe", "scribe", 
+		   ((Layer)configuration.get("scribeLayer").getValue()).getId());
+      assertNull("transcript_version_date not mapped",
+		 configuration.get("versionDateLayer").getValue());
+      assertEquals("publication_date", "air_date", 
+		   ((Layer)configuration.get("publicationDateLayer").getValue()).getId());
+      assertNull("transcript_language not mapped",
+		   configuration.get("transcriptLanguageLayer").getValue());
+      assertNull("sex not mapped",
+		 configuration.get("sexLayer").getValue());
+      assertNull("age not mapped",
+		 configuration.get("ageLayer").getValue());
+      assertNull("birthdate not mapped",
+		 configuration.get("birthLayer").getValue());
+
+      // load the stream
+      ParameterSet defaultParameters = deserializer.load(streams, schema);
+      //for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals(3, defaultParameters.size());
+      assertEquals("url", "url", 
+		   ((Layer)defaultParameters.get("idnoUrl").getValue()).getId());
+      assertEquals("subreddit", "subreddit", 
+		   ((Layer)defaultParameters.get("header_note_type_subreddit").getValue()).getId());
+      assertEquals("parent_id", "parent_id", 
+		   ((Layer)defaultParameters.get("header_note_type_parent_id").getValue()).getId());
+      
+      // configure the deserialization
+      deserializer.setParameters(defaultParameters);
+
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+
+      for (String warning : deserializer.getWarnings())
+      {
+	 System.out.println(warning);
+      }
+      
+      assertEquals("test-cmc-redditcomment.xml", g.getId());
+      String[] title = g.labels("title"); 
+      assertEquals(0, title.length);
+
+      // participants     
+      Annotation[] author = g.list("who"); 
+      assertEquals(1, author.length);
+      assertEquals("Genkaichan", author[0].getLabel());
+      assertEquals("Genkaichan", author[0].getId());
+
+      // meta data
+      assertEquals("2017-02-01T03:00:59.000Z", g.my("air_date").getLabel());
+      assertEquals("StrangerThings", g.my("subreddit").getLabel());
+      assertEquals("t1_dd5f8en", g.my("parent_id").getLabel());
+      assertEquals("https://www.reddit.com/r/StrangerThings/comments/t1_dd5f8en#dd6aabs",
+		   g.my("url").getLabel());
+
+      // turns
+      Annotation[] turns = g.list("turn");
+      assertEquals("one turn " + Arrays.asList(turns), 1, turns.length);
+      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
+      assertEquals(new Double(104.0), turns[0].getEnd().getOffset());
+      assertEquals("Genkaichan", turns[0].getLabel());
+      assertEquals(g.getAnnotation("Genkaichan"), turns[0].getParent());
+
+      // utterances
+      Annotation[] utterances = g.list("utterance");
+      assertEquals(1, utterances.length);
+      assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
+      assertEquals("Genkaichan", utterances[0].getParent().getLabel());
+      assertEquals(turns[0], utterances[0].getParent());
+
+      Annotation[] words = g.list("word");
+      assertEquals(new Double(0), words[0].getStart().getOffset());
+      // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
+      assertEquals("Such", words[0].getLabel());
+      assertEquals("a", words[1].getLabel());
+      assertEquals("lovable", words[2].getLabel());
+      assertEquals("teddy", words[3].getLabel());      
+      assertEquals("bear.", words[4].getLabel());
+      assertEquals("As", words[5].getLabel());
+      assertEquals("soon", words[6].getLabel());
+      assertEquals("as", words[7].getLabel());
+      assertEquals("I", words[8].getLabel());
+      assertEquals("thought", words[9].getLabel());
+      assertEquals("he'd", words[10].getLabel());
+      assertEquals("help", words[11].getLabel());
+      assertEquals("Eleven,", words[12].getLabel());
+      assertEquals("those", words[13].getLabel());
+      assertEquals("ideas", words[14].getLabel());
+      assertEquals("were", words[15].getLabel());
+      assertEquals("quickly", words[16].getLabel());
+      assertEquals("dismissed...", words[17].getLabel());
+
+   }
+
    @Test public void writing() 
       throws Exception
    {
@@ -527,7 +660,9 @@ public class TestTEIDeserializer
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
       // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(14, defaultParameters.size());
+      assertEquals(15, defaultParameters.size());
+      assertNull("no idno layer",
+		 defaultParameters.get("idno").getValue());
       assertEquals("q", "q", 
 		   ((Layer)defaultParameters.get("q").getValue()).getId());
       assertEquals("figure", "figure", 

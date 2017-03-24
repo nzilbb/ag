@@ -27,6 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.io.IOException;
 import java.net.URL;
@@ -48,6 +49,14 @@ import nzilbb.configure.ParameterSet;
 /**
  * Deserializer for TEI P5 XML files.
  * <p>TEI tag support is basic at this stage, and many tags are not explicitly interpreted, but most can be mapped to arbitrary annotation layers.
+ * <p>Arbitrary transcript/document attributes are implemented by including a &lt;notesStmt&gt;
+ * within the &lt;fileDesc&gt; header, containing one &lt;note&gt; tag per attribute, and using the
+ * <tt>type</tt> attribute as the attribute key and the tag content as the value - e.g.<br>
+ * <pre>&lt;notesStmt&gt;
+ *   &lt;note type="subreddit"&gt;StrangerThings&lt;/note&gt;
+ *   &lt;note type="parent_id"&gt;t1_dd5f8en&lt;/note&gt;
+ * &lt;/notesStmt&gt;
+ * </pre>
  * <p>Special support for regularization is used; for a construction like this: <br>
  * <code>&lt;choice&gt;&lt;orig&gt;color&lt;/orig&gt;&lt;reg&gt;colour&lt;/reg&gt;&lt;/choice&gt;</code> <br>
  * The contents of &lt;reg&gt;...&lt;/reg&gt; is used on the words layer, and it is annotated
@@ -753,6 +762,48 @@ public class TEIDeserializer
 	    }
 	 } // next turn child layer
 
+	 // transcript attributes
+	 NodeList items = (NodeList) xpath.evaluate("fileDesc/sourceDesc/msDesc/msIdentifier/idno[@type='URL']", header, XPathConstants.NODESET);
+	 if (items != null && items.getLength() > 0)
+	 {
+	    layerToPossibilities.put(
+	       new Parameter("idnoUrl", Layer.class, "ID URL"), 
+	       Arrays.asList("url","transcripturl","documenturl","sourceurl","transcriptidno"));
+	    layerToCandidates.put("idnoUrl", graphTagLayers);
+	 }
+	 else
+	 {
+	    items = (NodeList) xpath.evaluate("fileDesc/sourceDesc/msDesc/msIdentifier/idno", header, XPathConstants.NODESET);
+	    if (items != null && items.getLength() > 0)
+	    {
+	       layerToPossibilities.put(
+		  new Parameter("idno", Layer.class, "ID"), 
+		  Arrays.asList("idno", "transcriptidno"));
+	       layerToCandidates.put("idno", graphTagLayers);
+	    }
+	 }
+
+	 items = (NodeList) xpath.evaluate("//note/@type", header, XPathConstants.NODESET);
+	 if (items != null && items.getLength() > 0)
+	 {
+	    // typed <note>s can be mapped to graph tags
+	    for (int p = 0; p < items.getLength(); p++)
+	    {
+	       Attr noteType = (Attr)items.item(p);
+	       String keyName = "header_note_type_"+noteType.getValue();
+	       if (!layerToCandidates.containsKey(keyName))
+	       {
+		  Vector<String> possibleMatches = new Vector<String>();
+		  possibleMatches.add(noteType.getValue());
+		  possibleMatches.add("transcript" + noteType.getValue());
+		  layerToPossibilities.put(
+		     new Parameter(keyName, Layer.class, "Document Note Type: " + noteType.getValue()), 
+		     possibleMatches);
+		  layerToCandidates.put(keyName, graphTagLayers);
+	       } // not already specified
+	    } // next pc type
+	 } // there are pc types
+
 	 LinkedHashMap<String,Layer> instantLayers = new LinkedHashMap<String,Layer>();
 	 LinkedHashMap<String,Layer> intervalTurnPeerAndChildLayers = new LinkedHashMap<String,Layer>();
 	 for (Layer layer : schema.getRoot().getChildren().values())
@@ -793,7 +844,7 @@ public class TEIDeserializer
 	 // look for possible word tag layers - i.e. attributes on <w> tags
 	 //  e.g.  in the case of <w lemma="Niitty" msd="Nom SG" type="Noun">Niittykin</w>
 	 //  potential extra layers are lemma, msd, and type
-	 NodeList items = (NodeList) xpath.evaluate("//w", text, XPathConstants.NODESET);
+	 items = (NodeList) xpath.evaluate("//w", text, XPathConstants.NODESET);
 	 if (items != null)	    
 	 {
 	    for (int w = 0; w < items.getLength(); w++)
@@ -918,7 +969,6 @@ public class TEIDeserializer
 	       new Parameter("person_" + sType, Layer.class, "Person: " + sType), possibleMatches);
 	    layerToCandidates.put("person_" + sType, participantTagLayers);
 	 } // next tag type	    
-
 	 
 	 ParameterSet parameters = new ParameterSet();
 	 // add parameters that aren't in the configuration yet, and set possibile/default values
@@ -1045,7 +1095,7 @@ public class TEIDeserializer
       graph.setOffsetUnits(Constants.UNIT_CHARACTERS); // TODO look for timeline
       
       // creat the 0 anchor to prevent graph tagging from creating one with no confidence
-      graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL);
+      Anchor startAnchor = graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL);
 
       // add layers to the graph
       // we don't just copy the whole schema, because that would imply that all the extra layers
@@ -1070,6 +1120,7 @@ public class TEIDeserializer
       if (sexLayer != null) graph.addLayer((Layer)sexLayer.clone());
       if (ageLayer != null) graph.addLayer((Layer)ageLayer.clone());
       if (birthLayer != null) graph.addLayer((Layer)birthLayer.clone());
+      if (parameters == null) setParameters(new ParameterSet());
       for (Parameter p : parameters.values())
       {
 	 Layer layer = (Layer)p.getValue();
@@ -1078,7 +1129,7 @@ public class TEIDeserializer
 	    graph.addLayer((Layer)layer.clone());
 	 }
       }
-
+      
       try
       {
 	 // attributes
@@ -1107,6 +1158,14 @@ public class TEIDeserializer
 	 {
 	    graph.createTag(graph, publicationDateLayer.getId(), sResult);
 	 }
+	 else
+	 { // might be CDC-style - i.e. on a timeline
+	    sResult = xpath.evaluate("front/timeline/when/@absolute", text);
+	    if (sResult != null && sResult.length() > 0 && publicationDateLayer != null)
+	    {
+	       graph.createTag(graph, publicationDateLayer.getId(), sResult);
+	    }
+	 }
 	 sResult = xpath.evaluate("profileDesc/langUsage/language/@ident", header);
 	 if (sResult != null && sResult.length() > 0 && transcriptLanguageLayer != null)
 	 {
@@ -1117,10 +1176,59 @@ public class TEIDeserializer
 	 {
 	    graph.createTag(graph, transcriptLanguageLayer.getId(), lang.getValue().toLowerCase());
 	 }
+	 NodeList items = (NodeList) xpath.evaluate("fileDesc/sourceDesc/msDesc/msIdentifier/idno", header, XPathConstants.NODESET);
+	 if (items != null && items.getLength() > 0)
+	 {
+	    Element idno = (Element)items.item(0);
+	    String value = idno.getTextContent();
+	    if (value != null) value = value.trim();
+	    if (value != null && value.length() > 0)
+	    { // there's value
+	       Layer layer = null;	       
+	       if (parameters.containsKey("idnoUrl"))
+	       { // idno is URL
+		  layer = (Layer) parameters.get("idnoUrl").getValue();
+	       }
+	       else if (parameters.containsKey("idno"))
+	       { // idno isn't URL
+		  layer = (Layer) parameters.get("idno").getValue();
+	       }
+	       if (layer != null)
+	       { // it's mapped to a layer
+		  graph.createTag(graph, layer.getId(), value);
+	       }
+	    } // there's a value
+	 }
+
+	 items = (NodeList) xpath.evaluate("//note[@type]", header, XPathConstants.NODESET);
+	 if (items != null && items.getLength() > 0)
+	 {
+	    // typed <note>s can be mapped to graph tags
+	    for (int p = 0; p < items.getLength(); p++)
+	    {
+	       Element note = (Element)items.item(p);
+	       String value = note.getTextContent();
+	       if (value != null) value = value.trim();
+	       if (value != null && value.length() > 0)
+	       { // there's value
+		  String noteType = note.getAttribute("type");
+		  String keyName = "header_note_type_"+noteType;
+		  if (parameters.containsKey(keyName))
+		  { // there is a parameter
+		     Layer layer = (Layer) parameters.get(keyName).getValue();
+		     if (layer != null)
+		     { // mapped to a layer
+			graph.createTag(graph, layer.getId(), value);
+		     }
+		  } // there is a parameter
+	       } // there's value
+	    } // next note type
+	 } // there are note types
+
 	 
 	 // participants - teiHeader/profileDesc/particDesc[/listPerson]/person
 	 Annotation participant = null;
-	 NodeList items = (NodeList) xpath.evaluate(
+	 items = (NodeList) xpath.evaluate(
 	    // person may be a child of listPerson or directly of particDesc
 	    "profileDesc/particDesc/listPerson/person|profileDesc/particDesc/person",
 	    header, XPathConstants.NODESET);
@@ -1128,7 +1236,7 @@ public class TEIDeserializer
 	 {
 	    for (int p = 0; p < items.getLength(); p++)
 	    {
-	       participant = new Annotation(null, "author", schema.getParticipantLayerId());
+	       participant = new Annotation(null, "author", schema.getParticipantLayerId(), startAnchor.getId(), startAnchor.getId());
 	       Element person = (Element)items.item(p);
 	       // set ID
 	       if (person.getAttribute("xml:id").length() > 0)
@@ -1332,11 +1440,18 @@ public class TEIDeserializer
 		  }
 		  
 		  // start a new turn
-		  turn = new Annotation(null, participant.getLabel(), getTurnLayer().getId());
-		  turn.setParentId(participant.getId());
-		  graph.addAnnotation(turn);
-		  turn.setStart(graph.getOrCreateAnchorAt(
-				   (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+		  if (!turn.getStartId().equals(turn.getEndId()))
+		  {
+		     turn = new Annotation(null, participant.getLabel(), getTurnLayer().getId());
+		     turn.setParentId(participant.getId());
+		     graph.addAnnotation(turn);
+		     turn.setStart(graph.getOrCreateAnchorAt(
+				      (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+		  }
+		  else
+		  {
+		     turn.setParentId(participant.getId());
+		  }
 		  // start a new line too
 		  line.setEnd(graph.getOrCreateAnchorAt(
 				 (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
@@ -1520,6 +1635,17 @@ public class TEIDeserializer
 	    errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
 	 }
 	 
+	 // set end anchors of graph tags
+	 SortedSet<Anchor> anchors = graph.getSortedAnchors();
+	 Anchor firstAnchor = anchors.first();
+	 Anchor lastAnchor = anchors.last();
+	 for (Annotation a : graph.list(getParticipantLayer().getId()))
+	 {
+	    a.setStartId(firstAnchor.getId());
+	    a.setEndId(lastAnchor.getId());
+	 }
+	 graph.commit();
+
 	 if (errors != null) throw errors;
 
 	 Graph[] graphs = { graph };
