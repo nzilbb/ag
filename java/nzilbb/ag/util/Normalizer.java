@@ -45,6 +45,25 @@ public class Normalizer
   implements IGraphTransformer
 {
    // Attributes:
+
+   
+   /**
+    * The maximum length of a label, or null if there's no limit. Default is 255.
+    * @see #getMaxLabelLength()
+    * @see #setMaxLabelLength(Integer)
+    */
+   protected Integer maxLabelLength = 255;
+   /**
+    * Getter for {@link #maxLabelLength}: The maximum length of a label, or null if there's no limit.
+    * @return The maximum length of a label, or null if there's no limit.
+    */
+   public Integer getMaxLabelLength() { return maxLabelLength; }
+   /**
+    * Setter for {@link #maxLabelLength}: The maximum length of a label, or null if there's no limit.
+    * @param newMaxLabelLength The maximum length of a label, or null if there's no limit.
+    */
+   public void setMaxLabelLength(Integer newMaxLabelLength) { maxLabelLength = newMaxLabelLength; }
+
       
    // Methods:
    
@@ -211,6 +230,21 @@ public class Normalizer
 	    };
 	 } // disconnect end
       } // next word
+
+      if (maxLabelLength != null)
+      {
+	 // ensure no annotation has a label longer than the limit
+	 for (Annotation a : graph.getAnnotationsById().values())
+	 {
+	    if (a.getLabel().length() > maxLabelLength.intValue())
+	    {
+	       // truncate the label TODO: split annotation in two
+	       changes.addAll( // record changes for:
+		  a.setLabel(a.getLabel().substring(0,maxLabelLength.intValue())));		  
+	    }
+	 } // next annotation
+      }
+      
 
       return changes;
    }
