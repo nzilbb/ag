@@ -3185,10 +3185,28 @@ public class SqlGraphStore
 		     sqlInsert.executeUpdate();
 		     sqlInsert.close();
 		     sqlInsert = getConnection().prepareStatement("SELECT LAST_INSERT_ID()");
-		     ResultSet rsInsert = sqlInsert.executeQuery();
-		     rsInsert.next();
-		     speakerNumber = rsInsert.getInt(1);
-		     rsInsert.close();
+		     try
+		     {
+			ResultSet rsInsert = sqlInsert.executeQuery();
+			rsInsert.next();
+			speakerNumber = rsInsert.getInt(1);
+			rsInsert.close();
+		     }
+		     catch(SQLException exception)
+		     { // maybe some simultaneous upload already inserted this speaker...
+			rs.close();
+			rs = sql.executeQuery();
+			if (rs.next())
+			{ // yes, the speaker now exists, so get their identifier
+			   speakerNumber = rs.getInt("speaker_number");
+			}
+			else
+			{ // no speaker still doesn't exist, so something else went wrong...
+			   rs.close();
+			   sql.close();
+			   throw exception;
+			}
+		     }
 		     sqlInsert.close();
 		  }
 		  rs.close();
