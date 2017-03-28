@@ -255,6 +255,7 @@ public class TestLayer
 			   false, // saturated
 			   "turn", // parentId
 			   true); // parentIncludes
+      l.getValidLabels().put("bar", "bar");
       l.put("foo", "foo");
       Layer c = (Layer)l.clone();
       assertEquals("word", c.getId());
@@ -265,6 +266,7 @@ public class TestLayer
       assertEquals(false, c.getSaturated());
       assertEquals("turn", c.getParentId());
       assertEquals(true, c.getParentIncludes());
+      assertTrue(c.getValidLabels().containsKey("bar"));     
       assertFalse(c.containsKey("foo"));     
    }
 

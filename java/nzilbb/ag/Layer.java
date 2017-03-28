@@ -49,7 +49,7 @@ public class Layer // TODO add type attribute
    extends TrackedMap
 {
    // NB if this is updated, please also update the @return javadoc attribute on getClonedAttributes()
-   private static String[] aClonedAttributes = {"id", "parentId", "description", "alignment", "peers", "peersOverlap", "parentIncludes", "saturated", "type"};
+   private static String[] aClonedAttributes = {"id", "parentId", "description", "alignment", "peers", "peersOverlap", "parentIncludes", "saturated", "type", "validLabels"};
    /**
     * Keys for attributes that are cloned - i.e. when an object is cloned, only these attributes are copied into the clone.
     * <p>LinkedHashSet is used so that attributes are iterated in the order they're defined in aClonedAttributes (which is the order shown in the documentation of {@link #getClonedAttributes()}).
@@ -245,7 +245,7 @@ public class Layer // TODO add type attribute
     *   <li>{@link Constants#TYPE_SELECT}</li>
     *  </ul>
     */
-   protected String type;
+   protected String type = Constants.TYPE_STRING;
    /**
     * Getter for {@link #type}: The type for labels on this layer.
     * <p>Either a MIME type, or one of:
@@ -269,7 +269,7 @@ public class Layer // TODO add type attribute
     * List of valid label values for this layer, or null if the layer values are not restricted.
     * <p>The 'key' is the possible label value, and each key is associated with a description of the value (e.g. for displaying to users).
     */
-   protected LinkedHashMap<String,String> validLabels;
+   protected LinkedHashMap<String,String> validLabels = new LinkedHashMap<String,String>();
    /**
     * Getter for <tt>validLabels</tt>: List of valid label values for this layer, or null if the layer values are not restricted.
     * <p>The 'key' is the possible label value, and each key is associated with a description of the value (e.g. for displaying to users).
