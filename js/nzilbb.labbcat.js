@@ -83,11 +83,11 @@ function callComplete(evt) {
 	if (messages.length == 0) messages = null
 	evt.target.onResult(result, errors, messages, evt.target.call, evt.target.id);
     } catch(exception) {
-	evt.target.onResult(null, ["" +exception+ ": " + this.responseText], evt.target.call, evt.target.id);
+	evt.target.onResult(null, ["" +exception+ ": " + this.responseText], [], evt.target.call, evt.target.id);
     }
 }
 function callFailed(evt) {
-    evt.target.onResult(null, ["failed: " + this.responseText], evt.target.call, evt.target.id);
+    evt.target.onResult(null, ["failed: " + this.responseText], [], evt.target.call, evt.target.id);
 }
 function callCancelled(evt) {
     evt.target.onResult(null, ["cancelled"], evt.target.call, evt.target.id);
@@ -395,7 +395,7 @@ nzilbb.labbcat.Labbcat.prototype.newTranscript = function(transcript, media, med
 	var transcriptName = transcript.replace(/.*\//g, "");
 	fd.append("uploadfile1_0", 
 		  fs.createReadStream(transcript).on('error', function(){
-		      onResult(null, ["Invalid transcript: " + transcriptName], "newTranscript", transcriptName);
+		      onResult(null, ["Invalid transcript: " + transcriptName], [], "newTranscript", transcriptName);
 		  }), transcriptName);
 
 	if (media) {
@@ -406,10 +406,10 @@ nzilbb.labbcat.Labbcat.prototype.newTranscript = function(transcript, media, med
 		    try {
 			fd.append("uploadmedia"+mediaSuffix+"1", 
 				  fs.createReadStream(media[f]).on('error', function(){
-				      onResult(null, ["Invalid media: " + mediaName], "newTranscript", transcriptName);
+				      onResult(null, ["Invalid media: " + mediaName], [], "newTranscript", transcriptName);
 				  }), mediaName);
 		    } catch(error) {
-			onResult(null, ["Invalid media: " + mediaName], "newTranscript", transcriptName);
+			onResult(null, ["Invalid media: " + mediaName], [], "newTranscript", transcriptName);
 			return;
 		    }
 		} // next file
@@ -417,7 +417,7 @@ nzilbb.labbcat.Labbcat.prototype.newTranscript = function(transcript, media, med
 		var mediaName = media.replace(/.*\//g, "");
 		fd.append("uploadmedia"+mediaSuffix+"1", 
 			  fs.createReadStream(media).on('error', function(){
-			      onResult(null, ["Invalid media: " + mediaName], "newTranscript", transcriptName);
+			      onResult(null, ["Invalid media: " + mediaName], [], "newTranscript", transcriptName);
 			  }), mediaName);
 	    }
 	}
@@ -452,11 +452,11 @@ nzilbb.labbcat.Labbcat.prototype.newTranscript = function(transcript, media, med
 			if (messages.length == 0) messages = null
 			onResult(result, errors, messages, "newTranscript", transcriptName);
 		    } catch(exception) {
-			onResult(null, ["" +exception+ ": " + this.responseText], "newTranscript", transcript.name);
+			onResult(null, ["" +exception+ ": " + this.responseText], [], "newTranscript", transcript.name);
 		    }
 		});
 	    } else {
-		onResult(null, ["" +err+ ": " + this.responseText], "newTranscript", transcriptName);
+		onResult(null, ["Request - " +err+ ": " + this.responseText], [], "newTranscript", transcriptName);
 	    }
 
 	    if (res) res.resume();
