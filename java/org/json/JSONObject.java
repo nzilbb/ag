@@ -30,6 +30,7 @@ import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.LinkedHashMap; // robert@fromont.net.nz changed from HashMap to respect insertion ordering
@@ -308,6 +309,36 @@ public class JSONObject {
             } catch (Exception ignore) {
             }
         }
+    }
+
+   /**
+     * Construct a JSONObject from an {@link IJSONable}, using reflection to find the
+     * public members identified by {@link IJSONable#names()}. The resulting JSONObject's keys will be the strings from
+     * the names array, and the values will be the field values associated with
+     * those keys in the object. If a key is not found or not visible, then it
+     * will not be copied into the new JSONObject.
+     *
+     * @param object
+     *            An object that has fields that should be used to make a
+     *            JSONObject.
+     * @param names
+     *            An array of strings, the names of the fields to be obtained
+     *            from the object.
+     */
+   public JSONObject(IJSONableBean bean) {
+        this();
+	for (String key : bean.JSONAttributes())
+	{
+	   String getterName = "get" + key.substring(0,1).toUpperCase() + key.substring(1);
+	   try
+	   {
+	      Method getter = bean.getClass().getMethod(getterName);	   
+	      this.map.put(key, wrap(getter.invoke(bean)));
+	   }
+	   catch(NoSuchMethodException exception) {}
+	   catch(IllegalAccessException exception) {}
+	   catch(InvocationTargetException exception) {}
+	} // next attribute
     }
 
     /**
@@ -1558,6 +1589,10 @@ public class JSONObject {
                 return object;
             }
 
+            if (object instanceof IJSONableBean) {
+	       IJSONableBean o = (IJSONableBean)object; 
+	       return new JSONObject(o);
+            }
             if (object instanceof Collection) {
 	   @SuppressWarnings("unchecked") // 20150120 robert.fromont@canterbury.ac.nz
 	   Collection<Object> o = (Collection<Object>)object; 
