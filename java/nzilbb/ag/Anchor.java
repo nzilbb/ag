@@ -311,6 +311,7 @@ public class Anchor
       LinkedHashSet<Annotation> annotations = getStartOf().get(layerId);
       // check they still really are linked
       Iterator<Annotation> iAnnotations = annotations.iterator();
+      LinkedHashSet<Annotation> startsToSet = new LinkedHashSet<Annotation>();
       String id = getId();
       while (iAnnotations.hasNext())
       {
@@ -322,14 +323,18 @@ public class Anchor
 	    iAnnotations.remove();
 	    if (a.getStart() != null)
 	    {
-	       if (!a.getStart().startOf.containsKey(a.getLayerId()))
-	       {
-		  a.getStart().startOf.put(a.getLayerId(), new LinkedHashSet<Annotation>());
-	       }
-	       a.getStart().startOf.get(a.getLayerId()).add(a);
+	       startsToSet.add(a);
 	    }
 	 }
       } // next annotation
+      for (Annotation a : startsToSet)
+      {
+	 if (!a.getStart().startOf.containsKey(a.getLayerId()))
+	 {
+	    a.getStart().startOf.put(a.getLayerId(), new LinkedHashSet<Annotation>());
+	 }
+	 a.getStart().startOf.get(a.getLayerId()).add(a);
+      }
       return annotations;
    } // end of startOf()
 
@@ -384,6 +389,7 @@ public class Anchor
       // check they still really are linked
       Iterator<Annotation> iAnnotations = annotations.iterator();
       String id = getId();
+      LinkedHashSet<Annotation> endsToSet = new LinkedHashSet<Annotation>();
       while (iAnnotations.hasNext())
       {
 	 Annotation a = iAnnotations.next();
@@ -394,14 +400,18 @@ public class Anchor
 	    iAnnotations.remove();
 	    if (a.getEnd() != null)
 	    {
-	       if (!a.getEnd().endOf.containsKey(a.getLayerId()))
-	       {
-		  a.getEnd().endOf.put(a.getLayerId(), new LinkedHashSet<Annotation>());
-	       }
-	       a.getEnd().endOf.get(a.getLayerId()).add(a);
+	       endsToSet.add(a);
 	    }
 	 }
       } // next annotation
+      for (Annotation a : endsToSet)
+      {
+	 if (!a.getEnd().endOf.containsKey(a.getLayerId()))
+	 {
+	    a.getEnd().endOf.put(a.getLayerId(), new LinkedHashSet<Annotation>());
+	 }
+	 a.getEnd().endOf.get(a.getLayerId()).add(a);
+      }
       return annotations;
    } // end of endOf()
 

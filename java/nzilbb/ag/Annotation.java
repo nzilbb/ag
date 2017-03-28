@@ -1779,7 +1779,7 @@ public class Annotation
 	 tag.setParent(this);
 	 if (getGraph().getLayer(tag.getLayerId()).getAlignment() == 0)
 	 { // it's a non-aligned layer, so the anchors must match the parent
-	    assert getStartId() != null : "getStartId() != null " + getLayer() + ": " + getLabel();
+	    assert getStartId() != null : "getStartId() != null " + getLayer() + ": " + getLabel() + " - " + tag.getLayerId() + ": " + tag;
 	    tag.setStartId(getStartId());
 	    assert getEndId() != null : "getEndId() != null " + getLayer() + ": " + getLabel();
 	    tag.setEndId(getEndId());

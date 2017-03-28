@@ -535,6 +535,17 @@ public class Graph
       if (annotation.getParent() != null)
       { // this ensures it's in the parent's child collection
 	 annotation.setParent(annotation.getParent(), false);
+	 if (annotation.getParent() == this
+	     && annotation.getLayer() != null // we know what the alignment should be
+	     && annotation.getLayer().getAlignment() == Constants.ALIGNMENT_NONE)
+	 { // graph tags are given anchor IDs here
+	    SortedSet<Anchor> anchors = getSortedAnchors();
+	    if (anchors.size() > 0)
+	    {
+	       annotation.setStartId(anchors.first().getId());
+	       annotation.setEndId(anchors.last().getId());
+	    }
+	 }
       }
       else
       { // keep track of orphans

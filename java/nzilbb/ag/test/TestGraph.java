@@ -109,6 +109,8 @@ public class TestGraph
       Annotation orphan = new Annotation("orphan", "orphan", "word", "a3", "a4");
 
       g.addAnnotation(who1);
+      assertNotNull("graph tags have start ID set ", who1.getStartId());
+      assertNotNull("graph tags have end ID set ", who1.getEndId());
       g.addAnnotation(turn1);
       g.addAnnotation(the);
       g.addAnnotation(quick);
