@@ -26,8 +26,10 @@ import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Arrays;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
+import org.json.IJSONableBean;
 
 /**
  * Base class for annotation graph classes, which allows registered attributes to have their changes and original values tracked.
@@ -41,7 +43,7 @@ import java.lang.reflect.InvocationTargetException;
 @SuppressWarnings("serial")
 public class TrackedMap
    extends LinkedHashMap<String,Object>
-   implements Cloneable
+   implements Cloneable, IJSONableBean
 {
    // Attributes stored in HashMap:
 
@@ -66,6 +68,15 @@ public class TrackedMap
    {
       return trackedAttributes;
    } // end of getTrackedAttributes()
+
+   /**
+    * IJSONableBean implementation.
+    * @return The names of fields to be obtained from the object.
+    */
+   public String[] JSONAttributes()
+   {
+      return getClonedAttributes().toArray(new String[0]);
+   }
 
    /**
     * The object's identifier.
@@ -554,7 +565,14 @@ public class TrackedMap
 		  }
 		  catch(NoSuchMethodException x4)
 		  {
-		     return object.getClass().getMethod(setterName, Double.class); // Anchor.offset
+		     try
+		     {
+			return object.getClass().getMethod(setterName, LinkedHashMap.class); // Layer.validLabels
+		     }
+		     catch(NoSuchMethodException x5)
+		     {
+			return object.getClass().getMethod(setterName, Double.class); // Anchor.offset
+		     }
 		  }
 	       }
 	    }
