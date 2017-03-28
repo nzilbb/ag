@@ -458,7 +458,7 @@ public class TranscriptDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Transcriber transcript", "1.422", "text/xml-transcriber", ".trs", "20170228.1353", getClass().getResource("icon.png"));
+	 "Transcriber transcript", "1.423", "text/xml-transcriber", ".trs", "20170228.1353", getClass().getResource("icon.png"));
    }
 
    /**
@@ -932,7 +932,10 @@ public class TranscriptDeserializer
 	       String label = sSpeakerId;
 	       if (getSpeaker(sSpeakerId) != null) label = getSpeaker(sSpeakerId).getName();
 	       Annotation anTurn = new Annotation(null, label, schema.getTurnLayerId());
-	       anTurn.setParentId(graph.getAnnotation(sSpeakerId).getId());
+	       if (graph.getAnnotation(sSpeakerId) != null)
+	       {
+		  anTurn.setParentId(graph.getAnnotation(sSpeakerId).getId());
+	       }
 	       anTurn.setStart(
 		  graph.getOrCreateAnchorAt(
 		     turn.getStartTimeAsDouble(), Constants.CONFIDENCE_AUTOMATIC));
