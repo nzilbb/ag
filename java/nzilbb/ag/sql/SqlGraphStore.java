@@ -692,6 +692,180 @@ public class SqlGraphStore
 	 throw new StoreException(exception);
       }
    }
+
+   
+   /**
+    * Converts a graph-matching expression into a resultset (SELECT selectedClause FROM... WHERE... orderClause).
+    * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+    * <ul>
+    *  <li><code>id MATCHES 'Ada.+'</code></li>
+    *  <li><code>my('corpus').label = 'CC'</code></li>
+    *  <li><code>'Robert' IN labels('who')</code></li>
+    *  <li><code>id MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
+    * </ul>
+    * @param expression The graph-matching expression.
+    * @param selectClause The expression that is to go between SELECT and FROM.
+    * @param orderClause The expression that appended to the end of the SQL query.
+    * @return A PreparedStatement for the given expression, with parameters already set.
+    * @throws SQLException
+    * @throws StoreException If the expression is invalid.
+    */
+   private PreparedStatement graphMatchSql(String expression, String selectClause, String orderClause)
+      throws SQLException, StoreException
+   {
+      StringBuffer conditions = new StringBuffer();
+      for (String subexpression : expression.split(" AND "))
+      {
+	 subexpression = subexpression.trim();
+	 if (subexpression.length() == 0) continue;
+	 String operator = null;
+	 String[] operators = {"="," MATCHES ", " IN "};
+	 String[] operands = null;
+	 for (String op : operators)
+	 {
+	    operands = subexpression.split(op);
+	    if (operands.length == 2)
+	    {
+	       operator = op.trim();
+	       break;
+	    } // match
+	 } // next operator
+	 if (operator == null) throw new StoreException("Not valid operator found in: " + expression);
+	 if (operands == null) throw new StoreException("No operands found in: " + expression);
+
+	 String sqlLhs = null;
+	 String sqlOperator = operator.equals("MATCHES")?"REGEXP":operator;
+	 String sqlRhs = null;
+	 for (String operand : operands)
+	 {
+	    System.out.println("operand " + operand);
+	    operand = operand.trim();
+	    String sqlOperand = null;
+	    if (operand.equals("id"))
+	    {
+	       sqlOperand = "transcript_id";
+	    }
+	    else if (operand.equals("my('corpus').label"))
+	    {
+	       sqlOperand = "corpus_name";
+	    }
+	    else if (operand.equals("labels('who')"))
+	    {
+	       sqlOperand = "(SELECT speaker.name"
+		  +" FROM transcript_speaker"
+		  +" INNER JOIN speaker ON transcript_speaker.speaker_number = speaker.speaker_number"
+		  +" WHERE transcript_speaker.ag_id = transcript.ag_id)";
+	    }
+	    else
+	    {
+	       sqlOperand = operand;
+	    }
+	    if (sqlLhs == null)
+	    {
+	       System.out.println("lhs " + sqlOperand);
+	       sqlLhs = sqlOperand;
+	    }
+	    else
+	    {
+	       System.out.println("rhs " + sqlOperand);
+	       sqlRhs = sqlOperand;
+	    }
+	 } // next operand
+	 conditions.append(conditions.length() == 0?" WHERE ":" AND ");
+	 conditions.append(sqlLhs);
+	 conditions.append(" ");
+	 conditions.append(sqlOperator);
+	 conditions.append(" ");
+	 conditions.append(sqlRhs);
+      } // next subexpression
+      System.out.println(conditions.toString());
+      PreparedStatement sql = getConnection().prepareStatement(
+	 "SELECT "+selectClause+" FROM transcript" + conditions.toString() + " " + orderClause);
+      return sql;
+   } // end of graphMatchSql()
+
+
+   /**
+    * Counts the number of graphs that match a particular pattern.
+    * @param expression An expression that determines which graphs match.
+    * @return The number of matching graphs.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public int countMatchingGraphIds(String expression)
+      throws StoreException, PermissionException
+   {
+      try
+      {
+	 PreparedStatement sql = graphMatchSql(expression, "COUNT(*)", "");
+	 ResultSet rs = sql.executeQuery();
+	 try
+	 {
+	    rs.next();
+	    return rs.getInt(1);
+	 }
+	 finally
+	 {
+	    rs.close();
+	    sql.close();
+	 }
+      }
+      catch(SQLException exception)
+      {
+	 throw new StoreException(exception);
+      }
+   }
+   
+   /**
+    * Gets a list of IDs of graphs that match a particular pattern.
+    * @param expression An expression that determines which graphs match.
+    * @return A list of graph IDs.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public String[] getMatchingGraphIds(String expression)
+      throws StoreException, PermissionException
+   {
+      return getMatchingGraphIdsPage(expression, null, null);
+   }
+
+   /**
+    * Gets a list of IDs of graphs that match a particular pattern.
+    * @param expression An expression that determines which graphs match.
+    * @param pageLength The maximum number of IDs to return, or null to return all.
+    * @param pageNumber The zero-based page number to return, or null to return the first page.
+    * @return A list of graph IDs.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public String[] getMatchingGraphIdsPage(String expression, Integer pageLength, Integer pageNumber)
+      throws StoreException, PermissionException
+   {
+      try
+      {
+	 String limit = "";
+	 if (pageLength != null)
+	 {
+	    if (pageNumber == null) pageNumber = 0;
+	    limit = " LIMIT " + (pageNumber * pageLength) + "," + pageLength;
+	 }
+	 PreparedStatement sql = graphMatchSql(
+	    expression, "transcript_id", "ORDER BY transcript_id" + limit);
+	 ResultSet rs = sql.executeQuery();
+	 Vector<String> graphs = new Vector<String>();
+	 while (rs.next())
+	 {
+	    graphs.add(rs.getString("transcript_id"));
+	 } // next layer
+	 rs.close();
+	 sql.close();
+	 return graphs.toArray(new String[0]);
+      }
+      catch(SQLException exception)
+      {
+	 throw new StoreException(exception);
+      }
+   }
    
    /**
     * Gets a graph given its ID.

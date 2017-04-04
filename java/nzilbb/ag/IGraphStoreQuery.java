@@ -103,7 +103,7 @@ public interface IGraphStoreQuery
     */
    public String[] getGraphIds()
       throws StoreException, PermissionException; 
-
+   
    /**
     * Gets a list of graph IDs in the given corpus.
     * @param id A corpus ID.
@@ -123,7 +123,39 @@ public interface IGraphStoreQuery
     */
    public String[] getGraphIdsWithParticipant(String id)
       throws StoreException, PermissionException; 
+
+   /**
+    * Counts the number of graphs that match a particular pattern.
+    * @param expression An expression that determines which graphs match.
+    * @return The number of matching graphs.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public int countMatchingGraphIds(String expression)
+      throws StoreException, PermissionException; 
    
+   /**
+    * Gets a list of IDs of graphs that match a particular pattern.
+    * @param expression An expression that determines which graphs match.
+    * @return A list of graph IDs.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public String[] getMatchingGraphIds(String expression)
+      throws StoreException, PermissionException; 
+
+   /**
+    * Gets a list of IDs of graphs that match a particular pattern.
+    * @param expression An expression that determines which graphs match.
+    * @param pageLength The maximum number of IDs to return, or null to return all.
+    * @param pageNumber The page number to return, or null to return the first page.
+    * @return A list of graph IDs.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public String[] getMatchingGraphIdsPage(String expression, Integer pageLength, Integer pageNumber)
+      throws StoreException, PermissionException; 
+
    /**
     * Gets a graph given its ID.
     * @param id The given graph ID.
