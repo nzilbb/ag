@@ -738,7 +738,6 @@ public class SqlGraphStore
 	 String sqlRhs = null;
 	 for (String operand : operands)
 	 {
-	    System.out.println("operand " + operand);
 	    operand = operand.trim();
 	    String sqlOperand = null;
 	    if (operand.equals("id"))
@@ -762,12 +761,10 @@ public class SqlGraphStore
 	    }
 	    if (sqlLhs == null)
 	    {
-	       System.out.println("lhs " + sqlOperand);
 	       sqlLhs = sqlOperand;
 	    }
 	    else
 	    {
-	       System.out.println("rhs " + sqlOperand);
 	       sqlRhs = sqlOperand;
 	    }
 	 } // next operand
@@ -778,7 +775,6 @@ public class SqlGraphStore
 	 conditions.append(" ");
 	 conditions.append(sqlRhs);
       } // next subexpression
-      System.out.println(conditions.toString());
       PreparedStatement sql = getConnection().prepareStatement(
 	 "SELECT "+selectClause+" FROM transcript" + conditions.toString() + " " + orderClause);
       return sql;
