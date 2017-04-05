@@ -734,6 +734,188 @@ public class SqlGraphStore
 
    
    /**
+    * Converts a participant-matching expression into a resultset (SELECT selectedClause FROM... WHERE... orderClause).
+    * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+    * <ul>
+    *  <li><code>id MATCHES 'Ada.+'</code></li>
+    *  <li><code>'CC' IN labels('corpus')</code></li>
+    *  <li><code>id MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
+    * </ul>
+    * @param expression The graph-matching expression.
+    * @param selectClause The expression that is to go between SELECT and FROM.
+    * @param orderClause The expression that appended to the end of the SQL query.
+    * @return A PreparedStatement for the given expression, with parameters already set.
+    * @throws SQLException
+    * @throws StoreException If the expression is invalid.
+    */
+   private PreparedStatement participantMatchSql(String expression, String selectClause, String orderClause)
+      throws SQLException, StoreException
+   {
+      StringBuffer conditions = new StringBuffer();
+      for (String subexpression : expression.split(" AND "))
+      {
+	 subexpression = subexpression.trim();
+	 if (subexpression.length() == 0) continue;
+	 String operator = null;
+	 String[] operators = {"="," MATCHES ", " IN "};
+	 String[] operands = null;
+	 for (String op : operators)
+	 {
+	    operands = subexpression.split(op);
+	    if (operands.length == 2)
+	    {
+	       operator = op.trim();
+	       break;
+	    } // match
+	 } // next operator
+	 if (operator == null) throw new StoreException("Not valid operator found in: " + expression);
+	 if (operands == null) throw new StoreException("No operands found in: " + expression);
+
+	 String sqlLhs = null;
+	 String sqlOperator = operator.equals("MATCHES")?"REGEXP":operator;
+	 String sqlRhs = null;
+	 for (String operand : operands)
+	 {
+	    operand = operand.trim();
+	    String sqlOperand = null;
+	    if (operand.equals("id"))
+	    {
+	       sqlOperand = "speaker.name";
+	    }
+	    else if (operand.equals("labels('corpus')"))
+	    {
+	       sqlOperand = "(SELECT corpus.corpus_name"
+		  +" FROM speaker_corpus"
+		  +" INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id"
+		  +" WHERE speaker_corpus.speaker_number = speaker.speaker_number)";
+	    }
+	    else
+	    {
+	       sqlOperand = operand;
+	    }
+	    if (sqlLhs == null)
+	    {
+	       sqlLhs = sqlOperand;
+	    }
+	    else
+	    {
+	       sqlRhs = sqlOperand;
+	    }
+	 } // next operand
+	 conditions.append(conditions.length() == 0?" WHERE ":" AND ");
+	 conditions.append(sqlLhs);
+	 conditions.append(" ");
+	 conditions.append(sqlOperator);
+	 conditions.append(" ");
+	 conditions.append(sqlRhs);
+      } // next subexpression
+      String userWhereClauseParticipant = "";
+      String userWhereClause = userWhereClause(conditions.length() > 0);
+      if (userWhereClause.length() > 0)
+      {
+	 // insert links to speaker table
+	 userWhereClauseParticipant = userWhereClause.replaceAll(
+	    " WHERE user_id",
+	    " WHERE user_id"
+	    +" INNER JOIN transcript_speaker ON access_attribute.ag_id = transcript_speaker.ag_id")
+	    .replaceAll(
+	       "FROM role_permission)",
+	       "FROM role_permission)"
+	       // include those with no transcripts too
+	       + " OR NOT EXISTS (SELECT * FROM transcript_speaker"
+	       + " WHERE transcript_speaker.speaker_number = speaker.speaker_number)");
+      }
+      PreparedStatement sql = getConnection().prepareStatement(
+	 "SELECT "+selectClause+" FROM speaker"
+	 + conditions.toString()
+	 + userWhereClauseParticipant
+	 + " " + orderClause);
+      return sql;
+   } // end of graphMatchSql()
+
+   /**
+    * Counts the number of participants that match a particular pattern.
+    * @param expression An expression that determines which participants match.
+    * @return The number of matching participants.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public int countMatchingParticipantIds(String expression)
+      throws StoreException, PermissionException
+   {
+      try
+      {
+	 PreparedStatement sql = participantMatchSql(expression, "COUNT(*)", "");
+	 ResultSet rs = sql.executeQuery();
+	 try
+	 {
+	    rs.next();
+	    return rs.getInt(1);
+	 }
+	 finally
+	 {
+	    rs.close();
+	    sql.close();
+	 }
+      }
+      catch(SQLException exception)
+      {
+	 throw new StoreException(exception);
+      }
+   }
+   
+   /**
+    * Gets a list of IDs of participants that match a particular pattern.
+    * @param expression An expression that determines which participants match.
+    * @return A list of participant IDs.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public String[] getMatchingParticipantIds(String expression)
+      throws StoreException, PermissionException
+   {
+      return getMatchingParticipantIdsPage(expression, null, null);
+   }
+
+   /**
+    * Gets a list of IDs of participants that match a particular pattern.
+    * @param expression An expression that determines which participants match.
+    * @param pageLength The maximum number of IDs to return, or null to return all.
+    * @param pageNumber The page number to return, or null to return the first page.
+    * @return A list of participant IDs.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public String[] getMatchingParticipantIdsPage(String expression, Integer pageLength, Integer pageNumber)
+      throws StoreException, PermissionException
+   {
+      try
+      {
+	 String limit = "";
+	 if (pageLength != null)
+	 {
+	    if (pageNumber == null) pageNumber = 0;
+	    limit = " LIMIT " + (pageNumber * pageLength) + "," + pageLength;
+	 }
+	 PreparedStatement sql = participantMatchSql(
+	    expression, "DISTINCT speaker.name", "ORDER BY speaker.name" + limit);
+	 ResultSet rs = sql.executeQuery();
+	 Vector<String> ids = new Vector<String>();
+	 while (rs.next())
+	 {
+	    ids.add(rs.getString("name"));
+	 } // next layer
+	 rs.close();
+	 sql.close();
+	 return ids.toArray(new String[0]);
+      }
+      catch(SQLException exception)
+      {
+	 throw new StoreException(exception);
+      }
+   }
+
+   /**
     * Converts a graph-matching expression into a resultset (SELECT selectedClause FROM... WHERE... orderClause).
     * <p> The expression language is currently not well defined, but expressions such as the following can be used:
     * <ul>
@@ -821,7 +1003,6 @@ public class SqlGraphStore
 	 + " " + orderClause);
       return sql;
    } // end of graphMatchSql()
-
 
    /**
     * Counts the number of graphs that match a particular pattern.

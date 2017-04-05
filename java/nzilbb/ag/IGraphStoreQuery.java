@@ -96,6 +96,38 @@ public interface IGraphStoreQuery
       throws StoreException, PermissionException; 
 
    /**
+    * Counts the number of participants that match a particular pattern.
+    * @param expression An expression that determines which participants match.
+    * @return The number of matching participants.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public int countMatchingParticipantIds(String expression)
+      throws StoreException, PermissionException; 
+   
+   /**
+    * Gets a list of IDs of participants that match a particular pattern.
+    * @param expression An expression that determines which participants match.
+    * @return A list of participant IDs.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public String[] getMatchingParticipantIds(String expression)
+      throws StoreException, PermissionException; 
+
+   /**
+    * Gets a list of IDs of participants that match a particular pattern.
+    * @param expression An expression that determines which participants match.
+    * @param pageLength The maximum number of IDs to return, or null to return all.
+    * @param pageNumber The page number to return, or null to return the first page.
+    * @return A list of participant IDs.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public String[] getMatchingParticipantIdsPage(String expression, Integer pageLength, Integer pageNumber)
+      throws StoreException, PermissionException; 
+
+   /**
     * Gets a list of graph IDs.
     * @return A list of graph IDs.
     * @throws StoreException If an error occurs.
