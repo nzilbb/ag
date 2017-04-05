@@ -157,6 +157,57 @@ public class SqlGraphStore
     */
    public void setId(String newId) { id = newId; }
 
+
+   /**
+    * ID of the user querying the store.
+    * @see #getUser()
+    * @see #setUser(String)
+    */
+   protected String user;
+   /**
+    * Getter for {@link #user}: ID of the user querying the store.
+    * @return ID of the user querying the store.
+    */
+   public String getUser() { return user; }
+   /**
+    * Setter for {@link #user}: ID of the user querying the store.
+    * @param newUser ID of the user querying the store.
+    */
+   public void setUser(String newUser)
+   {
+      user = newUser;
+      if (user != null)
+      {
+	 try
+	 {
+	    PreparedStatement sqlUserGroups = getConnection().prepareStatement(
+	       "SELECT role_id FROM role WHERE user_id = ?");
+	    sqlUserGroups.setString(1, user);
+	    ResultSet rstUserGroups = sqlUserGroups.executeQuery();
+	    while (rstUserGroups.next())
+	    {
+	       userRoles.add(rstUserGroups.getString("role_id"));
+	    } // next group
+	    rstUserGroups.close();
+	    sqlUserGroups.close();
+	 }
+	 catch(Exception exception)
+	 {}
+      }
+   }
+
+   /**
+    * Roles the user fulfills.
+    * @see #getUserRoles()
+    * @see #setUserRoles(HashSet<String>)
+    */
+   protected HashSet<String> userRoles = new HashSet<String>();
+   /**
+    * Getter for {@link #userRoles}: Roles the user fulfills.
+    * @return Roles the user fulfills.
+    */
+   public HashSet<String> getUserRoles() { return userRoles; }
+   
    
    // Methods:
    
@@ -172,13 +223,15 @@ public class SqlGraphStore
     * @param baseUrl URL prefix for file access.
     * @param files Root directory for file structure.
     * @param connection An opened database connection.
+    * @param user ID of the user
     */
-   public SqlGraphStore(String baseUrl, File files, Connection connection)
+   public SqlGraphStore(String baseUrl, File files, Connection connection, String user)
    {
       setId(baseUrl);
       setBaseUrl(baseUrl);
       setFiles(files);
       setConnection(connection);
+      setUser(user);
    } // end of constructor
 
    /**
@@ -186,17 +239,19 @@ public class SqlGraphStore
     * @param baseUrl URL prefix for file access.
     * @param files Root directory for file structure.
     * @param connectString The database connection string.
-    * @param user The database username.
+    * @param databaseUser The database username.
     * @param password The databa password.
+    * @param storeUser ID of the user
     * @throws SQLException If an error occurs during connection.
     */
-   public SqlGraphStore(String baseUrl, File files, String connectString, String user, String password)
+   public SqlGraphStore(String baseUrl, File files, String connectString, String databaseUser, String password, String storeUser)
       throws SQLException
    {
       setId(baseUrl);
       setBaseUrl(baseUrl);
       setFiles(files);
       setConnection(DriverManager.getConnection (connectString, user, password));
+      setUser(storeUser);
    } // end of constructor
 
    /**
@@ -598,6 +653,30 @@ public class SqlGraphStore
       }
    }
 
+   
+   /**
+    * Returns an SQL WHERE clause for restricting access by user ID, if the user is set.
+    * @param prefixWithAnd
+    * @return A WHERE clause if appropriate, or an empty string if not.
+    */
+   private String userWhereClause(boolean prefixWithAnd)
+   {
+      if (getUser() != null && !getUserRoles().contains("admin"))
+      {
+	 return (prefixWithAnd?" AND":" WHERE")
+	    +" (EXISTS (SELECT * FROM role"
+	    + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
+	    + " INNER JOIN transcript_attribute access_attribute" 
+	    + " ON access_attribute.name = role_permission.attribute_name" 
+	    + " AND access_attribute.value REGEXP role_permission.value_pattern"
+	    + " AND role_permission.entity REGEXP '.*t.*'" // transcript access
+	    + " WHERE user_id = '"+getUser().replaceAll("'","\\'")+"'"
+	    + " AND access_attribute.ag_id = transcript.ag_id)"
+	    + " OR NOT EXISTS (SELECT * FROM role_permission)) "; // permissions are being used in general
+      }
+      return "";
+   } // end of userWhereClause()
+
 
    /**
     * Gets a list of graph IDs.
@@ -610,7 +689,8 @@ public class SqlGraphStore
       try
       {
 	 PreparedStatement sql = getConnection().prepareStatement(
-	    "SELECT transcript_id FROM transcript ORDER BY transcript_id");
+	    "SELECT transcript_id FROM transcript " + userWhereClause(false)
+	    +" ORDER BY transcript_id");
 	 ResultSet rs = sql.executeQuery();
 	 Vector<String> graphs = new Vector<String>();
 	 while (rs.next())
@@ -636,25 +716,7 @@ public class SqlGraphStore
     */
    public String[] getGraphIdsInCorpus(String id) throws StoreException, PermissionException
    {
-      try
-      {
-	 PreparedStatement sql = getConnection().prepareStatement(
-	    "SELECT transcript_id FROM transcript WHERE corpus_name = ? ORDER BY transcript_id");
-	 sql.setString(1, id);
-	 ResultSet rs = sql.executeQuery();
-	 Vector<String> graphs = new Vector<String>();
-	 while (rs.next())
-	 {
-	    graphs.add(rs.getString("transcript_id"));
-	 } // next layer
-	 rs.close();
-	 sql.close();
-	 return graphs.toArray(new String[0]);
-      }
-      catch(SQLException exception)
-      {
-	 throw new StoreException(exception);
-      }
+      return getMatchingGraphIds("my('corpus') = '"+id.replaceAll("'","\\'")+"'");
    }
 
 
@@ -667,30 +729,7 @@ public class SqlGraphStore
     */
    public String[] getGraphIdsWithParticipant(String id) throws StoreException, PermissionException
    {
-      try
-      {
-	 PreparedStatement sql = getConnection().prepareStatement(
-	    "SELECT transcript.transcript_id"
-	    +" FROM transcript"
-	    +" INNER JOIN transcript_speaker ON transcript.ag_id = transcript_speaker.ag_id"
-	    +" INNER JOIN speaker ON speaker.speaker_number = transcript_speaker.speaker_number"
-	    +" WHERE speaker.name = ? AND COALESCE(speaker.name,'') <> ''"
-	    +" ORDER BY transcript_id");
-	 sql.setString(1, id);
-	 ResultSet rs = sql.executeQuery();
-	 Vector<String> graphs = new Vector<String>();
-	 while (rs.next())
-	 {
-	    graphs.add(rs.getString("transcript_id"));
-	 } // next layer
-	 rs.close();
-	 sql.close();
-	 return graphs.toArray(new String[0]);
-      }
-      catch(SQLException exception)
-      {
-	 throw new StoreException(exception);
-      }
+      return getMatchingGraphIds("'"+id.replaceAll("'","\\'")+"' IN labels('who')");
    }
 
    
@@ -776,7 +815,10 @@ public class SqlGraphStore
 	 conditions.append(sqlRhs);
       } // next subexpression
       PreparedStatement sql = getConnection().prepareStatement(
-	 "SELECT "+selectClause+" FROM transcript" + conditions.toString() + " " + orderClause);
+	 "SELECT "+selectClause+" FROM transcript"
+	 + conditions.toString()
+	 + userWhereClause(conditions.length() > 0)
+	 + " " + orderClause);
       return sql;
    } // end of graphMatchSql()
 
@@ -3618,6 +3660,8 @@ public class SqlGraphStore
 		  url.append("/");
 		  url.append(graph.my("episode").getLabel());
 		  url.append("/");
+		  url.append(mediaFile.getExtension());
+		  url.append("/");
 		  url.append(f.getName());
 		  mediaFile.setUrl(url.toString());
 		  files.add(mediaFile);
@@ -3664,6 +3708,8 @@ public class SqlGraphStore
 	    url.append(graph.my("corpus").getLabel());
 	    url.append("/");
 	    url.append(graph.my("episode").getLabel());
+	    url.append("/");
+	    url.append(extension);
 	    url.append("/");
 	    url.append(fileName);
 	    return url.toString();

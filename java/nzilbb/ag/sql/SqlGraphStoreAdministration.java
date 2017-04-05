@@ -122,12 +122,15 @@ public class SqlGraphStoreAdministration
     * @param baseUrl URL prefix for file access.
     * @param files Root directory for file structure.
     * @param connection An opened database connection.
+    * @param user ID of the user
     * @throws SQLException If an error occurs during connection or loading of configuraion.
+    * @throws PermissionException If the store user doesn't have administrator privileges
     */
-   public SqlGraphStoreAdministration(String baseUrl, File files, Connection connection)
-      throws SQLException
+   public SqlGraphStoreAdministration(String baseUrl, File files, Connection connection, String user)
+      throws SQLException, PermissionException
    {
-      super(baseUrl, files, connection);
+      super(baseUrl, files, connection, user);
+      if (!getUserRoles().contains("admin")) throw new PermissionException();
       loadSerializers();
    } // end of constructor
 
@@ -136,14 +139,17 @@ public class SqlGraphStoreAdministration
     * @param baseUrl URL prefix for file access.
     * @param files Root directory for file structure.
     * @param connectString The database connection string.
-    * @param user The database username.
+    * @param databaseUser The database username.
     * @param password The databa password.
+    * @param storeUser ID of the user
     * @throws SQLException If an error occurs during connection or loading of configuraion.
+    * @throws PermissionException If the store user doesn't have administrator privileges
     */
-   public SqlGraphStoreAdministration(String baseUrl, File files, String connectString, String user, String password)
-      throws SQLException
+   public SqlGraphStoreAdministration(String baseUrl, File files, String connectString, String databaseUser, String password, String storeUser)
+      throws SQLException, PermissionException
    {
-      super(baseUrl, files, connectString, user, password);
+      super(baseUrl, files, connectString, databaseUser, password, storeUser);
+      if (!getUserRoles().contains("admin")) throw new PermissionException();
       loadSerializers();
    }
 
