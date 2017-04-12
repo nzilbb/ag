@@ -90,7 +90,7 @@ function callFailed(evt) {
     evt.target.onResult(null, ["failed: " + this.responseText], [], evt.target.call, evt.target.id);
 }
 function callCancelled(evt) {
-    evt.target.onResult(null, ["cancelled"], evt.target.call, evt.target.id);
+    evt.target.onResult(null, ["cancelled"], [], evt.target.call, evt.target.id);
 }
 
 // GraphStoreQuery class - read-only "view" access
@@ -423,45 +423,53 @@ nzilbb.labbcat.Labbcat.prototype.newTranscript = function(transcript, media, med
 	}
 	
 	var urlParts = parseUrl(this.baseUrl + "edit/transcript/new");
-	var requestParameters = {
-	    port: urlParts.port,
-	    path: urlParts.pathname,
-	    host: urlParts.hostname,
-	    headers: { "Accept" : "application/json" }
-	};
-	if (this.username && this.password) {
-	    requestParameters.auth = this.username+':'+this.password;
-	}
-	if (/^https.*/.test(this.baseUrl)) {
-	    requestParameters.protocol = "https:";
-	}
-	fd.submit(requestParameters, function(err, res) {
-	    var responseText = "";
-	    if (!err) {
-		res.on('data',function(buffer) {
-		    console.log('data ' + buffer);
-		    responseText += buffer;
-		});
-		res.on('end',function(){
-		    try {
-			var response = JSON.parse(responseText);
-			var result = response.model.result || response.model;
-			var errors = response.errors;
-			if (errors.length == 0) errors = null
-			var messages = response.messages;
-			if (messages.length == 0) messages = null
-			onResult(result, errors, messages, "newTranscript", transcriptName);
-		    } catch(exception) {
-			onResult(null, ["" +exception+ ": " + this.responseText], [], "newTranscript", transcript.name);
-		    }
-		});
-	    } else {
-		onResult(null, ["Request - " +err+ ": " + this.responseText], [], "newTranscript", transcriptName);
+	// for tomcat 8, we need to explicitly send the content-type and content-length headers...
+	var labbcat = this;
+	fd.getLength(function(something, contentLength) {
+	    var requestParameters = {
+		port: urlParts.port,
+		path: urlParts.pathname,
+		host: urlParts.hostname,
+		headers: {
+		    "Accept" : "application/json",
+		    "content-length" : contentLength,
+		    "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+		}
+	    };
+	    if (labbcat.username && labbcat.password) {
+		requestParameters.auth = labbcat.username+':'+labbcat.password;
 	    }
-
-	    if (res) res.resume();
-	});
-    }
+	    if (/^https.*/.test(labbcat.baseUrl)) {
+		requestParameters.protocol = "https:";
+	    }
+	    fd.submit(requestParameters, function(err, res) {
+		var responseText = "";
+		if (!err) {
+		    res.on('data',function(buffer) {
+			//console.log('data ' + buffer);
+			responseText += buffer;
+		    });
+		    res.on('end',function(){
+			try {
+			    var response = JSON.parse(responseText);
+			    var result = response.model.result || response.model;
+			    var errors = response.errors;
+			    if (errors.length == 0) errors = null
+			    var messages = response.messages;
+			    if (messages.length == 0) messages = null
+			    onResult(result, errors, messages, "newTranscript", transcriptName);
+			} catch(exception) {
+			    onResult(null, ["" +exception+ ": " + labbcat.responseText], [], "newTranscript", transcript.name);
+			}
+		    });
+		} else {
+		    onResult(null, ["" +err+ ": " + labbcat.responseText], [], "newTranscript", transcriptName);
+		}
+		
+		if (res) res.resume();
+	    });
+	}); // got length
+    } // runningOnNode
 };
 
 /**
