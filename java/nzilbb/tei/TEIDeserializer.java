@@ -70,7 +70,8 @@ import nzilbb.configure.ParameterSet;
  *  <li>The &lt;addressingTerm&gt;, &lt;addressMarker&gt; and &lt;addressee&gt; tags supported, and mapped to "entities" layer by default, but the <tt>who</tt> attribute of &lt;addressee&gt; is ignored.</li>
  *  <li>The <tt>type</tt> attribute of the &lt;div&gt; tag is ignored.</li>
  *  <li>The <tt>revisedWhen</tt>, <tt>revisedBy</tt>, and <tt>indentLevel</tt> attributes of the &lt;posting&gt; tag are ignored</li>
- *  <li>The &lt;interactionTemplate&gt;, &lt;interactionTerm&gt;, &lt;interactionWord&gt;, and &lt;emoticon&gt; tags are not explicitly supported.</li>
+ *  <li>The &lt;interactionTerm&gt; tag is ignored.</li>
+ *  <li>The &lt;interactionTemplate&gt;, &lt;interactionWord&gt;, and &lt;emoticon&gt; tags are not explicitly supported.</li>
  *  <li>The &lt;autoSignature&gt; and &lt;signatureContent&gt; tags are not explicitly supported.</li>
  * </ul>
  * @author Robert Fromont robert@fromont.net.nz
@@ -443,7 +444,7 @@ public class TEIDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "TEI Document", "0.02", "application/tei+xml", ".xml", "20170228.1353", getClass().getResource("icon.png"));
+	 "TEI Document", "0.03", "application/tei+xml", ".xml", "20170228.1353", getClass().getResource("icon.png"));
    }
 
    /**
@@ -1008,6 +1009,7 @@ public class TEIDeserializer
 	  && !sType.equals("when") 
 	  && !sType.equals("#comment")
 	  && !sType.equals("posting") // http://jtei.revues.org/476
+	  && !sType.equals("interactionTerm")
 	  // choice/orig/reg constructions have special handling, mapping just "orig" is sufficient
 	  && !sType.equals("choice") && !sType.equals("reg")) 
       {

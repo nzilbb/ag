@@ -263,7 +263,7 @@ public class TestTEIDeserializer
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
       // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(4, defaultParameters.size());
+      assertEquals(5, defaultParameters.size());
       assertNull("no url layer",
 		   defaultParameters.get("idnoUrl").getValue());
       assertEquals("addressingTerm", "entities", 
@@ -272,6 +272,8 @@ public class TestTEIDeserializer
 		   ((Layer)defaultParameters.get("addressee").getValue()).getId());
       assertEquals("addressMarker", "entities", 
 		   ((Layer)defaultParameters.get("addressMarker").getValue()).getId());
+      assertEquals("emoticon", "entities", 
+		   ((Layer)defaultParameters.get("emoticon").getValue()).getId());
       
       // configure the deserialization
       deserializer.setParameters(defaultParameters);
@@ -412,7 +414,9 @@ public class TestTEIDeserializer
 
       // addressee tags
       Annotation[] entities = g.list("entities");
-      assertEquals(18, entities.length);
+      assertEquals(19, entities.length);
+      assertEquals("emoticon", "face with tears of joy", entities[18].getLabel());
+      assertTrue("emoticon tags last word", entities[18].tags(words[words.length-1]));
       
       Annotation at = words[67];
       Annotation addressee = words[68];

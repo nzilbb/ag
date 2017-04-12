@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+<teiHeader>
+ <fileDesc>
+  <titleStmt><title>undefined</title></titleStmt>
+  <publicationStmt>
+   <publisher>https://www.reddit.com/user/Stuck_In_the_Matrix</publisher>
+   <availability status="free"><p>Published at https://www.reddit.com/r/datasets/comments/3bxlg7/i_have_every_publicly_available_reddit_comment/</p></availability>
+  </publicationStmt>
+  <sourceDesc>
+    <msDesc>
+      <msIdentifier>
+	<repository>Reddit</repository>
+	<idno type="URL">https://www.reddit.com/r/StrangerThings/comments/t1_dd5f8en#dd6aabs</idno>
+      </msIdentifier>
+    </msDesc>
+  </sourceDesc>
+  <notesStmt>
+    <note type="subreddit">StrangerThings</note>
+    <note type="parent_id">t1_dd5f8en</note>
+  </notesStmt>
+ </fileDesc>
+ <profileDesc>
+  <particDesc><listPerson><person xml:id="Genkaichan"/></listPerson></particDesc>
+ </profileDesc>
+</teiHeader>
+<text>
+ <front><timeline><when xml:id="a" absolute="2017-02-01T03:00:59.000Z" /></timeline></front>
+ <body><div type="thread"><posting who="#Genkaichan" synch="#a">Such a lovable teddy bear. As soon as I thought he'd help Eleven, those ideas were quickly dismissed...</posting></div></body>
+</text>
+</TEI>
