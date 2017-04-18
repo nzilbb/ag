@@ -716,7 +716,7 @@ public class SqlGraphStore
     */
    public String[] getGraphIdsInCorpus(String id) throws StoreException, PermissionException
    {
-      return getMatchingGraphIds("my('corpus') = '"+id.replaceAll("'","\\'")+"'");
+      return getMatchingGraphIds("my('corpus').label = '"+id.replaceAll("'","\\'")+"'");
    }
 
 
@@ -3575,11 +3575,11 @@ public class SqlGraphStore
 		     PreparedStatement sqlInsert = getConnection().prepareStatement(
 			"INSERT INTO speaker (name) VALUES (?)");
 		     sqlInsert.setString(1, annotation.getLabel());
-		     sqlInsert.executeUpdate();
-		     sqlInsert.close();
-		     sqlInsert = getConnection().prepareStatement("SELECT LAST_INSERT_ID()");
 		     try
 		     {
+			sqlInsert.executeUpdate();
+			sqlInsert.close();
+			sqlInsert = getConnection().prepareStatement("SELECT LAST_INSERT_ID()");
 			ResultSet rsInsert = sqlInsert.executeQuery();
 			rsInsert.next();
 			speakerNumber = rsInsert.getInt(1);
