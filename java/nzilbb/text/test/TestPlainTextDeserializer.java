@@ -437,8 +437,13 @@ public class TestPlainTextDeserializer
 		   "1.0.0", g.my("appVersion").getLabel());
       assertEquals("graph meta data", 
 		   "2017-01-13T15:49:55.575Z", g.my("creation_date").getLabel());
-      assertEquals("graph meta data", 
-		   "currently have migraine", g.my("speech_migraine").getLabel());
+      String[] multilineAttribute = g.labels("speech_migraine");
+      assertEquals("graph meta data - multiline", 
+		   2, multilineAttribute.length);
+      assertEquals("graph meta data - multiline", 
+		   "currently have migraine", multilineAttribute[0]);
+      assertEquals("graph meta data - multiline", 
+		   "second value", multilineAttribute[1]);
 
       // participants     
       Annotation[] authors = g.list("who"); 
