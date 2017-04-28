@@ -483,7 +483,7 @@ public class SqlGraphStore
 	       layer.setAlignment(Constants.ALIGNMENT_NONE);
 	       layer.setParentId("graph");
 	       layer.setParentIncludes(true);
-	       layer.setPeers(false);
+	       layer.setPeers(true);
 	       layer.setPeersOverlap(false);
 	       layer.setSaturated(true);
 
@@ -543,7 +543,7 @@ public class SqlGraphStore
 		  layer.setAlignment(Constants.ALIGNMENT_NONE);
 		  layer.setParentId("who");
 		  layer.setParentIncludes(true);
-		  layer.setPeers(false);
+		  layer.setPeers(true);
 		  layer.setPeersOverlap(false);
 		  layer.setSaturated(true);
 		  
@@ -2370,11 +2370,15 @@ public class SqlGraphStore
 	    // it's also possible that some annotations will change on the way that were
 	    // otherwise unchanged - e.g. as final anchor IDs are set, etc.
 	    HashSet<Annotation> extraUpdates = new HashSet<Annotation>();
+
+	    // multli-value attributes are implemented by concatenating values together,
+	    // so we gather up attribute changes, and process them afterwards
+	    LinkedHashMap<String,Annotation> transcriptAttributes = new LinkedHashMap<String,Annotation>(); 
+	    LinkedHashMap<String,Annotation> participantAttributes = new LinkedHashMap<String,Annotation>(); 
 	    for (Change change : changes)
 	    {
 	       if (change.getObject() == lastObject) continue; // already did this object
 	       lastObject = change.getObject();
-	       
 	       if (change.getObject() == graph)
 	       {
 		  saveGraphChanges(graph);
@@ -2399,19 +2403,41 @@ public class SqlGraphStore
 		  }
 		  else if (transcriptAttributeLayers.contains(annotation.getLayerId()))
 		  { // transcript attribute
-		     saveTranscriptAttributeChanges(
-			annotation, 
-			sqlInsertTranscriptAttribute, 
-			sqlUpdateTranscriptAttribute, 
-			sqlDeleteTranscriptAttribute);
+		     if (!transcriptAttributes.containsKey(annotation.getLayerId()))
+		     { // first mention, so add it to the map
+			transcriptAttributes.put(annotation.getLayerId(), annotation);
+		     }
+		     else
+		     { // already there, so merge this one with the other one
+			Annotation previous = transcriptAttributes.get(annotation.getLayerId());
+			if (previous.getChange() == Change.Operation.Destroy)
+			{ // replace the delete with this one
+			   transcriptAttributes.put(annotation.getLayerId(), annotation);
+			}
+			else if (annotation.getChange() != Change.Operation.Destroy)
+			{ // change or add, so append the label of this one
+			   previous.setLabel(previous.getLabel() + "\n" + annotation.getLabel());
+			}
+		     }
 		  }
 		  else if (participantAttributeLayers.contains(annotation.getLayerId()))
 		  { // participant attribute
-		     saveParticipantAttributeChanges(
-			annotation, 
-			sqlInsertParticipantAttribute, 
-			sqlUpdateParticipantAttribute, 
-			sqlDeleteParticipantAttribute);
+		     if (!participantAttributes.containsKey(annotation.getLayerId()))
+		     { // first mention, so add it to the map
+			participantAttributes.put(annotation.getLayerId(), annotation);
+		     }
+		     else
+		     { // already there, so merge this one with the other one
+			Annotation previous = participantAttributes.get(annotation.getLayerId());
+			if (previous.getChange() == Change.Operation.Destroy)
+			{ // replace the delete with this one
+			   participantAttributes.put(annotation.getLayerId(), annotation);
+			}
+			else if (annotation.getChange() != Change.Operation.Destroy)
+			{ // change or add, so append the label of this one
+			   previous.setLabel(previous.getLabel() + "\n" + annotation.getLabel());
+			}
+		     }
 		  }
 		  else
 		  { // temporal annotation
@@ -2429,6 +2455,24 @@ public class SqlGraphStore
 	       } // Annotation change
 	    } // next change
 
+	    // attributes
+	    for (Annotation annotation : transcriptAttributes.values())
+	    {
+	       saveTranscriptAttributeChanges(
+		  annotation, 
+		  sqlInsertTranscriptAttribute, 
+		  sqlUpdateTranscriptAttribute, 
+		  sqlDeleteTranscriptAttribute);
+	    } // next transcript attribute
+	    for (Annotation annotation : participantAttributes.values())
+	    {
+	       saveParticipantAttributeChanges(
+		  annotation, 
+		  sqlInsertParticipantAttribute, 
+		  sqlUpdateParticipantAttribute, 
+		  sqlDeleteParticipantAttribute);
+	    } // next participant attribute
+	    
 	    // extras
 	    HashSet<Annotation> newExtraUpdates = new HashSet<Annotation>();
 	    for (Annotation annotation : extraUpdates)
