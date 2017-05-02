@@ -481,7 +481,7 @@ public class PlainTextDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Plain Text Document", "0.01", "text/plain", ".txt", "20170228.1353", getClass().getResource("icon.png"));
+	 "Plain Text Document", "0.02", "text/plain", ".txt", "20170228.1353", getClass().getResource("icon.png"));
    }
 
    /**
@@ -972,12 +972,15 @@ public class PlainTextDeserializer
       if (lexicalLayer != null) graph.addLayer((Layer)lexicalLayer.clone());
       if (noiseLayer != null) graph.addLayer((Layer)noiseLayer.clone());
       if (commentLayer != null) graph.addLayer((Layer)commentLayer.clone());
-      for (Parameter p : parameters.values())
+      if (parameters != null)
       {
-	 Layer layer = (Layer)p.getValue();
-	 if (layer != null && graph.getLayer(layer.getId()) == null)
-	 { // haven't added this layer yet
-	    graph.addLayer((Layer)layer.clone());
+	 for (Parameter p : parameters.values())
+	 {
+	    Layer layer = (Layer)p.getValue();
+	    if (layer != null && graph.getLayer(layer.getId()) == null)
+	    { // haven't added this layer yet
+	       graph.addLayer((Layer)layer.clone());
+	    }
 	 }
       }
 
@@ -1207,7 +1210,9 @@ public class PlainTextDeserializer
       // ensure we have an utterance tokenizer
       if (getTokenizer() == null)
       {
-	 setTokenizer(new SimpleTokenizer(getUtteranceLayer().getId(), getWordLayer().getId()));
+	 setTokenizer(new SimpleTokenizer(getUtteranceLayer().getId(), getWordLayer().getId(),
+					  // … is an extra delimiter, because word docs often include it
+					  "[ \n\r\t…]"));
       }
       try
       {
