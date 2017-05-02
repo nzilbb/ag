@@ -369,7 +369,7 @@ public class EAFDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "ELAN EAF Transcript", "0.1", "text/x-eaf+xml", ".eaf", "20170314.1631", getClass().getResource("icon.png"));
+	 "ELAN EAF Transcript", "0.2", "text/x-eaf+xml", ".eaf", "20170314.1631", getClass().getResource("icon.png"));
    }
    
    /**
@@ -776,6 +776,20 @@ public class EAFDeserializer
 		tierName = getWordLayer().getId();
 	     }
 	     Layer layer = getSchema().getLayer(tierName);
+	     if (layer == null)
+	     { // no exact match
+		// try a case-insensitive match
+		// ignore spaces too
+		String tierNameNoWhitespace = tierName.toLowerCase().replaceAll("\\s","");
+		for (Layer mappableLayer : vPossiblLayers)
+		{
+		   if (tierNameNoWhitespace.equals(mappableLayer.getId().toLowerCase().replaceAll("\\s","")))
+		   {
+		      layer = mappableLayer;
+		      break;
+		   }
+		} // next layer
+	     }
 	     if (layer == null)
 	     { // no exact match
 		// try a prefix-match - i.e. "transcript - John Smith" should map to the "transcript" layer

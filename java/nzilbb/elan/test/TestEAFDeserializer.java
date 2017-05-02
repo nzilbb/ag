@@ -286,7 +286,7 @@ public class TestEAFDeserializer
 		   ((Layer)defaultParamaters.get("tier0").getValue()).getId());
       assertEquals("utterance mapping", "utterance", 
 		   ((Layer)defaultParamaters.get("tier1").getValue()).getId());
-      assertEquals("noise mapping", "noise", 
+      assertEquals("noise mapping - case mismatch", "noise", 
 		   ((Layer)defaultParamaters.get("tier2").getValue()).getId());
       assertEquals("comment mapping", "comment", 
 		   ((Layer)defaultParamaters.get("tier3").getValue()).getId());
