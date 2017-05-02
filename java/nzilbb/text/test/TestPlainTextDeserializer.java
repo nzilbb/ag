@@ -508,6 +508,124 @@ public class TestPlainTextDeserializer
 
    }
 
+   @Test public void interview() 
+      throws Exception
+   {
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("scribe", "Transcriber", 0, true, true, true),
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("comment", "Comment", 2, true, false, true),
+	 new Layer("noise", "Noise", 2, true, false, true),
+	 new Layer("participant_gender", "Gender", 0, false, false, true, "who", true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true),
+	 new Layer("pronounce", "Pronounce", 0, true, false, false, "word", true),
+	 new Layer("lexical", "Lexical", 0, true, false, false, "word", true));
+      
+      // access file
+      NamedStream[] streams = {
+	 new NamedStream(new File(getDir(), "interview.txt")) }; // transcript
+      
+      // create deserializer
+      PlainTextDeserializer deserializer = new PlainTextDeserializer();
+
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals("Configuration parameters" + configuration, 6, deserializer.configure(configuration, schema).size());      
+      assertEquals("comment", "comment", 
+		   ((Layer)configuration.get("commentLayer").getValue()).getId());
+      assertEquals("noise", "noise", 
+		   ((Layer)configuration.get("noiseLayer").getValue()).getId());
+      assertEquals("lexical", "lexical", 
+		   ((Layer)configuration.get("lexicalLayer").getValue()).getId());
+      assertEquals("pronounce", "pronounce", 
+		   ((Layer)configuration.get("pronounceLayer").getValue()).getId());
+      assertEquals("use conventions", Boolean.TRUE, configuration.get("useConventions").getValue());
+      assertEquals("maxParticipantLength",
+		   new Integer(20), configuration.get("maxParticipantLength").getValue());
+
+      // load the stream
+      ParameterSet defaultParameters = deserializer.load(streams, schema);
+      // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals(0, defaultParameters.size());
+
+      // no parameters, so configuration required - don't call deserializer.setParameters(defaultParameters);
+
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+      
+      for (String warning : deserializer.getWarnings())
+      {
+	 System.out.println(warning);
+      }
+      
+      assertEquals("interview.txt", g.getId());
+      assertEquals("time units", Constants.UNIT_CHARACTERS, g.getOffsetUnits());
+
+
+      // participants     
+      Annotation[] authors = g.list("who"); 
+      assertEquals(2, authors.length);
+      assertEquals("BOM is stripped from speaker name",
+		   "mop03-2b", authors[0].getLabel());
+      assertEquals("Interviewer", authors[1].getLabel());
+
+      // turns
+      Annotation[] turns = g.list("turn");
+      assertEquals(13, turns.length);
+      // assertEquals(new Double(0.0), turns[0].getStart().getOffset());
+      // assertEquals("turn ends at end of recording",
+      // 		   new Double(5.2941875), turns[0].getEnd().getOffset());
+      assertEquals("BOM is stripped from speaker name",
+		   "mop03-2b", turns[0].getLabel());
+      assertEquals(authors[0], turns[0].getParent());
+      
+      assertEquals("Interviewer", turns[1].getLabel());
+      assertEquals(authors[1], turns[1].getParent());
+
+      // utterances
+      Annotation[] utterances = g.list("utterance");
+      assertEquals(149, utterances.length);
+      // assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
+      // assertEquals("utterance ends at end of recording",
+      // 		   new Double(5.2941875), utterances[0].getEnd().getOffset());
+      // assertEquals("test", utterances[0].getParent().getLabel());
+      assertEquals(turns[0], utterances[0].getParent());
+      assertEquals(turns[0], utterances[1].getParent());
+      assertEquals(turns[0], utterances[2].getParent());
+      assertEquals(turns[0], utterances[3].getParent());
+      assertEquals(turns[0], utterances[4].getParent());
+
+      assertEquals(turns[1], utterances[5].getParent());
+	    
+      Annotation[] words = g.list("word");
+      assertEquals(804, words.length);
+      // System.out.println("" + Arrays.asList(words));
+      assertEquals("This", words[0].getLabel());
+      assertEquals("file", words[1].getLabel());
+      assertEquals("starts", words[2].getLabel());
+      assertEquals("with", words[3].getLabel());
+      assertEquals("the", words[4].getLabel());
+      assertEquals("UTF-8", words[5].getLabel());
+      assertEquals("BOM", words[6].getLabel());
+      assertEquals("Elipsis is kept, but taken as word boundary",
+		   "Elipisis…", words[7].getLabel());
+      assertEquals("is", words[8].getLabel());
+      assertEquals("kept", words[9].getLabel());
+
+      Annotation[] comments = g.list("comment");
+      assertEquals(1, comments.length);
+      assertEquals("unclear", comments[0].getLabel());
+
+      Annotation[] noises = g.list("noise");
+      assertEquals(1, noises.length);
+      assertEquals("click", noises[0].getLabel());
+
+   }
+
    /**
     * Directory for text files.
     * @see #getDir()

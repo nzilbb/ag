@@ -1,20 +1,11 @@
-TRANSCRIPT:	mop03-2b-02.trs
-ID:	1563
-
-SPEAKERS
-ID	NAME
-2218 	Interviewer mop03-2b
-602*	mop03-2b
-
-TRANSCRIPT
-
-mop03-2b:   . rest of that side of the family so he -- 
+﻿mop03-2b: This file starts with the UTF-8 BOM
+Elipisis…is kept but taken as a word boundary
  generously agreed that she could go with him but 
  there were so many people there 
  that nothing was done constructively 
 
-Interviewer mop03-2b:  right - 
- wa they just didn't get on to the interviews ? or 
+Interviewer:  right - 
+ wa they just didn't get on to the interviews or 
  it was just - everybody talked and had a chat ? yeah 
 
 mop03-2b:  there were no interviews they all talked - everybody talked -- yeah -- and just 
@@ -69,7 +60,7 @@ Barry and I's grandfather --
  and had a very successful building company 
  and had all his sons in it <mmm> 
 
-Interviewer mop03-2b:  <and> which is why grandpop was a builder 
+Interviewer:  <and> which is why grandpop was a builder 
  and ah . grandpop . 
  did his trade . 
   not with Pepper but with -  
@@ -137,12 +128,12 @@ mop03-2b:  and then he worked because he -
  grandpops father had been killed on the railway 
  <yeah yeah> when he was five 
 
-Interviewer mop03-2b:  that's why he was brought up by his 
+Interviewer:  that's why he was brought up by his 
 
 mop03-2b:  and his grandmother 
  brought 
 
-Interviewer mop03-2b:  grandmother 
+Interviewer:  grandmother 
 
 mop03-2b:  brought him up 
  and the whole family was split up - 
@@ -158,15 +149,13 @@ mop03-2b:  brought him up
  of the family be broken up 
  that was us 
 
-Interviewer mop03-2b:  yeah 
+Interviewer:  yeah 
 
 mop03-2b:  we were the eldest ones 
  of course I was seventeen . 
  Barry was nineteen 
 
-Interviewer mop03-2b:  how did she die ? 
+Interviewer:  how did she die ? 
 
 mop03-2b:  and ah . he she - 
  Dad 
-
-________________________________________________________________________________

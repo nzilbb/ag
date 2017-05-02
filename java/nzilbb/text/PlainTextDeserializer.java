@@ -765,6 +765,14 @@ public class PlainTextDeserializer
       if (timestampFormat != null && timestampFormat.length() > 0) fmtTimestampFormat = new MessageFormat(timestampFormat);
       while (sLine != null)
       {
+	 if (iLine == 0)
+	 { // first line
+	    // strip of the UTF-8 BOM if there is one.
+	    if (sLine.startsWith("\uFEFF"))
+	    {
+	       sLine = sLine.replaceAll("\uFEFF","");
+	    }
+	 }
 	 iLine++;
 
 	 if (!getHasTimestamps() && fmtTimestampFormat != null)
@@ -1158,7 +1166,10 @@ public class PlainTextDeserializer
 	    { // speech or text
 
 	       // temporary set label to transcription
-	       line.setLabel(sLine);
+	       line.setLabel(sLine
+			     // ensure ellipsis (sometimes appearing in MS Word transcripts)
+			     // ends up as a token boundary
+			     .replaceAll("…", "… "));
 	       lastLine = line;
 	    } // speech/text
 	    else
@@ -1210,9 +1221,7 @@ public class PlainTextDeserializer
       // ensure we have an utterance tokenizer
       if (getTokenizer() == null)
       {
-	 setTokenizer(new SimpleTokenizer(getUtteranceLayer().getId(), getWordLayer().getId(),
-					  // … is an extra delimiter, because word docs often include it
-					  "[ \n\r\t…]"));
+	 setTokenizer(new SimpleTokenizer(getUtteranceLayer().getId(), getWordLayer().getId()));
       }
       try
       {
