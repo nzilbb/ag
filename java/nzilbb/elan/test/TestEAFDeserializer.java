@@ -321,6 +321,10 @@ public class TestEAFDeserializer
       assertEquals(g, who[0].getParent());
       assertEquals("participant", who[1].getLabel());
       assertEquals(g, who[1].getParent());
+      assertNotNull("participant anchors set", who[0].getStart());
+      assertNotNull("participant anchors set", who[0].getEnd());
+      assertNotNull("participant anchors set", who[1].getStart());
+      assertNotNull("participant anchors set", who[1].getEnd());
       
       // turns
       Annotation[] turns = g.list("turn");

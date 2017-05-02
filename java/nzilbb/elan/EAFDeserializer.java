@@ -1514,6 +1514,15 @@ public class EAFDeserializer
 	 a.remove("@participant");
       }
 
+      // set end anchors of graph tags
+      for (Annotation a : graph.list(getParticipantLayer().getId()))
+      {
+	 a.setStartId(graphStart.getId());
+	 a.setEndId(graphEnd.getId());
+      }
+
+      graph.commit();
+
       if (errors != null) throw errors;
 
       Graph[] graphs = { graph };
