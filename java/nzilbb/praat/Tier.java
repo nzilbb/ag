@@ -121,20 +121,4 @@ public class Tier
       }
    } // end of toString()
    
-   /**
-    * Compares for equality - i.e. two tiers are equal if they are of the same type, have the same name, and the same Xmin and Xmax.
-    * @param o
-    * @return true if the given object is a Tier, the two tiers are of the same type, have the same name, and the same Xmin and Xmax, false otherwise
-    */
-   public boolean equals(Object o)
-   {
-      if (getClass().equals(o.getClass()))
-      {
-	 Tier other = (Tier)o;
-	 return getName().equals(other.getName())
-	    && getXmin() == other.getXmin()
-	    && getXmax() == other.getXmax();
-      }
-      return false;
-   } // end of equals()   
 }
