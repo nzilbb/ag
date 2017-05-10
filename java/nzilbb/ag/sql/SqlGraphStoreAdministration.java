@@ -130,7 +130,7 @@ public class SqlGraphStoreAdministration
       throws SQLException, PermissionException
    {
       super(baseUrl, files, connection, user);
-      if (getUser() != null && !getUserRoles().contains("admin")) throw new PermissionException();
+      // if (getUser() != null && !getUserRoles().contains("admin")) throw new PermissionException();
       loadSerializers();
    } // end of constructor
 
@@ -149,7 +149,7 @@ public class SqlGraphStoreAdministration
       throws SQLException, PermissionException
    {
       super(baseUrl, files, connectString, databaseUser, password, storeUser);
-      if (getUser() != null && !getUserRoles().contains("admin")) throw new PermissionException();
+      // if (getUser() != null && !getUserRoles().contains("admin")) throw new PermissionException();
       loadSerializers();
    }
 
