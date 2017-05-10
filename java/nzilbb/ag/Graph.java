@@ -704,7 +704,7 @@ public class Graph
       // 	 }
       // }
       Double o = new Double(offset);
-      if (offsetIndex.containsKey(o))
+      if (offsetIndex.containsKey(o)) //TODO should we be taking offsetGranularity into account?
       {
 	 for (Anchor anchor : offsetIndex.get(o))
 	 {
@@ -809,6 +809,25 @@ public class Graph
       } // next anchor
       return changes;
    } // end of shiftAnchors()
+
+   
+   /**
+    * Compares two offsets, taking {@link #offsetGranularity} into account.
+    * @param o1 The first offset to compare.
+    * @param o2 The second offset to compare.
+    * @return 0 if the two offsets are within {@link #offsetGranularity} of each other, or a negative number if o1 &lt; o2, and otherwise a positive number.
+    */
+   public int compareOffsets(double o1, double o2) // TODO test
+   {
+      if (offsetGranularity != null)
+      {
+	 if (Math.abs(o1 - o2) < offsetGranularity) return 0;
+      }
+      if (o1 < o2) return -1;
+      if (o1 > o2) return 1;
+      return 0;
+   } // end of compareOffsets()
+
    
    /**
     * Adds a layer definition.
