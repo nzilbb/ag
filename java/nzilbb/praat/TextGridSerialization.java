@@ -45,7 +45,7 @@ import nzilbb.util.Timers;
  * Converter that converts Praat TextGrids to/from AnnotationGraphs
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class TextGridDeserializer
+public class TextGridSerialization
    extends TextGrid
    implements IDeserializer
 {
@@ -319,7 +319,7 @@ public class TextGridDeserializer
    /**
     * Constructor
     */
-   public TextGridDeserializer()
+   public TextGridSerialization()
    {
    } // end of constructor
    
@@ -1582,4 +1582,4 @@ public class TextGridDeserializer
       }      
    }
 
-} // end of class TextGridDeserializer
+} // end of class TextGridSerialization

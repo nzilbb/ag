@@ -45,7 +45,7 @@ import nzilbb.ag.serialize.util.Utility;
 import nzilbb.ag.serialize.json.JSONSerialization;
 import nzilbb.praat.*;
 
-public class TestTextGridDeserializer
+public class TestTextGridSerialization
 {
    @Test public void utterance() 
       throws Exception
@@ -64,7 +64,7 @@ public class TestTextGridDeserializer
       NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance.TextGrid")) };
       
       // create deserializer
-      TextGridDeserializer deserializer = new TextGridDeserializer();
+      TextGridSerialization deserializer = new TextGridSerialization();
       
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
@@ -281,7 +281,7 @@ public class TestTextGridDeserializer
       NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance_utf-8.TextGrid")) };
       
       // create deserializer
-      TextGridDeserializer deserializer = new TextGridDeserializer();
+      TextGridSerialization deserializer = new TextGridSerialization();
       
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
@@ -356,7 +356,7 @@ public class TestTextGridDeserializer
       NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance_utf-16.TextGrid")) };
       
       // create deserializer
-      TextGridDeserializer deserializer = new TextGridDeserializer();
+      TextGridSerialization deserializer = new TextGridSerialization();
       
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
@@ -431,7 +431,7 @@ public class TestTextGridDeserializer
       NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance_latin1.TextGrid")) };
       
       // create deserializer
-      TextGridDeserializer deserializer = new TextGridDeserializer();
+      TextGridSerialization deserializer = new TextGridSerialization();
       
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
@@ -507,7 +507,7 @@ public class TestTextGridDeserializer
       NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance_word.TextGrid")) };
       
       // create deserializer
-      TextGridDeserializer deserializer = new TextGridDeserializer();
+      TextGridSerialization deserializer = new TextGridSerialization();
       
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
@@ -654,7 +654,7 @@ public class TestTextGridDeserializer
       NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance_word.TextGrid")) };
       
       // create deserializer
-      TextGridDeserializer deserializer = new TextGridDeserializer();
+      TextGridSerialization deserializer = new TextGridSerialization();
       
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
@@ -763,7 +763,7 @@ public class TestTextGridDeserializer
       NamedStream[] streams = { new NamedStream(new File(getDir(), "test_turn_utterance_word.TextGrid")) };
       
       // create deserializer
-      TextGridDeserializer deserializer = new TextGridDeserializer();
+      TextGridSerialization deserializer = new TextGridSerialization();
       
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
@@ -955,7 +955,7 @@ public class TestTextGridDeserializer
       NamedStream[] streams = { new NamedStream(new File(getDir(), "test_speaker_word.TextGrid")) };
       
       // create deserializer
-      TextGridDeserializer deserializer = new TextGridDeserializer();
+      TextGridSerialization deserializer = new TextGridSerialization();
       
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
@@ -1173,7 +1173,7 @@ public class TestTextGridDeserializer
       NamedStream[] streams = { new NamedStream(new File(getDir(), "fragment__1_890-3_830.TextGrid")) };
       
       // create deserializer
-      TextGridDeserializer deserializer = new TextGridDeserializer();
+      TextGridSerialization deserializer = new TextGridSerialization();
       
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
@@ -1307,7 +1307,7 @@ public class TestTextGridDeserializer
       NamedStream[] streams = { new NamedStream(new File(getDir(), "performance.TextGrid")) };
       
       // create deserializer
-      TextGridDeserializer deserializer = new TextGridDeserializer();
+      TextGridSerialization deserializer = new TextGridSerialization();
       deserializer.setTimers(new nzilbb.util.Timers());
       
       // general configuration
@@ -1363,7 +1363,7 @@ public class TestTextGridDeserializer
       Graph[] graphs = json.deserialize();
 
       // create serializer
-      TextGridDeserializer serializer = new TextGridDeserializer();
+      TextGridSerialization serializer = new TextGridSerialization();
       
       // general configuration
       ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
@@ -1489,6 +1489,6 @@ public class TestTextGridDeserializer
 
    public static void main(String args[]) 
    {
-      org.junit.runner.JUnitCore.main("nzilbb.praat.test.TestTextGridDeserializer");
+      org.junit.runner.JUnitCore.main("nzilbb.praat.test.TestTextGridSerialization");
    }
 }
