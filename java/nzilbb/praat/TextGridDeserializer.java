@@ -38,6 +38,7 @@ import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
+import nzilbb.util.TempFileInputStream;
 import nzilbb.util.Timers;
 
 /**
@@ -52,6 +53,7 @@ public class TextGridDeserializer
    protected Vector<String> warnings;
    /**
     * Returns any warnings that may have arisen during the last execution of {@link #deserialize()}.
+    * <p>{@link ISerializer} and {@link IDeserializer} method.
     * @return A possibly empty list of warnings.
     */
    public String[] getWarnings()
@@ -249,7 +251,8 @@ public class TextGridDeserializer
    // IStreamDeserializer methods:
    
    /**
-    * Returns the deserializer's descriptor
+    * Returns the deserializer's descriptor.
+    * <p>{@link ISerializer} and {@link IDeserializer} method.
     * @return The deserializer's descriptor
     */
    public SerializationDescriptor getDescriptor()
@@ -330,6 +333,7 @@ public class TextGridDeserializer
     *  set, to discover what (if any) general configuration is required. If parameters are
     *  returned, and user interaction is possible, then the user may be presented with an
     *  interface for setting/confirming these parameters.
+    * <p>{@link ISerializer} and {@link IDeserializer} method.
     * @param configuration The configuration for the deserializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of configuration parameters (still) must be set before {@link IDeserializer#setParameters()} can be invoked. If this is an empty list, {@link IDeserializer#setParameters()} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
@@ -521,6 +525,7 @@ public class TextGridDeserializer
 
    /**
     * Loads the serialized form of the graph, using the given set of named streams.
+    * <p>{@link IDeserializer} method.
     * @param streams A list of named streams that contain all the
     *  transcription/annotation data required, and possibly (a) stream(s) for the media annotated.
     * @param schema The layer schema, definining layers and the way they interrelate.
@@ -695,6 +700,7 @@ public class TextGridDeserializer
 
    /**
     * Sets parameters for a given deserialization operation, after loading the serialized form of the graph. This might include mappings from format-specific objects like tiers to graph layers, etc.
+    * <p>{@link IDeserializer} method.
     * @param parameters The configuration for a given deserialization operation.
     * @throws SerializationParametersMissingException If not all required parameters have a value.
     */
@@ -742,6 +748,7 @@ public class TextGridDeserializer
     * are capable of storing multiple transcripts in the same file
     * (e.g. AGTK, Transana XML export), which is why this method
     * returns a list.
+    * <p>{@link IDeserializer} method.
     * @return A list of valid (if incomplete) {@link Graph}s. 
     * @throws SerializerNotConfiguredException if the object has not been configured.
     * @throws SerializationParametersMissingException if the parameters for this particular graph have not been set.
@@ -764,6 +771,7 @@ public class TextGridDeserializer
 
       Graph graph = new Graph();
       graph.setId(getId());
+      graph.setOffsetGranularity(Constants.GRANULARITY_MILLISECONDS);
       // creat the 0 anchor to prevent graph tagging from creating one with no confidence
       Anchor graphStart = graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL);
 
@@ -1359,5 +1367,219 @@ public class TextGridDeserializer
 	 } // next child annotation
       } // next child layer
    } // end of joinTurns()
-   
+
+   /**
+    * Determines which layers, if any, must be present in the graph that will be serialized.
+    * <p>{@link ISerializer} method.
+    * @return A list of IDs of layers that must be present in the graph that will be serialized.
+    * @throws SerializationParametersMissingException If not all required parameters have a value.
+    */
+   public String[] getRequiredLayers() throws SerializationParametersMissingException
+   {
+      if (bUseConventions != null && bUseConventions)
+      {
+	 Vector<String> requiredLayers = new Vector<String>();
+	 if (getParticipantLayer() != null) requiredLayers.add(getParticipantLayer().getId());
+	 if (getTurnLayer() != null) requiredLayers.add(getTurnLayer().getId());
+	 if (getWordLayer() != null) requiredLayers.add(getWordLayer().getId());
+	 if (getLexicalLayer() != null) requiredLayers.add(getLexicalLayer().getId());
+	 if (getPronounceLayer() != null) requiredLayers.add(getPronounceLayer().getId());
+	 if (getCommentLayer() != null) requiredLayers.add(getCommentLayer().getId());
+	 if (getNoiseLayer() != null) requiredLayers.add(getNoiseLayer().getId());
+	 return requiredLayers.toArray(new String[0]);
+      }
+      else
+      {
+	 return new String[0];
+      }
+   }
+
+   /**
+    * Serializes the given graphs, generating one or more {@link NamedStream}s.
+    * <p>Many data formats will only yield one stream (e.g. Transcriber transcript or Praat
+    *  textgrid), however there are formats that use multiple files for the same transcript
+    *  (e.g. XWaves, EmuR), which is why this method returns a list. There are formats that
+    *  are capable of storing multiple transcripts in the same file (e.g. AGTK, Transana XML
+    *  export), which is why this method accepts a list.
+    * <p>{@link ISerializer} method.
+    * @param graphs The graphs to serialize.
+    * @return A list of named streams that contain the serialization in the given format. 
+    * @throws SerializerNotConfiguredException if the object has not been configured.
+    * @throws SerializationException if errors occur during deserialization.
+    */
+   public NamedStream[] serialize(Graph[] graphs) 
+      throws SerializerNotConfiguredException, SerializationException
+   {
+      Vector<NamedStream> streams = new Vector<NamedStream>();
+      for (Graph graph : graphs)
+      {
+	 streams.add(serializeGraph(graph));
+      } // next graph
+      return streams.toArray(new NamedStream[0]);     
+   }
+
+   /**
+    * Serializes the given graph, generating a {@link NamedStream}.
+    * @param graph The graph to serialize.
+    * @return A named stream that contains the TextGrid. 
+    * @throws SerializationException if errors occur during deserialization.
+    */
+   protected NamedStream serializeGraph(Graph graph) 
+      throws SerializationException
+   {
+      SerializationException errors = null;
+
+      graph.setOffsetGranularity(Constants.GRANULARITY_MILLISECONDS);
+
+      reset();
+      // for each layer, top-down
+      String participantLayerId = null;
+      if (getParticipantLayer() != null) participantLayerId = getParticipantLayer().getId();
+      for (Layer layer : graph.getLayersTopDown())
+      {
+	 // skip "who" layer
+	 if (layer.equals(getParticipantLayer())) continue;
+	 // skip "who" tags layer
+	 if (layer.getParent().equals(getParticipantLayer())
+	     && layer.getAlignment() == Constants.ALIGNMENT_NONE) continue;
+	 // include if there's an utterance layer, skip the turn layer
+	 if (layer.equals(getTurnLayer()) && getUtteranceLayer() != null) continue;
+	 boolean assignedToParticipant = layer.getAncestors().contains(getParticipantLayer());
+	 if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT)
+	 { // layer of instants
+	    TreeMap<String,TextTier> tiers = new TreeMap<String,TextTier>();
+	    for (Annotation a : graph.list(layer.getId()))
+	    {
+	       if (a.getAnchored())
+	       {
+		  // get tier for this participant
+		  String who = "";
+		  if (assignedToParticipant)
+		  {
+		     Annotation participant = a.my(participantLayerId);
+		     if (participant != null) who = participant.getLabel();
+		  }
+		  if (!tiers.containsKey(who))
+		  {
+		     String tierName = layer.getId();
+		     if (who.length() > 0) tierName += " - " + who;
+		     tiers.put(who, new TextTier(tierName, 0, 0));
+		  }
+		  TextTier tier = tiers.get(who);
+
+		  tier.addPoint(new Point(a.getLabel(), a.getStart().getOffset()));
+		  tier.setXmax(Math.max(tier.getXmax(), a.getStart().getOffset()));
+	       }
+	    } // next annotation	    
+	    for (Tier tier : tiers.values())
+	    {
+	       addTier(tier);
+	    } // next tier
+	 } // layer of instants
+	 else
+	 { // layer of intervals
+	    TreeMap<String,Vector<IntervalTier>> tiers = new TreeMap<String,Vector<IntervalTier>>();
+	    for (Annotation a : graph.list(layer.getId()))
+	    {
+	       if (a.getAnchored())
+	       {
+		  // get tier for this participant
+		  String who = "";
+		  if (assignedToParticipant)
+		  {
+		     Annotation participant = a.my(participantLayerId);
+		     if (participant != null) who = participant.getLabel();
+		  }
+		  if (!tiers.containsKey(who))
+		  {
+		     String tierName = layer.getId();
+		     if (who.length() > 0) tierName += " - " + who;
+		     Vector<IntervalTier> list = new Vector<IntervalTier>();
+		     tiers.put(who, list);
+		     list.add(new IntervalTier(tierName, 0, 0));
+		  }
+		  Vector<IntervalTier> tierList = tiers.get(who);
+		  IntervalTier tier = tierList.firstElement();
+		  double start = a.getStart().getOffset();
+		  if (graph.compareOffsets(tier.getXmax(), start) > 0) // xmax > start
+		  { // going backwards in time, so find/make a new tier
+		     tier = null;
+		     for (IntervalTier t : tierList)
+		     {
+			if (graph.compareOffsets(t.getXmax(), start) <= 0) // xmax <= start
+			{ // found a tier we can add to
+			   tier = t;
+			   break;
+			}
+		     } // next tier in the list
+		     if (tier == null)
+		     { // add a new tier
+			String tierName = layer.getId();
+			if (who.length() > 0) tierName += " - " + who;
+			tier = new IntervalTier(tierName, 0, 0);
+			tierList.add(tier);
+		     } // add a new tier
+		  }
+
+		  // determine label
+		  String label = a.getLabel();
+		  if (layer.equals(getTurnLayer()) || layer.equals(getUtteranceLayer())
+		      && getWordLayer() != null)
+		  { // turn/utterances layers are filled by their word token labels
+		     StringBuffer l = new StringBuffer();
+		     for (Annotation token : a.list(getWordLayer().getId()))
+		     {
+			if (l.length() > 0) l.append(" ");
+			l.append(token.getLabel());
+		     } // next token
+		     label = l.toString();
+		  } // turn/utterance layer
+
+		  // double-check we don't need to adjust the start offset a smidgin
+		  if (tier.getXmax() > start)
+		  { // offsets are within offsetGranularity, but not equal
+		     a.getStart().setOffset(tier.getXmax());
+		  } // adjust offset
+
+		  // add an interval to it
+		  tier.addInterval(new Interval(label, a.getStart().getOffset(), a.getEnd().getOffset()));
+		  tier.setXmax(Math.max(tier.getXmax(), a.getEnd().getOffset()));
+	       }
+	    } // next annotation
+	    for (Vector<IntervalTier> list : tiers.values())
+	    {
+	       for (Tier tier : list)
+	       {
+		  addTier(tier);
+	       } // next tier
+	    } // next list of tiers
+	 } // layer of intervals
+      } // next layer
+      
+      padIntervalTiersToXmax();
+
+      if (errors != null) throw errors;
+
+      try
+      {
+	 // write the TextGrid to a temporary file
+	 File f = File.createTempFile(graph.getId(), ".json");
+	 FileOutputStream out = new FileOutputStream(f);	 
+	 PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, "utf-8"));
+	 writeText(writer);
+	 writer.close();
+	 TempFileInputStream in = new TempFileInputStream(f);
+
+	 // return a named stream from the file
+	 return new NamedStream(in, graph.getId().replaceAll("\\.[^.]*$", "") + ".TextGrid");
+      }
+      catch(Exception exception)
+      {
+	 errors = new SerializationException();
+	 errors.initCause(exception);
+	 errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
+	 throw errors;
+      }      
+   }
+
 } // end of class TextGridDeserializer

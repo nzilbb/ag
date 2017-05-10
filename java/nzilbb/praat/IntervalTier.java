@@ -41,7 +41,7 @@ public class IntervalTier
    /** Gets a list of time intervals - {@link Interval} objects */
    public Vector<Interval> getIntervals() { return vIntervals; }
    
-   private boolean bAutoPad = false;
+   private boolean bAutoPad = true;
    /** Gets the auto-pad setting - whether the intervals are automatically padded with blank intervals if the end time of the last interval doesn't match the start time of a newly added interval */
    public boolean getAutoPad() { return bAutoPad; }
    /** Sets the auto-pad setting - whether the intervals are automatically padded with blank intervals if the end time of the last interval doesn't match the start time of a newly added interval */
