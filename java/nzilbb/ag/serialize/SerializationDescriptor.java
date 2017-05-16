@@ -298,5 +298,34 @@ public class SerializationDescriptor
     * @return The normal file name suffixes (extensions) of this MIME type, as an array of String.
     */
    public String[] getFileSuffixesArray() { return fileSuffixes.toArray(new String[0]); }
+
+   
+   /**
+    * Determines whether this object is equal to another.
+    * @param o Other object.
+    * @return true if both objects represent the same serialization descriptor (i.e. they have the same {@link #name}, {@link #version}, and {@link #mimeType}), false otherwise.
+    */
+   public boolean equals(Object o)
+   {
+      if (this == o) return true;
+      if (o instanceof SerializationDescriptor)
+      {
+	 SerializationDescriptor other = (SerializationDescriptor)o;
+	 return name.equals(other.getName())
+	    && version.equals(other.getVersion())
+	    && mimeType.equals(other.getMimeType());
+      }
+      return false;
+   } // end of equals()
+
+   
+   /**
+    * Returns a hash code value for the object. This override ensures that descriptors for which {@link #equals(Object)} returns true also have the same hash, for hash-table based collections.
+    */
+   public int hashCode()
+   {
+      return (name+version+mimeType).hashCode();
+   } // end of hashCode()
+
    
 } // end of class SerializationDescriptor
