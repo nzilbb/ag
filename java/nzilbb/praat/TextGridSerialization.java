@@ -47,7 +47,7 @@ import nzilbb.util.Timers;
  */
 public class TextGridSerialization
    extends TextGrid
-   implements IDeserializer
+   implements IDeserializer, ISerializer
 {
    // Attributes:     
    protected Vector<String> warnings;
