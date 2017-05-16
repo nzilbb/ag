@@ -2026,7 +2026,7 @@ public class TestValidator
       layers.add("word");
       layers.add("phone");
       assertEquals(2, g.getAnnotation("utterance2").getOrdinal());
-      Graph f = g.getFragment(utterance2, layers);
+      Graph f = g.getFragment(utterance2, layers.toArray(new String[0]));
       assertEquals(2, f.getAnnotation("utterance2").getOrdinal());
       f.getAnnotation("turn1").getAnnotations("word");
       assertEquals("word ordinal before validation",

@@ -276,7 +276,7 @@ public class Graph
     * @param layerIds A list of IDs of layers to include in the fragment.
     * @return A graph fragment containing the annotations that fall within the given bounds, on the given layers.
     */
-   public Graph getFragment(double startOffset, double endOffset, List<String> layerIds)
+   public Graph getFragment(double startOffset, double endOffset, String[] layerIds)
    {
       Graph fragment = new Graph();
       fragment.graph = this;
@@ -284,9 +284,11 @@ public class Graph
       {
 	 fragment.setId(FragmentId(this, startOffset, endOffset));
       }
+      HashSet<String> layerSet = new HashSet<String>();
+      for (String l : layerIds) layerSet.add(l);
       for (Layer layer : getLayersTopDown()) // ensure parents are added before children
       {	 
-	 if (layerIds.contains(layer.getId()))
+	 if (layerSet.contains(layer.getId()))
 	 {
 	    fragment.addLayer((Layer)layer.clone());
 	    for (Annotation annotation : list(layer.getId()))
@@ -324,7 +326,7 @@ public class Graph
     * @param layerIds A list of IDs of layers to include in the fragment.
     * @return A graph fragment containing the annotations that fall within the given bounds, on the given layers.
     */
-   public Graph getFragment(Annotation definingAnnotation, List<String> layerIds)
+   public Graph getFragment(Annotation definingAnnotation, String[] layerIds)
    {
       Graph fragment = new Graph();
       fragment.graph = this;
@@ -383,7 +385,7 @@ public class Graph
     * @param layerIds A list of IDs of layers to include in the fragment.
     * @return A graph fragment containing the annotations that fall within the given bounds, on the given layers.
     */
-   public Graph getFragment(Annotation bounds, Annotation ancestor, List<String> layerIds)
+   public Graph getFragment(Annotation bounds, Annotation ancestor, String[] layerIds)
    {
       Graph fragment = new Graph();
       fragment.graph = this;

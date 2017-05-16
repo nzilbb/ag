@@ -1056,7 +1056,7 @@ public class TestGraph
       Vector<String> layers = new Vector<String>();
       layers.add("utterance");
       layers.add("word");
-      Graph f = g.getFragment(0.0, 3.0, layers);
+      Graph f = g.getFragment(0.0, 3.0, layers.toArray(new String[0]));
       assertEquals("my graph__0.000-3.000", f.getId());
       assertEquals("fragment's graph is itself", f, f.getGraph());
       assertTrue(f.isFragment());
@@ -1223,7 +1223,7 @@ public class TestGraph
       layers.add("phone");
       layers.add("pos");
       assertEquals(2, quick.getOrdinal());
-      Graph f = g.getFragment(quick, layers);
+      Graph f = g.getFragment(quick, layers.toArray(new String[0]));
       assertEquals("my graph__2.000-3.000", f.getId());
       assertEquals("fragment's graph is itself", f, f.getGraph());
       assertTrue(f.isFragment());
@@ -1361,7 +1361,7 @@ public class TestGraph
       layers.add("word");
       layers.add("phone");
       layers.add("pos");
-      Graph f = g.getFragment(utterance1, layers);
+      Graph f = g.getFragment(utterance1, layers.toArray(new String[0]));
       assertEquals("my graph__0.000-3.000", f.getId());
       assertEquals("fragment's graph is itself", f, f.getGraph());
       assertTrue(f.isFragment());
@@ -1501,7 +1501,7 @@ public class TestGraph
       layers.add("utterance");
       layers.add("phone");
       layers.add("pos");
-      Graph f = g.getFragment(utterance1, turn1, layers);
+      Graph f = g.getFragment(utterance1, turn1, layers.toArray(new String[0]));
       assertEquals("my graph__0.000-3.000", f.getId());
       assertEquals("fragment's graph is itself", f, f.getGraph());
       assertTrue(f.isFragment());

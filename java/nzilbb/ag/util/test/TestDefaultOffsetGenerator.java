@@ -942,7 +942,7 @@ public class TestDefaultOffsetGenerator
 
       Vector<String> fragmentLayers = new Vector<String>();
       fragmentLayers.add("word");
-      Graph f = g.getFragment(g.getAnnotation("utterance1"), fragmentLayers);
+      Graph f = g.getFragment(g.getAnnotation("utterance1"), fragmentLayers.toArray(new String[0]));
 
       DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
       generator.setDefaultAnchorConfidence(Constants.CONFIDENCE_NONE);
@@ -971,7 +971,7 @@ public class TestDefaultOffsetGenerator
 	 fail(exception.toString());
       }
 
-      f = g.getFragment(g.getAnnotation("utterance2"), fragmentLayers);
+      f = g.getFragment(g.getAnnotation("utterance2"), fragmentLayers.toArray(new String[0]));
 
       // generator.setDebug(true);
       try
