@@ -1423,6 +1423,7 @@ public class TestTextGridSerialization
       layerIds.add("phone");
       Graph fragment = graphs[0].getFragment(fragmentFrom, fragmentTo, layerIds);
       fragment.shiftAnchors(-fragmentFrom);
+      assertEquals("serialize_utterance_word.TextGrid__212.400-216.363", fragment.getId());
       Graph[] fragments = { fragment };
 
       // create serializer
@@ -1449,10 +1450,74 @@ public class TestTextGridSerialization
 
       // test using diff
       String differences = diff(new File(dir, "expected_serialize_utterance_word__212.4-216.36333.TextGrid"),
-				new File(dir, "serialize_utterance_word.TextGrid__212.400-216.TextGrid"));
+				new File(dir, "serialize_utterance_word.TextGrid__212.400-216.363.TextGrid"));
       if (differences != null) fail(differences);	 
    }
 
+   @Test public void serialize_fragment_trailing_utterance_word() 
+      throws Exception
+   {
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("comment", "Comment", 2, true, false, true),
+	 new Layer("noise", "Noise", 2, true, false, true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true),
+	 new Layer("phone", "Phones", 2, true, true, true, "word", true),
+	 new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
+	 new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
+      File dir = getDir();
+      // access file
+      NamedStream[] jsonStreams = { new NamedStream(new File(dir, "serialize_utterance_word.json")) };
+      
+      // deserialize graph from JSON
+      JSONSerialization json = new JSONSerialization();
+      json.configure(json.configure(new ParameterSet(), schema), schema);
+      json.setParameters(json.load(jsonStreams, schema));
+      Graph[] graphs = json.deserialize();
+
+      // extract fragment
+      double fragmentFrom = 212.4;
+      double fragmentTo = 216.5; // between anchors
+      Vector<String> layerIds = new Vector<String>();
+      layerIds.add("utterance");
+      layerIds.add("word");
+      layerIds.add("phone");
+      Graph fragment = graphs[0].getFragment(fragmentFrom, fragmentTo, layerIds);
+      fragment.shiftAnchors(-fragmentFrom);
+      assertEquals("serialize_utterance_word.TextGrid__212.400-216.500", fragment.getId());
+      Graph[] fragments = { fragment };
+
+      // create serializer
+      TextGridSerialization serializer = new TextGridSerialization();
+      
+      // general configuration
+      ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
+      //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      assertEquals(6, serializer.configure(configuration, schema).size());
+
+      String[] needLayers = serializer.getRequiredLayers();
+      assertEquals(7, needLayers.length);
+      assertEquals("who", needLayers[0]);
+      assertEquals("turn", needLayers[1]);
+      assertEquals("word", needLayers[2]);
+      assertEquals("lexical", needLayers[3]);
+      assertEquals("pronounce", needLayers[4]);
+      assertEquals("comment", needLayers[5]);
+      assertEquals("noise", needLayers[6]);
+	 
+      // serialize
+      NamedStream[] streams = serializer.serialize(fragments);
+      streams[0].save(dir);
+
+      // test using diff
+      String differences = diff(new File(dir, "expected_serialize_utterance_word__212.4-216.500.TextGrid"),
+				new File(dir, "serialize_utterance_word.TextGrid__212.400-216.500.TextGrid"));
+      if (differences != null) fail(differences);	 
+   }
+   
    
    /**
     * Diffs two files.

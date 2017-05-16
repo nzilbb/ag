@@ -258,7 +258,7 @@ public class TextGridSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Praat TextGrid", "1.82", "text/praat-textgrid", ".textgrid", "20170228.1353", getClass().getResource("icon.png"));
+	 "Praat TextGrid", "1.83", "text/praat-textgrid", ".textgrid", "20170516.1519", getClass().getResource("icon.png"));
    }
    
    /**
@@ -1555,7 +1555,9 @@ public class TextGridSerialization
 	    } // next list of tiers
 	 } // layer of intervals
       } // next layer
-      
+
+      // ensure all tiers are correctly padded out to the end
+      setXmax(graph.getSortedAnchors().last().getOffset());
       padIntervalTiersToXmax();
 
       if (errors != null) throw errors;
@@ -1571,7 +1573,7 @@ public class TextGridSerialization
 	 TempFileInputStream in = new TempFileInputStream(f);
 
 	 // return a named stream from the file
-	 return new NamedStream(in, graph.getId().replaceAll("\\.[^.]*$", "") + ".TextGrid");
+	 return new NamedStream(in, graph.getId().replaceAll("\\.[a-zA-Z]*$", "") + ".TextGrid");
       }
       catch(Exception exception)
       {
