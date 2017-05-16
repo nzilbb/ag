@@ -74,9 +74,7 @@ public class ConfigurationHelper
    public static File LoadConfiguration(SerializationDescriptor descriptor, ParameterSet configuration, File directory, Schema schema)
       throws IOException
    {
-      System.out.println("LoadConfiguration: "+directory.getPath());
       File xmlFile = new File(directory, ConfigurationFilename(descriptor));
-      System.out.println("LoadConfiguration: "+xmlFile.getPath());
       if (xmlFile.exists())
       {
 	 Properties properties = new Properties();
