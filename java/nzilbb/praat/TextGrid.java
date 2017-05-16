@@ -30,6 +30,7 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.Writer;
 import java.io.IOException;
+import java.text.DecimalFormat;
 
 /**
  * Praat text-grid.
@@ -38,6 +39,7 @@ import java.io.IOException;
 public class TextGrid
    implements ITextEntity
 {
+   static final DecimalFormat OffsetFormat = new DecimalFormat("0.#################");
    // Attributes:
    
    protected double dXmin = 0.0;
@@ -181,14 +183,14 @@ public class TextGrid
 	 "File type = \"ooTextFile\"" +
 	 "\nObject class = \"TextGrid\"" +
 	 "\n" +
-	 "\nxmin = " + getXmin() +
-	 "\nxmax = " + getXmax()); 
+	 "\nxmin = " + OffsetFormat.format(getXmin()) + " " +
+	 "\nxmax = " + OffsetFormat.format(getXmax()) + " "); 
       
       if (vTiers.size() > 0)
       {
-	 writer.write("\ntiers? <exists>");
-	 writer.write("\nsize = " + vTiers.size());
-	 writer.write("\nitem []:");
+	 writer.write("\ntiers? <exists> ");
+	 writer.write("\nsize = " + vTiers.size() + " ");
+	 writer.write("\nitem []: ");
 	 for (int i = 0; i < vTiers.size(); i++)
 	 {
 	    Tier tier = vTiers.elementAt(i);

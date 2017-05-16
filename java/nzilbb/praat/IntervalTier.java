@@ -133,7 +133,7 @@ public class IntervalTier
       throws java.io.IOException
    {
       super.writeText(writer);
-      writer.write("\n        intervals: size = " + vIntervals.size());
+      writer.write("\n        intervals: size = " + vIntervals.size() + " ");
       for (int i = 0; i < vIntervals.size(); i++)
       {
 	 Interval interval = vIntervals.elementAt(i);

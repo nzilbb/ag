@@ -100,10 +100,9 @@ public class Interval
       throws java.io.IOException
    {
       writer.write( 
-	 "\n            xmin = " + Math.min(getXmin(),getXmax()) +
-	 "\n            xmax = " + Math.max(getXmin(),getXmax()) +
-	 "\n            text = \"" + getText().replaceAll("\\\"", "\'") 
-	 + "\"");
+	 "\n            xmin = " + TextGrid.OffsetFormat.format(Math.min(getXmin(),getXmax())) + " " +
+	 "\n            xmax = " + TextGrid.OffsetFormat.format(Math.max(getXmin(),getXmax())) + " " +
+	 "\n            text = \"" + getText().replaceAll("\\\"", "\'") + "\" ");
    }
    
    /**

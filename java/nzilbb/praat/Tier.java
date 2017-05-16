@@ -85,10 +85,10 @@ public class Tier
       throws java.io.IOException
    {
       writer.write(
-	 "\n        class = \"" + TextGrid.className(this) + "\"" +
-	 "\n        name = \"" + getName() + "\"" + 
-	 "\n        xmin = " + getXmin() +
-	 "\n        xmax = " + getXmax()); 
+	 "\n        class = \"" + TextGrid.className(this) + "\" " +
+	 "\n        name = \"" + getName() + "\" " + 
+	 "\n        xmin = " + TextGrid.OffsetFormat.format(getXmin()) + " " +
+	 "\n        xmax = " + TextGrid.OffsetFormat.format(getXmax()) + " "); 
    }
    
    /**
