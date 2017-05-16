@@ -73,4 +73,46 @@ public interface IGraphStoreAdministration
     */
    public IDeserializer deserializerForFilesSuffix(String suffix) throws StoreException, PermissionException;
 
+   /**
+    * Registers a graph serializer.
+    * @param serializer The serializer to register.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public void registerSerializer(ISerializer serializer) throws StoreException, PermissionException;
+
+   /**
+    * De-registers a graph serializer.
+    * @param serializer The serializer to de-register.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public void deregisterSerializer(ISerializer serializer) throws StoreException, PermissionException;
+
+   /**
+    * Lists the descriptors of all registered serializers.
+    * @return A list of the descriptors of all registered serializers.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public SerializationDescriptor[] getSerializerDescriptors() throws StoreException, PermissionException;
+   
+   /**
+    * Gets the serializer for the given MIME type.
+    * @param mimeType The MIME type.
+    * @return The serializer for the given MIME type, or null if none is registered.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public ISerializer serializerForMimeType(String mimeType) throws StoreException, PermissionException;
+
+   /**
+    * Gets the serializer for the given file suffix (extension).
+    * @param suffix The file extension.
+    * @return The serializer for the given suffix, or null if none is registered.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public ISerializer serializerForFilesSuffix(String suffix) throws StoreException, PermissionException;
+
 } // end of class IGraphStoreAdministration
