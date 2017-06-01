@@ -716,7 +716,7 @@ public class SqlGraphStore
     */
    public String[] getGraphIdsInCorpus(String id) throws StoreException, PermissionException
    {
-      return getMatchingGraphIds("my('corpus').label = '"+id.replaceAll("'","\\'")+"'");
+      return getMatchingGraphIds("my('corpus').label = '"+id.replaceAll("\\\\","\\\\\\\\").replaceAll("'","\\\\'")+"'");
    }
 
 
@@ -729,7 +729,7 @@ public class SqlGraphStore
     */
    public String[] getGraphIdsWithParticipant(String id) throws StoreException, PermissionException
    {
-      return getMatchingGraphIds("'"+id.replaceAll("'","\\'")+"' IN labels('who')");
+      return getMatchingGraphIds("'"+id.replaceAll("\\\\","\\\\\\\\").replaceAll("'","\\\\'")+"' IN labels('who')");
    }
 
    
