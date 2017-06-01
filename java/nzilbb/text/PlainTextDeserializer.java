@@ -381,7 +381,7 @@ public class PlainTextDeserializer
     * @see #getParticipantFormat()
     * @see #setParticipantFormat(String)
     */
-   protected String participantFormat = "{0}: ";
+   protected String participantFormat = "{0}: "; // TODO make this configurable
    /**
     * Getter for {@link #participantFormat}: Format for marking a change of turn within the transcript body.
     * @return Format for marking a change of turn within the transcript body.
@@ -462,6 +462,22 @@ public class PlainTextDeserializer
     */
    public void setTokenizer(IGraphTransformer newTokenizer) { tokenizer = newTokenizer; }
 
+   /**
+    * Maximum lines in a header
+    * @see #getMaxHeaderLines()
+    * @see #setMaxHeaderLines(Integer)
+    */
+   protected Integer maxHeaderLines = new Integer(50);
+   /**
+    * Getter for {@link #maxHeaderLines}: Maximum lines in a header
+    * @return Maximum lines in a header
+    */
+   public Integer getMaxHeaderLines() { return maxHeaderLines; }
+   /**
+    * Setter for {@link #maxHeaderLines}: Maximum lines in a header
+    * @param newMaxHeaderLines Maximum lines in a header
+    */
+   public void setMaxHeaderLines(Integer newMaxHeaderLines) { maxHeaderLines = newMaxHeaderLines; }
 
    // Methods:
    
@@ -481,7 +497,7 @@ public class PlainTextDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Plain Text Document", "0.02", "text/plain", ".txt", "20170228.1353", getClass().getResource("icon.png"));
+	 "Plain Text Document", "0.03", "text/plain", ".txt", "20170228.1353", getClass().getResource("icon.png"));
    }
 
    /**
@@ -699,6 +715,18 @@ public class PlainTextDeserializer
       {
 	 configuration.get("maxParticipantLength").setValue(new Integer(20));
       }
+      
+      if (!configuration.containsKey("maxHeaderLines"))
+      {
+	 configuration.addParameter(
+	    new Parameter("maxHeaderLines", Integer.class, 
+			  "Max Header Lines",
+			  "The maximum number of lines in a meta-data header", true));
+      }
+      if (configuration.get("maxHeaderLines").getValue() == null)
+      {
+	 configuration.get("maxHeaderLines").setValue(new Integer(50));
+      }
 
       return configuration;
    }
@@ -793,9 +821,9 @@ public class PlainTextDeserializer
 	    catch(NullPointerException exception) {} // null ID
 	 } // don't know whether hasTimestamps yet
 
-	 // if we encounter a speaker utterance within the first 50 lines, 
+	 // if we encounter a speaker utterance within the first 150 lines, 
 	 // it contains speakers (after that, we assume it's a coincidence)
-	 if (iLine <= 50 && !getHasSpeakers())
+	 if (iLine <= 150 && !getHasSpeakers())
 	 {
 	    // is this line a speaker utterance line?
 	    try

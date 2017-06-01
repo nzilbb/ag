@@ -72,7 +72,7 @@ public class TestPlainTextDeserializer
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
       assertEquals("Configuration parameters" + configuration,
-		   6, deserializer.configure(configuration, schema).size());      
+		   7, deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertEquals("noise", "noise", 
@@ -84,6 +84,8 @@ public class TestPlainTextDeserializer
       assertEquals("use conventions", Boolean.TRUE, configuration.get("useConventions").getValue());
       assertEquals("maxParticipantLength",
 		   new Integer(20), configuration.get("maxParticipantLength").getValue());
+      assertEquals("maxHeaderLines",
+		   new Integer(50), configuration.get("maxHeaderLines").getValue());
 
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -210,7 +212,7 @@ public class TestPlainTextDeserializer
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals("Configuration parameters" + configuration, 6, deserializer.configure(configuration, schema).size());      
+      assertEquals("Configuration parameters" + configuration, 7, deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertEquals("noise", "noise", 
@@ -222,6 +224,8 @@ public class TestPlainTextDeserializer
       assertEquals("use conventions", Boolean.TRUE, configuration.get("useConventions").getValue());
       assertEquals("maxParticipantLength",
 		   new Integer(20), configuration.get("maxParticipantLength").getValue());
+      assertEquals("maxHeaderLines",
+		   new Integer(50), configuration.get("maxHeaderLines").getValue());
 
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -390,7 +394,7 @@ public class TestPlainTextDeserializer
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals("Configuration parameters" + configuration, 6, deserializer.configure(configuration, schema).size());      
+      assertEquals("Configuration parameters" + configuration, 7, deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertNull("noise", configuration.get("noiseLayer").getValue());
@@ -399,6 +403,8 @@ public class TestPlainTextDeserializer
       assertEquals("use conventions", Boolean.TRUE, configuration.get("useConventions").getValue());
       assertEquals("maxParticipantLength",
 		   new Integer(20), configuration.get("maxParticipantLength").getValue());
+      assertEquals("maxHeaderLines",
+		   new Integer(50), configuration.get("maxHeaderLines").getValue());
 
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -533,7 +539,7 @@ public class TestPlainTextDeserializer
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals("Configuration parameters" + configuration, 6, deserializer.configure(configuration, schema).size());      
+      assertEquals("Configuration parameters" + configuration, 7, deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertEquals("noise", "noise", 
@@ -545,6 +551,8 @@ public class TestPlainTextDeserializer
       assertEquals("use conventions", Boolean.TRUE, configuration.get("useConventions").getValue());
       assertEquals("maxParticipantLength",
 		   new Integer(20), configuration.get("maxParticipantLength").getValue());
+      assertEquals("maxHeaderLines",
+		   new Integer(50), configuration.get("maxHeaderLines").getValue());
 
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
