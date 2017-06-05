@@ -67,6 +67,8 @@ public class TestTranscriptDeserializer
 	 new Layer("word", "Words", 2, true, false, false, "turn", true),
 	 new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
 	 new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
+      schema.getLayer("gender").getValidLabels().put("M","Male");
+      schema.getLayer("gender").getValidLabels().put("F","Female");
 
       // access file
       NamedStream[] streams = { new NamedStream(new File(getDir(), "test.trs")) };
@@ -150,8 +152,10 @@ public class TestTranscriptDeserializer
       assertEquals("who", g.getAnnotation("spk2").getLayerId());
 
       // participant meta data
-      assertEquals("female", g.getAnnotation("spk1").my("gender").getLabel());
-      assertEquals("male", g.getAnnotation("spk2").my("gender").getLabel());
+      assertEquals("Gender label is normalized",
+		   "F", g.getAnnotation("spk1").my("gender").getLabel());
+      assertEquals("Gender label is normalized",
+		   "M", g.getAnnotation("spk2").my("gender").getLabel());
       assertEquals("no", g.getAnnotation("spk1").my("participant_check").getLabel());
       assertEquals("yes", g.getAnnotation("spk2").my("participant_check").getLabel());
       assertEquals("native", g.getAnnotation("spk1").my("participant_dialect").getLabel());

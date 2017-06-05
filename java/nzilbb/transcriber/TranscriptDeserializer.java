@@ -458,7 +458,7 @@ public class TranscriptDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Transcriber transcript", "1.423", "text/xml-transcriber", ".trs", "20170228.1353", getClass().getResource("icon.png"));
+	 "Transcriber transcript", "1.424", "text/xml-transcriber", ".trs", "20170228.1353", getClass().getResource("icon.png"));
    }
 
    /**
@@ -884,7 +884,23 @@ public class TranscriptDeserializer
 	 }
 	 if (speaker.getType().length() > 0 && genderLayer != null)
 	 {
-	    graph.createTag(participant, genderLayer.getId(), speaker.getType());
+	    String genderLabel = speaker.getType();
+	    LinkedHashMap<String,String> validLabels = genderLayer.getValidLabels();
+	    if (validLabels.size() > 0 // there are valid labels
+		// and the "type" isn't one of them
+		&& !validLabels.containsKey(genderLabel)) 
+	    { // normalize label if possible
+	       for (String key : validLabels.keySet())
+	       {
+		  if (key.equalsIgnoreCase(genderLabel)
+		      || validLabels.get(key).equalsIgnoreCase(genderLabel))
+		  {
+		     genderLabel = key;
+		     break;
+		  }		     
+	       } // next label
+	    } // normalize label if possible
+	    graph.createTag(participant, genderLayer.getId(), genderLabel);
 	 }
 	 if (speaker.getDialect().length() > 0 && dialectLayer != null)
 	 {
