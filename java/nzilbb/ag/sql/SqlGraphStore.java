@@ -2371,7 +2371,7 @@ public class SqlGraphStore
 	    // otherwise unchanged - e.g. as final anchor IDs are set, etc.
 	    HashSet<Annotation> extraUpdates = new HashSet<Annotation>();
 
-	    // multli-value attributes are implemented by concatenating values together,
+	    // multi-value attributes are implemented by concatenating values together,
 	    // so we gather up attribute changes, and process them afterwards
 	    LinkedHashMap<String,Annotation> transcriptAttributes = new LinkedHashMap<String,Annotation>(); 
 	    LinkedHashMap<String,Annotation> participantAttributes = new LinkedHashMap<String,Annotation>(); 
@@ -2422,16 +2422,17 @@ public class SqlGraphStore
 		  }
 		  else if (participantAttributeLayers.contains(annotation.getLayerId()))
 		  { // participant attribute
-		     if (!participantAttributes.containsKey(annotation.getLayerId()))
+		     // the key of the collection includes the parent ID, so that attributes for all participants don't accumulate on to one
+		     if (!participantAttributes.containsKey(annotation.getLayerId() + "|" + annotation.getParentId()))
 		     { // first mention, so add it to the map
-			participantAttributes.put(annotation.getLayerId(), annotation);
+			participantAttributes.put(annotation.getLayerId() + "|" + annotation.getParentId(), annotation);
 		     }
 		     else
 		     { // already there, so merge this one with the other one
-			Annotation previous = participantAttributes.get(annotation.getLayerId());
+			Annotation previous = participantAttributes.get(annotation.getLayerId() + "|" + annotation.getParentId());
 			if (previous.getChange() == Change.Operation.Destroy)
 			{ // replace the delete with this one
-			   participantAttributes.put(annotation.getLayerId(), annotation);
+			   participantAttributes.put(annotation.getLayerId() + "|" + annotation.getParentId(), annotation);
 			}
 			else if (annotation.getChange() != Change.Operation.Destroy)
 			{ // change or add, so append the label of this one
@@ -3774,6 +3775,13 @@ public class SqlGraphStore
 	       String attribute = annotation.getLayerId().substring("participant_".length());
 	       Object[] o = fmtMetaAnnotationId.parse(annotation.getParentId());
 	       int speakerNumber = Integer.parseInt(o[1].toString());
+
+	       // the attribute might be new in this graph, but already exist in the database
+	       // so delete first and then add
+	       sqlDeleteParticipantAttribute.setInt(1, speakerNumber);
+	       sqlDeleteParticipantAttribute.setString(2, attribute);
+	       sqlDeleteParticipantAttribute.executeUpdate();
+
 	       sqlInsertParticipantAttribute.setInt(1, speakerNumber);
 	       sqlInsertParticipantAttribute.setString(2, attribute);
 	       sqlInsertParticipantAttribute.setString(3, annotation.getLabel());
@@ -3796,7 +3804,7 @@ public class SqlGraphStore
 	       Object[] o = fmtParticipantAttributeId.parse(annotation.getId());
 	       String attribute = o[0].toString();
 	       int speakerNumber = ((Long)o[1]).intValue();
-	       sqlUpdateParticipantAttribute.setInt(1, speakerNumber);
+	       sqlDeleteParticipantAttribute.setInt(1, speakerNumber);
 	       sqlDeleteParticipantAttribute.setString(2, attribute);
 	       sqlDeleteParticipantAttribute.executeUpdate();
 	       break;
