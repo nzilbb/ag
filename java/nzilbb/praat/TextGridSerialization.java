@@ -258,7 +258,7 @@ public class TextGridSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Praat TextGrid", "1.83", "text/praat-textgrid", ".textgrid", "20170516.1519", getClass().getResource("icon.png"));
+	 "Praat TextGrid", "1.831", "text/praat-textgrid", ".textgrid", "20170516.1519", getClass().getResource("icon.png"));
    }
    
    /**
@@ -687,8 +687,17 @@ public class TextGridSerialization
 	 }
 	 else if (tier instanceof IntervalTier)
 	 { // no name match, assume it's a tier named after a speaker
-	    // make the utteranceLayer the default
-	    p.setValue(getUtteranceLayer());
+	    if (sName.equalsIgnoreCase("word") || sName.equalsIgnoreCase("words")
+		&& getWordLayer() != null)
+	    {
+	       // make the wordLayer the default
+	       p.setValue(getWordLayer());
+	    }
+	    else
+	    {
+	       // make the utteranceLayer the default
+	       p.setValue(getUtteranceLayer());
+	    }
 	 }
 	 p.setPossibleValues(vPossiblLayers);
 	 mappings.addParameter(p);
@@ -1328,6 +1337,13 @@ public class TextGridSerialization
       for (Annotation a : graph.getAnnotationsById().values()) a.remove("@tier");
       if (timers != null) timers.end("remove tier references");
 
+      // set end anchors of graph tags
+      for (Annotation a : graph.list(getParticipantLayer().getId()))
+      {
+      	 a.setStartId(graphStart.getId());
+      	 a.setEndId(graphEnd.getId());
+      }
+
       if (errors != null) throw errors;
 
       Graph[] graphs = { graph };
@@ -1530,7 +1546,7 @@ public class TextGridSerialization
 		     for (Annotation token : a.list(getWordLayer().getId()))
 		     {
 			if (l.length() > 0) l.append(" ");
-			l.append(token.getLabel());
+			l.append(token.getLabel()); // TODO transcript convention support
 		     } // next token
 		     label = l.toString();
 		  } // turn/utterance layer
