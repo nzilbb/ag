@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2017 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -95,6 +95,8 @@ public class TestTextGridSerialization
       assertEquals(2, who.length);
       assertEquals("participant", who[0].getLabel());
       assertEquals(g, who[0].getParent());
+      assertNotNull("participants are anchored to the graph", who[0].getStart());
+      assertNotNull("participants are anchored to the graph", who[0].getEnd());
       assertEquals("interviewer", who[1].getLabel());
       assertEquals(g, who[1].getParent());
       
@@ -312,6 +314,10 @@ public class TestTextGridSerialization
       assertEquals(2, who.length);
       assertEquals("participant", who[0].getLabel());
       assertEquals(g, who[0].getParent());
+      assertNotNull("participants are anchored to the graph", who[0].getStart());
+      assertNotNull("participants are anchored to the graph", who[0].getEnd());
+      assertNotNull("participants are anchored in time", who[0].getStart().getOffset());
+      assertNotNull("participants are anchored in time", who[0].getEnd().getOffset());
       assertEquals("interviewer", who[1].getLabel());
       assertEquals(g, who[1].getParent());
       
@@ -387,6 +393,10 @@ public class TestTextGridSerialization
       assertEquals(2, who.length);
       assertEquals("participant", who[0].getLabel());
       assertEquals(g, who[0].getParent());
+      assertNotNull("participants are anchored to the graph", who[0].getStart());
+      assertNotNull("participants are anchored to the graph", who[0].getEnd());
+      assertNotNull("participants are anchored in time", who[0].getStart().getOffset());
+      assertNotNull("participants are anchored in time", who[0].getEnd().getOffset());
       assertEquals("interviewer", who[1].getLabel());
       assertEquals(g, who[1].getParent());
       
@@ -462,6 +472,10 @@ public class TestTextGridSerialization
       assertEquals(2, who.length);
       assertEquals("participant", who[0].getLabel());
       assertEquals(g, who[0].getParent());
+      assertNotNull("participants are anchored to the graph", who[0].getStart());
+      assertNotNull("participants are anchored to the graph", who[0].getEnd());
+      assertNotNull("participants are anchored in time", who[0].getStart().getOffset());
+      assertNotNull("participants are anchored in time", who[0].getEnd().getOffset());
       assertEquals("interviewer", who[1].getLabel());
       assertEquals(g, who[1].getParent());
       
@@ -538,6 +552,10 @@ public class TestTextGridSerialization
       assertEquals(2, who.length);
       assertEquals("participant", who[0].getLabel());
       assertEquals(g, who[0].getParent());
+      assertNotNull("participants are anchored to the graph", who[0].getStart());
+      assertNotNull("participants are anchored to the graph", who[0].getEnd());
+      assertNotNull("participants are anchored in time", who[0].getStart().getOffset());
+      assertNotNull("participants are anchored in time", who[0].getEnd().getOffset());
       assertEquals("interviewer", who[1].getLabel());
       assertEquals(g, who[1].getParent());
       
@@ -687,6 +705,10 @@ public class TestTextGridSerialization
       assertEquals(2, who.length);
       assertEquals("participant", who[0].getLabel());
       assertEquals(g, who[0].getParent());
+      assertNotNull("participants are anchored to the graph", who[0].getStart());
+      assertNotNull("participants are anchored to the graph", who[0].getEnd());
+      assertNotNull("participants are anchored in time", who[0].getStart().getOffset());
+      assertNotNull("participants are anchored in time", who[0].getEnd().getOffset());
       assertEquals("interviewer", who[1].getLabel());
       assertEquals(g, who[1].getParent());
       
@@ -794,6 +816,10 @@ public class TestTextGridSerialization
       assertEquals(2, who.length);
       assertEquals("participant", who[0].getLabel());
       assertEquals(g, who[0].getParent());
+      assertNotNull("participants are anchored to the graph", who[0].getStart());
+      assertNotNull("participants are anchored to the graph", who[0].getEnd());
+      assertNotNull("participants are anchored in time", who[0].getStart().getOffset());
+      assertNotNull("participants are anchored in time", who[0].getEnd().getOffset());
       assertEquals("interviewer", who[1].getLabel());
       assertEquals(g, who[1].getParent());
       
@@ -986,6 +1012,10 @@ public class TestTextGridSerialization
       assertEquals(2, who.length);
       assertEquals("participant", who[0].getLabel());
       assertEquals(g, who[0].getParent());
+      assertNotNull("participants are anchored to the graph", who[0].getStart());
+      assertNotNull("participants are anchored to the graph", who[0].getEnd());
+      assertNotNull("participants are anchored in time", who[0].getStart().getOffset());
+      assertNotNull("participants are anchored in time", who[0].getEnd().getOffset());
       assertEquals("interviewer", who[1].getLabel());
       assertEquals(g, who[1].getParent());
       
@@ -1209,6 +1239,10 @@ public class TestTextGridSerialization
       assertEquals(1, who.length);
       assertEquals("ORT", who[0].getLabel());
       assertEquals(g, who[0].getParent());
+      assertNotNull("participants are anchored to the graph", who[0].getStart());
+      assertNotNull("participants are anchored to the graph", who[0].getEnd());
+      assertNotNull("participants are anchored in time", who[0].getStart().getOffset());
+      assertNotNull("participants are anchored in time", who[0].getEnd().getOffset());
       
       // turns
       Annotation[] turns = g.list("turn");
@@ -1417,10 +1451,7 @@ public class TestTextGridSerialization
       // extract fragment
       double fragmentFrom = 212.4;
       double fragmentTo = 216.36333; // exactly on the offset of the last anchor
-      Vector<String> layerIds = new Vector<String>();
-      layerIds.add("utterance");
-      layerIds.add("word");
-      layerIds.add("phone");
+      String [] layerIds = { "utterance", "word", "phone" };
       Graph fragment = graphs[0].getFragment(fragmentFrom, fragmentTo, layerIds);
       fragment.shiftAnchors(-fragmentFrom);
       assertEquals("serialize_utterance_word.TextGrid__212.400-216.363", fragment.getId());
@@ -1454,7 +1485,7 @@ public class TestTextGridSerialization
       if (differences != null) fail(differences);	 
    }
 
-   @Test public void serialize_fragment_trailing_utterance_word() 
+   @Test public void serialize_fragment_trailing_utterance_word()  // TODO test serialization of point tiers
       throws Exception
    {
       Schema schema = new Schema(
@@ -1481,10 +1512,7 @@ public class TestTextGridSerialization
       // extract fragment
       double fragmentFrom = 212.4;
       double fragmentTo = 216.5; // between anchors
-      Vector<String> layerIds = new Vector<String>();
-      layerIds.add("utterance");
-      layerIds.add("word");
-      layerIds.add("phone");
+      String[] layerIds = { "utterance", "word", "phone"};
       Graph fragment = graphs[0].getFragment(fragmentFrom, fragmentTo, layerIds);
       fragment.shiftAnchors(-fragmentFrom);
       assertEquals("serialize_utterance_word.TextGrid__212.400-216.500", fragment.getId());
