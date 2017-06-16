@@ -25,6 +25,7 @@ import java.sql.*;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URI;
@@ -4186,4 +4187,289 @@ public class SqlGraphStore
 	 throw new StoreException(t);
       }
    }
+
+   
+   /**
+    * Generates any media files that are not marked "on demand" and for which there are available conversions.
+    * <p>This implementation starts conversion processes, and returns immediately, so new files may not exist immediately after the method returns.
+    * @param id The graph ID.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
+    */
+   public void generateMissingMedia(String id)
+      throws StoreException, PermissionException, GraphNotFoundException
+   {
+      try
+      {
+	 // for now only ffmpeg conversion is supported TODO
+	 PreparedStatement sql = getConnection().prepareStatement(
+	    "SELECT value FROM system_attribute WHERE name = 'ffmpegPath'");
+	 ResultSet rs = sql.executeQuery();
+	 if (!rs.next())
+	 {
+	    System.out.println("SqlGraphStore.generateMissingMedia: no ffmpegPath setting");
+	    rs.close();
+	    sql.close();
+	    return;
+	 }
+	 String ffmpegPath = rs.getString("value");
+	 rs.close();
+	 sql.close();
+	 if (ffmpegPath == null || ffmpegPath.length() == 0)
+	 {
+	    System.out.println("SqlGraphStore.generateMissingMedia: ffmpegPath not set");
+	    return;
+	 }
+	 File exe = new File(ffmpegPath, "ffmpeg");
+	 if (!exe.exists())
+	 {
+	    System.out.println("SqlGraphStore.generateMissingMedia: ffmpegPath not found: " + exe.getPath());
+	    return;
+	 }
+	 
+	 MediaFile[] availableMedia = getAvailableMedia(id);
+	 // first index them by track suffix, and then by MIME type
+	 HashMap<String,HashMap<String,MediaFile>> tracks = new HashMap<String,HashMap<String,MediaFile>>();
+	 for (MediaFile file : availableMedia)
+	 {
+	    if (!tracks.containsKey(file.getTrackSuffix()))
+	    {
+	       tracks.put(file.getTrackSuffix(), new HashMap<String,MediaFile>());
+	    }
+	    tracks.get(file.getTrackSuffix()).put(file.getMimeType(), file);
+	 } // next file
+
+	 // what media types do we want? (key=MIME type, value=extension)
+	 LinkedHashMap<String,String> wantedTypes = new LinkedHashMap<String,String>();
+	 sql = getConnection().prepareStatement(
+	    "SELECT mimetype, extension FROM media_type WHERE on_demand = 0 ORDER BY mimetype");
+	 rs = sql.executeQuery();
+	 while (rs.next())
+	 {
+	    wantedTypes.put(rs.getString("mimetype"), rs.getString("extension"));
+	 } // next layer
+	 rs.close();
+	 sql.close();
+
+	 Vector<MediaFile> wantedFiles = new Vector<MediaFile>();
+	 // check each track, and add any types that are missing
+	 for (String trackSuffix: tracks.keySet())
+	 {
+	    HashMap<String,MediaFile> filesInTrack = tracks.get(trackSuffix);
+	    for (String mediaType : wantedTypes.keySet())
+	    {
+	       if (!filesInTrack.containsKey(mediaType))
+	       {
+		  MediaFile wantedFile = new MediaFile();
+		  wantedFile.setTrackSuffix(trackSuffix);
+		  wantedFile.setMimeType(mediaType);
+		  // we'll set the rest of the details later...
+		  wantedFiles.add(wantedFile);
+	       }
+	    } // next wanted type
+	 } // next track suffix
+
+	 if (wantedFiles.size() > 0)
+	 { // there are missing files
+	    
+	    // need some info about the graph...
+	    String[] layers = { "corpus", "episode" };
+	    Graph graph = getGraph(id, layers);
+	    File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
+	    File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
+
+	    PreparedStatement sqlConversions = getConnection().prepareStatement(
+	       "SELECT from_mimetype, method, arguments FROM media_conversion"
+	       +" WHERE method = 'ffmpeg'" // TODO support other conversion methods
+	       +" AND to_mimetype = ? ORDER BY from_mimetype");
+
+	    // for each file we want:
+	    for (MediaFile wantedFile : wantedFiles)
+	    {
+	       // figure out file name
+	       String extension = MediaFile.MimeTypeToSuffix().get(wantedFile.getMimeType());
+	       if (extension == null) extension = wantedTypes.get(wantedFile.getMimeType());
+	       File mediaDir = new File(episodeDir, extension);
+	       String destinationName = graph.getId().replaceAll("\\.[^.]*$","") 
+		  + wantedFile.getTrackSuffix() + "." + extension;
+	       wantedFile.setFile(new File(mediaDir, destinationName));
+
+	       // look for a conversion
+	       sqlConversions.setString(1, wantedFile.getMimeType());
+	       ResultSet rsConversions = sqlConversions.executeQuery();
+	       while (rsConversions.next())
+	       {
+		  String fromMimeType = rsConversions.getString("from_mimetype");
+		  // do we have a file with that MIME type in the same track?
+		  HashMap<String,MediaFile> track = tracks.get(wantedFile.getTrackSuffix());
+		  if (track.containsKey(fromMimeType))
+		  { // the source MIME type exists - we have a winner
+		     MediaFile gotFile = track.get(fromMimeType);
+		     Vector<String> vArguments = new Vector<String>();
+		     vArguments.add(exe.getPath());
+		     for (String arg : rsConversions.getString("arguments").split(" "))
+		     {
+			if (arg.equals("{0}"))
+			{
+			   vArguments.add(gotFile.getFile().getPath());
+			}
+			else if (arg.equals("{1}"))
+			{
+			   vArguments.add(wantedFile.getFile().getPath());
+			}
+			else
+			{
+			   vArguments.add(arg);
+			}
+		     } // next argument
+		     // ensure destination directory exists
+		     if (!wantedFile.getFile().getParentFile().exists())
+		     {
+			if (!wantedFile.getFile().getParentFile().mkdir())
+			{
+			   System.err.println("SqlGraphStore.generateMissingMedia: mkdir " + wantedFile.getFile().getParentFile().getPath() + " - failed");
+			}
+		     }
+		     // convert
+		     startMediaConversion(
+			vArguments.toArray(new String[0]), gotFile.getFile(), wantedFile.getFile());
+		     break;
+		  } // the source MIME type exists
+	       } // next conversion
+	       rsConversions.close();
+	    } // next wanted file
+	    sqlConversions.close();
+
+	 } // there are missing files
+      }
+      catch(SQLException exception)
+      {
+	 throw new StoreException(exception);
+      }
+      catch(IOException exception)
+      {
+	 throw new StoreException(exception);
+      }
+      
+   } // end of generateMissingMedia()
+
+   /**
+    * Starts a media conversion process
+    * @param exe Executable file.
+    * @param arguments Arguments for the executable, to implement the conversion.
+    * @param from The source file.
+    * @param to The destination file.
+    * @return The process that was started.
+    * @throws IOException
+    */
+   protected Process startMediaConversion(String arguments[], File from, File to)
+    throws IOException
+   {
+      System.out.println("SqlGraphStore.startMediaConversion: Converting " + from.getName() + " to " + to.getName() + " ...");
+      final File outputFile = to;
+      final Process proc = Runtime.getRuntime().exec(arguments);
+      // processes can hang if their streams are not being processed, so start a thread to read/write
+      Thread streamProcessor = new Thread(new Runnable() {
+	    public void run()
+	    {
+	       InputStream inStream = proc.getInputStream();
+	       InputStream errStream = proc.getErrorStream();
+	       byte[] buffer = new byte[1024];
+	       
+	       // loop waiting for the process to exit, all the while reading from
+	       //  the input stream to stop it from hanging
+	       boolean bStillRunning = true;
+	       // there seems to be some overhead in querying the input streams,
+	       // so we need sleep while waiting to not barrage the process with
+	       // requests. However, we don't want to sleep too long for processes
+	       // that terminate quickly or we'll be needlessly waiting.
+	       // So we start with short sleeps, and exponentially increase the 
+	       // wait time, with a maximum sleep of 30 seconds
+	       int iMSSleep = 1;
+	       while (bStillRunning)
+	       {
+		  try
+		  {
+		     int iReturnValue = proc.exitValue();		     
+		     // if exitValue returns, the process has finished
+		     bStillRunning = false;
+		  }
+		  catch(IllegalThreadStateException exception)
+		  { // still executing		     
+		     // sleep for a while
+		     try
+		     {
+			Thread.sleep(iMSSleep);
+		     }
+		     catch(Exception sleepX)
+		     {
+			String sMessage = "ffmpeg Exception while sleeping: " + sleepX.toString() + "\r\n";
+			System.err.println("SqlGraphStore.startMediaConversion: " + sMessage);	
+		     }
+		     iMSSleep *= 2; // backoff exponentially
+		     if (iMSSleep > 10000) iMSSleep = 10000; // max 10 sec
+		  }
+		  
+		  try
+		  {
+		     // data ready?
+		     int bytesRead = inStream.available();
+		     String sMessages = "";
+		     while(bytesRead > 0)
+		     {
+			// if there's data coming, sleep a shorter time
+			iMSSleep = 1;		     
+			// write to the log file
+			bytesRead = inStream.read(buffer);
+			System.out.println("SqlGraphStore.startMediaConversion: "
+					   + new String(buffer, 0, bytesRead));		     
+			// data ready?
+			bytesRead = inStream.available();
+		     } // next chunk of data
+		     
+		  }
+		  catch(IOException exception)
+		  {
+		     System.err.println("SqlGraphStore.startMediaConversion: ERROR reading conversion input stream: "
+					+ outputFile.getName() + " - " + exception);
+		  }
+
+		  try
+		  {
+		     // data ready from error stream?
+		     int bytesRead = errStream.available();
+		     StringBuffer sErrors = new StringBuffer();
+		     while(bytesRead > 0)
+		     {
+			// if there's data coming, sleep a shorter time
+			iMSSleep = 1;	    
+			bytesRead = errStream.read(buffer);
+			sErrors.append(new String(buffer, 0, bytesRead));
+			// data ready?
+			bytesRead = errStream.available();
+		     } // next chunk of data
+		     if (sErrors.length() > 0)
+		     {
+			System.err.println("SqlGraphStore.startMediaConversion: ERROR generating: "
+					   + outputFile.getName());
+			System.err.println("SqlGraphStore.startMediaConversion: "
+					   + sErrors.toString());
+		     }
+		  }
+		  catch(IOException exception)
+		  {
+		     System.err.println("SqlGraphStore.startMediaConversion: ERROR reading conversion error stream: "
+					+ outputFile.getName() + " - " + exception);
+		  }
+	       } // bStillRunning
+	       System.out.println("SqlGraphStore.startMediaConversion: Conversion finished: " + outputFile.getName());
+	       if (outputFile.length() == 0) outputFile.delete(); // something failed, ensure there's no 0 byte file left
+	    }
+	 });
+      streamProcessor.start();
+      return proc;
+   } // end of startMediaConversion()
+
+
 } // end of class SqlGraphStore

@@ -30,7 +30,7 @@ public class Constants
 {
 
    /** API version */
-   public static final String VERSION = "20170606.1456";
+   public static final String VERSION = "20170615.1632";
    
    /** Standardized possible value for anchor offset or annotation label confidence - no confidence. Value is 0. */
    public static final int CONFIDENCE_NONE = 0;
