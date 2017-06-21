@@ -292,6 +292,17 @@ public class Parameter
       setName(name);
       setType(type);
    } // end of constructor
+   /**
+    * Constructor from attributes.
+    * @param name The paramater's name.
+    * @param value The value (or default value) of the parameter.
+    */
+   public Parameter(String name, Object value)
+   {
+      setName(name);
+      setType(value.getClass());
+      setValue(value);
+   } // end of constructor
 
    
    /**

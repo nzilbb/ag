@@ -44,6 +44,12 @@ import nzilbb.ag.*;
 import nzilbb.ag.util.Validator;
 import nzilbb.ag.util.LayerHierarchyTraversal;
 import nzilbb.util.IO;
+import nzilbb.configure.ParameterSet;
+import nzilbb.configure.Parameter;
+import nzilbb.media.IMediaConverter;
+import nzilbb.media.MediaThread;
+import nzilbb.media.MediaException;
+import nzilbb.media.ffmpeg.FfmpegConverter;
 
 /**
  * Graph store that uses a relational database as its back end.
@@ -4306,23 +4312,6 @@ public class SqlGraphStore
 		  if (track.containsKey(fromMimeType))
 		  { // the source MIME type exists - we have a winner
 		     MediaFile gotFile = track.get(fromMimeType);
-		     Vector<String> vArguments = new Vector<String>();
-		     vArguments.add(exe.getPath());
-		     for (String arg : rsConversions.getString("arguments").split(" "))
-		     {
-			if (arg.equals("{0}"))
-			{
-			   vArguments.add(gotFile.getFile().getPath());
-			}
-			else if (arg.equals("{1}"))
-			{
-			   vArguments.add(wantedFile.getFile().getPath());
-			}
-			else
-			{
-			   vArguments.add(arg);
-			}
-		     } // next argument
 		     // ensure destination directory exists
 		     if (!wantedFile.getFile().getParentFile().exists())
 		     {
@@ -4332,8 +4321,14 @@ public class SqlGraphStore
 			}
 		     }
 		     // convert
-		     startMediaConversion(
-			vArguments.toArray(new String[0]), gotFile.getFile(), wantedFile.getFile());
+		     ParameterSet configuration = new ParameterSet();
+		     configuration.addParameter(new Parameter("ffmpegPath", exe.getParentFile()));
+		     configuration.addParameter(
+			new Parameter("conversionCommandLine", rsConversions.getString("arguments")));
+		     IMediaConverter converter = new FfmpegConverter();
+		     converter.configure(configuration);
+		     MediaThread thread = converter.start(
+			fromMimeType, gotFile.getFile(), wantedFile.getMimeType(), wantedFile.getFile());
 		     break;
 		  } // the source MIME type exists
 	       } // next conversion
@@ -4347,129 +4342,11 @@ public class SqlGraphStore
       {
 	 throw new StoreException(exception);
       }
-      catch(IOException exception)
+      catch(MediaException exception)
       {
 	 throw new StoreException(exception);
       }
       
    } // end of generateMissingMedia()
-
-   /**
-    * Starts a media conversion process
-    * @param exe Executable file.
-    * @param arguments Arguments for the executable, to implement the conversion.
-    * @param from The source file.
-    * @param to The destination file.
-    * @return The process that was started.
-    * @throws IOException
-    */
-   protected Process startMediaConversion(String arguments[], File from, File to)
-    throws IOException
-   {
-      System.out.println("SqlGraphStore.startMediaConversion: Converting " + from.getName() + " to " + to.getName() + " ...");
-      final File outputFile = to;
-      final Process proc = Runtime.getRuntime().exec(arguments);
-      // processes can hang if their streams are not being processed, so start a thread to read/write
-      Thread streamProcessor = new Thread(new Runnable() {
-	    public void run()
-	    {
-	       InputStream inStream = proc.getInputStream();
-	       InputStream errStream = proc.getErrorStream();
-	       byte[] buffer = new byte[1024];
-	       
-	       // loop waiting for the process to exit, all the while reading from
-	       //  the input stream to stop it from hanging
-	       boolean bStillRunning = true;
-	       // there seems to be some overhead in querying the input streams,
-	       // so we need sleep while waiting to not barrage the process with
-	       // requests. However, we don't want to sleep too long for processes
-	       // that terminate quickly or we'll be needlessly waiting.
-	       // So we start with short sleeps, and exponentially increase the 
-	       // wait time, with a maximum sleep of 30 seconds
-	       int iMSSleep = 1;
-	       while (bStillRunning)
-	       {
-		  try
-		  {
-		     int iReturnValue = proc.exitValue();		     
-		     // if exitValue returns, the process has finished
-		     bStillRunning = false;
-		  }
-		  catch(IllegalThreadStateException exception)
-		  { // still executing		     
-		     // sleep for a while
-		     try
-		     {
-			Thread.sleep(iMSSleep);
-		     }
-		     catch(Exception sleepX)
-		     {
-			String sMessage = "ffmpeg Exception while sleeping: " + sleepX.toString() + "\r\n";
-			System.err.println("SqlGraphStore.startMediaConversion: " + sMessage);	
-		     }
-		     iMSSleep *= 2; // backoff exponentially
-		     if (iMSSleep > 10000) iMSSleep = 10000; // max 10 sec
-		  }
-		  
-		  try
-		  {
-		     // data ready?
-		     int bytesRead = inStream.available();
-		     String sMessages = "";
-		     while(bytesRead > 0)
-		     {
-			// if there's data coming, sleep a shorter time
-			iMSSleep = 1;		     
-			// write to the log file
-			bytesRead = inStream.read(buffer);
-			System.out.println("SqlGraphStore.startMediaConversion: "
-					   + new String(buffer, 0, bytesRead));		     
-			// data ready?
-			bytesRead = inStream.available();
-		     } // next chunk of data
-		     
-		  }
-		  catch(IOException exception)
-		  {
-		     System.err.println("SqlGraphStore.startMediaConversion: ERROR reading conversion input stream: "
-					+ outputFile.getName() + " - " + exception);
-		  }
-
-		  try
-		  {
-		     // data ready from error stream?
-		     int bytesRead = errStream.available();
-		     StringBuffer sErrors = new StringBuffer();
-		     while(bytesRead > 0)
-		     {
-			// if there's data coming, sleep a shorter time
-			iMSSleep = 1;	    
-			bytesRead = errStream.read(buffer);
-			sErrors.append(new String(buffer, 0, bytesRead));
-			// data ready?
-			bytesRead = errStream.available();
-		     } // next chunk of data
-		     if (sErrors.length() > 0)
-		     {
-			System.err.println("SqlGraphStore.startMediaConversion: ERROR generating: "
-					   + outputFile.getName());
-			System.err.println("SqlGraphStore.startMediaConversion: "
-					   + sErrors.toString());
-		     }
-		  }
-		  catch(IOException exception)
-		  {
-		     System.err.println("SqlGraphStore.startMediaConversion: ERROR reading conversion error stream: "
-					+ outputFile.getName() + " - " + exception);
-		  }
-	       } // bStillRunning
-	       System.out.println("SqlGraphStore.startMediaConversion: Conversion finished: " + outputFile.getName());
-	       if (outputFile.length() == 0) outputFile.delete(); // something failed, ensure there's no 0 byte file left
-	    }
-	 });
-      streamProcessor.start();
-      return proc;
-   } // end of startMediaConversion()
-
 
 } // end of class SqlGraphStore
