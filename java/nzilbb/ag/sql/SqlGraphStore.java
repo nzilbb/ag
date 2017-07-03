@@ -37,19 +37,23 @@ import java.util.SortedSet;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 import java.text.MessageFormat;
 import java.text.ParseException;
 
 import nzilbb.ag.*;
 import nzilbb.ag.util.Validator;
 import nzilbb.ag.util.LayerHierarchyTraversal;
+import nzilbb.ag.util.AnnotationsByAnchor;
 import nzilbb.util.IO;
 import nzilbb.configure.ParameterSet;
 import nzilbb.configure.Parameter;
 import nzilbb.media.IMediaConverter;
+import nzilbb.media.IMediaCensor;
 import nzilbb.media.MediaThread;
 import nzilbb.media.MediaException;
 import nzilbb.media.ffmpeg.FfmpegConverter;
+import nzilbb.media.ffmpeg.FfmpegCensor;
 
 /**
  * Graph store that uses a relational database as its back end.
@@ -821,11 +825,12 @@ public class SqlGraphStore
       if (userWhereClause.length() > 0)
       {
 	 // insert links to speaker table
-	 userWhereClauseParticipant = userWhereClause.replaceAll(
+	 userWhereClauseParticipant = userWhereClause.replace(
 	    " WHERE user_id",
-	    " WHERE user_id"
-	    +" INNER JOIN transcript_speaker ON access_attribute.ag_id = transcript_speaker.ag_id")
-	    .replaceAll(
+	    " INNER JOIN transcript_speaker ON access_attribute.ag_id = transcript_speaker.ag_id"
+	    + " WHERE user_id")
+	    .replace("AND access_attribute.ag_id = transcript.ag_id", "")
+	    .replace(
 	       "FROM role_permission)",
 	       "FROM role_permission)"
 	       // include those with no transcripts too
@@ -838,7 +843,7 @@ public class SqlGraphStore
 	 + userWhereClauseParticipant
 	 + " " + orderClause);
       return sql;
-   } // end of graphMatchSql()
+   } // end of participantMatchSql()
 
    /**
     * Counts the number of participants that match a particular pattern.
@@ -1143,11 +1148,12 @@ public class SqlGraphStore
 
 	 PreparedStatement sql = getConnection().prepareStatement(
 	    "SELECT transcript.*, transcript_family.name AS series,"
-	    +" transcript_type.transcript_type"
+	    +" transcript_type.transcript_type, divergent.value AS divergent"
 	    +" FROM transcript"
 	    +" INNER JOIN transcript_family ON transcript.family_id = transcript.family_id"
 	    +" INNER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
-	    +" WHERE transcript_id = ?");
+	    +" LEFT OUTER JOIN transcript_attribute divergent ON transcript.ag_id = divergent.ag_id AND divergent.name = 'divergent'"
+	    +" WHERE transcript_id = ?"+userWhereClause(true));
 	 sql.setString(1, id);
 	 ResultSet rs = sql.executeQuery();
 	 if (!rs.next())
@@ -1156,11 +1162,12 @@ public class SqlGraphStore
 	    sql.close();
 	    sql = getConnection().prepareStatement(
 	       "SELECT transcript.*, transcript_family.name AS series,"
-	       +" transcript_type.transcript_type"
+	       +" transcript_type.transcript_type, divergent.value AS divergent"
 	       +" FROM transcript"
 	       +" INNER JOIN transcript_family ON transcript.family_id = transcript.family_id"
 	       +" INNER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
-	       +" WHERE transcript_id REGEXP ?");
+	       +" LEFT OUTER JOIN transcript_attribute divergent ON transcript.ag_id = divergent.ag_id AND divergent.name = 'divergent'"
+	       +" WHERE transcript_id REGEXP ?"+userWhereClause(true));
 	    sql.setString(1, "^" + id.replaceAll("\\.[^.]+$","") + "\\.[^.]+$");
 	    rs = sql.executeQuery();
 	    if (!rs.next())
@@ -1172,11 +1179,12 @@ public class SqlGraphStore
 		  int iAgId = Integer.parseInt(id);
 		  sql = getConnection().prepareStatement(
 		     "SELECT transcript.*, transcript_family.name AS series,"
-		     +" transcript_type.transcript_type"
+		     +" transcript_type.transcript_type, divergent.value AS divergent"
 		     +" FROM transcript"
 		     +" INNER JOIN transcript_family ON transcript.family_id = transcript.family_id"
 		     +" INNER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
-		     +" WHERE ag_id = ?");
+		     +" LEFT OUTER JOIN transcript_attribute divergent ON transcript.ag_id = divergent.ag_id AND divergent.name = 'divergent'"
+		     +" WHERE transcript.ag_id = ?"+userWhereClause(true));
 		  sql.setInt(1, iAgId);
 		  rs = sql.executeQuery();
 		  if (!rs.next()) throw new GraphNotFoundException(id);
@@ -1197,6 +1205,7 @@ public class SqlGraphStore
 	 graph.put("@series", rs.getString("series"));
 	 graph.setOrdinal(rs.getInt("family_sequence"));
 	 graph.put("@offset_in_series", new Double(rs.getInt("family_offset")));
+	 if (rs.getString("divergent") != null) graph.put("@divergent", Boolean.TRUE);
 
 	 rs.close();
 
@@ -2051,6 +2060,32 @@ public class SqlGraphStore
 	       System.err.println("Graph " + graph.getId() + " OK");
 	    }
 	 }
+
+	 // censor the graph?
+	 String censorshipRegexp = getSystemAttribute("censorshipRegexp");
+	 if (censorshipRegexp != null && censorshipRegexp.length() > 0)
+	 { // censorship required
+	    Schema schema = getSchema();
+	    Pattern censorshipPattern = Pattern.compile(censorshipRegexp);
+	    String censorshipLayer = getSystemAttribute("censorshipLayer");
+	    String censorshipLabel = getSystemAttribute("censorshipLabel");
+	    int censoredCount = 0;
+	    for (Annotation annotation : graph.list(censorshipLayer))
+	    {
+	       if (censorshipPattern.matcher(annotation.getLabel()).matches())
+	       { // matching annotation
+		  System.out.println("Censoring interval: " + annotation + " " + annotation.getStart() + "-" + annotation.getEnd());
+		  censoredCount++;
+		  // change all words to censorshipLabel
+		  for (Annotation word : annotation.list(schema.getWordLayerId()))
+		  {
+		     System.out.println("Censoring word: " + word + " " + word.getStart() + "-" + word.getEnd());
+		     word.setLabel(censorshipLabel);
+		  } // next word
+	       } // matching annotation
+	    } // next annotation
+	    System.out.println("Censored intervals: " + censoredCount);
+	 } // censorshipRegexp required
 
 	 if (graph.getChange() == Change.Operation.Create)
 	 {
@@ -3983,20 +4018,64 @@ public class SqlGraphStore
 	 if (!episodeDir.exists()) episodeDir.mkdir();
 	 
 	 // get the content
-	 if (mediaUrl.startsWith("file:")) 
-	 { // file URL
-	    File source = new File(new URI(mediaUrl));
-	    MediaFile mediaFile = new MediaFile(source, trackSuffix);
-	    File mediaDir = new File(
-	       episodeDir, mediaFile.getType().equals("other")?"doc":mediaFile.getExtension());
-	    if (!mediaDir.exists()) mediaDir.mkdir();
+	 File source = null;
+	 if (!mediaUrl.startsWith("file:"))
+	 { // not file URL, but we need one, so download content to a temporary file
+	    URL url = new URL(mediaUrl);
+	    URLConnection connection = url.openConnection();
+	    String mimeType = connection.getContentType();
+	    String extension = MediaFile.MimeTypeToSuffix().get(mimeType);
+	    if (extension == null) throw new StoreException("Unknown MIME type: " + mimeType);
 	    String destinationName = graph.getId().replaceAll("\\.[^.]*$","") 
-	       + trackSuffix + "." + mediaFile.getExtension();
-	    File destination = new File(mediaDir, destinationName);
+	       + trackSuffix + "." + extension;
+	    source = File.createTempFile(destinationName, "."+extension);
+	    source.deleteOnExit();
+	    try
+	    {
+	       IO.SaveUrlConnectionToFile(connection, source);
+	    }
+	    catch(IOException exception)
+	    {
+	       throw new StoreException(
+		  "Could not save " + url + " to " + source.getPath(), exception);
+	    }	    
+	 } // not file URL
+	 else
+	 { // file URL
+	    // rename/take a copy of the file, so the caller can delete it with impunity
+	    File mediaFile = new File(new URI(mediaUrl));
+	    source = File.createTempFile("SqlGraphStore.saveMedia_", "_" + mediaFile.getName());
+	    source.deleteOnExit();
+	    if (!mediaFile.renameTo(source))
+	    { // can't rename, have to copy the data
+	       try
+	       {
+		  IO.Copy(mediaFile, source);
+	       }
+	       catch(IOException exception)
+	       {
+		  throw new StoreException(
+		     "Could not copy " + mediaFile.getPath() + " to " + source.getPath(), exception);
+	       }
+	    } // copy instead of rename
+	 }
 
-	    // backup old file if it exists
-	    IO.Backup(destination);
+	 // determine the destination path
+	 MediaFile mediaFile = new MediaFile(source, trackSuffix);
+	 File mediaDir = new File(
+	    episodeDir, mediaFile.getType().equals("other")?"doc":mediaFile.getExtension());
+	 if (!mediaDir.exists()) mediaDir.mkdir();
+	 String destinationName = graph.getId().replaceAll("\\.[^.]*$","") 
+	    + trackSuffix + "." + mediaFile.getExtension();
+	 File destination = new File(mediaDir, destinationName);
+	 
+	 // backup old file if it exists
+	 IO.Backup(destination);
 
+	 // does the file need censoring?
+	 String censorshipRegexp = getSystemAttribute("censorshipRegexp");
+	 if (censorshipRegexp == null || censorshipRegexp.length() == 0)
+	 { // no censorship required, so just move the file
 	    if (!source.renameTo(destination))
 	    { // can't rename, have to copy the data
 	       try
@@ -4009,32 +4088,123 @@ public class SqlGraphStore
 		     "Could not copy " + source.getPath() + " to " + destination.getPath(), exception);
 	       }
 	    } // copy instead of rename
-	 } // file URL
+	 } // no censorship required, so just move the file
 	 else
-	 { // not file URL
-	    URL url = new URL(mediaUrl);
-	    URLConnection connection = url.openConnection();
-	    String mimeType = connection.getContentType();
-	    String extension = MediaFile.MimeTypeToSuffix().get(mimeType);
-	    if (extension == null) throw new StoreException("Unknown MIME type: " + mimeType);
-	    File mediaDir = new File(episodeDir, extension);
-	    String destinationName = graph.getId().replaceAll("\\.[^.]*$","") 
-	       + trackSuffix + "." + extension;
-	    File destination = new File(mediaDir, destinationName);
+	 { // censorship required
 
-	    // backup old file if it exists
-	    IO.Backup(destination);
-
-	    try
+	    // check ffmpeg configuration
+	    Pattern censorshipPattern = Pattern.compile(censorshipRegexp);
+	    String censorshipLayer = getSystemAttribute("censorshipLayer");
+	    String censorshipFfmpegAudioFilter = getSystemAttribute("censorshipFfmpegAudioFilter");
+	    String ffmpegPath = getSystemAttribute("ffmpegPath");
+	    if (ffmpegPath == null || ffmpegPath.length() == 0)
 	    {
-	       IO.SaveUrlConnectionToFile(connection, destination);
+	       throw new StoreException("Censorship is configured, but ffmpeg path is not set");
 	    }
-	    catch(IOException exception)
+	    File exe = new File(ffmpegPath, "ffmpeg");
+	    if (!exe.exists())
 	    {
-	       throw new StoreException(
-		  "Could not save " + url + " to " + destination.getPath(), exception);
-	    }	    
-	 } // not file URL
+	       throw new StoreException("Censorship is configured, but ffmpeg path is invalid: " + ffmpegPath);
+	    }
+
+	    // load the censorship layer
+	    Schema schema = getSchema();
+	    String[] censorshipLayers = {
+	       schema.getParticipantLayerId(),
+	       schema.getTurnLayerId(),
+	       schema.getUtteranceLayerId(),
+	       censorshipLayer };
+	    graph = getGraph(id, censorshipLayers);
+	    
+	    // get censorship boundaries
+	    Vector<Double> boundaries = new Vector<Double>();
+	    double lastEnd = 0.0;
+	    // get all censor annotations, sorted by anchor to ensure that if list returns
+	    // them out of order, they're processed in temporal order
+	    for (Annotation annotation : new AnnotationsByAnchor(graph.list(censorshipLayer)))
+	    {
+	       if (censorshipPattern.matcher(annotation.getLabel()).matches())
+	       { // matching annotation
+		  System.out.println("Censoring: " + annotation + " " + annotation.getStart() + "-" + annotation.getEnd());
+		  try
+		  {
+		     // ensure points don't go backwards, and use offset Min/Max to widen interval
+		     // when alignment is uncertain
+		     double start = annotation.getStart().getOffset().doubleValue();
+		     if (annotation.getStart().getConfidence() < Constants.CONFIDENCE_AUTOMATIC)
+		     { // uncertain start
+			// find the containing utterance, and use its start
+			Annotation turn = annotation.my(schema.getTurnLayerId());
+			for (Annotation line : turn.list(schema.getUtteranceLayerId()))
+			{
+			   if (line.includesOffset(start))
+			   { // found the containing utterance
+			      System.out.println("falling back to line start: " + line + " " + line.getStart() + "-" + line.getEnd());
+			      start = line.getStart().getOffset();
+			      if (line.getStart().getConfidence() < Constants.CONFIDENCE_AUTOMATIC)
+			      { // still uncertain start
+				 // use turn start
+				 System.out.println("falling back to turn start: " + turn + " " + turn.getStart() + "-" + turn.getEnd());
+				 start = turn.getStart().getOffset();
+			      }
+			      break;
+			   } // found the containing utterance
+			} // next line
+		     } // uncertain start
+		     // ensure doesn't got backwards
+		     start = Math.max(start, lastEnd);
+		     double end = annotation.getEnd().getOffset().doubleValue();
+		     if (annotation.getEnd().getConfidence() < Constants.CONFIDENCE_AUTOMATIC)
+		     { // uncertain end
+			// find the containing utterance, and use its end
+			Annotation turn = annotation.my(schema.getTurnLayerId());
+			for (Annotation line : turn.list(schema.getUtteranceLayerId()))
+			{
+			   if (line.includesOffset(end))
+			   { // found the containing utterance
+			      end = line.getEnd().getOffset();
+			      System.out.println("falling back to line end: " + line + " " + line.getStart() + "-" + line.getEnd());
+			      if (line.getEnd().getConfidence() < Constants.CONFIDENCE_AUTOMATIC)
+			      { // still uncertain end
+				 // use turn end
+				 System.out.println("falling back to turn end: " + turn + " " + turn.getStart() + "-" + line.getEnd());
+				 end = turn.getEnd().getOffset();
+			      }
+			      break;
+			   } // found the containing utterance
+			} // next line
+		     } // uncertain end
+		     
+		     // add interval
+		     boundaries.add(start);
+		     boundaries.add(end);
+		     
+		     lastEnd = end;
+		  }
+		  catch(NullPointerException exception)
+		  {
+		     // rollback possibl nullification of anchors, to give the most info possible
+		     annotation.getStart().rollback();
+		     annotation.getEnd().rollback();
+		     throw new StoreException("Uncertain boundaries for annotation: " + annotation
+					      + " ("+annotation.getStart()+"-"+annotation.getEnd()+")");
+		  }
+	       } // matching annotation
+	    } // next annotation
+
+	    // create a censor
+	    ParameterSet configuration = new ParameterSet();
+	    configuration.addParameter(new Parameter("ffmpegPath", exe.getParentFile()));
+	    configuration.addParameter(new Parameter("audioFilter", censorshipFfmpegAudioFilter));
+	    configuration.addParameter(new Parameter("deleteSource", Boolean.TRUE));
+	    IMediaCensor censor = new FfmpegCensor();
+	    censor.configure(configuration);
+
+	    // run the censor
+	    MediaThread thread = censor.start(mediaFile.getMimeType(), source, boundaries, destination);	    
+
+	 } // censorship required
+
       }
       catch (URISyntaxException urix)
       {
@@ -4209,19 +4379,7 @@ public class SqlGraphStore
       try
       {
 	 // for now only ffmpeg conversion is supported TODO
-	 PreparedStatement sql = getConnection().prepareStatement(
-	    "SELECT value FROM system_attribute WHERE name = 'ffmpegPath'");
-	 ResultSet rs = sql.executeQuery();
-	 if (!rs.next())
-	 {
-	    System.out.println("SqlGraphStore.generateMissingMedia: no ffmpegPath setting");
-	    rs.close();
-	    sql.close();
-	    return;
-	 }
-	 String ffmpegPath = rs.getString("value");
-	 rs.close();
-	 sql.close();
+	 String ffmpegPath = getSystemAttribute("ffmpegPath");
 	 if (ffmpegPath == null || ffmpegPath.length() == 0)
 	 {
 	    System.out.println("SqlGraphStore.generateMissingMedia: ffmpegPath not set");
@@ -4248,9 +4406,9 @@ public class SqlGraphStore
 
 	 // what media types do we want? (key=MIME type, value=extension)
 	 LinkedHashMap<String,String> wantedTypes = new LinkedHashMap<String,String>();
-	 sql = getConnection().prepareStatement(
+	 PreparedStatement sql = getConnection().prepareStatement(
 	    "SELECT mimetype, extension FROM media_type WHERE on_demand = 0 ORDER BY mimetype");
-	 rs = sql.executeQuery();
+	 ResultSet rs = sql.executeQuery();
 	 while (rs.next())
 	 {
 	    wantedTypes.put(rs.getString("mimetype"), rs.getString("extension"));
@@ -4348,5 +4506,39 @@ public class SqlGraphStore
       }
       
    } // end of generateMissingMedia()
+
+   
+   /**
+    * Gets the value of a system attribute.
+    * @param name Attribute name.
+    * @return The value of the system attribute, or null if there is no value.
+    * @throws SQLException
+    */
+   public String getSystemAttribute(String name)
+      throws SQLException
+   {
+      String value = null;
+      PreparedStatement sql = getConnection().prepareStatement(
+	 "SELECT value FROM system_attribute WHERE name = ?");
+      sql.setString(1, name);
+      try
+      {
+	 ResultSet rs = sql.executeQuery();
+	 try
+	 {
+	    if (rs.next()) value = rs.getString("value");
+	 }
+	 finally
+	 {
+	    rs.close();
+	 }
+      }
+      finally
+      {
+	 sql.close();
+      }
+      return value;
+   } // end of getSystemAttribute()
+
 
 } // end of class SqlGraphStore
