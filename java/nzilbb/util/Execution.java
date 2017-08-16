@@ -170,7 +170,9 @@ public class Execution
    {
       running = true;
       finished = false;
-      
+      input = new StringBuffer();
+      error = new StringBuffer();
+       
       Vector<String> vArguments = new Vector<String>();
       vArguments.add(exe.getPath());
       vArguments.addAll(arguments);
@@ -242,13 +244,13 @@ public class Execution
 	    {
 	       // data ready from error stream?
 	       int bytesRead = errStream.available();
-	       StringBuffer sErrors = new StringBuffer();
 	       while(bytesRead > 0)
 	       {
 		  // if there's data coming, sleep a shorter time
 		  iMSSleep = 1;	    
 		  bytesRead = errStream.read(buffer);
 		  error.append(new String(buffer, 0, bytesRead));
+		  System.err.println("Execution: " + exe.getName() + ": " + new String(buffer, 0, bytesRead));
 		  // data ready?
 		  bytesRead = errStream.available();
 	       } // next chunk of data
@@ -262,6 +264,7 @@ public class Execution
       }
       catch(IOException exception)
       {
+	 System.err.println("Execution: Could not execute: " + exception);
 	 error.append("Could not execute: " + exception);
       }
       finished = true;
