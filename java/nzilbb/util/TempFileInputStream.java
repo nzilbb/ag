@@ -29,7 +29,7 @@ import java.io.IOException;
 
 /**
  * An InputStream for one-off reading of a temporary file. 
- * When the stream is closed or finalized, the file is deleted.
+ * When the stream is closed or finalized, or when a configurable timeout lapses, the file is deleted.
  * This implementation uses a FileInputStream member, rather than inheriting from FileInputStream,
  * so that the stream is not opened until it's actually going to be read.  This ensures that a
  * huge collection of TempFileInputStream objects can be handled without running out of open file
@@ -85,6 +85,23 @@ public class TempFileInputStream
     */
    public void setDeleteOnClose(Boolean bNewDeleteOnClose) { bDeleteOnClose = bNewDeleteOnClose; }
    
+   /**
+    * Timeout after which, if the file still exists, it will be deleted.
+    * @see #getTimeoutMS()
+    * @see #setTimeoutMS(Long)
+    */
+   protected Long timeoutMS;
+   /**
+    * Getter for {@link #timeoutMS}: Timeout after which, if the file still exists, it will be deleted.
+    * @return Timeout after which, if the file still exists, it will be deleted.
+    */
+   public Long getTimeoutMS() { return timeoutMS; }
+   /**
+    * Setter for {@link #timeoutMS}: Timeout after which, if the file still exists, it will be deleted.
+    * @param newTimeoutMS Timeout after which, if the file still exists, it will be deleted.
+    */
+   public void setTimeoutMS(Long newTimeoutMS) { timeoutMS = newTimeoutMS; }
+   
    // Methods:
    
    /**
@@ -100,7 +117,33 @@ public class TempFileInputStream
       setTempFile(file);
    } // end of constructor
 
-   
+   /**
+    * Constructor. Doesn't open the file; that doesn't happen until some data is wanted.
+    * <br>Side-effect: deleteOnExit() is called on the file.
+    * @param file The file.
+    * @param timeoutMS Timeout after which, if the file still exists, it will be deleted.
+    * @throws FileNotFoundException If the file doesn't exist.
+    */
+   public TempFileInputStream(File file, Long timeoutMS)
+      throws FileNotFoundException
+   {
+      if (!file.exists()) throw new FileNotFoundException(file.getName());
+      setTempFile(file);
+      setTimeoutMS(timeoutMS);
+      if (timeoutMS != null)
+      {
+	 Thread deleteAfterTimeout = new Thread(new Runnable() {
+	       public void run() {
+		  try { Thread.sleep(getTimeoutMS()); } catch(Throwable t) {}
+		  if (getTempFile().exists())
+		  {
+		     getTempFile().delete();
+		  }
+	       }});
+	 deleteAfterTimeout.start();
+      }
+   } // end of constructor
+
    /**
     * Ensures the FileInputStream has been initialised.
     * @throws FileNotFoundException If the temporary file no longer exists.
