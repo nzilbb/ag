@@ -136,6 +136,7 @@
 	<ant antfile="text.xml" inheritAll="false" />
 	<ant antfile="tei.xml" inheritAll="false" />
 	<ant antfile="clan.xml" inheritAll="false" />
+	<ant antfile="est.xml" inheritAll="false" />
   </target>  
 
     
