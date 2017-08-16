@@ -71,6 +71,25 @@ public class MediaThread
     * @param newExecution The external process Execution object, if the thread was given one.
     */
    public void setExecution(Execution newExecution) { execution = newExecution; }
+
+   
+   /**
+    * Last error, if any.
+    * @see #getLastError()
+    * @see #setLastError(Throwable)
+    */
+   protected Throwable lastError;
+   /**
+    * Getter for {@link #lastError}: Last error, if any.
+    * @return Last error, if any.
+    */
+   public Throwable getLastError() { return lastError; }
+   /**
+    * Setter for {@link #lastError}: Last error, if any.
+    * @param newLastError Last error, if any.
+    */
+   public void setLastError(Throwable newLastError) { lastError = newLastError; }
+
    
    // Methods:
    
