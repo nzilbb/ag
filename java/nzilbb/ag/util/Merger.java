@@ -29,6 +29,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.ListIterator;
@@ -321,7 +322,6 @@ public class Merger
 	    else
 	    { // not already mapped
 	       Layer layer = a1.getLayer();
-	       Layer parent = layer.getParent();
 	       // check labels (ignoring punctuation etc.)
 	       if (!a1.getLabel().equals(a2.getLabel()))
 	       {
@@ -348,13 +348,20 @@ public class Merger
 
 	       // don't compare anchors for graph tag layers (i.e. unaligned children of graph)
 	       // nor for tags of graph tags layers (i.e. unaligned children of unaligned children of graph)
-	       boolean graphTagLayer = layer.getAlignment() == Constants.ALIGNMENT_NONE
-		  && layer.getParentId().equals("graph");
-	       boolean graphTagTagLayer = layer.getAlignment() == Constants.ALIGNMENT_NONE
-		  && parent != null
-		  && parent.getAlignment() == Constants.ALIGNMENT_NONE
-		  && parent.getParentId().equals("graph");
-	       if (!graphTagLayer && !graphTagTagLayer)
+	       LinkedHashSet<Layer> layerLineage = new LinkedHashSet<Layer>();
+	       layerLineage.add(layer);
+	       layerLineage.addAll(layer.getAncestors());
+	       boolean graphTagLayer = !layer.getId().equals("graph");
+	       for (Layer l : layerLineage)
+	       {
+		  if (l.getAlignment() != Constants.ALIGNMENT_NONE
+		      && !l.getId().equals("graph"))
+		  {
+		     graphTagLayer = false;
+		     break;
+		  }
+	       } // next layer in lineage
+	       if (!graphTagLayer)
 	       {
 		  // an instant cannot map to a non-instant
 		  if (a1.getInstantaneous() != a2.getInstantaneous())
