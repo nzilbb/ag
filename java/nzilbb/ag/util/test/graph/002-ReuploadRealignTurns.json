@@ -11,6 +11,8 @@
         "who":{"description":"participants", "alignment":0,
           "peers":true, "peersOverlap":true, "parentIncludes":true, "saturated":true,
           "children":{
+            "main_participant":{"description":"Main Participant", "alignment":0,
+              "peers":false, "peersOverlap":false, "parentIncludes":true, "saturated":true},
             "turns":{"description":"turns", "alignment":2,
               "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
               "children":{
@@ -113,6 +115,8 @@
   },
   "who":[
     {"id":"Maxwell Smart",	"label":"Maxwell Smart",	"startId":"n_1010",	"endId":"n_1500",
+      "main_participant":[
+        {"id":"Main Maxwell Smart",	"label":"Maxwell Smart",	"startId":"n_1010",	"endId":"n_1500"}],
       "turns":[
         {"id":"em_11_1",	"label":"Maxwell Smart",	"startId":"n_1010",	"endId":"n_1100",	"confidence":100,
           "language":[

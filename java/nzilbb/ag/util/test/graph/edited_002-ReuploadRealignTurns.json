@@ -11,6 +11,8 @@
         "who":{"description":"participants", "alignment":0,
           "peers":true, "peersOverlap":true, "parentIncludes":true, "saturated":true,
           "children":{
+            "main_participant":{"description":"Main Participant", "alignment":0,
+              "peers":false, "peersOverlap":false, "parentIncludes":true, "saturated":true},
             "turns":{"description":"turns", "alignment":2,
               "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
               "children":{
@@ -31,6 +33,7 @@
       }}
   },
   "anchors":{
+    "n_0":	{"offset":0.0,	"confidence":100,	"comment":"STARTS WITH 0 ANCHOR NOT PRESENT IN ORIGINAL"},
     "n_1010":	{"offset":1.0,	"confidence":100},
     "n_1011":	{"offset":1.0,	"confidence":10},
     "n_1020":	{"offset":1.66666667,	"confidence":10},
@@ -85,7 +88,9 @@
     "n_1500":	{"offset":50.0,	"confidence":100}
   },
   "who":[
-    {"id":"Maxwell Smart",	"label":"Maxwell Smart",	"startId":"n_1010",	"endId":"n_1500",
+      {"id":"Maxwell Smart",	"label":"Maxwell Smart",	"startId":"n_0",	"endId":"n_1500",	"comment":"LINKS TO 0 ANCHOR INSTEAD OF n_1010",
+      "main_participant":[
+        {"id":"Main Maxwell Smart",	"label":"Maxwell Smart",	"startId":"n_0",	"endId":"n_1500"}],
       "turns":[
         {"id":"em_11_1",	"label":"Maxwell Smart",	"startId":"n_1010",	"endId":"n_1100",	"confidence":100,
           "language":[
@@ -152,7 +157,7 @@
           "utterances":[
             {"id":"em_12_31",	"label":"Maxwell Smart",	"startId":"n_1200",	"endId":"n_1300",	"confidence":100},
             {"id":"em_12_32",	"label":"Maxwell Smart",	"startId":"n_1300",	"endId":"n_1400",	"confidence":100}]}]},
-    {"id":"Ninety Nine",	"label":"Ninety Nine",	"startId":"n_1010",	"endId":"n_1500",
+      {"id":"Ninety Nine",	"label":"Ninety Nine",	"startId":"n_0",	"endId":"n_1500",	"comment":"LINKS TO 0 ANCHOR INSTEAD OF n_1010",
       "turns":[
         {"id":"em_11_2",	"label":"Ninety Nine",	"startId":"n_1100",	"endId":"n_1200",	"confidence":100,
           "transcript":[

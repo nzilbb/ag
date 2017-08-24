@@ -320,6 +320,8 @@ public class Merger
 	    }
 	    else
 	    { // not already mapped
+	       Layer layer = a1.getLayer();
+	       Layer parent = layer.getParent();
 	       // check labels (ignoring punctuation etc.)
 	       if (!a1.getLabel().equals(a2.getLabel()))
 	       {
@@ -327,8 +329,8 @@ public class Merger
 		  String s1 = a1.getLabel().replaceAll("[^\\p{javaLetter}\\p{javaDigit}]","").toLowerCase();
 		  String s2 = a2.getLabel().replaceAll("[^\\p{javaLetter}\\p{javaDigit}]","").toLowerCase();
 		  if (s1.length() <= 0 || s2.length() <= 0 
-		      || (a1.getLayer().containsKey("@type") 
-			  && a1.getLayer().get("@type").equals("D"))) // phonological layer TODO formalise layer types
+		      || (layer.containsKey("@type") 
+			  && layer.get("@type").equals("D"))) // phonological layer TODO formalise layer types
 		  {
 		     s1 = a1.getLabel();
 		     s2 = a2.getLabel(); // for all-punctuation annotations
@@ -344,89 +346,100 @@ public class Merger
 		  iWeight += (iDistance * iMagnifier);
 	       } // check labels
 
-	       // an instant cannot map to a non-instant
-	       if (a1.getInstantaneous() != a2.getInstantaneous())
+	       // don't compare anchors for graph tag layers (i.e. unaligned children of graph)
+	       // nor for tags of graph tags layers (i.e. unaligned children of unaligned children of graph)
+	       boolean graphTagLayer = layer.getAlignment() == Constants.ALIGNMENT_NONE
+		  && layer.getParentId().equals("graph");
+	       boolean graphTagTagLayer = layer.getAlignment() == Constants.ALIGNMENT_NONE
+		  && parent != null
+		  && parent.getAlignment() == Constants.ALIGNMENT_NONE
+		  && parent.getParentId().equals("graph");
+	       if (!graphTagLayer && !graphTagTagLayer)
 	       {
-		  iWeight += NO_WAY;
-	       }
-	       else
-	       { // neither an instant, or both an instant
-		  // are all offsets available?
-		  if (a1.getAnchored() && a2.getAnchored())
+		  // an instant cannot map to a non-instant
+		  if (a1.getInstantaneous() != a2.getInstantaneous())
 		  {
-		     // distance is as important as the reliability of the least reliable anchors
-		     // i.e. if a1 & a2 have matching alignments (both default, both user-aligned, etc.)
-		     // then the weight of the alignment is as heavy as the alignment
-		     // but if a1 has default alignments and a2 has user-alignments, then importance is low
-		     // because this is probably an alignment update or an unaligned update of aligned annotations
-		     // alternatively, if the annotation has a mixture of trustworthyness, weight will be higher
-		     double dImportance = Math.min(
-			(double)(getConfidence(a1.getStart()) + getConfidence(a1.getEnd())),
-			(double)(getConfidence(a2.getStart()) + getConfidence(a2.getEnd())))
-			// divided by CONFIDENCE_MANUAL, to make it near 1
-			/ (double)(Constants.CONFIDENCE_MANUAL * 2);
-		     // however, for "word" and "phone", which are frequently merged between aligned
-		     // and unaligned versions, and which should be merged by label only 
-		     // we ignore anchors
-		     if (a1.getLayerId().equals(schema.getWordLayerId()) // word layer
-			 // or (probably) phone layer
-			 || (a1.getLayer().getParentId().equals(schema.getWordLayerId())
-			     && a1.getLayer().getAlignment() == Constants.ALIGNMENT_INTERVAL))
+		     iWeight += NO_WAY;
+		  }
+		  else
+		  { // neither an instant, or both an instant
+		     // are all offsets available?
+		     if (a1.getAnchored() && a2.getAnchored())
 		     {
-			dImportance = 0.01;
-		     }			
-		     // instantaneous annotations need to have more similar offsets than intervals
-		     if (a1.getInstantaneous()) // && a2.getInstantaneous(), but we know it must be
-		     {
-			dImportance *= 2.0;
-		     }
-		     Double dDistance = a1.maxPairedDistance(a2);
-		     if (dDistance != null && dDistance != 0)
-		     {	
-			// we want to ensure that overlapping annotations are selected over non-overlapping ones
-			if (dImportance > 0)
+			// distance is as important as the reliability of the least reliable anchors
+			// i.e. if a1 & a2 have matching alignments (both default, both user-aligned, etc.)
+			// then the weight of the alignment is as heavy as the alignment
+			// but if a1 has default alignments and a2 has user-alignments, then importance is low
+			// because this is probably an alignment update or an unaligned update of aligned annotations
+			// alternatively, if the annotation has a mixture of trustworthyness, weight will be higher
+			double dImportance = Math.min(
+			   (double)(getConfidence(a1.getStart()) + getConfidence(a1.getEnd())),
+			   (double)(getConfidence(a2.getStart()) + getConfidence(a2.getEnd())))
+			   // divided by CONFIDENCE_MANUAL, to make it near 1
+			   / (double)(Constants.CONFIDENCE_MANUAL * 2);
+			// however, for "word" and "phone", which are frequently merged between aligned
+			// and unaligned versions, and which should be merged by label only 
+			// we ignore anchors
+			if (a1.getLayerId().equals(schema.getWordLayerId()) // word layer
+			    // or (probably) phone layer
+			    || (layer.getParentId().equals(schema.getWordLayerId())
+				&& layer.getAlignment() == Constants.ALIGNMENT_INTERVAL))
 			{
-			   if (dDistance > 0)
-			   { // no overlap
-			      // prefer overlap over none
-			      iWeight += (int)(dDistance * dImportance * 2);
-			   }
-			   else
-			   {  // overlap
-			      // when choosing between fragments of a split-up annotation, choose the 
-			      // fragment that overlaps the most
-			      double dOverlapMagnitude = Math.abs(a1.distance(a2))
-				 // but if the length difference is great, make it high cost anyway
-				 / ((a1.getDuration() + a2.getDuration())/2);
-			      dOverlapMagnitude *= 3; // soften the impact of this magically
-			      iWeight += (int)
-				 (Math.min(
-				    (double)NO_WAY, // make sure this tops out at NO_WAY, to avoid overflow
-				    Math.abs((-dDistance * dImportance / dOverlapMagnitude))));
-			   }
+			   dImportance = 0.01;
+			}			
+			// instantaneous annotations need to have more similar offsets than intervals
+			if (a1.getInstantaneous()) // && a2.getInstantaneous(), but we know it must be
+			{
+			   dImportance *= 2.0;
 			}
-			else 
-			{ 
-			   // while distance doesn't contribute to the weight, REALLY BIG distances shouldn't map
-			   if (dDistance > 0)
-			   { // no overlap
-			      if (dDistance > 30)
-			      {
-				 iWeight += NO_WAY;
+			Double dDistance = a1.maxPairedDistance(a2);
+			if (dDistance != null && dDistance != 0)
+			{	
+			   // we want to ensure that overlapping annotations are selected over non-overlapping ones
+			   if (dImportance > 0)
+			   {
+			      if (dDistance > 0)
+			      { // no overlap
+				 // prefer overlap over none
+				 iWeight += (int)(dDistance * dImportance * 2);
 			      }
-			      else if (Math.abs(a1.getDuration() - a2.getDuration()) > 10) // words differ in length by this much
-			      {
-				 iWeight += NO_WAY;
+			      else
+			      {  // overlap
+				 // when choosing between fragments of a split-up annotation, choose the 
+				 // fragment that overlaps the most
+				 double dOverlapMagnitude = Math.abs(a1.distance(a2))
+				    // but if the length difference is great, make it high cost anyway
+				    / ((a1.getDuration() + a2.getDuration())/2);
+				 dOverlapMagnitude *= 3; // soften the impact of this magically
+				 iWeight += (int)
+				    (Math.min(
+				       (double)NO_WAY, // make sure this tops out at NO_WAY, to avoid overflow
+				       Math.abs((-dDistance * dImportance / dOverlapMagnitude))));
 			      }
 			   }
-			   else
-			   { // overlap - should be too different at all
-			      if (-dDistance > 10)  iWeight += NO_WAY;
+			   else 
+			   { 
+			      // while distance doesn't contribute to the weight, REALLY BIG distances shouldn't map
+			      if (dDistance > 0)
+			      { // no overlap
+				 if (dDistance > 30)
+				 {
+				    iWeight += NO_WAY;
+				 }
+				 else if (Math.abs(a1.getDuration() - a2.getDuration()) > 10) // words differ in length by this much
+				 {
+				    iWeight += NO_WAY;
+				 }
+			      }
+			      else
+			      { // overlap - should be too different at all
+				 if (-dDistance > 10)  iWeight += NO_WAY;
+			      }
 			   }
-			}
-		     } // distant annotation
-		  } // all offsets are available
-	       } // neither an instant, or both an instant
+			} // distant annotation
+		     } // all offsets are available
+		  } // neither an instant, or both an instant
+	       } // not a graph tag
 	    } // not already mapped
 
 	    step.setStepDistance(iWeight);
