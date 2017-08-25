@@ -2990,8 +2990,8 @@ public class SqlGraphStore
 		  }
 		  catch(ParseException exception)
 		  {
-		     System.err.println("Error parsing turn id for "+annotation.getId()+": " + annotation.getParentId());
-		     throw new StoreException("Error parsing turn id for "+annotation.getId()+": " + annotation.getParentId(), exception);
+		     System.err.println("Error parsing turn id for "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParentId());
+		     throw new StoreException("Error parsing turn id for "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParentId(), exception);
 		  }
 	       }
 	       else
@@ -3005,8 +3005,8 @@ public class SqlGraphStore
 		     }
 		     catch(ParseException exception)
 		     {
-			System.err.println("Error parsing turn id for "+annotation.getId()+": " + annotation.getParentId());
-			throw new StoreException("Error parsing turn id for "+annotation.getId()+": " + annotation.getParentId(), exception);
+			System.err.println("Error parsing turn id for "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParentId());
+			throw new StoreException("Error parsing turn id for "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParentId(), exception);
 		     }
 		     sql.setInt(10, annotation.getOrdinal()); // ordinal_in_turn
 		     sql.setNull(11, java.sql.Types.INTEGER); // word_annotation_id - set it later
@@ -3029,8 +3029,8 @@ public class SqlGraphStore
 			}
 			catch(ParseException exception)
 			{
-			   System.err.println("Error parsing word ID for "+annotation.getId()+": " + annotation.getParentId());
-			   throw new StoreException("Error parsing word ID for "+annotation.getId()+": " + annotation.getParentId(), exception);
+			   System.err.println("Error parsing word ID for "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParentId());
+			   throw new StoreException("Error parsing word ID for "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParentId(), exception);
 			}
 		     }
 		     else 
@@ -3053,8 +3053,8 @@ public class SqlGraphStore
 			   }
 			   catch(ParseException exception)
 			   {
-			      System.err.println("Error parsing word ID for "+annotation.getId()+": " + annotation.getParentId());
-			      throw new StoreException("Error parsing word ID for "+annotation.getId()+": " + annotation.getParentId(), exception);
+			      System.err.println("Error parsing word ID for "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParentId());
+			      throw new StoreException("Error parsing word ID for "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParentId(), exception);
 			   }
 			}
 			else
@@ -3074,8 +3074,8 @@ public class SqlGraphStore
 			   }
 			   catch(ParseException exception)
 			   {
-			      System.err.println("Error parsing word ID for segment "+annotation.getId()+": " + annotation.getParent().getParentId());
-			      throw new StoreException("Error parsing word ID for segment "+annotation.getId()+": " + annotation.getParent().getParentId(), exception);
+			      System.err.println("Error parsing word ID for segment "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParent().getParentId());
+			      throw new StoreException("Error parsing word ID for segment "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParent().getParentId(), exception);
 			   }
 			   try
 			   {
@@ -3090,8 +3090,8 @@ public class SqlGraphStore
 			   }
 			   catch(ParseException exception)
 			   {
-			      System.err.println("Error parsing segment ID for "+annotation.getId()+": " + annotation.getParentId());
-			      throw new StoreException("Error parsing segment ID for "+annotation.getId()+": " + annotation.getParentId(), exception);
+			      System.err.println("Error parsing segment ID for "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParentId());
+			      throw new StoreException("Error parsing segment ID for "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParentId(), exception);
 			   }
 			} // other segment annotation
 		     } // segment annotation
