@@ -943,7 +943,6 @@ public class Graph
       getGraph().addAnnotation(span);
       return span;
    } // end of createSpan()
-
    
    /**
     * Creates a spanning annotation from the beginning of the start annotation to the ending of the end annotation. The parent annotation is guessed, if possible, from <var>from</var> or <var>to</var>
@@ -989,6 +988,23 @@ public class Graph
       }
       return createSpan(from, to, layerId, label, parent);
    } // end of createSpan()
+
+   /**
+    * Creates an annotation starting at <var>from</var> and ending at <var>to</var>.
+    * @param from The start anchor.
+    * @param to The end anchor.
+    * @param layerId The layer ID of the resulting annotation.
+    * @param label The label of the resulting annotation.
+    * @param parent The new annotation's parent.
+    * @return The new annotation.
+    */
+   public Annotation createAnnotation(Anchor from, Anchor to, String layerId, String label, Annotation parent)
+   {
+      Annotation span = new Annotation(null, label, layerId, from.getId(), to.getId(), parent.getId());
+      getGraph().addAnnotation(span);
+      return span;
+   } // end of createAnnotation()
+
 
    // query methods
 
