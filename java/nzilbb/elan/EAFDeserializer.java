@@ -359,6 +359,29 @@ public class EAFDeserializer
     * @param bNewTranscriptOnly Whether to use text conventions for comment, noise, lexical, and pronounce annotations.
     */
    public void setUseConventions(Boolean bNewUseConventions) { bUseConventions = bNewUseConventions; }
+
+   
+   /**
+    * Minimum amount of time between two turns by the same speaker, with no intervening speaker, for which the inter-turn pause counts as a turn change boundary. If the pause is shorter than this, the turns are merged into one. Default is 0.0;
+    * @see #getMinimumTurnPauseLength()
+    * @see #setMinimumTurnPauseLength(Double)
+    */
+   protected Double minimumTurnPauseLength;
+   /**
+    * Getter for {@link #minimumTurnPauseLength}: Minimum amount of time between two turns by the same speaker, with no intervening speaker, for which the inter-turn pause counts as a turn change boundary. If the pause is shorter than this, the turns are merged into one.
+    * @return Minimum amount of time between two turns by the same speaker, with no intervening speaker, for which the inter-turn pause counts as a turn change boundary. If the pause is shorter than this, the turns are merged into one.
+    */
+   public Double getMinimumTurnPauseLength()
+   {
+      if (minimumTurnPauseLength == null) minimumTurnPauseLength = new Double(0.0);
+      return minimumTurnPauseLength;
+   }
+   /**
+    * Setter for {@link #minimumTurnPauseLength}: Minimum amount of time between two turns by the same speaker, with no intervening speaker, for which the inter-turn pause counts as a turn change boundary. If the pause is shorter than this, the turns are merged into one.
+    * @param newMinimumTurnPauseLength Minimum amount of time between two turns by the same speaker, with no intervening speaker, for which the inter-turn pause counts as a turn change boundary. If the pause is shorter than this, the turns are merged into one.
+    */
+   public void setMinimumTurnPauseLength(Double newMinimumTurnPauseLength) { minimumTurnPauseLength = newMinimumTurnPauseLength; }
+
    
    // IStreamDeserializer methods:
    
@@ -369,7 +392,7 @@ public class EAFDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "ELAN EAF Transcript", "0.2", "text/x-eaf+xml", ".eaf", "20170314.1631", getClass().getResource("icon.png"));
+	 "ELAN EAF Transcript", "0.3", "text/x-eaf+xml", ".eaf", "20170314.1631", getClass().getResource("icon.png"));
    }
    
    /**
@@ -644,6 +667,18 @@ public class EAFDeserializer
       if (configuration.get("useConventions").getValue() == null)
       {
 	 configuration.get("useConventions").setValue(Boolean.TRUE);
+      }
+
+      if (!configuration.containsKey("minimumTurnPauseLength"))
+      {
+	 configuration.addParameter(
+	    new Parameter("minimumTurnPauseLength", Double.class, 
+			  "Min. Turn Pause Length",
+			  "Minimum amount of time between two turns by the same speaker, with no intervening speaker, for which the inter-turn pause counts as a turn change boundary. If the pause is shorter than this, the turns are merged into one.", true));
+      }
+      if (configuration.get("minimumTurnPauseLength").getValue() == null)
+      {
+	 configuration.get("minimumTurnPauseLength").setValue(new Double(0.0));
       }
 
       return configuration;
@@ -1238,13 +1273,32 @@ public class EAFDeserializer
 	 annotations.addAll(participant.getAnnotations(turnLayer.getId()));
 	 Annotation[] turns = annotations.toArray(new Annotation[0]);
 	 // go back through all the turns, looking for a turn for the same speaker that is
-	 // joined to, or overlaps, this one	 
+	 // joined to, or overlaps, this one
 	 for (int i = turns.length - 2; i >= 0; i--)
 	 {
 	    Annotation preceding = turns[i];
 	    Annotation following = turns[i + 1];
-	    if (preceding.getEnd().getOffset() != null && following.getStart().getOffset() != null
-		&& preceding.getEnd().getOffset() >= following.getStart().getOffset())
+	    boolean mergeTurns = false;
+	    if (preceding.getEnd().getOffset() != null
+		&& following.getStart().getOffset() != null)
+	    {
+	       if (preceding.getEnd().getOffset() >= following.getStart().getOffset())
+	       {
+		  mergeTurns = true;
+	       }
+	       else if (getMinimumTurnPauseLength() > 0
+			&& preceding.getEnd().getOffset() + getMinimumTurnPauseLength() >= following.getStart().getOffset())
+	       { // there is a short enough pause between two turns of the same participant
+		  // but there also must be no intervening speakers
+		  if (graph.overlappingAnnotations(
+			 preceding.getEnd(), following.getStart(), turnLayer.getId())
+		      .length == 0)
+		  {
+		     mergeTurns = true;
+		  }
+	       }
+	    }
+	    if (mergeTurns)
 	    {
 	       mergeTurns(preceding, following);
 	       following.destroy();
