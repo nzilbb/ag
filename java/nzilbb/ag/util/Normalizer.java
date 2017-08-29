@@ -64,6 +64,27 @@ public class Normalizer
     */
    public void setMaxLabelLength(Integer newMaxLabelLength) { maxLabelLength = newMaxLabelLength; }
 
+   /**
+    * Minimum amount of time between two turns by the same speaker, with no intervening speaker, for which the inter-turn pause counts as a turn change boundary. If the pause is shorter than this, the turns are merged into one. Default is 0.0;
+    * @see #getMinimumTurnPauseLength()
+    * @see #setMinimumTurnPauseLength(Double)
+    */
+   protected Double minimumTurnPauseLength = 0.0;
+   /**
+    * Getter for {@link #minimumTurnPauseLength}: Minimum amount of time between two turns by the same speaker, with no intervening speaker, for which the inter-turn pause counts as a turn change boundary. If the pause is shorter than this, the turns are merged into one.
+    * @return Minimum amount of time between two turns by the same speaker, with no intervening speaker, for which the inter-turn pause counts as a turn change boundary. If the pause is shorter than this, the turns are merged into one.
+    */
+   public Double getMinimumTurnPauseLength()
+   {
+      if (minimumTurnPauseLength == null) minimumTurnPauseLength = 0.0;
+      return minimumTurnPauseLength;
+   }
+   /**
+    * Setter for {@link #minimumTurnPauseLength}: Minimum amount of time between two turns by the same speaker, with no intervening speaker, for which the inter-turn pause counts as a turn change boundary. If the pause is shorter than this, the turns are merged into one.
+    * @param newMinimumTurnPauseLength Minimum amount of time between two turns by the same speaker, with no intervening speaker, for which the inter-turn pause counts as a turn change boundary. If the pause is shorter than this, the turns are merged into one.
+    */
+   public void setMinimumTurnPauseLength(Double newMinimumTurnPauseLength) { minimumTurnPauseLength = newMinimumTurnPauseLength; }
+
       
    // Methods:
    
@@ -163,8 +184,27 @@ public class Normalizer
 	 {
 	    Annotation preceding = turns[i];
 	    Annotation following = turns[i + 1];
-	    if (preceding.getEnd().getOffset() != null && following.getStart().getOffset() != null
-		&& preceding.getEnd().getOffset() >= following.getStart().getOffset())
+	    boolean mergeTurns = false;
+	    if (preceding.getEnd().getOffset() != null
+		&& following.getStart().getOffset() != null)
+	    {
+	       if (preceding.getEnd().getOffset() >= following.getStart().getOffset())
+	       {
+		  mergeTurns = true;
+	       }
+	       else if (getMinimumTurnPauseLength() > 0
+			&& preceding.getEnd().getOffset() + getMinimumTurnPauseLength() >= following.getStart().getOffset())
+	       { // there is a short enough pause between two turns of the same participant
+		  // but there also must be no intervening speakers
+		  if (graph.overlappingAnnotations(
+			 preceding.getEnd(), following.getStart(), schema.getTurnLayerId())
+		      .length == 0)
+		  {
+		     mergeTurns = true;
+		  }
+	       }
+	    }
+	    if (mergeTurns)
 	    {
 	       changes.addAll( // record changes for:}
 		  mergeTurns(preceding, following));

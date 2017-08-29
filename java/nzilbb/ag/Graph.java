@@ -990,6 +990,56 @@ public class Graph
       return createSpan(from, to, layerId, label, parent);
    } // end of createSpan()
 
+   // query methods
+
+   
+   /**
+    * Returns a list of annotations that overlap with the given offset interval
+    * @param annotation Annotation whose bounds define the interval.
+    * @param layerId Layer to match.
+    * @return A possibly empty array of annotations.
+    */
+   public Annotation[] overlappingAnnotations(Annotation annotation, String layerId)  // TODO test
+   {
+      return overlappingAnnotations(annotation.getStart(), annotation.getEnd(), layerId);
+   } // end of overlappingAnnotations()
+   /**
+    * Returns a list of annotations that overlap with the offset interval defined by the given anchors.
+    * @param start Start anchor.
+    * @param end End anchor.
+    * @param layerId Layer to match.
+    * @return A possibly empty array of annotations.
+    */
+   public Annotation[] overlappingAnnotations(Anchor start, Anchor end, String layerId)  // TODO test
+   {
+      if (start == null || end == null || start.getOffset() == null || end.getOffset() == null)
+      {
+	 return null;
+      }
+      return overlappingAnnotations(start.getOffset(), end.getOffset(), layerId);
+   } // end of overlappingAnnotations()
+   /**
+    * Returns a list of annotations that overlap with the given offset interval.
+    * @param start Start offset of the interval.
+    * @param end End offset of the interval.
+    * @param layerId Layer to match.
+    * @return A possibly empty array of annotations.
+    */
+   public Annotation[] overlappingAnnotations(double start, double end, String layerId)  // TODO test
+   {
+      Vector<Annotation> matches = new Vector<Annotation>();
+      for (Annotation annotation : list(layerId))
+      {
+	 if (annotation.getAnchored()
+	     && annotation.getEnd().getOffset() > start
+	     && annotation.getStart().getOffset() < end)
+	 {
+	    matches.add(annotation);
+	 }
+      }
+      return matches.toArray(new Annotation[0]);
+   } // end of overlappingAnnotations()
+
 
    // Annotation overrides
 

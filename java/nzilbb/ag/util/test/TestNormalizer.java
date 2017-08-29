@@ -230,6 +230,430 @@ public class TestNormalizer
       }
    }
 
+   @Test public void joinTurnsNoMinimumTurnPauseLength() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");      
+      Layer[] layers = {
+	 new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+		   true, // peers
+		   true, // peersOverlap
+		   true), // saturated
+	 new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   false, // saturated
+		   "who", // parentId
+		   true), // parentIncludes
+	 new Layer("utterance", "Utterance", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   true, // saturated
+		   "turn", // parentId
+		   true), // parentIncludes
+	 new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   false, // saturated
+		   "turn", // parentId
+		   true), // parentIncludes
+	 new Layer("pos", "POS", Constants.ALIGNMENT_NONE,
+		   true, // peers
+		   true, // peersOverlap
+		   true, // saturated
+		   "word", // parentId
+		   true)}; // parentIncludes
+      g.setSchema(new Schema(layers, "who", "turn", "utterance", "word"));
+
+      g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
+
+      g.addAnchor(new Anchor("a0", 0.01, Constants.CONFIDENCE_DEFAULT)); // the
+      g.addAnchor(new Anchor("a01", 0.02, Constants.CONFIDENCE_DEFAULT)); // quick
+      g.addAnchor(new Anchor("a02", 0.03, Constants.CONFIDENCE_DEFAULT)); // brown
+      g.addAnchor(new Anchor("a03", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox
+      g.addAnchor(new Anchor("a04a", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox end
+
+      g.addAnchor(new Anchor("utteranceEnd", 0.4, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+      g.addAnchor(new Anchor("utteranceStart", 1.0, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+
+      g.addAnchor(new Anchor("a04b", 2.0, Constants.CONFIDENCE_AUTOMATIC)); // jumps
+      g.addAnchor(new Anchor("a14", 3.3, Constants.CONFIDENCE_AUTOMATIC)); // over
+      g.addAnchor(new Anchor("a24", 4.4, Constants.CONFIDENCE_AUTOMATIC)); // a
+      g.addAnchor(new Anchor("a34", 5.0, Constants.CONFIDENCE_AUTOMATIC)); // lazy
+      g.addAnchor(new Anchor("a44", 5.1, Constants.CONFIDENCE_AUTOMATIC)); // dog
+      g.addAnchor(new Anchor("a54", null)); // end of dog
+
+      g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE_MANUAL)); // turn end
+
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+      
+      g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turnStart", "utteranceEnd", "participant1"));
+      g.addAnnotation(new Annotation("turn2", "john smith", "turn", "utteranceStart", "turnEnd", "participant1"));
+
+      g.addAnnotation(new Annotation("utterance1", "john smith", "utterance", "turnStart", "utteranceEnd", "turn1"));
+      g.addAnnotation(new Annotation("utterance2", "john smith", "utterance", "utteranceStart", "turnEnd", "turn2"));
+      
+      g.addAnnotation(new Annotation("the",   "the",   "word", "a0",  "a01", "turn1"));
+      g.addAnnotation(new Annotation("quick", "quick", "word", "a01", "a02", "turn1"));
+      g.addAnnotation(new Annotation("brown", "brown", "word", "a02",  "a03", "turn1"));
+      g.addAnnotation(new Annotation("fox",   "fox",   "word", "a03", "a04a", "turn1"));
+
+      g.addAnnotation(new Annotation("jumps", "jumps", "word", "a04b",  "a14", "turn2"));
+      g.addAnnotation(new Annotation("over",  "over",  "word", "a14",  "a24", "turn2"));
+      g.addAnnotation(new Annotation("a",     "a",     "word", "a24",  "a34", "turn2"));
+      g.addAnnotation(new Annotation("lazy",  "lazy",  "word", "a34",  "a44", "turn2"));
+      g.addAnnotation(new Annotation("dog",  "dog",    "word", "a44",  "a54", "turn2"));
+
+      g.getAnnotation("jumps").setLabel("test");
+      g.createTag(g.getAnnotation("jumps"), "pos", "V");
+
+      Normalizer n = new Normalizer();
+      // no minimumTurnPauseLength, so the gap between turns is not bridged
+      try
+      {
+	 Vector<Change> changes = n.transform(g);
+
+	 assertEquals("changes: " + changes, 0, changes.size());
+
+	 assertEquals("turn1 not changed", "utteranceEnd", g.getAnnotation("turn1").getEndId());
+	 assertEquals("turn2 not changed", "utteranceStart", g.getAnnotation("turn2").getStartId());
+	 assertEquals("turn2 not deleted", Change.Operation.NoChange, g.getAnnotation("turn2").getChange());
+	 assertEquals("turn not changed", "turn2", g.getAnnotation("jumps").getParentId());
+	 assertEquals("turn not changed", "turn2", g.getAnnotation("over").getParentId());
+	 assertEquals("turn not changed", "turn2", g.getAnnotation("a").getParentId());
+	 assertEquals("turn not changed", "turn2", g.getAnnotation("lazy").getParentId());
+	 assertEquals("turn not changed", "turn2", g.getAnnotation("dog").getParentId());
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+   }
+
+   @Test public void joinTurnsMinimumTurnPauseLength() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");      
+      Layer[] layers = {
+	 new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+		   true, // peers
+		   true, // peersOverlap
+		   true), // saturated
+	 new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   false, // saturated
+		   "who", // parentId
+		   true), // parentIncludes
+	 new Layer("utterance", "Utterance", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   true, // saturated
+		   "turn", // parentId
+		   true), // parentIncludes
+	 new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   false, // saturated
+		   "turn", // parentId
+		   true), // parentIncludes
+	 new Layer("pos", "POS", Constants.ALIGNMENT_NONE,
+		   true, // peers
+		   true, // peersOverlap
+		   true, // saturated
+		   "word", // parentId
+		   true)}; // parentIncludes
+      g.setSchema(new Schema(layers, "who", "turn", "utterance", "word"));
+
+      g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
+
+      g.addAnchor(new Anchor("a0", 0.01, Constants.CONFIDENCE_DEFAULT)); // the
+      g.addAnchor(new Anchor("a01", 0.02, Constants.CONFIDENCE_DEFAULT)); // quick
+      g.addAnchor(new Anchor("a02", 0.03, Constants.CONFIDENCE_DEFAULT)); // brown
+      g.addAnchor(new Anchor("a03", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox
+      g.addAnchor(new Anchor("a04a", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox end
+
+      g.addAnchor(new Anchor("utteranceEnd", 0.4, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+      g.addAnchor(new Anchor("utteranceStart", 1.0, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+
+      g.addAnchor(new Anchor("a04b", 2.0, Constants.CONFIDENCE_AUTOMATIC)); // jumps
+      g.addAnchor(new Anchor("a14", 3.3, Constants.CONFIDENCE_AUTOMATIC)); // over
+      g.addAnchor(new Anchor("a24", 4.4, Constants.CONFIDENCE_AUTOMATIC)); // a
+      g.addAnchor(new Anchor("a34", 5.0, Constants.CONFIDENCE_AUTOMATIC)); // lazy
+      g.addAnchor(new Anchor("a44", 5.1, Constants.CONFIDENCE_AUTOMATIC)); // dog
+      g.addAnchor(new Anchor("a54", null)); // end of dog
+
+      g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE_MANUAL)); // turn end
+
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+      
+      g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turnStart", "utteranceEnd", "participant1"));
+      g.addAnnotation(new Annotation("turn2", "john smith", "turn", "utteranceStart", "turnEnd", "participant1"));
+
+      g.addAnnotation(new Annotation("utterance1", "john smith", "utterance", "turnStart", "utteranceEnd", "turn1"));
+      g.addAnnotation(new Annotation("utterance2", "john smith", "utterance", "utteranceStart", "turnEnd", "turn2"));
+      
+      g.addAnnotation(new Annotation("the",   "the",   "word", "a0",  "a01", "turn1"));
+      g.addAnnotation(new Annotation("quick", "quick", "word", "a01", "a02", "turn1"));
+      g.addAnnotation(new Annotation("brown", "brown", "word", "a02",  "a03", "turn1"));
+      g.addAnnotation(new Annotation("fox",   "fox",   "word", "a03", "a04a", "turn1"));
+
+      g.addAnnotation(new Annotation("jumps", "jumps", "word", "a04b",  "a14", "turn2"));
+      g.addAnnotation(new Annotation("over",  "over",  "word", "a14",  "a24", "turn2"));
+      g.addAnnotation(new Annotation("a",     "a",     "word", "a24",  "a34", "turn2"));
+      g.addAnnotation(new Annotation("lazy",  "lazy",  "word", "a34",  "a44", "turn2"));
+      g.addAnnotation(new Annotation("dog",  "dog",    "word", "a44",  "a54", "turn2"));
+
+      g.getAnnotation("jumps").setLabel("test");
+      g.createTag(g.getAnnotation("jumps"), "pos", "V");
+
+      Normalizer n = new Normalizer();
+      // minimum long enough to bridge the gap
+      n.setMinimumTurnPauseLength(1.0);
+      try
+      {
+	 Vector<Change> changes = n.transform(g);
+
+	 assertNotEquals("changes: " + changes, 0, changes.size());
+
+	 assertEquals("turn1 end later", "turnEnd", g.getAnnotation("turn1").getEndId());
+	 assertEquals("turn2 deleted", Change.Operation.Destroy, g.getAnnotation("turn2").getChange());
+	 assertEquals("turn changed", "turn1", g.getAnnotation("jumps").getParentId());
+	 assertEquals("turn changed", "turn1", g.getAnnotation("over").getParentId());
+	 assertEquals("turn changed", "turn1", g.getAnnotation("a").getParentId());
+	 assertEquals("turn changed", "turn1", g.getAnnotation("lazy").getParentId());
+	 assertEquals("turn changed", "turn1", g.getAnnotation("dog").getParentId());
+
+	 assertEquals("ordinal changed", 5, g.getAnnotation("jumps").getOrdinal());
+	 assertEquals("ordinal changed", 1, g.getAnnotation("jumps").getOriginalOrdinal());
+	 assertEquals("ordinal changed", 6, g.getAnnotation("over").getOrdinal());
+	 assertEquals("ordinal changed", 2, g.getAnnotation("over").getOriginalOrdinal());
+	 assertEquals("ordinal changed", 7, g.getAnnotation("a").getOrdinal());
+	 assertEquals("ordinal changed", 3, g.getAnnotation("a").getOriginalOrdinal());
+	 assertEquals("ordinal changed", 8, g.getAnnotation("lazy").getOrdinal());
+	 assertEquals("ordinal changed", 4, g.getAnnotation("lazy").getOriginalOrdinal());
+	 assertEquals("ordinal changed", 9, g.getAnnotation("dog").getOrdinal());
+	 assertEquals("ordinal changed", 5, g.getAnnotation("dog").getOriginalOrdinal());
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+   }
+
+   @Test public void joinTurnsMinimumTurnPauseLengthTooShort() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");      
+      Layer[] layers = {
+	 new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+		   true, // peers
+		   true, // peersOverlap
+		   true), // saturated
+	 new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   false, // saturated
+		   "who", // parentId
+		   true), // parentIncludes
+	 new Layer("utterance", "Utterance", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   true, // saturated
+		   "turn", // parentId
+		   true), // parentIncludes
+	 new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   false, // saturated
+		   "turn", // parentId
+		   true), // parentIncludes
+	 new Layer("pos", "POS", Constants.ALIGNMENT_NONE,
+		   true, // peers
+		   true, // peersOverlap
+		   true, // saturated
+		   "word", // parentId
+		   true)}; // parentIncludes
+      g.setSchema(new Schema(layers, "who", "turn", "utterance", "word"));
+
+      g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
+
+      g.addAnchor(new Anchor("a0", 0.01, Constants.CONFIDENCE_DEFAULT)); // the
+      g.addAnchor(new Anchor("a01", 0.02, Constants.CONFIDENCE_DEFAULT)); // quick
+      g.addAnchor(new Anchor("a02", 0.03, Constants.CONFIDENCE_DEFAULT)); // brown
+      g.addAnchor(new Anchor("a03", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox
+      g.addAnchor(new Anchor("a04a", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox end
+
+      g.addAnchor(new Anchor("utteranceEnd", 0.4, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+      g.addAnchor(new Anchor("utteranceStart", 1.0, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+
+      g.addAnchor(new Anchor("a04b", 2.0, Constants.CONFIDENCE_AUTOMATIC)); // jumps
+      g.addAnchor(new Anchor("a14", 3.3, Constants.CONFIDENCE_AUTOMATIC)); // over
+      g.addAnchor(new Anchor("a24", 4.4, Constants.CONFIDENCE_AUTOMATIC)); // a
+      g.addAnchor(new Anchor("a34", 5.0, Constants.CONFIDENCE_AUTOMATIC)); // lazy
+      g.addAnchor(new Anchor("a44", 5.1, Constants.CONFIDENCE_AUTOMATIC)); // dog
+      g.addAnchor(new Anchor("a54", null)); // end of dog
+
+      g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE_MANUAL)); // turn end
+
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+      
+      g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turnStart", "utteranceEnd", "participant1"));
+      g.addAnnotation(new Annotation("turn2", "john smith", "turn", "utteranceStart", "turnEnd", "participant1"));
+
+      g.addAnnotation(new Annotation("utterance1", "john smith", "utterance", "turnStart", "utteranceEnd", "turn1"));
+      g.addAnnotation(new Annotation("utterance2", "john smith", "utterance", "utteranceStart", "turnEnd", "turn2"));
+      
+      g.addAnnotation(new Annotation("the",   "the",   "word", "a0",  "a01", "turn1"));
+      g.addAnnotation(new Annotation("quick", "quick", "word", "a01", "a02", "turn1"));
+      g.addAnnotation(new Annotation("brown", "brown", "word", "a02",  "a03", "turn1"));
+      g.addAnnotation(new Annotation("fox",   "fox",   "word", "a03", "a04a", "turn1"));
+
+      g.addAnnotation(new Annotation("jumps", "jumps", "word", "a04b",  "a14", "turn2"));
+      g.addAnnotation(new Annotation("over",  "over",  "word", "a14",  "a24", "turn2"));
+      g.addAnnotation(new Annotation("a",     "a",     "word", "a24",  "a34", "turn2"));
+      g.addAnnotation(new Annotation("lazy",  "lazy",  "word", "a34",  "a44", "turn2"));
+      g.addAnnotation(new Annotation("dog",  "dog",    "word", "a44",  "a54", "turn2"));
+
+      g.getAnnotation("jumps").setLabel("test");
+      g.createTag(g.getAnnotation("jumps"), "pos", "V");
+
+      Normalizer n = new Normalizer();
+      // minimum is too short to bridge the gap
+      n.setMinimumTurnPauseLength(0.5);
+      try
+      {
+	 Vector<Change> changes = n.transform(g);
+
+	 assertEquals("changes: " + changes, 0, changes.size());
+
+	 assertEquals("turn1 not changed", "utteranceEnd", g.getAnnotation("turn1").getEndId());
+	 assertEquals("turn2 not changed", "utteranceStart", g.getAnnotation("turn2").getStartId());
+	 assertEquals("turn2 not deleted", Change.Operation.NoChange, g.getAnnotation("turn2").getChange());
+	 assertEquals("turn not changed", "turn2", g.getAnnotation("jumps").getParentId());
+	 assertEquals("turn not changed", "turn2", g.getAnnotation("over").getParentId());
+	 assertEquals("turn not changed", "turn2", g.getAnnotation("a").getParentId());
+	 assertEquals("turn not changed", "turn2", g.getAnnotation("lazy").getParentId());
+	 assertEquals("turn not changed", "turn2", g.getAnnotation("dog").getParentId());
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+   }
+
+   @Test public void joinTurnsMinimumTurnPauseLengthInterveningSpeaker() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");      
+      Layer[] layers = {
+	 new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+		   true, // peers
+		   true, // peersOverlap
+		   true), // saturated
+	 new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   false, // saturated
+		   "who", // parentId
+		   true), // parentIncludes
+	 new Layer("utterance", "Utterance", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   true, // saturated
+		   "turn", // parentId
+		   true), // parentIncludes
+	 new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   false, // saturated
+		   "turn", // parentId
+		   true), // parentIncludes
+	 new Layer("pos", "POS", Constants.ALIGNMENT_NONE,
+		   true, // peers
+		   true, // peersOverlap
+		   true, // saturated
+		   "word", // parentId
+		   true)}; // parentIncludes
+      g.setSchema(new Schema(layers, "who", "turn", "utterance", "word"));
+
+      g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
+
+      g.addAnchor(new Anchor("a0", 0.01, Constants.CONFIDENCE_DEFAULT)); // the
+      g.addAnchor(new Anchor("a01", 0.02, Constants.CONFIDENCE_DEFAULT)); // quick
+      g.addAnchor(new Anchor("a02", 0.03, Constants.CONFIDENCE_DEFAULT)); // brown
+      g.addAnchor(new Anchor("a03", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox
+      g.addAnchor(new Anchor("a04a", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox end
+
+      g.addAnchor(new Anchor("utteranceEnd", 0.4, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+      g.addAnchor(new Anchor("ao1", 0.5, Constants.CONFIDENCE_DEFAULT)); // yes start
+      g.addAnchor(new Anchor("ao2", 0.9, Constants.CONFIDENCE_DEFAULT)); // yes end
+      g.addAnchor(new Anchor("utteranceStart", 1.0, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+
+      g.addAnchor(new Anchor("a04b", 2.0, Constants.CONFIDENCE_AUTOMATIC)); // jumps
+      g.addAnchor(new Anchor("a14", 3.3, Constants.CONFIDENCE_AUTOMATIC)); // over
+      g.addAnchor(new Anchor("a24", 4.4, Constants.CONFIDENCE_AUTOMATIC)); // a
+      g.addAnchor(new Anchor("a34", 5.0, Constants.CONFIDENCE_AUTOMATIC)); // lazy
+      g.addAnchor(new Anchor("a44", 5.1, Constants.CONFIDENCE_AUTOMATIC)); // dog
+      g.addAnchor(new Anchor("a54", null)); // end of dog
+
+      g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE_MANUAL)); // turn end
+
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+      g.addAnnotation(new Annotation("participant2", "jane doe", "who", "turnStart", "turnEnd", "my graph"));
+      
+      g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turnStart", "utteranceEnd", "participant1"));
+      g.addAnnotation(new Annotation("turnOther", "jane doe", "turn", "utteranceEnd", "utteranceStart", "participant2"));
+      g.addAnnotation(new Annotation("turn2", "john smith", "turn", "utteranceStart", "turnEnd", "participant1"));
+
+      g.addAnnotation(new Annotation("utterance1", "john smith", "utterance", "turnStart", "utteranceEnd", "turn1"));
+      g.addAnnotation(new Annotation("utteranceOther", "jane doe", "utterance", "utteranceEnd", "utteranceStart", "turnOther"));
+      g.addAnnotation(new Annotation("utterance2", "john smith", "utterance", "utteranceStart", "turnEnd", "turn2"));
+      
+      g.addAnnotation(new Annotation("the",   "the",   "word", "a0",  "a01", "turn1"));
+      g.addAnnotation(new Annotation("quick", "quick", "word", "a01", "a02", "turn1"));
+      g.addAnnotation(new Annotation("brown", "brown", "word", "a02",  "a03", "turn1"));
+      g.addAnnotation(new Annotation("fox",   "fox",   "word", "a03", "a04a", "turn1"));
+
+      g.addAnnotation(new Annotation("yes",   "yes",   "word", "ao1", "ao2", "turnOther"));
+
+      g.addAnnotation(new Annotation("jumps", "jumps", "word", "a04b",  "a14", "turn2"));
+      g.addAnnotation(new Annotation("over",  "over",  "word", "a14",  "a24", "turn2"));
+      g.addAnnotation(new Annotation("a",     "a",     "word", "a24",  "a34", "turn2"));
+      g.addAnnotation(new Annotation("lazy",  "lazy",  "word", "a34",  "a44", "turn2"));
+      g.addAnnotation(new Annotation("dog",  "dog",    "word", "a44",  "a54", "turn2"));
+
+      g.getAnnotation("jumps").setLabel("test");
+      g.createTag(g.getAnnotation("jumps"), "pos", "V");
+
+      Normalizer n = new Normalizer();
+      // minimum long enough to bridge the gap, but there's an intervening speaker
+      n.setMinimumTurnPauseLength(1.0);
+      try
+      {
+	 Vector<Change> changes = n.transform(g);
+
+	 assertEquals("changes: " + changes, 0, changes.size());
+
+	 assertEquals("turn1 not changed", "utteranceEnd", g.getAnnotation("turn1").getEndId());
+	 assertEquals("turn2 not changed", "utteranceStart", g.getAnnotation("turn2").getStartId());
+	 assertEquals("turn2 not deleted", Change.Operation.NoChange, g.getAnnotation("turn2").getChange());
+	 assertEquals("turn not changed", "turn2", g.getAnnotation("jumps").getParentId());
+	 assertEquals("turn not changed", "turn2", g.getAnnotation("over").getParentId());
+	 assertEquals("turn not changed", "turn2", g.getAnnotation("a").getParentId());
+	 assertEquals("turn not changed", "turn2", g.getAnnotation("lazy").getParentId());
+	 assertEquals("turn not changed", "turn2", g.getAnnotation("dog").getParentId());
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+   }
+
    @Test public void disconnectFromTurnsUtterances() 
    {
       Graph g = new Graph();
