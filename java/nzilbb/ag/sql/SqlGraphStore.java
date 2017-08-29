@@ -1145,6 +1145,13 @@ public class SqlGraphStore
       try
       {
 	 Graph graph = new Graph();
+	 Schema mainSchema = getSchema();
+	 graph.getSchema().setParticipantLayerId(mainSchema.getParticipantLayerId());
+	 graph.getSchema().setTurnLayerId(mainSchema.getTurnLayerId());
+	 graph.getSchema().setUtteranceLayerId(mainSchema.getUtteranceLayerId());
+	 graph.getSchema().setWordLayerId(mainSchema.getWordLayerId());
+	 graph.getSchema().setEpisodeLayerId(mainSchema.getEpisodeLayerId());
+	 graph.getSchema().setCorpusLayerId(mainSchema.getCorpusLayerId());
 
 	 PreparedStatement sql = getConnection().prepareStatement(
 	    "SELECT transcript.*, transcript_family.name AS series,"
