@@ -106,7 +106,6 @@ public class SimpleTokenizer
     * @param newTokensInSourceLayer Whether the tokens should be in the source layer (true) or the destination layer (false).
     */
    public void setTokensInSourceLayer(boolean newTokensInSourceLayer) { tokensInSourceLayer = newTokensInSourceLayer; }
-
    
    // Methods:
    
@@ -183,9 +182,22 @@ public class SimpleTokenizer
       for (Annotation parent : graph.list(sourceParent.getId()))
       {
 	 int ordinal = 0;
+	 // we'll build a new list of children in the right order
+	 Vector<Annotation> newChildren = new Vector<Annotation>();
+	 boolean changedOrdinals = false;
 	 for (Annotation source : new Vector<Annotation>(parent.getAnnotations(getSourceLayerId())))
 	 {
-	    if (ordinal == 0) ordinal = source.getOrdinal(); // start with first ordinal found
+	    if (ordinal == 0)
+	    {
+	       if (getTokensInSourceLayer())
+	       {
+		  ordinal = source.getOrdinal(); // start with first ordinal found
+	       }
+	       else
+	       {
+		  ordinal = 1;
+	       }
+	    }
 	    String[] tokens = regexDelimiters.split(source.getLabel());
 	    
 	    if (getTokensInSourceLayer())
@@ -196,10 +208,21 @@ public class SimpleTokenizer
 		  // check the ordinal
 		  if (source.getOrdinal() != ordinal)
 		  {
-		     changes.addAll( // track changes of
-			source.setOrdinal(ordinal));
+		     if (!sharedParent)
+		     {
+			changes.addAll( // track changes of
+			   source.setOrdinal(ordinal));
+		     }
+		     else
+		     {
+			// don't change the ordinal yet, as it will move peers
+			// - we'll just correct the whole lot in one pass at the end
+			source.put("@newOrdinal", ordinal);
+			changedOrdinals = true;
+		     }
 		  }
 		  ordinal++;
+		  newChildren.add(source);
 		  continue;
 	       }
 	       
@@ -237,23 +260,49 @@ public class SimpleTokenizer
 		  graph.addAnchor(end);
 		  changes.addAll(end.getChanges());
 	       }
+	       // don't immediately set the parent,
+	       // as it forces appending of children in Graph.addAnnotation() which can be slow
+	       // so we do one pass at the end
 	       Annotation token = new Annotation(
 		  null, sToken, 
 		  getTokensInSourceLayer()?getSourceLayerId():getDestinationLayerId(), 
-		  start.getId(), end.getId(), 
-		  sharedParent?source.getParentId():source.getId());
-	       graph.addAnnotation(token);
-	       if (getTokensInSourceLayer())
+		  start.getId(), end.getId());
+	       if (getTokensInSourceLayer() || sharedParent)
 	       {
-		  token.setOrdinal(ordinal);
+		  // explicitly set the ordinal
+		  token.setOrdinal(ordinal);//);
 		  ordinal++;
 	       }
+	       changedOrdinals = true;
+	       graph.addAnnotation(token);	
+	       newChildren.add(token);
 	       changes.addAll(token.getChanges());
-
+	       if (!sharedParent)
+	       {
+		  changes.addAll( // track changes of
+		     token.setParent(sharedParent?source.getParent():source, false));
+	       }
 	       // the next annotation's start will be this one's end
 	       start = end;
 	    } // next token
 	 } // next source annotation
+	 
+	 if (changedOrdinals && sharedParent)
+	 {
+	    // correct ordinals
+	    for (Annotation child : newChildren) child.setParent(null);
+	    for (Annotation child : newChildren)
+	    {
+	       child.setParent(null);
+	       if (child.containsKey("@newOrdinal"))
+	       {
+		  changes.addAll( // track changes of
+		     child.setOrdinal((Integer)child.get("@newOrdinal")));
+	       }
+	       child.setParent(parent, false);
+	    }
+	 }
+	 
       } // next parent
       return changes;
    }
