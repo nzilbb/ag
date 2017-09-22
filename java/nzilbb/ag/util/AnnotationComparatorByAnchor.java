@@ -77,11 +77,13 @@ public class AnnotationComparatorByAnchor
 	 {
 	    if (o2StartOffset != o2EndOffset)
 	    {
+	       // System.out.println("end same as start: " + o1 + " < " + o2 + " (" + o1Start + " < " + o2Start + ")");
 	       return -9;
 	    }
 	 }
 	 else if (o2StartOffset == o2EndOffset)
 	 {
+	    // System.out.println("start same as end: " + o1 + " > " + o2 + " (" + o1Start + " < " + o2Start + ")");
 	    return 9;
 	 }
 
@@ -128,7 +130,7 @@ public class AnnotationComparatorByAnchor
       }
 
       // anchors/layers the same, compare ordinal
-      if (o1.getParentId() != null && o1.getParentId().equals(o1.getParentId())
+      if (o1.getParentId() != null && o1.getParentId().equals(o2.getParentId())
 	  && o1.getAssignedOrdinal() != 0 && o2.getAssignedOrdinal() != 0)
       {
 	 int o1Ordinal = o1.getAssignedOrdinal();

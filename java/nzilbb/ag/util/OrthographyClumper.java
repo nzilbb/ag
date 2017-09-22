@@ -87,7 +87,6 @@ public class OrthographyClumper implements IGraphTransformer
     */
    public void setPartitionLayerId(String newPartitionLayerId) { partitionLayerId = newPartitionLayerId; }
 
-   
    // Methods
 
    /** 
@@ -135,6 +134,11 @@ public class OrthographyClumper implements IGraphTransformer
 	 Annotation last = null;
 	 Annotation toPrepend = null;
 	 Anchor prependEnd = null;
+	 
+	 // we'll build a new list of children in the right order
+	 Vector<Annotation> newChildren = new Vector<Annotation>();
+	 boolean changedOrdinals = false;
+	 
 	 for (Annotation token : parent.getAnnotations(getWordLayerId()))
 	 {
 	    if (token.getLabel().replaceAll(nonOrthoCharacterPattern, "").length() == 0)
@@ -161,7 +165,7 @@ public class OrthographyClumper implements IGraphTransformer
 		  // move childen to last token
 		  for (String childLayerId : token.getAnnotations().keySet())
 		  {
-		     for (Annotation child : token.getAnnotations().get(childLayerId))
+		     for (Annotation child : new Vector<Annotation>(token.getAnnotations().get(childLayerId)))
 		     {
 			changes.addAll( // register change of:
 			   child.setParent(last));
@@ -195,7 +199,7 @@ public class OrthographyClumper implements IGraphTransformer
 			// move childen to token
 			for (String childLayerId : token.getAnnotations().keySet())
 			{
-			   for (Annotation child : token.getAnnotations().get(childLayerId))
+			   for (Annotation child : new Vector<Annotation>(token.getAnnotations().get(childLayerId)))
 			   {
 			      changes.addAll( // register change of:
 				 child.setParent(toPrepend));
@@ -223,8 +227,12 @@ public class OrthographyClumper implements IGraphTransformer
 		  { // no intevening annotations/pauses
 		     changes.addAll( // register change of:
 			token.setLabel(toPrepend.getLabel() + " " + token.getLabel()));
-		     changes.addAll( // register change of:
-			token.setOrdinal(toPrepend.getOrdinal()));
+		     // changes.addAll( // register change of:
+		     // 	token.setOrdinal(toPrepend.getOrdinal()));
+		     // don't change the ordinal yet, as it will move peers
+		     // - we'll just correct the whole lot in one pass at the end
+		     token.put("@newOrdinal", toPrepend.getOrdinal());
+		     changedOrdinals = true;
 
 		     Anchor oldStart = token.getStart();
 		     // move all annotations that end at last.end to token.end
@@ -237,7 +245,7 @@ public class OrthographyClumper implements IGraphTransformer
 		     // move childen to last token
 		     for (String childLayerId : toPrepend.getAnnotations().keySet())
 		     {
-			for (Annotation child : toPrepend.getAnnotations().get(childLayerId))
+			for (Annotation child : new Vector<Annotation>(toPrepend.getAnnotations().get(childLayerId)))
 			{
 			   changes.addAll( // register change of:
 			      child.setParent(token));
@@ -252,8 +260,10 @@ public class OrthographyClumper implements IGraphTransformer
 	       } // something to prepend
 	       else if (last != null)
 	       {
-		  changes.addAll( // register change of:
-		     token.setOrdinal(last.getOrdinal() + 1));
+		  // changes.addAll( // register change of:
+		  //    token.setOrdinal(last.getOrdinal() + 1));
+		  token.put("@newOrdinal", last.getOrdinal() + 1);
+		  changedOrdinals = true;
 	       }
 	       last = token;
 	    } //orthographic 'word'
@@ -264,6 +274,19 @@ public class OrthographyClumper implements IGraphTransformer
 	    // so don't delete it
 	    toPrepend.rollback(); // TODO remove the change
 	    // System.out.println("unremoving final " + toPrepend);
+	 }
+
+	 if (changedOrdinals)
+	 {
+	    // correct ordinals
+	    for (Annotation child : newChildren) child.setParent(null);
+	    for (Annotation child : newChildren)
+	    {
+	       child.setParent(null);
+	       changes.addAll( // track changes of
+		  child.setOrdinal((Integer)child.get("@newOrdinal")));
+	       child.setParent(parent, false);
+	    }
 	 }
 
       } // next utterance

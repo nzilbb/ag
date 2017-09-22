@@ -474,8 +474,19 @@ public class Annotation
       {
 	 if (currentParent.getAnnotations().containsKey(getLayerId()))
 	 {
-	    SortedSet<Annotation> currentSiblings = currentParent.getAnnotations(getLayerId());
-	    currentSiblings.remove(this);
+	    SortedSet<Annotation> currentSiblings = currentParent.getAnnotations().get(getLayerId());
+	    // TODO instead of using remove, which is broken for some reason (dodgy comparator somehow??)
+	    // TODO we iterate and remove ourselves	    
+	    //currentSiblings.remove(this);
+	    Iterator<Annotation> iCurrentSiblings = currentSiblings.iterator();
+	    while (iCurrentSiblings.hasNext())
+	    {
+	       if (iCurrentSiblings.next() == this)
+	       {
+	    	  iCurrentSiblings.remove();
+	    	  break;
+	       }
+	    } // next sibling
 	 }
       }
       else if (currentParent == null && newParent != null)
@@ -1828,6 +1839,7 @@ public class Annotation
     */ 
    public int compareTo(Annotation o)
    {
+      if (this == o) return 0;
       if (this.equals(o)) return 0;
       if (getParentId() != null && getParentId().equals(o.getParentId())
 	  && this.ordinal != 0 && o.ordinal != 0
