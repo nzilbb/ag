@@ -38,6 +38,7 @@ import nzilbb.ag.*;
 import nzilbb.ag.util.Validator;
 import nzilbb.ag.util.Normalizer;
 import nzilbb.ag.serialize.util.NamedStream;
+import nzilbb.util.Timers;
 import nzilbb.text.*;
 
 public class TestPlainTextDeserializer
@@ -71,8 +72,8 @@ public class TestPlainTextDeserializer
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals("Configuration parameters" + configuration,
-		   7, deserializer.configure(configuration, schema).size());      
+      assertEquals("Configuration parameters" + configuration, 9,
+		   deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertEquals("noise", "noise", 
@@ -86,6 +87,10 @@ public class TestPlainTextDeserializer
 		   new Integer(20), configuration.get("maxParticipantLength").getValue());
       assertEquals("maxHeaderLines",
 		   new Integer(50), configuration.get("maxHeaderLines").getValue());
+      assertEquals("participantFormat", "{0}: ",
+		   configuration.get("participantFormat").getValue());
+      assertEquals("metaDataFormat", "{0}={1}",
+		   configuration.get("metaDataFormat").getValue());
 
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -212,7 +217,7 @@ public class TestPlainTextDeserializer
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals("Configuration parameters" + configuration, 7, deserializer.configure(configuration, schema).size());      
+      assertEquals("Configuration parameters" + configuration, 9, deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertEquals("noise", "noise", 
@@ -226,6 +231,10 @@ public class TestPlainTextDeserializer
 		   new Integer(20), configuration.get("maxParticipantLength").getValue());
       assertEquals("maxHeaderLines",
 		   new Integer(50), configuration.get("maxHeaderLines").getValue());
+      assertEquals("participantFormat", "{0}: ",
+		   configuration.get("participantFormat").getValue());
+      assertEquals("metaDataFormat", "{0}={1}",
+		   configuration.get("metaDataFormat").getValue());
 
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -394,7 +403,7 @@ public class TestPlainTextDeserializer
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals("Configuration parameters" + configuration, 7, deserializer.configure(configuration, schema).size());      
+      assertEquals("Configuration parameters" + configuration, 9, deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertNull("noise", configuration.get("noiseLayer").getValue());
@@ -405,6 +414,10 @@ public class TestPlainTextDeserializer
 		   new Integer(20), configuration.get("maxParticipantLength").getValue());
       assertEquals("maxHeaderLines",
 		   new Integer(50), configuration.get("maxHeaderLines").getValue());
+      assertEquals("participantFormat", "{0}: ",
+		   configuration.get("participantFormat").getValue());
+      assertEquals("metaDataFormat", "{0}={1}",
+		   configuration.get("metaDataFormat").getValue());
 
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -539,7 +552,7 @@ public class TestPlainTextDeserializer
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals("Configuration parameters" + configuration, 7, deserializer.configure(configuration, schema).size());      
+      assertEquals("Configuration parameters" + configuration, 9, deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertEquals("noise", "noise", 
@@ -553,6 +566,10 @@ public class TestPlainTextDeserializer
 		   new Integer(20), configuration.get("maxParticipantLength").getValue());
       assertEquals("maxHeaderLines",
 		   new Integer(50), configuration.get("maxHeaderLines").getValue());
+      assertEquals("participantFormat", "{0}: ",
+		   configuration.get("participantFormat").getValue());
+      assertEquals("metaDataFormat", "{0}={1}",
+		   configuration.get("metaDataFormat").getValue());
 
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -631,6 +648,120 @@ public class TestPlainTextDeserializer
       Annotation[] noises = g.list("noise");
       assertEquals(1, noises.length);
       assertEquals("click", noises[0].getLabel());
+
+   }
+
+   @Test public void cmsw() 
+      throws Exception
+   {
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("title", "Title", 0, true, true, true),
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("comment", "Comment", 2, true, false, true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true));
+      
+      // access file
+      NamedStream[] streams = {
+	 new NamedStream(new File(getDir(), "cmsw-0002.txt")) }; // transcript
+      
+      // create deserializer
+      PlainTextDeserializer deserializer = new PlainTextDeserializer();
+
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      
+      // adjust patterns for participant and meta-data
+      configuration.get("participantFormat").setValue("Author(s): {0}");
+      configuration.get("metaDataFormat").setValue("{0}: {1}");
+      // also don't use speech conventions
+      configuration.get("useConventions").setValue(Boolean.FALSE);
+	 
+      assertEquals("Configuration parameters" + configuration, 9, deserializer.configure(configuration, schema).size());      
+      assertEquals("comment", "comment", 
+		   ((Layer)configuration.get("commentLayer").getValue()).getId());
+      assertNull("noise", configuration.get("noiseLayer").getValue());
+      assertNull("lexical", configuration.get("lexicalLayer").getValue());
+      assertNull("pronounce", configuration.get("pronounceLayer").getValue());
+      assertEquals("use conventions", Boolean.FALSE, configuration.get("useConventions").getValue());
+      assertEquals("maxParticipantLength",
+		   new Integer(20), configuration.get("maxParticipantLength").getValue());
+      assertEquals("maxHeaderLines",
+		   new Integer(50), configuration.get("maxHeaderLines").getValue());
+      assertEquals("participantFormat", "Author(s): {0}",
+		   configuration.get("participantFormat").getValue());
+      assertEquals("metaDataFormat", "{0}: {1}",
+		   configuration.get("metaDataFormat").getValue());
+
+      // load the stream
+      ParameterSet defaultParameters = deserializer.load(streams, schema);
+      // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals(2, defaultParameters.size());
+      assertEquals("title", "title", 
+		   ((Layer)defaultParameters.get("header_Title").getValue()).getId());
+      assertNull("no document number", defaultParameters.get("header_Document ").getValue());
+      
+      // configure the deserialization
+      deserializer.setParameters(defaultParameters);
+
+      // no parameters, so configuration required - don't call deserializer.setParameters(defaultParameters);
+
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+      
+      for (String warning : deserializer.getWarnings())
+      {
+	 System.out.println(warning);
+      }
+      
+      assertEquals("ID", "cmsw-0002.txt", g.getId());
+      assertEquals("time units", Constants.UNIT_CHARACTERS, g.getOffsetUnits());
+      assertEquals("Title meta-data", "An Essay on the Scoto-English Dialect", g.my("title").getLabel());
+
+      // participants     
+      Annotation[] authors = g.list("who"); 
+      assertEquals(1, authors.length);
+      assertEquals("Collin, Zacharias", authors[0].getLabel());
+
+      // turns
+      Annotation[] turns = g.list("turn");
+      assertEquals(1, turns.length);
+      // assertEquals(new Double(0.0), turns[0].getStart().getOffset());
+      // assertEquals("turn ends at end of recording",
+      // 		   new Double(5.2941875), turns[0].getEnd().getOffset());
+      assertEquals("Collin, Zacharias", turns[0].getLabel());
+      assertEquals(authors[0], turns[0].getParent());
+      
+      // utterances
+      Annotation[] utterances = g.list("utterance");
+      assertEquals(3331, utterances.length);
+      // assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
+      // assertEquals("utterance ends at end of recording",
+      // 		   new Double(5.2941875), utterances[0].getEnd().getOffset());
+      // assertEquals("test", utterances[0].getParent().getLabel());
+      for (int l = 0; l < utterances.length; l++)
+      {
+	 assertEquals("turn for line " + (l+1), turns[0], utterances[l].getParent());
+      } // next line
+      Annotation[] words = g.list("word");
+      //assertEquals(804, words.length);
+      String[] checkWords = {
+	 "gurellough,", "you", "may", "do,", "2nd", "tense,", "D", "2196.",
+	 "grussyn,", "we", "did,", "3rd", "tense,", "R", "1341.",
+	 "gruga", "(that)", "I", "did,", "3rd", "tense,", "D", "1434.",
+	 "When", "the", "present", "participle", "governs", "a", "pronoun,", "it", "is"};
+      for (int w = 0; w < checkWords.length; w++)
+      {
+	 assertEquals("check word " + w + ": " + checkWords[w], checkWords[w], words[w].getLabel());
+      } // next word
+
+      Annotation[] comments = g.list("comment");
+      assertEquals(1, comments.length);
+      assertEquals("Header comment",
+		   "Corpus of Modern Scottish Writing (CMSW) - www.scottishcorpus.ac.uk/cmsw/", comments[0].getLabel());
 
    }
 

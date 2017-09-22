@@ -381,7 +381,7 @@ public class PlainTextDeserializer
     * @see #getParticipantFormat()
     * @see #setParticipantFormat(String)
     */
-   protected String participantFormat = "{0}: "; // TODO make this configurable
+   protected String participantFormat = "{0}: ";
    /**
     * Getter for {@link #participantFormat}: Format for marking a change of turn within the transcript body.
     * @return Format for marking a change of turn within the transcript body.
@@ -392,6 +392,23 @@ public class PlainTextDeserializer
     * @param newParticipantFormat Format for marking a change of turn within the transcript body.
     */
    public void setParticipantFormat(String newParticipantFormat) { participantFormat = newParticipantFormat; }
+   
+   /**
+    * Format for a meta-data line. Default pattern is "{0}={1}".  <tt>{0}</tt> is a place-holder for the attribute name or key, and <tt>{1}</tt> is a place-holder for the attribute value.
+    * @see #getMetaDataFormat()
+    * @see #setMetaDataFormat(String)
+    */
+   protected String metaDataFormat = "{0}={1}";
+   /**
+    * Getter for {@link #metaDataFormat}: Format for a meta-data line.
+    * @return Format for a meta-data line.
+    */
+   public String getMetaDataFormat() { return metaDataFormat; }
+   /**
+    * Setter for {@link #metaDataFormat}: Format for a meta-data line.
+    * @param newMetaDataFormat Format for a meta-data line.
+    */
+   public void setMetaDataFormat(String newMetaDataFormat) { metaDataFormat = newMetaDataFormat; }
 
    /**
     * The maximum length of a parsed participant ID/name.  Default is 20.
@@ -727,6 +744,30 @@ public class PlainTextDeserializer
       {
 	 configuration.get("maxHeaderLines").setValue(new Integer(50));
       }
+      
+      if (!configuration.containsKey("participantFormat"))
+      {
+	 configuration.addParameter(
+	    new Parameter("participantFormat", String.class, 
+			  "Participant Format",
+			  "Format for marking a change of turn within the transcript body - e.g. {0}:, where {0} is a place-holder for the participant ID/name", true));
+      }
+      if (configuration.get("participantFormat").getValue() == null)
+      {
+	 configuration.get("participantFormat").setValue(participantFormat);
+      }
+      
+      if (!configuration.containsKey("metaDataFormat"))
+      {
+	 configuration.addParameter(
+	    new Parameter("metaDataFormat", String.class, 
+			  "Meta-data Format",
+			  "Format for a meta-data line in the header - e.g. {0}={1}, where {0} is a place-holder for the attribute name or key, and {1} is a place-holder for the attribute value", true));
+      }
+      if (configuration.get("metaDataFormat").getValue() == null)
+      {
+	 configuration.get("metaDataFormat").setValue(metaDataFormat);
+      }
 
       return configuration;
    }
@@ -893,24 +934,26 @@ public class PlainTextDeserializer
       } // there is a WAV file
 
       // if there are headers, we need to map them to layers
+      MessageFormat fmtMetaDataFormat = new MessageFormat(metaDataFormat);
       for (String header : getHeaderLines())
       {
 	 if (header.trim().length() == 0) continue;
-	 int equals = header.indexOf('=');
-	 if (equals >= 0)
-	 { // the line is a key=value pair
-	    String key = header.substring(0, equals);
+	 try
+	 {
+	    Object[] oMetaData = fmtMetaDataFormat.parse(header);
+	    String key = (String)oMetaData[0];
 	    Vector<String> possibleMatches = new Vector<String>();
 	    possibleMatches.add("transcript" + key);
 	    possibleMatches.add("participant" + key);
 	    possibleMatches.add("speaker" + key);
 	    possibleMatches.add(key);
-
+	    
 	    layerToPossibilities.put(
 	       new Parameter("header_"+key, Layer.class, "Header: " + key), 
 	       possibleMatches);
 	    layerToCandidates.put("header_"+key, metadataLayers);
 	 }
+	 catch(ParseException exception) {} // not parseable
       } // next header
 	 
       ParameterSet parameters = new ParameterSet();
@@ -1023,17 +1066,18 @@ public class PlainTextDeserializer
       HashMap<String,Annotation> participants = new HashMap<String,Annotation>();
       Annotation participant = new Annotation(null, "author", schema.getParticipantLayerId());
       Vector<Annotation> participantTags = new Vector<Annotation>();
+      MessageFormat fmtMetaDataFormat = new MessageFormat(metaDataFormat);
       for (String header : getHeaderLines())
       {
 	 if (header.trim().length() == 0) continue;
-	 int equals = header.indexOf('=');
-	 if (equals >= 0)
-	 { // the line is a key=value pair, save it as meta-data
-	    String key = header.substring(0, equals);
+	 try
+	 { // parse meta data header
+	    Object[] oMetaData = fmtMetaDataFormat.parse(header);
+	    String key = (String)oMetaData[0];
 	    Layer layer = (Layer)parameters.get("header_" + key).getValue();
 	    if (layer != null)
 	    {
-	       String value = header.substring(equals+1);
+	       String value = (String)oMetaData[1];
 	       if (layer.getParentId().equals(schema.getRoot().getId())) // graph tag
 	       {
 		  graph.createTag(graph, layer.getId(), value);
@@ -1043,8 +1087,8 @@ public class PlainTextDeserializer
 		  participantTags.add(new Annotation(null, value, layer.getId()));
 	       }
 	    }
-	 }
-	 else
+	 } // parse meta data header
+	 catch(ParseException exception) // not parseable
 	 { // add the header line as a comment
 	    if (getCommentLayer() != null)
 	    {
