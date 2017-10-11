@@ -30,7 +30,7 @@ public class Constants
 {
 
    /** API version */
-   public static final String VERSION = "20170829.1615";
+   public static final String VERSION = "20171011.1854";
    
    /** Standardized possible value for anchor offset or annotation label confidence - no confidence. Value is 0. */
    public static final int CONFIDENCE_NONE = 0;
@@ -74,6 +74,8 @@ public class Constants
    public static final String TYPE_IPA = "ipa";
    /** Possible value for {@link Layer#getType()} representing a number - "number". */
    public static final String TYPE_NUMBER = "number";
+   /** Possible value for {@link Layer#getType()} representing a number - "number". */
+   public static final String TYPE_BOOLEAN = "boolean";
    /** Possible value for {@link Layer#getType()} representing a string value select from a closed set of possibilities - "select". 
     * @see Layer#getValidLabels()
     */

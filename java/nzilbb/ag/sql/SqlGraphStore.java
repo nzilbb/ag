@@ -446,6 +446,24 @@ public class SqlGraphStore
 	    layer.setPeersOverlap(rs.getInt("peers_overlap") == 1);
 	    layer.setSaturated(rs.getInt("saturated") == 1);
 
+	    if (rs.getString("type").equals("N")
+		|| rs.getString("type").equals("integer"))
+	    {
+	       layer.setType(Constants.TYPE_NUMBER);
+	    }
+	    else if (rs.getString("type").equals("D"))
+	    {
+	       layer.setType(Constants.TYPE_IPA);
+	    }
+	    else if (rs.getString("type").equals("boolean"))
+	    {
+	       layer.setType(Constants.TYPE_BOOLEAN);
+	    }
+	    else
+	    {
+	       layer.setType(Constants.TYPE_STRING);
+	    }
+
 	    // other attributes
 	    layer.put("@layer_id", new Integer(rs.getInt("layer_id")));
 	    layer.put("@type", rs.getString("type"));
@@ -497,6 +515,24 @@ public class SqlGraphStore
 	       layer.setPeers(true);
 	       layer.setPeersOverlap(false);
 	       layer.setSaturated(true);
+	       
+	       if (rs.getString("type").equals("N")
+		   || rs.getString("type").equals("integer"))
+	       {
+		  layer.setType(Constants.TYPE_NUMBER);
+	       }
+	       else if (rs.getString("type").equals("D"))
+	       {
+		  layer.setType(Constants.TYPE_IPA);
+	       }
+	       else if (rs.getString("type").equals("boolean"))
+	       {
+		  layer.setType(Constants.TYPE_BOOLEAN);
+	       }
+	       else
+	       {
+		  layer.setType(Constants.TYPE_STRING);
+	       }
 
 	       // other attributes
 	       layer.put("@class_id", rs.getString("class_id"));
@@ -558,6 +594,24 @@ public class SqlGraphStore
 		  layer.setPeersOverlap(false);
 		  layer.setSaturated(true);
 		  
+		  if (rs.getString("type").equals("N")
+		      || rs.getString("type").equals("integer"))
+		  {
+		     layer.setType(Constants.TYPE_NUMBER);
+		  }
+		  else if (rs.getString("type").equals("D"))
+		  {
+		     layer.setType(Constants.TYPE_IPA);
+		  }
+		  else if (rs.getString("type").equals("boolean"))
+		  {
+		     layer.setType(Constants.TYPE_BOOLEAN);
+		  }
+		  else
+		  {
+		     layer.setType(Constants.TYPE_STRING);
+		  }
+
 		  // other attributes
 		  layer.put("@class_id", rs.getString("class_id"));
 		  layer.put("@attribute", rs.getString("attribute"));
@@ -599,7 +653,7 @@ public class SqlGraphStore
 	       {
 		  throw new StoreException("Layer not found: " + id);
 	       }
-	    } // not a transcript attribute
+	    } // not a participant attribute
 	 } // not a temporal layer
       }
       catch(SQLException exception)
@@ -768,7 +822,7 @@ public class SqlGraphStore
 	 subexpression = subexpression.trim();
 	 if (subexpression.length() == 0) continue;
 	 String operator = null;
-	 String[] operators = {"="," MATCHES ", " IN "};
+	 String[] operators = {"=","<=",">=","<",">"," MATCHES ", " IN "};
 	 String[] operands = null;
 	 for (String op : operators)
 	 {
@@ -952,7 +1006,7 @@ public class SqlGraphStore
 	 subexpression = subexpression.trim();
 	 if (subexpression.length() == 0) continue;
 	 String operator = null;
-	 String[] operators = {"="," MATCHES ", " IN "};
+	 String[] operators = {" = "," <= "," >= "," < "," > "," MATCHES ", " IN "};
 	 String[] operands = null;
 	 for (String op : operators)
 	 {
@@ -969,11 +1023,13 @@ public class SqlGraphStore
 	 String sqlLhs = null;
 	 String sqlOperator = operator.equals("MATCHES")?"REGEXP":operator;
 	 String sqlRhs = null;
+	 PreparedStatement sqlAttribute = getConnection().prepareStatement(
+	    "SELECT * FROM attribute_definition WHERE CONCAT('transcript_', attribute) = ?");
 	 for (String operand : operands)
 	 {
 	    operand = operand.trim();
 	    String sqlOperand = null;
-	    if (operand.equals("id"))
+	    if (operand.equals("id") || operand.equals("my('graph').label"))
 	    {
 	       sqlOperand = "transcript_id";
 	    }
@@ -988,6 +1044,17 @@ public class SqlGraphStore
 		  +" INNER JOIN speaker ON transcript_speaker.speaker_number = speaker.speaker_number"
 		  +" WHERE transcript_speaker.ag_id = transcript.ag_id)";
 	    }
+	    else if (operand.startsWith("my('") && operand.endsWith("').label"))
+	    { // an attribute?
+	       String layerId = operand.replaceFirst("my\\('","").replaceFirst("'\\)\\.label$","");
+	       sqlOperand = "(SELECT value"
+		  +" FROM transcript_attribute"
+		  +" WHERE transcript_attribute.ag_id = transcript.ag_id"
+		  +" AND transcript_attribute.name = '"+layerId
+		  .replaceFirst("^transcript_", "")
+		  .replaceAll("\\'", "\\\\'")
+		  +"')";
+	    } // an attribute?
 	    else
 	    {
 	       sqlOperand = operand;
@@ -1001,6 +1068,7 @@ public class SqlGraphStore
 	       sqlRhs = sqlOperand;
 	    }
 	 } // next operand
+	 sqlAttribute.close();
 	 conditions.append(conditions.length() == 0?" WHERE ":" AND ");
 	 conditions.append(sqlLhs);
 	 conditions.append(" ");
