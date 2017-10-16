@@ -40,6 +40,7 @@ public class TestGraph
       Graph g = new Graph();
       g.setId("my graph");
       assertEquals("my graph", g.getId());
+      assertEquals("my graph", g.getLabel());
    }
 
    @Test public void extendedAttributes() 
@@ -213,7 +214,7 @@ public class TestGraph
 
 
       // graph inherits from annotation, but some annotation behavrious are special
-      assertNull(g.getLabel());
+      assertEquals(g.getId(), g.getLabel());
       assertEquals("graph", g.getLayerId());
       assertNotNull("graph", g.getLayer());
       assertEquals("who", turn1.getLayer().getParentId());
@@ -1708,6 +1709,9 @@ public class TestGraph
       g.addAnnotation(turn2);
       g.addAnnotation(utterance3);
       g.addAnnotation(yes);
+
+      assertEquals("layerId: graph", "graph", g.getLayerId());
+      assertEquals("my: graph", g, g.my("graph"));
 
       assertEquals("my: parent", turn1, the.my("turn"));
       assertEquals("my: ancestor", who1, the.my("who"));

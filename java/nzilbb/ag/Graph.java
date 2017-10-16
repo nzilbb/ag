@@ -1357,6 +1357,24 @@ public class Graph
    { 
       return schema.getRoot();
    }
+   /**
+    * Getter for <i>layerId</i>: The graph's layer ID, which is by definition the root of its schema.
+    * @return The annotation's layer ID.
+    * @see #getSchema()
+    * @see Schema#getRoot()
+    */
+   public String getLayerId() 
+   { 
+      return schema.getRoot().getId();
+   }
+   /**
+    * Getter for <i>label</i>: The label for the whole graph, which is defined as it's ID.
+    * @return The graph's label.
+    */
+   public String getLabel() 
+   { 
+      return getId();
+   }
 
    /**
     * Getter for {@link #graph}: The annotation's annotation graph.
