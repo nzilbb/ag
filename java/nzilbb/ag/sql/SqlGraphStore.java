@@ -822,7 +822,7 @@ public class SqlGraphStore
 	 subexpression = subexpression.trim();
 	 if (subexpression.length() == 0) continue;
 	 String operator = null;
-	 String[] operators = {"=","<=",">=","<",">"," MATCHES ", " IN "};
+	 String[] operators = {" = "," <= "," >= "," < "," > "," MATCHES ", " IN "};
 	 String[] operands = null;
 	 for (String op : operators)
 	 {
@@ -843,7 +843,7 @@ public class SqlGraphStore
 	 {
 	    operand = operand.trim();
 	    String sqlOperand = null;
-	    if (operand.equals("id"))
+	    if (operand.equals("id") || operand.equals("my('who').label"))
 	    {
 	       sqlOperand = "speaker.name";
 	    }
@@ -854,6 +854,25 @@ public class SqlGraphStore
 		  +" INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id"
 		  +" WHERE speaker_corpus.speaker_number = speaker.speaker_number)";
 	    }
+	    else if (operand.equals("my('corpus').label"))
+	    {
+	       // TODO technically, a participant can be in more than one corpus - this matches only the first one
+	       sqlOperand = "(SELECT corpus.corpus_name"
+		  +" FROM speaker_corpus"
+		  +" INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id"
+		  +" WHERE speaker_corpus.speaker_number = speaker.speaker_number LIMIT 1)";
+	    }
+	    else if (operand.startsWith("my('") && operand.endsWith("').label"))
+	    { // an attribute?
+	       String layerId = operand.replaceFirst("my\\('","").replaceFirst("'\\)\\.label$","");
+	       sqlOperand = "(SELECT value"
+		  +" FROM speaker_attribute"
+		  +" WHERE speaker_attribute.speaker_number = speaker.speaker_number"
+		  +" AND speaker_attribute.name = '"+layerId
+		  .replaceFirst("^participant_", "")
+		  .replaceAll("\\'", "\\\\'")
+		  +"')";
+	    } // an attribute?
 	    else
 	    {
 	       sqlOperand = operand;
