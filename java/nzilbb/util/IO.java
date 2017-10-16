@@ -141,6 +141,19 @@ public class IO
    public static long Pump(InputStream input, OutputStream output)
     throws IOException
    {
+      return Pump(input, output, true);
+   }
+   /**
+    * Copy all data from an input stream to an output stream.
+    * @param input Source of data.
+    * @param output Destination for data.
+    * @param closeStreams true if the streams should be closed after the data is exhausted, false otherwise.
+    * @return The number of bytes copied.
+    * @throws IOException On file IO error.
+    */
+   public static long Pump(InputStream input, OutputStream output, boolean closeStreams)
+    throws IOException
+   {
       long totalBytes = 0;
       
       byte[] buffer = new byte[1024];
@@ -152,8 +165,11 @@ public class IO
 	 bytesRead = input.read(buffer);
       } // next chunk	
       output.flush();
-      output.close();
-      input.close();
+      if (closeStreams)
+      {
+	 output.close();
+	 input.close();
+      }
 
       return totalBytes;
    } // end of Pump()
