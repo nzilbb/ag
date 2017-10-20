@@ -501,7 +501,8 @@ public class SqlGraphStore
 	    
 	    // maybe a transcript attribute
 	    sql = getConnection().prepareStatement(
-	       "SELECT * FROM attribute_definition WHERE CONCAT('transcript_', attribute) = ?");
+	       "SELECT * FROM attribute_definition WHERE CONCAT('transcript_', attribute) = ?"
+	       +" AND class_id = 'transcript'");
 	    sql.setString(1, id);
 	    rs = sql.executeQuery();
 	    if (rs.next())
@@ -579,7 +580,8 @@ public class SqlGraphStore
 	       
 	       // maybe a participant attribute
 	       sql = getConnection().prepareStatement(
-		  "SELECT * FROM attribute_definition WHERE CONCAT('participant_', attribute) = ?");
+		  "SELECT * FROM attribute_definition WHERE CONCAT('participant_', attribute) = ?"
+		  +" AND class_id = 'speaker'");
 	       sql.setString(1, id);
 	       rs = sql.executeQuery();
 	       if (rs.next())
