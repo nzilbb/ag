@@ -225,7 +225,12 @@ public class Normalizer
 	    final Anchor oldStart = word.getStart();
 
 	    // create a new anchor
-	    final Anchor newStart = new Anchor(null, word.getStart().getOffset(), Constants.CONFIDENCE_DEFAULT); 
+	    final Anchor newStart = new Anchor(
+	       null, word.getStart().getOffset(),
+	       // if the word end has the same confidence, just copy it, otherwise use "default"
+	       oldStart.getConfidence() != null
+	       && oldStart.getConfidence().equals(word.getEnd().getConfidence())?
+	       oldStart.getConfidence():Constants.CONFIDENCE_DEFAULT);
 	    graph.addAnchor(newStart);
 	    changes.addAll(newStart.getChanges());
 
@@ -252,7 +257,12 @@ public class Normalizer
 	    final Anchor oldEnd = word.getEnd();
 
 	    // create a new anchor
-	    final Anchor newEnd = new Anchor(null, word.getEnd().getOffset(), Constants.CONFIDENCE_DEFAULT); 
+	    final Anchor newEnd = new Anchor(
+	       null, word.getEnd().getOffset(),
+	       // if the word start has the same confidence, just copy it, otherwise use "default"
+	       word.getEnd().getConfidence() != null
+	       && oldEnd.getConfidence().equals(word.getStart().getConfidence())?
+	       oldEnd.getConfidence():Constants.CONFIDENCE_DEFAULT); 
 	    graph.addAnchor(newEnd);
 	    changes.addAll(newEnd.getChanges());
 
