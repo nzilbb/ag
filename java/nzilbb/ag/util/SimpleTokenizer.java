@@ -106,6 +106,25 @@ public class SimpleTokenizer
     * @param newTokensInSourceLayer Whether the tokens should be in the source layer (true) or the destination layer (false).
     */
    public void setTokensInSourceLayer(boolean newTokensInSourceLayer) { tokensInSourceLayer = newTokensInSourceLayer; }
+
+   
+   /**
+    * The confidence of anchors created in graphs for which {@link Graph#offsetUnits} == {@link Constants#UNIT_CHARACTERS}. Default is {@link Constants#CONFIDENCE_MANUAL}
+    * <p>For graphs of text, the anchors offsets represent the number of characters since the beginning, so the when tokenizing, the offsets can be set with high confidence to correspond to the lengh of the token labels.
+    * @see #getCharacterAnchorConfidence()
+    * @see #setCharacterAnchorConfidence(Long)
+    */
+   protected Integer characterAnchorConfidence = Constants.CONFIDENCE_MANUAL;
+   /**
+    * Getter for {@link #characterAnchorConfidence}: The confidence of anchors created in graphs for which {@link Graph#offsetUnits} == {@link Constants#UNIT_CHARACTERS}. Default is {@link Constants#CONFIDENCE_MANUAL} 
+    * @return The confidence of anchors created in graphs for which {@link Graph#offsetUnits} == {@link Constants#UNIT_CHARACTERS}.
+    */
+   public Integer getCharacterAnchorConfidence() { return characterAnchorConfidence; }
+   /**
+    * Setter for {@link #characterAnchorConfidence}: The confidence of anchors created in graphs for which {@link Graph#offsetUnits} == {@link Constants#UNIT_CHARACTERS}. 
+    * @param newCharacterAnchorConfidence The confidence of anchors created in graphs for which {@link Graph#offsetUnits} == {@link Constants#UNIT_CHARACTERS}.
+    */
+   public void setCharacterAnchorConfidence(Integer newCharacterAnchorConfidence) { characterAnchorConfidence = newCharacterAnchorConfidence; }
    
    // Methods:
    
@@ -248,6 +267,7 @@ public class SimpleTokenizer
 	       if (graph.getOffsetUnits() == Constants.UNIT_CHARACTERS) 
 	       {
 		  end.setOffset(start.getOffset() + (double)(sToken.length() + 1));
+		  end.setConfidence(characterAnchorConfidence);
 	       }
 	       if (t == tokens.length - 1)
 	       { // last token

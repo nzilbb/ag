@@ -60,10 +60,10 @@ public class TestSimpleTokenizer
 			   "turn", // parentId
 			   true)); // parentIncludes
 
-      g.addAnchor(new Anchor("a0", 0.0));
-      g.addAnchor(new Anchor("a1", 1.0));
-      g.addAnchor(new Anchor("a2", 2.0));
-      g.addAnchor(new Anchor("a3", 3.0));
+      g.addAnchor(new Anchor("a0", 0.0, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("a1", 1.0, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("a2", 2.0, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("a3", 3.0, Constants.CONFIDENCE_MANUAL));
 
       g.addAnnotation(new Annotation("participant1", "john smith", "who", "my graph"));
       g.addAnnotation(new Annotation("participant2", "jane doe", "who", "my graph"));
@@ -105,6 +105,21 @@ public class TestSimpleTokenizer
 	 assertEquals("lazy", words[1].getLabel());
 	 assertEquals("dog", words[2].getLabel());
 	 assertEquals("first word shares end with utterance", "a3", words[2].getEndId());
+
+	 for (Annotation word : g.list("word"))
+	 {
+	    if (!word.getStart().isStartOn("utterance"))
+	    {
+	       assertNull("Ensure word start anchors have no confidence: " + word + " - " + word.getStart() + ":" + word.getStart().getConfidence(),
+			  word.getStart().getConfidence());
+	    }
+	    if (!word.getEnd().isEndOn("utterance"))
+	    {
+	       assertNull("Ensure word end anchors have no confidence: " + word + " - " + word.getEnd() + ":" + word.getEnd().getConfidence(),
+			  word.getEnd().getConfidence());
+	    }
+	 } // next word
+	 
       }
       catch(TransformationException exception)
       {
@@ -143,10 +158,10 @@ public class TestSimpleTokenizer
 			   "turn", // parentId
 			   true)); // parentIncludes
 
-      g.addAnchor(new Anchor("a0", 0.0));
-      g.addAnchor(new Anchor("a1", 20.0));
-      g.addAnchor(new Anchor("a2", 31.0));
-      g.addAnchor(new Anchor("a3", 44.0));
+      g.addAnchor(new Anchor("a0", 0.0, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("a1", 20.0, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("a2", 31.0, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("a3", 44.0, Constants.CONFIDENCE_MANUAL));
 
       g.addAnnotation(new Annotation("participant1", "john smith", "who", "my graph"));
       g.addAnnotation(new Annotation("participant2", "jane doe", "who", "my graph"));
@@ -199,6 +214,14 @@ public class TestSimpleTokenizer
 	 assertEquals("dog", words[2].getLabel());
 	 assertEquals("offsets set", new Double(44), words[2].getEnd().getOffset());
 	 assertEquals("first word shares end with utterance", "a3", words[2].getEndId());
+	 
+	 for (Anchor a : g.getAnchors().values())
+	 {
+	    assertNotNull("ensure all anchors have confidence: " + a + ": " + a.getEndingAnnotations() + "." + a.getStartingAnnotations(),
+			  a.getConfidence());
+	    assertEquals("ensure all anchors have high confidence: " + a + " - " + a.getConfidence(),
+			 Constants.CONFIDENCE_MANUAL, a.getConfidence().longValue());
+	 }
       }
       catch(TransformationException exception)
       {
