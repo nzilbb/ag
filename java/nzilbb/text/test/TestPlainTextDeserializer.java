@@ -729,9 +729,9 @@ public class TestPlainTextDeserializer
       // turns
       Annotation[] turns = g.list("turn");
       assertEquals(1, turns.length);
-      // assertEquals(new Double(0.0), turns[0].getStart().getOffset());
-      // assertEquals("turn ends at end of recording",
-      // 		   new Double(5.2941875), turns[0].getEnd().getOffset());
+      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
+      assertEquals("turn ends at end of recording",
+      		   new Double(190946.0), turns[0].getEnd().getOffset());
       assertEquals("Collin, Zacharias", turns[0].getLabel());
       assertEquals(authors[0], turns[0].getParent());
       
@@ -762,6 +762,24 @@ public class TestPlainTextDeserializer
       assertEquals(1, comments.length);
       assertEquals("Header comment",
 		   "Corpus of Modern Scottish Writing (CMSW) - www.scottishcorpus.ac.uk/cmsw/", comments[0].getLabel());
+
+      for (Anchor a : g.getAnchors().values())
+      {
+	 if (a.getStartingAnnotations().size() + a.getEndingAnnotations().size() > 0)
+	 {
+	    assertNotNull("ensure all anchors have confidence: " + a + ": " + a.getEndingAnnotations() + "." + a.getStartingAnnotations(),
+			  a.getConfidence());
+	    assertEquals("ensure all anchors have high confidence: " + a, Constants.CONFIDENCE_MANUAL, a.getConfidence().longValue());
+	 }
+      }
+
+      // Normalizer normalizer = new Normalizer();
+      // normalizer.setMinimumTurnPauseLength(0.5); // TODO this should be configurable
+      // normalizer.transform(g);
+
+      // Validator v = new Validator();
+      // v.setFullValidation(true);
+      // v.transform(g);
 
    }
 
