@@ -73,10 +73,10 @@ public class SqlGraphStore
    protected MessageFormat fmtMetaAnnotationId = new MessageFormat("m_{0,number,0}_{1}");
 
    /** Format of annotation IDs for transcript attributes, where {0} = attribute and {1} = ag_id */
-   protected MessageFormat fmtTranscriptAttributeId = new MessageFormat("t_{0}_{1,number,0}");
+   protected MessageFormat fmtTranscriptAttributeId = new MessageFormat("t|{0}|{1,number,0}");
 
    /** Format of annotation IDs for participant attributes, where {0} = attribute and {1} = speaker number */
-   protected MessageFormat fmtParticipantAttributeId = new MessageFormat("p_{0}_{1,number,0}");
+   protected MessageFormat fmtParticipantAttributeId = new MessageFormat("p|{0}|{1,number,0}");
 
    /** Format of anchor IDs, where {0} = anchor_id */
    protected MessageFormat fmtAnchorId = new MessageFormat("n_{0,number,0}");
@@ -1076,6 +1076,17 @@ public class SqlGraphStore
 		  .replaceAll("\\'", "\\\\'")
 		  +"')";
 	    } // an attribute?
+	    else if (operand.startsWith("list('") && operand.endsWith("').length"))
+	    { // an attribute?
+	       String layerId = operand.replaceFirst("list\\('","").replaceFirst("'\\)\\.length$","");
+	       sqlOperand = "(SELECT COUNT(*)"
+		  +" FROM transcript_attribute"
+		  +" WHERE transcript_attribute.ag_id = transcript.ag_id"
+		  +" AND transcript_attribute.name = '"+layerId
+		  .replaceFirst("^transcript_", "") .replaceAll("\\'", "\\\\'") +"'"
+		  +" AND transcript_attribute.value <> ''" // empty values don't count
+		  +")";
+	    } // an attribute?
 	    else
 	    {
 	       sqlOperand = operand;
@@ -1198,26 +1209,7 @@ public class SqlGraphStore
    public Graph getGraph(String id) throws StoreException, PermissionException, GraphNotFoundException
 
    {
-      try
-      {
-	 // in layer_id order, to ensure that comment parents (transcript & turn) are loaded first
-	 PreparedStatement sql = getConnection().prepareStatement(
-	    "SELECT short_description FROM layer ORDER BY layer_id");
-	 ResultSet rs = sql.executeQuery();
-	 Vector<String> layerIds = new Vector<String>();
-	 while (rs.next())
-	 {
-	    layerIds.add(rs.getString("short_description"));
-	 } // next layer
-	 rs.close();
-	 sql.close();
-
-	 return getGraph(id, layerIds.toArray(new String[0]));
-      }
-      catch (SQLException x)
-      {
-	 throw new StoreException(x);
-      }
+      return getGraph(id, getLayerIds());
    }
 
    /**
@@ -2195,6 +2187,8 @@ public class SqlGraphStore
 	    ResultSet rs = sql.executeQuery();
 	    rs.next();
 	    graph.put("@ag_id", new Integer(rs.getInt(1)));
+	    rs.close();
+	    sql.close();
 	    saveGraphChanges(graph);
 	 }
 	 else
@@ -2272,7 +2266,7 @@ public class SqlGraphStore
 		     throw new StoreException("Could not parse special annotation ID:" + change.getObject().getId());
 		  }
 	       }
-	       else if (change.getObject().getId().startsWith("t_"))
+	       else if (change.getObject().getId().startsWith("t|"))
 	       {
 		  try
 		  {
@@ -2283,10 +2277,10 @@ public class SqlGraphStore
 		  }
 		  catch(ParseException parseX)
 		  {
-		     throw new StoreException("Could not parse special annotation ID:" + change.getObject().getId());
+		     throw new StoreException("Could not parse transcript attribute ID:" + change.getObject().getId());
 		  }
 	       }
-	       else if (change.getObject().getId().startsWith("p_"))
+	       else if (change.getObject().getId().startsWith("p|"))
 	       {
 		  try
 		  {
@@ -2297,7 +2291,7 @@ public class SqlGraphStore
 		  }
 		  catch(ParseException parseX)
 		  {
-		     throw new StoreException("Could not parse special annotation ID:" + change.getObject().getId());
+		     throw new StoreException("Could not parse participant attribute ID:" + change.getObject().getId());
 		  }
 	       }
 	       else
@@ -2604,7 +2598,7 @@ public class SqlGraphStore
 		  sqlDeleteTranscriptAttribute);
 	    } // next transcript attribute
 	    for (Annotation annotation : participantAttributes.values())
-	    {
+	    {	       
 	       saveParticipantAttributeChanges(
 		  annotation, 
 		  sqlInsertParticipantAttribute, 
@@ -2664,6 +2658,7 @@ public class SqlGraphStore
       }
       catch(SQLException exception)
       {
+      	 System.err.println(exception.toString());
 	 throw new StoreException(exception);
       }
       catch(TransformationException invalid)
@@ -2671,6 +2666,12 @@ public class SqlGraphStore
       	 System.err.println(invalid.toString());
       	 throw new StoreException("Graph was not valid", invalid);
       }
+      catch(Throwable exception)
+      {
+      	 System.err.println(exception.toString());
+	 throw new StoreException(exception);
+      }
+      System.err.println("saveGraph finished.");
       return true;
    }
 
