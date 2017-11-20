@@ -824,7 +824,7 @@ public class SqlGraphStore
 	 subexpression = subexpression.trim();
 	 if (subexpression.length() == 0) continue;
 	 String operator = null;
-	 String[] operators = {" = "," <= "," >= "," < "," > "," MATCHES ", " IN "};
+	 String[] operators = {" = "," <> "," <= "," >= "," < "," > "," MATCHES ", " IN "};
 	 String[] operands = null;
 	 for (String op : operators)
 	 {
@@ -1027,7 +1027,7 @@ public class SqlGraphStore
 	 subexpression = subexpression.trim();
 	 if (subexpression.length() == 0) continue;
 	 String operator = null;
-	 String[] operators = {" = "," <= "," >= "," < "," > "," MATCHES ", " IN "};
+	 String[] operators = {" = "," <> "," <= "," >= "," < "," > "," MATCHES ", " IN "};
 	 String[] operands = null;
 	 for (String op : operators)
 	 {
@@ -1241,7 +1241,7 @@ public class SqlGraphStore
 	    +" INNER JOIN transcript_family ON transcript.family_id = transcript.family_id"
 	    +" INNER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
 	    +" LEFT OUTER JOIN transcript_attribute divergent ON transcript.ag_id = divergent.ag_id AND divergent.name = 'divergent'"
-	    +" WHERE transcript_id = ?"+userWhereClause(true));
+	    +" WHERE transcript.transcript_id = ?"+userWhereClause(true));
 	 sql.setString(1, id);
 	 ResultSet rs = sql.executeQuery();
 	 if (!rs.next())
@@ -1255,7 +1255,7 @@ public class SqlGraphStore
 	       +" INNER JOIN transcript_family ON transcript.family_id = transcript.family_id"
 	       +" INNER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
 	       +" LEFT OUTER JOIN transcript_attribute divergent ON transcript.ag_id = divergent.ag_id AND divergent.name = 'divergent'"
-	       +" WHERE transcript_id REGEXP ?"+userWhereClause(true));
+	       +" WHERE transcript.transcript_id REGEXP ?"+userWhereClause(true));
 	    sql.setString(1, "^" + id.replaceAll("\\.[^.]+$","") + "\\.[^.]+$");
 	    rs = sql.executeQuery();
 	    if (!rs.next())
