@@ -1301,6 +1301,22 @@ public class SqlGraphStore
 
 	 if (layerIds != null)
 	 {
+	    // for each layer specified, all ancestor layers must also be loaded, to
+	    // ensure the graph is well structured.
+	    LinkedHashSet<String> layersToLoad = new LinkedHashSet<String>();
+	    for (String layerId : layerIds)
+	    {
+	       Layer layer = mainSchema.getLayer(layerId);
+	       if (layer != null)
+	       {
+		  for (Layer ancestor : layer.getAncestors())
+		  {
+		     layersToLoad.add(ancestor.getId());
+		  }		  
+		  layersToLoad.add(layerId);
+	       } // layer exists
+	    } // next specified layer
+	    
 	    // load annotations
 	    PreparedStatement sqlAnnotation = getConnection().prepareStatement(
 	       "SELECT layer.*,"
@@ -1311,7 +1327,7 @@ public class SqlGraphStore
 	       +" INNER JOIN anchor end ON layer.end_anchor_id = end.anchor_id"
 	       +" WHERE layer.ag_id = ? ORDER BY start.offset, end.offset DESC, annotation_id");
 	    sqlAnnotation.setInt(2, iAgId);
-	    for (String layerId : layerIds)
+	    for (String layerId : layersToLoad)
 	    {
 	       if (layerId.equals("graph"))
 	       { // special case
