@@ -1321,7 +1321,9 @@ public class SqlGraphStore
 	    PreparedStatement sqlAnnotation = getConnection().prepareStatement(
 	       "SELECT layer.*,"
 	       +" start.offset AS start_offset, start.alignment_status AS start_alignment_status,"
-	       +" end.offset AS end_offset, end.alignment_status AS end_alignment_status"
+	       +" start.annotated_by AS start_annotated_by, start.annotated_when AS start_annotated_when,"
+	       +" end.offset AS end_offset, end.alignment_status AS end_alignment_status,"
+	       +" end.annotated_by AS end_annotated_by, end.annotated_when AS end_annotated_when"
 	       +" FROM annotation_layer_? layer"
 	       +" INNER JOIN anchor start ON layer.start_anchor_id = start.anchor_id"
 	       +" INNER JOIN anchor end ON layer.end_anchor_id = end.anchor_id"
@@ -1470,7 +1472,7 @@ public class SqlGraphStore
 		  { // definitedly a transcript attribute layer
 		     graph.addLayer(attributeLayer);
 		     PreparedStatement sqlValue = getConnection().prepareStatement(
-			"SELECT value FROM transcript_attribute"
+			"SELECT value, annotated_by, annotated_when FROM transcript_attribute"
 			+" WHERE ag_id = ? AND name = ?");
 		     sqlValue.setInt(1, iAgId);
 		     sqlValue.setString(2, attributeLayer.get("@attribute").toString());
@@ -1483,6 +1485,14 @@ public class SqlGraphStore
 			Annotation attribute = new Annotation(
 			   fmtTranscriptAttributeId.format(annotationIdParts), 
 			   rsValue.getString("value"), attributeLayer.getId());
+			if (rsValue.getString("annotated_by") != null)
+			{
+			   attribute.setAnnotator(rsValue.getString("annotated_by"));
+			}
+			if (rsValue.getDate("annotated_when") != null)
+			{
+			   attribute.setWhen(rsValue.getDate("annotated_when"));
+			}
 			attribute.setParentId(graph.getId());
 			graph.addAnnotation(attribute);
 		     } 
@@ -1522,7 +1532,8 @@ public class SqlGraphStore
 		  { // definitedly a participant attribute layer
 		     graph.addLayer(attributeLayer);
 		     PreparedStatement sqlValue = getConnection().prepareStatement(
-			"SELECT a.speaker_number, a.value FROM speaker_attribute a"
+			"SELECT a.speaker_number, a.value, a.annotated_by, a.annotated_when"
+			+" FROM speaker_attribute a"
 			+" INNER JOIN transcript_speaker ts ON ts.speaker_number = a.speaker_number"
 			+" WHERE ts.ag_id = ? AND a.name = ?");
 		     sqlValue.setInt(1, iAgId);
@@ -1536,6 +1547,14 @@ public class SqlGraphStore
 			Annotation attribute = new Annotation(
 			   fmtParticipantAttributeId.format(annotationIdParts), 
 			   rsValue.getString("value"), attributeLayer.getId());
+			if (rsValue.getString("annotated_by") != null)
+			{
+			   attribute.setAnnotator(rsValue.getString("annotated_by"));
+			}
+			if (rsValue.getDate("annotated_when") != null)
+			{
+			   attribute.setWhen(rsValue.getDate("annotated_when"));
+			}
 			attribute.setParentId("m_-2_"+rsValue.getString("speaker_number"));
 			graph.addAnnotation(attribute);
 		     }
@@ -2379,10 +2398,10 @@ public class SqlGraphStore
 
 	 PreparedStatement sqlLastId = getConnection().prepareStatement("SELECT LAST_INSERT_ID()");
 	 PreparedStatement sqlInsertAnchor = getConnection().prepareStatement(
-	    "INSERT INTO anchor (ag_id, offset, alignment_status) VALUES (?, ?, ?)");
+	    "INSERT INTO anchor (ag_id, offset, alignment_status, annotated_by, annotated_when) VALUES (?, ?, ?, ?, ?)");
 	 sqlInsertAnchor.setInt(1, iAgId);
 	 PreparedStatement sqlUpdateAnchor = getConnection().prepareStatement(
-	    "UPDATE anchor SET offset = ?, alignment_status = ? WHERE anchor_id = ?");
+	    "UPDATE anchor SET offset = ?, alignment_status = ?, annotated_by = ?, annotated_when = ? WHERE anchor_id = ?");
 	 PreparedStatement sqlCheckAnchor = getConnection().prepareStatement(
 	    "SELECT COUNT(*) FROM annotation_layer_? WHERE start_anchor_id = ? OR end_anchor_id = ?");
 	 // create a list of layers to check before deleting an anchor
@@ -2399,50 +2418,50 @@ public class SqlGraphStore
 	 PreparedStatement sqlInsertFreeformAnnotation = getConnection().prepareStatement(
 	    "INSERT INTO annotation_layer_?"
 	    + " (ag_id, label, label_status, start_anchor_id, end_anchor_id,"
-	    + " parent_id, ordinal)"
-	    + " VALUES (?, ?, ?, ?, ?, ?, ?)");
+	    + " parent_id, ordinal, annotated_by, annotated_when)"
+	    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 	 sqlInsertFreeformAnnotation.setInt(2, iAgId);
 	 PreparedStatement sqlInsertMetaAnnotation = getConnection().prepareStatement(
 	    "INSERT INTO annotation_layer_?"
 	    + " (ag_id, label, label_status, start_anchor_id, end_anchor_id,"
-	    + " parent_id, ordinal,"
+	    + " parent_id, ordinal, annotated_by, annotated_when,"
 	    + " turn_annotation_id)"
-	    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+	    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 	 sqlInsertMetaAnnotation.setInt(2, iAgId);
 	 PreparedStatement sqlInsertWordAnnotation = getConnection().prepareStatement(
 	    "INSERT INTO annotation_layer_?"
 	    + " (ag_id, label, label_status, start_anchor_id, end_anchor_id,"
-	    + " parent_id, ordinal,"
+	    + " parent_id, ordinal, annotated_by, annotated_when,"
 	    + " turn_annotation_id,"
 	    + " ordinal_in_turn, word_annotation_id)"
-	    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+	    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 	 sqlInsertWordAnnotation.setInt(2, iAgId);
 	 PreparedStatement sqlInsertSegmentAnnotation = getConnection().prepareStatement(
 	    "INSERT INTO annotation_layer_?"
 	    + " (ag_id, label, label_status, start_anchor_id, end_anchor_id,"
-	    + " parent_id, ordinal,"
-	    + " turn_annotation_id,"
+	    + " parent_id, ordinal, annotated_by, annotated_when,"
+	    + " turn_annotation_id," 
 	    + " ordinal_in_turn, word_annotation_id,"
 	    + " ordinal_in_word, segment_annotation_id)"
-	    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+	    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 	 sqlInsertSegmentAnnotation.setInt(2, iAgId);
 	 PreparedStatement sqlUpdateFreeformAnnotation = getConnection().prepareStatement(
 	    "UPDATE annotation_layer_?"
 	    + " SET label = ?, label_status = ?, start_anchor_id = ?, end_anchor_id = ?,"
-	    + " parent_id = ?, ordinal = ?"
+	    + " parent_id = ?, ordinal = ?, annotated_by = ?, annotated_when = ?"
 	    + " WHERE annotation_id = ?");
 	 PreparedStatement sqlUpdateMetaAnnotation = getConnection().prepareStatement(
 	    "UPDATE annotation_layer_?"
 	    + " SET label = ?, label_status = ?, start_anchor_id = ?, end_anchor_id = ?,"
 	    + " turn_annotation_id = ?,"
-	    + " parent_id = ?, ordinal = ?"
+	    + " parent_id = ?, ordinal = ?, annotated_by = ?, annotated_when = ?"
 	    + " WHERE annotation_id = ?");
 	 PreparedStatement sqlUpdateWordAnnotation = getConnection().prepareStatement(
 	    "UPDATE annotation_layer_?"
 	    + " SET label = ?, label_status = ?, start_anchor_id = ?, end_anchor_id = ?,"
 	    + " turn_annotation_id = ?,"
 	    + " ordinal_in_turn = ?, word_annotation_id = ?,"
-	    + " parent_id = ?, ordinal = ?"
+	    + " parent_id = ?, ordinal = ?, annotated_by = ?, annotated_when = ?"
 	    + " WHERE annotation_id = ?");
 	 PreparedStatement sqlUpdateSegmentAnnotation = getConnection().prepareStatement(
 	    "UPDATE annotation_layer_?"
@@ -2450,7 +2469,7 @@ public class SqlGraphStore
 	    + " turn_annotation_id = ?,"
 	    + " ordinal_in_turn = ?, word_annotation_id = ?,"
 	    + " ordinal_in_word = ?, segment_annotation_id = ?,"
-	    + " parent_id = ?, ordinal = ?" 
+	    + " parent_id = ?, ordinal = ?, annotated_by = ?, annotated_when = ?" 
 	    + " WHERE annotation_id = ?");
 	 PreparedStatement sqlSelectWordFields = getConnection().prepareStatement(
 	    "SELECT turn_annotation_id, ordinal_in_turn"
@@ -2470,11 +2489,11 @@ public class SqlGraphStore
 	    "DELETE FROM annotation_layer_? WHERE annotation_id = ?");
 
 	 PreparedStatement sqlInsertTranscriptAttribute = getConnection().prepareStatement(
-	    "INSERT INTO transcript_attribute (ag_id, name, value) VALUES (?,?,?)");
+	    "INSERT INTO transcript_attribute (ag_id, name, value, annotated_by, annotated_when) VALUES (?,?,?,?,?)");
 	 sqlInsertTranscriptAttribute.setInt(1, iAgId);
 	 PreparedStatement sqlUpdateTranscriptAttribute = getConnection().prepareStatement(
-	    "UPDATE transcript_attribute SET value = ? WHERE ag_id = ? AND name = ?");
-	 sqlUpdateTranscriptAttribute.setInt(2, iAgId);
+	    "UPDATE transcript_attribute SET value = ?, annotated_by = ?, annotated_when = ? WHERE ag_id = ? AND name = ?");
+	 sqlUpdateTranscriptAttribute.setInt(4, iAgId);
 	 PreparedStatement sqlDeleteTranscriptAttribute = getConnection().prepareStatement(
 	    "DELETE FROM transcript_attribute WHERE ag_id = ? AND name = ?");
 	 sqlDeleteTranscriptAttribute.setInt(1, iAgId);
@@ -2483,9 +2502,9 @@ public class SqlGraphStore
 	 // for this reason, REPLACE INTO is required - an attribute that already exists
 	 // for the speaker may also be created by an uploaded graph.
 	 PreparedStatement sqlInsertParticipantAttribute = getConnection().prepareStatement(
-	    "REPLACE INTO speaker_attribute (speaker_number, name, value) VALUES (?,?,?)");
+	    "REPLACE INTO speaker_attribute (speaker_number, name, value, annotated_by, annotated_when) VALUES (?,?,?,?,?)");
 	 PreparedStatement sqlUpdateParticipantAttribute = getConnection().prepareStatement(
-	    "UPDATE speaker_attribute SET value = ? WHERE speaker_number = ? AND name = ?");
+	    "UPDATE speaker_attribute SET value = ?, annotated_by = ?, annotated_when = ? WHERE speaker_number = ? AND name = ?");
 	 PreparedStatement sqlDeleteParticipantAttribute = getConnection().prepareStatement(
 	    "DELETE FROM speaker_attribute WHERE speaker_number = ? AND name = ?");
 
@@ -2799,6 +2818,15 @@ public class SqlGraphStore
 	 annotation.setParentId(graph.getId());
       } // freeform scope
 
+      if (rsAnnotation.getString("annotated_by") != null)
+      {
+	 annotation.setAnnotator(rsAnnotation.getString("annotated_by"));
+      }
+      if (rsAnnotation.getDate("annotated_when") != null)
+      {
+	 annotation.setWhen(rsAnnotation.getDate("annotated_when"));
+      }
+
       // anchor IDs
       Object[] anchorIdParts = { new Long(rsAnnotation.getLong("start_anchor_id"))};
       annotation.setStartId(fmtAnchorId.format(anchorIdParts));
@@ -2822,6 +2850,14 @@ public class SqlGraphStore
       Anchor anchor = new Anchor(
 	 fmtAnchorId.format(anchorIdParts), new Double(rsAnchor.getDouble(prefix + "offset")));
       anchor.setConfidence(new Integer(rsAnchor.getInt(prefix + "alignment_status")));
+      if (rsAnchor.getString(prefix+"annotated_by") != null)
+      {
+	 anchor.setAnnotator(rsAnchor.getString(prefix+"annotated_by"));
+      }
+      if (rsAnchor.getDate(prefix+"annotated_when") != null)
+      {
+	 anchor.setWhen(rsAnchor.getDate(prefix+"annotated_when"));
+      }
       return anchor;
    } // end of anchorFromResult()
 
@@ -2859,6 +2895,22 @@ public class SqlGraphStore
 	       sqlInsertAnchor.setNull(2, java.sql.Types.DOUBLE);
 	    }
 	    sqlInsertAnchor.setInt(3, anchor.getConfidence());
+	    if (anchor.getAnnotator() != null)
+	    {
+	       sqlInsertAnchor.setString(4, anchor.getAnnotator());
+	    }
+	    else
+	    {
+	       sqlInsertAnchor.setString(4, getUser());
+	    }
+	    if (anchor.getWhen() != null)
+	    {
+	       sqlInsertAnchor.setTimestamp(5, new Timestamp(anchor.getWhen().getTime()));
+	    }
+	    else
+	    {
+	       sqlInsertAnchor.setTimestamp(5, new Timestamp(new java.util.Date().getTime()));
+	    }
 	    sqlInsertAnchor.executeUpdate();
 	    ResultSet rs = sqlLastId.executeQuery();
 	    rs.next();
@@ -2888,7 +2940,23 @@ public class SqlGraphStore
 		  sqlUpdateAnchor.setNull(1, java.sql.Types.DOUBLE);
 	       }
 	       sqlUpdateAnchor.setInt(2, anchor.getConfidence());
-	       sqlUpdateAnchor.setLong(3, anchorId);
+	       if (anchor.getAnnotator() != null)
+	       {
+		  sqlUpdateAnchor.setString(3, anchor.getAnnotator());
+	       }
+	       else
+	       {
+		  sqlUpdateAnchor.setString(3, getUser());
+	       }
+	       if (anchor.getWhen() != null)
+	       {
+		  sqlUpdateAnchor.setTimestamp(4, new Timestamp(anchor.getWhen().getTime()));
+	       }
+	       else
+	       {
+		  sqlUpdateAnchor.setTimestamp(4, new Timestamp(new java.util.Date().getTime()));
+	       }
+	       sqlUpdateAnchor.setLong(5, anchorId);
 	       sqlUpdateAnchor.executeUpdate();
 	       
 	    }
@@ -3084,6 +3152,22 @@ public class SqlGraphStore
 	       }
 	    }
 	    sql.setInt(8, annotation.getOrdinal());
+	    if (annotation.getAnnotator() != null)
+	    {
+	       sql.setString(9, annotation.getAnnotator());
+	    }
+	    else
+	    {
+	       sql.setString(9, getUser());
+	    }
+	    if (annotation.getWhen() != null)
+	    {
+	       sql.setTimestamp(10, new Timestamp(annotation.getWhen().getTime()));
+	    }
+	    else
+	    {
+	       sql.setTimestamp(10, new Timestamp(new java.util.Date().getTime()));
+	    }
 
 	    if (sql != sqlInsertFreeformAnnotation)
 	    { // meta, word, or segment annotation
@@ -3091,7 +3175,7 @@ public class SqlGraphStore
 	       if (layerId.intValue() == SqlConstants.LAYER_TURN)
 	       {
 		  // turn_annotation_id = annotation_id
-		  sql.setNull(9, java.sql.Types.INTEGER); // turn_annotation_id - set it later...
+		  sql.setNull(11, java.sql.Types.INTEGER); // turn_annotation_id - set it later...
 	       }
 	       else if (sql == sqlInsertMetaAnnotation)
 	       {
@@ -3099,7 +3183,7 @@ public class SqlGraphStore
 		  try
 		  {
 		     Object[] o = fmtAnnotationId.parse(annotation.getParentId());
-		     sql.setLong(9, ((Long)o[2]).longValue()); // turn_annotation_id
+		     sql.setLong(11, ((Long)o[2]).longValue()); // turn_annotation_id
 		  }
 		  catch(ParseException exception)
 		  {
@@ -3114,15 +3198,15 @@ public class SqlGraphStore
 		     try
 		     {
 			Object[] o = fmtAnnotationId.parse(annotation.getParentId());
-			sql.setLong(9, ((Long)o[2]).longValue()); // turn_annotation_id
+			sql.setLong(11, ((Long)o[2]).longValue()); // turn_annotation_id
 		     }
 		     catch(ParseException exception)
 		     {
 			System.err.println("Error parsing turn id for "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParentId());
 			throw new StoreException("Error parsing turn id for "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParentId(), exception);
 		     }
-		     sql.setInt(10, annotation.getOrdinal()); // ordinal_in_turn
-		     sql.setNull(11, java.sql.Types.INTEGER); // word_annotation_id - set it later
+		     sql.setInt(12, annotation.getOrdinal()); // ordinal_in_turn
+		     sql.setNull(13, java.sql.Types.INTEGER); // word_annotation_id - set it later
 		  }
 		  else
 		  { // other word or segment annotation
@@ -3135,10 +3219,10 @@ public class SqlGraphStore
 			   sqlSelectWordFields.setLong(1, wordAnnotationId); // word_annotation_id
 			   ResultSet rs = sqlSelectWordFields.executeQuery();
 			   rs.next();
-			   sql.setLong(9, rs.getLong("turn_annotation_id"));
-			   sql.setInt(10, rs.getInt("ordinal_in_turn"));
+			   sql.setLong(11, rs.getLong("turn_annotation_id"));
+			   sql.setInt(12, rs.getInt("ordinal_in_turn"));
 			   rs.close();
-			   sql.setLong(11, wordAnnotationId); // word_annotation_id
+			   sql.setLong(13, wordAnnotationId); // word_annotation_id
 			}
 			catch(ParseException exception)
 			{
@@ -3157,12 +3241,12 @@ public class SqlGraphStore
 			      sqlSelectWordFields.setLong(1, wordAnnotationId); // word_annotation_id
 			      ResultSet rs = sqlSelectWordFields.executeQuery();
 			      rs.next();
-			      sql.setLong(9, rs.getLong("turn_annotation_id"));
-			      sql.setInt(10, rs.getInt("ordinal_in_turn"));
+			      sql.setLong(11, rs.getLong("turn_annotation_id"));
+			      sql.setInt(12, rs.getInt("ordinal_in_turn"));
 			      rs.close();
-			      sql.setLong(11, wordAnnotationId); // word_annotation_id
-			      sql.setInt(12, annotation.getOrdinal()); // ordinal_in_word
-			      sql.setNull(13, java.sql.Types.INTEGER); // segment_annotation_id - set it later
+			      sql.setLong(13, wordAnnotationId); // word_annotation_id
+			      sql.setInt(14, annotation.getOrdinal()); // ordinal_in_word
+			      sql.setNull(15, java.sql.Types.INTEGER); // segment_annotation_id - set it later
 			   }
 			   catch(ParseException exception)
 			   {
@@ -3179,10 +3263,10 @@ public class SqlGraphStore
 			      sqlSelectWordFields.setLong(1, wordAnnotationId); // word_annotation_id
 			      ResultSet rs = sqlSelectWordFields.executeQuery();
 			      rs.next();
-			      sql.setLong(9, rs.getLong("turn_annotation_id"));
-			      sql.setInt(10, rs.getInt("ordinal_in_turn"));
+			      sql.setLong(11, rs.getLong("turn_annotation_id"));
+			      sql.setInt(12, rs.getInt("ordinal_in_turn"));
 			      rs.close();
-			      sql.setLong(11, wordAnnotationId); // word_annotation_id
+			      sql.setLong(13, wordAnnotationId); // word_annotation_id
 			      
 			   }
 			   catch(ParseException exception)
@@ -3197,8 +3281,8 @@ public class SqlGraphStore
 			      sqlSelectSegmentFields.setLong(1, segmentAnnotationId); // segment_annotation_id
 			      ResultSet rs = sqlSelectSegmentFields.executeQuery();
 			      rs.next();
-			      sql.setInt(12, rs.getInt("ordinal_in_word")); // ordinal_in_word
-			      sql.setLong(13, segmentAnnotationId); // segment_annotation_id
+			      sql.setInt(14, rs.getInt("ordinal_in_word")); // ordinal_in_word
+			      sql.setLong(15, segmentAnnotationId); // segment_annotation_id
 			      rs.close();
 			   }
 			   catch(ParseException exception)
@@ -3326,7 +3410,23 @@ public class SqlGraphStore
 	       sql.setLong(6, ((Integer)annotation.getGraph().get("@ag_id")).longValue());
 
 	       sql.setInt(7, annotation.getOrdinal());
-	       sql.setLong(8, annotationId);
+	       if (annotation.getAnnotator() != null)
+	       {
+		  sql.setString(8, annotation.getAnnotator());
+	       }
+	       else
+	       {
+		  sql.setString(8, getUser());
+	       }
+	       if (annotation.getWhen() != null)
+	       {
+		  sql.setTimestamp(9, new Timestamp(annotation.getWhen().getTime()));
+	       }
+	       else
+	       {
+		  sql.setTimestamp(9, new Timestamp(new java.util.Date().getTime()));
+	       }
+	       sql.setLong(10, annotationId);
 	    }
 	    else
 	    { // meta, word, or segment annotation
@@ -3388,8 +3488,24 @@ public class SqlGraphStore
 		     }
 		  }
 		  sql.setInt(8, annotation.getOrdinal());
+		  if (annotation.getAnnotator() != null)
+		  {
+		     sql.setString(9, annotation.getAnnotator());
+		  }
+		  else
+		  {
+		     sql.setString(9, getUser());
+		  }
+		  if (annotation.getWhen() != null)
+		  {
+		     sql.setTimestamp(10, new Timestamp(annotation.getWhen().getTime()));
+		  }
+		  else
+		  {
+		     sql.setTimestamp(10, new Timestamp(new java.util.Date().getTime()));
+		  }
 		  // annotation_id
-		  sql.setLong(9, annotationId);
+		  sql.setLong(11, annotationId);
 	       }
 	       else
 	       { // word or segment annotation
@@ -3425,7 +3541,23 @@ public class SqlGraphStore
 			}
 		     }
 		     sql.setInt(10, annotation.getOrdinal());
-		     sql.setLong(11, annotationId); // annotation_id		     
+		     if (annotation.getAnnotator() != null)
+		     {
+			sql.setString(11, annotation.getAnnotator());
+		     }
+		     else
+		     {
+			sql.setString(11, getUser());
+		     }
+		     if (annotation.getWhen() != null)
+		     {
+			sql.setTimestamp(12, new Timestamp(annotation.getWhen().getTime()));
+		     }
+		     else
+		     {
+			sql.setTimestamp(12, new Timestamp(new java.util.Date().getTime()));
+		     }
+		     sql.setLong(13, annotationId); // annotation_id		     
 		  }
 		  else
 		  { // other word or segment annotation
@@ -3459,7 +3591,23 @@ public class SqlGraphStore
 			      }
 			   }
 			   sql.setInt(10, annotation.getOrdinal());
-			   sql.setLong(11, annotationId); // annotation_id
+			   if (annotation.getAnnotator() != null)
+			   {
+			      sql.setString(11, annotation.getAnnotator());
+			   }
+			   else
+			   {
+			      sql.setString(11, getUser());
+			   }
+			   if (annotation.getWhen() != null)
+			   {
+			      sql.setTimestamp(12, new Timestamp(annotation.getWhen().getTime()));
+			   }
+			   else
+			   {
+			      sql.setTimestamp(12, new Timestamp(new java.util.Date().getTime()));
+			   }
+			   sql.setLong(13, annotationId); // annotation_id
 			   rs.close();
 			}
 			catch(ParseException exception)
@@ -3503,7 +3651,23 @@ public class SqlGraphStore
 				 }
 			      }
 			      sql.setInt(12, annotation.getOrdinal());
-			      sql.setLong(13, annotationId); // annotation_id
+			      if (annotation.getAnnotator() != null)
+			      {
+				 sql.setString(13, annotation.getAnnotator());
+			      }
+			      else
+			      {
+				 sql.setString(13, getUser());
+			      }
+			      if (annotation.getWhen() != null)
+			      {
+				 sql.setTimestamp(14, new Timestamp(annotation.getWhen().getTime()));
+			      }
+			      else
+			      {
+				 sql.setTimestamp(14, new Timestamp(new java.util.Date().getTime()));
+			      }
+			      sql.setLong(15, annotationId); // annotation_id
 			   }
 			   catch(ParseException exception)
 			   {
@@ -3564,7 +3728,23 @@ public class SqlGraphStore
 			      }
 			   }
 			   sql.setInt(12, annotation.getOrdinal());
-			   sql.setLong(13, annotationId); // annotation_id
+			   if (annotation.getAnnotator() != null)
+			   {
+			      sql.setString(13, annotation.getAnnotator());
+			   }
+			   else
+			   {
+			      sql.setString(13, getUser());
+			   }
+			   if (annotation.getWhen() != null)
+			   {
+			      sql.setTimestamp(14, new Timestamp(annotation.getWhen().getTime()));
+			   }
+			   else
+			   {
+			      sql.setTimestamp(14, new Timestamp(new java.util.Date().getTime()));
+			   }
+			   sql.setLong(15, annotationId); // annotation_id
 			} // other segment annotation
 		     } // segment annotation
 		  } // other word or segment annotation
@@ -3879,6 +4059,22 @@ public class SqlGraphStore
 	       String attribute = annotation.getLayerId().substring("transcript_".length());
 	       sqlInsertTranscriptAttribute.setString(2, attribute);
 	       sqlInsertTranscriptAttribute.setString(3, annotation.getLabel());
+	       if (annotation.getAnnotator() != null)
+	       {
+		  sqlInsertTranscriptAttribute.setString(4, annotation.getAnnotator());
+	       }
+	       else
+	       {
+		  sqlInsertTranscriptAttribute.setString(4, getUser());
+	       }
+	       if (annotation.getWhen() != null)
+	       {
+		  sqlInsertTranscriptAttribute.setTimestamp(5, new Timestamp(annotation.getWhen().getTime()));
+	       }
+	       else
+	       {
+		  sqlInsertTranscriptAttribute.setTimestamp(5, new Timestamp(new java.util.Date().getTime()));
+	       }
 	       sqlInsertTranscriptAttribute.executeUpdate();
 	       break;
 	    } // Create
@@ -3886,8 +4082,24 @@ public class SqlGraphStore
 	    {
 	       Object[] o = fmtTranscriptAttributeId.parse(annotation.getId());
 	       String attribute = o[0].toString();
-	       sqlUpdateTranscriptAttribute.setString(1, annotation.getLabel());	    
-	       sqlUpdateTranscriptAttribute.setString(3, attribute);
+	       sqlUpdateTranscriptAttribute.setString(1, annotation.getLabel());
+	       if (annotation.getAnnotator() != null)
+	       {
+		  sqlUpdateTranscriptAttribute.setString(2, annotation.getAnnotator());
+	       }
+	       else
+	       {
+		  sqlUpdateTranscriptAttribute.setString(2, getUser());
+	       }
+	       if (annotation.getWhen() != null)
+	       {
+		  sqlUpdateTranscriptAttribute.setTimestamp(3, new Timestamp(annotation.getWhen().getTime()));
+	       }
+	       else
+	       {
+		  sqlUpdateTranscriptAttribute.setTimestamp(3, new Timestamp(new java.util.Date().getTime()));
+	       }
+	       sqlUpdateTranscriptAttribute.setString(5, attribute);
 	       sqlUpdateTranscriptAttribute.executeUpdate();
 	       break;
 	    }
@@ -3940,6 +4152,22 @@ public class SqlGraphStore
 	       sqlInsertParticipantAttribute.setInt(1, speakerNumber);
 	       sqlInsertParticipantAttribute.setString(2, attribute);
 	       sqlInsertParticipantAttribute.setString(3, annotation.getLabel());
+	       if (annotation.getAnnotator() != null)
+	       {
+		  sqlInsertParticipantAttribute.setString(4, annotation.getAnnotator());
+	       }
+	       else
+	       {
+		  sqlInsertParticipantAttribute.setString(4, getUser());
+	       }
+	       if (annotation.getWhen() != null)
+	       {
+		  sqlInsertParticipantAttribute.setTimestamp(5, new Timestamp(annotation.getWhen().getTime()));
+	       }
+	       else
+	       {
+		  sqlInsertParticipantAttribute.setTimestamp(5, new Timestamp(new java.util.Date().getTime()));
+	       }
 	       sqlInsertParticipantAttribute.executeUpdate();
 	       break;
 	    } // Create
@@ -3949,8 +4177,24 @@ public class SqlGraphStore
 	       String attribute = o[0].toString();
 	       int speakerNumber = ((Long)o[1]).intValue();
 	       sqlUpdateParticipantAttribute.setString(1, annotation.getLabel());	    
-	       sqlUpdateParticipantAttribute.setInt(2, speakerNumber);
-	       sqlUpdateParticipantAttribute.setString(3, attribute);
+	       if (annotation.getAnnotator() != null)
+	       {
+		  sqlUpdateParticipantAttribute.setString(2, annotation.getAnnotator());
+	       }
+	       else
+	       {
+		  sqlUpdateParticipantAttribute.setString(2, getUser());
+	       }
+	       if (annotation.getWhen() != null)
+	       {
+		  sqlUpdateParticipantAttribute.setTimestamp(3, new Timestamp(annotation.getWhen().getTime()));
+	       }
+	       else
+	       {
+		  sqlUpdateParticipantAttribute.setTimestamp(3, new Timestamp(new java.util.Date().getTime()));
+	       }
+	       sqlUpdateParticipantAttribute.setInt(4, speakerNumber);
+	       sqlUpdateParticipantAttribute.setString(5, attribute);
 	       sqlUpdateParticipantAttribute.executeUpdate();
 	       break;
 	    }
