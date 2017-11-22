@@ -27,6 +27,7 @@ import java.util.Vector;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Arrays;
+import java.util.Date;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 import org.json.IJSONableBean;
@@ -110,7 +111,41 @@ public class TrackedMap
     */
    public void setConfidence(Integer newConfidence) { confidence = newConfidence; }
 
-   
+
+   /**
+    * Name of the person or system that created or changed this entity.
+    * @see #getAnnotator()
+    * @see #setAnnotator(String)
+    */
+   protected String annotator;
+   /**
+    * Getter for {@link #annotator}: Name of the person or system that created or changed this entity.
+    * @return Name of the person or system that created or changed this entity.
+    */
+   public String getAnnotator() { return annotator; }
+   /**
+    * Setter for {@link #annotator}: Name of the person or system that created or changed this entity.
+    * @param newAnnotator Name of the person or system that created or changed this entity.
+    */
+   public void setAnnotator(String newAnnotator) { annotator = newAnnotator; }
+
+   /**
+    * Date/time this entity was created or changed.
+    * @see #getWhen()
+    * @see #setWhen(Date)
+    */
+   protected Date when;
+   /**
+    * Getter for {@link #when}: Date/time this entity was created or changed.
+    * @return Date/time this entity was created or changed.
+    */
+   public Date getWhen() { return when; }
+   /**
+    * Setter for {@link #when}: Date/time this entity was created or changed.
+    * @param newWhen Date/time this entity was created or changed.
+    */
+   public void setWhen(Date newWhen) { when = newWhen; }
+
    // Methods:
    
    /**
@@ -151,7 +186,6 @@ public class TrackedMap
       }
    } // end of getOriginalLabel()
 
-   
    /**
     * Registers a change to a tracked attribute, by setting the "original..." attribute, and returning a corresponding change for the given attribute.
     * @param key
@@ -179,7 +213,6 @@ public class TrackedMap
       }
       return new Change(Change.Operation.Update, this, key, value);
    } // end of registerChange()
-
 
    /**
     * Marks the object for deletion.
@@ -216,6 +249,7 @@ public class TrackedMap
       remove("@destroy");
       remove("@create");
    }
+
    /**
     * Rolls back changes since the object was create or {@link #commit()} was last called. The effect of this is to reset tracked attributes to be the same as their original values, and to remove any {@link #destroy()} tag. If it has been tagged for {@link #create()}, the tag remains in place.
     * @see #getTrackedAttributes()
@@ -280,8 +314,7 @@ public class TrackedMap
 	 if (containsKey(originalValueKey)) return Change.Operation.Update;
       } // next tracked attribute
       return Change.Operation.NoChange;
-   } // end of getChange()   
-
+   } // end of getChange()
    
    /**
     * Produces a list of individual changes for the object.
@@ -394,7 +427,6 @@ public class TrackedMap
       }
       return change;
    } // end of put()
-
    
    /**
     * Overrides Map method so that if scripting environments like JSTL's EL exclusively use get() for retrieving attributes, bean attributes will be available.
@@ -422,7 +454,6 @@ public class TrackedMap
       }
       return value;
    } // end of get()
-
 
    // Map overrides
 
@@ -468,7 +499,6 @@ public class TrackedMap
 	 exception.printStackTrace(System.err);
       }
    } // end of clone()
-   
 
    // java.lang.Object overrides:
       
@@ -509,7 +539,6 @@ public class TrackedMap
       }
       return false;
    } // end of equals()
-
 
    /**
     * Access the class's getter for the given attribute.
@@ -584,6 +613,5 @@ public class TrackedMap
 	 return null;
       }	 
    } // end of getter()
-
    
 } // end of class Annotation
