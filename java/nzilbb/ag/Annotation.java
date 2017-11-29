@@ -926,88 +926,95 @@ public class Annotation
 	 {
 	    return children.first();
 	 }
-      }
-      Layer layer = getGraph().getLayer(layerId);
-      Layer commonAncestorLayer = getLayer().getFirstCommonAncestor(layer);
-      if (commonAncestorLayer == null) return null; // invalid layer
-      // is our layer an ancestor of layerId
-      if (commonAncestorLayer.getId().equals(getLayer().getId()))
-      { // we are an ancestor of the target layer
-	 // annotations should come out in ordinal order when they have the same parent
-	 // and in ancestor start order otherwise, where the ancestor used comes from the
-	 // highest aligned layer in the hierarchy, which may be the layer itself. so:
-	 // - aligned topics (parent=graph) fall back to topic offset
-	 // - aligned turns (parent=who) fall back to turn offset
-	 // - aligned words (parent=turn) fall back to turn offset
-	 // - unaligned pos's (paren=word) fall back to turn offset
-	 String root = getGraph().getSchema().getRoot().getId();
-	 Layer highestAlignedLayer = layer;
-	 for (Layer ancestor : layer.getAncestors())
-	 {
-	    if (ancestor.getId().equals(root)) break;
-	    if (ancestor.getAlignment() != Constants.ALIGNMENT_NONE)
-	    {
-	       highestAlignedLayer = ancestor;
-	    }
-	 }
-	 final String highestAlignedLayerId = highestAlignedLayer.getId();
-	 LayerTraversal<TreeSet<Annotation>> highestAlignedTraversal 
-	    = new LayerTraversal<TreeSet<Annotation>>(
-	       new TreeSet<Annotation>(new AnnotationComparatorByAnchor()), this)
-	    {
-	       protected void pre(Annotation annotation)
-	       {
-		  if (annotation.getLayerId().equals(highestAlignedLayerId))
-		  {
-		     result.add(annotation);
-		  }
-	       }
-	    };
-	 if (layerId.equals(highestAlignedLayerId))
-	 {
-	    if (highestAlignedTraversal.getResult().size() == 0) return null;
-	    return highestAlignedTraversal.getResult().first();
-	 }
 	 else
-	 { // layerId != highestAlignedLayerId
-	    LayerTraversal<Vector<Annotation>> descendantTraversal 
-	       = new LayerTraversal<Vector<Annotation>>(new Vector<Annotation>())
-	       {
-		  protected void pre(Annotation annotation)
-		  {
-		     if (annotation.getLayerId().equals(layerId))
-		     {
-			result.add(annotation);
-		     }
-		  }
-	       };
-	    for (Annotation highestAlignedAncestor : highestAlignedTraversal.getResult())
-	    {
-	       descendantTraversal.traverseAnnotation(highestAlignedAncestor);
-	    }
-	    if (descendantTraversal.getResult().size() == 0) return null;
-	    return descendantTraversal.getResult().firstElement();
-	 }
-      }
-      // check for children of ancestors
-      // so that word.my("utterance") works and so does word.my("corpus")
-      Annotation commonAncestor = getAncestor(commonAncestorLayer.getId());
-      if (commonAncestorLayer != null 
-	  // common ancestor must be related - i.e. in the layer of commonAncestorLayer
-	  && commonAncestor.getLayerId() == commonAncestorLayer.getId())
-      {
-	 // return the first child that t-includes this annotation
-	 if (commonAncestor != null)
 	 {
-	    for (Annotation child : commonAncestor.list(layerId))
-	    {
-	       if (child.includes(this))
-	       {
-		  return child;
-	       }
-	    } // next child of common ancestor
+	    return null;
 	 }
       }
+      if (getGraph() != null)
+      {
+	 Layer layer = getGraph().getLayer(layerId);
+	 Layer commonAncestorLayer = getLayer().getFirstCommonAncestor(layer);
+	 if (commonAncestorLayer == null) return null; // invalid layer
+	 // is our layer an ancestor of layerId
+	 if (commonAncestorLayer.getId().equals(getLayer().getId()))
+	 { // we are an ancestor of the target layer
+	    // annotations should come out in ordinal order when they have the same parent
+	    // and in ancestor start order otherwise, where the ancestor used comes from the
+	    // highest aligned layer in the hierarchy, which may be the layer itself. so:
+	    // - aligned topics (parent=graph) fall back to topic offset
+	    // - aligned turns (parent=who) fall back to turn offset
+	    // - aligned words (parent=turn) fall back to turn offset
+	    // - unaligned pos's (paren=word) fall back to turn offset
+	    String root = getGraph().getSchema().getRoot().getId();
+	    Layer highestAlignedLayer = layer;
+	    for (Layer ancestor : layer.getAncestors())
+	    {
+	       if (ancestor.getId().equals(root)) break;
+	       if (ancestor.getAlignment() != Constants.ALIGNMENT_NONE)
+	       {
+		  highestAlignedLayer = ancestor;
+	       }
+	    }
+	    final String highestAlignedLayerId = highestAlignedLayer.getId();
+	    LayerTraversal<TreeSet<Annotation>> highestAlignedTraversal 
+	       = new LayerTraversal<TreeSet<Annotation>>(
+		  new TreeSet<Annotation>(new AnnotationComparatorByAnchor()), this)
+		 {
+		    protected void pre(Annotation annotation)
+		    {
+		       if (annotation.getLayerId().equals(highestAlignedLayerId))
+		       {
+			  result.add(annotation);
+		       }
+		    }
+		  };
+	    if (layerId.equals(highestAlignedLayerId))
+	    {
+	       if (highestAlignedTraversal.getResult().size() == 0) return null;
+	       return highestAlignedTraversal.getResult().first();
+	    }
+	    else
+	    { // layerId != highestAlignedLayerId
+	       LayerTraversal<Vector<Annotation>> descendantTraversal 
+		  = new LayerTraversal<Vector<Annotation>>(new Vector<Annotation>())
+		    {
+		       protected void pre(Annotation annotation)
+		       {
+			  if (annotation.getLayerId().equals(layerId))
+			  {
+			     result.add(annotation);
+			  }
+		       }
+		     };
+	       for (Annotation highestAlignedAncestor : highestAlignedTraversal.getResult())
+	       {
+		  descendantTraversal.traverseAnnotation(highestAlignedAncestor);
+	       }
+	       if (descendantTraversal.getResult().size() == 0) return null;
+	       return descendantTraversal.getResult().firstElement();
+	    }
+	 }
+	 // check for children of ancestors
+	 // so that word.my("utterance") works and so does word.my("corpus")
+	 Annotation commonAncestor = getAncestor(commonAncestorLayer.getId());
+	 if (commonAncestorLayer != null 
+	     // common ancestor must be related - i.e. in the layer of commonAncestorLayer
+	     && commonAncestor.getLayerId() == commonAncestorLayer.getId())
+	 {
+	    // return the first child that t-includes this annotation
+	    if (commonAncestor != null)
+	    {
+	       for (Annotation child : commonAncestor.list(layerId))
+	       {
+		  if (child.includes(this))
+		  {
+		     return child;
+		  }
+	       } // next child of common ancestor
+	    }
+	 }
+      } // graph is set
       return null;
    } // end of my()
    
