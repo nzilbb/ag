@@ -72,10 +72,10 @@ public class SqlGraphStore
    /** Format of annotation IDs for 'meta' layers, where {0} = layer_id and {1} = the id of the entity (corpus_id, family_id, speaker_number, etc.) */
    protected MessageFormat fmtMetaAnnotationId = new MessageFormat("m_{0,number,0}_{1}");
 
-   /** Format of annotation IDs for transcript attributes, where {0} = attribute and {1} = ag_id */
+   /** Format of annotation IDs for transcript attributes, where {0} = attribute and {1} = annotation_id */
    protected MessageFormat fmtTranscriptAttributeId = new MessageFormat("t|{0}|{1,number,0}");
 
-   /** Format of annotation IDs for participant attributes, where {0} = attribute and {1} = speaker number */
+   /** Format of annotation IDs for participant attributes, where {0} = attribute and {1} = annotation_id */
    protected MessageFormat fmtParticipantAttributeId = new MessageFormat("p|{0}|{1,number,0}");
 
    /** Format of anchor IDs, where {0} = anchor_id */
@@ -513,8 +513,8 @@ public class SqlGraphStore
 	       layer.setAlignment(Constants.ALIGNMENT_NONE);
 	       layer.setParentId("graph");
 	       layer.setParentIncludes(true);
-	       layer.setPeers(true);
-	       layer.setPeersOverlap(false);
+	       layer.setPeers(rs.getString("style").matches(".*multiple.*"));
+	       layer.setPeersOverlap(true);
 	       layer.setSaturated(true);
 	       
 	       if (rs.getString("type").equals("N")
@@ -592,7 +592,7 @@ public class SqlGraphStore
 		  layer.setAlignment(Constants.ALIGNMENT_NONE);
 		  layer.setParentId("who");
 		  layer.setParentIncludes(true);
-		  layer.setPeers(true);
+		  layer.setPeers(rs.getString("style").matches(".*multiple.*"));
 		  layer.setPeersOverlap(false);
 		  layer.setSaturated(true);
 		  
@@ -719,8 +719,193 @@ public class SqlGraphStore
 	 throw new StoreException(exception);
       }
    }
-
    
+   /**
+    * Gets the participant record specified by the given identifier.
+    * @param id The ID of the participant, which could be their name or their database annotation ID.
+    * @return An annotation representing the participant, or null if the participant was not found.
+    * @throws StoreException
+    * @throws PermissionException
+    */
+   public Annotation getParticipant(String id)
+      throws StoreException, PermissionException
+   {
+      try
+      {
+	 String speakerNumber = null;
+	 String name = null;
+	 if (id.startsWith("m_-2_"))
+	 {
+	    speakerNumber = id.substring("m_-2_".length());
+	    PreparedStatement sqlParticipant = getConnection().prepareStatement(
+	       "SELECT name FROM speaker WHERE speaker_number = ?");
+	    sqlParticipant.setString(1, speakerNumber);
+	    ResultSet rsParticipant = sqlParticipant.executeQuery();
+	    if (rsParticipant.next())
+	    {
+	       name = rsParticipant.getString(1);
+	    }
+	    rsParticipant.close();
+	    sqlParticipant.close();
+	 }
+	 else
+	 {
+	    name = id;
+	    PreparedStatement sqlParticipant = getConnection().prepareStatement(
+	       "SELECT speaker_number FROM speaker WHERE name = ?");
+	    sqlParticipant.setString(1, name);
+	    ResultSet rsParticipant = sqlParticipant.executeQuery();
+	    if (rsParticipant.next())
+	    {
+	       speakerNumber = rsParticipant.getString(1);
+	    }
+	    rsParticipant.close();
+	    sqlParticipant.close();
+	 }
+
+	 if (name != null && speakerNumber != null)
+	 {
+	    Schema schema = getSchema();
+	    
+	    // add participant annotation
+	    Annotation participant = new Annotation(
+	       "m_-2_" + speakerNumber, name, schema.getParticipantLayerId());
+	    
+	    PreparedStatement sqlValue = getConnection().prepareStatement(
+	       "SELECT a.annotation_id, a.speaker_number, a.label, a.annotated_by, a.annotated_when"
+	       +" FROM annotation_participant a"
+	       +" WHERE a.layer = ? and a.speaker_number = ?");
+	    sqlValue.setString(2, speakerNumber);
+	    
+	    // load participant attributes
+	    for (Layer attributeLayer : schema.getLayer(schema.getParticipantLayerId()).getChildren().values())
+	    {
+	       // participant tag layers
+	       if (attributeLayer.getAlignment() == Constants.ALIGNMENT_NONE)
+	       {
+		  if ("speaker".equals(attributeLayer.get("@class_id")))
+		  {
+		     sqlValue.setString(1, attributeLayer.get("@attribute").toString());
+		     ResultSet rsValue = sqlValue.executeQuery();
+		     int ordinal = 1;
+		     while (rsValue.next())
+		     {
+			// add graph-tag annotation
+			Object[] annotationIdParts = {
+			   attributeLayer.get("@attribute"), new Integer(rsValue.getInt("annotation_id"))};
+			Annotation attribute = new Annotation(
+			   fmtParticipantAttributeId.format(annotationIdParts), 
+			   rsValue.getString("label"), attributeLayer.getId());
+			if (rsValue.getString("annotated_by") != null)
+			{
+			   attribute.setAnnotator(rsValue.getString("annotated_by"));
+			}
+			if (rsValue.getDate("annotated_when") != null)
+			{
+			   attribute.setWhen(rsValue.getDate("annotated_when"));
+			}
+			attribute.setParentId("m_-2_"+rsValue.getString("speaker_number"));
+			attribute.setOrdinal(ordinal++);
+			participant.addAnnotation(attribute);
+			attribute.commit();
+		     } // next annotation
+		     rsValue.close();
+		  } // class_id set
+	       } // unaligned layer
+	    } // next child of "who" layer
+	    sqlValue.close();
+
+	    participant.commit();
+	    
+	    return participant;
+	 } // participant found
+	 else
+	 {
+	    return null;
+	 }
+      }
+      catch(SQLException exception)
+      {
+	 throw new StoreException(exception);
+      }
+
+   } // end of getParticipant()
+   
+   /**
+    * Saves a participant, and all its tags, to the database.  The participant is represented by an Annotation that isn't assumed to be part of a graph.
+    * @param participant
+    * @return true if changes were saved, false if there were no changes to save.
+    * @throws StoreException If an error prevents the participant from being saved.
+    * @throws PermissionException If saving the participant is not permitted.
+    */
+   public boolean saveParticipant(Annotation participant)
+    throws StoreException, PermissionException
+   {
+      if (!"who".equals(participant.getLayerId()))
+	 throw new StoreException("Annotation is not on the participant layer.");
+      if (participant.getChange() == Change.Operation.Create)
+	 throw new StoreException("Adding new participants is not supported."); // TODO
+      if (participant.getChange() == Change.Operation.Destroy )
+	 throw new StoreException("Deleting participants is not supported.");
+      
+      boolean thereWereChanges = false;
+      try
+      {
+	 // save the participant record itself
+	 if (participant.getChange() == Change.Operation.Update)
+	 {
+	    thereWereChanges = true;
+	    Object[] o = fmtMetaAnnotationId.parse(participant.getId());
+	    int speakerNumber = Integer.parseInt(o[1].toString());
+	    // update the label (the only possible change)
+	    PreparedStatement sql = getConnection().prepareStatement(
+	       "UPDATE speaker SET name = ? WHERE speaker_number = ?");
+	    sql.setString(1, participant.getLabel());
+	    sql.setInt(2, speakerNumber);
+	    sql.executeUpdate();
+	    sql.close();
+	 }
+
+	 // save the tags
+	 PreparedStatement sqlInsertParticipantAttribute = getConnection().prepareStatement(
+	    "REPLACE INTO annotation_participant (speaker_number, layer, label, annotated_by, annotated_when) VALUES (?,?,?,?,?)");
+	 PreparedStatement sqlUpdateParticipantAttribute = getConnection().prepareStatement(
+	    "UPDATE annotation_participant SET label = ?, annotated_by = ?, annotated_when = ? WHERE layer = ? AND annotation_id = ?");
+	 PreparedStatement sqlDeleteParticipantAttribute = getConnection().prepareStatement(
+	    "DELETE FROM annotation_participant WHERE layer = ? AND annotation_id = ?");
+	 try
+	 {
+	    for (String layerId : participant.getAnnotations().keySet())
+	    {
+	       for (Annotation attribute : participant.getAnnotations().get(layerId))
+	       {
+		  if (attribute.getChange() != Change.Operation.NoChange)
+		  {
+		     thereWereChanges = true;
+		     saveParticipantAttributeChanges(attribute, sqlInsertParticipantAttribute, sqlUpdateParticipantAttribute, sqlDeleteParticipantAttribute);
+		  }
+	       } // next child
+	    } // next child layer
+	 }
+	 finally
+	 {
+	    sqlInsertParticipantAttribute.close();
+	    sqlUpdateParticipantAttribute.close();
+	    sqlDeleteParticipantAttribute.close();
+	 }
+      }
+      catch(ParseException exception)
+      {
+	 System.err.println("Error parsing ID for participant: "+participant.getId());
+	 throw new StoreException("Error parsing ID for participant: "+participant.getId(), exception);
+      }
+      catch(SQLException exception)
+      {
+	 throw new StoreException(exception);
+      }
+      return thereWereChanges;
+   } // end of saveParticipant()
+
    /**
     * Returns an SQL WHERE clause for restricting access by user ID, if the user is set.
     * @param prefixWithAnd
@@ -733,9 +918,9 @@ public class SqlGraphStore
 	 return (prefixWithAnd?" AND":" WHERE")
 	    +" (EXISTS (SELECT * FROM role"
 	    + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
-	    + " INNER JOIN transcript_attribute access_attribute" 
-	    + " ON access_attribute.name = role_permission.attribute_name" 
-	    + " AND access_attribute.value REGEXP role_permission.value_pattern"
+	    + " INNER JOIN annotation_transcript access_attribute" 
+	    + " ON access_attribute.layer = role_permission.attribute_name" 
+	    + " AND access_attribute.label REGEXP role_permission.value_pattern"
 	    + " AND role_permission.entity REGEXP '.*t.*'" // transcript access
 	    + " WHERE user_id = '"+getUser().replaceAll("'","\\'")+"'"
 	    + " AND access_attribute.ag_id = transcript.ag_id)"
@@ -867,13 +1052,13 @@ public class SqlGraphStore
 	    else if (operand.startsWith("my('") && operand.endsWith("').label"))
 	    { // an attribute?
 	       String layerId = operand.replaceFirst("my\\('","").replaceFirst("'\\)\\.label$","");
-	       sqlOperand = "(SELECT value"
-		  +" FROM speaker_attribute"
-		  +" WHERE speaker_attribute.speaker_number = speaker.speaker_number"
-		  +" AND speaker_attribute.name = '"+layerId
+	       sqlOperand = "(SELECT label"
+		  +" FROM annotation_participant"
+		  +" WHERE annotation_participant.speaker_number = speaker.speaker_number"
+		  +" AND annotation_participant.layer = '"+layerId
 		  .replaceFirst("^participant_", "")
 		  .replaceAll("\\'", "\\\\'")
-		  +"')";
+		  +"' LIMIT 1)";
 	    } // an attribute?
 	    else
 	    {
@@ -1068,23 +1253,23 @@ public class SqlGraphStore
 	    else if (operand.startsWith("my('") && operand.endsWith("').label"))
 	    { // an attribute?
 	       String layerId = operand.replaceFirst("my\\('","").replaceFirst("'\\)\\.label$","");
-	       sqlOperand = "(SELECT value"
-		  +" FROM transcript_attribute"
-		  +" WHERE transcript_attribute.ag_id = transcript.ag_id"
-		  +" AND transcript_attribute.name = '"+layerId
+	       sqlOperand = "(SELECT label"
+		  +" FROM annotation_transcript"
+		  +" WHERE annotation_transcript.ag_id = transcript.ag_id"
+		  +" AND annotation_transcript.layer = '"+layerId
 		  .replaceFirst("^transcript_", "")
 		  .replaceAll("\\'", "\\\\'")
-		  +"')";
+		  +"' LIMIT 1)";
 	    } // an attribute?
 	    else if (operand.startsWith("list('") && operand.endsWith("').length"))
 	    { // an attribute?
 	       String layerId = operand.replaceFirst("list\\('","").replaceFirst("'\\)\\.length$","");
 	       sqlOperand = "(SELECT COUNT(*)"
-		  +" FROM transcript_attribute"
-		  +" WHERE transcript_attribute.ag_id = transcript.ag_id"
-		  +" AND transcript_attribute.name = '"+layerId
+		  +" FROM annotation_transcript"
+		  +" WHERE annotation_transcript.ag_id = transcript.ag_id"
+		  +" AND annotation_transcript.layer = '"+layerId
 		  .replaceFirst("^transcript_", "") .replaceAll("\\'", "\\\\'") +"'"
-		  +" AND transcript_attribute.value <> ''" // empty values don't count
+		  +" AND annotation_transcript.label <> ''" // empty values don't count
 		  +")";
 	    } // an attribute?
 	    else
@@ -1236,11 +1421,11 @@ public class SqlGraphStore
 
 	 PreparedStatement sql = getConnection().prepareStatement(
 	    "SELECT transcript.*, transcript_family.name AS series,"
-	    +" transcript_type.transcript_type, divergent.value AS divergent"
+	    +" transcript_type.transcript_type, divergent.label AS divergent"
 	    +" FROM transcript"
 	    +" INNER JOIN transcript_family ON transcript.family_id = transcript.family_id"
 	    +" INNER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
-	    +" LEFT OUTER JOIN transcript_attribute divergent ON transcript.ag_id = divergent.ag_id AND divergent.name = 'divergent'"
+	    +" LEFT OUTER JOIN annotation_transcript divergent ON transcript.ag_id = divergent.ag_id AND divergent.layer = 'divergent'"
 	    +" WHERE transcript.transcript_id = ?"+userWhereClause(true));
 	 sql.setString(1, id);
 	 ResultSet rs = sql.executeQuery();
@@ -1250,11 +1435,11 @@ public class SqlGraphStore
 	    sql.close();
 	    sql = getConnection().prepareStatement(
 	       "SELECT transcript.*, transcript_family.name AS series,"
-	       +" transcript_type.transcript_type, divergent.value AS divergent"
+	       +" transcript_type.transcript_type, divergent.label AS divergent"
 	       +" FROM transcript"
 	       +" INNER JOIN transcript_family ON transcript.family_id = transcript.family_id"
 	       +" INNER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
-	       +" LEFT OUTER JOIN transcript_attribute divergent ON transcript.ag_id = divergent.ag_id AND divergent.name = 'divergent'"
+	       +" LEFT OUTER JOIN annotation_transcript divergent ON transcript.ag_id = divergent.ag_id AND divergent.layer = 'divergent'"
 	       +" WHERE transcript.transcript_id REGEXP ?"+userWhereClause(true));
 	    sql.setString(1, "^" + id.replaceAll("\\.[^.]+$","") + "\\.[^.]+$");
 	    rs = sql.executeQuery();
@@ -1267,11 +1452,11 @@ public class SqlGraphStore
 		  int iAgId = Integer.parseInt(id);
 		  sql = getConnection().prepareStatement(
 		     "SELECT transcript.*, transcript_family.name AS series,"
-		     +" transcript_type.transcript_type, divergent.value AS divergent"
+		     +" transcript_type.transcript_type, divergent.label AS divergent"
 		     +" FROM transcript"
 		     +" INNER JOIN transcript_family ON transcript.family_id = transcript.family_id"
 		     +" INNER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
-		     +" LEFT OUTER JOIN transcript_attribute divergent ON transcript.ag_id = divergent.ag_id AND divergent.name = 'divergent'"
+		     +" LEFT OUTER JOIN annotation_transcript divergent ON transcript.ag_id = divergent.ag_id AND divergent.layer = 'divergent'"
 		     +" WHERE transcript.ag_id = ?"+userWhereClause(true));
 		  sql.setInt(1, iAgId);
 		  rs = sql.executeQuery();
@@ -1472,19 +1657,22 @@ public class SqlGraphStore
 		  { // definitedly a transcript attribute layer
 		     graph.addLayer(attributeLayer);
 		     PreparedStatement sqlValue = getConnection().prepareStatement(
-			"SELECT value, annotated_by, annotated_when FROM transcript_attribute"
-			+" WHERE ag_id = ? AND name = ?");
+			"SELECT annotation_id, label, annotated_by, annotated_when"
+			+" FROM annotation_transcript"
+			+" WHERE ag_id = ? AND layer = ?");
 		     sqlValue.setInt(1, iAgId);
 		     sqlValue.setString(2, attributeLayer.get("@attribute").toString());
 		     ResultSet rsValue = sqlValue.executeQuery();
-		     if (rsValue.next())
+		     boolean attributeFound = false;
+		     while (rsValue.next())
 		     {
+			attributeFound = true;
 			// add graph-tag annotation
 			Object[] annotationIdParts = {
-			   attributeLayer.get("@attribute"), new Integer(iAgId)};
+			   attributeLayer.get("@attribute"), new Integer(rsValue.getInt("annotation_id"))};
 			Annotation attribute = new Annotation(
 			   fmtTranscriptAttributeId.format(annotationIdParts), 
-			   rsValue.getString("value"), attributeLayer.getId());
+			   rsValue.getString("label"), attributeLayer.getId());
 			if (rsValue.getString("annotated_by") != null)
 			{
 			   attribute.setAnnotator(rsValue.getString("annotated_by"));
@@ -1496,7 +1684,7 @@ public class SqlGraphStore
 			attribute.setParentId(graph.getId());
 			graph.addAnnotation(attribute);
 		     } 
-		     else if (attributeLayer.getId().equals("transcript_language"))
+		     if (!attributeFound && attributeLayer.getId().equals("transcript_language"))
 		     { // transcript_language can magically inherit from corpus
 			PreparedStatement sqlCorpusLanguage = getConnection().prepareStatement(
 			   "SELECT corpus_language FROM corpus"
@@ -1532,21 +1720,22 @@ public class SqlGraphStore
 		  { // definitedly a participant attribute layer
 		     graph.addLayer(attributeLayer);
 		     PreparedStatement sqlValue = getConnection().prepareStatement(
-			"SELECT a.speaker_number, a.value, a.annotated_by, a.annotated_when"
-			+" FROM speaker_attribute a"
+			"SELECT a.annotation_id, a.speaker_number, a.label, a.annotated_by, a.annotated_when"
+			+" FROM annotation_participant a"
 			+" INNER JOIN transcript_speaker ts ON ts.speaker_number = a.speaker_number"
-			+" WHERE ts.ag_id = ? AND a.name = ?");
+			+" WHERE ts.ag_id = ? AND a.layer = ?");
 		     sqlValue.setInt(1, iAgId);
 		     sqlValue.setString(2, attributeLayer.get("@attribute").toString());
 		     ResultSet rsValue = sqlValue.executeQuery();
+		     int ordinal = 1;
 		     while (rsValue.next())
 		     {
 			// add graph-tag annotation
 			Object[] annotationIdParts = {
-			   attributeLayer.get("@attribute"), new Integer(rsValue.getInt("speaker_number"))};
+			   attributeLayer.get("@attribute"), new Integer(rsValue.getInt("annotation_id"))};
 			Annotation attribute = new Annotation(
 			   fmtParticipantAttributeId.format(annotationIdParts), 
-			   rsValue.getString("value"), attributeLayer.getId());
+			   rsValue.getString("label"), attributeLayer.getId());
 			if (rsValue.getString("annotated_by") != null)
 			{
 			   attribute.setAnnotator(rsValue.getString("annotated_by"));
@@ -1556,6 +1745,7 @@ public class SqlGraphStore
 			   attribute.setWhen(rsValue.getDate("annotated_when"));
 			}
 			attribute.setParentId("m_-2_"+rsValue.getString("speaker_number"));
+			attribute.setOrdinal(ordinal++);
 			graph.addAnnotation(attribute);
 		     }
 		     rsValue.close();
@@ -1900,7 +2090,7 @@ public class SqlGraphStore
 	    sqlAnnotationsByOffset.setInt(2, ag_id);
 
 	    final PreparedStatement sqlTranscriptAttribute = getConnection().prepareStatement(
-	       "SELECT value FROM transcript_attribute WHERE ag_id = ? AND name = ?");
+	       "SELECT label FROM annotation_transcript WHERE ag_id = ? AND layer = ?");
 	    sqlTranscriptAttribute.setInt(1, ag_id);
 	    final PreparedStatement sqlCorpusLanguage = getConnection().prepareStatement(
 	       "SELECT corpus_language FROM corpus"
@@ -2019,13 +2209,13 @@ public class SqlGraphStore
 			{ // transcript attribute
 			   sqlTranscriptAttribute.setString(2, layer.get("@attribute").toString());
 			   ResultSet rs = sqlTranscriptAttribute.executeQuery();
-			   if (rs.next() && rs.getString("value").length() > 0)
+			   if (rs.next() && rs.getString("label").length() > 0)
 			   {
 			      Object[] annotationIdParts = {
-				 layer.get("@attribute"), new Integer(ag_id)};
+				 layer.get("@attribute"), new Integer(rs.getInt("annotation_id"))};
 			      Annotation attribute = new Annotation(
 				 fmtTranscriptAttributeId.format(annotationIdParts),
-				 rs.getString("value"), layer.getId());
+				 rs.getString("label"), layer.getId());
 			      attribute.setParentId(fragment.getId());
 			      fragment.addAnnotation(attribute);
 			   } 
@@ -2489,24 +2679,24 @@ public class SqlGraphStore
 	    "DELETE FROM annotation_layer_? WHERE annotation_id = ?");
 
 	 PreparedStatement sqlInsertTranscriptAttribute = getConnection().prepareStatement(
-	    "INSERT INTO transcript_attribute (ag_id, name, value, annotated_by, annotated_when) VALUES (?,?,?,?,?)");
+	    "INSERT INTO annotation_transcript (ag_id, layer, label, annotated_by, annotated_when) VALUES (?,?,?,?,?)");
 	 sqlInsertTranscriptAttribute.setInt(1, iAgId);
 	 PreparedStatement sqlUpdateTranscriptAttribute = getConnection().prepareStatement(
-	    "UPDATE transcript_attribute SET value = ?, annotated_by = ?, annotated_when = ? WHERE ag_id = ? AND name = ?");
+	    "UPDATE annotation_transcript SET label = ?, annotated_by = ?, annotated_when = ? WHERE ag_id = ? AND layer = ? AND annotation_id = ?");
 	 sqlUpdateTranscriptAttribute.setInt(4, iAgId);
 	 PreparedStatement sqlDeleteTranscriptAttribute = getConnection().prepareStatement(
-	    "DELETE FROM transcript_attribute WHERE ag_id = ? AND name = ?");
+	    "DELETE FROM annotation_transcript WHERE ag_id = ? AND layer = ? AND annotation_id = ?");
 	 sqlDeleteTranscriptAttribute.setInt(1, iAgId);
 	 // participant attributes look like children of graph in the schema
 	 // but they're actually store-wide entities.
 	 // for this reason, REPLACE INTO is required - an attribute that already exists
 	 // for the speaker may also be created by an uploaded graph.
 	 PreparedStatement sqlInsertParticipantAttribute = getConnection().prepareStatement(
-	    "REPLACE INTO speaker_attribute (speaker_number, name, value, annotated_by, annotated_when) VALUES (?,?,?,?,?)");
+	    "REPLACE INTO annotation_participant (speaker_number, layer, label, annotated_by, annotated_when) VALUES (?,?,?,?,?)");
 	 PreparedStatement sqlUpdateParticipantAttribute = getConnection().prepareStatement(
-	    "UPDATE speaker_attribute SET value = ?, annotated_by = ?, annotated_when = ? WHERE speaker_number = ? AND name = ?");
+	    "UPDATE annotation_participant SET label = ?, annotated_by = ?, annotated_when = ? WHERE layer = ? AND annotation_id = ?");
 	 PreparedStatement sqlDeleteParticipantAttribute = getConnection().prepareStatement(
-	    "DELETE FROM speaker_attribute WHERE speaker_number = ? AND name = ?");
+	    "DELETE FROM annotation_participant WHERE layer = ? AND annotation_id = ?");
 
 	 PreparedStatement sqlAttributeLayers = getConnection().prepareStatement(
 	    "SELECT attribute FROM attribute_definition WHERE class_id = ?");
@@ -2570,42 +2760,19 @@ public class SqlGraphStore
 		  }
 		  else if (transcriptAttributeLayers.contains(annotation.getLayerId()))
 		  { // transcript attribute
-		     if (!transcriptAttributes.containsKey(annotation.getLayerId()))
-		     { // first mention, so add it to the map
-			transcriptAttributes.put(annotation.getLayerId(), annotation);
-		     }
-		     else
-		     { // already there, so merge this one with the other one
-			Annotation previous = transcriptAttributes.get(annotation.getLayerId());
-			if (previous.getChange() == Change.Operation.Destroy)
-			{ // replace the delete with this one
-			   transcriptAttributes.put(annotation.getLayerId(), annotation);
-			}
-			else if (annotation.getChange() != Change.Operation.Destroy)
-			{ // change or add, so append the label of this one
-			   previous.setLabel(previous.getLabel() + "\n" + annotation.getLabel());
-			}
-		     }
+		     saveTranscriptAttributeChanges(
+			annotation, 
+			sqlInsertTranscriptAttribute, 
+			sqlUpdateTranscriptAttribute, 
+			sqlDeleteTranscriptAttribute);
 		  }
 		  else if (participantAttributeLayers.contains(annotation.getLayerId()))
 		  { // participant attribute
-		     // the key of the collection includes the parent ID, so that attributes for all participants don't accumulate on to one
-		     if (!participantAttributes.containsKey(annotation.getLayerId() + "|" + annotation.getParentId()))
-		     { // first mention, so add it to the map
-			participantAttributes.put(annotation.getLayerId() + "|" + annotation.getParentId(), annotation);
-		     }
-		     else
-		     { // already there, so merge this one with the other one
-			Annotation previous = participantAttributes.get(annotation.getLayerId() + "|" + annotation.getParentId());
-			if (previous.getChange() == Change.Operation.Destroy)
-			{ // replace the delete with this one
-			   participantAttributes.put(annotation.getLayerId() + "|" + annotation.getParentId(), annotation);
-			}
-			else if (annotation.getChange() != Change.Operation.Destroy)
-			{ // change or add, so append the label of this one
-			   previous.setLabel(previous.getLabel() + "\n" + annotation.getLabel());
-			}
-		     }
+		     saveParticipantAttributeChanges(
+			annotation, 
+			sqlInsertParticipantAttribute, 
+			sqlUpdateParticipantAttribute, 
+			sqlDeleteParticipantAttribute);
 		  }
 		  else
 		  { // temporal annotation
@@ -2622,24 +2789,6 @@ public class SqlGraphStore
 		  }
 	       } // Annotation change
 	    } // next change
-
-	    // attributes
-	    for (Annotation annotation : transcriptAttributes.values())
-	    {
-	       saveTranscriptAttributeChanges(
-		  annotation, 
-		  sqlInsertTranscriptAttribute, 
-		  sqlUpdateTranscriptAttribute, 
-		  sqlDeleteTranscriptAttribute);
-	    } // next transcript attribute
-	    for (Annotation annotation : participantAttributes.values())
-	    {	       
-	       saveParticipantAttributeChanges(
-		  annotation, 
-		  sqlInsertParticipantAttribute, 
-		  sqlUpdateParticipantAttribute, 
-		  sqlDeleteParticipantAttribute);
-	    } // next participant attribute
 	    
 	    // extras
 	    HashSet<Annotation> newExtraUpdates = new HashSet<Annotation>();
@@ -4037,7 +4186,6 @@ public class SqlGraphStore
 	 throw new StoreException("Error parsing ID for special attribute: "+annotation.getId() + " on layer " + annotation.getLayerId(), exception);
       }
    } // end of saveSpecialAnnotationChanges()
-
    
    /**
     * Saves changes to a transcript attribute annotation.
@@ -4100,6 +4248,7 @@ public class SqlGraphStore
 		  sqlUpdateTranscriptAttribute.setTimestamp(3, new Timestamp(new java.util.Date().getTime()));
 	       }
 	       sqlUpdateTranscriptAttribute.setString(5, attribute);
+	       sqlUpdateTranscriptAttribute.setInt(6, ((Long)o[1]).intValue());
 	       sqlUpdateTranscriptAttribute.executeUpdate();
 	       break;
 	    }
@@ -4108,6 +4257,7 @@ public class SqlGraphStore
 	       Object[] o = fmtTranscriptAttributeId.parse(annotation.getId());
 	       String attribute = o[0].toString();
 	       sqlDeleteTranscriptAttribute.setString(2, attribute);
+	       sqlDeleteTranscriptAttribute.setInt(3, ((Long)o[1]).intValue());
 	       sqlDeleteTranscriptAttribute.executeUpdate();
 	       break;
 	    } // Destroy
@@ -4175,7 +4325,7 @@ public class SqlGraphStore
 	    {
 	       Object[] o = fmtParticipantAttributeId.parse(annotation.getId());
 	       String attribute = o[0].toString();
-	       int speakerNumber = ((Long)o[1]).intValue();
+	       int annotationId = ((Long)o[1]).intValue();
 	       sqlUpdateParticipantAttribute.setString(1, annotation.getLabel());	    
 	       if (annotation.getAnnotator() != null)
 	       {
@@ -4193,8 +4343,8 @@ public class SqlGraphStore
 	       {
 		  sqlUpdateParticipantAttribute.setTimestamp(3, new Timestamp(new java.util.Date().getTime()));
 	       }
-	       sqlUpdateParticipantAttribute.setInt(4, speakerNumber);
-	       sqlUpdateParticipantAttribute.setString(5, attribute);
+	       sqlUpdateParticipantAttribute.setString(4, attribute);
+	       sqlUpdateParticipantAttribute.setInt(5, annotationId);
 	       sqlUpdateParticipantAttribute.executeUpdate();
 	       break;
 	    }
@@ -4202,9 +4352,9 @@ public class SqlGraphStore
 	    {
 	       Object[] o = fmtParticipantAttributeId.parse(annotation.getId());
 	       String attribute = o[0].toString();
-	       int speakerNumber = ((Long)o[1]).intValue();
-	       sqlDeleteParticipantAttribute.setInt(1, speakerNumber);
-	       sqlDeleteParticipantAttribute.setString(2, attribute);
+	       int annotationId = ((Long)o[1]).intValue();
+	       sqlDeleteParticipantAttribute.setString(1, attribute);
+	       sqlDeleteParticipantAttribute.setInt(2, annotationId);
 	       sqlDeleteParticipantAttribute.executeUpdate();
 	       break;
 	    } // Destroy

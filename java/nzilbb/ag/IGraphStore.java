@@ -44,6 +44,16 @@ public interface IGraphStore
       throws StoreException, PermissionException, GraphNotFoundException;
 
    /**
+    * Saves a participant, and all its tags, to the database.  The participant is represented by an Annotation that isn't assumed to be part of a graph.
+    * @param participant
+    * @return true if changes were saved, false if there were no changes to save.
+    * @throws StoreException If an error prevents the participant from being saved.
+    * @throws PermissionException If saving the participant is not permitted.
+    */
+   public boolean saveParticipant(Annotation participant)
+      throws StoreException, PermissionException;
+
+   /**
     * Saves the given media for the given graph
     * @param id The graph ID
     * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.

@@ -96,6 +96,16 @@ public interface IGraphStoreQuery
       throws StoreException, PermissionException; 
 
    /**
+    * Gets the participant record specified by the given identifier.
+    * @param id The ID of the participant, which could be their name or their database annotation ID.
+    * @return An annotation representing the participant, or null if the participant was not found.
+    * @throws StoreException
+    * @throws PermissionException
+    */
+   public Annotation getParticipant(String id)
+      throws StoreException, PermissionException;
+
+   /**
     * Counts the number of participants that match a particular pattern.
     * @param expression An expression that determines which participants match.
     * @return The number of matching participants.
