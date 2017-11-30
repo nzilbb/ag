@@ -1272,6 +1272,16 @@ public class SqlGraphStore
 		  +" AND annotation_transcript.label <> ''" // empty values don't count
 		  +")";
 	    } // an attribute?
+	    else if (operand.startsWith("annotators('") && operand.endsWith("')"))
+	    { // an attribute?
+	       String layerId = operand.replaceFirst("annotators\\('","").replaceFirst("'\\)$","");
+	       sqlOperand = "(SELECT annotated_by"
+		  +" FROM annotation_transcript"
+		  +" WHERE annotation_transcript.ag_id = transcript.ag_id"
+		  +" AND annotation_transcript.layer = '"+layerId
+		  .replaceFirst("^transcript_", "") .replaceAll("\\'", "\\\\'") +"'"
+		  +")";
+	    } // an attribute?
 	    else
 	    {
 	       sqlOperand = operand;
