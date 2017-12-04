@@ -513,7 +513,8 @@ public class SqlGraphStore
 	       layer.setAlignment(Constants.ALIGNMENT_NONE);
 	       layer.setParentId("graph");
 	       layer.setParentIncludes(true);
-	       layer.setPeers(rs.getString("style").matches(".*multiple.*"));
+	       layer.setPeers(rs.getInt("peers") == 1
+			      || rs.getString("style").matches(".*multiple.*"));
 	       layer.setPeersOverlap(true);
 	       layer.setSaturated(true);
 	       
@@ -541,6 +542,7 @@ public class SqlGraphStore
 	       layer.put("@category", rs.getString("category"));
 	       layer.put("@type", rs.getString("type"));
 	       layer.put("@style", rs.getString("style"));
+	       layer.put("@peers", rs.getString("peers"));
 	       layer.put("@label", rs.getString("label"));
 	       layer.put("@description", rs.getString("description"));
 	       layer.put("@display_order", rs.getString("display_order"));
@@ -592,7 +594,8 @@ public class SqlGraphStore
 		  layer.setAlignment(Constants.ALIGNMENT_NONE);
 		  layer.setParentId("who");
 		  layer.setParentIncludes(true);
-		  layer.setPeers(rs.getString("style").matches(".*multiple.*"));
+		  layer.setPeers(rs.getInt("peers") == 1
+				 || rs.getString("style").matches(".*multiple.*"));
 		  layer.setPeersOverlap(false);
 		  layer.setSaturated(true);
 		  
@@ -620,6 +623,7 @@ public class SqlGraphStore
 		  layer.put("@category", rs.getString("category"));
 		  layer.put("@type", rs.getString("type"));
 		  layer.put("@style", rs.getString("style"));
+		  layer.put("@peers", rs.getString("peers"));
 		  layer.put("@label", rs.getString("label"));
 		  layer.put("@description", rs.getString("description"));
 		  layer.put("@display_order", rs.getString("display_order"));
