@@ -995,7 +995,7 @@ public class SqlGraphStore
     * <ul>
     *  <li><code>id MATCHES 'Ada.+'</code></li>
     *  <li><code>'CC' IN labels('corpus')</code></li>
-    *  <li><code>id MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
+    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
     * </ul>
     * @param expression The graph-matching expression.
     * @param selectClause The expression that is to go between SELECT and FROM.
@@ -1013,7 +1013,7 @@ public class SqlGraphStore
 	 subexpression = subexpression.trim();
 	 if (subexpression.length() == 0) continue;
 	 String operator = null;
-	 String[] operators = {" = "," <> "," <= "," >= "," < "," > "," MATCHES ", " IN "};
+	 String[] operators = {" = "," <> "," <= "," >= "," < "," > "," NOT MATCHES "," MATCHES ", " NOT IN ", " IN "};
 	 String[] operands = null;
 	 for (String op : operators)
 	 {
@@ -1028,7 +1028,7 @@ public class SqlGraphStore
 	 if (operands == null) throw new StoreException("No operands found in: " + expression);
 
 	 String sqlLhs = null;
-	 String sqlOperator = operator.equals("MATCHES")?"REGEXP":operator;
+	 String sqlOperator = operator.replace("MATCHES", "REGEXP");
 	 String sqlRhs = null;
 	 for (String operand : operands)
 	 {
@@ -1198,7 +1198,7 @@ public class SqlGraphStore
     *  <li><code>id MATCHES 'Ada.+'</code></li>
     *  <li><code>my('corpus').label = 'CC'</code></li>
     *  <li><code>'Robert' IN labels('who')</code></li>
-    *  <li><code>id MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
+    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
     * </ul>
     * @param expression The graph-matching expression.
     * @param selectClause The expression that is to go between SELECT and FROM.
@@ -1216,7 +1216,7 @@ public class SqlGraphStore
 	 subexpression = subexpression.trim();
 	 if (subexpression.length() == 0) continue;
 	 String operator = null;
-	 String[] operators = {" = "," <> "," <= "," >= "," < "," > "," MATCHES ", " IN "};
+	 String[] operators = {" = "," <> "," <= "," >= "," < "," > ", " NOT MATCHES "," MATCHES ", " NOT IN ", " IN "};
 	 String[] operands = null;
 	 for (String op : operators)
 	 {
@@ -1231,7 +1231,7 @@ public class SqlGraphStore
 	 if (operands == null) throw new StoreException("No operands found in: " + expression);
 
 	 String sqlLhs = null;
-	 String sqlOperator = operator.equals("MATCHES")?"REGEXP":operator;
+	 String sqlOperator = operator.replace("MATCHES","REGEXP");
 	 String sqlRhs = null;
 	 PreparedStatement sqlAttribute = getConnection().prepareStatement(
 	    "SELECT * FROM attribute_definition WHERE CONCAT('transcript_', attribute) = ?");
@@ -1307,11 +1307,12 @@ public class SqlGraphStore
 	 conditions.append(" ");
 	 conditions.append(sqlRhs);
       } // next subexpression
-      PreparedStatement sql = getConnection().prepareStatement(
-	 "SELECT "+selectClause+" FROM transcript"
+      String sSql = "SELECT "+selectClause+" FROM transcript"
 	 + conditions.toString()
 	 + userWhereClause(conditions.length() > 0)
-	 + " " + orderClause);
+	 + " " + orderClause;
+      PreparedStatement sql = getConnection().prepareStatement(sSql);
+      //System.err.println(sSql);
       return sql;
    } // end of graphMatchSql()
 
