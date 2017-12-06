@@ -1202,12 +1202,13 @@ public class SqlGraphStore
     * </ul>
     * @param expression The graph-matching expression.
     * @param selectClause The expression that is to go between SELECT and FROM.
-    * @param orderClause The expression that appended to the end of the SQL query.
+    * @param order The expression that appended to the end of the SQL query.
+    * @param limit SQL LIMIT clause, if any.
     * @return A PreparedStatement for the given expression, with parameters already set.
     * @throws SQLException
     * @throws StoreException If the expression is invalid.
     */
-   private PreparedStatement graphMatchSql(String expression, String selectClause, String orderClause)
+   private PreparedStatement graphMatchSql(String expression, String selectClause, String order, String limit)
       throws SQLException, StoreException
    {
       StringBuffer conditions = new StringBuffer();
@@ -1307,12 +1308,64 @@ public class SqlGraphStore
 	 conditions.append(" ");
 	 conditions.append(sqlRhs);
       } // next subexpression
+      StringBuffer orderClause = new StringBuffer();
+      if (order != null)
+      {
+	 for (String part : order.split(","))
+	 {
+	    if (orderClause.length() == 0)
+	    {
+	       orderClause.append(" ORDER BY ");
+	    }
+	    else
+	    {
+	       orderClause.append(", ");
+	    }
+	    String direction = " ASC";
+	    if (part.endsWith(" ASC"))
+	    {
+	       part = part.substring(0, part.length() - " ASC".length());
+	    }
+	    if (part.endsWith(" DESC"))
+	    {
+	       part = part.substring(0, part.length() - " DESC".length());
+	       direction = " DESC";
+	    }
+	    if (part.equals("id") || part.equals("my('graph').label"))
+	    {
+	       orderClause.append("transcript_id");
+	    }
+	    else if (part.equals("my('corpus').label"))
+	    {
+	       orderClause.append("corpus_name");
+	    }
+	    else if (part.startsWith("my('") && part.endsWith("').label"))
+	    {
+	       String layerId = part.replaceFirst("my\\('","").replaceFirst("'\\)\\.label$","");
+	       orderClause.append(
+		  "(SELECT label"
+		  +" FROM annotation_transcript"
+		  +" WHERE annotation_transcript.ag_id = transcript.ag_id"
+		  +" AND annotation_transcript.layer = '"+layerId
+		  .replaceFirst("^transcript_", "")
+		  .replaceAll("\\'", "\\\\'")
+		  +"' LIMIT 1)");
+	    }
+	    else
+	    { // just pass it through...
+	       orderClause.append(part);
+	    }
+	    orderClause.append(direction);
+	 } // next part
+      } // order is specified
+      if (limit == null) limit = "";
       String sSql = "SELECT "+selectClause+" FROM transcript"
 	 + conditions.toString()
 	 + userWhereClause(conditions.length() > 0)
-	 + " " + orderClause;
+	 + orderClause.toString()
+	 + " " + limit;
       PreparedStatement sql = getConnection().prepareStatement(sSql);
-      //System.err.println(sSql);
+      System.err.println(sSql);
       return sql;
    } // end of graphMatchSql()
 
@@ -1328,7 +1381,7 @@ public class SqlGraphStore
    {
       try
       {
-	 PreparedStatement sql = graphMatchSql(expression, "COUNT(*)", "");
+	 PreparedStatement sql = graphMatchSql(expression, "COUNT(*)", null, null);
 	 ResultSet rs = sql.executeQuery();
 	 try
 	 {
@@ -1357,7 +1410,7 @@ public class SqlGraphStore
    public String[] getMatchingGraphIds(String expression)
       throws StoreException, PermissionException
    {
-      return getMatchingGraphIdsPage(expression, null, null);
+      return getMatchingGraphIdsPage(expression, null, null, null);
    }
 
    /**
@@ -1372,6 +1425,21 @@ public class SqlGraphStore
    public String[] getMatchingGraphIdsPage(String expression, Integer pageLength, Integer pageNumber)
       throws StoreException, PermissionException
    {
+      return getMatchingGraphIdsPage(expression, pageLength, pageNumber, null);
+   }
+   /**
+    * Gets a list of IDs of graphs that match a particular pattern.
+    * @param expression An expression that determines which graphs match.
+    * @param pageLength The maximum number of IDs to return, or null to return all.
+    * @param pageNumber The zero-based page number to return, or null to return the first page.
+    * @param order The ordering for the list of IDs, a string containing a comma-separated list of epxressions, which may be appended by " ASC" or " DESC", or null for graph ID order.
+    * @return A list of graph IDs.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public String[] getMatchingGraphIdsPage(String expression, Integer pageLength, Integer pageNumber, String order)
+      throws StoreException, PermissionException
+   {
       try
       {
 	 String limit = "";
@@ -1380,8 +1448,9 @@ public class SqlGraphStore
 	    if (pageNumber == null) pageNumber = 0;
 	    limit = " LIMIT " + (pageNumber * pageLength) + "," + pageLength;
 	 }
+	 if (order == null) order = "id";
 	 PreparedStatement sql = graphMatchSql(
-	    expression, "transcript_id", "ORDER BY transcript_id" + limit);
+	    expression, "transcript_id", order, limit);
 	 ResultSet rs = sql.executeQuery();
 	 Vector<String> graphs = new Vector<String>();
 	 while (rs.next())
