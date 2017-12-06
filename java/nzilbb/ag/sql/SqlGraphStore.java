@@ -1365,7 +1365,7 @@ public class SqlGraphStore
 	 + orderClause.toString()
 	 + " " + limit;
       PreparedStatement sql = getConnection().prepareStatement(sSql);
-      System.err.println(sSql);
+      //System.err.println(sSql);
       return sql;
    } // end of graphMatchSql()
 
