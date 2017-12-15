@@ -1000,6 +1000,9 @@ public class Graph
     */
    public Annotation createAnnotation(Anchor from, Anchor to, String layerId, String label, Annotation parent)
    {
+      if (from.getId() == null) getGraph().addAnchor(from);
+      if (to.getId() == null) getGraph().addAnchor(to);
+      if (parent.getId() == null) getGraph().addAnnotation(parent);
       Annotation span = new Annotation(null, label, layerId, from.getId(), to.getId(), parent.getId());
       getGraph().addAnnotation(span);
       return span;
