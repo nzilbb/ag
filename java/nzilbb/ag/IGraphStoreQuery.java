@@ -199,6 +199,19 @@ public interface IGraphStoreQuery
       throws StoreException, PermissionException; 
 
    /**
+    * Gets a list of IDs of graphs that match a particular pattern.
+    * @param expression An expression that determines which graphs match.
+    * @param pageLength The maximum number of IDs to return, or null to return all.
+    * @param pageNumber The page number to return, or null to return the first page.
+    * @param order The ordering for the list of IDs, a string containing a comma-separated list of epxressions, which may be appended by " ASC" or " DESC", or null for graph ID order.
+    * @return A list of graph IDs.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public String[] getMatchingGraphIdsPage(String expression, Integer pageLength, Integer pageNumber, String order)
+      throws StoreException, PermissionException; 
+
+   /**
     * Gets a graph given its ID.
     * @param id The given graph ID.
     * @return The identified graph.
