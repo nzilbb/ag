@@ -877,6 +877,8 @@ public class SqlGraphStore
 	    "UPDATE annotation_participant SET label = ?, annotated_by = ?, annotated_when = ? WHERE layer = ? AND annotation_id = ?");
 	 PreparedStatement sqlDeleteParticipantAttribute = getConnection().prepareStatement(
 	    "DELETE FROM annotation_participant WHERE layer = ? AND annotation_id = ?");
+	 PreparedStatement sqlDeleteAllParticipantAttributesOnLayer = getConnection().prepareStatement(
+	    "DELETE FROM annotation_participant WHERE speaker_number = ? AND layer = ?");
 	 try
 	 {
 	    for (String layerId : participant.getAnnotations().keySet())
@@ -886,7 +888,7 @@ public class SqlGraphStore
 		  if (attribute.getChange() != Change.Operation.NoChange)
 		  {
 		     thereWereChanges = true;
-		     saveParticipantAttributeChanges(attribute, sqlInsertParticipantAttribute, sqlUpdateParticipantAttribute, sqlDeleteParticipantAttribute);
+		     saveParticipantAttributeChanges(attribute, sqlInsertParticipantAttribute, sqlUpdateParticipantAttribute, sqlDeleteParticipantAttribute, sqlDeleteAllParticipantAttributesOnLayer);
 		  }
 	       } // next child
 	    } // next child layer
@@ -896,6 +898,7 @@ public class SqlGraphStore
 	    sqlInsertParticipantAttribute.close();
 	    sqlUpdateParticipantAttribute.close();
 	    sqlDeleteParticipantAttribute.close();
+	    sqlDeleteAllParticipantAttributesOnLayer.close();
 	 }
       }
       catch(ParseException exception)
@@ -2781,6 +2784,8 @@ public class SqlGraphStore
 	    "UPDATE annotation_participant SET label = ?, annotated_by = ?, annotated_when = ? WHERE layer = ? AND annotation_id = ?");
 	 PreparedStatement sqlDeleteParticipantAttribute = getConnection().prepareStatement(
 	    "DELETE FROM annotation_participant WHERE layer = ? AND annotation_id = ?");
+	 PreparedStatement sqlDeleteAllParticipantAttributesOnLayer = getConnection().prepareStatement(
+	    "DELETE FROM annotation_participant WHERE speaker_number = ? AND layer = ?");
 
 	 PreparedStatement sqlAttributeLayers = getConnection().prepareStatement(
 	    "SELECT attribute FROM attribute_definition WHERE class_id = ?");
@@ -2856,7 +2861,8 @@ public class SqlGraphStore
 			annotation, 
 			sqlInsertParticipantAttribute, 
 			sqlUpdateParticipantAttribute, 
-			sqlDeleteParticipantAttribute);
+			sqlDeleteParticipantAttribute,
+			sqlDeleteAllParticipantAttributesOnLayer);
 		  }
 		  else
 		  { // temporal annotation
@@ -2922,6 +2928,7 @@ public class SqlGraphStore
 	    sqlInsertParticipantAttribute.close();
 	    sqlUpdateParticipantAttribute.close();
 	    sqlDeleteParticipantAttribute.close();
+	    sqlDeleteAllParticipantAttributesOnLayer.close();
 	 }
       }
       catch(SQLException exception)
@@ -4362,10 +4369,11 @@ public class SqlGraphStore
     * @param sqlInsertParticipantAttribute Prepared statement for inserting an attribute value.
     * @param sqlUpdateParticipantAttribute Prepared statement for updating an attribute value.
     * @param sqlDeleteParticipantAttribute Prepared statement for deleting an attribute value.
+    * @param sqlDeleteAllParticipantAttributesOnLayer Prepared statement for deleting all attribute values on a given layer.
     * @throws StoreException If an ID can't be parsed.
     * @throws SQLException If a database error occurs.
     */
-   public void saveParticipantAttributeChanges(Annotation annotation, PreparedStatement sqlInsertParticipantAttribute, PreparedStatement sqlUpdateParticipantAttribute, PreparedStatement sqlDeleteParticipantAttribute) throws SQLException, StoreException
+   public void saveParticipantAttributeChanges(Annotation annotation, PreparedStatement sqlInsertParticipantAttribute, PreparedStatement sqlUpdateParticipantAttribute, PreparedStatement sqlDeleteParticipantAttribute, PreparedStatement sqlDeleteAllParticipantAttributesOnLayer) throws SQLException, StoreException
    {
       try
       {
@@ -4377,11 +4385,14 @@ public class SqlGraphStore
 	       Object[] o = fmtMetaAnnotationId.parse(annotation.getParentId());
 	       int speakerNumber = Integer.parseInt(o[1].toString());
 
-	       // the attribute might be new in this graph, but already exist in the database
-	       // so delete first and then add
-	       sqlDeleteParticipantAttribute.setInt(1, speakerNumber);
-	       sqlDeleteParticipantAttribute.setString(2, attribute);
-	       sqlDeleteParticipantAttribute.executeUpdate();
+	       if (!"1".equals(annotation.getLayer().get("@peers")))
+	       {
+		  // the attribute might be new in this graph, but already exist in the database
+		  // so delete first and then add
+		  sqlDeleteAllParticipantAttributesOnLayer.setInt(1, speakerNumber);
+		  sqlDeleteAllParticipantAttributesOnLayer.setString(2, attribute);
+		  sqlDeleteAllParticipantAttributesOnLayer.executeUpdate();
+	       }
 
 	       sqlInsertParticipantAttribute.setInt(1, speakerNumber);
 	       sqlInsertParticipantAttribute.setString(2, attribute);
