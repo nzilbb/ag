@@ -2007,7 +2007,9 @@ public class SqlGraphStore
 	 PreparedStatement sqlAnnotation = getConnection().prepareStatement(
 	    "SELECT layer.*,"
 	    +" start.offset AS start_offset, start.alignment_status AS start_alignment_status,"
-	    +" end.offset AS end_offset, end.alignment_status AS end_alignment_status"
+	    +" start.annotated_by AS start_annotated_by, start.annotated_when AS start_annotated_when,"
+	    +" end.offset AS end_offset, end.alignment_status AS end_alignment_status,"
+	    +" end.annotated_by AS end_annotated_by, end.annotated_when AS end_annotated_when"
 	    +" FROM annotation_layer_? layer"
 	    +" INNER JOIN anchor start ON layer.start_anchor_id = start.anchor_id"
 	    +" INNER JOIN anchor end ON layer.end_anchor_id = end.anchor_id"
@@ -2157,7 +2159,9 @@ public class SqlGraphStore
 	    final PreparedStatement sqlAnnotationsByParent = getConnection().prepareStatement(
 	       "SELECT layer.*,"
 	       +" start.offset AS start_offset, start.alignment_status AS start_alignment_status,"
-	       +" end.offset AS end_offset, end.alignment_status AS end_alignment_status"
+	       +" start.annotated_by AS start_annotated_by, start.annotated_when AS start_annotated_when,"
+	       +" end.offset AS end_offset, end.alignment_status AS end_alignment_status,"
+	       +" end.annotated_by AS end_annotated_by, end.annotated_when AS end_annotated_when"
 	       +" FROM annotation_layer_? layer"
 	       +" INNER JOIN anchor start ON layer.start_anchor_id = start.anchor_id"
 	       +" INNER JOIN anchor end ON layer.end_anchor_id = end.anchor_id"
@@ -2167,7 +2171,9 @@ public class SqlGraphStore
 	    final PreparedStatement sqlAnnotationsByOffset = getConnection().prepareStatement(
 	       "SELECT layer.*,"
 	       +" start.offset AS start_offset, start.alignment_status AS start_alignment_status,"
-	       +" end.offset AS end_offset, end.alignment_status AS end_alignment_status"
+	       +" start.annotated_by AS start_annotated_by, start.annotated_when AS start_annotated_when,"
+	       +" end.offset AS end_offset, end.alignment_status AS end_alignment_status,"
+	       +" end.annotated_by AS end_annotated_by, end.annotated_when AS end_annotated_when"
 	       +" FROM annotation_layer_? layer"
 	       +" INNER JOIN anchor start ON layer.start_anchor_id = start.anchor_id"
 	       +" INNER JOIN anchor end ON layer.end_anchor_id = end.anchor_id"
@@ -2177,7 +2183,7 @@ public class SqlGraphStore
 	    sqlAnnotationsByOffset.setInt(2, ag_id);
 
 	    final PreparedStatement sqlTranscriptAttribute = getConnection().prepareStatement(
-	       "SELECT label FROM annotation_transcript WHERE ag_id = ? AND layer = ?");
+	       "SELECT * FROM annotation_transcript WHERE ag_id = ? AND layer = ?");
 	    sqlTranscriptAttribute.setInt(1, ag_id);
 	    final PreparedStatement sqlCorpusLanguage = getConnection().prepareStatement(
 	       "SELECT corpus_language FROM corpus"
@@ -2474,17 +2480,14 @@ public class SqlGraphStore
 	    {
 	       if (censorshipPattern.matcher(annotation.getLabel()).matches())
 	       { // matching annotation
-		  System.out.println("Censoring interval: " + annotation + " " + annotation.getStart() + "-" + annotation.getEnd());
 		  censoredCount++;
 		  // change all words to censorshipLabel
 		  for (Annotation word : annotation.list(schema.getWordLayerId()))
 		  {
-		     System.out.println("Censoring word: " + word + " " + word.getStart() + "-" + word.getEnd());
 		     word.setLabel(censorshipLabel);
 		  } // next word
 	       } // matching annotation
 	    } // next annotation
-	    System.out.println("Censored intervals: " + censoredCount);
 	 } // censorshipRegexp required
 
 	 if (graph.getChange() == Change.Operation.Create)
@@ -4727,7 +4730,6 @@ public class SqlGraphStore
 	    {
 	       if (censorshipPattern.matcher(annotation.getLabel()).matches())
 	       { // matching annotation
-		  System.out.println("Censoring: " + annotation + " " + annotation.getStart() + "-" + annotation.getEnd());
 		  try
 		  {
 		     // ensure points don't go backwards, and use offset Min/Max to widen interval
@@ -4741,12 +4743,10 @@ public class SqlGraphStore
 			{
 			   if (line.includesOffset(start))
 			   { // found the containing utterance
-			      System.out.println("falling back to line start: " + line + " " + line.getStart() + "-" + line.getEnd());
 			      start = line.getStart().getOffset();
 			      if (line.getStart().getConfidence() < Constants.CONFIDENCE_AUTOMATIC)
 			      { // still uncertain start
 				 // use turn start
-				 System.out.println("falling back to turn start: " + turn + " " + turn.getStart() + "-" + turn.getEnd());
 				 start = turn.getStart().getOffset();
 			      }
 			      break;
@@ -4765,11 +4765,9 @@ public class SqlGraphStore
 			   if (line.includesOffset(end))
 			   { // found the containing utterance
 			      end = line.getEnd().getOffset();
-			      System.out.println("falling back to line end: " + line + " " + line.getStart() + "-" + line.getEnd());
 			      if (line.getEnd().getConfidence() < Constants.CONFIDENCE_AUTOMATIC)
 			      { // still uncertain end
 				 // use turn end
-				 System.out.println("falling back to turn end: " + turn + " " + turn.getStart() + "-" + line.getEnd());
 				 end = turn.getEnd().getOffset();
 			      }
 			      break;
