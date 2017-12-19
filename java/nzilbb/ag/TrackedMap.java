@@ -208,7 +208,11 @@ public class TrackedMap
 	 }
 	 catch(InvocationTargetException exception)
 	 {
-	    System.err.println("registerChange [" + this + "] - " + key + " = " + value + " :: " + exception);
+	    System.err.println("registerChange [" + this + "] - " + key + " = " + value + " :: " + exception.getCause());
+	    if (exception.getCause() != null)
+	    {
+	       exception.getCause().printStackTrace(System.err);
+	    }
 	 }
       }
       return new Change(Change.Operation.Update, this, key, value);
