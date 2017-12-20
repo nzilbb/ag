@@ -23,6 +23,7 @@ package nzilbb.praat;
 
 import nzilbb.ag.serialize.SerializationException;
 import java.util.Vector;
+import java.util.Locale;
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -31,6 +32,7 @@ import java.io.FileWriter;
 import java.io.Writer;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 
 /**
  * Praat text-grid.
@@ -39,7 +41,10 @@ import java.text.DecimalFormat;
 public class TextGrid
    implements ITextEntity
 {
-   static final DecimalFormat OffsetFormat = new DecimalFormat("0.#################");
+   static final DecimalFormat OffsetFormat = new DecimalFormat(
+      "0.#################",
+      // force the decimal separator to be '.':
+      new DecimalFormatSymbols(Locale.UK));
    // Attributes:
    
    protected double dXmin = 0.0;
