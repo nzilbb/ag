@@ -118,7 +118,7 @@ public class ConfigurationHelper
    public static String ConfigurationFilename(SerializationDescriptor descriptor)
    {
       String mimeType = descriptor.getMimeType();
-      return (mimeType + ".xml").replaceAll("[^A-Za-z0-9.]+", "-");
-   } // end of FilenameSafeMimeType()
+      return (mimeType + ".config.xml").replaceAll("[^A-Za-z0-9.]+", "-");
+   } // end of ConfigurationFilename()
    
 } // end of class IconHelper
