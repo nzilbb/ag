@@ -1251,6 +1251,12 @@ public class SqlGraphStore
 	    {
 	       sqlOperand = "corpus_name";
 	    }
+	    else if (operand.equals("my('episode').label"))
+	    {
+	       sqlOperand = "(SELECT name"
+		  +" FROM transcript_family"
+		  +" WHERE transcript_family.family_id = transcript.family_id)";
+	    }
 	    else if (operand.equals("labels('who')"))
 	    {
 	       sqlOperand = "(SELECT speaker.name"
