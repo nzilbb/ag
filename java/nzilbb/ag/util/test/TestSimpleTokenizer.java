@@ -529,6 +529,196 @@ public class TestSimpleTokenizer
       }
    }
 
+   @Test public void nonLatin() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+
+      g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+			   true, // peers
+			   true, // peersOverlap
+			   true)); // saturated
+      g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "who", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("utterance", "Utterances", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "turn", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "turn", // parentId
+			   true)); // parentIncludes
+
+      g.addAnchor(new Anchor("a0", 0.0, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("a1", 1.0, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("a2", 2.0, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("a3", 3.0, Constants.CONFIDENCE_MANUAL));
+
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "my graph"));
+      g.addAnnotation(new Annotation("participant2", "jane doe", "who", "my graph"));
+
+      g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a3", "participant1"));
+      g.addAnnotation(new Annotation("turn2", "jane doe", "turn", "a2", "a3", "participant2"));
+
+      g.addAnnotation(new Annotation("utterance1", "그게 뭐 영원히 남아서", "utterance", "a0", "a1", "turn1"));
+      g.addAnnotation(new Annotation("utterance2", "뭐 이제", "utterance", "a1", "a3", "turn1"));
+      g.addAnnotation(new Annotation("utterance3", "선 보는 데도", "utterance", "a2", "a3", "turn2"));
+
+      try
+      {
+	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word");
+	 Vector<Change> changes = tokenizer.transform(g);
+	 Annotation[] words = g.getAnnotation("turn1").list("word");
+	 assertEquals(6, words.length);
+
+	 assertEquals("first word shares start with utterance", "a0", words[0].getStartId());
+
+	 assertEquals("그게", words[0].getLabel());
+
+	 assertNull("intermediate anchors have null offsets", words[0].getEnd().getOffset());
+	 assertEquals("tokens chained together", words[0].getEndId(), words[1].getStartId());
+
+	 assertEquals("뭐", words[1].getLabel());
+	 assertEquals("영원히", words[2].getLabel());
+	 assertEquals("남아서", words[3].getLabel());
+	 assertEquals("last word shares end with utterance", "a1", words[3].getEndId());
+	 assertEquals("first word shares start with utterance", "a1", words[4].getStartId());
+	 assertEquals("뭐", words[4].getLabel());
+	 assertEquals("이제", words[5].getLabel());
+	 assertEquals("last word shares end with utterance", "a3", words[5].getEndId());
+
+	 words = g.getAnnotation("turn2").list("word");
+	 assertEquals(3, words.length);
+	 assertEquals("first word shares start with utterance", "a2", words[0].getStartId());
+	 assertEquals("선", words[0].getLabel());
+	 assertEquals("보는", words[1].getLabel());
+	 assertEquals("데도", words[2].getLabel());
+	 assertEquals("first word shares end with utterance", "a3", words[2].getEndId());
+
+	 for (Annotation word : g.list("word"))
+	 {
+	    if (!word.getStart().isStartOn("utterance"))
+	    {
+	       assertNull("Ensure word start anchors have no confidence: " + word + " - " + word.getStart() + ":" + word.getStart().getConfidence(),
+			  word.getStart().getConfidence());
+	    }
+	    if (!word.getEnd().isEndOn("utterance"))
+	    {
+	       assertNull("Ensure word end anchors have no confidence: " + word + " - " + word.getEnd() + ":" + word.getEnd().getConfidence(),
+			  word.getEnd().getConfidence());
+	    }
+	 } // next word
+	 
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+   }
+
+   @Test public void nonBMPUnicode() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+
+      g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+			   true, // peers
+			   true, // peersOverlap
+			   true)); // saturated
+      g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "who", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("utterance", "Utterances", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "turn", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "turn", // parentId
+			   true)); // parentIncludes
+
+      g.addAnchor(new Anchor("a0", 0.0, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("a1", 1.0, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("a2", 2.0, Constants.CONFIDENCE_MANUAL));
+      g.addAnchor(new Anchor("a3", 3.0, Constants.CONFIDENCE_MANUAL));
+
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "my graph"));
+      g.addAnnotation(new Annotation("participant2", "jane doe", "who", "my graph"));
+
+      g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a3", "participant1"));
+      g.addAnnotation(new Annotation("turn2", "jane doe", "turn", "a2", "a3", "participant2"));
+
+      g.addAnnotation(new Annotation("utterance1", "🍁 𝓜𝓪𝓷𝓰𝓸 𝓑𝓪𝔂 😍", "utterance", "a0", "a1", "turn1"));
+      g.addAnnotation(new Annotation("utterance2", "🅳🅰🅽🅺 🅼🅴🅼🅴🆂", "utterance", "a1", "a3", "turn1"));
+      g.addAnnotation(new Annotation("utterance3", "༼つ ◕_◕ ༽つ", "utterance", "a2", "a3", "turn2"));
+
+      try
+      {
+	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word");
+	 Vector<Change> changes = tokenizer.transform(g);
+	 Annotation[] words = g.getAnnotation("turn1").list("word");
+	 assertEquals(6, words.length);
+
+	 assertEquals("first word shares start with utterance", "a0", words[0].getStartId());
+
+	 assertEquals("🍁", words[0].getLabel());
+
+	 assertNull("intermediate anchors have null offsets", words[0].getEnd().getOffset());
+	 assertEquals("tokens chained together", words[0].getEndId(), words[1].getStartId());
+
+	 assertEquals("𝓜𝓪𝓷𝓰𝓸", words[1].getLabel());
+	 assertEquals("𝓑𝓪𝔂", words[2].getLabel());
+	 assertEquals("😍", words[3].getLabel());
+	 assertEquals("last word shares end with utterance", "a1", words[3].getEndId());
+	 assertEquals("first word shares start with utterance", "a1", words[4].getStartId());
+	 assertEquals("🅳🅰🅽🅺", words[4].getLabel());
+	 assertEquals("🅼🅴🅼🅴🆂", words[5].getLabel());
+	 assertEquals("last word shares end with utterance", "a3", words[5].getEndId());
+
+	 words = g.getAnnotation("turn2").list("word");
+	 assertEquals(3, words.length);
+	 assertEquals("first word shares start with utterance", "a2", words[0].getStartId());
+	 assertEquals("༼つ", words[0].getLabel());
+	 assertEquals("◕_◕", words[1].getLabel());
+	 assertEquals("༽つ", words[2].getLabel());
+	 assertEquals("first word shares end with utterance", "a3", words[2].getEndId());
+
+	 for (Annotation word : g.list("word"))
+	 {
+	    if (!word.getStart().isStartOn("utterance"))
+	    {
+	       assertNull("Ensure word start anchors have no confidence: " + word + " - " + word.getStart() + ":" + word.getStart().getConfidence(),
+			  word.getStart().getConfidence());
+	    }
+	    if (!word.getEnd().isEndOn("utterance"))
+	    {
+	       assertNull("Ensure word end anchors have no confidence: " + word + " - " + word.getEnd() + ":" + word.getEnd().getConfidence(),
+			  word.getEnd().getConfidence());
+	    }
+	 } // next word
+	 
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+   }
+
    public static void main(String args[]) 
    {
       org.junit.runner.JUnitCore.main("nzilbb.ag.util.test.TestSimpleTokenizer");

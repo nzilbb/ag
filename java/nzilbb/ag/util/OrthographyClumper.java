@@ -40,7 +40,7 @@ public class OrthographyClumper implements IGraphTransformer
     * @see #getNonOrthoCharacterPattern()
     * @see #setNonOrthoCharacterPattern(String)
     */
-   protected String nonOrthoCharacterPattern = "[^\\p{javaLetter}\\p{javaDigit}]";
+   protected String nonOrthoCharacterPattern = "[\\p{Punct}]";
    /**
     * Getter for {@link #nonOrthoCharacterPattern}: A regular expression that identifies a non-orthographic character.
     * @return A regular expression that identifies a non-orthographic character.

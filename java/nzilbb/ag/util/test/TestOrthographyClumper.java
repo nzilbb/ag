@@ -107,7 +107,7 @@ public class TestOrthographyClumper
 
 	 for (int o = 0; o < words.length; o++)
 	 {
-	    assertEquals("orhtography corrected", o+1, words[o].getOrdinal());
+	    assertEquals("orthography corrected", o+1, words[o].getOrdinal());
 	    if (o > 0)
 	    {
 	       assertEquals("anchor linking", words[o-1].getEnd(), words[o].getStart());
@@ -571,6 +571,160 @@ public class TestOrthographyClumper
       }
    }
 
+   @Test public void nonLatin() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");
+
+      g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+			   true, // peers
+			   true, // peersOverlap
+			   true)); // saturated
+      g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "who", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "turn", // parentId
+			   true)); // parentIncludes
+
+      g.addAnchor(new Anchor("a0", 0.0));
+      g.addAnchor(new Anchor("a1", 1.0));
+      g.addAnchor(new Anchor("a2", 2.0));
+      g.addAnchor(new Anchor("a3", 3.0));
+      g.addAnchor(new Anchor("a4", 4.0));
+      g.addAnchor(new Anchor("a5", 5.0));
+      g.addAnchor(new Anchor("a6", 6.0));
+      g.addAnchor(new Anchor("a7", 7.0));
+      g.addAnchor(new Anchor("a8", 8.0));
+      g.addAnchor(new Anchor("a9", 9.0));
+      g.addAnchor(new Anchor("a10", 10.0));
+      g.addAnchor(new Anchor("a15", 15.0));
+
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "a0", "a15", "my graph"));
+
+      g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a15", "participant1"));
+
+      g.addAnnotation(new Annotation("emoji1", "그게", "word", "a1", "a2", "turn1"));
+      g.addAnnotation(new Annotation("mango", "뭐", "word", "a2", "a3", "turn1"));
+      g.addAnnotation(new Annotation("bay", "영원히", "word", "a3", "a4", "turn1"));
+      g.addAnnotation(new Annotation("emoji2", "남아서", "word", "a4", "a5", "turn1"));
+      g.addAnnotation(new Annotation("dank", "뭐", "word", "a5", "a6", "turn1"));
+      g.addAnnotation(new Annotation("memes", "이제", "word", "a6", "a7", "turn1"));
+      g.addAnnotation(new Annotation("leftear", "선", "word", "a7", "a8", "turn1"));
+      g.addAnnotation(new Annotation("face", "보는", "word", "a8", "a9", "turn1"));
+      g.addAnnotation(new Annotation("rightear", "데도", "word", "a9", "a10", "turn1"));
+
+      try
+      {
+	 OrthographyClumper transformer = new OrthographyClumper("word");
+	 Vector<Change> changes = transformer.transform(g);
+	 g.commit();
+	 Annotation words[] = g.list("word");
+	 assertEquals("그게", words[0].getLabel());
+	 assertEquals("뭐", words[1].getLabel());
+	 assertEquals("영원히", words[2].getLabel());
+	 assertEquals("남아서", words[3].getLabel());
+	 assertEquals("뭐", words[4].getLabel());
+	 assertEquals("이제", words[5].getLabel());
+	 assertEquals("선", words[6].getLabel());
+	 assertEquals("보는", words[7].getLabel());
+	 assertEquals("데도", words[8].getLabel());
+	 assertEquals(9, words.length);
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+   }
+
+   @Test public void nonBMPUnicode() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");
+
+      g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+			   true, // peers
+			   true, // peersOverlap
+			   true)); // saturated
+      g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "who", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "turn", // parentId
+			   true)); // parentIncludes
+
+      g.addAnchor(new Anchor("a0", 0.0));
+      g.addAnchor(new Anchor("a1", 1.0));
+      g.addAnchor(new Anchor("a2", 2.0));
+      g.addAnchor(new Anchor("a3", 3.0));
+      g.addAnchor(new Anchor("a4", 4.0));
+      g.addAnchor(new Anchor("a5", 5.0));
+      g.addAnchor(new Anchor("a6", 6.0));
+      g.addAnchor(new Anchor("a7", 7.0));
+      g.addAnchor(new Anchor("a8", 8.0));
+      g.addAnchor(new Anchor("a9", 9.0));
+      g.addAnchor(new Anchor("a10", 10.0));
+      g.addAnchor(new Anchor("a15", 15.0));
+
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "a0", "a15", "my graph"));
+
+      g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a15", "participant1"));
+
+      g.addAnnotation(new Annotation("emoji1", "🍁", "word", "a1", "a2", "turn1"));
+      g.addAnnotation(new Annotation("mango", "𝓜𝓪𝓷𝓰𝓸", "word", "a2", "a3", "turn1"));
+      g.addAnnotation(new Annotation("bay", "𝓑𝓪𝔂", "word", "a3", "a4", "turn1"));
+      g.addAnnotation(new Annotation("emoji2", "😍", "word", "a4", "a5", "turn1"));
+      g.addAnnotation(new Annotation("dank", "🅳🅰🅽🅺", "word", "a5", "a6", "turn1"));
+      g.addAnnotation(new Annotation("memes", "🅼🅴🅼🅴🆂", "word", "a6", "a7", "turn1"));
+      g.addAnnotation(new Annotation("leftear", "༼つ", "word", "a7", "a8", "turn1"));
+      g.addAnnotation(new Annotation("face", "◕_◕", "word", "a8", "a9", "turn1"));
+      g.addAnnotation(new Annotation("rightear", "༽つ", "word", "a9", "a10", "turn1"));
+
+      try
+      {
+	 OrthographyClumper transformer = new OrthographyClumper("word");
+	 Vector<Change> changes = transformer.transform(g);
+	 g.commit();
+	 Annotation words[] = g.list("word");
+	 assertEquals("emoji counts as word",
+		      "🍁", words[0].getLabel());
+	 assertEquals("cursive word not clumped",
+		      "𝓜𝓪𝓷𝓰𝓸", words[1].getLabel());
+	 assertEquals("cursive word not clumped",
+		      "𝓑𝓪𝔂", words[2].getLabel());
+	 assertEquals("emoji counts as word",
+		      "😍", words[3].getLabel());
+	 assertEquals("block word not clumped",
+		      "🅳🅰🅽🅺", words[4].getLabel());
+	 assertEquals("block word not clumped",
+		      "🅼🅴🅼🅴🆂", words[5].getLabel());
+	 assertEquals("extended characters not clumped",
+		      "༼つ", words[6].getLabel());
+	 assertEquals("extended characters not clumped",
+		      "◕_◕", words[7].getLabel());
+	 assertEquals("extended characters not clumped",
+		      "༽つ", words[8].getLabel());
+	 assertEquals(9, words.length);
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+   }
 
    public static void main(String args[]) 
    {
