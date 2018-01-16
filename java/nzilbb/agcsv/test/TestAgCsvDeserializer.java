@@ -19,7 +19,7 @@
 //    along with nzilbb.ag; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.csv.test;
+package nzilbb.agcsv.test;
 	      
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -32,7 +32,7 @@ import nzilbb.configure.ParameterSet;
 import nzilbb.configure.Parameter;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.util.NamedStream;
-import nzilbb.csv.*;
+import nzilbb.agcsv.*;
 
 public class TestAgCsvDeserializer
 {      
