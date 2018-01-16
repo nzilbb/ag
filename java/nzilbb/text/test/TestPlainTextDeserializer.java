@@ -773,9 +773,19 @@ public class TestPlainTextDeserializer
 	 }
       }
 
-      // Normalizer normalizer = new Normalizer();
-      // normalizer.setMinimumTurnPauseLength(0.5); // TODO this should be configurable
-      // normalizer.transform(g);
+      Normalizer normalizer = new Normalizer();
+      normalizer.setMinimumTurnPauseLength(0.5); // TODO this should be configurable
+      normalizer.transform(g);
+
+      for (Anchor a : g.getAnchors().values())
+      {
+	 if (a.getStartingAnnotations().size() + a.getEndingAnnotations().size() > 0)
+	 {
+	    assertNotNull("ensure all anchors have confidence: " + a + ": " + a.getEndingAnnotations() + "." + a.getStartingAnnotations(),
+			  a.getConfidence());
+	    assertEquals("ensure all anchors have high confidence: " + a, Constants.CONFIDENCE_MANUAL, a.getConfidence().longValue());
+	 }
+      }
 
       // Validator v = new Validator();
       // v.setFullValidation(true);
