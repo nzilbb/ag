@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project name="nzilbb.csv" default="all" basedir=".">
-  <description>CSV file deserializer for nzilbb.ag</description>
+<project name="nzilbb.agcsv" default="all" basedir=".">
+  <description>Legacy CSV file deserializer for nzilbb.ag</description>
   <!-- set global properties for this build -->
   <property name="src"   location="."/>
   <property name="javadoc"   location="javadoc"/>
   <property name="build" location="build_${ant.project.name}"/>
   <property name="dist"  location="../bin"/>
-  <property name="srcfiles" value="nzilbb/csv/**/*.java"/> 
-  <property name="srctests" value="nzilbb/csv/test/Test*.java"/>
-  <property name="icon" value="nzilbb/csv/AgCsvDeserializer.png"/>
+  <property name="srcfiles" value="nzilbb/agcsv/**/*.java"/> 
+  <property name="srctests" value="nzilbb/agcsv/test/Test*.java"/>
+  <property name="icon" value="nzilbb/agcsv/AgCsvDeserializer.png"/>
   <property name="junitjar" value="/usr/share/java/junit4.jar"/>
-  <property name="mainclass" value="nzilbb.csv.CsvToJson"/>
+  <property name="mainclass" value="nzilbb.agcsv.CsvToJson"/>
   <property name="classpath" value="nzilbb.ag.jar commons-csv.jar"/>
   
   <target name="init">
@@ -29,7 +29,7 @@
     <javac srcdir="${src}" destdir="${build}"
 	   classpath="${dist}/nzilbb.ag.jar;lib/commons-csv.jar"
 	   includes="${srcfiles}"
-	   excludes="nzilbb/csv/**/test/*.java"
+	   excludes="nzilbb/agcsv/**/test/*.java"
 	   listfiles="yes"
 	   includeantruntime="false"
 	   target="6"
@@ -58,7 +58,7 @@
       <!-- include source code -->
       <fileset dir="${src}" 
 	       includes="${srcfiles} nzilbb/jsendpraat/nzilbb_jsendpraat_SendPraat.*"
-	       excludes="nzilbb/csv/**/test/*.java"
+	       excludes="nzilbb/agcsv/**/test/*.java"
 	       />
       <!-- include this build file -->
       <fileset dir="." includes="build.xml" />
@@ -69,7 +69,7 @@
     <delete dir="${build}"/>
   </target>
 
-  <target name="test" depends="dist" description="run nzilbb.csv annotation-graph unit tests">
+  <target name="test" depends="dist" description="run nzilbb.agcsv annotation-graph unit tests">
     <javac srcdir="${src}" destdir="."
 	   includes="${srctests}"
 	   classpath=".;${junitjar};${dist}/${ant.project.name}.jar;${dist}/nzilbb.ag.jar;lib/commons-csv.jar"
