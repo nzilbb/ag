@@ -87,19 +87,19 @@ public class AgCsvDeserializer
    protected Vector<String> warnings;
    
    /**
-    * Name of the .cha file.
+    * Name of the .csv file.
     * @see #getName()
     * @see #setName(String)
     */
    protected String name;
    /**
-    * Getter for {@link #name}: Name of the .cha file.
-    * @return Name of the .cha file.
+    * Getter for {@link #name}: Name of the .csv file.
+    * @return Name of the .csv file.
     */
    public String getName() { return name; }
    /**
-    * Setter for {@link #name}: Name of the .cha file.
-    * @param newName Name of the .cha file.
+    * Setter for {@link #name}: Name of the .csv file.
+    * @param newName Name of the .csv file.
     */
    public void setName(String newName) { name = newName; }
    
