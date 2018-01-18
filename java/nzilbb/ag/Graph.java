@@ -534,9 +534,6 @@ public class Graph
       // add to annotations collection
       getAnnotationsById().put(annotation.getId(), annotation);
 
-      // add to the layer's collection
-      annotation.setLayer(getLayer(annotation.getLayerId()));
-
       // add to the parent's collection
       if (annotation.getParent() != null)
       { // this ensures it's in the parent's child collection
