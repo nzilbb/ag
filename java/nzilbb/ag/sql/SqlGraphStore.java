@@ -476,6 +476,8 @@ public class SqlGraphStore
 	    layer.put("@project_id", rs.getString("project_id"));
 	    layer.put("@data_mime_type", rs.getString("data_mime_type"));
 	    layer.put("@alignment", rs.getString("alignment"));
+	    layer.put("@style", rs.getString("style"));
+	    layer.put("@peers", rs.getString("peers"));
 	    
 	    rs.close();
 	    sql.close();
@@ -1212,7 +1214,7 @@ public class SqlGraphStore
     * @throws StoreException If the expression is invalid.
     */
    private PreparedStatement graphMatchSql(String expression, String selectClause, String order, String limit)
-      throws SQLException, StoreException
+      throws SQLException, StoreException, PermissionException
    {
       StringBuffer conditions = new StringBuffer();
       for (String subexpression : expression.split(" AND "))
@@ -1265,36 +1267,105 @@ public class SqlGraphStore
 		  +" WHERE transcript_speaker.ag_id = transcript.ag_id)";
 	    }
 	    else if (operand.startsWith("my('") && operand.endsWith("').label"))
-	    { // an attribute?
+	    { // my
 	       String layerId = operand.replaceFirst("my\\('","").replaceFirst("'\\)\\.label$","");
-	       sqlOperand = "(SELECT label"
-		  +" FROM annotation_transcript"
-		  +" WHERE annotation_transcript.ag_id = transcript.ag_id"
-		  +" AND annotation_transcript.layer = '"+layerId
-		  .replaceFirst("^transcript_", "")
-		  .replaceAll("\\'", "\\\\'")
-		  +"' LIMIT 1)";
-	    } // an attribute?
+	       Layer layer = getLayer(layerId);
+	       if (layer == null) throw new StoreException("Invalid layer: " + layerId);
+	       if ("speaker".equals(layer.get("@class_id"))) throw new StoreException("Cannoth query by participant annotation layer: " + layerId);
+	       if ("transcript".equals(layer.get("@class_id")))
+	       { // transcript attribute
+		  sqlOperand = "(SELECT label"
+		     +" FROM annotation_transcript"
+		     +" WHERE annotation_transcript.ag_id = transcript.ag_id"
+		     +" AND annotation_transcript.layer = '"+layerId
+		     .replaceFirst("^transcript_", "")
+		     .replaceAll("\\'", "\\\\'")
+		     +"' LIMIT 1)";
+	       }
+	       else if (layer.getParentId().equals("episode"))
+	       { // episode tag layer
+		  sqlOperand =
+		     "(SELECT label"
+		     +" FROM `annotation_layer_" + layer.get("@layer_id") + "` layer"
+		     +" INNER JOIN transcript t ON layer.family_id = t.family_id"
+		     +" WHERE t.ag_id = transcript.ag_id"
+		     +" LIMIT 1)";
+	       }
+	       else
+	       { // regular temporal layer
+		  sqlOperand =
+		     "(SELECT label"
+		     +" FROM annotation_layer_" + layer.get("@layer_id") + " layer"
+		     +" WHERE layer.ag_id = transcript.ag_id"
+		     +" LIMIT 1)";
+	       }
+	    } // my
 	    else if (operand.startsWith("list('") && operand.endsWith("').length"))
-	    { // an attribute?
+	    { // list
 	       String layerId = operand.replaceFirst("list\\('","").replaceFirst("'\\)\\.length$","");
-	       sqlOperand = "(SELECT COUNT(*)"
-		  +" FROM annotation_transcript"
-		  +" WHERE annotation_transcript.ag_id = transcript.ag_id"
-		  +" AND annotation_transcript.layer = '"+layerId
-		  .replaceFirst("^transcript_", "") .replaceAll("\\'", "\\\\'") +"'"
-		  +" AND annotation_transcript.label <> ''" // empty values don't count
-		  +")";
-	    } // an attribute?
+	       Layer layer = getLayer(layerId);
+	       if (layer == null) throw new StoreException("Invalid layer: " + layerId);
+	       if ("speaker".equals(layer.get("@class_id"))) throw new StoreException("Cannoth query by participant annotation layer: " + layerId);
+	       if ("transcript".equals(layer.get("@class_id")))
+	       { // transcript attribute
+		  sqlOperand = "(SELECT COUNT(*)"
+		     +" FROM annotation_transcript"
+		     +" WHERE annotation_transcript.ag_id = transcript.ag_id"
+		     +" AND annotation_transcript.layer = '"+layerId
+		     .replaceFirst("^transcript_", "") .replaceAll("\\'", "\\\\'") +"'"
+		     +" AND annotation_transcript.label <> ''" // empty values don't count
+		     +")";
+	       }
+	       else if (layer.getParentId().equals("episode"))
+	       { // episode tag layer
+		  sqlOperand =
+		     "(SELECT COUNT(*)"
+		     +" FROM `annotation_layer_" + layer.get("@layer_id") + "` layer"
+		     +" INNER JOIN transcript t ON layer.family_id = t.family_id"
+		     +" WHERE t.ag_id = transcript.ag_id"
+		     +")";
+	       }
+	       else
+	       { // regular temporal layer
+		  sqlOperand =
+		     "(SELECT COUNT(*)"
+		     +" FROM annotation_layer_" + layer.get("@layer_id") + " layer"
+		     +" WHERE layer.ag_id = transcript.ag_id"
+		     +" LIMIT 1)";
+	       }
+	    } // list
 	    else if (operand.startsWith("annotators('") && operand.endsWith("')"))
-	    { // an attribute?
+	    { // annotators
 	       String layerId = operand.replaceFirst("annotators\\('","").replaceFirst("'\\)$","");
-	       sqlOperand = "(SELECT annotated_by"
-		  +" FROM annotation_transcript"
-		  +" WHERE annotation_transcript.ag_id = transcript.ag_id"
-		  +" AND annotation_transcript.layer = '"+layerId
-		  .replaceFirst("^transcript_", "") .replaceAll("\\'", "\\\\'") +"'"
-		  +")";
+	       Layer layer = getLayer(layerId);
+	       if (layer == null) throw new StoreException("Invalid layer: " + layerId);
+	       if ("speaker".equals(layer.get("@class_id"))) throw new StoreException("Cannoth query by participant annotation layer: " + layerId);
+	       if ("transcript".equals(layer.get("@class_id")))
+	       { // transcript attribute
+		  sqlOperand = "(SELECT annotated_by"
+		     +" FROM annotation_transcript"
+		     +" WHERE annotation_transcript.ag_id = transcript.ag_id"
+		     +" AND annotation_transcript.layer = '"+layerId
+		     .replaceFirst("^transcript_", "") .replaceAll("\\'", "\\\\'") +"'"
+		     +")";
+	       }
+	       else if (layer.getParentId().equals("episode"))
+	       { // episode tag layer
+		  sqlOperand =
+		     "(SELECT annotated_by"
+		     +" FROM `annotation_layer_" + layer.get("@layer_id") + "` layer"
+		     +" INNER JOIN transcript t ON layer.family_id = t.family_id"
+		     +" WHERE t.ag_id = transcript.ag_id"
+		     +")";
+	       }
+	       else
+	       { // regular temporal layer
+		  sqlOperand =
+		     "(SELECT annotated_by"
+		     +" FROM annotation_layer_" + layer.get("@layer_id") + " layer"
+		     +" WHERE layer.ag_id = transcript.ag_id"
+		     +" LIMIT 1)";
+	       }
 	    } // an attribute?
 	    else
 	    {
@@ -1351,14 +1422,37 @@ public class SqlGraphStore
 	    else if (part.startsWith("my('") && part.endsWith("').label"))
 	    {
 	       String layerId = part.replaceFirst("my\\('","").replaceFirst("'\\)\\.label$","");
-	       orderClause.append(
-		  "(SELECT label"
-		  +" FROM annotation_transcript"
-		  +" WHERE annotation_transcript.ag_id = transcript.ag_id"
-		  +" AND annotation_transcript.layer = '"+layerId
-		  .replaceFirst("^transcript_", "")
-		  .replaceAll("\\'", "\\\\'")
-		  +"' LIMIT 1)");
+	       Layer layer = getLayer(layerId);
+	       if (layer == null) throw new StoreException("Invalid layer: " + layerId);
+	       if ("speaker".equals(layer.get("@class_id"))) throw new StoreException("Cannoth query by participant annotation layer: " + layerId);
+	       if ("transcript".equals(layer.get("@class_id")))
+	       { // transcript attribute
+		  orderClause.append(
+		     "(SELECT label"
+		     +" FROM annotation_transcript"
+		     +" WHERE annotation_transcript.ag_id = transcript.ag_id"
+		     +" AND annotation_transcript.layer = '"+layerId
+		     .replaceFirst("^transcript_", "")
+		     .replaceAll("\\'", "\\\\'")
+		     +"' LIMIT 1)");
+	       }
+	       else if (layer.getParentId().equals("episode"))
+	       { // episode tag layer
+		  orderClause.append(
+		     "(SELECT label"
+		     +" FROM `annotation_layer_" + layer.get("@layer_id") + "` layer"
+		     +" INNER JOIN transcript t ON layer.family_id = t.family_id"
+		     +" WHERE t.ag_id = transcript.ag_id"
+		     +" LIMIT 1)");
+	       }
+	       else
+	       { // regular temporal layer
+		  orderClause.append(
+		     "(SELECT label"
+		     +" FROM annotation_layer_" + layer.get("@layer_id") + " layer"
+		     +" WHERE layer.ag_id = transcript.ag_id"
+		     +" LIMIT 1)");
+	       }
 	    }
 	    else
 	    { // just pass it through...
@@ -1373,6 +1467,8 @@ public class SqlGraphStore
 	 + userWhereClause(conditions.length() > 0)
 	 + orderClause.toString()
 	 + " " + limit;
+      // System.out.println("QL: " + expression);
+      // System.out.println("SQL: " + sSql);
       PreparedStatement sql = getConnection().prepareStatement(sSql);
       //System.err.println(sSql);
       return sql;
@@ -1609,6 +1705,7 @@ public class SqlGraphStore
 	    sqlAnnotation.setInt(2, iAgId);
 	    for (String layerId : layersToLoad)
 	    {
+	       Layer layer = getLayer(layerId);
 	       if (layerId.equals("graph"))
 	       { // special case
 		  continue;
@@ -1617,8 +1714,7 @@ public class SqlGraphStore
 	       {
 		  // create participant layer...
 		  // thereby creating a lookup list of participant names
-		  Layer participantLayer = getLayer(layerId);
-		  graph.addLayer(participantLayer);
+		  graph.addLayer(layer);
 		  Layer mainParticipantLayer = getLayer("main_participant");
 		  graph.addLayer(mainParticipantLayer);
 		  PreparedStatement sqlParticipant = getConnection().prepareStatement(
@@ -1632,11 +1728,11 @@ public class SqlGraphStore
 		  {
 		     // add graph-tag annotation
 		     Object[] annotationIdParts = {
-			participantLayer.get("@layer_id"), rsParticipant.getString("speaker_number")};
+			layer.get("@layer_id"), rsParticipant.getString("speaker_number")};
 		     Annotation participant = new Annotation(
 			fmtMetaAnnotationId.format(annotationIdParts), 
-			rsParticipant.getString("name"), participantLayer.getId());
-		     participant.setParentId(graph.getId());
+			rsParticipant.getString("name"), layer.getId());
+		     participant.setParentId(graph.getId());		     
 		     graph.addAnnotation(participant);
 		     
 		     // are they a main participant?
@@ -1664,8 +1760,7 @@ public class SqlGraphStore
 	       }
 	       else if (layerId.equals("episode"))
 	       {
-		  Layer episodeLayer = getLayer(layerId);
-		  graph.addLayer(episodeLayer);
+		  graph.addLayer(layer);
 		  PreparedStatement sqlEpisode = getConnection().prepareStatement(
 		     "SELECT t.family_id, e.name"
 		     +" FROM transcript t"
@@ -1677,10 +1772,10 @@ public class SqlGraphStore
 		  {
 		     // add graph-tag annotation
 		     Object[] annotationIdParts = {
-			episodeLayer.get("@layer_id"), rsEpisode.getString("family_id")};
+			layer.get("@layer_id"), rsEpisode.getString("family_id")};
 		     Annotation episode = new Annotation(
 			fmtMetaAnnotationId.format(annotationIdParts), 
-			rsEpisode.getString("name"), episodeLayer.getId());
+			rsEpisode.getString("name"), layer.getId());
 		     episode.setParentId(graph.getId());
 		     graph.addAnnotation(episode);		     
 		  }
@@ -1689,10 +1784,45 @@ public class SqlGraphStore
 		  setStartEndLayers.add(layerId);
 		  continue;
 	       }
+	       else if ("episode".equals(layer.getParentId()))
+	       { // episode tag layer
+		  graph.addLayer(layer);
+		  PreparedStatement sqlEpisode = getConnection().prepareStatement(
+		     "SELECT a.annotation_id, a.label, a.annotated_by, a.annotated_when, t.family_id"
+		     +" FROM `annotation_layer_" + layer.get("@layer_id") + "` a"
+		     +" INNER JOIN transcript t ON t.family_id = a.family_id"
+		     +" WHERE t.ag_id = ?");
+		  sqlEpisode.setInt(1, iAgId);
+		  ResultSet rsEpisode = sqlEpisode.executeQuery();
+		  while (rsEpisode.next())
+		  {
+		     // add graph-tag annotation
+		     Object[] annotationIdParts = {
+			"e", layer.get("@layer_id"), rsEpisode.getInt("annotation_id")};
+		     Object[] parentAnnotationIdParts = {
+			new Integer(-50), rsEpisode.getString("family_id")};
+		     Annotation episodeTag = new Annotation(
+			fmtAnnotationId.format(annotationIdParts), 
+			rsEpisode.getString("label"), layer.getId());
+		     episodeTag.setParentId(fmtMetaAnnotationId.format(parentAnnotationIdParts));
+		     if (rsEpisode.getString("annotated_by") != null)
+		     {
+			episodeTag.setAnnotator(rsEpisode.getString("annotated_by"));
+		     }
+		     if (rsEpisode.getDate("annotated_when") != null)
+		     {
+			episodeTag.setWhen(rsEpisode.getDate("annotated_when"));
+		     }
+		     graph.addAnnotation(episodeTag);		     
+		  }
+		  rsEpisode.close();
+		  sqlEpisode.close();
+		  setStartEndLayers.add(layerId);
+		  continue;
+	       }
 	       else if (layerId.equals("corpus"))
 	       {
-		  Layer corpusLayer = getLayer(layerId);
-		  graph.addLayer(corpusLayer);
+		  graph.addLayer(layer);
 		  PreparedStatement sqlCorpus = getConnection().prepareStatement(
 		     "SELECT t.corpus_name, COALESCE(c.corpus_id, t.corpus_name) AS corpus_id"
 		     +" FROM transcript t"
@@ -1704,10 +1834,10 @@ public class SqlGraphStore
 		  {
 		     // add graph-tag annotation
 		     Object[] annotationIdParts = {
-			corpusLayer.get("@layer_id"), rsCorpus.getString("corpus_id")};
+			layer.get("@layer_id"), rsCorpus.getString("corpus_id")};
 		     Annotation corpus = new Annotation(
 			fmtMetaAnnotationId.format(annotationIdParts), 
-			rsCorpus.getString("corpus_name"), corpusLayer.getId());
+			rsCorpus.getString("corpus_name"), layer.getId());
 		     corpus.setParentId(graph.getId());
 		     graph.addAnnotation(corpus);		     
 		  }
@@ -1718,8 +1848,7 @@ public class SqlGraphStore
 	       }
 	       else if (layerId.equals("transcript_type"))
 	       {
-		  Layer typeLayer = getLayer(layerId);
-		  graph.addLayer(typeLayer);
+		  graph.addLayer(layer);
 		  PreparedStatement sqlType = getConnection().prepareStatement(
 		     "SELECT transcript_type, t.type_id"
 		     +" FROM transcript t"
@@ -1733,7 +1862,7 @@ public class SqlGraphStore
 		     Object[] annotationIdParts = {"type", new Integer(iAgId)};
 		     Annotation type = new Annotation(
 			fmtTranscriptAttributeId.format(annotationIdParts), 
-			rsType.getString("transcript_type"), typeLayer.getId());
+			rsType.getString("transcript_type"), layer.getId());
 		     type.setParentId(graph.getId());
 		     graph.addAnnotation(type);
 		  }
@@ -1745,16 +1874,15 @@ public class SqlGraphStore
 	       
 	       if (layerId.startsWith("transcript_"))
 	       { // probably a transcript attribute layer
-		  Layer attributeLayer = getLayer(layerId);
-		  if ("transcript".equals(attributeLayer.get("@class_id")))
+		  if ("transcript".equals(layer.get("@class_id")))
 		  { // definitedly a transcript attribute layer
-		     graph.addLayer(attributeLayer);
+		     graph.addLayer(layer);
 		     PreparedStatement sqlValue = getConnection().prepareStatement(
 			"SELECT annotation_id, label, annotated_by, annotated_when"
 			+" FROM annotation_transcript"
 			+" WHERE ag_id = ? AND layer = ?");
 		     sqlValue.setInt(1, iAgId);
-		     sqlValue.setString(2, attributeLayer.get("@attribute").toString());
+		     sqlValue.setString(2, layer.get("@attribute").toString());
 		     ResultSet rsValue = sqlValue.executeQuery();
 		     boolean attributeFound = false;
 		     while (rsValue.next())
@@ -1762,10 +1890,10 @@ public class SqlGraphStore
 			attributeFound = true;
 			// add graph-tag annotation
 			Object[] annotationIdParts = {
-			   attributeLayer.get("@attribute"), new Integer(rsValue.getInt("annotation_id"))};
+			   layer.get("@attribute"), new Integer(rsValue.getInt("annotation_id"))};
 			Annotation attribute = new Annotation(
 			   fmtTranscriptAttributeId.format(annotationIdParts), 
-			   rsValue.getString("label"), attributeLayer.getId());
+			   rsValue.getString("label"), layer.getId());
 			if (rsValue.getString("annotated_by") != null)
 			{
 			   attribute.setAnnotator(rsValue.getString("annotated_by"));
@@ -1777,7 +1905,7 @@ public class SqlGraphStore
 			attribute.setParentId(graph.getId());
 			graph.addAnnotation(attribute);
 		     } 
-		     if (!attributeFound && attributeLayer.getId().equals("transcript_language"))
+		     if (!attributeFound && layer.getId().equals("transcript_language"))
 		     { // transcript_language can magically inherit from corpus
 			PreparedStatement sqlCorpusLanguage = getConnection().prepareStatement(
 			   "SELECT corpus_language FROM corpus"
@@ -1788,11 +1916,11 @@ public class SqlGraphStore
 			if (rsCorpusLanguage.next())
 			{
 			   Object[] annotationIdParts = {
-			      attributeLayer.get("@attribute"), new Integer(iAgId)};
+			      layer.get("@attribute"), new Integer(iAgId)};
 			   Annotation attribute = new Annotation(
 			      fmtTranscriptAttributeId.format(annotationIdParts),
 			      rsCorpusLanguage.getString("corpus_language"), 
-			      attributeLayer.getId());
+			      layer.getId());
 			   attribute.setParentId(graph.getId());
 			   graph.addAnnotation(attribute);
 			}
@@ -1808,27 +1936,26 @@ public class SqlGraphStore
 	       
 	       if (layerId.startsWith("participant_"))
 	       { // probably a transcript attribute layer
-		  Layer attributeLayer = getLayer(layerId);
-		  if ("speaker".equals(attributeLayer.get("@class_id")))
+		  if ("speaker".equals(layer.get("@class_id")))
 		  { // definitedly a participant attribute layer
-		     graph.addLayer(attributeLayer);
+		     graph.addLayer(layer);
 		     PreparedStatement sqlValue = getConnection().prepareStatement(
 			"SELECT a.annotation_id, a.speaker_number, a.label, a.annotated_by, a.annotated_when"
 			+" FROM annotation_participant a"
 			+" INNER JOIN transcript_speaker ts ON ts.speaker_number = a.speaker_number"
 			+" WHERE ts.ag_id = ? AND a.layer = ?");
 		     sqlValue.setInt(1, iAgId);
-		     sqlValue.setString(2, attributeLayer.get("@attribute").toString());
+		     sqlValue.setString(2, layer.get("@attribute").toString());
 		     ResultSet rsValue = sqlValue.executeQuery();
 		     int ordinal = 1;
 		     while (rsValue.next())
 		     {
 			// add graph-tag annotation
 			Object[] annotationIdParts = {
-			   attributeLayer.get("@attribute"), new Integer(rsValue.getInt("annotation_id"))};
+			   layer.get("@attribute"), new Integer(rsValue.getInt("annotation_id"))};
 			Annotation attribute = new Annotation(
 			   fmtParticipantAttributeId.format(annotationIdParts), 
-			   rsValue.getString("label"), attributeLayer.getId());
+			   rsValue.getString("label"), layer.getId());
 			if (rsValue.getString("annotated_by") != null)
 			{
 			   attribute.setAnnotator(rsValue.getString("annotated_by"));
@@ -1847,8 +1974,7 @@ public class SqlGraphStore
 		     continue;
 		  } // definitely a transcript attribute layer
 	       } // probably a transcript attribute layer
-	       
-	       Layer layer = getLayer(layerId);
+
 	       graph.addLayer(layer);
 	       int iLayerId = ((Integer)layer.get("@layer_id")).intValue();
 	       String scope = (String)layer.get("@scope");
@@ -2855,6 +2981,10 @@ public class SqlGraphStore
 		      || annotation.getLayerId().equals("who"))
 		  { // special layer annotation
 		     saveSpecialAnnotationChanges(annotation, participantNameToNumber);
+		  }
+		  else if (annotation.getLayer().getParentId().equals("episode"))
+		  { // episode tag annotation
+		     saveEpisodeAnnotationChanges(annotation, sqlLastId);
 		  }
 		  else if (transcriptAttributeLayers.contains(annotation.getLayerId()))
 		  { // transcript attribute
@@ -4005,7 +4135,6 @@ public class SqlGraphStore
 	 }
 	 case Destroy:
 	 {
-	    // deduce the database anchor.anchor_id from the object anchor.id
 	    try
 	    {
 	       Object[] o = fmtAnnotationId.parse(annotation.getId());
@@ -4024,7 +4153,7 @@ public class SqlGraphStore
 	 } // Destroy
       } // switch on change type
 
-      annotation.put("@SqlUpdated", Boolean.TRUE); // flag the anchor as having been updated
+      annotation.put("@SqlUpdated", Boolean.TRUE); // flag the annotation as having been updated
    } // end of saveAnchorChanges()
 
    
@@ -4286,6 +4415,152 @@ public class SqlGraphStore
 	 throw new StoreException("Error parsing ID for special attribute: "+annotation.getId() + " on layer " + annotation.getLayerId(), exception);
       }
    } // end of saveSpecialAnnotationChanges()
+
+   /**
+    * Save changes to an episode tag annotation.
+    * @param annotation The annotation whose changes should be saved.
+    * @param sqlLastId Prepared statement for retrieving the last database ID created.
+    * @throws PermissionException If there's a permission problem.
+    * @throws SQLException If a database error occurs.
+    * @throws StoreException If some other error occurs.
+    */
+   public void saveEpisodeAnnotationChanges(Annotation annotation, PreparedStatement sqlLastId)
+      throws PermissionException, StoreException, SQLException
+   {
+      try
+      {
+	 if (annotation.getConfidence() == null)
+	 {
+	    annotation.setConfidence(new Integer(Constants.CONFIDENCE_UNKNOWN));
+	 }
+	 switch (annotation.getChange())
+	 {
+	    case Create:
+	    {
+	       Integer layerId = (Integer)annotation.getLayer().get("@layer_id");
+	       PreparedStatement sql = getConnection().prepareStatement(
+		  "INSERT INTO `annotation_layer_"+layerId+"`"
+		  +" (family_id, label, label_status, parent_id, ordinal, annotated_by, annotated_when)"
+		  + " VALUES (?,?,?,?,?,?,?)");
+	       try
+	       {
+		  Object[] o = fmtMetaAnnotationId.parse(annotation.getParentId());
+		  long familyId = Long.parseLong(o[1].toString());
+		  sql.setLong(1, familyId);
+		  sql.setString(2, annotation.getLabel());
+		  sql.setInt(3, annotation.getConfidence());
+		  sql.setLong(4, familyId);
+		  sql.setInt(5, annotation.getOrdinal());
+		  if (annotation.getAnnotator() != null)
+		  {
+		     sql.setString(6, annotation.getAnnotator());
+		  }
+		  else
+		  {
+		     sql.setString(6, getUser());
+		  }
+		  if (annotation.getWhen() != null)
+		  {
+		     sql.setTimestamp(7, new Timestamp(annotation.getWhen().getTime()));
+		  }
+		  else
+		  {
+		     sql.setTimestamp(7, new Timestamp(new java.util.Date().getTime()));
+		  }
+		  sql.executeUpdate();
+
+		  ResultSet rs = sqlLastId.executeQuery();
+		  rs.next();
+		  String oldId = annotation.getId();
+		  long annotationId = rs.getLong(1);
+		  Object[] annotationIdParts = { "e", layerId, new Long(annotationId) };
+		  String newId = fmtAnnotationId.format(annotationIdParts);
+		  rs.close();
+		  
+		  // change annotation ID
+		  annotation.setId(newId);
+	       }
+	       finally
+	       {
+		  sql.close();
+	       }
+	       break;
+	    }
+	    case Update:
+	    {
+	       Object[] o = fmtAnnotationId.parse(annotation.getId());
+	       Long layerId = (Long)o[1];
+	       Long annotationId = (Long)o[2];
+	       PreparedStatement sql = getConnection().prepareStatement(
+		  "UPDATE `annotation_layer_"+layerId+"`"
+		  + " SET label = ?, label_status = ?, "
+		  + " ordinal = ?, annotated_by = ?, annotated_when = ?"
+		  + " WHERE annotation_id = ?");
+	       try
+	       {
+		  sql.setString(1, annotation.getLabel());
+		  sql.setInt(2, annotation.getConfidence());
+		  sql.setInt(3, annotation.getOrdinal());
+		  if (annotation.getAnnotator() != null)
+		  {
+		     sql.setString(4, annotation.getAnnotator());
+		  }
+		  else
+		  {
+		     sql.setString(4, getUser());
+		  }
+		  if (annotation.getWhen() != null)
+		  {
+		     sql.setTimestamp(5, new Timestamp(annotation.getWhen().getTime()));
+		  }
+		  else
+		  {
+		     sql.setTimestamp(5, new Timestamp(new java.util.Date().getTime()));
+		  }
+		  sql.setLong(6, annotationId);
+		  sql.executeUpdate();
+	       }
+	       finally
+	       {
+		  sql.close();
+	       }
+	       break;
+	    }
+	    case Destroy:
+	    {
+	       try
+	       {
+		  Object[] o = fmtAnnotationId.parse(annotation.getId());
+		  Long layerId = (Long)o[1];
+		  Long annotationId = (Long)o[2];
+		  PreparedStatement sql = getConnection().prepareStatement(
+		     "DELETE FROM `annotation_layer_"+layerId+"` WHERE annotation_id = ?");
+		  try
+		  {
+		     sql.setLong(1, annotationId);
+		     sql.executeUpdate();
+		  }
+		  finally
+		  {
+		     sql.close();
+		  }
+	       }
+	       catch(ParseException exception)
+	       {
+		  System.err.println("Error parsing ID for episode tag "+annotation.getId());
+		  throw new StoreException("Error parsing ID for episode tag "+annotation.getId(), exception);
+	       }
+	       break;
+	    } // switch on change type
+	 }
+	 annotation.put("@SqlUpdated", Boolean.TRUE); // flag the annotation as having been updated
+      }
+      catch(ParseException exception)
+      {
+	 System.err.println("Error parsing ID for episode attribute: "+annotation.getId() + " on layer " + annotation.getLayerId());
+	 throw new StoreException("Error parsing ID for episode attribute: "+annotation.getId() + " on layer " + annotation.getLayerId(), exception);
+      }
+   } // end of saveEpisodeAnnotationChanges()
    
    /**
     * Saves changes to a transcript attribute annotation.
