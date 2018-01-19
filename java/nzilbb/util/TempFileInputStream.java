@@ -161,7 +161,7 @@ public class TempFileInputStream
    public void close()
       throws IOException
    {
-      try { fis.close(); } catch(IOException exception) {}
+      if (fis != null) try { fis.close(); } catch(IOException exception) {}
       if (bDeleteOnClose) fTempFile.delete();
       fis = null;
    }
