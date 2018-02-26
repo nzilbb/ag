@@ -122,8 +122,9 @@ public class Normalizer
 	 if (participants.length == 1 && episode.length > 0)
 	 {
 	    Annotation onlyParticipant = participants[0];
+	    // if the only participant has no name
 	    if (onlyParticipant.getLabel() == null || onlyParticipant.getLabel().length() == 0)
-	    {
+	    { // name them after the episode
 	       changes.addAll( // record changes for:
 		  onlyParticipant.setLabel(episode[0].getLabel()));
 	    }
