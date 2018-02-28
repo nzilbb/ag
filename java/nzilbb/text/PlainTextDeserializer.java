@@ -496,6 +496,25 @@ public class PlainTextDeserializer
     */
    public void setMaxHeaderLines(Integer newMaxHeaderLines) { maxHeaderLines = newMaxHeaderLines; }
 
+   
+   /**
+    * Error encountered when trying to get length of media, if any.
+    * @see #getMediaError()
+    * @see #setMediaError(String)
+    */
+   protected String mediaError;
+   /**
+    * Getter for {@link #mediaError}: Error encountered when trying to get length of media, if any.
+    * @return Error encountered when trying to get length of media, if any.
+    */
+   public String getMediaError() { return mediaError; }
+   /**
+    * Setter for {@link #mediaError}: Error encountered when trying to get length of media, if any.
+    * @param newMediaError Error encountered when trying to get length of media, if any.
+    */
+   public void setMediaError(String newMediaError) { mediaError = newMediaError; }
+
+
    // Methods:
    
    /**
@@ -514,7 +533,7 @@ public class PlainTextDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Plain Text Document", "0.03", "text/plain", ".txt", "20170228.1353", getClass().getResource("icon.png"));
+	 "Plain Text Document", "0.10", "text/plain", ".txt", "20170228.1353", getClass().getResource("icon.png"));
    }
 
    /**
@@ -919,13 +938,19 @@ public class PlainTextDeserializer
 	    AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(fMedia);
 	    AudioFormat format = audioInputStream.getFormat();
 	    long frames = audioInputStream.getFrameLength();
-	    double durationInSeconds = ((double)frames) / format.getFrameRate(); 
-
-	    setMediaDurationSeconds(durationInSeconds);
+	    if (frames > 0)
+	    {
+	       double durationInSeconds = ((double)frames) / format.getFrameRate(); 
+	       setMediaDurationSeconds(durationInSeconds);
+	    }
+	    else
+	    {
+	       setMediaError("Ignoring media: " + wav.getName() + " is valid but contains no frames.");
+	    }
 	 }
 	 catch(Exception exception)
 	 {
-	    System.out.println("PlainTextDeserializer (" + fMedia.getPath() + "): " + exception);
+	    setMediaError("Ignoring media: " + wav.getName() + " ERROR: " + exception);
 	 }	 
 	 finally
 	 {
@@ -1403,6 +1428,8 @@ public class PlainTextDeserializer
    public Vector<String> validate()
    {     
       warnings = new Vector<String>();
+      if (mediaError != null) warnings.add(mediaError);
+      mediaError = null;
       return warnings;
    }
 
