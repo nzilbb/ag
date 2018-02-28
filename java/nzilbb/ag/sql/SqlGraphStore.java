@@ -447,6 +447,7 @@ public class SqlGraphStore
 	    layer.setSaturated(rs.getInt("saturated") == 1);
 
 	    if (rs.getString("type").equals("N")
+		|| rs.getString("type").equals("number")
 		|| rs.getString("type").equals("integer"))
 	    {
 	       layer.setType(Constants.TYPE_NUMBER);
@@ -521,6 +522,7 @@ public class SqlGraphStore
 	       layer.setSaturated(true);
 	       
 	       if (rs.getString("type").equals("N")
+		|| rs.getString("type").equals("number")
 		   || rs.getString("type").equals("integer"))
 	       {
 		  layer.setType(Constants.TYPE_NUMBER);
@@ -602,6 +604,7 @@ public class SqlGraphStore
 		  layer.setSaturated(true);
 		  
 		  if (rs.getString("type").equals("N")
+		      || rs.getString("type").equals("number")
 		      || rs.getString("type").equals("integer"))
 		  {
 		     layer.setType(Constants.TYPE_NUMBER);
@@ -1770,7 +1773,7 @@ public class SqlGraphStore
 		  ResultSet rsEpisode = sqlEpisode.executeQuery();
 		  if (rsEpisode.next())
 		  {
-		     // add graph-tag annotation
+		     // add episode annotation
 		     Object[] annotationIdParts = {
 			layer.get("@layer_id"), rsEpisode.getString("family_id")};
 		     Annotation episode = new Annotation(
@@ -2547,7 +2550,7 @@ public class SqlGraphStore
 	    if (graph.my("episode") == null)
 	    { // set to the graph name, without the extension
 	       graph.createTag(graph, layer.getId(), graph.getId().replaceAll("\\.[^.]*$",""))
-		  .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+	    	  .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
 	    }
 	    else if (graph.my("episode").getLabel().length() == 0)
 	    {
@@ -4657,7 +4660,7 @@ public class SqlGraphStore
     * @throws StoreException If an ID can't be parsed.
     * @throws SQLException If a database error occurs.
     */
-   public void saveParticipantAttributeChanges(Annotation annotation, PreparedStatement sqlInsertParticipantAttribute, PreparedStatement sqlUpdateParticipantAttribute, PreparedStatement sqlDeleteParticipantAttribute, PreparedStatement sqlDeleteAllParticipantAttributesOnLayer) throws SQLException, StoreException
+   public void saveParticipantAttributeChanges(Annotation annotation, PreparedStatement sqlInsertParticipantAttribute, PreparedStatement sqlUpdateParticipantAttribute, PreparedStatement sqlDeleteParticipantAttribute, PreparedStatement sqlDeleteAllParticipantAttributesOnLayer) throws SQLException, StoreException, PermissionException
    {
       try
       {
@@ -4669,7 +4672,9 @@ public class SqlGraphStore
 	       Object[] o = fmtMetaAnnotationId.parse(annotation.getParentId());
 	       int speakerNumber = Integer.parseInt(o[1].toString());
 
-	       if (!"1".equals(annotation.getLayer().get("@peers")))
+	       Layer layer = annotation.getLayer();
+	       if (layer == null) layer = getLayer(annotation.getLayerId());
+	       if (!"1".equals(layer.get("@peers")))
 	       {
 		  // the attribute might be new in this graph, but already exist in the database
 		  // so delete first and then add
@@ -4697,7 +4702,7 @@ public class SqlGraphStore
 	       {
 		  sqlInsertParticipantAttribute.setTimestamp(5, new Timestamp(new java.util.Date().getTime()));
 	       }
-	       sqlInsertParticipantAttribute.executeUpdate();
+	       int updated = sqlInsertParticipantAttribute.executeUpdate();
 	       break;
 	    } // Create
 	    case Update:
