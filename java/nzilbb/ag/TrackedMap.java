@@ -200,7 +200,13 @@ public class TrackedMap
 	 try
 	 {
 	    Method getter = getter(this, key);
+	    assert getter != null : "registerChange: getter != null : " + key + ", " + value + " - " + this.getClass().getName();
 	    put(originalValueKey, getter.invoke(this));
+	 }
+	 catch(NullPointerException exception)
+	 {
+	    System.err.println("registerChange [" + this + "] - " + key + " = " + value + " :: " + exception);
+	    exception.printStackTrace(System.err);
 	 }
 	 catch(IllegalAccessException exception)
 	 {
@@ -559,6 +565,8 @@ public class TrackedMap
       }
       catch(Throwable exception)
       {
+	 // System.err.println("getter [" + object + "] - " + key + " :: " + exception);
+	 // exception.printStackTrace(System.err);
 	 return null;
       }	 
    } // end of getter()
