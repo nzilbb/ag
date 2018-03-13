@@ -1032,14 +1032,18 @@ public class TestPlainTextDeserializer
 
       assertNotNull("Hack to skip validation for texts", g.get("@valid"));
 
-      // Validator v = new Validator();
-      // v.setFullValidation(true);
-      // timers.start("validation");
-      // v.transform(g);
-      // timers.end("validation");
-      
       assertTrue("Deserialization too slow:\n" + deserializer.getTimers().toString(),
 		 15000 > deserializer.getTimers().getTotals().get("deserialize"));
+
+      timers = new Timers();      
+      Validator v = new Validator();
+      v.setFullValidation(true);
+      timers.start("validation");
+      v.transform(g);
+      timers.end("validation");
+
+      assertTrue("Validation too slow:\n" + timers.toString(),
+		 30000 > timers.getTotals().get("deserialize"));
 
    }
 

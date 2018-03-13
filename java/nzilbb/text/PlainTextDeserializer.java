@@ -1145,6 +1145,7 @@ public class PlainTextDeserializer
 	    } // there is a comment layer
 	 } // comment header
       } // next header line
+      setHeaderLines(null); // allow lines to be garbage collected
 	 
       if (timers != null) timers.end("initialization");
       
@@ -1329,6 +1330,7 @@ public class PlainTextDeserializer
 	 }
       } // next line
       if (timers != null) timers.end("process lines");
+      setLines(null); // allow lines to be garbage collected
 
       if (getMediaDurationSeconds() != null)
       {
