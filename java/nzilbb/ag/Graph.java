@@ -41,6 +41,7 @@ import nzilbb.ag.util.LayerTraversal;
 import nzilbb.ag.util.LayerHierarchyTraversal;
 import nzilbb.ag.util.AnchorComparatorWithStructure;
 import nzilbb.ag.util.AnnotationComparatorByOrdinal;
+import nzilbb.util.Timers;
 
 /**
  * Linguistic annotation graph.
@@ -214,6 +215,22 @@ public class Graph
     */
    public void setSchema(Schema newSchema) { schema = newSchema; }
 
+   /**
+    * Timers for debugging and optimization.
+    * @see #getTimers()
+    * @see #setTimers(Timers)
+    */
+   protected Timers timers;
+   /**
+    * Getter for {@link #timers}: Timers for debugging and optimization.
+    * @return Timers for debugging and optimization.
+    */
+   public Timers getTimers() { return timers; }
+   /**
+    * Setter for {@link #timers}: Timers for debugging and optimization.
+    * @param newTimers Timers for debugging and optimization.
+    */
+   public void setTimers(Timers newTimers) { timers = newTimers; }
    
    // Methods:
       
@@ -510,8 +527,10 @@ public class Graph
     */
    public Annotation addAnnotation(Annotation annotation)
    {
+
       if (annotation.getId() == null)
       {
+	 if (timers != null) timers.start("Graph.addAnnotation: create ID");
 	 annotation.create();
 	 annotation.setId(newId());
 	 
@@ -527,9 +546,12 @@ public class Graph
 	       }
 	    } // next child layer
 	 }
+	 if (timers != null) timers.end("Graph.addAnnotation: create ID");
       }
       // set graph after the id is definitely set
+      if (timers != null) timers.start("Graph.addAnnotation: setGraph");
       annotation.setGraph(this);
+      if (timers != null) timers.end("Graph.addAnnotation: setGraph");
 
       // add to annotations collection
       getAnnotationsById().put(annotation.getId(), annotation);
@@ -537,6 +559,7 @@ public class Graph
       // add to the parent's collection
       if (annotation.getParent() != null)
       { // this ensures it's in the parent's child collection
+	 if (timers != null) timers.start("Graph.addAnnotation: add to parent");
 	 annotation.setParent(annotation.getParent(), false);
 	 if (annotation.getParent() == this
 	     && annotation.getLayer() != null // we know what the alignment should be
@@ -549,18 +572,22 @@ public class Graph
 	       annotation.setEndId(anchors.last().getId());
 	    }
 	 }
+	 if (timers != null) timers.end("Graph.addAnnotation: add to parent");
       }
       else
       { // keep track of orphans
+	 if (timers != null) timers.start("Graph.addAnnotation: track orphans");
 	 if (!orphans.containsKey(annotation.getLayerId()))
 	 {
 	    orphans.put(annotation.getLayerId(), new LinkedHashSet<Annotation>());
 	 }
 	 orphans.get(annotation.getLayerId()).add(annotation);
+	 if (timers != null) timers.end("Graph.addAnnotation: track orphans");
       }
       // find any children that might have already been added
       if (annotation.getLayer() != null)
       {
+	 if (timers != null) timers.start("Graph.addAnnotation: find children");
 	 Layer layer = annotation.getLayer();
 	 for (Layer childLayer : layer.getChildren().values())
 	 {
@@ -580,11 +607,14 @@ public class Graph
 	       if (orphans.get(childLayer.getId()).size() == 0) orphans.remove(childLayer.getId());
 	    } // there are orphaned children on this layer
 	 } // next child layer
+	 if (timers != null) timers.end("Graph.addAnnotation: find children");
 
 	 // also set the parent if it's a child of "graph"
 	 if (layer.getParentId().equals("graph"))
 	 {
+	    if (timers != null) timers.start("Graph.addAnnotation: setParent = graph");
 	    annotation.setParent(this, false);
+	    if (timers != null) timers.end("Graph.addAnnotation: setParent = graph");
 	 }
       } 
 
@@ -592,6 +622,7 @@ public class Graph
       if (annotation.getLayer() == null // we don't know what the alignment should be
 	  || annotation.getLayer().getAlignment() != Constants.ALIGNMENT_NONE) // or it's aligned
       { // should have an anchor
+	 if (timers != null) timers.start("Graph.addAnnotation: check anchors");
 	 if (annotation.getStartId() == null)
 	 { // no anchor, so create one TODO test this behaviour
 	    if (lastAddedAnchorId != null)
@@ -624,6 +655,7 @@ public class Graph
 	    unknownEndAnchor.get(annotation.getEndId()).add(annotation);
 	 }
 	 lastAddedAnchorId = annotation.getEndId();
+	 if (timers != null) timers.end("Graph.addAnnotation: check anchors");
       }
       return annotation;
    } // end of addAnnotation()
