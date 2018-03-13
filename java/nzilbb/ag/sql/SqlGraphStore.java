@@ -3836,8 +3836,24 @@ public class SqlGraphStore
 		     }
 		  }
 		  sql.setInt(8, annotation.getOrdinal());
+		  if (annotation.getAnnotator() != null)
+		  {
+		     sql.setString(9, annotation.getAnnotator());
+		  }
+		  else
+		  {
+		     sql.setString(9, getUser());
+		  }
+		  if (annotation.getWhen() != null)
+		  {
+		     sql.setTimestamp(10, new Timestamp(annotation.getWhen().getTime()));
+		  }
+		  else
+		  {
+		     sql.setTimestamp(10, new Timestamp(new java.util.Date().getTime()));
+		  }
 		  // annotation_id
-		  sql.setLong(9, annotationId);
+		  sql.setLong(11, annotationId);
 	       }
 	       else if (sql == sqlUpdateMetaAnnotation)
 	       {
