@@ -3169,10 +3169,12 @@ public class SqlGraphStore
 	 annotationIdParts[1] = new Integer(SqlConstants.LAYER_TURN); // turn
 	 annotationIdParts[2] = new Long(rsAnnotation.getLong("turn_annotation_id"));
 	 annotation.setParentId(fmtAnnotationId.format(annotationIdParts));
+	 annotation.setOrdinal(rsAnnotation.getInt("ordinal"));
       }
       else if (iLayerId == SqlConstants.LAYER_TURN) // turn
       {
 	 annotation.setParentId(turnParentId);
+	 annotation.setOrdinal(rsAnnotation.getInt("ordinal"));
       }
       else if (scope.equalsIgnoreCase(SqlConstants.SCOPE_SEGMENT)) // segment scope
       {
@@ -3198,6 +3200,7 @@ public class SqlGraphStore
       else // freeform scope
       {
 	 annotation.setParentId(graph.getId());
+	 annotation.setOrdinal(rsAnnotation.getInt("ordinal"));
       } // freeform scope
 
       if (rsAnnotation.getString("annotated_by") != null)
