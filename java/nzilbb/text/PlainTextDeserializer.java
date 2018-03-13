@@ -49,6 +49,7 @@ import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
+import nzilbb.util.Timers;
 
 /**
  * Deserializer for plain text files.
@@ -495,7 +496,6 @@ public class PlainTextDeserializer
     * @param newMaxHeaderLines Maximum lines in a header
     */
    public void setMaxHeaderLines(Integer newMaxHeaderLines) { maxHeaderLines = newMaxHeaderLines; }
-
    
    /**
     * Error encountered when trying to get length of media, if any.
@@ -514,6 +514,22 @@ public class PlainTextDeserializer
     */
    public void setMediaError(String newMediaError) { mediaError = newMediaError; }
 
+   /**
+    * Timers for debugging and optimization.
+    * @see #getTimers()
+    * @see #setTimers(Timers)
+    */
+   protected Timers timers;
+   /**
+    * Getter for {@link #timers}: Timers for debugging and optimization.
+    * @return Timers for debugging and optimization.
+    */
+   public Timers getTimers() { return timers; }
+   /**
+    * Setter for {@link #timers}: Timers for debugging and optimization.
+    * @param newTimers Timers for debugging and optimization.
+    */
+   public void setTimers(Timers newTimers) { timers = newTimers; }
 
    // Methods:
    
@@ -533,7 +549,7 @@ public class PlainTextDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Plain Text Document", "0.10", "text/plain", ".txt", "20170228.1353", getClass().getResource("icon.png"));
+	 "Plain Text Document", "0.11", "text/plain", ".txt", "20170228.1353", getClass().getResource("icon.png"));
    }
 
    /**
@@ -1009,6 +1025,8 @@ public class PlainTextDeserializer
    public Graph[] deserialize() 
       throws SerializerNotConfiguredException, SerializationParametersMissingException, SerializationException
    {
+      if (timers != null) timers.start("initialization");
+      
       if (participantLayer == null) throw new SerializerNotConfiguredException("Participant layer not set");
       if (turnLayer == null) throw new SerializerNotConfiguredException("Turn layer not set");
       if (utteranceLayer == null) throw new SerializerNotConfiguredException("Utterance layer not set");
@@ -1021,6 +1039,7 @@ public class PlainTextDeserializer
       SerializationException errors = null;
 
       Graph graph = new Graph();
+      graph.setTimers(timers);
       graph.setId(getName());
       double dOffsetFactor = 1.0;
       if (!getHasTimestamps() && getMediaDurationSeconds() == null)
@@ -1127,6 +1146,8 @@ public class PlainTextDeserializer
 	 } // comment header
       } // next header line
 	 
+      if (timers != null) timers.end("initialization");
+      
       // graph
       Annotation turn = new Annotation(
 	 null, participant.getLabel(), getTurnLayer().getId());
@@ -1143,7 +1164,10 @@ public class PlainTextDeserializer
       MessageFormat fmtTimestampFormat = null;
       if (timestampFormat != null && timestampFormat.length() > 0) fmtTimestampFormat = new MessageFormat(timestampFormat);
 
+      if (timers != null) timers.start("process lines");
+
       Annotation lastLine = null;
+      int lineOrdinal = 1;
       for (String sLine : getLines())
       {
 	 sLine = sLine.trim();
@@ -1159,12 +1183,14 @@ public class PlainTextDeserializer
 	 line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
 	 line.setParentId(turn.getId());
 	 line.setStart(turn.getStart());
+	 line.setOrdinal(lineOrdinal++);
 	 
 	 if (graph.getOffsetUnits() != Constants.UNIT_CHARACTERS)
 	 {
 	    // does the list start with a time stamp?
 	    if (getHasTimestamps())
 	    {
+	       if (timers != null) timers.start("check for timestamp");
 	       try
 	       {
 		  double dSeconds = 0.0;
@@ -1184,6 +1210,7 @@ public class PlainTextDeserializer
 		  sLine = sLine.substring(fmtTimestampFormat.format(timestamp).length());
 	       } // timestamp found
 	       catch(ParseException exception) {} // not parseable
+	       if (timers != null) timers.end("check for timestamp");
 	    } // HasTimestamps
 	 }
 	 line.setStart(lastAnchor);
@@ -1194,7 +1221,9 @@ public class PlainTextDeserializer
 	       graph.addAnchor(lastAnchor);
 	    }
 	    lastLine.setEndId(lastAnchor.getId());
+	    if (timers != null) timers.start("add line annotation");
 	    graph.addAnnotation(lastLine);
+	    if (timers != null) timers.end("add line annotation");
 	 }
 	 
 	 if (getHasSpeakers())
@@ -1202,7 +1231,9 @@ public class PlainTextDeserializer
 	    // does the line start with a speaker ID?
 	    try
 	    {
+	       if (timers != null) timers.start("check for speaker change");
 	       Object[] oSpeaker = fmtSpeakerFormat.parse(sLine);
+	       if (timers != null) timers.end("check for speaker change");
 	       String sSpeakerId = (String)oSpeaker[0];
 	       if (getMaxParticipantLength() == null
 		   || sSpeakerId.length() <= getMaxParticipantLength())
@@ -1229,16 +1260,23 @@ public class PlainTextDeserializer
 		     if (turn != null && turn.getStart() != lastAnchor)
 		     {
 			turn.setEnd(lastAnchor);
+			if (timers != null) timers.start("add old turn annotation");
 			graph.addAnnotation(turn);
+			if (timers != null) timers.end("add old turn annotation");
 		     }
+
+		     lineOrdinal = 1;
 		     
 		     // new turn		  
 		     turn = new Annotation(null, participant.getLabel(), getTurnLayer().getId());
 		     turn.setParentId(participant.getId());
+		     if (timers != null) timers.start("add new turn annotation");
 		     graph.addAnnotation(turn);
+		     if (timers != null) timers.end("add new turn annotation");
 		     turn.setStart(lastAnchor);
 		     // start a new line too
 		     line.setEnd(lastAnchor);
+		     line.setOrdinal(lineOrdinal++);
 		     if (!line.getStartId().equals(line.getEndId()))
 		     { // if we have <div><p>... don't create an instantaneous, empty line
 			graph.addAnnotation(line);
@@ -1280,14 +1318,18 @@ public class PlainTextDeserializer
 	 // update current position
 	 if (!getHasTimestamps())
 	 {
+	    if (timers != null) timers.start("getOrCreateAnchorAt");
 	    lastAnchor = graph.getOrCreateAnchorAt(
 	       lastAnchor.getOffset() + (((double)iNumChars + 1) * dOffsetFactor), iWordAlignmentConfidence);
+	    if (timers != null) timers.start("getOrCreateAnchorAt");
 	 }
 	 else
 	 {
 	    lastAnchor = new Anchor();
 	 }
       } // next line
+      if (timers != null) timers.end("process lines");
+
       if (getMediaDurationSeconds() != null)
       {
 	 lastAnchor.setOffset(getMediaDurationSeconds());
@@ -1322,7 +1364,9 @@ public class PlainTextDeserializer
       }
       try
       {
+	 if (timers != null) timers.start("tokenization");
 	 tokenizer.transform(graph);
+	 if (timers != null) timers.end("tokenization");
       }
       catch(TransformationException exception)
       {
@@ -1330,10 +1374,13 @@ public class PlainTextDeserializer
 	 if (errors.getCause() == null) errors.initCause(exception);
 	 errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
       }
+      if (timers != null) timers.start("commit tokenization");
       graph.commit();
+      if (timers != null) timers.end("commit tokenization");
 
       if (getUseConventions())
       {
+	 if (timers != null) timers.start("apply conventions");
 	 try
 	 {
 	    // word {comment comment} word
@@ -1370,14 +1417,17 @@ public class PlainTextDeserializer
 	    if (errors.getCause() == null) errors.initCause(exception);
 	    errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
 	 }
+	 if (timers != null) timers.end("apply conventions");
       } // apply transcription conventions
 
       OrthographyClumper clumper = new OrthographyClumper(wordLayer.getId(), utteranceLayer.getId());
       try
       {
 	 // clump non-orthographic 'words' with real words
+	 if (timers != null) timers.start("orthography clumping");
 	 clumper.transform(graph);
 	 graph.commit();
+	 if (timers != null) timers.end("orthography clumping");
       }
       catch(TransformationException exception)
       {
@@ -1385,6 +1435,8 @@ public class PlainTextDeserializer
 	 if (errors.getCause() == null) errors.initCause(exception);
 	 errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
       }
+
+      if (timers != null) timers.start("finalization");
 
       // now that we've got the whole text, we know who the participant(s) is for tagging
       participant = graph.my(getParticipantLayer().getId());
@@ -1405,6 +1457,19 @@ public class PlainTextDeserializer
 
       graph.commit();
       
+      if (timers != null) timers.end("finalization");
+
+      if (graph.getOffsetUnits() == Constants.UNIT_CHARACTERS)
+      {
+	 // hack to bypass validation during upload
+	 // this ensures that 'texts' (as opposed to 'transcripts') aren't put through validation
+	 // when saved to the graph store - this is because:
+	 //  1. they can be huge, so validation takes too long, and
+	 //  2. the main purpose of validation here is to set unset offsets,
+	 //     but these offsets are all set, so there's no need.
+	 graph.put("@valid", Boolean.TRUE);
+      }
+
       Graph[] graphs = { graph };
       return graphs;
    }
