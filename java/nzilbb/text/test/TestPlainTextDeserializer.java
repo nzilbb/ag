@@ -525,6 +525,7 @@ public class TestPlainTextDeserializer
       assertEquals("Please read the following aloud:", comments[0].getLabel());
       assertEquals(new Double(0), comments[0].getStart().getOffset());
 
+      assertNull("Hack to skip validation for texts isn't activated for transcripts", g.get("@valid"));
    }
 
    @Test public void invalidAudio() 
@@ -946,6 +947,99 @@ public class TestPlainTextDeserializer
       // Validator v = new Validator();
       // v.setFullValidation(true);
       // v.transform(g);
+
+   }
+
+   @Test public void speed() 
+      throws Exception
+   {
+      Timers timers = new Timers();
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("title", "Title", 0, true, true, true),
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("comment", "Comment", 2, true, false, true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true));
+      
+      // access file
+      NamedStream[] streams = {
+	 new NamedStream(new File(getDir(), "lockhartpapersco02lockuoft_djvu.txt")) }; // transcript
+      
+      // create deserializer
+      PlainTextDeserializer deserializer = new PlainTextDeserializer();
+      deserializer.setTimers(timers);
+
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      
+      // adjust patterns for participant and meta-data
+      configuration.get("participantFormat").setValue("Author(s): {0}");
+      configuration.get("metaDataFormat").setValue("{0}: {1}");
+      // also don't use speech conventions
+      configuration.get("useConventions").setValue(Boolean.FALSE);
+	 
+      assertEquals("Configuration parameters" + configuration, 9, deserializer.configure(configuration, schema).size());      
+      assertEquals("comment", "comment", 
+		   ((Layer)configuration.get("commentLayer").getValue()).getId());
+      assertNull("noise", configuration.get("noiseLayer").getValue());
+      assertNull("lexical", configuration.get("lexicalLayer").getValue());
+      assertNull("pronounce", configuration.get("pronounceLayer").getValue());
+      assertEquals("use conventions", Boolean.FALSE, configuration.get("useConventions").getValue());
+      assertEquals("maxParticipantLength",
+		   new Integer(20), configuration.get("maxParticipantLength").getValue());
+      assertEquals("maxHeaderLines",
+		   new Integer(50), configuration.get("maxHeaderLines").getValue());
+      assertEquals("participantFormat", "Author(s): {0}",
+		   configuration.get("participantFormat").getValue());
+      assertEquals("metaDataFormat", "{0}: {1}",
+		   configuration.get("metaDataFormat").getValue());
+
+      // load the stream
+      timers.start("load");
+      ParameterSet defaultParameters = deserializer.load(streams, schema);
+      timers.end("load");
+      // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals(1, defaultParameters.size());
+      assertEquals("title", "title", 
+		   ((Layer)defaultParameters.get("header_Title").getValue()).getId());
+      
+      // configure the deserialization
+      deserializer.setParameters(defaultParameters);
+
+      // no parameters, so configuration required - don't call deserializer.setParameters(defaultParameters);
+
+      // build the graph
+      timers.start("deserialize");
+      Graph[] graphs = deserializer.deserialize();
+      timers.end("deserialize");
+      Graph g = graphs[0];
+      
+      for (String warning : deserializer.getWarnings())
+      {
+	 System.out.println(warning);
+      }
+      
+      assertEquals("ID", "lockhartpapersco02lockuoft_djvu.txt", g.getId());
+      assertEquals("time units", Constants.UNIT_CHARACTERS, g.getOffsetUnits());
+      assertEquals("Title meta-data", "The Lockhart papers: containing memoirs and commentaries upon the affairs of Scotland from 1702 to 1715, his secret correspondence with the son of King James the Second from 1718 to 1728, and his other political writings; also, journals and memoirs of the Young Pretender's expedition in 1745", g.my("title").getLabel());
+
+      // participants     
+      Annotation[] authors = g.list("who"); 
+      assertEquals(1, authors.length);
+      assertEquals("Lockhart, George", authors[0].getLabel());
+
+      assertNotNull("Hack to skip validation for texts", g.get("@valid"));
+
+      // Validator v = new Validator();
+      // v.setFullValidation(true);
+      // timers.start("validation");
+      // v.transform(g);
+      // timers.end("validation");
+      
+      assertTrue("Deserialization too slow:\n" + deserializer.getTimers().toString(),
+		 15000 > deserializer.getTimers().getTotals().get("deserialize"));
 
    }
 
