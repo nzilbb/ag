@@ -76,11 +76,20 @@ if (typeof(require) == "function") { // running on node.js
 function callComplete(evt) {
     try {
 	var response = JSON.parse(this.responseText);
-	var result = response.model.result || response.model;
-	var errors = response.errors;
-	if (errors.length == 0) errors = null
-	var messages = response.messages;
-	if (messages.length == 0) messages = null
+	var result = null;
+	var errors = null;
+	var messages = null;
+	if (evt.target.call == "getGraph" && !response.model) {
+	    // if getGraph is successful, the response is the graph
+	    result = response;
+	} else {
+	    // all other results
+	    result = response.model.result || response.model;
+	    errors = response.errors;
+	    if (!errors || errors.length == 0) errors = null;
+	    messages = response.messages;
+	    if (!messages || messages.length == 0) messages = null;
+	}
 	evt.target.onResult(result, errors, messages, evt.target.call, evt.target.id);
     } catch(exception) {
 	evt.target.onResult(null, ["" +exception+ ": " + this.responseText], [], evt.target.call, evt.target.id);
@@ -511,7 +520,7 @@ nzilbb.labbcat.Labbcat.prototype.updateTranscript = function(transcript, onResul
 	var transcriptName = transcript.replace(/.*\//g, "");
 	fd.append("uploadfile1_0", 
 		  fs.createReadStream(transcript).on('error', function(){
-		      onResult(null, ["Invalid transcript: " + transcriptName], "newTranscript", transcriptName);
+		      onResult(null, ["Invalid transcript: " + transcriptName], [], "newTranscript", transcriptName);
 		  }), transcriptName);
 	
 	var urlParts = parseUrl(this.baseUrl + "edit/transcript/new");
@@ -544,11 +553,11 @@ nzilbb.labbcat.Labbcat.prototype.updateTranscript = function(transcript, onResul
 			if (messages.length == 0) messages = null
 			onResult(result, errors, messages, "newTranscript", transcriptName);
 		    } catch(exception) {
-			onResult(null, ["" +exception+ ": " + this.responseText], "newTranscript", transcript.name);
+			onResult(null, ["" +exception+ ": " + this.responseText], [], "newTranscript", transcript.name);
 		    }
 		});
 	    } else {
-		onResult(null, ["" +err+ ": " + this.responseText], "newTranscript", transcriptName);
+		onResult(null, ["" +err+ ": " + this.responseText], [], "newTranscript", transcriptName);
 	    }
 
 	    if (res) res.resume();
