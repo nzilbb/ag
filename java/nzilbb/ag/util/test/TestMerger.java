@@ -688,6 +688,7 @@ public class TestMerger
    {
       // create deserializer
       JSONSerialization s = new JSONSerialization();
+      s.setSortAnchors(true);
       // configure it with its default options
       s.configure(s.configure(new ParameterSet(), graph.getSchema()), graph.getSchema());
       // serialize      

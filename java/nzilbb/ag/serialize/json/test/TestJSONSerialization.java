@@ -382,6 +382,7 @@ public class TestJSONSerialization
 
       // create deserializer
       JSONSerialization s = new JSONSerialization();
+      s.setSortAnchors(true);
 
       // double-call to configure is sufficient
       assertEquals(0, s.configure(s.configure(new ParameterSet(), schema), schema).size());

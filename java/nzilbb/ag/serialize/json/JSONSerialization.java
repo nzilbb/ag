@@ -76,6 +76,24 @@ public class JSONSerialization
    private Schema schema;
    private LinkedHashMap<String, JSONObject> jsons;
 
+   
+   /**
+    * Whether to sort anchors by offset and graph structure (which takes time for larger graphs). Default is false.
+    * @see #getSortAnchors()
+    * @see #setSortAnchors(boolean)
+    */
+   protected boolean sortAnchors = false;
+   /**
+    * Getter for {@link #sortAnchors}: Whether to sort anchors by offset and graph structure (which takes time for larger graphs). Default is false.
+    * @return Whether to sort anchors by offset and graph structure (which takes time for larger graphs).
+    */
+   public boolean getSortAnchors() { return sortAnchors; }
+   /**
+    * Setter for {@link #sortAnchors}: Whether to sort anchors by offset and graph structure (which takes time for larger graphs).
+    * @param newSortAnchors Whether to sort anchors by offset and graph structure (which takes time for larger graphs).
+    */
+   public void setSortAnchors(boolean newSortAnchors) { sortAnchors = newSortAnchors; }
+
    // Methods:
    
    /**
@@ -503,7 +521,9 @@ public class JSONSerialization
 	    // anchors
 	    writer.println(indent(1) + "\"anchors\":{");
 	    boolean firstAnchor = true;
-	    for (Anchor anchor : graph.getAnchorsOrderedByStructure())
+	    Collection<Anchor> anchors = graph.getAnchors().values();
+	    if (sortAnchors) anchors = graph.getAnchorsOrderedByStructure();
+	    for (Anchor anchor : anchors)
 	    {
 	       if (firstAnchor)
 		  firstAnchor = false;
