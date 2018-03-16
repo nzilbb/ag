@@ -2063,6 +2063,51 @@ public class SqlGraphStore
    }
 
    /**
+    * Gets the annotations on the given layer of the given graph.
+    * @param id The ID of the graph.
+    * @param layerId The ID of the layer.
+    * @return A (possibly empty) array of annotations.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
+    */
+   public Annotation[] getAnnotations(String id, String layerId)
+      throws StoreException, PermissionException, GraphNotFoundException
+   {
+      try
+      {
+	 Vector<Annotation> annotations = new Vector<Annotation>();
+	 Layer layer = getLayer(layerId);
+	 int iLayerId = ((Integer)layer.get("@layer_id")).intValue();
+	 
+	 Graph graph = getGraph(id, null);
+	 int iAgId = ((Integer)graph.get("@ag_id")).intValue();
+	 
+	 PreparedStatement sqlAnnotation = getConnection().prepareStatement(
+	    "SELECT layer.*"
+	    +" FROM annotation_layer_? layer"
+	    +" INNER JOIN anchor start ON layer.start_anchor_id = start.anchor_id"
+	    +" INNER JOIN anchor end ON layer.end_anchor_id = end.anchor_id"
+	    +" WHERE layer.ag_id = ? ORDER BY start.offset, end.offset DESC, annotation_id");
+	 sqlAnnotation.setInt(1, iLayerId);
+	 sqlAnnotation.setInt(2, iAgId);
+	 ResultSet rsAnnotation = sqlAnnotation.executeQuery();
+	 while (rsAnnotation.next())
+	 {
+	    annotations.add(annotationFromResult(rsAnnotation, layer, graph));
+	 } // next annotation
+	 rsAnnotation.close();
+	 sqlAnnotation.close();
+	 
+	 return annotations.toArray(new Annotation[0]);
+      }
+      catch(SQLException exception)
+      {
+	 throw new StoreException(exception);
+      }
+   }
+
+   /**
     * Gets a fragment of a graph, given its ID and the ID of an annotation in it that defines the 
     * desired fragment, and containing only the given layers.
     * <p>The given annotation defines both the start and end anchors of the fragment, and also 
@@ -3182,6 +3227,7 @@ public class SqlGraphStore
 	 annotationIdParts[1] = new Integer(SqlConstants.LAYER_SEGMENT); // segment
 	 annotationIdParts[2] = new Long(rsAnnotation.getLong("segment_annotation_id"));
 	 annotation.setParentId(fmtAnnotationId.format(annotationIdParts));
+	 annotation.setOrdinal(rsAnnotation.getInt("ordinal"));
       } // segment scope
       else if (scope.equalsIgnoreCase(SqlConstants.SCOPE_WORD)) // word scope
       {
@@ -3189,6 +3235,7 @@ public class SqlGraphStore
 	 annotationIdParts[1] = new Integer(SqlConstants.LAYER_TRANSCRIPTION); // transcription word
 	 annotationIdParts[2] = new Long(rsAnnotation.getLong("word_annotation_id"));
 	 annotation.setParentId(fmtAnnotationId.format(annotationIdParts));
+	 annotation.setOrdinal(rsAnnotation.getInt("ordinal"));
       } // word scope
       else if (scope.equalsIgnoreCase(SqlConstants.SCOPE_META)) // meta scope
       {
@@ -3196,6 +3243,7 @@ public class SqlGraphStore
 	 annotationIdParts[1] = new Integer(SqlConstants.LAYER_TURN); // turn
 	 annotationIdParts[2] = new Long(rsAnnotation.getLong("turn_annotation_id"));
 	 annotation.setParentId(fmtAnnotationId.format(annotationIdParts));
+	 annotation.setOrdinal(rsAnnotation.getInt("ordinal"));
       } // meta scope
       else // freeform scope
       {
@@ -5412,6 +5460,93 @@ public class SqlGraphStore
       
    } // end of generateMissingMedia()
 
+   /**
+    * Deletes the given graph, and all associated files.
+    * @param id The ID graph to save.
+    * @throws StoreException If an error prevents the graph from being saved.
+    * @throws PermissionException If saving the graph is not permitted.
+    * @throws GraphNotFoundException If the graph doesn't exist.
+    */
+   public void deleteGraph(String id)
+      throws StoreException, PermissionException, GraphNotFoundException
+   {
+      try
+      {
+	 String[] layers = { "corpus", "episode" };
+	 Graph graph = getGraph(id, layers);
+	 int iAgId = ((Integer)graph.get("@ag_id")).intValue();
+
+	 // files to delete...
+	 File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
+	 File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
+
+	 // media
+	 for (MediaFile media : getAvailableMedia(graph.getId()))
+	 {
+	    if (!media.getFile().delete())
+	    {
+	       System.err.println("Could not delete " + media.getFile().getPath());
+	    }
+	 } // next media file
+
+	 // transcript
+	 File trs = new File(episodeDir, "trs");
+	 File transcript = new File(trs, graph.getId());
+	 if (transcript.exists())
+	 {
+	    if (!transcript.delete())
+	    {
+	       System.err.println("Could not delete " + transcript.getPath());
+	    }
+	 }
+	 
+	 // delete records from the database
+	    
+	 // for each layer
+	 PreparedStatement selectLayers = getConnection().prepareStatement(
+	    "SELECT layer_id, scope FROM layer WHERE layer_id >= 0"
+	    +" ORDER BY layer_id DESC");
+	 ResultSet rsLayers = selectLayers.executeQuery();
+	 PreparedStatement deleteLayerData = getConnection().prepareStatement(
+	    "DELETE FROM annotation_layer_? WHERE ag_id = ?");
+	 deleteLayerData.setInt(2, iAgId);
+	 while (rsLayers.next())
+	 {
+	    int iLayerId = rsLayers.getInt("layer_id");
+	    deleteLayerData.setInt(1, iLayerId);
+	    deleteLayerData.executeUpdate();
+	 } // next layer
+	 deleteLayerData.close();
+	 rsLayers.close();
+	 selectLayers.close();
+	 
+	 PreparedStatement deleteAnchors = getConnection().prepareStatement(
+	    "DELETE FROM anchor WHERE ag_id = ?");
+	 deleteAnchors.setInt(1, iAgId);
+	 deleteAnchors.executeUpdate();
+	 deleteAnchors.close();
+	    
+	 PreparedStatement deleteSpeakers = getConnection().prepareStatement(
+	    "DELETE FROM transcript_speaker WHERE ag_id = ?");
+	 deleteSpeakers.setInt(1, iAgId);
+	 deleteSpeakers.executeUpdate();
+	 deleteSpeakers.close();
+	 PreparedStatement deleteAttributes = getConnection().prepareStatement(
+	    "DELETE FROM annotation_transcript WHERE ag_id = ?");
+	 deleteAttributes.setInt(1, iAgId);
+	 deleteAttributes.executeUpdate();
+	 deleteAttributes.close();
+	 PreparedStatement deleteTranscript = getConnection().prepareStatement(
+	    "DELETE FROM transcript WHERE ag_id = ?");
+	 deleteTranscript.setInt(1, iAgId);
+	 deleteTranscript.executeUpdate();
+	 deleteTranscript.close();
+      }
+      catch(SQLException exception)
+      {
+	 throw new StoreException(exception);
+      }
+   }
    
    /**
     * Gets the value of a system attribute.

@@ -87,4 +87,14 @@ public interface IGraphStore
    public void saveEpisodeDocument(String id, String url)
       throws StoreException, PermissionException, GraphNotFoundException;
 
+   /**
+    * Deletes the given graph, and all associated files.
+    * @param id The ID graph to save.
+    * @throws StoreException If an error prevents the graph from being saved.
+    * @throws PermissionException If saving the graph is not permitted.
+    * @throws GraphNotFoundException If the graph doesn't exist.
+    */
+   public void deleteGraph(String id)
+      throws StoreException, PermissionException, GraphNotFoundException;
+   
 } // end of interface IGraphStore

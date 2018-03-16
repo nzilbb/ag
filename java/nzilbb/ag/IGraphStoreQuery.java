@@ -262,6 +262,18 @@ public interface IGraphStoreQuery
       throws StoreException, PermissionException, GraphNotFoundException;
    
    /**
+    * Gets the annotations on the given layer of the given graph
+    * @param id The ID of the graph.
+    * @param layerId The ID of the layer.
+    * @return A (possibly empty) array of annotations.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
+    */
+   public Annotation[] getAnnotations(String id, String layerId)
+      throws StoreException, PermissionException, GraphNotFoundException;
+
+   /**
     * List the predefined media tracks available for transcripts.
     * @return An ordered list of media track definitions.
     * @throws StoreException If an error occurs.
