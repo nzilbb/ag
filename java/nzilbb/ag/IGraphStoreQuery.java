@@ -262,7 +262,19 @@ public interface IGraphStoreQuery
       throws StoreException, PermissionException, GraphNotFoundException;
    
    /**
-    * Gets the annotations on the given layer of the given graph
+    * Gets the number of annotations on the given layer of the given graph.
+    * @param id The ID of the graph.
+    * @param layerId The ID of the layer.
+    * @return A (possibly empty) array of annotations.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
+    */
+   public long countAnnotations(String id, String layerId)
+      throws StoreException, PermissionException, GraphNotFoundException;
+
+   /**
+    * Gets the annotations on the given layer of the given graph.
     * @param id The ID of the graph.
     * @param layerId The ID of the layer.
     * @return A (possibly empty) array of annotations.
@@ -271,6 +283,32 @@ public interface IGraphStoreQuery
     * @throws GraphNotFoundException If the graph was not found in the store.
     */
    public Annotation[] getAnnotations(String id, String layerId)
+      throws StoreException, PermissionException, GraphNotFoundException;
+
+   /**
+    * Gets the annotations on the given layer of the given graph.
+    * @param id The ID of the graph.
+    * @param layerId The ID of the layer.
+    * @param pageLength The maximum number of IDs to return, or null to return all.
+    * @param pageNumber The page number to return, or null to return the first page.
+    * @return A (possibly empty) array of annotations.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
+    */
+   public Annotation[] getAnnotations(String id, String layerId, Integer pageLength, Integer pageNumber)
+      throws StoreException, PermissionException, GraphNotFoundException;
+
+   /**
+    * Gets the given anchors in the given graph.
+    * @param id The ID of the graph.
+    * @param anchorIds An array of anchor IDs.
+    * @return A (possibly empty) array of anchors.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
+    */
+   public Anchor[] getAnnotations(String id, String[] anchorIds)
       throws StoreException, PermissionException, GraphNotFoundException;
 
    /**

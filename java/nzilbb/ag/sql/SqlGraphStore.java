@@ -809,9 +809,9 @@ public class SqlGraphStore
 			{
 			   attribute.setAnnotator(rsValue.getString("annotated_by"));
 			}
-			if (rsValue.getDate("annotated_when") != null)
+			if (rsValue.getTimestamp("annotated_when") != null)
 			{
-			   attribute.setWhen(rsValue.getDate("annotated_when"));
+			   attribute.setWhen(rsValue.getTimestamp("annotated_when"));
 			}
 			attribute.setParentId("m_-2_"+rsValue.getString("speaker_number"));
 			attribute.setOrdinal(ordinal++);
@@ -1812,9 +1812,9 @@ public class SqlGraphStore
 		     {
 			episodeTag.setAnnotator(rsEpisode.getString("annotated_by"));
 		     }
-		     if (rsEpisode.getDate("annotated_when") != null)
+		     if (rsEpisode.getTimestamp("annotated_when") != null)
 		     {
-			episodeTag.setWhen(rsEpisode.getDate("annotated_when"));
+			episodeTag.setWhen(rsEpisode.getTimestamp("annotated_when"));
 		     }
 		     graph.addAnnotation(episodeTag);		     
 		  }
@@ -1901,9 +1901,9 @@ public class SqlGraphStore
 			{
 			   attribute.setAnnotator(rsValue.getString("annotated_by"));
 			}
-			if (rsValue.getDate("annotated_when") != null)
+			if (rsValue.getTimestamp("annotated_when") != null)
 			{
-			   attribute.setWhen(rsValue.getDate("annotated_when"));
+			   attribute.setWhen(rsValue.getTimestamp("annotated_when"));
 			}
 			attribute.setParentId(graph.getId());
 			graph.addAnnotation(attribute);
@@ -1963,9 +1963,9 @@ public class SqlGraphStore
 			{
 			   attribute.setAnnotator(rsValue.getString("annotated_by"));
 			}
-			if (rsValue.getDate("annotated_when") != null)
+			if (rsValue.getTimestamp("annotated_when") != null)
 			{
-			   attribute.setWhen(rsValue.getDate("annotated_when"));
+			   attribute.setWhen(rsValue.getTimestamp("annotated_when"));
 			}
 			attribute.setParentId("m_-2_"+rsValue.getString("speaker_number"));
 			attribute.setOrdinal(ordinal++);
@@ -2063,6 +2063,53 @@ public class SqlGraphStore
    }
 
    /**
+    * Gets the number of annotations on the given layer of the given graph.
+    * @param id The ID of the graph.
+    * @param layerId The ID of the layer.
+    * @return A (possibly empty) array of annotations.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
+    */
+   public long countAnnotations(String id, String layerId)
+      throws StoreException, PermissionException, GraphNotFoundException
+   {
+      try
+      {
+	 Layer layer = getLayer(layerId);
+	 int iLayerId = ((Integer)layer.get("@layer_id")).intValue();
+	 
+	 Graph graph = getGraph(id, null);
+	 int iAgId = ((Integer)graph.get("@ag_id")).intValue();
+	 
+	 PreparedStatement sqlAnnotation = getConnection().prepareStatement(
+	    "SELECT COUNT(*) FROM annotation_layer_? layer WHERE layer.ag_id = ?");
+	 sqlAnnotation.setInt(1, iLayerId);
+	 sqlAnnotation.setInt(2, iAgId);
+	 ResultSet rsAnnotation = sqlAnnotation.executeQuery();
+	 try
+	 {
+	    if (rsAnnotation.next())
+	    {
+	       return rsAnnotation.getLong(1);
+	    } // next annotation
+	    else
+	    {
+	       return 0;
+	    }
+	 }
+	 finally
+	 {
+	    rsAnnotation.close();
+	    sqlAnnotation.close();
+	 }
+      }
+      catch(SQLException exception)
+      {
+	 throw new StoreException(exception);
+      }
+   }
+   /**
     * Gets the annotations on the given layer of the given graph.
     * @param id The ID of the graph.
     * @param layerId The ID of the layer.
@@ -2074,6 +2121,22 @@ public class SqlGraphStore
    public Annotation[] getAnnotations(String id, String layerId)
       throws StoreException, PermissionException, GraphNotFoundException
    {
+      return getAnnotations(id, layerId, null, null);
+   }
+   /**
+    * Gets the annotations on the given layer of the given graph.
+    * @param id The ID of the graph.
+    * @param layerId The ID of the layer.
+    * @param pageLength The maximum number of IDs to return, or null to return all.
+    * @param pageNumber The page number to return, or null to return the first page.
+    * @return A (possibly empty) array of annotations.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
+    */
+   public Annotation[] getAnnotations(String id, String layerId, Integer pageLength, Integer pageNumber)
+      throws StoreException, PermissionException, GraphNotFoundException
+   {
       try
       {
 	 Vector<Annotation> annotations = new Vector<Annotation>();
@@ -2083,18 +2146,29 @@ public class SqlGraphStore
 	 Graph graph = getGraph(id, null);
 	 int iAgId = ((Integer)graph.get("@ag_id")).intValue();
 	 
+	 String limit = "";
+	 if (pageLength != null)
+	 {
+	    if (pageNumber == null) pageNumber = 0;
+	    limit = " LIMIT " + (pageNumber * pageLength) + "," + pageLength;
+	 }
+	 
 	 PreparedStatement sqlAnnotation = getConnection().prepareStatement(
 	    "SELECT layer.*"
 	    +" FROM annotation_layer_? layer"
 	    +" INNER JOIN anchor start ON layer.start_anchor_id = start.anchor_id"
 	    +" INNER JOIN anchor end ON layer.end_anchor_id = end.anchor_id"
-	    +" WHERE layer.ag_id = ? ORDER BY start.offset, end.offset DESC, annotation_id");
+	    +" WHERE layer.ag_id = ? ORDER BY start.offset, end.offset DESC, annotation_id"
+	    +limit);
 	 sqlAnnotation.setInt(1, iLayerId);
 	 sqlAnnotation.setInt(2, iAgId);
 	 ResultSet rsAnnotation = sqlAnnotation.executeQuery();
 	 while (rsAnnotation.next())
 	 {
-	    annotations.add(annotationFromResult(rsAnnotation, layer, graph));
+	    Annotation annotation = annotationFromResult(rsAnnotation, layer, graph);
+	    // annotation.setStart(anchorFromResult(rsAnnotation, "start_"));
+	    // annotation.setEnd(anchorFromResult(rsAnnotation, "end_"));
+	    annotations.add(annotation);
 	 } // next annotation
 	 rsAnnotation.close();
 	 sqlAnnotation.close();
@@ -2106,7 +2180,64 @@ public class SqlGraphStore
 	 throw new StoreException(exception);
       }
    }
-
+   /**
+    * Gets the given anchors in the given graph.
+    * @param id The ID of the graph.
+    * @param anchorIds An array of anchor IDs.
+    * @return A (possibly empty) array of anchors.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
+    */
+   public Anchor[] getAnnotations(String id, String[] anchorIds)
+      throws StoreException, PermissionException, GraphNotFoundException
+   {
+      try
+      {
+	 Vector<Anchor> anchors = new Vector<Anchor>();
+	 PreparedStatement sqlAnchor = getConnection().prepareStatement(
+	    "SELECT anchor_id, offset, alignment_status, annotated_by, annotated_when"
+	    +" FROM anchor"
+	    +" WHERE anchor_id = ?");
+	 try
+	 {
+	    for (String anchorId : anchorIds)
+	    {
+	       try
+	       {
+		  Object[] o = fmtAnchorId.parse(anchorId);
+		  Long databaseId = (Long)o[0];
+		  sqlAnchor.setLong(1, databaseId);
+		  ResultSet rsAnchor = sqlAnchor.executeQuery();
+		  if (rsAnchor.next())
+		  {
+		     Anchor anchor = anchorFromResult(rsAnchor, "");
+		     anchors.add(anchor);
+		  }
+		  rsAnchor.close();
+	       }
+	       catch(ClassCastException castX)
+	       {
+		  throw new StoreException("Not a valid anchor ID: " + anchorId);
+	       }
+	       catch(ParseException parseX)
+	       {
+		  throw new StoreException("Not an anchor ID: " + anchorId);
+	       }
+	    } // next anchor
+	 }
+	 finally
+	 {
+	    sqlAnchor.close();
+	 }
+	 return anchors.toArray(new Anchor[0]);
+      }
+      catch(SQLException exception)
+      {
+	 throw new StoreException(exception);
+      }
+   }
+   
    /**
     * Gets a fragment of a graph, given its ID and the ID of an annotation in it that defines the 
     * desired fragment, and containing only the given layers.
@@ -2674,8 +2805,9 @@ public class SqlGraphStore
 	 {
 	    // create the graph, to generate the ag_id
 	    PreparedStatement sql = getConnection().prepareStatement(
-	       "INSERT INTO transcript (transcript_id) VALUES (?)");
+	       "INSERT INTO transcript (transcript_id, offset_units) VALUES (?,?)");
 	    sql.setString(1, graph.getId());
+	    sql.setString(2, graph.getOffsetUnits());
 	    sql.executeUpdate();
 	    sql.close();
 	    sql = getConnection().prepareStatement("SELECT LAST_INSERT_ID()");
@@ -3255,9 +3387,9 @@ public class SqlGraphStore
       {
 	 annotation.setAnnotator(rsAnnotation.getString("annotated_by"));
       }
-      if (rsAnnotation.getDate("annotated_when") != null)
+      if (rsAnnotation.getTimestamp("annotated_when") != null)
       {
-	 annotation.setWhen(rsAnnotation.getDate("annotated_when"));
+	 annotation.setWhen(rsAnnotation.getTimestamp("annotated_when"));
       }
 
       // anchor IDs
@@ -3287,9 +3419,9 @@ public class SqlGraphStore
       {
 	 anchor.setAnnotator(rsAnchor.getString(prefix+"annotated_by"));
       }
-      if (rsAnchor.getDate(prefix+"annotated_when") != null)
+      if (rsAnchor.getTimestamp(prefix+"annotated_when") != null)
       {
-	 anchor.setWhen(rsAnchor.getDate(prefix+"annotated_when"));
+	 anchor.setWhen(rsAnchor.getTimestamp(prefix+"annotated_when"));
       }
       return anchor;
    } // end of anchorFromResult()
