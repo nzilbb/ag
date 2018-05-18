@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2018 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -108,6 +108,12 @@ public interface IGraphStoreQuery
    /**
     * Counts the number of participants that match a particular pattern.
     * @param expression An expression that determines which participants match.
+    * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+    * <ul>
+    *  <li><code>id MATCHES 'Ada.+'</code></li>
+    *  <li><code>'CC' IN labels('corpus')</code></li>
+    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
+    * </ul>
     * @return The number of matching participants.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
@@ -118,6 +124,12 @@ public interface IGraphStoreQuery
    /**
     * Gets a list of IDs of participants that match a particular pattern.
     * @param expression An expression that determines which participants match.
+    * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+    * <ul>
+    *  <li><code>id MATCHES 'Ada.+'</code></li>
+    *  <li><code>'CC' IN labels('corpus')</code></li>
+    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
+    * </ul>
     * @return A list of participant IDs.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
@@ -128,6 +140,12 @@ public interface IGraphStoreQuery
    /**
     * Gets a list of IDs of participants that match a particular pattern.
     * @param expression An expression that determines which participants match.
+    * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+    * <ul>
+    *  <li><code>id MATCHES 'Ada.+'</code></li>
+    *  <li><code>'CC' IN labels('corpus')</code></li>
+    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
+    * </ul>
     * @param pageLength The maximum number of IDs to return, or null to return all.
     * @param pageNumber The page number to return, or null to return the first page.
     * @return A list of participant IDs.
@@ -169,6 +187,13 @@ public interface IGraphStoreQuery
    /**
     * Counts the number of graphs that match a particular pattern.
     * @param expression An expression that determines which graphs match.
+    * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+    * <ul>
+    *  <li><code>id MATCHES 'Ada.+'</code></li>
+    *  <li><code>my('corpus').label = 'CC'</code></li>
+    *  <li><code>'Robert' IN labels('who')</code></li>
+    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
+    * </ul>
     * @return The number of matching graphs.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
@@ -179,6 +204,13 @@ public interface IGraphStoreQuery
    /**
     * Gets a list of IDs of graphs that match a particular pattern.
     * @param expression An expression that determines which graphs match.
+    * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+    * <ul>
+    *  <li><code>id MATCHES 'Ada.+'</code></li>
+    *  <li><code>my('corpus').label = 'CC'</code></li>
+    *  <li><code>'Robert' IN labels('who')</code></li>
+    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
+    * </ul>
     * @return A list of graph IDs.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
@@ -189,6 +221,13 @@ public interface IGraphStoreQuery
    /**
     * Gets a list of IDs of graphs that match a particular pattern.
     * @param expression An expression that determines which graphs match.
+    * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+    * <ul>
+    *  <li><code>id MATCHES 'Ada.+'</code></li>
+    *  <li><code>my('corpus').label = 'CC'</code></li>
+    *  <li><code>'Robert' IN labels('who')</code></li>
+    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
+    * </ul>
     * @param pageLength The maximum number of IDs to return, or null to return all.
     * @param pageNumber The page number to return, or null to return the first page.
     * @return A list of graph IDs.
@@ -201,6 +240,13 @@ public interface IGraphStoreQuery
    /**
     * Gets a list of IDs of graphs that match a particular pattern.
     * @param expression An expression that determines which graphs match.
+    * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+    * <ul>
+    *  <li><code>id MATCHES 'Ada.+'</code></li>
+    *  <li><code>my('corpus').label = 'CC'</code></li>
+    *  <li><code>'Robert' IN labels('who')</code></li>
+    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
+    * </ul>
     * @param pageLength The maximum number of IDs to return, or null to return all.
     * @param pageNumber The page number to return, or null to return the first page.
     * @param order The ordering for the list of IDs, a string containing a comma-separated list of epxressions, which may be appended by " ASC" or " DESC", or null for graph ID order.
@@ -210,6 +256,114 @@ public interface IGraphStoreQuery
     */
    public String[] getMatchingGraphIdsPage(String expression, Integer pageLength, Integer pageNumber, String order)
       throws StoreException, PermissionException; 
+
+   /**
+    * Counts the number of annotations that match a particular pattern.
+    * @param expression An expression that determines which participants match.
+    * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+    * <ul>
+    *  <li><code>id = 'ew_0_456'</code></li>
+    *  <li><code>label NOT MATCHES 'th[aeiou].*'</code></li>
+    *  <li><code>layer.id = 'orthography' AND my('who').label = 'Robert' AND my('utterances').start.offset = 12.345</code></li>
+    *  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset &gt; 10.5</code></li>
+    * </ul>
+    * <p><em>NB</em> all expressions must match by either id or layer.id.
+    * @return The number of matching annotations.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public int countMatchingAnnotations(String expression)
+      throws StoreException, PermissionException; 
+
+   /**
+    * Gets a list of annotations that match a particular pattern.
+    * @param expression An expression that determines which graphs match.
+    * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+    * <ul>
+    *  <li><code>id = 'ew_0_456'</code></li>
+    *  <li><code>label NOT MATCHES 'th[aeiou].*'</code></li>
+    *  <li><code>my('who').label = 'Robert' AND my('utterances').start.offset = 12.345</code></li>
+    *  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset &gt; 10.5</code></li>
+    *  <li><code>previous.id = 'ew_0_456'</code></li>
+    * </ul>
+    * <p><em>NB</em> all expressions must match by either id or layer.id.
+    * @return A list of matching {@link Annotation}s.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public Annotation[] getMatchingAnnotations(String expression)
+      throws StoreException, PermissionException; 
+
+   /**
+    * Gets a list of annotations that match a particular pattern.
+    * @param expression An expression that determines which graphs match.
+    * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+    * <ul>
+    *  <li><code>id = 'ew_0_456'</code></li>
+    *  <li><code>label NOT MATCHES 'th[aeiou].*'</code></li>
+    *  <li><code>my('who').label = 'Robert' AND my('utterances').start.offset = 12.345</code></li>
+    *  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset &gt; 10.5</code></li>
+    *  <li><code>previous.id = 'ew_0_456'</code></li>
+    * </ul>
+    * <p><em>NB</em> all expressions must match by either id or layer.id.
+    * @param pageLength The maximum number of annotations to return, or null to return all.
+    * @param pageNumber The page number to return, or null to return the first page.
+    * @return A list of matching {@link Annotation}s.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public Annotation[] getMatchingAnnotationsPage(String expression, Integer pageLength, Integer pageNumber)
+      throws StoreException, PermissionException; 
+
+   /**
+    * Gets the number of annotations on the given layer of the given graph.
+    * @param id The ID of the graph.
+    * @param layerId The ID of the layer.
+    * @return A (possibly empty) array of annotations.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
+    */
+   public long countAnnotations(String id, String layerId)
+      throws StoreException, PermissionException, GraphNotFoundException;
+
+   /**
+    * Gets the annotations on the given layer of the given graph.
+    * @param id The ID of the graph.
+    * @param layerId The ID of the layer.
+    * @return A (possibly empty) array of annotations.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
+    */
+   public Annotation[] getAnnotations(String id, String layerId)
+      throws StoreException, PermissionException, GraphNotFoundException;
+
+   /**
+    * Gets the annotations on the given layer of the given graph.
+    * @param id The ID of the graph.
+    * @param layerId The ID of the layer.
+    * @param pageLength The maximum number of IDs to return, or null to return all.
+    * @param pageNumber The page number to return, or null to return the first page.
+    * @return A (possibly empty) array of annotations.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
+    */
+   public Annotation[] getAnnotations(String id, String layerId, Integer pageLength, Integer pageNumber)
+      throws StoreException, PermissionException, GraphNotFoundException;
+
+   /**
+    * Gets the given anchors in the given graph.
+    * @param id The ID of the graph.
+    * @param anchorIds An array of anchor IDs.
+    * @return A (possibly empty) array of anchors.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
+    */
+   public Anchor[] getAnchors(String id, String[] anchorIds)
+      throws StoreException, PermissionException, GraphNotFoundException;
 
    /**
     * Gets a graph given its ID.
@@ -261,56 +415,6 @@ public interface IGraphStoreQuery
    public Graph getFragment(String graphId, String annotationId, String[] layerId) 
       throws StoreException, PermissionException, GraphNotFoundException;
    
-   /**
-    * Gets the number of annotations on the given layer of the given graph.
-    * @param id The ID of the graph.
-    * @param layerId The ID of the layer.
-    * @return A (possibly empty) array of annotations.
-    * @throws StoreException If an error occurs.
-    * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
-    */
-   public long countAnnotations(String id, String layerId)
-      throws StoreException, PermissionException, GraphNotFoundException;
-
-   /**
-    * Gets the annotations on the given layer of the given graph.
-    * @param id The ID of the graph.
-    * @param layerId The ID of the layer.
-    * @return A (possibly empty) array of annotations.
-    * @throws StoreException If an error occurs.
-    * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
-    */
-   public Annotation[] getAnnotations(String id, String layerId)
-      throws StoreException, PermissionException, GraphNotFoundException;
-
-   /**
-    * Gets the annotations on the given layer of the given graph.
-    * @param id The ID of the graph.
-    * @param layerId The ID of the layer.
-    * @param pageLength The maximum number of IDs to return, or null to return all.
-    * @param pageNumber The page number to return, or null to return the first page.
-    * @return A (possibly empty) array of annotations.
-    * @throws StoreException If an error occurs.
-    * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
-    */
-   public Annotation[] getAnnotations(String id, String layerId, Integer pageLength, Integer pageNumber)
-      throws StoreException, PermissionException, GraphNotFoundException;
-
-   /**
-    * Gets the given anchors in the given graph.
-    * @param id The ID of the graph.
-    * @param anchorIds An array of anchor IDs.
-    * @return A (possibly empty) array of anchors.
-    * @throws StoreException If an error occurs.
-    * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
-    */
-   public Anchor[] getAnnotations(String id, String[] anchorIds)
-      throws StoreException, PermissionException, GraphNotFoundException;
-
    /**
     * List the predefined media tracks available for transcripts.
     * @return An ordered list of media track definitions.
