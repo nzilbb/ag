@@ -2066,9 +2066,10 @@ public class SqlGraphStore
     * Converts a graph-matching expression into a resultset (SELECT selectedClause FROM... WHERE... orderClause).
     * <ul>
     *  <li><code>id = 'ew_0_456'</code></li>
-    *  <li><code>label NOT MATCHES 'th[aeiou].*'</code></li>
-    *  <li><code>my('who').label = 'Robert' AND my('utterances').start.offset = 12.345</code></li>
+    *  <li><code>layer.id = 'orthography' AND label NOT MATCHES 'th[aeiou].*'</code></li>
+    *  <li><code>layer.id = 'orthography' AND my('who').label = 'Robert' AND my('utterances').start.offset = 12.345</code></li>
     *  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset &gt; 10.5</code></li>
+    *  <li><code>layer.id = 'utterances' AND 'ew_0_456' IN list('transcript')</code></li>
     *  <li><code>previous.id = 'ew_0_456'</code></li>
     * </ul>
     * <p><em>NB</em> all expressions must match by either id or layer.id.
@@ -2108,8 +2109,13 @@ public class SqlGraphStore
 	 if (operands[0].trim().equals("id"))
 	 {
 	    // strip quotes
-	    if (operands[1].startsWith("'")) operands[1] = operands[1].substring(1);
-	    if (operands[1].endsWith("'")) operands[1] = operands[1].substring(0,operands[1].length() - 1);
+	    // extract text between first pair of quotes: works for "id = 'xyz'" and "id IN ('xyy, 'abc')"
+	    int firstQuotePos = operands[1].indexOf('\'');
+	    int secondQuotePos = operands[1].indexOf('\'', firstQuotePos + 1);
+	    if (firstQuotePos >= 0 && secondQuotePos >= 0)
+	    {
+	       operands[1] = operands[1].substring(firstQuotePos + 1, secondQuotePos);
+	    }
 	    // parse ID
 	    try
 	    {
@@ -2195,6 +2201,13 @@ public class SqlGraphStore
 	    { // we've already matched the layer ID, but to ensure the SQL is valid...
 	       sqlOperand = "'"+layer.getId().replaceAll("'","\\'")+"'";
 	    }
+	    else if (operand.equals("parent.id") || operand.equals("parentId"))
+	    {
+	       Layer parentLayer = getLayer(layer.getParentId());
+	       String parentScope = ((String)parentLayer.get("@scope")).toLowerCase();
+	       if (parentScope.equals("f")) parentScope = "";
+	       sqlOperand = "CONCAT('e"+parentScope+"_"+parentLayer.get("@layer_id")+"_', annotation.parent_id)";
+	    }
 	    else if (operand.equals("graph.id") || operand.equals("graph.label")
 		     || operand.equals("my('graph').label") || operand.equals("my('graph').id"))
 	    {
@@ -2212,19 +2225,19 @@ public class SqlGraphStore
 	    }
 	    else if (operand.equals("start.id"))
 	    {
-	       sqlOperand = "CONCAT('n_',annotation_start.anchor_id)";
+	       sqlOperand = "CONCAT('n_',start.anchor_id)";
 	    }
 	    else if (operand.equals("end.id"))
 	    {
-	       sqlOperand = "CONCAT('n_',annotation_end.anchor_id)";
+	       sqlOperand = "CONCAT('n_',end.anchor_id)";
 	    }
 	    else if (operand.equals("start.offset"))
 	    {
-	       sqlOperand = "annotation_start.offset";
+	       sqlOperand = "start.offset";
 	    }
 	    else if (operand.equals("end.offset"))
 	    {
-	       sqlOperand = "annotation_end.offset";
+	       sqlOperand = "end.offset";
 	    }
 	    else if (operand.equals("annotator"))
 	    {
@@ -2245,8 +2258,8 @@ public class SqlGraphStore
 		     +" INNER JOIN anchor turn_end_anchor ON turn.end_anchor_id = turn_end_anchor.id"
 		     +" WHERE turn.ag_id = graph.ag_id"
 		     // any overlap with the turn
-		     +" AND turn_start_anchor.offset <= annotation_end_anchor.offset"
-		     +" AND annotation_start_anchor.offset <= turn_end_anchor.offset"
+		     +" AND turn_start_anchor.offset <= end.offset"
+		     +" AND start.offset <= turn_end_anchor.offset"
 		     +" ORDER BY turn_start_anchor.offset, turn_end_anchor.offset DESC"
 		     +(operand.equals("my('who')")?" LIMIT 1":"")
 		     +")";
@@ -2284,22 +2297,59 @@ public class SqlGraphStore
 	       if (scope.equals("F")) joinFieldIndex = Math.min(joinFieldIndex, 0);
 	       if (operandScope.equals("F") && joinFieldIndex > 2) Math.min(joinFieldIndex, 0);
 	       String joinField = joinFields[joinFieldIndex];
-	       sqlOperand = "(SELECT otherLayer.name"
+	       sqlOperand = "(SELECT otherLayer.label"
 		  +" FROM annotation_layer_"+operandLayer.get("@layer_id")+" otherLayer"
-		  +" INNER JOIN anchor otherLayer_start_anchor ON otherLayer.start_anchor_id = otherLayer_start_anchor.id"
-		  +" INNER JOIN anchor otherLayer_end_anchor ON otherLayer.end_anchor_id = otherLayer_end_anchor.id"
+		  +" INNER JOIN anchor otherLayer_start ON otherLayer.start_anchor_id = otherLayer_start.anchor_id"
+		  +" INNER JOIN anchor otherLayer_end ON otherLayer.end_anchor_id = otherLayer_end.anchor_id"
 		  +" WHERE otherLayer.ag_id = annotation.ag_id"
-		  +(joinField==null?"":"AND otherLayer."+joinField+" = annotation."+joinField)
+		  +(joinField==null?"":" AND otherLayer."+joinField+" = annotation."+joinField)
 		  // any overlap
-		  +" AND otherLayer_start_anchor.offset <= annotation_end_anchor.offset"
-		  +" AND annotation_start_anchor.offset <= otherLayer_end_anchor.offset"
-		  +" ORDER BY otherLayer_start_anchor.offset, otherLayer_end_anchor.offset DESC"
+		  +" AND otherLayer_start.offset <= end.offset"
+		  +" AND start.offset <= otherLayer_end.offset"
+		  +" ORDER BY otherLayer_start.offset, otherLayer_end.offset DESC"
 		  +" LIMIT 1"
 		  +")";	       
 	    } // my
+	    else if (operand.startsWith("list('") && operand.endsWith("')"))
+	    { // list()
+	       String layerId = operand.replaceFirst("list\\('","").replaceFirst("'\\)$","");
+	       Layer operandLayer = getLayer(layerId);
+	       if (operandLayer == null) throw new StoreException("Invalid layer: " + layerId);
+	       // join by the finest-grain compatible with both layers
+	       String scope = (String)layer.get("@scope");
+	       String operandScope = (String)operandLayer.get("@scope");
+	       if (operandScope == null) throw new StoreException("Cannot query by non-temporal annotation layer: " + layerId);
+	       String[] joinFields = {
+		  null,
+		  "turn_annotation_id",
+		  "word_annotation_id",
+		  "segment_annotation_id" };
+	       int joinFieldIndex = 3;
+	       if (scope.equals("W")) joinFieldIndex = Math.min(joinFieldIndex, 2);
+	       if (operandScope.equals("W") && joinFieldIndex > 2) Math.min(joinFieldIndex, 2);
+	       if (scope.equals("M")) joinFieldIndex = Math.min(joinFieldIndex, 1);
+	       if (operandScope.equals("M") && joinFieldIndex > 2) Math.min(joinFieldIndex, 1);
+	       if (scope.equals("F")) joinFieldIndex = Math.min(joinFieldIndex, 0);
+	       if (operandScope.equals("F") && joinFieldIndex > 2) Math.min(joinFieldIndex, 0);
+	       String joinField = joinFields[joinFieldIndex];
+	       if (operandScope.equals("F")) operandScope = "";
+	       sqlOperand = "(SELECT CONCAT('e"
+		  +operandScope.toLowerCase()+"_"
+		  +operandLayer.get("@layer_id")+"_', otherLayer.annotation_id)"
+		  +" FROM annotation_layer_"+operandLayer.get("@layer_id")+" otherLayer"
+		  +" INNER JOIN anchor otherLayer_start ON otherLayer.start_anchor_id = otherLayer_start.anchor_id"
+		  +" INNER JOIN anchor otherLayer_end ON otherLayer.end_anchor_id = otherLayer_end.anchor_id"
+		  +" WHERE otherLayer.ag_id = annotation.ag_id"
+		  +(joinField==null?"":" AND otherLayer."+joinField+" = annotation."+joinField)
+		  // any overlap
+		  +" AND otherLayer_start.offset <= end.offset"
+		  +" AND start.offset <= otherLayer_end.offset"
+		  +" ORDER BY otherLayer_start.offset, otherLayer_end.offset DESC"
+		  +")";
+	    } // list()
 	    else if (operand.startsWith("list('") && operand.endsWith("').length"))
-	    { // list
-	       String layerId = operand.replaceFirst("my\\('","").replaceFirst("'\\)\\.label$","");
+	    { // list().length
+	       String layerId = operand.replaceFirst("list\\('","").replaceFirst("'\\)\\.length$","");
 	       Layer operandLayer = getLayer(layerId);
 	       if (operandLayer == null) throw new StoreException("Invalid layer: " + layerId);
 	       // join by the finest-grain compatible with both layers
@@ -2321,16 +2371,16 @@ public class SqlGraphStore
 	       String joinField = joinFields[joinFieldIndex];
 	       sqlOperand = "(SELECT COUNT(*)"
 		  +" FROM annotation_layer_"+operandLayer.get("@layer_id")+" otherLayer"
-		  +" INNER JOIN anchor otherLayer_start_anchor ON otherLayer.start_anchor_id = otherLayer_start_anchor.id"
-		  +" INNER JOIN anchor otherLayer_end_anchor ON otherLayer.end_anchor_id = otherLayer_end_anchor.id"
+		  +" INNER JOIN anchor otherLayer_start ON otherLayer.start_anchor_id = otherLayer_start.anchor_id"
+		  +" INNER JOIN anchor otherLayer_end ON otherLayer.end_anchor_id = otherLayer_end.anchor_id"
 		  +" WHERE otherLayer.ag_id = annotation.ag_id"
-		  +(joinField==null?"":"AND otherLayer."+joinField+" = annotation."+joinField)
+		  +(joinField==null?"":" AND otherLayer."+joinField+" = annotation."+joinField)
 		  // any overlap
-		  +" AND otherLayer_start_anchor.offset <= annotation_end_anchor.offset"
-		  +" AND annotation_start_anchor.offset <= otherLayer_end_anchor.offset"
-		  +" ORDER BY otherLayer_start_anchor.offset, otherLayer_end_anchor.offset DESC"
+		  +" AND otherLayer_start.offset <= end.offset"
+		  +" AND start.offset <= otherLayer_end.offset"
+		  +" ORDER BY otherLayer_start.offset, otherLayer_end.offset DESC"
 		  +")";
-	    } // list
+	    } // list().length
 	    else
 	    {
 	       sqlOperand = operand;
@@ -5296,6 +5346,144 @@ public class SqlGraphStore
 	 throw new StoreException("Error parsing ID for transcript attribute: "+annotation.getId(), exception);
       }
    } // end of saveParticipantAttributeChanges()
+
+   /**
+    * Creates an annotation starting at <var>fromId</var> and ending at <var>toId</var>.
+    * @param from The start anchor's ID.
+    * @param to The end anchor's ID.
+    * @param layerId The layer ID of the resulting annotation.
+    * @param label The label of the resulting annotation.
+    * @param confidence The confidence rating.
+    * @param parent The new annotation's parent's ID.
+    * @return The ID of the new annotation.
+    */
+   public String createAnnotation(String id, String fromId, String toId, String layerId, String label, Integer confidence, String parentId)
+      throws StoreException, PermissionException, GraphNotFoundException
+   {
+      Layer layer = getLayer(layerId);
+      if (layer.get("@scope") == null) throw new StoreException("Only temporal layers are supported: " + layerId);
+      Annotation[] annotations = getMatchingAnnotations("id = '"+parentId+"'");
+      if (annotations.length < 1) throw new StoreException("Invalid parent: " + parentId);
+      Annotation parent = annotations[0];
+      if (!layer.getParentId().equals(parent.getLayerId())) throw new StoreException("Layer "+layerId+" is not a child of " + parent.getLayerId());
+      Layer parentLayer = getLayer(parent.getLayerId());
+      if (layer.getAlignment() == Constants.ALIGNMENT_NONE)
+      { // tag layer - ignore given anchors, and use the parent's instead
+	 fromId = parent.getStartId();
+	 toId = parent.getEndId();
+      }
+      String[] anchorIds = {fromId, toId};
+      Anchor[] anchors = getAnchors(id, anchorIds);
+      if (anchors.length < 1) throw new StoreException("Invalid start anchor: " + fromId);
+      Anchor from = anchors[0];
+      if (anchors.length < 2) throw new StoreException("Invalid end anchor: " + toId);
+      Anchor to = anchors[1];
+      try
+      {
+	 Object[] parentAttributes = fmtAnnotationId.parse(parent.getId());
+	 Long parentAnnotationId = (Long)parentAttributes[2];
+	 if (!layer.getPeers())
+	 {
+	    // only one child allowed, so delete any children
+	    PreparedStatement sql = getConnection().prepareStatement(
+	       "DELETE FROM annotation_layer_"+layer.get("@layer_id") +" WHERE parent_id = ?");
+	    sql.setLong(1, parentAnnotationId);
+	    sql.executeUpdate();
+	    sql.close();
+	 }
+	 PreparedStatement sqlInsertAnnotation = getConnection().prepareStatement(
+	    "INSERT INTO annotation_layer_?"
+	    + " (ag_id, label, label_status, start_anchor_id, end_anchor_id,"
+	    + " parent_id, ordinal, annotated_by, annotated_when"
+	    + (!layer.get("@scope").equals("F")?
+	       ", turn_annotation_id":"")
+	    + (layer.get("@scope").equals("S")||layer.get("@scope").equals("W")?
+	       ", ordinal_in_turn, word_annotation_id":"")
+	    + (layer.get("@scope").equals("S")?", ordinal_in_word, segment_annotation_id":"")
+	    + ")"
+	    + " SELECT ag_id, ?, ?, ?, ?,"
+	    + " annotation_id, 1, ?, Now()"
+	    + (!layer.get("@scope").equals("F")?
+	       ", turn_annotation_id" :"")
+ 	    + (layer.get("@scope").equals("S")||layer.get("@scope").equals("W")?
+	       ", ordinal_in_turn, word_annotation_id":"")
+	    + (layer.get("@scope").equals("S")?", ordinal_in_word, segment_annotation_id":"")
+	    + " FROM annotation_layer_?"
+	    +" WHERE annotation_id = ?");
+	 sqlInsertAnnotation.setInt(1, ((Integer)layer.get("@layer_id")).intValue());
+	 sqlInsertAnnotation.setString(2, label);
+	 sqlInsertAnnotation.setInt(3, confidence);
+	 
+	 Object[] anchorAttributes = fmtAnchorId.parse(from.getId());
+	 sqlInsertAnnotation.setLong(4, (Long)anchorAttributes[0]);
+	 
+	 anchorAttributes = fmtAnchorId.parse(to.getId());
+	 sqlInsertAnnotation.setLong(5, (Long)anchorAttributes[0]);
+	 
+	 sqlInsertAnnotation.setString(6, getUser());
+	 sqlInsertAnnotation.setInt(7, ((Integer)parentLayer.get("@layer_id")).intValue());
+	 sqlInsertAnnotation.setLong(8, parentAnnotationId);
+	 sqlInsertAnnotation.executeUpdate();
+	 sqlInsertAnnotation.close();
+	 sqlInsertAnnotation = getConnection().prepareStatement("SELECT LAST_INSERT_ID()");
+	 ResultSet rsInsert = sqlInsertAnnotation.executeQuery();
+	 rsInsert.next();
+	 long annotation_id = rsInsert.getLong(1);
+	 rsInsert.close();
+	 sqlInsertAnnotation.close();
+	 Object[] annotationAttributes = {
+	    layer.get("@scope").equals("F")?"":((String)layer.get("@scope")).toLowerCase(),
+	    layer.get("@layer_id"),
+	    new Long(annotation_id)};
+	 return fmtAnnotationId.format(annotationAttributes);
+      }
+      catch(ParseException exception)
+      {
+	 System.err.println("Error parsing parent ID: "+parent.getId());
+	 throw new StoreException("Error parsing parent ID: "+parent.getId());
+      }
+      catch(SQLException exception)
+      {
+	 throw new StoreException(exception);
+      }
+   }
+
+   /**
+    * Destroys the annotation with the given ID.
+    * @param id The ID of the graph.
+    * @param annotationId The annotation's ID.
+    * @return The ID of the new annotation.
+    */
+   public void destroyAnnotation(String id, String annotationId)
+      throws StoreException, PermissionException, GraphNotFoundException
+   {
+      Annotation[] annotations = getMatchingAnnotations("id = '"+annotationId+"'");
+      if (annotations.length < 1) throw new StoreException("Invalid annotation: " + annotationId);
+      Annotation annotation = annotations[0];
+      Schema schema = getSchema();
+      Layer layer = schema.getLayer(annotation.getLayerId());
+      if (layer.getChildren().size() > 0) throw new StoreException("There are child layers: " + layer.getId());
+      try
+      {
+	 Object[] attributes = fmtAnnotationId.parse(annotation.getId());
+	 Long annotation_id = (Long)attributes[2];
+	 // only one child allowed, so delete any children
+	 PreparedStatement sql = getConnection().prepareStatement(
+	    "DELETE FROM annotation_layer_"+layer.get("@layer_id") +" WHERE annotation_id = ?");
+	 sql.setLong(1, annotation_id);
+	 sql.executeUpdate();
+	 sql.close();
+      }
+      catch(ParseException exception)
+      {
+	 System.err.println("Error parsing ID: "+annotation.getId());
+	 throw new StoreException("Error parsing ID: "+annotation.getId());
+      }
+      catch(SQLException exception)
+      {
+	 throw new StoreException(exception);
+      }
+   }
 
    /**
     * List the predefined media tracks available for transcripts.
