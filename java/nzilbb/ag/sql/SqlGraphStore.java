@@ -1404,6 +1404,7 @@ public class SqlGraphStore
 	    {
 	       orderClause.append(", ");
 	    }
+	    part = part.trim();
 	    String direction = " ASC";
 	    if (part.endsWith(" ASC"))
 	    {
