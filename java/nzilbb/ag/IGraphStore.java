@@ -44,6 +44,29 @@ public interface IGraphStore
       throws StoreException, PermissionException, GraphNotFoundException;
 
    /**
+    * Creates an annotation starting at <var>from</var> and ending at <var>to</var>.
+    * @param id The ID of the graph.
+    * @param from The start anchor's ID.
+    * @param to The end anchor's ID.
+    * @param layerId The layer ID of the resulting annotation.
+    * @param label The label of the resulting annotation.
+    * @param confidence The confidence rating.
+    * @param parent The new annotation's parent's ID.
+    * @return The ID of the new annotation.
+    */
+   public String createAnnotation(String id, String fromId, String toId, String layerId, String label, Integer confidence, String parentId)
+      throws StoreException, PermissionException, GraphNotFoundException;   
+
+   /**
+    * Destroys the annotation with the given ID.
+    * @param id The ID of the graph.
+    * @param annotationId The annotation's ID.
+    * @return The ID of the new annotation.
+    */
+   public void destroyAnnotation(String id, String annotationId)
+      throws StoreException, PermissionException, GraphNotFoundException;   
+   
+   /**
     * Saves a participant, and all its tags, to the database.  The participant is represented by an Annotation that isn't assumed to be part of a graph.
     * @param participant
     * @return true if changes were saved, false if there were no changes to save.
