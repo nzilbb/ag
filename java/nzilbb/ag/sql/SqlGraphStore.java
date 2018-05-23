@@ -2436,8 +2436,8 @@ public class SqlGraphStore
 	 +(anchorsJoin?"start.offset, end.offset, ":"")
 	 +"annotation_id"
 	 + " " + limit;
-      System.out.println("QL: " + expression);
-      System.out.println("SQL: " + sSql);
+      // System.out.println("QL: " + expression);
+      // System.out.println("SQL: " + sSql);
       PreparedStatement sql = getConnection().prepareStatement(sSql);
       sql.setString(1, layer.getId());
       sql.setInt(2, ((Integer)layer.get("@layer_id")).intValue());
