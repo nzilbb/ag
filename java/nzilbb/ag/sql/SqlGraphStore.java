@@ -3349,6 +3349,7 @@ public class SqlGraphStore
 			Object[] o = fmtAnnotationId.parse(change.getObject().getId());
 			String scope = o[0].toString();
 			if (scope.length() != 0 
+			    && !scope.equalsIgnoreCase(SqlConstants.SCOPE_EPISODE) 
 			    && !scope.equalsIgnoreCase(SqlConstants.SCOPE_META) 
 			    && !scope.equalsIgnoreCase(SqlConstants.SCOPE_WORD) 
 			    && !scope.equalsIgnoreCase(SqlConstants.SCOPE_SEGMENT) 
@@ -3894,11 +3895,11 @@ public class SqlGraphStore
 	    {
 	       sqlInsertAnchor.setString(4, getUser());
 	    }
-	    if (anchor.getWhen() != null)
-	    {
-	       sqlInsertAnchor.setTimestamp(5, new Timestamp(anchor.getWhen().getTime()));
-	    }
-	    else
+	    // if (anchor.getWhen() != null)
+	    // {
+	    //    sqlInsertAnchor.setTimestamp(5, new Timestamp(anchor.getWhen().getTime()));
+	    // }
+	    // else
 	    {
 	       sqlInsertAnchor.setTimestamp(5, new Timestamp(new java.util.Date().getTime()));
 	    }
@@ -3933,17 +3934,17 @@ public class SqlGraphStore
 	       sqlUpdateAnchor.setInt(2, anchor.getConfidence());
 	       if (anchor.getAnnotator() != null)
 	       {
-		  sqlUpdateAnchor.setString(3, anchor.getAnnotator());
+	       	  sqlUpdateAnchor.setString(3, anchor.getAnnotator());
 	       }
 	       else
 	       {
 		  sqlUpdateAnchor.setString(3, getUser());
 	       }
-	       if (anchor.getWhen() != null)
-	       {
-		  sqlUpdateAnchor.setTimestamp(4, new Timestamp(anchor.getWhen().getTime()));
-	       }
-	       else
+	       // if (anchor.getWhen() != null)
+	       // {
+	       // 	  sqlUpdateAnchor.setTimestamp(4, new Timestamp(anchor.getWhen().getTime()));
+	       // }
+	       // else
 	       {
 		  sqlUpdateAnchor.setTimestamp(4, new Timestamp(new java.util.Date().getTime()));
 	       }
@@ -4151,11 +4152,11 @@ public class SqlGraphStore
 	    {
 	       sql.setString(9, getUser());
 	    }
-	    if (annotation.getWhen() != null)
-	    {
-	       sql.setTimestamp(10, new Timestamp(annotation.getWhen().getTime()));
-	    }
-	    else
+	    // if (annotation.getWhen() != null)
+	    // {
+	    //    sql.setTimestamp(10, new Timestamp(annotation.getWhen().getTime()));
+	    // }
+	    // else
 	    {
 	       sql.setTimestamp(10, new Timestamp(new java.util.Date().getTime()));
 	    }
@@ -4403,17 +4404,17 @@ public class SqlGraphStore
 	       sql.setInt(7, annotation.getOrdinal());
 	       if (annotation.getAnnotator() != null)
 	       {
-		  sql.setString(8, annotation.getAnnotator());
+	       	  sql.setString(8, annotation.getAnnotator());
 	       }
 	       else
 	       {
 		  sql.setString(8, getUser());
 	       }
-	       if (annotation.getWhen() != null)
-	       {
-		  sql.setTimestamp(9, new Timestamp(annotation.getWhen().getTime()));
-	       }
-	       else
+	       // if (annotation.getWhen() != null)
+	       // {
+	       // 	  sql.setTimestamp(9, new Timestamp(annotation.getWhen().getTime()));
+	       // }
+	       // else
 	       {
 		  sql.setTimestamp(9, new Timestamp(new java.util.Date().getTime()));
 	       }
@@ -4453,11 +4454,11 @@ public class SqlGraphStore
 		  {
 		     sql.setString(9, getUser());
 		  }
-		  if (annotation.getWhen() != null)
-		  {
-		     sql.setTimestamp(10, new Timestamp(annotation.getWhen().getTime()));
-		  }
-		  else
+		  // if (annotation.getWhen() != null)
+		  // {
+		  //    sql.setTimestamp(10, new Timestamp(annotation.getWhen().getTime()));
+		  // }
+		  // else
 		  {
 		     sql.setTimestamp(10, new Timestamp(new java.util.Date().getTime()));
 		  }
@@ -4503,11 +4504,11 @@ public class SqlGraphStore
 		  {
 		     sql.setString(9, getUser());
 		  }
-		  if (annotation.getWhen() != null)
-		  {
-		     sql.setTimestamp(10, new Timestamp(annotation.getWhen().getTime()));
-		  }
-		  else
+		  // if (annotation.getWhen() != null)
+		  // {
+		  //    sql.setTimestamp(10, new Timestamp(annotation.getWhen().getTime()));
+		  // }
+		  // else
 		  {
 		     sql.setTimestamp(10, new Timestamp(new java.util.Date().getTime()));
 		  }
@@ -4550,17 +4551,17 @@ public class SqlGraphStore
 		     sql.setInt(10, annotation.getOrdinal());
 		     if (annotation.getAnnotator() != null)
 		     {
-			sql.setString(11, annotation.getAnnotator());
+		     	sql.setString(11, annotation.getAnnotator());
 		     }
 		     else
 		     {
 			sql.setString(11, getUser());
 		     }
-		     if (annotation.getWhen() != null)
-		     {
-			sql.setTimestamp(12, new Timestamp(annotation.getWhen().getTime()));
-		     }
-		     else
+		     // if (annotation.getWhen() != null)
+		     // {
+		     // 	sql.setTimestamp(12, new Timestamp(annotation.getWhen().getTime()));
+		     // }
+		     // else
 		     {
 			sql.setTimestamp(12, new Timestamp(new java.util.Date().getTime()));
 		     }
@@ -4606,11 +4607,11 @@ public class SqlGraphStore
 			   {
 			      sql.setString(11, getUser());
 			   }
-			   if (annotation.getWhen() != null)
-			   {
-			      sql.setTimestamp(12, new Timestamp(annotation.getWhen().getTime()));
-			   }
-			   else
+			   // if (annotation.getWhen() != null)
+			   // {
+			   //    sql.setTimestamp(12, new Timestamp(annotation.getWhen().getTime()));
+			   // }
+			   // else
 			   {
 			      sql.setTimestamp(12, new Timestamp(new java.util.Date().getTime()));
 			   }
@@ -4660,17 +4661,17 @@ public class SqlGraphStore
 			      sql.setInt(12, annotation.getOrdinal());
 			      if (annotation.getAnnotator() != null)
 			      {
-				 sql.setString(13, annotation.getAnnotator());
+			      	 sql.setString(13, annotation.getAnnotator());
 			      }
 			      else
 			      {
 				 sql.setString(13, getUser());
 			      }
-			      if (annotation.getWhen() != null)
-			      {
-				 sql.setTimestamp(14, new Timestamp(annotation.getWhen().getTime()));
-			      }
-			      else
+			      // if (annotation.getWhen() != null)
+			      // {
+			      // 	 sql.setTimestamp(14, new Timestamp(annotation.getWhen().getTime()));
+			      // }
+			      // else
 			      {
 				 sql.setTimestamp(14, new Timestamp(new java.util.Date().getTime()));
 			      }
@@ -4743,11 +4744,11 @@ public class SqlGraphStore
 			   {
 			      sql.setString(13, getUser());
 			   }
-			   if (annotation.getWhen() != null)
-			   {
-			      sql.setTimestamp(14, new Timestamp(annotation.getWhen().getTime()));
-			   }
-			   else
+			   // if (annotation.getWhen() != null)
+			   // {
+			   //    sql.setTimestamp(14, new Timestamp(annotation.getWhen().getTime()));
+			   // }
+			   // else
 			   {
 			      sql.setTimestamp(14, new Timestamp(new java.util.Date().getTime()));
 			   }
@@ -5087,11 +5088,11 @@ public class SqlGraphStore
 		  {
 		     sql.setString(6, getUser());
 		  }
-		  if (annotation.getWhen() != null)
-		  {
-		     sql.setTimestamp(7, new Timestamp(annotation.getWhen().getTime()));
-		  }
-		  else
+		  // if (annotation.getWhen() != null)
+		  // {
+		  //    sql.setTimestamp(7, new Timestamp(annotation.getWhen().getTime()));
+		  // }
+		  // else
 		  {
 		     sql.setTimestamp(7, new Timestamp(new java.util.Date().getTime()));
 		  }
@@ -5137,11 +5138,11 @@ public class SqlGraphStore
 		  {
 		     sql.setString(4, getUser());
 		  }
-		  if (annotation.getWhen() != null)
-		  {
-		     sql.setTimestamp(5, new Timestamp(annotation.getWhen().getTime()));
-		  }
-		  else
+		  // if (annotation.getWhen() != null)
+		  // {
+		  //    sql.setTimestamp(5, new Timestamp(annotation.getWhen().getTime()));
+		  // }
+		  // else
 		  {
 		     sql.setTimestamp(5, new Timestamp(new java.util.Date().getTime()));
 		  }
@@ -5212,17 +5213,17 @@ public class SqlGraphStore
 	       sqlInsertTranscriptAttribute.setString(3, annotation.getLabel());
 	       if (annotation.getAnnotator() != null)
 	       {
-		  sqlInsertTranscriptAttribute.setString(4, annotation.getAnnotator());
+	       	  sqlInsertTranscriptAttribute.setString(4, annotation.getAnnotator());
 	       }
 	       else
 	       {
 		  sqlInsertTranscriptAttribute.setString(4, getUser());
 	       }
-	       if (annotation.getWhen() != null)
-	       {
-		  sqlInsertTranscriptAttribute.setTimestamp(5, new Timestamp(annotation.getWhen().getTime()));
-	       }
-	       else
+	       // if (annotation.getWhen() != null)
+	       // {
+	       // 	  sqlInsertTranscriptAttribute.setTimestamp(5, new Timestamp(annotation.getWhen().getTime()));
+	       // }
+	       // else
 	       {
 		  sqlInsertTranscriptAttribute.setTimestamp(5, new Timestamp(new java.util.Date().getTime()));
 	       }
@@ -5236,17 +5237,17 @@ public class SqlGraphStore
 	       sqlUpdateTranscriptAttribute.setString(1, annotation.getLabel());
 	       if (annotation.getAnnotator() != null)
 	       {
-		  sqlUpdateTranscriptAttribute.setString(2, annotation.getAnnotator());
+	       	  sqlUpdateTranscriptAttribute.setString(2, annotation.getAnnotator());
 	       }
 	       else
 	       {
 		  sqlUpdateTranscriptAttribute.setString(2, getUser());
 	       }
-	       if (annotation.getWhen() != null)
-	       {
-		  sqlUpdateTranscriptAttribute.setTimestamp(3, new Timestamp(annotation.getWhen().getTime()));
-	       }
-	       else
+	       // if (annotation.getWhen() != null)
+	       // {
+	       // 	  sqlUpdateTranscriptAttribute.setTimestamp(3, new Timestamp(annotation.getWhen().getTime()));
+	       // }
+	       // else
 	       {
 		  sqlUpdateTranscriptAttribute.setTimestamp(3, new Timestamp(new java.util.Date().getTime()));
 	       }
@@ -5313,17 +5314,17 @@ public class SqlGraphStore
 	       sqlInsertParticipantAttribute.setString(3, annotation.getLabel());
 	       if (annotation.getAnnotator() != null)
 	       {
-		  sqlInsertParticipantAttribute.setString(4, annotation.getAnnotator());
+	       	  sqlInsertParticipantAttribute.setString(4, annotation.getAnnotator());
 	       }
 	       else
 	       {
 		  sqlInsertParticipantAttribute.setString(4, getUser());
 	       }
-	       if (annotation.getWhen() != null)
-	       {
-		  sqlInsertParticipantAttribute.setTimestamp(5, new Timestamp(annotation.getWhen().getTime()));
-	       }
-	       else
+	       // if (annotation.getWhen() != null)
+	       // {
+	       // 	  sqlInsertParticipantAttribute.setTimestamp(5, new Timestamp(annotation.getWhen().getTime()));
+	       // }
+	       // else
 	       {
 		  sqlInsertParticipantAttribute.setTimestamp(5, new Timestamp(new java.util.Date().getTime()));
 	       }
@@ -5338,17 +5339,17 @@ public class SqlGraphStore
 	       sqlUpdateParticipantAttribute.setString(1, annotation.getLabel());	    
 	       if (annotation.getAnnotator() != null)
 	       {
-		  sqlUpdateParticipantAttribute.setString(2, annotation.getAnnotator());
+	       	  sqlUpdateParticipantAttribute.setString(2, annotation.getAnnotator());
 	       }
 	       else
 	       {
 		  sqlUpdateParticipantAttribute.setString(2, getUser());
 	       }
-	       if (annotation.getWhen() != null)
-	       {
-		  sqlUpdateParticipantAttribute.setTimestamp(3, new Timestamp(annotation.getWhen().getTime()));
-	       }
-	       else
+	       // if (annotation.getWhen() != null)
+	       // {
+	       // 	  sqlUpdateParticipantAttribute.setTimestamp(3, new Timestamp(annotation.getWhen().getTime()));
+	       // }
+	       // else
 	       {
 		  sqlUpdateParticipantAttribute.setTimestamp(3, new Timestamp(new java.util.Date().getTime()));
 	       }
