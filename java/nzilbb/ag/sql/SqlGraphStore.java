@@ -1428,6 +1428,10 @@ public class SqlGraphStore
 	       String layerId = part.replaceFirst("my\\('","").replaceFirst("'\\)\\.label$","");
 	       Layer layer = getLayer(layerId);
 	       if (layer == null) throw new StoreException("Invalid layer: " + layerId);
+	       if (layer.getType() == Constants.TYPE_NUMBER)
+	       { // cast the value as a number
+		  orderClause.append("CAST(");
+	       }
 	       if ("speaker".equals(layer.get("@class_id"))) throw new StoreException("Cannoth query by participant annotation layer: " + layerId);
 	       if ("transcript".equals(layer.get("@class_id")))
 	       { // transcript attribute
@@ -1456,6 +1460,10 @@ public class SqlGraphStore
 		     +" FROM annotation_layer_" + layer.get("@layer_id") + " layer"
 		     +" WHERE layer.ag_id = transcript.ag_id"
 		     +" LIMIT 1)");
+	       }
+	       if (layer.getType() == Constants.TYPE_NUMBER)
+	       { // finish casting the value as a number
+		  orderClause.append(" AS SIGNED)");
 	       }
 	    }
 	    else
