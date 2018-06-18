@@ -1083,6 +1083,6 @@ public class TestPlainTextDeserializer
 
    public static void main(String args[]) 
    {
-      org.junit.runner.JUnitCore.main("nzilbb.ag.test.TestTEIDeserializer");
+      org.junit.runner.JUnitCore.main("nzilbb.text.test.TestPlainTextDeserializer");
    }
 }
