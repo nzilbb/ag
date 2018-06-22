@@ -1129,6 +1129,7 @@ public class EAFDeserializer
 		     annotation.put("@participant", sSpeakerName); // this might come in handy later
 		     mAnnotationIdToAnnotation.put(sAnnotationId, annotation);
 		     annotation.setConfidence(Constants.CONFIDENCE_MANUAL);
+		     // TODO annotation.setAnnotator(...), from the tier's settings.
 		     // add anchors if they're not in the graph
 		     if (!graph.getAnchors().containsKey(start.getId())) graph.addAnchor(start);
 		     if (!graph.getAnchors().containsKey(end.getId())) graph.addAnchor(end);
@@ -1321,6 +1322,8 @@ public class EAFDeserializer
 	 try
 	 {
 	    tokenizer.transform(graph);
+	    // TODO annotation.setAnnotator(...) for all tokens, from the tier's settings.
+
 	 }
 	 catch(TransformationException exception)
 	 {
