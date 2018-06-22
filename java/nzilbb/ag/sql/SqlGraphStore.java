@@ -1473,14 +1473,18 @@ public class SqlGraphStore
 	    orderClause.append(direction);
 	 } // next part
       } // order is specified
+      if (orderClause.length() == 0)
+      {
+	 orderClause.append(" ORDER BY family_id, family_sequence");
+      }
       if (limit == null) limit = "";
       String sSql = "SELECT "+selectClause+" FROM transcript"
 	 + conditions.toString()
 	 + userWhereClause(conditions.length() > 0)
 	 + orderClause.toString()
 	 + " " + limit;
-      System.out.println("QL: " + expression);
-      System.out.println("SQL: " + sSql);
+      // System.out.println("QL: " + expression);
+      // System.out.println("SQL: " + sSql);
       PreparedStatement sql = getConnection().prepareStatement(sSql);
       //System.err.println(sSql);
       return sql;
