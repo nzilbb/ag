@@ -1479,8 +1479,8 @@ public class SqlGraphStore
 	 + userWhereClause(conditions.length() > 0)
 	 + orderClause.toString()
 	 + " " + limit;
-      // System.out.println("QL: " + expression);
-      // System.out.println("SQL: " + sSql);
+      System.out.println("QL: " + expression);
+      System.out.println("SQL: " + sSql);
       PreparedStatement sql = getConnection().prepareStatement(sSql);
       //System.err.println(sSql);
       return sql;
@@ -5603,18 +5603,25 @@ public class SqlGraphStore
 	       if (f.exists())
 	       {
 		  MediaFile mediaFile = new MediaFile(f, track.getSuffix());
-		  StringBuffer url = new StringBuffer(getBaseUrl());
-		  url.append("/files/");
-		  url.append(graph.my("corpus").getLabel());
-		  url.append("/");
-		  url.append(graph.my("episode").getLabel());
-		  url.append("/");
-		  url.append(mediaFile.getExtension());
-		  url.append("/");
-		  url.append(f.getName());
-		  mediaFile.setUrl(url.toString());
+		  if (getBaseUrl() == null) // TODO check this isn't a security risk
+		  {
+		     mediaFile.setUrl(f.toURI().toString());
+		  }
+		  else
+		  {
+		     StringBuffer url = new StringBuffer(getBaseUrl());
+		     url.append("/files/");
+		     url.append(graph.my("corpus").getLabel());
+		     url.append("/");
+		     url.append(graph.my("episode").getLabel());
+		     url.append("/");
+		     url.append(mediaFile.getExtension());
+		     url.append("/");
+		     url.append(f.getName());
+		     mediaFile.setUrl(url.toString());
+		  }
 		  files.add(mediaFile);
-	       }
+	       } // f.exists()
 	    } // next track
 	 } // next subdir
       }
