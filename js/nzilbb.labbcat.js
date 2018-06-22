@@ -84,7 +84,8 @@ function callComplete(evt) {
 	    result = response;
 	} else {
 	    // all other results
-	    result = response.model.result || response.model;
+	    result = response.model.result;
+	    if (!result && result != 0) result = response.model;
 	    errors = response.errors;
 	    if (!errors || errors.length == 0) errors = null;
 	    messages = response.messages;
@@ -255,6 +256,30 @@ nzilbb.labbcat.GraphStoreQuery.prototype = {
 	this.createRequest("getGraph", { id : id, layerId : layerId }, onResult).send();
     },
     
+    /**
+     * Gets the number of annotations on the given layer of the given graph.
+     * @param {string} id The given graph ID.
+     * @param {string} layerId The ID of the layer to load.
+     * @callback {resultCallback} onResult Invoked when the request has returned a result.
+     * @return The identified graph.
+     */
+    countAnnotations : function (id, layerId, onResult) {
+	this.createRequest("countAnnotations", { id : id, layerId : layerId }, onResult).send();
+    },
+    
+    /**
+     * Gets the annotations on the given layer of the given graph.
+     * @param {string} id The given graph ID.
+     * @param {string} layerId The ID of the layer to load.
+     * @param {int} pageLength The number of annotations per page (or null for one big page with all annotations on it).
+     * @param {int} pageNumber The page number to return (or null for the first page).
+     * @callback {resultCallback} onResult Invoked when the request has returned a result.
+     * @return The identified graph.
+     */
+    getAnnotations : function (id, layerId, pageLength, pageNumber, onResult) {
+	this.createRequest("getAnnotations", { id : id, layerId : layerId, pageLength : pageLength, pageNumber : pageNumber }, onResult).send();
+    },
+        
     /**
      * List the predefined media tracks available for transcripts.
      * @callback {resultCallback} onResult Invoked when the request has returned a result.
