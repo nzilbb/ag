@@ -43,6 +43,9 @@ public class SqlConstants
    /** Database Layer ID for utterance layer - i.e. the lines/chunks of the transcript as originally time aligned before upload (in Transcriber, the words between Sync points) */
    public static final int LAYER_UTTERANCE = 12;
    
+   /** Scope for Episode layer - value is "e" */
+   public static final String SCOPE_EPISODE = "e"; 
+
    /** Scope for Participant layer - value is "p" */
    public static final String SCOPE_PARTICIPANT = "p"; 
 
