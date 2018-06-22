@@ -1183,6 +1183,8 @@ public class TranscriptDeserializer
 	 } // next event
       }
 
+      // TODO annotation.setAnnotator(...) for all annotations, from the tier's 'transcriber' setting.
+
       Graph[] graphs = { graph };
       return graphs;
    }
