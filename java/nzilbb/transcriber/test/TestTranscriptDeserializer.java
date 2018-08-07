@@ -38,6 +38,7 @@ import nzilbb.ag.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.transcriber.*;
 
+// TODO add a test for turns with no speaker assigned.
 public class TestTranscriptDeserializer
 {
    @Test public void basicConversion() 
