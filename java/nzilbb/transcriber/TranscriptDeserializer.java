@@ -1314,6 +1314,8 @@ public class TranscriptDeserializer
 	 }
 	 warnings.add(sMessage);
       } // next leftover start event
+
+      // TODO check for turns with no speaker assigned.
       return warnings;
    }
 
