@@ -4878,6 +4878,11 @@ public class SqlGraphStore
 		  sqlUpdate.setInt(4, agId);
 		  sqlUpdate.executeUpdate();
 		  sqlUpdate.close();
+
+		  // update ID
+		  Object[] annotationIdParts = {
+		     getLayer(annotation.getLayerId()).get("@layer_id"), ""+familyId};
+		  annotation.setId(fmtMetaAnnotationId.format(annotationIdParts));
 		  break;
 	       }
 	    } // switch on change type
@@ -5078,7 +5083,7 @@ public class SqlGraphStore
 	 {
 	    case Create:
 	    {
-	       Integer layerId = (Integer)annotation.getLayer().get("@layer_id");
+	       Integer layerId = (Integer)getLayer(annotation.getLayerId()).get("@layer_id");
 	       PreparedStatement sql = getConnection().prepareStatement(
 		  "INSERT INTO `annotation_layer_"+layerId+"`"
 		  +" (family_id, label, label_status, parent_id, ordinal, annotated_by, annotated_when)"

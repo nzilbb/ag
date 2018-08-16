@@ -353,8 +353,16 @@ public class Schema
    {
       return getLayers().get(id);
    } // end of getLayer()
-
    
+   /**
+    * Get the layer specified by {@link #episodeLayerId}
+    * @return The layer specified by {@link #episodeLayerId}, or null if there is none.
+    */
+   public Layer getEpisodeLayer()
+   {
+      return getLayer(getEpisodeLayerId());
+   } // end of getEpisodeLayer()
+
    /**
     * Get the layer specified by {@link #participantLayerId}
     * @return The layer specified by {@link #participantLayerId}, or null if there is none.
