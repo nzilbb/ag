@@ -166,6 +166,23 @@ public class PlainTextDeserializer
    public void setSchema(Schema newSchema) { schema = newSchema; }
 
    /**
+    * Episode information layer.
+    * @see #getEpisodeLayer()
+    * @see #setEpisodeLayer(Layer)
+    */
+   protected Layer episodeLayer;
+   /**
+    * Getter for {@link #episodeayer}: Episode information layer.
+    * @return Episode information layer.
+    */
+   public Layer getEpisodeLayer() { return episodeLayer; }
+   /**
+    * Setter for {@link #episodeLayer}: Episode information layer.
+    * @param newEpisodeLayer Episode information layer.
+    */
+   public void setEpisodeLayer(Layer newEpisodeLayer) { episodeLayer = newEpisodeLayer; }
+
+   /**
     * Participant information layer.
     * @see #getParticipantLayer()
     * @see #setParticipantLayer(Layer)
@@ -549,7 +566,7 @@ public class PlainTextDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Plain Text Document", "0.11", "text/plain", ".txt", "20170228.1353", getClass().getResource("icon.png"));
+	 "Plain Text Document", "0.20", "text/plain", ".txt", "20170228.1353", getClass().getResource("icon.png"));
    }
 
    /**
@@ -565,6 +582,7 @@ public class PlainTextDeserializer
    public ParameterSet configure(ParameterSet configuration, Schema schema)
    {
       setSchema(schema);
+      setEpisodeLayer(schema.getEpisodeLayer());
       setParticipantLayer(schema.getParticipantLayer());
       setTurnLayer(schema.getTurnLayer());
       setUtteranceLayer(schema.getUtteranceLayer());
@@ -583,6 +601,7 @@ public class PlainTextDeserializer
       LinkedHashMap<String,Layer> possibleTurnChildLayers = new LinkedHashMap<String,Layer>();
       LinkedHashMap<String,Layer> wordTagLayers = new LinkedHashMap<String,Layer>();
       LinkedHashMap<String,Layer> participantTagLayers = new LinkedHashMap<String,Layer>();
+      LinkedHashMap<String,Layer> episodeTagLayers = new LinkedHashMap<String,Layer>();
       if (getParticipantLayer() == null || getTurnLayer() == null 
 	  || getUtteranceLayer() == null || getWordLayer() == null)
       {
@@ -648,6 +667,17 @@ public class PlainTextDeserializer
 	       participantTagLayers.put(tag.getId(), tag);
 	    }
 	 } // next possible word tag layer
+	 if (getEpisodeLayer() != null)
+	 {
+	    for (Layer tag : getEpisodeLayer().getChildren().values())
+	    {
+	       if (tag.getAlignment() == Constants.ALIGNMENT_NONE
+		   && tag.getChildren().size() == 0)
+	       {
+		  episodeTagLayers.put(tag.getId(), tag);
+	       }
+	    } // next possible word tag layer
+	 } // there is an episode layer
       }
       participantTagLayers.remove("main_participant");
       if (getParticipantLayer() == null)
@@ -852,6 +882,18 @@ public class PlainTextDeserializer
 	 }
       } // next turn child layer
 
+      // look for episode attributes
+      if (schema.getEpisodeLayer() != null)
+      {
+	 for (Layer layer : schema.getEpisodeLayer().getChildren().values())
+	 {
+	    if (layer.getAlignment() == Constants.ALIGNMENT_NONE)
+	    {
+	       metadataLayers.put(layer.getId(), layer);
+	    }
+	 } // next turn child layer
+      }
+
       // read through the text looking for clues about whether:
       //  * it's time aligned
       //  * it contains speaker names
@@ -973,6 +1015,14 @@ public class PlainTextDeserializer
 	    fMedia.delete();
 	 }
       } // there is a WAV file
+      else
+      {
+	 NamedStream video = Utility.FindSingleStream(streams, ".webm", "video/webm");
+	 if (video != null)
+	 {
+	    setMediaDurationSeconds(100.0); // TODO find the actual length of the video
+	 }
+      }
 
       // if there are headers, we need to map them to layers
       MessageFormat fmtMetaDataFormat = new MessageFormat(metaDataFormat);
@@ -1083,6 +1133,11 @@ public class PlainTextDeserializer
       // add layers to the graph
       // we don't just copy the whole schema, because that would imply that all the extra layers
       // contained no annotations, which is not necessarily true
+      if (episodeLayer != null)
+      {
+	 graph.addLayer((Layer)episodeLayer.clone());
+	 graph.getSchema().setEpisodeLayerId(episodeLayer.getId());
+      }
       graph.addLayer((Layer)participantLayer.clone());
       graph.getSchema().setParticipantLayerId(participantLayer.getId());
       graph.addLayer((Layer)turnLayer.clone());
@@ -1125,6 +1180,16 @@ public class PlainTextDeserializer
 	       if (layer.getParentId().equals(schema.getRoot().getId())) // graph tag
 	       {
 		  graph.createTag(graph, layer.getId(), value);
+	       }
+	       else if (getEpisodeLayer() != null
+			&& layer.getParentId().equals(getEpisodeLayer().getId())) // episode tag
+	       {
+		  Annotation episode = graph.my(getEpisodeLayer().getId());
+		  if (episode == null)
+		  {
+		     episode = graph.createTag(graph, getEpisodeLayer().getId(), graph.getLabel());
+		  }
+		  graph.createTag(episode, layer.getId(), value);
 	       }
 	       else // participant tag
 	       {
@@ -1455,6 +1520,14 @@ public class PlainTextDeserializer
       {
 	 a.setStartId(firstAnchor.getId());
 	 a.setEndId(lastAnchor.getId());
+      }
+      if (getEpisodeLayer() != null)
+      {
+	 for (Annotation a : graph.list(getEpisodeLayer().getId()))
+	 {
+	    a.setStartId(firstAnchor.getId());
+	    a.setEndId(lastAnchor.getId());
+	 }
       }
 
       graph.commit();
