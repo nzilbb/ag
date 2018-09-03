@@ -25,6 +25,7 @@ package nzilbb.media;
  * Exception during media processing.
  * @author Robert Fromont robert@fromont.net.nz
  */
+@SuppressWarnings("serial")
 public class MediaException
   extends java.lang.Exception
 {
