@@ -392,7 +392,7 @@ public class EAFDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "ELAN EAF Transcript", "0.3", "text/x-eaf+xml", ".eaf", "20170314.1631", getClass().getResource("icon.png"));
+	 "ELAN EAF Transcript", "0.4", "text/x-eaf+xml", ".eaf", "20170314.1631", getClass().getResource("icon.png"));
    }
    
    /**
@@ -1362,6 +1362,11 @@ public class EAFDeserializer
 		  getWordLayer().getId(), "(.*)\\((.*)\\)", "$1", 
 		  lexicalLayer==null?null:lexicalLayer.getId(), "$2");
 	       lexicalTransformer.transform(graph);
+	       graph.commit();
+
+	       // run word[pronounce] again, in case some were masked by lexical tags:
+	       // word[pronounce](lexical)
+	       pronounceTransformer.transform(graph);
 	       graph.commit();
 
 	       // clump non-orthographic 'words' with real words
