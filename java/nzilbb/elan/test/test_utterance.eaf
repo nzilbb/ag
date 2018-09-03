@@ -260,12 +260,12 @@
     <TIER LANG_REF="eng" LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="participant" TIER_ID="P">
         <ANNOTATION>
             <ALIGNABLE_ANNOTATION ANNOTATION_ID="a3" TIME_SLOT_REF1="ts1" TIME_SLOT_REF2="ts2">
-                <ANNOTATION_VALUE>  . rest of that side of the family[f{mli] so he -- </ANNOTATION_VALUE>
+                <ANNOTATION_VALUE>  . rest of that side of the famly[f{mli](family) so he -- </ANNOTATION_VALUE>
             </ALIGNABLE_ANNOTATION>
         </ANNOTATION>
         <ANNOTATION>
             <ALIGNABLE_ANNOTATION ANNOTATION_ID="a948" TIME_SLOT_REF1="ts3" TIME_SLOT_REF2="ts4">
-                <ANNOTATION_VALUE> generously agreed(agrees) that she could go with him but </ANNOTATION_VALUE>
+                <ANNOTATION_VALUE> generously agreed(agrees)[@grid] that she could go with him but </ANNOTATION_VALUE>
             </ALIGNABLE_ANNOTATION>
         </ANNOTATION>
         <ANNOTATION>

@@ -209,7 +209,7 @@ public class TestEAFDeserializer
 
       Annotation[] words = g.list("word");
       String[] wordLabels = {
-	 ". rest", "of", "that", "side", "of", "the", "family", "so", "he --"
+	 ". rest", "of", "that", "side", "of", "the", "famly", "so", "he --"
       };
       for (int i = 0; i < wordLabels.length; i++)
       {
@@ -247,17 +247,23 @@ public class TestEAFDeserializer
 
       assertEquals(1, noises.length);
 
+      // ensure order of word tags isn't important
+      
       // pronounce
       Annotation[] pronounce = g.list("pronounce");
       assertEquals("f{mli", pronounce[0].getLabel());
-      assertTrue(pronounce[0].tags(words[6]));
-      assertEquals(1, pronounce.length);
+      assertEquals("famly", pronounce[0].my("word").getLabel());
+      assertEquals("@grid", pronounce[1].getLabel());
+      assertEquals("agreed", pronounce[1].my("word").getLabel());
+      assertEquals(2, pronounce.length);
 
       // lexical
       Annotation[] lexical = g.list("lexical");
-      assertEquals("agrees", lexical[0].getLabel());
-      assertEquals("agreed", lexical[0].my("word").getLabel());
-      assertEquals(1, lexical.length);
+      assertEquals("family", lexical[0].getLabel());
+      assertEquals("famly", lexical[0].my("word").getLabel());
+      assertEquals("agrees", lexical[1].getLabel());
+      assertEquals("agreed", lexical[1].my("word").getLabel());
+      assertEquals(2, lexical.length);
    }
 
    @Test public void utterance_word() 
