@@ -22,6 +22,7 @@
 package nzilbb.ag;
 
 import java.util.Vector;
+import nzilbb.util.ISeries;
 
 /**
  * Interface for querying an annotation graph store, a database of graphs.
@@ -413,6 +414,18 @@ public interface IGraphStoreQuery
     * @throws GraphNotFoundException If the graph was not found in the store.
     */
    public Graph getFragment(String graphId, String annotationId, String[] layerId) 
+      throws StoreException, PermissionException, GraphNotFoundException;
+   
+   /**
+    * Gets a series of fragments, given the series' ID, and only the given layers.
+    * @param seriesId The ID of the series.
+    * @param layerId The IDs of the layers to load, or null if only graph data is required.
+    * @return An enumeratable series of fragments.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the graph was not found in the store.
+    */
+   public ISeries<Graph> getFragmentSeries(String seriesId, String[] layerId) 
       throws StoreException, PermissionException, GraphNotFoundException;
    
    /**

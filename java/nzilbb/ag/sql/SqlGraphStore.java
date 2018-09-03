@@ -46,6 +46,7 @@ import nzilbb.ag.util.Validator;
 import nzilbb.ag.util.LayerHierarchyTraversal;
 import nzilbb.ag.util.AnnotationsByAnchor;
 import nzilbb.util.IO;
+import nzilbb.util.ISeries;
 import nzilbb.configure.ParameterSet;
 import nzilbb.configure.Parameter;
 import nzilbb.media.IMediaConverter;
@@ -1681,6 +1682,7 @@ public class SqlGraphStore
 	 graph.setCorpus(rs.getString("corpus_name"));
 	 graph.put("@transcript_type", rs.getString("transcript_type"));
 	 graph.put("@series", rs.getString("series"));
+	 graph.put("@family_id", rs.getInt("family_id"));
 	 graph.setOrdinal(rs.getInt("family_sequence"));
 	 graph.put("@offset_in_series", new Double(rs.getInt("family_offset")));
 	 if (rs.getString("divergent") != null) graph.put("@divergent", Boolean.TRUE);
@@ -2701,7 +2703,7 @@ public class SqlGraphStore
    {
       try
       {
-	 Graph graph = getGraph(graphId, null); // load just basic information
+	 final Graph graph = getGraph(graphId, null); // load just basic information
 	 final int ag_id = (Integer)graph.get("@ag_id");
 	 Schema schema = getSchema();
 
@@ -3017,7 +3019,17 @@ public class SqlGraphStore
 				 rs.close();
 			      } // next parent
 			   } // layer_id >= 0
-			   // TODO 'system' layers
+			   else if (layer.getId().equals("episode"))
+			   { // episode
+			      Object[] annotationIdParts = {
+				 layer.get("@layer_id"), graph.get("@family_id")};
+			      Annotation episode = new Annotation(
+				 fmtMetaAnnotationId.format(annotationIdParts), 
+				 ""+graph.get("@series"), layer.getId());
+			      episode.setParentId(fragment.getId());
+			      fragment.addAnnotation(episode);		     
+			   }
+			   // TODO 'system' layers...
 			} // temporal layer
 			else if (layer.getId().equals("transcript_type"))
 			{ // transcript type
@@ -3111,7 +3123,31 @@ public class SqlGraphStore
 	 throw new StoreException(exception);
       }
    }   
-
+ 
+   /**
+    * Gets a series of fragments, given the series' ID, and only the given layers.
+    * <p>This implementation expects <var>seriesId</var> to be a current <tt>result.search_id</tt>.
+    * <p>The fragments are created lazily as required, so this method should return quickly.
+    * @param seriesId The ID of the series.
+    * @param layerId The IDs of the layers to load, or null if only graph data is required.
+    * @return An enumeratable series of fragments.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the series identified by <var>seriesId</var> was not found in the store.
+    */
+   public ISeries<Graph> getFragmentSeries(String seriesId, String[] layerId) 
+      throws StoreException, PermissionException, GraphNotFoundException
+   {
+      try
+      {
+	 return new ResultSeries(Long.parseLong(seriesId), this, layerId);
+      }
+      catch(Exception exception)
+      {
+	 throw new StoreException(exception);
+      }
+   }
+  
    /**
     * Saves the given graph. The graph can be partial e.g. include only some of the layers that the stored version of the graph contains, or be a fragment.
     * <p>The graph deltas are assumed to be set correctly, so if this is a new graph, then {@link Graph#getChange()} should return Change.Operation.Create, if it's an update, Change.Operation.Update, and to delete, Change.Operation.Delete.  Correspondingly, all {@link Anchor}s and {@link Annotation}s should have their changes set also.  If {@link Graph#getChanges()} returns no changes, no action will be taken, and this method returns false.
