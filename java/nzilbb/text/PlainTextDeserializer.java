@@ -1018,6 +1018,8 @@ public class PlainTextDeserializer
       else
       {
 	 NamedStream video = Utility.FindSingleStream(streams, ".webm", "video/webm");
+	 if (video == null) video = Utility.FindSingleStream(streams, ".mp4", "video/mp4");
+	 if (video == null) video = Utility.FindSingleStream(streams, ".mov", "video/quicktime");
 	 if (video != null)
 	 {
 	    setMediaDurationSeconds(100.0); // TODO find the actual length of the video
