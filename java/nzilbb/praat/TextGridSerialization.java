@@ -1,5 +1,5 @@
 //
-// Copyright 2004-2017 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2004-2018 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -258,7 +258,7 @@ public class TextGridSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Praat TextGrid", "1.831", "text/praat-textgrid", ".textgrid", "20170516.1519", getClass().getResource("icon.png"));
+	 "Praat TextGrid", "1.84", "text/praat-textgrid", ".textgrid", "20170516.1519", getClass().getResource("icon.png"));
    }
    
    /**
@@ -1123,6 +1123,11 @@ public class TextGridSerialization
 		  getWordLayer().getId(), "(.*)\\((.*)\\)", "$1", 
 		  lexicalLayer==null?null:lexicalLayer.getId(), "$2");
 	       lexicalTransformer.transform(graph);
+	       graph.commit();
+
+	       // run word[pronounce] again, in case some were masked by lexical tags:
+	       // word[pronounce](lexical)
+	       pronounceTransformer.transform(graph);
 	       graph.commit();
 
 	       // clump non-orthographic 'words' with real words

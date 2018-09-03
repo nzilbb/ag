@@ -257,13 +257,17 @@ public class TestTextGridSerialization
       Annotation[] pronounce = g.list("pronounce");
       assertEquals("sIr@l", pronounce[0].getLabel());
       assertTrue(pronounce[0].tags(words[2]));
-      assertEquals(1, pronounce.length);
+      assertEquals("o", pronounce[1].getLabel());
+      assertEquals("o~", pronounce[1].my("word").getLabel());
+      assertEquals(2, pronounce.length);
 
       // lexical
       Annotation[] lexical = g.list("lexical");
-      assertEquals("often", lexical[0].getLabel());
-      assertEquals("o~", lexical[0].my("word").getLabel());
-      assertEquals(1, lexical.length);
+      assertEquals("Cyril", lexical[0].getLabel());
+      assertTrue(lexical[0].tags(words[2]));
+      assertEquals("often", lexical[1].getLabel());
+      assertEquals("o~", lexical[1].my("word").getLabel());
+      assertEquals(2, lexical.length);
    }
 
    @Test public void utterance_utf8() 

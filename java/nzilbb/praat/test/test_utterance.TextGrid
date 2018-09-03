@@ -15,7 +15,7 @@ item []:
         intervals [1]:
             xmin = 0 
             xmax = 5.75 
-            text = "and ah . [throatclear] Cyril[sIr@l] would arrive at the door" 
+            text = "and ah . [throatclear] Cyril[sIr@l](Cyril) would arrive at the door" 
         intervals [2]:
             xmin = 5.75 
             xmax = 6.907 
@@ -375,7 +375,7 @@ item []:
         intervals [91]:
             xmin = 206.415 
             xmax = 207.79 
-            text = "listen to it because o~(often)" 
+            text = "listen to it because o~(often)[o]" 
         intervals [92]:
             xmin = 207.79 
             xmax = 209.977 
