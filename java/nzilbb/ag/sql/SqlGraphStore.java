@@ -1629,7 +1629,7 @@ public class SqlGraphStore
 	    "SELECT transcript.*, COALESCE(transcript_family.name,'') AS series,"
 	    +" COALESCE(transcript_type.transcript_type,'') AS transcript_type, divergent.label AS divergent"
 	    +" FROM transcript"
-	    +" LEFT OUTER JOIN transcript_family ON transcript.family_id = transcript.family_id"
+	    +" LEFT OUTER JOIN transcript_family ON transcript.family_id = transcript_family.family_id"
 	    +" LEFT OUTER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
 	    +" LEFT OUTER JOIN annotation_transcript divergent ON transcript.ag_id = divergent.ag_id AND divergent.layer = 'divergent'"
 	    +" WHERE transcript.transcript_id = ?"+userWhereClause(true));
@@ -1643,7 +1643,7 @@ public class SqlGraphStore
 	       "SELECT transcript.*, COALESCE(transcript_family.name,'') AS series,"
 	       +" COALESCE(transcript_type.transcript_type,'') AS transcript_type, divergent.label AS divergent"
 	       +" FROM transcript"
-	       +" LEFT OUTER JOIN transcript_family ON transcript.family_id = transcript.family_id"
+	       +" LEFT OUTER JOIN transcript_family ON transcript.family_id = transcript_family.family_id"
 	       +" LEFT OUTER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
 	       +" LEFT OUTER JOIN annotation_transcript divergent ON transcript.ag_id = divergent.ag_id AND divergent.layer = 'divergent'"
 	       +" WHERE transcript.transcript_id REGEXP ?"+userWhereClause(true));
@@ -1660,7 +1660,7 @@ public class SqlGraphStore
 		     "SELECT transcript.*, COALESCE(transcript_family.name,'') AS series,"
 		     +" COALESCE(transcript_type.transcript_type,'') AS transcript_type, divergent.label AS divergent"
 		     +" FROM transcript"
-		     +" LEFT OUTER JOIN transcript_family ON transcript.family_id = transcript.family_id"
+		     +" LEFT OUTER JOIN transcript_family ON transcript.family_id = transcript_family.family_id"
 		     +" LEFT OUTER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
 		     +" LEFT OUTER JOIN annotation_transcript divergent ON transcript.ag_id = divergent.ag_id AND divergent.layer = 'divergent'"
 		     +" WHERE transcript.ag_id = ?"+userWhereClause(true));
