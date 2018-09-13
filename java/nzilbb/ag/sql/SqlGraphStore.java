@@ -558,24 +558,27 @@ public class SqlGraphStore
 	       sql.close();
 	       sqlParentId.close();
 
-	       // possible values
-	       sql = getConnection().prepareStatement(
-		  "SELECT value, description FROM attribute_option"
-		  +" WHERE class_id = 'transcript' AND attribute = ?"
-		  +" ORDER BY description");
-	       sql.setString(1, layer.get("@attribute").toString());
-	       rs = sql.executeQuery();
-	       if (rs.next())
+	       if (layer.get("@type").equals("select"))
 	       {
-		  layer.setValidLabels(new LinkedHashMap<String,String>());
-		  do
+		  // possible values
+		  sql = getConnection().prepareStatement(
+		     "SELECT value, description FROM attribute_option"
+		  +" WHERE class_id = 'transcript' AND attribute = ?"
+		     +" ORDER BY description");
+		  sql.setString(1, layer.get("@attribute").toString());
+		  rs = sql.executeQuery();
+		  if (rs.next())
 		  {
-		     layer.getValidLabels().put(rs.getString("value"), rs.getString("description"));
-		  }	 
-		  while (rs.next());
+		     layer.setValidLabels(new LinkedHashMap<String,String>());
+		     do
+		     {
+			layer.getValidLabels().put(rs.getString("value"), rs.getString("description"));
+		     }	 
+		     while (rs.next());
+		  }
+		  rs.close();
+		  sql.close();
 	       }
-	       rs.close();
-	       sql.close();
 	       
 	       return layer;
 	    }
@@ -640,24 +643,27 @@ public class SqlGraphStore
 		  sql.close();
 		  sqlParentId.close();
 
-		  // possible values
-		  sql = getConnection().prepareStatement(
-		     "SELECT value, description FROM attribute_option"
-		     +" WHERE class_id = 'speaker' AND attribute = ?"
-		     +" ORDER BY description");
-		  sql.setString(1, layer.get("@attribute").toString());
-		  rs = sql.executeQuery();
-		  if (rs.next())
+		  if (layer.get("@type").equals("select"))
 		  {
-		     layer.setValidLabels(new LinkedHashMap<String,String>());
-		     do
+		     // possible values
+		     sql = getConnection().prepareStatement(
+			"SELECT value, description FROM attribute_option"
+			+" WHERE class_id = 'speaker' AND attribute = ?"
+			+" ORDER BY description");
+		     sql.setString(1, layer.get("@attribute").toString());
+		     rs = sql.executeQuery();
+		     if (rs.next())
 		     {
-			layer.getValidLabels().put(rs.getString("value"), rs.getString("description"));
-		     }	 
-		     while (rs.next());
+			layer.setValidLabels(new LinkedHashMap<String,String>());
+			do
+			{
+			   layer.getValidLabels().put(rs.getString("value"), rs.getString("description"));
+			}	 
+			while (rs.next());
+		     }
+		     rs.close();
+		     sql.close();
 		  }
-		  rs.close();
-		  sql.close();
 		  
 		  return layer;
 	       }
