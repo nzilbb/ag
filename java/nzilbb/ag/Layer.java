@@ -45,7 +45,7 @@ import nzilbb.ag.util.AnnotationComparatorByOrdinal;
  * @author Robert Fromont robert@fromont.net.nz
  */
 @SuppressWarnings("serial")
-public class Layer // TODO add type attribute
+public class Layer
    extends TrackedMap
 {
    // NB if this is updated, please also update the @return javadoc attribute on getClonedAttributes()
