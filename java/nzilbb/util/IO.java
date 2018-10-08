@@ -259,5 +259,22 @@ public class IO
    } // end of JarFileOfClass()
 
 
+   /**
+    * Recursively deletes a directory.
+    * @param dir The directory to delete.
+    * @return true if the the directory was successfully deleted, false otherwise.
+    */
+   public static boolean RecursivelyDelete(File dir)
+   {
+      if (dir.isDirectory())
+      {
+	 for (File file : dir.listFiles())
+	 {
+	    if (!RecursivelyDelete(file)) return false;
+	 }
+      }
+      return dir.delete();
+   } // end of RecursivelyDelete()
+
    
 } // end of class IO
