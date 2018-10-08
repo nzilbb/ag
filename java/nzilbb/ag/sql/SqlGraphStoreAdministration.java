@@ -498,7 +498,7 @@ public class SqlGraphStoreAdministration
    public SerializationDescriptor[] getSerializerDescriptors()
        throws StoreException, PermissionException
    {
-      SerializationDescriptor[] descriptors = new SerializationDescriptor[deserializersByMimeType.size()];
+      SerializationDescriptor[] descriptors = new SerializationDescriptor[serializersByMimeType.size()];
       int i = 0;
       for (ISerializer serializer : serializersByMimeType.values())
       {
