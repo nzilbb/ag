@@ -522,12 +522,14 @@ public class KaldiSerializer
 	 {
 	    if (getCancelling()) break;
 	    Graph graph = graphs.nextElement();
-	    textWriter.print(graph.getId());
 	    String transcriptName = graph.getId().replaceAll("__[0-9.]+-[0-9.]+$","");
 	    String wavName = transcriptName.replaceAll("\\.[^.]+$",".wav");
 	    boolean firstWord = true;
 	    for (Annotation utterance : graph.list(utt))
 	    {
+	       String speakerId = utterance.my(speaker).getId();
+	       String utteranceId = speakerId + "-" + graph.getId();
+	       textWriter.print(utteranceId);
 	       for (Annotation token : utterance.list(orthography))
 	       {
 		  textWriter.print(" ");
@@ -549,12 +551,12 @@ public class KaldiSerializer
 	       corpusWriter.println();
 	
 	       segmentsWriter.println(
-		  graph.getId()
+		  utteranceId
 		  + " " + transcriptName
 		  + " " + fmt.format(graph.getStart().getOffset())
 		  + " " + fmt.format(graph.getEnd().getOffset()));
 	       
-	       utt2spkWriter.println(graph.getId() + " " + utterance.my(speaker).getId());
+	       utt2spkWriter.println(utteranceId + " " + utterance.my(speaker).getId());
 
 	       if (!wavs.contains(transcriptName))
 	       {
