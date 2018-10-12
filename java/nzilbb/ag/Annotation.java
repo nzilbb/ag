@@ -353,7 +353,7 @@ public class Annotation
 
 
    /**
-    * Traverses the given list of annototations and ensures that the "ordinal" property corresponds to the index in the list.
+    * Traverses the given list of annotations and ensures that the "ordinal" property corresponds to the index in the list.
     * @param peers
     * @return The resulting changes.
     */
@@ -362,18 +362,32 @@ public class Annotation
       Vector<Change> changes = new Vector<Change>();
       if (peers.size() > 0) 
       {
-	 int o = ordinalMinimum(peers.iterator().next().getLayerId());
-	 for (Annotation peer : peers)
-	 {
-	    if (peer.getChange() == Change.Operation.Destroy) continue;
-	    int originalOrdinal = peer.ordinal;
-	    if (originalOrdinal == 0 || originalOrdinal != o)
+	 String layerId = peers.iterator().next().getLayerId();
+	 // ensure accidental recursion can't occur
+	 String recursionFlag = "@correctOrdinals-"+layerId;
+	 if (!containsKey(recursionFlag))
+	 { // not already correcting ordinals for this layer
+	    try
 	    {
-	       changes.add(peer.registerChange("ordinal", o));
-	       peer.ordinal = o; 
+	       put(recursionFlag, Boolean.TRUE);
+	       int o = ordinalMinimum(layerId);
+	       for (Annotation peer : peers)
+	       {
+		  if (peer.getChange() == Change.Operation.Destroy) continue;
+		  int originalOrdinal = peer.ordinal;
+		  if (originalOrdinal == 0 || originalOrdinal != o)
+		  {
+		     changes.add(peer.registerChange("ordinal", o));
+		     peer.ordinal = o; 
+		  }
+		  o++;
+	       } // next peer
 	    }
-	    o++;
-	 }
+	    finally
+	    {
+	       remove(recursionFlag);
+	    }
+	 } // not already correcting ordinals for this layer
       }
       return changes;
    } // end of correctOrdinals()
