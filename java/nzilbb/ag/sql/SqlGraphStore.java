@@ -1328,6 +1328,17 @@ public class SqlGraphStore
 		  +" INNER JOIN speaker ON transcript_speaker.speaker_number = speaker.speaker_number"
 		  +" WHERE transcript_speaker.ag_id = transcript.ag_id)";
 	    }
+	    else if (operand.startsWith("labels('transcript_"))
+	    { // transcript attribute values
+	       String layerId = operand.replaceFirst("labels\\('","").replaceFirst("'\\)$","");
+	       Layer operandLayer = getLayer(layerId);
+	       if (operandLayer == null) throw new StoreException("Invalid layer: " + layerId);
+	       String class_id = (String)operandLayer.get("@class_id");
+	       if (!"transcript".equals(class_id)) throw new StoreException("Cannot query by temporal annotation layer: " + layerId);
+	       sqlOperand = "(SELECT label FROM annotation_transcript"
+		  +" WHERE annotation_transcript.ag_id = transcript.ag_id AND layer = '"+operandLayer.get("@attribute").toString().replace("'","\\'")+"'"
+		  +")";
+	    }
 	    else if (operand.startsWith("my('") && operand.endsWith("').label"))
 	    { // my
 	       String layerId = operand.replaceFirst("my\\('","").replaceFirst("'\\)\\.label$","");
@@ -1542,8 +1553,8 @@ public class SqlGraphStore
 	 + userWhereClauseGraph(conditions.length() > 0)
 	 + orderClause.toString()
 	 + " " + limit;
-      // System.out.println("QL: " + expression);
-      // System.out.println("SQL: " + sSql);
+      System.out.println("QL: " + expression);
+      System.out.println("SQL: " + sSql);
       PreparedStatement sql = getConnection().prepareStatement(sSql);
       //System.err.println(sSql);
       return sql;
