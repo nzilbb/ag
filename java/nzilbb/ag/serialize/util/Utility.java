@@ -95,13 +95,13 @@ public class Utility
       LinkedHashMap<String,Layer> possibleLayersSimplifiedIds = new LinkedHashMap<String,Layer>();
       for (String id : possibleLayers.keySet())
       {
-	 possibleLayersSimplifiedIds.put(id.toLowerCase().replaceAll("[ _]",""), possibleLayers.get(id));
+	 possibleLayersSimplifiedIds.put(id.toLowerCase().replaceAll("[^a-zA-Z0-9]",""), possibleLayers.get(id));
       }
       for (String id : possibleIds)
       {
-	 if (possibleLayersSimplifiedIds.containsKey(id.toLowerCase().replaceAll("[ _]","")))
+	 if (possibleLayersSimplifiedIds.containsKey(id.toLowerCase().replaceAll("[^a-zA-Z0-9]","")))
 	 {
-	    return possibleLayersSimplifiedIds.get(id.toLowerCase().replaceAll("[ _]",""));
+	    return possibleLayersSimplifiedIds.get(id.toLowerCase().replaceAll("[^a-zA-Z0-9]",""));
 	 }
       }
       return null;
