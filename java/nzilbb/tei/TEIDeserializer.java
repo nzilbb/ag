@@ -63,6 +63,20 @@ import nzilbb.configure.ParameterSet;
  *   &lt;note type="parent_id"&gt;t1_dd5f8en&lt;/note&gt;
  * &lt;/notesStmt&gt;
  * </pre>
+ * <p>Participant/speaker attributes can be included in the &lt;person&gt; tag, as per the TEI
+ *  specification.
+ * <p>Arbitrary participant/speaker attributes (i.e. custom attributes or others not foreseen by
+ *  the TEI specification) can be processed by including one &lt;note&gt; tag per attribute within
+ *  each participant's &lt;person&gt; tag, and using the
+ * <tt>type</tt> attribute as the attribute key and the tag content as the value - e.g.<br>
+ * <pre>&lt;person&gt;
+ *   &lt;idno&gt;ABCD&lt;/idno&gt;
+ *   &lt;age&gt;46&lt;/age&gt;
+ *   &lt;education&gt;Secondary&lt;/education&gt;
+ *   &lt;note type="first language"&gt;English&lt;/note&gt;
+ *   &lt;note type="origin"&gt;Liverpool&lt;/note&gt;
+ * &lt;/person&gt;
+ * </pre>
  * <p>Special support for regularization is used; for a construction like this: <br>
  * <code>&lt;choice&gt;&lt;orig&gt;color&lt;/orig&gt;&lt;reg&gt;colour&lt;/reg&gt;&lt;/choice&gt;</code> <br>
  * The contents of &lt;reg&gt;...&lt;/reg&gt; is used on the words layer, and it is annotated
