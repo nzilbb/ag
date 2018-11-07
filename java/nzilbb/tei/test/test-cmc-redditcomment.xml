@@ -21,7 +21,14 @@
   </notesStmt>
  </fileDesc>
  <profileDesc>
-  <particDesc><listPerson><person xml:id="Genkaichan"/></listPerson></particDesc>
+   <particDesc>
+     <listPerson>
+       <person xml:id="Genkaichan">
+	 <note type="language">english</note>
+       </person>
+     </listPerson>
+     
+   </particDesc>
  </profileDesc>
 </teiHeader>
 <text>

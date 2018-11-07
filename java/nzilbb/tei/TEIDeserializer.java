@@ -30,6 +30,8 @@ import java.util.HashSet;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.io.IOException;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.net.URL;
 import org.w3c.dom.*;
 import org.xml.sax.*;
@@ -38,8 +40,12 @@ import javax.xml.xpath.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
 import javax.xml.transform.stream.*;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioFormat;
 import nzilbb.ag.*;
 import nzilbb.ag.util.OrthographyClumper;
+import nzilbb.ag.util.DefaultOffsetGenerator;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
@@ -426,6 +432,40 @@ public class TEIDeserializer
       parameters = newParameters;
    }
 
+   /**
+    * Duration of the media file in seconds, if known.
+    * @see #getMediaDurationSeconds()
+    * @see #setMediaDurationSeconds(Double)
+    */
+   protected Double mediaDurationSeconds;
+   /**
+    * Getter for {@link #mediaDurationSeconds}: Duration of the media file in seconds, if known.
+    * @return Duration of the media file in seconds, if known.
+    */
+   public Double getMediaDurationSeconds() { return mediaDurationSeconds; }
+   /**
+    * Setter for {@link #mediaDurationSeconds}: Duration of the media file in seconds, if known.
+    * @param newMediaDurationSeconds Duration of the media file in seconds, if known.
+    */
+   public void setMediaDurationSeconds(Double newMediaDurationSeconds) { mediaDurationSeconds = newMediaDurationSeconds; }
+
+   /**
+    * Error encountered when trying to get length of media, if any.
+    * @see #getMediaError()
+    * @see #setMediaError(String)
+    */
+   protected String mediaError;
+   /**
+    * Getter for {@link #mediaError}: Error encountered when trying to get length of media, if any.
+    * @return Error encountered when trying to get length of media, if any.
+    */
+   public String getMediaError() { return mediaError; }
+   /**
+    * Setter for {@link #mediaError}: Error encountered when trying to get length of media, if any.
+    * @param newMediaError Error encountered when trying to get length of media, if any.
+    */
+   public void setMediaError(String newMediaError) { mediaError = newMediaError; }
+
    // Methods:
    
    /**
@@ -444,7 +484,7 @@ public class TEIDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "TEI Document", "0.03", "application/tei+xml", ".xml", "20170228.1353", getClass().getResource("icon.png"));
+	 "TEI Document", "0.04", "application/tei+xml", ".xml", "20170228.1353", getClass().getResource("icon.png"));
    }
 
    /**
@@ -708,7 +748,65 @@ public class TEIDeserializer
       NamedStream tei = Utility.FindSingleStream(streams, ".xml", "application/tei+xml");
       if (tei == null) throw new SerializationException("No TEI document stream found");
       setName(tei.getName());
-      
+
+      // media duration
+      NamedStream wav = Utility.FindSingleStream(streams, ".wav", "audio/wav");
+      if (wav != null)
+      {
+	 // save the media file
+	 File fMedia = File.createTempFile("PlainTextDeserializer-", wav.getName());
+	 fMedia.deleteOnExit();
+	 try
+	 {
+	    // we cannot just use the stream directly, because AudioSystem.getAudioInputStream()
+	    // requires a mark/reset-able stream, which we can't guarantee that we have
+	    // so we save the stream to a file, and give AudioSystem.getAudioInputStream() that file
+	    FileOutputStream outStream = new FileOutputStream(fMedia);
+	    byte[] buffer = new byte[1024];
+	    int bytesRead = wav.getStream().read(buffer);
+	    while(bytesRead >= 0)
+	    {
+	       outStream.write(buffer, 0, bytesRead);
+	       bytesRead = wav.getStream().read(buffer);
+	    } // next chunk of data
+	    wav.getStream().close();
+	    outStream.close();
+
+	    // determine the duration of the media file
+	    AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(fMedia);
+	    AudioFormat format = audioInputStream.getFormat();
+	    long frames = audioInputStream.getFrameLength();
+	    if (frames > 0)
+	    {
+	       double durationInSeconds = ((double)frames) / format.getFrameRate(); 
+	       setMediaDurationSeconds(durationInSeconds);
+	    }
+	    else
+	    {
+	       setMediaError("Ignoring media: " + wav.getName() + " is valid but contains no frames.");
+	    }
+	 }
+	 catch(Exception exception)
+	 {
+	    setMediaError("Ignoring media: " + wav.getName() + " ERROR: " + exception);
+	 }	 
+	 finally
+	 {
+	    fMedia.delete();
+	 }
+      } // there is a WAV file
+      else
+      {
+	 NamedStream video = Utility.FindSingleStream(streams, ".webm", "video/webm");
+	 if (video == null) video = Utility.FindSingleStream(streams, ".mp4", "video/mp4");
+	 if (video == null) video = Utility.FindSingleStream(streams, ".mov", "video/quicktime");
+	 if (video == null) video = Utility.FindSingleStream(streams, ".mp3", "audio/mp3");
+	 if (video != null)
+	 {
+	    setMediaDurationSeconds(100.0); // TODO find the actual length of the video
+	 }
+      }
+
       // Document factory
       DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
       try
@@ -784,7 +882,7 @@ public class TEIDeserializer
 	    }
 	 }
 
-	 items = (NodeList) xpath.evaluate("//note/@type", header, XPathConstants.NODESET);
+	 items = (NodeList) xpath.evaluate("//notesStmt/note/@type", header, XPathConstants.NODESET);
 	 if (items != null && items.getLength() > 0)
 	 {
 	    // typed <note>s can be mapped to graph tags
@@ -962,10 +1060,16 @@ public class TEIDeserializer
 	 { // person may be a child of listPerson or directly of particDesc
 	    particDesc = (Node) xpath.evaluate("//particDesc", header, XPathConstants.NODE);
 	 }
-	 for (String sType : distinctPersonNodes(particDesc))
+	 for (String sType : distinctPersonNodes(particDesc)) // TODO treat person/note separately
 	 {
 	    Vector<String> possibleMatches = new Vector<String>();
 	    possibleMatches.add(sType);
+	    if (sType.startsWith("note_type_"))
+	    { // person/note
+	       possibleMatches.add(sType.replaceAll("^note_type",""));
+	       possibleMatches.add("participant"+sType.replaceAll("^note_type",""));
+	       possibleMatches.add("speaker"+sType.replaceAll("^note_type",""));
+	    }
 	    layerToPossibilities.put(
 	       new Parameter("person_" + sType, Layer.class, "Person: " + sType), possibleMatches);
 	    layerToCandidates.put("person_" + sType, participantTagLayers);
@@ -1053,9 +1157,15 @@ public class TEIDeserializer
 		      && !sType.equals("birth")
 		      && !sType.equals("persName")
 		      && !sType.equals("#text") 
-		      && !sType.equals("#comment"))
+		      && !sType.equals("#comment")
+		      && !sType.equals("note"))
 		  {
 		     types.add(sType);
+		  }
+		  else if (sType.equals("note"))
+		  {
+		     Attr type = (Attr)child.getAttributes().getNamedItem("type");
+		     types.add("note_type_"+type.getValue());
 		  }
 	       } // next child
 	    } // next person
@@ -1094,10 +1204,22 @@ public class TEIDeserializer
 
       Graph graph = new Graph();
       graph.setId(getName());
-      graph.setOffsetUnits(Constants.UNIT_CHARACTERS); // TODO look for timeline
       
       // creat the 0 anchor to prevent graph tagging from creating one with no confidence
       Anchor startAnchor = graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL);
+      Anchor endAnchor = null;
+      boolean characterOffsets = true;
+
+      if (getMediaDurationSeconds() != null)
+      {
+	 graph.setOffsetUnits(Constants.UNIT_SECONDS);
+	 endAnchor = graph.getOrCreateAnchorAt(getMediaDurationSeconds(), Constants.CONFIDENCE_MANUAL);
+	 characterOffsets = false;
+      }
+      else
+      {
+	 graph.setOffsetUnits(Constants.UNIT_CHARACTERS); // TODO look for timeline
+      }
 
       // add layers to the graph
       // we don't just copy the whole schema, because that would imply that all the extra layers
@@ -1300,13 +1422,28 @@ public class TEIDeserializer
 		     if (!name.equals("idno")
 			 && !name.equals("birth")
 			 && !name.equals("age")
-			 && !name.equals("persName"))
+			 && !name.equals("persName")
+			 && !name.equals("note"))
 		     {
 			String value = child.getChildNodes().item(0).getNodeValue();
 			Layer layer = (Layer)parameters.get("person_" + name).getValue();
 			if (layer != null)
 			{
 			   graph.createTag(participant, layer.getId(), value);
+			}
+		     }
+		     else if (name.equals("note"))
+		     {
+			Attr noteType = (Attr)child.getAttributes().getNamedItem("type");
+			String keyName = "person_note_type_" + noteType.getValue();
+			if (noteType != null && parameters.containsKey(keyName))
+			{		     
+			   Layer layer = (Layer)parameters.get(keyName).getValue();
+			   if (layer != null)
+			   {
+			      String value = child.getTextContent();
+			      graph.createTag(participant, layer.getId(), value);
+			   }
 			}
 		     }
 		  } // element child
@@ -1341,8 +1478,7 @@ public class TEIDeserializer
 	    null, participant != null?participant.getLabel():"", getTurnLayer().getId());
 	 graph.addAnnotation(turn);
 	 if (participant != null) turn.setParent(participant);
-	 turn.setStart(
-	    graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL));
+	 turn.setStart(startAnchor);
 	 Annotation line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
 	 line.setParentId(turn.getId());
 	 line.setStart(turn.getStart());
@@ -1356,6 +1492,7 @@ public class TEIDeserializer
 	 Annotation anLastWord = null;
 	 Anchor aChoiceStarted = null;
 	 Annotation anCurrentOrig = null;
+	 Anchor lastAnchor = startAnchor;
 	 for (Node n : vNodes)
 	 {
 	    boolean finishHere = false;
@@ -1368,11 +1505,21 @@ public class TEIDeserializer
 		  Annotation anWord = new Annotation(null, words.nextToken(), wordLayerId, turn.getId());
 		  anWord.setOrdinal(w++);
 		  //TODO anWord.setLabelStatus(Labbcat.LABEL_STATUS_USER);
-		  anWord.setStartId(graph.getOrCreateAnchorAt(
-				       (double)iLastPosition, Constants.CONFIDENCE_MANUAL).getId());
-		  iLastPosition += anWord.getLabel().length() + 1; // include inter-word space
-		  anWord.setEndId(graph.getOrCreateAnchorAt(
-				     (double)iLastPosition, Constants.CONFIDENCE_MANUAL).getId());
+		  if (characterOffsets)
+		  {
+		     anWord.setStartId(graph.getOrCreateAnchorAt(
+					  (double)iLastPosition, Constants.CONFIDENCE_MANUAL).getId());
+		     iLastPosition += anWord.getLabel().length() + 1; // include inter-word space
+		     anWord.setEndId(graph.getOrCreateAnchorAt(
+					(double)iLastPosition, Constants.CONFIDENCE_MANUAL).getId());
+		  }
+		  else
+		  {
+		     anWord.setStartId(lastAnchor.getId());
+		     lastAnchor = new Anchor();
+		     graph.addAnchor(lastAnchor);
+		     anWord.setEndId(lastAnchor.getId());
+		  }
 		  
 		  graph.addAnnotation(anWord);
 		  
@@ -1386,8 +1533,17 @@ public class TEIDeserializer
 		     || n.getNodeName().equals("lb"))
 	    {
 	       // end the last line
-	       line.setEnd(graph.getOrCreateAnchorAt(
-			      (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+	       if (characterOffsets)
+	       {
+		  line.setEnd(graph.getOrCreateAnchorAt(
+				 (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+	       }
+	       else
+	       {
+		  lastAnchor = new Anchor();
+		  graph.addAnchor(lastAnchor);
+		  line.setEnd(lastAnchor);
+	       }
 	       if (!line.getStartId().equals(line.getEndId()))
 	       { // if we have <div><p>... don't create an instantaneous, empty line
 		  graph.addAnnotation(line);
@@ -1397,8 +1553,15 @@ public class TEIDeserializer
 	       line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
 	       line.setParentId(turn.getId());
 	       //graph.addAnnotation(line);
-	       line.setStart(graph.getOrCreateAnchorAt(
-				(double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+	       if (characterOffsets)
+	       {
+		  line.setStart(graph.getOrCreateAnchorAt(
+				   (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+	       }
+	       else
+	       {
+		  line.setStart(lastAnchor);
+	       }
 	    } // line
 	    else if (n.getNodeName().equals("u")
 		     || n.getNodeName().equals("posting"))
@@ -1422,8 +1585,17 @@ public class TEIDeserializer
 	       else
 	       { // new turn
 		  // "attributable" spans, utterance, etc.
-		  turn.setEnd(graph.getOrCreateAnchorAt(
-				 (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+		  if (characterOffsets)
+		  {
+		     turn.setEnd(graph.getOrCreateAnchorAt(
+				    (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+		  }
+		  else
+		  {
+		     lastAnchor = new Anchor();
+		     graph.addAnchor(lastAnchor);
+		     turn.setEnd(lastAnchor);
+		  }
 		  if (!turn.getStartId().equals(turn.getEndId()))
 		  { // don't create an instantaneous, empty turn
 		     graph.addAnnotation(turn);
@@ -1447,41 +1619,76 @@ public class TEIDeserializer
 		     turn = new Annotation(null, participant.getLabel(), getTurnLayer().getId());
 		     turn.setParentId(participant.getId());
 		     graph.addAnnotation(turn);
-		     turn.setStart(graph.getOrCreateAnchorAt(
-				      (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+		     if (characterOffsets)
+		     {
+			turn.setStart(graph.getOrCreateAnchorAt(
+					 (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+		     }
+		     else
+		     {
+			turn.setStart(lastAnchor);
+		     }
 		  }
 		  else
 		  {
 		     turn.setParentId(participant.getId());
 		  }
 		  // start a new line too
-		  line.setEnd(graph.getOrCreateAnchorAt(
-				 (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+		  if (characterOffsets)
+		  {
+		     line.setEnd(graph.getOrCreateAnchorAt(
+				    (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+		  }
+		  else
+		  {
+		     line.setEnd(lastAnchor);
+		  }
 		  if (!line.getStartId().equals(line.getEndId()))
 		  { // if we have <div><p>... don't create an instantaneous, empty line
 		     graph.addAnnotation(line);
 		  }
 		  line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
 		  line.setParentId(turn.getId());
-		  line.setStart(graph.getOrCreateAnchorAt(
-				   (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+		  if (characterOffsets)
+		  {
+		     line.setStart(graph.getOrCreateAnchorAt(
+				      (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+		  }
+		  else
+		  {
+		     line.setStart(lastAnchor);
+		  }
 	       }
 	    } // turn
 	    else if (n.getNodeName().equals("choice"))
 	    {
 	       if (aChoiceStarted == null)
 	       { // opening a new choice tag
-		  aChoiceStarted = graph.getOrCreateAnchorAt(
-		     (double)iLastPosition, Constants.CONFIDENCE_MANUAL);
+		  if (characterOffsets)
+		  {
+		     aChoiceStarted = graph.getOrCreateAnchorAt(
+			(double)iLastPosition, Constants.CONFIDENCE_MANUAL);
+		  }
+		  else
+		  {
+		     aChoiceStarted = lastAnchor;
+		  }
 		  anCurrentOrig = null;
 	       }
 	       else
 	       { // closing an opened choice tag
 		  if (anCurrentOrig != null)
 		  {
-		     anCurrentOrig.setEnd(
-			graph.getOrCreateAnchorAt(
-			   (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+		     if (characterOffsets)
+		     {
+			anCurrentOrig.setEnd(
+			   graph.getOrCreateAnchorAt(
+			      (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+		     }
+		     else
+		     {
+			anCurrentOrig.setEnd(lastAnchor);
+		     }
 		     anCurrentOrig = null;
 		  }
 		  aChoiceStarted = null;
@@ -1508,9 +1715,10 @@ public class TEIDeserializer
 			label = n.getChildNodes().item(0).getNodeValue();
 		     }
 		     Annotation anEntity = new Annotation(null, label, layer.getId());
-		     anEntity.setStart(
-			graph.getOrCreateAnchorAt(
-			   (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+		     anEntity.setStart(characterOffsets?
+				       graph.getOrCreateAnchorAt(
+					  (double)iLastPosition, Constants.CONFIDENCE_MANUAL)
+				       :lastAnchor);
 		     if (n.getNodeName().equals("orig"))
 		     {
 			if (aChoiceStarted != null)
@@ -1599,17 +1807,25 @@ public class TEIDeserializer
 	       if (finishHere)
 	       { // close the entity
 		  Annotation anEntity = mFoundEntities.get(n);
-		  anEntity.setEnd(
-		     graph.getOrCreateAnchorAt(
-			(double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+		  anEntity.setEnd(characterOffsets?
+				  graph.getOrCreateAnchorAt(
+				     (double)iLastPosition, Constants.CONFIDENCE_MANUAL)
+				  :lastAnchor);
 		  graph.addAnnotation(anEntity);
 		  mFoundEntities.remove(n);
 	       }
 	    }  // some other entity
 	 } // next node
-	 
-	 turn.setEnd(graph.getOrCreateAnchorAt(
-			(double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+
+	 if (characterOffsets)
+	 {
+	    turn.setEnd(graph.getOrCreateAnchorAt(
+			   (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+	 }
+	 else
+	 {
+	    turn.setEnd(endAnchor);
+	 }
 	 if (!turn.getStartId().equals(turn.getEndId()))
 	 { // don't create an instantaneous, empty turn
 	    graph.addAnnotation(turn);
@@ -1640,12 +1856,27 @@ public class TEIDeserializer
 	 // set end anchors of graph tags
 	 SortedSet<Anchor> anchors = graph.getSortedAnchors();
 	 Anchor firstAnchor = anchors.first();
-	 Anchor lastAnchor = anchors.last();
+	 lastAnchor = anchors.last();
 	 for (Annotation a : graph.list(getParticipantLayer().getId()))
 	 {
 	    a.setStartId(firstAnchor.getId());
 	    a.setEndId(lastAnchor.getId());
 	 }
+
+	 if (!characterOffsets)
+	 { // set default offsets
+	    try
+	    {
+	       new DefaultOffsetGenerator().transform(graph);	    
+	    }
+	    catch(TransformationException exception)
+	    {
+	       if (errors == null) errors = new SerializationException();
+	       if (errors.getCause() == null) errors.initCause(exception);
+	       errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
+	    }
+	 }
+	 
 	 graph.commit();
 
 	 if (errors != null) throw errors;
@@ -1741,6 +1972,8 @@ public class TEIDeserializer
    public Vector<String> validate()
    {     
       warnings = new Vector<String>();
+      if (mediaError != null) warnings.add(mediaError);
+      mediaError = null;
       return warnings;
    }
 

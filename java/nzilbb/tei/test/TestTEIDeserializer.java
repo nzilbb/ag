@@ -229,7 +229,9 @@ public class TestTEIDeserializer
 	 new Layer("lexical", "Lexical", 0, true, false, false, "word", true));
 
       // access file
-      NamedStream[] streams = { new NamedStream(new File(getDir(), "test-cmc.xml")) };
+      NamedStream[] streams = {
+	 new NamedStream(new File(getDir(), "test-cmc.xml"))
+      };
       
       // create deserializer
       TEIDeserializer deserializer = new TEIDeserializer();
@@ -291,6 +293,9 @@ public class TestTEIDeserializer
       String[] title = g.labels("title"); 
       assertEquals(1, title.length);
       assertEquals("Computer-Mediated Communication Example", title[0]);
+
+      // units
+      assertEquals(Constants.UNIT_CHARACTERS, g.getOffsetUnits());
 
       // participants     
       Annotation[] author = g.list("who"); 
@@ -476,6 +481,7 @@ public class TestTEIDeserializer
 	 new Layer("air_date", "Publication Date", 0, false, false, true),
 	 new Layer("url", "URL", 0, false, false, true),
 	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("participant_language", "Language", 0, false, false, true, "who", true),
 	 new Layer("comment", "Comment", 2, true, false, true),
 	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
 	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
@@ -515,15 +521,17 @@ public class TestTEIDeserializer
 
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
-      //for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(3, defaultParameters.size());
+//      for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals(4, defaultParameters.size());
       assertEquals("url", "url", 
 		   ((Layer)defaultParameters.get("idnoUrl").getValue()).getId());
       assertEquals("subreddit", "subreddit", 
 		   ((Layer)defaultParameters.get("header_note_type_subreddit").getValue()).getId());
       assertEquals("parent_id", "parent_id", 
 		   ((Layer)defaultParameters.get("header_note_type_parent_id").getValue()).getId());
-      
+      assertEquals("language", "participant_language", 
+      		   ((Layer)defaultParameters.get("person_note_type_language").getValue()).getId());
+
       // configure the deserialization
       deserializer.setParameters(defaultParameters);
 
@@ -540,6 +548,10 @@ public class TestTEIDeserializer
       String[] title = g.labels("title"); 
       assertEquals(0, title.length);
 
+      // units
+      assertEquals("Associated WAV makes units seconds rather than characters",
+		   Constants.UNIT_CHARACTERS, g.getOffsetUnits());
+
       // participants     
       Annotation[] author = g.list("who"); 
       assertEquals(1, author.length);
@@ -547,6 +559,8 @@ public class TestTEIDeserializer
       assertEquals("Genkaichan", author[0].getId());
 
       // meta data
+      assertEquals("english", author[0].my("participant_language").getLabel());
+
       assertEquals("2017-02-01T03:00:59.000Z", g.my("air_date").getLabel());
       assertEquals("StrangerThings", g.my("subreddit").getLabel());
       assertEquals("t1_dd5f8en", g.my("parent_id").getLabel());
@@ -854,6 +868,198 @@ public class TestTEIDeserializer
 
    }
 
+   @Test public void wav() 
+      throws Exception
+   {
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("scribe", "Transcriber", 0, true, true, true),
+	 new Layer("transcript_language", "Graph language", 0, false, false, true),
+	 new Layer("transcript_version_date", "Version Date", 0, false, false, true),
+	 new Layer("publication_date", "Publication Date", 0, false, false, true),
+	 new Layer("transcript_program", "Program", 0, false, false, true),
+	 new Layer("title", "Title", 0, false, false, true),
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("sex", "Sex", 0, false, false, true, "who", true),
+	 new Layer("age", "Age", 0, false, false, true, "who", true),
+	 new Layer("dob", "Birth Date", 0, false, false, true, "who", true),
+	 new Layer("topic", "Topic", 2, true, false, false),
+	 new Layer("comment", "Comment", 2, true, false, true),
+	 new Layer("noise", "Noise", 2, true, false, true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("entities", "Entities", 2, true, false, false, "turn", true),
+	 new Layer("language", "Language", 2, true, false, false, "turn", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true),
+	 new Layer("lexical", "Lexical", 0, true, false, false, "word", true));
+
+      // access file
+      NamedStream[] streams = {
+	 new NamedStream(new File(getDir(), "test-cmc.xml")),
+	 new NamedStream(new File(getDir(), "test-cmc.wav"))
+      };
+      
+      // create deserializer
+      TEIDeserializer deserializer = new TEIDeserializer();
+
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals("Configuration parameters" + configuration, 12, deserializer.configure(configuration, schema).size());      
+      assertEquals("comment", "comment", 
+		   ((Layer)configuration.get("commentLayer").getValue()).getId());
+      assertEquals("language", "language", 
+		   ((Layer)configuration.get("languageLayer").getValue()).getId());
+      assertEquals("lexical", "lexical", 
+		   ((Layer)configuration.get("lexicalLayer").getValue()).getId());
+      assertEquals("entities", "entities", 
+		   ((Layer)configuration.get("entityLayer").getValue()).getId());
+      assertEquals("scribe", "scribe", 
+		   ((Layer)configuration.get("scribeLayer").getValue()).getId());
+      assertEquals("transcript_version_date", "transcript_version_date", 
+		   ((Layer)configuration.get("versionDateLayer").getValue()).getId());
+      assertEquals("publication_date", "publication_date", 
+		   ((Layer)configuration.get("publicationDateLayer").getValue()).getId());
+      assertEquals("transcript_language", "transcript_language", 
+		   ((Layer)configuration.get("transcriptLanguageLayer").getValue()).getId());
+      assertEquals("sex", "sex", 
+		   ((Layer)configuration.get("sexLayer").getValue()).getId());
+      assertEquals("age", "age", 
+		   ((Layer)configuration.get("ageLayer").getValue()).getId());
+      assertEquals("birthdate", "dob", 
+		   ((Layer)configuration.get("birthLayer").getValue()).getId());
+
+      // load the stream
+      ParameterSet defaultParameters = deserializer.load(streams, schema);
+      // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals(5, defaultParameters.size());
+      assertNull("no url layer",
+		   defaultParameters.get("idnoUrl").getValue());
+      assertEquals("addressingTerm", "entities", 
+		   ((Layer)defaultParameters.get("addressingTerm").getValue()).getId());
+      assertEquals("addressee", "entities", 
+		   ((Layer)defaultParameters.get("addressee").getValue()).getId());
+      assertEquals("addressMarker", "entities", 
+		   ((Layer)defaultParameters.get("addressMarker").getValue()).getId());
+      assertEquals("emoticon", "entities", 
+		   ((Layer)defaultParameters.get("emoticon").getValue()).getId());
+      
+      // configure the deserialization
+      deserializer.setParameters(defaultParameters);
+
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+
+      for (String warning : deserializer.getWarnings())
+      {
+	 System.out.println(warning);
+      }
+      
+      assertEquals("test-cmc.xml", g.getId());
+      String[] title = g.labels("title"); 
+      assertEquals(1, title.length);
+      assertEquals("Computer-Mediated Communication Example", title[0]);
+
+      // units
+      assertEquals("Associated WAV makes units seconds rather than characters",
+		   Constants.UNIT_SECONDS, g.getOffsetUnits());
+      assertEquals("Length is based on media",
+       		   new Double(5.2941875), g.getEnd().getOffset());
+   }
+
+   @Test public void mp3() 
+      throws Exception
+   {
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("scribe", "Transcriber", 0, true, true, true),
+	 new Layer("transcript_language", "Graph language", 0, false, false, true),
+	 new Layer("transcript_version_date", "Version Date", 0, false, false, true),
+	 new Layer("publication_date", "Publication Date", 0, false, false, true),
+	 new Layer("transcript_program", "Program", 0, false, false, true),
+	 new Layer("title", "Title", 0, false, false, true),
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("sex", "Sex", 0, false, false, true, "who", true),
+	 new Layer("age", "Age", 0, false, false, true, "who", true),
+	 new Layer("dob", "Birth Date", 0, false, false, true, "who", true),
+	 new Layer("topic", "Topic", 2, true, false, false),
+	 new Layer("comment", "Comment", 2, true, false, true),
+	 new Layer("noise", "Noise", 2, true, false, true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("entities", "Entities", 2, true, false, false, "turn", true),
+	 new Layer("language", "Language", 2, true, false, false, "turn", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true),
+	 new Layer("lexical", "Lexical", 0, true, false, false, "word", true));
+
+      // access file
+      NamedStream[] streams = {
+	 new NamedStream(new File(getDir(), "test-cmc.xml")),
+	 new NamedStream(new File(getDir(), "test-cmc.mp3"))
+      };
+      
+      // create deserializer
+      TEIDeserializer deserializer = new TEIDeserializer();
+
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals("Configuration parameters" + configuration, 12, deserializer.configure(configuration, schema).size());      
+      assertEquals("comment", "comment", 
+		   ((Layer)configuration.get("commentLayer").getValue()).getId());
+      assertEquals("language", "language", 
+		   ((Layer)configuration.get("languageLayer").getValue()).getId());
+      assertEquals("lexical", "lexical", 
+		   ((Layer)configuration.get("lexicalLayer").getValue()).getId());
+      assertEquals("entities", "entities", 
+		   ((Layer)configuration.get("entityLayer").getValue()).getId());
+      assertEquals("scribe", "scribe", 
+		   ((Layer)configuration.get("scribeLayer").getValue()).getId());
+      assertEquals("transcript_version_date", "transcript_version_date", 
+		   ((Layer)configuration.get("versionDateLayer").getValue()).getId());
+      assertEquals("publication_date", "publication_date", 
+		   ((Layer)configuration.get("publicationDateLayer").getValue()).getId());
+      assertEquals("transcript_language", "transcript_language", 
+		   ((Layer)configuration.get("transcriptLanguageLayer").getValue()).getId());
+      assertEquals("sex", "sex", 
+		   ((Layer)configuration.get("sexLayer").getValue()).getId());
+      assertEquals("age", "age", 
+		   ((Layer)configuration.get("ageLayer").getValue()).getId());
+      assertEquals("birthdate", "dob", 
+		   ((Layer)configuration.get("birthLayer").getValue()).getId());
+
+      // load the stream
+      ParameterSet defaultParameters = deserializer.load(streams, schema);
+      // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals(5, defaultParameters.size());
+      assertNull("no url layer",
+		   defaultParameters.get("idnoUrl").getValue());
+      assertEquals("addressingTerm", "entities", 
+		   ((Layer)defaultParameters.get("addressingTerm").getValue()).getId());
+      assertEquals("addressee", "entities", 
+		   ((Layer)defaultParameters.get("addressee").getValue()).getId());
+      assertEquals("addressMarker", "entities", 
+		   ((Layer)defaultParameters.get("addressMarker").getValue()).getId());
+      assertEquals("emoticon", "entities", 
+		   ((Layer)defaultParameters.get("emoticon").getValue()).getId());
+      
+      // configure the deserialization
+      deserializer.setParameters(defaultParameters);
+
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+
+      for (String warning : deserializer.getWarnings())
+      {
+	 System.out.println(warning);
+      }
+      
+      assertEquals("Associated MP3 makes units seconds rather than characters",
+		   Constants.UNIT_SECONDS, g.getOffsetUnits());
+      // TODO assertEquals("Length is based on media",
+      // 		   new Double(5.32), g.getEnd().getOffset());
+   }
+   
    /**
     * Directory for text files.
     * @see #getDir()
