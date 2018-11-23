@@ -29,6 +29,7 @@ import java.net.URL;
 import java.net.MalformedURLException;
 import java.net.URLClassLoader;
 import java.sql.*;
+import java.lang.reflect.InvocationTargetException;
 
 import nzilbb.util.IO;
 import nzilbb.ag.*;
@@ -211,7 +212,7 @@ public class SqlGraphStoreAdministration
 	    // get an instance of the class
 	    URL[] url = new URL[] { file.toURI().toURL() };
 	    URLClassLoader classLoader = URLClassLoader.newInstance(url, getClass().getClassLoader());
-	    Object o = classLoader.loadClass(rs.getString("class")).newInstance();
+	    Object o = classLoader.loadClass(rs.getString("class")).getDeclaredConstructor().newInstance();
 	    if (o instanceof IDeserializer)
 	    {
 	       IDeserializer deserializer = (IDeserializer)o;
@@ -243,6 +244,8 @@ public class SqlGraphStoreAdministration
 		  new URL(getBaseUrl()+"/"+getSerializersDirectory().getName()+"/"+iconFile.getName()));
 	    }
 	 }	 
+	 catch(NoSuchMethodException x) { System.err.println(rs.getString("class") + ": " + x); }
+	 catch(InvocationTargetException x) { System.err.println(rs.getString("class") + ": " + x); }
 	 catch(ClassNotFoundException x) { System.err.println(rs.getString("class") + ": " + x); }
 	 catch(InstantiationException x) { System.err.println(rs.getString("class") + ": " + x); }
 	 catch(IllegalAccessException x) { System.err.println(rs.getString("class") + ": " + x); }
@@ -369,7 +372,15 @@ public class SqlGraphStoreAdministration
    {
       try
       {
-	 return (IDeserializer)deserializersByMimeType.get(mimeType).getClass().newInstance();
+	 return (IDeserializer)deserializersByMimeType.get(mimeType).getClass().getDeclaredConstructor().newInstance();
+      }
+      catch(NoSuchMethodException x)
+      {
+	 return null;
+      }
+      catch(InvocationTargetException x)
+      {
+	 return null;
       }
       catch(IllegalAccessException exception)
       {
@@ -396,7 +407,15 @@ public class SqlGraphStoreAdministration
    {
       try
       {
-	 return (IDeserializer)deserializersBySuffix.get(suffix.toLowerCase()).getClass().newInstance();
+	 return (IDeserializer)deserializersBySuffix.get(suffix.toLowerCase()).getClass().getDeclaredConstructor().newInstance();
+      }
+      catch(InvocationTargetException exception)
+      {
+	 return null;
+      }
+      catch(NoSuchMethodException exception)
+      {
+	 return null;
       }
       catch(IllegalAccessException exception)
       {
@@ -528,7 +547,15 @@ public class SqlGraphStoreAdministration
    {
       try
       {
-	 return (ISerializer)serializersByMimeType.get(mimeType).getClass().newInstance();
+	 return (ISerializer)serializersByMimeType.get(mimeType).getClass().getDeclaredConstructor().newInstance();
+      }
+      catch(NoSuchMethodException exception)
+      {
+	 return null;
+      }
+      catch(InvocationTargetException exception)
+      {
+	 return null;
       }
       catch(IllegalAccessException exception)
       {
@@ -555,7 +582,15 @@ public class SqlGraphStoreAdministration
    {
       try
       {
-	 return (ISerializer)serializersBySuffix.get(suffix.toLowerCase()).getClass().newInstance();
+	 return (ISerializer)serializersBySuffix.get(suffix.toLowerCase()).getClass().getDeclaredConstructor().newInstance();
+      }
+      catch(InvocationTargetException exception)
+      {
+	 return null;
+      }
+      catch(NoSuchMethodException exception)
+      {
+	 return null;
       }
       catch(IllegalAccessException exception)
       {

@@ -60,9 +60,9 @@ public class MinimumEditPathString
    public List<EditStep<Character>> minimumEditPath(String sFrom, String sTo)
    {
       Vector<Character> from = new Vector<Character>();
-      for (char c : sFrom.toCharArray()) from.add(new Character(c));
+      for (char c : sFrom.toCharArray()) from.add(Character.valueOf(c));
       Vector<Character> to = new Vector<Character>();
-      for (char c : sTo.toCharArray()) to.add(new Character(c));
+      for (char c : sTo.toCharArray()) to.add(Character.valueOf(c));
       return minimumEditPath(from, to);
    }
    /**

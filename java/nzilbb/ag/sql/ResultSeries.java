@@ -131,6 +131,7 @@ public class ResultSeries
     * Finalize method called by the garbage collector.
     * <p> This implementation ensures SQL resources are disposed of.
     */
+   @SuppressWarnings("deprecation")
    public void finalize()
    {
       if (rs != null) try { rs.close(); } catch(Throwable t) {}

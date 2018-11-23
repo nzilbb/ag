@@ -338,7 +338,7 @@ public class Annotation
       {
 	 if (this.ordinal != 0)
 	 {
-	    changes.add(registerChange("ordinal", new Integer(ordinal)));
+	    changes.add(registerChange("ordinal", Integer.valueOf(ordinal)));
 	 }
 	 this.ordinal = ordinal; 
 	 Annotation parent = getParent();
@@ -1868,7 +1868,7 @@ public class Annotation
 	  && this.ordinal != 0 && o.ordinal != 0
 	  && this.ordinal != o.ordinal)
       {
-	 return new Integer(this.ordinal).compareTo(new Integer(o.ordinal));
+	 return Integer.valueOf(this.ordinal).compareTo(Integer.valueOf(o.ordinal));
       }
       if (getLayerId().equals(o.getLayerId())
 	  && getParent() != null && o.getParent() != null

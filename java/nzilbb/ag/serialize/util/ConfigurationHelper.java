@@ -90,15 +90,15 @@ public class ConfigurationHelper
 	       }
 	       else if (parameter.getType().equals(Integer.class))
 	       {
-		  parameter.setValue(new Integer(value));
+		  parameter.setValue(Integer.valueOf(value));
 	       }
 	       else if (parameter.getType().equals(Double.class))
 	       {
-		  parameter.setValue(new Double(value));
+		  parameter.setValue(Double.valueOf(value));
 	       }
 	       else if (parameter.getType().equals(Boolean.class))
 	       {
-		  parameter.setValue(new Boolean(value));
+		  parameter.setValue(Boolean.valueOf(value));
 	       }
 	       else
 	       { // everything else given a string

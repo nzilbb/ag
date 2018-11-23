@@ -138,7 +138,7 @@ public class Validator
     * @see #setDefaultOffsetThreshold(Integer)
     * @see #defaultAnchorConfidence
     */
-   protected Integer defaultOffsetThreshold = new Integer(Constants.CONFIDENCE_DEFAULT);
+   protected Integer defaultOffsetThreshold = Integer.valueOf(Constants.CONFIDENCE_DEFAULT);
    /**
     * Getter for {@link #defaultOffsetThreshold}: The confidence threshold for default anchor offset computation, or null to skip default offset computation.
     * @return The confidence threshold for default anchor offset computation, or null to skip default offset computation.

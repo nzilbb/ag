@@ -475,7 +475,7 @@ public class TrackedMap
    {
       try
       {
-	 TrackedMap copy = getClass().newInstance();
+	 TrackedMap copy = getClass().getDeclaredConstructor().newInstance();
 	 copy.cloneAttributesFrom(this, null);
 	 return copy;
       }

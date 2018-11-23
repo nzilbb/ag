@@ -738,7 +738,7 @@ public class Graph
       // 	    return anchor;
       // 	 }
       // }
-      Double o = new Double(offset);
+      Double o = Double.valueOf(offset);
       if (offsetIndex.containsKey(o)) //TODO should we be taking offsetGranularity into account?
       {
 	 for (Anchor anchor : offsetIndex.get(o))

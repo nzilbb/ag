@@ -112,7 +112,7 @@ import java.awt.event.*;
  * <tt>java Useful --SomeString=Hello --SomeBoolean sundryArg1 sundryArg2</tt>
  * @author Robert Fromont robert@fromont.net.nz
  */
-
+@SuppressWarnings("deprecation")
 public class GuiProgram
    extends JApplet
 {
@@ -270,15 +270,15 @@ public class GuiProgram
 		     }
 		     else if (parameterClass.equals(Boolean.class))
 		     {
-			setter.invoke(this, new Boolean(sValue));
+			setter.invoke(this, Boolean.valueOf(sValue));
 		     }
 		     else if (parameterClass.equals(Integer.class))
 		     {
-			setter.invoke(this, new Integer(sValue));
+			setter.invoke(this, Integer.valueOf(sValue));
 		     }
 		     else if (parameterClass.equals(Double.class))
 		     {
-			setter.invoke(this, new Double(sValue));
+			setter.invoke(this, Double.valueOf(sValue));
 		     }
 		     else if (parameterClass.equals(URL.class))
 		     {
@@ -500,15 +500,15 @@ public class GuiProgram
 		  }
 		  else if (parameterClass.equals(Boolean.class))
 		  {
-		     setter.invoke(this, new Boolean(sValue));
+		     setter.invoke(this, Boolean.valueOf(sValue));
 		  }
 		  else if (parameterClass.equals(Integer.class))
 		  {
-		     setter.invoke(this, new Integer(sValue));
+		     setter.invoke(this, Integer.valueOf(sValue));
 		  }
 		  else if (parameterClass.equals(Double.class))
 		  {
-		     setter.invoke(this, new Boolean(sValue));
+		     setter.invoke(this, Double.valueOf(sValue));
 		  }
 		  else if (parameterClass.equals(URL.class))
 		  {
@@ -575,15 +575,15 @@ public class GuiProgram
 			}
 			else if (parameterClass.equals(Boolean.class))
 			{
-			   setter.invoke(this, new Boolean(sValue));
+			   setter.invoke(this, Boolean.valueOf(sValue));
 			}
 			else if (parameterClass.equals(Integer.class))
 			{
-			   setter.invoke(this, new Integer(sValue));
+			   setter.invoke(this, Integer.valueOf(sValue));
 			}
 			else if (parameterClass.equals(Double.class))
 			{
-			   setter.invoke(this, new Boolean(sValue));
+			   setter.invoke(this, Double.valueOf(sValue));
 			}
 			else if (parameterClass.equals(URL.class))
 			{

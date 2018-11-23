@@ -107,7 +107,7 @@ public class ArraySeries<T>
    {
       try
       {
-	 return new Long(array.length);
+	 return Long.valueOf(array.length);
       }
       catch(NullPointerException exception)
       {

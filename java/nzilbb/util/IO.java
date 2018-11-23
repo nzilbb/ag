@@ -213,7 +213,7 @@ public class IO
 		  URLClassLoader classLoader = URLClassLoader.newInstance(url, parentLoader);
 		  try
 		  {
-		     Object instance = classLoader.loadClass(className).newInstance();
+		     Object instance = classLoader.loadClass(className).getDeclaredConstructor().newInstance();
 		     if (c.isInstance(instance))
 		     {
 			implementors.add(instance);
