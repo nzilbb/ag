@@ -55,6 +55,7 @@ import nzilbb.media.MediaThread;
 import nzilbb.media.MediaException;
 import nzilbb.media.ffmpeg.FfmpegConverter;
 import nzilbb.media.ffmpeg.FfmpegCensor;
+import nzilbb.media.wav.Resampler;
 
 /**
  * Graph store that uses a relational database as its back end.
@@ -269,6 +270,7 @@ public class SqlGraphStore
    /**
     * Called when the object is garbage-collected.
     */
+   @SuppressWarnings("deprecation")
    public void finalize()
    {
       if (getDisconnectWhenFinished() && getConnection() != null)
@@ -370,23 +372,23 @@ public class SqlGraphStore
       {
 	 Layer layer = getLayer(layerId);
 	 schema.addLayer(layer);
-	 if (new Integer(11).equals(layer.get("@layer_id")))
+	 if (Integer.valueOf(11).equals(layer.get("@layer_id")))
 	 {
 	    schema.setTurnLayerId(layer.getId());
 	 }
-	 else if (new Integer(12).equals(layer.get("@layer_id")))
+	 else if (Integer.valueOf(12).equals(layer.get("@layer_id")))
 	 {
 	    schema.setUtteranceLayerId(layer.getId());
 	 } 
-	 else if (new Integer(0).equals(layer.get("@layer_id")))
+	 else if (Integer.valueOf(0).equals(layer.get("@layer_id")))
 	 {
 	    schema.setWordLayerId(layer.getId());
 	 } 
-	 else if (new Integer(-50).equals(layer.get("@layer_id")))
+	 else if (Integer.valueOf(-50).equals(layer.get("@layer_id")))
 	 {
 	    schema.setEpisodeLayerId(layer.getId());
 	 } 
-	 else if (new Integer(-100).equals(layer.get("@layer_id")))
+	 else if (Integer.valueOf(-100).equals(layer.get("@layer_id")))
 	 {
 	    schema.setCorpusLayerId(layer.getId());
 	 } 
@@ -467,7 +469,7 @@ public class SqlGraphStore
 	    }
 
 	    // other attributes
-	    layer.put("@layer_id", new Integer(rs.getInt("layer_id")));
+	    layer.put("@layer_id", Integer.valueOf(rs.getInt("layer_id")));
 	    layer.put("@type", rs.getString("type"));
 	    layer.put("@user_id", rs.getString("user_id"));
 	    layer.put("@layer_manager_id", rs.getString("layer_manager_id"));
@@ -830,7 +832,7 @@ public class SqlGraphStore
 		     {
 			// add graph-tag annotation
 			Object[] annotationIdParts = {
-			   attributeLayer.get("@attribute"), new Integer(rsValue.getInt("annotation_id"))};
+			   attributeLayer.get("@attribute"), Integer.valueOf(rsValue.getInt("annotation_id"))};
 			Annotation attribute = new Annotation(
 			   fmtParticipantAttributeId.format(annotationIdParts), 
 			   rsValue.getString("label"), attributeLayer.getId());
@@ -1747,13 +1749,13 @@ public class SqlGraphStore
 	 
 	 graph.setId(rs.getString("transcript_id"));
 	 int iAgId = rs.getInt("ag_id");
-	 graph.put("@ag_id", new Integer(iAgId));
+	 graph.put("@ag_id", Integer.valueOf(iAgId));
 	 graph.setCorpus(rs.getString("corpus_name"));
 	 graph.put("@transcript_type", rs.getString("transcript_type"));
 	 graph.put("@series", rs.getString("series"));
 	 graph.put("@family_id", rs.getInt("family_id"));
 	 graph.setOrdinal(rs.getInt("family_sequence"));
-	 graph.put("@offset_in_series", new Double(rs.getInt("family_offset")));
+	 graph.put("@offset_in_series", Double.valueOf(rs.getInt("family_offset")));
 	 if (rs.getString("divergent") != null) graph.put("@divergent", Boolean.TRUE);
 
 	 rs.close();
@@ -1887,7 +1889,7 @@ public class SqlGraphStore
 		     Object[] annotationIdParts = {
 			"e", layer.get("@layer_id"), rsEpisode.getInt("annotation_id")};
 		     Object[] parentAnnotationIdParts = {
-			new Integer(-50), rsEpisode.getString("family_id")};
+			Integer.valueOf(-50), rsEpisode.getString("family_id")};
 		     Annotation episodeTag = new Annotation(
 			fmtAnnotationId.format(annotationIdParts), 
 			rsEpisode.getString("label"), layer.getId());
@@ -1946,7 +1948,7 @@ public class SqlGraphStore
 		  if (rsType.next())
 		  {
 		     // add graph-tag annotation
-		     Object[] annotationIdParts = {"type", new Integer(iAgId)};
+		     Object[] annotationIdParts = {"type", Integer.valueOf(iAgId)};
 		     Annotation type = new Annotation(
 			fmtTranscriptAttributeId.format(annotationIdParts), 
 			rsType.getString("transcript_type"), layer.getId());
@@ -1977,7 +1979,7 @@ public class SqlGraphStore
 			attributeFound = true;
 			// add graph-tag annotation
 			Object[] annotationIdParts = {
-			   layer.get("@attribute"), new Integer(rsValue.getInt("annotation_id"))};
+			   layer.get("@attribute"), Integer.valueOf(rsValue.getInt("annotation_id"))};
 			Annotation attribute = new Annotation(
 			   fmtTranscriptAttributeId.format(annotationIdParts), 
 			   rsValue.getString("label"), layer.getId());
@@ -2003,7 +2005,7 @@ public class SqlGraphStore
 			if (rsCorpusLanguage.next())
 			{
 			   Object[] annotationIdParts = {
-			      layer.get("@attribute"), new Integer(iAgId)};
+			      layer.get("@attribute"), Integer.valueOf(iAgId)};
 			   Annotation attribute = new Annotation(
 			      fmtTranscriptAttributeId.format(annotationIdParts),
 			      rsCorpusLanguage.getString("corpus_language"), 
@@ -2039,7 +2041,7 @@ public class SqlGraphStore
 		     {
 			// add graph-tag annotation
 			Object[] annotationIdParts = {
-			   layer.get("@attribute"), new Integer(rsValue.getInt("annotation_id"))};
+			   layer.get("@attribute"), Integer.valueOf(rsValue.getInt("annotation_id"))};
 			Annotation attribute = new Annotation(
 			   fmtParticipantAttributeId.format(annotationIdParts), 
 			   rsValue.getString("label"), layer.getId());
@@ -2650,8 +2652,8 @@ public class SqlGraphStore
 	       layer = getLayer(rsAnnotation.getString("layer"));
 	    }
 	    if ("F".equals(layer.get("@scope")) // freeform layer
-		|| new Integer(11).equals(layer.get("@layer_id")) // turn layer
-		|| new Integer(11).equals(layer.get("@layer_id"))) // utterance layer
+		|| Integer.valueOf(11).equals(layer.get("@layer_id")) // turn layer
+		|| Integer.valueOf(11).equals(layer.get("@layer_id"))) // utterance layer
 	    { // we need graph for annotationFromResult	       
 	       if (graph == null || !graph.getId().equals(rsAnnotation.getInt("graph")))
 	       { // graph can change
@@ -2870,7 +2872,7 @@ public class SqlGraphStore
 		  Object[] o = fmtMetaAnnotationId.parse(ancestorId);
 		  scope = "";
 		  layer_id = ((Long)o[0]).intValue();
-		  annotation_id = new Long(o[1].toString());
+		  annotation_id = Long.valueOf(o[1].toString());
 	       }
 	       catch(ParseException exception2)
 	       {
@@ -3111,7 +3113,7 @@ public class SqlGraphStore
 			   if (rsType.next())
 			   {
 			      // add graph-tag annotation
-			      Object[] annotationIdParts = {"type", new Integer(ag_id)};
+			      Object[] annotationIdParts = {"type", Integer.valueOf(ag_id)};
 			      Annotation type = new Annotation(
 				 fmtTranscriptAttributeId.format(annotationIdParts), 
 				 rsType.getString("transcript_type"), layer.getId());
@@ -3128,7 +3130,7 @@ public class SqlGraphStore
 			   if (rs.next() && rs.getString("label").length() > 0)
 			   {
 			      Object[] annotationIdParts = {
-				 layer.get("@attribute"), new Integer(rs.getInt("annotation_id"))};
+				 layer.get("@attribute"), Integer.valueOf(rs.getInt("annotation_id"))};
 			      Annotation attribute = new Annotation(
 				 fmtTranscriptAttributeId.format(annotationIdParts),
 				 rs.getString("label"), layer.getId());
@@ -3142,7 +3144,7 @@ public class SqlGraphStore
 			      if (rs.next())
 			      {
 				 Object[] annotationIdParts = {
-				    layer.get("@attribute"), new Integer(ag_id)};
+				    layer.get("@attribute"), Integer.valueOf(ag_id)};
 				 Annotation attribute = new Annotation(
 				    fmtTranscriptAttributeId.format(annotationIdParts),
 				    rs.getString("corpus_language"), layer.getId());
@@ -3349,7 +3351,7 @@ public class SqlGraphStore
 	    sql = getConnection().prepareStatement("SELECT LAST_INSERT_ID()");
 	    ResultSet rs = sql.executeQuery();
 	    rs.next();
-	    graph.put("@ag_id", new Integer(rs.getInt(1)));
+	    graph.put("@ag_id", Integer.valueOf(rs.getInt(1)));
 	    rs.close();
 	    sql.close();
 	    saveGraphChanges(graph);
@@ -3367,7 +3369,7 @@ public class SqlGraphStore
 	       {
 		  
 		  if (!rs.next()) throw new GraphNotFoundException(graph.getId());
-		  graph.put("@ag_id", new Integer(rs.getInt("ag_id")));
+		  graph.put("@ag_id", Integer.valueOf(rs.getInt("ag_id")));
 	       }
 	       finally
 	       {
@@ -3538,7 +3540,7 @@ public class SqlGraphStore
 	    "SELECT layer_id FROM layer ORDER BY layer_id");
 	 ResultSet rsLayers = sqlLayers.executeQuery();
 	 HashSet<Integer> layerIds = new HashSet<Integer>();
-	 while (rsLayers.next()) layerIds.add(new Integer(rsLayers.getInt("layer_id")));
+	 while (rsLayers.next()) layerIds.add(Integer.valueOf(rsLayers.getInt("layer_id")));
 	 rsLayers.close();
 	 sqlLayers.close();
 	 PreparedStatement sqlDeleteAnchor = getConnection().prepareStatement(
@@ -3834,8 +3836,8 @@ public class SqlGraphStore
       String scope = (String)layer.get("@scope");
       Annotation annotation = new Annotation();
       Object[] annotationIdParts = {
-	 scope.toLowerCase(), new Integer(iLayerId), 
-	 new Long(rsAnnotation.getLong("annotation_id"))};
+	 scope.toLowerCase(), Integer.valueOf(iLayerId), 
+	 Long.valueOf(rsAnnotation.getLong("annotation_id"))};
       if (scope.equalsIgnoreCase(SqlConstants.SCOPE_FREEFORM)) annotationIdParts[0] = "";
       annotation.setId(fmtAnnotationId.format(annotationIdParts));
       String turnParentId = null;
@@ -3861,31 +3863,31 @@ public class SqlGraphStore
       {
 	 annotation.setLabel(rsAnnotation.getString("label"));
       }
-      annotation.setConfidence(new Integer(rsAnnotation.getInt("label_status")));
+      annotation.setConfidence(Integer.valueOf(rsAnnotation.getInt("label_status")));
       annotation.setLayerId(layer.getId());
       
       // parent:
       if (iLayerId == SqlConstants.LAYER_SEGMENT) // segment
       {
 	 annotationIdParts[0] = SqlConstants.SCOPE_WORD;
-	 annotationIdParts[1] = new Integer(SqlConstants.LAYER_TRANSCRIPTION); // transcript word
-	 annotationIdParts[2] = new Long(rsAnnotation.getLong("word_annotation_id"));
+	 annotationIdParts[1] = Integer.valueOf(SqlConstants.LAYER_TRANSCRIPTION); // transcript word
+	 annotationIdParts[2] = Long.valueOf(rsAnnotation.getLong("word_annotation_id"));
 	 annotation.setParentId(fmtAnnotationId.format(annotationIdParts));
 	 annotation.setOrdinal(rsAnnotation.getInt("ordinal_in_word"));
       }
       else if (iLayerId == SqlConstants.LAYER_TRANSCRIPTION) // transcription word
       {
 	 annotationIdParts[0] = SqlConstants.SCOPE_META;
-	 annotationIdParts[1] = new Integer(SqlConstants.LAYER_TURN); // turn
-	 annotationIdParts[2] = new Long(rsAnnotation.getLong("turn_annotation_id"));
+	 annotationIdParts[1] = Integer.valueOf(SqlConstants.LAYER_TURN); // turn
+	 annotationIdParts[2] = Long.valueOf(rsAnnotation.getLong("turn_annotation_id"));
 	 annotation.setParentId(fmtAnnotationId.format(annotationIdParts));
 	 annotation.setOrdinal(rsAnnotation.getInt("ordinal_in_turn"));
       }
       else if (iLayerId == SqlConstants.LAYER_UTTERANCE) // utterance
       {
 	 annotationIdParts[0] = SqlConstants.SCOPE_META;
-	 annotationIdParts[1] = new Integer(SqlConstants.LAYER_TURN); // turn
-	 annotationIdParts[2] = new Long(rsAnnotation.getLong("turn_annotation_id"));
+	 annotationIdParts[1] = Integer.valueOf(SqlConstants.LAYER_TURN); // turn
+	 annotationIdParts[2] = Long.valueOf(rsAnnotation.getLong("turn_annotation_id"));
 	 annotation.setParentId(fmtAnnotationId.format(annotationIdParts));
 	 annotation.setOrdinal(rsAnnotation.getInt("ordinal"));
       }
@@ -3897,24 +3899,24 @@ public class SqlGraphStore
       else if (scope.equalsIgnoreCase(SqlConstants.SCOPE_SEGMENT)) // segment scope
       {
 	 annotationIdParts[0] = SqlConstants.SCOPE_SEGMENT;
-	 annotationIdParts[1] = new Integer(SqlConstants.LAYER_SEGMENT); // segment
-	 annotationIdParts[2] = new Long(rsAnnotation.getLong("segment_annotation_id"));
+	 annotationIdParts[1] = Integer.valueOf(SqlConstants.LAYER_SEGMENT); // segment
+	 annotationIdParts[2] = Long.valueOf(rsAnnotation.getLong("segment_annotation_id"));
 	 annotation.setParentId(fmtAnnotationId.format(annotationIdParts));
 	 annotation.setOrdinal(rsAnnotation.getInt("ordinal"));
       } // segment scope
       else if (scope.equalsIgnoreCase(SqlConstants.SCOPE_WORD)) // word scope
       {
 	 annotationIdParts[0] = SqlConstants.SCOPE_WORD;
-	 annotationIdParts[1] = new Integer(SqlConstants.LAYER_TRANSCRIPTION); // transcription word
-	 annotationIdParts[2] = new Long(rsAnnotation.getLong("word_annotation_id"));
+	 annotationIdParts[1] = Integer.valueOf(SqlConstants.LAYER_TRANSCRIPTION); // transcription word
+	 annotationIdParts[2] = Long.valueOf(rsAnnotation.getLong("word_annotation_id"));
 	 annotation.setParentId(fmtAnnotationId.format(annotationIdParts));
 	 annotation.setOrdinal(rsAnnotation.getInt("ordinal"));
       } // word scope
       else if (scope.equalsIgnoreCase(SqlConstants.SCOPE_META)) // meta scope
       {
 	 annotationIdParts[0] = SqlConstants.SCOPE_META;
-	 annotationIdParts[1] = new Integer(SqlConstants.LAYER_TURN); // turn
-	 annotationIdParts[2] = new Long(rsAnnotation.getLong("turn_annotation_id"));
+	 annotationIdParts[1] = Integer.valueOf(SqlConstants.LAYER_TURN); // turn
+	 annotationIdParts[2] = Long.valueOf(rsAnnotation.getLong("turn_annotation_id"));
 	 annotation.setParentId(fmtAnnotationId.format(annotationIdParts));
 	 annotation.setOrdinal(rsAnnotation.getInt("ordinal"));
       } // meta scope
@@ -3937,9 +3939,9 @@ public class SqlGraphStore
       }
 
       // anchor IDs
-      Object[] anchorIdParts = { new Long(rsAnnotation.getLong("start_anchor_id"))};
+      Object[] anchorIdParts = { Long.valueOf(rsAnnotation.getLong("start_anchor_id"))};
       annotation.setStartId(fmtAnchorId.format(anchorIdParts));
-      anchorIdParts[0] = new Long(rsAnnotation.getLong("end_anchor_id"));
+      anchorIdParts[0] = Long.valueOf(rsAnnotation.getLong("end_anchor_id"));
       annotation.setEndId(fmtAnchorId.format(anchorIdParts));
 		  
       return annotation;
@@ -3955,10 +3957,10 @@ public class SqlGraphStore
    protected Anchor anchorFromResult(ResultSet rsAnchor, String prefix)
       throws SQLException
    {
-      Object[] anchorIdParts = { new Long(rsAnchor.getLong(prefix + "anchor_id"))};
+      Object[] anchorIdParts = { Long.valueOf(rsAnchor.getLong(prefix + "anchor_id"))};
       Anchor anchor = new Anchor(
-	 fmtAnchorId.format(anchorIdParts), new Double(rsAnchor.getDouble(prefix + "offset")));
-      anchor.setConfidence(new Integer(rsAnchor.getInt(prefix + "alignment_status")));
+	 fmtAnchorId.format(anchorIdParts), Double.valueOf(rsAnchor.getDouble(prefix + "offset")));
+      anchor.setConfidence(Integer.valueOf(rsAnchor.getInt(prefix + "alignment_status")));
       if (rsAnchor.getString(prefix+"annotated_by") != null)
       {
 	 anchor.setAnnotator(rsAnchor.getString(prefix+"annotated_by"));
@@ -3988,7 +3990,7 @@ public class SqlGraphStore
    {
       if (anchor.getConfidence() == null)
       {
-	 anchor.setConfidence(new Integer(Constants.CONFIDENCE_UNKNOWN));
+	 anchor.setConfidence(Integer.valueOf(Constants.CONFIDENCE_UNKNOWN));
       }
       switch (anchor.getChange())
       {
@@ -4024,7 +4026,7 @@ public class SqlGraphStore
 	    ResultSet rs = sqlLastId.executeQuery();
 	    rs.next();
 	    String oldId = anchor.getId();
-	    Object[] anchorIdParts = { new Long(rs.getLong(1)) };
+	    Object[] anchorIdParts = { Long.valueOf(rs.getLong(1)) };
 	    String newId = fmtAnchorId.format(anchorIdParts);
 	    rs.close();
 
@@ -4158,7 +4160,7 @@ public class SqlGraphStore
 
       if (annotation.getConfidence() == null)
       {
-	 annotation.setConfidence(new Integer(Constants.CONFIDENCE_UNKNOWN));
+	 annotation.setConfidence(Integer.valueOf(Constants.CONFIDENCE_UNKNOWN));
       }
       switch (annotation.getChange())
       {
@@ -4410,7 +4412,7 @@ public class SqlGraphStore
 	    rs.next();
 	    String oldId = annotation.getId();
 	    long annotationId = rs.getLong(1);
-	    Object[] annotationIdParts = { scope, layerId, new Long(annotationId) };
+	    Object[] annotationIdParts = { scope, layerId, Long.valueOf(annotationId) };
 	    String newId = fmtAnnotationId.format(annotationIdParts);
 	    rs.close();
 	    
@@ -5113,7 +5115,7 @@ public class SqlGraphStore
 		  }
 		  rs.close();
 		  sql.close();
-		  annotation.put("@speaker_number", new Integer(speakerNumber));
+		  annotation.put("@speaker_number", Integer.valueOf(speakerNumber));
 		  participantNameToNumber.put(annotation.getLabel(), ""+speakerNumber);
 		  
 		  // reset the annotation ID
@@ -5182,7 +5184,7 @@ public class SqlGraphStore
       {
 	 if (annotation.getConfidence() == null)
 	 {
-	    annotation.setConfidence(new Integer(Constants.CONFIDENCE_UNKNOWN));
+	    annotation.setConfidence(Integer.valueOf(Constants.CONFIDENCE_UNKNOWN));
 	 }
 	 switch (annotation.getChange())
 	 {
@@ -5224,7 +5226,7 @@ public class SqlGraphStore
 		  rs.next();
 		  String oldId = annotation.getId();
 		  long annotationId = rs.getLong(1);
-		  Object[] annotationIdParts = { "e", layerId, new Long(annotationId) };
+		  Object[] annotationIdParts = { "e", layerId, Long.valueOf(annotationId) };
 		  String newId = fmtAnnotationId.format(annotationIdParts);
 		  rs.close();
 		  
@@ -5588,7 +5590,7 @@ public class SqlGraphStore
 	 Object[] annotationAttributes = {
 	    layer.get("@scope").equals("F")?"":((String)layer.get("@scope")).toLowerCase(),
 	    layer.get("@layer_id"),
-	    new Long(annotation_id)};
+	    Long.valueOf(annotation_id)};
 	 return fmtAnnotationId.format(annotationAttributes);
       }
       catch(ParseException exception)
@@ -5866,6 +5868,33 @@ public class SqlGraphStore
 	 
 	 // backup old file if it exists
 	 IO.Backup(destination);
+
+	 String downsampleWav = getSystemAttribute("downsampleWav");
+	 if (downsampleWav.length() > 0 && mediaFile.getMimeType().equals("audio/wav"))
+	 {
+	    File downsampled = File.createTempFile("SqlGraphStore.saveMedia_", "_"+downsampleWav+"_" + mediaFile.getName());
+	    downsampled.deleteOnExit();
+	    
+	    ParameterSet configuration = new ParameterSet();
+	    configuration.addParameter(new Parameter("sampleRate", downsampleWav.equals("mono16kHz")?16000:22050));
+	    IMediaConverter resampler = new Resampler();
+	    resampler.configure(configuration);
+
+	    // run the resampler
+	    MediaThread thread = resampler.start(mediaFile.getMimeType(), source, mediaFile.getMimeType(), downsampled);
+
+	    // wait for resampler to finish
+	    thread.join();
+	    if (thread.getLastError() == null)
+	    {
+	       source = downsampled;
+	    }
+	    else
+	    {
+	       throw new StoreException(
+		  "Could not resample " + source.getPath() + " to " + downsampleWav, thread.getLastError());
+	    }
+	 }
 
 	 // does the file need censoring?
 	 String censorshipRegexp = getSystemAttribute("censorshipRegexp");
