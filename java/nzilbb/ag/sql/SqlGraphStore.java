@@ -883,8 +883,6 @@ public class SqlGraphStore
    {
       if (!"who".equals(participant.getLayerId()))
 	 throw new StoreException("Annotation is not on the participant layer.");
-      if (participant.getChange() == Change.Operation.Create)
-	 throw new StoreException("Adding new participants is not supported."); // TODO
       if (participant.getChange() == Change.Operation.Destroy )
 	 throw new StoreException("Deleting participants is not supported.");
       
@@ -892,18 +890,41 @@ public class SqlGraphStore
       try
       {
 	 // save the participant record itself
-	 if (participant.getChange() == Change.Operation.Update)
+	 switch(participant.getChange())
 	 {
-	    thereWereChanges = true;
-	    Object[] o = fmtMetaAnnotationId.parse(participant.getId());
-	    int speakerNumber = Integer.parseInt(o[1].toString());
-	    // update the label (the only possible change)
-	    PreparedStatement sql = getConnection().prepareStatement(
-	       "UPDATE speaker SET name = ? WHERE speaker_number = ?");
-	    sql.setString(1, participant.getLabel());
-	    sql.setInt(2, speakerNumber);
-	    sql.executeUpdate();
-	    sql.close();
+	    case Update:
+	    {
+	       thereWereChanges = true;
+	       Object[] o = fmtMetaAnnotationId.parse(participant.getId());
+	       int speakerNumber = Integer.parseInt(o[1].toString());
+	       // update the label (the only possible change)
+	       PreparedStatement sql = getConnection().prepareStatement(
+		  "UPDATE speaker SET name = ? WHERE speaker_number = ?");
+	       sql.setString(1, participant.getLabel());
+	       sql.setInt(2, speakerNumber);
+	       sql.executeUpdate();
+	       sql.close();
+	       break;
+	    }
+	    case Create:
+	    {
+	       thereWereChanges = true;
+	       // update the label (the only possible change)
+	       PreparedStatement sql = getConnection().prepareStatement(
+		  "INSERT INTO speaker (name) VALUES (?)");
+	       sql.setString(1, participant.getLabel());
+	       sql.executeUpdate();
+	       sql.close();
+	       sql = getConnection().prepareStatement("SELECT LAST_INSERT_ID()");
+	       ResultSet rsInsert = sql.executeQuery();
+	       rsInsert.next();
+	       int speakerNumber = rsInsert.getInt(1);
+	       rsInsert.close();
+	       sql.close();
+	       Object[] o = { Integer.valueOf(-2), Integer.valueOf(speakerNumber) };
+	       participant.setId(fmtMetaAnnotationId.format(o));
+	       break;
+	    }
 	 }
 
 	 // save the tags
@@ -924,6 +945,7 @@ public class SqlGraphStore
 		  if (attribute.getChange() != Change.Operation.NoChange)
 		  {
 		     thereWereChanges = true;
+		     if (attribute.getParentId() == null) attribute.setParentId(participant.getId());
 		     saveParticipantAttributeChanges(attribute, sqlInsertParticipantAttribute, sqlUpdateParticipantAttribute, sqlDeleteParticipantAttribute, sqlDeleteAllParticipantAttributesOnLayer);
 		  }
 	       } // next child
