@@ -5827,6 +5827,7 @@ public class SqlGraphStore
    public void saveMedia(String id, String trackSuffix, String mediaUrl)
       throws StoreException, PermissionException, GraphNotFoundException
    {
+      Vector<File> toDelete = new Vector<File>();
       try
       {
 	 String[] layers = { "corpus", "episode" };
@@ -5849,6 +5850,7 @@ public class SqlGraphStore
 	       + trackSuffix + "." + extension;
 	    source = File.createTempFile(destinationName, "."+extension);
 	    source.deleteOnExit();
+	    toDelete.add(source);
 	    try
 	    {
 	       IO.SaveUrlConnectionToFile(connection, source);
@@ -5865,6 +5867,7 @@ public class SqlGraphStore
 	    File mediaFile = new File(new URI(mediaUrl));
 	    source = File.createTempFile("SqlGraphStore.saveMedia_", "_" + mediaFile.getName());
 	    source.deleteOnExit();
+	    toDelete.add(source);
 	    if (!mediaFile.renameTo(source))
 	    { // can't rename, have to copy the data
 	       try
@@ -5896,6 +5899,7 @@ public class SqlGraphStore
 	 {
 	    File downsampled = File.createTempFile("SqlGraphStore.saveMedia_", "_"+downsampleWav+"_" + mediaFile.getName());
 	    downsampled.deleteOnExit();
+	    toDelete.add(downsampled);
 	    
 	    ParameterSet configuration = new ParameterSet();
 	    configuration.addParameter(new Parameter("sampleRate", downsampleWav.equals("mono16kHz")?16000:22050));
@@ -6054,6 +6058,11 @@ public class SqlGraphStore
       catch (Throwable t)
       {
 	 throw new StoreException(t);
+      }
+      finally
+      {
+	 // anything added to toDelete should be deleted, if it's still there
+	 for (File f : toDelete) f.delete();
       }
    }
    /**
