@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URI;
@@ -1899,7 +1900,7 @@ public class SqlGraphStore
 	       { // episode tag layer
 		  graph.addLayer(layer);
 		  PreparedStatement sqlEpisode = getConnection().prepareStatement(
-		     "SELECT a.annotation_id, a.label, a.annotated_by, a.annotated_when, t.family_id"
+		     "SELECT a.annotation_id, a.label, a.annotated_by, a.annotated_when, t.family_id, data"
 		     +" FROM `annotation_layer_" + layer.get("@layer_id") + "` a"
 		     +" INNER JOIN transcript t ON t.family_id = a.family_id"
 		     +" WHERE t.ag_id = ?");
@@ -1923,6 +1924,61 @@ public class SqlGraphStore
 		     if (rsEpisode.getTimestamp("annotated_when") != null)
 		     {
 			episodeTag.setWhen(rsEpisode.getTimestamp("annotated_when"));
+		     }
+		     byte[] data = rsEpisode.getBytes("data");
+		     try
+		     {
+			if (data != null) episodeTag.put("data", data);
+		     }
+		     catch(Exception exception)
+		     {
+			System.err.println("Could not get data for " + episodeTag.getId() + ": " + exception);
+		     }
+		     graph.addAnnotation(episodeTag);		     
+		  }
+		  rsEpisode.close();
+		  sqlEpisode.close();
+		  setStartEndLayers.add(layerId);
+		  continue;
+	       }
+	       else if ("E".equals(layer.get("@scope")))
+		  
+	       { // episode tag tag layer
+		  graph.addLayer(layer);
+		  PreparedStatement sqlEpisode = getConnection().prepareStatement(
+		     "SELECT a.annotation_id, a.label, a.annotated_by, a.annotated_when, a.parent_id, t.family_id, data"
+		     +" FROM `annotation_layer_" + layer.get("@layer_id") + "` a"
+		     +" INNER JOIN transcript t ON t.family_id = a.family_id"
+		     +" WHERE t.ag_id = ?");
+		  sqlEpisode.setInt(1, iAgId);
+		  ResultSet rsEpisode = sqlEpisode.executeQuery();
+		  while (rsEpisode.next())
+		  {
+		     // add graph-tag annotation
+		     Object[] annotationIdParts = {
+			"e", layer.get("@layer_id"), rsEpisode.getInt("annotation_id")};
+		     Object[] parentAnnotationIdParts = {
+			"e", layer.getParent().get("@layer_id"), rsEpisode.getInt("parent_id")};
+		     Annotation episodeTag = new Annotation(
+			fmtAnnotationId.format(annotationIdParts), 
+			rsEpisode.getString("label"), layer.getId());
+		     episodeTag.setParentId(fmtAnnotationId.format(parentAnnotationIdParts));
+		     if (rsEpisode.getString("annotated_by") != null)
+		     {
+			episodeTag.setAnnotator(rsEpisode.getString("annotated_by"));
+		     }
+		     if (rsEpisode.getTimestamp("annotated_when") != null)
+		     {
+			episodeTag.setWhen(rsEpisode.getTimestamp("annotated_when"));
+		     }
+		     byte[] data = rsEpisode.getBytes("data");
+		     try
+		     {
+			if (data != null) episodeTag.put("data", data);
+		     }
+		     catch(Exception exception)
+		     {
+			System.err.println("Could not get data for " + episodeTag.getId() + ": " + exception);
 		     }
 		     graph.addAnnotation(episodeTag);		     
 		  }
@@ -3723,7 +3779,7 @@ public class SqlGraphStore
 		  { // special layer annotation
 		     saveSpecialAnnotationChanges(annotation, participantNameToNumber);
 		  }
-		  else if (annotation.getLayer().getParentId().equals("episode"))
+		  else if ("E".equals(annotation.getLayer().get("@scope")))
 		  { // episode tag annotation
 		     saveEpisodeAnnotationChanges(annotation, sqlLastId);
 		  }
@@ -5208,6 +5264,7 @@ public class SqlGraphStore
 	 {
 	    annotation.setConfidence(Integer.valueOf(Constants.CONFIDENCE_UNKNOWN));
 	 }
+System.err.println("Episode tag "+annotation.getLayerId() + " " + annotation.getChange());
 	 switch (annotation.getChange())
 	 {
 	    case Create:
@@ -5215,16 +5272,23 @@ public class SqlGraphStore
 	       Integer layerId = (Integer)getLayer(annotation.getLayerId()).get("@layer_id");
 	       PreparedStatement sql = getConnection().prepareStatement(
 		  "INSERT INTO `annotation_layer_"+layerId+"`"
-		  +" (family_id, label, label_status, parent_id, ordinal, annotated_by, annotated_when)"
-		  + " VALUES (?,?,?,?,?,?,?)");
+		  +" (family_id, label, label_status, parent_id, ordinal, annotated_by, annotated_when, data)"
+		  + " VALUES (?,?,?,?,?,?,?,?)");
 	       try
 	       {
-		  Object[] o = fmtMetaAnnotationId.parse(annotation.getParentId());
-		  long familyId = Long.parseLong(o[1].toString());
-		  sql.setLong(1, familyId);
+		  int familyId = (Integer)annotation.getGraph().get("@family_id");
+		  sql.setInt(1, familyId);
 		  sql.setString(2, annotation.getLabel());
 		  sql.setInt(3, annotation.getConfidence());
-		  sql.setLong(4, familyId);
+		  if (annotation.getLayer().getParentId().equals("episode"))
+		  { // parent is episode, so parent_id is family_id
+		     sql.setInt(4, familyId);
+		  }
+		  else
+		  {
+		     Object[] o = fmtAnnotationId.parse(annotation.getParentId());
+		     sql.setLong(4, (Long)o[2]);
+		  }
 		  sql.setInt(5, annotation.getOrdinal());
 		  if (annotation.getAnnotator() != null)
 		  {
@@ -5241,6 +5305,14 @@ public class SqlGraphStore
 		  // else
 		  {
 		     sql.setTimestamp(7, new Timestamp(new java.util.Date().getTime()));
+		  }
+		  if (annotation.containsKey("data"))
+		  {
+		     sql.setBytes(8, annotation.get("data").toString().getBytes());
+		  }
+		  else
+		  {
+		     sql.setNull(8, java.sql.Types.BLOB);
 		  }
 		  sql.executeUpdate();
 
@@ -5266,10 +5338,12 @@ public class SqlGraphStore
 	       Object[] o = fmtAnnotationId.parse(annotation.getId());
 	       Long layerId = (Long)o[1];
 	       Long annotationId = (Long)o[2];
+System.err.println("Updating " + annotation.getId() + " annotation_id " + annotationId + " layer_id " + layerId + " label " + annotation.getLabel());
 	       PreparedStatement sql = getConnection().prepareStatement(
 		  "UPDATE `annotation_layer_"+layerId+"`"
 		  + " SET label = ?, label_status = ?, "
-		  + " ordinal = ?, annotated_by = ?, annotated_when = ?"
+		  + " ordinal = ?, annotated_by = ?, annotated_when = ?,"
+		  + " data = ?"
 		  + " WHERE annotation_id = ?");
 	       try
 	       {
@@ -5292,7 +5366,15 @@ public class SqlGraphStore
 		  {
 		     sql.setTimestamp(5, new Timestamp(new java.util.Date().getTime()));
 		  }
-		  sql.setLong(6, annotationId);
+		  if (annotation.containsKey("data"))
+		  {
+		     sql.setBytes(6, annotation.get("data").toString().getBytes());
+		  }
+		  else
+		  {
+		     sql.setNull(6, java.sql.Types.BLOB);
+		  }
+		  sql.setLong(7, annotationId);
 		  sql.executeUpdate();
 	       }
 	       finally
@@ -5332,7 +5414,7 @@ public class SqlGraphStore
       }
       catch(ParseException exception)
       {
-	 System.err.println("Error parsing ID for episode attribute: "+annotation.getId() + " on layer " + annotation.getLayerId());
+	 System.err.println("Error parsing ID for episode attribute: "+annotation.getId() + " on layer " + annotation.getLayerId() + " : " + exception);
 	 throw new StoreException("Error parsing ID for episode attribute: "+annotation.getId() + " on layer " + annotation.getLayerId(), exception);
       }
    } // end of saveEpisodeAnnotationChanges()
@@ -6214,6 +6296,46 @@ public class SqlGraphStore
       }
    }
 
+   /**
+    * Get a list of documents associated with the episode of the given graph.
+    * @param id The graph ID.
+    * @return List of document files/URLs.
+    * @throws StoreException If an error prevents the media from being saved.
+    * @throws PermissionException If saving the media is not permitted.
+    * @throws GraphNotFoundException If the graph doesn't exist.
+    */
+   public MediaFile[] getEpisodeDocuments(String id)
+      throws StoreException, PermissionException, GraphNotFoundException
+   {
+      Vector<MediaFile> files = new Vector<MediaFile>();
+      String[] layers = { "corpus", "episode" };
+      Graph graph = getGraph(id, layers);
+      File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
+      File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
+      File docDir = new File(episodeDir, "doc");
+      for (File f : docDir.listFiles())
+      {
+	 MediaFile mediaFile = new MediaFile(f, "");
+	 if (getBaseUrl() == null) // TODO check this isn't a security risk
+	 {
+	    mediaFile.setUrl(f.toURI().toString());
+	 }
+	 else
+	 {
+	    StringBuffer url = new StringBuffer(getBaseUrl());
+	    url.append("/files/");
+	    url.append(graph.my("corpus").getLabel());
+	    url.append("/");
+	    url.append(graph.my("episode").getLabel());
+	    url.append("/doc/");
+	    url.append(f.getName());
+	    mediaFile.setUrl(url.toString());
+	 }
+	 files.add(mediaFile);
+      } // next doc file
+      return files.toArray(new MediaFile[0]);      
+   }
+   
    
    /**
     * Generates any media files that are not marked "on demand" and for which there are available conversions.
