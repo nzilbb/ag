@@ -5264,7 +5264,6 @@ public class SqlGraphStore
 	 {
 	    annotation.setConfidence(Integer.valueOf(Constants.CONFIDENCE_UNKNOWN));
 	 }
-System.err.println("Episode tag "+annotation.getLayerId() + " " + annotation.getChange());
 	 switch (annotation.getChange())
 	 {
 	    case Create:
@@ -5308,7 +5307,7 @@ System.err.println("Episode tag "+annotation.getLayerId() + " " + annotation.get
 		  }
 		  if (annotation.containsKey("data"))
 		  {
-		     sql.setBytes(8, annotation.get("data").toString().getBytes());
+		     sql.setBytes(8, (byte[])annotation.get("data"));
 		  }
 		  else
 		  {
@@ -5338,7 +5337,6 @@ System.err.println("Episode tag "+annotation.getLayerId() + " " + annotation.get
 	       Object[] o = fmtAnnotationId.parse(annotation.getId());
 	       Long layerId = (Long)o[1];
 	       Long annotationId = (Long)o[2];
-System.err.println("Updating " + annotation.getId() + " annotation_id " + annotationId + " layer_id " + layerId + " label " + annotation.getLabel());
 	       PreparedStatement sql = getConnection().prepareStatement(
 		  "UPDATE `annotation_layer_"+layerId+"`"
 		  + " SET label = ?, label_status = ?, "
@@ -5368,7 +5366,7 @@ System.err.println("Updating " + annotation.getId() + " annotation_id " + annota
 		  }
 		  if (annotation.containsKey("data"))
 		  {
-		     sql.setBytes(6, annotation.get("data").toString().getBytes());
+		     sql.setBytes(6, (byte[])annotation.get("data"));
 		  }
 		  else
 		  {
