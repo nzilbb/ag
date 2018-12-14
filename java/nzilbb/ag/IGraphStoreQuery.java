@@ -460,5 +460,16 @@ public interface IGraphStoreQuery
     */
    public String getMedia(String id, String trackSuffix, String mimeType) 
       throws StoreException, PermissionException, GraphNotFoundException;
-   
+
+   /**
+    * Get a list of documents associated with the episode of the given graph.
+    * @param id The graph ID.
+    * @return List of URLs to documents.
+    * @throws StoreException If an error prevents the media from being saved.
+    * @throws PermissionException If saving the media is not permitted.
+    * @throws GraphNotFoundException If the graph doesn't exist.
+    */
+   public MediaFile[] getEpisodeDocuments(String id)
+      throws StoreException, PermissionException, GraphNotFoundException;
+
 } // end of interface IGraphStoreQuery
