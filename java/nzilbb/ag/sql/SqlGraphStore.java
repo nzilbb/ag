@@ -5280,21 +5280,23 @@ public class SqlGraphStore
 	       try
 	       {
 		  int familyId = (Integer)annotation.getGraph().get("@family_id");
-		  if (!layer.getPeers())
+		  // delete any other annotations on this layer
+		  PreparedStatement sqlDelete = getConnection().prepareStatement(
+		     "DELETE FROM `annotation_layer_"+layerId+"` WHERE family_id = ?"
+		     // if peers are allowed, only delete peers that have the same label
+		     // (so as not to double-up)
+		     +(layer.getPeers()?" AND label = ?":""));
+		  try
 		  {
-		     // delete any other annotations
-		     PreparedStatement sqlDelete = getConnection().prepareStatement(
-			"DELETE FROM `annotation_layer_"+layerId+"` WHERE family_id = ?");
-		     try
-		     {
-			sqlDelete.setInt(1, familyId);
-			sqlDelete.executeUpdate();
-		     }
-		     finally
-		     {
-			sqlDelete.close();
-		     }
+		     sqlDelete.setInt(1, familyId);
+		     if (layer.getPeers()) sqlDelete.setString(2, annotation.getLabel());
+		     sqlDelete.executeUpdate();
 		  }
+		  finally
+		  {
+		     sqlDelete.close();
+		  }
+
 		  sql.setInt(1, familyId);
 		  sql.setString(2, annotation.getLabel());
 		  sql.setInt(3, annotation.getConfidence());
