@@ -3779,7 +3779,7 @@ public class SqlGraphStore
 		  { // special layer annotation
 		     saveSpecialAnnotationChanges(annotation, participantNameToNumber);
 		  }
-		  else if ("E".equals(annotation.getLayer().get("@scope")))
+		  else if (annotation.getLayer().getAncestors().contains(graph.getLayer("episode")))
 		  { // episode tag annotation
 		     saveEpisodeAnnotationChanges(annotation, sqlLastId);
 		  }
@@ -5068,6 +5068,9 @@ public class SqlGraphStore
 		  Object[] annotationIdParts = {
 		     getLayer(annotation.getLayerId()).get("@layer_id"), ""+familyId};
 		  annotation.setId(fmtMetaAnnotationId.format(annotationIdParts));
+
+		  // also update graph
+		  annotation.getGraph().put("@family_id", familyId);		  
 		  break;
 	       }
 	    } // switch on change type
@@ -5268,7 +5271,8 @@ public class SqlGraphStore
 	 {
 	    case Create:
 	    {
-	       Integer layerId = (Integer)getLayer(annotation.getLayerId()).get("@layer_id");
+	       Layer layer = getLayer(annotation.getLayerId());
+	       Integer layerId = (Integer)layer.get("@layer_id");
 	       PreparedStatement sql = getConnection().prepareStatement(
 		  "INSERT INTO `annotation_layer_"+layerId+"`"
 		  +" (family_id, label, label_status, parent_id, ordinal, annotated_by, annotated_when, data)"
@@ -5276,6 +5280,21 @@ public class SqlGraphStore
 	       try
 	       {
 		  int familyId = (Integer)annotation.getGraph().get("@family_id");
+		  if (!layer.getPeers())
+		  {
+		     // delete any other annotations
+		     PreparedStatement sqlDelete = getConnection().prepareStatement(
+			"DELETE FROM `annotation_layer_"+layerId+"` WHERE family_id = ?");
+		     try
+		     {
+			sqlDelete.setInt(1, familyId);
+			sqlDelete.executeUpdate();
+		     }
+		     finally
+		     {
+			sqlDelete.close();
+		     }
+		  }
 		  sql.setInt(1, familyId);
 		  sql.setString(2, annotation.getLabel());
 		  sql.setInt(3, annotation.getConfidence());
