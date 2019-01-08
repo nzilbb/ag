@@ -373,7 +373,7 @@ public class EAFDeserializer
     */
    public Double getMinimumTurnPauseLength()
    {
-      if (minimumTurnPauseLength == null) minimumTurnPauseLength = new Double(0.0);
+      if (minimumTurnPauseLength == null) minimumTurnPauseLength = Double.valueOf(0.0);
       return minimumTurnPauseLength;
    }
    /**
@@ -392,7 +392,7 @@ public class EAFDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "ELAN EAF Transcript", "0.4", "text/x-eaf+xml", ".eaf", "20170314.1631", getClass().getResource("icon.png"));
+	 "ELAN EAF Transcript", "0.5", "text/x-eaf+xml", ".eaf", "20170314.1631", getClass().getResource("icon.png"));
    }
    
    /**
@@ -429,6 +429,7 @@ public class EAFDeserializer
     */
    public void setTokenizer(IGraphTransformer newTokenizer) { tokenizer = newTokenizer; }
 
+   private boolean mappingsDependOnTurn = false;
    // Methods:
    
    /**
@@ -678,7 +679,7 @@ public class EAFDeserializer
       }
       if (configuration.get("minimumTurnPauseLength").getValue() == null)
       {
-	 configuration.get("minimumTurnPauseLength").setValue(new Double(0.0));
+	 configuration.get("minimumTurnPauseLength").setValue(Double.valueOf(0.0));
       }
 
       return configuration;
@@ -874,6 +875,7 @@ public class EAFDeserializer
       int iTurnLayerMapped = 0;
       int iUtteranceLayerMapped = 0;
       int iWordLayerMapped = 0;
+      mappingsDependOnTurn = false;
       for (int t = 0; t < tiers.getLength(); t++)
       {
 	 Node tier = tiers.item(t);
@@ -881,6 +883,12 @@ public class EAFDeserializer
 	 Layer layer = (Layer)mappings.get("tier"+t).getValue();
 	 if (layer != null)
 	 {
+	    if (layer.equals(getTurnLayer())
+		|| layer.getAncestors().contains(getTurnLayer()))
+	    {
+	       mappingsDependOnTurn = true;
+	    }
+	    
 	    if (layer.equals(getTurnLayer()))
 	    {
 	       iTurnLayerMapped++;
@@ -895,10 +903,11 @@ public class EAFDeserializer
 	    }
 	 }
       }
-      if (iTurnLayerMapped + iUtteranceLayerMapped + iWordLayerMapped == 0)
+      if (iTurnLayerMapped + iUtteranceLayerMapped + iWordLayerMapped == 0
+	 && mappingsDependOnTurn)
       {
 	 throw new SerializationParametersMissingException(
-	    "There are no turn, utterance, or word mappings");
+	    "There are no turn, utterance, or word mappings, but at least one is required");
       }
       String sTimeUnits = "milliseconds";
       try
@@ -941,10 +950,13 @@ public class EAFDeserializer
    public Graph[] deserialize() 
       throws SerializerNotConfiguredException, SerializationParametersMissingException, SerializationException
    {
-      if (participantLayer == null) throw new SerializerNotConfiguredException("Participant layer not set");
-      if (turnLayer == null) throw new SerializerNotConfiguredException("Turn layer not set");
-      if (utteranceLayer == null) throw new SerializerNotConfiguredException("Utterance layer not set");
-      if (wordLayer == null) throw new SerializerNotConfiguredException("Word layer not set");
+      if (mappingsDependOnTurn)
+      {
+	 if (participantLayer == null) throw new SerializerNotConfiguredException("Participant layer not set");
+	 if (turnLayer == null) throw new SerializerNotConfiguredException("Turn layer not set");
+	 if (utteranceLayer == null) throw new SerializerNotConfiguredException("Utterance layer not set");
+	 if (wordLayer == null) throw new SerializerNotConfiguredException("Word layer not set");
+      }
       if (schema == null) throw new SerializerNotConfiguredException("Layer schema not set");
 
       // if there are errors, accumulate as many as we can before throwing SerializationException
@@ -958,16 +970,19 @@ public class EAFDeserializer
       Anchor graphStart = graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL);
 
       // add layers to the graph
-      // we don't just copy the whole schema, because that would imply that all the extra layers
-      // contained no annotations, which is not necessarily true
-      graph.addLayer((Layer)participantLayer.clone());
-      graph.getSchema().setParticipantLayerId(participantLayer.getId());
-      graph.addLayer((Layer)turnLayer.clone());
-      graph.getSchema().setTurnLayerId(turnLayer.getId());
-      graph.addLayer((Layer)utteranceLayer.clone());
-      graph.getSchema().setUtteranceLayerId(utteranceLayer.getId());
-      graph.addLayer((Layer)wordLayer.clone());
-      graph.getSchema().setWordLayerId(wordLayer.getId());
+      if (mappingsDependOnTurn)
+      {
+	 // we don't just copy the whole schema, because that would imply that all the extra layers
+	 // contained no annotations, which is not necessarily true
+	 graph.addLayer((Layer)participantLayer.clone());
+	 graph.getSchema().setParticipantLayerId(participantLayer.getId());
+	 graph.addLayer((Layer)turnLayer.clone());
+	 graph.getSchema().setTurnLayerId(turnLayer.getId());
+	 graph.addLayer((Layer)utteranceLayer.clone());
+	 graph.getSchema().setUtteranceLayerId(utteranceLayer.getId());
+	 graph.addLayer((Layer)wordLayer.clone());
+	 graph.getSchema().setWordLayerId(wordLayer.getId());
+      }
       if (authorLayer != null) graph.addLayer((Layer)authorLayer.clone());
       if (dateLayer != null) graph.addLayer((Layer)dateLayer.clone());
       if (languageLayer != null) graph.addLayer((Layer)languageLayer.clone());
@@ -1018,7 +1033,7 @@ public class EAFDeserializer
 	       String sTimeValue = ((Attr)timeslot.getAttributes().getNamedItem("TIME_VALUE")).getValue();
 	       mTimeslotIdToAnchor.put(sTimeSlotId, new Anchor(
 					  sTimeSlotId,
-					  new Double(timeFactor * Double.parseDouble(sTimeValue)),
+					  Double.valueOf(timeFactor * Double.parseDouble(sTimeValue)),
 					  Constants.CONFIDENCE_MANUAL));
 	    }
 	    catch(NullPointerException exception)
@@ -1031,8 +1046,7 @@ public class EAFDeserializer
       catch(XPathExpressionException x)
       {
 	 throw new SerializationException("Error finding TIME_SLOT tags: " + x);
-      }
-	 
+      }	 
 
       // this map keys by the ELAN ANNOTATION_ID
       HashMap<String,Annotation> mAnnotationIdToAnnotation = new HashMap<String,Annotation>();
@@ -1068,23 +1082,26 @@ public class EAFDeserializer
 	 } // tier is mapped to a layer
       } // next tier
 
-      if (!wordLayerMapped) 
+      if (mappingsDependOnTurn)
       {
-	 // add convention layers, as we'll be breaking utterances into tokens
-	 if (lexicalLayer != null) graph.addLayer((Layer)lexicalLayer.clone());
-	 if (pronounceLayer != null) graph.addLayer((Layer)pronounceLayer.clone());
-	 if (commentLayer != null) graph.addLayer((Layer)commentLayer.clone());
-	 if (noiseLayer != null) graph.addLayer((Layer)noiseLayer.clone());	 
-      }
-
-      // are at least two of turn/utterance/word are mapped?
-      // i.e. one for speaker name and other for transcription
-      if((turnLayerMapped && utteranceLayerMapped)
-	 || (turnLayerMapped && wordLayerMapped)
-	 || (utteranceLayerMapped && wordLayerMapped)
-	 )
-      {
-	 setUtterancesAreSpeakerNames(true);
+	 if (!wordLayerMapped) 
+	 {
+	    // add convention layers, as we'll be breaking utterances into tokens
+	    if (lexicalLayer != null) graph.addLayer((Layer)lexicalLayer.clone());
+	    if (pronounceLayer != null) graph.addLayer((Layer)pronounceLayer.clone());
+	    if (commentLayer != null) graph.addLayer((Layer)commentLayer.clone());
+	    if (noiseLayer != null) graph.addLayer((Layer)noiseLayer.clone());	 
+	 }
+	 
+	 // are at least two of turn/utterance/word are mapped?
+	 // i.e. one for speaker name and other for transcription
+	 if((turnLayerMapped && utteranceLayerMapped)
+	    || (turnLayerMapped && wordLayerMapped)
+	    || (utteranceLayerMapped && wordLayerMapped)
+	    )
+	 {
+	    setUtterancesAreSpeakerNames(true);
+	 }
       }
 
       int iLastWordOrdinal = 0;
@@ -1247,132 +1264,86 @@ public class EAFDeserializer
 	 } // next utterance
       } // both utterance and turn layers mapped
 
-      // now we have turns with participant name labels, 
-      // and utterances with parents, that maybe need tokenizing
-
-      // ensure participants are set
-      HashMap<String,Annotation> participantsByName = new HashMap<String,Annotation>();
-      int ordinal = 1;
-      for (Annotation turn : graph.list(turnLayer.getId()))
+      if (mappingsDependOnTurn)
       {
-	 if (!participantsByName.containsKey(turn.getLabel()))
-	 { // create participant
-	    Annotation who = new Annotation(null, turn.getLabel(), participantLayer.getId());
-	    graph.addAnnotation(who);
-	    participantsByName.put(turn.getLabel(), who);
-	 }
-	 // set ordinal first, then don't allow appending in setParent, to save a performance hit
-	 turn.setOrdinal(participantsByName.get(turn.getLabel()).getAnnotations(turnLayer.getId()).size() + 1);
-	 turn.setParent(participantsByName.get(turn.getLabel()), false);
-     } // next turn
-
-      // join subsequent turns by the same speaker...
-      // for each participant (assumed to be parent of turn)
-      for (Annotation participant : graph.list(participantLayer.getId()))
-      {
-	 TreeSet<Annotation> annotations = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
-	 annotations.addAll(participant.getAnnotations(turnLayer.getId()));
-	 Annotation[] turns = annotations.toArray(new Annotation[0]);
-	 // go back through all the turns, looking for a turn for the same speaker that is
-	 // joined to, or overlaps, this one
-	 for (int i = turns.length - 2; i >= 0; i--)
+	 // now we have turns with participant name labels, 
+	 // and utterances with parents, that maybe need tokenizing
+	 
+	 // ensure participants are set
+	 HashMap<String,Annotation> participantsByName = new HashMap<String,Annotation>();
+	 int ordinal = 1;
+	 for (Annotation turn : graph.list(turnLayer.getId()))
 	 {
-	    Annotation preceding = turns[i];
-	    Annotation following = turns[i + 1];
-	    boolean mergeTurns = false;
-	    if (preceding.getEnd().getOffset() != null
-		&& following.getStart().getOffset() != null)
+	    if (!participantsByName.containsKey(turn.getLabel()))
+	    { // create participant
+	       Annotation who = new Annotation(null, turn.getLabel(), participantLayer.getId());
+	       graph.addAnnotation(who);
+	       participantsByName.put(turn.getLabel(), who);
+	    }
+	    // set ordinal first, then don't allow appending in setParent, to save a performance hit
+	    turn.setOrdinal(participantsByName.get(turn.getLabel()).getAnnotations(turnLayer.getId()).size() + 1);
+	    turn.setParent(participantsByName.get(turn.getLabel()), false);
+	 } // next turn
+	 
+	 // join subsequent turns by the same speaker...
+	 // for each participant (assumed to be parent of turn)
+	 for (Annotation participant : graph.list(participantLayer.getId()))
+	 {
+	    TreeSet<Annotation> annotations = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
+	    annotations.addAll(participant.getAnnotations(turnLayer.getId()));
+	    Annotation[] turns = annotations.toArray(new Annotation[0]);
+	    // go back through all the turns, looking for a turn for the same speaker that is
+	    // joined to, or overlaps, this one
+	    for (int i = turns.length - 2; i >= 0; i--)
 	    {
-	       if (preceding.getEnd().getOffset() >= following.getStart().getOffset())
+	       Annotation preceding = turns[i];
+	       Annotation following = turns[i + 1];
+	       boolean mergeTurns = false;
+	       if (preceding.getEnd().getOffset() != null
+		   && following.getStart().getOffset() != null)
 	       {
-		  mergeTurns = true;
-	       }
-	       else if (getMinimumTurnPauseLength() > 0
-			&& preceding.getEnd().getOffset() + getMinimumTurnPauseLength() >= following.getStart().getOffset())
-	       { // there is a short enough pause between two turns of the same participant
-		  // but there also must be no intervening speakers
-		  if (graph.overlappingAnnotations(
-			 preceding.getEnd(), following.getStart(), turnLayer.getId())
-		      .length == 0)
+		  if (preceding.getEnd().getOffset() >= following.getStart().getOffset())
 		  {
 		     mergeTurns = true;
 		  }
+		  else if (getMinimumTurnPauseLength() > 0
+			   && preceding.getEnd().getOffset() + getMinimumTurnPauseLength() >= following.getStart().getOffset())
+		  { // there is a short enough pause between two turns of the same participant
+		     // but there also must be no intervening speakers
+		     if (graph.overlappingAnnotations(
+			    preceding.getEnd(), following.getStart(), turnLayer.getId())
+			 .length == 0)
+		     {
+			mergeTurns = true;
+		     }
+		  }
 	       }
-	    }
-	    if (mergeTurns)
-	    {
-	       mergeTurns(preceding, following);
-	       following.destroy();
-	    }
-	 } // next preceding turn
-      } // next turn parent
-      graph.commit();
-      
-      // now we have participants,
-      // and rationalized turns with participant name labels and parents, 
-      // and utterances with parents, that maybe need tokenizing
+	       if (mergeTurns)
+	       {
+		  mergeTurns(preceding, following);
+		  following.destroy();
+	       }
+	    } // next preceding turn
+	 } // next turn parent
 
-      if (!wordLayerMapped)
-      { // tokenize utterances and apply conventions
-	 // ensure we have an utterance tokenizer
-	 if (getTokenizer() == null)
-	 {
-	    setTokenizer(new SimpleTokenizer(getUtteranceLayer().getId(), getWordLayer().getId()));
-	 }
-	 try
-	 {
-	    tokenizer.transform(graph);
-	    // TODO annotation.setAnnotator(...) for all tokens, from the tier's settings.
-
-	 }
-	 catch(TransformationException exception)
-	 {
-	    if (errors == null) errors = new SerializationException();
-	    if (errors.getCause() == null) errors.initCause(exception);
-	    errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
-	 }
 	 graph.commit();
-	 if (getUseConventions())
-	 {
+	 
+	 // now we have participants,
+	 // and rationalized turns with participant name labels and parents, 
+	 // and utterances with parents, that maybe need tokenizing
+	 
+	 if (!wordLayerMapped)
+	 { // tokenize utterances and apply conventions
+	    // ensure we have an utterance tokenizer
+	    if (getTokenizer() == null)
+	    {
+	       setTokenizer(new SimpleTokenizer(getUtteranceLayer().getId(), getWordLayer().getId()));
+	    }
 	    try
 	    {
-	       // word {comment comment} word
-	       SpanningConventionTransformer commentTransformer = new SpanningConventionTransformer(
-		  getWordLayer().getId(), "\\{(.*)", "(.*)\\}", true, null, null, 
-		  commentLayer==null?null:commentLayer.getId(), "$1", "$1", false, false);
-	       commentTransformer.transform(graph);
-	       graph.commit();
+	       tokenizer.transform(graph);
+	       // TODO annotation.setAnnotator(...) for all tokens, from the tier's settings.
 	       
-	       // word [noise noise] word
-	       SpanningConventionTransformer noiseTransformer = new SpanningConventionTransformer(
-		  getWordLayer().getId(), "\\[(.*)", "(.*)\\]", true, null, null, 
-		  noiseLayer==null?null:noiseLayer.getId(), "$1", "$1", false, false);
-	       noiseTransformer.transform(graph);
-	       graph.commit();
-	       
-	       // word[pronounce]
-	       ConventionTransformer pronounceTransformer = new ConventionTransformer(
-		  getWordLayer().getId(), "(.*)\\[(.*)\\]", "$1", 
-		  pronounceLayer==null?null:pronounceLayer.getId(), "$2");
-	       pronounceTransformer.transform(graph);
-	       graph.commit();
-	       
-	       // word(lexical)
-	       ConventionTransformer lexicalTransformer = new ConventionTransformer(
-		  getWordLayer().getId(), "(.*)\\((.*)\\)", "$1", 
-		  lexicalLayer==null?null:lexicalLayer.getId(), "$2");
-	       lexicalTransformer.transform(graph);
-	       graph.commit();
-
-	       // run word[pronounce] again, in case some were masked by lexical tags:
-	       // word[pronounce](lexical)
-	       pronounceTransformer.transform(graph);
-	       graph.commit();
-
-	       // clump non-orthographic 'words' with real words
-	       OrthographyClumper clumper = new OrthographyClumper(wordLayer.getId());	  
-	       clumper.transform(graph);
-	       graph.commit();
 	    }
 	    catch(TransformationException exception)
 	    {
@@ -1380,88 +1351,139 @@ public class EAFDeserializer
 	       if (errors.getCause() == null) errors.initCause(exception);
 	       errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
 	    }
-	 } // apply transcription conventions
-      } // tokenize utterances
-      else
-      { // word layer mapped
-	 // ensure word parent turns are set
-	 for (Annotation word : graph.list(wordLayer.getId()))
-	 {
-	    if (word.getParent() == null)
+	    graph.commit();
+	    if (getUseConventions())
 	    {
-	       Annotation[] possibleTurns = word.includingAnnotationsOn(turnLayer.getId());
-	       if (possibleTurns.length == 1)
-	       { // must be this one
-		  word.setParent(possibleTurns[0]);
+	       try
+	       {
+		  // word {comment comment} word
+		  SpanningConventionTransformer commentTransformer = new SpanningConventionTransformer(
+		     getWordLayer().getId(), "\\{(.*)", "(.*)\\}", true, null, null, 
+		     commentLayer==null?null:commentLayer.getId(), "$1", "$1", false, false);
+		  commentTransformer.transform(graph);
+		  graph.commit();
+		  
+		  // word [noise noise] word
+		  SpanningConventionTransformer noiseTransformer = new SpanningConventionTransformer(
+		     getWordLayer().getId(), "\\[(.*)", "(.*)\\]", true, null, null, 
+		     noiseLayer==null?null:noiseLayer.getId(), "$1", "$1", false, false);
+		  noiseTransformer.transform(graph);
+		  graph.commit();
+		  
+		  // word[pronounce]
+		  ConventionTransformer pronounceTransformer = new ConventionTransformer(
+		     getWordLayer().getId(), "(.*)\\[(.*)\\]", "$1", 
+		     pronounceLayer==null?null:pronounceLayer.getId(), "$2");
+		  pronounceTransformer.transform(graph);
+		  graph.commit();
+		  
+		  // word(lexical)
+		  ConventionTransformer lexicalTransformer = new ConventionTransformer(
+		     getWordLayer().getId(), "(.*)\\((.*)\\)", "$1", 
+		     lexicalLayer==null?null:lexicalLayer.getId(), "$2");
+		  lexicalTransformer.transform(graph);
+		  graph.commit();
+		  
+		  // run word[pronounce] again, in case some were masked by lexical tags:
+		  // word[pronounce](lexical)
+		  pronounceTransformer.transform(graph);
+		  graph.commit();
+		  
+		  // clump non-orthographic 'words' with real words
+		  OrthographyClumper clumper = new OrthographyClumper(wordLayer.getId());	  
+		  clumper.transform(graph);
+		  graph.commit();
 	       }
-	       else if (possibleTurns.length > 1)
-	       { // multiple possible turns
-		  // use the turn whose label is included in the utterance's tier name
-		  // e.g. the turn might be "John Smith" and the utterance tier might be "utterance - John Smith"
-		  String wordTier = (String)word.get("@tierId");
-		  String wordParticipant = (String)word.get("@participant");
-		  Annotation turn = null;
-		  for (Annotation possibleTurn : possibleTurns)
-		  {
-		     // is the label (the speaker) a part of the utterance's tier name?
-		     if (wordTier.indexOf(possibleTurn.getLabel()) >= 0
-			 || wordParticipant.equals(possibleTurn.getLabel()))
-		     {
-			// multiple parents could match 
-			// e.g. "sp1" and "Interviewer sp1" both are suffixes of "word - Interviewer sp1"
-			// so we go with the longest one
-			if (turn == null
-			    || possibleTurn.getLabel().length() > turn.getLabel().length())
-			{
-			   turn = possibleTurn;
-			} // longest match so far
-		     } // label is a part of the tier name
-		  } // next possible turn
-		  if (turn != null) word.setParent(turn);
-	       } // multiple possible turns
-	    } // parent not set
-	    if (word.getParent() == null)
-	    { // parent still not set
-	       // maybe children don't quite line up with parents, so use midpoint-including instead
-	       Annotation[] possibleTurns = word.midpointIncludingAnnotationsOn(turnLayer.getId());
-	       if (possibleTurns.length == 1)
-	       { // must be this one
-		  word.setParent(possibleTurns[0]);
+	       catch(TransformationException exception)
+	       {
+		  if (errors == null) errors = new SerializationException();
+		  if (errors.getCause() == null) errors.initCause(exception);
+		  errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
 	       }
-	       else if (possibleTurns.length > 1)
-	       { // multiple possible turns
-		  // use the turn whose label is included in the utterance's tier name
-		  // e.g. the turn might be "John Smith" and the utterance tier might be "utterance - John Smith"
-		  String wordTier = (String)word.get("@tierId");
-		  String wordParticipant = (String)word.get("@participant");
-		  Annotation turn = null;
-		  for (Annotation possibleTurn : possibleTurns)
-		  {
-		     // is the label (the speaker) a part of the utterance's tier name?
-		     if (wordTier.indexOf(possibleTurn.getLabel()) >= 0
-			 || wordParticipant.equals(possibleTurn.getLabel()))
+	    } // apply transcription conventions
+	 } // tokenize utterances
+	 else
+	 { // word layer mapped
+	    // ensure word parent turns are set
+	    for (Annotation word : graph.list(wordLayer.getId()))
+	    {
+	       if (word.getParent() == null)
+	       {
+		  Annotation[] possibleTurns = word.includingAnnotationsOn(turnLayer.getId());
+		  if (possibleTurns.length == 1)
+		  { // must be this one
+		     word.setParent(possibleTurns[0]);
+		  }
+		  else if (possibleTurns.length > 1)
+		  { // multiple possible turns
+		     // use the turn whose label is included in the utterance's tier name
+		     // e.g. the turn might be "John Smith" and the utterance tier might be "utterance - John Smith"
+		     String wordTier = (String)word.get("@tierId");
+		     String wordParticipant = (String)word.get("@participant");
+		     Annotation turn = null;
+		     for (Annotation possibleTurn : possibleTurns)
 		     {
-			// multiple parents could match 
-			// e.g. "sp1" and "Interviewer sp1" both are suffixes of "word - Interviewer sp1"
-			// so we go with the longest one
-			if (turn == null
-			    || possibleTurn.getLabel().length() > turn.getLabel().length())
+			// is the label (the speaker) a part of the utterance's tier name?
+			if (wordTier.indexOf(possibleTurn.getLabel()) >= 0
+			    || wordParticipant.equals(possibleTurn.getLabel()))
 			{
-			   turn = possibleTurn;
-			} // longest match so far
-		     } // label is a part of the tier name
-		  } // next possible turn
-		  if (turn != null) word.setParent(turn);
-	       } // multiple possible turns
-	    } // parent still not set
-	 } // next utterance
-      } // word layer mapped
-
-      // now we have participants,
-      // and turns with participant name labels and parents, 
-      // and utterances with parents
-      // and words with parents
-
+			   // multiple parents could match 
+			   // e.g. "sp1" and "Interviewer sp1" both are suffixes of "word - Interviewer sp1"
+			   // so we go with the longest one
+			   if (turn == null
+			       || possibleTurn.getLabel().length() > turn.getLabel().length())
+			   {
+			      turn = possibleTurn;
+			   } // longest match so far
+			} // label is a part of the tier name
+		     } // next possible turn
+		     if (turn != null) word.setParent(turn);
+		  } // multiple possible turns
+	       } // parent not set
+	       if (word.getParent() == null)
+	       { // parent still not set
+		  // maybe children don't quite line up with parents, so use midpoint-including instead
+		  Annotation[] possibleTurns = word.midpointIncludingAnnotationsOn(turnLayer.getId());
+		  if (possibleTurns.length == 1)
+		  { // must be this one
+		     word.setParent(possibleTurns[0]);
+		  }
+		  else if (possibleTurns.length > 1)
+		  { // multiple possible turns
+		     // use the turn whose label is included in the utterance's tier name
+		     // e.g. the turn might be "John Smith" and the utterance tier might be "utterance - John Smith"
+		     String wordTier = (String)word.get("@tierId");
+		     String wordParticipant = (String)word.get("@participant");
+		     Annotation turn = null;
+		     for (Annotation possibleTurn : possibleTurns)
+		     {
+			// is the label (the speaker) a part of the utterance's tier name?
+			if (wordTier.indexOf(possibleTurn.getLabel()) >= 0
+			    || wordParticipant.equals(possibleTurn.getLabel()))
+			{
+			   // multiple parents could match 
+			   // e.g. "sp1" and "Interviewer sp1" both are suffixes of "word - Interviewer sp1"
+			   // so we go with the longest one
+			   if (turn == null
+			       || possibleTurn.getLabel().length() > turn.getLabel().length())
+			   {
+			      turn = possibleTurn;
+			   } // longest match so far
+			} // label is a part of the tier name
+		     } // next possible turn
+		     if (turn != null) word.setParent(turn);
+		  } // multiple possible turns
+	       } // parent still not set
+	    } // next utterance
+	 } // word layer mapped
+	 
+	 // now we have participants,
+	 // and turns with participant name labels and parents, 
+	 // and utterances with parents
+	 // and words with parents
+	 
+      } // mappingsDependOnTurn
+      
       // need to ensure that other required parents are set
       for (Annotation a : graph.getAnnotationsById().values())
       {

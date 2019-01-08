@@ -81,12 +81,12 @@ public class TestEAFDeserializer
 		   ((Layer)configuration.get("languageLayer").getValue()).getId());
       assertEquals("useConventions", Boolean.TRUE, 
 		   (Boolean)configuration.get("useConventions").getValue());
-      assertEquals("minimumTurnPauseLength", new Double(0.0), 
+      assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
 		   (Double)configuration.get("minimumTurnPauseLength").getValue());
       
-      configuration.get("minimumTurnPauseLength").setValue(new Double(0.5));
+      configuration.get("minimumTurnPauseLength").setValue(Double.valueOf(0.5));
       assertEquals(9, deserializer.configure(configuration, schema).size());
-      assertEquals("customize minimumTurnPauseLength", new Double(0.5), 
+      assertEquals("customize minimumTurnPauseLength", Double.valueOf(0.5), 
 		   deserializer.getMinimumTurnPauseLength());
 
       // load the stream
@@ -128,82 +128,82 @@ public class TestEAFDeserializer
       // turns
       Annotation[] turns = g.list("turn");
       assertEquals(13, turns.length);
-      assertEquals(new Double(4.675), turns[0].getStart().getOffset());
-      assertEquals(new Double(6.752), turns[0].getEnd().getOffset());
+      assertEquals(Double.valueOf(4.675), turns[0].getStart().getOffset());
+      assertEquals(Double.valueOf(6.752), turns[0].getEnd().getOffset());
       assertEquals("participant", turns[0].getLabel());
       assertEquals(who[1], turns[0].getParent());
       
       assertEquals("turn after long pause not merged back to turn before pause",
-		   new Double(7.658), turns[1].getStart().getOffset());
+		   Double.valueOf(7.658), turns[1].getStart().getOffset());
       assertEquals("turn after pause merged back to turn before pause",
-		   new Double(14.889000000000001), turns[1].getEnd().getOffset());
+		   Double.valueOf(14.889000000000001), turns[1].getEnd().getOffset());
       assertEquals("participant", turns[1].getLabel());
       assertEquals(who[1], turns[1].getParent());
       
-      assertEquals(new Double(14.889000000000001), turns[2].getStart().getOffset());
-      assertEquals(new Double(23.170), turns[2].getEnd().getOffset());
+      assertEquals(Double.valueOf(14.889000000000001), turns[2].getStart().getOffset());
+      assertEquals(Double.valueOf(23.170), turns[2].getEnd().getOffset());
       assertEquals("interviewer", turns[2].getLabel());
       assertEquals(who[0], turns[2].getParent());
 
-      assertEquals(new Double(17.983), turns[3].getStart().getOffset());
-      assertEquals(new Double(140.366), turns[3].getEnd().getOffset());
+      assertEquals(Double.valueOf(17.983), turns[3].getStart().getOffset());
+      assertEquals(Double.valueOf(140.366), turns[3].getEnd().getOffset());
       assertEquals("participant", turns[3].getLabel());
 
-      assertEquals(new Double(140.366), turns[4].getStart().getOffset());
-      assertEquals(new Double(159.457), turns[4].getEnd().getOffset());
+      assertEquals(Double.valueOf(140.366), turns[4].getStart().getOffset());
+      assertEquals(Double.valueOf(159.457), turns[4].getEnd().getOffset());
       assertEquals("interviewer", turns[4].getLabel());
 
-      assertEquals(new Double(159.457), turns[5].getStart().getOffset());
-      assertEquals(new Double(282.871), turns[5].getEnd().getOffset());
+      assertEquals(Double.valueOf(159.457), turns[5].getStart().getOffset());
+      assertEquals(Double.valueOf(282.871), turns[5].getEnd().getOffset());
       assertEquals("participant", turns[5].getLabel());
 
-      assertEquals(new Double(282.871), turns[6].getStart().getOffset());
-      assertEquals(new Double(283.96500000000003), turns[6].getEnd().getOffset());
+      assertEquals(Double.valueOf(282.871), turns[6].getStart().getOffset());
+      assertEquals(Double.valueOf(283.96500000000003), turns[6].getEnd().getOffset());
       assertEquals("interviewer", turns[6].getLabel());
 
-      assertEquals(new Double(283.96500000000003), turns[7].getStart().getOffset());
-      assertEquals(new Double(310.60200000000003), turns[7].getEnd().getOffset());
+      assertEquals(Double.valueOf(283.96500000000003), turns[7].getStart().getOffset());
+      assertEquals(Double.valueOf(310.60200000000003), turns[7].getEnd().getOffset());
       assertEquals("participant", turns[7].getLabel());
 
       assertEquals("simultaneous speech",
-		   new Double(284.84000000000003), turns[8].getStart().getOffset());
+		   Double.valueOf(284.84000000000003), turns[8].getStart().getOffset());
       assertEquals("simultaneous speech",
-		   new Double(285.34000000000003), turns[8].getEnd().getOffset());
+		   Double.valueOf(285.34000000000003), turns[8].getEnd().getOffset());
       assertEquals("interviewer", turns[8].getLabel());
 
-      assertEquals(new Double(310.60200000000003), turns[9].getStart().getOffset());
-      assertEquals(new Double(311.071), turns[9].getEnd().getOffset());
+      assertEquals(Double.valueOf(310.60200000000003), turns[9].getStart().getOffset());
+      assertEquals(Double.valueOf(311.071), turns[9].getEnd().getOffset());
       assertEquals("interviewer", turns[9].getLabel());
 
-      assertEquals(new Double(311.071), turns[10].getStart().getOffset());
-      assertEquals(new Double(316.258), turns[10].getEnd().getOffset());
+      assertEquals(Double.valueOf(311.071), turns[10].getStart().getOffset());
+      assertEquals(Double.valueOf(316.258), turns[10].getEnd().getOffset());
       assertEquals("participant", turns[10].getLabel());
 
-      assertEquals(new Double(316.258), turns[11].getStart().getOffset());
-      assertEquals(new Double(317.195), turns[11].getEnd().getOffset());
+      assertEquals(Double.valueOf(316.258), turns[11].getStart().getOffset());
+      assertEquals(Double.valueOf(317.195), turns[11].getEnd().getOffset());
       assertEquals("interviewer", turns[11].getLabel());
 
-      assertEquals(new Double(317.195), turns[12].getStart().getOffset());
-      assertEquals(new Double(321.240), turns[12].getEnd().getOffset());
+      assertEquals(Double.valueOf(317.195), turns[12].getStart().getOffset());
+      assertEquals(Double.valueOf(321.240), turns[12].getEnd().getOffset());
       assertEquals("participant", turns[12].getLabel());
 
       // utterances
       Annotation[] utterances = g.list("utterance");
       assertEquals(148, utterances.length);
-      assertEquals(new Double(4.675), utterances[0].getStart().getOffset());
-      assertEquals(new Double(6.752), utterances[0].getEnd().getOffset());
+      assertEquals(Double.valueOf(4.675), utterances[0].getStart().getOffset());
+      assertEquals(Double.valueOf(6.752), utterances[0].getEnd().getOffset());
       assertEquals("participant", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
 
-      assertEquals(new Double(7.658), utterances[1].getStart().getOffset());
+      assertEquals(Double.valueOf(7.658), utterances[1].getStart().getOffset());
       assertEquals("turn after pause merged back to turn before pause",
-		   new Double(10.348), utterances[1].getEnd().getOffset());
+		   Double.valueOf(10.348), utterances[1].getEnd().getOffset());
       assertEquals("participant", utterances[1].getParent().getLabel());
       assertEquals("turn after long pause not merged back to turn before pause",
 		   turns[1], utterances[1].getParent());
 
-      assertEquals(new Double(14.889000000000001), utterances[4].getStart().getOffset());
-      assertEquals(new Double(15.639000000000001), utterances[4].getEnd().getOffset());
+      assertEquals(Double.valueOf(14.889000000000001), utterances[4].getStart().getOffset());
+      assertEquals(Double.valueOf(15.639000000000001), utterances[4].getEnd().getOffset());
       assertEquals("interviewer", utterances[4].getParent().getLabel());
       assertEquals(turns[2], utterances[4].getParent());
 
@@ -243,7 +243,7 @@ public class TestEAFDeserializer
       Annotation[] noises = g.list("noise");
       assertEquals("click", noises[0].getLabel());
       assertEquals("um --", noises[0].getStart().endOf("word").iterator().next().getLabel());
-      assertEquals(new Double(132.992), noises[0].getEnd().getOffset());
+      assertEquals(Double.valueOf(132.992), noises[0].getEnd().getOffset());
 
       assertEquals(1, noises.length);
 
@@ -308,7 +308,7 @@ public class TestEAFDeserializer
 		   ((Layer)configuration.get("languageLayer").getValue()).getId());
       assertEquals("useConventions", Boolean.TRUE, 
 		   (Boolean)configuration.get("useConventions").getValue());
-      assertEquals("minimumTurnPauseLength", new Double(0.0), 
+      assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
 		   (Double)configuration.get("minimumTurnPauseLength").getValue());
 
       // load the stream
@@ -362,73 +362,73 @@ public class TestEAFDeserializer
       // turns
       Annotation[] turns = g.list("turn");
       assertEquals(12, turns.length);
-      assertEquals(new Double(4.675), turns[0].getStart().getOffset());
-      assertEquals(new Double(14.889000000000001), turns[0].getEnd().getOffset());
+      assertEquals(Double.valueOf(4.675), turns[0].getStart().getOffset());
+      assertEquals(Double.valueOf(14.889000000000001), turns[0].getEnd().getOffset());
       assertEquals("participant", turns[0].getLabel());
       assertEquals(who[1], turns[0].getParent());
       
-      assertEquals(new Double(14.889000000000001), turns[1].getStart().getOffset());
-      assertEquals(new Double(23.170), turns[1].getEnd().getOffset());
+      assertEquals(Double.valueOf(14.889000000000001), turns[1].getStart().getOffset());
+      assertEquals(Double.valueOf(23.170), turns[1].getEnd().getOffset());
       assertEquals("interviewer", turns[1].getLabel());
       assertEquals(who[0], turns[1].getParent());
 
-      assertEquals(new Double(17.983), turns[2].getStart().getOffset());
-      assertEquals(new Double(140.366), turns[2].getEnd().getOffset());
+      assertEquals(Double.valueOf(17.983), turns[2].getStart().getOffset());
+      assertEquals(Double.valueOf(140.366), turns[2].getEnd().getOffset());
       assertEquals("participant", turns[2].getLabel());
 
-      assertEquals(new Double(140.366), turns[3].getStart().getOffset());
-      assertEquals(new Double(159.457), turns[3].getEnd().getOffset());
+      assertEquals(Double.valueOf(140.366), turns[3].getStart().getOffset());
+      assertEquals(Double.valueOf(159.457), turns[3].getEnd().getOffset());
       assertEquals("interviewer", turns[3].getLabel());
 
-      assertEquals(new Double(159.457), turns[4].getStart().getOffset());
-      assertEquals(new Double(282.871), turns[4].getEnd().getOffset());
+      assertEquals(Double.valueOf(159.457), turns[4].getStart().getOffset());
+      assertEquals(Double.valueOf(282.871), turns[4].getEnd().getOffset());
       assertEquals("participant", turns[4].getLabel());
 
-      assertEquals(new Double(282.871), turns[5].getStart().getOffset());
-      assertEquals(new Double(283.96500000000003), turns[5].getEnd().getOffset());
+      assertEquals(Double.valueOf(282.871), turns[5].getStart().getOffset());
+      assertEquals(Double.valueOf(283.96500000000003), turns[5].getEnd().getOffset());
       assertEquals("interviewer", turns[5].getLabel());
 
-      assertEquals(new Double(283.96500000000003), turns[6].getStart().getOffset());
-      assertEquals(new Double(310.60200000000003), turns[6].getEnd().getOffset());
+      assertEquals(Double.valueOf(283.96500000000003), turns[6].getStart().getOffset());
+      assertEquals(Double.valueOf(310.60200000000003), turns[6].getEnd().getOffset());
       assertEquals("participant", turns[6].getLabel());
 
       assertEquals("simultaneous speech",
-		   new Double(284.84000000000003), turns[7].getStart().getOffset());
+		   Double.valueOf(284.84000000000003), turns[7].getStart().getOffset());
       assertEquals("simultaneous speech",
-		   new Double(285.34000000000003), turns[7].getEnd().getOffset());
+		   Double.valueOf(285.34000000000003), turns[7].getEnd().getOffset());
       assertEquals("interviewer", turns[7].getLabel());
 
-      assertEquals(new Double(310.60200000000003), turns[8].getStart().getOffset());
-      assertEquals(new Double(311.071), turns[8].getEnd().getOffset());
+      assertEquals(Double.valueOf(310.60200000000003), turns[8].getStart().getOffset());
+      assertEquals(Double.valueOf(311.071), turns[8].getEnd().getOffset());
       assertEquals("interviewer", turns[8].getLabel());
 
-      assertEquals(new Double(311.071), turns[9].getStart().getOffset());
-      assertEquals(new Double(316.258), turns[9].getEnd().getOffset());
+      assertEquals(Double.valueOf(311.071), turns[9].getStart().getOffset());
+      assertEquals(Double.valueOf(316.258), turns[9].getEnd().getOffset());
       assertEquals("participant", turns[9].getLabel());
 
-      assertEquals(new Double(316.258), turns[10].getStart().getOffset());
-      assertEquals(new Double(317.195), turns[10].getEnd().getOffset());
+      assertEquals(Double.valueOf(316.258), turns[10].getStart().getOffset());
+      assertEquals(Double.valueOf(317.195), turns[10].getEnd().getOffset());
       assertEquals("interviewer", turns[10].getLabel());
 
-      assertEquals(new Double(317.195), turns[11].getStart().getOffset());
-      assertEquals(new Double(321.240), turns[11].getEnd().getOffset());
+      assertEquals(Double.valueOf(317.195), turns[11].getStart().getOffset());
+      assertEquals(Double.valueOf(321.240), turns[11].getEnd().getOffset());
       assertEquals("participant", turns[11].getLabel());
 
       // utterances
       Annotation[] utterances = g.list("utterance");
       assertEquals(148, utterances.length);
-      assertEquals(new Double(4.675), utterances[0].getStart().getOffset());
-      assertEquals(new Double(6.752), utterances[0].getEnd().getOffset());
+      assertEquals(Double.valueOf(4.675), utterances[0].getStart().getOffset());
+      assertEquals(Double.valueOf(6.752), utterances[0].getEnd().getOffset());
       assertEquals("participant", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
 
-      assertEquals(new Double(6.752), utterances[1].getStart().getOffset());
-      assertEquals(new Double(10.515), utterances[1].getEnd().getOffset());
+      assertEquals(Double.valueOf(6.752), utterances[1].getStart().getOffset());
+      assertEquals(Double.valueOf(10.515), utterances[1].getEnd().getOffset());
       assertEquals("participant", utterances[1].getParent().getLabel());
       assertEquals(turns[0], utterances[1].getParent());
 
-      assertEquals(new Double(14.889000000000001), utterances[4].getStart().getOffset());
-      assertEquals(new Double(15.639000000000001), utterances[4].getEnd().getOffset());
+      assertEquals(Double.valueOf(14.889000000000001), utterances[4].getStart().getOffset());
+      assertEquals(Double.valueOf(15.639000000000001), utterances[4].getEnd().getOffset());
       assertEquals("interviewer", utterances[4].getParent().getLabel());
       assertEquals(turns[1], utterances[4].getParent());
 
@@ -467,15 +467,15 @@ public class TestEAFDeserializer
       Annotation[] comments = g.list("comment");
       assertEquals(1, comments.length);
       assertEquals("unclear", comments[0].getLabel());
-      assertEquals(new Double(102.164), comments[0].getStart().getOffset());
-      assertEquals(new Double(102.424), comments[0].getEnd().getOffset());
+      assertEquals(Double.valueOf(102.164), comments[0].getStart().getOffset());
+      assertEquals(Double.valueOf(102.424), comments[0].getEnd().getOffset());
 
       // noise
       Annotation[] noises = g.list("noise");
       assertEquals(1, noises.length);
       assertEquals("click", noises[0].getLabel());
-      assertEquals(new Double(129.612), noises[0].getStart().getOffset());
-      assertEquals(new Double(130.242), noises[0].getEnd().getOffset());
+      assertEquals(Double.valueOf(129.612), noises[0].getStart().getOffset());
+      assertEquals(Double.valueOf(130.242), noises[0].getEnd().getOffset());
 
       // pronounce
       Annotation[] pronounce = g.list("pronounce");
@@ -529,7 +529,7 @@ public class TestEAFDeserializer
 		   ((Layer)configuration.get("languageLayer").getValue()).getId());
       assertEquals("useConventions", Boolean.TRUE, 
 		   (Boolean)configuration.get("useConventions").getValue());
-      assertEquals("minimumTurnPauseLength", new Double(0.0), 
+      assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
 		   (Double)configuration.get("minimumTurnPauseLength").getValue());
 
       // load the stream
@@ -584,73 +584,73 @@ public class TestEAFDeserializer
       // turns
       Annotation[] turns = g.list("turn");
       assertEquals(12, turns.length);
-      assertEquals(new Double(4.675), turns[0].getStart().getOffset());
-      assertEquals(new Double(14.889000000000001), turns[0].getEnd().getOffset());
+      assertEquals(Double.valueOf(4.675), turns[0].getStart().getOffset());
+      assertEquals(Double.valueOf(14.889000000000001), turns[0].getEnd().getOffset());
       assertEquals("participant", turns[0].getLabel());
       assertEquals(who[1], turns[0].getParent());
       
-      assertEquals(new Double(14.889000000000001), turns[1].getStart().getOffset());
-      assertEquals(new Double(23.170), turns[1].getEnd().getOffset());
+      assertEquals(Double.valueOf(14.889000000000001), turns[1].getStart().getOffset());
+      assertEquals(Double.valueOf(23.170), turns[1].getEnd().getOffset());
       assertEquals("interviewer", turns[1].getLabel());
       assertEquals(who[0], turns[1].getParent());
 
-      assertEquals(new Double(17.983), turns[2].getStart().getOffset());
-      assertEquals(new Double(140.366), turns[2].getEnd().getOffset());
+      assertEquals(Double.valueOf(17.983), turns[2].getStart().getOffset());
+      assertEquals(Double.valueOf(140.366), turns[2].getEnd().getOffset());
       assertEquals("participant", turns[2].getLabel());
 
-      assertEquals(new Double(140.366), turns[3].getStart().getOffset());
-      assertEquals(new Double(159.457), turns[3].getEnd().getOffset());
+      assertEquals(Double.valueOf(140.366), turns[3].getStart().getOffset());
+      assertEquals(Double.valueOf(159.457), turns[3].getEnd().getOffset());
       assertEquals("interviewer", turns[3].getLabel());
 
-      assertEquals(new Double(159.457), turns[4].getStart().getOffset());
-      assertEquals(new Double(282.871), turns[4].getEnd().getOffset());
+      assertEquals(Double.valueOf(159.457), turns[4].getStart().getOffset());
+      assertEquals(Double.valueOf(282.871), turns[4].getEnd().getOffset());
       assertEquals("participant", turns[4].getLabel());
 
-      assertEquals(new Double(282.871), turns[5].getStart().getOffset());
-      assertEquals(new Double(283.96500000000003), turns[5].getEnd().getOffset());
+      assertEquals(Double.valueOf(282.871), turns[5].getStart().getOffset());
+      assertEquals(Double.valueOf(283.96500000000003), turns[5].getEnd().getOffset());
       assertEquals("interviewer", turns[5].getLabel());
 
-      assertEquals(new Double(283.96500000000003), turns[6].getStart().getOffset());
-      assertEquals(new Double(310.60200000000003), turns[6].getEnd().getOffset());
+      assertEquals(Double.valueOf(283.96500000000003), turns[6].getStart().getOffset());
+      assertEquals(Double.valueOf(310.60200000000003), turns[6].getEnd().getOffset());
       assertEquals("participant", turns[6].getLabel());
 
       assertEquals("simultaneous speech",
-		   new Double(284.84000000000003), turns[7].getStart().getOffset());
+		   Double.valueOf(284.84000000000003), turns[7].getStart().getOffset());
       assertEquals("simultaneous speech",
-		   new Double(285.34000000000003), turns[7].getEnd().getOffset());
+		   Double.valueOf(285.34000000000003), turns[7].getEnd().getOffset());
       assertEquals("interviewer", turns[7].getLabel());
 
-      assertEquals(new Double(310.60200000000003), turns[8].getStart().getOffset());
-      assertEquals(new Double(311.071), turns[8].getEnd().getOffset());
+      assertEquals(Double.valueOf(310.60200000000003), turns[8].getStart().getOffset());
+      assertEquals(Double.valueOf(311.071), turns[8].getEnd().getOffset());
       assertEquals("interviewer", turns[8].getLabel());
 
-      assertEquals(new Double(311.071), turns[9].getStart().getOffset());
-      assertEquals(new Double(316.258), turns[9].getEnd().getOffset());
+      assertEquals(Double.valueOf(311.071), turns[9].getStart().getOffset());
+      assertEquals(Double.valueOf(316.258), turns[9].getEnd().getOffset());
       assertEquals("participant", turns[9].getLabel());
 
-      assertEquals(new Double(316.258), turns[10].getStart().getOffset());
-      assertEquals(new Double(317.195), turns[10].getEnd().getOffset());
+      assertEquals(Double.valueOf(316.258), turns[10].getStart().getOffset());
+      assertEquals(Double.valueOf(317.195), turns[10].getEnd().getOffset());
       assertEquals("interviewer", turns[10].getLabel());
 
-      assertEquals(new Double(317.195), turns[11].getStart().getOffset());
-      assertEquals(new Double(321.240), turns[11].getEnd().getOffset());
+      assertEquals(Double.valueOf(317.195), turns[11].getStart().getOffset());
+      assertEquals(Double.valueOf(321.240), turns[11].getEnd().getOffset());
       assertEquals("participant", turns[11].getLabel());
 
       // utterances
       Annotation[] utterances = g.list("utterance");
       assertEquals(148, utterances.length);
-      assertEquals(new Double(4.675), utterances[0].getStart().getOffset());
-      assertEquals(new Double(6.752), utterances[0].getEnd().getOffset());
+      assertEquals(Double.valueOf(4.675), utterances[0].getStart().getOffset());
+      assertEquals(Double.valueOf(6.752), utterances[0].getEnd().getOffset());
       assertEquals("participant", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
 
-      assertEquals(new Double(6.752), utterances[1].getStart().getOffset());
-      assertEquals(new Double(10.515), utterances[1].getEnd().getOffset());
+      assertEquals(Double.valueOf(6.752), utterances[1].getStart().getOffset());
+      assertEquals(Double.valueOf(10.515), utterances[1].getEnd().getOffset());
       assertEquals("participant", utterances[1].getParent().getLabel());
       assertEquals(turns[0], utterances[1].getParent());
 
-      assertEquals(new Double(14.889000000000001), utterances[4].getStart().getOffset());
-      assertEquals(new Double(15.639000000000001), utterances[4].getEnd().getOffset());
+      assertEquals(Double.valueOf(14.889000000000001), utterances[4].getStart().getOffset());
+      assertEquals(Double.valueOf(15.639000000000001), utterances[4].getEnd().getOffset());
       assertEquals("interviewer", utterances[4].getParent().getLabel());
       assertEquals(turns[1], utterances[4].getParent());
 
@@ -700,6 +700,112 @@ public class TestEAFDeserializer
       // lexical
       Annotation[] lexical = g.list("lexical");
       assertEquals(0, lexical.length);
+   }
+
+   /**
+    * This tests that it's possible to deserialize without reference to a turn/utternance/word hierarchy.
+    * In this case the utterances are simple 'freeform' annotations that are not tokenized.
+    */
+   @Test public void freeform() 
+      throws Exception
+   {
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("scribe", "Author", 0, true, true, true),
+	 new Layer("version_date", "Date", 0, true, true, true),
+	 new Layer("lang", "Language", 0, true, true, true),
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("i", "Interviewer", 2, true, false, true),
+	 new Layer("p", "Participant", 2, true, false, true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true));
+      // access file
+      NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance.eaf")) };
+      
+      // create deserializer
+      EAFDeserializer deserializer = new EAFDeserializer();
+      
+      // general configuration
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      assertEquals(9, configuration.size());
+      assertNull("comment", 
+		 configuration.get("commentLayer").getValue());
+      assertNull("pronounce",
+		   configuration.get("pronounceLayer").getValue());
+      assertNull("lexical",
+		 configuration.get("lexicalLayer").getValue());
+      assertNull("noise",
+		 configuration.get("noiseLayer").getValue());
+      assertEquals("author", "scribe", 
+		   ((Layer)configuration.get("authorLayer").getValue()).getId());
+      assertEquals("version_date", "version_date", 
+		   ((Layer)configuration.get("dateLayer").getValue()).getId());
+      assertEquals("language", "lang", 
+		   ((Layer)configuration.get("languageLayer").getValue()).getId());
+      assertEquals("useConventions", Boolean.TRUE, 
+		   (Boolean)configuration.get("useConventions").getValue());
+      assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
+		   (Double)configuration.get("minimumTurnPauseLength").getValue());
+      
+      configuration.get("useConventions").setValue(Boolean.FALSE);
+      assertEquals(9, deserializer.configure(configuration, schema).size());
+      assertEquals("customize useConventions", Boolean.FALSE, 
+		   deserializer.getUseConventions());
+
+      // load the stream
+      ParameterSet defaultParamaters = deserializer.load(streams, schema);
+      // for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+      assertEquals(2, defaultParamaters.size());
+      assertEquals("utterance mapping", "i", 
+		   ((Layer)defaultParamaters.get("tier0").getValue()).getId());
+      assertEquals("utterance mapping", "p", 
+		   ((Layer)defaultParamaters.get("tier1").getValue()).getId());
+
+      // configure the deserialization
+      deserializer.setParameters(defaultParamaters);
+      
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+
+      for (String warning : deserializer.getWarnings())
+      {
+	 System.out.println(warning);
+      }
+      
+      assertEquals("test_utterance.eaf", g.getId());
+
+      // attributes
+      assertEquals("transcriber", "Robert", g.my("scribe").getLabel());
+      assertEquals("language", "eng", g.my("lang").getLabel());
+      assertEquals("version date", "2017-08-28T16:48:05-03:00", g.my("version_date").getLabel());
+
+      // participants     
+      assertEquals(0, g.list("who").length);
+      
+      // turns
+      assertEquals(0, g.list("turn").length);
+      
+      // interviewer
+      Annotation[] utterances = g.list("i");
+      assertEquals(17, utterances.length);
+
+      assertEquals(Double.valueOf(14.889000000000001), utterances[0].getStart().getOffset());
+      assertEquals(Double.valueOf(15.639000000000001), utterances[0].getEnd().getOffset());
+      assertEquals(" right - ", utterances[0].getLabel());
+      assertEquals(g, utterances[0].getParent());
+
+      // participant
+      utterances = g.list("p");
+      assertEquals(131, utterances.length);
+
+      assertEquals(Double.valueOf(4.675), utterances[0].getStart().getOffset());
+      assertEquals(Double.valueOf(6.752), utterances[0].getEnd().getOffset());
+      assertEquals("  . rest of that side of the famly[f{mli](family) so he -- ", utterances[0].getLabel());
+      assertEquals(g, utterances[0].getParent());
+
    }
 
    /**
