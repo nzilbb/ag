@@ -148,7 +148,7 @@ public interface IGraphStoreQuery
     *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
     * </ul>
     * @param pageLength The maximum number of IDs to return, or null to return all.
-    * @param pageNumber The page number to return, or null to return the first page.
+    * @param pageNumber The zero-based page number to return, or null to return the first page.
     * @return A list of participant IDs.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
@@ -230,7 +230,7 @@ public interface IGraphStoreQuery
     *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
     * </ul>
     * @param pageLength The maximum number of IDs to return, or null to return all.
-    * @param pageNumber The page number to return, or null to return the first page.
+    * @param pageNumber The zero-based page number to return, or null to return the first page.
     * @return A list of graph IDs.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
@@ -239,7 +239,10 @@ public interface IGraphStoreQuery
       throws StoreException, PermissionException; 
 
    /**
-    * Gets a list of IDs of graphs that match a particular pattern.
+    * <p>Gets a list of IDs of graphs that match a particular pattern.</p>
+    * <p>The results can be exhaustive, by omitting pageLength and pageNumber, or they
+    * can be a subset (a 'page') of results, by given pageLength and pageNumber values.</p>
+    * <p>The order of the list can be specified.  If ommitted, the graphs are listed in ID order.</p>
     * @param expression An expression that determines which graphs match.
     * <p> The expression language is currently not well defined, but expressions such as the following can be used:
     * <ul>
@@ -249,8 +252,8 @@ public interface IGraphStoreQuery
     *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
     * </ul>
     * @param pageLength The maximum number of IDs to return, or null to return all.
-    * @param pageNumber The page number to return, or null to return the first page.
-    * @param order The ordering for the list of IDs, a string containing a comma-separated list of epxressions, which may be appended by " ASC" or " DESC", or null for graph ID order.
+    * @param pageNumber The zero-based page number to return, or null to return the first page.
+    * @param order The ordering for the list of IDs, a string containing a comma-separated list of expressions, which may be appended by " ASC" or " DESC", or null for graph ID order.
     * @return A list of graph IDs.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
@@ -308,7 +311,7 @@ public interface IGraphStoreQuery
     * </ul>
     * <p><em>NB</em> all expressions must match by either id or layer.id.
     * @param pageLength The maximum number of annotations to return, or null to return all.
-    * @param pageNumber The page number to return, or null to return the first page.
+    * @param pageNumber The zero-based page number to return, or null to return the first page.
     * @return A list of matching {@link Annotation}s.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
@@ -345,7 +348,7 @@ public interface IGraphStoreQuery
     * @param id The ID of the graph.
     * @param layerId The ID of the layer.
     * @param pageLength The maximum number of IDs to return, or null to return all.
-    * @param pageNumber The page number to return, or null to return the first page.
+    * @param pageNumber The zero-based page number to return, or null to return the first page.
     * @return A (possibly empty) array of annotations.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
