@@ -12,6 +12,9 @@ labbcat.getLayerIds(labbcat)
 }
 \value{A list of layer IDs}
 \examples{
+## Connect to LaBB-CAT
+labbcat <- labbcat.instance("https://labbcat.canterbury.ac.nz/demo/", "demo", "demo")
+
 ## Get names of all layers
 layer.ids <- labbcat.getLayerIds(labbcat)
 }

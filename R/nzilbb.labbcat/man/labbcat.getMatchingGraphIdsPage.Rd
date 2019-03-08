@@ -12,7 +12,8 @@
   The expression language is currently not well defined, but expressions such as those in the examples can be used.
 }
 \usage{
-labbcat.getMatchingGraphIdsPage(labbcat, expression, pageLength = NULL, pageNumber = NULL, order = NULL)
+labbcat.getMatchingGraphIdsPage(
+        labbcat, expression, pageLength = NULL, pageNumber = NULL, order = NULL)
 }
 \arguments{
   \item{labbcat}{A LaBB-CAT instance object previously created by a call to labbcat.instance},
@@ -23,18 +24,25 @@ labbcat.getMatchingGraphIdsPage(labbcat, expression, pageLength = NULL, pageNumb
 }
 \value{A list of graph IDs (i.e. transcript names)}
 \examples{
+## Connect to LaBB-CAT
+labbcat <- labbcat.instance("https://labbcat.canterbury.ac.nz/demo/", "demo", "demo")
+
 ## Get all transcripts whose names start with "BR"
 transcripts <- labbcat.getMatchingGraphIdsPage(labbcat, "id MATCHES 'BR.+'")
 
 ## Get the first twenty transcripts in the "QB" corpus
-transcripts <- labbcat.getMatchingGraphIdsPage(labbcat, "my('corpus').label = 'QB'", 20, 0)
+transcripts <- labbcat.getMatchingGraphIdsPage(
+        labbcat, "my('corpus').label = 'QB'", 20, 0)
 
 ## Get the second transcript that has "QB247_Jacqui" as a speaker
-transcripts <- labbcat.getMatchingGraphIdsPage(labbcat, "'QB247_Jacqui' IN labels('who')", 1, 1)
+transcripts <- labbcat.getMatchingGraphIdsPage(
+        labbcat, "'QB247_Jacqui' IN labels('who')", 1, 1)
 
 ## Get all transcripts whose names start with "BR" and have "QB247_Jacqui" as a speaker,
 ## in word-count order 
-transcripts <- labbcat.getMatchingGraphIdsPage(labbcat, "my('corpus').label = 'QB' AND 'QB247_Jacqui' IN labels('who')", 1, 1, "my('transcript_word_count').label")
+transcripts <- labbcat.getMatchingGraphIdsPage(
+        labbcat, "my('corpus').label = 'QB' AND 'QB247_Jacqui' IN labels('who')", 1, 1,
+        "my('transcript_word_count').label")
 
 }
 \keyword{graph}

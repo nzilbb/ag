@@ -14,6 +14,9 @@ labbcat.getLayer(labbcat, id)
 \value{The definition of the given layer}
 \seealso{labbcat.getLayerIds}
 \examples{
+## Connect to LaBB-CAT
+labbcat <- labbcat.instance("https://labbcat.canterbury.ac.nz/demo/", "demo", "demo")
+
 ## Get the configuration of the orthography layer
 orthography.layer <- labbcat.getLayer(labbcat, "orthography")
 }

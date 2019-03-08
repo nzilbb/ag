@@ -12,6 +12,9 @@ labbcat.getCorpusIds(labbcat)
 }
 \value{A list of corpus IDs}
 \examples{
+## Connect to LaBB-CAT
+labbcat <- labbcat.instance("https://labbcat.canterbury.ac.nz/demo/", "demo", "demo")
+
 ## List corpora
 corpora <- labbcat.getCorpusIds(labbcat)
 }

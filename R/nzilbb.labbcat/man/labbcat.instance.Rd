@@ -15,10 +15,11 @@ labbcat.instance(url, username = NULL, password = NULL)
 \value{An object that can be passed as the labbcat parameter for other functions in this package}
 \examples{
 ## connect to an open intance of LaBB-CAT
-labbcat <- labbcat.instance("http://localhost:8080/labbcat/")
+labbcat <- labbcat.instance("https://labbcat.canterbury.ac.nz/demo/")
 
 ## connect to a password-protected instance of LaBB-CAT
-labbcat <- labbcat.instance("https://labbcat.canterbury.ac.nz/demo/", username="demo", password="demo")
+labbcat <- labbcat.instance("https://labbcat.canterbury.ac.nz/demo/", 
+        username="demo", password="demo")
 }
 \keyword{connect}
 \keyword{username}

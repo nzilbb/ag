@@ -12,7 +12,10 @@ labbcat.getId(labbcat)
 }
 \value{The annotation store's ID}
 \examples{
-## List corpora
+## Connect to LaBB-CAT
+labbcat <- labbcat.instance("https://labbcat.canterbury.ac.nz/demo/", "demo", "demo")
+
+## Get ID of LaBB-CAT instance
 instance.id <- labbcat.getId(labbcat)
 }
 \keyword{corpora}

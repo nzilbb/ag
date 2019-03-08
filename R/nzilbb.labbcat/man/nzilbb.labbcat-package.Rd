@@ -38,7 +38,7 @@ Maintainer: \packageMaintainer{nzilbb.labbcat}
 \examples{
 
 ## connect to LaBB-CAT
-labbcat <- labbcat.instance("http://localhost:8080/labbcat/")
+labbcat <- labbcat.instance("https://labbcat.canterbury.ac.nz/demo/", "demo", "demo")
 
 ## List corpora
 corpora <- labbcat.getCorpusIds(labbcat)

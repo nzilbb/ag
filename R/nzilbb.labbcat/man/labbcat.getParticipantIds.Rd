@@ -12,6 +12,9 @@ labbcat.getParticipantIds(labbcat)
 }
 \value{A list of participant IDs}
 \examples{
+## Connect to LaBB-CAT
+labbcat <- labbcat.instance("https://labbcat.canterbury.ac.nz/demo/", "demo", "demo")
+
 ## List all speakers
 speakers <- labbcat.getParticipantIds(labbcat)
 }

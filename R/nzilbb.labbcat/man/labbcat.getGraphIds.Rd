@@ -12,6 +12,9 @@ labbcat.getGraphIds(labbcat)
 }
 \value{A list of graph IDs}
 \examples{
+## Connect to LaBB-CAT
+labbcat <- labbcat.instance("https://labbcat.canterbury.ac.nz/demo/", "demo", "demo")
+
 ## List all transcripts
 transcripts <- labbcat.getGraphIds(labbcat)
 }

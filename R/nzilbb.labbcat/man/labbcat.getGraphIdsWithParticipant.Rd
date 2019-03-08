@@ -14,6 +14,9 @@ labbcat.getGraphIdsWithParticipant(labbcat, id)
 \value{A list of graph IDs}
 \seealso{labbcat.getParticipantIds}
 \examples{
+## Connect to LaBB-CAT
+labbcat <- labbcat.instance("https://labbcat.canterbury.ac.nz/demo/", "demo", "demo")
+
 ## List transcripts in which UC427_ViktoriaPapp_A_ENG speaks
 transcripts <- labbcat.getGraphIdsWithParticipant(labbcat, "UC427_ViktoriaPapp_A_ENG")
 }

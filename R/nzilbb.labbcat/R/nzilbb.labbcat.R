@@ -165,14 +165,20 @@ labbcat.getMatchingGraphIdsPage <- function(labbcat, expression, pageLength = NU
     return(resp.json$model$result)
 }
 
-labbcat.getSoundFragment <- function(labbcat, id, start, end) {
+labbcat.getSoundFragment <- function(labbcat, id, start, end, sampleRate = NULL) {
     url <- paste(labbcat$baseUrl, "soundfragment", sep="")
+    parameters <- list(id=id, start=start, end=end)
+    if (!is.null(sampleRate)) parameters <- list(id=id, start=start, end=end, sampleRate=sampleRate)
     filename <- paste(stringr::str_replace(id, "\\.[^.]+$",""), "__", start, "-", end, ".wav", sep="")
-    resp <- httr::POST(url, labbcat$authorization, httr::write_disk(filename, overwrite=TRUE), body = list(id=id, start=start, end=end), encode = "form")
+    resp <- httr::POST(url, labbcat$authorization, httr::write_disk(filename, overwrite=TRUE), body = parameters, encode = "form")
     if (httr::status_code(resp) != 200) { # 200 = OK
         print(paste("ERROR: ", httr::http_status(resp)$message))
-        print(resp.content)
-        return()
+        if (httr::status_code(resp) != 404) { # 404 means the audio wasn't on the server
+            ## some other error occurred so print what we got from the server
+            print(readLines(filename))
+        }
+        file.remove(filename)
+        return(NULL)
     }
     content.disposition <- as.character(httr::headers(resp)["content-disposition"])
     content.disposition.parts <- strsplit(content.disposition, "=")

@@ -14,6 +14,9 @@ labbcat.getGraphIdsInCorpus(labbcat, id)
 \value{A list of graph IDs}
 \seealso{labbcat.getCorpusIds}
 \examples{
+## Connect to LaBB-CAT
+labbcat <- labbcat.instance("https://labbcat.canterbury.ac.nz/demo/", "demo", "demo")
+
 ## List transcripts in QB corpus
 qb.transcripts <- labbcat.getGraphIdsInCorpus(labbcat, "QB")
 }
