@@ -10,7 +10,6 @@
 }
 \details{
 
-The DESCRIPTION file:
 \packageDESCRIPTION{nzilbb.labbcat}
 \packageIndices{nzilbb.labbcat}
 
@@ -40,7 +39,7 @@ Maintainer: \packageMaintainer{nzilbb.labbcat}
 ## connect to LaBB-CAT
 labbcat <- labbcat.instance("https://labbcat.canterbury.ac.nz/demo/", "demo", "demo")
 
-## List corpora
-corpora <- labbcat.getCorpusIds(labbcat)
+## Get the 5 seconds starting from 10s as a mono 22kHz file
+wav.file <- labbcat.getSoundFragment(labbcat, "AP2505_Nelson.eaf", 10.0, 15.0, 22050)
 
 }

@@ -12,7 +12,7 @@ labbcat.getGraphIdsInCorpus(labbcat, id)
   \item{id}{A corpus ID}
 }
 \value{A list of graph IDs}
-\seealso{labbcat.getCorpusIds}
+\seealso{\link{labbcat.getCorpusIds}}
 \examples{
 ## Connect to LaBB-CAT
 labbcat <- labbcat.instance("https://labbcat.canterbury.ac.nz/demo/", "demo", "demo")

@@ -12,7 +12,7 @@ labbcat.getGraphIdsWithParticipant(labbcat, id)
   \item{id}{A participant ID}
 }
 \value{A list of graph IDs}
-\seealso{labbcat.getParticipantIds}
+\seealso{\link{labbcat.getParticipantIds}}
 \examples{
 ## Connect to LaBB-CAT
 labbcat <- labbcat.instance("https://labbcat.canterbury.ac.nz/demo/", "demo", "demo")

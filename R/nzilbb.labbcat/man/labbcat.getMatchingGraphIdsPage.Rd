@@ -20,7 +20,8 @@ labbcat.getMatchingGraphIdsPage(
   \item{expression}{An expression that determines which graphs match},
   \item{pageLength}{The maximum number of IDs to return, or null to return all},
   \item{pageNumber}{The zero-based page number to return, or null to return the first page},
-  \item{order}{A LaBB-CAT instance object previously created by a call to labbcat.instance}
+  \item{order}{An expression that determines the order the graphs are
+    listed in}
 }
 \value{A list of graph IDs (i.e. transcript names)}
 \examples{

@@ -21,10 +21,10 @@ labbcat.getSoundFragment(labbcat, id, start, end, sampleRate = NULL)
 labbcat <- labbcat.instance("https://labbcat.canterbury.ac.nz/demo/", "demo", "demo")
 
 ## Get the 5 seconds starting from 10s after the beginning of a recording
-wav.file <- labbcat.getSoundFragment(labbcat, "AP2505_Nelson.eaf", 10.0, 5.0)
+wav.file <- labbcat.getSoundFragment(labbcat, "AP2505_Nelson.eaf", 10.0, 15.0)
 
 ## Get the 5 seconds starting from 10s as a mono 22kHz file
-wav.file <- labbcat.getSoundFragment(labbcat, "AP2505_Nelson.eaf", 10.0, 5.0, 22050)
+wav.file <- labbcat.getSoundFragment(labbcat, "AP2505_Nelson.eaf", 10.0, 15.0, 22050)
 }
 \keyword{sample}
 \keyword{sound}
