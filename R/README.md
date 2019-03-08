@@ -10,6 +10,10 @@ name and start/end times, so results CSV files can be processed
 directy from R.
 
 Future releases will include:
+ * *getTranscriptAttributes* - for retrieving given attributes of a
+ given set of transcripts.
+ * *getParticipantAttributes* - for retrieving given attributes of a
+ given set of participants.
  * *getGraph* - for retrieving annotations of a given transcript.
  * *countAnnotations* and *getAnnotations* - for counting/retieving
  annotations of a given transcript on a given layer.
