@@ -4,6 +4,8 @@ Date: 2019-03-05
 Title: Functions for accessing data stored in LaBB-CAT instances
 Authors@R: c(person("Robert", "Fromont", role = c("aut", "cre"),
                      email = "robert.fromont@canterbury.ac.nz"))
+Author: Robert Fromont [aut, cre],
+Maintainer: Robert Fromont <robert.fromont@canterbury.ac.nz>
 Imports: jsonlite, httr, stringr
 Suggests: MASS
 Description: LaBB-CAT is a web-based language corpus management
