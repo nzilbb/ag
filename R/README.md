@@ -15,11 +15,15 @@ Future releases will include:
  * *getParticipantAttributes* - for retrieving given attributes of a
  given set of participants.
  * *getGraph* - for retrieving annotations of a given transcript.
- * *countAnnotations* and *getAnnotations* - for counting/retieving
- annotations of a given transcript on a given layer.
+ * *countAnnotations* and *getAnnotations* - for counting/retrieving
+ annotations of a given transcript or annotation on a given layer.
  * *getMediaTracks* - for retrieving media track configuration.
  * *getAvaialableMedia* - for listing media availablle for a given
  transcript.
  * *getMedia* - for downloading a given media track of a given type
  for a given transcript.
  * *search* - for searching for annotation patterns in the corpus.
+ * *getDictionaryIds* and *lookup* - for accessing dictionary
+ entries. 
+ * *processWithPraat* - for batch acoustic measurement from search
+ results. 
