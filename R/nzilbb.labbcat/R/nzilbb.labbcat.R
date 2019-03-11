@@ -35,13 +35,14 @@ labbcat.instance <- function(url, username = NULL, password = NULL) {
     }
     if (httr::status_code(resp) != 200) { # 200 = OK
         print(paste("ERROR: ", httr::http_status(resp)$message))
-        labbcat <- NULL
+        return(NULL)
+    } else {
+        return (list(
+            baseUrl = baseUrl,
+            storeUrl = storeUrl,
+            authorization = authorization
+        ))
     }
-    list(
-        baseUrl = baseUrl,
-        storeUrl = storeUrl,
-        authorization = authorization
-    )
 }
 
 labbcat.getId <- function(labbcat) {
