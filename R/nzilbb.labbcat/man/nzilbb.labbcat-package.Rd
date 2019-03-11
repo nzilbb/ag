@@ -31,7 +31,7 @@ Maintainer: \packageMaintainer{nzilbb.labbcat}
 \references{
 \cite{Robert Fromont and Jennifer Hay, "{ONZE Miner}: the development of a browser-based research tool", 2008}
 
-\cite{Robert Fromont and Jennifer Hay, "{LaBB-CAT: an Annotation Store}", 2012}
+\cite{Robert Fromont, "{Toward a format-neutral annotation store}", 2017}
 }
 \keyword{ package }
 \examples{
