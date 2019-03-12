@@ -1,4 +1,7 @@
-### Internal functions:
+### Internal variables:
+
+## minimum version of LaBB-CAT required:
+.min.labbcat.version <- "20190312.1838"
 
 ## encode a parameter value for inclusion in the URL
 enc <- function(value) {
@@ -34,14 +37,31 @@ labbcat.instance <- function(url, username = NULL, password = NULL) {
         resp <- httr::GET(storeUrl, authorization)
     }
     if (httr::status_code(resp) != 200) { # 200 = OK
-        print(paste("ERROR: ", httr::http_status(resp)$message))
-        return(NULL)
-    } else {
-        return (list(
-            baseUrl = baseUrl,
-            storeUrl = storeUrl,
-            authorization = authorization
-        ))
+        if (httr::status_code(resp) == 401 && is.null(username) && is.null(password)) {
+            ## it's password-protected, but they haven't provided credentials
+            ## so ask them for the username and password
+            return(labbcat.instance(
+                url, readline("LaBB-CAT Username: "), readline("LaBB-CAT Password: ")))
+        } else {
+            print(paste("ERROR: ", httr::http_status(resp)$message))
+            return(NULL)
+        }
+    } else { ## respons was OK
+        ## check the LaBB-CAT version
+        resp.content <- httr::content(resp, as="text", encoding="UTF-8")
+        resp.json <- jsonlite::fromJSON(resp.content)
+        version <- resp.json$model$version
+        if (is.null(version) || version < .min.labbcat.version) {
+            print(paste("ERROR:", baseUrl, "is version", version, "but the minimum version is", .min.labbcat.version))
+            return(NULL)
+        } else { ## everything OK
+            return (list(
+                baseUrl = baseUrl,
+                version = version,
+                storeUrl = storeUrl,
+                authorization = authorization
+            ))
+        }
     }
 }
 
@@ -155,6 +175,51 @@ labbcat.getMatchingGraphIdsPage <- function(labbcat, expression, pageLength = NU
     if (!is.null(pageNumber)) parameters <- append(parameters, list(pageNumber=pageNumber))
     if (!is.null(order)) parameters <- append(parameters, list(order=order))
     url <- buildUrl(labbcat, "getMatchingGraphIdsPage", parameters)
+    resp <- httr::GET(url, labbcat$authorization)
+    resp.content <- httr::content(resp, as="text", encoding="UTF-8")
+    if (httr::status_code(resp) != 200) { # 200 = OK
+        print(paste("ERROR: ", httr::http_status(resp)$message))
+        print(resp.content)
+        return()
+    }
+    resp.json <- jsonlite::fromJSON(resp.content)
+    return(resp.json$model$result)
+}
+
+labbcat.countAnnotations <- function(labbcat, id, layerId) {
+    parameters <- list(id=id, layerId=layerId)
+    url <- buildUrl(labbcat, "countAnnotations", parameters)
+    resp <- httr::GET(url, labbcat$authorization)
+    resp.content <- httr::content(resp, as="text", encoding="UTF-8")
+    if (httr::status_code(resp) != 200) { # 200 = OK
+        print(paste("ERROR: ", httr::http_status(resp)$message))
+        print(resp.content)
+        return()
+    }
+    resp.json <- jsonlite::fromJSON(resp.content)
+    return(resp.json$model$result)
+}
+
+labbcat.getAnnotations <- function(labbcat, id, layerId, pageLength = NULL, pageNumber = NULL) {
+    parameters <- list(id=id, layerId=layerId)
+    if (!is.null(pageLength)) parameters <- append(parameters, list(pageLength=pageLength))
+    if (!is.null(pageNumber)) parameters <- append(parameters, list(pageNumber=pageNumber))
+    url <- buildUrl(labbcat, "getAnnotations", parameters)
+    resp <- httr::GET(url, labbcat$authorization)
+    resp.content <- httr::content(resp, as="text", encoding="UTF-8")
+    if (httr::status_code(resp) != 200) { # 200 = OK
+        print(paste("ERROR: ", httr::http_status(resp)$message))
+        print(resp.content)
+        return()
+    }
+    resp.json <- jsonlite::fromJSON(resp.content)
+    return(resp.json$model$result)
+}
+
+labbcat.getAnchors <- function(labbcat, id, anchorId) {
+    parameters <- list(id=id)
+    for (id in anchorId) parameters <- append(parameters, list(anchorId=id))
+    url <- buildUrl(labbcat, "getAnchors", parameters)
     resp <- httr::GET(url, labbcat$authorization)
     resp.content <- httr::content(resp, as="text", encoding="UTF-8")
     if (httr::status_code(resp) != 200) { # 200 = OK
