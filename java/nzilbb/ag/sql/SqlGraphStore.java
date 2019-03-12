@@ -48,6 +48,7 @@ import nzilbb.ag.util.LayerHierarchyTraversal;
 import nzilbb.ag.util.AnnotationsByAnchor;
 import nzilbb.util.IO;
 import nzilbb.util.ISeries;
+import nzilbb.util.Timers;
 import nzilbb.configure.ParameterSet;
 import nzilbb.configure.Parameter;
 import nzilbb.media.IMediaConverter;
@@ -1103,6 +1104,8 @@ public class SqlGraphStore
     *  <li><code>id MATCHES 'Ada.+'</code></li>
     *  <li><code>'CC' IN labels('corpus')</code></li>
     *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
+    *  <li><code>list('transcript_rating').length &gt; 2</code></li>
+    *  <li><code>'labbcat' NOT IN annotators('transcript_rating')</code></li>
     * </ul>
     * @param expression The graph-matching expression.
     * @param selectClause The expression that is to go between SELECT and FROM.
@@ -1171,6 +1174,26 @@ public class SqlGraphStore
 		  .replaceAll("\\'", "\\\\'")
 		  +"' LIMIT 1)";
 	    } // an attribute?
+	    else if (operand.startsWith("list('transcript_") && operand.endsWith("').length"))
+	    { // list().length for transcript attribute
+	       String attribute = operand.replaceFirst("list\\('transcript_","").replaceFirst("'\\)\\.length$","");
+	       sqlOperand = "(SELECT COUNT(*)"
+		  +" FROM annotation_transcript"
+		  +" INNER JOIN transcript_speaker ON annotation_transcript.ag_id = transcript_speaker.ag_id"
+		  +" WHERE layer = '"+attribute+"'"
+		  +" AND transcript_speaker.speaker_number = speaker.speaker_number"
+		  +")";
+	    } // list().length
+	    else if (operand.startsWith("annotators('transcript_") && operand.endsWith("')"))
+	    { // list().length for transcript attribute
+	       String attribute = operand.replaceFirst("annotators\\('transcript_","").replaceFirst("'\\)$","");
+	       sqlOperand = "(SELECT annotated_by"
+		  +" FROM annotation_transcript"
+		  +" INNER JOIN transcript_speaker ON annotation_transcript.ag_id = transcript_speaker.ag_id"
+		  +" WHERE layer = '"+attribute+"'"
+		  +" AND transcript_speaker.speaker_number = speaker.speaker_number"
+		  +")";
+	    } // list().length
 	    else
 	    {
 	       sqlOperand = operand;
@@ -1196,7 +1219,8 @@ public class SqlGraphStore
 	 + conditions.toString()
 	 + userWhereClause
 	 + " " + orderClause;
-      System.out.println(sSql);
+      System.out.println("QL: " + expression);
+      System.out.println("SQL: " + sSql);
       PreparedStatement sql = getConnection().prepareStatement(sSql);
       return sql;
    } // end of participantMatchSql()
@@ -2597,10 +2621,10 @@ public class SqlGraphStore
 	 +" ORDER BY "
 	 +(transcriptJoin?"graph.transcript_id":"ag_id") + ", "
 	 +(anchorsJoin?"start.offset, end.offset, ":"")
-	 +"annotation_id"
+	 +"parent_id, annotation_id"
 	 + " " + limit;
-      // System.out.println("QL: " + expression);
-      // System.out.println("SQL: " + sSql);
+      System.out.println("QL: " + expression);
+      System.out.println("SQL: " + sSql);
       PreparedStatement sql = getConnection().prepareStatement(sSql);
       sql.setString(1, layer.getId());
       sql.setInt(2, ((Integer)layer.get("@layer_id")).intValue());
@@ -3310,6 +3334,8 @@ public class SqlGraphStore
    public boolean saveGraph(Graph graph) 
       throws StoreException, PermissionException, GraphNotFoundException
    {
+      Timers timers = new Timers();
+      timers.start("saveGraph");
       try
       {
 	 // validate the graph before saving it
@@ -3369,7 +3395,10 @@ public class SqlGraphStore
 	 }
 	 else
 	 {
+	    timers.start("validate");
 	    Vector<Change> validationChanges = v.transform(graph);
+	    timers.end("validate");
+	    System.out.println("saveGraph: " + timers);
 	    if (v.getErrors().size() != 0)
 	    {
 	       StringBuffer messages = new StringBuffer();
@@ -3464,6 +3493,7 @@ public class SqlGraphStore
 	 Vector<Change> changes = graph.getChanges();
 	 if (changes.size() == 0) return false;
 
+	 timers.start("changes");
 	 Object lastObject = graph;
 	 for (Change change : changes)
 	 {
@@ -3815,6 +3845,8 @@ public class SqlGraphStore
 		  }
 	       } // Annotation change
 	    } // next change
+	    timers.end("changes");
+	    System.out.println("saveGraph: " + timers);
 	    
 	    // extras
 	    HashSet<Annotation> newExtraUpdates = new HashSet<Annotation>();
@@ -3883,6 +3915,8 @@ public class SqlGraphStore
 	 throw new StoreException(exception);
       }
       System.err.println("saveGraph finished.");
+      timers.end("saveGraph");
+      System.out.println("saveGraph: " + timers);
       return true;
    }
 
