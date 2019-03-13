@@ -7,7 +7,7 @@ R CMD build nzilbb.labbcat
 echo check nzilbb.labbcat ...
 R CMD check --as-cran nzilbb.labbcat_*.tar.gz
 
-echo copy package to bin
+echo move package to bin
 mv nzilbb.labbcat_*.tar.gz ../bin/nzilbb.labbcat.tar.gz
 
 echo finished.
