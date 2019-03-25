@@ -84,9 +84,9 @@ public class TestPlainTextDeserializer
 		   ((Layer)configuration.get("pronounceLayer").getValue()).getId());
       assertEquals("use conventions", Boolean.TRUE, configuration.get("useConventions").getValue());
       assertEquals("maxParticipantLength",
-		   new Integer(20), configuration.get("maxParticipantLength").getValue());
+		   Integer.valueOf(20), configuration.get("maxParticipantLength").getValue());
       assertEquals("maxHeaderLines",
-		   new Integer(50), configuration.get("maxHeaderLines").getValue());
+		   Integer.valueOf(50), configuration.get("maxHeaderLines").getValue());
       assertEquals("participantFormat", "{0}: ",
 		   configuration.get("participantFormat").getValue());
       assertEquals("metaDataFormat", "{0}={1}",
@@ -141,46 +141,46 @@ public class TestPlainTextDeserializer
       // turns
       Annotation[] turns = g.list("turn");
       assertEquals(1, turns.length);
-      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
-      //assertEquals(new Double(23.563), turns[0].getEnd().getOffset()); // TODO
+      assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
+      //assertEquals(Double.valueOf(23.563), turns[0].getEnd().getOffset()); // TODO
       assertEquals("YoungModern", turns[0].getLabel());
       assertEquals(g.my("who"), turns[0].getParent());
 
       // utterances
       Annotation[] utterances = g.list("utterance");
       assertEquals(1, utterances.length);
-      assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
+      assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       assertEquals("YoungModern", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
       
       Annotation[] words = g.list("word");
-      assertEquals(new Double(0), words[0].getStart().getOffset());
+      assertEquals(Double.valueOf(0), words[0].getStart().getOffset());
       // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
       assertEquals("Most", words[0].getLabel());
-      assertEquals("inter-word space", new Double(5), words[0].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(5), words[0].getEnd().getOffset());
       assertEquals("next word start where last ends",
-		   new Double(5), words[1].getStart().getOffset());
+		   Double.valueOf(5), words[1].getStart().getOffset());
       assertEquals("next word linked to last", words[0].getEnd(), words[1].getStart());
       assertEquals("of", words[1].getLabel());
-      assertEquals("inter-word space", new Double(8), words[1].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(8), words[1].getEnd().getOffset());
       assertEquals("next word linked to last", words[1].getEnd(), words[2].getStart());
       assertEquals("us", words[2].getLabel());
-      assertEquals("inter-word space", new Double(11), words[2].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(11), words[2].getEnd().getOffset());
       assertEquals("next word linked to last", words[2].getEnd(), words[3].getStart());
       assertEquals("have", words[3].getLabel());
-      assertEquals("inter-word space", new Double(16), words[3].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(16), words[3].getEnd().getOffset());
       assertEquals("next word linked to last", words[3].getEnd(), words[4].getStart());
       assertEquals("some", words[4].getLabel());
-      assertEquals("inter-word space", new Double(21), words[4].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(21), words[4].getEnd().getOffset());
       assertEquals("next word linked to last", words[4].getEnd(), words[5].getStart());
       assertEquals("family", words[5].getLabel());
-      assertEquals("inter-word space", new Double(28), words[5].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(28), words[5].getEnd().getOffset());
       assertEquals("next word linked to last", words[5].getEnd(), words[6].getStart());
       assertEquals("members", words[6].getLabel());
-      assertEquals("inter-word space", new Double(36), words[6].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(36), words[6].getEnd().getOffset());
       assertEquals("next word linked to last", words[6].getEnd(), words[7].getStart());
       assertEquals("like", words[7].getLabel());
-      assertEquals(new Double(41), words[7].getEnd().getOffset());
+      assertEquals(Double.valueOf(41), words[7].getEnd().getOffset());
 
       assertEquals(0, g.list("entities").length);
       assertEquals(0, g.list("language").length);
@@ -228,9 +228,9 @@ public class TestPlainTextDeserializer
 		   ((Layer)configuration.get("pronounceLayer").getValue()).getId());
       assertEquals("use conventions", Boolean.TRUE, configuration.get("useConventions").getValue());
       assertEquals("maxParticipantLength",
-		   new Integer(20), configuration.get("maxParticipantLength").getValue());
+		   Integer.valueOf(20), configuration.get("maxParticipantLength").getValue());
       assertEquals("maxHeaderLines",
-		   new Integer(50), configuration.get("maxHeaderLines").getValue());
+		   Integer.valueOf(50), configuration.get("maxHeaderLines").getValue());
       assertEquals("participantFormat", "{0}: ",
 		   configuration.get("participantFormat").getValue());
       assertEquals("metaDataFormat", "{0}={1}",
@@ -279,7 +279,7 @@ public class TestPlainTextDeserializer
       assertEquals(1, authors.length);
       assertEquals("tgflp", authors[0].getLabel());
       assertNotNull("start ID set", authors[0].getStartId());
-      assertEquals(new Double(0.0), authors[0].getStart().getOffset());
+      assertEquals(Double.valueOf(0.0), authors[0].getStart().getOffset());
 
       // tag participant as main one
       g.addLayer(schema.getLayer("main_participant"));
@@ -288,81 +288,81 @@ public class TestPlainTextDeserializer
       // turns
       Annotation[] turns = g.list("turn");
       //assertEquals(1, turns.length);
-      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
-      //assertEquals(new Double(23.563), turns[0].getEnd().getOffset()); // TODO
+      assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
+      //assertEquals(Double.valueOf(23.563), turns[0].getEnd().getOffset()); // TODO
       assertEquals("tgflp", turns[0].getLabel());
       assertEquals(g.my("who"), turns[0].getParent());
 
       // utterances
       Annotation[] utterances = g.list("utterance");
       assertEquals(5, utterances.length);
-      assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
+      assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       assertEquals("tgflp", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
-      assertEquals(new Double(277.0), utterances[0].getEnd().getOffset());
+      assertEquals(Double.valueOf(277.0), utterances[0].getEnd().getOffset());
       
-      assertEquals(new Double(277.0), utterances[1].getStart().getOffset());
+      assertEquals(Double.valueOf(277.0), utterances[1].getStart().getOffset());
       assertEquals("tgflp", utterances[1].getParent().getLabel());
       assertEquals(turns[0], utterances[1].getParent());
-      assertEquals(new Double(343.0), utterances[1].getEnd().getOffset());
+      assertEquals(Double.valueOf(343.0), utterances[1].getEnd().getOffset());
 
-      assertEquals(new Double(343.0), utterances[2].getStart().getOffset());
+      assertEquals(Double.valueOf(343.0), utterances[2].getStart().getOffset());
       assertEquals("tgflp", utterances[2].getParent().getLabel());
       assertEquals(turns[0], utterances[2].getParent());
-      assertEquals(new Double(345.0), utterances[2].getEnd().getOffset());
+      assertEquals(Double.valueOf(345.0), utterances[2].getEnd().getOffset());
 
-      assertEquals(new Double(345.0), utterances[3].getStart().getOffset());
+      assertEquals(Double.valueOf(345.0), utterances[3].getStart().getOffset());
       assertEquals("tgflp", utterances[3].getParent().getLabel());
       assertEquals(turns[0], utterances[3].getParent());
-      assertEquals(new Double(417.0), utterances[3].getEnd().getOffset());
+      assertEquals(Double.valueOf(417.0), utterances[3].getEnd().getOffset());
 
-      assertEquals(new Double(417.0), utterances[4].getStart().getOffset());
+      assertEquals(Double.valueOf(417.0), utterances[4].getStart().getOffset());
       assertEquals("tgflp", utterances[4].getParent().getLabel());
       assertEquals(turns[0], utterances[4].getParent());
-      assertEquals(new Double(454.0), utterances[4].getEnd().getOffset());
+      assertEquals(Double.valueOf(454.0), utterances[4].getEnd().getOffset());
       
       Annotation[] words = g.list("word");
-      assertEquals(new Double(0), words[0].getStart().getOffset());
+      assertEquals(Double.valueOf(0), words[0].getStart().getOffset());
       // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
       assertEquals("Jesus", words[0].getLabel());
-      assertEquals("inter-word space", new Double(6), words[0].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(6), words[0].getEnd().getOffset());
       assertEquals("next word start where last ends",
-		   new Double(6), words[1].getStart().getOffset());
+		   Double.valueOf(6), words[1].getStart().getOffset());
       assertEquals("next word linked to last", words[0].getEnd(), words[1].getStart());
       assertEquals("christ,", words[1].getLabel());
-      assertEquals("inter-word space", new Double(14), words[1].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(14), words[1].getEnd().getOffset());
       assertEquals("next word linked to last", words[1].getEnd(), words[2].getStart());
       assertEquals("if", words[2].getLabel());
-      assertEquals("inter-word space", new Double(17), words[2].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(17), words[2].getEnd().getOffset());
       assertEquals("next word linked to last", words[2].getEnd(), words[3].getStart());
       assertEquals("an", words[3].getLabel());
-      assertEquals("inter-word space", new Double(20), words[3].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(20), words[3].getEnd().getOffset());
       assertEquals("next word linked to last", words[3].getEnd(), words[4].getStart());
       assertEquals("actor", words[4].getLabel());
-      assertEquals("inter-word space", new Double(26), words[4].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(26), words[4].getEnd().getOffset());
       assertEquals("next word linked to last", words[4].getEnd(), words[5].getStart());
       assertEquals("talking", words[5].getLabel());
-      assertEquals("inter-word space", new Double(34), words[5].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(34), words[5].getEnd().getOffset());
       assertEquals("next word linked to last", words[5].getEnd(), words[6].getStart());
       assertEquals("about", words[6].getLabel());
-      assertEquals("inter-word space", new Double(40), words[6].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(40), words[6].getEnd().getOffset());
       assertEquals("next word linked to last", words[6].getEnd(), words[7].getStart());
       assertEquals("politics", words[7].getLabel());
-      assertEquals(new Double(49), words[7].getEnd().getOffset());
+      assertEquals(Double.valueOf(49), words[7].getEnd().getOffset());
 
       assertEquals("line boundary",
-		   new Double(265), words[49].getStart().getOffset());
+		   Double.valueOf(265), words[49].getStart().getOffset());
       assertEquals("line boundary",
 		   "here", words[49].getLabel());
       assertEquals("line boundary",
-		   new Double(277), words[49].getEnd().getOffset());
+		   Double.valueOf(277), words[49].getEnd().getOffset());
 
       assertEquals("line boundary",
-		   new Double(277), words[50].getStart().getOffset());
+		   Double.valueOf(277), words[50].getStart().getOffset());
       assertEquals("line boundary",
 		   "< In -", words[50].getLabel());
       assertEquals("line boundary",
-		   new Double(284), words[50].getEnd().getOffset());
+		   Double.valueOf(284), words[50].getEnd().getOffset());
 
       assertEquals(0, g.list("entities").length);
       assertEquals(0, g.list("language").length);
@@ -411,9 +411,9 @@ public class TestPlainTextDeserializer
       assertNull("pronounce", configuration.get("pronounceLayer").getValue());
       assertEquals("use conventions", Boolean.TRUE, configuration.get("useConventions").getValue());
       assertEquals("maxParticipantLength",
-		   new Integer(20), configuration.get("maxParticipantLength").getValue());
+		   Integer.valueOf(20), configuration.get("maxParticipantLength").getValue());
       assertEquals("maxHeaderLines",
-		   new Integer(50), configuration.get("maxHeaderLines").getValue());
+		   Integer.valueOf(50), configuration.get("maxHeaderLines").getValue());
       assertEquals("participantFormat", "{0}: ",
 		   configuration.get("participantFormat").getValue());
       assertEquals("metaDataFormat", "{0}={1}",
@@ -472,18 +472,18 @@ public class TestPlainTextDeserializer
       // turns
       Annotation[] turns = g.list("turn");
       assertEquals(1, turns.length);
-      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
+      assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals("turn ends at end of recording",
-		   new Double(5.2941875), turns[0].getEnd().getOffset());
+		   Double.valueOf(5.2941875), turns[0].getEnd().getOffset());
       assertEquals("test", turns[0].getLabel());
       assertEquals(g.my("who"), turns[0].getParent());
 
       // utterances
       Annotation[] utterances = g.list("utterance");
       assertEquals(1, utterances.length);
-      assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
+      assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       assertEquals("utterance ends at end of recording",
-		   new Double(5.2941875), utterances[0].getEnd().getOffset());
+		   Double.valueOf(5.2941875), utterances[0].getEnd().getOffset());
       assertEquals("test", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
       
@@ -518,12 +518,12 @@ public class TestPlainTextDeserializer
       assertEquals("next word linked to last", words[7].getEnd(), words[8].getStart());
       assertEquals("management", words[8].getLabel());
       assertEquals("last word ends at end of recording",
-		   new Double(5.2941875), words[8].getEnd().getOffset());
+		   Double.valueOf(5.2941875), words[8].getEnd().getOffset());
 
       Annotation[] comments = g.list("comment");
       assertEquals(1, comments.length);
       assertEquals("Please read the following aloud:", comments[0].getLabel());
-      assertEquals(new Double(0), comments[0].getStart().getOffset());
+      assertEquals(Double.valueOf(0), comments[0].getStart().getOffset());
 
       assertNull("Hack to skip validation for texts isn't activated for transcripts", g.get("@valid"));
    }
@@ -561,9 +561,9 @@ public class TestPlainTextDeserializer
       assertNull("pronounce", configuration.get("pronounceLayer").getValue());
       assertEquals("use conventions", Boolean.TRUE, configuration.get("useConventions").getValue());
       assertEquals("maxParticipantLength",
-		   new Integer(20), configuration.get("maxParticipantLength").getValue());
+		   Integer.valueOf(20), configuration.get("maxParticipantLength").getValue());
       assertEquals("maxHeaderLines",
-		   new Integer(50), configuration.get("maxHeaderLines").getValue());
+		   Integer.valueOf(50), configuration.get("maxHeaderLines").getValue());
       assertEquals("participantFormat", "{0}: ",
 		   configuration.get("participantFormat").getValue());
       assertEquals("metaDataFormat", "{0}={1}",
@@ -623,18 +623,18 @@ public class TestPlainTextDeserializer
       // turns
       Annotation[] turns = g.list("turn");
       assertEquals(1, turns.length);
-      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
+      assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals("turn ends at last character",
-		   new Double(100), turns[0].getEnd().getOffset());
+		   Double.valueOf(100), turns[0].getEnd().getOffset());
       assertEquals("test", turns[0].getLabel());
       assertEquals(g.my("who"), turns[0].getParent());
 
       // utterances
       Annotation[] utterances = g.list("utterance");
       assertEquals(1, utterances.length);
-      assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
+      assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       assertEquals("utterance ends at last character",
-		   new Double(100), utterances[0].getEnd().getOffset());
+		   Double.valueOf(100), utterances[0].getEnd().getOffset());
       assertEquals("test", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
       
@@ -643,44 +643,44 @@ public class TestPlainTextDeserializer
       // System.out.println("" + Arrays.asList(words));
       assertEquals("The", words[0].getLabel());
       assertEquals("inter-word anchors",
-		   new Double(39), words[0].getEnd().getOffset());
+		   Double.valueOf(39), words[0].getEnd().getOffset());
       assertEquals("next word linked to last", words[0].getEnd(), words[1].getStart());
       assertEquals("supermarket", words[1].getLabel());
       assertEquals("inter-word anchors",
-		   new Double(51), words[1].getEnd().getOffset());
+		   Double.valueOf(51), words[1].getEnd().getOffset());
       assertEquals("next word linked to last", words[1].getEnd(), words[2].getStart());
       assertEquals("chain", words[2].getLabel());
       assertEquals("inter-word anchors",
-		   new Double(57), words[2].getEnd().getOffset());
+		   Double.valueOf(57), words[2].getEnd().getOffset());
       assertEquals("next word linked to last", words[2].getEnd(), words[3].getStart());
       assertEquals("shut", words[3].getLabel());
       assertEquals("inter-word anchors",
-		   new Double(62), words[3].getEnd().getOffset());
+		   Double.valueOf(62), words[3].getEnd().getOffset());
       assertEquals("next word linked to last", words[3].getEnd(), words[4].getStart());
       assertEquals("down", words[4].getLabel());
       assertEquals("inter-word anchors",
-		   new Double(67), words[4].getEnd().getOffset());
+		   Double.valueOf(67), words[4].getEnd().getOffset());
       assertEquals("next word linked to last", words[4].getEnd(), words[5].getStart());
       assertEquals("because", words[5].getLabel());
       assertEquals("inter-word anchors",
-		   new Double(75), words[5].getEnd().getOffset());
+		   Double.valueOf(75), words[5].getEnd().getOffset());
       assertEquals("next word linked to last", words[5].getEnd(), words[6].getStart());
       assertEquals("of", words[6].getLabel());
       assertEquals("inter-word anchors",
-		   new Double(78), words[6].getEnd().getOffset());
+		   Double.valueOf(78), words[6].getEnd().getOffset());
       assertEquals("next word linked to last", words[6].getEnd(), words[7].getStart());
       assertEquals("poor", words[7].getLabel());
       assertEquals("inter-word anchors",
-		   new Double(83), words[7].getEnd().getOffset());
+		   Double.valueOf(83), words[7].getEnd().getOffset());
       assertEquals("next word linked to last", words[7].getEnd(), words[8].getStart());
       assertEquals("management", words[8].getLabel());
       assertEquals("last word ends at last character",
-		   new Double(100), words[8].getEnd().getOffset());
+		   Double.valueOf(100), words[8].getEnd().getOffset());
 
       Annotation[] comments = g.list("comment");
       assertEquals(1, comments.length);
       assertEquals("Please read the following aloud:", comments[0].getLabel());
-      assertEquals(new Double(0), comments[0].getStart().getOffset());
+      assertEquals(Double.valueOf(0), comments[0].getStart().getOffset());
 
    }
 
@@ -720,9 +720,9 @@ public class TestPlainTextDeserializer
 		   ((Layer)configuration.get("pronounceLayer").getValue()).getId());
       assertEquals("use conventions", Boolean.TRUE, configuration.get("useConventions").getValue());
       assertEquals("maxParticipantLength",
-		   new Integer(20), configuration.get("maxParticipantLength").getValue());
+		   Integer.valueOf(20), configuration.get("maxParticipantLength").getValue());
       assertEquals("maxHeaderLines",
-		   new Integer(50), configuration.get("maxHeaderLines").getValue());
+		   Integer.valueOf(50), configuration.get("maxHeaderLines").getValue());
       assertEquals("participantFormat", "{0}: ",
 		   configuration.get("participantFormat").getValue());
       assertEquals("metaDataFormat", "{0}={1}",
@@ -758,9 +758,9 @@ public class TestPlainTextDeserializer
       // turns
       Annotation[] turns = g.list("turn");
       assertEquals(13, turns.length);
-      // assertEquals(new Double(0.0), turns[0].getStart().getOffset());
+      // assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       // assertEquals("turn ends at end of recording",
-      // 		   new Double(5.2941875), turns[0].getEnd().getOffset());
+      // 		   Double.valueOf(5.2941875), turns[0].getEnd().getOffset());
       assertEquals("BOM is stripped from speaker name",
 		   "mop03-2b", turns[0].getLabel());
       assertEquals(authors[0], turns[0].getParent());
@@ -771,9 +771,9 @@ public class TestPlainTextDeserializer
       // utterances
       Annotation[] utterances = g.list("utterance");
       assertEquals(149, utterances.length);
-      // assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
+      // assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       // assertEquals("utterance ends at end of recording",
-      // 		   new Double(5.2941875), utterances[0].getEnd().getOffset());
+      // 		   Double.valueOf(5.2941875), utterances[0].getEnd().getOffset());
       // assertEquals("test", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
       assertEquals(turns[0], utterances[1].getParent());
@@ -844,9 +844,9 @@ public class TestPlainTextDeserializer
       assertNull("pronounce", configuration.get("pronounceLayer").getValue());
       assertEquals("use conventions", Boolean.FALSE, configuration.get("useConventions").getValue());
       assertEquals("maxParticipantLength",
-		   new Integer(20), configuration.get("maxParticipantLength").getValue());
+		   Integer.valueOf(20), configuration.get("maxParticipantLength").getValue());
       assertEquals("maxHeaderLines",
-		   new Integer(50), configuration.get("maxHeaderLines").getValue());
+		   Integer.valueOf(50), configuration.get("maxHeaderLines").getValue());
       assertEquals("participantFormat", "Author(s): {0}",
 		   configuration.get("participantFormat").getValue());
       assertEquals("metaDataFormat", "{0}: {1}",
@@ -886,18 +886,18 @@ public class TestPlainTextDeserializer
       // turns
       Annotation[] turns = g.list("turn");
       assertEquals(1, turns.length);
-      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
+      assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals("turn ends at end of recording",
-      		   new Double(190946.0), turns[0].getEnd().getOffset());
+      		   Double.valueOf(190946.0), turns[0].getEnd().getOffset());
       assertEquals("Collin, Zacharias", turns[0].getLabel());
       assertEquals(authors[0], turns[0].getParent());
       
       // utterances
       Annotation[] utterances = g.list("utterance");
       assertEquals(3331, utterances.length);
-      // assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
+      // assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       // assertEquals("utterance ends at end of recording",
-      // 		   new Double(5.2941875), utterances[0].getEnd().getOffset());
+      // 		   Double.valueOf(5.2941875), utterances[0].getEnd().getOffset());
       // assertEquals("test", utterances[0].getParent().getLabel());
       for (int l = 0; l < utterances.length; l++)
       {
@@ -988,9 +988,9 @@ public class TestPlainTextDeserializer
       assertNull("pronounce", configuration.get("pronounceLayer").getValue());
       assertEquals("use conventions", Boolean.FALSE, configuration.get("useConventions").getValue());
       assertEquals("maxParticipantLength",
-		   new Integer(20), configuration.get("maxParticipantLength").getValue());
+		   Integer.valueOf(20), configuration.get("maxParticipantLength").getValue());
       assertEquals("maxHeaderLines",
-		   new Integer(50), configuration.get("maxHeaderLines").getValue());
+		   Integer.valueOf(50), configuration.get("maxHeaderLines").getValue());
       assertEquals("participantFormat", "Author(s): {0}",
 		   configuration.get("participantFormat").getValue());
       assertEquals("metaDataFormat", "{0}: {1}",
