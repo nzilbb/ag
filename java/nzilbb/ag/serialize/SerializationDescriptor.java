@@ -298,7 +298,6 @@ public class SerializationDescriptor
     * @return The normal file name suffixes (extensions) of this MIME type, as an array of String.
     */
    public String[] getFileSuffixesArray() { return fileSuffixes.toArray(new String[0]); }
-
    
    /**
     * Determines whether this object is equal to another.
@@ -317,7 +316,6 @@ public class SerializationDescriptor
       }
       return false;
    } // end of equals()
-
    
    /**
     * Returns a hash code value for the object. This override ensures that descriptors for which {@link #equals(Object)} returns true also have the same hash, for hash-table based collections.
@@ -328,4 +326,12 @@ public class SerializationDescriptor
    } // end of hashCode()
 
    
+   /**
+    * Override that describes the serialization.
+    */
+   public String toString()
+   {
+      return "\""+getName()+"\" " + getMimeType() + " (v"+getVersion()+")";
+   } // end of toString()
+
 } // end of class SerializationDescriptor
