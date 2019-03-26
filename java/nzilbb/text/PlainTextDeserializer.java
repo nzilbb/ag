@@ -502,7 +502,7 @@ public class PlainTextDeserializer
     * @see #getMaxHeaderLines()
     * @see #setMaxHeaderLines(Integer)
     */
-   protected Integer maxHeaderLines = new Integer(50);
+   protected Integer maxHeaderLines = Integer.valueOf(50);
    /**
     * Getter for {@link #maxHeaderLines}: Maximum lines in a header
     * @return Maximum lines in a header
@@ -795,7 +795,7 @@ public class PlainTextDeserializer
       }
       if (configuration.get("maxParticipantLength").getValue() == null)
       {
-	 configuration.get("maxParticipantLength").setValue(new Integer(20));
+	 configuration.get("maxParticipantLength").setValue(Integer.valueOf(20));
       }
       
       if (!configuration.containsKey("maxHeaderLines"))
@@ -807,7 +807,7 @@ public class PlainTextDeserializer
       }
       if (configuration.get("maxHeaderLines").getValue() == null)
       {
-	 configuration.get("maxHeaderLines").setValue(new Integer(50));
+	 configuration.get("maxHeaderLines").setValue(Integer.valueOf(50));
       }
       
       if (!configuration.containsKey("participantFormat"))
