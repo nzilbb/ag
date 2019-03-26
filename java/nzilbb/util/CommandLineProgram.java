@@ -154,7 +154,7 @@ public class CommandLineProgram
 	 }
 	 else if (sArg.startsWith("--"))
 	 { // switch
-	    sArg = sArg.substring(1);
+	    sArg = sArg.substring(2);
 	    int iEquals = sArg.indexOf('=');
 	    String sName = sArg;
 	    String sValue = "true";
