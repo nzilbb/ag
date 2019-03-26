@@ -224,10 +224,15 @@ public class TextGrid
       {
 	 String sClass = readValue("class", reader);
 	 // assume it's a class in our package
-	 Tier tier = (Tier) Class.forName("nzilbb.praat."+ sClass).newInstance();
-	 
-	 tier.readText(reader);
-	 addTier(tier);
+	 try
+	 {
+	    Tier tier = (Tier) Class.forName("nzilbb.praat."+ sClass).getConstructor().newInstance();
+	    
+	    tier.readText(reader);
+	    addTier(tier);
+	 }
+	 catch(NoSuchMethodException exception) {}
+	 catch(java.lang.reflect.InvocationTargetException exception) {}
       }
       
    } // readText
