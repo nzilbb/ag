@@ -135,10 +135,13 @@ public class VttToTextGrid
       frame_.getContentPane().setLayout(new BorderLayout());
 
       JPanel pnlEast = new JPanel(new FlowLayout());
+      btnAdd.setToolTipText("Add a file to the list");
       pnlEast.add(btnAdd);
+      btnRemove.setToolTipText("Remove selected files from the list");
       pnlEast.add(btnRemove);
       getContentPane().add(pnlEast, BorderLayout.EAST);
 
+      files.setToolTipText("Drop/drop files to convert here");
       files.setCellRenderer(new DefaultListCellRenderer() {
 	    public Component getListCellRendererComponent(
 	       JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -153,6 +156,7 @@ public class VttToTextGrid
       JPanel pnlSouth = new JPanel(new BorderLayout());
       progress.setStringPainted(true);
       pnlSouth.add(progress, BorderLayout.CENTER);
+      btnConvert.setToolTipText("Convert all files");
       pnlSouth.add(btnConvert, BorderLayout.EAST);
       getContentPane().add(pnlSouth, BorderLayout.SOUTH);
 
