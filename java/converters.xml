@@ -38,6 +38,8 @@
 	<attribute name="Permissions" value="all-permissions"/>
 	<attribute name="Main-Class" value="nzilbb.converter.VttToTextGrid"/>
       </manifest>
+      <!-- icon -->
+      <fileset dir="${src}" includes="nzilbb/converter/VttToTextGrid.png" />
       
       <!-- add required jars -->
       <zipfileset src="${dist}/nzilbb.ag.jar" />
