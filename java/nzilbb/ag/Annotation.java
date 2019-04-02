@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2018 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2019 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -1013,21 +1013,18 @@ public class Annotation
       // check for children of ancestors
       // so that word.my("utterance") works and so does word.my("corpus")
       Annotation commonAncestor = getAncestor(commonAncestorLayer.getId());
-      if (commonAncestorLayer != null 
+      if (commonAncestorLayer != null  && commonAncestor != null
           // common ancestor must be related - i.e. in the layer of commonAncestorLayer
           && commonAncestor.getLayerId() == commonAncestorLayer.getId())
       {
         // return the first child that t-includes this annotation
-        if (commonAncestor != null)
+        for (Annotation child : commonAncestor.list(layerId))
         {
-          for (Annotation child : commonAncestor.list(layerId))
+          if (child.includes(this))
           {
-            if (child.includes(this))
-            {
-              return child;
-            }
-          } // next child of common ancestor
-        }
+            return child;
+          }
+        } // next child of common ancestor
       }
     } // graph is set
     return null;
