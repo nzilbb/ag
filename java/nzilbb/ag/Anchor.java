@@ -89,6 +89,7 @@ public class Anchor
    */
   public synchronized Vector<Change> setOffset(Double offset) 
   {
+    if (offset != null && offset.isNaN()) offset = null;
     Vector<Change> changes = new Vector<Change>();
     if (containsKey("originalOffset")
         || (this.offset != null && !this.offset.equals(offset)))
