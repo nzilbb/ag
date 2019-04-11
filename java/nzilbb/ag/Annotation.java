@@ -1015,7 +1015,7 @@ public class Annotation
       Annotation commonAncestor = getAncestor(commonAncestorLayer.getId());
       if (commonAncestorLayer != null  && commonAncestor != null
           // common ancestor must be related - i.e. in the layer of commonAncestorLayer
-          && commonAncestor.getLayerId() == commonAncestorLayer.getId())
+          && commonAncestor.getLayerId().equals(commonAncestorLayer.getId()))
       {
         // return the first child that t-includes this annotation
         for (Annotation child : commonAncestor.list(layerId))
