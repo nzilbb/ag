@@ -566,7 +566,7 @@ public class PlainTextDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Plain Text Document", "0.20", "text/plain", ".txt", "20170228.1353", getClass().getResource("icon.png"));
+	 "Plain Text Document", "0.3", "text/plain", ".txt", "20170228.1353", getClass().getResource("icon.png"));
    }
 
    /**
@@ -1468,14 +1468,14 @@ public class PlainTextDeserializer
 	    
 	    // word[pronounce]
 	    ConventionTransformer pronounceTransformer = new ConventionTransformer(
-	       getWordLayer().getId(), "(.*)\\[(.*)\\]", "$1", 
+	       getWordLayer().getId(), "(.+)\\[(.*)\\](\\p{Punct}*)", "$1$3", 
 	       pronounceLayer==null?null:pronounceLayer.getId(), "$2");
 	    pronounceTransformer.transform(graph);
 	    graph.commit();
 	    
 	    // word(lexical)
 	    ConventionTransformer lexicalTransformer = new ConventionTransformer(
-	       getWordLayer().getId(), "(.*)\\((.*)\\)", "$1", 
+	       getWordLayer().getId(), "(.+)\\((.*)\\)(\\p{Punct}*)", "$1$3", 
 	       lexicalLayer==null?null:lexicalLayer.getId(), "$2");
 	    lexicalTransformer.transform(graph);
 	    graph.commit();

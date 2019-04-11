@@ -392,7 +392,7 @@ public class EAFDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "ELAN EAF Transcript", "0.5", "text/x-eaf+xml", ".eaf", "20170314.1631", getClass().getResource("icon.png"));
+	 "ELAN EAF Transcript", "0.6", "text/x-eaf+xml", ".eaf", "20170314.1631", getClass().getResource("icon.png"));
    }
    
    /**
@@ -1372,14 +1372,14 @@ public class EAFDeserializer
 		  
 		  // word[pronounce]
 		  ConventionTransformer pronounceTransformer = new ConventionTransformer(
-		     getWordLayer().getId(), "(.*)\\[(.*)\\]", "$1", 
+		     getWordLayer().getId(), "(.+)\\[(.*)\\](\\p{Punct}*)", "$1$3", 
 		     pronounceLayer==null?null:pronounceLayer.getId(), "$2");
 		  pronounceTransformer.transform(graph);
 		  graph.commit();
 		  
 		  // word(lexical)
 		  ConventionTransformer lexicalTransformer = new ConventionTransformer(
-		     getWordLayer().getId(), "(.*)\\((.*)\\)", "$1", 
+		     getWordLayer().getId(), "(.+)\\((.*)\\)(\\p{Punct}*)", "$1$3", 
 		     lexicalLayer==null?null:lexicalLayer.getId(), "$2");
 		  lexicalTransformer.transform(graph);
 		  graph.commit();

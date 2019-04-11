@@ -258,7 +258,7 @@ public class TextGridSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Praat TextGrid", "1.84", "text/praat-textgrid", ".textgrid", "20170516.1519", getClass().getResource("icon.png"));
+	 "Praat TextGrid", "1.85", "text/praat-textgrid", ".textgrid", "20170516.1519", getClass().getResource("icon.png"));
    }
    
    /**
@@ -1113,14 +1113,14 @@ public class TextGridSerialization
 	       
 	       // word[pronounce]
 	       ConventionTransformer pronounceTransformer = new ConventionTransformer(
-		  getWordLayer().getId(), "(.*)\\[(.*)\\]", "$1", 
+		  getWordLayer().getId(), "(.+)\\[(.*)\\](\\p{Punct}*)", "$1$3", 
 		  pronounceLayer==null?null:pronounceLayer.getId(), "$2");
 	       pronounceTransformer.transform(graph);
 	       graph.commit();
 	       
 	       // word(lexical)
 	       ConventionTransformer lexicalTransformer = new ConventionTransformer(
-		  getWordLayer().getId(), "(.*)\\((.*)\\)", "$1", 
+		  getWordLayer().getId(), "(.+)\\((.*)\\)(\\p{Punct}*)", "$1$3", 
 		  lexicalLayer==null?null:lexicalLayer.getId(), "$2");
 	       lexicalTransformer.transform(graph);
 	       graph.commit();
