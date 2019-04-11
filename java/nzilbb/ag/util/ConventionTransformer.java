@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2019 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -72,188 +72,188 @@ import nzilbb.ag.*;
 public class ConventionTransformer
   implements IGraphTransformer
 {
-   // Attributes:
+  // Attributes:
    
-   /**
-    * Layer ID of the annotations to transform.
-    * @see #getSourceLayerId()
-    * @see #setSourceLayerId(String)
-    */
-   protected String sourceLayerId;
-   /**
-    * Getter for {@link #sourceLayerId}: Layer ID of the annotations to transform.
-    * @return Layer ID of the annotations to transform.
-    */
-   public String getSourceLayerId() { return sourceLayerId; }
-   /**
-    * Setter for {@link #sourceLayerId}: Layer ID of the annotations to transform.
-    * @param newSourceLayerId Layer ID of the annotations to transform.
-    */
-   public void setSourceLayerId(String newSourceLayerId) { sourceLayerId = newSourceLayerId; }
+  /**
+   * Layer ID of the annotations to transform.
+   * @see #getSourceLayerId()
+   * @see #setSourceLayerId(String)
+   */
+  protected String sourceLayerId;
+  /**
+   * Getter for {@link #sourceLayerId}: Layer ID of the annotations to transform.
+   * @return Layer ID of the annotations to transform.
+   */
+  public String getSourceLayerId() { return sourceLayerId; }
+  /**
+   * Setter for {@link #sourceLayerId}: Layer ID of the annotations to transform.
+   * @param newSourceLayerId Layer ID of the annotations to transform.
+   */
+  public void setSourceLayerId(String newSourceLayerId) { sourceLayerId = newSourceLayerId; }
 
-   /**
-    * Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
-    * @see #getSourcePattern()
-    * @see #setSourcePattern(String)
-    */
-   protected String sourcePattern;
-   /**
-    * Getter for {@link #sourcePattern}: Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
-    * @return Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
-    */
-   public String getSourcePattern() { return sourcePattern; }
-   /**
-    * Setter for {@link #sourcePattern}: Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
-    * @param newSourcePattern Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
-    */
-   public void setSourcePattern(String newSourcePattern) { sourcePattern = newSourcePattern; }
+  /**
+   * Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
+   * @see #getSourcePattern()
+   * @see #setSourcePattern(String)
+   */
+  protected String sourcePattern;
+  /**
+   * Getter for {@link #sourcePattern}: Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
+   * @return Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
+   */
+  public String getSourcePattern() { return sourcePattern; }
+  /**
+   * Setter for {@link #sourcePattern}: Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
+   * @param newSourcePattern Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
+   */
+  public void setSourcePattern(String newSourcePattern) { sourcePattern = newSourcePattern; }
 
 
-   /**
-    * A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.  If there is no key for {@link #sourceLayerId} then the matching annotation will be deleted.  If there is, then the label of the matching will be changed (unless the value is "\0", i.e. the whole source label, in which case the matching annotation is left unchanged).
-    * @see #getDestinationResults()
-    * @see #setDestinationResults(HashMap)
-    */
-   protected HashMap<String,String> destinationResults;
-   /**
-    * Getter for {@link #destinationResults}: A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.
-    * @return A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.
-    */
-   public HashMap<String,String> getDestinationResults() { return destinationResults; }
-   /**
-    * Setter for {@link #destinationResults}: A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.
-    * @param newDestinationResults A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.
-    */
-   public void setDestinationResults(HashMap<String,String> newDestinationResults) { destinationResults = newDestinationResults; }
+  /**
+   * A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.  If there is no key for {@link #sourceLayerId} then the matching annotation will be deleted.  If there is, then the label of the matching will be changed (unless the value is "\0", i.e. the whole source label, in which case the matching annotation is left unchanged).
+   * @see #getDestinationResults()
+   * @see #setDestinationResults(HashMap)
+   */
+  protected HashMap<String,String> destinationResults;
+  /**
+   * Getter for {@link #destinationResults}: A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.
+   * @return A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.
+   */
+  public HashMap<String,String> getDestinationResults() { return destinationResults; }
+  /**
+   * Setter for {@link #destinationResults}: A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.
+   * @param newDestinationResults A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.
+   */
+  public void setDestinationResults(HashMap<String,String> newDestinationResults) { destinationResults = newDestinationResults; }
    
 
-   // Methods:
+  // Methods:
    
-   /**
-    * Default constructor.
-    */
-   public ConventionTransformer()
-   {
-      setDestinationResults(new HashMap<String,String>());
-   } // end of constructor
+  /**
+   * Default constructor.
+   */
+  public ConventionTransformer()
+  {
+    setDestinationResults(new HashMap<String,String>());
+  } // end of constructor
 
-   /**
-    * Constructor from attribute values.
-    * @param sourceLayerId Layer ID of the annotations to transform.
-    * @param sourcePattern Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
-    * @param destinationResults A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.
-    */
-   public ConventionTransformer(String sourceLayerId, String sourcePattern, HashMap<String,String> destinationResults)
-   {
-      setSourceLayerId(sourceLayerId);
-      setSourcePattern(sourcePattern);
-      setDestinationResults(destinationResults);
-   } // end of constructor
+  /**
+   * Constructor from attribute values.
+   * @param sourceLayerId Layer ID of the annotations to transform.
+   * @param sourcePattern Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
+   * @param destinationResults A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.
+   */
+  public ConventionTransformer(String sourceLayerId, String sourcePattern, HashMap<String,String> destinationResults)
+  {
+    setSourceLayerId(sourceLayerId);
+    setSourcePattern(sourcePattern);
+    setDestinationResults(destinationResults);
+  } // end of constructor
 
-   /**
-    * Constructor from attribute values. Destination results must be subsequently added using {@link #setDestinationResults(HashMap)} or {@link #addDestinationResult(String,String)}.
-    * @param sourceLayerId Layer ID of the annotations to transform.
-    * @param sourcePattern Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
-    */
-   public ConventionTransformer(String sourceLayerId, String sourcePattern)
-   {
-      setSourceLayerId(sourceLayerId);
-      setSourcePattern(sourcePattern);
-      setDestinationResults(new HashMap<String,String>());
-   } // end of constructor
+  /**
+   * Constructor from attribute values. Destination results must be subsequently added using {@link #setDestinationResults(HashMap)} or {@link #addDestinationResult(String,String)}.
+   * @param sourceLayerId Layer ID of the annotations to transform.
+   * @param sourcePattern Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
+   */
+  public ConventionTransformer(String sourceLayerId, String sourcePattern)
+  {
+    setSourceLayerId(sourceLayerId);
+    setSourcePattern(sourcePattern);
+    setDestinationResults(new HashMap<String,String>());
+  } // end of constructor
 
-   /**
-    * Utility constructor for the common scenario of identifying a pattern on one layer and, where it occurs, changing the label on the source label and adding an annotation on a second layer.
-    * <p>For example, to tag disfluencies marked with a leading <tt>&amp;</tt> with a label <tt>DIS</tt>: 
-    * <code>new ConventionTransformer("word", "&amp;(.+)", "\\1", "disfluency", "DIS")</code>
-    * <br>...which strips the word annotation of the leading &amp;, and tags the word on the "disfluency" layer.
-    * @param sourceLayerId Layer ID of the annotations to transform.
-    * @param sourcePattern Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
-    * @param sourceResult The result on the source layer.
-    * @param destinationLayerId The ID of the destination layer.
-    * @param destinationResult The result on the destination layer.
-    */
-   public ConventionTransformer(String sourceLayerId, String sourcePattern, String sourceResult, String destinationLayerId, String destinationResult)
-   {
-      setSourceLayerId(sourceLayerId);
-      setSourcePattern(sourcePattern);
-      HashMap<String,String> destinationResults = new HashMap<String,String>();
-      destinationResults.put(sourceLayerId, sourceResult);
-      if (destinationLayerId != null)
-      {
-	 destinationResults.put(destinationLayerId, destinationResult);
-      }
-      setDestinationResults(destinationResults);
-   } // end of constructor
+  /**
+   * Utility constructor for the common scenario of identifying a pattern on one layer and, where it occurs, changing the label on the source label and adding an annotation on a second layer.
+   * <p>For example, to tag disfluencies marked with a leading <tt>&amp;</tt> with a label <tt>DIS</tt>: 
+   * <code>new ConventionTransformer("word", "&amp;(.+)", "\\1", "disfluency", "DIS")</code>
+   * <br>...which strips the word annotation of the leading &amp;, and tags the word on the "disfluency" layer.
+   * @param sourceLayerId Layer ID of the annotations to transform.
+   * @param sourcePattern Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
+   * @param sourceResult The result on the source layer.
+   * @param destinationLayerId The ID of the destination layer.
+   * @param destinationResult The result on the destination layer.
+   */
+  public ConventionTransformer(String sourceLayerId, String sourcePattern, String sourceResult, String destinationLayerId, String destinationResult)
+  {
+    setSourceLayerId(sourceLayerId);
+    setSourcePattern(sourcePattern);
+    HashMap<String,String> destinationResults = new HashMap<String,String>();
+    destinationResults.put(sourceLayerId, sourceResult);
+    if (destinationLayerId != null)
+    {
+      destinationResults.put(destinationLayerId, destinationResult);
+    }
+    setDestinationResults(destinationResults);
+  } // end of constructor
 
    
-   /**
-    * Add a destination result to {@link #destinationResults}.
-    * @param layerId The layer on which the annotation will be added. This can be null, in which case no destination is specified, resulting in the annotations being stripped out.
-    * @param label The label for the destination annotation, which may include groups captured in {@link #sourcePattern}.
-    */
-   public void addDestinationResult(String layerId, String label)
-   {
-      if (layerId != null)
-      {
-	 getDestinationResults().put(layerId, label);
-      }
-   } // end of addDestinationResult()
+  /**
+   * Add a destination result to {@link #destinationResults}.
+   * @param layerId The layer on which the annotation will be added. This can be null, in which case no destination is specified, resulting in the annotations being stripped out.
+   * @param label The label for the destination annotation, which may include groups captured in {@link #sourcePattern}.
+   */
+  public void addDestinationResult(String layerId, String label)
+  {
+    if (layerId != null)
+    {
+      getDestinationResults().put(layerId, label);
+    }
+  } // end of addDestinationResult()
 
 
-   /**
-    * Transforms the graph.
-    * @param graph The graph to transform.
-    * @return The changes introduced by the tranformation.
-    * @throws TransformationException If the transformation cannot be completed.
-    */
-   public Vector<Change> transform(Graph graph) throws TransformationException
-   {
-      if (graph.getLayer(getSourceLayerId()) == null) 
-	 throw new TransformationException(this, "No source layer: " + getSourceLayerId());
-      try
+  /**
+   * Transforms the graph.
+   * @param graph The graph to transform.
+   * @return The changes introduced by the tranformation.
+   * @throws TransformationException If the transformation cannot be completed.
+   */
+  public Vector<Change> transform(Graph graph) throws TransformationException
+  {
+    if (graph.getLayer(getSourceLayerId()) == null) 
+      throw new TransformationException(this, "No source layer: " + getSourceLayerId());
+    try
+    {
+      Pattern sourceRegexp = Pattern.compile(getSourcePattern());
+      Vector<Change> changes = new Vector<Change>();
+      for (Annotation source : graph.list(getSourceLayerId()))
       {
-	 Pattern sourceRegexp = Pattern.compile(getSourcePattern());
-	 Vector<Change> changes = new Vector<Change>();
-	 for (Annotation source : graph.list(getSourceLayerId()))
-	 {
-	    Matcher matcher = sourceRegexp.matcher(source.getLabel());
-	    if (matcher.matches())
-	    {
-	       for (String destinationLayerId : getDestinationResults().keySet())
-	       {
-		  String result = getDestinationResults().get(destinationLayerId);
-		  if (destinationLayerId.equals(getSourceLayerId()))
-		  {
-		     if (!result.equals("$0"))
-		     {
-			String label = matcher.replaceAll(result);
-			// check it's really a change
-			if (!label.equals(source.getLabel()))
-			{
-			   changes.addAll( // track changes
-			      source.setLabel(label));
- 			}
-		     }
-		  }
-		  else
-		  {
-		     Annotation tag = graph.createTag(source, destinationLayerId, matcher.replaceAll(result));
-		     changes.addAll(tag.getChanges());
-		  }
-	       } // next destination result
-	       // if the source layer isn't a destination layer
-	       if (!getDestinationResults().containsKey(getSourceLayerId()))
-	       { // delete the source annotation
-		  source.destroy();
-	       }
-	    } // label matches
-	 } // next source annotation
-	 return changes;
-      }
-      catch(PatternSyntaxException exception)
-      {
-	 throw new TransformationException(this, exception);
-      }
-   }
+        Matcher matcher = sourceRegexp.matcher(source.getLabel());
+        if (matcher.matches())
+        {
+          for (String destinationLayerId : getDestinationResults().keySet())
+          {
+            String result = getDestinationResults().get(destinationLayerId);
+            if (destinationLayerId.equals(getSourceLayerId()))
+            {
+              if (!result.equals("$0"))
+              {
+                String label = matcher.replaceAll(result);
+                // check it's really a change
+                if (!label.equals(source.getLabel()))
+                {
+                  changes.addAll( // track changes
+                    source.setLabel(label));
+                }
+              }
+            }
+            else
+            {
+              Annotation tag = graph.createTag(source, destinationLayerId, matcher.replaceAll(result));
+              changes.addAll(tag.getChanges());
+            }
+          } // next destination result
+          // if the source layer isn't a destination layer
+          if (!getDestinationResults().containsKey(getSourceLayerId()))
+          { // delete the source annotation
+            source.destroy();
+          }
+        } // label matches
+      } // next source annotation
+      return changes;
+    }
+    catch(PatternSyntaxException exception)
+    {
+      throw new TransformationException(this, exception);
+    }
+  }
 } // end of class ConventionTransformer
