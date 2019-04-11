@@ -315,13 +315,126 @@ public class TestConventionTransformer
     {
       // word[pronounce]
       ConventionTransformer pronounceTransformer = new ConventionTransformer(
-        "word", "(.*)\\[(.*)\\]", "$1", "pron", "$2");
+        "word", "(.+)\\[(.*)\\](\\p{Punct}*)", "$1$3", "pron", "$2");
       pronounceTransformer.transform(g);
       g.commit();
 	 
       // word(lexical)
       ConventionTransformer lexicalTransformer = new ConventionTransformer(
-        "word", "(.*)\\((.*)\\)", "$1", "lex", "$2");
+        "word", "(.+)\\((.*)\\)(\\p{Punct}*)", "$1$3", "lex", "$2");
+      lexicalTransformer.transform(g);
+      g.commit();
+
+      // run word[pronounce] again, in case some were masked by lexical tags:
+      // word[pronounce](lexical)
+      pronounceTransformer.transform(g);
+      g.commit();
+
+      // ensure the order of the conventions doesn't matter
+
+      Annotation token = g.getAnnotation("word2");
+      assertNotNull("pron-before-lex: pron", token.my("pron"));
+      assertEquals("pron-before-lex: pron label", "kwik", token.my("pron").getLabel());
+      assertNotNull("pron-before-lex: lex", token.my("lex"));
+      assertEquals("pron-before-lex: lex label", "quick", token.my("lex").getLabel());
+      assertEquals("pron-before-lex: token label", "qweek", token.getLabel());
+
+      token = g.getAnnotation("word3");
+      assertNotNull("lex-before-pron: pron", token.my("pron"));
+      assertEquals("lex-before-pron: pron label", "kwik", token.my("pron").getLabel());
+      assertNotNull("lex-before-pron: lex", token.my("lex"));
+      assertEquals("lex-before-pron: lex label", "quick", token.my("lex").getLabel());
+      assertEquals("pron-before-lex: token label", "qweek", token.getLabel());
+
+      token = g.getAnnotation("word4");
+      assertNotNull("~ pron-before-lex: pron", token.my("pron"));
+      assertEquals("~ pron-before-lex: pron label", "kw@", token.my("pron").getLabel());
+      assertNotNull("~ pron-before-lex: lex", token.my("lex"));
+      assertEquals("~ pron-before-lex: lex label", "quick", token.my("lex").getLabel());
+      assertEquals("pron-before-lex: token label", "qu~", token.getLabel());
+
+      token = g.getAnnotation("word5");
+      assertNotNull("~ lex-before-pron: pron", token.my("pron"));
+      assertEquals("~ lex-before-pron: pron label", "kw@", token.my("pron").getLabel());
+      assertNotNull("~ lex-before-pron: lex", token.my("lex"));
+      assertEquals("~ lex-before-pron: lex label", "quick", token.my("lex").getLabel());
+      assertEquals("pron-before-lex: token label", "qu~", token.getLabel());
+
+    }
+    catch(TransformationException exception)
+    {
+      fail(exception.toString());
+    }
+  }
+  
+  @Test public void MalformedELANConventions() 
+  {
+    Graph g = new Graph();
+    g.setId("my graph");
+    g.setCorpus("cc");
+
+    g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+                         true, // peers
+                         true, // peersOverlap
+                         true)); // saturated
+    g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+                         true, // peers
+                         false, // peersOverlap
+                         false, // saturated
+                         "who", // parentId
+                         true)); // parentIncludes
+    g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+                         true, // peers
+                         false, // peersOverlap
+                         false, // saturated
+                         "turn", // parentId
+                         true)); // parentIncludes
+    g.addLayer(new Layer("pron", "Pronounce", Constants.ALIGNMENT_NONE,
+                         false, // peers
+                         false, // peersOverlap
+                         true, // saturated
+                         "word", // parentId
+                         true)); // parentIncludes
+    g.addLayer(new Layer("lex", "Lexical", Constants.ALIGNMENT_NONE,
+                         false, // peers
+                         false, // peersOverlap
+                         true, // saturated
+                         "word", // parentId
+                         true)); // parentIncludes
+
+    g.addAnchor(new Anchor("a0", 0.0)); // turn start
+    g.addAnchor(new Anchor("a1", 1.0)); // the
+    g.addAnchor(new Anchor("a2", 2.0)); // qweek
+    g.addAnchor(new Anchor("a3", 3.0)); // qweek
+    g.addAnchor(new Anchor("a4", 4.0)); // qui~
+    // unset offsets
+    g.addAnchor(new Anchor("a?1", null)); // qu~
+    g.addAnchor(new Anchor("a?2", null)); // ah
+    g.addAnchor(new Anchor("a5", 5.0)); // end of ah
+    g.addAnchor(new Anchor("a6", 6.0)); // turn end
+
+    g.addAnnotation(new Annotation("participant1", "john smith", "who", "a0", "a6", "my graph"));
+
+    g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a6", "participant1"));
+
+    g.addAnnotation(new Annotation("word1", "the", "word", "a1", "a2", "turn1"));
+    g.addAnnotation(new Annotation("word2", "qweek[kwik](quick)", "word", "a2", "a3", "turn1"));
+    g.addAnnotation(new Annotation("word3", "qweek(quick)[kwik]", "word", "a3", "a4", "turn1"));
+    g.addAnnotation(new Annotation("word4", "qu[kw@](quick)~", "word", "a4", "a?1", "turn1"));
+    g.addAnnotation(new Annotation("word5", "qu(quick)[kw@]~", "word", "a?1", "a?2", "turn1"));
+    g.addAnnotation(new Annotation("word6", "ah", "word", "a?2", "a5", "turn1"));
+
+    try
+    {
+      // word[pronounce]
+      ConventionTransformer pronounceTransformer = new ConventionTransformer(
+        "word", "(.+)\\[(.*)\\](\\p{Punct}*)", "$1$3", "pron", "$2");
+      pronounceTransformer.transform(g);
+      g.commit();
+	 
+      // word(lexical)
+      ConventionTransformer lexicalTransformer = new ConventionTransformer(
+        "word", "(.+)\\((.*)\\)(\\p{Punct}*)", "$1$3", "lex", "$2");
       lexicalTransformer.transform(g);
       g.commit();
 
