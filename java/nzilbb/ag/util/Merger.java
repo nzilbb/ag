@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2019 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -2697,6 +2697,7 @@ public class Merger
                 while (itAnchors.hasPrevious())
                 {
                   predecessor = itAnchors.previous();
+                  if (predecessor == null) continue; // skip if there's none
                   if (predecessor == anchor) continue; // skip the one we just got
                   if (predecessor.getOffset() == null) continue; // skip no-offset anchors
 
@@ -2740,6 +2741,8 @@ public class Merger
                 }
                 // now itAnchors.next() is the first prior anchor to change
                 // and precedessor = the anchor before that
+                if (predecessor == null) continue; // skip if there's none
+                if (predecessor.getOffset() == null) continue; // skip no-offset anchors
                 double dStartOffset = predecessor.getOffset();
                 // if there's an original offset that's lower than this, we can't revert
                 if (dStartOffset > dLowestOriginalOffset) bRevertWouldSolve = false;
@@ -2855,30 +2858,38 @@ public class Merger
           { // edited graph includes child layer, children contains the edited version
             anOriginalChild = getCounterpart(anOriginalChild);
           }
-          if (anOriginalParent.getStart() != anOriginalChild.getStart()
-              // but not if we reconstructed the parent's anchor
-              && !dummyAnchors.contains(anOriginalParent.getStart()))
+          if (anOriginalChild != null)
           {
-            changes.addAll( // record changes for:
-              changeStartWithRelatedAnnotations(anOriginalParent, anOriginalChild.getStart(), layerId));
-            log(layerId, ": Share start of  first child ", anOriginalChild, 
-                " with parent ", anOriginalParent);
-          }
+            if (anOriginalParent.getStart() != anOriginalChild.getStart()
+                // but not if we reconstructed the parent's anchor
+                && !dummyAnchors.contains(anOriginalParent.getStart()))
+            {
+              changes.addAll( // record changes for:
+                changeStartWithRelatedAnnotations(anOriginalParent, anOriginalChild.getStart(), layerId));
+              log(layerId, ": Share start of  first child ", anOriginalChild, 
+                  " with parent ", anOriginalParent);
+            }
+          } // anOriginalChild != null
+          
           anOriginalChild = children.last();
           if (editGraphHasChildLayer)
           { // edited graph includes child layer, children contains the edited version
             anOriginalChild = getCounterpart(anOriginalChild);
           }
-          if (anOriginalParent.getEnd() != anOriginalChild.getEnd()
-              // but not if we reconstructed the parent's anchor
-              && !dummyAnchors.contains(anOriginalParent.getEnd()))
+          if (anOriginalChild != null)
           {
-            changes.addAll( // record changes for:
-              changeEndWithRelatedAnnotations(anOriginalParent, anOriginalChild.getEnd(), layerId));
-            log(layerId, ": Share end of last child ", anOriginalChild, 
-                " with parent ", anOriginalParent);
-          }
-        }
+            if (anOriginalParent.getEnd() != anOriginalChild.getEnd()
+                // but not if we reconstructed the parent's anchor
+                && !dummyAnchors.contains(anOriginalParent.getEnd()))
+            {
+              changes.addAll( // record changes for:
+                changeEndWithRelatedAnnotations(anOriginalParent, anOriginalChild.getEnd(), layerId));
+              log(layerId, ": Share end of last child ", anOriginalChild, 
+                  " with parent ", anOriginalParent);
+            }
+          } // anOriginalChild != null
+        } // saturated and there are children
+          
         anLastOriginalParentsLastChild = lastChild;
       } // next parent
     } // peers && !peersOverlap
