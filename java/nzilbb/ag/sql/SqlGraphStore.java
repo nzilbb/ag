@@ -2354,6 +2354,8 @@ public class SqlGraphStore
     boolean transcriptJoin = false;
     boolean anchorsJoin = false;
     // now rewrite the operands of the expression
+    StringBuffer extraJoins = new StringBuffer();
+    int xj = 0; // extra join count, for suffixing table names uniquely
     StringBuffer conditions = new StringBuffer();
     for (String subexpression : subexpressions)
     {
@@ -2471,9 +2473,9 @@ public class SqlGraphStore
               +")";
           } // turn based on turn_annotation_id
         }
-        else if (operand.startsWith("my('") && operand.endsWith("').label"))
+        else if (operand.startsWith("my('") && (operand.endsWith("').label") || operand.endsWith("').id")))
         { // my
-          String layerId = operand.replaceFirst("my\\('","").replaceFirst("'\\)\\.label$","");
+          String layerId = operand.replaceFirst("my\\('","").replaceFirst("'\\)\\.(label|id)$","");
           Layer operandLayer = getLayer(layerId);
           if (operandLayer == null) throw new StoreException("Invalid layer: " + layerId);
           // join by the finest-grain compatible with both layers
@@ -2486,26 +2488,43 @@ public class SqlGraphStore
             "word_annotation_id",
             "segment_annotation_id" };
           int joinFieldIndex = 3;
+          xj++;
+          String selectedValue = "otherLayer_"+xj+".label";
           if (scope.equals("W")) joinFieldIndex = Math.min(joinFieldIndex, 2);
-          if (operandScope.equals("W") && joinFieldIndex > 2) Math.min(joinFieldIndex, 2);
+          if (operandScope.equals("W") && joinFieldIndex > 2) joinFieldIndex = Math.min(joinFieldIndex, 2);
           if (scope.equals("M")) joinFieldIndex = Math.min(joinFieldIndex, 1);
-          if (operandScope.equals("M") && joinFieldIndex > 2) Math.min(joinFieldIndex, 1);
+          if (operandScope.equals("M") && joinFieldIndex > 2) joinFieldIndex = Math.min(joinFieldIndex, 1);
           if (scope.equals("F")) joinFieldIndex = Math.min(joinFieldIndex, 0);
-          if (operandScope.equals("F") && joinFieldIndex > 2) Math.min(joinFieldIndex, 0);
+          if (operandScope.equals("F") && joinFieldIndex > 2) joinFieldIndex = Math.min(joinFieldIndex, 0);
+          if (operand.endsWith("').id")) // getting id, not label
+          { // construct id from scope, layer_id, and annotation_id
+            String scopePrefix = operandScope.toLowerCase();
+            if (operandScope.equals("F")) scopePrefix = "";
+            selectedValue = "CONCAT('e"+scopePrefix+"_"+operandLayer.get("@layer_id")+"_', otherLayer_"+xj+".annotation_id)";
+          }
+          // if both layers are the same scope, we don't need to compare anchors
+          boolean temporalJoin = !scope.equals(operandScope);
+          String order = "otherLayer_start_"+xj+".offset, otherLayer_end_"+xj+".offset DESC";
+          if (!temporalJoin)
+          {
+            order = "otherLayer_"+xj+".ordinal";
+          }
+          
           String joinField = joinFields[joinFieldIndex];
-          sqlOperand = "(SELECT otherLayer.label"
-            +" FROM annotation_layer_"+operandLayer.get("@layer_id")+" otherLayer"
-            +" INNER JOIN anchor otherLayer_start ON otherLayer.start_anchor_id = otherLayer_start.anchor_id"
-            +" INNER JOIN anchor otherLayer_end ON otherLayer.end_anchor_id = otherLayer_end.anchor_id"
-            +" WHERE otherLayer.ag_id = annotation.ag_id"
-            +(joinField==null?"":" AND otherLayer."+joinField+" = annotation."+joinField)
-            // any overlap
-            +" AND otherLayer_start.offset <= end.offset"
-            +" AND start.offset <= otherLayer_end.offset"
-            +" ORDER BY otherLayer_start.offset, otherLayer_end.offset DESC"
-            +" LIMIT 1"
-            +")";
-          anchorsJoin = true;
+          extraJoins.append(
+            " INNER JOIN"
+            +" annotation_layer_"+operandLayer.get("@layer_id")+" otherLayer_"+xj
+            +" ON otherLayer_"+xj+".ag_id = annotation.ag_id"
+            +(joinField==null?"":" AND otherLayer_"+xj+"."+joinField+" = annotation."+joinField)
+            +(!temporalJoin?"":
+              " INNER JOIN anchor otherLayer_start_"+xj
+              +" ON otherLayer_"+xj+".start_anchor_id = otherLayer_start_"+xj+".anchor_id"
+              +" AND otherLayer_start_"+xj+".offset <= end.offset"
+              +" INNER JOIN anchor otherLayer_end_"+xj
+              +" ON otherLayer_"+xj+".end_anchor_id = otherLayer_end_"+xj+".anchor_id"
+              +" AND start.offset <= otherLayer_end_"+xj+".offset"));
+          sqlOperand = selectedValue;
+          if (temporalJoin) anchorsJoin = true;
         } // my
         else if (operand.startsWith("list('") && operand.endsWith("')"))
         { // list()
@@ -2611,11 +2630,13 @@ public class SqlGraphStore
     {
       transcriptJoin = true;
     }
-    String sSql = "SELECT " + select
+    String sSql = "SELECT DISTINCT " + select
+      +(anchorsJoin?", start.offset, end.offset":"") // need to SELECT for ORDER BY
       +" FROM annotation_layer_? annotation"
       +(transcriptJoin?" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id":"")
       +(anchorsJoin?" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
         +" INNER JOIN anchor end ON annotation.end_anchor_id = end.anchor_id":"")
+      + extraJoins.toString()
       + conditions.toString()
       + userWhereClauseGraph(conditions.length() > 0)
       +" ORDER BY "
