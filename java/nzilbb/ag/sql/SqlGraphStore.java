@@ -978,9 +978,10 @@ public class SqlGraphStore
    * <p>Assumes that the <tt>transcript</tt> table (with no alias) is in the FROM clause
    * of the query into which the WHERE clause will be embedded.
    * @param prefixWithAnd Whether to prefix the clause with "AND" or "WHERE".
+   * @param transcriptTableAlias The alias for the transcript table.
    * @return A WHERE clause if appropriate, or an empty string if not.
    */
-  private String userWhereClauseGraph(boolean prefixWithAnd)
+  private String userWhereClauseGraph(boolean prefixWithAnd, String transcriptTableAlias)
   {
     if (getUser() != null && !getUserRoles().contains("admin"))
     {
@@ -992,12 +993,12 @@ public class SqlGraphStore
         + " AND access_attribute.label REGEXP role_permission.value_pattern"
         + " AND role_permission.entity REGEXP '.*t.*'" // transcript access
         + " WHERE user_id = '"+getUser().replaceAll("'","\\'")+"'"
-        + " AND access_attribute.ag_id = transcript.ag_id)"
+        + " AND access_attribute.ag_id = "+transcriptTableAlias+".ag_id)"
         +" OR EXISTS (SELECT * FROM role"
         + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
         + " AND role_permission.attribute_name = 'corpus'" 
         + " AND role_permission.entity REGEXP '.*t.*'" // transcript access
-        + " WHERE transcript.corpus_name REGEXP role_permission.value_pattern"
+        + " WHERE "+transcriptTableAlias+".corpus_name REGEXP role_permission.value_pattern"
         + " AND user_id = '"+getUser().replaceAll("'","\\'")+"')"
         +" OR NOT EXISTS (SELECT * FROM role_permission)) "; // permissions are being used in general
     }
@@ -1015,7 +1016,7 @@ public class SqlGraphStore
   private String userWhereClauseParticipant(boolean prefixWithAnd)
   {
     String userWhereClauseSpeaker = "";
-    String userWhereClause = userWhereClauseGraph(prefixWithAnd);
+    String userWhereClause = userWhereClauseGraph(prefixWithAnd, "transcript");
     if (userWhereClause.length() > 0)
     {
       // insert links to speaker table
@@ -1053,7 +1054,7 @@ public class SqlGraphStore
     try
     {
       PreparedStatement sql = getConnection().prepareStatement(
-        "SELECT transcript_id FROM transcript " + userWhereClauseGraph(false)
+        "SELECT transcript_id FROM transcript " + userWhereClauseGraph(false, "transcript")
         +" ORDER BY transcript_id");
       ResultSet rs = sql.executeQuery();
       Vector<String> graphs = new Vector<String>();
@@ -1599,7 +1600,7 @@ public class SqlGraphStore
     if (limit == null) limit = "";
     String sSql = "SELECT "+selectClause+" FROM transcript"
       + conditions.toString()
-      + userWhereClauseGraph(conditions.length() > 0)
+      + userWhereClauseGraph(conditions.length() > 0, "transcript")
       + orderClause.toString()
       + " " + limit;
     System.out.println("QL: " + expression);
@@ -1750,7 +1751,7 @@ public class SqlGraphStore
         +" LEFT OUTER JOIN transcript_family ON transcript.family_id = transcript_family.family_id"
         +" LEFT OUTER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
         +" LEFT OUTER JOIN annotation_transcript divergent ON transcript.ag_id = divergent.ag_id AND divergent.layer = 'divergent'"
-        +" WHERE transcript.transcript_id = ?"+userWhereClauseGraph(true));
+        +" WHERE transcript.transcript_id = ?"+userWhereClauseGraph(true, "transcript"));
       sql.setString(1, id);
       ResultSet rs = sql.executeQuery();
       if (!rs.next())
@@ -1764,7 +1765,7 @@ public class SqlGraphStore
           +" LEFT OUTER JOIN transcript_family ON transcript.family_id = transcript_family.family_id"
           +" LEFT OUTER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
           +" LEFT OUTER JOIN annotation_transcript divergent ON transcript.ag_id = divergent.ag_id AND divergent.layer = 'divergent'"
-          +" WHERE transcript.transcript_id REGEXP ?"+userWhereClauseGraph(true));
+          +" WHERE transcript.transcript_id REGEXP ?"+userWhereClauseGraph(true, "transcript"));
         sql.setString(1, "^" + id.replaceAll("\\.[^.]+$","") + "\\.[^.]+$");
         rs = sql.executeQuery();
         if (!rs.next())
@@ -1781,7 +1782,7 @@ public class SqlGraphStore
               +" LEFT OUTER JOIN transcript_family ON transcript.family_id = transcript_family.family_id"
               +" LEFT OUTER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
               +" LEFT OUTER JOIN annotation_transcript divergent ON transcript.ag_id = divergent.ag_id AND divergent.layer = 'divergent'"
-              +" WHERE transcript.ag_id = ?"+userWhereClauseGraph(true));
+              +" WHERE transcript.ag_id = ?"+userWhereClauseGraph(true, "transcript"));
             sql.setInt(1, iAgId);
             rs = sql.executeQuery();
             if (!rs.next()) throw new GraphNotFoundException(id);
@@ -2638,7 +2639,7 @@ public class SqlGraphStore
         +" INNER JOIN anchor end ON annotation.end_anchor_id = end.anchor_id":"")
       + extraJoins.toString()
       + conditions.toString()
-      + userWhereClauseGraph(conditions.length() > 0)
+      + userWhereClauseGraph(conditions.length() > 0, "graph")
       +" ORDER BY "
       +(transcriptJoin?"graph.transcript_id":"ag_id") + ", "
       +(anchorsJoin?"start.offset, end.offset, ":"")
