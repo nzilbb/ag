@@ -1385,7 +1385,7 @@ public class SqlGraphStore
           if (operandLayer == null) throw new StoreException("Invalid layer: " + layerId);
           String class_id = (String)operandLayer.get("@class_id");
           if (!"transcript".equals(class_id)) throw new StoreException("Cannot query by temporal annotation layer: " + layerId);
-          sqlOperand = "(SELECT label FROM annotation_transcript"
+          sqlOperand = "(SELECT label FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
             +" WHERE annotation_transcript.ag_id = transcript.ag_id AND layer = '"+operandLayer.get("@attribute").toString().replace("'","\\'")+"'"
             +")";
         }
@@ -1398,7 +1398,7 @@ public class SqlGraphStore
           if ("transcript".equals(layer.get("@class_id")))
           { // transcript attribute
             sqlOperand = "(SELECT label"
-              +" FROM annotation_transcript"
+              +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
               +" WHERE annotation_transcript.ag_id = transcript.ag_id"
               +" AND annotation_transcript.layer = '"+layerId
               .replaceFirst("^transcript_", "")
