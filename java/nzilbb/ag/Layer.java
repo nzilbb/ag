@@ -48,409 +48,409 @@ import nzilbb.ag.util.AnnotationComparatorByOrdinal;
 public class Layer
    extends TrackedMap
 {
-   // NB if this is updated, please also update the @return javadoc attribute on getClonedAttributes()
-   private static String[] aClonedAttributes = {"id", "parentId", "description", "alignment", "peers", "peersOverlap", "parentIncludes", "saturated", "type", "validLabels"};
-   /**
-    * Keys for attributes that are cloned - i.e. when an object is cloned, only these attributes are copied into the clone.
-    * <p>LinkedHashSet is used so that attributes are iterated in the order they're defined in aClonedAttributes (which is the order shown in the documentation of {@link #getClonedAttributes()}).
-    */
-   protected static final Set<String> clonedAttributes = new LinkedHashSet<String>(java.util.Arrays.asList(aClonedAttributes));
+  // NB if this is updated, please also update the @return javadoc attribute on getClonedAttributes()
+  private static String[] aClonedAttributes = {"id", "parentId", "description", "alignment", "peers", "peersOverlap", "parentIncludes", "saturated", "type", "validLabels"};
+  /**
+   * Keys for attributes that are cloned - i.e. when an object is cloned, only these attributes are copied into the clone.
+   * <p>LinkedHashSet is used so that attributes are iterated in the order they're defined in aClonedAttributes (which is the order shown in the documentation of {@link #getClonedAttributes()}).
+   */
+  protected static final Set<String> clonedAttributes = new LinkedHashSet<String>(java.util.Arrays.asList(aClonedAttributes));
 
-   /**
-    * Keys for attributes that are cloned - i.e. when an object is cloned, only these attributes are copied into the clone.
-    * @return "id", "parentId", "description", "alignment", "peers", "peersOverlap", "parentIncludes", "saturated", "type"
-    */
-   public Set<String> getClonedAttributes()
-   {
-      return clonedAttributes;
-   } // end of getTrackedAttributes()
+  /**
+   * Keys for attributes that are cloned - i.e. when an object is cloned, only these attributes are copied into the clone.
+   * @return "id", "parentId", "description", "alignment", "peers", "peersOverlap", "parentIncludes", "saturated", "type"
+   */
+  public Set<String> getClonedAttributes()
+  {
+    return clonedAttributes;
+  } // end of getTrackedAttributes()
 
-   // Attributes stored in HashMap:
+  // Attributes stored in HashMap:
    
-   /**
-    * The layer's parent layer id
-    */
-   protected String parentId;
-   /**
-    * Getter for <i>parentId</i>: The layer's parent layer id
-    * @return The layer's parent layer id
-    */
-   public String getParentId() { return parentId; }
-   /**
-    * Setter for <i>parentId</i>: The layer's parent layer id
-    * @param parentId The layer's parent layer id
-    */
-   public void setParentId(String parentId) { this.parentId = parentId; }
+  /**
+   * The layer's parent layer id
+   */
+  protected String parentId;
+  /**
+   * Getter for <i>parentId</i>: The layer's parent layer id
+   * @return The layer's parent layer id
+   */
+  public String getParentId() { return parentId; }
+  /**
+   * Setter for <i>parentId</i>: The layer's parent layer id
+   * @param parentId The layer's parent layer id
+   */
+  public void setParentId(String parentId) { this.parentId = parentId; }
 
-   /**
-    * The description of the layer.
-    */
-   protected String description;
-   /**
-    * Getter for <i>description</i>: The description of the layer.
-    * @return The description of the layer.
-    */
-   public String getDescription() { return description; }
-   /**
-    * Setter for <i>description</i>: The description of the layer.
-    * @param description The description of the layer.
-    * @see Constants#ALIGNMENT_NONE
-    * @see Constants#ALIGNMENT_INSTANT
-    * @see Constants#ALIGNMENT_INTERVAL
-    */
-   public void setDescription(String description) { this.description = description; }
+  /**
+   * The description of the layer.
+   */
+  protected String description;
+  /**
+   * Getter for <i>description</i>: The description of the layer.
+   * @return The description of the layer.
+   */
+  public String getDescription() { return description; }
+  /**
+   * Setter for <i>description</i>: The description of the layer.
+   * @param description The description of the layer.
+   * @see Constants#ALIGNMENT_NONE
+   * @see Constants#ALIGNMENT_INSTANT
+   * @see Constants#ALIGNMENT_INTERVAL
+   */
+  public void setDescription(String description) { this.description = description; }
 
-   /**
-    * The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
-    * @see Constants#ALIGNMENT_NONE
-    * @see Constants#ALIGNMENT_INSTANT
-    * @see Constants#ALIGNMENT_INTERVAL
-    */
-   protected int alignment;
-   /**
-    * Getter for <i>alignment</i>: The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
-    * @return The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
-    * @see Constants#ALIGNMENT_NONE
-    * @see Constants#ALIGNMENT_INSTANT
-    * @see Constants#ALIGNMENT_INTERVAL
-    */
-   public int getAlignment() { return alignment; }
-   /**
-    * Setter for <i>alignment</i>: The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
-    * @param alignment The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
-    * @see Constants#ALIGNMENT_NONE
-    * @see Constants#ALIGNMENT_INSTANT
-    * @see Constants#ALIGNMENT_INTERVAL
-    */
-   public void setAlignment(int alignment) { this.alignment = alignment; }
+  /**
+   * The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
+   * @see Constants#ALIGNMENT_NONE
+   * @see Constants#ALIGNMENT_INSTANT
+   * @see Constants#ALIGNMENT_INTERVAL
+   */
+  protected int alignment;
+  /**
+   * Getter for <i>alignment</i>: The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
+   * @return The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
+   * @see Constants#ALIGNMENT_NONE
+   * @see Constants#ALIGNMENT_INSTANT
+   * @see Constants#ALIGNMENT_INTERVAL
+   */
+  public int getAlignment() { return alignment; }
+  /**
+   * Setter for <i>alignment</i>: The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
+   * @param alignment The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
+   * @see Constants#ALIGNMENT_NONE
+   * @see Constants#ALIGNMENT_INSTANT
+   * @see Constants#ALIGNMENT_INTERVAL
+   */
+  public void setAlignment(int alignment) { this.alignment = alignment; }
 
-   /**
-    * Whether children have peers or not.
-    */
-   protected boolean peers;
-   /**
-    * Getter for <i>peers</i>: Whether children have peers or not.
-    * @return Whether children have peers or not.
-    */
-   public boolean getPeers() { return peers; }
-   /**
-    * Setter for <i>peers</i>: Whether children have peers or not.
-    * @param peers Whether children have peers or not.
-    */
-   public void setPeers(boolean peers) { this.peers = peers; }
+  /**
+   * Whether children have peers or not.
+   */
+  protected boolean peers;
+  /**
+   * Getter for <i>peers</i>: Whether children have peers or not.
+   * @return Whether children have peers or not.
+   */
+  public boolean getPeers() { return peers; }
+  /**
+   * Setter for <i>peers</i>: Whether children have peers or not.
+   * @param peers Whether children have peers or not.
+   */
+  public void setPeers(boolean peers) { this.peers = peers; }
 
-   /**
-    * Whether child peers can overlap or not.
-    */
-   protected boolean peersOverlap;
-   /**
-    * Getter for <i>peersOverlap</i>: Whether child peers can overlap or not.
-    * @return Whether child peers can overlap or not.
-    */
-   public boolean getPeersOverlap() { return peersOverlap; }
-   /**
-    * Setter for <i>peersOverlap</i>: Whether child peers can overlap or not.
-    * @param peersOverlap Whether child peers can overlap or not.
-    */
-   public void setPeersOverlap(boolean peersOverlap) { this.peersOverlap = peersOverlap; }
+  /**
+   * Whether child peers can overlap or not.
+   */
+  protected boolean peersOverlap;
+  /**
+   * Getter for <i>peersOverlap</i>: Whether child peers can overlap or not.
+   * @return Whether child peers can overlap or not.
+   */
+  public boolean getPeersOverlap() { return peersOverlap; }
+  /**
+   * Setter for <i>peersOverlap</i>: Whether child peers can overlap or not.
+   * @param peersOverlap Whether child peers can overlap or not.
+   */
+  public void setPeersOverlap(boolean peersOverlap) { this.peersOverlap = peersOverlap; }
 
-   /**
-    * Whether the parent t-includes the child.
-    */
-   protected boolean parentIncludes;
-   /**
-    * Getter for <i>parentIncludes</i>: Whether the parent t-includes the child.
-    * @return Whether the parent t-includes the child.
-    */
-   public boolean getParentIncludes() { return parentIncludes; }
-   /**
-    * Setter for <i>parentIncludes</i>: Whether the parent t-includes the child.
-    * @param parentIncludes Whether the parent t-includes the child.
-    */
-   public void setParentIncludes(boolean parentIncludes) { this.parentIncludes = parentIncludes; }
+  /**
+   * Whether the parent t-includes the child.
+   */
+  protected boolean parentIncludes;
+  /**
+   * Getter for <i>parentIncludes</i>: Whether the parent t-includes the child.
+   * @return Whether the parent t-includes the child.
+   */
+  public boolean getParentIncludes() { return parentIncludes; }
+  /**
+   * Setter for <i>parentIncludes</i>: Whether the parent t-includes the child.
+   * @param parentIncludes Whether the parent t-includes the child.
+   */
+  public void setParentIncludes(boolean parentIncludes) { this.parentIncludes = parentIncludes; }
 
-   /**
-    * Whether children must temporally fill the entire parent duration (true) or not (false).
-    */
-   protected boolean saturated;
-   /**
-    * Getter for <i>saturated</i>: Whether children must temporally fill the entire parent duration (true) or not (false).
-    * @return Whether children must temporally fill the entire parent duration (true) or not (false).
-    */
-   public boolean getSaturated() { return saturated; }
-   /**
-    * Setter for <i>saturated</i>: Whether children must temporally fill the entire parent duration (true) or not (false).
-    * @param saturated Whether children must temporally fill the entire parent duration (true) or not (false).
-    */
-   public void setSaturated(boolean saturated) { this.saturated = saturated; }
+  /**
+   * Whether children must temporally fill the entire parent duration (true) or not (false).
+   */
+  protected boolean saturated;
+  /**
+   * Getter for <i>saturated</i>: Whether children must temporally fill the entire parent duration (true) or not (false).
+   * @return Whether children must temporally fill the entire parent duration (true) or not (false).
+   */
+  public boolean getSaturated() { return saturated; }
+  /**
+   * Setter for <i>saturated</i>: Whether children must temporally fill the entire parent duration (true) or not (false).
+   * @param saturated Whether children must temporally fill the entire parent duration (true) or not (false).
+   */
+  public void setSaturated(boolean saturated) { this.saturated = saturated; }
    
-   /**
-    * Child layers.
-    */
-   protected LinkedHashMap<String,Layer> children;
-   /**
-    * Getter for <i>children</i>: Child layers.
-    * @return Child layers.
-    */
-   @SuppressWarnings("unchecked")
-   public LinkedHashMap<String,Layer> getChildren() 
-   {
-      if (children == null)
-      {
-	 children = new LinkedHashMap<String,Layer>();
-      }
+  /**
+   * Child layers.
+   */
+  protected LinkedHashMap<String,Layer> children;
+  /**
+   * Getter for <i>children</i>: Child layers.
+   * @return Child layers.
+   */
+  @SuppressWarnings("unchecked")
+  public LinkedHashMap<String,Layer> getChildren() 
+  {
+    if (children == null)
+    {
+      children = new LinkedHashMap<String,Layer>();
+    }
 
-      return children; 
-   }
-   /**
-    * Setter for <i>children</i>: Child layers.
-    * @param children Child layers.
-    */
-   public void setChildren(LinkedHashMap<String,Layer> children) { this.children = children; }
+    return children; 
+  }
+  /**
+   * Setter for <i>children</i>: Child layers.
+   * @param children Child layers.
+   */
+  public void setChildren(LinkedHashMap<String,Layer> children) { this.children = children; }
 
-
-   
-   /**
-    * The layer's parent layer, if any.
-    * @see #getParent()
-    * @see #setParent(Layer)
-    */
-   protected Layer parent;
-   /**
-    * Getter for {@link #parent}: The layer's parent layer, if any.
-    * @return The layer's parent layer, if any.
-    */
-   public Layer getParent() { return parent; }
-   /**
-    * Setter for {@link #parent}: The layer's parent layer, if any.
-    * @param newParent The layer's parent layer, if any.
-    */
-   public void setParent(Layer newParent) 
-   { 
-      parent = newParent; 
-      if (parent != null)
-      {
-	 setParentId(parent.getId());
-	 parent.getChildren().put(getId(), this);
-      }
-   }
-
-   /**
-    * The type for labels on this layer.
-    * <p>Either a MIME type, or one of:
-    *  <ul>
-    *   <li>{@link Constants#TYPE_STRING}</li>
-    *   <li>{@link Constants#TYPE_IPA}</li>
-    *   <li>{@link Constants#TYPE_NUMBER}</li>
-    *   <li>{@link Constants#TYPE_SELECT}</li>
-    *  </ul>
-    */
-   protected String type = Constants.TYPE_STRING;
-   /**
-    * Getter for {@link #type}: The type for labels on this layer.
-    * <p>Either a MIME type, or one of:
-    *  <ul>
-    *   <li>{@link Constants#TYPE_STRING}</li>
-    *   <li>{@link Constants#TYPE_IPA}</li>
-    *   <li>{@link Constants#TYPE_NUMBER}</li>
-    *   <li>{@link Constants#TYPE_SELECT}</li>
-    *  </ul>
-    * @return The type for labels on this layer.
-    */
-   public String getType() { return type; }
-   /**
-    * Setter for {@link #type}: The type for labels on this layer.
-    * @param type The type for labels on this layer.
-    */
-   public void setType(String type) { this.type = type; }
 
    
-   /**
-    * List of valid label values for this layer, or null if the layer values are not restricted.
-    * <p>The 'key' is the possible label value, and each key is associated with a description of the value (e.g. for displaying to users).
-    */
-   protected LinkedHashMap<String,String> validLabels = new LinkedHashMap<String,String>();
-   /**
-    * Getter for <tt>validLabels</tt>: List of valid label values for this layer, or null if the layer values are not restricted.
-    * <p>The 'key' is the possible label value, and each key is associated with a description of the value (e.g. for displaying to users).
-    * @return List of valid label values for this layer, or null if the layer values are not restricted.
-    */
-   public LinkedHashMap<String,String> getValidLabels() { return validLabels; }
-   /**
-    * Setter for <tt>validLabels</tt>: List of valid label values for this layer, or null if the layer values are not restricted.
-    * <p>The 'key' is the possible label value, and each key is associated with a description of the value (e.g. for displaying to users).
-    * @param newValidLabels List of valid label values for this layer, or null if the layer values are not restricted.
-    */
-   public void setValidLabels(LinkedHashMap<String,String> newValidLabels) { this.validLabels = newValidLabels; }
-   /**
-    * Getter for <tt>validLabels</tt>: List of valid label values for this layer, or null if the layer values are not restricted.
-    * @return List of valid label values for this layer, or null if the layer values are not restricted.
-    */
-   public String[] getValidLabelsArray() 
-   { 
-      if (getValidLabels() == null) return null; 
-      return getValidLabels().keySet().toArray(new String[0]); 
-   }
+  /**
+   * The layer's parent layer, if any.
+   * @see #getParent()
+   * @see #setParent(Layer)
+   */
+  protected Layer parent;
+  /**
+   * Getter for {@link #parent}: The layer's parent layer, if any.
+   * @return The layer's parent layer, if any.
+   */
+  public Layer getParent() { return parent; }
+  /**
+   * Setter for {@link #parent}: The layer's parent layer, if any.
+   * @param newParent The layer's parent layer, if any.
+   */
+  public void setParent(Layer newParent) 
+  { 
+    parent = newParent; 
+    if (parent != null)
+    {
+      setParentId(parent.getId());
+      parent.getChildren().put(getId(), this);
+    }
+  }
 
-   // Methods:
+  /**
+   * The type for labels on this layer.
+   * <p>Either a MIME type, or one of:
+   *  <ul>
+   *   <li>{@link Constants#TYPE_STRING}</li>
+   *   <li>{@link Constants#TYPE_IPA}</li>
+   *   <li>{@link Constants#TYPE_NUMBER}</li>
+   *   <li>{@link Constants#TYPE_SELECT}</li>
+   *  </ul>
+   */
+  protected String type = Constants.TYPE_STRING;
+  /**
+   * Getter for {@link #type}: The type for labels on this layer.
+   * <p>Either a MIME type, or one of:
+   *  <ul>
+   *   <li>{@link Constants#TYPE_STRING}</li>
+   *   <li>{@link Constants#TYPE_IPA}</li>
+   *   <li>{@link Constants#TYPE_NUMBER}</li>
+   *   <li>{@link Constants#TYPE_SELECT}</li>
+   *  </ul>
+   * @return The type for labels on this layer.
+   */
+  public String getType() { return type; }
+  /**
+   * Setter for {@link #type}: The type for labels on this layer.
+   * @param type The type for labels on this layer.
+   */
+  public void setType(String type) { this.type = type; }
+
+   
+  /**
+   * List of valid label values for this layer, or null if the layer values are not restricted.
+   * <p>The 'key' is the possible label value, and each key is associated with a description of the value (e.g. for displaying to users).
+   */
+  protected LinkedHashMap<String,String> validLabels = new LinkedHashMap<String,String>();
+  /**
+   * Getter for <tt>validLabels</tt>: List of valid label values for this layer, or null if the layer values are not restricted.
+   * <p>The 'key' is the possible label value, and each key is associated with a description of the value (e.g. for displaying to users).
+   * @return List of valid label values for this layer, or null if the layer values are not restricted.
+   */
+  public LinkedHashMap<String,String> getValidLabels() { return validLabels; }
+  /**
+   * Setter for <tt>validLabels</tt>: List of valid label values for this layer, or null if the layer values are not restricted.
+   * <p>The 'key' is the possible label value, and each key is associated with a description of the value (e.g. for displaying to users).
+   * @param newValidLabels List of valid label values for this layer, or null if the layer values are not restricted.
+   */
+  public void setValidLabels(LinkedHashMap<String,String> newValidLabels) { this.validLabels = newValidLabels; }
+  /**
+   * Getter for <tt>validLabels</tt>: List of valid label values for this layer, or null if the layer values are not restricted.
+   * @return List of valid label values for this layer, or null if the layer values are not restricted.
+   */
+  public String[] getValidLabelsArray() 
+  { 
+    if (getValidLabels() == null) return null; 
+    return getValidLabels().keySet().toArray(new String[0]); 
+  }
+
+  // Methods:
       
-   /**
-    * Default constructor
-    */
-   public Layer()
-   {
-   } // end of constructor
+  /**
+   * Default constructor
+   */
+  public Layer()
+  {
+  } // end of constructor
 
-   /**
-    * Basic constructor
-    * @param id The layer's identifier.
-    * @param description The description of the layer.
-    * @param parentId The layer's parent layer id
-    * @param alignment The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
-    * @param peers Whether children have peers or not.
-    * @param peersOverlap Whether child peers can overlap or not.
-    * @param parentIncludes Whether the parent t-includes the child.
-    * @param saturated Whether children must temporally fill the entire parent duration (true) or not (false).
-    */
-   public Layer(String id, String description, int alignment, boolean peers, boolean peersOverlap, boolean saturated, String parentId, boolean parentIncludes)
-   {
-      setId(id);
-      setDescription(description);
-      setParentId(parentId);
-      setAlignment(alignment);
-      setPeers(peers);
-      setPeersOverlap(peersOverlap);
-      setParentIncludes(parentIncludes);
-      setSaturated(saturated);
-   } // end of constructor
+  /**
+   * Basic constructor
+   * @param id The layer's identifier.
+   * @param description The description of the layer.
+   * @param parentId The layer's parent layer id
+   * @param alignment The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
+   * @param peers Whether children have peers or not.
+   * @param peersOverlap Whether child peers can overlap or not.
+   * @param parentIncludes Whether the parent t-includes the child.
+   * @param saturated Whether children must temporally fill the entire parent duration (true) or not (false).
+   */
+  public Layer(String id, String description, int alignment, boolean peers, boolean peersOverlap, boolean saturated, String parentId, boolean parentIncludes)
+  {
+    setId(id);
+    setDescription(description);
+    setParentId(parentId);
+    setAlignment(alignment);
+    setPeers(peers);
+    setPeersOverlap(peersOverlap);
+    setParentIncludes(parentIncludes);
+    setSaturated(saturated);
+  } // end of constructor
 
-   /**
-    * Top-level layer constructor.  The <var>parentId</var> is taken to be "graph".
-    * @param id The layer's identifier.
-    * @param description The description of the layer.
-    * @param alignment The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
-    * @param peers Whether children have peers or not.
-    * @param peersOverlap Whether child peers can overlap or not.
-    * @param saturated Whether children must temporally fill the entire parent duration (true) or not (false).
-    */
-   public Layer(String id, String description, int alignment, boolean peers, boolean peersOverlap, boolean saturated)
-   {
-      setId(id);
-      setDescription(description);
-      setAlignment(alignment);
-      setPeers(peers);
-      setPeersOverlap(peersOverlap);
-      setSaturated(saturated);
-      if (!id.equals("graph")) setParentId("graph");
-      setParentIncludes(true);
-   } // end of constructor
+  /**
+   * Top-level layer constructor.  The <var>parentId</var> is taken to be "graph".
+   * @param id The layer's identifier.
+   * @param description The description of the layer.
+   * @param alignment The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
+   * @param peers Whether children have peers or not.
+   * @param peersOverlap Whether child peers can overlap or not.
+   * @param saturated Whether children must temporally fill the entire parent duration (true) or not (false).
+   */
+  public Layer(String id, String description, int alignment, boolean peers, boolean peersOverlap, boolean saturated)
+  {
+    setId(id);
+    setDescription(description);
+    setAlignment(alignment);
+    setPeers(peers);
+    setPeersOverlap(peersOverlap);
+    setSaturated(saturated);
+    if (!id.equals("graph")) setParentId("graph");
+    setParentIncludes(true);
+  } // end of constructor
 
 
-   /**
-    * Returns a list of ancestor layers (parent, grandparent, etc.).
-    * @return A set of ancestor layers, ordered by distance from this annotation (i.e. parent first, then grandparent, etc.).
-    */
-   public LinkedHashSet<Layer> getAncestors()
-   {
-      LinkedHashSet<Layer> ancestors = new LinkedHashSet<Layer>();
-      Layer ancestor = getParent(); // don't include ourselves in the list.
-      while (ancestor != null  
-	     && !ancestors.contains(ancestor)) // (guard against cycles, just in case)
-      {
-	 ancestors.add(ancestor);
-	 ancestor = ancestor.getParent();
-      } // next ancestor
-      return ancestors;
-   } // end of getAncestors()
+  /**
+   * Returns a list of ancestor layers (parent, grandparent, etc.).
+   * @return A set of ancestor layers, ordered by distance from this annotation (i.e. parent first, then grandparent, etc.).
+   */
+  public LinkedHashSet<Layer> getAncestors()
+  {
+    LinkedHashSet<Layer> ancestors = new LinkedHashSet<Layer>();
+    Layer ancestor = getParent(); // don't include ourselves in the list.
+    while (ancestor != null  
+           && !ancestors.contains(ancestor)) // (guard against cycles, just in case)
+    {
+      ancestors.add(ancestor);
+      ancestor = ancestor.getParent();
+    } // next ancestor
+    return ancestors;
+  } // end of getAncestors()
 
-   /**
-    * Determines the first ancestor layer this layer has in common with the given layer.
-    * This may return the graph layer itself, if there are no earlier common ancestors.
-    * "Ancestors" is inclusive in the sense that if either annotation is an ancestor of
-    * the other, it will be returned.
-    * @param other The other layer.
-    * @return The first ancestor layer this layer has in common with the given layer, or
-    * null if the hierarchy is incomplete and no common ancestor was found.
-    */
-   public Layer getFirstCommonAncestor(Layer other)
-   {
-      if (other == null) return null;
-      HashSet<Layer> ourAncestors = new HashSet<Layer>();
-      Layer ancestor = this; // include ourselves in the list.
-      do
-      {
-	 ourAncestors.add(ancestor);
-	 ancestor = ancestor.getParent();
-      }
-      while (ancestor != null);
+  /**
+   * Determines the first ancestor layer this layer has in common with the given layer.
+   * This may return the graph layer itself, if there are no earlier common ancestors.
+   * "Ancestors" is inclusive in the sense that if either annotation is an ancestor of
+   * the other, it will be returned.
+   * @param other The other layer.
+   * @return The first ancestor layer this layer has in common with the given layer, or
+   * null if the hierarchy is incomplete and no common ancestor was found.
+   */
+  public Layer getFirstCommonAncestor(Layer other)
+  {
+    if (other == null) return null;
+    HashSet<Layer> ourAncestors = new HashSet<Layer>();
+    Layer ancestor = this; // include ourselves in the list.
+    do
+    {
+      ourAncestors.add(ancestor);
+      ancestor = ancestor.getParent();
+    }
+    while (ancestor != null);
       
-      ancestor = other; // include other annotation in the list.
-      do
+    ancestor = other; // include other annotation in the list.
+    do
+    {
+      if (ourAncestors.contains(ancestor))
       {
-	 if (ourAncestors.contains(ancestor))
-	 {
-	    return ancestor;
-	 }
-	 ancestor = ancestor.getParent();
+        return ancestor;
       }
-      while (ancestor != null);
-      return null;
-   } // end of getFirstCommonAncestor()
+      ancestor = ancestor.getParent();
+    }
+    while (ancestor != null);
+    return null;
+  } // end of getFirstCommonAncestor()
 
    
-   // java.lang.Object overrides:
+  // java.lang.Object overrides:
 
-   /**
-    * A string representation of the object.
-    * @return A string representation of the object.
-    */
-   public String toString()
-   {
-      if (getId() != null)
-      {
-	 return getId();
-      }
-      else
-      { // id isn't set, so we return the map's hashCode and hope for the best
-	 return "[unnamed layer]";
-      }
-   } // end of toString()
+  /**
+   * A string representation of the object.
+   * @return A string representation of the object.
+   */
+  public String toString()
+  {
+    if (getId() != null)
+    {
+      return getId();
+    }
+    else
+    { // id isn't set, so we return the map's hashCode and hope for the best
+      return "[unnamed layer]";
+    }
+  } // end of toString()
 
-   /**
-    * Computes a hashCode for the object. 
-    * <p>Map (base class) has a very mutable hashCode, but we don't want Anchor hashcodes changing whenever arbitrary elements change (otherwise they get lost in hash-based collections, etc.).  So this implementation returns the hashcode of the anchor's id.
-    * @return Object's hashCode.
-    */
-   public int hashCode()
-   {
-      if (getId() != null)
-      {
-	 return getId().hashCode();
-      }
-      else
-      { // id isn't set, so we return the map's hashCode and hope for the best
-	 return super.hashCode();
-      }
-   } // end of hashCode()
+  /**
+   * Computes a hashCode for the object. 
+   * <p>Map (base class) has a very mutable hashCode, but we don't want Anchor hashcodes changing whenever arbitrary elements change (otherwise they get lost in hash-based collections, etc.).  So this implementation returns the hashcode of the anchor's id.
+   * @return Object's hashCode.
+   */
+  public int hashCode()
+  {
+    if (getId() != null)
+    {
+      return getId().hashCode();
+    }
+    else
+    { // id isn't set, so we return the map's hashCode and hope for the best
+      return super.hashCode();
+    }
+  } // end of hashCode()
    
-   /**
-    * Indicates whether an object is "equal to" this one.
-    * @param obj The object to compare to.
-    * @return true if obj is an Anchor with the same id as this one, false otherwise.
-    */
-   public boolean equals(Object obj)
-   {
-      if (obj == this) return true;
-      if (obj instanceof Layer)
+  /**
+   * Indicates whether an object is "equal to" this one.
+   * @param obj The object to compare to.
+   * @return true if obj is an Anchor with the same id as this one, false otherwise.
+   */
+  public boolean equals(Object obj)
+  {
+    if (obj == this) return true;
+    if (obj instanceof Layer)
+    {
+      Layer other = (Layer)obj;
+      if (getId() != null && other.getId() != null)
       {
-	 Layer other = (Layer)obj;
-	 if (getId() != null && other.getId() != null)
-	 {
-	    return other.getId().equals(getId());
-	 }
+        return other.getId().equals(getId());
       }
-      return false;
-   } // end of equals()
+    }
+    return false;
+  } // end of equals()
 
 
 } // end of class Layer
