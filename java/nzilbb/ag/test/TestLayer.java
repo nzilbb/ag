@@ -245,6 +245,13 @@ public class TestLayer
                  g.getLayer("word").getFirstCommonAncestor(g.getLayer("word")));
     assertNull("FirstCommonAncestor with null", 
                g.getLayer("phone").getFirstCommonAncestor(null));
+
+    assertEquals("descendant depth - phone", 0, g.getLayer("phone").getDescendentDepth());
+    assertEquals("descendant depth - word", 1, g.getLayer("word").getDescendentDepth());
+    assertEquals("descendant depth - utterance", 0, g.getLayer("utterance").getDescendentDepth());
+    assertEquals("descendant depth - turn", 2, g.getLayer("turn").getDescendentDepth());
+    assertEquals("descendant depth - who", 3, g.getLayer("who").getDescendentDepth());
+    assertEquals("descendant depth - topic", 0, g.getLayer("topic").getDescendentDepth());
   }
 
   @Test public void cloning() 

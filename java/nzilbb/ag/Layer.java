@@ -207,8 +207,6 @@ public class Layer
    * @param children Child layers.
    */
   public void setChildren(LinkedHashMap<String,Layer> children) { this.children = children; }
-
-
    
   /**
    * The layer's parent layer, if any.
@@ -263,7 +261,6 @@ public class Layer
    * @param type The type for labels on this layer.
    */
   public void setType(String type) { this.type = type; }
-
    
   /**
    * List of valid label values for this layer, or null if the layer values are not restricted.
@@ -397,6 +394,28 @@ public class Layer
     return null;
   } // end of getFirstCommonAncestor()
 
+  
+  /**
+   * Returns the maximum depth of the descendents of the layer. 
+   * <p> e.g. 
+   * <ul> 
+   *  <li>if the layer has no children descendent depth = 0</li>
+   *  <li>if the layer has children, but no grandchildren (i.e. no child layers have children) 
+   *   descendent depth = 1</li>
+   *  <li>if the layer has children, and some have grandchildren, but there are no 
+   *   great-granchildren (i.e. no grandchild layers have children) descendent depth = 2</li>
+   * </ul> 
+   * @return The maximum descendent depth.
+   */
+  public int getDescendentDepth()
+  {
+    int depth = 0;
+    for (Layer child : getChildren().values())
+    {
+      depth = Math.max(depth, child.getDescendentDepth() + 1);
+    } // next child
+    return depth;
+  } // end of getDescendentDepth()
    
   // java.lang.Object overrides:
 
