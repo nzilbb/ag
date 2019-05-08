@@ -252,6 +252,18 @@ public class TestLayer
     assertEquals("descendant depth - turn", 2, g.getLayer("turn").getDescendentDepth());
     assertEquals("descendant depth - who", 3, g.getLayer("who").getDescendentDepth());
     assertEquals("descendant depth - topic", 0, g.getLayer("topic").getDescendentDepth());
+
+    assertTrue("isAncestor", g.getLayer("word").isAncestor("turn"));
+    assertTrue("isAncestor", g.getLayer("word").isAncestor("graph"));
+    assertFalse("isAncestor - peer", g.getLayer("word").isAncestor("utterance"));
+    assertFalse("isAncestor - descendant", g.getLayer("word").isAncestor("phone"));
+    assertFalse("isAncestor - reflexive", g.getLayer("word").isAncestor("word"));
+
+    assertFalse("isDescendant", g.getLayer("word").isDescendant("turn"));
+    assertFalse("isDescendant", g.getLayer("word").isDescendant("graph"));
+    assertFalse("isDescendant - peer", g.getLayer("word").isDescendant("utterance"));
+    assertTrue("isDescendant - descendant", g.getLayer("word").isDescendant("phone"));
+    assertFalse("isDescendant - reflexive", g.getLayer("word").isDescendant("word"));
   }
 
   @Test public void cloning() 

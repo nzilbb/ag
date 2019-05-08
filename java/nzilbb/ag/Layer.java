@@ -342,7 +342,6 @@ public class Layer
     setParentIncludes(true);
   } // end of constructor
 
-
   /**
    * Returns a list of ancestor layers (parent, grandparent, etc.).
    * @return A set of ancestor layers, ordered by distance from this annotation (i.e. parent first, then grandparent, etc.).
@@ -359,7 +358,23 @@ public class Layer
     } // next ancestor
     return ancestors;
   } // end of getAncestors()
-
+  
+  /**
+   * Determines whether the given layer is an ancestor of this layer.
+   * @param layerId
+   * @return true if the given layer is an ancestor, and false otherwise.
+   */
+  public boolean isAncestor(String layerId)
+  {
+    Layer ancestor = getParent(); // don't include ourselves.
+    while (ancestor != null)
+    {
+      if (ancestor.getId().equals(layerId)) return true;
+      ancestor = ancestor.getParent();
+    } // next ancestor
+    return false;
+  } // end of isAncestor()
+  
   /**
    * Determines the first ancestor layer this layer has in common with the given layer.
    * This may return the graph layer itself, if there are no earlier common ancestors.
@@ -393,7 +408,6 @@ public class Layer
     while (ancestor != null);
     return null;
   } // end of getFirstCommonAncestor()
-
   
   /**
    * Returns the maximum depth of the descendents of the layer. 
@@ -416,7 +430,24 @@ public class Layer
     } // next child
     return depth;
   } // end of getDescendentDepth()
-   
+
+  /**
+   * Determines whether the given layer is a descendant of this layer.
+   * @param layerId
+   * @return true if the given layer is a descendant, and false otherwise.
+   */
+  public boolean isDescendant(String layerId)
+  {
+    for (Layer child : getChildren().values())
+    {
+      // this this child the layer?
+      if (child.getId().equals(layerId)) return true;
+      // are any of this child's descendants the layer?
+      if (child.isDescendant(layerId)) return true;
+    } // next child
+    return false;
+  } // end of isDescendant()
+
   // java.lang.Object overrides:
 
   /**
