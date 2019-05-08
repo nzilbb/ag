@@ -1,0 +1,80 @@
+{
+  "name": "Test",
+  "UUID": "fc379152-0381-4efc-b4c1-e90d696f5373",
+  "mediafileExtension": "wav",
+  "ssffTrackDefinitions": [{
+    "name": "FORMANTS",
+    "columnName": "fm",
+    "fileExtension": "fms"
+  }],
+  "levelDefinitions": [
+    {
+      "name": "phone",
+      "type": "SEGMENT",
+      "attributeDefinitions": [{
+        "name": "phone",
+        "type": "STRING"
+      }]
+    },
+    {
+      "name": "word",
+      "type": "SEGMENT",
+      "attributeDefinitions": [
+        {
+          "name": "word",
+          "type": "STRING"
+        },
+        {
+          "name": "pronounce",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "name": "utterance",
+      "type": "SEGMENT",
+      "attributeDefinitions": [{
+        "name": "utterance",
+        "type": "STRING"
+      }]
+    }
+  ],
+  "linkDefinitions": [],
+  "EMUwebAppConfig": {
+    "perspectives": [{
+      "name": "default",
+      "signalCanvases": {
+        "order": [
+          "OSCI",
+          "SPEC"
+        ],
+        "assign": [{
+          "signalCanvasName": "SPEC",
+          "ssffTrackName": "FORMANTS"
+        }],
+        "contourLims": [{
+          "ssffTrackName": "FORMANTS",
+          "minContourIdx": 0,
+          "maxContourIdx": 1
+        }]
+      },
+      "levelCanvases": {"order": [
+        "utterance",
+        "word",
+        "phone"
+      ]},
+      "twoDimCanvases": {"order": []}
+    }],
+    "restrictions": {
+      "showPerspectivesSidebar": false,
+      "playback": true,
+      "correctionTool": false,
+      "editItemSize": true,
+      "useLargeTextInputField": false
+    },
+    "activeButtons": {
+      "saveBundle": true,
+      "showHierarchy": false
+    }
+  }
+}
