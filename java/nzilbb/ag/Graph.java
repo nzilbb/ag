@@ -297,6 +297,12 @@ public class Graph
    {
       Graph fragment = new Graph();
       fragment.graph = this;
+      fragment.getSchema().setParticipantLayerId(graph.getSchema().getParticipantLayerId());
+      fragment.getSchema().setTurnLayerId(graph.getSchema().getTurnLayerId());
+      fragment.getSchema().setUtteranceLayerId(graph.getSchema().getUtteranceLayerId());
+      fragment.getSchema().setWordLayerId(graph.getSchema().getWordLayerId());
+      fragment.getSchema().setEpisodeLayerId(graph.getSchema().getEpisodeLayerId());
+      fragment.getSchema().setCorpusLayerId(graph.getSchema().getCorpusLayerId());
       if (getId() != null)
       {
 	 fragment.setId(FragmentId(this, startOffset, endOffset));
