@@ -240,6 +240,23 @@ public class SqlGraphStore
    * @param connection An opened database connection.
    * @param user ID of the user
    */
+  public SqlGraphStore(String baseUrl, Connection connection, String user)
+    throws SQLException
+  {
+    setId(baseUrl);
+    setBaseUrl(baseUrl);
+    setConnection(connection);
+    setFiles(new File(getSystemAttribute("transcriptPath")));
+    setUser(user);
+  } // end of constructor
+
+  /**
+   * Constructor with connection.
+   * @param baseUrl URL prefix for file access.
+   * @param files Root directory for file structure.
+   * @param connection An opened database connection.
+   * @param user ID of the user
+   */
   public SqlGraphStore(String baseUrl, File files, Connection connection, String user)
   {
     setId(baseUrl);
