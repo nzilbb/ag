@@ -1586,7 +1586,7 @@ public class TextGridSerialization
     try
     {
       // write the TextGrid to a temporary file
-      File f = File.createTempFile(graph.getId(), ".json");
+      File f = File.createTempFile(graph.getId(), ".TextGrid");
       FileOutputStream out = new FileOutputStream(f);	 
       PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, "utf-8"));
       writeText(writer);
