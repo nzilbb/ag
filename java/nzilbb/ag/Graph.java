@@ -102,10 +102,11 @@ public class Graph
    */
   public String getCorpus() { try { return (String)get("corpus"); } catch(ClassCastException exception) {return null;} }
   /**
-   * Setter for corpus: The name of the corpus the graph belongs to.
+   * Setter for corpus.
    * @param corpus The name of the corpus the graph belongs to.
+   * @return <var>this</var>.
    */
-  public void setCorpus(String corpus) { put("corpus", corpus); }
+  public Graph setCorpus(String corpus) { put("corpus", corpus); return this; }
 
   /**
    * Getter for <i>anchors</i>: Map of anchors (graph nodes) keyed by id. 
@@ -129,11 +130,12 @@ public class Graph
     } 
   }
   /**
-   * Setter for <i>anchors</i>: Map of anchors (graph nodes) keyed by id. 
+   * Setter for <i>anchors</i>. 
    * <p>In the underlying map, this is stored as the "children" attribute of a "layers" attribute.
+   * @return <var>this</var>.
    * @param anchors Map of anchors (graph nodes) keyed by id.
    */
-  public void setAnchors(LinkedHashMap<String,Anchor> anchors) { put("anchors", anchors); }
+  public Graph setAnchors(LinkedHashMap<String,Anchor> anchors) { put("anchors", anchors); return this; }
 
    
   /**
@@ -148,10 +150,11 @@ public class Graph
    */
   public Double getOffsetGranularity() { return offsetGranularity; }
   /**
-   * Setter for {@link #offsetGranularity}: Granularity of offsets - e.g. 0.001 if Anchor offsets are always set to the the nearest millisecond, or null for no particular granularity.
+   * Setter for {@link #offsetGranularity}.g. 0.001 if Anchor offsets are always set to the the nearest millisecond, or null for no particular granularity.
    * @param newOffsetGranularity Granularity of offsets - e.g. 0.001 if Anchor offsets are always set to the the nearest millisecond, or null for no particular granularity.
+   * @return <var>this</var>.
    */
-  public void setOffsetGranularity(Double newOffsetGranularity) { offsetGranularity = newOffsetGranularity; }
+  public Graph setOffsetGranularity(Double newOffsetGranularity) { offsetGranularity = newOffsetGranularity; return this; }
 
   /**
    * The units for anchor offsets - e.g. "s" for seconds, "char" for characters, etc.  Preferably the value should be one of the Constants.UNIT_... constants. The default value is {@link Constants#UNIT_SECONDS}.
@@ -167,10 +170,11 @@ public class Graph
    */
   public String getOffsetUnits() { return offsetUnits; }
   /**
-   * Setter for {@link #offsetUnits}: The units for anchor offsets - e.g. "s" for seconds, "char" for characters, etc.  Preferably the value should be one of the Constants.UNIT_... constants.
+   * Setter for {@link #offsetUnits}.g. "s" for seconds, "char" for characters, etc.  Preferably the value should be one of the Constants.UNIT_... constants.
    * @param newOffsetUnits The units for anchor offsets - e.g. "s" for seconds, "char" for characters, etc.  Preferably the value should be one of the Constants.UNIT_... constants.
+   * @return <var>this</var>.
    */
-  public void setOffsetUnits(String newOffsetUnits) { offsetUnits = newOffsetUnits; }
+  public Graph setOffsetUnits(String newOffsetUnits) { offsetUnits = newOffsetUnits; return this; }
 
 
   // TODO participants
@@ -191,10 +195,11 @@ public class Graph
    */
   public LinkedHashMap<String,Annotation> getAnnotationsById() { return annotationsById; }
   /**
-   * Setter for {@link #annotationsById}: Map of annotations (graph edges) keyed by id.
+   * Setter for {@link #annotationsById}.
    * @param newAnnotationsById Map of annotations (graph edges) keyed by id.
+   * @return <var>this</var>.
    */
-  public void setAnnotationsById(LinkedHashMap<String,Annotation> newAnnotationsById) { annotationsById = newAnnotationsById; }
+  public Graph setAnnotationsById(LinkedHashMap<String,Annotation> newAnnotationsById) { annotationsById = newAnnotationsById; return this; }
 
 
    
@@ -210,10 +215,11 @@ public class Graph
    */
   public Schema getSchema() { return schema; }
   /**
-   * Setter for {@link #schema}: The layer definitions and their interrelations.
+   * Setter for {@link #schema}.
    * @param newSchema The layer definitions and their interrelations.
+   * @return <var>this</var>.
    */
-  public void setSchema(Schema newSchema) { schema = newSchema; }
+  public Graph setSchema(Schema newSchema) { schema = newSchema; return this; }
 
   /**
    * Timers for debugging and optimization.
@@ -227,10 +233,29 @@ public class Graph
    */
   public Timers getTimers() { return timers; }
   /**
-   * Setter for {@link #timers}: Timers for debugging and optimization.
+   * Setter for {@link #timers}.
    * @param newTimers Timers for debugging and optimization.
+   * @return <var>this</var>.
    */
-  public void setTimers(Timers newTimers) { timers = newTimers; }
+  public Graph setTimers(Timers newTimers) { timers = newTimers; return this; }
+
+  /**
+   * An optional provider for media associated with the graph.
+   * @see #getMediaProvider()
+   * @see #setMediaProvider(IGraphMediaProvider)
+   */
+  protected IGraphMediaProvider mediaProvider;
+  /**
+   * Getter for {@link #mediaProvider}.
+   * @return An optional provider for media associated with the graph.
+   */
+  public IGraphMediaProvider getMediaProvider() { return mediaProvider; }
+  /**
+   * Setter for {@link #mediaProvider}.
+   * @param mediaProvider An optional provider for media associated with the graph.
+   * @return <var>this</var>.
+   */
+  public Graph setMediaProvider(IGraphMediaProvider mediaProvider) { this.mediaProvider = mediaProvider; return this; }
    
   // Methods:
       
