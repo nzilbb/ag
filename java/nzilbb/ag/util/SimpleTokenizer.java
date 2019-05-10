@@ -112,7 +112,7 @@ public class SimpleTokenizer
     * The confidence of anchors created in graphs for which {@link Graph#offsetUnits} == {@link Constants#UNIT_CHARACTERS}. Default is {@link Constants#CONFIDENCE_MANUAL}
     * <p>For graphs of text, the anchors offsets represent the number of characters since the beginning, so the when tokenizing, the offsets can be set with high confidence to correspond to the lengh of the token labels.
     * @see #getCharacterAnchorConfidence()
-    * @see #setCharacterAnchorConfidence(Long)
+    * @see #setCharacterAnchorConfidence(Integer)
     */
    protected Integer characterAnchorConfidence = Constants.CONFIDENCE_MANUAL;
    /**

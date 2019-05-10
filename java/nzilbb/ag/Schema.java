@@ -31,7 +31,6 @@ import java.util.Collection;
 public class Schema
 {
    // Attributes:
-
    
    /**
     * The root of the layer hierarchy, representing the graph as a whole.
@@ -43,7 +42,6 @@ public class Schema
     * @return The root of the layer hierarchy, representing the graph as a whole.
     */
    public Layer getRoot() { return root; }
-
    
    /**
     * Layers, indexed by ID.
@@ -61,7 +59,6 @@ public class Schema
     * @param newLayers Layers, indexed by ID.
     */
    public void setLayers(HashMap<String,Layer> newLayers) { layers = newLayers; }
-
    
    /**
     * ID of the layer that contains participants.

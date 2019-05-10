@@ -156,7 +156,7 @@ public class TrackedMap
    } // end of constructor
    
    /**
-    * Gets the original value of the given key, before any subsequent calls to {@link #put(String,Object)}, since the object was created or {@link #commit()} was called.
+    * Gets the original value of the given key, before any subsequent calls to put(String,Object), since the object was created or {@link #commit()} was called.
     * @param key The attribute name.
     * @return The original label.
     */
@@ -489,7 +489,6 @@ public class TrackedMap
    
    /**
     * Override of Map's clone method, to copy only tracked attributes plus "id".
-    * @return A copy of the object, including only the values of the tracked attributes.
     */
    public void cloneAttributesFrom(TrackedMap other, String except)
    {

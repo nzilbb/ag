@@ -37,8 +37,7 @@ import nzilbb.configure.ParameterSet;
  *  <li>Configure serializer using {@link #configure(ParameterSet,Schema)}</li>
  *  <li>Determine which (if any) layers are required for the serialization by calling
  *   {@link #getRequiredLayers()}, which returns a list of layer IDs.</li>
- *  <li>Start serializing the graph series using {@link #startSerialization(ISeries,ISeriesConsumer,ISeriesConsumer,ISeriesConsumer)}</li>
- *  <li>Possibly display or log warnings returned by {@link #getWarnings()}</li>
+ *  <li>Start serializing the graph series using {@link #serializeSeries(ISeries,ISeriesConsumer,ISeriesConsumer,ISeriesConsumer)}</li>
  * </ol>
  * @author Robert Fromont robert.fromont@canterbury.ac.nz
  */
@@ -56,8 +55,7 @@ public interface ISeriesSerializer
     * <p>When the serializer is installed, this method should be invoked with an empty parameter
     *  set, to discover what (if any) general configuration is required. If parameters are
     *  returned, and user interaction is possible, then the user may be presented with an
-    *  interface for setting/confirming these parameters. Unlike the
-    *  {@link #load(NamedStream[],Schema)} method, this always returns th}e required parameters, 
+    *  interface for setting/confirming these parameters. This always returns th}e required parameters, 
     *  whether or not they are fulfilled.
     * @param configuration The general configuration for the serializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
@@ -83,7 +81,9 @@ public interface ISeriesSerializer
     *  are capable of storing multiple transcripts in the same file (e.g. AGTK, Transana XML
     *  export), which is why this method accepts a list.
     * @param graphs The graphs to serialize.
-    * @return A list of named streams that contain the serialization in the given format. 
+    * @param consumer The object receiving the streams.
+    * @param warnings The object receiving warning messages.
+    * @param errors The object receiving error messages.
     * @throws SerializerNotConfiguredException if the object has not been configured.
     */
    public void serializeSeries(ISeries<Graph> graphs, ISeriesConsumer<NamedStream> consumer, ISeriesConsumer<String> warnings, ISeriesConsumer<SerializationException> errors) 

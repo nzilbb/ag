@@ -214,7 +214,6 @@ public class SqlGraphStore
   /**
    * Roles the user fulfills.
    * @see #getUserRoles()
-   * @see #setUserRoles(HashSet<String>)
    */
   protected HashSet<String> userRoles = new HashSet<String>();
   /**
@@ -236,7 +235,6 @@ public class SqlGraphStore
   /**
    * Constructor with connection.
    * @param baseUrl URL prefix for file access.
-   * @param files Root directory for file structure.
    * @param connection An opened database connection.
    * @param user ID of the user
    */
@@ -3974,7 +3972,6 @@ public class SqlGraphStore
   /**
    * Constructs an Annotation from the given query result row.
    * @param rsAnnotation The query result row.
-   * @param scope The layer scope.
    * @param layer The annotation layer.
    * @param graph The graph. This can be null, in which case turns/utterances will not have their participant name resolved, and freeform layers will not have their parent set
    * @return The annotation defined by the given row.
@@ -5701,12 +5698,12 @@ public class SqlGraphStore
 
   /**
    * Creates an annotation starting at <var>fromId</var> and ending at <var>toId</var>.
-   * @param from The start anchor's ID.
-   * @param to The end anchor's ID.
+   * @param fromId The start anchor's ID.
+   * @param toId The end anchor's ID.
    * @param layerId The layer ID of the resulting annotation.
    * @param label The label of the resulting annotation.
    * @param confidence The confidence rating.
-   * @param parent The new annotation's parent's ID.
+   * @param parentId The new annotation's parent's ID.
    * @return The ID of the new annotation.
    */
   public String createAnnotation(String id, String fromId, String toId, String layerId, String label, Integer confidence, String parentId)
@@ -5804,7 +5801,6 @@ public class SqlGraphStore
    * Destroys the annotation with the given ID.
    * @param id The ID of the graph.
    * @param annotationId The annotation's ID.
-   * @return The ID of the new annotation.
    */
   public void destroyAnnotation(String id, String annotationId)
     throws StoreException, PermissionException, GraphNotFoundException

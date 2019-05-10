@@ -46,12 +46,12 @@ public interface IGraphStore
    /**
     * Creates an annotation starting at <var>from</var> and ending at <var>to</var>.
     * @param id The ID of the graph.
-    * @param from The start anchor's ID. TODO an expression identifying the start anchor's ID. e.g. "'n_123'" or "start.id" or maybe something like "first('segments').start.id)"
-    * @param to The end anchor's ID. TODO an expression identifying the end anchor's ID. e.g. "'n_123'" or "end.id" or maybe something like "last('segments').end.id)"
+    * @param fromId The start anchor's ID. TODO an expression identifying the start anchor's ID. e.g. "'n_123'" or "start.id" or maybe something like "first('segments').start.id)"
+    * @param toId The end anchor's ID. TODO an expression identifying the end anchor's ID. e.g. "'n_123'" or "end.id" or maybe something like "last('segments').end.id)"
     * @param layerId The layer ID of the resulting annotation.
     * @param label The label of the resulting annotation. TODO an expression identifying the label. e.g. "'@gz#mpP'" or "my('orthography').label" or maybe something like "SUM(list('segments').duration)"
     * @param confidence The confidence rating.
-    * @param parent The new annotation's parent's ID. TODO an expression identifying the parent. e.g. "'em_0_123'" or "layer.id = 'orthography' AND label = 'example'"
+    * @param parentId The new annotation's parent's ID. TODO an expression identifying the parent. e.g. "'em_0_123'" or "layer.id = 'orthography' AND label = 'example'"
     * @return The ID of the new annotation.
     */
    public String createAnnotation(String id, String fromId, String toId, String layerId, String label, Integer confidence, String parentId)
@@ -61,7 +61,6 @@ public interface IGraphStore
     * Destroys the annotation with the given ID.
     * @param id The ID of the graph.
     * @param annotationId The annotation's ID.
-    * @return The ID of the new annotation.
     */
    public void destroyAnnotation(String id, String annotationId)
       throws StoreException, PermissionException, GraphNotFoundException;   

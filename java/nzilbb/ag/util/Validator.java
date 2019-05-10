@@ -73,21 +73,21 @@ public class Validator
     * @see #getDebug()
     * @see #setDebug(boolean)
     * @see #getLog()
-    * @see #log(String)
+    * @see #log(Object...)
     */
    protected boolean debug = false;
    /**
     * Getter for {@link #debug}: Whether a log of messages should be kept for reporting.
     * @return Whether a log of messages should be kept for reporting.
     * @see #getLog()
-    * @see #log(String)
+    * @see #log(Object...)
     */
    public boolean getDebug() { return debug; }
    /**
     * Setter for {@link #debug}: Whether a log of messages should be kept for reporting.
     * @param newDebug Whether a log of messages should be kept for reporting.
     * @see #getLog()
-    * @see #log(String)
+    * @see #log(Object...)
     */
    public void setDebug(boolean newDebug) { debug = newDebug; }
 
@@ -114,7 +114,7 @@ public class Validator
     * <p>The default value is {@link Constants#CONFIDENCE_MANUAL} - i.e. anchors with no "confidence" attribute are assumed to be manually aligned (high confidence).
     * @see #getDefaultAnchorConfidence()
     * @see #setDefaultAnchorConfidence(Integer)
-    * @see Constants#CONFIDENCE
+    * @see Constants#CONFIDENCE_MANUAL
     */
    protected int defaultAnchorConfidence = Constants.CONFIDENCE_MANUAL;
    /**
@@ -1913,7 +1913,7 @@ public class Validator
     * annotation. After this method, all children on a given layer
     * will be s-included (i.e. chained from the start anchor to the
     * end anchor), and all anchors that previously had an offset at or before the threshold 
-    * will have the offset set to null and the {@link Constants#CONFIDENCE confidence} set to
+    * will have the offset set to null and the confidence set to
     * {@link Constants#CONFIDENCE_NONE}. All changed anchors are new anchors.
     * @param parent The parent whose children should be changed.
     * @param threshold The offset before which anchors will be reset.
@@ -2023,7 +2023,7 @@ public class Validator
     * annotation. After this method, all children on a given layer
     * will be s-included (i.e. chained from the start anchor to the
     * end anchor), and all anchors that previously had an offset at or before the threshold 
-    * will have the offset set to null and the {@link Constants#CONFIDENCE confidence} set to
+    * will have the offset set to null and the confidence set to
     * @param parent The parent whose children should be changed.
     * @param threshold The offset theshold after which anchors will be reset.
     * @return The changes made during this operation.

@@ -77,21 +77,21 @@ public class Merger
    * @see #getDebug()
    * @see #setDebug(boolean)
    * @see #getLog()
-   * @see #log(String)
+   * @see #log(Object...)
    */
   protected boolean debug = false;
   /**
    * Getter for {@link #debug}: Whether a log of messages should be kept for reporting.
    * @return Whether a log of messages should be kept for reporting.
    * @see #getLog()
-   * @see #log(String)
+   * @see #log(Object...)
    */
   public boolean getDebug() { return debug; }
   /**
    * Setter for {@link #debug}: Whether a log of messages should be kept for reporting.
    * @param newDebug Whether a log of messages should be kept for reporting.
    * @see #getLog()
-   * @see #log(String)
+   * @see #log(Object...)
    */
   public void setDebug(boolean newDebug) { debug = newDebug; }
 
@@ -517,7 +517,7 @@ public class Merger
    *   and this is done using the same annotation labels.</li>
    * </ul>
    * The IDs of Anchors and Annotations in <var>editedGraph</var> are not assumed to correspond
-   * to IDs in <var>graph</var>. Only changes of equal or higher {@link Constants#CONFIDENCE} 
+   * to IDs in <var>graph</var>. Only changes of equal or higher condifence
    * will be applied, so that automatic changes do not override prior manual ones.
    * Once merging is finished, <var>graph</var> may be in an invalid state, and should be made 
    * valid using {@link Validator}.
@@ -2900,7 +2900,7 @@ public class Merger
   /**
    * Removes elements from the collection that are marked for deletion.
    * @param collection The collection to use
-   * @return A new collection, all the elements of <var>collection</var> except those where {@link TrackedMap#getChange()} is {@link Change#Operation}.Destroy.
+   * @return A new collection, all the elements of <var>collection</var> except those where {@link TrackedMap#getChange()} is {@link Change}.Operation.Destroy.
    */
   public Vector<Annotation> removeDeleted(Collection<Annotation> collection)
   {
@@ -2921,7 +2921,7 @@ public class Merger
    * annotation. After this method, all children on a given layer
    * will be s-included (i.e. chained from the start anchor to the
    * end anchor), and all anchors that previously had an offset at or before the threshold 
-   * will have the offset set to null and the {@link Constants#CONFIDENCE confidence} set to
+   * will have the offset set to null and the confidence set to
    * {@link Constants#CONFIDENCE_NONE}. All changed anchors are new anchors.
    * @param parent The parent whose children should be changed.
    * @param threshold The offset before which anchors will be reset.
@@ -3031,7 +3031,7 @@ public class Merger
    * annotation. After this method, all children on a given layer
    * will be s-included (i.e. chained from the start anchor to the
    * end anchor), and all anchors that previously had an offset at or before the threshold 
-   * will have the offset set to null and the {@link Constants#CONFIDENCE confidence} set to
+   * will have the offset set to null and the confidence set to
    * @param parent The parent whose children should be changed.
    * @param threshold The offset theshold after which anchors will be reset.
    * @return The changes made during this operation.

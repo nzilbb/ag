@@ -60,21 +60,21 @@ public class DefaultOffsetGenerator
     * @see #getDebug()
     * @see #setDebug(boolean)
     * @see #getLog()
-    * @see #log(String)
+    * @see #log(Object...)
     */
    protected boolean debug = false;
    /**
     * Getter for {@link #debug}: Whether a log of messages should be kept for reporting.
     * @return Whether a log of messages should be kept for reporting.
     * @see #getLog()
-    * @see #log(String)
+    * @see #log(Object...)
     */
    public boolean getDebug() { return debug; }
    /**
     * Setter for {@link #debug}: Whether a log of messages should be kept for reporting.
     * @param newDebug Whether a log of messages should be kept for reporting.
     * @see #getLog()
-    * @see #log(String)
+    * @see #log(Object...)
     */
    public void setDebug(boolean newDebug) { debug = newDebug; }
 
@@ -100,7 +100,7 @@ public class DefaultOffsetGenerator
     * <p>The default value is {@link Constants#CONFIDENCE_MANUAL} - i.e. anchors with no "confidence" attribute are assumed to be manually aligned (high confidence). This means that the default behaviour on a graph that does not include "confidence" values on anchors is to only assign offsets to anchors that have none.
     * @see #getDefaultAnchorConfidence()
     * @see #setDefaultAnchorConfidence(int)
-    * @see Constants#CONFIDENCE
+    * @see Constants#CONFIDENCE_MANUAL
     */
    protected int defaultAnchorConfidence = Constants.CONFIDENCE_MANUAL;
    /**
