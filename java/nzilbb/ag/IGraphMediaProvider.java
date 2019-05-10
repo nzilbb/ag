@@ -33,7 +33,7 @@ public interface IGraphMediaProvider
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public MediaFile[] getAvailableMedia(String id) 
+   public MediaFile[] getAvailableMedia() 
       throws StoreException, PermissionException;
 
   /**
@@ -44,7 +44,7 @@ public interface IGraphMediaProvider
    * @throws StoreException If an error occurs.
    * @throws PermissionException If the operation is not permitted.
    */
-  public String getMedia(String id, String trackSuffix, String mimeType) 
+  public String getMedia(String trackSuffix, String mimeType) 
     throws StoreException, PermissionException;
 
 } // end of interface IGraphMediaProvider
