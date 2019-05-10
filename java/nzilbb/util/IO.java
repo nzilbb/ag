@@ -46,235 +46,235 @@ import java.net.URLClassLoader;
  */
 public class IO
 {
-   // Methods:
+  // Methods:
 
-   /**
-    * If the given file exists, it's renamed to a filename with the last modification timestamp included.
-    * @param file The file to backup.
-    * @throws IOException On IO error.
-    */
-   public static void Backup(File file)
-      throws IOException
-   {
-      if (file.exists())
+  /**
+   * If the given file exists, it's renamed to a filename with the last modification timestamp included.
+   * @param file The file to backup.
+   * @throws IOException On IO error.
+   */
+  public static void Backup(File file)
+    throws IOException
+  {
+    if (file.exists())
+    {
+      // there's and older version of the file, take a backup
+      File backup = new File(
+        file.getParentFile(), file.getName()  + ".bak"
+        + new SimpleDateFormat("-yyyy-MM-dd-HH-mm-ss")
+        .format(new java.util.Date(file.lastModified())) + "." + Extension(file));
+      if (!file.renameTo(backup))
       {
-	 // there's and older version of the file, take a backup
-	 File backup = new File(
-	    file.getParentFile(), file.getName()  + ".bak"
-	    + new SimpleDateFormat("-yyyy-MM-dd-HH-mm-ss")
-	    .format(new java.util.Date(file.lastModified())) + "." + Extension(file));
-	 if (!file.renameTo(backup))
-	 {
-	    Copy(file, backup);
-	 }
+        Copy(file, backup);
       }
-   } // end of Backup()
+    }
+  } // end of Backup()
 
-   /**
-    * Determines the file extension (not including the dot) of the given file.
-    * @param file The file.
-    * @return The extension (not including the dot) of the given file.
-    */
-   public static String Extension(File file)
-   {
-      if (file.getName().indexOf('.') < 0) return "";
-      return file.getName().substring(file.getName().lastIndexOf('.') + 1);
-   } // end of Extension()
+  /**
+   * Determines the file extension (not including the dot) of the given file.
+   * @param file The file.
+   * @return The extension (not including the dot) of the given file.
+   */
+  public static String Extension(File file)
+  {
+    if (file.getName().indexOf('.') < 0) return "";
+    return file.getName().substring(file.getName().lastIndexOf('.') + 1);
+  } // end of Extension()
 
-   /**
-    * Determines the name of the given file without extension (not including the dot).
-    * @param file The file.
-    * @return The name of the given file without extension (not including the dot).
-    */
-   public static String WithoutExtension(File file)
-   {
-      return file.getName().replaceAll("\\.[^.]*","");
-   } // end of Extension()
+  /**
+   * Determines the name of the given file without extension (not including the dot).
+   * @param file The file.
+   * @return The name of the given file without extension (not including the dot).
+   */
+  public static String WithoutExtension(File file)
+  {
+    return file.getName().replaceAll("\\.[^.]*","");
+  } // end of Extension()
    
-   /**
-    * Copies a file.
-    * @param source The original file.
-    * @param destination The new file.
-    * @throws IOException On file IO error.
-    */
-   public static void Copy(File source, File destination)
+  /**
+   * Copies a file.
+   * @param source The original file.
+   * @param destination The new file.
+   * @throws IOException On file IO error.
+   */
+  public static void Copy(File source, File destination)
     throws IOException
-   {
-      SaveUrlToFile(source.toURI().toURL(), destination);
-   } // end of copy()
+  {
+    SaveUrlToFile(source.toURI().toURL(), destination);
+  } // end of copy()
    
-   /**
-    * Saves the content of a URL to a file.
-    * @param url The URL of the content.
-    * @param file The file to save the content to.
-    * @return The number size of the content in bytes.
-    * @throws IOException On file IO error.
-    */
-   public static long SaveUrlToFile(URL url, File file)
+  /**
+   * Saves the content of a URL to a file.
+   * @param url The URL of the content.
+   * @param file The file to save the content to.
+   * @return The number size of the content in bytes.
+   * @throws IOException On file IO error.
+   */
+  public static long SaveUrlToFile(URL url, File file)
     throws IOException
-   {
-      return SaveUrlConnectionToFile(url.openConnection(), file);
-   } // end of SaveUrlToFile()
+  {
+    return SaveUrlConnectionToFile(url.openConnection(), file);
+  } // end of SaveUrlToFile()
 
-   /**
-    * Saves the content of a URL to a file.
-    * @param connection The URL connection to the content.
-    * @param file The file to save the content to.
-    * @return The number size of the content in bytes.
-    * @throws IOException On file IO error.
-    */
-   public static long SaveUrlConnectionToFile(URLConnection connection, File file)
+  /**
+   * Saves the content of a URL to a file.
+   * @param connection The URL connection to the content.
+   * @param file The file to save the content to.
+   * @return The number size of the content in bytes.
+   * @throws IOException On file IO error.
+   */
+  public static long SaveUrlConnectionToFile(URLConnection connection, File file)
     throws IOException
-   {
-      FileOutputStream output = new FileOutputStream(file);
-      InputStream input = connection.getInputStream();
-      return Pump(input, output);
-   } // end of SaveUrlConnectionToFile()
+  {
+    FileOutputStream output = new FileOutputStream(file);
+    InputStream input = connection.getInputStream();
+    return Pump(input, output);
+  } // end of SaveUrlConnectionToFile()
    
-   /**
-    * Copy all data from an input stream to an output stream.
-    * @param input Source of data.
-    * @param output Destination for data.
-    * @return The number of bytes copied.
-    * @throws IOException On file IO error.
-    */
-   public static long Pump(InputStream input, OutputStream output)
+  /**
+   * Copy all data from an input stream to an output stream.
+   * @param input Source of data.
+   * @param output Destination for data.
+   * @return The number of bytes copied.
+   * @throws IOException On file IO error.
+   */
+  public static long Pump(InputStream input, OutputStream output)
     throws IOException
-   {
-      return Pump(input, output, true);
-   }
-   /**
-    * Copy all data from an input stream to an output stream.
-    * @param input Source of data.
-    * @param output Destination for data.
-    * @param closeStreams true if the streams should be closed after the data is exhausted, false otherwise.
-    * @return The number of bytes copied.
-    * @throws IOException On file IO error.
-    */
-   public static long Pump(InputStream input, OutputStream output, boolean closeStreams)
+  {
+    return Pump(input, output, true);
+  }
+  /**
+   * Copy all data from an input stream to an output stream.
+   * @param input Source of data.
+   * @param output Destination for data.
+   * @param closeStreams true if the streams should be closed after the data is exhausted, false otherwise.
+   * @return The number of bytes copied.
+   * @throws IOException On file IO error.
+   */
+  public static long Pump(InputStream input, OutputStream output, boolean closeStreams)
     throws IOException
-   {
-      long totalBytes = 0;
+  {
+    long totalBytes = 0;
       
-      byte[] buffer = new byte[1024];
-      int bytesRead = input.read(buffer);
-      while (bytesRead >= 0)
-      {
-	 totalBytes += bytesRead;
-	 output.write(buffer, 0, bytesRead);
-	 bytesRead = input.read(buffer);
-      } // next chunk	
-      output.flush();
-      if (closeStreams)
-      {
-	 output.close();
-	 input.close();
-      }
+    byte[] buffer = new byte[1024];
+    int bytesRead = input.read(buffer);
+    while (bytesRead >= 0)
+    {
+      totalBytes += bytesRead;
+      output.write(buffer, 0, bytesRead);
+      bytesRead = input.read(buffer);
+    } // next chunk	
+    output.flush();
+    if (closeStreams)
+    {
+      output.close();
+      input.close();
+    }
 
-      return totalBytes;
-   } // end of Pump()
+    return totalBytes;
+  } // end of Pump()
 
    
-   /**
-    * Scans the given jar file for instances of a particular class/interface.
-    * The implementors must be registered in the jar file, by way of a manifest attribute named
-    * after the class (with dots converted to hyphens to meet the attribute name requirements of
-    * jar manifests). e.g. if <var>c</var> = <code>nzilbb.ag.serialize.IDeserializer</code> and
-    * <var>file</var> contains a class called <code>nzilbb.praat.TextGridDeserializer</code> that
-    * implements <code>nzilbb.ag.serialize.IDeserializer</code>, in order to be returned by this
-    * method, <var>file</var> must also have a manifest attribute called 
-    * <q>nzilbb-ag-serialize-IDeserializer</q> whose value is <q>nzilbb.praat.TextGridDeserializer</q>.
-    * <p>There can be multiple implementing classes registered in the <var>file</var>; the value of
-    * the manifest attribute is assumed to be a space-delimited list.
-    * @param file The jar file.
-    * @param parentLoader The parent class loader.
-    * @param c The class/interface to search for.
-    * @return A list of objects that implement the given class/interface, which may be empty.
-    * @throws IOException On file IO error.
-    */
-   @SuppressWarnings({"rawtypes","unchecked"})
-   public static Vector FindImplementorsInJar(File file, ClassLoader parentLoader, Class c)
-      throws IOException
-   {
-      Vector implementors = new Vector();
+  /**
+   * Scans the given jar file for instances of a particular class/interface.
+   * The implementors must be registered in the jar file, by way of a manifest attribute named
+   * after the class (with dots converted to hyphens to meet the attribute name requirements of
+   * jar manifests). e.g. if <var>c</var> = <code>nzilbb.ag.serialize.IDeserializer</code> and
+   * <var>file</var> contains a class called <code>nzilbb.praat.TextGridDeserializer</code> that
+   * implements <code>nzilbb.ag.serialize.IDeserializer</code>, in order to be returned by this
+   * method, <var>file</var> must also have a manifest attribute called 
+   * <q>nzilbb-ag-serialize-IDeserializer</q> whose value is <q>nzilbb.praat.TextGridDeserializer</q>.
+   * <p>There can be multiple implementing classes registered in the <var>file</var>; the value of
+   * the manifest attribute is assumed to be a space-delimited list.
+   * @param file The jar file.
+   * @param parentLoader The parent class loader.
+   * @param c The class/interface to search for.
+   * @return A list of objects that implement the given class/interface, which may be empty.
+   * @throws IOException On file IO error.
+   */
+  @SuppressWarnings({"rawtypes","unchecked"})
+  public static Vector FindImplementorsInJar(File file, ClassLoader parentLoader, Class c)
+    throws IOException
+  {
+    Vector implementors = new Vector();
+    try
+    {
+      JarFile jar = new JarFile(file);
+      URL[] url = new URL[] { file.toURI().toURL() };
+      Manifest manifest = jar.getManifest();
+      if (manifest != null)
+      {
+        Attributes attributes = manifest.getMainAttributes();
+        Object convertersAtt = attributes.get(new Attributes.Name(c.getName().replace('.','-')));
+        if (convertersAtt != null)
+        {
+          for (String className : convertersAtt.toString().split(" "))
+          {
+            URLClassLoader classLoader = URLClassLoader.newInstance(url, parentLoader);
+            try
+            {
+              Object instance = classLoader.loadClass(className).getDeclaredConstructor().newInstance();
+              if (c.isInstance(instance))
+              {
+                implementors.add(instance);
+              }
+            }
+            catch(Throwable t) {}
+          } // next class
+        }
+      }
+    }
+    catch(MalformedURLException x) {}
+    return implementors;
+  } // end of FindImplementorsInJar()
+   
+  /**
+   * Determines the jar file that the given class comes from.
+   * @param c The class implemented.
+   * @return The jar file the given class implementation comes from, or null if it's not from a jar file.
+   */
+  @SuppressWarnings("rawtypes")
+  public static File JarFileOfClass(Class c)
+  {
+    URL url = c.getResource(c.getSimpleName() + ".class");
+    String sUrl = url.toString();
+    if (!sUrl.startsWith("jar:"))
+    {
+      return null;
+    }
+    else
+    {
+      int iUriStart = 4;
+      int iUriEnd = sUrl.indexOf("!");
+      String sFileUri = sUrl.substring(iUriStart, iUriEnd);
       try
       {
-	 JarFile jar = new JarFile(file);
-	 URL[] url = new URL[] { file.toURI().toURL() };
-	 Manifest manifest = jar.getManifest();
-	 if (manifest != null)
-	 {
-	    Attributes attributes = manifest.getMainAttributes();
-	    Object convertersAtt = attributes.get(new Attributes.Name(c.getName().replace('.','-')));
-	    if (convertersAtt != null)
-	    {
-	       for (String className : convertersAtt.toString().split(" "))
-	       {
-		  URLClassLoader classLoader = URLClassLoader.newInstance(url, parentLoader);
-		  try
-		  {
-		     Object instance = classLoader.loadClass(className).getDeclaredConstructor().newInstance();
-		     if (c.isInstance(instance))
-		     {
-			implementors.add(instance);
-		     }
-		  }
-		  catch(Throwable t) {}
-	       } // next class
-	    }
-	 }
+        return new File(new URI(sFileUri));
       }
-      catch(MalformedURLException x) {}
-      return implementors;
-   } // end of FindImplementorsInJar()
-   
-   /**
-    * Determines the jar file that the given class comes from.
-    * @param c The class implemented.
-    * @return The jar file the given class implementation comes from, or null if it's not from a jar file.
-    */
-   @SuppressWarnings("rawtypes")
-   public static File JarFileOfClass(Class c)
-   {
-      URL url = c.getResource(c.getSimpleName() + ".class");
-      String sUrl = url.toString();
-      if (!sUrl.startsWith("jar:"))
+      catch(URISyntaxException exception)
       {
-	 return null;
+        return null;
       }
-      else
-      {
-	 int iUriStart = 4;
-	 int iUriEnd = sUrl.indexOf("!");
-	 String sFileUri = sUrl.substring(iUriStart, iUriEnd);
-	 try
-	 {
-	    return new File(new URI(sFileUri));
-	 }
-	 catch(URISyntaxException exception)
-	 {
-	    return null;
-	 }
-      }
-   } // end of JarFileOfClass()
+    }
+  } // end of JarFileOfClass()
 
 
-   /**
-    * Recursively deletes a directory.
-    * @param dir The directory to delete.
-    * @return true if the the directory was successfully deleted, false otherwise.
-    */
-   public static boolean RecursivelyDelete(File dir)
-   {
-      if (dir.isDirectory())
+  /**
+   * Recursively deletes a directory.
+   * @param dir The directory to delete.
+   * @return true if the the directory was successfully deleted, false otherwise.
+   */
+  public static boolean RecursivelyDelete(File dir)
+  {
+    if (dir.isDirectory())
+    {
+      for (File file : dir.listFiles())
       {
-	 for (File file : dir.listFiles())
-	 {
-	    if (!RecursivelyDelete(file)) return false;
-	 }
+        if (!RecursivelyDelete(file)) return false;
       }
-      return dir.delete();
-   } // end of RecursivelyDelete()
+    }
+    return dir.delete();
+  } // end of RecursivelyDelete()
 
    
 } // end of class IO
