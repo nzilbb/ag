@@ -39,6 +39,7 @@ import nzilbb.ag.serialize.util.Utility;
 import nzilbb.ag.util.LayerTraversal;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
+import nzilbb.util.IO;
 import nzilbb.util.TempFileInputStream;
 import org.json.*;
 
@@ -68,6 +69,24 @@ public class BundleSerializer
    */
   public void setJsonIndentFactor(int newJsonIndentFactor) { jsonIndentFactor = newJsonIndentFactor; }
   
+  /**
+   * Sample rate for audio in Hz. Default is 16000.
+   * @see #getSampleRate()
+   * @see #setSampleRate(Integer)
+   */
+  protected Integer sampleRate = 16000;
+  /**
+   * Getter for {@link #sampleRate}.
+   * @return Sample rate for audio in Hz.
+   */
+  public Integer getSampleRate() { return sampleRate; }
+  /**
+   * Setter for {@link #sampleRate}.
+   * @param sampleRate Sample rate for audio in Hz.
+   * @return <var>this</var>.
+   */
+  public BundleSerializer setSampleRate(Integer sampleRate) { this.sampleRate = sampleRate; return this; }
+
   // Methods:
   
  /**
@@ -234,7 +253,6 @@ public class BundleSerializer
                 .put("showHierarchy", showHierarchy)));
     return data.toString(jsonIndentFactor);
   } // end of getDbConfig()
-
   /**
    * Serializes the given graph, generating a {@link NamedStream}.
    * @param graph The graph to serialize.
@@ -257,7 +275,6 @@ public class BundleSerializer
             // only things below turn
             if (layer.isAncestor(schema.getTurnLayerId()))
             {
-              System.out.println("layer: " + layer + " - " + schema.getTurnLayerId());
               switch (layer.getAlignment())
               {
                 case Constants.ALIGNMENT_INTERVAL:
@@ -278,10 +295,14 @@ public class BundleSerializer
                          .put("value", annotation.getLabel()));
                   assert annotation.getStart() != null : "annotation.getStart() != null - " + annotation.getId();
                   assert annotation.getStart().getOffset() != null : "annotation.getStart().getOffset() != null - " + annotation.getId();
+                  assert annotation.getEnd() != null : "annotation.getEnd() != null - " + annotation.getId();
+                  assert annotation.getEnd().getOffset() != null : "annotation.getEnd().getOffset() != null - " + annotation.getId();
+                  assert annotation.getDuration() != null : "annotation.getDuration() != null - " + annotation.getId();
+                  assert sampleRate != null : "sampleRate != null";
                   JSONObject item = new JSONObject()
                     .put("id", itemId++)
-                    .put("sampleStart", annotation.getStart().getOffset()) // TODO in samples
-                    .put("sampleDur", annotation.getDuration()) // TODO in samples
+                    .put("sampleStart", (long)(annotation.getStart().getOffset() * sampleRate))
+                    .put("sampleDur", (long)(annotation.getDuration() * sampleRate))
                     .put("labels", labels);
                   // make sure child tags can find the labels, as they'll need to add some
                   annotation.put("@labels", labels);
@@ -320,14 +341,36 @@ public class BundleSerializer
       .put("annotation", new JSONObject()
            .put("name", graph.getId())
            .put("annotates", graph.getLabel())
-           .put("sampleRate", 16000) // TODO??
+           .put("sampleRate", getSampleRate()) // TODO??
            .put("levels", levels)
            .put("links", new JSONArray()))
-      .put("mediaFile", new JSONObject()
-           .put("encoding", "BASE64")
-//           .put("data", base64Encode(getClass().getResource("audio.wav").openStream()))
-        ) // TODO
       .put("ssffFiles", new JSONArray());
+    
+    if (graph.getMediaProvider() != null) {      
+      try
+      {
+        // get media
+        String mediaUrl = graph.getMediaProvider().getMedia(
+          null, "audio/wav; channels=1; samplerate=" + sampleRate);
+        if (mediaUrl != null)
+        {
+          // encode it
+          String base64EncodedContent = IO.Base64Encode(mediaUrl);
+          
+          // add it to the bundle
+          data.put("mediaFile", new JSONObject()
+                   .put("encoding", "BASE64")
+                   .put("data", base64EncodedContent));
+        }
+      }
+      catch(Exception exception)
+      {
+        if (errors == null) errors = new SerializationException();
+        if (errors.getCause() == null) errors.initCause(exception);
+        errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
+      }
+    }
+  
     if (errors != null) throw errors;
     
     try
@@ -382,7 +425,22 @@ public class BundleSerializer
    */
   public ParameterSet configure(ParameterSet configuration, Schema schema)
   {
-    return new ParameterSet(); // TODO
+    // set any values that have been passed in
+    for (Parameter p : configuration.values()) try { p.apply(this); } catch(Exception x) {}
+    
+    if (!configuration.containsKey("useConventions"))
+    {
+      configuration.addParameter(
+        new Parameter("sampleRate", Integer.class, 
+                      "Sample Rate",
+                      "Sample rate for audio in Hz.", true));
+    }
+    if (configuration.get("sampleRate").getValue() == null)
+    {
+      configuration.get("sampleRate").setValue(getSampleRate());
+    }
+    
+    return configuration;
   }
   
   /**

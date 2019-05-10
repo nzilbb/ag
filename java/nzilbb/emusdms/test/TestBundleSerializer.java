@@ -83,7 +83,14 @@ public class TestBundleSerializer
     // test using diff
     String differences = diff(new File(dir, "expected_dbconfig.json"),
                               new File(dir, "actual_dbconfig.json"));
-    if (differences != null) fail(differences);	 
+    if (differences != null)
+    {
+      fail(differences);
+    }
+    else
+    {
+      actual.delete();
+    }
   }
   
   @Test public void serialize_fragment_utterance_word() 
@@ -100,7 +107,7 @@ public class TestBundleSerializer
       new Layer("phone", "Phones", 2, true, true, true, "word", true),
       new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
       new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
-    File dir = getDir();
+    final File dir = getDir();
     // access file
     NamedStream[] jsonStreams = { new NamedStream(new File(dir, "serialize_utterance_word.json")) };
     
@@ -111,12 +118,31 @@ public class TestBundleSerializer
     Graph[] graphs = json.deserialize();
 
     // extract fragment
-    double fragmentFrom = 212.4;
-    double fragmentTo = 216.36333; // exactly on the offset of the last anchor
+    double fragmentFrom = 211.837;
+    double fragmentTo = 214.822; // exactly on the offset of the last anchor
     String [] layerIds = { "utterance", "word", "phone" };
     Graph fragment = graphs[0].getFragment(fragmentFrom, fragmentTo, layerIds);
     fragment.shiftAnchors(-fragmentFrom);
-    assertEquals("serialize_utterance_word__212.400-216.363", fragment.getId());
+    assertEquals("serialize_utterance_word__211.837-214.822", fragment.getId());
+    fragment.setMediaProvider(new IGraphMediaProvider() {
+        public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
+        {
+          return null;
+        }
+        public String getMedia(String trackSuffix, String mimeType) 
+          throws StoreException, PermissionException
+        {          
+          try
+          {
+            return new File(dir, "silence.wav").toURI().toString();
+          }
+          catch(Exception exception)
+          {
+            throw new StoreException(exception);
+          }
+        }
+
+      });
     Graph[] fragments = { fragment };
 
     // create serializer
@@ -125,8 +151,12 @@ public class TestBundleSerializer
       
     // general configuration
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
+    assertEquals("sampleRate", Integer.valueOf(16000), 
+                 (Integer)configuration.get("sampleRate").getValue());
+    assertEquals(1, configuration.size());
+    
      //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(0, serializer.configure(configuration, schema).size());
+    assertEquals(1, serializer.configure(configuration, schema).size());
     
     String[] needLayers = serializer.getRequiredLayers();
     assertEquals(0, needLayers.length);
@@ -135,11 +165,19 @@ public class TestBundleSerializer
     // serialize
     NamedStream[] streams = serializer.serialize(fragments);
     streams[0].save(dir);
+    File actual = new File(dir, "serialize_utterance_word__211.837-214.822.json");
     
     // test using diff
     String differences = diff(new File(dir, "expected_serialize_utterance_word__212.4-216.36333.json"),
-                              new File(dir, "serialize_utterance_word__212.400-216.363.json"));
-    if (differences != null) fail(differences);	 
+                              actual);
+    if (differences != null)
+    {
+      fail(differences);
+    }
+    else
+    {
+      actual.delete();
+    }
    }
 
    
