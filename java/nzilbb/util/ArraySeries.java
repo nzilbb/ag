@@ -36,7 +36,7 @@ public class ArraySeries<T>
    /**
     * The underlying array.
     * @see #getArray()
-    * @see #setArray(T[])
+    * @see #setArray(Object[])
     */
    protected T[] array;
    /**

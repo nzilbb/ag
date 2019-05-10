@@ -56,7 +56,7 @@ public class Execution
    /**
     * Command line arguments.
     * @see #getArguments()
-    * @see #setArguments(Vector<String>)
+    * @see #setArguments(Vector)
     */
    protected Vector<String> arguments;
    /**
@@ -124,7 +124,6 @@ public class Execution
    /**
     * Whether the execution is currently running.
     * @see #getRunning()
-    * @see #setRunning(boolean)
     */
    protected boolean running = false;
    /**
@@ -136,7 +135,6 @@ public class Execution
    /**
     * Whether the execution has completed.
     * @see #getFinished()
-    * @see #setFinished(boolean)
     */
    protected boolean finished = false;
    /**

@@ -43,7 +43,7 @@ public class Resampler
    /**
     * Sample rate.
     * @see #getSampleRate()
-    * @see #setSampleRate(int)
+    * @see #setSampleRate(Integer)
     */
    protected Integer sampleRate = null;
    /**
