@@ -38,129 +38,129 @@ import javax.sound.sampled.*;
 public class Resampler
   implements IMediaConverter
 {
-   // Attributes:   
+  // Attributes:   
    
-   /**
-    * Sample rate.
-    * @see #getSampleRate()
-    * @see #setSampleRate(Integer)
-    */
-   protected Integer sampleRate = null;
-   /**
-    * Getter for {@link #sampleRate}: Sample rate.
-    * @return Sample rate.
-    */
-   public Integer getSampleRate() { return sampleRate; }
-   /**
-    * Setter for {@link #sampleRate}: Sample rate.
-    * @param newSampleRate Sample rate.
-    */
-   public void setSampleRate(Integer newSampleRate) { sampleRate = newSampleRate; }
+  /**
+   * Sample rate.
+   * @see #getSampleRate()
+   * @see #setSampleRate(Integer)
+   */
+  protected Integer sampleRate = null;
+  /**
+   * Getter for {@link #sampleRate}: Sample rate.
+   * @return Sample rate.
+   */
+  public Integer getSampleRate() { return sampleRate; }
+  /**
+   * Setter for {@link #sampleRate}: Sample rate.
+   * @param newSampleRate Sample rate.
+   */
+  public void setSampleRate(Integer newSampleRate) { sampleRate = newSampleRate; }
 
    
-   // Methods:
+  // Methods:
    
-   /**
-    * Default constructor.
-    */
-   public Resampler()
-   {
-   } // end of constructor
+  /**
+   * Default constructor.
+   */
+  public Resampler()
+  {
+  } // end of constructor
 
-   // IMediaConverter methods
+  // IMediaConverter methods
    
-   /**
-    * Configure the converter.  This might include executable paths, conversion parameters, etc.
-    * <p>This method can be invoked with an empty parameter set, to discover what (if any)
-    *  parameters are required. If parameters are returned, and user interaction is possible, 
-    *  then the user may be presented with an interface for setting/confirming these parameters. 
-    * @param configuration The configuration for the converter. 
-    * @return A list of configuration parameters must be set before the converter can be used.
-    * @throws MediaException If an error occurs.
-    */
-   public ParameterSet configure(ParameterSet configuration) throws MediaException
-   {
-      Parameter sampleRate = configuration.get("sampleRate");
-      if (sampleRate == null)
-      {
-	 sampleRate = new Parameter(
-	    "sampleRate", Integer.class, "Sample rate", "Sample rate in Hz", true);
-	 configuration.addParameter(sampleRate);
-      }
-      if (getSampleRate() != null)
-      {
-	 sampleRate.setValue(getSampleRate());
-      }
+  /**
+   * Configure the converter.  This might include executable paths, conversion parameters, etc.
+   * <p>This method can be invoked with an empty parameter set, to discover what (if any)
+   *  parameters are required. If parameters are returned, and user interaction is possible, 
+   *  then the user may be presented with an interface for setting/confirming these parameters. 
+   * @param configuration The configuration for the converter. 
+   * @return A list of configuration parameters must be set before the converter can be used.
+   * @throws MediaException If an error occurs.
+   */
+  public ParameterSet configure(ParameterSet configuration) throws MediaException
+  {
+    Parameter sampleRate = configuration.get("sampleRate");
+    if (sampleRate == null)
+    {
+      sampleRate = new Parameter(
+        "sampleRate", Integer.class, "Sample rate", "Sample rate in Hz", true);
+      configuration.addParameter(sampleRate);
+    }
+    if (getSampleRate() != null)
+    {
+      sampleRate.setValue(getSampleRate());
+    }
 
-      try { sampleRate.apply(this); }
-      catch(Exception exception) { throw new MediaException(exception); }
+    try { sampleRate.apply(this); }
+    catch(Exception exception) { throw new MediaException(exception); }
       
-      return configuration;
-   }
+    return configuration;
+  }
    
-   /**
-    * Determines whether this converter supports conversion between the given types.
-    * @param sourceType The MIME type of the source media.
-    * @param destinationType The MIME type of the destination format.
-    * @return true if the converter can convert from the sourceType to the destinationType, false otherwise.
-    * @throws MediaException If an error occurs.
-    */
-   public boolean conversionSupported(String sourceType, String destinationType) throws MediaException
-   {
-      return sourceType.equals("audio/wav") && destinationType.equals("audio/wav");
-   }
+  /**
+   * Determines whether this converter supports conversion between the given types.
+   * @param sourceType The MIME type of the source media.
+   * @param destinationType The MIME type of the destination format.
+   * @return true if the converter can convert from the sourceType to the destinationType, false otherwise.
+   * @throws MediaException If an error occurs.
+   */
+  public boolean conversionSupported(String sourceType, String destinationType) throws MediaException
+  {
+    return sourceType.equals("audio/wav") && destinationType.equals("audio/wav");
+  }
 
-   /**
-    * Starts conversion.
-    * @param sourceType The MIME type of the source media.
-    * @param source The source file.
-    * @param destinationType The MIME type of the destination format.
-    * @param destination The destination file.
-    * @return A thread that is processing the media.
-    * @throws MediaException If an error occurs.
-    */
-   public MediaThread start(String sourceType, File source, String destinationType, File destination) throws MediaException
-   {
-      if (getSampleRate() == null) throw new MediaException("Sample rate not specified.");
-      final File finalDestination = destination;
+  /**
+   * Starts conversion.
+   * @param sourceType The MIME type of the source media.
+   * @param source The source file.
+   * @param destinationType The MIME type of the destination format.
+   * @param destination The destination file.
+   * @return A thread that is processing the media.
+   * @throws MediaException If an error occurs.
+   */
+  public MediaThread start(String sourceType, File source, String destinationType, File destination) throws MediaException
+  {
+    if (getSampleRate() == null) throw new MediaException("Sample rate not specified.");
+    final File finalDestination = destination;
 
-      try
-      {
-	 AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(source);
-	 AudioFormat format = new AudioFormat(getSampleRate(), 16, 1, true, true);
-	 final AudioInputStream stream = AudioSystem.getAudioInputStream(format, audioInputStream);
+    try
+    {
+      AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(source);
+      AudioFormat format = new AudioFormat(getSampleRate(), 16, 1, true, true);
+      final AudioInputStream stream = AudioSystem.getAudioInputStream(format, audioInputStream);
 	 
-	 MediaThread thread = new MediaThread(new Runnable() {
-	       public void run()
-	       {
-		  try
-		  {
-		     ((MediaThread)Thread.currentThread()).setPercentComplete(1);
+      MediaThread thread = new MediaThread(new Runnable() {
+          public void run()
+          {
+            try
+            {
+              ((MediaThread)Thread.currentThread()).setPercentComplete(1);
 		     
-		     // run the resampling
-		     AudioSystem.write(stream, AudioFileFormat.Type.WAVE, finalDestination);
+              // run the resampling
+              AudioSystem.write(stream, AudioFileFormat.Type.WAVE, finalDestination);
 		     
-		     ((MediaThread)Thread.currentThread()).setPercentComplete(100);
-		  }
-		  catch (Throwable t)
-		  {
-		     ((MediaThread)Thread.currentThread()).setLastError(t);
-		     finalDestination.delete(); 
-		  }
-	       }
-	    });
-	 thread.start();
-	 return thread;
-      }
-      catch(Exception e)
-      {
-	 throw new MediaException(e);
-      }
-      catch(Error er)
-      {
-	 throw new MediaException(er);
-      }
+              ((MediaThread)Thread.currentThread()).setPercentComplete(100);
+            }
+            catch (Throwable t)
+            {
+              ((MediaThread)Thread.currentThread()).setLastError(t);
+              finalDestination.delete(); 
+            }
+          }
+        });
+      thread.start();
+      return thread;
+    }
+    catch(Exception e)
+    {
+      throw new MediaException(e);
+    }
+    catch(Error er)
+    {
+      throw new MediaException(er);
+    }
       
-   }
+  }
    
 } // end of class Resampler
