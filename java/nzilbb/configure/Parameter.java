@@ -314,7 +314,6 @@ public class Parameter
    {
       getPossibleValues().add(value);
    } // end of addPossibleValue()
-
    
    /**
     * Sets the value of the attribute named after {@link #name} of the given bean with the parameter's {@link value}.

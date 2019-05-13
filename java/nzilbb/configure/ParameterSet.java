@@ -39,7 +39,6 @@ public class ParameterSet
    public ParameterSet()
    {
    } // end of constructor
-
    
    /**
     * Adds a parameter to the set.
@@ -51,5 +50,21 @@ public class ParameterSet
       put(parameter.getName(), parameter);
       return parameter;
    } // end of addParameter()
+
+  /**
+   * Invokes {@link Parameter#apply(Object)} for all parameters in the collection.
+   * @param bean The object whose bean attribute should be set.
+   */
+  public void apply(Object bean)
+  {
+    for (Parameter parameter : values())
+    {
+      try
+      {
+        parameter.apply(bean);
+      }
+      catch(Exception exception) {}
+    }
+  } // end of apply()
 
 } // end of class ParameterSet
