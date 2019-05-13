@@ -358,8 +358,8 @@ public class Graph
       } // layer exists
     } // next layer
 
-      // ensure that there's an anchor at the end offset
-      // (so that the last anchor matches the name, and serializers can pad if necessary)
+    // ensure that there's an anchor at the end offset
+    // (so that the last anchor matches the name, and serializers can pad if necessary)
     fragment.getOrCreateAnchorAt(endOffset);
 
     return fragment;
