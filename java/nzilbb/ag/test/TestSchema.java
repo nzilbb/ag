@@ -33,268 +33,268 @@ import nzilbb.ag.*;
 
 public class TestSchema
 {
-   @Test public void basicObjectInterrelation() 
-   {
-      Schema s = new Schema();
+  @Test public void basicObjectInterrelation() 
+  {
+    Schema s = new Schema();
 
-      s.addLayer(new Layer("topic", "Topics", Constants.ALIGNMENT_INTERVAL, 
-			   true, // peers
-			   false, // peersOverlap
-			   false)); // saturated
-      s.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-			   true, // peers
-			   true, // peersOverlap
-			   true)); // saturated
-      s.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-			   true, // peers
-			   false, // peersOverlap
-			   false, // saturated
-			   "who", // parentId
-			   true)); // parentIncludes
-      s.addLayer(new Layer("utterance", "Utterances", Constants.ALIGNMENT_INTERVAL,
-			   true, // peers
-			   false, // peersOverlap
-			   true, // saturated
-			   "turn", // parentId
-			   true)); // parentIncludes
-      s.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-			   true, // peers
-			   false, // peersOverlap
-			   false, // saturated
-			   "turn", // parentId
-			   true)); // parentIncludes
-      s.addLayer(new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
-			   true, // peers
-			   false, // peersOverlap
-			   true, // saturated
-			   "word", // parentId
-			   true)); // parentIncludes
+    s.addLayer(new Layer("topic", "Topics", Constants.ALIGNMENT_INTERVAL, 
+                         true, // peers
+                         false, // peersOverlap
+                         false)); // saturated
+    s.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+                         true, // peers
+                         true, // peersOverlap
+                         true)); // saturated
+    s.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+                         true, // peers
+                         false, // peersOverlap
+                         false, // saturated
+                         "who", // parentId
+                         true)); // parentIncludes
+    s.addLayer(new Layer("utterance", "Utterances", Constants.ALIGNMENT_INTERVAL,
+                         true, // peers
+                         false, // peersOverlap
+                         true, // saturated
+                         "turn", // parentId
+                         true)); // parentIncludes
+    s.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+                         true, // peers
+                         false, // peersOverlap
+                         false, // saturated
+                         "turn", // parentId
+                         true)); // parentIncludes
+    s.addLayer(new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
+                         true, // peers
+                         false, // peersOverlap
+                         true, // saturated
+                         "word", // parentId
+                         true)); // parentIncludes
 
-      s.setParticipantLayerId("who");
-      s.setTurnLayerId("turn");
-      s.setUtteranceLayerId("utterance");
-      s.setWordLayerId("word");
+    s.setParticipantLayerId("who");
+    s.setTurnLayerId("turn");
+    s.setUtteranceLayerId("utterance");
+    s.setWordLayerId("word");
 
-      assertEquals("getLayer", "Topics", s.getLayer("topic").getDescription());
-      assertEquals("getLayer", "Participants", s.getLayer("who").getDescription());
-      assertEquals("getLayer", "Speaker turns", s.getLayer("turn").getDescription());
-      assertEquals("getLayer", "Utterances", s.getLayer("utterance").getDescription());
-      assertEquals("getLayer", "Words", s.getLayer("word").getDescription());
-      assertEquals("getLayer", "Phones", s.getLayer("phone").getDescription());
+    assertEquals("getLayer", "Topics", s.getLayer("topic").getDescription());
+    assertEquals("getLayer", "Participants", s.getLayer("who").getDescription());
+    assertEquals("getLayer", "Speaker turns", s.getLayer("turn").getDescription());
+    assertEquals("getLayer", "Utterances", s.getLayer("utterance").getDescription());
+    assertEquals("getLayer", "Words", s.getLayer("word").getDescription());
+    assertEquals("getLayer", "Phones", s.getLayer("phone").getDescription());
 
-      assertEquals("special layers", s.getLayer("who"), s.getParticipantLayer());
-      assertEquals("special layers", s.getLayer("turn"), s.getTurnLayer());
-      assertEquals("special layers", s.getLayer("utterance"), s.getUtteranceLayer());
-      assertEquals("special layers", s.getLayer("word"), s.getWordLayer());
+    assertEquals("special layers", s.getLayer("who"), s.getParticipantLayer());
+    assertEquals("special layers", s.getLayer("turn"), s.getTurnLayer());
+    assertEquals("special layers", s.getLayer("utterance"), s.getUtteranceLayer());
+    assertEquals("special layers", s.getLayer("word"), s.getWordLayer());
       
-      assertEquals("hierarchy", s.getLayer("who"), s.getLayer("turn").getParent());
-      assertEquals("hierarchy", s.getLayer("turn"), s.getLayer("word").getParent());
-      assertEquals("hierarchy", s.getLayer("turn"), s.getLayer("utterance").getParent());
-      assertEquals("hierarchy", s.getLayer("word"), s.getLayer("phone").getParent());
+    assertEquals("hierarchy", s.getLayer("who"), s.getLayer("turn").getParent());
+    assertEquals("hierarchy", s.getLayer("turn"), s.getLayer("word").getParent());
+    assertEquals("hierarchy", s.getLayer("turn"), s.getLayer("utterance").getParent());
+    assertEquals("hierarchy", s.getLayer("word"), s.getLayer("phone").getParent());
 
-      assertEquals("graph layer", s.getRoot(), s.getLayer("graph"));
+    assertEquals("graph layer", s.getRoot(), s.getLayer("graph"));
 
-      assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("who").getParent());
-      assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("topic").getParent());
+    assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("who").getParent());
+    assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("topic").getParent());
 
-      // don't let existing layers be replaced
-      Layer originalLayer = s.getLayer("phone");
-      Layer newLayer = new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
-				 true, // peers
-				 false, // peersOverlap
-				 true, // saturated
-				 "word", // parentId
-				 true); // parentIncludes
-      s.addLayer(newLayer);
-      assertFalse("existing layers not replaced", s.getLayer("phone") == newLayer);
-      assertTrue("existing layers not replaced", s.getLayer("phone") == originalLayer);
+    // don't let existing layers be replaced
+    Layer originalLayer = s.getLayer("phone");
+    Layer newLayer = new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
+                               true, // peers
+                               false, // peersOverlap
+                               true, // saturated
+                               "word", // parentId
+                               true); // parentIncludes
+    s.addLayer(newLayer);
+    assertFalse("existing layers not replaced", s.getLayer("phone") == newLayer);
+    assertTrue("existing layers not replaced", s.getLayer("phone") == originalLayer);
    
-   }
+  }
 
-   @Test public void arrayConstructor() 
-   {
-      Layer[] layers = {
-	 new Layer("topic", "Topics", Constants.ALIGNMENT_INTERVAL, 
-		   true, // peers
-		   false, // peersOverlap
-		   false), // saturated
-	 new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-		   true, // peers
-		   true, // peersOverlap
-		   true), // saturated
-	 new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-		   true, // peers
-		   false, // peersOverlap
-		   false, // saturated
-		   "who", // parentId
-		   true), // parentIncludes
-	 new Layer("utterance", "Utterances", Constants.ALIGNMENT_INTERVAL,
-		   true, // peers
-		   false, // peersOverlap
-		   true, // saturated
-		   "turn", // parentId
-		   true), // parentIncludes
-	 new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-		   true, // peers
-		   false, // peersOverlap
-		   false, // saturated
-		   "turn", // parentId
-		   true), // parentIncludes
-	 new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
-		   true, // peers
-		   false, // peersOverlap
-		   true, // saturated
-		   "word", // parentId
-		   true) // parentIncludes
-      };
-      Schema s = new Schema(layers, "who", "turn", "utterance", "word");
+  @Test public void arrayConstructor() 
+  {
+    Layer[] layers = {
+      new Layer("topic", "Topics", Constants.ALIGNMENT_INTERVAL, 
+                true, // peers
+                false, // peersOverlap
+                false), // saturated
+      new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+                true, // peers
+                true, // peersOverlap
+                true), // saturated
+      new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+                true, // peers
+                false, // peersOverlap
+                false, // saturated
+                "who", // parentId
+                true), // parentIncludes
+      new Layer("utterance", "Utterances", Constants.ALIGNMENT_INTERVAL,
+                true, // peers
+                false, // peersOverlap
+                true, // saturated
+                "turn", // parentId
+                true), // parentIncludes
+      new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+                true, // peers
+                false, // peersOverlap
+                false, // saturated
+                "turn", // parentId
+                true), // parentIncludes
+      new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
+                true, // peers
+                false, // peersOverlap
+                true, // saturated
+                "word", // parentId
+                true) // parentIncludes
+    };
+    Schema s = new Schema(layers, "who", "turn", "utterance", "word");
       
-      assertEquals("getLayer", "Topics", s.getLayer("topic").getDescription());
-      assertEquals("getLayer", "Participants", s.getLayer("who").getDescription());
-      assertEquals("getLayer", "Speaker turns", s.getLayer("turn").getDescription());
-      assertEquals("getLayer", "Utterances", s.getLayer("utterance").getDescription());
-      assertEquals("getLayer", "Words", s.getLayer("word").getDescription());
-      assertEquals("getLayer", "Phones", s.getLayer("phone").getDescription());
+    assertEquals("getLayer", "Topics", s.getLayer("topic").getDescription());
+    assertEquals("getLayer", "Participants", s.getLayer("who").getDescription());
+    assertEquals("getLayer", "Speaker turns", s.getLayer("turn").getDescription());
+    assertEquals("getLayer", "Utterances", s.getLayer("utterance").getDescription());
+    assertEquals("getLayer", "Words", s.getLayer("word").getDescription());
+    assertEquals("getLayer", "Phones", s.getLayer("phone").getDescription());
       
-      assertEquals("special layers", s.getLayer("who"), s.getParticipantLayer());
-      assertEquals("special layers", s.getLayer("turn"), s.getTurnLayer());
-      assertEquals("special layers", s.getLayer("utterance"), s.getUtteranceLayer());
-      assertEquals("special layers", s.getLayer("word"), s.getWordLayer());
+    assertEquals("special layers", s.getLayer("who"), s.getParticipantLayer());
+    assertEquals("special layers", s.getLayer("turn"), s.getTurnLayer());
+    assertEquals("special layers", s.getLayer("utterance"), s.getUtteranceLayer());
+    assertEquals("special layers", s.getLayer("word"), s.getWordLayer());
       
-      assertEquals("hierarchy", s.getLayer("who"), s.getLayer("turn").getParent());
-      assertEquals("hierarchy", s.getLayer("turn"), s.getLayer("word").getParent());
-      assertEquals("hierarchy", s.getLayer("turn"), s.getLayer("utterance").getParent());
-      assertEquals("hierarchy", s.getLayer("word"), s.getLayer("phone").getParent());
+    assertEquals("hierarchy", s.getLayer("who"), s.getLayer("turn").getParent());
+    assertEquals("hierarchy", s.getLayer("turn"), s.getLayer("word").getParent());
+    assertEquals("hierarchy", s.getLayer("turn"), s.getLayer("utterance").getParent());
+    assertEquals("hierarchy", s.getLayer("word"), s.getLayer("phone").getParent());
       
-      assertEquals("graph layer", s.getRoot(), s.getLayer("graph"));
+    assertEquals("graph layer", s.getRoot(), s.getLayer("graph"));
 
-      assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("who").getParent());
-      assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("topic").getParent());      
-   }
+    assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("who").getParent());
+    assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("topic").getParent());      
+  }
 
-   @Test public void collectionConstructor() 
-   {
-      Vector<Layer> layers = new Vector<Layer>();
-      layers.add(new Layer("topic", "Topics", Constants.ALIGNMENT_INTERVAL, 
-			   true, // peers
-			   false, // peersOverlap
-			   false)); // saturated
-      layers.add(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-			   true, // peers
-			   true, // peersOverlap
-			   true)); // saturated
-      layers.add(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-			   true, // peers
-			   false, // peersOverlap
-			   false, // saturated
-			   "who", // parentId
-			   true)); // parentIncludes
-      layers.add(new Layer("utterance", "Utterances", Constants.ALIGNMENT_INTERVAL,
-			   true, // peers
-			   false, // peersOverlap
-			   true, // saturated
-			   "turn", // parentId
-			   true)); // parentIncludes
-      layers.add(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-			   true, // peers
-			   false, // peersOverlap
-			   false, // saturated
-			   "turn", // parentId
-			   true)); // parentIncludes
-      layers.add(new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
-			   true, // peers
-			   false, // peersOverlap
-			   true, // saturated
-			   "word", // parentId
-			   true)); // parentIncludes
-      Schema s = new Schema(layers, "who", "turn", "utterance", "word");
+  @Test public void collectionConstructor() 
+  {
+    Vector<Layer> layers = new Vector<Layer>();
+    layers.add(new Layer("topic", "Topics", Constants.ALIGNMENT_INTERVAL, 
+                         true, // peers
+                         false, // peersOverlap
+                         false)); // saturated
+    layers.add(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+                         true, // peers
+                         true, // peersOverlap
+                         true)); // saturated
+    layers.add(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+                         true, // peers
+                         false, // peersOverlap
+                         false, // saturated
+                         "who", // parentId
+                         true)); // parentIncludes
+    layers.add(new Layer("utterance", "Utterances", Constants.ALIGNMENT_INTERVAL,
+                         true, // peers
+                         false, // peersOverlap
+                         true, // saturated
+                         "turn", // parentId
+                         true)); // parentIncludes
+    layers.add(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+                         true, // peers
+                         false, // peersOverlap
+                         false, // saturated
+                         "turn", // parentId
+                         true)); // parentIncludes
+    layers.add(new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
+                         true, // peers
+                         false, // peersOverlap
+                         true, // saturated
+                         "word", // parentId
+                         true)); // parentIncludes
+    Schema s = new Schema(layers, "who", "turn", "utterance", "word");
       
-      assertEquals("getLayer", "Topics", s.getLayer("topic").getDescription());
-      assertEquals("getLayer", "Participants", s.getLayer("who").getDescription());
-      assertEquals("getLayer", "Speaker turns", s.getLayer("turn").getDescription());
-      assertEquals("getLayer", "Utterances", s.getLayer("utterance").getDescription());
-      assertEquals("getLayer", "Words", s.getLayer("word").getDescription());
-      assertEquals("getLayer", "Phones", s.getLayer("phone").getDescription());
+    assertEquals("getLayer", "Topics", s.getLayer("topic").getDescription());
+    assertEquals("getLayer", "Participants", s.getLayer("who").getDescription());
+    assertEquals("getLayer", "Speaker turns", s.getLayer("turn").getDescription());
+    assertEquals("getLayer", "Utterances", s.getLayer("utterance").getDescription());
+    assertEquals("getLayer", "Words", s.getLayer("word").getDescription());
+    assertEquals("getLayer", "Phones", s.getLayer("phone").getDescription());
       
-      assertEquals("special layers", s.getLayer("who"), s.getParticipantLayer());
-      assertEquals("special layers", s.getLayer("turn"), s.getTurnLayer());
-      assertEquals("special layers", s.getLayer("utterance"), s.getUtteranceLayer());
-      assertEquals("special layers", s.getLayer("word"), s.getWordLayer());
+    assertEquals("special layers", s.getLayer("who"), s.getParticipantLayer());
+    assertEquals("special layers", s.getLayer("turn"), s.getTurnLayer());
+    assertEquals("special layers", s.getLayer("utterance"), s.getUtteranceLayer());
+    assertEquals("special layers", s.getLayer("word"), s.getWordLayer());
       
-      assertEquals("hierarchy", s.getLayer("who"), s.getLayer("turn").getParent());
-      assertEquals("hierarchy", s.getLayer("turn"), s.getLayer("word").getParent());
-      assertEquals("hierarchy", s.getLayer("turn"), s.getLayer("utterance").getParent());
-      assertEquals("hierarchy", s.getLayer("word"), s.getLayer("phone").getParent());
+    assertEquals("hierarchy", s.getLayer("who"), s.getLayer("turn").getParent());
+    assertEquals("hierarchy", s.getLayer("turn"), s.getLayer("word").getParent());
+    assertEquals("hierarchy", s.getLayer("turn"), s.getLayer("utterance").getParent());
+    assertEquals("hierarchy", s.getLayer("word"), s.getLayer("phone").getParent());
       
-      assertEquals("graph layer", s.getRoot(), s.getLayer("graph"));
+    assertEquals("graph layer", s.getRoot(), s.getLayer("graph"));
 
-      assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("who").getParent());
-      assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("topic").getParent());      
-   }
+    assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("who").getParent());
+    assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("topic").getParent());      
+  }
 
-   @Test public void ellispisConstructor() 
-   {
-      Schema s = new Schema(
-	 "who", "turn", "utterance", "word",
-	 new Layer("topic", "Topics", Constants.ALIGNMENT_INTERVAL, 
-		   true, // peers
-		   false, // peersOverlap
-		   false), // saturated
-	 new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-		   true, // peers
-		   true, // peersOverlap
-		   true), // saturated
-	 new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-		   true, // peers
-		   false, // peersOverlap
-		   false, // saturated
-		   "who", // parentId
-		   true), // parentIncludes
-	 new Layer("utterance", "Utterances", Constants.ALIGNMENT_INTERVAL,
-		   true, // peers
-		   false, // peersOverlap
-		   true, // saturated
-		   "turn", // parentId
-		   true), // parentIncludes
-	 new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-		   true, // peers
-		   false, // peersOverlap
-		   false, // saturated
-		   "turn", // parentId
-		   true), // parentIncludes
-	 new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
-		   true, // peers
-		   false, // peersOverlap
-		   true, // saturated
-		   "word", // parentId
-		   true) // parentIncludes
-	 );
+  @Test public void ellispisConstructor() 
+  {
+    Schema s = new Schema(
+      "who", "turn", "utterance", "word",
+      new Layer("topic", "Topics", Constants.ALIGNMENT_INTERVAL, 
+                true, // peers
+                false, // peersOverlap
+                false), // saturated
+      new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+                true, // peers
+                true, // peersOverlap
+                true), // saturated
+      new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+                true, // peers
+                false, // peersOverlap
+                false, // saturated
+                "who", // parentId
+                true), // parentIncludes
+      new Layer("utterance", "Utterances", Constants.ALIGNMENT_INTERVAL,
+                true, // peers
+                false, // peersOverlap
+                true, // saturated
+                "turn", // parentId
+                true), // parentIncludes
+      new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+                true, // peers
+                false, // peersOverlap
+                false, // saturated
+                "turn", // parentId
+                true), // parentIncludes
+      new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
+                true, // peers
+                false, // peersOverlap
+                true, // saturated
+                "word", // parentId
+                true) // parentIncludes
+      );
       
-      assertEquals("getLayer", "Topics", s.getLayer("topic").getDescription());
-      assertEquals("getLayer", "Participants", s.getLayer("who").getDescription());
-      assertEquals("getLayer", "Speaker turns", s.getLayer("turn").getDescription());
-      assertEquals("getLayer", "Utterances", s.getLayer("utterance").getDescription());
-      assertEquals("getLayer", "Words", s.getLayer("word").getDescription());
-      assertEquals("getLayer", "Phones", s.getLayer("phone").getDescription());
+    assertEquals("getLayer", "Topics", s.getLayer("topic").getDescription());
+    assertEquals("getLayer", "Participants", s.getLayer("who").getDescription());
+    assertEquals("getLayer", "Speaker turns", s.getLayer("turn").getDescription());
+    assertEquals("getLayer", "Utterances", s.getLayer("utterance").getDescription());
+    assertEquals("getLayer", "Words", s.getLayer("word").getDescription());
+    assertEquals("getLayer", "Phones", s.getLayer("phone").getDescription());
       
-      assertEquals("special layers", s.getLayer("who"), s.getParticipantLayer());
-      assertEquals("special layers", s.getLayer("turn"), s.getTurnLayer());
-      assertEquals("special layers", s.getLayer("utterance"), s.getUtteranceLayer());
-      assertEquals("special layers", s.getLayer("word"), s.getWordLayer());
+    assertEquals("special layers", s.getLayer("who"), s.getParticipantLayer());
+    assertEquals("special layers", s.getLayer("turn"), s.getTurnLayer());
+    assertEquals("special layers", s.getLayer("utterance"), s.getUtteranceLayer());
+    assertEquals("special layers", s.getLayer("word"), s.getWordLayer());
       
-      assertEquals("hierarchy", s.getLayer("who"), s.getLayer("turn").getParent());
-      assertEquals("hierarchy", s.getLayer("turn"), s.getLayer("word").getParent());
-      assertEquals("hierarchy", s.getLayer("turn"), s.getLayer("utterance").getParent());
-      assertEquals("hierarchy", s.getLayer("word"), s.getLayer("phone").getParent());
+    assertEquals("hierarchy", s.getLayer("who"), s.getLayer("turn").getParent());
+    assertEquals("hierarchy", s.getLayer("turn"), s.getLayer("word").getParent());
+    assertEquals("hierarchy", s.getLayer("turn"), s.getLayer("utterance").getParent());
+    assertEquals("hierarchy", s.getLayer("word"), s.getLayer("phone").getParent());
       
-      assertEquals("graph layer", s.getRoot(), s.getLayer("graph"));
+    assertEquals("graph layer", s.getRoot(), s.getLayer("graph"));
 
-      assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("who").getParent());
-      assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("topic").getParent());      
-   }
+    assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("who").getParent());
+    assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("topic").getParent());      
+  }
 
-   public static void main(String args[]) 
-   {
-      org.junit.runner.JUnitCore.main("nzilbb.ag.test.TestSchema");
-   }
+  public static void main(String args[]) 
+  {
+    org.junit.runner.JUnitCore.main("nzilbb.ag.test.TestSchema");
+  }
 }
