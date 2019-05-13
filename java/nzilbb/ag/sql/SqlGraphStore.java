@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2018 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2019 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -27,10 +27,12 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.Vector;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -5935,12 +5937,13 @@ public class SqlGraphStore
     }
     return files.toArray(new MediaFile[0]);
   }
-
+ 
   /**
    * Gets a given media track for a given graph.
    * @param id The graph ID.
    * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
-   * @param mimeType The MIME type of the media.
+   * @param mimeType The MIME type of the media, which may include parameters for type
+   * conversion, e.g. "text/wav; samplerate=16000".
    * @return A URL to the given media for the given graph, or null if the given media doesn't exist.
    * @throws StoreException If an error occurs.
    * @throws PermissionException If the operation is not permitted.
@@ -5949,10 +5952,42 @@ public class SqlGraphStore
   public String getMedia(String id, String trackSuffix, String mimeType) 
     throws StoreException, PermissionException, GraphNotFoundException
   {
+    return getMedia(id, trackSuffix, mimeType, null, null);
+  }
+  /**
+   * Gets a given media track for a given graph.
+   * @param id The graph ID.
+   * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
+   * @param mimeType The MIME type of the media, which may include parameters for type
+   * conversion, e.g. "text/wav; samplerate=16000"
+   * @param startOffset The start offset of the media sample, or null for the start of the whole
+   * recording. 
+   * @param endOffset The end offset of the media sample, or null for the end of the whole recording.
+   * @return A URL to the given media for the given graph, or null if the given media doesn't
+   * exist. 
+   * @throws StoreException If an error occurs.
+   * @throws PermissionException If the operation is not permitted.
+   * @throws GraphNotFoundException If the graph was not found in the store.
+   */
+  public String getMedia(String id, String trackSuffix, String mimeType, Double startOffset, Double endOffset) 
+    throws StoreException, PermissionException, GraphNotFoundException
+  {
     String[] layers = { "corpus", "episode" };
     Graph graph = getGraph(id, layers);
     File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
     File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
+    String[] mimeTypeParts = mimeType.split(";"); // e.g. "audio/wav; samplerate=16000"
+    LinkedHashMap<String,String> mimeTypeParameters = new LinkedHashMap<String,String>();
+    for (int p = 1; p < mimeTypeParts.length; p++)
+    {
+      int equals = mimeTypeParts[p].indexOf('=');
+      if (equals >= 0)
+      {
+        mimeTypeParameters.put(mimeTypeParts[p].substring(0, equals),
+                               mimeTypeParts[p].substring(equals+1));
+      } // '=' is present
+    } // next parameter
+    mimeType = mimeTypeParts[0];
     String extension = MediaFile.MimeTypeToSuffix().get(mimeType);
     if (extension == null) throw new StoreException("Unknown MIME type: " + mimeType);
     File mediaDir = new File(episodeDir, extension);
@@ -5961,22 +5996,74 @@ public class SqlGraphStore
     File file = new File(mediaDir, fileName);
     if (file.exists())
     {
-      if (getBaseUrl() == null) // TODO check this isn't a security risk
+      if (startOffset == null && endOffset == null)
       {
-        return file.toURI().toString();
+        if (getBaseUrl() == null) // TODO check this isn't a security risk
+        {
+          return file.toURI().toString();
+        }
+        else
+        {
+          try
+          {
+            StringBuffer url = new StringBuffer(getBaseUrl());
+            url.append("/files/");
+            url.append(URLEncoder.encode(graph.my("corpus").getLabel(), "UTF-8"));
+            url.append("/");
+            url.append(URLEncoder.encode(graph.my("episode").getLabel(), "UTF-8"));
+            url.append("/");
+            url.append(URLEncoder.encode(extension, "UTF-8"));
+            url.append("/");
+            url.append(URLEncoder.encode(fileName, "UTF-8"));
+            return url.toString();
+          }
+          catch(UnsupportedEncodingException exception)
+          {
+            throw new StoreException(exception);
+          }
+        }
       }
-      else
+      else // a fragment
       {
-        StringBuffer url = new StringBuffer(getBaseUrl());
-        url.append("/files/");
-        url.append(graph.my("corpus").getLabel());
-        url.append("/");
-        url.append(graph.my("episode").getLabel());
-        url.append("/");
-        url.append(extension);
-        url.append("/");
-        url.append(fileName);
-        return url.toString();
+        if (getBaseUrl() == null) // TODO check this isn't a security risk
+        {
+          // ParameterSet configuration = new ParameterSet();
+          // if (mimeTypeParameters.containsKey("samplerate"))
+          // {
+          //   configuration.addParameter(
+          //     new Parameter("sampleRate", Integer.parseInt(mimeTypeParameters.get("samplerate"))));
+          // }
+          // IMediaConverter resampler = new Resampler();
+          // resampler.configure(configuration);
+          return file.toURI().toString(); //
+            
+        }
+        else
+        {
+          StringBuffer url = new StringBuffer(getBaseUrl());
+          url.append("/soundfragment");
+          url.append("?id=");
+          try
+          {
+            url.append(URLEncoder.encode(id, "UTF-8"));
+          }
+          catch(UnsupportedEncodingException exception)
+          {
+            throw new StoreException(exception);
+          }
+          url.append("&start=");
+          url.append(startOffset.toString());
+          url.append("&end=");
+          url.append(endOffset.toString());          
+          for (String name : mimeTypeParameters.keySet())
+          {
+            url.append("&");
+            url.append(name);
+            url.append("=");
+            url.append(mimeTypeParameters.get(name));
+          } // next parameter
+          return url.toString();
+        }
       }
     }
     else
