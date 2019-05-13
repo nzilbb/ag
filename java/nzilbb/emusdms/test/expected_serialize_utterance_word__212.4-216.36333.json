@@ -1,2 +1,150 @@
 {
+  "annotation": {
+    "name": "serialize_utterance_word__211.837-214.822",
+    "annotates": "serialize_utterance_word__211.837-214.822",
+    "sampleRate": 16000,
+    "levels": [
+      {
+        "name": "phone",
+        "type": "SEGMENT",
+        "items": [
+          {
+            "id": 10,
+            "sampleStart": 34857,
+            "sampleDur": 2561,
+            "labels": [{
+              "name": "phone",
+              "value": "I"
+            }]
+          },
+          {
+            "id": 11,
+            "sampleStart": 37419,
+            "sampleDur": 3889,
+            "labels": [{
+              "name": "phone",
+              "value": "z"
+            }]
+          }
+        ]
+      },
+      {
+        "name": "word",
+        "type": "SEGMENT",
+        "items": [
+          {
+            "id": 2,
+            "sampleStart": 0,
+            "sampleDur": 3876,
+            "labels": [{
+              "name": "word",
+              "value": "you"
+            }]
+          },
+          {
+            "id": 3,
+            "sampleStart": 3876,
+            "sampleDur": 3875,
+            "labels": [{
+              "name": "word",
+              "value": "bloody"
+            }]
+          },
+          {
+            "id": 4,
+            "sampleStart": 7751,
+            "sampleDur": 3876,
+            "labels": [{
+              "name": "word",
+              "value": "find"
+            }]
+          },
+          {
+            "id": 5,
+            "sampleStart": 11628,
+            "sampleDur": 3876,
+            "labels": [{
+              "name": "word",
+              "value": "out"
+            }]
+          },
+          {
+            "id": 6,
+            "sampleStart": 15504,
+            "sampleDur": 6451,
+            "labels": [{
+              "name": "word",
+              "value": "that"
+            }]
+          },
+          {
+            "id": 7,
+            "sampleStart": 21955,
+            "sampleDur": 6451,
+            "labels": [{
+              "name": "word",
+              "value": "the"
+            }]
+          },
+          {
+            "id": 8,
+            "sampleStart": 28406,
+            "sampleDur": 6451,
+            "labels": [{
+              "name": "word",
+              "value": "microphone"
+            }]
+          },
+          {
+            "id": 9,
+            "sampleStart": 34857,
+            "sampleDur": 6451,
+            "labels": [{
+              "name": "word",
+              "value": "is"
+            }]
+          },
+          {
+            "id": 12,
+            "sampleStart": 41308,
+            "sampleDur": 6451,
+            "labels": [{
+              "name": "word",
+              "value": "malfunctioning"
+            }]
+          }
+        ]
+      },
+      {
+        "name": "utterance",
+        "type": "SEGMENT",
+        "items": [
+          {
+            "id": 0,
+            "sampleStart": 0,
+            "sampleDur": 15504,
+            "labels": [{
+              "name": "utterance",
+              "value": "participant"
+            }]
+          },
+          {
+            "id": 1,
+            "sampleStart": 15504,
+            "sampleDur": 32255,
+            "labels": [{
+              "name": "utterance",
+              "value": "participant"
+            }]
+          }
+        ]
+      }
+    ],
+    "links": []
+  },
+  "ssffFiles": [],
+  "mediaFile": {
+    "encoding": "BASE64",
+    "data": "UklGRsYCAABXQVZFZm10IBAAAAABAAEAgD4AAAB9AAACABAATElTVBoAAABJTkZPSVNGVA4AAABMYXZmNTguMjAuMTAwAGRhdGGAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+  }
 }

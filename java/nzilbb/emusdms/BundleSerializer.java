@@ -341,7 +341,7 @@ public class BundleSerializer
       .put("annotation", new JSONObject()
            .put("name", graph.getId())
            .put("annotates", graph.getLabel())
-           .put("sampleRate", getSampleRate()) // TODO??
+           .put("sampleRate", getSampleRate())
            .put("levels", levels)
            .put("links", new JSONArray()))
       .put("ssffFiles", new JSONArray());
