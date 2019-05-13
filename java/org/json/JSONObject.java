@@ -312,18 +312,15 @@ public class JSONObject {
     }
 
    /**
-     * Construct a JSONObject from an {@link IJSONable}, using reflection to find the
-     * public members identified by {@link IJSONable#names()}. The resulting JSONObject's keys will be the strings from
+     * Construct a JSONObject from an {@link IJSONableBean}, using reflection to find the
+     * public members identified by {@link IJSONableBean#JSONAttributes()}. The resulting JSONObject's keys will be the strings from
      * the names array, and the values will be the field values associated with
      * those keys in the object. If a key is not found or not visible, then it
      * will not be copied into the new JSONObject.
      *
-     * @param object
+     * @param bean
      *            An object that has fields that should be used to make a
      *            JSONObject.
-     * @param names
-     *            An array of strings, the names of the fields to be obtained
-     *            from the object.
      */
    public JSONObject(IJSONableBean bean) {
         this();
