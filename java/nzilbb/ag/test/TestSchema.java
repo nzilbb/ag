@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2019 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -291,6 +291,76 @@ public class TestSchema
 
     assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("who").getParent());
     assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("topic").getParent());      
+  }
+
+  @Test public void cloning() 
+  {
+    Schema s = new Schema(
+      "who", "turn", "utterance", "word",
+      new Layer("topic", "Topics", Constants.ALIGNMENT_INTERVAL, 
+                true, // peers
+                false, // peersOverlap
+                false), // saturated
+      new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+                true, // peers
+                true, // peersOverlap
+                true), // saturated
+      new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+                true, // peers
+                false, // peersOverlap
+                false, // saturated
+                "who", // parentId
+                true), // parentIncludes
+      new Layer("utterance", "Utterances", Constants.ALIGNMENT_INTERVAL,
+                true, // peers
+                false, // peersOverlap
+                true, // saturated
+                "turn", // parentId
+                true), // parentIncludes
+      new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+                true, // peers
+                false, // peersOverlap
+                false, // saturated
+                "turn", // parentId
+                true), // parentIncludes
+      new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
+                true, // peers
+                false, // peersOverlap
+                true, // saturated
+                "word", // parentId
+                true) // parentIncludes
+      );
+    Schema c = (Schema)s.clone();
+
+    // check structure and relations
+    assertEquals("getLayer", "Topics", c.getLayer("topic").getDescription());
+    assertEquals("getLayer", "Participants", c.getLayer("who").getDescription());
+    assertEquals("getLayer", "Speaker turns", c.getLayer("turn").getDescription());
+    assertEquals("getLayer", "Utterances", c.getLayer("utterance").getDescription());
+    assertEquals("getLayer", "Words", c.getLayer("word").getDescription());
+    assertEquals("getLayer", "Phones", c.getLayer("phone").getDescription());      
+    assertEquals("special layers", c.getLayer("who"), s.getParticipantLayer());
+    assertEquals("special layers", c.getLayer("turn"), s.getTurnLayer());
+    assertEquals("special layers", c.getLayer("utterance"), s.getUtteranceLayer());
+    assertEquals("special layers", c.getLayer("word"), s.getWordLayer());      
+    assertEquals("hierarchy", c.getLayer("who"), s.getLayer("turn").getParent());
+    assertEquals("hierarchy", c.getLayer("turn"), s.getLayer("word").getParent());
+    assertEquals("hierarchy", c.getLayer("turn"), s.getLayer("utterance").getParent());
+    assertEquals("hierarchy", c.getLayer("word"), s.getLayer("phone").getParent());      
+    assertEquals("graph layer", c.getRoot(), s.getLayer("graph"));
+    assertEquals("hierarchy - top level", c.getRoot(), c.getLayer("who").getParent());
+    assertEquals("hierarchy - top level", c.getRoot(), c.getLayer("topic").getParent());
+
+    // check Layer objects are copies
+    for (Layer layerCopy : c.getLayers().values())
+    {
+      assertTrue("copy: " + layerCopy.getId(), layerCopy != s.getLayer(layerCopy.getId()));
+      if (!layerCopy.getId().equals("graph"))
+      {
+        assertTrue("parent copy: " + layerCopy.getId(),
+                   layerCopy.getParent() != s.getLayer(layerCopy.getParentId()));
+      }
+    } // next layer
   }
 
   public static void main(String args[]) 

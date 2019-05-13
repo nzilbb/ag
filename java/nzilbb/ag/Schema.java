@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2019 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -23,12 +23,14 @@ package nzilbb.ag;
 
 import java.util.HashMap;
 import java.util.Collection;
+import nzilbb.ag.util.LayerHierarchyTraversal;
 
 /**
  * Definition of layers and their interrelations.
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class Schema
+  implements Cloneable
 {
   // Attributes:
    
@@ -407,4 +409,36 @@ public class Schema
   } // end of layers()
 
 
+  /**
+   * Override of Map's clone method, to copy only tracked attributes plus "id".
+   * @return A copy of the object, including only the values of the tracked attributes.
+   */
+  public Object clone()
+  {
+    Schema copy = new Schema();
+    copy.participantLayerId = participantLayerId;
+    copy.turnLayerId = turnLayerId;
+    copy.utteranceLayerId = utteranceLayerId;
+    copy.wordLayerId = wordLayerId;
+    copy.episodeLayerId = episodeLayerId;
+    copy.corpusLayerId = corpusLayerId;
+    copy.participantLayerId = participantLayerId;
+    copy.participantLayerId = participantLayerId;
+    
+    LayerHierarchyTraversal<Schema> t = new LayerHierarchyTraversal<Schema>(copy, this) {
+        // add parents before children (so we know we don't have to check for orphans)
+        protected void pre(Layer layer)
+        {
+          if (layer.getParentId() != null) // not root
+          {
+            Layer layerCopy = (Layer)layer.clone();
+            result.layers.put(layer.getId(), layerCopy);
+            layerCopy.setParent(result.layers.get(layerCopy.getParentId()));
+          }
+        }
+      };
+    
+    return copy;
+  } // end of clone()
+  
 } // end of class Schema
