@@ -378,42 +378,49 @@ public class SqlGraphStore
     return layerLookup.values().toArray(new Layer[0]);
   }
 
+  /** Schema is only retrieved/built once */
+  protected Schema schema = null;
+  
   /**
-   * Gets the layer schema.
+   * Gets the layer schema. For performance reasons, this implementation only retrieves/builds
+   * the schema once, and always returns a clone of that original object.
    * @return A schema defining the layers and how they relate to each other.
    * @throws StoreException If an error occurs.
    * @throws PermissionException If the operation is not permitted.
    */
   public Schema getSchema() throws StoreException, PermissionException
   {
-    Schema schema = new Schema();
-    for (String layerId : getLayerIds())
+    if (schema == null)
     {
-      Layer layer = getLayer(layerId);
-      schema.addLayer(layer);
-      if (Integer.valueOf(11).equals(layer.get("@layer_id")))
+      schema = new Schema();
+      for (String layerId : getLayerIds())
       {
-        schema.setTurnLayerId(layer.getId());
-      }
-      else if (Integer.valueOf(12).equals(layer.get("@layer_id")))
-      {
-        schema.setUtteranceLayerId(layer.getId());
-      } 
-      else if (Integer.valueOf(0).equals(layer.get("@layer_id")))
-      {
-        schema.setWordLayerId(layer.getId());
-      } 
-      else if (Integer.valueOf(-50).equals(layer.get("@layer_id")))
-      {
-        schema.setEpisodeLayerId(layer.getId());
-      } 
-      else if (Integer.valueOf(-100).equals(layer.get("@layer_id")))
-      {
-        schema.setCorpusLayerId(layer.getId());
-      } 
-    } // next layer
-    schema.setParticipantLayerId("who");
-    return schema;
+        Layer layer = getLayer(layerId);
+        schema.addLayer(layer);
+        if (Integer.valueOf(11).equals(layer.get("@layer_id")))
+        {
+          schema.setTurnLayerId(layer.getId());
+        }
+        else if (Integer.valueOf(12).equals(layer.get("@layer_id")))
+        {
+          schema.setUtteranceLayerId(layer.getId());
+        } 
+        else if (Integer.valueOf(0).equals(layer.get("@layer_id")))
+        {
+          schema.setWordLayerId(layer.getId());
+        } 
+        else if (Integer.valueOf(-50).equals(layer.get("@layer_id")))
+        {
+          schema.setEpisodeLayerId(layer.getId());
+        } 
+        else if (Integer.valueOf(-100).equals(layer.get("@layer_id")))
+        {
+          schema.setCorpusLayerId(layer.getId());
+        } 
+      } // next layer
+      schema.setParticipantLayerId("who");
+    }
+    return (Schema)schema.clone();
   }
 
 
