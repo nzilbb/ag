@@ -141,7 +141,7 @@ public class TestBundleSerializer
             throw new StoreException(exception);
           }
         }
-
+        public IGraphMediaProvider providerForGraph(Graph graph) { return this; }
       });
     Graph[] fragments = { fragment };
 
