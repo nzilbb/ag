@@ -22,35 +22,39 @@
 package nzilbb.configure;
 
 import java.util.LinkedHashMap;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.annotation.Annotation;
 
 /**
- * Set of parameters, being a map to Parameters keyed on parameter name.  Uses LinkedHashMap so that iteration order can be controlled, as it's insertion-order.
+ * Set of parameters, being a map to Parameters keyed on parameter name.  Uses LinkedHashMap so
+ * that iteration order can be controlled, as it's insertion-order. 
  * @author Robert Fromont robert@fromont.net.nz
  */
 @SuppressWarnings("serial")
 public class ParameterSet
    extends LinkedHashMap<String,Parameter>
 {   
-   // Methods:
-   
-   /**
-    * Default constructor
-    */
-   public ParameterSet()
-   {
-   } // end of constructor
-   
-   /**
-    * Adds a parameter to the set.
-    * @param parameter The parameter to add.
-    * @return The parmeter added.
-    */
-   public Parameter addParameter(Parameter parameter)
-   {
-      put(parameter.getName(), parameter);
-      return parameter;
-   } // end of addParameter()
-
+  // Methods:
+  
+  /**
+   * Default constructor
+   */
+  public ParameterSet()
+  {
+  } // end of constructor
+  
+  /**
+   * Adds a parameter to the set.
+   * @param parameter The parameter to add.
+   * @return The parmeter added.
+   */
+  public Parameter addParameter(Parameter parameter)
+  {
+    put(parameter.getName(), parameter);
+    return parameter;
+  } // end of addParameter()
+  
   /**
    * Invokes {@link Parameter#apply(Object)} for all parameters in the collection.
    * @param bean The object whose bean attribute should be set.
@@ -66,5 +70,37 @@ public class ParameterSet
       catch(Exception exception) {}
     }
   } // end of apply()
+  
+  
+   /**
+    * Adds parameters to this set which correspond to any fields of the class of the given object
+    * annotated as {@link ParameterField}s. 
+    * @param bean The object whose class may have {@link ParamaterField} attributes.
+    * @return A reference to this set.
+    */
+   @SuppressWarnings("rawtypes")
+   public ParameterSet addParameters(Object bean)
+   {
+     Class c = bean.getClass();
+     for (Field field : c.getDeclaredFields())
+     {
+       if (field.isAnnotationPresent(ParameterField.class))
+       {
+         ParameterField annotation = field.getAnnotation(ParameterField.class);
+         if (!containsKey(field.getName()))
+         { // parameter is not present
+           // so add it
+           String label = annotation.label();
+           if (label.length() == 0) label = field.getName();
+           Parameter p = new Parameter(
+             field.getName(), field.getType(), label, annotation.value(),
+             annotation.required());
+           p.extractValue(bean);
+           addParameter(p);
+         } // parameter is not present           
+       } // ParameterField
+     } // next field
+    return this;
+   } // end of addParameters()
 
 } // end of class ParameterSet

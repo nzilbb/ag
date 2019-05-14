@@ -332,5 +332,34 @@ public class Parameter
       setter.invoke(bean, value);
    } // end of apply()
 
+   /**
+    * Sets the {@link value} of the parameter with the value of the attribute named after {@link
+    * #name} of the given bean. 
+    * <p>e.g. if the parameter's name is "foo" and the bean has a getter called "getFoo()", then
+    * the effect of this method is the same as invoking <code>setValue(bead.getFoo())</code>, if
+    * the value is not null.
+    * @param bean The object whose bean attribute should be set.
+    * @return The value that was set.
+    */
+   public Object extractValue(Object bean)
+   {
+     Object value = null;
+     try
+     {
+       Method getter = bean.getClass().getMethod("get" + name.substring(0,1).toUpperCase() + name.substring(1));
+       value = getter.invoke(bean);
+       if (value != null) setValue(value);
+     }
+     catch(NoSuchMethodException exception) {
+     System.out.println(exception.toString());}
+     catch(SecurityException exception) {
+     System.out.println(exception.toString());}
+     catch(IllegalAccessException exception) {
+     System.out.println(exception.toString());}
+     catch(InvocationTargetException exception) {
+     System.out.println(exception.toString());}
+     return value;
+   } // end of extractValue()
+
 
 } // end of class SerializationParameter
