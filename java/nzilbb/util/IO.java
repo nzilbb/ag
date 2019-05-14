@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2019 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -21,6 +21,7 @@
 //
 package nzilbb.util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -34,6 +35,7 @@ import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.Vector;
 import java.util.Enumeration;
+import java.util.Base64;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.jar.Attributes;
@@ -173,7 +175,6 @@ public class IO
 
     return totalBytes;
   } // end of Pump()
-
    
   /**
    * Scans the given jar file for instances of a particular class/interface.
@@ -258,7 +259,6 @@ public class IO
     }
   } // end of JarFileOfClass()
 
-
   /**
    * Recursively deletes a directory.
    * @param dir The directory to delete.
@@ -276,5 +276,52 @@ public class IO
     return dir.delete();
   } // end of RecursivelyDelete()
 
+  /**
+   * Encodes the content of the given url content as a BASE64-encoded string.
+   * @param url A URL to the content to be encoded.
+   * @return A BASE64-encoded representation of the content.
+   * @throws IOException
+   */
+  public static String Base64Encode(String url)
+    throws IOException
+  {
+    return Base64Encode(new URL(url).openStream());
+  }
+
+  /**
+   * Encodes the content of the given url content as a BASE64-encoded string.
+   * @param url A URL to the content to be encoded.
+   * @return A BASE64-encoded representation of the content.
+   * @throws IOException
+   */
+  public static String Base64Encode(URL url)
+    throws IOException
+  {
+    return Base64Encode(url.openStream());
+  }
+  
+  /**
+   * Encodes the given content as a BASE64-encoded string.
+   * @param content The content to encode.
+   * @return A BASE64-encoded representation of the content.
+   * @throws IOException
+   */
+  public static String Base64Encode(InputStream content)
+    throws IOException
+  {
+    ByteArrayOutputStream base64Out = new ByteArrayOutputStream();
+    OutputStream bytesOut = Base64.getEncoder().wrap(base64Out);
+    byte[] buffer = new byte[1024];
+    int byteCount = content.read(buffer);
+    while (byteCount >= 0)
+    {
+      bytesOut.write(buffer, 0, byteCount);
+      byteCount = content.read(buffer);
+    } // read next chunk
+    content.close();
+    bytesOut.close();
+    return base64Out.toString();
+  } // end of base64EncodeFile()
+  
    
 } // end of class IO
