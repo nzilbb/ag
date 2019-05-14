@@ -410,8 +410,8 @@ public class Schema
 
 
   /**
-   * Override of Map's clone method, to copy only tracked attributes plus "id".
-   * @return A copy of the object, including only the values of the tracked attributes.
+   * Override of Object's clone method.
+   * @return A copy of the object.
    */
   public Object clone()
   {
