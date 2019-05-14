@@ -65,24 +65,57 @@ public class TestBundleSerializer
     
     BundleSerializer serializer = new BundleSerializer();
     serializer.setJsonIndentFactor(2);
-    
+
+    // general configuration
+    ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
+    // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+    assertEquals("sampleRate", Integer.valueOf(16000), 
+                 (Integer)configuration.get("sampleRate").getValue());
+    assertEquals("corpusName", "corpus", 
+                 (String)configuration.get("corpusName").getValue());
+    assertNotNull("uuid", configuration.get("uuid").getValue());
+    assertEquals("showPerspectivesSidebar", Boolean.TRUE, 
+                 (Boolean)configuration.get("showPerspectivesSidebar").getValue());
+    assertEquals("playback", Boolean.TRUE, 
+                 (Boolean)configuration.get("playback").getValue());
+    assertEquals("correctionTool", Boolean.TRUE, 
+                 (Boolean)configuration.get("correctionTool").getValue());
+    assertEquals("editItemSize", Boolean.TRUE, 
+                 (Boolean)configuration.get("editItemSize").getValue());
+    assertEquals("useLargeTextInputField", Boolean.TRUE, 
+                 (Boolean)configuration.get("useLargeTextInputField").getValue());
+    assertEquals("saveBundle", Boolean.TRUE, 
+                 (Boolean)configuration.get("saveBundle").getValue());
+    assertEquals("showHierarchy", Boolean.TRUE, 
+                 (Boolean)configuration.get("showHierarchy").getValue());
+    assertEquals(10, configuration.size());
+
+    // customize configuration
+    configuration.get("corpusName").setValue("actual_dbconfig");
+    configuration.get("uuid").setValue("fc379152-0381-4efc-b4c1-e90d696f5373");
+    configuration.get("showPerspectivesSidebar").setValue(Boolean.FALSE);
+    configuration.get("correctionTool").setValue(Boolean.FALSE);
+    configuration.get("useLargeTextInputField").setValue(Boolean.FALSE);
+    configuration.get("showHierarchy").setValue(Boolean.FALSE);
+
+    assertEquals(10, serializer.configure(configuration, schema).size());
+
     Vector<String> layers = new Vector<String>();
     layers.add("phone");
     // including a word tag layer forced the serializer to include the word layer
     layers.add("pronounce");
     // ...and the utterance layer is included anyway
-    
+
+    // serialize
+    NamedStream[] streams = serializer.serializeSchema(schema, layers);
     String json = serializer.getDbConfig(
       schema, layers, "Test", "fc379152-0381-4efc-b4c1-e90d696f5373",
       false, true, false, true, false, true, false);
+    streams[0].save(dir);
     File actual = new File(dir, "actual_dbconfig.json");
-    PrintWriter writer = new PrintWriter(actual, "UTF-8");
-    writer.print(json);
-    writer.close();
     
     // test using diff
-    String differences = diff(new File(dir, "expected_dbconfig.json"),
-                              new File(dir, "actual_dbconfig.json"));
+    String differences = diff(new File(dir, "expected_dbconfig.json"), actual);
     if (differences != null)
     {
       fail(differences);
@@ -151,12 +184,30 @@ public class TestBundleSerializer
       
     // general configuration
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
+    // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
     assertEquals("sampleRate", Integer.valueOf(16000), 
                  (Integer)configuration.get("sampleRate").getValue());
-    assertEquals(1, configuration.size());
+    assertEquals("corpusName", "corpus", 
+                 (String)configuration.get("corpusName").getValue());
+    assertNotNull("uuid", configuration.get("uuid").getValue());
+    assertEquals("showPerspectivesSidebar", Boolean.TRUE, 
+                 (Boolean)configuration.get("showPerspectivesSidebar").getValue());
+    assertEquals("playback", Boolean.TRUE, 
+                 (Boolean)configuration.get("playback").getValue());
+    assertEquals("correctionTool", Boolean.TRUE, 
+                 (Boolean)configuration.get("correctionTool").getValue());
+    assertEquals("editItemSize", Boolean.TRUE, 
+                 (Boolean)configuration.get("editItemSize").getValue());
+    assertEquals("useLargeTextInputField", Boolean.TRUE, 
+                 (Boolean)configuration.get("useLargeTextInputField").getValue());
+    assertEquals("saveBundle", Boolean.TRUE, 
+                 (Boolean)configuration.get("saveBundle").getValue());
+    assertEquals("showHierarchy", Boolean.TRUE, 
+                 (Boolean)configuration.get("showHierarchy").getValue());
+    assertEquals(10, configuration.size());
     
      //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(1, serializer.configure(configuration, schema).size());
+    assertEquals(10, serializer.configure(configuration, schema).size());
     
     String[] needLayers = serializer.getRequiredLayers();
     assertEquals(0, needLayers.length);

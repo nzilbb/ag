@@ -21,6 +21,7 @@
 //
 package nzilbb.emusdms;
 
+import java.util.UUID;
 import java.util.List;
 import java.util.Vector;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import java.util.Comparator;
 import java.util.Base64;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
@@ -39,6 +41,7 @@ import nzilbb.ag.serialize.util.Utility;
 import nzilbb.ag.util.LayerTraversal;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
+import nzilbb.configure.ParameterField;
 import nzilbb.util.IO;
 import nzilbb.util.TempFileInputStream;
 import org.json.*;
@@ -48,10 +51,181 @@ import org.json.*;
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class BundleSerializer
-  implements ISerializer
+  implements ISerializer, ISchemaSerializer
 {
   // Attributes:
   
+  /**
+   * Name of the corpus.
+   * @see #getCorpusName()
+   * @see #setCorpusName(String)
+   */
+  @ParameterField("Name of the corpus")
+  protected String corpusName = "corpus";
+  /**
+   * Getter for {@link #corpusName}.
+   * @return Name of the corpus.
+   */
+  public String getCorpusName() { return corpusName; }
+  /**
+   * Setter for {@link #corpusName}.
+   * @param corpusName Name of the corpus.
+   * @return <var>this</var>.
+   */
+  public BundleSerializer setCorpusName(String corpusName) { this.corpusName = corpusName; return this; }
+
+  /**
+   * UUID of the schema.
+   * @see #getUuid()
+   * @see #setUuid(String)
+   */
+  @ParameterField("UUID of the schema")
+  protected String uuid = UUID.randomUUID().toString();
+  /**
+   * Getter for {@link #uuid}.
+   * @return UUID of the schema.
+   */
+  public String getUuid() { return uuid; }
+  /**
+   * Setter for {@link #uuid}.
+   * @param uuid UUID of the schema.
+   * @return <var>this</var>.
+   */
+  public BundleSerializer setUuid(String uuid) { this.uuid = uuid; return this; }
+
+  /**
+   * Whether to show perspectives sidebar.
+   * @see #getShowPerspectivesSidebar()
+   * @see #setShowPerspectivesSidebar(Boolean)
+   */
+  @ParameterField("Whether to show perspectives sidebar")
+  protected Boolean showPerspectivesSidebar = Boolean.TRUE;
+  /**
+   * Getter for {@link #showPerspectivesSidebar}.
+   * @return Whether to show perspectives sidebar.
+   */
+  public Boolean getShowPerspectivesSidebar() { return showPerspectivesSidebar; }
+  /**
+   * Setter for {@link #showPerspectivesSidebar}.
+   * @param showPerspectivesSidebar Whether to show perspectives sidebar.
+   * @return <var>this</var>.
+   */
+  public BundleSerializer setShowPerspectivesSidebar(Boolean showPerspectivesSidebar) { this.showPerspectivesSidebar = showPerspectivesSidebar; return this; }
+
+  /**
+   * Whether to allow playback.
+   * @see #getPlayback()
+   * @see #setPlayback(Boolean)
+   */
+  @ParameterField("Whether to allow playback")
+  protected Boolean playback = Boolean.TRUE;
+  /**
+   * Getter for {@link #playback}.
+   * @return Whether to allow playback.
+   */
+  public Boolean getPlayback() { return playback; }
+  /**
+   * Setter for {@link #playback}.
+   * @param playback Whether to allow playback.
+   * @return <var>this</var>.
+   */
+  public BundleSerializer setPlayback(Boolean playback) { this.playback = playback; return this; }
+
+  /**
+   * Whether to show the correction tool.
+   * @see #getCorrectionTool()
+   * @see #setCorrectionTool(Boolean)
+   */
+  @ParameterField("Whether to show the correction tool")
+  protected Boolean correctionTool = Boolean.TRUE;
+  /**
+   * Getter for {@link #correctionTool}.
+   * @return Whether to show the correction tool.
+   */
+  public Boolean getCorrectionTool() { return correctionTool; }
+  /**
+   * Setter for {@link #correctionTool}.
+   * @param correctionTool Whether to show the correction tool.
+   * @return <var>this</var>.
+   */
+  public BundleSerializer setCorrectionTool(Boolean correctionTool) { this.correctionTool = correctionTool; return this; }
+
+  /**
+   * Whether to allow editing of the item size.
+   * @see #getEditItemSize()
+   * @see #setEditItemSize(Boolean)
+   */
+  @ParameterField("Whether to allow editing of the item size")
+  protected Boolean editItemSize = Boolean.TRUE;
+  /**
+   * Getter for {@link #editItemSize}.
+   * @return Whether to allow editing of the item size.
+   */
+  public Boolean getEditItemSize() { return editItemSize; }
+  /**
+   * Setter for {@link #editItemSize}.
+   * @param editItemSize Whether to allow editing of the item size.
+   * @return <var>this</var>.
+   */
+  public BundleSerializer setEditItemSize(Boolean editItemSize) { this.editItemSize = editItemSize; return this; }
+
+  /**
+   * Whether to use large text input field.
+   * @see #getUseLargeTextInputField()
+   * @see #setUseLargeTextInputField(Boolean)
+   */
+  @ParameterField("Whether to use large text input field")
+  protected Boolean useLargeTextInputField = Boolean.TRUE;
+  /**
+   * Getter for {@link #useLargeTextInputField}.
+   * @return Whether to use large text input field.
+   */
+  public Boolean getUseLargeTextInputField() { return useLargeTextInputField; }
+  /**
+   * Setter for {@link #useLargeTextInputField}.
+   * @param useLargeTextInputField Whether to use large text input field.
+   * @return <var>this</var>.
+   */
+  public BundleSerializer setUseLargeTextInputField(Boolean useLargeTextInputField) { this.useLargeTextInputField = useLargeTextInputField; return this; }
+
+  /**
+   * Whether to allow saving of bundles.
+   * @see #getSaveBundle()
+   * @see #setSaveBundle(Boolean)
+   */
+  @ParameterField("Whether to allow saving of bundles")
+  protected Boolean saveBundle = Boolean.TRUE;
+  /**
+   * Getter for {@link #saveBundle}.
+   * @return Whether to allow saving of bundles.
+   */
+  public Boolean getSaveBundle() { return saveBundle; }
+  /**
+   * Setter for {@link #saveBundle}.
+   * @param saveBundle Whether to allow saving of bundles.
+   * @return <var>this</var>.
+   */
+  public BundleSerializer setSaveBundle(Boolean saveBundle) { this.saveBundle = saveBundle; return this; }
+
+  /**
+   * Whether to show hierarchy.
+   * @see #getShowHierarchy()
+   * @see #setShowHierarchy(Boolean)
+   */
+  @ParameterField("Whether to show hierarchy")
+  protected Boolean showHierarchy = Boolean.TRUE;
+  /**
+   * Getter for {@link #showHierarchy}.
+   * @return Whether to show hierarchy.
+   */
+  public Boolean getShowHierarchy() { return showHierarchy; }
+  /**
+   * Setter for {@link #showHierarchy}.
+   * @param showHierarchy Whether to show hierarchy.
+   * @return <var>this</var>.
+   */
+  public BundleSerializer setShowHierarchy(Boolean showHierarchy) { this.showHierarchy = showHierarchy; return this; }
+
   /**
    * How much to indent JSON-encoded lines, for each level, or 0 for JSON all on one line.
    * @see #getJsonIndentFactor()
@@ -59,21 +233,26 @@ public class BundleSerializer
    */
   protected int jsonIndentFactor = 0;
   /**
-   * Getter for {@link #jsonIndentFactor}: How much to indent JSON-encoded lines, for each level, or 0 for JSON all on one line.
-   * @return How much to indent JSON-encoded lines, for each level, or 0 for JSON all on one line.
+   * Getter for {@link #jsonIndentFactor}: How much to indent JSON-encoded lines, for each level,
+   * or 0 for JSON all on one line. 
+   * @return How much to indent JSON-encoded lines, for each level, or 0 for JSON all on one
+   * line. 
    */
   public int getJsonIndentFactor() { return jsonIndentFactor; }
   /**
-   * Setter for {@link #jsonIndentFactor}: How much to indent JSON-encoded lines, for each level, or 0 for JSON all on one line.
-   * @param newJsonIndentFactor How much to indent JSON-encoded lines, for each level, or 0 for JSON all on one line.
+   * Setter for {@link #jsonIndentFactor}: How much to indent JSON-encoded lines, for each level,
+   * or 0 for JSON all on one line. 
+   * @param newJsonIndentFactor How much to indent JSON-encoded lines, for each level, or 0 for
+   * JSON all on one line. 
    */
-  public void setJsonIndentFactor(int newJsonIndentFactor) { jsonIndentFactor = newJsonIndentFactor; }
+  public BundleSerializer setJsonIndentFactor(int newJsonIndentFactor) { jsonIndentFactor = newJsonIndentFactor; return this; }
   
   /**
    * Sample rate for audio in Hz. Default is 16000.
    * @see #getSampleRate()
    * @see #setSampleRate(Integer)
    */
+  @ParameterField("Sample rate for audio in Hz")
   protected Integer sampleRate = 16000;
   /**
    * Getter for {@link #sampleRate}.
@@ -95,7 +274,7 @@ public class BundleSerializer
   public BundleSerializer()
   {
   } // end of constructor
-  
+
   /**
    * Returns the database configuration (e.g. a possible response to the EMU-webApp's 
    * <tt>GETGLOBALDBCONFIG</tt> request) for the given schema, and the given layers.
@@ -253,6 +432,7 @@ public class BundleSerializer
                 .put("showHierarchy", showHierarchy)));
     return data.toString(jsonIndentFactor);
   } // end of getDbConfig()
+  
   /**
    * Serializes the given graph, generating a {@link NamedStream}.
    * @param graph The graph to serialize.
@@ -346,7 +526,8 @@ public class BundleSerializer
            .put("links", new JSONArray()))
       .put("ssffFiles", new JSONArray());
     
-    if (graph.getMediaProvider() != null) {      
+    if (graph.getMediaProvider() != null)
+    {
       try
       {
         // get media
@@ -375,7 +556,7 @@ public class BundleSerializer
     
     try
     {
-      // write the TextGrid to a temporary file
+      // write the bundle to a temporary file
       File f = File.createTempFile(graph.getId(), ".json");
       FileOutputStream out = new FileOutputStream(f);	 
       PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, "utf-8"));
@@ -404,7 +585,7 @@ public class BundleSerializer
   public SerializationDescriptor getDescriptor()
   {
     return new SerializationDescriptor(
-      "EMU-SDMS Bundle", "0.01", "application/emusdms+json", ".json", "20170516.1519", getClass().getResource("icon.png"));
+      "EMU-SDMS Bundle", "0.01", "application/emusdms+json", ".json", "20190514.1428", getClass().getResource("icon.png"));
   }
   
   /**
@@ -425,21 +606,10 @@ public class BundleSerializer
    */
   public ParameterSet configure(ParameterSet configuration, Schema schema)
   {
+    // add any parameters that are missing
+    configuration.addParameters(this);    
     // set any values that have been passed in
-    for (Parameter p : configuration.values()) try { p.apply(this); } catch(Exception x) {}
-    
-    if (!configuration.containsKey("useConventions"))
-    {
-      configuration.addParameter(
-        new Parameter("sampleRate", Integer.class, 
-                      "Sample Rate",
-                      "Sample rate for audio in Hz.", true));
-    }
-    if (configuration.get("sampleRate").getValue() == null)
-    {
-      configuration.get("sampleRate").setValue(getSampleRate());
-    }
-    
+    configuration.apply(this);
     return configuration;
   }
   
@@ -486,5 +656,44 @@ public class BundleSerializer
     return new String[0];
   }
 
+  // ISchemaSerializer methods
+
+  /**
+   * Serializes the given schema, generating one or more {@link NamedStream}s.
+   * <p>Many data formats will only yield one stream (e.g. EMU-SDMS requires one JSON stream),
+   * however there may be formats that use multiple files for the same schema, which is why this
+   * method returns a list.
+   * @param schema The schema to serialize.
+   * @param layerIds A list of IDs of layers to include in the serialization, or null for all layers.
+   * @return A list of named streams that contain the serialization in the given format. 
+   * @throws SerializerNotConfiguredException if the object has not been configured.
+   * @throws SerializationException if errors occur during deserialization.
+   */
+  public NamedStream[] serializeSchema(Schema schema, List<String> layerIds) 
+    throws SerializerNotConfiguredException, SerializationException
+  {
+    SerializationException errors = null;
+
+    if (errors != null) throw errors;
+
+    String config = getDbConfig(
+      schema, layerIds, corpusName, uuid, showPerspectivesSidebar, playback, correctionTool,
+      editItemSize, useLargeTextInputField, saveBundle, showHierarchy);
+    
+    try
+    {
+      ByteArrayInputStream in = new ByteArrayInputStream(config.getBytes("UTF-8"));
+      return Utility.OneNamedStreamArray(
+        new NamedStream(in, corpusName.replaceAll("\\.[a-zA-Z]*$", "") + ".json"));
+    }
+    catch(Exception exception)
+    {
+      errors = new SerializationException();
+      errors.initCause(exception);
+      errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
+      throw errors;
+    }      
+    
+  }
 
 } // end of class BundleSerializer
