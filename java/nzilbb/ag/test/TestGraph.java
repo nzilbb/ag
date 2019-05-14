@@ -980,6 +980,25 @@ public class TestGraph
    {
       Graph g = new Graph();
       g.setId("my graph");
+      g.setMediaProvider(new IGraphMediaProvider() {
+          public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
+          { return null; }
+          public String getMedia(String trackSuffix, String mimeType)
+            throws StoreException, PermissionException
+          { return "GraphMediaProvider"; }
+          public IGraphMediaProvider providerForGraph(Graph graph)
+          {
+            return new IGraphMediaProvider() {
+              public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
+              { return null; }
+              public String getMedia(String trackSuffix, String mimeType)
+                throws StoreException, PermissionException
+              { return "FragmentMediaProvider"; }
+              public IGraphMediaProvider providerForGraph(Graph graph)
+              { return this; }
+            };
+          }
+        });
 
       g.addLayer(new Layer("topic", "Topics", 2, true, false, false));
       g.addLayer(new Layer("who", "Participants", 0, true, true, true));
@@ -1149,16 +1168,47 @@ public class TestGraph
       assertEquals("after offset change", 
 		   new Double(101.0), f.getAnchors().get("a1").getOffset());
       assertNull("after offset change", 
-		 f.getAnchors().get("a2").getOffset());
+                 f.getAnchors().get("a2").getOffset());
       assertEquals("after offset change", 
-		   new Double(103.0), f.getAnchors().get("a3").getOffset());
+                   new Double(103.0), f.getAnchors().get("a3").getOffset());
 
+      // check media provider handling
+      try
+      {
+        assertEquals("graph has original media proviers",
+                     "GraphMediaProvider", g.getMediaProvider().getMedia(null,null));
+        assertEquals("fragment has derived media proviers",
+                     "FragmentMediaProvider", f.getMediaProvider().getMedia(null,null));
+      }
+      catch(Exception exception)
+      {
+        fail("Media provider: " + exception);
+      }
    }
-
+  
    @Test public void fragmentByAnnotation() 
    {
       Graph g = new Graph();
       g.setId("my graph");
+      g.setMediaProvider(new IGraphMediaProvider() {
+          public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
+          { return null; }
+          public String getMedia(String trackSuffix, String mimeType)
+            throws StoreException, PermissionException
+          { return "GraphMediaProvider"; }
+          public IGraphMediaProvider providerForGraph(Graph graph)
+          {
+            return new IGraphMediaProvider() {
+              public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
+              { return null; }
+              public String getMedia(String trackSuffix, String mimeType)
+                throws StoreException, PermissionException
+              { return "FragmentMediaProvider"; }
+              public IGraphMediaProvider providerForGraph(Graph graph)
+              { return this; }
+            };
+          }
+        });
 
       g.addLayer(new Layer("topic", "Topics", 2, true, false, false));
       g.addLayer(new Layer("who", "Participants", 0, true, true, true));
@@ -1291,12 +1341,43 @@ public class TestGraph
       assertTrue("included layer", f.getSchema().getLayers().containsKey("pos"));
       assertFalse("excluded layer", f.getSchema().getLayers().containsKey("phrase"));
 
+      // check media provider handling
+      try
+      {
+        assertEquals("graph has original media proviers",
+                     "GraphMediaProvider", g.getMediaProvider().getMedia(null,null));
+        assertEquals("fragment has derived media proviers",
+                     "FragmentMediaProvider", f.getMediaProvider().getMedia(null,null));
+      }
+      catch(Exception exception)
+      {
+        fail("Media provider: " + exception);
+      }
    }
 
    @Test public void fragmentByUtterance() 
    {
       Graph g = new Graph();
       g.setId("my graph");
+      g.setMediaProvider(new IGraphMediaProvider() {
+          public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
+          { return null; }
+          public String getMedia(String trackSuffix, String mimeType)
+            throws StoreException, PermissionException
+          { return "GraphMediaProvider"; }
+          public IGraphMediaProvider providerForGraph(Graph graph)
+          {
+            return new IGraphMediaProvider() {
+              public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
+              { return null; }
+              public String getMedia(String trackSuffix, String mimeType)
+                throws StoreException, PermissionException
+              { return "FragmentMediaProvider"; }
+              public IGraphMediaProvider providerForGraph(Graph graph)
+              { return this; }
+            };
+          }
+        });
 
       g.addLayer(new Layer("topic", "Topics", 2, true, false, false));
       g.addLayer(new Layer("who", "Participants", 0, true, true, true));
@@ -1431,12 +1512,43 @@ public class TestGraph
       // check list
       assertEquals(2, f.list("word").length);
 
+      // check media provider handling
+      try
+      {
+        assertEquals("graph has original media proviers",
+                     "GraphMediaProvider", g.getMediaProvider().getMedia(null,null));
+        assertEquals("fragment has derived media proviers",
+                     "FragmentMediaProvider", f.getMediaProvider().getMedia(null,null));
+      }
+      catch(Exception exception)
+      {
+        fail("Media provider: " + exception);
+      }
    }
 
    @Test public void fragmentByBoundingAndAncestorAnnotations() 
    {
       Graph g = new Graph();
       g.setId("my graph");
+      g.setMediaProvider(new IGraphMediaProvider() {
+          public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
+          { return null; }
+          public String getMedia(String trackSuffix, String mimeType)
+            throws StoreException, PermissionException
+          { return "GraphMediaProvider"; }
+          public IGraphMediaProvider providerForGraph(Graph graph)
+          {
+            return new IGraphMediaProvider() {
+              public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
+              { return null; }
+              public String getMedia(String trackSuffix, String mimeType)
+                throws StoreException, PermissionException
+              { return "FragmentMediaProvider"; }
+              public IGraphMediaProvider providerForGraph(Graph graph)
+              { return this; }
+            };
+          }
+        });
 
       g.addLayer(new Layer("topic", "Topics", 2, true, false, false));
       g.addLayer(new Layer("who", "Participants", 0, true, true, true));
@@ -1568,6 +1680,18 @@ public class TestGraph
       assertTrue("included layer", f.getSchema().getLayers().containsKey("pos"));
       assertFalse("excluded layer", f.getSchema().getLayers().containsKey("phrase"));
 
+      // check media provider handling
+      try
+      {
+        assertEquals("graph has original media proviers",
+                     "GraphMediaProvider", g.getMediaProvider().getMedia(null,null));
+        assertEquals("fragment has derived media proviers",
+                     "FragmentMediaProvider", f.getMediaProvider().getMedia(null,null));
+      }
+      catch(Exception exception)
+      {
+        fail("Media provider: " + exception);
+      }
    }
 
 

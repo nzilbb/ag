@@ -27,15 +27,15 @@ package nzilbb.ag;
  */
 public interface IGraphMediaProvider
 {
-   /**
-    * List the media available for the graph.
-    * @return List of media files available for the given graph.
-    * @throws StoreException If an error occurs.
-    * @throws PermissionException If the operation is not permitted.
-    */
-   public MediaFile[] getAvailableMedia() 
-      throws StoreException, PermissionException;
-
+  /**
+   * List the media available for the graph.
+   * @return List of media files available for the given graph.
+   * @throws StoreException If an error occurs.
+   * @throws PermissionException If the operation is not permitted.
+   */
+  public MediaFile[] getAvailableMedia() 
+    throws StoreException, PermissionException;
+  
   /**
    * Gets a given media track for the graph.
    * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
@@ -46,5 +46,14 @@ public interface IGraphMediaProvider
    */
   public String getMedia(String trackSuffix, String mimeType) 
     throws StoreException, PermissionException;
-
+  
+  /**
+   * Provides another instance of the implementing class, for the given graph. The main use for
+   * this method is to allow graphs to generate fragments that have their own media providers.
+   * @param graph
+   * @return A new object that can provide media for the given graph, or null if none can be
+   * provided. 
+   */
+  public IGraphMediaProvider providerForGraph(Graph graph);
+  
 } // end of interface IGraphMediaProvider

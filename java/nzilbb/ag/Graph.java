@@ -284,7 +284,20 @@ public class Graph
     "0.000", new DecimalFormatSymbols(Locale.UK));
    
   /**
-   * Computes a graph fragment ID, given a graph and bounding anchors.
+   * Computes a graph fragment ID, given a graph ID and bounding offsets.
+   * @param graphId
+   * @param startOffset
+   * @param endOffset
+   * @return The ID of the fragment, formatted <var>graphId</var>__<var>startOffset</var>-<var>endOffset</var>
+   */
+  public static String FragmentId(String graphId, Double startOffset, Double endOffset)
+  {
+    return graphId + "__" + offsetFormat.format(startOffset) 
+      + "-" + offsetFormat.format(endOffset);
+  } // end of FragmentId()
+  
+  /**
+   * Computes a graph fragment ID, given a graph and bounding offsets.
    * @param graph
    * @param startOffset
    * @param endOffset
@@ -320,6 +333,10 @@ public class Graph
   public Graph getFragment(double startOffset, double endOffset, String[] layerIds)
   {
     Graph fragment = new Graph();
+    if (mediaProvider != null)
+    {
+      fragment.setMediaProvider(mediaProvider.providerForGraph(fragment));
+    }
     fragment.graph = this;
     fragment.getSchema().setParticipantLayerId(graph.getSchema().getParticipantLayerId());
     fragment.getSchema().setTurnLayerId(graph.getSchema().getTurnLayerId());
@@ -376,6 +393,10 @@ public class Graph
   public Graph getFragment(Annotation definingAnnotation, String[] layerIds)
   {
     Graph fragment = new Graph();
+    if (mediaProvider != null)
+    {
+      fragment.setMediaProvider(mediaProvider.providerForGraph(fragment));
+    }
     fragment.graph = this;
     Layer layer = getLayer(definingAnnotation.getLayerId());
     if (layer != null)
@@ -435,6 +456,10 @@ public class Graph
   public Graph getFragment(Annotation bounds, Annotation ancestor, String[] layerIds)
   {
     Graph fragment = new Graph();
+    if (mediaProvider != null)
+    {
+      fragment.setMediaProvider(mediaProvider.providerForGraph(fragment));
+    }
     fragment.graph = this;
     if (bounds.getAnchored())
     {
