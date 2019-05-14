@@ -1,5 +1,5 @@
 //
-// Copyright 2018 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2019 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -31,15 +31,16 @@ import nzilbb.configure.ParameterSet;
 import javax.sound.sampled.*;
 
 /**
- * IMediaConverter that converts sound samples using the javax.sound.sampled API.
+ * IMediaConverter that extracts portions of sound samples using the javax.sound.sampled API, with 
+ * optional resampling.
  * @author Robert Fromont robert@fromont.net.nz
  */
 
-public class Resampler
+public class FragmentExtractor
   implements IMediaConverter
 {
   // Attributes:   
-   
+  
   /**
    * Sample rate.
    * @see #getSampleRate()
@@ -56,14 +57,50 @@ public class Resampler
    * @param newSampleRate Sample rate.
    * @return this
    */
-  public Resampler setSampleRate(Integer newSampleRate) { sampleRate = newSampleRate; return this; }
-   
+  public FragmentExtractor setSampleRate(Integer newSampleRate) { sampleRate = newSampleRate; return this; }
+  
+  /**
+   * Start time of fragment.
+   * @see #getStart()
+   * @see #setStart(Double)
+   */
+  protected Double start;
+  /**
+   * Getter for {@link #start}.
+   * @return Start time of fragment.
+   */
+  public Double getStart() { return start; }
+  /**
+   * Setter for {@link #start}.
+   * @param start Start time of fragment.
+   * @return <var>this</var>.
+   */
+  public FragmentExtractor setStart(Double start) { this.start = start; return this; }
+
+  /**
+   * End time of fragment.
+   * @see #getEnd()
+   * @see #setEnd(Double)
+   */
+  protected Double end;
+  /**
+   * Getter for {@link #end}.
+   * @return End time of fragment.
+   */
+  public Double getEnd() { return end; }
+  /**
+   * Setter for {@link #end}.
+   * @param end End time of fragment.
+   * @return <var>this</var>.
+   */
+  public FragmentExtractor setEnd(Double end) { this.end = end; return this; }
+
   // Methods:
    
   /**
    * Default constructor.
    */
-  public Resampler()
+  public FragmentExtractor()
   {
   } // end of constructor
 
@@ -84,16 +121,39 @@ public class Resampler
     if (sampleRate == null)
     {
       sampleRate = new Parameter(
-        "sampleRate", Integer.class, "Sample rate", "Sample rate in Hz", true);
+        "sampleRate", Integer.class, "Sample rate", "Sample rate in Hz", false);
       configuration.addParameter(sampleRate);
     }
     if (getSampleRate() != null)
     {
       sampleRate.setValue(getSampleRate());
     }
+    
+    Parameter start = configuration.get("start");
+    if (start == null)
+    {
+      start = new Parameter(
+        "start", Double.class, "Start", "Start time in seconds", true);
+      configuration.addParameter(start);
+    }
+    if (getStart() != null)
+    {
+      start.setValue(getStart());
+    }
+    
+    Parameter end = configuration.get("end");
+    if (end == null)
+    {
+      end = new Parameter(
+        "end", Double.class, "End", "End time in seconds", true);
+      configuration.addParameter(end);
+    }
+    if (getEnd() != null)
+    {
+      end.setValue(getEnd());
+    }
 
-    try { sampleRate.apply(this); }
-    catch(Exception exception) { throw new MediaException(exception); }
+    configuration.apply(this);
       
     return configuration;
   }
@@ -128,18 +188,20 @@ public class Resampler
     {
       AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(source);
       AudioFormat format = new AudioFormat(getSampleRate(), 16, 1, true, true);
-      final AudioInputStream stream = AudioSystem.getAudioInputStream(format, audioInputStream);
-	 
+      audioInputStream = AudioSystem.getAudioInputStream(format, audioInputStream);
+      final AudioInputStream stream
+        = new TruncatingAudioInputStream(audioInputStream, getStart(), getEnd());
+      
       MediaThread thread = new MediaThread(new Runnable() {
           public void run()
           {
             try
             {
               ((MediaThread)Thread.currentThread()).setPercentComplete(1);
-		     
+              
               // run the resampling
               AudioSystem.write(stream, AudioFileFormat.Type.WAVE, finalDestination);
-		     
+              
               ((MediaThread)Thread.currentThread()).setPercentComplete(100);
             }
             catch (Throwable t)
@@ -163,4 +225,4 @@ public class Resampler
       
   }
    
-} // end of class Resampler
+} // end of class FragmentExtractor
