@@ -60,6 +60,7 @@ import nzilbb.media.MediaException;
 import nzilbb.media.ffmpeg.FfmpegConverter;
 import nzilbb.media.ffmpeg.FfmpegCensor;
 import nzilbb.media.wav.Resampler;
+import nzilbb.media.wav.FragmentExtractor;
 
 /**
  * Graph store that uses a relational database as its back end.
@@ -1760,6 +1761,7 @@ public class SqlGraphStore
     try
     {
       Graph graph = new Graph();
+      graph.setMediaProvider(new StoreGraphMediaProvider(graph, this));
       Schema mainSchema = getSchema();
       graph.getSchema().setParticipantLayerId(mainSchema.getParticipantLayerId());
       graph.getSchema().setTurnLayerId(mainSchema.getTurnLayerId());
@@ -2928,6 +2930,7 @@ public class SqlGraphStore
 
       final Graph fragment = new Graph();
       fragment.setGraph(graph);
+      fragment.setMediaProvider(new StoreGraphMediaProvider(graph, this));
       fragment.put("@ag_id", graph.get("@ag_id")); 
       fragment.getSchema().setParticipantLayerId(schema.getParticipantLayerId());
       fragment.getSchema().setTurnLayerId(schema.getTurnLayerId());
@@ -6007,7 +6010,7 @@ public class SqlGraphStore
       {
         if (getBaseUrl() == null) // TODO check this isn't a security risk
         {
-          return file.toURI().toString();
+          return file.toURI().toString(); // TODO resampling?
         }
         else
         {
@@ -6034,16 +6037,38 @@ public class SqlGraphStore
       {
         if (getBaseUrl() == null) // TODO check this isn't a security risk
         {
-          // ParameterSet configuration = new ParameterSet();
-          // if (mimeTypeParameters.containsKey("samplerate"))
-          // {
-          //   configuration.addParameter(
-          //     new Parameter("sampleRate", Integer.parseInt(mimeTypeParameters.get("samplerate"))));
-          // }
-          // IMediaConverter resampler = new Resampler();
-          // resampler.configure(configuration);
-          return file.toURI().toString(); //
-            
+          FragmentExtractor extractor = new FragmentExtractor();
+          if (mimeTypeParameters.containsKey("samplerate"))
+          {
+            extractor.setSampleRate(
+              Integer.parseInt(mimeTypeParameters.get("samplerate")));
+          }
+          extractor.setStart(startOffset);
+          extractor.setEnd(endOffset);
+          try
+          {
+            File fragment = File.createTempFile(
+              "SqlGraphStore.saveMedia_",
+              Graph.FragmentId(id, startOffset, endOffset) + "." + IO.Extension(file));
+            fragment.deleteOnExit();
+            MediaThread thread = extractor.start(mimeType, file, mimeType, fragment);          
+            // wait for extractor to finish
+            thread.join();
+            if (thread.getLastError() == null)
+            {
+              return fragment.toURI().toString();
+            }
+            else
+            {
+              throw new StoreException(
+                "Could not extract " + file.getName() + " to " + fragment.getName(),
+                thread.getLastError());
+            }
+          }
+          catch(Exception exception)
+          {
+            throw new StoreException(exception);
+          }
         }
         else
         {
