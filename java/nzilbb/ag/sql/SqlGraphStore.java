@@ -2930,7 +2930,7 @@ public class SqlGraphStore
 
       final Graph fragment = new Graph();
       fragment.setGraph(graph);
-      fragment.setMediaProvider(new StoreGraphMediaProvider(graph, this));
+      fragment.setMediaProvider(new StoreGraphMediaProvider(fragment, this));
       fragment.put("@ag_id", graph.get("@ag_id")); 
       fragment.getSchema().setParticipantLayerId(schema.getParticipantLayerId());
       fragment.getSchema().setTurnLayerId(schema.getTurnLayerId());
@@ -5993,8 +5993,8 @@ public class SqlGraphStore
       int equals = mimeTypeParts[p].indexOf('=');
       if (equals >= 0)
       {
-        mimeTypeParameters.put(mimeTypeParts[p].substring(0, equals),
-                               mimeTypeParts[p].substring(equals+1));
+        mimeTypeParameters.put(mimeTypeParts[p].substring(0, equals).toLowerCase().trim(),
+                               mimeTypeParts[p].substring(equals+1).trim());
       } // '=' is present
     } // next parameter
     mimeType = mimeTypeParts[0];
