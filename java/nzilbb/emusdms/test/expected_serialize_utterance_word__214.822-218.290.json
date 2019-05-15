@@ -1,0 +1,348 @@
+{
+  "annotation": {
+    "name": "serialize_utterance_word__214.822-218.290",
+    "annotates": "serialize_utterance_word__214.822-218.290",
+    "sampleRate": 16000,
+    "levels": [
+      {
+        "name": "phone",
+        "type": "SEGMENT",
+        "items": [
+          {
+            "id": 2,
+            "sampleStart": 0,
+            "sampleDur": 6165,
+            "labels": [{
+              "name": "phone",
+              "value": "$"
+            }]
+          },
+          {
+            "id": 5,
+            "sampleStart": 6165,
+            "sampleDur": 1483,
+            "labels": [{
+              "name": "phone",
+              "value": ""
+            }]
+          },
+          {
+            "id": 6,
+            "sampleStart": 7648,
+            "sampleDur": 560,
+            "labels": [{
+              "name": "phone",
+              "value": "s"
+            }]
+          },
+          {
+            "id": 7,
+            "sampleStart": 8208,
+            "sampleDur": 1625,
+            "labels": [{
+              "name": "phone",
+              "value": "V"
+            }]
+          },
+          {
+            "id": 8,
+            "sampleStart": 9833,
+            "sampleDur": 1,
+            "labels": [{
+              "name": "phone",
+              "value": ""
+            }]
+          },
+          {
+            "id": 9,
+            "sampleStart": 9834,
+            "sampleDur": 2496,
+            "labels": [{
+              "name": "phone",
+              "value": "m"
+            }]
+          },
+          {
+            "id": 11,
+            "sampleStart": 12330,
+            "sampleDur": 6165,
+            "labels": [{
+              "name": "phone",
+              "value": "n"
+            }]
+          },
+          {
+            "id": 22,
+            "sampleStart": 0,
+            "sampleDur": 6165,
+            "labels": [{
+              "name": "phone",
+              "value": "j"
+            }]
+          },
+          {
+            "id": 23,
+            "sampleStart": 6165,
+            "sampleDur": 3082,
+            "labels": [{
+              "name": "phone",
+              "value": "8"
+            }]
+          },
+          {
+            "id": 25,
+            "sampleStart": 9247,
+            "sampleDur": 1,
+            "labels": [{
+              "name": "phone",
+              "value": ""
+            }]
+          },
+          {
+            "id": 26,
+            "sampleStart": 9248,
+            "sampleDur": 3082,
+            "labels": [{
+              "name": "phone",
+              "value": "j"
+            }]
+          },
+          {
+            "id": 27,
+            "sampleStart": 12330,
+            "sampleDur": 6165,
+            "labels": [{
+              "name": "phone",
+              "value": "8"
+            }]
+          },
+          {
+            "id": 29,
+            "sampleStart": 18495,
+            "sampleDur": 1,
+            "labels": [{
+              "name": "phone",
+              "value": ""
+            }]
+          },
+          {
+            "id": 30,
+            "sampleStart": 18496,
+            "sampleDur": 6165,
+            "labels": [{
+              "name": "phone",
+              "value": "j"
+            }]
+          },
+          {
+            "id": 31,
+            "sampleStart": 24661,
+            "sampleDur": 3082,
+            "labels": [{
+              "name": "phone",
+              "value": "8"
+            }]
+          }
+        ]
+      },
+      {
+        "name": "word",
+        "type": "SEGMENT",
+        "items": [
+          {
+            "id": 1,
+            "sampleStart": 0,
+            "sampleDur": 6165,
+            "labels": [{
+              "name": "word",
+              "value": "or"
+            }]
+          },
+          {
+            "id": 3,
+            "sampleStart": 6165,
+            "sampleDur": 1483,
+            "labels": [{
+              "name": "word",
+              "value": ""
+            }]
+          },
+          {
+            "id": 4,
+            "sampleStart": 7648,
+            "sampleDur": 4682,
+            "labels": [{
+              "name": "word",
+              "value": "some"
+            }]
+          },
+          {
+            "id": 10,
+            "sampleStart": 12330,
+            "sampleDur": 6165,
+            "labels": [{
+              "name": "word",
+              "value": "and"
+            }]
+          },
+          {
+            "id": 12,
+            "sampleStart": 18495,
+            "sampleDur": 1,
+            "labels": [{
+              "name": "word",
+              "value": ""
+            }]
+          },
+          {
+            "id": 13,
+            "sampleStart": 18496,
+            "sampleDur": 6165,
+            "labels": [{
+              "name": "word",
+              "value": "there's"
+            }]
+          },
+          {
+            "id": 14,
+            "sampleStart": 24661,
+            "sampleDur": 6165,
+            "labels": [{
+              "name": "word",
+              "value": "nothing"
+            }]
+          },
+          {
+            "id": 15,
+            "sampleStart": 30826,
+            "sampleDur": 6165,
+            "labels": [{
+              "name": "word",
+              "value": "much"
+            }]
+          },
+          {
+            "id": 16,
+            "sampleStart": 36991,
+            "sampleDur": 6165,
+            "labels": [{
+              "name": "word",
+              "value": "on"
+            }]
+          },
+          {
+            "id": 17,
+            "sampleStart": 43156,
+            "sampleDur": 1,
+            "labels": [{
+              "name": "word",
+              "value": ""
+            }]
+          },
+          {
+            "id": 18,
+            "sampleStart": 43157,
+            "sampleDur": 6165,
+            "labels": [{
+              "name": "word",
+              "value": "it"
+            }]
+          },
+          {
+            "id": 19,
+            "sampleStart": 49322,
+            "sampleDur": 6165,
+            "labels": [{
+              "name": "word",
+              "value": "or "
+            }]
+          },
+          {
+            "id": 21,
+            "sampleStart": 0,
+            "sampleDur": 9248,
+            "labels": [{
+              "name": "word",
+              "value": "yeah"
+            }]
+          },
+          {
+            "id": 24,
+            "sampleStart": 9248,
+            "sampleDur": 9248,
+            "labels": [{
+              "name": "word",
+              "value": "yeah"
+            }]
+          },
+          {
+            "id": 28,
+            "sampleStart": 18496,
+            "sampleDur": 9248,
+            "labels": [{
+              "name": "word",
+              "value": "yeah --"
+            }]
+          },
+          {
+            "id": 32,
+            "sampleStart": 27744,
+            "sampleDur": 9247,
+            "labels": [{
+              "name": "word",
+              "value": "well"
+            }]
+          },
+          {
+            "id": 33,
+            "sampleStart": 36991,
+            "sampleDur": 9248,
+            "labels": [{
+              "name": "word",
+              "value": "that's"
+            }]
+          },
+          {
+            "id": 34,
+            "sampleStart": 46239,
+            "sampleDur": 9248,
+            "labels": [{
+              "name": "word",
+              "value": "right"
+            }]
+          }
+        ]
+      },
+      {
+        "name": "utterance",
+        "type": "SEGMENT",
+        "items": [
+          {
+            "id": 0,
+            "sampleStart": 0,
+            "sampleDur": 55487,
+            "labels": [{
+              "name": "utterance",
+              "value": "participant"
+            }]
+          },
+          {
+            "id": 20,
+            "sampleStart": 0,
+            "sampleDur": 55487,
+            "labels": [{
+              "name": "utterance",
+              "value": "interviewer"
+            }]
+          }
+        ]
+      }
+    ],
+    "links": []
+  },
+  "ssffFiles": [],
+  "mediaFile": {
+    "encoding": "BASE64",
+    "data": "UklGRsYCAABXQVZFZm10IBAAAAABAAEAgD4AAAB9AAACABAATElTVBoAAABJTkZPSVNGVA4AAABMYXZmNTguMjAuMTAwAGRhdGGAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+  }
+}

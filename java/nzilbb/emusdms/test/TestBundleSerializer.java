@@ -151,12 +151,12 @@ public class TestBundleSerializer
     Graph[] graphs = json.deserialize();
 
     // extract fragment
-    double fragmentFrom = 211.837;
-    double fragmentTo = 214.822; // exactly on the offset of the last anchor
+    double fragmentFrom = 214.822;
+    double fragmentTo = 218.29; // exactly on the offset of the last anchor
     String [] layerIds = { "utterance", "word", "phone" };
     Graph fragment = graphs[0].getFragment(fragmentFrom, fragmentTo, layerIds);
     fragment.shiftAnchors(-fragmentFrom);
-    assertEquals("serialize_utterance_word__211.837-214.822", fragment.getId());
+    assertEquals("serialize_utterance_word__214.822-218.290", fragment.getId());
     fragment.setMediaProvider(new IGraphMediaProvider() {
         public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
         {
@@ -216,10 +216,10 @@ public class TestBundleSerializer
     // serialize
     NamedStream[] streams = serializer.serialize(fragments);
     streams[0].save(dir);
-    File actual = new File(dir, "serialize_utterance_word__211.837-214.822.json");
+    File actual = new File(dir, "serialize_utterance_word__214.822-218.290.json");
     
     // test using diff
-    String differences = diff(new File(dir, "expected_serialize_utterance_word__212.4-216.36333.json"),
+    String differences = diff(new File(dir, "expected_serialize_utterance_word__214.822-218.290.json"),
                               actual);
     if (differences != null)
     {

@@ -444,6 +444,9 @@ public class BundleSerializer
   {
     SerializationException errors = null;
 
+    // offset times by how far through the graph is
+    final double graphOffset = graph.getStart().getOffset();
+
     final Schema schema = graph.getSchema();
     // traverse the graph depth first
     LayerTraversal<HashMap<String,JSONObject>> traversal
@@ -479,9 +482,33 @@ public class BundleSerializer
                   assert annotation.getEnd().getOffset() != null : "annotation.getEnd().getOffset() != null - " + annotation.getId();
                   assert annotation.getDuration() != null : "annotation.getDuration() != null - " + annotation.getId();
                   assert sampleRate != null : "sampleRate != null";
+
+                  // SEGMENT levels cannot have pauses between intervals, so insert blank labels before pauses
+                  double offset = annotation.getStart().getOffset() - graphOffset;
+                  long offsetSamples = (long)(offset * sampleRate);
+                  if (items.length() > 0)
+                  {
+                    // get last item
+                    JSONObject previous = (JSONObject)items.get(items.length()-1);
+                    // and get the end time in samples
+                    long endSamples = previous.getLong("sampleStart")
+                      + previous.getLong("sampleDur");
+                    if (offsetSamples > endSamples)
+                    { // there is a gap
+                      // insert a blank item
+                      JSONObject item = new JSONObject()
+                        .put("id", itemId++)
+                        .put("sampleStart", endSamples)
+                        .put("sampleDur", offsetSamples - endSamples)
+                        .put("labels", new JSONArray()
+                             .put(new JSONObject().put("name", layer.getId()).put("value", "")));
+                      items.put(item);
+                    } // there is a gap
+                  } // there is a previous annotation
+                  
                   JSONObject item = new JSONObject()
                     .put("id", itemId++)
-                    .put("sampleStart", (long)(annotation.getStart().getOffset() * sampleRate))
+                    .put("sampleStart", offsetSamples)
                     .put("sampleDur", (long)(annotation.getDuration() * sampleRate))
                     .put("labels", labels);
                   // make sure child tags can find the labels, as they'll need to add some
@@ -537,6 +564,8 @@ public class BundleSerializer
         {
           // encode it
           String base64EncodedContent = IO.Base64Encode(mediaUrl);
+
+          // TODO delete the file if the mediaUrl is a file:// URL
           
           // add it to the bundle
           data.put("mediaFile", new JSONObject()
