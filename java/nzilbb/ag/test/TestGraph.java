@@ -41,6 +41,8 @@ public class TestGraph
       g.setId("my graph");
       assertEquals("my graph", g.getId());
       assertEquals("my graph", g.getLabel());
+      assertEquals("graph's graph is itself", g, g.getGraph());
+      assertEquals("source graph is itself", g, g.sourceGraph());
    }
 
    @Test public void extendedAttributes() 
@@ -1459,6 +1461,7 @@ public class TestGraph
       Graph f = g.getFragment(utterance1, layers.toArray(new String[0]));
       assertEquals("my graph__0.000-3.000", f.getId());
       assertEquals("fragment's graph is itself", f, f.getGraph());
+      assertEquals("original graph is accessible", g, f.sourceGraph());
       assertTrue(f.isFragment());
 
       // check anchors
@@ -1630,6 +1633,7 @@ public class TestGraph
       Graph f = g.getFragment(utterance1, turn1, layers.toArray(new String[0]));
       assertEquals("my graph__0.000-3.000", f.getId());
       assertEquals("fragment's graph is itself", f, f.getGraph());
+      assertEquals("original graph is accessible", g, f.sourceGraph());
       assertTrue(f.isFragment());
 
       // check anchors

@@ -1460,14 +1460,23 @@ public class Graph
   }
 
   /**
-   * Getter for {@link #graph}: The annotation's annotation graph.
-   * @return The annotation's annotation graph.
+   * Getter for {@link #graph}, which always returns this.
+   * @return this.
    */
   public Graph getGraph() 
   { 
     return this;
   }
 
+  /**
+   * Returns the graph which this is a fragment of.
+   * @return The fragment's original graph, or this, if this graph is not a fragment.
+   */
+  public Graph sourceGraph() 
+  { 
+    if (!isFragment()) return this;
+    return graph;
+  }
 
   // TrackedMap methods
 
