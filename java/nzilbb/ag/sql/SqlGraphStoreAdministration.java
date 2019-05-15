@@ -155,6 +155,22 @@ public class SqlGraphStoreAdministration
    /**
     * Constructor with connection.
     * @param baseUrl URL prefix for file access.
+    * @param connection An opened database connection.
+    * @param user ID of the user
+    * @throws SQLException If an error occurs during connection or loading of configuraion.
+    * @throws PermissionException If the store user doesn't have administrator privileges
+    */
+   public SqlGraphStoreAdministration(String baseUrl, Connection connection, String user)
+      throws SQLException, PermissionException
+   {
+      super(baseUrl, connection, user);
+      // if (getUser() != null && !getUserRoles().contains("admin")) throw new PermissionException();
+      loadSerializers();
+   } // end of constructor
+
+   /**
+    * Constructor with connection.
+    * @param baseUrl URL prefix for file access.
     * @param files Root directory for file structure.
     * @param connection An opened database connection.
     * @param user ID of the user
