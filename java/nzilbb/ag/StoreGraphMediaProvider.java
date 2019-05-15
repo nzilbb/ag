@@ -130,7 +130,7 @@ public class StoreGraphMediaProvider
     {
       if (graph.isFragment())
       {
-        return store.getMedia(graph.getGraph().getId(), trackSuffix, mimeType,
+        return store.getMedia(graph.sourceGraph().getId(), trackSuffix, mimeType,
                               graph.getStart().getOffset(), graph.getEnd().getOffset());
       }
       else
