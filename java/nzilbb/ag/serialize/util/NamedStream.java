@@ -34,122 +34,122 @@ import nzilbb.util.IO;
  */
 public class NamedStream
 {
-   // Attributes:
+  // Attributes:
 
-   /**
-    * The input stream
-    * @see #getStream()
-    * @see #setStream(InputStream)
-    */
-   protected InputStream inputStream;
-   /**
-    * Getter for {@link #inputStream}: The input stream
-    * @return The input stream
-    */
-   public InputStream getStream() { return inputStream; }
-   /**
-    * Setter for {@link #inputStream}: The input stream
-    * @param isNewStream The input stream
-    */
-   public void setStream(InputStream isNewStream) { inputStream = isNewStream; }
+  /**
+   * The input stream
+   * @see #getStream()
+   * @see #setStream(InputStream)
+   */
+  protected InputStream inputStream;
+  /**
+   * Getter for {@link #inputStream}: The input stream
+   * @return The input stream
+   */
+  public InputStream getStream() { return inputStream; }
+  /**
+   * Setter for {@link #inputStream}: The input stream
+   * @param isNewStream The input stream
+   */
+  public NamedStream setStream(InputStream isNewStream) { inputStream = isNewStream; return this; }
 
-   /**
-    * The name of the stream
-    * @see #getName()
-    * @see #setName(String)
-    */
-   protected String name;
-   /**
-    * Getter for {@link #name}: The name of the stream
-    * @return The name of the stream
-    */
-   public String getName() { return name; }
-   /**
-    * Setter for {@link #name}: The name of the stream
-    * @param sNewName The name of the stream
-    */
-   public void setName(String sNewName) { name = sNewName; }
-
-   
-   /**
-    * Optional MIME Type for the stream.
-    * @see #getMimeType()
-    * @see #setMimeType(String)
-    */
-   protected String mimeType;
-   /**
-    * Getter for {@link #mimeType}: Optional MIME Type for the stream.
-    * @return Optional MIME Type for the stream.
-    */
-   public String getMimeType() { return mimeType; }
-   /**
-    * Setter for {@link #mimeType}: Optional MIME Type for the stream.
-    * @param sNewMimeType Optional MIME Type for the stream.
-    */
-   public void setMimeType(String sNewMimeType) { mimeType = sNewMimeType; }
-
-      
-   // Methods:
-      
-   /**
-    * Default constructor.
-    */
-   public NamedStream()
-   {
-   } // end of constructor
-
-   /**
-    * Constructor from attributes.
-    * @param stream Input stream.
-    * @param name Name for the stream.
-    */
-   public NamedStream(InputStream stream, String name)
-   {
-      setStream(stream);
-      setName(name);
-   } // end of constructor
-
-   /**
-    * Constructor
-    * @param stream Input stream.
-    * @param name Name for the stream.
-    * @param mimeType MIME type of the data.
-    */
-   public NamedStream(InputStream stream, String name, String mimeType)
-   {
-      setStream(stream);
-      setName(name);
-      setMimeType(mimeType);
-   } // end of constructor
-
-   /**
-    * Constructor from a file. The {@link #inputStream} will be set to a FileInputStream for the file, and {@link #name} will be set to the file's name.
-    * @param file File for the stream.
-    * @throws java.io.FileNotFoundException If <var>file</var> doesn't exist.
-    */
-   public NamedStream(File file)
-      throws java.io.FileNotFoundException
-   {
-      setStream(new FileInputStream(file));
-      setName(file.getName());
-   } // end of constructor
+  /**
+   * The name of the stream
+   * @see #getName()
+   * @see #setName(String)
+   */
+  protected String name;
+  /**
+   * Getter for {@link #name}: The name of the stream
+   * @return The name of the stream
+   */
+  public String getName() { return name; }
+  /**
+   * Setter for {@link #name}: The name of the stream
+   * @param sNewName The name of the stream
+   */
+  public NamedStream setName(String sNewName) { name = sNewName; return this; }
 
    
-   /**
-    * Saves the named stream as a file into the given directory.
-    * @param directory Directory to save the file into.
-    * @return The number of bytes saved.
-    * @throws IOException On IO error.
-    */
-   public long save(File directory)
+  /**
+   * Optional MIME Type for the stream.
+   * @see #getMimeType()
+   * @see #setMimeType(String)
+   */
+  protected String mimeType;
+  /**
+   * Getter for {@link #mimeType}: Optional MIME Type for the stream.
+   * @return Optional MIME Type for the stream.
+   */
+  public String getMimeType() { return mimeType; }
+  /**
+   * Setter for {@link #mimeType}: Optional MIME Type for the stream.
+   * @param sNewMimeType Optional MIME Type for the stream.
+   */
+  public NamedStream setMimeType(String sNewMimeType) { mimeType = sNewMimeType; return this; }
+
+      
+  // Methods:
+      
+  /**
+   * Default constructor.
+   */
+  public NamedStream()
+  {
+  } // end of constructor
+
+  /**
+   * Constructor from attributes.
+   * @param stream Input stream.
+   * @param name Name for the stream.
+   */
+  public NamedStream(InputStream stream, String name)
+  {
+    setStream(stream);
+    setName(name);
+  } // end of constructor
+
+  /**
+   * Constructor
+   * @param stream Input stream.
+   * @param name Name for the stream.
+   * @param mimeType MIME type of the data.
+   */
+  public NamedStream(InputStream stream, String name, String mimeType)
+  {
+    setStream(stream);
+    setName(name);
+    setMimeType(mimeType);
+  } // end of constructor
+
+  /**
+   * Constructor from a file. The {@link #inputStream} will be set to a FileInputStream for the file, and {@link #name} will be set to the file's name.
+   * @param file File for the stream.
+   * @throws java.io.FileNotFoundException If <var>file</var> doesn't exist.
+   */
+  public NamedStream(File file)
+    throws java.io.FileNotFoundException
+  {
+    setStream(new FileInputStream(file));
+    setName(file.getName());
+  } // end of constructor
+
+   
+  /**
+   * Saves the named stream as a file into the given directory.
+   * @param directory Directory to save the file into.
+   * @return The number of bytes saved.
+   * @throws IOException On IO error.
+   */
+  public long save(File directory)
     throws IOException
-   {
-      if (directory == null) throw new IOException("Directory is null.");
-      if (!directory.exists()) throw new IOException("Does not exist: " + directory.getPath());
-      if (!directory.isDirectory()) throw new IOException("Not a directory: " + directory.getPath());
-      File f = new File(directory, getName());
-      FileOutputStream out = new FileOutputStream(f);
-      return IO.Pump(getStream(), out);      
-   } // end of save()
+  {
+    if (directory == null) throw new IOException("Directory is null.");
+    if (!directory.exists()) throw new IOException("Does not exist: " + directory.getPath());
+    if (!directory.isDirectory()) throw new IOException("Not a directory: " + directory.getPath());
+    File f = new File(directory, getName());
+    FileOutputStream out = new FileOutputStream(f);
+    return IO.Pump(getStream(), out);      
+  } // end of save()
 
 } // end of class NamedStream
