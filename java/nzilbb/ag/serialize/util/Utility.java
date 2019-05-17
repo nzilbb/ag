@@ -24,6 +24,7 @@ package nzilbb.ag.serialize.util;
 import java.util.LinkedHashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Vector;
 import nzilbb.ag.Graph;
 import nzilbb.ag.Layer;
 import nzilbb.ag.serialize.*;
@@ -61,7 +62,6 @@ public class Utility
     streams[0] = stream;
     return streams;
   } // end of OneNamedStreamArray()
-
    
   /**
    * Finds a single stream of the given type in the given list of streams.
@@ -82,6 +82,29 @@ public class Utility
     } // next stream
     return null;
   } // end of findSingleStream()
+
+  /**
+   * Finds all streams of the given type in the given list of streams.
+   * @param streams The streams to search.
+   * @param nameSuffix The file extension to check the name for.
+   * @param mimeType The MIME type to match.
+   * @return A possibly empty array of streams whose {@link NamedStream#name} ends with
+   * <var>nameSuffix</var> or whose {@link NamedStream#mimeType} is the same as
+   * <var>mimeType</var>. 
+   */
+  public static NamedStream[] FindStreams(NamedStream[] streams, String nameSuffix, String mimeType)
+  {
+    Vector<NamedStream> matching = new Vector<NamedStream>();
+    for (NamedStream stream : streams)
+    {	 
+      if (stream.getName().toLowerCase().endsWith(nameSuffix) 
+          || (mimeType != null && mimeType.equals(stream.getMimeType())))
+      {
+        matching.add(stream);
+      }
+    } // next stream
+    return matching.toArray(new NamedStream[0]);
+  } // end of findStreams()
 
   /**
    * Tries to find a layer in the given map, using an ordered list of possible IDs. Spaces, 
