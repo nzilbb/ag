@@ -36,76 +36,76 @@ import nzilbb.ag.serialize.*;
 public class Utility
 {
    
-   /**
-    * Creates an array of {@link Graph}s from one graph. Handy for calling
-    * {@link ISerializer#serialize(Graph[])} when you have only one graph.
-    * @param graph The graph.
-    * @return A graph with one element.
-    */
-   public static Graph[] OneGraphArray(Graph graph)
-   {
-      Graph[] graphs = new Graph[1];
-      graphs[0] = graph;
-      return graphs;
-   } // end of OneGraphArray()
+  /**
+   * Creates an array of {@link Graph}s from one graph. Handy for calling
+   * {@link ISerializer#serialize(Graph[])} when you have only one graph.
+   * @param graph The graph.
+   * @return A graph with one element.
+   */
+  public static Graph[] OneGraphArray(Graph graph)
+  {
+    Graph[] graphs = new Graph[1];
+    graphs[0] = graph;
+    return graphs;
+  } // end of OneGraphArray()
 
-   /**
-    * Creates an array of {@link NamedStream}s from one stream. Handy for calling
-    * {@link IDeserializer#load(NamedStream[],Schema)} when you have only one graph.
-    * @param stream The named stream.
-    * @return A graph with one element.
-    */
-   public static NamedStream[] OneNamedStreamArray(NamedStream stream)
-   {
-      NamedStream[] streams = new NamedStream[1];
-      streams[0] = stream;
-      return streams;
-   } // end of OneNamedStreamArray()
+  /**
+   * Creates an array of {@link NamedStream}s from one stream. Handy for calling
+   * {@link IDeserializer#load(NamedStream[],Schema)} when you have only one graph.
+   * @param stream The named stream.
+   * @return A graph with one element.
+   */
+  public static NamedStream[] OneNamedStreamArray(NamedStream stream)
+  {
+    NamedStream[] streams = new NamedStream[1];
+    streams[0] = stream;
+    return streams;
+  } // end of OneNamedStreamArray()
 
    
-   /**
-    * Finds a single stream of the given type in the given list of streams.
-    * @param streams The streams to search.
-    * @param nameSuffix The file extension to check the name for.
-    * @param mimeType The MIME type to match.
-    * @return The first stream whose {@link NamedStream#name} ends with <var>nameSuffix</var> or whose {@link NamedStream#mimeType} is the same as <var>mimeType</var>, or null if no such stream was found.
-    */
-   public static NamedStream FindSingleStream(NamedStream[] streams, String nameSuffix, String mimeType)
-   {      
-      for (NamedStream stream : streams)
-      {	 
-	 if (stream.getName().toLowerCase().endsWith(nameSuffix) 
-	     || (mimeType != null && mimeType.equals(stream.getMimeType())))
-	 {
-	    return stream;
-	 }
-      } // next stream
-      return null;
-   } // end of findSingleStream()
+  /**
+   * Finds a single stream of the given type in the given list of streams.
+   * @param streams The streams to search.
+   * @param nameSuffix The file extension to check the name for.
+   * @param mimeType The MIME type to match.
+   * @return The first stream whose {@link NamedStream#name} ends with <var>nameSuffix</var> or whose {@link NamedStream#mimeType} is the same as <var>mimeType</var>, or null if no such stream was found.
+   */
+  public static NamedStream FindSingleStream(NamedStream[] streams, String nameSuffix, String mimeType)
+  {      
+    for (NamedStream stream : streams)
+    {	 
+      if (stream.getName().toLowerCase().endsWith(nameSuffix) 
+          || (mimeType != null && mimeType.equals(stream.getMimeType())))
+      {
+        return stream;
+      }
+    } // next stream
+    return null;
+  } // end of findSingleStream()
 
-   /**
-    * Tries to find a layer in the given map, using an ordered list of possible IDs. Spaces, 
-    * underscores, and case are ignored when looking for matching layer IDs.
-    * @param possibleLayers Collection of layers from which a possibility can be selected.
-    * @param possibleIds Guesses at possible layer IDs.
-    * @return The first matching layer, or null if none matched.
-    */
-   public static Layer FindLayerById(LinkedHashMap<String,Layer> possibleLayers, List<String> possibleIds)
-   {
-      LinkedHashMap<String,Layer> possibleLayersSimplifiedIds = new LinkedHashMap<String,Layer>();
-      for (String id : possibleLayers.keySet())
+  /**
+   * Tries to find a layer in the given map, using an ordered list of possible IDs. Spaces, 
+   * underscores, and case are ignored when looking for matching layer IDs.
+   * @param possibleLayers Collection of layers from which a possibility can be selected.
+   * @param possibleIds Guesses at possible layer IDs.
+   * @return The first matching layer, or null if none matched.
+   */
+  public static Layer FindLayerById(LinkedHashMap<String,Layer> possibleLayers, List<String> possibleIds)
+  {
+    LinkedHashMap<String,Layer> possibleLayersSimplifiedIds = new LinkedHashMap<String,Layer>();
+    for (String id : possibleLayers.keySet())
+    {
+      possibleLayersSimplifiedIds.put(id.toLowerCase().replaceAll("[^a-zA-Z0-9]",""), possibleLayers.get(id));
+    }
+    for (String id : possibleIds)
+    {
+      if (possibleLayersSimplifiedIds.containsKey(id.toLowerCase().replaceAll("[^a-zA-Z0-9]","")))
       {
-	 possibleLayersSimplifiedIds.put(id.toLowerCase().replaceAll("[^a-zA-Z0-9]",""), possibleLayers.get(id));
+        return possibleLayersSimplifiedIds.get(id.toLowerCase().replaceAll("[^a-zA-Z0-9]",""));
       }
-      for (String id : possibleIds)
-      {
-	 if (possibleLayersSimplifiedIds.containsKey(id.toLowerCase().replaceAll("[^a-zA-Z0-9]","")))
-	 {
-	    return possibleLayersSimplifiedIds.get(id.toLowerCase().replaceAll("[^a-zA-Z0-9]",""));
-	 }
-      }
-      return null;
-   } // end of findLayerById()
+    }
+    return null;
+  } // end of findLayerById()
 
 
 } // end of class Utility
