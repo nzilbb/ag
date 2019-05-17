@@ -52,7 +52,7 @@ public class TextGridSerialization
   // Attributes:     
   protected Vector<String> warnings;
   /**
-   * Returns any warnings that may have arisen during the last execution of {@link #deserialize()}.
+   * Returns any warnings that may have arisen during the last execution of {@link #deserialize()} or  {@link #serialize(Graph[])}.
    * <p>{@link ISerializer} and {@link IDeserializer} method.
    * @return A possibly empty list of warnings.
    */
