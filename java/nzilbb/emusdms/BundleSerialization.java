@@ -33,6 +33,7 @@ import java.io.FileOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.IOException;
 
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
@@ -50,8 +51,8 @@ import org.json.*;
  * Serializer that produces JSON-encoded 'bundles' for consumption by the EMU-webapp.
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class BundleSerializer
-  implements ISerializer, ISchemaSerializer
+public class BundleSerialization
+  implements ISerializer, ISchemaSerializer, IDeserializer
 {
   // Attributes:
   
@@ -72,7 +73,7 @@ public class BundleSerializer
    * @param corpusName Name of the corpus.
    * @return <var>this</var>.
    */
-  public BundleSerializer setCorpusName(String corpusName) { this.corpusName = corpusName; return this; }
+  public BundleSerialization setCorpusName(String corpusName) { this.corpusName = corpusName; return this; }
 
   /**
    * UUID of the schema.
@@ -91,7 +92,7 @@ public class BundleSerializer
    * @param uuid UUID of the schema.
    * @return <var>this</var>.
    */
-  public BundleSerializer setUuid(String uuid) { this.uuid = uuid; return this; }
+  public BundleSerialization setUuid(String uuid) { this.uuid = uuid; return this; }
 
   /**
    * Whether to show perspectives sidebar.
@@ -110,7 +111,7 @@ public class BundleSerializer
    * @param showPerspectivesSidebar Whether to show perspectives sidebar.
    * @return <var>this</var>.
    */
-  public BundleSerializer setShowPerspectivesSidebar(Boolean showPerspectivesSidebar) { this.showPerspectivesSidebar = showPerspectivesSidebar; return this; }
+  public BundleSerialization setShowPerspectivesSidebar(Boolean showPerspectivesSidebar) { this.showPerspectivesSidebar = showPerspectivesSidebar; return this; }
 
   /**
    * Whether to allow playback.
@@ -129,7 +130,7 @@ public class BundleSerializer
    * @param playback Whether to allow playback.
    * @return <var>this</var>.
    */
-  public BundleSerializer setPlayback(Boolean playback) { this.playback = playback; return this; }
+  public BundleSerialization setPlayback(Boolean playback) { this.playback = playback; return this; }
 
   /**
    * Whether to show the correction tool.
@@ -148,7 +149,7 @@ public class BundleSerializer
    * @param correctionTool Whether to show the correction tool.
    * @return <var>this</var>.
    */
-  public BundleSerializer setCorrectionTool(Boolean correctionTool) { this.correctionTool = correctionTool; return this; }
+  public BundleSerialization setCorrectionTool(Boolean correctionTool) { this.correctionTool = correctionTool; return this; }
 
   /**
    * Whether to allow editing of the item size.
@@ -167,7 +168,7 @@ public class BundleSerializer
    * @param editItemSize Whether to allow editing of the item size.
    * @return <var>this</var>.
    */
-  public BundleSerializer setEditItemSize(Boolean editItemSize) { this.editItemSize = editItemSize; return this; }
+  public BundleSerialization setEditItemSize(Boolean editItemSize) { this.editItemSize = editItemSize; return this; }
 
   /**
    * Whether to use large text input field.
@@ -186,7 +187,7 @@ public class BundleSerializer
    * @param useLargeTextInputField Whether to use large text input field.
    * @return <var>this</var>.
    */
-  public BundleSerializer setUseLargeTextInputField(Boolean useLargeTextInputField) { this.useLargeTextInputField = useLargeTextInputField; return this; }
+  public BundleSerialization setUseLargeTextInputField(Boolean useLargeTextInputField) { this.useLargeTextInputField = useLargeTextInputField; return this; }
 
   /**
    * Whether to allow saving of bundles.
@@ -205,7 +206,7 @@ public class BundleSerializer
    * @param saveBundle Whether to allow saving of bundles.
    * @return <var>this</var>.
    */
-  public BundleSerializer setSaveBundle(Boolean saveBundle) { this.saveBundle = saveBundle; return this; }
+  public BundleSerialization setSaveBundle(Boolean saveBundle) { this.saveBundle = saveBundle; return this; }
 
   /**
    * Whether to show hierarchy.
@@ -224,7 +225,7 @@ public class BundleSerializer
    * @param showHierarchy Whether to show hierarchy.
    * @return <var>this</var>.
    */
-  public BundleSerializer setShowHierarchy(Boolean showHierarchy) { this.showHierarchy = showHierarchy; return this; }
+  public BundleSerialization setShowHierarchy(Boolean showHierarchy) { this.showHierarchy = showHierarchy; return this; }
 
   /**
    * How much to indent JSON-encoded lines, for each level, or 0 for JSON all on one line.
@@ -245,7 +246,7 @@ public class BundleSerializer
    * @param newJsonIndentFactor How much to indent JSON-encoded lines, for each level, or 0 for
    * JSON all on one line. 
    */
-  public BundleSerializer setJsonIndentFactor(int newJsonIndentFactor) { jsonIndentFactor = newJsonIndentFactor; return this; }
+  public BundleSerialization setJsonIndentFactor(int newJsonIndentFactor) { jsonIndentFactor = newJsonIndentFactor; return this; }
   
   /**
    * Sample rate for audio in Hz. Default is 16000.
@@ -264,14 +265,33 @@ public class BundleSerializer
    * @param sampleRate Sample rate for audio in Hz.
    * @return <var>this</var>.
    */
-  public BundleSerializer setSampleRate(Integer sampleRate) { this.sampleRate = sampleRate; return this; }
+  public BundleSerialization setSampleRate(Integer sampleRate) { this.sampleRate = sampleRate; return this; }
+
+
+  /**
+   * The last schema passed in.
+   * @see #getSchema()
+   * @see #setSchema(Schema)
+   */
+  protected Schema schema;
+  /**
+   * Getter for {@link #schema}.
+   * @return The last schema passed in.
+   */
+  public Schema getSchema() { return schema; }
+  /**
+   * Setter for {@link #schema}.
+   * @param schema The last schema passed in.
+   * @return <var>this</var>.
+   */
+  public BundleSerialization setSchema(Schema schema) { this.schema = schema; return this; }
 
   // Methods:
   
- /**
+  /**
    * Default constructor.
    */
-  public BundleSerializer()
+  public BundleSerialization()
   {
   } // end of constructor
 
@@ -446,6 +466,7 @@ public class BundleSerializer
 
     // offset times by how far through the graph is
     final double graphOffset = graph.getStart().getOffset();
+    final TreeSet<String> tagLayersWithMultipleValues = new TreeSet<String>();
 
     final Schema schema = graph.getSchema();
     // traverse the graph depth first
@@ -534,6 +555,10 @@ public class BundleSerializer
                       } // found the nearest aligned ancestor
                     } // next ancestor
                   } // ordinal == 1
+                  else
+                  {
+                    tagLayersWithMultipleValues.add(annotation.getLayerId());
+                  }
                 } // not aligned                
               } // switch (layer.getAlignment())
             } // a layer below turn
@@ -544,6 +569,14 @@ public class BundleSerializer
             annotation.remove("@labels");
           } // end of post()
         };
+
+    if (tagLayersWithMultipleValues.size() > 0)
+    {
+      warnings.add("Tag layer"
+                   +(tagLayersWithMultipleValues.size()==1?"":"s")
+                   +" with multiple values; only first value used: "
+                   + tagLayersWithMultipleValues);
+    }
     
     JSONArray levels = new JSONArray();
     for (JSONObject level : traversal.getResult().values()) levels.put(level);
@@ -609,7 +642,7 @@ public class BundleSerializer
     }      
   }
 
-  // ISerializer methods
+  // ISerializer and IDeserializer methods
   
   /**
    * Returns the deserializer's descriptor
@@ -618,7 +651,8 @@ public class BundleSerializer
   public SerializationDescriptor getDescriptor()
   {
     return new SerializationDescriptor(
-      "EMU-SDMS Bundle", "0.01", "application/emusdms+json", ".json", "20190514.1428", getClass().getResource("icon.png"));
+      "EMU-SDMS Bundle", "0.02", "application/emusdms+json", ".json", "20190516.1519",
+      getClass().getResource("icon.png"));
   }
   
   /**
@@ -639,12 +673,27 @@ public class BundleSerializer
    */
   public ParameterSet configure(ParameterSet configuration, Schema schema)
   {
+    setSchema(schema);
     // add any parameters that are missing
     configuration.addParameters(this);    
     // set any values that have been passed in
     configuration.apply(this);
     return configuration;
   }
+
+  /** Warnings */
+  protected Vector<String> warnings = new Vector<String>();
+  /**
+   * Returns any warnings that may have arisen during the last execution of {@link #serialize(Graph[])}.
+   * @return A possibly empty list of warnings.
+   */
+  public String[] getWarnings()
+  {
+    return warnings.toArray(new String[0]);
+  }
+
+
+  // ISerializer methods
   
   /**
    * Determines which layers, if any, must be present in the graph that will be serialized.
@@ -672,6 +721,7 @@ public class BundleSerializer
   public NamedStream[] serialize(Graph[] graphs) 
       throws SerializerNotConfiguredException, SerializationException
   {
+    warnings = new Vector<String>();
     Vector<NamedStream> streams = new Vector<NamedStream>();
     for (Graph graph : graphs)
     {
@@ -680,15 +730,6 @@ public class BundleSerializer
     return streams.toArray(new NamedStream[0]);     
   }
   
-  /**
-   * Returns any warnings that may have arisen during the last execution of {@link #serialize(Graph[])}.
-   * @return A possibly empty list of warnings.
-   */
-  public String[] getWarnings()
-  {
-    return new String[0];
-  }
-
   // ISchemaSerializer methods
 
   /**
@@ -705,6 +746,7 @@ public class BundleSerializer
   public NamedStream[] serializeSchema(Schema schema, List<String> layerIds) 
     throws SerializerNotConfiguredException, SerializationException
   {
+    setSchema(schema);
     SerializationException errors = null;
 
     if (errors != null) throw errors;
@@ -725,8 +767,71 @@ public class BundleSerializer
       errors.initCause(exception);
       errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
       throw errors;
-    }      
+    }
+  }
+
+  // IDeserializer methods
+  /**
+   * Loads the serialized form of the graph, using the given set of named streams.
+   * <p>{@link IDeserializer} method.
+   * @param streams A list of named streams that contain all the
+   *  transcription/annotation data required, and possibly (a) stream(s) for the media annotated.
+   * @param schema The layer schema, definining layers and the way they interrelate.
+   * @return A list of parameters that require setting before {@link IDeserializer#deserialize()}
+   * can be invoked. This may be an empty list, and may include parameters with the value already
+   * set to a workable default. If there are parameters, and user interaction is possible, then
+   * the user may be presented with an interface for setting/confirming these parameters, before
+   * they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
+   * @throws SerializationException If the graph could not be loaded.
+   * @throws IOException On IO error.
+   */
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public ParameterSet load(NamedStream[] streams, Schema schema) throws SerializationException, IOException
+  {
+    setSchema(schema);
+    warnings = new Vector<String>();
+    NamedStream[] jsonStreams = Utility.FindStreams(streams, ".json", "application/emusdms+json");
+    if (jsonStreams.length == 0)
+    {
+      throw new SerializationException("No EMU-SDMS bundle streams found");
+    }
+
+    // TODO parse the JSON of all streams
+
+    // TODO allow mapping of levels and labels to layers
+
+    throw new SerializationException("TODO not implemented");
     
   }
 
-} // end of class BundleSerializer
+  /**
+   * Sets parameters for a given deserialization operation, after loading the serialized form of the graph. This might include mappings from format-specific objects like tiers to graph layers, etc.
+   * <p>{@link IDeserializer} method.
+   * @param parameters The configuration for a given deserialization operation.
+   * @throws SerializationParametersMissingException If not all required parameters have a value.
+   */
+  public void setParameters(ParameterSet parameters) throws SerializationParametersMissingException // TODO
+  {
+  }
+
+  /**
+   * Deserializes the serialized data, generating one or more {@link Graph}s.
+   * <p>Many data formats will only yield one graph (e.g. Transcriber
+   * transcript or Praat textgrid), however there are formats that
+   * are capable of storing multiple transcripts in the same file
+   * (e.g. AGTK, Transana XML export), which is why this method
+   * returns a list.
+   * <p>{@link IDeserializer} method.
+   * @return A list of valid (if incomplete) {@link Graph}s. 
+   * @throws SerializerNotConfiguredException if the object has not been configured.
+   * @throws SerializationParametersMissingException if the parameters for this particular graph have not been set.
+   * @throws SerializationException if errors occur during deserialization.
+   */
+  public Graph[] deserialize() 
+    throws SerializerNotConfiguredException, SerializationParametersMissingException, SerializationException
+  {
+    throw new SerializationException("TODO not implemented");
+  }
+
+
+} // end of class BundleSerialization

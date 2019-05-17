@@ -31,6 +31,7 @@ import java.util.LinkedHashSet;
 import java.util.Iterator;
 import java.util.Vector;
 import java.util.List;
+import java.util.Arrays;
 import java.io.File;
 import java.io.FileReader;
 import java.io.BufferedReader;
@@ -63,7 +64,7 @@ public class TestBundleSerializer
       new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
     File dir = getDir();
     
-    BundleSerializer serializer = new BundleSerializer();
+    BundleSerialization serializer = new BundleSerialization();
     serializer.setJsonIndentFactor(2);
 
     // general configuration
@@ -108,6 +109,8 @@ public class TestBundleSerializer
 
     // serialize
     NamedStream[] streams = serializer.serializeSchema(schema, layers);
+    assertEquals("No warnings: " + Arrays.asList(serializer.getWarnings()),
+                 0, serializer.getWarnings().length);
     String json = serializer.getDbConfig(
       schema, layers, "Test", "fc379152-0381-4efc-b4c1-e90d696f5373",
       false, true, false, true, false, true, false);
@@ -179,7 +182,7 @@ public class TestBundleSerializer
     Graph[] fragments = { fragment };
 
     // create serializer
-    BundleSerializer serializer = new BundleSerializer();
+    BundleSerialization serializer = new BundleSerialization();
     serializer.setJsonIndentFactor(2);
       
     // general configuration
@@ -215,6 +218,8 @@ public class TestBundleSerializer
     
     // serialize
     NamedStream[] streams = serializer.serialize(fragments);
+    assertEquals("One warning: " + Arrays.asList(serializer.getWarnings()),
+                 1, serializer.getWarnings().length);
     streams[0].save(dir);
     File actual = new File(dir, "serialize_utterance_word__214.822-218.290.json");
     
