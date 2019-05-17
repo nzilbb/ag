@@ -923,7 +923,7 @@ public class SqlGraphStore
         {
           thereWereChanges = true;
           Object[] o = fmtMetaAnnotationId.parse(participant.getId());
-          int speakerNumber = Integer.parseInt(o[1].toString());
+          int speakerNumber = Integer.parseInt(o[1].toString().replace(",",""));
           // update the label (the only possible change)
           PreparedStatement sql = getConnection().prepareStatement(
             "UPDATE speaker SET name = ? WHERE speaker_number = ?");
@@ -5207,7 +5207,7 @@ public class SqlGraphStore
       {
         int agId = ((Integer)annotation.getGraph().get("@ag_id")).intValue();
         Object[] o = fmtMetaAnnotationId.parse(annotation.getParentId());
-        int speakerNumber = Integer.parseInt(o[1].toString());
+        int speakerNumber = Integer.parseInt(o[1].toString().replace(",",""));
         PreparedStatement sqlUpdate = getConnection().prepareStatement(
           "UPDATE transcript_speaker SET main_speaker = ?"
           +" WHERE ag_id = ? AND speaker_number = ?");
@@ -5298,7 +5298,7 @@ public class SqlGraphStore
           case Update:
           {
             Object[] o = fmtMetaAnnotationId.parse(annotation.getId());
-            int speakerNumber = Integer.parseInt(o[1].toString());
+            int speakerNumber = Integer.parseInt(o[1].toString().replace(",",""));
             // update the label (the only possible change)
             PreparedStatement sql = getConnection().prepareStatement(
               "UPDATE speaker SET name = ? WHERE speaker_number = ?");
@@ -5311,7 +5311,7 @@ public class SqlGraphStore
           case Destroy:
           {
             Object[] o = fmtMetaAnnotationId.parse(annotation.getId());
-            int speakerNumber = Integer.parseInt(o[1].toString());
+            int speakerNumber = Integer.parseInt(o[1].toString().replace(",",""));
             // delete from transcript_speaker only
             PreparedStatement sql = getConnection().prepareStatement(
               "DELETE FROM transcript_speaker WHERE speaker_number = ? AND ag_id = ?");
@@ -5625,7 +5625,7 @@ public class SqlGraphStore
         {
           String attribute = annotation.getLayerId().substring("participant_".length());
           Object[] o = fmtMetaAnnotationId.parse(annotation.getParentId());
-          int speakerNumber = Integer.parseInt(o[1].toString());
+          int speakerNumber = Integer.parseInt(o[1].toString().replace(",",""));
 
           Layer layer = annotation.getLayer();
           if (layer == null) layer = getLayer(annotation.getLayerId());
