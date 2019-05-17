@@ -33,15 +33,13 @@ public class TestLayer
 {
   @Test public void basicAttributes() 
   {
-    Layer l = new Layer();
-    l.setId("word");
-    l.setDescription("Words");
-    l.setParentId("turn");
-    l.setAlignment(2);
-    l.setPeers(true);
-    l.setPeersOverlap(false);
-    l.setParentIncludes(true);
-    l.setSaturated(false);
+    Layer l = new Layer("word", "Words")
+      .setParentId("turn")
+      .setAlignment(2)
+      .setPeers(true)
+      .setPeersOverlap(false)
+      .setParentIncludes(true)
+      .setSaturated(false);
     assertEquals("word", l.getId());
     assertEquals("Words", l.getDescription());
     assertEquals("turn", l.getParentId());
@@ -83,14 +81,14 @@ public class TestLayer
     Layer l = new Layer();
     l.setId("word");
     int iStartHashCode = l.hashCode();
-    l.setDescription("Words");
-    l.setParentId("turn");
-    l.setAlignment(2);
-    l.setPeers(true);
-    l.setPeersOverlap(false);
-    l.setParentIncludes(true);
-    l.setSaturated(false);
-    l.put("foo", "bar");
+    l.setDescription("Words")
+      .setParentId("turn")
+      .setAlignment(2)
+      .setPeers(true)
+      .setPeersOverlap(false)
+      .setParentIncludes(true)
+      .setSaturated(false)
+      .put("foo", "bar");
     int iEndHashCode = l.hashCode();
     assertEquals("Immutable hashcode:", iStartHashCode, iEndHashCode);
       
