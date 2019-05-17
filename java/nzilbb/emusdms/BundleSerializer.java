@@ -518,18 +518,22 @@ public class BundleSerializer
                 } // aligned
                 default: // Constants.ALIGNMENT_NONE:
                 { // unaligned layers are attributes on a parent SEGMENT level
-                  // find an aligned ancestor
-                  for (Annotation ancestor : annotation.getAncestors())
-                  {
-                    if (ancestor.containsKey("@labels"))
-                    { // found the nearest aligned ancestor
-                      JSONArray labels = (JSONArray)ancestor.get("@labels");
-                      labels.put(new JSONObject()
-                                 .put("name", layer.getId())
-                                 .put("value", annotation.getLabel()));
-                      break;
-                    } // found the nearest aligned ancestor
-                  } // next ancestor
+                  // we only add the first tag
+                  if (annotation.getOrdinal() == 1)
+                  { 
+                    // find an aligned ancestor
+                    for (Annotation ancestor : annotation.getAncestors())
+                    {
+                      if (ancestor.containsKey("@labels"))
+                      { // found the nearest aligned ancestor
+                        JSONArray labels = (JSONArray)ancestor.get("@labels");
+                        labels.put(new JSONObject()
+                                   .put("name", layer.getId())
+                                   .put("value", annotation.getLabel()));
+                        break;
+                      } // found the nearest aligned ancestor
+                    } // next ancestor
+                  } // ordinal == 1
                 } // not aligned                
               } // switch (layer.getAlignment())
             } // a layer below turn

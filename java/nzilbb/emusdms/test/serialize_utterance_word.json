@@ -20,8 +20,10 @@
                 "word":{"description":"Words", "alignment":2,
                   "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
                   "children":{
+                    "tag":{"description":"Word Tag", "alignment":0,
+                      "peers":true, "peersOverlap":true, "parentIncludes":true, "saturated":true},
                     "phone":{"description":"Phones", "alignment":2,
-                      "peers":true, "peersOverlap":true, "parentIncludes":true, "saturated":true}
+                      "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true}
                   }}
               }}
           }}
@@ -1445,6 +1447,10 @@
               "phone":[
                 {"id":"1bm",	"label":"$",	"startId":"54",	"endId":"x7",	"confidence":100}]},
             {"id":"xa",	"label":"some",	"startId":"yyy",	"endId":"x9",	"confidence":100,
+              "tag":[
+                {"id":"xx1bo",	"label":"first-tag",	"startId":"yyy",	"endId":"x9",	"confidence":100},
+                {"id":"xx1bq",	"label":"second-tag",	"startId":"yyy",	"endId":"x9",	"confidence":100},
+                {"id":"xx1br",	"label":"third-tag",	"startId":"yyy",	"endId":"x9",	"confidence":100}],
               "phone":[
                 {"id":"1bo",	"label":"s",	"startId":"yyy",	"endId":"1bn",	"confidence":100},
                 {"id":"1bq",	"label":"V",	"startId":"1bn",	"endId":"1bp",	"confidence":100},

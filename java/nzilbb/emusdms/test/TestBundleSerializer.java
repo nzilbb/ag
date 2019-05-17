@@ -58,7 +58,7 @@ public class TestBundleSerializer
       new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
       new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
       new Layer("word", "Words", 2, true, false, false, "turn", true),
-      new Layer("phone", "Phones", 2, true, true, true, "word", true),
+      new Layer("phone", "Phones", 2, true, false, true, "word", true),
       new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
       new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
     File dir = getDir();
@@ -137,8 +137,8 @@ public class TestBundleSerializer
       new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
       new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
       new Layer("word", "Words", 2, true, false, false, "turn", true),
-      new Layer("phone", "Phones", 2, true, true, true, "word", true),
-      new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
+      new Layer("phone", "Phones", 2, true, false, true, "word", true),
+      new Layer("tag", "Word Tags", 0, true, false, false, "word", true),
       new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
     final File dir = getDir();
     // access file
@@ -153,7 +153,7 @@ public class TestBundleSerializer
     // extract fragment
     double fragmentFrom = 214.822;
     double fragmentTo = 218.29; // exactly on the offset of the last anchor
-    String [] layerIds = { "utterance", "word", "phone" };
+    String [] layerIds = { "utterance", "word", "phone", "tag" };
     Graph fragment = graphs[0].getFragment(fragmentFrom, fragmentTo, layerIds);
     fragment.shiftAnchors(-fragmentFrom);
     assertEquals("serialize_utterance_word__214.822-218.290", fragment.getId());

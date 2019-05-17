@@ -171,10 +171,16 @@
             "id": 4,
             "sampleStart": 7648,
             "sampleDur": 4682,
-            "labels": [{
-              "name": "word",
-              "value": "some"
-            }]
+            "labels": [
+              {
+                "name": "word",
+                "value": "some"
+              },
+              {
+                "name": "tag",
+                "value": "first-tag"
+              }
+            ]
           },
           {
             "id": 10,
