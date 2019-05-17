@@ -80,7 +80,7 @@ public class Layer
    * Setter for <i>parentId</i>: The layer's parent layer id
    * @param parentId The layer's parent layer id
    */
-  public void setParentId(String parentId) { this.parentId = parentId; }
+  public Layer setParentId(String parentId) { this.parentId = parentId; return this; }
 
   /**
    * The description of the layer.
@@ -98,7 +98,7 @@ public class Layer
    * @see Constants#ALIGNMENT_INSTANT
    * @see Constants#ALIGNMENT_INTERVAL
    */
-  public void setDescription(String description) { this.description = description; }
+  public Layer setDescription(String description) { this.description = description; return this; }
 
   /**
    * The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
@@ -122,12 +122,12 @@ public class Layer
    * @see Constants#ALIGNMENT_INSTANT
    * @see Constants#ALIGNMENT_INTERVAL
    */
-  public void setAlignment(int alignment) { this.alignment = alignment; }
+  public Layer setAlignment(int alignment) { this.alignment = alignment; return this; }
 
   /**
-   * Whether children have peers or not.
+   * Whether children have peers or not. Defaults to <code>true</code>
    */
-  protected boolean peers;
+  protected boolean peers = true;
   /**
    * Getter for <i>peers</i>: Whether children have peers or not.
    * @return Whether children have peers or not.
@@ -137,12 +137,12 @@ public class Layer
    * Setter for <i>peers</i>: Whether children have peers or not.
    * @param peers Whether children have peers or not.
    */
-  public void setPeers(boolean peers) { this.peers = peers; }
+  public Layer setPeers(boolean peers) { this.peers = peers; return this; }
 
   /**
-   * Whether child peers can overlap or not.
+   * Whether child peers can overlap or not. Defaults to <code>true</code>.
    */
-  protected boolean peersOverlap;
+  protected boolean peersOverlap = true;
   /**
    * Getter for <i>peersOverlap</i>: Whether child peers can overlap or not.
    * @return Whether child peers can overlap or not.
@@ -152,12 +152,12 @@ public class Layer
    * Setter for <i>peersOverlap</i>: Whether child peers can overlap or not.
    * @param peersOverlap Whether child peers can overlap or not.
    */
-  public void setPeersOverlap(boolean peersOverlap) { this.peersOverlap = peersOverlap; }
+  public Layer setPeersOverlap(boolean peersOverlap) { this.peersOverlap = peersOverlap; return this; }
 
   /**
-   * Whether the parent t-includes the child.
+   * Whether the parent t-includes the child. Defaults to <code>true</code>.
    */
-  protected boolean parentIncludes;
+  protected boolean parentIncludes = true;
   /**
    * Getter for <i>parentIncludes</i>: Whether the parent t-includes the child.
    * @return Whether the parent t-includes the child.
@@ -167,12 +167,12 @@ public class Layer
    * Setter for <i>parentIncludes</i>: Whether the parent t-includes the child.
    * @param parentIncludes Whether the parent t-includes the child.
    */
-  public void setParentIncludes(boolean parentIncludes) { this.parentIncludes = parentIncludes; }
+  public Layer setParentIncludes(boolean parentIncludes) { this.parentIncludes = parentIncludes; return this; }
 
   /**
-   * Whether children must temporally fill the entire parent duration (true) or not (false).
+   * Whether children must temporally fill the entire parent duration (true) or not (false). . Defaults to <code>true</code>
    */
-  protected boolean saturated;
+  protected boolean saturated = true;
   /**
    * Getter for <i>saturated</i>: Whether children must temporally fill the entire parent duration (true) or not (false).
    * @return Whether children must temporally fill the entire parent duration (true) or not (false).
@@ -182,7 +182,7 @@ public class Layer
    * Setter for <i>saturated</i>: Whether children must temporally fill the entire parent duration (true) or not (false).
    * @param saturated Whether children must temporally fill the entire parent duration (true) or not (false).
    */
-  public void setSaturated(boolean saturated) { this.saturated = saturated; }
+  public Layer setSaturated(boolean saturated) { this.saturated = saturated; return this; }
    
   /**
    * Child layers.
@@ -206,7 +206,7 @@ public class Layer
    * Setter for <i>children</i>: Child layers.
    * @param children Child layers.
    */
-  public void setChildren(LinkedHashMap<String,Layer> children) { this.children = children; }
+  public Layer setChildren(LinkedHashMap<String,Layer> children) { this.children = children; return this; }
    
   /**
    * The layer's parent layer, if any.
@@ -223,7 +223,7 @@ public class Layer
    * Setter for {@link #parent}: The layer's parent layer, if any.
    * @param newParent The layer's parent layer, if any.
    */
-  public void setParent(Layer newParent) 
+  public Layer setParent(Layer newParent)
   { 
     parent = newParent; 
     if (parent != null)
@@ -231,13 +231,14 @@ public class Layer
       setParentId(parent.getId());
       parent.getChildren().put(getId(), this);
     }
+    return this;
   }
 
   /**
    * The type for labels on this layer.
    * <p>Either a MIME type, or one of:
    *  <ul>
-   *   <li>{@link Constants#TYPE_STRING}</li>
+   *   <li>{@link Constants#TYPE_STRING} (the default)</li>
    *   <li>{@link Constants#TYPE_IPA}</li>
    *   <li>{@link Constants#TYPE_NUMBER}</li>
    *   <li>{@link Constants#TYPE_SELECT}</li>
@@ -260,25 +261,29 @@ public class Layer
    * Setter for {@link #type}: The type for labels on this layer.
    * @param type The type for labels on this layer.
    */
-  public void setType(String type) { this.type = type; }
+  public Layer setType(String type) { this.type = type; return this; }
    
   /**
    * List of valid label values for this layer, or null if the layer values are not restricted.
    * <p>The 'key' is the possible label value, and each key is associated with a description of the value (e.g. for displaying to users).
    */
-  protected LinkedHashMap<String,String> validLabels = new LinkedHashMap<String,String>();
+  protected LinkedHashMap<String,String> validLabels;
   /**
    * Getter for <tt>validLabels</tt>: List of valid label values for this layer, or null if the layer values are not restricted.
    * <p>The 'key' is the possible label value, and each key is associated with a description of the value (e.g. for displaying to users).
    * @return List of valid label values for this layer, or null if the layer values are not restricted.
    */
-  public LinkedHashMap<String,String> getValidLabels() { return validLabels; }
+  public LinkedHashMap<String,String> getValidLabels()
+  {
+    if (validLabels == null) validLabels = new LinkedHashMap<String,String>();
+    return validLabels;
+  }
   /**
    * Setter for <tt>validLabels</tt>: List of valid label values for this layer, or null if the layer values are not restricted.
    * <p>The 'key' is the possible label value, and each key is associated with a description of the value (e.g. for displaying to users).
    * @param newValidLabels List of valid label values for this layer, or null if the layer values are not restricted.
    */
-  public void setValidLabels(LinkedHashMap<String,String> newValidLabels) { this.validLabels = newValidLabels; }
+  public Layer setValidLabels(LinkedHashMap<String,String> newValidLabels) { this.validLabels = newValidLabels; return this; }
   /**
    * Getter for <tt>validLabels</tt>: List of valid label values for this layer, or null if the layer values are not restricted.
    * @return List of valid label values for this layer, or null if the layer values are not restricted.
@@ -299,7 +304,25 @@ public class Layer
   } // end of constructor
 
   /**
-   * Basic constructor
+   * Bare name constructor. This is provided for 'builder pattern' style contruction, like:
+   * <code>
+   *  Layer layer = new Layer("phone", "Phones")
+   *    .setParentId("word")
+   *    .setAlignment(Constants.ALIGNMENT_INTERVAL)
+   *    .setPeers(true)
+   *    .setPeersOverlap(false)
+   * </code>
+   * @param id The layer's identifier.
+   * @param description The description of the layer.
+   */
+  public Layer(String id, String description)
+  {
+    setId(id);
+    setDescription(description);
+  } // end of constructor
+
+  /**
+   * Attribute constructor.
    * @param id The layer's identifier.
    * @param description The description of the layer.
    * @param parentId The layer's parent layer id
