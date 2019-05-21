@@ -24,14 +24,17 @@ package nzilbb.util;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.BufferedReader;
 import java.io.OutputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Vector;
 import java.util.Enumeration;
@@ -132,6 +135,31 @@ public class IO
     InputStream input = connection.getInputStream();
     return Pump(input, output);
   } // end of SaveUrlConnectionToFile()
+
+  /**
+   * Reads the contents of the given InputStream into a String, assuming it's UTF-8 encoded text.
+   * <p>The InputStream is closed by the this method.
+   * @param input
+   * @return The contents of the given InputStream.
+   * @throws IOException
+   */
+   public static String InputStreamToString(InputStream input)
+     throws IOException
+  {
+    StringBuilder content = new StringBuilder();
+    BufferedReader reader = new BufferedReader(
+      new InputStreamReader(input, StandardCharsets.UTF_8));
+    String line = reader.readLine();
+    while (line != null)
+    {
+      if (content.length() > 0) content.append("\n");
+      content.append(line);
+      
+      line = reader.readLine();
+    } // next line
+    reader.close();
+    return content.toString();
+  } // end of InputStreamToString()
    
   /**
    * Copy all data from an input stream to an output stream.
@@ -322,6 +350,5 @@ public class IO
     bytesOut.close();
     return base64Out.toString();
   } // end of base64EncodeFile()
-  
    
 } // end of class IO
