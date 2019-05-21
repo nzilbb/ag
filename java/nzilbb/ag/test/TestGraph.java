@@ -1155,24 +1155,24 @@ public class TestGraph
 
       // offset anchors
       assertEquals("before offset change", 
-		   new Double(0.0), f.getAnchors().get("turnStart").getOffset()); 
+		   Double.valueOf(0.0), f.getAnchors().get("turnStart").getOffset()); 
       assertEquals("before offset change", 
-		   new Double(1.0), f.getAnchors().get("a1").getOffset());
+		   Double.valueOf(1.0), f.getAnchors().get("a1").getOffset());
       assertNull("before offset change", 
 		 f.getAnchors().get("a2").getOffset());
       assertEquals("before offset change", 
-		   new Double(3.0), f.getAnchors().get("a3").getOffset());
+		   Double.valueOf(3.0), f.getAnchors().get("a3").getOffset());
       
       assertEquals("shiftAnchors", 3, f.shiftAnchors(100.0).size());
 
       assertEquals("after offset change", 
-		   new Double(100.0), f.getAnchors().get("turnStart").getOffset()); 
+		   Double.valueOf(100.0), f.getAnchors().get("turnStart").getOffset()); 
       assertEquals("after offset change", 
-		   new Double(101.0), f.getAnchors().get("a1").getOffset());
+		   Double.valueOf(101.0), f.getAnchors().get("a1").getOffset());
       assertNull("after offset change", 
                  f.getAnchors().get("a2").getOffset());
       assertEquals("after offset change", 
-                   new Double(103.0), f.getAnchors().get("a3").getOffset());
+                   Double.valueOf(103.0), f.getAnchors().get("a3").getOffset());
 
       // check media provider handling
       try
@@ -1234,6 +1234,11 @@ public class TestGraph
       g.addAnchor(new Anchor("a5", 5.0));
       g.addAnchor(new Anchor("turnEnd", 6.0));
 
+      g.getSchema().setParticipantLayerId("who");
+      g.getSchema().setTurnLayerId("turn");
+      g.getSchema().setUtteranceLayerId("utterance");
+      g.getSchema().setWordLayerId("word");
+
       Annotation who1 = new Annotation("who1", "john smith", "who", "turnStart", "turnEnd", "my graph");
       Annotation who2 = new Annotation("who1", "jane doe", "who", "turnStart", "turnEnd", "my graph");
 
@@ -1293,6 +1298,14 @@ public class TestGraph
       assertEquals("my graph__2.000-3.000", f.getId());
       assertEquals("fragment's graph is itself", f, f.getGraph());
       assertTrue(f.isFragment());
+      assertEquals("graph schema copied to fragment",
+                  g.getSchema().getParticipantLayerId(), f.getSchema().getParticipantLayerId());
+      assertEquals("graph schema copied to fragment",
+                  g.getSchema().getTurnLayerId(), f.getSchema().getTurnLayerId());
+      assertEquals("graph schema copied to fragment",
+                  g.getSchema().getUtteranceLayerId(), f.getSchema().getUtteranceLayerId());
+      assertEquals("graph schema copied to fragment",
+                  g.getSchema().getWordLayerId(), f.getSchema().getWordLayerId());
 
       // check anchors
       assertFalse(f.getAnchors().containsKey("turnStart")); 
@@ -1390,6 +1403,11 @@ public class TestGraph
       g.addLayer(new Layer("pos", "Part of speech", 0, false, false, true, "word", true));
       g.addLayer(new Layer("phrase", "Phrase structure", 0, true, true, false, "turn", true));
 
+      g.getSchema().setParticipantLayerId("who");
+      g.getSchema().setTurnLayerId("turn");
+      g.getSchema().setUtteranceLayerId("utterance");
+      g.getSchema().setWordLayerId("word");
+
       g.addAnchor(new Anchor("turnStart", 0.0));
       g.addAnchor(new Anchor("a1", 1.0));
       g.addAnchor(new Anchor("a1.5", 1.5));
@@ -1463,6 +1481,14 @@ public class TestGraph
       assertEquals("fragment's graph is itself", f, f.getGraph());
       assertEquals("original graph is accessible", g, f.sourceGraph());
       assertTrue(f.isFragment());
+      assertEquals("graph schema copied to fragment",
+                  g.getSchema().getParticipantLayerId(), f.getSchema().getParticipantLayerId());
+      assertEquals("graph schema copied to fragment",
+                  g.getSchema().getTurnLayerId(), f.getSchema().getTurnLayerId());
+      assertEquals("graph schema copied to fragment",
+                  g.getSchema().getUtteranceLayerId(), f.getSchema().getUtteranceLayerId());
+      assertEquals("graph schema copied to fragment",
+                  g.getSchema().getWordLayerId(), f.getSchema().getWordLayerId());
 
       // check anchors
       assertTrue(f.getAnchors().containsKey("turnStart")); 
@@ -1562,6 +1588,11 @@ public class TestGraph
       g.addLayer(new Layer("pos", "Part of speech", 0, false, false, true, "word", true));
       g.addLayer(new Layer("phrase", "Phrase structure", 0, true, true, false, "turn", true));
 
+      g.getSchema().setParticipantLayerId("who");
+      g.getSchema().setTurnLayerId("turn");
+      g.getSchema().setUtteranceLayerId("utterance");
+      g.getSchema().setWordLayerId("word");
+
       g.addAnchor(new Anchor("turnStart", 0.0));
       g.addAnchor(new Anchor("a1", 1.0));
       g.addAnchor(new Anchor("a1.5", 1.5));
@@ -1635,6 +1666,14 @@ public class TestGraph
       assertEquals("fragment's graph is itself", f, f.getGraph());
       assertEquals("original graph is accessible", g, f.sourceGraph());
       assertTrue(f.isFragment());
+      assertEquals("graph schema copied to fragment",
+                  g.getSchema().getParticipantLayerId(), f.getSchema().getParticipantLayerId());
+      assertEquals("graph schema copied to fragment",
+                  g.getSchema().getTurnLayerId(), f.getSchema().getTurnLayerId());
+      assertEquals("graph schema copied to fragment",
+                  g.getSchema().getUtteranceLayerId(), f.getSchema().getUtteranceLayerId());
+      assertEquals("graph schema copied to fragment",
+                  g.getSchema().getWordLayerId(), f.getSchema().getWordLayerId());
 
       // check anchors
       assertTrue(f.getAnchors().containsKey("turnStart")); 

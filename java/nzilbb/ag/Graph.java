@@ -398,6 +398,12 @@ public class Graph
       fragment.setMediaProvider(mediaProvider.providerForGraph(fragment));
     }
     fragment.graph = this;
+    fragment.getSchema().setParticipantLayerId(graph.getSchema().getParticipantLayerId());
+    fragment.getSchema().setTurnLayerId(graph.getSchema().getTurnLayerId());
+    fragment.getSchema().setUtteranceLayerId(graph.getSchema().getUtteranceLayerId());
+    fragment.getSchema().setWordLayerId(graph.getSchema().getWordLayerId());
+    fragment.getSchema().setEpisodeLayerId(graph.getSchema().getEpisodeLayerId());
+    fragment.getSchema().setCorpusLayerId(graph.getSchema().getCorpusLayerId());
     Layer layer = getLayer(definingAnnotation.getLayerId());
     if (layer != null)
     {	 
@@ -461,6 +467,12 @@ public class Graph
       fragment.setMediaProvider(mediaProvider.providerForGraph(fragment));
     }
     fragment.graph = this;
+    fragment.getSchema().setParticipantLayerId(graph.getSchema().getParticipantLayerId());
+    fragment.getSchema().setTurnLayerId(graph.getSchema().getTurnLayerId());
+    fragment.getSchema().setUtteranceLayerId(graph.getSchema().getUtteranceLayerId());
+    fragment.getSchema().setWordLayerId(graph.getSchema().getWordLayerId());
+    fragment.getSchema().setEpisodeLayerId(graph.getSchema().getEpisodeLayerId());
+    fragment.getSchema().setCorpusLayerId(graph.getSchema().getCorpusLayerId());
     if (bounds.getAnchored())
     {
       double startOffset = bounds.getStart().getOffset();
@@ -500,7 +512,6 @@ public class Graph
     return fragment;
   } // end of getFragment()
 
-
   /**
    * Ensures all the given annotation's ancestors are in the given fragment, and that they're ordinal minima are correct.
    * @param annotation
@@ -531,7 +542,6 @@ public class Graph
     } // next ancestor
     ensureMinimumOrdinalSpecified(annotation, fragment);
   } // end of ensureAllAncestorsPresentInFragment()
-
    
   /**
    * Ensures that the minimum ordinal for the parent is set for this annotation.
@@ -554,8 +564,6 @@ public class Graph
     }
   } // end of ensureMinimumOrdinalSpecified()
 
-
-   
   /**
    * Retrieves an annotation given an id.
    * @param id ID of the annotation.
@@ -867,7 +875,6 @@ public class Graph
     }
     return sortedAnchors;
   } // end of getSortedAnchors()
-
    
   /**
    * Returns all anchors, in the best order given their offset and annotation links. This ordering requires much graph traversal to find the best comparison between anchors, so is computationally expensive and should be used sparingly.
@@ -879,7 +886,6 @@ public class Graph
     sortedAnchors.addAll(getAnchors().values());
     return sortedAnchors;
   } // end of getAnchorsOrderedByStructure()
-
    
   /**
    * Increments all (set) anchor offsets by the given amount.
@@ -899,7 +905,6 @@ public class Graph
     } // next anchor
     return changes;
   } // end of shiftAnchors()
-
    
   /**
    * Compares two offsets, taking {@link #offsetGranularity} into account.
@@ -917,7 +922,6 @@ public class Graph
     if (o1 > o2) return 1;
     return 0;
   } // end of compareOffsets()
-
    
   /**
    * Adds a layer definition.
@@ -927,7 +931,6 @@ public class Graph
   {
     getSchema().addLayer(layer);
   } // end of addLayer()
-
    
   /**
    * Get the definition of the given layer ID.
@@ -938,7 +941,6 @@ public class Graph
   {
     return getSchema().getLayer(layerId);
   } // end of getLayer()
-
    
   /**
    * Get a list of layers, ordered top down.
@@ -1088,9 +1090,7 @@ public class Graph
     return span;
   } // end of createAnnotation()
 
-
   // query methods
-
    
   /**
    * Returns a list of annotations that overlap with the given offset interval
@@ -1139,7 +1139,6 @@ public class Graph
     return matches.toArray(new Annotation[0]);
   } // end of overlappingAnnotations()
 
-
   // Annotation overrides
 
   /**
@@ -1147,7 +1146,6 @@ public class Graph
    * @return An empty set.
    */
   public Set<String> getTrackedAttributes() { return new HashSet<String>(); }
-
 
   /**
    * Setter for <i>id</i>: The annotation's identifier.
@@ -1237,7 +1235,6 @@ public class Graph
     if (latest == null) return null;
     return latest.getId();
   }
-
    
   /**
    * Returns the depth of an anchor - i.e. the depth of the shallowest non-aligned associated Annotation.
@@ -1271,7 +1268,6 @@ public class Graph
     }
     return depth;
   } // end of depth()
-
 
   /**
    * Getter for <i>start</i>: The anchor with the lowest offset.
