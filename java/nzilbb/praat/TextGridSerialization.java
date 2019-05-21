@@ -625,7 +625,7 @@ public class TextGridSerialization
       }
     } // next layer
 
-      // map tiers to layers by name
+    // map tiers to layers by name
     Layer ignore = new Layer();
     ignore.setId("[ignore tier]");      
     for (int t = 0; t < getTiers().size(); t++)
@@ -780,7 +780,6 @@ public class TextGridSerialization
 
     Graph graph = new Graph();
     graph.setId(getId());
-    graph.setOffsetGranularity(Constants.GRANULARITY_MILLISECONDS);
     // creat the 0 anchor to prevent graph tagging from creating one with no confidence
     Anchor graphStart = graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL);
 
