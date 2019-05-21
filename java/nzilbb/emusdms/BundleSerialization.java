@@ -25,9 +25,10 @@ import java.util.UUID;
 import java.util.List;
 import java.util.Vector;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Comparator;
-import java.util.Base64;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.ByteArrayInputStream;
@@ -40,6 +41,7 @@ import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.ag.util.LayerTraversal;
+import nzilbb.ag.util.LayerHierarchyTraversal;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 import nzilbb.configure.ParameterField;
@@ -73,7 +75,8 @@ public class BundleSerialization
    * @param corpusName Name of the corpus.
    * @return <var>this</var>.
    */
-  public BundleSerialization setCorpusName(String corpusName) { this.corpusName = corpusName; return this; }
+  public BundleSerialization setCorpusName(String corpusName)
+  { this.corpusName = corpusName; return this; }
 
   /**
    * UUID of the schema.
@@ -111,7 +114,8 @@ public class BundleSerialization
    * @param showPerspectivesSidebar Whether to show perspectives sidebar.
    * @return <var>this</var>.
    */
-  public BundleSerialization setShowPerspectivesSidebar(Boolean showPerspectivesSidebar) { this.showPerspectivesSidebar = showPerspectivesSidebar; return this; }
+  public BundleSerialization setShowPerspectivesSidebar(Boolean showPerspectivesSidebar)
+  { this.showPerspectivesSidebar = showPerspectivesSidebar; return this; }
 
   /**
    * Whether to allow playback.
@@ -130,7 +134,8 @@ public class BundleSerialization
    * @param playback Whether to allow playback.
    * @return <var>this</var>.
    */
-  public BundleSerialization setPlayback(Boolean playback) { this.playback = playback; return this; }
+  public BundleSerialization setPlayback(Boolean playback)
+  { this.playback = playback; return this; }
 
   /**
    * Whether to show the correction tool.
@@ -149,7 +154,8 @@ public class BundleSerialization
    * @param correctionTool Whether to show the correction tool.
    * @return <var>this</var>.
    */
-  public BundleSerialization setCorrectionTool(Boolean correctionTool) { this.correctionTool = correctionTool; return this; }
+  public BundleSerialization setCorrectionTool(Boolean correctionTool)
+  { this.correctionTool = correctionTool; return this; }
 
   /**
    * Whether to allow editing of the item size.
@@ -168,7 +174,8 @@ public class BundleSerialization
    * @param editItemSize Whether to allow editing of the item size.
    * @return <var>this</var>.
    */
-  public BundleSerialization setEditItemSize(Boolean editItemSize) { this.editItemSize = editItemSize; return this; }
+  public BundleSerialization setEditItemSize(Boolean editItemSize)
+  { this.editItemSize = editItemSize; return this; }
 
   /**
    * Whether to use large text input field.
@@ -187,7 +194,8 @@ public class BundleSerialization
    * @param useLargeTextInputField Whether to use large text input field.
    * @return <var>this</var>.
    */
-  public BundleSerialization setUseLargeTextInputField(Boolean useLargeTextInputField) { this.useLargeTextInputField = useLargeTextInputField; return this; }
+  public BundleSerialization setUseLargeTextInputField(Boolean useLargeTextInputField)
+  { this.useLargeTextInputField = useLargeTextInputField; return this; }
 
   /**
    * Whether to allow saving of bundles.
@@ -206,7 +214,8 @@ public class BundleSerialization
    * @param saveBundle Whether to allow saving of bundles.
    * @return <var>this</var>.
    */
-  public BundleSerialization setSaveBundle(Boolean saveBundle) { this.saveBundle = saveBundle; return this; }
+  public BundleSerialization setSaveBundle(Boolean saveBundle)
+  { this.saveBundle = saveBundle; return this; }
 
   /**
    * Whether to show hierarchy.
@@ -225,7 +234,8 @@ public class BundleSerialization
    * @param showHierarchy Whether to show hierarchy.
    * @return <var>this</var>.
    */
-  public BundleSerialization setShowHierarchy(Boolean showHierarchy) { this.showHierarchy = showHierarchy; return this; }
+  public BundleSerialization setShowHierarchy(Boolean showHierarchy)
+  { this.showHierarchy = showHierarchy; return this; }
 
   /**
    * How much to indent JSON-encoded lines, for each level, or 0 for JSON all on one line.
@@ -246,7 +256,8 @@ public class BundleSerialization
    * @param newJsonIndentFactor How much to indent JSON-encoded lines, for each level, or 0 for
    * JSON all on one line. 
    */
-  public BundleSerialization setJsonIndentFactor(int newJsonIndentFactor) { jsonIndentFactor = newJsonIndentFactor; return this; }
+  public BundleSerialization setJsonIndentFactor(int newJsonIndentFactor)
+  { jsonIndentFactor = newJsonIndentFactor; return this; }
   
   /**
    * Sample rate for audio in Hz. Default is 16000.
@@ -265,8 +276,8 @@ public class BundleSerialization
    * @param sampleRate Sample rate for audio in Hz.
    * @return <var>this</var>.
    */
-  public BundleSerialization setSampleRate(Integer sampleRate) { this.sampleRate = sampleRate; return this; }
-
+  public BundleSerialization setSampleRate(Integer sampleRate)
+  { this.sampleRate = sampleRate; return this; }
 
   /**
    * The last schema passed in.
@@ -286,6 +297,46 @@ public class BundleSerialization
    */
   public BundleSerialization setSchema(Schema schema) { this.schema = schema; return this; }
 
+  /**
+   * A list of JSON bundles to deserialize.
+   * @see #getJsonBundles()
+   * @see #setJsonBundles(LinkedHashMap)
+   */
+  protected LinkedHashMap<String,JSONObject> jsonBundles;
+  /**
+   * Getter for {@link #jsonBundles}.
+   * @return A list of JSON bundles to deserialize.
+   */
+  public LinkedHashMap<String,JSONObject> getJsonBundles() { return jsonBundles; }
+  /**
+   * Setter for {@link #jsonBundles}.
+   * @param jsonBundles A list of JSON bundles to deserialize.
+   * @return <var>this</var>.
+   */
+  public BundleSerialization setJsonBundles(LinkedHashMap<String,JSONObject> jsonBundles)
+  { this.jsonBundles = jsonBundles; return this; }
+  
+  /**
+   * Mappings from levels or labels to Layers.
+   * @see #getMappings()
+   * @see #setMappings(ParameterSet)
+   */
+  protected ParameterSet mappings;
+  /**
+   * Getter for {@link #mappings}.
+   * @return Mappings from levels or labels to Layers.
+   */
+  public ParameterSet getMappings() { return mappings; }
+  /**
+   * Setter for {@link #mappings}.
+   * @param mappings Mappings from levels or labels to Layers.
+   * @return <var>this</var>.
+   */
+  public BundleSerialization setMappings(ParameterSet mappings) { this.mappings = mappings; return this; }
+  
+  /** Required mappings; key is level parameter ID, values are label parameter IDs */
+  protected TreeMap<String,TreeSet<String>> requiredMappings;
+  
   // Methods:
   
   /**
@@ -497,14 +548,20 @@ public class BundleSerialization
                     .put(new JSONObject()
                          .put("name", layer.getId())
                          .put("value", annotation.getLabel()));
-                  assert annotation.getStart() != null : "annotation.getStart() != null - " + annotation.getId();
-                  assert annotation.getStart().getOffset() != null : "annotation.getStart().getOffset() != null - " + annotation.getId();
-                  assert annotation.getEnd() != null : "annotation.getEnd() != null - " + annotation.getId();
-                  assert annotation.getEnd().getOffset() != null : "annotation.getEnd().getOffset() != null - " + annotation.getId();
-                  assert annotation.getDuration() != null : "annotation.getDuration() != null - " + annotation.getId();
+                  assert annotation.getStart() != null
+                    : "annotation.getStart() != null - " + annotation.getId();
+                  assert annotation.getStart().getOffset() != null
+                    : "annotation.getStart().getOffset() != null - " + annotation.getId();
+                  assert annotation.getEnd() != null
+                    : "annotation.getEnd() != null - " + annotation.getId();
+                  assert annotation.getEnd().getOffset() != null
+                    : "annotation.getEnd().getOffset() != null - " + annotation.getId();
+                  assert annotation.getDuration() != null
+                    : "annotation.getDuration() != null - " + annotation.getId();
                   assert sampleRate != null : "sampleRate != null";
 
-                  // SEGMENT levels cannot have pauses between intervals, so insert blank labels before pauses
+                  // SEGMENT levels cannot have pauses between intervals,
+                  // so insert blank labels before pauses
                   double offset = annotation.getStart().getOffset() - graphOffset;
                   long offsetSamples = (long)(offset * sampleRate);
                   if (items.length() > 0)
@@ -651,7 +708,7 @@ public class BundleSerialization
   public SerializationDescriptor getDescriptor()
   {
     return new SerializationDescriptor(
-      "EMU-SDMS Bundle", "0.02", "application/emusdms+json", ".json", "20190516.1519",
+      "EMU-SDMS Bundle", "0.02", "application/emusdms+json", ".json", "20190521.1036",
       getClass().getResource("icon.png"));
   }
   
@@ -684,7 +741,8 @@ public class BundleSerialization
   /** Warnings */
   protected Vector<String> warnings = new Vector<String>();
   /**
-   * Returns any warnings that may have arisen during the last execution of {@link #serialize(Graph[])}.
+   * Returns any warnings that may have arisen during the last execution of 
+   * {@link #serialize(Graph[])}.
    * @return A possibly empty list of warnings.
    */
   public String[] getWarnings()
@@ -738,7 +796,8 @@ public class BundleSerialization
    * however there may be formats that use multiple files for the same schema, which is why this
    * method returns a list.
    * @param schema The schema to serialize.
-   * @param layerIds A list of IDs of layers to include in the serialization, or null for all layers.
+   * @param layerIds A list of IDs of layers to include in the serialization, or null for all
+   * layers. 
    * @return A list of named streams that contain the serialization in the given format. 
    * @throws SerializerNotConfiguredException if the object has not been configured.
    * @throws SerializationException if errors occur during deserialization.
@@ -786,7 +845,8 @@ public class BundleSerialization
    * @throws IOException On IO error.
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
-  public ParameterSet load(NamedStream[] streams, Schema schema) throws SerializationException, IOException
+  public ParameterSet load(NamedStream[] streams, Schema schema)
+    throws SerializationException, IOException
   {
     setSchema(schema);
     warnings = new Vector<String>();
@@ -796,22 +856,198 @@ public class BundleSerialization
       throw new SerializationException("No EMU-SDMS bundle streams found");
     }
 
-    // TODO parse the JSON of all streams
+    // parse the JSON of all streams
+    jsonBundles = new LinkedHashMap<String,JSONObject>();
+    try
+    {
+      for (NamedStream stream : jsonStreams)
+      {
+        String json = IO.InputStreamToString(stream.getStream());
+        jsonBundles.put(stream.getName(), new JSONObject(json));
+      } // next stream
+    }
+    catch(JSONException exception)
+    {
+      throw new SerializationException(
+        SerializationException.ErrorType.InvalidDocument, exception.getMessage());
+    }
 
-    // TODO allow mapping of levels and labels to layers
-
-    throw new SerializationException("TODO not implemented");
+    LayerHierarchyTraversal<TreeMap<String,Layer>> intervalLayers
+      = new LayerHierarchyTraversal<TreeMap<String,Layer>>(
+        new TreeMap<String,Layer>(), schema) {
+          protected void pre(Layer layer)
+          {
+            if (layer.getAlignment() == Constants.ALIGNMENT_INTERVAL)
+            {
+              result.put(layer.getId(), layer);
+            }
+          }
+        };
+    LayerHierarchyTraversal<TreeMap<String,Layer>> tagLayers
+      = new LayerHierarchyTraversal<TreeMap<String,Layer>>(
+        new TreeMap<String,Layer>(), schema) {
+          protected void pre(Layer layer)
+          {
+            if (layer.getAlignment() == Constants.ALIGNMENT_NONE
+                && layer.getParentId() != schema.getRoot().getId()
+                && layer.getParent().getAlignment() == Constants.ALIGNMENT_INTERVAL)
+            {
+              result.put(layer.getId(), layer);
+            }
+          }
+        };
     
+    mappings = new ParameterSet();
+    requiredMappings = new TreeMap<String,TreeSet<String>>();
+    try
+    {
+      // Assume first stream is representative, and discover what levels/labels it has,
+      // for mapping to layers
+      JSONObject firstBundle = jsonBundles.values().iterator().next();
+      JSONArray levels = firstBundle.getJSONObject("annotation").getJSONArray("levels");
+      for (int l = 0; l < levels.length(); l++)
+      {
+        JSONObject level = levels.getJSONObject(l);
+        if (!level.getString("type").equals("SEGMENT"))
+        {
+          throw new SerializationException(
+            SerializationException.ErrorType.InvalidDocument,
+            "Unrecognized level type: " + level.getString("type"));
+        }
+        String levelName = level.getString("name");
+        final Layer levelLayer = intervalLayers.getResult().get(levelName); // (or null)
+        Parameter levelParameter = new Parameter(
+          "level_"+levelName, Layer.class, levelName,
+          "Layer for level called: " + levelName, true);
+        requiredMappings.put(levelParameter.getName(), new TreeSet<String>());
+        if (levelLayer != null)
+        { // force mapping of same-named layers
+          levelParameter.setPossibleValues(new Vector<Layer>() {{ add(levelLayer); }});
+          levelParameter.setValue(levelLayer);
+        }
+        else
+        {
+          levelParameter.setPossibleValues(intervalLayers.getResult().values());
+        }
+        mappings.addParameter(levelParameter);
+
+        // read all item labels
+        JSONArray items = level.getJSONArray("items");
+        for (int i = 0; i < items.length(); i++)
+        {
+          JSONObject item = items.getJSONObject(i);
+          // read all labels
+          JSONArray labels = item.getJSONArray("labels");
+          for (int lb = 0; lb < labels.length(); lb++)
+          {
+            JSONObject label = labels.getJSONObject(lb);
+            String labelName = label.getString("name");
+            if (labelName.equals(levelName)) continue;
+            if (!mappings.containsKey(labelName))
+            { // no layer mapping yet
+              Parameter labelParameter = new Parameter(
+                "label_"+labelName, Layer.class, labelName,
+                "Layer for label called: " + labelName, false);
+              if (levelLayer != null)
+              { // there is a level layer, so labels can only be tag unaligned children
+                final Layer labelLayer = tagLayers.getResult().get(labelName); // (or null)
+                if (labelLayer != null && labelLayer.getParentId().equals(levelLayer.getId()))
+                { // a matching levelLayer child tag
+                  labelParameter.setPossibleValues(new Vector<Layer>() {{ add(labelLayer); }});
+                  labelParameter.setValue(labelLayer);
+                } // a matching levelLayer child tag
+                else
+                { // no matching levelLayer child tag
+                  Vector<Layer> tagChildren = new Vector<Layer>();
+                  for (Layer child : levelLayer.getChildren().values())
+                  {
+                    if (child.getAlignment() == Constants.ALIGNMENT_NONE)
+                    {
+                      tagChildren.add(child);
+                    }
+                  }
+                  levelParameter.setPossibleValues(tagChildren);
+                } // no matching levelLayer child tag                
+              } // there is a level layer
+              else
+              { // we don't know the level layer yet, so the label could be any aligned layer
+                labelParameter.setPossibleValues(tagLayers.getResult().values());
+              }
+              
+              mappings.addParameter(labelParameter);
+              requiredMappings.get(levelParameter.getName()).add(labelParameter.getName());
+            } // no layer mapping yet
+          } // next item        
+        } // next item        
+      } // next level
+      
+    }
+    catch(JSONException exception)
+    {
+      throw new SerializationException(
+        SerializationException.ErrorType.InvalidDocument,
+        "Invalid JSON structure: " + exception.getMessage());
+    }
+    return mappings;
   }
 
   /**
-   * Sets parameters for a given deserialization operation, after loading the serialized form of the graph. This might include mappings from format-specific objects like tiers to graph layers, etc.
+   * Sets parameters for a given deserialization operation, after loading the serialized form of
+   * the graph. This might include mappings from format-specific objects like tiers to graph
+   * layers, etc. 
    * <p>{@link IDeserializer} method.
    * @param parameters The configuration for a given deserialization operation.
    * @throws SerializationParametersMissingException If not all required parameters have a value.
    */
-  public void setParameters(ParameterSet parameters) throws SerializationParametersMissingException // TODO
+  public void setParameters(ParameterSet parameters) throws SerializationParametersMissingException
   {
+    TreeSet<String> leftovers = new TreeSet<String>(requiredMappings.keySet());
+    leftovers.removeAll(parameters.keySet());
+    if (leftovers.size() > 0)
+    {
+      throw new SerializationParametersMissingException("Missing parameters: " + leftovers);
+    }
+    ParameterSet unset = parameters.unsetRequiredParameters();
+    if (unset.size() > 0)
+    {
+      throw new SerializationParametersMissingException("Unset required parameters: " + unset);
+    }
+    ParameterSet invalid = parameters.invalidValueParameters();
+    if (invalid.size() > 0)
+    {
+      throw new SerializationParametersMissingException(
+        "Parameters with invalid values: " + invalid);
+    }
+    // check label layers are tag children of corresponding level layers
+    for (String levelParameterId : requiredMappings.keySet())
+    {
+      Parameter levelParameter = parameters.get(levelParameterId);
+      Layer levelLayer = (Layer)levelParameter.getValue();
+      for (String labelParameterId : requiredMappings.get(levelParameterId))
+      {
+        Parameter labelParameter = parameters.get(labelParameterId);
+        Layer labelLayer = (Layer)labelParameter.getValue();
+        if (labelLayer != null)
+        { // label layer must be tag child of level layer
+          if (!labelLayer.getParentId().equals(levelLayer.getId()))
+          {
+            throw new SerializationParametersMissingException(
+              "Layer for "
+              + labelParameter.getLabel() + " ("+labelLayer.getId()
+              +") is not a child of layer for "
+              + levelParameter.getLabel() + " ("+levelLayer.getId()+")");
+          }
+          if (labelLayer.getAlignment() != Constants.ALIGNMENT_NONE)
+          {
+            throw new SerializationParametersMissingException(
+              "Layer for "
+              + labelParameter.getLabel() + " ("+labelLayer.getId()
+              +") is not an unaligned layer ("+labelLayer.getAlignment()+")");
+          }
+        }
+      }
+    } // next level parameter
+    setMappings(parameters);
   }
 
   /**
@@ -830,8 +1066,118 @@ public class BundleSerialization
   public Graph[] deserialize() 
     throws SerializerNotConfiguredException, SerializationParametersMissingException, SerializationException
   {
-    throw new SerializationException("TODO not implemented");
+    Vector<Graph> graphs = new Vector<Graph>();
+    for (String name : jsonBundles.keySet())
+    {
+      graphs.add(deserializeJson(name, jsonBundles.get(name)));
+    } // next bundle
+    return graphs.toArray(new Graph[0]);
   }
 
+  /**
+   * Deserializes a given JSON bundle.
+   * @param name The name of the original stream.
+   * @param bundle JSON representation of the bundle.
+   * @return The graph represented by the JSON bundle.
+   * @throws SerializerNotConfiguredException
+   * @throws SerializationParametersMissingException
+   * @throws SerializationException
+   */
+  private Graph deserializeJson(String name, JSONObject bundle)
+    throws SerializerNotConfiguredException, SerializationParametersMissingException, SerializationException
+  {
+    try
+    {
+      JSONObject top = bundle.getJSONObject("annotation");
+      double sampleRate = top.getDouble("sampleRate");
+      Graph graph = new Graph();
+      graph.setId(top.getString("name"));
+      graph.setOffsetGranularity(1/sampleRate);
 
+      for (Parameter p : mappings.values())
+      {
+        Layer layer = (Layer)p.getValue();
+        if (layer != null)
+        {
+          graph.addLayer((Layer)layer.clone());
+        }
+      } // next parameter
+      // // ensure layers are connected to the root of the schema
+      // for (Layer layer : graph.getSchema().getLayers().values())
+      // {
+      //   if (layer.getParent() == null && layer != graph.getSchema().getRoot())
+      //   {
+      //     System.out.println("Rooting layer " + layer);
+      //     layer.setParentId(graph.getSchema().getRoot().getId());
+      //   }
+      // }
+      
+      graph.setOffsetUnits(Constants.UNIT_SECONDS);
+      
+      JSONArray levels = top.getJSONArray("levels");
+
+      for (int l = 0; l < levels.length(); l++)
+      {
+        JSONObject level = levels.getJSONObject(l);
+        if (!level.getString("type").equals("SEGMENT"))
+        {
+          throw new SerializationException(
+            SerializationException.ErrorType.InvalidDocument,
+            name + ": Unrecognized level type: " + level.getString("type"));
+        }
+        String levelName = level.getString("name");
+        Layer levelLayer = (Layer)mappings.get("level_"+levelName).getValue();
+
+        // read all item labels
+        JSONArray items = level.getJSONArray("items");
+        for (int i = 0; i < items.length(); i++)
+        {
+          JSONObject item = items.getJSONObject(i);
+          Anchor start = graph.getOrCreateAnchorAt(item.getDouble("sampleStart")/sampleRate);
+          graph.addAnchor(start);
+          Anchor end = graph.getOrCreateAnchorAt(
+            start.getOffset() + item.getDouble("sampleDur")/sampleRate);
+          graph.addAnchor(end);
+          Annotation levelAnnotation = new Annotation(
+            null, "", levelLayer.getId(), start.getId(), end.getId());
+          // read all labels
+          JSONArray labels = item.getJSONArray("labels");
+          for (int lb = 0; lb < labels.length(); lb++)
+          {
+            JSONObject label = labels.getJSONObject(lb);
+            String labelName = label.getString("name");
+            String labelValue = label.getString("value");
+            if (labelValue.length() == 0) continue;
+            if (labelName.equals(levelName))
+            {
+              levelAnnotation.setLabel(labelValue);
+              graph.addAnnotation(levelAnnotation);
+            }
+            else
+            { // a tag layer
+              Layer labelLayer = (Layer)mappings.get("label_"+labelName).getValue();
+              if (labelLayer != null)
+              {
+                if (levelAnnotation.getId() == null) graph.addAnnotation(levelAnnotation);
+                Annotation labelAnnotation = new Annotation(
+                  null,
+                  labelValue, labelLayer.getId(), start.getId(), end.getId(), levelAnnotation.getId());
+                graph.addAnnotation(labelAnnotation);
+              } // label is mapped to a layer
+            } // a tag layer
+          } // next label
+        } // next item
+
+      } // next level      
+      
+      return graph;
+    }
+    catch(JSONException exception)
+    {
+      throw new SerializationException(
+        SerializationException.ErrorType.InvalidDocument,
+        name + ": Invalid JSON structure: " + exception.getMessage());
+    }
+  } // end of deserializeJson()
+ 
 } // end of class BundleSerialization

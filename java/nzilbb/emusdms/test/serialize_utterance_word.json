@@ -1463,7 +1463,7 @@
             {"id":"xi",	"label":"much",	"startId":"xf",	"endId":"xh",	"confidence":100},
             {"id":"xk",	"label":"on",	"startId":"xh",	"endId":"xj",	"confidence":100},
             {"id":"xm",	"label":"it",	"startId":"xj",	"endId":"xl",	"confidence":100},
-            {"id":"xn",	"label":"or ",	"startId":"xl",	"endId":"56",	"confidence":100},
+            {"id":"xn",	"label":"or",	"startId":"xl",	"endId":"56",	"confidence":100},
             {"id":"xp",	"label":"now",	"startId":"56",	"endId":"xo",	"confidence":100},
             {"id":"xr",	"label":"where",	"startId":"xo",	"endId":"xq",	"confidence":100},
             {"id":"xt",	"label":"is",	"startId":"xq",	"endId":"xs",	"confidence":100},

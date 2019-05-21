@@ -70,78 +70,6 @@
               "name": "phone",
               "value": "n"
             }]
-          },
-          {
-            "id": 22,
-            "sampleStart": 0,
-            "sampleDur": 6165,
-            "labels": [{
-              "name": "phone",
-              "value": "j"
-            }]
-          },
-          {
-            "id": 23,
-            "sampleStart": 6165,
-            "sampleDur": 3082,
-            "labels": [{
-              "name": "phone",
-              "value": "8"
-            }]
-          },
-          {
-            "id": 25,
-            "sampleStart": 9247,
-            "sampleDur": 1,
-            "labels": [{
-              "name": "phone",
-              "value": ""
-            }]
-          },
-          {
-            "id": 26,
-            "sampleStart": 9248,
-            "sampleDur": 3082,
-            "labels": [{
-              "name": "phone",
-              "value": "j"
-            }]
-          },
-          {
-            "id": 27,
-            "sampleStart": 12330,
-            "sampleDur": 6165,
-            "labels": [{
-              "name": "phone",
-              "value": "8"
-            }]
-          },
-          {
-            "id": 29,
-            "sampleStart": 18495,
-            "sampleDur": 1,
-            "labels": [{
-              "name": "phone",
-              "value": ""
-            }]
-          },
-          {
-            "id": 30,
-            "sampleStart": 18496,
-            "sampleDur": 6165,
-            "labels": [{
-              "name": "phone",
-              "value": "j"
-            }]
-          },
-          {
-            "id": 31,
-            "sampleStart": 24661,
-            "sampleDur": 3082,
-            "labels": [{
-              "name": "phone",
-              "value": "8"
-            }]
           }
         ]
       },
@@ -260,61 +188,7 @@
             "sampleDur": 6165,
             "labels": [{
               "name": "word",
-              "value": "or "
-            }]
-          },
-          {
-            "id": 21,
-            "sampleStart": 0,
-            "sampleDur": 9248,
-            "labels": [{
-              "name": "word",
-              "value": "yeah"
-            }]
-          },
-          {
-            "id": 24,
-            "sampleStart": 9248,
-            "sampleDur": 9248,
-            "labels": [{
-              "name": "word",
-              "value": "yeah"
-            }]
-          },
-          {
-            "id": 28,
-            "sampleStart": 18496,
-            "sampleDur": 9248,
-            "labels": [{
-              "name": "word",
-              "value": "yeah --"
-            }]
-          },
-          {
-            "id": 32,
-            "sampleStart": 27744,
-            "sampleDur": 9247,
-            "labels": [{
-              "name": "word",
-              "value": "well"
-            }]
-          },
-          {
-            "id": 33,
-            "sampleStart": 36991,
-            "sampleDur": 9248,
-            "labels": [{
-              "name": "word",
-              "value": "that's"
-            }]
-          },
-          {
-            "id": 34,
-            "sampleStart": 46239,
-            "sampleDur": 9248,
-            "labels": [{
-              "name": "word",
-              "value": "right"
+              "value": "or"
             }]
           }
         ]
@@ -322,26 +196,15 @@
       {
         "name": "utterance",
         "type": "SEGMENT",
-        "items": [
-          {
-            "id": 0,
-            "sampleStart": 0,
-            "sampleDur": 55487,
-            "labels": [{
-              "name": "utterance",
-              "value": "participant"
-            }]
-          },
-          {
-            "id": 20,
-            "sampleStart": 0,
-            "sampleDur": 55487,
-            "labels": [{
-              "name": "utterance",
-              "value": "interviewer"
-            }]
-          }
-        ]
+        "items": [{
+          "id": 0,
+          "sampleStart": 0,
+          "sampleDur": 55487,
+          "labels": [{
+            "name": "utterance",
+            "value": "participant"
+          }]
+        }]
       }
     ],
     "links": []
