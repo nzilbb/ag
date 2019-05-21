@@ -358,5 +358,15 @@ public class Parameter
       System.out.println(exception.toString());}
     return value;
   } // end of extractValue()
+
+  /**
+   * String representation of the parameter.
+   * @return String representation of the parameter.
+   */
+  public String toString()
+  {
+    return getName() + " ("+getType().getSimpleName()+") = " + getValue();
+  } // end of toString()
+  
   
 } // end of class SerializationParameter

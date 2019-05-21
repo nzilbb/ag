@@ -1,5 +1,5 @@
 //
-// Copyright 2015 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2019 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -33,7 +33,7 @@ import java.lang.annotation.Annotation;
  */
 @SuppressWarnings("serial")
 public class ParameterSet
-   extends LinkedHashMap<String,Parameter>
+  extends LinkedHashMap<String,Parameter>
 {   
   // Methods:
   
@@ -69,38 +69,74 @@ public class ParameterSet
       }
       catch(Exception exception) {}
     }
-  } // end of apply()
+  } // end of apply()  
   
-  
-   /**
-    * Adds parameters to this set which correspond to any fields of the class of the given object
-    * annotated as {@link ParameterField}s. 
-    * @param bean The object whose class may have {@link ParamaterField} attributes.
-    * @return A reference to this set.
-    */
-   @SuppressWarnings("rawtypes")
-   public ParameterSet addParameters(Object bean)
-   {
-     Class c = bean.getClass();
-     for (Field field : c.getDeclaredFields())
-     {
-       if (field.isAnnotationPresent(ParameterField.class))
-       {
-         ParameterField annotation = field.getAnnotation(ParameterField.class);
-         if (!containsKey(field.getName()))
-         { // parameter is not present
-           // so add it
-           String label = annotation.label();
-           if (label.length() == 0) label = field.getName();
-           Parameter p = new Parameter(
-             field.getName(), field.getType(), label, annotation.value(),
-             annotation.required());
-           p.extractValue(bean);
-           addParameter(p);
-         } // parameter is not present           
-       } // ParameterField
-     } // next field
+  /**
+   * Adds parameters to this set which correspond to any fields of the class of the given object
+   * annotated as {@link ParameterField}s. 
+   * @param bean The object whose class may have {@link ParamaterField} attributes.
+   * @return A reference to this set.
+   */
+  @SuppressWarnings("rawtypes")
+  public ParameterSet addParameters(Object bean)
+  {
+    Class c = bean.getClass();
+    for (Field field : c.getDeclaredFields())
+    {
+      if (field.isAnnotationPresent(ParameterField.class))
+      {
+        ParameterField annotation = field.getAnnotation(ParameterField.class);
+        if (!containsKey(field.getName()))
+        { // parameter is not present
+          // so add it
+          String label = annotation.label();
+          if (label.length() == 0) label = field.getName();
+          Parameter p = new Parameter(
+            field.getName(), field.getType(), label, annotation.value(),
+            annotation.required());
+          p.extractValue(bean);
+          addParameter(p);
+        } // parameter is not present           
+      } // ParameterField
+    } // next field
     return this;
-   } // end of addParameters()
+  } // end of addParameters()
+  
+  /**
+   * Returns a list of {@link Parameter}s that are marked as required, but which have no value set.
+   * @return A possibly empty list of parameters that should have a value but don't.
+   */
+  public ParameterSet unsetRequiredParameters()
+  {
+    ParameterSet unset = new ParameterSet();
+    for (Parameter p : values())
+    {
+      if (p.getRequired() && p.getValue() == null)
+      {
+        unset.addParameter(p);
+      }
+    }
+    return unset;
+  } // end of unsetRequiredParameters()
+
+  /**
+   * Returns a list of {@link Parameter}s that have a collection of possible values, but the
+   * assigned value is not among them.
+   * @return A possibly empty list of parameters that have a value not in {@link Parameter#possibleValues}.
+   */
+  public ParameterSet invalidValueParameters()
+  {
+    ParameterSet invalid = new ParameterSet();
+    for (Parameter p : values())
+    {
+      if (p.getPossibleValues() != null
+          && p.getValue() != null
+          && !p.getPossibleValues().contains(p.getValue()))
+      {
+        invalid.addParameter(p);
+      }
+    }
+    return invalid;
+  } // end of invalidValueParameters()
 
 } // end of class ParameterSet
