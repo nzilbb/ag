@@ -421,7 +421,22 @@ public class SqlGraphStore
       } // next layer
       schema.setParticipantLayerId("who");
     }
-    return (Schema)schema.clone();
+
+    Schema clone = (Schema)schema.clone();
+    for (Layer layer : schema.getLayers().values())
+    {
+      Layer layerCopy = clone.getLayer(layer.getId());
+      // clone the temporary attributes too
+      for (String key : layer.keySet())
+      {
+        if (key.startsWith("@"))
+        {
+          layerCopy.put(key, layer.get(key));
+        }
+      } // next attribute
+    } // next layer
+
+    return clone;
   }
 
 
