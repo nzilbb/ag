@@ -1009,6 +1009,22 @@ public class Graph
   {
     return toTag.createTag(layerId, label);
   } // end of createTag()
+  
+  /**
+   * Creates a tag and adds it to the graph.
+   * <p>This method has the same effect as:
+   * <code><var>graph</var>.addAnnotation(
+   *       <var>graph</var>.creatTag(<var>toTag</var>, <var>layerId</var>, <var>label</var>));</code>
+   * @param toTag The annotation to tag.
+   * @param layerId The tag layer ID.
+   * @param label The tag label.
+   * @return The tag annotation created.
+   * @see #createTag(Annotation,String,String)
+   */
+  public Annotation addTag(Annotation toTag, String layerId, String label)
+  {
+    return addAnnotation(createTag(toTag, layerId, label));
+  } // end of addTag()
 
   /**
    * Creates a spanning annotation from the beginning of the start annotation to the ending of the end annotation.
@@ -1025,6 +1041,25 @@ public class Graph
     getGraph().addAnnotation(span);
     return span;
   } // end of createSpan()
+   
+  /**
+   * Creates a spanning annotation from the beginning of the start annotation to the ending of
+   * the end annotation, and adds it to the graph.
+   * <p>This method has the same effect as:
+   * <code><var>graph</var>.addAnnotation(
+   *       <var>graph</var>createSpan(<var>from</var>, <var>to</var>, <var>layerId</var>, <var>label</var>, <var>parent</var>));</code>
+   * @param from The first annotation to span.
+   * @param to The last annotation to span.
+   * @param layerId The layer ID of the resulting annotation.
+   * @param label The label of the resulting annotation.
+   * @param parent The new annotation's parent.
+   * @return The new annotation.
+   * @see #createSpan(Annotation,Annotation,String,label,parent)
+   */
+  public Annotation addSpan(Annotation from, Annotation to, String layerId, String label, Annotation parent)
+  {
+    return addAnnotation(createSpan(from, to, layerId, label, parent));
+  } // end of addSpan()
    
   /**
    * Creates a spanning annotation from the beginning of the start annotation to the ending of the end annotation. The parent annotation is guessed, if possible, from <var>from</var> or <var>to</var>
@@ -1072,6 +1107,25 @@ public class Graph
   } // end of createSpan()
 
   /**
+   * Creates a spanning annotation from the beginning of the start annotation to the ending of
+   * the end annotation and adds it to the graph. The parent annotation is guessed, if possible,
+   * from <var>from</var> or <var>to</var>.
+   * <p>This method has the same effect as:
+   * <code><var>graph</var>.addAnnotation(
+   *       <var>graph</var>.createSpan(<var>from</var>, <var>to</var>, <var>layerId</var>, <var>label</var>));</code>
+   * @param from The first annotation to span.
+   * @param to The last annotation to span.
+   * @param layerId The layer ID of the resulting annotation.
+   * @param label The label of the resulting annotation.
+   * @return The new annotation.
+   * @see #createSpan(Annotation,Annotation,String,String)
+   */
+  public Annotation addSpan(Annotation from, Annotation to, String layerId, String label)
+  {
+    return addAnnotation(createSpan(from, to, layerId, label));
+  } // end of addSpan()
+
+  /**
    * Creates an annotation starting at <var>from</var> and ending at <var>to</var>.
    * @param from The start anchor.
    * @param to The end anchor.
@@ -1088,6 +1142,24 @@ public class Graph
     Annotation span = new Annotation(null, label, layerId, from.getId(), to.getId(), parent.getId());
     getGraph().addAnnotation(span);
     return span;
+  } // end of createAnnotation()
+
+  /**
+   * Creates an annotation starting at <var>from</var> and ending at <var>to</var>, and adds it
+   * to the graph.
+   * <p>This method has the same effect as:
+   * <code><var>graph</var>.addAnnotation(
+   *       <var>graph</var>.createAnnotation(<var>from</var>, <var>to</var>, <var>layerId</var>, <var>label</var>, <var>parent</var>));</code>
+   * @param from The start anchor.
+   * @param to The end anchor.
+   * @param layerId The layer ID of the resulting annotation.
+   * @param label The label of the resulting annotation.
+   * @param parent The new annotation's parent.
+   * @return The new annotation.
+   */
+  public Annotation addAnnotation(Anchor from, Anchor to, String layerId, String label, Annotation parent)
+  {
+    return addAnnotation(createAnnotation(from, to, layerId, label, parent));
   } // end of createAnnotation()
 
   // query methods
