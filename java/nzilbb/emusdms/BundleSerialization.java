@@ -708,7 +708,7 @@ public class BundleSerialization
   public SerializationDescriptor getDescriptor()
   {
     return new SerializationDescriptor(
-      "EMU-SDMS Bundle", "0.02", "application/emusdms+json", ".json", "20190521.1036",
+      "EMU-SDMS Bundle", "0.02", "application/emusdms+json", ".json", "20190523.1453",
       getClass().getResource("icon.png"));
   }
   
@@ -1094,23 +1094,23 @@ public class BundleSerialization
       graph.setId(top.getString("name"));
       graph.setOffsetGranularity(1/sampleRate);
 
+      String rootId = graph.getSchema().getRoot().getId();
       for (Parameter p : mappings.values())
       {
         Layer layer = (Layer)p.getValue();
         if (layer != null)
         {
-          graph.addLayer((Layer)layer.clone());
-        }
+          // if it's a tag layer
+          if (layer.getAlignment() == Constants.ALIGNMENT_NONE)
+          { // it has the same parent as the schema we were given
+            graph.addLayer((Layer)layer.clone());
+          }
+          else // an aligned layer
+          { // so the parent is the graph itself
+            graph.addLayer(((Layer)layer.clone()).setParentId(rootId));
+          }            
+        } // there's a mapped layer
       } // next parameter
-      // // ensure layers are connected to the root of the schema
-      // for (Layer layer : graph.getSchema().getLayers().values())
-      // {
-      //   if (layer.getParent() == null && layer != graph.getSchema().getRoot())
-      //   {
-      //     System.out.println("Rooting layer " + layer);
-      //     layer.setParentId(graph.getSchema().getRoot().getId());
-      //   }
-      // }
       
       graph.setOffsetUnits(Constants.UNIT_SECONDS);
       
@@ -1139,7 +1139,10 @@ public class BundleSerialization
             start.getOffset() + item.getDouble("sampleDur")/sampleRate);
           graph.addAnchor(end);
           Annotation levelAnnotation = new Annotation(
-            null, "", levelLayer.getId(), start.getId(), end.getId());
+            null, // let the graph assign the ID
+            "", // we'll fill in the label when we get to it
+            levelLayer.getId(), start.getId(), end.getId(),
+            graph.getId()); // aligned layers are children of the graph
           // read all labels
           JSONArray labels = item.getJSONArray("labels");
           for (int lb = 0; lb < labels.length(); lb++)
@@ -1151,6 +1154,7 @@ public class BundleSerialization
             if (labelName.equals(levelName))
             {
               levelAnnotation.setLabel(labelValue);
+              // now we know it's not an empty interval, we can add it to the graph
               graph.addAnnotation(levelAnnotation);
             }
             else
@@ -1158,11 +1162,10 @@ public class BundleSerialization
               Layer labelLayer = (Layer)mappings.get("label_"+labelName).getValue();
               if (labelLayer != null)
               {
+                // ensure the level annotation is in the graph, as it's the parent
                 if (levelAnnotation.getId() == null) graph.addAnnotation(levelAnnotation);
-                Annotation labelAnnotation = new Annotation(
-                  null,
-                  labelValue, labelLayer.getId(), start.getId(), end.getId(), levelAnnotation.getId());
-                graph.addAnnotation(labelAnnotation);
+                // create a tag annotation
+                graph.addTag(levelAnnotation, labelLayer.getId(), labelValue);
               } // label is mapped to a layer
             } // a tag layer
           } // next label
