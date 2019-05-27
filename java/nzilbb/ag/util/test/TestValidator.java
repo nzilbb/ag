@@ -257,20 +257,20 @@ public class TestValidator
                    new Change(Change.Operation.Update, g.getAnnotation("word3"), "parentId", "turn2"), 
                    order.next());
       assertEquals("moved to new turn - update ordinal", 
-                   new Change(Change.Operation.Update, g.getAnnotation("word3"), "ordinal", new Integer(1)), 
+                   new Change(Change.Operation.Update, g.getAnnotation("word3"), "ordinal", Integer.valueOf(1)), 
                    order.next());
       assertEquals("moved to new turn - prefer same speaker", 
                    new Change(Change.Operation.Update, g.getAnnotation("word4"), "parentId", "turn3"), 
                    order.next());
       assertEquals(1, g.getAnnotation("word4").getOrdinal());
       assertEquals("moved to new turn - update ordinal", 
-                   new Change(Change.Operation.Update, g.getAnnotation("word4"), "ordinal", new Integer(1)), 
+                   new Change(Change.Operation.Update, g.getAnnotation("word4"), "ordinal", Integer.valueOf(1)), 
                    order.next());
       assertEquals("moved to new turn - same speaker", 
                    new Change(Change.Operation.Update, g.getAnnotation("word5"), "parentId", "turn3"), 
                    order.next());
       assertEquals("moved to new turn - update ordinal", 
-                   new Change(Change.Operation.Update, g.getAnnotation("word5"), "ordinal", new Integer(2)), 
+                   new Change(Change.Operation.Update, g.getAnnotation("word5"), "ordinal", Integer.valueOf(2)), 
                    order.next());
       assertEquals("" + g.getAnnotation("word6").getChange(), "turn3", g.getAnnotation("word6").getParentId());
       assertEquals("parent on wrong layer", 
@@ -279,7 +279,7 @@ public class TestValidator
       assertEquals(3, g.getAnnotation("word6").getOrdinal());
       // setting the ordinal doesn't count as a change, because ordinal is not set in the first place
       // assertEquals("parent on wrong layer - update ordinal", 
-      // 	      new Change(Change.Operation.Update, g.getAnnotation("word6"), "ordinal", new Integer(3)), 
+      // 	      new Change(Change.Operation.Update, g.getAnnotation("word6"), "ordinal", Integer.valueOf(3)), 
       // 	      order.next());
       assertFalse(order.hasNext());
       assertEquals("no extra changes to graph - " + changes + " vs. " +g.getChanges(), changes.size(), g.getChanges().size());
@@ -519,10 +519,10 @@ public class TestValidator
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       Iterator<Change> order = changes.iterator();
       assertEquals("children out of order - update ordinal", 
-                   new Change(Change.Operation.Update, g.getAnnotation("word2"), "ordinal", new Integer(2)), 
+                   new Change(Change.Operation.Update, g.getAnnotation("word2"), "ordinal", Integer.valueOf(2)), 
                    order.next());
       // assertEquals("children out of order - update ordinal", 
-      // 	      new Change(Change.Operation.Update, g.getAnnotation("word3"), "ordinal", new Integer(3)), 
+      // 	      new Change(Change.Operation.Update, g.getAnnotation("word3"), "ordinal", Integer.valueOf(3)), 
       // 	      order.next());
       assertEquals(4, g.getAnnotation("word5").getOrdinal());
       // deletion should cause updated ordinals of subsequent annotations, but this is actually
@@ -533,11 +533,11 @@ public class TestValidator
       assertTrue("update ordinal after deleted annotation", 
                  g.getChanges().contains(
                    new Change(Change.Operation.Update, g.getAnnotation("word5"), 
-                              "ordinal", new Integer(4))));
+                              "ordinal", Integer.valueOf(4))));
       assertTrue("update ordinal after deleted annotation", 
                  g.getChanges().contains(
                    new Change(Change.Operation.Update, g.getAnnotation("word6"), 
-                              "ordinal", new Integer(5))));
+                              "ordinal", Integer.valueOf(5))));
       // assertEquals("three extra changes to graph, the deletion and two ordinal updates" + g.getChanges(), changes.size() + 3, g.getChanges().size());
     }
     catch(TransformationException exception)
@@ -661,7 +661,7 @@ public class TestValidator
                    new Change(Change.Operation.Create, g.getAnchor("1")), 
                    order.next());
       assertEquals("word share start anchors - new anchor copies offset: " + changes, 
-                   new Change(Change.Operation.Update, g.getAnchor("1"), "offset", new Double(4.0)), 
+                   new Change(Change.Operation.Update, g.getAnchor("1"), "offset", Double.valueOf(4.0)), 
                    order.next());
       assertNotEquals("word share start anchors - not shared any more: " + changes, 
                       g.getAnnotation("word6").getStartId(), 
@@ -804,17 +804,17 @@ public class TestValidator
       // quick
       assertEquals("previous start kept", "a2", g.getAnnotation("word2").getStartId());
       assertEquals("previous start offset unchanged", 
-                   new Double(2.0), g.getAnnotation("word2").getStart().getOffset());
+                   Double.valueOf(2.0), g.getAnnotation("word2").getStart().getOffset());
       assertEquals("previous end kept", "a3", g.getAnnotation("word2").getEndId());
       assertNull("previous end offset reset", 
                  g.getAnnotation("word2").getEnd().getOffset());
       // brown
       assertEquals("next start kept", "a2.6", g.getAnnotation("word3").getStartId());
       assertEquals("next end offset kept", 
-                   new Double(2.6), g.getAnnotation("word3").getStart().getOffset());
+                   Double.valueOf(2.6), g.getAnnotation("word3").getStart().getOffset());
       assertEquals("next end kept", "a4", g.getAnnotation("word3").getEndId());
       assertEquals("next end offset unchanged", 
-                   new Double(4.0), g.getAnnotation("word3").getEnd().getOffset());
+                   Double.valueOf(4.0), g.getAnnotation("word3").getEnd().getOffset());
 
       // fox
       assertEquals("trailing word start shared", g.getAnnotation("word3").getEndId(),
@@ -829,7 +829,7 @@ public class TestValidator
       // I
       assertEquals("child start unchanged", "a2.5", g.getAnnotation("phone5").getStartId());
       assertEquals("next start offset unchanged", 
-                   new Double(2.5), g.getAnnotation("phone5").getStart().getOffset());
+                   Double.valueOf(2.5), g.getAnnotation("phone5").getStart().getOffset());
       assertEquals("child end unchanged", "a2.75", g.getAnnotation("phone5").getEndId());
       assertNull("child end reset offset", g.getAnnotation("phone5").getEnd().getOffset());
       // k
@@ -843,14 +843,14 @@ public class TestValidator
                    g.getAnnotation("phone7").getStartId());
       assertEquals("child end kept", "a2.8", g.getAnnotation("phone7").getEndId());
       assertEquals("child end offset kept", 
-                   new Double(2.8), g.getAnnotation("phone7").getEnd().getOffset());
+                   Double.valueOf(2.8), g.getAnnotation("phone7").getEnd().getOffset());
       // r
       assertEquals("child start kept", "a2.8", g.getAnnotation("phone8").getStartId());
       assertEquals("child start offset kept", 
-                   new Double(2.8), g.getAnnotation("phone8").getStart().getOffset());
+                   Double.valueOf(2.8), g.getAnnotation("phone8").getStart().getOffset());
       assertEquals("child end unchanged", "a3.2", g.getAnnotation("phone8").getEndId());
       assertEquals("next end offset unchanged", 
-                   new Double(3.2), g.getAnnotation("phone8").getEnd().getOffset());
+                   Double.valueOf(3.2), g.getAnnotation("phone8").getEnd().getOffset());
       // au
       assertEquals("child start unchanged", "a3.2", g.getAnnotation("phone9").getStartId());
       assertEquals("child end unchanged", "a3.5", g.getAnnotation("phone9").getEndId());
@@ -1000,21 +1000,21 @@ public class TestValidator
 	 
       // word start has been reset
       assertNull(g.getAnchor("a2b").getOffset());
-      assertEquals(new Integer(Constants.CONFIDENCE_NONE), 
+      assertEquals(Integer.valueOf(Constants.CONFIDENCE_NONE), 
                    g.getAnchor("a2b").getConfidence());
       // phones are the same as before
-      assertEquals(new Double(2.25), g.getAnchor("a2.25").getOffset());
-      assertEquals(new Integer(Constants.CONFIDENCE_MANUAL), 
+      assertEquals(Double.valueOf(2.25), g.getAnchor("a2.25").getOffset());
+      assertEquals(Integer.valueOf(Constants.CONFIDENCE_MANUAL), 
                    g.getAnchor("a2.25").getConfidence());
-      assertEquals(new Double(2.5), g.getAnchor("a2.5").getOffset());
-      assertEquals(new Integer(Constants.CONFIDENCE_MANUAL), 
+      assertEquals(Double.valueOf(2.5), g.getAnchor("a2.5").getOffset());
+      assertEquals(Integer.valueOf(Constants.CONFIDENCE_MANUAL), 
                    g.getAnchor("a2.5").getConfidence());
-      assertEquals(new Double(2.75), g.getAnchor("a2.75").getOffset());
-      assertEquals(new Integer(Constants.CONFIDENCE_MANUAL), 
+      assertEquals(Double.valueOf(2.75), g.getAnchor("a2.75").getOffset());
+      assertEquals(Integer.valueOf(Constants.CONFIDENCE_MANUAL), 
                    g.getAnchor("a2.75").getConfidence());
       // word end has been reset
       assertNull(g.getAnchor("a3a").getOffset());
-      assertEquals(new Integer(Constants.CONFIDENCE_NONE), 
+      assertEquals(Integer.valueOf(Constants.CONFIDENCE_NONE), 
                    g.getAnchor("a3a").getConfidence());
 
       // annotations still linked as before
@@ -1033,12 +1033,12 @@ public class TestValidator
       assertNull("same confidence - start reset", 
                  g.getAnchor("a4.75").getOffset());
       assertEquals("same confidence - start reset", 
-                   new Integer(Constants.CONFIDENCE_NONE), 
+                   Integer.valueOf(Constants.CONFIDENCE_NONE), 
                    g.getAnchor("a4.75").getConfidence());
       assertEquals("same confidence - end kept", 
-                   new Double(4.25), g.getAnchor("a4.25").getOffset());
+                   Double.valueOf(4.25), g.getAnchor("a4.25").getOffset());
       assertEquals("same confidence - end reset", 
-                   new Integer(Constants.CONFIDENCE_AUTOMATIC), 
+                   Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC), 
                    g.getAnchor("a4.25").getConfidence());
 
       assertEquals("a4.75", g.getAnnotation("word5").getStartId());
@@ -1180,22 +1180,22 @@ public class TestValidator
       // check the anchoring is what we expect
 	 
       // start the same as before
-      assertEquals(new Double(2.5), g.getAnchor("a2.5").getOffset());
-      assertEquals(new Integer(Constants.CONFIDENCE_AUTOMATIC), 
+      assertEquals(Double.valueOf(2.5), g.getAnchor("a2.5").getOffset());
+      assertEquals(Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC), 
                    g.getAnchor("a2.5").getConfidence());
-      assertEquals(new Double(2.75), g.getAnchor("a2.75").getOffset());
-      assertEquals(new Integer(Constants.CONFIDENCE_AUTOMATIC), 
+      assertEquals(Double.valueOf(2.75), g.getAnchor("a2.75").getOffset());
+      assertEquals(Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC), 
                    g.getAnchor("a2.75").getConfidence());
-      assertEquals(new Double(3.0), g.getAnchor("a3.0").getOffset());
-      assertEquals(new Integer(Constants.CONFIDENCE_AUTOMATIC), 
+      assertEquals(Double.valueOf(3.0), g.getAnchor("a3.0").getOffset());
+      assertEquals(Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC), 
                    g.getAnchor("a3.0").getConfidence());
 
       // last two have been reset
       assertNull(g.getAnchor("a2.0").getOffset());
-      assertEquals(new Integer(Constants.CONFIDENCE_NONE), 
+      assertEquals(Integer.valueOf(Constants.CONFIDENCE_NONE), 
                    g.getAnchor("a2.0").getConfidence());
       assertNull(g.getAnchor("a2.25").getOffset());
-      assertEquals(new Integer(Constants.CONFIDENCE_NONE), 
+      assertEquals(Integer.valueOf(Constants.CONFIDENCE_NONE), 
                    g.getAnchor("a2.25").getConfidence());
 
       // annotations still linked as before
@@ -1299,19 +1299,19 @@ public class TestValidator
       // check the anchoring is what we expect
 	 
       // same as before...
-      assertEquals("unchanged", new Double(120.0), g.getAnchor("turnStart").getOffset());
-      assertEquals("unchanged", new Double(129.1), g.getAnchor("thanStart").getOffset());
+      assertEquals("unchanged", Double.valueOf(120.0), g.getAnchor("turnStart").getOffset());
+      assertEquals("unchanged", Double.valueOf(129.1), g.getAnchor("thanStart").getOffset());
       // changed...
       assertNull("reset", g.getAnchor("a1Start").getOffset());
       assertNull("reset", g.getAnchor("nStart").getOffset());
       assertNull("reset", g.getAnchor("thatStart").getOffset());
       // same as before...
-      assertEquals("unchanged", new Double(129.5), g.getAnchor("a2Start").getOffset());
-      assertEquals("unchanged", new Double(129.6), g.getAnchor("tStart").getOffset());
-      assertEquals("unchanged", new Double(129.7), g.getAnchor("yeahStart").getOffset());
-      assertEquals("unchanged", new Double(129.8), g.getAnchor("eahStart").getOffset());
-      assertEquals("unchanged", new Double(129.9), g.getAnchor("yeahEnd").getOffset());
-      assertEquals("unchanged", new Double(140.0), g.getAnchor("turnEnd").getOffset());
+      assertEquals("unchanged", Double.valueOf(129.5), g.getAnchor("a2Start").getOffset());
+      assertEquals("unchanged", Double.valueOf(129.6), g.getAnchor("tStart").getOffset());
+      assertEquals("unchanged", Double.valueOf(129.7), g.getAnchor("yeahStart").getOffset());
+      assertEquals("unchanged", Double.valueOf(129.8), g.getAnchor("eahStart").getOffset());
+      assertEquals("unchanged", Double.valueOf(129.9), g.getAnchor("yeahEnd").getOffset());
+      assertEquals("unchanged", Double.valueOf(140.0), g.getAnchor("turnEnd").getOffset());
 
     }
     catch(TransformationException exception)
@@ -1392,11 +1392,11 @@ public class TestValidator
       // check the anchoring is what we expect
 	 
       // same as before...
-      assertEquals("unchanged", new Double(120.0), g.getAnchor("turnStart").getOffset());
-      assertEquals("unchanged", new Double(129.1), g.getAnchor("thanStart").getOffset());
-      assertEquals("unchanged", new Double(130.6), g.getAnchor("a1Start").getOffset());
-      assertEquals("unchanged", new Double(131.3), g.getAnchor("nStart").getOffset());
-      assertEquals("unchanged", new Double(131.4), g.getAnchor("thatStart").getOffset());
+      assertEquals("unchanged", Double.valueOf(120.0), g.getAnchor("turnStart").getOffset());
+      assertEquals("unchanged", Double.valueOf(129.1), g.getAnchor("thanStart").getOffset());
+      assertEquals("unchanged", Double.valueOf(130.6), g.getAnchor("a1Start").getOffset());
+      assertEquals("unchanged", Double.valueOf(131.3), g.getAnchor("nStart").getOffset());
+      assertEquals("unchanged", Double.valueOf(131.4), g.getAnchor("thatStart").getOffset());
       // changed...
       assertNull("reset", g.getAnchor("a2Start").getOffset());
       assertNull("reset", g.getAnchor("tStart").getOffset());
@@ -1404,7 +1404,7 @@ public class TestValidator
       assertNull("reset", g.getAnchor("eahStart").getOffset());
       assertNull("reset", g.getAnchor("yeahEnd").getOffset());
       // same as before...
-      assertEquals("unchanged", new Double(140.0), g.getAnchor("turnEnd").getOffset());
+      assertEquals("unchanged", Double.valueOf(140.0), g.getAnchor("turnEnd").getOffset());
 
     }
     catch(TransformationException exception)
@@ -1485,19 +1485,19 @@ public class TestValidator
       // check the anchoring is what we expect
 	 
       // same as before...
-      assertEquals("unchanged", new Double(120.0), g.getAnchor("turnStart").getOffset());
-      assertEquals("unchanged", new Double(129.1), g.getAnchor("thanStart").getOffset());
+      assertEquals("unchanged", Double.valueOf(120.0), g.getAnchor("turnStart").getOffset());
+      assertEquals("unchanged", Double.valueOf(129.1), g.getAnchor("thanStart").getOffset());
       // changed...
       assertNull("reset", g.getAnchor("a1Start").getOffset());
       assertNull("reset", g.getAnchor("nStart").getOffset());
       assertNull("reset", g.getAnchor("thatStart").getOffset());
       // same as before...
-      assertEquals("unchanged", new Double(129.5), g.getAnchor("a2Start").getOffset());
-      assertEquals("unchanged", new Double(129.6), g.getAnchor("tStart").getOffset());
-      assertEquals("unchanged", new Double(129.7), g.getAnchor("yeahStart").getOffset());
-      assertEquals("unchanged", new Double(129.8), g.getAnchor("eahStart").getOffset());
-      assertEquals("unchanged", new Double(129.9), g.getAnchor("yeahEnd").getOffset());
-      assertEquals("unchanged", new Double(140.0), g.getAnchor("turnEnd").getOffset());
+      assertEquals("unchanged", Double.valueOf(129.5), g.getAnchor("a2Start").getOffset());
+      assertEquals("unchanged", Double.valueOf(129.6), g.getAnchor("tStart").getOffset());
+      assertEquals("unchanged", Double.valueOf(129.7), g.getAnchor("yeahStart").getOffset());
+      assertEquals("unchanged", Double.valueOf(129.8), g.getAnchor("eahStart").getOffset());
+      assertEquals("unchanged", Double.valueOf(129.9), g.getAnchor("yeahEnd").getOffset());
+      assertEquals("unchanged", Double.valueOf(140.0), g.getAnchor("turnEnd").getOffset());
 
     }
     catch(TransformationException exception)
@@ -1568,15 +1568,15 @@ public class TestValidator
       // check the anchoring is what we expect
 	 
       // same as before...
-      assertEquals("unchanged", new Double(120.0), g.getAnchor("turnStart").getOffset());
-      assertEquals("unchanged", new Double(129.1), g.getAnchor("thanStart").getOffset());
-      assertEquals("unchanged", new Double(130.6), g.getAnchor("a1Start").getOffset());
-      assertEquals("unchanged", new Double(131.3), g.getAnchor("nStart").getOffset());
-      assertEquals("unchanged", new Double(131.4), g.getAnchor("thatStart").getOffset());
+      assertEquals("unchanged", Double.valueOf(120.0), g.getAnchor("turnStart").getOffset());
+      assertEquals("unchanged", Double.valueOf(129.1), g.getAnchor("thanStart").getOffset());
+      assertEquals("unchanged", Double.valueOf(130.6), g.getAnchor("a1Start").getOffset());
+      assertEquals("unchanged", Double.valueOf(131.3), g.getAnchor("nStart").getOffset());
+      assertEquals("unchanged", Double.valueOf(131.4), g.getAnchor("thatStart").getOffset());
       // changed...
       assertNull("reset", g.getAnchor("thatEnd").getOffset());
       // same as before...
-      assertEquals("unchanged", new Double(140.0), g.getAnchor("turnEnd").getOffset());
+      assertEquals("unchanged", Double.valueOf(140.0), g.getAnchor("turnEnd").getOffset());
 
     }
     catch(TransformationException exception)
@@ -1657,19 +1657,19 @@ public class TestValidator
       // check the anchoring is what we expect
 	 
       // same as before...
-      assertEquals("unchanged", new Double(120.0), g.getAnchor("turnStart").getOffset());
-      assertEquals("unchanged", new Double(129.1), g.getAnchor("thanStart").getOffset());
+      assertEquals("unchanged", Double.valueOf(120.0), g.getAnchor("turnStart").getOffset());
+      assertEquals("unchanged", Double.valueOf(129.1), g.getAnchor("thanStart").getOffset());
       // changed...
-      assertEquals("unchanged", new Double(129.6), g.getAnchor("a1Start").getOffset());
+      assertEquals("unchanged", Double.valueOf(129.6), g.getAnchor("a1Start").getOffset());
       assertNull("reset", g.getAnchor("nStart").getOffset());
       assertNull("reset", g.getAnchor("thatStart").getOffset());
       assertNull("reset", g.getAnchor("a2Start").getOffset());
       assertNull("reset", g.getAnchor("tStart").getOffset());
       // same as before...
-      assertEquals("unchanged", new Double(129.7), g.getAnchor("yeahStart").getOffset());
-      assertEquals("unchanged", new Double(129.8), g.getAnchor("eahStart").getOffset());
-      assertEquals("unchanged", new Double(129.9), g.getAnchor("yeahEnd").getOffset());
-      assertEquals("unchanged", new Double(140.0), g.getAnchor("turnEnd").getOffset());
+      assertEquals("unchanged", Double.valueOf(129.7), g.getAnchor("yeahStart").getOffset());
+      assertEquals("unchanged", Double.valueOf(129.8), g.getAnchor("eahStart").getOffset());
+      assertEquals("unchanged", Double.valueOf(129.9), g.getAnchor("yeahEnd").getOffset());
+      assertEquals("unchanged", Double.valueOf(140.0), g.getAnchor("turnEnd").getOffset());
 
     }
     catch(TransformationException exception)
@@ -1958,6 +1958,8 @@ public class TestValidator
     g.addLayer(new Layer("phrase", "Phrase structure", 0, true, true, false, "turn", true));
 
     g.addAnchor(new Anchor("turnStart", 0.0));
+    assertNotNull("Turn start anchor in graph",
+                  g.getAnchor("turnStart"));
     g.addAnchor(new Anchor("a1", 1.0));
     g.addAnchor(new Anchor("a1.5", 1.5));
     g.addAnchor(new Anchor("a2", 2.0));
@@ -2022,11 +2024,20 @@ public class TestValidator
 
     // create fragment
     Vector<String> layers = new Vector<String>();
+    layers.add("turn");
     layers.add("utterance");
     layers.add("word");
     layers.add("phone");
     assertEquals(2, g.getAnnotation("utterance2").getOrdinal());
-    Graph f = g.getFragment(utterance2, layers.toArray(new String[0]));
+    assertEquals("Turn start ID in graph",
+                 "turnStart", g.getAnnotation("turn1").getStartId());
+    assertNotNull("Turn start anchor in graph",
+               g.getAnchor("turnStart"));
+    Graph f = g.getFragment(utterance2, g.getSchema().getLayers().keySet().toArray(new String[0]));
+    assertEquals("Turn start ID in fragment",
+                 "turnStart", f.getAnnotation("turn1").getStartId());
+    assertNull("Turn start anchor not in fragment",
+               f.getAnchor("turnStart"));
     assertEquals(2, f.getAnnotation("utterance2").getOrdinal());
     f.getAnnotation("turn1").getAnnotations("word");
     assertEquals("word ordinal before validation",
