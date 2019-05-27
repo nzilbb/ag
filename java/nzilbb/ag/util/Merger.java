@@ -711,6 +711,11 @@ public class Merger
         checkChildrenForMerge(layer, graph));
     } // next layer
 
+    // remove any dummy anchors before validation
+    // (for merging fragments, it's important they're not there)
+    for (Anchor dummy : dummyAnchors) graph.getAnchors().remove(dummy.getId());
+    for (Anchor dummy : dummyEditedAnchors) editedGraph.getAnchors().remove(dummy.getId());
+
     if (validator != null)
     {
       log("phase 6: validate");
@@ -737,10 +742,6 @@ public class Merger
         graph.getAnchors().remove(a.getId());
       }
     } // next anchor
-
-      // remove any dummy anchors
-    for (Anchor dummy : dummyAnchors) graph.getAnchors().remove(dummy.getId());
-    for (Anchor dummy : dummyEditedAnchors) editedGraph.getAnchors().remove(dummy.getId());      
 
     // unlink counterparts, so that either graph can be garbage-collected with the other still referenced
     for (Annotation a : graph.getAnnotationsById().values()) unsetCounterparts(a);
