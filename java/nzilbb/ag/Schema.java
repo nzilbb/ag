@@ -325,6 +325,11 @@ public class Schema
 
     getLayers().put(layer.getId(), layer);
 
+    if (layer.getParentId() == null
+        && !layer.getId().equals(getRoot().getId()))
+    {
+      layer.setParentId(getRoot().getId());
+    }
     // set their parent
     if (layer.getParentId() != null)
     {
