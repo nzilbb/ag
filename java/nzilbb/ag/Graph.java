@@ -354,6 +354,7 @@ public class Graph
     {	 
       if (layerSet.contains(layer.getId()))
       {
+        if (layer.getId().equals(getSchema().getRoot().getId())) continue;
         fragment.addLayer((Layer)layer.clone());
         for (Annotation annotation : list(layer.getId()))
         {
@@ -406,21 +407,36 @@ public class Graph
     fragment.getSchema().setCorpusLayerId(graph.getSchema().getCorpusLayerId());
     Layer layer = getLayer(definingAnnotation.getLayerId());
     if (layer != null)
-    {	 
+    {
       // add the layer
       fragment.addLayer((Layer)layer.clone());
-      // add the anchors
       fragment.addAnchor((Anchor)definingAnnotation.getStart().clone());
       fragment.addAnchor((Anchor)definingAnnotation.getEnd().clone());
 	 
       ensureAllAncestorsPresentInFragment(definingAnnotation, fragment);
-
       // add the annotation
       fragment.addAnnotation((Annotation)definingAnnotation.clone());
     }
-    // add descendants
-    for (String layerId : layerIds)
+    Anchor firstAnchor = definingAnnotation.getStart();
+    Anchor lastAnchor = definingAnnotation.getEnd();
+    
+    // add other layers, top-down
+    final LinkedHashSet<String> layerIdSet = new LinkedHashSet<String>();
+    for (String id : layerIds) layerIdSet.add(id);
+    LayerHierarchyTraversal<Vector<String>> topDownLayers
+      = new LayerHierarchyTraversal<Vector<String>>(new Vector<String>(), getSchema()) {
+          protected void pre(Layer layer)
+          {
+            if (layerIdSet.contains(layer.getId()))
+            {
+              result.add(layer.getId());
+            }
+          }
+        };
+    
+    for (String layerId : topDownLayers.getResult())
     {
+      if (layerId.equals(getSchema().getRoot().getId())) continue;
       layer = getLayer(layerId);
       if (layer != null)
       {
@@ -430,17 +446,30 @@ public class Graph
         for (Annotation annotation : definingAnnotation.list(layerId))
         {
           ensureAllAncestorsPresentInFragment(annotation, fragment);
-          // add the anchors
-          fragment.addAnchor((Anchor)annotation.getStart().clone());
-          fragment.addAnchor((Anchor)annotation.getEnd().clone());
-          // add the annotation
-          fragment.addAnnotation((Annotation)annotation.clone());
+          // add the anchors that fit
+          if (fragment.getAnchor(annotation.getStart().getId()) == null
+              && (annotation.getStart().getOffset() == null
+                  || definingAnnotation.includesOffset(annotation.getStart().getOffset())))
+          {
+            fragment.addAnchor((Anchor)annotation.getStart().clone());
+          }
+          if (fragment.getAnchor(annotation.getEnd().getId()) == null
+              && (annotation.getEnd().getOffset() == null
+                  || definingAnnotation.includesOffset(annotation.getEnd().getOffset())
+                  // 'includesOffset' == false if annotation.end.offset == end.offset, so:
+                  || annotation.getEnd().getOffset().equals(lastAnchor.getOffset())))
+          {
+            fragment.addAnchor((Anchor)annotation.getEnd().clone());
+          }
+          if (fragment.getAnnotation(annotation.getId()) == null)
+          {
+            // add the annotation
+            fragment.addAnnotation((Annotation)annotation.clone());
+          }
         } // next annotation
       } // layer exists
     } // next layer
       
-    Anchor firstAnchor = definingAnnotation.getStart();
-    Anchor lastAnchor = definingAnnotation.getEnd();
     if (getId() != null) 
     {
       fragment.setId(FragmentId(this, firstAnchor, lastAnchor));
@@ -479,6 +508,7 @@ public class Graph
       double endOffset = bounds.getEnd().getOffset();
       for (String layerId : layerIds)
       {
+        if (layerId.equals(getSchema().getRoot().getId())) continue;
         Layer layer = getLayer(layerId);
         if (layer != null)
         {
@@ -513,7 +543,8 @@ public class Graph
   } // end of getFragment()
 
   /**
-   * Ensures all the given annotation's ancestors are in the given fragment, and that they're ordinal minima are correct.
+   * Ensures all the given annotation's ancestors are in the given fragment, and that they're
+   * ordinal minima are correct. 
    * @param annotation
    * @param fragment
    */
@@ -531,7 +562,7 @@ public class Graph
         { // add the parent
           if (!fragment.schema.getLayers().containsKey(ancestor.getLayerId()))
           { // add the ancestor's layer
-            fragment.addLayer(getLayer(ancestor.getLayerId()));
+            fragment.addLayer((Layer)getLayer(ancestor.getLayerId()).clone());
           }
           // ensure it's ordinal ends up correct
           ensureMinimumOrdinalSpecified(ancestor, fragment);
@@ -618,6 +649,12 @@ public class Graph
 
     // add to annotations collection
     getAnnotationsById().put(annotation.getId(), annotation);
+
+    if (annotation.getParent() == null
+        && annotation.getLayerId().equals(getSchema().getRoot().getId()))
+    {
+      annotation.setParentId(getId());
+    }
 
     // add to the parent's collection
     if (annotation.getParent() != null)
@@ -895,14 +932,17 @@ public class Graph
   public Vector<Change> shiftAnchors(double offset)
   {
     Vector<Change> changes = new Vector<Change>();
-    for (Anchor a : getAnchors().values())
+    if (offset != 0.0)
     {
-      if (a.getOffset() != null)
+      for (Anchor a : getAnchors().values())
       {
-        changes.addAll( // record changes of:
+        if (a.getOffset() != null)
+        {
+          changes.addAll( // record changes of:
           a.setOffset(a.getOffset() + offset));
-      }
-    } // next anchor
+        }
+      } // next anchor
+    }
     return changes;
   } // end of shiftAnchors()
    
