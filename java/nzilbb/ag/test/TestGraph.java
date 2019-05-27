@@ -1030,7 +1030,7 @@ public class TestGraph
       g.addAnchor(new Anchor("turnEnd", 6.0));
 
       Annotation who1 = new Annotation("who1", "john smith", "who", "turnStart", "turnEnd", "my graph");
-      Annotation who2 = new Annotation("who1", "jane doe", "who", "turnStart", "turnEnd", "my graph");
+      Annotation who2 = new Annotation("who2", "jane doe", "who", "turnStart", "turnEnd", "my graph");
 
       Annotation turn1 = new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "who1");
 
@@ -1081,6 +1081,7 @@ public class TestGraph
 
       // create fragment
       Vector<String> layers = new Vector<String>();
+      layers.add("turn"); // include ancestor layer - annotations should have no anchors
       layers.add("utterance");
       layers.add("word");
       Graph f = g.getFragment(0.0, 3.0, layers.toArray(new String[0]));
@@ -1212,14 +1213,16 @@ public class TestGraph
           }
         });
 
-      g.addLayer(new Layer("topic", "Topics", 2, true, false, false));
-      g.addLayer(new Layer("who", "Participants", 0, true, true, true));
-      g.addLayer(new Layer("turn", "Speaker turns", 2, true, false, false, "who", true));
-      g.addLayer(new Layer("utterance", "Utterances", 2, true, false, true, "turn", true));
-      g.addLayer(new Layer("word", "Words", 2, true, false, false, "turn",true));
-      g.addLayer(new Layer("phone", "Phones", 2, true, false, true, "word",  true));
-      g.addLayer(new Layer("pos", "Part of speech", 0, false, false, true, "word", true));
-      g.addLayer(new Layer("phrase", "Phrase structure", 0, true, true, false, "turn", true));
+      g.setSchema(new Schema(
+                  "who", "turn", "utterance", "word",
+                  new Layer("topic", "Topics", 2, true, false, false),
+                  new Layer("who", "Participants", 0, true, true, true),
+                  new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+                  new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+                  new Layer("word", "Words", 2, true, false, false, "turn",true),
+                  new Layer("phone", "Phones", 2, true, false, true, "word",  true),
+                  new Layer("pos", "Part of speech", 0, false, false, true, "word", true),
+                  new Layer("phrase", "Phrase structure", 0, true, true, false, "turn", true)));
 
       g.addAnchor(new Anchor("turnStart", 0.0));
       g.addAnchor(new Anchor("a1", 1.0));
@@ -1234,13 +1237,8 @@ public class TestGraph
       g.addAnchor(new Anchor("a5", 5.0));
       g.addAnchor(new Anchor("turnEnd", 6.0));
 
-      g.getSchema().setParticipantLayerId("who");
-      g.getSchema().setTurnLayerId("turn");
-      g.getSchema().setUtteranceLayerId("utterance");
-      g.getSchema().setWordLayerId("word");
-
       Annotation who1 = new Annotation("who1", "john smith", "who", "turnStart", "turnEnd", "my graph");
-      Annotation who2 = new Annotation("who1", "jane doe", "who", "turnStart", "turnEnd", "my graph");
+      Annotation who2 = new Annotation("who2", "jane doe", "who", "turnStart", "turnEnd", "my graph");
 
       Annotation turn1 = new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "who1");
 
@@ -1291,6 +1289,7 @@ public class TestGraph
 
       // create fragment
       Vector<String> layers = new Vector<String>();
+      layers.add("turn"); // include ancestor layer - annotations should have no anchors
       layers.add("phone");
       layers.add("pos");
       assertEquals(2, quick.getOrdinal());
@@ -1308,17 +1307,17 @@ public class TestGraph
                   g.getSchema().getWordLayerId(), f.getSchema().getWordLayerId());
 
       // check anchors
-      assertFalse(f.getAnchors().containsKey("turnStart")); 
-      assertFalse(f.getAnchors().containsKey("a1"));
-      assertFalse(f.getAnchors().containsKey("a1.5"));
-      assertTrue(f.getAnchors().containsKey("a2"));
-      assertTrue(f.getAnchors().containsKey("a2.25"));
-      assertTrue(f.getAnchors().containsKey("a2.5"));
-      assertTrue(f.getAnchors().containsKey("a2.75"));
-      assertTrue(f.getAnchors().containsKey("a3"));
-      assertFalse(f.getAnchors().containsKey("a4"));
-      assertFalse(f.getAnchors().containsKey("a5"));
-      assertFalse(f.getAnchors().containsKey("turnEnd"));
+      assertFalse("check anchors", f.getAnchors().containsKey("turnStart")); 
+      assertFalse("check anchors", f.getAnchors().containsKey("a1"));
+      assertFalse("check anchors", f.getAnchors().containsKey("a1.5"));
+      assertTrue("check anchors", f.getAnchors().containsKey("a2"));
+      assertTrue("check anchors", f.getAnchors().containsKey("a2.25"));
+      assertTrue("check anchors", f.getAnchors().containsKey("a2.5"));
+      assertTrue("check anchors", f.getAnchors().containsKey("a2.75"));
+      assertTrue("check anchors", f.getAnchors().containsKey("a3"));
+      assertFalse("check anchors", f.getAnchors().containsKey("a4"));
+      assertFalse("check anchors", f.getAnchors().containsKey("a5"));
+      assertFalse("check anchors", f.getAnchors().containsKey("turnEnd"));
 
       // check annotations
       assertTrue("speaker", f.getAnnotationsById().containsKey("who1"));
@@ -1373,7 +1372,7 @@ public class TestGraph
    @Test public void fragmentByUtterance() 
    {
       Graph g = new Graph();
-      g.setId("my graph");
+      g.setId("XXX");
       g.setMediaProvider(new IGraphMediaProvider() {
           public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
           { return null; }
@@ -1398,7 +1397,7 @@ public class TestGraph
       g.addLayer(new Layer("who", "Participants", 0, true, true, true));
       g.addLayer(new Layer("turn", "Speaker turns", 2, true, false, false, "who", true));
       g.addLayer(new Layer("utterance", "Utterances", 2, true, false, true, "turn", true));
-      g.addLayer(new Layer("word", "Words", 2, true, false, false, "turn",true));
+      g.addLayer(new Layer("word", "Words", 2, true, false, false, "turn", true));
       g.addLayer(new Layer("phone", "Phones", 2, true, false, true, "word",  true));
       g.addLayer(new Layer("pos", "Part of speech", 0, false, false, true, "word", true));
       g.addLayer(new Layer("phrase", "Phrase structure", 0, true, true, false, "turn", true));
@@ -1421,8 +1420,8 @@ public class TestGraph
       g.addAnchor(new Anchor("a5", 5.0));
       g.addAnchor(new Anchor("turnEnd", 6.0));
 
-      Annotation who1 = new Annotation("who1", "john smith", "who", "turnStart", "turnEnd", "my graph");
-      Annotation who2 = new Annotation("who1", "jane doe", "who", "turnStart", "turnEnd", "my graph");
+      Annotation who1 = new Annotation("who1", "john smith", "who", "turnStart", "turnEnd", "XXX");
+      Annotation who2 = new Annotation("who2", "jane doe", "who", "turnStart", "turnEnd", "XXX");
 
       Annotation turn1 = new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "who1");
 
@@ -1473,11 +1472,12 @@ public class TestGraph
 
       // create fragment
       Vector<String> layers = new Vector<String>();
+      layers.add("turn"); // include ancestor layer - annotations should have no anchors
       layers.add("word");
       layers.add("phone");
       layers.add("pos");
       Graph f = g.getFragment(utterance1, layers.toArray(new String[0]));
-      assertEquals("my graph__0.000-3.000", f.getId());
+      assertEquals("XXX__0.000-3.000", f.getId());
       assertEquals("fragment's graph is itself", f, f.getGraph());
       assertEquals("original graph is accessible", g, f.sourceGraph());
       assertTrue(f.isFragment());
@@ -1539,7 +1539,8 @@ public class TestGraph
       assertFalse("excluded layer", f.getSchema().getLayers().containsKey("phrase"));
       
       // check list
-      assertEquals(2, f.list("word").length);
+      Annotation[] words = f.list("word");
+      assertEquals(2, words.length);
 
       // check media provider handling
       try
@@ -1736,7 +1737,6 @@ public class TestGraph
         fail("Media provider: " + exception);
       }
    }
-
 
    @Test public void orderOfAnnotationAnchorLinking() 
    {
