@@ -54,7 +54,7 @@ public class LayerHierarchyTraversal<R>
    * <ol>
    *  <li>non-included layers before included layers (dependency before pos)</li>
    *  <li>less alignment before more alignment (orthography before phone)</li>
-   *  <li>fewer peers before more peers (orthogrphy before pos)</li>
+   *  <li>fewer peers before more peers (orthography before pos)</li>
    *  <li>childless peers before childful peers (utterance before word)</li>
    *  <li>saturated before sparse (utterance before named entity)</li>
    *  <li>overlapping peers before sequential peers (parse tree before named entity)</li>
@@ -292,7 +292,7 @@ public class LayerHierarchyTraversal<R>
         orderedTopLevelLayers.add(layer);
       }
     } // next top level layer
-      // for each top level layer
+    // for each top level layer
     for (Layer layer : orderedTopLevelLayers)
     {
       traverseLayer(layer);
