@@ -309,20 +309,24 @@ public class Annotation
       if (parent != null)
       {
         // get all peers before this one
-        SortedSet<Annotation> priorPeers = parent.getAnnotations(getLayerId()).headSet(this);
-        // weed out the deleted one
-        Iterator<Annotation> it = priorPeers.iterator();
-        while (it.hasNext()) 
+        SortedSet<Annotation> peers = parent.getAnnotations(getLayerId());
+        if (peers != null)
         {
-          Annotation p = it.next();
-          if (p.getChange() == Change.Operation.Destroy)
+          SortedSet<Annotation> priorPeers = peers.headSet(this);
+          // weed out the deleted one
+          Iterator<Annotation> it = priorPeers.iterator();
+          while (it.hasNext()) 
           {
-            it.remove();
+            Annotation p = it.next();
+            if (p.getChange() == Change.Operation.Destroy)
+            {
+              it.remove();
+            }
           }
-        }
-        ordinalToReturn = priorPeers.size() + 1;
-        setOrdinal(ordinalToReturn);
-      }
+          ordinalToReturn = priorPeers.size() + 1;
+          setOrdinal(ordinalToReturn);
+        } // peers exist
+      } // parent exists
     }
     return ordinalToReturn;
   }
@@ -360,7 +364,7 @@ public class Annotation
   protected Vector<Change> correctOrdinals(SortedSet<Annotation> peers)
   {
     Vector<Change> changes = new Vector<Change>();
-    if (peers.size() > 0) 
+    if (peers != null && peers.size() > 0) 
     {
       String layerId = peers.iterator().next().getLayerId();
       // ensure accidental recursion can't occur
@@ -1083,9 +1087,10 @@ public class Annotation
       // - aligned topics (parent=graph) fall back to topic offset
       // - aligned turns (parent=who) fall back to turn offset
       // - aligned words (parent=turn) fall back to turn offset
-      // - unaligned pos's (paren=word) fall back to turn offset
+      // - unaligned pos's (parent=word) fall back to turn offset
       String root = getGraph().getSchema().getRoot().getId();
       Layer highestAlignedLayer = layer;
+      final Annotation thisAnnotation = this;
       for (Layer ancestor : layer.getAncestors())
       {
         if (ancestor.getId().equals(root)) break;
