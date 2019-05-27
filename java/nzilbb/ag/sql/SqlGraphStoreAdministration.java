@@ -41,585 +41,585 @@ import nzilbb.ag.serialize.util.IconHelper;
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class SqlGraphStoreAdministration
-   extends SqlGraphStore
-   implements IGraphStoreAdministration
+  extends SqlGraphStore
+  implements IGraphStoreAdministration
 {
-   // Attributes:
+  // Attributes:
 
    
-   /**
-    * Root directory for serializers.
-    * @see #getSerializersDirectory()
-    * @see #setSerializersDirectory(File)
-    */
-   protected File serializersDirectory;
-   /**
-    * Getter for {@link #serializersDirectory}: Root directory for serializers.
-    * @return Root directory for serializers.
-    */
-   public File getSerializersDirectory() 
-   { 
-      if (serializersDirectory == null)
+  /**
+   * Root directory for serializers.
+   * @see #getSerializersDirectory()
+   * @see #setSerializersDirectory(File)
+   */
+  protected File serializersDirectory;
+  /**
+   * Getter for {@link #serializersDirectory}: Root directory for serializers.
+   * @return Root directory for serializers.
+   */
+  public File getSerializersDirectory() 
+  { 
+    if (serializersDirectory == null)
+    {
+      if (files != null)
       {
-	 if (files != null)
-	 {
-	    try
-	    {
-	       setSerializersDirectory(new File(files.getParentFile(), "converters"));
-	    }
-	    catch(Exception exception)
-	    {}
-	 }
+        try
+        {
+          setSerializersDirectory(new File(files.getParentFile(), "converters"));
+        }
+        catch(Exception exception)
+        {}
       }
-      return serializersDirectory; 
-   }
-   /**
-    * Setter for {@link #serializersDirectory}: Root directory for serializers.
-    * @param newSerializersDirectory Root directory for serializers.
-    */
-   public void setSerializersDirectory(File newSerializersDirectory) { serializersDirectory = newSerializersDirectory; }
+    }
+    return serializersDirectory; 
+  }
+  /**
+   * Setter for {@link #serializersDirectory}: Root directory for serializers.
+   * @param newSerializersDirectory Root directory for serializers.
+   */
+  public void setSerializersDirectory(File newSerializersDirectory) { serializersDirectory = newSerializersDirectory; }
 
    
-   /**
-    * Registered deserializers, keyed by MIME type.
-    * @see #getDeserializersByMimeType()
-    * @see #setDeserializersByMimeType(HashMap)
-    */
-   protected HashMap<String,IDeserializer> deserializersByMimeType = new HashMap<String,IDeserializer>();
-   /**
-    * Getter for {@link #deserializersByMimeType}: Registered deserializers, keyed by MIME type.
-    * @return Registered deserializers, keyed by MIME type.
-    */
-   public HashMap<String,IDeserializer> getDeserializersByMimeType() { return deserializersByMimeType; }
-   /**
-    * Setter for {@link #deserializersByMimeType}: Registered deserializers, keyed by MIME type.
-    * @param newDeserializersByMimeType Registered deserializers, keyed by MIME type.
-    */
-   public void setDeserializersByMimeType(HashMap<String,IDeserializer> newDeserializersByMimeType) { deserializersByMimeType = newDeserializersByMimeType; }
+  /**
+   * Registered deserializers, keyed by MIME type.
+   * @see #getDeserializersByMimeType()
+   * @see #setDeserializersByMimeType(HashMap)
+   */
+  protected HashMap<String,IDeserializer> deserializersByMimeType = new HashMap<String,IDeserializer>();
+  /**
+   * Getter for {@link #deserializersByMimeType}: Registered deserializers, keyed by MIME type.
+   * @return Registered deserializers, keyed by MIME type.
+   */
+  public HashMap<String,IDeserializer> getDeserializersByMimeType() { return deserializersByMimeType; }
+  /**
+   * Setter for {@link #deserializersByMimeType}: Registered deserializers, keyed by MIME type.
+   * @param newDeserializersByMimeType Registered deserializers, keyed by MIME type.
+   */
+  public void setDeserializersByMimeType(HashMap<String,IDeserializer> newDeserializersByMimeType) { deserializersByMimeType = newDeserializersByMimeType; }
 
    
-   /**
-    * Registered deserializers, keyed by file suffix (extension).
-    * @see #getDeserializersBySuffix()
-    * @see #setDeserializersBySuffix(HashMap)
-    */
-   protected HashMap<String,IDeserializer> deserializersBySuffix = new HashMap<String,IDeserializer>();
-   /**
-    * Getter for {@link #deserializersBySuffix}: Registered deserializers, keyed by file suffix (extension).
-    * @return Registered deserializers, keyed by file suffix (extension).
-    */
-   public HashMap<String,IDeserializer> getDeserializersBySuffix() { return deserializersBySuffix; }
-   /**
-    * Setter for {@link #deserializersBySuffix}: Registered deserializers, keyed by file suffix (extension).
-    * @param newDeserializersBySuffix Registered deserializers, keyed by file suffix (extension).
-    */
-   public void setDeserializersBySuffix(HashMap<String,IDeserializer> newDeserializersBySuffix) { deserializersBySuffix = newDeserializersBySuffix; }
+  /**
+   * Registered deserializers, keyed by file suffix (extension).
+   * @see #getDeserializersBySuffix()
+   * @see #setDeserializersBySuffix(HashMap)
+   */
+  protected HashMap<String,IDeserializer> deserializersBySuffix = new HashMap<String,IDeserializer>();
+  /**
+   * Getter for {@link #deserializersBySuffix}: Registered deserializers, keyed by file suffix (extension).
+   * @return Registered deserializers, keyed by file suffix (extension).
+   */
+  public HashMap<String,IDeserializer> getDeserializersBySuffix() { return deserializersBySuffix; }
+  /**
+   * Setter for {@link #deserializersBySuffix}: Registered deserializers, keyed by file suffix (extension).
+   * @param newDeserializersBySuffix Registered deserializers, keyed by file suffix (extension).
+   */
+  public void setDeserializersBySuffix(HashMap<String,IDeserializer> newDeserializersBySuffix) { deserializersBySuffix = newDeserializersBySuffix; }
 
-   /**
-    * Registered serializers, keyed by MIME type.
-    * @see #getSerializersByMimeType()
-    * @see #setSerializersByMimeType(HashMap)
-    */
-   protected HashMap<String,ISerializer> serializersByMimeType = new HashMap<String,ISerializer>();
-   /**
-    * Getter for {@link #serializersByMimeType}: Registered serializers, keyed by MIME type.
-    * @return Registered serializers, keyed by MIME type.
-    */
-   public HashMap<String,ISerializer> getSerializersByMimeType() { return serializersByMimeType; }
-   /**
-    * Setter for {@link #serializersByMimeType}: Registered serializers, keyed by MIME type.
-    * @param newSerializersByMimeType Registered serializers, keyed by MIME type.
-    */
-   public void setSerializersByMimeType(HashMap<String,ISerializer> newSerializersByMimeType) { serializersByMimeType = newSerializersByMimeType; }
+  /**
+   * Registered serializers, keyed by MIME type.
+   * @see #getSerializersByMimeType()
+   * @see #setSerializersByMimeType(HashMap)
+   */
+  protected HashMap<String,ISerializer> serializersByMimeType = new HashMap<String,ISerializer>();
+  /**
+   * Getter for {@link #serializersByMimeType}: Registered serializers, keyed by MIME type.
+   * @return Registered serializers, keyed by MIME type.
+   */
+  public HashMap<String,ISerializer> getSerializersByMimeType() { return serializersByMimeType; }
+  /**
+   * Setter for {@link #serializersByMimeType}: Registered serializers, keyed by MIME type.
+   * @param newSerializersByMimeType Registered serializers, keyed by MIME type.
+   */
+  public void setSerializersByMimeType(HashMap<String,ISerializer> newSerializersByMimeType) { serializersByMimeType = newSerializersByMimeType; }
    
-   /**
-    * Registered serializers, keyed by file suffix (extension).
-    * @see #getSerializersBySuffix()
-    * @see #setSerializersBySuffix(HashMap)
-    */
-   protected HashMap<String,ISerializer> serializersBySuffix = new HashMap<String,ISerializer>();
-   /**
-    * Getter for {@link #serializersBySuffix}: Registered serializers, keyed by file suffix (extension).
-    * @return Registered serializers, keyed by file suffix (extension).
-    */
-   public HashMap<String,ISerializer> getSerializersBySuffix() { return serializersBySuffix; }
-   /**
-    * Setter for {@link #serializersBySuffix}: Registered serializers, keyed by file suffix (extension).
-    * @param newSerializersBySuffix Registered serializers, keyed by file suffix (extension).
-    */
-   public void setSerializersBySuffix(HashMap<String,ISerializer> newSerializersBySuffix) { serializersBySuffix = newSerializersBySuffix; }
+  /**
+   * Registered serializers, keyed by file suffix (extension).
+   * @see #getSerializersBySuffix()
+   * @see #setSerializersBySuffix(HashMap)
+   */
+  protected HashMap<String,ISerializer> serializersBySuffix = new HashMap<String,ISerializer>();
+  /**
+   * Getter for {@link #serializersBySuffix}: Registered serializers, keyed by file suffix (extension).
+   * @return Registered serializers, keyed by file suffix (extension).
+   */
+  public HashMap<String,ISerializer> getSerializersBySuffix() { return serializersBySuffix; }
+  /**
+   * Setter for {@link #serializersBySuffix}: Registered serializers, keyed by file suffix (extension).
+   * @param newSerializersBySuffix Registered serializers, keyed by file suffix (extension).
+   */
+  public void setSerializersBySuffix(HashMap<String,ISerializer> newSerializersBySuffix) { serializersBySuffix = newSerializersBySuffix; }
 
 
-   // Methods:
+  // Methods:
    
-   /**
-    * Constructor with connection.
-    * @param baseUrl URL prefix for file access.
-    * @param connection An opened database connection.
-    * @param user ID of the user
-    * @throws SQLException If an error occurs during connection or loading of configuraion.
-    * @throws PermissionException If the store user doesn't have administrator privileges
-    */
-   public SqlGraphStoreAdministration(String baseUrl, Connection connection, String user)
-      throws SQLException, PermissionException
-   {
-      super(baseUrl, connection, user);
-      // if (getUser() != null && !getUserRoles().contains("admin")) throw new PermissionException();
-      loadSerializers();
-   } // end of constructor
+  /**
+   * Constructor with connection.
+   * @param baseUrl URL prefix for file access.
+   * @param connection An opened database connection.
+   * @param user ID of the user
+   * @throws SQLException If an error occurs during connection or loading of configuraion.
+   * @throws PermissionException If the store user doesn't have administrator privileges
+   */
+  public SqlGraphStoreAdministration(String baseUrl, Connection connection, String user)
+    throws SQLException, PermissionException
+  {
+    super(baseUrl, connection, user);
+    // if (getUser() != null && !getUserRoles().contains("admin")) throw new PermissionException();
+    loadSerializers();
+  } // end of constructor
 
-   /**
-    * Constructor with connection.
-    * @param baseUrl URL prefix for file access.
-    * @param files Root directory for file structure.
-    * @param connection An opened database connection.
-    * @param user ID of the user
-    * @throws SQLException If an error occurs during connection or loading of configuraion.
-    * @throws PermissionException If the store user doesn't have administrator privileges
-    */
-   public SqlGraphStoreAdministration(String baseUrl, File files, Connection connection, String user)
-      throws SQLException, PermissionException
-   {
-      super(baseUrl, files, connection, user);
-      // if (getUser() != null && !getUserRoles().contains("admin")) throw new PermissionException();
-      loadSerializers();
-   } // end of constructor
+  /**
+   * Constructor with connection.
+   * @param baseUrl URL prefix for file access.
+   * @param files Root directory for file structure.
+   * @param connection An opened database connection.
+   * @param user ID of the user
+   * @throws SQLException If an error occurs during connection or loading of configuraion.
+   * @throws PermissionException If the store user doesn't have administrator privileges
+   */
+  public SqlGraphStoreAdministration(String baseUrl, File files, Connection connection, String user)
+    throws SQLException, PermissionException
+  {
+    super(baseUrl, files, connection, user);
+    // if (getUser() != null && !getUserRoles().contains("admin")) throw new PermissionException();
+    loadSerializers();
+  } // end of constructor
 
-   /**
-    * Constructor with connection parameters.
-    * @param baseUrl URL prefix for file access.
-    * @param files Root directory for file structure.
-    * @param connectString The database connection string.
-    * @param databaseUser The database username.
-    * @param password The databa password.
-    * @param storeUser ID of the user
-    * @throws SQLException If an error occurs during connection or loading of configuraion.
-    * @throws PermissionException If the store user doesn't have administrator privileges
-    */
-   public SqlGraphStoreAdministration(String baseUrl, File files, String connectString, String databaseUser, String password, String storeUser)
-      throws SQLException, PermissionException
-   {
-      super(baseUrl, files, connectString, databaseUser, password, storeUser);
-      // if (getUser() != null && !getUserRoles().contains("admin")) throw new PermissionException();
-      loadSerializers();
-   }
+  /**
+   * Constructor with connection parameters.
+   * @param baseUrl URL prefix for file access.
+   * @param files Root directory for file structure.
+   * @param connectString The database connection string.
+   * @param databaseUser The database username.
+   * @param password The databa password.
+   * @param storeUser ID of the user
+   * @throws SQLException If an error occurs during connection or loading of configuraion.
+   * @throws PermissionException If the store user doesn't have administrator privileges
+   */
+  public SqlGraphStoreAdministration(String baseUrl, File files, String connectString, String databaseUser, String password, String storeUser)
+    throws SQLException, PermissionException
+  {
+    super(baseUrl, files, connectString, databaseUser, password, storeUser);
+    // if (getUser() != null && !getUserRoles().contains("admin")) throw new PermissionException();
+    loadSerializers();
+  }
 
-   /**
-    * Loads the registered serializers/deserializers.
-    * @throws SQLException On SQL error.
-    */
-   protected void loadSerializers()
+  /**
+   * Loads the registered serializers/deserializers.
+   * @throws SQLException On SQL error.
+   */
+  protected void loadSerializers()
     throws SQLException
-   {
-      PreparedStatement sqlRegisteredConverter = getConnection().prepareStatement(
-	 "SELECT DISTINCT class, jar, mimetype"
-	 +" FROM converter"
-	 +" WHERE type IN ('Serializer', 'Deserializer')"
-	 +" ORDER BY mimetype");
-      ResultSet rs = sqlRegisteredConverter.executeQuery();
-      while (rs.next())
+  {
+    PreparedStatement sqlRegisteredConverter = getConnection().prepareStatement(
+      "SELECT DISTINCT class, jar, mimetype"
+      +" FROM converter"
+      +" WHERE type IN ('Serializer', 'Deserializer')"
+      +" ORDER BY mimetype");
+    ResultSet rs = sqlRegisteredConverter.executeQuery();
+    while (rs.next())
+    {
+      // get the jar file
+      File file = new File(getSerializersDirectory(), rs.getString("jar"));
+      try
       {
-	 // get the jar file
-	 File file = new File(getSerializersDirectory(), rs.getString("jar"));
-	 try
-	 {
-	    JarFile jar = new JarFile(file);
+        JarFile jar = new JarFile(file);
 	    
-	    // get an instance of the class
-	    URL[] url = new URL[] { file.toURI().toURL() };
-	    URLClassLoader classLoader = URLClassLoader.newInstance(url, getClass().getClassLoader());
-	    Object o = classLoader.loadClass(rs.getString("class")).getDeclaredConstructor().newInstance();
-	    if (o instanceof IDeserializer)
-	    {
-	       IDeserializer deserializer = (IDeserializer)o;
+        // get an instance of the class
+        URL[] url = new URL[] { file.toURI().toURL() };
+        URLClassLoader classLoader = URLClassLoader.newInstance(url, getClass().getClassLoader());
+        Object o = classLoader.loadClass(rs.getString("class")).getDeclaredConstructor().newInstance();
+        if (o instanceof IDeserializer)
+        {
+          IDeserializer deserializer = (IDeserializer)o;
 	       
-	       // register it in memory
-	       SerializationDescriptor descriptor = deserializer.getDescriptor();
-	       deserializersByMimeType.put(descriptor.getMimeType(), deserializer);
-	       for (String suffix : descriptor.getFileSuffixes())
-	       {
-		  deserializersBySuffix.put(suffix, deserializer);
-	       } // next suffix
-	       File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
-	       descriptor.setIcon(
-		  new URL(getBaseUrl()+"/"+getSerializersDirectory().getName()+"/"+iconFile.getName()));
-	    }
-	    if (o instanceof ISerializer)
-	    {
-	       ISerializer serializer = (ISerializer)o;
+          // register it in memory
+          SerializationDescriptor descriptor = deserializer.getDescriptor();
+          deserializersByMimeType.put(descriptor.getMimeType(), deserializer);
+          for (String suffix : descriptor.getFileSuffixes())
+          {
+            deserializersBySuffix.put(suffix, deserializer);
+          } // next suffix
+          File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
+          descriptor.setIcon(
+            new URL(getBaseUrl()+"/"+getSerializersDirectory().getName()+"/"+iconFile.getName()));
+        }
+        if (o instanceof ISerializer)
+        {
+          ISerializer serializer = (ISerializer)o;
 	       
-	       // register it in memory
-	       SerializationDescriptor descriptor = serializer.getDescriptor();
-	       serializersByMimeType.put(descriptor.getMimeType(), serializer);
-	       for (String suffix : descriptor.getFileSuffixes())
-	       {
-		  serializersBySuffix.put(suffix, serializer);
-	       } // next suffix
-	       File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
-	       descriptor.setIcon(
-		  new URL(getBaseUrl()+"/"+getSerializersDirectory().getName()+"/"+iconFile.getName()));
-	    }
-	 }	 
-	 catch(NoSuchMethodException x) { System.err.println(rs.getString("class") + ": " + x); }
-	 catch(InvocationTargetException x) { System.err.println(rs.getString("class") + ": " + x); }
-	 catch(ClassNotFoundException x) { System.err.println(rs.getString("class") + ": " + x); }
-	 catch(InstantiationException x) { System.err.println(rs.getString("class") + ": " + x); }
-	 catch(IllegalAccessException x) { System.err.println(rs.getString("class") + ": " + x); }
-	 catch(MalformedURLException x) { System.err.println(rs.getString("class") + ": " + x); }
-	 catch(IOException x) { System.err.println(rs.getString("class") + ": " + x); }
-      }
-      rs.close();
-      sqlRegisteredConverter.close();
-   } // end of loadSerializers()
+          // register it in memory
+          SerializationDescriptor descriptor = serializer.getDescriptor();
+          serializersByMimeType.put(descriptor.getMimeType(), serializer);
+          for (String suffix : descriptor.getFileSuffixes())
+          {
+            serializersBySuffix.put(suffix, serializer);
+          } // next suffix
+          File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
+          descriptor.setIcon(
+            new URL(getBaseUrl()+"/"+getSerializersDirectory().getName()+"/"+iconFile.getName()));
+        }
+      }	 
+      catch(NoSuchMethodException x) { System.err.println(rs.getString("class") + ": " + x); }
+      catch(InvocationTargetException x) { System.err.println(rs.getString("class") + ": " + x); }
+      catch(ClassNotFoundException x) { System.err.println(rs.getString("class") + ": " + x); }
+      catch(InstantiationException x) { System.err.println(rs.getString("class") + ": " + x); }
+      catch(IllegalAccessException x) { System.err.println(rs.getString("class") + ": " + x); }
+      catch(MalformedURLException x) { System.err.println(rs.getString("class") + ": " + x); }
+      catch(IOException x) { System.err.println(rs.getString("class") + ": " + x); }
+    }
+    rs.close();
+    sqlRegisteredConverter.close();
+  } // end of loadSerializers()
 
-   /**
-    * Registers a graph deserializer.
-    * @param deserializer The deserializer to register.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
-    */
-   public void registerDeserializer(IDeserializer deserializer)
-       throws StoreException, PermissionException
-   {
-      deregisterDeserializer(deserializer);
+  /**
+   * Registers a graph deserializer.
+   * @param deserializer The deserializer to register.
+   * @throws StoreException If an error prevents the graph from being saved.
+   * @throws PermissionException If saving the graph is not permitted.
+   */
+  public void registerDeserializer(IDeserializer deserializer)
+    throws StoreException, PermissionException
+  {
+    deregisterDeserializer(deserializer);
 
-      try
-      {
-	 SerializationDescriptor descriptor = deserializer.getDescriptor();
-	 PreparedStatement sqlRegister = connection.prepareStatement(
-	    "INSERT INTO converter"
-	    +" (mimetype, type, class, version, name, jar)"
-	    +" VALUES (?,'Deserializer',?,?,?,?)");
-	 sqlRegister.setString(1, descriptor.getMimeType());
-	 sqlRegister.setString(2, deserializer.getClass().getName());
-	 sqlRegister.setString(3, descriptor.getVersion());
-	 sqlRegister.setString(4, descriptor.getName());
-	 sqlRegister.setString(5, IO.JarFileOfClass(deserializer.getClass()).getName());
-	 sqlRegister.executeUpdate();
-	 sqlRegister.close();
+    try
+    {
+      SerializationDescriptor descriptor = deserializer.getDescriptor();
+      PreparedStatement sqlRegister = connection.prepareStatement(
+        "INSERT INTO converter"
+        +" (mimetype, type, class, version, name, jar)"
+        +" VALUES (?,'Deserializer',?,?,?,?)");
+      sqlRegister.setString(1, descriptor.getMimeType());
+      sqlRegister.setString(2, deserializer.getClass().getName());
+      sqlRegister.setString(3, descriptor.getVersion());
+      sqlRegister.setString(4, descriptor.getName());
+      sqlRegister.setString(5, IO.JarFileOfClass(deserializer.getClass()).getName());
+      sqlRegister.executeUpdate();
+      sqlRegister.close();
 	 
-	 deserializersByMimeType.put(descriptor.getMimeType(), deserializer);
-	 for (String suffix : descriptor.getFileSuffixes())
-	 {
-	    deserializersBySuffix.put(suffix, deserializer);
-	 } // next suffix
-
-	 try
-	 {
-	    File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
-	    descriptor.setIcon(
-	       new URL(getBaseUrl()+"/"+getSerializersDirectory().getName()+"/"+iconFile.getName()));
-	 }
-	 catch(MalformedURLException exception) {}
-	 catch(IOException exception) {}
-      }
-      catch(SQLException exception)
+      deserializersByMimeType.put(descriptor.getMimeType(), deserializer);
+      for (String suffix : descriptor.getFileSuffixes())
       {
-	 throw new StoreException(exception);
-      }
-   }
+        deserializersBySuffix.put(suffix, deserializer);
+      } // next suffix
 
-   /**
-    * De-registers a graph deserializer.
-    * @param deserializer The deserializer to de-register.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
-    */
-   public void deregisterDeserializer(IDeserializer deserializer)
-       throws StoreException, PermissionException
-   {
       try
       {
-	 SerializationDescriptor descriptor = deserializer.getDescriptor();
-	 deserializersByMimeType.remove(descriptor.getMimeType());
-	 for (String suffix : descriptor.getFileSuffixes())
-	 {
-	    deserializersBySuffix.remove(suffix);
-	 } // next suffix
+        File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
+        descriptor.setIcon(
+          new URL(getBaseUrl()+"/"+getSerializersDirectory().getName()+"/"+iconFile.getName()));
+      }
+      catch(MalformedURLException exception) {}
+      catch(IOException exception) {}
+    }
+    catch(SQLException exception)
+    {
+      throw new StoreException(exception);
+    }
+  }
 
-	 PreparedStatement sqlDeregister = connection.prepareStatement(
-	    "DELETE FROM converter WHERE mimetype = ? AND type = 'Deserializer'");
-	 sqlDeregister.setString(1, descriptor.getMimeType());
-	 sqlDeregister.executeUpdate();
-	 sqlDeregister.close();
-      }
-      catch(SQLException exception)
+  /**
+   * De-registers a graph deserializer.
+   * @param deserializer The deserializer to de-register.
+   * @throws StoreException If an error prevents the graph from being saved.
+   * @throws PermissionException If saving the graph is not permitted.
+   */
+  public void deregisterDeserializer(IDeserializer deserializer)
+    throws StoreException, PermissionException
+  {
+    try
+    {
+      SerializationDescriptor descriptor = deserializer.getDescriptor();
+      deserializersByMimeType.remove(descriptor.getMimeType());
+      for (String suffix : descriptor.getFileSuffixes())
       {
-	 throw new StoreException(exception);
-      }
-   }
+        deserializersBySuffix.remove(suffix);
+      } // next suffix
 
-   /**
-    * Lists the descriptors of all registered deserializers.
-    * @return A list of the descriptors of all registered deserializers.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
-    */
-   public SerializationDescriptor[] getDeserializerDescriptors()
-       throws StoreException, PermissionException
-   {
-      SerializationDescriptor[] descriptors = new SerializationDescriptor[deserializersByMimeType.size()];
-      int i = 0;
-      for (IDeserializer deserializer : deserializersByMimeType.values())
-      {
-	 SerializationDescriptor descriptor = deserializer.getDescriptor();
-	 try
-	 { // fix up the icon URL
-	    File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
-	    descriptor.setIcon(
-	       new URL(getBaseUrl()+"/"+getSerializersDirectory().getName()+"/"+iconFile.getName()));
-	 }
-	 catch(MalformedURLException exception) {}
-	 catch(IOException exception) {}
-	 descriptors[i++] = descriptor;
+      PreparedStatement sqlDeregister = connection.prepareStatement(
+        "DELETE FROM converter WHERE mimetype = ? AND type = 'Deserializer'");
+      sqlDeregister.setString(1, descriptor.getMimeType());
+      sqlDeregister.executeUpdate();
+      sqlDeregister.close();
+    }
+    catch(SQLException exception)
+    {
+      throw new StoreException(exception);
+    }
+  }
+
+  /**
+   * Lists the descriptors of all registered deserializers.
+   * @return A list of the descriptors of all registered deserializers.
+   * @throws StoreException If an error prevents the graph from being saved.
+   * @throws PermissionException If saving the graph is not permitted.
+   */
+  public SerializationDescriptor[] getDeserializerDescriptors()
+    throws StoreException, PermissionException
+  {
+    SerializationDescriptor[] descriptors = new SerializationDescriptor[deserializersByMimeType.size()];
+    int i = 0;
+    for (IDeserializer deserializer : deserializersByMimeType.values())
+    {
+      SerializationDescriptor descriptor = deserializer.getDescriptor();
+      try
+      { // fix up the icon URL
+        File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
+        descriptor.setIcon(
+          new URL(getBaseUrl()+"/"+getSerializersDirectory().getName()+"/"+iconFile.getName()));
       }
-      return descriptors;
-   }
+      catch(MalformedURLException exception) {}
+      catch(IOException exception) {}
+      descriptors[i++] = descriptor;
+    }
+    return descriptors;
+  }
    
-   /**
-    * Gets the deserializer for the given MIME type.
-    * @param mimeType The MIME type.
-    * @return The deserializer for the given MIME type, or null if none is registered.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
-    */
-   public IDeserializer deserializerForMimeType(String mimeType)
-       throws StoreException, PermissionException
-   {
-      try
-      {
-	 return (IDeserializer)deserializersByMimeType.get(mimeType).getClass().getDeclaredConstructor().newInstance();
-      }
-      catch(NoSuchMethodException x)
-      {
-	 return null;
-      }
-      catch(InvocationTargetException x)
-      {
-	 return null;
-      }
-      catch(IllegalAccessException exception)
-      {
-	 return null;
-      }
-      catch(InstantiationException exception)
-      {
-	 return null;
-      }
-      catch(NullPointerException exception)
-      {
-	 return null;
-      }
-   }
+  /**
+   * Gets the deserializer for the given MIME type.
+   * @param mimeType The MIME type.
+   * @return The deserializer for the given MIME type, or null if none is registered.
+   * @throws StoreException If an error prevents the graph from being saved.
+   * @throws PermissionException If saving the graph is not permitted.
+   */
+  public IDeserializer deserializerForMimeType(String mimeType)
+    throws StoreException, PermissionException
+  {
+    try
+    {
+      return (IDeserializer)deserializersByMimeType.get(mimeType).getClass().getDeclaredConstructor().newInstance();
+    }
+    catch(NoSuchMethodException x)
+    {
+      return null;
+    }
+    catch(InvocationTargetException x)
+    {
+      return null;
+    }
+    catch(IllegalAccessException exception)
+    {
+      return null;
+    }
+    catch(InstantiationException exception)
+    {
+      return null;
+    }
+    catch(NullPointerException exception)
+    {
+      return null;
+    }
+  }
 
-   /**
-    * Gets the deserializer for the given file suffix (extension).
-    * @param suffix The file extension.
-    * @return The deserializer for the given suffix, or null if none is registered.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
-    */
-   public IDeserializer deserializerForFilesSuffix(String suffix) throws StoreException, PermissionException
-   {
-      try
-      {
-	 return (IDeserializer)deserializersBySuffix.get(suffix.toLowerCase()).getClass().getDeclaredConstructor().newInstance();
-      }
-      catch(InvocationTargetException exception)
-      {
-	 return null;
-      }
-      catch(NoSuchMethodException exception)
-      {
-	 return null;
-      }
-      catch(IllegalAccessException exception)
-      {
-	 return null;
-      }
-      catch(InstantiationException exception)
-      {
-	 return null;
-      }
-      catch(NullPointerException exception)
-      {
-	 return null;
-      }
-   }
+  /**
+   * Gets the deserializer for the given file suffix (extension).
+   * @param suffix The file extension.
+   * @return The deserializer for the given suffix, or null if none is registered.
+   * @throws StoreException If an error prevents the graph from being saved.
+   * @throws PermissionException If saving the graph is not permitted.
+   */
+  public IDeserializer deserializerForFilesSuffix(String suffix) throws StoreException, PermissionException
+  {
+    try
+    {
+      return (IDeserializer)deserializersBySuffix.get(suffix.toLowerCase()).getClass().getDeclaredConstructor().newInstance();
+    }
+    catch(InvocationTargetException exception)
+    {
+      return null;
+    }
+    catch(NoSuchMethodException exception)
+    {
+      return null;
+    }
+    catch(IllegalAccessException exception)
+    {
+      return null;
+    }
+    catch(InstantiationException exception)
+    {
+      return null;
+    }
+    catch(NullPointerException exception)
+    {
+      return null;
+    }
+  }
 
-   /**
-    * Registers a graph serializer.
-    * @param serializer The serializer to register.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
-    */
-   public void registerSerializer(ISerializer serializer)
-       throws StoreException, PermissionException
-   {
-      deregisterSerializer(serializer);
+  /**
+   * Registers a graph serializer.
+   * @param serializer The serializer to register.
+   * @throws StoreException If an error prevents the graph from being saved.
+   * @throws PermissionException If saving the graph is not permitted.
+   */
+  public void registerSerializer(ISerializer serializer)
+    throws StoreException, PermissionException
+  {
+    deregisterSerializer(serializer);
 
-      try
-      {
-	 SerializationDescriptor descriptor = serializer.getDescriptor();
-	 PreparedStatement sqlRegister = connection.prepareStatement(
-	    "INSERT INTO converter"
-	    +" (mimetype, type, class, version, name, jar)"
-	    +" VALUES (?,'Serializer',?,?,?,?)");
-	 sqlRegister.setString(1, descriptor.getMimeType());
-	 sqlRegister.setString(2, serializer.getClass().getName());
-	 sqlRegister.setString(3, descriptor.getVersion());
-	 sqlRegister.setString(4, descriptor.getName());
-	 sqlRegister.setString(5, IO.JarFileOfClass(serializer.getClass()).getName());
-	 sqlRegister.executeUpdate();
-	 sqlRegister.close();
+    try
+    {
+      SerializationDescriptor descriptor = serializer.getDescriptor();
+      PreparedStatement sqlRegister = connection.prepareStatement(
+        "INSERT INTO converter"
+        +" (mimetype, type, class, version, name, jar)"
+        +" VALUES (?,'Serializer',?,?,?,?)");
+      sqlRegister.setString(1, descriptor.getMimeType());
+      sqlRegister.setString(2, serializer.getClass().getName());
+      sqlRegister.setString(3, descriptor.getVersion());
+      sqlRegister.setString(4, descriptor.getName());
+      sqlRegister.setString(5, IO.JarFileOfClass(serializer.getClass()).getName());
+      sqlRegister.executeUpdate();
+      sqlRegister.close();
 	 
-	 serializersByMimeType.put(descriptor.getMimeType(), serializer);
-	 for (String suffix : descriptor.getFileSuffixes())
-	 {
-	    serializersBySuffix.put(suffix, serializer);
-	 } // next suffix
-
-	 try
-	 {
-	    File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
-	    descriptor.setIcon(
-	       new URL(getBaseUrl()+"/"+getSerializersDirectory().getName()+"/"+iconFile.getName()));
-	 }
-	 catch(MalformedURLException exception) {}
-	 catch(IOException exception) {}
-      }
-      catch(SQLException exception)
+      serializersByMimeType.put(descriptor.getMimeType(), serializer);
+      for (String suffix : descriptor.getFileSuffixes())
       {
-	 throw new StoreException(exception);
-      }
-   }
+        serializersBySuffix.put(suffix, serializer);
+      } // next suffix
 
-   /**
-    * De-registers a graph serializer.
-    * @param serializer The serializer to de-register.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
-    */
-   public void deregisterSerializer(ISerializer serializer)
-       throws StoreException, PermissionException
-   {
       try
       {
-	 SerializationDescriptor descriptor = serializer.getDescriptor();
-	 serializersByMimeType.remove(descriptor.getMimeType());
-	 for (String suffix : descriptor.getFileSuffixes())
-	 {
-	    serializersBySuffix.remove(suffix);
-	 } // next suffix
+        File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
+        descriptor.setIcon(
+          new URL(getBaseUrl()+"/"+getSerializersDirectory().getName()+"/"+iconFile.getName()));
+      }
+      catch(MalformedURLException exception) {}
+      catch(IOException exception) {}
+    }
+    catch(SQLException exception)
+    {
+      throw new StoreException(exception);
+    }
+  }
 
-	 PreparedStatement sqlDeregister = connection.prepareStatement(
-	    "DELETE FROM converter WHERE mimetype = ? AND type = 'Serializer'");
-	 sqlDeregister.setString(1, descriptor.getMimeType());
-	 sqlDeregister.executeUpdate();
-	 sqlDeregister.close();
-      }
-      catch(SQLException exception)
+  /**
+   * De-registers a graph serializer.
+   * @param serializer The serializer to de-register.
+   * @throws StoreException If an error prevents the graph from being saved.
+   * @throws PermissionException If saving the graph is not permitted.
+   */
+  public void deregisterSerializer(ISerializer serializer)
+    throws StoreException, PermissionException
+  {
+    try
+    {
+      SerializationDescriptor descriptor = serializer.getDescriptor();
+      serializersByMimeType.remove(descriptor.getMimeType());
+      for (String suffix : descriptor.getFileSuffixes())
       {
-	 throw new StoreException(exception);
-      }
-   }
+        serializersBySuffix.remove(suffix);
+      } // next suffix
 
-   /**
-    * Lists the descriptors of all registered serializers.
-    * @return A list of the descriptors of all registered serializers.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
-    */
-   public SerializationDescriptor[] getSerializerDescriptors()
-       throws StoreException, PermissionException
-   {
-      SerializationDescriptor[] descriptors = new SerializationDescriptor[serializersByMimeType.size()];
-      int i = 0;
-      for (ISerializer serializer : serializersByMimeType.values())
-      {
-	 SerializationDescriptor descriptor = serializer.getDescriptor();
-	 try
-	 { // fix up the icon URL
-	    File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
-	    descriptor.setIcon(
-	       new URL(getBaseUrl()+"/"+getSerializersDirectory().getName()+"/"+iconFile.getName()));
-	 }
-	 catch(MalformedURLException exception) {}
-	 catch(IOException exception) {}
-	 descriptors[i++] = descriptor;
+      PreparedStatement sqlDeregister = connection.prepareStatement(
+        "DELETE FROM converter WHERE mimetype = ? AND type = 'Serializer'");
+      sqlDeregister.setString(1, descriptor.getMimeType());
+      sqlDeregister.executeUpdate();
+      sqlDeregister.close();
+    }
+    catch(SQLException exception)
+    {
+      throw new StoreException(exception);
+    }
+  }
+
+  /**
+   * Lists the descriptors of all registered serializers.
+   * @return A list of the descriptors of all registered serializers.
+   * @throws StoreException If an error prevents the graph from being saved.
+   * @throws PermissionException If saving the graph is not permitted.
+   */
+  public SerializationDescriptor[] getSerializerDescriptors()
+    throws StoreException, PermissionException
+  {
+    SerializationDescriptor[] descriptors = new SerializationDescriptor[serializersByMimeType.size()];
+    int i = 0;
+    for (ISerializer serializer : serializersByMimeType.values())
+    {
+      SerializationDescriptor descriptor = serializer.getDescriptor();
+      try
+      { // fix up the icon URL
+        File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
+        descriptor.setIcon(
+          new URL(getBaseUrl()+"/"+getSerializersDirectory().getName()+"/"+iconFile.getName()));
       }
-      return descriptors;
-   }
+      catch(MalformedURLException exception) {}
+      catch(IOException exception) {}
+      descriptors[i++] = descriptor;
+    }
+    return descriptors;
+  }
    
-   /**
-    * Gets the serializer for the given MIME type.
-    * @param mimeType The MIME type.
-    * @return The serializer for the given MIME type, or null if none is registered.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
-    */
-   public ISerializer serializerForMimeType(String mimeType)
-       throws StoreException, PermissionException
-   {
-      try
-      {
-	 return (ISerializer)serializersByMimeType.get(mimeType).getClass().getDeclaredConstructor().newInstance();
-      }
-      catch(NoSuchMethodException exception)
-      {
-	 return null;
-      }
-      catch(InvocationTargetException exception)
-      {
-	 return null;
-      }
-      catch(IllegalAccessException exception)
-      {
-	 return null;
-      }
-      catch(InstantiationException exception)
-      {
-	 return null;
-      }
-      catch(NullPointerException exception)
-      {
-	 return null;
-      }
-   }
+  /**
+   * Gets the serializer for the given MIME type.
+   * @param mimeType The MIME type.
+   * @return The serializer for the given MIME type, or null if none is registered.
+   * @throws StoreException If an error prevents the graph from being saved.
+   * @throws PermissionException If saving the graph is not permitted.
+   */
+  public ISerializer serializerForMimeType(String mimeType)
+    throws StoreException, PermissionException
+  {
+    try
+    {
+      return (ISerializer)serializersByMimeType.get(mimeType).getClass().getDeclaredConstructor().newInstance();
+    }
+    catch(NoSuchMethodException exception)
+    {
+      return null;
+    }
+    catch(InvocationTargetException exception)
+    {
+      return null;
+    }
+    catch(IllegalAccessException exception)
+    {
+      return null;
+    }
+    catch(InstantiationException exception)
+    {
+      return null;
+    }
+    catch(NullPointerException exception)
+    {
+      return null;
+    }
+  }
 
-   /**
-    * Gets the serializer for the given file suffix (extension).
-    * @param suffix The file extension.
-    * @return The serializer for the given suffix, or null if none is registered.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
-    */
-   public ISerializer serializerForFilesSuffix(String suffix) throws StoreException, PermissionException
-   {
-      try
-      {
-	 return (ISerializer)serializersBySuffix.get(suffix.toLowerCase()).getClass().getDeclaredConstructor().newInstance();
-      }
-      catch(InvocationTargetException exception)
-      {
-	 return null;
-      }
-      catch(NoSuchMethodException exception)
-      {
-	 return null;
-      }
-      catch(IllegalAccessException exception)
-      {
-	 return null;
-      }
-      catch(InstantiationException exception)
-      {
-	 return null;
-      }
-      catch(NullPointerException exception)
-      {
-	 return null;
-      }
-   }
+  /**
+   * Gets the serializer for the given file suffix (extension).
+   * @param suffix The file extension.
+   * @return The serializer for the given suffix, or null if none is registered.
+   * @throws StoreException If an error prevents the graph from being saved.
+   * @throws PermissionException If saving the graph is not permitted.
+   */
+  public ISerializer serializerForFilesSuffix(String suffix) throws StoreException, PermissionException
+  {
+    try
+    {
+      return (ISerializer)serializersBySuffix.get(suffix.toLowerCase()).getClass().getDeclaredConstructor().newInstance();
+    }
+    catch(InvocationTargetException exception)
+    {
+      return null;
+    }
+    catch(NoSuchMethodException exception)
+    {
+      return null;
+    }
+    catch(IllegalAccessException exception)
+    {
+      return null;
+    }
+    catch(InstantiationException exception)
+    {
+      return null;
+    }
+    catch(NullPointerException exception)
+    {
+      return null;
+    }
+  }
 
 } // end of class SqlGraphStoreAdministration
