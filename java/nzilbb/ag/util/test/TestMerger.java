@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2019 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -296,15 +296,196 @@ public class TestMerger
       assertTrue("speakers are unchanged", g.getAnnotationsById().containsKey("who1"));
       assertTrue("speakers are unchanged", g.getAnnotationsById().containsKey("who2"));
 
-      assertEquals("word alignments updated", new Double(1.0), words[0].getStart().getOffset());
-      assertEquals("word alignments updated", new Double(2.0), words[0].getEnd().getOffset());
-      assertEquals("word alignments updated", new Double(2.0), words[1].getStart().getOffset());
-      assertEquals("word alignments updated", new Double(3.0), words[1].getEnd().getOffset());
-      assertEquals("word alignments updated", new Double(3.0), words[2].getStart().getOffset());
-      assertEquals("word alignments updated", new Double(4.0), words[2].getEnd().getOffset());
-      assertEquals("word alignments updated", new Double(4.0), words[3].getStart().getOffset());
-      assertEquals("word alignments updated", new Double(5.0), words[3].getEnd().getOffset());
+      assertEquals("word alignments updated", Double.valueOf(1.0), words[0].getStart().getOffset());
+      assertEquals("word alignments updated", Double.valueOf(2.0), words[0].getEnd().getOffset());
+      assertEquals("word alignments updated", Double.valueOf(2.0), words[1].getStart().getOffset());
+      assertEquals("word alignments updated", Double.valueOf(3.0), words[1].getEnd().getOffset());
+      assertEquals("word alignments updated", Double.valueOf(3.0), words[2].getStart().getOffset());
+      assertEquals("word alignments updated", Double.valueOf(4.0), words[2].getEnd().getOffset());
+      assertEquals("word alignments updated", Double.valueOf(4.0), words[3].getStart().getOffset());
+      assertEquals("word alignments updated", Double.valueOf(5.0), words[3].getEnd().getOffset());
 
+    }
+    catch(TransformationException exception)
+    {
+      StringWriter sw = new StringWriter();
+      PrintWriter pw = new PrintWriter(sw);
+      exception.printStackTrace(pw);
+      try { sw.close(); }
+      catch(IOException x) {}
+      pw.close();	
+      fail("merge() failed" + exception.toString() + "\n" + sw);
+    }
+  }
+
+  @Test public void extractedFragmentMerge()
+  {
+    Graph g = new Graph();
+    g.setSchema(new Schema(
+                  "who", "turn", "utterance", "word",
+                  new Layer("who", "participants")
+                  .setAlignment(Constants.ALIGNMENT_NONE) 
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                  new Layer("turn", "turns")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("who").setParentIncludes(true),
+                  new Layer("utterance", "utterances")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("phrase", "phrase")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("word", "Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("pos", "Part of speech")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(false).setPeersOverlap(false).setSaturated(true)
+                  .setParentId("word").setParentIncludes(true),
+                  new Layer("phone", "segments")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
+                  .setParentId("word").setParentIncludes(true)
+                  ));
+    g.setId("my graph");
+
+    g.addAnchor(new Anchor("turnStart", 0.0));
+    g.addAnchor(new Anchor("a1", 0.0));
+    g.addAnchor(new Anchor("a2", null));
+    g.addAnchor(new Anchor("a3a", 3.0));
+    g.addAnchor(new Anchor("utterance", 3.0));
+    g.addAnchor(new Anchor("a3b", 3.0));
+    g.addAnchor(new Anchor("a4", 3.1));
+    g.addAnchor(new Anchor("a5", 6.0));
+    g.addAnchor(new Anchor("turnEnd", 6.0));
+
+    g.addAnnotation(new Annotation("who1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+    g.addAnnotation(new Annotation("who2", "jane doe", "who", "turnStart", "turnEnd", "my graph"));
+
+    g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "who1"));
+
+    g.addAnnotation(new Annotation("utterance1", "john smith", "utterance", "turnStart", "utterance", "turn1"));
+    g.addAnnotation(new Annotation("utterance2", "john smith", "utterance", "utterance", "turnEnd", "turn1"));
+
+    g.addAnnotation(new Annotation("word1", "the", "word", "a1", "a2", "turn1"));
+    g.addAnnotation(new Annotation("pos1", "DT", "pos", "a1", "a2", "word1"));
+    g.addAnnotation(new Annotation("word2", "quick", "word", "a2", "a3a", "turn1"));
+    g.addAnnotation(new Annotation("pos2", "A", "pos", "a2", "a3a", "word2"));
+    g.addAnnotation(new Annotation("word3", "brown", "word", "a3b", "a4", "turn1"));
+    g.addAnnotation(new Annotation("phrase1", "AP", "phrase", "a2", "a4", "turn1"));
+    g.addAnnotation(new Annotation("word4", "fox", "word", "a4", "a5", "turn1"));
+    g.addAnnotation(new Annotation("pos3", "N", "pos", "a4", "a5", "word4"));
+    g.addAnnotation(new Annotation("phrase2", "NP", "phrase", "a1", "a5", "turn1"));
+    // no phones
+
+    // now we have a whole graph, we're going to extract a fragment of it.
+    // "utterance2" is used to ensure that ordinals don't start from 1
+    String[] layers = g.getSchema().getLayers().keySet().toArray(new String[0]);
+    Graph originalFragment = g.getFragment(g.getAnnotation("utterance2"), layers);
+
+    // the resulting graphs includes annotations that reference anchors that aren't in the graph
+    assertEquals("Turn start ID in fragment",
+                 "turnStart", originalFragment.getAnnotation("turn1").getStartId());
+    assertNull("Turn start anchor not in fragment",
+               originalFragment.getAnchor("turnStart"));
+    assertNull("Turn start unavailable",
+               originalFragment.getAnnotation("turn1").getStart());
+    assertEquals("Turn end ID in fragment",
+                 "turnEnd", originalFragment.getAnnotation("turn1").getEndId());
+    assertNotNull("Turn end is in fragment",
+                  originalFragment.getAnnotation("turn1").getEnd());
+
+    // and includes layers with ordinals that don't start from 1
+    assertEquals("Utterance ordinal in fragmant",
+                 2, originalFragment.getAnnotation("utterance2").getOrdinal());
+    assertEquals("Word 3 ordinal in fragmant",
+                 3, originalFragment.getAnnotation("word3").getOrdinal());
+    assertEquals("Word 4 ordinal in fragmant",
+                 4, originalFragment.getAnnotation("word4").getOrdinal());
+
+    // test initial words state we'll test later...
+    Annotation[] words = originalFragment.list("word");
+    assertEquals("words - " + Arrays.asList(words), 2, words.length);
+    assertEquals("brown", words[0].getLabel());
+    assertEquals("fox", words[1].getLabel());
+
+    assertEquals("word 3 start", Double.valueOf(3.0), words[0].getStart().getOffset());
+    assertEquals("word 3 end", Double.valueOf(3.1), words[0].getEnd().getOffset());
+    assertEquals("word 4 start", Double.valueOf(3.1), words[1].getStart().getOffset());
+    assertEquals("word 4 end", Double.valueOf(6.0), words[1].getEnd().getOffset());
+    
+    // construct an edited version of the fragment, with flattened schema
+    Graph editedFragment = new Graph();
+    editedFragment.setSchema(new Schema(
+                               "who", "turn", "utterance", "word",
+                               new Layer("utterance", "utterances")
+                               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                               .setPeers(false).setPeersOverlap(false).setSaturated(true),
+                               new Layer("word", "Words")
+                               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                               .setPeers(true).setPeersOverlap(false).setSaturated(false),
+                               new Layer("phone", "segments")
+                               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                               .setPeers(true).setPeersOverlap(false).setSaturated(true)
+                               .setParentId("word").setParentIncludes(true)
+                               ));
+    editedFragment.setId("my edited fragment");
+
+    editedFragment.addAnchor(new Anchor("utterance", 3.0));
+    editedFragment.addAnchor(new Anchor("a3b", 3.0));
+    editedFragment.addAnchor(new Anchor("a4", 4.0)); // has offset
+    editedFragment.addAnchor(new Anchor("a5", 5.0)); // different offset
+    editedFragment.addAnchor(new Anchor("turnEnd", 6.0));
+
+    editedFragment.addAnnotation(
+      new Annotation(
+        "utterance2", "john smith", "utterance", "utterance", "turnEnd"));
+    // words have uppercase labels now
+    editedFragment.addAnnotation(
+      new Annotation("word3", "BROWN", "word", "a3b", "a4"));
+    editedFragment.addAnnotation(
+      new Annotation("word4", "FOX", "word", "a4", "a5"));
+
+    Merger m = new Merger(editedFragment);
+    // m.setDebug(true);
+    try
+    {
+      Vector<Change> changes = m.transform(originalFragment);
+      if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
+      g.commit();
+
+      words = originalFragment.list("word");
+      assertEquals("words are unchanged - " + Arrays.asList(words), 2, words.length);
+      assertEquals("BROWN", words[0].getLabel());
+      assertEquals("FOX", words[1].getLabel());
+
+      assertEquals("word 3 start unchanged", Double.valueOf(3.0), words[0].getStart().getOffset());
+      assertEquals("word 3 end changed", Double.valueOf(4.0), words[0].getEnd().getOffset());
+      assertEquals("word 4 start changed", Double.valueOf(4.0), words[1].getStart().getOffset());
+      assertEquals("word 4 end changed", Double.valueOf(5.0), words[1].getEnd().getOffset());
+
+      // turn is unchanged
+      assertEquals("Turn start ID in fragment",
+                   "turnStart", originalFragment.getAnnotation("turn1").getStartId());
+      assertNull("Turn start not in fragment",
+                 originalFragment.getAnnotation("turn1").getStart());
+      assertEquals("Turn end ID in fragment",
+                 "turnEnd", originalFragment.getAnnotation("turn1").getEndId());
+      assertNotNull("Turn end is in fragment",
+                 originalFragment.getAnnotation("turn1").getEnd());
+
+      // ordinals are unchanged
+      assertEquals("Utterance ordinal in fragmant",
+                   2, originalFragment.getAnnotation("utterance2").getOrdinal());
+      assertEquals("Word 3 ordinal in fragmant",
+                   3, originalFragment.getAnnotation("word3").getOrdinal());
+      assertEquals("Word 4 ordinal in fragmant",
+                   4, originalFragment.getAnnotation("word4").getOrdinal());
+      
     }
     catch(TransformationException exception)
     {
