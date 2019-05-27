@@ -240,9 +240,15 @@ public class SqlGraphStoreAdministration
           {
             deserializersBySuffix.put(suffix, deserializer);
           } // next suffix
-          File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
-          descriptor.setIcon(
-            new URL(getBaseUrl()+"/"+getSerializersDirectory().getName()+"/"+iconFile.getName()));
+          if (getSerializersDirectory() != null)
+          {
+            File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
+            if (getBaseUrl() != null)
+            {
+              descriptor.setIcon(
+                new URL(getBaseUrl()+"/"+getSerializersDirectory().getName()+"/"+iconFile.getName()));
+            }
+          }
         }
         if (o instanceof ISerializer)
         {
@@ -255,11 +261,17 @@ public class SqlGraphStoreAdministration
           {
             serializersBySuffix.put(suffix, serializer);
           } // next suffix
-          File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
-          descriptor.setIcon(
-            new URL(getBaseUrl()+"/"+getSerializersDirectory().getName()+"/"+iconFile.getName()));
+          if (getSerializersDirectory() != null)
+          {
+            File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
+            if (getBaseUrl() != null)
+            {
+              descriptor.setIcon(
+                new URL(getBaseUrl()+"/"+getSerializersDirectory().getName()+"/"+iconFile.getName()));
+            }
+          }
         }
-      }	 
+      }
       catch(NoSuchMethodException x) { System.err.println(rs.getString("class") + ": " + x); }
       catch(InvocationTargetException x) { System.err.println(rs.getString("class") + ": " + x); }
       catch(ClassNotFoundException x) { System.err.println(rs.getString("class") + ": " + x); }
