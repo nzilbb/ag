@@ -1642,7 +1642,6 @@ public class Merger
     String layerId = layer.getId();
 
     // check for anchor changes between mapped annotations
-    int iOrdinal = 1;
     Annotation anLastOriginal = null;
     // traverse the edited version of the graph, to ensure we're all in the new order
     TreeSet<Annotation> editedAnnotations = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
