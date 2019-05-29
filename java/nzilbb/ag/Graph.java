@@ -952,7 +952,7 @@ public class Graph
    * @param o2 The second offset to compare.
    * @return 0 if the two offsets are within {@link #offsetGranularity} of each other, or a negative number if o1 &lt; o2, and otherwise a positive number.
    */
-  public int compareOffsets(double o1, double o2) // TODO test
+  public int compareOffsets(double o1, double o2)
   {
     if (offsetGranularity != null)
     {
