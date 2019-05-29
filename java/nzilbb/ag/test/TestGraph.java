@@ -2024,6 +2024,46 @@ public class TestGraph
       assertNull("chaining anchors with no offset", g.getAnnotation("fox").getEnd().getOffset());
       
    }
+  
+   @Test public void compareOffsets1000() 
+   {
+      Graph g = new Graph();
+      g.setOffsetGranularity(0.001);
+      assertEquals("big difference +ve",
+                   1, g.compareOffsets(0.5, 0.4));
+      assertEquals("big difference -ve",
+                   -1, g.compareOffsets(0.4, 0.5));
+      assertEquals("equal",
+                   0, g.compareOffsets(0.5, 0.5));
+      assertEquals("small difference +ve",
+                   1, g.compareOffsets(0.005, 0.004));
+      assertEquals("small difference -ve",
+                   -1, g.compareOffsets(0.004, 0.005));
+      assertEquals("under threshold +ve",
+                   0, g.compareOffsets(0.0049, 0.004));
+      assertEquals("under threshold -ve",
+                   -0, g.compareOffsets(0.004, 0.0049));
+   }
+
+   @Test public void compareOffsets16000() 
+   {
+     Graph g = new Graph();
+     g.setOffsetGranularity(1.0/16000.0); // 0.0000625
+     assertEquals("big difference +ve",
+                  1, g.compareOffsets(0.5, 0.4));
+     assertEquals("big difference -ve",
+                  -1, g.compareOffsets(0.4, 0.5));
+     assertEquals("equal",
+                  0, g.compareOffsets(0.5, 0.5));
+     assertEquals("small difference +ve",
+                  1, g.compareOffsets(0.0050625, 0.005));
+     assertEquals("small difference -ve",
+                  -1, g.compareOffsets(0.005, 0.0050625));
+     assertEquals("under threshold +ve",
+                  0, g.compareOffsets(0.0050624, 0.005));
+     assertEquals("under threshold -ve",
+                  -0, g.compareOffsets(0.005, 0.0050624));
+   }
 
    public static void main(String args[]) 
    {
