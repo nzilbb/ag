@@ -29,7 +29,7 @@
           {
             "id": 6,
             "sampleStart": 7648,
-            "sampleDur": 560,
+            "sampleDur": 561,
             "labels": [{
               "name": "phone",
               "value": "s"
@@ -37,7 +37,7 @@
           },
           {
             "id": 7,
-            "sampleStart": 8208,
+            "sampleStart": 8209,
             "sampleDur": 1625,
             "labels": [{
               "name": "phone",
@@ -46,15 +46,6 @@
           },
           {
             "id": 8,
-            "sampleStart": 9833,
-            "sampleDur": 1,
-            "labels": [{
-              "name": "phone",
-              "value": ""
-            }]
-          },
-          {
-            "id": 9,
             "sampleStart": 9834,
             "sampleDur": 2496,
             "labels": [{
@@ -63,8 +54,17 @@
             }]
           },
           {
-            "id": 11,
+            "id": 10,
             "sampleStart": 12330,
+            "sampleDur": 1,
+            "labels": [{
+              "name": "phone",
+              "value": ""
+            }]
+          },
+          {
+            "id": 11,
+            "sampleStart": 12331,
             "sampleDur": 6165,
             "labels": [{
               "name": "phone",
@@ -98,7 +98,7 @@
           {
             "id": 4,
             "sampleStart": 7648,
-            "sampleDur": 4682,
+            "sampleDur": 4683,
             "labels": [
               {
                 "name": "word",
@@ -111,8 +111,8 @@
             ]
           },
           {
-            "id": 10,
-            "sampleStart": 12330,
+            "id": 9,
+            "sampleStart": 12331,
             "sampleDur": 6165,
             "labels": [{
               "name": "word",
@@ -121,15 +121,6 @@
           },
           {
             "id": 12,
-            "sampleStart": 18495,
-            "sampleDur": 1,
-            "labels": [{
-              "name": "word",
-              "value": ""
-            }]
-          },
-          {
-            "id": 13,
             "sampleStart": 18496,
             "sampleDur": 6165,
             "labels": [{
@@ -138,7 +129,7 @@
             }]
           },
           {
-            "id": 14,
+            "id": 13,
             "sampleStart": 24661,
             "sampleDur": 6165,
             "labels": [{
@@ -147,8 +138,17 @@
             }]
           },
           {
-            "id": 15,
+            "id": 14,
             "sampleStart": 30826,
+            "sampleDur": 1,
+            "labels": [{
+              "name": "word",
+              "value": ""
+            }]
+          },
+          {
+            "id": 15,
+            "sampleStart": 30827,
             "sampleDur": 6165,
             "labels": [{
               "name": "word",
@@ -157,7 +157,7 @@
           },
           {
             "id": 16,
-            "sampleStart": 36991,
+            "sampleStart": 36992,
             "sampleDur": 6165,
             "labels": [{
               "name": "word",
@@ -166,15 +166,6 @@
           },
           {
             "id": 17,
-            "sampleStart": 43156,
-            "sampleDur": 1,
-            "labels": [{
-              "name": "word",
-              "value": ""
-            }]
-          },
-          {
-            "id": 18,
             "sampleStart": 43157,
             "sampleDur": 6165,
             "labels": [{
@@ -183,8 +174,17 @@
             }]
           },
           {
-            "id": 19,
+            "id": 18,
             "sampleStart": 49322,
+            "sampleDur": 1,
+            "labels": [{
+              "name": "word",
+              "value": ""
+            }]
+          },
+          {
+            "id": 19,
+            "sampleStart": 49323,
             "sampleDur": 6165,
             "labels": [{
               "name": "word",
@@ -199,7 +199,7 @@
         "items": [{
           "id": 0,
           "sampleStart": 0,
-          "sampleDur": 55487,
+          "sampleDur": 55488,
           "labels": [{
             "name": "utterance",
             "value": "participant"

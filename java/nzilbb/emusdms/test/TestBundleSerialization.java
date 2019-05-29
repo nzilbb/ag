@@ -317,23 +317,17 @@ public class TestBundleSerialization
     // words
     Annotation[] words = g.list("word");
     String[] wordLabels = { "or", "some", "and", "there's", "nothing", "much", "on", "it", "or" };
-    Double[] wordStarts = { 214.822, 215.3, 215.592625, 215.978, 216.3633125, 216.748625, 217.1339375, 217.5193125, 217.904625 };
-    Double[] wordEnds = { 215.2073125, 215.592625, 215.9779375, 216.3633125, 216.748625, 217.1339375, 217.51925, 217.904625, 218.2899375 };
-    // TODO use original offsets
-    // double[] wordStarts = { 214.822, 215.3, 215.5926666667, 215.978, 216.36333, 216.7486666667, 217.134, 217.5193333333, 217.9046666667 };
-    // double[] wordEnds = { 215.2073333333, 215.5926666667, 215.978, 216.36333, 216.7486666667, 217.134, 217.5193333333, 217.9046666667, 218.29 };
+    // use original offsets
+    double[] wordStarts = { 214.822, 215.3, 215.5926666667, 215.978, 216.36333, 216.7486666667, 217.134, 217.5193333333, 217.9046666667 };
+    double[] wordEnds = { 215.2073333333, 215.5926666667, 215.978, 216.36333, 216.7486666667, 217.134, 217.5193333333, 217.9046666667, 218.29 };
     assertEquals("word count", wordLabels.length, words.length);
     for (int i = 0; i < wordLabels.length; i++)
     {
       assertEquals("word label " + i, wordLabels[i], words[i].getLabel());
-      assertEquals("word start " + i,
-                   wordStarts[i], words[i].getStart().getOffset());
-      assertEquals("word end " + i,
-                   wordEnds[i], words[i].getEnd().getOffset());
-      // TODO assertEquals("word start " + i + " " + wordStarts[i] + " vs " + words[i].getStart().getOffset(),
-      //              0, g.compareOffsets(wordStarts[i], words[i].getStart().getOffset()));
-      // TODO assertEquals("word end " + i + " " +  wordEnds[i] + " vs " + words[i].getEnd().getOffset(),
-      //              0, g.compareOffsets(wordEnds[i], words[i].getEnd().getOffset()));
+      assertEquals("word start " + i + " " + wordStarts[i] + " vs " + words[i].getStart().getOffset(),
+                   0, g.compareOffsets(wordStarts[i], words[i].getStart().getOffset()));
+      assertEquals("word end " + i + " " +  wordEnds[i] + " vs " + words[i].getEnd().getOffset(),
+                   0, g.compareOffsets(wordEnds[i], words[i].getEnd().getOffset()));
     } // next annotation
 
     // tags

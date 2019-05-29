@@ -563,7 +563,7 @@ public class BundleSerialization
                   // SEGMENT levels cannot have pauses between intervals,
                   // so insert blank labels before pauses
                   double offset = annotation.getStart().getOffset() - graphOffset;
-                  long offsetSamples = (long)(offset * sampleRate);
+                  long offsetSamples = Math.round(offset * sampleRate);
                   if (items.length() > 0)
                   {
                     // get last item
@@ -587,7 +587,7 @@ public class BundleSerialization
                   JSONObject item = new JSONObject()
                     .put("id", itemId++)
                     .put("sampleStart", offsetSamples)
-                    .put("sampleDur", (long)(annotation.getDuration() * sampleRate))
+                    .put("sampleDur", Math.round(annotation.getDuration() * sampleRate))
                     .put("labels", labels);
                   // make sure child tags can find the labels, as they'll need to add some
                   annotation.put("@labels", labels);
