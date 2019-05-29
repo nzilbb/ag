@@ -1133,10 +1133,11 @@ public class BundleSerialization
         for (int i = 0; i < items.length(); i++)
         {
           JSONObject item = items.getJSONObject(i);
-          Anchor start = graph.getOrCreateAnchorAt(item.getDouble("sampleStart")/sampleRate);
+          Anchor start = graph.getOrCreateAnchorAt(
+            item.getDouble("sampleStart")/sampleRate, Constants.CONFIDENCE_MANUAL);
           graph.addAnchor(start);
           Anchor end = graph.getOrCreateAnchorAt(
-            start.getOffset() + item.getDouble("sampleDur")/sampleRate);
+            start.getOffset() + item.getDouble("sampleDur")/sampleRate, Constants.CONFIDENCE_MANUAL);
           graph.addAnchor(end);
           Annotation levelAnnotation = new Annotation(
             null, // let the graph assign the ID

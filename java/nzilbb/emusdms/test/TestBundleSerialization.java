@@ -345,6 +345,15 @@ public class TestBundleSerialization
     {
       assertEquals("phone label " + i, phoneLabels[i], annotations[i].getLabel());
     } // next annotation
+
+    // anchors
+    for (Anchor a : g.getAnchors().values())
+    {
+      assertNotNull("no null offsets " + a.getId() + ":" + a.getOffset(),
+                    a.getOffset());
+      assertEquals("anchor set to manual confidence " + a.getId() + ":" + a.getOffset(),
+                   Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+    }
   }
 
   /**
