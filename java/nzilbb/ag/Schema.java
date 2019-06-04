@@ -412,7 +412,28 @@ public class Schema
   {
     return layers.values().toArray(new Layer[0]);
   } // end of layers()
-
+  
+  /**
+   * Copies the IDs of the special layers identified by the given schema.
+   * @param source The source schema.
+   * @return this
+   * @see #participantLayerId
+   * @see #turnLayerId
+   * @see #utteranceLayerId
+   * @see #wordLayerId
+   * @see #episodeLayerId
+   * @see #corpusLayerId
+   */
+  public Schema copyLayerIdsFrom(Schema source)
+  {
+    participantLayerId = source.participantLayerId;
+    turnLayerId = source.turnLayerId;
+    utteranceLayerId = source.utteranceLayerId;
+    wordLayerId = source.wordLayerId;
+    episodeLayerId = source.episodeLayerId;
+    corpusLayerId = source.corpusLayerId;
+    return this;
+  } // end of copyLayerIdsFrom()
 
   /**
    * Override of Object's clone method.
@@ -420,15 +441,7 @@ public class Schema
    */
   public Object clone()
   {
-    Schema copy = new Schema();
-    copy.participantLayerId = participantLayerId;
-    copy.turnLayerId = turnLayerId;
-    copy.utteranceLayerId = utteranceLayerId;
-    copy.wordLayerId = wordLayerId;
-    copy.episodeLayerId = episodeLayerId;
-    copy.corpusLayerId = corpusLayerId;
-    copy.participantLayerId = participantLayerId;
-    copy.participantLayerId = participantLayerId;
+    Schema copy = new Schema().copyLayerIdsFrom(this);
     
     LayerHierarchyTraversal<Schema> t = new LayerHierarchyTraversal<Schema>(copy, this) {
         // add parents before children (so we know we don't have to check for orphans)
