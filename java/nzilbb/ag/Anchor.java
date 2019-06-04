@@ -107,11 +107,7 @@ public class Anchor
       if (graph != null)
       {
         // add this to offsetIndex
-        if (offset != null)
-        {
-          if (!graph.offsetIndex.containsKey(offset)) graph.offsetIndex.put(offset, new Vector<Anchor>());
-          graph.offsetIndex.get(offset).add(this); // TODO should probably remove it from the old position.
-        }
+        graph.indexAnchor(this);
 	    
         // reset indices of related layers
         for (String layerId : startOf.keySet()) graph.indicesByLayer.remove(layerId);

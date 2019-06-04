@@ -3147,13 +3147,14 @@ public class Merger
     Double d2 = a2.getOffset();
     if (d1 == null) return 999;
     if (d2 == null) return -999;
-    // if there's a threshold
-    if (offsetComparisonThreshold != null)
-    {
-      if (Math.abs(d1 - d2) <= offsetComparisonThreshold) return 0;
-    }
-    // if we got this far, use straight Double comparison
-    return d1.compareTo(d2);
+    return editedGraph.compareOffsets(d1,d2);
+    // // if there's a threshold
+    // if (offsetComparisonThreshold != null)
+    // {
+    //   if (Math.abs(d1 - d2) <= offsetComparisonThreshold) return 0;
+    // }
+    // // if we got this far, use straight Double comparison
+    // return d1.compareTo(d2);
   }
 
   /**

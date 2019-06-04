@@ -2065,6 +2065,32 @@ public class TestGraph
                   -0, g.compareOffsets(0.005, 0.0050624));
    }
 
+   @Test public void getAnchorAt() 
+   {
+     Graph g = new Graph();
+     Anchor a = g.addAnchor(new Anchor(null, 0.005));
+     assertEquals("equal",
+                  a, g.getAnchorAt(0.005));
+     assertNull("big difference",
+                g.getAnchorAt(0.004));
+     assertNull("small difference",
+                g.getAnchorAt(0.0050625));
+     assertNull("smaller difference",
+                g.getAnchorAt(0.0050624));
+     
+     g.setOffsetGranularity(1.0/16000.0); // 0.0000625
+     
+     assertEquals("16kHz granularity: equal",
+                  a, g.getAnchorAt(0.005));
+     assertNull("16kHz granularity: big difference",
+                g.getAnchorAt(0.004));
+     assertNull("16kHz granularity: small difference",
+                g.getAnchorAt(0.0050625));
+     assertEquals("16kHz granularity: negligible difference",
+                  a, g.getAnchorAt(0.0050624));
+     
+   }
+
    public static void main(String args[]) 
    {
       org.junit.runner.JUnitCore.main("nzilbb.ag.test.TestGraph");

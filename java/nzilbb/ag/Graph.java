@@ -136,7 +136,6 @@ public class Graph
    * @param anchors Map of anchors (graph nodes) keyed by id.
    */
   public Graph setAnchors(LinkedHashMap<String,Anchor> anchors) { put("anchors", anchors); return this; }
-
    
   /**
    * Granularity of offsets - e.g. 0.001 if Anchor offsets are always set to the the nearest millisecond, or null for no particular granularity.
@@ -154,7 +153,18 @@ public class Graph
    * @param newOffsetGranularity Granularity of offsets - e.g. 0.001 if Anchor offsets are always set to the the nearest millisecond, or null for no particular granularity.
    * @return <var>this</var>.
    */
-  public Graph setOffsetGranularity(Double newOffsetGranularity) { offsetGranularity = newOffsetGranularity; return this; }
+  public Graph setOffsetGranularity(Double newOffsetGranularity)
+  {
+    offsetGranularity = newOffsetGranularity;
+    // need to re-index anchors by offset
+    offsetIndex = new HashMap<Double,LinkedHashSet<Anchor>>();
+    for (Anchor a : getAnchors().values())
+    {
+      indexAnchor(a);
+    } // next anchor
+    
+    return this;
+  }
 
   /**
    * The units for anchor offsets - e.g. "s" for seconds, "char" for characters, etc.  Preferably the value should be one of the Constants.UNIT_... constants. The default value is {@link Constants#UNIT_SECONDS}.
@@ -710,7 +720,7 @@ public class Graph
       if (timers != null) timers.end("Graph.addAnnotation: find children");
 
       // also set the parent if it's a child of "graph"
-      if (layer.getParentId().equals("graph"))
+      if (layer.getParentId() == null || layer.getParentId().equals("graph"))
       {
         if (timers != null) timers.start("Graph.addAnnotation: setParent = graph");
         annotation.setParent(this, false);
@@ -778,11 +788,7 @@ public class Graph
     getAnchors().put(anchor.getId(), anchor);
 
     // add to offset index
-    if (anchor.getOffset() != null)
-    {
-      if (!offsetIndex.containsKey(anchor.getOffset())) offsetIndex.put(anchor.getOffset(), new Vector<Anchor>());
-      offsetIndex.get(anchor.getOffset()).add(anchor);
-    }
+    indexAnchor(anchor);
 
     // look for annotations referencing that anchor
     String id = anchor.getId();
@@ -822,29 +828,34 @@ public class Graph
     return getAnchors().get(id);
   } // end of getAnchor()
 
-  HashMap<Double,Vector<Anchor>> offsetIndex = new HashMap<Double,Vector<Anchor>>();
+  protected HashMap<Double,LinkedHashSet<Anchor>> offsetIndex = new HashMap<Double,LinkedHashSet<Anchor>>();  
+  /**
+   * Ensure the given anchor is in the offset index.
+   * @param anchor The anchor to index.
+   */
+  void indexAnchor(Anchor anchor)
+  {
+    if (anchor.getOffset() == null) return;
+    Double q = quantumOffset(anchor.getOffset());
+    if (!offsetIndex.containsKey(q)) offsetIndex.put(q, new LinkedHashSet<Anchor>());
+    offsetIndex.get(q).add(anchor);
+  } // end of indexAnchor()
+
   /**
    * Gets an anchor at the given offset.
    * @param offset The anchor offset.
    * @return An anchor that has the given offset, or null if there isn't one in the graph.
    * @see #getOrCreateAnchorAt(double)
    */
-  public Anchor getAnchorAt(double offset) // TODO test
+  public Anchor getAnchorAt(double offset)
   {
-    // for (Anchor anchor : getAnchors().values())
-    // {
-    // 	 if (anchor.getOffset() != null && anchor.getOffset().doubleValue() == offset)
-    // 	 {
-    // 	    return anchor;
-    // 	 }
-    // }
-    Double o = Double.valueOf(offset);
-    if (offsetIndex.containsKey(o)) //TODO should we be taking offsetGranularity into account?
+    Double q = quantumOffset(offset);
+    if (offsetIndex.containsKey(q))
     {
-      for (Anchor anchor : offsetIndex.get(o))
+      for (Anchor anchor : offsetIndex.get(q))
       {
         // check the offset is still this one
-        if (anchor.getOffset() != null && anchor.getOffset().doubleValue() == offset)
+        if (q.equals(quantumOffset(anchor.getOffset())))
         { 
           return anchor;
         }
@@ -869,7 +880,7 @@ public class Graph
       addAnchor(anchor);
     }
     return anchor;
-  } // end of getAnchorAt()
+  } // end of getOrCreateAnchorAt()
 
   /**
    * Gets an anchor at the given offset. If there isn't already one in the graph, one is created.
@@ -962,6 +973,20 @@ public class Graph
     if (o1 > o2) return 1;
     return 0;
   } // end of compareOffsets()
+  
+  /**
+   * Returns the given offset rounded to the nearest 'quantum' as determined by 
+   * {@link #offsetGranularity}
+   * @param offset
+   * @return The given offset, rounded to the nearest {@link #offsetGranularity} unit.
+   */
+  public Double quantumOffset(Double offset)
+  {
+    if (offset == null) return null;
+    if (offsetGranularity == null) return offset;
+    return offset - Math.IEEEremainder(offset + offsetGranularity/2, offsetGranularity);
+  } // end of quantumOffset()
+
    
   /**
    * Adds a layer definition.
