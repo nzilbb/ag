@@ -711,7 +711,7 @@ public class BundleSerialization
   public SerializationDescriptor getDescriptor()
   {
     return new SerializationDescriptor(
-      "EMU-SDMS Bundle", "0.02", "application/emusdms+json", ".json", "20190529.1502",
+      "EMU-SDMS Bundle", "0.02", "application/emusdms+json", ".json", "20190604.1518",
       getClass().getResource("icon.png"));
   }
   
@@ -1147,10 +1147,8 @@ public class BundleSerialization
           JSONObject item = items.getJSONObject(i);
           Anchor start = graph.getOrCreateAnchorAt(
             item.getDouble("sampleStart")/sampleRate, Constants.CONFIDENCE_MANUAL);
-          graph.addAnchor(start);
           Anchor end = graph.getOrCreateAnchorAt(
             start.getOffset() + item.getDouble("sampleDur")/sampleRate, Constants.CONFIDENCE_MANUAL);
-          graph.addAnchor(end);
           Annotation levelAnnotation = new Annotation(
             null, // let the graph assign the ID
             "", // we'll fill in the label when we get to it
