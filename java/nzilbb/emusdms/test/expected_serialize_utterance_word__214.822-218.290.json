@@ -11,7 +11,7 @@
           {
             "id": 2,
             "sampleStart": 0,
-            "sampleDur": 6165,
+            "sampleDur": 6166,
             "labels": [{
               "name": "phone",
               "value": "$"
@@ -19,8 +19,8 @@
           },
           {
             "id": 5,
-            "sampleStart": 6165,
-            "sampleDur": 1483,
+            "sampleStart": 6166,
+            "sampleDur": 1482,
             "labels": [{
               "name": "phone",
               "value": ""
@@ -38,7 +38,7 @@
           {
             "id": 7,
             "sampleStart": 8209,
-            "sampleDur": 1625,
+            "sampleDur": 1626,
             "labels": [{
               "name": "phone",
               "value": "V"
@@ -46,7 +46,7 @@
           },
           {
             "id": 8,
-            "sampleStart": 9834,
+            "sampleStart": 9835,
             "sampleDur": 2496,
             "labels": [{
               "name": "phone",
@@ -55,15 +55,6 @@
           },
           {
             "id": 10,
-            "sampleStart": 12330,
-            "sampleDur": 1,
-            "labels": [{
-              "name": "phone",
-              "value": ""
-            }]
-          },
-          {
-            "id": 11,
             "sampleStart": 12331,
             "sampleDur": 6165,
             "labels": [{
@@ -80,7 +71,7 @@
           {
             "id": 1,
             "sampleStart": 0,
-            "sampleDur": 6165,
+            "sampleDur": 6166,
             "labels": [{
               "name": "word",
               "value": "or"
@@ -88,8 +79,8 @@
           },
           {
             "id": 3,
-            "sampleStart": 6165,
-            "sampleDur": 1483,
+            "sampleStart": 6166,
+            "sampleDur": 1482,
             "labels": [{
               "name": "word",
               "value": ""
@@ -120,17 +111,17 @@
             }]
           },
           {
-            "id": 12,
+            "id": 11,
             "sampleStart": 18496,
-            "sampleDur": 6165,
+            "sampleDur": 6166,
             "labels": [{
               "name": "word",
               "value": "there's"
             }]
           },
           {
-            "id": 13,
-            "sampleStart": 24661,
+            "id": 12,
+            "sampleStart": 24662,
             "sampleDur": 6165,
             "labels": [{
               "name": "word",
@@ -138,16 +129,7 @@
             }]
           },
           {
-            "id": 14,
-            "sampleStart": 30826,
-            "sampleDur": 1,
-            "labels": [{
-              "name": "word",
-              "value": ""
-            }]
-          },
-          {
-            "id": 15,
+            "id": 13,
             "sampleStart": 30827,
             "sampleDur": 6165,
             "labels": [{
@@ -156,17 +138,17 @@
             }]
           },
           {
-            "id": 16,
+            "id": 14,
             "sampleStart": 36992,
-            "sampleDur": 6165,
+            "sampleDur": 6166,
             "labels": [{
               "name": "word",
               "value": "on"
             }]
           },
           {
-            "id": 17,
-            "sampleStart": 43157,
+            "id": 15,
+            "sampleStart": 43158,
             "sampleDur": 6165,
             "labels": [{
               "name": "word",
@@ -174,16 +156,7 @@
             }]
           },
           {
-            "id": 18,
-            "sampleStart": 49322,
-            "sampleDur": 1,
-            "labels": [{
-              "name": "word",
-              "value": ""
-            }]
-          },
-          {
-            "id": 19,
+            "id": 16,
             "sampleStart": 49323,
             "sampleDur": 6165,
             "labels": [{

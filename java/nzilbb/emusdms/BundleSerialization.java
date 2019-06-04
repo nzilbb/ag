@@ -562,8 +562,8 @@ public class BundleSerialization
 
                   // SEGMENT levels cannot have pauses between intervals,
                   // so insert blank labels before pauses
-                  double offset = annotation.getStart().getOffset() - graphOffset;
-                  long offsetSamples = Math.round(offset * sampleRate);
+                  double startOffset = annotation.getStart().getOffset() - graphOffset;
+                  long startOffsetSamples = Math.round(startOffset * sampleRate);
                   if (items.length() > 0)
                   {
                     // get last item
@@ -571,23 +571,26 @@ public class BundleSerialization
                     // and get the end time in samples
                     long endSamples = previous.getLong("sampleStart")
                       + previous.getLong("sampleDur");
-                    if (offsetSamples > endSamples)
+                    if (startOffsetSamples > endSamples)
                     { // there is a gap
                       // insert a blank item
                       JSONObject item = new JSONObject()
                         .put("id", itemId++)
                         .put("sampleStart", endSamples)
-                        .put("sampleDur", offsetSamples - endSamples)
+                        .put("sampleDur", startOffsetSamples - endSamples)
                         .put("labels", new JSONArray()
                              .put(new JSONObject().put("name", layer.getId()).put("value", "")));
                       items.put(item);
                     } // there is a gap
                   } // there is a previous annotation
-                  
+
+                  double endOffset = annotation.getEnd().getOffset() - graphOffset;
+                  long endOffsetSamples = Math.round(endOffset * sampleRate);
+
                   JSONObject item = new JSONObject()
                     .put("id", itemId++)
-                    .put("sampleStart", offsetSamples)
-                    .put("sampleDur", Math.round(annotation.getDuration() * sampleRate))
+                    .put("sampleStart", startOffsetSamples)
+                    .put("sampleDur", endOffsetSamples - startOffsetSamples)
                     .put("labels", labels);
                   // make sure child tags can find the labels, as they'll need to add some
                   annotation.put("@labels", labels);
@@ -708,7 +711,7 @@ public class BundleSerialization
   public SerializationDescriptor getDescriptor()
   {
     return new SerializationDescriptor(
-      "EMU-SDMS Bundle", "0.02", "application/emusdms+json", ".json", "20190523.1453",
+      "EMU-SDMS Bundle", "0.02", "application/emusdms+json", ".json", "20190529.1502",
       getClass().getResource("icon.png"));
   }
   
@@ -830,6 +833,7 @@ public class BundleSerialization
   }
 
   // IDeserializer methods
+  
   /**
    * Loads the serialized form of the graph, using the given set of named streams.
    * <p>{@link IDeserializer} method.
@@ -1094,21 +1098,29 @@ public class BundleSerialization
       graph.setId(top.getString("name"));
       graph.setOffsetGranularity(1/sampleRate);
 
+      // copy schema special layer IDs
+      graph.getSchema().copyLayerIdsFrom(schema);
+
       String rootId = graph.getSchema().getRoot().getId();
       for (Parameter p : mappings.values())
       {
         Layer layer = (Layer)p.getValue();
         if (layer != null)
         {
-          // if it's a tag layer
-          if (layer.getAlignment() == Constants.ALIGNMENT_NONE)
-          { // it has the same parent as the schema we were given
+          // the schema structure must match the one we've been given
+          // so unmapped ancestors must nevertheless be added
+          for (Layer ancestor : layer.getAncestors())
+          {
+            if (graph.getLayer(ancestor.getId()) == null)
+            {
+              graph.addLayer((Layer)ancestor.clone());
+            }
+          } // next ancestor
+          // now add the layer itself
+          if (graph.getLayer(layer.getId()) == null)
+          {
             graph.addLayer((Layer)layer.clone());
           }
-          else // an aligned layer
-          { // so the parent is the graph itself
-            graph.addLayer(((Layer)layer.clone()).setParentId(rootId));
-          }            
         } // there's a mapped layer
       } // next parameter
       
@@ -1142,8 +1154,7 @@ public class BundleSerialization
           Annotation levelAnnotation = new Annotation(
             null, // let the graph assign the ID
             "", // we'll fill in the label when we get to it
-            levelLayer.getId(), start.getId(), end.getId(),
-            graph.getId()); // aligned layers are children of the graph
+            levelLayer.getId(), start.getId(), end.getId());
           // read all labels
           JSONArray labels = item.getJSONArray("labels");
           for (int lb = 0; lb < labels.length(); lb++)
@@ -1172,7 +1183,69 @@ public class BundleSerialization
           } // next label
         } // next item
 
-      } // next level      
+      } // next level
+
+      // now we've got all the annotations, ensure they all have parents
+      Vector<Annotation> toCheck = new Vector<Annotation>(graph.getAnnotationsById().values());
+      while (toCheck.size() > 0)
+      {
+        Vector<Annotation> newAnnotations = new Vector<Annotation>();
+        for (Annotation annotation : toCheck)
+        {
+          Layer parentLayer = annotation.getLayer().getParent();
+          if (annotation.getParent() == null)
+          {
+            Annotation[] candidates = graph.overlappingAnnotations(annotation, parentLayer.getId());
+            if (candidates.length > 0)
+            { // parent found
+              annotation.setParent(candidates[0]);
+            } // parent found
+            else
+            { // parent not found
+              // create a dummy parent
+              Anchor start = graph.getStart();
+              Anchor end = graph.getEnd();
+              Annotation dummy = graph.addAnnotation(
+                new Annotation(null, "", annotation.getLayer().getParentId(),
+                               start.getId(), end.getId()));
+              newAnnotations.add(dummy);
+              // later we need to unhook the anchors, so tag this as a dummy
+              dummy.put("@dummy", Boolean.TRUE);
+              
+              annotation.setParent(dummy);
+            } // parent not found
+          } // annotation needs parent
+
+          // check turns take label of utterance, and participant, from turn
+          if (annotation.getParent().getLabel().length() == 0
+              && ( // utterance -> turn
+                (annotation.getLayer().getId().equals(graph.getSchema().getUtteranceLayerId())
+                 && parentLayer.getId().equals(graph.getSchema().getTurnLayerId()))
+                || // turn -> who
+                (annotation.getLayer().getId().equals(graph.getSchema().getTurnLayerId())
+                 && parentLayer.getId().equals(graph.getSchema().getParticipantLayerId())))
+            )
+          { // copy label to parent, which is the participant label
+            annotation.getParent().setLabel(annotation.getLabel());
+          }
+        } // next annotation
+        
+        // if we've added dummy annotations, we need to set their parents too...
+        toCheck = newAnnotations;
+      } // next pass
+
+      // now de-anchor dummy annotations
+      for (Annotation annotation : graph.getAnnotationsById().values())
+      {
+        if (annotation.get("@dummy") != null)
+        {
+          annotation.remove("@dummy");
+          annotation.setStartId("dummy-start");
+          annotation.setEndId("dummy-end");
+        } // dummy annotation
+      } // next annotation
+
+      graph.commit();
       
       return graph;
     }

@@ -307,12 +307,30 @@ public class TestBundleSerialization
     Graph g = graphs[0];
     assertEquals("graph id", "serialize_utterance_word__214.822-218.290", g.getId());
     assertEquals("granularity", Double.valueOf(1.0/16000.0), g.getOffsetGranularity());
+
+    // ensure schema structure is correct
+    assertEquals("schema: utterance parent ", "turn", g.getLayer("utterance").getParentId());
+    assertEquals("schema: word parent ", "turn", g.getLayer("word").getParentId());
+    assertEquals("schema: phone parent ", "word", g.getLayer("phone").getParentId());
+    assertEquals("schema: tag parent ", "word", g.getLayer("tag").getParentId());
+    assertEquals("schema: turn layer", "turn", g.getSchema().getTurnLayerId());
+    assertEquals("schema: utterance layer", "utterance", g.getSchema().getUtteranceLayerId());
+    assertEquals("schema: word layer", "word", g.getSchema().getWordLayerId());
+
     g.shiftAnchors(214.822);
 
     // utterances
     Annotation[] annotations = g.list("utterance");
     assertEquals("utterance count", 1, annotations.length);
     assertEquals("utterance label", "participant", annotations[0].getLabel());
+    assertNotNull("utterance parent is set",
+               annotations[0].getParent());
+    assertNull("utterance parent is unanchored (start)",
+               annotations[0].getParent().getStart());
+    assertNull("utterance parent is unanchored (end)",
+               annotations[0].getParent().getEnd());
+    assertEquals("utterance parent label",
+                annotations[0].getLabel(), annotations[0].getParent().getLabel());
 
     // words
     Annotation[] words = g.list("word");
@@ -328,6 +346,12 @@ public class TestBundleSerialization
                    0, g.compareOffsets(wordStarts[i], words[i].getStart().getOffset()));
       assertEquals("word end " + i + " " +  wordEnds[i] + " vs " + words[i].getEnd().getOffset(),
                    0, g.compareOffsets(wordEnds[i], words[i].getEnd().getOffset()));
+      assertNotNull("word parent is set " + i,
+                    words[i].getParent());
+      assertNull("word parent is unanchored (start) " + i,
+                 words[i].getParent().getStart());
+      assertNull("word parent is unanchored (end) " + i,
+                 words[i].getParent().getEnd());
     } // next annotation
 
     // tags
@@ -335,15 +359,18 @@ public class TestBundleSerialization
     assertEquals("tag count", 1, tags.length);
     assertEquals("tag label", "first-tag", tags[0].getLabel());
     assertTrue("tag word", tags[0].tags(words[1]));    
+    assertEquals("tag parent", words[1], tags[0].getParent());    
 
     // phones
     annotations = g.list("phone");
     assertEquals("phone count", 5, annotations.length);
     String[] phoneLabels = { "$", "s", "V", "m", "n" };
+    String[] parentLabels = { "or", "some", "some", "some", "and" };
     assertEquals("phone count", phoneLabels.length, annotations.length);
     for (int i = 0; i < phoneLabels.length; i++)
     {
       assertEquals("phone label " + i, phoneLabels[i], annotations[i].getLabel());
+      assertEquals("phone parent " + i, parentLabels[i], annotations[i].getParent().getLabel());
     } // next annotation
 
     // anchors
