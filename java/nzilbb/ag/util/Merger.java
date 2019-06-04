@@ -207,42 +207,6 @@ public class Merger
    */
   public void setIgnoreOffsetConfidence(boolean newIgnoreOffsetConfidence) { ignoreOffsetConfidence = newIgnoreOffsetConfidence; }
 
-
-  /**
-   * When comparing anchor offsets, differences below this threshold are ignored.
-   * <p>This is useful during merge of graphs that come from two different annotation tools,
-   * where one tool has a higher anchor granularity than the other, or when reimporting a graph
-   * with default anchors (with maximum granularity) which have been forced to the granurality
-   * of a particular tool (e.g. Praat saves offsets to the nearest millisecond).
-   * <p>i.e. if an anchor is exported as 3.33333333333 and re-imported as 3.333 then it counts
-   * as equal, if the threshold is set to 0.001
-   * @see #getOffsetComparisonThreshold()
-   * @see #setOffsetComparisonThreshold(Double)
-   * @see #compare(Anchor,Anchor)
-   */
-  protected Double offsetComparisonThreshold;
-  /**
-   * Getter for {@link #offsetComparisonThreshold}: When comparing anchor offsets, differences below this threshold are ignored.
-   * @return When comparing anchor offsets, differences below this threshold are ignored.
-   */
-  public Double getOffsetComparisonThreshold() { return offsetComparisonThreshold; }
-  /**
-   * Setter for {@link #offsetComparisonThreshold}: When comparing anchor offsets, differences
-   * below this threshold are ignored.
-   * <p> A (small) tolerance of 0.00000000001 is automatically added to the threshold to ensure
-   * that decimals inaccurately represented as doubles don't produce false-inequalities
-   * - e.g. if the intended threshold is 0.0005 and a difference is 0.000500000000001,
-   * this is probably due to floating-point rounding error, and so this slight excess
-   * is tolerated in {@link #compare(Anchor,Anchor)}.
-
-   * @param newOffsetComparisonThreshold When comparing anchor offsets, differences below this threshold are ignored.
-   */
-  public void setOffsetComparisonThreshold(Double newOffsetComparisonThreshold) 
-  { 
-    if (newOffsetComparisonThreshold == null) offsetComparisonThreshold = null;
-    else offsetComparisonThreshold = newOffsetComparisonThreshold + 0.00000000001; 
-  }
-
   /**
    * Set of IDs of layers for which annotations may not be added, changed, or deleted.
    * @see #getNoChangeLayers()
@@ -643,22 +607,13 @@ public class Merger
 
       // phase 4. - compute anchor deltas horizontally
     log("phase 4: anchor deltas");
-    // take into account the granularities of the graphs when comparing offsets
-    if (graph.getOffsetGranularity() != null || editedGraph.getOffsetGranularity() != null)
+    // use the coarsest granularity of the graphs when comparing offsets
+    if (graph.getOffsetGranularity() != null)
     {
-      if (graph.getOffsetGranularity() == null)
+      if (editedGraph.getOffsetGranularity() == null
+          || editedGraph.getOffsetGranularity() < graph.getOffsetGranularity())
       {
-        setOffsetComparisonThreshold(editedGraph.getOffsetGranularity() / 2);
-      }
-      else if (editedGraph.getOffsetGranularity() == null)
-      {
-        setOffsetComparisonThreshold(graph.getOffsetGranularity() / 2);
-      }
-      else
-      {
-        setOffsetComparisonThreshold(
-          Math.max(Math.abs(graph.getOffsetGranularity()), 
-                   Math.abs(editedGraph.getOffsetGranularity())) / 2);
+        editedGraph.setOffsetGranularity(graph.getOffsetGranularity());
       }
     }
     // construct a bottom up list of layers, to ensure children unshare from parents, 
@@ -3148,13 +3103,6 @@ public class Merger
     if (d1 == null) return 999;
     if (d2 == null) return -999;
     return editedGraph.compareOffsets(d1,d2);
-    // // if there's a threshold
-    // if (offsetComparisonThreshold != null)
-    // {
-    //   if (Math.abs(d1 - d2) <= offsetComparisonThreshold) return 0;
-    // }
-    // // if we got this far, use straight Double comparison
-    // return d1.compareTo(d2);
   }
 
   /**
