@@ -366,6 +366,7 @@ public class TestBundleSerialization
     assertEquals("phone count", 5, annotations.length);
     String[] phoneLabels = { "$", "s", "V", "m", "n" };
     String[] parentLabels = { "or", "some", "some", "some", "and" };
+    int[] phoneOrdinals = { 1, 1, 2, 3, 1 };
     assertEquals("phone count", phoneLabels.length, annotations.length);
     for (int i = 0; i < phoneLabels.length; i++)
     {
