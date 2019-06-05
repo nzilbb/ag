@@ -392,7 +392,7 @@ public class EAFDeserializer
   public SerializationDescriptor getDescriptor()
   {
     return new SerializationDescriptor(
-      "ELAN EAF Transcript", "0.6", "text/x-eaf+xml", ".eaf", "20170314.1631", getClass().getResource("icon.png"));
+      "ELAN EAF Transcript", "0.61", "text/x-eaf+xml", ".eaf", "20170314.1631", getClass().getResource("icon.png"));
   }
    
   /**
@@ -1136,8 +1136,6 @@ public class EAFDeserializer
               String sTimeSlotRef1 = ((Attr)annotationNode.getAttributes().getNamedItem("TIME_SLOT_REF1")).getValue();
               String sTimeSlotRef2 = ((Attr)annotationNode.getAttributes().getNamedItem("TIME_SLOT_REF2")).getValue();
               String sAnnotationValue = (String)xpath.evaluate("ANNOTATION_VALUE/text()", annotationNode, XPathConstants.STRING);
-              // ignore empty intervals...
-              if (sAnnotationValue.trim().length() == 0) continue; 
 
               Anchor start = mTimeslotIdToAnchor.get(sTimeSlotRef1);
               Anchor end = mTimeslotIdToAnchor.get(sTimeSlotRef2);
