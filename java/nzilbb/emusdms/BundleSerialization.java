@@ -1148,7 +1148,9 @@ public class BundleSerialization
           Anchor start = graph.getOrCreateAnchorAt(
             item.getDouble("sampleStart")/sampleRate, Constants.CONFIDENCE_MANUAL);
           Anchor end = graph.getOrCreateAnchorAt(
-            start.getOffset() + item.getDouble("sampleDur")/sampleRate, Constants.CONFIDENCE_MANUAL);
+            // to avoid rounding errors, get end time in samples, then divide by sampleRate:
+            (item.getDouble("sampleStart") + item.getDouble("sampleDur"))/sampleRate,
+            Constants.CONFIDENCE_MANUAL);
           Annotation levelAnnotation = new Annotation(
             null, // let the graph assign the ID
             "", // we'll fill in the label when we get to it
