@@ -187,9 +187,6 @@ public class Graph
   public Graph setOffsetUnits(String newOffsetUnits) { offsetUnits = newOffsetUnits; return this; }
 
 
-  // TODO participants
-   
-   
   // Attributes stored outside HashMap, so that JSONifying the HashMap doesn't result in infinite recursion
 
 
@@ -870,7 +867,7 @@ public class Graph
    * @return An anchor that has the given offset.
    * @see #getAnchorAt(double)
    */
-  public Anchor getOrCreateAnchorAt(double offset) // TODO test
+  public Anchor getOrCreateAnchorAt(double offset)
   {
     Anchor anchor = getAnchorAt(offset);
     if (anchor == null)
@@ -894,7 +891,7 @@ public class Graph
    * @return An anchor that has the given offset.
    * @see #getAnchorAt(double)
    */
-  public Anchor getOrCreateAnchorAt(double offset, Integer confidence) // TODO test
+  public Anchor getOrCreateAnchorAt(double offset, Integer confidence)
   {
     Anchor anchor = getAnchorAt(offset);
     if (anchor == null)
@@ -1235,7 +1232,7 @@ public class Graph
    * @param layerId Layer to match.
    * @return A possibly empty array of annotations.
    */
-  public Annotation[] overlappingAnnotations(Annotation annotation, String layerId)  // TODO test
+  public Annotation[] overlappingAnnotations(Annotation annotation, String layerId)
   {
     return overlappingAnnotations(annotation.getStart(), annotation.getEnd(), layerId);
   } // end of overlappingAnnotations()
@@ -1246,7 +1243,7 @@ public class Graph
    * @param layerId Layer to match.
    * @return A possibly empty array of annotations.
    */
-  public Annotation[] overlappingAnnotations(Anchor start, Anchor end, String layerId)  // TODO test
+  public Annotation[] overlappingAnnotations(Anchor start, Anchor end, String layerId)
   {
     if (start == null || end == null || start.getOffset() == null || end.getOffset() == null)
     {
@@ -1261,7 +1258,7 @@ public class Graph
    * @param layerId Layer to match.
    * @return A possibly empty array of annotations.
    */
-  public Annotation[] overlappingAnnotations(double start, double end, String layerId)  // TODO test
+  public Annotation[] overlappingAnnotations(double start, double end, String layerId)
   {
     Vector<Annotation> matches = new Vector<Annotation>();
     for (Annotation annotation : list(layerId))
