@@ -829,6 +829,7 @@ public class TestGraph
       g.addAnchor(new Anchor("turnEnd", 6.0));
 
       Annotation turn1 = new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "my graph");
+      Annotation turn2 = new Annotation("turn2", "jane doe", "turn", "turnStart", "turnEnd", "my graph");
 
       Annotation the = new Annotation("word1", "the", "word", "a1", "a2", "turn1");
       Annotation DT = new Annotation("pos1", "DT", "pos", "a1", "a2", "word1");
@@ -847,6 +848,7 @@ public class TestGraph
       Annotation NP = new Annotation("phrase2", "NP", "phrase", "a1", "a5", "turn1");
 
       g.addAnnotation(turn1);
+      g.addAnnotation(turn2);
 
       g.addAnnotation(the);
       g.addAnnotation(quick);
@@ -869,8 +871,9 @@ public class TestGraph
 
       // includingAnnotationsOn
       Annotation[] including = the.includingAnnotationsOn("turn");
-      assertEquals(turn1, including[0]);
-      assertEquals(1, including.length);
+      assertEquals("includingAnnotationsOn - unrelated", turn2, including[0]);
+      assertEquals("includingAnnotationsOn - related", turn1, including[1]);
+      assertEquals(2, including.length);
       including = the.includingAnnotationsOn("pos");
       assertEquals(DT, including[0]);
       assertEquals(1, including.length);
@@ -909,8 +912,9 @@ public class TestGraph
 
       // midpointIncludingAnnotationsOn
       including = the.midpointIncludingAnnotationsOn("turn");
-      assertEquals(turn1, including[0]);
-      assertEquals(1, including.length);
+      assertEquals("midpointIncludingAnnotationsOn - unrelated", turn2, including[0]);
+      assertEquals("midpointIncludingAnnotationsOn - related", turn1, including[1]);
+      assertEquals(2, including.length);
       including = the.midpointIncludingAnnotationsOn("pos");
       assertEquals(DT, including[0]);
       assertEquals(1, including.length);
@@ -927,6 +931,39 @@ public class TestGraph
       including = AP.midpointIncludingAnnotationsOn("phrase");
       assertEquals(NP, including[0]);
       assertEquals("midpointIncludingAnnotationsOn - exclude self", 1, including.length);
+
+      // overlappingAnnotations
+      Annotation[] overlapping = g.overlappingAnnotations(the, "turn");
+      assertEquals("overlappingAnnotations - related", turn1, overlapping[0]);
+      assertEquals("overlappingAnnotations - unrelated", turn2, overlapping[1]);
+      assertEquals(2, overlapping.length);
+      overlapping = g.overlappingAnnotations(the, "pos");
+      assertEquals(DT, overlapping[0]);
+      assertEquals(1, overlapping.length);
+      overlapping = g.overlappingAnnotations(the, "phone");
+      assertEquals(th, overlapping[0]);
+      assertEquals(e, overlapping[1]);
+      assertEquals(2, overlapping.length);
+      overlapping = g.overlappingAnnotations(quick, "phrase");
+      assertEquals("overlappingAnnotations - earlier first", AP, overlapping[0]);
+      assertEquals("overlappingAnnotations - later last", NP, overlapping[1]);
+      assertEquals(2, overlapping.length);
+      // own layer
+      overlapping = g.overlappingAnnotations(the, "word");
+      assertEquals(the, overlapping[0]);
+      assertEquals("overlappingAnnotations - include self", 1, including.length);
+      overlapping = g.overlappingAnnotations(AP, "phrase");
+      assertEquals(AP, overlapping[0]);
+      assertEquals(NP, overlapping[1]);
+      assertEquals("overlappingAnnotations - include self", 2, overlapping.length);
+      // orphans
+      Annotation orphan = new Annotation("orphanphone", "orphan", "phone", "a1", "a1.5");
+      g.addAnnotation(orphan);
+      overlapping = g.overlappingAnnotations(the, "phone");
+      assertEquals(th, overlapping[0]);
+      assertEquals(e, overlapping[1]);
+      assertEquals(orphan, overlapping[2]);
+      assertEquals(3, overlapping.length);
 
       // tagsOn
       Annotation[] tags = the.tagsOn("turn");
@@ -2090,7 +2127,6 @@ public class TestGraph
                   a, g.getAnchorAt(0.0050624));
      
    }
-
    public static void main(String args[]) 
    {
       org.junit.runner.JUnitCore.main("nzilbb.ag.test.TestGraph");
