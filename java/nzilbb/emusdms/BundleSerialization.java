@@ -578,8 +578,8 @@ public class BundleSerialization
                         .put("id", itemId++)
                         .put("sampleStart", endSamples)
                         .put("sampleDur", startOffsetSamples - endSamples)
-                        .put("labels", new JSONArray()
-                             .put(new JSONObject().put("name", layer.getId()).put("value", "")));
+                        // no labels in pauses
+                        .put("labels", new JSONArray());
                       items.put(item);
                     } // there is a gap
                   } // there is a previous annotation
@@ -1186,11 +1186,22 @@ public class BundleSerialization
       } // next level
 
       // now we've got all the annotations, ensure they all have parents
-      Vector<Annotation> toCheck = new Vector<Annotation>(graph.getAnnotationsById().values());
-      while (toCheck.size() > 0)
+      // traverse bottom-up in the hierarchy, to ensure that parents have been created before
+      // we get to their layer, and also becayse overlappingAnnotations() uses list(), which
+      // will only find annotations that are either orphans, or have a complete hierarchy
+      // (if a parent candidate's parent is set but not its grandparent, list() won't list it)
+      Vector<Layer> layersBottomUp = new LayerHierarchyTraversal<Vector<Layer>>(
+        new Vector<Layer>(), 
+        new Comparator<Layer>() { // reverse default child order
+          public int compare(Layer l1, Layer l2) { 
+            return -LayerHierarchyTraversal.defaultComparator.compare(l1,l2); 
+          } },
+        graph.getSchema()) {
+          protected void post(Layer layer) { result.add(layer); } // post = child before parent
+        }.getResult();
+      for (Layer layer : layersBottomUp)
       {
-        Vector<Annotation> newAnnotations = new Vector<Annotation>();
-        for (Annotation annotation : toCheck)
+        for (Annotation annotation : graph.list(layer.getId()))
         {
           Layer parentLayer = annotation.getLayer().getParent();
           if (annotation.getParent() == null)
@@ -1208,14 +1219,13 @@ public class BundleSerialization
               Annotation dummy = graph.addAnnotation(
                 new Annotation(null, "", annotation.getLayer().getParentId(),
                                start.getId(), end.getId()));
-              newAnnotations.add(dummy);
               // later we need to unhook the anchors, so tag this as a dummy
               dummy.put("@dummy", Boolean.TRUE);
               
               annotation.setParent(dummy);
             } // parent not found
           } // annotation needs parent
-
+          
           // check turns take label of utterance, and participant, from turn
           if (annotation.getParent().getLabel().length() == 0
               && ( // utterance -> turn
@@ -1229,10 +1239,7 @@ public class BundleSerialization
             annotation.getParent().setLabel(annotation.getLabel());
           }
         } // next annotation
-        
-        // if we've added dummy annotations, we need to set their parents too...
-        toCheck = newAnnotations;
-      } // next pass
+      } // next layer
 
       // now de-anchor dummy annotations
       for (Annotation annotation : graph.getAnnotationsById().values())
