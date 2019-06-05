@@ -21,10 +21,7 @@
             "id": 5,
             "sampleStart": 6166,
             "sampleDur": 1482,
-            "labels": [{
-              "name": "phone",
-              "value": ""
-            }]
+            "labels": []
           },
           {
             "id": 6,
@@ -81,10 +78,7 @@
             "id": 3,
             "sampleStart": 6166,
             "sampleDur": 1482,
-            "labels": [{
-              "name": "word",
-              "value": ""
-            }]
+            "labels": []
           },
           {
             "id": 4,
