@@ -40,6 +40,7 @@ import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
+import nzilbb.ag.util.AnnotationComparatorByDistance;
 import nzilbb.ag.util.LayerTraversal;
 import nzilbb.ag.util.LayerHierarchyTraversal;
 import nzilbb.configure.Parameter;
@@ -711,7 +712,7 @@ public class BundleSerialization
   public SerializationDescriptor getDescriptor()
   {
     return new SerializationDescriptor(
-      "EMU-SDMS Bundle", "0.02", "application/emusdms+json", ".json", "20190604.1518",
+      "EMU-SDMS Bundle", "0.02", "application/emusdms+json", ".json", "20190606.1502",
       getClass().getResource("icon.png"));
   }
   
@@ -1207,10 +1208,18 @@ public class BundleSerialization
           if (annotation.getParent() == null)
           {
             Annotation[] candidates = graph.overlappingAnnotations(annotation, parentLayer.getId());
-            if (candidates.length > 0)
+            if (candidates.length == 1)
             { // parent found
               annotation.setParent(candidates[0]);
             } // parent found
+            else if (candidates.length > 1)
+            { // multiple possible parents found
+              // pick the one with the most overlap - i.e. the lowest distance
+              TreeSet<Annotation> byDistance = new TreeSet<Annotation>(
+                new AnnotationComparatorByDistance(annotation));
+              for (Annotation c : candidates) byDistance.add(c);
+              annotation.setParent(byDistance.first());
+            } // multiple possible parents found
             else
             { // parent not found
               // create a dummy parent
