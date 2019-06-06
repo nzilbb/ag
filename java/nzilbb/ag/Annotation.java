@@ -1379,7 +1379,9 @@ public class Annotation
   } // end of includesMidpointOf()
 
   /**
-   * Determines the offset difference between this annotation and another - i.e. the minimum distance between any of the anchors.  If the annotations overlap, the returned difference will be negative, with a magnitude corresponding to the degree of overlap.
+   * Determines the offset difference between this annotation and another - i.e. the minimum
+   * distance between any of the anchors.  If the annotations overlap, the returned difference
+   * will be negative, with a magnitude corresponding to the degree of overlap. 
    * @param other The given other annotation.
    * @return The minimum distance between any two of the annotations' anchors, or null if any anchors are unset.
    */
