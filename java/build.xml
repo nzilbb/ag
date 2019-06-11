@@ -25,15 +25,15 @@
           description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
     <javac srcdir="${src}" destdir="${build}"
-	   classpath=""
-	   includes="${srcfiles}"
-	   excludes="${srctests} ${srctestseditpath}"
-	   listfiles="yes"
-	   includeantruntime="false"
-	   target="6"
-	   source="6"
-	   debug="on"
-	   >
+	       classpath="lib/antlr-4.7.2-complete.jar"
+	       includes="${srcfiles}"
+	       excludes="${srctests} ${srctestseditpath}"
+	       listfiles="yes"
+	       includeantruntime="false"
+	       target="6"
+	       source="6"
+	       debug="on"
+	       >
       <compilerarg value="-Xlint"/>
     </javac>
   </target>
@@ -45,7 +45,7 @@
     
     <!-- Put everything in ${build} into the ${ant.project.name}.jar file -->
     <jar jarfile="${dist}/${ant.project.name}.jar" 
-	 basedir="${build}">
+	     basedir="${build}">
       
       <!-- include source code -->
       <fileset dir="${src}" includes="${srcfiles} nzilbb/jsendpraat/nzilbb_jsendpraat_SendPraat.*" />
@@ -59,34 +59,35 @@
   </target>
 
   <target name="javadoc" depends="init,compile"
-        description="document the source" >
+          description="document the source" >
     <mkdir dir="${javadoc}"/>
     <javadoc destdir="${javadoc}"
-	     classpath="."
-	     Author="yes"
-	     >
-      <fileset dir="${src}" includes="${srcfiles}" excludes="${srctests} ${srctestseditpath}" />
+	         classpath="."
+	         Author="yes" >
+      <fileset dir="${src}"
+               includes="${srcfiles}"
+               excludes="${srctests} ${srctestseditpath} nzilbb/ag/ql/**/*.java" />
     </javadoc>
   </target>
-
+  
   <target name="test" depends="dist" description="run nzilbb.ag annotation-graph unit tests">
     <javac srcdir="${src}" destdir="."
-	   includes="${srctests} ${srctestseditpath}"
-	   classpath=".;${junitjar};${dist}/${ant.project.name}.jar"
-	   listfiles="yes"
-	   target="6"
-	   source="6"
-	   debug="on"
-	   includeAntRuntime="false"
-	   >
+	       includes="${srctests} ${srctestseditpath}"
+	       classpath=".;${junitjar};${dist}/${ant.project.name}.jar;lib/antlr-4.7.2-complete.jar"
+	       listfiles="yes"
+	       target="6"
+	       source="6"
+	       debug="on"
+	       includeAntRuntime="false"
+	       >
       <compilerarg value="-Xlint"/>
     </javac>
     <junit
-	haltonfailure="true"
-	fork="true"
-	>
+	    haltonfailure="true"
+	    fork="true"
+	    >
       <classpath>
-	<pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar}"/>
+	    <pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar}"/>
       </classpath>
       <jvmarg value="-ea"/>
       <formatter type="plain" usefile="false" />
@@ -103,22 +104,22 @@
 
   <target name="testmerger" depends="dist" description="run nzilbb.ag.util.Merger unit tests">
     <javac srcdir="${src}" destdir="."
-	   includes="nzilbb/ag/util/test/TestMerger.java"
-	   classpath=".;${junitjar};${dist}/${ant.project.name}.jar"
-	   listfiles="yes"
-	   target="6"
-	   source="6"
-	   debug="on"
-	   includeAntRuntime="false"
-	   >
+	       includes="nzilbb/ag/util/test/TestMerger.java"
+	       classpath=".;${junitjar};${dist}/${ant.project.name}.jar"
+	       listfiles="yes"
+	       target="6"
+	       source="6"
+	       debug="on"
+	       includeAntRuntime="false"
+	       >
       <compilerarg value="-Xlint"/>
     </javac>
     <junit
-	haltonfailure="true"
-	fork="true"
-	>
+	    haltonfailure="true"
+	    fork="true"
+	    >
       <classpath>
-	<pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar}"/>
+	    <pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar}"/>
       </classpath>
       <jvmarg value="-ea"/>
       <formatter type="plain" usefile="false" />
@@ -137,9 +138,10 @@
 	<ant antfile="tei.xml" inheritAll="false" />
 	<ant antfile="clan.xml" inheritAll="false" />
 	<ant antfile="est.xml" inheritAll="false" />
+	<ant antfile="emusdms.xml" inheritAll="false" />
   </target>  
 
-    
+  
   <target name="clean" description="clean up" >
     <!-- Delete the ${build} and ${dist} directory trees -->
     <delete dir="${build}"/>
