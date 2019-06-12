@@ -21,7 +21,14 @@
   <target name="all" depends="compile,dist">
   </target>
   
-  <target name="compile" depends="init"
+  <target name="grammar" depends="init">
+    <!--antlr target="${src}/nzilbb/ag/ql/AGQL.g4"/-->
+    <java jar="lib/antlr-4.7.2-complete.jar" fork="true" failonerror="true">
+      <arg value="${src}/nzilbb/ag/ql/AGQL.g4"/>
+    </java>
+  </target>
+  
+  <target name="compile" depends="init,grammar"
           description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
     <javac srcdir="${src}" destdir="${build}"
@@ -126,6 +133,33 @@
       <batchtest>
         <fileset dir="." includes="nzilbb/ag/util/test/TestAnchorComparators.java"/>
         <fileset dir="." includes="nzilbb/ag/util/test/TestMerger.java"/>
+      </batchtest>
+    </junit>
+  </target>
+
+  <target name="testql" depends="dist" description="run nzilbb.ag.ql.* unit tests">
+    <javac srcdir="${src}" destdir="."
+	       includes="nzilbb/ag/ql/test/Test*.java"
+	       classpath=".;${junitjar};${dist}/${ant.project.name}.jar;lib/antlr-4.7.2-complete.jar"
+	       listfiles="yes"
+	       target="6"
+	       source="6"
+	       debug="on"
+	       includeAntRuntime="false"
+	       >
+      <compilerarg value="-Xlint"/>
+    </javac>
+    <junit
+	    haltonfailure="true"
+	    fork="true"
+	    >
+      <classpath>
+	    <pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar};lib/antlr-4.7.2-complete.jar"/>
+      </classpath>
+      <jvmarg value="-ea"/>
+      <formatter type="plain" usefile="false" />
+      <batchtest>
+        <fileset dir="." includes="nzilbb/ag/ql/test/Test*.java"/>
       </batchtest>
     </junit>
   </target>
