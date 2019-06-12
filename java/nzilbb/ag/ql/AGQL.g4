@@ -49,9 +49,11 @@ operand
   | anchorIdExpression                                 # AnchorIdOperand
   | anchorOffsetExpression                             # AnchorOffsetOperand
   | labelExpression                                    # LabelOperand
+  | labelsExpression                                   # LabelsOperand
   | idExpression                                       # IdOperand
   | listExpression                                     # ListOperand
   | listLengthExpression                               # ListLengthOperand
+  | annotatorsExpression                               # AnnotatorsOperand
   | ANNOTATOR                                          # AnnotatorOperand
   | WHEN                                               # WhenOperand
   | attribute                                          # AttributeOperand
@@ -86,6 +88,8 @@ labelExpression : MY OPEN_PAREN stringLiteral CLOSE_PAREN DOT LABEL ;
 idExpression : MY OPEN_PAREN stringLiteral CLOSE_PAREN DOT ID ;
 listExpression : LIST OPEN_PAREN stringLiteral CLOSE_PAREN ;
 listLengthExpression : LIST OPEN_PAREN stringLiteral CLOSE_PAREN DOT LENGTH ;
+labelsExpression : LABELS OPEN_PAREN stringLiteral CLOSE_PAREN ;
+annotatorsExpression : ANNOTATORS OPEN_PAREN stringLiteral CLOSE_PAREN ;
     
 method
   : atom DOT IDENTIFIER OPEN_PAREN CLOSE_PAREN         # MethodNoArgs 
@@ -153,6 +157,7 @@ LENGTH                : 'length' ;
 MY                    : 'my' ;
 LIST                  : 'list' ;
 LABELS                : 'labels' ;
+ANNOTATORS            : 'annotators' ;
 
 /* other stuff */
 DOT                   : '.' ;

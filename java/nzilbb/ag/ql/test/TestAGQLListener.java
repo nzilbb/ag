@@ -386,6 +386,39 @@ public class TestAGQLListener
 
   }
   
+  @Test public void labels() 
+  {
+    final StringBuffer parse = new StringBuffer();
+    final StringBuffer error = new StringBuffer();
+    AGQLListener listener = new AGQLBaseListener() {
+        // @Override public void exitEveryRule(ParserRuleContext ctx)
+        // {
+        //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
+        // }
+        @Override public void exitLabelsExpression(AGQLParser.LabelsExpressionContext ctx)
+        {
+          parse.append(ctx.stringLiteral().quotedString.getText());
+        }
+        @Override public void visitErrorNode(ErrorNode node)
+        {
+          // System.out.println(node.getText());
+          error.append(node.getText());
+        }
+      };
+
+    AGQLLexer lexer = new AGQLLexer(
+      CharStreams.fromString("'something' IN labels('transcript')"));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    AGQLParser parser = new AGQLParser(tokens);
+    AGQLParser.QueryContext tree = parser.query();
+
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("No errors: " + error.toString(), error.length() == 0);
+    assertEquals("Parse structure: " + parse,
+                 "'transcript'", parse.toString());
+
+  }
+
   @Test public void annotator() 
   {
     final StringBuffer parse = new StringBuffer();
@@ -411,6 +444,39 @@ public class TestAGQLListener
     assertTrue("No errors: " + error.toString(), error.length() == 0);
     assertEquals("Parse structure: " + parse,
                  "annotator", parse.toString());
+
+  }
+
+  @Test public void annotators() 
+  {
+    final StringBuffer parse = new StringBuffer();
+    final StringBuffer error = new StringBuffer();
+    AGQLListener listener = new AGQLBaseListener() {
+        // @Override public void exitEveryRule(ParserRuleContext ctx)
+        // {
+        //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
+        // }
+        @Override public void exitAnnotatorsExpression(AGQLParser.AnnotatorsExpressionContext ctx)
+        {
+          parse.append(ctx.stringLiteral().quotedString.getText());
+        }
+        @Override public void visitErrorNode(ErrorNode node)
+        {
+          // System.out.println(node.getText());
+          error.append(node.getText());
+        }
+      };
+
+    AGQLLexer lexer = new AGQLLexer(
+      CharStreams.fromString("'someone' IN annotators('transcript')"));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    AGQLParser parser = new AGQLParser(tokens);
+    AGQLParser.QueryContext tree = parser.query();
+
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("No errors: " + error.toString(), error.length() == 0);
+    assertEquals("Parse structure: " + parse,
+                 "'transcript'", parse.toString());
 
   }
 
