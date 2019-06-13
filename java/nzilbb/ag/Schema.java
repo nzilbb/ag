@@ -60,7 +60,7 @@ public class Schema
    * Setter for {@link #layers}: Layers, indexed by ID.
    * @param newLayers Layers, indexed by ID.
    */
-  public void setLayers(HashMap<String,Layer> newLayers) { layers = newLayers; }
+  public Schema setLayers(HashMap<String,Layer> newLayers) { layers = newLayers; return this; }
    
   /**
    * ID of the layer that contains participants.
@@ -77,7 +77,7 @@ public class Schema
    * Setter for {@link #participantLayerId}: ID of the layer that contains participants.
    * @param newParticipantLayerId ID of the layer that contains participants.
    */
-  public void setParticipantLayerId(String newParticipantLayerId) { participantLayerId = newParticipantLayerId; }
+  public Schema setParticipantLayerId(String newParticipantLayerId) { participantLayerId = newParticipantLayerId; return this; }
 
   /**
    * ID of the layer that contains speaker turns.
@@ -94,7 +94,7 @@ public class Schema
    * Setter for {@link #turnLayerId}: ID of the layer that contains speaker turns.
    * @param newTurnLayerId ID of the layer that contains speaker turns.
    */
-  public void setTurnLayerId(String newTurnLayerId) { turnLayerId = newTurnLayerId; }
+  public Schema setTurnLayerId(String newTurnLayerId) { turnLayerId = newTurnLayerId; return this; }
 
   /**
    * ID of the layer that contains speaker utterances.
@@ -111,7 +111,7 @@ public class Schema
    * Setter for {@link #utteranceLayerId}: ID of the layer that contains speaker utterances.
    * @param newUtteranceLayerId ID of the layer that contains speaker utterances.
    */
-  public void setUtteranceLayerId(String newUtteranceLayerId) { utteranceLayerId = newUtteranceLayerId; }
+  public Schema setUtteranceLayerId(String newUtteranceLayerId) { utteranceLayerId = newUtteranceLayerId; return this; }
 
   /**
    * ID of the layer that contains individual word tokens.
@@ -128,7 +128,7 @@ public class Schema
    * Setter for {@link #wordLayerId}: ID of the layer that contains individual word tokens.
    * @param newWordLayerId ID of the layer that contains individual word tokens.
    */
-  public void setWordLayerId(String newWordLayerId) { wordLayerId = newWordLayerId; }
+  public Schema setWordLayerId(String newWordLayerId) { wordLayerId = newWordLayerId; return this; }
 
   /**
    * ID of the layer that tags the graph with its episode name, if any.
@@ -145,7 +145,7 @@ public class Schema
    * Setter for {@link #episodeLayerId}: ID of the layer that tags the graph with its episode name, if any.
    * @param newEpisodeLayerId ID of the layer that tags the graph with its episode name, if any.
    */
-  public void setEpisodeLayerId(String newEpisodeLayerId) { episodeLayerId = newEpisodeLayerId; }
+  public Schema setEpisodeLayerId(String newEpisodeLayerId) { episodeLayerId = newEpisodeLayerId; return this; }
 
   /**
    * ID of the layer that tags the graph with its corpus name, if any.
@@ -162,7 +162,7 @@ public class Schema
    * Setter for {@link #corpusLayerId}: ID of the layer that tags the graph with its corpus name, if any.
    * @param newCorpusLayerId ID of the layer that tags the graph with its corpus name, if any.
    */
-  public void setCorpusLayerId(String newCorpusLayerId) { corpusLayerId = newCorpusLayerId; }
+  public Schema setCorpusLayerId(String newCorpusLayerId) { corpusLayerId = newCorpusLayerId; return this; }
    
   // Methods:
    
