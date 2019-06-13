@@ -464,6 +464,18 @@ public class TrackedMap
     }
     return value;
   } // end of get()
+  
+  /**
+   * Builder-pattern method for putting an arbitrary kay/value into the map.
+   * @param key
+   * @param value
+   * @return this
+   */
+  public TrackedMap with(String key, Object value)
+  {
+    put(key, value);
+    return this;
+  } // end of with()
 
   // Map overrides
 

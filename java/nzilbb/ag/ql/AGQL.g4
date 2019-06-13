@@ -37,8 +37,7 @@ booleanExpression
 
 predicate
   : operand comparisonOperator operand                 # ComparisonPredicate
-  | attribute                                          # AttributePredicate
-  | method                                             # MethodPredicate
+  | operand                                            # BarePredicate
   ;
 
 operand

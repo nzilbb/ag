@@ -632,6 +632,65 @@ public class TestAGQLListener
     } // next operator
   }
 
+  @Test public void atomicEpressions() 
+  {
+    final StringBuffer parse = new StringBuffer();
+    final StringBuffer error = new StringBuffer();
+    AGQLListener listener = new AGQLBaseListener() {
+        // @Override public void exitEveryRule(ParserRuleContext ctx)
+        // {
+        //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
+        // }
+        @Override public void exitBarePredicate(AGQLParser.BarePredicateContext ctx)
+        {
+          parse.append(ctx.getText());
+        }
+        @Override public void visitErrorNode(ErrorNode node)
+        {
+          error.append(node.getText());
+        }
+      };
+
+    AGQLLexer lexer = new AGQLLexer(
+      CharStreams.fromString("'something'"));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    AGQLParser parser = new AGQLParser(tokens);
+    AGQLParser.QueryContext tree = parser.query();
+
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("No errors: " + error.toString(), error.length() == 0);
+    assertEquals("Parse structure: " + parse,
+                 "'something'", parse.toString());
+
+    parse.setLength(0);
+    lexer.setInputStream(CharStreams.fromString("something"));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    tree = parser.query();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertEquals("Parse structure: " + parse,
+                 "something", parse.toString());
+
+    parse.setLength(0);
+    lexer.setInputStream(CharStreams.fromString("label"));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    tree = parser.query();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertEquals("Parse structure: " + parse,
+                 "label", parse.toString());
+    
+    parse.setLength(0);
+    lexer.setInputStream(CharStreams.fromString("id"));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    tree = parser.query();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertEquals("Parse structure: " + parse,
+                 "id", parse.toString());
+  }
+  
+
   public static void main(String args[]) 
   {
     org.junit.runner.JUnitCore.main("nzilbb.ag.ql.test.TestAGQLListener");

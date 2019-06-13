@@ -1226,7 +1226,7 @@ public class SqlGraphStore
             +")";
         } // list().length
         else if (operand.startsWith("annotators('transcript_") && operand.endsWith("')"))
-        { // list().length for transcript attribute
+        { // annotators for transcript attribute
           String attribute = operand.replaceFirst("annotators\\('transcript_","").replaceFirst("'\\)$","");
           sqlOperand = "(SELECT annotated_by"
             +" FROM annotation_transcript"
@@ -1234,7 +1234,7 @@ public class SqlGraphStore
             +" WHERE layer = '"+attribute+"'"
             +" AND transcript_speaker.speaker_number = speaker.speaker_number"
             +")";
-        } // list().length
+        } // annotators
         else
         {
           sqlOperand = operand;
