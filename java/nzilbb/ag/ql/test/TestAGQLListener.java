@@ -269,9 +269,13 @@ public class TestAGQLListener
     final StringBuffer parse = new StringBuffer();
     final StringBuffer error = new StringBuffer();
     AGQLListener listener = new AGQLBaseListener() {
-        @Override public void exitLabelExpression(AGQLParser.LabelExpressionContext ctx)
+        @Override public void exitOtherLabelExpression(AGQLParser.OtherLabelExpressionContext ctx)
         {
-          parse.append(ctx.stringLiteral().quotedString.getText());
+          parse.append("other: " + ctx.stringLiteral().quotedString.getText());
+        }
+        @Override public void exitThisLabelExpression(AGQLParser.ThisLabelExpressionContext ctx)
+        {
+          parse.append(ctx.getText());
         }
         @Override public void visitErrorNode(ErrorNode node)
         {
@@ -288,8 +292,16 @@ public class TestAGQLListener
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
     assertEquals("Parse structure: " + parse,
-                 "'transcript'", parse.toString());
+                 "other: 'transcript'", parse.toString());
 
+    parse.setLength(0);
+    lexer.setInputStream(CharStreams.fromString("label = 'something'"));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    tree = parser.query();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertEquals("Parse structure: " + parse,
+                 "label", parse.toString());
   }
   
   @Test public void id() 

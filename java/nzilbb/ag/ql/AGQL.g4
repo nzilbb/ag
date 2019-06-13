@@ -84,7 +84,10 @@ anchorOffsetExpression
   : START DOT OFFSET                                   # StartOffsetExpression
   | END DOT OFFSET                                     # EndOffsetExpression
   ;
-labelExpression : MY OPEN_PAREN stringLiteral CLOSE_PAREN DOT LABEL ;
+labelExpression
+  : MY OPEN_PAREN stringLiteral CLOSE_PAREN DOT LABEL  # OtherLabelExpression
+  | LABEL                                              # ThisLabelExpression
+  ;
 idExpression
   : MY OPEN_PAREN stringLiteral CLOSE_PAREN DOT ID     # OtherIdExpression
   | ID                                                 # ThisIdExpression
