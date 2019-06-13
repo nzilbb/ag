@@ -37,8 +37,8 @@
 	       excludes="${srctests} ${srctestseditpath}"
 	       listfiles="yes"
 	       includeantruntime="false"
-	       target="6"
-	       source="6"
+	       target="8"
+	       source="8"
 	       debug="on"
 	       >
       <compilerarg value="-Xlint"/>
@@ -94,7 +94,7 @@
 	    fork="true"
 	    >
       <classpath>
-	    <pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar}"/>
+	    <pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar};lib/antlr-4.7.2-complete.jar"/>
       </classpath>
       <jvmarg value="-ea"/>
       <formatter type="plain" usefile="false" />
@@ -139,7 +139,7 @@
 
   <target name="testql" depends="dist" description="run nzilbb.ag.ql.* unit tests">
     <javac srcdir="${src}" destdir="."
-	       includes="nzilbb/ag/ql/test/Test*.java"
+	       includes="nzilbb/ag/ql/test/Test*.java nzilbb/ag/sql/test/Test*.java"
 	       classpath=".;${junitjar};${dist}/${ant.project.name}.jar;lib/antlr-4.7.2-complete.jar"
 	       listfiles="yes"
 	       target="6"
@@ -160,6 +160,7 @@
       <formatter type="plain" usefile="false" />
       <batchtest>
         <fileset dir="." includes="nzilbb/ag/ql/test/Test*.java"/>
+        <fileset dir="." includes="nzilbb/ag/sql/test/Test*.java"/>
       </batchtest>
     </junit>
   </target>
