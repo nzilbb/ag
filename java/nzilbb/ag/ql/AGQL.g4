@@ -85,7 +85,10 @@ anchorOffsetExpression
   | END DOT OFFSET                                     # EndOffsetExpression
   ;
 labelExpression : MY OPEN_PAREN stringLiteral CLOSE_PAREN DOT LABEL ;
-idExpression : MY OPEN_PAREN stringLiteral CLOSE_PAREN DOT ID ;
+idExpression
+  : MY OPEN_PAREN stringLiteral CLOSE_PAREN DOT ID     # OtherIdExpression
+  | ID                                                 # ThisIdExpression
+  ;
 listExpression : LIST OPEN_PAREN stringLiteral CLOSE_PAREN ;
 listLengthExpression : LIST OPEN_PAREN stringLiteral CLOSE_PAREN DOT LENGTH ;
 labelsExpression : LABELS OPEN_PAREN stringLiteral CLOSE_PAREN ;
@@ -115,21 +118,21 @@ stringLiteral
   ;
 
 comparisonOperator
-  : EQ
-  | NE
-  | MATCHES
-  | NOT_MATCHES
-  | LT
-  | GT
-  | LTE
-  | GTE
-  | IN
-  | NOT_IN
+  : operator=EQ
+  | operator=NE
+  | operator=MATCHES
+  | operator=NOT_MATCHES
+  | operator=LT
+  | operator=GT
+  | operator=LTE
+  | operator=GTE
+  | operator=IN
+  | operator=NOT_IN
   ;
 
 logicalOperator
-  : AND
-  | OR
+  : operator=AND
+  | operator=OR
   ;
 
 /* Lexer rules: */

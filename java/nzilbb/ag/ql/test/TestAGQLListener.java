@@ -72,7 +72,7 @@ public class TestAGQLListener
     parse.setLength(0);
     lexer.setInputStream(CharStreams.fromString("graph.id = 'something'"));
     tokens = new CommonTokenStream(lexer);
-   parser = new AGQLParser(tokens);
+    parser = new AGQLParser(tokens);
     tree = parser.query();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertEquals("Parse structure: " + parse,
@@ -86,7 +86,7 @@ public class TestAGQLListener
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertEquals("Parse structure: " + parse,
                  "graph.label", parse.toString());
-    
+
   }
 
   @Test public void corpusName() 
@@ -297,9 +297,14 @@ public class TestAGQLListener
     final StringBuffer parse = new StringBuffer();
     final StringBuffer error = new StringBuffer();
     AGQLListener listener = new AGQLBaseListener() {
-        @Override public void exitIdExpression(AGQLParser.IdExpressionContext ctx)
+        @Override public void exitOtherIdExpression(AGQLParser.OtherIdExpressionContext ctx)
         {
+          parse.append("other: ");
           parse.append(ctx.stringLiteral().quotedString.getText());
+        }
+        @Override public void exitThisIdExpression(AGQLParser.ThisIdExpressionContext ctx)
+        {
+          parse.append(ctx.getText());
         }
         @Override public void visitErrorNode(ErrorNode node)
         {
@@ -316,8 +321,17 @@ public class TestAGQLListener
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
     assertEquals("Parse structure: " + parse,
-                 "'transcript'", parse.toString());
+                 "other: 'transcript'", parse.toString());
 
+    parse.setLength(0);
+    lexer.setInputStream(CharStreams.fromString("id = 'something'"));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    tree = parser.query();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertEquals("Parse structure: " + parse,
+                 "id", parse.toString());
+    
   }
   
   @Test public void list() 
@@ -511,6 +525,99 @@ public class TestAGQLListener
     assertEquals("Parse structure: " + parse,
                  "when", parse.toString());
 
+  }
+
+  @Test public void logicalOperators() 
+  {
+    final StringBuffer parse = new StringBuffer();
+    final StringBuffer error = new StringBuffer();
+    AGQLListener listener = new AGQLBaseListener() {
+        // @Override public void exitEveryRule(ParserRuleContext ctx)
+        // {
+        //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
+        // }
+        @Override public void exitLogicalOperator(AGQLParser.LogicalOperatorContext ctx)
+        {
+          parse.append(ctx.operator.getText());
+        }
+        @Override public void visitErrorNode(ErrorNode node)
+        {
+          // System.out.println("ERROR: " + node.getText());
+          error.append(node.getText());
+        }
+      };
+
+    AGQLLexer lexer = new AGQLLexer(
+      CharStreams.fromString("id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'"));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    AGQLParser parser = new AGQLParser(tokens);
+    AGQLParser.QueryContext tree = parser.query();
+
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("AND: No errors: " + error.toString(), error.length() == 0);
+    assertEquals("AND: Parse structure: " + parse,
+                 " AND ", parse.toString());
+
+    parse.setLength(0);
+    lexer.setInputStream(
+      CharStreams.fromString("id NOT MATCHES 'Ada.+' OR my('corpus').label = 'CC'"));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    tree = parser.query();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("OR: No errors: " + error.toString(), error.length() == 0);
+    assertEquals("OR: Parse structure: " + parse,
+                 " OR ", parse.toString());
+    
+    parse.setLength(0);
+    lexer.setInputStream(CharStreams.fromString(
+                           "id NOT MATCHES 'Ada.+'"
+                           +" AND my('corpus').label = 'CC'"
+                           +" AND 'labbcat' NOT IN annotators('transcript_rating')"));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    tree = parser.query();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("Chaining: No errors: " + error.toString(), error.length() == 0);
+    assertEquals("Chaining: Parse structure: " + parse,
+                 " AND  AND ", parse.toString());
+  }
+
+  @Test public void comparisonOperators() 
+  {
+    final StringBuffer parse = new StringBuffer();
+    final StringBuffer error = new StringBuffer();
+    AGQLListener listener = new AGQLBaseListener() {
+        // @Override public void exitEveryRule(ParserRuleContext ctx)
+        // {
+        //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
+        // }
+        @Override public void exitComparisonOperator(AGQLParser.ComparisonOperatorContext ctx)
+        {
+          parse.append(ctx.operator.getText().trim());
+        }
+        @Override public void visitErrorNode(ErrorNode node)
+        {
+          // System.out.println("ERROR: " + node.getText());
+          error.append(node.getText());
+        }
+      };
+
+    String[] operators =
+      {"=", "<>", "MATCHES", "NOT MATCHES", "<", ">", "<=", ">=", "IN", "NOT IN" };
+
+    for (String operator : operators)
+    {
+      parse.setLength(0);
+      AGQLLexer lexer = new AGQLLexer(CharStreams.fromString("this "+operator+" that"));
+      CommonTokenStream tokens = new CommonTokenStream(lexer);
+      AGQLParser parser = new AGQLParser(tokens);
+      AGQLParser.QueryContext tree = parser.query();
+      ParseTreeWalker.DEFAULT.walk(listener, tree);
+      assertTrue(operator + ": No errors: " + error.toString(), error.length() == 0);
+      assertEquals(operator + ": Parse structure: " + parse,
+                   operator, parse.toString());
+    } // next operator
   }
 
   public static void main(String args[]) 
