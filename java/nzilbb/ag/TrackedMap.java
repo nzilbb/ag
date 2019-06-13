@@ -43,586 +43,586 @@ import org.json.IJSONableBean;
  */
 @SuppressWarnings("serial")
 public class TrackedMap
-   extends LinkedHashMap<String,Object>
-   implements Cloneable, IJSONableBean
+  extends LinkedHashMap<String,Object>
+  implements Cloneable, IJSONableBean
 {
-   // Attributes stored in HashMap:
+  // Attributes stored in HashMap:
 
-   /**
-    * Keys for attributes that are change-tracked - i.e. when a new value is set for any of these attributes, the original value is saved in the map with the given key prefixed by "original" - e.g. if "label" is changed, then "originalLabel" will contain its original value.
-    */
-   private static final TreeSet<String> trackedAttributes = new TreeSet<String>();
-   /**
-    * Keys for attributes that are change-tracked - i.e. when a new value is set for any of these attributes, the original value is saved in the map with the given key prefixed by "original" - e.g. if "label" is changed, then "originalLabel" will contain its original value.
-    * @return A set of attributes whose changes are tracked.
-    */
-   public Set<String> getTrackedAttributes()
-   {
-      return trackedAttributes;
-   } // end of getTrackedAttributes()
+  /**
+   * Keys for attributes that are change-tracked - i.e. when a new value is set for any of these attributes, the original value is saved in the map with the given key prefixed by "original" - e.g. if "label" is changed, then "originalLabel" will contain its original value.
+   */
+  private static final TreeSet<String> trackedAttributes = new TreeSet<String>();
+  /**
+   * Keys for attributes that are change-tracked - i.e. when a new value is set for any of these attributes, the original value is saved in the map with the given key prefixed by "original" - e.g. if "label" is changed, then "originalLabel" will contain its original value.
+   * @return A set of attributes whose changes are tracked.
+   */
+  public Set<String> getTrackedAttributes()
+  {
+    return trackedAttributes;
+  } // end of getTrackedAttributes()
 
-   /**
-    * Keys for attributes that are cloned - i.e. when a subclass object is cloned, only these attributes are copied into the clone.
-    * @return A set of attributes whose values are cloned.
-    */
-   public Set<String> getClonedAttributes()
-   {
-      return trackedAttributes;
-   } // end of getTrackedAttributes()
+  /**
+   * Keys for attributes that are cloned - i.e. when a subclass object is cloned, only these attributes are copied into the clone.
+   * @return A set of attributes whose values are cloned.
+   */
+  public Set<String> getClonedAttributes()
+  {
+    return trackedAttributes;
+  } // end of getTrackedAttributes()
 
-   /**
-    * IJSONableBean implementation.
-    * @return The names of fields to be obtained from the object.
-    */
-   public String[] JSONAttributes()
-   {
-      return getClonedAttributes().toArray(new String[0]);
-   }
+  /**
+   * IJSONableBean implementation.
+   * @return The names of fields to be obtained from the object.
+   */
+  public String[] JSONAttributes()
+  {
+    return getClonedAttributes().toArray(new String[0]);
+  }
 
-   /**
-    * The object's identifier.
-    */
-   protected String id;
-   /**
-    * Getter for <i>id</i>: The object's identifier.
-    * @return The object's identifier.
-    */
-   public String getId() { return id; }
-   /**
-    * Setter for <i>id</i>: The object's identifier.
-    * @param id The object's identifier.
-    */
-   public void setId(String id) { this.id = id; }
+  /**
+   * The object's identifier.
+   */
+  protected String id;
+  /**
+   * Getter for <i>id</i>: The object's identifier.
+   * @return The object's identifier.
+   */
+  public String getId() { return id; }
+  /**
+   * Setter for <i>id</i>: The object's identifier.
+   * @param id The object's identifier.
+   */
+  public void setId(String id) { this.id = id; }
    
-   /**
-    * Confidence rating.
-    * @see #getConfidence()
-    * @see #setConfidence(Integer)
-    */
-   protected Integer confidence;
-   /**
-    * Getter for {@link #confidence}: Confidence rating.
-    * @return Confidence rating.
-    */
-   public Integer getConfidence() { return confidence; }
-   /**
-    * Setter for {@link #confidence}: Confidence rating.
-    * @param newConfidence Confidence rating.
-    */
-   public void setConfidence(Integer newConfidence) { confidence = newConfidence; }
+  /**
+   * Confidence rating.
+   * @see #getConfidence()
+   * @see #setConfidence(Integer)
+   */
+  protected Integer confidence;
+  /**
+   * Getter for {@link #confidence}: Confidence rating.
+   * @return Confidence rating.
+   */
+  public Integer getConfidence() { return confidence; }
+  /**
+   * Setter for {@link #confidence}: Confidence rating.
+   * @param newConfidence Confidence rating.
+   */
+  public void setConfidence(Integer newConfidence) { confidence = newConfidence; }
 
 
-   /**
-    * Name of the person or system that created or changed this entity.
-    * @see #getAnnotator()
-    * @see #setAnnotator(String)
-    */
-   protected String annotator;
-   /**
-    * Getter for {@link #annotator}: Name of the person or system that created or changed this entity.
-    * @return Name of the person or system that created or changed this entity.
-    */
-   public String getAnnotator() { return annotator; }
-   /**
-    * Setter for {@link #annotator}: Name of the person or system that created or changed this entity.
-    * @param newAnnotator Name of the person or system that created or changed this entity.
-    */
-   public void setAnnotator(String newAnnotator) { annotator = newAnnotator; }
+  /**
+   * Name of the person or system that created or changed this entity.
+   * @see #getAnnotator()
+   * @see #setAnnotator(String)
+   */
+  protected String annotator;
+  /**
+   * Getter for {@link #annotator}: Name of the person or system that created or changed this entity.
+   * @return Name of the person or system that created or changed this entity.
+   */
+  public String getAnnotator() { return annotator; }
+  /**
+   * Setter for {@link #annotator}: Name of the person or system that created or changed this entity.
+   * @param newAnnotator Name of the person or system that created or changed this entity.
+   */
+  public void setAnnotator(String newAnnotator) { annotator = newAnnotator; }
 
-   /**
-    * Date/time this entity was created or changed.
-    * @see #getWhen()
-    * @see #setWhen(Date)
-    */
-   protected Date when;
-   /**
-    * Getter for {@link #when}: Date/time this entity was created or changed.
-    * @return Date/time this entity was created or changed.
-    */
-   public Date getWhen() { return when; }
-   /**
-    * Setter for {@link #when}: Date/time this entity was created or changed.
-    * @param newWhen Date/time this entity was created or changed.
-    */
-   public void setWhen(Date newWhen) { when = newWhen; }
+  /**
+   * Date/time this entity was created or changed.
+   * @see #getWhen()
+   * @see #setWhen(Date)
+   */
+  protected Date when;
+  /**
+   * Getter for {@link #when}: Date/time this entity was created or changed.
+   * @return Date/time this entity was created or changed.
+   */
+  public Date getWhen() { return when; }
+  /**
+   * Setter for {@link #when}: Date/time this entity was created or changed.
+   * @param newWhen Date/time this entity was created or changed.
+   */
+  public void setWhen(Date newWhen) { when = newWhen; }
 
-   // Methods:
+  // Methods:
    
-   /**
-    * Default constructor
-    */
-   public TrackedMap()
-   {
-   } // end of constructor
+  /**
+   * Default constructor
+   */
+  public TrackedMap()
+  {
+  } // end of constructor
    
-   /**
-    * Gets the original value of the given key, before any subsequent calls to put(String,Object), since the object was created or {@link #commit()} was called.
-    * @param key The attribute name.
-    * @return The original label.
-    */
-   protected Object getOriginal(String key)
-   {
+  /**
+   * Gets the original value of the given key, before any subsequent calls to put(String,Object), since the object was created or {@link #commit()} was called.
+   * @param key The attribute name.
+   * @return The original label.
+   */
+  protected Object getOriginal(String key)
+  {
+    String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
+    if (containsKey(originalValueKey))
+    {
+      return super.get(originalValueKey);
+    }
+    else
+    {
+      try
+      {
+        Method getter = getter(this, key);
+        return getter.invoke(this);
+      }
+      catch(IllegalAccessException exception)
+      {
+        System.err.println("getOriginal [" + this + "] - " + key);
+      }
+      catch(InvocationTargetException exception)
+      {
+        System.err.println("getOriginal [" + this + "] - " + key);
+      }
+      return null;
+    }
+  } // end of getOriginalLabel()
+
+  /**
+   * Registers a change to a tracked attribute, by setting the "original..." attribute, and returning a corresponding change for the given attribute.
+   * @param key
+   * @param value
+   * @return Returns an Update change.
+   */
+  protected Change registerChange(String key, Object value)
+  {
+    String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
+    if (!containsKey(originalValueKey)) // only if it's not already registered...
+    {
+      try
+      {
+        Method getter = getter(this, key);
+        assert getter != null : "registerChange: getter != null : " + key + ", " + value + " - " + this.getClass().getName();
+        put(originalValueKey, getter.invoke(this));
+      }
+      catch(NullPointerException exception)
+      {
+        System.err.println("registerChange [" + this + "] - " + key + " = " + value + " :: " + exception);
+        exception.printStackTrace(System.err);
+      }
+      catch(IllegalAccessException exception)
+      {
+        System.err.println("registerChange [" + this + "] - " + key + " = " + value + " :: " + exception);
+      }
+      catch(InvocationTargetException exception)
+      {
+        System.err.println("registerChange [" + this + "] - " + key + " = " + value + " :: " + exception.getCause());
+        if (exception.getCause() != null)
+        {
+          exception.getCause().printStackTrace(System.err);
+        }
+      }
+    }
+    return new Change(Change.Operation.Update, this, key, value);
+  } // end of registerChange()
+
+  /**
+   * Marks the object for deletion.
+   * <p>This method is not called "delete()" because "delete" is a reserved word in Javascript, and we want these objects to be manipulable from Javascript.
+   * @return The changes made during this operation.
+   */
+  public Change destroy()
+  {
+    put("@destroy", Boolean.TRUE);
+    return new Change(Change.Operation.Destroy, this);
+  } // end of destroy()
+
+  /**
+   * Marks the object for creation.
+   * @return The changes made during this operation.
+   */
+  public Change create()
+  {
+    put("@create", Boolean.TRUE);
+    return new Change(Change.Operation.Create, this);
+  } // end of create()
+
+  /**
+   * Commits object's changes, if any.  The effect of this is to set original values of tracked attributes to be the same as their current values, and to remove any {@link #create()}/{@link #destroy()} tag.
+   * @see #getTrackedAttributes()
+   */
+  public void commit()
+  {
+    for (String key : getTrackedAttributes())
+    {
       String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
-      if (containsKey(originalValueKey))
-      {
-	 return super.get(originalValueKey);
-      }
-      else
-      {
-	 try
-	 {
-	    Method getter = getter(this, key);
-	    return getter.invoke(this);
-	 }
-	 catch(IllegalAccessException exception)
-	 {
-	    System.err.println("getOriginal [" + this + "] - " + key);
-	 }
-	 catch(InvocationTargetException exception)
-	 {
-	    System.err.println("getOriginal [" + this + "] - " + key);
-	 }
-	 return null;
-      }
-   } // end of getOriginalLabel()
+      remove(originalValueKey);
+    }
+    remove("@destroy");
+    remove("@create");
+  }
 
-   /**
-    * Registers a change to a tracked attribute, by setting the "original..." attribute, and returning a corresponding change for the given attribute.
-    * @param key
-    * @param value
-    * @return Returns an Update change.
-    */
-   protected Change registerChange(String key, Object value)
-   {
-      String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
-      if (!containsKey(originalValueKey)) // only if it's not already registered...
-      {
-	 try
-	 {
-	    Method getter = getter(this, key);
-	    assert getter != null : "registerChange: getter != null : " + key + ", " + value + " - " + this.getClass().getName();
-	    put(originalValueKey, getter.invoke(this));
-	 }
-	 catch(NullPointerException exception)
-	 {
-	    System.err.println("registerChange [" + this + "] - " + key + " = " + value + " :: " + exception);
-	    exception.printStackTrace(System.err);
-	 }
-	 catch(IllegalAccessException exception)
-	 {
-	    System.err.println("registerChange [" + this + "] - " + key + " = " + value + " :: " + exception);
-	 }
-	 catch(InvocationTargetException exception)
-	 {
-	    System.err.println("registerChange [" + this + "] - " + key + " = " + value + " :: " + exception.getCause());
-	    if (exception.getCause() != null)
-	    {
-	       exception.getCause().printStackTrace(System.err);
-	    }
-	 }
-      }
-      return new Change(Change.Operation.Update, this, key, value);
-   } // end of registerChange()
-
-   /**
-    * Marks the object for deletion.
-    * <p>This method is not called "delete()" because "delete" is a reserved word in Javascript, and we want these objects to be manipulable from Javascript.
-    * @return The changes made during this operation.
-    */
-   public Change destroy()
-   {
-      put("@destroy", Boolean.TRUE);
-      return new Change(Change.Operation.Destroy, this);
-   } // end of destroy()
-
-   /**
-    * Marks the object for creation.
-    * @return The changes made during this operation.
-    */
-   public Change create()
-   {
-      put("@create", Boolean.TRUE);
-      return new Change(Change.Operation.Create, this);
-   } // end of create()
-
-   /**
-    * Commits object's changes, if any.  The effect of this is to set original values of tracked attributes to be the same as their current values, and to remove any {@link #create()}/{@link #destroy()} tag.
-    * @see #getTrackedAttributes()
-    */
-   public void commit()
-   {
-      for (String key : getTrackedAttributes())
-      {
-	 String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
-	 remove(originalValueKey);
-      }
-      remove("@destroy");
-      remove("@create");
-   }
-
-   /**
-    * Rolls back changes since the object was create or {@link #commit()} was last called. The effect of this is to reset tracked attributes to be the same as their original values, and to remove any {@link #destroy()} tag. If it has been tagged for {@link #create()}, the tag remains in place.
-    * @see #getTrackedAttributes()
-    */
-   public void rollback()
-   {
-      for (String key : getTrackedAttributes())
-      {
-	 String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
-	 
-	 if (containsKey(originalValueKey))
-	 {
-	    try
-	    {
-	       // set the current value to the original value
-	       setter(this, key).invoke(this, super.get(originalValueKey));
-	       // remove the original key
-	       remove(originalValueKey);
-	    }
-	    catch(IllegalAccessException exception) {}
-	    catch(InvocationTargetException exception) {}
-	 }
-      }
-      remove("@destroy");
-   } // end of rollback()
-
-   /**
-    * Rolls back an individual attribute change.
-    * @param key The name of the attribute to roll back.
-    * @see #getTrackedAttributes()
-    */
-   public void rollback(String key)
-   {
+  /**
+   * Rolls back changes since the object was create or {@link #commit()} was last called. The effect of this is to reset tracked attributes to be the same as their original values, and to remove any {@link #destroy()} tag. If it has been tagged for {@link #create()}, the tag remains in place.
+   * @see #getTrackedAttributes()
+   */
+  public void rollback()
+  {
+    for (String key : getTrackedAttributes())
+    {
       String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
 	 
       if (containsKey(originalValueKey))
-      { 
-	 try
-	 {
-	    // set the current value to the original value
-	    setter(this, key).invoke(this, super.get(originalValueKey));
-	    // remove the original key
-	    remove(originalValueKey);
-	 }
-	 catch(IllegalAccessException exception) {}
-	 catch(InvocationTargetException exception) {}
-      }
-   } // end of rollback()
-   
-   /**
-    * Determines how the object has changed since it was originally defined, or since {@link #commit()} was last called.
-    * @return How/whether the object has been changed.
-    * @see #getTrackedAttributes()
-    */
-   public Change.Operation getChange()
-   {
-      if (containsKey("@destroy")) return Change.Operation.Destroy;
-      if (containsKey("@create")) return Change.Operation.Create;
-      for (String key : getTrackedAttributes())
       {
-	 String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
-	 if (containsKey(originalValueKey)) return Change.Operation.Update;
-      } // next tracked attribute
-      return Change.Operation.NoChange;
-   } // end of getChange()
-   
-   /**
-    * Produces a list of individual changes for the object.
-    * @return A list of individual changes for the object.
-    */
-   public Vector<Change> getChanges()
-   {
-      Vector<Change> changes = new Vector<Change>();
-      Change.Operation operation = getChange();
-      switch (operation)
-      {
-	 case Destroy:
-	 {
-	    // if this has also been marked for creation, then it doesn't exist yet
-	    // so no delete (or any other) operation is required
-	    if (!containsKey("@create"))
-	    { // it's not (also) being created, so delete operation is returned
-	       changes.add(new Change(Change.Operation.Destroy, this));
-	    }
-	    break;
-	 }
-	 case Create:
-	 {
-	    // add a create operation first
-	    changes.add(new Change(Change.Operation.Create, this));
-	    // add all attributes as updates
-	    for (String key : getTrackedAttributes())
-	    {
-	       try
-	       {
-		  Method getter = getter(this, key);
-		  Object value = getter.invoke(this);
-		  if (value != null)
-		  {
-		     changes.add(new Change(Change.Operation.Update, this, key, value));
-		  }
-	       }
-	       catch(Exception exception)
-	       {
-		  System.err.println("TrackedMap.getChanges(): " + getId() + ": " + exception);
-		  exception.printStackTrace(System.err);
-	       }
-	    } // next tracked attribute
-	    break;
-	 }
-	 case Update:
-	 {
-	    // add only attributes that have changed
-	    for (String key : getTrackedAttributes())
-	    {
-	       String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
-	       Method getter = getter(this, key);
-	       try
-	       {
-		  Object value = getter.invoke(this);
-		  if (containsKey(originalValueKey))
-		  {
-		     Object originalValue = super.get(originalValueKey);
-		     if ((value == null && originalValue != null)
-			 || (value != null && originalValue == null)
-			 || (value != null && !value.equals(originalValue)))
-		     {
-			changes.add(new Change(Change.Operation.Update, this, key, value));
-		     }
-		  }
-	       }
-	       catch(Exception exception)
-	       {
-		  System.err.println("TrackedMap.getChanges(): " + getId() + ": " + exception);
-		  exception.printStackTrace(System.err);
-	       }
-	    } // next tracked attribute
-	    break;
-	 }
+        try
+        {
+          // set the current value to the original value
+          setter(this, key).invoke(this, super.get(originalValueKey));
+          // remove the original key
+          remove(originalValueKey);
+        }
+        catch(IllegalAccessException exception) {}
+        catch(InvocationTargetException exception) {}
       }
-      return changes;
-   } // end of getChanges()
+    }
+    remove("@destroy");
+  } // end of rollback()
 
-   /**
-    * Override of Map's put method to allow tracking of selected keys.
-    * @param key The attribute name.
-    * @param value The attribute value.
-    * @return The previous value associated with key.
-    */
-   public Change checkForChange(String key, Object value)
-      throws UnsupportedOperationException, ClassCastException, NullPointerException, IllegalArgumentException
-   {
-      Change change = null;
-      if (getTrackedAttributes().contains(key))
-      { // tracked key
-	 String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
-	 Method getter = getter(this, key);
-	 try
-	 {
-	    Object currentValue = getter.invoke(this);
-	    if (currentValue != null // current value is null
-		&& !currentValue.equals(value)) // or they're different
-	    { // value is changing
-	       change = new Change(Change.Operation.Update, this, key, value);
-	       // if this is the first time the value is being changed
-	       if (!containsKey(originalValueKey))
-	       { // remember the original value
-		  super.put(originalValueKey, currentValue);
-	       }
-	    }
-	 }
-	 catch(IllegalAccessException x1) {}
-	 catch(InvocationTargetException x2) {}
+  /**
+   * Rolls back an individual attribute change.
+   * @param key The name of the attribute to roll back.
+   * @see #getTrackedAttributes()
+   */
+  public void rollback(String key)
+  {
+    String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
 	 
-      }
-      return change;
-   } // end of put()
-   
-   /**
-    * Overrides Map method so that if scripting environments like JSTL's EL exclusively use get() for retrieving attributes, bean attributes will be available.
-    * @param key The attribute key.
-    * @return The attribute value.
-    */
-   public Object get(Object key)
-   {
-      Object value = super.get(key);
-      if (value == null) // there's no value in the map
-      {
-	 String keyString = key.toString();
-	 // ...and we're not calling get("original...") for the original value of a tracked attribute
-	 if (!keyString.startsWith("original"))
-	 {
-	    Method getter = getter(this, keyString);
-	    // ...and there's a getter
-	    if (getter != null)
-	    { // use the getter
-	       try { value = getter.invoke(this); }
-	       catch(IllegalAccessException x1) {}
-	       catch(InvocationTargetException x2) {}
-	    }
-	 }
-      }
-      return value;
-   } // end of get()
-
-   // Map overrides
-
-   /**
-    * Override of Map's clone method, to copy only tracked attributes plus "id".
-    * @return A copy of the object, including only the values of the tracked attributes.
-    */
-   public Object clone()
-   {
+    if (containsKey(originalValueKey))
+    { 
       try
       {
-	 TrackedMap copy = getClass().getDeclaredConstructor().newInstance();
-	 copy.cloneAttributesFrom(this, null);
-	 return copy;
+        // set the current value to the original value
+        setter(this, key).invoke(this, super.get(originalValueKey));
+        // remove the original key
+        remove(originalValueKey);
       }
-      catch(Exception exception)
-      {
-	 System.err.println("TrackedMap.clone(): Could not instantiate " + getId() + ": " + exception);
-	 exception.printStackTrace(System.err);
-	 return null;
-      }
-   } // end of clone()
+      catch(IllegalAccessException exception) {}
+      catch(InvocationTargetException exception) {}
+    }
+  } // end of rollback()
    
-   /**
-    * Override of Map's clone method, to copy only tracked attributes plus "id".
-    */
-   public void cloneAttributesFrom(TrackedMap other, String except)
-   {
+  /**
+   * Determines how the object has changed since it was originally defined, or since {@link #commit()} was last called.
+   * @return How/whether the object has been changed.
+   * @see #getTrackedAttributes()
+   */
+  public Change.Operation getChange()
+  {
+    if (containsKey("@destroy")) return Change.Operation.Destroy;
+    if (containsKey("@create")) return Change.Operation.Create;
+    for (String key : getTrackedAttributes())
+    {
+      String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
+      if (containsKey(originalValueKey)) return Change.Operation.Update;
+    } // next tracked attribute
+    return Change.Operation.NoChange;
+  } // end of getChange()
+   
+  /**
+   * Produces a list of individual changes for the object.
+   * @return A list of individual changes for the object.
+   */
+  public Vector<Change> getChanges()
+  {
+    Vector<Change> changes = new Vector<Change>();
+    Change.Operation operation = getChange();
+    switch (operation)
+    {
+      case Destroy:
+      {
+        // if this has also been marked for creation, then it doesn't exist yet
+        // so no delete (or any other) operation is required
+        if (!containsKey("@create"))
+        { // it's not (also) being created, so delete operation is returned
+          changes.add(new Change(Change.Operation.Destroy, this));
+        }
+        break;
+      }
+      case Create:
+      {
+        // add a create operation first
+        changes.add(new Change(Change.Operation.Create, this));
+        // add all attributes as updates
+        for (String key : getTrackedAttributes())
+        {
+          try
+          {
+            Method getter = getter(this, key);
+            Object value = getter.invoke(this);
+            if (value != null)
+            {
+              changes.add(new Change(Change.Operation.Update, this, key, value));
+            }
+          }
+          catch(Exception exception)
+          {
+            System.err.println("TrackedMap.getChanges(): " + getId() + ": " + exception);
+            exception.printStackTrace(System.err);
+          }
+        } // next tracked attribute
+        break;
+      }
+      case Update:
+      {
+        // add only attributes that have changed
+        for (String key : getTrackedAttributes())
+        {
+          String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
+          Method getter = getter(this, key);
+          try
+          {
+            Object value = getter.invoke(this);
+            if (containsKey(originalValueKey))
+            {
+              Object originalValue = super.get(originalValueKey);
+              if ((value == null && originalValue != null)
+                  || (value != null && originalValue == null)
+                  || (value != null && !value.equals(originalValue)))
+              {
+                changes.add(new Change(Change.Operation.Update, this, key, value));
+              }
+            }
+          }
+          catch(Exception exception)
+          {
+            System.err.println("TrackedMap.getChanges(): " + getId() + ": " + exception);
+            exception.printStackTrace(System.err);
+          }
+        } // next tracked attribute
+        break;
+      }
+    }
+    return changes;
+  } // end of getChanges()
+
+  /**
+   * Override of Map's put method to allow tracking of selected keys.
+   * @param key The attribute name.
+   * @param value The attribute value.
+   * @return The previous value associated with key.
+   */
+  public Change checkForChange(String key, Object value)
+    throws UnsupportedOperationException, ClassCastException, NullPointerException, IllegalArgumentException
+  {
+    Change change = null;
+    if (getTrackedAttributes().contains(key))
+    { // tracked key
+      String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
+      Method getter = getter(this, key);
       try
       {
-	 for (String key : getClonedAttributes())
-	 { // copy tracked attributes
-	    if (key.equals(except)) continue;	    
-	    Method getter = getter(other, key);
-	    Method setter = setter(this, key);
-	    setter.invoke(this, getter.invoke(other));
-	 }
+        Object currentValue = getter.invoke(this);
+        if (currentValue != null // current value is null
+            && !currentValue.equals(value)) // or they're different
+        { // value is changing
+          change = new Change(Change.Operation.Update, this, key, value);
+          // if this is the first time the value is being changed
+          if (!containsKey(originalValueKey))
+          { // remember the original value
+            super.put(originalValueKey, currentValue);
+          }
+        }
       }
-      catch(Exception exception)
+      catch(IllegalAccessException x1) {}
+      catch(InvocationTargetException x2) {}
+	 
+    }
+    return change;
+  } // end of put()
+   
+  /**
+   * Overrides Map method so that if scripting environments like JSTL's EL exclusively use get() for retrieving attributes, bean attributes will be available.
+   * @param key The attribute key.
+   * @return The attribute value.
+   */
+  public Object get(Object key)
+  {
+    Object value = super.get(key);
+    if (value == null) // there's no value in the map
+    {
+      String keyString = key.toString();
+      // ...and we're not calling get("original...") for the original value of a tracked attribute
+      if (!keyString.startsWith("original"))
       {
-	 System.err.println("TrackedMap.cloneAttributesFrom(): Could not copy " + other.getId() + ": " + exception);
-	 exception.printStackTrace(System.err);
+        Method getter = getter(this, keyString);
+        // ...and there's a getter
+        if (getter != null)
+        { // use the getter
+          try { value = getter.invoke(this); }
+          catch(IllegalAccessException x1) {}
+          catch(InvocationTargetException x2) {}
+        }
       }
-   } // end of clone()
+    }
+    return value;
+  } // end of get()
 
-   // java.lang.Object overrides:
+  // Map overrides
+
+  /**
+   * Override of Map's clone method, to copy only tracked attributes plus "id".
+   * @return A copy of the object, including only the values of the tracked attributes.
+   */
+  public Object clone()
+  {
+    try
+    {
+      TrackedMap copy = getClass().getDeclaredConstructor().newInstance();
+      copy.cloneAttributesFrom(this, null);
+      return copy;
+    }
+    catch(Exception exception)
+    {
+      System.err.println("TrackedMap.clone(): Could not instantiate " + getId() + ": " + exception);
+      exception.printStackTrace(System.err);
+      return null;
+    }
+  } // end of clone()
+   
+  /**
+   * Override of Map's clone method, to copy only tracked attributes plus "id".
+   */
+  public void cloneAttributesFrom(TrackedMap other, String except)
+  {
+    try
+    {
+      for (String key : getClonedAttributes())
+      { // copy tracked attributes
+        if (key.equals(except)) continue;	    
+        Method getter = getter(other, key);
+        Method setter = setter(this, key);
+        setter.invoke(this, getter.invoke(other));
+      }
+    }
+    catch(Exception exception)
+    {
+      System.err.println("TrackedMap.cloneAttributesFrom(): Could not copy " + other.getId() + ": " + exception);
+      exception.printStackTrace(System.err);
+    }
+  } // end of clone()
+
+  // java.lang.Object overrides:
       
-   /**
-    * Computes a hashCode for the object. 
-    * <p>Map (base class) has a very mutable hashCode, but we don't want Annotation hashcodes changing whenever arbitrary elements change (otherwise they get lost in hash-based collections, etc.).  So this implementation returns the hashcode of the annotation's id.
-    * @return Object's hashCode.
-    */
-   public int hashCode()
-   {
-      if (id != null)
-      {
-	 return id.hashCode();
-      }
-      else
-      { // id isn't set, so we return the map's hashCode and hope for the best
-	 return super.hashCode();
-      }
-   } // end of hashCode()
+  /**
+   * Computes a hashCode for the object. 
+   * <p>Map (base class) has a very mutable hashCode, but we don't want Annotation hashcodes changing whenever arbitrary elements change (otherwise they get lost in hash-based collections, etc.).  So this implementation returns the hashcode of the annotation's id.
+   * @return Object's hashCode.
+   */
+  public int hashCode()
+  {
+    if (id != null)
+    {
+      return id.hashCode();
+    }
+    else
+    { // id isn't set, so we return the map's hashCode and hope for the best
+      return super.hashCode();
+    }
+  } // end of hashCode()
    
-   /**
-    * Indicates whether an object is "equal to" this one.  Equality is determined solely by the value of {@link #getId()}
-    * @param obj The object being compared to.
-    * @return true if obj is a ChangedTrackedMap with the same id as this one, false otherwise.
-    */
-   public boolean equals(Object obj)
-   {
-      if (obj == null) return false;
-      if (obj == this) return true;
-      // is it the same class (will be a subclass of TrackedMap, so we don't use instanceof)
-      if (obj.getClass().getName().equals(getClass().getName()))
+  /**
+   * Indicates whether an object is "equal to" this one.  Equality is determined solely by the value of {@link #getId()}
+   * @param obj The object being compared to.
+   * @return true if obj is a ChangedTrackedMap with the same id as this one, false otherwise.
+   */
+  public boolean equals(Object obj)
+  {
+    if (obj == null) return false;
+    if (obj == this) return true;
+    // is it the same class (will be a subclass of TrackedMap, so we don't use instanceof)
+    if (obj.getClass().getName().equals(getClass().getName()))
+    {
+      TrackedMap other = (TrackedMap)obj;
+      if (getId() != null && other.getId() != null)
       {
-	 TrackedMap other = (TrackedMap)obj;
-	 if (getId() != null && other.getId() != null)
-	 {
-	    return other.getId().equals(getId());
-	 }
+        return other.getId().equals(getId());
       }
-      return false;
-   } // end of equals()
+    }
+    return false;
+  } // end of equals()
 
-   /**
-    * Access the class's getter for the given attribute.
-    * @param object
-    * @param key
-    * @return The getter, or null if there isn't one.
-    */
-   public Method getter(TrackedMap object, String key)
-   {
+  /**
+   * Access the class's getter for the given attribute.
+   * @param object
+   * @param key
+   * @return The getter, or null if there isn't one.
+   */
+  public Method getter(TrackedMap object, String key)
+  {
+    try
+    {
+      String getterName = "get" + key.substring(0,1).toUpperCase() + key.substring(1);
+      return object.getClass().getMethod(getterName);
+    }
+    catch(Throwable exception)
+    {
+      // System.err.println("getter [" + object + "] - " + key + " :: " + exception);
+      // exception.printStackTrace(System.err);
+      return null;
+    }	 
+  } // end of getter()
+
+  /**
+   * Access the class's getter for the given attribute.
+   * @param object
+   * @param key
+   * @return The getter, or null if there isn't one.
+   */
+  public static Method setter(TrackedMap object, String key)
+  {
+    try
+    {
+      String setterName = "set" + key.substring(0,1).toUpperCase() + key.substring(1);
       try
       {
-	 String getterName = "get" + key.substring(0,1).toUpperCase() + key.substring(1);
-	 return object.getClass().getMethod(getterName);
+        return object.getClass().getMethod(setterName, String.class); // labels, etc.
       }
-      catch(Throwable exception)
+      catch(NoSuchMethodException x1)
       {
-	 // System.err.println("getter [" + object + "] - " + key + " :: " + exception);
-	 // exception.printStackTrace(System.err);
-	 return null;
-      }	 
-   } // end of getter()
-
-   /**
-    * Access the class's getter for the given attribute.
-    * @param object
-    * @param key
-    * @return The getter, or null if there isn't one.
-    */
-   public static Method setter(TrackedMap object, String key)
-   {
-      try
-      {
-	 String setterName = "set" + key.substring(0,1).toUpperCase() + key.substring(1);
-	 try
-	 {
-	    return object.getClass().getMethod(setterName, String.class); // labels, etc.
-	 }
-	 catch(NoSuchMethodException x1)
-	 {
-	    try
-	    {
-	       return object.getClass().getMethod(setterName, int.class); // Annotation.ordinal
-	    }
-	    catch(NoSuchMethodException x2)
-	    {
-	       try
-	       {
-		  return object.getClass().getMethod(setterName, Integer.class); // confidence
-	       }
-	       catch(NoSuchMethodException x3)
-	       {
-		  try
-		  {
-		     return object.getClass().getMethod(setterName, boolean.class); // Layer.peers, etc...
-		  }
-		  catch(NoSuchMethodException x4)
-		  {
-		     try
-		     {
-			return object.getClass().getMethod(setterName, LinkedHashMap.class); // Layer.validLabels
-		     }
-		     catch(NoSuchMethodException x5)
-		     {
-			return object.getClass().getMethod(setterName, Double.class); // Anchor.offset
-		     }
-		  }
-	       }
-	    }
-	 }
+        try
+        {
+          return object.getClass().getMethod(setterName, int.class); // Annotation.ordinal
+        }
+        catch(NoSuchMethodException x2)
+        {
+          try
+          {
+            return object.getClass().getMethod(setterName, Integer.class); // confidence
+          }
+          catch(NoSuchMethodException x3)
+          {
+            try
+            {
+              return object.getClass().getMethod(setterName, boolean.class); // Layer.peers, etc...
+            }
+            catch(NoSuchMethodException x4)
+            {
+              try
+              {
+                return object.getClass().getMethod(setterName, LinkedHashMap.class); // Layer.validLabels
+              }
+              catch(NoSuchMethodException x5)
+              {
+                return object.getClass().getMethod(setterName, Double.class); // Anchor.offset
+              }
+            }
+          }
+        }
       }
-      catch(Throwable exception)
-      {
-	 System.out.println("" + exception);
-	 return null;
-      }	 
-   } // end of getter()
+    }
+    catch(Throwable exception)
+    {
+      System.out.println("" + exception);
+      return null;
+    }	 
+  } // end of getter()
    
 } // end of class Annotation
