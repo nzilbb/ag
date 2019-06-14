@@ -135,8 +135,7 @@ public class TestParticipantAgqlToSql
                  "SELECT speaker_number, name FROM speaker"
                  +" WHERE speaker.name REGEXP 'Ada.+' ORDER BY speaker.name",
                  q.sql);
-    assertEquals("Parameter count - label",
-                 0, q.parameters.size());
+    assertEquals("Parameter count - label", 0, q.parameters.size());
 
     q = transformer.sqlFor(
       "id NOT MATCHES \"Ada.+\"", "speaker_number, name", null, "id");
@@ -144,8 +143,7 @@ public class TestParticipantAgqlToSql
                  "SELECT speaker_number, name FROM speaker"
                  +" WHERE speaker.name NOT REGEXP 'Ada.+' ORDER BY speaker.name",
                  q.sql);
-    assertEquals("Parameter count - id",
-                 0, q.parameters.size());
+    assertEquals("Parameter count - id", 0, q.parameters.size());
   }
 
   @Test public void corpusLabel() throws AGQLException
@@ -162,8 +160,7 @@ public class TestParticipantAgqlToSql
                  +" = 'CC'"
                  +" ORDER BY speaker.name",
                  q.sql);
-    assertEquals("Parameter count",
-                 0, q.parameters.size());
+    assertEquals("Parameter count", 0, q.parameters.size());
   }
 
   @Test public void corpusLabels() throws AGQLException
@@ -179,8 +176,7 @@ public class TestParticipantAgqlToSql
                  +" WHERE speaker_corpus.speaker_number = speaker.speaker_number)"
                  +" ORDER BY speaker.name",
                  q.sql);
-    assertEquals("Parameter count",
-                 0, q.parameters.size());
+    assertEquals("Parameter count", 0, q.parameters.size());
   }
 
   @Test public void listLength() throws AGQLException
@@ -199,8 +195,7 @@ public class TestParticipantAgqlToSql
                  +" > 2"
                  +" ORDER BY speaker.name",
                  q.sql);
-    assertEquals("Parameter count",
-                 0, q.parameters.size());
+    assertEquals("Parameter count", 0, q.parameters.size());
 
     q = transformer.sqlFor(
       "list('participant_gender').length = 0", "speaker_number, name", null, "label");
@@ -213,8 +208,7 @@ public class TestParticipantAgqlToSql
                  +" = 0"
                  +" ORDER BY speaker.name",
                  q.sql);
-    assertEquals("Parameter count",
-                 0, q.parameters.size());
+    assertEquals("Parameter count", 0, q.parameters.size());
     
     q = transformer.sqlFor(
       "labels('transcript_rating').length > 2", "speaker_number, name", null, "label");
@@ -229,8 +223,7 @@ public class TestParticipantAgqlToSql
                  +" > 2"
                  +" ORDER BY speaker.name",
                  q.sql);
-    assertEquals("Parameter count",
-                 0, q.parameters.size());
+    assertEquals("Parameter count", 0, q.parameters.size());
     
     q = transformer.sqlFor(
       "labels('participant_gender').length = 0", "speaker_number, name", null, "label");
@@ -243,8 +236,7 @@ public class TestParticipantAgqlToSql
                  +" = 0"
                  +" ORDER BY speaker.name",
                  q.sql);
-    assertEquals("Parameter count",
-                 0, q.parameters.size());
+    assertEquals("Parameter count", 0, q.parameters.size());
   }
 
   @Test public void labels() throws AGQLException
@@ -262,8 +254,7 @@ public class TestParticipantAgqlToSql
                  +" AND transcript_speaker.speaker_number = speaker.speaker_number)"
                  +" ORDER BY speaker.name",
                  q.sql);
-    assertEquals("Parameter count",
-                 0, q.parameters.size());
+    assertEquals("Parameter count", 0, q.parameters.size());
 
     q = transformer.sqlFor(
       "'NA' IN labels('participant_gender')", "speaker_number, name", null, "label");
@@ -275,8 +266,7 @@ public class TestParticipantAgqlToSql
                  +" AND annotation_participant.speaker_number = speaker.speaker_number)"
                  +" ORDER BY speaker.name",
                  q.sql);
-    assertEquals("Parameter count",
-                 0, q.parameters.size());
+    assertEquals("Parameter count", 0, q.parameters.size());
   }
 
   @Test public void participantAttributeLabel() throws AGQLException
@@ -293,8 +283,7 @@ public class TestParticipantAgqlToSql
                  +" = 'NA'"
                  +" ORDER BY speaker.name",
                  q.sql);
-    assertEquals("Parameter count",
-                 0, q.parameters.size());
+    assertEquals("Parameter count", 0, q.parameters.size());
   }
 
   @Test public void annotators() throws AGQLException
@@ -312,8 +301,7 @@ public class TestParticipantAgqlToSql
                  +" AND transcript_speaker.speaker_number = speaker.speaker_number)"
                  +" ORDER BY speaker.name",
                  q.sql);
-    assertEquals("Transcript Attribute - Parameter count",
-                 0, q.parameters.size());
+    assertEquals("Transcript Attribute - Parameter count", 0, q.parameters.size());
 
     q = transformer.sqlFor(
       "'labbcat' NOT IN annotators('participant_gender')", "speaker_number, name", null, "label");
@@ -325,8 +313,7 @@ public class TestParticipantAgqlToSql
                  +" AND annotation_participant.speaker_number = speaker.speaker_number)"
                  +" ORDER BY speaker.name",
                  q.sql);
-    assertEquals("Participant Attribute - Parameter count",
-                 0, q.parameters.size());
+    assertEquals("Participant Attribute - Parameter count", 0, q.parameters.size());
   }
   
   @Test public void invalidLayers() throws AGQLException
@@ -344,9 +331,69 @@ public class TestParticipantAgqlToSql
     }
     catch(AGQLException exception)
     {
-      assertEquals("Number of errors: " + exception.getErrors(),
-                   4, exception.getErrors().size());
+      assertEquals("Number of errors: " + exception.getErrors(), 4, exception.getErrors().size());
     }
+  }
+
+  @Test public void userWhereClause() throws AGQLException
+  {
+    ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
+    ParticipantAgqlToSql.Query q = transformer.sqlFor(
+      "label MATCHES \"Ada.+\"", "speaker_number, name",
+      "AND (EXISTS (SELECT * FROM role"
+      + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
+      + " INNER JOIN annotation_transcript access_attribute" 
+      + " ON access_attribute.layer = role_permission.attribute_name" 
+      + " AND access_attribute.label REGEXP role_permission.value_pattern"
+      + " AND role_permission.entity REGEXP '.*t.*'"
+      + " INNER JOIN transcript_speaker ON access_attribute.ag_id = transcript_speaker.ag_id"
+      + " WHERE transcript_speaker.speaker_number = speaker.speaker_number"
+      + " AND user_id = 'test')"
+      + " OR EXISTS (SELECT * FROM role"
+      + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
+      + " AND role_permission.attribute_name = 'corpus'" 
+      + " AND role_permission.entity REGEXP '.*t.*'"
+      + " INNER JOIN transcript_speaker"
+      + " INNER JOIN transcript ON transcript_speaker.ag_id = transcript.ag_id"
+      + " WHERE transcript_speaker.speaker_number = speaker.speaker_number"
+      + " AND transcript.corpus_name REGEXP role_permission.value_pattern"
+      + " AND INNER JOIN transcript_speaker ON access_attribute.ag_id = transcript_speaker.ag_id"
+      + " WHERE transcript_speaker.speaker_number = speaker.speaker_number"
+      + " AND user_id = 'label')"
+      + " OR NOT EXISTS (SELECT * FROM role_permission)"
+      + " OR NOT EXISTS (SELECT * FROM transcript_speaker"
+      + " WHERE transcript_speaker.speaker_number = speaker.speaker_number))",
+      "label");
+    assertEquals(
+      "SQL - label",
+      "SELECT speaker_number, name FROM speaker"
+      + " WHERE speaker.name REGEXP 'Ada.+'"
+      + " AND (EXISTS (SELECT * FROM role"
+      + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
+      + " INNER JOIN annotation_transcript access_attribute" 
+      + " ON access_attribute.layer = role_permission.attribute_name" 
+      + " AND access_attribute.label REGEXP role_permission.value_pattern"
+      + " AND role_permission.entity REGEXP '.*t.*'"
+      + " INNER JOIN transcript_speaker ON access_attribute.ag_id = transcript_speaker.ag_id"
+      + " WHERE transcript_speaker.speaker_number = speaker.speaker_number"
+      + " AND user_id = 'test')"
+      + " OR EXISTS (SELECT * FROM role"
+      + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
+      + " AND role_permission.attribute_name = 'corpus'" 
+      + " AND role_permission.entity REGEXP '.*t.*'"
+      + " INNER JOIN transcript_speaker"
+      + " INNER JOIN transcript ON transcript_speaker.ag_id = transcript.ag_id"
+      + " WHERE transcript_speaker.speaker_number = speaker.speaker_number"
+      + " AND transcript.corpus_name REGEXP role_permission.value_pattern"
+      + " AND INNER JOIN transcript_speaker ON access_attribute.ag_id = transcript_speaker.ag_id"
+      + " WHERE transcript_speaker.speaker_number = speaker.speaker_number"
+      + " AND user_id = 'label')"
+      + " OR NOT EXISTS (SELECT * FROM role_permission)"
+      + " OR NOT EXISTS (SELECT * FROM transcript_speaker"
+      + " WHERE transcript_speaker.speaker_number = speaker.speaker_number))"
+      + " ORDER BY speaker.name",
+      q.sql);
+    assertEquals("Parameter count - label", 0, q.parameters.size());
   }
 
 

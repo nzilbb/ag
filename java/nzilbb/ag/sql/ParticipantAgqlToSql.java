@@ -337,7 +337,7 @@ public class ParticipantAgqlToSql
     sql.append(conditions);
     if (conditions.length() > 0 && userWhereClause != null && userWhereClause.trim().length() > 0)
     {
-      sql.append(" AND ");
+      sql.append(" ");
       sql.append(userWhereClause);
     }
 
