@@ -92,12 +92,12 @@ public class TestAGQLListener
 
   }
 
-  @Test public void corpusName() 
+  @Test public void corpusLabel() 
   {
     final StringBuffer parse = new StringBuffer();
     final StringBuffer error = new StringBuffer();
     AGQLListener listener = new AGQLBaseListener() {
-        @Override public void exitCorpusNameExpression(AGQLParser.CorpusNameExpressionContext ctx)
+        @Override public void exitCorpusLabelExpression(AGQLParser.CorpusLabelExpressionContext ctx)
         {
           parse.append(ctx.getText());
         }
@@ -117,6 +117,34 @@ public class TestAGQLListener
     assertTrue("No errors: " + error.toString(), error.length() == 0);
     assertEquals("Parse structure: " + parse,
                  "my('corpus').label", parse.toString());
+
+  }
+
+  @Test public void corpusLabels() 
+  {
+    final StringBuffer parse = new StringBuffer();
+    final StringBuffer error = new StringBuffer();
+    AGQLListener listener = new AGQLBaseListener() {
+        @Override public void exitCorpusLabelsExpression(AGQLParser.CorpusLabelsExpressionContext ctx)
+        {
+          parse.append(ctx.getText());
+        }
+        @Override public void visitErrorNode(ErrorNode node)
+        {
+          error.append(node.getText());
+        }
+      };
+
+    AGQLLexer lexer = new AGQLLexer(
+      CharStreams.fromString("'something' IN labels('corpus')"));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    AGQLParser parser = new AGQLParser(tokens);
+    AGQLParser.QueryContext tree = parser.query();
+
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("No errors: " + error.toString(), error.length() == 0);
+    assertEquals("Parse structure: " + parse,
+                 "labels('corpus')", parse.toString());
 
   }
 
@@ -683,7 +711,7 @@ public class TestAGQLListener
     parser = new AGQLParser(tokens);
     tree = parser.query();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
-    assertTrue("Lable - No errors: " + error.toString(), error.length() == 0);
+    assertTrue("Label - No errors: " + error.toString(), error.length() == 0);
     assertEquals("Label: " + parse,
                  "label", parse.toString());
     

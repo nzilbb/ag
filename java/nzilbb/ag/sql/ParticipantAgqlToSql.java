@@ -124,14 +124,25 @@ public class ParticipantAgqlToSql
           space();
           conditions.append("speaker.name");
         }
-        @Override public void exitCorpusNameOperand(AGQLParser.CorpusNameOperandContext ctx)
+        @Override public void exitCorpusLabelOperand(AGQLParser.CorpusLabelOperandContext ctx)
+        {
+          space();
+          conditions.append(
+            // TODO technically, a participant can be in more than one corpus
+            // TODO - this matches only the first one
+            "(SELECT corpus.corpus_name"
+            +" FROM speaker_corpus"
+            +" INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id"
+            +" WHERE speaker_corpus.speaker_number = speaker.speaker_number LIMIT 1)");
+        }
+        @Override public void enterCorpusLabelsExpression(AGQLParser.CorpusLabelsExpressionContext ctx)
         {
           space();
           conditions.append(
             "(SELECT corpus.corpus_name"
             +" FROM speaker_corpus"
             +" INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id"
-            +" WHERE speaker_corpus.speaker_number = speaker.speaker_number LIMIT 1)");
+            +" WHERE speaker_corpus.speaker_number = speaker.speaker_number)");
         }
         @Override public void enterOtherLabelExpression(AGQLParser.OtherLabelExpressionContext ctx)
         {

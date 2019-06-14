@@ -127,9 +127,35 @@ public class TestParticipantAgqlToSql
     ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
     ParticipantAgqlToSql.Query q = transformer.sqlFor(
       "label MATCHES \"Ada.+\"", "speaker_number, name", null, "label");
-    assertEquals("SQL",
+    assertEquals("SQL - label",
                  "SELECT speaker_number, name FROM speaker"
                  +" WHERE speaker.name REGEXP 'Ada.+' ORDER BY speaker.name",
+                 q.sql);
+    assertEquals("Parameter count - label",
+                 0, q.parameters.size());
+
+    q = transformer.sqlFor(
+      "id MATCHES \"Ada.+\"", "speaker_number, name", null, "id");
+    assertEquals("SQL - id",
+                 "SELECT speaker_number, name FROM speaker"
+                 +" WHERE speaker.name REGEXP 'Ada.+' ORDER BY speaker.name",
+                 q.sql);
+    assertEquals("Parameter count - id",
+                 0, q.parameters.size());
+  }
+
+  @Test public void corpusLabels() throws AGQLException
+  {
+    ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
+    ParticipantAgqlToSql.Query q = transformer.sqlFor(
+      "'CC' IN labels('corpus')", "speaker_number, name", null, "label");
+    assertEquals("SQL",
+                 "SELECT speaker_number, name FROM speaker"
+                 +" WHERE 'CC' IN (SELECT corpus.corpus_name"
+                 +" FROM speaker_corpus"
+                 +" INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id"
+                 +" WHERE speaker_corpus.speaker_number = speaker.speaker_number)"
+                 +" ORDER BY speaker.name",
                  q.sql);
     assertEquals("Parameter count",
                  0, q.parameters.size());

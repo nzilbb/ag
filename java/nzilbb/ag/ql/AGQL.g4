@@ -42,7 +42,8 @@ predicate
 
 operand
   : graphIdExpression                                  # GraphIdOperand
-  | corpusNameExpression                               # CorpusNameOperand
+  | corpusLabelExpression                              # CorpusLabelOperand
+  | corpusLabelsExpression                             # CorpusLabelsOperand
   | episodeNameExpression                              # EpisodeNameOperand
   | whoExpression                                      # WhoOperand
   | anchorIdExpression                                 # AnchorIdOperand
@@ -69,7 +70,8 @@ graphIdExpression
   | GRAPH DOT ID
   ;
 
-corpusNameExpression : MY OPEN_PAREN CORPUS_LITERAL CLOSE_PAREN DOT LABEL ;
+corpusLabelExpression : MY OPEN_PAREN CORPUS_LITERAL CLOSE_PAREN DOT LABEL ;
+corpusLabelsExpression : LABELS OPEN_PAREN CORPUS_LITERAL CLOSE_PAREN DOT LABEL ;
 episodeNameExpression : MY OPEN_PAREN EPISODE_LITERAL CLOSE_PAREN DOT LABEL ;
 whoExpression
   : LABELS OPEN_PAREN WHO_LITERAL CLOSE_PAREN          # WhoLabelsExpression
