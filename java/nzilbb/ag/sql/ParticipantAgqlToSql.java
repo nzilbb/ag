@@ -144,6 +144,45 @@ public class ParticipantAgqlToSql
             +" INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id"
             +" WHERE speaker_corpus.speaker_number = speaker.speaker_number)");
         }
+        @Override public void enterLabelsExpression(AGQLParser.LabelsExpressionContext ctx)
+        {
+          space();
+          String layerId = unquote(ctx.stringLiteral().quotedString.getText());
+          Layer layer = getSchema().getLayer(layerId);
+          if (layer == null)
+          {
+            errors.add("Invalid layer: " + ctx.getText());
+          }
+          else
+          {
+            String attribute = attribute(layerId);
+            if ("transcript".equals(layer.get("@class_id")))
+            {
+              conditions.append(
+                "(SELECT DISTINCT label"
+                +" FROM annotation_transcript"
+                +" INNER JOIN transcript_speaker"
+                +" ON annotation_transcript.ag_id = transcript_speaker.ag_id"
+                +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
+                +" AND transcript_speaker.speaker_number = speaker.speaker_number"
+                +")");
+            } // transcript attribute
+            else if ("speaker".equals(layer.get("@class_id")))
+            {
+              conditions.append(
+                "(SELECT DISTINCT label"
+                +" FROM annotation_participant"
+                +" WHERE annotation_participant.layer = '"+escape(attribute)+"'"
+                +" AND annotation_participant.speaker_number = speaker.speaker_number"
+                +")");
+            } // participant attribute
+            else
+            {
+              errors.add("Can only get labels list for participant or transcript attributes: "
+                         + ctx.getText());
+            }
+          } // valid layer
+        }
         @Override public void enterOtherLabelExpression(AGQLParser.OtherLabelExpressionContext ctx)
         {
           space();

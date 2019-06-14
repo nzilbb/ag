@@ -26,7 +26,8 @@ import nzilbb.util.ISeries;
 
 /**
  * Interface for querying an annotation graph store, a database of graphs.
- * <p>In order to easily support access via scripting in other languages, methods that return lists use arrays rather than collection classes.
+ * <p>In order to easily support access via scripting in other languages, methods that return
+ * lists use arrays rather than collection classes. 
  * @author Robert Fromont robert@fromont.net.nz
  */
 public interface IGraphStoreQuery
@@ -98,7 +99,8 @@ public interface IGraphStoreQuery
 
   /**
    * Gets the participant record specified by the given identifier.
-   * @param id The ID of the participant, which could be their name or their database annotation ID.
+   * @param id The ID of the participant, which could be their name or their database annotation
+   * ID. 
    * @return An annotation representing the participant, or null if the participant was not found.
    * @throws StoreException
    * @throws PermissionException
@@ -109,11 +111,18 @@ public interface IGraphStoreQuery
   /**
    * Counts the number of participants that match a particular pattern.
    * @param expression An expression that determines which participants match.
-   * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+   * <p> The expression language is currently not well defined, but expressions such as the
+   * following can be used: 
    * <ul>
    *  <li><code>id MATCHES 'Ada.+'</code></li>
    *  <li><code>'CC' IN labels('corpus')</code></li>
+   *  <li><code>'en' IN labels('participant_languages')</code></li>
+   *  <li><code>'en' IN labels('transcript_language')</code></li>
    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
+   *  <li><code>list('transcript_rating').length &gt; 2</code></li>
+   *  <li><code>list('participant_rating').length = 0</code></li>
+   *  <li><code>'labbcat' NOT IN annotators('transcript_rating')</code></li>
+   *  <li><code>my('participant_gender').label = 'NA'</code></li>
    * </ul>
    * @return The number of matching participants.
    * @throws StoreException If an error occurs.
@@ -125,11 +134,18 @@ public interface IGraphStoreQuery
   /**
    * Gets a list of IDs of participants that match a particular pattern.
    * @param expression An expression that determines which participants match.
-   * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+   * <p> The expression language is currently not well defined, but expressions such as the
+   * following can be used: 
    * <ul>
    *  <li><code>id MATCHES 'Ada.+'</code></li>
    *  <li><code>'CC' IN labels('corpus')</code></li>
+   *  <li><code>'en' IN labels('participant_languages')</code></li>
+   *  <li><code>'en' IN labels('transcript_language')</code></li>
    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
+   *  <li><code>list('transcript_rating').length &gt; 2</code></li>
+   *  <li><code>list('participant_rating').length = 0</code></li>
+   *  <li><code>'labbcat' NOT IN annotators('transcript_rating')</code></li>
+   *  <li><code>my('participant_gender').label = 'NA'</code></li>
    * </ul>
    * @return A list of participant IDs.
    * @throws StoreException If an error occurs.
@@ -141,11 +157,18 @@ public interface IGraphStoreQuery
   /**
    * Gets a list of IDs of participants that match a particular pattern.
    * @param expression An expression that determines which participants match.
-   * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+   * <p> The expression language is currently not well defined, but expressions such as the
+   * following can be used: 
    * <ul>
    *  <li><code>id MATCHES 'Ada.+'</code></li>
    *  <li><code>'CC' IN labels('corpus')</code></li>
+   *  <li><code>'en' IN labels('participant_languages')</code></li>
+   *  <li><code>'en' IN labels('transcript_language')</code></li>
    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
+   *  <li><code>list('transcript_rating').length &gt; 2</code></li>
+   *  <li><code>list('participant_rating').length = 0</code></li>
+   *  <li><code>'labbcat' NOT IN annotators('transcript_rating')</code></li>
+   *  <li><code>my('participant_gender').label = 'NA'</code></li>
    * </ul>
    * @param pageLength The maximum number of IDs to return, or null to return all.
    * @param pageNumber The zero-based page number to return, or null to return the first page.
@@ -188,7 +211,8 @@ public interface IGraphStoreQuery
   /**
    * Counts the number of graphs that match a particular pattern.
    * @param expression An expression that determines which graphs match.
-   * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+   * <p> The expression language is currently not well defined, but expressions such as the
+   * following can be used: 
    * <ul>
    *  <li><code>id MATCHES 'Ada.+'</code></li>
    *  <li><code>my('corpus').label = 'CC'</code></li>
@@ -210,7 +234,8 @@ public interface IGraphStoreQuery
    *  <li><code>id MATCHES 'Ada.+'</code></li>
    *  <li><code>my('corpus').label = 'CC'</code></li>
    *  <li><code>'Robert' IN labels('who')</code></li>
-   *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
+   *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN
+   * labels('who')</code></li> 
    * </ul>
    * @return A list of graph IDs.
    * @throws StoreException If an error occurs.
@@ -222,7 +247,8 @@ public interface IGraphStoreQuery
   /**
    * Gets a list of IDs of graphs that match a particular pattern.
    * @param expression An expression that determines which graphs match.
-   * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+   * <p> The expression language is currently not well defined, but expressions such as the
+   * following can be used: 
    * <ul>
    *  <li><code>id MATCHES 'Ada.+'</code></li>
    *  <li><code>my('corpus').label = 'CC'</code></li>
@@ -242,18 +268,21 @@ public interface IGraphStoreQuery
    * <p>Gets a list of IDs of graphs that match a particular pattern.</p>
    * <p>The results can be exhaustive, by omitting pageLength and pageNumber, or they
    * can be a subset (a 'page') of results, by given pageLength and pageNumber values.</p>
-   * <p>The order of the list can be specified.  If ommitted, the graphs are listed in ID order.</p>
+   * <p>The order of the list can be specified.  If ommitted, the graphs are listed in ID
+   * order.</p> 
    * @param expression An expression that determines which graphs match.
    * <p> The expression language is currently not well defined, but expressions such as the following can be used:
    * <ul>
    *  <li><code>id MATCHES 'Ada.+'</code></li>
    *  <li><code>my('corpus').label = 'CC'</code></li>
    *  <li><code>'Robert' IN labels('who')</code></li>
-   *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
+   *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN
+   * labels('who')</code></li> 
    * </ul>
    * @param pageLength The maximum number of IDs to return, or null to return all.
    * @param pageNumber The zero-based page number to return, or null to return the first page.
-   * @param order The ordering for the list of IDs, a string containing a comma-separated list of expressions, which may be appended by " ASC" or " DESC", or null for graph ID order.
+   * @param order The ordering for the list of IDs, a string containing a comma-separated list of
+   * expressions, which may be appended by " ASC" or " DESC", or null for graph ID order. 
    * @return A list of graph IDs.
    * @throws StoreException If an error occurs.
    * @throws PermissionException If the operation is not permitted.
@@ -268,8 +297,10 @@ public interface IGraphStoreQuery
    * <ul>
    *  <li><code>id = 'ew_0_456'</code></li>
    *  <li><code>label NOT MATCHES 'th[aeiou].*'</code></li>
-   *  <li><code>layer.id = 'orthography' AND my('who').label = 'Robert' AND my('utterances').start.offset = 12.345</code></li>
-   *  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset &gt; 10.5</code></li>
+   *  <li><code>layer.id = 'orthography' AND my('who').label = 'Robert' AND
+   * my('utterances').start.offset = 12.345</code></li> 
+   *  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset
+   * &gt; 10.5</code></li> 
    * </ul>
    * <p><em>NB</em> all expressions must match by either id or layer.id.
    * @return The number of matching annotations.
@@ -287,7 +318,8 @@ public interface IGraphStoreQuery
    *  <li><code>id = 'ew_0_456'</code></li>
    *  <li><code>label NOT MATCHES 'th[aeiou].*'</code></li>
    *  <li><code>my('who').label = 'Robert' AND my('utterances').start.offset = 12.345</code></li>
-   *  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset &gt; 10.5</code></li>
+   *  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset
+   * &gt; 10.5</code></li> 
    *  <li><code>previous.id = 'ew_0_456'</code></li>
    * </ul>
    * <p><em>NB</em> all expressions must match by either id or layer.id.
@@ -301,12 +333,14 @@ public interface IGraphStoreQuery
   /**
    * Gets a list of annotations that match a particular pattern.
    * @param expression An expression that determines which graphs match.
-   * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+   * <p> The expression language is currently not well defined, but expressions such as the
+   * following can be used: 
    * <ul>
    *  <li><code>id = 'ew_0_456'</code></li>
    *  <li><code>label NOT MATCHES 'th[aeiou].*'</code></li>
    *  <li><code>my('who').label = 'Robert' AND my('utterances').start.offset = 12.345</code></li>
-   *  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset &gt; 10.5</code></li>
+   *  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset
+   * &gt; 10.5</code></li> 
    *  <li><code>previous.id = 'ew_0_456'</code></li>
    * </ul>
    * <p><em>NB</em> all expressions must match by either id or layer.id.
@@ -457,7 +491,8 @@ public interface IGraphStoreQuery
    * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
    * @param mimeType The MIME type of the media, which may include parameters for type
    * conversion, e.g. "text/wav; samplerate=16000".
-   * @return A URL to the given media for the given graph, or null if the given media doesn't exist.
+   * @return A URL to the given media for the given graph, or null if the given media doesn't
+   * exist. 
    * @throws StoreException If an error occurs.
    * @throws PermissionException If the operation is not permitted.
    * @throws GraphNotFoundException If the graph was not found in the store.
@@ -473,7 +508,8 @@ public interface IGraphStoreQuery
    * conversion, e.g. "text/wav; samplerate=16000"
    * @param startOffset The start offset of the media sample, or null for the start of the whole
    * recording. 
-   * @param endOffset The end offset of the media sample, or null for the end of the whole recording.
+   * @param endOffset The end offset of the media sample, or null for the end of the whole
+   * recording. 
    * @return A URL to the given media for the given graph, or null if the given media doesn't
    * exist. 
    * @throws StoreException If an error occurs.

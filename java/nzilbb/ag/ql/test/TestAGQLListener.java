@@ -375,8 +375,7 @@ public class TestAGQLListener
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
     assertEquals("Parse structure: " + parse,
-                 "id", parse.toString());
-    
+                 "id", parse.toString());    
   }
   
   @Test public void list() 
@@ -443,6 +442,15 @@ public class TestAGQLListener
     assertEquals("Parse structure: " + parse,
                  "'transcript'", parse.toString());
 
+    parse.setLength(0);
+    lexer.setInputStream(CharStreams.fromString("labels('transcript').length = 0"));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    tree = parser.query();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("No errors: " + error.toString(), error.length() == 0);
+    assertEquals("Parse structure: " + parse,
+                 "'transcript'", parse.toString());
   }
   
   @Test public void labels() 

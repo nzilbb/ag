@@ -94,7 +94,10 @@ idExpression
   | ID                                                 # ThisIdExpression
   ;
 listExpression : LIST OPEN_PAREN stringLiteral CLOSE_PAREN ;
-listLengthExpression : LIST OPEN_PAREN stringLiteral CLOSE_PAREN DOT LENGTH ;
+listLengthExpression
+  : LIST OPEN_PAREN stringLiteral CLOSE_PAREN DOT LENGTH
+  | LABELS OPEN_PAREN stringLiteral CLOSE_PAREN DOT LENGTH
+  ;
 labelsExpression : LABELS OPEN_PAREN stringLiteral CLOSE_PAREN ;
 annotatorsExpression : ANNOTATORS OPEN_PAREN stringLiteral CLOSE_PAREN ;
     

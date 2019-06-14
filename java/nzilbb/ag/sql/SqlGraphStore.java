@@ -1144,6 +1144,8 @@ public class SqlGraphStore
    * <ul>
    *  <li><code>id MATCHES 'Ada.+'</code></li>
    *  <li><code>'CC' IN labels('corpus')</code></li>
+   *  <li><code>'en' IN labels('participant_languages')</code></li>
+   *  <li><code>'en' IN labels('transcript_language')</code></li>
    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
    *  <li><code>list('transcript_rating').length &gt; 2</code></li>
    *  <li><code>list('participant_rating').length = 0</code></li>
@@ -1271,6 +1273,19 @@ public class SqlGraphStore
   /**
    * Counts the number of participants that match a particular pattern.
    * @param expression An expression that determines which participants match.
+   * <p> The expression language is currently not well defined, but expressions such as the
+   * following can be used: 
+   * <ul>
+   *  <li><code>id MATCHES 'Ada.+'</code></li>
+   *  <li><code>'CC' IN labels('corpus')</code></li>
+   *  <li><code>'en' IN labels('participant_languages')</code></li>
+   *  <li><code>'en' IN labels('transcript_language')</code></li>
+   *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
+   *  <li><code>list('transcript_rating').length &gt; 2</code></li>
+   *  <li><code>list('participant_rating').length = 0</code></li>
+   *  <li><code>'labbcat' NOT IN annotators('transcript_rating')</code></li>
+   *  <li><code>my('participant_gender').label = 'NA'</code></li>
+   * </ul>
    * @return The number of matching participants.
    * @throws StoreException If an error occurs.
    * @throws PermissionException If the operation is not permitted.
@@ -1302,6 +1317,19 @@ public class SqlGraphStore
   /**
    * Gets a list of IDs of participants that match a particular pattern.
    * @param expression An expression that determines which participants match.
+   * <p> The expression language is currently not well defined, but expressions such as the
+   * following can be used: 
+   * <ul>
+   *  <li><code>id MATCHES 'Ada.+'</code></li>
+   *  <li><code>'CC' IN labels('corpus')</code></li>
+   *  <li><code>'en' IN labels('participant_languages')</code></li>
+   *  <li><code>'en' IN labels('transcript_language')</code></li>
+   *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
+   *  <li><code>list('transcript_rating').length &gt; 2</code></li>
+   *  <li><code>list('participant_rating').length = 0</code></li>
+   *  <li><code>'labbcat' NOT IN annotators('transcript_rating')</code></li>
+   *  <li><code>my('participant_gender').label = 'NA'</code></li>
+   * </ul>
    * @return A list of participant IDs.
    * @throws StoreException If an error occurs.
    * @throws PermissionException If the operation is not permitted.
@@ -1315,6 +1343,19 @@ public class SqlGraphStore
   /**
    * Gets a list of IDs of participants that match a particular pattern.
    * @param expression An expression that determines which participants match.
+   * <p> The expression language is currently not well defined, but expressions such as the
+   * following can be used: 
+   * <ul>
+   *  <li><code>id MATCHES 'Ada.+'</code></li>
+   *  <li><code>'CC' IN labels('corpus')</code></li>
+   *  <li><code>'en' IN labels('participant_languages')</code></li>
+   *  <li><code>'en' IN labels('transcript_language')</code></li>
+   *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
+   *  <li><code>list('transcript_rating').length &gt; 2</code></li>
+   *  <li><code>list('participant_rating').length = 0</code></li>
+   *  <li><code>'labbcat' NOT IN annotators('transcript_rating')</code></li>
+   *  <li><code>my('participant_gender').label = 'NA'</code></li>
+   * </ul>
    * @param pageLength The maximum number of IDs to return, or null to return all.
    * @param pageNumber The page number to return, or null to return the first page.
    * @return A list of participant IDs.

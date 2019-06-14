@@ -183,12 +183,12 @@ public class TestParticipantAgqlToSql
                  0, q.parameters.size());
   }
 
-  @Test public void labelsLength() throws AGQLException
+  @Test public void listLength() throws AGQLException
   {
     ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
     ParticipantAgqlToSql.Query q = transformer.sqlFor(
       "list('transcript_rating').length > 2", "speaker_number, name", null, "label");
-    assertEquals("Transcript attribute - SQL",
+    assertEquals("Transcript attribute - list - SQL",
                  "SELECT speaker_number, name FROM speaker"
                  +" WHERE (SELECT COUNT(*)"
                  +" FROM annotation_transcript"
@@ -204,13 +204,75 @@ public class TestParticipantAgqlToSql
 
     q = transformer.sqlFor(
       "list('participant_gender').length = 0", "speaker_number, name", null, "label");
-    assertEquals("Participant attribute - SQL",
+    assertEquals("Participant attribute - list - SQL",
                  "SELECT speaker_number, name FROM speaker"
                  +" WHERE (SELECT COUNT(*)"
                  +" FROM annotation_participant"
                  +" WHERE annotation_participant.layer = 'gender'"
                  +" AND annotation_participant.speaker_number = speaker.speaker_number)"
                  +" = 0"
+                 +" ORDER BY speaker.name",
+                 q.sql);
+    assertEquals("Parameter count",
+                 0, q.parameters.size());
+    
+    q = transformer.sqlFor(
+      "labels('transcript_rating').length > 2", "speaker_number, name", null, "label");
+    assertEquals("Transcript attribute - labels - SQL",
+                 "SELECT speaker_number, name FROM speaker"
+                 +" WHERE (SELECT COUNT(*)"
+                 +" FROM annotation_transcript"
+                 +" INNER JOIN transcript_speaker"
+                 +" ON annotation_transcript.ag_id = transcript_speaker.ag_id"
+                 +" WHERE annotation_transcript.layer = 'rating'"
+                 +" AND transcript_speaker.speaker_number = speaker.speaker_number)"
+                 +" > 2"
+                 +" ORDER BY speaker.name",
+                 q.sql);
+    assertEquals("Parameter count",
+                 0, q.parameters.size());
+    
+    q = transformer.sqlFor(
+      "labels('participant_gender').length = 0", "speaker_number, name", null, "label");
+    assertEquals("Participant attribute - labels - SQL",
+                 "SELECT speaker_number, name FROM speaker"
+                 +" WHERE (SELECT COUNT(*)"
+                 +" FROM annotation_participant"
+                 +" WHERE annotation_participant.layer = 'gender'"
+                 +" AND annotation_participant.speaker_number = speaker.speaker_number)"
+                 +" = 0"
+                 +" ORDER BY speaker.name",
+                 q.sql);
+    assertEquals("Parameter count",
+                 0, q.parameters.size());
+  }
+
+  @Test public void labels() throws AGQLException
+  {
+    ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
+    ParticipantAgqlToSql.Query q = transformer.sqlFor(
+      "'en' IN labels('transcript_language')", "speaker_number, name", null, "label");
+    assertEquals("Transcript attribute - SQL",
+                 "SELECT speaker_number, name FROM speaker"
+                 +" WHERE 'en' IN (SELECT DISTINCT label"
+                 +" FROM annotation_transcript"
+                 +" INNER JOIN transcript_speaker"
+                 +" ON annotation_transcript.ag_id = transcript_speaker.ag_id"
+                 +" WHERE annotation_transcript.layer = 'language'"
+                 +" AND transcript_speaker.speaker_number = speaker.speaker_number)"
+                 +" ORDER BY speaker.name",
+                 q.sql);
+    assertEquals("Parameter count",
+                 0, q.parameters.size());
+
+    q = transformer.sqlFor(
+      "'NA' IN labels('participant_gender')", "speaker_number, name", null, "label");
+    assertEquals("Participant attribute - SQL",
+                 "SELECT speaker_number, name FROM speaker"
+                 +" WHERE 'NA' IN (SELECT DISTINCT label"
+                 +" FROM annotation_participant"
+                 +" WHERE annotation_participant.layer = 'gender'"
+                 +" AND annotation_participant.speaker_number = speaker.speaker_number)"
                  +" ORDER BY speaker.name",
                  q.sql);
     assertEquals("Parameter count",
