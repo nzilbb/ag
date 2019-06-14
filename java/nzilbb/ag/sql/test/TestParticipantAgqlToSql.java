@@ -56,6 +56,10 @@ public class TestParticipantAgqlToSql
       .setPeers(false).setPeersOverlap(false).setSaturated(true))
       .with("@class_id", "transcript").with("@attribute", "scribe"),
       
+      (Layer)(new Layer("transcript_rating", "Ratings").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true))
+      .with("@class_id", "transcript").with("@attribute", "rating"),
+      
       (Layer)(new Layer("corpus", "Corpus").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true))
       .with("@layer_id", -100),
@@ -135,12 +139,30 @@ public class TestParticipantAgqlToSql
                  0, q.parameters.size());
 
     q = transformer.sqlFor(
-      "id MATCHES \"Ada.+\"", "speaker_number, name", null, "id");
+      "id NOT MATCHES \"Ada.+\"", "speaker_number, name", null, "id");
     assertEquals("SQL - id",
                  "SELECT speaker_number, name FROM speaker"
-                 +" WHERE speaker.name REGEXP 'Ada.+' ORDER BY speaker.name",
+                 +" WHERE speaker.name NOT REGEXP 'Ada.+' ORDER BY speaker.name",
                  q.sql);
     assertEquals("Parameter count - id",
+                 0, q.parameters.size());
+  }
+
+  @Test public void corpusLabel() throws AGQLException
+  {
+    ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
+    ParticipantAgqlToSql.Query q = transformer.sqlFor(
+      "my(\"corpus\").label = \"CC\"", "speaker_number, name", null, "label");
+    assertEquals("SQL",
+                 "SELECT speaker_number, name FROM speaker"
+                 +" WHERE (SELECT corpus.corpus_name"
+                 +" FROM speaker_corpus"
+                 +" INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id"
+                 +" WHERE speaker_corpus.speaker_number = speaker.speaker_number LIMIT 1)"
+                 +" = 'CC'"
+                 +" ORDER BY speaker.name",
+                 q.sql);
+    assertEquals("Parameter count",
                  0, q.parameters.size());
   }
 
@@ -155,6 +177,45 @@ public class TestParticipantAgqlToSql
                  +" FROM speaker_corpus"
                  +" INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id"
                  +" WHERE speaker_corpus.speaker_number = speaker.speaker_number)"
+                 +" ORDER BY speaker.name",
+                 q.sql);
+    assertEquals("Parameter count",
+                 0, q.parameters.size());
+  }
+
+  @Test public void labelsLength() throws AGQLException
+  {
+    ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
+    ParticipantAgqlToSql.Query q = transformer.sqlFor(
+      "list('transcript_rating').length > 2", "speaker_number, name", null, "label");
+    assertEquals("SQL",
+                 "SELECT speaker_number, name FROM speaker"
+                 +" WHERE (SELECT COUNT(*)"
+                 +" FROM annotation_transcript"
+                 +" INNER JOIN transcript_speaker"
+                 +" ON annotation_transcript.ag_id = transcript_speaker.ag_id"
+                 +" WHERE layer = 'rating'"
+                 +" AND transcript_speaker.speaker_number = speaker.speaker_number)"
+                 +" > 2"
+                 +" ORDER BY speaker.name",
+                 q.sql);
+    assertEquals("Parameter count",
+                 0, q.parameters.size());
+  }
+
+  @Test public void annotators() throws AGQLException
+  {
+    ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
+    ParticipantAgqlToSql.Query q = transformer.sqlFor(
+      "'labbcat' NOT IN annotators('transcript_rating')", "speaker_number, name", null, "label");
+    assertEquals("SQL",
+                 "SELECT speaker_number, name FROM speaker"
+                 +" WHERE 'labbcat' NOT IN (SELECT annotated_by"
+                 +" FROM annotation_transcript"
+                 +" INNER JOIN transcript_speaker"
+                 +" ON annotation_transcript.ag_id = transcript_speaker.ag_id"
+                 +" WHERE layer = 'rating'"
+                 +" AND transcript_speaker.speaker_number = speaker.speaker_number)"
                  +" ORDER BY speaker.name",
                  q.sql);
     assertEquals("Parameter count",
