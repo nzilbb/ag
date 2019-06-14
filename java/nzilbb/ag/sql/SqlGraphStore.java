@@ -1146,7 +1146,9 @@ public class SqlGraphStore
    *  <li><code>'CC' IN labels('corpus')</code></li>
    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
    *  <li><code>list('transcript_rating').length &gt; 2</code></li>
+   *  <li><code>list('participant_rating').length = 0</code></li>
    *  <li><code>'labbcat' NOT IN annotators('transcript_rating')</code></li>
+   *  <li><code>my('participant_gender').label = 'NA'</code></li>
    * </ul>
    * @param expression The graph-matching expression.
    * @param selectClause The expression that is to go between SELECT and FROM.

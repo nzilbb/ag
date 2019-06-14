@@ -149,55 +149,102 @@ public class ParticipantAgqlToSql
           space();
           String layerId = unquote(ctx.stringLiteral().quotedString.getText());
           Layer layer = getSchema().getLayer(layerId);
-          if (!"participant".equals(layer.get("@scope")))
+          if (layer == null)
           {
-            errors.add("Can only get labels for participant attributes: " + ctx.getText());
+            errors.add("Invalid layer: " + ctx.getText());
           }
-          String attribute = attribute(layer.getId());
-          conditions.append(
-            "(SELECT label"
-            +" FROM annotation_participant"
-            +" WHERE annotation_participant.speaker_number = speaker.speaker_number"
-            +" AND annotation_participant.layer = '"+escape(attribute)
-            +"' LIMIT 1)");
+          else
+          {
+            if (!"speaker".equals(layer.get("@class_id")))
+            {
+              errors.add("Can only get labels for participant attributes: " + ctx.getText());
+            }
+            String attribute = attribute(layerId);
+            conditions.append(
+              "(SELECT label"
+              +" FROM annotation_participant"
+              +" WHERE annotation_participant.layer = '"+escape(attribute)+"'"
+              +" AND annotation_participant.speaker_number = speaker.speaker_number"
+              +" LIMIT 1)");
+          } // valid layer
         }
         @Override public void exitListLengthExpression(AGQLParser.ListLengthExpressionContext ctx)
         {
           space();
           String layerId = unquote(ctx.stringLiteral().quotedString.getText());
           Layer layer = getSchema().getLayer(layerId);
-          if (!"transcript".equals(layer.get("@scope")))
+          if (layer == null)
           {
-            errors.add("Can only get list length for transcript attributes: " + ctx.getText());
+            errors.add("Invalid layer: " + ctx.getText());
           }
-          String attribute = attribute(layer.getId());
-          conditions.append(
-            "(SELECT COUNT(*)"
-            +" FROM annotation_transcript"
-            +" INNER JOIN transcript_speaker"
-            +" ON annotation_transcript.ag_id = transcript_speaker.ag_id"
-            +" WHERE layer = '"+escape(attribute)+"'"
-            +" AND transcript_speaker.speaker_number = speaker.speaker_number"
-            +")");
+          else
+          {
+            String attribute = attribute(layerId);
+            if ("transcript".equals(layer.get("@class_id")))
+            {
+              conditions.append(
+                "(SELECT COUNT(*)"
+                +" FROM annotation_transcript"
+                +" INNER JOIN transcript_speaker"
+                +" ON annotation_transcript.ag_id = transcript_speaker.ag_id"
+                +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
+                +" AND transcript_speaker.speaker_number = speaker.speaker_number"
+                +")");
+            } // transcript attribute
+            else if ("speaker".equals(layer.get("@class_id")))
+            {
+              conditions.append(
+                "(SELECT COUNT(*)"
+                +" FROM annotation_participant"
+                +" WHERE annotation_participant.layer = '"+escape(attribute)+"'"
+                +" AND annotation_participant.speaker_number = speaker.speaker_number"
+                +")");
+            } // participant attribute
+            else
+            {
+              errors.add("Can only get list length for participant or transcript attributes: "
+                         + ctx.getText());
+            }
+          } // valid layer
         }
         @Override public void enterAnnotatorsExpression(AGQLParser.AnnotatorsExpressionContext ctx)
         {
           space();
           String layerId = unquote(ctx.stringLiteral().quotedString.getText());
           Layer layer = getSchema().getLayer(layerId);
-          if (!"transcript".equals(layer.get("@scope")))
+          if (layer == null)
           {
-            errors.add("Can only get annotators for transcript attributes: " + ctx.getText());
+            errors.add("Invalid layer: " + ctx.getText());
           }
-          String attribute = attribute(layer.getId());
-          conditions.append(
-            "(SELECT annotated_by"
-            +" FROM annotation_transcript"
-            +" INNER JOIN transcript_speaker"
-            +" ON annotation_transcript.ag_id = transcript_speaker.ag_id"
-            +" WHERE layer = '"+escape(attribute)+"'"
-            +" AND transcript_speaker.speaker_number = speaker.speaker_number"
-            +")");
+          else
+          {
+            String attribute = attribute(layerId);
+            if ("transcript".equals(layer.get("@class_id")))
+            {
+              conditions.append(
+                "(SELECT annotated_by"
+                +" FROM annotation_transcript"
+                +" INNER JOIN transcript_speaker"
+                +" ON annotation_transcript.ag_id = transcript_speaker.ag_id"
+                +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
+                +" AND transcript_speaker.speaker_number = speaker.speaker_number"
+                +")");
+            } // transcript attribute
+            else if ("speaker".equals(layer.get("@class_id")))
+            {
+              conditions.append(
+                "(SELECT annotated_by"
+                +" FROM annotation_participant"
+                +" WHERE annotation_participant.layer = '"+escape(attribute)+"'"
+                +" AND annotation_participant.speaker_number = speaker.speaker_number"
+                +")");
+            } // participant attribute
+            else
+            {
+              errors.add("Can only get annotators for participant or transcript attributes: "
+                         + ctx.getText());
+            }
+          } // valid layer
         }
         @Override public void enterComparisonOperator(AGQLParser.ComparisonOperatorContext ctx)
         {

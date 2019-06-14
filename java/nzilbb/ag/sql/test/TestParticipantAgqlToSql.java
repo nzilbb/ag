@@ -188,15 +188,47 @@ public class TestParticipantAgqlToSql
     ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
     ParticipantAgqlToSql.Query q = transformer.sqlFor(
       "list('transcript_rating').length > 2", "speaker_number, name", null, "label");
-    assertEquals("SQL",
+    assertEquals("Transcript attribute - SQL",
                  "SELECT speaker_number, name FROM speaker"
                  +" WHERE (SELECT COUNT(*)"
                  +" FROM annotation_transcript"
                  +" INNER JOIN transcript_speaker"
                  +" ON annotation_transcript.ag_id = transcript_speaker.ag_id"
-                 +" WHERE layer = 'rating'"
+                 +" WHERE annotation_transcript.layer = 'rating'"
                  +" AND transcript_speaker.speaker_number = speaker.speaker_number)"
                  +" > 2"
+                 +" ORDER BY speaker.name",
+                 q.sql);
+    assertEquals("Parameter count",
+                 0, q.parameters.size());
+
+    q = transformer.sqlFor(
+      "list('participant_gender').length = 0", "speaker_number, name", null, "label");
+    assertEquals("Participant attribute - SQL",
+                 "SELECT speaker_number, name FROM speaker"
+                 +" WHERE (SELECT COUNT(*)"
+                 +" FROM annotation_participant"
+                 +" WHERE annotation_participant.layer = 'gender'"
+                 +" AND annotation_participant.speaker_number = speaker.speaker_number)"
+                 +" = 0"
+                 +" ORDER BY speaker.name",
+                 q.sql);
+    assertEquals("Parameter count",
+                 0, q.parameters.size());
+  }
+
+  @Test public void participantAttributeLabel() throws AGQLException
+  {
+    ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
+    ParticipantAgqlToSql.Query q = transformer.sqlFor(
+      "my('participant_gender').label = 'NA'", "speaker_number, name", null, "label");
+    assertEquals("SQL",
+                 "SELECT speaker_number, name FROM speaker"
+                 +" WHERE (SELECT label"
+                 +" FROM annotation_participant"
+                 +" WHERE annotation_participant.layer = 'gender'"
+                 +" AND annotation_participant.speaker_number = speaker.speaker_number LIMIT 1)"
+                 +" = 'NA'"
                  +" ORDER BY speaker.name",
                  q.sql);
     assertEquals("Parameter count",
@@ -208,19 +240,53 @@ public class TestParticipantAgqlToSql
     ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
     ParticipantAgqlToSql.Query q = transformer.sqlFor(
       "'labbcat' NOT IN annotators('transcript_rating')", "speaker_number, name", null, "label");
-    assertEquals("SQL",
+    assertEquals("Transcript Attribute - SQL",
                  "SELECT speaker_number, name FROM speaker"
                  +" WHERE 'labbcat' NOT IN (SELECT annotated_by"
                  +" FROM annotation_transcript"
                  +" INNER JOIN transcript_speaker"
                  +" ON annotation_transcript.ag_id = transcript_speaker.ag_id"
-                 +" WHERE layer = 'rating'"
+                 +" WHERE annotation_transcript.layer = 'rating'"
                  +" AND transcript_speaker.speaker_number = speaker.speaker_number)"
                  +" ORDER BY speaker.name",
                  q.sql);
-    assertEquals("Parameter count",
+    assertEquals("Transcript Attribute - Parameter count",
+                 0, q.parameters.size());
+
+    q = transformer.sqlFor(
+      "'labbcat' NOT IN annotators('participant_gender')", "speaker_number, name", null, "label");
+    assertEquals("Participant Attribute - SQL",
+                 "SELECT speaker_number, name FROM speaker"
+                 +" WHERE 'labbcat' NOT IN (SELECT annotated_by"
+                 +" FROM annotation_participant"
+                 +" WHERE annotation_participant.layer = 'gender'"
+                 +" AND annotation_participant.speaker_number = speaker.speaker_number)"
+                 +" ORDER BY speaker.name",
+                 q.sql);
+    assertEquals("Participant Attribute - Parameter count",
                  0, q.parameters.size());
   }
+  
+  @Test public void invalidLayers() throws AGQLException
+  {
+    ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
+    try
+    {
+      ParticipantAgqlToSql.Query q = transformer.sqlFor(
+        "my('invalid layer 1').label = 'NA'"
+        + " AND list('invalid layer 2').length > 2"
+        + " AND my('invalid layer 3').label = 'NA'"
+        + " AND 'labbcat' NOT IN annotators('invalid layer 4')",
+        "speaker_number, name", null, "label");
+      fail("sqlFor fails: " + q.sql);
+    }
+    catch(AGQLException exception)
+    {
+      assertEquals("Number of errors: " + exception.getErrors(),
+                   4, exception.getErrors().size());
+    }
+  }
+
 
   public static void main(String args[]) 
   {
