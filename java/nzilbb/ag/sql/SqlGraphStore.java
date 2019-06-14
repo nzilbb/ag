@@ -45,6 +45,7 @@ import java.text.MessageFormat;
 import java.text.ParseException;
 
 import nzilbb.ag.*;
+import nzilbb.ag.ql.AGQLException;
 import nzilbb.ag.util.Validator;
 import nzilbb.ag.util.LayerHierarchyTraversal;
 import nzilbb.ag.util.AnnotationsByAnchor;
@@ -1153,120 +1154,22 @@ public class SqlGraphStore
    *  <li><code>my('participant_gender').label = 'NA'</code></li>
    * </ul>
    * @param expression The graph-matching expression.
-   * @param selectClause The expression that is to go between SELECT and FROM.
-   * @param orderClause The expression that appended to the end of the SQL query.
+   * @param sqlSelectClause The expression that is to go between SELECT and FROM.
+   * @param sqlOrderClause The expression that appended to the end of the SQL query.
    * @return A PreparedStatement for the given expression, with parameters already set.
    * @throws SQLException
    * @throws StoreException If the expression is invalid.
    */
-  private PreparedStatement participantMatchSql(String expression, String selectClause, String orderClause)
-    throws SQLException, StoreException
+  private PreparedStatement participantMatchSql(String expression, String sqlSelectClause, String sqlOrderClause)
+    throws SQLException, StoreException, PermissionException
   {
-    StringBuffer conditions = new StringBuffer();
-    for (String subexpression : expression.split(" AND "))
-    {
-      subexpression = subexpression.trim();
-      if (subexpression.length() == 0) continue;
-      String operator = null;
-      String[] operators = {" = "," <> "," <= "," >= "," < "," > "," NOT MATCHES "," MATCHES ", " NOT IN ", " IN "};
-      String[] operands = null;
-      for (String op : operators)
-      {
-        operands = subexpression.split(op);
-        if (operands.length == 2)
-        {
-          operator = op.trim();
-          break;
-        } // match
-      } // next operator
-      if (operator == null) throw new StoreException("Not valid operator found in: " + expression);
-      if (operands == null) throw new StoreException("No operands found in: " + expression);
-
-      String sqlLhs = null;
-      String sqlOperator = operator.replace("MATCHES", "REGEXP");
-      String sqlRhs = null;
-      for (String operand : operands)
-      {
-        operand = operand.trim();
-        String sqlOperand = null;
-        if (operand.equals("id") || operand.equals("label"))
-        {
-          sqlOperand = "speaker.name";
-        }
-        else if (operand.equals("labels('corpus')"))
-        {
-          sqlOperand = "(SELECT corpus.corpus_name"
-            +" FROM speaker_corpus"
-            +" INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id"
-            +" WHERE speaker_corpus.speaker_number = speaker.speaker_number)";
-        }
-        else if (operand.equals("my('corpus').label"))
-        {
-          // TODO technically, a participant can be in more than one corpus - this matches only the first one
-          sqlOperand = "(SELECT corpus.corpus_name"
-            +" FROM speaker_corpus"
-            +" INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id"
-            +" WHERE speaker_corpus.speaker_number = speaker.speaker_number LIMIT 1)";
-        }
-        else if (operand.startsWith("my('") && operand.endsWith("').label"))
-        { // an attribute?
-          String layerId = operand.replaceFirst("my\\('","").replaceFirst("'\\)\\.label$","");
-          sqlOperand = "(SELECT label"
-            +" FROM annotation_participant"
-            +" WHERE annotation_participant.speaker_number = speaker.speaker_number"
-            +" AND annotation_participant.layer = '"+layerId
-            .replaceFirst("^participant_", "")
-            .replaceAll("\\'", "\\\\'")
-            +"' LIMIT 1)";
-        } // an attribute?
-        else if (operand.startsWith("list('transcript_") && operand.endsWith("').length"))
-        { // list().length for transcript attribute
-          String attribute = operand.replaceFirst("list\\('transcript_","").replaceFirst("'\\)\\.length$","");
-          sqlOperand = "(SELECT COUNT(*)"
-            +" FROM annotation_transcript"
-            +" INNER JOIN transcript_speaker ON annotation_transcript.ag_id = transcript_speaker.ag_id"
-            +" WHERE layer = '"+attribute+"'"
-            +" AND transcript_speaker.speaker_number = speaker.speaker_number"
-            +")";
-        } // list().length
-        else if (operand.startsWith("annotators('transcript_") && operand.endsWith("')"))
-        { // annotators for transcript attribute
-          String attribute = operand.replaceFirst("annotators\\('transcript_","").replaceFirst("'\\)$","");
-          sqlOperand = "(SELECT annotated_by"
-            +" FROM annotation_transcript"
-            +" INNER JOIN transcript_speaker ON annotation_transcript.ag_id = transcript_speaker.ag_id"
-            +" WHERE layer = '"+attribute+"'"
-            +" AND transcript_speaker.speaker_number = speaker.speaker_number"
-            +")";
-        } // annotators
-        else
-        {
-          sqlOperand = operand;
-        }
-        if (sqlLhs == null)
-        {
-          sqlLhs = sqlOperand;
-        }
-        else
-        {
-          sqlRhs = sqlOperand;
-        }
-      } // next operand
-      conditions.append(conditions.length() == 0?" WHERE ":" AND ");
-      conditions.append(sqlLhs);
-      conditions.append(" ");
-      conditions.append(sqlOperator);
-      conditions.append(" ");
-      conditions.append(sqlRhs);
-    } // next subexpression
-    String userWhereClause = userWhereClauseParticipant(conditions.length() > 0);
-    String sSql = "SELECT "+selectClause+" FROM speaker"
-      + conditions.toString()
-      + userWhereClause
-      + " " + orderClause;
+    String userWhereClause = userWhereClauseParticipant(true).replaceAll("^ AND ","");
+    ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
+    ParticipantAgqlToSql.Query q = transformer.sqlFor(
+      expression, sqlSelectClause, userWhereClause, sqlOrderClause);
     System.out.println("QL: " + expression);
-    System.out.println("SQL: " + sSql);
-    PreparedStatement sql = getConnection().prepareStatement(sSql);
+    System.out.println("SQL: " + q.sql);
+    PreparedStatement sql = q.prepareStatement(getConnection());
     return sql;
   } // end of participantMatchSql()
 

@@ -81,16 +81,15 @@ public class ParticipantAgqlToSql
   /**
    * Transforms the given AGQL query into an SQL query.
    * @param expression The graph-matching expression.
-   * @param selectClause The expression that is to go between SELECT and FROM.
+   * @param sqlSelectClause The SQL expression that is to go between SELECT and FROM.
    * @param userWhereClause The expression to add to the WHERE clause to ensure the user doesn't
    * get access to data to which they're not enititled.
-   * @param orderClause The expression that appended to the end of the SQL query.
+   * @param sqlOrderClause The SQL expression that appended to the end of the SQL query.
    * @throws AGQLException If the expression is invalid.
    */
-  public Query sqlFor(String expression, String selectClause, String userWhereClause, String orderClause)
+  public Query sqlFor(String expression, String sqlSelectClause, String userWhereClause, String sqlOrderClause)
     throws AGQLException
   {
-    if (orderClause == null || orderClause.trim().length() == 0) orderClause = "label";
     final Query q = new Query();
     final StringBuilder conditions = new StringBuilder();
     final Vector<String> errors = new Vector<String>();
@@ -332,7 +331,7 @@ public class ParticipantAgqlToSql
     }
     StringBuilder sql = new StringBuilder();
     sql.append("SELECT ");
-    sql.append(selectClause);
+    sql.append(sqlSelectClause);
     sql.append(" FROM speaker");
     if (conditions.length() > 0)
     {
@@ -345,21 +344,27 @@ public class ParticipantAgqlToSql
       sql.append(userWhereClause);
     }
 
-    // now order clause
-    StringBuilder order = new StringBuilder();
-    for (String part : orderClause.split(","))
+    // Don't process the order clause for now - it's SQL
+    // // now order clause
+    // StringBuilder order = new StringBuilder();
+    // for (String part : orderClause.split(","))
+    // {
+    //   order.append(order.length() == 0?" ORDER BY":",");
+    //   conditions.setLength(0);
+    //   lexer.setInputStream(CharStreams.fromString(part));
+    //   tokens = new CommonTokenStream(lexer);
+    //   parser = new AGQLParser(tokens);
+    //   tree = parser.query();
+    //   ParseTreeWalker.DEFAULT.walk(listener, tree);
+    //   order.append(" ");
+    //   order.append(conditions);
+    // } // next orderClause part
+    // sql.append(order);
+    if (sqlOrderClause.length() > 0)
     {
-      order.append(order.length() == 0?" ORDER BY":",");
-      conditions.setLength(0);
-      lexer.setInputStream(CharStreams.fromString(part));
-      tokens = new CommonTokenStream(lexer);
-      parser = new AGQLParser(tokens);
-      tree = parser.query();
-      ParseTreeWalker.DEFAULT.walk(listener, tree);
-      order.append(" ");
-      order.append(conditions);
-    } // next orderClause part
-    sql.append(order);
+      sql.append(" ");
+      sql.append(sqlOrderClause);
+    }
     
     q.sql = sql.toString();
     return q;
