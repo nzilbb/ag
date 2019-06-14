@@ -28,8 +28,8 @@ import static org.junit.Assert.*;
 import nzilbb.ag.Constants;
 import nzilbb.ag.Schema;
 import nzilbb.ag.Layer;
+import nzilbb.ag.ql.AGQLException;
 import nzilbb.ag.sql.ParticipantAgqlToSql;
-import nzilbb.ag.sql.AGQLException;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -142,6 +142,25 @@ public class TestParticipantAgqlToSql
     assertEquals("SQL - id",
                  "SELECT speaker_number, name FROM speaker"
                  +" WHERE speaker.name NOT REGEXP 'Ada.+' ORDER BY speaker.name",
+                 q.sql);
+    assertEquals("Parameter count - id", 0, q.parameters.size());
+  }
+
+  @Test public void emptyExpression() throws AGQLException
+  {
+    ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
+    ParticipantAgqlToSql.Query q = transformer.sqlFor(
+      "", "speaker_number, name", null, "label");
+    assertEquals("SQL - no userWhere",
+                 "SELECT speaker_number, name FROM speaker ORDER BY speaker.name",
+                 q.sql);
+    assertEquals("Parameter count - no userWhere", 0, q.parameters.size());
+
+    q = transformer.sqlFor(
+      "", "speaker_number, name", "speaker.annotated_by = 'user'", "id");
+    assertEquals("SQL - id",
+                 "SELECT speaker_number, name FROM speaker"
+                 +" WHERE speaker.annotated_by = 'user' ORDER BY speaker.name",
                  q.sql);
     assertEquals("Parameter count - id", 0, q.parameters.size());
   }
@@ -340,7 +359,7 @@ public class TestParticipantAgqlToSql
     ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
     ParticipantAgqlToSql.Query q = transformer.sqlFor(
       "label MATCHES \"Ada.+\"", "speaker_number, name",
-      "AND (EXISTS (SELECT * FROM role"
+      "(EXISTS (SELECT * FROM role"
       + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
       + " INNER JOIN annotation_transcript access_attribute" 
       + " ON access_attribute.layer = role_permission.attribute_name" 
@@ -395,7 +414,6 @@ public class TestParticipantAgqlToSql
       q.sql);
     assertEquals("Parameter count - label", 0, q.parameters.size());
   }
-
 
   public static void main(String args[]) 
   {

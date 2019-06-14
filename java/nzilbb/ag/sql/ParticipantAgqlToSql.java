@@ -333,11 +333,15 @@ public class ParticipantAgqlToSql
     StringBuilder sql = new StringBuilder();
     sql.append("SELECT ");
     sql.append(selectClause);
-    sql.append(" FROM speaker WHERE ");
-    sql.append(conditions);
-    if (conditions.length() > 0 && userWhereClause != null && userWhereClause.trim().length() > 0)
+    sql.append(" FROM speaker");
+    if (conditions.length() > 0)
     {
-      sql.append(" ");
+      sql.append(" WHERE ");
+      sql.append(conditions);
+    }
+    if (userWhereClause != null && userWhereClause.trim().length() > 0)
+    {
+      sql.append(conditions.length() > 0?" AND ":" WHERE ");
       sql.append(userWhereClause);
     }
 

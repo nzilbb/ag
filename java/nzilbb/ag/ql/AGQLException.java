@@ -19,9 +19,10 @@
 //    along with nzilbb.ag; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.ag.sql;
+package nzilbb.ag.ql;
 
 import java.util.List;
+import nzilbb.ag.StoreException;
 
 /**
  * Exception thrown when an AGQL expression is invalid.
@@ -29,7 +30,7 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class AGQLException
-  extends Exception
+  extends StoreException
 {
   // Attributes:
 
