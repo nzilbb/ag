@@ -182,8 +182,8 @@ IN                    : ' IN ' ;
 NOT_IN                : ' NOT IN ' ;
 OPEN_PAREN            : '(' ;
 CLOSE_PAREN           : ')' ;
-DOUBLE_QUOTED_STRING  : '"' (~'"')+ '"';
-SINGLE_QUOTED_STRING  : '\'' (~'\'')+ '\'';
+DOUBLE_QUOTED_STRING  : '"' (~'"')* ('\\"' (~'"')*)* '"';
+SINGLE_QUOTED_STRING  : '\'' (~'\'')* ('\\\'' (~'\'')*)* '\'';
 INTEGER_LITERAL       : '-'? [0-9]+ ;
 NUMBER_LITERAL        : '-'? [0-9]+ '.' [0-9]+ ; 
 

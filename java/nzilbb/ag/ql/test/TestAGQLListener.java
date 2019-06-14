@@ -66,6 +66,7 @@ public class TestAGQLListener
     parser = new AGQLParser(tokens);
     tree = parser.query();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("No errors: " + error.toString(), error.length() == 0);
     assertEquals("Parse structure: " + parse,
                  "my(\"graph\").id", parse.toString());
     
@@ -75,6 +76,7 @@ public class TestAGQLListener
     parser = new AGQLParser(tokens);
     tree = parser.query();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("No errors: " + error.toString(), error.length() == 0);
     assertEquals("Parse structure: " + parse,
                  "graph.id", parse.toString());
     
@@ -84,6 +86,7 @@ public class TestAGQLListener
     parser = new AGQLParser(tokens);
     tree = parser.query();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("No errors: " + error.toString(), error.length() == 0);
     assertEquals("Parse structure: " + parse,
                  "graph.label", parse.toString());
 
@@ -300,6 +303,7 @@ public class TestAGQLListener
     parser = new AGQLParser(tokens);
     tree = parser.query();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("No errors: " + error.toString(), error.length() == 0);
     assertEquals("Parse structure: " + parse,
                  "label", parse.toString());
   }
@@ -341,6 +345,7 @@ public class TestAGQLListener
     parser = new AGQLParser(tokens);
     tree = parser.query();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("No errors: " + error.toString(), error.length() == 0);
     assertEquals("Parse structure: " + parse,
                  "id", parse.toString());
     
@@ -658,17 +663,18 @@ public class TestAGQLListener
     AGQLParser.QueryContext tree = parser.query();
 
     ParseTreeWalker.DEFAULT.walk(listener, tree);
-    assertTrue("No errors: " + error.toString(), error.length() == 0);
-    assertEquals("Parse structure: " + parse,
+    assertTrue("String literal - No errors: " + error.toString(), error.length() == 0);
+    assertEquals("String literal: " + parse,
                  "'something'", parse.toString());
-
+    
     parse.setLength(0);
     lexer.setInputStream(CharStreams.fromString("something"));
     tokens = new CommonTokenStream(lexer);
     parser = new AGQLParser(tokens);
     tree = parser.query();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
-    assertEquals("Parse structure: " + parse,
+    assertTrue("Identifier - No errors: " + error.toString(), error.length() == 0);
+    assertEquals("Identifier: " + parse,
                  "something", parse.toString());
 
     parse.setLength(0);
@@ -677,7 +683,8 @@ public class TestAGQLListener
     parser = new AGQLParser(tokens);
     tree = parser.query();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
-    assertEquals("Parse structure: " + parse,
+    assertTrue("Lable - No errors: " + error.toString(), error.length() == 0);
+    assertEquals("Label: " + parse,
                  "label", parse.toString());
     
     parse.setLength(0);
@@ -686,10 +693,94 @@ public class TestAGQLListener
     parser = new AGQLParser(tokens);
     tree = parser.query();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
-    assertEquals("Parse structure: " + parse,
+    assertTrue("ID - No errors: " + error.toString(), error.length() == 0);
+    assertEquals("ID: " + parse,
                  "id", parse.toString());
+    
   }
-  
+
+  @Test public void emptyString() 
+  {
+    final StringBuffer parse = new StringBuffer();
+    final StringBuffer error = new StringBuffer();
+    AGQLListener listener = new AGQLBaseListener() {
+        // @Override public void exitEveryRule(ParserRuleContext ctx)
+        // {
+        //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
+        // }
+        @Override public void exitBarePredicate(AGQLParser.BarePredicateContext ctx)
+        {
+          parse.append(ctx.getText());
+        }
+        @Override public void visitErrorNode(ErrorNode node)
+        {
+          error.append(node.getText());
+        }
+      };
+
+    AGQLLexer lexer = new AGQLLexer(
+      CharStreams.fromString("''"));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    AGQLParser parser = new AGQLParser(tokens);
+    AGQLParser.QueryContext tree = parser.query();
+
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("Single quoted - No errors: " + error.toString(), error.length() == 0);
+    assertEquals("Single quoted: " + parse,
+                 "''", parse.toString());
+    
+    parse.setLength(0);
+    lexer.setInputStream(CharStreams.fromString("\"\""));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    tree = parser.query();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("Double quoted - No errors: " + error.toString(), error.length() == 0);
+    assertEquals("Double quoted: " + parse,
+                 "\"\"", parse.toString());
+  }
+
+  @Test public void quoteEscaping() 
+  {
+    final StringBuffer parse = new StringBuffer();
+    final StringBuffer error = new StringBuffer();
+    AGQLListener listener = new AGQLBaseListener() {
+        // @Override public void exitEveryRule(ParserRuleContext ctx)
+        // {
+        //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
+        // }
+        @Override public void exitBarePredicate(AGQLParser.BarePredicateContext ctx)
+        {
+          parse.append(ctx.getText());
+        }
+        @Override public void visitErrorNode(ErrorNode node)
+        {
+          error.append(node.getText());
+        }
+      };
+
+    AGQLLexer lexer = new AGQLLexer(
+      CharStreams.fromString("'O\\'Reilly'"));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    AGQLParser parser = new AGQLParser(tokens);
+    AGQLParser.QueryContext tree = parser.query();
+
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("Single quote escape - No errors: " + error.toString(), error.length() == 0);
+    assertEquals("Single quote escape: " + parse,
+                 "'O\\'Reilly'", parse.toString());
+    
+    parse.setLength(0);
+    lexer.setInputStream(CharStreams.fromString("\"\\\"quoted\\\"\""));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    tree = parser.query();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("Double quote escape - No errors: " + error.toString(), error.length() == 0);
+    assertEquals("Double quote escape: " + parse,
+                 "\"\\\"quoted\\\"\"", parse.toString());
+
+  }
 
   public static void main(String args[]) 
   {
