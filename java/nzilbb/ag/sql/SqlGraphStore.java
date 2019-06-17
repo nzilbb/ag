@@ -1305,9 +1305,13 @@ public class SqlGraphStore
    *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
    *  <li><code>my('participant_languages').label = 'en'</code></li>
    *  <li><code>my('noise').label = 'bell'</code></li>
-   *  <li><code>'en' labels('transcript_languages')</code></li>
-   *  <li><code>'en' labels('participant_languages')</code></li>
-   *  <li><code>'bell' labels('noise')</code></li>
+   *  <li><code>'en' IN labels('transcript_languages')</code></li>
+   *  <li><code>'en' IN labels('participant_languages')</code></li>
+   *  <li><code>'bell' IN labels('noise')</code></li>
+   *  <li><code>list('transcript_languages').length gt; 1</code></li>
+   *  <li><code>list('participant_languages').length gt; 1</code></li>
+   *  <li><code>list('transcript').length gt; 100</code></li>
+   *  <li><code>'Robert' IN annotators('transcript_rating')</code></li>
    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
    * </ul>
    * @param expression The graph-matching expression.
@@ -1606,6 +1610,24 @@ public class SqlGraphStore
   /**
    * Counts the number of graphs that match a particular pattern.
    * @param expression An expression that determines which graphs match.
+   * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+   * <ul>
+   *  <li><code>id MATCHES 'Ada.+'</code></li>
+   *  <li><code>'Robert' IN labels('who')</code></li>
+   *  <li><code>my('corpus').label = 'CC'</code></li>
+   *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
+   *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
+   *  <li><code>my('participant_languages').label = 'en'</code></li>
+   *  <li><code>my('noise').label = 'bell'</code></li>
+   *  <li><code>'en' IN labels('transcript_languages')</code></li>
+   *  <li><code>'en' IN labels('participant_languages')</code></li>
+   *  <li><code>'bell' IN labels('noise')</code></li>
+   *  <li><code>list('transcript_languages').length gt; 1</code></li>
+   *  <li><code>list('participant_languages').length gt; 1</code></li>
+   *  <li><code>list('transcript').length gt; 100</code></li>
+   *  <li><code>'Robert' IN annotators('transcript_rating')</code></li>
+   *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
+   * </ul>
    * @return The number of matching graphs.
    * @throws StoreException If an error occurs.
    * @throws PermissionException If the operation is not permitted.
@@ -1637,6 +1659,24 @@ public class SqlGraphStore
   /**
    * Gets a list of IDs of graphs that match a particular pattern.
    * @param expression An expression that determines which graphs match.
+   * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+   * <ul>
+   *  <li><code>id MATCHES 'Ada.+'</code></li>
+   *  <li><code>'Robert' IN labels('who')</code></li>
+   *  <li><code>my('corpus').label = 'CC'</code></li>
+   *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
+   *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
+   *  <li><code>my('participant_languages').label = 'en'</code></li>
+   *  <li><code>my('noise').label = 'bell'</code></li>
+   *  <li><code>'en' IN labels('transcript_languages')</code></li>
+   *  <li><code>'en' IN labels('participant_languages')</code></li>
+   *  <li><code>'bell' IN labels('noise')</code></li>
+   *  <li><code>list('transcript_languages').length gt; 1</code></li>
+   *  <li><code>list('participant_languages').length gt; 1</code></li>
+   *  <li><code>list('transcript').length gt; 100</code></li>
+   *  <li><code>'Robert' IN annotators('transcript_rating')</code></li>
+   *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
+   * </ul>
    * @return A list of graph IDs.
    * @throws StoreException If an error occurs.
    * @throws PermissionException If the operation is not permitted.
@@ -1650,6 +1690,24 @@ public class SqlGraphStore
   /**
    * Gets a list of IDs of graphs that match a particular pattern.
    * @param expression An expression that determines which graphs match.
+   * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+   * <ul>
+   *  <li><code>id MATCHES 'Ada.+'</code></li>
+   *  <li><code>'Robert' IN labels('who')</code></li>
+   *  <li><code>my('corpus').label = 'CC'</code></li>
+   *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
+   *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
+   *  <li><code>my('participant_languages').label = 'en'</code></li>
+   *  <li><code>my('noise').label = 'bell'</code></li>
+   *  <li><code>'en' IN labels('transcript_languages')</code></li>
+   *  <li><code>'en' IN labels('participant_languages')</code></li>
+   *  <li><code>'bell' IN labels('noise')</code></li>
+   *  <li><code>list('transcript_languages').length gt; 1</code></li>
+   *  <li><code>list('participant_languages').length gt; 1</code></li>
+   *  <li><code>list('transcript').length gt; 100</code></li>
+   *  <li><code>'Robert' IN annotators('transcript_rating')</code></li>
+   *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
+   * </ul>
    * @param pageLength The maximum number of IDs to return, or null to return all.
    * @param pageNumber The zero-based page number to return, or null to return the first page.
    * @return A list of graph IDs.
@@ -1664,6 +1722,24 @@ public class SqlGraphStore
   /**
    * Gets a list of IDs of graphs that match a particular pattern.
    * @param expression An expression that determines which graphs match.
+   * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+   * <ul>
+   *  <li><code>id MATCHES 'Ada.+'</code></li>
+   *  <li><code>'Robert' IN labels('who')</code></li>
+   *  <li><code>my('corpus').label = 'CC'</code></li>
+   *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
+   *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
+   *  <li><code>my('participant_languages').label = 'en'</code></li>
+   *  <li><code>my('noise').label = 'bell'</code></li>
+   *  <li><code>'en' IN labels('transcript_languages')</code></li>
+   *  <li><code>'en' IN labels('participant_languages')</code></li>
+   *  <li><code>'bell' IN labels('noise')</code></li>
+   *  <li><code>list('transcript_languages').length gt; 1</code></li>
+   *  <li><code>list('participant_languages').length gt; 1</code></li>
+   *  <li><code>list('transcript').length gt; 100</code></li>
+   *  <li><code>'Robert' IN annotators('transcript_rating')</code></li>
+   *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
+   * </ul>
    * @param pageLength The maximum number of IDs to return, or null to return all.
    * @param pageNumber The zero-based page number to return, or null to return the first page.
    * @param order The ordering for the list of IDs, a string containing a comma-separated list of epxressions, which may be appended by " ASC" or " DESC", or null for graph ID order.

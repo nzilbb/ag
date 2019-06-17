@@ -83,10 +83,21 @@ public class GraphAgqlToSql
    * @param expression The graph-matching expression, for example:
    * <ul>
    *  <li><code>id MATCHES 'Ada.+'</code></li>
-   *  <li><code>my('corpus').label = 'CC'</code></li>
    *  <li><code>'Robert' IN labels('who')</code></li>
-   *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN
-   * labels('who')</code></li> 
+   *  <li><code>my('corpus').label = 'CC'</code></li>
+   *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
+   *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
+   *  <li><code>my('participant_languages').label = 'en'</code></li>
+   *  <li><code>my('noise').label = 'bell'</code></li>
+   *  <li><code>'en' IN labels('transcript_languages')</code></li>
+   *  <li><code>'en' IN labels('participant_languages')</code></li>
+   *  <li><code>'bell' IN labels('noise')</code></li>
+   *  <li><code>list('transcript_languages').length gt; 1</code></li>
+   *  <li><code>list('participant_languages').length gt; 1</code></li>
+   *  <li><code>list('transcript').length gt; 100</code></li>
+   *  <li><code>'Robert' IN annotators('transcript_rating')</code></li>
+   *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
+   * </ul>
    * </ul>
    * @param sqlSelectClause The SQL expression that is to go between SELECT and FROM.
    * @param userWhereClause The expression to add to the WHERE clause to ensure the user doesn't
