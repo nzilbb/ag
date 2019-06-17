@@ -148,12 +148,12 @@ public class TestAGQLListener
 
   }
 
-  @Test public void episodeName() 
+  @Test public void episodeLabel() 
   {
     final StringBuffer parse = new StringBuffer();
     final StringBuffer error = new StringBuffer();
     AGQLListener listener = new AGQLBaseListener() {
-        @Override public void exitEpisodeNameExpression(AGQLParser.EpisodeNameExpressionContext ctx)
+        @Override public void exitEpisodeLabelExpression(AGQLParser.EpisodeLabelExpressionContext ctx)
         {
           parse.append(ctx.getText());
         }
@@ -341,6 +341,10 @@ public class TestAGQLListener
     final StringBuffer parse = new StringBuffer();
     final StringBuffer error = new StringBuffer();
     AGQLListener listener = new AGQLBaseListener() {
+        // @Override public void exitEveryRule(ParserRuleContext ctx)
+        // {
+        //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
+        // }
         @Override public void exitOtherIdExpression(AGQLParser.OtherIdExpressionContext ctx)
         {
           parse.append("other: ");
@@ -352,6 +356,7 @@ public class TestAGQLListener
         }
         @Override public void visitErrorNode(ErrorNode node)
         {
+          // System.out.println("error: " + node.getText());
           error.append(node.getText());
         }
       };
@@ -368,7 +373,10 @@ public class TestAGQLListener
                  "other: 'transcript'", parse.toString());
 
     parse.setLength(0);
-    lexer.setInputStream(CharStreams.fromString("id = 'something'"));
+    // TODO for some reason the parser prints:
+    // TODO "line 1:31 mismatched input '<EOF>' expecting '.'"
+    // TODO ...to stderr with this expression - no errors are raised, but need to figure out why
+    lexer.setInputStream(CharStreams.fromString("id NOT MATCHES \"Ada.+\""));
     tokens = new CommonTokenStream(lexer);
     parser = new AGQLParser(tokens);
     tree = parser.query();
@@ -544,6 +552,34 @@ public class TestAGQLListener
     assertTrue("No errors: " + error.toString(), error.length() == 0);
     assertEquals("Parse structure: " + parse,
                  "'transcript'", parse.toString());
+
+  }
+
+  @Test public void ordinal() 
+  {
+    final StringBuffer parse = new StringBuffer();
+    final StringBuffer error = new StringBuffer();
+    AGQLListener listener = new AGQLBaseListener() {
+        @Override public void exitOrdinalOperand(AGQLParser.OrdinalOperandContext ctx)
+        {
+          parse.append(ctx.getText());
+        }
+        @Override public void visitErrorNode(ErrorNode node)
+        {
+          error.append(node.getText());
+        }
+      };
+
+    AGQLLexer lexer = new AGQLLexer(
+      CharStreams.fromString("ordinal = 1"));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    AGQLParser parser = new AGQLParser(tokens);
+    AGQLParser.QueryContext tree = parser.query();
+
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("No errors: " + error.toString(), error.length() == 0);
+    assertEquals("Parse structure: " + parse,
+                 "ordinal", parse.toString());
 
   }
 

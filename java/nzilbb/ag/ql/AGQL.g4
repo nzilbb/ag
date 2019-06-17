@@ -44,7 +44,7 @@ operand
   : graphIdExpression                                  # GraphIdOperand
   | corpusLabelExpression                              # CorpusLabelOperand
   | corpusLabelsExpression                             # CorpusLabelsOperand
-  | episodeNameExpression                              # EpisodeNameOperand
+  | episodeLabelExpression                             # EpisodeLabelOperand
   | whoExpression                                      # WhoOperand
   | anchorIdExpression                                 # AnchorIdOperand
   | anchorOffsetExpression                             # AnchorOffsetOperand
@@ -54,6 +54,7 @@ operand
   | listExpression                                     # ListOperand
   | listLengthExpression                               # ListLengthOperand
   | annotatorsExpression                               # AnnotatorsOperand
+  | ORDINAL                                            # OrdinalOperand
   | ANNOTATOR                                          # AnnotatorOperand
   | WHEN                                               # WhenOperand
   | attribute                                          # AttributeOperand
@@ -72,7 +73,7 @@ graphIdExpression
 
 corpusLabelExpression : MY OPEN_PAREN CORPUS_LITERAL CLOSE_PAREN DOT LABEL ;
 corpusLabelsExpression : LABELS OPEN_PAREN CORPUS_LITERAL CLOSE_PAREN DOT LABEL ;
-episodeNameExpression : MY OPEN_PAREN EPISODE_LITERAL CLOSE_PAREN DOT LABEL ;
+episodeLabelExpression : MY OPEN_PAREN EPISODE_LITERAL CLOSE_PAREN DOT LABEL ;
 whoExpression
   : LABELS OPEN_PAREN WHO_LITERAL CLOSE_PAREN          # WhoLabelsExpression
   | MY OPEN_PAREN WHO_LITERAL CLOSE_PAREN DOT LABEL    # WhoLabelExpression
@@ -155,6 +156,7 @@ GRAPH                 : 'graph' ;
 
 /* attributes */
 ID                    : 'id' ;
+ORDINAL               : 'ordinal' ;
 LABEL                 : 'label' ;
 START                 : 'start' ;
 END                   : 'end' ;

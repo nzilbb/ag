@@ -1299,8 +1299,15 @@ public class SqlGraphStore
    * <p> The expression language is currently not well defined, but expressions such as the following can be used:
    * <ul>
    *  <li><code>id MATCHES 'Ada.+'</code></li>
-   *  <li><code>my('corpus').label = 'CC'</code></li>
    *  <li><code>'Robert' IN labels('who')</code></li>
+   *  <li><code>my('corpus').label = 'CC'</code></li>
+   *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
+   *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
+   *  <li><code>my('participant_languages').label = 'en'</code></li>
+   *  <li><code>my('noise').label = 'bell'</code></li>
+   *  <li><code>'en' labels('transcript_languages')</code></li>
+   *  <li><code>'en' labels('participant_languages')</code></li>
+   *  <li><code>'bell' labels('noise')</code></li>
    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
    * </ul>
    * @param expression The graph-matching expression.
