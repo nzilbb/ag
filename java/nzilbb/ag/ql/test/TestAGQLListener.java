@@ -53,7 +53,7 @@ public class TestAGQLListener
       CharStreams.fromString("my('graph').label = \"something\""));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
-    AGQLParser.QueryContext tree = parser.query();
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
 
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
@@ -64,7 +64,7 @@ public class TestAGQLListener
     lexer.setInputStream(CharStreams.fromString("my(\"graph\").id = 'something'"));
     tokens = new CommonTokenStream(lexer);
     parser = new AGQLParser(tokens);
-    tree = parser.query();
+    tree = parser.booleanExpression();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
     assertEquals("Parse structure: " + parse,
@@ -74,7 +74,7 @@ public class TestAGQLListener
     lexer.setInputStream(CharStreams.fromString("graph.id = 'something'"));
     tokens = new CommonTokenStream(lexer);
     parser = new AGQLParser(tokens);
-    tree = parser.query();
+    tree = parser.booleanExpression();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
     assertEquals("Parse structure: " + parse,
@@ -84,7 +84,7 @@ public class TestAGQLListener
     lexer.setInputStream(CharStreams.fromString("graph.label = 'something'"));
     tokens = new CommonTokenStream(lexer);
     parser = new AGQLParser(tokens);
-    tree = parser.query();
+    tree = parser.booleanExpression();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
     assertEquals("Parse structure: " + parse,
@@ -111,7 +111,7 @@ public class TestAGQLListener
       CharStreams.fromString("my('corpus').label = \"something\""));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
-    AGQLParser.QueryContext tree = parser.query();
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
 
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
@@ -139,7 +139,7 @@ public class TestAGQLListener
       CharStreams.fromString("'something' IN labels('corpus')"));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
-    AGQLParser.QueryContext tree = parser.query();
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
 
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
@@ -167,7 +167,7 @@ public class TestAGQLListener
       CharStreams.fromString("my('episode').label = \"something\""));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
-    AGQLParser.QueryContext tree = parser.query();
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
 
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
@@ -195,7 +195,7 @@ public class TestAGQLListener
       CharStreams.fromString("my('who').label = \"something\""));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
-    AGQLParser.QueryContext tree = parser.query();
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
 
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
@@ -223,7 +223,7 @@ public class TestAGQLListener
       CharStreams.fromString("\"something\" IN labels('who')"));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
-    AGQLParser.QueryContext tree = parser.query();
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
 
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
@@ -252,7 +252,7 @@ public class TestAGQLListener
       CharStreams.fromString("start.id = end.id"));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
-    AGQLParser.QueryContext tree = parser.query();
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
 
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
@@ -286,7 +286,7 @@ public class TestAGQLListener
       CharStreams.fromString("start.offset = end.offset"));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
-    AGQLParser.QueryContext tree = parser.query();
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
 
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
@@ -318,7 +318,7 @@ public class TestAGQLListener
       CharStreams.fromString("my('transcript').label = 'something'"));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
-    AGQLParser.QueryContext tree = parser.query();
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
 
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
@@ -329,7 +329,7 @@ public class TestAGQLListener
     lexer.setInputStream(CharStreams.fromString("label = 'something'"));
     tokens = new CommonTokenStream(lexer);
     parser = new AGQLParser(tokens);
-    tree = parser.query();
+    tree = parser.booleanExpression();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
     assertEquals("Parse structure: " + parse,
@@ -365,7 +365,7 @@ public class TestAGQLListener
       CharStreams.fromString("my('transcript').id = 'something'"));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
-    AGQLParser.QueryContext tree = parser.query();
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
 
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
@@ -379,7 +379,7 @@ public class TestAGQLListener
     lexer.setInputStream(CharStreams.fromString("id NOT MATCHES \"Ada.+\""));
     tokens = new CommonTokenStream(lexer);
     parser = new AGQLParser(tokens);
-    tree = parser.query();
+    tree = parser.booleanExpression();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
     assertEquals("Parse structure: " + parse,
@@ -410,7 +410,7 @@ public class TestAGQLListener
       CharStreams.fromString("list('transcript') = 'something'"));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
-    AGQLParser.QueryContext tree = parser.query();
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
 
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
@@ -443,7 +443,7 @@ public class TestAGQLListener
       CharStreams.fromString("list('transcript').length = 0"));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
-    AGQLParser.QueryContext tree = parser.query();
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
 
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
@@ -454,7 +454,7 @@ public class TestAGQLListener
     lexer.setInputStream(CharStreams.fromString("labels('transcript').length = 0"));
     tokens = new CommonTokenStream(lexer);
     parser = new AGQLParser(tokens);
-    tree = parser.query();
+    tree = parser.booleanExpression();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
     assertEquals("Parse structure: " + parse,
@@ -485,7 +485,7 @@ public class TestAGQLListener
       CharStreams.fromString("'something' IN labels('transcript')"));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
-    AGQLParser.QueryContext tree = parser.query();
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
 
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
@@ -513,7 +513,7 @@ public class TestAGQLListener
       CharStreams.fromString("annotator = 'somebody'"));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
-    AGQLParser.QueryContext tree = parser.query();
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
 
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
@@ -546,7 +546,7 @@ public class TestAGQLListener
       CharStreams.fromString("'someone' IN annotators('transcript')"));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
-    AGQLParser.QueryContext tree = parser.query();
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
 
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
@@ -574,7 +574,7 @@ public class TestAGQLListener
       CharStreams.fromString("ordinal = 1"));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
-    AGQLParser.QueryContext tree = parser.query();
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
 
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
@@ -607,7 +607,7 @@ public class TestAGQLListener
       CharStreams.fromString("when < '2018-01-01 00:00:00'"));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
-    AGQLParser.QueryContext tree = parser.query();
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
 
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("No errors: " + error.toString(), error.length() == 0);
@@ -640,7 +640,7 @@ public class TestAGQLListener
       CharStreams.fromString("id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'"));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
-    AGQLParser.QueryContext tree = parser.query();
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
 
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("AND: No errors: " + error.toString(), error.length() == 0);
@@ -652,7 +652,7 @@ public class TestAGQLListener
       CharStreams.fromString("id NOT MATCHES 'Ada.+' OR my('corpus').label = 'CC'"));
     tokens = new CommonTokenStream(lexer);
     parser = new AGQLParser(tokens);
-    tree = parser.query();
+    tree = parser.booleanExpression();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("OR: No errors: " + error.toString(), error.length() == 0);
     assertEquals("OR: Parse structure: " + parse,
@@ -665,7 +665,7 @@ public class TestAGQLListener
                            +" AND 'labbcat' NOT IN annotators('transcript_rating')"));
     tokens = new CommonTokenStream(lexer);
     parser = new AGQLParser(tokens);
-    tree = parser.query();
+    tree = parser.booleanExpression();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("Chaining: No errors: " + error.toString(), error.length() == 0);
     assertEquals("Chaining: Parse structure: " + parse,
@@ -701,7 +701,7 @@ public class TestAGQLListener
       AGQLLexer lexer = new AGQLLexer(CharStreams.fromString("this "+operator+" that"));
       CommonTokenStream tokens = new CommonTokenStream(lexer);
       AGQLParser parser = new AGQLParser(tokens);
-      AGQLParser.QueryContext tree = parser.query();
+      AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
       ParseTreeWalker.DEFAULT.walk(listener, tree);
       assertTrue(operator + ": No errors: " + error.toString(), error.length() == 0);
       assertEquals(operator + ": Parse structure: " + parse,
@@ -709,7 +709,7 @@ public class TestAGQLListener
     } // next operator
   }
 
-  @Test public void atomicEpressions() 
+  @Test public void atomicExpressions() 
   {
     final StringBuffer parse = new StringBuffer();
     final StringBuffer error = new StringBuffer();
@@ -732,7 +732,7 @@ public class TestAGQLListener
       CharStreams.fromString("'something'"));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
-    AGQLParser.QueryContext tree = parser.query();
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
 
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("String literal - No errors: " + error.toString(), error.length() == 0);
@@ -743,7 +743,7 @@ public class TestAGQLListener
     lexer.setInputStream(CharStreams.fromString("something"));
     tokens = new CommonTokenStream(lexer);
     parser = new AGQLParser(tokens);
-    tree = parser.query();
+    tree = parser.booleanExpression();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("Identifier - No errors: " + error.toString(), error.length() == 0);
     assertEquals("Identifier: " + parse,
@@ -753,7 +753,7 @@ public class TestAGQLListener
     lexer.setInputStream(CharStreams.fromString("label"));
     tokens = new CommonTokenStream(lexer);
     parser = new AGQLParser(tokens);
-    tree = parser.query();
+    tree = parser.booleanExpression();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("Label - No errors: " + error.toString(), error.length() == 0);
     assertEquals("Label: " + parse,
@@ -763,11 +763,129 @@ public class TestAGQLListener
     lexer.setInputStream(CharStreams.fromString("id"));
     tokens = new CommonTokenStream(lexer);
     parser = new AGQLParser(tokens);
-    tree = parser.query();
+    tree = parser.booleanExpression();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("ID - No errors: " + error.toString(), error.length() == 0);
     assertEquals("ID: " + parse,
                  "id", parse.toString());
+    
+  }
+
+  @Test public void listExpressions() 
+  {
+    final StringBuffer parse = new StringBuffer();
+    final StringBuffer error = new StringBuffer();
+    AGQLListener listener = new AGQLBaseListener() {
+        // @Override public void exitEveryRule(ParserRuleContext ctx)
+        // {
+        //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
+        // }
+        @Override public void exitAtomListOperand(AGQLParser.AtomListOperandContext ctx)
+        {
+          parse.append(ctx.getText());
+        }
+        @Override public void visitErrorNode(ErrorNode node)
+        {
+          error.append(node.getText());
+        }
+      };
+
+    AGQLLexer lexer = new AGQLLexer(
+      CharStreams.fromString("('something')"));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    AGQLParser parser = new AGQLParser(tokens);
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
+
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("Single literal - No errors: " + error.toString(), error.length() == 0);
+    assertEquals("Single literal: " + parse,
+                 "('something')", parse.toString());
+    
+    parse.setLength(0);
+    lexer.setInputStream(CharStreams.fromString("('foo', 'bar')"));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    tree = parser.booleanExpression();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("Two strings - No errors: " + error.toString(), error.length() == 0);
+    assertEquals("Two strings: " + parse,
+                 "('foo','bar')", parse.toString());
+
+    parse.setLength(0);
+    lexer.setInputStream(CharStreams.fromString("(1, 2.2, 'three', something)"));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    tree = parser.booleanExpression();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("Various things - No errors: " + error.toString(), error.length() == 0);
+    assertEquals("Various things: " + parse,
+                 "(1,2.2,'three',something)", parse.toString());
+    
+  }
+
+  @Test public void orderEpressions() 
+  {
+    final StringBuffer parse = new StringBuffer();
+    final StringBuffer error = new StringBuffer();
+    AGQLListener listener = new AGQLBaseListener() {
+        // @Override public void exitEveryRule(ParserRuleContext ctx)
+        // {
+        //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
+        // }
+        @Override public void exitAscendingOrderExpression(AGQLParser.AscendingOrderExpressionContext ctx)
+        {
+          parse.append(" ascending " + ctx.order.getText());
+        }
+        @Override public void exitDescendingOrderExpression(AGQLParser.DescendingOrderExpressionContext ctx)
+        {
+          parse.append(" descending " + ctx.order.getText());
+        }
+        @Override public void visitErrorNode(ErrorNode node)
+        {
+          error.append(node.getText());
+        }
+      };
+
+    AGQLLexer lexer = new AGQLLexer(
+      CharStreams.fromString("id ASC"));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    AGQLParser parser = new AGQLParser(tokens);
+    AGQLParser.OrderListExpressionContext tree = parser.orderListExpression();
+
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("ASC - No errors: " + error.toString(), error.length() == 0);
+    assertEquals("ASC: " + parse,
+                 " ascending id", parse.toString());
+    
+    parse.setLength(0);
+    lexer.setInputStream(CharStreams.fromString("my('episode').label DESC"));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    tree = parser.orderListExpression();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("DESC - No errors: " + error.toString(), error.length() == 0);
+    assertEquals("DESC: " + parse,
+                 " descending my('episode').label", parse.toString());
+
+    parse.setLength(0);
+    lexer.setInputStream(CharStreams.fromString("my('episode').label ASC, ordinal DESC"));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    tree = parser.orderListExpression();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("DESC - No errors: " + error.toString(), error.length() == 0);
+    assertEquals("DESC: " + parse,
+                 " ascending my('episode').label descending ordinal", parse.toString());
+
+    parse.setLength(0);
+    lexer.setInputStream(CharStreams.fromString("label"));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    tree = parser.orderListExpression();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("Bare operand - Error: " + error.toString(), error.length() > 0);
+    assertEquals("Bare operand not an order expression: " + parse,
+                 "", parse.toString());
     
   }
 
@@ -794,7 +912,7 @@ public class TestAGQLListener
       CharStreams.fromString("''"));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
-    AGQLParser.QueryContext tree = parser.query();
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
 
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("Single quoted - No errors: " + error.toString(), error.length() == 0);
@@ -805,7 +923,7 @@ public class TestAGQLListener
     lexer.setInputStream(CharStreams.fromString("\"\""));
     tokens = new CommonTokenStream(lexer);
     parser = new AGQLParser(tokens);
-    tree = parser.query();
+    tree = parser.booleanExpression();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("Double quoted - No errors: " + error.toString(), error.length() == 0);
     assertEquals("Double quoted: " + parse,
@@ -835,7 +953,7 @@ public class TestAGQLListener
       CharStreams.fromString("'O\\'Reilly'"));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
-    AGQLParser.QueryContext tree = parser.query();
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
 
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("Single quote escape - No errors: " + error.toString(), error.length() == 0);
@@ -846,7 +964,7 @@ public class TestAGQLListener
     lexer.setInputStream(CharStreams.fromString("\"\\\"quoted\\\"\""));
     tokens = new CommonTokenStream(lexer);
     parser = new AGQLParser(tokens);
-    tree = parser.query();
+    tree = parser.booleanExpression();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
     assertTrue("Double quote escape - No errors: " + error.toString(), error.length() == 0);
     assertEquals("Double quote escape: " + parse,
