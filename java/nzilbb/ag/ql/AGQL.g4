@@ -28,7 +28,18 @@ package nzilbb.ag.ql;
 
 /* Parser rules: */
 
-query : booleanExpression EOF;
+agqlExpression
+  : booleanExpression EOF
+  | orderListExpression EOF
+  | EOF
+  ;
+
+orderListExpression : orderExpression (COMMA orderExpression)* ;
+
+orderExpression
+  : order=operand ASC                                  # AscendingOrderExpression
+  | order=operand DESC                                 # DescendingOrderExpression
+  ;
 
 booleanExpression
   : booleanExpression logicalOperator predicate        # CompositeExpression
@@ -59,6 +70,7 @@ operand
   | WHEN                                               # WhenOperand
   | attribute                                          # AttributeOperand
   | method                                             # MethodOperand
+  | atomList                                           # AtomListOperand
   | atom                                               # AtomOperand
   ;
 
@@ -110,10 +122,19 @@ method
 arglist : operand (COMMA atom)* ;
 
 atom
-  : literal                   # LiteralAtom
-  | IDENTIFIER                # IdentifierAtom
+  : literal                                            # LiteralAtom
+  | WHO_LITERAL                                        # WhoLiteralAtom
+  | GRAPH_LITERAL                                      # GraphLiteralAtom
+  | CORPUS_LITERAL                                     # CorpusLiteralAtom
+  | EPISODE_LITERAL                                    # EpisodeLiteralAtom
+  | IDENTIFIER                                         # IdentifierAtom
   ;
 
+atomList : OPEN_PAREN firstAtom (COMMA subsequentAtom)* CLOSE_PAREN ;
+
+firstAtom : atom ;
+subsequentAtom : atom ;
+    
 literal
   : stringLiteral
   | INTEGER_LITERAL
@@ -146,6 +167,7 @@ logicalOperator
 /* Lexer rules: */
 
 /* special layers */
+/* TODO: these shouldn't be explicitly defined here, as they may be different in a particular schema */
 WHO_LITERAL           : '"who"' | '\'who\'' ;
 GRAPH_LITERAL         : '"graph"' | '\'graph\'' ;
 CORPUS_LITERAL        : '"corpus"' | '\'corpus\'' ;
@@ -172,6 +194,8 @@ LABELS                : 'labels' ;
 ANNOTATORS            : 'annotators' ;
 
 /* other stuff */
+ASC                   : 'ASC' ;
+DESC                  : 'DESC' ;
 DOT                   : '.' ;
 COMMA                 : ',' ;
 IDENTIFIER            : [a-zA-Z][a-zA-Z0-9_]* ;
