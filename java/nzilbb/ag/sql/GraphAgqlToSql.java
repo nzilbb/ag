@@ -111,10 +111,11 @@ public class GraphAgqlToSql
     throws AGQLException
   {
     // ensure there's always a sensible order
-    if (orderClause == null || orderClause.trim().length() == 0) orderClause = "id";
+    if (orderClause == null || orderClause.trim().length() == 0) orderClause = "id ASC";
     final Query q = new Query();
     final StringBuilder conditions = new StringBuilder();
     final Vector<String> errors = new Vector<String>();
+
     AGQLBaseListener listener = new AGQLBaseListener() {
         private void space()
         {
@@ -141,6 +142,11 @@ public class GraphAgqlToSql
           conditions.append("transcript.transcript_id");
         }
         @Override public void exitThisLabelExpression(AGQLParser.ThisLabelExpressionContext ctx)
+        {
+          space();
+          conditions.append("transcript.transcript_id");
+        }
+        @Override public void exitGraphIdExpression(AGQLParser.GraphIdExpressionContext ctx)
         {
           space();
           conditions.append("transcript.transcript_id");
@@ -377,6 +383,18 @@ public class GraphAgqlToSql
           space();
           conditions.append("transcript.family_sequence");
         }
+        @Override public void enterAtomListOperand(AGQLParser.AtomListOperandContext ctx)
+        {
+          conditions.append(" (");
+        }
+        @Override public void enterSubsequentAtom(AGQLParser.SubsequentAtomContext ctx)
+        {
+          conditions.append(",");
+        }
+        @Override public void exitAtomListOperand(AGQLParser.AtomListOperandContext ctx)
+        {
+          conditions.append(")");
+        }
         @Override public void enterComparisonOperator(AGQLParser.ComparisonOperatorContext ctx)
         {
           space();
@@ -402,10 +420,42 @@ public class GraphAgqlToSql
             conditions.append(ctx.getText());
           }
         }
+        @Override public void exitWhoLiteralAtom(AGQLParser.WhoLiteralAtomContext ctx)
+        {
+          conditions.append(" 'who'");
+        }
+        @Override public void exitGraphLiteralAtom(AGQLParser.GraphLiteralAtomContext ctx)
+        {
+          conditions.append(" 'graph'");
+        }
+        @Override public void exitCorpusLiteralAtom(AGQLParser.CorpusLiteralAtomContext ctx)
+        {
+          conditions.append(" 'corpus'");
+        }
+        @Override public void exitEpisodeLiteralAtom(AGQLParser.EpisodeLiteralAtomContext ctx)
+        {
+          conditions.append(" 'episode'");
+        }
         @Override public void exitIdentifierAtom(AGQLParser.IdentifierAtomContext ctx)
         {
           space();
           conditions.append(ctx.getText());
+        }
+        @Override public void enterAscendingOrderExpression(AGQLParser.AscendingOrderExpressionContext ctx)
+        {
+          if (conditions.length() > 0) conditions.append(", ");
+        }
+        @Override public void exitAscendingOrderExpression(AGQLParser.AscendingOrderExpressionContext ctx)
+        {
+          // no need for: conditions.append(" ASC");
+        }
+        @Override public void enterDescendingOrderExpression(AGQLParser.DescendingOrderExpressionContext ctx)
+        {
+          if (conditions.length() > 0) conditions.append(", ");
+        }
+        @Override public void exitDescendingOrderExpression(AGQLParser.DescendingOrderExpressionContext ctx)
+        {
+          conditions.append(" DESC");
         }
         @Override public void visitErrorNode(ErrorNode node)
         {
@@ -415,7 +465,7 @@ public class GraphAgqlToSql
     AGQLLexer lexer = new AGQLLexer(CharStreams.fromString(expression));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
-    AGQLParser.QueryContext tree = parser.query();
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
 
     if (errors.size() > 0)
@@ -439,18 +489,14 @@ public class GraphAgqlToSql
 
     // now order clause
     StringBuilder order = new StringBuilder();
-    for (String part : orderClause.split(","))
-    {
-      order.append(order.length() == 0?" ORDER BY":",");
-      conditions.setLength(0);
-      lexer.setInputStream(CharStreams.fromString(part));
-      tokens = new CommonTokenStream(lexer);
-      parser = new AGQLParser(tokens);
-      tree = parser.query();
-      ParseTreeWalker.DEFAULT.walk(listener, tree);
-      order.append(" ");
-      order.append(conditions);
-    } // next orderClause part
+    order.append(" ORDER BY ");
+    conditions.setLength(0);
+    lexer.setInputStream(CharStreams.fromString(orderClause));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    AGQLParser.OrderListExpressionContext orderTree = parser.orderListExpression();
+    ParseTreeWalker.DEFAULT.walk(listener, orderTree);
+    order.append(conditions);
     sql.append(order);
 
     if (sqlLimitClause != null && sqlLimitClause.trim().length() > 0)

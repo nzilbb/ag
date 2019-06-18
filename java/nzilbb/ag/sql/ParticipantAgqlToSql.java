@@ -297,6 +297,34 @@ public class ParticipantAgqlToSql
             }
           } // valid layer
         }
+        @Override public void exitWhoLiteralAtom(AGQLParser.WhoLiteralAtomContext ctx)
+        {
+          conditions.append(" 'who'");
+        }
+        @Override public void exitGraphLiteralAtom(AGQLParser.GraphLiteralAtomContext ctx)
+        {
+          conditions.append(" 'graph'");
+        }
+        @Override public void exitCorpusLiteralAtom(AGQLParser.CorpusLiteralAtomContext ctx)
+        {
+          conditions.append(" 'corpus'");
+        }
+        @Override public void exitEpisodeLiteralAtom(AGQLParser.EpisodeLiteralAtomContext ctx)
+        {
+          conditions.append(" 'episode'");
+        }
+        @Override public void enterAtomListOperand(AGQLParser.AtomListOperandContext ctx)
+        {
+          conditions.append(" (");
+        }
+        @Override public void enterSubsequentAtom(AGQLParser.SubsequentAtomContext ctx)
+        {
+          conditions.append(",");
+        }
+        @Override public void exitAtomListOperand(AGQLParser.AtomListOperandContext ctx)
+        {
+          conditions.append(")");
+        }
         @Override public void enterComparisonOperator(AGQLParser.ComparisonOperatorContext ctx)
         {
           space();
@@ -335,7 +363,7 @@ public class ParticipantAgqlToSql
     AGQLLexer lexer = new AGQLLexer(CharStreams.fromString(expression));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
-    AGQLParser.QueryContext tree = parser.query();
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
 
     if (errors.size() > 0)
