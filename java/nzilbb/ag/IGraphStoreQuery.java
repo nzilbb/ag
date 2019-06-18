@@ -215,7 +215,7 @@ public interface IGraphStoreQuery
    * <ul>
    *  <li><code>id MATCHES 'Ada.+'</code></li>
    *  <li><code>'Robert' IN labels('who')</code></li>
-   *  <li><code>my('corpus').label = 'CC'</code></li>
+   *  <li><code>my('corpus').label IN ('CC', 'IA', 'MU')</code></li>
    *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
    *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
    *  <li><code>my('participant_languages').label = 'en'</code></li>
@@ -243,7 +243,7 @@ public interface IGraphStoreQuery
    * <ul>
    *  <li><code>id MATCHES 'Ada.+'</code></li>
    *  <li><code>'Robert' IN labels('who')</code></li>
-   *  <li><code>my('corpus').label = 'CC'</code></li>
+   *  <li><code>my('corpus').label IN ('CC', 'IA', 'MU')</code></li>
    *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
    *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
    *  <li><code>my('participant_languages').label = 'en'</code></li>
@@ -271,7 +271,7 @@ public interface IGraphStoreQuery
    * <ul>
    *  <li><code>id MATCHES 'Ada.+'</code></li>
    *  <li><code>'Robert' IN labels('who')</code></li>
-   *  <li><code>my('corpus').label = 'CC'</code></li>
+   *  <li><code>my('corpus').label IN ('CC', 'IA', 'MU')</code></li>
    *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
    *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
    *  <li><code>my('participant_languages').label = 'en'</code></li>
@@ -305,7 +305,7 @@ public interface IGraphStoreQuery
    * <ul>
    *  <li><code>id MATCHES 'Ada.+'</code></li>
    *  <li><code>'Robert' IN labels('who')</code></li>
-   *  <li><code>my('corpus').label = 'CC'</code></li>
+   *  <li><code>my('corpus').label IN ('CC', 'IA', 'MU')</code></li>
    *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
    *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
    *  <li><code>my('participant_languages').label = 'en'</code></li>
