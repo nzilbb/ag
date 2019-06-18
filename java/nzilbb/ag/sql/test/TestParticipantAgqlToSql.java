@@ -182,6 +182,24 @@ public class TestParticipantAgqlToSql
     assertEquals("Parameter count", 0, q.parameters.size());
   }
 
+  @Test public void literalList() throws AGQLException
+  {
+    ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
+    ParticipantAgqlToSql.Query q = transformer.sqlFor(
+      "my(\"corpus\").label IN (\"CC\", 'IA', 'MU', \"graph\", 'who')",
+      "speaker_number, name", null, "ORDER BY speaker.name");
+    assertEquals("SQL",
+                 "SELECT speaker_number, name FROM speaker"
+                 +" WHERE (SELECT corpus.corpus_name"
+                 +" FROM speaker_corpus"
+                 +" INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id"
+                 +" WHERE speaker_corpus.speaker_number = speaker.speaker_number LIMIT 1)"
+                 +" IN ( 'CC', 'IA', 'MU', 'graph', 'who')"
+                 +" ORDER BY speaker.name",
+                 q.sql);
+    assertEquals("Parameter count", 0, q.parameters.size());
+  }
+
   @Test public void corpusLabels() throws AGQLException
   {
     ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());

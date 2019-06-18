@@ -145,7 +145,17 @@ public class TestGraphAgqlToSql
 
     q = transformer.sqlFor(
       "id NOT MATCHES \"Ada.+\"",
-      "transcript.transcript_id, transcript.ag_id", null, "id", "LIMIT 1,1");
+      "transcript.transcript_id, transcript.ag_id", null, "id ASC", "LIMIT 1,1");
+    assertEquals("SQL - id",
+                 "SELECT transcript.transcript_id, transcript.ag_id FROM transcript"
+                 +" WHERE transcript.transcript_id NOT REGEXP 'Ada.+'"
+                 +" ORDER BY transcript.transcript_id LIMIT 1,1",
+                 q.sql);
+    assertEquals("Parameter count - id", 0, q.parameters.size());
+    
+    q = transformer.sqlFor(
+      "my('graph').label NOT MATCHES \"Ada.+\"",
+      "transcript.transcript_id, transcript.ag_id", null, "id ASC", "LIMIT 1,1");
     assertEquals("SQL - id",
                  "SELECT transcript.transcript_id, transcript.ag_id FROM transcript"
                  +" WHERE transcript.transcript_id NOT REGEXP 'Ada.+'"
@@ -166,11 +176,11 @@ public class TestGraphAgqlToSql
     assertEquals("Parameter count - no userWhere", 0, q.parameters.size());
 
     q = transformer.sqlFor(
-      "", "transcript.transcript_id", "transcript.annotated_by = 'user'", "label", null);
+      "", "transcript.transcript_id", "transcript.annotated_by = 'user'", "label DESC", null);
     assertEquals("SQL - with userWhere",
                  "SELECT transcript.transcript_id FROM transcript"
                  +" WHERE transcript.annotated_by = 'user'"
-                 +" ORDER BY transcript.transcript_id",
+                 +" ORDER BY transcript.transcript_id DESC",
                  q.sql);
     assertEquals("Parameter count - id", 0, q.parameters.size());
   }
@@ -180,13 +190,13 @@ public class TestGraphAgqlToSql
     GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
     GraphAgqlToSql.Query q = transformer.sqlFor(
       "", "transcript.transcript_id, transcript.ag_id", null,
-      "my(\"corpus\").label, my(\"episode\").label, ordinal",
+      "my(\"corpus\").label ASC, my(\"episode\").label DESC, ordinal ASC",
       null);
     assertEquals("SQL",
                  "SELECT transcript.transcript_id, transcript.ag_id FROM transcript"
                  +" ORDER BY transcript.corpus_name, (SELECT name"
                  +" FROM transcript_family"
-                 +" WHERE transcript_family.family_id = transcript.family_id),"
+                 +" WHERE transcript_family.family_id = transcript.family_id) DESC,"
                  +" transcript.family_sequence",
                  q.sql);
     assertEquals("Parameter count - no userWhere", 0, q.parameters.size());
@@ -202,6 +212,20 @@ public class TestGraphAgqlToSql
     assertEquals("SQL",
                  "SELECT transcript.transcript_id FROM transcript"
                  +" WHERE transcript.corpus_name = 'CC'"
+                 +" ORDER BY transcript.transcript_id",
+                 q.sql);
+    assertEquals("Parameter count", 0, q.parameters.size());
+  }
+
+  @Test public void literalList() throws AGQLException
+  {
+    GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
+    GraphAgqlToSql.Query q = transformer.sqlFor(
+      "my(\"corpus\").label IN (\"CC\", 'IA', 'MU', 'corpus', \"episode\")",
+      "transcript.transcript_id", null, null, null);
+    assertEquals("SQL",
+                 "SELECT transcript.transcript_id FROM transcript"
+                 +" WHERE transcript.corpus_name IN ( 'CC', 'IA', 'MU', 'corpus', 'episode')"
                  +" ORDER BY transcript.transcript_id",
                  q.sql);
     assertEquals("Parameter count", 0, q.parameters.size());
