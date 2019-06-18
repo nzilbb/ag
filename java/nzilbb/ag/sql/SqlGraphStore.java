@@ -1300,7 +1300,7 @@ public class SqlGraphStore
    * <ul>
    *  <li><code>id MATCHES 'Ada.+'</code></li>
    *  <li><code>'Robert' IN labels('who')</code></li>
-   *  <li><code>my('corpus').label = 'CC'</code></li>
+   *  <li><code>my('corpus').label IN ('CC', 'IA', 'MU')</code></li>
    *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
    *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
    *  <li><code>my('participant_languages').label = 'en'</code></li>
@@ -1325,285 +1325,13 @@ public class SqlGraphStore
   private PreparedStatement graphMatchSql(String expression, String selectClause, String order, String limit)
     throws SQLException, StoreException, PermissionException
   {
-    StringBuffer conditions = new StringBuffer();
-    for (String subexpression : expression.split(" AND "))
-    {
-      subexpression = subexpression.trim();
-      if (subexpression.length() == 0) continue;
-      String operator = null;
-      String[] operators = {" = "," <> "," <= "," >= "," < "," > ", " NOT MATCHES "," MATCHES ", " NOT IN ", " IN "};
-      String[] operands = null;
-      for (String op : operators)
-      {
-        operands = subexpression.split(op);
-        if (operands.length == 2)
-        {
-          operator = op.trim();
-          break;
-        } // match
-      } // next operator
-      if (operator == null) throw new StoreException("Not valid operator found in: " + expression);
-      if (operands == null) throw new StoreException("No operands found in: " + expression);
-
-      String sqlLhs = null;
-      String sqlOperator = operator.replace("MATCHES","REGEXP");
-      String sqlRhs = null;
-      PreparedStatement sqlAttribute = getConnection().prepareStatement(
-        "SELECT * FROM attribute_definition WHERE CONCAT('transcript_', attribute) = ?");
-      for (String operand : operands)
-      {
-        operand = operand.trim();
-        String sqlOperand = null;
-        if (operand.equals("id") || operand.equals("my('graph').label"))
-        {
-          sqlOperand = "transcript_id";
-        }
-        else if (operand.equals("my('corpus').label"))
-        {
-          sqlOperand = "corpus_name";
-        }
-        else if (operand.equals("my('episode').label"))
-        {
-          sqlOperand = "(SELECT name"
-            +" FROM transcript_family"
-            +" WHERE transcript_family.family_id = transcript.family_id)";
-        }
-        else if (operand.equals("labels('who')"))
-        {
-          sqlOperand = "(SELECT speaker.name"
-            +" FROM transcript_speaker"
-            +" INNER JOIN speaker ON transcript_speaker.speaker_number = speaker.speaker_number"
-            +" WHERE transcript_speaker.ag_id = transcript.ag_id)";
-        }
-        else if (operand.startsWith("labels('transcript_"))
-        { // transcript attribute values
-          String layerId = operand.replaceFirst("labels\\('","").replaceFirst("'\\)$","");
-          Layer operandLayer = getLayer(layerId);
-          if (operandLayer == null) throw new StoreException("Invalid layer: " + layerId);
-          String class_id = (String)operandLayer.get("@class_id");
-          if (!"transcript".equals(class_id)) throw new StoreException("Cannot query by temporal annotation layer: " + layerId);
-          sqlOperand = "(SELECT label FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
-            +" WHERE annotation_transcript.ag_id = transcript.ag_id AND layer = '"+operandLayer.get("@attribute").toString().replace("'","\\'")+"'"
-            +")";
-        }
-        else if (operand.startsWith("my('") && operand.endsWith("').label"))
-        { // my
-          String layerId = operand.replaceFirst("my\\('","").replaceFirst("'\\)\\.label$","");
-          Layer layer = getLayer(layerId);
-          if (layer == null) throw new StoreException("Invalid layer: " + layerId);
-          if ("speaker".equals(layer.get("@class_id"))) throw new StoreException("Cannoth query by participant annotation layer: " + layerId);
-          if ("transcript".equals(layer.get("@class_id")))
-          { // transcript attribute
-            sqlOperand = "(SELECT label"
-              +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
-              +" WHERE annotation_transcript.ag_id = transcript.ag_id"
-              +" AND annotation_transcript.layer = '"+layerId
-              .replaceFirst("^transcript_", "")
-              .replaceAll("\\'", "\\\\'")
-              +"' LIMIT 1)";
-          }
-          else if (layer.getParentId().equals("episode"))
-          { // episode tag layer
-            sqlOperand =
-              "(SELECT label"
-              +" FROM `annotation_layer_" + layer.get("@layer_id") + "` layer"
-              +" INNER JOIN transcript t ON layer.family_id = t.family_id"
-              +" WHERE t.ag_id = transcript.ag_id"
-              +" LIMIT 1)";
-          }
-          else
-          { // regular temporal layer
-            sqlOperand =
-              "(SELECT label"
-              +" FROM annotation_layer_" + layer.get("@layer_id") + " layer"
-              +" WHERE layer.ag_id = transcript.ag_id"
-              +" LIMIT 1)";
-          }
-        } // my
-        else if (operand.startsWith("list('") && operand.endsWith("').length"))
-        { // list
-          String layerId = operand.replaceFirst("list\\('","").replaceFirst("'\\)\\.length$","");
-          Layer layer = getLayer(layerId);
-          if (layer == null) throw new StoreException("Invalid layer: " + layerId);
-          if ("speaker".equals(layer.get("@class_id"))) throw new StoreException("Cannoth query by participant annotation layer: " + layerId);
-          if ("transcript".equals(layer.get("@class_id")))
-          { // transcript attribute
-            sqlOperand = "(SELECT COUNT(*)"
-              +" FROM annotation_transcript"
-              +" WHERE annotation_transcript.ag_id = transcript.ag_id"
-              +" AND annotation_transcript.layer = '"+layerId
-              .replaceFirst("^transcript_", "") .replaceAll("\\'", "\\\\'") +"'"
-              +" AND annotation_transcript.label <> ''" // empty values don't count
-              +")";
-          }
-          else if (layer.getParentId().equals("episode"))
-          { // episode tag layer
-            sqlOperand =
-              "(SELECT COUNT(*)"
-              +" FROM `annotation_layer_" + layer.get("@layer_id") + "` layer"
-              +" INNER JOIN transcript t ON layer.family_id = t.family_id"
-              +" WHERE t.ag_id = transcript.ag_id"
-              +")";
-          }
-          else
-          { // regular temporal layer
-            sqlOperand =
-              "(SELECT COUNT(*)"
-              +" FROM annotation_layer_" + layer.get("@layer_id") + " layer"
-              +" WHERE layer.ag_id = transcript.ag_id"
-              +" LIMIT 1)";
-          }
-        } // list
-        else if (operand.startsWith("annotators('") && operand.endsWith("')"))
-        { // annotators
-          String layerId = operand.replaceFirst("annotators\\('","").replaceFirst("'\\)$","");
-          Layer layer = getLayer(layerId);
-          if (layer == null) throw new StoreException("Invalid layer: " + layerId);
-          if ("speaker".equals(layer.get("@class_id"))) throw new StoreException("Cannoth query by participant annotation layer: " + layerId);
-          if ("transcript".equals(layer.get("@class_id")))
-          { // transcript attribute
-            sqlOperand = "(SELECT annotated_by"
-              +" FROM annotation_transcript"
-              +" WHERE annotation_transcript.ag_id = transcript.ag_id"
-              +" AND annotation_transcript.layer = '"+layerId
-              .replaceFirst("^transcript_", "") .replaceAll("\\'", "\\\\'") +"'"
-              +")";
-          }
-          else if (layer.getParentId().equals("episode"))
-          { // episode tag layer
-            sqlOperand =
-              "(SELECT annotated_by"
-              +" FROM `annotation_layer_" + layer.get("@layer_id") + "` layer"
-              +" INNER JOIN transcript t ON layer.family_id = t.family_id"
-              +" WHERE t.ag_id = transcript.ag_id"
-              +")";
-          }
-          else
-          { // regular temporal layer
-            sqlOperand =
-              "(SELECT annotated_by"
-              +" FROM annotation_layer_" + layer.get("@layer_id") + " layer"
-              +" WHERE layer.ag_id = transcript.ag_id"
-              +" LIMIT 1)";
-          }
-        } // an attribute?
-        else
-        {
-          sqlOperand = operand;
-        }
-        if (sqlLhs == null)
-        {
-          sqlLhs = sqlOperand;
-        }
-        else
-        {
-          sqlRhs = sqlOperand;
-        }
-      } // next operand
-      sqlAttribute.close();
-      conditions.append(conditions.length() == 0?" WHERE ":" AND ");
-      conditions.append(sqlLhs);
-      conditions.append(" ");
-      conditions.append(sqlOperator);
-      conditions.append(" ");
-      conditions.append(sqlRhs);
-    } // next subexpression
-    StringBuffer orderClause = new StringBuffer();
-    if (order != null)
-    {
-      for (String part : order.split(","))
-      {
-        if (orderClause.length() == 0)
-        {
-          orderClause.append(" ORDER BY ");
-        }
-        else
-        {
-          orderClause.append(", ");
-        }
-        part = part.trim();
-        String direction = " ASC";
-        if (part.endsWith(" ASC"))
-        {
-          part = part.substring(0, part.length() - " ASC".length());
-        }
-        if (part.endsWith(" DESC"))
-        {
-          part = part.substring(0, part.length() - " DESC".length());
-          direction = " DESC";
-        }
-        if (part.equals("id") || part.equals("my('graph').label"))
-        {
-          orderClause.append("transcript_id");
-        }
-        else if (part.equals("my('corpus').label"))
-        {
-          orderClause.append("corpus_name");
-        }
-        else if (part.startsWith("my('") && part.endsWith("').label"))
-        {
-          String layerId = part.replaceFirst("my\\('","").replaceFirst("'\\)\\.label$","");
-          Layer layer = getLayer(layerId);
-          if (layer == null) throw new StoreException("Invalid layer: " + layerId);
-          if (layer.getType() == Constants.TYPE_NUMBER)
-          { // cast the value as a number
-            orderClause.append("CAST(");
-          }
-          if ("speaker".equals(layer.get("@class_id"))) throw new StoreException("Cannoth query by participant annotation layer: " + layerId);
-          if ("transcript".equals(layer.get("@class_id")))
-          { // transcript attribute
-            orderClause.append(
-              "(SELECT label"
-              +" FROM annotation_transcript"
-              +" WHERE annotation_transcript.ag_id = transcript.ag_id"
-              +" AND annotation_transcript.layer = '"+layerId
-              .replaceFirst("^transcript_", "")
-              .replaceAll("\\'", "\\\\'")
-              +"' LIMIT 1)");
-          }
-          else if (layer.getParentId().equals("episode"))
-          { // episode tag layer
-            orderClause.append(
-              "(SELECT label"
-              +" FROM `annotation_layer_" + layer.get("@layer_id") + "` layer"
-              +" INNER JOIN transcript t ON layer.family_id = t.family_id"
-              +" WHERE t.ag_id = transcript.ag_id"
-              +" LIMIT 1)");
-          }
-          else
-          { // regular temporal layer
-            orderClause.append(
-              "(SELECT label"
-              +" FROM annotation_layer_" + layer.get("@layer_id") + " layer"
-              +" WHERE layer.ag_id = transcript.ag_id"
-              +" LIMIT 1)");
-          }
-          if (layer.getType() == Constants.TYPE_NUMBER)
-          { // finish casting the value as a number
-            orderClause.append(" AS SIGNED)");
-          }
-        }
-        else
-        { // just pass it through...
-          orderClause.append(part);
-        }
-        orderClause.append(direction);
-      } // next part
-    } // order is specified
-    if (orderClause.length() == 0)
-    {
-      orderClause.append(" ORDER BY family_id, family_sequence");
-    }
-    if (limit == null) limit = "";
-    String sSql = "SELECT "+selectClause+" FROM transcript"
-      + conditions.toString()
-      + userWhereClauseGraph(conditions.length() > 0, "transcript")
-      + orderClause.toString()
-      + " " + limit;
+    String userWhereClause = userWhereClauseGraph(true, "transcript").replaceAll("^ AND ","");
+    GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
+    GraphAgqlToSql.Query q = transformer.sqlFor(
+      expression, selectClause, userWhereClause, order, limit);
     System.out.println("QL: " + expression);
-    System.out.println("SQL: " + sSql);
-    PreparedStatement sql = getConnection().prepareStatement(sSql);
-    //System.err.println(sSql);
+    System.out.println("SQL: " + q.sql);
+    PreparedStatement sql = q.prepareStatement(getConnection());
     return sql;
   } // end of graphMatchSql()
 
@@ -1614,7 +1342,7 @@ public class SqlGraphStore
    * <ul>
    *  <li><code>id MATCHES 'Ada.+'</code></li>
    *  <li><code>'Robert' IN labels('who')</code></li>
-   *  <li><code>my('corpus').label = 'CC'</code></li>
+   *  <li><code>my('corpus').label IN ('CC', 'IA', 'MU')</code></li>
    *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
    *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
    *  <li><code>my('participant_languages').label = 'en'</code></li>
@@ -1663,7 +1391,7 @@ public class SqlGraphStore
    * <ul>
    *  <li><code>id MATCHES 'Ada.+'</code></li>
    *  <li><code>'Robert' IN labels('who')</code></li>
-   *  <li><code>my('corpus').label = 'CC'</code></li>
+   *  <li><code>my('corpus').label IN ('CC', 'IA', 'MU')</code></li>
    *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
    *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
    *  <li><code>my('participant_languages').label = 'en'</code></li>
@@ -1694,7 +1422,7 @@ public class SqlGraphStore
    * <ul>
    *  <li><code>id MATCHES 'Ada.+'</code></li>
    *  <li><code>'Robert' IN labels('who')</code></li>
-   *  <li><code>my('corpus').label = 'CC'</code></li>
+   *  <li><code>my('corpus').label IN ('CC', 'IA', 'MU')</code></li>
    *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
    *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
    *  <li><code>my('participant_languages').label = 'en'</code></li>
@@ -1726,7 +1454,7 @@ public class SqlGraphStore
    * <ul>
    *  <li><code>id MATCHES 'Ada.+'</code></li>
    *  <li><code>'Robert' IN labels('who')</code></li>
-   *  <li><code>my('corpus').label = 'CC'</code></li>
+   *  <li><code>my('corpus').label IN ('CC', 'IA', 'MU')</code></li>
    *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
    *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
    *  <li><code>my('participant_languages').label = 'en'</code></li>
