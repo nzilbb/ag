@@ -55,11 +55,13 @@
 	     basedir="${build}">
       
       <!-- include source code -->
-      <fileset dir="${src}" includes="${srcfiles} nzilbb/jsendpraat/nzilbb_jsendpraat_SendPraat.*" />
+      <fileset dir="${src}" includes="${srcfiles}" />
       <!-- include images -->
       <fileset dir="${src}" includes="nzilbb/**/*.svg" />
       <!-- include this build file -->
       <fileset dir="." includes="build.xml" />
+      <!-- include antlr base classes -->
+      <zipfileset src="lib/antlr-runtime-4.7.2.jar" />
       
     </jar>
     <delete dir="${build}"/>
