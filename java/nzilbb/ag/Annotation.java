@@ -583,6 +583,27 @@ public class Annotation
         Annotation parent = getParent();
         if (parent != null) return parent.getStart();
       }
+      // TODO should do this instead, but it breaks Anchor comparator unit tests, need to figure out why
+      //   if (parent != null && parent.startId != null
+      //       && !parent.startId.equals(startId))
+      //   { 
+      //     // unlink old start, if available
+      //     Anchor start = graph.getAnchor(startId);
+      //     if (start != null && !start.getId().equals(startId))
+      //     {
+      //       start.startOf(getLayerId()).remove(this);
+      //     }
+
+      //     startId = parent.startId;
+          
+      //     // introduce ourselves to the new anchor, if available
+      //     start = graph.getAnchor(startId);
+      //     if (start != null)
+      //     {
+      //       start.startOf(getLayerId()).add(this);
+      //     }
+      //   } // anchor different from parent
+      // } // tag layer
       return graph.getAnchor(getStartId());
     }
     return null;
@@ -614,6 +635,27 @@ public class Annotation
         Annotation parent = getParent();
         if (parent != null) return parent.getEnd();
       }
+      // TODO should do this instead, but it breaks Anchor comparator unit tests, need to figure out why
+      //   if (parent != null && parent.endId != null
+      //       && !parent.endId.equals(endId))
+      //   {
+      //     // unlink old end, if available
+      //     Anchor end = graph.getAnchor(endId);
+      //     if (end != null && !end.getId().equals(endId))
+      //     {
+      //       end.endOf(getLayerId()).remove(this);
+      //     }
+
+      //     endId = parent.endId;
+          
+      //     // introduce ourselves to the new anchor, if available
+      //     end = graph.getAnchor(endId);
+      //     if (end != null)
+      //     {
+      //       end.endOf(getLayerId()).add(this);
+      //     }
+      //   } // anchor differen from parent
+      // } // tag layer
       return graph.getAnchor(getEndId());
     }
     return null;
