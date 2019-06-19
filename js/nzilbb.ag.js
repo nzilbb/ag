@@ -403,7 +403,7 @@ nzilbb.ag.Anchor = function(offset, graph)
 }
 nzilbb.ag.Anchor.prototype = {
 
-    toString : function Annotation_toString() { return this.offset; }
+    toString : function Anchor_toString() { return this.offset; }
 
 } // Anchor methods
 nzilbb.ag.Anchor.coerce = function(obj)
