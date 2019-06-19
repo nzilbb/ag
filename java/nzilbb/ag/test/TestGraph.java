@@ -59,13 +59,29 @@ public class TestGraph
       Graph g = new Graph();
       g.setId("my graph");
 
-      Layer who = new Layer("who", "Speaker", 0, true, true, false);
+      Layer who = new Layer("who", "Speaker")
+        .setAlignment(0)
+        .setPeers(true)
+        .setPeersOverlap(true)
+        .setSaturated(true);
       g.addLayer(who);
-
-      Layer turn = new Layer("turn", "Speaker turns", 2, true, true, false, "who", true);
+      
+      Layer turn = new Layer("turn", "Speaker turns")
+        .setAlignment(2)
+        .setPeers(true)
+        .setPeersOverlap(true)
+        .setSaturated(false)
+        .setParentId("who")
+        .setParentIncludes(true);
       g.addLayer(turn);
 
-      Layer word = new Layer("word", "Words", 2, true, false, false, "turn", true);
+      Layer word = new Layer("word", "Words")
+        .setAlignment(2)
+        .setPeers(true)
+        .setPeersOverlap(false)
+        .setSaturated(false)
+        .setParentId("turn")
+        .setParentIncludes(true);
       g.addLayer(word);
 
       assertEquals(turn, g.getLayer("turn"));
