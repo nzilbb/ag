@@ -427,10 +427,11 @@ public class SqlGraphStore
     for (Layer layer : schema.getLayers().values())
     {
       Layer layerCopy = clone.getLayer(layer.getId());
+      if (layerCopy == null) continue;
       // clone the temporary attributes too
       for (String key : layer.keySet())
       {
-        if (key.startsWith("@"))
+        if (key.startsWith("@") && layer.get(key) != null)
         {
           layerCopy.put(key, layer.get(key));
         }
@@ -1486,7 +1487,7 @@ public class SqlGraphStore
         if (pageNumber == null) pageNumber = 0;
         limit = " LIMIT " + (pageNumber * pageLength) + "," + pageLength;
       }
-      if (order == null) order = "id";
+      if (order == null) order = "id ASC";
       PreparedStatement sql = graphMatchSql(
         expression, "transcript_id", order, limit);
       ResultSet rs = sql.executeQuery();
