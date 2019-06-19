@@ -1,7 +1,7 @@
 {
   "annotation": {
-    "name": "serialize_utterance_word__214.822-218.290",
-    "annotates": "serialize_utterance_word__214.822-218.290",
+    "name": "onetomany_serialize_utterance_word__214.822-218.290",
+    "annotates": "onetomany_serialize_utterance_word__214.822-218.290",
     "sampleRate": 16000,
     "levels": [
       {
@@ -18,13 +18,13 @@
             "sampleDur": 6166
           },
           {
-            "id": 6,
+            "id": 5,
             "sampleStart": 6166,
             "sampleDur": 1482,
             "labels": []
           },
           {
-            "id": 5,
+            "id": 4,
             "labels": [{
               "name": "phone",
               "value": "s"
@@ -33,7 +33,7 @@
             "sampleDur": 561
           },
           {
-            "id": 7,
+            "id": 6,
             "labels": [{
               "name": "phone",
               "value": "V"
@@ -42,7 +42,7 @@
             "sampleDur": 1626
           },
           {
-            "id": 8,
+            "id": 7,
             "labels": [{
               "name": "phone",
               "value": "m"
@@ -51,7 +51,7 @@
             "sampleDur": 2496
           },
           {
-            "id": 10,
+            "id": 9,
             "labels": [{
               "name": "phone",
               "value": "n"
@@ -63,22 +63,14 @@
       },
       {
         "name": "word",
-        "type": "SEGMENT",
+        "type": "ITEM",
         "items": [
           {
             "id": 1,
             "labels": [{
               "name": "word",
               "value": "or"
-            }],
-            "sampleStart": 0,
-            "sampleDur": 6166
-          },
-          {
-            "id": 4,
-            "sampleStart": 6166,
-            "sampleDur": 1482,
-            "labels": []
+            }]
           },
           {
             "id": 3,
@@ -91,72 +83,56 @@
                 "name": "tag",
                 "value": "first-tag"
               }
-            ],
-            "sampleStart": 7648,
-            "sampleDur": 4683
+            ]
           },
           {
-            "id": 9,
+            "id": 8,
             "labels": [{
               "name": "word",
               "value": "and"
-            }],
-            "sampleStart": 12331,
-            "sampleDur": 6165
+            }]
+          },
+          {
+            "id": 10,
+            "labels": [{
+              "name": "word",
+              "value": "there's"
+            }]
           },
           {
             "id": 11,
             "labels": [{
               "name": "word",
-              "value": "there's"
-            }],
-            "sampleStart": 18496,
-            "sampleDur": 6166
+              "value": "nothing"
+            }]
           },
           {
             "id": 12,
             "labels": [{
               "name": "word",
-              "value": "nothing"
-            }],
-            "sampleStart": 24662,
-            "sampleDur": 6165
+              "value": "much"
+            }]
           },
           {
             "id": 13,
             "labels": [{
               "name": "word",
-              "value": "much"
-            }],
-            "sampleStart": 30827,
-            "sampleDur": 6165
+              "value": "on"
+            }]
           },
           {
             "id": 14,
             "labels": [{
               "name": "word",
-              "value": "on"
-            }],
-            "sampleStart": 36992,
-            "sampleDur": 6166
+              "value": "it"
+            }]
           },
           {
             "id": 15,
             "labels": [{
               "name": "word",
-              "value": "it"
-            }],
-            "sampleStart": 43158,
-            "sampleDur": 6165
-          },
-          {
-            "id": 16,
-            "labels": [{
-              "name": "word",
               "value": "or"
-            }],
-            "sampleStart": 49323,
-            "sampleDur": 6165
+            }]
           }
         ]
       },
@@ -174,7 +150,28 @@
         }]
       }
     ],
-    "links": []
+    "links": [
+      {
+        "fromID": 1,
+        "toID": 2
+      },
+      {
+        "fromID": 3,
+        "toID": 4
+      },
+      {
+        "fromID": 3,
+        "toID": 6
+      },
+      {
+        "fromID": 3,
+        "toID": 7
+      },
+      {
+        "fromID": 8,
+        "toID": 9
+      }
+    ]
   },
   "ssffFiles": [],
   "mediaFile": {

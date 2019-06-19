@@ -26,9 +26,12 @@ import java.util.List;
 import java.util.Vector;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Comparator;
+import java.util.stream.Stream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.ByteArrayInputStream;
@@ -41,6 +44,7 @@ import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.ag.util.AnnotationComparatorByDistance;
+import nzilbb.ag.util.AnnotationComparatorByAnchor;
 import nzilbb.ag.util.LayerTraversal;
 import nzilbb.ag.util.LayerHierarchyTraversal;
 import nzilbb.configure.Parameter;
@@ -281,6 +285,36 @@ public class BundleSerialization
   { this.sampleRate = sampleRate; return this; }
 
   /**
+   * Whether to implement ONE_TO_MANY relationships between aligned parents and their aligned,
+   * saturated children. Setting this to false makes the UI appear more like Praat, where both
+   * word and phone are visible on the canvas, but allows users to misalign word and phone
+   * boundaries. 
+   * @see #getOneToManyRelationships()
+   * @see #setOneToManyRelationships(Boolean)
+   */
+  @ParameterField("Use ONE_TO_MANY relationships where possible (hides word labels when phones are visible)")
+  protected Boolean oneToManyRelationships = Boolean.TRUE;
+  /**
+   * Getter for {@link #oneToManyRelationships}.
+   * @return Whether to implement ONE_TO_MANY relationships between aligned parents and their
+   * aligned, saturated children. Setting this to false makes the UI appear more like Praat,
+   * where both word and phone are visible on the canvas, but allows users to misalign word and
+   * phone boundaries. 
+   */
+  public Boolean getOneToManyRelationships()
+  {
+    return Optional.of(oneToManyRelationships).orElse(Boolean.TRUE);
+  }
+  /**
+   * Setter for {@link #oneToManyRelationships}.
+   * @param oneToManyRelationships Whether to implement ONE_TO_MANY relationships between aligned
+   * parents and their aligned, saturated children. Setting this to false makes the UI appear
+   * more like Praat, where both word and phone are visible on the canvas, but allows users to
+   * misalign word and phone boundaries. 
+   * @return <var>this</var>.
+   */
+  public BundleSerialization setOneToManyRelationships(Boolean oneToManyRelationships) { this.oneToManyRelationships = oneToManyRelationships; return this; }
+  /**
    * The last schema passed in.
    * @see #getSchema()
    * @see #setSchema(Schema)
@@ -375,7 +409,7 @@ public class BundleSerialization
   {
     HashMap<String,JSONObject> levelsToAdd = new HashMap<String,JSONObject>();
     HashMap<String,JSONArray> attributeDefinitions = new HashMap<String,JSONArray>();
-    TreeSet<Layer> layerOrder = new TreeSet<Layer>(new Comparator<Layer>() {
+    Comparator<Layer> shallowToDeep = new Comparator<Layer>() {
         // comparator orders layers by 'depth', shallowest first
         // e.g. utterance at the top, then transcript, then segment
         public int compare(Layer l1, Layer l2)
@@ -396,19 +430,39 @@ public class BundleSerialization
           // same depth in both directions, so order by ID
           return l1.getId().compareTo(l2.getId());
         }
-      });
-    
-    TreeSet<String> layersToExport = new TreeSet<String>();
-    layersToExport.addAll(layerIds);
+      };
+    TreeSet<Layer> layersShallowToDeep = new TreeSet<Layer>(shallowToDeep);
     // include utterance layer, whether its mentioned or not
-    layersToExport.add(schema.getUtteranceLayerId());
-    for (String l : layersToExport)
+    layersShallowToDeep.add(schema.getUtteranceLayer());
+    // and also process selected layers, shallowest first
+    for (String l : layerIds)
     {
       Layer layer = schema.getLayer(l);
+      if (layer != null)
+      {
+        layersShallowToDeep.add(layer);
+        if (layer.getAlignment() == Constants.ALIGNMENT_NONE)
+        { // ensure first aligned ancestor is included too
+          for (Layer ancestor : layer.getAncestors())
+          {
+            if (ancestor.getAlignment() != Constants.ALIGNMENT_NONE)
+            {
+              layersShallowToDeep.add(ancestor);
+              break;
+            }
+          } // next ancestor
+        } // not aligned
+      } // layer ID is valid
+    } // next selected layer
+    
+    TreeSet<Layer> canvasOrder = new TreeSet<Layer>(shallowToDeep);
+    JSONArray linkDefinitions = new JSONArray();
+    for (Layer layer : layersShallowToDeep)
+    {
       Layer alignedLayer = null; // corresponds to a SEGMENT layer
       Layer tagLayer = null; // corresponds to an attribute of a SEGMENT layer
       if (layer.getAlignment() != Constants.ALIGNMENT_NONE)
-      { // this is a SEGMENT level, there's no extra attribute definition
+      { // this is a level, there's no extra attribute definition
         alignedLayer = layer;
       }
       else
@@ -427,21 +481,45 @@ public class BundleSerialization
       }
       if (!levelsToAdd.containsKey(alignedLayer.getId()))
       { // define segment level
+        // TODO include 'legalLabels' if any - array of strings
         attributeDefinitions.put(alignedLayer.getId(), new JSONArray()
                                  .put(new JSONObject()
                                       .put("name", alignedLayer.getId())
-                                      .put("type", "STRING"))); // TODO other types
+                                      // as at 2019-06-10, the only supported type:
+                                      .put("type", "STRING")));
         levelsToAdd.put(alignedLayer.getId(), new JSONObject()
                         .put("name", alignedLayer.getId())
                         .put("type", "SEGMENT"));
-        layerOrder.add(alignedLayer);
+        canvasOrder.add(alignedLayer);
+
+        if (getOneToManyRelationships())
+        {
+          // if we're also exporting the parent
+          if (levelsToAdd.containsKey(alignedLayer.getParentId())
+              // and the parent is also aligned
+              && alignedLayer.getParent().getAlignment() != Constants.ALIGNMENT_NONE
+              // and the relationship is saturated
+              && alignedLayer.getSaturated()
+            )
+          { // the parent is actually an "ITEM" layer, not a "SEGMENT" layer
+            levelsToAdd.get(alignedLayer.getParentId()).put("type", "ITEM");
+            canvasOrder.remove(alignedLayer.getParent());
+            // and we add a link between them
+            linkDefinitions.put(new JSONObject()
+                                .put("type", "ONE_TO_MANY")
+                                .put("superlevelName", alignedLayer.getParentId())
+                                .put("sublevelName", alignedLayer.getId()));
+          }
+        } // oneToManyRelationships
       } // define segment level
       if (tagLayer != null)
       { // need to define an attribute
+        // TODO inlcude 'legal labels' if any
         attributeDefinitions.get(alignedLayer.getId())
           .put(new JSONObject()
                .put("name", tagLayer.getId())
-               .put("type", "STRING")); // TODO other types
+               // as at 2019-06-10, the only supported type:
+               .put("type", "STRING"));
       }
     } // next layer
 
@@ -454,9 +532,9 @@ public class BundleSerialization
       levelDefinitions.put(level);
     } // next level to add
 
-    // now we've got all the SEGMENT levels, order them shallowest to deepest
+    // now we've got all the levels, order them shallowest to deepest
     JSONArray levelCanvasesOrder = new JSONArray();
-    for (Layer layer : layerOrder)
+    for (Layer layer : canvasOrder)
     {
       levelCanvasesOrder.put(layer.getId());
     }
@@ -471,7 +549,7 @@ public class BundleSerialization
                 .put("columnName", "fm")
                 .put("fileExtension", "fms"))) 
       .put("levelDefinitions", levelDefinitions)
-      .put("linkDefinitions", new JSONArray())
+      .put("linkDefinitions", linkDefinitions)
       .put("EMUwebAppConfig", new JSONObject()
            .put("perspectives", new JSONArray()
                 .put(new JSONObject()
@@ -519,8 +597,25 @@ public class BundleSerialization
     // offset times by how far through the graph is
     final double graphOffset = graph.getStart().getOffset();
     final TreeSet<String> tagLayersWithMultipleValues = new TreeSet<String>();
+    final JSONArray links = new JSONArray();
 
     final Schema schema = graph.getSchema();
+
+    if (getOneToManyRelationships())
+    {
+      // first detect ONE_TO_MANY relationhips - i.e. aligned saturated child layer is included
+      for (Layer layer : graph.getLayersTopDown())
+      {
+        // only things below turn
+        if (layer.isAncestor(schema.getTurnLayerId())
+            // if aligned and saturated
+            && layer.getAlignment() != Constants.ALIGNMENT_NONE && layer.getSaturated())
+        {
+          layer.getParent().put("@hasItems", Boolean.TRUE);
+        }
+      } // next layer
+    }
+    
     // traverse the graph depth first
     LayerTraversal<HashMap<String,JSONObject>> traversal
       = new LayerTraversal<HashMap<String,JSONObject>>(new HashMap<String,JSONObject>(), graph) {
@@ -536,12 +631,14 @@ public class BundleSerialization
                 case Constants.ALIGNMENT_INTERVAL:
                 case Constants.ALIGNMENT_INSTANT: // TODO
                 { // aligned layers are SEGMENT levels
+                  boolean isItem = layer.containsKey("@hasItems");
                   // is the level already defined?
                   if (!result.containsKey(layer.getId()))
                   { // define the level
                     result.put(layer.getId(), new JSONObject()
                                .put("name", layer.getId())
-                               .put("type", "SEGMENT")
+                               // TODO if ONE_TO_MANY, then the parent will be type:ITEM
+                               .put("type", isItem?"ITEM":"SEGMENT")
                                .put("items", new JSONArray()));
                   }
                   JSONArray items = result.get(layer.getId()).getJSONArray("items");
@@ -549,52 +646,67 @@ public class BundleSerialization
                     .put(new JSONObject()
                          .put("name", layer.getId())
                          .put("value", annotation.getLabel()));
-                  assert annotation.getStart() != null
-                    : "annotation.getStart() != null - " + annotation.getId();
-                  assert annotation.getStart().getOffset() != null
-                    : "annotation.getStart().getOffset() != null - " + annotation.getId();
-                  assert annotation.getEnd() != null
-                    : "annotation.getEnd() != null - " + annotation.getId();
-                  assert annotation.getEnd().getOffset() != null
-                    : "annotation.getEnd().getOffset() != null - " + annotation.getId();
-                  assert annotation.getDuration() != null
-                    : "annotation.getDuration() != null - " + annotation.getId();
-                  assert sampleRate != null : "sampleRate != null";
-
-                  // SEGMENT levels cannot have pauses between intervals,
-                  // so insert blank labels before pauses
-                  double startOffset = annotation.getStart().getOffset() - graphOffset;
-                  long startOffsetSamples = Math.round(startOffset * sampleRate);
-                  if (items.length() > 0)
-                  {
-                    // get last item
-                    JSONObject previous = (JSONObject)items.get(items.length()-1);
-                    // and get the end time in samples
-                    long endSamples = previous.getLong("sampleStart")
-                      + previous.getLong("sampleDur");
-                    if (startOffsetSamples > endSamples)
-                    { // there is a gap
-                      // insert a blank item
-                      JSONObject item = new JSONObject()
-                        .put("id", itemId++)
-                        .put("sampleStart", endSamples)
-                        .put("sampleDur", startOffsetSamples - endSamples)
-                        // no labels in pauses
-                        .put("labels", new JSONArray());
-                      items.put(item);
-                    } // there is a gap
-                  } // there is a previous annotation
-
-                  double endOffset = annotation.getEnd().getOffset() - graphOffset;
-                  long endOffsetSamples = Math.round(endOffset * sampleRate);
-
                   JSONObject item = new JSONObject()
                     .put("id", itemId++)
-                    .put("sampleStart", startOffsetSamples)
-                    .put("sampleDur", endOffsetSamples - startOffsetSamples)
                     .put("labels", labels);
-                  // make sure child tags can find the labels, as they'll need to add some
+                  if (!isItem)
+                  { // SEGMENT
+                    assert annotation.getStart() != null
+                      : "annotation.getStart() != null - " + annotation.getId();
+                    assert annotation.getStart().getOffset() != null
+                      : "annotation.getStart().getOffset() != null - " + annotation.getId();
+                    assert annotation.getEnd() != null
+                      : "annotation.getEnd() != null - " + annotation.getId();
+                    assert annotation.getEnd().getOffset() != null
+                      : "annotation.getEnd().getOffset() != null - " + annotation.getId();
+                    assert annotation.getDuration() != null
+                      : "annotation.getDuration() != null - " + annotation.getId();
+                    assert sampleRate != null : "sampleRate != null";
+                    
+                    // SEGMENT levels cannot have pauses between intervals,
+                    // so insert blank labels before pauses
+                    double startOffset = annotation.getStart().getOffset() - graphOffset;
+                    long startOffsetSamples = Math.round(startOffset * sampleRate);
+                    if (items.length() > 0)
+                    {
+                      // get last item
+                      JSONObject previous = (JSONObject)items.get(items.length()-1);
+                      // and get the end time in samples
+                      long endSamples = previous.getLong("sampleStart")
+                        + previous.getLong("sampleDur");
+                      if (startOffsetSamples > endSamples)
+                      { // there is a gap
+                        // insert a blank item
+                        JSONObject pauseItem = new JSONObject()
+                          .put("id", itemId++)
+                          .put("sampleStart", endSamples)
+                          .put("sampleDur", startOffsetSamples - endSamples)
+                          // no labels in pauses
+                          .put("labels", new JSONArray());
+                        items.put(pauseItem);
+                      } // there is a gap
+                    } // there is a previous annotation
+                    
+                    double endOffset = annotation.getEnd().getOffset() - graphOffset;
+                    long endOffsetSamples = Math.round(endOffset * sampleRate);
+                    item
+                      .put("sampleStart", startOffsetSamples)
+                      .put("sampleDur", endOffsetSamples - startOffsetSamples);
+
+                    // if parent is ITEM
+                    if (layer.getParent().containsKey("@hasItems")
+                        && annotation.getParent().containsKey("@item"))
+                    { // add link to parent
+                      JSONObject parentItem = (JSONObject)annotation.getParent().get("@item");
+                      links.put(new JSONObject()
+                                .put("fromID", parentItem.getInt("id"))
+                                .put("toID", item.getInt("id")));
+                    }
+                  } // SEGMENT
+                  // make sure child tags can find the labels and item
                   annotation.put("@labels", labels);
+                  annotation.put("@item", item);
+                  // add the item to the serialization
                   items.put(item);
                   break;
                 } // aligned
@@ -628,6 +740,7 @@ public class BundleSerialization
           {
             // tidy up item links
             annotation.remove("@labels");
+            annotation.remove("@item");
           } // end of post()
         };
 
@@ -648,7 +761,9 @@ public class BundleSerialization
            .put("annotates", graph.getLabel())
            .put("sampleRate", getSampleRate())
            .put("levels", levels)
-           .put("links", new JSONArray()))
+           // TODO links define parent ITEM / child SEGMENT relationships
+           // [{"fromID": 2, "toID": 102}, from is parent, to is child
+           .put("links", links))
       .put("ssffFiles", new JSONArray());
     
     if (graph.getMediaProvider() != null)
@@ -913,7 +1028,8 @@ public class BundleSerialization
       for (int l = 0; l < levels.length(); l++)
       {
         JSONObject level = levels.getJSONObject(l);
-        if (!level.getString("type").equals("SEGMENT"))
+        if (!level.getString("type").equals("SEGMENT")
+            && !level.getString("type").equals("ITEM"))
         {
           throw new SerializationException(
             SerializationException.ErrorType.InvalidDocument,
@@ -1129,10 +1245,13 @@ public class BundleSerialization
       
       JSONArray levels = top.getJSONArray("levels");
 
+      HashMap<Integer,Annotation> idToAnnotation = new HashMap<Integer,Annotation>();
+      
       for (int l = 0; l < levels.length(); l++)
       {
         JSONObject level = levels.getJSONObject(l);
-        if (!level.getString("type").equals("SEGMENT"))
+        if (!level.getString("type").equals("SEGMENT")
+            && !level.getString("type").equals("ITEM"))
         {
           throw new SerializationException(
             SerializationException.ErrorType.InvalidDocument,
@@ -1146,16 +1265,28 @@ public class BundleSerialization
         for (int i = 0; i < items.length(); i++)
         {
           JSONObject item = items.getJSONObject(i);
-          Anchor start = graph.getOrCreateAnchorAt(
-            item.getDouble("sampleStart")/sampleRate, Constants.CONFIDENCE_MANUAL);
-          Anchor end = graph.getOrCreateAnchorAt(
-            // to avoid rounding errors, get end time in samples, then divide by sampleRate:
-            (item.getDouble("sampleStart") + item.getDouble("sampleDur"))/sampleRate,
-            Constants.CONFIDENCE_MANUAL);
-          Annotation levelAnnotation = new Annotation(
-            null, // let the graph assign the ID
-            "", // we'll fill in the label when we get to it
-            levelLayer.getId(), start.getId(), end.getId());
+          String startId = null;
+          String endId = null;
+          if (level.getString("type").equals("SEGMENT"))
+          {
+            // get anchors
+            Anchor start = graph.getOrCreateAnchorAt(
+              item.getDouble("sampleStart")/sampleRate, Constants.CONFIDENCE_MANUAL);
+            startId = start.getId();
+            
+            Anchor end = graph.getOrCreateAnchorAt(
+              // to avoid rounding errors, get end time in samples, then divide by sampleRate:
+              (item.getDouble("sampleStart") + item.getDouble("sampleDur"))/sampleRate,
+              Constants.CONFIDENCE_MANUAL);
+            endId = end.getId();
+          }
+          Annotation levelAnnotation = new Annotation().setLayerId(levelLayer.getId());
+          idToAnnotation.put(item.getInt("id"), levelAnnotation);
+          if (startId != null)
+          {
+            levelAnnotation.setStartId(startId);
+            levelAnnotation.setEndId(endId);
+          }
           // read all labels
           JSONArray labels = item.getJSONArray("labels");
           for (int lb = 0; lb < labels.length(); lb++)
@@ -1186,6 +1317,50 @@ public class BundleSerialization
 
       } // next level
 
+      // now link parents to children
+      JSONArray links = top.getJSONArray("links");
+      for (int l = 0; l < links.length(); l++)
+      {
+        JSONObject link = links.getJSONObject(l);
+        Annotation parent = idToAnnotation.get(link.getInt("fromID"));
+        if (parent == null)
+        {
+          throw new SerializationException(
+            SerializationException.ErrorType.InvalidDocument,
+            "Link: fromID " + link.getInt("fromID") + " not found");
+        }
+        Annotation child = idToAnnotation.get(link.getInt("toID"));
+        if (child == null)
+        {
+          throw new SerializationException(
+            SerializationException.ErrorType.InvalidDocument,
+            "Link: toID " + link.getInt("toID") + " not found");
+        }
+        if (!child.getLayer().getParentId().equals(parent.getLayerId()))
+        {
+          throw new SerializationException(
+            SerializationException.ErrorType.InvalidDocument,
+            "Linking child "+child.getLayer()+" " + link.getInt("toID") + " \""+child+"\""
+            + " to parent "+parent.getLayer()+" " + link.getInt("toID") + " \""+parent+"\""
+            + " but parent layer should be " + child.getLayer().getParentId());
+        }
+        parent.addAnnotation(child);
+        
+        // check/set parent anchors
+        System.out.println("Before: Child " + child.getStart() + "-" + child.getEnd() + " parent " + parent.getStart() + "-" + parent.getEnd());
+        parent.setStart(Stream.of(parent.getStart(), child.getStart())
+                        .filter(Objects::nonNull)
+                        .filter(anchor -> Objects.nonNull(anchor.getOffset()))
+                        .sorted()
+                        .findFirst().orElseThrow(SerializationException::new));
+        parent.setEnd(Stream.of(parent.getEnd(), child.getEnd())
+                      .filter(anchor -> Objects.nonNull(anchor))
+                      .filter(anchor -> Objects.nonNull(anchor.getOffset()))
+                      .sorted(Comparator.reverseOrder())
+                      .findFirst().orElseThrow(SerializationException::new));
+        System.out.println("After: Child " + child.getStart() + "-" + child.getEnd() + " parent " + parent.getStart() + "-" + parent.getEnd());
+      } // next link
+
       // now we've got all the annotations, ensure they all have parents
       // traverse bottom-up in the hierarchy, to ensure that parents have been created before
       // we get to their layer, and also becayse overlappingAnnotations() uses list(), which
@@ -1204,6 +1379,8 @@ public class BundleSerialization
       {
         for (Annotation annotation : graph.list(layer.getId()))
         {
+          if (!annotation.getAnchored()) continue;
+              
           Layer parentLayer = annotation.getLayer().getParent();
           if (annotation.getParent() == null)
           {
