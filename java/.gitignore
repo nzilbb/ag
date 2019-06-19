@@ -1,3 +1,6 @@
 *.class
 
 *~
+
+# JUnit files
+junit*.properties
