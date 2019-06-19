@@ -752,28 +752,16 @@ public class TestBundleSerialization
     for (int i = 0; i < wordLabels.length; i++)
     {
       assertEquals("word label " + i, wordLabels[i], words[i].getLabel());
-      if (i < 3)
-      { // all words up to "and" are anchored and have parents
-        assertEquals("word start " + i + " " + wordStarts[i] + " vs " + words[i].getStart().getOffset(),
-                     0, g.compareOffsets(wordStarts[i], words[i].getStart().getOffset()));
-        assertEquals("word end " + i + " " +  wordEnds[i] + " vs " + words[i].getEnd().getOffset(),
-                     0, g.compareOffsets(wordEnds[i], words[i].getEnd().getOffset()));
-        assertNotNull("word parent is set " + i,
-                      words[i].getParent());
-        assertNull("word parent is unanchored (start) " + i,
-                   words[i].getParent().getStart());
-        assertNull("word parent is unanchored (end) " + i,
-                   words[i].getParent().getEnd());
-      }
-      else
-      { // all words after "and" are unanchored and have no parents
-        assertNull("no word start " + i,
-                   words[i].getStart().getOffset());
-        assertNull("no word end " + i,
-                     words[i].getEnd().getOffset());
-        assertNull("word parent is not set " + i,
-                      words[i].getParent());
-      } // all words after "and" are unanchored and have no parents
+      assertEquals("word start " + i + " " + wordStarts[i] + " vs " + words[i].getStart().getOffset(),
+                   0, g.compareOffsets(wordStarts[i], words[i].getStart().getOffset()));
+      assertEquals("word end " + i + " " +  wordEnds[i] + " vs " + words[i].getEnd().getOffset(),
+                   0, g.compareOffsets(wordEnds[i], words[i].getEnd().getOffset()));
+      assertNotNull("word parent is set " + i,
+                    words[i].getParent());
+      assertNull("word parent is unanchored (start) " + i,
+                 words[i].getParent().getStart());
+      assertNull("word parent is unanchored (end) " + i,
+                 words[i].getParent().getEnd());
     } // next annotation
 
     // tags
@@ -785,10 +773,14 @@ public class TestBundleSerialization
 
     // phones
     annotations = g.list("phone");
-    assertEquals("phone count", 5, annotations.length);
-    String[] phoneLabels = { "$", "s", "V", "m", "n" };
-    String[] parentLabels = { "or", "some", "some", "some", "and" };
-    int[] phoneOrdinals = { 1, 1, 2, 3, 1 };
+    assertEquals("phone count", 11, annotations.length);
+    String[] phoneLabels = { "$", "s", "V", "m", "n",
+                             // and the dummy ones
+                             "?", "?", "?", "?", "?", "?" };
+    String[] parentLabels = { "or", "some", "some", "some", "and",
+                              "there's", "nothing", "much", "on", "it", "or"};
+    int[] phoneOrdinals = { 1, 1, 2, 3, 1,
+                            1, 1, 1, 1, 1, 1 };
     assertEquals("phone count", phoneLabels.length, annotations.length);
     for (int i = 0; i < phoneLabels.length; i++)
     {
@@ -796,6 +788,14 @@ public class TestBundleSerialization
       assertEquals("phone parent " + i, parentLabels[i], annotations[i].getParent().getLabel());
     } // next annotation
 
+    // anchors
+    for (Anchor a : g.getAnchors().values())
+    {
+      assertNotNull("no null offsets " + a.getId() + ":" + a.getOffset(),
+                    a.getOffset());
+      assertEquals("anchor set to manual confidence " + a.getId() + ":" + a.getOffset(),
+                   Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+    }
   }
 
   /**

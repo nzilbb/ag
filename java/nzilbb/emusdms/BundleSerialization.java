@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Vector;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -611,7 +612,20 @@ public class BundleSerialization
             // if aligned and saturated
             && layer.getAlignment() != Constants.ALIGNMENT_NONE && layer.getSaturated())
         {
+          // mark the parent layer as being an ITEM level
           layer.getParent().put("@hasItems", Boolean.TRUE);
+
+          // for each parent layer annotation
+          for (Annotation parent : graph.list(layer.getParentId()))
+          {
+            // if it has no childrent
+            if (parent.getAnnotations(layer.getId()).size() == 0)
+            {
+              // create a dummy child so that there are no aligned items
+              graph.addTag(parent, layer.getId(), "?")
+                .setConfidence(Constants.CONFIDENCE_NONE);
+            }
+          } // next parent annotation
         }
       } // next layer
     }
@@ -1347,7 +1361,6 @@ public class BundleSerialization
         parent.addAnnotation(child);
         
         // check/set parent anchors
-        System.out.println("Before: Child " + child.getStart() + "-" + child.getEnd() + " parent " + parent.getStart() + "-" + parent.getEnd());
         parent.setStart(Stream.of(parent.getStart(), child.getStart())
                         .filter(Objects::nonNull)
                         .filter(anchor -> Objects.nonNull(anchor.getOffset()))
@@ -1358,7 +1371,6 @@ public class BundleSerialization
                       .filter(anchor -> Objects.nonNull(anchor.getOffset()))
                       .sorted(Comparator.reverseOrder())
                       .findFirst().orElseThrow(SerializationException::new));
-        System.out.println("After: Child " + child.getStart() + "-" + child.getEnd() + " parent " + parent.getStart() + "-" + parent.getEnd());
       } // next link
 
       // now we've got all the annotations, ensure they all have parents
@@ -1428,8 +1440,11 @@ public class BundleSerialization
       } // next layer
 
       // now de-anchor dummy annotations
+      HashSet<Anchor> referencedAnchors = new HashSet<Anchor>();
       for (Annotation annotation : graph.getAnnotationsById().values())
       {
+        referencedAnchors.add(annotation.getStart());
+        referencedAnchors.add(annotation.getEnd());
         if (annotation.get("@dummy") != null)
         {
           annotation.remove("@dummy");
@@ -1437,6 +1452,9 @@ public class BundleSerialization
           annotation.setEndId("dummy-end");
         } // dummy annotation
       } // next annotation
+
+      // and remove any un-referenced anchors
+      graph.getAnchors().values().retainAll(referencedAnchors);
 
       graph.commit();
       
