@@ -1285,10 +1285,11 @@ public class Graph
    * Setter for <i>id</i>: The annotation's identifier.
    * @param id The annotation's identifier.
    */
-  public void setId(String id) 
+  public Graph setId(String id) 
   {
     // we don't want the graph or child re-hooking...
     this.id = id;
+    return this;
   }
 
   /**

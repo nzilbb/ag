@@ -92,7 +92,7 @@ public class TrackedMap
    * Setter for <i>id</i>: The object's identifier.
    * @param id The object's identifier.
    */
-  public void setId(String id) { this.id = id; }
+  public TrackedMap setId(String id) { this.id = id; return this; }
    
   /**
    * Confidence rating.

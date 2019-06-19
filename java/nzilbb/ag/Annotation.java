@@ -114,7 +114,7 @@ public class Annotation
    * Setter for <i>layerId</i>: The identifier of the annotation's layer.
    * @param layerId The identifier of the annotation's layer.
    */
-  public void setLayerId(String layerId) { this.layerId = layerId; }
+  public Annotation setLayerId(String layerId) { this.layerId = layerId; return this; }
 
   /**
    * ID of the annotation's start anchor.
@@ -429,7 +429,7 @@ public class Annotation
    * Setter for {@link #graph}: The annotation's annotation graph.
    * @param newGraph The annotation's annotation graph.
    */
-  public void setGraph(Graph newGraph) 
+  public Annotation setGraph(Graph newGraph) 
   { 
     graph = newGraph; 
     if (graph != null)
@@ -451,6 +451,7 @@ public class Annotation
       // reset index for layer
       graph.indicesByLayer.remove(getLayerId());
     }
+    return this;
   }
    
   /**
@@ -649,12 +650,13 @@ public class Annotation
    * Setter for <i>layer</i>: The annotation's layer definition.
    * @param layer The annotation's layer definition.
    */
-  public void setLayer(Layer layer) 
+  public Annotation setLayer(Layer layer) 
   { 
     if (layer != null)
     {
       setLayerId(layer.getId());
     }
+    return this;
   }
    
   // Methods:
@@ -781,7 +783,7 @@ public class Annotation
    * Setter for <i>id</i>: The annotation's identifier.
    * @param id The annotation's identifier.
    */
-  public void setId(String id) 
+  public Annotation setId(String id) 
   {
     // remove the old id from the graph index
     String oldId = getId();
@@ -802,6 +804,7 @@ public class Annotation
         }
       } // next child
     } // next child layer
+    return this;
   }
    
   /**

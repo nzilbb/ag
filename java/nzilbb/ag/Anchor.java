@@ -247,7 +247,7 @@ public class Anchor
    * Setter for <i>id</i>: The anchor's identifier.
    * @param id The anchor's identifier.
    */
-  public void setId(String id) 
+  public Anchor setId(String id) 
   {
     LinkedHashSet<Annotation> starting = getStartingAnnotations();
     LinkedHashSet<Annotation> ending = getEndingAnnotations();
@@ -276,6 +276,7 @@ public class Anchor
         endsHere.setEndId(id);
       }
     } // next annotation
+    return this;
   }
    
 
