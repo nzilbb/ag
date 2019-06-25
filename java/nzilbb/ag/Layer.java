@@ -36,11 +36,25 @@ import nzilbb.ag.util.AnnotationComparatorByOrdinal;
  * <p>The primary defining characteristics of a layer are:
  * <ul>
  *  <li>{@link #getParentId() parentId} - what layer parent annotations are on</li>
- *  <li>{@link #getAlignment() alignment} - whether this annotation is {@link Constants#ALIGNMENT_NONE not aligned} (i.e. simply tags the parent annotation), or defines a {@link Constants#ALIGNMENT_INSTANT instant}, or an {@link Constants#ALIGNMENT_INTERVAL interval}.</li>
- *  <li>{@link #getPeers() peers} - whether there is one child annotation per parent (e.g. orthography tags on word tokens), or children can have peers (e.g. word tokens in a turn, or different POS tags on a word token)</li>
- *  <li>{@link #getPeersOverlap peersOverlap} - if there are peers, whether they can overlap (e.g. topic tags within a graph, syntactic parse annotations within a turn) or not (e.g. word tokens within a turn, utterance partitions within a turn, turn annotations for a participant)</li>
- *  <li>{@link #getParentIncludes() parentIncludes} - whether the child annotation's anchors must have offsets between the parent's offsets (e.g. word tokens within a turn, tag annotations, syntactic parse annotations within a turn) or not (e.g. syntactic dependency annotations linking one word to another)</li>
- *  <li>{@link #getSaturated() saturated} - whether the child annotations fully cover the duration of the parent (e.g. utterance partitions within a turn, tag annotations) or not (e.g. word tokens within a turn, which may have leading, intervening, or trailing pauses)</li>
+ *  <li>{@link #getAlignment() alignment} - whether this annotation is 
+ *      {@link Constants#ALIGNMENT_NONE not aligned} (i.e. simply tags the parent annotation), or
+ *      defines a  {@link Constants#ALIGNMENT_INSTANT instant}, or an 
+ *      {@link Constants#ALIGNMENT_INTERVAL interval}.</li> 
+ *  <li>{@link #getPeers() peers} - whether there is one child annotation per parent
+ *      (e.g. orthography tags on word tokens), or children can have peers (e.g. word tokens in a
+ *      turn, or different POS tags on a word token)</li> 
+ *  <li>{@link #getPeersOverlap peersOverlap} - if there are peers, whether they can overlap
+ *      (e.g. topic tags within a graph, syntactic parse annotations within a turn) or not
+ *      (e.g. word tokens within a turn, utterance partitions within a turn, turn annotations for
+ *      a participant)</li> 
+ *  <li>{@link #getParentIncludes() parentIncludes} - whether the child annotation's anchors must
+ *      have offsets between the parent's offsets (e.g. word tokens within a turn, tag
+ *      annotations, syntactic parse annotations within a turn) or not (e.g. syntactic dependency
+ *      annotations linking one word to another)</li> 
+ *  <li>{@link #getSaturated() saturated} - whether the child annotations fully cover the
+ *      duration of the parent (e.g. utterance partitions within a turn, tag annotations) or not
+ *      (e.g. word tokens within a turn, which may have leading, intervening, or trailing
+ *      pauses)</li> 
  * </ul>
  * @author Robert Fromont robert@fromont.net.nz
  */
@@ -57,7 +71,8 @@ public class Layer
   protected static final Set<String> clonedAttributes = new LinkedHashSet<String>(java.util.Arrays.asList(aClonedAttributes));
 
   /**
-   * Keys for attributes that are cloned - i.e. when an object is cloned, only these attributes are copied into the clone.
+   * Keys for attributes that are cloned - i.e. when an object is cloned, only these attributes
+   * are copied into the clone. 
    * @return "id", "parentId", "description", "alignment", "peers", "peersOverlap", "parentIncludes", "saturated", "type"
    */
   public Set<String> getClonedAttributes()
@@ -108,7 +123,8 @@ public class Layer
    */
   protected int alignment;
   /**
-   * Getter for <i>alignment</i>: The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
+   * Getter for <i>alignment</i>: The layer's alignment - 0 for none, 1 for point alignment, 2
+   * for interval alignment. 
    * @return The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
    * @see Constants#ALIGNMENT_NONE
    * @see Constants#ALIGNMENT_INSTANT
@@ -116,8 +132,10 @@ public class Layer
    */
   public int getAlignment() { return alignment; }
   /**
-   * Setter for <i>alignment</i>: The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
-   * @param alignment The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
+   * Setter for <i>alignment</i>: The layer's alignment - 0 for none, 1 for point alignment, 2
+   * for interval alignment. 
+   * @param alignment The layer's alignment - 0 for none, 1 for point alignment, 2 for interval
+   * alignment. 
    * @see Constants#ALIGNMENT_NONE
    * @see Constants#ALIGNMENT_INSTANT
    * @see Constants#ALIGNMENT_INTERVAL
@@ -170,16 +188,20 @@ public class Layer
   public Layer setParentIncludes(boolean parentIncludes) { this.parentIncludes = parentIncludes; return this; }
 
   /**
-   * Whether children must temporally fill the entire parent duration (true) or not (false). . Defaults to <code>true</code>
+   * Whether children must temporally fill the entire parent duration (true) or not
+   * (false). Defaults to <code>true</code> 
    */
   protected boolean saturated = true;
   /**
-   * Getter for <i>saturated</i>: Whether children must temporally fill the entire parent duration (true) or not (false).
-   * @return Whether children must temporally fill the entire parent duration (true) or not (false).
+   * Getter for <i>saturated</i>: Whether children must temporally fill the entire parent
+   * duration (true) or not (false). 
+   * @return Whether children must temporally fill the entire parent duration (true) or not
+   * (false). 
    */
   public boolean getSaturated() { return saturated; }
   /**
-   * Setter for <i>saturated</i>: Whether children must temporally fill the entire parent duration (true) or not (false).
+   * Setter for <i>saturated</i>: Whether children must temporally fill the entire parent
+   * duration (true) or not (false). 
    * @param saturated Whether children must temporally fill the entire parent duration (true) or not (false).
    */
   public Layer setSaturated(boolean saturated) { this.saturated = saturated; return this; }
@@ -265,13 +287,17 @@ public class Layer
    
   /**
    * List of valid label values for this layer, or null if the layer values are not restricted.
-   * <p>The 'key' is the possible label value, and each key is associated with a description of the value (e.g. for displaying to users).
+   * <p>The 'key' is the possible label value, and each key is associated with a description of
+   * the value (e.g. for displaying to users). 
    */
   protected LinkedHashMap<String,String> validLabels;
   /**
-   * Getter for <tt>validLabels</tt>: List of valid label values for this layer, or null if the layer values are not restricted.
-   * <p>The 'key' is the possible label value, and each key is associated with a description of the value (e.g. for displaying to users).
-   * @return List of valid label values for this layer, or null if the layer values are not restricted.
+   * Getter for <tt>validLabels</tt>: List of valid label values for this layer, or null if the
+   * layer values are not restricted. 
+   * <p>The 'key' is the possible label value, and each key is associated with a description of
+   * the value (e.g. for displaying to users). 
+   * @return List of valid label values for this layer, or null if the layer values are not
+   * restricted. 
    */
   public LinkedHashMap<String,String> getValidLabels()
   {
@@ -279,14 +305,19 @@ public class Layer
     return validLabels;
   }
   /**
-   * Setter for <tt>validLabels</tt>: List of valid label values for this layer, or null if the layer values are not restricted.
-   * <p>The 'key' is the possible label value, and each key is associated with a description of the value (e.g. for displaying to users).
-   * @param newValidLabels List of valid label values for this layer, or null if the layer values are not restricted.
+   * Setter for <tt>validLabels</tt>: List of valid label values for this layer, or null if the
+   * layer values are not restricted. 
+   * <p>The 'key' is the possible label value, and each key is associated with a description of
+   * the value (e.g. for displaying to users). 
+   * @param newValidLabels List of valid label values for this layer, or null if the layer values
+   * are not restricted. 
    */
   public Layer setValidLabels(LinkedHashMap<String,String> newValidLabels) { this.validLabels = newValidLabels; return this; }
   /**
-   * Getter for <tt>validLabels</tt>: List of valid label values for this layer, or null if the layer values are not restricted.
-   * @return List of valid label values for this layer, or null if the layer values are not restricted.
+   * Getter for <tt>validLabels</tt>: List of valid label values for this layer, or null if the
+   * layer values are not restricted. 
+   * @return List of valid label values for this layer, or null if the layer values are not
+   * restricted. 
    */
   public String[] getValidLabelsArray() 
   { 
@@ -326,11 +357,13 @@ public class Layer
    * @param id The layer's identifier.
    * @param description The description of the layer.
    * @param parentId The layer's parent layer id
-   * @param alignment The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
+   * @param alignment The layer's alignment - 0 for none, 1 for point alignment, 2 for interval
+   * alignment. 
    * @param peers Whether children have peers or not.
    * @param peersOverlap Whether child peers can overlap or not.
    * @param parentIncludes Whether the parent t-includes the child.
-   * @param saturated Whether children must temporally fill the entire parent duration (true) or not (false).
+   * @param saturated Whether children must temporally fill the entire parent duration (true) or
+   * not (false). 
    */
   public Layer(String id, String description, int alignment, boolean peers, boolean peersOverlap, boolean saturated, String parentId, boolean parentIncludes)
   {
@@ -348,7 +381,8 @@ public class Layer
    * Top-level layer constructor.  The <var>parentId</var> is taken to be "graph".
    * @param id The layer's identifier.
    * @param description The description of the layer.
-   * @param alignment The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment.
+   * @param alignment The layer's alignment - 0 for none, 1 for point alignment, 2 for interval
+   * alignment. 
    * @param peers Whether children have peers or not.
    * @param peersOverlap Whether child peers can overlap or not.
    * @param saturated Whether children must temporally fill the entire parent duration (true) or not (false).
@@ -367,7 +401,8 @@ public class Layer
 
   /**
    * Returns a list of ancestor layers (parent, grandparent, etc.).
-   * @return A set of ancestor layers, ordered by distance from this annotation (i.e. parent first, then grandparent, etc.).
+   * @return A set of ancestor layers, ordered by distance from this annotation (i.e. parent
+   * first, then grandparent, etc.). 
    */
   public LinkedHashSet<Layer> getAncestors()
   {
@@ -491,7 +526,9 @@ public class Layer
 
   /**
    * Computes a hashCode for the object. 
-   * <p>Map (base class) has a very mutable hashCode, but we don't want Anchor hashcodes changing whenever arbitrary elements change (otherwise they get lost in hash-based collections, etc.).  So this implementation returns the hashcode of the anchor's id.
+   * <p>Map (base class) has a very mutable hashCode, but we don't want Anchor hashcodes changing
+   * whenever arbitrary elements change (otherwise they get lost in hash-based collections,
+   * etc.).  So this implementation returns the hashcode of the anchor's id. 
    * @return Object's hashCode.
    */
   public int hashCode()
