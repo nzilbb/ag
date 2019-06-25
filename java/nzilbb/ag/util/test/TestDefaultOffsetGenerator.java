@@ -942,6 +942,7 @@ public class TestDefaultOffsetGenerator
 
     Vector<String> fragmentLayers = new Vector<String>();
     fragmentLayers.add("word");
+    fragmentLayers.add("utterance");
     Graph f = g.getFragment(g.getAnnotation("utterance1"), fragmentLayers.toArray(new String[0]));
 
     DefaultOffsetGenerator generator = new DefaultOffsetGenerator();

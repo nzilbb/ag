@@ -2705,10 +2705,7 @@ public class SqlGraphStore
       fragment.setGraph(graph);
       fragment.setMediaProvider(new StoreGraphMediaProvider(fragment, this));
       fragment.put("@ag_id", graph.get("@ag_id")); 
-      fragment.getSchema().setParticipantLayerId(schema.getParticipantLayerId());
-      fragment.getSchema().setTurnLayerId(schema.getTurnLayerId());
-      fragment.getSchema().setUtteranceLayerId(schema.getUtteranceLayerId());
-      fragment.getSchema().setWordLayerId(schema.getWordLayerId());
+      fragment.getSchema().copyLayerIdsFrom(schema);
 
       // decompose the annotation ID
       String scope = null;

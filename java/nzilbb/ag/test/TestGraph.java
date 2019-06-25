@@ -1526,6 +1526,7 @@ public class TestGraph
       // create fragment
       Vector<String> layers = new Vector<String>();
       layers.add("turn"); // include ancestor layer - annotations should have no anchors
+      layers.add("utterance");
       layers.add("word");
       layers.add("phone");
       layers.add("pos");

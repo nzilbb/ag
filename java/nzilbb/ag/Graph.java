@@ -345,12 +345,7 @@ public class Graph
       fragment.setMediaProvider(mediaProvider.providerForGraph(fragment));
     }
     fragment.graph = this;
-    fragment.getSchema().setParticipantLayerId(graph.getSchema().getParticipantLayerId());
-    fragment.getSchema().setTurnLayerId(graph.getSchema().getTurnLayerId());
-    fragment.getSchema().setUtteranceLayerId(graph.getSchema().getUtteranceLayerId());
-    fragment.getSchema().setWordLayerId(graph.getSchema().getWordLayerId());
-    fragment.getSchema().setEpisodeLayerId(graph.getSchema().getEpisodeLayerId());
-    fragment.getSchema().setCorpusLayerId(graph.getSchema().getCorpusLayerId());
+    fragment.getSchema().copyLayerIdsFrom(graph.getSchema());
     if (getId() != null)
     {
       fragment.setId(FragmentId(this, startOffset, endOffset));
@@ -391,45 +386,47 @@ public class Graph
   } // end of getFragment()
 
   /**
-   * Creates a fragment of this graph, copying into it the given annotation and its descendants, on the given layers. 
-   * Ancestors which do not fall into the interval are also added to the fragment, so that turns/speakers/etc. are accessible, but their anchors are not added to the fragment.
+   * Creates a fragment of this graph, copying into it the given annotation and its descendants,
+   * on the given layers. Ancestors which do not fall into the interval are also added to the
+   * fragment, so that turns/speakers/etc. are accessible, but their anchors are not added to the
+   * fragment. If the defining annotation's layer is not included in <var>layerIds</var>, the
+   * annotation is not included in the resulting fragment.
    * <p>The ID of the new fragment is <var>graphId</var>__<var>fragment.start.offset</var>-<var>fragment.end.offset</var>
    * @param definingAnnotation The annotation that defines fragment membership.
    * @param layerIds A list of IDs of layers to include in the fragment.
-   * @return A graph fragment containing the annotations that fall within the given bounds, on the given layers.
+   * @return A graph fragment containing the annotations that fall within the given bounds, on
+   * the given layers. 
    */
   public Graph getFragment(Annotation definingAnnotation, String[] layerIds)
   {
+    final LinkedHashSet<String> layerIdSet = new LinkedHashSet<String>();
+    for (String id : layerIds) layerIdSet.add(id);
     Graph fragment = new Graph();
     if (mediaProvider != null)
     {
       fragment.setMediaProvider(mediaProvider.providerForGraph(fragment));
     }
     fragment.graph = this;
-    fragment.getSchema().setParticipantLayerId(graph.getSchema().getParticipantLayerId());
-    fragment.getSchema().setTurnLayerId(graph.getSchema().getTurnLayerId());
-    fragment.getSchema().setUtteranceLayerId(graph.getSchema().getUtteranceLayerId());
-    fragment.getSchema().setWordLayerId(graph.getSchema().getWordLayerId());
-    fragment.getSchema().setEpisodeLayerId(graph.getSchema().getEpisodeLayerId());
-    fragment.getSchema().setCorpusLayerId(graph.getSchema().getCorpusLayerId());
+    fragment.getSchema().copyLayerIdsFrom(graph.getSchema());
     Layer layer = getLayer(definingAnnotation.getLayerId());
     if (layer != null)
     {
-      // add the layer
-      fragment.addLayer((Layer)layer.clone());
       fragment.addAnchor((Anchor)definingAnnotation.getStart().clone());
       fragment.addAnchor((Anchor)definingAnnotation.getEnd().clone());
 	 
       ensureAllAncestorsPresentInFragment(definingAnnotation, fragment);
-      // add the annotation
-      fragment.addAnnotation((Annotation)definingAnnotation.clone());
+      if (layerIdSet.contains(definingAnnotation.getLayerId()))
+      {
+        // add the layer
+        fragment.addLayer((Layer)layer.clone());
+        // and the annotation
+        fragment.addAnnotation((Annotation)definingAnnotation.clone());
+      }
     }
     Anchor firstAnchor = definingAnnotation.getStart();
     Anchor lastAnchor = definingAnnotation.getEnd();
     
     // add other layers, top-down
-    final LinkedHashSet<String> layerIdSet = new LinkedHashSet<String>();
-    for (String id : layerIds) layerIdSet.add(id);
     LayerHierarchyTraversal<Vector<String>> topDownLayers
       = new LayerHierarchyTraversal<Vector<String>>(new Vector<String>(), getSchema()) {
           protected void pre(Layer layer)
