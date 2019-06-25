@@ -109,7 +109,7 @@ public class BundleSerialization
    * @see #setShowPerspectivesSidebar(Boolean)
    */
   @ParameterField("Whether to show perspectives sidebar")
-  protected Boolean showPerspectivesSidebar = Boolean.TRUE;
+  protected Boolean showPerspectivesSidebar = Boolean.FALSE;
   /**
    * Getter for {@link #showPerspectivesSidebar}.
    * @return Whether to show perspectives sidebar.
@@ -434,7 +434,7 @@ public class BundleSerialization
       };
     TreeSet<Layer> layersShallowToDeep = new TreeSet<Layer>(shallowToDeep);
     // include utterance layer, whether its mentioned or not
-    layersShallowToDeep.add(schema.getUtteranceLayer());
+    //layersShallowToDeep.add(schema.getUtteranceLayer());
     // and also process selected layers, shallowest first
     for (String l : layerIds)
     {

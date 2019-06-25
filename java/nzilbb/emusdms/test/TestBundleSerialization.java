@@ -99,7 +99,7 @@ public class TestBundleSerialization
     assertEquals("corpusName", "corpus", 
                  (String)configuration.get("corpusName").getValue());
     assertNotNull("uuid", configuration.get("uuid").getValue());
-    assertEquals("showPerspectivesSidebar", Boolean.TRUE, 
+    assertEquals("showPerspectivesSidebar", Boolean.FALSE, 
                  (Boolean)configuration.get("showPerspectivesSidebar").getValue());
     assertEquals("playback", Boolean.TRUE, 
                  (Boolean)configuration.get("playback").getValue());
@@ -209,7 +209,7 @@ public class TestBundleSerialization
     assertEquals("corpusName", "corpus", 
                  (String)configuration.get("corpusName").getValue());
     assertNotNull("uuid", configuration.get("uuid").getValue());
-    assertEquals("showPerspectivesSidebar", Boolean.TRUE, 
+    assertEquals("showPerspectivesSidebar", Boolean.FALSE, 
                  (Boolean)configuration.get("showPerspectivesSidebar").getValue());
     assertEquals("playback", Boolean.TRUE, 
                  (Boolean)configuration.get("playback").getValue());
@@ -242,7 +242,7 @@ public class TestBundleSerialization
     layers.add("phone");
     // including a word tag layer forced the serializer to include the word layer
     layers.add("pronounce");
-    // ...and the utterance layer is included anyway
+    layers.add("utterance");
 
     // serialize
     NamedStream[] streams = serializer.serializeSchema(schema, layers);
@@ -291,7 +291,7 @@ public class TestBundleSerialization
     Graph[] graphs = json.deserialize();
 
     // extract fragment
-    String [] layerIds = { "utterance", "word", "phone", "tag" };
+    String [] layerIds = { "word", "phone", "tag" };
     Graph fragment = graphs[0].getFragment(graphs[0].getAnnotation("57"), layerIds);
     fragment.shiftAnchors(-214.822);
     assertEquals("serialize_utterance_word__214.822-218.290", fragment.getId());
@@ -328,7 +328,7 @@ public class TestBundleSerialization
     assertEquals("corpusName", "corpus", 
                  (String)configuration.get("corpusName").getValue());
     assertNotNull("uuid", configuration.get("uuid").getValue());
-    assertEquals("showPerspectivesSidebar", Boolean.TRUE, 
+    assertEquals("showPerspectivesSidebar", Boolean.FALSE, 
                  (Boolean)configuration.get("showPerspectivesSidebar").getValue());
     assertEquals("playback", Boolean.TRUE, 
                  (Boolean)configuration.get("playback").getValue());
@@ -440,7 +440,7 @@ public class TestBundleSerialization
     assertEquals("corpusName", "corpus", 
                  (String)configuration.get("corpusName").getValue());
     assertNotNull("uuid", configuration.get("uuid").getValue());
-    assertEquals("showPerspectivesSidebar", Boolean.TRUE, 
+    assertEquals("showPerspectivesSidebar", Boolean.FALSE, 
                  (Boolean)configuration.get("showPerspectivesSidebar").getValue());
     assertEquals("playback", Boolean.TRUE, 
                  (Boolean)configuration.get("playback").getValue());
@@ -512,7 +512,7 @@ public class TestBundleSerialization
     assertEquals("corpusName", "corpus", 
                  (String)configuration.get("corpusName").getValue());
     assertNotNull("uuid", configuration.get("uuid").getValue());
-    assertEquals("showPerspectivesSidebar", Boolean.TRUE, 
+    assertEquals("showPerspectivesSidebar", Boolean.FALSE, 
                  (Boolean)configuration.get("showPerspectivesSidebar").getValue());
     assertEquals("playback", Boolean.TRUE, 
                  (Boolean)configuration.get("playback").getValue());
@@ -542,15 +542,15 @@ public class TestBundleSerialization
 
     ParameterSet parameters = deserializer.load(jsonBundles, schema);
     // for (Parameter p : parameters.values()) System.out.println("param " + p);
-    assertEquals(4, parameters.size());
+    assertEquals(3, parameters.size());
     assertEquals("level_phone", schema.getLayer("phone"), 
                  parameters.get("level_phone").getValue());
     assertEquals("level_word", schema.getLayer("word"), 
                  parameters.get("level_word").getValue());
     assertEquals("label_tag", schema.getLayer("tag"), 
                  parameters.get("label_tag").getValue());
-    assertEquals("level_utterance", schema.getLayer("utterance"), 
-                 parameters.get("level_utterance").getValue());
+    assertNull("level_utterance not included",
+               parameters.get("level_utterance"));
 
     deserializer.setParameters(parameters);
     
@@ -566,7 +566,7 @@ public class TestBundleSerialization
     assertEquals("granularity", Double.valueOf(1.0/16000.0), g.getOffsetGranularity());
 
     // ensure schema structure is correct
-    assertEquals("schema: utterance parent ", "turn", g.getLayer("utterance").getParentId());
+    assertNull("schema: utterance not included ", g.getLayer("utterance"));
     assertEquals("schema: word parent ", "turn", g.getLayer("word").getParentId());
     assertEquals("schema: phone parent ", "word", g.getLayer("phone").getParentId());
     assertEquals("schema: tag parent ", "word", g.getLayer("tag").getParentId());
@@ -578,16 +578,7 @@ public class TestBundleSerialization
 
     // utterances
     Annotation[] annotations = g.list("utterance");
-    assertEquals("utterance count", 1, annotations.length);
-    assertEquals("utterance label", "participant", annotations[0].getLabel());
-    assertNotNull("utterance parent is set",
-               annotations[0].getParent());
-    assertNull("utterance parent is unanchored (start)",
-               annotations[0].getParent().getStart());
-    assertNull("utterance parent is unanchored (end)",
-               annotations[0].getParent().getEnd());
-    assertEquals("utterance parent label",
-                annotations[0].getLabel(), annotations[0].getParent().getLabel());
+    assertEquals("utterance count", 0, annotations.length);
 
     // words
     Annotation[] words = g.list("word");
@@ -668,7 +659,7 @@ public class TestBundleSerialization
     assertEquals("corpusName", "corpus", 
                  (String)configuration.get("corpusName").getValue());
     assertNotNull("uuid", configuration.get("uuid").getValue());
-    assertEquals("showPerspectivesSidebar", Boolean.TRUE, 
+    assertEquals("showPerspectivesSidebar", Boolean.FALSE, 
                  (Boolean)configuration.get("showPerspectivesSidebar").getValue());
     assertEquals("playback", Boolean.TRUE, 
                  (Boolean)configuration.get("playback").getValue());

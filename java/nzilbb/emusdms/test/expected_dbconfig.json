@@ -29,14 +29,6 @@
           "type": "STRING"
         }
       ]
-    },
-    {
-      "name": "utterance",
-      "type": "SEGMENT",
-      "attributeDefinitions": [{
-        "name": "utterance",
-        "type": "STRING"
-      }]
     }
   ],
   "linkDefinitions": [],
@@ -59,7 +51,6 @@
         }]
       },
       "levelCanvases": {"order": [
-        "utterance",
         "word",
         "phone"
       ]},
