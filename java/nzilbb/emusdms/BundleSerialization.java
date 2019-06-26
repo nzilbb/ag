@@ -32,6 +32,7 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Comparator;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -433,9 +434,7 @@ public class BundleSerialization
         }
       };
     TreeSet<Layer> layersShallowToDeep = new TreeSet<Layer>(shallowToDeep);
-    // include utterance layer, whether its mentioned or not
-    //layersShallowToDeep.add(schema.getUtteranceLayer());
-    // and also process selected layers, shallowest first
+    // process selected layers, shallowest first
     for (String l : layerIds)
     {
       Layer layer = schema.getLayer(l);
@@ -495,8 +494,27 @@ public class BundleSerialization
 
         if (getOneToManyRelationships())
         {
+          // Is there already an aligned peer layer?
+          final Layer l = alignedLayer;
+          Optional<Layer> alignedPeer = alignedLayer.getParent().getChildren().values().stream()
+            .filter(peer -> peer != l)
+            .filter(peer -> peer.getAlignment() == Constants.ALIGNMENT_INTERVAL)
+            .filter(peer -> levelsToAdd.containsKey(peer.getId()))
+            .findFirst();
+          if (alignedPeer.isPresent())
+          { // there's an aligned peer layer
+            
+            // make the peer an item - e.g. utterance is ITEM of word
+            levelsToAdd.get(alignedPeer.get().getId()).put("type", "ITEM");
+            canvasOrder.remove(alignedPeer.get());
+            // and we add a link between them
+            linkDefinitions.put(new JSONObject()
+                                .put("type", "ONE_TO_MANY")
+                                .put("superlevelName", alignedPeer.get().getId())
+                                .put("sublevelName", alignedLayer.getId()));
+          }
           // if we're also exporting the parent
-          if (levelsToAdd.containsKey(alignedLayer.getParentId())
+          else if (levelsToAdd.containsKey(alignedLayer.getParentId())
               // and the parent is also aligned
               && alignedLayer.getParent().getAlignment() != Constants.ALIGNMENT_NONE
               // and the relationship is saturated
@@ -515,7 +533,7 @@ public class BundleSerialization
       } // define segment level
       if (tagLayer != null)
       { // need to define an attribute
-        // TODO inlcude 'legal labels' if any
+        // TODO include 'legal labels' if any
         attributeDefinitions.get(alignedLayer.getId())
           .put(new JSONObject()
                .put("name", tagLayer.getId())
@@ -605,28 +623,63 @@ public class BundleSerialization
     if (getOneToManyRelationships())
     {
       // first detect ONE_TO_MANY relationhips - i.e. aligned saturated child layer is included
-      for (Layer layer : graph.getLayersTopDown())
+      for (final Layer layer : graph.getLayersTopDown())
       {
         // only things below turn
         if (layer.isAncestor(schema.getTurnLayerId())
-            // if aligned and saturated
-            && layer.getAlignment() != Constants.ALIGNMENT_NONE && layer.getSaturated())
+            && layer.getAlignment() != Constants.ALIGNMENT_NONE)
         {
-          // mark the parent layer as being an ITEM level
-          layer.getParent().put("@hasItems", Boolean.TRUE);
-
-          // for each parent layer annotation
-          for (Annotation parent : graph.list(layer.getParentId()))
-          {
-            // if it has no childrent
-            if (parent.getAnnotations(layer.getId()).size() == 0)
+          Optional<Layer> alignedPeer = layer.getParent().getChildren().values().stream()
+            .filter(peer -> peer != layer)
+            .filter(peer -> peer.getAlignment() == Constants.ALIGNMENT_INTERVAL)
+            .filter(peer -> peer.get("@hasItems") == null)
+            .findFirst();
+          if (alignedPeer.isPresent())
+          { // there's an aligned peer layer
+            // mark this layer as being an ITEM level
+            layer.put("@hasItems", Boolean.TRUE);
+            
+            // for each parent layer annotation
+            for (Annotation parent : graph.list(layer.getId()))
             {
-              // create a dummy child so that there are no aligned items
-              graph.addTag(parent, layer.getId(), "?")
-                .setConfidence(Constants.CONFIDENCE_NONE);
-            }
-          } // next parent annotation
-        }
+              // if it has no children
+              if (parent.list(alignedPeer.get().getId()).length == 0)
+              {
+                // create a dummy child so that there are no aligned items
+                graph.addTag(parent, layer.getId(), "?")
+                  .setConfidence(Constants.CONFIDENCE_NONE);
+              }
+              // create links
+              for (Annotation child : parent.list(alignedPeer.get().getId()))
+              {
+                child.put("@link", parent);
+              }
+            } // next parent annotation
+          }
+          // if saturated
+          else if (layer.getSaturated() && !layer.getParent().containsKey("@hasItems"))
+          {
+            // mark the parent layer as being an ITEM level
+            layer.getParent().put("@hasItems", Boolean.TRUE);
+            
+            // for each parent layer annotation
+            for (Annotation parent : graph.list(layer.getParentId()))
+            {
+              // if it has no childrent
+              if (parent.getAnnotations(layer.getId()).size() == 0)
+              {
+                // create a dummy child so that there are no aligned items
+                graph.addTag(parent, layer.getId(), "?")
+                  .setConfidence(Constants.CONFIDENCE_NONE);
+              }
+              // create links
+              for (Annotation child : parent.getAnnotations(layer.getId()))
+              {
+                child.put("@link", parent);
+              }
+            } // next parent annotation
+          }
+        } // // aligned and sub-turn
       } // next layer
     }
     
@@ -707,16 +760,19 @@ public class BundleSerialization
                       .put("sampleStart", startOffsetSamples)
                       .put("sampleDur", endOffsetSamples - startOffsetSamples);
 
-                    // if parent is ITEM
-                    if (layer.getParent().containsKey("@hasItems")
-                        && annotation.getParent().containsKey("@item"))
-                    { // add link to parent
-                      JSONObject parentItem = (JSONObject)annotation.getParent().get("@item");
+                  } // SEGMENT
+                  // if the annotation has a link to another...
+                  if (annotation.containsKey("@link"))
+                  { // add link to parent
+                    Annotation linkedAnnotation = (Annotation)annotation.get("@link");
+                    JSONObject parentItem = (JSONObject)linkedAnnotation.get("@item");
+                    if (parentItem != null)
+                    {
                       links.put(new JSONObject()
                                 .put("fromID", parentItem.getInt("id"))
                                 .put("toID", item.getInt("id")));
                     }
-                  } // SEGMENT
+                  }
                   // make sure child tags can find the labels and item
                   annotation.put("@labels", labels);
                   annotation.put("@item", item);
@@ -750,12 +806,6 @@ public class BundleSerialization
               } // switch (layer.getAlignment())
             } // a layer below turn
           } // end of pre()
-          protected void post(Annotation annotation)
-          {
-            // tidy up item links
-            annotation.remove("@labels");
-            annotation.remove("@item");
-          } // end of post()
         };
 
     if (tagLayersWithMultipleValues.size() > 0)
@@ -772,7 +822,8 @@ public class BundleSerialization
     JSONObject data = new JSONObject()
       .put("annotation", new JSONObject()
            .put("name", graph.getId())
-           .put("annotates", graph.getLabel())
+           .put("annotates", graph.sourceGraph().getLabel()
+                .replaceAll("\\.[^.]+$","")+".wav?t="+graphOffset)
            .put("sampleRate", getSampleRate())
            .put("levels", levels)
            // TODO links define parent ITEM / child SEGMENT relationships
@@ -1333,45 +1384,79 @@ public class BundleSerialization
 
       // now link parents to children
       JSONArray links = top.getJSONArray("links");
-      for (int l = 0; l < links.length(); l++)
+      TreeSet<Integer> unalignedItems = new TreeSet<Integer>();
+      unalignedItems.add(-1);
+      int loopCount = 0;
+      do
       {
-        JSONObject link = links.getJSONObject(l);
-        Annotation parent = idToAnnotation.get(link.getInt("fromID"));
-        if (parent == null)
+        unalignedItems = new TreeSet<Integer>();
+        for (int l = 0; l < links.length(); l++)
         {
-          throw new SerializationException(
-            SerializationException.ErrorType.InvalidDocument,
-            "Link: fromID " + link.getInt("fromID") + " not found");
-        }
-        Annotation child = idToAnnotation.get(link.getInt("toID"));
-        if (child == null)
-        {
-          throw new SerializationException(
-            SerializationException.ErrorType.InvalidDocument,
-            "Link: toID " + link.getInt("toID") + " not found");
-        }
-        if (!child.getLayer().getParentId().equals(parent.getLayerId()))
-        {
-          throw new SerializationException(
-            SerializationException.ErrorType.InvalidDocument,
-            "Linking child "+child.getLayer()+" " + link.getInt("toID") + " \""+child+"\""
-            + " to parent "+parent.getLayer()+" " + link.getInt("toID") + " \""+parent+"\""
-            + " but parent layer should be " + child.getLayer().getParentId());
-        }
-        parent.addAnnotation(child);
-        
-        // check/set parent anchors
-        parent.setStart(Stream.of(parent.getStart(), child.getStart())
-                        .filter(Objects::nonNull)
-                        .filter(anchor -> Objects.nonNull(anchor.getOffset()))
-                        .sorted()
-                        .findFirst().orElseThrow(SerializationException::new));
-        parent.setEnd(Stream.of(parent.getEnd(), child.getEnd())
-                      .filter(anchor -> Objects.nonNull(anchor))
-                      .filter(anchor -> Objects.nonNull(anchor.getOffset()))
-                      .sorted(Comparator.reverseOrder())
-                      .findFirst().orElseThrow(SerializationException::new));
-      } // next link
+          JSONObject link = links.getJSONObject(l);
+          Annotation parent = idToAnnotation.get(link.getInt("fromID"));
+          if (parent == null)
+          {
+            throw new SerializationException(
+              SerializationException.ErrorType.InvalidDocument,
+              "Link: fromID " + link.getInt("fromID") + " not found");
+          }
+          Annotation child = idToAnnotation.get(link.getInt("toID"));
+          if (child == null)
+          {
+            throw new SerializationException(
+              SerializationException.ErrorType.InvalidDocument,
+              "Link: toID " + link.getInt("toID") + " not found");
+          }
+          if (child.getLayer().getParentId().equals(parent.getLayerId())
+              && child.getParent() == null)
+          {
+            parent.addAnnotation(child);
+          }
+          
+          // check/set parent anchors
+          Anchor parentStart = parent.getStart();
+          Anchor childStart = child.getStart();
+          if (childStart != null)
+          {
+            if (parentStart == null || parentStart.getOffset() == null)
+            {
+              parentStart = childStart;
+            }
+            if (childStart.getOffset() != null
+                && childStart.getOffset() < parentStart.getOffset())
+            {
+              parentStart = childStart;
+            }
+          }
+          parent.setStart(parentStart);
+          Anchor parentEnd = parent.getEnd();
+          Anchor childEnd = child.getEnd();
+          if (childEnd != null)
+          {
+            if (parentEnd == null || parentEnd.getOffset() == null)
+            {
+              parentEnd = childEnd;
+            }
+            if (childEnd.getOffset() != null
+                && childEnd.getOffset() > parentEnd.getOffset())
+            {
+              parentEnd = childEnd;
+            }
+          }
+          parent.setEnd(parentEnd);
+          if (!parent.getAnchored()) unalignedItems.add(link.getInt("fromID"));
+        } // next link
+
+        // this while loop is potentially infinite
+      } // next pass to align everything
+      while (unalignedItems.size() > 0 && loopCount < 100);
+      
+      if (unalignedItems.size() > 0)
+      {
+        throw new SerializationException(
+          SerializationException.ErrorType.InvalidDocument,
+          "Link: could not anchor items: " + unalignedItems);
+      }
 
       // now we've got all the annotations, ensure they all have parents
       // traverse bottom-up in the hierarchy, to ensure that parents have been created before
@@ -1423,7 +1508,7 @@ public class BundleSerialization
               annotation.setParent(dummy);
             } // parent not found
           } // annotation needs parent
-          
+
           // check turns take label of utterance, and participant, from turn
           if (annotation.getParent().getLabel().length() == 0
               && ( // utterance -> turn
