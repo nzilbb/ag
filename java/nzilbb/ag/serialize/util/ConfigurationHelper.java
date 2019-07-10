@@ -39,86 +39,86 @@ import nzilbb.ag.serialize.*;
  */
 public class ConfigurationHelper
 {
-   // Methods:
+  // Methods:
    
-   /**
-    * Ensures the icon file for the given descriptor has been extracted to the given directory.
-    * @param descriptor Descriptor of serialization.
-    * @param directory Directory to unpack the icon into if it's not already there.
-    * @return The icon file.
-    * @throws IOException On file IO error.
-    */
-   public static File SaveConfiguration(SerializationDescriptor descriptor, ParameterSet configuration, File directory)
-      throws IOException
-   {
-      File xmlFile = new File(directory, ConfigurationFilename(descriptor));
+  /**
+   * Ensures the icon file for the given descriptor has been extracted to the given directory.
+   * @param descriptor Descriptor of serialization.
+   * @param directory Directory to unpack the icon into if it's not already there.
+   * @return The icon file.
+   * @throws IOException On file IO error.
+   */
+  public static File SaveConfiguration(SerializationDescriptor descriptor, ParameterSet configuration, File directory)
+    throws IOException
+  {
+    File xmlFile = new File(directory, ConfigurationFilename(descriptor));
+    Properties properties = new Properties();
+    for (Parameter parameter : configuration.values())
+    {
+      if (parameter.getValue() != null)
+      {
+        properties.setProperty(parameter.getName(), parameter.getValue().toString());
+      }
+    }
+    properties.storeToXML(new FileOutputStream(xmlFile), descriptor.getName());
+    return xmlFile;
+  } // end of EnsureIconFileExists()
+
+  /**
+   * Ensures the icon file for the given descriptor has been extracted to the given directory.
+   * @param descriptor Descriptor of serialization.
+   * @param directory Directory to unpack the icon into if it's not already there.
+   * @return The icon file.
+   * @throws IOException On file IO error.
+   */
+  public static File LoadConfiguration(SerializationDescriptor descriptor, ParameterSet configuration, File directory, Schema schema)
+    throws IOException
+  {
+    File xmlFile = new File(directory, ConfigurationFilename(descriptor));
+    if (xmlFile.exists())
+    {
       Properties properties = new Properties();
+      properties.loadFromXML(new FileInputStream(xmlFile));
       for (Parameter parameter : configuration.values())
       {
-	 if (parameter.getValue() != null)
-	 {
-	    properties.setProperty(parameter.getName(), parameter.getValue().toString());
-	 }
-      }
-      properties.storeToXML(new FileOutputStream(xmlFile), descriptor.getName());
-      return xmlFile;
-   } // end of EnsureIconFileExists()
+        if (properties.containsKey(parameter.getName()))
+        {
+          String value = properties.getProperty(parameter.getName());
+          if (parameter.getType().equals(Layer.class))
+          {
+            parameter.setValue(schema.getLayer(value));
+          }
+          else if (parameter.getType().equals(Integer.class))
+          {
+            parameter.setValue(Integer.valueOf(value));
+          }
+          else if (parameter.getType().equals(Double.class))
+          {
+            parameter.setValue(Double.valueOf(value));
+          }
+          else if (parameter.getType().equals(Boolean.class))
+          {
+            parameter.setValue(Boolean.valueOf(value));
+          }
+          else
+          { // everything else given a string
+            parameter.setValue(value);
+          }
+        }
+      } // next parameter
+    }
+    return xmlFile;
+  } // end of EnsureIconFileExists()
 
-   /**
-    * Ensures the icon file for the given descriptor has been extracted to the given directory.
-    * @param descriptor Descriptor of serialization.
-    * @param directory Directory to unpack the icon into if it's not already there.
-    * @return The icon file.
-    * @throws IOException On file IO error.
-    */
-   public static File LoadConfiguration(SerializationDescriptor descriptor, ParameterSet configuration, File directory, Schema schema)
-      throws IOException
-   {
-      File xmlFile = new File(directory, ConfigurationFilename(descriptor));
-      if (xmlFile.exists())
-      {
-	 Properties properties = new Properties();
-	 properties.loadFromXML(new FileInputStream(xmlFile));
-	 for (Parameter parameter : configuration.values())
-	 {
-	    if (properties.containsKey(parameter.getName()))
-	    {
-	       String value = properties.getProperty(parameter.getName());
-	       if (parameter.getType().equals(Layer.class))
-	       {
-		  parameter.setValue(schema.getLayer(value));
-	       }
-	       else if (parameter.getType().equals(Integer.class))
-	       {
-		  parameter.setValue(Integer.valueOf(value));
-	       }
-	       else if (parameter.getType().equals(Double.class))
-	       {
-		  parameter.setValue(Double.valueOf(value));
-	       }
-	       else if (parameter.getType().equals(Boolean.class))
-	       {
-		  parameter.setValue(Boolean.valueOf(value));
-	       }
-	       else
-	       { // everything else given a string
-		  parameter.setValue(value);
-	       }
-	    }
-	 } // next parameter
-      }
-      return xmlFile;
-   } // end of EnsureIconFileExists()
-
-   /**
-    * Transforms the given descriptor's MIME type name into something that is safe to use as a file name.
-    * @param descriptor Descriptor of serialization.
-    * @return The descriptor's MIME type name transformed into something that is safe to use as a file name.
-    */
-   public static String ConfigurationFilename(SerializationDescriptor descriptor)
-   {
-      String mimeType = descriptor.getMimeType();
-      return (mimeType + ".config.xml").replaceAll("[^A-Za-z0-9.]+", "-");
-   } // end of ConfigurationFilename()
+  /**
+   * Transforms the given descriptor's MIME type name into something that is safe to use as a file name.
+   * @param descriptor Descriptor of serialization.
+   * @return The descriptor's MIME type name transformed into something that is safe to use as a file name.
+   */
+  public static String ConfigurationFilename(SerializationDescriptor descriptor)
+  {
+    String mimeType = descriptor.getMimeType();
+    return (mimeType + ".config.xml").replaceAll("[^A-Za-z0-9.]+", "-");
+  } // end of ConfigurationFilename()
    
 } // end of class IconHelper
