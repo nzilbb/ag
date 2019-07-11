@@ -2116,7 +2116,7 @@ public class SqlGraphStore
           try
           {
             if (!rsLayer.next()) throw new StoreException("Invalid layer_id for " + operands[1] + ": " + layer_id);
-            layer = getLayer(rsLayer.getString("short_description"));
+            layer = getSchema().getLayer(rsLayer.getString("short_description"));
           }
           finally
           {
@@ -2137,7 +2137,7 @@ public class SqlGraphStore
         if (operands[1].endsWith("'")) operands[1] = operands[1].substring(0,operands[1].length() - 1);
         // unescape any remaining quotes
         operands[1] = operands[1].replaceAll("\\\\'","'");
-        layer = getLayer(operands[1]);
+        layer = getSchema().getLayer(operands[1]);
         break;
       }
     } // next subexpression
@@ -2195,7 +2195,7 @@ public class SqlGraphStore
         }
         else if (operand.equals("parent.id") || operand.equals("parentId"))
         {
-          Layer parentLayer = getLayer(layer.getParentId());
+          Layer parentLayer = getSchema().getLayer(layer.getParentId());
           String parentScope = ((String)parentLayer.get("@scope")).toLowerCase();
           if (parentScope.equals("f")) parentScope = "";
           sqlOperand = "CONCAT('e"+parentScope+"_"+parentLayer.get("@layer_id")+"_', annotation.parent_id)";
@@ -2276,7 +2276,7 @@ public class SqlGraphStore
         else if (operand.startsWith("my('") && (operand.endsWith("').label") || operand.endsWith("').id")))
         { // my
           String layerId = operand.replaceFirst("my\\('","").replaceFirst("'\\)\\.(label|id)$","");
-          Layer operandLayer = getLayer(layerId);
+          Layer operandLayer = getSchema().getLayer(layerId);
           if (operandLayer == null) throw new StoreException("Invalid layer: " + layerId);
           // join by the finest-grain compatible with both layers
           String scope = (String)layer.get("@scope");
@@ -2329,7 +2329,7 @@ public class SqlGraphStore
         else if (operand.startsWith("list('") && operand.endsWith("')"))
         { // list()
           String layerId = operand.replaceFirst("list\\('","").replaceFirst("'\\)$","");
-          Layer operandLayer = getLayer(layerId);
+          Layer operandLayer = getSchema().getLayer(layerId);
           if (operandLayer == null) throw new StoreException("Invalid layer: " + layerId);
           // join by the finest-grain compatible with both layers
           String scope = (String)layer.get("@scope");
@@ -2367,7 +2367,7 @@ public class SqlGraphStore
         else if (operand.startsWith("list('") && operand.endsWith("').length"))
         { // list().length
           String layerId = operand.replaceFirst("list\\('","").replaceFirst("'\\)\\.length$","");
-          Layer operandLayer = getLayer(layerId);
+          Layer operandLayer = getSchema().getLayer(layerId);
           if (operandLayer == null) throw new StoreException("Invalid layer: " + layerId);
           // join by the finest-grain compatible with both layers
           String scope = (String)layer.get("@scope");
@@ -2572,7 +2572,7 @@ public class SqlGraphStore
       {
         if (layer == null)
         { // they'll all be on the same layer
-          layer = getLayer(rsAnnotation.getString("layer"));
+          layer = getSchema().getLayer(rsAnnotation.getString("layer"));
         }
         if ("F".equals(layer.get("@scope")) // freeform layer
             || Integer.valueOf(11).equals(layer.get("@layer_id")) // turn layer
@@ -5480,8 +5480,8 @@ public class SqlGraphStore
 
   /**
    * Creates an annotation starting at <var>fromId</var> and ending at <var>toId</var>.
-   * @param fromId The start anchor's ID.
-   * @param toId The end anchor's ID.
+   * @param fromId The start anchor's ID, which can be null if the layer is a tag layer.
+   * @param toId The end anchor's ID, which can be null if the layer is a tag layer.
    * @param layerId The layer ID of the resulting annotation.
    * @param label The label of the resulting annotation.
    * @param confidence The confidence rating.
@@ -5491,13 +5491,13 @@ public class SqlGraphStore
   public String createAnnotation(String id, String fromId, String toId, String layerId, String label, Integer confidence, String parentId)
     throws StoreException, PermissionException, GraphNotFoundException
   {
-    Layer layer = getLayer(layerId);
+    Layer layer = getSchema().getLayer(layerId);
     if (layer.get("@scope") == null) throw new StoreException("Only temporal layers are supported: " + layerId);
     Annotation[] annotations = getMatchingAnnotations("id = '"+parentId+"'");
     if (annotations.length < 1) throw new StoreException("Invalid parent: " + parentId);
     Annotation parent = annotations[0];
     if (!layer.getParentId().equals(parent.getLayerId())) throw new StoreException("Layer "+layerId+" is not a child of " + parent.getLayerId());
-    Layer parentLayer = getLayer(parent.getLayerId());
+    Layer parentLayer = getSchema().getLayer(parent.getLayerId());
     if (layer.getAlignment() == Constants.ALIGNMENT_NONE)
     { // tag layer - ignore given anchors, and use the parent's instead
       fromId = parent.getStartId();
@@ -5532,7 +5532,9 @@ public class SqlGraphStore
            ", ordinal_in_turn, word_annotation_id":"")
         + (layer.get("@scope").equals("S")?", ordinal_in_word, segment_annotation_id":"")
         + ")"
-        + " SELECT ag_id, ?, ?, ?, ?,"
+        + " SELECT ag_id, ?, ?, "
+        // non-aligned layers use their parent anchors, regardless of startId/endId
+        +(layer.getAlignment()==Constants.ALIGNMENT_NONE?"start_anchor_id, end_anchor_id,":"?, ?,")
         + " annotation_id, 1, ?, Now()"
         + (!layer.get("@scope").equals("F")?
            ", turn_annotation_id" :"")
@@ -5541,19 +5543,23 @@ public class SqlGraphStore
         + (layer.get("@scope").equals("S")?", ordinal_in_word, segment_annotation_id":"")
         + " FROM annotation_layer_?"
         +" WHERE annotation_id = ?");
-      sqlInsertAnnotation.setInt(1, ((Integer)layer.get("@layer_id")).intValue());
-      sqlInsertAnnotation.setString(2, label);
-      sqlInsertAnnotation.setInt(3, confidence);
+      int p = 1;
+      sqlInsertAnnotation.setInt(p++, ((Integer)layer.get("@layer_id")).intValue());
+      sqlInsertAnnotation.setString(p++, label);
+      sqlInsertAnnotation.setInt(p++, confidence);
+
+      if (layer.getAlignment() != Constants.ALIGNMENT_NONE)
+      { // explicit anchors
+        Object[] anchorAttributes = fmtAnchorId.parse(from.getId());
+        sqlInsertAnnotation.setLong(p++, (Long)anchorAttributes[0]);
+        
+        anchorAttributes = fmtAnchorId.parse(to.getId());
+        sqlInsertAnnotation.setLong(p++, (Long)anchorAttributes[0]);
+      }
 	 
-      Object[] anchorAttributes = fmtAnchorId.parse(from.getId());
-      sqlInsertAnnotation.setLong(4, (Long)anchorAttributes[0]);
-	 
-      anchorAttributes = fmtAnchorId.parse(to.getId());
-      sqlInsertAnnotation.setLong(5, (Long)anchorAttributes[0]);
-	 
-      sqlInsertAnnotation.setString(6, getUser());
-      sqlInsertAnnotation.setInt(7, ((Integer)parentLayer.get("@layer_id")).intValue());
-      sqlInsertAnnotation.setLong(8, parentAnnotationId);
+      sqlInsertAnnotation.setString(p++, getUser());
+      sqlInsertAnnotation.setInt(p++, ((Integer)parentLayer.get("@layer_id")).intValue());
+      sqlInsertAnnotation.setLong(p++, parentAnnotationId);
       sqlInsertAnnotation.executeUpdate();
       sqlInsertAnnotation.close();
       sqlInsertAnnotation = getConnection().prepareStatement("SELECT LAST_INSERT_ID()");
