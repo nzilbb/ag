@@ -1,7 +1,7 @@
 {
   "annotation": {
     "name": "onetomany_serialize_utterance_word__214.822-218.290",
-    "annotates": "onetomany_serialize_utterance_word__214.822-218.290",
+    "annotates": "serialize_utterance_word.wav?t=-2.4999999993724487E-5",
     "sampleRate": 16000,
     "levels": [
       {
@@ -192,22 +192,28 @@
       },
       {
         "name": "utterance",
-        "type": "SEGMENT",
+        "type": "ITEM",
         "items": [{
           "id": 0,
           "labels": [{
             "name": "utterance",
             "value": "participant"
-          }],
-          "sampleStart": 0,
-          "sampleDur": 55488
+          }]
         }]
       }
     ],
     "links": [
       {
+        "fromID": 0,
+        "toID": 1
+      },
+      {
         "fromID": 1,
         "toID": 2
+      },
+      {
+        "fromID": 0,
+        "toID": 3
       },
       {
         "fromID": 3,
@@ -222,28 +228,56 @@
         "toID": 7
       },
       {
+        "fromID": 0,
+        "toID": 8
+      },
+      {
         "fromID": 8,
         "toID": 9
+      },
+      {
+        "fromID": 0,
+        "toID": 10
       },
       {
         "fromID": 10,
         "toID": 11
       },
       {
+        "fromID": 0,
+        "toID": 12
+      },
+      {
         "fromID": 12,
         "toID": 13
+      },
+      {
+        "fromID": 0,
+        "toID": 14
       },
       {
         "fromID": 14,
         "toID": 15
       },
       {
+        "fromID": 0,
+        "toID": 16
+      },
+      {
         "fromID": 16,
         "toID": 17
       },
       {
+        "fromID": 0,
+        "toID": 18
+      },
+      {
         "fromID": 18,
         "toID": 19
+      },
+      {
+        "fromID": 0,
+        "toID": 20
       },
       {
         "fromID": 20,

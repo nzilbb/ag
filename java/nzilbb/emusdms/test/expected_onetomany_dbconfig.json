@@ -32,18 +32,25 @@
     },
     {
       "name": "utterance",
-      "type": "SEGMENT",
+      "type": "ITEM",
       "attributeDefinitions": [{
         "name": "utterance",
         "type": "STRING"
       }]
     }
   ],
-  "linkDefinitions": [{
-    "type": "ONE_TO_MANY",
-    "superlevelName": "word",
-    "sublevelName": "phone"
-  }],
+  "linkDefinitions": [
+    {
+      "type": "ONE_TO_MANY",
+      "superlevelName": "utterance",
+      "sublevelName": "word"
+    },
+    {
+      "type": "ONE_TO_MANY",
+      "superlevelName": "word",
+      "sublevelName": "phone"
+    }
+  ],
   "EMUwebAppConfig": {
     "perspectives": [{
       "name": "default",
@@ -62,10 +69,7 @@
           "maxContourIdx": 1
         }]
       },
-      "levelCanvases": {"order": [
-        "utterance",
-        "phone"
-      ]},
+      "levelCanvases": {"order": ["phone"]},
       "twoDimCanvases": {"order": []}
     }],
     "restrictions": {
