@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.Map;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 import nzilbb.ag.Layer;
@@ -65,10 +66,12 @@ public class ConfigurationHelper
   } // end of EnsureIconFileExists()
 
   /**
-   * Ensures the icon file for the given descriptor has been extracted to the given directory.
+   * Loads configuration for a (de)serializer from an XML file, whose path is determined by the
+   * given descriptor and the given directory.
    * @param descriptor Descriptor of serialization.
    * @param directory Directory to unpack the icon into if it's not already there.
-   * @return The icon file.
+   * @param schema Layer schema for retrieval of named layers.
+   * @return The XML file.
    * @throws IOException On file IO error.
    */
   public static File LoadConfiguration(SerializationDescriptor descriptor, ParameterSet configuration, File directory, Schema schema)
@@ -108,7 +111,64 @@ public class ConfigurationHelper
       } // next parameter
     }
     return xmlFile;
-  } // end of EnsureIconFileExists()
+  } // end of LoadConfiguration()
+
+  /**
+   * Loads a (de)serialization configuratation from the given parameter map (most likely from a
+   * servlet request) the icon file for the given descriptor has been extracted to the given directory.
+   * @param map A parameter map specifying the parameter names and values (the value is an array
+   * of String, consistent with <code>javax.serlvet.ServletRequest.getParameterMap()</code>, but
+   * the value is expected to be in the first string of the array.
+   * @param keyPrefix An optional prefix for each parameter key.
+   * @param parameters A set of parameters to use for looking for map keys and for receiving the
+   * values. 
+   * @param schema Layer schema for retrieval of named layers.
+   * @return The given ParameterSet, with the values specified by the map loaded.
+   * @throws IOException On file IO error.
+   */
+  public static ParameterSet LoadParameters(Map<String,String[]> map, String keyPrefix, ParameterSet parameters, Schema schema)
+    throws IOException
+  {
+    if (keyPrefix == null) keyPrefix = "";
+    
+    for (Parameter parameter : parameters.values())
+    {
+      String[] values = map.get(keyPrefix + parameter.getName());
+      String value = (values == null || values.length == 0)?null:values[0];
+      if (value == null || value.length() == 0)
+      {
+        if (parameter.getType().equals(Boolean.class))
+        { // null boolean means "false"
+          parameter.setValue(Boolean.FALSE);
+        }
+        else
+        {
+          parameter.setValue(null);
+        }
+      }
+      else if (parameter.getType().equals(Layer.class))
+      {
+        parameter.setValue(schema.getLayer(value));
+      }
+      else if (parameter.getType().equals(Integer.class))
+      {
+        parameter.setValue(new Integer(value));
+      }
+      else if (parameter.getType().equals(Double.class))
+      {
+        parameter.setValue(new Double(value));
+      }
+      else if (parameter.getType().equals(Boolean.class))
+      { // if the parameter is set, it's ticked, so TRUE
+        parameter.setValue(Boolean.TRUE);
+      }
+      else
+      { // everything else given a string
+        parameter.setValue(value);
+      }
+    } // next parameter
+    return parameters;
+  } // end of LoadParameters()
 
   /**
    * Transforms the given descriptor's MIME type name into something that is safe to use as a file name.
