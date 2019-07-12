@@ -152,11 +152,11 @@ public class ConfigurationHelper
       }
       else if (parameter.getType().equals(Integer.class))
       {
-        parameter.setValue(new Integer(value));
+        parameter.setValue(Integer.valueOf(value));
       }
       else if (parameter.getType().equals(Double.class))
       {
-        parameter.setValue(new Double(value));
+        parameter.setValue(Double.valueOf(value));
       }
       else if (parameter.getType().equals(Boolean.class))
       { // if the parameter is set, it's ticked, so TRUE
