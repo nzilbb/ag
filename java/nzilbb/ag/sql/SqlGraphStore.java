@@ -2733,7 +2733,7 @@ public class SqlGraphStore
       sqlLayer.setInt(1, layer_id);
       ResultSet rsLayer = sqlLayer.executeQuery();
       if (!rsLayer.next()) throw new StoreException("Invalid layer_id for " + annotationId + ": " + layer_id);
-      final Layer definingLayer = getLayer(rsLayer.getString("short_description"));
+      final Layer definingLayer = getSchema().getLayer(rsLayer.getString("short_description"));
       rsLayer.close();
       sqlLayer.close();
       fragment.addLayer(definingLayer);
@@ -3115,14 +3115,196 @@ public class SqlGraphStore
       throw new StoreException(exception);
     }
   }   
- 
+
+  /**
+   * Gets a fragment of a graph, given its ID and the start/end offsets that define the 
+   * desired fragment, and containing only the given layers.
+   * @param graphId The ID of the graph.
+   * @param start The start offset of the fragment.
+   * @param end The end offset of the fragment.
+   * @param layerId The IDs of the layers to load, or null if only graph data is required.
+   * @return The identified graph fragment.
+   * @throws StoreException If an error occurs.
+   * @throws PermissionException If the operation is not permitted.
+   * @throws GraphNotFoundException If the graph was not found in the store.
+   */
+  public Graph getFragment(String graphId, double start, double end, String[] layerId) 
+    throws StoreException, PermissionException, GraphNotFoundException
+  {
+    try
+    {
+      final Graph graph = getGraph(graphId, null); // load just basic information
+      final int ag_id = (Integer)graph.get("@ag_id");
+      Schema schema = getSchema();
+
+      final Graph fragment = new Graph();
+      fragment.setGraph(graph);
+      fragment.setMediaProvider(new StoreGraphMediaProvider(fragment, this));
+      fragment.put("@ag_id", graph.get("@ag_id")); 
+      fragment.getSchema().copyLayerIdsFrom(schema);
+
+      // load all annotations in the specified layers, by offset
+      final PreparedStatement sqlAnnotationsByOffset = getConnection().prepareStatement(
+        "SELECT layer.*,"
+        +" start.offset AS start_offset, start.alignment_status AS start_alignment_status,"
+        +" start.annotated_by AS start_annotated_by, start.annotated_when AS start_annotated_when,"
+        +" end.offset AS end_offset, end.alignment_status AS end_alignment_status,"
+        +" end.annotated_by AS end_annotated_by, end.annotated_when AS end_annotated_when"
+        +" FROM annotation_layer_? layer"
+        +" INNER JOIN anchor start ON layer.start_anchor_id = start.anchor_id"
+        +" INNER JOIN anchor end ON layer.end_anchor_id = end.anchor_id"
+          +" WHERE layer.ag_id = ?"
+        + " AND start.offset >= ? AND end.offset <= ?"
+        +" ORDER BY start.offset, end.offset DESC, annotation_id");
+      sqlAnnotationsByOffset.setInt(2, ag_id);
+      sqlAnnotationsByOffset.setDouble(3, start);
+      sqlAnnotationsByOffset.setDouble(4, end);
+
+      final HashSet<String> layersToLoad = new HashSet<String>(Arrays.asList(layerId));
+      // traverse top-down through the schema, looking for layers to add
+      final HashSet<String> loadedLayers = new HashSet<String>();
+      new LayerHierarchyTraversal<HashSet<String>>(loadedLayers, fragment.getSchema())
+      {
+        // pre; before children means top-down
+        protected void pre(Layer layer)
+        {
+          if (layersToLoad.contains(layer.getId()))
+          { // load this layer
+            Integer layer_id = (Integer)layer.get("@layer_id");
+            if (layer_id != null && layer_id >= 0) // a temporal layer
+            {
+              fragment.addLayer(layer);
+              getResult().add(layer.getId());
+              try
+              {
+                sqlAnnotationsByOffset.setInt(1, layer_id);
+                ResultSet rs = sqlAnnotationsByOffset.executeQuery();
+                boolean setOrdinalMinimum = true;
+                while (rs.next())
+                {
+                  Annotation annotation = annotationFromResult(rs, layer, fragment);
+                  
+                  Annotation parent = fragment.getAnnotation(annotation.getParentId());
+                  if (setOrdinalMinimum && parent != null)
+                  {
+                    parent.setOrdinalMinimum(layer.getId(), annotation.getOrdinal());
+                    setOrdinalMinimum = false;
+                  }
+                  
+                  fragment.addAnnotation(annotation);
+                  
+                  // add anchors?
+                  if (fragment.getAnchor(annotation.getStartId()) == null)
+                  { // start anchor isn't in graph yet
+                    fragment.addAnchor(anchorFromResult(rs, "start_"));
+                  }
+                  if (fragment.getAnchor(annotation.getEndId()) == null)
+                  { // end anchor isn't in graph yet
+                    fragment.addAnchor(anchorFromResult(rs, "end_"));
+                  }
+                } // next annotation
+                rs.close();
+              }
+              catch (SQLException x)
+              {
+                System.err.println(
+                  "SqlGraphStore.getFragment: LayerHierarchyTraversal.pre: " + x);
+              }
+            } // temporal layer
+          } // selected layer
+        } // end of pre()
+      }; // end of LayerHierarchyTraversal
+      sqlAnnotationsByOffset.close();
+
+      // now load all missing ancestors...
+
+      // traverse bottom-up through the schema, looking for annotations without parents
+      new LayerHierarchyTraversal<HashSet<String>>(loadedLayers, fragment.getSchema())
+      {
+        // post; after children means bottom-up
+        protected void post(Layer layer)
+        {
+          // if we've loaded this layer
+          if (getResult().contains(layer.getId()))
+          { // check for missing parents
+            Layer parentLayer = layer.getParent();
+            if (parentLayer != null && !parentLayer.getId().equals(schema.getRoot().getId()))
+            {
+              if (!getResult().contains(parentLayer.getId()))
+              { // haven't included the layer in the fragment yet
+                fragment.addLayer(parentLayer);
+                getResult().add(parentLayer.getId());
+              }
+
+              // check for orphans
+              for (Annotation annotation : fragment.list(layer.getId()))
+              {
+                if (annotation.getParent() == null)
+                { // need to load the parent too
+                  try
+                  {
+                    Annotation[] match = getMatchingAnnotations(
+                      "id = '"+annotation.getParentId()+"'");
+                    if (match.length > 0)
+                    { // found parent
+                      Annotation parent = match[0];
+                      parent.setOrdinalMinimum(layer.getId(), annotation.getOrdinal());
+                      fragment.addAnnotation(parent);
+                      Vector<String> anchorsToLoad = new Vector<String>();
+                      // load anchors?
+                      if (fragment.getAnchor(parent.getStartId()) == null)
+                      { // start anchor isn't in graph yet
+                        anchorsToLoad.add(parent.getStartId());
+                      }
+                      if (fragment.getAnchor(parent.getEndId()) == null)
+                      { // end anchor isn't in graph yet
+                        anchorsToLoad.add(parent.getEndId());
+                      }
+                      Anchor[] anchors = getAnchors(
+                        graph.getId(), anchorsToLoad.toArray(new String[0]));
+                      for (Anchor anchor : anchors)
+                      {
+                        if (anchor.getOffset() != null
+                            && anchor.getOffset() >= start
+                            && anchor.getOffset() <= end)
+                        {
+                          graph.addAnchor(anchor);
+                        }
+                      } // next anchor
+                    } // found parent
+                  }
+                  catch (Exception x)
+                  {
+                    System.err.println(
+                      "SqlGraphStore.getFragment : LayerHierarchyTraversal.post: " + x);
+                  }
+                } // need to load parent
+              } // next annotation
+            } // layer parent should be processed
+          } // have loaded this layer
+        } // end of post
+      }; // end of LayerHierarchyTraversal
+
+      // if there are no bounding anchors, add dummy anchors so that media fragment will be correct
+      fragment.getOrCreateAnchorAt(start);
+      fragment.getOrCreateAnchorAt(end);
+      
+      fragment.commit();
+      return fragment;
+    }
+    catch(SQLException exception)
+    {
+      throw new StoreException(exception);
+    }
+  }
+  
   /**
    * Gets a series of fragments, given the series' ID, and only the given layers.
    * <p>This implementation expects <var>seriesId</var> to be a current <tt>result.search_id</tt>.
    * <p>The fragments are created lazily as required, so this method should return quickly.
    * @param seriesId The ID of the series.
    * @param layerId The IDs of the layers to load, or null if only graph data is required.
-   * @return An enumeratable series of fragments.
+   * @return An enumerable series of fragments.
    * @throws StoreException If an error occurs.
    * @throws PermissionException If the operation is not permitted.
    * @throws GraphNotFoundException If the series identified by <var>seriesId</var> was not found in the store.
