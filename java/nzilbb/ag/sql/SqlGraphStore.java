@@ -2594,6 +2594,14 @@ public class SqlGraphStore
         Annotation annotation = annotationFromResult(rsAnnotation, layer, graph);
         // annotation.setStart(anchorFromResult(rsAnnotation, "start_"));
         // annotation.setEnd(anchorFromResult(rsAnnotation, "end_"));
+        if (layer.getId().equals(getSchema().getUtteranceLayerId())
+            || layer.getId().equals(getSchema().getTurnLayerId()))
+        {
+          // label is speaker.speaker_number but should be speaker.name
+          String id = "m_-2_" + annotation.getLabel();
+          Annotation participant = getParticipant(id);
+          if (participant != null) annotation.setLabel(participant.getLabel());
+        }
         annotations.add(annotation);
       } // next annotation
       rsAnnotation.close();
@@ -3138,6 +3146,7 @@ public class SqlGraphStore
       Schema schema = getSchema();
 
       final Graph fragment = new Graph();
+      fragment.setId(Graph.FragmentId(graph, start, end));
       fragment.setGraph(graph);
       fragment.setMediaProvider(new StoreGraphMediaProvider(fragment, this));
       fragment.put("@ag_id", graph.get("@ag_id")); 
@@ -3163,7 +3172,7 @@ public class SqlGraphStore
       final HashSet<String> layersToLoad = new HashSet<String>(Arrays.asList(layerId));
       // traverse top-down through the schema, looking for layers to add
       final HashSet<String> loadedLayers = new HashSet<String>();
-      new LayerHierarchyTraversal<HashSet<String>>(loadedLayers, fragment.getSchema())
+      new LayerHierarchyTraversal<HashSet<String>>(loadedLayers, schema)
       {
         // pre; before children means top-down
         protected void pre(Layer layer)
@@ -3173,7 +3182,7 @@ public class SqlGraphStore
             Integer layer_id = (Integer)layer.get("@layer_id");
             if (layer_id != null && layer_id >= 0) // a temporal layer
             {
-              fragment.addLayer(layer);
+              fragment.addLayer((Layer)layer.clone());
               getResult().add(layer.getId());
               try
               {
@@ -3183,6 +3192,20 @@ public class SqlGraphStore
                 while (rs.next())
                 {
                   Annotation annotation = annotationFromResult(rs, layer, fragment);
+                  if (layer.getId().equals(schema.getUtteranceLayerId())
+                      || layer.getId().equals(schema.getTurnLayerId()))
+                  {
+                    // label is speaker.speaker_number but should be speaker.name
+                    String id = "m_-2_" + annotation.getLabel();
+                    try
+                    {
+                      Annotation participant = getParticipant(id);
+                      if (participant != null) annotation.setLabel(participant.getLabel());
+                    }
+                    catch(Exception exception)
+                    {}
+                  }
+                  System.out.println("Annotation " + annotation + " ("+layer+")" + annotation.getOrdinal());
                   
                   Annotation parent = fragment.getAnnotation(annotation.getParentId());
                   if (setOrdinalMinimum && parent != null)
@@ -3219,7 +3242,7 @@ public class SqlGraphStore
       // now load all missing ancestors...
 
       // traverse bottom-up through the schema, looking for annotations without parents
-      new LayerHierarchyTraversal<HashSet<String>>(loadedLayers, fragment.getSchema())
+      new LayerHierarchyTraversal<HashSet<String>>(loadedLayers, schema)
       {
         // post; after children means bottom-up
         protected void post(Layer layer)
@@ -3232,7 +3255,7 @@ public class SqlGraphStore
             {
               if (!getResult().contains(parentLayer.getId()))
               { // haven't included the layer in the fragment yet
-                fragment.addLayer(parentLayer);
+                fragment.addLayer((Layer)parentLayer.clone());
                 getResult().add(parentLayer.getId());
               }
 
@@ -3243,35 +3266,53 @@ public class SqlGraphStore
                 { // need to load the parent too
                   try
                   {
-                    Annotation[] match = getMatchingAnnotations(
-                      "id = '"+annotation.getParentId()+"'");
-                    if (match.length > 0)
-                    { // found parent
-                      Annotation parent = match[0];
-                      parent.setOrdinalMinimum(layer.getId(), annotation.getOrdinal());
-                      fragment.addAnnotation(parent);
-                      Vector<String> anchorsToLoad = new Vector<String>();
-                      // load anchors?
-                      if (fragment.getAnchor(parent.getStartId()) == null)
-                      { // start anchor isn't in graph yet
-                        anchorsToLoad.add(parent.getStartId());
-                      }
-                      if (fragment.getAnchor(parent.getEndId()) == null)
-                      { // end anchor isn't in graph yet
-                        anchorsToLoad.add(parent.getEndId());
-                      }
-                      Anchor[] anchors = getAnchors(
-                        graph.getId(), anchorsToLoad.toArray(new String[0]));
-                      for (Anchor anchor : anchors)
+                    if (layer.getParentId().equals(schema.getParticipantLayerId()))
+                    { // who
+                      Annotation parent = getParticipant(annotation.getParentId());
+                      if (parent != null)
                       {
-                        if (anchor.getOffset() != null
-                            && anchor.getOffset() >= start
-                            && anchor.getOffset() <= end)
+                        fragment.addAnnotation(parent);
+                      }
+                    } // who
+                    else
+                    { // other layer
+                      Annotation[] match = getMatchingAnnotations(
+                        "id = '"+annotation.getParentId()+"'");
+                      if (match.length > 0)
+                      { // found parent
+                        Annotation parent = match[0];
+                        for (String childLayerId : parentLayer.getChildren().keySet())
                         {
-                          graph.addAnchor(anchor);
+                          Annotation firstChild = fragment.my(childLayerId);
+                          if (firstChild != null)
+                          {
+                            parent.setOrdinalMinimum(childLayerId, firstChild.getOrdinal());
+                          }
+                        } // next child layer
+                        fragment.addAnnotation(parent);
+                        Vector<String> anchorsToLoad = new Vector<String>();
+                        // load anchors?
+                        if (fragment.getAnchor(parent.getStartId()) == null)
+                        { // start anchor isn't in graph yet
+                          anchorsToLoad.add(parent.getStartId());
                         }
-                      } // next anchor
-                    } // found parent
+                        if (fragment.getAnchor(parent.getEndId()) == null)
+                        { // end anchor isn't in graph yet
+                          anchorsToLoad.add(parent.getEndId());
+                        }
+                        Anchor[] anchors = getAnchors(
+                          graph.getId(), anchorsToLoad.toArray(new String[0]));
+                        for (Anchor anchor : anchors)
+                        {
+                          if (anchor.getOffset() != null
+                              && anchor.getOffset() >= start
+                              && anchor.getOffset() <= end)
+                          {
+                            graph.addAnchor(anchor);
+                          }
+                        } // next anchor
+                      } // found parent
+                    } // other layer
                   }
                   catch (Exception x)
                   {
