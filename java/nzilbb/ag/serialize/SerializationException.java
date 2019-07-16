@@ -28,83 +28,83 @@ import java.util.LinkedHashMap;
  */
 @SuppressWarnings("serial")
 public class SerializationException
-   extends Exception
+  extends Exception
 {
-   public enum ErrorType { InvalidDocument, Alignment, Tokenization, Other };
+  public enum ErrorType { InvalidDocument, Alignment, Tokenization, Other };
 
-   // Attributes:
+  // Attributes:
    
-   /**
-    * Collection of fatal errors that occurred during deserialization. The key is the error type, and the value is a displayable description of the error.
-    * @see #getErrors()
-    * @see #setErrors(LinkedHashMap)
-    */
-   protected LinkedHashMap<ErrorType,String> errors = new LinkedHashMap<ErrorType,String>();
-   /**
-    * Getter for {@link #errors}: Collection of fatal errors that occurred during deserialization. The key is the error type, and the value is a displayable description of the error.
-    * @return Collection of fatal errors that occurred during deserialization. The key is the error type, and the value is a displayable description of the error.
-    */
-   public LinkedHashMap<ErrorType,String> getErrors() { return errors; }
-   /**
-    * Setter for {@link #errors}: Collection of fatal errors that occurred during deserialization. The key is the error type, and the value is a displayable description of the error.
-    * @param newErrors Collection of fatal errors that occurred during deserialization. The key is the error type, and the value is a displayable description of the error.
-    */
-   public void setErrors(LinkedHashMap<ErrorType,String> newErrors) { errors = newErrors; }
+  /**
+   * Collection of fatal errors that occurred during deserialization. The key is the error type, and the value is a displayable description of the error.
+   * @see #getErrors()
+   * @see #setErrors(LinkedHashMap)
+   */
+  protected LinkedHashMap<ErrorType,String> errors = new LinkedHashMap<ErrorType,String>();
+  /**
+   * Getter for {@link #errors}: Collection of fatal errors that occurred during deserialization. The key is the error type, and the value is a displayable description of the error.
+   * @return Collection of fatal errors that occurred during deserialization. The key is the error type, and the value is a displayable description of the error.
+   */
+  public LinkedHashMap<ErrorType,String> getErrors() { return errors; }
+  /**
+   * Setter for {@link #errors}: Collection of fatal errors that occurred during deserialization. The key is the error type, and the value is a displayable description of the error.
+   * @param newErrors Collection of fatal errors that occurred during deserialization. The key is the error type, and the value is a displayable description of the error.
+   */
+  public void setErrors(LinkedHashMap<ErrorType,String> newErrors) { errors = newErrors; }
    
-   // Methods:
+  // Methods:
    
-   /**
-    * Default constructor
-    */
-   public SerializationException()
-   {
-   } // end of constructor
+  /**
+   * Default constructor
+   */
+  public SerializationException()
+  {
+  } // end of constructor
 
-   /**
-    * Constructor.
-    * @param cause The causing error.
-    */
-   public SerializationException(Throwable cause)
-   {
-      super(cause);
-      addError(ErrorType.Other, cause.getMessage());
-   } // end of constructor
+  /**
+   * Constructor.
+   * @param cause The causing error.
+   */
+  public SerializationException(Throwable cause)
+  {
+    super(cause);
+    addError(ErrorType.Other, cause.getMessage());
+  } // end of constructor
 
-   /**
-    * Constructor.
-    * @param message The error message.
-    */
-   public SerializationException(String message)
-   {
-      super(message);
-      addError(ErrorType.Other, message);
-   } // end of constructor
+  /**
+   * Constructor.
+   * @param message The error message.
+   */
+  public SerializationException(String message)
+  {
+    super(message);
+    addError(ErrorType.Other, message);
+  } // end of constructor
    
-   /**
-    * Constructor.
-    * @param message The error message.
-    */
-   public SerializationException(ErrorType type, String message)
-   {
-      super(message);
-      addError(type, message);
-   } // end of constructor
+  /**
+   * Constructor.
+   * @param message The error message.
+   */
+  public SerializationException(ErrorType type, String message)
+  {
+    super(message);
+    addError(type, message);
+  } // end of constructor
    
-   /**
-    * Adds an error. If the given type of error has already been added, the description is appended to the existing description.
-    * @param type The error type.
-    * @param description The error's description.
-    */
-   public void addError(ErrorType type, String description)
-   {
-      if (!errors.containsKey(type))
-      {
-	 errors.put(type, description);
-      }
-      else
-      { // one of those errors already occurred - add to it's description
-	 errors.put(type, errors.get(type) + "\n" + description);
-      }
-   } // end of addError()
+  /**
+   * Adds an error. If the given type of error has already been added, the description is appended to the existing description.
+   * @param type The error type.
+   * @param description The error's description.
+   */
+  public void addError(ErrorType type, String description)
+  {
+    if (!errors.containsKey(type))
+    {
+      errors.put(type, description);
+    }
+    else
+    { // one of those errors already occurred - add to it's description
+      errors.put(type, errors.get(type) + "\n" + description);
+    }
+  } // end of addError()
 
 } // end of class SerializationException
