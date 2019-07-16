@@ -258,7 +258,8 @@ public class TextGridSerialization
   public SerializationDescriptor getDescriptor()
   {
     return new SerializationDescriptor(
-      "Praat TextGrid", "1.85", "text/praat-textgrid", ".textgrid", "20170516.1519", getClass().getResource("icon.png"));
+      "Praat TextGrid", "1.86", "text/praat-textgrid", ".textgrid", "20170516.1519",
+      getClass().getResource("icon.png"));
   }
    
   /**
@@ -1218,12 +1219,12 @@ public class TextGridSerialization
       if (timers != null) timers.end("set word turns");
     } // word layer mapped
 
-      // now we have participants,
-      // and turns with participant name labels and parents, 
-      // and utterances with parents
-      // and words with parents
+    // now we have participants,
+    // and turns with participant name labels and parents, 
+    // and utterances with parents
+    // and words with parents
 
-      // need to ensure that other required parents are set
+    // need to ensure that other required parents are set
     if (timers != null) timers.start("set parents");
     for (Annotation a : graph.getAnnotationsById().values())
     {
@@ -1308,6 +1309,11 @@ public class TextGridSerialization
         } // multiple possible parents
       } // parent still not set
 
+      if (a.getParentId() == null)
+      { // parent STILL not set
+        warnings.add("No parent for " + a.getLayerId() + ":" + a.getLabel()
+                     + " ("+a.getStart()+"-"+a.getEnd()+")");
+      } // parent STILL not set
     } // next annotation
     if (timers != null) timers.end("set parents");
 

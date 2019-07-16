@@ -87,6 +87,8 @@ public class TestTextGridSerialization
     {
       System.out.println(warning);
     }
+    assertEquals("No warnings",
+                 0, deserializer.getWarnings().length);
       
     assertEquals("test_utterance.TextGrid", g.getId());
 
@@ -310,6 +312,8 @@ public class TestTextGridSerialization
     {
       System.out.println(warning);
     }
+    assertEquals("No warnings",
+                 0, deserializer.getWarnings().length);
       
     assertEquals("test_utterance_utf-8.TextGrid", g.getId());
 
@@ -389,6 +393,8 @@ public class TestTextGridSerialization
     {
       System.out.println(warning);
     }
+    assertEquals("No warnings",
+                 0, deserializer.getWarnings().length);
       
     assertEquals("test_utterance_utf-16.TextGrid", g.getId());
 
@@ -468,6 +474,8 @@ public class TestTextGridSerialization
     {
       System.out.println(warning);
     }
+    assertEquals("No warnings",
+                 0, deserializer.getWarnings().length);
       
     assertEquals("test_utterance_latin1.TextGrid", g.getId());
 
@@ -548,6 +556,8 @@ public class TestTextGridSerialization
     {
       System.out.println(warning);
     }
+    assertEquals("No warnings",
+                 0, deserializer.getWarnings().length);
       
     assertEquals("test_utterance_word.TextGrid", g.getId());
 
@@ -701,6 +711,8 @@ public class TestTextGridSerialization
     {
       System.out.println(warning);
     }
+    assertEquals("No warnings",
+                 0, deserializer.getWarnings().length);
       
     assertEquals("test_utterance_word.TextGrid", g.getId());
 
@@ -812,6 +824,8 @@ public class TestTextGridSerialization
     {
       System.out.println(warning);
     }
+    assertEquals("No warnings",
+                 0, deserializer.getWarnings().length);
       
     assertEquals("test_turn_utterance_word.TextGrid", g.getId());
 
@@ -1008,6 +1022,8 @@ public class TestTextGridSerialization
     {
       System.out.println(warning);
     }
+    assertEquals("No warnings",
+                 0, deserializer.getWarnings().length);
       
     assertEquals("test_speaker_word.TextGrid", g.getId());
 
@@ -1235,6 +1251,8 @@ public class TestTextGridSerialization
     {
       System.out.println(warning);
     }
+    assertEquals("Two warnings (about orphans)",
+                 2, deserializer.getWarnings().length);
       
     assertEquals("fragment__1_890-3_830.TextGrid", g.getId());
 
@@ -1369,6 +1387,8 @@ public class TestTextGridSerialization
     {
       System.out.println(warning);
     }
+    assertEquals("Four warnings (about orphans)",
+                 4, deserializer.getWarnings().length);
 
     assertEquals("performance.TextGrid", g.getId());
 
