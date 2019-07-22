@@ -494,6 +494,21 @@ public interface IGraphStoreQuery
     throws StoreException, PermissionException, GraphNotFoundException;
    
   /**
+   * Gets a fragment of a graph, given its ID and the start/end offsets that define the 
+   * desired fragment, and containing only the given layers.
+   * @param graphId The ID of the graph.
+   * @param start The start offset of the fragment.
+   * @param end The end offset of the fragment.
+   * @param layerId The IDs of the layers to load, or null if only graph data is required.
+   * @return The identified graph fragment.
+   * @throws StoreException If an error occurs.
+   * @throws PermissionException If the operation is not permitted.
+   * @throws GraphNotFoundException If the graph was not found in the store.
+   */
+  public Graph getFragment(String graphId, double start, double end, String[] layerId) 
+    throws StoreException, PermissionException, GraphNotFoundException;
+   
+  /**
    * Gets a series of fragments, given the series' ID, and only the given layers.
    * @param seriesId The ID of the series.
    * @param layerId The IDs of the layers to load, or null if only graph data is required.
