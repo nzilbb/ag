@@ -22,6 +22,7 @@
 package nzilbb.ag.serialize;
 
 import java.util.LinkedHashMap;
+import java.lang.StringBuilder;
 /**
  * Thrown when {@link IDeserializer#deserialize()} could not complete due to fatal errors.
  * @author Robert Fromont robert@fromont.net.nz
@@ -106,5 +107,25 @@ public class SerializationException
       errors.put(type, errors.get(type) + "\n" + description);
     }
   } // end of addError()
+
+  
+  /**
+   * Represents the exception with all its errors as a String.
+   * @return A String representation of the exception with all its errors.
+   */
+  @Override public String toString()
+  {
+    StringBuilder s = new StringBuilder();
+    s.append(super.toString());
+    for (String error : errors.values())
+    {
+      if (!error.equals(getMessage()))
+      {
+        s.append("\n");
+        s.append(error);
+      }
+    } // next error
+    return s.toString();
+  } // end of toString()
 
 } // end of class SerializationException
