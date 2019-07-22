@@ -131,8 +131,9 @@ public class Merger
 
    
   /**
-   * The maximum length of a list used for mapping annotations of the same layer but in different graphs to each other.
-   * <p>For word and segment layers, the arrays used for shortest-edit-path computation
+   * The maximum length of a list used for mapping annotations of the same layer but in different
+   * graphs to each other. 
+   * <p>For word and segment layers, the arrays used for shortest-edit-path computation 
    * can get very very large. In order to avoid running out of memory, we split the lists into
    * overlapping chunks and map overlapping chunks. This doesn't strictly give us a guaranteed 
    * shortest edit path, but it works for realistic cases and terminates in a realistic time 
@@ -143,14 +144,19 @@ public class Merger
    */
   protected int arraySizeLimit = 500;
   /**
-   * Getter for {@link #arraySizeLimit}: The maximum length of a list used for mapping annotations of the same layer but in different graphs to each other.
-   * Default is 500. A value of 0 means don't used overlapping chunks.
-   * @return The maximum length of a list used for mapping annotations of the same layer but in different graphs to each other.
+   * Getter for {@link #arraySizeLimit}: The maximum length of a list used for mapping
+   * annotations of the same layer but in different graphs to each other. 
+   * <p>Default is 500. A value of 0 means don't used overlapping chunks.
+   * @return The maximum length of a list used for mapping annotations of the same layer but in
+   * different graphs to each other. 
    */
   public int getArraySizeLimit() { return arraySizeLimit; }
   /**
-   * Setter for {@link #arraySizeLimit}: The maximum length of a list used for mapping annotations of the same layer but in different graphs to each other.
-   * @param newArraySizeLimit The maximum length of a list used for mapping annotations of the same layer but in different graphs to each other. A value of 0 means don't used overlapping chunks.
+   * Setter for {@link #arraySizeLimit}: The maximum length of a list used for mapping
+   * annotations of the same layer but in different graphs to each other. 
+   * @param newArraySizeLimit The maximum length of a list used for mapping annotations of the
+   * same layer but in different graphs to each other. A value of 0 means don't used overlapping
+   * chunks. 
    */
   public void setArraySizeLimit(int newArraySizeLimit) { arraySizeLimit = newArraySizeLimit; }
 
@@ -162,7 +168,8 @@ public class Merger
    */
   protected double smidgin = 0.00001;
   /**
-   * Getter for {@link #smidgin}: Initial duration of early/layer children, out of order annotations, etc.
+   * Getter for {@link #smidgin}: Initial duration of early/layer children, out of order
+   * annotations, etc. 
    * @return Initial duration of early/layer children, out of order annotations, etc.
    */
   public double getSmidgin() { return smidgin; }
@@ -173,37 +180,57 @@ public class Merger
   public void setSmidgin(double newSmidgin) { smidgin = newSmidgin; }
 
   /**
-   * Whether to ignore label confidence and force label changes (true), or only change labels when the edited confidence is equal to or higher than the original confidence. Default is false.
+   * Whether to ignore label confidence and force label changes (true), or only change labels
+   * when the edited confidence is equal to or higher than the original confidence. Default is
+   * false. 
    * @see #getIgnoreLabelConfidence()
    * @see #setIgnoreLabelConfidence(boolean)
    */
   protected boolean ignoreLabelConfidence = false;
   /**
-   * Getter for {@link #ignoreLabelConfidence}: Whether to ignore label confidence and force label changes (true), or only change labels when the edited confidence is equal to or higher than the original confidence.
-   * @return Whether to ignore label confidence and force label changes (true), or only change labels when the edited confidence is equal to or higher than the original confidence. Default is false.
+   * Getter for {@link #ignoreLabelConfidence}: Whether to ignore label confidence and force
+   * label changes (true), or only change labels when the edited confidence is equal to or higher
+   * than the original confidence. 
+   * @return Whether to ignore label confidence and force label changes (true), or only change
+   * labels when the edited confidence is equal to or higher than the original
+   * confidence. Default is false. 
    */
   public boolean getIgnoreLabelConfidence() { return ignoreLabelConfidence; }
   /**
-   * Setter for {@link #ignoreLabelConfidence}: Whether to ignore label confidence and force label changes (true), or only change labels when the edited confidence is equal to or higher than the original confidence.
-   * @param newIgnoreLabelConfidence Whether to ignore label confidence and force label changes (true), or only change labels when the edited confidence is equal to or higher than the original confidence.
+   * Setter for {@link #ignoreLabelConfidence}: Whether to ignore label confidence and force
+   * label changes (true), or only change labels when the edited confidence is equal to or higher
+   * than the original confidence. 
+   * @param newIgnoreLabelConfidence Whether to ignore label confidence and force label changes
+   * (true), or only change labels when the edited confidence is equal to or higher than the
+   * original confidence. 
    */
   public void setIgnoreLabelConfidence(boolean newIgnoreLabelConfidence) { ignoreLabelConfidence = newIgnoreLabelConfidence; }
 
    
   /**
-   * Wether to ignore offset confidence and force offset changes (true), or only change offsets when the edited offset is equal to or higher than the original confidence (false).  The default is false.
+   * Wether to ignore offset confidence and force offset changes (true), or only change offsets
+   * when the edited offset is equal to or higher than the original confidence (false).  The
+   * default is false. 
    * @see #getIgnoreOffsetConfidence()
    * @see #setIgnoreOffsetConfidence(boolean)
    */
   protected boolean ignoreOffsetConfidence = false;
   /**
-   * Getter for {@link #ignoreOffsetConfidence}: Wether to ignore offset confidence and force offset changes (true), or only change offsets when the edited offset is equal to or higher than the original confidence (false).
-   * @return Wether to ignore offset confidence and force offset changes (true), or only change offsets when the edited offset is equal to or higher than the original confidence (false).  The default is false.
+   * Getter for {@link #ignoreOffsetConfidence}: Wether to ignore offset confidence and force
+   * offset changes (true), or only change offsets when the edited offset is equal to or higher
+   * than the original confidence (false). 
+   * @return Wether to ignore offset confidence and force offset changes (true), or only change
+   * offsets when the edited offset is equal to or higher than the original confidence (false).
+   * The default is false. 
    */
   public boolean getIgnoreOffsetConfidence() { return ignoreOffsetConfidence; }
   /**
-   * Setter for {@link #ignoreOffsetConfidence}: Wether to ignore offset confidence and force offset changes (true), or only change offsets when the edited offset is equal to or higher than the original confidence (false).
-   * @param newIgnoreOffsetConfidence Wether to ignore offset confidence and force offset changes (true), or only change offsets when the edited offset is equal to or higher than the original confidence (false).
+   * Setter for {@link #ignoreOffsetConfidence}: Wether to ignore offset confidence and force
+   * offset changes (true), or only change offsets when the edited offset is equal to or higher
+   * than the original confidence (false). 
+   * @param newIgnoreOffsetConfidence Wether to ignore offset confidence and force offset changes
+   * (true), or only change offsets when the edited offset is equal to or higher than the
+   * original confidence (false). 
    */
   public void setIgnoreOffsetConfidence(boolean newIgnoreOffsetConfidence) { ignoreOffsetConfidence = newIgnoreOffsetConfidence; }
 
@@ -220,19 +247,24 @@ public class Merger
    
 
   /**
-   * The validator to use after merge is complete, or null to not validate the graph after merge. Default value is a {@link Validator} created with its default constructor.
+   * The validator to use after merge is complete, or null to not validate the graph after
+   * merge. Default value is a {@link Validator} created with its default constructor. 
    * @see #getValidator()
    * @see #setValidator(Validator)
    */
   protected Validator validator = new Validator();
   /**
-   * Getter for {@link #validator}: The validator to use after merge is complete, or null to not validate the graph after merge.
-   * @return The validator to use after merge is complete, or null to not validate the graph after merge. Default value is a {@link Validator} created with its default constructor.
+   * Getter for {@link #validator}: The validator to use after merge is complete, or null to not
+   * validate the graph after merge. 
+   * @return The validator to use after merge is complete, or null to not validate the graph
+   * after merge. Default value is a {@link Validator} created with its default constructor. 
    */
   public Validator getValidator() { return validator; }
   /**
-   * Setter for {@link #validator}: The validator to use after merge is complete, or null to not validate the graph after merge.
-   * @param newValidator The validator to use after merge is complete, or null to not validate the graph after merge.
+   * Setter for {@link #validator}: The validator to use after merge is complete, or null to not
+   * validate the graph after merge. 
+   * @param newValidator The validator to use after merge is complete, or null to not validate
+   * the graph after merge. 
    */
   public void setValidator(Validator newValidator) { validator = newValidator; }
 
@@ -240,207 +272,216 @@ public class Merger
   private Schema schema = null;
 
   /** Default edit-path comparator for annotations */
-  private IEditComparator<Annotation> defaultComparator = new IEditComparator<Annotation>()
-                                                          {
-                                                            int NO_WAY = 200; // weight for ensuring they don't map to each other
-                                                            MinimumEditPathString stringComparator = new MinimumEditPathString();
-                                                            MinimumEditPathString stringComparatorAvoidSubstitution = new MinimumEditPathString(
-                                                              new DefaultEditComparator<Character>(1, 1, 2)); // change is more costly
-
-                                                            /**
-                                                             * Compares two sequence elements, and evaluates the distance between them.
-                                                             * @param from The element from the source sequence, which may be null,
-                                                             * @param to The element from the destination sequence, which may be null.
-                                                             * @return An edit step between the two elements. {@link EditStep#getFrom()} is set to <var>from</var>, {@link EditStep#getTo()} is set to <var>to</var>, {@link EditStep#getDistance()} is set to the computed edit distance between these two elements, and {@link EditStep#getOperation()} is set to either <var>EditStep.StepOperation.NONE</var> or <var>EditStep.StepOperation.CHANGE</var>.
-                                                             */
-                                                            public EditStep<Annotation> compare(Annotation a1, Annotation a2)
-                                                            {
-                                                              EditStep<Annotation> step = new EditStep<Annotation>(
-                                                                a1, a2, 0, EditStep.StepOperation.NONE);
-                                                              if (a1 == null)
-                                                              {
-                                                                if (a2 != null)
-                                                                {
-                                                                  step.setStepDistance(1);
-                                                                  step.setOperation(EditStep.StepOperation.CHANGE);
-                                                                }
-                                                                // if both are null, we fall through to the return, which amounts to no change
-                                                              }
-                                                              else if (a2 == null)
-                                                              {
-                                                                step.setStepDistance(1);
-                                                                step.setOperation(EditStep.StepOperation.CHANGE);
-                                                              }
-                                                              else 
-                                                              { // two annotations to compare
-                                                                int iWeight = 0;
-
-                                                                if (hasCounterpart(a1) || hasCounterpart(a2))
-                                                                { // already mapped
-                                                                  if (!hasCounterpart(a1) || !hasCounterpart(a2) || getCounterpart(a1) != a2)
-                                                                  { // not mapped to each other
-                                                                    iWeight += NO_WAY; // definitely don't want to map them
-                                                                  }
-                                                                  // else they're already mapped together, so iWeight = 0 is good.
-                                                                }
-                                                                else
-                                                                { // not already mapped
-                                                                  Layer layer = a1.getLayer();
-                                                                  // check labels (ignoring punctuation etc.)
-                                                                  if (!a1.getLabel().equals(a2.getLabel()))
-                                                                  {
-                                                                    // ignore punctuation and case by default
-                                                                    String s1 = a1.getLabel().replaceAll("[^\\p{javaLetter}\\p{javaDigit}]","").toLowerCase();
-                                                                    String s2 = a2.getLabel().replaceAll("[^\\p{javaLetter}\\p{javaDigit}]","").toLowerCase();
-                                                                    if (s1.length() <= 0 || s2.length() <= 0 
-                                                                        || (layer.containsKey("@type") 
-                                                                            && layer.get("@type").equals("D"))) // phonological layer TODO formalise layer types
-                                                                    {
-                                                                      s1 = a1.getLabel();
-                                                                      s2 = a2.getLabel(); // for all-punctuation annotations
-                                                                    }
-                                                                    int iDistance = s1.length() <= 2 || s2.length() <= 2?
-                                                                      // really short strings don't as easily allow subsitutions
-                                                                      stringComparatorAvoidSubstitution.levenshteinDistance(s1, s2)
-                                                                      // but longer strings use standard edit costs
-                                                                      :stringComparator.levenshteinDistance(s1, s2);
-                                                                    int iMagnifier = 1; // magnify this because anchor offsets also contribute
-                                                                    // really short words have to be really similar
-                                                                    if (s1.length() <= 2 || s2.length() <= 2) iMagnifier = 3; 
-                                                                    iWeight += (iDistance * iMagnifier);
-                                                                  } // check labels
-
-                                                                  // don't compare anchors for graph tag layers (i.e. unaligned children of graph)
-                                                                  // nor for tags of graph tags layers (i.e. unaligned children of unaligned children of graph)
-                                                                  LinkedHashSet<Layer> layerLineage = new LinkedHashSet<Layer>();
-                                                                  layerLineage.add(layer);
-                                                                  layerLineage.addAll(layer.getAncestors());
-                                                                  boolean graphTagLayer = !layer.getId().equals("graph");
-                                                                  for (Layer l : layerLineage)
-                                                                  {
-                                                                    if (l.getAlignment() != Constants.ALIGNMENT_NONE
-                                                                        && !l.getId().equals("graph"))
-                                                                    {
-                                                                      graphTagLayer = false;
-                                                                      break;
-                                                                    }
-                                                                  } // next layer in lineage
-                                                                  if (!graphTagLayer)
-                                                                  {
-                                                                    // an instant cannot map to a non-instant
-                                                                    if (a1.getInstantaneous() != a2.getInstantaneous())
-                                                                    {
-                                                                      iWeight += NO_WAY;
-                                                                    }
-                                                                    else
-                                                                    { // neither an instant, or both an instant
-                                                                      // are all offsets available?
-                                                                      if (a1.getAnchored() && a2.getAnchored())
-                                                                      {
-                                                                        // distance is as important as the reliability of the least reliable anchors
-                                                                        // i.e. if a1 & a2 have matching alignments (both default, both user-aligned, etc.)
-                                                                        // then the weight of the alignment is as heavy as the alignment
-                                                                        // but if a1 has default alignments and a2 has user-alignments, then importance is low
-                                                                        // because this is probably an alignment update or an unaligned update of aligned annotations
-                                                                        // alternatively, if the annotation has a mixture of trustworthyness, weight will be higher
-                                                                        double dImportance = Math.min(
-                                                                          (double)(getConfidence(a1.getStart()) + getConfidence(a1.getEnd())),
-                                                                          (double)(getConfidence(a2.getStart()) + getConfidence(a2.getEnd())))
-                                                                          // divided by CONFIDENCE_MANUAL, to make it near 1
-                                                                          / (double)(Constants.CONFIDENCE_MANUAL * 2);
-                                                                        // however, for "word" and "phone", which are frequently merged between aligned
-                                                                        // and unaligned versions, and which should be merged by label only 
-                                                                        // we ignore anchors
-                                                                        if (a1.getLayerId().equals(schema.getWordLayerId()) // word layer
-                                                                            // or (probably) phone layer
-                                                                            || (layer.getParentId().equals(schema.getWordLayerId())
-                                                                                && layer.getAlignment() == Constants.ALIGNMENT_INTERVAL))
-                                                                        {
-                                                                          dImportance = 0.01;
-                                                                        }			
-                                                                        // instantaneous annotations need to have more similar offsets than intervals
-                                                                        if (a1.getInstantaneous()) // && a2.getInstantaneous(), but we know it must be
-                                                                        {
-                                                                          dImportance *= 2.0;
-                                                                        }
-                                                                        Double dDistance = a1.maxPairedDistance(a2);
-                                                                        if (dDistance != null && dDistance != 0)
-                                                                        {	
-                                                                          // we want to ensure that overlapping annotations are selected over non-overlapping ones
-                                                                          if (dImportance > 0)
-                                                                          {
-                                                                            if (dDistance > 0)
-                                                                            { // no overlap
-                                                                              // prefer overlap over none
-                                                                              iWeight += (int)(dDistance * dImportance * 2);
-                                                                            }
-                                                                            else
-                                                                            {  // overlap
-                                                                              // when choosing between fragments of a split-up annotation, choose the 
-                                                                              // fragment that overlaps the most
-                                                                              double dOverlapMagnitude = Math.abs(a1.distance(a2))
-                                                                                // but if the length difference is great, make it high cost anyway
-                                                                                / ((a1.getDuration() + a2.getDuration())/2);
-                                                                              dOverlapMagnitude *= 3; // soften the impact of this magically
-                                                                              iWeight += (int)
-                                                                                (Math.min(
-                                                                                  (double)NO_WAY, // make sure this tops out at NO_WAY, to avoid overflow
-                                                                                  Math.abs((-dDistance * dImportance / dOverlapMagnitude))));
-                                                                            }
-                                                                          }
-                                                                          else 
-                                                                          { 
-                                                                            // while distance doesn't contribute to the weight, REALLY BIG distances shouldn't map
-                                                                            if (dDistance > 0)
-                                                                            { // no overlap
-                                                                              if (dDistance > 30)
-                                                                              {
-                                                                                iWeight += NO_WAY;
-                                                                              }
-                                                                              else if (Math.abs(a1.getDuration() - a2.getDuration()) > 10) // words differ in length by this much
-                                                                              {
-                                                                                iWeight += NO_WAY;
-                                                                              }
-                                                                            }
-                                                                            else
-                                                                            { // overlap - should be too different at all
-                                                                              if (-dDistance > 10)  iWeight += NO_WAY;
-                                                                            }
-                                                                          }
-                                                                        } // distant annotation
-                                                                      } // all offsets are available
-                                                                    } // neither an instant, or both an instant
-                                                                  } // not a graph tag
-                                                                } // not already mapped
-
-                                                                step.setStepDistance(iWeight);
-                                                                if (!a1.getLabel().equals(a2.getLabel())) 
-                                                                { // label would actually change
-                                                                  step.setOperation(EditStep.StepOperation.CHANGE);
-                                                                }
-                                                              }
-                                                              return step;
-                                                            }
+  private IEditComparator<Annotation> defaultComparator
+  = new IEditComparator<Annotation>()
+    {
+      int NO_WAY = 200; // weight for ensuring they don't map to each other
+      MinimumEditPathString stringComparator = new MinimumEditPathString();
+      MinimumEditPathString stringComparatorAvoidSubstitution = new MinimumEditPathString(
+        new DefaultEditComparator<Character>(1, 1, 2)); // change is more costly
       
-                                                            /**
-                                                             * The distance for deleting the given element.
-                                                             * @param from The element that would be deleted, which may be null.
-                                                             * @return An edit step with {@link EditStep#getDistance()} set to the distance for deleting the given element. {@link EditStep#getFrom()} is set to <var>from</var>, and {@link EditStep#getOperation()} is set to <var>EditStep.StepOperation.DELETE</var>
-                                                             */
-                                                            public EditStep<Annotation> delete(Annotation a1)
-                                                            {
-                                                              return new EditStep<Annotation>(a1, null, 1, EditStep.StepOperation.DELETE);
-                                                            }
+      /**
+       * Compares two sequence elements, and evaluates the distance between them.
+       * @param from The element from the source sequence, which may be null,
+       * @param to The element from the destination sequence, which may be null.
+       * @return An edit step between the two elements. {@link EditStep#getFrom()} is set to
+       * <var>from</var>, {@link EditStep#getTo()} is set to <var>to</var>, {@link
+       * EditStep#getDistance()} is set to the computed edit distance between these two elements,
+       * and {@link EditStep#getOperation()} is set to either
+       * <var>EditStep.StepOperation.NONE</var> or <var>EditStep.StepOperation.CHANGE</var>. 
+       */
+      public EditStep<Annotation> compare(Annotation a1, Annotation a2)
+      {
+        EditStep<Annotation> step = new EditStep<Annotation>(
+          a1, a2, 0, EditStep.StepOperation.NONE);
+        if (a1 == null)
+        {
+          if (a2 != null)
+          {
+            step.setStepDistance(1);
+            step.setOperation(EditStep.StepOperation.CHANGE);
+          }
+          // if both are null, we fall through to the return, which amounts to no change
+        }
+        else if (a2 == null)
+        {
+          step.setStepDistance(1);
+          step.setOperation(EditStep.StepOperation.CHANGE);
+        }
+        else 
+        { // two annotations to compare
+          int iWeight = 0;
 
-                                                            /**
-                                                             * The distance for inserting the given element.
-                                                             * @param from The element that would be inserted, which may be null.
-                                                             * @return An edit step with {@link EditStep#getDistance()} set to the distance for inserting the given element. {@link EditStep#getTo()} is set to <var>to</var>, and {@link EditStep#getOperation()} is set to <var>EditStep.StepOperation.INSERT</var>
-                                                             */
-                                                            public EditStep<Annotation> insert(Annotation a2)
-                                                            {
-                                                              return new EditStep<Annotation>(null, a2, 1, EditStep.StepOperation.INSERT);
-                                                            }
+          if (hasCounterpart(a1) || hasCounterpart(a2))
+          { // already mapped
+            if (!hasCounterpart(a1) || !hasCounterpart(a2) || getCounterpart(a1) != a2)
+            { // not mapped to each other
+              iWeight += NO_WAY; // definitely don't want to map them
+            }
+            // else they're already mapped together, so iWeight = 0 is good.
+          }
+          else
+          { // not already mapped
+            Layer layer = a1.getLayer();
+            // check labels (ignoring punctuation etc.)
+            if (!a1.getLabel().equals(a2.getLabel()))
+            {
+              // ignore punctuation and case by default
+              String s1 = a1.getLabel().replaceAll("[^\\p{javaLetter}\\p{javaDigit}]","").toLowerCase();
+              String s2 = a2.getLabel().replaceAll("[^\\p{javaLetter}\\p{javaDigit}]","").toLowerCase();
+              if (s1.length() <= 0 || s2.length() <= 0 
+                  || (layer.containsKey("@type") 
+                      && layer.get("@type").equals("D"))) // phonological layer TODO formalise layer types
+              {
+                s1 = a1.getLabel();
+                s2 = a2.getLabel(); // for all-punctuation annotations
+              }
+              int iDistance = s1.length() <= 2 || s2.length() <= 2?
+                // really short strings don't as easily allow subsitutions
+                stringComparatorAvoidSubstitution.levenshteinDistance(s1, s2)
+                // but longer strings use standard edit costs
+                :stringComparator.levenshteinDistance(s1, s2);
+              int iMagnifier = 1; // magnify this because anchor offsets also contribute
+              // really short words have to be really similar
+              if (s1.length() <= 2 || s2.length() <= 2) iMagnifier = 3; 
+              iWeight += (iDistance * iMagnifier);
+            } // check labels
+
+            // don't compare anchors for graph tag layers (i.e. unaligned children of graph)
+            // nor for tags of graph tags layers (i.e. unaligned children of unaligned children of graph)
+            LinkedHashSet<Layer> layerLineage = new LinkedHashSet<Layer>();
+            layerLineage.add(layer);
+            layerLineage.addAll(layer.getAncestors());
+            boolean graphTagLayer = !layer.getId().equals("graph");
+            for (Layer l : layerLineage)
+            {
+              if (l.getAlignment() != Constants.ALIGNMENT_NONE
+                  && !l.getId().equals("graph"))
+              {
+                graphTagLayer = false;
+                break;
+              }
+            } // next layer in lineage
+            if (!graphTagLayer)
+            {
+              // an instant cannot map to a non-instant
+              if (a1.getInstantaneous() != a2.getInstantaneous())
+              {
+                iWeight += NO_WAY;
+              }
+              else
+              { // neither an instant, or both an instant
+                // are all offsets available?
+                if (a1.getAnchored() && a2.getAnchored())
+                {
+                  // distance is as important as the reliability of the least reliable anchors
+                  // i.e. if a1 & a2 have matching alignments (both default, both user-aligned, etc.)
+                  // then the weight of the alignment is as heavy as the alignment
+                  // but if a1 has default alignments and a2 has user-alignments, then importance is low
+                  // because this is probably an alignment update or an unaligned update of aligned annotations
+                  // alternatively, if the annotation has a mixture of trustworthyness, weight will be higher
+                  double dImportance = Math.min(
+                    (double)(getConfidence(a1.getStart()) + getConfidence(a1.getEnd())),
+                    (double)(getConfidence(a2.getStart()) + getConfidence(a2.getEnd())))
+                    // divided by CONFIDENCE_MANUAL, to make it near 1
+                    / (double)(Constants.CONFIDENCE_MANUAL * 2);
+                  // however, for "word" and "phone", which are frequently merged between aligned
+                  // and unaligned versions, and which should be merged by label only 
+                  // we ignore anchors
+                  if (a1.getLayerId().equals(schema.getWordLayerId()) // word layer
+                      // or (probably) phone layer
+                      || (layer.getParentId().equals(schema.getWordLayerId())
+                          && layer.getAlignment() == Constants.ALIGNMENT_INTERVAL))
+                  {
+                    dImportance = 0.01;
+                  }			
+                  // instantaneous annotations need to have more similar offsets than intervals
+                  if (a1.getInstantaneous()) // && a2.getInstantaneous(), but we know it must be
+                  {
+                    dImportance *= 2.0;
+                  }
+                  Double dDistance = a1.maxPairedDistance(a2);
+                  if (dDistance != null && dDistance != 0)
+                  {	
+                    // we want to ensure that overlapping annotations are selected over non-overlapping ones
+                    if (dImportance > 0)
+                    {
+                      if (dDistance > 0)
+                      { // no overlap
+                        // prefer overlap over none
+                        iWeight += (int)(dDistance * dImportance * 2);
+                      }
+                      else
+                      {  // overlap
+                        // when choosing between fragments of a split-up annotation, choose the 
+                        // fragment that overlaps the most
+                        double dOverlapMagnitude = Math.abs(a1.distance(a2))
+                          // but if the length difference is great, make it high cost anyway
+                          / ((a1.getDuration() + a2.getDuration())/2);
+                        dOverlapMagnitude *= 3; // soften the impact of this magically
+                        iWeight += (int)
+                          (Math.min(
+                            (double)NO_WAY, // make sure this tops out at NO_WAY, to avoid overflow
+                            Math.abs((-dDistance * dImportance / dOverlapMagnitude))));
+                      }
+                    }
+                    else 
+                    { 
+                      // while distance doesn't contribute to the weight, REALLY BIG distances shouldn't map
+                      if (dDistance > 0)
+                      { // no overlap
+                        if (dDistance > 30)
+                        {
+                          iWeight += NO_WAY;
+                        }
+                        else if (Math.abs(a1.getDuration() - a2.getDuration()) > 10) // words differ in length by this much
+                        {
+                          iWeight += NO_WAY;
+                        }
+                      }
+                      else
+                      { // overlap - should be too different at all
+                        if (-dDistance > 10)  iWeight += NO_WAY;
+                      }
+                    }
+                  } // distant annotation
+                } // all offsets are available
+              } // neither an instant, or both an instant
+            } // not a graph tag
+          } // not already mapped
+
+          step.setStepDistance(iWeight);
+          if (!a1.getLabel().equals(a2.getLabel())) 
+          { // label would actually change
+            step.setOperation(EditStep.StepOperation.CHANGE);
+          }
+        }
+        return step;
+      }
+      
+      /**
+       * The distance for deleting the given element.
+       * @param from The element that would be deleted, which may be null.
+       * @return An edit step with {@link EditStep#getDistance()} set to the distance for
+       * deleting the given element. {@link EditStep#getFrom()} is set to <var>from</var>, and
+       * {@link EditStep#getOperation()} is set to <var>EditStep.StepOperation.DELETE</var> 
+       */
+      public EditStep<Annotation> delete(Annotation a1)
+      {
+        return new EditStep<Annotation>(a1, null, 1, EditStep.StepOperation.DELETE);
+      }
+
+      /**
+       * The distance for inserting the given element.
+       * @param from The element that would be inserted, which may be null.
+       * @return An edit step with {@link EditStep#getDistance()} set to the distance for
+       * inserting the given element. {@link EditStep#getTo()} is set to <var>to</var>, and
+       * {@link EditStep#getOperation()} is set to <var>EditStep.StepOperation.INSERT</var> 
+       */
+      public EditStep<Annotation> insert(Annotation a2)
+      {
+        return new EditStep<Annotation>(null, a2, 1, EditStep.StepOperation.INSERT);
+      }
     };
 
   protected HashSet<Anchor> dummyAnchors;
@@ -892,13 +933,13 @@ public class Merger
   } // end of mapAnnotationsForMerge()
    
   /**
-   * PHASE 2: Create new annotations we don't have that exist in the other graph, and mark annotations that
-   * don't exist in the other graph for deletion.
-   * <p>This method assumes that {@link #mapAnnotationsForMerge(Layer,SortedSet,SortedSet)} has already
-   * been called and thus annotations have had their "@other" attributes set appropriately.
-   * <p>New annotations are also given new anchors, and if surrounding annotations (on the same layer)
-   * share anchors in the edited version, then corresponding surrounding annotations in the original
-   * will be linked to the new anchors.
+   * PHASE 2: Create new annotations we don't have that exist in the other graph, and mark
+   * annotations that don't exist in the other graph for deletion.
+   * <p>This method assumes that {@link #mapAnnotationsForMerge(Layer,SortedSet,SortedSet)} has
+   * already been called and thus annotations have had their "@other" attributes set appropriately.
+   * <p>New annotations are also given new anchors, and if surrounding annotations (on the same
+   * layer) share anchors in the edited version, then corresponding surrounding annotations in
+   * the original will be linked to the new anchors.
    * @param layer The layer to traverse.
    * @param graph The graph to add changes to.
    * @return The resulting Create/Destroy changes.
@@ -1309,7 +1350,8 @@ public class Merger
   } // end of removeLeadingMappedAnnotations()
 
   /**
-   * Sets the Start Anchor of the given annotation, and also the start anchors of related annotations that start in the same place.
+   * Sets the Start Anchor of the given annotation, and also the start anchors of related
+   * annotations that start in the same place. 
    * @param annotation The annotation to change the start anchor of.
    * @param newStartAnchor The new start anchor.
    * @return The changes made during this operation.
@@ -1319,7 +1361,8 @@ public class Merger
     return changeStartWithRelatedAnnotations(annotation, newStartAnchor, new HashSet<String>());
   }
   /**
-   * Sets the Start Anchor of the given annotation, and also the start anchors of related annotations that start in the same place.
+   * Sets the Start Anchor of the given annotation, and also the start anchors of related
+   * annotations that start in the same place. 
    * @param annotation The annotation whose start anchor will be changed.
    * @param newStartAnchor The new start anchor.
    * @param layerIdToExclude A layer to exclude when updating related annotations.
@@ -1332,7 +1375,8 @@ public class Merger
     return changeStartWithRelatedAnnotations(annotation, newStartAnchor, exclude);
   }
   /**
-   * Sets the StartAnchor of the given annotation, and also the start anchors of related annotations that start in the same place.
+   * Sets the StartAnchor of the given annotation, and also the start anchors of related
+   * annotations that start in the same place. 
    * @param annotation The annotation whose start anchor will be changed.
    * @param newStartAnchor The new start anchor.
    * @param layerIdsToExclude Layers to exclude when updating related annotations.
@@ -1429,7 +1473,8 @@ public class Merger
   } // end of changeStartWithRelatedAnnotations()
 
   /**
-   * Sets the End Anchor of the given annotation, and also the end anchors of related annotations that end in the same place.
+   * Sets the End Anchor of the given annotation, and also the end anchors of related annotations
+   * that end in the same place. 
    * @param annotation The annotation whose end anchor should be changed.
    * @param newEndAnchor The new end anchor.
    * @return The changes made during this operation.
@@ -1439,7 +1484,8 @@ public class Merger
     return changeEndWithRelatedAnnotations(annotation, newEndAnchor, new HashSet<String>());
   }
   /**
-   * Sets the End Anchor of the given annotation, and also the end anchors of related annotations that end in the same place.
+   * Sets the End Anchor of the given annotation, and also the end anchors of related annotations
+   * that end in the same place. 
    * @param annotation The annotation whose end anchor should be changed.
    * @param newEndAnchor The new end anchor.
    * @param layerIdToExclude A layer to exclude when updating related annotations.
@@ -1452,7 +1498,8 @@ public class Merger
     return changeEndWithRelatedAnnotations(annotation, newEndAnchor, exclude);
   }
   /**
-   * Sets the End Anchor of the given annotation, and also the end anchors of related annotations that end in the same place.
+   * Sets the End Anchor of the given annotation, and also the end anchors of related annotations
+   * that end in the same place. 
    * @param annotation The annotation whose end anchor should be changed.
    * @param newEndAnchor The new end anchor.
    * @param layerIdsToExclude Layers to exclude when updating related annotations.
@@ -2855,7 +2902,8 @@ public class Merger
   /**
    * Removes elements from the collection that are marked for deletion.
    * @param collection The collection to use
-   * @return A new collection, all the elements of <var>collection</var> except those where {@link TrackedMap#getChange()} is {@link Change}.Operation.Destroy.
+   * @return A new collection, all the elements of <var>collection</var> except those where
+   * {@link TrackedMap#getChange()} is {@link Change}.Operation.Destroy. 
    */
   public Vector<Annotation> removeDeleted(Collection<Annotation> collection)
   {
@@ -2872,12 +2920,11 @@ public class Merger
 
 
   /**
-   * Resets the anchors of the children of the given
-   * annotation. After this method, all children on a given layer
-   * will be s-included (i.e. chained from the start anchor to the
-   * end anchor), and all anchors that previously had an offset at or before the threshold 
-   * will have the offset set to null and the confidence set to
-   * {@link Constants#CONFIDENCE_NONE}. All changed anchors are new anchors.
+   * Resets the anchors of the children of the given annotation. After this method, all children
+   * on a given layer  will be s-included (i.e. chained from the start anchor to the end anchor),
+   * and all anchors that previously had an offset at or before the threshold will have the
+   * offset set to null and the confidence set to {@link Constants#CONFIDENCE_NONE}. All changed
+   * anchors are new anchors. 
    * @param parent The parent whose children should be changed.
    * @param threshold The offset before which anchors will be reset.
    * @return The changes made during this operation.
@@ -3091,10 +3138,13 @@ public class Merger
   } // end of resetChildAnchorsAfter()
 
   /**
-   * Compare two anchors, evaluating them as equal if the difference is less than {@link #offsetComparisonThreshold}.
+   * Compare two anchors, evaluating them as equal if the difference is less than 
+   * {@link #offsetComparisonThreshold}.
    * @param a1 The first anchor.
    * @param a2 The second anchor.
-   * @return 0 if the anchore offsets are the same, or the difference is less than {@link #offsetComparisonThreshold}, 999 if a1.offset is null, -999 if a2.offset is null, or the value of Double.compareTo(Double) otherwise.
+   * @return 0 if the anchore offsets are the same, or the difference is less than 
+   * {@link #offsetComparisonThreshold}, 999 if a1.offset is null, -999 if a2.offset is null, or
+   * the value of Double.compareTo(Double) otherwise. 
    */
   protected int compare(Anchor a1, Anchor a2)
   {
@@ -3106,9 +3156,12 @@ public class Merger
   }
 
   /**
-   * Gets the confidence rating of a given anchor. If the anchor offset is not set, {@link Constants#CONFIDENCE_NONE} is returned. If no Integer confidence attribute is present, {@link Constants#CONFIDENCE_MANUAL} is returned.
+   * Gets the confidence rating of a given anchor. If the anchor offset is not set, 
+   * {@link Constants#CONFIDENCE_NONE} is returned. If no Integer confidence attribute is
+   * present, {@link Constants#CONFIDENCE_MANUAL} is returned. 
    * @param o The anchor to get the confidence rating for.
-   * @return The confidence rating of a given object, or {@link Constants#CONFIDENCE_MANUAL} if it could not be determined.
+   * @return The confidence rating of a given object, or {@link Constants#CONFIDENCE_MANUAL} if
+   * it could not be determined. 
    */
   protected int getConfidence(Anchor o)
   {
@@ -3117,9 +3170,11 @@ public class Merger
   } // end of getConfidence()
 
   /**
-   * Gets the confidence rating of a given object.  If no Integer confidence attribute is present, {@link Constants#CONFIDENCE_MANUAL} is returned.
+   * Gets the confidence rating of a given object.  If no Integer confidence attribute is
+   * present, {@link Constants#CONFIDENCE_MANUAL} is returned. 
    * @param o The annotation to get the confidence rating for.
-   * @return The confidence rating of a given object, or {@link Constants#CONFIDENCE_MANUAL} if it could not be determined.
+   * @return The confidence rating of a given object, or {@link Constants#CONFIDENCE_MANUAL} if
+   * it could not be determined. 
    */
   protected int getConfidence(Annotation o)
   {      
@@ -3128,7 +3183,8 @@ public class Merger
    
   /**
    * Sets the confidence of a given object.
-   * @param o The object to set the confidence rating for (most likely an {@link Annotation} or {@link Anchor})
+   * @param o The object to set the confidence rating for (most likely an {@link Annotation} or
+   * {@link Anchor}) 
    * @param confidence The confidence rating of a given object.
    */
   protected void setConfidence(TrackedMap o, int confidence)
@@ -3150,7 +3206,8 @@ public class Merger
   /**
    * Gets the given annotation's mapped counterpart in the other graph.
    * @param annotation The annotation to get the counterpart of.
-   * @return The annotation in the other graph that has been mapped to the given annotation, or null if no mapping has been made.
+   * @return The annotation in the other graph that has been mapped to the given annotation, or
+   * null if no mapping has been made. 
    */
   protected Annotation getCounterpart(Annotation annotation)
   {
@@ -3170,7 +3227,8 @@ public class Merger
 
   /**
    * Removes mapping between the given annotation and its counterpart.
-   * @param annotation One of the counterpart annotations ({@link #getCounterpart(Annotation)} will be called to determine the other.).
+   * @param annotation One of the counterpart annotations ({@link #getCounterpart(Annotation)}
+   * will be called to determine the other.). 
    */
   protected void unsetCounterparts(Annotation annotation)
   {
