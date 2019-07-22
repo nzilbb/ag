@@ -614,7 +614,7 @@ public class Merger
       mapAnnotationsForMerge(layer, uneditedAnnotations, editedAnnotations); 
     } // next layer
 
-      // phase 2. - reconcile unmapped annotations
+    // phase 2. - reconcile unmapped annotations
     log("phase 2: reconcile unmapped annotations");
       
     for (Layer layer : topDownLayersInEditedGraph)
@@ -630,7 +630,7 @@ public class Merger
       }
     } // next layer
 
-      // phase 3. - compute label deltas
+    // phase 3. - compute label deltas
     log("phase 3: label deltas");
 
     for (Layer layer : topDownLayersInEditedGraph)
@@ -646,7 +646,7 @@ public class Merger
       }
     } // next layer
 
-      // phase 4. - compute anchor deltas horizontally
+    // phase 4. - compute anchor deltas horizontally
     log("phase 4: anchor deltas");
     // use the coarsest granularity of the graphs when comparing offsets
     if (graph.getOffsetGranularity() != null)
@@ -686,7 +686,7 @@ public class Merger
           computeAnchorDeltasForMerge(layer, graph));
       }
     } // next layer
-      // untag annotations tagged during this phase
+    // untag annotations tagged during this phase
     for (Annotation a : graph.getAnnotationsById().values()) a.remove("@computeAnchorDeltasForMerge");
 
     // phase 5. - check new order by offset, and check new containment
@@ -755,7 +755,8 @@ public class Merger
   }
    
   /**
-   * PHASE 1: Maps annotations from another fragment to annotations in this fragment, in order to then compute change deltas.
+   * PHASE 1: Maps annotations from another fragment to annotations in this fragment, in order to
+   * then compute change deltas. 
    * <p>Corresponding annotations in each graph are linked by having the "@other" attribute set.
    * <p>Only annotations with the same participant (if any) can be linked as counterparts.
    * @param layer Layer definition to use.
@@ -2287,17 +2288,43 @@ public class Merger
   protected Vector<Change> checkChildrenForMerge(Layer layer, Graph graph)
     throws TransformationException
   {
+    log("checkChildrenForMerge ", layer.getId(), " peers:", layer.getPeers(), " peers overlap:", layer.getPeersOverlap());
     Vector<Change> changes = new Vector<Change>();
     Layer parentLayer = layer.getParent();
     if (parentLayer == null) return changes; // top level layer
     String layerId = layer.getId();
     String parentLayerId = parentLayer.getId();
 
+    boolean editedGraphHasChildLayer = editedGraph.getLayer(layerId) != null;
+    boolean editedGraphHasParentLayer = editedGraph.getLayer(parentLayerId) != null;
+    if (editedGraphHasChildLayer && editedGraphHasParentLayer
+        // only allow tag annotations to move parents (for now)
+        && layer.getAlignment() == Constants.ALIGNMENT_NONE)
+    { // edited graph has both parent and child layer
+      // detect parent changes
+      for (Annotation child : graph.list(layerId))
+      {
+        Annotation editedChild = getCounterpart(child);
+        if (editedChild == null) continue;
+        Annotation editedParent = editedChild.getParent();
+        if (editedParent == null) continue;
+        Annotation editedParentCounterpart = getCounterpart(editedParent);
+        if (editedParentCounterpart == null) continue;
+        Annotation originalParent = child.getParent();
+        if (originalParent == null || originalParent.getId() == null
+            || !originalParent.getId().equals(editedParentCounterpart.getId()))
+        { // parent has changed
+          log(layerId, ": Parent ", originalParent, " changed to ", editedParentCounterpart);
+          child.setParent(editedParentCounterpart);
+        } // parent has changed
+      } // next child
+    } // edited graph has both parent and child layer
+    
+    // check anchors between children and parents
     if (layer.getPeers() && !layer.getPeersOverlap())
     {
-      boolean editGraphHasChildLayer = editedGraph.getLayer(layerId) != null;
       TreeSet<String> partitionIds = new TreeSet<String>();
-      if (layer.getParentIncludes() && editGraphHasChildLayer)
+      if (layer.getParentIncludes() && editedGraphHasChildLayer)
       { // parentIncludes, so can be partitioned
         // identify partition layers
         for (Layer peerLayer : parentLayer.getChildren().values())
@@ -2347,7 +2374,7 @@ public class Merger
 
         TreeSet<Annotation> byOrdinalOrOffset = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
         HashSet<Annotation> myChildren = new HashSet<Annotation>();
-        if (editGraphHasChildLayer)
+        if (editedGraphHasChildLayer)
         { // edited graph includes child layer, so use its annotations to get to the originals
           byOrdinalOrOffset.addAll(anParent.getAnnotations(layerId));
           for (Annotation an : byOrdinalOrOffset) myChildren.add(getCounterpart(an));
@@ -2376,7 +2403,7 @@ public class Merger
         SortedSet<Annotation> children = byOrdinalOrOffset;
         // special case:
         // if the child layer is in the original only
-        if (!editGraphHasChildLayer
+        if (!editedGraphHasChildLayer
             // and the relationship is saturated
             && layer.getSaturated())
         {
@@ -2416,7 +2443,7 @@ public class Merger
         for (Annotation anChild : removeDeleted(children))
         {
           Annotation anOriginalChild = anChild;
-          if (editGraphHasChildLayer)
+          if (editedGraphHasChildLayer)
           { // edited graph includes child layer, so use its annotations to get to the originals
             anOriginalChild = getCounterpart(anChild);
           }
@@ -2561,7 +2588,7 @@ public class Merger
             Vector<Annotation> childrenEndingHere 
               = removeDeleted(anOriginalChild.getEnd().endOf(layerId));
             Annotation anLastOriginalChild = children.last();
-            if (editGraphHasChildLayer)
+            if (editedGraphHasChildLayer)
             { // edited graph includes child layer, children contains the edited version
               anLastOriginalChild = getCounterpart(anLastOriginalChild);
             }	       
@@ -2856,7 +2883,7 @@ public class Merger
         if (layer.getSaturated() && children.size() > 0)
         {
           Annotation anOriginalChild = children.first();
-          if (editGraphHasChildLayer)
+          if (editedGraphHasChildLayer)
           { // edited graph includes child layer, children contains the edited version
             anOriginalChild = getCounterpart(anOriginalChild);
           }
@@ -2874,7 +2901,7 @@ public class Merger
           } // anOriginalChild != null
           
           anOriginalChild = children.last();
-          if (editGraphHasChildLayer)
+          if (editedGraphHasChildLayer)
           { // edited graph includes child layer, children contains the edited version
             anOriginalChild = getCounterpart(anOriginalChild);
           }
