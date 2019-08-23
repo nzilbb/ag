@@ -723,6 +723,8 @@ public class TestMerger
         } // next step
         if (differences.length() > 0) fail(differences);	 
         if (m.getErrors().size() > 0) fail(m.getErrors().toString());
+
+        fActual.delete();
       }
       catch(Exception exception)
       {
