@@ -185,34 +185,34 @@ public class TestSimpleTokenizer
 	 assertEquals("the", words[0].getLabel());
 
 	 assertEquals("first anchors don't have null offsets", 
-		      new Double(0.0), words[0].getStart().getOffset());
+		      Double.valueOf(0.0), words[0].getStart().getOffset());
 	 assertEquals("intermediate anchors don't have null offsets", 
-		      new Double(4.0), words[0].getEnd().getOffset());
+		      Double.valueOf(4.0), words[0].getEnd().getOffset());
 	 assertEquals("tokens chained together", words[0].getEndId(), words[1].getStartId());
 
 	 assertEquals("quick", words[1].getLabel());
-	 assertEquals("offsets set", new Double(10), words[1].getEnd().getOffset());
+	 assertEquals("offsets set", Double.valueOf(10), words[1].getEnd().getOffset());
 	 assertEquals("brown", words[2].getLabel());
-	 assertEquals("offsets set", new Double(16), words[2].getEnd().getOffset());
+	 assertEquals("offsets set", Double.valueOf(16), words[2].getEnd().getOffset());
 	 assertEquals("fox", words[3].getLabel());
-	 assertEquals("offsets set", new Double(20), words[3].getEnd().getOffset());
+	 assertEquals("offsets set", Double.valueOf(20), words[3].getEnd().getOffset());
 	 assertEquals("last word shares end with utterance", "a1", words[3].getEndId());
 	 assertEquals("first word shares start with utterance", "a1", words[4].getStartId());
 	 assertEquals("jumps", words[4].getLabel());
-	 assertEquals("offsets set", new Double(26), words[4].getEnd().getOffset());
+	 assertEquals("offsets set", Double.valueOf(26), words[4].getEnd().getOffset());
 	 assertEquals("over", words[5].getLabel());
-	 assertEquals("offsets set", new Double(31), words[5].getEnd().getOffset());
+	 assertEquals("offsets set", Double.valueOf(31), words[5].getEnd().getOffset());
 	 assertEquals("last word shares end with utterance", "a2", words[5].getEndId());
 
 	 words = g.getAnnotation("turn2").list("word");
 	 assertEquals(3, words.length);
 	 assertEquals("first word shares start with utterance", "a2", words[0].getStartId());
 	 assertEquals("the", words[0].getLabel());
-	 assertEquals("offsets set", new Double(35), words[0].getEnd().getOffset());
+	 assertEquals("offsets set", Double.valueOf(35), words[0].getEnd().getOffset());
 	 assertEquals("lazy", words[1].getLabel());
-	 assertEquals("offsets set", new Double(40), words[1].getEnd().getOffset());
+	 assertEquals("offsets set", Double.valueOf(40), words[1].getEnd().getOffset());
 	 assertEquals("dog", words[2].getLabel());
-	 assertEquals("offsets set", new Double(44), words[2].getEnd().getOffset());
+	 assertEquals("offsets set", Double.valueOf(44), words[2].getEnd().getOffset());
 	 assertEquals("first word shares end with utterance", "a3", words[2].getEndId());
 	 
 	 for (Anchor a : g.getAnchors().values())

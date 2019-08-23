@@ -72,21 +72,21 @@ public class TestMinimumEditPath
       assertEquals(EditStep.StepOperation.INSERT, path.get(6).getOperation()); //  /n
 
       // 'from' set
-      assertEquals(new Integer(1), path.get(0).getFrom());
-      assertEquals(new Integer(2), path.get(1).getFrom());
-      assertEquals(new Integer(3), path.get(2).getFrom());
+      assertEquals(Integer.valueOf(1), path.get(0).getFrom());
+      assertEquals(Integer.valueOf(2), path.get(1).getFrom());
+      assertEquals(Integer.valueOf(3), path.get(2).getFrom());
       assertNull(path.get(3).getFrom());
-      assertEquals(new Integer(5), path.get(4).getFrom());
-      assertEquals(new Integer(8), path.get(5).getFrom());
+      assertEquals(Integer.valueOf(5), path.get(4).getFrom());
+      assertEquals(Integer.valueOf(8), path.get(5).getFrom());
       assertNull(path.get(6).getFrom());
 
       // 'to' set
       assertNull(path.get(0).getTo());
-      assertEquals(new Integer(2), path.get(1).getTo());
-      assertEquals(new Integer(4), path.get(2).getTo());
+      assertEquals(Integer.valueOf(2), path.get(1).getTo());
+      assertEquals(Integer.valueOf(4), path.get(2).getTo());
       assertNull(path.get(3).getTo());
       assertNull(path.get(4).getTo());
-      assertEquals(new Integer(8), path.get(5).getTo());
+      assertEquals(Integer.valueOf(8), path.get(5).getTo());
       assertNull(path.get(6).getTo());
 
       // distances set

@@ -51,16 +51,16 @@ public class TestMinimumEditPathString
       assertEquals(EditStep.StepOperation.NONE, path.get(3).getOperation());
 
       // 'from' set
-      assertEquals(new Character('t'), path.get(0).getFrom());
-      assertEquals(new Character('h'), path.get(1).getFrom());
-      assertEquals(new Character('i'), path.get(2).getFrom());
-      assertEquals(new Character('s'), path.get(3).getFrom());
+      assertEquals(Character.valueOf('t'), path.get(0).getFrom());
+      assertEquals(Character.valueOf('h'), path.get(1).getFrom());
+      assertEquals(Character.valueOf('i'), path.get(2).getFrom());
+      assertEquals(Character.valueOf('s'), path.get(3).getFrom());
 
       // 'to' set
-      assertEquals(new Character('t'), path.get(0).getTo());
-      assertEquals(new Character('h'), path.get(1).getTo());
-      assertEquals(new Character('i'), path.get(2).getTo());
-      assertEquals(new Character('s'), path.get(3).getTo());
+      assertEquals(Character.valueOf('t'), path.get(0).getTo());
+      assertEquals(Character.valueOf('h'), path.get(1).getTo());
+      assertEquals(Character.valueOf('i'), path.get(2).getTo());
+      assertEquals(Character.valueOf('s'), path.get(3).getTo());
 
       // distances set
       assertEquals(0, path.get(0).getStepDistance());
@@ -114,16 +114,16 @@ public class TestMinimumEditPathString
       assertEquals(EditStep.StepOperation.CHANGE, path.get(3).getOperation());
 
       // 'from' set
-      assertEquals(new Character('t'), path.get(0).getFrom());
-      assertEquals(new Character('h'), path.get(1).getFrom());
-      assertEquals(new Character('i'), path.get(2).getFrom());
-      assertEquals(new Character('s'), path.get(3).getFrom());
+      assertEquals(Character.valueOf('t'), path.get(0).getFrom());
+      assertEquals(Character.valueOf('h'), path.get(1).getFrom());
+      assertEquals(Character.valueOf('i'), path.get(2).getFrom());
+      assertEquals(Character.valueOf('s'), path.get(3).getFrom());
 
       // 'to' set
-      assertEquals(new Character('t'), path.get(0).getTo());
-      assertEquals(new Character('h'), path.get(1).getTo());
-      assertEquals(new Character('a'), path.get(2).getTo());
-      assertEquals(new Character('t'), path.get(3).getTo());
+      assertEquals(Character.valueOf('t'), path.get(0).getTo());
+      assertEquals(Character.valueOf('h'), path.get(1).getTo());
+      assertEquals(Character.valueOf('a'), path.get(2).getTo());
+      assertEquals(Character.valueOf('t'), path.get(3).getTo());
 
       // distances set
       assertEquals(0, path.get(0).getStepDistance());
@@ -183,10 +183,10 @@ public class TestMinimumEditPathString
       assertNull(path.get(3).getFrom());
 
       // 'to' set
-      assertEquals(new Character('t'), path.get(0).getTo());
-      assertEquals(new Character('h'), path.get(1).getTo());
-      assertEquals(new Character('a'), path.get(2).getTo());
-      assertEquals(new Character('t'), path.get(3).getTo());
+      assertEquals(Character.valueOf('t'), path.get(0).getTo());
+      assertEquals(Character.valueOf('h'), path.get(1).getTo());
+      assertEquals(Character.valueOf('a'), path.get(2).getTo());
+      assertEquals(Character.valueOf('t'), path.get(3).getTo());
 
       // distances set
       assertEquals(1, path.get(0).getStepDistance());
@@ -240,10 +240,10 @@ public class TestMinimumEditPathString
       assertEquals(EditStep.StepOperation.DELETE, path.get(3).getOperation());
 
       // 'from' set
-      assertEquals(new Character('t'), path.get(0).getFrom());
-      assertEquals(new Character('h'), path.get(1).getFrom());
-      assertEquals(new Character('i'), path.get(2).getFrom());
-      assertEquals(new Character('s'), path.get(3).getFrom());
+      assertEquals(Character.valueOf('t'), path.get(0).getFrom());
+      assertEquals(Character.valueOf('h'), path.get(1).getFrom());
+      assertEquals(Character.valueOf('i'), path.get(2).getFrom());
+      assertEquals(Character.valueOf('s'), path.get(3).getFrom());
 
       // 'to' set
       assertNull(path.get(0).getTo());
@@ -319,18 +319,18 @@ public class TestMinimumEditPathString
       assertEquals(EditStep.StepOperation.NONE, path.get(4).getOperation());
 
       // 'from' set
-      assertEquals(new Character('p'), path.get(0).getFrom());
-      assertEquals(new Character('l'), path.get(1).getFrom());
-      assertEquals(new Character('o'), path.get(2).getFrom());
-      assertEquals(new Character('m'), path.get(3).getFrom());
-      assertEquals(new Character('o'), path.get(4).getFrom());
+      assertEquals(Character.valueOf('p'), path.get(0).getFrom());
+      assertEquals(Character.valueOf('l'), path.get(1).getFrom());
+      assertEquals(Character.valueOf('o'), path.get(2).getFrom());
+      assertEquals(Character.valueOf('m'), path.get(3).getFrom());
+      assertEquals(Character.valueOf('o'), path.get(4).getFrom());
 
       // 'to' set
       assertNull(path.get(0).getTo());
       assertNull(path.get(1).getTo());
-      assertEquals(new Character('o'), path.get(2).getTo());
-      assertEquals(new Character('r'), path.get(3).getTo());
-      assertEquals(new Character('o'), path.get(4).getTo());
+      assertEquals(Character.valueOf('o'), path.get(2).getTo());
+      assertEquals(Character.valueOf('r'), path.get(3).getTo());
+      assertEquals(Character.valueOf('o'), path.get(4).getTo());
 
       // distances set
       assertEquals(1, path.get(0).getStepDistance());
@@ -389,20 +389,20 @@ public class TestMinimumEditPathString
       assertEquals(EditStep.StepOperation.NONE, path.get(5).getOperation());
 
       // 'from' set
-      assertEquals(new Character('p'), path.get(0).getFrom()); // delete p
-      assertEquals(new Character('l'), path.get(1).getFrom()); // delete l
-      assertEquals(new Character('o'), path.get(2).getFrom()); 
+      assertEquals(Character.valueOf('p'), path.get(0).getFrom()); // delete p
+      assertEquals(Character.valueOf('l'), path.get(1).getFrom()); // delete l
+      assertEquals(Character.valueOf('o'), path.get(2).getFrom()); 
       assertNull(path.get(3).getFrom());                       // insert r
-      assertEquals(new Character('m'), path.get(4).getFrom()); // delete m
-      assertEquals(new Character('o'), path.get(5).getFrom());
+      assertEquals(Character.valueOf('m'), path.get(4).getFrom()); // delete m
+      assertEquals(Character.valueOf('o'), path.get(5).getFrom());
 
       // 'to' set
       assertNull(path.get(0).getTo());                       // delete p
       assertNull(path.get(1).getTo());                       // delete l
-      assertEquals(new Character('o'), path.get(2).getTo());
-      assertEquals(new Character('r'), path.get(3).getTo()); // insert r
+      assertEquals(Character.valueOf('o'), path.get(2).getTo());
+      assertEquals(Character.valueOf('r'), path.get(3).getTo()); // insert r
       assertNull(path.get(4).getTo());                       // delete m
-      assertEquals(new Character('o'), path.get(5).getTo());
+      assertEquals(Character.valueOf('o'), path.get(5).getTo());
 
       // distances set
       assertEquals(1, path.get(0).getStepDistance()); // delete p
@@ -458,18 +458,18 @@ public class TestMinimumEditPathString
       assertEquals(EditStep.StepOperation.NONE, path.get(4).getOperation());
 
       // 'from' set
-      assertEquals(new Character('p'), path.get(0).getFrom()); // delete p
-      assertEquals(new Character('l'), path.get(1).getFrom()); // delete l
-      assertEquals(new Character('o'), path.get(2).getFrom()); 
-      assertEquals(new Character('m'), path.get(3).getFrom()); // change m to r
-      assertEquals(new Character('o'), path.get(4).getFrom());
+      assertEquals(Character.valueOf('p'), path.get(0).getFrom()); // delete p
+      assertEquals(Character.valueOf('l'), path.get(1).getFrom()); // delete l
+      assertEquals(Character.valueOf('o'), path.get(2).getFrom()); 
+      assertEquals(Character.valueOf('m'), path.get(3).getFrom()); // change m to r
+      assertEquals(Character.valueOf('o'), path.get(4).getFrom());
 
       // 'to' set
       assertNull(path.get(0).getTo());                       // delete p
       assertNull(path.get(1).getTo());                       // delete l
-      assertEquals(new Character('o'), path.get(2).getTo());
-      assertEquals(new Character('r'), path.get(3).getTo()); // change m to r
-      assertEquals(new Character('o'), path.get(4).getTo());
+      assertEquals(Character.valueOf('o'), path.get(2).getTo());
+      assertEquals(Character.valueOf('r'), path.get(3).getTo()); // change m to r
+      assertEquals(Character.valueOf('o'), path.get(4).getTo());
 
       // distances set
       assertEquals(1, path.get(0).getStepDistance()); // delete p
@@ -506,18 +506,18 @@ public class TestMinimumEditPathString
       assertEquals(EditStep.StepOperation.NONE, path.get(4).getOperation());
 
       // 'from' set
-      assertEquals(new Character('p'), path.get(0).getFrom());
-      assertEquals(new Character('l'), path.get(1).getFrom());
-      assertEquals(new Character('o'), path.get(2).getFrom());
-      assertEquals(new Character('m'), path.get(3).getFrom());
-      assertEquals(new Character('o'), path.get(4).getFrom());
+      assertEquals(Character.valueOf('p'), path.get(0).getFrom());
+      assertEquals(Character.valueOf('l'), path.get(1).getFrom());
+      assertEquals(Character.valueOf('o'), path.get(2).getFrom());
+      assertEquals(Character.valueOf('m'), path.get(3).getFrom());
+      assertEquals(Character.valueOf('o'), path.get(4).getFrom());
 
       // 'to' set
       assertNull(path.get(0).getTo());
       assertNull(path.get(1).getTo());
-      assertEquals(new Character('o'), path.get(2).getTo());
-      assertEquals(new Character('r'), path.get(3).getTo());
-      assertEquals(new Character('o'), path.get(4).getTo());
+      assertEquals(Character.valueOf('o'), path.get(2).getTo());
+      assertEquals(Character.valueOf('r'), path.get(3).getTo());
+      assertEquals(Character.valueOf('o'), path.get(4).getTo());
 
       // distances set
       assertEquals(10, path.get(0).getStepDistance());
@@ -650,30 +650,30 @@ public class TestMinimumEditPathString
       assertEquals(EditStep.StepOperation.CHANGE, path.get(10).getOperation()); // 1/2
 
       // 'from' set
-      assertEquals(new Character(' '), path.get(0).getFrom());
-      assertEquals(new Character('p'), path.get(1).getFrom());
-      assertEquals(new Character('l'), path.get(2).getFrom());
-      assertEquals(new Character('o'), path.get(3).getFrom());
-      assertEquals(new Character('m'), path.get(4).getFrom());
+      assertEquals(Character.valueOf(' '), path.get(0).getFrom());
+      assertEquals(Character.valueOf('p'), path.get(1).getFrom());
+      assertEquals(Character.valueOf('l'), path.get(2).getFrom());
+      assertEquals(Character.valueOf('o'), path.get(3).getFrom());
+      assertEquals(Character.valueOf('m'), path.get(4).getFrom());
       assertNull(path.get(5).getFrom());
-      assertEquals(new Character('o'), path.get(6).getFrom());
+      assertEquals(Character.valueOf('o'), path.get(6).getFrom());
       assertNull(path.get(7).getFrom());
       assertNull(path.get(8).getFrom());
-      assertEquals(new Character(' '), path.get(9).getFrom());
-      assertEquals(new Character('1'), path.get(10).getFrom());
+      assertEquals(Character.valueOf(' '), path.get(9).getFrom());
+      assertEquals(Character.valueOf('1'), path.get(10).getFrom());
 
       // 'to' set
       assertNull(path.get(0).getTo());
-      assertEquals(new Character('P'), path.get(1).getTo());
-      assertEquals(new Character('r'), path.get(2).getTo());
-      assertEquals(new Character('i'), path.get(3).getTo());
-      assertEquals(new Character('n'), path.get(4).getTo());
-      assertEquals(new Character('c'), path.get(5).getTo());
-      assertEquals(new Character('i'), path.get(6).getTo());
-      assertEquals(new Character('p'), path.get(7).getTo());
-      assertEquals(new Character('e'), path.get(8).getTo());
+      assertEquals(Character.valueOf('P'), path.get(1).getTo());
+      assertEquals(Character.valueOf('r'), path.get(2).getTo());
+      assertEquals(Character.valueOf('i'), path.get(3).getTo());
+      assertEquals(Character.valueOf('n'), path.get(4).getTo());
+      assertEquals(Character.valueOf('c'), path.get(5).getTo());
+      assertEquals(Character.valueOf('i'), path.get(6).getTo());
+      assertEquals(Character.valueOf('p'), path.get(7).getTo());
+      assertEquals(Character.valueOf('e'), path.get(8).getTo());
       assertNull(path.get(9).getTo());
-      assertEquals(new Character('2'), path.get(10).getTo());
+      assertEquals(Character.valueOf('2'), path.get(10).getTo());
 
       // distances set
       assertEquals(10, path.get(0).getStepDistance()); // space
@@ -739,26 +739,26 @@ public class TestMinimumEditPathString
       assertEquals(EditStep.StepOperation.INSERT, path.get(8).getOperation()); //  /2
 
       // 'from' set
-      assertEquals(new Character(' '), path.get(0).getFrom());
-      assertEquals(new Character('p'), path.get(1).getFrom());
-      assertEquals(new Character('l'), path.get(2).getFrom());
-      assertEquals(new Character('o'), path.get(3).getFrom());
-      assertEquals(new Character('m'), path.get(4).getFrom());
-      assertEquals(new Character('o'), path.get(5).getFrom());
-      assertEquals(new Character(' '), path.get(6).getFrom());
-      assertEquals(new Character('1'), path.get(7).getFrom());
+      assertEquals(Character.valueOf(' '), path.get(0).getFrom());
+      assertEquals(Character.valueOf('p'), path.get(1).getFrom());
+      assertEquals(Character.valueOf('l'), path.get(2).getFrom());
+      assertEquals(Character.valueOf('o'), path.get(3).getFrom());
+      assertEquals(Character.valueOf('m'), path.get(4).getFrom());
+      assertEquals(Character.valueOf('o'), path.get(5).getFrom());
+      assertEquals(Character.valueOf(' '), path.get(6).getFrom());
+      assertEquals(Character.valueOf('1'), path.get(7).getFrom());
       assertNull(path.get(8).getFrom());
 
       // 'to' set
-      assertEquals(new Character('P'), path.get(0).getTo());
-      assertEquals(new Character('r'), path.get(1).getTo());
-      assertEquals(new Character('i'), path.get(2).getTo());
-      assertEquals(new Character('n'), path.get(3).getTo());
-      assertEquals(new Character('c'), path.get(4).getTo());
-      assertEquals(new Character('i'), path.get(5).getTo());
-      assertEquals(new Character('p'), path.get(6).getTo());
-      assertEquals(new Character('e'), path.get(7).getTo());
-      assertEquals(new Character('2'), path.get(8).getTo());
+      assertEquals(Character.valueOf('P'), path.get(0).getTo());
+      assertEquals(Character.valueOf('r'), path.get(1).getTo());
+      assertEquals(Character.valueOf('i'), path.get(2).getTo());
+      assertEquals(Character.valueOf('n'), path.get(3).getTo());
+      assertEquals(Character.valueOf('c'), path.get(4).getTo());
+      assertEquals(Character.valueOf('i'), path.get(5).getTo());
+      assertEquals(Character.valueOf('p'), path.get(6).getTo());
+      assertEquals(Character.valueOf('e'), path.get(7).getTo());
+      assertEquals(Character.valueOf('2'), path.get(8).getTo());
       
       // distances
       assertEquals(10, path.get(0).getStepDistance()); //  /P

@@ -84,7 +84,7 @@ public class TestAnnotation
    {
       Annotation a = new Annotation("123", "LABEL", "word");
       a.put("labelStatus", 50);
-      assertEquals(new Integer(50), a.get("labelStatus"));      
+      assertEquals(Integer.valueOf(50), a.get("labelStatus"));      
    }
 
    @Test public void objectAttributes() 
@@ -191,7 +191,7 @@ public class TestAnnotation
       a.setOrdinal(1000);
       assertEquals(1000, a.getOrdinal());
       assertEquals("Original value attribute:", 99, a.getOriginalOrdinal());
-      assertEquals("Original value in map:", new Integer(99), a.get("originalOrdinal"));
+      assertEquals("Original value in map:", Integer.valueOf(99), a.get("originalOrdinal"));
       assertEquals(Change.Operation.Update, a.getChange());
 
       a.create();
@@ -218,7 +218,7 @@ public class TestAnnotation
       assertEquals("end", c.getEndId());
       assertEquals("parent", c.getParentId());
       assertEquals(99, c.getOrdinal());     
-      assertEquals(new Integer(Constants.CONFIDENCE_AUTOMATIC), c.getConfidence());
+      assertEquals(Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC), c.getConfidence());
       assertFalse(c.containsKey("foo"));     
    }
 
@@ -236,7 +236,7 @@ public class TestAnnotation
       assertEquals("end", c.getEndId());
       assertEquals("parent", c.getParentId());
       assertEquals(99, c.getOrdinal());     
-      assertEquals(new Integer(Constants.CONFIDENCE_AUTOMATIC), c.getConfidence());
+      assertEquals(Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC), c.getConfidence());
       assertEquals("foo", c.get("foo"));     
       assertFalse(c.containsKey("@bar"));     
    }
@@ -387,13 +387,13 @@ public class TestAnnotation
       assertFalse("includes - endInstant", test.includes(endInstant));
 
       // duration
-      assertEquals("interval duration", new Double(1.0), test.getDuration());
-      assertEquals("instant duration", new Double(0.0), startInstant.getDuration());
+      assertEquals("interval duration", Double.valueOf(1.0), test.getDuration());
+      assertEquals("instant duration", Double.valueOf(0.0), startInstant.getDuration());
       assertNull("unknown duration", unknown.getDuration());
 
       // midpoint
-      assertEquals("interval midpoint", new Double(1.5), test.getMidpoint());
-      assertEquals("instant midpoint", new Double(1.0), startInstant.getMidpoint());
+      assertEquals("interval midpoint", Double.valueOf(1.5), test.getMidpoint());
+      assertEquals("instant midpoint", Double.valueOf(1.0), startInstant.getMidpoint());
       assertNull("unknown midpoint", unknown.getMidpoint());
 
       // includesMidpointOf
@@ -421,37 +421,37 @@ public class TestAnnotation
       graph.addAnchor(first);
       graph.addAnnotation(following);
       graph.addAnchor(last);
-      assertEquals("distance prior", new Double(0.5), test.distance(prior));
-      assertEquals("distance previous", new Double(0.0), test.distance(previous));
-      assertEquals("distance next", new Double(0.0), test.distance(next));
-      assertEquals("distance following", new Double(0.5), test.distance(following));
-      assertEquals("distance overStart", new Double(-0.25), test.distance(overStart));
-      assertEquals("distance overEnd", new Double(-0.25), test.distance(overEnd));
-      assertEquals("distance startEdge", new Double(-0.25), test.distance(startEdge));
-      assertEquals("distance endEdge", new Double(-0.25), test.distance(endEdge));
-      assertEquals("distance parallel", new Double(-1.0), test.distance(parallel));
-      assertEquals("distance simultaneous", new Double(-1.0), test.distance(simultaneous));
-      assertEquals("distance reflexive", new Double(-1.0), test.distance(test));
+      assertEquals("distance prior", Double.valueOf(0.5), test.distance(prior));
+      assertEquals("distance previous", Double.valueOf(0.0), test.distance(previous));
+      assertEquals("distance next", Double.valueOf(0.0), test.distance(next));
+      assertEquals("distance following", Double.valueOf(0.5), test.distance(following));
+      assertEquals("distance overStart", Double.valueOf(-0.25), test.distance(overStart));
+      assertEquals("distance overEnd", Double.valueOf(-0.25), test.distance(overEnd));
+      assertEquals("distance startEdge", Double.valueOf(-0.25), test.distance(startEdge));
+      assertEquals("distance endEdge", Double.valueOf(-0.25), test.distance(endEdge));
+      assertEquals("distance parallel", Double.valueOf(-1.0), test.distance(parallel));
+      assertEquals("distance simultaneous", Double.valueOf(-1.0), test.distance(simultaneous));
+      assertEquals("distance reflexive", Double.valueOf(-1.0), test.distance(test));
       // we tolerate negative-zero even though it's silly
-      assertEquals("distance startInstant", new Double(-0.0), test.distance(startInstant));
-      assertEquals("distance endInstant", new Double(0.0), test.distance(endInstant));
+      assertEquals("distance startInstant", Double.valueOf(-0.0), test.distance(startInstant));
+      assertEquals("distance endInstant", Double.valueOf(0.0), test.distance(endInstant));
       assertNull("distance unknown", test.distance(unknown));
 
-      assertEquals("maxPairedDistance prior", new Double(1.5), test.maxPairedDistance(prior));
-      assertEquals("maxPairedDistance previous", new Double(1.0), test.maxPairedDistance(previous));
-      assertEquals("maxPairedDistance next", new Double(1.0), test.maxPairedDistance(next));
-      assertEquals("maxPairedDistance following", new Double(1.5), test.maxPairedDistance(following));
-      assertEquals("maxPairedDistance overStart", new Double(-0.75), test.maxPairedDistance(overStart));
-      assertEquals("maxPairedDistance overEnd", new Double(-0.75), test.maxPairedDistance(overEnd));
-      assertEquals("maxPairedDistance startEdge", new Double(-0.75), test.maxPairedDistance(startEdge));
-      assertEquals("maxPairedDistance endEdge", new Double(-0.75), test.maxPairedDistance(endEdge));
-      assertEquals("maxPairedDistance startInstant", new Double(1.0), test.maxPairedDistance(startInstant));
-      assertEquals("maxPairedDistance endInstant", new Double(1.0), test.maxPairedDistance(endInstant));
+      assertEquals("maxPairedDistance prior", Double.valueOf(1.5), test.maxPairedDistance(prior));
+      assertEquals("maxPairedDistance previous", Double.valueOf(1.0), test.maxPairedDistance(previous));
+      assertEquals("maxPairedDistance next", Double.valueOf(1.0), test.maxPairedDistance(next));
+      assertEquals("maxPairedDistance following", Double.valueOf(1.5), test.maxPairedDistance(following));
+      assertEquals("maxPairedDistance overStart", Double.valueOf(-0.75), test.maxPairedDistance(overStart));
+      assertEquals("maxPairedDistance overEnd", Double.valueOf(-0.75), test.maxPairedDistance(overEnd));
+      assertEquals("maxPairedDistance startEdge", Double.valueOf(-0.75), test.maxPairedDistance(startEdge));
+      assertEquals("maxPairedDistance endEdge", Double.valueOf(-0.75), test.maxPairedDistance(endEdge));
+      assertEquals("maxPairedDistance startInstant", Double.valueOf(1.0), test.maxPairedDistance(startInstant));
+      assertEquals("maxPairedDistance endInstant", Double.valueOf(1.0), test.maxPairedDistance(endInstant));
       assertNull("maxPairedDistance unknown", test.maxPairedDistance(unknown));
       // we tolerate negative-zero even though it's silly
-      assertEquals("maxPairedDistance reflexive", new Double(-0.0), test.maxPairedDistance(test));
-      assertEquals("maxPairedDistance parallel", new Double(-0.0), test.maxPairedDistance(parallel));
-      assertEquals("maxPairedDistance simultaneous", new Double(-0.0), test.maxPairedDistance(simultaneous));
+      assertEquals("maxPairedDistance reflexive", Double.valueOf(-0.0), test.maxPairedDistance(test));
+      assertEquals("maxPairedDistance parallel", Double.valueOf(-0.0), test.maxPairedDistance(parallel));
+      assertEquals("maxPairedDistance simultaneous", Double.valueOf(-0.0), test.maxPairedDistance(simultaneous));
 
       // anchored
       assertTrue("anchored", test.getAnchored());
@@ -556,28 +556,28 @@ public class TestAnnotation
       a34.setEndAnchor(a4);
 
       // distal
-      assertEquals(new Double(1.0), a12.minimumOffsetDifference(a34, false));
+      assertEquals(Double.valueOf(1.0), a12.minimumOffsetDifference(a34, false));
       assertEquals(a34.minimumOffsetDifference(a12, false), a12.minimumOffsetDifference(a34, false));
 
       // joined
-      assertEquals(new Double(0.0), a12.minimumOffsetDifference(a23, false));
+      assertEquals(Double.valueOf(0.0), a12.minimumOffsetDifference(a23, false));
       assertEquals(a23.minimumOffsetDifference(a12, false), a12.minimumOffsetDifference(a23, false));
 
       // overlapping
-      assertEquals(new Double(-1.0), a13.minimumOffsetDifference(a24, false));
+      assertEquals(Double.valueOf(-1.0), a13.minimumOffsetDifference(a24, false));
       assertEquals(a24.minimumOffsetDifference(a13, false), a13.minimumOffsetDifference(a24, false));
 
       // identical
-      assertEquals(new Double(-2.0), a13.minimumOffsetDifference(a13, false));
+      assertEquals(Double.valueOf(-2.0), a13.minimumOffsetDifference(a13, false));
 
       // t-included
-      assertEquals(new Double(-1.0), a14.minimumOffsetDifference(a12, false));
+      assertEquals(Double.valueOf(-1.0), a14.minimumOffsetDifference(a12, false));
       assertEquals(a14.minimumOffsetDifference(a12, false), a12.minimumOffsetDifference(a14, false));
 
-      assertEquals(new Double(-1.0), a14.minimumOffsetDifference(a23, false));
+      assertEquals(Double.valueOf(-1.0), a14.minimumOffsetDifference(a23, false));
       assertEquals(a14.minimumOffsetDifference(a23, false), a23.minimumOffsetDifference(a14, false));
 
-      assertEquals(new Double(-1.0), a14.minimumOffsetDifference(a34, false));
+      assertEquals(Double.valueOf(-1.0), a14.minimumOffsetDifference(a34, false));
       assertEquals(a14.minimumOffsetDifference(a34, false), a34.minimumOffsetDifference(a14, false));
    }
    @Test public void validate()

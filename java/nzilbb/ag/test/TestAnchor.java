@@ -39,16 +39,16 @@ public class TestAnchor
       a.setOffset(456.789);
       assertEquals("123", a.getId());
       assertEquals("get() works", "123", a.get("id"));
-      assertEquals(new Double(456.789), a.getOffset());
-      assertEquals("get() works", new Double(456.789), a.get("offset"));
+      assertEquals(Double.valueOf(456.789), a.getOffset());
+      assertEquals("get() works", Double.valueOf(456.789), a.get("offset"));
       assertEquals("456.789", a.toString());
 
       // Basic constructor
       a = new Anchor("123", 456.789);
       assertEquals("123", a.getId());
       assertEquals("get() works", "123", a.get("id"));
-      assertEquals(new Double(456.789), a.getOffset());
-      assertEquals("get() works", new Double(456.789), a.get("offset"));
+      assertEquals(Double.valueOf(456.789), a.getOffset());
+      assertEquals("get() works", Double.valueOf(456.789), a.get("offset"));
       assertEquals("456.789", a.toString());
    }
 
@@ -58,7 +58,7 @@ public class TestAnchor
       a.setId("123");
       a.setOffset(456.789);
       a.put("alignmentStatus", 50);
-      assertEquals(new Integer(50), a.get("alignmentStatus"));      
+      assertEquals(Integer.valueOf(50), a.get("alignmentStatus"));      
    }
 
    @Test public void copyConstructor() 
@@ -73,8 +73,8 @@ public class TestAnchor
 
       Anchor newA = new Anchor(a);
       assertNull("id not copied", newA.getId());
-      assertEquals("offset copied", new Double(123.456), newA.getOffset());
-      assertEquals("originalOffset not copied", new Double(123.456), newA.getOriginalOffset());
+      assertEquals("offset copied", Double.valueOf(123.456), newA.getOffset());
+      assertEquals("originalOffset not copied", Double.valueOf(123.456), newA.getOriginalOffset());
       assertEquals("other attribute copied", Boolean.TRUE, newA.get("copy"));
       assertNull("transient attribute not copied", newA.get("@dontCopy"));      
    }
@@ -127,7 +127,7 @@ public class TestAnchor
       a.setId("123");
       a.setOffset(456.789);
       a.put("foo", "bar");
-      assertEquals(new Double(456.789), a.getOffset());
+      assertEquals(Double.valueOf(456.789), a.getOffset());
       assertEquals("Offset and original are the same", a.getOriginalOffset(), a.getOffset());
       assertEquals(Change.Operation.NoChange, a.getChange());
 
@@ -135,17 +135,17 @@ public class TestAnchor
       assertEquals("Only offset affects change:", Change.Operation.NoChange, a.getChange());
 
       a.setOffset(123.456);
-      assertEquals(new Double(123.456), a.getOffset());
-      assertEquals("Original offset remembers first offset:", new Double(456.789), a.getOriginalOffset());
+      assertEquals(Double.valueOf(123.456), a.getOffset());
+      assertEquals("Original offset remembers first offset:", Double.valueOf(456.789), a.getOriginalOffset());
       assertEquals(Change.Operation.Update, a.getChange());
 
       a.setOffset(456.123);
-      assertEquals(new Double(456.123), a.getOffset());
-      assertEquals("Original offset only set once:", new Double(456.789), a.getOriginalOffset());
+      assertEquals(Double.valueOf(456.123), a.getOffset());
+      assertEquals("Original offset only set once:", Double.valueOf(456.789), a.getOriginalOffset());
       assertEquals(Change.Operation.Update, a.getChange());
 
       a.rollback();
-      assertEquals(new Double(456.789), a.getOffset());
+      assertEquals(Double.valueOf(456.789), a.getOffset());
       assertEquals("Offset and original are the same", a.getOriginalOffset(), a.getOffset());
       assertEquals(Change.Operation.NoChange, a.getChange());
 
@@ -168,8 +168,8 @@ public class TestAnchor
       Anchor c = (Anchor)a.clone();
       assertNotNull(c);
       assertEquals("123", c.getId());
-      assertEquals(new Integer(Constants.CONFIDENCE_AUTOMATIC), c.getConfidence());
-      assertEquals(new Double(99.0), c.getOffset());
+      assertEquals(Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC), c.getConfidence());
+      assertEquals(Double.valueOf(99.0), c.getOffset());
       assertFalse(c.containsKey("foo"));     
    }
 
@@ -181,8 +181,8 @@ public class TestAnchor
       assertEquals("no change registered when offset is initialised as null",
 		   0, a.getChanges().size());
       assertEquals("change is registered by setter", 1,
-		   a.setOffset(new Double(99.0)).size());
-      assertEquals(new Double(99.0), a.getOffset());
+		   a.setOffset(Double.valueOf(99.0)).size());
+      assertEquals(Double.valueOf(99.0), a.getOffset());
       assertTrue(a.containsKey("originalOffset"));     
       assertNull(a.get("originalOffset"));
       assertEquals("a change registered when offset is initialised as null and then is changed",
@@ -211,13 +211,13 @@ public class TestAnchor
       assertNull("offsetMin - null offsets, multiple paths preceding", a.getOffsetMin());
 
       g.getAnchor("earliest").setOffset(1.0);
-      assertEquals("offsetMin - earliest", new Double(1.0), a.getOffsetMin());
+      assertEquals("offsetMin - earliest", Double.valueOf(1.0), a.getOffsetMin());
 
       g.getAnchor("earlier").setOffset(2.0);
-      assertEquals("offsetMin - chain overrides direct connection", new Double(2.0), a.getOffsetMin());
+      assertEquals("offsetMin - chain overrides direct connection", Double.valueOf(2.0), a.getOffsetMin());
 
       g.getAnchor("early").setOffset(3.0);
-      assertEquals("offsetMin - direct connection overrides chain", new Double(3.0), a.getOffsetMin());
+      assertEquals("offsetMin - direct connection overrides chain", Double.valueOf(3.0), a.getOffsetMin());
 
       assertNull("offsetMax - null offset, no following", a.getOffsetMax());
 
@@ -234,17 +234,17 @@ public class TestAnchor
       assertNull("offsetMax - null offsets, multiple paths following", a.getOffsetMax());
 
       g.getAnchor("latest").setOffset(7.0);
-      assertEquals("offsetMax - latest", new Double(7.0), a.getOffsetMax());
+      assertEquals("offsetMax - latest", Double.valueOf(7.0), a.getOffsetMax());
 
       g.getAnchor("later").setOffset(6.0);
-      assertEquals("offsetMax - chain overrides direct connection", new Double(6.0), a.getOffsetMax());
+      assertEquals("offsetMax - chain overrides direct connection", Double.valueOf(6.0), a.getOffsetMax());
 
       g.getAnchor("late").setOffset(5.0);
-      assertEquals("offsetMax - direct connection overrides chain", new Double(5.0), a.getOffsetMax());
+      assertEquals("offsetMax - direct connection overrides chain", Double.valueOf(5.0), a.getOffsetMax());
       
       a.setOffset(5.0);
-      assertEquals("offsetMin - offset set", new Double(5.0), a.getOffsetMin());
-      assertEquals("offsetMax - offset set", new Double(5.0), a.getOffsetMax());
+      assertEquals("offsetMin - offset set", Double.valueOf(5.0), a.getOffsetMin());
+      assertEquals("offsetMax - offset set", Double.valueOf(5.0), a.getOffsetMax());
 
       // preceding
       LinkedHashSet<Anchor> preceding = a.getPreceding();

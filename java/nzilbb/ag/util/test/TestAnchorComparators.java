@@ -206,8 +206,8 @@ public class TestAnchorComparators
       
     assertEquals("endTurn2", g.getAnnotation("turn2").getEndId());
     assertEquals("endDog", g.getAnnotation("word9").getEndId());
-    assertEquals(new Double(9.0), g.getAnnotation("turn2").getEnd().getOffset());
-    assertEquals(new Double(9.0), g.getAnnotation("word9").getEnd().getOffset());
+    assertEquals(Double.valueOf(9.0), g.getAnnotation("turn2").getEnd().getOffset());
+    assertEquals(Double.valueOf(9.0), g.getAnnotation("word9").getEnd().getOffset());
     assertEquals("turn2", g.getAnnotation("word9").getParentId());
     assertTrue("compare ancestry - non-t-included child: " + comparator.compare(g.getAnchor("endDog"), g.getAnchor("endTurn2")), 
                comparator.compare(g.getAnchor("endDog"), g.getAnchor("endTurn2")) < 0);

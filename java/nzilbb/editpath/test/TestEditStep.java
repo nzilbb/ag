@@ -41,30 +41,30 @@ public class TestEditStep
 
       // constructor with no backtrace
       EditStep<Integer> step1 = new EditStep<Integer>(1,1,0,EditStep.StepOperation.NONE);
-      assertEquals(new Integer(1), step1.getFrom());
-      assertEquals(new Integer(1), step1.getTo());
+      assertEquals(Integer.valueOf(1), step1.getFrom());
+      assertEquals(Integer.valueOf(1), step1.getTo());
       assertEquals(0, step1.getStepDistance());
       assertEquals(EditStep.StepOperation.NONE, step1.getOperation());
 
       // constructor with backtrace
       EditStep<Integer> step2 = new EditStep<Integer>(2,-2,1,EditStep.StepOperation.CHANGE, step1);
-      assertEquals(new Integer(2), step2.getFrom());
-      assertEquals(new Integer(-2), step2.getTo());
+      assertEquals(Integer.valueOf(2), step2.getFrom());
+      assertEquals(Integer.valueOf(-2), step2.getTo());
       assertEquals(1, step2.getStepDistance());
       assertEquals(EditStep.StepOperation.CHANGE, step2.getOperation());
       assertEquals(step1, step2.getBackTrace());
 
       // no-distance change is possible
       EditStep<Integer> step3 = new EditStep<Integer>(3,33,0,EditStep.StepOperation.CHANGE, step2);
-      assertEquals(new Integer(3), step3.getFrom());
-      assertEquals(new Integer(33), step3.getTo());
+      assertEquals(Integer.valueOf(3), step3.getFrom());
+      assertEquals(Integer.valueOf(33), step3.getTo());
       assertEquals(0, step3.getStepDistance());
       assertEquals(EditStep.StepOperation.CHANGE, step3.getOperation());
       assertEquals(step2, step3.getBackTrace());
 
       // delete
       EditStep<Integer> step4 = new EditStep<Integer>(4,null,50,EditStep.StepOperation.DELETE, step3);
-      assertEquals(new Integer(4), step4.getFrom());
+      assertEquals(Integer.valueOf(4), step4.getFrom());
       assertNull(step4.getTo());
       assertEquals(50, step4.getStepDistance());
       assertEquals(EditStep.StepOperation.DELETE, step4.getOperation());
@@ -73,7 +73,7 @@ public class TestEditStep
       // insert
       EditStep<Integer> step5 = new EditStep<Integer>(null,5,25,EditStep.StepOperation.INSERT, step4);
       assertNull(step5.getFrom());
-      assertEquals(new Integer(5), step5.getTo());
+      assertEquals(Integer.valueOf(5), step5.getTo());
       assertEquals(25, step5.getStepDistance());
       assertEquals(EditStep.StepOperation.INSERT, step5.getOperation());
       assertEquals(step4, step5.getBackTrace());

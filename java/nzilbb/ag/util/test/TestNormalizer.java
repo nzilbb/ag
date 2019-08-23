@@ -753,13 +753,13 @@ public class TestNormalizer
 	 assertNotEquals("words not linked", g.getAnnotation("jumps").getStart(), 
 			 g.getAnnotation("fox").getEnd());
 
-	 assertEquals("same offset", new Double(0.0), 
+	 assertEquals("same offset", Double.valueOf(0.0), 
 		      g.getAnnotation("the").getStart().getOffset());
-	 assertEquals("same offset", new Double(0.4), 
+	 assertEquals("same offset", Double.valueOf(0.4), 
 		      g.getAnnotation("fox").getEnd().getOffset());
-	 assertEquals("same offset", new Double(0.4), 
+	 assertEquals("same offset", Double.valueOf(0.4), 
 		      g.getAnnotation("jumps").getStart().getOffset());
-	 assertEquals("same offset", new Double(5.4), 
+	 assertEquals("same offset", Double.valueOf(5.4), 
 		      g.getAnnotation("dog").getEnd().getOffset());
 
 	 assertEquals("low confidence", Constants.CONFIDENCE_DEFAULT, 
@@ -878,13 +878,13 @@ public class TestNormalizer
 	 assertNotEquals("words not linked", g.getAnnotation("jumps").getStart(), 
 			 g.getAnnotation("fox").getEnd());
 
-	 assertEquals("same offset", new Double(0.0), 
+	 assertEquals("same offset", Double.valueOf(0.0), 
 		      g.getAnnotation("the").getStart().getOffset());
-	 assertEquals("same offset", new Double(0.4), 
+	 assertEquals("same offset", Double.valueOf(0.4), 
 		      g.getAnnotation("fox").getEnd().getOffset());
-	 assertEquals("same offset", new Double(0.4), 
+	 assertEquals("same offset", Double.valueOf(0.4), 
 		      g.getAnnotation("jumps").getStart().getOffset());
-	 assertEquals("same offset", new Double(5.4), 
+	 assertEquals("same offset", Double.valueOf(5.4), 
 		      g.getAnnotation("dog").getEnd().getOffset());
 
 	 assertEquals("same confidence", Constants.CONFIDENCE_MANUAL, 
@@ -1008,9 +1008,9 @@ public class TestNormalizer
 	 assertNotEquals("words not linked", g.getAnnotation("jumps").getStart(), 
 			 g.getAnnotation("fox").getEnd());
 
-	 assertEquals("same offset", new Double(0.4), 
+	 assertEquals("same offset", Double.valueOf(0.4), 
 		      g.getAnnotation("fox").getEnd().getOffset());
-	 assertEquals("same offset", new Double(0.4), 
+	 assertEquals("same offset", Double.valueOf(0.4), 
 		      g.getAnnotation("jumps").getStart().getOffset());
 
 	 assertEquals("same offset", Constants.CONFIDENCE_DEFAULT, 

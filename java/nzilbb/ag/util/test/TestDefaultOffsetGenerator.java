@@ -97,39 +97,39 @@ public class TestDefaultOffsetGenerator
 
       // test the changes are recorded
       Iterator<Change> order = changes.iterator();
-      assertEquals(new Double(0.0), g.getAnchor("a0").getOffset());
-      assertEquals(new Double(1.0), g.getAnchor("a1").getOffset());
-      assertEquals(new Double(2.0), g.getAnchor("a2").getOffset());
-      assertEquals(new Double(3.0), g.getAnchor("a3").getOffset());
-      assertEquals(new Double(4.0), g.getAnchor("a4").getOffset());
-      assertEquals(new Double(5.0), g.getAnchor("a5").getOffset());
-      assertEquals(new Double(6.0), g.getAnchor("a6").getOffset());
-      assertEquals(new Double(7.0), g.getAnchor("a7").getOffset());
-      assertEquals(new Double(8.0), g.getAnchor("a8").getOffset());
-      assertEquals(new Double(9.0), g.getAnchor("a9").getOffset());
+      assertEquals(Double.valueOf(0.0), g.getAnchor("a0").getOffset());
+      assertEquals(Double.valueOf(1.0), g.getAnchor("a1").getOffset());
+      assertEquals(Double.valueOf(2.0), g.getAnchor("a2").getOffset());
+      assertEquals(Double.valueOf(3.0), g.getAnchor("a3").getOffset());
+      assertEquals(Double.valueOf(4.0), g.getAnchor("a4").getOffset());
+      assertEquals(Double.valueOf(5.0), g.getAnchor("a5").getOffset());
+      assertEquals(Double.valueOf(6.0), g.getAnchor("a6").getOffset());
+      assertEquals(Double.valueOf(7.0), g.getAnchor("a7").getOffset());
+      assertEquals(Double.valueOf(8.0), g.getAnchor("a8").getOffset());
+      assertEquals(Double.valueOf(9.0), g.getAnchor("a9").getOffset());
 
       // collapsed back to start of turn
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a0"), "offset", new Double(0.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a0"), "offset", Double.valueOf(0.0)), 
                    order.next());
       // collapsed forward to end of turn
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a9"), "offset", new Double(9.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a9"), "offset", Double.valueOf(9.0)), 
                    order.next());
       // then the rest interpolated between
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a1"), "offset", new Double(1.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a1"), "offset", Double.valueOf(1.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a2"), "offset", new Double(2.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a2"), "offset", Double.valueOf(2.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a3"), "offset", new Double(3.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a3"), "offset", Double.valueOf(3.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a4"), "offset", new Double(4.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a4"), "offset", Double.valueOf(4.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a5"), "offset", new Double(5.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a5"), "offset", Double.valueOf(5.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a6"), "offset", new Double(6.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a6"), "offset", Double.valueOf(6.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a7"), "offset", new Double(7.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a7"), "offset", Double.valueOf(7.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a8"), "offset", new Double(8.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a8"), "offset", Double.valueOf(8.0)), 
                    order.next());
       assertEquals("no extra changes to graph: " + g.getChanges(), changes.size(), g.getChanges().size());
 
@@ -215,38 +215,38 @@ public class TestDefaultOffsetGenerator
 
       // test the changes are recorded
       Iterator<Change> order = changes.iterator();
-      assertEquals(new Double(0.0), g.getAnchor("a0").getOffset());
-      assertEquals(new Double(0.5), g.getAnchor("a05").getOffset());
-      assertEquals(new Double(1.0), g.getAnchor("a1").getOffset());
-      assertEquals(new Double(1.5), g.getAnchor("a15").getOffset());
-      assertEquals(new Double(2.0), g.getAnchor("a2").getOffset());
-      assertEquals(new Double(3.0), g.getAnchor("a3").getOffset());
-      assertEquals(new Double(4.0), g.getAnchor("a4").getOffset());
-      assertEquals(new Double(5.0), g.getAnchor("a5").getOffset());
-      assertEquals(new Double(6.0), g.getAnchor("a6").getOffset());
-      assertEquals(new Double(7.0), g.getAnchor("a7").getOffset());
+      assertEquals(Double.valueOf(0.0), g.getAnchor("a0").getOffset());
+      assertEquals(Double.valueOf(0.5), g.getAnchor("a05").getOffset());
+      assertEquals(Double.valueOf(1.0), g.getAnchor("a1").getOffset());
+      assertEquals(Double.valueOf(1.5), g.getAnchor("a15").getOffset());
+      assertEquals(Double.valueOf(2.0), g.getAnchor("a2").getOffset());
+      assertEquals(Double.valueOf(3.0), g.getAnchor("a3").getOffset());
+      assertEquals(Double.valueOf(4.0), g.getAnchor("a4").getOffset());
+      assertEquals(Double.valueOf(5.0), g.getAnchor("a5").getOffset());
+      assertEquals(Double.valueOf(6.0), g.getAnchor("a6").getOffset());
+      assertEquals(Double.valueOf(7.0), g.getAnchor("a7").getOffset());
 
       // collapsed back to start of turn
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a0"), "offset", new Double(0.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a0"), "offset", Double.valueOf(0.0)), 
                    order.next());
       // then the rest interpolated between
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a05"), "offset", new Double(0.5)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a05"), "offset", Double.valueOf(0.5)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a1"), "offset", new Double(1.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a1"), "offset", Double.valueOf(1.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a15"), "offset", new Double(1.5)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a15"), "offset", Double.valueOf(1.5)), 
                    order.next());
       // a2 not changed
       // collapsed forward to end of span
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a7"), "offset", new Double(7.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a7"), "offset", Double.valueOf(7.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a3"), "offset", new Double(3.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a3"), "offset", Double.valueOf(3.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a4"), "offset", new Double(4.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a4"), "offset", Double.valueOf(4.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a5"), "offset", new Double(5.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a5"), "offset", Double.valueOf(5.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a6"), "offset", new Double(6.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a6"), "offset", Double.valueOf(6.0)), 
                    order.next());
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
 
@@ -338,46 +338,46 @@ public class TestDefaultOffsetGenerator
 
       // test the changes are recorded
       Iterator<Change> order = changes.iterator();
-      assertEquals(new Double(0.0), g.getAnchor("a0").getOffset());
-      assertEquals(new Double(0.1), g.getAnchor("a01").getOffset());
-      assertEquals(new Double(0.2), g.getAnchor("a02").getOffset());
+      assertEquals(Double.valueOf(0.0), g.getAnchor("a0").getOffset());
+      assertEquals(Double.valueOf(0.1), g.getAnchor("a01").getOffset());
+      assertEquals(Double.valueOf(0.2), g.getAnchor("a02").getOffset());
       // yay for inexact floating point representations!
-      assertEquals(new Double(0.30000000000000004), g.getAnchor("a03").getOffset());
-      assertEquals(new Double(0.4), g.getAnchor("a04a").getOffset());
-      assertEquals(new Double(0.4), g.getAnchor("a04b").getOffset());
-      assertEquals(new Double(1.4), g.getAnchor("a14").getOffset());
-      assertEquals(new Double(2.4), g.getAnchor("a24").getOffset());
-      assertEquals(new Double(3.4), g.getAnchor("a34").getOffset());
-      assertEquals(new Double(4.4), g.getAnchor("a44").getOffset());
-      assertEquals(new Double(5.4), g.getAnchor("a54").getOffset());
+      assertEquals(Double.valueOf(0.30000000000000004), g.getAnchor("a03").getOffset());
+      assertEquals(Double.valueOf(0.4), g.getAnchor("a04a").getOffset());
+      assertEquals(Double.valueOf(0.4), g.getAnchor("a04b").getOffset());
+      assertEquals(Double.valueOf(1.4), g.getAnchor("a14").getOffset());
+      assertEquals(Double.valueOf(2.4), g.getAnchor("a24").getOffset());
+      assertEquals(Double.valueOf(3.4), g.getAnchor("a34").getOffset());
+      assertEquals(Double.valueOf(4.4), g.getAnchor("a44").getOffset());
+      assertEquals(Double.valueOf(5.4), g.getAnchor("a54").getOffset());
 
       // collapsed back to start of turn
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a0"), "offset", new Double(0.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a0"), "offset", Double.valueOf(0.0)), 
                    order.next());
       // collapsed forward to end of utterance
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a04a"), "offset", new Double(0.4)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a04a"), "offset", Double.valueOf(0.4)), 
                    order.next());
       // then the rest interpolated between
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a01"), "offset", new Double(0.1)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a01"), "offset", Double.valueOf(0.1)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a02"), "offset", new Double(0.2)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a02"), "offset", Double.valueOf(0.2)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a03"), "offset", new Double(0.30000000000000004)), // yay for inexact floating point representations
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a03"), "offset", Double.valueOf(0.30000000000000004)), // yay for inexact floating point representations
                    order.next());
       // collapsed back to start of utterance
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a04b"), "offset", new Double(0.4)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a04b"), "offset", Double.valueOf(0.4)), 
                    order.next());
       // collapsed forward to end of utterance
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a54"), "offset", new Double(5.4)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a54"), "offset", Double.valueOf(5.4)), 
                    order.next());
       // then the rest interpolated between
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a14"), "offset", new Double(1.4)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a14"), "offset", Double.valueOf(1.4)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a24"), "offset", new Double(2.4)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a24"), "offset", Double.valueOf(2.4)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a34"), "offset", new Double(3.4)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a34"), "offset", Double.valueOf(3.4)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a44"), "offset", new Double(4.4)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a44"), "offset", Double.valueOf(4.4)), 
                    order.next());
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
 
@@ -467,68 +467,68 @@ public class TestDefaultOffsetGenerator
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
 
       // test the values are what we expected
-      assertEquals(new Double(0.0), g.getAnchor("a0").getOffset());
-      assertEquals(new Double(1.0), g.getAnchor("a1").getOffset());
-      assertEquals(new Double(2.0), g.getAnchor("a2").getOffset());
-      assertEquals(new Double(3.0), g.getAnchor("a3").getOffset());
-      assertEquals(new Double(4.0), g.getAnchor("a4").getOffset());
-      assertEquals(new Double(5.0), g.getAnchor("a5").getOffset());
-      assertEquals(new Double(6.0), g.getAnchor("a6").getOffset());
-      assertEquals(new Double(7.0), g.getAnchor("a7").getOffset());
-      assertEquals(new Double(8.0), g.getAnchor("a8").getOffset());
-      assertEquals(new Double(9.0), g.getAnchor("a9").getOffset());
+      assertEquals(Double.valueOf(0.0), g.getAnchor("a0").getOffset());
+      assertEquals(Double.valueOf(1.0), g.getAnchor("a1").getOffset());
+      assertEquals(Double.valueOf(2.0), g.getAnchor("a2").getOffset());
+      assertEquals(Double.valueOf(3.0), g.getAnchor("a3").getOffset());
+      assertEquals(Double.valueOf(4.0), g.getAnchor("a4").getOffset());
+      assertEquals(Double.valueOf(5.0), g.getAnchor("a5").getOffset());
+      assertEquals(Double.valueOf(6.0), g.getAnchor("a6").getOffset());
+      assertEquals(Double.valueOf(7.0), g.getAnchor("a7").getOffset());
+      assertEquals(Double.valueOf(8.0), g.getAnchor("a8").getOffset());
+      assertEquals(Double.valueOf(9.0), g.getAnchor("a9").getOffset());
 
-      assertEquals(new Double(6.5),  g.getAnchor("b6").getOffset());
-      assertEquals(new Double(7.5),  g.getAnchor("b7").getOffset());
-      assertEquals(new Double(8.5),  g.getAnchor("b8").getOffset());
-      assertEquals(new Double(9.5),  g.getAnchor("b9").getOffset());
-      assertEquals(new Double(10.5), g.getAnchor("b10").getOffset());
-      assertEquals(new Double(11.5), g.getAnchor("b11").getOffset());
-      assertEquals(new Double(12.5), g.getAnchor("b12").getOffset());
+      assertEquals(Double.valueOf(6.5),  g.getAnchor("b6").getOffset());
+      assertEquals(Double.valueOf(7.5),  g.getAnchor("b7").getOffset());
+      assertEquals(Double.valueOf(8.5),  g.getAnchor("b8").getOffset());
+      assertEquals(Double.valueOf(9.5),  g.getAnchor("b9").getOffset());
+      assertEquals(Double.valueOf(10.5), g.getAnchor("b10").getOffset());
+      assertEquals(Double.valueOf(11.5), g.getAnchor("b11").getOffset());
+      assertEquals(Double.valueOf(12.5), g.getAnchor("b12").getOffset());
 
       // test the changes are recorded
       Iterator<Change> order = changes.iterator();
 
       // collapsed back to start of turn
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a0"), "offset", new Double(0.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a0"), "offset", Double.valueOf(0.0)), 
                    order.next());
       // collapsed forward to end of turn
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a9"), "offset", new Double(9.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a9"), "offset", Double.valueOf(9.0)), 
                    order.next());
       // then the rest interpolated between
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a1"), "offset", new Double(1.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a1"), "offset", Double.valueOf(1.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a2"), "offset", new Double(2.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a2"), "offset", Double.valueOf(2.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a3"), "offset", new Double(3.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a3"), "offset", Double.valueOf(3.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a4"), "offset", new Double(4.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a4"), "offset", Double.valueOf(4.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a5"), "offset", new Double(5.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a5"), "offset", Double.valueOf(5.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a6"), "offset", new Double(6.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a6"), "offset", Double.valueOf(6.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a7"), "offset", new Double(7.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a7"), "offset", Double.valueOf(7.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a8"), "offset", new Double(8.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a8"), "offset", Double.valueOf(8.0)), 
                    order.next());
 
       // collapsed back to start of turn
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b6"), "offset", new Double(6.5)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b6"), "offset", Double.valueOf(6.5)), 
                    order.next());
       // collapsed forward to end of turn
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b12"), "offset", new Double(12.5)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b12"), "offset", Double.valueOf(12.5)), 
                    order.next());
       // then the rest interpolated between
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b7"), "offset", new Double(7.5)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b7"), "offset", Double.valueOf(7.5)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b8"), "offset", new Double(8.5)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b8"), "offset", Double.valueOf(8.5)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b9"), "offset", new Double(9.5)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b9"), "offset", Double.valueOf(9.5)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b10"), "offset", new Double(10.5)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b10"), "offset", Double.valueOf(10.5)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b11"), "offset", new Double(11.5)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b11"), "offset", Double.valueOf(11.5)), 
                    order.next());
 
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
@@ -605,33 +605,33 @@ public class TestDefaultOffsetGenerator
 
       // test the changes are recorded
       Iterator<Change> order = changes.iterator();
-      assertEquals(new Double(1.0), g.getAnchor("a1").getOffset());
-      assertEquals(new Double(2.0), g.getAnchor("a2").getOffset());
-      assertEquals(new Double(3.0), g.getAnchor("a3").getOffset());
-      assertEquals(new Double(4.0), g.getAnchor("a4").getOffset());
-      assertEquals(new Double(5.0), g.getAnchor("a5").getOffset());
-      assertEquals(new Double(6.0), g.getAnchor("a6").getOffset());
-      assertEquals(new Double(7.0), g.getAnchor("a7").getOffset());
-      assertEquals(new Double(8.0), g.getAnchor("a8").getOffset());
-      assertEquals(new Double(9.0), g.getAnchor("a9").getOffset());
+      assertEquals(Double.valueOf(1.0), g.getAnchor("a1").getOffset());
+      assertEquals(Double.valueOf(2.0), g.getAnchor("a2").getOffset());
+      assertEquals(Double.valueOf(3.0), g.getAnchor("a3").getOffset());
+      assertEquals(Double.valueOf(4.0), g.getAnchor("a4").getOffset());
+      assertEquals(Double.valueOf(5.0), g.getAnchor("a5").getOffset());
+      assertEquals(Double.valueOf(6.0), g.getAnchor("a6").getOffset());
+      assertEquals(Double.valueOf(7.0), g.getAnchor("a7").getOffset());
+      assertEquals(Double.valueOf(8.0), g.getAnchor("a8").getOffset());
+      assertEquals(Double.valueOf(9.0), g.getAnchor("a9").getOffset());
 
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a1"), "offset", new Double(1.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a1"), "offset", Double.valueOf(1.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a2"), "offset", new Double(2.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a2"), "offset", Double.valueOf(2.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a3"), "offset", new Double(3.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a3"), "offset", Double.valueOf(3.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a4"), "offset", new Double(4.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a4"), "offset", Double.valueOf(4.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a5"), "offset", new Double(5.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a5"), "offset", Double.valueOf(5.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a6"), "offset", new Double(6.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a6"), "offset", Double.valueOf(6.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a7"), "offset", new Double(7.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a7"), "offset", Double.valueOf(7.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a8"), "offset", new Double(8.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a8"), "offset", Double.valueOf(8.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a9"), "offset", new Double(9.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a9"), "offset", Double.valueOf(9.0)), 
                    order.next());
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
 
@@ -787,27 +787,27 @@ public class TestDefaultOffsetGenerator
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
 
       // test the values are what we expected
-      assertEquals(new Double(0.0), g.getAnchor("a0").getOffset());
-      assertEquals(new Double(1.0), g.getAnchor("a1").getOffset());
-      assertEquals(new Double(2.0), g.getAnchor("a2").getOffset());
-      assertEquals(new Double(3.0), g.getAnchor("a3").getOffset());
-      assertEquals(new Double(4.0), g.getAnchor("a4").getOffset());
-      assertEquals(new Double(5.0), g.getAnchor("a5").getOffset());
-      assertEquals(new Double(6.0), g.getAnchor("a6").getOffset());
-      assertEquals(new Double(7.0), g.getAnchor("a7").getOffset());
-      assertEquals(new Double(8.0), g.getAnchor("a8").getOffset());
-      assertEquals(new Double(9.0), g.getAnchor("a9").getOffset());
+      assertEquals(Double.valueOf(0.0), g.getAnchor("a0").getOffset());
+      assertEquals(Double.valueOf(1.0), g.getAnchor("a1").getOffset());
+      assertEquals(Double.valueOf(2.0), g.getAnchor("a2").getOffset());
+      assertEquals(Double.valueOf(3.0), g.getAnchor("a3").getOffset());
+      assertEquals(Double.valueOf(4.0), g.getAnchor("a4").getOffset());
+      assertEquals(Double.valueOf(5.0), g.getAnchor("a5").getOffset());
+      assertEquals(Double.valueOf(6.0), g.getAnchor("a6").getOffset());
+      assertEquals(Double.valueOf(7.0), g.getAnchor("a7").getOffset());
+      assertEquals(Double.valueOf(8.0), g.getAnchor("a8").getOffset());
+      assertEquals(Double.valueOf(9.0), g.getAnchor("a9").getOffset());
 
-      assertEquals(new Double(6.5),  g.getAnchor("b6").getOffset());
-      assertEquals(new Double(7.5),  g.getAnchor("b7").getOffset());
-      assertEquals(new Double(8.5),  g.getAnchor("b8").getOffset());
-      assertEquals(new Double(9.5),  g.getAnchor("b9").getOffset());
-      assertEquals(new Double(10.5), g.getAnchor("b10").getOffset());
+      assertEquals(Double.valueOf(6.5),  g.getAnchor("b6").getOffset());
+      assertEquals(Double.valueOf(7.5),  g.getAnchor("b7").getOffset());
+      assertEquals(Double.valueOf(8.5),  g.getAnchor("b8").getOffset());
+      assertEquals(Double.valueOf(9.5),  g.getAnchor("b9").getOffset());
+      assertEquals(Double.valueOf(10.5), g.getAnchor("b10").getOffset());
       // word and phone anchors evenly spread amongst each other
-      assertEquals(new Double(11.5), g.getAnchor("b11").getOffset());
-      assertEquals(new Double(12.5), g.getAnchor("b12").getOffset());
-      assertEquals(new Double(13.5), g.getAnchor("b13").getOffset());
-      assertEquals(new Double(14.5), g.getAnchor("b14").getOffset());
+      assertEquals(Double.valueOf(11.5), g.getAnchor("b11").getOffset());
+      assertEquals(Double.valueOf(12.5), g.getAnchor("b12").getOffset());
+      assertEquals(Double.valueOf(13.5), g.getAnchor("b13").getOffset());
+      assertEquals(Double.valueOf(14.5), g.getAnchor("b14").getOffset());
 
       // topic left unchanged (it's a top-level layer)
       assertNull(g.getAnchor("topic1Start").getOffset());
@@ -817,49 +817,49 @@ public class TestDefaultOffsetGenerator
       Iterator<Change> order = changes.iterator();
 
       // collapsed back to start of turn
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a0"), "offset", new Double(0.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a0"), "offset", Double.valueOf(0.0)), 
                    order.next());
       // collapsed forward to end of turn
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a9"), "offset", new Double(9.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a9"), "offset", Double.valueOf(9.0)), 
                    order.next());
       // then the rest interpolated between
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a1"), "offset", new Double(1.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a1"), "offset", Double.valueOf(1.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a2"), "offset", new Double(2.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a2"), "offset", Double.valueOf(2.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a3"), "offset", new Double(3.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a3"), "offset", Double.valueOf(3.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a4"), "offset", new Double(4.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a4"), "offset", Double.valueOf(4.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a5"), "offset", new Double(5.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a5"), "offset", Double.valueOf(5.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a6"), "offset", new Double(6.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a6"), "offset", Double.valueOf(6.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a7"), "offset", new Double(7.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a7"), "offset", Double.valueOf(7.0)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a8"), "offset", new Double(8.0)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a8"), "offset", Double.valueOf(8.0)), 
                    order.next());
 
       // collapsed back to start of turn
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b6"), "offset", new Double(6.5)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b6"), "offset", Double.valueOf(6.5)), 
                    order.next());
       // collapsed forward to end of turn
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b14"), "offset", new Double(14.5)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b14"), "offset", Double.valueOf(14.5)), 
                    order.next());
       // then the rest interpolated between
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b7"), "offset", new Double(7.5)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b7"), "offset", Double.valueOf(7.5)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b8"), "offset", new Double(8.5)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b8"), "offset", Double.valueOf(8.5)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b9"), "offset", new Double(9.5)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b9"), "offset", Double.valueOf(9.5)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b10"), "offset", new Double(10.5)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b10"), "offset", Double.valueOf(10.5)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b11"), "offset", new Double(11.5)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b11"), "offset", Double.valueOf(11.5)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b12"), "offset", new Double(12.5)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b12"), "offset", Double.valueOf(12.5)), 
                    order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b13"), "offset", new Double(13.5)), 
+      assertEquals(new Change(Change.Operation.Update, g.getAnchor("b13"), "offset", Double.valueOf(13.5)), 
                    order.next());
 
       assertEquals("no extra changes to graph - " + changes + " vs. " +g.getChanges(), 
@@ -959,12 +959,12 @@ public class TestDefaultOffsetGenerator
 
       // test the changes are recorded
       Iterator<Change> order = changes.iterator();
-      assertEquals(new Double(0.0), f.getAnchor("a0").getOffset());
-      assertEquals(new Double(0.1), f.getAnchor("a01").getOffset());
-      assertEquals(new Double(0.2), f.getAnchor("a02").getOffset());
+      assertEquals(Double.valueOf(0.0), f.getAnchor("a0").getOffset());
+      assertEquals(Double.valueOf(0.1), f.getAnchor("a01").getOffset());
+      assertEquals(Double.valueOf(0.2), f.getAnchor("a02").getOffset());
       // yay for inexact floating point representations!
-      assertEquals(new Double(0.30000000000000004), f.getAnchor("a03").getOffset());
-      assertEquals(new Double(0.4), f.getAnchor("a04a").getOffset());
+      assertEquals(Double.valueOf(0.30000000000000004), f.getAnchor("a03").getOffset());
+      assertEquals(Double.valueOf(0.4), f.getAnchor("a04a").getOffset());
 
     }
     catch(TransformationException exception)
@@ -982,12 +982,12 @@ public class TestDefaultOffsetGenerator
       for (String m : generator.getErrors()) System.out.println("ERROR: " + m);
 
       // test the values are what we expected
-      assertEquals(new Double(0.4), f.getAnchor("a04b").getOffset());
-      assertEquals(new Double(1.4), f.getAnchor("a14").getOffset());
-      assertEquals(new Double(2.4), f.getAnchor("a24").getOffset());
-      assertEquals(new Double(3.4), f.getAnchor("a34").getOffset());
-      assertEquals(new Double(4.4), f.getAnchor("a44").getOffset());
-      assertEquals(new Double(5.4), f.getAnchor("a54").getOffset());
+      assertEquals(Double.valueOf(0.4), f.getAnchor("a04b").getOffset());
+      assertEquals(Double.valueOf(1.4), f.getAnchor("a14").getOffset());
+      assertEquals(Double.valueOf(2.4), f.getAnchor("a24").getOffset());
+      assertEquals(Double.valueOf(3.4), f.getAnchor("a34").getOffset());
+      assertEquals(Double.valueOf(4.4), f.getAnchor("a44").getOffset());
+      assertEquals(Double.valueOf(5.4), f.getAnchor("a54").getOffset());
     }
     catch(TransformationException exception)
     {

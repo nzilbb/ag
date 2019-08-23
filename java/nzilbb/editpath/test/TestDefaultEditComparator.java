@@ -36,42 +36,42 @@ public class TestDefaultEditComparator
       DefaultEditComparator<Integer> c = new DefaultEditComparator<Integer>();
 
       // comparator's default equals comparator
-      assertEquals(0, c.getComparator().compare(new Integer(1), new Integer(1)));
-      assertNotEquals(0, c.getComparator().compare(new Integer(1), new Integer(2)));
+      assertEquals(0, c.getComparator().compare(Integer.valueOf(1), Integer.valueOf(1)));
+      assertNotEquals(0, c.getComparator().compare(Integer.valueOf(1), Integer.valueOf(2)));
 
       // no change
       EditStep<Integer> step = c.compare(1,1);
-      assertEquals(new Integer(1), step.getFrom());
-      assertEquals(new Integer(1), step.getTo());
+      assertEquals(Integer.valueOf(1), step.getFrom());
+      assertEquals(Integer.valueOf(1), step.getTo());
       assertEquals(0, step.getStepDistance());
       assertEquals(EditStep.StepOperation.NONE, step.getOperation());
       
       // change
       step = c.compare(1,2);
-      assertEquals(new Integer(1), step.getFrom());
-      assertEquals(new Integer(2), step.getTo());
+      assertEquals(Integer.valueOf(1), step.getFrom());
+      assertEquals(Integer.valueOf(2), step.getTo());
       assertEquals(1, step.getStepDistance());
       assertEquals(EditStep.StepOperation.CHANGE, step.getOperation());
 
       // delete
       step = c.delete(1);
       assertEquals(1, step.getStepDistance());
-      assertEquals(new Integer(1), step.getFrom());
+      assertEquals(Integer.valueOf(1), step.getFrom());
       assertNull(step.getTo());
       assertEquals(EditStep.StepOperation.DELETE, step.getOperation());
 
       // insert
       step = c.insert(1);
       assertEquals(1, step.getStepDistance());
-      assertEquals(new Integer(1), step.getTo());
+      assertEquals(Integer.valueOf(1), step.getTo());
       assertNull(step.getFrom());
       assertEquals(EditStep.StepOperation.INSERT, step.getOperation());
 
       // different distance
       c = new DefaultEditComparator<Integer>(10);
       step = c.compare(1,2);
-      assertEquals(new Integer(1), step.getFrom());
-      assertEquals(new Integer(2), step.getTo());
+      assertEquals(Integer.valueOf(1), step.getFrom());
+      assertEquals(Integer.valueOf(2), step.getTo());
       assertEquals(10, step.getStepDistance());
       assertEquals(EditStep.StepOperation.CHANGE, step.getOperation());
 
@@ -110,7 +110,7 @@ public class TestDefaultEditComparator
 
       // no to
       EditStep<Integer> step = c.compare(1,null);
-      assertEquals(new Integer(1), step.getFrom());
+      assertEquals(Integer.valueOf(1), step.getFrom());
       assertNull(step.getTo());
       assertEquals(1, step.getStepDistance());
       assertEquals(EditStep.StepOperation.CHANGE, step.getOperation());
@@ -118,7 +118,7 @@ public class TestDefaultEditComparator
       // no from
       step = c.compare(null,2);
       assertNull(step.getFrom());
-      assertEquals(new Integer(2), step.getTo());
+      assertEquals(Integer.valueOf(2), step.getTo());
       assertEquals(1, step.getStepDistance());
       assertEquals(EditStep.StepOperation.CHANGE, step.getOperation());
 
