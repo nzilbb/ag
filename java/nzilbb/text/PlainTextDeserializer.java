@@ -449,19 +449,19 @@ public class PlainTextDeserializer
   public void setMaxParticipantLength(Integer newMaxParticipantLength) { maxParticipantLength = newMaxParticipantLength; }
 
   /**
-   * Format for time synchronizations within the transcript body. {0} = hours, {1} = minutes, {2} = seconds, {3} = milliseconds
+   * Format for time synchronizations within the transcript body. e.g. HH:mm:ss.SSS
    * @see #getTimestampFormat()
    * @see #setTimestampFormat(String)
    */
   protected String timestampFormat = "HH:mm:ss.SSS";
   /**
-   * Getter for {@link #timestampFormat}: Format for time synchronizations within the transcript body. {0} = hours, {1} = minutes, {2} = seconds, {3} = milliseconds
-   * @return Format for time synchronizations within the transcript body. {0} = hours, {1} = minutes, {2} = seconds, {3} = milliseconds
+   * Getter for {@link #timestampFormat}: Format for time synchronizations within the transcript body.
+   * @return Format for time synchronizations within the transcript body. 
    */
   public String getTimestampFormat() { return timestampFormat; }
   /**
-   * Setter for {@link #timestampFormat}: Format for time synchronizations within the transcript body. {0} = hours, {1} = minutes, {2} = seconds, {3} = milliseconds
-   * @param newTimestampFormat Format for time synchronizations within the transcript body. {0} = hours, {1} = minutes, {2} = seconds, {3} = milliseconds
+   * Setter for {@link #timestampFormat}: Format for time synchronizations within the transcript body. 
+   * @param newTimestampFormat Format for time synchronizations within the transcript body. e.g. "HH:mm:ss.SSS"
    */
   public void setTimestampFormat(String newTimestampFormat) { timestampFormat = newTimestampFormat; }
 
@@ -842,7 +842,7 @@ public class PlainTextDeserializer
       configuration.addParameter(
         new Parameter("timestampFormat", String.class, 
                       "Time-stamp Format",
-                      "Format for a time stamp - e.g. {0}={1}, where {0} is a place-holder for the attribute name or key, and {1} is a place-holder for the attribute value", true));
+                      "Format for a time stamp - e.g. HH:mm:ss.SSS", true));
     }
     if (configuration.get("timestampFormat").getValue() == null)
     {
