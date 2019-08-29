@@ -72,7 +72,7 @@ public class TestPlainTextDeserializer
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals("Configuration parameters" + configuration, 9,
+      assertEquals("Configuration parameters" + configuration, 10,
 		   deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
@@ -91,6 +91,9 @@ public class TestPlainTextDeserializer
 		   configuration.get("participantFormat").getValue());
       assertEquals("metaDataFormat", "{0}={1}",
 		   configuration.get("metaDataFormat").getValue());
+      assertEquals("timestampFormat",
+                   "HH:mm:ss.SSS",
+		   configuration.get("timestampFormat").getValue());
 
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -217,7 +220,7 @@ public class TestPlainTextDeserializer
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals("Configuration parameters" + configuration, 9, deserializer.configure(configuration, schema).size());      
+      assertEquals("Configuration parameters" + configuration, 10, deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertEquals("noise", "noise", 
@@ -235,6 +238,9 @@ public class TestPlainTextDeserializer
 		   configuration.get("participantFormat").getValue());
       assertEquals("metaDataFormat", "{0}={1}",
 		   configuration.get("metaDataFormat").getValue());
+      assertEquals("timestampFormat",
+                   "HH:mm:ss.SSS",
+		   configuration.get("timestampFormat").getValue());
 
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -403,7 +409,7 @@ public class TestPlainTextDeserializer
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals("Configuration parameters" + configuration, 9, deserializer.configure(configuration, schema).size());      
+      assertEquals("Configuration parameters" + configuration, 10, deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertNull("noise", configuration.get("noiseLayer").getValue());
@@ -418,6 +424,9 @@ public class TestPlainTextDeserializer
 		   configuration.get("participantFormat").getValue());
       assertEquals("metaDataFormat", "{0}={1}",
 		   configuration.get("metaDataFormat").getValue());
+      assertEquals("timestampFormat",
+                   "HH:mm:ss.SSS",
+		   configuration.get("timestampFormat").getValue());
 
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -553,7 +562,7 @@ public class TestPlainTextDeserializer
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals("Configuration parameters" + configuration, 9, deserializer.configure(configuration, schema).size());      
+      assertEquals("Configuration parameters" + configuration, 10, deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertNull("noise", configuration.get("noiseLayer").getValue());
@@ -568,6 +577,9 @@ public class TestPlainTextDeserializer
 		   configuration.get("participantFormat").getValue());
       assertEquals("metaDataFormat", "{0}={1}",
 		   configuration.get("metaDataFormat").getValue());
+      assertEquals("timestampFormat",
+                   "HH:mm:ss.SSS",
+		   configuration.get("timestampFormat").getValue());
 
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -709,7 +721,7 @@ public class TestPlainTextDeserializer
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals("Configuration parameters" + configuration, 9, deserializer.configure(configuration, schema).size());      
+      assertEquals("Configuration parameters" + configuration, 10, deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertEquals("noise", "noise", 
@@ -727,6 +739,9 @@ public class TestPlainTextDeserializer
 		   configuration.get("participantFormat").getValue());
       assertEquals("metaDataFormat", "{0}={1}",
 		   configuration.get("metaDataFormat").getValue());
+      assertEquals("timestampFormat",
+                   "HH:mm:ss.SSS",
+		   configuration.get("timestampFormat").getValue());
 
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -808,6 +823,122 @@ public class TestPlainTextDeserializer
 
    }
 
+   @Test public void transcribeme() 
+      throws Exception
+   {
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("scribe", "Transcriber", 0, true, true, true),
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("comment", "Comment", 2, true, false, true),
+	 new Layer("noise", "Noise", 2, true, false, true),
+	 new Layer("participant_gender", "Gender", 0, false, false, true, "who", true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true),
+	 new Layer("pronounce", "Pronounce", 0, true, false, false, "word", true),
+	 new Layer("lexical", "Lexical", 0, true, false, false, "word", true));
+      
+      // access file
+      NamedStream[] streams = {
+	 new NamedStream(new File(getDir(), "transcribeme.txt")) }; // transcript
+      
+      // create deserializer
+      PlainTextDeserializer deserializer = new PlainTextDeserializer();
+
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      
+      // adjust patterns for participant and meta-data
+      configuration.get("participantFormat").setValue("{0} ");
+      // also don't use speech conventions
+      configuration.get("useConventions").setValue(Boolean.FALSE);
+	 
+      assertEquals("Configuration parameters" + configuration, 10, deserializer.configure(configuration, schema).size());      
+      assertEquals("comment", "comment", 
+		   ((Layer)configuration.get("commentLayer").getValue()).getId());
+      assertEquals("noise", "noise", 
+		   ((Layer)configuration.get("noiseLayer").getValue()).getId());
+      assertEquals("lexical", "lexical", 
+		   ((Layer)configuration.get("lexicalLayer").getValue()).getId());
+      assertEquals("pronounce", "pronounce", 
+		   ((Layer)configuration.get("pronounceLayer").getValue()).getId());
+      assertEquals("use conventions", Boolean.FALSE, configuration.get("useConventions").getValue());
+      assertEquals("maxParticipantLength",
+		   Integer.valueOf(20), configuration.get("maxParticipantLength").getValue());
+      assertEquals("maxHeaderLines",
+		   Integer.valueOf(50), configuration.get("maxHeaderLines").getValue());
+      assertEquals("participantFormat", "{0} ",
+		   configuration.get("participantFormat").getValue());
+      assertEquals("metaDataFormat", "{0}={1}",
+		   configuration.get("metaDataFormat").getValue());
+      assertEquals("timestampFormat", "HH:mm:ss.SSS",
+      	   configuration.get("timestampFormat").getValue());
+
+      // load the stream
+      ParameterSet defaultParameters = deserializer.load(streams, schema);
+      // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals(0, defaultParameters.size());
+
+      // no parameters, so configuration required - don't call deserializer.setParameters(defaultParameters);
+
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+      
+      for (String warning : deserializer.getWarnings())
+      {
+	 System.out.println(warning);
+      }
+      
+      assertEquals("transcribeme.txt", g.getId());
+      assertEquals("time units", Constants.UNIT_SECONDS, g.getOffsetUnits());
+
+
+      // participants     
+      Annotation[] participants = g.list("who"); 
+      assertEquals(2, participants.length);
+      assertEquals("S1", participants[0].getLabel());
+      assertEquals("S2", participants[1].getLabel());
+
+      // turns
+      Annotation[] turns = g.list("turn");
+      //assertEquals(4, turns.length);
+      assertEquals("S1", turns[0].getLabel());
+      assertEquals(participants[0], turns[0].getParent());
+      
+      //assertEquals("S2", turns[1].getLabel());
+      //assertEquals(participants[1], turns[1].getParent());
+
+      // utterances
+      Annotation[] utterances = g.list("utterance");
+      assertEquals(4, utterances.length);
+      assertEquals(turns[0], utterances[0].getParent());
+      assertEquals(turns[1], utterances[1].getParent());
+      assertEquals(turns[2], utterances[2].getParent());
+      assertEquals(turns[3], utterances[3].getParent());
+	    
+      Annotation[] words = g.list("word");
+      assertEquals(9, words.length);
+      // System.out.println("" + Arrays.asList(words));
+      assertEquals("The", words[0].getLabel());
+      assertEquals("quick", words[1].getLabel());
+      assertEquals("Brown", words[2].getLabel());
+      assertEquals("fox", words[3].getLabel());
+      assertEquals("jumps", words[4].getLabel());
+      assertEquals("Over", words[5].getLabel());
+      assertEquals("the", words[6].getLabel());
+      assertEquals("lazy", words[7].getLabel());
+      assertEquals("dog.", words[8].getLabel());
+
+      // alignment
+      assertEquals(Double.valueOf(1.717), utterances[0].getStart().getOffset());
+      assertEquals(Double.valueOf(4.395), utterances[1].getStart().getOffset());
+      assertEquals(Double.valueOf(8.692), utterances[2].getStart().getOffset());
+      assertEquals(Double.valueOf(75.835), utterances[3].getStart().getOffset());
+	    
+   }
+
    @Test public void cmsw() 
       throws Exception
    {
@@ -836,7 +967,7 @@ public class TestPlainTextDeserializer
       // also don't use speech conventions
       configuration.get("useConventions").setValue(Boolean.FALSE);
 	 
-      assertEquals("Configuration parameters" + configuration, 9, deserializer.configure(configuration, schema).size());      
+      assertEquals("Configuration parameters" + configuration, 10, deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertNull("noise", configuration.get("noiseLayer").getValue());
@@ -851,6 +982,9 @@ public class TestPlainTextDeserializer
 		   configuration.get("participantFormat").getValue());
       assertEquals("metaDataFormat", "{0}: {1}",
 		   configuration.get("metaDataFormat").getValue());
+      assertEquals("timestampFormat",
+                   "HH:mm:ss.SSS",
+		   configuration.get("timestampFormat").getValue());
 
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -950,7 +1084,7 @@ public class TestPlainTextDeserializer
 
    }
 
-   @Test public void speed() 
+   /*@Test*/ public void speed() 
       throws Exception
    {
       Timers timers = new Timers();
@@ -977,10 +1111,11 @@ public class TestPlainTextDeserializer
       // adjust patterns for participant and meta-data
       configuration.get("participantFormat").setValue("Author(s): {0}");
       configuration.get("metaDataFormat").setValue("{0}: {1}");
-      // also don't use speech conventions
+      // also don't use speech conventions, nor timstamps
       configuration.get("useConventions").setValue(Boolean.FALSE);
+      configuration.get("timestampFormat").setValue(null);
 	 
-      assertEquals("Configuration parameters" + configuration, 9, deserializer.configure(configuration, schema).size());      
+      assertEquals("Configuration parameters" + configuration, 10, deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertNull("noise", configuration.get("noiseLayer").getValue());
@@ -995,6 +1130,8 @@ public class TestPlainTextDeserializer
 		   configuration.get("participantFormat").getValue());
       assertEquals("metaDataFormat", "{0}: {1}",
 		   configuration.get("metaDataFormat").getValue());
+      assertNull("timestampFormat",
+                 configuration.get("timestampFormat").getValue());
 
       // load the stream
       timers.start("load");

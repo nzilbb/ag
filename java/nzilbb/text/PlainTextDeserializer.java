@@ -23,11 +23,13 @@ package nzilbb.text;
 
 import java.util.Vector;
 import java.util.HashMap;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.StringTokenizer;
+import java.util.TimeZone;
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -35,6 +37,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.text.MessageFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.net.URL;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.AudioInputStream;
@@ -450,7 +453,7 @@ public class PlainTextDeserializer
    * @see #getTimestampFormat()
    * @see #setTimestampFormat(String)
    */
-  protected String timestampFormat;
+  protected String timestampFormat = "HH:mm:ss.SSS";
   /**
    * Getter for {@link #timestampFormat}: Format for time synchronizations within the transcript body. {0} = hours, {1} = minutes, {2} = seconds, {3} = milliseconds
    * @return Format for time synchronizations within the transcript body. {0} = hours, {1} = minutes, {2} = seconds, {3} = milliseconds
@@ -566,7 +569,7 @@ public class PlainTextDeserializer
   public SerializationDescriptor getDescriptor()
   {
     return new SerializationDescriptor(
-      "Plain Text Document", "0.4", "text/plain", ".txt", "20190613.1753", getClass().getResource("icon.png"));
+      "Plain Text Document", "0.5", "text/plain", ".txt", "20190613.1753", getClass().getResource("icon.png"));
   }
 
   /**
@@ -834,6 +837,18 @@ public class PlainTextDeserializer
       configuration.get("metaDataFormat").setValue(metaDataFormat);
     }
 
+    if (!configuration.containsKey("timestampFormat"))
+    {
+      configuration.addParameter(
+        new Parameter("timestampFormat", String.class, 
+                      "Time-stamp Format",
+                      "Format for a time stamp - e.g. {0}={1}, where {0} is a place-holder for the attribute name or key, and {1} is a place-holder for the attribute value", true));
+    }
+    if (configuration.get("timestampFormat").getValue() == null)
+    {
+      configuration.get("timestampFormat").setValue(timestampFormat);
+    }
+
     return configuration;
   }
 
@@ -907,8 +922,14 @@ public class PlainTextDeserializer
     String sLine = reader.readLine();
     int iLine = 0;
     MessageFormat fmtSpeakerFormat = new MessageFormat(participantFormat);
-    MessageFormat fmtTimestampFormat = null;
-    if (timestampFormat != null && timestampFormat.length() > 0) fmtTimestampFormat = new MessageFormat(timestampFormat);
+    SimpleDateFormat fmtTimestampFormat = null;
+    if (timestampFormat != null && timestampFormat.length() > 0)
+    {
+       // prefix with {5} and {6} to include the possibility that the timestamp
+       // isn't at the beginning or end of the line
+       fmtTimestampFormat = new SimpleDateFormat(timestampFormat);
+       fmtTimestampFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+    }
     while (sLine != null)
     {
       if (iLine == 0)
@@ -921,23 +942,7 @@ public class PlainTextDeserializer
       }
       iLine++;
 
-      if (!getHasTimestamps() && fmtTimestampFormat != null)
-      {
-        // is this line a speaker utterance line?
-        try 
-        { 
-          fmtTimestampFormat.parse(sLine); 
-          // parsed, so there are timestamps
-          setHasTimestamps(true);
-
-          // if it's a timestamp, it's not a name, etc...
-          getLines().add(sLine);
-          sLine = reader.readLine();
-          continue;
-        }
-        catch(ParseException exception) {} // not parseable
-        catch(NullPointerException exception) {} // null ID
-      } // don't know whether hasTimestamps yet
+      String leftover = sLine;
 
       // if we encounter a speaker utterance within the first 150 lines, 
       // it contains speakers (after that, we assume it's a coincidence)
@@ -946,7 +951,8 @@ public class PlainTextDeserializer
         // is this line a speaker utterance line?
         try
         {
-          String id = (String)fmtSpeakerFormat.parse(sLine)[0];
+          Object[] oSpeaker = fmtSpeakerFormat.parse(sLine);
+          String id = (String)oSpeaker[0];
           if (getMaxParticipantLength() == null
               || id.length() <= getMaxParticipantLength())
           {
@@ -958,16 +964,30 @@ public class PlainTextDeserializer
               // and the transcript content starts here
               setLines(new Vector<String>());
             }
+            leftover = leftover.substring(fmtSpeakerFormat.format(oSpeaker).length()).trim();
           }
         }
         catch(ParseException exception) {} // not parseable
         catch(NullPointerException exception) {} // null ID
       } // early enough and we don't know whether has speakers or not yet
 
+      if (!getHasTimestamps() && fmtTimestampFormat != null)
+      {
+        // is this line a speaker utterance line?
+        try 
+        {
+          fmtTimestampFormat.parse(leftover); 
+          // parsed, so there are timestamps
+          setHasTimestamps(true);
+        }
+        catch(ParseException exception) {} // not parseable
+        catch(NullPointerException exception) {} // null ID
+      } // don't know whether hasTimestamps yet
+
       getLines().add(sLine);
       sLine = reader.readLine();
     } // next line
-    reader.close();      
+    reader.close();
 
     // media duration
     NamedStream wav = Utility.FindSingleStream(streams, ".wav", "audio/wav");
@@ -1229,8 +1249,12 @@ public class PlainTextDeserializer
     int iLastPosition = 0;	 
 
     MessageFormat fmtSpeakerFormat = new MessageFormat(participantFormat);
-    MessageFormat fmtTimestampFormat = null;
-    if (timestampFormat != null && timestampFormat.length() > 0) fmtTimestampFormat = new MessageFormat(timestampFormat);
+    SimpleDateFormat fmtTimestampFormat = null;
+    if (timestampFormat != null && timestampFormat.length() > 0)
+    {
+       fmtTimestampFormat = new SimpleDateFormat(timestampFormat);
+       fmtTimestampFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+    }
 
     if (timers != null) timers.start("process lines");
 
@@ -1253,34 +1277,6 @@ public class PlainTextDeserializer
       line.setStart(turn.getStart());
       line.setOrdinal(lineOrdinal++);
 	 
-      if (graph.getOffsetUnits() != Constants.UNIT_CHARACTERS)
-      {
-        // does the list start with a time stamp?
-        if (getHasTimestamps())
-        {
-          if (timers != null) timers.start("check for timestamp");
-          try
-          {
-            double dSeconds = 0.0;
-            Object[] timestamp = fmtTimestampFormat.parse(sLine);
-            try {dSeconds += Integer.parseInt(timestamp[0].toString()) * 3600;} // hours
-            catch(Throwable exception) {}
-            try {dSeconds += Integer.parseInt(timestamp[1].toString()) * 60;} // minutes
-            catch(Throwable exception) {}
-            try {dSeconds += Integer.parseInt(timestamp[2].toString());} // seconds
-            catch(Throwable exception) {}
-            try {dSeconds += Double.parseDouble(timestamp[3].toString()) / 1000;} // ms
-            catch(Throwable exception) {}
-            lastAnchor.setOffset(dSeconds);
-            lastAnchor.setConfidence(Constants.CONFIDENCE_MANUAL);
-		  
-            // consume the timestamp
-            sLine = sLine.substring(fmtTimestampFormat.format(timestamp).length());
-          } // timestamp found
-          catch(ParseException exception) {} // not parseable
-          if (timers != null) timers.end("check for timestamp");
-        } // HasTimestamps
-      }
       line.setStart(lastAnchor);
       if (lastLine != null)
       {
@@ -1315,7 +1311,7 @@ public class PlainTextDeserializer
               participants.put(sSpeakerId, participant);
             }
 		  
-            if (lastAnchor.getOffset().equals(0.0))
+            if (lastAnchor.getOffset() != null && lastAnchor.getOffset().equals(0.0))
             { // just started, so recycle the turn and utterance we're already in
               turn.setLabel(participant.getLabel());
               turn.setParentId(participant.getId());
@@ -1345,7 +1341,7 @@ public class PlainTextDeserializer
               // start a new line too
               line.setEnd(lastAnchor);
               line.setOrdinal(lineOrdinal++);
-              if (!line.getStartId().equals(line.getEndId()))
+              if (line.getStartId() != null && !line.getStartId().equals(line.getEndId()))
               { // if we have <div><p>... don't create an instantaneous, empty line
                 graph.addAnnotation(line);
               }
@@ -1355,13 +1351,40 @@ public class PlainTextDeserializer
 
             }
             // consume the speaker ID
-            sLine = sLine.substring(fmtSpeakerFormat.format(oSpeaker).length());
+            sLine = sLine.substring(fmtSpeakerFormat.format(oSpeaker).length()).trim();
           } // speaker found
         }
-        catch(ParseException exception) {} // not parseable
-        catch(NullPointerException exception) {} // null ID
+        catch(ParseException exception)
+        {
+           // System.out.println("SPEAKER: " + exception);
+        } // not parseable
+        catch(NullPointerException exception)
+        {
+           // System.out.println("SPEAKER: " + exception);
+        } // null ID
       } // HasSpeakers
 	 
+      if (graph.getOffsetUnits() != Constants.UNIT_CHARACTERS)
+      {
+        // does the line start with a time stamp?
+        if (getHasTimestamps())
+        {
+          if (timers != null) timers.start("check for timestamp");
+          try
+          {
+            double dSeconds = 0.0;
+            Date timestamp = fmtTimestampFormat.parse(sLine);
+            lastAnchor.setOffset(((double)(timestamp.getTime()))/1000);
+            lastAnchor.setConfidence(Constants.CONFIDENCE_MANUAL);
+		  
+            // consume the timestamp
+            sLine = sLine.substring(fmtTimestampFormat.format(timestamp).length()).trim();
+          } // timestamp found
+          catch(ParseException exception) {} // not parseable
+          if (timers != null) timers.end("check for timestamp");
+        } // HasTimestamps
+      }
+
       // process text
       if (sLine.length() > 0)
       {

@@ -1,0 +1,8 @@
+
+S1 00:00:01.717 The quick
+
+S2 00:00:04.395 Brown fox jumps
+
+S1 00:00:08.692 Over the lazy
+
+S2 00:01:15.835 dog.
