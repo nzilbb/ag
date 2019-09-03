@@ -360,6 +360,23 @@ public class EAFDeserializer
    */
   public void setUseConventions(Boolean bNewUseConventions) { bUseConventions = bNewUseConventions; }
 
+
+   /**
+    * Whether to ignore annotations with no label (true), or to include them as blank-labelled annotations (false).
+    * @see #getIgnoreBlankAnnotations()
+    * @see #setIgnoreBlankAnnotations(Boolean)
+    */
+   protected Boolean ignoreBlankAnnotations;
+   /**
+    * Getter for {@link #ignoreBlankAnnotations}: Whether to ignore annotations with no label (true), or to include them as blank-labelled annotations (false).
+    * @return Whether to ignore annotations with no label (true), or to include them as blank-labelled annotations (false).
+    */
+   public Boolean getIgnoreBlankAnnotations() { return ignoreBlankAnnotations; }
+   /**
+    * Setter for {@link #ignoreBlankAnnotations}: Whether to ignore annotations with no label (true), or to include them as blank-labelled annotations (false).
+    * @param newIgnoreBlankAnnotations Whether to ignore annotations with no label (true), or to include them as blank-labelled annotations (false).
+    */
+   public EAFDeserializer setIgnoreBlankAnnotations(Boolean newIgnoreBlankAnnotations) { ignoreBlankAnnotations = newIgnoreBlankAnnotations; return this; }
    
   /**
    * Minimum amount of time between two turns by the same speaker, with no intervening speaker, for which the inter-turn pause counts as a turn change boundary. If the pause is shorter than this, the turns are merged into one. Default is 0.0;
@@ -392,7 +409,7 @@ public class EAFDeserializer
   public SerializationDescriptor getDescriptor()
   {
     return new SerializationDescriptor(
-      "ELAN EAF Transcript", "0.62", "text/x-eaf+xml", ".eaf", "20170314.1631", getClass().getResource("icon.png"));
+      "ELAN EAF Transcript", "0.63", "text/x-eaf+xml", ".eaf", "20170314.1631", getClass().getResource("icon.png"));
   }
    
   /**
@@ -668,6 +685,18 @@ public class EAFDeserializer
     if (configuration.get("useConventions").getValue() == null)
     {
       configuration.get("useConventions").setValue(Boolean.TRUE);
+    }
+
+    if (!configuration.containsKey("ignoreBlankAnnotations"))
+    {
+      configuration.addParameter(
+        new Parameter("ignoreBlankAnnotations", Boolean.class, 
+                      "Ignore Blank Annotations",
+                      "Whether to skip annotations with no label, or process them", true));
+    }
+    if (configuration.get("ignoreBlankAnnotations").getValue() == null)
+    {
+      configuration.get("ignoreBlankAnnotations").setValue(Boolean.TRUE);
     }
 
     if (!configuration.containsKey("minimumTurnPauseLength"))
@@ -1136,7 +1165,12 @@ public class EAFDeserializer
               String sTimeSlotRef1 = ((Attr)annotationNode.getAttributes().getNamedItem("TIME_SLOT_REF1")).getValue();
               String sTimeSlotRef2 = ((Attr)annotationNode.getAttributes().getNamedItem("TIME_SLOT_REF2")).getValue();
               String sAnnotationValue = (String)xpath.evaluate("ANNOTATION_VALUE/text()", annotationNode, XPathConstants.STRING);
-
+              if (getIgnoreBlankAnnotations())
+              {
+                 // ignore empty intervals...
+                 if (sAnnotationValue.trim().length() == 0) continue; 
+              }
+              
               Anchor start = mTimeslotIdToAnchor.get(sTimeSlotRef1);
               Anchor end = mTimeslotIdToAnchor.get(sTimeSlotRef2);
               Annotation annotation = new Annotation(sAnnotationId, sAnnotationValue, layer.getId(), start.getId(), end.getId());

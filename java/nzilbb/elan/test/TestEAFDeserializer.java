@@ -64,7 +64,7 @@ public class TestEAFDeserializer
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-      assertEquals(9, configuration.size());
+      assertEquals(10, configuration.size());
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertEquals("pronounce", "pronounce", 
@@ -81,11 +81,13 @@ public class TestEAFDeserializer
 		   ((Layer)configuration.get("languageLayer").getValue()).getId());
       assertEquals("useConventions", Boolean.TRUE, 
 		   (Boolean)configuration.get("useConventions").getValue());
+      assertEquals("ignoreBlankAnnotations", Boolean.TRUE, 
+		   (Boolean)configuration.get("ignoreBlankAnnotations").getValue());
       assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
 		   (Double)configuration.get("minimumTurnPauseLength").getValue());
       
       configuration.get("minimumTurnPauseLength").setValue(Double.valueOf(0.5));
-      assertEquals(9, deserializer.configure(configuration, schema).size());
+      assertEquals(10, deserializer.configure(configuration, schema).size());
       assertEquals("customize minimumTurnPauseLength", Double.valueOf(0.5), 
 		   deserializer.getMinimumTurnPauseLength());
 
@@ -184,12 +186,12 @@ public class TestEAFDeserializer
       assertEquals("interviewer", turns[11].getLabel());
 
       assertEquals(Double.valueOf(317.195), turns[12].getStart().getOffset());
-      assertEquals(Double.valueOf(321.240), turns[12].getEnd().getOffset());
+      assertEquals(Double.valueOf(320.757), turns[12].getEnd().getOffset());
       assertEquals("participant", turns[12].getLabel());
 
       // utterances
       Annotation[] utterances = g.list("utterance");
-      assertEquals(148, utterances.length);
+      assertEquals(147, utterances.length);
       assertEquals(Double.valueOf(4.675), utterances[0].getStart().getOffset());
       assertEquals(Double.valueOf(6.752), utterances[0].getEnd().getOffset());
       assertEquals("participant", utterances[0].getParent().getLabel());
@@ -291,7 +293,7 @@ public class TestEAFDeserializer
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-      assertEquals(9, deserializer.configure(configuration, schema).size());
+      assertEquals(10, deserializer.configure(configuration, schema).size());
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertEquals("pronounce", "pronounce", 
@@ -308,6 +310,8 @@ public class TestEAFDeserializer
 		   ((Layer)configuration.get("languageLayer").getValue()).getId());
       assertEquals("useConventions", Boolean.TRUE, 
 		   (Boolean)configuration.get("useConventions").getValue());
+      assertEquals("ignoreBlankAnnotations", Boolean.TRUE, 
+		   (Boolean)configuration.get("ignoreBlankAnnotations").getValue());
       assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
 		   (Double)configuration.get("minimumTurnPauseLength").getValue());
 
@@ -512,7 +516,7 @@ public class TestEAFDeserializer
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-      assertEquals(9, deserializer.configure(configuration, schema).size());
+      assertEquals(10, deserializer.configure(configuration, schema).size());
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertEquals("pronounce", "pronounce", 
@@ -529,6 +533,8 @@ public class TestEAFDeserializer
 		   ((Layer)configuration.get("languageLayer").getValue()).getId());
       assertEquals("useConventions", Boolean.TRUE, 
 		   (Boolean)configuration.get("useConventions").getValue());
+      assertEquals("ignoreBlankAnnotations", Boolean.TRUE, 
+		   (Boolean)configuration.get("ignoreBlankAnnotations").getValue());
       assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
 		   (Double)configuration.get("minimumTurnPauseLength").getValue());
 
@@ -706,7 +712,7 @@ public class TestEAFDeserializer
     * This tests that it's possible to deserialize without reference to a turn/utternance/word hierarchy.
     * In this case the utterances are simple 'freeform' annotations that are not tokenized.
     */
-   @Test public void freeform() 
+   @Test public void freeform_keep_empty_utterances() 
       throws Exception
    {
       Schema schema = new Schema(
@@ -729,7 +735,7 @@ public class TestEAFDeserializer
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-      assertEquals(9, configuration.size());
+      assertEquals(10, configuration.size());
       assertNull("comment", 
 		 configuration.get("commentLayer").getValue());
       assertNull("pronounce",
@@ -746,11 +752,124 @@ public class TestEAFDeserializer
 		   ((Layer)configuration.get("languageLayer").getValue()).getId());
       assertEquals("useConventions", Boolean.TRUE, 
 		   (Boolean)configuration.get("useConventions").getValue());
+      assertEquals("ignoreBlankAnnotations", Boolean.TRUE, 
+		   (Boolean)configuration.get("ignoreBlankAnnotations").getValue());
       assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
 		   (Double)configuration.get("minimumTurnPauseLength").getValue());
       
       configuration.get("useConventions").setValue(Boolean.FALSE);
-      assertEquals(9, deserializer.configure(configuration, schema).size());
+      configuration.get("ignoreBlankAnnotations").setValue(Boolean.FALSE);
+      assertEquals(10, deserializer.configure(configuration, schema).size());
+      assertEquals("customize useConventions", Boolean.FALSE, 
+		   deserializer.getUseConventions());
+      assertEquals("customize ignoreBlankAnnotations", Boolean.FALSE, 
+		   deserializer.getIgnoreBlankAnnotations());
+
+      // load the stream
+      ParameterSet defaultParamaters = deserializer.load(streams, schema);
+      // for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+      assertEquals(2, defaultParamaters.size());
+      assertEquals("utterance mapping", "i", 
+		   ((Layer)defaultParamaters.get("tier0").getValue()).getId());
+      assertEquals("utterance mapping", "p", 
+		   ((Layer)defaultParamaters.get("tier1").getValue()).getId());
+
+      // configure the deserialization
+      deserializer.setParameters(defaultParamaters);
+      
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+
+      for (String warning : deserializer.getWarnings())
+      {
+	 System.out.println(warning);
+      }
+      
+      assertEquals("test_utterance.eaf", g.getId());
+
+      // attributes
+      assertEquals("transcriber", "Robert", g.my("scribe").getLabel());
+      assertEquals("language", "eng", g.my("lang").getLabel());
+      assertEquals("version date", "2017-08-28T16:48:05-03:00", g.my("version_date").getLabel());
+
+      // participants     
+      assertEquals(0, g.list("who").length);
+      
+      // turns
+      assertEquals(0, g.list("turn").length);
+      
+      // interviewer
+      Annotation[] utterances = g.list("i");
+      assertEquals(17, utterances.length);
+
+      assertEquals(Double.valueOf(14.889000000000001), utterances[0].getStart().getOffset());
+      assertEquals(Double.valueOf(15.639000000000001), utterances[0].getEnd().getOffset());
+      assertEquals(" right - ", utterances[0].getLabel());
+      assertEquals(g, utterances[0].getParent());
+
+      // participant
+      utterances = g.list("p");
+      assertEquals(131, utterances.length);
+
+      assertEquals(Double.valueOf(4.675), utterances[0].getStart().getOffset());
+      assertEquals(Double.valueOf(6.752), utterances[0].getEnd().getOffset());
+      assertEquals("  . rest of that side of the famly[f{mli](family) so he -- ", utterances[0].getLabel());
+      assertEquals(g, utterances[0].getParent());
+
+   }
+
+   /**
+    * This tests that it's possible to deserialize without reference to a turn/utternance/word hierarchy.
+    * In this case the utterances are simple 'freeform' annotations that are not tokenized.
+    */
+   @Test public void freeform_ignore_empty_utterances() 
+      throws Exception
+   {
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("scribe", "Author", 0, true, true, true),
+	 new Layer("version_date", "Date", 0, true, true, true),
+	 new Layer("lang", "Language", 0, true, true, true),
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("i", "Interviewer", 2, true, false, true),
+	 new Layer("p", "Participant", 2, true, false, true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true));
+      // access file
+      NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance.eaf")) };
+      
+      // create deserializer
+      EAFDeserializer deserializer = new EAFDeserializer();
+      
+      // general configuration
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      assertEquals(10, configuration.size());
+      assertNull("comment", 
+		 configuration.get("commentLayer").getValue());
+      assertNull("pronounce",
+		   configuration.get("pronounceLayer").getValue());
+      assertNull("lexical",
+		 configuration.get("lexicalLayer").getValue());
+      assertNull("noise",
+		 configuration.get("noiseLayer").getValue());
+      assertEquals("author", "scribe", 
+		   ((Layer)configuration.get("authorLayer").getValue()).getId());
+      assertEquals("version_date", "version_date", 
+		   ((Layer)configuration.get("dateLayer").getValue()).getId());
+      assertEquals("language", "lang", 
+		   ((Layer)configuration.get("languageLayer").getValue()).getId());
+      assertEquals("useConventions", Boolean.TRUE, 
+		   (Boolean)configuration.get("useConventions").getValue());
+      assertEquals("ignoreBlankAnnotations", Boolean.TRUE, 
+		   (Boolean)configuration.get("ignoreBlankAnnotations").getValue());
+      assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
+		   (Double)configuration.get("minimumTurnPauseLength").getValue());
+      
+      configuration.get("useConventions").setValue(Boolean.FALSE);
+      assertEquals(10, deserializer.configure(configuration, schema).size());
       assertEquals("customize useConventions", Boolean.FALSE, 
 		   deserializer.getUseConventions());
 
@@ -799,7 +918,7 @@ public class TestEAFDeserializer
 
       // participant
       utterances = g.list("p");
-      assertEquals(131, utterances.length);
+      assertEquals(130, utterances.length);
 
       assertEquals(Double.valueOf(4.675), utterances[0].getStart().getOffset());
       assertEquals(Double.valueOf(6.752), utterances[0].getEnd().getOffset());
