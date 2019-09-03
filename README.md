@@ -16,3 +16,6 @@ developed by the [NZILBB](http://www.nzilbb.canterbury.ac.nz),
 includes extra features that allow tier hierarchies and parent/child constraints to be defined.
 More details on extra features are available in [http://dx.doi.org/10.1016/j.csl.2017.01.004](http://dx.doi.org/10.1016/j.csl.2017.01.004)
 
+Apart from use within LaBB-CAT, the object model can be used for other purposes like format conversion, e.g.
+- [vtt-to-textgrid](https://github.com/nzilbb/ag/blob/master/bin/vtt-to-textgrid.jar?raw=true) - a utility for converting subtitles downloaded from YouTube to [Praat](http://praat.org) TextGrids
+
