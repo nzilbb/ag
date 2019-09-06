@@ -48,7 +48,7 @@ public class DefaultEditComparator<T>
     * Setter for {@link #iChangeDistance}: The distance represented by a change.
     * @param iNewChangeDistance The distance represented by a change.
     */
-   public DefaultEditComparator setChangeDistance(int iNewChangeDistance) { iChangeDistance = iNewChangeDistance; return this; }
+   public DefaultEditComparator<T> setChangeDistance(int iNewChangeDistance) { iChangeDistance = iNewChangeDistance; return this; }
 
    
    /**
@@ -66,7 +66,7 @@ public class DefaultEditComparator<T>
     * Setter for {@link #iDeleteDistance}: The distance represented by a deletion.
     * @param iNewDeleteDistance The distance represented by a deletion.
     */
-   public DefaultEditComparator setDeleteDistance(int iNewDeleteDistance) { iDeleteDistance = iNewDeleteDistance; return this; }
+   public DefaultEditComparator<T> setDeleteDistance(int iNewDeleteDistance) { iDeleteDistance = iNewDeleteDistance; return this; }
 
 
    /**
@@ -84,7 +84,7 @@ public class DefaultEditComparator<T>
     * Setter for {@link #iInsertDistance}: The distance represented by an insertion.
     * @param iNewInsertDistance The distance represented by an insertion.
     */
-   public DefaultEditComparator setInsertDistance(int iNewInsertDistance) { iInsertDistance = iNewInsertDistance; return this; }
+   public DefaultEditComparator<T> setInsertDistance(int iNewInsertDistance) { iInsertDistance = iNewInsertDistance; return this; }
 
 
    private final Comparator<T> objectEqualsComparator = new EqualsComparator<T>();
@@ -103,7 +103,7 @@ public class DefaultEditComparator<T>
     * Setter for {@link #comparator}: A comparator to use to determin equality, or null to use java.util.Object.equals(Object).
     * @param newComparator A comparator to use to determin equality, or null to use java.util.Object.equals(Object).
     */
-   public DefaultEditComparator setComparator(Comparator<T> newComparator) { comparator = newComparator; if (comparator == null) comparator = objectEqualsComparator; return this; }
+   public DefaultEditComparator<T> setComparator(Comparator<T> newComparator) { comparator = newComparator; if (comparator == null) comparator = objectEqualsComparator; return this; }
 
    
    // Methods:
