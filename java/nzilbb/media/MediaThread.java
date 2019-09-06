@@ -52,7 +52,7 @@ public class MediaThread
     * Setter for {@link #percentComplete}: Percent complete.
     * @param newPercentComplete Percent complete.
     */
-   public void setPercentComplete(int newPercentComplete) { percentComplete = newPercentComplete; }
+   public MediaThread setPercentComplete(int newPercentComplete) { percentComplete = newPercentComplete; return this; }
 
    
    /**
@@ -70,7 +70,7 @@ public class MediaThread
     * Setter for {@link #execution}: The external process Execution object, if the thread was given one.
     * @param newExecution The external process Execution object, if the thread was given one.
     */
-   public void setExecution(Execution newExecution) { execution = newExecution; }
+   public MediaThread setExecution(Execution newExecution) { execution = newExecution; return this; }
 
    
    /**
@@ -88,7 +88,7 @@ public class MediaThread
     * Setter for {@link #lastError}: Last error, if any.
     * @param newLastError Last error, if any.
     */
-   public void setLastError(Throwable newLastError) { lastError = newLastError; }
+   public MediaThread setLastError(Throwable newLastError) { lastError = newLastError; return this; }
 
    
    // Methods:
