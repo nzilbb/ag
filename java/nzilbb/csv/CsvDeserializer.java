@@ -263,7 +263,7 @@ public class CsvDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "CSV text collection", "0.01", "text/csv", ".csv", "20170228.1353", getClass().getResource("icon.png"));
+	 "CSV text collection", "0.1", "text/csv", ".csv", "20190906.1040", getClass().getResource("icon.png"));
    }
    
    /**

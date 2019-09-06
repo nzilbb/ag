@@ -190,7 +190,7 @@ public class TrackDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "EST Track", "0.1", "text/x-est-track", ".f0", "20170228.1353", getClass().getResource("icon.png"));
+	 "EST Track", "0.2", "text/x-est-track", ".f0", "20190906.1040", getClass().getResource("icon.png"));
    }
 
    /**
