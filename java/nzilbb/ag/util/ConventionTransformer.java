@@ -89,7 +89,7 @@ public class ConventionTransformer
    * Setter for {@link #sourceLayerId}: Layer ID of the annotations to transform.
    * @param newSourceLayerId Layer ID of the annotations to transform.
    */
-  public void setSourceLayerId(String newSourceLayerId) { sourceLayerId = newSourceLayerId; }
+  public ConventionTransformer setSourceLayerId(String newSourceLayerId) { sourceLayerId = newSourceLayerId; return this; }
 
   /**
    * Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
@@ -106,7 +106,7 @@ public class ConventionTransformer
    * Setter for {@link #sourcePattern}: Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
    * @param newSourcePattern Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
    */
-  public void setSourcePattern(String newSourcePattern) { sourcePattern = newSourcePattern; }
+  public ConventionTransformer setSourcePattern(String newSourcePattern) { sourcePattern = newSourcePattern; return this; }
 
 
   /**
@@ -124,7 +124,7 @@ public class ConventionTransformer
    * Setter for {@link #destinationResults}: A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.
    * @param newDestinationResults A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.
    */
-  public void setDestinationResults(HashMap<String,String> newDestinationResults) { destinationResults = newDestinationResults; }
+  public ConventionTransformer setDestinationResults(HashMap<String,String> newDestinationResults) { destinationResults = newDestinationResults; return this; }
    
 
   // Methods:

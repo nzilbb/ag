@@ -48,7 +48,7 @@ public class Timers
     * Setter for {@link #runningTimers}: Currently running timers - a map of IDs to start times.
     * @param newRunningTimers Currently running timers - a map of IDs to start times.
     */
-   public void setRunningTimers(LinkedHashMap<String,Long> newRunningTimers) { runningTimers = newRunningTimers; }
+   public Timers setRunningTimers(LinkedHashMap<String,Long> newRunningTimers) { runningTimers = newRunningTimers; return this; }
    
    /**
     * Timer totals - a map of IDs to total run times in ms.
@@ -65,7 +65,7 @@ public class Timers
     * Setter for {@link #totals}: Timer totals - a map of IDs to total run times.
     * @param newTotals Timer totals - a map of IDs to total run times.
     */
-   public void setTotals(LinkedHashMap<String,Long> newTotals) { totals = newTotals; }
+   public Timers setTotals(LinkedHashMap<String,Long> newTotals) { totals = newTotals; return this; }
    
    // Methods:
    

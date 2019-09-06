@@ -119,7 +119,7 @@ public class CommandLineProgram
     * @param bNewUsage Whether or not to display usage information
     */
    @Switch("Whether or not to display usage information")
-   public void setUsage(Boolean bNewUsage) { usage = bNewUsage; }
+   public CommandLineProgram setUsage(Boolean bNewUsage) { usage = bNewUsage; return this; }
   
 
    /**

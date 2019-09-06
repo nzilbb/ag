@@ -50,7 +50,7 @@ public class MediaFile
     * Setter for {@link #trackSuffix}: The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
     * @param newTrackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
     */
-   public void setTrackSuffix(String newTrackSuffix) { trackSuffix = newTrackSuffix; }
+   public MediaFile setTrackSuffix(String newTrackSuffix) { trackSuffix = newTrackSuffix; return this; }
 
    /**
     * The MIME type of the file.
@@ -67,7 +67,7 @@ public class MediaFile
     * Setter for {@link #mimeType}: The MIME type of the file.
     * @param newMimeType The MIME type of the file.
     */
-   public void setMimeType(String newMimeType) { mimeType = newMimeType; }
+   public MediaFile setMimeType(String newMimeType) { mimeType = newMimeType; return this; }
 
    /**
     * URL to the content of the file.
@@ -84,7 +84,7 @@ public class MediaFile
     * Setter for {@link #url}: URL to the content of the file.
     * @param newUrl URL to the content of the file.
     */
-   public void setUrl(String newUrl) { url = newUrl; }
+   public MediaFile setUrl(String newUrl) { url = newUrl; return this; }
 
    /**
     * Name of the file
@@ -101,10 +101,11 @@ public class MediaFile
     * Setter for {@link #name}: Name of the file
     * @param newName Name of the file
     */
-   public void setName(String newName) 
+   public MediaFile setName(String newName) 
    { 
       name = newName; 
       if (getMimeType() == null) inferType();
+      return this;
    }
 
    /**
@@ -122,7 +123,7 @@ public class MediaFile
     * Setter for {@link #generateFrom}: The media file from which this one could be generated, or null if the file already exists.
     * @param newGenerateFrom The media file from which this one could be generated, or null if the file already exists.
     */
-   public void setGenerateFrom(MediaFile newGenerateFrom) { generateFrom = newGenerateFrom; }
+   public MediaFile setGenerateFrom(MediaFile newGenerateFrom) { generateFrom = newGenerateFrom; return this; }
 
    
    /**
@@ -140,10 +141,11 @@ public class MediaFile
     * Setter for {@link #file}: The local media file, if any.
     * @param newFile The local media file, if any.
     */
-   public void setFile(File newFile) 
+   public MediaFile setFile(File newFile) 
    { 
       file = newFile; 
       if (getName() == null && file != null) setName(file.getName());
+      return this;
    }
 
    // Methods:

@@ -121,7 +121,7 @@ public class LayerHierarchyTraversal<R>
    * Setter for {@link #peerComparator}: Comparator for ordering peer layers.
    * @param newPeerComparator Comparator for ordering peer layers.
    */
-  public void setPeerComparator(Comparator<Layer> newPeerComparator) { peerComparator = newPeerComparator; }
+  public LayerHierarchyTraversal setPeerComparator(Comparator<Layer> newPeerComparator) { peerComparator = newPeerComparator; return this; }
    
   /**
    * The schema to be traversed.
@@ -138,7 +138,7 @@ public class LayerHierarchyTraversal<R>
    * Setter for {@link #schema}: The schema to be traversed.
    * @param newSchema The schema to be traversed.
    */
-  public void setSchema(Schema newSchema) { schema = newSchema; }
+  public LayerHierarchyTraversal setSchema(Schema newSchema) { schema = newSchema; return this; }
    
   /**
    * The result of the traversal, if required.
@@ -155,7 +155,7 @@ public class LayerHierarchyTraversal<R>
    * Setter for {@link #result}: The result of the traversal, if required.
    * @param newResult The result of the traversal, if required.
    */
-  public void setResult(R newResult) { result = newResult; }
+  public LayerHierarchyTraversal setResult(R newResult) { result = newResult; return this; }
    
   // Methods:
    

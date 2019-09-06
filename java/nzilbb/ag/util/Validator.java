@@ -65,7 +65,7 @@ public class Validator
    * Setter for {@link #errors}: Fatal errors raised during the last {@link #transform(Graph)}.
    * @param newErrors Fatal errors raised during the last {@link #transform(Graph)}.
    */
-  public void setErrors(Vector<String> newErrors) { errors = newErrors; }
+  public Validator setErrors(Vector<String> newErrors) { errors = newErrors; return this; }
 
    
   /**
@@ -89,7 +89,7 @@ public class Validator
    * @see #getLog()
    * @see #log(Object...)
    */
-  public void setDebug(boolean newDebug) { debug = newDebug; }
+  public Validator setDebug(boolean newDebug) { debug = newDebug; return this; }
 
   /**
    * Messages for debugging.
@@ -106,7 +106,7 @@ public class Validator
    * Setter for {@link #log}: Messages for debugging.
    * @param newLog Messages for debugging.
    */
-  protected void setLog(Vector<String> newLog) { log = newLog; }
+  protected Validator setLog(Vector<String> newLog) { log = newLog; return this; }
 
 
   /**
@@ -126,7 +126,7 @@ public class Validator
    * Setter for {@link #defaultAnchorConfidence}: Value to assume in the case of Anchors that have no value for "confidence".
    * @param newDefaultAnchorConfidence Value to assume in the case of Anchors that have no value for "confidence".
    */
-  public void setDefaultAnchorConfidence(Integer newDefaultAnchorConfidence) { defaultAnchorConfidence = newDefaultAnchorConfidence; }
+  public Validator setDefaultAnchorConfidence(Integer newDefaultAnchorConfidence) { defaultAnchorConfidence = newDefaultAnchorConfidence; return this; }
 
 
    
@@ -148,7 +148,7 @@ public class Validator
    * Setter for {@link #defaultOffsetThreshold}: The confidence threshold for default anchor offset computation, or null to skip default offset computation.
    * @param newDefaultOffsetThreshold The confidence threshold for default anchor offset computation, or null to skip default offset computation.
    */
-  public void setDefaultOffsetThreshold(Integer newDefaultOffsetThreshold) { defaultOffsetThreshold = newDefaultOffsetThreshold; }
+  public Validator setDefaultOffsetThreshold(Integer newDefaultOffsetThreshold) { defaultOffsetThreshold = newDefaultOffsetThreshold; return this; }
 
    
   /**
@@ -166,7 +166,7 @@ public class Validator
    * Setter for {@link #fullValidation}: Whether to validate all annotations on all layers (true) or perform a 'smart' validation tries to validate only parts of the graph that have actually changed (false - the default).
    * @param newFullValidation Whether to validate all annotations on all layers (true) or perform a 'smart' validation tries to validate only parts of the graph that have actually changed (false - the default).
    */
-  public void setFullValidation(boolean newFullValidation) { fullValidation = newFullValidation; }
+  public Validator setFullValidation(boolean newFullValidation) { fullValidation = newFullValidation; return this; }
 
    
   // Methods:

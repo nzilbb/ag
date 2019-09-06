@@ -53,7 +53,7 @@ public class DefaultOffsetGenerator
     * Setter for {@link #errors}: Fatal errors raised during the last {@link #transform(Graph)}.
     * @param newErrors Fatal errors raised during the last {@link #transform(Graph)}.
     */
-   public void setErrors(Vector<String> newErrors) { errors = newErrors; }
+   public DefaultOffsetGenerator setErrors(Vector<String> newErrors) { errors = newErrors; return this; }
    
    /**
     * Whether a log of messages should be kept for reporting.
@@ -76,7 +76,7 @@ public class DefaultOffsetGenerator
     * @see #getLog()
     * @see #log(Object...)
     */
-   public void setDebug(boolean newDebug) { debug = newDebug; }
+   public DefaultOffsetGenerator setDebug(boolean newDebug) { debug = newDebug; return this; }
 
    /**
     * Messages for debugging.
@@ -93,7 +93,7 @@ public class DefaultOffsetGenerator
     * Setter for {@link #log}: Messages for debugging.
     * @param newLog Messages for debugging.
     */
-   protected void setLog(Vector<String> newLog) { log = newLog; }
+   protected DefaultOffsetGenerator setLog(Vector<String> newLog) { log = newLog; return this; }
 
    /**
     * Value to assume in the case of Anchors that have no value for "confidence".
@@ -112,7 +112,7 @@ public class DefaultOffsetGenerator
     * Setter for {@link #defaultAnchorConfidence}: Value to assume in the case of Anchors that have no value for "confidence".
     * @param newDefaultAnchorConfidence Value to assume in the case of Anchors that have no value for "confidence".
     */
-   public void setDefaultAnchorConfidence(int newDefaultAnchorConfidence) { defaultAnchorConfidence = newDefaultAnchorConfidence; }
+   public DefaultOffsetGenerator setDefaultAnchorConfidence(int newDefaultAnchorConfidence) { defaultAnchorConfidence = newDefaultAnchorConfidence; return this; }
    
    /**
     * The confidence threshold for default anchor offset computation.
@@ -131,7 +131,7 @@ public class DefaultOffsetGenerator
     * Setter for {@link #defaultOffsetThreshold}: The confidence threshold for default anchor offset computation, or null to skip default offset computation.
     * @param newDefaultOffsetThreshold The confidence threshold for default anchor offset computation, or null to skip default offset computation.
     */
-   public void setDefaultOffsetThreshold(int newDefaultOffsetThreshold) { defaultOffsetThreshold = newDefaultOffsetThreshold; }
+   public DefaultOffsetGenerator setDefaultOffsetThreshold(int newDefaultOffsetThreshold) { defaultOffsetThreshold = newDefaultOffsetThreshold; return this; }
 
    
    /**
@@ -150,7 +150,7 @@ public class DefaultOffsetGenerator
     * Setter for {@link #confidence}: Value to set for <var>confidence</var> for anchors that have their offsets changed by this transformer.
     * @param newConfidence Value to set for <var>confidence</var> for anchors that have their offsets changed by this transformer.
     */
-   public void setConfidence(int newConfidence) { confidence = newConfidence; }
+   public DefaultOffsetGenerator setConfidence(int newConfidence) { confidence = newConfidence; return this; }
 
 
    // Methods:

@@ -64,7 +64,7 @@ public class Change
     * Setter for {@link #operation}: The operation of this change.
     * @param newOperation The operation of this change.
     */
-   public void setOperation(Operation newOperation) { operation = newOperation; }
+   public Change setOperation(Operation newOperation) { operation = newOperation; return this; }
 
    /**
     * The object on which the change is made.
@@ -81,7 +81,7 @@ public class Change
     * Setter for {@link #object}: The object on which the change is made.
     * @param newObject The object on which the change is made.
     */
-   public void setObject(TrackedMap newObject) { object = newObject; }
+   public Change setObject(TrackedMap newObject) { object = newObject; return this; }
 
    /**
     * The attribute name which will be changed, if the change is an Update.
@@ -98,7 +98,7 @@ public class Change
     * Setter for {@link #key}: The attribute name which will be changed, if the change is an Update.
     * @param newKey The attribute name which will be changed, if the change is an Update.
     */
-   public void setKey(String newKey) { key = newKey; }
+   public Change setKey(String newKey) { key = newKey; return this; }
 
    /**
     * The new value for the attribute identified by {@link #getKey()}.
@@ -115,7 +115,7 @@ public class Change
     * Setter for {@link #value}: The new value for the attribute identified by {@link #getKey()}.
     * @param newValue The new value for the attribute identified by {@link #getKey()}.
     */
-   public void setValue(Object newValue) { value = newValue; }
+   public Change setValue(Object newValue) { value = newValue; return this; }
    
    // Methods:
    

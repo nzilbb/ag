@@ -57,7 +57,7 @@ public class ResultSeries
     * Setter for {@link #store}: The graph store object.
     * @param newStore The graph store object.
     */
-   public void setStore(SqlGraphStore newStore) { store = newStore; }
+   public ResultSeries setStore(SqlGraphStore newStore) { store = newStore; return this; }
 
    /**
     * <tt>result.search_id</tt> key value.
@@ -74,7 +74,7 @@ public class ResultSeries
     * Setter for {@link #searchId}: <tt>result.search_id</tt> key value.
     * @param newSearchId <tt>result.search_id</tt> key value.
     */
-   public void setSearchId(long newSearchId) { searchId = newSearchId; }
+   public ResultSeries setSearchId(long newSearchId) { searchId = newSearchId; return this; }
 
    
    /**
@@ -92,7 +92,7 @@ public class ResultSeries
     * Setter for {@link #layers}: Layers to load into the fragments.
     * @param newLayers Layers to load into the fragments.
     */
-   public void setLayers(String[] newLayers) { layers = newLayers; }
+   public ResultSeries setLayers(String[] newLayers) { layers = newLayers; return this; }
    
    // Methods:
    

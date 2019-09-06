@@ -50,7 +50,7 @@ public class SerializationException
    * Setter for {@link #errors}: Collection of fatal errors that occurred during deserialization. The key is the error type, and the value is a displayable description of the error.
    * @param newErrors Collection of fatal errors that occurred during deserialization. The key is the error type, and the value is a displayable description of the error.
    */
-  public void setErrors(LinkedHashMap<ErrorType,String> newErrors) { errors = newErrors; }
+  public SerializationException setErrors(LinkedHashMap<ErrorType,String> newErrors) { errors = newErrors; return this; }
    
   // Methods:
    

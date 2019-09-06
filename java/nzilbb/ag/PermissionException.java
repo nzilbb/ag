@@ -45,7 +45,7 @@ public class PermissionException
     * Setter for {@link #user}: The user ID that doesn't have permission, if available.
     * @param newUser The user ID that doesn't have permission, if available.
     */
-   public void setUser(String newUser) { user = newUser; }
+   public PermissionException setUser(String newUser) { user = newUser; return this; }
 
    /**
     * Default constructor.

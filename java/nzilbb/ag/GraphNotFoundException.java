@@ -45,7 +45,7 @@ public class GraphNotFoundException
     * Setter for {@link #id}: ID of the graph.
     * @param newId ID of the graph.
     */
-   public void setId(String newId) { id = newId; }
+   public GraphNotFoundException setId(String newId) { id = newId; return this; }
 
    /**
     * Default constructor.

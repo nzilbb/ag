@@ -53,7 +53,7 @@ public class SimpleTokenizer
     * Setter for {@link #delimiters}: Regular expression to match delimiters for tokenization.
     * @param newDelimiters Regular expression to match delimiters for tokenization.
     */
-   public void setDelimiters(String newDelimiters) { delimiters = newDelimiters; }
+   public SimpleTokenizer setDelimiters(String newDelimiters) { delimiters = newDelimiters; return this; }
    
    /**
     * Layer ID of the layer to tokenize.
@@ -70,7 +70,7 @@ public class SimpleTokenizer
     * Setter for {@link #sourceLayerId}: Layer ID of the layer to tokenize.
     * @param newSourceLayerId Layer ID of the layer to tokenize.
     */
-   public void setSourceLayerId(String newSourceLayerId) { sourceLayerId = newSourceLayerId; }
+   public SimpleTokenizer setSourceLayerId(String newSourceLayerId) { sourceLayerId = newSourceLayerId; return this; }
 
    /**
     * Layer ID of the individual tokens.
@@ -87,7 +87,7 @@ public class SimpleTokenizer
     * Setter for {@link #destinationLayerId}: Layer ID of the individual tokens.
     * @param newDestinationLayerId Layer ID of the individual tokens.
     */
-   public void setDestinationLayerId(String newDestinationLayerId) { destinationLayerId = newDestinationLayerId; }
+   public SimpleTokenizer setDestinationLayerId(String newDestinationLayerId) { destinationLayerId = newDestinationLayerId; return this; }
    
    /**
     * Whether the tokens should be in the source layer (true) or the destination layer (false). The default is false.
@@ -105,7 +105,7 @@ public class SimpleTokenizer
     * Setter for {@link #tokensInSourceLayer}: Whether the tokens should be in the source layer (true) or the destination layer (false).
     * @param newTokensInSourceLayer Whether the tokens should be in the source layer (true) or the destination layer (false).
     */
-   public void setTokensInSourceLayer(boolean newTokensInSourceLayer) { tokensInSourceLayer = newTokensInSourceLayer; }
+   public SimpleTokenizer setTokensInSourceLayer(boolean newTokensInSourceLayer) { tokensInSourceLayer = newTokensInSourceLayer; return this; }
 
    
    /**
@@ -124,7 +124,7 @@ public class SimpleTokenizer
     * Setter for {@link #characterAnchorConfidence}: The confidence of anchors created in graphs for which {@link Graph#offsetUnits} == {@link Constants#UNIT_CHARACTERS}. 
     * @param newCharacterAnchorConfidence The confidence of anchors created in graphs for which {@link Graph#offsetUnits} == {@link Constants#UNIT_CHARACTERS}.
     */
-   public void setCharacterAnchorConfidence(Integer newCharacterAnchorConfidence) { characterAnchorConfidence = newCharacterAnchorConfidence; }
+   public SimpleTokenizer setCharacterAnchorConfidence(Integer newCharacterAnchorConfidence) { characterAnchorConfidence = newCharacterAnchorConfidence; return this; }
    
    // Methods:
    

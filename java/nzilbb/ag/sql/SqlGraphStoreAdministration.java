@@ -77,7 +77,7 @@ public class SqlGraphStoreAdministration
    * Setter for {@link #serializersDirectory}: Root directory for serializers.
    * @param newSerializersDirectory Root directory for serializers.
    */
-  public void setSerializersDirectory(File newSerializersDirectory) { serializersDirectory = newSerializersDirectory; }
+  public SqlGraphStoreAdministration setSerializersDirectory(File newSerializersDirectory) { serializersDirectory = newSerializersDirectory; return this; }
 
    
   /**
@@ -95,7 +95,7 @@ public class SqlGraphStoreAdministration
    * Setter for {@link #deserializersByMimeType}: Registered deserializers, keyed by MIME type.
    * @param newDeserializersByMimeType Registered deserializers, keyed by MIME type.
    */
-  public void setDeserializersByMimeType(HashMap<String,IDeserializer> newDeserializersByMimeType) { deserializersByMimeType = newDeserializersByMimeType; }
+  public SqlGraphStoreAdministration setDeserializersByMimeType(HashMap<String,IDeserializer> newDeserializersByMimeType) { deserializersByMimeType = newDeserializersByMimeType; return this; }
 
    
   /**
@@ -113,7 +113,7 @@ public class SqlGraphStoreAdministration
    * Setter for {@link #deserializersBySuffix}: Registered deserializers, keyed by file suffix (extension).
    * @param newDeserializersBySuffix Registered deserializers, keyed by file suffix (extension).
    */
-  public void setDeserializersBySuffix(HashMap<String,IDeserializer> newDeserializersBySuffix) { deserializersBySuffix = newDeserializersBySuffix; }
+  public SqlGraphStoreAdministration setDeserializersBySuffix(HashMap<String,IDeserializer> newDeserializersBySuffix) { deserializersBySuffix = newDeserializersBySuffix; return this; }
 
   /**
    * Registered serializers, keyed by MIME type.
@@ -130,7 +130,7 @@ public class SqlGraphStoreAdministration
    * Setter for {@link #serializersByMimeType}: Registered serializers, keyed by MIME type.
    * @param newSerializersByMimeType Registered serializers, keyed by MIME type.
    */
-  public void setSerializersByMimeType(HashMap<String,ISerializer> newSerializersByMimeType) { serializersByMimeType = newSerializersByMimeType; }
+  public SqlGraphStoreAdministration setSerializersByMimeType(HashMap<String,ISerializer> newSerializersByMimeType) { serializersByMimeType = newSerializersByMimeType; return this; }
    
   /**
    * Registered serializers, keyed by file suffix (extension).
@@ -147,7 +147,7 @@ public class SqlGraphStoreAdministration
    * Setter for {@link #serializersBySuffix}: Registered serializers, keyed by file suffix (extension).
    * @param newSerializersBySuffix Registered serializers, keyed by file suffix (extension).
    */
-  public void setSerializersBySuffix(HashMap<String,ISerializer> newSerializersBySuffix) { serializersBySuffix = newSerializersBySuffix; }
+  public SqlGraphStoreAdministration setSerializersBySuffix(HashMap<String,ISerializer> newSerializersBySuffix) { serializersBySuffix = newSerializersBySuffix; return this; }
 
 
   // Methods:

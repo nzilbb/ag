@@ -61,10 +61,11 @@ public class TempFileInputStream
     * <br>Side-effect: deleteOnExit() is called on the file.
     * @param fNewTempFile The temporary file for deletion.
     */
-   public void setTempFile(File fNewTempFile) 
+   public TempFileInputStream setTempFile(File fNewTempFile) 
    { 
       fTempFile = fNewTempFile; 
       fTempFile.deleteOnExit();
+      return this;
    }
 
    
@@ -83,7 +84,7 @@ public class TempFileInputStream
     * Setter for {@link #bDeleteOnClose}: Whether to delete the file when close() is called or not. Default is TRUE.
     * @param bNewDeleteOnClose Whether to delete the file when close() is called or not. Default is TRUE.
     */
-   public void setDeleteOnClose(Boolean bNewDeleteOnClose) { bDeleteOnClose = bNewDeleteOnClose; }
+   public TempFileInputStream setDeleteOnClose(Boolean bNewDeleteOnClose) { bDeleteOnClose = bNewDeleteOnClose; return this; }
    
    /**
     * Timeout after which, if the file still exists, it will be deleted.
@@ -100,7 +101,7 @@ public class TempFileInputStream
     * Setter for {@link #timeoutMS}: Timeout after which, if the file still exists, it will be deleted.
     * @param newTimeoutMS Timeout after which, if the file still exists, it will be deleted.
     */
-   public void setTimeoutMS(Long newTimeoutMS) { timeoutMS = newTimeoutMS; }
+   public TempFileInputStream setTimeoutMS(Long newTimeoutMS) { timeoutMS = newTimeoutMS; return this; }
    
    // Methods:
    

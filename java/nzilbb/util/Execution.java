@@ -51,7 +51,7 @@ public class Execution
     * Setter for {@link #exe}: Executable file.
     * @param newExe Executable file.
     */
-   public void setExe(File newExe) { exe = newExe; }
+   public Execution setExe(File newExe) { exe = newExe; return this; }
    
    /**
     * Command line arguments.
@@ -68,7 +68,7 @@ public class Execution
     * Setter for {@link #arguments}: Command line arguments.
     * @param newArguments Command line arguments.
     */
-   public void setArguments(Vector<String> newArguments) { arguments = newArguments; }
+   public Execution setArguments(Vector<String> newArguments) { arguments = newArguments; return this; }
    
    /**
     * The executed process.
@@ -85,7 +85,7 @@ public class Execution
     * Setter for {@link #process}: The executed process.
     * @param newProcess The executed process.
     */
-   public void setProcess(Process newProcess) { process = newProcess; }
+   public Execution setProcess(Process newProcess) { process = newProcess; return this; }
    
    /**
     * Text from stdout
@@ -102,7 +102,7 @@ public class Execution
     * Setter for {@link #input}: Text from stdout
     * @param newInput Text from stdout
     */
-   public void setInput(StringBuffer newInput) { input = newInput; }
+   public Execution setInput(StringBuffer newInput) { input = newInput; return this; }
 
    /**
     * Text from stderr
@@ -119,7 +119,7 @@ public class Execution
     * Setter for {@link #error}: Text from stderr
     * @param newError Text from stderr
     */
-   public void setError(StringBuffer newError) { error = newError; }
+   public Execution setError(StringBuffer newError) { error = newError; return this; }
 
    /**
     * Whether the execution is currently running.

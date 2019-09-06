@@ -62,7 +62,7 @@ public class Normalizer
     * Setter for {@link #maxLabelLength}: The maximum length of a label, or null if there's no limit.
     * @param newMaxLabelLength The maximum length of a label, or null if there's no limit.
     */
-   public void setMaxLabelLength(Integer newMaxLabelLength) { maxLabelLength = newMaxLabelLength; }
+   public Normalizer setMaxLabelLength(Integer newMaxLabelLength) { maxLabelLength = newMaxLabelLength; return this; }
 
    /**
     * Minimum amount of time between two turns by the same speaker, with no intervening speaker, for which the inter-turn pause counts as a turn change boundary. If the pause is shorter than this, the turns are merged into one. Default is 0.0;
@@ -83,7 +83,7 @@ public class Normalizer
     * Setter for {@link #minimumTurnPauseLength}: Minimum amount of time between two turns by the same speaker, with no intervening speaker, for which the inter-turn pause counts as a turn change boundary. If the pause is shorter than this, the turns are merged into one.
     * @param newMinimumTurnPauseLength Minimum amount of time between two turns by the same speaker, with no intervening speaker, for which the inter-turn pause counts as a turn change boundary. If the pause is shorter than this, the turns are merged into one.
     */
-   public void setMinimumTurnPauseLength(Double newMinimumTurnPauseLength) { minimumTurnPauseLength = newMinimumTurnPauseLength; }
+   public Normalizer setMinimumTurnPauseLength(Double newMinimumTurnPauseLength) { minimumTurnPauseLength = newMinimumTurnPauseLength; return this; }
 
       
    // Methods:

@@ -46,7 +46,7 @@ public class TransformationException
     * Setter for {@link #transformer}: The transformer rasing the exception.
     * @param newTransformer The transformer rasing the exception.
     */
-   public void setTransformer(IGraphTransformer newTransformer) { transformer = newTransformer; }
+   public TransformationException setTransformer(IGraphTransformer newTransformer) { transformer = newTransformer; return this; }
 
    /**
     * Default constructor.

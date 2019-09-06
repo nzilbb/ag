@@ -45,7 +45,7 @@ public class MediaTrackDefinition
     * Setter for {@link #suffix}: The file suffix associated with the track.
     * @param newSuffix The file suffix associated with the track.
     */
-   public void setSuffix(String newSuffix) { suffix = newSuffix; }
+   public MediaTrackDefinition setSuffix(String newSuffix) { suffix = newSuffix; return this; }
 
    /**
     * The description of the track.
@@ -62,7 +62,7 @@ public class MediaTrackDefinition
     * Setter for {@link #description}: The description of the track.
     * @param newDescription The description of the track.
     */
-   public void setDescription(String newDescription) { description = newDescription; }
+   public MediaTrackDefinition setDescription(String newDescription) { description = newDescription; return this; }
    
    // Methods:
    

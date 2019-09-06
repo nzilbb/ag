@@ -66,7 +66,7 @@ public class JSONSerialization
     * Setter for {@link #indenter}: String used for indenting.
     * @param newIndenter String used for indenting.
     */
-   public void setIndenter(String newIndenter) { indenter = newIndenter; }
+   public JSONSerialization setIndenter(String newIndenter) { indenter = newIndenter; return this; }
 
    private DecimalFormat fmtOffset = new DecimalFormat(
       // force the locale to something with . as the decimal separator
@@ -92,7 +92,7 @@ public class JSONSerialization
     * Setter for {@link #sortAnchors}: Whether to sort anchors by offset and graph structure (which takes time for larger graphs).
     * @param newSortAnchors Whether to sort anchors by offset and graph structure (which takes time for larger graphs).
     */
-   public void setSortAnchors(boolean newSortAnchors) { sortAnchors = newSortAnchors; }
+   public JSONSerialization setSortAnchors(boolean newSortAnchors) { sortAnchors = newSortAnchors; return this; }
 
    // Methods:
    

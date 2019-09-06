@@ -70,7 +70,7 @@ public class Merger
    * Setter for {@link #errors}: Fatal errors raised during the last {@link #transform(Graph)}.
    * @param newErrors Fatal errors raised during the last {@link #transform(Graph)}.
    */
-  public void setErrors(Vector<String> newErrors) { errors = newErrors; }
+  public Merger setErrors(Vector<String> newErrors) { errors = newErrors; return this; }
    
   /**
    * Whether a log of messages should be kept for reporting.
@@ -93,7 +93,7 @@ public class Merger
    * @see #getLog()
    * @see #log(Object...)
    */
-  public void setDebug(boolean newDebug) { debug = newDebug; }
+  public Merger setDebug(boolean newDebug) { debug = newDebug; return this; }
 
   /**
    * Messages for debugging.
@@ -110,7 +110,7 @@ public class Merger
    * Setter for {@link #log}: Messages for debugging.
    * @param newLog Messages for debugging.
    */
-  protected void setLog(Vector<String> newLog) { log = newLog; }
+  protected Merger setLog(Vector<String> newLog) { log = newLog; return this; }
    
   /**
    * The edited version of the graph.
@@ -127,7 +127,7 @@ public class Merger
    * Setter for {@link #editedGraph}: The edited version of the graph.
    * @param newEditedGraph The edited version of the graph.
    */
-  public void setEditedGraph(Graph newEditedGraph) { editedGraph = newEditedGraph; }
+  public Merger setEditedGraph(Graph newEditedGraph) { editedGraph = newEditedGraph; return this; }
 
    
   /**
@@ -158,7 +158,7 @@ public class Merger
    * same layer but in different graphs to each other. A value of 0 means don't used overlapping
    * chunks. 
    */
-  public void setArraySizeLimit(int newArraySizeLimit) { arraySizeLimit = newArraySizeLimit; }
+  public Merger setArraySizeLimit(int newArraySizeLimit) { arraySizeLimit = newArraySizeLimit; return this; }
 
 
   /**
@@ -177,7 +177,7 @@ public class Merger
    * Setter for {@link #smidgin}: Initial duration of early/layer children, out of order annotations, etc.
    * @param newSmidgin Initial duration of early/layer children, out of order annotations, etc.
    */
-  public void setSmidgin(double newSmidgin) { smidgin = newSmidgin; }
+  public Merger setSmidgin(double newSmidgin) { smidgin = newSmidgin; return this; }
 
   /**
    * Whether to ignore label confidence and force label changes (true), or only change labels
@@ -204,7 +204,7 @@ public class Merger
    * (true), or only change labels when the edited confidence is equal to or higher than the
    * original confidence. 
    */
-  public void setIgnoreLabelConfidence(boolean newIgnoreLabelConfidence) { ignoreLabelConfidence = newIgnoreLabelConfidence; }
+  public Merger setIgnoreLabelConfidence(boolean newIgnoreLabelConfidence) { ignoreLabelConfidence = newIgnoreLabelConfidence; return this; }
 
    
   /**
@@ -232,7 +232,7 @@ public class Merger
    * (true), or only change offsets when the edited offset is equal to or higher than the
    * original confidence (false). 
    */
-  public void setIgnoreOffsetConfidence(boolean newIgnoreOffsetConfidence) { ignoreOffsetConfidence = newIgnoreOffsetConfidence; }
+  public Merger setIgnoreOffsetConfidence(boolean newIgnoreOffsetConfidence) { ignoreOffsetConfidence = newIgnoreOffsetConfidence; return this; }
 
   /**
    * Set of IDs of layers for which annotations may not be added, changed, or deleted.
@@ -266,7 +266,7 @@ public class Merger
    * @param newValidator The validator to use after merge is complete, or null to not validate
    * the graph after merge. 
    */
-  public void setValidator(Validator newValidator) { validator = newValidator; }
+  public Merger setValidator(Validator newValidator) { validator = newValidator; return this; }
 
   /** Layer shema being used */
   private Schema schema = null;

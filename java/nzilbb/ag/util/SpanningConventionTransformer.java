@@ -79,7 +79,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
     * Setter for {@link #sourceLayerId}: Layer ID of the annotations to transform.
     * @param newSourceLayerId Layer ID of the annotations to transform.
     */
-   public void setSourceLayerId(String newSourceLayerId) { sourceLayerId = newSourceLayerId; }
+   public SpanningConventionTransformer setSourceLayerId(String newSourceLayerId) { sourceLayerId = newSourceLayerId; return this; }
 
 
    /**
@@ -97,7 +97,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
     * Setter for {@link #startPattern}: A regular expression matching the label of the first source annotation in the span.
     * @param newStartPattern A regular expression matching the label of the first source annotation in the span.
     */
-   public void setStartPattern(String newStartPattern) { startPattern = newStartPattern; }
+   public SpanningConventionTransformer setStartPattern(String newStartPattern) { startPattern = newStartPattern; return this; }
 
    /**
     * A regular expression matching the label of the last source annotation in the span.
@@ -114,7 +114,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
     * Setter for {@link #endPattern}: A regular expression matching the label of the last source annotation in the span.
     * @param newEndPattern A regular expression matching the label of the last source annotation in the span.
     */
-   public void setEndPattern(String newEndPattern) { endPattern = newEndPattern; }
+   public SpanningConventionTransformer setEndPattern(String newEndPattern) { endPattern = newEndPattern; return this; }
 
    /**
     * Whether to delete the source annotations between the start and end source annotations (exclusive).
@@ -131,7 +131,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
     * Setter for {@link #deleteInSource}: Whether to delete the source annotations between the start and end source annotations (exclusive).
     * @param newDeleteInSource Whether to delete the source annotations between the start and end source annotations (exclusive).
     */
-   public void setDeleteInSource(boolean newDeleteInSource) { deleteInSource = newDeleteInSource; }
+   public SpanningConventionTransformer setDeleteInSource(boolean newDeleteInSource) { deleteInSource = newDeleteInSource; return this; }
 
    /**
     * The resulting label of the start source annotation, which may contain references to captured groups in {@link #startPattern}, or be null to delete the start annotation.
@@ -148,7 +148,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
     * Setter for {@link #sourceStartResult}: The resulting label of the start source annotation, which may contain references to captured groups in {@link #startPattern}, or be null to delete the start annotation.
     * @param newSourceStartResult The resulting label of the start source annotation, which may contain references to captured groups in {@link #startPattern}, or be null to delete the start annotation.
     */
-   public void setSourceStartResult(String newSourceStartResult) { sourceStartResult = newSourceStartResult; }
+   public SpanningConventionTransformer setSourceStartResult(String newSourceStartResult) { sourceStartResult = newSourceStartResult; return this; }
 
    /**
     * The resulting label of the end source annotation, which may contain references to captured groups in {@link #endPattern}, or be null to delete the end annotation.
@@ -165,7 +165,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
     * Setter for {@link #sourceEndResult}: The resulting label of the end source annotation, which may contain references to captured groups in {@link #endPattern}, or be null to delete the end annotation.
     * @param newSourceEndResult The resulting label of the end source annotation, which may contain references to captured groups in {@link #endPattern}, or be null to delete the end annotation.
     */
-   public void setSourceEndResult(String newSourceEndResult) { sourceEndResult = newSourceEndResult; }
+   public SpanningConventionTransformer setSourceEndResult(String newSourceEndResult) { sourceEndResult = newSourceEndResult; return this; }
 
    /**
     * Layer ID of the annotation created for each span.
@@ -182,7 +182,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
     * Setter for {@link #destinationLayerId}: Layer ID of the annotation created for each span.
     * @param newDestinationLayerId Layer ID of the annotation created for each span.
     */
-   public void setDestinationLayerId(String newDestinationLayerId) { destinationLayerId = newDestinationLayerId; }
+   public SpanningConventionTransformer setDestinationLayerId(String newDestinationLayerId) { destinationLayerId = newDestinationLayerId; return this; }
 
    /**
     * Delimiter to insert between source labels when concatenting them to for the destination label.  The default is <code>" "</code> (space).
@@ -199,7 +199,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
     * Setter for {@link #delimiter}: Delimiter to insert between source labels when concatenting them to for the destination label.
     * @param newDelimiter Delimiter to insert between source labels when concatenting them to for the destination label.
     */
-   public void setDelimiter(String newDelimiter) { delimiter = newDelimiter; }
+   public SpanningConventionTransformer setDelimiter(String newDelimiter) { delimiter = newDelimiter; return this; }
 
    /**
     * The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #startPattern}, or be null to not include the start annotation.
@@ -216,7 +216,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
     * Setter for {@link #destinationStartResult}: The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #startPattern}, or be null to not include the start annotation.
     * @param newDestinationStartResult The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #startPattern}, or be null to not include the start annotation.
     */
-   public void setDestinationStartResult(String newDestinationStartResult) { destinationStartResult = newDestinationStartResult; }
+   public SpanningConventionTransformer setDestinationStartResult(String newDestinationStartResult) { destinationStartResult = newDestinationStartResult; return this; }
 
    /**
     * The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #endPattern}, or be null to not include the end annotation.
@@ -233,7 +233,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
     * Setter for {@link #destinationEndResult}: The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #endPattern}, or be null to not include the end annotation.
     * @param newDestinationEndResult The resulting label appended to the destination annotation, which may contain references to captured groups in {@link #endPattern}, or be null to not include the end annotation.
     */
-   public void setDestinationEndResult(String newDestinationEndResult) { destinationEndResult = newDestinationEndResult; }
+   public SpanningConventionTransformer setDestinationEndResult(String newDestinationEndResult) { destinationEndResult = newDestinationEndResult; return this; }
 
    
    /**
@@ -251,7 +251,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
     * Setter for {@link #annotatePrevious}: Whether the destination annotation annotates the source token prior to the first matching source token (i.e. whether they should share start anchors).
     * @param newAnnotatePrevious Whether the destination annotation annotates the source token prior to the first matching source token (i.e. whether they should share start anchors).
     */
-   public void setAnnotatePrevious(boolean newAnnotatePrevious) { annotatePrevious = newAnnotatePrevious; }
+   public SpanningConventionTransformer setAnnotatePrevious(boolean newAnnotatePrevious) { annotatePrevious = newAnnotatePrevious; return this; }
 
    
    /**
@@ -269,7 +269,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
     * Setter for {@link #closeGaps}: Whether to close gaps in the source layer created by deleting span annotations, by setting the end of the previous annotation to the start of the following annotation.
     * @param newCloseGaps Whether to close gaps in the source layer created by deleting span annotations, by setting the end of the previous annotation to the start of the following annotation.
     */
-   public void setCloseGaps(boolean newCloseGaps) { closeGaps = newCloseGaps; }
+   public SpanningConventionTransformer setCloseGaps(boolean newCloseGaps) { closeGaps = newCloseGaps; return this; }
 
 
    // Methods:

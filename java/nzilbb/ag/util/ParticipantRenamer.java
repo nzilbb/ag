@@ -51,7 +51,7 @@ public class ParticipantRenamer
     * Setter for {@link #oldNameToNewName}: A map from old speaker names to new speaker names.
     * @param newOldNameToNewName A map from old speaker names to new speaker names.
     */
-   public void setOldNameToNewName(HashMap<String,String> newOldNameToNewName) { oldNameToNewName = newOldNameToNewName; }
+   public ParticipantRenamer setOldNameToNewName(HashMap<String,String> newOldNameToNewName) { oldNameToNewName = newOldNameToNewName; return this; }
 
    
    // Methods:

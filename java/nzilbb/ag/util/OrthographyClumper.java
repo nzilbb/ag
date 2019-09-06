@@ -50,7 +50,7 @@ public class OrthographyClumper implements IGraphTransformer
     * Setter for {@link #nonOrthoCharacterPattern}: A regular expression that identifies a non-orthographic character.
     * @param sNewNonOrthoCharacterPattern A regular expression that identifies a non-orthographic character.
     */
-   public void setNonOrthoCharacterPattern(String sNewNonOrthoCharacterPattern) { nonOrthoCharacterPattern = sNewNonOrthoCharacterPattern; }
+   public OrthographyClumper setNonOrthoCharacterPattern(String sNewNonOrthoCharacterPattern) { nonOrthoCharacterPattern = sNewNonOrthoCharacterPattern; return this; }
    
    /**
     * ID of the layer to transform.
@@ -67,7 +67,7 @@ public class OrthographyClumper implements IGraphTransformer
     * Setter for {@link #wordLayerId}: ID of the layer to transform.
     * @param newWordLayerId ID of the layer to transform.
     */
-   public void setWordLayerId(String newWordLayerId) { wordLayerId = newWordLayerId; }
+   public OrthographyClumper setWordLayerId(String newWordLayerId) { wordLayerId = newWordLayerId; return this; }
 
    
    /**
@@ -85,7 +85,7 @@ public class OrthographyClumper implements IGraphTransformer
     * Setter for {@link #partitionLayerId}: ID of a partition layer, such that words can't be clumped across partitions.
     * @param newPartitionLayerId ID of a partition layer, such that words can't be clumped across partitions.
     */
-   public void setPartitionLayerId(String newPartitionLayerId) { partitionLayerId = newPartitionLayerId; }
+   public OrthographyClumper setPartitionLayerId(String newPartitionLayerId) { partitionLayerId = newPartitionLayerId; return this; }
 
    // Methods
 

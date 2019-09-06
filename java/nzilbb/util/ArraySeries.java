@@ -48,7 +48,7 @@ public class ArraySeries<T>
     * Setter for {@link #array}: The underlying array.
     * @param newArray The underlying array.
     */
-   public void setArray(T[] newArray) { array = newArray; }
+   public ArraySeries<T> setArray(T[] newArray) { array = newArray; return this; }
 
 
    /**
@@ -66,7 +66,7 @@ public class ArraySeries<T>
     * Setter for {@link #i}: Index of current position.
     * @param newI Index of current position.
     */
-   public void setI(int newI) { i = newI; }
+   public ArraySeries<T> setI(int newI) { i = newI; return this; }
    
    // Methods:
    

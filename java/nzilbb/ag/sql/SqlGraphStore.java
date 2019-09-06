@@ -104,7 +104,7 @@ public class SqlGraphStore
    * Setter for {@link #baseUrl}: URL prefix for file access.
    * @param newBaseUrl URL prefix for file access.
    */
-  public void setBaseUrl(String newBaseUrl) { baseUrl = newBaseUrl; }
+  public SqlGraphStore setBaseUrl(String newBaseUrl) { baseUrl = newBaseUrl; return this; }
 
   /**
    * Root directory for file structure.
@@ -121,7 +121,7 @@ public class SqlGraphStore
    * Setter for {@link #files}: Root directory for file structure.
    * @param newFiles Root directory for file structure.
    */
-  public void setFiles(File newFiles) { files = newFiles; }
+  public SqlGraphStore setFiles(File newFiles) { files = newFiles; return this; }
 
   /**
    * Database connection.
@@ -138,7 +138,7 @@ public class SqlGraphStore
    * Setter for {@link #connection}: Database connection.
    * @param newConnection Database connection.
    */
-  public void setConnection(Connection newConnection) { connection = newConnection; }
+  public SqlGraphStore setConnection(Connection newConnection) { connection = newConnection; return this; }
 
   /**
    * Whether to disconnect the connection when garbage collected.
@@ -155,7 +155,7 @@ public class SqlGraphStore
    * Setter for {@link #disconnectWhenFinished}: Whether to disconnect the connection when garbage collected.
    * @param newDisconnectWhenFinished Whether to disconnect the connection when garbage collected.
    */
-  public void setDisconnectWhenFinished(boolean newDisconnectWhenFinished) { disconnectWhenFinished = newDisconnectWhenFinished; }
+  public SqlGraphStore setDisconnectWhenFinished(boolean newDisconnectWhenFinished) { disconnectWhenFinished = newDisconnectWhenFinished; return this; }
    
   /**
    * The store's ID.
@@ -174,7 +174,7 @@ public class SqlGraphStore
    * Setter for {@link #id}: The store's ID.
    * @param newId The store's ID.
    */
-  public void setId(String newId) { id = newId; }
+  public SqlGraphStore setId(String newId) { id = newId; return this; }
 
 
   /**
@@ -192,7 +192,7 @@ public class SqlGraphStore
    * Setter for {@link #user}: ID of the user querying the store.
    * @param newUser ID of the user querying the store.
    */
-  public void setUser(String newUser)
+  public SqlGraphStore setUser(String newUser)
   {
     user = newUser;
     if (user != null)
@@ -213,6 +213,7 @@ public class SqlGraphStore
       catch(Exception exception)
       {}
     }
+    return this;
   }
 
   /**

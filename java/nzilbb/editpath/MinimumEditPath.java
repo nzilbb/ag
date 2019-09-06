@@ -52,7 +52,7 @@ public class MinimumEditPath<T>
     * Setter for {@link #comparator}: The comparator used when determining the distance between two sequence elements.
     * @param Newcomparator The comparator used when determining the distance between two sequence elements.
     */
-   public void setComparator(IEditComparator<T> Newcomparator) { comparator = Newcomparator; }
+   public MinimumEditPath<T> setComparator(IEditComparator<T> Newcomparator) { comparator = Newcomparator; return this; }
    
    
    // Methods:

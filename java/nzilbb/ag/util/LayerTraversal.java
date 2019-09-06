@@ -60,7 +60,7 @@ public class LayerTraversal<R>
     * Setter for {@link #graph}: The graph to be traversed.
     * @param newGraph The graph to be traversed.
     */
-   public void setGraph(Graph newGraph) { graph = newGraph; }
+   public LayerTraversal<R> setGraph(Graph newGraph) { graph = newGraph; return this; }
 
    
    /**
@@ -78,7 +78,7 @@ public class LayerTraversal<R>
     * Setter for {@link #result}: The result of the traversal, if required.
     * @param newResult The result of the traversal, if required.
     */
-   public void setResult(R newResult) { result = newResult; }
+   public LayerTraversal<R> setResult(R newResult) { result = newResult; return this; }
    
    /**
     * Whether the traversal is breadth-first (true) or depth-first (false - the default).
@@ -95,7 +95,7 @@ public class LayerTraversal<R>
     * Setter for {@link #breadthFirst}: Whether the traversal is breadth-first (true) or depth-first (false - the default).
     * @param newBreadthFirst Whether the traversal is breadth-first (true) or depth-first (false - the default).
     */
-   public void setBreadthFirst(boolean newBreadthFirst) { breadthFirst = newBreadthFirst; }
+   public LayerTraversal<R> setBreadthFirst(boolean newBreadthFirst) { breadthFirst = newBreadthFirst; return this; }
 
    protected HashSet<Annotation> visited = new HashSet<Annotation>();
 

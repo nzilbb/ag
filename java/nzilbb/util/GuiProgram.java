@@ -143,7 +143,7 @@ public class GuiProgram
    * Setter for {@link #iDefaultHeight}: Default height of the application.
    * @param iNewDefaultHeight Default height of the application.
    */
-  public void setDefaultHeight(int iNewDefaultHeight) { iDefaultHeight = iNewDefaultHeight; }
+  public GuiProgram setDefaultHeight(int iNewDefaultHeight) { iDefaultHeight = iNewDefaultHeight; return this; }
    
   /**
    * Default width of the application.
@@ -160,7 +160,7 @@ public class GuiProgram
    * Setter for {@link #iDefaultWidth}: Default width of the application.
    * @param iNewDefaultWidth Default width of the application.
    */
-  public void setDefaultWidth(int iNewDefaultWidth) { iDefaultWidth = iNewDefaultWidth; }
+  public GuiProgram setDefaultWidth(int iNewDefaultWidth) { iDefaultWidth = iNewDefaultWidth; return this; }
    
 
   /**
@@ -184,7 +184,7 @@ public class GuiProgram
    * Setter for {@link #sDefaultWindowTitle}: Default title for the application window.
    * @param sNewDefaultWindowTitle Default title for the application window.
    */
-  public void setDefaultWindowTitle(String sNewDefaultWindowTitle) { sDefaultWindowTitle = sNewDefaultWindowTitle; }
+  public GuiProgram setDefaultWindowTitle(String sNewDefaultWindowTitle) { sDefaultWindowTitle = sNewDefaultWindowTitle; return this; }
 
 
   /**
@@ -203,7 +203,7 @@ public class GuiProgram
    * @param bNewUsage Whether or not to display usage information
    */
   @Switch("Whether or not to display usage information")
-  public void setUsage(Boolean bNewUsage) { usage = bNewUsage; }
+  public GuiProgram setUsage(Boolean bNewUsage) { usage = bNewUsage; return this; }
   
 
   /**
