@@ -1,0 +1,5 @@
+graph,who,word,word start,word end
+ignoreConfidence.trs,john smith,The,0.0,1.0
+ignoreConfidence.trs,john smith,quick,1.0,3.0
+ignoreConfidence.trs,john smith,BROWN,4.0,5.0
+ignoreConfidence.trs,john smith,fox,5.0,6.0

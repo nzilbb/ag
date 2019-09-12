@@ -1,0 +1,9 @@
+graph,who,word,word start,word end,orthography,orthography start,orthography end
+multipleLayers.trs,john smith,The,0.0,1.0,,,
+multipleLayers.trs,john smith,quick,1.0,3.0,,,
+multipleLayers.trs,john smith,BROWN,,,,,
+multipleLayers.trs,john smith,fox,,,,,
+multipleLayers.trs,john smith,,,,the,0.0,1.0
+multipleLayers.trs,john smith,,,,quick,1.0,3.0
+multipleLayers.trs,john smith,,,,brown,,
+multipleLayers.trs,john smith,,,,fox,,
