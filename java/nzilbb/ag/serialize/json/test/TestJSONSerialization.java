@@ -189,7 +189,7 @@ public class TestJSONSerialization
 
       // serialize
       File dir = getDir();
-      NamedStream[] streams = s.serialize(Utility.OneGraphArray(g));
+      NamedStream[] streams = s.serialize(Utility.OneGraphArray(g), null);
       assertEquals(1, streams.length);
       streams[0].save(dir);
 
@@ -393,7 +393,7 @@ public class TestJSONSerialization
       Graph[] graphs = s.deserialize();
       Graph d = graphs[0];
 
-      NamedStream[] streams = s.serialize(Utility.OneGraphArray(d));
+      NamedStream[] streams = s.serialize(Utility.OneGraphArray(d), null);
       File fCorrected = new File(dir, "test_corrected.json");
       assertEquals(1, streams.length);
       streams[0].setName(fCorrected.getName());

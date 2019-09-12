@@ -229,7 +229,7 @@ public class KaldiSerializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Kaldi Files", "0.2", "text/x-kaldi-text", ".kaldi", "20190906.1040", getClass().getResource("icon.png"));
+	 "Kaldi Files", "0.2", "text/x-kaldi-text", ".kaldi", "20190912.1504", getClass().getResource("icon.png"));
    }
 
    /**
@@ -433,13 +433,13 @@ public class KaldiSerializer
     * @throws SerializerNotConfiguredException if the object has not been configured.
     * @throws SerializationException if errors occur during deserialization.
     */
-   public NamedStream[] serialize(Graph[] graphs) 
+   public NamedStream[] serialize(Graph[] graphs, String[] layerIds) 
       throws SerializerNotConfiguredException, SerializationException
    {
       warnings = new Vector<String>();
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
-      serializeSeries(new ArraySeries<Graph>(graphs), new ISeriesConsumer<NamedStream>() {
+      serializeSeries(new ArraySeries<Graph>(graphs), layerIds, new ISeriesConsumer<NamedStream>() {
 	    public void next(NamedStream stream)
 	    {
 	       streams.add(stream);
@@ -470,10 +470,13 @@ public class KaldiSerializer
     *  are capable of storing multiple transcripts in the same file (e.g. AGTK, Transana XML
     *  export), which is why this method accepts a list.
     * @param graphs The graphs to serialize.
+    * @param layerIds The IDs of the layers to include, or null for all layers.
+    * @param consumer The object receiving the streams.
+    * @param warnings The object receiving warning messages.
     * @return A list of named streams that contain the serialization in the given format. 
     * @throws SerializerNotConfiguredException if the object has not been configured.
     */
-   public void serializeSeries(ISeries<Graph> graphs, ISeriesConsumer<NamedStream> consumer, ISeriesConsumer<String> warnings, ISeriesConsumer<SerializationException> errors) 
+   public void serializeSeries(ISeries<Graph> graphs, String[] layerIds, ISeriesConsumer<NamedStream> consumer, ISeriesConsumer<String> warnings, ISeriesConsumer<SerializationException> errors) 
       throws SerializerNotConfiguredException
    {
       percentComplete = 0;

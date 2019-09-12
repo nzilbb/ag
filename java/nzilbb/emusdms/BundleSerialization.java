@@ -608,7 +608,7 @@ public class BundleSerialization
    * @return A named stream that contains the TextGrid. 
    * @throws SerializationException if errors occur during deserialization.
    */
-  protected NamedStream serializeGraph(Graph graph) 
+   protected NamedStream serializeGraph(Graph graph, String[] layerIds) 
     throws SerializationException
   {
     SerializationException errors = null;
@@ -892,7 +892,7 @@ public class BundleSerialization
   public SerializationDescriptor getDescriptor()
   {
     return new SerializationDescriptor(
-      "EMU-SDMS Bundle", "0.1", "application/emusdms+json", ".json", "20190906.1040",
+      "EMU-SDMS Bundle", "0.1", "application/emusdms+json", ".json", "20190912.1504",
       getClass().getResource("icon.png"));
   }
   
@@ -926,7 +926,7 @@ public class BundleSerialization
   protected Vector<String> warnings = new Vector<String>();
   /**
    * Returns any warnings that may have arisen during the last execution of 
-   * {@link #serialize(Graph[])}.
+   * {@link #serialize(Graph[],String[])}.
    * @return A possibly empty list of warnings.
    */
   public String[] getWarnings()
@@ -960,14 +960,14 @@ public class BundleSerialization
    * @throws SerializerNotConfiguredException if the object has not been configured.
    * @throws SerializationException if errors occur during deserialization.
    */
-  public NamedStream[] serialize(Graph[] graphs) 
+   public NamedStream[] serialize(Graph[] graphs, String[] layerIds) 
       throws SerializerNotConfiguredException, SerializationException
   {
     warnings = new Vector<String>();
     Vector<NamedStream> streams = new Vector<NamedStream>();
     for (Graph graph : graphs)
     {
-      streams.add(serializeGraph(graph));
+       streams.add(serializeGraph(graph, layerIds));
     } // next graph
     return streams.toArray(new NamedStream[0]);     
   }

@@ -52,7 +52,7 @@ public class TextGridSerialization
   // Attributes:     
   protected Vector<String> warnings;
   /**
-   * Returns any warnings that may have arisen during the last execution of {@link #deserialize()} or  {@link #serialize(Graph[])}.
+   * Returns any warnings that may have arisen during the last execution of {@link #deserialize()} or  {@link #serialize(Graph[],String[])}.
    * <p>{@link ISerializer} and {@link IDeserializer} method.
    * @return A possibly empty list of warnings.
    */
@@ -258,7 +258,7 @@ public class TextGridSerialization
   public SerializationDescriptor getDescriptor()
   {
     return new SerializationDescriptor(
-      "Praat TextGrid", "1.9", "text/praat-textgrid", ".textgrid", "20190906.1040",
+      "Praat TextGrid", "1.9", "text/praat-textgrid", ".textgrid", "20190912.1504",
       getClass().getResource("icon.png"));
   }
    
@@ -1433,13 +1433,13 @@ public class TextGridSerialization
    * @throws SerializerNotConfiguredException if the object has not been configured.
    * @throws SerializationException if errors occur during deserialization.
    */
-  public NamedStream[] serialize(Graph[] graphs) 
+  public NamedStream[] serialize(Graph[] graphs, String[] layerIds) 
     throws SerializerNotConfiguredException, SerializationException
   {
     Vector<NamedStream> streams = new Vector<NamedStream>();
     for (Graph graph : graphs)
     {
-      streams.add(serializeGraph(graph));
+       streams.add(serializeGraph(graph, layerIds));
     } // next graph
     return streams.toArray(new NamedStream[0]);     
   }
@@ -1450,7 +1450,7 @@ public class TextGridSerialization
    * @return A named stream that contains the TextGrid. 
    * @throws SerializationException if errors occur during deserialization.
    */
-  protected NamedStream serializeGraph(Graph graph) 
+  protected NamedStream serializeGraph(Graph graph, String[] layerIds) 
     throws SerializationException
   {
     SerializationException errors = null;

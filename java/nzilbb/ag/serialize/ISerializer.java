@@ -35,7 +35,7 @@ import nzilbb.configure.ParameterSet;
  *  <li>Configure serializer using {@link #configure(ParameterSet,Schema)}</li>
  *  <li>Determine which (if any) layers are required for the serialization by calling
  *   {@link #getRequiredLayers()}, which returns a list of layer IDs.</li>
- *  <li>Serialize the graph using {@link #serialize(Graph[])}</li>
+ *  <li>Serialize the graph using {@link #serialize(Graph[],String[])}</li>
  *  <li>Possibly display or log warnings returned by {@link #getWarnings()}</li>
  * </ol>
  * @author Robert Fromont robert@fromont.net.nz
@@ -80,11 +80,12 @@ public interface ISerializer
     *  are capable of storing multiple transcripts in the same file (e.g. AGTK, Transana XML
     *  export), which is why this method accepts a list.
     * @param graphs The graphs to serialize.
+    * @param layerIds The IDs of the layers to include, or null for all layers.
     * @return A list of named streams that contain the serialization in the given format. 
     * @throws SerializerNotConfiguredException if the object has not been configured.
     * @throws SerializationException if errors occur during deserialization.
     */
-   public NamedStream[] serialize(Graph[] graphs) 
+   public NamedStream[] serialize(Graph[] graphs, String[] layerIds) 
       throws SerializerNotConfiguredException, SerializationException;
 
    /**

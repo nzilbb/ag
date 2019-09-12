@@ -111,7 +111,7 @@ public class JSONSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "JSON (JavaScript Object Notation)", "0.1", "application/json", ".json", 
+	 "JSON (JavaScript Object Notation)", "0.1", "application/json", ".json", "20190912.1504", 
 	 getClass().getResource(getClass().getSimpleName() + ".png"));
    }
 
@@ -476,7 +476,7 @@ public class JSONSerialization
     * @throws SerializerNotConfiguredException if the object has not been configured.
     * @throws SerializationException if errors occur during deserialization.
     */
-   public NamedStream[] serialize(Graph[] graphs) 
+   public NamedStream[] serialize(Graph[] graphs, String[] layerIds) 
       throws SerializerNotConfiguredException, SerializationException
    {
       // if there are errors, accumlate as many as we can before throwing DeserializationException

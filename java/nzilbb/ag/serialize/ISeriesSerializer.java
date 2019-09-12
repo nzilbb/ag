@@ -81,12 +81,13 @@ public interface ISeriesSerializer
     *  are capable of storing multiple transcripts in the same file (e.g. AGTK, Transana XML
     *  export), which is why this method accepts a list.
     * @param graphs The graphs to serialize.
+    * @param layerIds The IDs of the layers to include, or null for all layers.
     * @param consumer The object receiving the streams.
     * @param warnings The object receiving warning messages.
     * @param errors The object receiving error messages.
     * @throws SerializerNotConfiguredException if the object has not been configured.
     */
-   public void serializeSeries(ISeries<Graph> graphs, ISeriesConsumer<NamedStream> consumer, ISeriesConsumer<String> warnings, ISeriesConsumer<SerializationException> errors) 
+   public void serializeSeries(ISeries<Graph> graphs, String[] layerIds, ISeriesConsumer<NamedStream> consumer, ISeriesConsumer<String> warnings, ISeriesConsumer<SerializationException> errors) 
       throws SerializerNotConfiguredException;
    
    /**

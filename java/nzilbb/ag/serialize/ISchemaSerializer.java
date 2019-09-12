@@ -35,7 +35,7 @@ import nzilbb.configure.ParameterSet;
  *  <li>Configure serializer using {@link #configure(ParameterSet,Schema)}</li>
  *  <li>Determine which (if any) layers are required for the serialization by calling
  *   {@link #getRequiredLayers()}, which returns a list of layer IDs.</li>
- *  <li>Serialize the schema using {@link #serialize(Graph[])}</li>
+ *  <li>Serialize the schema using {@link #serializeSchema(Schema,List<String>)}</li>
  *  <li>Possibly display or log warnings returned by {@link #getWarnings()}</li>
  * </ol>
  * @author Robert Fromont robert@fromont.net.nz
