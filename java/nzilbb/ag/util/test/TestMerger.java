@@ -871,7 +871,7 @@ public class TestMerger
     // configure it with its default options
     s.configure(s.configure(new ParameterSet(), graph.getSchema()), graph.getSchema());
     // serialize      
-    NamedStream[] streams = s.serialize(Utility.OneGraphArray(graph));
+    NamedStream[] streams = s.serialize(Utility.OneGraphArray(graph), null);
     streams[0].setName(file.getName());
     streams[0].save(file.getParentFile());
   } // end of loadGraphFromJSON()
