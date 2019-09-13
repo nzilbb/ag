@@ -258,7 +258,7 @@ public class TextGridSerialization
   public SerializationDescriptor getDescriptor()
   {
     return new SerializationDescriptor(
-      "Praat TextGrid", "1.9", "text/praat-textgrid", ".textgrid", "20190912.1504",
+      "Praat TextGrid", "1.91", "text/praat-textgrid", ".textgrid", "20190912.1504",
       getClass().getResource("icon.png"));
   }
    
@@ -1455,6 +1455,16 @@ public class TextGridSerialization
   {
     SerializationException errors = null;
 
+    HashSet<String> selectedLayers = new HashSet<String>();
+    if (layerIds != null)
+    {
+       for (String l : layerIds) selectedLayers.add(l);
+    }
+    else
+    {
+       for (Layer l : graph.getSchema().getLayers().values()) selectedLayers.add(l.getId());
+    }
+
     graph.setOffsetGranularity(Constants.GRANULARITY_MILLISECONDS);
 
     reset();
@@ -1470,6 +1480,8 @@ public class TextGridSerialization
           && layer.getAlignment() == Constants.ALIGNMENT_NONE) continue;
       // include if there's an utterance layer, skip the turn layer
       if (layer.equals(getTurnLayer()) && getUtteranceLayer() != null) continue;
+      // skip layers that were not explicitly selected
+      if (!selectedLayers.contains(layer.getId())) continue;
       boolean assignedToParticipant = layer.getAncestors().contains(getParticipantLayer());
       if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT)
       { // layer of instants
