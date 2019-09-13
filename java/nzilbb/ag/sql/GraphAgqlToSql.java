@@ -219,6 +219,13 @@ public class GraphAgqlToSql
                 +" AND annotation_participant.layer = '"+escape(attribute)+"'"
                 +" WHERE transcript_speaker.ag_id = transcript.ag_id)");
             } // participant attribute
+            else if (layer.getId().equals("transcript_type"))
+            { // transcript type TODO this should be a join
+              conditions.append(
+                "(SELECT transcript_type AS label"
+                +" FROM transcript_type"
+                +" WHERE transcript_type.type_id = transcript.type_id)");
+            } // transcript type
             else if (schema.getEpisodeLayerId().equals(layer.getParentId()))
             { // episode attribute
               conditions.append(
@@ -267,6 +274,13 @@ public class GraphAgqlToSql
                 +" WHERE transcript_speaker.ag_id = transcript.ag_id"
                 +" ORDER BY annotation_id LIMIT 1)");
             } // participant attribute 
+            else if (layer.getId().equals("transcript_type"))
+            { // transcript type TODO this should be a join
+              conditions.append(
+                "(SELECT transcript_type AS label"
+                +" FROM transcript_type"
+                +" WHERE transcript_type.type_id = transcript.type_id)");
+            } // transcript type
             else if (schema.getEpisodeLayerId().equals(layer.getParentId()))
             { // episode attribute
               conditions.append(
@@ -316,6 +330,10 @@ public class GraphAgqlToSql
                 +" AND annotation_participant.layer = '"+escape(attribute)+"'"
                 +" WHERE transcript_speaker.ag_id = transcript.ag_id)");
             } // participant attribute
+            else if (layer.getId().equals("transcript_type"))
+            { // transcript type
+              conditions.append("1");
+            } // transcript type
             else if (schema.getEpisodeLayerId().equals(layer.getParentId()))
             { // episode attribute
               conditions.append(

@@ -56,6 +56,9 @@ public class TestGraphAgqlToSql
       .setPeers(false).setPeersOverlap(false).setSaturated(true))
       .with("@class_id", "transcript").with("@attribute", "scribe"),
       
+      (Layer)(new Layer("transcript_type", "Type").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)),
+      
       (Layer)(new Layer("transcript_rating", "Ratings").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(true).setPeersOverlap(true).setSaturated(true))
       .with("@class_id", "transcript").with("@attribute", "rating"),
@@ -256,6 +259,22 @@ public class TestGraphAgqlToSql
                  +" WHERE (SELECT name"
                  +" FROM transcript_family"
                  +" WHERE transcript_family.family_id = transcript.family_id) = 'some-episode'"
+                 +" ORDER BY transcript.transcript_id",
+                 q.sql);
+    assertEquals("Parameter count", 0, q.parameters.size());
+  }
+
+  @Test public void transcriptTypeLabel() throws AGQLException
+  {
+    GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
+    GraphAgqlToSql.Query q = transformer.sqlFor(
+      "my(\"transcript_type\").label = 'interview'",
+      "transcript.transcript_id", null, null, null);
+    assertEquals("SQL",
+                 "SELECT transcript.transcript_id FROM transcript"
+                 +" WHERE (SELECT transcript_type AS label"
+                 +" FROM transcript_type"
+                 +" WHERE transcript_type.type_id = transcript.type_id) = 'interview'"
                  +" ORDER BY transcript.transcript_id",
                  q.sql);
     assertEquals("Parameter count", 0, q.parameters.size());
