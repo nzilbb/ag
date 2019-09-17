@@ -25,6 +25,8 @@ import java.util.Vector;
 import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.SortedSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.TreeSet;
 import java.util.List;
 import java.util.Arrays;
@@ -145,7 +147,7 @@ public class CsvSerializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Comma Separated Values", "0.1", "text/csv", ".csv", "20190906.1040", getClass().getResource("icon.png"));
+	 "Comma Separated Values", "0.2", "text/csv", ".csv", "20190906.1040", getClass().getResource("icon.png"));
    }
 
    /**
@@ -217,7 +219,8 @@ public class CsvSerializer
          for (String layerId : layerIds)
          {
             Layer layer = schema.getLayer(layerId);
-            if (layer.getParentId().equals(schema.getRoot().getId())
+            if ((layer.getParentId().equals(schema.getRoot().getId())
+                 || layer.getParentId().equals(schema.getParticipantLayerId()))
                 && layer.getAlignment() == Constants.ALIGNMENT_NONE)
             {
                attributeLayers.add(layer);
@@ -266,7 +269,15 @@ public class CsvSerializer
                   {
                      try
                      {
-                        csv.print(annotation.my(attributeLayer.getId()).getLabel());
+                        csv.print(
+                           // multiple values are represented with multiple lines in the cell
+                           String.join("\n",
+                                       // stream all annotations on the attribute layer
+                                       Arrays.stream(annotation.list(attributeLayer.getId()))
+                                       // convert to a stream of labels
+                                       .map(a -> a.getLabel())
+                                       // and convert the stream to an array
+                                       .collect(Collectors.toList()).toArray(new String[0])));
                      }
                      catch(NullPointerException exception)
                      {
