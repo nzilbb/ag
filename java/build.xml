@@ -84,8 +84,8 @@
 	       includes="${srctests} ${srctestseditpath}"
 	       classpath=".;${junitjar};${dist}/${ant.project.name}.jar;lib/antlr-4.7.2-complete.jar"
 	       listfiles="yes"
-	       target="6"
-	       source="6"
+	       target="8"
+	       source="8"
 	       debug="on"
 	       includeAntRuntime="false"
 	       >
@@ -116,8 +116,8 @@
 	       includes="nzilbb/ag/util/test/TestMerger.java"
 	       classpath=".;${junitjar};${dist}/${ant.project.name}.jar"
 	       listfiles="yes"
-	       target="6"
-	       source="6"
+	       target="8"
+	       source="8"
 	       debug="on"
 	       includeAntRuntime="false"
 	       >
@@ -144,8 +144,8 @@
 	       includes="nzilbb/ag/ql/test/Test*.java nzilbb/ag/sql/test/Test*.java"
 	       classpath=".;${junitjar};${dist}/${ant.project.name}.jar;lib/antlr-4.7.2-complete.jar"
 	       listfiles="yes"
-	       target="6"
-	       source="6"
+	       target="8"
+	       source="8"
 	       debug="on"
 	       includeAntRuntime="false"
 	       >

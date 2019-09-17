@@ -31,8 +31,8 @@
 	   excludes="nzilbb/clan/**/test/*.java"
 	   listfiles="yes"
 	   includeantruntime="false"
-	   target="6"
-	   source="6"
+	   target="8"
+	   source="8"
 	   debug="on"
 	   >
       <compilerarg value="-Xlint"/>
@@ -63,8 +63,8 @@
 	   includes="${srctests}"
 	   classpath=".;${junitjar};${dist}/${ant.project.name}.jar;${dist}/nzilbb.ag.jar"
 	   listfiles="yes"
-	   target="6"
-	   source="6"
+	   target="8"
+	   source="8"
 	   debug="on"
 	   includeAntRuntime="false"
 	   >
