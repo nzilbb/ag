@@ -1113,7 +1113,7 @@ public class Graph
    * @param label The label of the resulting annotation.
    * @param parent The new annotation's parent.
    * @return The new annotation.
-   * @see #createSpan(Annotation,Annotation,String,label,parent)
+   * @see #createSpan(Annotation,Annotation,String,String,Annotation)
    */
   public Annotation addSpan(Annotation from, Annotation to, String layerId, String label, Annotation parent)
   {
