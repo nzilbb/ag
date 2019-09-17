@@ -350,5 +350,20 @@ public class IO
       bytesOut.close();
       return base64Out.toString();
    } // end of base64EncodeFile()
+
+   /**
+    * Converts the given string into a version that's safe for a file name or URL.
+    * @param s The possibly unsafe string.
+    * @return The given string with characters that are unsafe for file names or URLs removed.
+    */
+   public static String SafeFileNameUrl(String s)
+   {
+      if (s == null) return "";
+      return s.replaceAll("[\\\\\\?\\*\\+\\$]", "")
+         .replaceAll("[\\|\\:\\!\\>\\<\\=\\^ ]", "_")	
+         .replaceAll("@","-at-")
+         .replaceAll("&","-amp-");
+   } // end of SafeFileNameUrl()
+
    
 } // end of class IO
