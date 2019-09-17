@@ -327,7 +327,7 @@ public class TestGraphAgqlToSql
                  +" (SELECT DISTINCT label"
                  +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
                  +" WHERE annotation_transcript.layer = 'rating'"
-                 +" AND transcript_speaker.ag_id = transcript.ag_id)"
+                 +" AND annotation_transcript.ag_id = transcript.ag_id)"
                  +" ORDER BY transcript.transcript_id",
                  q.sql);
     assertEquals("Parameter count", 0, q.parameters.size());
@@ -450,7 +450,7 @@ public class TestGraphAgqlToSql
                  +" WHERE (SELECT COUNT(*)"
                  +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
                  +" WHERE annotation_transcript.layer = 'rating'"
-                 +" AND transcript_speaker.ag_id = transcript.ag_id) > 10"
+                 +" AND annotation_transcript.ag_id = transcript.ag_id) > 10"
                  +" ORDER BY transcript.transcript_id",
                  q.sql);
     assertEquals("Parameter count", 0, q.parameters.size());
@@ -508,7 +508,7 @@ public class TestGraphAgqlToSql
                  +" (SELECT DISTINCT annotated_by"
                  +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
                  +" WHERE annotation_transcript.layer = 'rating'"
-                 +" AND transcript_speaker.ag_id = transcript.ag_id)"
+                 +" AND annotation_transcript.ag_id = transcript.ag_id)"
                  +" ORDER BY transcript.transcript_id",
                  q.sql);
     assertEquals("Parameter count", 0, q.parameters.size());

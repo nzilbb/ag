@@ -207,7 +207,7 @@ public class GraphAgqlToSql
                 "(SELECT DISTINCT label"
                 +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
                 +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
-                +" AND transcript_speaker.ag_id = transcript.ag_id)");
+                +" AND annotation_transcript.ag_id = transcript.ag_id)");
             } // transcript attribute
             else if ("speaker".equals(layer.get("@class_id")))
             {
@@ -318,7 +318,7 @@ public class GraphAgqlToSql
                 "(SELECT COUNT(*)"
                 +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
                 +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
-                +" AND transcript_speaker.ag_id = transcript.ag_id)");
+                +" AND annotation_transcript.ag_id = transcript.ag_id)");
             } // transcript attribute
             else if ("speaker".equals(layer.get("@class_id")))
             {
@@ -368,7 +368,7 @@ public class GraphAgqlToSql
                 "(SELECT DISTINCT annotated_by"
                 +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
                 +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
-                +" AND transcript_speaker.ag_id = transcript.ag_id)");
+                +" AND annotation_transcript.ag_id = transcript.ag_id)");
             } // transcript attribute
             else if ("speaker".equals(layer.get("@class_id")))
             {
