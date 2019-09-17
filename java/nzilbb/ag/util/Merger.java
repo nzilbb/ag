@@ -2672,7 +2672,8 @@ public class Merger
               // which has the higher status?
               if (getConfidence(anchor) <= getConfidence(predecessor)
                   // but we also don't want to run past the end of the parent
-                  && (!layer.getParentIncludes() // ...if the layer is parentIncludes
+                  && (!(layer.getParentIncludes() // ...if the layer is parentIncludes
+                        && anOriginalParent.getEnd().getOffset() != null)
                       || anchor.getOffset() < anOriginalParent.getEnd().getOffset()))
               { // anchor.confidence < predecessor.confidence
                 // easy case - just change this anchor and keep going
