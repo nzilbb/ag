@@ -71,8 +71,8 @@
           description="document the source" >
     <mkdir dir="${javadoc}"/>
     <javadoc destdir="${javadoc}"
-	         classpath="."
-	         Author="yes" >
+	     classpath=".;lib/antlr-4.7.2-complete.jar"
+	     Author="yes" >
       <fileset dir="${src}"
                includes="${srcfiles}"
                excludes="${srctests} ${srctestseditpath} nzilbb/ag/ql/**/*.java" />
