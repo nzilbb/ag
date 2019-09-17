@@ -69,7 +69,6 @@ public class NamedStream
    * @param sNewName The name of the stream
    */
   public NamedStream setName(String sNewName) { name = sNewName; return this; }
-
    
   /**
    * Optional MIME Type for the stream.
@@ -87,7 +86,6 @@ public class NamedStream
    * @param sNewMimeType Optional MIME Type for the stream.
    */
   public NamedStream setMimeType(String sNewMimeType) { mimeType = sNewMimeType; return this; }
-
       
   // Methods:
       
