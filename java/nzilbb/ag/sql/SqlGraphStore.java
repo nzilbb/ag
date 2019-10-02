@@ -3384,6 +3384,7 @@ public class SqlGraphStore
       // validate the graph before saving it
       // TODO ensure all layers are loaded before validation
       Validator v = new Validator();
+      v.setMaxLabelLength(247);
       if (graph.getChange() == Change.Operation.Create)
       {
         v.setFullValidation(true);
@@ -5898,6 +5899,11 @@ public class SqlGraphStore
     Vector<MediaFile> files = new Vector<MediaFile>();
     String[] layers = { "corpus", "episode" };
     Graph graph = getGraph(id, layers);
+    if (graph.my("corpus") == null || graph.my("episode") == null)
+    { // corpus/episode not correctly set
+       return new MediaFile[0];
+    }
+
     File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
     File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
     MediaTrackDefinition[] tracks = getMediaTracks();
@@ -6702,29 +6708,32 @@ public class SqlGraphStore
       Graph graph = getGraph(id, layers);
       int iAgId = ((Integer)graph.get("@ag_id")).intValue();
 
-      // files to delete...
-      File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
-      File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
-
       // media
       for (MediaFile media : getAvailableMedia(graph.getId()))
       {
-        if (!media.getFile().delete())
-        {
-          System.err.println("Could not delete " + media.getFile().getPath());
-        }
+         if (!media.getFile().delete())
+         {
+            System.err.println("Could not delete " + media.getFile().getPath());
+         }
       } // next media file
-
-      // transcript
-      File trs = new File(episodeDir, "trs");
-      File transcript = new File(trs, graph.getId());
-      if (transcript.exists())
+      
+      if (graph.my("corpus") != null && graph.my("episode") != null)
       {
-        if (!transcript.delete())
-        {
-          System.err.println("Could not delete " + transcript.getPath());
-        }
-      }
+         // files to delete...
+         File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
+         File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
+         
+         // transcript
+         File trs = new File(episodeDir, "trs");
+         File transcript = new File(trs, graph.getId());
+         if (transcript.exists())
+         {
+            if (!transcript.delete())
+            {
+               System.err.println("Could not delete " + transcript.getPath());
+            }
+         }
+      } // corpus/episode correctly set
 	 
       // delete records from the database
 	    
