@@ -2070,6 +2070,119 @@ public class TestValidator
     }
   }
 
+   @Test public void labels() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");
+      
+      g.addLayer(new Layer("who", "Participants")
+                 .setAlignment(Constants.ALIGNMENT_NONE) 
+                 .setPeers(true)
+                 .setPeersOverlap(true)
+                 .setSaturated(true));
+      g.addLayer(new Layer("turn", "Speaker turns")
+                 .setAlignment(Constants.ALIGNMENT_INTERVAL) 
+                 .setPeers(true)
+                 .setPeersOverlap(false)
+                 .setSaturated(false)
+                 .setParentId("who")
+                 .setParentIncludes(true));
+      g.addLayer(new Layer("word", "Words")
+                 .setAlignment(Constants.ALIGNMENT_INTERVAL) 
+                 .setPeers(true)
+                 .setPeersOverlap(false)
+                 .setSaturated(false)
+                 .setParentId("turn")
+                 .setParentIncludes(true));
+      g.addLayer(new Layer("phone", "Phones")
+                 .setAlignment(Constants.ALIGNMENT_INTERVAL) 
+                 .setPeers(true)
+                 .setPeersOverlap(false)
+                 .setSaturated(true)
+                 .setParentId("word")
+                 .setParentIncludes(true));
+      g.addLayer(new Layer("pos", "Part of speech")
+                 .setAlignment(Constants.ALIGNMENT_NONE) 
+                 .setPeers(false)
+                 .setPeersOverlap(false)
+                 .setSaturated(true)
+                 .setParentId("word")
+                 .setParentIncludes(true));
+      g.addLayer(new Layer("phrase", "Phrase structure")
+                 .setAlignment(Constants.ALIGNMENT_INTERVAL) 
+                 .setPeers(true)
+                 .setPeersOverlap(true)
+                 .setSaturated(false)
+                 .setParentId("turn")
+                 .setParentIncludes(true));
+      
+      g.addAnchor(new Anchor("a0", 0.0)); // turn start
+      g.addAnchor(new Anchor("a1", 1.0)); // the & DT & D & NP
+      g.addAnchor(new Anchor("a1.5", 1.5)); // @
+      g.addAnchor(new Anchor("a2", 2.0)); // quick & A & k & AP
+      g.addAnchor(new Anchor("a2.25", 2.25)); // w
+      g.addAnchor(new Anchor("a2.5", 2.5)); // I
+      g.addAnchor(new Anchor("a2.75", 2.75)); // k
+      g.addAnchor(new Anchor("a3", 3.0)); // brown
+      g.addAnchor(new Anchor("a4", 4.0)); // fox & N
+      // unset offsets
+      g.addAnchor(new Anchor("a?1", null)); // jumps
+      g.addAnchor(new Anchor("a?2", null)); // over
+      g.addAnchor(new Anchor("a5", 5.0)); // end of over
+      g.addAnchor(new Anchor("a6", 6.0)); // turn end
+      
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "a0", "a6", "my graph"));
+      
+      g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a6", "participant1"));
+      
+      g.addAnnotation(new Annotation("phrase1", "NP", "phrase", "a1", "a4", "turn1"));
+      g.addAnnotation(new Annotation("phrase2", "AP", "phrase", "a2", "a4", "turn1"));
+      
+      g.addAnnotation(new Annotation("word1", "the", "word", "a1", "a2", "turn1"));
+      g.addAnnotation(new Annotation("word2", "very-very-very-very-very-very", "word", "a2", "a3", "turn1"));
+      g.addAnnotation(new Annotation("word3", "long", "word", "a3", "a4", "turn1"));
+      g.addAnnotation(new Annotation("word4", "word", "word", "a4", "a?1", "turn1"));
+      g.addAnnotation(new Annotation("word5", "jumps", "word", "a?1", "a?2", "turn1"));
+      g.addAnnotation(new Annotation("word6", "over", "word", "a?2", "a5", "turn1"));
+      
+      g.addAnnotation(new Annotation("pos1", "DT", "pos", "a1", "a2", "word1"));
+      g.addAnnotation(new Annotation("pos2", "A", "pos", "a2", "a3", "word2"));
+      g.addAnnotation(new Annotation("pos3", "N", "pos", "a4", "a?1", "word4"));
+      
+      g.addAnnotation(new Annotation("phone1", "D", "phone", "a1", "a1.5", "word1"));
+      g.addAnnotation(new Annotation("phone2", "@", "phone", "a1.5", "a2", "word1"));
+      g.addAnnotation(new Annotation("phone3", "k", "phone", "a2", "a2.25", "word2"));
+      g.addAnnotation(new Annotation("phone4", "w", "phone", "a2.25", "a2.5", "word2"));
+      g.addAnnotation(new Annotation("phone5", "I", "phone", "a2.5", "a2.75", "word2"));
+      g.addAnnotation(new Annotation("phone6", "k", "phone", "a2.75", "a3", "word2"));
+      
+      Validator v = new Validator();
+      v.setMaxLabelLength(20);
+      v.setFullValidation(true);
+      
+      // v.setDebug(true);
+      v.setDefaultOffsetThreshold(null);
+      try
+      {
+         Vector<Change> changes = v.transform(g);
+         if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
+         assertEquals("one error: " + v.getErrors(),
+                      1, v.getErrors().size());
+         assertEquals("Label too long (>20) for  [word2]2#very-very-very-very-very-very(2.0-3.0)",
+                      v.getErrors().elementAt(0));
+         assertEquals("changes applied",
+                      1, changes.size());
+         assertEquals("label truncated",
+                      "very-very-very-very-", g.getAnnotation("word2").getLabel());
+    }
+    catch(TransformationException exception)
+    {
+      fail(exception.toString());
+    }
+  }
+
+
   @Test public void validateHierarchyParentChildSynchronicity() // TODO saturated anchor sharing, and non-saturated by parent-including violations
   {
   }
