@@ -365,8 +365,9 @@ public class Validator
             {
                if (annotation.getLabel() != null && annotation.getLabel().length() > maxLabelLength)
                {
-                  errors.add("Label too long (>" + maxLabelLength + ") for  "
-                             + logAnnotation(annotation));
+                  errors.add("Label too long (>" + maxLabelLength + ") for "
+                             + annotation.getLayerId()
+                             + ": " + logAnnotation(annotation));
                   // truncate it so it's valid
                   changes.addAll(
                      annotation.setLabel(annotation.getLabel().substring(0, maxLabelLength)));
