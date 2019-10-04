@@ -37,7 +37,7 @@ import nzilbb.configure.ParameterSet;
  *  <li>Configure serializer using {@link #configure(ParameterSet,Schema)}</li>
  *  <li>Determine which (if any) layers are required for the serialization by calling
  *   {@link #getRequiredLayers()}, which returns a list of layer IDs.</li>
- *  <li>Start serializing the graph series using {@link #serializeSeries(ISeries,ISeriesConsumer,ISeriesConsumer,ISeriesConsumer)}</li>
+ *  <li>Start serializing the graph series using {@link #serializeSeries(ISeries,String[],ISeriesConsumer,ISeriesConsumer,ISeriesConsumer)}</li>
  * </ol>
  * @author Robert Fromont robert.fromont@canterbury.ac.nz
  */

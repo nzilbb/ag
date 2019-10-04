@@ -3167,11 +3167,11 @@ public class Merger
 
   /**
    * Compare two anchors, evaluating them as equal if the difference is less than 
-   * {@link #offsetComparisonThreshold}.
+   * {@link Graph#offsetGranularity}.
    * @param a1 The first anchor.
    * @param a2 The second anchor.
    * @return 0 if the anchore offsets are the same, or the difference is less than 
-   * {@link #offsetComparisonThreshold}, 999 if a1.offset is null, -999 if a2.offset is null, or
+   * {@link Graph#offsetGranularity}, 999 if a1.offset is null, -999 if a2.offset is null, or
    * the value of Double.compareTo(Double) otherwise. 
    */
   protected int compare(Anchor a1, Anchor a2)

@@ -89,7 +89,7 @@ public interface ISerializer
       throws SerializerNotConfiguredException, SerializationException;
 
    /**
-    * Returns any warnings that may have arisen during the last execution of {@link #serialize(Graph[])}.
+    * Returns any warnings that may have arisen during the last execution of {@link #serialize(Graph[],String[])}.
     * @return A possibly empty list of warnings.
     */
    public String[] getWarnings();

@@ -412,7 +412,7 @@ public class ParticipantAgqlToSql
   } // end of sqlFor()
 
   /** 
-   * Encapsulates the results of {@link #getSqlFor(String,String,String)} including the SQL
+   * Encapsulates the results of {@link #sqlFor(String,String,String,String)} including the SQL
    * string and the parameters to set.
    */
   public static class Query

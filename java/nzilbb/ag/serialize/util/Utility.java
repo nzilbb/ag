@@ -39,7 +39,7 @@ public class Utility
    
   /**
    * Creates an array of {@link Graph}s from one graph. Handy for calling
-   * {@link ISerializer#serialize(Graph[])} when you have only one graph.
+   * {@link ISerializer#serialize(Graph[],String[])} when you have only one graph.
    * @param graph The graph.
    * @return A graph with one element.
    */

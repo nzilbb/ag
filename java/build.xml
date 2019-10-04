@@ -2,10 +2,10 @@
 <project name="nzilbb.ag" default="all" basedir=".">
   <description>Java implemetation for NZILBB's Annotation Graphs</description>
   <!-- set global properties for this build -->
-  <property name="src"   location="."/>
-  <property name="javadoc"   location="javadoc"/>
-  <property name="build" location="build_${ant.project.name}"/>
-  <property name="dist"  location="../bin"/>
+  <property name="src"     location="."/>
+  <property name="javadoc" location="javadoc"/>
+  <property name="build"   location="build_${ant.project.name}"/>
+  <property name="dist"    location="../bin"/>
   <property name="srcfiles" value="nzilbb/ag/**/*.java nzilbb/editpath/**/*.java nzilbb/configure/**/*.java nzilbb/util/**/*.java nzilbb/media/**/*.java org/json/**/*.java"/> 
   <property name="srctests" value="nzilbb/ag/**/Test*.java"/>
   <property name="srctestseditpath" value="nzilbb/editpath/**/Test*.java"/>
@@ -75,7 +75,7 @@
 	     Author="yes" >
       <fileset dir="${src}"
                includes="${srcfiles}"
-               excludes="${srctests} ${srctestseditpath} nzilbb/ag/ql/**/*.java" />
+               excludes="nzilbb/ag/**/test/*.java ${srctestseditpath} nzilbb/ag/ql/**/*.java" />
     </javadoc>
   </target>
   

@@ -74,7 +74,7 @@ public class ParameterSet
   /**
    * Adds parameters to this set which correspond to any fields of the class of the given object
    * annotated as {@link ParameterField}s. 
-   * @param bean The object whose class may have {@link ParamaterField} attributes.
+   * @param bean The object whose class may have {@link ParameterField} attributes.
    * @return A reference to this set.
    */
   @SuppressWarnings("rawtypes")

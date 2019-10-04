@@ -104,7 +104,7 @@ public class GraphAgqlToSql
    * get access to data to which they're not entitled, or null.
    * @param orderClause A comma-separated list of AGQL expressions to determine the order of
    * results; e.g. "my('corpus').label, id", or null. 
-   * @param slqLimitClause The SQL LIMIT clause to append, or null for no LIMIT clause. 
+   * @param sqlLimitClause The SQL LIMIT clause to append, or null for no LIMIT clause. 
    * @throws AGQLException If the expression is invalid.
    */
   public Query sqlFor(String expression, String sqlSelectClause, String userWhereClause, String orderClause, String sqlLimitClause)
@@ -528,7 +528,7 @@ public class GraphAgqlToSql
   } // end of sqlFor()
 
   /** 
-   * Encapsulates the results of {@link #getSqlFor(String,String,String)} including the SQL
+   * Encapsulates the results of {@link #sqlFor(String,String,String,String,String)} including the SQL
    * string and the parameters to set.
    */
   public static class Query

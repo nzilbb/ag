@@ -35,7 +35,7 @@ import nzilbb.configure.ParameterSet;
  *  <li>Configure serializer using {@link #configure(ParameterSet,Schema)}</li>
  *  <li>Determine which (if any) layers are required for the serialization by calling
  *   {@link #getRequiredLayers()}, which returns a list of layer IDs.</li>
- *  <li>Serialize the schema using {@link #serializeSchema(Schema,List<String>)}</li>
+ *  <li>Serialize the schema using {@link #serializeSchema(Schema,List)}</li>
  *  <li>Possibly display or log warnings returned by {@link #getWarnings()}</li>
  * </ol>
  * @author Robert Fromont robert@fromont.net.nz
@@ -87,7 +87,7 @@ public interface ISchemaSerializer
     throws SerializerNotConfiguredException, SerializationException;
   
   /**
-   * Returns any warnings that may have arisen during the last execution of {@link #serializeSchema(Schema)}.
+   * Returns any warnings that may have arisen during the last execution of {@link #serializeSchema(Schema,List)}.
    * @return A possibly empty list of warnings.
    */
   public String[] getWarnings();
