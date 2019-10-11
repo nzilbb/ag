@@ -38,6 +38,8 @@ import nzilbb.editpath.EditStep;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.csv.*;
+import nzilbb.ag.serialize.SerializationException;
+import nzilbb.util.ArraySeries;
 
 public class TestCsvSerializer
 {      
@@ -61,13 +63,18 @@ public class TestCsvSerializer
       Graph[] graphs = { g };
       File dir = getDir();
       String[] layerIds = {"who", "word"};
-      NamedStream[] streams = serializer.serialize(graphs, layerIds);
-      assertEquals(1, streams.length);
-      streams[0].save(dir);
+      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+      final Vector<NamedStream> streams = new Vector<NamedStream>();
+      serializer.serialize(new ArraySeries<Graph>(graphs), layerIds,
+                                 (stream) -> streams.add(stream),
+                                 (warning) -> System.out.println(warning),
+                                 (exception) -> exceptions.add(exception));
+      assertEquals(1, streams.size());
+      streams.elementAt(0).save(dir);
       
-      File actual = new File(dir, streams[0].getName());
+      File actual = new File(dir, streams.elementAt(0).getName());
       String differences = diff(
-         new File(dir, "expected_" + streams[0].getName()),
+         new File(dir, "expected_" + streams.elementAt(0).getName()),
          actual);
       if (differences != null)
       {
@@ -100,13 +107,18 @@ public class TestCsvSerializer
       Graph[] graphs = { g };
       File dir = getDir();
       String[] layerIds = {"who", "word"};
-      NamedStream[] streams = serializer.serialize(graphs, layerIds);
-      assertEquals(1, streams.length);
-      streams[0].save(dir);
+      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+      final Vector<NamedStream> streams = new Vector<NamedStream>();
+      serializer.serialize(new ArraySeries<Graph>(graphs), layerIds,
+                                 (stream) -> streams.add(stream),
+                                 (warning) -> System.out.println(warning),
+                                 (exception) -> exceptions.add(exception));
+      assertEquals(1, streams.size());
+      streams.elementAt(0).save(dir);
       
-      File actual = new File(dir, streams[0].getName());
+      File actual = new File(dir, streams.elementAt(0).getName());
       String differences = diff(
-         new File(dir, "expected_" + streams[0].getName()),
+         new File(dir, "expected_" + streams.elementAt(0).getName()),
          actual);
       if (differences != null)
       {
@@ -138,13 +150,18 @@ public class TestCsvSerializer
       Graph[] graphs = { g };
       File dir = getDir();
       String[] layerIds = {"transcript_transcriber", "who", "word"};
-      NamedStream[] streams = serializer.serialize(graphs, layerIds);
-      assertEquals(1, streams.length);
-      streams[0].save(dir);
+      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+      final Vector<NamedStream> streams = new Vector<NamedStream>();
+      serializer.serialize(new ArraySeries<Graph>(graphs), layerIds,
+                                 (stream) -> streams.add(stream),
+                                 (warning) -> System.out.println(warning),
+                                 (exception) -> exceptions.add(exception));
+      assertEquals(1, streams.size());
+      streams.elementAt(0).save(dir);
 
-      File actual = new File(dir, streams[0].getName());
+      File actual = new File(dir, streams.elementAt(0).getName());
       String differences = diff(
-         new File(dir, "expected_" + streams[0].getName()),
+         new File(dir, "expected_" + streams.elementAt(0).getName()),
          actual);
       if (differences != null)
       {
@@ -176,13 +193,18 @@ public class TestCsvSerializer
       Graph[] graphs = { g };
       File dir = getDir();
       String[] layerIds = {"who", "word", "orthography"};
-      NamedStream[] streams = serializer.serialize(graphs, layerIds);
-      assertEquals(1, streams.length);
-      streams[0].save(dir);
+      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+      final Vector<NamedStream> streams = new Vector<NamedStream>();
+      serializer.serialize(new ArraySeries<Graph>(graphs), layerIds,
+                                 (stream) -> streams.add(stream),
+                                 (warning) -> System.out.println(warning),
+                                 (exception) -> exceptions.add(exception));
+      assertEquals(1, streams.size());
+      streams.elementAt(0).save(dir);
 
-      File actual = new File(dir, streams[0].getName());
+      File actual = new File(dir, streams.elementAt(0).getName());
       String differences = diff(
-         new File(dir, "expected_" + streams[0].getName()),
+         new File(dir, "expected_" + streams.elementAt(0).getName()),
          actual);
       if (differences != null)
       {

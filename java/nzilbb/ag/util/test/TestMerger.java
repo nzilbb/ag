@@ -53,6 +53,7 @@ import nzilbb.ag.serialize.json.*;
 import nzilbb.ag.*;
 import nzilbb.editpath.MinimumEditPath;
 import nzilbb.editpath.EditStep;
+import nzilbb.util.ArraySeries;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestMerger
@@ -871,9 +872,15 @@ public class TestMerger
     // configure it with its default options
     s.configure(s.configure(new ParameterSet(), graph.getSchema()), graph.getSchema());
     // serialize      
-    NamedStream[] streams = s.serialize(Utility.OneGraphArray(graph), null);
-    streams[0].setName(file.getName());
-    streams[0].save(file.getParentFile());
+    final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+    final Vector<NamedStream> streams = new Vector<NamedStream>();
+    s.serialize(new ArraySeries<Graph>(Utility.OneGraphArray(graph)), null,
+                      (stream) -> streams.add(stream),
+                      (warning) -> System.out.println(warning),
+                      (exception) -> exceptions.add(exception));
+    streams.elementAt(0).setName(file.getName());
+    streams.elementAt(0).save(file.getParentFile());
+
   } // end of loadGraphFromJSON()
 
   public static void main(String args[]) 

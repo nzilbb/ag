@@ -46,6 +46,8 @@ import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.ag.serialize.json.JSONSerialization;
 import nzilbb.emusdms.*;
+import nzilbb.ag.serialize.SerializationException;
+import nzilbb.util.ArraySeries;
 
 public class TestBundleSerialization
 {
@@ -358,10 +360,13 @@ public class TestBundleSerialization
     // assertEquals("utterance", needLayers[1]);
     
     // serialize
-    NamedStream[] streams = serializer.serialize(fragments, needLayers);
-//    assertEquals("One warning: " + Arrays.asList(serializer.getWarnings()),
-//                 1, serializer.getWarnings().length);
-    streams[0].save(dir);
+    final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+    final Vector<NamedStream> streams = new Vector<NamedStream>();
+    serializer.serialize(new ArraySeries<Graph>(fragments), needLayers,
+                                           (stream) -> streams.add(stream),
+                                           (warning) -> System.out.println(warning),
+                                           (exception) -> exceptions.add(exception));
+    streams.elementAt(0).save(dir);
     File actual = new File(dir, fragment.getId()+".json");
     
     // test using diff
@@ -467,10 +472,14 @@ public class TestBundleSerialization
     // assertEquals("utterance", needLayers[1]);
     
     // serialize
-    NamedStream[] streams = serializer.serialize(fragments, needLayers);
-//    assertEquals("One warning: " + Arrays.asList(serializer.getWarnings()),
-//                 1, serializer.getWarnings().length);
-    streams[0].save(dir);
+    final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+    final Vector<NamedStream> streams = new Vector<NamedStream>();
+    serializer.serialize(new ArraySeries<Graph>(fragments), needLayers,
+                                           (stream) -> streams.add(stream),
+                                           (warning) -> System.out.println(warning),
+                                           (exception) -> exceptions.add(exception));
+    streams.elementAt(0).save(dir);
+
     File actual = new File(dir, fragment.getId()+".json");
     
     // test using diff

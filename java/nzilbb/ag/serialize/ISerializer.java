@@ -101,33 +101,6 @@ public interface ISerializer
    {
       return Cardinality.NToM;
    }
-
-   /**
-    * Serializes the given graph, generating one or more {@link NamedStream}s.
-    * <p>Many data formats will only yield one stream (e.g. Transcriber transcript or Praat
-    *  textgrid), however there are formats that use multiple files for the same transcript
-    *  (e.g. XWaves, EmuR), which is why this method returns a list. There are formats that
-    *  are capable of storing multiple transcripts in the same file (e.g. AGTK, Transana XML
-    *  export), which is why this method accepts a list.
-    * @param graphs The graphs to serialize.
-    * @param layerIds The IDs of the layers to include, or null for all layers.
-    * @return A list of named streams that contain the serialization in the given format. 
-    * @throws SerializerNotConfiguredException if the object has not been configured.
-    * @throws SerializationException if errors occur during deserialization.
-    */
-   @Deprecated
-   default public NamedStream[] serialize(Graph[] graphs, String[] layerIds) 
-      throws SerializerNotConfiguredException, SerializationException
-   {
-      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
-      final Vector<NamedStream> streams = new Vector<NamedStream>();
-      serializeSeries(new ArraySeries<Graph>(graphs), layerIds,
-                      (stream) -> streams.add(stream),
-                      (warning) -> System.out.println(warning),
-                      (exception) -> exceptions.add(exception));
-      if (exceptions.size() > 0) throw exceptions.elementAt(0);
-      return streams.toArray(new NamedStream[0]);     
-   }
    
    /**
     * Serializes the given series of graphs, generating one or more {@link NamedStream}s.
@@ -144,7 +117,7 @@ public interface ISerializer
     * @param errors A consumer for (fatal) error messages.
     * @throws SerializerNotConfiguredException if the object has not been configured.
     */
-   public void serializeSeries(ISeries<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
+   public void serialize(ISeries<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
       throws SerializerNotConfiguredException;
    
    /**

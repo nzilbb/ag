@@ -44,6 +44,8 @@ import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.ag.serialize.json.JSONSerialization;
 import nzilbb.kaldi.*;
+import nzilbb.ag.serialize.SerializationException;
+import nzilbb.util.ArraySeries;
 
 public class TestKaldiSerializer
 {
@@ -145,8 +147,13 @@ public class TestKaldiSerializer
 
       // serialize
       File dir = getDir();
-      NamedStream[] streams = serializer.serialize(fragments, requiredLayers);
-      assertEquals(6, streams.length);
+      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+      final Vector<NamedStream> streams = new Vector<NamedStream>();
+      serializer.serialize(new ArraySeries<Graph>(fragments), allLayers,
+                                 (stream) -> streams.add(stream),
+                                 (warning) -> System.out.println(warning),
+                                 (exception) -> exceptions.add(exception));
+      assertEquals(6, streams.size());
       for (NamedStream stream: streams)
       {
 	 stream.save(dir);

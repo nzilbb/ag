@@ -41,7 +41,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.ISerializer;
-import nzilbb.ag.serialize.ISeriesSerializer;
 import nzilbb.ag.serialize.SerializationDescriptor;
 import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.SerializationParametersMissingException;
@@ -52,7 +51,6 @@ import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 import nzilbb.util.ArraySeries;
 import nzilbb.util.ISeries;
-import nzilbb.util.ISeriesConsumer;
 import nzilbb.util.TempFileInputStream;
 import org.apache.commons.csv.*;
 
@@ -242,7 +240,7 @@ public class CsvSerializer
     * @return A list of named streams that contain the serialization in the given format. 
     * @throws SerializerNotConfiguredException if the object has not been configured.
     */
-   public void serializeSeries(ISeries<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
+   public void serialize(ISeries<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
       throws SerializerNotConfiguredException
    {
       percentComplete = 0;

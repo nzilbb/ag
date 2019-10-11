@@ -44,6 +44,8 @@ import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.ag.serialize.json.JSONSerialization;
 import nzilbb.praat.*;
+import nzilbb.ag.serialize.SerializationException;
+import nzilbb.util.ArraySeries;
 
 public class TestTextGridSerialization
 {
@@ -1439,8 +1441,13 @@ public class TestTextGridSerialization
     assertEquals("noise", needLayers[6]);
 	 
     // serialize
-    NamedStream[] streams = serializer.serialize(graphs, null);
-    streams[0].save(dir);
+    final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+    final Vector<NamedStream> streams = new Vector<NamedStream>();
+    serializer.serialize(new ArraySeries<Graph>(graphs), null,
+                               (stream) -> streams.add(stream),
+                               (warning) -> System.out.println(warning),
+                               (exception) -> exceptions.add(exception));
+    streams.elementAt(0).save(dir);
 
     // test using diff
     String differences = diff(new File(dir, "expected_serialize_utterance_word.TextGrid"),
@@ -1500,8 +1507,14 @@ public class TestTextGridSerialization
     assertEquals("noise", needLayers[6]);
 	 
     // serialize
-    NamedStream[] streams = serializer.serialize(fragments, null);
-    streams[0].save(dir);
+    final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+    final Vector<NamedStream> streams = new Vector<NamedStream>();
+    serializer.serialize(new ArraySeries<Graph>(fragments), layerIds,
+                               (stream) -> streams.add(stream),
+                               (warning) -> System.out.println(warning),
+                               (exception) -> exceptions.add(exception));
+    assertEquals(1, streams.size());
+    streams.elementAt(0).save(dir);
 
     // test using diff
     String differences = diff(new File(dir, "expected_serialize_utterance_word__212.4-216.36333.TextGrid"),
@@ -1562,9 +1575,14 @@ public class TestTextGridSerialization
 	 
     String[] selectedLayers = { "phone" };
     // serialize
-    NamedStream[] streams = serializer.serialize(fragments, selectedLayers);
-    streams[0].setName("selected_layers__212.400-216.363.TextGrid");
-    streams[0].save(dir);
+    final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+    final Vector<NamedStream> streams = new Vector<NamedStream>();
+    serializer.serialize(new ArraySeries<Graph>(fragments), selectedLayers,
+                               (stream) -> streams.add(stream),
+                               (warning) -> System.out.println(warning),
+                               (exception) -> exceptions.add(exception));
+    streams.elementAt(0).setName("selected_layers__212.400-216.363.TextGrid");
+    streams.elementAt(0).save(dir);
 
     // test using diff
     String differences = diff(new File(dir, "expected_selected_layers__212.400-216.363.TextGrid"),
@@ -1624,8 +1642,13 @@ public class TestTextGridSerialization
     assertEquals("noise", needLayers[6]);
 	 
     // serialize
-    NamedStream[] streams = serializer.serialize(fragments, null);
-    streams[0].save(dir);
+    final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+    final Vector<NamedStream> streams = new Vector<NamedStream>();
+    serializer.serialize(new ArraySeries<Graph>(fragments), null,
+                         (stream) -> streams.add(stream),
+                         (warning) -> System.out.println(warning),
+                         (exception) -> exceptions.add(exception));
+    streams.elementAt(0).save(dir);
 
     // test using diff
     String differences = diff(new File(dir, "expected_serialize_utterance_word__212.4-216.500.TextGrid"),

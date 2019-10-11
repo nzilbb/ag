@@ -37,6 +37,8 @@ import nzilbb.configure.ParameterSet;
 import nzilbb.configure.Parameter;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.ISerializer;
+import nzilbb.ag.serialize.SerializationException;
+import nzilbb.util.ArraySeries;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.ag.serialize.json.*;
@@ -193,9 +195,14 @@ public class TestJSONSerialization
 
       // serialize
       File dir = getDir();
-      NamedStream[] streams = s.serialize(Utility.OneGraphArray(g), null);
-      assertEquals(1, streams.length);
-      streams[0].save(dir);
+      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+      final Vector<NamedStream> streams = new Vector<NamedStream>();
+      s.serialize(new ArraySeries<Graph>(Utility.OneGraphArray(g)), null,
+                      (stream) -> streams.add(stream),
+                      (warning) -> System.out.println(warning),
+                      (exception) -> exceptions.add(exception));
+      assertEquals(1, streams.size());
+      streams.elementAt(0).save(dir);
 
       // compare with what we expected
       File fActual = new File(dir, "test.json");
@@ -397,11 +404,17 @@ public class TestJSONSerialization
       Graph[] graphs = s.deserialize();
       Graph d = graphs[0];
 
-      NamedStream[] streams = s.serialize(Utility.OneGraphArray(d), null);
+      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+      final Vector<NamedStream> streams = new Vector<NamedStream>();
+      s.serialize(new ArraySeries<Graph>(Utility.OneGraphArray(d)), null,
+                      (stream) -> streams.add(stream),
+                      (warning) -> System.out.println(warning),
+                      (exception) -> exceptions.add(exception));
+      assertEquals(1, streams.size());
       File fCorrected = new File(dir, "test_corrected.json");
-      assertEquals(1, streams.length);
-      streams[0].setName(fCorrected.getName());
-      streams[0].save(dir);
+      streams.elementAt(0).setName(fCorrected.getName());
+      streams.elementAt(0).save(dir);
+
 
       // compare corrected with expected
       File fExpected = new File(dir, "test_expected.json");
