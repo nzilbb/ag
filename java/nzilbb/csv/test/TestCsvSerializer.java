@@ -24,21 +24,21 @@ package nzilbb.csv.test;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.net.URL;
-import nzilbb.configure.ParameterSet;
-import nzilbb.configure.Parameter;
-import nzilbb.editpath.MinimumEditPath;
-import nzilbb.editpath.EditStep;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 import nzilbb.ag.*;
-import nzilbb.ag.serialize.util.NamedStream;
-import nzilbb.csv.*;
 import nzilbb.ag.serialize.SerializationException;
+import nzilbb.ag.serialize.util.NamedStream;
+import nzilbb.configure.Parameter;
+import nzilbb.configure.ParameterSet;
+import nzilbb.csv.*;
+import nzilbb.editpath.EditStep;
+import nzilbb.editpath.MinimumEditPath;
 import nzilbb.util.ArraySeries;
 
 public class TestCsvSerializer
@@ -66,9 +66,9 @@ public class TestCsvSerializer
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
       serializer.serialize(new ArraySeries<Graph>(graphs), layerIds,
-                                 (stream) -> streams.add(stream),
-                                 (warning) -> System.out.println(warning),
-                                 (exception) -> exceptions.add(exception));
+                           (stream) -> streams.add(stream),
+                           (warning) -> System.out.println(warning),
+                           (exception) -> exceptions.add(exception));
       assertEquals(1, streams.size());
       streams.elementAt(0).save(dir);
       
@@ -110,9 +110,9 @@ public class TestCsvSerializer
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
       serializer.serialize(new ArraySeries<Graph>(graphs), layerIds,
-                                 (stream) -> streams.add(stream),
-                                 (warning) -> System.out.println(warning),
-                                 (exception) -> exceptions.add(exception));
+                           (stream) -> streams.add(stream),
+                           (warning) -> System.out.println(warning),
+                           (exception) -> exceptions.add(exception));
       assertEquals(1, streams.size());
       streams.elementAt(0).save(dir);
       
@@ -153,9 +153,9 @@ public class TestCsvSerializer
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
       serializer.serialize(new ArraySeries<Graph>(graphs), layerIds,
-                                 (stream) -> streams.add(stream),
-                                 (warning) -> System.out.println(warning),
-                                 (exception) -> exceptions.add(exception));
+                           (stream) -> streams.add(stream),
+                           (warning) -> System.out.println(warning),
+                           (exception) -> exceptions.add(exception));
       assertEquals(1, streams.size());
       streams.elementAt(0).save(dir);
 
@@ -196,9 +196,9 @@ public class TestCsvSerializer
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
       serializer.serialize(new ArraySeries<Graph>(graphs), layerIds,
-                                 (stream) -> streams.add(stream),
-                                 (warning) -> System.out.println(warning),
-                                 (exception) -> exceptions.add(exception));
+                           (stream) -> streams.add(stream),
+                           (warning) -> System.out.println(warning),
+                           (exception) -> exceptions.add(exception));
       assertEquals(1, streams.size());
       streams.elementAt(0).save(dir);
 

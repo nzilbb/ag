@@ -25,26 +25,26 @@ package nzilbb.kaldi.test;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-import java.util.LinkedHashMap;
-import java.util.SortedSet;
-import java.util.LinkedHashSet;
-import java.util.Iterator;
-import java.util.Vector;
-import java.util.List;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.BufferedReader;
 import java.net.URL;
-import nzilbb.configure.ParameterSet;
-import nzilbb.configure.Parameter;
-import nzilbb.editpath.MinimumEditPath;
-import nzilbb.editpath.EditStep;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.Vector;
 import nzilbb.ag.*;
+import nzilbb.ag.serialize.SerializationException;
+import nzilbb.ag.serialize.json.JSONSerialization;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
-import nzilbb.ag.serialize.json.JSONSerialization;
+import nzilbb.configure.Parameter;
+import nzilbb.configure.ParameterSet;
+import nzilbb.editpath.EditStep;
+import nzilbb.editpath.MinimumEditPath;
 import nzilbb.kaldi.*;
-import nzilbb.ag.serialize.SerializationException;
 import nzilbb.util.ArraySeries;
 
 public class TestKaldiSerializer
@@ -150,9 +150,9 @@ public class TestKaldiSerializer
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
       serializer.serialize(new ArraySeries<Graph>(fragments), allLayers,
-                                 (stream) -> streams.add(stream),
-                                 (warning) -> System.out.println(warning),
-                                 (exception) -> exceptions.add(exception));
+                           (stream) -> streams.add(stream),
+                           (warning) -> System.out.println(warning),
+                           (exception) -> exceptions.add(exception));
       assertEquals(6, streams.size());
       for (NamedStream stream: streams)
       {

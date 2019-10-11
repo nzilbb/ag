@@ -28,8 +28,8 @@ import nzilbb.ag.Schema;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
-import nzilbb.util.ISeries;
 import nzilbb.util.ArraySeries;
+import nzilbb.util.ISeries;
 
 /**
  * Interface for serializing a graph to streams of data.

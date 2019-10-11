@@ -41,8 +41,8 @@ import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
-import nzilbb.util.TempFileInputStream;
 import nzilbb.util.ISeries;
+import nzilbb.util.TempFileInputStream;
 import org.json.*;
 
 /**
@@ -50,7 +50,7 @@ import org.json.*;
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class JSONSerialization
-  implements ISerializer
+   implements ISerializer
 {
    // Attributes:
 
@@ -275,7 +275,7 @@ public class JSONSerialization
     * @throws SerializationException On error.
     */
    protected Graph jsonToGraph(JSONObject json)
-    throws SerializationException
+      throws SerializationException
    {
       try
       {
@@ -319,7 +319,7 @@ public class JSONSerialization
     * @throws SerializationException On error.
     */
    protected Schema jsonToSchema(JSONObject json)
-    throws SerializationException
+      throws SerializationException
    {
       try
       {
@@ -361,7 +361,7 @@ public class JSONSerialization
     * @throws SerializationException On error.
     */
    protected Layer jsonToLayer(Schema s, String parentId, String layerId, JSONObject json)
-    throws SerializationException
+      throws SerializationException
    {
       try
       {
@@ -399,7 +399,7 @@ public class JSONSerialization
     * @throws SerializationException On error.
     */
    protected Anchor jsonToAnchor(String anchorId, JSONObject json)
-    throws SerializationException
+      throws SerializationException
    {
       try
       {
@@ -453,7 +453,7 @@ public class JSONSerialization
     * @throws SerializationException On error.
     */
    protected Annotation jsonToAnnotation(Graph graph, String layerId, String parentId, int ordinal, JSONObject json)
-    throws SerializationException
+      throws SerializationException
    {
       try
       {

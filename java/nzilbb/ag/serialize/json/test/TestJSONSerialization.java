@@ -24,25 +24,25 @@ package nzilbb.ag.serialize.json.test;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Vector;
-import java.util.LinkedHashSet;
-import java.util.Iterator;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.BufferedReader;
 import java.net.URL;
-import nzilbb.configure.ParameterSet;
-import nzilbb.configure.Parameter;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Vector;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.ISerializer;
 import nzilbb.ag.serialize.SerializationException;
-import nzilbb.util.ArraySeries;
+import nzilbb.ag.serialize.json.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
-import nzilbb.ag.serialize.json.*;
+import nzilbb.configure.Parameter;
+import nzilbb.configure.ParameterSet;
 import nzilbb.editpath.*;
+import nzilbb.util.ArraySeries;
 
 public class TestJSONSerialization
 {
@@ -198,9 +198,9 @@ public class TestJSONSerialization
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
       s.serialize(new ArraySeries<Graph>(Utility.OneGraphArray(g)), null,
-                      (stream) -> streams.add(stream),
-                      (warning) -> System.out.println(warning),
-                      (exception) -> exceptions.add(exception));
+                  (stream) -> streams.add(stream),
+                  (warning) -> System.out.println(warning),
+                  (exception) -> exceptions.add(exception));
       assertEquals(1, streams.size());
       streams.elementAt(0).save(dir);
 
@@ -407,9 +407,9 @@ public class TestJSONSerialization
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
       s.serialize(new ArraySeries<Graph>(Utility.OneGraphArray(d)), null,
-                      (stream) -> streams.add(stream),
-                      (warning) -> System.out.println(warning),
-                      (exception) -> exceptions.add(exception));
+                  (stream) -> streams.add(stream),
+                  (warning) -> System.out.println(warning),
+                  (exception) -> exceptions.add(exception));
       assertEquals(1, streams.size());
       File fCorrected = new File(dir, "test_corrected.json");
       streams.elementAt(0).setName(fCorrected.getName());
