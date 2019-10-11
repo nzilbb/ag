@@ -2169,7 +2169,7 @@ public class TestValidator
          if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
          assertEquals("one error: " + v.getErrors(),
                       1, v.getErrors().size());
-         assertEquals("Label too long (>20) for  [word2]2#very-very-very-very-very-very(2.0-3.0)",
+         assertEquals("Label too long (>20) for word: [word2]2#very-very-very-very-very-very(2.0-3.0)",
                       v.getErrors().elementAt(0));
          assertEquals("changes applied",
                       1, changes.size());
