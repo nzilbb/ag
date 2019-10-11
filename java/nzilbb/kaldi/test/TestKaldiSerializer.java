@@ -145,7 +145,7 @@ public class TestKaldiSerializer
 
       // serialize
       File dir = getDir();
-      NamedStream[] streams = serializer.serialize(fragments);
+      NamedStream[] streams = serializer.serialize(fragments, requiredLayers);
       assertEquals(6, streams.length);
       for (NamedStream stream: streams)
       {

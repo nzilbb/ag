@@ -22,25 +22,28 @@
 package nzilbb.ag.serialize.json;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.Locale;
-import java.util.Vector;
-import java.util.LinkedHashMap;
-import java.util.TreeSet;
-import java.util.SortedSet;
 import java.util.Collection;
-import org.json.*;
-import nzilbb.util.TempFileInputStream;
-import nzilbb.configure.Parameter;
-import nzilbb.configure.ParameterSet;
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.Vector;
+import java.util.function.Consumer;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
+import nzilbb.configure.Parameter;
+import nzilbb.configure.ParameterSet;
+import nzilbb.util.TempFileInputStream;
+import nzilbb.util.ISeries;
+import org.json.*;
 
 /**
  * Annotation Graph serializer/deserializer for JSON.
@@ -94,6 +97,34 @@ public class JSONSerialization
     */
    public JSONSerialization setSortAnchors(boolean newSortAnchors) { sortAnchors = newSortAnchors; return this; }
 
+   protected int percentComplete = -1;
+   /**
+    * Determines how far through the serialization is.
+    * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
+    */
+   public Integer getPercentComplete()
+   {
+      if (percentComplete < 0) return null;
+      return percentComplete;
+   }
+   
+   /**
+    * Serialization marked for cancelling.
+    * @see #getCancelling()
+    * @see #setCancelling(boolean)
+    */
+   protected boolean cancelling;
+   /**
+    * Getter for {@link #cancelling}: Serialization marked for cancelling.
+    * @return Serialization marked for cancelling.
+    */
+   public boolean getCancelling() { return cancelling; }
+   /**
+    * Setter for {@link #cancelling}: Serialization marked for cancelling.
+    * @param newCancelling Serialization marked for cancelling.
+    */
+   public JSONSerialization setCancelling(boolean newCancelling) { cancelling = newCancelling; return this; }
+
    // Methods:
    
    /**
@@ -113,6 +144,14 @@ public class JSONSerialization
       return new SerializationDescriptor(
 	 "JSON (JavaScript Object Notation)", "0.1", "application/json", ".json", "20190912.1504", 
 	 getClass().getResource(getClass().getSimpleName() + ".png"));
+   }
+
+   /**
+    * Cancel the serialization in course (if any).
+    */
+   public void cancel()
+   {
+      setCancelling(true);
    }
 
    /**
@@ -455,12 +494,21 @@ public class JSONSerialization
    /**
     * Determines which layers, if any, must be present in the graph that will be serialized.
     * <p>{@link ISerializer} method.
-    * @return A list of IDs of layers that must be present in the graph that will be serialized.
+    * @return An empty array, as no particular layers are required.
     * @throws SerializationParametersMissingException If not all required parameters have a value.
     */
    public String[] getRequiredLayers() throws SerializationParametersMissingException
    {
       return new String[0];
+   }
+
+   /**
+    * Determines the cardinality between graphs and serialized streams.
+    * @return {@link ISerializer#Cardinality}.NtoN as there is one stream produced per graph.
+    */
+   public Cardinality getCardinality()
+   {
+      return Cardinality.NToN;
    }
 
    /**
@@ -470,20 +518,22 @@ public class JSONSerialization
     *  (e.g. XWaves, EmuR), which is why this method returns a list. There are formats that
     *  are capable of storing multiple transcripts in the same file (e.g. AGTK, Transana XML
     *  export), which is why this method accepts a list.
-    * <p>{@link ISerializer} method.
     * @param graphs The graphs to serialize.
+    * @param layerIds The IDs of the layers to include, or null for all layers.
+    * @param consumer The object receiving the streams.
+    * @param warnings The object receiving warning messages.
     * @return A list of named streams that contain the serialization in the given format. 
     * @throws SerializerNotConfiguredException if the object has not been configured.
-    * @throws SerializationException if errors occur during deserialization.
     */
-   public NamedStream[] serialize(Graph[] graphs, String[] layerIds) 
-      throws SerializerNotConfiguredException, SerializationException
+   public void serializeSeries(ISeries<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
+      throws SerializerNotConfiguredException
    {
-      // if there are errors, accumlate as many as we can before throwing DeserializationException
-      SerializationException errors = null;
-      Vector<NamedStream> streams = new Vector<NamedStream>();
-      for (Graph graph : graphs)
+      percentComplete = 0;
+      
+      while (graphs.hasMoreElements())
       {
+         if (getCancelling()) break;
+         Graph graph = graphs.nextElement();
 	 try
 	 {
 	    File f = File.createTempFile(graph.getId(), ".json");
@@ -546,17 +596,14 @@ public class JSONSerialization
 	    // provide a stream from the buffer
 	    writer.close();
 	    TempFileInputStream in = new TempFileInputStream(f);
-	    streams.add(new NamedStream(in, graph.getId() + ".json"));
+	    consumer.accept(new NamedStream(in, graph.getId() + ".json"));
 	 }
 	 catch(Exception exception)
 	 {
-	    if (errors == null) errors = new SerializationException();
-	    if (errors.getCause() == null) errors.initCause(exception);
-	    errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
+	    errors.accept(new SerializationException(exception));
 	 }
+         percentComplete = Optional.of(graphs.percentComplete()).orElse(0);
       } // next graph
-      if (errors != null) throw errors;
-      return streams.toArray(new NamedStream[0]);     
    }			
    
    /**

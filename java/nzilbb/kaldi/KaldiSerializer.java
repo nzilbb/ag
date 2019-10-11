@@ -21,41 +21,40 @@
 //
 package nzilbb.kaldi;
 
-import java.util.Vector;
-import java.util.LinkedHashMap;
-import java.util.HashMap;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.List;
-import java.util.Arrays;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.Vector;
+import java.util.function.Consumer;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.ISerializer;
-import nzilbb.ag.serialize.ISeriesSerializer;
 import nzilbb.ag.serialize.SerializationDescriptor;
+import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.SerializationParametersMissingException;
 import nzilbb.ag.serialize.SerializerNotConfiguredException;
-import nzilbb.ag.serialize.SerializationException;
-import nzilbb.util.TempFileInputStream;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
-import nzilbb.util.ISeries;
-import nzilbb.util.ArraySeries;
-import nzilbb.util.ISeriesConsumer;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
+import nzilbb.util.ArraySeries;
+import nzilbb.util.ISeries;
+import nzilbb.util.TempFileInputStream;
 
 /**
  * Converter that generates Kaldi files from annotation graphs.
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class KaldiSerializer
-   implements ISerializer, ISeriesSerializer
+   implements ISerializer
 {
    // Attributes:
 
@@ -212,6 +211,7 @@ public class KaldiSerializer
     * @param newCancelling Serialization marked for cancellation.
     */
    public void setCancelling(boolean newCancelling) { cancelling = newCancelling; }
+
    // Methods:
    
    /**
@@ -418,49 +418,7 @@ public class KaldiSerializer
       return requiredLayers.toArray(new String[0]);
    }
 
-   // ISerializer method
-   
-   /**
-    * Serializes the given graphs, generating one or more {@link NamedStream}s.
-    * <p>Many data formats will only yield one stream (e.g. Transcriber transcript or Praat
-    *  textgrid), however there are formats that use multiple files for the same transcript
-    *  (e.g. XWaves, EmuR), which is why this method returns a list. There are formats that
-    *  are capable of storing multiple transcripts in the same file (e.g. AGTK, Transana XML
-    *  export), which is why this method accepts a list.
-    * <p>{@link ISerializer} method.
-    * @param graphs The graphs to serialize.
-    * @return A list of named streams that contain the serialization in the given format. 
-    * @throws SerializerNotConfiguredException if the object has not been configured.
-    * @throws SerializationException if errors occur during deserialization.
-    */
-   public NamedStream[] serialize(Graph[] graphs, String[] layerIds) 
-      throws SerializerNotConfiguredException, SerializationException
-   {
-      warnings = new Vector<String>();
-      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
-      final Vector<NamedStream> streams = new Vector<NamedStream>();
-      serializeSeries(new ArraySeries<Graph>(graphs), layerIds, new ISeriesConsumer<NamedStream>() {
-	    public void next(NamedStream stream)
-	    {
-	       streams.add(stream);
-	    }
-	 }, new ISeriesConsumer<String>() {
-	       public void next(String warning)
-	       {
-		  warnings.add(warning);
-	       }	       
-	    }, new ISeriesConsumer<SerializationException>() {
-		  public void next(SerializationException exception)
-		  {
-		     exceptions.add(exception);
-		  }
-		  
-	       });
-      if (exceptions.size() > 0) throw exceptions.elementAt(0);
-      return streams.toArray(new NamedStream[0]);     
-   }
-
-   // ISeriesSerializer methods
+   // ISerializer methods   
 
    /**
     * Serializes the given graph, generating one or more {@link NamedStream}s.
@@ -476,7 +434,7 @@ public class KaldiSerializer
     * @return A list of named streams that contain the serialization in the given format. 
     * @throws SerializerNotConfiguredException if the object has not been configured.
     */
-   public void serializeSeries(ISeries<Graph> graphs, String[] layerIds, ISeriesConsumer<NamedStream> consumer, ISeriesConsumer<String> warnings, ISeriesConsumer<SerializationException> errors) 
+   public void serializeSeries(ISeries<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
       throws SerializerNotConfiguredException
    {
       percentComplete = 0;
@@ -591,29 +549,29 @@ public class KaldiSerializer
 	    wavWriter.close();
 	    
 	    // pass them to the consumer
-	    consumer.next(textStream);
+	    consumer.accept(textStream);
 	    percentComplete = 91;
-	    consumer.next(corpusStream);
+	    consumer.accept(corpusStream);
 	    percentComplete = 92;
-	    consumer.next(segmentsStream);
+	    consumer.accept(segmentsStream);
 	    percentComplete = 93;
-	    consumer.next(utt2spkStream);
+	    consumer.accept(utt2spkStream);
 	    percentComplete = 94;
-	    consumer.next(wavStream);
+	    consumer.accept(wavStream);
 	    percentComplete = 95;
 	    
 	    // finally, words (sorted)
 	    for (String word : words) wordsWriter.println(word);
 	    wordsWriter.close();
 	    percentComplete = 96;
-	    consumer.next(wordsStream);
+	    consumer.accept(wordsStream);
 	    percentComplete = 100;
 	 }
 
       }
       catch(Exception exception)
       {
-	 errors.next(new SerializationException(exception));
+	 errors.accept(new SerializationException(exception));
       }
    }
 

@@ -358,7 +358,7 @@ public class TestBundleSerialization
     // assertEquals("utterance", needLayers[1]);
     
     // serialize
-    NamedStream[] streams = serializer.serialize(fragments);
+    NamedStream[] streams = serializer.serialize(fragments, needLayers);
 //    assertEquals("One warning: " + Arrays.asList(serializer.getWarnings()),
 //                 1, serializer.getWarnings().length);
     streams[0].save(dir);
@@ -467,7 +467,7 @@ public class TestBundleSerialization
     // assertEquals("utterance", needLayers[1]);
     
     // serialize
-    NamedStream[] streams = serializer.serialize(fragments);
+    NamedStream[] streams = serializer.serialize(fragments, needLayers);
 //    assertEquals("One warning: " + Arrays.asList(serializer.getWarnings()),
 //                 1, serializer.getWarnings().length);
     streams[0].save(dir);

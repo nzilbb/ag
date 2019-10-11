@@ -24,20 +24,23 @@ package nzilbb.praat;
 import java.io.*;
 import java.nio.*;
 import java.nio.charset.*;
-import java.util.*;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.*;
+import java.util.Optional;
+import java.util.function.Consumer;
 import nzilbb.ag.*;
-import nzilbb.ag.util.SimpleTokenizer;
-import nzilbb.ag.util.ConventionTransformer;
-import nzilbb.ag.util.SpanningConventionTransformer;
-import nzilbb.ag.util.OrthographyClumper;
-import nzilbb.ag.util.AnnotationComparatorByAnchor;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
+import nzilbb.ag.util.AnnotationComparatorByAnchor;
+import nzilbb.ag.util.ConventionTransformer;
+import nzilbb.ag.util.OrthographyClumper;
+import nzilbb.ag.util.SimpleTokenizer;
+import nzilbb.ag.util.SpanningConventionTransformer;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
+import nzilbb.util.ISeries;
 import nzilbb.util.TempFileInputStream;
 import nzilbb.util.Timers;
 
@@ -313,7 +316,41 @@ public class TextGridSerialization
    * @param newTimers Timers for measuring performance.
    */
   public void setTimers(Timers newTimers) { timers = newTimers; }
-
+   
+   protected int percentComplete = -1;
+   /**
+    * Determines how far through the serialization is.
+    * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
+    */
+   public Integer getPercentComplete()
+   {
+      if (percentComplete < 0) return null;
+      return percentComplete;
+   }
+   
+   /**
+    * Serialization marked for cancelling.
+    * @see #getCancelling()
+    * @see #setCancelling(boolean)
+    */
+   protected boolean cancelling;
+   /**
+    * Getter for {@link #cancelling}: Serialization marked for cancelling.
+    * @return Serialization marked for cancelling.
+    */
+   public boolean getCancelling() { return cancelling; }
+   /**
+    * Setter for {@link #cancelling}: Serialization marked for cancelling.
+    * @param newCancelling Serialization marked for cancelling.
+    */
+   public TextGridSerialization setCancelling(boolean newCancelling) { cancelling = newCancelling; return this; }
+   /**
+    * Cancel the serialization in course (if any).
+    */
+   public void cancel()
+   {
+      setCancelling(true);
+   }
    
   // Methods:
    
@@ -1420,29 +1457,50 @@ public class TextGridSerialization
     }
   }
 
-  /**
-   * Serializes the given graphs, generating one or more {@link NamedStream}s.
-   * <p>Many data formats will only yield one stream (e.g. Transcriber transcript or Praat
-   *  textgrid), however there are formats that use multiple files for the same transcript
-   *  (e.g. XWaves, EmuR), which is why this method returns a list. There are formats that
-   *  are capable of storing multiple transcripts in the same file (e.g. AGTK, Transana XML
-   *  export), which is why this method accepts a list.
-   * <p>{@link ISerializer} method.
-   * @param graphs The graphs to serialize.
-   * @return A list of named streams that contain the serialization in the given format. 
-   * @throws SerializerNotConfiguredException if the object has not been configured.
-   * @throws SerializationException if errors occur during deserialization.
-   */
-  public NamedStream[] serialize(Graph[] graphs, String[] layerIds) 
-    throws SerializerNotConfiguredException, SerializationException
-  {
-    Vector<NamedStream> streams = new Vector<NamedStream>();
-    for (Graph graph : graphs)
-    {
-       streams.add(serializeGraph(graph, layerIds));
-    } // next graph
-    return streams.toArray(new NamedStream[0]);     
-  }
+   /**
+    * Determines the cardinality between graphs and serialized streams.
+    * @return {@link ISerializer#Cardinality}.NtoN as there is one stream produced
+    * for each graph to serialize.
+    */
+   public Cardinality getCardinality()
+   {
+      return Cardinality.NToN;
+   }
+
+   /**
+    * Serializes the given graph, generating one or more {@link NamedStream}s.
+    * <p>Many data formats will only yield one stream (e.g. Transcriber transcript or Praat
+    *  textgrid), however there are formats that use multiple files for the same transcript
+    *  (e.g. XWaves, EmuR), which is why this method returns a list. There are formats that
+    *  are capable of storing multiple transcripts in the same file (e.g. AGTK, Transana XML
+    *  export), which is why this method accepts a list.
+    * @param graphs The graphs to serialize.
+    * @param layerIds The IDs of the layers to include, or null for all layers.
+    * @param consumer The object receiving the streams.
+    * @param warnings The object receiving warning messages.
+    * @return A list of named streams that contain the serialization in the given format. 
+    * @throws SerializerNotConfiguredException if the object has not been configured.
+    */
+   public void serializeSeries(ISeries<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
+      throws SerializerNotConfiguredException
+   {
+      percentComplete = 0;
+      
+      while (graphs.hasMoreElements())
+      {
+         if (getCancelling()) break;
+         Graph graph = graphs.nextElement();
+         try
+         {
+            consumer.accept(serializeGraph(graph, layerIds));
+         }
+         catch(SerializationException exception)
+         {
+            errors.accept(exception);
+         }
+         percentComplete = Optional.of(graphs.percentComplete()).orElse(0);
+      } // next graph
+   }
 
   /**
    * Serializes the given graph, generating a {@link NamedStream}.

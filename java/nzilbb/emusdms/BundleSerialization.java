@@ -21,38 +21,40 @@
 //
 package nzilbb.emusdms;
 
-import java.util.UUID;
-import java.util.List;
-import java.util.Vector;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.Comparator;
+import java.util.UUID;
+import java.util.Vector;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.IOException;
-
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
-import nzilbb.ag.util.AnnotationComparatorByDistance;
 import nzilbb.ag.util.AnnotationComparatorByAnchor;
-import nzilbb.ag.util.LayerTraversal;
+import nzilbb.ag.util.AnnotationComparatorByDistance;
 import nzilbb.ag.util.LayerHierarchyTraversal;
+import nzilbb.ag.util.LayerTraversal;
 import nzilbb.configure.Parameter;
-import nzilbb.configure.ParameterSet;
 import nzilbb.configure.ParameterField;
+import nzilbb.configure.ParameterSet;
 import nzilbb.util.IO;
+import nzilbb.util.ISeries;
 import nzilbb.util.TempFileInputStream;
 import org.json.*;
 
@@ -374,6 +376,41 @@ public class BundleSerialization
   /** Required mappings; key is level parameter ID, values are label parameter IDs */
   protected TreeMap<String,TreeSet<String>> requiredMappings;
   
+   protected int percentComplete = -1;
+   /**
+    * Determines how far through the serialization is.
+    * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
+    */
+   public Integer getPercentComplete()
+   {
+      if (percentComplete < 0) return null;
+      return percentComplete;
+   }
+   
+   /**
+    * Serialization marked for cancelling.
+    * @see #getCancelling()
+    * @see #setCancelling(boolean)
+    */
+   protected boolean cancelling;
+   /**
+    * Getter for {@link #cancelling}: Serialization marked for cancelling.
+    * @return Serialization marked for cancelling.
+    */
+   public boolean getCancelling() { return cancelling; }
+   /**
+    * Setter for {@link #cancelling}: Serialization marked for cancelling.
+    * @param newCancelling Serialization marked for cancelling.
+    */
+   public BundleSerialization setCancelling(boolean newCancelling) { cancelling = newCancelling; return this; }
+   /**
+    * Cancel the serialization in course (if any).
+    */
+   public void cancel()
+   {
+      setCancelling(true);
+   }
+
   // Methods:
   
   /**
@@ -948,29 +985,51 @@ public class BundleSerialization
     return new String[0];
   }
   
-  /**
-   * Serializes the given graph, generating one or more {@link NamedStream}s.
-   * <p>Many data formats will only yield one stream (e.g. Transcriber transcript or Praat
-   *  textgrid), however there are formats that use multiple files for the same transcript
-   *  (e.g. XWaves, EmuR), which is why this method returns a list. There are formats that
-   *  are capable of storing multiple transcripts in the same file (e.g. AGTK, Transana XML
-   *  export), which is why this method accepts a list.
-   * @param graphs The graphs to serialize.
-   * @return A list of named streams that contain the serialization in the given format. 
-   * @throws SerializerNotConfiguredException if the object has not been configured.
-   * @throws SerializationException if errors occur during deserialization.
-   */
-   public NamedStream[] serialize(Graph[] graphs, String[] layerIds) 
-      throws SerializerNotConfiguredException, SerializationException
-  {
-    warnings = new Vector<String>();
-    Vector<NamedStream> streams = new Vector<NamedStream>();
-    for (Graph graph : graphs)
-    {
-       streams.add(serializeGraph(graph, layerIds));
-    } // next graph
-    return streams.toArray(new NamedStream[0]);     
-  }
+   /**
+    * Determines the cardinality between graphs and serialized streams.
+    * @return {@link ISerializer#Cardinality}.NtoOne as there is one stream produced
+    * regardless of  how many graphs are serialized.
+    */
+   public Cardinality getCardinality()
+   {
+      return Cardinality.NToOne;
+   }
+
+   /**
+    * Serializes the given graph, generating one or more {@link NamedStream}s.
+    * <p>Many data formats will only yield one stream (e.g. Transcriber transcript or Praat
+    *  textgrid), however there are formats that use multiple files for the same transcript
+    *  (e.g. XWaves, EmuR), which is why this method returns a list. There are formats that
+    *  are capable of storing multiple transcripts in the same file (e.g. AGTK, Transana XML
+    *  export), which is why this method accepts a list.
+    * @param graphs The graphs to serialize.
+    * @param layerIds The IDs of the layers to include, or null for all layers.
+    * @param consumer The object receiving the streams.
+    * @param warnings The object receiving warning messages.
+    * @return A list of named streams that contain the serialization in the given format. 
+    * @throws SerializerNotConfiguredException if the object has not been configured.
+    */
+   public void serializeSeries(ISeries<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
+      throws SerializerNotConfiguredException
+   {
+      percentComplete = 0;
+      
+      Vector<NamedStream> streams = new Vector<NamedStream>();
+      while (graphs.hasMoreElements())
+      {
+         if (getCancelling()) break;
+         Graph graph = graphs.nextElement();
+         try
+         {
+            consumer.accept(serializeGraph(graph, layerIds));
+         }
+         catch(SerializationException exception)
+         {
+            errors.accept(exception);
+         }
+         percentComplete = Optional.of(graphs.percentComplete()).orElse(0);
+      } // next graph
+   }
   
   // ISchemaSerializer methods
 

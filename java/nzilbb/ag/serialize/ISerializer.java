@@ -22,11 +22,14 @@
 package nzilbb.ag.serialize;
 
 import java.util.Vector;
+import java.util.function.Consumer;
 import nzilbb.ag.Graph;
 import nzilbb.ag.Schema;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
+import nzilbb.util.ISeries;
+import nzilbb.util.ArraySeries;
 
 /**
  * Interface for serializing a graph to streams of data.
@@ -73,6 +76,33 @@ public interface ISerializer
    public String[] getRequiredLayers() throws SerializationParametersMissingException;
 
    /**
+    * Possible values for cardinality (given <var>N</var> {@link Graph}s, how many 
+    * {@link NamedStreams} are produced) are:
+    * <ul>
+    *  <li><b>NToOne</b>: only one {@link NamedStream} is generated, regardless of the
+    * number of {@link Graph}s to serialize.</li>
+    *  <li><b>NToN</b>: for each {@link Graph} serialized, exactly one {@link NamedStream}
+    *   is generated.</li>
+    *  <li><b>NToM</b>: the number of {@link Graph}s to serialize is unrelated to the
+    *   number of {@link NamedStream} generated.</li>
+    * </ul>
+    * @see #getCardinality()
+    */
+   public enum Cardinality { NToOne, NToN, NToM }
+   
+   /**
+    * Determines the cardinality between graphs and serialized streams.
+    * <p>This can be useful to know when deciding, for example, whether a given
+    * serialization with produce a single stream that can be returned directly,
+    * vs. multiple streams that should be zipped into a single stream result.
+    * @return The cardinality between graphs and serialized streams.
+    */
+   default public Cardinality getCardinality()
+   {
+      return Cardinality.NToM;
+   }
+
+   /**
     * Serializes the given graph, generating one or more {@link NamedStream}s.
     * <p>Many data formats will only yield one stream (e.g. Transcriber transcript or Praat
     *  textgrid), however there are formats that use multiple files for the same transcript
@@ -85,8 +115,49 @@ public interface ISerializer
     * @throws SerializerNotConfiguredException if the object has not been configured.
     * @throws SerializationException if errors occur during deserialization.
     */
-   public NamedStream[] serialize(Graph[] graphs, String[] layerIds) 
-      throws SerializerNotConfiguredException, SerializationException;
+   @Deprecated
+   default public NamedStream[] serialize(Graph[] graphs, String[] layerIds) 
+      throws SerializerNotConfiguredException, SerializationException
+   {
+      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+      final Vector<NamedStream> streams = new Vector<NamedStream>();
+      serializeSeries(new ArraySeries<Graph>(graphs), layerIds,
+                      (stream) -> streams.add(stream),
+                      (warning) -> System.out.println(warning),
+                      (exception) -> exceptions.add(exception));
+      if (exceptions.size() > 0) throw exceptions.elementAt(0);
+      return streams.toArray(new NamedStream[0]);     
+   }
+   
+   /**
+    * Serializes the given series of graphs, generating one or more {@link NamedStream}s.
+    * <p>Many data formats will only yield one stream per graph (e.g. Transcriber
+    * transcript or Praat textgrid), however there are formats that use multiple files for
+    * the same transcript (e.g. XWaves, EmuR), and others still that will produce one
+    * stream from many Graphs (e.g. CSV).
+    * <p>The method is synchronous in the sense that it should not return until all graphs
+    * have been serialized.
+    * @param graphs The graphs to serialize.
+    * @param layerIds The IDs of the layers to include, or null for all layers.
+    * @param consumer The consumer receiving the streams.
+    * @param warnings A consumer for (non-fatal) warning messages.
+    * @param errors A consumer for (fatal) error messages.
+    * @throws SerializerNotConfiguredException if the object has not been configured.
+    */
+   public void serializeSeries(ISeries<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
+      throws SerializerNotConfiguredException;
+   
+   /**
+    * Determines how far through the serialization is.
+    * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
+    */
+   public Integer getPercentComplete();
+
+   /**
+    * Cancel the serialization in course (if any).
+    */
+   public void cancel();
+
 
    /**
     * Returns any warnings that may have arisen during the last execution of {@link #serialize(Graph[],String[])}.

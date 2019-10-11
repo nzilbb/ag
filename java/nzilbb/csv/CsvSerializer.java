@@ -21,37 +21,39 @@
 //
 package nzilbb.csv;
 
-import java.util.Vector;
-import java.util.LinkedHashMap;
-import java.util.HashMap;
-import java.util.SortedSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.TreeSet;
-import java.util.List;
-import java.util.Arrays;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.Vector;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.ISerializer;
 import nzilbb.ag.serialize.ISeriesSerializer;
 import nzilbb.ag.serialize.SerializationDescriptor;
+import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.SerializationParametersMissingException;
 import nzilbb.ag.serialize.SerializerNotConfiguredException;
-import nzilbb.ag.serialize.SerializationException;
-import nzilbb.util.TempFileInputStream;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
-import nzilbb.util.ISeries;
-import nzilbb.util.ArraySeries;
-import nzilbb.util.ISeriesConsumer;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
+import nzilbb.util.ArraySeries;
+import nzilbb.util.ISeries;
+import nzilbb.util.ISeriesConsumer;
+import nzilbb.util.TempFileInputStream;
 import org.apache.commons.csv.*;
 
 /**
@@ -130,6 +132,41 @@ public class CsvSerializer
     */
    public CsvSerializer setMinimumAnchorConfidence(Integer newMinimumAnchorConfidence) { minimumAnchorConfidence = newMinimumAnchorConfidence; return this; }
 
+   protected int percentComplete = -1;
+   /**
+    * Determines how far through the serialization is.
+    * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
+    */
+   public Integer getPercentComplete()
+   {
+      if (percentComplete < 0) return null;
+      return percentComplete;
+   }
+   
+   /**
+    * Serialization marked for cancelling.
+    * @see #getCancelling()
+    * @see #setCancelling(boolean)
+    */
+   protected boolean cancelling;
+   /**
+    * Getter for {@link #cancelling}: Serialization marked for cancelling.
+    * @return Serialization marked for cancelling.
+    */
+   public boolean getCancelling() { return cancelling; }
+   /**
+    * Setter for {@link #cancelling}: Serialization marked for cancelling.
+    * @param newCancelling Serialization marked for cancelling.
+    */
+   public CsvSerializer setCancelling(boolean newCancelling) { cancelling = newCancelling; return this; }
+   /**
+    * Cancel the serialization in course (if any).
+    */
+   public void cancel()
+   {
+      setCancelling(true);
+   }
+
    // Methods:
    
    /**
@@ -179,39 +216,43 @@ public class CsvSerializer
       return new String[0];
    }
 
+   /**
+    * Determines the cardinality between graphs and serialized streams.
+    * @return {@link ISerializer#Cardinality}.NtoOne as there is one stream produced
+    * regardless of  how many graphs are serialized.
+    */
+   public Cardinality getCardinality()
+   {
+      return Cardinality.NToOne;
+   }
+
    // ISerializer method
    
    /**
-    * Serializes the given graphs, generating one or more {@link NamedStream}s.
+    * Serializes the given graph, generating one or more {@link NamedStream}s.
     * <p>Many data formats will only yield one stream (e.g. Transcriber transcript or Praat
     *  textgrid), however there are formats that use multiple files for the same transcript
     *  (e.g. XWaves, EmuR), which is why this method returns a list. There are formats that
     *  are capable of storing multiple transcripts in the same file (e.g. AGTK, Transana XML
     *  export), which is why this method accepts a list.
-    * <p>{@link ISerializer} method.
     * @param graphs The graphs to serialize.
     * @param layerIds The IDs of the layers to include, or null for all layers.
+    * @param consumer The object receiving the streams.
+    * @param warnings The object receiving warning messages.
     * @return A list of named streams that contain the serialization in the given format. 
     * @throws SerializerNotConfiguredException if the object has not been configured.
-    * @throws SerializationException if errors occur during deserialization.
     */
-   public NamedStream[] serialize(Graph[] graphs, String[] layerIds) 
-      throws SerializerNotConfiguredException, SerializationException
+   public void serializeSeries(ISeries<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
+      throws SerializerNotConfiguredException
    {
-      warnings = new Vector<String>();
+      percentComplete = 0;
+      
       try
       {
-         String fileName = "annotations";
-         if (graphs.length >= 1)
-         {
-            fileName = graphs[0].getId().replaceAll("\\.[^.]+$","");
-            if (graphs.length > 1) fileName += "-etc";
-         }
-         File csvFile = File.createTempFile(fileName+".",".csv");
+         String fileName = null;
+         File csvFile = File.createTempFile("annotations.",".csv");
          CSVPrinter csv = new CSVPrinter(
             new OutputStreamWriter(new FileOutputStream(csvFile), "UTF-8"), CSVFormat.EXCEL);
-         NamedStream csvStream = new NamedStream(
-            new TempFileInputStream(csvFile), fileName+".csv", "text/csv");
          
          csv.print("graph");
          Vector<Layer> attributeLayers = new Vector<Layer>();
@@ -253,8 +294,19 @@ public class CsvSerializer
             }
          } // next temporal layer
          csv.println();
-         for (Graph graph : graphs)
+         while (graphs.hasMoreElements())
          {
+            if (getCancelling()) break;
+            Graph graph = graphs.nextElement();
+            if (fileName == null)
+            {
+               fileName = graph.getId().replaceAll("\\.[^.]+$","");
+            }
+            else if (!fileName.endsWith("-etc"))
+            {
+               fileName += "-etc";
+            }
+            
             // target one temporal layer at a time
             for (Layer targetLayer : temporalLayers)
             {
@@ -321,15 +373,16 @@ public class CsvSerializer
                   csv.println();
                } // next annotation
             } // next layer
+            percentComplete = Optional.of(graphs.percentComplete()).orElse(0);
          } // next graph
          csv.flush();
          csv.close();
-         NamedStream[] streams = { csvStream };
-         return streams;     
+         consumer.accept(
+            new NamedStream(new TempFileInputStream(csvFile), fileName+".csv", "text/csv"));     
       }
       catch(Exception exception)
       {
-         throw new SerializationException(exception);
+         errors.accept(new SerializationException(exception));
       }
    }
 

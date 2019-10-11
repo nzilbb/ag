@@ -36,6 +36,7 @@ import java.net.URL;
 import nzilbb.configure.ParameterSet;
 import nzilbb.configure.Parameter;
 import nzilbb.ag.*;
+import nzilbb.ag.serialize.ISerializer;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.ag.serialize.json.*;
@@ -186,6 +187,9 @@ public class TestJSONSerialization
 
       // no particular layers required
       assertEquals(0, s.getRequiredLayers().length);
+
+      // cardinality is known
+      assertEquals(ISerializer.Cardinality.NToN, s.getCardinality());
 
       // serialize
       File dir = getDir();
