@@ -21,47 +21,46 @@
 //
 package nzilbb.ag.sql;
 
-import java.sql.*;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.util.Vector;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.SortedSet;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Arrays;
-import java.util.regex.Pattern;
+import java.sql.*;
 import java.text.MessageFormat;
 import java.text.ParseException;
-
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.SortedSet;
+import java.util.Spliterator;
+import java.util.Vector;
+import java.util.regex.Pattern;
 import nzilbb.ag.*;
 import nzilbb.ag.ql.AGQLException;
-import nzilbb.ag.util.Validator;
-import nzilbb.ag.util.LayerHierarchyTraversal;
 import nzilbb.ag.util.AnnotationsByAnchor;
-import nzilbb.util.IO;
-import nzilbb.util.ISeries;
-import nzilbb.util.Timers;
-import nzilbb.configure.ParameterSet;
+import nzilbb.ag.util.LayerHierarchyTraversal;
+import nzilbb.ag.util.Validator;
 import nzilbb.configure.Parameter;
-import nzilbb.media.IMediaConverter;
+import nzilbb.configure.ParameterSet;
 import nzilbb.media.IMediaCensor;
-import nzilbb.media.MediaThread;
+import nzilbb.media.IMediaConverter;
 import nzilbb.media.MediaException;
-import nzilbb.media.ffmpeg.FfmpegConverter;
+import nzilbb.media.MediaThread;
 import nzilbb.media.ffmpeg.FfmpegCensor;
-import nzilbb.media.wav.Resampler;
+import nzilbb.media.ffmpeg.FfmpegConverter;
 import nzilbb.media.wav.FragmentExtractor;
+import nzilbb.media.wav.Resampler;
+import nzilbb.util.IO;
+import nzilbb.util.Timers;
 
 /**
  * Graph store that uses a relational database as its back end.
@@ -3351,7 +3350,7 @@ public class SqlGraphStore
    * @throws PermissionException If the operation is not permitted.
    * @throws GraphNotFoundException If the series identified by <var>seriesId</var> was not found in the store.
    */
-  public ISeries<Graph> getFragmentSeries(String seriesId, String[] layerId) 
+  public Spliterator<Graph> getFragmentSeries(String seriesId, String[] layerId) 
     throws StoreException, PermissionException, GraphNotFoundException
   {
     try

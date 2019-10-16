@@ -22,8 +22,8 @@
 package nzilbb.ag.sql;
 
 import java.sql.*;
-import java.util.NoSuchElementException;
-import nzilbb.util.ISeries;
+import java.util.Spliterator;
+import java.util.function.Consumer;
 import nzilbb.ag.*;
 
 /**
@@ -32,7 +32,7 @@ import nzilbb.ag.*;
  */
 
 public class ResultSeries
-  implements ISeries<Graph>
+  implements Spliterator<Graph>
 {
    // Attributes:
 
@@ -138,6 +138,12 @@ public class ResultSeries
       if (sql != null) try { sql.close(); } catch(Throwable t) {}
    } // end of finalize()
 
+   // Spliterator implementations
+
+   public int characteristics()
+   {
+      return ORDERED | DISTINCT | IMMUTABLE | NONNULL | SUBSIZED | SIZED;
+   }
 
    /**
     * Tests if this enumeration contains more elements.
@@ -159,18 +165,21 @@ public class ResultSeries
    /**
     * Returns the next element of this enumeration if this enumeration object has at least one more element to provide.
     */
-   public Graph nextElement()
-      throws NoSuchElementException
+   public boolean tryAdvance(Consumer<? super Graph> action)
    {
+      if (!hasMoreElements()) return false;
       try
       {
 	 rs.next();
 	 nextRow++;
-	 return store.getFragment(rs.getString("ag_id"), "em_12_"+rs.getLong("defining_annotation_id"), layers);
+	 action.accept(
+            store.getFragment(
+               rs.getString("ag_id"), "em_12_"+rs.getLong("defining_annotation_id"), layers));
+         return true;
       }
       catch(Exception exception)
       {
-	 throw new NoSuchElementException(exception.getMessage());
+	 return false;
       }
    }
 
@@ -180,9 +189,14 @@ public class ResultSeries
     * Counts the elements in the series, if possible.
     * @return The number of elements in the series, or null if the number is unknown.
     */
-   public Long countElements()
+   public long estimateSize()
    {
       if (rowCount >= 0) return rowCount;
+      return Long.MAX_VALUE;
+   }
+
+   public Spliterator<Graph> trySplit()
+   {
       return null;
    }
    

@@ -22,7 +22,7 @@
 package nzilbb.ag;
 
 import java.util.Vector;
-import nzilbb.util.ISeries;
+import java.util.Spliterator;
 
 /**
  * Interface for querying an annotation graph store, a database of graphs.
@@ -517,7 +517,7 @@ public interface IGraphStoreQuery
    * @throws PermissionException If the operation is not permitted.
    * @throws GraphNotFoundException If the graph was not found in the store.
    */
-  public ISeries<Graph> getFragmentSeries(String seriesId, String[] layerId) 
+  public Spliterator<Graph> getFragmentSeries(String seriesId, String[] layerId) 
     throws StoreException, PermissionException, GraphNotFoundException;
    
   /**
