@@ -56,8 +56,8 @@ public class TestGraphAgqlToSql
                  .setPeers(false).setPeersOverlap(false).setSaturated(true))
          .with("@class_id", "transcript").with("@attribute", "scribe"),
       
-         (Layer)(new Layer("transcript_type", "Type").setAlignment(Constants.ALIGNMENT_NONE)
-                 .setPeers(false).setPeersOverlap(false).setSaturated(true)),
+         new Layer("transcript_type", "Type").setAlignment(Constants.ALIGNMENT_NONE)
+                 .setPeers(false).setPeersOverlap(false).setSaturated(true),
       
          (Layer)(new Layer("transcript_rating", "Ratings").setAlignment(Constants.ALIGNMENT_NONE)
                  .setPeers(true).setPeersOverlap(true).setSaturated(true))
