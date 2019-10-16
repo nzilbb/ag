@@ -72,10 +72,10 @@
     <mkdir dir="${javadoc}"/>
     <javadoc destdir="${javadoc}"
 	     classpath=".;lib/antlr-4.7.2-complete.jar"
-	     Author="yes" >
+	     Author="yes" Windowtitle="nzilbb.ag" >
       <fileset dir="${src}"
                includes="${srcfiles}"
-               excludes="nzilbb/ag/**/test/*.java ${srctestseditpath} nzilbb/ag/ql/**/*.java" />
+               excludes="nzilbb/ag/**/test/*.java ${srctestseditpath} nzilbb/ag/ql/**/*.java org/**/*.java" />
     </javadoc>
   </target>
   
@@ -176,8 +176,8 @@
 	<ant antfile="clan.xml" inheritAll="false" />
 	<ant antfile="est.xml" inheritAll="false" />
 	<ant antfile="emusdms.xml" inheritAll="false" />
-  </target>  
-
+	<ant antfile="csv.xml" inheritAll="false" />
+  </target>
   
   <target name="clean" description="clean up" >
     <!-- Delete the ${build} and ${dist} directory trees -->
