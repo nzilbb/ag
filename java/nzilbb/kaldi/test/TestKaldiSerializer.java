@@ -29,6 +29,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -45,7 +46,6 @@ import nzilbb.configure.ParameterSet;
 import nzilbb.editpath.EditStep;
 import nzilbb.editpath.MinimumEditPath;
 import nzilbb.kaldi.*;
-import nzilbb.util.ArraySeries;
 
 public class TestKaldiSerializer
 {
@@ -149,10 +149,10 @@ public class TestKaldiSerializer
       File dir = getDir();
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
-      serializer.serialize(new ArraySeries<Graph>(fragments), allLayers,
-                           (stream) -> streams.add(stream),
-                           (warning) -> System.out.println(warning),
-                           (exception) -> exceptions.add(exception));
+      serializer.serialize(Arrays.spliterator(fragments), allLayers,
+                           stream -> streams.add(stream),
+                           warning -> System.out.println(warning),
+                           exception -> exceptions.add(exception));
       assertEquals(6, streams.size());
       for (NamedStream stream: streams)
       {

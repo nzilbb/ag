@@ -28,6 +28,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -39,7 +40,6 @@ import nzilbb.configure.ParameterSet;
 import nzilbb.csv.*;
 import nzilbb.editpath.EditStep;
 import nzilbb.editpath.MinimumEditPath;
-import nzilbb.util.ArraySeries;
 
 public class TestCsvSerializer
 {      
@@ -65,10 +65,10 @@ public class TestCsvSerializer
       String[] layerIds = {"who", "word"};
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
-      serializer.serialize(new ArraySeries<Graph>(graphs), layerIds,
-                           (stream) -> streams.add(stream),
-                           (warning) -> System.out.println(warning),
-                           (exception) -> exceptions.add(exception));
+      serializer.serialize(Arrays.spliterator(graphs), layerIds,
+                           stream -> streams.add(stream),
+                           warning -> System.out.println(warning),
+                           exception -> exceptions.add(exception));
       assertEquals(1, streams.size());
       streams.elementAt(0).save(dir);
       
@@ -109,10 +109,10 @@ public class TestCsvSerializer
       String[] layerIds = {"who", "word"};
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
-      serializer.serialize(new ArraySeries<Graph>(graphs), layerIds,
-                           (stream) -> streams.add(stream),
-                           (warning) -> System.out.println(warning),
-                           (exception) -> exceptions.add(exception));
+      serializer.serialize(Arrays.spliterator(graphs), layerIds,
+                           stream -> streams.add(stream),
+                           warning -> System.out.println(warning),
+                           exception -> exceptions.add(exception));
       assertEquals(1, streams.size());
       streams.elementAt(0).save(dir);
       
@@ -152,10 +152,10 @@ public class TestCsvSerializer
       String[] layerIds = {"transcript_transcriber", "who", "word"};
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
-      serializer.serialize(new ArraySeries<Graph>(graphs), layerIds,
-                           (stream) -> streams.add(stream),
-                           (warning) -> System.out.println(warning),
-                           (exception) -> exceptions.add(exception));
+      serializer.serialize(Arrays.spliterator(graphs), layerIds,
+                           stream -> streams.add(stream),
+                           warning -> System.out.println(warning),
+                           exception -> exceptions.add(exception));
       assertEquals(1, streams.size());
       streams.elementAt(0).save(dir);
 
@@ -195,10 +195,10 @@ public class TestCsvSerializer
       String[] layerIds = {"who", "word", "orthography"};
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
-      serializer.serialize(new ArraySeries<Graph>(graphs), layerIds,
-                           (stream) -> streams.add(stream),
-                           (warning) -> System.out.println(warning),
-                           (exception) -> exceptions.add(exception));
+      serializer.serialize(Arrays.spliterator(graphs), layerIds,
+                           stream -> streams.add(stream),
+                           warning -> System.out.println(warning),
+                           exception -> exceptions.add(exception));
       assertEquals(1, streams.size());
       streams.elementAt(0).save(dir);
 

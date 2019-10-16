@@ -27,7 +27,6 @@ import java.nio.charset.*;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.*;
-import java.util.Optional;
 import java.util.function.Consumer;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
@@ -40,7 +39,6 @@ import nzilbb.ag.util.SimpleTokenizer;
 import nzilbb.ag.util.SpanningConventionTransformer;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
-import nzilbb.util.ISeries;
 import nzilbb.util.TempFileInputStream;
 import nzilbb.util.Timers;
 
@@ -317,15 +315,16 @@ public class TextGridSerialization
     */
    public void setTimers(Timers newTimers) { timers = newTimers; }
    
-   protected int percentComplete = -1;
+   private long graphCount = 0;
+   private long consumedGraphCount = 0;
    /**
     * Determines how far through the serialization is.
     * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
     */
    public Integer getPercentComplete()
    {
-      if (percentComplete < 0) return null;
-      return percentComplete;
+      if (graphCount < 0) return null;
+      return (int)((consumedGraphCount * 100) / graphCount);
    }
    
    /**
@@ -1481,25 +1480,22 @@ public class TextGridSerialization
     * @return A list of named streams that contain the serialization in the given format. 
     * @throws SerializerNotConfiguredException if the object has not been configured.
     */
-   public void serialize(ISeries<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
+   public void serialize(Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
       throws SerializerNotConfiguredException
    {
-      percentComplete = 0;
-      
-      while (graphs.hasMoreElements())
-      {
-         if (getCancelling()) break;
-         Graph graph = graphs.nextElement();
-         try
-         {
-            consumer.accept(serializeGraph(graph, layerIds));
-         }
-         catch(SerializationException exception)
-         {
-            errors.accept(exception);
-         }
-         percentComplete = Optional.of(graphs.percentComplete()).orElse(0);
-      } // next graph
+      graphCount = graphs.getExactSizeIfKnown();
+      graphs.forEachRemaining(graph -> {
+            if (getCancelling()) return;
+            try
+            {
+               consumer.accept(serializeGraph(graph, layerIds));
+            }
+            catch(SerializationException exception)
+            {
+               errors.accept(exception);
+            }
+            consumedGraphCount++;
+         }); // next graph
    }
 
    /**

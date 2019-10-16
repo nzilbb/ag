@@ -21,6 +21,7 @@
 //
 package nzilbb.ag.serialize;
 
+import java.util.Spliterator;
 import java.util.Vector;
 import java.util.function.Consumer;
 import nzilbb.ag.Graph;
@@ -28,8 +29,6 @@ import nzilbb.ag.Schema;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
-import nzilbb.util.ArraySeries;
-import nzilbb.util.ISeries;
 
 /**
  * Interface for serializing a graph to streams of data.
@@ -117,7 +116,7 @@ public interface ISerializer
     * @param errors A consumer for (fatal) error messages.
     * @throws SerializerNotConfiguredException if the object has not been configured.
     */
-   public void serialize(ISeries<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
+   public void serialize(Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
       throws SerializerNotConfiguredException;
    
    /**

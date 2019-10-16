@@ -27,33 +27,33 @@ import org.junit.runners.MethodSorters;
 import org.junit.FixMethodOrder;
 import static org.junit.Assert.*;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FilenameFilter;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URL;
-import java.util.Vector;
-import java.util.Iterator;
-import java.util.TreeSet;
-import java.util.List;
 import java.util.Arrays;
-import nzilbb.configure.ParameterSet;
-import nzilbb.configure.Parameter;
-import nzilbb.ag.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.TreeSet;
+import java.util.Vector;
+import nzilbb.ag.*;
 import nzilbb.ag.serialize.SerializationException;
-import nzilbb.ag.serialize.SerializerNotConfiguredException;
 import nzilbb.ag.serialize.SerializationParametersMissingException;
+import nzilbb.ag.serialize.SerializerNotConfiguredException;
+import nzilbb.ag.serialize.json.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
-import nzilbb.ag.serialize.json.*;
-import nzilbb.ag.*;
-import nzilbb.editpath.MinimumEditPath;
+import nzilbb.ag.util.*;
+import nzilbb.configure.Parameter;
+import nzilbb.configure.ParameterSet;
 import nzilbb.editpath.EditStep;
-import nzilbb.util.ArraySeries;
+import nzilbb.editpath.MinimumEditPath;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestMerger
@@ -874,10 +874,10 @@ public class TestMerger
     // serialize      
     final Vector<SerializationException> exceptions = new Vector<SerializationException>();
     final Vector<NamedStream> streams = new Vector<NamedStream>();
-    s.serialize(new ArraySeries<Graph>(Utility.OneGraphArray(graph)), null,
-                      (stream) -> streams.add(stream),
-                      (warning) -> System.out.println(warning),
-                      (exception) -> exceptions.add(exception));
+    s.serialize(Arrays.spliterator(Utility.OneGraphArray(graph)), null,
+                (stream) -> streams.add(stream),
+                (warning) -> System.out.println(warning),
+                (exception) -> exceptions.add(exception));
     streams.elementAt(0).setName(file.getName());
     streams.elementAt(0).save(file.getParentFile());
 

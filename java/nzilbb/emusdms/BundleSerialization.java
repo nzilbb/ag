@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Optional;
+import java.util.Spliterator;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -376,15 +377,16 @@ public class BundleSerialization
    /** Required mappings; key is level parameter ID, values are label parameter IDs */
    protected TreeMap<String,TreeSet<String>> requiredMappings;
   
-   protected int percentComplete = -1;
+   private long graphCount = 0;
+   private long consumedGraphCount = 0;
    /**
     * Determines how far through the serialization is.
     * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
     */
    public Integer getPercentComplete()
    {
-      if (percentComplete < 0) return null;
-      return percentComplete;
+      if (graphCount < 0) return null;
+      return (int)((consumedGraphCount * 100) / graphCount);
    }
    
    /**
@@ -1009,26 +1011,22 @@ public class BundleSerialization
     * @return A list of named streams that contain the serialization in the given format. 
     * @throws SerializerNotConfiguredException if the object has not been configured.
     */
-   public void serialize(ISeries<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
+   public void serialize(Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
       throws SerializerNotConfiguredException
    {
-      percentComplete = 0;
-      
-      Vector<NamedStream> streams = new Vector<NamedStream>();
-      while (graphs.hasMoreElements())
-      {
-         if (getCancelling()) break;
-         Graph graph = graphs.nextElement();
-         try
-         {
-            consumer.accept(serializeGraph(graph, layerIds));
-         }
-         catch(SerializationException exception)
-         {
-            errors.accept(exception);
-         }
-         percentComplete = Optional.of(graphs.percentComplete()).orElse(0);
-      } // next graph
+      graphCount = graphs.getExactSizeIfKnown();
+      graphs.forEachRemaining(graph -> {
+            if (getCancelling()) return;
+            try
+            {
+               consumer.accept(serializeGraph(graph, layerIds));
+            }
+            catch(SerializationException exception)
+            {
+               errors.accept(exception);
+            }
+            consumedGraphCount++;
+         }); // next graph
    }
   
    // ISchemaSerializer methods

@@ -32,6 +32,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.SortedSet;
+import java.util.Spliterator;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.function.Consumer;
@@ -45,8 +46,6 @@ import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
-import nzilbb.util.ArraySeries;
-import nzilbb.util.ISeries;
 import nzilbb.util.TempFileInputStream;
 
 /**
@@ -434,19 +433,16 @@ public class KaldiSerializer
     * @return A list of named streams that contain the serialization in the given format. 
     * @throws SerializerNotConfiguredException if the object has not been configured.
     */
-   public void serialize(ISeries<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
+   public void serialize(Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
       throws SerializerNotConfiguredException
    {
-      percentComplete = 0;
-
-      long graphCount = graphs.countElements();
-      
+      graphCount = graphs.getExactSizeIfKnown();
       try
       {
 	 // prepare streams for writing...
 	 
 	 File textFile = File.createTempFile(getClass().getSimpleName()+"-","-text");
-	 PrintWriter textWriter = new PrintWriter(textFile, "utf-8");
+	 final PrintWriter textWriter = new PrintWriter(textFile, "utf-8");
 	 NamedStream textStream = new NamedStream(new TempFileInputStream(textFile), "text");
 	 
 	 File corpusFile = File.createTempFile(getClass().getSimpleName()+"-","-corpus.txt");
@@ -454,19 +450,19 @@ public class KaldiSerializer
 	 NamedStream corpusStream = new NamedStream(new TempFileInputStream(corpusFile), "corpus.txt");
 	 
 	 File segmentsFile = File.createTempFile(getClass().getSimpleName()+"-","-segments");
-	 PrintWriter segmentsWriter = new PrintWriter(segmentsFile, "utf-8");
+	 final PrintWriter segmentsWriter = new PrintWriter(segmentsFile, "utf-8");
 	 NamedStream segmentsStream = new NamedStream(new TempFileInputStream(segmentsFile), "segments");
 	 
 	 File utt2spkFile = File.createTempFile(getClass().getSimpleName()+"-","-utt2spk");
-	 PrintWriter utt2spkWriter = new PrintWriter(utt2spkFile, "utf-8");
+	 final PrintWriter utt2spkWriter = new PrintWriter(utt2spkFile, "utf-8");
 	 NamedStream utt2spkStream = new NamedStream(new TempFileInputStream(utt2spkFile), "utt2spk");
 	 
 	 File wordsFile = File.createTempFile(getClass().getSimpleName()+"-","-words.txt");
-	 PrintWriter wordsWriter = new PrintWriter(wordsFile, "utf-8");
+	 final PrintWriter wordsWriter = new PrintWriter(wordsFile, "utf-8");
 	 NamedStream wordsStream = new NamedStream(new TempFileInputStream(wordsFile), "words.txt");
 	 
 	 File wavFile = File.createTempFile(getClass().getSimpleName()+"-","-wav.scp");
-	 PrintWriter wavWriter = new PrintWriter(wavFile, "utf-8");
+	 final PrintWriter wavWriter = new PrintWriter(wavFile, "utf-8");
 	 NamedStream wavStream = new NamedStream(new TempFileInputStream(wavFile), "wav.scp");
 
 	 String utt = getUtteranceLayer().getId();
@@ -474,61 +470,58 @@ public class KaldiSerializer
 	 String speaker = getParticipantLayer().getId();
 	 String episode = getEpisodeLayer().getId();
 
-	 SortedSet<String> words = new TreeSet<String>();
-	 SortedSet<String> wavs = new TreeSet<String>();
+	 final SortedSet<String> words = new TreeSet<String>();
+	 final SortedSet<String> wavs = new TreeSet<String>();
 
-	 long g = 0;
-	 String lastMediaName = "";
-	 while (graphs.hasMoreElements())
-	 {
-	    if (getCancelling()) break;
-	    Graph graph = graphs.nextElement();
-	    String transcriptName = graph.getId().replaceAll("__[0-9.]+-[0-9.]+$","");
-	    String wavName = transcriptName.replaceAll("\\.[^.]+$",".wav");
-	    boolean firstWord = true;
-	    for (Annotation utterance : graph.list(utt))
-	    {
-	       String speakerId = utterance.my(speaker).getId();
-	       String utteranceId = speakerId + "-" + graph.getId();
-	       textWriter.print(utteranceId);
-	       for (Annotation token : utterance.list(orthography))
-	       {
-		  textWriter.print(" ");
-		  textWriter.print(token.getLabel());
-		  
-		  if (firstWord)
-		  {
-		     firstWord = false;
-		  }
-		  else
-		  {
-		     corpusWriter.print(" ");
-		  }
-		  corpusWriter.print(token.getLabel());
+	 StringBuffer lastMediaName = new StringBuffer();
+         graphs.forEachRemaining(graph -> {
+               if (getCancelling()) return;
+               String transcriptName = graph.getId().replaceAll("__[0-9.]+-[0-9.]+$","");
+               String wavName = transcriptName.replaceAll("\\.[^.]+$",".wav");
+               boolean firstWord = true;
+               for (Annotation utterance : graph.list(utt))
+               {
+                  String speakerId = utterance.my(speaker).getId();
+                  String utteranceId = speakerId + "-" + graph.getId();
+                  textWriter.print(utteranceId);
+                  for (Annotation token : utterance.list(orthography))
+                  {
+                     textWriter.print(" ");
+                     textWriter.print(token.getLabel());
+                     
+                     if (firstWord)
+                     {
+                        firstWord = false;
+                     }
+                     else
+                     {
+                        corpusWriter.print(" ");
+                     }
+                     corpusWriter.print(token.getLabel());
+                     
+                     words.add(token.getLabel());
+                  } // next word token
+                  textWriter.println();
+                  corpusWriter.println();
+                  
+                  segmentsWriter.println(
+                     utteranceId
+                     + " " + transcriptName
+                     + " " + fmt.format(graph.getStart().getOffset())
+                     + " " + fmt.format(graph.getEnd().getOffset()));
+                  
+                  utt2spkWriter.println(utteranceId + " " + utterance.my(speaker).getId());
 
-		  words.add(token.getLabel());
-	       } // next word token
-	       textWriter.println();
-	       corpusWriter.println();
-	
-	       segmentsWriter.println(
-		  utteranceId
-		  + " " + transcriptName
-		  + " " + fmt.format(graph.getStart().getOffset())
-		  + " " + fmt.format(graph.getEnd().getOffset()));
-	       
-	       utt2spkWriter.println(utteranceId + " " + utterance.my(speaker).getId());
-
-	       if (!wavs.contains(transcriptName))
-	       {
-		  wavs.add(transcriptName);
-		  wavWriter.println(transcriptName
-				    + " " + graph.my(episode).getLabel() + "/wav/" + wavName); // TODO just point to original files
-	       }
-	    } // next utterance
-	    percentComplete = (int)((++g * 90) / graphCount);
-	 } // next graph
-
+                  if (!wavs.contains(transcriptName))
+                  {
+                     wavs.add(transcriptName);
+                     wavWriter.println(transcriptName
+                                       + " " + graph.my(episode).getLabel() + "/wav/" + wavName); // TODO just point to original files
+                  }
+               } // next utterance
+               consumedGraphCount++;
+            }); // next graph
+         
 	 if (getCancelling())
 	 {
 	    // close the streams
@@ -550,24 +543,16 @@ public class KaldiSerializer
 	    
 	    // pass them to the consumer
 	    consumer.accept(textStream);
-	    percentComplete = 91;
 	    consumer.accept(corpusStream);
-	    percentComplete = 92;
 	    consumer.accept(segmentsStream);
-	    percentComplete = 93;
 	    consumer.accept(utt2spkStream);
-	    percentComplete = 94;
 	    consumer.accept(wavStream);
-	    percentComplete = 95;
 	    
 	    // finally, words (sorted)
 	    for (String word : words) wordsWriter.println(word);
 	    wordsWriter.close();
-	    percentComplete = 96;
 	    consumer.accept(wordsStream);
-	    percentComplete = 100;
 	 }
-
       }
       catch(Exception exception)
       {
@@ -575,15 +560,16 @@ public class KaldiSerializer
       }
    }
 
-   protected int percentComplete = -1;
+   private long graphCount = 0;
+   private long consumedGraphCount = 0;
    /**
     * Determines how far through the serialization is.
     * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
     */
    public Integer getPercentComplete()
    {
-      if (percentComplete < 0) return null;
-      return percentComplete;
+      if (graphCount < 0) return null;
+      return (int)((consumedGraphCount * 100) / graphCount);
    }
 
    /**

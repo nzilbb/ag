@@ -33,6 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.SortedSet;
+import java.util.Spliterator;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.function.Consumer;
@@ -41,7 +42,6 @@ import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
-import nzilbb.util.ISeries;
 import nzilbb.util.TempFileInputStream;
 import org.json.*;
 
@@ -97,15 +97,16 @@ public class JSONSerialization
     */
    public JSONSerialization setSortAnchors(boolean newSortAnchors) { sortAnchors = newSortAnchors; return this; }
 
-   protected int percentComplete = -1;
+   private long graphCount = 0;
+   private long consumedGraphCount = 0;
    /**
     * Determines how far through the serialization is.
     * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
     */
    public Integer getPercentComplete()
    {
-      if (percentComplete < 0) return null;
-      return percentComplete;
+      if (graphCount < 0) return null;
+      return (int)((consumedGraphCount * 100) / graphCount);
    }
    
    /**
@@ -525,85 +526,84 @@ public class JSONSerialization
     * @return A list of named streams that contain the serialization in the given format. 
     * @throws SerializerNotConfiguredException if the object has not been configured.
     */
-   public void serialize(ISeries<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
+   public void serialize(Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
       throws SerializerNotConfiguredException
    {
-      percentComplete = 0;
-      
-      while (graphs.hasMoreElements())
-      {
-         if (getCancelling()) break;
-         Graph graph = graphs.nextElement();
-	 try
-	 {
-	    File f = File.createTempFile(graph.getId(), ".json");
-	    FileOutputStream out = new FileOutputStream(f);	 
-	    PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, "utf-8"));
-	    
-	    writer.println("{");
-	    writer.println(keyValue(1, "id", graph.getId()) + ",");
-
-	    // offsetGranularity
-	    if (graph.getOffsetGranularity() != null)
-	    {
-	       writer.println(keyValue(1, "offsetGranularity", graph.getOffsetGranularity()) + ",");
-	    }
-	    
-	    // layers
-	    Schema schema = graph.getSchema();
-	    writer.println(indent(1) + "\"schema\":{");
-	    if (schema.getCorpusLayerId() != null)
-	       writer.println(keyValue(2, "corpusLayerId", schema.getCorpusLayerId()) + ",");
-	    if (schema.getEpisodeLayerId() != null)
-	       writer.println(keyValue(2, "episodeLayerId", schema.getEpisodeLayerId()) + ",");
-	    if (schema.getParticipantLayerId() != null)
-	       writer.println(keyValue(2, "participantLayerId", schema.getParticipantLayerId()) + ",");
-	    if (schema.getTurnLayerId() != null)
-	       writer.println(keyValue(2, "turnLayerId", schema.getTurnLayerId()) + ",");
-	    if (schema.getUtteranceLayerId() != null)
-	       writer.println(keyValue(2, "utteranceLayerId", schema.getUtteranceLayerId()) + ",");
-	    if (schema.getWordLayerId() != null)
-	       writer.println(keyValue(2, "wordLayerId", schema.getWordLayerId()) + ",");
-	    serializeLayer(writer, 2, schema.getRoot());
-	    writer.println();
-	    writer.println(indent(1) + "},");
-	    
-	    // anchors
-	    writer.println(indent(1) + "\"anchors\":{");
-	    boolean firstAnchor = true;
-	    Collection<Anchor> anchors = graph.getAnchors().values();
-	    if (sortAnchors) anchors = graph.getAnchorsOrderedByStructure();
-	    for (Anchor anchor : anchors)
-	    {
-	       if (firstAnchor)
-		  firstAnchor = false;
-	       else
-		  writer.println(",");
-	       serializeAnchor(writer, 2, anchor);
-	    } // next anchor
-	    writer.println();
-	    writer.println(indent(1) + "},");
-
-	    // layers in predictable (alphabetical) order
-	    for (String layerId : new TreeSet<String>(schema.getRoot().getChildren().keySet()))
-	    {
-	       serializeAnnotations(writer, 1, layerId, graph.getAnnotations(layerId));
-	    }
-	    
-	    writer.println();
-	    writer.println("}");
-	    
-	    // provide a stream from the buffer
-	    writer.close();
-	    TempFileInputStream in = new TempFileInputStream(f);
-	    consumer.accept(new NamedStream(in, graph.getId() + ".json"));
-	 }
-	 catch(Exception exception)
-	 {
-	    errors.accept(new SerializationException(exception));
-	 }
-         percentComplete = Optional.of(graphs.percentComplete()).orElse(0);
-      } // next graph
+      graphCount = graphs.getExactSizeIfKnown();
+      graphs.forEachRemaining(graph -> {
+            if (!getCancelling())
+            {
+               try
+               {
+                  File f = File.createTempFile(graph.getId(), ".json");
+                  FileOutputStream out = new FileOutputStream(f);	 
+                  PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, "utf-8"));
+                  
+                  writer.println("{");
+                  writer.println(keyValue(1, "id", graph.getId()) + ",");
+                  
+                  // offsetGranularity
+                  if (graph.getOffsetGranularity() != null)
+                  {
+                     writer.println(keyValue(1, "offsetGranularity", graph.getOffsetGranularity()) + ",");
+                  }
+                  
+                  // layers
+                  Schema schema = graph.getSchema();
+                  writer.println(indent(1) + "\"schema\":{");
+                  if (schema.getCorpusLayerId() != null)
+                     writer.println(keyValue(2, "corpusLayerId", schema.getCorpusLayerId()) + ",");
+                  if (schema.getEpisodeLayerId() != null)
+                     writer.println(keyValue(2, "episodeLayerId", schema.getEpisodeLayerId()) + ",");
+                  if (schema.getParticipantLayerId() != null)
+                     writer.println(keyValue(2, "participantLayerId", schema.getParticipantLayerId()) + ",");
+                  if (schema.getTurnLayerId() != null)
+                     writer.println(keyValue(2, "turnLayerId", schema.getTurnLayerId()) + ",");
+                  if (schema.getUtteranceLayerId() != null)
+                     writer.println(keyValue(2, "utteranceLayerId", schema.getUtteranceLayerId()) + ",");
+                  if (schema.getWordLayerId() != null)
+                     writer.println(keyValue(2, "wordLayerId", schema.getWordLayerId()) + ",");
+                  serializeLayer(writer, 2, schema.getRoot());
+                  writer.println();
+                  writer.println(indent(1) + "},");
+                  
+                  // anchors
+                  writer.println(indent(1) + "\"anchors\":{");
+                  boolean firstAnchor = true;
+                  Collection<Anchor> anchors = graph.getAnchors().values();
+                  if (sortAnchors) anchors = graph.getAnchorsOrderedByStructure();
+                  for (Anchor anchor : anchors)
+                  {
+                     if (firstAnchor)
+                        firstAnchor = false;
+                     else
+                        writer.println(",");
+                     serializeAnchor(writer, 2, anchor);
+                  } // next anchor
+                  writer.println();
+                  writer.println(indent(1) + "},");
+                  
+                  // layers in predictable (alphabetical) order
+                  for (String layerId : new TreeSet<String>(schema.getRoot().getChildren().keySet()))
+                  {
+                     serializeAnnotations(writer, 1, layerId, graph.getAnnotations(layerId));
+                  }
+                  
+                  writer.println();
+                  writer.println("}");
+                  
+                  // provide a stream from the buffer
+                  writer.close();
+                  TempFileInputStream in = new TempFileInputStream(f);
+                  consumer.accept(new NamedStream(in, graph.getId() + ".json"));
+               }
+               catch(Exception exception)
+               {
+                  errors.accept(new SerializationException(exception));
+               }
+               consumedGraphCount++;
+            }
+         });// next graph
    }			
    
    /**

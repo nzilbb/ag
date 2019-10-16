@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.SortedSet;
+import java.util.Spliterator;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.function.Consumer;
@@ -49,8 +50,6 @@ import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
-import nzilbb.util.ArraySeries;
-import nzilbb.util.ISeries;
 import nzilbb.util.TempFileInputStream;
 import org.apache.commons.csv.*;
 
@@ -130,15 +129,16 @@ public class CsvSerializer
     */
    public CsvSerializer setMinimumAnchorConfidence(Integer newMinimumAnchorConfidence) { minimumAnchorConfidence = newMinimumAnchorConfidence; return this; }
 
-   protected int percentComplete = -1;
+   private long graphCount = 0;
+   private long consumedGraphCount = 0;
    /**
     * Determines how far through the serialization is.
     * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
     */
    public Integer getPercentComplete()
    {
-      if (percentComplete < 0) return null;
-      return percentComplete;
+      if (graphCount < 0) return null;
+      return (int)((consumedGraphCount * 100) / graphCount);
    }
    
    /**
@@ -240,16 +240,15 @@ public class CsvSerializer
     * @return A list of named streams that contain the serialization in the given format. 
     * @throws SerializerNotConfiguredException if the object has not been configured.
     */
-   public void serialize(ISeries<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
+   public void serialize(Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
       throws SerializerNotConfiguredException
    {
-      percentComplete = 0;
-      
+      graphCount = graphs.getExactSizeIfKnown();
       try
       {
-         String fileName = null;
+         final StringBuffer fileName = new StringBuffer();
          File csvFile = File.createTempFile("annotations.",".csv");
-         CSVPrinter csv = new CSVPrinter(
+         final CSVPrinter csv = new CSVPrinter(
             new OutputStreamWriter(new FileOutputStream(csvFile), "UTF-8"), CSVFormat.EXCEL);
          
          csv.print("graph");
@@ -292,87 +291,92 @@ public class CsvSerializer
             }
          } // next temporal layer
          csv.println();
-         while (graphs.hasMoreElements())
-         {
-            if (getCancelling()) break;
-            Graph graph = graphs.nextElement();
-            if (fileName == null)
-            {
-               fileName = graph.getId().replaceAll("\\.[^.]+$","");
-            }
-            else if (!fileName.endsWith("-etc"))
-            {
-               fileName += "-etc";
-            }
-            
-            // target one temporal layer at a time
-            for (Layer targetLayer : temporalLayers)
-            {
-               // there's one CSV row per annotation
-               for (Annotation annotation : graph.list(targetLayer.getId()))
+         graphs.forEachRemaining(graph -> {
+               if (getCancelling()) return;
+               if (fileName.length() == 0)
                {
-                  // graph ID
-                  csv.print(graph.getId());
+                  fileName.append(graph.getId().replaceAll("\\.[^.]+$",""));
+               }
+               else if (!fileName.toString().endsWith("-etc"))
+               {
+                  fileName.append("-etc");
+               }
 
-                  // all the attribute layers
-                  for (Layer attributeLayer : attributeLayers)
+               try
+               {
+                  // target one temporal layer at a time
+                  for (Layer targetLayer : temporalLayers)
                   {
-                     try
+                     // there's one CSV row per annotation
+                     for (Annotation annotation : graph.list(targetLayer.getId()))
                      {
-                        csv.print(
-                           // multiple values are represented with multiple lines in the cell
-                           String.join("\n",
-                                       // stream all annotations on the attribute layer
-                                       Arrays.stream(annotation.list(attributeLayer.getId()))
-                                       // convert to a stream of labels
-                                       .map(a -> a.getLabel())
-                                       // and convert the stream to an array
-                                       .collect(Collectors.toList()).toArray(new String[0])));
-                     }
-                     catch(NullPointerException exception)
-                     {
-                        csv.print("");
-                     }
-                  } // next attribute layer
-
-                  // now iterate through the temporal layers, inserting the label in the
-                  // right column, and adding blanks in the other columns
-                  for (Layer columnLayer : temporalLayers)
-                  {
-                     if (columnLayer == targetLayer)
-                     { // put values in these columns
-                        csv.print(annotation.getLabel());
-                        switch (columnLayer.getAlignment())
+                        // graph ID
+                        csv.print(graph.getId());
+                        
+                        // all the attribute layers
+                        for (Layer attributeLayer : attributeLayers)
                         {
-                           case Constants.ALIGNMENT_INSTANT:
-                              csv.print(offset(annotation.getStart()));
-                              break;
-                           default: // INTERVAL and NONE
-                              csv.print(offset(annotation.getStart()));
-                              csv.print(offset(annotation.getEnd()));
-                              break;
-                        }
-                     } // columnLayer == targetLayer
-                     else
-                     { // blank columns
-                        csv.print("");
-                        switch (columnLayer.getAlignment())
+                           try
+                           {
+                              csv.print(
+                                 // multiple values are represented with multiple lines in the cell
+                                 String.join("\n",
+                                             // stream all annotations on the attribute layer
+                                             Arrays.stream(annotation.list(attributeLayer.getId()))
+                                             // convert to a stream of labels
+                                             .map(a -> a.getLabel())
+                                             // and convert the stream to an array
+                                             .collect(Collectors.toList()).toArray(new String[0])));
+                           }
+                           catch(NullPointerException exception)
+                           {
+                              csv.print("");
+                           }
+                        } // next attribute layer
+                        
+                        // now iterate through the temporal layers, inserting the label in the
+                        // right column, and adding blanks in the other columns
+                        for (Layer columnLayer : temporalLayers)
                         {
-                           case Constants.ALIGNMENT_INSTANT:
+                           if (columnLayer == targetLayer)
+                           { // put values in these columns
+                              csv.print(annotation.getLabel());
+                              switch (columnLayer.getAlignment())
+                              {
+                                 case Constants.ALIGNMENT_INSTANT:
+                                    csv.print(offset(annotation.getStart()));
+                                    break;
+                                 default: // INTERVAL and NONE
+                                    csv.print(offset(annotation.getStart()));
+                                    csv.print(offset(annotation.getEnd()));
+                                    break;
+                              }
+                           } // columnLayer == targetLayer
+                           else
+                           { // blank columns
                               csv.print("");
-                              break;
-                           default: // INTERVAL and NONE
-                              csv.print("");
-                              csv.print("");
-                              break;
-                        }
-                     } // blank columns
-                  } // next temporal layer
-                  csv.println();
-               } // next annotation
-            } // next layer
-            percentComplete = Optional.of(graphs.percentComplete()).orElse(0);
-         } // next graph
+                              switch (columnLayer.getAlignment())
+                              {
+                                 case Constants.ALIGNMENT_INSTANT:
+                                    csv.print("");
+                                    break;
+                                 default: // INTERVAL and NONE
+                                    csv.print("");
+                                    csv.print("");
+                                    break;
+                              }
+                           } // blank columns
+                        } // next temporal layer
+                        csv.println();
+                     } // next annotation
+                  } // next layer
+                  consumedGraphCount++;
+               }
+               catch(Exception exception)
+               {
+                  errors.accept(new SerializationException(exception));
+               }
+            }); // next graph
          csv.flush();
          csv.close();
          consumer.accept(

@@ -28,6 +28,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -42,7 +43,6 @@ import nzilbb.ag.serialize.util.Utility;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 import nzilbb.editpath.*;
-import nzilbb.util.ArraySeries;
 
 public class TestJSONSerialization
 {
@@ -197,10 +197,10 @@ public class TestJSONSerialization
       File dir = getDir();
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
-      s.serialize(new ArraySeries<Graph>(Utility.OneGraphArray(g)), null,
-                  (stream) -> streams.add(stream),
-                  (warning) -> System.out.println(warning),
-                  (exception) -> exceptions.add(exception));
+      s.serialize(Arrays.spliterator(Utility.OneGraphArray(g)), null,
+                  stream -> streams.add(stream),
+                  warning -> System.out.println(warning),
+                  exception -> exceptions.add(exception));
       assertEquals(1, streams.size());
       streams.elementAt(0).save(dir);
 
@@ -406,10 +406,10 @@ public class TestJSONSerialization
 
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
-      s.serialize(new ArraySeries<Graph>(Utility.OneGraphArray(d)), null,
-                  (stream) -> streams.add(stream),
-                  (warning) -> System.out.println(warning),
-                  (exception) -> exceptions.add(exception));
+      s.serialize(Arrays.spliterator(Utility.OneGraphArray(d)), null,
+                  stream -> streams.add(stream),
+                  warning -> System.out.println(warning),
+                  exception -> exceptions.add(exception));
       assertEquals(1, streams.size());
       File fCorrected = new File(dir, "test_corrected.json");
       streams.elementAt(0).setName(fCorrected.getName());

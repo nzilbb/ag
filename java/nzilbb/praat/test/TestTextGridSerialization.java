@@ -29,6 +29,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -45,7 +46,6 @@ import nzilbb.configure.ParameterSet;
 import nzilbb.editpath.EditStep;
 import nzilbb.editpath.MinimumEditPath;
 import nzilbb.praat.*;
-import nzilbb.util.ArraySeries;
 
 public class TestTextGridSerialization
 {
@@ -1443,10 +1443,10 @@ public class TestTextGridSerialization
       // serialize
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
-      serializer.serialize(new ArraySeries<Graph>(graphs), null,
-                           (stream) -> streams.add(stream),
-                           (warning) -> System.out.println(warning),
-                           (exception) -> exceptions.add(exception));
+      serializer.serialize(Arrays.spliterator(graphs), null,
+                           stream -> streams.add(stream),
+                           warning -> System.out.println(warning),
+                           exception -> exceptions.add(exception));
       streams.elementAt(0).save(dir);
 
       // test using diff
@@ -1509,10 +1509,10 @@ public class TestTextGridSerialization
       // serialize
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
-      serializer.serialize(new ArraySeries<Graph>(fragments), layerIds,
-                           (stream) -> streams.add(stream),
-                           (warning) -> System.out.println(warning),
-                           (exception) -> exceptions.add(exception));
+      serializer.serialize(Arrays.spliterator(fragments), layerIds,
+                           stream -> streams.add(stream),
+                           warning -> System.out.println(warning),
+                           exception -> exceptions.add(exception));
       assertEquals(1, streams.size());
       streams.elementAt(0).save(dir);
 
@@ -1577,10 +1577,10 @@ public class TestTextGridSerialization
       // serialize
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
-      serializer.serialize(new ArraySeries<Graph>(fragments), selectedLayers,
-                           (stream) -> streams.add(stream),
-                           (warning) -> System.out.println(warning),
-                           (exception) -> exceptions.add(exception));
+      serializer.serialize(Arrays.spliterator(fragments), selectedLayers,
+                           stream -> streams.add(stream),
+                           warning -> System.out.println(warning),
+                           exception -> exceptions.add(exception));
       streams.elementAt(0).setName("selected_layers__212.400-216.363.TextGrid");
       streams.elementAt(0).save(dir);
 
@@ -1644,10 +1644,10 @@ public class TestTextGridSerialization
       // serialize
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
-      serializer.serialize(new ArraySeries<Graph>(fragments), null,
-                           (stream) -> streams.add(stream),
-                           (warning) -> System.out.println(warning),
-                           (exception) -> exceptions.add(exception));
+      serializer.serialize(Arrays.spliterator(fragments), null,
+                           stream -> streams.add(stream),
+                           warning -> System.out.println(warning),
+                           exception -> exceptions.add(exception));
       streams.elementAt(0).save(dir);
 
       // test using diff

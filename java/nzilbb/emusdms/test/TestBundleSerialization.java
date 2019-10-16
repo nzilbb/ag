@@ -47,7 +47,6 @@ import nzilbb.configure.ParameterSet;
 import nzilbb.editpath.EditStep;
 import nzilbb.editpath.MinimumEditPath;
 import nzilbb.emusdms.*;
-import nzilbb.util.ArraySeries;
 
 public class TestBundleSerialization
 {
@@ -362,10 +361,10 @@ public class TestBundleSerialization
       // serialize
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
-      serializer.serialize(new ArraySeries<Graph>(fragments), needLayers,
-                           (stream) -> streams.add(stream),
-                           (warning) -> System.out.println(warning),
-                           (exception) -> exceptions.add(exception));
+      serializer.serialize(Arrays.spliterator(fragments), needLayers,
+                           stream -> streams.add(stream),
+                           warning -> System.out.println(warning),
+                           exception -> exceptions.add(exception));
       streams.elementAt(0).save(dir);
       File actual = new File(dir, fragment.getId()+".json");
     
@@ -474,10 +473,10 @@ public class TestBundleSerialization
       // serialize
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
-      serializer.serialize(new ArraySeries<Graph>(fragments), needLayers,
-                           (stream) -> streams.add(stream),
-                           (warning) -> System.out.println(warning),
-                           (exception) -> exceptions.add(exception));
+      serializer.serialize(Arrays.spliterator(fragments), needLayers,
+                           stream -> streams.add(stream),
+                           warning -> System.out.println(warning),
+                           exception -> exceptions.add(exception));
       streams.elementAt(0).save(dir);
 
       File actual = new File(dir, fragment.getId()+".json");
