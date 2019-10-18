@@ -197,7 +197,7 @@ public class TestJSONSerialization
       File dir = getDir();
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
-      s.serialize(Arrays.spliterator(Utility.OneGraphArray(g)), null,
+      s.serialize(Utility.OneGraphSpliterator(g), null,
                   stream -> streams.add(stream),
                   warning -> System.out.println(warning),
                   exception -> exceptions.add(exception));
@@ -406,7 +406,7 @@ public class TestJSONSerialization
 
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
-      s.serialize(Arrays.spliterator(Utility.OneGraphArray(d)), null,
+      s.serialize(Utility.OneGraphSpliterator(d), null,
                   stream -> streams.add(stream),
                   warning -> System.out.println(warning),
                   exception -> exceptions.add(exception));
