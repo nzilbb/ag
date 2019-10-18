@@ -21,9 +21,11 @@
 //
 package nzilbb.ag.serialize.util;
 
-import java.util.LinkedHashMap;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Spliterator;
 import java.util.Vector;
 import nzilbb.ag.Graph;
 import nzilbb.ag.Layer;
@@ -48,6 +50,17 @@ public class Utility
     Graph[] graphs = new Graph[1];
     graphs[0] = graph;
     return graphs;
+  } // end of OneGraphArray()
+
+  /**
+   * Creates an array of {@link Graph}s from one graph. Handy for calling
+   * {@link ISerializer#serialize(Graph[],String[])} when you have only one graph.
+   * @param graph The graph.
+   * @return A graph with one element.
+   */
+  public static Spliterator<Graph> OneGraphSpliterator(Graph graph)
+  {
+    return Arrays.spliterator(OneGraphArray(graph));
   } // end of OneGraphArray()
 
   /**
