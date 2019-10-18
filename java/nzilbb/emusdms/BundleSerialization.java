@@ -55,7 +55,6 @@ import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterField;
 import nzilbb.configure.ParameterSet;
 import nzilbb.util.IO;
-import nzilbb.util.ISeries;
 import nzilbb.util.TempFileInputStream;
 import org.json.*;
 
@@ -931,7 +930,7 @@ public class BundleSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "EMU-SDMS Bundle", "0.1", "application/emusdms+json", ".json", "20190912.1504",
+         "EMU-SDMS Bundle", "1.0", "application/emusdms+json", ".json", "20191018.1435",
          getClass().getResource("icon.png"));
    }
   

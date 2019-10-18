@@ -259,7 +259,7 @@ public class TextGridSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "Praat TextGrid", "1.91", "text/praat-textgrid", ".textgrid", "20190912.1504",
+         "Praat TextGrid", "2.01", "text/praat-textgrid", ".textgrid", "20191018.1435",
          getClass().getResource("icon.png"));
    }
    

@@ -182,7 +182,7 @@ public class CsvSerializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Comma Separated Values", "0.2", "text/csv", ".csv", "20190906.1040", getClass().getResource("icon.png"));
+	 "Comma Separated Values", "1.0", "text/csv", ".csv", "20191018.1435", getClass().getResource("icon.png"));
    }
 
    /**
