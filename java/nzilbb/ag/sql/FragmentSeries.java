@@ -22,25 +22,25 @@
 package nzilbb.ag.sql;
 
 import java.sql.*;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import nzilbb.ag.*;
 
 /**
- * An implementation of Spliterator&lt;Graph&gt; that enumerates fragments corresponding to a search result set.
+ * An implementation of Spliterator&lt;Graph&gt; that enumerates fragments corresponding to a list of selected fragment Ids.
  * @author Robert Fromont robert@fromont.net.nz
  */
 
-public class ResultSeries
+public class FragmentSeries
   implements Spliterator<Graph>
 {
    // Attributes:
 
-   private PreparedStatement sql;
-   private ResultSet rs;
    private long nextRow = 0;
    private long rowCount = -1;
-   
+   private Iterator<String> iterator;
 
    /**
     * The graph store object.
@@ -57,25 +57,24 @@ public class ResultSeries
     * Setter for {@link #store}: The graph store object.
     * @param newStore The graph store object.
     */
-   public ResultSeries setStore(SqlGraphStore newStore) { store = newStore; return this; }
+   public FragmentSeries setStore(SqlGraphStore newStore) { store = newStore; return this; }
 
    /**
-    * <tt>result.search_id</tt> key value.
-    * @see #getSearchId()
-    * @see #setSearchId(long)
+    * A collection of strings that identify a graph fragment.
+    * @see #getFragmentIds()
+    * @see #setFragmentIds(Collection)
     */
-   protected long searchId;
+   protected Collection<String> fragmentIds;
    /**
-    * Getter for {@link #searchId}: <tt>result.search_id</tt> key value.
-    * @return <tt>result.search_id</tt> key value.
+    * Getter for {@link #fragmentIds}: A collection of strings that identify a graph fragment.
+    * @return A collection of strings that identify a graph fragment.
     */
-   public long getSearchId() { return searchId; }
+   public Collection<String> getFragmentIds() { return fragmentIds; }
    /**
-    * Setter for {@link #searchId}: <tt>result.search_id</tt> key value.
-    * @param newSearchId <tt>result.search_id</tt> key value.
+    * Setter for {@link #fragmentIds}: A collection of strings that identify a graph fragment.
+    * @param newFragmentIds A collection of strings that identify a graph fragment.
     */
-   public ResultSeries setSearchId(long newSearchId) { searchId = newSearchId; return this; }
-
+   public FragmentSeries setFragmentIds(Collection<String> newFragmentIds) { fragmentIds = newFragmentIds; return this; }
    
    /**
     * Layers to load into the fragments.
@@ -92,89 +91,53 @@ public class ResultSeries
     * Setter for {@link #layers}: Layers to load into the fragments.
     * @param newLayers Layers to load into the fragments.
     */
-   public ResultSeries setLayers(String[] newLayers) { layers = newLayers; return this; }
+   public FragmentSeries setLayers(String[] newLayers) { layers = newLayers; return this; }
    
    // Methods:
    
    /**
     * Constructor.
+    * @param fragmentIds A collection of strings that identify a graph fragment.
     * @throws SQLException If an error occurs retrieving results.
     */
-   public ResultSeries(long search_id, SqlGraphStore store, String[] layers)
+   public FragmentSeries(Collection<String> fragmentIds, SqlGraphStore store, String[] layers)
       throws SQLException
    {
-      setSearchId(search_id);
+      setFragmentIds(fragmentIds);
       setStore(store);
       setLayers(layers);
-
-      sql = store.getConnection().prepareStatement(
-	 "SELECT COUNT(*) FROM result WHERE search_id = ?");
-      sql.setLong(1, getSearchId());
-      rs = sql.executeQuery();
-      rs.next();
-      rowCount = rs.getLong(1);
-      rs.close();
-      sql.close();
-      
-      sql = store.getConnection().prepareStatement(
-	 "SELECT match_id, ag_id, defining_annotation_id"
-	 +" FROM result"
-	 +" WHERE search_id = ?"
-	 +" ORDER BY match_id");
-      sql.setLong(1, getSearchId());
-      rs = sql.executeQuery();
-      
+      rowCount = fragmentIds.size();
+      iterator = fragmentIds.iterator();
    } // end of constructor
 
-   
-   /**
-    * Finalize method called by the garbage collector.
-    * <p> This implementation ensures SQL resources are disposed of.
-    */
-   @SuppressWarnings("deprecation")
-   public void finalize()
-   {
-      if (rs != null) try { rs.close(); } catch(Throwable t) {}
-      if (sql != null) try { sql.close(); } catch(Throwable t) {}
-   } // end of finalize()
-
    // Spliterator implementations
-
+   
    public int characteristics()
    {
       return ORDERED | DISTINCT | IMMUTABLE | NONNULL | SUBSIZED | SIZED;
    }
-
-   /**
-    * Tests if this enumeration contains more elements.
-    */
-   public boolean hasMoreElements()
-   {
-      if (rs == null) return false;
-      if (nextRow >= rowCount)
-      {
-	 if (rs != null) try { rs.close(); } catch(Throwable t) {}
-	 rs = null;
-	 if (sql != null) try { sql.close(); } catch(Throwable t) {}
-	 sql = null;
-	 return false;
-      }
-      return true;
-   }
-
+   
    /**
     * Returns the next element of this enumeration if this enumeration object has at least one more element to provide.
     */
    public boolean tryAdvance(Consumer<? super Graph> action)
    {
-      if (!hasMoreElements()) return false;
+      if (!iterator.hasNext()) return false;
       try
       {
-	 rs.next();
+         String spec = iterator.next();
 	 nextRow++;
-	 action.accept(
-            store.getFragment(
-               rs.getString("ag_id"), "em_12_"+rs.getLong("defining_annotation_id"), layers));
+         String[] parts = spec.split(";");
+	 String graphId = parts[0];
+	 String[] interval = parts[1].split("-");
+	 double start = Double.parseDouble(interval[0]);
+	 double end = Double.parseDouble(interval[1]);
+	 String prefix = parts.length > 2 && parts[2].startsWith("prefix=")?
+            parts[2].substring("prefix=".length()):"";
+
+         Graph fragment = store.getFragment(graphId, start, end, layers);
+         if (prefix.length() > 0) fragment.setId(prefix + fragment.getId());         
+	 action.accept(fragment);
          return true;
       }
       catch(Exception exception)
@@ -212,4 +175,4 @@ public class ResultSeries
       }
       return null;
    }   
-} // end of class ResultSeries
+} // end of class FragmentSeries
