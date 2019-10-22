@@ -25,6 +25,7 @@ import java.sql.*;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import nzilbb.ag.*;
+import nzilbb.util.MonitorableSeries;
 
 /**
  * An implementation of Spliterator&lt;Graph&gt; that enumerates fragments corresponding to a search result set.
@@ -32,7 +33,7 @@ import nzilbb.ag.*;
  */
 
 public class ResultSeries
-  implements Spliterator<Graph>
+  implements MonitorableSeries<Graph>
 {
    // Attributes:
 
@@ -40,7 +41,7 @@ public class ResultSeries
    private ResultSet rs;
    private long nextRow = 0;
    private long rowCount = -1;
-   
+   private boolean cancelling = false;   
 
    /**
     * The graph store object.
@@ -167,6 +168,7 @@ public class ResultSeries
     */
    public boolean tryAdvance(Consumer<? super Graph> action)
    {
+      if (cancelling) return false;
       if (!hasMoreElements()) return false;
       try
       {
@@ -183,8 +185,6 @@ public class ResultSeries
       }
    }
 
-   // Series methods
-
    /**
     * Counts the elements in the series, if possible.
     * @return The number of elements in the series, or null if the number is unknown.
@@ -200,11 +200,13 @@ public class ResultSeries
       return null;
    }
    
+   // GraphSeries methods
+
    /**
     * Determines how far through the serialization is.
     * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
     */
-   public Integer percentComplete()
+   public Integer getPercentComplete()
    {
       if (rowCount > 0)
       {
@@ -212,4 +214,12 @@ public class ResultSeries
       }
       return null;
    }   
+
+   /**
+    * Cancels spliteration; the next call to tryAdvance will return false.
+    */
+   public void cancel()
+   {
+      cancelling = true;
+   }
 } // end of class ResultSeries

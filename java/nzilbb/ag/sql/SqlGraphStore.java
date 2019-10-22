@@ -41,7 +41,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.SortedSet;
-import java.util.Spliterator;
 import java.util.Vector;
 import java.util.regex.Pattern;
 import nzilbb.ag.*;
@@ -60,6 +59,7 @@ import nzilbb.media.ffmpeg.FfmpegConverter;
 import nzilbb.media.wav.FragmentExtractor;
 import nzilbb.media.wav.Resampler;
 import nzilbb.util.IO;
+import nzilbb.util.MonitorableSeries;
 import nzilbb.util.Timers;
 
 /**
@@ -3350,7 +3350,7 @@ public class SqlGraphStore
    * @throws PermissionException If the operation is not permitted.
    * @throws GraphNotFoundException If the series identified by <var>seriesId</var> was not found in the store.
    */
-  public Spliterator<Graph> getFragmentSeries(String seriesId, String[] layerId) 
+  public MonitorableSeries<Graph> getFragmentSeries(String seriesId, String[] layerId) 
     throws StoreException, PermissionException, GraphNotFoundException
   {
     try

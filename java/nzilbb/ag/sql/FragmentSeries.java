@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import nzilbb.ag.*;
+import nzilbb.util.MonitorableSeries;
 
 /**
  * An implementation of Spliterator&lt;Graph&gt; that enumerates fragments corresponding to a list of selected fragment Ids.
@@ -34,13 +35,14 @@ import nzilbb.ag.*;
  */
 
 public class FragmentSeries
-  implements Spliterator<Graph>
+  implements MonitorableSeries<Graph>
 {
    // Attributes:
 
    private long nextRow = 0;
    private long rowCount = -1;
    private Iterator<String> iterator;
+   private boolean cancelling = false;
 
    /**
     * The graph store object.
@@ -98,6 +100,11 @@ public class FragmentSeries
    /**
     * Constructor.
     * @param fragmentIds A collection of strings that identify a graph fragment.
+    * <p>These can be something like:
+    * <ul>
+    * <li><q>g_3;em_12_2676;n_19985-n_20003;p_4;#=ew_0_12611;prefix=001-;[0]=ew_0_12611</q></li>
+    * <li><q>AgnesShacklock-01.trs;60.897-67.922;prefix=001-</q></li>
+    * </ul>
     * @throws SQLException If an error occurs retrieving results.
     */
    public FragmentSeries(Collection<String> fragmentIds, SqlGraphStore store, String[] layers)
@@ -122,19 +129,47 @@ public class FragmentSeries
     */
    public boolean tryAdvance(Consumer<? super Graph> action)
    {
+      if (cancelling) return false;
       if (!iterator.hasNext()) return false;
+      String spec = iterator.next();
       try
       {
-         String spec = iterator.next();
 	 nextRow++;
          String[] parts = spec.split(";");
 	 String graphId = parts[0];
-	 String[] interval = parts[1].split("-");
-	 double start = Double.parseDouble(interval[0]);
-	 double end = Double.parseDouble(interval[1]);
-	 String prefix = parts.length > 2 && parts[2].startsWith("prefix=")?
-            parts[2].substring("prefix=".length()):"";
-
+         if (graphId.startsWith("g_")) graphId = graphId.substring(2);
+         String intervalPart = null;
+         for (int p = 1; p < parts.length; p++)
+         {
+            if (parts[p].indexOf("-") > 0)
+            {
+               intervalPart = parts[p];
+               break;
+            }
+         }
+	 String[] interval = intervalPart.split("-");
+	 double start = 0.0;
+	 double end = 0.0;
+         if (interval[0].startsWith("n_"))
+         { // anchor IDs
+            Anchor[] anchors = store.getAnchors(graphId, interval);
+            start = anchors[0].getOffset();
+            end = anchors[1].getOffset();
+         }
+         else
+         { // offsets
+            start = Double.parseDouble(interval[0]);
+            end = Double.parseDouble(interval[1]);
+         }
+	 String prefix = "";
+         for (int p = 1; p < parts.length; p++)
+         {
+            if (parts[p].startsWith("prefix="))
+            {
+               prefix = parts[p].substring("prefix=".length());
+               break;
+            }
+         }
          Graph fragment = store.getFragment(graphId, start, end, layers);
          if (prefix.length() > 0) fragment.setId(prefix + fragment.getId());         
 	 action.accept(fragment);
@@ -142,11 +177,11 @@ public class FragmentSeries
       }
       catch(Exception exception)
       {
+         System.err.println("FragmentSeries: Could not get fragment from spec \""+spec+"\": "
+                            + exception);
 	 return false;
       }
    }
-
-   // Series methods
 
    /**
     * Counts the elements in the series, if possible.
@@ -162,17 +197,27 @@ public class FragmentSeries
    {
       return null;
    }
+
+   // GraphSeries methods
    
    /**
     * Determines how far through the serialization is.
     * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
     */
-   public Integer percentComplete()
+   public Integer getPercentComplete()
    {
       if (rowCount > 0)
       {
 	 return (int)((nextRow * 100) / rowCount);
       }
       return null;
-   }   
+   }
+   
+   /**
+    * Cancels spliteration; the next call to tryAdvance will return false.
+    */
+   public void cancel()
+   {
+      cancelling = true;
+   }
 } // end of class FragmentSeries
