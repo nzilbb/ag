@@ -259,7 +259,7 @@ public class TextGridSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "Praat TextGrid", "2.01", "text/praat-textgrid", ".textgrid", "20191018.1435",
+         "Praat TextGrid", "2.02", "text/praat-textgrid", ".textgrid", "20191018.1435",
          getClass().getResource("icon.png"));
    }
    
@@ -1443,6 +1443,7 @@ public class TextGridSerialization
          Vector<String> requiredLayers = new Vector<String>();
          if (getParticipantLayer() != null) requiredLayers.add(getParticipantLayer().getId());
          if (getTurnLayer() != null) requiredLayers.add(getTurnLayer().getId());
+         if (getUtteranceLayer() != null) requiredLayers.add(getUtteranceLayer().getId());
          if (getWordLayer() != null) requiredLayers.add(getWordLayer().getId());
          if (getLexicalLayer() != null) requiredLayers.add(getLexicalLayer().getId());
          if (getPronounceLayer() != null) requiredLayers.add(getPronounceLayer().getId());
