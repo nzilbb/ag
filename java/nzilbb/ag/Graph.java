@@ -295,12 +295,13 @@ public class Graph
    * @param graphId
    * @param startOffset
    * @param endOffset
-   * @return The ID of the fragment, formatted <var>graphId</var>__<var>startOffset</var>-<var>endOffset</var>
+   * @return The ID of the fragment, formatted <var>graphId-without-extension</var>__<var>startOffset</var>-<var>endOffset</var>
    */
   public static String FragmentId(String graphId, Double startOffset, Double endOffset)
   {
-    return graphId + "__" + offsetFormat.format(startOffset) 
-      + "-" + offsetFormat.format(endOffset);
+     return graphId.replaceAll("\\.[^.]+","")
+        + "__" + offsetFormat.format(startOffset) 
+        + "-" + offsetFormat.format(endOffset);
   } // end of FragmentId()
   
   /**
@@ -308,11 +309,12 @@ public class Graph
    * @param graph
    * @param startOffset
    * @param endOffset
-   * @return The ID of the fragment, formatted <var>graphId</var>__<var>startOffset</var>-<var>endOffset</var>
+   * @return The ID of the fragment, formatted <var>graphId-without-extension</var>__<var>startOffset</var>-<var>endOffset</var>
    */
   public static String FragmentId(Graph graph, Double startOffset, Double endOffset)
   {
-    return graph.getId() + "__" + offsetFormat.format(startOffset) 
+    return graph.getId().replaceAll("\\.[^.]+","")
+       + "__" + offsetFormat.format(startOffset) 
       + "-" + offsetFormat.format(endOffset);
   } // end of FragmentId()
    
