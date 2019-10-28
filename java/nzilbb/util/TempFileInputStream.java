@@ -67,7 +67,6 @@ public class TempFileInputStream
       fTempFile.deleteOnExit();
       return this;
    }
-
    
    /**
     * Whether to delete the file when close() is called or not. Default is TRUE.
@@ -154,7 +153,6 @@ public class TempFileInputStream
    {
       if (fis == null) fis = new FileInputStream(getTempFile());
    } // end of checkFileInputStream()
-
 
    /** Overridden to delete the file after closing the stream
     * @throws IOException On IO error.
