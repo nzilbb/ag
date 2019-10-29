@@ -118,8 +118,10 @@ public class ResultSeries
       sql.close();
       
       sql = store.getConnection().prepareStatement(
-	 "SELECT match_id, ag_id, defining_annotation_id"
+	 "SELECT match_id, result.ag_id, defining_annotation_id,"
+         +" COALESCE(anchor.offset,0) AS start_offset"
 	 +" FROM result"
+         +" LEFT OUTER JOIN anchor ON anchor.anchor_id = result.start_anchor_id"
 	 +" WHERE search_id = ?"
 	 +" ORDER BY match_id");
       sql.setLong(1, getSearchId());
@@ -174,9 +176,10 @@ public class ResultSeries
       {
 	 rs.next();
 	 nextRow++;
-	 action.accept(
-            store.getFragment(
-               rs.getString("ag_id"), "em_12_"+rs.getLong("defining_annotation_id"), layers));
+         Graph fragment = store.getFragment(
+            rs.getString("ag_id"), "em_12_"+rs.getLong("defining_annotation_id"), layers);
+         fragment.shiftAnchors(-rs.getDouble("start_offset"));
+	 action.accept(fragment);
          return true;
       }
       catch(Exception exception)

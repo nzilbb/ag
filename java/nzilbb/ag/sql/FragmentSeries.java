@@ -171,6 +171,7 @@ public class FragmentSeries
             }
          }
          Graph fragment = store.getFragment(graphId, start, end, layers);
+         fragment.shiftAnchors(-start);
          if (prefix.length() > 0) fragment.setId(prefix + fragment.getId());         
 	 action.accept(fragment);
          return true;
