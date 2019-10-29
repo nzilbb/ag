@@ -876,7 +876,7 @@ public class BundleSerialization
             // get media
             String mediaUrl = graph.getMediaProvider().getMedia(
                null, "audio/wav; channels=1; samplerate=" + sampleRate);
-            if (mediaUrl != null)
+            if (mediaUrl != null && mediaUrl.startsWith("file:"))
             {
                // encode it
                String base64EncodedContent = IO.Base64Encode(mediaUrl);
@@ -930,7 +930,7 @@ public class BundleSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "EMU-SDMS Bundle", "1.0", "application/emusdms+json", ".json", "20191018.1435",
+         "EMU-SDMS Bundle", "1.1", "application/emusdms+json", ".json", "20191018.1435",
          getClass().getResource("icon.png"));
    }
   
@@ -988,12 +988,12 @@ public class BundleSerialization
   
    /**
     * Determines the cardinality between graphs and serialized streams.
-    * @return {@link ISerializer#Cardinality}.NtoOne as there is one stream produced
+    * @return {@link ISerializer#Cardinality}.NtoN as there is one stream produced per graph.
     * regardless of  how many graphs are serialized.
     */
    public Cardinality getCardinality()
    {
-      return Cardinality.NToOne;
+      return Cardinality.NToN;
    }
 
    /**
