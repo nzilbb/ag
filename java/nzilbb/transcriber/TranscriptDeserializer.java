@@ -458,7 +458,7 @@ public class TranscriptDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Transcriber transcript", "1.5", "text/xml-transcriber", ".trs", "20190906.1040", getClass().getResource("icon.png"));
+	 "Transcriber transcript", "1.51", "text/xml-transcriber", ".trs", "20191031.1734", getClass().getResource("icon.png"));
    }
 
    /**

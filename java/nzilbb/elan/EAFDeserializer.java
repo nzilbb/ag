@@ -409,7 +409,7 @@ public class EAFDeserializer
   public SerializationDescriptor getDescriptor()
   {
     return new SerializationDescriptor(
-      "ELAN EAF Transcript", "0.7", "text/x-eaf+xml", ".eaf", "20190906.1040", getClass().getResource("icon.png"));
+      "ELAN EAF Transcript", "0.71", "text/x-eaf+xml", ".eaf", "20191031.1734", getClass().getResource("icon.png"));
   }
    
   /**

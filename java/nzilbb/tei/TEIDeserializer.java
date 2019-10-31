@@ -498,7 +498,7 @@ public class TEIDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "TEI Document", "0.1", "application/tei+xml", ".xml", "20190906.1040", getClass().getResource("icon.png"));
+	 "TEI Document", "0.11", "application/tei+xml", ".xml", "20191031.1734", getClass().getResource("icon.png"));
    }
 
    /**
