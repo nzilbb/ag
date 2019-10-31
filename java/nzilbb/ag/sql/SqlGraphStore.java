@@ -596,7 +596,7 @@ public class SqlGraphStore
           layer.put("@peers", rs.getString("peers"));
           layer.put("@label", rs.getString("label"));
           layer.put("@description", rs.getString("description"));
-          layer.put("@display_order", rs.getString("display_order"));
+          layer.put("@display_order", rs.getInt("display_order"));
           layer.put("@searchable", rs.getString("searchable"));
           layer.put("@access", rs.getString("access"));
 	    
@@ -681,7 +681,7 @@ public class SqlGraphStore
             layer.put("@peers", rs.getString("peers"));
             layer.put("@label", rs.getString("label"));
             layer.put("@description", rs.getString("description"));
-            layer.put("@display_order", rs.getString("display_order"));
+            layer.put("@display_order", rs.getInt("display_order"));
             layer.put("@searchable", rs.getString("searchable"));
             layer.put("@access", rs.getString("access"));
 		  
