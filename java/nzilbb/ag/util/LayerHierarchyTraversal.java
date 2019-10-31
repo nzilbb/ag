@@ -100,6 +100,13 @@ public class LayerHierarchyTraversal<R>
                if (l1.getPeersOverlap()) return -6;
                else return 6;
             }
+            // by display_order
+            if (l1.containsKey("@display_order") && l2.containsKey("@display_order")
+                && !l1.get("@display_order").equals(l2.get("@display_order")))
+            {
+               return ((Integer)l1.get("@display_order"))
+                  .compareTo((Integer)l2.get("@display_order"));
+            }
             // by layerId
             return l1.getId().compareTo(l2.getId());
          }
