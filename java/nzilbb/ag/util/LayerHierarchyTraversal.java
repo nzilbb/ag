@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2019 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -46,295 +46,298 @@ import nzilbb.ag.*;
 
 public class LayerHierarchyTraversal<R>
 {
-  // Attributes:
+   // Attributes:
 
-  /**
-   * Default comparator for ordering peer layers.
-   * <p>The default ordering is
-   * <ol>
-   *  <li>non-included layers before included layers (dependency before pos)</li>
-   *  <li>less alignment before more alignment (orthography before phone)</li>
-   *  <li>fewer peers before more peers (orthography before pos)</li>
-   *  <li>childless peers before childful peers (utterance before word)</li>
-   *  <li>saturated before sparse (utterance before named entity)</li>
-   *  <li>overlapping peers before sequential peers (parse tree before named entity)</li>
-   * </ol>
-   * @see #peerComparator
-   */
-  public static final Comparator<Layer> defaultComparator = new Comparator<Layer>() {
-	    public int compare(Layer l1, Layer l2) {
-        if (l1 == l2) return 0;
-        // non-included layers before included layers (dependency before pos)
-        if (l1.getParentIncludes() != l2.getParentIncludes())
-        {
-          if (l1.getParentIncludes()) return 1;
-          else return -1;
-        }
-        // less alignment before more alignment (orthography before phone)
-        if (l1.getAlignment() != l2.getAlignment())
-        {
-          if (l1.getAlignment() > l2.getAlignment()) return 2;
-          else return -2;
-        }
-        // fewer peers before more peers, (orthography before pos)
-        if (l1.getPeers() != l2.getPeers())
-        {
-          if (l1.getPeers()) return 3;
-          else return -3;
-        }
-        // childless peers before childful peers (utterance before word)
-        if (l1.getChildren().size() != l2.getChildren().size())
-        {
-          if (l1.getChildren().size() > l2.getChildren().size()) return 4;
-          else return -4;
-        }
-        // saturated before sparse
-        if (l1.getSaturated() != l2.getSaturated())
-        {
-          if (l1.getSaturated()) return -5;
-          else return 5;
-        }
-        // overlapping peers before sequential peers (parse tree before named entity)
-        if (l1.getPeersOverlap() != l2.getPeersOverlap())
-        {
-          if (l1.getPeersOverlap()) return -6;
-          else return 6;
-        }
-        // by layerId
-        return l1.getId().compareTo(l2.getId());
-	    }
-    };
+   /**
+    * Default comparator for ordering peer layers.
+    * <p>The default ordering is
+    * <ol>
+    *  <li>non-included layers before included layers (dependency before pos)</li>
+    *  <li>less alignment before more alignment (orthography before phone)</li>
+    *  <li>fewer peers before more peers (orthography before pos)</li>
+    *  <li>childless peers before childful peers (utterance before word)</li>
+    *  <li>saturated before sparse (utterance before named entity)</li>
+    *  <li>overlapping peers before sequential peers (parse tree before named entity)</li>
+    * </ol>
+    * @see #peerComparator
+    */
+   public static final Comparator<Layer> defaultComparator = new Comparator<Layer>() {
+         public int compare(Layer l1, Layer l2) {
+            if (l1 == l2) return 0;
+            // non-included layers before included layers (dependency before pos)
+            if (l1.getParentIncludes() != l2.getParentIncludes())
+            {
+               if (l1.getParentIncludes()) return 1;
+               else return -1;
+            }
+            // less alignment before more alignment (orthography before phone)
+            if (l1.getAlignment() != l2.getAlignment())
+            {
+               if (l1.getAlignment() > l2.getAlignment()) return 2;
+               else return -2;
+            }
+            // fewer peers before more peers, (orthography before pos)
+            if (l1.getPeers() != l2.getPeers())
+            {
+               if (l1.getPeers()) return 3;
+               else return -3;
+            }
+            // childless peers before childful peers (utterance before word)
+            if (l1.getChildren().size() != l2.getChildren().size())
+            {
+               if (l1.getChildren().size() > l2.getChildren().size()) return 4;
+               else return -4;
+            }
+            // saturated before sparse
+            if (l1.getSaturated() != l2.getSaturated())
+            {
+               if (l1.getSaturated()) return -5;
+               else return 5;
+            }
+            // overlapping peers before sequential peers (parse tree before named entity)
+            if (l1.getPeersOverlap() != l2.getPeersOverlap())
+            {
+               if (l1.getPeersOverlap()) return -6;
+               else return 6;
+            }
+            // by layerId
+            return l1.getId().compareTo(l2.getId());
+         }
+      };
 
-  /**
-   * Comparator for ordering peer layers.
-   * @see #defaultComparator
-   * @see #getPeerComparator()
-   * @see #setPeerComparator(Comparator)
-   */
-  protected Comparator<Layer> peerComparator = defaultComparator;
-  /**
-   * Getter for {@link #peerComparator}: Comparator for ordering peer layers.
-   * @return Comparator for ordering peer layers.
-   */
-  public Comparator<Layer> getPeerComparator() { return peerComparator; }
-  /**
-   * Setter for {@link #peerComparator}: Comparator for ordering peer layers.
-   * @param newPeerComparator Comparator for ordering peer layers.
-   */
-  public LayerHierarchyTraversal<R> setPeerComparator(Comparator<Layer> newPeerComparator) { peerComparator = newPeerComparator; return this; }
+   /**
+    * Comparator for ordering peer layers.
+    * @see #defaultComparator
+    * @see #getPeerComparator()
+    * @see #setPeerComparator(Comparator)
+    */
+   protected Comparator<Layer> peerComparator = defaultComparator;
+   /**
+    * Getter for {@link #peerComparator}: Comparator for ordering peer layers.
+    * @return Comparator for ordering peer layers.
+    */
+   public Comparator<Layer> getPeerComparator() { return peerComparator; }
+   /**
+    * Setter for {@link #peerComparator}: Comparator for ordering peer layers.
+    * @param newPeerComparator Comparator for ordering peer layers.
+    */
+   public LayerHierarchyTraversal<R> setPeerComparator(Comparator<Layer> newPeerComparator)
+   { peerComparator = newPeerComparator; return this; }
    
-  /**
-   * The schema to be traversed.
-   * @see #getSchema()
-   * @see #setSchema(Schema)
-   */
-  protected Schema schema;
-  /**
-   * Getter for {@link #schema}: The schema to be traversed.
-   * @return The schema to be traversed.
-   */
-  public Schema getSchema() { return schema; }
-  /**
-   * Setter for {@link #schema}: The schema to be traversed.
-   * @param newSchema The schema to be traversed.
-   */
-  public LayerHierarchyTraversal<R> setSchema(Schema newSchema) { schema = newSchema; return this; }
+   /**
+    * The schema to be traversed.
+    * @see #getSchema()
+    * @see #setSchema(Schema)
+    */
+   protected Schema schema;
+   /**
+    * Getter for {@link #schema}: The schema to be traversed.
+    * @return The schema to be traversed.
+    */
+   public Schema getSchema() { return schema; }
+   /**
+    * Setter for {@link #schema}: The schema to be traversed.
+    * @param newSchema The schema to be traversed.
+    */
+   public LayerHierarchyTraversal<R> setSchema(Schema newSchema)
+   { schema = newSchema; return this; }
    
-  /**
-   * The result of the traversal, if required.
-   * @see #getResult()
-   * @see #setResult(Object)
-   */
-  protected R result;
-  /**
-   * Getter for {@link #result}: The result of the traversal, if required.
-   * @return The result of the traversal, if required.
-   */
-  public R getResult() { return result; }
-  /**
-   * Setter for {@link #result}: The result of the traversal, if required.
-   * @param newResult The result of the traversal, if required.
-   */
-  public LayerHierarchyTraversal<R> setResult(R newResult) { result = newResult; return this; }
+   /**
+    * The result of the traversal, if required.
+    * @see #getResult()
+    * @see #setResult(Object)
+    */
+   protected R result;
+   /**
+    * Getter for {@link #result}: The result of the traversal, if required.
+    * @return The result of the traversal, if required.
+    */
+   public R getResult() { return result; }
+   /**
+    * Setter for {@link #result}: The result of the traversal, if required.
+    * @param newResult The result of the traversal, if required.
+    */
+   public LayerHierarchyTraversal<R> setResult(R newResult)
+   { result = newResult; return this; }
    
-  // Methods:
+   // Methods:
    
-  /**
-   * Default constructor.
-   */
-  public LayerHierarchyTraversal()
-  {
-  } // end of constructor
+   /**
+    * Default constructor.
+    */
+   public LayerHierarchyTraversal()
+   {
+   } // end of constructor
 
-  /**
-   * Constructor with starting result.
-   * @param result The result of the traversal.
-   */
-  public LayerHierarchyTraversal(R result)
-  {
-    setResult(result);
-  } // end of constructor
+   /**
+    * Constructor with starting result.
+    * @param result The result of the traversal.
+    */
+   public LayerHierarchyTraversal(R result)
+   {
+      setResult(result);
+   } // end of constructor
  
-  /**
-   * Constructor with starting result and schema to immediately traverse.
-   * @param result The result of the traversal.
-   * @param schema The schema to be traversed.
-   */
-  public LayerHierarchyTraversal(R result, Schema schema)
-  {
-    setResult(result);
-    setResult(traverseSchema(schema));
-  } // end of constructor
+   /**
+    * Constructor with starting result and schema to immediately traverse.
+    * @param result The result of the traversal.
+    * @param schema The schema to be traversed.
+    */
+   public LayerHierarchyTraversal(R result, Schema schema)
+   {
+      setResult(result);
+      setResult(traverseSchema(schema));
+   } // end of constructor
 
-  /**
-   * Constructor with starting result and schema to immediately traverse.
-   * The comparator supplied determines the ordering among peer layers.
-   * e.g. to achieve the reverse of the default ordering (see {@link #defaultComparator}),
-   * set <var>comparator</var> to:
-   * <pre>
-   * new Comparator&lt;Layer&gt;() { 
-   *    public int compare(Layer l1, Layer l2) { 
-   *       return -LayerHierarchyTraversal.defaultComparator.compare(l1,l2); 
-   *    } }
-   * </pre>
-   * @param result The result of the traversal.
-   * @param comparator Peer layer comparator.
-   * @param schema The schema to be traversed.
-   */
-  public LayerHierarchyTraversal(R result, Comparator<Layer> comparator, Schema schema)
-  {
-    setResult(result);
-    setPeerComparator(comparator);
-    setResult(traverseSchema(schema));
-  } // end of constructor
+   /**
+    * Constructor with starting result and schema to immediately traverse.
+    * The comparator supplied determines the ordering among peer layers.
+    * e.g. to achieve the reverse of the default ordering (see {@link #defaultComparator}),
+    * set <var>comparator</var> to:
+    * <pre>
+    * new Comparator&lt;Layer&gt;() { 
+    *    public int compare(Layer l1, Layer l2) { 
+    *       return -LayerHierarchyTraversal.defaultComparator.compare(l1,l2); 
+    *    } }
+    * </pre>
+    * @param result The result of the traversal.
+    * @param comparator Peer layer comparator.
+    * @param schema The schema to be traversed.
+    */
+   public LayerHierarchyTraversal(R result, Comparator<Layer> comparator, Schema schema)
+   {
+      setResult(result);
+      setPeerComparator(comparator);
+      setResult(traverseSchema(schema));
+   } // end of constructor
 
-  /**
-   * Constructor with starting result and a collection of layers to immediately traverse.
-   * @param result The result of the traversal.
-   * @param layers A collection of layers to traverse.
-   */
-  public LayerHierarchyTraversal(R result, Collection<Layer> layers)
-  {
-    setResult(result);
-    setResult(traverseLayers(layers));
-  } // end of constructor
+   /**
+    * Constructor with starting result and a collection of layers to immediately traverse.
+    * @param result The result of the traversal.
+    * @param layers A collection of layers to traverse.
+    */
+   public LayerHierarchyTraversal(R result, Collection<Layer> layers)
+   {
+      setResult(result);
+      setResult(traverseLayers(layers));
+   } // end of constructor
 
-  /**
-   * Constructor with starting result and a collection of layers to immediately traverse.
-   * The comparator supplied determines the ordering among peer layers.
-   * e.g. to achieve the reverse of the default ordering (see {@link #defaultComparator}),
-   * set <var>comparator</var> to:
-   * <pre>
-   * new Comparator&lt;Layer&gt;() { 
-   *    public int compare(Layer l1, Layer l2) { 
-   *       return -LayerHierarchyTraversal.defaultComparator.compare(l1,l2); 
-   *    } }
-   * </pre>
-   * @param result The result of the traversal.
-   * @param comparator Peer layer comparator.
-   * @param layers A collection of layers to traverse.
-   */
-  public LayerHierarchyTraversal(R result, Comparator<Layer> comparator, Collection<Layer> layers)
-  {
-    setResult(result);
-    setPeerComparator(comparator);
-    setResult(traverseLayers(layers));
-  } // end of constructor
+   /**
+    * Constructor with starting result and a collection of layers to immediately traverse.
+    * The comparator supplied determines the ordering among peer layers.
+    * e.g. to achieve the reverse of the default ordering (see {@link #defaultComparator}),
+    * set <var>comparator</var> to:
+    * <pre>
+    * new Comparator&lt;Layer&gt;() { 
+    *    public int compare(Layer l1, Layer l2) { 
+    *       return -LayerHierarchyTraversal.defaultComparator.compare(l1,l2); 
+    *    } }
+    * </pre>
+    * @param result The result of the traversal.
+    * @param comparator Peer layer comparator.
+    * @param layers A collection of layers to traverse.
+    */
+   public LayerHierarchyTraversal(R result, Comparator<Layer> comparator, Collection<Layer> layers)
+   {
+      setResult(result);
+      setPeerComparator(comparator);
+      setResult(traverseLayers(layers));
+   } // end of constructor
 
-  /**
-   * Traverses the given collection of layers.
-   * @param layers The layers to traverse.
-   * @return Some result of the traversal, if required.
-   */
-  public R traverseLayers(Collection<Layer> layers)
-  {
-    // sort the top level layers with the comparator
-    TreeSet<Layer> orderedTopLevelLayers = new TreeSet<Layer>(getPeerComparator());
-    for (Layer layer : layers)
-    {
-      if (layer.getId().equals("graph")) continue;
-      if (layer.getParentId().equals("graph"))
+   /**
+    * Traverses the given collection of layers.
+    * @param layers The layers to traverse.
+    * @return Some result of the traversal, if required.
+    */
+   public R traverseLayers(Collection<Layer> layers)
+   {
+      // sort the top level layers with the comparator
+      TreeSet<Layer> orderedTopLevelLayers = new TreeSet<Layer>(getPeerComparator());
+      for (Layer layer : layers)
       {
-        orderedTopLevelLayers.add(layer);
-      }
-    } // next top level layer
+         if (layer.getId().equals("graph")) continue;
+         if (layer.getParentId().equals("graph"))
+         {
+            orderedTopLevelLayers.add(layer);
+         }
+      } // next top level layer
       // for each top-level layer
-    for (Layer layer : orderedTopLevelLayers)
-    {
-      traverseLayer(layer);
-    }
-    return getResult();
-  } // end of traverseLayers()
-  
-  
-  /**
-   * Traverses the given schema.
-   * @param schema The schema to traverse.
-   * @return Some result of the traversal, if required.
-   */
-  public R traverseSchema(Schema schema)
-  {
-    setSchema(schema);
-      
-    // sort the top level layers with the comparator
-    TreeSet<Layer> orderedTopLevelLayers = new TreeSet<Layer>(getPeerComparator());
-    // a top level layer is any layer with "graph" as a parent, 
-    // or any layer whose parent is not in the graph 
-    // (this ensures all layers are included, even for partial graphs)
-    // for each top-level layer
-    for (Layer layer : schema.getLayers().values())
-    {
-      if (layer.getParentId() != null
-          && (layer.getParentId().equals("graph")
-              || !schema.getLayers().containsKey(layer.getParentId()))
-          && !layer.getId().equals("graph"))
+      for (Layer layer : orderedTopLevelLayers)
       {
-        orderedTopLevelLayers.add(layer);
+         traverseLayer(layer);
       }
-    } // next top level layer
-    // for each top level layer
-    for (Layer layer : orderedTopLevelLayers)
-    {
-      traverseLayer(layer);
-    }
-    return getResult();
-  } // end of traverseSchema()
-
+      return getResult();
+   } // end of traverseLayers()
+  
+   /**
+    * Traverses the given schema.
+    * @param schema The schema to traverse.
+    * @return Some result of the traversal, if required.
+    */
+   public R traverseSchema(Schema schema)
+   {
+      setSchema(schema);
+      
+      // sort the top level layers with the comparator
+      TreeSet<Layer> orderedTopLevelLayers = new TreeSet<Layer>(getPeerComparator());
+      // a top level layer is any layer with "graph" as a parent, 
+      // or any layer whose parent is not in the graph 
+      // (this ensures all layers are included, even for partial graphs)
+      // for each top-level layer
+      for (Layer layer : schema.getLayers().values())
+      {
+         if (layer.getParentId() != null
+             && (layer.getParentId().equals("graph")
+                 || !schema.getLayers().containsKey(layer.getParentId()))
+             && !layer.getId().equals("graph"))
+         {
+            orderedTopLevelLayers.add(layer);
+         }
+      } // next top level layer
+      // for each top level layer
+      for (Layer layer : orderedTopLevelLayers)
+      {
+         traverseLayer(layer);
+      }
+      return getResult();
+   } // end of traverseSchema()
    
-  /**
-   * Depth-first recursive method that traverses the layer annotations using the layer hierarchy, calling {@link #pre(Layer)}, then calling itself for all children, then called {@link #post(Layer)}, before returning.
-   * @param layer The layer to traverse.
-   */
-  protected void traverseLayer(Layer layer)
-  {
-    pre(layer);
-    TreeSet<Layer> orderedChildren = new TreeSet<Layer>(getPeerComparator());
-    orderedChildren.addAll(layer.getChildren().values());
-    for (Layer childLayer : orderedChildren)
-    {
-      traverseLayer(childLayer);
-    } // next child layer
-    post(layer);
-  } // end of traverse()
+   /**
+    * Depth-first recursive method that traverses the layer annotations using the layer
+    * hierarchy, calling {@link #pre(Layer)}, then calling itself for all children, then
+    * called {@link #post(Layer)}, before returning. 
+    * @param layer The layer to traverse.
+    */
+   protected void traverseLayer(Layer layer)
+   {
+      pre(layer);
+      TreeSet<Layer> orderedChildren = new TreeSet<Layer>(getPeerComparator());
+      orderedChildren.addAll(layer.getChildren().values());
+      for (Layer childLayer : orderedChildren)
+      {
+         traverseLayer(childLayer);
+      } // next child layer
+      post(layer);
+   } // end of traverse()
 
-   
-  /**
-   * Operation to perform before processing children. Default implementation does nothing, subclasses should implement this to provide pre-order functionality.
-   * <p>This method may call change {@link #result} in order to build up a result for the traversal.
-   * @param layer The layer to process.
-   */
-  protected void pre(Layer layer)
-  {
-  } // end of pre()
+   /**
+    * Operation to perform before processing children. Default implementation does
+    * nothing, subclasses should implement this to provide pre-order functionality. 
+    * <p>This method may call change {@link #result} in order to build up a result for the traversal.
+    * @param layer The layer to process.
+    */
+   protected void pre(Layer layer)
+   {
+   } // end of pre()
 
-  /**
-   * Operation to perform after processing children. Default implementation does nothing, subclasses should implement this to provide post-order functionality.
-   * <p>This method may call change {@link #result} in order to build up a result for the traversal.
-   * @param layer The layer to process.
-   */
-  protected void post(Layer layer)
-  {
-  } // end of post()
-
+   /**
+    * Operation to perform after processing children. Default implementation does nothing,
+    * subclasses should implement this to provide post-order functionality. 
+    * <p>This method may call change {@link #result} in order to build up a result for the traversal.
+    * @param layer The layer to process.
+    */
+   protected void post(Layer layer)
+   {
+   } // end of post()
 
 } // end of class LayerHierarchyTraversal
