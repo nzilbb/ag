@@ -21,7 +21,7 @@
 //
 package nzilbb.ag;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Collection;
 import nzilbb.ag.util.LayerHierarchyTraversal;
 
@@ -50,17 +50,17 @@ public class Schema
    * @see #getLayers()
    * @see #setLayers(HashMap)
    */
-  protected HashMap<String,Layer> layers = new HashMap<String,Layer>();
+  protected LinkedHashMap<String,Layer> layers = new LinkedHashMap<String,Layer>();
   /**
    * Getter for {@link #layers}: Layers, indexed by ID.
    * @return Layers, indexed by ID.
    */
-  public HashMap<String,Layer> getLayers() { return layers; }
+  public LinkedHashMap<String,Layer> getLayers() { return layers; }
   /**
    * Setter for {@link #layers}: Layers, indexed by ID.
    * @param newLayers Layers, indexed by ID.
    */
-  public Schema setLayers(HashMap<String,Layer> newLayers) { layers = newLayers; return this; }
+  public Schema setLayers(LinkedHashMap<String,Layer> newLayers) { layers = newLayers; return this; }
    
   /**
    * ID of the layer that contains participants.
