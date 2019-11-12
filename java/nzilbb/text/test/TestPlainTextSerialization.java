@@ -1,5 +1,5 @@
 //
-// Copyright 2017 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2017-2019 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -25,23 +25,30 @@ package nzilbb.text.test;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Vector;
-import java.util.LinkedHashSet;
-import java.util.Iterator;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.net.URL;
-import nzilbb.configure.ParameterSet;
-import nzilbb.configure.Parameter;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Vector;
 import nzilbb.ag.*;
-import nzilbb.ag.util.Validator;
-import nzilbb.ag.util.Normalizer;
+import nzilbb.ag.serialize.SerializationException;
+import nzilbb.ag.serialize.json.JSONSerialization;
 import nzilbb.ag.serialize.util.NamedStream;
-import nzilbb.util.Timers;
+import nzilbb.ag.util.Normalizer;
+import nzilbb.ag.util.Validator;
+import nzilbb.configure.Parameter;
+import nzilbb.configure.ParameterSet;
+import nzilbb.editpath.EditStep;
+import nzilbb.editpath.MinimumEditPath;
 import nzilbb.text.*;
+import nzilbb.util.Timers;
 
-public class TestPlainTextDeserializer
+public class TestPlainTextSerialization
 {
    @Test public void comment() 
       throws Exception
@@ -68,7 +75,7 @@ public class TestPlainTextDeserializer
       NamedStream[] streams = { new NamedStream(new File(getDir(), "comment.txt")) };
       
       // create deserializer
-      PlainTextDeserializer deserializer = new PlainTextDeserializer();
+      PlainTextSerialization deserializer = new PlainTextSerialization();
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
@@ -216,7 +223,7 @@ public class TestPlainTextDeserializer
       NamedStream[] streams = { new NamedStream(new File(getDir(), "comment2.txt")) };
       
       // create deserializer
-      PlainTextDeserializer deserializer = new PlainTextDeserializer();
+      PlainTextSerialization deserializer = new PlainTextSerialization();
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
@@ -405,7 +412,7 @@ public class TestPlainTextDeserializer
       };
       
       // create deserializer
-      PlainTextDeserializer deserializer = new PlainTextDeserializer();
+      PlainTextSerialization deserializer = new PlainTextSerialization();
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
@@ -558,7 +565,7 @@ public class TestPlainTextDeserializer
       };
       
       // create deserializer
-      PlainTextDeserializer deserializer = new PlainTextDeserializer();
+      PlainTextSerialization deserializer = new PlainTextSerialization();
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
@@ -717,7 +724,7 @@ public class TestPlainTextDeserializer
 	 new NamedStream(new File(getDir(), "interview.txt")) }; // transcript
       
       // create deserializer
-      PlainTextDeserializer deserializer = new PlainTextDeserializer();
+      PlainTextSerialization deserializer = new PlainTextSerialization();
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
@@ -844,7 +851,7 @@ public class TestPlainTextDeserializer
 	 new NamedStream(new File(getDir(), "transcribeme.txt")) }; // transcript
       
       // create deserializer
-      PlainTextDeserializer deserializer = new PlainTextDeserializer();
+      PlainTextSerialization deserializer = new PlainTextSerialization();
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
@@ -854,7 +861,8 @@ public class TestPlainTextDeserializer
       // also don't use speech conventions
       configuration.get("useConventions").setValue(Boolean.FALSE);
 	 
-      assertEquals("Configuration parameters" + configuration, 10, deserializer.configure(configuration, schema).size());      
+      assertEquals("Configuration parameters" + configuration,
+                   10, deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertEquals("noise", "noise", 
@@ -893,7 +901,6 @@ public class TestPlainTextDeserializer
       
       assertEquals("transcribeme.txt", g.getId());
       assertEquals("time units", Constants.UNIT_SECONDS, g.getOffsetUnits());
-
 
       // participants     
       Annotation[] participants = g.list("who"); 
@@ -956,7 +963,7 @@ public class TestPlainTextDeserializer
 	 new NamedStream(new File(getDir(), "cmsw-0002.txt")) }; // transcript
       
       // create deserializer
-      PlainTextDeserializer deserializer = new PlainTextDeserializer();
+      PlainTextSerialization deserializer = new PlainTextSerialization();
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
@@ -1102,7 +1109,7 @@ public class TestPlainTextDeserializer
 	 new NamedStream(new File(getDir(), "lockhartpapersco02lockuoft_djvu.txt")) }; // transcript
       
       // create deserializer
-      PlainTextDeserializer deserializer = new PlainTextDeserializer();
+      PlainTextSerialization deserializer = new PlainTextSerialization();
       deserializer.setTimers(timers);
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
@@ -1184,6 +1191,140 @@ public class TestPlainTextDeserializer
 
    }
 
+   @Test public void serialize()
+      throws Exception
+   {
+      Schema schema = new Schema(
+         "who", "turn", "utterance", "word",
+	 new Layer("scribe", "Transcriber")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(true)
+         .setPeersOverlap(true)
+         .setSaturated(true),
+         new Layer("who", "Participants")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(true)
+         .setPeersOverlap(true)
+         .setSaturated(true),
+         new Layer("comment", "Comment", 2, true, false, true),
+         new Layer("noise", "Noise", 2, true, false, true),
+         new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+         new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+         new Layer("word", "Words", 2, true, false, false, "turn", true),
+         new Layer("phone", "Phones", 2, true, true, true, "word", true),
+         new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
+         new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
+      File dir = getDir();
+      // access file
+      NamedStream[] jsonStreams = { new NamedStream(new File(dir, "serialize_utterance_word.json")) };
+      
+      // deserialize graph from JSON
+      JSONSerialization json = new JSONSerialization();
+      json.configure(json.configure(new ParameterSet(), schema), schema);
+      json.setParameters(json.load(jsonStreams, schema));
+      Graph[] graphs = json.deserialize();
+      
+      // create serializer
+      PlainTextSerialization serializer = new PlainTextSerialization();
+      
+      // general configuration
+      ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      assertEquals(10, serializer.configure(configuration, schema).size());
+
+      String[] needLayers = serializer.getRequiredLayers();
+      assertEquals(4, needLayers.length);
+      assertEquals("who", needLayers[0]);
+      assertEquals("turn", needLayers[1]);
+      assertEquals("utterance", needLayers[2]);
+      assertEquals("word", needLayers[3]);
+	 
+      // serialize
+      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+      final Vector<NamedStream> streams = new Vector<NamedStream>();
+      String[] layers = {"word","scribe"}; 
+      serializer.serialize(Arrays.spliterator(graphs), layers,
+                           stream -> streams.add(stream),
+                           warning -> System.out.println(warning),
+                           exception -> exceptions.add(exception));
+      if (exceptions.size() > 0) fail(""+exceptions);
+
+      streams.elementAt(0).save(dir);
+
+      // test using diff
+      File result = new File(dir, "serialize_utterance_word.txt");
+      String differences = diff(new File(dir, "expected_serialize_utterance_word.txt"), result);
+      if (differences != null)
+      {
+         fail(differences);
+      }
+      else
+      {
+         result.delete();
+      }
+   }
+
+   /**
+    * Diffs two files.
+    * @param expected
+    * @param actual
+    * @return null if the files are the same, and a String describing differences if not.
+    */
+   public String diff(File expected, File actual)
+   {
+      StringBuffer d = new StringBuffer();
+      
+      try
+      {
+         // compare with what we expected
+         Vector<String> actualLines = new Vector<String>();
+         BufferedReader reader = new BufferedReader(new FileReader(actual));
+         String line = reader.readLine();
+         while (line != null)
+         {
+            actualLines.add(line);
+            line = reader.readLine();
+         }
+         Vector<String> expectedLines = new Vector<String>();
+         reader = new BufferedReader(new FileReader(expected));
+         line = reader.readLine();
+         while (line != null)
+         {
+            expectedLines.add(line);
+            line = reader.readLine();
+         }
+         MinimumEditPath<String> comparator = new MinimumEditPath<String>();
+         List<EditStep<String>> path = comparator.minimumEditPath(expectedLines, actualLines);
+         for (EditStep<String> step : path)
+         {
+            switch (step.getOperation())
+            {
+               case CHANGE:
+                  d.append("\n"+expected.getPath()+":"+(step.getFromIndex()+1)+": Expected:\n" 
+                           + step.getFrom() 
+                           + "\n"+actual.getPath()+":"+(step.getToIndex()+1)+": Found:\n" + step.getTo());
+                  break;
+               case DELETE:
+                  d.append("\n"+expected.getPath()+":"+(step.getFromIndex()+1)+": Deleted:\n" 
+                           + step.getFrom()
+                           + "\n"+actual.getPath()+":"+(step.getToIndex()+1)+": Missing");
+                  break;
+               case INSERT:
+                  d.append("\n"+expected.getPath()+":"+(step.getFromIndex()+1)+": Missing" 
+                           + "\n"+actual.getPath()+":"+(step.getToIndex()+1)+": Inserted:\n" 
+                           + step.getTo());
+                  break;
+            }
+         } // next step
+      }
+      catch(Exception exception)
+      {
+         d.append("\n" + exception);
+      }
+      if (d.length() > 0) return d.toString();
+      return null;
+   } // end of diff()
+
    /**
     * Directory for text files.
     * @see #getDir()
@@ -1220,6 +1361,6 @@ public class TestPlainTextDeserializer
 
    public static void main(String args[]) 
    {
-      org.junit.runner.JUnitCore.main("nzilbb.text.test.TestPlainTextDeserializer");
+      org.junit.runner.JUnitCore.main("nzilbb.text.test.TestPlainTextSerialization");
    }
 }

@@ -21,37 +21,43 @@
 //
 package nzilbb.text;
 
-import java.util.Vector;
-import java.util.HashMap;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.StringTokenizer;
-import java.util.TimeZone;
-import java.io.IOException;
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.URL;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.net.URL;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.AudioInputStream;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Spliterator;
+import java.util.StringTokenizer;
+import java.util.TimeZone;
+import java.util.Vector;
+import java.util.function.Consumer;
 import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
 import nzilbb.ag.*;
-import nzilbb.ag.util.OrthographyClumper;
-import nzilbb.ag.util.SimpleTokenizer;
-import nzilbb.ag.util.ConventionTransformer;
-import nzilbb.ag.util.SpanningConventionTransformer;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
+import nzilbb.ag.util.ConventionTransformer;
+import nzilbb.ag.util.OrthographyClumper;
+import nzilbb.ag.util.SimpleTokenizer;
+import nzilbb.ag.util.SpanningConventionTransformer;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
+import nzilbb.util.IO;
+import nzilbb.util.TempFileInputStream;
 import nzilbb.util.Timers;
 
 /**
@@ -60,8 +66,8 @@ import nzilbb.util.Timers;
  * @author Robert Fromont robert@fromont.net.nz
  */
 
-public class PlainTextDeserializer
-   implements IDeserializer
+public class PlainTextSerialization
+   implements IDeserializer, ISerializer
 {
    // Attributes:
    protected Vector<String> warnings;
@@ -81,7 +87,7 @@ public class PlainTextDeserializer
     * Setter for {@link #name}: Name of the file.
     * @param newName Name of the file.
     */
-   public PlainTextDeserializer setName(String newName) { name = newName; return this; }
+   public PlainTextSerialization setName(String newName) { name = newName; return this; }
 
    /**
     * Lines of the header, if any.
@@ -98,7 +104,7 @@ public class PlainTextDeserializer
     * Setter for {@link #headerLines}: Lines of the header, if any.
     * @param newHeaderLines Lines of the header, if any.
     */
-   public PlainTextDeserializer setHeaderLines(Vector<String> newHeaderLines) { headerLines = newHeaderLines; return this; }
+   public PlainTextSerialization setHeaderLines(Vector<String> newHeaderLines) { headerLines = newHeaderLines; return this; }
 
    /**
     * Lines of the main text.
@@ -115,7 +121,7 @@ public class PlainTextDeserializer
     * Setter for {@link #lines}: Lines of the main text.
     * @param newLines Lines of the main text.
     */
-   public PlainTextDeserializer setLines(Vector<String> newLines) { lines = newLines; return this; }
+   public PlainTextSerialization setLines(Vector<String> newLines) { lines = newLines; return this; }
 
    /**
     * Whether the text includes marked speaker turns.
@@ -132,7 +138,7 @@ public class PlainTextDeserializer
     * Setter for {@link #hasSpeakers}: Whether the text includes marked speaker turns.
     * @param newHasSpeakers Whether the text includes marked speaker turns.
     */
-   public PlainTextDeserializer setHasSpeakers(boolean newHasSpeakers) { hasSpeakers = newHasSpeakers; return this; }
+   public PlainTextSerialization setHasSpeakers(boolean newHasSpeakers) { hasSpeakers = newHasSpeakers; return this; }
 
    /**
     * Whether the text includes timestamps or not.
@@ -149,7 +155,7 @@ public class PlainTextDeserializer
     * Setter for {@link #hasTimestamps}: Whether the text includes timestamps or not.
     * @param newHasTimestamps Whether the text includes timestamps or not.
     */
-   public PlainTextDeserializer setHasTimestamps(boolean newHasTimestamps) { hasTimestamps = newHasTimestamps; return this; }
+   public PlainTextSerialization setHasTimestamps(boolean newHasTimestamps) { hasTimestamps = newHasTimestamps; return this; }
 
    /**
     * Layer schema.
@@ -166,7 +172,7 @@ public class PlainTextDeserializer
     * Setter for {@link #schema}: Layer schema.
     * @param newSchema Layer schema.
     */
-   public PlainTextDeserializer setSchema(Schema newSchema) { schema = newSchema; return this; }
+   public PlainTextSerialization setSchema(Schema newSchema) { schema = newSchema; return this; }
 
    /**
     * Episode information layer.
@@ -183,7 +189,7 @@ public class PlainTextDeserializer
     * Setter for {@link #episodeLayer}: Episode information layer.
     * @param newEpisodeLayer Episode information layer.
     */
-   public PlainTextDeserializer setEpisodeLayer(Layer newEpisodeLayer) { episodeLayer = newEpisodeLayer; return this; }
+   public PlainTextSerialization setEpisodeLayer(Layer newEpisodeLayer) { episodeLayer = newEpisodeLayer; return this; }
 
    /**
     * Participant information layer.
@@ -200,7 +206,7 @@ public class PlainTextDeserializer
     * Setter for {@link #participantLayer}: Participant information layer.
     * @param newParticipantLayer Participant information layer.
     */
-   public PlainTextDeserializer setParticipantLayer(Layer newParticipantLayer) { participantLayer = newParticipantLayer; return this; }
+   public PlainTextSerialization setParticipantLayer(Layer newParticipantLayer) { participantLayer = newParticipantLayer; return this; }
 
    /**
     * Turn layer.
@@ -217,7 +223,7 @@ public class PlainTextDeserializer
     * Setter for {@link #turnLayer}: Turn layer.
     * @param newTurnLayer Turn layer.
     */
-   public PlainTextDeserializer setTurnLayer(Layer newTurnLayer) { turnLayer = newTurnLayer; return this; }
+   public PlainTextSerialization setTurnLayer(Layer newTurnLayer) { turnLayer = newTurnLayer; return this; }
 
    /**
     * Utterance layer.
@@ -234,7 +240,7 @@ public class PlainTextDeserializer
     * Setter for {@link #utteranceLayer}: Utterance layer.
     * @param newUtteranceLayer Utterance layer.
     */
-   public PlainTextDeserializer setUtteranceLayer(Layer newUtteranceLayer) { utteranceLayer = newUtteranceLayer; return this; }
+   public PlainTextSerialization setUtteranceLayer(Layer newUtteranceLayer) { utteranceLayer = newUtteranceLayer; return this; }
 
    /**
     * Word token layer.
@@ -251,7 +257,7 @@ public class PlainTextDeserializer
     * Setter for {@link #wordLayer}: Word token layer.
     * @param newWordLayer Word token layer.
     */
-   public PlainTextDeserializer setWordLayer(Layer newWordLayer) { wordLayer = newWordLayer; return this; }
+   public PlainTextSerialization setWordLayer(Layer newWordLayer) { wordLayer = newWordLayer; return this; }
 
    /**
     * Layer for lexical word tags.
@@ -268,7 +274,7 @@ public class PlainTextDeserializer
     * Setter for {@link #lexicalLayer}: Layer for lexical word tags.
     * @param newLexicalLayer Layer for lexical word tags.
     */
-   public PlainTextDeserializer setLexicalLayer(Layer newLexicalLayer) { lexicalLayer = newLexicalLayer; return this; }
+   public PlainTextSerialization setLexicalLayer(Layer newLexicalLayer) { lexicalLayer = newLexicalLayer; return this; }
 
    /**
     * Layer for exceptional pronunciation tags.
@@ -285,7 +291,7 @@ public class PlainTextDeserializer
     * Setter for {@link #pronounceLayer}: Layer for exceptional pronunciation tags.
     * @param newPronounceLayer Layer for exceptional pronunciation tags.
     */
-   public PlainTextDeserializer setPronounceLayer(Layer newPronounceLayer) { pronounceLayer = newPronounceLayer; return this; }
+   public PlainTextSerialization setPronounceLayer(Layer newPronounceLayer) { pronounceLayer = newPronounceLayer; return this; }
 
    /**
     * Layer for commentary.
@@ -302,7 +308,7 @@ public class PlainTextDeserializer
     * Setter for {@link #commentLayer}: Layer for commentary.
     * @param newCommentLayer Layer for commentary.
     */
-   public PlainTextDeserializer setCommentLayer(Layer newCommentLayer) { commentLayer = newCommentLayer; return this; }
+   public PlainTextSerialization setCommentLayer(Layer newCommentLayer) { commentLayer = newCommentLayer; return this; }
 
    /**
     * Layer for background noise.
@@ -319,7 +325,7 @@ public class PlainTextDeserializer
     * Setter for {@link #noiseLayer}: Layer for background noise.
     * @param newNoiseLayer Layer for background noise.
     */
-   public PlainTextDeserializer setNoiseLayer(Layer newNoiseLayer) { noiseLayer = newNoiseLayer; return this; }
+   public PlainTextSerialization setNoiseLayer(Layer newNoiseLayer) { noiseLayer = newNoiseLayer; return this; }
 
    /**
     * Parameters and mappings for the next deserialization.
@@ -358,7 +364,7 @@ public class PlainTextDeserializer
     * Setter for {@link #useConventions}: Whether to use text conventions for comment, noise, lexical, and pronunciation annotations.
     * @param newUseConventions Whether to use text conventions for comment, noise, lexical, and pronunciation annotations.
     */
-   public PlainTextDeserializer setUseConventions(Boolean newUseConventions) { useConventions = newUseConventions; return this; }
+   public PlainTextSerialization setUseConventions(Boolean newUseConventions) { useConventions = newUseConventions; return this; }
 
    /**
     * Delimiters used for comments, a string whose first characters is the open-comment
@@ -384,7 +390,7 @@ public class PlainTextDeserializer
     * characters is the open-comment marker, and the last character is the close-comment
     * marker. The default is "{}" 
     */
-   public PlainTextDeserializer setCommentDelimiters(String newCommentDelimiters) { commentDelimiters = newCommentDelimiters; return this; }
+   public PlainTextSerialization setCommentDelimiters(String newCommentDelimiters) { commentDelimiters = newCommentDelimiters; return this; }
 
    /**
     * Delimiters used for noises, a string whose first characters is the open-comment marker, and the last character is the close-comment marker. The default is "[]"
@@ -409,7 +415,7 @@ public class PlainTextDeserializer
     * characters is the open-comment marker, and the last character is the close-comment
     * marker. The default is "[]" 
     */
-   public PlainTextDeserializer setNoiseDelimiters(String newNoiseDelimiters) { noiseDelimiters = newNoiseDelimiters; return this; }
+   public PlainTextSerialization setNoiseDelimiters(String newNoiseDelimiters) { noiseDelimiters = newNoiseDelimiters; return this; }
 
    /**
     * Format for marking a change of turn within the transcript body. Default pattern is
@@ -429,7 +435,7 @@ public class PlainTextDeserializer
     * the transcript body. 
     * @param newParticipantFormat Format for marking a change of turn within the transcript body.
     */
-   public PlainTextDeserializer setParticipantFormat(String newParticipantFormat) { participantFormat = newParticipantFormat; return this; }
+   public PlainTextSerialization setParticipantFormat(String newParticipantFormat) { participantFormat = newParticipantFormat; return this; }
    
    /**
     * Format for a meta-data line. Default pattern is "{0}={1}".  <tt>{0}</tt> is a
@@ -448,7 +454,7 @@ public class PlainTextDeserializer
     * Setter for {@link #metaDataFormat}: Format for a meta-data line.
     * @param newMetaDataFormat Format for a meta-data line.
     */
-   public PlainTextDeserializer setMetaDataFormat(String newMetaDataFormat) { metaDataFormat = newMetaDataFormat; return this; }
+   public PlainTextSerialization setMetaDataFormat(String newMetaDataFormat) { metaDataFormat = newMetaDataFormat; return this; }
 
    /**
     * The maximum length of a parsed participant ID/name.  Default is 20.
@@ -466,7 +472,7 @@ public class PlainTextDeserializer
     * Setter for {@link #maxParticipantLength}: The maximum length of a parsed participant ID/name.
     * @param newMaxParticipantLength The maximum length of a parsed participant ID/name. 
     */
-   public PlainTextDeserializer setMaxParticipantLength(Integer newMaxParticipantLength) { maxParticipantLength = newMaxParticipantLength; return this; }
+   public PlainTextSerialization setMaxParticipantLength(Integer newMaxParticipantLength) { maxParticipantLength = newMaxParticipantLength; return this; }
 
    /**
     * Format for time synchronizations within the transcript body. e.g. HH:mm:ss.SSS
@@ -483,7 +489,7 @@ public class PlainTextDeserializer
     * Setter for {@link #timestampFormat}: Format for time synchronizations within the transcript body. 
     * @param newTimestampFormat Format for time synchronizations within the transcript body. e.g. "HH:mm:ss.SSS"
     */
-   public PlainTextDeserializer setTimestampFormat(String newTimestampFormat) { timestampFormat = newTimestampFormat; return this; }
+   public PlainTextSerialization setTimestampFormat(String newTimestampFormat) { timestampFormat = newTimestampFormat; return this; }
 
    /**
     * Duration of the media file in seconds, if known.
@@ -500,7 +506,7 @@ public class PlainTextDeserializer
     * Setter for {@link #mediaDurationSeconds}: Duration of the media file in seconds, if known.
     * @param newMediaDurationSeconds Duration of the media file in seconds, if known.
     */
-   public PlainTextDeserializer setMediaDurationSeconds(Double newMediaDurationSeconds) { mediaDurationSeconds = newMediaDurationSeconds; return this; }
+   public PlainTextSerialization setMediaDurationSeconds(Double newMediaDurationSeconds) { mediaDurationSeconds = newMediaDurationSeconds; return this; }
 
    /**
     * Utterance tokenizer.  The default is {@link SimpleTokenizer}.
@@ -517,7 +523,7 @@ public class PlainTextDeserializer
     * Setter for {@link #tokenizer}: Utterance tokenizer.
     * @param newTokenizer Utterance tokenizer.
     */
-   public PlainTextDeserializer setTokenizer(IGraphTransformer newTokenizer) { tokenizer = newTokenizer; return this; }
+   public PlainTextSerialization setTokenizer(IGraphTransformer newTokenizer) { tokenizer = newTokenizer; return this; }
 
    /**
     * Maximum lines in a header
@@ -534,7 +540,7 @@ public class PlainTextDeserializer
     * Setter for {@link #maxHeaderLines}: Maximum lines in a header
     * @param newMaxHeaderLines Maximum lines in a header
     */
-   public PlainTextDeserializer setMaxHeaderLines(Integer newMaxHeaderLines) { maxHeaderLines = newMaxHeaderLines; return this; }
+   public PlainTextSerialization setMaxHeaderLines(Integer newMaxHeaderLines) { maxHeaderLines = newMaxHeaderLines; return this; }
    
    /**
     * Error encountered when trying to get length of media, if any.
@@ -551,7 +557,7 @@ public class PlainTextDeserializer
     * Setter for {@link #mediaError}: Error encountered when trying to get length of media, if any.
     * @param newMediaError Error encountered when trying to get length of media, if any.
     */
-   public PlainTextDeserializer setMediaError(String newMediaError) { mediaError = newMediaError; return this; }
+   public PlainTextSerialization setMediaError(String newMediaError) { mediaError = newMediaError; return this; }
 
    /**
     * Timers for debugging and optimization.
@@ -568,14 +574,50 @@ public class PlainTextDeserializer
     * Setter for {@link #timers}: Timers for debugging and optimization.
     * @param newTimers Timers for debugging and optimization.
     */
-   public PlainTextDeserializer setTimers(Timers newTimers) { timers = newTimers; return this; }
+   public PlainTextSerialization setTimers(Timers newTimers) { timers = newTimers; return this; }
+
+   private long graphCount = 0;
+   private long consumedGraphCount = 0;
+   /**
+    * Determines how far through the serialization is.
+    * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
+    */
+   public Integer getPercentComplete()
+   {
+      if (graphCount < 0) return null;
+      return (int)((consumedGraphCount * 100) / graphCount);
+   }
+   
+   /**
+    * Serialization marked for cancelling.
+    * @see #getCancelling()
+    * @see #setCancelling(boolean)
+    */
+   protected boolean cancelling;
+   /**
+    * Getter for {@link #cancelling}: Serialization marked for cancelling.
+    * @return Serialization marked for cancelling.
+    */
+   public boolean getCancelling() { return cancelling; }
+   /**
+    * Setter for {@link #cancelling}: Serialization marked for cancelling.
+    * @param newCancelling Serialization marked for cancelling.
+    */
+   public PlainTextSerialization setCancelling(boolean newCancelling) { cancelling = newCancelling; return this; }
+   /**
+    * Cancel the serialization in course (if any).
+    */
+   public void cancel()
+   {
+      setCancelling(true);
+   }
 
    // Methods:
    
    /**
     * Default constructor.
     */
-   public PlainTextDeserializer()
+   public PlainTextSerialization()
    {
    } // end of constructor
    
@@ -1021,7 +1063,7 @@ public class PlainTextDeserializer
       if (wav != null)
       {
          // save the media file
-         File fMedia = File.createTempFile("PlainTextDeserializer-", wav.getName());
+         File fMedia = File.createTempFile("PlainTextSerialization-", wav.getName());
          fMedia.deleteOnExit();
          try
          {
@@ -1629,4 +1671,154 @@ public class PlainTextDeserializer
       return warnings;
    }
 
-} // end of class PlainTextDeserializer
+   // ISerializer methods
+
+   /**
+    * Determines which layers, if any, must be present in the graph that will be serialized.
+    * @return A list of IDs of layers that must be present in the graph that will be serialized.
+    * @throws SerializationParametersMissingException If not all required parameters have a value.
+    */
+   public String[] getRequiredLayers() throws SerializationParametersMissingException
+   {
+      Vector<String> requiredLayers = new Vector<String>();
+      if (getParticipantLayer() != null) requiredLayers.add(getParticipantLayer().getId());
+      if (getTurnLayer() != null) requiredLayers.add(getTurnLayer().getId());
+      if (getUtteranceLayer() != null) requiredLayers.add(getUtteranceLayer().getId());
+      if (getWordLayer() != null) requiredLayers.add(getWordLayer().getId());
+      return requiredLayers.toArray(new String[0]);
+   } // getRequiredLayers()
+
+   /**
+    * Determines the cardinality between graphs and serialized streams.
+    * <p>The cardinatlity of this deseerializer is NToN.
+    * @return {@link nzilbb.ag.serialize.ISerializer#Cardinality}.NToN.
+    */
+   public Cardinality getCardinality()
+   {
+      return Cardinality.NToN;
+   }
+
+   /**
+    * Serializes the given series of graphs, generating one or more {@link NamedStream}s.
+    * <p>Many data formats will only yield one stream per graph (e.g. Transcriber
+    * transcript or Praat textgrid), however there are formats that use multiple files for
+    * the same transcript (e.g. XWaves, EmuR), and others still that will produce one
+    * stream from many Graphs (e.g. CSV).
+    * <p>The method is synchronous in the sense that it should not return until all graphs
+    * have been serialized.
+    * @param graphs The graphs to serialize.
+    * @param layerIds The IDs of the layers to include, or null for all layers.
+    * @param consumer The consumer receiving the streams.
+    * @param warnings A consumer for (non-fatal) warning messages.
+    * @param errors A consumer for (fatal) error messages.
+    * @throws SerializerNotConfiguredException if the object has not been configured.
+    */
+   public void serialize(Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
+      throws SerializerNotConfiguredException
+   {
+      graphCount = graphs.getExactSizeIfKnown();
+      graphs.forEachRemaining(graph -> {
+            if (getCancelling()) return;
+            try
+            {
+               consumer.accept(serializeGraph(graph, layerIds));
+            }
+            catch(SerializationException exception)
+            {
+               errors.accept(exception);
+            }
+            consumedGraphCount++;
+         }); // next graph
+   }
+
+      /**
+    * Serializes the given graph, generating a {@link NamedStream}.
+    * @param graph The graph to serialize.
+    * @return A named stream that contains the TextGrid. 
+    * @throws SerializationException if errors occur during deserialization.
+    */
+   protected NamedStream serializeGraph(Graph graph, String[] layerIds) 
+      throws SerializationException
+   {
+      SerializationException errors = null;
+      
+      HashSet<String> selectedLayers = new HashSet<String>();
+      if (layerIds != null)
+      {
+         for (String l : layerIds) selectedLayers.add(l);
+      }
+      else
+      {
+         for (Layer l : graph.getSchema().getLayers().values()) selectedLayers.add(l.getId());
+      }
+
+      try
+      {
+         // write the text to a temporary file
+         File f = File.createTempFile(graph.getId(), ".txt");
+         PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(f), "utf-8"));
+
+         Schema schema = graph.getSchema();
+         
+         // meta-data first
+         MessageFormat fmtMetaDataFormat = new MessageFormat(metaDataFormat);
+         boolean thereWereAttributes = false;
+         for (String id : selectedLayers)
+         {
+            Layer layer = schema.getLayer(id);
+            // is it a graph tag layer
+            if (layer.getParent() != null
+                && layer.getParent().equals(schema.getRoot())
+                && layer.getAlignment() == Constants.ALIGNMENT_NONE
+                && !layer.equals(getParticipantLayer()))
+            { // it's a graph tag
+               for (Annotation a : graph.list(id))
+               {
+                  thereWereAttributes = true;
+                  Object[] metadata = { id, a.getLabel() }; 
+                  writer.println(fmtMetaDataFormat.format(metadata));
+               } // next attribute               
+            } // it's a graph tag
+         } // next selected layer
+
+         // for each utterance
+         Annotation currentParticipant = null;
+         MessageFormat fmtParticipant = new MessageFormat(participantFormat);
+         for (Annotation utterance : graph.list(getUtteranceLayer().getId()))
+         {
+            if (cancelling) break;
+            // is the participant changing?
+            Annotation participant = utterance.my(getParticipantLayer().getId());
+            if (participant != currentParticipant)
+            { // participant change
+               currentParticipant = participant;
+               Object[] participantLabel = { currentParticipant.getLabel() }; 
+               writer.println();
+               writer.print(fmtParticipant.format(participantLabel));
+            } // participant change
+
+            StringBuffer l = new StringBuffer();
+            for (Annotation token : utterance.list(getWordLayer().getId()))
+            {
+               writer.print(" ");
+               writer.print(token.getLabel()); // TODO transcript convention support
+            } // next token
+            writer.println();
+         } // next utterance
+         writer.close();
+
+         TempFileInputStream in = new TempFileInputStream(f);
+         
+         // return a named stream from the file
+         return new NamedStream(in, IO.SafeFileNameUrl(graph.getId()) + ".txt");
+      }
+      catch(Exception exception)
+      {
+         errors = new SerializationException();
+         errors.initCause(exception);
+         errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
+         throw errors;
+      }      
+   }
+
+} // end of class PlainTextSerialization
