@@ -81,7 +81,7 @@ public class PlainTextDeserializer
     * Setter for {@link #name}: Name of the file.
     * @param newName Name of the file.
     */
-   public void setName(String newName) { name = newName; }
+   public PlainTextDeserializer setName(String newName) { name = newName; return this; }
 
    /**
     * Lines of the header, if any.
@@ -98,7 +98,7 @@ public class PlainTextDeserializer
     * Setter for {@link #headerLines}: Lines of the header, if any.
     * @param newHeaderLines Lines of the header, if any.
     */
-   public void setHeaderLines(Vector<String> newHeaderLines) { headerLines = newHeaderLines; }
+   public PlainTextDeserializer setHeaderLines(Vector<String> newHeaderLines) { headerLines = newHeaderLines; return this; }
 
    /**
     * Lines of the main text.
@@ -115,7 +115,7 @@ public class PlainTextDeserializer
     * Setter for {@link #lines}: Lines of the main text.
     * @param newLines Lines of the main text.
     */
-   public void setLines(Vector<String> newLines) { lines = newLines; }
+   public PlainTextDeserializer setLines(Vector<String> newLines) { lines = newLines; return this; }
 
    /**
     * Whether the text includes marked speaker turns.
@@ -132,7 +132,7 @@ public class PlainTextDeserializer
     * Setter for {@link #hasSpeakers}: Whether the text includes marked speaker turns.
     * @param newHasSpeakers Whether the text includes marked speaker turns.
     */
-   public void setHasSpeakers(boolean newHasSpeakers) { hasSpeakers = newHasSpeakers; }
+   public PlainTextDeserializer setHasSpeakers(boolean newHasSpeakers) { hasSpeakers = newHasSpeakers; return this; }
 
    /**
     * Whether the text includes timestamps or not.
@@ -149,7 +149,7 @@ public class PlainTextDeserializer
     * Setter for {@link #hasTimestamps}: Whether the text includes timestamps or not.
     * @param newHasTimestamps Whether the text includes timestamps or not.
     */
-   public void setHasTimestamps(boolean newHasTimestamps) { hasTimestamps = newHasTimestamps; }
+   public PlainTextDeserializer setHasTimestamps(boolean newHasTimestamps) { hasTimestamps = newHasTimestamps; return this; }
 
    /**
     * Layer schema.
@@ -166,7 +166,7 @@ public class PlainTextDeserializer
     * Setter for {@link #schema}: Layer schema.
     * @param newSchema Layer schema.
     */
-   public void setSchema(Schema newSchema) { schema = newSchema; }
+   public PlainTextDeserializer setSchema(Schema newSchema) { schema = newSchema; return this; }
 
    /**
     * Episode information layer.
@@ -183,7 +183,7 @@ public class PlainTextDeserializer
     * Setter for {@link #episodeLayer}: Episode information layer.
     * @param newEpisodeLayer Episode information layer.
     */
-   public void setEpisodeLayer(Layer newEpisodeLayer) { episodeLayer = newEpisodeLayer; }
+   public PlainTextDeserializer setEpisodeLayer(Layer newEpisodeLayer) { episodeLayer = newEpisodeLayer; return this; }
 
    /**
     * Participant information layer.
@@ -200,7 +200,7 @@ public class PlainTextDeserializer
     * Setter for {@link #participantLayer}: Participant information layer.
     * @param newParticipantLayer Participant information layer.
     */
-   public void setParticipantLayer(Layer newParticipantLayer) { participantLayer = newParticipantLayer; }
+   public PlainTextDeserializer setParticipantLayer(Layer newParticipantLayer) { participantLayer = newParticipantLayer; return this; }
 
    /**
     * Turn layer.
@@ -217,7 +217,7 @@ public class PlainTextDeserializer
     * Setter for {@link #turnLayer}: Turn layer.
     * @param newTurnLayer Turn layer.
     */
-   public void setTurnLayer(Layer newTurnLayer) { turnLayer = newTurnLayer; }
+   public PlainTextDeserializer setTurnLayer(Layer newTurnLayer) { turnLayer = newTurnLayer; return this; }
 
    /**
     * Utterance layer.
@@ -234,7 +234,7 @@ public class PlainTextDeserializer
     * Setter for {@link #utteranceLayer}: Utterance layer.
     * @param newUtteranceLayer Utterance layer.
     */
-   public void setUtteranceLayer(Layer newUtteranceLayer) { utteranceLayer = newUtteranceLayer; }
+   public PlainTextDeserializer setUtteranceLayer(Layer newUtteranceLayer) { utteranceLayer = newUtteranceLayer; return this; }
 
    /**
     * Word token layer.
@@ -251,7 +251,7 @@ public class PlainTextDeserializer
     * Setter for {@link #wordLayer}: Word token layer.
     * @param newWordLayer Word token layer.
     */
-   public void setWordLayer(Layer newWordLayer) { wordLayer = newWordLayer; }
+   public PlainTextDeserializer setWordLayer(Layer newWordLayer) { wordLayer = newWordLayer; return this; }
 
    /**
     * Layer for lexical word tags.
@@ -268,7 +268,7 @@ public class PlainTextDeserializer
     * Setter for {@link #lexicalLayer}: Layer for lexical word tags.
     * @param newLexicalLayer Layer for lexical word tags.
     */
-   public void setLexicalLayer(Layer newLexicalLayer) { lexicalLayer = newLexicalLayer; }
+   public PlainTextDeserializer setLexicalLayer(Layer newLexicalLayer) { lexicalLayer = newLexicalLayer; return this; }
 
    /**
     * Layer for exceptional pronunciation tags.
@@ -285,7 +285,7 @@ public class PlainTextDeserializer
     * Setter for {@link #pronounceLayer}: Layer for exceptional pronunciation tags.
     * @param newPronounceLayer Layer for exceptional pronunciation tags.
     */
-   public void setPronounceLayer(Layer newPronounceLayer) { pronounceLayer = newPronounceLayer; }
+   public PlainTextDeserializer setPronounceLayer(Layer newPronounceLayer) { pronounceLayer = newPronounceLayer; return this; }
 
    /**
     * Layer for commentary.
@@ -302,7 +302,7 @@ public class PlainTextDeserializer
     * Setter for {@link #commentLayer}: Layer for commentary.
     * @param newCommentLayer Layer for commentary.
     */
-   public void setCommentLayer(Layer newCommentLayer) { commentLayer = newCommentLayer; }
+   public PlainTextDeserializer setCommentLayer(Layer newCommentLayer) { commentLayer = newCommentLayer; return this; }
 
    /**
     * Layer for background noise.
@@ -319,7 +319,7 @@ public class PlainTextDeserializer
     * Setter for {@link #noiseLayer}: Layer for background noise.
     * @param newNoiseLayer Layer for background noise.
     */
-   public void setNoiseLayer(Layer newNoiseLayer) { noiseLayer = newNoiseLayer; }
+   public PlainTextDeserializer setNoiseLayer(Layer newNoiseLayer) { noiseLayer = newNoiseLayer; return this; }
 
    /**
     * Parameters and mappings for the next deserialization.
@@ -358,7 +358,7 @@ public class PlainTextDeserializer
     * Setter for {@link #useConventions}: Whether to use text conventions for comment, noise, lexical, and pronunciation annotations.
     * @param newUseConventions Whether to use text conventions for comment, noise, lexical, and pronunciation annotations.
     */
-   public void setUseConventions(Boolean newUseConventions) { useConventions = newUseConventions; }
+   public PlainTextDeserializer setUseConventions(Boolean newUseConventions) { useConventions = newUseConventions; return this; }
 
    /**
     * Delimiters used for comments, a string whose first characters is the open-comment
@@ -384,7 +384,7 @@ public class PlainTextDeserializer
     * characters is the open-comment marker, and the last character is the close-comment
     * marker. The default is "{}" 
     */
-   public void setCommentDelimiters(String newCommentDelimiters) { commentDelimiters = newCommentDelimiters; }
+   public PlainTextDeserializer setCommentDelimiters(String newCommentDelimiters) { commentDelimiters = newCommentDelimiters; return this; }
 
    /**
     * Delimiters used for noises, a string whose first characters is the open-comment marker, and the last character is the close-comment marker. The default is "[]"
@@ -409,7 +409,7 @@ public class PlainTextDeserializer
     * characters is the open-comment marker, and the last character is the close-comment
     * marker. The default is "[]" 
     */
-   public void setNoiseDelimiters(String newNoiseDelimiters) { noiseDelimiters = newNoiseDelimiters; }
+   public PlainTextDeserializer setNoiseDelimiters(String newNoiseDelimiters) { noiseDelimiters = newNoiseDelimiters; return this; }
 
    /**
     * Format for marking a change of turn within the transcript body. Default pattern is
@@ -429,7 +429,7 @@ public class PlainTextDeserializer
     * the transcript body. 
     * @param newParticipantFormat Format for marking a change of turn within the transcript body.
     */
-   public void setParticipantFormat(String newParticipantFormat) { participantFormat = newParticipantFormat; }
+   public PlainTextDeserializer setParticipantFormat(String newParticipantFormat) { participantFormat = newParticipantFormat; return this; }
    
    /**
     * Format for a meta-data line. Default pattern is "{0}={1}".  <tt>{0}</tt> is a
@@ -448,7 +448,7 @@ public class PlainTextDeserializer
     * Setter for {@link #metaDataFormat}: Format for a meta-data line.
     * @param newMetaDataFormat Format for a meta-data line.
     */
-   public void setMetaDataFormat(String newMetaDataFormat) { metaDataFormat = newMetaDataFormat; }
+   public PlainTextDeserializer setMetaDataFormat(String newMetaDataFormat) { metaDataFormat = newMetaDataFormat; return this; }
 
    /**
     * The maximum length of a parsed participant ID/name.  Default is 20.
@@ -466,7 +466,7 @@ public class PlainTextDeserializer
     * Setter for {@link #maxParticipantLength}: The maximum length of a parsed participant ID/name.
     * @param newMaxParticipantLength The maximum length of a parsed participant ID/name. 
     */
-   public void setMaxParticipantLength(Integer newMaxParticipantLength) { maxParticipantLength = newMaxParticipantLength; }
+   public PlainTextDeserializer setMaxParticipantLength(Integer newMaxParticipantLength) { maxParticipantLength = newMaxParticipantLength; return this; }
 
    /**
     * Format for time synchronizations within the transcript body. e.g. HH:mm:ss.SSS
@@ -483,7 +483,7 @@ public class PlainTextDeserializer
     * Setter for {@link #timestampFormat}: Format for time synchronizations within the transcript body. 
     * @param newTimestampFormat Format for time synchronizations within the transcript body. e.g. "HH:mm:ss.SSS"
     */
-   public void setTimestampFormat(String newTimestampFormat) { timestampFormat = newTimestampFormat; }
+   public PlainTextDeserializer setTimestampFormat(String newTimestampFormat) { timestampFormat = newTimestampFormat; return this; }
 
    /**
     * Duration of the media file in seconds, if known.
@@ -500,7 +500,7 @@ public class PlainTextDeserializer
     * Setter for {@link #mediaDurationSeconds}: Duration of the media file in seconds, if known.
     * @param newMediaDurationSeconds Duration of the media file in seconds, if known.
     */
-   public void setMediaDurationSeconds(Double newMediaDurationSeconds) { mediaDurationSeconds = newMediaDurationSeconds; }
+   public PlainTextDeserializer setMediaDurationSeconds(Double newMediaDurationSeconds) { mediaDurationSeconds = newMediaDurationSeconds; return this; }
 
    /**
     * Utterance tokenizer.  The default is {@link SimpleTokenizer}.
@@ -517,7 +517,7 @@ public class PlainTextDeserializer
     * Setter for {@link #tokenizer}: Utterance tokenizer.
     * @param newTokenizer Utterance tokenizer.
     */
-   public void setTokenizer(IGraphTransformer newTokenizer) { tokenizer = newTokenizer; }
+   public PlainTextDeserializer setTokenizer(IGraphTransformer newTokenizer) { tokenizer = newTokenizer; return this; }
 
    /**
     * Maximum lines in a header
@@ -534,7 +534,7 @@ public class PlainTextDeserializer
     * Setter for {@link #maxHeaderLines}: Maximum lines in a header
     * @param newMaxHeaderLines Maximum lines in a header
     */
-   public void setMaxHeaderLines(Integer newMaxHeaderLines) { maxHeaderLines = newMaxHeaderLines; }
+   public PlainTextDeserializer setMaxHeaderLines(Integer newMaxHeaderLines) { maxHeaderLines = newMaxHeaderLines; return this; }
    
    /**
     * Error encountered when trying to get length of media, if any.
@@ -551,7 +551,7 @@ public class PlainTextDeserializer
     * Setter for {@link #mediaError}: Error encountered when trying to get length of media, if any.
     * @param newMediaError Error encountered when trying to get length of media, if any.
     */
-   public void setMediaError(String newMediaError) { mediaError = newMediaError; }
+   public PlainTextDeserializer setMediaError(String newMediaError) { mediaError = newMediaError; return this; }
 
    /**
     * Timers for debugging and optimization.
@@ -568,7 +568,7 @@ public class PlainTextDeserializer
     * Setter for {@link #timers}: Timers for debugging and optimization.
     * @param newTimers Timers for debugging and optimization.
     */
-   public void setTimers(Timers newTimers) { timers = newTimers; }
+   public PlainTextDeserializer setTimers(Timers newTimers) { timers = newTimers; return this; }
 
    // Methods:
    
