@@ -63,7 +63,7 @@ public class Layer
    extends TrackedMap
 {
    // NB if this is updated, please also update the @return javadoc attribute on getClonedAttributes()
-   private static String[] aClonedAttributes = {"id", "parentId", "description", "alignment", "peers", "peersOverlap", "parentIncludes", "saturated", "type", "validLabels"};
+   private static String[] aClonedAttributes = {"id", "parentId", "description", "alignment", "peers", "peersOverlap", "parentIncludes", "saturated", "type", "validLabels", "category"};
    /**
     * Keys for attributes that are cloned - i.e. when an object is cloned, only these attributes are copied into the clone.
     * <p>LinkedHashSet is used so that attributes are iterated in the order they're defined in aClonedAttributes (which is the order shown in the documentation of {@link #getClonedAttributes()}).
@@ -73,7 +73,7 @@ public class Layer
    /**
     * Keys for attributes that are cloned - i.e. when an object is cloned, only these attributes
     * are copied into the clone. 
-    * @return "id", "parentId", "description", "alignment", "peers", "peersOverlap", "parentIncludes", "saturated", "type"
+    * @return "id", "parentId", "description", "alignment", "peers", "peersOverlap", "parentIncludes", "saturated", "type", "validLabels", "category"
     */
    public Set<String> getClonedAttributes()
    {
@@ -324,7 +324,23 @@ public class Layer
       if (getValidLabels() == null) return null; 
       return getValidLabels().keySet().toArray(new String[0]); 
    }
-
+   
+   /**
+    * Category for the layer, if any.
+    * @see #getCategory()
+    * @see #setCategory(String)
+    */
+   protected String category;
+   /**
+    * Getter for {@link #category}: Category for the layer, if any.
+    * @return Category for the layer, if any.
+    */
+   public String getCategory() { return category; }
+   /**
+    * Setter for {@link #category}: Category for the layer, if any.
+    * @param newCategory Category for the layer, if any.
+    */
+   public Layer setCategory(String newCategory) { category = newCategory; return this; }
    // Methods:
       
    /**

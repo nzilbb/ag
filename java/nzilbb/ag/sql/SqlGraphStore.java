@@ -472,7 +472,10 @@ public class SqlGraphStore
       PreparedStatement sqlParentId = getConnection().prepareStatement(
         "SELECT short_description FROM layer WHERE layer_id = ?");
       PreparedStatement sql = getConnection().prepareStatement(
-        "SELECT * FROM layer WHERE short_description = ?");
+        "SELECT layer.*, project.project"
+        +" FROM layer"
+        +" LEFT OUTER JOIN project ON layer.project_id = project.project_id"
+        +" WHERE short_description = ?");
       sql.setString(1, id);
       ResultSet rs = sql.executeQuery();
       if (rs.next())
@@ -511,6 +514,10 @@ public class SqlGraphStore
         {
           layer.setType(Constants.TYPE_STRING);
         }
+        if (rs.getString("project") != null)
+        {
+           layer.setCategory(rs.getString("project"));
+        }
 
         // other attributes
         layer.put("@layer_id", Integer.valueOf(rs.getInt("layer_id")));
@@ -522,6 +529,7 @@ public class SqlGraphStore
         layer.put("@enabled", rs.getString("enabled"));
         layer.put("@notes", rs.getString("notes"));
         layer.put("@project_id", rs.getString("project_id"));
+        System.out.println(rs.getString("layer_id") + " " + rs.getString("project"));
         layer.put("@data_mime_type", rs.getString("data_mime_type"));
         layer.put("@alignment", rs.getString("alignment"));
         layer.put("@style", rs.getString("style"));
@@ -586,11 +594,11 @@ public class SqlGraphStore
           {
             layer.setType(Constants.TYPE_STRING);
           }
+          layer.setCategory(rs.getString("category"));
 
           // other attributes
           layer.put("@class_id", rs.getString("class_id"));
           layer.put("@attribute", rs.getString("attribute"));
-          layer.put("@category", rs.getString("category"));
           layer.put("@type", rs.getString("type"));
           layer.put("@style", rs.getString("style"));
           layer.put("@peers", rs.getString("peers"));
@@ -671,11 +679,11 @@ public class SqlGraphStore
             {
               layer.setType(Constants.TYPE_STRING);
             }
+            layer.setCategory(rs.getString("category"));
 
             // other attributes
             layer.put("@class_id", rs.getString("class_id"));
             layer.put("@attribute", rs.getString("attribute"));
-            layer.put("@category", rs.getString("category"));
             layer.put("@type", rs.getString("type"));
             layer.put("@style", rs.getString("style"));
             layer.put("@peers", rs.getString("peers"));
