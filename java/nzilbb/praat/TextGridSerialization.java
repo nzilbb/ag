@@ -259,7 +259,7 @@ public class TextGridSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "Praat TextGrid", "2.03", "text/praat-textgrid", ".textgrid", "20191031.1734",
+         "Praat TextGrid", "2.04", "text/praat-textgrid", ".textgrid", "20191031.1734",
          getClass().getResource("icon.png"));
    }
    
@@ -964,15 +964,24 @@ public class TextGridSerialization
          HashMap<String,Annotation> turnsByName = new HashMap<String,Annotation>();
          for (Annotation word : graph.list(wordLayer.getId()))
          {
-            String tierName = ((Tier)word.get("@tier")).getName();
-            Annotation turn = turnsByName.get(tierName);
+            String participantName = ((Tier)word.get("@tier")).getName();
+            // if the tier name is something like "transcript - foo"...
+            if (participantName.startsWith(word.getLayerId()))
+            { // ... strip off the prefix
+               participantName = participantName
+                  // strip off layer ID
+                  .substring(word.getLayerId().length())
+                  // trim spaces, dashes, etc.
+                  .replaceAll("^\\W+","");
+            }
+            Annotation turn = turnsByName.get(participantName);
             if (turn == null)
             {
                // create turn 
                turn = new Annotation(
-                  null, tierName, turnLayer.getId(), graphStart.getId(), graphEnd.getId());
+                  null, participantName, turnLayer.getId(), graphStart.getId(), graphEnd.getId());
                graph.addAnnotation(turn);
-               turnsByName.put(tierName, turn);
+               turnsByName.put(participantName, turn);
 
                // create utterance
                Annotation utterance = new Annotation(turn);
@@ -1459,8 +1468,8 @@ public class TextGridSerialization
 
    /**
     * Determines the cardinality between graphs and serialized streams.
-    * @return {@link ISerializer#Cardinality}.NtoN as there is one stream produced
-    * for each graph to serialize.
+    * @return {@link nzilbb.ag.serialize.ISerializer#Cardinality}.NtoN as there is one
+    * stream produced for each graph to serialize.
     */
    public Cardinality getCardinality()
    {

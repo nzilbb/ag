@@ -786,6 +786,113 @@ public class TestTextGridSerialization
       assertEquals("no phones", 0, g.list("phone").length);
    }
 
+   @Test public void word_only() 
+      throws Exception
+   {
+      Schema schema = new Schema(
+         "who", "turn", "utterance", "word",
+         new Layer("who", "Participants", 0, true, true, true),
+         new Layer("comment", "Comment", 2, true, false, true),
+         new Layer("noise", "Noise", 2, true, false, true),
+         new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+         new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+         new Layer("word", "Words", 2, true, false, false, "turn", true),
+         new Layer("phone", "Phones", 2, true, true, true, "word", true),
+         new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
+         new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
+      // access file
+      NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance_word.TextGrid")) };
+      
+      // create deserializer
+      TextGridSerialization deserializer = new TextGridSerialization();
+      
+      // general configuration
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      assertEquals(6, deserializer.configure(configuration, schema).size());
+      
+      // load the stream
+      ParameterSet defaultParamaters = deserializer.load(streams, schema);
+      // for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+      assertEquals(6, defaultParamaters.size());
+
+      // ignore all but word tiers
+      defaultParamaters.get("tier0").setValue(null); // participant
+      defaultParamaters.get("tier1").setValue(null); // interviewer
+      defaultParamaters.get("tier4").setValue(null); // phone - participant
+      defaultParamaters.get("tier5").setValue(null); // phone - interviewer
+      deserializer.setParameters(defaultParamaters);
+      
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+
+      for (String warning : deserializer.getWarnings())
+      {
+         System.out.println(warning);
+      }
+      assertEquals("No warnings",
+                   0, deserializer.getWarnings().length);
+      
+      assertEquals("test_utterance_word.TextGrid", g.getId());
+
+      // participants     
+      Annotation[] who = g.list("who");
+      assertEquals(2, who.length);
+      assertEquals("participant", who[0].getLabel());
+      assertEquals(g, who[0].getParent());
+      assertEquals("interviewer", who[1].getLabel());
+      assertEquals(g, who[1].getParent());
+      assertNotNull("participants are anchored to the graph", who[0].getStart());
+      assertNotNull("participants are anchored to the graph", who[0].getEnd());
+      assertNotNull("participants are anchored in time", who[0].getStart().getOffset());
+      assertNotNull("participants are anchored in time", who[0].getEnd().getOffset());
+      assertEquals("interviewer", who[1].getLabel());
+      assertEquals(g, who[1].getParent());
+      
+      // turns
+      Annotation[] turns = g.list("turn");
+      assertEquals(2, turns.length);
+      assertEquals("participant", turns[0].getLabel());
+      assertEquals(who[0], turns[0].getParent());
+      assertEquals("interviewer", turns[1].getLabel());
+      assertEquals(who[1], turns[1].getParent());
+
+      // utterances
+      Annotation[] utterances = g.list("utterance");
+      assertEquals(2, utterances.length);
+      assertEquals("participant", utterances[0].getParent().getLabel());
+      assertEquals(turns[0], utterances[0].getParent());
+      assertEquals("interviewer", utterances[1].getParent().getLabel());
+      assertEquals(turns[1], utterances[1].getParent());
+
+      Annotation[] words = g.list("word");
+      String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
+         "and", "ah .", "Cyril", "would", "arrive", "at", "the", "door",
+         "with", "this", "letter", "for", "Mum", 
+         "and", "and", "then", "there", "was", "a", "message .", 
+         "and", "I", "think", "they", "both", "had", "telephones ."
+      };
+      for (int i = 0; i < wordLabels.length; i++)
+      {
+         assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
+         assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
+                      i+1, words[i].getOrdinal());
+         assertEquals(turns[0].getId(), words[i].getParentId());
+      }
+
+      // no convention annotations, because the utterances are not tokenized
+      assertEquals("no conventional comments", 0, g.list("comment").length);
+      assertEquals("no conventional noises", 0, g.list("noise").length);
+      assertEquals("no conventional pronounce annotations", 0, g.list("pronounce").length);
+      assertEquals("no conventional lexical annotations", 0, g.list("lexical").length);
+
+      // phones
+      Annotation[] phones = g.list("phone");
+      assertEquals("phones", 0, phones.length);
+
+   }
+
    @Test public void turn_utterance_word() 
       throws Exception
    {
@@ -1486,7 +1593,7 @@ public class TestTextGridSerialization
       String [] layerIds = { "utterance", "word", "phone" };
       Graph fragment = graphs[0].getFragment(fragmentFrom, fragmentTo, layerIds);
       fragment.shiftAnchors(-fragmentFrom);
-      assertEquals("serialize_utterance_word.TextGrid__212.400-216.363", fragment.getId());
+      assertEquals("serialize_utterance_word__212.400-216.363", fragment.getId());
       Graph[] fragments = { fragment };
 
       // create serializer
@@ -1554,7 +1661,7 @@ public class TestTextGridSerialization
       String [] layerIds = { "utterance", "word", "phone" };
       Graph fragment = graphs[0].getFragment(fragmentFrom, fragmentTo, layerIds);
       fragment.shiftAnchors(-fragmentFrom);
-      assertEquals("serialize_utterance_word.TextGrid__212.400-216.363", fragment.getId());
+      assertEquals("serialize_utterance_word__212.400-216.363", fragment.getId());
       Graph[] fragments = { fragment };
 
       // create serializer
@@ -1623,7 +1730,7 @@ public class TestTextGridSerialization
       String[] layerIds = { "utterance", "word", "phone"};
       Graph fragment = graphs[0].getFragment(fragmentFrom, fragmentTo, layerIds);
       fragment.shiftAnchors(-fragmentFrom);
-      assertEquals("serialize_utterance_word.TextGrid__212.400-216.500", fragment.getId());
+      assertEquals("serialize_utterance_word__212.400-216.500", fragment.getId());
       Graph[] fragments = { fragment };
 
       // create serializer
@@ -1658,8 +1765,7 @@ public class TestTextGridSerialization
       String differences = diff(new File(dir, "expected_serialize_utterance_word__212.4-216.500.TextGrid"),
                                 new File(dir, "serialize_utterance_word.TextGrid__212.400-216.500.TextGrid"));
       if (differences != null) fail(differences);	 
-   }
-   
+   }   
    
    /**
     * Diffs two files.
@@ -1721,7 +1827,6 @@ public class TestTextGridSerialization
       if (d.length() > 0) return d.toString();
       return null;
    } // end of diff()
-
 
    /**
     * Directory for text files.
