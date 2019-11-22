@@ -80,7 +80,7 @@ public class TestPlainTextSerialization
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals("Configuration parameters" + configuration, 10,
+      assertEquals("Configuration parameters" + configuration, 11,
 		   deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
@@ -228,7 +228,7 @@ public class TestPlainTextSerialization
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals("Configuration parameters" + configuration, 10, deserializer.configure(configuration, schema).size());      
+      assertEquals("Configuration parameters" + configuration, 11, deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertEquals("noise", "noise", 
@@ -237,6 +237,8 @@ public class TestPlainTextSerialization
 		   ((Layer)configuration.get("lexicalLayer").getValue()).getId());
       assertEquals("pronounce", "pronounce", 
 		   ((Layer)configuration.get("pronounceLayer").getValue()).getId());
+      assertNull("orthography", 
+		   configuration.get("orthographyLayer").getValue());
       assertEquals("use conventions", Boolean.TRUE, configuration.get("useConventions").getValue());
       assertEquals("maxParticipantLength",
 		   Integer.valueOf(20), configuration.get("maxParticipantLength").getValue());
@@ -417,7 +419,8 @@ public class TestPlainTextSerialization
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals("Configuration parameters" + configuration, 10, deserializer.configure(configuration, schema).size());      
+      assertEquals("Configuration parameters" + configuration,
+                   11, deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertNull("noise", configuration.get("noiseLayer").getValue());
@@ -570,7 +573,8 @@ public class TestPlainTextSerialization
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals("Configuration parameters" + configuration, 10, deserializer.configure(configuration, schema).size());      
+      assertEquals("Configuration parameters" + configuration,
+                   11, deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertNull("noise", configuration.get("noiseLayer").getValue());
@@ -729,7 +733,8 @@ public class TestPlainTextSerialization
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals("Configuration parameters" + configuration, 10, deserializer.configure(configuration, schema).size());      
+      assertEquals("Configuration parameters" + configuration,
+                   11, deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertEquals("noise", "noise", 
@@ -863,7 +868,7 @@ public class TestPlainTextSerialization
       configuration.get("useConventions").setValue(Boolean.FALSE);
 	 
       assertEquals("Configuration parameters" + configuration,
-                   10, deserializer.configure(configuration, schema).size());      
+                   11, deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertEquals("noise", "noise", 
@@ -975,7 +980,8 @@ public class TestPlainTextSerialization
       // also don't use speech conventions
       configuration.get("useConventions").setValue(Boolean.FALSE);
 	 
-      assertEquals("Configuration parameters" + configuration, 10, deserializer.configure(configuration, schema).size());      
+      assertEquals("Configuration parameters" + configuration,
+                   11, deserializer.configure(configuration, schema).size());      
       assertEquals("comment", "comment", 
 		   ((Layer)configuration.get("commentLayer").getValue()).getId());
       assertNull("noise", configuration.get("noiseLayer").getValue());
@@ -1231,7 +1237,7 @@ public class TestPlainTextSerialization
       // general configuration
       ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-      assertEquals(10, serializer.configure(configuration, schema).size());
+      assertEquals(11, serializer.configure(configuration, schema).size());
 
       String[] needLayers = serializer.getRequiredLayers();
       assertEquals(4, needLayers.length);
@@ -1277,7 +1283,13 @@ public class TestPlainTextSerialization
          .setSaturated(true),
          new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
          new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
-         new Layer("word", "Words", 2, true, false, false, "turn", true));
+         new Layer("word", "Words", 2, true, false, false, "turn", true),
+         new Layer("orthography", "Orthography")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false)
+         .setPeersOverlap(false)
+         .setSaturated(true)
+         .setParentId("word"));
       File dir = getDir();
 
       // create a graph with simultaneous speech turns
@@ -1350,6 +1362,12 @@ public class TestPlainTextSerialization
                                          "a7.5",
                                          graph.addAnchor(new Anchor("a8.5", 8.5)).getId(),
                                          "t2"));
+
+      // add orthography tags that should not be used because orthography is not selected
+      for (Annotation word : graph.list("word"))
+      {
+         graph.addTag(word, "orthography", word.getLabel()+"-orthography");
+      }
       
       // create serializer
       PlainTextSerialization serializer = new PlainTextSerialization();
@@ -1357,7 +1375,7 @@ public class TestPlainTextSerialization
       // general configuration
       ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-      assertEquals(10, serializer.configure(configuration, schema).size());
+      assertEquals(11, serializer.configure(configuration, schema).size());
 
       String[] needLayers = serializer.getRequiredLayers();
       assertEquals(4, needLayers.length);
@@ -1370,6 +1388,154 @@ public class TestPlainTextSerialization
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
       String[] layers = {"word"}; 
+      serializer.serialize(Utility.OneGraphSpliterator(graph), layers,
+                           stream -> streams.add(stream),
+                           warning -> System.out.println(warning),
+                           exception -> exceptions.add(exception));
+      if (exceptions.size() > 0) fail(""+exceptions);
+
+      streams.elementAt(0).save(dir);
+
+      // test using diff
+      File result = new File(dir, graph.getId() + ".txt");
+      String differences = diff(new File(dir, "expected_" + graph.getId() + ".txt"), result);
+      if (differences != null)
+      {
+         fail(differences);
+      }
+      else
+      {
+         result.delete();
+      }
+   }
+
+   @Test public void serializeWithTags()
+      throws Exception
+   {
+      Schema schema = new Schema(
+         "who", "turn", "utterance", "word",
+         new Layer("who", "Participants")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(true)
+         .setPeersOverlap(true)
+         .setSaturated(true),
+         new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+         new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+         new Layer("word", "Words", 2, true, false, false, "turn", true),
+         new Layer("orthography", "Orthography")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false)
+         .setPeersOverlap(false)
+         .setSaturated(true)
+         .setParentId("word"),
+         new Layer("pos", "Part of Speech")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false)
+         .setPeersOverlap(false)
+         .setSaturated(true)
+         .setParentId("word"));
+      File dir = getDir();
+      
+      // create a graph with simultaneous speech turns
+
+      Graph graph = new Graph()
+         .setId("tagged_sentence")
+         .setSchema(schema);
+      graph.addAnchor(new Anchor("a0", 0.0));
+      graph.addAnchor(new Anchor("a5", 5.0));
+      graph.addAnchor(new Anchor("a10", 10.0));
+      // participants
+      graph.addAnnotation(new Annotation("author", "author", "who", "a0", "a10"));
+      // turns
+      graph.addAnnotation(new Annotation("t1", "author", "turn", "a0", "a10", "author"));
+      // utterances
+      graph.addAnnotation(new Annotation("u1", "author", "utterance", "a0", "a5", "t1"));
+      graph.addAnnotation(new Annotation("u2", "author", "utterance", "a5", "a10", "t1"));
+
+      // words
+      graph.addAnnotation(new Annotation("the", "The", "word",
+                                         "a0",
+                                         graph.addAnchor(new Anchor("a1", 1.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("quick", "'quick", "word", 
+                                         "a1",
+                                         graph.addAnchor(new Anchor("a2", 2.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("brown", "brown'", "word", 
+                                         "a2",
+                                         graph.addAnchor(new Anchor("a3", 3.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("fox", "fox", "word", 
+                                         "a3",
+                                         graph.addAnchor(new Anchor("a4", 4.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("jumps", "jumps -", "word", 
+                                         "a4",
+                                         "a5",
+                                         "t1"));
+      
+      graph.addAnnotation(new Annotation("over", "over", "word",
+                                         "a5",
+                                         graph.addAnchor(new Anchor("a6", 6.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("the2", "the", "word", 
+                                         "a6",
+                                         graph.addAnchor(new Anchor("a7", 7.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("lazy", "lazy", "word", 
+                                         "a7",
+                                         graph.addAnchor(new Anchor("a8", 8.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("dog", "\"dog\"", "word", 
+                                         "a8",
+                                         graph.addAnchor(new Anchor("a9", 9.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation(".", ".", "word", 
+                                         "a9",
+                                         "a10",
+                                         "t1"));
+      graph.addTag(graph.getAnnotation("the"), "orthography", "the");
+      graph.addTag(graph.getAnnotation("quick"), "orthography", "quick");
+      graph.addTag(graph.getAnnotation("brown"), "orthography", "brown");
+      graph.addTag(graph.getAnnotation("fox"), "orthography", "fox");
+      graph.addTag(graph.getAnnotation("jumps"), "orthography", "jumps");
+      graph.addTag(graph.getAnnotation("over"), "orthography", "over");
+      graph.addTag(graph.getAnnotation("the2"), "orthography", "the");
+      graph.addTag(graph.getAnnotation("lazy"), "orthography", "lazy");
+      graph.addTag(graph.getAnnotation("dog"), "orthography", "dog");
+
+      graph.addTag(graph.getAnnotation("the"), "pos", "DET");
+      graph.addTag(graph.getAnnotation("quick"), "pos", "ADJ");
+      graph.addTag(graph.getAnnotation("brown"), "pos", "ADJ");
+      graph.addTag(graph.getAnnotation("fox"), "pos", "N");
+      graph.addTag(graph.getAnnotation("jumps"), "pos", "V");
+      graph.addTag(graph.getAnnotation("over"), "pos", "PREP");
+      graph.addTag(graph.getAnnotation("the2"), "pos", "DET");
+      graph.addTag(graph.getAnnotation("lazy"), "pos", "ADJ");
+      graph.addTag(graph.getAnnotation("dog"), "pos", "N");
+      graph.addTag(graph.getAnnotation("."), "pos", "PUNC");
+
+      // create serializer
+      PlainTextSerialization serializer = new PlainTextSerialization();
+      
+      // general configuration
+      ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      assertEquals(11, serializer.configure(configuration, schema).size());
+      assertEquals("orthography", "orthography", 
+		   ((Layer)configuration.get("orthographyLayer").getValue()).getId());
+
+      String[] needLayers = serializer.getRequiredLayers();
+      assertEquals(4, needLayers.length);
+      assertEquals("who", needLayers[0]);
+      assertEquals("turn", needLayers[1]);
+      assertEquals("utterance", needLayers[2]);
+      assertEquals("word", needLayers[3]);
+	 
+      // serialize
+      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+      final Vector<NamedStream> streams = new Vector<NamedStream>();
+      String[] layers = {"word", "pos", "orthography"}; 
       serializer.serialize(Utility.OneGraphSpliterator(graph), layers,
                            stream -> streams.add(stream),
                            warning -> System.out.println(warning),

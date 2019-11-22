@@ -35,7 +35,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Spliterator;
@@ -328,6 +328,24 @@ public class PlainTextSerialization
     * @param newNoiseLayer Layer for background noise.
     */
    public PlainTextSerialization setNoiseLayer(Layer newNoiseLayer) { noiseLayer = newNoiseLayer; return this; }
+
+
+   /**
+    * Layer for orthography.
+    * @see #getOrthographyLayer()
+    * @see #setOrthographyLayer(Layer)
+    */
+   protected Layer orthographyLayer;
+   /**
+    * Getter for {@link #orthographyLayer}: Layer for orthography.
+    * @return Layer for orthography.
+    */
+   public Layer getOrthographyLayer() { return orthographyLayer; }
+   /**
+    * Setter for {@link #orthographyLayer}: Layer for orthography.
+    * @param newOrthographyLayer Layer for orthography.
+    */
+   public PlainTextSerialization setOrthographyLayer(Layer newOrthographyLayer) { orthographyLayer = newOrthographyLayer; return this; }
 
    /**
     * Parameters and mappings for the next deserialization.
@@ -826,6 +844,11 @@ public class PlainTextSerialization
          new Parameter("pronounceLayer", Layer.class, "Pronounce layer", "Non-standard pronunciation tags"), 
          Arrays.asList("pronounce", "pronounced"));
       layerToCandidates.put("pronounceLayer", wordTagLayers);
+
+      layerToPossibilities.put(
+         new Parameter("orthographyLayer", Layer.class, "Orthography layer", "Orthography"), 
+         Arrays.asList("orthography"));
+      layerToCandidates.put("orthographyLayer", wordTagLayers);
 
       // add parameters that aren't in the configuration yet, and set possibile/default values
       for (Parameter p : layerToPossibilities.keySet())
@@ -1744,10 +1767,22 @@ public class PlainTextSerialization
    {
       SerializationException errors = null;
       
-      HashSet<String> selectedLayers = new HashSet<String>();
+      LinkedHashSet<String> selectedLayers = new LinkedHashSet<String>();
+      LinkedHashSet<String> tagLayers = new LinkedHashSet<String>();
       if (layerIds != null)
       {
-         for (String l : layerIds) selectedLayers.add(l);
+         for (String l : layerIds)
+         {
+            Layer layer = graph.getSchema().getLayer(l);
+            if (layer != null)
+            {
+               selectedLayers.add(l);
+               if (layer.getParentId().equals(getWordLayer().getId()))
+               {
+                  tagLayers.add(l); // TODO maybe allow other layers
+               }
+            }
+         } // next layeyId
       }
       else
       {
@@ -1809,7 +1844,27 @@ public class PlainTextSerialization
             for (Annotation token : utterance.list(getWordLayer().getId()))
             {
                writer.print(" ");
-               writer.print(token.getLabel()); // TODO transcript convention support
+               Annotation orthography = token;
+               if (orthographyLayer != null && selectedLayers.contains(orthographyLayer.getId()))
+               {
+                  orthography = token.my(orthographyLayer.getId());
+                  if (orthography == null) orthography = token;
+               }
+               writer.print(orthography.getLabel()); // TODO transcript convention support
+               // add tags
+               for (String layerId : tagLayers)
+               {
+                  if (!layerId.equals(token.getLayerId())
+                      && (orthographyLayer == null || !layerId.equals(orthographyLayer.getId())))
+                  {
+                     writer.print("_");
+                     Annotation tag = token.my(layerId);
+                     if (tag != null)
+                     {
+                        writer.print(tag.getLabel());
+                     }
+                  }
+               } // next selected layer 
             } // next token
             writer.println();
          } // next utterance
