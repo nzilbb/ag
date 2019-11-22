@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Spliterator;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
+import java.util.TreeSet;
 import java.util.Vector;
 import java.util.function.Consumer;
 import javax.sound.sampled.AudioFormat;
@@ -50,6 +51,7 @@ import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
+import nzilbb.ag.util.AnnotationComparatorByAnchor;
 import nzilbb.ag.util.ConventionTransformer;
 import nzilbb.ag.util.OrthographyClumper;
 import nzilbb.ag.util.SimpleTokenizer;
@@ -1781,10 +1783,16 @@ public class PlainTextSerialization
             } // it's a graph tag
          } // next selected layer
 
-         // for each utterance
+         // for each utterance...
          Annotation currentParticipant = null;
          MessageFormat fmtParticipant = new MessageFormat(participantFormat);
-         for (Annotation utterance : graph.list(getUtteranceLayer().getId()))
+         
+         // order utterances by anchor so that simultaneous speech comes out in utterance order
+         TreeSet<Annotation> utterancesByAnchor
+            = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
+         for (Annotation u : graph.list(getUtteranceLayer().getId())) utterancesByAnchor.add(u);
+
+         for (Annotation utterance : utterancesByAnchor)
          {
             if (cancelling) break;
             // is the participant changing?

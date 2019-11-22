@@ -39,6 +39,7 @@ import nzilbb.ag.*;
 import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.json.JSONSerialization;
 import nzilbb.ag.serialize.util.NamedStream;
+import nzilbb.ag.serialize.util.Utility;
 import nzilbb.ag.util.Normalizer;
 import nzilbb.ag.util.Validator;
 import nzilbb.configure.Parameter;
@@ -1254,6 +1255,132 @@ public class TestPlainTextSerialization
       // test using diff
       File result = new File(dir, "serialize_utterance_word.txt");
       String differences = diff(new File(dir, "expected_serialize_utterance_word.txt"), result);
+      if (differences != null)
+      {
+         fail(differences);
+      }
+      else
+      {
+         result.delete();
+      }
+   }
+
+   @Test public void serializeSimultaneousSpeech()
+      throws Exception
+   {
+      Schema schema = new Schema(
+         "who", "turn", "utterance", "word",
+         new Layer("who", "Participants")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(true)
+         .setPeersOverlap(true)
+         .setSaturated(true),
+         new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+         new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+         new Layer("word", "Words", 2, true, false, false, "turn", true));
+      File dir = getDir();
+
+      // create a graph with simultaneous speech turns
+
+      Graph graph = new Graph()
+         .setId("simultaneous_speech")
+         .setSchema(schema);
+      graph.addAnchor(new Anchor("a0", 0.0));
+      graph.addAnchor(new Anchor("a15", 15.0));
+      // participants
+      graph.addAnnotation(new Annotation("p1", "p1", "who", "a0", "a15"));
+      graph.addAnnotation(new Annotation("p2", "p2", "who", "a0", "a15"));
+      // turns
+      graph.addAnnotation(new Annotation("t1", "p1", "turn", "a0", "a15", "p1"));
+      graph.addAnchor(new Anchor("a5", 5.0));
+      graph.addAnchor(new Anchor("a10", 10.0));
+      graph.addAnnotation(new Annotation("t2", "p2", "turn", "a5", "a10", "p2"));
+      // utterances
+      graph.addAnnotation(new Annotation("u1-1", "p1", "utterance", "a0", "a5", "t1"));
+      graph.addAnnotation(new Annotation("u1-2", "p1", "utterance", "a5", "a10", "t1"));
+      graph.addAnnotation(new Annotation("u2-1", "p2", "utterance", "a5", "a10", "t2"));
+      graph.addAnnotation(new Annotation("u1-3", "p1", "utterance", "a10", "a15", "t1"));
+
+      // words
+      graph.addAnnotation(new Annotation("w1-1", "w1-1", "word", 
+                                         graph.addAnchor(new Anchor("a1", 1.0)).getId(),
+                                         graph.addAnchor(new Anchor("a2", 2.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("w1-2", "w1-2", "word", 
+                                         "a2",
+                                         graph.addAnchor(new Anchor("a3", 3.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("w1-3", "w1-3", "word", 
+                                         "a3",
+                                         graph.addAnchor(new Anchor("a4", 4.0)).getId(),
+                                         "t1"));
+      
+      graph.addAnnotation(new Annotation("w1-6", "w1-6", "word", 
+                                         graph.addAnchor(new Anchor("a6", 6.0)).getId(),
+                                         graph.addAnchor(new Anchor("a7", 7.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("w1-7", "w1-7", "word", 
+                                         "a7", 
+                                         graph.addAnchor(new Anchor("a8", 8.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("w1-8", "w1-8", "word", 
+                                         "a8",
+                                         graph.addAnchor(new Anchor("a9", 9.0)).getId(),
+                                         "t1"));
+      
+
+      graph.addAnnotation(new Annotation("w1-11", "w1-11", "word", 
+                                         graph.addAnchor(new Anchor("a11", 11.0)).getId(),
+                                         graph.addAnchor(new Anchor("a12", 12.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("w1-12", "w1-12", "word", 
+                                         "a12",
+                                         graph.addAnchor(new Anchor("a13", 13.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("w1-13", "w1-13", "word", 
+                                         "a13",
+                                         graph.addAnchor(new Anchor("a14", 14.0)).getId(),
+                                         "t1"));
+      
+      graph.addAnnotation(new Annotation("w2-6.5", "w2-6.5", "word", 
+                                         graph.addAnchor(new Anchor("a6.5", 6.5)).getId(),
+                                         graph.addAnchor(new Anchor("a7.5", 7.5)).getId(),
+                                         "t2"));
+      graph.addAnnotation(new Annotation("w2-7.5", "w2-7.5", "word", 
+                                         "a7.5",
+                                         graph.addAnchor(new Anchor("a8.5", 8.5)).getId(),
+                                         "t2"));
+      
+      // create serializer
+      PlainTextSerialization serializer = new PlainTextSerialization();
+      
+      // general configuration
+      ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      assertEquals(10, serializer.configure(configuration, schema).size());
+
+      String[] needLayers = serializer.getRequiredLayers();
+      assertEquals(4, needLayers.length);
+      assertEquals("who", needLayers[0]);
+      assertEquals("turn", needLayers[1]);
+      assertEquals("utterance", needLayers[2]);
+      assertEquals("word", needLayers[3]);
+	 
+      // serialize
+      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+      final Vector<NamedStream> streams = new Vector<NamedStream>();
+      String[] layers = {"word"}; 
+      serializer.serialize(Utility.OneGraphSpliterator(graph), layers,
+                           stream -> streams.add(stream),
+                           warning -> System.out.println(warning),
+                           exception -> exceptions.add(exception));
+      if (exceptions.size() > 0) fail(""+exceptions);
+
+      streams.elementAt(0).save(dir);
+
+      // test using diff
+      File result = new File(dir, graph.getId() + ".txt");
+      String differences = diff(new File(dir, "expected_" + graph.getId() + ".txt"), result);
       if (differences != null)
       {
          fail(differences);
