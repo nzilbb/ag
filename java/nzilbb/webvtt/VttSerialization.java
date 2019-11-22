@@ -21,35 +21,46 @@
 //
 package nzilbb.webvtt;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.URL;
+import java.text.MessageFormat;
+import java.text.ParseException;
 import java.util.Arrays;
-import java.util.Vector;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.text.ParseException;
-import java.net.URL;
+import java.util.Locale;
+import java.util.Spliterator;
+import java.util.TreeSet;
+import java.util.Vector;
+import java.util.function.Consumer;
 import nzilbb.ag.*;
-import nzilbb.ag.util.OrthographyClumper;
-import nzilbb.ag.util.SimpleTokenizer;
-import nzilbb.ag.util.ConventionTransformer;
-import nzilbb.ag.util.SpanningConventionTransformer;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
+import nzilbb.ag.util.AnnotationComparatorByAnchor;
+import nzilbb.ag.util.ConventionTransformer;
+import nzilbb.ag.util.OrthographyClumper;
+import nzilbb.ag.util.SimpleTokenizer;
+import nzilbb.ag.util.SpanningConventionTransformer;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
+import nzilbb.util.IO;
+import nzilbb.util.TempFileInputStream;
 import nzilbb.util.Timers;
 
 /**
- * Deserializes VTT subtitle/caption files.
+ * (De)serializes VTT subtitle/caption files.
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class VttDeserializer
-   implements IDeserializer
+public class VttSerialization
+   implements IDeserializer, ISerializer
 {
    // Attributes:
    protected Vector<String> warnings;
@@ -257,13 +268,48 @@ public class VttDeserializer
     */
    public void setMetaData(HashMap<String,String> newMetaData) { metaData = newMetaData; }
 
+   private long graphCount = 0;
+   private long consumedGraphCount = 0;
+   /**
+    * Determines how far through the serialization is.
+    * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
+    */
+   public Integer getPercentComplete()
+   {
+      if (graphCount < 0) return null;
+      return (int)((consumedGraphCount * 100) / graphCount);
+   }
+   
+   /**
+    * Serialization marked for cancelling.
+    * @see #getCancelling()
+    * @see #setCancelling(boolean)
+    */
+   protected boolean cancelling;
+   /**
+    * Getter for {@link #cancelling}: Serialization marked for cancelling.
+    * @return Serialization marked for cancelling.
+    */
+   public boolean getCancelling() { return cancelling; }
+   /**
+    * Setter for {@link #cancelling}: Serialization marked for cancelling.
+    * @param newCancelling Serialization marked for cancelling.
+    */
+   public VttSerialization setCancelling(boolean newCancelling) { cancelling = newCancelling; return this; }
+   /**
+    * Cancel the serialization in course (if any).
+    */
+   public void cancel()
+   {
+      setCancelling(true);
+   }
 
    // Methods:
 
    /**
     * Default constructor.
     */
-   public VttDeserializer()
+   public VttSerialization()
    {
    } // end of constructor
 
@@ -754,5 +800,162 @@ public class VttDeserializer
       return graphs;
    }
 
+   // ISerializer methods
 
-} // end of class VttDeserializer
+   /**
+    * Determines which layers, if any, must be present in the graph that will be serialized.
+    * @return A list of IDs of layers that must be present in the graph that will be serialized.
+    * @throws SerializationParametersMissingException If not all required parameters have a value.
+    */
+   public String[] getRequiredLayers() throws SerializationParametersMissingException
+   {
+      Vector<String> requiredLayers = new Vector<String>();
+      if (getParticipantLayer() != null) requiredLayers.add(getParticipantLayer().getId());
+      if (getTurnLayer() != null) requiredLayers.add(getTurnLayer().getId());
+      if (getUtteranceLayer() != null) requiredLayers.add(getUtteranceLayer().getId());
+      if (getWordLayer() != null) requiredLayers.add(getWordLayer().getId());
+      return requiredLayers.toArray(new String[0]);
+   } // getRequiredLayers()
+   
+   /**
+    * Determines the cardinality between graphs and serialized streams.
+    * <p>The cardinatlity of this deseerializer is NToN.
+    * @return {@link nzilbb.ag.serialize.ISerializer#Cardinality}.NToN.
+    */
+   public Cardinality getCardinality()
+   {
+      return Cardinality.NToN;
+   }
+   
+   /**
+    * Serializes the given series of graphs, generating one or more {@link NamedStream}s.
+    * <p>Many data formats will only yield one stream per graph (e.g. Transcriber
+    * transcript or Praat textgrid), however there are formats that use multiple files for
+    * the same transcript (e.g. XWaves, EmuR), and others still that will produce one
+    * stream from many Graphs (e.g. CSV).
+    * <p>The method is synchronous in the sense that it should not return until all graphs
+    * have been serialized.
+    * @param graphs The graphs to serialize.
+    * @param layerIds The IDs of the layers to include, or null for all layers.
+    * @param consumer The consumer receiving the streams.
+    * @param warnings A consumer for (non-fatal) warning messages.
+    * @param errors A consumer for (fatal) error messages.
+    * @throws SerializerNotConfiguredException if the object has not been configured.
+    */
+   public void serialize(Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
+      throws SerializerNotConfiguredException
+   {
+      graphCount = graphs.getExactSizeIfKnown();
+      graphs.forEachRemaining(graph -> {
+            if (getCancelling()) return;
+            try
+            {
+               consumer.accept(serializeGraph(graph, layerIds));
+            }
+            catch(SerializationException exception)
+            {
+               errors.accept(exception);
+            }
+            consumedGraphCount++;
+         }); // next graph
+   }
+   
+   /**
+    * Serializes the given graph, generating a {@link NamedStream}.
+    * @param graph The graph to serialize.
+    * @return A named stream that contains the TextGrid. 
+    * @throws SerializationException if errors occur during deserialization.
+    */
+   protected NamedStream serializeGraph(Graph graph, String[] layerIds) 
+      throws SerializationException
+   {
+      SerializationException errors = null;
+      try
+      {
+         // write the text to a temporary file
+         File f = File.createTempFile(graph.getId(), ".txt");
+         PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(f), "utf-8"));
+
+         writer.println("WEBVTT Kind: captions");
+         writer.println();
+         writer.println("NOTE Generated by nzilbb.ag converter: " + getDescriptor());
+         writer.println();
+
+         Schema schema = graph.getSchema();
+
+         // number each participant
+         int s = 0;
+         for (Annotation participant : graph.list(participantLayer.getId()))
+         {
+            participant.put("@serial", Integer.valueOf(s++));
+         } // next participant
+         
+         // order utterances by anchor so that simultaneous speech comes out in utterance order
+         TreeSet<Annotation> utterancesByAnchor
+            = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
+         for (Annotation u : graph.list(getUtteranceLayer().getId())) utterancesByAnchor.add(u);
+         
+         int iSubtitle = 0;
+         for (Annotation utterance : utterancesByAnchor)
+         {
+            if (cancelling) break;
+	    writer.println("" + (++iSubtitle));
+	    writer.println(VttTime(utterance.getStart().getOffset())
+                           + " --> "
+                           + VttTime(utterance.getEnd().getOffset()));
+
+            // is the participant changing?
+            Annotation participant = utterance.my(participantLayer.getId());
+	    writer.print("<v " + participant.get("@serial") + ">");
+
+            boolean firstWord = true;
+            for (Annotation token : utterance.list(getWordLayer().getId()))
+            {
+               if (firstWord)
+               {
+                  firstWord = false;
+               }
+               else
+               {
+                  writer.print(" ");
+               }
+               writer.print(token.getLabel());
+            } // next token
+	    writer.println("</v>"); // to end the line
+            writer.println(); // to create a blank line
+         } // next utterance
+         writer.close();
+
+         TempFileInputStream in = new TempFileInputStream(f);
+         
+         // return a named stream from the file
+         return new NamedStream(in, IO.SafeFileNameUrl(graph.getId()) + ".vtt");
+      }
+      catch(Exception exception)
+      {
+         errors = new SerializationException();
+         errors.initCause(exception);
+         errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
+         throw errors;
+      }      
+   }
+   
+   private static final MessageFormat timeFormatter = new MessageFormat(
+      "{0,number,00}:{1,number,00}:{2,number,00.000}", new Locale("en"));
+   /**
+    * Formats a number of seconds as HH:MM:SS,mmm
+    * @param dSeconds
+    * @return The time in HH:MM:SS,mmm format.
+    */
+   public static String VttTime(double dSeconds)
+   {
+      Integer iHours = Integer.valueOf((int)(dSeconds / 3600));
+      dSeconds -= (iHours * 3600);
+      Integer iMinutes = Integer.valueOf((int)(dSeconds / 60));
+      dSeconds -= (iMinutes * 60);
+      Double dTheRest = Double.valueOf(dSeconds);
+      Object[] args = {iHours, iMinutes, dTheRest};
+      return timeFormatter.format(args);
+   } // end of VttTime()
+
+} // end of class VttSerialization
