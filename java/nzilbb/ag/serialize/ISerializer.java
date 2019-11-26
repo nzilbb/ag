@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2019 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -129,7 +129,6 @@ public interface ISerializer
     * Cancel the serialization in course (if any).
     */
    public void cancel();
-
 
    /**
     * Returns any warnings that may have arisen during the last execution of {@link #serialize(Graph[],String[])}.
