@@ -22,6 +22,7 @@
 package nzilbb.ag.sql;
 
 import java.sql.*;
+import java.text.NumberFormat;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import nzilbb.ag.*;
@@ -41,7 +42,8 @@ public class ResultSeries
    private ResultSet rs;
    private long nextRow = 0;
    private long rowCount = -1;
-   private boolean cancelling = false;   
+   private boolean cancelling = false;
+   private NumberFormat prefixFormatter = NumberFormat.getIntegerInstance();
 
    /**
     * The graph store object.
@@ -76,7 +78,6 @@ public class ResultSeries
     * @param newSearchId <tt>result.search_id</tt> key value.
     */
    public ResultSeries setSearchId(long newSearchId) { searchId = newSearchId; return this; }
-
    
    /**
     * Layers to load into the fragments.
@@ -94,6 +95,23 @@ public class ResultSeries
     * @param newLayers Layers to load into the fragments.
     */
    public ResultSeries setLayers(String[] newLayers) { layers = newLayers; return this; }
+   
+   /**
+    * Whether to prefix fragment names with a numeric serial number or not.
+    * @see #getPrefixNames()
+    * @see #setPrefixNames(boolean)
+    */
+   protected boolean prefixNames = true;
+   /**
+    * Getter for {@link #prefixNames}: Whether to prefix fragment names with a numeric serial number or not.
+    * @return Whether to prefix fragment names with a numeric serial number or not.
+    */
+   public boolean getPrefixNames() { return prefixNames; }
+   /**
+    * Setter for {@link #prefixNames}: Whether to prefix fragment names with a numeric serial number or not.
+    * @param newPrefixNames Whether to prefix fragment names with a numeric serial number or not.
+    */
+   public ResultSeries setPrefixNames(boolean newPrefixNames) { prefixNames = newPrefixNames; return this; }
    
    // Methods:
    
@@ -116,6 +134,10 @@ public class ResultSeries
       rowCount = rs.getLong(1);
       rs.close();
       sql.close();
+      // set zero-padding of prefixes based on number of rows
+      prefixFormatter.setMinimumIntegerDigits((int)(Math.log10(rowCount)) + 1);
+      // no thousands-separators
+      prefixFormatter.setGroupingUsed(false);
       
       sql = store.getConnection().prepareStatement(
 	 "SELECT match_id, result.ag_id, defining_annotation_id,"
@@ -179,6 +201,11 @@ public class ResultSeries
          Graph fragment = store.getFragment(
             rs.getString("ag_id"), "em_12_"+rs.getLong("defining_annotation_id"), layers);
          fragment.shiftAnchors(-rs.getDouble("start_offset"));
+         if (prefixNames)
+         {
+            String prefix = prefixFormatter.format(nextRow);
+            fragment.setId(prefix + "-" + fragment.getId());
+         }
 	 action.accept(fragment);
          return true;
       }
