@@ -364,9 +364,14 @@ public class TestSchema
 
     // check child order is preserved
     Iterator<String> turnChildren = c.getLayer("turn").getChildren().keySet().iterator();
-    assertEquals("word first", turnChildren.next(), "word");
-    assertEquals("utterance last", turnChildren.next(), "utterance");
-    
+    assertEquals("word first", "word", turnChildren.next());
+    assertEquals("utterance last", "utterance", turnChildren.next());
+
+    // check root child order is preserved
+    Iterator<String> rootChildren = c.getRoot().getChildren().keySet().iterator();
+    assertEquals("topic first", "topic", rootChildren.next());
+    assertEquals("who last", "who", rootChildren.next());
+
   }
 
   public static void main(String args[]) 

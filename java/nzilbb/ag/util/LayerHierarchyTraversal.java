@@ -22,6 +22,7 @@
 package nzilbb.ag.util;
 
 import java.util.Collection;
+import java.util.stream.Stream;
 import java.util.Comparator;
 import java.util.TreeSet;
 
@@ -263,22 +264,22 @@ public class LayerHierarchyTraversal<R>
     */
    public R traverseLayers(Collection<Layer> layers)
    {
-      // sort the top level layers with the comparator
-      TreeSet<Layer> orderedTopLevelLayers = new TreeSet<Layer>(
-         peerComparator != null? peerComparator : defaultComparator);
-      for (Layer layer : layers)
+      // a top level layer is any layer with "graph" as a parent, 
+      // or any layer whose parent is not in the graph 
+      // (this ensures all layers are included, even for partial graphs)
+      // (this ensures all layers are included, even for partial graphs)
+      Stream<Layer> topLevelLayersStream = layers.stream()
+         .filter(layer -> !layer.getId().equals("graph"))
+         .filter(layer -> layer.getParentId() != null)
+         .filter(layer -> layer.getParentId().equals("graph")
+                 || !schema.getLayers().containsKey(layer.getParentId()));
+      if (peerComparator != null)
       {
-         if (layer.getId().equals("graph")) continue;
-         if (layer.getParentId().equals("graph"))
-         {
-            orderedTopLevelLayers.add(layer);
-         }
-      } // next top level layer
-      // for each top-level layer
-      for (Layer layer : orderedTopLevelLayers)
-      {
-         traverseLayer(layer);
+         topLevelLayersStream = topLevelLayersStream.sorted(peerComparator);            
       }
+      
+      // for each top level layer
+      topLevelLayersStream.forEach(this::traverseLayer);
       return getResult();
    } // end of traverseLayers()
   
@@ -291,28 +292,21 @@ public class LayerHierarchyTraversal<R>
    {
       setSchema(schema);
       
-      // sort the top level layers with the comparator
-      TreeSet<Layer> orderedTopLevelLayers = new TreeSet<Layer>(
-         peerComparator != null? peerComparator : defaultComparator);
       // a top level layer is any layer with "graph" as a parent, 
       // or any layer whose parent is not in the graph 
       // (this ensures all layers are included, even for partial graphs)
-      // for each top-level layer
-      for (Layer layer : schema.getLayers().values())
+      Stream<Layer> topLevelLayersStream = schema.getLayers().values().stream()
+         .filter(layer -> !layer.getId().equals("graph"))
+         .filter(layer -> layer.getParentId() != null)
+         .filter(layer -> layer.getParentId().equals("graph")
+                 || !schema.getLayers().containsKey(layer.getParentId()));
+      if (peerComparator != null)
       {
-         if (layer.getParentId() != null
-             && (layer.getParentId().equals("graph")
-                 || !schema.getLayers().containsKey(layer.getParentId()))
-             && !layer.getId().equals("graph"))
-         {
-            orderedTopLevelLayers.add(layer);
-         }
-      } // next top level layer
-      // for each top level layer
-      for (Layer layer : orderedTopLevelLayers)
-      {
-         traverseLayer(layer);
+         topLevelLayersStream = topLevelLayersStream.sorted(peerComparator);            
       }
+      
+      // for each top level layer
+      topLevelLayersStream.forEach(this::traverseLayer);
       return getResult();
    } // end of traverseSchema()
    
