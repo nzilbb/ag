@@ -326,9 +326,8 @@ public class SqlGraphStore
       sql.close();
 
       // graph layers
-      layerIds.add("transcript_type"); // special case that's not in attribute_definition
       sql = getConnection().prepareStatement(
-        "SELECT attribute"
+        "SELECT attribute, attribute_definition.category"
         +" FROM attribute_definition"
         +" LEFT OUTER JOIN attribute_category"
         +" ON attribute_definition.class_id = attribute_category.class_id"
@@ -336,10 +335,22 @@ public class SqlGraphStore
         +" WHERE attribute_definition.class_id = 'transcript'"
         +" ORDER BY attribute_category.display_order, attribute_definition.display_order, attribute");
       rs = sql.executeQuery();
+      // in order to get category ordering right, "transcript_type" is added as the first
+      // "General" category attribute layer.
+      boolean haveAddedTranscriptType = false; 
       while (rs.next())
       {
-        layerIds.add("transcript_"+rs.getString("attribute"));
+         if (!haveAddedTranscriptType && "General".equals(rs.getString("category")))
+         {
+            layerIds.add("transcript_type");
+            haveAddedTranscriptType = true;
+         }
+         layerIds.add("transcript_"+rs.getString("attribute"));
       } // next layer
+      if (!haveAddedTranscriptType)
+      { // never encountered the "General" category
+         layerIds.add("transcript_type");
+      }
       rs.close();
       sql.close();
 
@@ -539,7 +550,6 @@ public class SqlGraphStore
         layer.put("@enabled", rs.getString("enabled"));
         layer.put("@notes", rs.getString("notes"));
         layer.put("@project_id", rs.getString("project_id"));
-        System.out.println(rs.getString("layer_id") + " " + rs.getString("project"));
         layer.put("@data_mime_type", rs.getString("data_mime_type"));
         layer.put("@alignment", rs.getString("alignment"));
         layer.put("@style", rs.getString("style"));
@@ -2604,7 +2614,7 @@ public class SqlGraphStore
             }
             catch(GraphNotFoundException exception)
             {
-              System.out.println("getMatchingAnnotationsPage: " + expression + " : " + exception);
+              System.err.println("getMatchingAnnotationsPage: " + expression + " : " + exception);
               continue;
             }
           } // need graph
@@ -3223,7 +3233,6 @@ public class SqlGraphStore
                     catch(Exception exception)
                     {}
                   }
-                  System.out.println("Annotation " + annotation + " ("+layer+")" + annotation.getOrdinal());
                   
                   Annotation parent = fragment.getAnnotation(annotation.getParentId());
                   if (setOrdinalMinimum && parent != null)
@@ -6584,13 +6593,13 @@ public class SqlGraphStore
       String ffmpegPath = getSystemAttribute("ffmpegPath");
       if (ffmpegPath == null || ffmpegPath.length() == 0)
       {
-        System.out.println("SqlGraphStore.generateMissingMedia: ffmpegPath not set");
+        System.err.println("SqlGraphStore.generateMissingMedia: ffmpegPath not set");
         return;
       }
       File exe = new File(ffmpegPath, "ffmpeg");
       if (!exe.exists())
       {
-        System.out.println("SqlGraphStore.generateMissingMedia: ffmpegPath not found: " + exe.getPath());
+        System.err.println("SqlGraphStore.generateMissingMedia: ffmpegPath not found: " + exe.getPath());
         return;
       }
 	 
