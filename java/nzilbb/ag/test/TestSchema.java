@@ -311,16 +311,16 @@ public class TestSchema
                 false, // saturated
                 "who", // parentId
                 true), // parentIncludes
-      new Layer("utterance", "Utterances", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                true, // saturated
-                "turn", // parentId
-                true), // parentIncludes
       new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
                 true, // peers
                 false, // peersOverlap
                 false, // saturated
+                "turn", // parentId
+                true), // parentIncludes
+      new Layer("utterance", "Utterances", Constants.ALIGNMENT_INTERVAL,
+                true, // peers
+                false, // peersOverlap
+                true, // saturated
                 "turn", // parentId
                 true), // parentIncludes
       new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
@@ -361,6 +361,12 @@ public class TestSchema
                    layerCopy.getParent() != s.getLayer(layerCopy.getParentId()));
       }
     } // next layer
+
+    // check child order is preserved
+    Iterator<String> turnChildren = c.getLayer("turn").getChildren().keySet().iterator();
+    assertEquals("word first", turnChildren.next(), "word");
+    assertEquals("utterance last", turnChildren.next(), "utterance");
+    
   }
 
   public static void main(String args[]) 

@@ -442,8 +442,10 @@ public class Schema
   public Object clone()
   {
     Schema copy = new Schema().copyLayerIdsFrom(this);
-    
-    LayerHierarchyTraversal<Schema> t = new LayerHierarchyTraversal<Schema>(copy, this) {
+
+    // null comparator, so that children will be in the same order in the copy as they are
+    // in the original
+    LayerHierarchyTraversal<Schema> t = new LayerHierarchyTraversal<Schema>(copy, null, this) {
         // add parents before children (so we know we don't have to check for orphans)
         protected void pre(Layer layer)
         {

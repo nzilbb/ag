@@ -131,7 +131,8 @@ public class TestLayerHierarchyTraversal
 			   true)); // parentIncludes
 
       // top down
-      LayerHierarchyTraversal<StringBuffer> topDown = new LayerHierarchyTraversal<StringBuffer>(new StringBuffer(), g.getSchema())
+      LayerHierarchyTraversal<StringBuffer> topDown = new LayerHierarchyTraversal<StringBuffer>(
+         new StringBuffer(), g.getSchema())
 	 {
 	    protected void pre(Layer layer)
 	    {
@@ -161,6 +162,96 @@ public class TestLayerHierarchyTraversal
 		   "phone syllable pos orthography dependency word entity parse utterance turn ", 
 		   bottomUp.getResult().toString());
       
+   }
+
+   @Test public void nullComparator() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");
+
+      // add layers in a different order that the traversal should take
+      // traversal order should be 
+      // * by height, (turn before word)
+      // * and among peers, ALIGNMENT_NONE are first (orthography before syllable)
+      // * and then peers=false are first, (orthogrphy before pos)
+      // * then childless peers are first (utterance before word)
+      // so the traversal order should be:
+      // turn utterance parse entity word orthography pos syllable phone
+      g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL, 
+			   true, // peers
+			   true, // peersOverlap
+			   false)); // saturated
+      g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL, 
+			   true, // peers
+			   false, // peersOverlap
+			   false,  // saturated
+			   "turn", // parent
+			   true)); // parentIncludes
+      g.addLayer(new Layer("utterance", "Utterances", Constants.ALIGNMENT_INTERVAL, 
+			   true, // peers
+			   false, // peersOverlap
+			   true,  // saturated
+			   "turn", // parent
+			   true)); // parentIncludes
+      g.addLayer(new Layer("entity", "Name entity", Constants.ALIGNMENT_INTERVAL, 
+			   true, // peers
+			   false, // peersOverlap
+			   false,  // saturated
+			   "turn", // parent
+			   true)); // parentIncludes
+      g.addLayer(new Layer("parse", "Syntactic Parse", Constants.ALIGNMENT_INTERVAL, 
+			   true, // peers
+			   true, // peersOverlap
+			   false,  // saturated
+			   "turn", // parent
+			   true)); // parentIncludes
+      g.addLayer(new Layer("dependency", "Syntactic Dependency", Constants.ALIGNMENT_INTERVAL, 
+			   false, // peers
+			   false, // peersOverlap
+			   false,  // saturated
+			   "word", // parent
+			   false)); // parentIncludes
+      g.addLayer(new Layer("syllable", "Syllables", Constants.ALIGNMENT_INTERVAL, 
+			   true, // peers
+			   false, // peersOverlap
+			   true, // saturated
+			   "word", // parent
+			   true)); // parentIncludes
+      g.addLayer(new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL, 
+			   true, // peers
+			   false, // peersOverlap
+			   true, // saturated
+			   "syllable", // parent
+			   true)); // parentIncludes
+      g.addLayer(new Layer("orthography", "Orthography", Constants.ALIGNMENT_NONE, 
+			   false, // peers
+			   false, // peersOverlap
+			   true, // saturated
+			   "word", // parent
+			   true)); // parentIncludes
+      g.addLayer(new Layer("pos", "Part of Speech", Constants.ALIGNMENT_NONE, 
+			   true, // peers
+			   false, // peersOverlap
+			   true, // saturated
+			   "word", // parent
+			   true)); // parentIncludes
+
+      // null comparator, so layers appear in insertion order (above)
+      // i.e. word before utterance, syllable before orthography, etc.
+      LayerHierarchyTraversal<StringBuffer> topDown = new LayerHierarchyTraversal<StringBuffer>(
+         new StringBuffer(), null, g.getSchema())
+	 {
+	    protected void pre(Layer layer)
+	    {
+	       result.append(layer.getId() + " ");
+	    }
+	 };
+      
+      assertEquals("top down", 
+		   "turn word dependency syllable phone orthography pos utterance entity parse ", 
+		   topDown.getResult().toString());
+            
    }
 
    @Test public void partialGraph() 

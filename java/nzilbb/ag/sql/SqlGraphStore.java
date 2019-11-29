@@ -328,8 +328,13 @@ public class SqlGraphStore
       // graph layers
       layerIds.add("transcript_type"); // special case that's not in attribute_definition
       sql = getConnection().prepareStatement(
-        "SELECT attribute FROM attribute_definition"
-        +" WHERE class_id = 'transcript' ORDER BY display_order, attribute");
+        "SELECT attribute"
+        +" FROM attribute_definition"
+        +" LEFT OUTER JOIN attribute_category"
+        +" ON attribute_definition.class_id = attribute_category.class_id"
+        +" AND attribute_definition.category = attribute_category.category"
+        +" WHERE attribute_definition.class_id = 'transcript'"
+        +" ORDER BY attribute_category.display_order, attribute_definition.display_order, attribute");
       rs = sql.executeQuery();
       while (rs.next())
       {
@@ -340,8 +345,13 @@ public class SqlGraphStore
 
       // participant layers
       sql = getConnection().prepareStatement(
-        "SELECT attribute FROM attribute_definition"
-        +" WHERE class_id = 'speaker' ORDER BY display_order, attribute");
+        "SELECT attribute"
+        +" FROM attribute_definition"
+        +" LEFT OUTER JOIN attribute_category"
+        +" ON attribute_definition.class_id = attribute_category.class_id"
+        +" AND attribute_definition.category = attribute_category.category"
+        +" WHERE attribute_definition.class_id = 'speaker'"
+        +" ORDER BY attribute_category.display_order, attribute_definition.display_order, attribute");
       rs = sql.executeQuery();
       while (rs.next())
       {

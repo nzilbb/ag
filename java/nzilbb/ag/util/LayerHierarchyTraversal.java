@@ -21,15 +21,17 @@
 //
 package nzilbb.ag.util;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.TreeSet;
-import java.util.Collection;
 
 import nzilbb.ag.*;
 
 /**
  * Traverses {@link Layer}s a {@link Schema}'s Layer hierarchy.
- * <p>This base class handles the traversal. The pre-order and post-order operations (the actual work being done) can be implemented by subclassing to implement {@link #pre(Layer)} and {@link #post(Layer)}.
+ * <p>This base class handles the traversal. The pre-order and post-order operations (the
+ * actual work being done) can be implemented by subclassing to implement 
+ * {@link #pre(Layer)} and {@link #post(Layer)}.
  * <p>For example, to print a list of layers in hierarchy order:
  * <pre>
  * LayerHierarchyTraversal&lt;StringBuffer&gt; t = new LayerHierarchyTraversal&lt;StringBuffer&gt;(new StringBuffer(), schema)
@@ -47,7 +49,7 @@ import nzilbb.ag.*;
 public class LayerHierarchyTraversal<R>
 {
    // Attributes:
-
+   
    /**
     * Default comparator for ordering peer layers.
     * <p>The default ordering is
@@ -111,9 +113,10 @@ public class LayerHierarchyTraversal<R>
             return l1.getId().compareTo(l2.getId());
          }
       };
-
+   
    /**
-    * Comparator for ordering peer layers.
+    * Comparator for ordering peer layers. Set to <tt>null</tt> for order the children are
+    * encountered in.
     * @see #defaultComparator
     * @see #getPeerComparator()
     * @see #setPeerComparator(Comparator)
@@ -121,12 +124,14 @@ public class LayerHierarchyTraversal<R>
    protected Comparator<Layer> peerComparator = defaultComparator;
    /**
     * Getter for {@link #peerComparator}: Comparator for ordering peer layers.
-    * @return Comparator for ordering peer layers.
+    * @return Comparator for ordering peer layers, or <tt>null</tt> for order the children
+    * are encountered in.
     */
    public Comparator<Layer> getPeerComparator() { return peerComparator; }
    /**
     * Setter for {@link #peerComparator}: Comparator for ordering peer layers.
-    * @param newPeerComparator Comparator for ordering peer layers.
+    * @param newPeerComparator Comparator for ordering peer layers, or <tt>null</tt>
+    * for order the children are encountered in.
     */
    public LayerHierarchyTraversal<R> setPeerComparator(Comparator<Layer> newPeerComparator)
    { peerComparator = newPeerComparator; return this; }
@@ -259,7 +264,8 @@ public class LayerHierarchyTraversal<R>
    public R traverseLayers(Collection<Layer> layers)
    {
       // sort the top level layers with the comparator
-      TreeSet<Layer> orderedTopLevelLayers = new TreeSet<Layer>(getPeerComparator());
+      TreeSet<Layer> orderedTopLevelLayers = new TreeSet<Layer>(
+         peerComparator != null? peerComparator : defaultComparator);
       for (Layer layer : layers)
       {
          if (layer.getId().equals("graph")) continue;
@@ -286,7 +292,8 @@ public class LayerHierarchyTraversal<R>
       setSchema(schema);
       
       // sort the top level layers with the comparator
-      TreeSet<Layer> orderedTopLevelLayers = new TreeSet<Layer>(getPeerComparator());
+      TreeSet<Layer> orderedTopLevelLayers = new TreeSet<Layer>(
+         peerComparator != null? peerComparator : defaultComparator);
       // a top level layer is any layer with "graph" as a parent, 
       // or any layer whose parent is not in the graph 
       // (this ensures all layers are included, even for partial graphs)
@@ -318,8 +325,12 @@ public class LayerHierarchyTraversal<R>
    protected void traverseLayer(Layer layer)
    {
       pre(layer);
-      TreeSet<Layer> orderedChildren = new TreeSet<Layer>(getPeerComparator());
-      orderedChildren.addAll(layer.getChildren().values());
+      Collection<Layer> orderedChildren = layer.getChildren().values();
+      if (peerComparator != null)
+      {
+         orderedChildren = new TreeSet<Layer>(peerComparator);
+         orderedChildren.addAll(layer.getChildren().values());
+      }
       for (Layer childLayer : orderedChildren)
       {
          traverseLayer(childLayer);
