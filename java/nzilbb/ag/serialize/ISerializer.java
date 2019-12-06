@@ -37,8 +37,9 @@ import nzilbb.configure.ParameterSet;
  *  <li>Configure serializer using {@link #configure(ParameterSet,Schema)}</li>
  *  <li>Determine which (if any) layers are required for the serialization by calling
  *   {@link #getRequiredLayers()}, which returns a list of layer IDs.</li>
- *  <li>Serialize the graph using {@link #serialize(Graph[],String[])}</li>
- *  <li>Possibly display or log warnings returned by {@link #getWarnings()}</li>
+ *  <li>Serialize the graph using {@link #serialize(Spliterator,String[],Consumer,Consumer,Consumer)}</li>
+ *  <li>Possibly display or log warnings consumed during serialize() by 
+ *      {@link #serialize(Spliterator,String[],Consumer,Consumer,Consumer)}</li>
  * </ol>
  * @author Robert Fromont robert@fromont.net.nz
  */
@@ -129,12 +130,5 @@ public interface ISerializer
     * Cancel the serialization in course (if any).
     */
    public void cancel();
-
-   /**
-    * Returns any warnings that may have arisen during the last execution of {@link #serialize(Graph[],String[])}.
-    * @return A possibly empty list of warnings.
-    */
-   public String[] getWarnings();
-
 
 } // end of interface IDeserialize
