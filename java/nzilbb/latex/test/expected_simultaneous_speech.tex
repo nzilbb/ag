@@ -1,0 +1,27 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\pagestyle{plain}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
+% command for speaker turns...
+% copy this into your preamble if you copy parts of the transcript into another document:
+\newcommand{\turn}[2]{
+\item[#1:] #2
+}
+\begin{document}
+\begin{center}\textbf{simultaneous\_speech}\end{center}
+
+\begin{description}
+
+\turn{p1}{w1-1 w1-2 w1-3\\
+w1-6 w1-7 w1-8}
+
+\turn{p2}{w2-6.5 w2-7.5}
+
+\turn{p1}{w1-11 w1-12 w1-13}
+
+
+\end{description}
+
+\end{document}
