@@ -52,8 +52,10 @@ import nzilbb.util.Switch;
 import nzilbb.configure.ParameterSet;
 
 import nzilbb.ag.*;
+import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.util.NamedStream;
-import nzilbb.webvtt.VttDeserializer;
+import nzilbb.ag.serialize.util.Utility;
+import nzilbb.webvtt.VttSerialization;
 import nzilbb.praat.TextGridSerialization;
 
 /**
@@ -346,7 +348,7 @@ public class VttToTextGrid
       NamedStream[] streams = { new NamedStream(inputFile) };
       
       // create deserializer
-      VttDeserializer deserializer = new VttDeserializer();
+      VttSerialization deserializer = new VttSerialization();
       if (verbose) System.out.println("Deserializing with " + deserializer.getDescriptor());
 
       // configure deserializer
@@ -377,7 +379,12 @@ public class VttToTextGrid
       serializer.configure(configuration, schema);
 
       // serialize
-      NamedStream[] outputStreams = serializer.serialize(graphs);
+      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+      final Vector<NamedStream> outputStreams = new Vector<NamedStream>();
+      serializer.serialize(Utility.OneGraphSpliterator(g), null,
+                           stream -> outputStreams.add(stream),
+                           warning -> { if (verbose) System.out.println(warning); },
+                           exception -> exceptions.add(exception));
       for (NamedStream stream : outputStreams)
       {
 	 File dir = inputFile.getParentFile();
@@ -386,6 +393,7 @@ public class VttToTextGrid
       }
       
       if (verbose) System.out.println("Finished " + inputFile.getPath());
+      for (SerializationException x : exceptions) System.err.println(x.toString());
    } // end of convert()
 
    
