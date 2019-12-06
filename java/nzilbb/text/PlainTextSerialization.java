@@ -1756,7 +1756,7 @@ public class PlainTextSerialization
          }); // next graph
    }
 
-      /**
+   /**
     * Serializes the given graph, generating a {@link NamedStream}.
     * @param graph The graph to serialize.
     * @return A named stream that contains the TextGrid. 
@@ -1840,7 +1840,6 @@ public class PlainTextSerialization
                writer.print(fmtParticipant.format(participantLabel));
             } // participant change
 
-            StringBuffer l = new StringBuffer();
             for (Annotation token : utterance.list(getWordLayer().getId()))
             {
                writer.print(" ");
