@@ -91,9 +91,11 @@ public class TestLatexSerializer
       // general configuration
       ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
       //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-      assertEquals(5, serializer.configure(configuration, schema).size());
+      assertEquals(6, serializer.configure(configuration, schema).size());
       assertNull("no orthography", 
                  configuration.get("orthographyLayer").getValue());
+      assertEquals("noise", "noise", 
+		   ((Layer)configuration.get("noiseLayer").getValue()).getId());
       assertEquals("texPreamble",
                    "", configuration.get("texPreamble").getValue());
       assertEquals("texBeginTranscript",
@@ -140,6 +142,11 @@ public class TestLatexSerializer
    {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
+         new Layer("noise", "Noise") 
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true)
+         .setPeersOverlap(false)
+         .setSaturated(false),
          new Layer("who", "Participants")
          .setAlignment(Constants.ALIGNMENT_NONE)
          .setPeers(true)
@@ -227,6 +234,14 @@ public class TestLatexSerializer
                                          graph.addAnchor(new Anchor("a8.5", 8.5)).getId(),
                                          "t2"));
 
+      // noises
+      graph.addAnnotation(new Annotation("n1", "n1", "noise", 
+                                         "a2",
+                                         "a2"));
+      graph.addAnnotation(new Annotation("n2", "n2", "noise", 
+                                         "a4",
+                                         "a5"));      
+
       // add orthography tags that should not be used because orthography is not selected
       for (Annotation word : graph.list("word"))
       {
@@ -239,9 +254,11 @@ public class TestLatexSerializer
       // general configuration
       ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-      assertEquals(5, serializer.configure(configuration, schema).size());
+      assertEquals(6, serializer.configure(configuration, schema).size());
       assertEquals("orthography", "orthography", 
 		   ((Layer)configuration.get("orthographyLayer").getValue()).getId());
+      assertEquals("noise", "noise", 
+		   ((Layer)configuration.get("noiseLayer").getValue()).getId());
       assertEquals("texPreamble",
                    "", configuration.get("texPreamble").getValue());
       assertEquals("texBeginTranscript",
@@ -393,9 +410,11 @@ public class TestLatexSerializer
       // general configuration
       ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-      assertEquals(5, serializer.configure(configuration, schema).size());
+      assertEquals(6, serializer.configure(configuration, schema).size());
       assertEquals("orthography", "orthography", 
 		   ((Layer)configuration.get("orthographyLayer").getValue()).getId());
+      assertNull("no noise", 
+                 configuration.get("noiseLayer").getValue());
       assertEquals("texPreamble",
                    "", configuration.get("texPreamble").getValue());
       assertEquals("texBeginTranscript",

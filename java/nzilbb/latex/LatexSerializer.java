@@ -35,6 +35,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -154,9 +155,24 @@ public class LatexSerializer
     * @param newOrthographyLayer Layer for orthography.
     */
    public LatexSerializer setOrthographyLayer(Layer newOrthographyLayer) { orthographyLayer = newOrthographyLayer; return this; }
-
-
    
+   /**
+    * Layer for noise annotations.
+    * @see #getNoiseLayer()
+    * @see #setNoiseLayer(Layer)
+    */
+   protected Layer noiseLayer;
+   /**
+    * Getter for {@link #noiseLayer}: Layer for noise annotations.
+    * @return Layer for noise annotations.
+    */
+   public Layer getNoiseLayer() { return noiseLayer; }
+   /**
+    * Setter for {@link #noiseLayer}: Layer for noise annotations.
+    * @param newNoiseLayer Layer for noise annotations.
+    */
+   public LatexSerializer setNoiseLayer(Layer newNoiseLayer) { noiseLayer = newNoiseLayer; return this; }
+
    /**
     * Tex code to include in preamble.
     * @see #getTexPreamble()
@@ -412,7 +428,24 @@ public class LatexSerializer
          }
       } // next top level layer
 
+      LinkedHashMap<String,Layer> graphTagLayers = new LinkedHashMap<String,Layer>();
+      for (Layer top : schema.getRoot().getChildren().values())
+      {
+         if (top.getAlignment() == Constants.ALIGNMENT_NONE
+             && top.getChildren().size() == 0)
+         { // unaligned childless children of graph
+            graphTagLayers.put(top.getId(), top);
+         }
+      } // next top level layer
+      graphTagLayers.remove("corpus");
+      graphTagLayers.remove("transcript_type");
+
       // other layers...
+
+      layerToPossibilities.put(
+         new Parameter("noiseLayer", Layer.class, "Noise layer", "Background noises"), 
+         Arrays.asList("noise","noises","background","backgroundnoise"));
+      layerToCandidates.put("noiseLayer", topLevelLayers);
 
       layerToPossibilities.put(
          new Parameter("orthographyLayer", Layer.class, "Orthography layer", "Orthography"), 
@@ -635,7 +668,16 @@ public class LatexSerializer
          // order utterances by anchor so that simultaneous speech comes out in utterance order
          TreeSet<Annotation> utterancesByAnchor
             = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
-         for (Annotation u : graph.list(getUtteranceLayer().getId())) utterancesByAnchor.add(u);
+         for (Annotation u : graph.list(utteranceLayer.getId())) utterancesByAnchor.add(u);
+         TreeSet<Annotation> noisesByAnchor
+            = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
+         if (noiseLayer != null)
+         {
+            // list all anchored noises
+            for (Annotation n : graph.list(noiseLayer.getId())) if (n.getAnchored()) noisesByAnchor.add(n);
+         }
+         Iterator<Annotation> noises = noisesByAnchor.iterator();
+         Annotation nextNoise = noises.hasNext()?noises.next():null;
          
          for (Annotation utterance : utterancesByAnchor)
          {
@@ -660,6 +702,16 @@ public class LatexSerializer
             {
 	       // space precedes all but the first word
 	       if (firstWord) { firstWord = false; } else { turnText.append(" "); }
+
+               // is there a noise to insert?
+               while (nextNoise != null
+                      && token.getStart() != null
+                      && token.getStart().getOffset() != null
+                      && token.getStart().getOffset() >= nextNoise.getStart().getOffset())
+               {
+                  turnText.append("\\textit{[" + TexSafeText(nextNoise.getLabel()) + "]} ");
+                  nextNoise = noises.hasNext()?noises.next():null;
+               } // next noise
                
                Annotation orthography = token;
                if (orthographyLayer != null && selectedLayers.contains(orthographyLayer.getId()))
@@ -684,6 +736,16 @@ public class LatexSerializer
                } // next selected layer 
             } // next token
 	    if (firstUtterance) firstUtterance = false;
+
+            // is there a noise to append to the end of the line?
+            while (nextNoise != null
+                   && utterance.getEnd() != null
+                   && utterance.getEnd().getOffset() != null
+                   && utterance.getEnd().getOffset() >= nextNoise.getStart().getOffset())
+            {
+                  turnText.append("\\textit{[" + TexSafeText(nextNoise.getLabel()) + "]} ");
+                  nextNoise = noises.hasNext()?noises.next():null;
+            } // next noise
          } // next utterance
          if (currentParticipant != null)
          {
