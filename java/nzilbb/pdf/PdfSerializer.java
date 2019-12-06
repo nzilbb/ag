@@ -578,6 +578,9 @@ public class PdfSerializer
             graph.getId(),
             FontFactory.getFont(FontFactory.HELVETICA, 18, Font.BOLDITALIC, color1));      
          document.add(p);
+
+         boolean transcriptHeading = false;
+         
          Annotation[] participants = graph.list(participantLayer.getId());
          if (participants.length > 1)
          {
@@ -591,10 +594,7 @@ public class PdfSerializer
                      FontFactory.HELVETICA, 14, highlight?Font.BOLD:Font.ITALIC, color2));
                document.add(p);
             }
-            p = new Paragraph("TRANSCRIPT:",
-                              FontFactory.getFont(FontFactory.HELVETICA, 14, Font.ITALIC, color2));
-            p.setSpacingBefore(10);
-            document.add(p);
+            transcriptHeading = true;
          }
 
          Schema schema = graph.getSchema();
@@ -614,7 +614,16 @@ public class PdfSerializer
                FontFactory.getFont(FontFactory.HELVETICA, 14, Font.ITALIC, color2));
             p.setSpacingBefore(10);
             document.add(p);
+            transcriptHeading = true;
          } // multiple layers selected
+
+         if (transcriptHeading)
+         {
+            p = new Paragraph("TRANSCRIPT:",
+                              FontFactory.getFont(FontFactory.HELVETICA, 14, Font.ITALIC, color2));
+            p.setSpacingBefore(10);
+            document.add(p);
+         }
          
          // for each utterance...
          Annotation currentParticipant = null;
