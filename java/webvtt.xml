@@ -10,7 +10,7 @@
   <property name="srctests" value="nzilbb/webvtt/test/Test*.java"/>
   <property name="icon" value="nzilbb/webvtt/icon.png"/>
   <property name="junitjar" value="/usr/share/java/junit4.jar"/>
-  <property name="nzilbb-ag-serialize-IDeserializer" value="nzilbb.webvtt.VttDeserializer" />
+  <property name="nzilbb-ag-serialize-IDeserializer" value="nzilbb.webvtt.VttSerialization" />
   
   <target name="init">
     <!-- Create the time stamp -->
