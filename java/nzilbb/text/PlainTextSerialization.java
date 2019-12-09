@@ -756,7 +756,7 @@ public class PlainTextSerialization
             {
                participantTagLayers.put(tag.getId(), tag);
             }
-         } // next possible word tag layer
+         } // next possible participant tag layer
          if (getEpisodeLayer() != null)
          {
             for (Layer tag : getEpisodeLayer().getChildren().values())
