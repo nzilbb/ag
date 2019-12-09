@@ -552,6 +552,6 @@ public class TestLatexSerializer
 
    public static void main(String args[]) 
    {
-      org.junit.runner.JUnitCore.main("nzilbb.text.test.TestLatexSerializer");
+      org.junit.runner.JUnitCore.main("nzilbb.latex.test.TestLatexSerializer");
    }
 }

@@ -586,7 +586,7 @@ public class LatexSerializer
    /**
     * Serializes the given graph, generating a {@link NamedStream}.
     * @param graph The graph to serialize.
-    * @return A named stream that contains the TextGrid. 
+    * @return A named stream that contains the LaTeX file. 
     * @throws SerializationException if errors occur during deserialization.
     */
    protected NamedStream serializeGraph(Graph graph, String[] layerIds) 
@@ -619,7 +619,7 @@ public class LatexSerializer
       try
       {
          // write the text to a temporary file
-         File f = File.createTempFile(graph.getId(), ".txt");
+         File f = File.createTempFile(graph.getId(), ".tex");
          PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(f), "utf-8"));
 
          Schema schema = graph.getSchema();
