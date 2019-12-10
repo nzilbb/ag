@@ -1558,9 +1558,17 @@ public class TestTextGridSerialization
       streams.elementAt(0).save(dir);
 
       // test using diff
-      String differences = diff(new File(dir, "expected_serialize_utterance_word.TextGrid"),
-                                new File(dir, "serialize_utterance_word.TextGrid"));
-      if (differences != null) fail(differences);	 
+      File expected = new File(dir, "expected_serialize_utterance_word.TextGrid");
+      File actual = new File(dir, "serialize_utterance_word.TextGrid");
+      String differences = diff(expected, actual);
+      if (differences != null)
+      {
+         fail(differences);
+      }
+      else
+      {
+         actual.delete();
+      }
    }
 
    @Test public void serialize_fragment_utterance_word() 
@@ -1626,9 +1634,17 @@ public class TestTextGridSerialization
       streams.elementAt(0).save(dir);
 
       // test using diff
-      String differences = diff(new File(dir, "expected_serialize_utterance_word__212.4-216.36333.TextGrid"),
-                                new File(dir, "serialize_utterance_word.TextGrid__212.400-216.363.TextGrid"));
-      if (differences != null) fail(differences);	 
+      File expected = new File(dir, "expected_serialize_utterance_word__212.4-216.36333.TextGrid");
+      File actual = new File(dir, "serialize_utterance_word__212.400-216.363.TextGrid");
+      String differences = diff(expected, actual);
+      if (differences != null)
+      {
+         fail(differences);
+      }
+      else
+      {
+         actual.delete();
+      }
    }
 
    @Test public void serialize_selected_layer() 
@@ -1695,9 +1711,17 @@ public class TestTextGridSerialization
       streams.elementAt(0).save(dir);
 
       // test using diff
-      String differences = diff(new File(dir, "expected_selected_layers__212.400-216.363.TextGrid"),
-                                new File(dir, "selected_layers__212.400-216.363.TextGrid"));
-      if (differences != null) fail(differences);	 
+      File expected = new File(dir, "expected_selected_layers__212.400-216.363.TextGrid");
+      File actual = new File(dir, "selected_layers__212.400-216.363.TextGrid");
+      String differences = diff(expected, actual);
+      if (differences != null)
+      {
+         fail(differences);
+      }
+      else
+      {
+         actual.delete();
+      }
    }
 
    @Test public void serialize_fragment_trailing_utterance_word()  // TODO test serialization of point tiers
@@ -1762,9 +1786,17 @@ public class TestTextGridSerialization
       streams.elementAt(0).save(dir);
 
       // test using diff
-      String differences = diff(new File(dir, "expected_serialize_utterance_word__212.4-216.500.TextGrid"),
-                                new File(dir, "serialize_utterance_word.TextGrid__212.400-216.500.TextGrid"));
-      if (differences != null) fail(differences);	 
+      File expected = new File(dir, "expected_serialize_utterance_word__212.4-216.500.TextGrid");
+      File actual = new File(dir, "serialize_utterance_word__212.400-216.500.TextGrid");
+      String differences = diff(expected, actual);
+      if (differences != null)
+      {
+         fail(differences);
+      }
+      else
+      {
+         actual.delete();
+      }
    }   
    
    /**

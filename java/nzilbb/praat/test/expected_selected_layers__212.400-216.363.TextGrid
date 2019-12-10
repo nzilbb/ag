@@ -1,0 +1,84 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 3.963329999999985 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "phone - interviewer" 
+        xmin = 0 
+        xmax = 3.963329999999985 
+        intervals: size = 6 
+        intervals [1]:
+            xmin = 0 
+            xmax = 2.421999999999997 
+            text = "" 
+        intervals [2]:
+            xmin = 2.421999999999997 
+            xmax = 2.8073333332999937 
+            text = "j" 
+        intervals [3]:
+            xmin = 2.8073333332999937 
+            xmax = 3 
+            text = "8" 
+        intervals [4]:
+            xmin = 3 
+            xmax = 3.1926666667000063 
+            text = "j" 
+        intervals [5]:
+            xmin = 3.1926666667000063 
+            xmax = 3.578000000000003 
+            text = "8" 
+        intervals [6]:
+            xmin = 3.578000000000003 
+            xmax = 3.963329999999985 
+            text = "j" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "phone - participant" 
+        xmin = 0 
+        xmax = 3.963329999999985 
+        intervals: size = 10 
+        intervals [1]:
+            xmin = 0 
+            xmax = 1.6156000000000006 
+            text = "" 
+        intervals [2]:
+            xmin = 1.6156000000000006 
+            xmax = 1.775708430199984 
+            text = "I" 
+        intervals [3]:
+            xmin = 1.775708430199984 
+            xmax = 2.018799999999999 
+            text = "z" 
+        intervals [4]:
+            xmin = 2.018799999999999 
+            xmax = 2.421999999999997 
+            text = "" 
+        intervals [5]:
+            xmin = 2.421999999999997 
+            xmax = 2.8073333332999937 
+            text = "$" 
+        intervals [6]:
+            xmin = 2.8073333332999937 
+            xmax = 2.9350504756000078 
+            text = "s" 
+        intervals [7]:
+            xmin = 2.9350504756000078 
+            xmax = 3.0366423042999884 
+            text = "V" 
+        intervals [8]:
+            xmin = 3.0366423042999884 
+            xmax = 3.1926666667000063 
+            text = "m" 
+        intervals [9]:
+            xmin = 3.1926666667000063 
+            xmax = 3.578000000000003 
+            text = "n" 
+        intervals [10]:
+            xmin = 3.578000000000003 
+            xmax = 3.963329999999985 
+            text = "" 
