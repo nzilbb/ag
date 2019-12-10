@@ -39,6 +39,7 @@ import nzilbb.ag.util.SimpleTokenizer;
 import nzilbb.ag.util.SpanningConventionTransformer;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
+import nzilbb.util.IO;
 import nzilbb.util.TempFileInputStream;
 import nzilbb.util.Timers;
 
@@ -1477,12 +1478,13 @@ public class TextGridSerialization
    }
 
    /**
-    * Serializes the given graph, generating one or more {@link NamedStream}s.
-    * <p>Many data formats will only yield one stream (e.g. Transcriber transcript or Praat
-    *  textgrid), however there are formats that use multiple files for the same transcript
-    *  (e.g. XWaves, EmuR), which is why this method returns a list. There are formats that
-    *  are capable of storing multiple transcripts in the same file (e.g. AGTK, Transana XML
-    *  export), which is why this method accepts a list.
+    * Serializes the given series of graphs, generating one or more {@link NamedStream}s.
+    * <p>Many data formats will only yield one stream per graph (e.g. Transcriber
+    * transcript or Praat textgrid), however there are formats that use multiple files for
+    * the same transcript (e.g. XWaves, EmuR), and others still that will produce one
+    * stream from many Graphs (e.g. CSV).
+    * <p>The method is synchronous in the sense that it should not return until all graphs
+    * have been serialized.
     * @param graphs The graphs to serialize.
     * @param layerIds The IDs of the layers to include, or null for all layers.
     * @param consumer The object receiving the streams.
@@ -1667,7 +1669,7 @@ public class TextGridSerialization
       try
       {
          // write the TextGrid to a temporary file
-         File f = File.createTempFile(graph.getId(), ".TextGrid");
+         File f = File.createTempFile(IO.SafeFileNameUrl(graph.getId()), ".TextGrid");
          FileOutputStream out = new FileOutputStream(f);	 
          PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, "utf-8"));
          writeText(writer);
@@ -1675,7 +1677,7 @@ public class TextGridSerialization
          TempFileInputStream in = new TempFileInputStream(f);
 
          // return a named stream from the file
-         return new NamedStream(in, graph.getId().replaceAll("\\.[a-zA-Z]*$", "") + ".TextGrid");
+         return new NamedStream(in, IO.SafeFileNameUrl(graph.getId()) + ".TextGrid");
       }
       catch(Exception exception)
       {
