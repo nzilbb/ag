@@ -1677,7 +1677,9 @@ public class TextGridSerialization
          TempFileInputStream in = new TempFileInputStream(f);
 
          // return a named stream from the file
-         return new NamedStream(in, IO.SafeFileNameUrl(graph.getId()) + ".TextGrid");
+         String name = IO.SafeFileNameUrl(graph.getId());
+         if (!name.toLowerCase().endsWith(".textgrid")) name += ".TextGrid";
+         return new NamedStream(in, name);
       }
       catch(Exception exception)
       {
