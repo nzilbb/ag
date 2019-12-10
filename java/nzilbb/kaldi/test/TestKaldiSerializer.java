@@ -203,8 +203,12 @@ public class TestKaldiSerializer
 		  break;
 	    }
 	 } // next step
+         if (differences.length() == 0) fActual.delete();
       } // next file
-      if (differences.length() > 0) fail(differences);
+      if (differences.length() > 0)
+      {
+         fail(differences);
+      }
    }
    /**
     * Diffs two files.
