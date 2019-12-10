@@ -22,30 +22,34 @@
 package nzilbb.elan;
 
 import java.io.*;
+import java.net.URL;
 import java.nio.*;
 import java.nio.charset.*;
-import java.util.*;
-import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import org.w3c.dom.*;
-import org.xml.sax.*;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import javax.xml.parsers.*;
-import javax.xml.xpath.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
 import javax.xml.transform.stream.*;
+import javax.xml.xpath.*;
 import nzilbb.ag.*;
-import nzilbb.ag.util.SimpleTokenizer;
-import nzilbb.ag.util.ConventionTransformer;
-import nzilbb.ag.util.SpanningConventionTransformer;
-import nzilbb.ag.util.OrthographyClumper;
-import nzilbb.ag.util.AnnotationComparatorByAnchor;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
+import nzilbb.ag.util.AnnotationComparatorByAnchor;
+import nzilbb.ag.util.ConventionTransformer;
+import nzilbb.ag.util.OrthographyClumper;
+import nzilbb.ag.util.SimpleTokenizer;
+import nzilbb.ag.util.SpanningConventionTransformer;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
+import nzilbb.util.IO;
+import nzilbb.util.TempFileInputStream;
+import org.w3c.dom.*;
+import org.xml.sax.*;
 
 /**
  * Converter that converts ELAN EAF v2.7 files to Annotation Graphs
@@ -53,8 +57,8 @@ import nzilbb.configure.ParameterSet;
  * <a href="http://www.mpi.nl/tools/elan/EAFv2.7.xsd">http://www.mpi.nl/tools/elan/EAFv2.7.xsd</a>
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class EAFDeserializer
-   implements IDeserializer
+public class EAFSerialization
+   implements IDeserializer, ISerializer
 {
    // Attributes:     
    protected Vector<String> warnings;
@@ -101,7 +105,7 @@ public class EAFDeserializer
     * Setter for {@link #mTierMessages}: A message for each tier, filled in during conversion.
     * @param mNewTierMessages A message for each tier, filled in during conversion.
     */
-   public EAFDeserializer setTierMessages(HashMap<String,String> mNewTierMessages) { mTierMessages = mNewTierMessages; return this; }
+   public EAFSerialization setTierMessages(HashMap<String,String> mNewTierMessages) { mTierMessages = mNewTierMessages; return this; }
 
    /**
     * Whether 'utterance' intervals (those which map to either {@link Labbcat#LAYER_TURN}
@@ -132,7 +136,7 @@ public class EAFDeserializer
     * name of the speaker (true) or the words spoken (false - in which case the tier name
     * is assumed to be the speaker name)
     */
-   public EAFDeserializer setUtterancesAreSpeakerNames(boolean newUtterancesAreSpeakerNames) { utterancesAreSpeakerNames = newUtterancesAreSpeakerNames; return this; }
+   public EAFSerialization setUtterancesAreSpeakerNames(boolean newUtterancesAreSpeakerNames) { utterancesAreSpeakerNames = newUtterancesAreSpeakerNames; return this; }
    
    /**
     * Map of tier names to tiers.
@@ -149,7 +153,7 @@ public class EAFDeserializer
     * Setter for {@link #mTiers}: Map of tier names to tiers.
     * @param mNewTiers Map of tier names to tiers.
     */
-   public EAFDeserializer setTiers(LinkedHashMap<String,Node> mNewTiers) { mTiers = mNewTiers; return this; }
+   public EAFSerialization setTiers(LinkedHashMap<String,Node> mNewTiers) { mTiers = mNewTiers; return this; }
 
    /**
     * Layer schema.
@@ -166,7 +170,7 @@ public class EAFDeserializer
     * Setter for {@link #schema}: Layer schema.
     * @param newSchema Layer schema.
     */
-   public EAFDeserializer setSchema(Schema newSchema) { schema = newSchema; return this; }
+   public EAFSerialization setSchema(Schema newSchema) { schema = newSchema; return this; }
 
    /**
     * Participant information layer.
@@ -183,7 +187,7 @@ public class EAFDeserializer
     * Setter for {@link #participantLayer}: Participant information layer.
     * @param newParticipantLayer Participant information layer.
     */
-   public EAFDeserializer setParticipantLayer(Layer newParticipantLayer) { participantLayer = newParticipantLayer; return this; }
+   public EAFSerialization setParticipantLayer(Layer newParticipantLayer) { participantLayer = newParticipantLayer; return this; }
 
    /**
     * Turn layer.
@@ -200,7 +204,7 @@ public class EAFDeserializer
     * Setter for {@link #turnLayer}: Turn layer.
     * @param newTurnLayer Turn layer.
     */
-   public EAFDeserializer setTurnLayer(Layer newTurnLayer) { turnLayer = newTurnLayer; return this; }
+   public EAFSerialization setTurnLayer(Layer newTurnLayer) { turnLayer = newTurnLayer; return this; }
 
    /**
     * Utterance layer.
@@ -217,7 +221,7 @@ public class EAFDeserializer
     * Setter for {@link #utteranceLayer}: Utterance layer.
     * @param newUtteranceLayer Utterance layer.
     */
-   public EAFDeserializer setUtteranceLayer(Layer newUtteranceLayer) { utteranceLayer = newUtteranceLayer; return this; }
+   public EAFSerialization setUtteranceLayer(Layer newUtteranceLayer) { utteranceLayer = newUtteranceLayer; return this; }
 
    /**
     * Word token layer.
@@ -234,7 +238,7 @@ public class EAFDeserializer
     * Setter for {@link #wordLayer}: Word token layer.
     * @param newWordLayer Word token layer.
     */
-   public EAFDeserializer setWordLayer(Layer newWordLayer) { wordLayer = newWordLayer; return this; }
+   public EAFSerialization setWordLayer(Layer newWordLayer) { wordLayer = newWordLayer; return this; }
 
    /**
     * Layer for lexical word tags.
@@ -251,7 +255,7 @@ public class EAFDeserializer
     * Setter for {@link #lexicalLayer}: Layer for lexical word tags.
     * @param newLexicalLayer Layer for lexical word tags.
     */
-   public EAFDeserializer setLexicalLayer(Layer newLexicalLayer) { lexicalLayer = newLexicalLayer; return this; }
+   public EAFSerialization setLexicalLayer(Layer newLexicalLayer) { lexicalLayer = newLexicalLayer; return this; }
 
    /**
     * Layer for pronounce events.
@@ -268,7 +272,7 @@ public class EAFDeserializer
     * Setter for {@link #pronounceLayer}: Layer for pronounce events.
     * @param newPronounceLayer Layer for pronounce events.
     */
-   public EAFDeserializer setPronounceLayer(Layer newPronounceLayer) { pronounceLayer = newPronounceLayer; return this; }
+   public EAFSerialization setPronounceLayer(Layer newPronounceLayer) { pronounceLayer = newPronounceLayer; return this; }
 
    /**
     * Layer for commentary.
@@ -285,7 +289,7 @@ public class EAFDeserializer
     * Setter for {@link #commentLayer}: Layer for commentary.
     * @param newCommentLayer Layer for commentary.
     */
-   public EAFDeserializer setCommentLayer(Layer newCommentLayer) { commentLayer = newCommentLayer; return this; }
+   public EAFSerialization setCommentLayer(Layer newCommentLayer) { commentLayer = newCommentLayer; return this; }
 
    /**
     * Layer for noise annotations.
@@ -302,7 +306,7 @@ public class EAFDeserializer
     * Setter for {@link #noiseLayer}: Layer for noise annotations.
     * @param newNoiseLayer Layer for noise annotations.
     */
-   public EAFDeserializer setNoiseLayer(Layer newNoiseLayer) { noiseLayer = newNoiseLayer; return this; }
+   public EAFSerialization setNoiseLayer(Layer newNoiseLayer) { noiseLayer = newNoiseLayer; return this; }
 
    /**
     * Layer for the author/transcriber.
@@ -319,7 +323,7 @@ public class EAFDeserializer
     * Setter for {@link #AuthorLayer}: Layer for the author/transcriber.
     * @param newAuthorLayer Layer for the author/transcriber.
     */
-   public EAFDeserializer setAuthorLayer(Layer newAuthorLayer) { authorLayer = newAuthorLayer; return this; }
+   public EAFSerialization setAuthorLayer(Layer newAuthorLayer) { authorLayer = newAuthorLayer; return this; }
 
    /**
     * Layer for the document date.
@@ -336,7 +340,7 @@ public class EAFDeserializer
     * Setter for {@link #DateLayer}: Layer for the document date.
     * @param newDateLayer Layer for the document date.
     */
-   public EAFDeserializer setDateLayer(Layer newDateLayer) { dateLayer = newDateLayer; return this; }
+   public EAFSerialization setDateLayer(Layer newDateLayer) { dateLayer = newDateLayer; return this; }
 
    /**
     * Layer for the document language.
@@ -353,7 +357,7 @@ public class EAFDeserializer
     * Setter for {@link #LanguageLayer}: Layer for the document language.
     * @param newLanguageLayer Layer for the document language.
     */
-   public EAFDeserializer setLanguageLayer(Layer newLanguageLayer) { languageLayer = newLanguageLayer; return this; }
+   public EAFSerialization setLanguageLayer(Layer newLanguageLayer) { languageLayer = newLanguageLayer; return this; }
 
    /**
     * Whether to use text conventions for comment, noise, lexical, and pronounce annotations.
@@ -370,7 +374,7 @@ public class EAFDeserializer
     * Setter for {@link #bUseConventions}: Whether to use text conventions for comment, noise, lexical, and pronounce annotations.
     * @param bNewTranscriptOnly Whether to use text conventions for comment, noise, lexical, and pronounce annotations.
     */
-   public EAFDeserializer setUseConventions(Boolean bNewUseConventions) { bUseConventions = bNewUseConventions; return this; }
+   public EAFSerialization setUseConventions(Boolean bNewUseConventions) { bUseConventions = bNewUseConventions; return this; }
 
    /**
     * Whether to ignore annotations with no label (true), or to include them as
@@ -392,7 +396,7 @@ public class EAFDeserializer
     * @param newIgnoreBlankAnnotations Whether to ignore annotations with no label (true),
     * or to include them as blank-labelled annotations (false).
     */
-   public EAFDeserializer setIgnoreBlankAnnotations(Boolean newIgnoreBlankAnnotations) { ignoreBlankAnnotations = newIgnoreBlankAnnotations; return this; }
+   public EAFSerialization setIgnoreBlankAnnotations(Boolean newIgnoreBlankAnnotations) { ignoreBlankAnnotations = newIgnoreBlankAnnotations; return this; }
    
    /**
     * Minimum amount of time between two turns by the same speaker, with no intervening
@@ -426,7 +430,7 @@ public class EAFDeserializer
     * a turn change boundary. If the pause is shorter than this, the turns are merged into
     * one.
     */
-   public EAFDeserializer setMinimumTurnPauseLength(Double newMinimumTurnPauseLength) { minimumTurnPauseLength = newMinimumTurnPauseLength; return this; }
+   public EAFSerialization setMinimumTurnPauseLength(Double newMinimumTurnPauseLength) { minimumTurnPauseLength = newMinimumTurnPauseLength; return this; }
 
    
    // IStreamDeserializer methods:
@@ -457,7 +461,7 @@ public class EAFDeserializer
     * Setter for {@link #id}: Graph ID.
     * @param newId Graph ID.
     */
-   public EAFDeserializer setId(String newId) { id = newId; return this; }
+   public EAFSerialization setId(String newId) { id = newId; return this; }
 
    /**
     * Utterance tokenizer.  The default is {@link SimpleTokenizer}.
@@ -474,16 +478,52 @@ public class EAFDeserializer
     * Setter for {@link #tokenizer}: Utterance tokenizer.
     * @param newTokenizer Utterance tokenizer.
     */
-   public EAFDeserializer setTokenizer(IGraphTransformer newTokenizer) { tokenizer = newTokenizer; return this; }
+   public EAFSerialization setTokenizer(IGraphTransformer newTokenizer) { tokenizer = newTokenizer; return this; }
 
    private boolean mappingsDependOnTurn = false;
+   
+   private long graphCount = 0;
+   private long consumedGraphCount = 0;
+   /**
+    * Determines how far through the serialization is.
+    * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
+    */
+   public Integer getPercentComplete()
+   {
+      if (graphCount < 0) return null;
+      return (int)((consumedGraphCount * 100) / graphCount);
+   }
+   
+   /**
+    * Serialization marked for cancelling.
+    * @see #getCancelling()
+    * @see #setCancelling(boolean)
+    */
+   protected boolean cancelling;
+   /**
+    * Getter for {@link #cancelling}: Serialization marked for cancelling.
+    * @return Serialization marked for cancelling.
+    */
+   public boolean getCancelling() { return cancelling; }
+   /**
+    * Setter for {@link #cancelling}: Serialization marked for cancelling.
+    * @param newCancelling Serialization marked for cancelling.
+    */
+   public EAFSerialization setCancelling(boolean newCancelling) { cancelling = newCancelling; return this; }
+   /**
+    * Cancel the serialization in course (if any).
+    */
+   public void cancel()
+   {
+      setCancelling(true);
+   }
    
    // Methods:
    
    /**
     * Constructor
     */
-   public EAFDeserializer()
+   public EAFSerialization()
    {
    } // end of constructor
    
@@ -1755,5 +1795,655 @@ public class EAFDeserializer
          } // next child annotation
       } // next child layer
    } // end of joinTurns()
+
+   // ISerializer methods
    
-} // end of class EAFDeserializer
+   /**
+    * Determines which layers, if any, must be present in the graph that will be serialized.
+    * <p>{@link ISerializer} method.
+    * @return A list of IDs of layers that must be present in the graph that will be serialized.
+    * @throws SerializationParametersMissingException If not all required parameters have a value.
+    */
+   public String[] getRequiredLayers() throws SerializationParametersMissingException
+   {
+      if (bUseConventions != null && bUseConventions)
+      {
+         Vector<String> requiredLayers = new Vector<String>();
+         if (getParticipantLayer() != null) requiredLayers.add(getParticipantLayer().getId());
+         if (getTurnLayer() != null) requiredLayers.add(getTurnLayer().getId());
+         if (getUtteranceLayer() != null) requiredLayers.add(getUtteranceLayer().getId());
+         if (getWordLayer() != null) requiredLayers.add(getWordLayer().getId());
+         if (getLexicalLayer() != null) requiredLayers.add(getLexicalLayer().getId());
+         if (getPronounceLayer() != null) requiredLayers.add(getPronounceLayer().getId());
+         if (getCommentLayer() != null) requiredLayers.add(getCommentLayer().getId());
+         if (getNoiseLayer() != null) requiredLayers.add(getNoiseLayer().getId());
+         return requiredLayers.toArray(new String[0]);
+      }
+      else
+      {
+         return new String[0];
+      }
+   }
+
+   /**
+    * Determines the cardinality between graphs and serialized streams.
+    * @return {@link nzilbb.ag.serialize.ISerializer#Cardinality}.NtoN as there is one
+    * stream produced for each graph to serialize.
+    */
+   public Cardinality getCardinality()
+   {
+      return Cardinality.NToN;
+   }
+
+   /**
+    * Serializes the given series of graphs, generating one or more {@link NamedStream}s.
+    * <p>Many data formats will only yield one stream per graph (e.g. Transcriber
+    * transcript or Praat textgrid), however there are formats that use multiple files for
+    * the same transcript (e.g. XWaves, EmuR), and others still that will produce one
+    * stream from many Graphs (e.g. CSV).
+    * <p>The method is synchronous in the sense that it should not return until all graphs
+    * have been serialized.
+    * @param graphs The graphs to serialize.
+    * @param layerIds The IDs of the layers to include, or null for all layers.
+    * @param consumer The object receiving the streams.
+    * @param warnings The object receiving warning messages.
+    * @return A list of named streams that contain the serialization in the given format. 
+    * @throws SerializerNotConfiguredException if the object has not been configured.
+    */
+   public void serialize(Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
+      throws SerializerNotConfiguredException
+   {
+      graphCount = graphs.getExactSizeIfKnown();
+      graphs.forEachRemaining(graph -> {
+            if (getCancelling()) return;
+            try
+            {
+               consumer.accept(serializeGraph(graph, layerIds, warnings));
+            }
+            catch(SerializationException exception)
+            {
+               errors.accept(exception);
+            }
+            consumedGraphCount++;
+         }); // next graph
+   }
+
+   /**
+    * Serializes the given graph, generating a {@link NamedStream}.
+    * @param graph The graph to serialize.
+    * @return A named stream that contains the TextGrid. 
+    * @throws SerializationException if errors occur during deserialization.
+    */
+   protected NamedStream serializeGraph(Graph graph, String[] layerIds, Consumer<String> warnings) 
+      throws SerializationException
+   {
+      SerializationException errors = null;      
+
+      HashSet<String> selectedLayers = new HashSet<String>();
+      if (layerIds != null)
+      {
+         for (String l : layerIds) selectedLayers.add(l);
+      }
+      else
+      {
+         for (Layer l : graph.getSchema().getLayers().values()) selectedLayers.add(l.getId());
+      }
+
+      graph.setOffsetGranularity(Constants.GRANULARITY_MILLISECONDS);
+      String language = null;
+      if (languageLayer != null)
+      {
+         Annotation lang = graph.my(languageLayer.getId());
+         if (lang != null) language = lang.getLabel();
+      }
+
+      // create a new XML document
+      DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+      DocumentBuilder builder = null;   
+      try
+      {
+         builder = builderFactory.newDocumentBuilder();   
+      }
+      catch(Exception exception)
+      {
+         errors = new SerializationException(exception);
+      }
+      builder.setEntityResolver(new EntityResolver() {
+            public InputSource resolveEntity(String publicId, String systemId)
+               throws SAXException, IOException
+            {
+               // Get DTDs locally, to prevent not found errors
+               String sName = systemId.substring(systemId.lastIndexOf('/') + 1);
+               URL url = getClass().getResource(sName);
+               if (url != null)
+                  return new InputSource(url.openStream());
+               else
+                  return null;
+            }
+         });
+      
+      Document document = builder.newDocument();
+      document.setXmlStandalone(true);
+      Element annotationDocument = document.createElement("ANNOTATION_DOCUMENT");
+      document.appendChild(annotationDocument);
+      Annotation author = authorLayer==null?null:graph.my(authorLayer.getId());
+      if (author != null)
+      {
+         annotationDocument.setAttribute("AUTHOR", author.getLabel());
+      }
+      else
+      {
+         annotationDocument.setAttribute("AUTHOR", "");
+      }
+      Annotation date = dateLayer==null?null:graph.my(dateLayer.getId());
+      if (date != null)
+      {
+         annotationDocument.setAttribute("DATE", date.getLabel());
+      }
+      else
+      {
+         annotationDocument.setAttribute("DATE", "");
+      }
+      annotationDocument.setAttribute("FORMAT", "2.7");
+      annotationDocument.setAttribute("VERSION", "2.7");
+      annotationDocument.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+      annotationDocument.setAttribute(
+         "xsi:noNamespaceSchemaLocation", "http://www.mpi.nl/tools/elan/EAFv2.7.xsd");
+      
+      Element header = document.createElement("HEADER");
+      annotationDocument.appendChild(header);
+      header.setAttribute("MEDIA_FILE","");
+      header.setAttribute("TIME_UNITS","milliseconds");
+      long lLastUnusedAnnotationId = 0;
+      Element mediaDescriptor = document.createElement("MEDIA_DESCRIPTOR");
+      header.appendChild(mediaDescriptor);
+      mediaDescriptor.setAttribute("MEDIA_URL", "");
+      mediaDescriptor.setAttribute("MIME_TYPE", "");
+      if (graph.getMediaProvider() != null)
+      {
+         try
+         {
+            MediaFile[] files = graph.getMediaProvider().getAvailableMedia();
+            if (files.length > 0)
+            {
+               MediaFile firstFile = files[0];
+               mediaDescriptor.setAttribute("MEDIA_URL", firstFile.getUrl());
+               mediaDescriptor.setAttribute("MIME_TYPE", firstFile.getMimeType());
+            }
+         }
+         catch(StoreException exception) {}
+         catch(PermissionException exception) {}
+      }
+      Element lastUnusedAnnotationId = document.createElement("PROPERTY");
+      header.appendChild(lastUnusedAnnotationId);
+      lastUnusedAnnotationId.setAttribute("NAME", "lastUnusedAnnotationId");
+      
+      // create time slots
+      Element timeOrder = document.createElement("TIME_ORDER");
+      annotationDocument.appendChild(timeOrder);
+      HashMap<String,String> mapAnchorToTimeslotId = new HashMap<String,String>();
+      for (Anchor a : graph.getSortedAnchors())
+      {
+         ensureAnchorHasTimeslot(a, document, timeOrder, mapAnchorToTimeslotId);
+      } // next anchor
+      
+      // a line tier for each speaker
+      HashMap<String,Element> mSpeakerTiers = new HashMap<String,Element>();
+      for (Annotation participant : graph.list(participantLayer.getId()))
+      {
+         Element utterances = document.createElement("TIER");
+         annotationDocument.appendChild(utterances);
+         utterances.setAttribute("LINGUISTIC_TYPE_REF", "default-lt");
+         utterances.setAttribute("TIER_ID", participant.getLabel());
+         utterances.setAttribute("PARTICIPANT", participant.getLabel());
+         mSpeakerTiers.put(participant.getLabel(), utterances);
+      } // next participant
+      
+      // 'freeform' layers first - i.e. aligned children of graph
+      for (Layer layer : graph.getSchema().getLayers().values().stream()
+              .filter(layer -> selectedLayers.contains(layer.getId()))
+              // parent is root
+              .filter(layer -> layer.getParent().equals(graph.getSchema().getRoot()))
+              // is aligned
+              .filter(layer -> layer.getAlignment() != Constants.ALIGNMENT_NONE)
+              .collect(Collectors.toList()))
+      {
+         lLastUnusedAnnotationId = insertTier(
+            layer, graph, document, annotationDocument, timeOrder, mapAnchorToTimeslotId,
+            lLastUnusedAnnotationId, warnings, language);
+      }
+      
+      if (getUseConventions())
+      {
+         // TODO transcript convention support
+         warnings.accept("Serialization of transcript conventions not currently supported");
+      }
+      
+      // utterances
+      for (Annotation utterance : graph.list(utteranceLayer.getId()))
+      {
+         // find the speaker's tier
+         Element tier = mSpeakerTiers.get(utterance.getLabel());
+         if (tier == null) continue;
+         
+         // add an annotation to it
+         Element annotation = document.createElement("ANNOTATION");
+         tier.appendChild(annotation);
+         Element alignableAnnotation = document.createElement("ALIGNABLE_ANNOTATION");
+         annotation.appendChild(alignableAnnotation);
+         String sId = "a"+(++lLastUnusedAnnotationId);
+         alignableAnnotation.setAttribute("ANNOTATION_ID", sId);
+         utterance.put("@alignableAnnotation", alignableAnnotation);
+         alignableAnnotation.setAttribute(
+            "TIME_SLOT_REF1", ensureAnchorHasTimeslot(
+               utterance.getStart(), document, timeOrder, mapAnchorToTimeslotId));
+         alignableAnnotation.setAttribute(
+            "TIME_SLOT_REF2", ensureAnchorHasTimeslot(
+               utterance.getEnd(), document, timeOrder, mapAnchorToTimeslotId));
+         Element annotationValue = document.createElement("ANNOTATION_VALUE");
+         alignableAnnotation.appendChild(annotationValue);
+         StringBuffer sUtteranceText = new StringBuffer();
+         
+         for (Annotation word : utterance.list(wordLayer.getId()))
+         {
+            if (sUtteranceText.length() > 0) sUtteranceText.append(" ");
+            sUtteranceText.append(word.getLabel());
+            
+            // rollback label changes made by conventionAnnotator
+            // TODO anWord.rollback();
+            
+            // link word to its utterance, so that words can be dependent on utterances
+            word.put("@utterance", utterance);
+         }
+         annotationValue.setTextContent(sUtteranceText.toString());
+      } // next annotation
+      
+      // 'meta' layers next - i.e. children of turn
+      for (Layer layer : graph.getSchema().getLayers().values().stream()
+              .filter(layer -> selectedLayers.contains(layer.getId()))
+              // parent is turn
+              .filter(layer -> layer.getParentId().equals(turnLayer.getId()))
+              // not utterance
+              .filter(layer -> layer.getId().equals(utteranceLayer.getId()))
+              // nor word
+              .filter(layer -> layer.getId().equals(wordLayer.getId()))
+              .collect(Collectors.toList()))
+      {
+         lLastUnusedAnnotationId = insertTier(
+            layer, graph, document, annotationDocument, timeOrder, mapAnchorToTimeslotId,
+            lLastUnusedAnnotationId, warnings, language);
+      }
+      
+      // now word layer
+      lLastUnusedAnnotationId = insertTier(
+         wordLayer, graph, document, annotationDocument, timeOrder, mapAnchorToTimeslotId,
+         lLastUnusedAnnotationId, warnings, language);
+      
+      // word tag layers
+      for (Layer layer : graph.getSchema().getLayers().values().stream()
+              .filter(layer -> selectedLayers.contains(layer.getId()))
+              // parent is word
+              .filter(layer -> layer.getParentId().equals(wordLayer.getId()))
+              // not aligned
+              .filter(layer -> layer.getAlignment() == Constants.ALIGNMENT_NONE)
+              .collect(Collectors.toList()))
+      {
+         lLastUnusedAnnotationId = insertTier(
+            layer, graph, document, annotationDocument, timeOrder, mapAnchorToTimeslotId,
+            lLastUnusedAnnotationId, warnings, language);
+      }
+      
+      // segment layers
+      for (Layer layer : graph.getSchema().getLayers().values().stream()
+              .filter(layer -> selectedLayers.contains(layer.getId()))
+              // parent is word
+              .filter(layer -> layer.getParentId().equals(wordLayer.getId()))
+              // aligned
+              .filter(layer -> layer.getAlignment() != Constants.ALIGNMENT_NONE)
+              .collect(Collectors.toList()))
+      {
+         lLastUnusedAnnotationId = insertTier(
+            layer, graph, document, annotationDocument, timeOrder, mapAnchorToTimeslotId,
+            lLastUnusedAnnotationId, warnings, language);
+      }
+      
+      // trailing structure definitions
+      Element linguisticType = document.createElement("LINGUISTIC_TYPE");
+      annotationDocument.appendChild(linguisticType);
+      linguisticType.setAttribute("GRAPHIC_REFERENCES","false");
+      linguisticType.setAttribute("LINGUISTIC_TYPE_ID","default-lt");
+      linguisticType.setAttribute("TIME_ALIGNABLE","true");
+      
+      linguisticType = document.createElement("LINGUISTIC_TYPE");
+      annotationDocument.appendChild(linguisticType);
+      linguisticType.setAttribute("GRAPHIC_REFERENCES","false");
+      linguisticType.setAttribute("LINGUISTIC_TYPE_ID","tag-lt");
+      linguisticType.setAttribute("TIME_ALIGNABLE","false");
+      linguisticType.setAttribute("CONSTRAINTS","Symbolic_Association");
+      
+      linguisticType = document.createElement("LINGUISTIC_TYPE");
+      annotationDocument.appendChild(linguisticType);
+      linguisticType.setAttribute("GRAPHIC_REFERENCES","false");
+      linguisticType.setAttribute("LINGUISTIC_TYPE_ID","subinterval-lt");
+      linguisticType.setAttribute("TIME_ALIGNABLE","true");
+      linguisticType.setAttribute("CONSTRAINTS","Included_In");
+      
+      linguisticType = document.createElement("LINGUISTIC_TYPE");
+      annotationDocument.appendChild(linguisticType);
+      linguisticType.setAttribute("GRAPHIC_REFERENCES","false");
+      linguisticType.setAttribute("LINGUISTIC_TYPE_ID","partition-lt");
+      linguisticType.setAttribute("TIME_ALIGNABLE","true");
+      linguisticType.setAttribute("CONSTRAINTS","Time_Subdivision");
+      
+      Element constraint = document.createElement("CONSTRAINT");
+      annotationDocument.appendChild(constraint);
+      constraint.setAttribute("DESCRIPTION","Time subdivision of parent annotation's time interval, no time gaps allowed within this interval");
+      linguisticType.setAttribute("STEREOTYPE","Time_Subdivision");
+      
+      constraint = document.createElement("CONSTRAINT");
+      annotationDocument.appendChild(constraint);
+      constraint.setAttribute("DESCRIPTION","Symbolic subdivision of a parent annotation. Annotations refering to the same parent are ordered");
+      linguisticType.setAttribute("STEREOTYPE","Symbolic_Subdivision");
+      
+      constraint = document.createElement("CONSTRAINT");
+      annotationDocument.appendChild(constraint);
+      constraint.setAttribute("DESCRIPTION","1-1 association with a parent annotation");
+      linguisticType.setAttribute("STEREOTYPE","Symbolic_Association");
+      
+      constraint = document.createElement("CONSTRAINT");
+      annotationDocument.appendChild(constraint);
+      constraint.setAttribute("DESCRIPTION","Time alignable annotations within the parent annotation's time interval, gaps are allowed");
+      linguisticType.setAttribute("STEREOTYPE","Included_In");
+      
+      lastUnusedAnnotationId.setTextContent(""+(++lLastUnusedAnnotationId));
+      
+      if (errors != null) throw errors;
+      
+      try
+      {
+         TransformerFactory transformerFactory = TransformerFactory.newInstance();
+         Transformer transformer = transformerFactory.newTransformer();
+         
+         // indented XML 
+         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+         
+         DOMSource source = new DOMSource(document);
+         File f = File.createTempFile(IO.SafeFileNameUrl(graph.getId()), ".eaf");
+         FileWriter fw = new FileWriter(f);
+         StreamResult result = new StreamResult(fw);
+         transformer.transform(source, result);
+         TempFileInputStream in = new TempFileInputStream(f);
+
+         // return a named stream from the file
+         return new NamedStream(in, IO.SafeFileNameUrl(graph.getId()) + ".eaf");
+      }
+      catch(Exception exception)
+      {
+         errors = new SerializationException();
+         errors.initCause(exception);
+         errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
+         throw errors;
+      }      
+   } // end of serializeGraph()
+
+   /**
+    * Ensures that the given anchor has a a timeslot in the given time order.  If there
+    * isn't one already there, one is created. 
+    * @param anchor
+    * @param timeOrder
+    * @param mapAnchorToTimeslotId
+    * @return The TIME_SLOT_ID for the anchor
+    */
+   protected String ensureAnchorHasTimeslot(Anchor anchor, Document document, Element timeOrder, HashMap<String,String> mapAnchorToTimeslotId)
+   {
+      if (mapAnchorToTimeslotId.containsKey(anchor.getId()))
+      {
+	 return mapAnchorToTimeslotId.get(anchor.getId());
+      }
+      else
+      {
+	 Element timeSlot = document.createElement("TIME_SLOT");
+	 timeOrder.appendChild(timeSlot);
+	 String sId = "ts"+(mapAnchorToTimeslotId.size() + 1);
+	 timeSlot.setAttribute("TIME_SLOT_ID", sId);
+	 mapAnchorToTimeslotId.put(anchor.getId(), sId);
+	 if (anchor.getOffset() == null)
+	 {
+	    System.err.println("Anchor " + anchor.getId() + " has no offset, and will be ignored.");
+	 }
+	 else
+	 {
+	    long lMs = (long)((anchor.getOffset() * 1000)
+			      + 0.5); // rounding, not truncating
+	    timeSlot.setAttribute("TIME_VALUE", ""+lMs);
+	 }
+	 return sId;
+      }
+   } // end of ensureAnchorHasTimeslot()
+   
+   /**
+    * Inserts tiers for the layers that have the given scope (ignoring system layers)
+    * @param layer The layer to convert into tiers
+    * @param graph The graph
+    * @param document The XML document
+    * @param annotationDocument The ANNOTATION_DOCUMENT element
+    * @param timeOrder The TIME_ORDER element
+    * @param mapAnchorToTimeslotId A map from Anchor IDs to Timeslot IDs
+    * @param lLastUnusedAnnotationId The last unused annotation ID 
+    * @return The new value for lLastUnusedAnnotationId
+    */
+   protected long insertTier(Layer layer, Graph graph, Document document, Element annotationDocument, Element timeOrder, HashMap<String,String> mapAnchorToTimeslotId, long lLastUnusedAnnotationId, Consumer<String> warnings, String language)
+   {
+      if (layer.getAlignment() == 1)
+      { // point layer
+         warnings.accept("Cannot serialize time-point layers: " + layer.getId());
+	 return lLastUnusedAnnotationId; // can't represent points is EAF
+      }
+
+      /// unaligned or interval layer - either way, start/end anchors are distinct
+	 
+      // tiers for words (one tier collection for each speaker)
+      // (we build a collection of like-named tiers
+      //  which allows us to represent overlapping annotations
+      //  if necessary)
+      HashMap<String,Vector<Element>> mSpeakerTiers = new HashMap<String,Vector<Element>>();
+      // to keep track of the latest time in the current tier
+      HashMap<String,Vector<Double>> mSpeakerTimes = new HashMap<String,Vector<Double>>();
+	 
+      // in order to get longer annotations above shorter ones
+      // (e.g. for constituent 'trees') we need to order
+      // by start time, and then by reverse end time
+      // TreeSet<Annotation> annotations 
+      //    = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
+      // annotations.addAll(ag.getLayer(layer.getId()));
+      Annotation[] annotations = graph.list(layer.getId());
+
+      // what relationship are we using, if any
+      Layer dominatingLayer = layer.getParent();
+      String sLinguisticTypeRef = "default-lt";
+      String sAnnotationTag = "ALIGNABLE_ANNOTATION";
+      if (!layer.getPeers()
+          && layer.getSaturated()
+          && layer.getAlignment() == Constants.ALIGNMENT_NONE
+          && dominatingLayer.getId().equals(wordLayer.getId()))
+      { // word tag layer
+         sLinguisticTypeRef = "tag-lt";
+         sAnnotationTag = "REF_ANNOTATION";
+      }
+      else if (layer.getPeers())
+      {
+         if (layer.getSaturated())
+         {
+            sLinguisticTypeRef = "partition-lt";
+         }
+         else
+         {
+            sLinguisticTypeRef = "subinterval-lt";
+         }
+      }
+
+      // should we look for the participant layer?
+      boolean ancestorOfParticipant = layer.getAncestors().contains(participantLayer);
+      
+      // for each annotation
+      HashMap<String,Double> mapTierIdToLastOffset = new HashMap<String,Double>();
+      for (Annotation annotation : annotations)
+      {
+         if (annotation.getStart().getOffset() == null)
+         {
+            warnings.accept("Annotation " + annotation.getId() + " \"" + annotation.getLabel()
+                            + "\" has no start offset, and will be ignored.");
+            continue;
+         }
+         if (annotation.getEnd().getOffset() == null)
+         {
+            warnings.accept("Annotation " + annotation.getId() + " \"" + annotation.getLabel()
+                            + "\" has no end offset, and will be ignored.");
+            continue;
+         }
+         Annotation participant = null;
+         if (ancestorOfParticipant)
+         {
+            participant = annotation.my(participantLayer.getId());
+         }
+         String participantId = participant != null?participant.getId():"";
+         String participantName = participant != null?participant.getLabel():"";
+
+         // reference to dominating annotation?
+         Annotation anDominating = annotation.containsKey("@utterance")
+            ?(Annotation)annotation.get("@utterance")
+            :annotation.getParent();
+         
+         Vector<Element> vTiers = mSpeakerTiers.get(participantId);
+         if (vTiers == null)
+         {
+            // create a new tier
+            vTiers = new Vector<Element>();
+            Element firstTier = document.createElement("TIER");
+            annotationDocument.appendChild(firstTier);
+            firstTier.setAttribute("LINGUISTIC_TYPE_REF", sLinguisticTypeRef);
+            String sId = layer.getId() + " - " + participantName;
+            firstTier.setAttribute("TIER_ID", sId);
+            firstTier.setAttribute("PARTICIPANT", participantName);
+            if (language != null) firstTier.setAttribute("LANG_REF", language);
+            if (anDominating != null)
+            {
+               Element dominatingElement = (Element)anDominating.get("@alignableAnnotation");
+               if (dominatingElement != null)
+               {
+                  firstTier.setAttribute(
+                     "PARENT_REF", 
+                     ((Element)dominatingElement.getParentNode().getParentNode()).getAttribute("TIER_ID"));
+               }
+            }
+            vTiers.add(firstTier);
+            mSpeakerTiers.put(participantId, vTiers);
+            mapTierIdToLastOffset.put(sId, 0.0);	       
+         }
+	    
+         // find a tier to add the interval to - i.e. the first
+         // one whose last interval is before this one
+         Element tier = null;
+         for (Element t : vTiers)
+         {
+            // can we add to this tier?			
+            if (mapTierIdToLastOffset.get(t.getAttribute("TIER_ID")).doubleValue()
+                <= annotation.getStart().getOffset())
+            {
+               tier = t;
+               break;
+            }
+         } // next possible tier
+         if (tier == null)
+         {
+            if (layer.getAlignment() == Constants.ALIGNMENT_NONE 
+                && layer.getParent().getId().equals(wordLayer.getId()))
+            { // unaligned word layer
+               // subsequent annotations are alternatives,
+               // so after we have the first one, skip the rest
+               // TODO check for conjuctive (rather than disjunctive) cases like clitics dividing the word in two
+               continue;
+            }
+            else
+            {
+               // can't add to any current tier, so add a new one
+               tier = document.createElement("TIER");
+               annotationDocument.appendChild(tier);
+               tier.setAttribute("LINGUISTIC_TYPE_REF", sLinguisticTypeRef);
+               String sId = layer.getId() + " - " + (vTiers.size() + 1) + " - " + participantName;
+               tier.setAttribute("TIER_ID", sId);
+               tier.setAttribute("PARTICIPANT", participantName);
+               if (language != null) tier.setAttribute("LANG_REF", language);
+               if (anDominating != null)
+               {
+                  Element dominatingElement = (Element)anDominating.get("@alignableAnnotation");
+                  if (dominatingElement != null)
+                  {
+                     tier.setAttribute(
+                        "PARENT_REF", 
+                        ((Element)dominatingElement.getParentNode().getParentNode()).getAttribute("TIER_ID"));
+                  }
+               }
+               vTiers.add(tier);
+               mapTierIdToLastOffset.put(sId, 0.0);
+            }
+         } // if tier == null 
+	    
+         // add an annotation to it
+         Element elAnnotation = document.createElement("ANNOTATION");
+         tier.appendChild(elAnnotation);
+         Element alignableAnnotation = document.createElement(sAnnotationTag);
+         elAnnotation.appendChild(alignableAnnotation);
+         String sId = "a"+(++lLastUnusedAnnotationId);
+         alignableAnnotation.setAttribute("ANNOTATION_ID", sId);
+         annotation.put("@@alignableAnnotation", alignableAnnotation);
+         
+         // anchors?
+         if (layer.getAlignment() != Constants.ALIGNMENT_NONE)
+         {
+            alignableAnnotation.setAttribute(
+               "TIME_SLOT_REF1", ensureAnchorHasTimeslot(
+                  annotation.getStart(), document, timeOrder, mapAnchorToTimeslotId));
+            alignableAnnotation.setAttribute(
+               "TIME_SLOT_REF2", ensureAnchorHasTimeslot(
+                  annotation.getEnd(), document, timeOrder, mapAnchorToTimeslotId));
+         }
+         else
+         {
+            // hopefully it's in the map! TODO
+            alignableAnnotation.setAttribute(
+               "ANNOTATION_REF",
+               ((Element)anDominating.get("@alignableAnnotation")).getAttribute("ANNOTATION_ID"));
+         }
+
+         Element annotationValue = document.createElement("ANNOTATION_VALUE");
+         alignableAnnotation.appendChild(annotationValue);
+         annotationValue.setTextContent(annotation.getLabel());
+	    
+         // note the end time
+         mapTierIdToLastOffset.put(
+            tier.getAttribute("TIER_ID"), annotation.getEnd().getOffset());
+         
+      } // next annotation
+	 
+      // add all the tiers we created
+      if (mSpeakerTiers.size() > 0)
+      {
+         for (String s : mSpeakerTiers.keySet())
+         {
+            for (Element t : mSpeakerTiers.get(s))
+            {
+               if (mSpeakerTiers.size() == 1)
+               {
+                  // no need to distinguish tiers using speaker name...
+                  t.setAttribute("TIER_ID", layer.getId());
+               }
+               annotationDocument.appendChild(t);
+            } // next tier
+         } // next speaker
+      } // there were tiers created
+      return lLastUnusedAnnotationId;
+   } // end of insertTier
+   
+} // end of class EAFSerialization
