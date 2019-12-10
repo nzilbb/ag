@@ -477,7 +477,7 @@ public class KaldiSerializer
          graphs.forEachRemaining(graph -> {
                if (getCancelling()) return;
                String transcriptName = graph.getId().replaceAll("__[0-9.]+-[0-9.]+$","");
-               String wavName = transcriptName.replaceAll("\\.[^.]+$",".wav");
+               String wavName = transcriptName.replaceAll("\\.[^.]+$","")+".wav";
                boolean firstWord = true;
                for (Annotation utterance : graph.list(utt))
                {
