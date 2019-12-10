@@ -245,7 +245,10 @@ public class TestJSONSerialization
 	       break;
 	 }
       } // next step
-      if (differences.length() > 0) fail(differences);
+      if (differences.length() > 0)
+      {
+         fail(differences);
+      }
 
       // now deserialization
       ParameterSet parameters = s.load(Utility.OneNamedStreamArray(new NamedStream(fActual)), schema);
@@ -331,6 +334,8 @@ public class TestJSONSerialization
       assertEquals("No extra annotations: " + d.getAnnotationsById().values(),
 		   g.getAnnotationsById().size(), d.getAnnotationsById().size());
 
+      // delete generated file
+      fActual.delete();
    }
 
    @Test public void childOrder() 
@@ -457,7 +462,14 @@ public class TestJSONSerialization
 	       break;
 	 }
       } // next step
-      if (differences.length() > 0) fail(differences);
+      if (differences.length() > 0)
+      {
+         fail(differences);
+      }
+      else
+      {
+         fCorrected.delete();
+      }
       
    }
 
