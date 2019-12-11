@@ -1,5 +1,5 @@
 //
-// Copyright 2016-2017 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2019 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -41,7 +41,7 @@ import nzilbb.configure.ParameterSet;
  * @author Robert Fromont robert@fromont.net.nz
  */
 
-public class TranscriptDeserializer
+public class TranscriptSerialization
    extends Transcript
    implements IDeserializer
 {
@@ -445,7 +445,7 @@ public class TranscriptDeserializer
    /**
     * Default constructor.
     */
-   public TranscriptDeserializer()
+   public TranscriptSerialization()
    {
    } // end of constructor
    
@@ -1319,4 +1319,4 @@ public class TranscriptDeserializer
       return warnings;
    }
 
-} // end of class TranscriptDeserializer
+} // end of class TranscriptSerialization

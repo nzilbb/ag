@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2019 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -39,7 +39,7 @@ import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.transcriber.*;
 
 // TODO add a test for turns with no speaker assigned.
-public class TestTranscriptDeserializer
+public class TestTranscriptSerialization
 {
    @Test public void basicConversion() 
       throws Exception
@@ -75,7 +75,7 @@ public class TestTranscriptDeserializer
       NamedStream[] streams = { new NamedStream(new File(getDir(), "test.trs")) };
       
       // create deserializer
-      TranscriptDeserializer deserializer = new TranscriptDeserializer();
+      TranscriptSerialization deserializer = new TranscriptSerialization();
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
@@ -170,30 +170,30 @@ public class TestTranscriptDeserializer
       // turns
       Annotation[] turns = g.list("turn");
       assertEquals(26, turns.length);
-      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
-      assertEquals(new Double(23.563), turns[0].getEnd().getOffset());
+      assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
+      assertEquals(Double.valueOf(23.563), turns[0].getEnd().getOffset());
       assertEquals("mop03-2b", turns[0].getLabel());
       assertEquals(g.getAnnotation("spk2"), turns[0].getParent());
-      assertEquals(new Double(302.834), turns[24].getStart().getOffset());
-      assertEquals(new Double(304.334), turns[24].getEnd().getOffset());
+      assertEquals(Double.valueOf(302.834), turns[24].getStart().getOffset());
+      assertEquals(Double.valueOf(304.334), turns[24].getEnd().getOffset());
       assertEquals("Interviewer", turns[24].getLabel());
       assertEquals(g.getAnnotation("spk1"), turns[24].getParent());
 
       // utterances
       Annotation[] utterances = g.list("utterance");
       assertEquals(140, utterances.length);
-      assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
-      assertEquals(new Double(5.75), utterances[0].getEnd().getOffset());
+      assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
+      assertEquals(Double.valueOf(5.75), utterances[0].getEnd().getOffset());
       assertEquals("mop03-2b", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
 
-      assertEquals(new Double(5.75), utterances[1].getStart().getOffset());
-      assertEquals(new Double(6.907), utterances[1].getEnd().getOffset());
+      assertEquals(Double.valueOf(5.75), utterances[1].getStart().getOffset());
+      assertEquals(Double.valueOf(6.907), utterances[1].getEnd().getOffset());
       assertEquals("mop03-2b", utterances[1].getParent().getLabel());
 
       
       Annotation[] words = g.list("word");
-      assertEquals(new Double(0), words[0].getStart().getOffset());
+      assertEquals(Double.valueOf(0), words[0].getStart().getOffset());
       // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
       assertEquals("and", words[0].getLabel());
       assertEquals("ah .", words[1].getLabel());
@@ -203,24 +203,24 @@ public class TestTranscriptDeserializer
       assertEquals("at", words[5].getLabel());
       assertEquals("the", words[6].getLabel());
       assertEquals("door", words[7].getLabel());
-      assertEquals(new Double(5.75), words[7].getEnd().getOffset());
+      assertEquals(Double.valueOf(5.75), words[7].getEnd().getOffset());
 
       // topic
       Annotation[] topics = g.list("topic");
       assertEquals(9, topics.length);
 
-      assertEquals(new Double(0.0), topics[0].getStart().getOffset());
-      assertEquals(new Double(23.563), topics[0].getEnd().getOffset());
+      assertEquals(Double.valueOf(0.0), topics[0].getStart().getOffset());
+      assertEquals(Double.valueOf(23.563), topics[0].getEnd().getOffset());
       assertEquals("teen-decadeplus-friend-general", topics[0].getLabel());
       assertEquals(g, topics[0].getParent());
 
-      assertEquals(new Double(23.563), topics[1].getStart().getOffset());
-      assertEquals(new Double(183.995), topics[1].getEnd().getOffset());
+      assertEquals(Double.valueOf(23.563), topics[1].getStart().getOffset());
+      assertEquals(Double.valueOf(183.995), topics[1].getEnd().getOffset());
       assertEquals("teen-decadeplus-me-event", topics[1].getLabel());
       assertEquals(g, topics[1].getParent());
 
-      assertEquals(new Double(295.115), topics[8].getStart().getOffset());
-      assertEquals(new Double(306.920), topics[8].getEnd().getOffset());
+      assertEquals(Double.valueOf(295.115), topics[8].getStart().getOffset());
+      assertEquals(Double.valueOf(306.920), topics[8].getEnd().getOffset());
       assertEquals("teen-decadeplus-friend-general", topics[8].getLabel());
       assertEquals(g, topics[8].getParent());
 
@@ -228,20 +228,20 @@ public class TestTranscriptDeserializer
       Annotation[] noises = g.list("noise");
       assertEquals(4, noises.length);
 
-      assertEquals(new Double(174.168), noises[0].getStart().getOffsetMin());
-      assertEquals(new Double(177.59), noises[0].getEnd().getOffsetMax());
+      assertEquals(Double.valueOf(174.168), noises[0].getStart().getOffsetMin());
+      assertEquals(Double.valueOf(177.59), noises[0].getEnd().getOffsetMax());
       assertEquals("and -", noises[0].getStart().endOf("word").iterator().next().getLabel());
       assertEquals("interviewer: clears throat", noises[0].getLabel());
       assertEquals("--", noises[0].getEnd().startOf("word").iterator().next().getLabel());
       assertEquals(g, noises[0].getParent());
 
-      assertEquals(new Double(185.339), noises[1].getStart().getOffset());
-      assertEquals(new Double(185.339), noises[1].getEnd().getOffset());
+      assertEquals(Double.valueOf(185.339), noises[1].getStart().getOffset());
+      assertEquals(Double.valueOf(185.339), noises[1].getEnd().getOffset());
       assertEquals("both laugh", noises[1].getLabel());
       assertEquals(g, noises[1].getParent());
 
-      assertEquals(new Double(233.727), noises[3].getStart().getOffsetMin());
-      assertEquals(new Double(236.946), noises[3].getEnd().getOffsetMax());
+      assertEquals(Double.valueOf(233.727), noises[3].getStart().getOffsetMin());
+      assertEquals(Double.valueOf(236.946), noises[3].getEnd().getOffsetMax());
       assertEquals("microphone movement noise", noises[3].getLabel());
       assertEquals(g, noises[3].getParent());
 
@@ -249,8 +249,8 @@ public class TestTranscriptDeserializer
       Annotation[] comments = g.list("comment");
       assertEquals(6, comments.length);
 
-      assertEquals(new Double(55.444), comments[0].getStart().getOffsetMin());
-      assertEquals(new Double(60.101), comments[0].getEnd().getOffsetMax());
+      assertEquals(Double.valueOf(55.444), comments[0].getStart().getOffsetMin());
+      assertEquals(Double.valueOf(60.101), comments[0].getEnd().getOffsetMax());
       assertEquals("in", comments[0].getStart().endOf("word").iterator().next().getLabel());
       assertEquals("unclear", comments[0].getLabel());
       assertEquals("--", comments[0].getEnd().startOf("word").iterator().next().getLabel());
@@ -277,7 +277,7 @@ public class TestTranscriptDeserializer
       NamedStream[] streams = { new NamedStream(new File(getDir(), "test.trs")) };
       
       // create deserializer
-      TranscriptDeserializer deserializer = new TranscriptDeserializer();
+      TranscriptSerialization deserializer = new TranscriptSerialization();
 
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
@@ -330,29 +330,29 @@ public class TestTranscriptDeserializer
       // turns
       Annotation[] turns = g.list("turn");
       assertEquals(26, turns.length);
-      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
-      assertEquals(new Double(23.563), turns[0].getEnd().getOffset());
+      assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
+      assertEquals(Double.valueOf(23.563), turns[0].getEnd().getOffset());
       assertEquals("mop03-2b", turns[0].getLabel());
       assertEquals(g.getAnnotation("spk2"), turns[0].getParent());
-      assertEquals(new Double(302.834), turns[24].getStart().getOffset());
-      assertEquals(new Double(304.334), turns[24].getEnd().getOffset());
+      assertEquals(Double.valueOf(302.834), turns[24].getStart().getOffset());
+      assertEquals(Double.valueOf(304.334), turns[24].getEnd().getOffset());
       assertEquals("Interviewer", turns[24].getLabel());
       assertEquals(g.getAnnotation("spk1"), turns[24].getParent());
 
       // utterances
       Annotation[] utterances = g.list("utterance");
       assertEquals(140, utterances.length);
-      assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
-      assertEquals(new Double(5.75), utterances[0].getEnd().getOffset());
+      assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
+      assertEquals(Double.valueOf(5.75), utterances[0].getEnd().getOffset());
       assertEquals("mop03-2b", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
 
-      assertEquals(new Double(5.75), utterances[1].getStart().getOffset());
-      assertEquals(new Double(6.907), utterances[1].getEnd().getOffset());
+      assertEquals(Double.valueOf(5.75), utterances[1].getStart().getOffset());
+      assertEquals(Double.valueOf(6.907), utterances[1].getEnd().getOffset());
       assertEquals("mop03-2b", utterances[1].getParent().getLabel());
       
       Annotation[] words = g.list("word");
-      assertEquals(new Double(0), words[0].getStart().getOffset());
+      assertEquals(Double.valueOf(0), words[0].getStart().getOffset());
       // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
       assertEquals("and", words[0].getLabel());
       assertEquals("ah .", words[1].getLabel());
@@ -362,7 +362,7 @@ public class TestTranscriptDeserializer
       assertEquals("at", words[5].getLabel());
       assertEquals("the", words[6].getLabel());
       assertEquals("door", words[7].getLabel());
-      assertEquals(new Double(5.75), words[7].getEnd().getOffset());
+      assertEquals(Double.valueOf(5.75), words[7].getEnd().getOffset());
 
    }
 
@@ -402,6 +402,6 @@ public class TestTranscriptDeserializer
 
    public static void main(String args[]) 
    {
-      org.junit.runner.JUnitCore.main("nzilbb.ag.test.TestTranscriptDeserializer");
+      org.junit.runner.JUnitCore.main("nzilbb.ag.test.TestTranscriptSerialization");
    }
 }
