@@ -1009,7 +1009,123 @@ public class TestTranscriptSerialization
          result.delete();
       }
    }
-   
+
+   @Test public void serialize()
+      throws Exception
+   {
+      Schema schema = new Schema(
+         "who", "turn", "utterance", "word",
+	 new Layer("scribe", "Transcriber")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(true)
+         .setPeersOverlap(true)
+         .setSaturated(true),
+         new Layer("who", "Participants")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(true)
+         .setPeersOverlap(true)
+         .setSaturated(true),
+         new Layer("comment", "Comment", 2, true, false, true),
+         new Layer("noise", "Noise", 2, true, false, true),
+         new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+         new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+         new Layer("word", "Words", 2, true, false, false, "turn", true),
+         new Layer("phone", "Phones", 2, true, true, true, "word", true),
+         new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
+         new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
+      File dir = getDir();
+      // access file
+      NamedStream[] jsonStreams = { new NamedStream(new File(dir, "serialize_utterance_word.json")) };
+      
+      // deserialize graph from JSON
+      JSONSerialization json = new JSONSerialization();
+      json.configure(json.configure(new ParameterSet(), schema), schema);
+      json.setParameters(json.load(jsonStreams, schema));
+      Graph[] graphs = json.deserialize();
+      
+      // create serializer
+      TranscriptSerialization serializer = new TranscriptSerialization();
+      
+      // general configuration
+      ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      assertEquals(18, serializer.configure(configuration, schema).size());
+      assertNull("topic", 
+                 configuration.get("topicLayer").getValue());
+      assertEquals("comment", "comment", 
+		   ((Layer)configuration.get("commentLayer").getValue()).getId());
+      assertEquals("noise", "noise", 
+		   ((Layer)configuration.get("noiseLayer").getValue()).getId());
+      assertNull("language",
+		   configuration.get("languageLayer").getValue());
+      assertEquals("lexical", "lexical", 
+		   ((Layer)configuration.get("lexicalLayer").getValue()).getId());
+      assertEquals("pronounce", "pronounce", 
+		   ((Layer)configuration.get("pronounceLayer").getValue()).getId());
+      assertNull("entity", 
+                 configuration.get("entityLayer").getValue());
+      assertEquals("scribe", "scribe", 
+		   ((Layer)configuration.get("scribeLayer").getValue()).getId());
+      assertNull("version",
+                 configuration.get("versionLayer").getValue());
+      assertNull("version_date", 
+                 configuration.get("versionDateLayer").getValue());
+      assertNull("program", 
+                 configuration.get("programLayer").getValue());
+      assertNull("air date", 
+                 configuration.get("airDateLayer").getValue());
+      assertNull("transcript language",
+                 configuration.get("transcriptLanguageLayer").getValue());
+      assertNull("participant check", 
+                 configuration.get("participantCheckLayer").getValue());
+      assertNull("gender", 
+                 configuration.get("genderLayer").getValue());
+      assertNull("dialect", 
+                 configuration.get("dialectLayer").getValue());
+      assertNull("accent", 
+                 configuration.get("accentLayer").getValue());
+      assertNull("scope", 
+                 configuration.get("scopeLayer").getValue());
+     
+      LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
+         Arrays.asList(serializer.getRequiredLayers()));
+      assertEquals("Needed layers: " + needLayers,
+                   9, needLayers.size());
+      assertTrue(needLayers.contains("who"));
+      assertTrue(needLayers.contains("turn"));
+      assertTrue(needLayers.contains("utterance"));
+      assertTrue(needLayers.contains("word"));
+      assertTrue(needLayers.contains("pronounce"));
+      assertTrue(needLayers.contains("lexical"));
+      assertTrue(needLayers.contains("comment"));
+      assertTrue(needLayers.contains("noise"));
+      assertTrue(needLayers.contains("scribe"));
+	 
+      // serialize
+      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+      final Vector<NamedStream> streams = new Vector<NamedStream>();
+      String[] layers = {"word","scribe","utterance"}; // ignored anyway
+      serializer.serialize(Arrays.spliterator(graphs), layers,
+                           stream -> streams.add(stream),
+                           warning -> System.out.println(warning),
+                           exception -> exceptions.add(exception));
+      if (exceptions.size() > 0) fail(""+exceptions);
+
+      streams.elementAt(0).save(dir);
+
+      // test using diff
+      File result = new File(dir, "serialize_utterance_word.trs");
+      String differences = diff(new File(dir, "expected_serialize_utterance_word.trs"), result);
+      if (differences != null)
+      {
+         fail(differences);
+      }
+      else
+      {
+         result.delete();
+      }
+   }
+
    /**
     * Diffs two files.
     * @param expected
