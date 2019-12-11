@@ -1371,8 +1371,11 @@ public class Annotation
 
    
   /**
-   * Determines whether this annotation t-includes the given annotation. Returns true if this annotation includes the other annotation's start and end offsets.
-   * <p><em>NB</em> If the start and end offsets of <var>other</var> are the same as the end offset of this annotation (i.e. <var>other</var> is instantaneous at the end of this annotation), this method will return false.
+   * Determines whether this annotation t-includes the given annotation. Returns true if
+   * this annotation includes the other annotation's start and end offsets. 
+   * <p><em>NB</em> If the start and end offsets of <var>other</var> are the same as the
+   * end offset of this annotation (i.e. <var>other</var> is instantaneous at the end of
+   * this annotation), this method will return false. 
    * <p>A precondition is that the annotation's {@link #graph} is set.
    * @param other The given other annotation.
    * @return true if the other annotation's duration is wholly included within this annotation's duration, and false otherwise.
