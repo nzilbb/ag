@@ -1762,49 +1762,67 @@ public class TranscriptSerialization
    public void checkForNonWordEvents(Anchor anchor, Sync sync)
    {
       // ending language tags
-      for (Annotation an : anchor.endOf(languageLayer.getId()))
+      if (languageLayer != null)
       {
-	 if (an.containsKey("@ended")) continue;
-	 sync.addEvent(new Event(an.getLabel(), "language", "end"));
-         an.put("@ended", Boolean.TRUE);
+         for (Annotation an : anchor.endOf(languageLayer.getId()))
+         {
+            if (an.containsKey("@ended")) continue;
+            sync.addEvent(new Event(an.getLabel(), "language", "end"));
+            an.put("@ended", Boolean.TRUE);
+         }
       }
       // ending entity tags
-      for (Annotation an : anchor.endOf(entityLayer.getId()))
+      if (entityLayer != null)
       {
-	 if (an.containsKey("@ended")) continue;
-	 sync.addEvent(new Event(an.getLabel(), "entities", "end"));
-         an.put("@ended", Boolean.TRUE);
+         for (Annotation an : anchor.endOf(entityLayer.getId()))
+         {
+            if (an.containsKey("@ended")) continue;
+            sync.addEvent(new Event(an.getLabel(), "entities", "end"));
+            an.put("@ended", Boolean.TRUE);
+         }
       }
       
       // noise tags
-      for (Annotation an : anchor.endOf(noiseLayer.getId()))
+      if (noiseLayer != null)
       {
-	 if (an.containsKey("@ended")) continue;
-	 sync.addEvent(new Event(an.getLabel(), "noise", "instantaneous"));
-         an.put("@ended", Boolean.TRUE);
+         for (Annotation an : anchor.endOf(noiseLayer.getId()))
+         {
+            if (an.containsKey("@ended")) continue;
+            sync.addEvent(new Event(an.getLabel(), "noise", "instantaneous"));
+            an.put("@ended", Boolean.TRUE);
+         }
       }
       
       // comments tags
-      for (Annotation an : anchor.endOf(commentLayer.getId()))
+      if (commentLayer != null)
       {
-	 if (an.containsKey("@ended")) continue;
-	 sync.addEvent(new Comment(an.getLabel()));
-         an.put("@ended", Boolean.TRUE);
+         for (Annotation an : anchor.endOf(commentLayer.getId()))
+         {
+            if (an.containsKey("@ended")) continue;
+            sync.addEvent(new Comment(an.getLabel()));
+            an.put("@ended", Boolean.TRUE);
+         }
       }
       
       // beginning entity tags
-      for (Annotation an : anchor.startOf(entityLayer.getId()))
+      if (entityLayer != null)
       {
-	 if (an.containsKey("@begun")) continue;
-	 sync.addEvent(new Event(an.getLabel(), "entities", "begin"));
-         an.put("@begun", Boolean.TRUE);
+         for (Annotation an : anchor.startOf(entityLayer.getId()))
+         {
+            if (an.containsKey("@begun")) continue;
+            sync.addEvent(new Event(an.getLabel(), "entities", "begin"));
+            an.put("@begun", Boolean.TRUE);
+         }
       }
       // beginning language tags
-      for (Annotation an : anchor.startOf(languageLayer.getId()))
+      if (languageLayer != null)
       {
-	 if (an.containsKey("@begun")) continue;
-	 sync.addEvent(new Event(an.getLabel(), "language", "begin"));
-         an.put("@begun", Boolean.TRUE);
+         for (Annotation an : anchor.startOf(languageLayer.getId()))
+         {
+            if (an.containsKey("@begun")) continue;
+            sync.addEvent(new Event(an.getLabel(), "language", "begin"));
+            an.put("@begun", Boolean.TRUE);
+         }
       }
    } // end of checkForNonWordEvents()
    
