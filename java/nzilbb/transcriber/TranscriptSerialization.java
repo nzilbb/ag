@@ -21,20 +21,33 @@
 //
 package nzilbb.transcriber;
 
-import java.util.Vector;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Arrays;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Spliterator;
+import java.util.Vector;
+import java.util.function.Consumer;
 import javax.xml.parsers.ParserConfigurationException;
-import org.xml.sax.SAXException;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
+import nzilbb.util.IO;
+import nzilbb.util.TempFileInputStream;
+import org.xml.sax.SAXException;
 
 /**
  * Deserializer for trs files produced with Transcriber.
@@ -43,7 +56,7 @@ import nzilbb.configure.ParameterSet;
 
 public class TranscriptSerialization
    extends Transcript
-   implements IDeserializer
+   implements IDeserializer, ISerializer
 {
    // Attributes:
    protected Vector<String> warnings;
@@ -63,7 +76,7 @@ public class TranscriptSerialization
     * Setter for {@link #schema}: Layer schema.
     * @param newSchema Layer schema.
     */
-   public void setSchema(Schema newSchema) { schema = newSchema; }
+   public TranscriptSerialization setSchema(Schema newSchema) { schema = newSchema; return this; }
 
    /**
     * Participant information layer.
@@ -80,7 +93,7 @@ public class TranscriptSerialization
     * Setter for {@link #participantLayer}: Participant information layer.
     * @param newParticipantLayer Participant information layer.
     */
-   public void setParticipantLayer(Layer newParticipantLayer) { participantLayer = newParticipantLayer; }
+   public TranscriptSerialization setParticipantLayer(Layer newParticipantLayer) { participantLayer = newParticipantLayer; return this; }
 
    /**
     * Turn layer.
@@ -97,7 +110,7 @@ public class TranscriptSerialization
     * Setter for {@link #turnLayer}: Turn layer.
     * @param newTurnLayer Turn layer.
     */
-   public void setTurnLayer(Layer newTurnLayer) { turnLayer = newTurnLayer; }
+   public TranscriptSerialization setTurnLayer(Layer newTurnLayer) { turnLayer = newTurnLayer; return this; }
 
    /**
     * Utterance layer.
@@ -114,7 +127,7 @@ public class TranscriptSerialization
     * Setter for {@link #utteranceLayer}: Utterance layer.
     * @param newUtteranceLayer Utterance layer.
     */
-   public void setUtteranceLayer(Layer newUtteranceLayer) { utteranceLayer = newUtteranceLayer; }
+   public TranscriptSerialization setUtteranceLayer(Layer newUtteranceLayer) { utteranceLayer = newUtteranceLayer; return this; }
 
    /**
     * Word token layer.
@@ -131,7 +144,7 @@ public class TranscriptSerialization
     * Setter for {@link #wordLayer}: Word token layer.
     * @param newWordLayer Word token layer.
     */
-   public void setWordLayer(Layer newWordLayer) { wordLayer = newWordLayer; }
+   public TranscriptSerialization setWordLayer(Layer newWordLayer) { wordLayer = newWordLayer; return this; }
 
    /**
     * Layer for topic tags.
@@ -148,7 +161,7 @@ public class TranscriptSerialization
     * Setter for {@link #topicLayer}: Layer for topic tags.
     * @param newTopicLayer Layer for topic tags.
     */
-   public void setTopicLayer(Layer newTopicLayer) { topicLayer = newTopicLayer; }
+   public TranscriptSerialization setTopicLayer(Layer newTopicLayer) { topicLayer = newTopicLayer; return this; }
 
    /**
     * Layer for language tags.
@@ -165,7 +178,7 @@ public class TranscriptSerialization
     * Setter for {@link #languageLayer}: Layer for language tags.
     * @param newLanguageLayer Layer for language tags.
     */
-   public void setLanguageLayer(Layer newLanguageLayer) { languageLayer = newLanguageLayer; }
+   public TranscriptSerialization setLanguageLayer(Layer newLanguageLayer) { languageLayer = newLanguageLayer; return this; }
 
    /**
     * Layer for lexical word tags.
@@ -182,7 +195,7 @@ public class TranscriptSerialization
     * Setter for {@link #lexicalLayer}: Layer for lexical word tags.
     * @param newLexicalLayer Layer for lexical word tags.
     */
-   public void setLexicalLayer(Layer newLexicalLayer) { lexicalLayer = newLexicalLayer; }
+   public TranscriptSerialization setLexicalLayer(Layer newLexicalLayer) { lexicalLayer = newLexicalLayer; return this; }
 
    /**
     * Layer for pronounce events.
@@ -199,7 +212,7 @@ public class TranscriptSerialization
     * Setter for {@link #pronounceLayer}: Layer for pronounce events.
     * @param newPronounceLayer Layer for pronounce events.
     */
-   public void setPronounceLayer(Layer newPronounceLayer) { pronounceLayer = newPronounceLayer; }
+   public TranscriptSerialization setPronounceLayer(Layer newPronounceLayer) { pronounceLayer = newPronounceLayer; return this; }
 
    /**
     * Layer for named entities.
@@ -216,7 +229,7 @@ public class TranscriptSerialization
     * Setter for {@link #entityLayer}: Layer for named entities.
     * @param newEntityLayer Layer for named entities.
     */
-   public void setEntityLayer(Layer newEntityLayer) { entityLayer = newEntityLayer; }
+   public TranscriptSerialization setEntityLayer(Layer newEntityLayer) { entityLayer = newEntityLayer; return this; }
 
    /**
     * Layer for commentary.
@@ -233,7 +246,7 @@ public class TranscriptSerialization
     * Setter for {@link #commentLayer}: Layer for commentary.
     * @param newCommentLayer Layer for commentary.
     */
-   public void setCommentLayer(Layer newCommentLayer) { commentLayer = newCommentLayer; }
+   public TranscriptSerialization setCommentLayer(Layer newCommentLayer) { commentLayer = newCommentLayer; return this; }
 
    /**
     * Layer for noise annotations.
@@ -250,7 +263,7 @@ public class TranscriptSerialization
     * Setter for {@link #noiseLayer}: Layer for noise annotations.
     * @param newNoiseLayer Layer for noise annotations.
     */
-   public void setNoiseLayer(Layer newNoiseLayer) { noiseLayer = newNoiseLayer; }
+   public TranscriptSerialization setNoiseLayer(Layer newNoiseLayer) { noiseLayer = newNoiseLayer; return this; }
 
    /**
     * Transcript tag layer for name of trascriber.
@@ -267,7 +280,7 @@ public class TranscriptSerialization
     * Setter for {@link #scribeLayer}: Transcript tag layer for name of trascriber.
     * @param newScribeLayer Transcript tag layer for name of trascriber.
     */
-   public void setScribeLayer(Layer newScribeLayer) { scribeLayer = newScribeLayer; }
+   public TranscriptSerialization setScribeLayer(Layer newScribeLayer) { scribeLayer = newScribeLayer; return this; }
 
    /**
     * Transcript tag layer for version.
@@ -284,7 +297,7 @@ public class TranscriptSerialization
     * Setter for {@link #versionLayer}: Transcript tag layer for version.
     * @param newVersionLayer Transcript tag layer for version.
     */
-   public void setVersionLayer(Layer newVersionLayer) { versionLayer = newVersionLayer; }
+   public TranscriptSerialization setVersionLayer(Layer newVersionLayer) { versionLayer = newVersionLayer; return this; }
 
    /**
     * Transcript tag layer for version date.
@@ -301,7 +314,7 @@ public class TranscriptSerialization
     * Setter for {@link #versionDateLayer}: Transcript tag layer for version date.
     * @param newVersionDateLayer Transcript tag layer for version date.
     */
-   public void setVersionDateLayer(Layer newVersionDateLayer) { versionDateLayer = newVersionDateLayer; }
+   public TranscriptSerialization setVersionDateLayer(Layer newVersionDateLayer) { versionDateLayer = newVersionDateLayer; return this; }
 
    /**
     * Transcript tag layer for program name.
@@ -318,7 +331,7 @@ public class TranscriptSerialization
     * Setter for {@link #programLayer}: Transcript tag layer for program name.
     * @param newProgramLayer Transcript tag layer for program name.
     */
-   public void setProgramLayer(Layer newProgramLayer) { programLayer = newProgramLayer; }
+   public TranscriptSerialization setProgramLayer(Layer newProgramLayer) { programLayer = newProgramLayer; return this; }
 
    /**
     * Transcript tag layer for air date.
@@ -335,7 +348,7 @@ public class TranscriptSerialization
     * Setter for {@link #airDateLayer}: Transcript tag layer for air date.
     * @param newAirDateLayer Transcript tag layer for air date.
     */
-   public void setAirDateLayer(Layer newAirDateLayer) { airDateLayer = newAirDateLayer; }
+   public TranscriptSerialization setAirDateLayer(Layer newAirDateLayer) { airDateLayer = newAirDateLayer; return this; }
 
    /**
     * Transcript tag layer for trascript language.
@@ -352,7 +365,7 @@ public class TranscriptSerialization
     * Setter for {@link #transcriptLanguageLayer}: Transcript tag layer for trascript language.
     * @param newTranscriptLanguageLayer Transcript tag layer for trascript language.
     */
-   public void setTranscriptLanguageLayer(Layer newTranscriptLanguageLayer) { transcriptLanguageLayer = newTranscriptLanguageLayer; }
+   public TranscriptSerialization setTranscriptLanguageLayer(Layer newTranscriptLanguageLayer) { transcriptLanguageLayer = newTranscriptLanguageLayer; return this; }
 
    /**
     * Participant tag layer for check attribute.
@@ -369,7 +382,7 @@ public class TranscriptSerialization
     * Setter for {@link #participantCheckLayer}: Participant tag layer for check attribute.
     * @param newParticipantCheckLayer Participant tag layer for check attribute.
     */
-   public void setParticipantCheckLayer(Layer newParticipantCheckLayer) { participantCheckLayer = newParticipantCheckLayer; }
+   public TranscriptSerialization setParticipantCheckLayer(Layer newParticipantCheckLayer) { participantCheckLayer = newParticipantCheckLayer; return this; }
 
    /**
     * Participant tag layer for gender ('type') attribute.
@@ -386,7 +399,7 @@ public class TranscriptSerialization
     * Setter for {@link #genderLayer}: Participant tag layer for gender ('type') attribute.
     * @param newGenderLayer Participant tag layer for gender ('type') attribute.
     */
-   public void setGenderLayer(Layer newGenderLayer) { genderLayer = newGenderLayer; }
+   public TranscriptSerialization setGenderLayer(Layer newGenderLayer) { genderLayer = newGenderLayer; return this; }
 
    /**
     * Participant tag layer for dialect attribute.
@@ -403,7 +416,7 @@ public class TranscriptSerialization
     * Setter for {@link #dialectLayer}: Participant tag layer for dialect attribute.
     * @param newDialectLayer Participant tag layer for dialect attribute.
     */
-   public void setDialectLayer(Layer newDialectLayer) { dialectLayer = newDialectLayer; }
+   public TranscriptSerialization setDialectLayer(Layer newDialectLayer) { dialectLayer = newDialectLayer; return this; }
 
    /**
     * Participant tag layer for accent attribute.
@@ -420,7 +433,7 @@ public class TranscriptSerialization
     * Setter for {@link #accentLayer}: Participant tag layer for accent attribute.
     * @param newAccentLayer Participant tag layer for accent attribute.
     */
-   public void setAccentLayer(Layer newAccentLayer) { accentLayer = newAccentLayer; }
+   public TranscriptSerialization setAccentLayer(Layer newAccentLayer) { accentLayer = newAccentLayer; return this; }
 
    /**
     * Participant tag layer for scope attribute.
@@ -437,8 +450,43 @@ public class TranscriptSerialization
     * Setter for {@link #scopeLayer}: Participant tag layer for scope attribute.
     * @param newScopeLayer Participant tag layer for scope attribute.
     */
-   public void setScopeLayer(Layer newScopeLayer) { scopeLayer = newScopeLayer; }
+   public TranscriptSerialization setScopeLayer(Layer newScopeLayer) { scopeLayer = newScopeLayer; return this; }
 
+   private long graphCount = 0;
+   private long consumedGraphCount = 0;
+   /**
+    * Determines how far through the serialization is.
+    * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
+    */
+   public Integer getPercentComplete()
+   {
+      if (graphCount < 0) return null;
+      return (int)((consumedGraphCount * 100) / graphCount);
+   }
+   
+   /**
+    * Serialization marked for cancelling.
+    * @see #getCancelling()
+    * @see #setCancelling(boolean)
+    */
+   protected boolean cancelling;
+   /**
+    * Getter for {@link #cancelling}: Serialization marked for cancelling.
+    * @return Serialization marked for cancelling.
+    */
+   public boolean getCancelling() { return cancelling; }
+   /**
+    * Setter for {@link #cancelling}: Serialization marked for cancelling.
+    * @param newCancelling Serialization marked for cancelling.
+    */
+   public TranscriptSerialization setCancelling(boolean newCancelling) { cancelling = newCancelling; return this; }
+   /**
+    * Cancel the serialization in course (if any).
+    */
+   public void cancel()
+   {
+      setCancelling(true);
+   }
    
    // Methods:
    
@@ -666,7 +714,7 @@ public class TranscriptSerialization
 
       layerToPossibilities.put(
 	 new Parameter("programLayer", Layer.class, "Program layer", "Name of the program recorded"), 
-	 Arrays.asList("transcriptprogram","program"));
+	 Arrays.asList("transcriptprogram","program","episode","series","family"));
       layerToCandidates.put("programLayer", graphTagLayers);
 
       layerToPossibilities.put(
@@ -774,7 +822,9 @@ public class TranscriptSerialization
    }
 
    /**
-    * Sets parameters for a given deserialization operation, after loading the serialized form of the graph. This might include mappings from format-specific objects like tiers to graph layers, etc.
+    * Sets parameters for a given deserialization operation, after loading the serialized
+    * form of the graph. This might include mappings from format-specific objects like
+    * tiers to graph layers, etc. 
     * @param parameters The configuration for a given deserialization operation.
     * @throws SerializationParametersMissingException If not all required parameters have a value.
     */
@@ -1318,5 +1368,435 @@ public class TranscriptSerialization
       // TODO check for turns with no speaker assigned.
       return warnings;
    }
+   // ISerializer methods
+   
+   /**
+    * Determines which layers, if any, must be present in the graph that will be serialized.
+    * <p>{@link ISerializer} method.
+    * @return A list of IDs of layers that must be present in the graph that will be serialized.
+    * @throws SerializationParametersMissingException If not all required parameters have a value.
+    */
+   public String[] getRequiredLayers() throws SerializationParametersMissingException
+   {
+      Vector<String> requiredLayers = new Vector<String>();
+      if (participantLayer != null)        requiredLayers.add(participantLayer.getId());
+      if (turnLayer != null)               requiredLayers.add(turnLayer.getId());
+      if (utteranceLayer != null)          requiredLayers.add(utteranceLayer.getId());
+      if (wordLayer != null)               requiredLayers.add(wordLayer.getId());
+      if (lexicalLayer != null)            requiredLayers.add(lexicalLayer.getId());
+      if (pronounceLayer != null)          requiredLayers.add(pronounceLayer.getId());
+      if (commentLayer != null)            requiredLayers.add(commentLayer.getId());
+      if (noiseLayer != null)              requiredLayers.add(noiseLayer.getId());
+      if (topicLayer != null)              requiredLayers.add(topicLayer.getId());
+      if (languageLayer != null)           requiredLayers.add(languageLayer.getId());
+      if (transcriptLanguageLayer != null) requiredLayers.add(transcriptLanguageLayer.getId());
+      if (entityLayer != null)             requiredLayers.add(entityLayer.getId());
+      if (scribeLayer != null)             requiredLayers.add(scribeLayer.getId());
+      if (versionLayer != null)            requiredLayers.add(versionLayer.getId());
+      if (versionDateLayer != null)        requiredLayers.add(versionDateLayer.getId());
+      if (programLayer != null)            requiredLayers.add(programLayer.getId());
+      if (airDateLayer != null)            requiredLayers.add(airDateLayer.getId());
+      if (participantCheckLayer != null)   requiredLayers.add(participantCheckLayer.getId());
+      if (genderLayer != null)             requiredLayers.add(genderLayer.getId());
+      if (dialectLayer != null)            requiredLayers.add(dialectLayer.getId());
+      if (accentLayer != null)             requiredLayers.add(accentLayer.getId());
+      if (scopeLayer != null)              requiredLayers.add(scopeLayer.getId());
+      return requiredLayers.toArray(new String[0]);
+   }
 
+   /**
+    * Determines the cardinality between graphs and serialized streams.
+    * @return {@link nzilbb.ag.serialize.ISerializer#Cardinality}.NtoN as there is one
+    * stream produced for each graph to serialize.
+    */
+   public Cardinality getCardinality()
+   {
+      return Cardinality.NToN;
+   }
+
+   /**
+    * Serializes the given series of graphs, generating one or more {@link NamedStream}s.
+    * <p>Many data formats will only yield one stream per graph (e.g. Transcriber
+    * transcript or Praat textgrid), however there are formats that use multiple files for
+    * the same transcript (e.g. XWaves, EmuR), and others still that will produce one
+    * stream from many Graphs (e.g. CSV).
+    * <p>The method is synchronous in the sense that it should not return until all graphs
+    * have been serialized.
+    * @param graphs The graphs to serialize.
+    * @param layerIds The IDs of the layers to include, or null for all layers.
+    * @param consumer The object receiving the streams.
+    * @param warnings The object receiving warning messages.
+    * @return A list of named streams that contain the serialization in the given format. 
+    * @throws SerializerNotConfiguredException if the object has not been configured.
+    */
+   public void serialize(Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
+      throws SerializerNotConfiguredException
+   {
+      graphCount = graphs.getExactSizeIfKnown();
+      graphs.forEachRemaining(graph -> {
+            if (getCancelling()) return;
+            try
+            {
+               consumer.accept(serializeGraph(graph, layerIds, warnings));
+            }
+            catch(SerializationException exception)
+            {
+               errors.accept(exception);
+            }
+            consumedGraphCount++;
+         }); // next graph
+   }
+
+   /**
+    * Serializes the given graph, generating a {@link NamedStream}.
+    * @param graph The graph to serialize.
+    * @return A named stream that contains the TextGrid. 
+    * @throws SerializationException if errors occur during deserialization.
+    */
+   protected NamedStream serializeGraph(Graph graph, String[] layerIds, Consumer<String> warnings) 
+      throws SerializationException
+   {
+      SerializationException errors = null;      
+
+      HashSet<String> selectedLayers = new HashSet<String>();
+      if (layerIds != null)
+      {
+         for (String l : layerIds) selectedLayers.add(l);
+      }
+      else
+      {
+         for (Layer l : graph.getSchema().getLayers().values()) selectedLayers.add(l.getId());
+      }
+
+      graph.setOffsetGranularity(Constants.GRANULARITY_MILLISECONDS);
+
+      Transcript transcript = new Transcript();
+      transcript.setId(graph.getId());
+      transcript.setVersion("0");
+      if (versionLayer != null)
+      {
+         Annotation tag = graph.my(versionLayer.getId());
+         if (tag != null)
+         {
+            transcript.setVersion(tag.getLabel());
+         }
+      }
+      SimpleDateFormat fmtTranscriberDate =new SimpleDateFormat("yymmdd");
+      String sVersionDate = fmtTranscriberDate.format(new java.util.Date());
+      transcript.setVersionDate(sVersionDate);
+      if (versionDateLayer != null)
+      {
+         Annotation tag = graph.my(versionDateLayer.getId());
+         if (tag != null)
+         {
+            transcript.setVersionDate(tag.getLabel());
+         }
+      }
+      if (scribeLayer != null)
+      {
+         Annotation tag = graph.my(scribeLayer.getId());
+         if (tag != null)
+         {
+            transcript.setScribe(tag.getLabel());
+         }
+      }
+      if (transcript.getScribe() == null) transcript.setScribe(getDescriptor().toString());
+      if (graph.getMediaProvider() != null)
+      {
+         try
+         {
+            MediaFile[] files = graph.getMediaProvider().getAvailableMedia();
+            if (files.length > 0)
+            {
+               MediaFile firstFile = files[0];
+               transcript.setAudioFilename(firstFile.getName());
+            }
+         }
+         catch(StoreException exception) {}
+         catch(PermissionException exception) {}
+      }
+      if (programLayer != null)
+      {
+         Annotation tag = graph.my(programLayer.getId());
+         if (tag != null)
+         {
+            transcript.setProgram(tag.getLabel());
+         }
+      }
+      if (transcriptLanguageLayer != null)
+      {
+         Annotation tag = graph.my(transcriptLanguageLayer.getId());
+         if (tag != null)
+         {
+            transcript.setLanguage(tag.getLabel());
+         }
+      }
+
+      // speakers
+      int iSpk = 0;
+      HashMap<String,String> mSpeakerToSpk = new HashMap<String,String>();
+      for (Annotation participant : graph.list(participantLayer.getId()))
+      {
+	 Speaker speaker = new Speaker(transcript);
+	 speaker.setId("spk" + (++iSpk));
+	 speaker.setName(participant.getLabel());
+	 transcript.addSpeaker(speaker);
+	 mSpeakerToSpk.put(participant.getLabel(), speaker.getId());
+
+         // participant attributes?
+         if (genderLayer != null)
+         {
+            Annotation tag = participant.my(genderLayer.getId());
+            if (tag != null)
+            {
+               speaker.setType(tag.getLabel());
+            }
+         }
+         if (participantCheckLayer != null)
+         {
+            Annotation tag = participant.my(participantCheckLayer.getId());
+            if (tag != null)
+            {
+               speaker.setCheck(tag.getLabel());
+            }
+         }
+         if (scopeLayer != null)
+         {
+            Annotation tag = participant.my(scopeLayer.getId());
+            if (tag != null)
+            {
+               speaker.setScope(tag.getLabel());
+            }
+         }
+         if (accentLayer != null)
+         {
+            Annotation tag = participant.my(accentLayer.getId());
+            if (tag != null)
+            {
+               speaker.setAccent(tag.getLabel());
+            }
+         }
+         if (dialectLayer != null)
+         {
+            Annotation tag = participant.my(dialectLayer.getId());
+            if (tag != null)
+            {
+               speaker.setDialect(tag.getLabel());
+            }
+         }
+      }
+
+      // ensure simultaneous speech is isolated into discrete turns
+      //TODO ag.convertSimultaneousSpeechToParallelTurns();
+
+      // transcript...
+
+      DecimalFormat fmt = new DecimalFormat(
+	 // force the locale to something with . as the decimal separator
+	 "0.000", new DecimalFormatSymbols(Locale.UK));
+
+      HashMap<String, String> topicId = new HashMap<String, String>();
+
+      Section section = null;
+
+      Annotation currentTopic = null;
+      HashSet<String> consumed = new HashSet<String>();
+      for (Annotation anTurn : graph.list(turnLayer.getId()))
+      {
+	 // ignore it if we've already added it (because it's simultaneous)
+	 if (consumed.contains(anTurn.getId())) continue;
+
+	 // check for new topic
+         if (topicLayer != null)
+         {
+            Annotation topic = anTurn.my(topicLayer.getId());
+            if (currentTopic != topic)
+            {
+               currentTopic = topic;
+               section = new Section(transcript);
+               if (currentTopic != null)
+               {
+                  if (!topicId.containsKey(currentTopic.getLabel()))
+                  {
+                     topicId.put(currentTopic.getLabel(), "to" + (topicId.size() + 1));
+                     transcript.addTopic(topicId.get(currentTopic.getLabel()), currentTopic.getLabel());
+                  }
+                  section.setTopic(topicId.get(currentTopic.getLabel()));
+               } // there is a topic
+               transcript.addSection(section);
+            } // topic changing
+         } // topic layer specified
+
+	 if (section == null)
+	 {
+	    section = new Section(transcript);
+	    transcript.addSection(section);
+	 }
+	 
+	 Turn turn = new Turn(section);
+	 turn.setStartTime(fmt.format(anTurn.getStart().getOffset()));
+	 turn.setEndTime(fmt.format(anTurn.getEnd().getOffset()));
+	 
+	 LinkedHashSet<Annotation> turnsStartingHere = anTurn.getStart().startOf(anTurn.getLayerId());
+	 int i = 1;
+	 for (Annotation anThisTurn : turnsStartingHere)
+	 {
+	    if (turn.getSpeakerId().length() == 0)
+	    {
+	       turn.setSpeakerId(mSpeakerToSpk.get(anThisTurn.getLabel()));
+	    }
+	    else
+	    { // more than one speaker
+	       turn.setSpeakerId(turn.getSpeakerId() 
+				 + " " + mSpeakerToSpk.get(anThisTurn.getLabel()));
+	    }
+	    consumed.add(anThisTurn.getId());
+	 } // next turn
+
+	 // utterances
+	 for (Annotation anLine : anTurn.list(utteranceLayer.getId()))
+	 {
+	    // ignore it if we've already added it (because it's simultaneous)
+	    if (consumed.contains(anLine.getId())) continue;
+            
+	    Sync sync = new Sync(turn);
+	    sync.setTime(fmt.format(anLine.getStart().getOffset()));
+	    sync.setEndTime(fmt.format(anLine.getEnd().getOffset()));
+
+	    checkForNonWordEvents(anLine.getStart(), sync);
+
+	    LinkedHashSet<Annotation> linesStartingHere = anLine.getStart().startOf(anLine.getLayerId());
+	    for (Annotation anThisLine : linesStartingHere)
+	    {
+	       Sync thisSync = sync;
+	       if (linesStartingHere.size() > 1)
+	       { // simultaneous speech
+		  thisSync = new SimultaneousSync(mSpeakerToSpk.get(anThisLine.getLabel()), sync);
+		  sync.getSimultaneousSyncs().add((SimultaneousSync)thisSync);
+	       }
+	       // words 
+	       thisSync.setText(""); // TODO handle events
+	       for (Annotation anWord : anThisLine.list(wordLayer.getId()))
+	       {
+		  checkForNonWordEvents(anWord.getStart(), thisSync);
+		  if (thisSync.getText().length() > 0)
+		  {
+		     thisSync.setText(thisSync.getText() + " " + anWord.getLabel());
+		  }
+		  else
+		  {
+		     thisSync.setText(anWord.getLabel());
+		  }
+		  if (anWord.my(lexicalLayer.getId()) != null)
+		  { // lexical tag
+		     thisSync.addEvent(new Event(
+					  anWord.my(lexicalLayer.getId()).getLabel(),
+					  "lexical", "previous"));
+		  }
+		  if (anWord.my(pronounceLayer.getId()) != null)
+		  { // lexical tag
+		     thisSync.addEvent(new Event(
+					  anWord.my(pronounceLayer.getId()).getLabel(),
+					  "pronounce", "previous"));
+		  }
+		  checkForNonWordEvents(anWord.getEnd(), thisSync);
+	       } // next word
+	       
+	       consumed.add(anThisLine.getId());
+	    } // next line
+
+	    checkForNonWordEvents(anLine.getEnd(), sync);
+	    
+	    turn.addSync(sync);
+	 } // next line
+	 
+	 section.addTurn(turn);
+      } // next turn
+
+      // remove tags used during serialization
+      for (Annotation a : graph.getAnnotationsById().values())
+      {
+         a.remove("@begun");
+         a.remove("@ended");
+      } // next annotation
+
+      if (errors != null) throw errors;
+      
+      try
+      {
+         File f = File.createTempFile(IO.SafeFileNameUrl(graph.getId()), ".trs");
+         FileOutputStream out = new FileOutputStream(f);	 
+         OutputStreamWriter writer = new OutputStreamWriter(out, "utf-8");
+         transcript.writeText(writer);
+         writer.flush();
+         TempFileInputStream in = new TempFileInputStream(f);
+
+         // return a named stream from the file
+         String name = IO.SafeFileNameUrl(graph.getId());
+         if (!name.toLowerCase().endsWith(".trs")) name += ".trs";
+         return new NamedStream(in, name);
+      }
+      catch(Exception exception)
+      {
+         errors = new SerializationException();
+         errors.initCause(exception);
+         errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
+         throw errors;
+      }
+   }
+   
+   /**
+    * Checks the givn anchor for non-word events, e.g. language start or end tags.
+    * @param anchor
+    * @param sync
+    */
+   public void checkForNonWordEvents(Anchor anchor, Sync sync)
+   {
+      // ending language tags
+      for (Annotation an : anchor.endOf(languageLayer.getId()))
+      {
+	 if (an.containsKey("@ended")) continue;
+	 sync.addEvent(new Event(an.getLabel(), "language", "end"));
+         an.put("@ended", Boolean.TRUE);
+      }
+      // ending entity tags
+      for (Annotation an : anchor.endOf(entityLayer.getId()))
+      {
+	 if (an.containsKey("@ended")) continue;
+	 sync.addEvent(new Event(an.getLabel(), "entities", "end"));
+         an.put("@ended", Boolean.TRUE);
+      }
+      
+      // noise tags
+      for (Annotation an : anchor.endOf(noiseLayer.getId()))
+      {
+	 if (an.containsKey("@ended")) continue;
+	 sync.addEvent(new Event(an.getLabel(), "noise", "instantaneous"));
+         an.put("@ended", Boolean.TRUE);
+      }
+      
+      // comments tags
+      for (Annotation an : anchor.endOf(commentLayer.getId()))
+      {
+	 if (an.containsKey("@ended")) continue;
+	 sync.addEvent(new Comment(an.getLabel()));
+         an.put("@ended", Boolean.TRUE);
+      }
+      
+      // beginning entity tags
+      for (Annotation an : anchor.startOf(entityLayer.getId()))
+      {
+	 if (an.containsKey("@begun")) continue;
+	 sync.addEvent(new Event(an.getLabel(), "entities", "begin"));
+         an.put("@begun", Boolean.TRUE);
+      }
+      // beginning language tags
+      for (Annotation an : anchor.startOf(languageLayer.getId()))
+      {
+	 if (an.containsKey("@begun")) continue;
+	 sync.addEvent(new Event(an.getLabel(), "language", "begin"));
+         an.put("@begun", Boolean.TRUE);
+      }
+   } // end of checkForNonWordEvents()
+   
 } // end of class TranscriptSerialization

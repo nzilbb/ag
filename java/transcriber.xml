@@ -11,6 +11,7 @@
   <property name="icon" value="nzilbb/transcriber/icon.png"/>
   <property name="junitjar" value="/usr/share/java/junit4.jar"/>
   <property name="nzilbb-ag-serialize-IDeserializer" value="nzilbb.transcriber.TranscriptSerialization" />
+  <property name="nzilbb-ag-serialize-ISerializer" value="nzilbb.transcriber.TranscriptSerialization" />
   
   <target name="init">
     <!-- Create the time stamp -->
