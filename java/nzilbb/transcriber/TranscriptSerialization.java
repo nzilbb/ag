@@ -43,6 +43,7 @@ import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
+import nzilbb.ag.util.UtteranceParallelizer;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 import nzilbb.util.IO;
@@ -506,7 +507,8 @@ public class TranscriptSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Transcriber transcript", "1.51", "text/xml-transcriber", ".trs", "20191031.1734", getClass().getResource("icon.png"));
+	 "Transcriber transcript", "1.51", "text/xml-transcriber", ".trs", "20191211.1902",
+         getClass().getResource("icon.png"));
    }
 
    /**
@@ -1587,7 +1589,14 @@ public class TranscriptSerialization
       }
 
       // ensure simultaneous speech is isolated into discrete turns
-      //TODO ag.convertSimultaneousSpeechToParallelTurns();
+      try
+      {
+         new UtteranceParallelizer(schema).transform(graph);
+      }
+      catch(TransformationException exception)
+      {
+         errors = new SerializationException(exception);
+      }
 
       // transcript...
 

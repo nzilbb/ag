@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Trans SYSTEM "trans-14.dtd">
+<Trans scribe="robert" audio_filename="test.wav" version="1" version_date="20191211" xml:lang="en-NZ">
+<Topics>
+<Topic id="to1" desc="testing"/>
+</Topics>
+<Speakers>
+<Speaker id="spk1" name="p1" check="" type="M" dialect="" accent="" scope=""/>
+<Speaker id="spk2" name="p2" check="" type="F" dialect="" accent="" scope=""/>
+</Speakers>
+<Episode>
+<Section type="report" topic="to1" startTime="0.000" endTime="10.000">
+<Turn speaker="spk1" startTime="0.000" endTime="5.000">
+<Sync time="0.000"/>
+<Comment desc="preamble"/>w1-1 w1-2 w1-3
+<Event desc="throat-clear" type="noise" extent="instantaneous"/>
+
+</Turn>
+<Turn speaker="spk2 spk1" startTime="5.000" endTime="10.000">
+<Sync time="5.000"/>
+<Who nb="2"/>w1-6
+<Event desc="lex-1-6" type="lexical" extent="previous"/>
+ w1-7
+<Event desc="lex-1-7" type="lexical" extent="previous"/>
+
+<Event desc="pron-1-7" type="pronounce" extent="previous"/>
+w1-8
+<Who nb="1"/>w2-6.5 w2-7.5
+</Turn>
+</Section>
+<Section type="report" startTime="10.000" endTime="15.000">
+<Turn speaker="spk1" startTime="10.000" endTime="15.000">
+<Sync time="10.000"/>
+<Event desc="en-US" type="language" extent="begin"/>
+w1-11
+<Event desc="animal" type="entities" extent="begin"/>
+ w1-12
+<Event desc="en-US" type="language" extent="end"/>
+ w1-13
+<Event desc="animal" type="entities" extent="end"/>
+
+</Turn>
+</Section>
+</Episode>
+</Trans>

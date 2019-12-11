@@ -709,6 +709,307 @@ public class TestTranscriptSerialization
       }
    }
    
+   @Test public void simultaneousSpeechSerialization()
+      throws Exception
+   {
+      Schema schema = new Schema(
+         "who", "turn", "utterance", "word",
+         new Layer("version_date", "Date")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false)
+         .setPeersOverlap(false)
+         .setSaturated(true),
+         new Layer("version", "Version number")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false)
+         .setPeersOverlap(false)
+         .setSaturated(true),
+         new Layer("version_date", "Version date")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false)
+         .setPeersOverlap(false)
+         .setSaturated(true),
+         new Layer("scribe", "Author")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false)
+         .setPeersOverlap(false)
+         .setSaturated(true),
+         new Layer("episode", "Episode")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false)
+         .setPeersOverlap(false)
+         .setSaturated(true),
+         new Layer("transcript_language", "Transcript Language")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false)
+         .setPeersOverlap(false)
+         .setSaturated(true),
+         new Layer("comment", "Comment")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true)
+         .setPeersOverlap(false)
+         .setSaturated(false),
+         new Layer("noise", "Noise")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true)
+         .setPeersOverlap(false)
+         .setSaturated(false),
+         new Layer("topic", "Topic")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true)
+         .setPeersOverlap(false)
+         .setSaturated(false),
+         new Layer("who", "Participants")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(true)
+         .setPeersOverlap(true)
+         .setSaturated(true),
+         new Layer("gender", "Gender")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false)
+         .setPeersOverlap(false)
+         .setSaturated(true)
+         .setParentId("who"),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+         new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+         new Layer("language", "Other Language")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true)
+         .setPeersOverlap(false)
+         .setSaturated(false)
+         .setParentId("turn"),
+         new Layer("entity", "Named Entity")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true)
+         .setPeersOverlap(false)
+         .setSaturated(false)
+         .setParentId("turn"),
+         new Layer("word", "Words", 2, true, false, false, "turn", true),
+         new Layer("orthography", "Orthography")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false)
+         .setPeersOverlap(false)
+         .setSaturated(true)
+         .setParentId("word"),
+         new Layer("lexical", "Lexical")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false)
+         .setPeersOverlap(false)
+         .setSaturated(true)
+         .setParentId("word"),
+         new Layer("pronounce", "Pronunciation")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false)
+         .setPeersOverlap(false)
+         .setSaturated(true)
+         .setParentId("word"));
+      File dir = getDir();
+      
+      // create a graph with simultaneous speech turns
+
+      Graph graph = new Graph()
+         .setId("simultaneous_speech")
+         .setSchema(schema);
+      graph.addAnchor(new Anchor("a0", 0.0));
+      graph.addAnchor(new Anchor("a15", 15.0));
+      // transcript attributes
+      graph.addAnnotation(new Annotation("l", "en-NZ", "transcript_language", "a0", "a15"));
+      graph.addAnnotation(new Annotation("by", "robert", "scribe", "a0", "a15"));
+      graph.addAnnotation(new Annotation("v", "1", "version", "a0", "a15"));
+      graph.addAnnotation(new Annotation("date", "20191211", "version_date", "a0", "a15"));
+      // participants
+      graph.addAnnotation(new Annotation("p1", "p1", "who", "a0", "a15"));
+      graph.addAnnotation(new Annotation("p2", "p2", "who", "a0", "a15"));
+      // participant attributes
+      graph.addAnnotation(new Annotation("g1", "M", "gender", "a0", "a15", "p1"));
+      graph.addAnnotation(new Annotation("g2", "F", "gender", "a0", "a15", "p2"));
+      // turns
+      graph.addAnnotation(new Annotation("t1", "p1", "turn", "a0", "a15", "p1"));
+      graph.addAnchor(new Anchor("a5", 5.0));
+      graph.addAnchor(new Anchor("a10", 10.0));
+      graph.addAnnotation(new Annotation("t2", "p2", "turn", "a5", "a10", "p2"));
+      // utterances
+      graph.addAnnotation(new Annotation("u1-1", "p1", "utterance", "a0", "a5", "t1"));
+      graph.addAnnotation(new Annotation("u1-2", "p1", "utterance", "a5", "a10", "t1"));
+      graph.addAnnotation(new Annotation("u2-1", "p2", "utterance", "a5", "a10", "t2"));
+      graph.addAnnotation(new Annotation("u1-3", "p1", "utterance", "a10", "a15", "t1"));
+      // topic
+      graph.addAnnotation(new Annotation("topic", "testing", "topic", "a0", "a10", "t1"));
+
+      // words
+      graph.addAnnotation(new Annotation("w1-1", "w1-1", "word", 
+                                         graph.addAnchor(new Anchor("a1", 1.0)).getId(),
+                                         graph.addAnchor(new Anchor("a2", 2.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("w1-2", "w1-2", "word", 
+                                         "a2",
+                                         graph.addAnchor(new Anchor("a3", 3.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("w1-3", "w1-3", "word", 
+                                         "a3",
+                                         graph.addAnchor(new Anchor("a4", 4.0)).getId(),
+                                         "t1"));
+      
+      graph.addAnnotation(new Annotation("w1-6", "w1-6", "word", 
+                                         graph.addAnchor(new Anchor("a6", 6.0)).getId(),
+                                         graph.addAnchor(new Anchor("a7", 7.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("w1-7", "w1-7", "word", 
+                                         "a7", 
+                                         graph.addAnchor(new Anchor("a8", 8.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("w1-8", "w1-8", "word", 
+                                         "a8",
+                                         graph.addAnchor(new Anchor("a9", 9.0)).getId(),
+                                         "t1"));
+      
+
+      graph.addAnnotation(new Annotation("w1-11", "w1-11", "word", 
+                                         graph.addAnchor(new Anchor("a11", 11.0)).getId(),
+                                         graph.addAnchor(new Anchor("a12", 12.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("w1-12", "w1-12", "word", 
+                                         "a12",
+                                         graph.addAnchor(new Anchor("a13", 13.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("w1-13", "w1-13", "word", 
+                                         "a13",
+                                         graph.addAnchor(new Anchor("a14", 14.0)).getId(),
+                                         "t1"));
+      
+      graph.addAnnotation(new Annotation("w2-6.5", "w2-6.5", "word", 
+                                         graph.addAnchor(new Anchor("a6.5", 6.5)).getId(),
+                                         graph.addAnchor(new Anchor("a7.5", 7.5)).getId(),
+                                         "t2"));
+      graph.addAnnotation(new Annotation("w2-7.5", "w2-7.5", "word", 
+                                         "a7.5",
+                                         graph.addAnchor(new Anchor("a8.5", 8.5)).getId(),
+                                         "t2"));
+
+      // add some non-speech annotations
+      graph.addAnnotation(new Annotation("comment1", "preamble", "comment", "a0", "a1"));
+      graph.addAnnotation(new Annotation("noise1", "throat-clear", "noise", "a4", "a5"));
+      graph.addAnnotation(new Annotation("lex1", "lex-1-6", "lexical", "a6", "a7", "w1-6"));
+      graph.addAnnotation(new Annotation("lex2", "lex-1-7", "lexical", "a7", "a8", "w1-7"));
+      graph.addAnnotation(new Annotation("pron1", "pron-1-7", "pronounce", "a7", "a8", "w1-7"));
+      graph.addAnnotation(new Annotation("pron2", "pron-1-8", "pronounce", "a8", "a9", "w1-7"));
+      
+      graph.addAnnotation(new Annotation("lUS", "en-US", "language", "a11", "a13"));
+      graph.addAnnotation(new Annotation("ent1", "animal", "entity", "a12", "a14"));
+
+      // add a media handler to test MEDIA_DESCRIPTOR
+      graph.setMediaProvider(new IGraphMediaProvider() {
+            public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
+            {
+               MediaFile[] media = {
+                  new MediaFile().setMimeType("audio/wav").setName("test.wav")
+               };
+               return media;
+            }
+            public String getMedia(String trackSuffix, String mimeType)
+               throws StoreException, PermissionException
+            { return "file://test.wav"; }
+            public IGraphMediaProvider providerForGraph(Graph graph)
+            { return this; }
+         });  
+
+      // add orthography tags that should not be used because orthography is not selected
+      for (Annotation word : graph.list("word"))
+      {
+         graph.addTag(word, "orthography", word.getLabel()+"-orthography");
+      }
+      
+      // create serializer
+      TranscriptSerialization serializer = new TranscriptSerialization();
+      
+      // general configuration
+      ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      assertEquals(18, serializer.configure(configuration, schema).size());
+      assertEquals("topic", "topic", 
+		   ((Layer)configuration.get("topicLayer").getValue()).getId());
+      assertEquals("comment", "comment", 
+		   ((Layer)configuration.get("commentLayer").getValue()).getId());
+      assertEquals("noise", "noise", 
+		   ((Layer)configuration.get("noiseLayer").getValue()).getId());
+      assertEquals("language", "language", 
+		   ((Layer)configuration.get("languageLayer").getValue()).getId());
+      assertEquals("lexical", "lexical", 
+		   ((Layer)configuration.get("lexicalLayer").getValue()).getId());
+      assertEquals("pronounce", "pronounce", 
+		   ((Layer)configuration.get("pronounceLayer").getValue()).getId());
+      assertEquals("entity", "entity", 
+		   ((Layer)configuration.get("entityLayer").getValue()).getId());
+      assertEquals("scribe", "scribe", 
+		   ((Layer)configuration.get("scribeLayer").getValue()).getId());
+      assertEquals("version", "version", 
+		   ((Layer)configuration.get("versionLayer").getValue()).getId());
+      assertEquals("version_date", "version_date", 
+		   ((Layer)configuration.get("versionDateLayer").getValue()).getId());
+      assertEquals("program", "episode", 
+		   ((Layer)configuration.get("programLayer").getValue()).getId());
+      assertNull("air date", 
+                 configuration.get("airDateLayer").getValue());
+      assertEquals("transcript language", "transcript_language", 
+		   ((Layer)configuration.get("transcriptLanguageLayer").getValue()).getId());
+      assertNull("participant check", 
+                 configuration.get("participantCheckLayer").getValue());
+      assertEquals("gender", "gender", 
+		   ((Layer)configuration.get("genderLayer").getValue()).getId());
+      assertNull("dialect", 
+                 configuration.get("dialectLayer").getValue());
+      assertNull("accent", 
+                 configuration.get("accentLayer").getValue());
+      assertNull("scope", 
+                 configuration.get("scopeLayer").getValue());
+
+      LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
+         Arrays.asList(serializer.getRequiredLayers()));
+      assertEquals("Needed layers: " + needLayers,
+                   17, needLayers.size());
+      assertTrue(needLayers.contains("who"));
+      assertTrue(needLayers.contains("turn"));
+      assertTrue(needLayers.contains("utterance"));
+      assertTrue(needLayers.contains("word"));
+      assertTrue(needLayers.contains("pronounce"));
+      assertTrue(needLayers.contains("lexical"));
+      assertTrue(needLayers.contains("comment"));
+      assertTrue(needLayers.contains("noise"));
+      assertTrue(needLayers.contains("topic"));
+      assertTrue(needLayers.contains("language"));
+      assertTrue(needLayers.contains("transcript_language"));
+      assertTrue(needLayers.contains("entity"));
+      assertTrue(needLayers.contains("scribe"));
+      assertTrue(needLayers.contains("version"));
+      assertTrue(needLayers.contains("version_date"));
+      assertTrue(needLayers.contains("episode"));
+      assertTrue(needLayers.contains("gender"));
+	 
+      // serialize
+      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+      final Vector<NamedStream> streams = new Vector<NamedStream>();
+      String[] layers = {"word"}; // ignored, actually
+      serializer.serialize(Utility.OneGraphSpliterator(graph), layers,
+                           stream -> streams.add(stream),
+                           warning -> System.out.println(warning),
+                           exception -> exceptions.add(exception));
+      if (exceptions.size() > 0) fail(""+exceptions);
+
+      streams.elementAt(0).save(dir);
+
+      // test using diff
+      File result = new File(dir, graph.getId() + ".trs");
+      String differences = diff(new File(dir, "expected_" + graph.getId() + ".trs"), result);
+      if (differences != null)
+      {
+         fail(differences);
+      }
+      else
+      {
+         result.delete();
+      }
+   }
+   
    /**
     * Diffs two files.
     * @param expected
