@@ -28,7 +28,12 @@ import nzilbb.ag.*;
 
 /**
  * Transforms a text convention on a source layer into annotations on destination layers.
- * <p>Annotations on {@link #sourceLayerId} are scanned, and where a label matches the {@link #sourcePattern} regular expression, annotations are added (or modified, in the case of the source layer) on the layers specified by the keys of {@link #destinationResults}. The values of this collection are used as the labels for annotations added on the corresponding layers. These values can contain groups captured in {@link #sourcePattern}, in which case the corresponding group content is substituted into the label.
+ * <p>Annotations on {@link #sourceLayerId} are scanned, and where a label matches the
+ * {@link #sourcePattern} regular expression, annotations are added (or modified, in the
+ * case of the source layer) on the layers specified by the keys of {@link #destinationResults}. 
+ * The values of this collection are used as the labels for annotations added on the
+ * corresponding layers. These values can contain groups captured in {@link #sourcePattern}, 
+ * in which case the corresponding group content is substituted into the label.
  * <p>Some examples:
  * <p>To convert words in the format <var>orthography</var>_<var>pos</var> into words with POS tags:
  * <ul>
@@ -41,8 +46,10 @@ import nzilbb.ag.*;
  *    </ul>
  *  </li>
  * </ul>
- * So a word labelled "the_DT" will end up being labelled "the" and tagged with "DT" on the "pos" layer.
- * <p>To convert words prepended with a disfluency marker of <tt>&amp;</tt> to words with the marker stripped, and tagged with <tt>DIS</tt> on the "disfluency" layer:
+ * So a word labelled "the_DT" will end up being labelled "the" and tagged with "DT" on
+ * the "pos" layer.
+ * <p>To convert words prepended with a disfluency marker of <tt>&amp;</tt> to words with
+ * the marker stripped, and tagged with <tt>DIS</tt> on the "disfluency" layer:
  * <ul>
  *  <li><b>sourceLayerId</b>: <tt>word</tt></li>
  *  <li><b>sourcePattern</b>: <tt>&amp;(.+)</tt></li>
@@ -53,7 +60,8 @@ import nzilbb.ag.*;
  *    </ul>
  *  </li>
  * </ul>
- * So a word labelled "&amp;th" will end up being labelled "th" and tagged with "DIS" on the "disfluency" layer.
+ * So a word labelled "&amp;th" will end up being labelled "th" and tagged with "DIS" on
+ * the "disfluency" layer.
  * <p>To convert words in square brackets into noise annotations:
  * <ul>
  *  <li><b>sourceLayerId</b>: <tt>word</tt></li>
@@ -64,8 +72,10 @@ import nzilbb.ag.*;
  *    </ul>
  *  </li>
  * </ul>
- * So a word labelled "[coughs]" will end up being deleted, replaced by an annotation labelled "coughs" on the "noise" layer.
- * Note that in this case, the {@link #destinationResults} contains no key for the source layer, so the source annotation is deleted.
+ * So a word labelled "[coughs]" will end up being deleted, replaced by an annotation
+ * labelled "coughs" on the "noise" layer.
+ * Note that in this case, the {@link #destinationResults} contains no key for the source
+ * layer, so the source annotation is deleted.
  * @author Robert Fromont robert@fromont.net.nz
  */
 
@@ -92,37 +102,55 @@ public class ConventionTransformer
   public ConventionTransformer setSourceLayerId(String newSourceLayerId) { sourceLayerId = newSourceLayerId; return this; }
 
   /**
-   * Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
+   * Regular expression in the source layer which triggers transformation of the
+   * annotation. This may capture groups, which can be copied into the destination or
+   * source layers. 
    * @see #getSourcePattern()
    * @see #setSourcePattern(String)
    */
   protected String sourcePattern;
   /**
-   * Getter for {@link #sourcePattern}: Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
-   * @return Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
+   * Getter for {@link #sourcePattern}: Regular expression in the source layer which
+   * triggers transformation of the annotation. This may capture groups, which can be
+   * copied into the destination or source layers. 
+   * @return Regular expression in the source layer which triggers transformation of the
+   * annotation. This may capture groups, which can be copied into the destination or
+   * source layers. 
    */
   public String getSourcePattern() { return sourcePattern; }
   /**
-   * Setter for {@link #sourcePattern}: Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
-   * @param newSourcePattern Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
+   * Setter for {@link #sourcePattern}: Regular expression in the source layer which
+   * triggers transformation of the annotation. This may capture groups, which can be
+   * copied into the destination or source layers. 
+   * @param newSourcePattern Regular expression in the source layer which triggers
+   * transformation of the annotation. This may capture groups, which can be copied into
+   * the destination or source layers. 
    */
   public ConventionTransformer setSourcePattern(String newSourcePattern) { sourcePattern = newSourcePattern; return this; }
 
 
   /**
-   * A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.  If there is no key for {@link #sourceLayerId} then the matching annotation will be deleted.  If there is, then the label of the matching will be changed (unless the value is "\0", i.e. the whole source label, in which case the matching annotation is left unchanged).
+   * A map of layer IDs to label values which may include references to groups captured in
+   * the {@link #sourcePattern}.  If there is no key for {@link #sourceLayerId} then the
+   * matching annotation will be deleted.  If there is, then the label of the matching
+   * will be changed (unless the value is "\0", i.e. the whole source label, in which case
+   * the matching annotation is left unchanged). 
    * @see #getDestinationResults()
    * @see #setDestinationResults(HashMap)
    */
   protected HashMap<String,String> destinationResults;
   /**
-   * Getter for {@link #destinationResults}: A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.
-   * @return A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.
+   * Getter for {@link #destinationResults}: A map of layer IDs to label values which may
+   * include references to groups captured in the {@link #sourcePattern}. 
+   * @return A map of layer IDs to label values which may include references to groups
+   * captured in the {@link #sourcePattern}. 
    */
   public HashMap<String,String> getDestinationResults() { return destinationResults; }
   /**
-   * Setter for {@link #destinationResults}: A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.
-   * @param newDestinationResults A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.
+   * Setter for {@link #destinationResults}: A map of layer IDs to label values which may
+   * include references to groups captured in the {@link #sourcePattern}. 
+   * @param newDestinationResults A map of layer IDs to label values which may include
+   * references to groups captured in the {@link #sourcePattern}. 
    */
   public ConventionTransformer setDestinationResults(HashMap<String,String> newDestinationResults) { destinationResults = newDestinationResults; return this; }
    
@@ -140,8 +168,11 @@ public class ConventionTransformer
   /**
    * Constructor from attribute values.
    * @param sourceLayerId Layer ID of the annotations to transform.
-   * @param sourcePattern Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
-   * @param destinationResults A map of layer IDs to label values which may include references to groups captured in the {@link #sourcePattern}.
+   * @param sourcePattern Regular expression in the source layer which triggers
+   * transformation of the annotation. This may capture groups, which can be copied into
+   * the destination or source layers. 
+   * @param destinationResults A map of layer IDs to label values which may include
+   * references to groups captured in the {@link #sourcePattern}. 
    */
   public ConventionTransformer(String sourceLayerId, String sourcePattern, HashMap<String,String> destinationResults)
   {
@@ -151,9 +182,13 @@ public class ConventionTransformer
   } // end of constructor
 
   /**
-   * Constructor from attribute values. Destination results must be subsequently added using {@link #setDestinationResults(HashMap)} or {@link #addDestinationResult(String,String)}.
+   * Constructor from attribute values. Destination results must be subsequently added
+   * using {@link #setDestinationResults(HashMap)} or 
+   * {@link #addDestinationResult(String,String)}. 
    * @param sourceLayerId Layer ID of the annotations to transform.
-   * @param sourcePattern Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
+   * @param sourcePattern Regular expression in the source layer which triggers
+   * transformation of the annotation. This may capture groups, which can be copied into
+   * the destination or source layers. 
    */
   public ConventionTransformer(String sourceLayerId, String sourcePattern)
   {
@@ -163,12 +198,18 @@ public class ConventionTransformer
   } // end of constructor
 
   /**
-   * Utility constructor for the common scenario of identifying a pattern on one layer and, where it occurs, changing the label on the source label and adding an annotation on a second layer.
-   * <p>For example, to tag disfluencies marked with a leading <tt>&amp;</tt> with a label <tt>DIS</tt>: 
+   * Utility constructor for the common scenario of identifying a pattern on one layer
+   * and, where it occurs, changing the label on the source label and adding an annotation
+   * on a second layer. 
+   * <p>For example, to tag disfluencies marked with a leading <tt>&amp;</tt> with a label
+   * <tt>DIS</tt>:  
    * <code>new ConventionTransformer("word", "&amp;(.+)", "\\1", "disfluency", "DIS")</code>
-   * <br>...which strips the word annotation of the leading &amp;, and tags the word on the "disfluency" layer.
+   * <br>...which strips the word annotation of the leading &amp;, and tags the word on
+   * the "disfluency" layer. 
    * @param sourceLayerId Layer ID of the annotations to transform.
-   * @param sourcePattern Regular expression in the source layer which triggers transformation of the annotation. This may capture groups, which can be copied into the destination or source layers.
+   * @param sourcePattern Regular expression in the source layer which triggers
+   * transformation of the annotation. This may capture groups, which can be copied into
+   * the destination or source layers. 
    * @param sourceResult The result on the source layer.
    * @param destinationLayerId The ID of the destination layer.
    * @param destinationResult The result on the destination layer.
@@ -189,8 +230,11 @@ public class ConventionTransformer
    
   /**
    * Add a destination result to {@link #destinationResults}.
-   * @param layerId The layer on which the annotation will be added. This can be null, in which case no destination is specified, resulting in the annotations being stripped out.
-   * @param label The label for the destination annotation, which may include groups captured in {@link #sourcePattern}.
+   * @param layerId The layer on which the annotation will be added. This can be null, in
+   * which case no destination is specified, resulting in the annotations being stripped
+   * out. 
+   * @param label The label for the destination annotation, which may include groups
+   * captured in {@link #sourcePattern}. 
    */
   public void addDestinationResult(String layerId, String label)
   {
