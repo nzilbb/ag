@@ -26,7 +26,10 @@ import java.io.Writer;
 import java.util.Vector;
 
 /**
- * A speaker in a particular transcript.  This class captures data about a speaker specific to a transcript (e.g. their accent as marked in the .trs file, their ID within the transcript, etc.), in addition to cross-transcript data (e.g. their name, and their ONZE Miner database ID).
+ * A speaker in a particular transcript.  This class captures data about a speaker
+ * specific to a transcript (e.g. their accent as marked in the .trs file, their ID within
+ * the transcript, etc.), in addition to cross-transcript data (e.g. their name, and their
+ * ONZE Miner database ID). 
  * @author Robert Fromont robert@fromont.net.nz
  */
 
