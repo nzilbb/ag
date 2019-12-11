@@ -2013,12 +2013,6 @@ public class EAFSerialization
             lLastUnusedAnnotationId, warnings, language);
       }
       
-      if (getUseConventions())
-      {
-         // TODO transcript convention support
-         warnings.accept("Serialization of transcript conventions not currently supported");
-      }
-      
       // utterances
       for (Annotation utterance : graph.list(utteranceLayer.getId()))
       {
@@ -2048,9 +2042,6 @@ public class EAFSerialization
          {
             if (sUtteranceText.length() > 0) sUtteranceText.append(" ");
             sUtteranceText.append(word.getLabel());
-            
-            // rollback label changes made by conventionAnnotator
-            // TODO anWord.rollback();
             
             // link word to its utterance, so that words can be dependent on utterances
             word.put("@utterance", utterance);
@@ -2156,6 +2147,13 @@ public class EAFSerialization
       linguisticType.setAttribute("STEREOTYPE","Included_In");
       
       lastUnusedAnnotationId.setTextContent(""+(++lLastUnusedAnnotationId));
+
+      // unlink the graph objects frome the XML elements
+      for (Annotation a : graph.getAnnotationsById().values())
+      {
+         a.remove("@alignableAnnotation");
+         a.remove("@utterance");
+      } // next annotation
       
       if (errors != null) throw errors;
       
@@ -2397,7 +2395,7 @@ public class EAFSerialization
          elAnnotation.appendChild(alignableAnnotation);
          String sId = "a"+(++lLastUnusedAnnotationId);
          alignableAnnotation.setAttribute("ANNOTATION_ID", sId);
-         annotation.put("@@alignableAnnotation", alignableAnnotation);
+         annotation.put("@alignableAnnotation", alignableAnnotation);
          
          // anchors?
          if (layer.getAlignment() != Constants.ALIGNMENT_NONE)
@@ -2411,10 +2409,22 @@ public class EAFSerialization
          }
          else
          {
-            // hopefully it's in the map! TODO
-            alignableAnnotation.setAttribute(
-               "ANNOTATION_REF",
-               ((Element)anDominating.get("@alignableAnnotation")).getAttribute("ANNOTATION_ID"));
+            // hopefully it's in the map!
+            if (!anDominating.containsKey("@alignableAnnotation"))
+            {
+               warnings.accept("Cannot link to dominating ANNOTATION_ID: "
+                               + annotation.getLayerId() + ":" + annotation.getLabel()
+                               + " (" + annotation.getStart() + "-" + annotation.getEnd() + ")"
+                               +" - dominated by: "
+                               + anDominating.getLayerId() + ":" + anDominating.getLabel()
+                               + " (" + anDominating.getStart() + "-" + anDominating.getEnd() + ")");
+            }
+            else
+            {
+               alignableAnnotation.setAttribute(
+                  "ANNOTATION_REF",
+                  ((Element)anDominating.get("@alignableAnnotation")).getAttribute("ANNOTATION_ID"));
+            }
          }
 
          Element annotationValue = document.createElement("ANNOTATION_VALUE");

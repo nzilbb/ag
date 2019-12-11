@@ -1068,7 +1068,9 @@ public class TestEAFSerialization
                                          graph.addAnchor(new Anchor("a8.5", 8.5)).getId(),
                                          "t2"));
 
-      // add some comments, noises, lexical and pronounce tags to test convention support TODO
+      // add some comments, noises, lexical and pronounce tags
+      // conventions are not (currently) reversed when serializing (i.e. they're only
+      // supported during deserialization)
       graph.addAnnotation(new Annotation("comment1", "preamble", "comment", "a0", "a1"));
       graph.addAnnotation(new Annotation("noise1", "throat-clear", "noise", "a4", "a5"));
       graph.addAnnotation(new Annotation("lex1", "lex-1-6", "lexical", "a6", "a7", "w1-6"));
