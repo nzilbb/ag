@@ -1806,23 +1806,19 @@ public class EAFSerialization
     */
    public String[] getRequiredLayers() throws SerializationParametersMissingException
    {
+      Vector<String> requiredLayers = new Vector<String>();
+      if (getParticipantLayer() != null) requiredLayers.add(getParticipantLayer().getId());
+      if (getTurnLayer() != null) requiredLayers.add(getTurnLayer().getId());
+      if (getUtteranceLayer() != null) requiredLayers.add(getUtteranceLayer().getId());
+      if (getWordLayer() != null) requiredLayers.add(getWordLayer().getId());
       if (bUseConventions != null && bUseConventions)
       {
-         Vector<String> requiredLayers = new Vector<String>();
-         if (getParticipantLayer() != null) requiredLayers.add(getParticipantLayer().getId());
-         if (getTurnLayer() != null) requiredLayers.add(getTurnLayer().getId());
-         if (getUtteranceLayer() != null) requiredLayers.add(getUtteranceLayer().getId());
-         if (getWordLayer() != null) requiredLayers.add(getWordLayer().getId());
          if (getLexicalLayer() != null) requiredLayers.add(getLexicalLayer().getId());
          if (getPronounceLayer() != null) requiredLayers.add(getPronounceLayer().getId());
          if (getCommentLayer() != null) requiredLayers.add(getCommentLayer().getId());
          if (getNoiseLayer() != null) requiredLayers.add(getNoiseLayer().getId());
-         return requiredLayers.toArray(new String[0]);
       }
-      else
-      {
-         return new String[0];
-      }
+      return requiredLayers.toArray(new String[0]);
    }
 
    /**
@@ -2174,7 +2170,9 @@ public class EAFSerialization
          TempFileInputStream in = new TempFileInputStream(f);
 
          // return a named stream from the file
-         return new NamedStream(in, IO.SafeFileNameUrl(graph.getId()) + ".eaf");
+         String name = IO.SafeFileNameUrl(graph.getId());
+         if (!name.toLowerCase().endsWith(".eaf")) name += ".eaf";
+         return new NamedStream(in, name);
       }
       catch(Exception exception)
       {
