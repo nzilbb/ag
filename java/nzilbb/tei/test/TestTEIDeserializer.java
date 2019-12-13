@@ -127,73 +127,73 @@ public class TestTEIDeserializer
       // turns
       Annotation[] turns = g.list("turn");
       assertEquals(1, turns.length);
-      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
-      //assertEquals(new Double(23.563), turns[0].getEnd().getOffset()); // TODO
+      assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
+      //assertEquals(Double.valueOf(23.563), turns[0].getEnd().getOffset()); // TODO
       assertEquals("Aaliyah", turns[0].getLabel());
       assertEquals(g.my("who"), turns[0].getParent());
 
       // utterances
       Annotation[] utterances = g.list("utterance");
       assertEquals(45, utterances.length);
-      assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
-      assertEquals("inter-line space", new Double(10.0), utterances[0].getEnd().getOffset());
+      assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
+      assertEquals("inter-line space", Double.valueOf(10.0), utterances[0].getEnd().getOffset());
       assertEquals("Aaliyah", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
 
-      assertEquals("inter-line space", new Double(10.0), utterances[1].getStart().getOffset());
-      assertEquals("inter-line space", new Double(31.0), utterances[1].getEnd().getOffset());
+      assertEquals("inter-line space", Double.valueOf(10.0), utterances[1].getStart().getOffset());
+      assertEquals("inter-line space", Double.valueOf(31.0), utterances[1].getEnd().getOffset());
       assertEquals("Aaliyah", utterances[1].getParent().getLabel());
       
       Annotation[] words = g.list("word");
-      assertEquals(new Double(0), words[0].getStart().getOffset());
+      assertEquals(Double.valueOf(0), words[0].getStart().getOffset());
       // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
       assertEquals("[Aaliyah]", words[0].getLabel());
-      assertEquals("inter-word space", new Double(10), words[0].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(10), words[0].getEnd().getOffset());
       assertEquals("next word start where last ends",
-		   new Double(10), words[1].getStart().getOffset());
+		   Double.valueOf(10), words[1].getStart().getOffset());
       assertEquals("next word linked to last", words[0].getEnd(), words[1].getStart());
       assertEquals("Yo", words[1].getLabel());
-      assertEquals("inter-word space", new Double(13), words[1].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(13), words[1].getEnd().getOffset());
       assertEquals("next word linked to last", words[1].getEnd(), words[2].getStart());
       assertEquals("Rodney", words[2].getLabel());
-      assertEquals("inter-word space", new Double(20), words[2].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(20), words[2].getEnd().getOffset());
       assertEquals("next word linked to last", words[2].getEnd(), words[3].getStart());
       assertEquals("you", words[3].getLabel());
-      assertEquals("inter-word space", new Double(24), words[3].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(24), words[3].getEnd().getOffset());
       assertEquals("next word linked to last", words[3].getEnd(), words[4].getStart());
       assertEquals("ready?", words[4].getLabel());
-      assertEquals("inter-word space", new Double(31), words[4].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(31), words[4].getEnd().getOffset());
       assertEquals("next word linked to last", words[4].getEnd(), words[5].getStart());
       assertEquals("Cause", words[5].getLabel());
-      assertEquals("inter-word space", new Double(37), words[5].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(37), words[5].getEnd().getOffset());
       assertEquals("next word linked to last", words[5].getEnd(), words[6].getStart());
       assertEquals("I’m", words[6].getLabel());
-      assertEquals("inter-word space", new Double(41), words[6].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(41), words[6].getEnd().getOffset());
       assertEquals("next word linked to last", words[6].getEnd(), words[7].getStart());
       assertEquals("ready", words[7].getLabel());
-      assertEquals(new Double(47), words[7].getEnd().getOffset());
+      assertEquals(Double.valueOf(47), words[7].getEnd().getOffset());
 
       // lg
       Annotation[] verses = g.list("lg");
       assertEquals(16, verses.length);
 
-      assertEquals(new Double(0), verses[0].getStart().getOffset());
-      assertEquals(new Double(59), verses[0].getEnd().getOffset());
+      assertEquals(Double.valueOf(0), verses[0].getStart().getOffset());
+      assertEquals(Double.valueOf(59), verses[0].getEnd().getOffset());
       assertEquals("lg with no type is labelled 'lg'", "lg", verses[0].getLabel());
       assertEquals(turns[0], verses[0].getParent());
 
-      assertEquals(new Double(59), verses[1].getStart().getOffset());
-      assertEquals(new Double(214), verses[1].getEnd().getOffset());
+      assertEquals(Double.valueOf(59), verses[1].getStart().getOffset());
+      assertEquals(Double.valueOf(214), verses[1].getEnd().getOffset());
       assertEquals("lg", verses[1].getLabel());
       assertEquals(turns[0], verses[1].getParent());
 
-      assertEquals(new Double(214), verses[2].getStart().getOffset());
-      assertEquals(new Double(214), verses[2].getEnd().getOffset());
+      assertEquals(Double.valueOf(214), verses[2].getStart().getOffset());
+      assertEquals(Double.valueOf(214), verses[2].getEnd().getOffset());
       assertEquals("lg", verses[2].getLabel());
       assertEquals(turns[0], verses[2].getParent());
 
-      assertEquals(new Double(214), verses[3].getStart().getOffset());
-      assertEquals(new Double(332), verses[3].getEnd().getOffset());
+      assertEquals(Double.valueOf(214), verses[3].getStart().getOffset());
+      assertEquals(Double.valueOf(332), verses[3].getEnd().getOffset());
       assertEquals("lg with type is labelled with type", "chorus", verses[3].getLabel());
       assertEquals(turns[0], verses[3].getParent());
 
@@ -325,8 +325,8 @@ public class TestTEIDeserializer
       // turns
       Annotation[] turns = g.list("turn");
       assertEquals(9, turns.length);
-      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
-      //assertEquals(new Double(23.563), turns[0].getEnd().getOffset()); // TODO
+      assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
+      //assertEquals(Double.valueOf(23.563), turns[0].getEnd().getOffset()); // TODO
       assertEquals("Rachael Tatman", turns[0].getLabel());
       assertEquals(g.getAnnotation("rctatman"), turns[0].getParent());
       assertEquals("Rachael Tatman", turns[1].getLabel());
@@ -341,49 +341,49 @@ public class TestTEIDeserializer
       // utterances
       Annotation[] utterances = g.list("utterance");
       assertEquals(11, utterances.length);
-      assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
-      assertEquals("inter-line space", new Double(40.0), utterances[0].getEnd().getOffset());
+      assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
+      assertEquals("inter-line space", Double.valueOf(40.0), utterances[0].getEnd().getOffset());
       assertEquals("Rachael Tatman", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
 
-      assertEquals("inter-line space", new Double(40.0), utterances[1].getStart().getOffset());
-      assertEquals("inter-line space", new Double(82.0), utterances[1].getEnd().getOffset());
+      assertEquals("inter-line space", Double.valueOf(40.0), utterances[1].getStart().getOffset());
+      assertEquals("inter-line space", Double.valueOf(82.0), utterances[1].getEnd().getOffset());
       assertEquals("Rachael Tatman", utterances[1].getParent().getLabel());
       assertEquals(turns[0], utterances[1].getParent());
 
-      assertEquals("inter-line space", new Double(82.0), utterances[2].getStart().getOffset());
-      assertEquals("inter-line space", new Double(136.0), utterances[2].getEnd().getOffset());
+      assertEquals("inter-line space", Double.valueOf(82.0), utterances[2].getStart().getOffset());
+      assertEquals("inter-line space", Double.valueOf(136.0), utterances[2].getEnd().getOffset());
       assertEquals("Rachael Tatman", utterances[2].getParent().getLabel());
       assertEquals(turns[0], utterances[2].getParent());
 
-      assertEquals("inter-line space", new Double(136.0), utterances[3].getStart().getOffset());
-      assertEquals("inter-line space", new Double(259.0), utterances[3].getEnd().getOffset());
+      assertEquals("inter-line space", Double.valueOf(136.0), utterances[3].getStart().getOffset());
+      assertEquals("inter-line space", Double.valueOf(259.0), utterances[3].getEnd().getOffset());
       assertEquals("Rachael Tatman", utterances[3].getParent().getLabel());
       assertEquals("Turn change", turns[1], utterances[3].getParent());
 
-      assertEquals("inter-line space", new Double(259.0), utterances[4].getStart().getOffset());
-      assertEquals("inter-line space", new Double(366.0), utterances[4].getEnd().getOffset());
+      assertEquals("inter-line space", Double.valueOf(259.0), utterances[4].getStart().getOffset());
+      assertEquals("inter-line space", Double.valueOf(366.0), utterances[4].getEnd().getOffset());
       assertEquals("Rachael Tatman", utterances[4].getParent().getLabel());
       assertEquals("Turn change", turns[2], utterances[4].getParent());
 
-      assertEquals("inter-line space", new Double(366.0), utterances[5].getStart().getOffset());
-      assertEquals("inter-line space", new Double(381.0), utterances[5].getEnd().getOffset());
+      assertEquals("inter-line space", Double.valueOf(366.0), utterances[5].getStart().getOffset());
+      assertEquals("inter-line space", Double.valueOf(381.0), utterances[5].getEnd().getOffset());
       assertEquals("Lauren Ackerman", utterances[5].getParent().getLabel());
       assertEquals("Turn change", turns[3], utterances[5].getParent());
 
       Annotation[] words = g.list("word");
-      assertEquals(new Double(0), words[0].getStart().getOffset());
+      assertEquals(Double.valueOf(0), words[0].getStart().getOffset());
       // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
       assertEquals("Two", words[0].getLabel());
-      assertEquals("inter-word space", new Double(4), words[0].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(4), words[0].getEnd().getOffset());
       assertEquals("next word start where last ends",
-		   new Double(4), words[1].getStart().getOffset());
+		   Double.valueOf(4), words[1].getStart().getOffset());
       assertEquals("next word linked to last", words[0].getEnd(), words[1].getStart());
       assertEquals("things", words[1].getLabel());
-      assertEquals("inter-word space", new Double(11), words[1].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(11), words[1].getEnd().getOffset());
       assertEquals("next word linked to last", words[1].getEnd(), words[2].getStart());
       assertEquals("that", words[2].getLabel());
-      assertEquals("inter-word space", new Double(16), words[2].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(16), words[2].getEnd().getOffset());
       assertEquals("next word linked to last", words[2].getEnd(), words[3].getStart());
       assertEquals("drive", words[3].getLabel());
       
@@ -570,20 +570,20 @@ public class TestTEIDeserializer
       // turns
       Annotation[] turns = g.list("turn");
       assertEquals("one turn " + Arrays.asList(turns), 1, turns.length);
-      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
-      assertEquals(new Double(104.0), turns[0].getEnd().getOffset());
+      assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
+      assertEquals(Double.valueOf(104.0), turns[0].getEnd().getOffset());
       assertEquals("Genkaichan", turns[0].getLabel());
       assertEquals(g.getAnnotation("Genkaichan"), turns[0].getParent());
 
       // utterances
       Annotation[] utterances = g.list("utterance");
       assertEquals(1, utterances.length);
-      assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
+      assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       assertEquals("Genkaichan", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
 
       Annotation[] words = g.list("word");
-      assertEquals(new Double(0), words[0].getStart().getOffset());
+      assertEquals(Double.valueOf(0), words[0].getStart().getOffset());
       // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
       assertEquals("Such", words[0].getLabel());
       assertEquals("a", words[1].getLabel());
@@ -745,39 +745,39 @@ public class TestTEIDeserializer
       // turns
       Annotation[] turns = g.list("turn");
       assertEquals(1, turns.length);
-      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
-      //assertEquals(new Double(23.563), turns[0].getEnd().getOffset()); // TODO
+      assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
+      //assertEquals(Double.valueOf(23.563), turns[0].getEnd().getOffset()); // TODO
       assertEquals("ABCD", turns[0].getLabel());
       assertEquals(g.getAnnotation("ABCD"), turns[0].getParent());
 
       // utterances
       Annotation[] utterances = g.list("utterance");
       assertEquals(5, utterances.length);
-      assertEquals(new Double(0.0), utterances[0].getStart().getOffset());
-      assertEquals("inter-line space", new Double(41.0), utterances[0].getEnd().getOffset());
+      assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
+      assertEquals("inter-line space", Double.valueOf(41.0), utterances[0].getEnd().getOffset());
       assertEquals("ABCD", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
 
-      assertEquals("inter-line space", new Double(41.0), utterances[1].getStart().getOffset());
-      assertEquals("inter-line space", new Double(60.0), utterances[1].getEnd().getOffset());
+      assertEquals("inter-line space", Double.valueOf(41.0), utterances[1].getStart().getOffset());
+      assertEquals("inter-line space", Double.valueOf(60.0), utterances[1].getEnd().getOffset());
       assertEquals("ABCD", utterances[1].getParent().getLabel());
       assertEquals(turns[0], utterances[1].getParent());
 
 
       Annotation[] words = g.list("word");
       assertEquals(28, words.length);
-      assertEquals(new Double(0), words[0].getStart().getOffset());
+      assertEquals(Double.valueOf(0), words[0].getStart().getOffset());
       // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
       assertEquals("I", words[0].getLabel());
-      assertEquals("inter-word space", new Double(2), words[0].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(2), words[0].getEnd().getOffset());
       assertEquals("next word start where last ends",
-		   new Double(2), words[1].getStart().getOffset());
+		   Double.valueOf(2), words[1].getStart().getOffset());
       assertEquals("next word linked to last", words[0].getEnd(), words[1].getStart());
       assertEquals("xi", words[1].getLabel());
-      assertEquals("inter-word space", new Double(5), words[1].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(5), words[1].getEnd().getOffset());
       assertEquals("next word linked to last", words[1].getEnd(), words[2].getStart());
       assertEquals("xaixi", words[2].getLabel());
-      assertEquals("inter-word space", new Double(11), words[2].getEnd().getOffset());
+      assertEquals("inter-word space", Double.valueOf(11), words[2].getEnd().getOffset());
       assertEquals("next word linked to last", words[2].getEnd(), words[3].getStart());
       assertEquals("a", words[3].getLabel());
       
@@ -964,7 +964,7 @@ public class TestTEIDeserializer
       assertEquals("Associated WAV makes units seconds rather than characters",
 		   Constants.UNIT_SECONDS, g.getOffsetUnits());
       assertEquals("Length is based on media",
-       		   new Double(5.2941875), g.getEnd().getOffset());
+       		   Double.valueOf(5.2941875), g.getEnd().getOffset());
    }
 
    @Test public void mp3() 
@@ -1057,7 +1057,7 @@ public class TestTEIDeserializer
       assertEquals("Associated MP3 makes units seconds rather than characters",
 		   Constants.UNIT_SECONDS, g.getOffsetUnits());
       // TODO assertEquals("Length is based on media",
-      // 		   new Double(5.32), g.getEnd().getOffset());
+      // 		   Double.valueOf(5.32), g.getEnd().getOffset());
    }
    
    /**
