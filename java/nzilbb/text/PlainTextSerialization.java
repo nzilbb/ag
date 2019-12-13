@@ -650,7 +650,7 @@ public class PlainTextSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "Plain Text Document", "0.62", "text/plain", ".txt", "20191031.1734",
+         "Plain Text Document", "1.01", "text/plain", ".txt", "20191031.1734",
          getClass().getResource("icon.png"));
    }
 
