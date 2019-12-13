@@ -1483,7 +1483,7 @@ public class TranscriptSerialization
             transcript.setVersion(tag.getLabel());
          }
       }
-      SimpleDateFormat fmtTranscriberDate =new SimpleDateFormat("yymmdd");
+      SimpleDateFormat fmtTranscriberDate =new SimpleDateFormat("yyMMdd");
       String sVersionDate = fmtTranscriberDate.format(new java.util.Date());
       transcript.setVersionDate(sVersionDate);
       if (versionDateLayer != null)
