@@ -9,7 +9,9 @@
 
     "graph":{"description":"The graph as a whole",
       "children":{
-          "scribe":{"description":"Transcriber", "alignment":0,
+        "scribe":{"description":"Transcriber", "alignment":0,
+          "peers":false, "peersOverlap":false, "parentIncludes":true, "saturated":true},
+        "version_date":{"description":"Version Date", "alignment":0,
           "peers":false, "peersOverlap":false, "parentIncludes":true, "saturated":true},
         "who":{"description":"Participants", "alignment":0,
           "peers":true, "peersOverlap":true, "parentIncludes":true, "saturated":true,
@@ -822,6 +824,7 @@
     "6x":	{"offset":306.92,	"confidence":100}
   },
   "scribe":[{"id":"scribe",	"label":"Robert",	"startId":"1",	"endId":"6x"}],
+  "version_date":[{"id":"version_date",	"label":"191211",	"startId":"1",	"endId":"6x"}],
   "who":[
     {"id":"1fu",	"label":"participant",	"startId":"1",	"endId":"6x",
       "turn":[

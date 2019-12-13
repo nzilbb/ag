@@ -1020,6 +1020,11 @@ public class TestTranscriptSerialization
          .setPeers(true)
          .setPeersOverlap(true)
          .setSaturated(true),
+	 new Layer("version_date", "Version Date")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(true)
+         .setPeersOverlap(true)
+         .setSaturated(true),
          new Layer("who", "Participants")
          .setAlignment(Constants.ALIGNMENT_NONE)
          .setPeers(true)
@@ -1068,8 +1073,8 @@ public class TestTranscriptSerialization
 		   ((Layer)configuration.get("scribeLayer").getValue()).getId());
       assertNull("version",
                  configuration.get("versionLayer").getValue());
-      assertNull("version_date", 
-                 configuration.get("versionDateLayer").getValue());
+      assertEquals("version date", "version_date", 
+		   ((Layer)configuration.get("versionDateLayer").getValue()).getId());
       assertNull("program", 
                  configuration.get("programLayer").getValue());
       assertNull("air date", 
@@ -1090,7 +1095,7 @@ public class TestTranscriptSerialization
       LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
          Arrays.asList(serializer.getRequiredLayers()));
       assertEquals("Needed layers: " + needLayers,
-                   9, needLayers.size());
+                   10, needLayers.size());
       assertTrue(needLayers.contains("who"));
       assertTrue(needLayers.contains("turn"));
       assertTrue(needLayers.contains("utterance"));
@@ -1100,6 +1105,7 @@ public class TestTranscriptSerialization
       assertTrue(needLayers.contains("comment"));
       assertTrue(needLayers.contains("noise"));
       assertTrue(needLayers.contains("scribe"));
+      assertTrue(needLayers.contains("version_date"));
 	 
       // serialize
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
