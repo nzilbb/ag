@@ -166,17 +166,34 @@
       </batchtest>
     </junit>
   </target>
-
+  
   <target name="serializers" description="serializers" depends="compile,dist">
-	<ant antfile="praat.xml" inheritAll="false" />
-	<ant antfile="transcriber.xml" inheritAll="false" />
-	<ant antfile="elan.xml" inheritAll="false" />
-	<ant antfile="text.xml" inheritAll="false" />
-	<ant antfile="tei.xml" inheritAll="false" />
-	<ant antfile="clan.xml" inheritAll="false" />
-	<ant antfile="est.xml" inheritAll="false" />
-	<ant antfile="emusdms.xml" inheritAll="false" />
-	<ant antfile="csv.xml" inheritAll="false" />
+    <ant antfile="praat.xml" inheritAll="false" />
+    <ant antfile="transcriber.xml" inheritAll="false" />
+    <ant antfile="elan.xml" inheritAll="false" />
+    <ant antfile="text.xml" inheritAll="false" />
+    <ant antfile="latex.xml" inheritAll="false" />
+    <ant antfile="pdf.xml" inheritAll="false" />
+    <ant antfile="tei.xml" inheritAll="false" />
+    <ant antfile="clan.xml" inheritAll="false" />
+    <ant antfile="est.xml" inheritAll="false" />
+    <ant antfile="emusdms.xml" inheritAll="false" />
+    <ant antfile="webvtt.xml" inheritAll="false" />
+    <ant antfile="csv.xml" inheritAll="false" />
+  </target>
+  <target name="test-serializers" description="serializers" depends="compile,dist">
+    <ant antfile="praat.xml" inheritAll="false" target="test" />
+    <ant antfile="transcriber.xml" inheritAll="false" target="test" />
+    <ant antfile="elan.xml" inheritAll="false" target="test" />
+    <ant antfile="text.xml" inheritAll="false" target="test" />
+    <ant antfile="latex.xml" inheritAll="false" target="test" />
+    <ant antfile="pdf.xml" inheritAll="false" target="test" />
+    <ant antfile="tei.xml" inheritAll="false" target="test" />
+    <ant antfile="clan.xml" inheritAll="false" target="test" />
+    <ant antfile="est.xml" inheritAll="false" target="test" />
+    <ant antfile="emusdms.xml" inheritAll="false" target="test" />
+    <ant antfile="webvtt.xml" inheritAll="false" target="test" />
+    <ant antfile="csv.xml" inheritAll="false" target="test" />
   </target>
   
   <target name="clean" description="clean up" >
