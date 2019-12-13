@@ -10,7 +10,8 @@
   <property name="srctests" value="nzilbb/text/test/Test*.java"/>
   <property name="icon" value="nzilbb/text/icon.png"/>
   <property name="junitjar" value="/usr/share/java/junit4.jar"/>
-  <property name="nzilbb-ag-serialize-IDeserializer" value="nzilbb.text.PlainTextDeserializer" />
+  <property name="nzilbb-ag-serialize-IDeserializer" value="nzilbb.text.PlainTextSerialization" />
+  <property name="nzilbb-ag-serialize-ISerializer" value="nzilbb.text.PlainTextSerialization" />
   
   <target name="init">
     <!-- Create the time stamp -->
@@ -47,7 +48,10 @@
     <!-- Put everything in ${build} into the ${ant.project.name}.jar file -->
     <jar jarfile="${dist}/${ant.project.name}.jar" 
 	 basedir="${build}">
-      <manifest><attribute name="nzilbb-ag-serialize-IDeserializer" value="${nzilbb-ag-serialize-IDeserializer}"/></manifest>
+      <manifest>
+        <attribute name="nzilbb-ag-serialize-IDeserializer" value="${nzilbb-ag-serialize-IDeserializer}"/>
+        <attribute name="nzilbb-ag-serialize-ISerializer" value="${nzilbb-ag-serialize-ISerializer}"/>
+      </manifest>
       
       <!-- include source code -->
       <fileset dir="${src}" 

@@ -48,7 +48,10 @@
     <!-- Put everything in ${build} into the ${ant.project.name}.jar file -->
     <jar jarfile="${dist}/${ant.project.name}.jar" 
 	 basedir="${build}">
-      <manifest><attribute name="nzilbb-ag-serialize-IDeserializer" value="${nzilbb-ag-serialize-IDeserializer}"/></manifest>
+      <manifest>
+        <attribute name="nzilbb-ag-serialize-IDeserializer" value="${nzilbb-ag-serialize-IDeserializer}"/>
+        <attribute name="nzilbb-ag-serialize-ISerializer" value="${nzilbb-ag-serialize-ISerializer}"/>
+      </manifest>
       
       <!-- include source code -->
       <fileset dir="${src}" 

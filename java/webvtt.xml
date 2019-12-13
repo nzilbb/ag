@@ -11,6 +11,7 @@
   <property name="icon" value="nzilbb/webvtt/icon.png"/>
   <property name="junitjar" value="/usr/share/java/junit4.jar"/>
   <property name="nzilbb-ag-serialize-IDeserializer" value="nzilbb.webvtt.VttSerialization" />
+  <property name="nzilbb-ag-serialize-ISerializer" value="nzilbb.webvtt.VttSerialization" />
   
   <target name="init">
     <!-- Create the time stamp -->
@@ -47,7 +48,10 @@
     <!-- Put everything in ${build} into the ${ant.project.name}.jar file -->
     <jar jarfile="${dist}/${ant.project.name}.jar" 
 	 basedir="${build}">
-      <manifest><attribute name="nzilbb-ag-serialize-IDeserializer" value="${nzilbb-ag-serialize-IDeserializer}"/></manifest>
+      <manifest>
+        <attribute name="nzilbb-ag-serialize-IDeserializer" value="${nzilbb-ag-serialize-IDeserializer}"/>
+        <attribute name="nzilbb-ag-serialize-ISerializer" value="${nzilbb-ag-serialize-ISerializer}"/>
+      </manifest>
       
       <!-- include source code -->
       <fileset dir="${src}" 
