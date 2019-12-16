@@ -35,6 +35,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -379,7 +380,7 @@ public class PlainTextSerialization
     * Getter for {@link #useConventions}: Whether to use text conventions for comment, noise, lexical, and pronunciation annotations.
     * @return Whether to use text conventions for comment, noise, lexical, and pronunciation annotations.
     */
-   public Boolean getUseConventions() { return useConventions; }
+   public Boolean getUseConventions() { return useConventions == null?Boolean.FALSE:useConventions; }
    /**
     * Setter for {@link #useConventions}: Whether to use text conventions for comment, noise, lexical, and pronunciation annotations.
     * @param newUseConventions Whether to use text conventions for comment, noise, lexical, and pronunciation annotations.
@@ -392,7 +393,7 @@ public class PlainTextSerialization
     * @see #getCommentDelimiters()
     * @see #setCommentDelimiters(String)
     */
-   protected String commentDelimiters;
+   protected String commentDelimiters; // TODO
    /**
     * Getter for {@link #commentDelimiters}: Delimiters used for comments, a string whose
     * first characters is the open-comment marker, and the last character is the
@@ -417,7 +418,7 @@ public class PlainTextSerialization
     * @see #getNoiseDelimiters()
     * @see #setNoiseDelimiters(String)
     */
-   protected String noiseDelimiters;
+   protected String noiseDelimiters; // TODO
    /**
     * Getter for {@link #noiseDelimiters}: Delimiters used for noises, a string whose
     * first characters is the open-comment marker, and the last character is the
@@ -650,7 +651,7 @@ public class PlainTextSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "Plain Text Document", "1.01", "text/plain", ".txt", "20191031.1734",
+         "Plain Text Document", "1.02", "text/plain", ".txt", "20191031.1734",
          getClass().getResource("icon.png"));
    }
 
@@ -1710,6 +1711,13 @@ public class PlainTextSerialization
       if (getTurnLayer() != null) requiredLayers.add(getTurnLayer().getId());
       if (getUtteranceLayer() != null) requiredLayers.add(getUtteranceLayer().getId());
       if (getWordLayer() != null) requiredLayers.add(getWordLayer().getId());
+      if (getUseConventions())
+      {
+         if (getNoiseLayer() != null) requiredLayers.add(getNoiseLayer().getId());
+         if (getCommentLayer() != null) requiredLayers.add(getCommentLayer().getId());
+         if (getLexicalLayer() != null) requiredLayers.add(getLexicalLayer().getId());
+         if (getPronounceLayer() != null) requiredLayers.add(getPronounceLayer().getId());
+      }
       return requiredLayers.toArray(new String[0]);
    } // getRequiredLayers()
 
@@ -1741,6 +1749,7 @@ public class PlainTextSerialization
    public void serialize(Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
       throws SerializerNotConfiguredException
    {
+      // TODO maybe serialize a list of graph fragments into a single file?
       graphCount = graphs.getExactSizeIfKnown();
       graphs.forEachRemaining(graph -> {
             if (getCancelling()) return;
@@ -1818,6 +1827,28 @@ public class PlainTextSerialization
             } // it's a graph tag
          } // next selected layer
 
+         // get noises if needed
+         TreeSet<Annotation> noisesByAnchor
+            = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
+         if (noiseLayer != null && getUseConventions())
+         {
+            // list all anchored noises
+            for (Annotation n : graph.list(noiseLayer.getId())) if (n.getAnchored()) noisesByAnchor.add(n);
+         }
+         Iterator<Annotation> noises = noisesByAnchor.iterator();
+         Annotation nextNoise = noises.hasNext()?noises.next():null;
+
+         // get comments if needed
+         TreeSet<Annotation> commentsByAnchor
+            = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
+         if (commentLayer != null && getUseConventions())
+         {
+            // list all anchored noises
+            for (Annotation n : graph.list(commentLayer.getId())) if (n.getAnchored()) commentsByAnchor.add(n);
+         }
+         Iterator<Annotation> comments = commentsByAnchor.iterator();
+         Annotation nextComment = comments.hasNext()?comments.next():null;
+
          // for each utterance...
          Annotation currentParticipant = null;
          MessageFormat fmtParticipant = new MessageFormat(participantFormat);
@@ -1843,6 +1874,30 @@ public class PlainTextSerialization
             for (Annotation token : utterance.list(getWordLayer().getId()))
             {
                writer.print(" ");
+               
+               if (getUseConventions())
+               {
+                  // is there a noise to insert?
+                  while (nextNoise != null
+                         && token.getStart() != null
+                         && token.getStart().getOffset() != null
+                         && token.getStart().getOffset() >= nextNoise.getStart().getOffset())
+                  {
+                     writer.print("[" + nextNoise.getLabel() + "] ");
+                     nextNoise = noises.hasNext()?noises.next():null;
+                  } // next noise
+                  
+                  // is there a comment to insert?
+                  while (nextComment != null
+                         && token.getStart() != null
+                         && token.getStart().getOffset() != null
+                         && token.getStart().getOffset() >= nextComment.getStart().getOffset())
+                  {
+                     writer.print("{" + nextComment.getLabel() + "} ");
+                     nextComment = comments.hasNext()?comments.next():null;
+                  } // next comment
+               } // useConventions
+               
                Annotation orthography = token;
                if (orthographyLayer != null && selectedLayers.contains(orthographyLayer.getId()))
                {
@@ -1864,7 +1919,52 @@ public class PlainTextSerialization
                      }
                   }
                } // next selected layer 
+
+               if (getUseConventions())
+               {
+                  if (lexicalLayer != null)
+                  {
+                     Annotation tag = token.my(lexicalLayer.getId());
+                     if (tag != null)
+                     {
+                        writer.print("(");
+                        writer.print(tag.getLabel());
+                        writer.print(")");
+                     }
+                  }
+                  if (pronounceLayer != null)
+                  {
+                     Annotation tag = token.my(pronounceLayer.getId());
+                     if (tag != null)
+                     {
+                        writer.print("[");
+                        writer.print(tag.getLabel());
+                        writer.print("]");
+                     }
+                  }
+               } // useConventions
             } // next token
+            
+            // is there a noise to append to the end of the line?
+            while (nextNoise != null
+                   && utterance.getEnd() != null
+                   && utterance.getEnd().getOffset() != null
+                   && utterance.getEnd().getOffset() >= nextNoise.getStart().getOffset())
+            {
+               writer.print(" [" + nextNoise.getLabel() + "]");
+               nextNoise = noises.hasNext()?noises.next():null;
+            } // next noise
+
+            // is there a comment to append to the end of the line?
+            while (nextComment != null
+                   && utterance.getEnd() != null
+                   && utterance.getEnd().getOffset() != null
+                   && utterance.getEnd().getOffset() >= nextComment.getStart().getOffset())
+            {
+               writer.print(" [" + nextComment.getLabel() + "]");
+               nextComment = comments.hasNext()?comments.next():null;
+            } // next comment
+            
             writer.println();
          } // next utterance
          writer.close();

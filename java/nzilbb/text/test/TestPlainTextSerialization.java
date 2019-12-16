@@ -1239,12 +1239,18 @@ public class TestPlainTextSerialization
       // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
       assertEquals(11, serializer.configure(configuration, schema).size());
 
-      String[] needLayers = serializer.getRequiredLayers();
-      assertEquals(4, needLayers.length);
-      assertEquals("who", needLayers[0]);
-      assertEquals("turn", needLayers[1]);
-      assertEquals("utterance", needLayers[2]);
-      assertEquals("word", needLayers[3]);
+      LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
+         Arrays.asList(serializer.getRequiredLayers()));
+      assertEquals("Needed layers: " + needLayers,
+                   8, needLayers.size());
+      assertTrue(needLayers.contains("who"));
+      assertTrue(needLayers.contains("turn"));
+      assertTrue(needLayers.contains("utterance"));
+      assertTrue(needLayers.contains("word"));
+      assertTrue(needLayers.contains("pronounce"));
+      assertTrue(needLayers.contains("lexical"));
+      assertTrue(needLayers.contains("comment"));
+      assertTrue(needLayers.contains("noise"));
 	 
       // serialize
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
@@ -1276,6 +1282,16 @@ public class TestPlainTextSerialization
    {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
+         new Layer("comment", "Comment")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true)
+         .setPeersOverlap(false)
+         .setSaturated(false),
+         new Layer("noise", "Noise")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true)
+         .setPeersOverlap(false)
+         .setSaturated(false),
          new Layer("who", "Participants")
          .setAlignment(Constants.ALIGNMENT_NONE)
          .setPeers(true)
@@ -1285,6 +1301,18 @@ public class TestPlainTextSerialization
          new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
          new Layer("word", "Words", 2, true, false, false, "turn", true),
          new Layer("orthography", "Orthography")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false)
+         .setPeersOverlap(false)
+         .setSaturated(true)
+         .setParentId("word"),
+         new Layer("lexical", "Lexical")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false)
+         .setPeersOverlap(false)
+         .setSaturated(true)
+         .setParentId("word"),
+         new Layer("pronounce", "Pronunciation")
          .setAlignment(Constants.ALIGNMENT_NONE)
          .setPeers(false)
          .setPeersOverlap(false)
@@ -1369,6 +1397,14 @@ public class TestPlainTextSerialization
          graph.addTag(word, "orthography", word.getLabel()+"-orthography");
       }
       
+      // add some comments, noises, lexical and pronounce tags
+      graph.addAnnotation(new Annotation("comment1", "some preamble", "comment", "a0", "a1"));
+      graph.addAnnotation(new Annotation("noise1", "throat clear", "noise", "a4", "a5"));
+      graph.addAnnotation(new Annotation("lex1", "lex-1-6", "lexical", "a6", "a7", "w1-6"));
+      graph.addAnnotation(new Annotation("lex2", "lex-1-7", "lexical", "a7", "a8", "w1-7"));
+      graph.addAnnotation(new Annotation("pron1", "pron-1-7", "pronounce", "a7", "a8", "w1-7"));
+      graph.addAnnotation(new Annotation("pron2", "pron-1-8", "pronounce", "a8", "a9", "w1-8"));
+
       // create serializer
       PlainTextSerialization serializer = new PlainTextSerialization();
       
@@ -1377,12 +1413,18 @@ public class TestPlainTextSerialization
       // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
       assertEquals(11, serializer.configure(configuration, schema).size());
 
-      String[] needLayers = serializer.getRequiredLayers();
-      assertEquals(4, needLayers.length);
-      assertEquals("who", needLayers[0]);
-      assertEquals("turn", needLayers[1]);
-      assertEquals("utterance", needLayers[2]);
-      assertEquals("word", needLayers[3]);
+      LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
+         Arrays.asList(serializer.getRequiredLayers()));
+      assertEquals("Needed layers: " + needLayers,
+                   8, needLayers.size());
+      assertTrue(needLayers.contains("who"));
+      assertTrue(needLayers.contains("turn"));
+      assertTrue(needLayers.contains("utterance"));
+      assertTrue(needLayers.contains("word"));
+      assertTrue(needLayers.contains("pronounce"));
+      assertTrue(needLayers.contains("lexical"));
+      assertTrue(needLayers.contains("comment"));
+      assertTrue(needLayers.contains("noise"));
 	 
       // serialize
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
@@ -1429,6 +1471,18 @@ public class TestPlainTextSerialization
          .setSaturated(true)
          .setParentId("word"),
          new Layer("pos", "Part of Speech")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false)
+         .setPeersOverlap(false)
+         .setSaturated(true)
+         .setParentId("word"),
+         new Layer("lexical", "Lexical")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false)
+         .setPeersOverlap(false)
+         .setSaturated(true)
+         .setParentId("word"),
+         new Layer("pronounce", "Pronunciation")
          .setAlignment(Constants.ALIGNMENT_NONE)
          .setPeers(false)
          .setPeersOverlap(false)
@@ -1515,22 +1569,35 @@ public class TestPlainTextSerialization
       graph.addTag(graph.getAnnotation("dog"), "pos", "N");
       graph.addTag(graph.getAnnotation("."), "pos", "PUNC");
 
+      // add some comments, noises, lexical and pronounce tags
+      graph.addAnnotation(new Annotation("comment1", "some preamble", "comment", "a0", "a1"));
+      graph.addAnnotation(new Annotation("noise1", "throat clear", "noise", "a4", "a5"));
+      graph.addAnnotation(new Annotation("lex1", "lex-1-6", "lexical", "a6", "a7", "w1-6"));
+      graph.addAnnotation(new Annotation("lex2", "lex-1-7", "lexical", "a7", "a8", "w1-7"));
+      graph.addAnnotation(new Annotation("pron1", "pron-1-7", "pronounce", "a7", "a8", "w1-7"));
+      graph.addAnnotation(new Annotation("pron2", "pron-1-8", "pronounce", "a8", "a9", "w1-8"));
+
       // create serializer
       PlainTextSerialization serializer = new PlainTextSerialization();
       
       // general configuration
       ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      // don't use conventions
+      configuration.get("useConventions").setValue(Boolean.FALSE);
       assertEquals(11, serializer.configure(configuration, schema).size());
       assertEquals("orthography", "orthography", 
 		   ((Layer)configuration.get("orthographyLayer").getValue()).getId());
-
-      String[] needLayers = serializer.getRequiredLayers();
-      assertEquals(4, needLayers.length);
-      assertEquals("who", needLayers[0]);
-      assertEquals("turn", needLayers[1]);
-      assertEquals("utterance", needLayers[2]);
-      assertEquals("word", needLayers[3]);
+      assertEquals("use conventions", Boolean.FALSE, configuration.get("useConventions").getValue());
+      LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
+         Arrays.asList(serializer.getRequiredLayers()));
+      assertEquals("Needed layers doesn't include convention layers: " + needLayers,
+                   4, needLayers.size());
+      assertTrue(needLayers.contains("who"));
+      assertTrue(needLayers.contains("turn"));
+      assertTrue(needLayers.contains("utterance"));
+      assertTrue(needLayers.contains("word"));
+	 
 	 
       // serialize
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
