@@ -21,20 +21,19 @@
 //
 package nzilbb.ag.sql;
 
-import java.util.HashMap;
-import java.util.jar.JarFile;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.*;
-import java.lang.reflect.InvocationTargetException;
-
-import nzilbb.util.IO;
+import java.util.HashMap;
+import java.util.jar.JarFile;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.IconHelper;
+import nzilbb.util.IO;
 
 /**
  * Graph store administration that uses a relational database as its back end.
@@ -78,7 +77,6 @@ public class SqlGraphStoreAdministration
    * @param newSerializersDirectory Root directory for serializers.
    */
   public SqlGraphStoreAdministration setSerializersDirectory(File newSerializersDirectory) { serializersDirectory = newSerializersDirectory; return this; }
-
    
   /**
    * Registered deserializers, keyed by MIME type.
@@ -243,7 +241,7 @@ public class SqlGraphStoreAdministration
           if (getSerializersDirectory() != null)
           {
             File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
-            if (getBaseUrl() != null)
+            if (getBaseUrl() != null && getBaseUrl().length() > 0)
             {
               descriptor.setIcon(
                 new URL(getBaseUrl()+"/"+getSerializersDirectory().getName()+"/"+iconFile.getName()));
@@ -264,7 +262,7 @@ public class SqlGraphStoreAdministration
           if (getSerializersDirectory() != null)
           {
             File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
-            if (getBaseUrl() != null)
+            if (getBaseUrl() != null && getBaseUrl().length() > 0)
             {
               descriptor.setIcon(
                 new URL(getBaseUrl()+"/"+getSerializersDirectory().getName()+"/"+iconFile.getName()));
@@ -402,26 +400,11 @@ public class SqlGraphStoreAdministration
     {
       return (IDeserializer)deserializersByMimeType.get(mimeType).getClass().getDeclaredConstructor().newInstance();
     }
-    catch(NoSuchMethodException x)
-    {
-      return null;
-    }
-    catch(InvocationTargetException x)
-    {
-      return null;
-    }
-    catch(IllegalAccessException exception)
-    {
-      return null;
-    }
-    catch(InstantiationException exception)
-    {
-      return null;
-    }
-    catch(NullPointerException exception)
-    {
-      return null;
-    }
+    catch(NoSuchMethodException x) { return null; }
+    catch(InvocationTargetException x) { return null; }
+    catch(IllegalAccessException exception) { return null; }
+    catch(InstantiationException exception) { return null; }
+    catch(NullPointerException exception) { return null; }
   }
 
   /**
@@ -437,26 +420,11 @@ public class SqlGraphStoreAdministration
     {
       return (IDeserializer)deserializersBySuffix.get(suffix.toLowerCase()).getClass().getDeclaredConstructor().newInstance();
     }
-    catch(InvocationTargetException exception)
-    {
-      return null;
-    }
-    catch(NoSuchMethodException exception)
-    {
-      return null;
-    }
-    catch(IllegalAccessException exception)
-    {
-      return null;
-    }
-    catch(InstantiationException exception)
-    {
-      return null;
-    }
-    catch(NullPointerException exception)
-    {
-      return null;
-    }
+    catch(InvocationTargetException exception) { return null; }
+    catch(NoSuchMethodException exception) { return null; }
+    catch(IllegalAccessException exception) { return null; }
+    catch(InstantiationException exception) { return null; }
+    catch(NullPointerException exception) { return null; }
   }
 
   /**
@@ -577,26 +545,11 @@ public class SqlGraphStoreAdministration
     {
       return (ISerializer)serializersByMimeType.get(mimeType).getClass().getDeclaredConstructor().newInstance();
     }
-    catch(NoSuchMethodException exception)
-    {
-      return null;
-    }
-    catch(InvocationTargetException exception)
-    {
-      return null;
-    }
-    catch(IllegalAccessException exception)
-    {
-      return null;
-    }
-    catch(InstantiationException exception)
-    {
-      return null;
-    }
-    catch(NullPointerException exception)
-    {
-      return null;
-    }
+    catch(NoSuchMethodException exception) { return null; }
+    catch(InvocationTargetException exception) { return null; }
+    catch(IllegalAccessException exception) { return null; }
+    catch(InstantiationException exception) { return null; }
+    catch(NullPointerException exception) { return null; }
   }
 
   /**
@@ -612,26 +565,11 @@ public class SqlGraphStoreAdministration
     {
       return (ISerializer)serializersBySuffix.get(suffix.toLowerCase()).getClass().getDeclaredConstructor().newInstance();
     }
-    catch(InvocationTargetException exception)
-    {
-      return null;
-    }
-    catch(NoSuchMethodException exception)
-    {
-      return null;
-    }
-    catch(IllegalAccessException exception)
-    {
-      return null;
-    }
-    catch(InstantiationException exception)
-    {
-      return null;
-    }
-    catch(NullPointerException exception)
-    {
-      return null;
-    }
+    catch(InvocationTargetException exception) { return null; }
+    catch(NoSuchMethodException exception) { return null; }
+    catch(IllegalAccessException exception) { return null; }
+    catch(InstantiationException exception) { return null; }
+    catch(NullPointerException exception) { return null; }
   }
 
 } // end of class SqlGraphStoreAdministration
