@@ -1216,6 +1216,8 @@ public class Merger
                 if (getConfidence(anLastOriginal.getStart()) // TODO should be original confidence, but we don't track that!
                     < getConfidence(anOriginal.getStart())
                     // don't go back before parent start
+                    && anLastOriginal.getParent().getStart() != null
+                    && anLastOriginal.getParent().getStart().getOffset() != null
                     && anLastOriginal.getParent().getStart().getOffset()
                     <= anOriginal.getStart().getOffset() - smidgin)
                 {
