@@ -1429,7 +1429,7 @@ public class TestPlainTextSerialization
       // serialize
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
-      String[] layers = {"word"}; 
+      String[] layers = {"word","lexical","pronounce"}; 
       serializer.serialize(Utility.OneGraphSpliterator(graph), layers,
                            stream -> streams.add(stream),
                            warning -> System.out.println(warning),

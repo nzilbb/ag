@@ -651,7 +651,7 @@ public class PlainTextSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "Plain Text Document", "1.02", "text/plain", ".txt", "20191031.1734",
+         "Plain Text Document", "1.03", "text/plain", ".txt", "20191031.1734",
          getClass().getResource("icon.png"));
    }
 
@@ -1786,7 +1786,9 @@ public class PlainTextSerialization
             if (layer != null)
             {
                selectedLayers.add(l);
-               if (layer.getParentId().equals(getWordLayer().getId()))
+               if (layer.getParentId().equals(getWordLayer().getId())
+                   && (lexicalLayer == null || !layer.getId().equals(lexicalLayer.getId()))
+                   && (pronounceLayer == null || !layer.getId().equals(pronounceLayer.getId())))
                {
                   tagLayers.add(l); // TODO maybe allow other layers
                }
