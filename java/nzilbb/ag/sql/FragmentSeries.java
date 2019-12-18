@@ -102,8 +102,9 @@ public class FragmentSeries
     * @param fragmentIds A collection of strings that identify a graph fragment.
     * <p>These can be something like:
     * <ul>
-    * <li><q>g_3;em_12_2676;n_19985-n_20003;p_4;#=ew_0_12611;prefix=001-;[0]=ew_0_12611</q></li>
+    * <li><q>g_3;em_11_23;n_19985-n_20003;p_4;#=ew_0_12611;prefix=001-;[0]=ew_0_12611</q></li>
     * <li><q>AgnesShacklock-01.trs;60.897-67.922;prefix=001-</q></li>
+    * <li><q>AgnesShacklock-01.trs;60.897-67.922;m_-1_23-</q></li>
     * </ul>
     * @throws SQLException If an error occurs retrieving results.
     */
@@ -162,17 +163,48 @@ public class FragmentSeries
             end = Double.parseDouble(interval[1]);
          }
 	 String prefix = "";
+	 String filterId = "";
          for (int p = 1; p < parts.length; p++)
          {
+            System.err.println("part " + parts[p]);
             if (parts[p].startsWith("prefix="))
             {
                prefix = parts[p].substring("prefix=".length());
                break;
             }
+            if (parts[p].startsWith("em_") || parts[p].startsWith("m_"))
+            {
+               filterId = parts[p];
+               break;
+            }
          }
          Graph fragment = store.getFragment(graphId, start, end, layers);
          fragment.shiftAnchors(-start);
-         if (prefix.length() > 0) fragment.setId(prefix + fragment.getId());         
+         if (prefix.length() > 0) fragment.setId(prefix + fragment.getId());
+         if (filterId.length() > 0)
+         { // filter annotation is specified
+            System.err.println("Filtering by " + filterId);
+            // remove annotations that don't belong to the specified filter annotation
+            Annotation targetAncestor = fragment.getAnnotationsById().get(filterId);
+            System.err.println("targetAncestor " + targetAncestor);
+            if (targetAncestor != null)
+            { // target is in the graph
+               for (Annotation a : fragment.getAnnotationsById().values())
+               {
+                  System.err.println(a.getLayer()+".isAncestor("+targetAncestor.getLayerId()+"): " + a.getLayer().isAncestor(targetAncestor.getLayerId()));
+                  if (a.getLayer().isAncestor(targetAncestor.getLayerId()))
+                  { // annotation is a descendent of the participant layer
+                     System.err.println("Layer " + a.my(targetAncestor.getLayerId()));
+                     if (a.my(targetAncestor.getLayerId()) != targetAncestor)
+                     {
+                        System.err.println("Destroy " + a);
+                        a.destroy();
+                     } // annotation has a different ancestor on the same layer
+                  } // annotation is a descendent of the target layer
+               } // next annotation
+            } // participant is in the graph
+         } // target is specified
+         fragment.commit();
 	 action.accept(fragment);
          return true;
       }
