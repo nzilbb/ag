@@ -166,38 +166,34 @@ public class FragmentSeries
 	 String filterId = "";
          for (int p = 1; p < parts.length; p++)
          {
-            System.err.println("part " + parts[p]);
             if (parts[p].startsWith("prefix="))
             {
                prefix = parts[p].substring("prefix=".length());
-               break;
             }
-            if (parts[p].startsWith("em_") || parts[p].startsWith("m_"))
+            if ((parts[p].startsWith("em_") || parts[p].startsWith("m_"))
+                // don't filter by utterance - it usuall has no descendants, so just makes things
+                // slower without actually discarding anything
+                && !parts[p].startsWith("em_12_"))
             {
                filterId = parts[p];
-               break;
             }
          }
+        
          Graph fragment = store.getFragment(graphId, start, end, layers);
          fragment.shiftAnchors(-start);
          if (prefix.length() > 0) fragment.setId(prefix + fragment.getId());
          if (filterId.length() > 0)
          { // filter annotation is specified
-            System.err.println("Filtering by " + filterId);
             // remove annotations that don't belong to the specified filter annotation
             Annotation targetAncestor = fragment.getAnnotationsById().get(filterId);
-            System.err.println("targetAncestor " + targetAncestor);
             if (targetAncestor != null)
             { // target is in the graph
                for (Annotation a : fragment.getAnnotationsById().values())
                {
-                  System.err.println(a.getLayer()+".isAncestor("+targetAncestor.getLayerId()+"): " + a.getLayer().isAncestor(targetAncestor.getLayerId()));
                   if (a.getLayer().isAncestor(targetAncestor.getLayerId()))
                   { // annotation is a descendent of the participant layer
-                     System.err.println("Layer " + a.my(targetAncestor.getLayerId()));
                      if (a.my(targetAncestor.getLayerId()) != targetAncestor)
                      {
-                        System.err.println("Destroy " + a);
                         a.destroy();
                      } // annotation has a different ancestor on the same layer
                   } // annotation is a descendent of the target layer
