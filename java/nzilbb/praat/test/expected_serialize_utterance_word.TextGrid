@@ -8,7 +8,7 @@ size = 7
 item []: 
     item [1]:
         class = "IntervalTier" 
-        name = "utterance - interviewer" 
+        name = "interviewer" 
         xmin = 0 
         xmax = 306.92 
         intervals: size = 30 
@@ -134,7 +134,7 @@ item []:
             text = "" 
     item [2]:
         class = "IntervalTier" 
-        name = "utterance - participant" 
+        name = "participant" 
         xmin = 0 
         xmax = 306.92 
         intervals: size = 129 

@@ -8,7 +8,7 @@ size = 5
 item []: 
     item [1]:
         class = "IntervalTier" 
-        name = "utterance - participant" 
+        name = "participant" 
         xmin = 0 
         xmax = 3.963329999999985 
         intervals: size = 3 

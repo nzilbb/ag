@@ -260,7 +260,7 @@ public class TextGridSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "Praat TextGrid", "2.10", "text/praat-textgrid", ".textgrid", "20191031.1734",
+         "Praat TextGrid", "2.11", "text/praat-textgrid", ".textgrid", "20191031.1734",
          getClass().getResource("icon.png"));
    }
    
@@ -1597,7 +1597,18 @@ public class TextGridSerialization
                   if (!tiers.containsKey(who))
                   {
                      String tierName = layer.getId();
-                     if (who.length() > 0) tierName += " - " + who;
+                     if (who.length() > 0)
+                     {
+                        // for utterance tiers, just use the speaker name
+                        if (layer.equals(getUtteranceLayer()))
+                        {
+                           tierName = who;
+                        }
+                        else
+                        {
+                           tierName += " - " + who;
+                        }
+                     }
                      Vector<IntervalTier> list = new Vector<IntervalTier>();
                      tiers.put(who, list);
                      list.add(new IntervalTier(tierName, 0, 0));
@@ -1619,7 +1630,18 @@ public class TextGridSerialization
                      if (tier == null)
                      { // add a new tier
                         String tierName = layer.getId();
-                        if (who.length() > 0) tierName += " - " + who;
+                        if (who.length() > 0)
+                        {
+                           // for utterance tiers, just use the speaker name
+                           if (layer.equals(getUtteranceLayer()))
+                           {
+                              tierName = who;
+                           }
+                           else
+                           {
+                              tierName += " - " + who;
+                           }
+                        }
                         tier = new IntervalTier(tierName, 0, 0);
                         tierList.add(tier);
                      } // add a new tier
