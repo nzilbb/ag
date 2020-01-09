@@ -65,7 +65,6 @@ import nzilbb.util.Timers;
 
 /**
  * Graph store that uses a relational database as its back end.
- * TODO user permission checking
  * @author Robert Fromont robert@fromont.net.nz
  */
 
@@ -77,13 +76,16 @@ public class SqlGraphStore
    /** Format of annotation IDs, where {0} = scope, {1} = layer_id, and {2} = annotation_id */
    protected MessageFormat fmtAnnotationId = new MessageFormat("e{0}_{1,number,0}_{2,number,0}");
 
-   /** Format of annotation IDs for 'meta' layers, where {0} = layer_id and {1} = the id of the entity (corpus_id, family_id, speaker_number, etc.) */
+   /** Format of annotation IDs for 'meta' layers, where {0} = layer_id and {1} = the id
+    * of the entity (corpus_id, family_id, speaker_number, etc.)  */
    protected MessageFormat fmtMetaAnnotationId = new MessageFormat("m_{0,number,0}_{1}");
 
-   /** Format of annotation IDs for transcript attributes, where {0} = attribute and {1} = annotation_id */
+   /** Format of annotation IDs for transcript attributes, where {0} = attribute and {1} =
+    * annotation_id */
    protected MessageFormat fmtTranscriptAttributeId = new MessageFormat("t|{0}|{1,number,0}");
 
-   /** Format of annotation IDs for participant attributes, where {0} = attribute and {1} = annotation_id */
+   /** Format of annotation IDs for participant attributes, where {0} = attribute and {1}
+    * = annotation_id */
    protected MessageFormat fmtParticipantAttributeId = new MessageFormat("p|{0}|{1,number,0}");
 
    /** Format of anchor IDs, where {0} = anchor_id */
@@ -147,12 +149,14 @@ public class SqlGraphStore
     */
    protected boolean disconnectWhenFinished = false;
    /**
-    * Getter for {@link #disconnectWhenFinished}: Whether to disconnect the connection when garbage collected.
+    * Getter for {@link #disconnectWhenFinished}: Whether to disconnect the connection
+    * when garbage collected.
     * @return Whether to disconnect the connection when garbage collected.
     */
    public boolean getDisconnectWhenFinished() { return disconnectWhenFinished; }
    /**
-    * Setter for {@link #disconnectWhenFinished}: Whether to disconnect the connection when garbage collected.
+    * Setter for {@link #disconnectWhenFinished}: Whether to disconnect the connection
+    * when garbage collected.
     * @param newDisconnectWhenFinished Whether to disconnect the connection when garbage collected.
     */
    public SqlGraphStore setDisconnectWhenFinished(boolean newDisconnectWhenFinished) { disconnectWhenFinished = newDisconnectWhenFinished; return this; }
@@ -944,7 +948,8 @@ public class SqlGraphStore
    } // end of getParticipant()
    
    /**
-    * Saves a participant, and all its tags, to the database.  The participant is represented by an Annotation that isn't assumed to be part of a graph.
+    * Saves a participant, and all its tags, to the database.  The participant is
+    * represented by an Annotation that isn't assumed to be part of a graph.
     * @param participant
     * @return true if changes were saved, false if there were no changes to save.
     * @throws StoreException If an error prevents the participant from being saved.
@@ -1169,8 +1174,10 @@ public class SqlGraphStore
 
    
    /**
-    * Converts a participant-matching expression into a resultset (SELECT selectedClause FROM... WHERE... orderClause).
-    * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+    * Converts a participant-matching expression into a resultset (SELECT selectedClause
+    * FROM... WHERE... orderClause).
+    * <p> The expression language is currently not well defined, but expressions such as
+    * the following can be used:
     * <ul>
     *  <li><code>id MATCHES 'Ada.+'</code></li>
     *  <li><code>'CC' IN labels('corpus')</code></li>
@@ -1324,8 +1331,10 @@ public class SqlGraphStore
    }
 
    /**
-    * Converts a graph-matching expression into a resultset (SELECT selectedClause FROM... WHERE... orderClause).
-    * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+    * Converts a graph-matching expression into a resultset (SELECT selectedClause
+    * FROM... WHERE... orderClause).
+    * <p> The expression language is currently not well defined, but expressions such as
+    * the following can be used:
     * <ul>
     *  <li><code>id MATCHES 'Ada.+'</code></li>
     *  <li><code>'Robert' IN labels('who')</code></li>
@@ -1367,7 +1376,8 @@ public class SqlGraphStore
    /**
     * Counts the number of graphs that match a particular pattern.
     * @param expression An expression that determines which graphs match.
-    * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+    * <p> The expression language is currently not well defined, but expressions such as
+    * the following can be used:
     * <ul>
     *  <li><code>id MATCHES 'Ada.+'</code></li>
     *  <li><code>'Robert' IN labels('who')</code></li>
@@ -1383,7 +1393,8 @@ public class SqlGraphStore
     *  <li><code>list('participant_languages').length gt; 1</code></li>
     *  <li><code>list('transcript').length gt; 100</code></li>
     *  <li><code>'Robert' IN annotators('transcript_rating')</code></li>
-    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
+    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN
+    * labels('who')</code></li>
     * </ul>
     * @return The number of matching graphs.
     * @throws StoreException If an error occurs.
@@ -1416,7 +1427,8 @@ public class SqlGraphStore
    /**
     * Gets a list of IDs of graphs that match a particular pattern.
     * @param expression An expression that determines which graphs match.
-    * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+    * <p> The expression language is currently not well defined, but expressions such as
+    * the following can be used:
     * <ul>
     *  <li><code>id MATCHES 'Ada.+'</code></li>
     *  <li><code>'Robert' IN labels('who')</code></li>
@@ -1432,7 +1444,8 @@ public class SqlGraphStore
     *  <li><code>list('participant_languages').length gt; 1</code></li>
     *  <li><code>list('transcript').length gt; 100</code></li>
     *  <li><code>'Robert' IN annotators('transcript_rating')</code></li>
-    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
+    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN
+    * labels('who')</code></li>
     * </ul>
     * @return A list of graph IDs.
     * @throws StoreException If an error occurs.
@@ -1447,7 +1460,8 @@ public class SqlGraphStore
    /**
     * Gets a list of IDs of graphs that match a particular pattern.
     * @param expression An expression that determines which graphs match.
-    * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+    * <p> The expression language is currently not well defined, but expressions such as
+    * the following can be used:
     * <ul>
     *  <li><code>id MATCHES 'Ada.+'</code></li>
     *  <li><code>'Robert' IN labels('who')</code></li>
@@ -1463,7 +1477,8 @@ public class SqlGraphStore
     *  <li><code>list('participant_languages').length gt; 1</code></li>
     *  <li><code>list('transcript').length gt; 100</code></li>
     *  <li><code>'Robert' IN annotators('transcript_rating')</code></li>
-    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
+    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN
+    * labels('who')</code></li>
     * </ul>
     * @param pageLength The maximum number of IDs to return, or null to return all.
     * @param pageNumber The zero-based page number to return, or null to return the first page.
@@ -1479,7 +1494,8 @@ public class SqlGraphStore
    /**
     * Gets a list of IDs of graphs that match a particular pattern.
     * @param expression An expression that determines which graphs match.
-    * <p> The expression language is currently not well defined, but expressions such as the following can be used:
+    * <p> The expression language is currently not well defined, but expressions such as
+    * the following can be used:
     * <ul>
     *  <li><code>id MATCHES 'Ada.+'</code></li>
     *  <li><code>'Robert' IN labels('who')</code></li>
@@ -1495,11 +1511,14 @@ public class SqlGraphStore
     *  <li><code>list('participant_languages').length gt; 1</code></li>
     *  <li><code>list('transcript').length gt; 100</code></li>
     *  <li><code>'Robert' IN annotators('transcript_rating')</code></li>
-    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
+    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN
+    * labels('who')</code></li>
     * </ul>
     * @param pageLength The maximum number of IDs to return, or null to return all.
     * @param pageNumber The zero-based page number to return, or null to return the first page.
-    * @param order The ordering for the list of IDs, a string containing a comma-separated list of epxressions, which may be appended by " ASC" or " DESC", or null for graph ID order.
+    * @param order The ordering for the list of IDs, a string containing a comma-separated
+    * list of epxressions, which may be appended by " ASC" or " DESC", or null for graph
+    * ID order.
     * @return A list of graph IDs.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
@@ -2083,8 +2102,10 @@ public class SqlGraphStore
     * <ul>
     *  <li><code>id = 'ew_0_456'</code></li>
     *  <li><code>layer.id = 'orthography' AND label NOT MATCHES 'th[aeiou].*'</code></li>
-    *  <li><code>layer.id = 'orthography' AND my('who').label = 'Robert' AND my('utterances').start.offset = 12.345</code></li>
-    *  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset &gt; 10.5</code></li>
+    *  <li><code>layer.id = 'orthography' AND my('who').label = 'Robert' AND
+    * my('utterances').start.offset = 12.345</code></li> 
+    *  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND
+    * start.offset &gt; 10.5</code></li> 
     *  <li><code>layer.id = 'utterances' AND 'ew_0_456' IN list('transcript')</code></li>
     *  <li><code>previous.id = 'ew_0_456'</code></li>
     * </ul>
@@ -3426,9 +3447,16 @@ public class SqlGraphStore
    }
   
    /**
-    * Saves the given graph. The graph can be partial e.g. include only some of the layers that the stored version of the graph contains, or be a fragment.
-    * <p>The graph deltas are assumed to be set correctly, so if this is a new graph, then {@link Graph#getChange()} should return Change.Operation.Create, if it's an update, Change.Operation.Update, and to delete, Change.Operation.Delete.  Correspondingly, all {@link Anchor}s and {@link Annotation}s should have their changes set also.  If {@link Graph#getChanges()} returns no changes, no action will be taken, and this method returns false.
-    * <p>After this method has executed, {@link Graph#commit()} is <em>not</em> called - this must be done by the caller, if they want changes to be committed.
+    * Saves the given graph. The graph can be partial e.g. include only some of the layers
+    * that the stored version of the graph contains, or be a fragment.
+    * <p>The graph deltas are assumed to be set correctly, so if this is a new graph, then
+    * {@link Graph#getChange()} should return Change.Operation.Create, if it's an update,
+    * Change.Operation.Update, and to delete, Change.Operation.Delete.  Correspondingly,
+    * all {@link Anchor}s and {@link Annotation}s should have their changes set also.  If
+    * {@link Graph#getChanges()} returns no changes, no action will be taken, and this
+    * method returns false.
+    * <p>After this method has executed, {@link Graph#commit()} is <em>not</em> called -
+    * this must be done by the caller, if they want changes to be committed.
     * @param graph The graph to save.
     * @return true if changes were saved, false if there were no changes to save.
     * @throws StoreException If an error occurs.
@@ -3619,13 +3647,15 @@ public class SqlGraphStore
                      }
                      catch(ClassCastException castX)
                      {
-                        throw new StoreException("Parsed anchor ID is not a Long integer:" + change.getObject().getId());
+                        throw new StoreException("Parsed anchor ID is not a Long integer:"
+                                                 + change.getObject().getId());
                      }
                   }
                }
                catch(ParseException parseX)
                {
-                  throw new StoreException("Could not parse anchor ID:" + change.getObject().getId());
+                  throw new StoreException("Could not parse anchor ID:"
+                                           + change.getObject().getId());
                }
             } // Anchor change
             else if (change.getObject() instanceof Annotation)
@@ -3641,7 +3671,8 @@ public class SqlGraphStore
                   }
                   catch(ParseException parseX)
                   {
-                     throw new StoreException("Could not parse special annotation ID:" + change.getObject().getId());
+                     throw new StoreException("Could not parse special annotation ID:"
+                                              + change.getObject().getId());
                   }
                }
                else if (change.getObject().getId().startsWith("t|"))
@@ -3655,7 +3686,8 @@ public class SqlGraphStore
                   }
                   catch(ParseException parseX)
                   {
-                     throw new StoreException("Could not parse transcript attribute ID:" + change.getObject().getId());
+                     throw new StoreException("Could not parse transcript attribute ID:"
+                                              + change.getObject().getId());
                   }
                }
                else if (change.getObject().getId().startsWith("p|"))
@@ -3669,7 +3701,8 @@ public class SqlGraphStore
                   }
                   catch(ParseException parseX)
                   {
-                     throw new StoreException("Could not parse participant attribute ID:" + change.getObject().getId());
+                     throw new StoreException("Could not parse participant attribute ID:"
+                                              + change.getObject().getId());
                   }
                }
                else
@@ -3687,7 +3720,8 @@ public class SqlGraphStore
                             && !scope.equalsIgnoreCase(SqlConstants.SCOPE_SEGMENT) 
                             && !scope.equalsIgnoreCase(SqlConstants.SCOPE_PARTICIPANT))
                         {
-                           throw new StoreException("Parsed annotation scope is not recognised:" + change.getObject().getId() + " - " + scope);
+                           throw new StoreException("Parsed annotation scope is not recognised:"
+                                                    + change.getObject().getId() + " - " + scope);
                         }
                         try
                         {
@@ -3695,7 +3729,8 @@ public class SqlGraphStore
                         }
                         catch(ClassCastException castX)
                         {
-                           throw new StoreException("Parsed annotation layer ID is not an Integer:" + change.getObject().getId() + " - " + o[1]);
+                           throw new StoreException("Parsed annotation layer ID is not an Integer:"
+                                                    + change.getObject().getId() + " - " + o[1]);
                         }
                         try
                         {
@@ -3703,13 +3738,15 @@ public class SqlGraphStore
                         }
                         catch(ClassCastException castX)
                         {
-                           throw new StoreException("Parsed annotation ID is not a Long integer:" + change.getObject().getId() + " - " + o[2]);
+                           throw new StoreException("Parsed annotation ID is not a Long integer:"
+                                                    + change.getObject().getId() + " - " + o[2]);
                         }
                      }
                   }
                   catch(ParseException parseX)
                   {
-                     throw new StoreException("Could not parse annotation ID:" + change.getObject().getId());
+                     throw new StoreException("Could not parse annotation ID:"
+                                              + change.getObject().getId());
                   }
                } // not a participant annotation
             } // Annotation change
@@ -4192,13 +4229,16 @@ public class SqlGraphStore
 
 
    /**
-    * Saves the changes to the given anchor, and updates related annotations if the anchor ID is changed.
+    * Saves the changes to the given anchor, and updates related annotations if the anchor
+    * ID is changed.
     * @param anchor The anchor whose changes should be saved.
-    * @param extraUpdates A set to add annotations which had no changes to save, but which now must be updated because the anchor's ID is changing.
+    * @param extraUpdates A set to add annotations which had no changes to save, but which
+    * now must be updated because the anchor's ID is changing.
     * @param sqlInsertAnchor Prepared statement for inserting an anchor row.
     * @param sqlLastId Prepared statement for retrieving the last database ID created.
     * @param sqlUpdateAnchor Prepared statement for updating an anchor row.
-    * @param sqlCheckAnchor Prepared statement for counting the number of anchors currently using an anchor.
+    * @param sqlCheckAnchor Prepared statement for counting the number of anchors
+    * currently using an anchor.
     * @param layerIds List of all layer_ids, for checking for annotations that use this anchor.
     * @param sqlDeleteAnchor Prepared statement for deleteing an anchor row.
     * @throws StoreException If an ID can't be parsed.
@@ -4340,10 +4380,13 @@ public class SqlGraphStore
    } // end of saveAnchorChanges()
 
    /**
-    * Saves the changes to the given anchor, and updates related annotations if the anchor ID is changed.
+    * Saves the changes to the given anchor, and updates related annotations if the anchor
+    * ID is changed.
     * @param annotation The annotation whose changes should be saved.
-    * @param extraUpdates A set to add annotations which had no changes to save, but which now must be updated because the anchor's ID is changing.
-    * @param sqlInsertFreeformAnnotation Prepared statement for inserting a freeform annotation row.
+    * @param extraUpdates A set to add annotations which had no changes to save, but which
+    * now must be updated because the anchor's ID is changing.
+    * @param sqlInsertFreeformAnnotation Prepared statement for inserting a freeform
+    * annotation row.
     * @param sqlInsertMetaAnnotation Prepared statement for inserting a meta annotation row.
     * @param sqlInsertWordAnnotation Prepared statement for inserting a word annotation row.
     * @param sqlInsertSegmentAnnotation Prepared statement for inserting a segment annotation row.
@@ -4428,8 +4471,11 @@ public class SqlGraphStore
             }
             catch(ParseException exception)
             {
-               System.err.println("Error parsing start anchor for "+annotation.getLayerId()+":"+annotation.getId()+": " + annotation.getStartId());
-               throw new StoreException("Error parsing start anchor for "+annotation.getLayerId()+":"+annotation.getId()+": " + annotation.getStartId(), exception);
+               System.err.println("Error parsing start anchor for "+annotation.getLayerId()
+                                  +":"+annotation.getId()+": " + annotation.getStartId());
+               throw new StoreException("Error parsing start anchor for "
+                                        +annotation.getLayerId()+":"+annotation.getId()+": "
+                                        + annotation.getStartId(), exception);
             }
             try
             {
@@ -4439,8 +4485,10 @@ public class SqlGraphStore
             }
             catch(ParseException exception)
             {
-               System.err.println("Error parsing end anchor for "+annotation.getId()+": " + annotation.getEndId());
-               throw new StoreException("Error parsing end anchor for "+annotation.getId()+": " + annotation.getEndId(), exception);
+               System.err.println("Error parsing end anchor for "+annotation.getId()
+                                  +": " + annotation.getEndId());
+               throw new StoreException("Error parsing end anchor for "+annotation.getId()
+                                        +": " + annotation.getEndId(), exception);
             }
             if (annotation.getParentId() == null)
             {
@@ -4462,8 +4510,12 @@ public class SqlGraphStore
                   }
                   catch(ParseException exception)
                   {
-                     System.err.println("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId() + " on " + annotation.getLayerId());
-                     throw new StoreException("Error parsing who parent id for "+annotation.getId()+": " + annotation.getParentId() + " on " + annotation.getLayerId(), exception);
+                     System.err.println("Error parsing parent id for "+annotation.getId()
+                                        +": " + annotation.getParentId()
+                                        + " on " + annotation.getLayerId());
+                     throw new StoreException("Error parsing who parent id for "
+                                              +annotation.getId()+": " + annotation.getParentId()
+                                              + " on " + annotation.getLayerId(), exception);
                   }
                }
                else
@@ -4475,8 +4527,12 @@ public class SqlGraphStore
                   }
                   catch(ParseException exception)
                   {
-                     System.err.println("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId() + " on " + annotation.getLayerId());
-                     throw new StoreException("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId() + " on " + annotation.getLayerId(), exception);
+                     System.err.println("Error parsing parent id for "+annotation.getId()+": "
+                                        + annotation.getParentId()
+                                        + " on " + annotation.getLayerId());
+                     throw new StoreException("Error parsing parent id for "+annotation.getId()
+                                              +": " + annotation.getParentId()
+                                              + " on " + annotation.getLayerId(), exception);
                   }
                }
             }
@@ -4516,8 +4572,12 @@ public class SqlGraphStore
                   }
                   catch(ParseException exception)
                   {
-                     System.err.println("Error parsing turn id for "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParentId());
-                     throw new StoreException("Error parsing turn id for "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParentId(), exception);
+                     System.err.println("Error parsing turn id for "+annotation.getId()
+                                        +" (" + annotation.getStart() + "): "
+                                        + annotation.getParentId());
+                     throw new StoreException("Error parsing turn id for "+annotation.getId()
+                                              +" (" + annotation.getStart() + "): "
+                                              + annotation.getParentId(), exception);
                   }
                }
                else
@@ -4531,8 +4591,12 @@ public class SqlGraphStore
                      }
                      catch(ParseException exception)
                      {
-                        System.err.println("Error parsing turn id for "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParentId());
-                        throw new StoreException("Error parsing turn id for "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParentId(), exception);
+                        System.err.println("Error parsing turn id for "+annotation.getId()
+                                           +" (" + annotation.getStart() + "): "
+                                           + annotation.getParentId());
+                        throw new StoreException("Error parsing turn id for "+annotation.getId()
+                                                 +" (" + annotation.getStart() + "): "
+                                                 + annotation.getParentId(), exception);
                      }
                      sql.setInt(12, annotation.getOrdinal()); // ordinal_in_turn
                      sql.setNull(13, java.sql.Types.INTEGER); // word_annotation_id - set it later
@@ -4555,8 +4619,12 @@ public class SqlGraphStore
                         }
                         catch(ParseException exception)
                         {
-                           System.err.println("Error parsing word ID for "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParentId());
-                           throw new StoreException("Error parsing word ID for "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParentId(), exception);
+                           System.err.println("Error parsing word ID for "+annotation.getId()
+                                              +" (" + annotation.getStart() + "): "
+                                              + annotation.getParentId());
+                           throw new StoreException("Error parsing word ID for "+annotation.getId()
+                                                    +" (" + annotation.getStart() + "): "
+                                                    + annotation.getParentId(), exception);
                         }
                      }
                      else 
@@ -4579,8 +4647,13 @@ public class SqlGraphStore
                            }
                            catch(ParseException exception)
                            {
-                              System.err.println("Error parsing word ID for "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParentId());
-                              throw new StoreException("Error parsing word ID for "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParentId(), exception);
+                              System.err.println("Error parsing word ID for "+annotation.getId()
+                                                 +" (" + annotation.getStart() + "): "
+                                                 + annotation.getParentId());
+                              throw new StoreException("Error parsing word ID for "
+                                                       +annotation.getId()
+                                                       +" (" + annotation.getStart() + "): "
+                                                       + annotation.getParentId(), exception);
                            }
                         }
                         else
@@ -4600,8 +4673,15 @@ public class SqlGraphStore
                            }
                            catch(ParseException exception)
                            {
-                              System.err.println("Error parsing word ID for segment "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParent().getParentId());
-                              throw new StoreException("Error parsing word ID for segment "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParent().getParentId(), exception);
+                              System.err.println("Error parsing word ID for segment "
+                                                 +annotation.getId()
+                                                 +" (" + annotation.getStart() + "): "
+                                                 + annotation.getParent().getParentId());
+                              throw new StoreException("Error parsing word ID for segment "
+                                                       +annotation.getId()
+                                                       +" (" + annotation.getStart() + "): "
+                                                       + annotation.getParent().getParentId(),
+                                                       exception);
                            }
                            try
                            {
@@ -4616,8 +4696,14 @@ public class SqlGraphStore
                            }
                            catch(ParseException exception)
                            {
-                              System.err.println("Error parsing segment ID for "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParentId());
-                              throw new StoreException("Error parsing segment ID for "+annotation.getId()+" (" + annotation.getStart() + "): " + annotation.getParentId(), exception);
+                              System.err.println("Error parsing segment ID for "
+                                                 +annotation.getId()
+                                                 +" (" + annotation.getStart() + "): "
+                                                 + annotation.getParentId());
+                              throw new StoreException("Error parsing segment ID for "
+                                                       +annotation.getId()
+                                                       +" (" + annotation.getStart() + "): "
+                                                       + annotation.getParentId(), exception);
                            }
                         } // other segment annotation
                      } // segment annotation
@@ -4719,8 +4805,10 @@ public class SqlGraphStore
             }
             catch(ParseException exception)
             {
-               System.err.println("Error parsing start anchor for "+annotation.getId()+": " + annotation.getStartId());
-               throw new StoreException("Error parsing start anchor for "+annotation.getId()+": " + annotation.getStartId(), exception);
+               System.err.println("Error parsing start anchor for "+annotation.getId()+": "
+                                  + annotation.getStartId());
+               throw new StoreException("Error parsing start anchor for "+annotation.getId()
+                                        +": " + annotation.getStartId(), exception);
             }
             try
             {
@@ -4730,8 +4818,10 @@ public class SqlGraphStore
             }
             catch(ParseException exception)
             {
-               System.err.println("Error parsing end anchor for "+annotation.getId()+": " + annotation.getEndId());
-               throw new StoreException("Error parsing end anchor for "+annotation.getId()+": " + annotation.getEndId(), exception);
+               System.err.println("Error parsing end anchor for "+annotation.getId()
+                                  +": " + annotation.getEndId());
+               throw new StoreException("Error parsing end anchor for "+annotation.getId()
+                                        +": " + annotation.getEndId(), exception);
             }
             if (sql == sqlUpdateFreeformAnnotation)
             {
@@ -4778,8 +4868,10 @@ public class SqlGraphStore
                      }
                      catch(ParseException exception)
                      {
-                        System.err.println("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId());
-                        throw new StoreException("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId(), exception);
+                        System.err.println("Error parsing parent id for "+annotation.getId()
+                                           +": " + annotation.getParentId());
+                        throw new StoreException("Error parsing parent id for "+annotation.getId()
+                                                 +": " + annotation.getParentId(), exception);
                      }
                   }
                   sql.setInt(8, annotation.getOrdinal());
@@ -4812,8 +4904,10 @@ public class SqlGraphStore
                   }
                   catch(ParseException exception)
                   {
-                     System.err.println("Error parsing turn ID for "+annotation.getId()+": " + annotation.getParentId());
-                     throw new StoreException("Error parsing turn ID for "+annotation.getId()+": " + annotation.getParentId(), exception);
+                     System.err.println("Error parsing turn ID for "+annotation.getId()
+                                        +": " + annotation.getParentId());
+                     throw new StoreException("Error parsing turn ID for "+annotation.getId()
+                                              +": " + annotation.getParentId(), exception);
                   }
                   if (annotation.getParentId() == null)
                   {
@@ -4828,8 +4922,10 @@ public class SqlGraphStore
                      }
                      catch(ParseException exception)
                      {
-                        System.err.println("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId());
-                        throw new StoreException("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId(), exception);
+                        System.err.println("Error parsing parent id for "+annotation.getId()
+                                           +": " + annotation.getParentId());
+                        throw new StoreException("Error parsing parent id for "+annotation.getId()
+                                                 +": " + annotation.getParentId(), exception);
                      }
                   }
                   sql.setInt(8, annotation.getOrdinal());
@@ -4863,8 +4959,10 @@ public class SqlGraphStore
                      }
                      catch(ParseException exception)
                      {
-                        System.err.println("Error parsing turn ID for "+annotation.getId()+": " + annotation.getParentId());
-                        throw new StoreException("Error parsing turn ID for "+annotation.getId()+": " + annotation.getParentId(), exception);
+                        System.err.println("Error parsing turn ID for "+annotation.getId()
+                                           +": " + annotation.getParentId());
+                        throw new StoreException("Error parsing turn ID for "+annotation.getId()
+                                                 +": " + annotation.getParentId(), exception);
                      }
                      sql.setInt(7, annotation.getOrdinal()); // ordinal_in_turn
                      sql.setLong(8, annotationId); // word_annotation_id		     
@@ -4881,8 +4979,11 @@ public class SqlGraphStore
                         }
                         catch(ParseException exception)
                         {
-                           System.err.println("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId());
-                           throw new StoreException("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId(), exception);
+                           System.err.println("Error parsing parent id for "+annotation.getId()
+                                              +": " + annotation.getParentId());
+                           throw new StoreException("Error parsing parent id for "
+                                                    +annotation.getId()
+                                                    +": " + annotation.getParentId(), exception);
                         }
                      }
                      sql.setInt(10, annotation.getOrdinal());
@@ -4931,8 +5032,13 @@ public class SqlGraphStore
                               }
                               catch(ParseException exception)
                               {
-                                 System.err.println("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId());
-                                 throw new StoreException("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId(), exception);
+                                 System.err.println("Error parsing parent id for "
+                                                    +annotation.getId()
+                                                    +": " + annotation.getParentId());
+                                 throw new StoreException("Error parsing parent id for "
+                                                          +annotation.getId()
+                                                          +": " + annotation.getParentId(),
+                                                          exception);
                               }
                            }
                            sql.setInt(10, annotation.getOrdinal());
@@ -4957,8 +5063,11 @@ public class SqlGraphStore
                         }
                         catch(ParseException exception)
                         {
-                           System.err.println("Error parsing word ID for "+annotation.getId()+": " + annotation.getParentId());
-                           throw new StoreException("Error parsing word ID for "+annotation.getId()+": " + annotation.getParentId(), exception);
+                           System.err.println("Error parsing word ID for "+annotation.getId()
+                                              +": " + annotation.getParentId());
+                           throw new StoreException("Error parsing word ID for "
+                                                    +annotation.getId()
+                                                    +": " + annotation.getParentId(), exception);
                         }
                      }
                      else 
@@ -4991,8 +5100,13 @@ public class SqlGraphStore
                                  }
                                  catch(ParseException exception)
                                  {
-                                    System.err.println("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId());
-                                    throw new StoreException("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId(), exception);
+                                    System.err.println("Error parsing parent id for "
+                                                       +annotation.getId()
+                                                       +": " + annotation.getParentId());
+                                    throw new StoreException("Error parsing parent id for "
+                                                             +annotation.getId()
+                                                             +": " + annotation.getParentId(),
+                                                             exception);
                                  }
                               }
                               sql.setInt(12, annotation.getOrdinal());
@@ -5016,8 +5130,12 @@ public class SqlGraphStore
                            }
                            catch(ParseException exception)
                            {
-                              System.err.println("Error parsing word ID for "+annotation.getId()+": " + annotation.getParentId());
-                              throw new StoreException("Error parsing word ID for "+annotation.getId()+": " + annotation.getParentId(), exception);
+                              System.err.println("Error parsing word ID for "
+                                                 +annotation.getId()
+                                                 +": " + annotation.getParentId());
+                              throw new StoreException("Error parsing word ID for "
+                                                       +annotation.getId()
+                                                       +": " + annotation.getParentId(), exception);
                            }
                         }
                         else
@@ -5036,8 +5154,13 @@ public class SqlGraphStore
                            }
                            catch(ParseException exception)
                            {
-                              System.err.println("Error parsing word ID for parent "+annotation.getId()+": " + annotation.getParent().getParentId());
-                              throw new StoreException("Error parsing word ID for parent "+annotation.getId()+": " + annotation.getParent().getParentId(), exception);
+                              System.err.println("Error parsing word ID for parent "
+                                                 +annotation.getId()
+                                                 +": " + annotation.getParent().getParentId());
+                              throw new StoreException("Error parsing word ID for parent "
+                                                       +annotation.getId()
+                                                       +": " + annotation.getParent().getParentId(),
+                                                       exception);
                            }
                            try
                            {
@@ -5052,8 +5175,12 @@ public class SqlGraphStore
                            }
                            catch(ParseException exception)
                            {
-                              System.err.println("Error parsing segment ID for "+annotation.getId()+": " + annotation.getParentId());
-                              throw new StoreException("Error parsing segment ID for "+annotation.getId()+": " + annotation.getParentId(), exception);
+                              System.err.println("Error parsing segment ID for "
+                                                 +annotation.getId()
+                                                 +": " + annotation.getParentId());
+                              throw new StoreException("Error parsing segment ID for "
+                                                       +annotation.getId()+": "
+                                                       + annotation.getParentId(), exception);
                            }
                            if (annotation.getParentId() == null)
                            {
@@ -5068,8 +5195,12 @@ public class SqlGraphStore
                               }
                               catch(ParseException exception)
                               {
-                                 System.err.println("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId());
-                                 throw new StoreException("Error parsing parent id for "+annotation.getId()+": " + annotation.getParentId(), exception);
+                                 System.err.println("Error parsing parent id for "
+                                                    +annotation.getId()
+                                                    +": " + annotation.getParentId());
+                                 throw new StoreException("Error parsing parent id for "
+                                                          +annotation.getId()+": "
+                                                          + annotation.getParentId(), exception);
                               }
                            }
                            sql.setInt(12, annotation.getOrdinal());
@@ -5564,7 +5695,8 @@ public class SqlGraphStore
                catch(ParseException exception)
                {
                   System.err.println("Error parsing ID for episode tag "+annotation.getId());
-                  throw new StoreException("Error parsing ID for episode tag "+annotation.getId(), exception);
+                  throw new StoreException("Error parsing ID for episode tag "+annotation.getId(),
+                                           exception);
                }
                break;
             } // switch on change type
@@ -5573,8 +5705,10 @@ public class SqlGraphStore
       }
       catch(ParseException exception)
       {
-         System.err.println("Error parsing ID for episode attribute: "+annotation.getId() + " on layer " + annotation.getLayerId() + " : " + exception);
-         throw new StoreException("Error parsing ID for episode attribute: "+annotation.getId() + " on layer " + annotation.getLayerId(), exception);
+         System.err.println("Error parsing ID for episode attribute: "+annotation.getId()
+                            + " on layer " + annotation.getLayerId() + " : " + exception);
+         throw new StoreException("Error parsing ID for episode attribute: "+annotation.getId()
+                                  + " on layer " + annotation.getLayerId(), exception);
       }
    } // end of saveEpisodeAnnotationChanges()
    
@@ -6023,7 +6157,8 @@ public class SqlGraphStore
     * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
     * @param mimeType The MIME type of the media, which may include parameters for type
     * conversion, e.g. "text/wav; samplerate=16000".
-    * @return A URL to the given media for the given graph, or null if the given media doesn't exist.
+    * @return A URL to the given media for the given graph, or null if the given media
+    * doesn't exist.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     * @throws GraphNotFoundException If the graph was not found in the store.
@@ -6041,7 +6176,8 @@ public class SqlGraphStore
     * conversion, e.g. "text/wav; samplerate=16000"
     * @param startOffset The start offset of the media sample, or null for the start of the whole
     * recording. 
-    * @param endOffset The end offset of the media sample, or null for the end of the whole recording.
+    * @param endOffset The end offset of the media sample, or null for the end of the
+    * whole recording. 
     * @return A URL to the given media for the given graph, or null if the given media doesn't
     * exist. 
     * @throws StoreException If an error occurs.
@@ -6614,8 +6750,10 @@ public class SqlGraphStore
    
    
    /**
-    * Generates any media files that are not marked "on demand" and for which there are available conversions.
-    * <p>This implementation starts conversion processes, and returns immediately, so new files may not exist immediately after the method returns.
+    * Generates any media files that are not marked "on demand" and for which there are
+    * available conversions.
+    * <p>This implementation starts conversion processes, and returns immediately, so new
+    * files may not exist immediately after the method returns.
     * @param id The graph ID.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
