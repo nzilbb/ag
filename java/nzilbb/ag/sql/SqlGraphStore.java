@@ -2131,7 +2131,9 @@ public class SqlGraphStore
          String layerId = wordBasedQueryMatcher.group(2);
          layer = schema.getLayer(layerId);
          if (layer.getParentId().equals(schema.getWordLayerId()) // word layer
-             || layer.getParent().getParentId().equals(schema.getWordLayerId())) // segment child
+             || (layer.getParent() != null
+                 && layer.getParent().getParentId() != null
+                 && layer.getParent().getParentId().equals(schema.getWordLayerId()))) // segment child
          { // table has word_annotation_id
             String select = "DISTINCT annotation.*, ? AS layer, graph.transcript_id AS graph";
             if (limit.equals("COUNT(*)"))
@@ -2148,6 +2150,52 @@ public class SqlGraphStore
                +" ORDER BY annotation_id"
                + " " + limit;
          } // table has word_annotation_id, so use it and save a JOIN
+         else if ("transcript".equals(layer.get("@class_id")))
+         { // transcript attribute
+            String select = "DISTINCT annotation.annotation_id, annotation.ag_id,"
+               +" annotation.label, annotation.label_status,"
+               +" annotation.annotated_by, annotation.annotated_when,"
+               +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+               +" ? AS layer, graph.transcript_id AS graph";
+            if (limit.equals("COUNT(*)"))
+            {
+               select = "COUNT(*), ? AS layer";
+               limit = "";
+            }
+            
+            sSql = "SELECT " + select
+               +" FROM annotation_transcript annotation"
+               +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
+               +" INNER JOIN annotation_layer_0 word ON word.ag_id = graph.ag_id"
+               +" WHERE word.annotation_id = " + word_annotation_id
+               +" AND layer = ?"
+               + userWhereClauseGraph(true, "graph")
+               +" ORDER BY annotation_id"
+               + " " + limit;
+         } // transcript attribute
+         else if ("speaker".equals(layer.get("@class_id")))
+         { // participant attribute
+            String select = "DISTINCT annotation.annotation_id, annotation.speaker_number,"
+               +" annotation.label, annotation.label_status,"
+               +" annotation.annotated_by, annotation.annotated_when,"
+               +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+               +" ? AS layer, NULL AS graph";
+            if (limit.equals("COUNT(*)"))
+            {
+               select = "COUNT(*), ? AS layer";
+               limit = "";
+            }
+            
+            sSql = "SELECT " + select
+               +" FROM annotation_layer_0 word"
+               +" INNER JOIN annotation_layer_11 turn ON turn.annotation_id = word.turn_annotation_id"
+               +" INNER JOIN annotation_participant annotation ON turn.label = annotation.speaker_number"
+               +" WHERE word.annotation_id = " + word_annotation_id
+               +" AND layer = ?"
+               + userWhereClauseGraph(true, "graph")
+               +" ORDER BY annotation_id"
+               + " " + limit;
+         } // participant attribute
       } // optimization for common word_annotation_id-nased queries may be possible 
 
       if (sSql == null)
@@ -2531,7 +2579,14 @@ public class SqlGraphStore
       System.out.println("SQL: " + sSql);
       PreparedStatement sql = getConnection().prepareStatement(sSql);
       sql.setString(1, layer.getId());
-      sql.setInt(2, ((Integer)layer.get("@layer_id")).intValue());
+      if (layer.containsKey("@layer_id"))
+      {
+         sql.setInt(2, ((Integer)layer.get("@layer_id")).intValue());
+      }
+      else if (layer.containsKey("@attribute"))
+      {
+         sql.setString(2, (String)layer.get("@attribute"));
+      }
       return sql;
    } // end of annotationMatchSql()
 
@@ -2659,8 +2714,9 @@ public class SqlGraphStore
                layer = getSchema().getLayer(rsAnnotation.getString("layer"));
             }
             if ("F".equals(layer.get("@scope")) // freeform layer
-                || Integer.valueOf(11).equals(layer.get("@layer_id")) // turn layer
-                || Integer.valueOf(12).equals(layer.get("@layer_id"))) // utterance layer
+                || layer.getId().equals(getSchema().getUtteranceLayerId())
+                || layer.getId().equals(getSchema().getTurnLayerId())
+                || "transcript".equals(layer.get("@class_id"))) // transcript attribute
             { // we need graph for annotationFromResult	       
                if (graph == null || !graph.getId().equals(rsAnnotation.getInt("graph")))
                { // graph can change
@@ -2676,8 +2732,6 @@ public class SqlGraphStore
                } // need graph
             } // freeform/turn/utterance
             Annotation annotation = annotationFromResult(rsAnnotation, layer, graph);
-            // annotation.setStart(anchorFromResult(rsAnnotation, "start_"));
-            // annotation.setEnd(anchorFromResult(rsAnnotation, "end_"));
             if (layer.getId().equals(getSchema().getUtteranceLayerId())
                 || layer.getId().equals(getSchema().getTurnLayerId()))
             {
@@ -4087,119 +4141,165 @@ public class SqlGraphStore
    protected Annotation annotationFromResult(ResultSet rsAnnotation, Layer layer, Graph graph)
       throws SQLException
    {
-      int iLayerId = ((Integer)layer.get("@layer_id")).intValue();
-      String scope = (String)layer.get("@scope");
-      Annotation annotation = new Annotation();
-      Object[] annotationIdParts = {
-         scope.toLowerCase(), Integer.valueOf(iLayerId), 
-         Long.valueOf(rsAnnotation.getLong("annotation_id"))};
-      if (scope.equalsIgnoreCase(SqlConstants.SCOPE_FREEFORM)) annotationIdParts[0] = "";
-      annotation.setId(fmtAnnotationId.format(annotationIdParts));
-      String turnParentId = null;
-      if (iLayerId == SqlConstants.LAYER_TURN 
-          || iLayerId == SqlConstants.LAYER_UTTERANCE) // turn or utterance
-      { // convert speaker_number label into participant name
-         turnParentId = "m_-2_"+rsAnnotation.getString("label");
-         Annotation participant = null;
-         if (graph != null)
-         {
-            participant = graph.getAnnotation(turnParentId);
-         }
-         if (participant != null)
-         {
-            annotation.setLabel(participant.getLabel());
+      if (layer.containsKey("@layer_id"))
+      { // it's a normal temporal layer
+         int iLayerId = ((Integer)layer.get("@layer_id")).intValue();
+         String scope = (String)layer.get("@scope");
+         Annotation annotation = new Annotation();
+         Object[] annotationIdParts = {
+            scope.toLowerCase(), Integer.valueOf(iLayerId), 
+            Long.valueOf(rsAnnotation.getLong("annotation_id"))};
+         if (scope.equalsIgnoreCase(SqlConstants.SCOPE_FREEFORM)) annotationIdParts[0] = "";
+         annotation.setId(fmtAnnotationId.format(annotationIdParts));
+         String turnParentId = null;
+         if (iLayerId == SqlConstants.LAYER_TURN 
+             || iLayerId == SqlConstants.LAYER_UTTERANCE) // turn or utterance
+         { // convert speaker_number label into participant name
+            turnParentId = "m_-2_"+rsAnnotation.getString("label");
+            Annotation participant = null;
+            if (graph != null)
+            {
+               participant = graph.getAnnotation(turnParentId);
+            }
+            if (participant != null)
+            {
+               annotation.setLabel(participant.getLabel());
+            }
+            else
+            {
+               annotation.setLabel(rsAnnotation.getString("label"));
+            }
          }
          else
          {
             annotation.setLabel(rsAnnotation.getString("label"));
          }
-      }
-      else
-      {
-         annotation.setLabel(rsAnnotation.getString("label"));
-      }
-      annotation.setConfidence(Integer.valueOf(rsAnnotation.getInt("label_status")));
-      annotation.setLayerId(layer.getId());
-      
-      // parent:
-      if (iLayerId == SqlConstants.LAYER_SEGMENT) // segment
-      {
-         annotationIdParts[0] = SqlConstants.SCOPE_WORD;
-         annotationIdParts[1] = Integer.valueOf(SqlConstants.LAYER_TRANSCRIPTION); // transcript word
-         annotationIdParts[2] = Long.valueOf(rsAnnotation.getLong("word_annotation_id"));
-         annotation.setParentId(fmtAnnotationId.format(annotationIdParts));
-         annotation.setOrdinal(rsAnnotation.getInt("ordinal_in_word"));
-      }
-      else if (iLayerId == SqlConstants.LAYER_TRANSCRIPTION) // transcription word
-      {
-         annotationIdParts[0] = SqlConstants.SCOPE_META;
-         annotationIdParts[1] = Integer.valueOf(SqlConstants.LAYER_TURN); // turn
-         annotationIdParts[2] = Long.valueOf(rsAnnotation.getLong("turn_annotation_id"));
-         annotation.setParentId(fmtAnnotationId.format(annotationIdParts));
-         annotation.setOrdinal(rsAnnotation.getInt("ordinal_in_turn"));
-      }
-      else if (iLayerId == SqlConstants.LAYER_UTTERANCE) // utterance
-      {
-         annotationIdParts[0] = SqlConstants.SCOPE_META;
-         annotationIdParts[1] = Integer.valueOf(SqlConstants.LAYER_TURN); // turn
-         annotationIdParts[2] = Long.valueOf(rsAnnotation.getLong("turn_annotation_id"));
-         annotation.setParentId(fmtAnnotationId.format(annotationIdParts));
-         annotation.setOrdinal(rsAnnotation.getInt("ordinal"));
-      }
-      else if (iLayerId == SqlConstants.LAYER_TURN) // turn
-      {
-         annotation.setParentId(turnParentId);
-         annotation.setOrdinal(rsAnnotation.getInt("ordinal"));
-      }
-      else if (scope.equalsIgnoreCase(SqlConstants.SCOPE_SEGMENT)) // segment scope
-      {
-         annotationIdParts[0] = SqlConstants.SCOPE_SEGMENT;
-         annotationIdParts[1] = Integer.valueOf(SqlConstants.LAYER_SEGMENT); // segment
-         annotationIdParts[2] = Long.valueOf(rsAnnotation.getLong("segment_annotation_id"));
-         annotation.setParentId(fmtAnnotationId.format(annotationIdParts));
-         annotation.setOrdinal(rsAnnotation.getInt("ordinal"));
-      } // segment scope
-      else if (scope.equalsIgnoreCase(SqlConstants.SCOPE_WORD)) // word scope
-      {
-         annotationIdParts[0] = SqlConstants.SCOPE_WORD;
-         annotationIdParts[1] = Integer.valueOf(SqlConstants.LAYER_TRANSCRIPTION); // transcription word
-         annotationIdParts[2] = Long.valueOf(rsAnnotation.getLong("word_annotation_id"));
-         annotation.setParentId(fmtAnnotationId.format(annotationIdParts));
-         annotation.setOrdinal(rsAnnotation.getInt("ordinal"));
-      } // word scope
-      else if (scope.equalsIgnoreCase(SqlConstants.SCOPE_META)) // meta scope
-      {
-         annotationIdParts[0] = SqlConstants.SCOPE_META;
-         annotationIdParts[1] = Integer.valueOf(SqlConstants.LAYER_TURN); // turn
-         annotationIdParts[2] = Long.valueOf(rsAnnotation.getLong("turn_annotation_id"));
-         annotation.setParentId(fmtAnnotationId.format(annotationIdParts));
-         annotation.setOrdinal(rsAnnotation.getInt("ordinal"));
-      } // meta scope
-      else // freeform scope
-      {
+         annotation.setConfidence(Integer.valueOf(rsAnnotation.getInt("label_status")));
+         annotation.setLayerId(layer.getId());
+         
+         // parent:
+         if (iLayerId == SqlConstants.LAYER_SEGMENT) // segment
+         {
+            annotationIdParts[0] = SqlConstants.SCOPE_WORD;
+            annotationIdParts[1] = Integer.valueOf(SqlConstants.LAYER_TRANSCRIPTION); // transcript word
+            annotationIdParts[2] = Long.valueOf(rsAnnotation.getLong("word_annotation_id"));
+            annotation.setParentId(fmtAnnotationId.format(annotationIdParts));
+            annotation.setOrdinal(rsAnnotation.getInt("ordinal_in_word"));
+         }
+         else if (iLayerId == SqlConstants.LAYER_TRANSCRIPTION) // transcription word
+         {
+            annotationIdParts[0] = SqlConstants.SCOPE_META;
+            annotationIdParts[1] = Integer.valueOf(SqlConstants.LAYER_TURN); // turn
+            annotationIdParts[2] = Long.valueOf(rsAnnotation.getLong("turn_annotation_id"));
+            annotation.setParentId(fmtAnnotationId.format(annotationIdParts));
+            annotation.setOrdinal(rsAnnotation.getInt("ordinal_in_turn"));
+         }
+         else if (iLayerId == SqlConstants.LAYER_UTTERANCE) // utterance
+         {
+            annotationIdParts[0] = SqlConstants.SCOPE_META;
+            annotationIdParts[1] = Integer.valueOf(SqlConstants.LAYER_TURN); // turn
+            annotationIdParts[2] = Long.valueOf(rsAnnotation.getLong("turn_annotation_id"));
+            annotation.setParentId(fmtAnnotationId.format(annotationIdParts));
+            annotation.setOrdinal(rsAnnotation.getInt("ordinal"));
+         }
+         else if (iLayerId == SqlConstants.LAYER_TURN) // turn
+         {
+            annotation.setParentId(turnParentId);
+            annotation.setOrdinal(rsAnnotation.getInt("ordinal"));
+         }
+         else if (scope.equalsIgnoreCase(SqlConstants.SCOPE_SEGMENT)) // segment scope
+         {
+            annotationIdParts[0] = SqlConstants.SCOPE_SEGMENT;
+            annotationIdParts[1] = Integer.valueOf(SqlConstants.LAYER_SEGMENT); // segment
+            annotationIdParts[2] = Long.valueOf(rsAnnotation.getLong("segment_annotation_id"));
+            annotation.setParentId(fmtAnnotationId.format(annotationIdParts));
+            annotation.setOrdinal(rsAnnotation.getInt("ordinal"));
+         } // segment scope
+         else if (scope.equalsIgnoreCase(SqlConstants.SCOPE_WORD)) // word scope
+         {
+            annotationIdParts[0] = SqlConstants.SCOPE_WORD;
+            annotationIdParts[1] = Integer.valueOf(SqlConstants.LAYER_TRANSCRIPTION); // transcription word
+            annotationIdParts[2] = Long.valueOf(rsAnnotation.getLong("word_annotation_id"));
+            annotation.setParentId(fmtAnnotationId.format(annotationIdParts));
+            annotation.setOrdinal(rsAnnotation.getInt("ordinal"));
+         } // word scope
+         else if (scope.equalsIgnoreCase(SqlConstants.SCOPE_META)) // meta scope
+         {
+            annotationIdParts[0] = SqlConstants.SCOPE_META;
+            annotationIdParts[1] = Integer.valueOf(SqlConstants.LAYER_TURN); // turn
+            annotationIdParts[2] = Long.valueOf(rsAnnotation.getLong("turn_annotation_id"));
+            annotation.setParentId(fmtAnnotationId.format(annotationIdParts));
+            annotation.setOrdinal(rsAnnotation.getInt("ordinal"));
+         } // meta scope
+         else // freeform scope
+         {
+            if (graph != null)
+            {
+               annotation.setParentId(graph.getId());
+            }
+            annotation.setOrdinal(rsAnnotation.getInt("ordinal"));
+         } // freeform scope
+
+         if (rsAnnotation.getString("annotated_by") != null)
+         {
+            annotation.setAnnotator(rsAnnotation.getString("annotated_by"));
+         }
+         if (rsAnnotation.getTimestamp("annotated_when") != null)
+         {
+            annotation.setWhen(rsAnnotation.getTimestamp("annotated_when"));
+         }
+         
+         // anchor IDs
+         Object[] anchorIdParts = { Long.valueOf(rsAnnotation.getLong("start_anchor_id"))};
+         annotation.setStartId(fmtAnchorId.format(anchorIdParts));
+         anchorIdParts[0] = Long.valueOf(rsAnnotation.getLong("end_anchor_id"));
+         annotation.setEndId(fmtAnchorId.format(anchorIdParts));
+		  
+         return annotation;
+      } // normal temporal annotation
+      else if ("transcript".equals(layer.get("@class_id")))
+      { // transcript attribute
+         Object[] annotationIdParts = {
+            layer.get("@attribute"), Integer.valueOf(rsAnnotation.getInt("annotation_id"))};
+         Annotation attribute = new Annotation(
+            fmtTranscriptAttributeId.format(annotationIdParts), 
+            rsAnnotation.getString("label"), layer.getId());
+         if (rsAnnotation.getString("annotated_by") != null)
+         {
+            attribute.setAnnotator(rsAnnotation.getString("annotated_by"));
+         }
+         if (rsAnnotation.getTimestamp("annotated_when") != null)
+         {
+            attribute.setWhen(rsAnnotation.getTimestamp("annotated_when"));
+         }
          if (graph != null)
          {
-            annotation.setParentId(graph.getId());
+            attribute.setParentId(graph.getId());
          }
-         annotation.setOrdinal(rsAnnotation.getInt("ordinal"));
-      } // freeform scope
-
-      if (rsAnnotation.getString("annotated_by") != null)
-      {
-         annotation.setAnnotator(rsAnnotation.getString("annotated_by"));
-      }
-      if (rsAnnotation.getTimestamp("annotated_when") != null)
-      {
-         annotation.setWhen(rsAnnotation.getTimestamp("annotated_when"));
-      }
-
-      // anchor IDs
-      Object[] anchorIdParts = { Long.valueOf(rsAnnotation.getLong("start_anchor_id"))};
-      annotation.setStartId(fmtAnchorId.format(anchorIdParts));
-      anchorIdParts[0] = Long.valueOf(rsAnnotation.getLong("end_anchor_id"));
-      annotation.setEndId(fmtAnchorId.format(anchorIdParts));
-		  
-      return annotation;
+         return attribute;
+      } // transcript attribute
+      else if ("speaker".equals(layer.get("@class_id")))
+      { // participant attribute
+         Object[] annotationIdParts = {
+            layer.get("@attribute"), Integer.valueOf(rsAnnotation.getInt("annotation_id"))};
+         Annotation attribute = new Annotation(
+            fmtParticipantAttributeId.format(annotationIdParts), 
+            rsAnnotation.getString("label"), layer.getId());
+         if (rsAnnotation.getString("annotated_by") != null)
+         {
+            attribute.setAnnotator(rsAnnotation.getString("annotated_by"));
+         }
+         if (rsAnnotation.getTimestamp("annotated_when") != null)
+         {
+            attribute.setWhen(rsAnnotation.getTimestamp("annotated_when"));
+         }
+         Object[] parentAnnotationIdParts = {
+            Integer.valueOf(-2), rsAnnotation.getString("speaker_number")};         
+         attribute.setParentId(fmtMetaAnnotationId.format(parentAnnotationIdParts));
+         return attribute;
+      } // transcript attribute
+      
+      return null; // could not identify the annotation type
    } // end of annotationFromResult()
 
    /**
