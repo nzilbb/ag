@@ -2826,7 +2826,6 @@ public class SqlGraphStore
             }
          } // next layer
       }
-      System.out.println("getMatchAnnotations " + matchId + " target layer " + target_layer_id + " = " + targetLayer);
       
       // we'll create a list of prepared queries, one for each layerId, corresponding to the
       // method for getting that layer's annotations.
@@ -2846,20 +2845,30 @@ public class SqlGraphStore
          {
             Layer layer = schema.getLayer(layerId);
             layers.add(layer);
-            System.out.println("layer " + layer);
             if (targetLayer.containsKey("@layer_id") // target is segment
                 && targetLayer.get("@layer_id").equals(Integer.valueOf(SqlConstants.LAYER_SEGMENT))
                 && (layer.getParentId().equals(targetLayer.getId()) // segment child
                     || layer.getId().equals(targetLayer.getId())))  // or the segment layer itself
             { // target is segment layer and layer is segment child
-               System.out.println("layer table has segment_annotation_id and target is segment");
                Integer layer_id = (Integer)layer.get("@layer_id");
                String sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph"
                   +" FROM annotation_layer_"+layer_id+" annotation"
                   +" WHERE segment_annotation_id = ?"
                   +" ORDER BY annotation.ordinal, annotation.annotation_id"
                   +" LIMIT 0, " + annotationsPerLayer;
-               System.out.println(sql);
+               if (targetOffset != 0)
+               {
+                  sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph"
+                     +" FROM annotation_layer_"+layer_id+" annotation"
+                     +" INNER JOIN annotation_layer_"+targetLayer.get("@layer_id")+" target"
+                     +" ON annotation.segment_annotation_id = target.annotation_id"
+                     +" INNER JOIN annotation_layer_"+targetLayer.get("@layer_id")+" token"
+                     +" ON target.word_annotation_id = token.word_annotation_id"
+                     +" AND target.ordinal_in_word = token.ordinal_in_word + "+targetOffset
+                     +" WHERE token.annotation_id = ?"
+                     +" ORDER BY annotation.ordinal, annotation.annotation_id"
+                     +" LIMIT 0, " + annotationsPerLayer;
+               }
                Object[] groups = { layer.getId(), target_annotation_id_group };
                queries.add(getConnection().prepareStatement(sql));
                parameterGroups.add(groups);
@@ -2867,9 +2876,7 @@ public class SqlGraphStore
             else if (layer.isAncestor(schema.getWordLayerId())
                 || layer.getId().equals(schema.getWordLayerId())) // the transcript layer itself
             { // layer table has word_annotation_id            
-               System.out.println("layer table has word_annotation_id");
                Integer layer_id = (Integer)layer.get("@layer_id");
-               // TODO handle target = segment and layer = segment layer
                if (targetLayer.getId().equals(schema.getWordLayerId()))
                { // target is transcript layer
                   String sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph"
@@ -2877,7 +2884,18 @@ public class SqlGraphStore
                      +" WHERE word_annotation_id = ?"
                      +" ORDER BY annotation.ordinal, annotation.annotation_id"
                      +" LIMIT 0, " + annotationsPerLayer;
-                  System.out.println(sql);
+                  if (targetOffset != 0
+                      && targetLayer.getId().equals(schema.getWordLayerId()))
+                  { // offset word
+                     sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph"
+                        +" FROM annotation_layer_"+layer_id+" annotation"
+                        +" INNER JOIN annotation_layer_"+layer_id+" token"
+                        +" ON annotation.turn_annotation_id = token.turn_annotation_id"
+                        +" AND annotation.ordinal_in_turn = token.ordinal_in_turn + " + targetOffset
+                        +" WHERE token.word_annotation_id = ?"
+                        +" ORDER BY annotation.ordinal, annotation.annotation_id"
+                        +" LIMIT 0, " + annotationsPerLayer;
+                  } // offset word
                   Object[] groups = { layer.getId(), target_annotation_id_group };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
@@ -2891,7 +2909,20 @@ public class SqlGraphStore
                      +" WHERE target.annotation_id = ?"
                      +" ORDER BY annotation.ordinal, annotation.annotation_id"
                      +" LIMIT 0, " + annotationsPerLayer;
-                  System.out.println(sql);
+                  if (targetOffset != 0
+                      && SqlConstants.SCOPE_WORD.equalsIgnoreCase((String)targetLayer.get("@scope")))
+                  { // offset word
+                     sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph"
+                        +" FROM annotation_layer_"+layer_id+" annotation"
+                        +" INNER JOIN annotation_layer_"+SqlConstants.LAYER_TRANSCRIPTION+" target"
+                        +" ON annotation.word_annotation_id = target.annotation_id"
+                        +" INNER JOIN annotation_layer_"+targetLayer.get("@layer_id")+" token"
+                        +" ON target.turn_annotation_id = token.turn_annotation_id"
+                        +" AND target.ordinal_in_turn = token.ordinal_in_turn + " + targetOffset
+                        +" WHERE token.annotation_id = ?"
+                        +" ORDER BY annotation.ordinal, annotation.annotation_id"
+                        +" LIMIT 0, " + annotationsPerLayer;
+                  } // offset word
                   Object[] groups = { layer.getId(), target_annotation_id_group };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
@@ -2915,7 +2946,6 @@ public class SqlGraphStore
                   +" AND layer = ?"
                   +" ORDER BY annotation_id"
                   +" LIMIT 0, " + annotationsPerLayer;
-               System.out.println(sql);
                Object[] groups = {
                   layer.getId(), ag_id_group, layer.get("@attribute") };
                queries.add(getConnection().prepareStatement(sql));
@@ -2933,7 +2963,6 @@ public class SqlGraphStore
                   +" AND layer = ?"
                   +" ORDER BY annotation_id"
                   +" LIMIT 0, " + annotationsPerLayer;
-               System.out.println(sql);
                Object[] groups = {
                   layer.getId(), participant_speaker_number_group, layer.get("@attribute") };
                queries.add(getConnection().prepareStatement(sql));
@@ -2949,7 +2978,6 @@ public class SqlGraphStore
                   +" ? AS layer, NULL AS graph"
                   +" FROM speaker annotation"
                   +" WHERE annotation.speaker_number = ?";
-               System.out.println(sql);
                Object[] groups = {
                   layer.getId(), participant_speaker_number_group };
                queries.add(getConnection().prepareStatement(sql));
@@ -2966,7 +2994,6 @@ public class SqlGraphStore
                   +" FROM transcript graph"
                   +" LEFT OUTER JOIN corpus c ON c.corpus_name = graph.corpus_name"
                   +" WHERE graph.ag_id = ?";
-               System.out.println(sql);
                Object[] groups = {
                   layer.getId(), ag_id_group };
                queries.add(getConnection().prepareStatement(sql));
@@ -2983,14 +3010,12 @@ public class SqlGraphStore
                   +" FROM transcript graph"
                   +" INNER JOIN transcript_family e ON e.family_id = graph.family_id"
                   +" WHERE graph.ag_id = ?";
-                  System.out.println(sql);
                Object[] groups = { layer.getId(), ag_id_group };
                queries.add(getConnection().prepareStatement(sql));
                parameterGroups.add(groups);
             } // episode
             else if (layer.getId().equals(schema.getTurnLayerId()))
             { // turn
-               System.out.println("turn layer");
                Integer layer_id = (Integer)layer.get("@layer_id");
                if (targetLayer.isAncestor(schema.getTurnLayerId()))
                { // target table has turn_annotation_id field
@@ -3009,7 +3034,6 @@ public class SqlGraphStore
                      +" WHERE target.annotation_id = ?"
                      +" ORDER BY annotation.annotation_id"
                      +" LIMIT 1"; // there's only one turn
-                  System.out.println(sql);
                   Object[] groups = { layer.getId(), target_annotation_id_group };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
@@ -3023,7 +3047,6 @@ public class SqlGraphStore
             } // turn
             else if (layer.getId().equals(schema.getUtteranceLayerId()))
             { // utterance
-               System.out.println("utterance layer");
                Integer layer_id = (Integer)layer.get("@layer_id");
                if (targetLayer.isAncestor(schema.getTurnLayerId()))
                { // target table has turn_annotation_id field
@@ -3057,7 +3080,49 @@ public class SqlGraphStore
                      +" AND target_start.offset < annotation_end.offset"
                      +" ORDER BY annotation.annotation_id"
                      +" LIMIT 1"; // there's only one utterance
-                  System.out.println(sql);
+                  if (targetOffset != 0
+                      && SqlConstants.SCOPE_WORD.equalsIgnoreCase((String)targetLayer.get("@scope")))
+                  { // offset word
+                     sql = "SELECT DISTINCT annotation.annotation_id,"
+                        +" annotation.start_anchor_id, annotation.end_anchor_id,"
+                        +" annotation.label_status, annotation.ordinal,"
+                        +" annotation.annotated_by, annotation.annotated_when,"
+                        +" speaker.name AS label,"
+                        +" annotation.turn_annotation_id,"
+                        +" ? AS layer,"
+                        +" annotation.ag_id AS graph,"
+                        // these required for ORDER BY
+                        +" annotation_start.offset AS annotation_start_offset,"
+                        +" annotation_end.offset - annotation_start.offset AS annotation_length"
+                        +" FROM annotation_layer_"+layer_id+" annotation"
+                        // same turn as target
+                        +" INNER JOIN annotation_layer_"+SqlConstants.LAYER_TRANSCRIPTION+" target"
+                        +" ON annotation.turn_annotation_id = target.turn_annotation_id"
+                        
+                        // token is the original target before applying offset
+                        +" INNER JOIN annotation_layer_"+targetLayer.get("@layer_id")+" token"
+                        +" ON target.turn_annotation_id = token.turn_annotation_id"
+                        +" AND target.ordinal_in_turn = token.ordinal_in_turn + " + targetOffset
+                        
+                        +" INNER JOIN speaker ON speaker.speaker_number = annotation.label"
+                        // annotation anchors
+                        +" INNER JOIN anchor annotation_start"
+                        +" ON annotation.start_anchor_id = annotation_start.anchor_id"
+                        +" INNER JOIN anchor annotation_end"
+                        +" ON annotation.end_anchor_id = annotation_end.anchor_id"
+                        // target anchors
+                        +" INNER JOIN anchor target_start"
+                        +" ON target.start_anchor_id = target_start.anchor_id"
+                        
+                        // use token.annotation_id instead of target.annotation_id
+                        +" WHERE token.annotation_id = ?"
+                        
+                        // annotation includes target start time
+                        +" AND annotation_start.offset <= target_start.offset"
+                        +" AND target_start.offset < annotation_end.offset"
+                        +" ORDER BY annotation.annotation_id"
+                        +" LIMIT 1"; // there's only one utterance
+                  } // offset word
                   Object[] groups = { layer.getId(), target_annotation_id_group };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
@@ -3071,7 +3136,6 @@ public class SqlGraphStore
             } // utterance
             else if (layer.getParentId().equals(schema.getTurnLayerId()))
             { // meta layer
-               System.out.println("meta layer");
                Integer layer_id = (Integer)layer.get("@layer_id");
                if (targetLayer.isAncestor(schema.getTurnLayerId()))
                { // target table has turn_annotation_id field
@@ -3100,7 +3164,43 @@ public class SqlGraphStore
                      +" annotation_end.offset - annotation_start.offset," // then shortest first
                      +" annotation.annotation_id"
                      +" LIMIT 0, " + annotationsPerLayer;
-                  System.out.println(sql);
+                  if (targetOffset != 0
+                      && SqlConstants.SCOPE_WORD.equalsIgnoreCase((String)targetLayer.get("@scope")))
+                  { // offset word
+                     sql = "SELECT DISTINCT annotation.*, ? AS layer,"
+                        +" annotation.ag_id AS graph,"
+                        // these required for ORDER BY
+                        +" annotation_start.offset AS annotation_start_offset,"
+                        +" annotation_end.offset - annotation_start.offset AS annotation_length"
+                        +" FROM annotation_layer_"+layer_id+" annotation"
+                        // same turn as target
+                        +" INNER JOIN annotation_layer_"+SqlConstants.LAYER_TRANSCRIPTION+" target"
+                        +" ON annotation.turn_annotation_id = target.turn_annotation_id"
+                        
+                        // token is the original target before applying offset
+                        +" INNER JOIN annotation_layer_"+targetLayer.get("@layer_id")+" token"
+                        +" ON target.turn_annotation_id = token.turn_annotation_id"
+                        +" AND target.ordinal_in_turn = token.ordinal_in_turn + " + targetOffset
+                        
+                        // annotation anchors
+                        +" INNER JOIN anchor annotation_start"
+                        +" ON annotation.start_anchor_id = annotation_start.anchor_id"
+                        +" INNER JOIN anchor annotation_end"
+                        +" ON annotation.end_anchor_id = annotation_end.anchor_id"
+                        // target anchors
+                        +" INNER JOIN anchor target_start"
+                        +" ON target.start_anchor_id = target_start.anchor_id"
+
+                        // use token.annotation_id instead of target.annotation_id
+                        +" WHERE token.annotation_id = ?"
+                        // annotation includes target start time
+                        +" AND annotation_start.offset <= target_start.offset"
+                        +" AND target_start.offset < annotation_end.offset"
+                        +" ORDER BY annotation_start.offset," // earliest first
+                        +" annotation_end.offset - annotation_start.offset," // then shortest first
+                        +" annotation.annotation_id"
+                        +" LIMIT 0, " + annotationsPerLayer;
+                  } // offset word
                   Object[] groups = { layer.getId(), target_annotation_id_group };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
@@ -3116,7 +3216,6 @@ public class SqlGraphStore
                       || layer.getParentId() == null)
                      && layer.getAlignment() != Constants.ALIGNMENT_NONE)
             { // freeform layer
-               System.out.println("freeform layer");
                Integer layer_id = (Integer)layer.get("@layer_id");
                String sql = "SELECT DISTINCT annotation.*, ? AS layer,"
                   +" annotation.ag_id AS graph,"
@@ -3143,7 +3242,43 @@ public class SqlGraphStore
                   +" annotation_end.offset - annotation_start.offset," // then shortest first
                   +" annotation.annotation_id"
                   +" LIMIT 0, " + annotationsPerLayer;
-               System.out.println(sql);
+               if (targetOffset != 0
+                   && SqlConstants.SCOPE_WORD.equalsIgnoreCase((String)targetLayer.get("@scope")))
+               { // offset word
+                  sql = "SELECT DISTINCT annotation.*, ? AS layer,"
+                     +" annotation.ag_id AS graph,"
+                     // these required for ORDER BY
+                     +" annotation_start.offset AS annotation_start_offset,"
+                     +" annotation_end.offset - annotation_start.offset AS annotation_length"
+                     +" FROM annotation_layer_"+layer_id+" annotation"
+                     // same graph as target
+                     +" INNER JOIN annotation_layer_"+SqlConstants.LAYER_TRANSCRIPTION+" target"
+                     +" ON annotation.ag_id = target.ag_id"
+                        
+                     // token is the original target before applying offset
+                     +" INNER JOIN annotation_layer_"+targetLayer.get("@layer_id")+" token"
+                     +" ON target.turn_annotation_id = token.turn_annotation_id"
+                     +" AND target.ordinal_in_turn = token.ordinal_in_turn + " + targetOffset
+                     
+                     // annotation anchors
+                     +" INNER JOIN anchor annotation_start"
+                     +" ON annotation.start_anchor_id = annotation_start.anchor_id"
+                     +" INNER JOIN anchor annotation_end"
+                     +" ON annotation.end_anchor_id = annotation_end.anchor_id"
+                     // target anchors
+                     +" INNER JOIN anchor target_start"
+                     +" ON target.start_anchor_id = target_start.anchor_id"
+
+                     // use token.annotation_id instead of target.annotation_id
+                     +" WHERE token.annotation_id = ?"
+                     // annotation includes target start time
+                     +" AND annotation_start.offset <= target_start.offset"
+                     +" AND target_start.offset < annotation_end.offset"
+                     +" ORDER BY annotation_start.offset," // earliest first
+                     +" annotation_end.offset - annotation_start.offset," // then shortest first
+                     +" annotation.annotation_id"
+                     +" LIMIT 0, " + annotationsPerLayer;
+               } // offset word
                Object[] groups = { layer.getId(), target_annotation_id_group };
                queries.add(getConnection().prepareStatement(sql));
                parameterGroups.add(groups);
@@ -3159,7 +3294,6 @@ public class SqlGraphStore
                   +" FROM transcript graph"
                   +" INNER JOIN transcript_type ON transcript_type.type_id = graph.type_id"
                   +" WHERE graph.ag_id = ?";
-                  System.out.println(sql);
                Object[] groups = { layer.getId(), ag_id_group };
                queries.add(getConnection().prepareStatement(sql));
                parameterGroups.add(groups);
@@ -3225,7 +3359,6 @@ public class SqlGraphStore
                      {
                         value = idMatcher.group((Integer)parameter);
                      }
-                     System.out.println("p " + p + " = " + value);
                      sql.setString(p++, value);
                   } // next parameter
                   
@@ -3233,13 +3366,12 @@ public class SqlGraphStore
                   ResultSet rs = sql.executeQuery();
                   while (rs.next()) // there won't be more than annotationsPerLayer results
                   {
-                     System.out.println("row " + rs.getString("label"));
                      annotations[a++] = annotationFromResult(rs, layer, null);
                   }
                }
                catch (SQLException sqlX)
                {
-                  System.out.println("Query error for layer: " + layerIds[l] + ": " + sqlX);
+                  System.err.println("Query error for layer: " + layerIds[l] + ": " + sqlX);
                   if (firstRow) // give feedback about the failure reason (once)
                   {
                      annotations[a] = new Annotation(
