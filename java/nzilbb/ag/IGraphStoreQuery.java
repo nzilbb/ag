@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2018 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -21,7 +21,9 @@
 //
 package nzilbb.ag;
 
+import java.util.Iterator;
 import java.util.Vector;
+import java.util.function.Consumer;
 import nzilbb.util.MonitorableSeries;
 
 /**
@@ -430,7 +432,28 @@ public interface IGraphStoreQuery
     */
    public Annotation[] getAnnotations(String id, String layerId, Integer pageLength, Integer pageNumber)
       throws StoreException, PermissionException, GraphNotFoundException;
-
+   
+   /**
+    * Gets the annotations on given layers for a set of match IDs.
+    * @param matchIds An iterator that supplies match IDs - these may be the contents of
+    * the MatchId column in exported search results, token URLs, or annotation IDs. 
+    * @param targetOffset Which token to get the annotations of; 0 means the match target
+    * itself, 1 means the token after the target, -1 means the token before the target, etc. 
+    * @param layerIds The layer IDs of the layers to get.
+    * @param annotationsPerLayer The number of annotations per layer to get; if there's a
+    * smaller number of annotations available, the unfilled array elements will be null.
+    * @param resultConsumer A consumer for handling the resulting
+    * annotations. Consumer.accept() will be invoked once for each element returned by the
+    * <var>matchIds</var> iterator, with an array of {@link Annotation} objects. The size
+    * of this array will be <var>layerIds.length</var> * <var>annotationsPerLayer</var>,
+    * and will be filled in with the available annotations for each layer; when
+    * annotations are not available, null is supplied.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public void getMatchAnnotations(Iterator<String> matchIds, int targetOffset, String[] layerIds, int annotationsPerLayer, Consumer<Annotation[]> consumer)
+      throws StoreException, PermissionException;
+   
    /**
     * Gets the given anchors in the given graph.
     * @param id The ID of the graph.
