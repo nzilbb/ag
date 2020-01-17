@@ -437,9 +437,9 @@ public interface IGraphStoreQuery
     * Gets the annotations on given layers for a set of match IDs.
     * @param matchIds An iterator that supplies match IDs - these may be the contents of
     * the MatchId column in exported search results, token URLs, or annotation IDs. 
+    * @param layerIds The layer IDs of the layers to get.
     * @param targetOffset Which token to get the annotations of; 0 means the match target
     * itself, 1 means the token after the target, -1 means the token before the target, etc. 
-    * @param layerIds The layer IDs of the layers to get.
     * @param annotationsPerLayer The number of annotations per layer to get; if there's a
     * smaller number of annotations available, the unfilled array elements will be null.
     * @param resultConsumer A consumer for handling the resulting
@@ -451,7 +451,7 @@ public interface IGraphStoreQuery
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public void getMatchAnnotations(Iterator<String> matchIds, int targetOffset, String[] layerIds, int annotationsPerLayer, Consumer<Annotation[]> consumer)
+   public void getMatchAnnotations(Iterator<String> matchIds, String[] layerIds, int targetOffset, int annotationsPerLayer, Consumer<Annotation[]> consumer)
       throws StoreException, PermissionException;
    
    /**
