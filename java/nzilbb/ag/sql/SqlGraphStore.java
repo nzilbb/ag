@@ -2788,8 +2788,10 @@ public class SqlGraphStore
       // we'll assume that the first matchId is representative of the rest;
       // specifically, that the target layer is the same for all matches.
       // TODO remove the assumption that the first target layer is the same as the rest
-      
-      // now assume matchIds are of the form:
+ 
+      // we'll need a pattern to extract the parts of the ID
+
+      // first try the normal MatchId pattern, of the form:
       // g_3;em_12_2671;n_19877-n_19939;p_4;#=es_1_17;prefix=0001-;[0]=ew_0_12574
       // where:
       // - g_3 identifies the graph
@@ -2797,11 +2799,6 @@ public class SqlGraphStore
       // - p_4 identifies the participant
       // - #=es_1_17 identifies the target
       // - [0]=ew_0_12574 identifies the first word in the match
-      
-      // TODO handle URL matchIds
-      // TODO handle UID matchIds, in particular utterance UIDs and word UIDs
-
-      // we'll need a pattern to extract the parts of the ID
       Pattern matchIdPattern = Pattern.compile(
          "g_(\\d+);em_12_(\\d+);n_\\d+-n_\\d+;p_(\\d+);#=e.?_(\\d+)_(\\d+);.*;\\[0\\]=ew_0_(\\d+)");
       // so groups are:
@@ -2812,8 +2809,46 @@ public class SqlGraphStore
       Integer target_annotation_id_group = 5;
       Integer first_word_annotation_id_group = 6;
       Matcher idMatcher = matchIdPattern.matcher(matchId);
-      if (!idMatcher.matches()) throw new StoreException("Malformed ID: " + matchId);
-      Integer target_layer_id = Integer.valueOf(idMatcher.group(4));
+      if (!idMatcher.matches())
+      {
+         // not IdMatch - maybe they've passed in the URL
+         // something like:
+         // http://localhost:8080/labbcat/transcript?ag_id=6#ew_0_16783
+         matchIdPattern = Pattern.compile(
+            "https?://.+/transcript\\?ag_id=(\\d+)#e.?_(\\d+)_(\\d+)");
+         idMatcher = matchIdPattern.matcher(matchId);
+         if (idMatcher.matches())
+         { // URL pattern matches
+            ag_id_group = 1;
+            utterance_annotation_id_group = null;
+            participant_speaker_number_group = null;
+            target_layer_id_group = 2;
+            target_annotation_id_group = 3;
+            first_word_annotation_id_group = 3;
+         } // URL pattern matches
+         else
+         {
+            // not IdMatch or URL - maybe they've passed in annotation UIDs
+            // something like:
+            // "em_12_2671" or "ew_0_16783"
+            matchIdPattern = Pattern.compile("e.?_(\\d+)_(\\d+)");
+            idMatcher = matchIdPattern.matcher(matchId);
+            if (idMatcher.matches())
+            { // UID pattern matches
+               ag_id_group = null;
+               utterance_annotation_id_group = null;
+               participant_speaker_number_group = null;
+               target_layer_id_group = 1;
+               target_annotation_id_group = 2;
+               first_word_annotation_id_group = 2;
+            } // UID pattern matches
+            else
+            {
+               throw new StoreException("Malformed ID: " + matchId);
+            }
+         }
+      } // MatchId pattern matches
+      Integer target_layer_id = Integer.valueOf(idMatcher.group(target_layer_id_group));
       Layer targetLayer = schema.getWordLayer();
       if (target_layer_id != 0)
       { // scan for the layer with the matching layer_id
@@ -2936,83 +2971,197 @@ public class SqlGraphStore
             } // layer table has word_annotation_id
             else if ("transcript".equals(layer.get("@class_id")))
             { // transcript attribute
-               String sql = "SELECT DISTINCT annotation.annotation_id, annotation.ag_id,"
-                  +" annotation.label, annotation.label_status,"
-                  +" annotation.annotated_by, annotation.annotated_when,"
-                  +" 0 AS ordinal, NULL AS start_anchor_id, NULL AS end_anchor_id,"
-                  +" ? AS layer, annotation.ag_id AS graph"
-                  +" FROM annotation_transcript annotation"
-                  +" WHERE annotation.ag_id = ?"
-                  +" AND layer = ?"
-                  +" ORDER BY annotation_id"
-                  +" LIMIT 0, " + annotationsPerLayer;
-               Object[] groups = {
-                  layer.getId(), ag_id_group, layer.get("@attribute") };
-               queries.add(getConnection().prepareStatement(sql));
-               parameterGroups.add(groups);
+               if (ag_id_group != null)
+               { // the MatchId includes to ag_id
+                  String sql = "SELECT DISTINCT annotation.annotation_id, annotation.ag_id,"
+                     +" annotation.label, annotation.label_status,"
+                     +" annotation.annotated_by, annotation.annotated_when,"
+                     +" 0 AS ordinal, NULL AS start_anchor_id, NULL AS end_anchor_id,"
+                     +" ? AS layer, annotation.ag_id AS graph"
+                     +" FROM annotation_transcript annotation"
+                     +" WHERE annotation.ag_id = ?"
+                     +" AND layer = ?"
+                     +" ORDER BY annotation_id"
+                     +" LIMIT 0, " + annotationsPerLayer;
+                  Object[] groups = {
+                     layer.getId(), ag_id_group, layer.get("@attribute") };
+                  queries.add(getConnection().prepareStatement(sql));
+                  parameterGroups.add(groups);
+               } // the MatchId includes to ag_id
+               else
+               { // the MatchId doesn't include to ag_id
+                  // get the ag_id from the target
+                  String sql = "SELECT DISTINCT annotation.annotation_id, annotation.ag_id,"
+                     +" annotation.label, annotation.label_status,"
+                     +" annotation.annotated_by, annotation.annotated_when,"
+                     +" 0 AS ordinal, NULL AS start_anchor_id, NULL AS end_anchor_id,"
+                     +" ? AS layer, annotation.ag_id AS graph"
+                     +" FROM annotation_transcript annotation"
+                     +" INNER JOIN annotation_layer_"+targetLayer.get("@layer_id")+" target"
+                     +" ON annotation.ag_id = target.ag_id"
+                     +" WHERE target.annotation_id = ?"
+                     +" AND layer = ?"
+                     +" ORDER BY annotation_id"
+                     +" LIMIT 0, " + annotationsPerLayer;
+                  Object[] groups = {
+                     layer.getId(), target_annotation_id_group, layer.get("@attribute") };
+                  queries.add(getConnection().prepareStatement(sql));
+                  parameterGroups.add(groups);
+               } // the MatchId doesn't include to ag_id
             } // transcript attribute
             else if ("speaker".equals(layer.get("@class_id")))
             { // participant attribute
-               String sql  = "SELECT DISTINCT annotation.annotation_id, annotation.speaker_number,"
-                  +" annotation.label, annotation.label_status,"
-                  +" annotation.annotated_by, annotation.annotated_when,"
-                  +" 0 AS ordinal, NULL AS start_anchor_id, NULL AS end_anchor_id,"
-                  +" ? AS layer, NULL AS graph"
-                  +" FROM annotation_participant annotation"
-                  +" WHERE annotation.speaker_number = ?"
-                  +" AND layer = ?"
-                  +" ORDER BY annotation_id"
-                  +" LIMIT 0, " + annotationsPerLayer;
-               Object[] groups = {
-                  layer.getId(), participant_speaker_number_group, layer.get("@attribute") };
-               queries.add(getConnection().prepareStatement(sql));
-               parameterGroups.add(groups);
+               if (participant_speaker_number_group != null)
+               { // the MatchId includes the speaker number
+                  String sql  = "SELECT DISTINCT"+
+                     " annotation.annotation_id, annotation.speaker_number,"
+                     +" annotation.label, annotation.label_status,"
+                     +" annotation.annotated_by, annotation.annotated_when,"
+                     +" 0 AS ordinal, NULL AS start_anchor_id, NULL AS end_anchor_id,"
+                     +" ? AS layer, NULL AS graph"
+                     +" FROM annotation_participant annotation"
+                     +" WHERE annotation.speaker_number = ? AND layer = ?"
+                     +" ORDER BY annotation_id"
+                     +" LIMIT 0, " + annotationsPerLayer;
+                  Object[] groups = {
+                     layer.getId(), participant_speaker_number_group, layer.get("@attribute") };
+                  queries.add(getConnection().prepareStatement(sql));
+                  parameterGroups.add(groups);
+               } // the MatchId includes the speaker number
+               else
+               { // the MatchId doesn't include the speaker number
+                  // use the turn label to get the speaker of the token instead
+                  String sql = "SELECT DISTINCT"
+                     +" annotation.annotation_id, annotation.speaker_number,"
+                     +" annotation.label, annotation.label_status,"
+                     +" annotation.annotated_by, annotation.annotated_when,"
+                     +" 0 AS ordinal, NULL AS start_anchor_id, NULL AS end_anchor_id,"
+                     +" ? AS layer, NULL AS graph"
+                     +" FROM annotation_layer_"+SqlConstants.LAYER_TURN+" turn"
+                     // same turn as target
+                     +" INNER JOIN annotation_layer_"+targetLayer.get("@layer_id")+" target"
+                     +" ON turn.turn_annotation_id = target.turn_annotation_id"
+                     +" INNER JOIN annotation_participant annotation"
+                     +" ON annotation.speaker_number = turn.label AND layer = ?"
+                     +" WHERE target.annotation_id = ?"
+                     +" ORDER BY annotation.annotation_id"
+                     +" LIMIT 0, " + annotationsPerLayer;
+                  Object[] groups = {
+                     layer.getId(), layer.get("@attribute"), target_annotation_id_group };
+                  queries.add(getConnection().prepareStatement(sql));
+                  parameterGroups.add(groups);
+               } // the MatchId doesn't include the speaker number
             } // participant attribute
             else if (layer.getId().equals(schema.getParticipantLayerId()))
             { // who
-               String sql  = "SELECT annotation.speaker_number AS annotation_id,"
-                  +" annotation.speaker_number,"
-                  +" annotation.name AS label, 100 AS label_status,"
-                  +" 0 AS ordinal, NULL AS annotated_by, NULL AS annotated_when,"
-                  +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
-                  +" ? AS layer, NULL AS graph"
-                  +" FROM speaker annotation"
-                  +" WHERE annotation.speaker_number = ?";
-               Object[] groups = {
-                  layer.getId(), participant_speaker_number_group };
-               queries.add(getConnection().prepareStatement(sql));
-               parameterGroups.add(groups);
+               if (participant_speaker_number_group != null)
+               { // the MatchId includes the speaker number
+                  String sql  = "SELECT annotation.speaker_number AS annotation_id,"
+                     +" annotation.speaker_number,"
+                     +" annotation.name AS label, 100 AS label_status,"
+                     +" 0 AS ordinal, NULL AS annotated_by, NULL AS annotated_when,"
+                     +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+                     +" ? AS layer, NULL AS graph"
+                     +" FROM speaker annotation"
+                     +" WHERE annotation.speaker_number = ?";
+                  Object[] groups = {
+                     layer.getId(), participant_speaker_number_group };
+                  queries.add(getConnection().prepareStatement(sql));
+                  parameterGroups.add(groups);
+               } // the MatchId includes the speaker number
+               else
+               { // the MatchId doesn't include the speaker number
+                  // use the turn label to get the speaker of the token instead
+                  String sql  = "SELECT annotation.speaker_number AS annotation_id,"
+                     +" annotation.speaker_number,"
+                     +" annotation.name AS label, 100 AS label_status,"
+                     +" 0 AS ordinal, NULL AS annotated_by, NULL AS annotated_when,"
+                     +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+                     +" ? AS layer, NULL AS graph"
+                     +" FROM annotation_layer_"+SqlConstants.LAYER_TURN+" turn"
+                     // same turn as target
+                     +" INNER JOIN annotation_layer_"+targetLayer.get("@layer_id")+" target"
+                     +" ON turn.turn_annotation_id = target.turn_annotation_id"
+                     +" INNER JOIN speaker annotation ON annotation.speaker_number = turn.label"
+                     +" WHERE target.annotation_id = ?"
+                     +" ORDER BY annotation.speaker_number"
+                     +" LIMIT 1"; // there's only one speaker
+                  Object[] groups = {layer.getId(), target_annotation_id_group };
+                  queries.add(getConnection().prepareStatement(sql));
+                  parameterGroups.add(groups);
+               } // the MatchId doesn't include the speaker number
             } // who
             else if (layer.getId().equals(schema.getCorpusLayerId()))
             { // corpus
-               String sql = "SELECT graph.corpus_name AS label,"
-                  +" COALESCE(c.corpus_id, graph.corpus_name) AS annotation_id,"
-                  +" 0 AS ordinal, 100 AS label_status,"
-                  +" NULL AS annotated_by, NULL AS annotated_when,"
-                  +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
-                  +" ? AS layer, graph.transcript_id AS graph"
-                  +" FROM transcript graph"
-                  +" LEFT OUTER JOIN corpus c ON c.corpus_name = graph.corpus_name"
-                  +" WHERE graph.ag_id = ?";
-               Object[] groups = {
-                  layer.getId(), ag_id_group };
-               queries.add(getConnection().prepareStatement(sql));
-               parameterGroups.add(groups);
+               if (ag_id_group != null)
+               { // the MatchId includes to ag_id
+                  String sql = "SELECT graph.corpus_name AS label,"
+                     +" COALESCE(c.corpus_id, graph.corpus_name) AS annotation_id,"
+                     +" 0 AS ordinal, 100 AS label_status,"
+                     +" NULL AS annotated_by, NULL AS annotated_when,"
+                     +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+                     +" ? AS layer, graph.transcript_id AS graph"
+                     +" FROM transcript graph"
+                     +" LEFT OUTER JOIN corpus c ON c.corpus_name = graph.corpus_name"
+                     +" WHERE graph.ag_id = ?";
+                  Object[] groups = { layer.getId(), ag_id_group };
+                  queries.add(getConnection().prepareStatement(sql));
+                  parameterGroups.add(groups);
+               } // the MatchId includes to ag_id
+               else
+               { // the MatchId doesn't include to ag_id
+                  // get the ag_id from the target
+                  String sql = "SELECT graph.corpus_name AS label,"
+                     +" COALESCE(c.corpus_id, graph.corpus_name) AS annotation_id,"
+                     +" 0 AS ordinal, 100 AS label_status,"
+                     +" NULL AS annotated_by, NULL AS annotated_when,"
+                     +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+                     +" ? AS layer, graph.transcript_id AS graph"
+                     +" FROM transcript graph"
+                     +" INNER JOIN annotation_layer_"+targetLayer.get("@layer_id")+" target"
+                     +" ON graph.ag_id = target.ag_id"
+                     +" LEFT OUTER JOIN corpus c ON c.corpus_name = graph.corpus_name"
+                     +" WHERE target.annotation_id = ?";
+                  Object[] groups = { layer.getId(), target_annotation_id_group };
+                  queries.add(getConnection().prepareStatement(sql));
+                  parameterGroups.add(groups);
+               } // the MatchId doesn't include to ag_id
             } // corpus
             else if (layer.getId().equals(schema.getEpisodeLayerId()))
             { // episode
-               String sql = "SELECT e.name AS label,"
-                  +" graph.family_id AS annotation_id,"
-                  +" 0 AS ordinal, 100 AS label_status,"
-                  +" NULL AS annotated_by, NULL AS annotated_when,"
-                  +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
-                  +" ? AS layer, graph.transcript_id AS graph"
-                  +" FROM transcript graph"
-                  +" INNER JOIN transcript_family e ON e.family_id = graph.family_id"
-                  +" WHERE graph.ag_id = ?";
-               Object[] groups = { layer.getId(), ag_id_group };
-               queries.add(getConnection().prepareStatement(sql));
-               parameterGroups.add(groups);
+               if (ag_id_group != null)
+               { // the MatchId includes to ag_id
+                  String sql = "SELECT e.name AS label,"
+                     +" graph.family_id AS annotation_id,"
+                     +" 0 AS ordinal, 100 AS label_status,"
+                     +" NULL AS annotated_by, NULL AS annotated_when,"
+                     +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+                     +" ? AS layer, graph.transcript_id AS graph"
+                     +" FROM transcript graph"
+                     +" INNER JOIN transcript_family e ON e.family_id = graph.family_id"
+                     +" WHERE graph.ag_id = ?";
+                  Object[] groups = { layer.getId(), ag_id_group };
+                  queries.add(getConnection().prepareStatement(sql));
+                  parameterGroups.add(groups);
+               } // the MatchId includes to ag_id
+               else
+               { // the MatchId doesn't include to ag_id
+                  // get the ag_id from the target
+                  String sql = "SELECT e.name AS label,"
+                     +" graph.family_id AS annotation_id,"
+                     +" 0 AS ordinal, 100 AS label_status,"
+                     +" NULL AS annotated_by, NULL AS annotated_when,"
+                     +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+                     +" ? AS layer, graph.transcript_id AS graph"
+                     +" FROM transcript graph"
+                     +" INNER JOIN annotation_layer_"+targetLayer.get("@layer_id")+" target"
+                     +" ON graph.ag_id = target.ag_id"
+                     +" INNER JOIN transcript_family e ON e.family_id = graph.family_id"
+                     +" WHERE target.annotation_id = ?";
+                  Object[] groups = { layer.getId(), target_annotation_id_group };
+                  queries.add(getConnection().prepareStatement(sql));
+                  parameterGroups.add(groups);
+               } // the MatchId doesn't include to ag_id
             } // episode
             else if (layer.getId().equals(schema.getTurnLayerId()))
             { // turn
@@ -3285,18 +3434,39 @@ public class SqlGraphStore
             } // freeform layer
             else if (layer.getId().equals("transcript_type")) // TODO one day this will be a vanilla transcript attribute 
             { // transcript type
-               String sql = "SELECT transcript_type.transcript_type AS label,"
-                  +" transcript_type.type_id AS annotation_id,"
-                  +" 0 AS ordinal, 100 AS label_status,"
-                  +" NULL AS annotated_by, NULL AS annotated_when,"
-                  +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
-                  +" ? AS layer, graph.transcript_id AS graph, graph.ag_id"
-                  +" FROM transcript graph"
-                  +" INNER JOIN transcript_type ON transcript_type.type_id = graph.type_id"
-                  +" WHERE graph.ag_id = ?";
-               Object[] groups = { layer.getId(), ag_id_group };
-               queries.add(getConnection().prepareStatement(sql));
-               parameterGroups.add(groups);
+               if (ag_id_group != null)
+               { // the MatchId includes to ag_id
+                  String sql = "SELECT transcript_type.transcript_type AS label,"
+                     +" transcript_type.type_id AS annotation_id,"
+                     +" 0 AS ordinal, 100 AS label_status,"
+                     +" NULL AS annotated_by, NULL AS annotated_when,"
+                     +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+                     +" ? AS layer, graph.transcript_id AS graph, graph.ag_id"
+                     +" FROM transcript graph"
+                     +" INNER JOIN transcript_type ON transcript_type.type_id = graph.type_id"
+                     +" WHERE graph.ag_id = ?";
+                  Object[] groups = { layer.getId(), ag_id_group };
+                  queries.add(getConnection().prepareStatement(sql));
+                  parameterGroups.add(groups);
+               } // the MatchId includes to ag_id
+               else
+               { // the MatchId doesn't include to ag_id
+                  // get the ag_id from the target
+                  String sql = "SELECT transcript_type.transcript_type AS label,"
+                     +" transcript_type.type_id AS annotation_id,"
+                     +" 0 AS ordinal, 100 AS label_status,"
+                     +" NULL AS annotated_by, NULL AS annotated_when,"
+                     +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+                     +" ? AS layer, graph.transcript_id AS graph, graph.ag_id"
+                     +" FROM transcript graph"
+                     +" INNER JOIN annotation_layer_"+targetLayer.get("@layer_id")+" target"
+                     +" ON graph.ag_id = target.ag_id"
+                     +" INNER JOIN transcript_type ON transcript_type.type_id = graph.type_id"
+                     +" WHERE target.annotation_id = ?";
+                  Object[] groups = { layer.getId(), target_annotation_id_group };
+                  queries.add(getConnection().prepareStatement(sql));
+                  parameterGroups.add(groups);
+               } // the MatchId doesn't include to ag_id
             } // transcript type
             else
             { // can't process this layer
@@ -3368,6 +3538,7 @@ public class SqlGraphStore
                   {
                      annotations[a++] = annotationFromResult(rs, layer, null);
                   }
+                  rs.close();
                }
                catch (SQLException sqlX)
                {
@@ -3386,6 +3557,9 @@ public class SqlGraphStore
          matchId = matchIds.hasNext()?matchIds.next():null;
          firstRow = false;
       } while (matchId != null);
+
+      // close all the statements we prepared
+      for (PreparedStatement sql : queries) try { sql.close(); } catch(SQLException x) {}
        
    } // getMatchAnnotations
    
