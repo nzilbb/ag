@@ -38,29 +38,18 @@ import nzilbb.ag.serialize.*;
 
 public class Utility
 {
-   
   /**
    * Creates an array of {@link Graph}s from one graph. Handy for calling
-   * {@link ISerializer#serialize(Graph[],String[])} when you have only one graph.
-   * @param graph The graph.
-   * @return A graph with one element.
-   */
-  public static Graph[] OneGraphArray(Graph graph)
-  {
-    Graph[] graphs = new Graph[1];
-    graphs[0] = graph;
-    return graphs;
-  } // end of OneGraphArray()
-
-  /**
-   * Creates an array of {@link Graph}s from one graph. Handy for calling
-   * {@link ISerializer#serialize(Graph[],String[])} when you have only one graph.
+   * {@link nzilbb.ag.serialize.ISerializer#serialize(Spliterator,String[],Consumer,Consumer,Consumer)}
+   * when you have
+   * only one graph. 
    * @param graph The graph.
    * @return A graph with one element.
    */
   public static Spliterator<Graph> OneGraphSpliterator(Graph graph)
   {
-    return Arrays.spliterator(OneGraphArray(graph));
+    Graph[] graphs = { graph };
+    return Arrays.spliterator(graphs);
   } // end of OneGraphArray()
 
   /**
