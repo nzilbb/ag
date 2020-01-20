@@ -505,7 +505,8 @@ public class JSONSerialization
 
    /**
     * Determines the cardinality between graphs and serialized streams.
-    * @return {@link ISerializer#Cardinality}.NtoN as there is one stream produced per graph.
+    * @return {@link nzilbb.ag.serialize.ISerializer.Cardinality}.NtoN as there is one
+    * stream produced per graph. 
     */
    public Cardinality getCardinality()
    {
@@ -523,7 +524,6 @@ public class JSONSerialization
     * @param layerIds The IDs of the layers to include, or null for all layers.
     * @param consumer The object receiving the streams.
     * @param warnings The object receiving warning messages.
-    * @return A list of named streams that contain the serialization in the given format. 
     * @throws SerializerNotConfiguredException if the object has not been configured.
     */
    public void serialize(Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 

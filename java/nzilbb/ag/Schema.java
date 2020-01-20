@@ -48,7 +48,7 @@ public class Schema
   /**
    * Layers, indexed by ID.
    * @see #getLayers()
-   * @see #setLayers(HashMap)
+   * @see #setLayers(LinkedHashMap)
    */
   protected LinkedHashMap<String,Layer> layers = new LinkedHashMap<String,Layer>();
   /**

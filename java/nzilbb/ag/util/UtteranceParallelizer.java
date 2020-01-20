@@ -54,7 +54,7 @@ public class UtteranceParallelizer
    /**
     * Layer IDs to parallelize, e.g. "turn", "utterance".
     * @see #getLayerIds()
-    * @see #setLayerIds(HashSet<String>)
+    * @see #setLayerIds(HashSet)
     */
    protected HashSet<String> layerIds = new HashSet<String>();
    /**

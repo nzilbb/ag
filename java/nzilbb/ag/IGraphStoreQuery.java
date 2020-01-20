@@ -442,7 +442,7 @@ public interface IGraphStoreQuery
     * itself, 1 means the token after the target, -1 means the token before the target, etc. 
     * @param annotationsPerLayer The number of annotations per layer to get; if there's a
     * smaller number of annotations available, the unfilled array elements will be null.
-    * @param resultConsumer A consumer for handling the resulting
+    * @param consumer A consumer for handling the resulting
     * annotations. Consumer.accept() will be invoked once for each element returned by the
     * <var>matchIds</var> iterator, with an array of {@link Annotation} objects. The size
     * of this array will be <var>layerIds.length</var> * <var>annotationsPerLayer</var>,

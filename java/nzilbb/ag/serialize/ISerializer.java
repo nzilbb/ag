@@ -77,7 +77,7 @@ public interface ISerializer
 
    /**
     * Possible values for cardinality (given <var>N</var> {@link Graph}s, how many 
-    * {@link NamedStreams} are produced) are:
+    * {@link nzilbb.ag.serialize.util.NamedStream}s are produced) are:
     * <ul>
     *  <li><b>NToOne</b>: only one {@link NamedStream} is generated, regardless of the
     * number of {@link Graph}s to serialize.</li>
