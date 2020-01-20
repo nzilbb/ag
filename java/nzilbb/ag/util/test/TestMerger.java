@@ -874,7 +874,7 @@ public class TestMerger
     // serialize      
     final Vector<SerializationException> exceptions = new Vector<SerializationException>();
     final Vector<NamedStream> streams = new Vector<NamedStream>();
-    s.serialize(Arrays.spliterator(Utility.OneGraphArray(graph)), null,
+    s.serialize(Utility.OneGraphSpliterator(graph), null,
                 (stream) -> streams.add(stream),
                 (warning) -> System.out.println(warning),
                 (exception) -> exceptions.add(exception));
