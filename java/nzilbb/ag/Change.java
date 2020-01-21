@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -31,7 +31,9 @@ public class Change
    // enums:
 
    /** 
-    * The change operation on a given object - i.e. whether and how the object has changed since it was first defined, or since the object's {@link TrackedMap#commit()}} method was last called.
+    * The change operation on a given object - i.e. whether and how the object has changed
+    * since it was first defined, or since the object's {@link TrackedMap#commit()}}
+    * method was last called.
     * @see TrackedMap#commit()
     * @see TrackedMap#rollback()
     * @see TrackedMap#getChange()
@@ -47,7 +49,6 @@ public class Change
       Update };
 
    // Attributes:
-
    
    /**
     * The operation of this change.
@@ -90,12 +91,14 @@ public class Change
     */
    protected String key;
    /**
-    * Getter for {@link #key}: The attribute name which will be changed, if the change is an Update.
+    * Getter for {@link #key}: The attribute name which will be changed, if the change is
+    * an Update. 
     * @return The attribute name which will be changed, if the change is an Update.
     */
    public String getKey() { return key; }
    /**
-    * Setter for {@link #key}: The attribute name which will be changed, if the change is an Update.
+    * Setter for {@link #key}: The attribute name which will be changed, if the change is
+    * an Update. 
     * @param newKey The attribute name which will be changed, if the change is an Update.
     */
    public Change setKey(String newKey) { key = newKey; return this; }
@@ -151,7 +154,6 @@ public class Change
       setKey(key);
       setValue(value);
    } // end of constructor
-
    
    /**
     * Applies the change to the object.
@@ -166,7 +168,6 @@ public class Change
       }
    } // end of apply()
 
-
    // java.lang.Object overrides:
    
    /**
@@ -178,12 +179,12 @@ public class Change
       return ""+getOperation() + " " + getObject().getId()
 	 + (getOperation() == Operation.Update?": " + getKey() + " = " + getValue():"");
    } // end of toString()   
-
    
    /**
     * Equality test.
     * @param o The other object to compare with.
-    * @return true if the object is a Change with the same operation, key, and value on the same object as this one.
+    * @return true if the object is a Change with the same operation, key, and value on
+    * the same object as this one. 
     */
    public boolean equals(Object o)
    {
@@ -206,6 +207,5 @@ public class Change
       }
       return false;
    } // end of equals()
-
    
 } // end of class Delta
