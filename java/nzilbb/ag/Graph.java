@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -631,8 +631,8 @@ public class Graph
       if (annotation.getId() == null)
       {
          if (timers != null) timers.start("Graph.addAnnotation: create ID");
-         annotation.create();
          annotation.setId(newId());
+         annotation.create();
 	 
          // does the annotation have children?
          if (annotation.getAnnotations().size() > 0)
@@ -776,8 +776,8 @@ public class Graph
       anchor.setGraph(this);
       if (anchor.getId() == null)
       {
-         anchor.create();
          anchor.setId(newId());
+         anchor.create();
       }
 
       // add to anchors collection
@@ -1608,15 +1608,13 @@ public class Graph
       return graph;
    }
 
-   // TrackedMap methods
-
    /**
-    * Commits object's changes, if any.  The effect of this is to commit all anchors and annotations.
+    * Commits graphs's changes, if any.  Any annotations/anchors marked for deletion are removed.
     */
    public void commit()
    {
-      super.commit();
-
+      if (tracker == null) return;
+      
       // annotations
       Iterator<Annotation> iAnnotation = getAnnotationsById().values().iterator();
       while (iAnnotation.hasNext())
@@ -1633,11 +1631,7 @@ public class Graph
             a.setLayer(null);
             iAnnotation.remove();
          }
-         else
-         {
-            a.commit();
-         }
-      } // next 
+      } // next annotation
 
       // anchors
       Iterator<Anchor> iAnchor = getAnchors().values().iterator();
@@ -1648,19 +1642,33 @@ public class Graph
          {
             iAnchor.remove();
          }
-         else
-         {
-            a.commit();
-         }
-      } // next 
-
+      } // next anchor
    }
+   
+   // TrackedMap methods
+
+   /**
+    * Ensure tracker is updated for all known annotations and anchors.
+    * @param newTracker Object that tracks all changes to this object.
+    */
+   public TrackedMap setTracker(ChangeTracker newTracker)
+   {
+      super.setTracker(newTracker);
+      getAnchors().values().forEach(
+         a -> a.setTracker(newTracker));
+      getAnnotationsById().values().forEach(
+         a -> a.setTracker(newTracker));
+      return this;
+   }
+
    /**
     * Rolls back changes since the object was create or {@link #commit()} was last called. The effect of this is to rollback all anchors and annotations.
     * @see #getTrackedAttributes()
     */
    public void rollback()
    {
+      if (tracker == null) return;
+      
       super.rollback();
       // anchors
       Iterator<Anchor> iAnchor = getAnchors().values().iterator();
@@ -1675,7 +1683,7 @@ public class Graph
          {
             a.rollback();
          }
-      } // next 
+      } // next anchor
 
       // annotations
       Iterator<Annotation> iAnnotation = getAnnotationsById().values().iterator();
@@ -1694,34 +1702,23 @@ public class Graph
          {
             a.rollback();
          }
-      } // next 
+      } // next annotation
    } // end of rollback()
-
+   
    /**
-    * Determines how the object has changed since it was originally defined, or since {@link #commit()} was last called.
+    * Determines how the object has changed since it was originally defined, or since
+    * {@link #commit()} was last called.
     * @return How/whether the object has been changed.
     * @see #getTrackedAttributes()
     */
    public Change.Operation getChange()
    {
+      if (tracker == null) return Change.Operation.NoChange;
+      
       Change.Operation operation = super.getChange();
       if (operation == Change.Operation.NoChange)
       { // check for changes to anchors or annotations
-         for (Anchor a : getAnchors().values())
-         {
-            if (a.getChange() != Change.Operation.NoChange)
-            { // something has changed so the graph change is Update
-               return Change.Operation.Update;
-            }
-         } // next anchor
-         // all annotations must be created
-         for (Annotation a : getAnnotationsById().values())
-         {
-            if (a.getChange() != Change.Operation.NoChange)
-            { // something has changed so the graph change is Update
-               return Change.Operation.Update;
-            }
-         } // next anchor
+         if (tracker.hasChanges()) operation = Change.Operation.Update;
       }
       return operation;
    } // end of getChange()   
@@ -1733,98 +1730,106 @@ public class Graph
    public Vector<Change> getChanges()
    {
       Vector<Change> changes = new Vector<Change>(); // start with graph changes
-      if (super.getChange() == Change.Operation.Create)
-      { 
-         // graph create before creating anchors/annotations
-         changes.addAll(super.getChanges());
-         // all anchors must be created
-         for (Anchor a : getAnchors().values())
-         {
-            a.create();
-            changes.addAll(a.getChanges());
-         } // next anchor
-         // all annotations must be created
-         LayerTraversal<Vector<Change>> createTraversal = new LayerTraversal<Vector<Change>>(changes, this, true)
-                                                          {
-                                                             protected void pre(Annotation a) // parents before children
-                                                             {
-                                                                a.create();
-                                                                result.addAll(a.getChanges());
-                                                             }
-                                                             protected void except(Annotation a) { pre(a); }
-            };
-      } // Create
-      else if (super.getChange() == Change.Operation.Destroy)
+      if (tracker != null)
       {
-         // all annotations must be deleted before anchors are deleted
-         LayerTraversal<Vector<Change>> deleteTraversal = new LayerTraversal<Vector<Change>>(changes, this, true)
-                                                          {
-                                                             protected void post(Annotation a) // parents after children
-                                                             {
-                                                                a.destroy();
-                                                                result.addAll(a.getChanges());
-                                                             }
-                                                             protected void except(Annotation a) { post(a); }
-            };
-         // all anchors must be deleted
-         for (Anchor a : getAnchors().values())
-         {
-            a.destroy();
-            changes.addAll(a.getChanges());
-         } // next anchor
-         // graph delete after deleting anchors/annotations
-         changes.addAll(super.getChanges()); 
-      }
-      else
-      { // not creating or deleting the graph
-         changes.addAll(super.getChanges());
-         // add anchor changes
-         for (Anchor a : getAnchors().values())
-         {
-            if (a.getChange() != Change.Operation.NoChange)
+         if (super.getChange() == Change.Operation.Create)
+         { 
+            // graph create before creating anchors/annotations
+            changes.addAll(super.getChanges());
+            // all anchors must be created
+            for (Anchor a : getAnchors().values())
             {
+               a.create();
                changes.addAll(a.getChanges());
-            }
-         } // next anchor
-
-         // add annotation changes
-	 
-         // ensure all possible parents are created before their children
-         LayerTraversal<Vector<Change>> createTraversal = new LayerTraversal<Vector<Change>>(changes, this, true) {
-               protected void pre(Annotation a) // parents created (and updated) before children
+            } // next anchor
+            // all annotations must be created
+            LayerTraversal<Vector<Change>> createTraversal
+               = new LayerTraversal<Vector<Change>>(changes, this, true)
+                 {
+                    protected void pre(Annotation a) // parents before children
+                    {
+                       a.create();
+                       result.addAll(a.getChanges());
+                    }
+                    protected void except(Annotation a) { pre(a); }
+                  };
+         } // Create
+         else if (super.getChange() == Change.Operation.Destroy)
+         {
+            // all annotations must be deleted before anchors are deleted
+            LayerTraversal<Vector<Change>> deleteTraversal
+               = new LayerTraversal<Vector<Change>>(changes, this, true)
+                 {
+                    protected void post(Annotation a) // parents after children
+                    {
+                       a.destroy();
+                       result.addAll(a.getChanges());
+                    }
+                    protected void except(Annotation a) { post(a); }
+                  };
+            // all anchors must be deleted
+            for (Anchor a : getAnchors().values())
+            {
+               a.destroy();
+               changes.addAll(a.getChanges());
+            } // next anchor
+            // graph delete after deleting anchors/annotations
+            changes.addAll(super.getChanges()); 
+         }
+         else
+         { // not creating or deleting the graph
+            changes.addAll(super.getChanges());
+            // add anchor changes
+            for (Anchor a : getAnchors().values())
+            {
+               if (a.getChange() != Change.Operation.NoChange)
                {
-                  if (a.getChange() == Change.Operation.Create)
-                  {
-                     result.addAll(a.getChanges());
-                  }
+                  changes.addAll(a.getChanges());
                }
-               protected void except(Annotation a) { pre(a); }
-            };
-      
-         // perform updates after creates and before deletes
-         LayerTraversal<Vector<Change>> updateTraversal = new LayerTraversal<Vector<Change>>(changes, this, true) {
-               protected void pre(Annotation a) // parents created (and updated) before children
-               {
-                  if (a.getChange() == Change.Operation.Update)
-                  {
-                     result.addAll(a.getChanges());
-                  }
-               }
-               protected void except(Annotation a) { pre(a); }
-            };
-
-         // now perform deletes, children first
-         LayerTraversal<Vector<Change>> deleteTraversal = new LayerTraversal<Vector<Change>>(changes, this, true) {
-               protected void post(Annotation a) // parents deleted after children
-               {
-                  if (a.getChange() == Change.Operation.Destroy)
-                  {
-                     result.addAll(a.getChanges());
-                  }
-               }
-               protected void except(Annotation a) { post(a); }
-            };
-      }
+            } // next anchor
+            
+            // add annotation changes
+            
+            // ensure all possible parents are created before their children
+            LayerTraversal<Vector<Change>> createTraversal
+               = new LayerTraversal<Vector<Change>>(changes, this, true) {
+                     protected void pre(Annotation a) // parents created before children
+                     {
+                        if (a.getChange() == Change.Operation.Create)
+                        {
+                           result.addAll(a.getChanges());
+                        }
+                     }
+                     protected void except(Annotation a) { pre(a); }
+                  };
+            
+            // perform updates after creates and before deletes
+            LayerTraversal<Vector<Change>> updateTraversal
+               = new LayerTraversal<Vector<Change>>(changes, this, true) {
+                     protected void pre(Annotation a) // parents updated before children
+                     {
+                        if (a.getChange() == Change.Operation.Update)
+                        {
+                           result.addAll(a.getChanges());
+                        }
+                     }
+                     protected void except(Annotation a) { pre(a); }
+                  };
+            
+            // now perform deletes, children first
+            LayerTraversal<Vector<Change>> deleteTraversal
+               = new LayerTraversal<Vector<Change>>(changes, this, true) {
+                     protected void post(Annotation a) // parents deleted after children
+                     {
+                        if (a.getChange() == Change.Operation.Destroy)
+                        {
+                           result.addAll(a.getChanges());
+                        }
+                     }
+                     protected void except(Annotation a) { post(a); }
+                  };
+         }
+      } // changes were tracked
       return changes;
    } // end of getChanges()
   

@@ -21,12 +21,13 @@
 //
 package nzilbb.ag;
 
-import java.util.Set;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Vector;
-import java.util.LinkedHashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.Vector;
 
 /**
  * Annotation graph anchor - i.e. a node of the graph.
@@ -148,7 +149,18 @@ public class Anchor
     * Setter for {@link #graph}: The annotation's annotation graph.
     * @param newGraph The annotation's annotation graph.
     */
-   public void setGraph(Graph newGraph) { graph = newGraph; }
+   public void setGraph(Graph newGraph)
+   {
+      graph = newGraph;
+      if (graph != null)
+      {
+         setTracker(graph.getTracker());
+      }
+      else
+      {
+         setTracker(null);
+      }
+   }
    
    /**
     * Map of annotations that start with this anchor, keyed on layer id.
@@ -302,17 +314,20 @@ public class Anchor
    
 
    /**
-    * Gets the original offset of the anchor, before any subsequent calls to {@link
-    * #setOffset(Double)}, since the object was created or {@link #commit()} was called. 
+    * Gets the original offset of the anchor, before any subsequent calls to 
+    * {@link #setOffset(Double)}, since the object was created. 
     * <p>This method mirrors the map key "originalOffset" created by the TrackedMap.
     * @return The original offset.
     */
    public Double getOriginalOffset() 
-   { 
-      if (containsKey("originalOffset"))
+   {
+      if (tracker != null)
       {
-         try { return (Double)get("originalOffset"); }
-         catch(ClassCastException exception) {} 
+         Optional<Change> change = tracker.getChange(id, "offset");
+         if (change.isPresent())
+         {
+            return (Double)change.get().getOldValue();
+         }
       }
       return getOffset(); 
    }

@@ -1115,7 +1115,7 @@ public class Merger
                 { // using a new anchor, and replacing a manual anchor
                   // set the original attributes instead of a delta
                   // this is so it can't later be reverted to its 'new' values
-                  start.commit();
+                  // TODO was this necessary? start.commit();
                   start.create();
                 }
                 changes.addAll( // track changes of:

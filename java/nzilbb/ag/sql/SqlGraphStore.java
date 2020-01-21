@@ -925,7 +925,6 @@ public class SqlGraphStore
                         attribute.setParentId("m_-2_"+rsValue.getString("speaker_number"));
                         attribute.setOrdinal(ordinal++);
                         participant.addAnnotation(attribute);
-                        attribute.commit();
                      } // next annotation
                      rsValue.close();
                   } // class_id set
@@ -933,8 +932,6 @@ public class SqlGraphStore
             } // next child of "who" layer
             sqlValue.close();
 
-            participant.commit();
-	    
             return participant;
          } // participant found
          else

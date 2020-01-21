@@ -120,6 +120,23 @@ public class Change
     */
    public Change setValue(Object newValue) { value = newValue; return this; }
    
+   /**
+    * The old value for the attribute defined by {@link #getKey()}
+    * @see #getOldValue()
+    * @see #setOldValue(Object)
+    */
+   protected Object oldValue;
+   /**
+    * Getter for {@link #oldValue}: The old value for the attribute defined by {@link #getKey()}
+    * @return The old value for the attribute defined by {@link #getKey()}
+    */
+   public Object getOldValue() { return oldValue; }
+   /**
+    * Setter for {@link #oldValue}: The old value for the attribute defined by {@link #getKey()}
+    * @param newOldValue The old value for the attribute defined by {@link #getKey()}
+    */
+   public Change setOldValue(Object newOldValue) { oldValue = newOldValue; return this; }
+   
    // Methods:
    
    /**
@@ -146,8 +163,9 @@ public class Change
     * @param operation The operation of this change.
     * @param key The attribute name which will be changed, if the change is an Update.
     * @param value The new value for the attribute identified by <var>key</var>.
+    * @param value The old value for the attribute identified by <var>key</var>.
     */
-   public Change(Operation operation, TrackedMap object, String key, Object value)
+   public Change(Operation operation, TrackedMap object, String key, Object value, Object oldValue)
    {
       setObject(object);
       setOperation(operation);
@@ -158,13 +176,26 @@ public class Change
    /**
     * Applies the change to the object.
     */
-   public void apply()
+   public void apply(TrackedMap object)
    {
       switch (getOperation())
       {
 	 case Update: getObject().put(getKey(), getValue()); break;
 	 case Destroy: getObject().destroy(); break;
 	 case Create: getObject().create(); break;
+      }
+   } // end of apply()
+
+   /**
+    * Rolls back the change to the object.
+    */
+   public void rollback()
+   {
+      switch (getOperation())
+      {
+	 case Update: getObject().put(getKey(), getOldValue()); break;
+	 case Destroy: getObject().create(); break;
+	 case Create: getObject().destroy(); break;
       }
    } // end of apply()
 

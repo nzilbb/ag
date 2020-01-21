@@ -22,23 +22,25 @@
 package nzilbb.ag;
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.LinkedHashMap;
 import java.util.HashMap;
-import java.util.Vector;
-import java.util.Set;
 import java.util.HashSet;
-import java.util.TreeSet;
-import java.util.LinkedHashSet;
-import java.util.SortedSet;
 import java.util.Iterator;
-import nzilbb.ag.util.LayerTraversal;
-import nzilbb.ag.util.AnnotationComparatorByOrdinal;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.Vector;
 import nzilbb.ag.util.AnnotationComparatorByAnchor;
+import nzilbb.ag.util.AnnotationComparatorByOrdinal;
+import nzilbb.ag.util.LayerTraversal;
+
 /**
  * Annotation graph annotation - i.e. an edge of the graph.
  * <p>TODO maybe change <code>list</code> and <code>my</code> to <code>all</code> and
- * <code>all</code>, and add <code>last</code> to complete the set.  
+ * <code>first</code>, and add <code>last</code> to complete the set.  
  * @author Robert Fromont robert@fromont.net.nz
  */
 @SuppressWarnings("serial")
@@ -456,6 +458,8 @@ public class Annotation
       graph = newGraph; 
       if (graph != null)
       {
+         setTracker(graph.getTracker());
+
          // now we have a graph, we may be able to introduce ourselves to related objects
          Layer layer = graph.getLayer(getLayerId());
          if (layer != null)
@@ -472,6 +476,10 @@ public class Annotation
          }
          // reset index for layer
          graph.indicesByLayer.remove(getLayerId());
+      }
+      else
+      {
+         setTracker(null);
       }
       return this;
    }
@@ -891,92 +899,64 @@ public class Annotation
    }
    
    /**
-    * Gets the original label of the annotation, before any subsequent calls to {@link
-    * #setLabel(String)}, since the object was created or {@link #commit()} was called. 
+    * Gets the original label of the annotation, before any subsequent calls to 
+    * {@link #setLabel(String)}, since the object was created. 
     * <p>This method mirrors the map key "originalLabel" created by the TrackedMap.
     * @return The original label.
     */
    public String getOriginalLabel()
    {
-      try 
-      { 
-         return (String)getOriginal("label"); 
-      }
-      catch(ClassCastException exception) 
-      {
-         return getLabel();
-      } 
+      return (String)getOriginal("label")
+         .orElse(getLabel()); 
    } // end of getOriginalLabel()
+   
    /**
-    * Gets the original startId of the annotation, before any subsequent calls to {@link
-    * #setStartId(String)}, since the object was created or {@link #commit()} was called. 
+    * Gets the original startId of the annotation, before any subsequent calls to 
+    * {@link #setStartId(String)}, since the object was created. 
     * <p>This method mirrors the map key "originalStartId" created by the TrackedMap.
     * @return The original label.
     */
    public String getOriginalStartId()
    {
-      try 
-      { 
-         return (String)getOriginal("startId"); 
-      }
-      catch(ClassCastException exception) 
-      {
-         return getStartId();
-      } 
+      return (String)getOriginal("startId")
+         .orElse(getStartId()); 
    } // end of getOriginalStartId()
+   
    /**
-    * Gets the original endId of the annotation, before any subsequent calls to {@link
-    * #setEndId(String)}, since the object was created or {@link #commit()} was called. 
+    * Gets the original endId of the annotation, before any subsequent calls to 
+    * {@link #setEndId(String)}, since the object was created. 
     * <p>This method mirrors the map key "originalEndId" created by the TrackedMap.
     * @return The original endId.
     */
    public String getOriginalEndId()
    {
-      try 
-      { 
-         return (String)getOriginal("endId"); 
-      }
-      catch(ClassCastException exception) 
-      {
-         return getEndId();
-      } 
+      return (String)getOriginal("endId")
+         .orElse(getEndId());
    } // end of getOriginalEndId()
+   
    /**
-    * Gets the original parentId of the annotation, before any subsequent calls to {@link
-    * #setParentId(String)}, since the object was created or {@link #commit()} was
-    * called. 
+    * Gets the original parentId of the annotation, before any subsequent calls to 
+    * {@link #setParentId(String)}, since the object was created. 
     * <p>This method mirrors the map key "originalParenId" created by the TrackedMap.
     * @return The original parentId.
     */
    public String getOriginalParentId()
    {
-      try 
-      { 
-         return (String)getOriginal("parentId"); 
-      }
-      catch(ClassCastException exception) 
-      {
-         return getParentId();
-      } 
+      return (String)getOriginal("parentId")
+         .orElse(getParentId());
    } // end of getOriginalParentId()
+
    /**
-    * Gets the original ordinal of the annotation, before any subsequent calls to {@link
-    * #setOrdinal(int)}, since the object was created or {@link #commit()} was called. 
+    * Gets the original ordinal of the annotation, before any subsequent calls to 
+    * {@link #setOrdinal(int)}, since the object was created. 
     * <p>This method mirrors the map key "originalOrdinal" created by the TrackedMap.
     * @return The original ordinal.
     */
    public int getOriginalOrdinal()
    {
-      try 
-      { 
-         return ((Integer)getOriginal("ordinal")).intValue(); 
-      }
-      catch(ClassCastException exception) 
-      {
-         return getOrdinal();
-      } 
+      return ((Integer)getOriginal("ordinal")
+              .orElse(getOrdinal())).intValue(); 
    } // end of getOriginalOrdinal()
-
    
    /**
     * Returns the ordinal that has previously been explicitly assigned.
