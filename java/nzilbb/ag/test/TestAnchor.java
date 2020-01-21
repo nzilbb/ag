@@ -38,17 +38,13 @@ public class TestAnchor
       a.setId("123");
       a.setOffset(456.789);
       assertEquals("123", a.getId());
-      assertEquals("get() works", "123", a.get("id"));
       assertEquals(Double.valueOf(456.789), a.getOffset());
-      assertEquals("get() works", Double.valueOf(456.789), a.get("offset"));
       assertEquals("456.789", a.toString());
 
       // Basic constructor
       a = new Anchor("123", 456.789);
       assertEquals("123", a.getId());
-      assertEquals("get() works", "123", a.get("id"));
       assertEquals(Double.valueOf(456.789), a.getOffset());
-      assertEquals("get() works", Double.valueOf(456.789), a.get("offset"));
       assertEquals("456.789", a.toString());
    }
 
@@ -124,9 +120,10 @@ public class TestAnchor
    @Test public void changeTracking() 
    {
       Anchor a = new Anchor();
-      a.setId("123");
+      a.setId("changeTracking");
       a.setOffset(456.789);
       a.put("foo", "bar");
+      a.setTracker(new ChangeTracker()); // after initialization 
       assertEquals(Double.valueOf(456.789), a.getOffset());
       assertEquals("Offset and original are the same", a.getOriginalOffset(), a.getOffset());
       assertEquals(Change.Operation.NoChange, a.getChange());
@@ -136,7 +133,8 @@ public class TestAnchor
 
       a.setOffset(123.456);
       assertEquals(Double.valueOf(123.456), a.getOffset());
-      assertEquals("Original offset remembers first offset:", Double.valueOf(456.789), a.getOriginalOffset());
+      assertEquals("Original offset remembers first offset:",
+                   Double.valueOf(456.789), a.getOriginalOffset());
       assertEquals(Change.Operation.Update, a.getChange());
 
       a.setOffset(456.123);
@@ -175,16 +173,18 @@ public class TestAnchor
 
    @Test public void nullInitialOffset() 
    {
-      Anchor a = new Anchor("123", null);
-      assertEquals("123", a.getId());
+      Anchor a = new Anchor("nullInitialOffset", null);
+      a.setTracker(new ChangeTracker());
+      
+      assertEquals("nullInitialOffset", a.getId());
       assertNull(a.getOffset());
       assertEquals("no change registered when offset is initialised as null",
 		   0, a.getChanges().size());
-      assertEquals("change is registered by setter", 1,
-		   a.setOffset(Double.valueOf(99.0)).size());
+
+      a.setOffset(Double.valueOf(99.0)).size();
+      
       assertEquals(Double.valueOf(99.0), a.getOffset());
-      assertTrue(a.containsKey("originalOffset"));     
-      assertNull(a.get("originalOffset"));
+
       assertEquals("a change registered when offset is initialised as null and then is changed",
 		   1, a.getChanges().size());
    }

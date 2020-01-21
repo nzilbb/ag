@@ -164,7 +164,7 @@ public class TestAnnotation
       assertEquals("Original value in map:", "start", a.get("originalStartId"));
       assertEquals(Change.Operation.Update, a.getChange());
 
-      a.commit();
+      //a.commit();
       assertEquals("new start", a.getStartId());
       assertEquals("Committed original attribute:", "new start", a.getOriginalStartId());
       assertFalse("Original value no longer in map:", a.containsKey("originalStartId"));
@@ -263,6 +263,8 @@ public class TestAnnotation
       assertFalse("Anchors inaccessible", test.includesOffset(1.5));
 
       Graph graph = new Graph();
+      graph.setTracker(new ChangeTracker());
+
       graph.addAnchor(start);
       graph.addAnchor(end);
       graph.addAnnotation(test);

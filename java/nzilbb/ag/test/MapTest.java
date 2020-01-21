@@ -40,7 +40,7 @@ public class MapTest extends TrackedMap
    public String getTracked1() { return tracked1; }
    public void setTracked1(String newTracked1)
    {
-      if (tracked1 != null && !tracked1.equals(newTracked1)) registerChange("tracked1", newTracked1);
+      registerChange("tracked1", newTracked1);
       tracked1 = newTracked1;
    }
    
@@ -48,7 +48,7 @@ public class MapTest extends TrackedMap
    public String getTracked2() { return tracked2; }
    public void setTracked2(String newTracked2)
    {
-      if (tracked2 != null && !tracked2.equals(newTracked2)) registerChange("tracked2", newTracked2);
+      registerChange("tracked2", newTracked2);
       tracked2 = newTracked2;
    }
    
@@ -56,7 +56,7 @@ public class MapTest extends TrackedMap
    public String getTracked3() { return tracked3; }
    public void setTracked3(String newTracked3)
    {
-      if (tracked3 != null && !tracked3.equals(newTracked3)) registerChange("tracked3", newTracked3);
+      registerChange("tracked3", newTracked3);
       tracked3 = newTracked3;
    }
    

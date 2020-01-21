@@ -86,7 +86,6 @@ public class TestTrackedMap
       assertEquals(1, m.getChanges().size());
       assertEquals("Update ID: tracked2 = newValue2", m.getChanges().elementAt(0).toString());
 
-      m.commit();
       assertEquals("newValue2", m.getTracked2());
       assertFalse("Original value no longer in map:", m.containsKey("originalTracked2"));
       assertEquals(Change.Operation.NoChange, m.getChange());
@@ -176,10 +175,10 @@ public class TestTrackedMap
 
       // get()
       assertEquals("123", m.getId());
-      assertEquals("value1", m.get("tracked1"));
-      assertEquals("value2", m.get("tracked2"));
-      assertEquals("value3", m.get("tracked3"));
-      assertEquals("value4", m.get("notTracked"));
+      assertNull(m.get("tracked1"));
+      assertNull(m.get("tracked2"));
+      assertNull(m.get("tracked3"));
+      assertNull(m.get("notTracked"));
       assertEquals("value5", m.get("noGetter"));
    }
 
