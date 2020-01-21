@@ -42,9 +42,7 @@ public class Anchor
    private static String[] aTrackedAttributes = {"offset"};
    /**
     * Keys for attributes that are change-tracked - i.e. when a new value is set for any
-    * of these attributes, the original value is saved in the map with the given key
-    * prefixed by "original" - e.g. if "offset" is changed, then "originalOffset" will
-    * contain its original value.
+    * of these attributes, and {@link TrackedMap#tracker} is set, the change is registered.
     * <p>HashSet is used for this because there's only one tracked attribute, so iteration
     * order is unimportant.
     */
@@ -52,9 +50,7 @@ public class Anchor
 
    /**
     * Keys for attributes that are change-tracked - i.e. when a new value is set for any
-    * of these attributes, the original value is saved in the map with the given key
-    * prefixed by "original" - e.g. if "offset" is changed, then "originalOffset" will
-    * contain its original value.
+    * of these attributes, and {@link TrackedMap#tracker} is set, the change is registered.
     * @return "offset"
     */
    public Set<String> getTrackedAttributes()
@@ -104,15 +100,14 @@ public class Anchor
    {
       if (offset != null && offset.isNaN()) offset = null;
       Vector<Change> changes = new Vector<Change>();
-      if (containsKey("originalOffset")
-          || (this.offset != null && !this.offset.equals(offset)))
-      {
-         Change change = registerChange("offset", offset);
+      Change change = registerChange("offset", offset);
 
+      if (change != null)
+      {
          // record the change
          changes.add(change);
       }
-
+      
       this.offset = offset;
 
       if (offset != null || changes.size() > 0)
@@ -218,7 +213,6 @@ public class Anchor
    {
       setId(id);
       setOffset(offset);
-      if (offset == null) put("originalOffset", null);
       put("startOf", getStartOf()); // TODO these violate the principle of having only simple values
       put("endOf", getEndOf());
    } // end of constructor
@@ -238,7 +232,6 @@ public class Anchor
    {
       setId(id);
       setOffset(offset);
-      if (offset == null) put("originalOffset", null);
       setConfidence(confidence);
       put("startOf", getStartOf());
       put("endOf", getEndOf());
@@ -258,11 +251,6 @@ public class Anchor
    {
       putAll(other);
       Vector<String> keysToRemove = new Vector<String>();
-      for (String key : getTrackedAttributes())
-      {
-         String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
-         keysToRemove.add(originalValueKey);
-      }
       for (String key : keySet())
       {
          if (key.length() > 0 && !Character.isLetterOrDigit(key.charAt(0)))
@@ -316,7 +304,6 @@ public class Anchor
    /**
     * Gets the original offset of the anchor, before any subsequent calls to 
     * {@link #setOffset(Double)}, since the object was created. 
-    * <p>This method mirrors the map key "originalOffset" created by the TrackedMap.
     * @return The original offset.
     */
    public Double getOriginalOffset() 
@@ -324,6 +311,7 @@ public class Anchor
       if (tracker != null)
       {
          Optional<Change> change = tracker.getChange(id, "offset");
+         System.out.println("getOriginalOffset " + id + ": " + change);
          if (change.isPresent())
          {
             return (Double)change.get().getOldValue();

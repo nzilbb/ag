@@ -80,16 +80,12 @@ public class TrackedMap
    
    /**
     * Keys for attributes that are change-tracked - i.e. when a new value is set for any of
-    * these attributes, the original value is saved in the map with the given key prefixed
-    * by "original" - e.g. if "label" is changed, then "originalLabel" will contain its
-    * original value. 
+    * these attributes, and {@link #tracker} is set, the change is registered. 
     */
    private static final TreeSet<String> trackedAttributes = new TreeSet<String>();
    /**
     * Keys for attributes that are change-tracked - i.e. when a new value is set for any of
-    * these attributes, the original value is saved in the map with the given key prefixed
-    * by "original" - e.g. if "label" is changed, then "originalLabel" will contain its
-    * original value. 
+    * these attributes, and {@link #tracker} is set, the change is registered. 
     * @return A set of attributes whose changes are tracked.
     */
    public Set<String> getTrackedAttributes()
@@ -229,11 +225,11 @@ public class TrackedMap
    } // end of getOriginalLabel()
 
    /**
-    * Registers a change to a tracked attribute, by setting the "original..." attribute,
-    * and returning a corresponding change for the given attribute. 
-    * @param key
-    * @param value
-    * @return Returns an Update change.
+    * Registers a change to a tracked attribute, if appropriate,
+    * and returns a corresponding change for the given attribute. 
+    * @param key The attribute key.
+    * @param value The proposed change.
+    * @return Returns an Update change, or null if the value is not changing.
     */
    protected Change registerChange(String key, Object value)
    {
@@ -246,8 +242,8 @@ public class TrackedMap
          assert getter != null : "registerChange: getter != null : "
             + key + ", " + value + " - " + this.getClass().getName();
          Object oldValue = getter.invoke(this);
-         if (oldValue != null && value != null
-             && !value.equals(oldValue))
+         if ((value != null && !value.equals(oldValue))
+             || value == null && oldValue != null)
          { // only track actual changes
             change = new Change(Change.Operation.Update, this, key, value, oldValue);
             tracker.accept(change);
@@ -336,10 +332,13 @@ public class TrackedMap
       if (tracker == null)
          throw new NullPointerException(""+id+" has no change tracker and cannot be rolled back");
 
-      tracker.getChanges(id).forEach(c -> {
-            c.rollback();
-            tracker.reject(c);
-         });
+      if (getChange() != Change.Operation.Create)
+      {
+         tracker.getChanges(id).forEach(c -> {
+               c.rollback();
+               tracker.reject(c);
+            });
+      }
    } // end of rollback()
 
    /**
@@ -366,15 +365,14 @@ public class TrackedMap
     */
    public Change.Operation getChange()
    {
-      if (tracker == null)
-         throw new NullPointerException(""+id+" has no change tracker so change is unknown");
+      if (tracker == null) return Change.Operation.NoChange;
       
       Optional<Change> createDestroy = tracker.getChange(id, null);
       if (createDestroy.isPresent()) return createDestroy.get().getOperation();
 
       return tracker.getChanges(id).size() == 0
-         ?Change.Operation.Update
-         :Change.Operation.NoChange;
+         ?Change.Operation.NoChange
+         :Change.Operation.Update;
    } // end of getChange()
    
    /**
@@ -604,7 +602,7 @@ public class TrackedMap
       }
       catch(Throwable exception)
       {
-         System.out.println("" + exception);
+         System.err.println("" + exception);
          return null;
       }	 
    } // end of getter()

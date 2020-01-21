@@ -1720,6 +1720,8 @@ public class Graph
             iAnchor.remove();
          }
       } // next anchor
+
+      tracker.reset();
    }
    
    // TrackedMap methods
@@ -1781,6 +1783,7 @@ public class Graph
             a.rollback();
          }
       } // next annotation
+      tracker.reset();
    } // end of rollback()
    
    /**

@@ -21,8 +21,9 @@
 //
 package nzilbb.ag;
 
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -60,6 +61,7 @@ public class ChangeTracker
          Change earlierChange = attributeMap.get(change.getKey());
          change.setOldValue(earlierChange.getOldValue());
       }
+      // System.out.println("ChangeTracker.accept: " + change);
       attributeMap.put(change.getKey(), change);
    }
    
@@ -109,14 +111,26 @@ public class ChangeTracker
     */
    public Set<Change> getChanges(String id)
    {
-      final HashSet<Change> changes = new HashSet<Change>();
+      final LinkedHashSet<Change> changes = new LinkedHashSet<Change>();
       if (id != null)
       {
          if (idToChanges.containsKey(id))
          {
-            idToChanges.get(id).values().forEach(c -> changes.add(c));
+            idToChanges.get(id).values().stream()
+               .sorted(new Comparator<Change>(){
+                     public int compare(Change c1, Change c2)
+                     {
+                        if (c1.getOperation() == Change.Operation.Create) return -1;
+                        if (c2.getOperation() == Change.Operation.Create) return 1;
+                        if (c1.getOperation() == Change.Operation.Destroy) return 1;
+                        if (c2.getOperation() == Change.Operation.Destroy) return -1;
+                        return c1.getKey().compareTo(c2.getKey());
+                     }
+                  })
+               .forEach(c -> changes.add(c));
          } // idToChanges.containsKey(id)
       } // id != null
+      // System.out.println("Changes for " + id + ": " + changes);
       return changes;
    }
    
@@ -135,8 +149,8 @@ public class ChangeTracker
     */
    public Set<Change> getChanges()
    {
-      final HashSet<Change> changes = new HashSet<Change>();
-      idToChanges.values().forEach(map -> map.values().forEach(c -> changes.add(c)));
+      final LinkedHashSet<Change> changes = new LinkedHashSet<Change>();
+      idToChanges.keySet().forEach(id -> changes.addAll(getChanges()));
       return changes;
    }
    

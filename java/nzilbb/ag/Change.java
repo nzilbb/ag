@@ -21,6 +21,8 @@
 //
 package nzilbb.ag;
 
+import java.lang.reflect.InvocationTargetException;
+
 /**
  * Defines a single change to a TrackedMap object.
  * @author Robert Fromont robert@fromont.net.nz
@@ -171,6 +173,7 @@ public class Change
       setOperation(operation);
       setKey(key);
       setValue(value);
+      setOldValue(oldValue);
    } // end of constructor
    
    /**
@@ -180,7 +183,14 @@ public class Change
    {
       switch (getOperation())
       {
-	 case Update: getObject().put(getKey(), getValue()); break;
+	 case Update:
+            try
+            {
+               TrackedMap.setter(object, key).invoke(object, value);
+            }
+            catch(IllegalAccessException x) {}
+            catch(InvocationTargetException x) {}
+            break;
 	 case Destroy: getObject().destroy(); break;
 	 case Create: getObject().create(); break;
       }
@@ -191,12 +201,22 @@ public class Change
     */
    public void rollback()
    {
+      ChangeTracker tracker = object.getTracker();
+      object.setTracker(null); // prevent change tracking for rollback
       switch (getOperation())
       {
-	 case Update: getObject().put(getKey(), getOldValue()); break;
+	 case Update:
+            try
+            {
+               TrackedMap.setter(object, key).invoke(object, oldValue); 
+            }
+            catch(IllegalAccessException x) {}
+            catch(InvocationTargetException x) {}
+            break;
 	 case Destroy: getObject().create(); break;
 	 case Create: getObject().destroy(); break;
       }
+      object.setTracker(tracker);
    } // end of apply()
 
    // java.lang.Object overrides:
@@ -207,8 +227,9 @@ public class Change
     */
    public String toString()
    {
-      return ""+getOperation() + " " + getObject().getId()
-	 + (getOperation() == Operation.Update?": " + getKey() + " = " + getValue():"");
+      return ""+operation + " " + object.getId()
+	 + (operation == Operation.Update?
+            ": " + key + " = " + value + " (was "+oldValue+")":"");
    } // end of toString()   
    
    /**

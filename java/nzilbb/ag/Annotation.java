@@ -52,9 +52,7 @@ public class Annotation
    private static String[] aTrackedAttributes = {"label", "startId", "endId", "parentId", "ordinal"};
    /**
     * Keys for attributes that are change-tracked - i.e. when a new value is set for any
-    * of these attributes, the original value is saved in the map with the given key
-    * prefixed by "original" - e.g. if "label" is changed, then "originalLabel" will
-    * contain its original value. 
+    * of these attributes, and {@link TrackedMap#tracker} is set, the change is registered. 
     * <p>LinkedHashSet is used so that attributes are iterated in the order they're
     * defined in aTrackedAttributes (which is the order shown in the documentation of
     * {@link #getTrackedAttributes()}). 
@@ -63,9 +61,7 @@ public class Annotation
 
    /**
     * Keys for attributes that are change-tracked - i.e. when a new value is set for any
-    * of these attributes, the original value is saved in the map with the given key
-    * prefixed by "original" - e.g. if "label" is changed, then "originalLabel" will
-    * contain its original value. 
+    * of these attributes, and {@link TrackedMap#tracker} is set, the change is registered. 
     * @return "label", "startId", "endId", "parentId", "ordinal"
     */
    public Set<String> getTrackedAttributes() { return trackedAttributes; }
@@ -856,12 +852,7 @@ public class Annotation
       for (String key : keySet())
       {
          // remove tracked original attributes
-         if (getTrackedAttributes().contains(key))
-         {
-            String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
-            keysToRemove.add(originalValueKey);
-         }
-         else if (key.length() > 0 && !Character.isLetterOrDigit(key.charAt(0)))
+         if (key.length() > 0 && !Character.isLetterOrDigit(key.charAt(0)))
          { // starts with non-alphanumeric
             keysToRemove.add(key);
          }
@@ -901,7 +892,6 @@ public class Annotation
    /**
     * Gets the original label of the annotation, before any subsequent calls to 
     * {@link #setLabel(String)}, since the object was created. 
-    * <p>This method mirrors the map key "originalLabel" created by the TrackedMap.
     * @return The original label.
     */
    public String getOriginalLabel()
@@ -913,7 +903,6 @@ public class Annotation
    /**
     * Gets the original startId of the annotation, before any subsequent calls to 
     * {@link #setStartId(String)}, since the object was created. 
-    * <p>This method mirrors the map key "originalStartId" created by the TrackedMap.
     * @return The original label.
     */
    public String getOriginalStartId()
@@ -925,7 +914,6 @@ public class Annotation
    /**
     * Gets the original endId of the annotation, before any subsequent calls to 
     * {@link #setEndId(String)}, since the object was created. 
-    * <p>This method mirrors the map key "originalEndId" created by the TrackedMap.
     * @return The original endId.
     */
    public String getOriginalEndId()
@@ -937,7 +925,6 @@ public class Annotation
    /**
     * Gets the original parentId of the annotation, before any subsequent calls to 
     * {@link #setParentId(String)}, since the object was created. 
-    * <p>This method mirrors the map key "originalParenId" created by the TrackedMap.
     * @return The original parentId.
     */
    public String getOriginalParentId()
@@ -949,7 +936,6 @@ public class Annotation
    /**
     * Gets the original ordinal of the annotation, before any subsequent calls to 
     * {@link #setOrdinal(int)}, since the object was created. 
-    * <p>This method mirrors the map key "originalOrdinal" created by the TrackedMap.
     * @return The original ordinal.
     */
    public int getOriginalOrdinal()
