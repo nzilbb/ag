@@ -93,6 +93,7 @@ public class TestSpanningConventionTransformer
 
       try
       {
+         g.setTracker(new ChangeTracker());
 	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
 	    "word", "\\{(.*)", "(.*)\\}", true, null, null, "comment", "$1", "$1", false, true);
 	 Vector<Change> changes = transformer.transform(g);
@@ -174,6 +175,7 @@ public class TestSpanningConventionTransformer
 
       try
       {
+         g.setTracker(new ChangeTracker());
 	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
 	    "word", "\\{(.*)", "(.*)\\}", true, null, null, "comment", "$1", "$1", false, 
 	    // this time don't close gaps:
@@ -253,6 +255,7 @@ public class TestSpanningConventionTransformer
 
       try
       {
+         g.setTracker(new ChangeTracker());
 	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
 	    "word", "\\{(.*)", "(.*)\\}", true, null, null, "comment", "$1", "$1", false, true);
 	 Vector<Change> changes = transformer.transform(g);
@@ -338,6 +341,7 @@ public class TestSpanningConventionTransformer
 
       try
       {
+         g.setTracker(new ChangeTracker());
 	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
 	    "word", "\\{(.*)", "(.*)\\}", true, null, null, "comment", "$1", "$1");
 	 Vector<Change> changes = transformer.transform(g);
@@ -414,6 +418,7 @@ public class TestSpanningConventionTransformer
 
       try
       {
+         g.setTracker(new ChangeTracker());
 	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
 	    "word", "\\{(.*)", "(.*)\\}", true, null, null, "comment", "$1", "$1");
 	 Vector<Change> changes = transformer.transform(g);
@@ -492,6 +497,7 @@ public class TestSpanningConventionTransformer
 
       try
       {
+         g.setTracker(new ChangeTracker());
 	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
 	    "word", "\\[(.*)", "(.*)\\]", false, null, "$1", "phrase", "$1", null);
 	 Vector<Change> changes = transformer.transform(g);
@@ -583,6 +589,7 @@ public class TestSpanningConventionTransformer
 
       try
       {
+         g.setTracker(new ChangeTracker());
 	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
 	    "word", "\\[:", "(.*)\\]", true, null, null, "expansion", null, "$1", true, true);
 	 Vector<Change> changes = transformer.transform(g);
@@ -676,6 +683,7 @@ public class TestSpanningConventionTransformer
       try
       {
 	 // transformer allows suffix after closing ]
+         g.setTracker(new ChangeTracker());
 	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
 	    "word", "\\[:", "(.*)\\](.*)", true, null, "$2", "expansion", null, "$1", true, true);
 	 Vector<Change> changes = transformer.transform(g);
@@ -769,6 +777,7 @@ public class TestSpanningConventionTransformer
       try
       {
 	 // transformer allows suffix after closing ]
+         g.setTracker(new ChangeTracker());
 	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
 	    "word", "\\[:", "(.*)\\](.*)", true, null, "$2", "expansion", null, "$1", true, true);
 	 Vector<Change> changes = transformer.transform(g);
@@ -861,6 +870,7 @@ public class TestSpanningConventionTransformer
 
       try
       {
+         g.setTracker(new ChangeTracker());
 	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
 	    "word", "<(.*)", "(.*)>(.*)", false, "$1", "$1$2", "span", "-", "$1", "$1", false);
 	 Vector<Change> changes = transformer.transform(g);
@@ -941,6 +951,7 @@ public class TestSpanningConventionTransformer
       try
       {
 	 // delete span by setting destination layer to null
+         g.setTracker(new ChangeTracker());
 	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
 	    "word", "\\{(.*)", "(.*)\\}", true, null, null, null, null, null);
 	 Vector<Change> changes = transformer.transform(g);

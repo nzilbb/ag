@@ -93,6 +93,7 @@ public class TestOrthographyClumper
 
       try
       {
+         g.setTracker(new ChangeTracker());
 	 OrthographyClumper transformer = new OrthographyClumper("word");
 	 Vector<Change> changes = transformer.transform(g);
 	 g.commit();
@@ -192,6 +193,7 @@ public class TestOrthographyClumper
 
       try
       {
+         g.setTracker(new ChangeTracker());
 	 OrthographyClumper transformer = new OrthographyClumper("word", "line");
 	 Vector<Change> changes = transformer.transform(g);
 	 g.commit();
@@ -309,6 +311,7 @@ public class TestOrthographyClumper
 
       try
       {
+         g.setTracker(new ChangeTracker());
 	 OrthographyClumper transformer = new OrthographyClumper("word");
 	 Vector<Change> changes = transformer.transform(g);
 	 g.commit();
@@ -429,6 +432,7 @@ public class TestOrthographyClumper
 
       try
       {
+         g.setTracker(new ChangeTracker());
 	 OrthographyClumper transformer = new OrthographyClumper("word");
 	 Vector<Change> changes = transformer.transform(g);
 	 g.commit();
@@ -546,7 +550,8 @@ public class TestOrthographyClumper
 
       try
       {
-	 OrthographyClumper transformer = new OrthographyClumper("word");
+         g.setTracker(new ChangeTracker());
+         OrthographyClumper transformer = new OrthographyClumper("word");
 	 Vector<Change> changes = transformer.transform(g);
 	 g.commit();
 	 Annotation words[] = g.list("word");
@@ -623,6 +628,7 @@ public class TestOrthographyClumper
 
       try
       {
+         g.setTracker(new ChangeTracker());
 	 OrthographyClumper transformer = new OrthographyClumper("word");
 	 Vector<Change> changes = transformer.transform(g);
 	 g.commit();
@@ -696,6 +702,7 @@ public class TestOrthographyClumper
 
       try
       {
+         g.setTracker(new ChangeTracker());
 	 OrthographyClumper transformer = new OrthographyClumper("word");
 	 Vector<Change> changes = transformer.transform(g);
 	 g.commit();

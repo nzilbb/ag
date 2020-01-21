@@ -77,6 +77,7 @@ public class TestSimpleTokenizer
 
       try
       {
+         g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word");
 	 Vector<Change> changes = tokenizer.transform(g);
 	 Annotation[] words = g.getAnnotation("turn1").list("word");
@@ -175,6 +176,7 @@ public class TestSimpleTokenizer
 
       try
       {
+         g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word");
 	 Vector<Change> changes = tokenizer.transform(g);
 	 Annotation[] words = g.getAnnotation("turn1").list("word");
@@ -274,6 +276,7 @@ public class TestSimpleTokenizer
 
       try
       {
+         g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word");
 	 Vector<Change> changes = tokenizer.transform(g);
 	 Annotation[] words = g.getAnnotation("turn1").list("word");
@@ -354,6 +357,7 @@ public class TestSimpleTokenizer
 
       try
       {
+         g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word", "\\|");
 	 Vector<Change> changes = tokenizer.transform(g);
 	 Annotation[] words = g.getAnnotation("turn1").list("word");
@@ -463,6 +467,7 @@ public class TestSimpleTokenizer
 
       try
       {
+         g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("word", "linkage", "_", true);
 	 Vector<Change> changes = tokenizer.transform(g);
 	 Annotation[] words = g.getAnnotation("turn1").list("word");
@@ -574,6 +579,7 @@ public class TestSimpleTokenizer
 
       try
       {
+         g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word");
 	 Vector<Change> changes = tokenizer.transform(g);
 	 Annotation[] words = g.getAnnotation("turn1").list("word");
@@ -669,6 +675,7 @@ public class TestSimpleTokenizer
 
       try
       {
+         g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word");
 	 Vector<Change> changes = tokenizer.transform(g);
 	 Annotation[] words = g.getAnnotation("turn1").list("word");

@@ -234,6 +234,7 @@ public class TestConventionTransformer
     g.addAnnotation(new Annotation("word5", "jumps", "word", "a?1", "a?2", "turn1"));
     g.addAnnotation(new Annotation("word6", "over", "word", "a?2", "a5", "turn1"));
 
+    g.setTracker(new ChangeTracker());
     try
     {
       ConventionTransformer transformer = new ConventionTransformer("word", "\\[(.+)\\]");

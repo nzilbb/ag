@@ -108,6 +108,7 @@ public class TestNormalizer
       g.getAnnotation("jumps").setLabel("test");
       g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
+      g.setTracker(new ChangeTracker());
       Normalizer n = new Normalizer();
       try
       {
@@ -198,6 +199,7 @@ public class TestNormalizer
       g.getAnnotation("jumps").setLabel("test");
       g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
+      g.setTracker(new ChangeTracker());
       Normalizer n = new Normalizer();
       try
       {
@@ -308,6 +310,7 @@ public class TestNormalizer
       g.getAnnotation("jumps").setLabel("test");
       g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
+      g.setTracker(new ChangeTracker());
       Normalizer n = new Normalizer();
       // no minimumTurnPauseLength, so the gap between turns is not bridged
       try
@@ -409,6 +412,7 @@ public class TestNormalizer
       g.getAnnotation("jumps").setLabel("test");
       g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
+      g.setTracker(new ChangeTracker());
       Normalizer n = new Normalizer();
       // minimum long enough to bridge the gap
       n.setMinimumTurnPauseLength(1.0);
@@ -521,6 +525,7 @@ public class TestNormalizer
       g.getAnnotation("jumps").setLabel("test");
       g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
+      g.setTracker(new ChangeTracker());
       Normalizer n = new Normalizer();
       // minimum is too short to bridge the gap
       n.setMinimumTurnPauseLength(0.5);
@@ -630,6 +635,7 @@ public class TestNormalizer
       g.getAnnotation("jumps").setLabel("test");
       g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
+      g.setTracker(new ChangeTracker());
       Normalizer n = new Normalizer();
       // minimum long enough to bridge the gap, but there's an intervening speaker
       n.setMinimumTurnPauseLength(1.0);
@@ -730,6 +736,7 @@ public class TestNormalizer
       g.getAnnotation("jumps").setLabel("test");
       g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
+      g.setTracker(new ChangeTracker());
       Normalizer n = new Normalizer();
       try
       {
@@ -855,6 +862,7 @@ public class TestNormalizer
       g.getAnnotation("jumps").setLabel("test");
       g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
+      g.setTracker(new ChangeTracker());
       Normalizer n = new Normalizer();
       try
       {
@@ -984,6 +992,7 @@ public class TestNormalizer
       g.getAnnotation("jumps").setLabel("test");
       g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
+      g.setTracker(new ChangeTracker());
       Normalizer n = new Normalizer();
       try
       {
@@ -1103,6 +1112,7 @@ public class TestNormalizer
       g.getAnnotation("jumps").setLabel("test");
       g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
+      g.setTracker(new ChangeTracker());
       Normalizer n = new Normalizer();
       try
       {
@@ -1205,6 +1215,7 @@ public class TestNormalizer
       g.getAnnotation("jumps").setLabel("test");
       g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
+      g.setTracker(new ChangeTracker());
       Normalizer n = new Normalizer();
       try
       {
@@ -1299,6 +1310,7 @@ public class TestNormalizer
       g.addAnnotation(new Annotation("lazy",  "lazy",  "word", "a34",  "a44", "turn1"));
       g.addAnnotation(new Annotation("dog",  "dog",    "word", "a44",  "a54", "turn1"));
 
+      g.setTracker(new ChangeTracker());
       Normalizer n = new Normalizer();
       n.setMaxLabelLength(4);
       try

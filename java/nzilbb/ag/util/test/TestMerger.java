@@ -67,6 +67,7 @@ public class TestMerger
       
     Graph originalGraph = loadGraphFromJSON(f, schema);
 
+    originalGraph.setTracker(new ChangeTracker());
     Merger m = new Merger();
 
     try
@@ -105,6 +106,7 @@ public class TestMerger
     //m.setDebug(true);
 
     Graph originalGraph = loadGraphFromJSON(f, schema);
+    originalGraph.setTracker(new ChangeTracker());
 
     try
     {
@@ -267,6 +269,8 @@ public class TestMerger
     e.addAnnotation(new Annotation("word5", "ah", "word", "a5", "a6", "turn1"));
     e.addAnnotation(new Annotation("phrase2", "NP", "phrase", "a1", "a5", "turn1"));
     // no pos nor phrase
+    
+    g.setTracker(new ChangeTracker());
 
     Merger m = new Merger(e);
     // m.setDebug(true);
@@ -451,6 +455,8 @@ public class TestMerger
     editedFragment.addAnnotation(
       new Annotation("word4", "FOX", "word", "a4", "a5"));
 
+    originalFragment.setTracker(new ChangeTracker());
+    
     Merger m = new Merger(editedFragment);
     // m.setDebug(true);
     try
@@ -628,6 +634,7 @@ public class TestMerger
       try
       {
         Graph originalGraph = loadGraphFromJSON(fOriginal, schema);
+        originalGraph.setTracker(new ChangeTracker());
         File fEdited = new File(subdir, "edited_" + fragmentName + ".json");
         Graph editedGraph = loadGraphFromJSON(fEdited, schema);
         Merger m = new Merger(editedGraph);
