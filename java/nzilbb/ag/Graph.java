@@ -45,19 +45,32 @@ import nzilbb.util.Timers;
 
 /**
  * Linguistic annotation graph.
- * <p>An annotation graph is a collection of {@link Annotation}s (edges) joined by {@link Anchor}s (nodes) which may or may not have temporal/character offsets. Superimposed over this temporallay anchored graph is another heirarchical graph, where annotations are nodes and edges are child-to-parent links.
- * <p>In addition to containing the nodes/edges, this class inherits from {@link Annotation} so that it can:
+ * <p>An annotation graph is a collection of {@link Annotation}s (edges) joined by {@link
+ * Anchor}s (nodes) which may or may not have temporal/character offsets. Superimposed
+ * over this temporallay anchored graph is another heirarchical graph, where annotations
+ * are nodes and edges are child-to-parent links. 
+ * <p>In addition to containing the nodes/edges, this class inherits from {@link
+ * Annotation} so that it can: 
  * <ul>
- *   <li>be the root node of the annotation hierarchy - i.e. be the parent of annotations at the top of the layer hierarchy</li>
+ *   <li>be the root node of the annotation hierarchy - i.e. be the parent of annotations
+ * at the top of the layer hierarchy</li> 
  *   <li>have start/end anchors</li>
  * </ul>
  * <p>In addition to this, the graph also has:
  * <ul>
- *  <li>a corpus attribute representing the collection to which it belongs (see {@link #getCorpus()}, {@link #setCorpus(String)}),</li>
+ *  <li>a corpus attribute representing the collection to which it belongs (see 
+ * {@link #getCorpus()}, {@link #setCorpus(String)}),</li> 
  *  <li>definitions of annotation {@link Layer}s and their hierarchy</li>
  * </ul>
- * <p>It is recommended that other graph attributes are represented as annotations that 'tag' the whole graph, and that speakers/participants are also represented as such annotations, on a "participant" layer, which is the parent of a "turn" layer which defines speaker turns.
- * <p>This class can also represent graph fragments (sub-graphs).  If this is a whole graph, {@link Annotation#graph} == <var>this</var>, but if it's a fragment, then {@link Annotation#graph} != <var>this</var>. The {@link #isFragment()} convenience method captures this principle. The annotations in a graph fragment have the fragment object (not the whole-graph object) set as their {@link Annotation#graph}.
+ * <p>It is recommended that other graph attributes are represented as annotations that
+ * 'tag' the whole graph, and that speakers/participants are also represented as such
+ * annotations, on a "participant" layer, which is the parent of a "turn" layer which
+ * defines speaker turns. 
+ * <p>This class can also represent graph fragments (sub-graphs).  If this is a whole
+ * graph, {@link Annotation#graph} == <var>this</var>, but if it's a fragment, then 
+ * {@link Annotation#graph} != <var>this</var>. The {@link #isFragment()} convenience method
+ * captures this principle. The annotations in a graph fragment have the fragment object
+ * (not the whole-graph object) set as their {@link Annotation#graph}. 
  * @author Robert Fromont robert.fromont@canterbury.ac.nz
  */
 @SuppressWarnings("serial")
@@ -81,20 +94,29 @@ public class Graph
    } // end of newId()
 
    /**
-    * The ID of the end anchor of the last annotation added using {@link #addAnnotation(Annotation)}, or the last anchor added using {@link #addAnchor(Anchor)}.
+    * The ID of the end anchor of the last annotation added using
+    * {@link #addAnnotation(Annotation)}, or the last anchor added using
+    * {@link #addAnchor(Anchor)}.
     */
    protected String lastAddedAnchorId;
    /**
-    * Getter for lastAddedAnchorId: The ID of the end anchor of the last annotation added using {@link #addAnnotation(Annotation)}, or the last anchor added using {@link #addAnchor(Anchor)}.
-    * @return The ID of the end anchor of the last annotation added using {@link #addAnnotation(Annotation)}, or the last anchor added using {@link #addAnchor(Anchor)}.
+    * Getter for lastAddedAnchorId: The ID of the end anchor of the last annotation added
+    * using {@link #addAnnotation(Annotation)}, or the last anchor added using 
+    * {@link #addAnchor(Anchor)}. 
+    * @return The ID of the end anchor of the last annotation added using
+    * {@link #addAnnotation(Annotation)}, or the last anchor added using
+    * {@link #addAnchor(Anchor)}.
     */
    public String getLastAddedAnchorId() { return lastAddedAnchorId; }
 
    // keep a list of annotations whose anchors haven't been added yet
-   private HashMap<String,Vector<Annotation>> unknownStartAnchor = new HashMap<String,Vector<Annotation>>();
-   private HashMap<String,Vector<Annotation>> unknownEndAnchor = new HashMap<String,Vector<Annotation>>();
+   private HashMap<String,Vector<Annotation>> unknownStartAnchor
+   = new HashMap<String,Vector<Annotation>>();
+   private HashMap<String,Vector<Annotation>> unknownEndAnchor
+   = new HashMap<String,Vector<Annotation>>();
    // keep a list of orphaned annotations, keyed on layerId
-   HashMap<String,LinkedHashSet<Annotation>> orphans = new HashMap<String,LinkedHashSet<Annotation>>();
+   HashMap<String,LinkedHashSet<Annotation>> orphans
+   = new HashMap<String,LinkedHashSet<Annotation>>();
 
    /**
     * Getter for corpus: The name of the corpus the graph belongs to.
@@ -138,19 +160,26 @@ public class Graph
    public Graph setAnchors(LinkedHashMap<String,Anchor> anchors) { put("anchors", anchors); return this; }
    
    /**
-    * Granularity of offsets - e.g. 0.001 if Anchor offsets are always set to the the nearest millisecond, or null for no particular granularity.
+    * Granularity of offsets - e.g. 0.001 if Anchor offsets are always set to the the
+    * nearest millisecond, or null for no particular granularity. 
     * @see #getOffsetGranularity()
     * @see #setOffsetGranularity(Double)
     */
    protected Double offsetGranularity;
    /**
-    * Getter for {@link #offsetGranularity}: Granularity of offsets - e.g. 0.001 if Anchor offsets are always set to the the nearest millisecond, or null for no particular granularity.
-    * @return Granularity of offsets - e.g. 0.001 if Anchor offsets are always set to the the nearest millisecond, or null for no particular granularity.
+    * Getter for {@link #offsetGranularity}: Granularity of offsets - e.g. 0.001 if Anchor
+    * offsets are always set to the the nearest millisecond, or null for no particular
+    * granularity. 
+    * @return Granularity of offsets - e.g. 0.001 if Anchor offsets are always set to the
+    * the nearest millisecond, or null for no particular granularity. 
     */
    public Double getOffsetGranularity() { return offsetGranularity; }
    /**
-    * Setter for {@link #offsetGranularity}.g. 0.001 if Anchor offsets are always set to the the nearest millisecond, or null for no particular granularity.
-    * @param newOffsetGranularity Granularity of offsets - e.g. 0.001 if Anchor offsets are always set to the the nearest millisecond, or null for no particular granularity.
+    * Setter for {@link #offsetGranularity}.g. 0.001 if Anchor offsets are always set to
+    * the the nearest millisecond, or null for no particular granularity. 
+    * @param newOffsetGranularity Granularity of offsets - e.g. 0.001 if Anchor offsets
+    * are always set to the the nearest millisecond, or null for no particular
+    * granularity. 
     * @return <var>this</var>.
     */
    public Graph setOffsetGranularity(Double newOffsetGranularity)
@@ -167,7 +196,9 @@ public class Graph
    }
 
    /**
-    * The units for anchor offsets - e.g. "s" for seconds, "char" for characters, etc.  Preferably the value should be one of the Constants.UNIT_... constants. The default value is {@link Constants#UNIT_SECONDS}.
+    * The units for anchor offsets - e.g. "s" for seconds, "char" for characters, etc.
+    * Preferably the value should be one of the Constants.UNIT_... constants. The default
+    * value is {@link Constants#UNIT_SECONDS}. 
     * @see #getOffsetUnits()
     * @see #setOffsetUnits(String)
     * @see Constants#UNIT_SECONDS
@@ -175,20 +206,24 @@ public class Graph
     */
    protected String offsetUnits = Constants.UNIT_SECONDS;
    /**
-    * Getter for {@link #offsetUnits}: The units for anchor offsets - e.g. "s" for seconds, "char" for characters, etc.  Preferably the value should be one of the Constants.UNIT_... constants. The default value is {@link Constants#UNIT_SECONDS}.
-    * @return The units for anchor offsets - e.g. "s" for seconds, "char" for characters, etc.  Preferably the value should be one of the Constants.UNIT_... constants.
+    * Getter for {@link #offsetUnits}: The units for anchor offsets - e.g. "s" for
+    * seconds, "char" for characters, etc.  Preferably the value should be one of the
+    * Constants.UNIT_... constants. The default value is {@link Constants#UNIT_SECONDS}. 
+    * @return The units for anchor offsets - e.g. "s" for seconds, "char" for characters,
+    * etc.  Preferably the value should be one of the Constants.UNIT_... constants. 
     */
    public String getOffsetUnits() { return offsetUnits; }
    /**
-    * Setter for {@link #offsetUnits}.g. "s" for seconds, "char" for characters, etc.  Preferably the value should be one of the Constants.UNIT_... constants.
-    * @param newOffsetUnits The units for anchor offsets - e.g. "s" for seconds, "char" for characters, etc.  Preferably the value should be one of the Constants.UNIT_... constants.
+    * Setter for {@link #offsetUnits}.g. "s" for seconds, "char" for characters, etc.
+    * Preferably the value should be one of the Constants.UNIT_... constants. 
+    * @param newOffsetUnits The units for anchor offsets - e.g. "s" for seconds, "char"
+    * for characters, etc.  Preferably the value should be one of the
+    * Constants.UNIT_... constants. 
     * @return <var>this</var>.
     */
    public Graph setOffsetUnits(String newOffsetUnits) { offsetUnits = newOffsetUnits; return this; }
 
-
    // Attributes stored outside HashMap, so that JSONifying the HashMap doesn't result in infinite recursion
-
 
    /**
     * Map of annotations (graph edges) keyed by id.
@@ -207,8 +242,6 @@ public class Graph
     * @return <var>this</var>.
     */
    public Graph setAnnotationsById(LinkedHashMap<String,Annotation> newAnnotationsById) { annotationsById = newAnnotationsById; return this; }
-
-
    
    /**
     * The layer definitions and their interrelations.
@@ -274,7 +307,6 @@ public class Graph
       graph = this;
       setLayerId(getSchema().getRoot().getId());
    } // end of constructor
-
    
    /**
     * Determines whether this is a fragment of a larger graph (true) or the whole graph (false).
@@ -295,7 +327,8 @@ public class Graph
     * @param graphId
     * @param startOffset
     * @param endOffset
-    * @return The ID of the fragment, formatted <var>graphId-without-extension</var>__<var>startOffset</var>-<var>endOffset</var>
+    * @return The ID of the fragment, formatted
+    * <var>graphId-without-extension</var>__<var>startOffset</var>-<var>endOffset</var> 
     */
    public static String FragmentId(String graphId, Double startOffset, Double endOffset)
    {
@@ -309,7 +342,8 @@ public class Graph
     * @param graph
     * @param startOffset
     * @param endOffset
-    * @return The ID of the fragment, formatted <var>graphId-without-extension</var>__<var>startOffset</var>-<var>endOffset</var>
+    * @return The ID of the fragment, formatted
+    * <var>graphId-without-extension</var>__<var>startOffset</var>-<var>endOffset</var> 
     */
    public static String FragmentId(Graph graph, Double startOffset, Double endOffset)
    {
@@ -323,7 +357,8 @@ public class Graph
     * @param graph
     * @param start
     * @param end
-    * @return The ID of the fragment, formatted <var>graphId</var>__<var>startOffset</var>-<var>endOffset</var>
+    * @return The ID of the fragment, formatted
+    * <var>graphId</var>__<var>startOffset</var>-<var>endOffset</var> 
     */
    public static String FragmentId(Graph graph, Anchor start, Anchor end)
    {
@@ -331,13 +366,18 @@ public class Graph
    } // end of FragmentId()
       
    /**
-    * Creates a fragment of this graph, copying into it annotations that fall within the given bounds, on the given layers. 
-    * Ancestors which do not fall into the interval are also added to the fragment, so that turns/speakers/etc. are accessible, but their anchors are not added to the fragment.
-    * <p>The ID of the new fragment is <var>graphId</var>__<var>startOffset</var>-<var>endOffset</var>
+    * Creates a fragment of this graph, copying into it annotations that fall within the
+    * given bounds, on the given layers.  
+    * Ancestors which do not fall into the interval are also added to the fragment, so
+    * that turns/speakers/etc. are accessible, but their anchors are not added to the
+    * fragment. 
+    * <p>The ID of the new fragment is
+    * <var>graphId</var>__<var>startOffset</var>-<var>endOffset</var> 
     * @param startOffset The start offset for annotations to include in the fragment.
     * @param endOffset The end offset for annotations to include in the fragment.
     * @param layerIds A list of IDs of layers to include in the fragment.
-    * @return A graph fragment containing the annotations that fall within the given bounds, on the given layers.
+    * @return A graph fragment containing the annotations that fall within the given
+    * bounds, on the given layers. 
     */
    public Graph getFragment(double startOffset, double endOffset, String[] layerIds)
    {
@@ -393,7 +433,8 @@ public class Graph
     * fragment, so that turns/speakers/etc. are accessible, but their anchors are not added to the
     * fragment. If the defining annotation's layer is not included in <var>layerIds</var>, the
     * annotation is not included in the resulting fragment.
-    * <p>The ID of the new fragment is <var>graphId</var>__<var>fragment.start.offset</var>-<var>fragment.end.offset</var>
+    * <p>The ID of the new fragment is
+    * <var>graphId</var>__<var>fragment.start.offset</var>-<var>fragment.end.offset</var> 
     * @param definingAnnotation The annotation that defines fragment membership.
     * @param layerIds A list of IDs of layers to include in the fragment.
     * @return A graph fragment containing the annotations that fall within the given bounds, on
@@ -484,15 +525,21 @@ public class Graph
    } // end of getFragment()
 
    /**
-    * Creates a fragment of this graph, copying into it annotations that fall within the bounds of the given <var>bounds</var> annotation, 
+    * Creates a fragment of this graph, copying into it annotations that fall within the
+    * bounds of the given <var>bounds</var> annotation,  
     * and which are descendants of the given <var>ancestor</var> annotation, 
     * on the given layers. 
-    * Ancestors which do not fall into the interval are also added to the fragment, so that turns/speakers/etc. are accessible, but their anchors are not added to the fragment.
-    * <p>The ID of the new fragment is <var>graphId</var>__<var>fragment.start.offset</var>-<var>fragment.end.offset</var>
-    * @param bounds Annotation that defines the offset bounds (start/end time) of the included annotations
+    * Ancestors which do not fall into the interval are also added to the fragment, so
+    * that turns/speakers/etc. are accessible, but their anchors are not added to the
+    * fragment. 
+    * <p>The ID of the new fragment is
+    * <var>graphId</var>__<var>fragment.start.offset</var>-<var>fragment.end.offset</var> 
+    * @param bounds Annotation that defines the offset bounds (start/end time) of the
+    * included annotations 
     * @param ancestor Annotation that is an ancestor of all annotations to be included.
     * @param layerIds A list of IDs of layers to include in the fragment.
-    * @return A graph fragment containing the annotations that fall within the given bounds, on the given layers.
+    * @return A graph fragment containing the annotations that fall within the given
+    * bounds, on the given layers. 
     */
    public Graph getFragment(Annotation bounds, Annotation ancestor, String[] layerIds)
    {
@@ -921,7 +968,9 @@ public class Graph
    } // end of getSortedAnchors()
    
    /**
-    * Returns all anchors, in the best order given their offset and annotation links. This ordering requires much graph traversal to find the best comparison between anchors, so is computationally expensive and should be used sparingly.
+    * Returns all anchors, in the best order given their offset and annotation links. This
+    * ordering requires much graph traversal to find the best comparison between anchors,
+    * so is computationally expensive and should be used sparingly. 
     * @return An ordered set of all anchors in the graph.
     */
    public SortedSet<Anchor> getAnchorsOrderedByStructure()
@@ -957,7 +1006,8 @@ public class Graph
     * Compares two offsets, taking {@link #offsetGranularity} into account.
     * @param o1 The first offset to compare.
     * @param o2 The second offset to compare.
-    * @return 0 if the two offsets are within {@link #offsetGranularity} of each other, or a negative number if o1 &lt; o2, and otherwise a positive number.
+    * @return 0 if the two offsets are within {@link #offsetGranularity} of each other, or
+    * a negative number if o1 &lt; o2, and otherwise a positive number. 
     */
    public int compareOffsets(double o1, double o2)
    {
@@ -1075,7 +1125,7 @@ public class Graph
     * Creates a tag and adds it to the graph.
     * <p>This method has the same effect as:
     * <code><var>graph</var>.addAnnotation(
-    *       <var>graph</var>.creatTag(<var>toTag</var>, <var>layerId</var>, <var>label</var>));</code>
+    *       <var>graph</var>.creatTag(<var>toTag</var>, <var>layerId</var>, <var>label</var>));</code> 
     * @param toTag The annotation to tag.
     * @param layerId The tag layer ID.
     * @param label The tag label.
@@ -1088,7 +1138,8 @@ public class Graph
    } // end of addTag()
 
    /**
-    * Creates a spanning annotation from the beginning of the start annotation to the ending of the end annotation.
+    * Creates a spanning annotation from the beginning of the start annotation to the
+    * ending of the end annotation. 
     * @param from The first annotation to span.
     * @param to The last annotation to span.
     * @param layerId The layer ID of the resulting annotation.
@@ -1123,7 +1174,9 @@ public class Graph
    } // end of addSpan()
    
    /**
-    * Creates a spanning annotation from the beginning of the start annotation to the ending of the end annotation. The parent annotation is guessed, if possible, from <var>from</var> or <var>to</var>
+    * Creates a spanning annotation from the beginning of the start annotation to the
+    * ending of the end annotation. The parent annotation is guessed, if possible, from
+    * <var>from</var> or <var>to</var> 
     * @param from The first annotation to span.
     * @param to The last annotation to span.
     * @param layerId The layer ID of the resulting annotation.
@@ -1236,7 +1289,8 @@ public class Graph
       return overlappingAnnotations(annotation.getStart(), annotation.getEnd(), layerId);
    } // end of overlappingAnnotations()
    /**
-    * Returns a list of annotations that overlap with the offset interval defined by the given anchors.
+    * Returns a list of annotations that overlap with the offset interval defined by the
+    * given anchors. 
     * @param start Start anchor.
     * @param end End anchor.
     * @param layerId Layer to match.
@@ -1371,7 +1425,8 @@ public class Graph
    }
    
    /**
-    * Returns the depth of an anchor - i.e. the depth of the shallowest non-aligned associated Annotation.
+    * Returns the depth of an anchor - i.e. the depth of the shallowest non-aligned
+    * associated Annotation. 
     * @param a The anchor to get the depth of.
     * @return The depth of the shallowest non-aligned associated Annotation.
     */
@@ -1425,17 +1480,25 @@ public class Graph
     *  <li><code>word.my("turn")</code> for the (parent) turn</li>
     *  <li><code>phone.my("turn")</code> for the (grandparent) turn</li>
     *  <li><code>word.my("POS")</code> for the (first) part of speech annotation</li>
-    *  <li><code>phone.my("POS")</code> for the (first) part of speech annotation, which is neither an ancestor nor descendant, but rather is a child of an ancestor (<code>phone.my("word")</code>)</li>
+    *  <li><code>phone.my("POS")</code> for the (first) part of speech annotation, which
+    *    is neither an ancestor nor descendant, but rather is a child of an ancestor
+    *    (<code>phone.my("word")</code>)</li> 
     *  <li><code>word.my("who")</code> for the speaker</li>
     *  <li><code>word.my("graph")</code> for the graph</li>
-    *  <li><code>word.my("utterance")</code> for the utterance, which is neither an ancestor nor descendant, but rather is a child of an ancestor (<code>word.my("turn")</code>)</li>
-    *  <li><code>word.my("corpus")</code> for the graph's corpus, which is neither an ancestor nor descendant, but rather is a child of an ancestor (<code>word.my("graph")</code>)</li>
+    *  <li><code>word.my("utterance")</code> for the utterance, which is neither an
+    *    ancestor nor descendant, but rather is a child of an ancestor
+    *    (<code>word.my("turn")</code>)</li> 
+    *  <li><code>word.my("corpus")</code> for the graph's corpus, which is neither an
+    *    ancestor nor descendant, but rather is a child of an ancestor
+    *    (<code>word.my("graph")</code>)</li> 
     * </ul>
-    * <p>{@link #setGraph(Graph)} must have been previously called, and the graph must have a correct layer hierarchy for this method to work correctly.
+    * <p>{@link #setGraph(Graph)} must have been previously called, and the graph must
+    * have a correct layer hierarchy for this method to work correctly. 
     * <p>This override of {@link Annotation#my(String)} ensures that even orphaned annotations 
     * on the given layer are returned.
     * @param layerId The layer of the desired annotation.
-    * @return The related annotation (or the first one if there are many), or null if none could be found on the given layer.
+    * @return The related annotation (or the first one if there are many), or null if none
+    * could be found on the given layer. 
     */
    public Annotation my(final String layerId)
    {
@@ -1471,12 +1534,20 @@ public class Graph
     *  <li><code>word.list("POS")</code> for all (child) part of speech annotations</li>
     *  <li><code>word.list("phone")</code> for all (child) phones in a word</li>
     *  <li><code>turn.list("phone")</code> for all (grandchild) phones in a turn</li>
-    *  <li><code>phone.list("POS")</code> for the all (peer) part of speech annotation, which are neither ancestors nor descendants, but rather children of an ancestor (<code>phone.my("word")</code>)</li>
+    *  <li><code>phone.list("POS")</code> for the all (peer) part of speech annotation,
+    *   which are neither ancestors nor descendants, but rather children of an ancestor
+    *   (<code>phone.my("word")</code>)</li> 
     *  <li><code>word.list("who")[0]</code> for the (grandparent) speaker</li>
     *  <li><code>word.list("graph")[0]</code> for the (great-grandparent) graph</li>
-    *  <li><code>word.list("utterance")[0]</code> for the (peer) utterance, which is neither an ancestor nor descendant, but rather is a child of an ancestor (<code>word.my"turn")</code>)</li>
-    *  <li><code>utterace.list("word")</code> for the utterance's (peer) words, which are neither an ancestors nor descendants, but rather are children of an ancestor (<code>utterance.my"turn")</code>)</li>
-    *  <li><code>word.list("corpus")[0]</code> for the graph's (child of grandparent) corpus, which is neither an ancestor nor descendant, but rather is a child of an ancestor (<code>word.my("graph")</code>)</li>
+    *  <li><code>word.list("utterance")[0]</code> for the (peer) utterance, which is
+    *   neither an ancestor nor descendant, but rather is a child of an ancestor
+    *   (<code>word.my"turn")</code>)</li> 
+    *  <li><code>utterace.list("word")</code> for the utterance's (peer) words, which are
+    *   neither an ancestors nor descendants, but rather are children of an ancestor
+    *   (<code>utterance.my"turn")</code>)</li> 
+    *  <li><code>word.list("corpus")[0]</code> for the graph's (child of grandparent)
+    *   corpus, which is neither an ancestor nor descendant, but rather is a child of an
+    *   ancestor (<code>word.my("graph")</code>)</li> 
     * </ul>
     * <p>{@link #setGraph(Graph)} must have been previously called, and the graph must have a
     * correct layer hierarchy for this method to work correctly.
@@ -1520,9 +1591,14 @@ public class Graph
    // Key is the layerId, Value is a map of nearest-integer offsets to annotations that are nearby
    HashMap<String,HashMap<Integer,Set<Annotation>>> indicesByLayer = new HashMap<String,HashMap<Integer,Set<Annotation>>>();
    /**
-    * Determine which annotations on the given layer are 'near' the given offset. 'Near' means that the annotations t-include within 1.0 of the given offset. 
-    * <p> The first time this is called for a given layer, an index is constructed so that subsequent calls on the same layer return quicker.
-    * <p> The index is rebuild after any of {@link Anchor#setOffset(Double)}, {@link Annotation#setStartId(String)}, {@link Annotation#setEndId(String)}, or {@link Annotation#setGraph(Graph)} are called, to ensure it's up-to-date with graph changes.
+    * Determine which annotations on the given layer are 'near' the given offset. 'Near'
+    * means that the annotations t-include within 1.0 of the given offset.  
+    * <p> The first time this is called for a given layer, an index is constructed so that
+    * subsequent calls on the same layer return quicker. 
+    * <p> The index is rebuild after any of {@link Anchor#setOffset(Double)},
+    * {@link Annotation#setStartId(String)}, {@link Annotation#setEndId(String)}, 
+    * or {@link Annotation#setGraph(Graph)} are called, to ensure it's up-to-date with
+    * graph changes. 
     * @param layerId The layer for the returned annotations.
     * @param offset The offset to look near.
     * @return A list of annotations on the given layer which are near the given offset.
@@ -1559,9 +1635,9 @@ public class Graph
       return nearby;
    } // end of listNear()
 
-
    /**
-    * Getter for <i>layer</i>: The graph's layer definition, which is by definition the root of its schema.
+    * Getter for <i>layer</i>: The graph's layer definition, which is by definition the
+    * root of its schema. 
     * @return The annotation's layer definition.
     * @see #getSchema()
     * @see Schema#getRoot()
@@ -1571,7 +1647,8 @@ public class Graph
       return schema.getRoot();
    }
    /**
-    * Getter for <i>layerId</i>: The graph's layer ID, which is by definition the root of its schema.
+    * Getter for <i>layerId</i>: The graph's layer ID, which is by definition the root of
+    * its schema. 
     * @return The annotation's layer ID.
     * @see #getSchema()
     * @see Schema#getRoot()
@@ -1662,7 +1739,8 @@ public class Graph
    }
 
    /**
-    * Rolls back changes since the object was create or {@link #commit()} was last called. The effect of this is to rollback all anchors and annotations.
+    * Rolls back changes since the object was create or {@link #commit()} was last
+    * called. The effect of this is to rollback all anchors and annotations. 
     * @see #getTrackedAttributes()
     */
    public void rollback()
