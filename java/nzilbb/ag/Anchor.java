@@ -93,24 +93,17 @@ public class Anchor
    /**
     * Setter for <i>offset</i>: The anchor's time/character offset.
     * @param offset The anchor's time/character offset.
-    * @return A list of changes, which will be empty if the offset is being set for the
-    * first time, or is already set to this value. 
+    * @return A reference to this object. 
     */
-   public synchronized Vector<Change> setOffset(Double offset) 
+   public synchronized Anchor setOffset(Double offset) 
    {
       if (offset != null && offset.isNaN()) offset = null;
-      Vector<Change> changes = new Vector<Change>();
+
       Change change = registerChange("offset", offset);
 
-      if (change != null)
-      {
-         // record the change
-         changes.add(change);
-      }
-      
       this.offset = offset;
 
-      if (offset != null || changes.size() > 0)
+      if (offset != null || change != null)
       {
          if (graph != null)
          {
@@ -123,7 +116,7 @@ public class Anchor
          }
       }
       
-      return changes;
+      return this;
    }
 
    // Attributes stored outside HashMap, so that JSONifying the HashMap doesn't
@@ -456,33 +449,25 @@ public class Anchor
    /**
     * Sets the start of all annotations that start here, to the given anchor.
     * @param newStart The new start anchor
-    * @return The resulting changes.
     */
-   public Vector<Change> moveStartingAnnotations(Anchor newStart)
+   public void moveStartingAnnotations(Anchor newStart)
    {
-      Vector<Change> changes = new Vector<Change>();
       for (Annotation starting : getStartingAnnotations())
       {
-         changes.addAll( // record changes of:
-            starting.setStart(newStart));
+         starting.setStart(newStart);
       } // next annotion ending here
-      return changes;      
    } // end of moveStartingAnnotations()
    
    /**
     * Sets the end of all annotations that end here, to the given anchor.
     * @param newEnd The new end anchor
-    * @return The resulting changes.
     */
-   public Vector<Change> moveEndingAnnotations(Anchor newEnd)
+   public void moveEndingAnnotations(Anchor newEnd)
    {
-      Vector<Change> changes = new Vector<Change>();
       for (Annotation ending : getEndingAnnotations())
       {
-         changes.addAll( // record changes of:
-            ending.setEnd(newEnd));
+         ending.setEnd(newEnd);
       } // next annotion ending here
-      return changes;      
    } // end of moveEndingAnnotations()
 
    /**
