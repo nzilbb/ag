@@ -497,7 +497,9 @@ public class TestGraph
       assertEquals("Update word1: label = The (was the)", changes.elementAt(1).toString());
 
       Annotation jumps = new Annotation("word5", "jumps", "word", "a5", "a5", "turn1");
-      g.addAnnotation(jumps).create();
+      // create() can be called before addAnnotation() (and setTracker() thus being called)
+      jumps.create(); 
+      g.addAnnotation(jumps);
 
       g.rollback();
       assertEquals(Change.Operation.NoChange, g.getChange());

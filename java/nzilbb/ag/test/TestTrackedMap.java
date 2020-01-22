@@ -51,10 +51,6 @@ public class TestTrackedMap
       assertEquals("value4", m.getNotTracked());
 
       // initial change tracking state
-      assertFalse(m.containsKey("originalTracked1"));
-      assertFalse(m.containsKey("originalTracked2"));
-      assertFalse(m.containsKey("originalTracked3"));
-      assertFalse(m.containsKey("originalNotTracked"));
       assertEquals(Change.Operation.NoChange, m.getChange());
       assertEquals(0, m.getChanges().size());
 
@@ -161,6 +157,64 @@ public class TestTrackedMap
       assertEquals("Create cannot be rolled back", Change.Operation.Create, m.getChange());
       assertEquals("Create reports all attributes", 4, m.getChanges().size());
 
+   }
+
+   @Test public void changeTrackingWithNoTracker() 
+   {
+      MapTest m = new MapTest();
+      m.setId("123");
+      m.setTracked1("value1");
+      m.setTracked2("value2");
+      m.setTracked3("value3");
+      m.setNotTracked("value4");
+      
+      // values set
+      assertEquals("123", m.getId());
+      assertEquals("value1", m.getTracked1());
+      assertEquals("value2", m.getTracked2());
+      assertEquals("value3", m.getTracked3());
+      assertEquals("value4", m.getNotTracked());
+
+      // initial change tracking state
+      assertEquals(Change.Operation.NoChange, m.getChange());
+      assertEquals(0, m.getChanges().size());
+
+      m.setNotTracked("newValue4");
+      assertEquals("newValue4", m.getNotTracked());
+      assertEquals("Non-tracked keys don't affect change:",
+                   Change.Operation.NoChange, m.getChange());
+      assertEquals(0, m.getChanges().size());
+      
+      m.setId("ID");
+      assertEquals("ID", m.getId());
+      assertEquals("Non-tracked attributes don't affect change - id:",
+                   Change.Operation.NoChange, m.getChange());
+
+      m.setTracked1("newValue1");
+      assertEquals("newValue1", m.getTracked1());
+      assertEquals("Updates to tracked values aren't tracked if no tracker set",
+                   Change.Operation.NoChange, m.getChange());
+      assertEquals(0, m.getChanges().size());
+
+      m.create();
+      assertEquals("Creation tracked even if there's no tracker",
+                   Change.Operation.Create, m.getChange());
+      assertEquals("Create reports all attributes", 4, m.getChanges().size());
+      assertEquals("Multiple attribute changes", "Create ID", m.getChanges().elementAt(0).toString());
+      // these should be ordered according to the aTrackedAttributes above:
+      assertEquals("Multiple attribute changes",
+                   "Update ID: tracked2 = value2 (was null)",
+                   m.getChanges().elementAt(1).toString());
+      assertEquals("Multiple attribute changes",
+                   "Update ID: tracked1 = newValue1 (was null)",
+                   m.getChanges().elementAt(2).toString());
+      assertEquals("Multiple attribute changes",
+                   "Update ID: tracked3 = value3 (was null)",
+                   m.getChanges().elementAt(3).toString());
+      
+      m.destroy();
+      assertEquals("Destroy trumps Create as a change, even though there's no tracker",
+                   Change.Operation.Destroy, m.getChange());
    }
 
    @Test public void mapGetter() 

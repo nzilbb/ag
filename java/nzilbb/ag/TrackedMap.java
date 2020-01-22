@@ -127,7 +127,31 @@ public class TrackedMap
     * Setter for {@link #tracker}: Object that tracks all changes to this object.
     * @param newTracker Object that tracks all changes to this object.
     */
-   public TrackedMap setTracker(ChangeTracker newTracker) { tracker = newTracker; return this; }
+   public TrackedMap setTracker(ChangeTracker newTracker)
+   {
+      if (tracker == null && newTracker != null)
+      { // there was no previous tracker
+         // have we been flagged for creation?
+         if (containsKey("@create"))
+         {
+            // track the change
+            newTracker.accept(new Change(Change.Operation.Create, this));
+            // remove the flag
+            remove("@create");
+         }
+         // have we been flagged for destruction?
+         if (containsKey("@destroy"))
+         {
+            // track the change
+            newTracker.accept(new Change(Change.Operation.Destroy, this));
+            // remove the flag
+            remove("@destroy");
+         }
+      } // there was no previous tracker
+      
+      tracker = newTracker;
+      return this;
+   }
 
    /**
     * The object's identifier.
@@ -274,32 +298,44 @@ public class TrackedMap
    } // end of registerChange()
 
    /**
-    * Marks the object for deletion.
+    * Marks the object for deletion. If this is invoked before {@link #setTracker(ChangeTracker)}
+    * is called, a Destroy change will nevertheless be tracked if 
+    * {@link #setTracker(ChangeTracker)} is called later. 
     * <p>This method is not called "delete()" because "delete" is a reserved word in
     * Javascript, and we want these objects to be manipulable from Javascript. 
     * @return The changes made during this operation.
     */
    public Change destroy()
    {
-      if (tracker == null) return null; // nobody cares
-      // TODO need this? put("@destroy", Boolean.TRUE);
       Change change = new Change(Change.Operation.Destroy, this);
-      tracker.accept(change);
+      if (tracker == null)
+      { // no tracker (yet?) so add a flag to the map
+         put("@destroy", Boolean.TRUE);
+      }
+      else
+      {
+         tracker.accept(change);
+      }
       return change;
    } // end of destroy()
 
    /**
-    * Marks the object for creation.
+    * Marks the object for creation. If this is invoked before {@link #setTracker(ChangeTracker)}
+    * is called, a Create change will nevertheless be tracked if 
+    * {@link #setTracker(ChangeTracker)} is called later. 
     * @return The changes made during this operation.
     */
    public Change create()
    {
-      if (tracker == null) return null; // nobody cares
-      
-      // TODO need this? put("@create", Boolean.TRUE);
-      
       Change change = new Change(Change.Operation.Create, this);
-      tracker.accept(change);
+      if (tracker == null)
+      { // no tracker (yet?) so add a flag to the map
+         put("@create", Boolean.TRUE);
+      }
+      else
+      { 
+         tracker.accept(change);
+      }
       return change;
    } // end of create()
 
@@ -365,8 +401,12 @@ public class TrackedMap
     */
    public Change.Operation getChange()
    {
-      if (tracker == null) return Change.Operation.NoChange;
-      
+      if (tracker == null)
+      { // tracker is not set (yet).
+         if (containsKey("@destroy")) return Change.Operation.Destroy;
+         else if (containsKey("@create")) return Change.Operation.Create;
+         else return Change.Operation.NoChange;
+      }      
       Optional<Change> createDestroy = tracker.getChange(id, null);
       if (createDestroy.isPresent()) return createDestroy.get().getOperation();
 
