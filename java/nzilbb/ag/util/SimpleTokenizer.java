@@ -189,8 +189,18 @@ public class SimpleTokenizer
       if (getDestinationLayerId().equals(getSourceLayerId())) 
 	 throw new TransformationException(this, "Source and destination layer are the same: " + getDestinationLayerId());
 
-      if (graph.getTracker() == null) graph.trackChanges();
-      Vector<Change> changes = new Vector<Change>();
+      // ensure we can track our changes
+      ChangeTracker ourTracker = new ChangeTracker();
+      ChangeTracker originalTracker = graph.getTracker();
+      if (originalTracker == null)
+      {
+         graph.setTracker(ourTracker);
+         ourTracker.reset(); // in case there were any lingering creates/destroys in the graph
+      }
+      else
+      {
+         originalTracker.addListener(ourTracker);
+      }
 
       Layer sourceParent = graph.getLayer(graph.getLayer(getSourceLayerId()).getParentId());
       boolean sharedParent = sourceParent.getId()
@@ -230,8 +240,7 @@ public class SimpleTokenizer
 		  {
 		     if (!sharedParent)
 		     {
-			changes.addAll( // track changes of
-			   source.setOrdinal(ordinal));
+                        source.setOrdinal(ordinal);
 		     }
 		     else
 		     {
@@ -253,7 +262,6 @@ public class SimpleTokenizer
 		  source.getStart().getId(), source.getEnd().getId(), 
 		  source.getParentId());
 	       graph.addAnnotation(span);
-	       changes.addAll(span.getChanges());
 	       
 	       // and the source gets deleted (to be replaced by individual tokens)
 	       source.destroy();
@@ -279,7 +287,6 @@ public class SimpleTokenizer
 	       { 
 		  // add the new end anchor to the graph
 		  graph.addAnchor(end);
-		  changes.addAll(end.getChanges());
 	       }
 	       // don't immediately set the parent,
 	       // as it forces appending of children in Graph.addAnnotation() which can be slow
@@ -297,11 +304,10 @@ public class SimpleTokenizer
 	       changedOrdinals = true;
 	       graph.addAnnotation(token);	
 	       newChildren.add(token);
-	       changes.addAll(token.getChanges());
+	       // TODO ? token.create();
 	       if (!sharedParent)
 	       {
-		  changes.addAll( // track changes of
-		     token.setParent(sharedParent?source.getParent():source, false));
+                  token.setParent(sharedParent?source.getParent():source, false);
 	       }
 	       // the next annotation's start will be this one's end
 	       start = end;
@@ -317,15 +323,24 @@ public class SimpleTokenizer
 	       child.setParent(null);
 	       if (child.containsKey("@newOrdinal"))
 	       {
-		  changes.addAll( // track changes of
-		     child.setOrdinal((Integer)child.get("@newOrdinal")));
+                  child.setOrdinal((Integer)child.get("@newOrdinal"));
 	       }
 	       child.setParent(parent, false);
 	    }
 	 }
 	 
       } // next parent
-      return changes;
+
+      // set the tracker back how it was
+      if (originalTracker == null)
+      {
+         graph.setTracker(null);
+      }
+      else
+      {
+         originalTracker.removeListener(ourTracker);
+      }
+      return new Vector<Change>(ourTracker.getChanges());
    }
 
 } // end of class SimpleTokenizer

@@ -108,8 +108,18 @@ public class UtteranceParallelizer
     */
    public Vector<Change> transform(Graph graph) throws TransformationException
    {
-      if (graph.getTracker() == null) graph.trackChanges();
-      Vector<Change> changes = new Vector<Change>();
+      // ensure we can track our changes
+      ChangeTracker ourTracker = new ChangeTracker();
+      ChangeTracker originalTracker = graph.getTracker();
+      if (originalTracker == null)
+      {
+         graph.setTracker(ourTracker);
+         ourTracker.reset(); // in case there were any lingering creates/destroys in the graph
+      }
+      else
+      {
+         originalTracker.addListener(ourTracker);
+      }
 
       LayerHierarchyTraversal<Vector<String>> bottomUpSelectedLayers
          = new LayerHierarchyTraversal<Vector<String>>(new Vector<String>(), graph.getSchema()) {
@@ -175,12 +185,10 @@ public class UtteranceParallelizer
                {
                   // split annotation at nextStart 
                   Annotation following = new Annotation(annotation);
-                  changes.addAll(
-                     annotation.setEnd(nextStart));
+                  annotation.setEnd(nextStart);
                   following.create();
                   following.setStart(nextStart);
                   graph.addAnnotation(following);
-                  changes.addAll(following.getChanges());
                                     
                   // new annotation will be processed next time around the main loop
                   annotationsByAnchor.add(following);
@@ -196,8 +204,7 @@ public class UtteranceParallelizer
                         // strict - i.e. children can overlap the parent at this point
                         if (following.includesMidpointOf(child))
                         {
-                           changes.addAll(
-                              child.setParent(following));
+                           child.setParent(following);
                         }
                      } // next child
                   } // next child layer
@@ -206,6 +213,15 @@ public class UtteranceParallelizer
          } // process annotationsByAnchor again
       } // next layer
       
-      return changes;
+      // set the tracker back how it was
+      if (originalTracker == null)
+      {
+         graph.setTracker(null);
+      }
+      else
+      {
+         originalTracker.removeListener(ourTracker);
+      }
+      return new Vector<Change>(ourTracker.getChanges());
    }
 } // end of class UtteranceParallelizer

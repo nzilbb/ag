@@ -255,7 +255,20 @@ public class ConventionTransformer
   {
     if (graph.getLayer(getSourceLayerId()) == null) 
       throw new TransformationException(this, "No source layer: " + getSourceLayerId());
-    if (graph.getTracker() == null) graph.trackChanges();
+    
+    // ensure we can track our changes
+    ChangeTracker ourTracker = new ChangeTracker();
+    ChangeTracker originalTracker = graph.getTracker();
+    if (originalTracker == null)
+    {
+       graph.setTracker(ourTracker);
+       ourTracker.reset(); // in case there were any lingering creates/destroys in the graph
+    }
+    else
+    {
+       originalTracker.addListener(ourTracker);
+    }
+
     try
     {
       Pattern sourceRegexp = Pattern.compile(getSourcePattern());
@@ -294,7 +307,17 @@ public class ConventionTransformer
           }
         } // label matches
       } // next source annotation
-      return changes;
+      
+      // set the tracker back how it was
+      if (originalTracker == null)
+      {
+         graph.setTracker(null);
+      }
+      else
+      {
+         originalTracker.removeListener(ourTracker);
+      }
+      return new Vector<Change>(ourTracker.getChanges());
     }
     catch(PatternSyntaxException exception)
     {

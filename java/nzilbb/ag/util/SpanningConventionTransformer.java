@@ -582,7 +582,20 @@ public class SpanningConventionTransformer // TODO implementation that handles n
       Layer destinationLayer = graph.getLayer(getDestinationLayerId());
       if (getSourceLayerId().equals(getDestinationLayerId())) 
 	 throw new TransformationException(this, "Source and destination layer are the same: " + getDestinationLayerId());
-      if (graph.getTracker() == null) graph.trackChanges();
+
+      // ensure we can track our changes
+      ChangeTracker ourTracker = new ChangeTracker();
+      ChangeTracker originalTracker = graph.getTracker();
+      if (originalTracker == null)
+      {
+         graph.setTracker(ourTracker);
+         ourTracker.reset(); // in case there were any lingering creates/destroys in the graph
+      }
+      else
+      {
+         originalTracker.addListener(ourTracker);
+      }
+
       boolean sourceDestinationOfParent = destinationLayer != null 
 	 && destinationLayer.getParentId().equals(getSourceLayerId());
       boolean graphDestinationOfParent = destinationLayer != null 
@@ -796,11 +809,24 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 	    } // next child
 
 	 } // next parent
-	 return changes;
+
+         return new Vector<Change>(ourTracker.getChanges());
       }
       catch(PatternSyntaxException exception)
       {
 	 throw new TransformationException(this, exception);
+      }
+      finally
+      {
+         // set the tracker back how it was
+         if (originalTracker == null)
+         {
+            graph.setTracker(null);
+         }
+         else
+         {
+            originalTracker.removeListener(ourTracker);
+         }
       }
    }
 } // end of class SpanningConventionTransformer

@@ -536,7 +536,18 @@ public class Merger
     Vector<Change> changes = new Vector<Change>();
     if (debug) setLog(new Vector<String>());
     setErrors(new Vector<String>());
-    if (graph.getTracker() == null) graph.trackChanges();
+    // ensure we can track our changes
+    ChangeTracker ourTracker = new ChangeTracker();
+    ChangeTracker originalTracker = graph.getTracker();
+    if (originalTracker == null)
+    {
+       graph.setTracker(ourTracker);
+       ourTracker.reset(); // in case there were any lingering creates/destroys in the graph
+    }
+    else
+    {
+       originalTracker.addListener(ourTracker);
+    }
 
     schema = graph.getSchema();
     if (graph == editedGraph) return changes;
@@ -753,7 +764,16 @@ public class Merger
         editedGraph.getLayer(layerId).remove("@noChange");
     }
 
-    return changes;
+    // set the tracker back how it was
+    if (originalTracker == null)
+    {
+       graph.setTracker(null);
+    }
+    else
+    {
+       originalTracker.removeListener(ourTracker);
+    }
+    return new Vector<Change>(ourTracker.getChanges());
   }
    
   /**
@@ -1120,9 +1140,7 @@ public class Merger
                   // TODO was this necessary? start.commit();
                   start.create();
                 }
-                changes.addAll( // track changes of:
-                  start.setOffset(
-                    anPreviousEditedOther.getEnd().getOffset()));
+                start.setOffset(anPreviousEditedOther.getEnd().getOffset());
                 setConfidence(start, newStatus);
               } // previous more reliable
               if (anPreviousEditedOther.getEnd() != start)
@@ -2693,8 +2711,7 @@ public class Merger
                   // and mark it for default alignment
                   double dOriginalOffset = anchor.getOffset();
                   double dNewOffset = predecessor.getOffset() + smidgin;
-                  changes.addAll( // record changes for:
-                    anchor.setOffset(dNewOffset));
+                  anchor.setOffset(dNewOffset);
                   setConfidence(anchor, Constants.CONFIDENCE_NONE);
                   log(layerId, ": Out of order; changing offset: ", anchor, " (", predecessor, ")");
                   // the offset is moving forward, so ending child annotations will be reset
@@ -2708,8 +2725,7 @@ public class Merger
                         && anStartingHere.getEnd().getOffset() < dNewOffset)
                     {
                       // if the end anchor is in the past, it will need moving too
-                      changes.addAll( // record changes for:
-                        anStartingHere.getEnd().setOffset(dNewOffset + smidgin));
+                       anStartingHere.getEnd().setOffset(dNewOffset + smidgin);
                       setConfidence(anStartingHere.getEnd(), Constants.CONFIDENCE_NONE);
                       log(layerId, ": Out of order, changing offset of end anchor: ", anStartingHere);
                     }
@@ -2820,8 +2836,7 @@ public class Merger
                       // offset a little more than the last one
                       double dOriginalOffset = anchorToChange.getOffset();
                       double dNewOffset = dStartOffset + (iChange * dDuration / iChangeCount);
-                      changes.addAll( // record changes for:
-                        anchorToChange.setOffset(dNewOffset));
+                      anchorToChange.setOffset(dNewOffset);
                       setConfidence(anchorToChange, Constants.CONFIDENCE_NONE);
 				 
                       if (resetChildrenBefore != null)

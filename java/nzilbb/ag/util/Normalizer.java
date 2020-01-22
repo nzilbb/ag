@@ -113,8 +113,18 @@ public class Normalizer
       if (schema.getWordLayerId() == null) 
 	 throw new TransformationException(this, "No word layer specified.");
 
-      if (graph.getTracker() == null) graph.trackChanges();
-      Vector<Change> changes = new Vector<Change>();
+      // ensure we can track our changes
+      ChangeTracker ourTracker = new ChangeTracker();
+      ChangeTracker originalTracker = graph.getTracker();
+      if (originalTracker == null)
+      {
+         graph.setTracker(ourTracker);
+         ourTracker.reset(); // in case there were any lingering creates/destroys in the graph
+      }
+      else
+      {
+         originalTracker.addListener(ourTracker);
+      }
 
       if (schema.getEpisodeLayerId() != null)
       {
@@ -126,8 +136,7 @@ public class Normalizer
 	    // if the only participant has no name
 	    if (onlyParticipant.getLabel() == null || onlyParticipant.getLabel().length() == 0)
 	    { // name them after the episode
-	       changes.addAll( // record changes for:
-		  onlyParticipant.setLabel(episode[0].getLabel()));
+               onlyParticipant.setLabel(episode[0].getLabel());
 	    }
 	 }
       } // episode layer set
@@ -139,16 +148,14 @@ public class Normalizer
 	 {
 	    if (!participant.getLabel().equals(turn.getLabel()))
 	    {
-	       changes.addAll( // record changes for:
-		  turn.setLabel(participant.getLabel()));
+               turn.setLabel(participant.getLabel());
 	    }
 	    Annotation lastUtterance = null;
 	    for (Annotation utterance : turn.getAnnotations(schema.getUtteranceLayerId()))
 	    {
 	       if (!participant.getLabel().equals(utterance.getLabel()))
 	       {
-		  changes.addAll( // record changes for:
-		     utterance.setLabel(participant.getLabel()));
+                  utterance.setLabel(participant.getLabel());
 	       }
 	       // check utterances are chained together
 	       if (lastUtterance != null 
@@ -164,8 +171,7 @@ public class Normalizer
 		  {
 		     if (turn == ending.my(schema.getTurnLayerId()))
 		     {
-			changes.addAll( // record changes for:
-			   ending.setEnd(newEnd));
+                        ending.setEnd(newEnd);
 		     }
 		  } // next ending annotation
 	       }
@@ -208,8 +214,7 @@ public class Normalizer
 	    }
 	    if (mergeTurns)
 	    {
-	       changes.addAll( // record changes for:}
-		  mergeTurns(preceding, following));
+               mergeTurns(preceding, following);
 	    }
 	 } // next preceding turn
 
@@ -234,17 +239,15 @@ public class Normalizer
 	       && oldStart.getConfidence().equals(word.getEnd().getConfidence())?
 	       oldStart.getConfidence():Constants.CONFIDENCE_DEFAULT);
 	    graph.addAnchor(newStart);
-	    changes.addAll(newStart.getChanges());
 
 	    // assign it to the word and any descendants that use it
-	    LayerTraversal<Vector<Change>> descendantTraverser = new LayerTraversal<Vector<Change>>(changes, word)
+	    LayerTraversal<Vector<Change>> descendantTraverser = new LayerTraversal<Vector<Change>>(new Vector<Change>(), word)
 	    {
 	       protected void pre(Annotation annotation)
 	       {
 		  if (annotation.getStart().equals(oldStart))
 		  {
-		     getResult().addAll( // record changes for:
-			annotation.setStart(newStart));
+                     annotation.setStart(newStart);
 		  }
 	       }
 	    };
@@ -266,17 +269,15 @@ public class Normalizer
 	       && oldEnd.getConfidence().equals(word.getStart().getConfidence())?
 	       oldEnd.getConfidence():Constants.CONFIDENCE_DEFAULT); 
 	    graph.addAnchor(newEnd);
-	    changes.addAll(newEnd.getChanges());
 
 	    // assign it to the word and any descendants that use it
-	    LayerTraversal<Vector<Change>> descendantTraverser = new LayerTraversal<Vector<Change>>(changes, word)
+	    LayerTraversal<Vector<Change>> descendantTraverser = new LayerTraversal<Vector<Change>>(new Vector<Change>(), word)
 	    {
 	       protected void pre(Annotation annotation)
 	       {
 		  if (annotation.getEnd().equals(oldEnd))
 		  {
-		     getResult().addAll( // record changes for:
-			annotation.setEnd(newEnd));
+                     annotation.setEnd(newEnd);
 		  }
 	       }
 	    };
@@ -291,14 +292,21 @@ public class Normalizer
 	    if (a.getLabel().length() > maxLabelLength.intValue())
 	    {
 	       // truncate the label TODO: split annotation in two
-	       changes.addAll( // record changes for:
-		  a.setLabel(a.getLabel().substring(0,maxLabelLength.intValue())));		  
+               a.setLabel(a.getLabel().substring(0,maxLabelLength.intValue()));
 	    }
 	 } // next annotation
       }
-      
 
-      return changes;
+      // set the tracker back how it was
+      if (originalTracker == null)
+      {
+         graph.setTracker(null);
+      }
+      else
+      {
+         originalTracker.removeListener(ourTracker);
+      }
+      return new Vector<Change>(ourTracker.getChanges());
    }
 
    

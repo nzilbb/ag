@@ -104,8 +104,18 @@ public class ParticipantRenamer
       if (schema.getUtteranceLayerId() == null) 
 	 throw new TransformationException(this, "No utterance layer specified.");
 
-      if (graph.getTracker() == null) graph.trackChanges();
-      Vector<Change> changes = new Vector<Change>();
+      // ensure we can track our changes
+      ChangeTracker ourTracker = new ChangeTracker();
+      ChangeTracker originalTracker = graph.getTracker();
+      if (originalTracker == null)
+      {
+         graph.setTracker(ourTracker);
+         ourTracker.reset(); // in case there were any lingering creates/destroys in the graph
+      }
+      else
+      {
+         originalTracker.addListener(ourTracker);
+      }
 
       if (getOldNameToNewName().size() > 0)
       { // there is actually some work to do
@@ -114,23 +124,29 @@ public class ParticipantRenamer
 	    if (getOldNameToNewName().containsKey(participant.getLabel()))
 	    {
 	       String newLabel = getOldNameToNewName().get(participant.getLabel());
-	       changes.addAll( // record changes for:
-		  participant.setLabel(newLabel));
+               participant.setLabel(newLabel);
 	       for (Annotation turn : participant.getAnnotations(schema.getTurnLayerId()))
 	       {
-		  changes.addAll( // record changes for:
-		     turn.setLabel(newLabel));
+                  turn.setLabel(newLabel);
 		  for (Annotation utterance : turn.getAnnotations(schema.getUtteranceLayerId()))
 		  {
-		     changes.addAll( // record changes for:
-			utterance.setLabel(newLabel));
+                     utterance.setLabel(newLabel);
 		  } // next utterance
 	       } // next turn
 	    } // changing name
 	 } // next participant
       } // there are name changes
       
-      return changes;
+      // set the tracker back how it was
+      if (originalTracker == null)
+      {
+         graph.setTracker(null);
+      }
+      else
+      {
+         originalTracker.removeListener(ourTracker);
+      }
+      return new Vector<Change>(ourTracker.getChanges());
    }
 
 } // end of class ParticipantRenamer
