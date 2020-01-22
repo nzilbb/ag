@@ -983,23 +983,19 @@ public class Graph
    /**
     * Increments all (set) anchor offsets by the given amount.
     * @param offset
-    * @return The changes.
     */
-   public Vector<Change> shiftAnchors(double offset)
+   public void shiftAnchors(double offset)
    {
-      Vector<Change> changes = new Vector<Change>();
       if (offset != 0.0)
       {
          for (Anchor a : getAnchors().values())
          {
             if (a.getOffset() != null)
             {
-               changes.addAll( // record changes of:
-                  a.setOffset(a.getOffset() + offset));
+               a.setOffset(a.getOffset() + offset);
             }
          } // next anchor
       }
-      return changes;
    } // end of shiftAnchors()
    
    /**
@@ -1730,7 +1726,11 @@ public class Graph
     */
    public void trackChanges()
    {
-      if (tracker == null) setTracker(new ChangeTracker());
+      if (tracker == null)
+      {
+         setTracker(new ChangeTracker());
+         tracker.reset(); // ignore any prehistoric creates/deletes
+      }
    } // end of trackChanges()
    
    // TrackedMap methods
