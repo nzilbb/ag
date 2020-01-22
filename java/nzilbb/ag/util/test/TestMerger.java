@@ -609,7 +609,7 @@ public class TestMerger
   /**
    * Standardised method for running graph fragment tests based on files in the test directory.
    * @param sDir Subdirectory name
-   * @param logTestPrefix null, or a filename substring like "001" to identify a test for which to switch on debug logging.
+   * @param log null, or a filename substring like "001" to identify a test for which to switch on debug logging.
    */ 
   public void tests(String sDir, String log)
   {
@@ -634,7 +634,7 @@ public class TestMerger
       try
       {
         Graph originalGraph = loadGraphFromJSON(fOriginal, schema);
-        originalGraph.setTracker(new ChangeTracker());
+        originalGraph.trackChanges();
         File fEdited = new File(subdir, "edited_" + fragmentName + ".json");
         Graph editedGraph = loadGraphFromJSON(fEdited, schema);
         Merger m = new Merger(editedGraph);
@@ -655,7 +655,7 @@ public class TestMerger
         }
         if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
         for (String message : m.getErrors()) System.out.println("ERROR: " + message);
-        originalGraph.commit();
+
         // destroy any unreferenced anchors
         for (Anchor a : new Vector<Anchor>(originalGraph.getAnchors().values()))
         {
@@ -681,6 +681,7 @@ public class TestMerger
           }
           if (destroy) a.destroy();
         } // next anchor
+        
         originalGraph.commit();
 
         // save the actual result
