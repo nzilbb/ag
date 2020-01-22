@@ -311,7 +311,6 @@ public class Anchor
       if (tracker != null)
       {
          Optional<Change> change = tracker.getChange(id, "offset");
-         System.out.println("getOriginalOffset " + id + ": " + change);
          if (change.isPresent())
          {
             return (Double)change.get().getOldValue();
