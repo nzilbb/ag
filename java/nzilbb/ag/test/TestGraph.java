@@ -500,7 +500,6 @@ public class TestGraph
       g.addAnnotation(jumps).create();
 
       g.rollback();
-      System.out.println("CHNAGED "+g.getChanges());
       assertEquals(Change.Operation.NoChange, g.getChange());
       assertEquals(""+g.getChanges(), 0, g.getChanges().size());
 
