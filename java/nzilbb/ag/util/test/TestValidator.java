@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -244,6 +244,7 @@ public class TestValidator
     assertEquals("parent on wrong layer - ordinal not set",
                  0, g.getAnnotation("word6").getAssignedOrdinal());
 
+    // this shouldn't be necessary: g.trackChanges();
     Validator v = new Validator();
     // v.setDebug(true);
     v.setFullValidation(true);
@@ -254,28 +255,21 @@ public class TestValidator
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       Iterator<Change> order = changes.iterator();
       assertEquals("moved to new turn - different speaker", 
-                   new Change(Change.Operation.Update, g.getAnnotation("word3"), "parentId", "turn2"), 
-                   order.next());
+                   "Update word3: parentId = turn2 (was turn1)", order.next().toString());
       assertEquals("moved to new turn - update ordinal", 
-                   new Change(Change.Operation.Update, g.getAnnotation("word3"), "ordinal", Integer.valueOf(1)), 
-                   order.next());
+                   "Update word3: ordinal = 1 (was 3)", order.next().toString());
       assertEquals("moved to new turn - prefer same speaker", 
-                   new Change(Change.Operation.Update, g.getAnnotation("word4"), "parentId", "turn3"), 
-                   order.next());
+                   "Update word4: parentId = turn3 (was turn1)", order.next().toString());
       assertEquals(1, g.getAnnotation("word4").getOrdinal());
       assertEquals("moved to new turn - update ordinal", 
-                   new Change(Change.Operation.Update, g.getAnnotation("word4"), "ordinal", Integer.valueOf(1)), 
-                   order.next());
+                   "Update word4: ordinal = 1 (was 4)", order.next().toString());
       assertEquals("moved to new turn - same speaker", 
-                   new Change(Change.Operation.Update, g.getAnnotation("word5"), "parentId", "turn3"), 
-                   order.next());
+                   "Update word5: parentId = turn3 (was turn1)", order.next().toString());
       assertEquals("moved to new turn - update ordinal", 
-                   new Change(Change.Operation.Update, g.getAnnotation("word5"), "ordinal", Integer.valueOf(2)), 
-                   order.next());
+                   "Update word5: ordinal = 2 (was 5)", order.next().toString());
       assertEquals("" + g.getAnnotation("word6").getChange(), "turn3", g.getAnnotation("word6").getParentId());
       assertEquals("parent on wrong layer", 
-                   new Change(Change.Operation.Update, g.getAnnotation("word6"), "parentId", "turn3"), 
-                   order.next());
+                   "Update word6: parentId = turn3 (was participant1)", order.next().toString());
       assertEquals(3, g.getAnnotation("word6").getOrdinal());
       // setting the ordinal doesn't count as a change, because ordinal is not set in the first place
       // assertEquals("parent on wrong layer - update ordinal", 
@@ -371,7 +365,6 @@ public class TestValidator
     g.addAnnotation(new Annotation("pos4", "ADV", "pos", "a?2", "a5", "word6"));
     g.getAnnotation("pos4").setConfidence(Constants.CONFIDENCE_MANUAL);
     assertEquals("a?2", g.getAnnotation("pos4").getStartId());
-    assertNull(g.getAnnotation("pos4").get("originalStartId"));
     // automatic child - deleted
     g.addAnnotation(new Annotation("pos5", "deleteme", "pos", "a?2", "a5", "word6"));
     g.getAnnotation("pos5").setConfidence(Constants.CONFIDENCE_AUTOMATIC);
@@ -382,6 +375,9 @@ public class TestValidator
     g.addAnnotation(new Annotation("phone4", "w", "phone", "a2.25", "a2.5", "word2"));
     g.addAnnotation(new Annotation("phone5", "I", "phone", "a2.5", "a2.75", "word2"));
     g.addAnnotation(new Annotation("phone6", "k", "phone", "a2.75", "a3", "word2"));
+
+    // this is necessary because we need to capture changes before the validator is runs
+    g.trackChanges();
 
     // delete a word with children
     g.getAnnotation("word6").destroy();
@@ -395,22 +391,17 @@ public class TestValidator
       Vector<Change> changes = v.transform(g);
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       assertEquals("a?1", g.getAnnotation("pos4").getStartId());
-      assertEquals("a?2", g.getAnnotation("pos4").get("originalStartId"));
       assertEquals("a?2", g.getAnnotation("pos4").getOriginalStartId());
 
       Iterator<Change> order = changes.iterator();
       assertEquals("Delete word - manual child has new parent", 
-                   new Change(Change.Operation.Update, g.getAnnotation("pos4"), "parentId", "word5"), 
-                   order.next());
+                   "Update pos4: parentId = word5 (was word6)", order.next().toString());
       assertEquals("Delete word - manual child shares start", 
-                   new Change(Change.Operation.Update, g.getAnnotation("pos4"), "startId", "a?1"), 
-                   order.next());
+                   "Update pos4: startId = a?1 (was a?2)", order.next().toString());
       assertEquals("Delete word - manual child shares end", 
-                   new Change(Change.Operation.Update, g.getAnnotation("pos4"), "endId", "a?2"), 
-                   order.next());
+                   "Update pos4: endId = a?2 (was a5)", order.next().toString());
       assertEquals("Delete word - automatically generated child is deleted", 
-                   new Change(Change.Operation.Destroy, g.getAnnotation("pos5")), 
-                   order.next());
+                   "Destroy pos5", order.next().toString());
       assertFalse("Delete word - manual child is not deleted " + changes, order.hasNext());
       assertEquals("one extra change in graph - the word deletion - " + g.getChanges(), 
                    changes.size() + 1, g.getChanges().size());
@@ -503,6 +494,9 @@ public class TestValidator
     g.addAnnotation(new Annotation("role1", "object", "role", "a?2", "a5", "word5")); // over
     g.addAnnotation(new Annotation("role2", "subject", "role", "a4", "a?1", "word5")); // fox
 
+    // this is necessary because we need to capture changes before the validator is run    
+    g.trackChanges();
+
     // delete a word to ensure subsequent ordinals are updated
     assertEquals(5, g.getAnnotation("word5").getAssignedOrdinal());
     assertEquals(5, g.getAnnotation("word5").getOrdinal());
@@ -519,8 +513,7 @@ public class TestValidator
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       Iterator<Change> order = changes.iterator();
       assertEquals("children out of order - update ordinal", 
-                   new Change(Change.Operation.Update, g.getAnnotation("word2"), "ordinal", Integer.valueOf(2)), 
-                   order.next());
+                   "Update word2: ordinal = 2 (was 3)", order.next().toString());
       // assertEquals("children out of order - update ordinal", 
       // 	      new Change(Change.Operation.Update, g.getAnnotation("word3"), "ordinal", Integer.valueOf(3)), 
       // 	      order.next());
@@ -532,12 +525,10 @@ public class TestValidator
       assertEquals(5, g.getAnnotation("word6").getOrdinal());
       assertTrue("update ordinal after deleted annotation", 
                  g.getChanges().contains(
-                   new Change(Change.Operation.Update, g.getAnnotation("word5"), 
-                              "ordinal", Integer.valueOf(4))));
+                    new Change(Change.Operation.Update, g.getAnnotation("word5"), "ordinal", Integer.valueOf(4), Integer.valueOf(5))));
       assertTrue("update ordinal after deleted annotation", 
                  g.getChanges().contains(
-                   new Change(Change.Operation.Update, g.getAnnotation("word6"), 
-                              "ordinal", Integer.valueOf(5))));
+                    new Change(Change.Operation.Update, g.getAnnotation("word6"), "ordinal", Integer.valueOf(5), Integer.valueOf(6))));
       // assertEquals("three extra changes to graph, the deletion and two ordinal updates" + g.getChanges(), changes.size() + 3, g.getChanges().size());
     }
     catch(TransformationException exception)
@@ -645,8 +636,8 @@ public class TestValidator
     g.addAnnotation(new Annotation("phone5", "I", "phone", "a2.5", "a2.75", "word2"));
     g.addAnnotation(new Annotation("phone6", "k", "phone", "a2.75", "a3a", "word2"));
 
-    assertEquals("no extra changes to graph", 0, g.getChanges().size());
-
+    // this shouldn't be necessary: g.trackChanges();
+    
     Validator v = new Validator();
     v.setFullValidation(true);
     // v.setDebug(true);
@@ -656,13 +647,11 @@ public class TestValidator
       Vector<Change> changes = v.transform(g);
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       Iterator<Change> order = changes.iterator();
-	 
+
       assertEquals("word share start anchors - new anchor: " + changes, 
-                   new Change(Change.Operation.Create, g.getAnchor("1")), 
-                   order.next());
+                   "Create 1", order.next().toString());
       assertEquals("word share start anchors - new anchor copies offset: " + changes, 
-                   new Change(Change.Operation.Update, g.getAnchor("1"), "offset", Double.valueOf(4.0)), 
-                   order.next());
+                   "Update 1: offset = 4.0 (was null)", order.next().toString());
       assertNotEquals("word share start anchors - not shared any more: " + changes, 
                       g.getAnnotation("word6").getStartId(), 
                       g.getAnnotation("word4").getStartId());
@@ -670,17 +659,14 @@ public class TestValidator
                    g.getAnnotation("word4").get("startId"), 
                    g.getAnnotation("pos3").get("startId"));
       assertEquals("word share start anchors - new start: " + changes, 
-                   new Change(Change.Operation.Update, g.getAnnotation("word4"), "startId", "1"), 
-                   order.next());
+                   "Update word4: startId = 1 (was a4)", order.next().toString());
       assertNotEquals("word share end anchors - not shared any more: " + changes, 
                       g.getAnnotation("word5").getEndId(), 
                       g.getAnnotation("word4").getEndId());
       assertEquals("word tag share start anchors - new start: " + changes, 
-                   new Change(Change.Operation.Update, g.getAnnotation("pos3"), "startId", "1"), 
-                   order.next());
+                   "Update pos3: startId = 1 (was a4)", order.next().toString());
       assertEquals("word share start anchors - new end: " + changes, 
-                   new Change(Change.Operation.Update, g.getAnnotation("word3"), "endId", "1"), 
-                   order.next());
+                   "Update word3: endId = 1 (was a4)", order.next().toString());
 
       assertFalse("no more changes " + changes, order.hasNext());
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
@@ -784,6 +770,7 @@ public class TestValidator
     g.addAnnotation(new Annotation("pos2", "A", "pos", "a2", "a3", "word2")); // quick
     g.addAnnotation(new Annotation("pos3", "A", "pos", "a2.6", "a4", "word3")); // brown
 
+    // this shouldn't be necessary: g.trackChanges();
     Validator v = new Validator();
     v.setFullValidation(true);
     // v.setDebug(true);
@@ -985,6 +972,7 @@ public class TestValidator
     g.addAnnotation(new Annotation("phone5", "I", "phone", "a2.5", "a2.75", "word2"));
     g.addAnnotation(new Annotation("phone6", "k", "phone", "a2.75", "a3a", "word2"));
 
+    // this shouldn't be necessary: g.trackChanges();
     Validator v = new Validator();
     v.setFullValidation(true);
     // v.setDebug(true);
@@ -1046,12 +1034,9 @@ public class TestValidator
 
       // order of changes
       Iterator<Change> order = changes.iterator();
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a2b"), "offset", null), 
-                   order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a3a"), "offset", null), 
-                   order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a4.75"), "offset", null), 
-                   order.next());
+      assertEquals("Update a2b: offset = null (was 3.0)", order.next().toString());
+      assertEquals("Update a3a: offset = null (was 2.0)", order.next().toString());
+      assertEquals("Update a4.75: offset = null (was 4.75)", order.next().toString());
       assertFalse(order.hasNext());
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
     }
@@ -1168,6 +1153,7 @@ public class TestValidator
     g.addAnnotation(new Annotation("phone5", "I", "phone", "a3.0", "a2.0", "word2"));
     g.addAnnotation(new Annotation("phone6", "k", "phone", "a2.0", "a2.25", "word2"));
 
+    // this shouldn't be necessary: g.trackChanges();
     Validator v = new Validator();
     v.setFullValidation(true);
     // v.setDebug(true);
@@ -1211,12 +1197,9 @@ public class TestValidator
       assertEquals("a2.25", g.getAnnotation("phone6").getEndId());
 	 
       Iterator<Change> order = changes.iterator();
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a2.0"), "offset", null), 
-                   order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a2.25"), "offset", null), 
-                   order.next());
-      assertEquals(new Change(Change.Operation.Update, g.getAnchor("a3b"), "offset", null), 
-                   order.next());
+      assertEquals("Update a2.0: offset = null (was 2.0)", order.next().toString());
+      assertEquals("Update a2.25: offset = null (was 2.25)", order.next().toString());
+      assertEquals("Update a3b: offset = null (was 3.0)", order.next().toString());
       assertFalse("No extraneous changes", order.hasNext());
 
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
@@ -1287,6 +1270,7 @@ public class TestValidator
     g.addAnnotation(new Annotation("y", "y", "phone", "yeahStart", "eahStart", "yeah"));
     g.addAnnotation(new Annotation("eah", "eah", "phone", "eahStart", "yeahEnd", "yeah"));
 
+    // this shouldn't be necessary: g.trackChanges();
     Validator v = new Validator();
     v.setFullValidation(true);
     // v.setDebug(true);
@@ -1380,6 +1364,7 @@ public class TestValidator
     g.addAnnotation(new Annotation("y", "y", "phone", "yeahStart", "eahStart", "yeah"));
     g.addAnnotation(new Annotation("eah", "eah", "phone", "eahStart", "yeahEnd", "yeah"));
 
+    // this shouldn't be necessary: g.trackChanges();
     Validator v = new Validator();
     v.setFullValidation(true);
     // v.setDebug(true);
@@ -1473,6 +1458,7 @@ public class TestValidator
     g.addAnnotation(new Annotation("y", "y", "phone", "yeahStart", "eahStart", "yeah"));
     g.addAnnotation(new Annotation("eah", "eah", "phone", "eahStart", "yeahEnd", "yeah"));
 
+    // this shouldn't be necessary: g.trackChanges();
     Validator v = new Validator();
     v.setFullValidation(true);
     // v.setDebug(true);
@@ -1556,6 +1542,7 @@ public class TestValidator
     g.addAnnotation(new Annotation("a1", "a", "phone", "a1Start", "nStart", "than"));
     g.addAnnotation(new Annotation("n", "n", "phone", "nStart", "thatStart", "than"));
 
+    // this shouldn't be necessary: g.trackChanges();
     Validator v = new Validator();
     v.setFullValidation(true);
     // v.setDebug(true);
@@ -1645,6 +1632,7 @@ public class TestValidator
     g.addAnnotation(new Annotation("y", "y", "phone", "yeahStart", "eahStart", "yeah"));
     g.addAnnotation(new Annotation("eah", "eah", "phone", "eahStart", "yeahEnd", "yeah"));
 
+    // this shouldn't be necessary: g.trackChanges();
     Validator v = new Validator();
     v.setFullValidation(true);
     // v.setDebug(true);
@@ -1753,6 +1741,7 @@ public class TestValidator
     g.getAnnotation("jumps").setLabel("test");
     g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
+    // this shouldn't be necessary: g.trackChanges();
     Validator v = new Validator();
     v.setFullValidation(true);
     // v.setDebug(true);
@@ -1838,6 +1827,7 @@ public class TestValidator
     g.addAnnotation(new Annotation("lazy",  "lazy",  "word", "a34",  "a44", "turn1"));
     g.addAnnotation(new Annotation("dog",  "dog",    "word", "a44",  "a54", "turn1"));
 
+    // this shouldn't be necessary: g.trackChanges();
     Validator v = new Validator();
     v.setFullValidation(true);
     // v.setDebug(true);
@@ -1921,7 +1911,10 @@ public class TestValidator
     g.addAnnotation(new Annotation("orth4", "fox", "orthography", null, null, "word4"));
     g.addAnnotation(new Annotation("orth5", "jumps", "orthography", null, null, "word5"));
     g.addAnnotation(new Annotation("orth6", "over", "orthography", null, null, "word6"));
-      
+
+    // this is necessary because we need to capture changes before the validator is run
+    g.trackChanges();
+
     g.getAnnotation("orth3").destroy();
 
     Validator v = new Validator();
@@ -2048,6 +2041,7 @@ public class TestValidator
                     f.getAnnotation("utterance2").getStart());
     assertTrue(f.isFragment());
 
+    // this shouldn't be necessary: g.trackChanges();
     Validator v = new Validator();
     v.setFullValidation(true);
     // v.setDebug(true);
@@ -2157,6 +2151,7 @@ public class TestValidator
       g.addAnnotation(new Annotation("phone5", "I", "phone", "a2.5", "a2.75", "word2"));
       g.addAnnotation(new Annotation("phone6", "k", "phone", "a2.75", "a3", "word2"));
       
+      // this shouldn't be necessary: g.trackChanges();
       Validator v = new Validator();
       v.setMaxLabelLength(20);
       v.setFullValidation(true);
@@ -2181,7 +2176,6 @@ public class TestValidator
       fail(exception.toString());
     }
   }
-
 
   @Test public void validateHierarchyParentChildSynchronicity() // TODO saturated anchor sharing, and non-saturated by parent-including violations
   {

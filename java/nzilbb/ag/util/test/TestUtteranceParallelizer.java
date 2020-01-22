@@ -35,7 +35,6 @@ public class TestUtteranceParallelizer
 {
    @Test public void envelopedTurn() throws Exception
    {
-      System.out.println("envelopedTurn");
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants")
@@ -135,16 +134,18 @@ public class TestUtteranceParallelizer
                                          "t2"));
       assertEquals("2 turns", 2, graph.list("turn").length);
 
+      graph.trackChanges();
+      
       UtteranceParallelizer parallelizer = new UtteranceParallelizer(schema);
       try
       {
 	 Vector<Change> changes = parallelizer.transform(graph);
 
-	 //TODO assertNotEquals("changes: " + changes, 0, changes.size());
+	 assertNotEquals("changes: " + changes, 0, changes.size());
 
          // there are now four turns
          Annotation[] turns = graph.list("turn");
-         for (Annotation t : turns) System.out.println(t.getLabel() + " ("+t.getStart()+"-"+t.getEnd()+")");
+         // for (Annotation t : turns) System.out.println(t.getLabel() + " ("+t.getStart()+"-"+t.getEnd()+")");
 	 assertEquals("now 4 turns: " + Arrays.asList(turns),
                       4, turns.length);
 
@@ -174,7 +175,6 @@ public class TestUtteranceParallelizer
    
    @Test public void overlappingTurn() throws Exception
    {
-      System.out.println("overlappingTurn");
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants")
@@ -271,17 +271,18 @@ public class TestUtteranceParallelizer
       
       assertEquals("2 turns", 2, graph.list("turn").length);
 
+      graph.trackChanges();
       UtteranceParallelizer parallelizer = new UtteranceParallelizer()
          .addLayerId("utterance").addLayerId("turn");
       try
       {
 	 Vector<Change> changes = parallelizer.transform(graph);
 
-	 //TODO assertNotEquals("changes: " + changes, 0, changes.size());
+	 assertNotEquals("changes: " + changes, 0, changes.size());
 
          // there are now four turns
          Annotation[] turns = graph.list("turn");
-         for (Annotation t : turns) System.out.println(t.getLabel() + " ("+t.getStart()+"-"+t.getEnd()+")");
+         // for (Annotation t : turns) System.out.println(t.getLabel() + " ("+t.getStart()+"-"+t.getEnd()+")");
 	 assertEquals("now 4 turns: " + Arrays.asList(turns),
                       4, turns.length);
 
