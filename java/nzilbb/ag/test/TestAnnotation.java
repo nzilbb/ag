@@ -131,6 +131,7 @@ public class TestAnnotation
    @Test public void changeTracking() 
    {
       Annotation a = new Annotation("123", "LABEL", "word", "start", "end", "parent", 99);
+      a.setTracker(new ChangeTracker());
       assertEquals("LABEL", a.getLabel());
       assertEquals("Offset and original are the same", a.getLabel(), a.getOriginalLabel());
       assertEquals(Change.Operation.NoChange, a.getChange());
@@ -149,31 +150,26 @@ public class TestAnnotation
       a.setLabel("NEW LABEL");
       assertEquals("NEW LABEL", a.getLabel());
       assertEquals("Original value attribute:", "LABEL", a.getOriginalLabel());
-      assertEquals("Original value in map:", "LABEL", a.get("originalLabel"));
       assertEquals(Change.Operation.Update, a.getChange());
 
       a.rollback();
       assertEquals("Rollback:", "LABEL", a.getLabel());
       assertEquals("Original value attribute:", "LABEL", a.getOriginalLabel());
-      assertFalse("Original value no longer in map:", a.containsKey("originalLabel"));
       assertEquals(Change.Operation.NoChange, a.getChange());
 
       a.setStartId("new start");
       assertEquals("new start", a.getStartId());
       assertEquals("Original value attribute:", "start", a.getOriginalStartId());
-      assertEquals("Original value in map:", "start", a.get("originalStartId"));
       assertEquals(Change.Operation.Update, a.getChange());
 
-      //a.commit();
+      a.getTracker().reset();
       assertEquals("new start", a.getStartId());
       assertEquals("Committed original attribute:", "new start", a.getOriginalStartId());
-      assertFalse("Original value no longer in map:", a.containsKey("originalStartId"));
       assertEquals(Change.Operation.NoChange, a.getChange());
 
       a.setEndId("new end");
       assertEquals("new end", a.getEndId());
       assertEquals("Original value attribute:", "end", a.getOriginalEndId());
-      assertEquals("Original value in map:", "end", a.get("originalEndId"));
       assertEquals(Change.Operation.Update, a.getChange());
 
       a.rollback();
@@ -182,7 +178,6 @@ public class TestAnnotation
       a.setParentId("new parent");
       assertEquals("new parent", a.getParentId());
       assertEquals("Original value attribute:", "parent", a.getOriginalParentId());
-      assertEquals("Original value in map:", "parent", a.get("originalParentId"));
       assertEquals(Change.Operation.Update, a.getChange());
 
       a.rollback();
@@ -191,7 +186,6 @@ public class TestAnnotation
       a.setOrdinal(1000);
       assertEquals(1000, a.getOrdinal());
       assertEquals("Original value attribute:", 99, a.getOriginalOrdinal());
-      assertEquals("Original value in map:", Integer.valueOf(99), a.get("originalOrdinal"));
       assertEquals(Change.Operation.Update, a.getChange());
 
       a.create();
@@ -199,7 +193,9 @@ public class TestAnnotation
 
       a.destroy();
       assertEquals("Destroy trumps Create as a change", Change.Operation.Destroy, a.getChange());
-
+      a.rollback();
+      
+      a.create();
       a.rollback();
       assertEquals("Create cannot be rolled back:", Change.Operation.Create, a.getChange());
 

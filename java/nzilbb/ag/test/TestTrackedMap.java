@@ -41,6 +41,7 @@ public class TestTrackedMap
       m.setTracked2("value2");
       m.setTracked3("value3");
       m.setNotTracked("value4");
+      m.setTracker(new ChangeTracker());
       
       // values set
       assertEquals("123", m.getId());
@@ -59,66 +60,72 @@ public class TestTrackedMap
 
       m.setNotTracked("newValue4");
       assertEquals("newValue4", m.getNotTracked());
-      assertEquals("Non-tracked keys don't affect change:", Change.Operation.NoChange, m.getChange());
+      assertEquals("Non-tracked keys don't affect change:",
+                   Change.Operation.NoChange, m.getChange());
       assertEquals(0, m.getChanges().size());
       
       m.setId("ID");
       assertEquals("ID", m.getId());
-      assertEquals("Non-tracked attributes don't affect change - id:", Change.Operation.NoChange, m.getChange());
+      assertEquals("Non-tracked attributes don't affect change - id:",
+                   Change.Operation.NoChange, m.getChange());
 
       m.setTracked1("newValue1");
       assertEquals("newValue1", m.getTracked1());
-      assertEquals("Original value in map:", "value1", m.get("originalTracked1"));
       assertEquals(Change.Operation.Update, m.getChange());
       assertEquals(1, m.getChanges().size());
-      assertEquals("Update ID: tracked1 = newValue1", m.getChanges().elementAt(0).toString());
+      assertEquals("Update ID: tracked1 = newValue1 (was value1)",
+                   m.getChanges().elementAt(0).toString());
 
       m.rollback();
       assertEquals("value1", m.getTracked1());
-      assertFalse("Original value no longer in map:", m.containsKey("originalTracked1"));
       assertEquals(Change.Operation.NoChange, m.getChange());
       assertEquals(0, m.getChanges().size());
 
       m.setTracked2("newValue2");
       assertEquals("newValue2", m.getTracked2());
-      assertEquals("Original value in map:", "value2", m.get("originalTracked2"));
       assertEquals(Change.Operation.Update, m.getChange());
       assertEquals(1, m.getChanges().size());
-      assertEquals("Update ID: tracked2 = newValue2", m.getChanges().elementAt(0).toString());
+      assertEquals("Update ID: tracked2 = newValue2 (was value2)",
+                   m.getChanges().elementAt(0).toString());
 
+      m.getTracker().reset();
       assertEquals("newValue2", m.getTracked2());
-      assertFalse("Original value no longer in map:", m.containsKey("originalTracked2"));
       assertEquals(Change.Operation.NoChange, m.getChange());
       assertEquals(0, m.getChanges().size());
 
       m.setTracked3("newerValue3");
       assertEquals("newerValue3", m.getTracked3());
-      assertEquals("Original value in map:", "value3", m.get("originalTracked3"));
       assertEquals(Change.Operation.Update, m.getChange());
       assertEquals(1, m.getChanges().size());
-      assertEquals("Update ID: tracked3 = newerValue3", m.getChanges().elementAt(0).toString());
+      assertEquals("Update ID: tracked3 = newerValue3 (was value3)",
+                   m.getChanges().elementAt(0).toString());
       
       m.setTracked3("newestValue3");
       assertEquals("newestValue3", m.getTracked3());
-      assertEquals("First original value in map:", "value3", m.get("originalTracked3"));
       assertEquals(Change.Operation.Update, m.getChange());
       assertEquals("Only latest change is reported", 1, m.getChanges().size());
-      assertEquals("Only latest change is reported", "Update ID: tracked3 = newestValue3", m.getChanges().elementAt(0).toString());
+      assertEquals("Only latest change is reported",
+                   "Update ID: tracked3 = newestValue3 (was value3)",
+                   m.getChanges().elementAt(0).toString());
       
       m.setTracked2("newestValue2");
       assertEquals("newestValue2", m.getTracked2());
-      assertEquals("Original value in map:", "newValue2", m.get("originalTracked2"));
       assertEquals(Change.Operation.Update, m.getChange());
       assertEquals("Multiple attribute changes", 2, m.getChanges().size());
-      assertEquals("Multiple attribute changes", "Update ID: tracked2 = newestValue2", m.getChanges().elementAt(0).toString());
-      assertEquals("Multiple attribute changes", "Update ID: tracked3 = newestValue3", m.getChanges().elementAt(1).toString());
+      assertEquals("Multiple attribute changes",
+                   "Update ID: tracked2 = newestValue2 (was newValue2)",
+                   m.getChanges().elementAt(0).toString());
+      assertEquals("Multiple attribute changes",
+                   "Update ID: tracked3 = newestValue3 (was value3)",
+                   m.getChanges().elementAt(1).toString());
 
       m.rollback("tracked3");
       assertEquals("Rollback single key", "value3", m.getTracked3());
-      assertFalse("Original value no longer in map:", m.containsKey("originalTracked3"));
       assertEquals(Change.Operation.Update, m.getChange());
       assertEquals("Rollback single key", 1, m.getChanges().size());
-      assertEquals("Rollback single key", "Update ID: tracked2 = newestValue2", m.getChanges().elementAt(0).toString());
+      assertEquals("Rollback single key",
+                   "Update ID: tracked2 = newestValue2 (was newValue2)",
+                   m.getChanges().elementAt(0).toString());
       
       m.destroy();
       assertEquals("Destroy trumps Update as a change", Change.Operation.Destroy, m.getChange());
@@ -135,15 +142,21 @@ public class TestTrackedMap
       assertEquals("Create reports all attributes", 4, m.getChanges().size());
       assertEquals("Multiple attribute changes", "Create ID", m.getChanges().elementAt(0).toString());
       // these should be ordered according to the aTrackedAttributes above:
-      assertEquals("Multiple attribute changes", "Update ID: tracked2 = value2", m.getChanges().elementAt(1).toString());
-      assertEquals("Multiple attribute changes", "Update ID: tracked1 = value1", m.getChanges().elementAt(2).toString());
-      assertEquals("Multiple attribute changes", "Update ID: tracked3 = value3", m.getChanges().elementAt(3).toString());
+      assertEquals("Multiple attribute changes",
+                   "Update ID: tracked2 = value2 (was null)",
+                   m.getChanges().elementAt(1).toString());
+      assertEquals("Multiple attribute changes",
+                   "Update ID: tracked1 = value1 (was null)",
+                   m.getChanges().elementAt(2).toString());
+      assertEquals("Multiple attribute changes",
+                   "Update ID: tracked3 = value3 (was null)",
+                   m.getChanges().elementAt(3).toString());
       
       m.destroy();
       assertEquals("Destroy trumps Create as a change", Change.Operation.Destroy, m.getChange());
-      // an insert followed by a delete cancels out - there is no operation
-      assertEquals("Insert followed by delete", 0, m.getChanges().size());
-      
+      m.rollback();
+
+      m.create();
       m.rollback();
       assertEquals("Create cannot be rolled back", Change.Operation.Create, m.getChange());
       assertEquals("Create reports all attributes", 4, m.getChanges().size());
