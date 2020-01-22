@@ -25,10 +25,12 @@ package nzilbb.ag.util.test;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-import java.util.Vector;
+import java.util.Set;
 import java.util.Iterator;
-import nzilbb.ag.util.*;
+import java.util.Vector;
+import java.util.stream.Collectors;
 import nzilbb.ag.*;
+import nzilbb.ag.util.*;
 
 public class TestDefaultOffsetGenerator
 {
@@ -95,7 +97,6 @@ public class TestDefaultOffsetGenerator
       // test the values are what we expected
 
       // test the changes are recorded
-      Iterator<Change> order = changes.iterator();
       assertEquals(Double.valueOf(0.0), g.getAnchor("a0").getOffset());
       assertEquals(Double.valueOf(1.0), g.getAnchor("a1").getOffset());
       assertEquals(Double.valueOf(2.0), g.getAnchor("a2").getOffset());
@@ -107,20 +108,23 @@ public class TestDefaultOffsetGenerator
       assertEquals(Double.valueOf(8.0), g.getAnchor("a8").getOffset());
       assertEquals(Double.valueOf(9.0), g.getAnchor("a9").getOffset());
 
+      Set<String> changeStrings = changes.stream()
+         .map(Change::toString).collect(Collectors.toSet());
       // collapsed back to start of turn
-      assertEquals("Update a0: offset = 0.0 (was null)", order.next().toString());
+      assertTrue(changeStrings.contains("Update a0: offset = 0.0 (was null)"));
       // collapsed forward to end of turn
-      assertEquals("Update a9: offset = 9.0 (was null)", order.next().toString());
+      assertTrue(changeStrings.contains("Update a9: offset = 9.0 (was null)"));
       // then the rest interpolated between
-      assertEquals("Update a1: offset = 1.0 (was null)", order.next().toString());
-      assertEquals("Update a2: offset = 2.0 (was null)", order.next().toString());
-      assertEquals("Update a3: offset = 3.0 (was null)", order.next().toString());
-      assertEquals("Update a4: offset = 4.0 (was null)", order.next().toString());
-      assertEquals("Update a5: offset = 5.0 (was null)", order.next().toString());
-      assertEquals("Update a6: offset = 6.0 (was null)", order.next().toString());
-      assertEquals("Update a7: offset = 7.0 (was null)", order.next().toString());
-      assertEquals("Update a8: offset = 8.0 (was null)", order.next().toString());
-      assertEquals("no extra changes to graph: " + g.getChanges(), changes.size(), g.getChanges().size());
+      assertTrue(changeStrings.contains("Update a1: offset = 1.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a2: offset = 2.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a3: offset = 3.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a4: offset = 4.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a5: offset = 5.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a6: offset = 6.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a7: offset = 7.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a8: offset = 8.0 (was null)"));
+      assertEquals("no extra changes to graph: " + g.getChanges(),
+                   changes.size(), g.getChanges().size());
     }
     catch(TransformationException exception)
     {
@@ -204,7 +208,8 @@ public class TestDefaultOffsetGenerator
       // test the values are what we expected
 
       // test the changes are recorded
-      Iterator<Change> order = changes.iterator();
+      Set<String> changeStrings = changes.stream()
+         .map(Change::toString).collect(Collectors.toSet());
       assertEquals(Double.valueOf(0.0), g.getAnchor("a0").getOffset());
       assertEquals(Double.valueOf(0.5), g.getAnchor("a05").getOffset());
       assertEquals(Double.valueOf(1.0), g.getAnchor("a1").getOffset());
@@ -217,18 +222,18 @@ public class TestDefaultOffsetGenerator
       assertEquals(Double.valueOf(7.0), g.getAnchor("a7").getOffset());
 
       // collapsed back to start of turn
-      assertEquals("Update a0: offset = 0.0 (was 0.1)", order.next().toString());
+      assertTrue(changeStrings.contains("Update a0: offset = 0.0 (was 0.1)"));
       // then the rest interpolated between
-      assertEquals("Update a05: offset = 0.5 (was 0.2)", order.next().toString());
-      assertEquals("Update a1: offset = 1.0 (was 1.3)", order.next().toString());
-      assertEquals("Update a15: offset = 1.5 (was 1.4)", order.next().toString());
+      assertTrue(changeStrings.contains("Update a05: offset = 0.5 (was 0.2)"));
+      assertTrue(changeStrings.contains("Update a1: offset = 1.0 (was 1.3)"));
+      assertTrue(changeStrings.contains("Update a15: offset = 1.5 (was 1.4)"));
       // a2 not changed
       // collapsed forward to end of span
-      assertEquals("Update a7: offset = 7.0 (was null)", order.next().toString());
-      assertEquals("Update a3: offset = 3.0 (was 3.3)", order.next().toString());
-      assertEquals("Update a4: offset = 4.0 (was 4.4)", order.next().toString());
-      assertEquals("Update a5: offset = 5.0 (was 5.5)", order.next().toString());
-      assertEquals("Update a6: offset = 6.0 (was 6.6)", order.next().toString());
+      assertTrue(changeStrings.contains("Update a7: offset = 7.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a3: offset = 3.0 (was 3.3)"));
+      assertTrue(changeStrings.contains("Update a4: offset = 4.0 (was 4.4)"));
+      assertTrue(changeStrings.contains("Update a5: offset = 5.0 (was 5.5)"));
+      assertTrue(changeStrings.contains("Update a6: offset = 6.0 (was 6.6)"));
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
 
     }
@@ -320,7 +325,8 @@ public class TestDefaultOffsetGenerator
       // test the values are what we expected
 
       // test the changes are recorded
-      Iterator<Change> order = changes.iterator();
+      Set<String> changeStrings = changes.stream()
+         .map(Change::toString).collect(Collectors.toSet());
       assertEquals(Double.valueOf(0.0), g.getAnchor("a0").getOffset());
       assertEquals(Double.valueOf(0.1), g.getAnchor("a01").getOffset());
       assertEquals(Double.valueOf(0.2), g.getAnchor("a02").getOffset());
@@ -335,22 +341,22 @@ public class TestDefaultOffsetGenerator
       assertEquals(Double.valueOf(5.4), g.getAnchor("a54").getOffset());
 
       // collapsed back to start of turn
-      assertEquals("Update a0: offset = 0.0 (was 0.01)", order.next().toString());
+      assertTrue(changeStrings.contains("Update a0: offset = 0.0 (was 0.01)"));
       // collapsed forward to end of utterancew 
-      assertEquals("Update a04a: offset = 0.4 (was 0.04)", order.next().toString());
+      assertTrue(changeStrings.contains("Update a04a: offset = 0.4 (was 0.04)"));
       // then the rest interpolated between
-      assertEquals("Update a01: offset = 0.1 (was 0.02)", order.next().toString());
-      assertEquals("Update a02: offset = 0.2 (was 0.03)", order.next().toString());
-      assertEquals("Update a03: offset = 0.30000000000000004 (was 0.04)", order.next().toString());
+      assertTrue(changeStrings.contains("Update a01: offset = 0.1 (was 0.02)"));
+      assertTrue(changeStrings.contains("Update a02: offset = 0.2 (was 0.03)"));
+      assertTrue(changeStrings.contains("Update a03: offset = 0.30000000000000004 (was 0.04)"));
       // collapsed back to start of utterance
-      assertEquals("Update a04b: offset = 0.4 (was 2.0)", order.next().toString());
+      assertTrue(changeStrings.contains("Update a04b: offset = 0.4 (was 2.0)"));
       // collapsed forward to end of utterance
-      assertEquals("Update a54: offset = 5.4 (was null)", order.next().toString());
+      assertTrue(changeStrings.contains("Update a54: offset = 5.4 (was null)"));
       // then the rest interpolated between
-      assertEquals("Update a14: offset = 1.4 (was 3.3)", order.next().toString());
-      assertEquals("Update a24: offset = 2.4 (was 4.4)", order.next().toString());
-      assertEquals("Update a34: offset = 3.4 (was 5.0)", order.next().toString());
-      assertEquals("Update a44: offset = 4.4 (was 5.1)", order.next().toString());
+      assertTrue(changeStrings.contains("Update a14: offset = 1.4 (was 3.3)"));
+      assertTrue(changeStrings.contains("Update a24: offset = 2.4 (was 4.4)"));
+      assertTrue(changeStrings.contains("Update a34: offset = 3.4 (was 5.0)"));
+      assertTrue(changeStrings.contains("Update a44: offset = 4.4 (was 5.1)"));
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
 
     }
@@ -461,32 +467,33 @@ public class TestDefaultOffsetGenerator
       assertEquals(Double.valueOf(12.5), g.getAnchor("b12").getOffset());
 
       // test the changes are recorded
-      Iterator<Change> order = changes.iterator();
+      Set<String> changeStrings = changes.stream()
+         .map(Change::toString).collect(Collectors.toSet());
 
       // collapsed back to start of turn
-      assertEquals("Update a0: offset = 0.0 (was null)", order.next().toString());
+      assertTrue(changeStrings.contains("Update a0: offset = 0.0 (was null)"));
       // collapsed forward to end of turn
-      assertEquals("Update a9: offset = 9.0 (was null)", order.next().toString());
+      assertTrue(changeStrings.contains("Update a9: offset = 9.0 (was null)"));
       // then the rest interpolated between
-      assertEquals("Update a1: offset = 1.0 (was null)", order.next().toString());
-      assertEquals("Update a2: offset = 2.0 (was null)", order.next().toString());
-      assertEquals("Update a3: offset = 3.0 (was null)", order.next().toString());
-      assertEquals("Update a4: offset = 4.0 (was null)", order.next().toString());
-      assertEquals("Update a5: offset = 5.0 (was null)", order.next().toString());
-      assertEquals("Update a6: offset = 6.0 (was null)", order.next().toString());
-      assertEquals("Update a7: offset = 7.0 (was null)", order.next().toString());
-      assertEquals("Update a8: offset = 8.0 (was null)", order.next().toString());
+      assertTrue(changeStrings.contains("Update a1: offset = 1.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a2: offset = 2.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a3: offset = 3.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a4: offset = 4.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a5: offset = 5.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a6: offset = 6.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a7: offset = 7.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a8: offset = 8.0 (was null)"));
 
       // collapsed back to start of turn
-      assertEquals("Update b6: offset = 6.5 (was null)", order.next().toString());
+      assertTrue(changeStrings.contains("Update b6: offset = 6.5 (was null)"));
       // collapsed forward to end of turn
-      assertEquals("Update b12: offset = 12.5 (was null)", order.next().toString());
+      assertTrue(changeStrings.contains("Update b12: offset = 12.5 (was null)"));
       // then the rest interpolated between
-      assertEquals("Update b7: offset = 7.5 (was null)", order.next().toString());
-      assertEquals("Update b8: offset = 8.5 (was null)", order.next().toString());
-      assertEquals("Update b9: offset = 9.5 (was null)", order.next().toString());
-      assertEquals("Update b10: offset = 10.5 (was null)", order.next().toString());
-      assertEquals("Update b11: offset = 11.5 (was null)", order.next().toString());
+      assertTrue(changeStrings.contains("Update b7: offset = 7.5 (was null)"));
+      assertTrue(changeStrings.contains("Update b8: offset = 8.5 (was null)"));
+      assertTrue(changeStrings.contains("Update b9: offset = 9.5 (was null)"));
+      assertTrue(changeStrings.contains("Update b10: offset = 10.5 (was null)"));
+      assertTrue(changeStrings.contains("Update b11: offset = 11.5 (was null)"));
 
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
     }
@@ -562,7 +569,8 @@ public class TestDefaultOffsetGenerator
       // test the values are what we expected
 
       // test the changes are recorded
-      Iterator<Change> order = changes.iterator();
+      Set<String> changeStrings = changes.stream()
+         .map(Change::toString).collect(Collectors.toSet());
       assertEquals(Double.valueOf(1.0), g.getAnchor("a1").getOffset());
       assertEquals(Double.valueOf(2.0), g.getAnchor("a2").getOffset());
       assertEquals(Double.valueOf(3.0), g.getAnchor("a3").getOffset());
@@ -573,15 +581,15 @@ public class TestDefaultOffsetGenerator
       assertEquals(Double.valueOf(8.0), g.getAnchor("a8").getOffset());
       assertEquals(Double.valueOf(9.0), g.getAnchor("a9").getOffset());
 
-      assertEquals("Update a1: offset = 1.0 (was null)", order.next().toString());
-      assertEquals("Update a2: offset = 2.0 (was null)", order.next().toString());
-      assertEquals("Update a3: offset = 3.0 (was null)", order.next().toString());
-      assertEquals("Update a4: offset = 4.0 (was null)", order.next().toString());
-      assertEquals("Update a5: offset = 5.0 (was null)", order.next().toString());
-      assertEquals("Update a6: offset = 6.0 (was null)", order.next().toString());
-      assertEquals("Update a7: offset = 7.0 (was null)", order.next().toString());
-      assertEquals("Update a8: offset = 8.0 (was null)", order.next().toString());
-      assertEquals("Update a9: offset = 9.0 (was null)", order.next().toString());
+      assertTrue(changeStrings.contains("Update a1: offset = 1.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a2: offset = 2.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a3: offset = 3.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a4: offset = 4.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a5: offset = 5.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a6: offset = 6.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a7: offset = 7.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a8: offset = 8.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a9: offset = 9.0 (was null)"));
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
 
     }
@@ -765,34 +773,35 @@ public class TestDefaultOffsetGenerator
       assertNull(g.getAnchor("topic1End").getOffset());
 
       // test the changes are recorded
-      Iterator<Change> order = changes.iterator();
+      Set<String> changeStrings = changes.stream()
+         .map(Change::toString).collect(Collectors.toSet());
 
       // collapsed back to start of turn
-      assertEquals("Update a0: offset = 0.0 (was null)", order.next().toString());
+      assertTrue(changeStrings.contains("Update a0: offset = 0.0 (was null)"));
       // collapsed forward to end of turn
-      assertEquals("Update a9: offset = 9.0 (was null)", order.next().toString());
+      assertTrue(changeStrings.contains("Update a9: offset = 9.0 (was null)"));
       // then the rest interpolated between
-      assertEquals("Update a1: offset = 1.0 (was null)", order.next().toString());
-      assertEquals("Update a2: offset = 2.0 (was null)", order.next().toString());
-      assertEquals("Update a3: offset = 3.0 (was null)", order.next().toString());
-      assertEquals("Update a4: offset = 4.0 (was null)", order.next().toString());
-      assertEquals("Update a5: offset = 5.0 (was null)", order.next().toString());
-      assertEquals("Update a6: offset = 6.0 (was null)", order.next().toString());
-      assertEquals("Update a7: offset = 7.0 (was null)", order.next().toString());
-      assertEquals("Update a8: offset = 8.0 (was null)", order.next().toString());
+      assertTrue(changeStrings.contains("Update a1: offset = 1.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a2: offset = 2.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a3: offset = 3.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a4: offset = 4.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a5: offset = 5.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a6: offset = 6.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a7: offset = 7.0 (was null)"));
+      assertTrue(changeStrings.contains("Update a8: offset = 8.0 (was null)"));
 
       // collapsed back to start of turn
-      assertEquals("Update b6: offset = 6.5 (was null)", order.next().toString());
+      assertTrue(changeStrings.contains("Update b6: offset = 6.5 (was null)"));
       // collapsed forward to end of turn
-      assertEquals("Update b14: offset = 14.5 (was null)", order.next().toString());
+      assertTrue(changeStrings.contains("Update b14: offset = 14.5 (was null)"));
       // then the rest interpolated between
-      assertEquals("Update b7: offset = 7.5 (was null)", order.next().toString());
-      assertEquals("Update b8: offset = 8.5 (was null)", order.next().toString());
-      assertEquals("Update b9: offset = 9.5 (was null)", order.next().toString());
-      assertEquals("Update b10: offset = 10.5 (was null)", order.next().toString());
-      assertEquals("Update b11: offset = 11.5 (was null)", order.next().toString());
-      assertEquals("Update b12: offset = 12.5 (was null)", order.next().toString());
-      assertEquals("Update b13: offset = 13.5 (was null)", order.next().toString());
+      assertTrue(changeStrings.contains("Update b7: offset = 7.5 (was null)"));
+      assertTrue(changeStrings.contains("Update b8: offset = 8.5 (was null)"));
+      assertTrue(changeStrings.contains("Update b9: offset = 9.5 (was null)"));
+      assertTrue(changeStrings.contains("Update b10: offset = 10.5 (was null)"));
+      assertTrue(changeStrings.contains("Update b11: offset = 11.5 (was null)"));
+      assertTrue(changeStrings.contains("Update b12: offset = 12.5 (was null)"));
+      assertTrue(changeStrings.contains("Update b13: offset = 13.5 (was null)"));
 
       assertEquals("no extra changes to graph - " + changes + " vs. " +g.getChanges(), 
                    changes.size(), g.getChanges().size());
@@ -892,7 +901,8 @@ public class TestDefaultOffsetGenerator
       // test the values are what we expected
 
       // test the changes are recorded
-      Iterator<Change> order = changes.iterator();
+      Set<String> changeStrings = changes.stream()
+         .map(Change::toString).collect(Collectors.toSet());
       assertEquals(Double.valueOf(0.0), f.getAnchor("a0").getOffset());
       assertEquals(Double.valueOf(0.1), f.getAnchor("a01").getOffset());
       assertEquals(Double.valueOf(0.2), f.getAnchor("a02").getOffset());
