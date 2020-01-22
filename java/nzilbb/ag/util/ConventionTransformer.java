@@ -255,6 +255,7 @@ public class ConventionTransformer
   {
     if (graph.getLayer(getSourceLayerId()) == null) 
       throw new TransformationException(this, "No source layer: " + getSourceLayerId());
+    if (graph.getTracker() == null) graph.trackChanges();
     try
     {
       Pattern sourceRegexp = Pattern.compile(getSourcePattern());

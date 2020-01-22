@@ -127,6 +127,7 @@ public class OrthographyClumper implements IGraphTransformer
       Layer wordLayer = graph.getLayer(getWordLayerId());
       if (wordLayer == null) 
 	 throw new TransformationException(this, "No layer: " + getWordLayerId());
+      if (graph.getTracker() == null) graph.trackChanges();
       Vector<Change> changes = new Vector<Change>();
       // for each parent
       for (Annotation parent : graph.list(wordLayer.getParentId()))

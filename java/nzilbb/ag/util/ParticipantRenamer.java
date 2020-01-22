@@ -104,6 +104,7 @@ public class ParticipantRenamer
       if (schema.getUtteranceLayerId() == null) 
 	 throw new TransformationException(this, "No utterance layer specified.");
 
+      if (graph.getTracker() == null) graph.trackChanges();
       Vector<Change> changes = new Vector<Change>();
 
       if (getOldNameToNewName().size() > 0)

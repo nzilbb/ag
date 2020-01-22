@@ -202,6 +202,7 @@ public class DefaultOffsetGenerator
    {
       if (debug) setLog(new Vector<String>());
       setErrors(new Vector<String>());
+      if (graph.getTracker() == null) graph.trackChanges();
 
       Vector<Change> changes = new Vector<Change>();
 

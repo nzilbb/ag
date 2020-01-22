@@ -207,6 +207,7 @@ public class Validator
    {
       if (debug) setLog(new Vector<String>());
       setErrors(new Vector<String>());
+      if (graph.getTracker() == null) graph.trackChanges();
 
       boolean needMoreValidation = false;
       if (getFullValidation())

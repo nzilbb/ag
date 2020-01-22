@@ -108,6 +108,7 @@ public class UtteranceParallelizer
     */
    public Vector<Change> transform(Graph graph) throws TransformationException
    {
+      if (graph.getTracker() == null) graph.trackChanges();
       Vector<Change> changes = new Vector<Change>();
 
       LayerHierarchyTraversal<Vector<String>> bottomUpSelectedLayers

@@ -113,6 +113,7 @@ public class Normalizer
       if (schema.getWordLayerId() == null) 
 	 throw new TransformationException(this, "No word layer specified.");
 
+      if (graph.getTracker() == null) graph.trackChanges();
       Vector<Change> changes = new Vector<Change>();
 
       if (schema.getEpisodeLayerId() != null)

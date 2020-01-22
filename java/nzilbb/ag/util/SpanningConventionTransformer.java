@@ -582,6 +582,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
       Layer destinationLayer = graph.getLayer(getDestinationLayerId());
       if (getSourceLayerId().equals(getDestinationLayerId())) 
 	 throw new TransformationException(this, "Source and destination layer are the same: " + getDestinationLayerId());
+      if (graph.getTracker() == null) graph.trackChanges();
       boolean sourceDestinationOfParent = destinationLayer != null 
 	 && destinationLayer.getParentId().equals(getSourceLayerId());
       boolean graphDestinationOfParent = destinationLayer != null 

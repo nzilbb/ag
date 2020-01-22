@@ -536,6 +536,8 @@ public class Merger
     Vector<Change> changes = new Vector<Change>();
     if (debug) setLog(new Vector<String>());
     setErrors(new Vector<String>());
+    if (graph.getTracker() == null) graph.trackChanges();
+
     schema = graph.getSchema();
     if (graph == editedGraph) return changes;
     if (editedGraph == null) throw new TransformationException(this, "Edited graph is no set.", new NullPointerException());

@@ -189,6 +189,7 @@ public class SimpleTokenizer
       if (getDestinationLayerId().equals(getSourceLayerId())) 
 	 throw new TransformationException(this, "Source and destination layer are the same: " + getDestinationLayerId());
 
+      if (graph.getTracker() == null) graph.trackChanges();
       Vector<Change> changes = new Vector<Change>();
 
       Layer sourceParent = graph.getLayer(graph.getLayer(getSourceLayerId()).getParentId());
