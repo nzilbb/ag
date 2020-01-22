@@ -457,7 +457,7 @@ public class TestGraph
    @Test public void basicChangeTracking() 
    {
       Graph g = new Graph();
-      g.setTracker(new ChangeTracker());
+      g.trackChanges();
       g.setId("my graph");
 
       g.addLayer(new Layer("turn", "Speaker turns", 2, true, true, false));
@@ -586,7 +586,7 @@ public class TestGraph
    @Test public void changeOrder() 
    {
       Graph g = new Graph();
-      g.setTracker(new ChangeTracker());
+      g.trackChanges();
       g.setId("my graph");
 
       g.addLayer(new Layer("turn", "Speaker turns", 2, true, true, false));
@@ -2053,7 +2053,7 @@ public class TestGraph
    @Test public void easyAnchorChaining() 
    {
       Graph g = new Graph();
-      g.setTracker(new ChangeTracker());
+      g.trackChanges();
       g.setId("my graph");
       
       g.addLayer(new Layer("test", "test", 2, true, false, false));

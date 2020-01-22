@@ -1724,6 +1724,15 @@ public class Graph
       tracker.reset();
    }
    
+   /**
+    * Adds a default change tracker. From this point on, changes to the graph or any of
+    * its Anchors/Annotations will be tracked and reversible. 
+    */
+   public void trackChanges()
+   {
+      if (tracker == null) setTracker(new ChangeTracker());
+   } // end of trackChanges()
+   
    // TrackedMap methods
 
    /**
