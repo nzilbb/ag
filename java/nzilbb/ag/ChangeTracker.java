@@ -39,6 +39,23 @@ public class ChangeTracker
    // map of object IDs to attribute maps, which are keyed by attribute key
    private HashMap<String,HashMap<String,Change>> idToChanges
    = new HashMap<String,HashMap<String,Change>>();
+
+   /**
+    * Consumers to pass the events to.
+    * @see #getOthers()
+    * @see #setOthers(Vector)
+    */
+   protected LinkedHashSet<Consumer<Change>> others = new LinkedHashSet<Consumer<Change>>();
+   /**
+    * Getter for {@link #others}: Consumers to pass the events to.
+    * @return Consumers to pass the events to.
+    */
+   public LinkedHashSet<Consumer<Change>> getOthers() { return others; }
+   /**
+    * Setter for {@link #others}: Consumers to pass the events to.
+    * @param newOthers Consumers to pass the events to.
+    */
+   public ChangeTracker setOthers(LinkedHashSet<Consumer<Change>> newOthers) { others = newOthers; return this; }
    
    /**
     * Register a {@link TrackedMap} object {@link Change}.
@@ -63,6 +80,8 @@ public class ChangeTracker
       }
       // System.out.println("ChangeTracker.accept: " + change);
       attributeMap.put(change.getKey(), change);
+
+      others.forEach(o -> o.accept(change));
    }
    
    /**
@@ -150,7 +169,7 @@ public class ChangeTracker
    public Set<Change> getChanges()
    {
       final LinkedHashSet<Change> changes = new LinkedHashSet<Change>();
-      idToChanges.keySet().forEach(id -> changes.addAll(getChanges()));
+      idToChanges.keySet().forEach(id -> changes.addAll(getChanges(id)));
       return changes;
    }
    
@@ -162,5 +181,24 @@ public class ChangeTracker
    {
       idToChanges = new HashMap<String,HashMap<String,Change>>();
    } // end of reset()
+
+   /**
+    * Add another consumer to also receive the changes.
+    * @param other
+    */
+   public void addListener(Consumer<Change> other)
+   {
+      if (other != null) others.add(other);
+   } // end of addListener()
+   
+
+   /**
+    * Stop a registered consumer receiving further the changes.
+    * @param other
+    */
+   public void removeListener(Consumer<Change> other)
+   {
+      if (other != null) others.remove(other);
+   } // end of removeListener()
 
 } // end of ChangeTracker
