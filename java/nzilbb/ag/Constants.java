@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2019 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -30,7 +30,7 @@ public class Constants
 {
 
    /** API version */
-   public static final String VERSION = "20200117.1258";
+   public static final String VERSION = "20200123.1213";
    
    /** Standardized possible value for anchor offset or annotation label confidence - no confidence. Value is 0. */
    public static final int CONFIDENCE_NONE = 0;
