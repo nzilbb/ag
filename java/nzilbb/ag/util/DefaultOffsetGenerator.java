@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -30,7 +30,9 @@ import java.util.Vector;
 import nzilbb.ag.*;
 
 /**
- * Generates default anchor offsets. These are computed using linear interpolation between certain offsets. What counts as <var>certain</var> depends on how {@link #defaultOffsetThreshold} is set.
+ * Generates default anchor offsets. These are computed using linear interpolation between
+ * certain offsets. What counts as <var>certain</var> depends on how 
+ * {@link #defaultOffsetThreshold} is set. 
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class DefaultOffsetGenerator
@@ -97,61 +99,78 @@ public class DefaultOffsetGenerator
 
    /**
     * Value to assume in the case of Anchors that have no value for "confidence".
-    * <p>The default value is {@link Constants#CONFIDENCE_MANUAL} - i.e. anchors with no "confidence" attribute are assumed to be manually aligned (high confidence). This means that the default behaviour on a graph that does not include "confidence" values on anchors is to only assign offsets to anchors that have none.
+    * <p>The default value is {@link Constants#CONFIDENCE_MANUAL} - i.e. anchors with no
+    * "confidence" attribute are assumed to be manually aligned (high confidence). This
+    * means that the default behaviour on a graph that does not include "confidence"
+    * values on anchors is to only assign offsets to anchors that have none. 
     * @see #getDefaultAnchorConfidence()
     * @see #setDefaultAnchorConfidence(int)
     * @see Constants#CONFIDENCE_MANUAL
     */
    protected int defaultAnchorConfidence = Constants.CONFIDENCE_MANUAL;
    /**
-    * Getter for {@link #defaultAnchorConfidence}: Value to assume in the case of Anchors that have no value for "confidence".
+    * Getter for {@link #defaultAnchorConfidence}: Value to assume in the case of Anchors
+    * that have no value for "confidence". 
     * @return Value to assume in the case of Anchors that have no value for "confidence".
     */
    public int getDefaultAnchorConfidence() { return defaultAnchorConfidence; }
    /**
-    * Setter for {@link #defaultAnchorConfidence}: Value to assume in the case of Anchors that have no value for "confidence".
-    * @param newDefaultAnchorConfidence Value to assume in the case of Anchors that have no value for "confidence".
+    * Setter for {@link #defaultAnchorConfidence}: Value to assume in the case of Anchors
+    * that have no value for "confidence". 
+    * @param newDefaultAnchorConfidence Value to assume in the case of Anchors that have
+    * no value for "confidence". 
     */
    public DefaultOffsetGenerator setDefaultAnchorConfidence(int newDefaultAnchorConfidence) { defaultAnchorConfidence = newDefaultAnchorConfidence; return this; }
    
    /**
     * The confidence threshold for default anchor offset computation.
-    * <p>Anchors with null offset, with no "confidence" attribute, or with the "confidence" attribute set to equal or below this value, may have their offset set to a default, computed value. Generally, the default value is determined by linear interpolation between parent start/end anchors, or between anchors with higher confidence.
+    * <p>Anchors with null offset, with no "confidence" attribute, or with the
+    * "confidence" attribute set to equal or below this value, may have their offset set
+    * to a default, computed value. Generally, the default value is determined by linear
+    * interpolation between parent start/end anchors, or between anchors with higher
+    * confidence. 
     * <p>The default value is {@link Constants#CONFIDENCE_DEFAULT}.
     * @see #getDefaultOffsetThreshold()
     * @see #setDefaultOffsetThreshold(int)
     */
    protected int defaultOffsetThreshold = Constants.CONFIDENCE_DEFAULT;
    /**
-    * Getter for {@link #defaultOffsetThreshold}: The confidence threshold for default anchor offset computation, or null to skip default offset computation.
-    * @return The confidence threshold for default anchor offset computation, or null to skip default offset computation.
+    * Getter for {@link #defaultOffsetThreshold}: The confidence threshold for default
+    * anchor offset computation, or  null to skip default offset computation.
+    * @return The confidence threshold for default anchor offset computation, or null to
+    * skip default offset computation. 
     */
    public int getDefaultOffsetThreshold() { return defaultOffsetThreshold; }
    /**
-    * Setter for {@link #defaultOffsetThreshold}: The confidence threshold for default anchor offset computation, or null to skip default offset computation.
-    * @param newDefaultOffsetThreshold The confidence threshold for default anchor offset computation, or null to skip default offset computation.
+    * Setter for {@link #defaultOffsetThreshold}: The confidence threshold for default
+    * anchor offset computation, or null to skip default offset computation. 
+    * @param newDefaultOffsetThreshold The confidence threshold for default anchor offset
+    * computation, or null to skip default offset computation. 
     */
    public DefaultOffsetGenerator setDefaultOffsetThreshold(int newDefaultOffsetThreshold) { defaultOffsetThreshold = newDefaultOffsetThreshold; return this; }
-
    
    /**
-    * Value to set for <var>confidence</var> for anchors that have their offsets changed by this transformer.
+    * Value to set for <var>confidence</var> for anchors that have their offsets changed
+    * by this transformer. 
     * <p>The default value is {@link Constants#CONFIDENCE_DEFAULT}.
     * @see #getConfidence()
     * @see #setConfidence(int)
     */
    protected int confidence = Constants.CONFIDENCE_DEFAULT;
    /**
-    * Getter for {@link #confidence}: Value to set for <var>confidence</var> for anchors that have their offsets changed by this transformer.
-    * @return Value to set for <var>confidence</var> for anchors that have their offsets changed by this transformer.
+    * Getter for {@link #confidence}: Value to set for <var>confidence</var> for anchors
+    * that have their offsets changed by this transformer. 
+    * @return Value to set for <var>confidence</var> for anchors that have their offsets
+    * changed by this transformer. 
     */
    public int getConfidence() { return confidence; }
    /**
-    * Setter for {@link #confidence}: Value to set for <var>confidence</var> for anchors that have their offsets changed by this transformer.
-    * @param newConfidence Value to set for <var>confidence</var> for anchors that have their offsets changed by this transformer.
+    * Setter for {@link #confidence}: Value to set for <var>confidence</var> for anchors
+    * that have their offsets changed by this transformer. 
+    * @param newConfidence Value to set for <var>confidence</var> for anchors that have
+    * their offsets changed by this transformer. 
     */
    public DefaultOffsetGenerator setConfidence(int newConfidence) { confidence = newConfidence; return this; }
-
 
    // Methods:
    
@@ -164,8 +183,10 @@ public class DefaultOffsetGenerator
 
    /**
     * Constructor with attributes.
-    * @param defaultOffsetThreshold The confidence threshold for default anchor offset computation, or null to skip default offset computation.
-    * @param defaultAnchorConfidence Value to assume in the case of Anchors that have no value for "confidence".
+    * @param defaultOffsetThreshold The confidence threshold for default anchor offset
+    * computation, or null to skip default offset computation. 
+    * @param defaultAnchorConfidence Value to assume in the case of Anchors that have no
+    * value for "confidence". 
     * @throws TransformationException If the transformation cannot be completed.
     */
    public DefaultOffsetGenerator(int defaultOffsetThreshold, int defaultAnchorConfidence)
@@ -179,18 +200,29 @@ public class DefaultOffsetGenerator
 
    /**
     * Generates default anchor offsets.
-    * <p>Anchors with null offset, with no "confidence" attribute, or with the "confidence" attribute set to equal or below {@link #defaultOffsetThreshold}, may have their offset set to a default, computed value. 
-    * <p>Strings of candidate anchors are have their offsets set by linear interpolation between bounding anchors.
+    * <p>Anchors with null offset, with no "confidence" attribute, or with the
+    * "confidence" attribute set to equal or below {@link #defaultOffsetThreshold}, may
+    * have their offset set to a default, computed value.  
+    * <p>Strings of candidate anchors are have their offsets set by linear interpolation
+    * between bounding anchors. 
     * <p>Strings are determined by:
     * <ul>
-    *  <li>chaining annotations together by common {@link Annotation#getStart()}/{@link Annotation#getEnd()} anchors (on any layer) - e.g. words chained together with interspersed or bounding noise annotations, or</li>
-    *  <li>chaining annotations together by successive values of {@link Annotation#getOrdinal()} on a common layer and within a common parent - e.g. words within a turn, interspersed with discontinuties in the graph (i.e. pauses).</li>
+    *  <li>chaining annotations together by common {@link Annotation#getStart()}/{@link
+    *   Annotation#getEnd()} anchors (on any layer) - e.g. words chained together with
+    *   interspersed or bounding noise annotations, or</li> 
+    *  <li>chaining annotations together by successive values of {@link
+    *   Annotation#getOrdinal()} on a common layer and within a common parent - e.g. words
+    *   within a turn, interspersed with discontinuties in the graph (i.e. pauses).</li> 
     * </ul>
     * <p>Bounding anchors are determined by:
     * <ul>
-    *  <li>having higher "confidence" than {@link #defaultOffsetThreshold} on the same layer and within a common parent - e.g. manually aligned words within a turn,</li>
-    *  <li>having higher "confidence" than {@link #defaultOffsetThreshold} on a different layer and within a common parent - e.g. manually aligned utterances within a turn partition the words in that turn, and</li>
-    *  <li>being a start or end anchor of a parent {@link #defaultOffsetThreshold} - e.g. a turn's start/end anchors bound the anchors of it's words.</li>
+    *  <li>having higher "confidence" than {@link #defaultOffsetThreshold} on the same
+    *   layer and within a common parent - e.g. manually aligned words within a turn,</li> 
+    *  <li>having higher "confidence" than {@link #defaultOffsetThreshold} on a different
+    *   layer and within a common parent - e.g. manually aligned utterances within a turn
+    *   partition the words in that turn, and</li> 
+    *  <li>being a start or end anchor of a parent {@link #defaultOffsetThreshold} -
+    *   e.g. a turn's start/end anchors bound the anchors of it's words.</li> 
     *  <li>or otherwise using the existing offsets of bounding candidate anchors.</li>
     * </ul>
     * @param graph The graph to transform.
@@ -520,9 +552,10 @@ public class DefaultOffsetGenerator
       } // not an instant
    } // end of setOffsetsForDescendantsOf()
    
-   
    /**
-    * Recursively passes traverses child layers, adding anchors of children on non-peer-overlapping layers to the given set. Does not add the anchors of the parent (unless they're also anchors of some child).
+    * Recursively passes traverses child layers, adding anchors of children on
+    * non-peer-overlapping layers to the given set. Does not add the anchors of the parent
+    * (unless they're also anchors of some child). 
     * @param parent The parent of the children to process.
     * @param anchors The collection to add the anchors to.
     */
@@ -581,9 +614,11 @@ public class DefaultOffsetGenerator
    } // end of descendantAnchors()
 
    /**
-    * Gets the confidence rating of a given anchor.  If no Integer confidence attribute is present, the #defaultAnchorConfidence is returned.
+    * Gets the confidence rating of a given anchor.  If no Integer confidence attribute is
+    * present, the {@link #defaultAnchorConfidence} is returned. 
     * @param anchor The anchor to get the rating of.
-    * @return The confidence rating of a given annotation, or defaultAnchorConfidence if it could not be determined.
+    * @return The confidence rating of a given annotation, or defaultAnchorConfidence if
+    * it could not be determined. 
     */
    protected int getConfidence(Anchor anchor)
    {
