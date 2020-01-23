@@ -156,7 +156,6 @@ public class TestTrackedMap
       m.rollback();
       assertEquals("Create cannot be rolled back", Change.Operation.Create, m.getChange());
       assertEquals("Create reports all attributes", 4, m.getChanges().size());
-
    }
 
    @Test public void changeTrackingWithNoTracker() 
@@ -242,10 +241,10 @@ public class TestTrackedMap
 
       // get()
       assertEquals("123", m.getId());
-      assertNull(m.get("tracked1"));
-      assertNull(m.get("tracked2"));
-      assertNull(m.get("tracked3"));
-      assertNull(m.get("notTracked"));
+      assertEquals("value1", m.get("tracked1"));
+      assertEquals("value2", m.get("tracked2"));
+      assertEquals("value3", m.get("tracked3"));
+      assertEquals("value4", m.get("notTracked"));
       assertEquals("value5", m.get("noGetter"));
    }
 
