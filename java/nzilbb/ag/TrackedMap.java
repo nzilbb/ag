@@ -489,6 +489,30 @@ public class TrackedMap
    // Map overrides
 
    /**
+    * Overrides Map method so that if scripting environments like JSTL's EL exclusively
+    * use get() for retrieving attributes, bean attributes will be available.
+    * @param key The attribute key.
+    * @return The attribute value.
+    */
+   public Object get(Object key)
+   {
+      Object value = super.get(key);
+      if (value == null) // there's no value in the map
+      {
+         String keyString = key.toString();
+         Method getter = getter(this, keyString);
+         // ...and there's a getter
+         if (getter != null)
+         { // use the getter
+            try { value = getter.invoke(this); }
+            catch(IllegalAccessException x1) {}
+            catch(InvocationTargetException x2) {}
+         }
+      }
+      return value;
+   } // end of get()
+   
+   /**
     * Override of Map's clone method, to copy only tracked attributes plus "id".
     * @return A copy of the object, including only the values of the tracked attributes.
     */
