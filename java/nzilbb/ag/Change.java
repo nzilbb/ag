@@ -29,6 +29,7 @@ import java.lang.reflect.InvocationTargetException;
  */
 @SuppressWarnings("overrides")
 public class Change
+   implements Cloneable
 {
    // enums:
 
@@ -253,6 +254,10 @@ public class Change
 		  && (
 		     (getValue() == null && other.getValue() == null)
 		     || getValue().equals(other.getValue())
+                     && (
+                        (getOldValue() == null && other.getOldValue() == null)
+                        || getOldValue().equals(other.getOldValue())
+                        )
 		     )
 		  )
 	       );
@@ -260,4 +265,13 @@ public class Change
       return false;
    } // end of equals()
    
+   /**
+    * Make the clone method public.
+    * @return A copy of this Change.
+    */
+   public Object clone()
+   {
+      return new Change(operation, object, key, value, oldValue);
+   } // end of clone()
+
 } // end of class Delta

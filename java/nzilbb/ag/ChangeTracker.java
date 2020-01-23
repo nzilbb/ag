@@ -64,24 +64,30 @@ public class ChangeTracker
     */
    public void accept(Change change)
    {
-      if (change == null) return;
-      
-      String id = change.getObject().getId();
-      if (id == null) return;
+      final Change changeForListeners = change;
+      if (change != null)
+      {      
+         String id = change.getObject().getId();
+         if (id != null)
+         {
+            if (!idToChanges.containsKey(id)) idToChanges.put(id, new HashMap<String,Change>());
 
-      if (!idToChanges.containsKey(id)) idToChanges.put(id, new HashMap<String,Change>());
-
-      HashMap<String,Change> attributeMap = idToChanges.get(id);
-      if (attributeMap.containsKey(change.getKey()))
-      { // attribute has changed previously
-         // conserve the original old value
-         Change earlierChange = attributeMap.get(change.getKey());
-         change.setOldValue(earlierChange.getOldValue());
-      }
-      // System.out.println("ChangeTracker.accept: " + change);
-      attributeMap.put(change.getKey(), change);
-
-      others.forEach(o -> o.accept(change));
+            HashMap<String,Change> attributeMap = idToChanges.get(id);
+            if (attributeMap.containsKey(change.getKey()))
+            { // attribute has changed previously
+               // take a copy of the change, so that listeners get an unaltered version
+               change = (Change)change.clone();
+               
+               // conserve the original old value
+               Change earlierChange = attributeMap.get(change.getKey());
+               change.setOldValue(earlierChange.getOldValue());
+            }
+            // System.out.println("ChangeTracker.accept: " + change);
+            attributeMap.put(change.getKey(), change);
+         } // id != null
+      } // change != null
+      // pass on the change to any listeners that are interested
+      others.forEach(o -> o.accept(changeForListeners));
    }
    
    /**
