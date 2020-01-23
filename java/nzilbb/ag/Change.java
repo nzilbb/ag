@@ -35,9 +35,7 @@ public class Change
 
    /** 
     * The change operation on a given object - i.e. whether and how the object has changed
-    * since it was first defined, or since the object's {@link TrackedMap#commit()}}
-    * method was last called.
-    * @see TrackedMap#commit()
+    * since it was first defined.
     * @see TrackedMap#rollback()
     * @see TrackedMap#getChange()
     */
@@ -166,7 +164,7 @@ public class Change
     * @param operation The operation of this change.
     * @param key The attribute name which will be changed, if the change is an Update.
     * @param value The new value for the attribute identified by <var>key</var>.
-    * @param value The old value for the attribute identified by <var>key</var>.
+    * @param oldValue The old value for the attribute identified by <var>key</var>.
     */
    public Change(Operation operation, TrackedMap object, String key, Object value, Object oldValue)
    {

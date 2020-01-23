@@ -321,7 +321,6 @@ public class DefaultOffsetGenerator
    /**
     * Sets the default offsets for anchors of all descendants of the given annotation.
     * @param top The top of the annotation hierarchy to set anchor offsets of.
-    * @return The changes made during this operation.
     * @throws TransformationException If the transformation cannot be completed.
     */
    public void setOffsetsForDescendantsOf(Annotation top)

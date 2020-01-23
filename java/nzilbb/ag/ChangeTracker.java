@@ -43,7 +43,7 @@ public class ChangeTracker
    /**
     * Consumers to pass the events to.
     * @see #getOthers()
-    * @see #setOthers(Vector)
+    * @see #setOthers(LinkedHashSet)
     */
    protected LinkedHashSet<Consumer<Change>> others = new LinkedHashSet<Consumer<Change>>();
    /**

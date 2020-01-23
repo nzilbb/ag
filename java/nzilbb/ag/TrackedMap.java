@@ -232,7 +232,7 @@ public class TrackedMap
    
    /**
     * Gets the original value of the given key, before any subsequent calls to
-    * put(String,Object), since the object was created or {@link #commit()} was called. 
+    * put(String,Object). 
     * @param key The attribute name.
     * @return The original label.
     */
@@ -358,8 +358,8 @@ public class TrackedMap
    // }
 
    /**
-    * Rolls back changes since the object was create or {@link #commit()} was last
-    * called. The effect of this is to reset tracked attributes to be the same as their
+    * Rolls back changes since the object was created. 
+    * The effect of this is to reset tracked attributes to be the same as their
     * original values, and to remove any {@link #destroy()} tag. If it has been tagged for
     * {@link #create()}, the tag remains in place. 
     * @see #getTrackedAttributes()
@@ -395,8 +395,7 @@ public class TrackedMap
    } // end of rollback()
    
    /**
-    * Determines how the object has changed since it was originally defined, or since
-    * {@link #commit()} was last called. 
+    * Determines how the object has changed since it was originally defined. 
     * @return How/whether the object has been changed.
     * @see #getTrackedAttributes()
     */
