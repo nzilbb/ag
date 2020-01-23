@@ -36,40 +36,40 @@ import java.util.Vector;
 import org.json.IJSONableBean;
 
 /**
- * Base class for annotation graph classes, which allows registered attributes to have
- * their changes and original values tracked.
- * <p>Annotation graph classes (in particular {@link Annotation} and {@link Anchor} are
- * defined as Maps not just to allow tracking of changes to registered attributes
- * (key/value pairs), but also to allow them to easily be informally extended or tagged at
- * runtime. This is with two particular possibilities in mind: 
- * <ul>
- *  <li>An annotation is defined as a directed graph edge with a <var>label</var> and a
- * <var>type</var> (which in this implementation is actually <var>layerId</var>), and an
- * anchor is a  graph node with an optional <var>offset</var>, but there is scope of an
- * annotation to include other attributes - not alternative annotation labels, but rather
- * extra information about the annotation itself, which might include provenance,
- * authorship, etc.  In particular, nzilbb.ag annotation graphs include, for both
- * annotations and anchors, an indication of <var>confidence</var>; in nzilbb.ag all
- * anchors are given offsets, but some offsets are more certain than others - an offset
- * may have been manually aligned by a human annotator (high confidence), or may have been
- * arrived at by an automated forced-alignment Process (lower confidence), or may simply
- * have been calculated by linear interpolation between two more certain anchors (very low
- * confidence).  Rather than include <var>confidence</var> as a formal attribute of the
- * Annotation class, this is implemented by setting an attribute on the anchor (the same
- * notion also applies to anchors), which is processed by nzilbb.ag annotators, but can be
- * ignored by other processing. Such 'sticky' attributes, which should ideally be
- * serialized if possible, for storage or transfer, are assumed to have keys that start
- * with an alphabetic character - e.g. <var>"confidence"</var> - in contrast to
- * 'transient' attributes mentioned below.</li> 
- *  <li>During processing, it may be desirable or necessary to tag annotations or anchors
- * in some way, e.g. to mark them as 'already visited' or 'already processed' by some
- * traversal process, or to link together entities during merging of graphs, etc. This can
- * be easily achieved by simply setting ad-hoc attributes on the entity as required.  Such
- * 'transient' attributes, which should ideally not be serialized for storage or transfer,
- * are assumed to have keys that start with a non-alphabetic character -
- * e.g. <var>"@otherGraphConterpart</var> - in contrast to 'sticky' attributes mentioned
- * above.</li> 
- * </ul>
+ * Base class for annotation graph classes, which encapsulates two common features of
+ * these classes:
+ * <ol>
+ *  <li>Changes to specific attributes can be tracked and rolled back, by setting
+ *   {@link #tracker}, which receives notification of all relevant changes.  Before 
+ *   {@link #tracker} is set, no change registration is done, which the exception of calls
+ *   to {@link #create()} and {@link #destroy()}, changes which are remembered and passed
+ *   to the {@link ChangeTracker} when {@link #setTracker(ChangeTracker)} is called (this
+ *   is done so that {@link Anchor}s/{@link Annotation}s can be marked for creation before
+ *   being added to a {@link Graph}). </li>
+ *  <li>Annotation graph classes (in particular {@link Annotation} and {@link Anchor} are
+ *   defined as Maps not just to allow tracking of changes to registered attributes
+ *   (key/value pairs), but also to allow them to easily be informally extended or tagged at
+ *   runtime. This is with two particular possibilities in mind: 
+ *   <ul>
+ *    <li>An annotation is defined as a directed graph edge with a <var>label</var> and a
+ *     <var>type</var> (which in this implementation is actually <var>layerId</var>), and an
+ *     anchor is a  graph node with an optional <var>offset</var>, but there is scope of an
+ *     annotation to include other attributes - not alternative annotation labels, but rather
+ *     extra information about the annotation itself, which might include provenance,
+ *     authorship, etc. This information can be set with arbitrarily named keys in the map
+ *     as required.</li> 
+ *    <li>During processing, it may be desirable or necessary to tag annotations or anchors
+ *     in some way, e.g. to mark them as 'already visited' or 'already processed' by some
+ *     traversal process, or to link together entities during merging of graphs, etc. This can
+ *     be easily achieved by simply setting ad-hoc attributes on the entity as required.  Such
+ *     'transient' attributes, which should ideally not be serialized for storage or transfer,
+ *     are assumed to have keys that start with a non-alphabetic character -
+ *     e.g. <var>"@otherGraphConterpart</var> - in contrast to 'sticky' attributes mentioned
+ *     above.</li> 
+ *   </ul>
+ *  </li>
+ * </ol>
+ * <p>
  * @author Robert Fromont robert@fromont.net.nz
  */
 @SuppressWarnings("serial")
@@ -170,18 +170,33 @@ public class TrackedMap
    public TrackedMap setId(String id) { this.id = id; return this; }
    
    /**
-    * Confidence rating.
+    * Confidence rating. 
+    * <p>By convention, this is a value between 0 and 100 (inclusive), 0
+    * meaning "no confidence and all" (e.g. a default value computed by interpolation),
+    * 100 meaning "full confidence" (e.g. values set by a human annotator), and
+    * intermediate values conveying different degrees of confidence (e.g. 50 for values
+    * obtained by automatic annotation).
     * @see #getConfidence()
     * @see #setConfidence(Integer)
     */
    protected Integer confidence;
    /**
     * Getter for {@link #confidence}: Confidence rating.
+    * <p>By convention, this is a value between 0 and 100 (inclusive), 0
+    * meaning "no confidence and all" (e.g. a default value computed by interpolation),
+    * 100 meaning "full confidence" (e.g. values set by a human annotator), and
+    * intermediate values conveying different degrees of confidence (e.g. 50 for values
+    * obtained by automatic annotation).
     * @return Confidence rating.
     */
    public Integer getConfidence() { return confidence; }
    /**
     * Setter for {@link #confidence}: Confidence rating.
+    * <p>By convention, this is a value between 0 and 100 (inclusive), 0
+    * meaning "no confidence and all" (e.g. a default value computed by interpolation),
+    * 100 meaning "full confidence" (e.g. values set by a human annotator), and
+    * intermediate values conveying different degrees of confidence (e.g. 50 for values
+    * obtained by automatic annotation).
     * @param newConfidence Confidence rating.
     */
    public void setConfidence(Integer newConfidence) { confidence = newConfidence; }
@@ -231,10 +246,11 @@ public class TrackedMap
    } // end of constructor
    
    /**
-    * Gets the original value of the given key, before any subsequent calls to
-    * put(String,Object). 
+    * Gets the original value of the given (change tracked) key, before any subsequent calls to
+    * its setter.
     * @param key The attribute name.
-    * @return The original label.
+    * @return The original value, or Optional.empty() if it has not been changed or
+    * {@link #tracker} is not set.
     */
    protected Optional<Object> getOriginal(String key)
    {
@@ -250,8 +266,9 @@ public class TrackedMap
    } // end of getOriginalLabel()
 
    /**
-    * Registers a change to a tracked attribute, if appropriate,
-    * and returns a corresponding change for the given attribute. 
+    * Registers a change to a tracked attribute, if appropriate (e.g. only if it is
+    * actually changing, and only if {@link #tracker} is set), and returns a corresponding
+    * change for the given attribute.  
     * @param key The attribute key.
     * @param value The proposed change.
     * @return Returns an Update change, or null if the value is not changing.
@@ -340,29 +357,14 @@ public class TrackedMap
       return change;
    } // end of create()
 
-   // /**
-   //  * Commits object's changes, if any.  The effect of this is to set original values of
-   //  * tracked attributes to be the same as their current values, and to remove any {@link
-   //  * #create()}/{@link #destroy()} tag. 
-   //  * @see #getTrackedAttributes()
-   //  */
-   // public void commit()
-   // {
-   //    for (String key : getTrackedAttributes())
-   //    {
-   //       String originalValueKey = "original" + key.substring(0,1).toUpperCase() + key.substring(1);
-   //       remove(originalValueKey);
-   //    }
-   //    remove("@destroy");
-   //    remove("@create");
-   // }
-
    /**
     * Rolls back changes since the object was created. 
     * The effect of this is to reset tracked attributes to be the same as their
     * original values, and to remove any {@link #destroy()} tag. If it has been tagged for
     * {@link #create()}, the tag remains in place. 
     * @see #getTrackedAttributes()
+    * @throws NullPointerException If {@link #tracker} is not set (changes can only be
+    * rolled back if there's a {@link ChangeTracker} that knows what has changed).
     */
    public void rollback()
    {
@@ -382,6 +384,8 @@ public class TrackedMap
     * Rolls back an individual attribute change.
     * @param key The name of the attribute to roll back.
     * @see #getTrackedAttributes()
+    * @throws NullPointerException If {@link #tracker} is not set (changes can only be
+    * rolled back if there's a {@link ChangeTracker} that knows what has changed).
     */
    public void rollback(String key)
    {
@@ -396,7 +400,8 @@ public class TrackedMap
    
    /**
     * Determines how the object has changed since it was originally defined. 
-    * @return How/whether the object has been changed.
+    * @return How/whether the object has been changed. If {@link #tracker} has not been
+    * set, then only create or destroy changes can be returned.
     * @see #getTrackedAttributes()
     */
    public Change.Operation getChange()
