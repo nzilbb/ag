@@ -195,8 +195,7 @@ public class ChangeTracker
    public void addListener(Consumer<Change> other)
    {
       if (other != null) others.add(other);
-   } // end of addListener()
-   
+   } // end of addListener()   
 
    /**
     * Stop a registered consumer receiving further the changes.
