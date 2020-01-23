@@ -1,5 +1,5 @@
 //
-// Copyright 2019 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2019-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -930,7 +930,7 @@ public class BundleSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "EMU-SDMS Bundle", "1.11", "application/emusdms+json", ".json", "20191031.1734",
+         "EMU-SDMS Bundle", "1.12", "application/emusdms+json", ".json", "20191031.1734",
          getClass().getResource("icon.png"));
    }
   

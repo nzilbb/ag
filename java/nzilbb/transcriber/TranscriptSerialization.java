@@ -1,5 +1,5 @@
 //
-// Copyright 2016-2019 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -507,7 +507,7 @@ public class TranscriptSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Transcriber transcript", "1.60", "text/xml-transcriber", ".trs", "20191211.1902",
+	 "Transcriber transcript", "1.61", "text/xml-transcriber", ".trs", "20191211.1902",
          getClass().getResource("icon.png"));
    }
 

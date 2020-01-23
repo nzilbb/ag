@@ -1,5 +1,5 @@
 //
-// Copyright 2018 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2018-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -263,7 +263,7 @@ public class CsvDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "CSV text collection", "0.11", "text/csv", ".csv", "20191031.1734", getClass().getResource("icon.png"));
+	 "CSV text collection", "0.12", "text/csv", ".csv", "20191031.1734", getClass().getResource("icon.png"));
    }
    
    /**
