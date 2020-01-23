@@ -21,26 +21,25 @@
 //
 package nzilbb.ag;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.Vector;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Iterator;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-
-import nzilbb.ag.util.LayerTraversal;
-import nzilbb.ag.util.LayerHierarchyTraversal;
+import java.util.Vector;
 import nzilbb.ag.util.AnchorComparatorWithStructure;
 import nzilbb.ag.util.AnnotationComparatorByOrdinal;
+import nzilbb.ag.util.LayerHierarchyTraversal;
+import nzilbb.ag.util.LayerTraversal;
 import nzilbb.util.Timers;
 
 /**
@@ -1817,7 +1816,7 @@ public class Graph
     * Produces a list of individual changes for this graph and its elements.
     * @return A list of individual changes for the object.
     */
-   public Vector<Change> getChanges()
+   public List<Change> getChanges()
    {
       Vector<Change> changes = new Vector<Change>(); // start with graph changes
       if (tracker != null)

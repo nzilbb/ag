@@ -21,7 +21,7 @@
 //
 package nzilbb.ag;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
  * Interface for transformer that transforms a Graph in some way.  This might include tokenizers, valitors, and taggers.
@@ -36,6 +36,6 @@ public interface IGraphTransformer
     * @return The changes introduced by the tranformation.
     * @throws TransformationException If the transformation cannot be completed.
     */
-   public Vector<Change> transform(Graph graph) throws TransformationException;
+   public List<Change> transform(Graph graph) throws TransformationException;
    
 } // end of interface IGraphTransformer

@@ -289,8 +289,7 @@ public class ConventionTransformer
                 // check it's really a change
                 if (!label.equals(source.getLabel()))
                 {
-                  changes.addAll( // track changes
-                    source.setLabel(label));
+                   source.setLabel(label);
                 }
               }
             }

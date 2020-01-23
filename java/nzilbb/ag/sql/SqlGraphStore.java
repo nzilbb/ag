@@ -36,6 +36,7 @@ import java.sql.*;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -4492,7 +4493,7 @@ public class SqlGraphStore
          int iAgId = Integer.parseInt(graph.get("@ag_id").toString());
 
          // check changes
-         Vector<Change> changes = graph.getChanges();
+         Collection<Change> changes = graph.getChanges();
          if (changes.size() == 0) return false;
 
          timers.start("changes");

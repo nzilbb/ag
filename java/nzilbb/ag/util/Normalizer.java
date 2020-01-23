@@ -325,8 +325,7 @@ public class Normalizer
 	  || following.getEnd().getOffset() == null
 	  || preceding.getEnd().getOffset() < following.getEnd().getOffset()) 
       {
-	 changes.addAll( // record changes for:
-	    preceding.setEnd(following.getEnd()));
+         preceding.setEnd(following.getEnd());
       }
       Vector<Annotation> toRemove = new Vector<Annotation>();
 
@@ -341,10 +340,8 @@ public class Normalizer
 	 }
 	 for (Annotation child : following.annotations(childLayerId))
 	 {
-	    changes.addAll( // record changes for:
-	       child.setParent(preceding));
-	    changes.addAll( // record changes for:
-	       child.setOrdinal(ordinal++));
+            child.setParent(preceding);
+            child.setOrdinal(ordinal++);
 	 } // next child annotation
       } // next child layer
 

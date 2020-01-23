@@ -21,7 +21,6 @@
 //
 package nzilbb.ag;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -98,19 +97,17 @@ public class Annotation
    /**
     * Setter for <i>label</i>: The annotation's label.
     * @param label The annotation's label.
-    * @return A list of changes, which will be empty if the label is being set for the
-    * first time, or is already set to this value. 
+    * @return A reference this this object. 
     */
-   public Vector<Change> setLabel(String label) 
+   public Annotation setLabel(String label) 
    { 
-      Vector<Change> changes = new Vector<Change>();
-      if (this.label != null && !this.label.equals(label))  // is it actually changing?
+      // if (this.label != null && !this.label.equals(label))  // is it actually changing?
       {
-         changes.add(registerChange("label", label));
+         registerChange("label", label);
       }
 
       this.label = label; 
-      return changes;
+      return this;
    }
 
    /**
@@ -143,10 +140,9 @@ public class Annotation
    /**
     * Setter for <i>startId</i>: ID of the annotation's start anchor.
     * @param startId ID of the annotation's start anchor.
-    * @return A list of changes, which will be empty if the startId is being set for the
-    * first time, or is already set to this value. 
+    * @return A reference this this object. 
     */
-   public synchronized Vector<Change> setStartId(String startId) 
+   public synchronized Annotation setStartId(String startId) 
    { 
       // unlink old start, if available
       Anchor start = getStart();
@@ -155,10 +151,9 @@ public class Annotation
          start.startOf(getLayerId()).remove(this);
       }
 
-      Vector<Change> changes = new Vector<Change>();
-      if (this.startId != null && !this.startId.equals(startId))  // is it actually changing?
+      // if (this.startId != null && !this.startId.equals(startId))  // is it actually changing?
       {
-         changes.add(registerChange("startId", startId));
+         registerChange("startId", startId);
       }
 
       // set the ID
@@ -185,14 +180,13 @@ public class Annotation
                for (Annotation child : getAnnotations(layerId))
                {
                   if (child.getChange() == Change.Operation.Destroy) continue;
-                  changes.addAll( // register changes:
-                     child.setStartId(startId));
+                  child.setStartId(startId);
                } // next tag child
             } // layer is not aligned
          } // next layer
       } // we're in a graph
       
-      return changes;
+      return this;
    }
    
    /**
@@ -210,10 +204,9 @@ public class Annotation
    /**
     * Setter for <i>endId</i>: ID of the annotation's end anchor.
     * @param endId ID of the annotation's end anchor.
-    * @return A list of changes, which will be empty if the endId is being set for the
-    * first time, or is already set to this value. 
+    * @return A reference this this object. 
     */
-   public synchronized Vector<Change> setEndId(String endId) 
+   public synchronized Annotation setEndId(String endId) 
    { 
       // unlink old end, if available
       Anchor end = getEnd();
@@ -222,10 +215,9 @@ public class Annotation
          end.endOf(getLayerId()).remove(this);
       }
 
-      Vector<Change> changes = new Vector<Change>();
-      if (this.endId != null && !this.endId.equals(endId))  // is it actually changing?
+      // if (this.endId != null && !this.endId.equals(endId))  // is it actually changing?
       {
-         changes.add(registerChange("endId", endId));
+         registerChange("endId", endId);
       }
 
       // set the ID
@@ -253,14 +245,13 @@ public class Annotation
                for (Annotation child : getAnnotations(layerId))
                {
                   if (child.getChange() == Change.Operation.Destroy) continue;
-                  changes.addAll( // register changes:
-                     child.setEndId(endId));
+                  child.setEndId(endId);
                } // next tag child
             } // layer is not aligned
          } // next layer
       } // we're in a graph
 
-      return changes;
+      return this;
    }
    
    /**
@@ -275,15 +266,13 @@ public class Annotation
    /**
     * Setter for <i>parentId</i>: The annotation's parent annotation ID, if any.
     * @param parentId The annotation's parent annotation ID, if any.
-    * @return A list of changes, which will be empty if the parentId is being set for the
-    * first time, or is already set to this value. 
+    * @return A reference this this object. 
     */
-   public synchronized Vector<Change> setParentId(String parentId) 
+   public synchronized Annotation setParentId(String parentId) 
    { 
-      Vector<Change> changes = new Vector<Change>();
-      if (this.parentId != null && !this.parentId.equals(parentId))  // is it actually changing?
+      // if (this.parentId != null && !this.parentId.equals(parentId))  // is it actually changing?
       {
-         changes.add(registerChange("parentId", parentId));
+         registerChange("parentId", parentId);
       }
       this.parentId = parentId;
       // if we're on an unaligned layer, set start/end Ids to match parent
@@ -295,12 +284,10 @@ public class Annotation
           // unaligned (tag) layer
           && layer.getAlignment() == Constants.ALIGNMENT_NONE)
       {
-         changes.addAll( // register changes:
-            setStartId(parent.getStartId()));
-         changes.addAll( // register changes:
-            setEndId(parent.getEndId()));
+         setStartId(parent.getStartId());
+         setEndId(parent.getEndId());
       } // layer is not aligned
-      return changes;
+      return this;
    }
    
    /**
@@ -351,27 +338,24 @@ public class Annotation
     * Setter for <i>ordinal</i>: The annotation's ordinal position amongst the parent's
     * children. Ordinal is 1-based - i.e. the first child has ordinal = 1. 
     * @param ordinal The annotation's ordinal position amongst the parent's children.
-    * @return A list of changes, which will be empty if the ordinal is being set for the
-    * first time, or is already set to this value. 
+    * @return A reference this this object. 
     */
-   public synchronized Vector<Change> setOrdinal(int ordinal) 
+   public synchronized Annotation setOrdinal(int ordinal) 
    { 
-      Vector<Change> changes = new Vector<Change>();
       if (this.ordinal != ordinal)  // is it actually changing?
       {
          if (this.ordinal != 0)
          {
-            changes.add(registerChange("ordinal", Integer.valueOf(ordinal)));
+            registerChange("ordinal", Integer.valueOf(ordinal));
          }
          this.ordinal = ordinal; 
          Annotation parent = getParent();
          if (parent != null)
          {
-            changes.addAll( // record changes of:
-               correctOrdinals(parent.getAnnotations(getLayerId())));
+            correctOrdinals(parent.getAnnotations(getLayerId()));
          }
       } // ordinal actually changing      
-      return changes;
+      return this;
    }
 
 
@@ -379,11 +363,10 @@ public class Annotation
     * Traverses the given list of annotations and ensures that the "ordinal" property
     * corresponds to the index in the list. 
     * @param peers
-    * @return The resulting changes.
+    * @return A reference this this object. 
     */
-   protected Vector<Change> correctOrdinals(SortedSet<Annotation> peers)
+   protected Annotation correctOrdinals(SortedSet<Annotation> peers)
    {
-      Vector<Change> changes = new Vector<Change>();
       if (peers != null && peers.size() > 0) 
       {
          String layerId = peers.iterator().next().getLayerId();
@@ -401,7 +384,7 @@ public class Annotation
                   int originalOrdinal = peer.ordinal;
                   if (originalOrdinal == 0 || originalOrdinal != o)
                   {
-                     changes.add(peer.registerChange("ordinal", o));
+                     peer.registerChange("ordinal", o);
                      peer.ordinal = o; 
                   }
                   o++;
@@ -413,7 +396,7 @@ public class Annotation
             }
          } // not already correcting ordinals for this layer
       }
-      return changes;
+      return this;
    } // end of correctOrdinals()
 
    // Attributes stored outside HashMap, so that JSONifying the HashMap doesn't result in infinite recursion
@@ -503,10 +486,9 @@ public class Annotation
     * side-effect is that the annotation will be appended to the parent's collection of
     * children. 
     * @param newParent The annotation's parent annotation, if any.
-    * @return A collection of resulting changes (which may be empty or may include an
-    * ordinal change) 
+    * @return A reference this this object. 
     */
-   public Vector<Change> setParent(Annotation newParent) 
+   public Annotation setParent(Annotation newParent) 
    { 
       return setParent(newParent, true);
    }   
@@ -516,12 +498,10 @@ public class Annotation
     * @param newParent The annotation's parent annotation, if any.
     * @param append true if the annotation should be added to the end of the parent's
     * existing children, false if it should keep its current ordinal. 
-    * @return A collection of resulting changes (which may be empty or may include an
-    * ordinal change) 
+    * @return A reference this this object. 
     */
-   public Vector<Change> setParent(Annotation newParent, boolean append) 
+   public Annotation setParent(Annotation newParent, boolean append) 
    {
-      Vector<Change> changes = new Vector<Change>();
       Annotation currentParent = getParent();
       if (currentParent != null && currentParent != newParent)
       {
@@ -553,8 +533,7 @@ public class Annotation
       if (newParent == null)
       {
          // if it's a tag layer its anchors depend on the parent...
-         changes.addAll(
-            setParentId(null));
+         setParentId(null);
          // now an orphan
          if (graph != null && getLayerId() != null && graph.orphans.containsKey(getLayerId()))
          {
@@ -563,8 +542,7 @@ public class Annotation
       }
       else
       {
-         changes.addAll(
-            setParentId(newParent.getId()));
+         setParentId(newParent.getId());
          if (!newParent.getAnnotations().containsKey(getLayerId()))
          { // ensure the collection exists
             newParent.getAnnotations(getLayerId());
@@ -577,8 +555,7 @@ public class Annotation
             newSiblings.add(this);
             if (append || this.ordinal == 0)
             {
-               changes.addAll(
-                  setOrdinal(newSiblings.size() + ordinalMinimum(getLayerId()) - 1));
+               setOrdinal(newSiblings.size() + ordinalMinimum(getLayerId()) - 1);
             }
          }
 /* TODO this incurs a surprisingly huge performance hit 
@@ -587,18 +564,16 @@ public class Annotation
    { // annotation must share anchors with parent
    if (!getStartId().equals(newParent.getStartId()))
    {
-   changes.addAll(
-   setStart(newParent.getStart()));
+   setStart(newParent.getStart());
    }
    if (!getEndId().equals(newParent.getEndId()))
    {
-   changes.addAll(
-   setEnd(newParent.getEnd()));
+   setEnd(newParent.getEnd());
    }
    }
 */
       }      
-      return changes;
+      return this;
    }   
 
    /**
@@ -646,12 +621,11 @@ public class Annotation
    /**
     * Setter for <var>start</var>: The annotation's start anchor.
     * @param start The annotation's start anchor.
-    * @return A list of changes, which will be empty if the start anchor is being set for
-    * the first time, or is already set to this value. 
+    * @return A reference this this object. 
     */
-   public Vector<Change> setStart(Anchor start) 
+   public Annotation setStart(Anchor start) 
    { 
-      if (start == null) return new Vector<Change>(); // TODO test this behaviour
+      if (start == null) return this;
       return setStartId(start.getId());
    }
 
@@ -700,12 +674,11 @@ public class Annotation
    /**
     * Setter for <var>end</var>: The annotation's end anchor.
     * @param end The annotation's end anchor.
-    * @return A list of changes, which will be empty if the end anchor is being set for
-    * the first time, or is already set to this value. 
+    * @return A reference this this object. 
     */
-   public Vector<Change> setEnd(Anchor end) 
+   public Annotation setEnd(Anchor end) 
    { 
-      if (end == null) return new Vector<Change>(); // TODO text this behaviour
+      if (end == null) return this;
       return setEndId(end.getId());
    }
    

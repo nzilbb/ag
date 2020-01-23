@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -419,7 +420,7 @@ public class TrackedMap
     * Produces a list of individual changes for the object.
     * @return A list of individual changes for the object.
     */
-   public Vector<Change> getChanges()
+   public List<Change> getChanges()
    {
       final Vector<Change> changes = new Vector<Change>();
       Change.Operation operation = getChange();

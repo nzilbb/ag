@@ -491,10 +491,10 @@ public class TestGraph
       the.setLabel("The");
       the.getStart().setOffset(0.5);
       assertEquals(Change.Operation.Update, g.getChange());
-      Vector<Change> changes = g.getChanges();
+      List<Change> changes = g.getChanges();
       assertEquals(2, changes.size());
-      assertEquals("Update a1: offset = 0.5 (was 1.0)", changes.elementAt(0).toString());
-      assertEquals("Update word1: label = The (was the)", changes.elementAt(1).toString());
+      assertEquals("Update a1: offset = 0.5 (was 1.0)", changes.get(0).toString());
+      assertEquals("Update word1: label = The (was the)", changes.get(1).toString());
 
       Annotation jumps = new Annotation("word5", "jumps", "word", "a5", "a5", "turn1");
       // create() can be called before addAnnotation() (and setTracker() thus being called)
@@ -511,51 +511,51 @@ public class TestGraph
       assertEquals(Change.Operation.Create, g.getChange());
       changes = g.getChanges();
       int i = 0;
-      assertEquals("Create my graph", changes.elementAt(i++).toString());
-      assertEquals("Create turnStart", changes.elementAt(i++).toString());
-      assertEquals("Update turnStart: offset = 0.0 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Create a1", changes.elementAt(i++).toString());
-      assertEquals("Update a1: offset = 1.0 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Create a2", changes.elementAt(i++).toString());
-      assertEquals("Update a2: offset = 2.0 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Create a3", changes.elementAt(i++).toString());
-      assertEquals("Update a3: offset = 3.0 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Create a4", changes.elementAt(i++).toString());
-      assertEquals("Update a4: offset = 4.0 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Create a5", changes.elementAt(i++).toString());
-      assertEquals("Update a5: offset = 5.0 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Create turnEnd", changes.elementAt(i++).toString());
-      assertEquals("Update turnEnd: offset = 6.0 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Create turn1", changes.elementAt(i++).toString());
-      assertEquals("Update turn1: label = john smith (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update turn1: startId = turnStart (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update turn1: endId = turnEnd (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update turn1: parentId = my graph (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update turn1: ordinal = 1 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Create word1", changes.elementAt(i++).toString());
-      assertEquals("Update word1: label = the (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word1: startId = a1 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word1: endId = a2 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word1: parentId = turn1 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word1: ordinal = 1 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Create word2", changes.elementAt(i++).toString());
-      assertEquals("Update word2: label = quick (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word2: startId = a2 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word2: endId = a3 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word2: parentId = turn1 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word2: ordinal = 2 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Create word3", changes.elementAt(i++).toString());
-      assertEquals("Update word3: label = brown (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word3: startId = a3 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word3: endId = a4 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word3: parentId = turn1 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word3: ordinal = 3 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Create word4", changes.elementAt(i++).toString());
-      assertEquals("Update word4: label = fox (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word4: startId = a4 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word4: endId = a5 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word4: parentId = turn1 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word4: ordinal = 4 (was null)", changes.elementAt(i++).toString());
+      assertEquals("Create my graph", changes.get(i++).toString());
+      assertEquals("Create turnStart", changes.get(i++).toString());
+      assertEquals("Update turnStart: offset = 0.0 (was null)", changes.get(i++).toString());
+      assertEquals("Create a1", changes.get(i++).toString());
+      assertEquals("Update a1: offset = 1.0 (was null)", changes.get(i++).toString());
+      assertEquals("Create a2", changes.get(i++).toString());
+      assertEquals("Update a2: offset = 2.0 (was null)", changes.get(i++).toString());
+      assertEquals("Create a3", changes.get(i++).toString());
+      assertEquals("Update a3: offset = 3.0 (was null)", changes.get(i++).toString());
+      assertEquals("Create a4", changes.get(i++).toString());
+      assertEquals("Update a4: offset = 4.0 (was null)", changes.get(i++).toString());
+      assertEquals("Create a5", changes.get(i++).toString());
+      assertEquals("Update a5: offset = 5.0 (was null)", changes.get(i++).toString());
+      assertEquals("Create turnEnd", changes.get(i++).toString());
+      assertEquals("Update turnEnd: offset = 6.0 (was null)", changes.get(i++).toString());
+      assertEquals("Create turn1", changes.get(i++).toString());
+      assertEquals("Update turn1: label = john smith (was null)", changes.get(i++).toString());
+      assertEquals("Update turn1: startId = turnStart (was null)", changes.get(i++).toString());
+      assertEquals("Update turn1: endId = turnEnd (was null)", changes.get(i++).toString());
+      assertEquals("Update turn1: parentId = my graph (was null)", changes.get(i++).toString());
+      assertEquals("Update turn1: ordinal = 1 (was null)", changes.get(i++).toString());
+      assertEquals("Create word1", changes.get(i++).toString());
+      assertEquals("Update word1: label = the (was null)", changes.get(i++).toString());
+      assertEquals("Update word1: startId = a1 (was null)", changes.get(i++).toString());
+      assertEquals("Update word1: endId = a2 (was null)", changes.get(i++).toString());
+      assertEquals("Update word1: parentId = turn1 (was null)", changes.get(i++).toString());
+      assertEquals("Update word1: ordinal = 1 (was null)", changes.get(i++).toString());
+      assertEquals("Create word2", changes.get(i++).toString());
+      assertEquals("Update word2: label = quick (was null)", changes.get(i++).toString());
+      assertEquals("Update word2: startId = a2 (was null)", changes.get(i++).toString());
+      assertEquals("Update word2: endId = a3 (was null)", changes.get(i++).toString());
+      assertEquals("Update word2: parentId = turn1 (was null)", changes.get(i++).toString());
+      assertEquals("Update word2: ordinal = 2 (was null)", changes.get(i++).toString());
+      assertEquals("Create word3", changes.get(i++).toString());
+      assertEquals("Update word3: label = brown (was null)", changes.get(i++).toString());
+      assertEquals("Update word3: startId = a3 (was null)", changes.get(i++).toString());
+      assertEquals("Update word3: endId = a4 (was null)", changes.get(i++).toString());
+      assertEquals("Update word3: parentId = turn1 (was null)", changes.get(i++).toString());
+      assertEquals("Update word3: ordinal = 3 (was null)", changes.get(i++).toString());
+      assertEquals("Create word4", changes.get(i++).toString());
+      assertEquals("Update word4: label = fox (was null)", changes.get(i++).toString());
+      assertEquals("Update word4: startId = a4 (was null)", changes.get(i++).toString());
+      assertEquals("Update word4: endId = a5 (was null)", changes.get(i++).toString());
+      assertEquals("Update word4: parentId = turn1 (was null)", changes.get(i++).toString());
+      assertEquals("Update word4: ordinal = 4 (was null)", changes.get(i++).toString());
       assertEquals(i, changes.size());
 
       g.commit();
@@ -566,20 +566,20 @@ public class TestGraph
       changes = g.getChanges();
       i = 0;
       // children deleted before parents
-      assertEquals("Destroy word1", changes.elementAt(i++).toString());
-      assertEquals("Destroy word2", changes.elementAt(i++).toString());
-      assertEquals("Destroy word3", changes.elementAt(i++).toString());
-      assertEquals("Destroy word4", changes.elementAt(i++).toString());
+      assertEquals("Destroy word1", changes.get(i++).toString());
+      assertEquals("Destroy word2", changes.get(i++).toString());
+      assertEquals("Destroy word3", changes.get(i++).toString());
+      assertEquals("Destroy word4", changes.get(i++).toString());
       // parents deleted after children
-      assertEquals("Destroy turn1", changes.elementAt(i++).toString());
-      assertEquals("Destroy turnStart", changes.elementAt(i++).toString());
-      assertEquals("Destroy a1", changes.elementAt(i++).toString());
-      assertEquals("Destroy a2", changes.elementAt(i++).toString());
-      assertEquals("Destroy a3", changes.elementAt(i++).toString());
-      assertEquals("Destroy a4", changes.elementAt(i++).toString());
-      assertEquals("Destroy a5", changes.elementAt(i++).toString());
-      assertEquals("Destroy turnEnd", changes.elementAt(i++).toString());
-      assertEquals("Destroy my graph", changes.elementAt(i++).toString());
+      assertEquals("Destroy turn1", changes.get(i++).toString());
+      assertEquals("Destroy turnStart", changes.get(i++).toString());
+      assertEquals("Destroy a1", changes.get(i++).toString());
+      assertEquals("Destroy a2", changes.get(i++).toString());
+      assertEquals("Destroy a3", changes.get(i++).toString());
+      assertEquals("Destroy a4", changes.get(i++).toString());
+      assertEquals("Destroy a5", changes.get(i++).toString());
+      assertEquals("Destroy turnEnd", changes.get(i++).toString());
+      assertEquals("Destroy my graph", changes.get(i++).toString());
       assertEquals(i, changes.size());
 
    }
@@ -633,20 +633,20 @@ public class TestGraph
       assertEquals("Deletions affect following ordinals", 3, fox.getOrdinal());
       assertEquals("Deletions affect following ordinals", 4, jumps.getOrdinal());
 
-      Vector<Change> changes = g.getChanges();
+      List<Change> changes = g.getChanges();
       int i = 0;
-      assertEquals("Create a6", changes.elementAt(i++).toString());
-      assertEquals("Update a6: offset = 5.9 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Create word5", changes.elementAt(i++).toString());
-      assertEquals("Update word5: label = jumps (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word5: startId = a5 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word5: endId = a6 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word5: parentId = turn1 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word5: ordinal = 4 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word3: ordinal = 2 (was 3)", changes.elementAt(i++).toString());
-      assertEquals("Update word4: ordinal = 3 (was 4)", changes.elementAt(i++).toString());
+      assertEquals("Create a6", changes.get(i++).toString());
+      assertEquals("Update a6: offset = 5.9 (was null)", changes.get(i++).toString());
+      assertEquals("Create word5", changes.get(i++).toString());
+      assertEquals("Update word5: label = jumps (was null)", changes.get(i++).toString());
+      assertEquals("Update word5: startId = a5 (was null)", changes.get(i++).toString());
+      assertEquals("Update word5: endId = a6 (was null)", changes.get(i++).toString());
+      assertEquals("Update word5: parentId = turn1 (was null)", changes.get(i++).toString());
+      assertEquals("Update word5: ordinal = 4 (was null)", changes.get(i++).toString());
+      assertEquals("Update word3: ordinal = 2 (was 3)", changes.get(i++).toString());
+      assertEquals("Update word4: ordinal = 3 (was 4)", changes.get(i++).toString());
       // delete after create
-      assertEquals("Destroy word2", changes.elementAt(i++).toString());
+      assertEquals("Destroy word2", changes.get(i++).toString());
       assertEquals("" + changes, i, changes.size());
 
       assertEquals(1, turn1.getOrdinal());
@@ -665,32 +665,32 @@ public class TestGraph
       changes = g.getChanges();
       i = 0;
       // create anchors first
-      assertEquals("Create a6", changes.elementAt(i++).toString());
-      assertEquals("Update a6: offset = 5.9 (was null)", changes.elementAt(i++).toString());
+      assertEquals("Create a6", changes.get(i++).toString());
+      assertEquals("Update a6: offset = 5.9 (was null)", changes.get(i++).toString());
       // new parent is created before any children are created or changed
-      assertEquals("Create newTurn", changes.elementAt(i++).toString());
-      assertEquals("Update newTurn: label = john smith (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update newTurn: startId = turnStart (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update newTurn: endId = turnEnd (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update newTurn: parentId = my graph (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update newTurn: ordinal = 1 (was null)", changes.elementAt(i++).toString());
+      assertEquals("Create newTurn", changes.get(i++).toString());
+      assertEquals("Update newTurn: label = john smith (was null)", changes.get(i++).toString());
+      assertEquals("Update newTurn: startId = turnStart (was null)", changes.get(i++).toString());
+      assertEquals("Update newTurn: endId = turnEnd (was null)", changes.get(i++).toString());
+      assertEquals("Update newTurn: parentId = my graph (was null)", changes.get(i++).toString());
+      assertEquals("Update newTurn: ordinal = 1 (was null)", changes.get(i++).toString());
       // new child is created after its parent, and before its peers are changed
-      assertEquals("Create word5", changes.elementAt(i++).toString());
-      assertEquals("Update word5: label = jumps (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word5: startId = a5 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word5: endId = a6 (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word5: parentId = newTurn (was null)", changes.elementAt(i++).toString());
-      assertEquals("Update word5: ordinal = 4 (was null)", changes.elementAt(i++).toString());
+      assertEquals("Create word5", changes.get(i++).toString());
+      assertEquals("Update word5: label = jumps (was null)", changes.get(i++).toString());
+      assertEquals("Update word5: startId = a5 (was null)", changes.get(i++).toString());
+      assertEquals("Update word5: endId = a6 (was null)", changes.get(i++).toString());
+      assertEquals("Update word5: parentId = newTurn (was null)", changes.get(i++).toString());
+      assertEquals("Update word5: ordinal = 4 (was null)", changes.get(i++).toString());
       // then the children are updated
-      assertEquals("Update word1: parentId = newTurn (was turn1)", changes.elementAt(i++).toString());
-      assertEquals("Update word3: ordinal = 2 (was 3)", changes.elementAt(i++).toString());
-      assertEquals("Update word3: parentId = newTurn (was turn1)", changes.elementAt(i++).toString());
-      assertEquals("Update word4: ordinal = 3 (was 4)", changes.elementAt(i++).toString());
-      assertEquals("Update word4: parentId = newTurn (was turn1)", changes.elementAt(i++).toString());
+      assertEquals("Update word1: parentId = newTurn (was turn1)", changes.get(i++).toString());
+      assertEquals("Update word3: ordinal = 2 (was 3)", changes.get(i++).toString());
+      assertEquals("Update word3: parentId = newTurn (was turn1)", changes.get(i++).toString());
+      assertEquals("Update word4: ordinal = 3 (was 4)", changes.get(i++).toString());
+      assertEquals("Update word4: parentId = newTurn (was turn1)", changes.get(i++).toString());
       // children delete before parents
-      assertEquals("Destroy word2", changes.elementAt(i++).toString());
+      assertEquals("Destroy word2", changes.get(i++).toString());
       // finally the old parent is deleted
-      assertEquals("Destroy turn1", changes.elementAt(i++).toString());
+      assertEquals("Destroy turn1", changes.get(i++).toString());
       assertEquals(i, changes.size());
 
       // delete an anchor
@@ -699,8 +699,10 @@ public class TestGraph
       g.commit();
       assertEquals(Change.Operation.NoChange, g.getChange());
       assertNull("commit removes deleted annotations", g.getAnnotation("word2"));
-      assertEquals("commit removes anchor references to deleted annotations", 0, g.getAnchor("a2").startOf("word").size());
-      assertEquals("commit removes anchor references to deleted annotations", 0, g.getAnchor("a3").endOf("word").size());
+      assertEquals("commit removes anchor references to deleted annotations",
+                   0, g.getAnchor("a2").startOf("word").size());
+      assertEquals("commit removes anchor references to deleted annotations",
+                   0, g.getAnchor("a3").endOf("word").size());
       assertNull("commit removes deleted annotations", g.getAnnotation("turn1"));
       assertNull("commit removes deleted anchors", g.getAnchor("a7"));
    }
