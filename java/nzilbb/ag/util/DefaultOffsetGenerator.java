@@ -21,12 +21,12 @@
 //
 package nzilbb.ag.util;
 
-import java.util.Vector;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.HashSet;
 import java.util.Iterator;
-
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.Vector;
 import nzilbb.ag.*;
 
 /**
@@ -197,7 +197,7 @@ public class DefaultOffsetGenerator
     * @return The changes introduced by the tranformation.
     * @throws TransformationException If the transformation cannot be completed.
     */
-   public Vector<Change> transform(Graph graph)
+   public List<Change> transform(Graph graph)
       throws TransformationException
    {
       if (debug) setLog(new Vector<String>());
@@ -324,11 +324,10 @@ public class DefaultOffsetGenerator
     * @return The changes made during this operation.
     * @throws TransformationException If the transformation cannot be completed.
     */
-   public Vector<Change> setOffsetsForDescendantsOf(Annotation top)
+   public void setOffsetsForDescendantsOf(Annotation top)
       throws TransformationException
    {
       //log("Top: ", top);
-      Vector<Change> changes = new Vector<Change>();
       if (!top.getInstantaneous())
       {	 
 	 // get a list of all anchors for relevant descendant annotations, 
@@ -520,7 +519,6 @@ public class DefaultOffsetGenerator
 	    } // offset is not set
 	 } // next anchor
       } // not an instant
-      return changes;
    } // end of setOffsetsForDescendantsOf()
    
    

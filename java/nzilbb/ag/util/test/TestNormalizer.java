@@ -25,10 +25,10 @@ package nzilbb.ag.util.test;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-import java.util.Vector;
 import java.util.Iterator;
-import nzilbb.ag.util.*;
+import java.util.List;
 import nzilbb.ag.*;
+import nzilbb.ag.util.*;
 
 public class TestNormalizer
 {
@@ -112,7 +112,7 @@ public class TestNormalizer
       Normalizer n = new Normalizer();
       try
       {
-	 Vector<Change> changes = n.transform(g);
+	 List<Change> changes = n.transform(g);
 
 	 assertEquals("no changes: " + changes, 0, changes.size());
       }
@@ -203,7 +203,7 @@ public class TestNormalizer
       Normalizer n = new Normalizer();
       try
       {
-	 Vector<Change> changes = n.transform(g);
+	 List<Change> changes = n.transform(g);
 
 	 assertNotEquals("changes: " + changes, 0, changes.size());
 
@@ -315,7 +315,7 @@ public class TestNormalizer
       // no minimumTurnPauseLength, so the gap between turns is not bridged
       try
       {
-	 Vector<Change> changes = n.transform(g);
+	 List<Change> changes = n.transform(g);
 
 	 assertEquals("changes: " + changes, 0, changes.size());
 
@@ -418,7 +418,7 @@ public class TestNormalizer
       n.setMinimumTurnPauseLength(1.0);
       try
       {
-	 Vector<Change> changes = n.transform(g);
+	 List<Change> changes = n.transform(g);
 
 	 assertNotEquals("changes: " + changes, 0, changes.size());
 
@@ -531,7 +531,7 @@ public class TestNormalizer
       n.setMinimumTurnPauseLength(0.5);
       try
       {
-	 Vector<Change> changes = n.transform(g);
+	 List<Change> changes = n.transform(g);
 
 	 assertEquals("changes: " + changes, 0, changes.size());
 
@@ -641,7 +641,7 @@ public class TestNormalizer
       n.setMinimumTurnPauseLength(1.0);
       try
       {
-	 Vector<Change> changes = n.transform(g);
+	 List<Change> changes = n.transform(g);
 
 	 assertEquals("changes: " + changes, 0, changes.size());
 
@@ -740,7 +740,7 @@ public class TestNormalizer
       Normalizer n = new Normalizer();
       try
       {
-	 Vector<Change> changes = n.transform(g);
+	 List<Change> changes = n.transform(g);
 
 	 assertNotEquals("changes: " + changes, 0, changes.size());
 
@@ -866,7 +866,7 @@ public class TestNormalizer
       Normalizer n = new Normalizer();
       try
       {
-	 Vector<Change> changes = n.transform(g);
+	 List<Change> changes = n.transform(g);
 
 	 assertNotEquals("changes: " + changes, 0, changes.size());
 
@@ -996,7 +996,7 @@ public class TestNormalizer
       Normalizer n = new Normalizer();
       try
       {
-	 Vector<Change> changes = n.transform(g);
+	 List<Change> changes = n.transform(g);
 
 	 assertNotEquals("changes: " + changes, 0, changes.size());
 
@@ -1116,7 +1116,7 @@ public class TestNormalizer
       Normalizer n = new Normalizer();
       try
       {
-	 Vector<Change> changes = n.transform(g);
+	 List<Change> changes = n.transform(g);
 	 assertNotEquals("there are changes", 0, changes.size());
 
 	 assertEquals("turn changed: " + g.getAnnotation("turn1").getLabel(), 
@@ -1219,7 +1219,7 @@ public class TestNormalizer
       Normalizer n = new Normalizer();
       try
       {
-	 Vector<Change> changes = n.transform(g);
+	 List<Change> changes = n.transform(g);
 	 assertNotEquals("there are changes", 0, changes.size());
 
 	 assertEquals("participant changed: " + g.getAnnotation("participant1").getLabel(), 
@@ -1315,7 +1315,7 @@ public class TestNormalizer
       n.setMaxLabelLength(4);
       try
       {
-	 Vector<Change> changes = n.transform(g);
+	 List<Change> changes = n.transform(g);
 
 	 assertEquals("changes: " + changes, 7, changes.size());
 	 assertEquals("quic", g.getAnnotation("quick").getLabel());

@@ -21,8 +21,9 @@
 //
 package nzilbb.ag.util;
 
-import java.util.Vector;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Vector;
 import nzilbb.ag.*;
 
 /**
@@ -94,7 +95,7 @@ public class ParticipantRenamer
     * @return The changes introduced by the tranformation.
     * @throws TransformationException If the transformation cannot be completed.
     */
-   public Vector<Change> transform(Graph graph) throws TransformationException
+   public List<Change> transform(Graph graph) throws TransformationException
    {
       Schema schema = graph.getSchema();
       if (schema.getParticipantLayerId() == null) 

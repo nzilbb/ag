@@ -72,7 +72,7 @@ public class TestMerger
 
     try
     {
-      Vector<Change> changes = m.transform(originalGraph);
+      List<Change> changes = m.transform(originalGraph);
       fail("Doesn't throw exception when editedGraph is unset: " + changes);
     }
     catch(TransformationException exception)
@@ -84,7 +84,7 @@ public class TestMerger
 
     try
     {
-      Vector<Change> changes = m.transform(originalGraph);
+      List<Change> changes = m.transform(originalGraph);
       if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
       assertEquals("No changes - " + changes, 0, changes.size());
     }
@@ -110,7 +110,7 @@ public class TestMerger
 
     try
     {
-      Vector<Change> changes = m.transform(originalGraph);
+      List<Change> changes = m.transform(originalGraph);
       if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
       assertEquals("No changes - " + changes, 0, changes.size());
     }
@@ -278,7 +278,7 @@ public class TestMerger
     m.getNoChangeLayers().add("word");
     try
     {
-      Vector<Change> changes = m.transform(g);
+      List<Change> changes = m.transform(g);
       if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
       g.commit();
 
@@ -461,7 +461,7 @@ public class TestMerger
     // m.setDebug(true);
     try
     {
-      Vector<Change> changes = m.transform(originalFragment);
+      List<Change> changes = m.transform(originalFragment);
       if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
       g.commit();
 
@@ -641,7 +641,7 @@ public class TestMerger
         m.setDebug(log != null && fragmentName.indexOf(log) >= 0);
         try
         {
-          Vector<Change> changes = m.transform(originalGraph);
+          List<Change> changes = m.transform(originalGraph);
         }
         catch(TransformationException exception)
         {

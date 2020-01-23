@@ -25,10 +25,10 @@ package nzilbb.ag.util.test;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-import java.util.Vector;
 import java.util.Iterator;
-import nzilbb.ag.util.*;
+import java.util.List;
 import nzilbb.ag.*;
+import nzilbb.ag.util.*;
 
 public class TestParticipantRenamer
 {
@@ -114,7 +114,7 @@ public class TestParticipantRenamer
       ParticipantRenamer renamer = new ParticipantRenamer("jane doe", "jane doe");
       try
       {
-	 Vector<Change> changes = renamer.transform(g);
+	 List<Change> changes = renamer.transform(g);
 	 assertEquals("no changes: " + changes, 0, changes.size());
       }
       catch(TransformationException exception)
@@ -205,7 +205,7 @@ public class TestParticipantRenamer
       ParticipantRenamer renamer = new ParticipantRenamer("john smith", "john doe");
       try
       {
-	 Vector<Change> changes = renamer.transform(g);
+	 List<Change> changes = renamer.transform(g);
 	 assertNotEquals("changes are returned", 0, changes.size());
 	 assertNotEquals("name is changed", "john smith", g.getAnnotation("participant1").getLabel());
 	 assertNotEquals("name is changed", "john smith", g.getAnnotation("turn1").getLabel());
@@ -307,7 +307,7 @@ public class TestParticipantRenamer
       renamer.rename("jane doe", "jane smith");
       try
       {
-	 Vector<Change> changes = renamer.transform(g);
+	 List<Change> changes = renamer.transform(g);
 	 assertNotEquals("changes are returned", 0, changes.size());
 	 assertNotEquals("name is changed", "john smith", g.getAnnotation("participant1").getLabel());
 	 assertNotEquals("name is changed", "john smith", g.getAnnotation("turn1").getLabel());

@@ -21,8 +21,9 @@
 //
 package nzilbb.ag.util;
 
-import java.util.Vector;
+import java.util.List;
 import java.util.SortedSet;
+import java.util.Vector;
 import nzilbb.ag.*;
 
 /**
@@ -101,7 +102,7 @@ public class Normalizer
     * @return The changes introduced by the tranformation.
     * @throws TransformationException If the transformation cannot be completed.
     */
-   public Vector<Change> transform(Graph graph) throws TransformationException
+   public List<Change> transform(Graph graph) throws TransformationException
    {
       Schema schema = graph.getSchema();
       if (schema.getParticipantLayerId() == null) 
@@ -314,12 +315,9 @@ public class Normalizer
     * Moves all of the children of the following turn into the preceding turn, set the the end of the preceding to the end of the following, and marks the following for deletion.
     * @param preceding The preceding, surviving turn.
     * @param following The following turn, which will be deleted.
-    * @return The changes for this merge.
     */
-   public Vector<Change> mergeTurns(Annotation preceding, Annotation following)
+   public void mergeTurns(Annotation preceding, Annotation following)
    {
-      Vector<Change> changes = new Vector<Change>();
-
       // set anchor
       if (preceding.getEnd().getOffset() == null
 	  || following.getEnd().getOffset() == null
@@ -345,10 +343,7 @@ public class Normalizer
 	 } // next child annotation
       } // next child layer
 
-      changes.add( // record changes for:
-	 following.destroy());
-      return changes;
+      following.destroy();
    } // end of joinTurns()
-
 
 } // end of class Normalizer

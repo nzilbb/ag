@@ -25,8 +25,9 @@ package nzilbb.ag.util.test;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-import java.util.Set;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 import java.util.stream.Collectors;
 import nzilbb.ag.*;
@@ -91,7 +92,7 @@ public class TestDefaultOffsetGenerator
     // generator.setDebug(true);
     try
     {
-      Vector<Change> changes = generator.transform(g);
+      List<Change> changes = generator.transform(g);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
 
       // test the values are what we expected
@@ -202,7 +203,7 @@ public class TestDefaultOffsetGenerator
     // generator.setDebug(true);
     try
     {
-      Vector<Change> changes = generator.transform(g);
+      List<Change> changes = generator.transform(g);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
 
       // test the values are what we expected
@@ -319,7 +320,7 @@ public class TestDefaultOffsetGenerator
     // generator.setDebug(true);
     try
     {
-      Vector<Change> changes = generator.transform(g);
+      List<Change> changes = generator.transform(g);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
 
       // test the values are what we expected
@@ -443,7 +444,7 @@ public class TestDefaultOffsetGenerator
     // generator.setDebug(true);
     try
     {
-      Vector<Change> changes = generator.transform(g);
+      List<Change> changes = generator.transform(g);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
 
       // test the values are what we expected
@@ -563,7 +564,7 @@ public class TestDefaultOffsetGenerator
     // generator.setDebug(true);
     try
     {
-      Vector<Change> changes = generator.transform(g);
+      List<Change> changes = generator.transform(g);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
 
       // test the values are what we expected
@@ -742,7 +743,7 @@ public class TestDefaultOffsetGenerator
     // generator.setDebug(true);
     try
     {
-      Vector<Change> changes = generator.transform(g);
+      List<Change> changes = generator.transform(g);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
 
       // test the values are what we expected
@@ -894,7 +895,7 @@ public class TestDefaultOffsetGenerator
     // generator.setDebug(true);
     try
     {
-      Vector<Change> changes = generator.transform(f);
+      List<Change> changes = generator.transform(f);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
       for (String m : generator.getErrors()) System.out.println("ERROR: " + m);
 
@@ -921,7 +922,7 @@ public class TestDefaultOffsetGenerator
     // generator.setDebug(true);
     try
     {
-      Vector<Change> changes = generator.transform(f);
+      List<Change> changes = generator.transform(f);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
       for (String m : generator.getErrors()) System.out.println("ERROR: " + m);
 

@@ -21,9 +21,10 @@
 //
 package nzilbb.ag.util;
 
-import java.util.Vector;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Vector;
 import java.util.regex.*;
 import nzilbb.ag.*;
 
@@ -575,7 +576,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
     * @return The changes introduced by the tranformation.
     * @throws TransformationException If the transformation cannot be completed.
     */
-   public Vector<Change> transform(Graph graph) throws TransformationException
+   public List<Change> transform(Graph graph) throws TransformationException
    {
       if (graph.getLayer(getSourceLayerId()) == null) 
 	 throw new TransformationException(this, "No source layer: " + getSourceLayerId());
@@ -604,7 +605,6 @@ public class SpanningConventionTransformer // TODO implementation that handles n
       {
 	 Pattern startRegexp = Pattern.compile(getStartPattern());
 	 Pattern endRegexp = Pattern.compile(getEndPattern());
-	 Vector<Change> changes = new Vector<Change>();
 	 // group the source annotations by parent...
 	 // for each parent
 	 for (Annotation parent : graph.list(graph.getLayer(getSourceLayerId()).getParentId()))
@@ -701,8 +701,6 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 			   startSpan, endSpan, 
 			   getDestinationLayerId(), label.toString(), 
 			   spanParent);
-			changes.addAll( // record changes of:
-			   annotation.getChanges());
 		     } // non-null destination
 
 		     // source annotations: 
@@ -711,8 +709,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 		     if (getSourceStartResult() == null)
 		     { // delete start annotation
 			endOfGap = span.firstElement().getEnd();
-			changes.add( // record changes of:
-			   span.firstElement().destroy());
+                        span.firstElement().destroy();
 		     }
 		     else
 		     { // change the label
@@ -720,8 +717,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 			if (l.length() == 0) // treat empty label as a delete
 			{
 			   endOfGap = span.firstElement().getEnd();
-			   changes.add( // record changes of:
-			      span.firstElement().destroy());
+                           span.firstElement().destroy();
 			}
 			else
 			{
@@ -738,16 +734,14 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 			for (int i = 1; i < span.size() - 1; i++)
 			{
 			   endOfGap = span.elementAt(i).getEnd();
-			   changes.add( // record changes of:
-			      span.elementAt(i).destroy());
+                           span.elementAt(i).destroy();
 			}
 		     } // intervening annotations
 
 		     if (getSourceEndResult() == null)
 		     { // delete end annotation
 			endOfGap = span.lastElement().getEnd();
-			changes.add( // record changes of:
-			   span.lastElement().destroy());
+                        span.lastElement().destroy();
 		     }
 		     else
 		     { // change the label
@@ -755,8 +749,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 			if (l.length() == 0) // treat empty label as a delete
 			{
 			   endOfGap = span.lastElement().getEnd();
-			   changes.add( // record changes of:
-			      span.lastElement().destroy());
+                           span.lastElement().destroy();
 			}
 			else
 			{

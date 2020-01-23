@@ -25,10 +25,10 @@ package nzilbb.ag.util.test;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-import java.util.Vector;
 import java.util.Iterator;
-import nzilbb.ag.util.*;
+import java.util.List;
 import nzilbb.ag.*;
+import nzilbb.ag.util.*;
 
 public class TestSimpleTokenizer
 {
@@ -79,7 +79,7 @@ public class TestSimpleTokenizer
       {
          g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word");
-	 Vector<Change> changes = tokenizer.transform(g);
+	 List<Change> changes = tokenizer.transform(g);
 	 Annotation[] words = g.getAnnotation("turn1").list("word");
 	 assertEquals(6, words.length);
 
@@ -178,7 +178,7 @@ public class TestSimpleTokenizer
       {
          g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word");
-	 Vector<Change> changes = tokenizer.transform(g);
+	 List<Change> changes = tokenizer.transform(g);
 	 Annotation[] words = g.getAnnotation("turn1").list("word");
 	 assertEquals(6, words.length);
 
@@ -278,7 +278,7 @@ public class TestSimpleTokenizer
       {
          g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word");
-	 Vector<Change> changes = tokenizer.transform(g);
+	 List<Change> changes = tokenizer.transform(g);
 	 Annotation[] words = g.getAnnotation("turn1").list("word");
 	 assertEquals(6, words.length);
 
@@ -359,7 +359,7 @@ public class TestSimpleTokenizer
       {
          g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word", "\\|");
-	 Vector<Change> changes = tokenizer.transform(g);
+	 List<Change> changes = tokenizer.transform(g);
 	 Annotation[] words = g.getAnnotation("turn1").list("word");
 	 assertEquals(6, words.length);
 
@@ -469,7 +469,7 @@ public class TestSimpleTokenizer
       {
          g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("word", "linkage", "_", true);
-	 Vector<Change> changes = tokenizer.transform(g);
+	 List<Change> changes = tokenizer.transform(g);
 	 Annotation[] words = g.getAnnotation("turn1").list("word");
 	 assertEquals(10, words.length);
 
@@ -581,7 +581,7 @@ public class TestSimpleTokenizer
       {
          g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word");
-	 Vector<Change> changes = tokenizer.transform(g);
+	 List<Change> changes = tokenizer.transform(g);
 	 Annotation[] words = g.getAnnotation("turn1").list("word");
 	 assertEquals(6, words.length);
 
@@ -677,7 +677,7 @@ public class TestSimpleTokenizer
       {
          g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word");
-	 Vector<Change> changes = tokenizer.transform(g);
+	 List<Change> changes = tokenizer.transform(g);
 	 Annotation[] words = g.getAnnotation("turn1").list("word");
 	 assertEquals(6, words.length);
 

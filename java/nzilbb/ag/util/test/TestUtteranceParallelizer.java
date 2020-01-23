@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Vector;
+import java.util.List;
 import nzilbb.ag.*;
 import nzilbb.ag.util.*;
 
@@ -139,7 +139,7 @@ public class TestUtteranceParallelizer
       UtteranceParallelizer parallelizer = new UtteranceParallelizer(schema);
       try
       {
-	 Vector<Change> changes = parallelizer.transform(graph);
+	 List<Change> changes = parallelizer.transform(graph);
 
 	 assertNotEquals("changes: " + changes, 0, changes.size());
 
@@ -276,7 +276,7 @@ public class TestUtteranceParallelizer
          .addLayerId("utterance").addLayerId("turn");
       try
       {
-	 Vector<Change> changes = parallelizer.transform(graph);
+	 List<Change> changes = parallelizer.transform(graph);
 
 	 assertNotEquals("changes: " + changes, 0, changes.size());
 

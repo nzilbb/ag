@@ -25,11 +25,12 @@ package nzilbb.ag.util.test;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-import java.util.Vector;
-import java.util.SortedSet;
 import java.util.Iterator;
-import nzilbb.ag.util.*;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.Vector;
 import nzilbb.ag.*;
+import nzilbb.ag.util.*;
 
 public class TestConventionTransformer
 {
@@ -87,7 +88,7 @@ public class TestConventionTransformer
     try
     {
       ConventionTransformer transformer = new ConventionTransformer("word", "&(.+)", "$1", "disfluency", "DIS");
-      Vector<Change> changes = transformer.transform(g);
+      List<Change> changes = transformer.transform(g);
       assertEquals("the", g.getAnnotation("word1").getLabel());
       assertEquals("full label matches", "qui", g.getAnnotation("word2").getLabel());
       assertEquals("quick", g.getAnnotation("word3").getLabel());
@@ -163,7 +164,7 @@ public class TestConventionTransformer
     try
     {
       ConventionTransformer transformer = new ConventionTransformer("word", "(.+)_(.+)", "$1", "pos", "$2");
-      Vector<Change> changes = transformer.transform(g);
+      List<Change> changes = transformer.transform(g);
       assertEquals("the", g.getAnnotation("word1").getLabel());
       assertEquals("quick", g.getAnnotation("word2").getLabel());
       assertEquals("brown", g.getAnnotation("word3").getLabel());
@@ -239,7 +240,7 @@ public class TestConventionTransformer
     {
       ConventionTransformer transformer = new ConventionTransformer("word", "\\[(.+)\\]");
       transformer.addDestinationResult("noise", "$1");
-      Vector<Change> changes = transformer.transform(g);
+      List<Change> changes = transformer.transform(g);
       assertEquals("annotation is deleted", Change.Operation.Destroy, g.getAnnotation("word2").getChange());
 
       SortedSet<Annotation> noises = g.getAnnotations("noise");
@@ -531,7 +532,7 @@ public class TestConventionTransformer
     {
       ConventionTransformer transformer = new ConventionTransformer(
         "word", "(.*)\\[(.*)\\]", "$1", null, "$2"); // null destination layer
-      Vector<Change> changes = transformer.transform(g);
+      List<Change> changes = transformer.transform(g);
       assertEquals("annotation is deleted", "brown", g.getAnnotation("word3").getLabel());	 
     }
     catch(TransformationException exception)
@@ -594,7 +595,7 @@ public class TestConventionTransformer
     try
     {
       ConventionTransformer transformer = new ConventionTransformer("word", "(.+)_(.+)", "$0", "acronym", "$1 $2");
-      Vector<Change> changes = transformer.transform(g);
+      List<Change> changes = transformer.transform(g);
       assertEquals("one underscore", "Scarface_Claw", g.getAnnotation("word1").getLabel());
       assertEquals("two underscores", "B_B_C", g.getAnnotation("word6").getLabel());
 

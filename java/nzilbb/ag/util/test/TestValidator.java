@@ -26,6 +26,7 @@ import org.junit.*;
 import static org.junit.Assert.*;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 import java.util.stream.Collectors;
@@ -123,7 +124,7 @@ public class TestValidator
     try
     {
        g.trackChanges();
-      Vector<Change> changes = v.transform(g);
+      List<Change> changes = v.transform(g);
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       assertEquals("no changes to valid graph", 0, changes.size());
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
@@ -255,7 +256,7 @@ public class TestValidator
     try
     {
        g.trackChanges();
-      Vector<Change> changes = v.transform(g);
+      List<Change> changes = v.transform(g);
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       Set<String> changeStrings = changes.stream()
          .map(Change::toString).collect(Collectors.toSet());
@@ -392,7 +393,7 @@ public class TestValidator
     v.setDefaultOffsetThreshold(null);
     try
     {
-      Vector<Change> changes = v.transform(g);
+      List<Change> changes = v.transform(g);
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       assertEquals("a?1", g.getAnnotation("pos4").getStartId());
       assertEquals("a?2", g.getAnnotation("pos4").getOriginalStartId());
@@ -513,7 +514,7 @@ public class TestValidator
     v.setDefaultOffsetThreshold(null);
     try
     {
-      Vector<Change> changes = v.transform(g);
+      List<Change> changes = v.transform(g);
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       Set<String> changeStrings = changes.stream()
          .map(Change::toString).collect(Collectors.toSet());
@@ -649,7 +650,7 @@ public class TestValidator
     try
     {
        g.trackChanges();
-      Vector<Change> changes = v.transform(g);
+      List<Change> changes = v.transform(g);
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       Set<String> changeStrings = changes.stream()
          .map(Change::toString).collect(Collectors.toSet());
@@ -786,7 +787,7 @@ public class TestValidator
     try
     {
        g.trackChanges();
-      Vector<Change> changes = v.transform(g);
+      List<Change> changes = v.transform(g);
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
 
       // check the anchoring is what we expect
@@ -990,7 +991,7 @@ public class TestValidator
     v.setDefaultOffsetThreshold(null);
     try
     {
-      Vector<Change> changes = v.transform(g);
+      List<Change> changes = v.transform(g);
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
 
       // check the anchoring is what we expect
@@ -1172,7 +1173,7 @@ public class TestValidator
     try
     {
        g.trackChanges();
-      Vector<Change> changes = v.transform(g);
+      List<Change> changes = v.transform(g);
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
 
       // check the anchoring is what we expect
@@ -1290,7 +1291,7 @@ public class TestValidator
     try
     {
        g.trackChanges();
-      Vector<Change> changes = v.transform(g);
+      List<Change> changes = v.transform(g);
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
 
       // check the anchoring is what we expect
@@ -1385,7 +1386,7 @@ public class TestValidator
     try
     {
        g.trackChanges();
-      Vector<Change> changes = v.transform(g);
+      List<Change> changes = v.transform(g);
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
 
       // check the anchoring is what we expect
@@ -1480,7 +1481,7 @@ public class TestValidator
     try
     {
        g.trackChanges();
-      Vector<Change> changes = v.transform(g);
+      List<Change> changes = v.transform(g);
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
 
       // check the anchoring is what we expect
@@ -1565,7 +1566,7 @@ public class TestValidator
     try
     {
        g.trackChanges();
-      Vector<Change> changes = v.transform(g);
+      List<Change> changes = v.transform(g);
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
 
       // check the anchoring is what we expect
@@ -1656,7 +1657,7 @@ public class TestValidator
     try
     {
        g.trackChanges();
-      Vector<Change> changes = v.transform(g);
+      List<Change> changes = v.transform(g);
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
 
       // check the anchoring is what we expect
@@ -1766,7 +1767,7 @@ public class TestValidator
     try
     {
        g.trackChanges();
-      Vector<Change> changes = v.transform(g);
+      List<Change> changes = v.transform(g);
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
 
       assertEquals("no changes: " + changes, 0, changes.size());
@@ -1853,7 +1854,7 @@ public class TestValidator
     try
     {
        g.trackChanges();
-      Vector<Change> changes = v.transform(g);
+      List<Change> changes = v.transform(g);
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
 
       assertNull("reset", g.getAnchor("a0").getOffset());
@@ -1942,7 +1943,7 @@ public class TestValidator
     v.setDefaultOffsetThreshold(null);
     try
     {
-      Vector<Change> changes = v.transform(g);
+      List<Change> changes = v.transform(g);
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       assertNotEquals("changes applied", 0, changes.size());
       assertEquals("extra peer deleted", Change.Operation.Destroy, g.getAnnotation("orth2.5").getChange());
@@ -2066,7 +2067,7 @@ public class TestValidator
     // v.setDebug(true);
     try
     {
-      Vector<Change> changes = v.transform(f);
+      List<Change> changes = v.transform(f);
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       assertEquals(2, f.getAnnotation("utterance2").getOrdinal());
       assertNotEquals(f.getAnnotation("turn1").getStart(), 
@@ -2179,7 +2180,7 @@ public class TestValidator
       v.setDefaultOffsetThreshold(null);
       try
       {
-         Vector<Change> changes = v.transform(g);
+         List<Change> changes = v.transform(g);
          if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
          assertEquals("one error: " + v.getErrors(),
                       1, v.getErrors().size());

@@ -25,11 +25,11 @@ package nzilbb.ag.util.test;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-import java.util.Vector;
 import java.util.Arrays;
 import java.util.HashSet;
-import nzilbb.ag.util.*;
+import java.util.List;
 import nzilbb.ag.*;
+import nzilbb.ag.util.*;
 
 public class TestOrthographyClumper
 {
@@ -95,7 +95,7 @@ public class TestOrthographyClumper
       {
          g.setTracker(new ChangeTracker());
 	 OrthographyClumper transformer = new OrthographyClumper("word");
-	 Vector<Change> changes = transformer.transform(g);
+	 List<Change> changes = transformer.transform(g);
 	 g.commit();
 	 Annotation words[] = g.list("word");
 	 assertEquals("- \" the '", words[0].getLabel());
@@ -195,7 +195,7 @@ public class TestOrthographyClumper
       {
          g.setTracker(new ChangeTracker());
 	 OrthographyClumper transformer = new OrthographyClumper("word", "line");
-	 Vector<Change> changes = transformer.transform(g);
+	 List<Change> changes = transformer.transform(g);
 	 g.commit();
 	 Annotation words[] = g.list("word");
 	 assertEquals("- \" the '", words[0].getLabel());
@@ -313,7 +313,7 @@ public class TestOrthographyClumper
       {
          g.setTracker(new ChangeTracker());
 	 OrthographyClumper transformer = new OrthographyClumper("word");
-	 Vector<Change> changes = transformer.transform(g);
+	 List<Change> changes = transformer.transform(g);
 	 g.commit();
 	 Annotation words[] = g.list("word");
 	 assertEquals("- \" the '", words[0].getLabel());
@@ -434,7 +434,7 @@ public class TestOrthographyClumper
       {
          g.setTracker(new ChangeTracker());
 	 OrthographyClumper transformer = new OrthographyClumper("word");
-	 Vector<Change> changes = transformer.transform(g);
+	 List<Change> changes = transformer.transform(g);
 	 g.commit();
 	 Annotation words[] = g.list("word");
 	 assertEquals("a1", words[0].getStartId());
@@ -552,7 +552,7 @@ public class TestOrthographyClumper
       {
          g.setTracker(new ChangeTracker());
          OrthographyClumper transformer = new OrthographyClumper("word");
-	 Vector<Change> changes = transformer.transform(g);
+	 List<Change> changes = transformer.transform(g);
 	 g.commit();
 	 Annotation words[] = g.list("word");
 	 assertEquals("- \" the", words[0].getLabel());
@@ -630,7 +630,7 @@ public class TestOrthographyClumper
       {
          g.setTracker(new ChangeTracker());
 	 OrthographyClumper transformer = new OrthographyClumper("word");
-	 Vector<Change> changes = transformer.transform(g);
+	 List<Change> changes = transformer.transform(g);
 	 g.commit();
 	 Annotation words[] = g.list("word");
 	 assertEquals("그게", words[0].getLabel());
@@ -704,7 +704,7 @@ public class TestOrthographyClumper
       {
          g.setTracker(new ChangeTracker());
 	 OrthographyClumper transformer = new OrthographyClumper("word");
-	 Vector<Change> changes = transformer.transform(g);
+	 List<Change> changes = transformer.transform(g);
 	 g.commit();
 	 Annotation words[] = g.list("word");
 	 assertEquals("emoji counts as word",

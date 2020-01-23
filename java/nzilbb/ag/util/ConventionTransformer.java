@@ -21,8 +21,9 @@
 //
 package nzilbb.ag.util;
 
-import java.util.Vector;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Vector;
 import java.util.regex.*;
 import nzilbb.ag.*;
 
@@ -251,7 +252,7 @@ public class ConventionTransformer
    * @return The changes introduced by the tranformation.
    * @throws TransformationException If the transformation cannot be completed.
    */
-  public Vector<Change> transform(Graph graph) throws TransformationException
+  public List<Change> transform(Graph graph) throws TransformationException
   {
     if (graph.getLayer(getSourceLayerId()) == null) 
       throw new TransformationException(this, "No source layer: " + getSourceLayerId());
@@ -272,7 +273,6 @@ public class ConventionTransformer
     try
     {
       Pattern sourceRegexp = Pattern.compile(getSourcePattern());
-      Vector<Change> changes = new Vector<Change>();
       for (Annotation source : graph.list(getSourceLayerId()))
       {
         Matcher matcher = sourceRegexp.matcher(source.getLabel());
@@ -296,7 +296,6 @@ public class ConventionTransformer
             else
             {
               Annotation tag = graph.createTag(source, destinationLayerId, matcher.replaceAll(result));
-              changes.addAll(tag.getChanges());
             }
           } // next destination result
           // if the source layer isn't a destination layer

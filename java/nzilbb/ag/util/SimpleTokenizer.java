@@ -21,6 +21,7 @@
 //
 package nzilbb.ag.util;
 
+import java.util.List;
 import java.util.Vector;
 import java.util.regex.Pattern;
 import nzilbb.ag.*;
@@ -180,7 +181,7 @@ public class SimpleTokenizer
     * @return The changes introduced by the tranformation.
     * @throws TransformationException If the transformation cannot be completed.
     */
-   public Vector<Change> transform(Graph graph) throws TransformationException
+   public List<Change> transform(Graph graph) throws TransformationException
    {
       if (graph.getLayer(getSourceLayerId()) == null) 
 	 throw new TransformationException(this, "No source layer: " + getSourceLayerId());

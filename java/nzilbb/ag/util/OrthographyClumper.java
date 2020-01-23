@@ -22,6 +22,7 @@
 
 package nzilbb.ag.util;
 
+import java.util.List;
 import java.util.Vector;
 import nzilbb.ag.*;
 
@@ -122,7 +123,7 @@ public class OrthographyClumper implements IGraphTransformer
     * @return The changes introduced by the tranformation.
     * @throws TransformationException If the transformation cannot be completed.
     */
-   public Vector<Change> transform(Graph graph) throws TransformationException
+   public List<Change> transform(Graph graph) throws TransformationException
    {
       Layer wordLayer = graph.getLayer(getWordLayerId());
       if (wordLayer == null) 

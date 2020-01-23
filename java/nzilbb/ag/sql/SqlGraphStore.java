@@ -4399,7 +4399,7 @@ public class SqlGraphStore
          else
          {
             timers.start("validate");
-            Vector<Change> validationChanges = v.transform(graph);
+            v.transform(graph);
             timers.end("validate");
             System.out.println("saveGraph: " + timers);
             if (v.getErrors().size() != 0)
