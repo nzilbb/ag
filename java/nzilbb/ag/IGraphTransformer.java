@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -24,7 +24,8 @@ package nzilbb.ag;
 import java.util.List;
 
 /**
- * Interface for transformer that transforms a Graph in some way.  This might include tokenizers, valitors, and taggers.
+ * Interface for transformer that transforms a Graph in some way.  This might include
+ * tokenizers, valitors, and taggers. 
  * @author Robert Fromont robert@fromont.net.nz
  */
 
