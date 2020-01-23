@@ -1,5 +1,5 @@
 //
-// Copyright 2019 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2019-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -295,7 +295,7 @@ public class LatexSerializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "LaTeX Document", "0.01", "application/x-tex", ".tex", "20191206.1545",
+         "LaTeX Document", "0.02", "application/x-tex", ".tex", "20191206.1545",
          getClass().getResource("icon.png"));
    }
 
@@ -568,6 +568,7 @@ public class LatexSerializer
    public void serialize(Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
       throws SerializerNotConfiguredException
    {
+      // TODO maybe serialize a list of graph fragments into a single document?
       graphCount = graphs.getExactSizeIfKnown();
       graphs.forEachRemaining(graph -> {
             if (getCancelling()) return;

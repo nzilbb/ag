@@ -1,5 +1,5 @@
 //
-// Copyright 2017 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2017-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -498,7 +498,7 @@ public class TEIDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "TEI Document", "0.11", "application/tei+xml", ".xml", "20191031.1734", getClass().getResource("icon.png"));
+	 "TEI Document", "0.12", "application/tei+xml", ".xml", "20191031.1734", getClass().getResource("icon.png"));
    }
 
    /**
@@ -1850,6 +1850,8 @@ public class TEIDeserializer
 	    graph.addAnnotation(line);
 	 }
 
+         graph.trackChanges();
+         
 	 OrthographyClumper clumper = new OrthographyClumper(wordLayer.getId());
 	 // orthographic characters include not only letters and numbers,
 	 // but also @, so that tweet addressee annotations aren't clumped
@@ -1894,6 +1896,10 @@ public class TEIDeserializer
 	 graph.commit();
 
 	 if (errors != null) throw errors;
+
+         // reset all change tracking
+         graph.getTracker().reset();
+         graph.setTracker(null);
 
 	 Graph[] graphs = { graph };
 	 return graphs;

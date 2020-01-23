@@ -1,5 +1,5 @@
 //
-// Copyright 2016-2017 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -555,7 +555,7 @@ public class ChatDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "CLAN CHAT transcript", "0.61", "text/x-chat", ".cha", "20191031.1734", getClass().getResource("icon.gif"));
+	 "CLAN CHAT transcript", "0.62", "text/x-chat", ".cha", "20191031.1734", getClass().getResource("icon.gif"));
    }
 
    /**
@@ -1342,7 +1342,8 @@ public class ChatDeserializer
 	       }
 	       else
 	       {
-		  checkAlignmentAgainstLastUtterance(utterance, start, end, cUnit, lastUtterance, currentTurn, utteranceLayer, graph);
+		  checkAlignmentAgainstLastUtterance(
+                     utterance, start, end, cUnit, lastUtterance, currentTurn, utteranceLayer, graph);
 	       }
 	    } // synchronised utterance
 	    graph.addAnnotation(utterance);
@@ -1411,6 +1412,8 @@ public class ChatDeserializer
 
       try
       {
+         graph.trackChanges();
+         
 	 // split linkages?
 	 if (getLinkageLayer() != null)
 	 { 
@@ -1560,6 +1563,11 @@ public class ChatDeserializer
 	 errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
       }
       if (errors != null) throw errors;
+      
+      // reset all change tracking
+      graph.getTracker().reset();
+      graph.setTracker(null);
+
       Graph[] graphs = { graph };
       return graphs;
    }

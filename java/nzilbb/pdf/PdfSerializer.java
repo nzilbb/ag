@@ -1,5 +1,5 @@
 //
-// Copyright 2019 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2019-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -252,7 +252,7 @@ public class PdfSerializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "PDF Document", "0.01", "application/pdf", ".pdf", "20191206.1545",
+         "PDF Document", "0.02", "application/pdf", ".pdf", "20191206.1545",
          getClass().getResource("icon.png"));
    }
 
@@ -495,6 +495,7 @@ public class PdfSerializer
    public void serialize(Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
       throws SerializerNotConfiguredException
    {
+      // TODO maybe serialize a list of graph fragments into a single document?
       graphCount = graphs.getExactSizeIfKnown();
       graphs.forEachRemaining(graph -> {
             if (getCancelling()) return;

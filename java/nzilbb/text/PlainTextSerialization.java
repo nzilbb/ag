@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2019 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2017-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -651,7 +651,7 @@ public class PlainTextSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "Plain Text Document", "1.03", "text/plain", ".txt", "20191031.1734",
+         "Plain Text Document", "1.04", "text/plain", ".txt", "20191031.1734",
          getClass().getResource("icon.png"));
    }
 
@@ -1562,12 +1562,11 @@ public class PlainTextSerialization
          if (errors.getCause() == null) errors.initCause(exception);
          errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
       }
-      if (timers != null) timers.start("commit tokenization");
-      graph.commit();
-      if (timers != null) timers.end("commit tokenization");
 
+      graph.trackChanges();
+      
       if (getUseConventions())
-      {
+      {         
          if (timers != null) timers.start("apply conventions");
          try
          {
@@ -1665,6 +1664,10 @@ public class PlainTextSerialization
          //     but these offsets are all set, so there's no need.
          graph.put("@valid", Boolean.TRUE);
       }
+
+      // reset all change tracking
+      graph.getTracker().reset();
+      graph.setTracker(null);
 
       Graph[] graphs = { graph };
       return graphs;

@@ -1,5 +1,5 @@
 //
-// Copyright 2019 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2019-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -82,7 +82,7 @@ public class VttSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "WebVTT subtitles", "0.21", "text/vtt", ".vtt", "20191031.1734", getClass().getResource("icon.png"));
+	 "WebVTT subtitles", "0.22", "text/vtt", ".vtt", "20191031.1734", getClass().getResource("icon.png"));
    }
 
    /**
@@ -744,6 +744,7 @@ public class VttSerialization
 	 // ensure we have an utterance tokenizer
 	 if (getWordLayer() != null)
 	 {
+            graph.trackChanges();
 	    if (getTokenizer() == null)
 	    {
 	       setTokenizer(new SimpleTokenizer(getUtteranceLayer().getId(), getWordLayer().getId()));
@@ -795,6 +796,13 @@ public class VttSerialization
 
       if (errors != null) throw errors;
 
+      // reset all change tracking
+      if (graph.getTracker() != null)
+      {
+         graph.getTracker().reset();
+         graph.setTracker(null);
+      }
+      
       Graph[] graphs = { graph };
       if (timers != null) timers.end("deserialize");
       return graphs;

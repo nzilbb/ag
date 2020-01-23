@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2019 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2017-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -442,7 +442,7 @@ public class EAFSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "ELAN EAF Transcript", "1.01", "text/x-eaf+xml", ".eaf", "20191031.1734",
+         "ELAN EAF Transcript", "1.02", "text/x-eaf+xml", ".eaf", "20191031.1734",
          getClass().getResource("icon.png"));
    }
    
@@ -1422,7 +1422,10 @@ public class EAFSerialization
                participantsByName.get(turn.getLabel()).getAnnotations(turnLayer.getId()).size() + 1);
             turn.setParent(participantsByName.get(turn.getLabel()), false);
          } // next turn
-	 
+         
+         // have to track changes to be able to mark things for destrucion...
+         graph.trackChanges();
+         
          // join subsequent turns by the same speaker...
          // for each participant (assumed to be parent of turn)
          for (Annotation participant : graph.list(participantLayer.getId()))
@@ -1757,6 +1760,13 @@ public class EAFSerialization
 
       if (errors != null) throw errors;
 
+      // reset all change tracking
+      if (graph.getTracker() != null)
+      {
+         graph.getTracker().reset();
+         graph.setTracker(null);
+      }
+      
       Graph[] graphs = { graph };
       return graphs;
    }

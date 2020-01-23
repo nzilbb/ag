@@ -1,5 +1,5 @@
 //
-// Copyright 2004-2019 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2004-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -260,7 +260,7 @@ public class TextGridSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "Praat TextGrid", "2.11", "text/praat-textgrid", ".textgrid", "20191031.1734",
+         "Praat TextGrid", "2.12", "text/praat-textgrid", ".textgrid", "20191031.1734",
          getClass().getResource("icon.png"));
    }
    
@@ -1089,6 +1089,9 @@ public class TextGridSerialization
       } // next turn
       if (timers != null) timers.end("set turn participants");
 
+      // have to track changes to be able to mark things for destrucion...
+      graph.trackChanges(); 
+
       // join subsequent turns by the same speaker...
       // for each participant (assumed to be parent of turn)
       if (timers != null) timers.start("join subsequent turns");
@@ -1401,6 +1404,13 @@ public class TextGridSerialization
       }
 
       if (errors != null) throw errors;
+
+      // reset all change tracking
+      if (graph.getTracker() != null)
+      {
+         graph.getTracker().reset();
+         graph.setTracker(null);
+      }
 
       Graph[] graphs = { graph };
       if (timers != null) timers.end("deserialize");
