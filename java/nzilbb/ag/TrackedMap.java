@@ -40,8 +40,8 @@ import org.json.IJSONableBean;
  * these classes:
  * <ol>
  *  <li>Changes to specific attributes can be tracked and rolled back, by setting
- *   {@link #tracker}, which receives notification of all relevant changes.  Before 
- *   {@link #tracker} is set, no change registration is done, which the exception of calls
+ *   {@link #getTracker()}, which receives notification of all relevant changes.  Before 
+ *   {@link #getTracker()} is set, no change registration is done, which the exception of calls
  *   to {@link #create()} and {@link #destroy()}, changes which are remembered and passed
  *   to the {@link ChangeTracker} when {@link #setTracker(ChangeTracker)} is called (this
  *   is done so that {@link Anchor}s/{@link Annotation}s can be marked for creation before
@@ -81,12 +81,12 @@ public class TrackedMap
    
    /**
     * Keys for attributes that are change-tracked - i.e. when a new value is set for any of
-    * these attributes, and {@link #tracker} is set, the change is registered. 
+    * these attributes, and {@link #getTracker()} is set, the change is registered. 
     */
    private static final TreeSet<String> trackedAttributes = new TreeSet<String>();
    /**
     * Keys for attributes that are change-tracked - i.e. when a new value is set for any of
-    * these attributes, and {@link #tracker} is set, the change is registered. 
+    * these attributes, and {@link #getTracker()} is set, the change is registered. 
     * @return A set of attributes whose changes are tracked.
     */
    public Set<String> getTrackedAttributes()
@@ -120,12 +120,12 @@ public class TrackedMap
     */
    protected ChangeTracker tracker;
    /**
-    * Getter for {@link #tracker}: Object that tracks all changes to this object.
+    * Getter for {@link #getTracker()}: Object that tracks all changes to this object.
     * @return Object that tracks all changes to this object.
     */
    public ChangeTracker getTracker() { return tracker; }
    /**
-    * Setter for {@link #tracker}: Object that tracks all changes to this object.
+    * Setter for {@link #getTracker()}: Object that tracks all changes to this object.
     * @param newTracker Object that tracks all changes to this object.
     */
    public TrackedMap setTracker(ChangeTracker newTracker)
@@ -250,7 +250,7 @@ public class TrackedMap
     * its setter.
     * @param key The attribute name.
     * @return The original value, or Optional.empty() if it has not been changed or
-    * {@link #tracker} is not set.
+    * {@link #getTracker()} is not set.
     */
    protected Optional<Object> getOriginal(String key)
    {
@@ -267,7 +267,7 @@ public class TrackedMap
 
    /**
     * Registers a change to a tracked attribute, if appropriate (e.g. only if it is
-    * actually changing, and only if {@link #tracker} is set), and returns a corresponding
+    * actually changing, and only if {@link #getTracker()} is set), and returns a corresponding
     * change for the given attribute.  
     * @param key The attribute key.
     * @param value The proposed change.
@@ -363,7 +363,7 @@ public class TrackedMap
     * original values, and to remove any {@link #destroy()} tag. If it has been tagged for
     * {@link #create()}, the tag remains in place. 
     * @see #getTrackedAttributes()
-    * @throws NullPointerException If {@link #tracker} is not set (changes can only be
+    * @throws NullPointerException If {@link #getTracker()} is not set (changes can only be
     * rolled back if there's a {@link ChangeTracker} that knows what has changed).
     */
    public void rollback()
@@ -384,7 +384,7 @@ public class TrackedMap
     * Rolls back an individual attribute change.
     * @param key The name of the attribute to roll back.
     * @see #getTrackedAttributes()
-    * @throws NullPointerException If {@link #tracker} is not set (changes can only be
+    * @throws NullPointerException If {@link #getTracker()} is not set (changes can only be
     * rolled back if there's a {@link ChangeTracker} that knows what has changed).
     */
    public void rollback(String key)
@@ -400,7 +400,7 @@ public class TrackedMap
    
    /**
     * Determines how the object has changed since it was originally defined. 
-    * @return How/whether the object has been changed. If {@link #tracker} has not been
+    * @return How/whether the object has been changed. If {@link #getTracker()} has not been
     * set, then only create or destroy changes can be returned.
     * @see #getTrackedAttributes()
     */

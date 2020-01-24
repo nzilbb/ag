@@ -56,13 +56,13 @@ public class Constants
    /** {@link Layer#getAlignment()} value - interval alignment (2). */
    public static final int ALIGNMENT_INTERVAL = 2;
 
-   /** {@link Graph#offsetUnits} value for seconds. Value is "s" */
+   /** {@link Graph#getOffsetUnits()} value for seconds. Value is "s" */
    public static final String UNIT_SECONDS = "s";
 
-   /** {@link Graph#offsetUnits} value for characters. Value is "char" */
+   /** {@link Graph#getOffsetUnits()} value for characters. Value is "char" */
    public static final String UNIT_CHARACTERS = "char";
 
-   /** {@link Graph#offsetGranularity} value for millisecond accuracy. Value is 0.001 */
+   /** {@link Graph#getOffsetUnits()} value for millisecond accuracy. Value is 0.001 */
    public static final Double GRANULARITY_MILLISECONDS = 0.001;
 
    /** Standardized attribute name (key) for a comment. Value is "comment". */

@@ -30,7 +30,7 @@ import java.util.Set;
 import java.util.Vector;
 
 /**
- * Annotation graph anchor - i.e. a node of the graph.
+ * Annotation graph anchor - a node of the graph.
  * @author Robert Fromont robert@fromont.net.nz
  */
 @SuppressWarnings("serial")
@@ -42,7 +42,7 @@ public class Anchor
    private static String[] aTrackedAttributes = {"offset"};
    /**
     * Keys for attributes that are change-tracked - i.e. when a new value is set for any
-    * of these attributes, and {@link TrackedMap#tracker} is set, the change is registered.
+    * of these attributes, and {@link TrackedMap#getTracker()} is set, the change is registered.
     * <p>HashSet is used for this because there's only one tracked attribute, so iteration
     * order is unimportant.
     */
@@ -50,7 +50,7 @@ public class Anchor
 
    /**
     * Keys for attributes that are change-tracked - i.e. when a new value is set for any
-    * of these attributes, and {@link TrackedMap#tracker} is set, the change is registered.
+    * of these attributes, and {@link TrackedMap#getTracker()} is set, the change is registered.
     * @return "offset"
     */
    public Set<String> getTrackedAttributes()

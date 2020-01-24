@@ -113,7 +113,7 @@ public class ChangeTracker
    
    /**
     * Gets all the changes for the given attribute of the given object.
-    * @param id The {@link TrackedMap#id} of the changed object. 
+    * @param id The {@link TrackedMap#getId()} of the changed object. 
     * @param key The key of the changed attribute, or null for Create/Destroy changes.
     * @return A (possibly empty) set of changes that were registered.
     */
@@ -131,7 +131,7 @@ public class ChangeTracker
    
    /**
     * Gets all the changes for the identified object.
-    * @param id The {@link TrackedMap#id} of the changed object. 
+    * @param id The {@link TrackedMap#getId()} of the changed object. 
     * @return A (possibly empty) set of changes that were registered.
     */
    public Set<Change> getChanges(String id)

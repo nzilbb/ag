@@ -46,8 +46,12 @@ import nzilbb.util.Timers;
  * Linguistic annotation graph.
  * <p>An annotation graph is a collection of {@link Annotation}s (edges) joined by {@link
  * Anchor}s (nodes) which may or may not have temporal/character offsets. Superimposed
- * over this temporallay anchored graph is another heirarchical graph, where annotations
+ * over this temporally anchored graph is another heirarchical graph, where annotations
  * are nodes and edges are child-to-parent links. 
+ * <figure>
+ *   <img src="doc-files/annotation-graph-example.svg">
+ *   <figcaption>An example of a heirarchical annotation graph</figcaption>
+ * </figure>
  * <p>In addition to containing the nodes/edges, this class inherits from {@link
  * Annotation} so that it can: 
  * <ul>
@@ -58,18 +62,18 @@ import nzilbb.util.Timers;
  * <p>In addition to this, the graph also has:
  * <ul>
  *  <li>a corpus attribute representing the collection to which it belongs (see 
- * {@link #getCorpus()}, {@link #setCorpus(String)}),</li> 
- *  <li>definitions of annotation {@link Layer}s and their hierarchy</li>
+ *   {@link #getCorpus()}, {@link #setCorpus(String)}),</li> 
+ *  <li>definitions of a {@link Schema} defining annotation {@link Layer}s and their hierarchy</li>
  * </ul>
  * <p>It is recommended that other graph attributes are represented as annotations that
  * 'tag' the whole graph, and that speakers/participants are also represented as such
  * annotations, on a "participant" layer, which is the parent of a "turn" layer which
  * defines speaker turns. 
  * <p>This class can also represent graph fragments (sub-graphs).  If this is a whole
- * graph, {@link Annotation#graph} == <var>this</var>, but if it's a fragment, then 
- * {@link Annotation#graph} != <var>this</var>. The {@link #isFragment()} convenience method
+ * graph, {@link Graph#getGraph()} == <var>this</var>, but if it's a fragment, then 
+ * {@link Graph#getGraph()} != <var>this</var>. The {@link #isFragment()} convenience method
  * captures this principle. The annotations in a graph fragment have the fragment object
- * (not the whole-graph object) set as their {@link Annotation#graph}. 
+ * (not the whole-graph object) set as their {@link Graph#getGraph()}. 
  * @author Robert Fromont robert.fromont@canterbury.ac.nz
  */
 @SuppressWarnings("serial")
@@ -121,12 +125,14 @@ public class Graph
     * Getter for corpus: The name of the corpus the graph belongs to.
     * @return The name of the corpus the graph belongs to.
     */
+   @Deprecated
    public String getCorpus() { try { return (String)get("corpus"); } catch(ClassCastException exception) {return null;} }
    /**
     * Setter for corpus.
     * @param corpus The name of the corpus the graph belongs to.
     * @return <var>this</var>.
     */
+   @Deprecated
    public Graph setCorpus(String corpus) { put("corpus", corpus); return this; }
 
    /**
@@ -166,7 +172,7 @@ public class Graph
     */
    protected Double offsetGranularity;
    /**
-    * Getter for {@link #offsetGranularity}: Granularity of offsets - e.g. 0.001 if Anchor
+    * Getter for {@link #getOffsetGranularity()}: Granularity of offsets - e.g. 0.001 if Anchor
     * offsets are always set to the the nearest millisecond, or null for no particular
     * granularity. 
     * @return Granularity of offsets - e.g. 0.001 if Anchor offsets are always set to the
@@ -174,7 +180,7 @@ public class Graph
     */
    public Double getOffsetGranularity() { return offsetGranularity; }
    /**
-    * Setter for {@link #offsetGranularity}.g. 0.001 if Anchor offsets are always set to
+    * Setter for {@link #getOffsetGranularity()}.g. 0.001 if Anchor offsets are always set to
     * the the nearest millisecond, or null for no particular granularity. 
     * @param newOffsetGranularity Granularity of offsets - e.g. 0.001 if Anchor offsets
     * are always set to the the nearest millisecond, or null for no particular
@@ -309,7 +315,7 @@ public class Graph
    
    /**
     * Determines whether this is a fragment of a larger graph (true) or the whole graph (false).
-    * @return false if {@link Annotation#graph} == <var>this</var>, true otherwise.
+    * @return false if {@link Graph#getGraph()} == <var>this</var>, true otherwise.
     */
    public boolean isFragment()
    {
@@ -998,10 +1004,10 @@ public class Graph
    } // end of shiftAnchors()
    
    /**
-    * Compares two offsets, taking {@link #offsetGranularity} into account.
+    * Compares two offsets, taking {@link #getOffsetGranularity()} into account.
     * @param o1 The first offset to compare.
     * @param o2 The second offset to compare.
-    * @return 0 if the two offsets are within {@link #offsetGranularity} of each other, or
+    * @return 0 if the two offsets are within {@link #getOffsetGranularity()} of each other, or
     * a negative number if o1 &lt; o2, and otherwise a positive number. 
     */
    public int compareOffsets(double o1, double o2)
@@ -1017,9 +1023,9 @@ public class Graph
   
    /**
     * Returns the given offset rounded to the nearest 'quantum' as determined by 
-    * {@link #offsetGranularity}
+    * {@link #getOffsetGranularity()}
     * @param offset
-    * @return The given offset, rounded to the nearest {@link #offsetGranularity} unit.
+    * @return The given offset, rounded to the nearest {@link #getOffsetGranularity()} unit.
     */
    public Double quantumOffset(Double offset)
    {

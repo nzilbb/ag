@@ -37,7 +37,7 @@ import nzilbb.ag.util.AnnotationComparatorByOrdinal;
 import nzilbb.ag.util.LayerTraversal;
 
 /**
- * Annotation graph annotation - i.e. an edge of the graph.
+ * Annotation graph annotation - an edge of the graph.
  * <p>TODO maybe change <code>list</code> and <code>my</code> to <code>all</code> and
  * <code>first</code>, and add <code>last</code> to complete the set.  
  * @author Robert Fromont robert@fromont.net.nz
@@ -51,7 +51,7 @@ public class Annotation
    private static String[] aTrackedAttributes = {"label", "startId", "endId", "parentId", "ordinal"};
    /**
     * Keys for attributes that are change-tracked - i.e. when a new value is set for any
-    * of these attributes, and {@link TrackedMap#tracker} is set, the change is registered. 
+    * of these attributes, and {@link TrackedMap#getTracker()} is set, the change is registered. 
     * <p>LinkedHashSet is used so that attributes are iterated in the order they're
     * defined in aTrackedAttributes (which is the order shown in the documentation of
     * {@link #getTrackedAttributes()}). 
@@ -60,7 +60,7 @@ public class Annotation
 
    /**
     * Keys for attributes that are change-tracked - i.e. when a new value is set for any
-    * of these attributes, and {@link TrackedMap#tracker} is set, the change is registered. 
+    * of these attributes, and {@link TrackedMap#getTracker()} is set, the change is registered. 
     * @return "label", "startId", "endId", "parentId", "ordinal"
     */
    public Set<String> getTrackedAttributes() { return trackedAttributes; }

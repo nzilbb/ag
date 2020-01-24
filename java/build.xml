@@ -4,6 +4,7 @@
   <!-- set global properties for this build -->
   <property name="src"     location="."/>
   <property name="javadoc" location="javadoc"/>
+  <property name="doc" location="../doc/javadoc"/>
   <property name="build"   location="build_${ant.project.name}"/>
   <property name="dist"    location="../bin"/>
   <property name="srcfiles" value="nzilbb/ag/**/*.java nzilbb/editpath/**/*.java nzilbb/configure/**/*.java nzilbb/util/**/*.java nzilbb/media/**/*.java org/json/**/*.java"/> 
@@ -68,7 +69,7 @@
   </target>
 
   <target name="javadoc" depends="init,compile"
-          description="document the source" >
+          description="Generate javadoc for all source files" >
     <mkdir dir="${javadoc}"/>
     <javadoc destdir="${javadoc}"
 	     classpath=".;lib/antlr-4.7.2-complete.jar"
@@ -78,7 +79,25 @@
                excludes="nzilbb/ag/**/test/*.java ${srctestseditpath} nzilbb/ag/ql/**/*.java org/**/*.java" />
     </javadoc>
   </target>
-  
+
+  <target name="doc" depends="init,compile"
+          description="Generate javadoc documentation for public parts of main packages" >
+    <mkdir dir="${doc}"/>
+    <javadoc destdir="${doc}"
+	     classpath=".;lib/antlr-4.7.2-complete.jar"
+             packagenames="nzilbb.ag"
+             access="public"
+	     Author="yes"
+             Windowtitle="nzilbb.ag"
+             stylesheetfile="doc-files/style.css"
+             Overview="nzilbb/ag/overview.html"
+             bottom="&lt;i&gt;&amp;copy; NZILBB - ${TODAY}&lt;/i&gt;"
+             >
+      <fileset dir="${src}"
+               includes="nzilbb/ag/*.java nzilbb/ag/util/*.java " />
+    </javadoc>
+  </target>  
+
   <target name="test" depends="dist" description="run nzilbb.ag annotation-graph unit tests">
     <javac srcdir="${src}" destdir="."
 	       includes="${srctests} ${srctestseditpath}"
@@ -200,6 +219,7 @@
     <!-- Delete the ${build} and ${dist} directory trees -->
     <delete dir="${build}"/>
     <delete dir="${javadoc}"/>
+    <delete dir="${doc}"/>
     <delete>
       <fileset dir="." includes="**/*.class"/>
       <fileset dir="." includes="**/*~" defaultexcludes="no"/>

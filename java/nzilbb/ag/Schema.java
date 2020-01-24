@@ -417,12 +417,12 @@ public class Schema
    * Copies the IDs of the special layers identified by the given schema.
    * @param source The source schema.
    * @return this
-   * @see #participantLayerId
-   * @see #turnLayerId
-   * @see #utteranceLayerId
-   * @see #wordLayerId
-   * @see #episodeLayerId
-   * @see #corpusLayerId
+   * @see #getParticipantLayerId()
+   * @see #getTurnLayerId()
+   * @see #getUtteranceLayerId()
+   * @see #getWordLayerId()
+   * @see #getEpisodeLayerId()
+   * @see #getCorpusLayerId()
    */
   public Schema copyLayerIdsFrom(Schema source)
   {
