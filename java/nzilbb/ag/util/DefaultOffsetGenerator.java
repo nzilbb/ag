@@ -367,6 +367,11 @@ public class DefaultOffsetGenerator
 	 TreeSet<Anchor> sortedAnchors = new TreeSet<Anchor>(new AnchorComparatorWithStructure());
 	 // recursively descend through children, gathering anchors for non-overlapping child layers
 	 descendantAnchors(top, sortedAnchors);
+         if (debug)
+         {
+            log("sortedAnchors:");
+            for (Anchor a : sortedAnchors) log(a, ": ", a.getConfidence());
+         }
 
 	 // avoid unbounded anchor chain problems by starting/ending the collection with
 	 // immovable start/end anchors - these come from graph.getSortedAnchors()
@@ -525,6 +530,8 @@ public class DefaultOffsetGenerator
 		     double dEnd = nextSetAnchor.getOffset();
 		     double dDuration = dEnd - dStart;
 		     double dIncrement = dDuration / (unsetAnchors.size() + 1);
+                     log("from: ", lastSetAnchor, " to ", nextSetAnchor,
+                         " duration: ", dDuration, " increment: ", dIncrement);
 		     int i = 0;
 		     for (Anchor unset : unsetAnchors)
 		     {
@@ -546,6 +553,7 @@ public class DefaultOffsetGenerator
 		  
 	       // update the last set anchor 
 	       lastSetAnchor = nextSetAnchor;
+               log("last now: ", lastSetAnchor);
 		  
 	    } // offset is not set
 	 } // next anchor
@@ -585,11 +593,13 @@ public class DefaultOffsetGenerator
 		  if (link.getStart() != null) anchors.add(link.getStart());
 		  if (link.getEnd() != null) anchors.add(link.getEnd());
 	       } // next link
-	       log(" child: ", child, " ", child.getStart(), "-", child.getEnd());
+	       log(" child: ", child, " ",
+                   child.getStart(), "(", child.getStart().getConfidence(), ")-",
+                   child.getEnd(), "(", child.getEnd().getConfidence(), ")");
 	       if (child.getStart() != null) anchors.add(child.getStart());
-	       //log("added start ", child.getStart());
+	       // log("added start ", child.getStart());
 	       if (child.getEnd() != null) anchors.add(child.getEnd());
-	       //log("added end ", child.getEnd());
+	       // log("added end ", child.getEnd());
 	       previousAnchor = child.getEnd();
 	    } // add anchors
 	    // recurse into all layers regardless of layer definition, to catch interesting grandchildren
@@ -694,7 +704,7 @@ public class DefaultOffsetGenerator
 	    }
 	 }	 
 	 log.add(s.toString());
-	 // System.out.println(message);
+	 // System.out.println(s.toString());
       }
    } // end of log()
 
