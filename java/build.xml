@@ -91,6 +91,7 @@
              Windowtitle="nzilbb.ag"
              stylesheetfile="doc-files/style.css"
              Overview="nzilbb/ag/overview.html"
+             noqualifier="all"
              bottom="&lt;i&gt;&amp;copy; NZILBB - ${TODAY}&lt;/i&gt;"
              >
       <fileset dir="${src}"
