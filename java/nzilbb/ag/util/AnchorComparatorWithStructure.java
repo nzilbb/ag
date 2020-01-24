@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -27,6 +27,7 @@ import java.util.Vector;
 import java.util.SortedSet;
 import nzilbb.ag.Anchor;
 import nzilbb.ag.Graph;
+import nzilbb.ag.Schema;
 import nzilbb.ag.Annotation;
 import nzilbb.ag.Constants;
 
@@ -39,6 +40,25 @@ public class AnchorComparatorWithStructure
   implements Comparator<Anchor>
 {
    // Attributes:
+   
+   /**
+    * Schema, which will be inferred from the first anchor, if unset and available.
+    * @see #getSchema()
+    * @see #setSchema(Schema)
+    */
+   protected Schema schema;
+   /**
+    * Getter for {@link #schema}: Schema, which will be inferred from the first anchor, if unset and available.
+    * @return Schema, which will be inferred from the first anchor, if unset and available.
+    */
+   public Schema getSchema() { return schema; }
+   /**
+    * Setter for {@link #schema}: Schema, which will be inferred from the first anchor, if unset and available.
+    * @param newSchema Schema, which will be inferred from the first anchor, if unset and available.
+    */
+   public AnchorComparatorWithStructure setSchema(Schema newSchema) { schema = newSchema; return this; }
+
+   
    // Methods:
    
    /**
@@ -106,7 +126,7 @@ public class AnchorComparatorWithStructure
 	       }
 	    } // a2Min not null
 	 } // a1Max not null
-      } // one of the offsets is nullo
+      } // one of the offsets is null
 
       // these are going to be useful:
       LinkedHashSet<Annotation> endingAtA1 = a1.getEndingAnnotations();
@@ -114,6 +134,41 @@ public class AnchorComparatorWithStructure
       LinkedHashSet<Annotation> startingAtA1 = a1.getStartingAnnotations();
       LinkedHashSet<Annotation> startingAtA2 = a2.getStartingAnnotations();
 
+      // if the offsets are equal
+      if (a1.getOffset() != null && a1.getOffset().equals(a2.getOffset()))
+      {         
+         if (schema == null && a1.getGraph() != null && a1.getGraph().getSchema() != null)
+         {
+            schema = a1.getGraph().getSchema();
+         }
+         if (schema != null)
+         {
+            // utterance starts are before word starts
+            if (a1.isStartOn(schema.getWordLayerId())
+                && a2.isStartOn(schema.getUtteranceLayerId()))
+            { // a1 is a word start, a2 is an utterance start, so a2 is before a1
+               return 9;
+            }
+            if (a2.isStartOn(schema.getWordLayerId())
+                && a1.isStartOn(schema.getUtteranceLayerId()))
+            { // a2 is a word start, a1 is an utterance start, so a1 is before a2
+               return -9;
+            }
+
+            // word ends are before utterance ends
+            if (a1.isEndOn(schema.getWordLayerId())
+                && a2.isEndOn(schema.getUtteranceLayerId()))
+            { // a1 is a word end, a2 is an utterance end, so a1 is before a2
+               return -10;
+            }
+            if (a2.isEndOn(schema.getWordLayerId())
+                && a1.isEndOn(schema.getUtteranceLayerId()))
+            { // a2 is a word end, a1 is and utterance end, so a2 is before a1
+               return 10;
+            }
+         }
+      } // offsets are equal
+      
       // if there is a common parent annotation, we can compare by ordinal
       // or if one is an ancestor of the other, we can compare by start/end
       LinkedHashSet<Annotation> a1Annotations = new LinkedHashSet<Annotation>(startingAtA1);
@@ -252,7 +307,7 @@ public class AnchorComparatorWithStructure
 
       // if the offsets are equal
       if (a1.getOffset() != null && a1.getOffset().equals(a2.getOffset()))
-      {
+      {         
 	 if (endingAtA1.size() == 0 && endingAtA2.size() > 0)
 	 { // a1 is not an end anchor and a2 is, so a1 is structurally after a2
 	    return 3;
@@ -271,8 +326,8 @@ public class AnchorComparatorWithStructure
 	 }
 	 // if both are ends only, use inclusion to decide which is earlier TODO these actually necessary?
 	 // if both are starts only, use inclusion to decide which is earlier TODO
-      } // offsets are equal
 
+      } // offsets are equal
 
       return a1.getId().compareTo(a2.getId()); //TODO
    }
