@@ -23,13 +23,14 @@ package nzilbb.ag.util;
 
 import java.util.Comparator;
 import java.util.LinkedHashSet;
-import java.util.Vector;
+import java.util.OptionalDouble;
 import java.util.SortedSet;
+import java.util.Vector;
 import nzilbb.ag.Anchor;
-import nzilbb.ag.Graph;
-import nzilbb.ag.Schema;
 import nzilbb.ag.Annotation;
 import nzilbb.ag.Constants;
+import nzilbb.ag.Graph;
+import nzilbb.ag.Schema;
 
 /**
  * Anchor comparator that uses primarily offset, but when offset is null, uses the structure of the graph to compare anchors.
@@ -40,24 +41,6 @@ public class AnchorComparatorWithStructure
   implements Comparator<Anchor>
 {
    // Attributes:
-   
-   /**
-    * Schema, which will be inferred from the first anchor, if unset and available.
-    * @see #getSchema()
-    * @see #setSchema(Schema)
-    */
-   protected Schema schema;
-   /**
-    * Getter for {@link #schema}: Schema, which will be inferred from the first anchor, if unset and available.
-    * @return Schema, which will be inferred from the first anchor, if unset and available.
-    */
-   public Schema getSchema() { return schema; }
-   /**
-    * Setter for {@link #schema}: Schema, which will be inferred from the first anchor, if unset and available.
-    * @param newSchema Schema, which will be inferred from the first anchor, if unset and available.
-    */
-   public AnchorComparatorWithStructure setSchema(Schema newSchema) { schema = newSchema; return this; }
-
    
    // Methods:
    
@@ -137,36 +120,45 @@ public class AnchorComparatorWithStructure
       // if the offsets are equal
       if (a1.getOffset() != null && a1.getOffset().equals(a2.getOffset()))
       {         
-         if (schema == null && a1.getGraph() != null && a1.getGraph().getSchema() != null)
-         {
-            schema = a1.getGraph().getSchema();
-         }
-         if (schema != null)
-         {
-            // utterance starts are before word starts
-            if (a1.isStartOn(schema.getWordLayerId())
-                && a2.isStartOn(schema.getUtteranceLayerId()))
-            { // a1 is a word start, a2 is an utterance start, so a2 is before a1
-               return 9;
-            }
-            if (a2.isStartOn(schema.getWordLayerId())
-                && a1.isStartOn(schema.getUtteranceLayerId()))
-            { // a2 is a word start, a1 is an utterance start, so a1 is before a2
-               return -9;
-            }
+         // compare anchors at the other end of annotations
+         // i.e. if one they're both end anchors, and one has a start that's earlier than
+         // the other, then it's after the other.
+         // (utterance start will be ealier than word start)
 
-            // word ends are before utterance ends
-            if (a1.isEndOn(schema.getWordLayerId())
-                && a2.isEndOn(schema.getUtteranceLayerId()))
-            { // a1 is a word end, a2 is an utterance end, so a1 is before a2
-               return -10;
-            }
-            if (a2.isEndOn(schema.getWordLayerId())
-                && a1.isEndOn(schema.getUtteranceLayerId()))
-            { // a2 is a word end, a1 is and utterance end, so a2 is before a1
-               return 10;
-            }
-         }
+         // find nearest start anchors
+         OptionalDouble nearestStartOffset1 = endingAtA1.stream()
+            .filter(a->a.getStart() != null)
+            .filter(a->a.getStart().getOffset() != null)
+            .mapToDouble(a->a.getStart().getOffset())
+            .max();
+         OptionalDouble nearestStartOffset2 = endingAtA2.stream()
+            .filter(a->a.getStart() != null)
+            .filter(a->a.getStart().getOffset() != null)
+            .mapToDouble(a->a.getStart().getOffset())
+            .max();
+         if (nearestStartOffset1.isPresent() && nearestStartOffset2.isPresent())
+         { // there are start offsets to compare
+            if (nearestStartOffset1.getAsDouble() < nearestStartOffset2.getAsDouble()) return 9;
+            if (nearestStartOffset1.getAsDouble() > nearestStartOffset2.getAsDouble()) return -9;
+         } // there are start offsets to compare
+
+         // find nearest end anchors
+         OptionalDouble nearestEndOffset1 = startingAtA1.stream()
+            .filter(a->a.getEnd() != null)
+            .filter(a->a.getEnd().getOffset() != null)
+            .mapToDouble(a->a.getEnd().getOffset())
+            .min();
+         OptionalDouble nearestEndOffset2 = startingAtA2.stream()
+            .filter(a->a.getEnd() != null)
+            .filter(a->a.getEnd().getOffset() != null)
+            .mapToDouble(a->a.getEnd().getOffset())
+            .min();
+         if (nearestEndOffset1.isPresent() && nearestEndOffset2.isPresent())
+         { // there are end offsets to compare
+            if (nearestEndOffset1.getAsDouble() < nearestEndOffset2.getAsDouble()) return 10;
+            if (nearestEndOffset1.getAsDouble() > nearestEndOffset2.getAsDouble()) return -10;
+         } // there are end offsets to compare
+
       } // offsets are equal
       
       // if there is a common parent annotation, we can compare by ordinal
