@@ -905,3 +905,6 @@ table.striped > tbody > tr > th, table.striped > tbody > tr > td {
 table.striped > tbody > tr > th {
     font-weight: normal;
 }
+figure img {
+    max-width: 90vw;
+}
