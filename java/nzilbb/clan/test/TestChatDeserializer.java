@@ -116,91 +116,91 @@ public class TestChatDeserializer
       // turns
       Annotation[] turns = g.list("turn");
       assertEquals(1, turns.length);
-      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
+      assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals("unaligned final utterance - turn has end time", 
-		   new Double(681.935), turns[0].getEnd().getOffset());
+		   Double.valueOf(681.935), turns[0].getEnd().getOffset());
       assertEquals(g.getAnnotation("SUB"), turns[0].getParent());
 
       // utterances
       Annotation[] utterances = g.list("utterance");
-      assertEquals(new Double(0.001), utterances[0].getStart().getOffset());
-      assertEquals(new Double(21.510), utterances[0].getEnd().getOffset());
+      assertEquals(Double.valueOf(0.001), utterances[0].getStart().getOffset());
+      assertEquals(Double.valueOf(21.510), utterances[0].getEnd().getOffset());
       assertEquals("SUB", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
 
-      assertEquals("wrapped line", new Double(21.510), utterances[1].getStart().getOffset());
+      assertEquals("wrapped line", Double.valueOf(21.510), utterances[1].getStart().getOffset());
       assertEquals("simultaneos with next line", 
-		   new Double(23.2835), utterances[1].getEnd().getOffset());
+		   Double.valueOf(23.2835), utterances[1].getEnd().getOffset());
       assertEquals("simultaneos with next line", 
-		   new Integer(Constants.CONFIDENCE_DEFAULT), 
+		   Integer.valueOf(Constants.CONFIDENCE_DEFAULT), 
 		   utterances[1].getEnd().getConfidence());
       assertEquals("SUB", utterances[1].getParent().getLabel());
 
       assertEquals("simultaneous with previous line", 
-		   new Double(23.2835), utterances[2].getStart().getOffset());
+		   Double.valueOf(23.2835), utterances[2].getStart().getOffset());
       assertEquals("simultaneous with previous line", 
-		   new Integer(Constants.CONFIDENCE_DEFAULT), 
+		   Integer.valueOf(Constants.CONFIDENCE_DEFAULT), 
 		   utterances[2].getStart().getConfidence());
-      assertEquals("simultaneous line", new Double(25.057), utterances[2].getEnd().getOffset());
+      assertEquals("simultaneous line", Double.valueOf(25.057), utterances[2].getEnd().getOffset());
       assertEquals("SUB", utterances[2].getParent().getLabel());
 
-      assertEquals(new Double(25.057), utterances[3].getStart().getOffset());
-      assertEquals(new Double(29.994), utterances[3].getEnd().getOffset());
+      assertEquals(Double.valueOf(25.057), utterances[3].getStart().getOffset());
+      assertEquals(Double.valueOf(29.994), utterances[3].getEnd().getOffset());
 
       assertEquals("linking utterance", "", utterances[4].getLabel());
-      assertEquals("linking utterance", new Double(29.994), utterances[4].getStart().getOffset());
-      assertEquals("linking utterance", new Double(34.723), utterances[4].getEnd().getOffset());
+      assertEquals("linking utterance", Double.valueOf(29.994), utterances[4].getStart().getOffset());
+      assertEquals("linking utterance", Double.valueOf(34.723), utterances[4].getEnd().getOffset());
 
-      assertEquals(new Double(34.723), utterances[5].getStart().getOffset());
-      assertEquals(new Double(35.752), utterances[5].getEnd().getOffset());
+      assertEquals(Double.valueOf(34.723), utterances[5].getStart().getOffset());
+      assertEquals(Double.valueOf(35.752), utterances[5].getEnd().getOffset());
 
       assertEquals("mid-line synchronisation - first utterance", 
-		   new Double(414.937), utterances[142].getStart().getOffset());
+		   Double.valueOf(414.937), utterances[142].getStart().getOffset());
       assertEquals("mid-line synchronisation - first utterance", 
-		   new Double(418.673), utterances[142].getEnd().getOffset());
+		   Double.valueOf(418.673), utterances[142].getEnd().getOffset());
       assertEquals("mid-line synchronisation - linking utterance", 
-		   new Double(418.673), utterances[143].getStart().getOffset());
+		   Double.valueOf(418.673), utterances[143].getStart().getOffset());
       assertEquals("mid-line synchronisation - linking utterance", 
-		   new Double(418.809), utterances[143].getEnd().getOffset());
+		   Double.valueOf(418.809), utterances[143].getEnd().getOffset());
       assertEquals("mid-line synchronisation - second utterance", 
-		   new Double(418.809), utterances[144].getStart().getOffset());
+		   Double.valueOf(418.809), utterances[144].getStart().getOffset());
       assertEquals("mid-line synchronisation - second utterance", 
-		   new Double(420.631), utterances[144].getEnd().getOffset());
+		   Double.valueOf(420.631), utterances[144].getEnd().getOffset());
 
       assertEquals("overlapping utterances - first start unchanged", 
-		   new Double(452.319), utterances[159].getStart().getOffset());
+		   Double.valueOf(452.319), utterances[159].getStart().getOffset());
       assertEquals("overlapping utterances - first end unchanged", 
-		   new Double(455.432), utterances[159].getEnd().getOffset());
+		   Double.valueOf(455.432), utterances[159].getEnd().getOffset());
       assertEquals("overlapping utterances - second start changed", 
-		   new Double(455.432), utterances[160].getStart().getOffset());
+		   Double.valueOf(455.432), utterances[160].getStart().getOffset());
       assertEquals("overlapping utterances - second end unchanged", 
-		   new Double(460.584), utterances[160].getEnd().getOffset());
+		   Double.valueOf(460.584), utterances[160].getEnd().getOffset());
 
       assertEquals("unsynchronised utterance - before", 
-		   new Double(489.467), utterances[170].getStart().getOffset());
+		   Double.valueOf(489.467), utterances[170].getStart().getOffset());
       assertEquals("unsynchronised utterances - before - end moved", 
-		   new Double(491.397), utterances[170].getEnd().getOffset());
+		   Double.valueOf(491.397), utterances[170].getEnd().getOffset());
       assertEquals("unsynchronised utterances - before - low confidence", 
 		   Constants.CONFIDENCE_DEFAULT, utterances[170].getEnd().getConfidence().intValue());
       assertEquals("unsynchronised utterance - chained with utterance before", 
 		   utterances[170].getEnd(), utterances[171].getStart());
 
       assertEquals("unsynchronised utterance - end original alignment", 
-		   new Double(493.327), utterances[171].getEnd().getOffset());
+		   Double.valueOf(493.327), utterances[171].getEnd().getOffset());
       assertEquals("unsynchronised utterance - after", 
-		   new Double(493.327), utterances[172].getStart().getOffset());
+		   Double.valueOf(493.327), utterances[172].getStart().getOffset());
       assertEquals("unsynchronised utterances - after", 
-		   new Double(496.813), utterances[172].getEnd().getOffset());
+		   Double.valueOf(496.813), utterances[172].getEnd().getOffset());
 
       assertEquals("unaligned final utterance has end time", 
-		   new Double(681.935), utterances[utterances.length-1].getEnd().getOffset());
+		   Double.valueOf(681.935), utterances[utterances.length-1].getEnd().getOffset());
       assertEquals("aligned penultimate utterance has original start time", 
-		   new Double(678.341), utterances[utterances.length-2].getStart().getOffset());
+		   Double.valueOf(678.341), utterances[utterances.length-2].getStart().getOffset());
       assertEquals("aligned penultimate utterance links to unaligned ultimate utterance", 
 		   utterances[utterances.length-2].getEnd(), 
 		   utterances[utterances.length-1].getStart());
       assertEquals("aligned penultimate utterance has end time adjusted", 
-		   new Double(681.935 + ((678.341-681.935)/2)), 
+		   Double.valueOf(681.935 + ((678.341-681.935)/2)), 
 		   utterances[utterances.length-2].getEnd().getOffset());
       assertEquals("aligned penultimate utterance has end confidence adjusted", 
 		   Constants.CONFIDENCE_DEFAULT, 
@@ -245,7 +245,7 @@ public class TestChatDeserializer
       {	 
 	 assertEquals("ordinals correct " + words[i], i+1, words[i].getOrdinal());
 	 assertEquals("tagged as manual: " + words[i], 
-		      new Integer(Constants.CONFIDENCE_MANUAL), words[i].getConfidence());
+		      Integer.valueOf(Constants.CONFIDENCE_MANUAL), words[i].getConfidence());
       }
 
       // c-units
@@ -277,7 +277,7 @@ public class TestChatDeserializer
       for (Annotation a : cUnits)
       {
 	 assertEquals("tagged as manual: " + a + " " + a.getStart() + "-" + a.getEnd(), 
-		      new Integer(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+		      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
 	 assertEquals("parent set: " + a + " " + a.getStart() + "-" + a.getEnd(), 
 		      turns[0], a.getParent());
       }
@@ -290,7 +290,7 @@ public class TestChatDeserializer
       for (Annotation a : g.list("disfluency"))
       {
 	 assertEquals("tagged as manual: " + a, 
-		      new Integer(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+		      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
 
       Annotation[] expansions = g.list("expansion");
@@ -306,7 +306,7 @@ public class TestChatDeserializer
       for (Annotation a : expansions)
       {
 	 assertEquals("tagged as manual: " + a, 
-		      new Integer(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+		      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
 
       // linkages
@@ -341,7 +341,7 @@ public class TestChatDeserializer
       for (Annotation a : errors)
       {
 	 assertEquals("tagged as manual: " + a, 
-		      new Integer(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+		      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
 
       // completion
@@ -350,7 +350,7 @@ public class TestChatDeserializer
       for (Annotation a : completions)
       {
 	 assertEquals("tagged as manual: " + a, 
-		      new Integer(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+		      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
 
       assertEquals("leading completion", "nd", words[22].getLabel());
@@ -368,7 +368,7 @@ public class TestChatDeserializer
       for (Annotation a : retracing)
       {
 	 assertEquals("tagged as manual: " + a, 
-		      new Integer(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+		      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
 
       // tag previous word
@@ -420,52 +420,52 @@ public class TestChatDeserializer
       for (Annotation a : repetition)
       {
 	 assertEquals("tagged as manual: " + a, 
-		      new Integer(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+		      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
 
       // gems
       Annotation[] gems = g.list("gem");
       assertEquals(11, gems.length);
-      assertEquals(new Double(0.001), gems[0].getStart().getOffset());
+      assertEquals(Double.valueOf(0.001), gems[0].getStart().getOffset());
       assertEquals("gdc", gems[0].getLabel());
-      assertEquals(new Double(180.068), gems[0].getEnd().getOffset());
-      assertEquals(new Double(180.068), gems[1].getStart().getOffset());
+      assertEquals(Double.valueOf(180.068), gems[0].getEnd().getOffset());
+      assertEquals(Double.valueOf(180.068), gems[1].getStart().getOffset());
       assertEquals("picnic", gems[1].getLabel());
-      assertEquals(new Double(347.077), gems[1].getEnd().getOffset());
-      assertEquals(new Double(347.077), gems[2].getStart().getOffset());
+      assertEquals(Double.valueOf(347.077), gems[1].getEnd().getOffset());
+      assertEquals(Double.valueOf(347.077), gems[2].getStart().getOffset());
       assertEquals("christmas", gems[2].getLabel());
-      assertEquals(new Double(403.531), gems[2].getEnd().getOffset());
-      assertEquals(new Double(403.531), gems[3].getStart().getOffset());
+      assertEquals(Double.valueOf(403.531), gems[2].getEnd().getOffset());
+      assertEquals(Double.valueOf(403.531), gems[3].getStart().getOffset());
       assertEquals("weekend", gems[3].getLabel());
-      assertEquals(new Double(455.432), gems[3].getEnd().getOffset());
+      assertEquals(Double.valueOf(455.432), gems[3].getEnd().getOffset());
       assertEquals("Shifted to end of previous utterance", 
-		   new Double(455.432), gems[4].getStart().getOffset());
+		   Double.valueOf(455.432), gems[4].getStart().getOffset());
       assertEquals("vacation", gems[4].getLabel());
-      assertEquals(new Double(502.431), gems[4].getEnd().getOffset());
-      assertEquals(new Double(507.270), gems[5].getStart().getOffset());
+      assertEquals(Double.valueOf(502.431), gems[4].getEnd().getOffset());
+      assertEquals(Double.valueOf(507.270), gems[5].getStart().getOffset());
       assertEquals("peanut", gems[5].getLabel());
-      assertEquals(new Double(536.950), gems[5].getEnd().getOffset());
+      assertEquals(Double.valueOf(536.950), gems[5].getEnd().getOffset());
       assertEquals("Shifted to end of previous utterance", 
-		   new Double(536.950), gems[6].getStart().getOffset());
+		   Double.valueOf(536.950), gems[6].getStart().getOffset());
       assertEquals("flower", gems[6].getLabel());
-      assertEquals(new Double(562.364), gems[6].getEnd().getOffset());
-      assertEquals(new Double(562.364), gems[7].getStart().getOffset());
+      assertEquals(Double.valueOf(562.364), gems[6].getEnd().getOffset());
+      assertEquals(Double.valueOf(562.364), gems[7].getStart().getOffset());
       assertEquals("birthday", gems[7].getLabel());
-      assertEquals(new Double(605.459), gems[7].getEnd().getOffset());
-      assertEquals(new Double(605.552), gems[8].getStart().getOffset());
+      assertEquals(Double.valueOf(605.459), gems[7].getEnd().getOffset());
+      assertEquals(Double.valueOf(605.552), gems[8].getStart().getOffset());
       assertEquals("directions", gems[8].getLabel());
-      assertEquals(new Double(630.083), gems[8].getEnd().getOffset());
+      assertEquals(Double.valueOf(630.083), gems[8].getEnd().getOffset());
       assertEquals("Shifted to end of previous utterance", 
-		   new Double(630.083), gems[9].getStart().getOffset());
+		   Double.valueOf(630.083), gems[9].getStart().getOffset());
       assertEquals("argument", gems[9].getLabel());
-      assertEquals(new Double(657.253), gems[9].getEnd().getOffset());
-      assertEquals(new Double(657.253), gems[10].getStart().getOffset());
+      assertEquals(Double.valueOf(657.253), gems[9].getEnd().getOffset());
+      assertEquals(Double.valueOf(657.253), gems[10].getStart().getOffset());
       assertEquals("cat", gems[10].getLabel());
       assertEquals(turns[0].getEnd(), gems[10].getEnd());
       for (Annotation a : gems)
       {
 	 assertEquals("tagged as manual: " + a, 
-		      new Integer(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+		      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
 
    }
@@ -539,75 +539,75 @@ public class TestChatDeserializer
       // turns
       Annotation[] turns = g.list("turn");
       assertEquals(1, turns.length);
-      assertEquals(new Double(0.0), turns[0].getStart().getOffset());
+      assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals("unaligned final utterance - turn has end time", 
-		   new Double(681.935), turns[0].getEnd().getOffset());
+		   Double.valueOf(681.935), turns[0].getEnd().getOffset());
       assertEquals(g.getAnnotation("SUB"), turns[0].getParent());
 
       // utterances
       Annotation[] utterances = g.list("utterance");
-      assertEquals(new Double(0.001), utterances[0].getStart().getOffset());
-      assertEquals(new Double(21.510), utterances[0].getEnd().getOffset());
+      assertEquals(Double.valueOf(0.001), utterances[0].getStart().getOffset());
+      assertEquals(Double.valueOf(21.510), utterances[0].getEnd().getOffset());
       assertEquals("SUB", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
 
-      assertEquals("wrapped line", new Double(21.510), utterances[1].getStart().getOffset());
+      assertEquals("wrapped line", Double.valueOf(21.510), utterances[1].getStart().getOffset());
       assertEquals("simultaneos with next line", 
-		   new Double(23.2835), utterances[1].getEnd().getOffset());
+		   Double.valueOf(23.2835), utterances[1].getEnd().getOffset());
       assertEquals("simultaneos with next line", 
-		   new Integer(Constants.CONFIDENCE_DEFAULT), 
+		   Integer.valueOf(Constants.CONFIDENCE_DEFAULT), 
 		   utterances[1].getEnd().getConfidence());
       assertEquals("SUB", utterances[1].getParent().getLabel());
 
       assertEquals("simultaneous with previous line", 
-		   new Double(23.2835), utterances[2].getStart().getOffset());
+		   Double.valueOf(23.2835), utterances[2].getStart().getOffset());
       assertEquals("simultaneous with previous line", 
-		   new Integer(Constants.CONFIDENCE_DEFAULT), 
+		   Integer.valueOf(Constants.CONFIDENCE_DEFAULT), 
 		   utterances[2].getStart().getConfidence());
-      assertEquals("simultaneous line", new Double(25.057), utterances[2].getEnd().getOffset());
+      assertEquals("simultaneous line", Double.valueOf(25.057), utterances[2].getEnd().getOffset());
       assertEquals("SUB", utterances[2].getParent().getLabel());
 
-      assertEquals(new Double(25.057), utterances[3].getStart().getOffset());
-      assertEquals(new Double(29.994), utterances[3].getEnd().getOffset());
+      assertEquals(Double.valueOf(25.057), utterances[3].getStart().getOffset());
+      assertEquals(Double.valueOf(29.994), utterances[3].getEnd().getOffset());
 
       assertEquals("linking utterance", "", utterances[4].getLabel());
-      assertEquals("linking utterance", new Double(29.994), utterances[4].getStart().getOffset());
-      assertEquals("linking utterance", new Double(34.723), utterances[4].getEnd().getOffset());
+      assertEquals("linking utterance", Double.valueOf(29.994), utterances[4].getStart().getOffset());
+      assertEquals("linking utterance", Double.valueOf(34.723), utterances[4].getEnd().getOffset());
 
-      assertEquals(new Double(34.723), utterances[5].getStart().getOffset());
-      assertEquals(new Double(35.752), utterances[5].getEnd().getOffset());
+      assertEquals(Double.valueOf(34.723), utterances[5].getStart().getOffset());
+      assertEquals(Double.valueOf(35.752), utterances[5].getEnd().getOffset());
 
       assertEquals("mid-line synchronisation - first utterance", 
-		   new Double(414.937), utterances[142].getStart().getOffset());
+		   Double.valueOf(414.937), utterances[142].getStart().getOffset());
       assertEquals("mid-line synchronisation - first utterance", 
-		   new Double(418.673), utterances[142].getEnd().getOffset());
+		   Double.valueOf(418.673), utterances[142].getEnd().getOffset());
       assertEquals("mid-line synchronisation - linking utterance", 
-		   new Double(418.673), utterances[143].getStart().getOffset());
+		   Double.valueOf(418.673), utterances[143].getStart().getOffset());
       assertEquals("mid-line synchronisation - linking utterance", 
-		   new Double(418.809), utterances[143].getEnd().getOffset());
+		   Double.valueOf(418.809), utterances[143].getEnd().getOffset());
       assertEquals("mid-line synchronisation - second utterance", 
-		   new Double(418.809), utterances[144].getStart().getOffset());
+		   Double.valueOf(418.809), utterances[144].getStart().getOffset());
       assertEquals("mid-line synchronisation - second utterance", 
-		   new Double(420.631), utterances[144].getEnd().getOffset());
+		   Double.valueOf(420.631), utterances[144].getEnd().getOffset());
 
       assertEquals("overlapping utterances - first start unchanged", 
-		   new Double(452.319), utterances[159].getStart().getOffset());
+		   Double.valueOf(452.319), utterances[159].getStart().getOffset());
       assertEquals("overlapping utterances - first end unchanged", 
-		   new Double(455.432), utterances[159].getEnd().getOffset());
+		   Double.valueOf(455.432), utterances[159].getEnd().getOffset());
       assertEquals("overlapping utterances - second start changed", 
-		   new Double(455.432), utterances[160].getStart().getOffset());
+		   Double.valueOf(455.432), utterances[160].getStart().getOffset());
       assertEquals("overlapping utterances - second end unchanged", 
-		   new Double(460.584), utterances[160].getEnd().getOffset());
+		   Double.valueOf(460.584), utterances[160].getEnd().getOffset());
 
       assertEquals("unaligned final utterance has end time", 
-		   new Double(681.935), utterances[utterances.length-1].getEnd().getOffset());
+		   Double.valueOf(681.935), utterances[utterances.length-1].getEnd().getOffset());
       assertEquals("aligned penultimate utterance has original start time", 
-		   new Double(678.341), utterances[utterances.length-2].getStart().getOffset());
+		   Double.valueOf(678.341), utterances[utterances.length-2].getStart().getOffset());
       assertEquals("aligned penultimate utterance links to unaligned ultimate utterance", 
 		   utterances[utterances.length-2].getEnd(), 
 		   utterances[utterances.length-1].getStart());
       assertEquals("aligned penultimate utterance has end time adjusted", 
-		   new Double(681.935 + ((678.341-681.935)/2)), 
+		   Double.valueOf(681.935 + ((678.341-681.935)/2)), 
 		   utterances[utterances.length-2].getEnd().getOffset());
       assertEquals("aligned penultimate utterance has end confidence adjusted", 
 		   Constants.CONFIDENCE_DEFAULT, 
