@@ -4,7 +4,7 @@
   <!-- set global properties for this build -->
   <property name="src"     location="."/>
   <property name="javadoc" location="javadoc"/>
-  <property name="doc" location="../doc/javadoc"/>
+  <property name="docs" location="../docs/javadoc"/>
   <property name="build"   location="build_${ant.project.name}"/>
   <property name="dist"    location="../bin"/>
   <property name="srcfiles" value="nzilbb/ag/**/*.java nzilbb/editpath/**/*.java nzilbb/configure/**/*.java nzilbb/util/**/*.java nzilbb/media/**/*.java org/json/**/*.java"/> 
@@ -80,10 +80,10 @@
     </javadoc>
   </target>
 
-  <target name="doc" depends="init,compile"
+  <target name="docs" depends="init,compile"
           description="Generate javadoc documentation for public parts of main packages" >
-    <mkdir dir="${doc}"/>
-    <javadoc destdir="${doc}"
+    <mkdir dir="${docs}"/>
+    <javadoc destdir="${docs}"
 	     classpath=".;lib/antlr-4.7.2-complete.jar"
              packagenames="nzilbb.ag"
              access="public"
@@ -219,7 +219,7 @@
     <!-- Delete the ${build} and ${dist} directory trees -->
     <delete dir="${build}"/>
     <delete dir="${javadoc}"/>
-    <delete dir="${doc}"/>
+    <delete dir="${docs}"/>
     <delete>
       <fileset dir="." includes="**/*.class"/>
       <fileset dir="." includes="**/*~" defaultexcludes="no"/>
