@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -933,6 +933,141 @@ public class TestDefaultOffsetGenerator
       assertEquals(Double.valueOf(3.4), f.getAnchor("a34").getOffset());
       assertEquals(Double.valueOf(4.4), f.getAnchor("a44").getOffset());
       assertEquals(Double.valueOf(5.4), f.getAnchor("a54").getOffset());
+    }
+    catch(TransformationException exception)
+    {
+      fail(exception.toString());
+    }
+  }
+
+  @Test public void partialAlignmentOfUnalignedFragment() 
+  {
+    Graph g = new Graph();
+    g.setId("my graph");
+    g.setCorpus("cc");
+
+    g.addLayer(new Layer("who", "Participants")
+               .setAlignment(Constants.ALIGNMENT_NONE) 
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(true));
+    g.addLayer(new Layer("turn", "Speaker turns")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("who")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("utterance", "Utterance")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("turn")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("word", "Words")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
+
+    g.addAnchor(new Anchor("utteranceStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
+    g.addAnchor(new Anchor("a0", 0.0, Constants.CONFIDENCE_DEFAULT)); // the
+    g.addAnchor(new Anchor("a1", 1.0, Constants.CONFIDENCE_MANUAL)); // quick
+    g.addAnchor(new Anchor("a2", 2.5, Constants.CONFIDENCE_DEFAULT)); // brown
+    g.addAnchor(new Anchor("a3", 3.5, Constants.CONFIDENCE_DEFAULT)); // fox
+    g.addAnchor(new Anchor("a4", 4.5, Constants.CONFIDENCE_DEFAULT)); // jumps
+    g.addAnchor(new Anchor("a5", 5.5, Constants.CONFIDENCE_DEFAULT)); // over
+    g.addAnchor(new Anchor("a6", 6.5, Constants.CONFIDENCE_DEFAULT)); // a
+    g.addAnchor(new Anchor("a7", 7.5, Constants.CONFIDENCE_DEFAULT)); // lazy
+    g.addAnchor(new Anchor("a8", 8.5, Constants.CONFIDENCE_DEFAULT)); // dog
+    g.addAnchor(new Anchor("a9", 9.0, Constants.CONFIDENCE_DEFAULT)); // end of dog
+    g.addAnchor(new Anchor("utteranceEnd", 9.0, Constants.CONFIDENCE_MANUAL)); // turn end
+
+    g.addAnnotation(
+       new Annotation("participant1", "john smith", "who", "utteranceStart", "utteranceEnd",
+                      "my graph"));
+      
+    g.addAnnotation( // null anchors like a fragment
+       new Annotation("turn1", "john smith", "turn", "none1", "none2", "participant1"));
+    
+    g.addAnnotation(
+       new Annotation("utterance1", "john smith", "utterance", "utteranceStart", "utteranceEnd",
+                      "turn1"));
+      
+    g.addAnnotation(new Annotation("the", "the", "word", "a0", "a1", "turn1", 1));
+    g.addAnnotation(new Annotation("quick", "quick", "word", "a1", "a2", "turn1", 2));
+    g.addAnnotation(new Annotation("brown", "brown", "word", "a2", "a3", "turn1", 3));
+    g.addAnnotation(new Annotation("fox", "fox", "word", "a3", "a4", "turn1", 4));
+    g.addAnnotation(new Annotation("jumps", "jumps", "word", "a4", "a5", "turn1", 5));
+    g.addAnnotation(new Annotation("over", "over", "word", "a5", "a6", "turn1", 6));
+    g.addAnnotation(new Annotation("a", "a", "word", "a6", "a7", "turn1", 7));
+    g.addAnnotation(new Annotation("lazy", "lazy", "word", "a7", "a8", "turn1", 8));
+    g.addAnnotation(new Annotation("dog", "dog", "word", "a8", "a9", "turn1", 9));
+
+    g.trackChanges();
+
+    DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
+    // generator.setDebug(true);
+    try
+    {
+      List<Change> changes = generator.transform(g);
+      if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
+
+      // test the values are what we expected
+
+      Set<String> changeStrings = changes.stream()
+         .map(Change::toString).collect(Collectors.toSet());
+
+      assertEquals("Anchor offset: " + changeStrings,
+                   Double.valueOf(0.0), g.getAnchor("a0").getOffset());
+      assertEquals("Anchor offset: " + changeStrings,
+                   Double.valueOf(1.0), g.getAnchor("a1").getOffset());
+      assertEquals("Anchor offset: " + changeStrings,
+                   Double.valueOf(2.0), g.getAnchor("a2").getOffset());
+      assertEquals("Anchor offset: " + changeStrings,
+                   Double.valueOf(3.0), g.getAnchor("a3").getOffset());
+      assertEquals("Anchor offset: " + changeStrings,
+                   Double.valueOf(4.0), g.getAnchor("a4").getOffset());
+      assertEquals("Anchor offset: " + changeStrings,
+                   Double.valueOf(5.0), g.getAnchor("a5").getOffset());
+      assertEquals("Anchor offset: " + changeStrings,
+                   Double.valueOf(6.0), g.getAnchor("a6").getOffset());
+      assertEquals("Anchor offset: " + changeStrings,
+                   Double.valueOf(7.0), g.getAnchor("a7").getOffset());
+      assertEquals("Anchor offset: " + changeStrings,
+                   Double.valueOf(8.0), g.getAnchor("a8").getOffset());
+      assertEquals("Anchor offset: " + changeStrings,
+                   Double.valueOf(9.0), g.getAnchor("a9").getOffset());
+
+      // test the changes are recorded
+      assertFalse("First default anchor unchanged",
+                  changeStrings.contains("Update a0: offset = 0.0 (was null)"));
+      assertFalse("Last default anchor unchanged",
+                  changeStrings.contains("Update a9: offset = 9.0 (was null)"));
+      assertFalse("Manual alignment unchanged",
+                  changeStrings.contains("Update a1: offset = 1.0 (was null)"));
+      
+      // then the rest interpolated between
+      assertTrue("Default anchor shifted: " + changeStrings,
+                 changeStrings.contains("Update a2: offset = 2.0 (was 2.5)"));
+      assertTrue("Default anchor shifted: " + changeStrings,
+                 changeStrings.contains("Update a3: offset = 3.0 (was 3.5)"));
+      assertTrue("Default anchor shifted: " + changeStrings,
+                 changeStrings.contains("Update a4: offset = 4.0 (was 4.5)"));
+      assertTrue("Default anchor shifted: " + changeStrings,
+                 changeStrings.contains("Update a5: offset = 5.0 (was 5.5)"));
+      assertTrue("Default anchor shifted: " + changeStrings,
+                 changeStrings.contains("Update a6: offset = 6.0 (was 6.5)"));
+      assertTrue("Default anchor shifted: " + changeStrings,
+                 changeStrings.contains("Update a7: offset = 7.0 (was 7.5)"));
+      assertTrue("Default anchor shifted: " + changeStrings,
+                 changeStrings.contains("Update a8: offset = 8.0 (was 8.5)"));
+      
+      assertEquals("no extra changes to graph: " + g.getChanges(),
+                   changes.size(), g.getChanges().size());
     }
     catch(TransformationException exception)
     {
