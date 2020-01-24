@@ -267,12 +267,11 @@ public class LayerHierarchyTraversal<R>
       // a top level layer is any layer with "graph" as a parent, 
       // or any layer whose parent is not in the graph 
       // (this ensures all layers are included, even for partial graphs)
-      // (this ensures all layers are included, even for partial graphs)
       Stream<Layer> topLevelLayersStream = layers.stream()
          .filter(layer -> !layer.getId().equals("graph"))
          .filter(layer -> layer.getParentId() != null)
          .filter(layer -> layer.getParentId().equals("graph")
-                 || !schema.getLayers().containsKey(layer.getParentId()));
+                 || (schema != null && !schema.getLayers().containsKey(layer.getParentId())));
       if (peerComparator != null)
       {
          topLevelLayersStream = topLevelLayersStream.sorted(peerComparator);            
