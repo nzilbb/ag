@@ -35,8 +35,8 @@
       }}
   },
   "anchors":{
-    "2":	{"offset":1.0,	"confidence":100},
     "n_1010":	{"offset":1.0,	"confidence":100},
+    "2":	{"offset":1.0,	"confidence":100},
     "n_1011":	{"offset":1.11,	"confidence":50},
     "n_1012":	{"offset":1.12,	"confidence":50},
     "n_1013":	{"offset":1.13,	"confidence":50},
