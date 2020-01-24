@@ -141,17 +141,17 @@ public class ChangeTracker
       {
          if (idToChanges.containsKey(id))
          {
+            // creates first
             idToChanges.get(id).values().stream()
-               .sorted(new Comparator<Change>(){
-                     public int compare(Change c1, Change c2)
-                     {
-                        if (c1.getOperation() == Change.Operation.Create) return -1;
-                        if (c2.getOperation() == Change.Operation.Create) return 1;
-                        if (c1.getOperation() == Change.Operation.Destroy) return 1;
-                        if (c2.getOperation() == Change.Operation.Destroy) return -1;
-                        return c1.getKey().compareTo(c2.getKey());
-                     }
-                  })
+               .filter(c->c.getOperation() == Change.Operation.Create)
+               .forEach(c -> changes.add(c));
+            // then updates
+            idToChanges.get(id).values().stream()
+               .filter(c->c.getOperation() == Change.Operation.Update)
+               .forEach(c -> changes.add(c));
+            // then deletes
+            idToChanges.get(id).values().stream()
+               .filter(c->c.getOperation() == Change.Operation.Destroy)
                .forEach(c -> changes.add(c));
          } // idToChanges.containsKey(id)
       } // id != null

@@ -683,10 +683,10 @@ public class TestGraph
       assertEquals("Update word5: ordinal = 4 (was null)", changes.get(i++).toString());
       // then the children are updated
       assertEquals("Update word1: parentId = newTurn (was turn1)", changes.get(i++).toString());
-      assertEquals("Update word3: ordinal = 2 (was 3)", changes.get(i++).toString());
       assertEquals("Update word3: parentId = newTurn (was turn1)", changes.get(i++).toString());
-      assertEquals("Update word4: ordinal = 3 (was 4)", changes.get(i++).toString());
+      assertEquals("Update word3: ordinal = 2 (was 3)", changes.get(i++).toString());
       assertEquals("Update word4: parentId = newTurn (was turn1)", changes.get(i++).toString());
+      assertEquals("Update word4: ordinal = 3 (was 4)", changes.get(i++).toString());
       // children delete before parents
       assertEquals("Destroy word2", changes.get(i++).toString());
       // finally the old parent is deleted
