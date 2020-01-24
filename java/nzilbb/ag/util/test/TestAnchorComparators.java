@@ -663,6 +663,138 @@ public class TestAnchorComparators
 
   }
 
+  @Test public void fragmentCase()
+  {
+    Graph g = new Graph();
+    g.setId("my graph");
+    g.setCorpus("cc");
+
+    g.setSchema(
+       new Schema("who", "turn", "utterance", "transcript",
+                  new Layer("who", "Participants")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(true)
+                  .setPeersOverlap(true)
+                  .setSaturated(true),
+                  new Layer("turn", "Speaker turns")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true)
+                  .setPeersOverlap(false)
+                  .setSaturated(false)
+                  .setParentId("who")
+                  .setParentIncludes(true),
+                  new Layer("transcript", "Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true)
+                  .setPeersOverlap(false)
+                  .setSaturated(false)
+                  .setParentId("turn")
+                  .setParentIncludes(true),
+                  new Layer("utterance", "Utterances")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true)
+                  .setPeersOverlap(false)
+                  .setSaturated(true)
+                  .setParentId("turn")
+                  .setParentIncludes(true)));
+
+    g.addAnchor(new Anchor("1", 10.0, // the
+                           Constants.CONFIDENCE_DEFAULT));
+    g.addAnchor(new Anchor("n_101", 10.0, // quick
+                           Constants.CONFIDENCE_DEFAULT));
+    g.addAnchor(new Anchor("n_100", 10.0, // utterance start 
+                           Constants.CONFIDENCE_MANUAL));
+    g.addAnchor(new Anchor("n_300", 25.0, // brown
+                           Constants.CONFIDENCE_DEFAULT));
+    g.addAnchor(new Anchor("n_399", 40.0, // brown end
+                           Constants.CONFIDENCE_DEFAULT));
+    g.addAnchor(new Anchor("n_400", 40.0, // utterance break
+                           Constants.CONFIDENCE_MANUAL));
+    g.addAnchor(new Anchor("n_401", 40.0, // fox
+                           Constants.CONFIDENCE_DEFAULT));
+    g.addAnchor(new Anchor("4", 50.0, // jumps
+                           Constants.CONFIDENCE_DEFAULT));
+    g.addAnchor(new Anchor("n_500", 60.0, // over
+                           Constants.CONFIDENCE_DEFAULT));
+    g.addAnchor(new Anchor("n_600", 70.0, // over end
+                           Constants.CONFIDENCE_DEFAULT));
+    g.addAnchor(new Anchor("n_700", 70.0, // utterance end
+                           Constants.CONFIDENCE_MANUAL));
+    
+    g.addAnnotation(new Annotation("participant1", "john smith", "who", "none", "none", "my graph"));
+
+    // null turn anchors, like a fragment
+    g.addAnnotation(new Annotation("turn1", "john smith", "turn", "none", "none", "participant1"));
+
+    g.addAnnotation(new Annotation("utterance1", "john smith", "utterance", "n_100", "n_400", "turn1"));
+    g.addAnnotation(new Annotation("utterance2", "john smith", "utterance", "n_400", "n_700", "turn1"));
+      
+    g.addAnnotation(new Annotation("the", "the", "transcript", "1", "n_101", "turn1"));
+    g.addAnnotation(new Annotation("quick", "quick", "transcript", "n_101", "n_300", "turn1"));
+    g.addAnnotation(new Annotation("brown", "brown", "transcript", "n_300", "n_399", "turn1"));
+    g.addAnnotation(new Annotation("fox", "fox", "transcript", "n_401", "4", "turn1"));
+    g.addAnnotation(new Annotation("jumps", "jumps", "transcript", "4", "n_500", "turn1"));
+    g.addAnnotation(new Annotation("over", "over", "transcript", "n_500", "n_600", "turn1"));
+  
+    AnchorComparatorWithStructure comparator = new AnchorComparatorWithStructure();
+
+    // assert some preconditions
+    g.getAnnotation("turn1").setStartId(null);
+    g.getAnnotation("turn1").setEndId(null);
+    assertNull("turn start is null: ", g.getAnnotation("turn1").getStartId());
+    assertNull("turn end is null: ", g.getAnnotation("turn1").getEndId());
+    g.getAnnotation("participant1").setStartId(null);
+    g.getAnnotation("participant1").setEndId(null);
+    assertNull("participant start is null: ", g.getAnnotation("participant1").getStartId());
+    assertNull("participant end is null: ", g.getAnnotation("participant1").getEndId());
+    assertFalse("word is not ancestor of utterance",
+                g.getAnnotation("the").getAncestors().contains(g.getAnnotation("utterance1")));
+    assertFalse("utterance is not ancestor of word",
+                g.getAnnotation("utterance1").getAncestors().contains(g.getAnnotation("the")));
+
+    assertTrue("utterance start before word start: "
+               + comparator.compare(g.getAnchor("n_100"), g.getAnchor("1")), 
+               comparator.compare(g.getAnchor("n_100"), g.getAnchor("1")) < 0);
+    assertTrue("utteranace start before word end: "
+               + comparator.compare(g.getAnchor("n_100"), g.getAnchor("n_101")), 
+               comparator.compare(g.getAnchor("n_100"), g.getAnchor("n_101")) < 0);
+    assertTrue("utterance end after word end: "
+               + comparator.compare(g.getAnchor("n_600"), g.getAnchor("n_700")), 
+               comparator.compare(g.getAnchor("n_600"), g.getAnchor("n_700")) < 0);
+
+    // test sorting
+    final TreeSet<Anchor> anchors = new TreeSet<Anchor>(comparator);
+    g.getAnchors().values().forEach(a->anchors.add(a));
+    anchors.addAll(g.getAnchors().values());
+    final StringBuffer anchorOrder = new StringBuffer();
+    anchors.forEach(a->anchorOrder.append(a.getId() + ": " + a.getOffset() + ", "));
+    // System.out.println(""+anchors);
+    Iterator<Anchor> order = anchors.iterator();
+    assertEquals("Order: "+anchorOrder,
+                 "n_100", order.next().getId());
+    assertEquals("Order: "+anchorOrder,
+                 "1", order.next().getId());
+    assertEquals("Order: "+anchorOrder,
+                 "n_101", order.next().getId());
+    assertEquals("Order: "+anchorOrder,
+                 "n_300", order.next().getId());
+    assertEquals("Order: "+anchorOrder,
+                 "n_399", order.next().getId());
+    assertEquals("Order: "+anchorOrder,
+                 "n_400", order.next().getId());
+    assertEquals("Order: "+anchorOrder,
+                 "n_401", order.next().getId());
+    assertEquals("Order: "+anchorOrder,
+                 "4", order.next().getId());
+    assertEquals("Order: "+anchorOrder,
+                 "n_500", order.next().getId());
+    assertEquals("Order: "+anchorOrder,
+                 "n_600", order.next().getId());
+    assertEquals("Order: "+anchorOrder,
+                 "n_700", order.next().getId());
+    assertFalse(order.hasNext());
+
+  }
 
   public static void main(String args[]) 
   {
