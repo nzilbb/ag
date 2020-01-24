@@ -128,7 +128,6 @@ public class Merger
    * @param newEditedGraph The edited version of the graph.
    */
   public Merger setEditedGraph(Graph newEditedGraph) { editedGraph = newEditedGraph; return this; }
-
    
   /**
    * The maximum length of a list used for mapping annotations of the same layer but in different
@@ -245,7 +244,6 @@ public class Merger
    */
   public HashSet<String> getNoChangeLayers() { return noChangeLayers; }
    
-
   /**
    * The validator to use after merge is complete, or null to not validate the graph after
    * merge. Default value is a {@link Validator} created with its default constructor. 
@@ -2411,7 +2409,9 @@ public class Merger
               if (i == null) continue;
               Annotation currentPartitionEdited = currentPartition.get(partitionLayerId);
               Annotation currentPartitionOriginal = getCounterpart(currentPartitionEdited);
-              assert currentPartitionOriginal != null : "currentPartitionOriginal != null";
+              assert currentPartitionOriginal != null : "currentPartitionOriginal != null: "
+                 + currentPartitionEdited.getId() + " " + currentPartitionEdited.getLabel()
+                 + " ("+partitionLayerId+")";
               // assume that partition layer already saturates parent, and add end anchors
               // into the collection as appropriate
               double midPoint = minStart + ((maxEnd-minStart) / 2);
