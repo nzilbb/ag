@@ -33,12 +33,13 @@ import nzilbb.ag.Graph;
 import nzilbb.ag.Schema;
 
 /**
- * Anchor comparator that uses primarily offset, but when offset is null, uses the structure of the graph to compare anchors.
+ * Anchor comparator that uses primarily offset, but when offset is null, uses the
+ * structure of the graph to compare anchors. 
  * @author Robert Fromont robert@fromont.net.nz
  */
 
 public class AnchorComparatorWithStructure
-  implements Comparator<Anchor>
+   implements Comparator<Anchor>
 {
    // Attributes:
    
@@ -55,7 +56,7 @@ public class AnchorComparatorWithStructure
    {
       // if they're the same anchor, return 0
       if (a1.equals(a2)) return 0;
-
+      
       // does one follow the other in the graph?
       if (a1.follows(a2))
       { // there are directed links from a2 to a1
