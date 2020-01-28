@@ -24,16 +24,29 @@ package nzilbb.ag;
 import java.util.LinkedHashMap;
 import java.util.Collection;
 import nzilbb.ag.util.LayerHierarchyTraversal;
+import org.json.IJSONableBean;
 
 /**
  * Definition of layers and their interrelations.
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class Schema
-  implements Cloneable
+  implements Cloneable, IJSONableBean
 {
   // Attributes:
-   
+
+   private static String[] jsonAttributes = {
+      "participantLayerId", "turnLayerId", "utteranceLayerId", "wordLayerId", "episodeLayerId",
+      "corpusLayerId", "root", "layers" };
+   /**
+    * IJSONableBean implementation.
+    * @return The names of fields to be obtained from the object.
+    */
+   public String[] JSONAttributes()
+   {
+      return jsonAttributes;
+   }
+
   /**
    * The root of the layer hierarchy, representing the graph as a whole.
    * @see #getRoot()
