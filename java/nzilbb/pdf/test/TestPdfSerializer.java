@@ -428,6 +428,148 @@ public class TestPdfSerializer
       streams.elementAt(0).save(dir);
    }
 
+   @Test public void serializeWithNonWordLayer()
+      throws Exception
+   {
+      Schema schema = new Schema(
+         "who", "turn", "utterance", "word",
+         new Layer("who", "Participants")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(true)
+         .setPeersOverlap(true)
+         .setSaturated(true),
+         new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+         new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+         new Layer("word", "Words", 2, true, false, false, "turn", true),
+         new Layer("orthography", "Orthography")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false)
+         .setPeersOverlap(false)
+         .setSaturated(true)
+         .setParentId("word"),
+         new Layer("pos", "Part of Speech")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false)
+         .setPeersOverlap(false)
+         .setSaturated(true)
+         .setParentId("word"));
+      File dir = getDir();
+      
+      Graph graph = new Graph()
+         .setId("pos_only")
+         .setSchema(schema);
+      graph.addAnchor(new Anchor("a0", 0.0));
+      graph.addAnchor(new Anchor("a5", 5.0));
+      graph.addAnchor(new Anchor("a10", 10.0));
+      // participants
+      graph.addAnnotation(new Annotation("author", "author", "who", "a0", "a10"));
+      // turns
+      graph.addAnnotation(new Annotation("t1", "author", "turn", "a0", "a10", "author"));
+      // utterances
+      graph.addAnnotation(new Annotation("u1", "author", "utterance", "a0", "a5", "t1"));
+      graph.addAnnotation(new Annotation("u2", "author", "utterance", "a5", "a10", "t1"));
+
+      // words
+      graph.addAnnotation(new Annotation("the", "The", "word",
+                                         "a0",
+                                         graph.addAnchor(new Anchor("a1", 1.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("quick", "'quick", "word", 
+                                         "a1",
+                                         graph.addAnchor(new Anchor("a2", 2.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("brown", "brown'", "word", 
+                                         "a2",
+                                         graph.addAnchor(new Anchor("a3", 3.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("fox", "fox", "word", 
+                                         "a3",
+                                         graph.addAnchor(new Anchor("a4", 4.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("jumps", "jumps -", "word", 
+                                         "a4",
+                                         "a5",
+                                         "t1"));
+      
+      graph.addAnnotation(new Annotation("over", "over", "word",
+                                         "a5",
+                                         graph.addAnchor(new Anchor("a6", 6.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("the2", "the", "word", 
+                                         "a6",
+                                         graph.addAnchor(new Anchor("a7", 7.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("lazy", "lazy", "word", 
+                                         "a7",
+                                         graph.addAnchor(new Anchor("a8", 8.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("dog", "\"dog\"", "word", 
+                                         "a8",
+                                         graph.addAnchor(new Anchor("a9", 9.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation(".", ".", "word", 
+                                         "a9",
+                                         "a10",
+                                         "t1"));
+      graph.addTag(graph.getAnnotation("the"), "orthography", "the");
+      graph.addTag(graph.getAnnotation("quick"), "orthography", "quick");
+      graph.addTag(graph.getAnnotation("brown"), "orthography", "brown");
+      graph.addTag(graph.getAnnotation("fox"), "orthography", "fox");
+      graph.addTag(graph.getAnnotation("jumps"), "orthography", "jumps");
+      graph.addTag(graph.getAnnotation("over"), "orthography", "over");
+      graph.addTag(graph.getAnnotation("the2"), "orthography", "the");
+      graph.addTag(graph.getAnnotation("lazy"), "orthography", "lazy");
+      graph.addTag(graph.getAnnotation("dog"), "orthography", "dog");
+
+      graph.addTag(graph.getAnnotation("the"), "pos", "DET");
+      graph.addTag(graph.getAnnotation("quick"), "pos", "ADJ");
+      graph.addTag(graph.getAnnotation("brown"), "pos", "ADJ");
+      graph.addTag(graph.getAnnotation("fox"), "pos", "N");
+      graph.addTag(graph.getAnnotation("jumps"), "pos", "V");
+      graph.addTag(graph.getAnnotation("over"), "pos", "PREP");
+      graph.addTag(graph.getAnnotation("the2"), "pos", "DET");
+      graph.addTag(graph.getAnnotation("lazy"), "pos", "ADJ");
+      graph.addTag(graph.getAnnotation("dog"), "pos", "N");
+      graph.addTag(graph.getAnnotation("."), "pos", "PUNC");
+
+      // create serializer
+      PdfSerializer serializer = new PdfSerializer();
+      
+      // general configuration
+      ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      assertEquals(5, serializer.configure(configuration, schema).size());
+      assertEquals("orthography", "orthography", 
+		   ((Layer)configuration.get("orthographyLayer").getValue()).getId());
+      assertNull("no noise", 
+                 configuration.get("noiseLayer").getValue());
+      assertNull("no main participant", 
+                 configuration.get("mainParticipantLayer").getValue());
+      assertNull("no logo", 
+                 configuration.get("logoFile").getValue());
+      assertNull("no logo scaling", 
+                 configuration.get("logoScalePercent").getValue());
+
+      String[] needLayers = serializer.getRequiredLayers();
+      assertEquals(4, needLayers.length);
+      assertEquals("who", needLayers[0]);
+      assertEquals("turn", needLayers[1]);
+      assertEquals("utterance", needLayers[2]);
+      assertEquals("word", needLayers[3]);
+	 
+      // serialize
+      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+      final Vector<NamedStream> streams = new Vector<NamedStream>();
+      String[] layers = {"pos"}; 
+      serializer.serialize(Utility.OneGraphSpliterator(graph), layers,
+                           stream -> streams.add(stream),
+                           warning -> System.out.println(warning),
+                           exception -> exceptions.add(exception));
+      if (exceptions.size() > 0) fail(""+exceptions);
+
+      streams.elementAt(0).save(dir);
+   }
+
    /**
     * Directory for text files.
     * @see #getDir()

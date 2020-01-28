@@ -578,6 +578,7 @@ public class PdfSerializer
       
       LinkedHashSet<String> selectedLayers = new LinkedHashSet<String>();
       LinkedHashSet<String> tagLayers = new LinkedHashSet<String>();
+      String firstTagLayerId = null;
       if (layerIds != null)
       {
          for (String l : layerIds)
@@ -589,6 +590,7 @@ public class PdfSerializer
                if (layer.getParentId().equals(getWordLayer().getId()))
                {
                   tagLayers.add(l);
+                  if (firstTagLayerId == null) firstTagLayerId = l;
                }
             }
          } // next layeyId
@@ -747,12 +749,22 @@ public class PdfSerializer
                   orthography = token.my(orthographyLayer.getId());
                   if (orthography == null) orthography = token;
                }
-               line.append(orthography.getLabel());
+               else if (!selectedLayers.contains(getWordLayer().getId()))
+               { // word layer isn't selected (and neither is orthography layer)
+                  // pick the first tag layer
+                  if (firstTagLayerId != null)
+                  {
+                     orthography = token.my(firstTagLayerId);
+                  }
+               }
+               if (orthography != null) line.append(orthography.getLabel());
                // add tags
                for (String layerId : tagLayers)
                {
+                  // not the word layer
                   if (!layerId.equals(token.getLayerId())
-                      && (orthographyLayer == null || !layerId.equals(orthographyLayer.getId())))
+                      // and not whichever layer just appended
+                      && !layerId.equals(orthography.getLayerId())) 
                   {
                      line.append("_");
                      Annotation tag = token.my(layerId);
