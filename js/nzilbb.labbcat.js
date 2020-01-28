@@ -77,20 +77,14 @@ function callComplete(evt) {
     try {
 	var response = JSON.parse(this.responseText);
 	var result = null;
-	var errors = null;
-	var messages = null;
-	if (evt.target.call == "getGraph" && !response.model) {
-	    // if getGraph is successful, the response is the graph
-	    result = response;
-	} else {
-	    // all other results
-	    result = response.model.result;
+        if (response.model != null) {
+            if (response.model.result) result = response.model.result;
 	    if (!result && result != 0) result = response.model;
-	    errors = response.errors;
-	    if (!errors || errors.length == 0) errors = null;
-	    messages = response.messages;
-	    if (!messages || messages.length == 0) messages = null;
-	}
+        }
+	var errors = response.errors;
+	if (!errors || errors.length == 0) errors = null;
+	var messages = response.messages;
+	if (!messages || messages.length == 0) messages = null;
 	evt.target.onResult(result, errors, messages, evt.target.call, evt.target.id);
     } catch(exception) {
 	evt.target.onResult(null, ["" +exception+ ": " + this.responseText], [], evt.target.call, evt.target.id);
