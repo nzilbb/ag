@@ -97,13 +97,21 @@ public class TestPdfSerializer
       // general configuration
       ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
       //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-      assertEquals(3, serializer.configure(configuration, schema).size());
+      // set logo file
+      configuration.get("logoFile").setValue("nzilbb/pdf/icon.png");
+      configuration.get("logoScalePercent").setValue(Integer.valueOf(20));
+      
+      assertEquals(5, serializer.configure(configuration, schema).size());
       assertNull("no orthography", 
                  configuration.get("orthographyLayer").getValue());
       assertEquals("noise", "noise", 
 		   ((Layer)configuration.get("noiseLayer").getValue()).getId());
       assertEquals("main participant", "main_participant", 
 		   ((Layer)configuration.get("mainParticipantLayer").getValue()).getId());
+      assertEquals("logo set", 
+                   "nzilbb/pdf/icon.png", configuration.get("logoFile").getValue());
+      assertEquals("20% logo width", 
+                   Integer.valueOf(20), configuration.get("logoScalePercent").getValue());
 
       String[] needLayers = serializer.getRequiredLayers();
       assertEquals(4, needLayers.length);
@@ -242,13 +250,21 @@ public class TestPdfSerializer
       // general configuration
       ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-      assertEquals(3, serializer.configure(configuration, schema).size());
+      
+      // set logo (no scaling this time)
+      configuration.get("logoFile").setValue("nzilbb/pdf/icon.png");
+      
+      assertEquals(5, serializer.configure(configuration, schema).size());
       assertEquals("orthography", "orthography", 
 		   ((Layer)configuration.get("orthographyLayer").getValue()).getId());
       assertEquals("noise", "noise", 
 		   ((Layer)configuration.get("noiseLayer").getValue()).getId());
       assertNull("no main participant", 
                  configuration.get("mainParticipantLayer").getValue());
+      assertEquals("logo set", 
+                   "nzilbb/pdf/icon.png", configuration.get("logoFile").getValue());
+      assertNull("no logo scaling", 
+                 configuration.get("logoScalePercent").getValue());
 
       String[] needLayers = serializer.getRequiredLayers();
       assertEquals(4, needLayers.length);
@@ -380,13 +396,17 @@ public class TestPdfSerializer
       // general configuration
       ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-      assertEquals(3, serializer.configure(configuration, schema).size());
+      assertEquals(5, serializer.configure(configuration, schema).size());
       assertEquals("orthography", "orthography", 
 		   ((Layer)configuration.get("orthographyLayer").getValue()).getId());
       assertNull("no noise", 
                  configuration.get("noiseLayer").getValue());
       assertNull("no main participant", 
                  configuration.get("mainParticipantLayer").getValue());
+      assertNull("no logo", 
+                 configuration.get("logoFile").getValue());
+      assertNull("no logo scaling", 
+                 configuration.get("logoScalePercent").getValue());
 
       String[] needLayers = serializer.getRequiredLayers();
       assertEquals(4, needLayers.length);

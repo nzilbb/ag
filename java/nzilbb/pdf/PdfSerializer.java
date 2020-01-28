@@ -28,6 +28,7 @@ import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Chunk;
+import com.itextpdf.text.Image;
 import com.itextpdf.text.pdf.PdfWriter;
 import java.io.BufferedReader;
 import java.io.File;
@@ -197,6 +198,45 @@ public class PdfSerializer
     * @param newNoiseLayer Layer for noise annotations.
     */
    public PdfSerializer setNoiseLayer(Layer newNoiseLayer) { noiseLayer = newNoiseLayer; return this; }
+   
+   /**
+    * An image file for a head logo to insert at the beginning of the PDF.
+    * @see #getLogoFile()
+    * @see #setLogoFile(File)
+    */
+   protected String logoFile;
+   /**
+    * Getter for {@link #logoFile}: An image file for a head logo to insert at the
+    * beginning of the PDF. 
+    * @return An image file for a head logo to insert at the beginning of the PDF.
+    */
+   public String getLogoFile() { return logoFile; }
+   /**
+    * Setter for {@link #logoFile}: An image file for a head logo to insert at the
+    * beginning of the PDF. 
+    * @param newLogoFile An image file for a head logo to insert at the beginning of the PDF.
+    */
+   public PdfSerializer setLogoFile(String newLogoFile) { logoFile = newLogoFile; return this; }
+
+   /**
+    * How much to scale the logo, in percent of its original size, or null for no scaling.
+    * @see #getLogoScalePercent()
+    * @see #setLogoScalePercent(Integer)
+    */
+   protected Integer logoScalePercent;
+   /**
+    * Getter for {@link #logoScalePercent}: How much to scale the logo, in percent of its
+    * original size, or null for no scaling.
+    * @return How much to scale the logo, in percent of its original size, or null for no scaling.
+    */
+   public Integer getLogoScalePercent() { return logoScalePercent; }
+   /**
+    * Setter for {@link #logoScalePercent}: How much to scale the logo, in percent of its
+    * original size, or null for no scaling.
+    * @param newLogoScalePercent How much to scale the logo, in percent of its original
+    * size, or null for no scaling.
+    */
+   public PdfSerializer setLogoScalePercent(Integer newLogoScalePercent) { logoScalePercent = newLogoScalePercent; return this; }
 
    private long graphCount = 0;
    private long consumedGraphCount = 0;
@@ -252,7 +292,7 @@ public class PdfSerializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "PDF Document", "0.03", "application/pdf", ".pdf", "20191206.1545",
+         "PDF Document", "0.04", "application/pdf", ".pdf", "20191206.1545",
          getClass().getResource("icon.png"));
    }
 
@@ -447,6 +487,20 @@ public class PdfSerializer
          p.setPossibleValues(candidateLayers.values());
       }
 
+      // logo parameters
+      if (!configuration.containsKey("logoFile"))
+      {
+         configuration.addParameter(
+            new Parameter("logoFile", String.class, "Logo File",
+                          "An image file for a head logo to insert at the beginning of the PDF"));
+      }
+      if (!configuration.containsKey("logoScalePercent"))
+      {
+         configuration.addParameter(
+            new Parameter("logoScalePercent", Integer.class, "Logo Scale %",
+                          "Logo size, in percent of original size."));
+      }
+
       return configuration;
    }
 
@@ -556,21 +610,23 @@ public class PdfSerializer
          document.addCreator(getClass().getName() + " (" +getDescriptor().getVersion() + ")");
          //if (ag.getLanguage() != null) document.addLanguage(ag.getLanguage());
          //document.add(new Header("AGID", ""+ag.getId()));
-         // if (fLogoFile != null) // TODO
-         // {
-         //    try
-         //    {
-         //       Image logo = Image.getInstance(fLogoFile.getPath());
-         //       logo.scalePercent(getLogoWidthPercent());
-         //       document.add(logo);
-         //       System.out.println("Logo added: " + logo);
-         //    }
-         //    catch(Throwable exception)
-         //    {
-         //       // document.add(new Paragraph(exception.toString()));
-         //       System.out.println("PDFConverter: " + exception.toString());
-         //    }
-         // }
+         if (logoFile != null && logoFile.length() > 0)
+         {
+            try
+            {
+               Image logo = Image.getInstance(logoFile);
+               if (logoScalePercent != null)
+               {    
+                  logo.scalePercent(logoScalePercent);
+               }
+               document.add(logo);
+            }
+            catch(Throwable exception)
+            {
+               // document.add(new Paragraph(exception.toString()));
+               System.out.println("PDFConverter: " + exception.toString());
+            }
+         }
 
          BaseColor color1 = new BaseColor(157,166,21);
          BaseColor color2 = new BaseColor(109,110,114);
