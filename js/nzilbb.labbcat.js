@@ -107,7 +107,7 @@ function callCancelled(evt) {
 
 nzilbb.labbcat.GraphStoreQuery = function(baseUrl) {
     if (!/\/$/.test(baseUrl)) baseUrl += "/";
-    this.url = baseUrl + "store";
+    this.url = baseUrl + "api/store/";
 }
 
 nzilbb.labbcat.GraphStoreQuery.prototype = {
@@ -129,7 +129,7 @@ nzilbb.labbcat.GraphStoreQuery.prototype = {
 	xhr.addEventListener("load", callComplete, false);
 	xhr.addEventListener("error", callFailed, false);
 	xhr.addEventListener("abort", callCancelled, false);
-	var queryString = "?call="+call;
+	var queryString = "";
 	if (parameters) {
 	    for (var key in parameters) {
 		if (parameters[key]) {
@@ -143,8 +143,9 @@ nzilbb.labbcat.GraphStoreQuery.prototype = {
 		}
 	    } // next parameter
 	}
+        queryString = queryString.replace(/^&/,"?");
 	if (!url) url = this.url;
-	xhr.open("GET", url + queryString, true, this.username, this.password);
+	xhr.open("GET", url + call + queryString, true, this.username, this.password);
 	if (this.username) {
 	    xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
 	}
@@ -278,6 +279,17 @@ nzilbb.labbcat.GraphStoreQuery.prototype = {
      */
     getAnnotations : function (id, layerId, pageLength, pageNumber, onResult) {
 	this.createRequest("getAnnotations", { id : id, layerId : layerId, pageLength : pageLength, pageNumber : pageNumber }, onResult).send();
+    },
+        
+    /**
+     * Gets the given anchors in the given graph.
+     * @param {string} id The given graph ID.
+     * @param {string[]} anchorId The IDs of the anchors to load.
+     * @callback {resultCallback} onResult Invoked when the request has returned a result.
+     * @return The identified graph.
+     */
+    getAnchors : function (id, anchorId, onResult) {
+	this.createRequest("getAnchors", { id : id, anchorId : anchorId }, onResult).send();
     },
         
     /**
