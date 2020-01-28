@@ -480,13 +480,13 @@ public interface IGraphStoreQuery
    /**
     * Gets a graph given its ID, containing only the given layers.
     * @param id The given graph ID.
-    * @param layerId The IDs of the layers to load, or null if only graph data is required.
+    * @param layerIds The IDs of the layers to load, or null if only graph data is required.
     * @return The identified graph.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     * @throws GraphNotFoundException If the graph was not found in the store.
     */
-   public Graph getGraph(String id, String[] layerId) 
+   public Graph getGraph(String id, String[] layerIds) 
       throws StoreException, PermissionException, GraphNotFoundException;
 
    /**
@@ -507,13 +507,13 @@ public interface IGraphStoreQuery
     * desired fragment, and containing only the given layers.
     * @param graphId The ID of the graph.
     * @param annotationId The ID of an annotation that defines the bounds of the fragment.
-    * @param layerId The IDs of the layers to load, or null if only graph data is required.
+    * @param layerIds The IDs of the layers to load, or null if only graph data is required.
     * @return The identified graph fragment.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     * @throws GraphNotFoundException If the graph was not found in the store.
     */
-   public Graph getFragment(String graphId, String annotationId, String[] layerId) 
+   public Graph getFragment(String graphId, String annotationId, String[] layerIds) 
       throws StoreException, PermissionException, GraphNotFoundException;
    
    /**
@@ -522,25 +522,25 @@ public interface IGraphStoreQuery
     * @param graphId The ID of the graph.
     * @param start The start offset of the fragment.
     * @param end The end offset of the fragment.
-    * @param layerId The IDs of the layers to load, or null if only graph data is required.
+    * @param layerIds The IDs of the layers to load, or null if only graph data is required.
     * @return The identified graph fragment.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     * @throws GraphNotFoundException If the graph was not found in the store.
     */
-   public Graph getFragment(String graphId, double start, double end, String[] layerId) 
+   public Graph getFragment(String graphId, double start, double end, String[] layerIds) 
       throws StoreException, PermissionException, GraphNotFoundException;
    
    /**
     * Gets a series of fragments, given the series' ID, and only the given layers.
     * @param seriesId The ID of the series.
-    * @param layerId The IDs of the layers to load, or null if only graph data is required.
+    * @param layerIds The IDs of the layers to load, or null if only graph data is required.
     * @return An enumeratable series of fragments.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     * @throws GraphNotFoundException If the graph was not found in the store.
     */
-   public MonitorableSeries<Graph> getFragmentSeries(String seriesId, String[] layerId) 
+   public MonitorableSeries<Graph> getFragmentSeries(String seriesId, String[] layerIds) 
       throws StoreException, PermissionException, GraphNotFoundException;
    
    /**
