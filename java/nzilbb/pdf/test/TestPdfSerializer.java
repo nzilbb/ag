@@ -114,11 +114,12 @@ public class TestPdfSerializer
                    Integer.valueOf(20), configuration.get("logoScalePercent").getValue());
 
       String[] needLayers = serializer.getRequiredLayers();
-      assertEquals(4, needLayers.length);
+      assertEquals(5, needLayers.length);
       assertEquals("who", needLayers[0]);
       assertEquals("turn", needLayers[1]);
       assertEquals("utterance", needLayers[2]);
       assertEquals("word", needLayers[3]);
+      assertEquals("noise", needLayers[4]);
 	 
       // serialize
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
@@ -267,11 +268,12 @@ public class TestPdfSerializer
                  configuration.get("logoScalePercent").getValue());
 
       String[] needLayers = serializer.getRequiredLayers();
-      assertEquals(4, needLayers.length);
+      assertEquals(5, needLayers.length);
       assertEquals("who", needLayers[0]);
       assertEquals("turn", needLayers[1]);
       assertEquals("utterance", needLayers[2]);
       assertEquals("word", needLayers[3]);
+      assertEquals("noise", needLayers[4]);
 	 
       // serialize
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();

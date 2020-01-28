@@ -518,6 +518,7 @@ public class PdfSerializer
       if (getTurnLayer() != null) requiredLayers.add(getTurnLayer().getId());
       if (getUtteranceLayer() != null) requiredLayers.add(getUtteranceLayer().getId());
       if (getWordLayer() != null) requiredLayers.add(getWordLayer().getId());
+      if (getNoiseLayer() != null) requiredLayers.add(getNoiseLayer().getId());
       return requiredLayers.toArray(new String[0]);
    } // getRequiredLayers()
 
