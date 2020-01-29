@@ -428,8 +428,11 @@ public interface IGraphStoreQuery
     * @throws PermissionException If the operation is not permitted.
     * @throws GraphNotFoundException If the graph was not found in the store.
     */
-   public Annotation[] getAnnotations(String id, String layerId)
-      throws StoreException, PermissionException, GraphNotFoundException;
+   default public Annotation[] getAnnotations(String id, String layerId)
+      throws StoreException, PermissionException, GraphNotFoundException
+   {
+      return getAnnotations(id, layerId, null, null);
+   }
 
    /**
     * Gets the annotations on the given layer of the given graph.
