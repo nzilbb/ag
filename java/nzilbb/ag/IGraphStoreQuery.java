@@ -469,7 +469,7 @@ public interface IGraphStoreQuery
    /**
     * Gets the given anchors in the given graph.
     * @param id The ID of the graph.
-    * @param anchorIds An array of anchor IDs.
+    * @param anchorIds A list of anchor IDs.
     * @return A (possibly empty) array of anchors.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
