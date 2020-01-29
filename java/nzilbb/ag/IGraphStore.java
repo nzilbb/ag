@@ -23,7 +23,8 @@ package nzilbb.ag;
 
 /**
  * Interface for querying and updating an annotation graph store, a database of graphs.
- * <p>In order to easily support access via scripting in other languages, methods that return lists use arrays rather than collection classes.
+ * <p>In order to easily support access via scripting in other languages, methods that
+ * return lists use arrays rather than collection classes.
  * @author Robert Fromont robert@fromont.net.nz
  */
 public interface IGraphStore 
@@ -31,9 +32,16 @@ public interface IGraphStore
 {
    
    /**
-    * Saves the given graph. The graph can be partial e.g. include only some of the layers that the stored version of the graph contains.
-    * <p>The graph deltas are assumed to be set correctly, so if this is a new graph, then {@link Graph#getChange()} should return Change.Operation.Create, if it's an update, Change.Operation.Update, and to delete, Change.Operation.Delete.  Correspondingly, all {@link Anchor}s and {@link Annotation}s should have their changes set also.  If {@link Graph#getChanges()} returns no changes, no action will be taken, and this method returns false.
-    * <p>After this method has executed, {@link Graph#commit()} is <em>not</em> called - this must be done by the caller, if they want changes to be committed.
+    * Saves the given graph. The graph can be partial e.g. include only some of the layers
+    * that the stored version of the graph contains.
+    * <p>The graph deltas are assumed to be set correctly, so if this is a new graph, then
+    * {@link Graph#getChange()} should return Change.Operation.Create, if it's an update,
+    * Change.Operation.Update, and to delete, Change.Operation.Delete.  Correspondingly,
+    * all {@link Anchor}s and {@link Annotation}s should have their changes set also.  If
+    * {@link Graph#getChanges()} returns no changes, no action will be taken, and this
+    * method returns false.
+    * <p>After this method has executed, {@link Graph#commit()} is <em>not</em> called -
+    * this must be done by the caller, if they want changes to be committed.
     * @param graph The graph to save.
     * @return true if changes were saved, false if there were no changes to save.
     * @throws StoreException If an error prevents the graph from being saved.
@@ -46,12 +54,18 @@ public interface IGraphStore
    /**
     * Creates an annotation starting at <var>from</var> and ending at <var>to</var>.
     * @param id The ID of the graph.
-    * @param fromId The start anchor's ID. TODO an expression identifying the start anchor's ID. e.g. "'n_123'" or "start.id" or maybe something like "first('segments').start.id)"
-    * @param toId The end anchor's ID. TODO an expression identifying the end anchor's ID. e.g. "'n_123'" or "end.id" or maybe something like "last('segments').end.id)"
+    * @param fromId The start anchor's ID. TODO an expression identifying the start
+    * anchor's ID. e.g. "'n_123'" or "start.id" or maybe something like
+    * "first('segments').start.id)"
+    * @param toId The end anchor's ID. TODO an expression identifying the end anchor's
+    * ID. e.g. "'n_123'" or "end.id" or maybe something like "last('segments').end.id)"
     * @param layerId The layer ID of the resulting annotation.
-    * @param label The label of the resulting annotation. TODO an expression identifying the label. e.g. "'@gz#mpP'" or "my('orthography').label" or maybe something like "SUM(list('segments').duration)"
+    * @param label The label of the resulting annotation. TODO an expression identifying
+    * the label. e.g. "'@gz#mpP'" or "my('orthography').label" or maybe something like
+    * "SUM(list('segments').duration)"
     * @param confidence The confidence rating.
-    * @param parentId The new annotation's parent's ID. TODO an expression identifying the parent. e.g. "'em_0_123'" or "layer.id = 'orthography' AND label = 'example'"
+    * @param parentId The new annotation's parent's ID. TODO an expression identifying the
+    * parent. e.g. "'em_0_123'" or "layer.id = 'orthography' AND label = 'example'"
     * @return The ID of the new annotation.
     */
    public String createAnnotation(String id, String fromId, String toId, String layerId, String label, Integer confidence, String parentId)
@@ -66,7 +80,8 @@ public interface IGraphStore
       throws StoreException, PermissionException, GraphNotFoundException;   
    
    /**
-    * Saves a participant, and all its tags, to the database.  The participant is represented by an Annotation that isn't assumed to be part of a graph.
+    * Saves a participant, and all its tags, to the database.  The participant is
+    * represented by an Annotation that isn't assumed to be part of a graph.
     * @param participant
     * @return true if changes were saved, false if there were no changes to save.
     * @throws StoreException If an error prevents the participant from being saved.

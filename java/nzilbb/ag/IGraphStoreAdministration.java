@@ -24,7 +24,8 @@ package nzilbb.ag;
 import nzilbb.ag.serialize.*;
 
 /**
- * Interface for administration of a graph store, including definition of layers, registration of converters, etc.
+ * Interface for administration of a graph store, including definition of layers,
+ * registration of converters, etc.
  * @author Robert Fromont robert@fromont.net.nz
  */
 
