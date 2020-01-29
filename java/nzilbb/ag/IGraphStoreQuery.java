@@ -153,8 +153,11 @@ public interface IGraphStoreQuery
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getMatchingParticipantIds(String expression)
-      throws StoreException, PermissionException; 
+   default public String[] getMatchingParticipantIds(String expression)
+      throws StoreException, PermissionException
+   {
+      return getMatchingParticipantIds(expression, null, null);
+   }
 
    /**
     * Gets a list of IDs of participants that match a particular pattern.
@@ -178,7 +181,7 @@ public interface IGraphStoreQuery
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getMatchingParticipantIdsPage(String expression, Integer pageLength, Integer pageNumber)
+   public String[] getMatchingParticipantIds(String expression, Integer pageLength, Integer pageNumber)
       throws StoreException, PermissionException; 
 
    /**
@@ -263,8 +266,11 @@ public interface IGraphStoreQuery
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getMatchingGraphIds(String expression)
-      throws StoreException, PermissionException; 
+   default public String[] getMatchingGraphIds(String expression)
+      throws StoreException, PermissionException
+   {
+      return getMatchingGraphIds(expression, null, null, null);
+   }
 
    /**
     * Gets a list of IDs of graphs that match a particular pattern.
@@ -293,8 +299,11 @@ public interface IGraphStoreQuery
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getMatchingGraphIdsPage(String expression, Integer pageLength, Integer pageNumber)
-      throws StoreException, PermissionException; 
+   default public String[] getMatchingGraphIds(String expression, Integer pageLength, Integer pageNumber)
+      throws StoreException, PermissionException
+   {
+      return getMatchingGraphIds(expression, pageLength, pageNumber, null);
+   }
 
    /**
     * <p>Gets a list of IDs of graphs that match a particular pattern.</p>
@@ -329,7 +338,7 @@ public interface IGraphStoreQuery
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getMatchingGraphIdsPage(String expression, Integer pageLength, Integer pageNumber, String order)
+   public String[] getMatchingGraphIds(String expression, Integer pageLength, Integer pageNumber, String order)
       throws StoreException, PermissionException; 
 
    /**
@@ -369,8 +378,11 @@ public interface IGraphStoreQuery
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public Annotation[] getMatchingAnnotations(String expression)
-      throws StoreException, PermissionException; 
+   default public Annotation[] getMatchingAnnotations(String expression)
+      throws StoreException, PermissionException
+   {
+      return getMatchingAnnotations(expression, null, null);
+   }
 
    /**
     * Gets a list of annotations that match a particular pattern.
@@ -392,7 +404,7 @@ public interface IGraphStoreQuery
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public Annotation[] getMatchingAnnotationsPage(String expression, Integer pageLength, Integer pageNumber)
+   public Annotation[] getMatchingAnnotations(String expression, Integer pageLength, Integer pageNumber)
       throws StoreException, PermissionException; 
 
    /**
