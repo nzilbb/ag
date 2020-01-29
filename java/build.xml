@@ -76,7 +76,7 @@
 	     Author="yes" Windowtitle="nzilbb.ag" >
       <fileset dir="${src}"
                includes="${srcfiles}"
-               excludes="nzilbb/ag/**/test/*.java ${srctestseditpath} nzilbb/ag/ql/**/*.java org/**/*.java" />
+               excludes="nzilbb/ag/**/test/*.java ${srctestseditpath} nzilbb/ag/ql/**/*.java" />
     </javadoc>
   </target>
 
