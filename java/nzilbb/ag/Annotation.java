@@ -35,6 +35,7 @@ import java.util.Vector;
 import nzilbb.ag.util.AnnotationComparatorByAnchor;
 import nzilbb.ag.util.AnnotationComparatorByOrdinal;
 import nzilbb.ag.util.LayerTraversal;
+import org.json.JSONObject;
 
 /**
  * Annotation graph annotation - an edge of the graph.
@@ -833,6 +834,16 @@ public class Annotation
       for (String key : keysToRemove) remove(key);
    } // end of constructor
 
+   /**
+    * JSON constructor.
+    * <p>All attributes are copied, including those that are not bean attributes; other
+    * are stored as map values.
+    * @param json JSON representation of the annotation.
+    */
+   public Annotation(JSONObject json)
+   {
+      fromJson(json);
+   } // end of constructor
 
    /**
     * Setter for <i>id</i>: The annotation's identifier.

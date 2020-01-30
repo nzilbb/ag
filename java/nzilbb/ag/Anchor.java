@@ -28,6 +28,7 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Vector;
+import org.json.JSONObject;
 
 /**
  * Annotation graph anchor - a node of the graph.
@@ -255,6 +256,17 @@ public class Anchor
       put("startOf", getStartOf());
       put("endOf", getEndOf());
       cloneAttributesFrom(other, "id");
+   } // end of constructor
+
+   /**
+    * JSON constructor.
+    * <p>All attributes are copied, including those that are not bean attributes; other
+    * are stored as map values.
+    * @param json JSON representation of the anchor.
+    */
+   public Anchor(JSONObject json)
+   {
+      fromJson(json);
    } // end of constructor
 
    /**

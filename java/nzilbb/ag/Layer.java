@@ -28,6 +28,7 @@ import java.util.TreeSet;
 import java.util.SortedSet;
 import java.util.Set;
 import nzilbb.ag.util.AnnotationComparatorByOrdinal;
+import org.json.JSONObject;
 
 /**
  * Annotation graph layer.
@@ -413,6 +414,17 @@ public class Layer
       setSaturated(saturated);
       if (!id.equals("graph")) setParentId("graph");
       setParentIncludes(true);
+   } // end of constructor
+
+   /**
+    * JSON constructor.
+    * <p>All attributes are copied, including those that are not bean attributes; other
+    * are stored as map values.
+    * @param json JSON representation of the layer.
+    */
+   public Layer(JSONObject json)
+   {
+      fromJson(json);
    } // end of constructor
 
    /**
