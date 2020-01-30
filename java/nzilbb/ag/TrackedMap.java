@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 import org.json.IJSONableBean;
+import org.json.JSONObject;
 
 /**
  * Base class for annotation graph classes, which encapsulates two common features of
@@ -112,6 +113,43 @@ public class TrackedMap
    {
       return getClonedAttributes().toArray(new String[0]);
    }
+   
+   /**
+    * Sets the object attributes using the given JSON representation. 
+    * @param json
+    * @return A reference to this object.
+    */
+   public TrackedMap fromJson(JSONObject json)
+   {
+      HashSet<String> beanAttributes = new HashSet<String>();
+      for (String a : JSONAttributes()) beanAttributes.add(a);
+
+      for (String key : json.keySet())
+      {
+         if (!json.isNull(key))
+         {
+            Object value = json.get(key);
+            if (beanAttributes.contains(key))
+            { // is a bean attribute
+               Method setter = setter(this, key);
+               try
+               {
+                  setter.invoke(this, value);
+               }
+               catch(Exception exception)
+               {
+                  System.err.println("TrackedMap.fromJson - can't set " + key + ": " + exception);
+                  put(key, value);
+               }
+            } // is a bean attribute
+            else
+            { // not a bean attribute
+               put(key, value);
+            } // not a bean attribute
+         } // value is not null
+      } // next attribute
+      return this;
+   } // end of fromJson()
 
    /**
     * Object that tracks all changes to this object.

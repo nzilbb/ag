@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.LinkedHashSet;
 import nzilbb.ag.*;
+import org.json.JSONObject;
 
 public class TestTrackedMap
 {   
@@ -262,6 +263,27 @@ public class TestTrackedMap
       assertEquals("copy current, not old, tracked values", "newValue2", c.getEndId());
       assertNull("don't copy nonexistent tracked values", c.getLabel());
       assertFalse("don't copy non-tracked values", c.containsKey("notTracked"));      
+   }
+
+   @Test public void fromJson() 
+   {
+      JSONObject json = new JSONObject()
+         .put("id", "123")
+         .put("layer", "layer")
+         .put("startId", "value1")
+         .put("endId", "value2")
+         .put("confidence", 100)
+         .put("notTracked", "value4");
+         
+      Annotation a = new Annotation();
+      a.fromJson(json);
+
+      assertEquals("123", a.getId());
+      assertEquals("copy tracked values", "value1", a.getStartId());
+      assertEquals("copy tracked values", "value2", a.getEndId());
+      assertEquals("copy tracked values", Integer.valueOf(100), a.getConfidence());
+      assertNull("don't copy nonexistent tracked values", a.getLabel());
+      assertTrue("copy non-tracked values", a.containsKey("notTracked"));      
    }
 
    public static void main(String args[]) 
