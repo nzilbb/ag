@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -20,6 +20,8 @@
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 package nzilbb.ag;
+
+import org.json.JSONObject;
 
 /**
  * Definition of a possible media track that a graph might be associated with.
@@ -82,5 +84,15 @@ public class MediaTrackDefinition
    {
       setSuffix(suffix);
       setDescription(description);
+   } // end of constructor
+   
+   /**
+    * Constructor from JSON.
+    * @param json A JSON representation of the object.
+    */
+   public MediaTrackDefinition(JSONObject json)
+   {
+      setSuffix(json.optString("suffix"));
+      setDescription(json.optString("description"));
    } // end of constructor
 } // end of class MediaTrackDefinition

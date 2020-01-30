@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -21,19 +21,20 @@
 //
 package nzilbb.ag;
 
-import java.util.Map;
-import java.util.HashMap;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+import org.json.JSONObject;
 
 /**
- * A single media file, which may exist or may be creatable by conversion from some other media file.
+ * A single media file, which may exist or may be creatable by conversion from some other
+ * media file.
  * @author Robert Fromont robert@fromont.net.nz
  */
 
 public class MediaFile
 {
    // Attributes:
-
    
    /**
     * The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
@@ -124,7 +125,6 @@ public class MediaFile
     * @param newGenerateFrom The media file from which this one could be generated, or null if the file already exists.
     */
    public MediaFile setGenerateFrom(MediaFile newGenerateFrom) { generateFrom = newGenerateFrom; return this; }
-
    
    /**
     * The local media file, if any.
@@ -176,6 +176,21 @@ public class MediaFile
       setFile(file);
       setTrackSuffix(trackSuffix);
    } // end of constructor   
+   
+   /**
+    * Constructor from JSON.
+    * @param json A JSON representation of the object.
+    */
+   public MediaFile(JSONObject json)
+   {
+      setTrackSuffix(json.optString("trackSuffix"));
+      setMimeType(json.optString("mimeType"));
+      setUrl(json.optString("url"));
+      setName(json.optString("name"));
+      setMimeType(json.optString("mimeType"));
+      setMimeType(json.optString("mimeType"));
+      setMimeType(json.optString("mimeType"));
+   } // end of constructor
 
    /**
     * The file's extension, not including the dot.
