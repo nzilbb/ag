@@ -35,7 +35,7 @@
     <javac srcdir="${src}" destdir="${build}"
 	       classpath="lib/antlr-4.7.2-complete.jar"
 	       includes="${srcfiles}"
-	       excludes="${srctests} ${srctestseditpath}"
+	       excludes="${srctests} ${srctestseditpath} **/package-info.java"
 	       listfiles="yes"
 	       includeantruntime="false"
 	       target="8"
