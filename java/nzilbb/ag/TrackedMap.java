@@ -115,10 +115,13 @@ public class TrackedMap
    }
    
    /**
-    * Sets the object attributes using the given JSON representation. 
+    * Sets the object attributes using the given JSON representation.
+    * <p>All attributes are copied, including those that are not bean attributes; other
+    * are stored as map values.
     * @param json
     * @return A reference to this object.
     */
+   @SuppressWarnings({"rawtypes","unchecked"})
    public TrackedMap fromJson(JSONObject json)
    {
       HashSet<String> beanAttributes = new HashSet<String>();
@@ -132,15 +135,46 @@ public class TrackedMap
             if (beanAttributes.contains(key))
             { // is a bean attribute
                Method setter = setter(this, key);
-               try
-               {
-                  setter.invoke(this, value);
-               }
-               catch(Exception exception)
-               {
-                  System.err.println("TrackedMap.fromJson - can't set " + key + ": " + exception);
-                  put(key, value);
-               }
+               if (value instanceof JSONObject)
+               { // complex object value
+                  JSONObject objectValue = (JSONObject)value;
+                  // what type are we expecting?
+                  Class type = setter.getParameterTypes()[0];
+                  boolean isMap = false;
+                  for (Class i : type.getInterfaces())
+                  {
+                     if (i.equals(Map.class)) isMap = true;
+                  }
+                  if (isMap)
+                  {
+                     try
+                     {
+                        Map map = (Map)type.getConstructor().newInstance();
+                        for (String k : objectValue.keySet())
+                        {
+                           map.put(k, objectValue.get(k));
+                        } // next key/value pair
+                        setter.invoke(this, map); 
+                     }
+                     catch(Exception exception)
+                     {
+                        System.err.println(
+                           "TrackedMap.fromJson - can't set " + key + ": " + exception);
+                     }
+                  }
+               } // complex object value
+               else
+               { // simple value
+                  try
+                  {
+                     setter.invoke(this, value);
+                  }
+                  catch(Exception exception)
+                  {
+                     System.err.println("TrackedMap.fromJson - can't set " + key + ": " + exception);
+                     put(key, value);
+                  }
+               } // simple value
             } // is a bean attribute
             else
             { // not a bean attribute

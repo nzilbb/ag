@@ -267,23 +267,52 @@ public class TestTrackedMap
 
    @Test public void fromJson() 
    {
-      JSONObject json = new JSONObject()
+      Annotation a = new Annotation(
+         new JSONObject()
          .put("id", "123")
          .put("layer", "layer")
          .put("startId", "value1")
          .put("endId", "value2")
          .put("confidence", 100)
-         .put("notTracked", "value4");
-         
-      Annotation a = new Annotation();
-      a.fromJson(json);
-
+         .put("notTracked", "value4"));
+      
       assertEquals("123", a.getId());
       assertEquals("copy tracked values", "value1", a.getStartId());
       assertEquals("copy tracked values", "value2", a.getEndId());
       assertEquals("copy tracked values", Integer.valueOf(100), a.getConfidence());
       assertNull("don't copy nonexistent tracked values", a.getLabel());
       assertTrue("copy non-tracked values", a.containsKey("notTracked"));      
+   }
+
+   @Test public void fromJsonWithMapAttribute() 
+   {
+      // Layer has an attribute that's a map, so we need to ensure it's interpreted
+      Layer l = new Layer(
+         new JSONObject()
+         .put("id", "layer")
+         .put("parentId", "parent")
+         .put("description", "Desc")
+         .put("alignment", 2)
+         .put("peers", true)
+         .put("peersOverlap", false)
+         .put("validLabels", new JSONObject()
+              .put("v1", "value1")
+              .put("v2", "value2")));
+      
+      assertEquals("layer", l.getId());
+      assertEquals("parent", l.getParentId());
+      assertEquals("Desc", l.getDescription());
+      assertEquals(2, l.getAlignment());
+      assertEquals(Boolean.TRUE, l.getPeers());
+      assertEquals(Boolean.FALSE, l.getPeersOverlap());
+      assertNotNull("validLabels map set",
+                    l.getValidLabels());
+      assertEquals("validLabels map right size",
+                    2, l.getValidLabels().size());
+      assertEquals("validLabels value 1",
+                    "value1", l.getValidLabels().get("v1"));
+      assertEquals("validLabels value 2",
+                    "value2", l.getValidLabels().get("v2"));
    }
 
    public static void main(String args[]) 
