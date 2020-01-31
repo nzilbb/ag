@@ -53,7 +53,8 @@
     
     <!-- Put everything in ${build} into the ${ant.project.name}.jar file -->
     <jar jarfile="${dist}/${ant.project.name}.jar" 
-	     basedir="${build}">
+	 basedir="${build}"
+         comment="version ${DSTAMP}.${TSTAMP}">
       
       <!-- include source code -->
       <fileset dir="${src}" includes="${srcfiles}" />
