@@ -290,7 +290,8 @@ public class Normalizer
 	 // ensure no annotation has a label longer than the limit
 	 for (Annotation a : graph.getAnnotationsById().values())
 	 {
-	    if (a.getLabel().length() > maxLabelLength.intValue())
+	    if (a.getLabel() != null
+                && a.getLabel().length() > maxLabelLength.intValue())
 	    {
 	       // truncate the label TODO: split annotation in two
                a.setLabel(a.getLabel().substring(0,maxLabelLength.intValue()));
