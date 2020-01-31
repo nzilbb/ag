@@ -513,7 +513,7 @@ nzilbb.labbcat.Labbcat.prototype.newTranscript = function(transcript, media, med
 };
 
 /**
- * Uploads a new transcript.
+ * Uploads a new version of an existing transcript.
  * @param {file} transcript The transcript to upload.
  * @callback {resultCallback} onResult Invoked when the request has returned a result.
  * @callback onProgress Invoked on XMLHttpRequest progress.
@@ -604,6 +604,10 @@ nzilbb.labbcat.Labbcat.prototype.updateTranscript = function(transcript, onResul
 nzilbb.labbcat.Labbcat.prototype.deleteTranscript = function(id, onResult) {
     this.createRequest("deleteTranscript", { id : id, transcript_id : id, btnConfirmDelete : true, chkDb : true }, onResult, this.baseUrl + "edit/transcript/delete").send();
 };
+
+   // TODO String getMatches(pattern, participantId=NULL, main.participant=TRUE, words.context=0)
+   // TODO getMatchLabels(matchIds, layerIds, targetOffset=0, annotationsPerLayer=1)
+   // TODO String getSoundFragments(id, start, end, sampleRate = NULL)
 
 /**
  * Gets list of tasks.
