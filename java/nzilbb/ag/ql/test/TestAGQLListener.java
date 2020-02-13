@@ -956,6 +956,38 @@ public class TestAGQLListener {
       assertEquals("Various things: " + parse,
                    "(1,2.2,'three',something)", parse.toString());
     
+      parse.setLength(0);
+      lexer.setInputStream(CharStreams.fromString("['something']"));
+      tokens = new CommonTokenStream(lexer);
+      parser = new AGQLParser(tokens);
+      tree = parser.booleanExpression();
+      ParseTreeWalker.DEFAULT.walk(listener, tree);
+      assertTrue("JS Array - Single literal - No errors: " + error.toString(),
+                 error.length() == 0);
+      assertEquals("JS Array - Single literal: " + parse,
+                   "['something']", parse.toString());
+
+      parse.setLength(0);
+      lexer.setInputStream(CharStreams.fromString("['foo', 'bar']"));
+      tokens = new CommonTokenStream(lexer);
+      parser = new AGQLParser(tokens);
+      tree = parser.booleanExpression();
+      ParseTreeWalker.DEFAULT.walk(listener, tree);
+      assertTrue("JS Array - Two strings - No errors: " + error.toString(), error.length() == 0);
+      assertEquals("JS Array - Two strings: " + parse,
+                   "['foo','bar']", parse.toString());
+
+      parse.setLength(0);
+      lexer.setInputStream(CharStreams.fromString("[1, 2.2, 'three', something]"));
+      tokens = new CommonTokenStream(lexer);
+      parser = new AGQLParser(tokens);
+      tree = parser.booleanExpression();
+      ParseTreeWalker.DEFAULT.walk(listener, tree);
+      assertTrue("JS Array - Various things - No errors: " + error.toString(),
+                 error.length() == 0);
+      assertEquals("JS Array - Various things: " + parse,
+                   "[1,2.2,'three',something]", parse.toString());
+    
    }
 
    @Test public void orderEpressions() {

@@ -142,7 +142,10 @@ atom
   | IDENTIFIER                                         # IdentifierAtom
   ;
 
-atomList : OPEN_PAREN firstAtom (COMMA subsequentAtom)* CLOSE_PAREN ;
+atomList
+  : OPEN_PAREN firstAtom (COMMA subsequentAtom)* CLOSE_PAREN
+  | OPEN_SQUARE_PAREN firstAtom (COMMA subsequentAtom)* CLOSE_SQUARE_PAREN
+  ;
 
 firstAtom : atom ;
 subsequentAtom : atom ;
@@ -223,6 +226,8 @@ GTE                   : '>=' ;
 IN                    : ' IN ' ;
 OPEN_PAREN            : '(' ;
 CLOSE_PAREN           : ')' ;
+OPEN_SQUARE_PAREN     : '[' ;
+CLOSE_SQUARE_PAREN    : ']' ;
 DOUBLE_QUOTED_STRING  : '"' (~'"')* ('\\"' (~'"')*)* '"';
 SINGLE_QUOTED_STRING  : '\'' (~'\'')* ('\\\'' (~'\'')*)* '\'';
 SLASH_QUOTED_STRING  : '/' (~'/')* ('\\/' (~'/')*)* '/';
