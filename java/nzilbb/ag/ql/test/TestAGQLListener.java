@@ -771,7 +771,7 @@ public class TestAGQLListener
       };
 
     String[] operators =
-      {"=", "==", "<>", "MATCHES", "NOT MATCHES", "<", ">", "<=", ">=", "IN", "NOT IN" };
+      {"=", "==", "<>", "NOT MATCHES", "<", ">", "<=", ">=", "NOT IN" };
 
     for (String operator : operators)
     {
@@ -785,6 +785,96 @@ public class TestAGQLListener
       assertEquals(operator + ": Parse structure: " + parse,
                    operator, parse.toString());
     } // next operator
+  }
+
+  @Test public void includesExpression() 
+  {
+    final StringBuffer parse = new StringBuffer();
+    final StringBuffer error = new StringBuffer();
+    AGQLListener listener = new AGQLBaseListener() {
+        // @Override public void exitEveryRule(ParserRuleContext ctx)
+        // {
+        //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
+        // }
+        @Override public void exitIncludesExpression(AGQLParser.IncludesExpressionContext ctx)
+        {
+           parse.append(ctx.singletonOperand.getText()
+                        + " IN "
+                        + ctx.listOperand.getText());
+        }
+        @Override public void visitErrorNode(ErrorNode node)
+        {
+          // System.out.println("ERROR: " + node.getText());
+          error.append(node.getText());
+        }
+      };
+
+    AGQLLexer lexer = new AGQLLexer(
+       CharStreams.fromString("'something' IN labels('corpus')"));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    AGQLParser parser = new AGQLParser(tokens);
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
+    
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("IN: No errors: " + error.toString(), error.length() == 0);
+    assertEquals("IN: Parse structure: " + parse,
+                 "'something' IN labels('corpus')", parse.toString());
+
+    parse.setLength(0);
+    lexer.setInputStream(
+      CharStreams.fromString("labels('corpus').includes('something')"));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    tree = parser.booleanExpression();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("INCLUDES: No errors: " + error.toString(), error.length() == 0);
+    assertEquals("INCLUDES: Parse structure: " + parse,
+                 "'something' IN labels('corpus')", parse.toString());
+  }
+
+  @Test public void patternMatchExpression() 
+  {
+    final StringBuffer parse = new StringBuffer();
+    final StringBuffer error = new StringBuffer();
+    AGQLListener listener = new AGQLBaseListener() {
+        @Override public void exitEveryRule(ParserRuleContext ctx)
+        {
+          System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
+        }
+        @Override public void exitPatternMatchExpression(AGQLParser.PatternMatchExpressionContext ctx)
+        {
+           parse.append(ctx.singletonOperand.getText()
+                        + " REGEXP "
+                        + ctx.patternOperand.getText());
+        }
+        @Override public void visitErrorNode(ErrorNode node)
+        {
+          // System.out.println("ERROR: " + node.getText());
+          error.append(node.getText());
+        }
+      };
+
+    AGQLLexer lexer = new AGQLLexer(
+       CharStreams.fromString("'something' MATCHES 'regexp'"));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    AGQLParser parser = new AGQLParser(tokens);
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
+    
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("IN: No errors: " + error.toString(), error.length() == 0);
+    assertEquals("IN: Parse structure: " + parse,
+                 "'something' REGEXP 'regexp'", parse.toString());
+
+    parse.setLength(0);
+    lexer.setInputStream(
+      CharStreams.fromString("/regexp/.test('something')"));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    tree = parser.booleanExpression();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("INCLUDES: No errors: " + error.toString(), error.length() == 0);
+    assertEquals("INCLUDES: Parse structure: " + parse,
+                 "'something' REGEXP /regexp/", parse.toString());
   }
 
   @Test public void atomicExpressions() 

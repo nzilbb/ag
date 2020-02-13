@@ -48,8 +48,20 @@ booleanExpression
 
 predicate
   : operand comparisonOperator operand                 # ComparisonPredicate
+  | includesExpression                                 # IncludesPredicate
+  | patternMatchExpression                             # PatterMatchPredicate
   | operand                                            # BarePredicate
   ;
+
+includesExpression
+  : singletonOperand=operand IN listOperand=operand
+  | listOperand=operand DOT INCLUDES OPEN_PAREN singletonOperand=operand CLOSE_PAREN
+  ; 
+
+patternMatchExpression
+  : singletonOperand=operand MATCHES patternOperand=stringLiteral
+  | patternOperand=stringLiteral DOT TEST OPEN_PAREN singletonOperand=operand CLOSE_PAREN
+  ; 
 
 operand
   : graphIdExpression                                  # GraphIdOperand
@@ -84,7 +96,7 @@ graphIdExpression
   ;
 
 corpusLabelExpression : MY OPEN_PAREN CORPUS_LITERAL CLOSE_PAREN DOT LABEL ;
-corpusLabelsExpression : LABELS OPEN_PAREN CORPUS_LITERAL CLOSE_PAREN DOT LABEL ;
+corpusLabelsExpression : LABELS OPEN_PAREN CORPUS_LITERAL CLOSE_PAREN ;
 episodeLabelExpression : MY OPEN_PAREN EPISODE_LITERAL CLOSE_PAREN DOT LABEL ;
 whoExpression
   : LABELS OPEN_PAREN WHO_LITERAL CLOSE_PAREN          # WhoLabelsExpression
@@ -134,7 +146,7 @@ atomList : OPEN_PAREN firstAtom (COMMA subsequentAtom)* CLOSE_PAREN ;
 
 firstAtom : atom ;
 subsequentAtom : atom ;
-    
+
 literal
   : stringLiteral
   | INTEGER_LITERAL
@@ -144,18 +156,17 @@ literal
 stringLiteral
   : quotedString=DOUBLE_QUOTED_STRING
   | quotedString=SINGLE_QUOTED_STRING
+  | quotedString=SLASH_QUOTED_STRING
   ;
 
 comparisonOperator
   : operator=EQ
   | operator=NE
-  | operator=MATCHES
   | operator=NOT_MATCHES
   | operator=LT
   | operator=GT
   | operator=LTE
   | operator=GTE
-  | operator=IN
   | operator=NOT_IN
   ;
 
@@ -217,8 +228,10 @@ OPEN_PAREN            : '(' ;
 CLOSE_PAREN           : ')' ;
 DOUBLE_QUOTED_STRING  : '"' (~'"')* ('\\"' (~'"')*)* '"';
 SINGLE_QUOTED_STRING  : '\'' (~'\'')* ('\\\'' (~'\'')*)* '\'';
+SLASH_QUOTED_STRING  : '/' (~'/')* ('\\/' (~'/')*)* '/';
 INTEGER_LITERAL       : '-'? [0-9]+ ;
 NUMBER_LITERAL        : '-'? [0-9]+ '.' [0-9]+ ; 
+SLASH                 : '/' ;
 
 /* ignore white space */
 WS : [ \n\t\r]+ -> channel(HIDDEN);
