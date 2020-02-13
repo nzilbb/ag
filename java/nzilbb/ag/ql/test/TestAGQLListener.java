@@ -136,7 +136,7 @@ public class TestAGQLListener
       };
 
     AGQLLexer lexer = new AGQLLexer(
-      CharStreams.fromString("'something' IN labels('corpus')"));
+      CharStreams.fromString("labels('corpus').includes('something')"));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
     AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
@@ -220,7 +220,7 @@ public class TestAGQLListener
       };
 
     AGQLLexer lexer = new AGQLLexer(
-      CharStreams.fromString("\"something\" IN labels('who')"));
+      CharStreams.fromString("labels('who').includes(\"something\")"));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
     AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
@@ -376,7 +376,7 @@ public class TestAGQLListener
     // TODO for some reason the parser prints:
     // TODO "line 1:31 mismatched input '<EOF>' expecting '.'"
     // TODO ...to stderr with this expression - no errors are raised, but need to figure out why
-    lexer.setInputStream(CharStreams.fromString("id NOT MATCHES \"Ada.+\""));
+    lexer.setInputStream(CharStreams.fromString("/Ada.+/.test(id)"));
     tokens = new CommonTokenStream(lexer);
     parser = new AGQLParser(tokens);
     tree = parser.booleanExpression();
@@ -482,7 +482,7 @@ public class TestAGQLListener
       };
 
     AGQLLexer lexer = new AGQLLexer(
-      CharStreams.fromString("'something' IN labels('transcript')"));
+      CharStreams.fromString("labels('transcript').includes('something')"));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
     AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
@@ -543,7 +543,7 @@ public class TestAGQLListener
       };
 
     AGQLLexer lexer = new AGQLLexer(
-      CharStreams.fromString("'someone' IN annotators('transcript')"));
+      CharStreams.fromString("annotators('transcript').includes('someone')"));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
     AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
@@ -648,7 +648,7 @@ public class TestAGQLListener
       };
 
     AGQLLexer lexer = new AGQLLexer(
-      CharStreams.fromString("id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'"));
+      CharStreams.fromString("/Ada.+/.test(id) AND my('corpus').label = 'CC'"));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
     AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
@@ -660,7 +660,7 @@ public class TestAGQLListener
 
     parse.setLength(0);
     lexer.setInputStream(
-      CharStreams.fromString("id NOT MATCHES 'Ada.+' OR my('corpus').label = 'CC'"));
+      CharStreams.fromString("!/'Ada.+'/.test(id) OR my('corpus').label = 'CC'"));
     tokens = new CommonTokenStream(lexer);
     parser = new AGQLParser(tokens);
     tree = parser.booleanExpression();
@@ -671,9 +671,9 @@ public class TestAGQLListener
     
     parse.setLength(0);
     lexer.setInputStream(CharStreams.fromString(
-                           "id NOT MATCHES 'Ada.+'"
+                           "!/Ada.+/.test(id)"
                            +" AND my('corpus').label = 'CC'"
-                           +" AND 'labbcat' NOT IN annotators('transcript_rating')"));
+                           +" AND !annotators('transcript_rating').includes('labbcat')"));
     tokens = new CommonTokenStream(lexer);
     parser = new AGQLParser(tokens);
     tree = parser.booleanExpression();
@@ -715,7 +715,7 @@ public class TestAGQLListener
       };
 
     AGQLLexer lexer = new AGQLLexer(
-      CharStreams.fromString("id NOT MATCHES 'Ada.+' && my('corpus').label = 'CC'"));
+      CharStreams.fromString("!/Ada.+/.test(id) && my('corpus').label = 'CC'"));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     AGQLParser parser = new AGQLParser(tokens);
     AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
@@ -727,7 +727,7 @@ public class TestAGQLListener
 
     parse.setLength(0);
     lexer.setInputStream(
-      CharStreams.fromString("id NOT MATCHES 'Ada.+' || my('corpus').label = 'CC'"));
+      CharStreams.fromString("!/Ada.+/.test(id) || my('corpus').label = 'CC'"));
     tokens = new CommonTokenStream(lexer);
     parser = new AGQLParser(tokens);
     tree = parser.booleanExpression();
@@ -738,9 +738,9 @@ public class TestAGQLListener
     
     parse.setLength(0);
     lexer.setInputStream(CharStreams.fromString(
-                           "id NOT MATCHES 'Ada.+'"
+                           "!/Ada.+/.test(id)"
                            +" && my('corpus').label = 'CC'"
-                           +" && 'labbcat' NOT IN annotators('transcript_rating')"));
+                           +" && !annotators('transcript_rating').includes('labbcat')"));
     tokens = new CommonTokenStream(lexer);
     parser = new AGQLParser(tokens);
     tree = parser.booleanExpression();
