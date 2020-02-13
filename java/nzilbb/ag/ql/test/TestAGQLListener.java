@@ -616,7 +616,7 @@ public class TestAGQLListener
 
   }
 
-  @Test public void logicalOperators() 
+  @Test public void logicalOperatorsSQLStyle() 
   {
     final StringBuffer parse = new StringBuffer();
     final StringBuffer error = new StringBuffer();
@@ -627,7 +627,18 @@ public class TestAGQLListener
         // }
         @Override public void exitLogicalOperator(AGQLParser.LogicalOperatorContext ctx)
         {
-          parse.append(ctx.operator.getText());
+           if (ctx.AND() != null)
+           {
+              parse.append(" AND ");
+           }
+           else if (ctx.OR() != null)
+           {
+              parse.append(" OR ");
+           }
+           else
+           {
+              parse.append(ctx.operator.getText());
+           }
         }
         @Override public void visitErrorNode(ErrorNode node)
         {
@@ -672,6 +683,73 @@ public class TestAGQLListener
                  " AND  AND ", parse.toString());
   }
 
+  @Test public void logicalOperatorsJSStyle() 
+  {
+    final StringBuffer parse = new StringBuffer();
+    final StringBuffer error = new StringBuffer();
+    AGQLListener listener = new AGQLBaseListener() {
+        // @Override public void exitEveryRule(ParserRuleContext ctx)
+        // {
+        //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
+        // }
+        @Override public void exitLogicalOperator(AGQLParser.LogicalOperatorContext ctx)
+        {
+           if (ctx.AND() != null)
+           {
+              parse.append(" AND ");
+           }
+           else if (ctx.OR() != null)
+           {
+              parse.append(" OR ");
+           }
+           else
+           {
+              parse.append(ctx.operator.getText());
+           }
+        }
+        @Override public void visitErrorNode(ErrorNode node)
+        {
+          // System.out.println("ERROR: " + node.getText());
+          error.append(node.getText());
+        }
+      };
+
+    AGQLLexer lexer = new AGQLLexer(
+      CharStreams.fromString("id NOT MATCHES 'Ada.+' && my('corpus').label = 'CC'"));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    AGQLParser parser = new AGQLParser(tokens);
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
+
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("AND: No errors: " + error.toString(), error.length() == 0);
+    assertEquals("AND: Parse structure: " + parse,
+                 " AND ", parse.toString());
+
+    parse.setLength(0);
+    lexer.setInputStream(
+      CharStreams.fromString("id NOT MATCHES 'Ada.+' || my('corpus').label = 'CC'"));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    tree = parser.booleanExpression();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("OR: No errors: " + error.toString(), error.length() == 0);
+    assertEquals("OR: Parse structure: " + parse,
+                 " OR ", parse.toString());
+    
+    parse.setLength(0);
+    lexer.setInputStream(CharStreams.fromString(
+                           "id NOT MATCHES 'Ada.+'"
+                           +" && my('corpus').label = 'CC'"
+                           +" && 'labbcat' NOT IN annotators('transcript_rating')"));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    tree = parser.booleanExpression();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("Chaining: No errors: " + error.toString(), error.length() == 0);
+    assertEquals("Chaining: Parse structure: " + parse,
+                 " AND  AND ", parse.toString());
+  }
+
   @Test public void comparisonOperators() 
   {
     final StringBuffer parse = new StringBuffer();
@@ -693,7 +771,7 @@ public class TestAGQLListener
       };
 
     String[] operators =
-      {"=", "<>", "MATCHES", "NOT MATCHES", "<", ">", "<=", ">=", "IN", "NOT IN" };
+      {"=", "==", "<>", "MATCHES", "NOT MATCHES", "<", ">", "<=", ">=", "IN", "NOT IN" };
 
     for (String operator : operators)
     {

@@ -192,6 +192,8 @@ MY                    : 'my' ;
 LIST                  : 'list' ;
 LABELS                : 'labels' ;
 ANNOTATORS            : 'annotators' ;
+INCLUDES              : 'includes' ;
+TEST                  : 'test' ;
 
 /* other stuff */
 ASC                   : 'ASC' ;
@@ -199,9 +201,9 @@ DESC                  : 'DESC' ;
 DOT                   : '.' ;
 COMMA                 : ',' ;
 IDENTIFIER            : [a-zA-Z][a-zA-Z0-9_]* ;
-AND                   : ' AND ' ;
-OR                    : ' OR ' ;
-EQ                    : '=' ;
+AND                   : ' AND ' | '&&' ;
+OR                    : ' OR '  | '||';
+EQ                    : '=' | '==' ;
 NE                    : '<>' ;
 MATCHES               : ' MATCHES ' ;
 NOT_MATCHES           : ' NOT MATCHES ' ;
