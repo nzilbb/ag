@@ -33,7 +33,9 @@ import java.awt.*;
 import java.awt.event.*;
 
 /**
- * Base class that standardizes various common functions for utilitiy applications - whether they be run as full applications from the command line or via JNLP or as applets within a browser.
+ * Base class that standardizes various common functions for utilitiy applications -
+ * whether they be run as full applications from the command line or via JNLP or as
+ * applets within a browser. 
  * <p>To implement a self-documenting, self-configuring application,
  * simply extend this class, annotate any setXXX() methods with a {@link Switch}
  * annotation, and call <code>processArguments(String argv[])</code> from the derived
