@@ -54,13 +54,13 @@ predicate
   ;
 
 includesExpression
-  : singletonOperand=operand IN listOperand=operand
-  | listOperand=operand DOT INCLUDES OPEN_PAREN singletonOperand=operand CLOSE_PAREN
+  : singletonOperand=operand negation=NOT? IN listOperand=operand
+  | negation=NOT? listOperand=operand DOT INCLUDES OPEN_PAREN singletonOperand=operand CLOSE_PAREN
   ; 
 
 patternMatchExpression
-  : singletonOperand=operand MATCHES patternOperand=stringLiteral
-  | patternOperand=stringLiteral DOT TEST OPEN_PAREN singletonOperand=operand CLOSE_PAREN
+  : singletonOperand=operand negation=NOT? MATCHES patternOperand=stringLiteral
+  | negation=NOT? patternOperand=stringLiteral DOT TEST OPEN_PAREN singletonOperand=operand CLOSE_PAREN
   ; 
 
 operand
@@ -162,7 +162,6 @@ stringLiteral
 comparisonOperator
   : operator=EQ
   | operator=NE
-  | operator=NOT_MATCHES
   | operator=LT
   | operator=GT
   | operator=LTE
@@ -217,13 +216,11 @@ OR                    : ' OR '  | '||';
 EQ                    : '=' | '==' ;
 NE                    : '<>' ;
 MATCHES               : ' MATCHES ' ;
-NOT_MATCHES           : ' NOT MATCHES ' ;
 LT                    : '<' ;
 GT                    : '>' ;
 LTE                   : '<=' ;
 GTE                   : '>=' ;
 IN                    : ' IN ' ;
-NOT_IN                : ' NOT IN ' ;
 OPEN_PAREN            : '(' ;
 CLOSE_PAREN           : ')' ;
 DOUBLE_QUOTED_STRING  : '"' (~'"')* ('\\"' (~'"')*)* '"';
@@ -232,6 +229,7 @@ SLASH_QUOTED_STRING  : '/' (~'/')* ('\\/' (~'/')*)* '/';
 INTEGER_LITERAL       : '-'? [0-9]+ ;
 NUMBER_LITERAL        : '-'? [0-9]+ '.' [0-9]+ ; 
 SLASH                 : '/' ;
+NOT                   : ' NOT' || '!' ;
 
 /* ignore white space */
 WS : [ \n\t\r]+ -> channel(HIDDEN);

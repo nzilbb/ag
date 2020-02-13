@@ -770,8 +770,7 @@ public class TestAGQLListener
         }
       };
 
-    String[] operators =
-      {"=", "==", "<>", "NOT MATCHES", "<", ">", "<=", ">=", "NOT IN" };
+    String[] operators = {"=", "==", "<>", "<", ">", "<=", ">=" };
 
     for (String operator : operators)
     {
@@ -799,7 +798,7 @@ public class TestAGQLListener
         @Override public void exitIncludesExpression(AGQLParser.IncludesExpressionContext ctx)
         {
            parse.append(ctx.singletonOperand.getText()
-                        + " IN "
+                        + (ctx.negation!=null?" NOT IN ":" IN ")
                         + ctx.listOperand.getText());
         }
         @Override public void visitErrorNode(ErrorNode node)
@@ -830,6 +829,28 @@ public class TestAGQLListener
     assertTrue("INCLUDES: No errors: " + error.toString(), error.length() == 0);
     assertEquals("INCLUDES: Parse structure: " + parse,
                  "'something' IN labels('corpus')", parse.toString());
+
+    parse.setLength(0);
+    lexer.setInputStream(
+      CharStreams.fromString("'something' NOT IN labels('corpus')"));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    tree = parser.booleanExpression();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("NEGATED IN: No errors: " + error.toString(), error.length() == 0);
+    assertEquals("NEGATED  IN: Parse structure: " + parse,
+                 "'something' NOT IN labels('corpus')", parse.toString());
+
+    parse.setLength(0);
+    lexer.setInputStream(
+      CharStreams.fromString("!labels('corpus').includes('something')"));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    tree = parser.booleanExpression();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("NEGATED INCLUDES: No errors: " + error.toString(), error.length() == 0);
+    assertEquals("NEGATED INCLUDES: Parse structure: " + parse,
+                 "'something' NOT IN labels('corpus')", parse.toString());
   }
 
   @Test public void patternMatchExpression() 
@@ -837,14 +858,14 @@ public class TestAGQLListener
     final StringBuffer parse = new StringBuffer();
     final StringBuffer error = new StringBuffer();
     AGQLListener listener = new AGQLBaseListener() {
-        @Override public void exitEveryRule(ParserRuleContext ctx)
-        {
-          System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
-        }
+        // @Override public void exitEveryRule(ParserRuleContext ctx)
+        // {
+        //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
+        // }
         @Override public void exitPatternMatchExpression(AGQLParser.PatternMatchExpressionContext ctx)
         {
            parse.append(ctx.singletonOperand.getText()
-                        + " REGEXP "
+                        + (ctx.negation!=null?" NOT REGEXP ":" REGEXP ")
                         + ctx.patternOperand.getText());
         }
         @Override public void visitErrorNode(ErrorNode node)
@@ -861,8 +882,8 @@ public class TestAGQLListener
     AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
     
     ParseTreeWalker.DEFAULT.walk(listener, tree);
-    assertTrue("IN: No errors: " + error.toString(), error.length() == 0);
-    assertEquals("IN: Parse structure: " + parse,
+    assertTrue("MATCHES: No errors: " + error.toString(), error.length() == 0);
+    assertEquals("MATCHES: Parse structure: " + parse,
                  "'something' REGEXP 'regexp'", parse.toString());
 
     parse.setLength(0);
@@ -872,9 +893,31 @@ public class TestAGQLListener
     parser = new AGQLParser(tokens);
     tree = parser.booleanExpression();
     ParseTreeWalker.DEFAULT.walk(listener, tree);
-    assertTrue("INCLUDES: No errors: " + error.toString(), error.length() == 0);
-    assertEquals("INCLUDES: Parse structure: " + parse,
+    assertTrue("TEST: No errors: " + error.toString(), error.length() == 0);
+    assertEquals("TEST: Parse structure: " + parse,
                  "'something' REGEXP /regexp/", parse.toString());
+
+    parse.setLength(0);
+    lexer.setInputStream(
+      CharStreams.fromString("'something' NOT MATCHES 'regexp'"));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    tree = parser.booleanExpression();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("NEGATED MATCHES: No errors: " + error.toString(), error.length() == 0);
+    assertEquals("NEGATED MATCHES: Parse structure: " + parse,
+                 "'something' NOT REGEXP 'regexp'", parse.toString());
+
+    parse.setLength(0);
+    lexer.setInputStream(
+      CharStreams.fromString("!/regexp/.test('something')"));
+    tokens = new CommonTokenStream(lexer);
+    parser = new AGQLParser(tokens);
+    tree = parser.booleanExpression();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("NEGATED TEST: No errors: " + error.toString(), error.length() == 0);
+    assertEquals("NEGATED TEST: Parse structure: " + parse,
+                 "'something' NOT REGEXP /regexp/", parse.toString());
   }
 
   @Test public void atomicExpressions() 
