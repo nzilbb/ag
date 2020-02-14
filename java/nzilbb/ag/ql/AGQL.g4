@@ -1,6 +1,6 @@
 /**
  * Annotation Graph Query Language grammar.
- * Copyright 2015-2019 New Zealand Institute of Language, Brain and Behaviour, 
+ * Copyright 2015-2020 New Zealand Institute of Language, Brain and Behaviour, 
  * University of Canterbury
  * Written by Robert Fromont - robert.fromont@canterbury.ac.nz
  *
@@ -21,6 +21,11 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 grammar AGQL;
+
+/* TODO:
+ previous...
+ next...
+*/
 
 @header {
 package nzilbb.ag.ql;
@@ -74,6 +79,8 @@ operand
   | labelExpression                                    # LabelOperand
   | labelsExpression                                   # LabelsOperand
   | idExpression                                       # IdOperand
+  | layerIdExpression                                  # LayerIdOperand
+  | parentIdExpression                                 # ParentIdOperand
   | listExpression                                     # ListOperand
   | listLengthExpression                               # ListLengthOperand
   | annotatorsExpression                               # AnnotatorsOperand
@@ -117,6 +124,14 @@ labelExpression
 idExpression
   : MY OPEN_PAREN stringLiteral CLOSE_PAREN DOT ID     # OtherIdExpression
   | ID                                                 # ThisIdExpression
+  ;
+layerIdExpression
+  : LAYER DOT ID
+  | LAYERID
+  ;
+parentIdExpression
+  : PARENT DOT ID
+  | PARENTID
   ;
 listExpression : LIST OPEN_PAREN stringLiteral CLOSE_PAREN ;
 listLengthExpression
@@ -199,6 +214,10 @@ OFFSET                : 'offset' ;
 ANNOTATOR             : 'annotator' ;
 WHEN                  : 'when' ;
 LENGTH                : 'length' ;
+LAYER                 : 'layer' ;
+LAYERID               : 'layerId' ;
+PARENT                : 'parent' ;
+PARENTID              : 'parentId' ;
 
 /* methods */
 MY                    : 'my' ;

@@ -270,6 +270,58 @@ public class TestAGQLListener {
 
    }
   
+   @Test public void layerId() {
+      final StringBuffer parse = new StringBuffer();
+      final StringBuffer error = new StringBuffer();
+      AGQLListener listener = new AGQLBaseListener() {
+            @Override public void exitLayerIdOperand(AGQLParser.LayerIdOperandContext ctx) {
+               if (parse.length() > 0) parse.append(" ");
+               parse.append(ctx.getText());
+            }
+            @Override public void visitErrorNode(ErrorNode node) {
+               error.append(node.getText());
+            }
+         };
+
+      AGQLLexer lexer = new AGQLLexer(
+         CharStreams.fromString("layer.id = layerId"));
+      CommonTokenStream tokens = new CommonTokenStream(lexer);
+      AGQLParser parser = new AGQLParser(tokens);
+      AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
+
+      ParseTreeWalker.DEFAULT.walk(listener, tree);
+      assertTrue("No errors: " + error.toString(), error.length() == 0);
+      assertEquals("Parse structure: " + parse,
+                   "layer.id layerId", parse.toString());
+
+   }
+  
+   @Test public void parentId() {
+      final StringBuffer parse = new StringBuffer();
+      final StringBuffer error = new StringBuffer();
+      AGQLListener listener = new AGQLBaseListener() {
+            @Override public void exitParentIdOperand(AGQLParser.ParentIdOperandContext ctx) {
+               if (parse.length() > 0) parse.append(" ");
+               parse.append(ctx.getText());
+            }
+            @Override public void visitErrorNode(ErrorNode node) {
+               error.append(node.getText());
+            }
+         };
+
+      AGQLLexer lexer = new AGQLLexer(
+         CharStreams.fromString("parent.id = parentId"));
+      CommonTokenStream tokens = new CommonTokenStream(lexer);
+      AGQLParser parser = new AGQLParser(tokens);
+      AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
+
+      ParseTreeWalker.DEFAULT.walk(listener, tree);
+      assertTrue("No errors: " + error.toString(), error.length() == 0);
+      assertEquals("Parse structure: " + parse,
+                   "parent.id parentId", parse.toString());
+
+   }
+  
    @Test public void label() {
       final StringBuffer parse = new StringBuffer();
       final StringBuffer error = new StringBuffer();
