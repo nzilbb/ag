@@ -59,8 +59,8 @@ predicate
   ;
 
 includesExpression
-  : singletonOperand=operand negation=NOT? IN listOperand=operand
-  | negation=NOT? listOperand=operand DOT INCLUDES OPEN_PAREN singletonOperand=operand CLOSE_PAREN
+  : singletonOperand=operand negation=NOT? IN listOperand=listExpression
+  | negation=NOT? listOperand=listExpression DOT INCLUDES OPEN_PAREN singletonOperand=operand CLOSE_PAREN
   ; 
 
 patternMatchExpression
@@ -69,95 +69,145 @@ patternMatchExpression
   ; 
 
 operand
-  : graphIdExpression                                  # GraphIdOperand
-  | corpusLabelExpression                              # CorpusLabelOperand
-  | corpusLabelsExpression                             # CorpusLabelsOperand
-  | episodeLabelExpression                             # EpisodeLabelOperand
-  | whoExpression                                      # WhoOperand
-  | anchorIdExpression                                 # AnchorIdOperand
-  | anchorOffsetExpression                             # AnchorOffsetOperand
-  | labelExpression                                    # LabelOperand
-  | labelsExpression                                   # LabelsOperand
-  | idExpression                                       # IdOperand
-  | layerIdExpression                                  # LayerIdOperand
-  | parentIdExpression                                 # ParentIdOperand
-  | listExpression                                     # ListOperand
-  | listLengthExpression                               # ListLengthOperand
-  | annotatorsExpression                               # AnnotatorsOperand
-  | ORDINAL                                            # OrdinalOperand
-  | ANNOTATOR                                          # AnnotatorOperand
-  | WHEN                                               # WhenOperand
-  | attribute                                          # AttributeOperand
-  | method                                             # MethodOperand
-  | atomList                                           # AtomListOperand
-  | atom                                               # AtomOperand
+  : idExpression               # IdOperand
+  | ordinalExpression          # OrdinalOperand
+  | labelExpression            # LabelOperand
+  | annotatorExpression        # AnnotatorOperand
+  | whenExpression             # WhenOperand
+  | layerExpression            # LayerOperand
+  | parentIdExpression         # ParentIdOperand
+  | confidenceExpression       # ConfidenceOperand
+  | anchorIdExpression         # AnchorIdOperand
+  | anchorOffsetExpression     # AnchorOffsetOperand
+  | anchorConfidenceExpression # AnchorConfidenceOperand
+  | graphIdExpression          # GraphIdOperand
+  | listLengthExpression       # ListLengthOperand
+  | atom                       # AtomOperand
   ;
 
-attribute : atom DOT IDENTIFIER;
+listExpression
+  : valueListExpression
+  | annotationListExpression
+  | atomListExpression
+  ;
+
+valueListExpression
+  : labelsMethodCall
+  | annotatorsMethodCall
+  ;
+
+annotationListExpression
+  : listMethodCall
+  ;
+
+listLengthExpression
+  : listExpression DOT LENGTH
+  ;
+
+/* TODO will include parent, next, previous */
+annotationExpression
+  : myMethodCall
+  | parentExpression
+  ;
+
+idExpression
+  : other=annotationExpression DOT ID
+  | ID                               
+  ;
+
+ordinalExpression
+  : other=annotationExpression DOT ORDINAL
+  | ORDINAL                               
+  ;
+
+labelExpression
+  : other=annotationExpression DOT LABEL
+  | LABEL                               
+  ;
+
+annotatorExpression
+  : other=annotationExpression DOT ANNOTATOR
+  | ANNOTATOR                               
+  ;
+
+whenExpression
+  : other=annotationExpression DOT WHEN
+  | WHEN                               
+  ;
+
+layerExpression
+  : other=annotationExpression DOT LAYER                     
+  | LAYER                                              
+  | other=annotationExpression DOT LAYERID                   
+  | LAYERID                                            
+  | other=annotationExpression DOT LAYER DOT ID              
+  | LAYER DOT ID                                       
+  ;
+
+parentExpression
+  : PARENT                               
+  /*: other=annotationExpression DOT PARENT*/
+  ;
+
+parentIdExpression
+  : other=annotationExpression DOT PARENTID
+  | PARENTID                               
+  ;
+
+confidenceExpression
+  : other=annotationExpression DOT CONFIDENCE
+  | CONFIDENCE                               
+  ;
+
+anchorExpression
+  : other=annotationExpression DOT START
+  | START                               
+  | other=annotationExpression DOT END        
+  | END                                 
+  ;
+
+anchorIdExpression
+  : other=annotationExpression DOT STARTID
+  | STARTID                               
+  | other=annotationExpression DOT ENDID
+  | ENDID                               
+  | anchorExpression DOT ID             
+  ;
+
+anchorOffsetExpression : anchorExpression DOT OFFSET ;
+anchorConfidenceExpression : anchorExpression DOT CONFIDENCE ;
+
+myMethodCall
+  : MY OPEN_PAREN layer=stringLiteral CLOSE_PAREN
+/*  | annotationExpression DOT MY OPEN_PAREN stringLiteral CLOSE_PAREN # OtherMyMethodCall*/
+  ;
+
+listMethodCall
+  : LIST OPEN_PAREN layer=stringLiteral CLOSE_PAREN
+  | other=annotationExpression LIST OPEN_PAREN stringLiteral CLOSE_PAREN
+  ;
+
+labelsMethodCall
+  : LABELS OPEN_PAREN layer=stringLiteral CLOSE_PAREN
+  | other=annotationExpression LABELS OPEN_PAREN layer=stringLiteral CLOSE_PAREN
+  ;
+
+annotatorsMethodCall
+  : ANNOTATORS OPEN_PAREN layer=stringLiteral CLOSE_PAREN
+  | other=annotationExpression ANNOTATORS OPEN_PAREN layer=stringLiteral CLOSE_PAREN
+  ;
 
 graphIdExpression
-  : MY OPEN_PAREN GRAPH_LITERAL CLOSE_PAREN DOT LABEL
-  | MY OPEN_PAREN GRAPH_LITERAL CLOSE_PAREN DOT ID
-  | GRAPH DOT LABEL
+  : GRAPH DOT LABEL
   | GRAPH DOT ID
   ;
-
-corpusLabelExpression : MY OPEN_PAREN CORPUS_LITERAL CLOSE_PAREN DOT LABEL ;
-corpusLabelsExpression : LABELS OPEN_PAREN CORPUS_LITERAL CLOSE_PAREN ;
-episodeLabelExpression : MY OPEN_PAREN EPISODE_LITERAL CLOSE_PAREN DOT LABEL ;
-whoExpression
-  : LABELS OPEN_PAREN WHO_LITERAL CLOSE_PAREN          # WhoLabelsExpression
-  | MY OPEN_PAREN WHO_LITERAL CLOSE_PAREN DOT LABEL    # WhoLabelExpression
-  ;
-anchorIdExpression
-  : START DOT ID                                       # StartIdExpression
-  | END DOT ID                                         # EndIdExpression
-  ;
-anchorOffsetExpression
-  : START DOT OFFSET                                   # StartOffsetExpression
-  | END DOT OFFSET                                     # EndOffsetExpression
-  ;
-labelExpression
-  : MY OPEN_PAREN stringLiteral CLOSE_PAREN DOT LABEL  # OtherLabelExpression
-  | LABEL                                              # ThisLabelExpression
-  ;
-idExpression
-  : MY OPEN_PAREN stringLiteral CLOSE_PAREN DOT ID     # OtherIdExpression
-  | ID                                                 # ThisIdExpression
-  ;
-layerIdExpression
-  : LAYER DOT ID
-  | LAYERID
-  ;
-parentIdExpression
-  : PARENT DOT ID
-  | PARENTID
-  ;
-listExpression : LIST OPEN_PAREN stringLiteral CLOSE_PAREN ;
-listLengthExpression
-  : LIST OPEN_PAREN stringLiteral CLOSE_PAREN DOT LENGTH
-  | LABELS OPEN_PAREN stringLiteral CLOSE_PAREN DOT LENGTH
-  ;
-labelsExpression : LABELS OPEN_PAREN stringLiteral CLOSE_PAREN ;
-annotatorsExpression : ANNOTATORS OPEN_PAREN stringLiteral CLOSE_PAREN ;
     
-method
-  : atom DOT IDENTIFIER OPEN_PAREN CLOSE_PAREN         # MethodNoArgs 
-  | atom DOT IDENTIFIER OPEN_PAREN arglist CLOSE_PAREN # MethodArgs 
-  ;
-
-arglist : operand (COMMA atom)* ;
-
 atom
   : literal                                            # LiteralAtom
-  | WHO_LITERAL                                        # WhoLiteralAtom
-  | GRAPH_LITERAL                                      # GraphLiteralAtom
-  | CORPUS_LITERAL                                     # CorpusLiteralAtom
-  | EPISODE_LITERAL                                    # EpisodeLiteralAtom
   | IDENTIFIER                                         # IdentifierAtom
   ;
 
-atomList
+atomListExpression
   : OPEN_PAREN firstAtom (COMMA subsequentAtom)* CLOSE_PAREN
   | OPEN_SQUARE_PAREN firstAtom (COMMA subsequentAtom)* CLOSE_SQUARE_PAREN
   ;
@@ -184,7 +234,6 @@ comparisonOperator
   | operator=GT
   | operator=LTE
   | operator=GTE
-  | operator=NOT_IN
   ;
 
 logicalOperator
@@ -194,13 +243,6 @@ logicalOperator
 
 /* Lexer rules: */
 
-/* special layers */
-/* TODO: these shouldn't be explicitly defined here, as they may be different in a particular schema */
-WHO_LITERAL           : '"who"' | '\'who\'' ;
-GRAPH_LITERAL         : '"graph"' | '\'graph\'' ;
-CORPUS_LITERAL        : '"corpus"' | '\'corpus\'' ;
-EPISODE_LITERAL       : '"episode"' | '\'episode\'' ;
-
 /* special variables */
 GRAPH                 : 'graph' ;
 
@@ -208,9 +250,6 @@ GRAPH                 : 'graph' ;
 ID                    : 'id' ;
 ORDINAL               : 'ordinal' ;
 LABEL                 : 'label' ;
-START                 : 'start' ;
-END                   : 'end' ;
-OFFSET                : 'offset' ;
 ANNOTATOR             : 'annotator' ;
 WHEN                  : 'when' ;
 LENGTH                : 'length' ;
@@ -218,6 +257,12 @@ LAYER                 : 'layer' ;
 LAYERID               : 'layerId' ;
 PARENT                : 'parent' ;
 PARENTID              : 'parentId' ;
+CONFIDENCE            : 'confidence' ;
+START                 : 'start' ;
+END                   : 'end' ;
+STARTID               : 'startId' ;
+ENDID                 : 'endId' ;
+OFFSET                : 'offset' ;
 
 /* methods */
 MY                    : 'my' ;

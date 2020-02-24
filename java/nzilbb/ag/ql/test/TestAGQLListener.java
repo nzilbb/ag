@@ -37,8 +37,17 @@ public class TestAGQLListener {
       final StringBuffer parse = new StringBuffer();
       final StringBuffer error = new StringBuffer();
       AGQLListener listener = new AGQLBaseListener() {
+            @Override public void exitMyMethodCall(AGQLParser.MyMethodCallContext ctx) {
+               parse.append("layer:"+ctx.layer.quotedString.getText());
+            }
+            @Override public void exitLabelExpression(AGQLParser.LabelExpressionContext ctx) { 
+               parse.append("->label");
+            }
+            @Override public void exitIdExpression(AGQLParser.IdExpressionContext ctx) { 
+               parse.append("->id");
+            }
             @Override public void exitGraphIdExpression(AGQLParser.GraphIdExpressionContext ctx) {
-               parse.append(ctx.getText());
+               parse.append("graph.id");
             }
             @Override public void visitErrorNode(ErrorNode node) {
                error.append(node.getText());
@@ -54,7 +63,7 @@ public class TestAGQLListener {
       ParseTreeWalker.DEFAULT.walk(listener, tree);
       assertTrue("No errors: " + error.toString(), error.length() == 0);
       assertEquals("Parse structure: " + parse,
-                   "my('graph').label", parse.toString());
+                   "layer:'graph'->label", parse.toString());
 
       parse.setLength(0);
       lexer.setInputStream(CharStreams.fromString("my(\"graph\").id = 'something'"));
@@ -64,7 +73,7 @@ public class TestAGQLListener {
       ParseTreeWalker.DEFAULT.walk(listener, tree);
       assertTrue("No errors: " + error.toString(), error.length() == 0);
       assertEquals("Parse structure: " + parse,
-                   "my(\"graph\").id", parse.toString());
+                   "layer:\"graph\"->id", parse.toString());
     
       parse.setLength(0);
       lexer.setInputStream(CharStreams.fromString("graph.id = 'something'"));
@@ -84,7 +93,7 @@ public class TestAGQLListener {
       ParseTreeWalker.DEFAULT.walk(listener, tree);
       assertTrue("No errors: " + error.toString(), error.length() == 0);
       assertEquals("Parse structure: " + parse,
-                   "graph.label", parse.toString());
+                   "graph.id", parse.toString());
 
    }
 
@@ -92,8 +101,11 @@ public class TestAGQLListener {
       final StringBuffer parse = new StringBuffer();
       final StringBuffer error = new StringBuffer();
       AGQLListener listener = new AGQLBaseListener() {
-            @Override public void exitCorpusLabelExpression(AGQLParser.CorpusLabelExpressionContext ctx) {
-               parse.append(ctx.getText());
+            @Override public void exitMyMethodCall(AGQLParser.MyMethodCallContext ctx) {
+               parse.append("layer:"+ctx.layer.quotedString.getText());
+            }
+            @Override public void exitLabelExpression(AGQLParser.LabelExpressionContext ctx) { 
+               parse.append("->label");
             }
             @Override public void visitErrorNode(ErrorNode node) {
                error.append(node.getText());
@@ -109,7 +121,7 @@ public class TestAGQLListener {
       ParseTreeWalker.DEFAULT.walk(listener, tree);
       assertTrue("No errors: " + error.toString(), error.length() == 0);
       assertEquals("Parse structure: " + parse,
-                   "my('corpus').label", parse.toString());
+                   "layer:'corpus'->label", parse.toString());
 
    }
 
@@ -117,8 +129,8 @@ public class TestAGQLListener {
       final StringBuffer parse = new StringBuffer();
       final StringBuffer error = new StringBuffer();
       AGQLListener listener = new AGQLBaseListener() {
-            @Override public void exitCorpusLabelsExpression(AGQLParser.CorpusLabelsExpressionContext ctx) {
-               parse.append(ctx.getText());
+            @Override public void exitLabelsMethodCall(AGQLParser.LabelsMethodCallContext ctx) { 
+               parse.append("layer:"+ctx.layer.quotedString.getText()+"->labels");
             }
             @Override public void visitErrorNode(ErrorNode node) {
                error.append(node.getText());
@@ -134,7 +146,7 @@ public class TestAGQLListener {
       ParseTreeWalker.DEFAULT.walk(listener, tree);
       assertTrue("No errors: " + error.toString(), error.length() == 0);
       assertEquals("Parse structure: " + parse,
-                   "labels('corpus')", parse.toString());
+                   "layer:'corpus'->labels", parse.toString());
 
    }
 
@@ -142,11 +154,11 @@ public class TestAGQLListener {
       final StringBuffer parse = new StringBuffer();
       final StringBuffer error = new StringBuffer();
       AGQLListener listener = new AGQLBaseListener() {
-            @Override public void exitEpisodeLabelExpression(AGQLParser.EpisodeLabelExpressionContext ctx) {
-               parse.append(ctx.getText());
+            @Override public void exitMyMethodCall(AGQLParser.MyMethodCallContext ctx) {
+               parse.append("layer:"+ctx.layer.quotedString.getText());
             }
-            @Override public void visitErrorNode(ErrorNode node) {
-               error.append(node.getText());
+            @Override public void exitLabelExpression(AGQLParser.LabelExpressionContext ctx) { 
+               parse.append("->label");
             }
          };
 
@@ -159,7 +171,7 @@ public class TestAGQLListener {
       ParseTreeWalker.DEFAULT.walk(listener, tree);
       assertTrue("No errors: " + error.toString(), error.length() == 0);
       assertEquals("Parse structure: " + parse,
-                   "my('episode').label", parse.toString());
+                   "layer:'episode'->label", parse.toString());
 
    }
 
@@ -167,11 +179,11 @@ public class TestAGQLListener {
       final StringBuffer parse = new StringBuffer();
       final StringBuffer error = new StringBuffer();
       AGQLListener listener = new AGQLBaseListener() {
-            @Override public void exitWhoLabelExpression(AGQLParser.WhoLabelExpressionContext ctx) {
-               parse.append(ctx.getText());
+            @Override public void exitMyMethodCall(AGQLParser.MyMethodCallContext ctx) {
+               parse.append("layer:"+ctx.layer.quotedString.getText());
             }
-            @Override public void visitErrorNode(ErrorNode node) {
-               error.append(node.getText());
+            @Override public void exitLabelExpression(AGQLParser.LabelExpressionContext ctx) { 
+               parse.append("->label");
             }
          };
 
@@ -184,7 +196,7 @@ public class TestAGQLListener {
       ParseTreeWalker.DEFAULT.walk(listener, tree);
       assertTrue("No errors: " + error.toString(), error.length() == 0);
       assertEquals("Parse structure: " + parse,
-                   "my('who').label", parse.toString());
+                   "layer:'who'->label", parse.toString());
 
    }
 
@@ -192,8 +204,8 @@ public class TestAGQLListener {
       final StringBuffer parse = new StringBuffer();
       final StringBuffer error = new StringBuffer();
       AGQLListener listener = new AGQLBaseListener() {
-            @Override public void exitWhoLabelsExpression(AGQLParser.WhoLabelsExpressionContext ctx) {
-               parse.append(ctx.getText());
+            @Override public void exitLabelsMethodCall(AGQLParser.LabelsMethodCallContext ctx) { 
+               parse.append("layer:"+ctx.layer.quotedString.getText()+"->labels");
             }
             @Override public void visitErrorNode(ErrorNode node) {
                error.append(node.getText());
@@ -209,7 +221,7 @@ public class TestAGQLListener {
       ParseTreeWalker.DEFAULT.walk(listener, tree);
       assertTrue("No errors: " + error.toString(), error.length() == 0);
       assertEquals("Parse structure: " + parse,
-                   "labels('who')", parse.toString());
+                   "layer:'who'->labels", parse.toString());
 
    }
 
@@ -234,8 +246,20 @@ public class TestAGQLListener {
 
       ParseTreeWalker.DEFAULT.walk(listener, tree);
       assertTrue("No errors: " + error.toString(), error.length() == 0);
-      assertEquals("Parse structure: " + parse,
+      assertEquals("Parse structure - dot: " + parse,
                    "start.id end.id", parse.toString());
+
+      parse.setLength(0);
+      lexer = new AGQLLexer(
+         CharStreams.fromString("startId = endId"));
+      tokens = new CommonTokenStream(lexer);
+      parser = new AGQLParser(tokens);
+      tree = parser.booleanExpression();
+
+      ParseTreeWalker.DEFAULT.walk(listener, tree);
+      assertTrue("No errors: " + error.toString(), error.length() == 0);
+      assertEquals("Parse structure - no dot: " + parse,
+                   "startId endId", parse.toString());
 
    }
   
@@ -274,7 +298,7 @@ public class TestAGQLListener {
       final StringBuffer parse = new StringBuffer();
       final StringBuffer error = new StringBuffer();
       AGQLListener listener = new AGQLBaseListener() {
-            @Override public void exitLayerIdOperand(AGQLParser.LayerIdOperandContext ctx) {
+            @Override public void exitLayerExpression(AGQLParser.LayerExpressionContext ctx) { 
                if (parse.length() > 0) parse.append(" ");
                parse.append(ctx.getText());
             }
@@ -300,7 +324,14 @@ public class TestAGQLListener {
       final StringBuffer parse = new StringBuffer();
       final StringBuffer error = new StringBuffer();
       AGQLListener listener = new AGQLBaseListener() {
-            @Override public void exitParentIdOperand(AGQLParser.ParentIdOperandContext ctx) {
+            @Override public void exitParentExpression(AGQLParser.ParentExpressionContext ctx) {
+               if (parse.length() > 0) parse.append(" ");
+               parse.append(ctx.getText());
+            }
+            @Override public void exitIdExpression(AGQLParser.IdExpressionContext ctx) { 
+               parse.append("->id");
+            }
+            @Override public void exitParentIdExpression(AGQLParser.ParentIdExpressionContext ctx) { 
                if (parse.length() > 0) parse.append(" ");
                parse.append(ctx.getText());
             }
@@ -318,7 +349,7 @@ public class TestAGQLListener {
       ParseTreeWalker.DEFAULT.walk(listener, tree);
       assertTrue("No errors: " + error.toString(), error.length() == 0);
       assertEquals("Parse structure: " + parse,
-                   "parent.id parentId", parse.toString());
+                   "parent->id parentId", parse.toString());
 
    }
   
@@ -326,11 +357,11 @@ public class TestAGQLListener {
       final StringBuffer parse = new StringBuffer();
       final StringBuffer error = new StringBuffer();
       AGQLListener listener = new AGQLBaseListener() {
-            @Override public void exitOtherLabelExpression(AGQLParser.OtherLabelExpressionContext ctx) {
-               parse.append("other: " + ctx.stringLiteral().quotedString.getText());
+            @Override public void exitMyMethodCall(AGQLParser.MyMethodCallContext ctx) {
+               parse.append("layer:"+ctx.layer.quotedString.getText());
             }
-            @Override public void exitThisLabelExpression(AGQLParser.ThisLabelExpressionContext ctx) {
-               parse.append(ctx.getText());
+            @Override public void exitLabelExpression(AGQLParser.LabelExpressionContext ctx) { 
+               parse.append("->label");
             }
             @Override public void visitErrorNode(ErrorNode node) {
                error.append(node.getText());
@@ -346,7 +377,7 @@ public class TestAGQLListener {
       ParseTreeWalker.DEFAULT.walk(listener, tree);
       assertTrue("No errors: " + error.toString(), error.length() == 0);
       assertEquals("Parse structure: " + parse,
-                   "other: 'transcript'", parse.toString());
+                   "layer:'transcript'->label", parse.toString());
 
       parse.setLength(0);
       lexer.setInputStream(CharStreams.fromString("label = 'something'"));
@@ -356,7 +387,7 @@ public class TestAGQLListener {
       ParseTreeWalker.DEFAULT.walk(listener, tree);
       assertTrue("No errors: " + error.toString(), error.length() == 0);
       assertEquals("Parse structure: " + parse,
-                   "label", parse.toString());
+                   "->label", parse.toString());
    }
   
    @Test public void id() {
@@ -367,12 +398,11 @@ public class TestAGQLListener {
             // {
             //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
             // }
-            @Override public void exitOtherIdExpression(AGQLParser.OtherIdExpressionContext ctx) {
-               parse.append("other: ");
-               parse.append(ctx.stringLiteral().quotedString.getText());
+            @Override public void exitMyMethodCall(AGQLParser.MyMethodCallContext ctx) {
+               parse.append("layer:"+ctx.layer.quotedString.getText());
             }
-            @Override public void exitThisIdExpression(AGQLParser.ThisIdExpressionContext ctx) {
-               parse.append(ctx.getText());
+            @Override public void exitIdExpression(AGQLParser.IdExpressionContext ctx) { 
+               parse.append("->id");
             }
             @Override public void visitErrorNode(ErrorNode node) {
                // System.out.println("error: " + node.getText());
@@ -389,12 +419,9 @@ public class TestAGQLListener {
       ParseTreeWalker.DEFAULT.walk(listener, tree);
       assertTrue("No errors: " + error.toString(), error.length() == 0);
       assertEquals("Parse structure: " + parse,
-                   "other: 'transcript'", parse.toString());
+                   "layer:'transcript'->id", parse.toString());
 
       parse.setLength(0);
-      // TODO for some reason the parser prints:
-      // TODO "line 1:31 mismatched input '<EOF>' expecting '.'"
-      // TODO ...to stderr with this expression - no errors are raised, but need to figure out why
       lexer.setInputStream(CharStreams.fromString("/Ada.+/.test(id)"));
       tokens = new CommonTokenStream(lexer);
       parser = new AGQLParser(tokens);
@@ -402,9 +429,9 @@ public class TestAGQLListener {
       ParseTreeWalker.DEFAULT.walk(listener, tree);
       assertTrue("No errors: " + error.toString(), error.length() == 0);
       assertEquals("Parse structure: " + parse,
-                   "id", parse.toString());    
+                   "->id", parse.toString());    
    }
-  
+
    @Test public void list() {
       final StringBuffer parse = new StringBuffer();
       final StringBuffer error = new StringBuffer();
@@ -413,8 +440,8 @@ public class TestAGQLListener {
             // {
             //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
             // }
-            @Override public void exitListExpression(AGQLParser.ListExpressionContext ctx) {
-               parse.append(ctx.stringLiteral().quotedString.getText());
+            @Override public void exitListMethodCall(AGQLParser.ListMethodCallContext ctx) {
+               parse.append("layer:"+ctx.layer.quotedString.getText()+"->list");
             }
             @Override public void visitErrorNode(ErrorNode node) {
                // System.out.println(node.getText());
@@ -423,7 +450,7 @@ public class TestAGQLListener {
          };
 
       AGQLLexer lexer = new AGQLLexer(
-         CharStreams.fromString("list('transcript') = 'something'"));
+         CharStreams.fromString("list('transcript').includes('something')"));
       CommonTokenStream tokens = new CommonTokenStream(lexer);
       AGQLParser parser = new AGQLParser(tokens);
       AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
@@ -431,7 +458,7 @@ public class TestAGQLListener {
       ParseTreeWalker.DEFAULT.walk(listener, tree);
       assertTrue("No errors: " + error.toString(), error.length() == 0);
       assertEquals("Parse structure: " + parse,
-                   "'transcript'", parse.toString());
+                   "layer:'transcript'->list", parse.toString());
 
    }
 
@@ -443,8 +470,14 @@ public class TestAGQLListener {
             // {
             //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
             // }
+            @Override public void exitListMethodCall(AGQLParser.ListMethodCallContext ctx) {
+               parse.append("layer:"+ctx.layer.quotedString.getText()+"->list");
+            }
+            @Override public void exitLabelsMethodCall(AGQLParser.LabelsMethodCallContext ctx) { 
+               parse.append("layer:"+ctx.layer.quotedString.getText()+"->labels");
+            }
             @Override public void exitListLengthExpression(AGQLParser.ListLengthExpressionContext ctx) {
-               parse.append(ctx.stringLiteral().quotedString.getText());
+               parse.append("->length");
             }
             @Override public void visitErrorNode(ErrorNode node) {
                // System.out.println(node.getText());
@@ -453,7 +486,7 @@ public class TestAGQLListener {
          };
 
       AGQLLexer lexer = new AGQLLexer(
-         CharStreams.fromString("list('transcript').length = 0"));
+         CharStreams.fromString("list('transcript').length == 0"));
       CommonTokenStream tokens = new CommonTokenStream(lexer);
       AGQLParser parser = new AGQLParser(tokens);
       AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
@@ -461,7 +494,7 @@ public class TestAGQLListener {
       ParseTreeWalker.DEFAULT.walk(listener, tree);
       assertTrue("No errors: " + error.toString(), error.length() == 0);
       assertEquals("Parse structure: " + parse,
-                   "'transcript'", parse.toString());
+                   "layer:'transcript'->list->length", parse.toString());
 
       parse.setLength(0);
       lexer.setInputStream(CharStreams.fromString("labels('transcript').length = 0"));
@@ -471,7 +504,7 @@ public class TestAGQLListener {
       ParseTreeWalker.DEFAULT.walk(listener, tree);
       assertTrue("No errors: " + error.toString(), error.length() == 0);
       assertEquals("Parse structure: " + parse,
-                   "'transcript'", parse.toString());
+                   "layer:'transcript'->labels->length", parse.toString());
    }
   
    @Test public void labels() {
@@ -482,8 +515,8 @@ public class TestAGQLListener {
             // {
             //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
             // }
-            @Override public void exitLabelsExpression(AGQLParser.LabelsExpressionContext ctx) {
-               parse.append(ctx.stringLiteral().quotedString.getText());
+            @Override public void exitLabelsMethodCall(AGQLParser.LabelsMethodCallContext ctx) { 
+               parse.append("layer:"+ctx.layer.quotedString.getText()+"->labels");
             }
             @Override public void visitErrorNode(ErrorNode node) {
                // System.out.println(node.getText());
@@ -500,7 +533,7 @@ public class TestAGQLListener {
       ParseTreeWalker.DEFAULT.walk(listener, tree);
       assertTrue("No errors: " + error.toString(), error.length() == 0);
       assertEquals("Parse structure: " + parse,
-                   "'transcript'", parse.toString());
+                   "layer:'transcript'->labels", parse.toString());
 
    }
 
@@ -508,8 +541,11 @@ public class TestAGQLListener {
       final StringBuffer parse = new StringBuffer();
       final StringBuffer error = new StringBuffer();
       AGQLListener listener = new AGQLBaseListener() {
-            @Override public void exitAnnotatorOperand(AGQLParser.AnnotatorOperandContext ctx) {
-               parse.append(ctx.getText());
+            @Override public void exitMyMethodCall(AGQLParser.MyMethodCallContext ctx) {
+               parse.append("layer:"+ctx.layer.quotedString.getText());
+            }
+            @Override public void exitAnnotatorExpression(AGQLParser.AnnotatorExpressionContext ctx) { 
+               parse.append("->annotator");
             }
             @Override public void visitErrorNode(ErrorNode node) {
                error.append(node.getText());
@@ -525,7 +561,19 @@ public class TestAGQLListener {
       ParseTreeWalker.DEFAULT.walk(listener, tree);
       assertTrue("No errors: " + error.toString(), error.length() == 0);
       assertEquals("Parse structure: " + parse,
-                   "annotator", parse.toString());
+                   "->annotator", parse.toString());
+
+      parse.setLength(0);
+      lexer = new AGQLLexer(
+         CharStreams.fromString("my('pos').annotator = 'somebody'"));
+      tokens = new CommonTokenStream(lexer);
+      parser = new AGQLParser(tokens);
+      tree = parser.booleanExpression();
+
+      ParseTreeWalker.DEFAULT.walk(listener, tree);
+      assertTrue("No errors: " + error.toString(), error.length() == 0);
+      assertEquals("Parse structure: " + parse,
+                   "layer:'pos'->annotator", parse.toString());
 
    }
 
@@ -537,8 +585,8 @@ public class TestAGQLListener {
             // {
             //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
             // }
-            @Override public void exitAnnotatorsExpression(AGQLParser.AnnotatorsExpressionContext ctx) {
-               parse.append(ctx.stringLiteral().quotedString.getText());
+            @Override public void exitAnnotatorsMethodCall(AGQLParser.AnnotatorsMethodCallContext ctx) { 
+               parse.append("layer:"+ctx.layer.quotedString.getText()+"->annotators");
             }
             @Override public void visitErrorNode(ErrorNode node) {
                // System.out.println(node.getText());
@@ -555,7 +603,7 @@ public class TestAGQLListener {
       ParseTreeWalker.DEFAULT.walk(listener, tree);
       assertTrue("No errors: " + error.toString(), error.length() == 0);
       assertEquals("Parse structure: " + parse,
-                   "'transcript'", parse.toString());
+                   "layer:'transcript'->annotators", parse.toString());
 
    }
 
@@ -563,8 +611,11 @@ public class TestAGQLListener {
       final StringBuffer parse = new StringBuffer();
       final StringBuffer error = new StringBuffer();
       AGQLListener listener = new AGQLBaseListener() {
+            @Override public void exitMyMethodCall(AGQLParser.MyMethodCallContext ctx) {
+               parse.append("layer:"+ctx.layer.quotedString.getText());
+            }
             @Override public void exitOrdinalOperand(AGQLParser.OrdinalOperandContext ctx) {
-               parse.append(ctx.getText());
+               parse.append("->ordinal");
             }
             @Override public void visitErrorNode(ErrorNode node) {
                error.append(node.getText());
@@ -580,7 +631,19 @@ public class TestAGQLListener {
       ParseTreeWalker.DEFAULT.walk(listener, tree);
       assertTrue("No errors: " + error.toString(), error.length() == 0);
       assertEquals("Parse structure: " + parse,
-                   "ordinal", parse.toString());
+                   "->ordinal", parse.toString());
+
+      parse.setLength(0);
+      lexer = new AGQLLexer(
+         CharStreams.fromString("my('transcript').ordinal = 1"));
+      tokens = new CommonTokenStream(lexer);
+      parser = new AGQLParser(tokens);
+      tree = parser.booleanExpression();
+
+      ParseTreeWalker.DEFAULT.walk(listener, tree);
+      assertTrue("No errors: " + error.toString(), error.length() == 0);
+      assertEquals("Parse structure: " + parse,
+                   "layer:'transcript'->ordinal", parse.toString());
 
    }
 
@@ -592,8 +655,11 @@ public class TestAGQLListener {
             // {
             //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
             // }
-            @Override public void exitWhenOperand(AGQLParser.WhenOperandContext ctx) {
-               parse.append(ctx.getText());
+            @Override public void exitMyMethodCall(AGQLParser.MyMethodCallContext ctx) {
+               parse.append("layer:"+ctx.layer.quotedString.getText());
+            }
+            @Override public void exitWhenExpression(AGQLParser.WhenExpressionContext ctx) { 
+               parse.append("->when");
             }
             @Override public void visitErrorNode(ErrorNode node) {
                // System.out.println("ERROR: " + node.getText());
@@ -610,7 +676,19 @@ public class TestAGQLListener {
       ParseTreeWalker.DEFAULT.walk(listener, tree);
       assertTrue("No errors: " + error.toString(), error.length() == 0);
       assertEquals("Parse structure: " + parse,
-                   "when", parse.toString());
+                   "->when", parse.toString());
+
+      parse.setLength(0);
+      lexer = new AGQLLexer(
+         CharStreams.fromString("my('transcript').when < '2018-01-01 00:00:00'"));
+      tokens = new CommonTokenStream(lexer);
+      parser = new AGQLParser(tokens);
+      tree = parser.booleanExpression();
+
+      ParseTreeWalker.DEFAULT.walk(listener, tree);
+      assertTrue("No errors: " + error.toString(), error.length() == 0);
+      assertEquals("Parse structure: " + parse,
+                   "layer:'transcript'->when", parse.toString());
 
    }
 
@@ -969,7 +1047,7 @@ public class TestAGQLListener {
             // {
             //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
             // }
-            @Override public void exitAtomListOperand(AGQLParser.AtomListOperandContext ctx) {
+            @Override public void exitAtomListExpression(AGQLParser.AtomListExpressionContext ctx) {
                parse.append(ctx.getText());
             }
             @Override public void visitErrorNode(ErrorNode node) {
@@ -978,7 +1056,7 @@ public class TestAGQLListener {
          };
 
       AGQLLexer lexer = new AGQLLexer(
-         CharStreams.fromString("('something')"));
+         CharStreams.fromString("('something').includes('x')"));
       CommonTokenStream tokens = new CommonTokenStream(lexer);
       AGQLParser parser = new AGQLParser(tokens);
       AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
@@ -989,7 +1067,7 @@ public class TestAGQLListener {
                    "('something')", parse.toString());
     
       parse.setLength(0);
-      lexer.setInputStream(CharStreams.fromString("('foo', 'bar')"));
+      lexer.setInputStream(CharStreams.fromString("('foo', 'bar').includes('x')"));
       tokens = new CommonTokenStream(lexer);
       parser = new AGQLParser(tokens);
       tree = parser.booleanExpression();
@@ -999,7 +1077,7 @@ public class TestAGQLListener {
                    "('foo','bar')", parse.toString());
 
       parse.setLength(0);
-      lexer.setInputStream(CharStreams.fromString("(1, 2.2, 'three', something)"));
+      lexer.setInputStream(CharStreams.fromString("(1, 2.2, 'three', something).includes('x')"));
       tokens = new CommonTokenStream(lexer);
       parser = new AGQLParser(tokens);
       tree = parser.booleanExpression();
@@ -1009,7 +1087,7 @@ public class TestAGQLListener {
                    "(1,2.2,'three',something)", parse.toString());
     
       parse.setLength(0);
-      lexer.setInputStream(CharStreams.fromString("['something']"));
+      lexer.setInputStream(CharStreams.fromString("['something'].includes('x')"));
       tokens = new CommonTokenStream(lexer);
       parser = new AGQLParser(tokens);
       tree = parser.booleanExpression();
@@ -1020,7 +1098,7 @@ public class TestAGQLListener {
                    "['something']", parse.toString());
 
       parse.setLength(0);
-      lexer.setInputStream(CharStreams.fromString("['foo', 'bar']"));
+      lexer.setInputStream(CharStreams.fromString("['foo', 'bar'].includes('x')"));
       tokens = new CommonTokenStream(lexer);
       parser = new AGQLParser(tokens);
       tree = parser.booleanExpression();
@@ -1030,7 +1108,7 @@ public class TestAGQLListener {
                    "['foo','bar']", parse.toString());
 
       parse.setLength(0);
-      lexer.setInputStream(CharStreams.fromString("[1, 2.2, 'three', something]"));
+      lexer.setInputStream(CharStreams.fromString("[1, 2.2, 'three', something].includes('x')"));
       tokens = new CommonTokenStream(lexer);
       parser = new AGQLParser(tokens);
       tree = parser.booleanExpression();
