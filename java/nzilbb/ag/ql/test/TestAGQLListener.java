@@ -353,6 +353,52 @@ public class TestAGQLListener {
 
    }
   
+   @Test public void neighbours() {
+      final StringBuffer parse = new StringBuffer();
+      final StringBuffer error = new StringBuffer();
+      AGQLListener listener = new AGQLBaseListener() {
+            @Override public void exitNextExpression(AGQLParser.NextExpressionContext ctx) {
+               parse.append("->next");
+            }
+            @Override public void exitPreviousExpression(AGQLParser.PreviousExpressionContext ctx) {
+               parse.append("->previous");
+            }
+            @Override public void exitIdExpression(AGQLParser.IdExpressionContext ctx) { 
+               parse.append("->id");
+            }
+            @Override public void exitLabelExpression(AGQLParser.LabelExpressionContext ctx) { 
+               parse.append("->label");
+            }
+            @Override public void visitErrorNode(ErrorNode node) {
+               error.append(node.getText());
+            }
+         };
+
+      AGQLLexer lexer = new AGQLLexer(
+         CharStreams.fromString("next.id = 'xyz'"));
+      CommonTokenStream tokens = new CommonTokenStream(lexer);
+      AGQLParser parser = new AGQLParser(tokens);
+      AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
+
+      ParseTreeWalker.DEFAULT.walk(listener, tree);
+      assertTrue("No errors: " + error.toString(), error.length() == 0);
+      assertEquals("Parse structure: " + parse,
+                   "->next->id", parse.toString());
+
+      parse.setLength(0);
+      lexer = new AGQLLexer(
+         CharStreams.fromString("previous.label = 'xyz'"));
+      tokens = new CommonTokenStream(lexer);
+      parser = new AGQLParser(tokens);
+      tree = parser.booleanExpression();
+
+      ParseTreeWalker.DEFAULT.walk(listener, tree);
+      assertTrue("No errors: " + error.toString(), error.length() == 0);
+      assertEquals("Parse structure: " + parse,
+                   "->previous->label", parse.toString());
+
+   }
+  
    @Test public void label() {
       final StringBuffer parse = new StringBuffer();
       final StringBuffer error = new StringBuffer();

@@ -22,11 +22,6 @@
  */
 grammar AGQL;
 
-/* TODO:
- previous...
- next...
-*/
-
 @header {
 package nzilbb.ag.ql;
 }
@@ -104,10 +99,11 @@ listLengthExpression
   : listExpression DOT LENGTH
   ;
 
-/* TODO will include parent, next, previous */
 annotationExpression
   : myMethodCall
   | parentExpression
+  | nextExpression
+  | previousExpression
   ;
 
 idExpression
@@ -147,6 +143,16 @@ layerExpression
 parentExpression
   : PARENT                               
   /*: other=annotationExpression DOT PARENT*/
+  ;
+
+nextExpression 
+  : NEXT                               
+  /*: other=annotationExpression DOT NEXT*/
+  ;
+
+previousExpression 
+  : PREVIOUS                               
+  /*: other=annotationExpression DOT PREVIOUSx*/
   ;
 
 parentIdExpression
@@ -257,6 +263,8 @@ LAYER                 : 'layer' ;
 LAYERID               : 'layerId' ;
 PARENT                : 'parent' ;
 PARENTID              : 'parentId' ;
+NEXT                  : 'next' ;
+PREVIOUS              : 'previous' ;
 CONFIDENCE            : 'confidence' ;
 START                 : 'start' ;
 END                   : 'end' ;
