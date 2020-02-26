@@ -555,7 +555,7 @@ public interface IGraphStoreQuery
    public Graph getTranscript(String id) 
       throws StoreException, PermissionException, GraphNotFoundException;
 
-   /** Synonym for {@link #getTranscript(String.String[])}. */
+   /** Synonym for {@link #getTranscript(String,String[])}. */
    @Deprecated default public Graph getGraph(String id, String[] layerIds) 
       throws StoreException, PermissionException, GraphNotFoundException {
       return getTranscript(id, layerIds);
