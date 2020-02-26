@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -22,7 +22,8 @@
 package nzilbb.ag;
 
 /**
- * Interface for querying and updating an annotation graph store, a database of graphs.
+ * Interface for querying and updating an annotation graph store, a database of
+ * transcripts represented as Annotation {@link Graph}s.
  * <p>In order to easily support access via scripting in other languages, methods that
  * return lists use arrays rather than collection classes.
  * @author Robert Fromont robert@fromont.net.nz
@@ -31,10 +32,16 @@ public interface IGraphStore
    extends IGraphStoreQuery
 {
    
+   /** Synonym for {@link #saveTranscript(Graph)}. */
+   @Deprecated default public boolean saveGraph(Graph transcript)
+      throws StoreException, PermissionException, GraphNotFoundException {
+      return saveTranscript(transcript);
+   }
+
    /**
-    * Saves the given graph. The graph can be partial e.g. include only some of the layers
-    * that the stored version of the graph contains.
-    * <p>The graph deltas are assumed to be set correctly, so if this is a new graph, then
+    * Saves the given transcript. The graph can be partial e.g. include only some of the layers
+    * that the stored version of the transcript contains.
+    * <p>The graph deltas are assumed to be set correctly, so if this is a new transcript, then
     * {@link Graph#getChange()} should return Change.Operation.Create, if it's an update,
     * Change.Operation.Update, and to delete, Change.Operation.Delete.  Correspondingly,
     * all {@link Anchor}s and {@link Annotation}s should have their changes set also.  If
@@ -42,18 +49,18 @@ public interface IGraphStore
     * method returns false.
     * <p>After this method has executed, {@link Graph#commit()} is <em>not</em> called -
     * this must be done by the caller, if they want changes to be committed.
-    * @param graph The graph to save.
+    * @param transcript The transcript to save.
     * @return true if changes were saved, false if there were no changes to save.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
-    * @throws GraphNotFoundException If the graph doesn't exist.
+    * @throws StoreException If an error prevents the transcript from being saved.
+    * @throws PermissionException If saving the transcript is not permitted.
+    * @throws GraphNotFoundException If the transcript doesn't exist.
     */
-   public boolean saveGraph(Graph graph)
+   public boolean saveTranscript(Graph transcript)
       throws StoreException, PermissionException, GraphNotFoundException;
 
    /**
     * Creates an annotation starting at <var>from</var> and ending at <var>to</var>.
-    * @param id The ID of the graph.
+    * @param id The ID of the transcript.
     * @param fromId The start anchor's ID. TODO an expression identifying the start
     * anchor's ID. e.g. "'n_123'" or "start.id" or maybe something like
     * "first('segments').start.id)"
@@ -73,7 +80,7 @@ public interface IGraphStore
 
    /**
     * Destroys the annotation with the given ID.
-    * @param id The ID of the graph.
+    * @param id The ID of the transcript.
     * @param annotationId The annotation's ID.
     */
    public void destroyAnnotation(String id, String annotationId)
@@ -81,7 +88,7 @@ public interface IGraphStore
    
    /**
     * Saves a participant, and all its tags, to the database.  The participant is
-    * represented by an Annotation that isn't assumed to be part of a graph.
+    * represented by an Annotation that isn't assumed to be part of a transcript.
     * @param participant
     * @return true if changes were saved, false if there were no changes to save.
     * @throws StoreException If an error prevents the participant from being saved.
@@ -91,47 +98,53 @@ public interface IGraphStore
       throws StoreException, PermissionException;
 
    /**
-    * Saves the given media for the given graph
-    * @param id The graph ID
+    * Saves the given media for the given transcript
+    * @param id The transcript ID
     * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
     * @param mediaUrl A URL to the media content.
     * @throws StoreException If an error prevents the media from being saved.
     * @throws PermissionException If saving the media is not permitted.
-    * @throws GraphNotFoundException If the graph doesn't exist.
+    * @throws GraphNotFoundException If the transcript doesn't exist.
     */
    public void saveMedia(String id, String trackSuffix, String mediaUrl)
       throws StoreException, PermissionException, GraphNotFoundException;
 
    /**
-    * Saves the given source file (transcript) for the given graph.
-    * @param id The graph ID
+    * Saves the given source file for the given transcript.
+    * @param id The transcript ID
     * @param url A URL to the transcript.
     * @throws StoreException If an error prevents the media from being saved.
     * @throws PermissionException If saving the media is not permitted.
-    * @throws GraphNotFoundException If the graph doesn't exist.
+    * @throws GraphNotFoundException If the transcript doesn't exist.
     */
    public void saveSource(String id, String url)
       throws StoreException, PermissionException, GraphNotFoundException;
 
    /**
-    * Saves the given document for the episode of the given graph.
-    * @param id The graph ID
+    * Saves the given document for the episode of the given transcript.
+    * @param id The transcript ID
     * @param url A URL to the document.
     * @throws StoreException If an error prevents the media from being saved.
     * @throws PermissionException If saving the media is not permitted.
-    * @throws GraphNotFoundException If the graph doesn't exist.
+    * @throws GraphNotFoundException If the transcript doesn't exist.
     */
    public void saveEpisodeDocument(String id, String url)
       throws StoreException, PermissionException, GraphNotFoundException;
 
+   /** Synonym for {@link #deleteTranscript(String)}. */
+   @Deprecated default public void deleteGraph(String id)
+      throws StoreException, PermissionException, GraphNotFoundException {
+      deleteTranscript(id);
+   }
+   
    /**
-    * Deletes the given graph, and all associated files.
-    * @param id The ID graph to save.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
-    * @throws GraphNotFoundException If the graph doesn't exist.
+    * Deletes the given transcript, and all associated files.
+    * @param id The ID transcript to delete.
+    * @throws StoreException If an error prevents the transcript from being saved.
+    * @throws PermissionException If saving the transcript is not permitted.
+    * @throws GraphNotFoundException If the transcript doesn't exist.
     */
-   public void deleteGraph(String id)
+   public void deleteTranscript(String id)
       throws StoreException, PermissionException, GraphNotFoundException;
    
 } // end of interface IGraphStore

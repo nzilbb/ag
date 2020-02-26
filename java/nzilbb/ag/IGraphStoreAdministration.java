@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -33,7 +33,7 @@ public interface IGraphStoreAdministration
    extends IGraphStore
 {   
    /**
-    * Registers a graph deserializer.
+    * Registers a transcript deserializer.
     * @param deserializer The deserializer to register.
     * @throws StoreException If an error prevents the operation.
     * @throws PermissionException If the operation is not permitted.
@@ -41,7 +41,7 @@ public interface IGraphStoreAdministration
    public void registerDeserializer(IDeserializer deserializer) throws StoreException, PermissionException;
 
    /**
-    * De-registers a graph deserializer.
+    * De-registers a transcript deserializer.
     * @param deserializer The deserializer to de-register.
     * @throws StoreException If an error prevents the operation.
     * @throws PermissionException If the operation is not permitted.
@@ -75,7 +75,7 @@ public interface IGraphStoreAdministration
    public IDeserializer deserializerForFilesSuffix(String suffix) throws StoreException, PermissionException;
 
    /**
-    * Registers a graph serializer.
+    * Registers a transcript serializer.
     * @param serializer The serializer to register.
     * @throws StoreException If an error prevents the operation.
     * @throws PermissionException If the operation is not permitted.
@@ -83,7 +83,7 @@ public interface IGraphStoreAdministration
    public void registerSerializer(ISerializer serializer) throws StoreException, PermissionException;
 
    /**
-    * De-registers a graph serializer.
+    * De-registers a transcript serializer.
     * @param serializer The serializer to de-register.
     * @throws StoreException If an error prevents the operation.
     * @throws PermissionException If the operation is not permitted.

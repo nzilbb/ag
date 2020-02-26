@@ -27,7 +27,8 @@ import java.util.function.Consumer;
 import nzilbb.util.MonitorableSeries;
 
 /**
- * Interface for querying an annotation graph store, a database of graphs.
+ * Interface for querying an annotation graph store, a database of transcripts
+ * represented using Annotation {@link Graph}s.
  * <p>In order to easily support access via scripting in other languages, methods that return
  * lists use arrays rather than collection classes. 
  * @author Robert Fromont robert@fromont.net.nz
@@ -184,101 +185,139 @@ public interface IGraphStoreQuery
    public String[] getMatchingParticipantIds(String expression, Integer pageLength, Integer pageNumber)
       throws StoreException, PermissionException; 
 
+   /** Synonym for {@link #getTranscriptIds()}. */
+   @Deprecated default public String[] getGraphIds()
+      throws StoreException, PermissionException {
+      return getTranscriptIds();
+   }
+   
    /**
-    * Gets a list of graph IDs.
-    * @return A list of graph IDs.
+    * Gets a list of all trancript IDs.
+    * @return A list of transcript IDs.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getGraphIds()
+   public String[] getTranscriptIds()
       throws StoreException, PermissionException; 
    
+   /** A synonym for {@link #getTranscriptIdsInCorpus(String)}. */
+   @Deprecated default public String[] getGraphIdsInCorpus(String id)
+      throws StoreException, PermissionException {
+      return getTranscriptIdsInCorpus(id);
+   }
+   
    /**
-    * Gets a list of graph IDs in the given corpus.
+    * Gets a list of transcript IDs in the given corpus.
     * @param id A corpus ID.
-    * @return A list of graph IDs.
+    * @return A list of transcript IDs.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getGraphIdsInCorpus(String id)
+   public String[] getTranscriptIdsInCorpus(String id)
       throws StoreException, PermissionException; 
 
-   /**
-    * Gets a list of IDs of graphs that include the given participant.
-    * @param id A participant ID.
-    * @return A list of graph IDs.
-    * @throws StoreException If an error occurs.
-    * @throws PermissionException If the operation is not permitted.
-    */
-   public String[] getGraphIdsWithParticipant(String id)
-      throws StoreException, PermissionException; 
-
-   /**
-    * Counts the number of graphs that match a particular pattern.
-    * @param expression An expression that determines which graphs match.
-    * <p> The expression language is loosely based on JavaScript; expressions such as the
-    * following can be used: 
-    * <ul>
-    *  <li><code>/Ada.+/.test(id)</code></li>
-    *  <li><code>labels('who').includes('Robert')</code></li>
-    *  <li><code>('CC', 'IA', 'MU').includes(my('corpus').label)</code></li>
-    *  <li><code>my('episode').label == 'Ada Aitcheson'</code></li>
-    *  <li><code>my('transcript_scribe').label == 'Robert'</code></li>
-    *  <li><code>my('participant_languages').label == 'en'</code></li>
-    *  <li><code>my('noise').label == 'bell'</code></li>
-    *  <li><code>labels('transcript_languages').includes('en')</code></li>
-    *  <li><code>labels('participant_languages').includes('en')</code></li>
-    *  <li><code>labels('noise').includes('bell')</code></li>
-    *  <li><code>list('transcript_languages').length gt; 1</code></li>
-    *  <li><code>list('participant_languages').length gt; 1</code></li>
-    *  <li><code>list('transcript').length gt; 100</code></li>
-    *  <li><code>annotators('transcript_rating').includes('Robert')</code></li>
-    *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC' &amp;&amp;
-    * labels('who').includes('Robert')</code></li> 
-    * </ul>
-    * @return The number of matching graphs.
-    * @throws StoreException If an error occurs.
-    * @throws PermissionException If the operation is not permitted.
-    */
-   public int countMatchingGraphIds(String expression)
-      throws StoreException, PermissionException; 
+   /** Synonym for {@link #getTranscriptIdsWithParticipant(String)}. */
+   @Deprecated default public String[] getGraphIdsWithParticipant(String id)
+      throws StoreException, PermissionException {
+      return getTranscriptIdsWithParticipant(id);
+   }
    
    /**
-    * Gets a list of IDs of graphs that match a particular pattern.
-    * @param expression An expression that determines which graphs match.
-    * <p> The expression language is loosely based on JavaScript; expressions such as the
-    * following can be used: 
-    * <ul>
-    *  <li><code>/Ada.+/.test(id)</code></li>
-    *  <li><code>labels('who').includes('Robert')</code></li>
-    *  <li><code>('CC', 'IA', 'MU').includes(my('corpus').label)</code></li>
-    *  <li><code>my('episode').label == 'Ada Aitcheson'</code></li>
-    *  <li><code>my('transcript_scribe').label == 'Robert'</code></li>
-    *  <li><code>my('participant_languages').label == 'en'</code></li>
-    *  <li><code>my('noise').label == 'bell'</code></li>
-    *  <li><code>labels('transcript_languages').includes('en')</code></li>
-    *  <li><code>labels('participant_languages').includes('en')</code></li>
-    *  <li><code>labels('noise').includes('bell')</code></li>
-    *  <li><code>list('transcript_languages').length gt; 1</code></li>
-    *  <li><code>list('participant_languages').length gt; 1</code></li>
-    *  <li><code>list('transcript').length gt; 100</code></li>
-    *  <li><code>annotators('transcript_rating').includes('Robert')</code></li>
-    *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC' &amp;&amp;
-    * labels('who').includes('Robert')</code></li> 
-    * </ul>
-    * @return A list of graph IDs.
+    * Gets a list of IDs of transcripts that include the given participant.
+    * @param id A participant ID.
+    * @return A list of transcript IDs.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   default public String[] getMatchingGraphIds(String expression)
-      throws StoreException, PermissionException
-   {
-      return getMatchingGraphIds(expression, null, null, null);
+   public String[] getTranscriptIdsWithParticipant(String id)
+      throws StoreException, PermissionException; 
+
+   /** Synonym for {@link #countMatchingTranscriptIds(String)}. */
+   @Deprecated default public int countMatchingGraphIds(String expression)
+      throws StoreException, PermissionException {
+      return countMatchingTranscriptIds(expression);
    }
 
    /**
-    * Gets a list of IDs of graphs that match a particular pattern.
-    * @param expression An expression that determines which graphs match.
+    * Counts the number of transcript IDs that match a particular pattern.
+    * @param expression An expression that determines which transcripts match.
+    * <p> The expression language is loosely based on JavaScript; expressions such as the
+    * following can be used: 
+    * <ul>
+    *  <li><code>/Ada.+/.test(id)</code></li>
+    *  <li><code>labels('who').includes('Robert')</code></li>
+    *  <li><code>('CC', 'IA', 'MU').includes(my('corpus').label)</code></li>
+    *  <li><code>my('episode').label == 'Ada Aitcheson'</code></li>
+    *  <li><code>my('transcript_scribe').label == 'Robert'</code></li>
+    *  <li><code>my('participant_languages').label == 'en'</code></li>
+    *  <li><code>my('noise').label == 'bell'</code></li>
+    *  <li><code>labels('transcript_languages').includes('en')</code></li>
+    *  <li><code>labels('participant_languages').includes('en')</code></li>
+    *  <li><code>labels('noise').includes('bell')</code></li>
+    *  <li><code>list('transcript_languages').length gt; 1</code></li>
+    *  <li><code>list('participant_languages').length gt; 1</code></li>
+    *  <li><code>list('transcript').length gt; 100</code></li>
+    *  <li><code>annotators('transcript_rating').includes('Robert')</code></li>
+    *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC' &amp;&amp;
+    * labels('who').includes('Robert')</code></li> 
+    * </ul>
+    * @return The number of matching transcript IDs.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public int countMatchingTranscriptIds(String expression)
+      throws StoreException, PermissionException; 
+
+   /** Synonym for {@link #getMatchingTranscriptIds(String)}. */
+   @Deprecated default public String[] getMatchingGraphIds(String expression)
+      throws StoreException, PermissionException
+   {
+      return getMatchingTranscriptIds(expression, null, null, null);
+   }
+
+   /**
+    * Gets a list of IDs of transcript that match a particular pattern.
+    * @param expression An expression that determines which transcript match.
+    * <p> The expression language is loosely based on JavaScript; expressions such as the
+    * following can be used: 
+    * <ul>
+    *  <li><code>/Ada.+/.test(id)</code></li>
+    *  <li><code>labels('who').includes('Robert')</code></li>
+    *  <li><code>('CC', 'IA', 'MU').includes(my('corpus').label)</code></li>
+    *  <li><code>my('episode').label == 'Ada Aitcheson'</code></li>
+    *  <li><code>my('transcript_scribe').label == 'Robert'</code></li>
+    *  <li><code>my('participant_languages').label == 'en'</code></li>
+    *  <li><code>my('noise').label == 'bell'</code></li>
+    *  <li><code>labels('transcript_languages').includes('en')</code></li>
+    *  <li><code>labels('participant_languages').includes('en')</code></li>
+    *  <li><code>labels('noise').includes('bell')</code></li>
+    *  <li><code>list('transcript_languages').length gt; 1</code></li>
+    *  <li><code>list('participant_languages').length gt; 1</code></li>
+    *  <li><code>list('transcript').length gt; 100</code></li>
+    *  <li><code>annotators('transcript_rating').includes('Robert')</code></li>
+    *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC' &amp;&amp;
+    * labels('who').includes('Robert')</code></li> 
+    * </ul>
+    * @return A list of transcript IDs.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   default public String[] getMatchingTranscriptIds(String expression)
+      throws StoreException, PermissionException
+   {
+      return getMatchingTranscriptIds(expression, null, null, null);
+   }
+
+   /** Synonym for {@link #getMatchingTranscriptIds(String,Integer,Integer)}. */
+   @Deprecated default public String[] getMatchingGraphIds(String expression, Integer pageLength, Integer pageNumber)
+      throws StoreException, PermissionException
+   {
+      return getMatchingGraphIds(expression, pageLength, pageNumber, null);
+   }
+
+   /**
+    * Gets a list of IDs of transcripts that match a particular pattern.
+    * @param expression An expression that determines which transcripts match.
     * <p> The expression language is loosely based on JavaScript; expressions such as the
     * following can be used: 
     * <ul>
@@ -301,23 +340,29 @@ public interface IGraphStoreQuery
     * </ul>
     * @param pageLength The maximum number of IDs to return, or null to return all.
     * @param pageNumber The zero-based page number to return, or null to return the first page.
-    * @return A list of graph IDs.
+    * @return A list of transcript IDs.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   default public String[] getMatchingGraphIds(String expression, Integer pageLength, Integer pageNumber)
+   default public String[] getMatchingTranscriptIds(String expression, Integer pageLength, Integer pageNumber)
       throws StoreException, PermissionException
    {
-      return getMatchingGraphIds(expression, pageLength, pageNumber, null);
+      return getMatchingTranscriptIds(expression, pageLength, pageNumber, null);
+   }
+
+   /** Synonym for {@link #getMatchingTranscriptIds(String,Integer,Integer,String)}. */
+   @Deprecated default public String[] getMatchingGraphIds(String expression, Integer pageLength, Integer pageNumber, String order)
+      throws StoreException, PermissionException {
+      return getMatchingTranscriptIds(expression, pageLength, pageNumber, order);
    }
 
    /**
-    * <p>Gets a list of IDs of graphs that match a particular pattern.</p>
+    * <p>Gets a list of IDs of transcript that match a particular pattern.</p>
     * <p>The results can be exhaustive, by omitting pageLength and pageNumber, or they
     * can be a subset (a 'page') of results, by given pageLength and pageNumber values.</p>
-    * <p>The order of the list can be specified.  If ommitted, the graphs are listed in ID
+    * <p>The order of the list can be specified.  If ommitted, the transcripts are listed in ID
     * order.</p> 
-    * @param expression An expression that determines which graphs match.
+    * @param expression An expression that determines which transcripts match.
     * <p> The expression language is loosely based on JavaScript; expressions such as the following can be used:
     * <ul>
     *  <li><code>/Ada.+/.test(id)</code></li>
@@ -340,12 +385,12 @@ public interface IGraphStoreQuery
     * @param pageLength The maximum number of IDs to return, or null to return all.
     * @param pageNumber The zero-based page number to return, or null to return the first page.
     * @param order The ordering for the list of IDs, a string containing a comma-separated list of
-    * expressions, which may be appended by " ASC" or " DESC", or null for graph ID order. 
-    * @return A list of graph IDs.
+    * expressions, which may be appended by " ASC" or " DESC", or null for transcript ID order. 
+    * @return A list of transcript IDs.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getMatchingGraphIds(String expression, Integer pageLength, Integer pageNumber, String order)
+   public String[] getMatchingTranscriptIds(String expression, Integer pageLength, Integer pageNumber, String order)
       throws StoreException, PermissionException; 
 
    /**
@@ -371,7 +416,7 @@ public interface IGraphStoreQuery
 
    /**
     * Gets a list of annotations that match a particular pattern.
-    * @param expression An expression that determines which graphs match.
+    * @param expression An expression that determines which annotations match.
     * <p> The expression language is loosely based on JavaScript; expressions such as the
     * following can be used: 
     * <ul>
@@ -396,7 +441,7 @@ public interface IGraphStoreQuery
 
    /**
     * Gets a list of annotations that match a particular pattern.
-    * @param expression An expression that determines which graphs match.
+    * @param expression An expression that determines which annotations match.
     * <p> The expression language is loosely based on JavaScript; expressions such as the
     * following can be used: 
     * <ul>
@@ -420,25 +465,25 @@ public interface IGraphStoreQuery
       throws StoreException, PermissionException; 
 
    /**
-    * Gets the number of annotations on the given layer of the given graph.
-    * @param id The ID of the graph.
+    * Gets the number of annotations on the given layer of the given transcript.
+    * @param id The ID of the transcript.
     * @param layerId The ID of the layer.
     * @return A (possibly empty) array of annotations.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
    public long countAnnotations(String id, String layerId)
       throws StoreException, PermissionException, GraphNotFoundException;
 
    /**
-    * Gets the annotations on the given layer of the given graph.
-    * @param id The ID of the graph.
+    * Gets the annotations on the given layer of the given transcript.
+    * @param id The ID of the transcript.
     * @param layerId The ID of the layer.
     * @return A (possibly empty) array of annotations.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
    default public Annotation[] getAnnotations(String id, String layerId)
       throws StoreException, PermissionException, GraphNotFoundException
@@ -447,15 +492,15 @@ public interface IGraphStoreQuery
    }
 
    /**
-    * Gets the annotations on the given layer of the given graph.
-    * @param id The ID of the graph.
+    * Gets the annotations on the given layer of the given transcript.
+    * @param id The ID of the transcript.
     * @param layerId The ID of the layer.
     * @param pageLength The maximum number of IDs to return, or null to return all.
     * @param pageNumber The zero-based page number to return, or null to return the first page.
     * @return A (possibly empty) array of annotations.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
    public Annotation[] getAnnotations(String id, String layerId, Integer pageLength, Integer pageNumber)
       throws StoreException, PermissionException, GraphNotFoundException;
@@ -482,90 +527,102 @@ public interface IGraphStoreQuery
       throws StoreException, PermissionException;
    
    /**
-    * Gets the given anchors in the given graph.
-    * @param id The ID of the graph.
+    * Gets the given anchors in the given transcript.
+    * @param id The ID of the transcript.
     * @param anchorIds A list of anchor IDs.
     * @return A (possibly empty) array of anchors.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
    public Anchor[] getAnchors(String id, String[] anchorIds)
       throws StoreException, PermissionException, GraphNotFoundException;
 
+   /** Synonym for {@link #getTranscript(String)}. */
+   @Deprecated default public Graph getGraph(String id) 
+      throws StoreException, PermissionException, GraphNotFoundException {
+      return getTranscript(id);
+   }
+   
    /**
-    * Gets a graph given its ID.
-    * @param id The given graph ID.
-    * @return The identified graph.
+    * Gets a transcript given its ID.
+    * @param id The given transcript ID.
+    * @return The identified transcript.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
-   public Graph getGraph(String id) 
+   public Graph getTranscript(String id) 
+      throws StoreException, PermissionException, GraphNotFoundException;
+
+   /** Synonym for {@link #getTranscript(String.String[])}. */
+   @Deprecated default public Graph getGraph(String id, String[] layerIds) 
+      throws StoreException, PermissionException, GraphNotFoundException {
+      return getTranscript(id, layerIds);
+   }
+   
+   /**
+    * Gets a transcript given its ID, containing only the given layers.
+    * @param id The given transcript ID.
+    * @param layerIds The IDs of the layers to load, or null if only transcript data is required.
+    * @return The identified transcript.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
+    */
+   public Graph getTranscript(String id, String[] layerIds) 
       throws StoreException, PermissionException, GraphNotFoundException;
 
    /**
-    * Gets a graph given its ID, containing only the given layers.
-    * @param id The given graph ID.
-    * @param layerIds The IDs of the layers to load, or null if only graph data is required.
-    * @return The identified graph.
-    * @throws StoreException If an error occurs.
-    * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
-    */
-   public Graph getGraph(String id, String[] layerIds) 
-      throws StoreException, PermissionException, GraphNotFoundException;
-
-   /**
-    * Gets a fragment of a graph, given its ID and the ID of an annotation in it that defines the 
-    * desired fragment.
-    * @param graphId The ID of the graph.
+    * Gets a fragment of a transcript, given its ID and the ID of an annotation in it that
+    * defines the  desired fragment.
+    * @param transcriptId The ID of the transcript.
     * @param annotationId The ID of an annotation that defines the bounds of the fragment.
-    * @return The identified graph fragment.
+    * @return The identified transcript fragment.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
-   public Graph getFragment(String graphId, String annotationId) 
+   public Graph getFragment(String transcriptId, String annotationId) 
       throws StoreException, PermissionException, GraphNotFoundException;
 
    /**
-    * Gets a fragment of a graph, given its ID and the ID of an annotation in it that defines the 
-    * desired fragment, and containing only the given layers.
-    * @param graphId The ID of the graph.
+    * Gets a fragment of a transcript, given its ID and the ID of an annotation in it that
+    * defines the desired fragment, and containing only the given layers.
+    * @param transcriptId The ID of the transcript.
     * @param annotationId The ID of an annotation that defines the bounds of the fragment.
-    * @param layerIds The IDs of the layers to load, or null if only graph data is required.
-    * @return The identified graph fragment.
+    * @param layerIds The IDs of the layers to load, or null if only transcript data is required.
+    * @return The identified transcript fragment.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
-   public Graph getFragment(String graphId, String annotationId, String[] layerIds) 
+   public Graph getFragment(String transcriptId, String annotationId, String[] layerIds) 
       throws StoreException, PermissionException, GraphNotFoundException;
    
    /**
-    * Gets a fragment of a graph, given its ID and the start/end offsets that define the 
+    * Gets a fragment of a transcript, given its ID and the start/end offsets that define the 
     * desired fragment, and containing only the given layers.
-    * @param graphId The ID of the graph.
+    * @param transcriptId The ID of the transcript.
     * @param start The start offset of the fragment.
     * @param end The end offset of the fragment.
-    * @param layerIds The IDs of the layers to load, or null if only graph data is required.
-    * @return The identified graph fragment.
+    * @param layerIds The IDs of the layers to load, or null if only transcript data is required.
+    * @return The identified transcript fragment.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
-   public Graph getFragment(String graphId, double start, double end, String[] layerIds) 
+   public Graph getFragment(String transcriptId, double start, double end, String[] layerIds) 
       throws StoreException, PermissionException, GraphNotFoundException;
    
    /**
     * Gets a series of fragments, given the series' ID, and only the given layers.
     * @param seriesId The ID of the series.
-    * @param layerIds The IDs of the layers to load, or null if only graph data is required.
+    * @param layerIds The IDs of the layers to load, or null if only transcript data is required.
     * @return An enumeratable series of fragments.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
    public MonitorableSeries<Graph> getFragmentSeries(String seriesId, String[] layerIds) 
       throws StoreException, PermissionException, GraphNotFoundException;
@@ -580,34 +637,34 @@ public interface IGraphStoreQuery
       throws StoreException, PermissionException;
    
    /**
-    * List the media available for the given graph.
-    * @param id The graph ID.
-    * @return List of media files available for the given graph.
+    * List the media available for the given transcript.
+    * @param id The transcript ID.
+    * @return List of media files available for the given transcript.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
    public MediaFile[] getAvailableMedia(String id) 
       throws StoreException, PermissionException, GraphNotFoundException;
 
    /**
-    * Gets a given media track for a given graph.
-    * @param id The graph ID.
+    * Gets a given media track for a given transcript.
+    * @param id The transcript ID.
     * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
     * @param mimeType The MIME type of the media, which may include parameters for type
     * conversion, e.g. "text/wav; samplerate=16000".
-    * @return A URL to the given media for the given graph, or null if the given media doesn't
+    * @return A URL to the given media for the given transcript, or null if the given media doesn't
     * exist. 
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
    public String getMedia(String id, String trackSuffix, String mimeType) 
       throws StoreException, PermissionException, GraphNotFoundException;
 
    /**
-    * Gets a given media track for a given graph.
-    * @param id The graph ID.
+    * Gets a given media track for a given transcript.
+    * @param id The transcript ID.
     * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
     * @param mimeType The MIME type of the media, which may include parameters for type
     * conversion, e.g. "text/wav; samplerate=16000"
@@ -615,18 +672,18 @@ public interface IGraphStoreQuery
     * recording. 
     * @param endOffset The end offset of the media sample, or null for the end of the whole
     * recording. 
-    * @return A URL to the given media for the given graph, or null if the given media doesn't
+    * @return A URL to the given media for the given transcript, or null if the given media doesn't
     * exist. 
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
    public String getMedia(String id, String trackSuffix, String mimeType, Double startOffset, Double endOffset) 
       throws StoreException, PermissionException, GraphNotFoundException;
 
    /**
-    * Get a list of documents associated with the episode of the given graph.
-    * @param id The graph ID.
+    * Get a list of documents associated with the episode of the given transcript.
+    * @param id The transcript ID.
     * @return List of URLs to documents.
     * @throws StoreException If an error prevents the media from being saved.
     * @throws PermissionException If saving the media is not permitted.
