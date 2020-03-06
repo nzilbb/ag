@@ -24,7 +24,9 @@ package nzilbb.ag;
 import nzilbb.ag.serialize.*;
 
 /**
- * Interface for administration of a graph store, including definition of layers,
+ * Interface for administration of a graph store.
+ * <p>This interface inherits the <em>read-write</em> operations of {@link IGraphStore}
+ * and adds some administration operations, including definition of layers,
  * registration of converters, etc.
  * @author Robert Fromont robert@fromont.net.nz
  */

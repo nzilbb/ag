@@ -29,6 +29,7 @@ import nzilbb.util.MonitorableSeries;
 /**
  * Interface for querying an annotation graph store, a database of transcripts
  * represented using Annotation {@link Graph}s.
+ * <p>This interface provides only <em>read-only</em> operations.
  * <p>In order to easily support access via scripting in other languages, methods that return
  * lists use arrays rather than collection classes. 
  * @author Robert Fromont robert@fromont.net.nz

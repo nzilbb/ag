@@ -24,6 +24,8 @@ package nzilbb.ag;
 /**
  * Interface for querying and updating an annotation graph store, a database of
  * transcripts represented as Annotation {@link Graph}s.
+ * <p>This interface inherits the <em>read-only</em> operations of {@link IGraphStoreQuery}
+ * and adds some <em>write</em> operations for updating data.
  * <p>In order to easily support access via scripting in other languages, methods that
  * return lists use arrays rather than collection classes.
  * @author Robert Fromont robert@fromont.net.nz
