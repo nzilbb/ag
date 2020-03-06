@@ -2153,22 +2153,22 @@ public class EAFSerialization
       Element constraint = document.createElement("CONSTRAINT");
       annotationDocument.appendChild(constraint);
       constraint.setAttribute("DESCRIPTION","Time subdivision of parent annotation's time interval, no time gaps allowed within this interval");
-      linguisticType.setAttribute("STEREOTYPE","Time_Subdivision");
+      constraint.setAttribute("STEREOTYPE","Time_Subdivision");
       
       constraint = document.createElement("CONSTRAINT");
       annotationDocument.appendChild(constraint);
       constraint.setAttribute("DESCRIPTION","Symbolic subdivision of a parent annotation. Annotations refering to the same parent are ordered");
-      linguisticType.setAttribute("STEREOTYPE","Symbolic_Subdivision");
+      constraint.setAttribute("STEREOTYPE","Symbolic_Subdivision");
       
       constraint = document.createElement("CONSTRAINT");
       annotationDocument.appendChild(constraint);
       constraint.setAttribute("DESCRIPTION","1-1 association with a parent annotation");
-      linguisticType.setAttribute("STEREOTYPE","Symbolic_Association");
+      constraint.setAttribute("STEREOTYPE","Symbolic_Association");
       
       constraint = document.createElement("CONSTRAINT");
       annotationDocument.appendChild(constraint);
       constraint.setAttribute("DESCRIPTION","Time alignable annotations within the parent annotation's time interval, gaps are allowed");
-      linguisticType.setAttribute("STEREOTYPE","Included_In");
+      constraint.setAttribute("STEREOTYPE","Included_In");
       
       lastUnusedAnnotationId.setTextContent(""+(++lLastUnusedAnnotationId));
 
