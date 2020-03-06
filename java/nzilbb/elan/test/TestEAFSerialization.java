@@ -1265,6 +1265,108 @@ public class TestEAFSerialization
       }
    }
 
+   @Test public void serializeNoWordTokens()
+      throws Exception
+   {
+      Schema schema = new Schema(
+         "who", "turn", "utterance", "word",
+	 new Layer("scribe", "Transcriber")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(true)
+         .setPeersOverlap(true)
+         .setSaturated(true),
+         new Layer("who", "Participants")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(true)
+         .setPeersOverlap(true)
+         .setSaturated(true),
+         new Layer("comment", "Comment", 2, true, false, true),
+         new Layer("noise", "Noise", 2, true, false, true),
+         new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+         new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+         new Layer("word", "Words", 2, true, false, false, "turn", true),
+         new Layer("phone", "Phones", 2, true, true, true, "word", true),
+         new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
+         new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
+      File dir = getDir();
+      // access file
+      NamedStream[] jsonStreams = { new NamedStream(new File(dir, "serialize_utterance_word.json")) };
+      
+      // deserialize graph from JSON
+      JSONSerialization json = new JSONSerialization();
+      json.configure(json.configure(new ParameterSet(), schema), schema);
+      json.setParameters(json.load(jsonStreams, schema));
+      Graph[] graphs = json.deserialize();
+
+      // change the ID
+      graphs[0].setId("serialize_utterance_no_word");
+      
+      // create serializer
+      EAFSerialization serializer = new EAFSerialization();
+      
+      // general configuration
+      ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      assertEquals(10, serializer.configure(configuration, schema).size());
+      assertEquals("comment", "comment", 
+		   ((Layer)configuration.get("commentLayer").getValue()).getId());
+      assertEquals("pronounce", "pronounce", 
+		   ((Layer)configuration.get("pronounceLayer").getValue()).getId());
+      assertEquals("lexical", "lexical", 
+		   ((Layer)configuration.get("lexicalLayer").getValue()).getId());
+      assertEquals("noise", "noise", 
+		   ((Layer)configuration.get("noiseLayer").getValue()).getId());
+      assertEquals("author", "scribe", 
+		   ((Layer)configuration.get("authorLayer").getValue()).getId());
+      assertNull("version_date",
+                 configuration.get("dateLayer").getValue());
+      assertNull("language", 
+                 configuration.get("languageLayer").getValue());
+      assertEquals("useConventions", Boolean.TRUE, 
+		   (Boolean)configuration.get("useConventions").getValue());
+      assertEquals("ignoreBlankAnnotations", Boolean.TRUE, 
+		   (Boolean)configuration.get("ignoreBlankAnnotations").getValue());
+      assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
+		   (Double)configuration.get("minimumTurnPauseLength").getValue());
+      
+      LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
+         Arrays.asList(serializer.getRequiredLayers()));
+      assertEquals("Needed layers: " + needLayers,
+                   8, needLayers.size());
+      assertTrue(needLayers.contains("who"));
+      assertTrue(needLayers.contains("turn"));
+      assertTrue(needLayers.contains("utterance"));
+      assertTrue(needLayers.contains("word"));
+      assertTrue(needLayers.contains("pronounce"));
+      assertTrue(needLayers.contains("lexical"));
+      assertTrue(needLayers.contains("comment"));
+      assertTrue(needLayers.contains("noise"));
+	 
+      // serialize
+      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+      final Vector<NamedStream> streams = new Vector<NamedStream>();
+      String[] layers = {"utterance"}; 
+      serializer.serialize(Arrays.spliterator(graphs), layers,
+                           stream -> streams.add(stream),
+                           warning -> System.out.println(warning),
+                           exception -> exceptions.add(exception));
+      if (exceptions.size() > 0) fail(""+exceptions);
+
+      streams.elementAt(0).save(dir);
+
+      // test using diff
+      File result = new File(dir, "serialize_utterance_no_word.eaf");
+      String differences = diff(new File(dir, "expected_serialize_utterance_no_word.eaf"), result);
+      if (differences != null)
+      {
+         fail(differences);
+      }
+      else
+      {
+         result.delete();
+      }
+   }
+
    /**
     * Diffs two files.
     * @param expected
