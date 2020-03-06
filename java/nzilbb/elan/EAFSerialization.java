@@ -442,7 +442,7 @@ public class EAFSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "ELAN EAF Transcript", "1.02", "text/x-eaf+xml", ".eaf", "20191031.1734",
+         "ELAN EAF Transcript", "1.03", "text/x-eaf+xml", ".eaf", "20191031.1734",
          getClass().getResource("icon.png"));
    }
    
@@ -1883,7 +1883,8 @@ public class EAFSerialization
    protected NamedStream serializeGraph(Graph graph, String[] layerIds, Consumer<String> warnings) 
       throws SerializationException
    {
-      SerializationException errors = null;      
+      SerializationException errors = null;
+      Schema schema = graph.getSchema();
 
       HashSet<String> selectedLayers = new HashSet<String>();
       if (layerIds != null)
@@ -1892,7 +1893,7 @@ public class EAFSerialization
       }
       else
       {
-         for (Layer l : graph.getSchema().getLayers().values()) selectedLayers.add(l.getId());
+         for (Layer l : schema.getLayers().values()) selectedLayers.add(l.getId());
       }
 
       graph.setOffsetGranularity(Constants.GRANULARITY_MILLISECONDS);
@@ -2006,7 +2007,7 @@ public class EAFSerialization
       } // next participant
       
       // 'freeform' layers first - i.e. aligned children of graph
-      for (Layer layer : graph.getSchema().getLayers().values().stream()
+      for (Layer layer : schema.getLayers().values().stream()
               .filter(layer -> selectedLayers.contains(layer.getId()))
               // parent is root
               .filter(layer -> layer.getParent().equals(graph.getSchema().getRoot()))
@@ -2056,7 +2057,7 @@ public class EAFSerialization
       } // next annotation
       
       // 'meta' layers next - i.e. children of turn
-      for (Layer layer : graph.getSchema().getLayers().values().stream()
+      for (Layer layer : schema.getLayers().values().stream()
               .filter(layer -> selectedLayers.contains(layer.getId()))
               // parent is turn
               .filter(layer -> layer.getParentId().equals(turnLayer.getId()))
@@ -2070,20 +2071,43 @@ public class EAFSerialization
             layer, graph, document, annotationDocument, timeOrder, mapAnchorToTimeslotId,
             lLastUnusedAnnotationId, warnings, language);
       }
-      
-      // now word layer
-      lLastUnusedAnnotationId = insertTier(
-         wordLayer, graph, document, annotationDocument, timeOrder, mapAnchorToTimeslotId,
-         lLastUnusedAnnotationId, warnings, language);
+
+      // do we want word tokens? depends on selected layers...
+
+      List<Layer> wordTagLayers = schema.getLayers().values().stream()
+         .filter(layer -> selectedLayers.contains(layer.getId()))
+         // parent is word
+         .filter(layer -> layer.getParentId().equals(wordLayer.getId()))
+         // not aligned
+         .filter(layer -> layer.getAlignment() == Constants.ALIGNMENT_NONE)
+         .collect(Collectors.toList());
+
+      List<Layer> segmentLayers = schema.getLayers().values().stream()
+         .filter(layer -> selectedLayers.contains(layer.getId()))
+         // parent is word
+         .filter(layer -> layer.getParentId().equals(wordLayer.getId()))
+         // aligned
+         .filter(layer -> layer.getAlignment() != Constants.ALIGNMENT_NONE)
+         .collect(Collectors.toList());
+         
+      boolean wordTokens
+         // if explicitly selected
+         = selectedLayers.contains(schema.getWordLayerId())
+         // or there are word tag layers selected
+         || wordTagLayers.size() > 0
+         // or there are segment layers selected
+         || segmentLayers.size() > 0;
+
+      if (wordTokens)
+      {
+         // now word layer
+         lLastUnusedAnnotationId = insertTier(
+            wordLayer, graph, document, annotationDocument, timeOrder, mapAnchorToTimeslotId,
+            lLastUnusedAnnotationId, warnings, language);
+      }
       
       // word tag layers
-      for (Layer layer : graph.getSchema().getLayers().values().stream()
-              .filter(layer -> selectedLayers.contains(layer.getId()))
-              // parent is word
-              .filter(layer -> layer.getParentId().equals(wordLayer.getId()))
-              // not aligned
-              .filter(layer -> layer.getAlignment() == Constants.ALIGNMENT_NONE)
-              .collect(Collectors.toList()))
+      for (Layer layer : wordTagLayers)
       {
          lLastUnusedAnnotationId = insertTier(
             layer, graph, document, annotationDocument, timeOrder, mapAnchorToTimeslotId,
@@ -2091,13 +2115,7 @@ public class EAFSerialization
       }
       
       // segment layers
-      for (Layer layer : graph.getSchema().getLayers().values().stream()
-              .filter(layer -> selectedLayers.contains(layer.getId()))
-              // parent is word
-              .filter(layer -> layer.getParentId().equals(wordLayer.getId()))
-              // aligned
-              .filter(layer -> layer.getAlignment() != Constants.ALIGNMENT_NONE)
-              .collect(Collectors.toList()))
+      for (Layer layer : segmentLayers)
       {
          lLastUnusedAnnotationId = insertTier(
             layer, graph, document, annotationDocument, timeOrder, mapAnchorToTimeslotId,
