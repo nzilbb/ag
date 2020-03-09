@@ -298,7 +298,6 @@ public class TestVttSerialization
 
    }
 
-
    @Test public void serializeSimultaneousSpeech()
       throws Exception
    {
@@ -431,6 +430,76 @@ public class TestVttSerialization
          result.delete();
       }
    }
+
+   @Test public void canReadOwnOutput() 
+      throws Exception
+   {
+      Schema schema = new Schema(
+         "who", "turn", "utterance", "word",
+         new Layer("transcript_language", "Language", 0, true, true, true),
+         new Layer("kind", "Kind", 0, false, false, true),
+         new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true));
+      
+      // access file
+      NamedStream[] streams = {
+         new NamedStream(new File(getDir(), "expected_simultaneous_speech.vtt")) };
+      
+      // create deserializer
+      VttSerialization deserializer = new VttSerialization();
+
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals("Configuration parameters" + configuration, 0,
+		   deserializer.configure(configuration, schema).size());      
+
+      // load the stream
+      ParameterSet defaultParameters = deserializer.load(streams, schema);
+      // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals(1, defaultParameters.size());
+      
+      // configure the deserialization
+      deserializer.setParameters(defaultParameters);
+
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+
+      for (String warning : deserializer.getWarnings())
+      {
+	 System.out.println(warning);
+      }
+      
+      assertEquals("expected_simultaneous_speech.vtt", g.getId());
+      assertEquals("time units", Constants.UNIT_SECONDS, g.getOffsetUnits());
+
+      // participants     
+      Annotation[] authors = g.list("who"); 
+      assertEquals(1, authors.length);
+      assertEquals("speaker", authors[0].getLabel());
+
+      // turns
+      Annotation[] turns = g.list("turn");
+      assertEquals(1, turns.length);
+      assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
+      assertEquals(Double.valueOf(15.0), turns[0].getEnd().getOffset());
+
+      // utterances
+      Annotation[] utterances = g.list("utterance");
+      assertEquals(4, utterances.length);
+      assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
+      assertEquals(Double.valueOf(5.0), utterances[0].getEnd().getOffset());
+
+      assertEquals(Double.valueOf(5.0), utterances[1].getStart().getOffset());
+      assertEquals(Double.valueOf(10.0), utterances[1].getEnd().getOffset());
+
+      assertEquals(Double.valueOf(10.0), utterances[utterances.length-1].getStart().getOffset());
+      assertEquals(Double.valueOf(15.0), utterances[utterances.length-1].getEnd().getOffset());
+
+   }
+
 
    /**
     * Diffs two files.

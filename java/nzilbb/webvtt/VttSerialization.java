@@ -677,62 +677,63 @@ public class VttSerialization
 	 while (line != null)
 	 {
 	    // skip comment lines
-	    if (line.startsWith("NOTE ")) continue;
-	    // skip cue-number lines
-	    if (line.matches("^[0-9]+$")) continue; 
-	    try
-	    {
-	       Object[] intervalLine = intervalFormat.parse(line);
-	       
-	       // this is an interval line...
-	       
-	       // finish last utterance
-	       if (currentUtterance.getLabel().trim().length() > 0)
-	       { // the utterance actually contains something
-
-		  currentUtterance.setLabel(
-		     currentUtterance.getLabel()
-		     // remove <...> tags TODO extract voice tags for speakers
-		     .replaceAll("<[^>]+>","")
-		     // strip out newlines and multiple spaces
-		     .replaceAll("[\r\n ]+", " ").replaceAll(" +", " ").trim());
-		  graph.addAnnotation(currentUtterance);
-	       }
-	       
-	       // start new utterance
-	       Long hours = (Long)intervalLine[0];
-	       Long minutes = (Long)intervalLine[1];
-	       Long seconds = (Long)intervalLine[2];
-	       Long milliseconds = (Long)intervalLine[3];
-	       Anchor start = graph.getOrCreateAnchorAt(
-		  hours * 3600 + minutes * 60 + seconds + milliseconds.doubleValue()/1000,
-		  Constants.CONFIDENCE_MANUAL);
-	       
-	       hours = (Long)intervalLine[4];
-	       minutes = (Long)intervalLine[5];
-	       seconds = (Long)intervalLine[6];
-	       milliseconds = (Long)intervalLine[7];
-	       Anchor end = graph.getOrCreateAnchorAt(
-		  hours * 3600 + minutes * 60 + seconds + milliseconds.doubleValue()/1000,
-		  Constants.CONFIDENCE_MANUAL);
-	       
-	       String suffix = (String)intervalLine[8]; // TODO do something with this?
-	       
-	       currentUtterance = new Annotation(
-		  null, "", schema.getUtteranceLayerId(), start.getId(), end.getId(), currentTurn.getId());
-	       currentTurn.setEndId(end.getId());
-	       
-	       line = vtt.readLine();
-	       continue;
+	    if (!line.startsWith("NOTE ")
+                // skip cue-number lines
+                && !line.matches("^[0-9]+$"))
+            {            
+               try
+               {
+                  Object[] intervalLine = intervalFormat.parse(line);
+                  // this is an interval line...
+                  
+                  // finish last utterance
+                  if (currentUtterance.getLabel().trim().length() > 0)
+                  { // the utterance actually contains something
+                     
+                     currentUtterance.setLabel(
+                        currentUtterance.getLabel()
+                        // remove <...> tags TODO extract voice tags for speakers
+                        .replaceAll("<[^>]+>","")
+                        // strip out newlines and multiple spaces
+                        .replaceAll("[\r\n ]+", " ").replaceAll(" +", " ").trim());
+                     graph.addAnnotation(currentUtterance);
+                  }
+                  
+                  // start new utterance
+                  Long hours = (Long)intervalLine[0];
+                  Long minutes = (Long)intervalLine[1];
+                  Long seconds = (Long)intervalLine[2];
+                  Long milliseconds = (Long)intervalLine[3];
+                  Anchor start = graph.getOrCreateAnchorAt(
+                     hours * 3600 + minutes * 60 + seconds + milliseconds.doubleValue()/1000,
+                     Constants.CONFIDENCE_MANUAL);
+                  
+                  hours = (Long)intervalLine[4];
+                  minutes = (Long)intervalLine[5];
+                  seconds = (Long)intervalLine[6];
+                  milliseconds = (Long)intervalLine[7];
+                  Anchor end = graph.getOrCreateAnchorAt(
+                     hours * 3600 + minutes * 60 + seconds + milliseconds.doubleValue()/1000,
+                     Constants.CONFIDENCE_MANUAL);
+                  
+                  String suffix = (String)intervalLine[8]; // TODO do something with this?
+                  
+                  currentUtterance = new Annotation(
+                     null, "", schema.getUtteranceLayerId(), start.getId(), end.getId(), currentTurn.getId());
+                  currentTurn.setEndId(end.getId());
+                  
+                  line = vtt.readLine();
+                  continue;
+               }
+               catch(ParseException exception)
+               {
+               }
+               
+               // not an interval definition, so add the text to the utterance
+               // TODO looks for cue tags like: <c.colorE5E5E5>first question</c>
+               currentUtterance.setLabel(currentUtterance.getLabel() + " " + line);
 	    }
-	    catch(ParseException exception)
-	    {
-	    }
-	    
-	    // not an interval definition, so add the text to the utterance
-	    // TODO looks for cue tags like: <c.colorE5E5E5>first question</c>
-	    currentUtterance.setLabel(currentUtterance.getLabel() + " " + line);
-	    
+            
 	    line = vtt.readLine();
 	 } // next line
 	 // finish last utterance
