@@ -77,23 +77,54 @@ public class IO
 
    /**
     * Determines the file extension (not including the dot) of the given file.
+    * <p>The extension is assumed to have at least one alphabetic character 
+    * - i.e. <q>.trs</q> of <q>something.trs</q> 
+    * but not <q>.678</q> of <q>something__1.234-5.678</q>.
     * @param file The file.
     * @return The extension (not including the dot) of the given file.
     */
    public static String Extension(File file)
    {
-      if (file.getName().indexOf('.') < 0) return "";
-      return file.getName().substring(file.getName().lastIndexOf('.') + 1);
+      return Extension(file.getName());
+   } // end of Extension()
+
+   /**
+    * Determines the file extension (not including the dot) of the given file.
+    * <p>The extension is assumed to have at least one alphabetic character 
+    * - i.e. <q>.trs</q> of <q>something.trs</q> 
+    * but not <q>.678</q> of <q>something__1.234-5.678</q>.
+    * @param name The file name.
+    * @return The extension (not including the dot) of the given file.
+    */
+   public static String Extension(String name)
+   {
+      return name.replaceAll(".*(\\.[^.]*[a-zA-Z][^.]*)$","$1");
    } // end of Extension()
 
    /**
     * Determines the name of the given file without extension (not including the dot).
+    * <p>The extension is assumed to have at least one alphabetic character 
+    * - i.e. <q>.trs</q> of <q>something.trs</q> 
+    * but not <q>.678</q> of <q>something__1.234-5.678</q>.
     * @param file The file.
     * @return The name of the given file without extension (not including the dot).
     */
    public static String WithoutExtension(File file)
    {
-      return file.getName().replaceAll("\\.[^.]*","");
+      return WithoutExtension(file.getName());
+   } // end of Extension()
+   
+   /**
+    * Determines the name of the given file without extension (not including the dot).
+    * <p>The extension is assumed to have at least one alphabetic character 
+    * - i.e. <q>.trs</q> of <q>something.trs</q> 
+    * but not <q>.678</q> of <q>something__1.234-5.678</q>.
+    * @param name The file name.
+    * @return The name of the given file without extension (not including the dot).
+    */
+   public static String WithoutExtension(String name)
+   {
+      return name.replaceAll("\\.[^.]*[a-zA-Z][^.]*$","");
    } // end of Extension()
    
    /**
