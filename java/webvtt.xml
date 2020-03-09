@@ -93,6 +93,7 @@
     <junit
 	haltonfailure="true"
 	fork="true"
+        showoutput="true"
 	>
       <classpath>
 	<pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar};${dist}/nzilbb.ag.jar"/>
