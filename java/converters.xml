@@ -130,7 +130,7 @@
     <!-- Put everything in ${build} into the ${ant.project.name}.jar file -->
     <jar jarfile="${dist}/trs-to-eaf.jar" basedir="${build}">
       <manifest>
-	<attribute name="Application-Name" value="Transcriber to Eaf Converter"/>
+	<attribute name="Application-Name" value="Transcriber .trs to ELAN .eaf Converter"/>
 	<attribute name="Permissions" value="all-permissions"/>
 	<attribute name="Main-Class" value="nzilbb.converter.TrsToEaf"/>
       </manifest>
@@ -157,6 +157,53 @@
       <jvmarg value="-ea"/>
       <formatter type="plain" usefile="false" />
       <test name="nzilbb.converter.test.TestTrsToEaf"/>
+    </junit>
+  </target>
+
+  <target name="vtt-to-eaf"
+          description="Web VTT to ELAN converter" >
+    <mkdir dir="${build}"/>
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}"
+	   classpath="${dist}/nzilbb.ag.jar;${dist}/nzilbb.webvtt.jar;${dist}/nzilbb.elan.jar"
+	   includes="nzilbb/converter/VttToEaf.java"
+	   listfiles="yes"
+	   includeantruntime="false"
+	   target="8" source="8"
+	   debug="on"
+	   >
+      <compilerarg value="-Xlint"/>
+    </javac>
+    <!-- Put everything in ${build} into the ${ant.project.name}.jar file -->
+    <jar jarfile="${dist}/vtt-to-eaf.jar" basedir="${build}">
+      <manifest>
+	<attribute name="Application-Name" value="Web VTT to ELAN .eaf Converter"/>
+	<attribute name="Permissions" value="all-permissions"/>
+	<attribute name="Main-Class" value="nzilbb.converter.VttToEaf"/>
+      </manifest>
+      <!-- icon -->
+      <fileset dir="${src}" includes="nzilbb/converter/VttToEaf.png" />
+      <!-- add required jars -->
+      <zipfileset src="${dist}/nzilbb.ag.jar" />
+      <zipfileset src="${dist}/nzilbb.webvtt.jar" />
+      <zipfileset src="${dist}/nzilbb.elan.jar" />      
+    </jar>    
+    <delete dir="${build}"/>
+  </target>
+  <target name="test-vtt-to-eaf" depends="vtt-to-eaf"
+          description="Test Wen VTT to ELAN converter" >
+    <!-- compile unit tests -->
+    <javac srcdir="${src}" destdir="."
+	   includes="nzilbb/converter/test/TestVttToEaf.java"
+	   classpath=".;${junitjar};${dist}/vtt-to-eaf.jar"
+	   listfiles="yes" target="8" source="8" debug="on" includeAntRuntime="false" >
+      <compilerarg value="-Xlint"/>
+    </javac>
+    <junit haltonfailure="true" fork="true" showoutput="true">
+      <classpath><pathelement path=".;${junitjar};${dist}/vtt-to-eaf.jar"/></classpath>
+      <jvmarg value="-ea"/>
+      <formatter type="plain" usefile="false" />
+      <test name="nzilbb.converter.test.TestVttToEaf"/>
     </junit>
   </target>
   
