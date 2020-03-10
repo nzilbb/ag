@@ -16,6 +16,7 @@ to another, including:
 
 * [vtt-to-textgrid.jar](https://github.com/nzilbb/ag/blob/master/bin/vtt-to-textgrid.jar?raw=true) - convert from web subtitles (Web VTT) to Praat TextGrid
 * [trs-to-textgrid.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-textgrid.jar?raw=true) - convert from Transcriber transcripts (.trs) to Praat TextGrid
+* [trs-to-eaf.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-eaf.jar?raw=true) - convert from Transcriber transcripts (.trs) to ELAN files (.eaf)
 
 To use a particular converter, you need to have Java installed on your
 system. Download the file, and double-click it to run.

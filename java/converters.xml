@@ -3,21 +3,25 @@
   <description>Format conversion utilities using nzilbb.ag</description>
   <!-- set global properties for this build -->
   <property name="src"   location="."/>
+  <property name="junitjar" value="/usr/share/java/junit4.jar"/>
   <property name="build" location="build_${ant.project.name}"/>
   <property name="dist"  location="../bin"/>
   
-  <target name="all" depends="serializations,vtt-to-textgrid">
+  <target name="all" depends="serializations,vtt-to-textgrid,trs-to-textgrid">
+  </target>
+  <target name="test" depends="test-vtt-to-textgrid,test-trs-to-textgrid,test-trs-to-eaf">    
   </target>
 
   <target name="serializations">
     <ant antfile="praat.xml" />
     <ant antfile="webvtt.xml" />
+    <ant antfile="transcriber.xml" />
+    <ant antfile="elan.xml" />
   </target>
 
   <target name="vtt-to-textgrid"
           description="VTT to TextGrid converter" >
     <mkdir dir="${build}"/>
-
     <!-- Compile the java code from ${src} into ${build} -->
     <javac srcdir="${src}" destdir="${build}"
 	   classpath="${dist}/nzilbb.ag.jar;${dist}/nzilbb.webvtt.jar;${dist}/nzilbb.praat.jar"
@@ -29,10 +33,8 @@
 	   >
       <compilerarg value="-Xlint"/>
     </javac>
-    
     <!-- Put everything in ${build} into the ${ant.project.name}.jar file -->
-    <jar jarfile="${dist}/vtt-to-textgrid.jar" 
-	 basedir="${build}">
+    <jar jarfile="${dist}/vtt-to-textgrid.jar" basedir="${build}">
       <manifest>
 	<attribute name="Application-Name" value="VTT to TextGrid Converter"/>
 	<attribute name="Permissions" value="all-permissions"/>
@@ -40,15 +42,122 @@
       </manifest>
       <!-- icon -->
       <fileset dir="${src}" includes="nzilbb/converter/VttToTextGrid.png" />
-      
       <!-- add required jars -->
       <zipfileset src="${dist}/nzilbb.ag.jar" />
       <zipfileset src="${dist}/nzilbb.webvtt.jar" />
-      <zipfileset src="${dist}/nzilbb.praat.jar" />
-      
-    </jar>
-    
+      <zipfileset src="${dist}/nzilbb.praat.jar" />      
+    </jar>    
     <delete dir="${build}"/>
+  </target>
+  <target name="test-vtt-to-textgrid" depends="vtt-to-textgrid"
+          description="Test VTT to TextGrid converter" >
+    <!-- compile unit tests -->
+    <javac srcdir="${src}" destdir="."
+	   includes="nzilbb/converter/test/TestVttToTextGrid.java"
+	   classpath=".;${junitjar};${dist}/vtt-to-textgrid.jar"
+	   listfiles="yes" target="8" source="8" debug="on" includeAntRuntime="false" >
+      <compilerarg value="-Xlint"/>
+    </javac>
+    <junit haltonfailure="true" fork="true" showoutput="true">
+      <classpath><pathelement path=".;${junitjar};${dist}/vtt-to-textgrid.jar"/></classpath>
+      <jvmarg value="-ea"/>
+      <formatter type="plain" usefile="false" />
+      <test name="nzilbb.converter.test.TestVttToTextGrid"/>
+    </junit>
+  </target>
+  
+  <target name="trs-to-textgrid"
+          description="Transcriber to TextGrid converter" >
+    <mkdir dir="${build}"/>
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}"
+	   classpath="${dist}/nzilbb.ag.jar;${dist}/nzilbb.transcriber.jar;${dist}/nzilbb.praat.jar"
+	   includes="nzilbb/converter/TrsToTextGrid.java"
+	   listfiles="yes"
+	   includeantruntime="false"
+	   target="8" source="8"
+	   debug="on"
+	   >
+      <compilerarg value="-Xlint"/>
+    </javac>
+    <!-- Put everything in ${build} into the ${ant.project.name}.jar file -->
+    <jar jarfile="${dist}/trs-to-textgrid.jar" basedir="${build}">
+      <manifest>
+	<attribute name="Application-Name" value="Transcriber to TextGrid Converter"/>
+	<attribute name="Permissions" value="all-permissions"/>
+	<attribute name="Main-Class" value="nzilbb.converter.TrsToTextGrid"/>
+      </manifest>
+      <!-- icon -->
+      <fileset dir="${src}" includes="nzilbb/converter/TrsToTextGrid.png" />
+      <!-- add required jars -->
+      <zipfileset src="${dist}/nzilbb.ag.jar" />
+      <zipfileset src="${dist}/nzilbb.transcriber.jar" />
+      <zipfileset src="${dist}/nzilbb.praat.jar" />      
+    </jar>    
+    <delete dir="${build}"/>
+  </target>
+  <target name="test-trs-to-textgrid" depends="trs-to-textgrid"
+          description="Test Transcriber to TextGrid converter" >
+    <!-- compile unit tests -->
+    <javac srcdir="${src}" destdir="."
+	   includes="nzilbb/converter/test/TestTrsToTextGrid.java"
+	   classpath=".;${junitjar};${dist}/trs-to-textgrid.jar"
+	   listfiles="yes" target="8" source="8" debug="on" includeAntRuntime="false" >
+      <compilerarg value="-Xlint"/>
+    </javac>
+    <junit haltonfailure="true" fork="true" showoutput="true">
+      <classpath><pathelement path=".;${junitjar};${dist}/trs-to-textgrid.jar"/></classpath>
+      <jvmarg value="-ea"/>
+      <formatter type="plain" usefile="false" />
+      <test name="nzilbb.converter.test.TestTrsToTextGrid"/>
+    </junit>
+  </target>
+  
+  <target name="trs-to-eaf"
+          description="Transcriber to ELAN converter" >
+    <mkdir dir="${build}"/>
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}"
+	   classpath="${dist}/nzilbb.ag.jar;${dist}/nzilbb.transcriber.jar;${dist}/nzilbb.elan.jar"
+	   includes="nzilbb/converter/TrsToEaf.java"
+	   listfiles="yes"
+	   includeantruntime="false"
+	   target="8" source="8"
+	   debug="on"
+	   >
+      <compilerarg value="-Xlint"/>
+    </javac>
+    <!-- Put everything in ${build} into the ${ant.project.name}.jar file -->
+    <jar jarfile="${dist}/trs-to-eaf.jar" basedir="${build}">
+      <manifest>
+	<attribute name="Application-Name" value="Transcriber to Eaf Converter"/>
+	<attribute name="Permissions" value="all-permissions"/>
+	<attribute name="Main-Class" value="nzilbb.converter.TrsToEaf"/>
+      </manifest>
+      <!-- icon -->
+      <fileset dir="${src}" includes="nzilbb/converter/TrsToEaf.png" />
+      <!-- add required jars -->
+      <zipfileset src="${dist}/nzilbb.ag.jar" />
+      <zipfileset src="${dist}/nzilbb.transcriber.jar" />
+      <zipfileset src="${dist}/nzilbb.elan.jar" />      
+    </jar>    
+    <delete dir="${build}"/>
+  </target>
+  <target name="test-trs-to-eaf" depends="trs-to-eaf"
+          description="Test Transcriber to ELAN converter" >
+    <!-- compile unit tests -->
+    <javac srcdir="${src}" destdir="."
+	   includes="nzilbb/converter/test/TestTrsToEaf.java"
+	   classpath=".;${junitjar};${dist}/trs-to-eaf.jar"
+	   listfiles="yes" target="8" source="8" debug="on" includeAntRuntime="false" >
+      <compilerarg value="-Xlint"/>
+    </javac>
+    <junit haltonfailure="true" fork="true" showoutput="true">
+      <classpath><pathelement path=".;${junitjar};${dist}/trs-to-eaf.jar"/></classpath>
+      <jvmarg value="-ea"/>
+      <formatter type="plain" usefile="false" />
+      <test name="nzilbb.converter.test.TestTrsToEaf"/>
+    </junit>
   </target>
   
 </project>
