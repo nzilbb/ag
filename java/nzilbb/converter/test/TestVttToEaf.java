@@ -41,7 +41,7 @@ public class TestVttToEaf extends UnitTestBase {
       if (differences != null) {
          fail(differences);
       } else {
-         //actual.delete();
+         actual.delete();
       }
    }
 
