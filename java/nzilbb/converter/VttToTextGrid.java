@@ -22,6 +22,7 @@
 package nzilbb.converter;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Vector;
 import java.util.List;
 import java.util.ListIterator;
@@ -63,9 +64,8 @@ import nzilbb.praat.TextGridSerialization;
  * @author Robert Fromont robert@fromont.net.nz
  */
 @ProgramDescription(value="Converts WebVTT subtitle files to Praat TextGrids",arguments="file1.vtt file2.vtt ...")
-public class VttToTextGrid
-   extends GuiProgram
-{
+public class VttToTextGrid extends GuiProgram {
+   
    // Attributes:
    
    /**
@@ -117,20 +117,18 @@ public class VttToTextGrid
    /**
     * Default constructor.
     */
-   public VttToTextGrid()
-   {
+   public VttToTextGrid() {
       setDefaultWindowTitle("WebVTT to TextGrid converter");
       setDefaultWidth(800);
       setDefaultHeight(600);
    } // end of constructor
    
-   public static void main(String argv[])
-   {
+   public static void main(String argv[]) {
       new VttToTextGrid().mainRun(argv);
    }
 
-   public void init()
-   {
+   public void init() {
+      
       interpretAppletParameters();
 
       // build UI
@@ -250,29 +248,23 @@ public class VttToTextGrid
 
    }
 
-   public void start()
-   {
-      if (arguments.size() == 0)
-      {
+   public void start() {
+      
+      if (arguments.size() == 0) {
 	 System.err.println("Nothing to do yet. (Try using --usage command line switch)");
       }
-      for (String argument: arguments)
-      {
+      for (String argument: arguments) {
       	 if (verbose) System.out.println("argument: " + argument);
-      	 try
-      	 {
+      	 try {
       	    File file = new File(argument);
       	    if (verbose) System.out.println("file: " + file.getPath());
       	    ((DefaultListModel)files.getModel()).add(files.getModel().getSize(), file);
-      	 }
-      	 catch(Exception exception)
-      	 {
+      	 } catch(Exception exception) {
       	    System.err.println("Error processing: " + argument + " : " + exception.getMessage());
       	    exception.printStackTrace(System.err);
       	 }
       } // next argument
-      if (getBatchMode())
-      {
+      if (getBatchMode()) {
 	 convertFiles();
       }
    }
@@ -280,8 +272,7 @@ public class VttToTextGrid
    /**
     * Converts the files in the <var>files</var> list.
     */
-   public void convertFiles()
-   {
+   public void convertFiles() {
       new Thread(new Runnable() {
 	    public void run() {
 	       btnConvert.setEnabled(false);
@@ -297,17 +288,14 @@ public class VttToTextGrid
     * Converts a batch of files.
     * @param files
     */
-   public void convertBatch(Vector<File> files)
-   {
+   public void convertBatch(Vector<File> files) {
       progress.setMaximum(files.size());
       progress.setValue(0);
       progress.setString("");
       int f = 0;
-      for (File inputFile: files)
-      {
+      for (File inputFile: files) {
 	 progress.setString(inputFile.getName());
-	 try
-	 {
+	 try {
 	    if (!inputFile.exists())
 	    {
 	       System.err.println("Input file doesn't exist: " + inputFile.getPath());
@@ -316,9 +304,7 @@ public class VttToTextGrid
 	    {
 	       convert(inputFile);
 	    }
-	 }
-	 catch(Exception exception)
-	 {
+	 } catch(Exception exception) {
 	    System.err.println("Error processing: " + inputFile.getPath() + " : " + exception.getMessage());
 	    exception.printStackTrace(System.err);
 	 }
@@ -333,9 +319,7 @@ public class VttToTextGrid
     * @param outputFile
     * @throws Exception
     */
-   public void convert(File inputFile)
-      throws Exception
-   {
+   public void convert(File inputFile) throws Exception {
       if (verbose) System.out.println("Converting " + inputFile.getPath());
       
       Schema schema = new Schema("who", "turn", "utterance", null,
@@ -363,8 +347,7 @@ public class VttToTextGrid
       
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];     
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -379,22 +362,21 @@ public class VttToTextGrid
       serializer.configure(configuration, schema);
 
       // serialize
-      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
-      final Vector<NamedStream> outputStreams = new Vector<NamedStream>();
-      serializer.serialize(Utility.OneGraphSpliterator(g), null,
-                           stream -> outputStreams.add(stream),
-                           warning -> { if (verbose) System.out.println(warning); },
-                           exception -> exceptions.add(exception));
-      for (NamedStream stream : outputStreams)
-      {
-	 File dir = inputFile.getParentFile();
-	 if (dir == null) dir = new File(".");
-	 stream.save(dir);
-      }
+      final File dir = (inputFile.getParentFile() != null? inputFile.getParentFile()
+                        : new File("."));
+      serializer.serialize(
+         Utility.OneGraphSpliterator(g), null,
+         stream -> {
+            try {
+               stream.save(dir);
+            } catch(IOException exception) {
+               System.err.println(exception.toString());
+            }
+         },
+         warning -> { if (verbose) System.out.println(warning); },
+         exception -> System.err.println(exception.toString()));
       
       if (verbose) System.out.println("Finished " + inputFile.getPath());
-      for (SerializationException x : exceptions) System.err.println(x.toString());
    } // end of convert()
-
    
 } // end of class VttToTextGrid
