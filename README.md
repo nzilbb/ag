@@ -32,6 +32,6 @@ format conversion, e.g.
  [Praat](http://praat.org) TextGrids 
 
 More format converter information is available
-[here](https://github.com/nzilbb/ag/tree/master/bin)
+[here](https://github.com/nzilbb/ag/blob/master/bin/README.md)
 
 More API documentation is available [here](https://nzilbb.github.io/ag/)
