@@ -21,49 +21,48 @@
 //
 package nzilbb.converter;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Vector;
-import java.util.List;
-import java.util.ListIterator;
-import java.awt.Component;
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.FlowLayout;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetAdapter;
 import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JFileChooser;
-import javax.swing.JList;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Vector;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import nzilbb.util.IO;
-import nzilbb.util.GuiProgram;
-import nzilbb.util.ProgramDescription;
-import nzilbb.util.Switch;
-import nzilbb.configure.ParameterSet;
-
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
-import nzilbb.transcriber.TranscriptSerialization;
+import nzilbb.configure.ParameterSet;
 import nzilbb.elan.EAFSerialization;
+import nzilbb.transcriber.TranscriptSerialization;
+import nzilbb.util.GuiProgram;
+import nzilbb.util.IO;
+import nzilbb.util.ProgramDescription;
+import nzilbb.util.Switch;
 
 /**
- * Converts Transcriber .trs files to Praat TextGrids.
+ * Converts Transcriber .trs files to ELAN .eaf files.
  * @author Robert Fromont robert@fromont.net.nz
  */
-@ProgramDescription(value="Converts Transcriber .trs files to Praat TextGrids",arguments="file1.trs file2.trs ...")
+@ProgramDescription(value="Converts Transcriber .trs transcripts to ELAN .eaf files",arguments="file1.trs file2.trs ...")
 public class TrsToEaf extends Converter {
    
    // Methods:
@@ -72,7 +71,7 @@ public class TrsToEaf extends Converter {
     * Default constructor.
     */
    public TrsToEaf() {
-      setDefaultWindowTitle("Transcriber to ELANx converter");
+      setDefaultWindowTitle("Transcriber to ELAN converter");
       setDefaultWidth(800);
       setDefaultHeight(600);
    } // end of constructor
