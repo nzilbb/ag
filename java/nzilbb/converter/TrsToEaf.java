@@ -47,6 +47,8 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import nzilbb.ag.*;
+import nzilbb.ag.serialize.IDeserializer;
+import nzilbb.ag.serialize.ISerializer;
 import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
@@ -86,17 +88,31 @@ public class TrsToEaf extends Converter {
    }
 
    /**
-    * Converts a file.
-    * @param inputFile
-    * @param outputFile
-    * @throws Exception
+    * Gets the deserializer that #convert(File) uses.
+    * @return The deserializer to use.
     */
-   public void convert(File inputFile) throws Exception {
-      if (verbose) System.out.println("Converting " + inputFile.getPath());
-      
-      Schema schema = new Schema(
+   public IDeserializer getDeserializer() {
+      return new TranscriptSerialization();
+   }
+
+   /**
+    * Gets the serializer that #convert(File) uses.
+    * @return The serializer to use.
+    */
+   public ISerializer getSerializer() {
+      return new EAFSerialization();
+   }
+
+   /**
+    * Specify the schema to used by  {@link #convert(File)}.
+    * @return The schema.
+    */
+   public Schema getSchema() {
+      return new Schema(
          "who", "turn", "utterance", "word",
+         // include topic layer
          new Layer("topic", "Topic")
+         
          .setAlignment(Constants.ALIGNMENT_INTERVAL)
          .setPeers(true).setPeersOverlap(false).setSaturated(false),
          new Layer("who", "Participants")
@@ -114,62 +130,17 @@ public class TrsToEaf extends Converter {
          .setAlignment(Constants.ALIGNMENT_INTERVAL)
          .setPeers(true).setPeersOverlap(false).setSaturated(false)
          .setParentId("turn").setParentIncludes(true));
+   } // end of getSchema()
 
-      // deserialize...
-      
-      NamedStream[] streams = { new NamedStream(inputFile) };
-      
-      // create deserializer
-      TranscriptSerialization deserializer = new TranscriptSerialization();
-      if (verbose) System.out.println("Deserializing with " + deserializer.getDescriptor());
-
-      // configure deserializer
-      ParameterSet defaultConfig = deserializer.configure(new ParameterSet(), schema);
-      deserializer.configure(defaultConfig, schema);
-
-      // load the stream
-      ParameterSet defaultParameters = deserializer.load(streams, schema);
-      
-      // configure the deserialization
-      deserializer.setParameters(defaultParameters);
-      
-      Graph[] graphs = deserializer.deserialize();
-      Graph g = graphs[0];     
-      for (String warning : deserializer.getWarnings()) {
-	 System.out.println(warning);
-      }
-      
-      // strip extension off name
-      g.setId(IO.WithoutExtension(g.getId()));
-      
-      // serialize...
-
-      // create serializer
-      EAFSerialization serializer = new EAFSerialization();
-      if (verbose) System.out.println("Serializing with " + serializer.getDescriptor());
-      
-      // configure serializer
-      ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
-      serializer.configure(configuration, schema);
-
-      // serialize
-      final File dir = (inputFile.getParentFile() != null? inputFile.getParentFile()
-                        : new File("."));
+   /**
+    * Specifies which layers should be given to the serializer. The default implementaion
+    * returns only the "utterance" layer.
+    * @return An array of layer IDs.
+    */
+   public String[] getLayersToSerialize() {
       String[] layers = { "utterance", "topic" };
-      serializer.serialize(
-         Utility.OneGraphSpliterator(g), layers,
-         stream -> {
-            try {
-               stream.save(dir);
-            } catch(IOException exception) {
-               System.err.println(exception.toString());
-            }
-         },
-         warning -> { if (verbose) System.out.println(warning); },
-         exception -> System.err.println(exception.toString()));
+      return layers;
+   } // end of getLayersToSerialize()
       
-      if (verbose) System.out.println("Finished " + inputFile.getPath());
-   } // end of convert()
-   
    private static final long serialVersionUID = -1;
 } // end of class TrsToEaf

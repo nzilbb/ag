@@ -53,6 +53,8 @@ import nzilbb.util.Switch;
 import nzilbb.configure.ParameterSet;
 
 import nzilbb.ag.*;
+import nzilbb.ag.serialize.IDeserializer;
+import nzilbb.ag.serialize.ISerializer;
 import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
@@ -83,81 +85,20 @@ public class VttToTextGrid extends Converter {
    }
 
    /**
-    * Converts a file.
-    * @param inputFile
-    * @throws Exception
+    * Gets the deserializer that #convert(File) uses.
+    * @return The deserializer to use.
     */
-   public void convert(File inputFile) throws Exception {
-      if (verbose) System.out.println("Converting " + inputFile.getPath());
-      
-      Schema schema = new Schema(
-         "who", "turn", "utterance", null,
-         new Layer("who", "Participants")
-         .setAlignment(Constants.ALIGNMENT_NONE)
-         .setPeers(true).setPeersOverlap(true).setSaturated(true),
-	 new Layer("turn", "Speaker turns")
-         .setAlignment(Constants.ALIGNMENT_INTERVAL)
-         .setPeers(true).setPeersOverlap(false).setSaturated(false)
-         .setParentId("who").setParentIncludes(true),
-	 new Layer("utterance", "Utterances")
-         .setAlignment(Constants.ALIGNMENT_INTERVAL)
-         .setPeers(true).setPeersOverlap(false).setSaturated(true)
-         .setParentId("turn").setParentIncludes(true));
+   public IDeserializer getDeserializer() {
+      return new VttSerialization();
+   }
 
-      // deserialize...
-      
-      NamedStream[] streams = { new NamedStream(inputFile) };
-      
-      // create deserializer
-      VttSerialization deserializer = new VttSerialization();
-      if (verbose) System.out.println("Deserializing with " + deserializer.getDescriptor());
-
-      // configure deserializer
-      ParameterSet defaultConfig = deserializer.configure(new ParameterSet(), schema);
-      deserializer.configure(defaultConfig, schema);
-
-      // load the stream
-      ParameterSet defaultParameters = deserializer.load(streams, schema);
-      
-      // configure the deserialization
-      deserializer.setParameters(defaultParameters);
-      
-      Graph[] graphs = deserializer.deserialize();
-      Graph g = graphs[0];     
-      for (String warning : deserializer.getWarnings()) {
-	 System.out.println(warning);
-      }
-
-      // strip extension off name
-      g.setId(IO.WithoutExtension(g.getId()));
-      
-      // serialize...
-
-      // create serializer
-      TextGridSerialization serializer = new TextGridSerialization();
-      if (verbose) System.out.println("Serializing with " + serializer.getDescriptor());
-      
-      // configure serializer
-      ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
-      serializer.configure(configuration, schema);
-
-      // serialize
-      final File dir = (inputFile.getParentFile() != null? inputFile.getParentFile()
-                        : new File("."));
-      serializer.serialize(
-         Utility.OneGraphSpliterator(g), null,
-         stream -> {
-            try {
-               stream.save(dir);
-            } catch(IOException exception) {
-               System.err.println(exception.toString());
-            }
-         },
-         warning -> { if (verbose) System.out.println(warning); },
-         exception -> System.err.println(exception.toString()));
-      
-      if (verbose) System.out.println("Finished " + inputFile.getPath());
-   } // end of convert()
+   /**
+    * Gets the serializer that #convert(File) uses.
+    * @return The serializer to use.
+    */
+   public ISerializer getSerializer() {
+      return new TextGridSerialization();
+   }
 
    private static final long serialVersionUID = -1;
 } // end of class VttToTextGrid

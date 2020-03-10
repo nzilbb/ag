@@ -53,6 +53,8 @@ import nzilbb.util.Switch;
 import nzilbb.configure.ParameterSet;
 
 import nzilbb.ag.*;
+import nzilbb.ag.serialize.IDeserializer;
+import nzilbb.ag.serialize.ISerializer;
 import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
@@ -120,13 +122,118 @@ public abstract class Converter extends GuiProgram {
 
    /** File filter for identifying files of the correct type */
    protected abstract FileNameExtensionFilter getFileFilter();
+   
+   /**
+    * Gets the deserializer that {@link #convert(File)} uses.
+    * @return The deserializer to use.
+    */
+   public abstract IDeserializer getDeserializer();
 
    /**
-    * Converts a file.
+    * Gets the serializer that {@link #convert(File)} uses.
+    * @return The serializer to use.
+    */
+   public abstract ISerializer getSerializer();
+   
+   /**
+    * Specifies which layers should be given to the serializer. The default implementaion
+    * returns only the "utterance" layer.
+    * @return An array of layer IDs.
+    */
+   public String[] getLayersToSerialize() {
+      String[] layers = { "utterance" };
+      return layers;
+   } // end of getLayersToSerialize()
+   
+   /**
+    * Specify the schema to used by  {@link #convert(File)}.
+    * @return The schema.
+    */
+   public Schema getSchema() {
+      return new Schema(
+         "who", "turn", "utterance", "word",
+         new Layer("who", "Participants")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(true).setPeersOverlap(true).setSaturated(true),
+	 new Layer("turn", "Speaker turns")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false)
+         .setParentId("who").setParentIncludes(true),
+	 new Layer("utterance", "Utterances")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(true)
+         .setParentId("turn").setParentIncludes(true),
+	 new Layer("word", "Words")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false)
+         .setParentId("turn").setParentIncludes(true));
+   } // end of getSchema()
+
+   /**
+    * Converts a file. The default implementation uses a default schema, default settings
+    * for serializations, and serializes the "utterance" layer only. 
     * @param inputFile
     * @throws Exception
     */
-   public abstract void convert(File inputFile) throws Exception;
+   public void convert(File inputFile) throws Exception {
+      if (verbose) System.out.println("Converting " + inputFile.getPath());
+      
+      Schema schema = getSchema();
+
+      // deserialize...
+      
+      NamedStream[] streams = { new NamedStream(inputFile) };
+      
+      // create deserializer
+      IDeserializer deserializer = getDeserializer();
+      if (verbose) System.out.println("Deserializing with " + deserializer.getDescriptor());
+
+      // configure deserializer
+      ParameterSet defaultConfig = deserializer.configure(new ParameterSet(), schema);
+      deserializer.configure(defaultConfig, schema);
+
+      // load the stream
+      ParameterSet defaultParameters = deserializer.load(streams, schema);
+      
+      // configure the deserialization
+      deserializer.setParameters(defaultParameters);
+      
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];     
+      for (String warning : deserializer.getWarnings()) {
+	 System.out.println(warning);
+      }
+
+      // strip extension off name
+      g.setId(IO.WithoutExtension(g.getId()));
+
+      // serialize...
+
+      // create serializer
+      ISerializer serializer = getSerializer();
+      if (verbose) System.out.println("Serializing with " + serializer.getDescriptor());
+      
+      // configure serializer
+      ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
+      serializer.configure(configuration, schema);
+
+      // serialize
+      final File dir = (inputFile.getParentFile() != null? inputFile.getParentFile()
+                        : new File("."));
+      serializer.serialize(
+         Utility.OneGraphSpliterator(g), getLayersToSerialize(),
+         stream -> {
+            try {
+               stream.save(dir);
+            } catch(IOException exception) {
+               System.err.println(exception.toString());
+            }
+         },
+         warning -> { if (verbose) System.out.println(warning); },
+         exception -> System.err.println(exception.toString()));
+      
+      if (verbose) System.out.println("Finished " + inputFile.getPath());
+   } // end of convert()
    
    /**
     * Default constructor.
