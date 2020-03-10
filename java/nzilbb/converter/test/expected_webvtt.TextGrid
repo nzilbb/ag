@@ -1,0 +1,2302 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 2782.55 
+tiers? <exists> 
+size = 1 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "speaker" 
+        xmin = 0 
+        xmax = 2782.55 
+        intervals: size = 572 
+        intervals [1]:
+            xmin = 0 
+            xmax = 1.849 
+            text = "" 
+        intervals [2]:
+            xmin = 1.849 
+            xmax = 6.43 
+            text = "Before we move to the first question to the First Minister, I invite the First Minister" 
+        intervals [3]:
+            xmin = 6.43 
+            xmax = 9.879 
+            text = "to make a few remarks following the tragic events in Christchurch in New Zealand." 
+        intervals [4]:
+            xmin = 9.879 
+            xmax = 13.6 
+            text = "The First Minister (Nicola Sturgeon): Thank you, Presiding Officer. I begin today" 
+        intervals [5]:
+            xmin = 13.6 
+            xmax = 18.45 
+            text = "with heartfelt condolences to the people of New Zealand after last week’s appalling" 
+        intervals [6]:
+            xmin = 18.45 
+            xmax = 24.01 
+            text = "terrorist attack in Christchurch. I hope that people in New Zealand can take some comfort" 
+        intervals [7]:
+            xmin = 24.01 
+            xmax = 28.74 
+            text = "from the knowledge that people across the world stand in solidarity with them." 
+        intervals [8]:
+            xmin = 28.74 
+            xmax = 34 
+            text = "Events in New Zealand have been felt deeply here in Scotland, as in other countries, and" 
+        intervals [9]:
+            xmin = 34 
+            xmax = 39.649 
+            text = "perhaps especially in our Muslim community. Last week, Police Scotland arranged reassurance" 
+        intervals [10]:
+            xmin = 39.649 
+            xmax = 44.979 
+            text = "patrols and visits to mosques and other places of worship. On Friday, I visited Glasgow central" 
+        intervals [11]:
+            xmin = 44.979 
+            xmax = 48.159 
+            text = "mosque with the justice secretary." 
+        intervals [12]:
+            xmin = 48.159 
+            xmax = 53.089 
+            text = "The Prime Minister of New Zealand has said that nations around the world are engaged" 
+        intervals [13]:
+            xmin = 53.089 
+            xmax = 59.889 
+            text = "in a global fight against far-right, racist and extremist ideology. Regrettably, she is" 
+        intervals [14]:
+            xmin = 59.889 
+            xmax = 66.85 
+            text = "absolutely right. All of us have a responsibility to engage in that fight. We must tackle hatred" 
+        intervals [15]:
+            xmin = 66.85 
+            xmax = 71.729 
+            text = "and prejudice through the words that we use, the actions that we take and the climate that" 
+        intervals [16]:
+            xmin = 71.729 
+            xmax = 76.619 
+            text = "we create. I know that all parties in this chamber will play their part in doing that." 
+        intervals [17]:
+            xmin = 76.619 
+            xmax = 81.969 
+            text = "In the past week, we have also seen an attack in Utrecht and the stabbing of a teenager" 
+        intervals [18]:
+            xmin = 81.969 
+            xmax = 86.42 
+            text = "in Surrey. Our condolences are with all those who have been affected by those incidents" 
+        intervals [19]:
+            xmin = 86.42 
+            xmax = 87.579 
+            text = "as well." 
+        intervals [20]:
+            xmin = 87.579 
+            xmax = 93.06 
+            text = "Let us today express sympathy and solidarity with the victims of racist and extremist violence" 
+        intervals [21]:
+            xmin = 93.06 
+            xmax = 99.31 
+            text = "in Christchurch and around the world. Above all, let us make clear our determination that" 
+        intervals [22]:
+            xmin = 99.31 
+            xmax = 107.34 
+            text = "the proponents of hate will be defeated by the values of kindness, compassion and love." 
+        intervals [23]:
+            xmin = 107.34 
+            xmax = 109.56 
+            text = "[Applause.]" 
+        intervals [24]:
+            xmin = 109.56 
+            xmax = 117.71 
+            text = "The Presiding Officer: We turn to questions to the First Minister," 
+        intervals [25]:
+            xmin = 117.71 
+            xmax = 118.71 
+            text = "the first of which is from Jackson Carlaw." 
+        intervals [26]:
+            xmin = 118.71 
+            xmax = 123.719 
+            text = "Jackson Carlaw (Eastwood) (Con): I associate all of us in the Scottish Conservatives" 
+        intervals [27]:
+            xmin = 123.719 
+            xmax = 128.03 
+            text = "with the First Minister’s remarks and offer our support for any measures that are required" 
+        intervals [28]:
+            xmin = 128.03 
+            xmax = 132.62 
+            text = "to reassure those who attend mosques in Scotland." 
+        intervals [29]:
+            xmin = 132.62 
+            xmax = 137.42 
+            text = "Many Scots will have friends and family who live in or regularly visit New Zealand and" 
+        intervals [30]:
+            xmin = 137.42 
+            xmax = 141.67 
+            text = "who will have been deeply affected. However, for many in Scotland’s Muslim community," 
+        intervals [31]:
+            xmin = 141.67 
+            xmax = 146.25 
+            text = "events on the other side of the world must never have felt closer to home. As we embrace" 
+        intervals [32]:
+            xmin = 146.25 
+            xmax = 150.09 
+            text = "them with our good wishes and condolences, we must—as the First Minister said—work" 
+        intervals [33]:
+            xmin = 150.09 
+            xmax = 156.28 
+            text = "together to think afresh about what must be done by us all to counter this defining 21st" 
+        intervals [34]:
+            xmin = 156.28 
+            xmax = 159.75 
+            text = "century scourge." 
+        intervals [35]:
+            xmin = 159.75 
+            xmax = 163.36 
+            text = "Over the past 10 years, the Scottish National Party Government has launched two major drug" 
+        intervals [36]:
+            xmin = 163.36 
+            xmax = 169.11 
+            text = "strategies. Tragically, during those 10 years drug deaths have doubled. We are now on course" 
+        intervals [37]:
+            xmin = 169.11 
+            xmax = 174.59 
+            text = "to have the largest number of drug deaths per head anywhere in Europe. Does the First" 
+        intervals [38]:
+            xmin = 174.59 
+            xmax = 178.36 
+            text = "Minister believe that the strategies have been a success or a failure?" 
+        intervals [39]:
+            xmin = 178.36 
+            xmax = 182.68 
+            text = "The First Minister (Nicola Sturgeon): These are challenging issues and I readily" 
+        intervals [40]:
+            xmin = 182.68 
+            xmax = 190.23 
+            text = "concede that this Government—any Government—must remain open to fresh thinking and new ideas." 
+        intervals [41]:
+            xmin = 190.23 
+            xmax = 196.09 
+            text = "The situation with regard to drug deaths is not one that any of us would consider to be" 
+        intervals [42]:
+            xmin = 196.09 
+            xmax = 203.84 
+            text = "acceptable. However, as I said in the chamber last week, many of those who have died have" 
+        intervals [43]:
+            xmin = 203.84 
+            xmax = 208.2 
+            text = "lived with alcohol and drug use for a long time—such people become more vulnerable" 
+        intervals [44]:
+            xmin = 208.2 
+            xmax = 215.92 
+            text = "as they grow older as a result of their complex health and social needs. Although I do not" 
+        intervals [45]:
+            xmin = 215.92 
+            xmax = 220.08 
+            text = "overstate the point, more encouraging is the fact that the last report showed fewer deaths" 
+        intervals [46]:
+            xmin = 220.08 
+            xmax = 226.63 
+            text = "among the under-25 population. Recent reports also highlight falling heroin use—again," 
+        intervals [47]:
+            xmin = 226.63 
+            xmax = 227.68 
+            text = "particularly among under-25s." 
+        intervals [48]:
+            xmin = 227.68 
+            xmax = 234.09 
+            text = "As I am sure that Jackson Carlaw is aware, work is under way in Dundee and Glasgow to" 
+        intervals [49]:
+            xmin = 234.09 
+            xmax = 239.69 
+            text = "consider what more can be done to tackle drug deaths. That work will be of relevance around" 
+        intervals [50]:
+            xmin = 239.69 
+            xmax = 244.3 
+            text = "Scotland, but we want to see the outcomes from it before we consider what further action" 
+        intervals [51]:
+            xmin = 244.3 
+            xmax = 246.21 
+            text = "we should take." 
+        intervals [52]:
+            xmin = 246.21 
+            xmax = 250.92 
+            text = "Jackson Carlaw: We all want to sort the crisis, but the first" 
+        intervals [53]:
+            xmin = 250.92 
+            xmax = 255.33 
+            text = "step is surely to admit that the current policy is not working as it should. Regrettably," 
+        intervals [54]:
+            xmin = 255.33 
+            xmax = 258.19 
+            text = "it has been a failure. I have an example of that." 
+        intervals [55]:
+            xmin = 258.19 
+            xmax = 262.81 
+            text = "We know that rehabilitation services in prisons can be vital in turning around people’s" 
+        intervals [56]:
+            xmin = 262.81 
+            xmax = 266.28 
+            text = "lives. However, my colleague Adam Tomkins has discovered in recent days that in Barlinnie," 
+        intervals [57]:
+            xmin = 266.28 
+            xmax = 272.09 
+            text = "which is one of our biggest prisons, a successful voluntary project—a recovery cafe where" 
+        intervals [58]:
+            xmin = 272.09 
+            xmax = 278.2 
+            text = "people can go to get their lives back on track—is facing closure. How can it be right that we" 
+        intervals [59]:
+            xmin = 278.2 
+            xmax = 284.73 
+            text = "prioritise spending millions of pounds on methadone programmes, yet successful projects" 
+        intervals [60]:
+            xmin = 284.73 
+            xmax = 286.08 
+            text = "such as the cafe are put at risk?" 
+        intervals [61]:
+            xmin = 286.08 
+            xmax = 293.4 
+            text = "The First Minister: First, I say to Jackson Carlaw and to Adam" 
+        intervals [62]:
+            xmin = 293.4 
+            xmax = 298.49 
+            text = "Tomkins that the justice secretary has received a letter on the issue, which will be responded" 
+        intervals [63]:
+            xmin = 298.49 
+            xmax = 299.57 
+            text = "to in due course." 
+        intervals [64]:
+            xmin = 299.57 
+            xmax = 304.6 
+            text = "It is important that I advise members that the Scottish Government has not previously" 
+        intervals [65]:
+            xmin = 304.6 
+            xmax = 311.56 
+            text = "funded recovery cafes. However, we provide funding for the Scottish Recovery Consortium," 
+        intervals [66]:
+            xmin = 311.56 
+            xmax = 316.83 
+            text = "and the Scottish Prison Service adopts a therapeutic approach in dealing with addiction issues" 
+        intervals [67]:
+            xmin = 316.83 
+            xmax = 320.79 
+            text = "and provides support for those with addiction problems who are in their care." 
+        intervals [68]:
+            xmin = 320.79 
+            xmax = 325.24 
+            text = "The new alcohol and drug strategy highlights the importance of recovery communities and" 
+        intervals [69]:
+            xmin = 325.24 
+            xmax = 330.85 
+            text = "the need for them to be at the heart of any proposals. They help to reduce stigma, because" 
+        intervals [70]:
+            xmin = 330.85 
+            xmax = 336.19 
+            text = "they provide the visible face of recovery, as well as insights into addiction and harm." 
+        intervals [71]:
+            xmin = 336.19 
+            xmax = 341.01 
+            text = "Through our sustained funding of the Scottish Recovery Consortium, we will continue to do" 
+        intervals [72]:
+            xmin = 341.01 
+            xmax = 344.9 
+            text = "what we can to support the growth of recovery communities across the country." 
+        intervals [73]:
+            xmin = 344.9 
+            xmax = 350.91 
+            text = "We will of course give consideration to the points that Adam Tomkins made in his letter." 
+        intervals [74]:
+            xmin = 350.91 
+            xmax = 353.4 
+            text = "Jackson Carlaw: My question was not intended as a criticism" 
+        intervals [75]:
+            xmin = 353.4 
+            xmax = 354.4 
+            text = "of that mix of approaches." 
+        intervals [76]:
+            xmin = 354.4 
+            xmax = 357.67 
+            text = "Just a few miles from Parliament is Castle Craig hospital near West Linton, which is" 
+        intervals [77]:
+            xmin = 357.67 
+            xmax = 362.59 
+            text = "a drug rehabilitation centre with capacity for residential drug rehab patients, and which" 
+        intervals [78]:
+            xmin = 362.59 
+            xmax = 365.32 
+            text = "the Conservative health spokesman, Miles Briggs, visited recently. Hospital staff told him" 
+        intervals [79]:
+            xmin = 365.32 
+            xmax = 369.97 
+            text = "that Castle Craig is not receiving national health service referrals and is mostly kept" 
+        intervals [80]:
+            xmin = 369.97 
+            xmax = 375.441 
+            text = "going by patients who are referred from the Netherlands for treatment. Is not the First" 
+        intervals [81]:
+            xmin = 375.441 
+            xmax = 381.08 
+            text = "Minister, like me, concerned that Dutch patients are getting better access to that rehabilitation" 
+        intervals [82]:
+            xmin = 381.08 
+            xmax = 385.93 
+            text = "project here in Scotland than local Scots who are in need of the same support and treatment?" 
+        intervals [83]:
+            xmin = 385.93 
+            xmax = 391.84 
+            text = "The First Minister: I am very happy to look into that specific" 
+        intervals [84]:
+            xmin = 391.84 
+            xmax = 401.05 
+            text = "example. We want people to have access to a broad range of rehabilitation services." 
+        intervals [85]:
+            xmin = 401.05 
+            xmax = 406.41 
+            text = "The Scottish Government is providing £70 million this financial year to reduce the" 
+        intervals [86]:
+            xmin = 406.41 
+            xmax = 412.75 
+            text = "harms that are caused by alcohol and drugs. That includes an additional £20 million for" 
+        intervals [87]:
+            xmin = 412.75 
+            xmax = 417.15 
+            text = "drug and alcohol services, which is being allocated to support new approaches, so that" 
+        intervals [88]:
+            xmin = 417.15 
+            xmax = 427 
+            text = "we respond in a much more joined-up and person-centred way. Such investment is important." 
+        intervals [89]:
+            xmin = 427 
+            xmax = 431.16 
+            text = "I am not trying to make a party-political point about a very serious issue, but it is" 
+        intervals [90]:
+            xmin = 431.16 
+            xmax = 436.46 
+            text = "also important that we are prepared to take forward innovative and evidence-based new" 
+        intervals [91]:
+            xmin = 436.46 
+            xmax = 442.79 
+            text = "approaches, even if at first they seem to be challenging, particularly for public opinion." 
+        intervals [92]:
+            xmin = 442.79 
+            xmax = 447.98 
+            text = "That is why we supported the principles behind Glasgow’s proposals for a medically supervised" 
+        intervals [93]:
+            xmin = 447.98 
+            xmax = 453.23 
+            text = "safer drug consumption facility and heroin-assisted treatment in the city. It is important that" 
+        intervals [94]:
+            xmin = 453.23 
+            xmax = 458.36 
+            text = "we work with health and social care partnerships on new approaches, as well as ensuring that" 
+        intervals [95]:
+            xmin = 458.36 
+            xmax = 463.62 
+            text = "we invest in rehabilitation. I hope that the Conservatives will think about giving us support" 
+        intervals [96]:
+            xmin = 463.62 
+            xmax = 468.23 
+            text = "on that, because we need to persuade the United Kingdom Government to do what is required." 
+        intervals [97]:
+            xmin = 468.23 
+            xmax = 471.68 
+            text = "Jackson Carlaw: I respect the First Minister’s approach" 
+        intervals [98]:
+            xmin = 471.68 
+            xmax = 474.669 
+            text = "to that policy. We have looked at it, but, unfortunately, it is the one policy in this" 
+        intervals [99]:
+            xmin = 474.669 
+            xmax = 478.81 
+            text = "area on which we fundamentally disagree. We think that the policy should be to get people" 
+        intervals [100]:
+            xmin = 478.81 
+            xmax = 482.87 
+            text = "clean of drugs, not to provide opportunities for people to take them." 
+        intervals [101]:
+            xmin = 482.87 
+            xmax = 487.87 
+            text = "Scottish Conservatives have set out a clear plan to tackle Scotland’s growing drugs" 
+        intervals [102]:
+            xmin = 487.87 
+            xmax = 492.699 
+            text = "crisis, which is to get first-time offenders into treatment, direct more money into rehabilitation" 
+        intervals [103]:
+            xmin = 492.699 
+            xmax = 498.9 
+            text = "programmes run by third sector bodies and, at the same time, at least review the failed" 
+        intervals [104]:
+            xmin = 498.9 
+            xmax = 499.9 
+            text = "methadone programme." 
+        intervals [105]:
+            xmin = 499.9 
+            xmax = 506.24 
+            text = "Let us admit that, in politics at the moment, we are not overrun with issues on which we" 
+        intervals [106]:
+            xmin = 506.24 
+            xmax = 511.63 
+            text = "can form consensus. However, on this one vital issue, will the First Minister commit today" 
+        intervals [107]:
+            xmin = 511.63 
+            xmax = 515.99 
+            text = "to working across the chamber—we will commit to that—to improve the drugs strategy for" 
+        intervals [108]:
+            xmin = 515.99 
+            xmax = 522.159 
+            text = "the next 10 years, so that we can cut drug deaths and drug addiction and come down hard" 
+        intervals [109]:
+            xmin = 522.159 
+            xmax = 524.529 
+            text = "on those peddling misery in our communities?" 
+        intervals [110]:
+            xmin = 524.529 
+            xmax = 530.81 
+            text = "The First Minister: I reiterate my willingness to work across" 
+        intervals [111]:
+            xmin = 530.81 
+            xmax = 535.6 
+            text = "the chamber. I think that I have said in a couple of my responses today that I will consider" 
+        intervals [112]:
+            xmin = 535.6 
+            xmax = 540.589 
+            text = "the points that Jackson Carlaw has raised, and I give that reassurance again. I ask for" 
+        intervals [113]:
+            xmin = 540.589 
+            xmax = 546.48 
+            text = "the same in return. I am slightly concerned at the almost knee-jerk way in which Jackson" 
+        intervals [114]:
+            xmin = 546.48 
+            xmax = 552.459 
+            text = "Carlaw ruled out the fresh thinking around safer drug consumption facilities. If we are" 
+        intervals [115]:
+            xmin = 552.459 
+            xmax = 557.04 
+            text = "genuinely to try and find a consensus, we have to be open to new thinking, and that" 
+        intervals [116]:
+            xmin = 557.04 
+            xmax = 563.189 
+            text = "will sometimes be very tough and challenging. I appeal to Jackson Carlaw to reconsider his" 
+        intervals [117]:
+            xmin = 563.189 
+            xmax = 567.17 
+            text = "opposition to that policy, just as he is asking me to be open-minded to any proposals that" 
+        intervals [118]:
+            xmin = 567.17 
+            xmax = 568.29 
+            text = "he makes." 
+        intervals [119]:
+            xmin = 568.29 
+            xmax = 573.11 
+            text = "We will continue to ensure that we have the right strategies in place to deal with what" 
+        intervals [120]:
+            xmin = 573.11 
+            xmax = 578.36 
+            text = "we all accept is a challenging and complex issue. First, that involves taking a very" 
+        intervals [121]:
+            xmin = 578.36 
+            xmax = 582.66 
+            text = "hard line against those who supply drugs—and we saw figures earlier this week about police" 
+        intervals [122]:
+            xmin = 582.66 
+            xmax = 588.72 
+            text = "seizures of drugs. Secondly, it definitely involves support, particularly rehabilitation" 
+        intervals [123]:
+            xmin = 588.72 
+            xmax = 594.249 
+            text = "support, for those who are addicted to drugs. Thirdly, it involves being open to new ideas" 
+        intervals [124]:
+            xmin = 594.249 
+            xmax = 599.879 
+            text = "and new thinking. If we can all agree broadly around that approach, perhaps we can build" 
+        intervals [125]:
+            xmin = 599.879 
+            xmax = 606.139 
+            text = "a consensus that allows us to tackle something that we all agree is unacceptable. We want" 
+        intervals [126]:
+            xmin = 606.139 
+            xmax = 610.94 
+            text = "to see a considerably improved situation, and I hope that we have the support of Jackson" 
+        intervals [127]:
+            xmin = 610.94 
+            xmax = 614.839 
+            text = "Carlaw and the Conservatives on that." 
+        intervals [128]:
+            xmin = 614.839 
+            xmax = 620.309 
+            text = "Richard Leonard (Central Scotland) (Lab): I add the deep-felt condolences of the Scottish" 
+        intervals [129]:
+            xmin = 620.309 
+            xmax = 625.04 
+            text = "Labour Party to the families and friends of all those who lost their lives in the terror" 
+        intervals [130]:
+            xmin = 625.04 
+            xmax = 633.259 
+            text = "attack in Christchurch last Friday. I offer our support for practical action to defeat" 
+        intervals [131]:
+            xmin = 633.259 
+            xmax = 638.009 
+            text = "racism and hatred wherever it occurs." 
+        intervals [132]:
+            xmin = 638.009 
+            xmax = 643.009 
+            text = "To ask the First Minister why there is a staffing crisis in the national health service." 
+        intervals [133]:
+            xmin = 643.009 
+            xmax = 647.779 
+            text = "The First Minister (Nicola Sturgeon): There is not a staffing crisis in the national" 
+        intervals [134]:
+            xmin = 647.779 
+            xmax = 652.869 
+            text = "health service. There are record numbers of people working in the national health service." 
+        intervals [135]:
+            xmin = 652.869 
+            xmax = 660.1 
+            text = "In fact, I can tell Richard Leonard that staffing levels in NHS Scotland are now at a record" 
+        intervals [136]:
+            xmin = 660.1 
+            xmax = 669.709 
+            text = "high and are up by more than 13,600 since 2006, just before this Government took office." 
+        intervals [137]:
+            xmin = 669.709 
+            xmax = 675.839 
+            text = "The number of consultants is up by 51 per cent; the number of qualified nurses and midwives" 
+        intervals [138]:
+            xmin = 675.839 
+            xmax = 680.54 
+            text = "is up by 8 per cent; and there is a higher level of NHS staffing per head in Scotland" 
+        intervals [139]:
+            xmin = 680.54 
+            xmax = 682.769 
+            text = "than there is in NHS England." 
+        intervals [140]:
+            xmin = 682.769 
+            xmax = 687.929 
+            text = "Our NHS staff of course work under considerable pressure, and we are grateful to them for" 
+        intervals [141]:
+            xmin = 687.929 
+            xmax = 692.629 
+            text = "the job that they do, but we will continue to invest in our NHS to ensure that there" 
+        intervals [142]:
+            xmin = 692.629 
+            xmax = 697.269 
+            text = "are record numbers of staff, so that they can continue to deliver the excellent services" 
+        intervals [143]:
+            xmin = 697.269 
+            xmax = 698.269 
+            text = "that they do." 
+        intervals [144]:
+            xmin = 698.269 
+            xmax = 703.79 
+            text = "Richard Leonard: This week, the Parliament’s Health and Sport" 
+        intervals [145]:
+            xmin = 703.79 
+            xmax = 709.019 
+            text = "Committee, following the tragic events at the Queen Elizabeth university hospital, began" 
+        intervals [146]:
+            xmin = 709.019 
+            xmax = 715.8 
+            text = "its inquiry into infection control standards. New figures released to Scottish Labour this" 
+        intervals [147]:
+            xmin = 715.8 
+            xmax = 721.22 
+            text = "week reveal that the number of domestic staff—that is, cleaners—who are employed at the Queen" 
+        intervals [148]:
+            xmin = 721.22 
+            xmax = 730.48 
+            text = "Elizabeth university hospital is falling. In March 2018, 464 cleaners were employed" 
+        intervals [149]:
+            xmin = 730.48 
+            xmax = 739.98 
+            text = "at the hospital. According to the latest figures, that number has dropped to 440. Why, at the" 
+        intervals [150]:
+            xmin = 739.98 
+            xmax = 747.889 
+            text = "very point when it is facing a rise in infection outbreaks, is Scotland’s biggest hospital" 
+        intervals [151]:
+            xmin = 747.889 
+            xmax = 754.379 
+            text = "employing fewer people on the front line whose job it is to keep that hospital clean and" 
+        intervals [152]:
+            xmin = 754.379 
+            xmax = 755.489 
+            text = "safe?" 
+        intervals [153]:
+            xmin = 755.489 
+            xmax = 760.649 
+            text = "The First Minister: I am sure that Richard Leonard will have heard" 
+        intervals [154]:
+            xmin = 760.649 
+            xmax = 764.73 
+            text = "the Cabinet Secretary for Health and Sport already address this issue publicly. The issue" 
+        intervals [155]:
+            xmin = 764.73 
+            xmax = 769.699 
+            text = "has been raised with Greater Glasgow and Clyde NHS Board. It is absolutely imperative that" 
+        intervals [156]:
+            xmin = 769.699 
+            xmax = 774.62 
+            text = "all health boards in all hospitals ensure appropriate numbers of domestic and cleaning" 
+        intervals [157]:
+            xmin = 774.62 
+            xmax = 775.62 
+            text = "staff." 
+        intervals [158]:
+            xmin = 775.62 
+            xmax = 780.67 
+            text = "It is of course for health boards to consider the configuration of staffing. As Richard" 
+        intervals [159]:
+            xmin = 780.67 
+            xmax = 785.279 
+            text = "Leonard will know, and as those of us who represent Glasgow constituencies know particularly" 
+        intervals [160]:
+            xmin = 785.279 
+            xmax = 789.47 
+            text = "well, there has been a significant change in the configuration of Glasgow hospitals" 
+        intervals [161]:
+            xmin = 789.47 
+            xmax = 794.889 
+            text = "over the past number of years, and the overall staffing numbers will undoubtedly reflect" 
+        intervals [162]:
+            xmin = 794.889 
+            xmax = 797.869 
+            text = "that." 
+        intervals [163]:
+            xmin = 797.869 
+            xmax = 802.899 
+            text = "We will continue to raise issues directly with health boards to ensure that they are" 
+        intervals [164]:
+            xmin = 802.899 
+            xmax = 808.13 
+            text = "addressed where that is necessary. Notwithstanding the very serious incidents at the Queen Elizabeth" 
+        intervals [165]:
+            xmin = 808.13 
+            xmax = 811.759 
+            text = "university hospital, which we have discussed on many occasions in the chamber before—and" 
+        intervals [166]:
+            xmin = 811.759 
+            xmax = 816.04 
+            text = "I welcome the Health and Sport Committee’s inquiry into these issues—infection rates" 
+        intervals [167]:
+            xmin = 816.04 
+            xmax = 821.319 
+            text = "are down considerably in Scottish hospitals overall." 
+        intervals [168]:
+            xmin = 821.319 
+            xmax = 827.42 
+            text = "I see that Jackie Baillie is in the chamber. She and I regularly used to have exchanges" 
+        intervals [169]:
+            xmin = 827.42 
+            xmax = 830.949 
+            text = "about the levels of Clostridium difficile in our hospitals, following the tragic incident" 
+        intervals [170]:
+            xmin = 830.949 
+            xmax = 835.579 
+            text = "at the Vale of Leven hospital. C diff, MRSA and infections generally are down, in some" 
+        intervals [171]:
+            xmin = 835.579 
+            xmax = 838.079 
+            text = "cases by more than 80 per cent." 
+        intervals [172]:
+            xmin = 838.079 
+            xmax = 843.629 
+            text = "Let us tackle issues where they arise—Richard Leonard is right to raise them—but let us" 
+        intervals [173]:
+            xmin = 843.629 
+            xmax = 848.47 
+            text = "not lose sight of the good work that has been done in our NHS to reduce infection and to" 
+        intervals [174]:
+            xmin = 848.47 
+            xmax = 850.949 
+            text = "put a real focus on patient safety." 
+        intervals [175]:
+            xmin = 850.949 
+            xmax = 855.679 
+            text = "Richard Leonard: I should also make it clear that the problem" 
+        intervals [176]:
+            xmin = 855.679 
+            xmax = 861.499 
+            text = "is not unique to one hospital: it is replicated right across the NHS Greater Glasgow and Clyde" 
+        intervals [177]:
+            xmin = 861.499 
+            xmax = 868.569 
+            text = "area. There are fewer domestics, porters and laundry and linen staff compared with last" 
+        intervals [178]:
+            xmin = 868.569 
+            xmax = 873.989 
+            text = "year’s levels. It is clear that we have a staffing crisis in our health service, and" 
+        intervals [179]:
+            xmin = 873.989 
+            xmax = 879.649 
+            text = "that it is not confined to consultants, nurses and midwives but extends to facilities staff," 
+        intervals [180]:
+            xmin = 879.649 
+            xmax = 887.749 
+            text = "domestics, catering workers, porters and laundry staff—all workers without whom no hospital" 
+        intervals [181]:
+            xmin = 887.749 
+            xmax = 890.329 
+            text = "can operate." 
+        intervals [182]:
+            xmin = 890.329 
+            xmax = 894.649 
+            text = "We know that there is a parliamentary inquiry and that reviews are being carried out by" 
+        intervals [183]:
+            xmin = 894.649 
+            xmax = 902.889 
+            text = "the health board and the Government. However, these issues are serious and urgent. The public," 
+        intervals [184]:
+            xmin = 902.889 
+            xmax = 908.519 
+            text = "and the staff who are under pressure, need to hear a commitment that the reduction in" 
+        intervals [185]:
+            xmin = 908.519 
+            xmax = 913.949 
+            text = "such vital front-line jobs will be reversed as soon as possible. Is the First Minister" 
+        intervals [186]:
+            xmin = 913.949 
+            xmax = 917.029 
+            text = "prepared to give them that commitment today?" 
+        intervals [187]:
+            xmin = 917.029 
+            xmax = 921.799 
+            text = "The First Minister: As I said earlier, we will continue to work" 
+        intervals [188]:
+            xmin = 921.799 
+            xmax = 924.68 
+            text = "with health boards, including NHS Greater Glasgow and Clyde, to ensure that they have" 
+        intervals [189]:
+            xmin = 924.68 
+            xmax = 931.779 
+            text = "appropriate staffing levels across all specialties in the NHS. That is important. I repeat what" 
+        intervals [190]:
+            xmin = 931.779 
+            xmax = 936.389 
+            text = "I have already said: record numbers of staff are working in our national health service." 
+        intervals [191]:
+            xmin = 936.389 
+            xmax = 941.509 
+            text = "Richard Leonard says that the issues are urgent, and I could not agree more. I know how devastating" 
+        intervals [192]:
+            xmin = 941.509 
+            xmax = 945.879 
+            text = "outbreaks of infection in hospitals are—principally for patients and their families, but also" 
+        intervals [193]:
+            xmin = 945.879 
+            xmax = 951.449 
+            text = "for the staff who work there. That is why the Healthcare Environment Inspectorate’s" 
+        intervals [194]:
+            xmin = 951.449 
+            xmax = 953.889 
+            text = "report on the Queen Elizabeth university hospital, which was commissioned and instructed by the" 
+        intervals [195]:
+            xmin = 953.889 
+            xmax = 959.269 
+            text = "Cabinet Secretary for Health and Sport, has already been completed, and why its recommendations" 
+        intervals [196]:
+            xmin = 959.269 
+            xmax = 964.8 
+            text = "have already been accepted by the health board and are being implemented." 
+        intervals [197]:
+            xmin = 964.8 
+            xmax = 969.429 
+            text = "Whatever disagreements we might have, and whatever legitimate points Richard Leonard" 
+        intervals [198]:
+            xmin = 969.429 
+            xmax = 973.92 
+            text = "might raise—they are legitimate points—I do not think that anybody could doubt the" 
+        intervals [199]:
+            xmin = 973.92 
+            xmax = 979.799 
+            text = "seriousness of the Government and the health service when it comes to tackling infections" 
+        intervals [200]:
+            xmin = 979.799 
+            xmax = 986.1 
+            text = "in our hospitals. Overall, the figures state that things are going in the right direction," 
+        intervals [201]:
+            xmin = 986.1 
+            xmax = 990.579 
+            text = "but that does not take away from the need to tackle serious incidents when they arise." 
+        intervals [202]:
+            xmin = 990.579 
+            xmax = 992.67 
+            text = "We will continue to do exactly that." 
+        intervals [203]:
+            xmin = 992.67 
+            xmax = 996.589 
+            text = "The Presiding Officer: We turn to constituency supplementary questions," 
+        intervals [204]:
+            xmin = 996.589 
+            xmax = 998.92 
+            text = "the first of which is from Liam Kerr." 
+        intervals [205]:
+            xmin = 998.92 
+            xmax = 1003.259 
+            text = "Liam Kerr (North East Scotland) (Con): Cove harbour fishing community is suffering." 
+        intervals [206]:
+            xmin = 1003.259 
+            xmax = 1008.179 
+            text = "First, its landing was bought—and closed—by a private landlord. It went to court and won" 
+        intervals [207]:
+            xmin = 1008.179 
+            xmax = 1012.259 
+            text = "rights of public access but faced significant legal costs. Several boats were then destroyed" 
+        intervals [208]:
+            xmin = 1012.259 
+            xmax = 1016.069 
+            text = "in a fire, and now the landlord has closed access to the beach. Community representatives" 
+        intervals [209]:
+            xmin = 1016.069 
+            xmax = 1018.829 
+            text = "have written to the Cabinet Secretary for the Rural Economy, Fergus Ewing, several times," 
+        intervals [210]:
+            xmin = 1018.829 
+            xmax = 1022.759 
+            text = "requesting a meeting—even if that were to be here at Holyrood—to discuss their rights" 
+        intervals [211]:
+            xmin = 1022.759 
+            xmax = 1024.53 
+            text = "and their future, but to no avail." 
+        intervals [212]:
+            xmin = 1024.53 
+            xmax = 1028.649 
+            text = "Will the First Minister ask the cabinet secretary to meet those representatives, and not risk" 
+        intervals [213]:
+            xmin = 1028.649 
+            xmax = 1030.799 
+            text = "ignoring a community that faces the loss of its livelihood?" 
+        intervals [214]:
+            xmin = 1030.799 
+            xmax = 1034.579 
+            text = "The First Minister (Nicola Sturgeon): Of course, the Scottish Government wants to" 
+        intervals [215]:
+            xmin = 1034.579 
+            xmax = 1040.399 
+            text = "do everything possible to help any community that is experiencing difficulties. Beyond" 
+        intervals [216]:
+            xmin = 1040.399 
+            xmax = 1043.11 
+            text = "what the member has just said, I am not aware of the content of the correspondence with" 
+        intervals [217]:
+            xmin = 1043.11 
+            xmax = 1047.829 
+            text = "Fergus Ewing, but I am happy to give an undertaking to look into that and, if the cabinet secretary" 
+        intervals [218]:
+            xmin = 1047.829 
+            xmax = 1051.73 
+            text = "thinks that the Scottish Government can offer help, for him to meet those who are affected." 
+        intervals [219]:
+            xmin = 1051.73 
+            xmax = 1057.53 
+            text = "Dr Alasdair Allan (Na h-Eileanan an Iar) (SNP): Earlier this week, the Office of Gas and Electricity" 
+        intervals [220]:
+            xmin = 1057.53 
+            xmax = 1062.649 
+            text = "Markets announced that it was minded to reject proposals for a 600MW transmission link to" 
+        intervals [221]:
+            xmin = 1062.649 
+            xmax = 1068.97 
+            text = "the Western Isles, saying that it would instead support a much-reduced 450MW link. That has" 
+        intervals [222]:
+            xmin = 1068.97 
+            xmax = 1072.99 
+            text = "been met with extreme disappointment in my constituency, because it will severely constrain" 
+        intervals [223]:
+            xmin = 1072.99 
+            xmax = 1076.92 
+            text = "capacity for future community projects and place other existing projects from the Western" 
+        intervals [224]:
+            xmin = 1076.92 
+            xmax = 1079.59 
+            text = "Isles at a potential disadvantage." 
+        intervals [225]:
+            xmin = 1079.59 
+            xmax = 1083.94 
+            text = "What pressure can the Scottish Government put on Ofgem, and the United Kingdom Government," 
+        intervals [226]:
+            xmin = 1083.94 
+            xmax = 1084.94 
+            text = "to reconsider that short-sighted decision?" 
+        intervals [227]:
+            xmin = 1084.94 
+            xmax = 1089.549 
+            text = "The First Minister (Nicola Sturgeon): The Scottish Government is absolutely committed" 
+        intervals [228]:
+            xmin = 1089.549 
+            xmax = 1094.669 
+            text = "to unlocking the vast renewables potential of our islands and the associated economic" 
+        intervals [229]:
+            xmin = 1094.669 
+            xmax = 1099.19 
+            text = "benefits for our island communities. We are very concerned at the uncertainty over the" 
+        intervals [230]:
+            xmin = 1099.19 
+            xmax = 1103.62 
+            text = "proposed connection from the Western Isles. The Government believes that for the islands’" 
+        intervals [231]:
+            xmin = 1103.62 
+            xmax = 1108.669 
+            text = "full renewables potential to be realised, a larger link is required, so I very much" 
+        intervals [232]:
+            xmin = 1108.669 
+            xmax = 1113.101 
+            text = "agree with the sentiment of Alasdair Allan’s question. We have made arguments directly" 
+        intervals [233]:
+            xmin = 1113.101 
+            xmax = 1118.01 
+            text = "to Ofgem to support that point, and we will continue to do so as we engage further with" 
+        intervals [234]:
+            xmin = 1118.01 
+            xmax = 1123.929 
+            text = "it and with island stakeholders and developers during the on-going consultation process." 
+        intervals [235]:
+            xmin = 1123.929 
+            xmax = 1129.1 
+            text = "I assure Alasdair Allan—and the chamber—that we will make absolutely every effort to secure" 
+        intervals [236]:
+            xmin = 1129.1 
+            xmax = 1131.5 
+            text = "the right outcome for the Western Isles." 
+        intervals [237]:
+            xmin = 1131.5 
+            xmax = 1137.45 
+            text = "Jackie Baillie (Dumbarton) (Lab): The First Minister will be aware that my constituent" 
+        intervals [238]:
+            xmin = 1137.45 
+            xmax = 1143.299 
+            text = "Jagtar Singh Johal has spent more than 500 days detained in prison in the Punjab. There" 
+        intervals [239]:
+            xmin = 1143.299 
+            xmax = 1149.69 
+            text = "have been accusations of torture and he has now faced his 77th pre-trial preliminary hearing." 
+        intervals [240]:
+            xmin = 1149.69 
+            xmax = 1155.35 
+            text = "His MP, Martin Docherty-Hughes, is to be commended for pursuing the matter vigorously." 
+        intervals [241]:
+            xmin = 1155.35 
+            xmax = 1159.919 
+            text = "Will the First Minister use her influence and speak to the Foreign Secretary and the" 
+        intervals [242]:
+            xmin = 1159.919 
+            xmax = 1164.519 
+            text = "United Kingdom Government to urge them to provide support and assistance to Mr Johal" 
+        intervals [243]:
+            xmin = 1164.519 
+            xmax = 1165.519 
+            text = "and his family?" 
+        intervals [244]:
+            xmin = 1165.519 
+            xmax = 1168.929 
+            text = "The First Minister (Nicola Sturgeon): I thank Jackie Baillie for raising this issue." 
+        intervals [245]:
+            xmin = 1168.929 
+            xmax = 1174.75 
+            text = "I know that she has raised it previously and she is right to say that Martin Docherty-Hughes" 
+        intervals [246]:
+            xmin = 1174.75 
+            xmax = 1179.929 
+            text = "MP has been assiduous in raising the rights and situation of his constituent." 
+        intervals [247]:
+            xmin = 1179.929 
+            xmax = 1183.88 
+            text = "We have raised this issue and we will continue to do so. The Deputy First Minister has raised" 
+        intervals [248]:
+            xmin = 1183.88 
+            xmax = 1190.73 
+            text = "it directly with Indian ministers on recent visits to India and with the British high" 
+        intervals [249]:
+            xmin = 1190.73 
+            xmax = 1195.39 
+            text = "commission. I believe—although I will double-check this—that we have raised the issue directly" 
+        intervals [250]:
+            xmin = 1195.39 
+            xmax = 1202.45 
+            text = "with the Foreign Office. If not, I am happy to undertake that we will do so." 
+        intervals [251]:
+            xmin = 1202.45 
+            xmax = 1205.88 
+            text = "Miles Briggs (Lothian) (Con): In recent weeks, I have received correspondence" 
+        intervals [252]:
+            xmin = 1205.88 
+            xmax = 1210.191 
+            text = "from families across Scotland who are facing unacceptable waits for cleft surgery. Two" 
+        intervals [253]:
+            xmin = 1210.191 
+            xmax = 1213.88 
+            text = "years ago, we warned Scottish National Party ministers about the impact of the closure" 
+        intervals [254]:
+            xmin = 1213.88 
+            xmax = 1218.929 
+            text = "of the Edinburgh unit and the centralisation of cleft services. This Parliament voted against" 
+        intervals [255]:
+            xmin = 1218.929 
+            xmax = 1222.87 
+            text = "centralisation, but ministers pressed on against the will of Parliament." 
+        intervals [256]:
+            xmin = 1222.87 
+            xmax = 1226.82 
+            text = "One case highlighted to me just this week is that of a young man who has been waiting" 
+        intervals [257]:
+            xmin = 1226.82 
+            xmax = 1232.17 
+            text = "two years for a promised final surgery and is no further forward on when he will receive" 
+        intervals [258]:
+            xmin = 1232.17 
+            xmax = 1236.44 
+            text = "that. Families are also telling me that they are looking to NHS England in order to receive" 
+        intervals [259]:
+            xmin = 1236.44 
+            xmax = 1241.07 
+            text = "the surgery. Will the First Minister apologise to families for those waits? What will she" 
+        intervals [260]:
+            xmin = 1241.07 
+            xmax = 1243.88 
+            text = "do to correct the mistake that this Government made?" 
+        intervals [261]:
+            xmin = 1243.88 
+            xmax = 1246.96 
+            text = "The First Minister (Nicola Sturgeon): As I have said many times before in the chamber," 
+        intervals [262]:
+            xmin = 1246.96 
+            xmax = 1252.74 
+            text = "I regret it when any patient has to wait longer for treatment than we would want to be the" 
+        intervals [263]:
+            xmin = 1252.74 
+            xmax = 1253.74 
+            text = "case." 
+        intervals [264]:
+            xmin = 1253.74 
+            xmax = 1258.98 
+            text = "On the issue of cleft surgery, as I recall, the redesign of that service was on clinical" 
+        intervals [265]:
+            xmin = 1258.98 
+            xmax = 1265.47 
+            text = "grounds, to ensure a quality and safe service. If Miles Briggs would like to give further" 
+        intervals [266]:
+            xmin = 1265.47 
+            xmax = 1268.61 
+            text = "details of the constituents who are raising issues with him, the Cabinet Secretary for" 
+        intervals [267]:
+            xmin = 1268.61 
+            xmax = 1273.659 
+            text = "Health and Sport will look into those and, once she has had the opportunity to do that," 
+        intervals [268]:
+            xmin = 1273.659 
+            xmax = 1276.2 
+            text = "will correspond further with him." 
+        intervals [269]:
+            xmin = 1276.2 
+            xmax = 1281.2 
+            text = "Patrick Harvie (Glasgow) (Green): On behalf of the Scottish Greens, I join others" 
+        intervals [270]:
+            xmin = 1281.2 
+            xmax = 1288.169 
+            text = "in expressing our shared concern for the bereaved and injured following the far-right terrorist" 
+        intervals [271]:
+            xmin = 1288.169 
+            xmax = 1295 
+            text = "attack in New Zealand, but also our respect for the response that that country is showing," 
+        intervals [272]:
+            xmin = 1295 
+            xmax = 1302.039 
+            text = "recommitting to the values of its inclusive society and refusing to placate the far right," 
+        intervals [273]:
+            xmin = 1302.039 
+            xmax = 1307.6 
+            text = "as far too many politicians around the world have done." 
+        intervals [274]:
+            xmin = 1307.6 
+            xmax = 1312.779 
+            text = "Last night, in the midst of a crisis of her own making, the Prime Minister again refused" 
+        intervals [275]:
+            xmin = 1312.779 
+            xmax = 1320.48 
+            text = "to listen to reason and instead effectively told the public that Parliament is their enemy." 
+        intervals [276]:
+            xmin = 1320.48 
+            xmax = 1326.75 
+            text = "Scotland needs the freedom to take a different direction, leave behind this chaos and find" 
+        intervals [277]:
+            xmin = 1326.75 
+            xmax = 1333.029 
+            text = "our own way out of the crisis. That is why we need our independence. The First Minister" 
+        intervals [278]:
+            xmin = 1333.029 
+            xmax = 1338.279 
+            text = "told us that she would say something about her preferred timing within weeks. That was" 
+        intervals [279]:
+            xmin = 1338.279 
+            xmax = 1343.159 
+            text = "two months ago. I ask again, when?" 
+        intervals [280]:
+            xmin = 1343.159 
+            xmax = 1347.279 
+            text = "The First Minister (Nicola Sturgeon): First, I agree with Patrick Harvie that the" 
+        intervals [281]:
+            xmin = 1347.279 
+            xmax = 1352.86 
+            text = "Prime Minister’s comments last night were deeply irresponsible and I hope that, in time," 
+        intervals [282]:
+            xmin = 1352.86 
+            xmax = 1354.519 
+            text = "she will reflect on that." 
+        intervals [283]:
+            xmin = 1354.519 
+            xmax = 1359.54 
+            text = "The Prime Minister’s comments also failed to accept any of the responsibility that she" 
+        intervals [284]:
+            xmin = 1359.54 
+            xmax = 1365.789 
+            text = "bears for the mess that the United Kingdom is in right now. She wanted to blame everybody" 
+        intervals [285]:
+            xmin = 1365.789 
+            xmax = 1370.159 
+            text = "except herself, and yet I think that most people know that it was the Prime Minister" 
+        intervals [286]:
+            xmin = 1370.159 
+            xmax = 1375.23 
+            text = "who triggered article 50 without a plan. It was the Prime Minister who drew self-defeating," 
+        intervals [287]:
+            xmin = 1375.23 
+            xmax = 1378.57 
+            text = "contradictory red lines that boxed her in from the start. It was the Prime Minister" 
+        intervals [288]:
+            xmin = 1378.57 
+            xmax = 1383.759 
+            text = "who called an unnecessary general election and who delayed the first vote on her deal" 
+        intervals [289]:
+            xmin = 1383.759 
+            xmax = 1387.62 
+            text = "in an attempt to run down the clock. It was the Prime Minister who failed to listen and" 
+        intervals [290]:
+            xmin = 1387.62 
+            xmax = 1392.81 
+            text = "change course after the first defeat of her deal and then again after the second. She" 
+        intervals [291]:
+            xmin = 1392.81 
+            xmax = 1398.61 
+            text = "must change course now before it is too late and she must bear responsibility for the mess" 
+        intervals [292]:
+            xmin = 1398.61 
+            xmax = 1400.72 
+            text = "that this country is in." 
+        intervals [293]:
+            xmin = 1400.72 
+            xmax = 1406.35 
+            text = "On the issue of independence, the frustration that people feel right now at Scotland’s" 
+        intervals [294]:
+            xmin = 1406.35 
+            xmax = 1411.7 
+            text = "future being determined by the Democratic Unionist Party and a cabal of right-wing Tories" 
+        intervals [295]:
+            xmin = 1411.7 
+            xmax = 1417.82 
+            text = "is understandable, and I absolutely share it. I said that I would wait until the end" 
+        intervals [296]:
+            xmin = 1417.82 
+            xmax = 1422.879 
+            text = "of this phase of the Brexit negotiations before setting out my views on the way forward for" 
+        intervals [297]:
+            xmin = 1422.879 
+            xmax = 1428.409 
+            text = "Scotland. Having done so this long, I think that it is reasonable for me to wait to see" 
+        intervals [298]:
+            xmin = 1428.409 
+            xmax = 1433.73 
+            text = "what clarity emerges in the next few days, even if I suspect that it will just be clarity" 
+        intervals [299]:
+            xmin = 1433.73 
+            xmax = 1441.54 
+            text = "that there will be no clarity. I will then set out my views on the path forward." 
+        intervals [300]:
+            xmin = 1441.54 
+            xmax = 1447.1 
+            text = "Nobody can be in any doubt that change is needed. The past three years have shown that" 
+        intervals [301]:
+            xmin = 1447.1 
+            xmax = 1453.299 
+            text = "the status quo is broken. It cannot protect Scotland from the folly of Brexit and all" 
+        intervals [302]:
+            xmin = 1453.299 
+            xmax = 1458.65 
+            text = "that flows from that. Even the most ardent unionist must see that the way we are now" 
+        intervals [303]:
+            xmin = 1458.65 
+            xmax = 1465.039 
+            text = "governed by Westminster is broken. The question is how we fix that for the future, and there" 
+        intervals [304]:
+            xmin = 1465.039 
+            xmax = 1470.019 
+            text = "is no doubt in my mind that letting people in Scotland choose an independent future is" 
+        intervals [305]:
+            xmin = 1470.019 
+            xmax = 1474.53 
+            text = "the best way to do that." 
+        intervals [306]:
+            xmin = 1474.53 
+            xmax = 1484.259 
+            text = "Patrick Harvie: At every stage of this nightmare, this Parliament" 
+        intervals [307]:
+            xmin = 1484.259 
+            xmax = 1489.6 
+            text = "has tried to persuade the Prime Minister to change course. We have called for the narrow" 
+        intervals [308]:
+            xmin = 1489.6 
+            xmax = 1495.879 
+            text = "2016 result and Scotland’s remain vote to be respected, for our place in the single" 
+        intervals [309]:
+            xmin = 1495.879 
+            xmax = 1501.39 
+            text = "market to be protected and for the public to have the right of a final say and the chance" 
+        intervals [310]:
+            xmin = 1501.39 
+            xmax = 1508.649 
+            text = "to cancel this crisis. If the Prime Minister succeeds in closing off all those positive" 
+        intervals [311]:
+            xmin = 1508.649 
+            xmax = 1514.85 
+            text = "choices and the country finds itself being driven to the edge of the cliff at this time" 
+        intervals [312]:
+            xmin = 1514.85 
+            xmax = 1522.32 
+            text = "next week, does the First Minister agree that MPs must be prepared, finally, to put the" 
+        intervals [313]:
+            xmin = 1522.32 
+            xmax = 1528.379 
+            text = "public interest first and willing, if all else fails, to do what is necessary and revoke" 
+        intervals [314]:
+            xmin = 1528.379 
+            xmax = 1529.379 
+            text = "article 50?" 
+        intervals [315]:
+            xmin = 1529.379 
+            xmax = 1534.62 
+            text = "The First Minister: Yes. Indeed, the Scottish National Party at" 
+        intervals [316]:
+            xmin = 1534.62 
+            xmax = 1539.7 
+            text = "Westminster and the Greens, the Liberal Democrats and Plaid Cymru issued a joint statement last" 
+        intervals [317]:
+            xmin = 1539.7 
+            xmax = 1545.94 
+            text = "night to that effect. SNP MPs will not vote for the Prime Minister’s deal, because it" 
+        intervals [318]:
+            xmin = 1545.94 
+            xmax = 1551.639 
+            text = "is a bad deal that will damage Scottish interests. I do not think that any Scottish MP should" 
+        intervals [319]:
+            xmin = 1551.639 
+            xmax = 1556.39 
+            text = "vote for such a deal. However, nor will we accept the Prime Minister framing it as a" 
+        intervals [320]:
+            xmin = 1556.39 
+            xmax = 1562.889 
+            text = "choice between her deal and no deal. Just because she is not willing to contemplate" 
+        intervals [321]:
+            xmin = 1562.889 
+            xmax = 1568.429 
+            text = "the alternatives does not mean that there are no alternatives. One of those alternatives" 
+        intervals [322]:
+            xmin = 1568.429 
+            xmax = 1575.529 
+            text = "is, undoubtedly, revoking article 50. If all else fails by this time next week, that is" 
+        intervals [323]:
+            xmin = 1575.529 
+            xmax = 1580.23 
+            text = "exactly what MPs should do." 
+        intervals [324]:
+            xmin = 1580.23 
+            xmax = 1584.941 
+            text = "Willie Rennie (North East Fife) (LD): I associate myself and my party with the First" 
+        intervals [325]:
+            xmin = 1584.941 
+            xmax = 1589.82 
+            text = "Minister’s remarks about New Zealand. The events in that country were truly sickening." 
+        intervals [326]:
+            xmin = 1589.82 
+            xmax = 1594.42 
+            text = "You would not think that we were in the middle of a national crisis if you just listened" 
+        intervals [327]:
+            xmin = 1594.42 
+            xmax = 1601.019 
+            text = "to the questions from the leaders of the Conservative and Labour parties, but the last thing this" 
+        intervals [328]:
+            xmin = 1601.019 
+            xmax = 1607.02 
+            text = "country needs is more division and chaos with independence to compound the division and" 
+        intervals [329]:
+            xmin = 1607.02 
+            xmax = 1611.549 
+            text = "chaos of Brexit. [Interruption.]" 
+        intervals [330]:
+            xmin = 1611.549 
+            xmax = 1612.549 
+            text = "The Presiding Officer: Order, please." 
+        intervals [331]:
+            xmin = 1612.549 
+            xmax = 1616.009 
+            text = "Willie Rennie: The first duty of a Prime Minister is to keep" 
+        intervals [332]:
+            xmin = 1616.009 
+            xmax = 1622.679 
+            text = "the country safe but, because of the cavalier choices of this Prime Minister, emergency" 
+        intervals [333]:
+            xmin = 1622.679 
+            xmax = 1628.81 
+            text = "measures under operation yellowhammer have been triggered and medicines, food supply" 
+        intervals [334]:
+            xmin = 1628.81 
+            xmax = 1634.46 
+            text = "chains and transport are all at risk. Does the First Minister agree that no serious Prime" 
+        intervals [335]:
+            xmin = 1634.46 
+            xmax = 1641.09 
+            text = "Minister should ever threaten such catastrophic consequences, no matter how much she wants" 
+        intervals [336]:
+            xmin = 1641.09 
+            xmax = 1643.58 
+            text = "her policy to be agreed?" 
+        intervals [337]:
+            xmin = 1643.58 
+            xmax = 1644.933 
+            text = "The First Minister (Nicola Sturgeon): Before I address Willie Rennie’s question," 
+        intervals [338]:
+            xmin = 1644.933 
+            xmax = 1650.72 
+            text = "I say in response to the first part of what he said that the inconsistency in his position" 
+        intervals [339]:
+            xmin = 1650.72 
+            xmax = 1656.289 
+            text = "is this: he wants people across the United Kingdom to have the ability to escape Brexit" 
+        intervals [340]:
+            xmin = 1656.289 
+            xmax = 1660.94 
+            text = "through a second referendum—and I agree with him on that—but if that does not prove" 
+        intervals [341]:
+            xmin = 1660.94 
+            xmax = 1665.029 
+            text = "to be possible, he thinks that Scotland should just grin and bear it, and put up with the" 
+        intervals [342]:
+            xmin = 1665.029 
+            xmax = 1671.02 
+            text = "devastation of Brexit, instead of Scotland having the choice to escape Brexit and have" 
+        intervals [343]:
+            xmin = 1671.02 
+            xmax = 1677.159 
+            text = "an independent future. That is a deeply inconsistent position for him to take and I hope that he" 
+        intervals [344]:
+            xmin = 1677.159 
+            xmax = 1680.559 
+            text = "will reflect on it." 
+        intervals [345]:
+            xmin = 1680.559 
+            xmax = 1690.159 
+            text = "On operation yellowhammer, which is the emergency planning for a no-deal Brexit, it is beyond" 
+        intervals [346]:
+            xmin = 1690.159 
+            xmax = 1697.61 
+            text = "comprehension that any Prime Minister could knowingly allow the country to be eight days—about" 
+        intervals [347]:
+            xmin = 1697.61 
+            xmax = 1704.299 
+            text = "200 hours—away from the possibility of crashing out of the European Union without a deal and" 
+        intervals [348]:
+            xmin = 1704.299 
+            xmax = 1710.019 
+            text = "to require that emergency planning work to be done. Yesterday, as I have done once a" 
+        intervals [349]:
+            xmin = 1710.019 
+            xmax = 1713.37 
+            text = "week for several weeks, I chaired a meeting of the Scottish Government’s resilience" 
+        intervals [350]:
+            xmin = 1713.37 
+            xmax = 1719.01 
+            text = "committee that was looking at medicine supplies, food supplies and transport links in the event" 
+        intervals [351]:
+            xmin = 1719.01 
+            xmax = 1725.95 
+            text = "of a no-deal Brexit. It is outrageous that we have to expend time, energy and resources" 
+        intervals [352]:
+            xmin = 1725.95 
+            xmax = 1733.639 
+            text = "on doing that. Before any more time passes and it is too late, the Prime Minister must" 
+        intervals [353]:
+            xmin = 1733.639 
+            xmax = 1740.22 
+            text = "change course, take no deal off the table completely, look to build a broader consensus" 
+        intervals [354]:
+            xmin = 1740.22 
+            xmax = 1746.47 
+            text = "rather than pandering to the hardliners in her own party and, if necessary, dump Brexit" 
+        intervals [355]:
+            xmin = 1746.47 
+            xmax = 1749.809 
+            text = "completely. That would be in the best interests of the country." 
+        intervals [356]:
+            xmin = 1749.809 
+            xmax = 1754.249 
+            text = "Willie Rennie: The First Minister is wrong. The inconsistency" 
+        intervals [357]:
+            xmin = 1754.249 
+            xmax = 1760.759 
+            text = "is to believe that breaking up an economic partnership of 40 years will be chaotic but" 
+        intervals [358]:
+            xmin = 1760.759 
+            xmax = 1764.269 
+            text = "that breaking up one of 300 years will be a piece of cake. [Interruption.]" 
+        intervals [359]:
+            xmin = 1764.269 
+            xmax = 1765.269 
+            text = "The Presiding Officer: Order, please." 
+        intervals [360]:
+            xmin = 1765.269 
+            xmax = 1766.7 
+            text = "Willie Rennie: The First Minister is the inconsistent one." 
+        intervals [361]:
+            xmin = 1766.7 
+            xmax = 1767.7 
+            text = "[Interruption.]" 
+        intervals [362]:
+            xmin = 1767.7 
+            xmax = 1768.7 
+            text = "The Presiding Officer: Order, please." 
+        intervals [363]:
+            xmin = 1768.7 
+            xmax = 1772 
+            text = "Willie Rennie: People are scunnered by this agonising Brexit" 
+        intervals [364]:
+            xmin = 1772 
+            xmax = 1779.74 
+            text = "process. We are three years on, with 200 hours left. Is it not time for a commonsense approach" 
+        intervals [365]:
+            xmin = 1779.74 
+            xmax = 1788.309 
+            text = "under which the Prime Minister takes a no-deal Brexit off the table instead of using it as" 
+        intervals [366]:
+            xmin = 1788.309 
+            xmax = 1796.07 
+            text = "a threat against her own citizens; all party leaders sit down and talk instead of the leader" 
+        intervals [367]:
+            xmin = 1796.07 
+            xmax = 1800.99 
+            text = "of the Opposition walking out because he does not like Chuka Umunna; the Prime Minister" 
+        intervals [368]:
+            xmin = 1800.99 
+            xmax = 1807.02 
+            text = "reaches out to MPs in Parliament rather than insulting them from behind a podium in number" 
+        intervals [369]:
+            xmin = 1807.02 
+            xmax = 1815.009 
+            text = "10; and we admit that Parliament is incapable of deciding, so we have a public vote to let" 
+        intervals [370]:
+            xmin = 1815.009 
+            xmax = 1819.299 
+            text = "the people decide? Is it not time for that commonsense approach?" 
+        intervals [371]:
+            xmin = 1819.299 
+            xmax = 1825.082 
+            text = "The First Minister: Yes, I agree with all that. I think that people" 
+        intervals [372]:
+            xmin = 1825.082 
+            xmax = 1830.09 
+            text = "across the UK should have the opportunity to vote again, given everything that they" 
+        intervals [373]:
+            xmin = 1830.09 
+            xmax = 1835.62 
+            text = "now know that was not known in 2016. That is why I will be calling for that public vote" 
+        intervals [374]:
+            xmin = 1835.62 
+            xmax = 1843.14 
+            text = "in London on Saturday, along with many others—no doubt, hundreds of thousands of others." 
+        intervals [375]:
+            xmin = 1843.14 
+            xmax = 1846.669 
+            text = "I agree with everything that the member said about the Prime Minister, and I share his" 
+        intervals [376]:
+            xmin = 1846.669 
+            xmax = 1851.15 
+            text = "despair about the leader of the Labour Party and his childish behaviour last night at a" 
+        intervals [377]:
+            xmin = 1851.15 
+            xmax = 1856.789 
+            text = "time when we need people to come together to find an alternative. Where I disagree with" 
+        intervals [378]:
+            xmin = 1856.789 
+            xmax = 1862.23 
+            text = "the member is on his view that, if all of what he has just called for fails, Scotland" 
+        intervals [379]:
+            xmin = 1862.23 
+            xmax = 1868.25 
+            text = "is powerless in the face of the disaster of Brexit. I oppose Brexit, as he does, but there" 
+        intervals [380]:
+            xmin = 1868.25 
+            xmax = 1874.19 
+            text = "was nothing inevitable about the chaos of Brexit. That is down to those who proposed" 
+        intervals [381]:
+            xmin = 1874.19 
+            xmax = 1878.8 
+            text = "it having no idea what it would look like in reality and doing no planning for it. It" 
+        intervals [382]:
+            xmin = 1878.8 
+            xmax = 1882.7 
+            text = "did not have to be that way." 
+        intervals [383]:
+            xmin = 1882.7 
+            xmax = 1887.43 
+            text = "I say to Willie Rennie that the inconsistency is in him standing up to rightly spell out" 
+        intervals [384]:
+            xmin = 1887.43 
+            xmax = 1892.99 
+            text = "what a disaster Brexit will be but then saying that, if all else fails, Scotland just has" 
+        intervals [385]:
+            xmin = 1892.99 
+            xmax = 1896.95 
+            text = "to put up with it. I do not think that Scotland has to put up with it and I do not think that" 
+        intervals [386]:
+            xmin = 1896.95 
+            xmax = 1901.02 
+            text = "Scotland should have to put up with it. If it comes to it, Scotland choosing independence" 
+        intervals [387]:
+            xmin = 1901.02 
+            xmax = 1904.271 
+            text = "is a much brighter future than remaining part of Brexit Britain." 
+        intervals [388]:
+            xmin = 1904.271 
+            xmax = 1911.47 
+            text = "The Presiding Officer: We have some additional supplementaries." 
+        intervals [389]:
+            xmin = 1911.47 
+            xmax = 1916.36 
+            text = "Jenny Gilruth (Mid Fife and Glenrothes) (SNP): Last night, the Prime Minister claimed that" 
+        intervals [390]:
+            xmin = 1916.36 
+            xmax = 1921.44 
+            text = "the public have had enough; today, a petition on the UK Parliament website calling for article" 
+        intervals [391]:
+            xmin = 1921.44 
+            xmax = 1926.889 
+            text = "50 to be revoked is already well on the way to 1 million signatures. Support is growing" 
+        intervals [392]:
+            xmin = 1926.889 
+            xmax = 1932.649 
+            text = "so fast that the website crashed harder than the Prime Minister’s credibility. If the" 
+        intervals [393]:
+            xmin = 1932.649 
+            xmax = 1936.35 
+            text = "Prime Minister believes that the people are with her, should she not have the courage" 
+        intervals [394]:
+            xmin = 1936.35 
+            xmax = 1939.51 
+            text = "to put that to the test and call for a people’s vote?" 
+        intervals [395]:
+            xmin = 1939.51 
+            xmax = 1944.23 
+            text = "The First Minister (Nicola Sturgeon): Yes, I agree. As I said, I thought that the" 
+        intervals [396]:
+            xmin = 1944.23 
+            xmax = 1949.749 
+            text = "Prime Minister’s statement last night was deeply regrettable. For her to blame everybody" 
+        intervals [397]:
+            xmin = 1949.749 
+            xmax = 1956.509 
+            text = "except herself beggars belief. Now is the time for people across parties to speak out." 
+        intervals [398]:
+            xmin = 1956.509 
+            xmax = 1963.529 
+            text = "Last night, I watched one of the most powerful contributions that I have ever seen in the" 
+        intervals [399]:
+            xmin = 1963.529 
+            xmax = 1965.19 
+            text = "House of Commons. It was from Dominic Grieve, a moderate Tory who I think everybody would" 
+        intervals [400]:
+            xmin = 1965.19 
+            xmax = 1971.179 
+            text = "accept is an honourable person. He had the honesty to say that he was ashamed to be in" 
+        intervals [401]:
+            xmin = 1971.179 
+            xmax = 1975.669 
+            text = "the Conservative Party and that the conduct of the Prime Minister made him want to weep," 
+        intervals [402]:
+            xmin = 1975.669 
+            xmax = 1981.99 
+            text = "yet Scottish Conservatives continue to parrot the lines of the Prime Minister. I often wonder" 
+        intervals [403]:
+            xmin = 1981.99 
+            xmax = 1988.08 
+            text = "whether Jackson Carlaw ever, in his quieter moments, thinks that it might be better for" 
+        intervals [404]:
+            xmin = 1988.08 
+            xmax = 1993.92 
+            text = "the country and indeed his own reputation for him to say what I believe he probably" 
+        intervals [405]:
+            xmin = 1993.92 
+            xmax = 1998.85 
+            text = "thinks—that this is a mess, that carrying on regardless is a profound mistake and that" 
+        intervals [406]:
+            xmin = 1998.85 
+            xmax = 2004.529 
+            text = "the Prime Minister must change course and must do so now before it is too late." 
+        intervals [407]:
+            xmin = 2004.529 
+            xmax = 2011.389 
+            text = "Daniel Johnson (Edinburgh Southern) (Lab): The First Minister will be aware that the" 
+        intervals [408]:
+            xmin = 2011.389 
+            xmax = 2016.419 
+            text = "British Retail Consortium annual crime survey was published today. It records that, last" 
+        intervals [409]:
+            xmin = 2016.419 
+            xmax = 2021.309 
+            text = "year, 115 shop workers were physically attacked at work every single day across the United" 
+        intervals [410]:
+            xmin = 2021.309 
+            xmax = 2024.269 
+            text = "Kingdom. The Union of Shop, Distributive and Allied Workers—USDAW—estimates that the" 
+        intervals [411]:
+            xmin = 2024.269 
+            xmax = 2028.86 
+            text = "real problem could be much greater; its estimate is that 34 retail workers are attacked every" 
+        intervals [412]:
+            xmin = 2028.86 
+            xmax = 2030.96 
+            text = "day in Scotland alone." 
+        intervals [413]:
+            xmin = 2030.96 
+            xmax = 2035.49 
+            text = "My bill to protect shop workers is in the final stages of drafting. What does the First" 
+        intervals [414]:
+            xmin = 2035.49 
+            xmax = 2040.749 
+            text = "Minister think needs to be done to tackle this growing problem and will her Government" 
+        intervals [415]:
+            xmin = 2040.749 
+            xmax = 2045.47 
+            text = "work with me to look at what changes in the law may be needed to do so? Everyone has the" 
+        intervals [416]:
+            xmin = 2045.47 
+            xmax = 2048.869 
+            text = "right to be safe at work, whether they work in an office or on a shop floor." 
+        intervals [417]:
+            xmin = 2048.869 
+            xmax = 2054.25 
+            text = "The First Minister (Nicola Sturgeon): I thank Daniel Johnson for raising the issue" 
+        intervals [418]:
+            xmin = 2054.25 
+            xmax = 2060.02 
+            text = "and the results of the British Retail Consortium’s survey. It is a powerful reminder that our" 
+        intervals [419]:
+            xmin = 2060.02 
+            xmax = 2066.52 
+            text = "shop workers do an essential job that is often dangerous to them, for which we all owe them" 
+        intervals [420]:
+            xmin = 2066.52 
+            xmax = 2068.34 
+            text = "a huge debt of gratitude." 
+        intervals [421]:
+            xmin = 2068.34 
+            xmax = 2072.79 
+            text = "We will be happy to work with Daniel Johnson and others to look at what further protections" 
+        intervals [422]:
+            xmin = 2072.79 
+            xmax = 2077.71 
+            text = "we need to put in place. He said that his bill is in the final stages of drafting; we" 
+        intervals [423]:
+            xmin = 2077.71 
+            xmax = 2083.39 
+            text = "will look carefully at it when it is published and we will be happy to consider it and discuss" 
+        intervals [424]:
+            xmin = 2083.39 
+            xmax = 2088.429 
+            text = "it with him. We will be happy to try to build consensus." 
+        intervals [425]:
+            xmin = 2088.429 
+            xmax = 2092.55 
+            text = "Mark McDonald (Aberdeen Donside) (Ind): On 1 April, employer contributions to national" 
+        intervals [426]:
+            xmin = 2092.55 
+            xmax = 2099.1 
+            text = "health service pension schemes will increase from 14.9 to 20.9 per cent. Children’s hospices" 
+        intervals [427]:
+            xmin = 2099.1 
+            xmax = 2103.11 
+            text = "across Scotland have estimated that the increased cost to them will be equivalent to the salaries" 
+        intervals [428]:
+            xmin = 2103.11 
+            xmax = 2107.25 
+            text = "of nine full-time nurses. The United Kingdom Government has stated that funding for charities" 
+        intervals [429]:
+            xmin = 2107.25 
+            xmax = 2110.98 
+            text = "and hospices is included in the funding that has been provided to NHS England to cover" 
+        intervals [430]:
+            xmin = 2110.98 
+            xmax = 2113.2 
+            text = "the costs of the increase, but the Children’s Hospice Association Scotland says that similar" 
+        intervals [431]:
+            xmin = 2113.2 
+            xmax = 2118.53 
+            text = "commitments have not yet been made to Scottish charities and hospices. Will the Scottish" 
+        intervals [432]:
+            xmin = 2118.53 
+            xmax = 2121.92 
+            text = "Government provide funding to help charities and hospice organisations to meet the cost" 
+        intervals [433]:
+            xmin = 2121.92 
+            xmax = 2125.81 
+            text = "increase and ensure that they do not have to divert money from the vital support services" 
+        intervals [434]:
+            xmin = 2125.81 
+            xmax = 2126.81 
+            text = "that they provide?" 
+        intervals [435]:
+            xmin = 2126.81 
+            xmax = 2129.54 
+            text = "The First Minister (Nicola Sturgeon): I thank Mark McDonald for rightly raising" 
+        intervals [436]:
+            xmin = 2129.54 
+            xmax = 2137.06 
+            text = "the issue, which is concerning generally and in particular for hospices and charities." 
+        intervals [437]:
+            xmin = 2137.06 
+            xmax = 2141.17 
+            text = "The Scottish Government has been in discussions with the British Medical Association about" 
+        intervals [438]:
+            xmin = 2141.17 
+            xmax = 2147.34 
+            text = "how best to disburse additional funding to practices to meet the change. We will continue" 
+        intervals [439]:
+            xmin = 2147.34 
+            xmax = 2151.53 
+            text = "to discuss that, and I will ask the health secretary to look at the position of hospices" 
+        intervals [440]:
+            xmin = 2151.53 
+            xmax = 2156.52 
+            text = "and charities and to come back to Mark McDonald when she has done so." 
+        intervals [441]:
+            xmin = 2156.52 
+            xmax = 2159.69 
+            text = "Christine Grahame (Midlothian South, Tweeddale and Lauderdale) (SNP):" 
+        intervals [442]:
+            xmin = 2159.69 
+            xmax = 2163.99 
+            text = "To ask the First Minister, in light of the reported travel chaos on the Borders railway" 
+        intervals [443]:
+            xmin = 2163.99 
+            xmax = 2168.93 
+            text = "last weekend as a result of a number of train cancellations, whether the Scottish Government" 
+        intervals [444]:
+            xmin = 2168.93 
+            xmax = 2172.72 
+            text = "considers that the ScotRail franchise continues to be sustainable. (S5F-03189)" 
+        intervals [445]:
+            xmin = 2172.72 
+            xmax = 2176.05 
+            text = "The First Minister (Nicola Sturgeon): I am disappointed that passengers across a" 
+        intervals [446]:
+            xmin = 2176.05 
+            xmax = 2180.81 
+            text = "number of routes on the ScotRail network continue to be affected by train cancellations as a" 
+        intervals [447]:
+            xmin = 2180.81 
+            xmax = 2186.63 
+            text = "consequence of ScotRail’s training backlog. There is evidence of some improvement in ScotRail’s" 
+        intervals [448]:
+            xmin = 2186.63 
+            xmax = 2191.2 
+            text = "performance nationally, but that will do little to reassure passengers who attempted to travel" 
+        intervals [449]:
+            xmin = 2191.2 
+            xmax = 2195.78 
+            text = "on the Borders railway last Sunday and were faced with an unacceptable number of cancellations." 
+        intervals [450]:
+            xmin = 2195.78 
+            xmax = 2200.27 
+            text = "That is why ScotRail’s focus must remain on delivering a robust remedial plan that" 
+        intervals [451]:
+            xmin = 2200.27 
+            xmax = 2204.08 
+            text = "puts passenger interests at the forefront of restoring performance levels. The remedial" 
+        intervals [452]:
+            xmin = 2204.08 
+            xmax = 2209.22 
+            text = "plan has been specifically designed to militate against train crew and train fleet challenges," 
+        intervals [453]:
+            xmin = 2209.22 
+            xmax = 2213.11 
+            text = "and I fully expect ScotRail to ensure that the plan is delivered in order to reaffirm" 
+        intervals [454]:
+            xmin = 2213.11 
+            xmax = 2215.22 
+            text = "passenger confidence in the railway." 
+        intervals [455]:
+            xmin = 2215.22 
+            xmax = 2218.69 
+            text = "Christine Grahame: There was, indeed, a service meltdown. It" 
+        intervals [456]:
+            xmin = 2218.69 
+            xmax = 2227.73 
+            text = "was a breakdown, too—on the Borders railway on Sunday. The cancellations continued since" 
+        intervals [457]:
+            xmin = 2227.73 
+            xmax = 2229.44 
+            text = "then and continue today." 
+        intervals [458]:
+            xmin = 2229.44 
+            xmax = 2231.18 
+            text = "I heard the Cabinet Secretary for Transport, Infrastructure and Connectivity talking this" 
+        intervals [459]:
+            xmin = 2231.18 
+            xmax = 2235.69 
+            text = "morning about remedial notices. The second notice that was served requires that a plan" 
+        intervals [460]:
+            xmin = 2235.69 
+            xmax = 2241.51 
+            text = "be delivered soon. The plan might be delivered, but it will not deliver trains—plans do" 
+        intervals [461]:
+            xmin = 2241.51 
+            xmax = 2246.82 
+            text = "not drive trains. Is not it time that the Scottish Government told Abellio ScotRail" 
+        intervals [462]:
+            xmin = 2246.82 
+            xmax = 2252.27 
+            text = "that it is in the last chance saloon? I certainly think so, and so do my constituents." 
+        intervals [463]:
+            xmin = 2252.27 
+            xmax = 2259.6 
+            text = "The First Minister: ScotRail should treat the remedial plan very" 
+        intervals [464]:
+            xmin = 2259.6 
+            xmax = 2266.59 
+            text = "much as the last chance saloon. That is the nature of it. ScotRail has been left in no" 
+        intervals [465]:
+            xmin = 2266.59 
+            xmax = 2271.051 
+            text = "doubt that its recent performance levels, particularly in the Borders and Fife, have" 
+        intervals [466]:
+            xmin = 2271.051 
+            xmax = 2275.21 
+            text = "been completely unacceptable. I have said that in the chamber and I heard Michael Matheson" 
+        intervals [467]:
+            xmin = 2275.21 
+            xmax = 2281.48 
+            text = "say it a short while ago, when members including Annabelle Ewing raised legitimate and understandable" 
+        intervals [468]:
+            xmin = 2281.48 
+            xmax = 2284.09 
+            text = "concerns on their constituents’ behalf." 
+        intervals [469]:
+            xmin = 2284.09 
+            xmax = 2288.4 
+            text = "We have used contractual mechanisms that are in the franchise agreement to require the" 
+        intervals [470]:
+            xmin = 2288.4 
+            xmax = 2294.56 
+            text = "remedial plan. ScotRail will publish its performance remedial plan on its website shortly. The" 
+        intervals [471]:
+            xmin = 2294.56 
+            xmax = 2300.84 
+            text = "commitments in that plan have been contracted as a remedial agreement. Of course, if ScotRail" 
+        intervals [472]:
+            xmin = 2300.84 
+            xmax = 2304.94 
+            text = "does not achieve improved performance, or if it fails to deliver on its contractual" 
+        intervals [473]:
+            xmin = 2304.94 
+            xmax = 2308.73 
+            text = "commitments, it runs the risk of its franchise being terminated early." 
+        intervals [474]:
+            xmin = 2308.73 
+            xmax = 2312.53 
+            text = "Rachael Hamilton (Ettrick, Roxburgh and Berwickshire) (Con):" 
+        intervals [475]:
+            xmin = 2312.53 
+            xmax = 2317.5 
+            text = "I recently received a letter from a concerned Borders railway commuter. His letter says:" 
+        intervals [476]:
+            xmin = 2317.5 
+            xmax = 2321.65 
+            text = "“It has come to the point where there is genuine surprise that the train is running" 
+        intervals [477]:
+            xmin = 2321.65 
+            xmax = 2327.75 
+            text = "on time as opposed to it being so frequently cancelled ... The negative effects of this" 
+        intervals [478]:
+            xmin = 2327.75 
+            xmax = 2333.13 
+            text = "are significant, there is a financial penalty imposed by the nursery as a result of collecting" 
+        intervals [479]:
+            xmin = 2333.13 
+            xmax = 2334.13 
+            text = "my daughter”" 
+        intervals [480]:
+            xmin = 2334.13 
+            xmax = 2335.13 
+            text = "late, and" 
+        intervals [481]:
+            xmin = 2335.13 
+            xmax = 2339.22 
+            text = "“There is significant stress and anxiety because of the lateness at work”." 
+        intervals [482]:
+            xmin = 2339.22 
+            xmax = 2343.97 
+            text = "Will the First Minister apologise on behalf of her transport secretary to the hundreds" 
+        intervals [483]:
+            xmin = 2343.97 
+            xmax = 2349.48 
+            text = "of commuters who are experiencing transport hell, and will she personally oversee the" 
+        intervals [484]:
+            xmin = 2349.48 
+            xmax = 2354.37 
+            text = "remedial plan that has been submitted by ScotRail, and which will be published in the next few" 
+        intervals [485]:
+            xmin = 2354.37 
+            xmax = 2355.37 
+            text = "days?" 
+        intervals [486]:
+            xmin = 2355.37 
+            xmax = 2357.92 
+            text = "The First Minister: The transport secretary will oversee that," 
+        intervals [487]:
+            xmin = 2357.92 
+            xmax = 2364 
+            text = "because it is part of his responsibilities. However, as First Minister, I, too, will obviously" 
+        intervals [488]:
+            xmin = 2364 
+            xmax = 2366.52 
+            text = "retain a very close interest in the matter." 
+        intervals [489]:
+            xmin = 2366.52 
+            xmax = 2370.29 
+            text = "I have made it very clear—I do not think that I can make it clearer—that some of" 
+        intervals [490]:
+            xmin = 2370.29 
+            xmax = 2375.1 
+            text = "ScotRail’s recent performance levels have been completely unacceptable. That is particularly," 
+        intervals [491]:
+            xmin = 2375.1 
+            xmax = 2379.32 
+            text = "although not exclusively, the case on the Borders railway. I could stand here and talk" 
+        intervals [492]:
+            xmin = 2379.32 
+            xmax = 2383.29 
+            text = "about some of the reasons for that, including train delivery and training requirements." 
+        intervals [493]:
+            xmin = 2383.29 
+            xmax = 2391.42 
+            text = "There have also been problems with trains coming into and going out of Edinburgh in" 
+        intervals [494]:
+            xmin = 2391.42 
+            xmax = 2394.64 
+            text = "the past couple of days to do with Network Rail failings. However, I am not going to" 
+        intervals [495]:
+            xmin = 2394.64 
+            xmax = 2399.72 
+            text = "talk about those reasons, because it is ScotRail’s responsibility to ensure that it lives up" 
+        intervals [496]:
+            xmin = 2399.72 
+            xmax = 2405.21 
+            text = "to its performance standards. That is why the remedial plan is so important and why" 
+        intervals [497]:
+            xmin = 2405.21 
+            xmax = 2410.84 
+            text = "ScotRail has to understand the seriousness of the obligation on it to deliver on the" 
+        intervals [498]:
+            xmin = 2410.84 
+            xmax = 2412.48 
+            text = "commitments that it makes in the plan." 
+        intervals [499]:
+            xmin = 2412.48 
+            xmax = 2416.25 
+            text = "Mark Ruskell (Mid Scotland and Fife) (Green): Commuters are suffering from poor rail services" 
+        intervals [500]:
+            xmin = 2416.25 
+            xmax = 2420.73 
+            text = "across Scotland, especially in Fife. Last year, the then Minister for Transport and" 
+        intervals [501]:
+            xmin = 2420.73 
+            xmax = 2423.361 
+            text = "the Islands, Humza Yousaf, said in the chamber:" 
+        intervals [502]:
+            xmin = 2423.361 
+            xmax = 2429.64 
+            text = "“there will be an upgrade in the rolling stock later in 2018 or early in 2019. Nevertheless," 
+        intervals [503]:
+            xmin = 2429.64 
+            xmax = 2432.96 
+            text = "people in Fife should not have to wait for that to get an improvement in their service”.—[Official" 
+        intervals [504]:
+            xmin = 2432.96 
+            xmax = 2434.32 
+            text = "Report, 25 January 2018; c 2.]" 
+        intervals [505]:
+            xmin = 2434.32 
+            xmax = 2439.83 
+            text = "Why are Fife commuters now being told that it will be the end of 2019 at the very earliest" 
+        intervals [506]:
+            xmin = 2439.83 
+            xmax = 2443.36 
+            text = "before any improvements come through? Does not the First Minister believe that it is" 
+        intervals [507]:
+            xmin = 2443.36 
+            xmax = 2447.26 
+            text = "time that she personally stepped in to take charge of the ScotRail crisis?" 
+        intervals [508]:
+            xmin = 2447.26 
+            xmax = 2451.41 
+            text = "The First Minister: I have made my views clear, and I will do" 
+        intervals [509]:
+            xmin = 2451.41 
+            xmax = 2459 
+            text = "so again. Those who are charged with and remunerated for the responsibility of running our railways" 
+        intervals [510]:
+            xmin = 2459 
+            xmax = 2467.1 
+            text = "are the ones who have to get that right. They have a responsibility to do so and to begin" 
+        intervals [511]:
+            xmin = 2467.1 
+            xmax = 2471.56 
+            text = "immediately to deliver the improvements that passengers want. That is what the remedial" 
+        intervals [512]:
+            xmin = 2471.56 
+            xmax = 2473.76 
+            text = "plan will focus very much on." 
+        intervals [513]:
+            xmin = 2473.76 
+            xmax = 2479.61 
+            text = "Of course, significant investment is being made in our railways, with rolling stock being" 
+        intervals [514]:
+            xmin = 2479.61 
+            xmax = 2483.94 
+            text = "renewed and a lot of other positive work being done from which I hope passengers will start" 
+        intervals [515]:
+            xmin = 2483.94 
+            xmax = 2490.94 
+            text = "to benefit very soon. However, ScotRail must address the reasons for the dip in its performance—at" 
+        intervals [516]:
+            xmin = 2490.94 
+            xmax = 2498.64 
+            text = "least, those that are within its responsibility—and we expect it to do so very quickly." 
+        intervals [517]:
+            xmin = 2498.64 
+            xmax = 2502.13 
+            text = "Liz Smith (Mid Scotland and Fife) (Con): To ask the First Minister, in light of the" 
+        intervals [518]:
+            xmin = 2502.13 
+            xmax = 2507.62 
+            text = "parliamentary reports by both MSPs and MPs, what the Scottish Government's response is" 
+        intervals [519]:
+            xmin = 2507.62 
+            xmax = 2511.88 
+            text = "to the growing concerns about the effects of social media on the mental health of young" 
+        intervals [520]:
+            xmin = 2511.88 
+            xmax = 2513.16 
+            text = "people across Scotland. (S5F-03169)" 
+        intervals [521]:
+            xmin = 2513.16 
+            xmax = 2516.37 
+            text = "The First Minister (Nicola Sturgeon): We welcome the report that was published last" 
+        intervals [522]:
+            xmin = 2516.37 
+            xmax = 2519.91 
+            text = "week by the Public Audit and Post-legislative Scrutiny Committee on the relationship between" 
+        intervals [523]:
+            xmin = 2519.91 
+            xmax = 2525.42 
+            text = "social media and mental health. It made recommendations on the need for further research in the area." 
+        intervals [524]:
+            xmin = 2525.42 
+            xmax = 2530.34 
+            text = "Next month, we will publish initial research on the links between unhealthy social media" 
+        intervals [525]:
+            xmin = 2530.34 
+            xmax = 2536.09 
+            text = "use and lower mental wellbeing, in particular in girls and young women. We are also committed" 
+        intervals [526]:
+            xmin = 2536.09 
+            xmax = 2540.19 
+            text = "to developing and publishing Scotland-specific advice on how young people can use social" 
+        intervals [527]:
+            xmin = 2540.19 
+            xmax = 2544.23 
+            text = "media in a healthy way. That advice, which will be co-produced with young people for" 
+        intervals [528]:
+            xmin = 2544.23 
+            xmax = 2548.73 
+            text = "young people, will be informed by the research that we will publish next month." 
+        intervals [529]:
+            xmin = 2548.73 
+            xmax = 2552.15 
+            text = "Liz Smith: I thank the First Minister for that helpful" 
+        intervals [530]:
+            xmin = 2552.15 
+            xmax = 2557.88 
+            text = "answer. I am sure that the whole Parliament will be united in deep concern about the shocking" 
+        intervals [531]:
+            xmin = 2557.88 
+            xmax = 2564.26 
+            text = "statistics that say that 60 per cent of 16 to 25-year-olds believe that social media" 
+        intervals [532]:
+            xmin = 2564.26 
+            xmax = 2569.33 
+            text = "place “overwhelming pressure” on their age group, and that mental health referrals" 
+        intervals [533]:
+            xmin = 2569.33 
+            xmax = 2574.5 
+            text = "have increased by 22 per cent since 2014. Those are just some of the facts that have," 
+        intervals [534]:
+            xmin = 2574.5 
+            xmax = 2580.47 
+            text = "quite rightly, led MSPs and MPs to state categorically that we all have a duty of care to protect" 
+        intervals [535]:
+            xmin = 2580.47 
+            xmax = 2587.57 
+            text = "vulnerable users. In addition to her previous answer, can the First Minister give us some" 
+        intervals [536]:
+            xmin = 2587.57 
+            xmax = 2594.56 
+            text = "details about the timescale that she envisages for implementing the task force delivery plan?" 
+        intervals [537]:
+            xmin = 2594.56 
+            xmax = 2601.23 
+            text = "The First Minister: First, I appreciate very much the sentiments" 
+        intervals [538]:
+            xmin = 2601.23 
+            xmax = 2605.63 
+            text = "behind, and the detail of, Liz Smith’s question. The internet and social media should be, and" 
+        intervals [539]:
+            xmin = 2605.63 
+            xmax = 2612.21 
+            text = "in many respects are, forces for good that we should embrace and welcome, but they also" 
+        intervals [540]:
+            xmin = 2612.21 
+            xmax = 2619.94 
+            text = "put considerable pressure on young people—in particular, young girls. Many of us have young" 
+        intervals [541]:
+            xmin = 2619.94 
+            xmax = 2623.02 
+            text = "girls in our families—I have a niece who is about to enter her teenage years—and" 
+        intervals [542]:
+            xmin = 2623.02 
+            xmax = 2629.74 
+            text = "it is not difficult to see that pressure. We must ensure that our young people are equipped" 
+        intervals [543]:
+            xmin = 2629.74 
+            xmax = 2632 
+            text = "to deal with it properly." 
+        intervals [544]:
+            xmin = 2632 
+            xmax = 2638.32 
+            text = "I have referred to research that we will publish and work that will flow from it. The task" 
+        intervals [545]:
+            xmin = 2638.32 
+            xmax = 2643.832 
+            text = "force is taking forward a substantial programme of work. I will ask the Minister for Mental" 
+        intervals [546]:
+            xmin = 2643.832 
+            xmax = 2648.9 
+            text = "Health to write to Liz Smith with the precise timescales for delivery of the various aspects" 
+        intervals [547]:
+            xmin = 2648.9 
+            xmax = 2654.4 
+            text = "of the work. All that work is important, so that we can prevent mental health issues and" 
+        intervals [548]:
+            xmin = 2654.4 
+            xmax = 2657.61 
+            text = "provide treatment as quickly as possible, when it is required. Undoubtedly, part of" 
+        intervals [549]:
+            xmin = 2657.61 
+            xmax = 2662.58 
+            text = "prevention is encouragement of, and support for, healthy use of social media." 
+        intervals [550]:
+            xmin = 2662.58 
+            xmax = 2664.95 
+            text = "Willie Coffey (Kilmarnock and Irvine Valley) (SNP):" 
+        intervals [551]:
+            xmin = 2664.95 
+            xmax = 2670.2 
+            text = "The First Minister will be aware of the tragic death of a young 18-year-old girl in Kilmarnock" 
+        intervals [552]:
+            xmin = 2670.2 
+            xmax = 2675.34 
+            text = "last weekend, which was followed only hours later by the death of another youngster in" 
+        intervals [553]:
+            xmin = 2675.34 
+            xmax = 2681.24 
+            text = "Ayrshire. I understand that there are no suspicious circumstances. A growing number of young people" 
+        intervals [554]:
+            xmin = 2681.24 
+            xmax = 2687.09 
+            text = "across Ayrshire seem to be ending their lives through suicide, which is clearly heartbreaking" 
+        intervals [555]:
+            xmin = 2687.09 
+            xmax = 2692.51 
+            text = "for their families and friends. Will the First Minister offer some hope to youngsters and" 
+        intervals [556]:
+            xmin = 2692.51 
+            xmax = 2697.29 
+            text = "their families by saying that services are there to help, and that if more can be done" 
+        intervals [557]:
+            xmin = 2697.29 
+            xmax = 2702.51 
+            text = "to help to put an end to such awful tragedies, it will be done?" 
+        intervals [558]:
+            xmin = 2702.51 
+            xmax = 2706.65 
+            text = "The First Minister: I give that assurance. I will not comment" 
+        intervals [559]:
+            xmin = 2706.65 
+            xmax = 2710.84 
+            text = "on individual cases, beyond saying that my thoughts and condolences are with the families" 
+        intervals [560]:
+            xmin = 2710.84 
+            xmax = 2716.36 
+            text = "involved. East Ayrshire Council is already looking at the incidents with the national" 
+        intervals [561]:
+            xmin = 2716.36 
+            xmax = 2720.18 
+            text = "health service, and will want to ensure that it responds appropriately." 
+        intervals [562]:
+            xmin = 2720.18 
+            xmax = 2730.35 
+            text = "Across the chamber, we are committed to ensuring that, as the challenges around mental health" 
+        intervals [563]:
+            xmin = 2730.35 
+            xmax = 2735.19 
+            text = "change and develop, our responses do so, too. I have said previously in the chamber that," 
+        intervals [564]:
+            xmin = 2735.19 
+            xmax = 2740.92 
+            text = "as the system has developed over many years, too many people are referred to specialist" 
+        intervals [565]:
+            xmin = 2740.92 
+            xmax = 2747.37 
+            text = "services because there are not services in the community for prevention and early intervention." 
+        intervals [566]:
+            xmin = 2747.37 
+            xmax = 2751.882 
+            text = "Many of the initiatives that we are implementing through the investment that we announced recently" 
+        intervals [567]:
+            xmin = 2751.882 
+            xmax = 2757.28 
+            text = "are trying to redress that balance, so that there is a focus on prevention and early intervention," 
+        intervals [568]:
+            xmin = 2757.28 
+            xmax = 2762.83 
+            text = "and so that we ensure that we also have specialist services when young people need them. I hope" 
+        intervals [569]:
+            xmin = 2762.83 
+            xmax = 2766.97 
+            text = "and believe that that programme of work has wide support across the chamber." 
+        intervals [570]:
+            xmin = 2766.97 
+            xmax = 2770.51 
+            text = "The Presiding Officer: That concludes First Minister’s question" 
+        intervals [571]:
+            xmin = 2770.51 
+            xmax = 2777.96 
+            text = "time. Before we move on to the members’ business debate, we will have a short suspension" 
+        intervals [572]:
+            xmin = 2777.96 
+            xmax = 2782.55 
+            text = " to allow members, ministers and people in the gallery to change seats. " 
