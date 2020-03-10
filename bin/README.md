@@ -5,14 +5,31 @@ version of various *nzilbb.ag* components.
 
 These include:
 * nzilbb.ag.jar - the primary API/object model for nzilbb.ag
-* vtt-to-textgrid.jar - a program that converted WebVTT caption files
-to Praat TextGrids
+* nzilbb.???.jar - a number of serialization modules that cane, for example, be installed in
+  LaBB-CAT to add support for format conversions.
+* ???-to-???.jar - stand-alone utilities to perform specific format conversions - see below...
 
-To run *vtt-to-textgrid.jar*, you need to have Java installed on your
+## Stand-alone Format Converters
+
+There are a number converter utilities that can be used to convert files from one format
+to another, including:
+
+* vtt-to-textgrid.jar - convert from web subtitles (Web VTT) to Praat TextGrid
+* trs-to-textgrid.jar - convert from Transcriber transcripts (.trs) to Praat TextGrid
+
+To use a particular converter, you need to have Java installed on your
 system. Download the file, and double-click it to run.
 
 If double-clicking doesn't work, you can run the converter from the
 command line, by entering:
 ```
 java -jar vtt-to-textgrid.jar
+```
+
+By default converters display a window on to which you can drag and drop files for
+converting. However, they can also be run in 'batch mode', which allows you to
+automatically convert a list of files using the command line - e.g.
+
+```
+java -jar trs-to-textgrid.jar --batchmode *.trs
 ```
