@@ -23,11 +23,11 @@ More details on extra features are available in
 
 Apart from use within LaBB-CAT, the object model can be used for other purposes like
 format conversion, e.g. 
- * [vtt-to-textgrid](https://github.com/nzilbb/ag/blob/master/bin/vtt-to-textgrid.jar?raw=true)
- - a utility for converting subtitles downloaded from YouTube to [Praat](http://praat.org)
- TextGrids 
- * [trs-to-textgrid](https://github.com/nzilbb/ag/blob/master/bin/trs-to-textgrid.jar?raw=true)
- - a utility for converting
+ * [vtt-to-textgrid](https://github.com/nzilbb/ag/blob/master/bin/vtt-to-textgrid.jar?raw=true) -
+ a utility for converting subtitles downloaded from YouTube to
+ [Praat](http://praat.org) TextGrids 
+ * [trs-to-textgrid](https://github.com/nzilbb/ag/blob/master/bin/trs-to-textgrid.jar?raw=true) -
+ a utility for converting
  [Transcriber](http://trans.sourceforge.net/en/presentation.php) files to
  [Praat](http://praat.org) TextGrids 
 
