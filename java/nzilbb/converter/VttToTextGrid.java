@@ -149,7 +149,6 @@ public class VttToTextGrid extends GuiProgram {
 	       setText(((File)value).getName());
 	       return this;
 	    }
-
 	 });
       getContentPane().add(new JScrollPane(files), BorderLayout.CENTER);
 
@@ -173,11 +172,9 @@ public class VttToTextGrid extends GuiProgram {
 	       chooser.setMultiSelectionEnabled(true);
 	       
 	       int returnVal = chooser.showOpenDialog(frame_);
-	       if(returnVal == JFileChooser.APPROVE_OPTION)
-	       {
+	       if(returnVal == JFileChooser.APPROVE_OPTION) {
 		  if (verbose) System.out.println("Chosen file " + chooser.getSelectedFile().getName());
-		  for (File file : chooser.getSelectedFiles())
-		  {
+		  for (File file : chooser.getSelectedFiles()) {
 		     if (verbose) System.out.println("Adding selected file " + file.getPath());
 		     ((DefaultListModel)files.getModel()).add(files.getModel().getSize(), file);
 		  }
@@ -187,8 +184,7 @@ public class VttToTextGrid extends GuiProgram {
 
       btnRemove.addActionListener(new ActionListener() {
 	    public void actionPerformed(ActionEvent e) {
-	       for (int i : files.getSelectedIndices())
-	       {
+	       for (int i : files.getSelectedIndices()) {
 		  ((DefaultListModel)files.getModel()).remove(i);
 	       }
 	    }
@@ -201,43 +197,32 @@ public class VttToTextGrid extends GuiProgram {
       DropTarget target = new DropTarget(files, new DropTargetAdapter() {
 	    public void dragEnter(DropTargetDragEvent dtde) 
 	    {
-	       if (!dtde.isDataFlavorSupported(java.awt.datatransfer.DataFlavor.javaFileListFlavor))
-	       {
+	       if (!dtde.isDataFlavorSupported(java.awt.datatransfer.DataFlavor.javaFileListFlavor)) {
 		  dtde.rejectDrag();
 	       }
 	    }
 	    public void drop(DropTargetDropEvent dtde) 
 	    {
-	       try
-	       {
-		  if (dtde.getTransferable().isDataFlavorSupported(java.awt.datatransfer.DataFlavor.javaFileListFlavor))
-		  {
+	       try {
+		  if (dtde.getTransferable().isDataFlavorSupported(java.awt.datatransfer.DataFlavor.javaFileListFlavor)) {
 		     dtde.acceptDrop(dtde.getDropAction());
 		     List droppedFiles = (java.util.List) dtde.getTransferable()
 			.getTransferData(java.awt.datatransfer.DataFlavor.javaFileListFlavor);
 		     ListIterator f = droppedFiles.listIterator();
-		     while(f.hasNext())
-		     {
+		     while(f.hasNext()) {
 			File file = (File)f.next();
-			if (fileFilter.accept(file))
-			{
+			if (fileFilter.accept(file)) {
 			   if (verbose) System.out.println("Adding dropped file: " + file.getPath());
 			   ((DefaultListModel)files.getModel()).add(files.getModel().getSize(), file);
-			}
-			else
-			{
+			} else {
 			   if (verbose) System.out.println("Dropped file incorrect type: " + file.getPath());
 			}
 		     } // next file
 		     dtde.dropComplete(true);
-		  } 
-		  else // not a file list
-		  {
+		  } else { // not a file list
 		     dtde.rejectDrop();
 		  }
-	       }
-	       catch(Exception e)
-	       {
+	       } catch(Exception e) {
 		  dtde.rejectDrop();
 		  System.err.println("ERROR dropping file: " + e.getMessage());
 		  e.printStackTrace(System.err);
@@ -296,12 +281,9 @@ public class VttToTextGrid extends GuiProgram {
       for (File inputFile: files) {
 	 progress.setString(inputFile.getName());
 	 try {
-	    if (!inputFile.exists())
-	    {
+	    if (!inputFile.exists()) {
 	       System.err.println("Input file doesn't exist: " + inputFile.getPath());
-	    }
-	    else
-	    {
+	    } else {
 	       convert(inputFile);
 	    }
 	 } catch(Exception exception) {
