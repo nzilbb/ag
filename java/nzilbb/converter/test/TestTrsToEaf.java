@@ -37,7 +37,7 @@ public class TestTrsToEaf extends UnitTestBase {
       converter.convert(input);
       File actual = new File(dir, "transcriber.eaf");
       File expected = new File(dir, "expected_transcriber.eaf");
-      String differences = diff(expected, expected);
+      String differences = diff(expected, actual);
       if (differences != null) {
          fail(differences);
       } else {

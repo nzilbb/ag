@@ -37,7 +37,7 @@ public class TestVttToTextGrid extends UnitTestBase {
       converter.convert(input);
       File actual = new File(dir, "webvtt.TextGrid");
       File expected = new File(dir, "expected_webvtt.TextGrid");
-      String differences = diff(expected, expected);
+      String differences = diff(expected, actual);
       if (differences != null) {
          fail(differences);
       } else {
