@@ -666,7 +666,7 @@ public class VttSerialization
       }
       String currentSpeaker = graph.my(schema.getParticipantLayerId()).getLabel();
       Annotation currentTurn = new Annotation(
-	 null, "", schema.getTurnLayerId(), graphStart.getId(), graphStart.getId(), graph.my(schema.getParticipantLayerId()).getId());
+	 null, graph.my(schema.getParticipantLayerId()).getLabel(), schema.getTurnLayerId(), graphStart.getId(), graphStart.getId(), graph.my(schema.getParticipantLayerId()).getId());
       graph.addAnnotation(currentTurn);
       Annotation currentUtterance = new Annotation(
 	 null, "", schema.getUtteranceLayerId(), graphStart.getId(), graphStart.getId(), currentTurn.getId());
@@ -777,7 +777,13 @@ public class VttSerialization
 	       if (errors.getCause() == null) errors.initCause(exception);
 	       errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
 	    }
-	 } // there is a word layer
+
+            // utterance annotations are speaker labels then
+            for (Annotation utterance : graph.list(utteranceLayer.getId()))
+            {
+               utterance.setLabel(utterance.getParent().getLabel());
+            } // next turn
+         } // there is a word layer
 	 graph.commit();
       }
       catch(IOException exception)

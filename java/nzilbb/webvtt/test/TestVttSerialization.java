@@ -110,11 +110,15 @@ public class TestVttSerialization
       // turns
       Annotation[] turns = g.list("turn");
       assertEquals(1, turns.length);
+      assertEquals("Turn label is speaker name",
+                   "speaker", turns[0].getLabel());
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals(Double.valueOf(2782.55), turns[0].getEnd().getOffset());
 
       // utterances
       Annotation[] utterances = g.list("utterance");
+      assertEquals("Utterance label is speaker name",
+                   "speaker", utterances[0].getLabel());
       assertEquals(Double.valueOf(1.849), utterances[0].getStart().getOffset());
       assertEquals(Double.valueOf(6.43), utterances[0].getEnd().getOffset());
 
@@ -286,6 +290,9 @@ public class TestVttSerialization
 
       // utterances
       Annotation[] utterances = g.list("utterance");
+      assertEquals("Utterance label is transcript",
+                   "Before we move to the first question to the First Minister, I invite the First Minister",
+                   utterances[0].getLabel());
       assertEquals(571, utterances.length);
       assertEquals(Double.valueOf(1.849), utterances[0].getStart().getOffset());
       assertEquals(Double.valueOf(6.43), utterances[0].getEnd().getOffset());
