@@ -442,7 +442,7 @@ public class EAFSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "ELAN EAF Transcript", "1.03", "text/x-eaf+xml", ".eaf", "20191031.1734",
+         "ELAN EAF Transcript", "1.03", "text/x-eaf+xml", ".eaf", "20200306.1746",
          getClass().getResource("icon.png"));
    }
    
@@ -1878,7 +1878,7 @@ public class EAFSerialization
     * Serializes the given graph, generating a {@link NamedStream}.
     * @param graph The graph to serialize.
     * @return A named stream that contains the TextGrid. 
-    * @throws SerializationException if errors occur during deserialization.
+    * @throws SerializationException if errors occur during serialization.
     */
    protected NamedStream serializeGraph(Graph graph, String[] layerIds, Consumer<String> warnings) 
       throws SerializationException
@@ -2009,8 +2009,10 @@ public class EAFSerialization
       // 'freeform' layers first - i.e. aligned children of graph
       for (Layer layer : schema.getLayers().values().stream()
               .filter(layer -> selectedLayers.contains(layer.getId()))
+              .filter(layer -> !schema.getRoot().equals(layer))
               // parent is root
-              .filter(layer -> layer.getParent().equals(graph.getSchema().getRoot()))
+              .filter(layer -> layer.getParent() == null
+                      || layer.getParent().equals(graph.getSchema().getRoot()))
               // is aligned
               .filter(layer -> layer.getAlignment() != Constants.ALIGNMENT_NONE)
               .collect(Collectors.toList()))
@@ -2060,11 +2062,13 @@ public class EAFSerialization
       for (Layer layer : schema.getLayers().values().stream()
               .filter(layer -> selectedLayers.contains(layer.getId()))
               // parent is turn
-              .filter(layer -> layer.getParentId().equals(turnLayer.getId()))
+              .filter(layer -> layer.getParentId() != null
+                      && layer.getParentId().equals(turnLayer.getId()))
               // not utterance
               .filter(layer -> layer.getId().equals(utteranceLayer.getId()))
               // nor word
-              .filter(layer -> layer.getId().equals(wordLayer.getId()))
+              .filter(layer -> wordLayer != null
+                      && layer.getId().equals(wordLayer.getId()))
               .collect(Collectors.toList()))
       {
          lLastUnusedAnnotationId = insertTier(
@@ -2077,7 +2081,8 @@ public class EAFSerialization
       List<Layer> wordTagLayers = schema.getLayers().values().stream()
          .filter(layer -> selectedLayers.contains(layer.getId()))
          // parent is word
-         .filter(layer -> layer.getParentId().equals(wordLayer.getId()))
+         .filter(layer -> layer.getParentId() != null && wordLayer != null
+                 && layer.getParentId().equals(wordLayer.getId()))
          // not aligned
          .filter(layer -> layer.getAlignment() == Constants.ALIGNMENT_NONE)
          .collect(Collectors.toList());
@@ -2085,7 +2090,8 @@ public class EAFSerialization
       List<Layer> segmentLayers = schema.getLayers().values().stream()
          .filter(layer -> selectedLayers.contains(layer.getId()))
          // parent is word
-         .filter(layer -> layer.getParentId().equals(wordLayer.getId()))
+         .filter(layer -> layer.getParentId() != null && wordLayer != null
+                 && layer.getParentId().equals(wordLayer.getId()))
          // aligned
          .filter(layer -> layer.getAlignment() != Constants.ALIGNMENT_NONE)
          .collect(Collectors.toList());
@@ -2198,8 +2204,7 @@ public class EAFSerialization
          TempFileInputStream in = new TempFileInputStream(f);
 
          // return a named stream from the file
-         String name = IO.SafeFileNameUrl(graph.getId());
-         if (!name.toLowerCase().endsWith(".eaf")) name += ".eaf";
+         String name = IO.SafeFileNameUrl(IO.WithoutExtension(graph.getId())) + ".eaf";
          return new NamedStream(in, name);
       }
       catch(Exception exception)
