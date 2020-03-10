@@ -14,7 +14,7 @@ These include:
 There are a number converter utilities that can be used to convert files from one format
 to another, including:
 
-* [vtt-to-textgrid.jar]((https://github.com/nzilbb/ag/blob/master/bin/vtt-to-textgrid.jar?raw=true)) - convert from web subtitles (Web VTT) to Praat TextGrid
+* [vtt-to-textgrid.jar](https://github.com/nzilbb/ag/blob/master/bin/vtt-to-textgrid.jar?raw=true) - convert from web subtitles (Web VTT) to Praat TextGrid
 * [trs-to-textgrid.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-textgrid.jar?raw=true) - convert from Transcriber transcripts (.trs) to Praat TextGrid
 
 To use a particular converter, you need to have Java installed on your
