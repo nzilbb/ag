@@ -7,9 +7,9 @@
   <property name="build" location="build_${ant.project.name}"/>
   <property name="dist"  location="../bin"/>
   
-  <target name="all" depends="serializations,vtt-to-textgrid,trs-to-textgrid">
+  <target name="all" depends="serializations,vtt-to-textgrid,trs-to-textgrid,vtt-to-eaf,trs-to-eaf,trs-to-pdf">
   </target>
-  <target name="test" depends="test-vtt-to-textgrid,test-trs-to-textgrid,test-trs-to-eaf">    
+  <target name="test" depends="test-vtt-to-textgrid,test-trs-to-textgrid,test-trs-to-eaf,test-vtt-to-eaf,test-trs-to-pdf">    
   </target>
 
   <target name="serializations">
@@ -17,6 +17,7 @@
     <ant antfile="webvtt.xml" />
     <ant antfile="transcriber.xml" />
     <ant antfile="elan.xml" />
+    <ant antfile="pdf.xml" />
   </target>
 
   <target name="vtt-to-textgrid"
@@ -207,4 +208,51 @@
     </junit>
   </target>
   
+  <target name="trs-to-pdf"
+          description="Transcriber to PDF converter" >
+    <mkdir dir="${build}"/>
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}"
+	   classpath="${dist}/nzilbb.ag.jar;${dist}/nzilbb.transcriber.jar;${dist}/nzilbb.pdf.jar"
+	   includes="nzilbb/converter/TrsToPdf.java"
+	   listfiles="yes"
+	   includeantruntime="false"
+	   target="8" source="8"
+	   debug="on"
+	   >
+      <compilerarg value="-Xlint"/>
+    </javac>
+    <!-- Put everything in ${build} into the ${ant.project.name}.jar file -->
+    <jar jarfile="${dist}/trs-to-pdf.jar" basedir="${build}">
+      <manifest>
+	<attribute name="Application-Name" value="Transcriber to Pdf Converter"/>
+	<attribute name="Permissions" value="all-permissions"/>
+	<attribute name="Main-Class" value="nzilbb.converter.TrsToPdf"/>
+      </manifest>
+      <!-- icon -->
+      <fileset dir="${src}" includes="nzilbb/converter/TrsToPdf.png" />
+      <!-- add required jars -->
+      <zipfileset src="${dist}/nzilbb.ag.jar" />
+      <zipfileset src="${dist}/nzilbb.transcriber.jar" />
+      <zipfileset src="${dist}/nzilbb.pdf.jar" />      
+    </jar>    
+    <delete dir="${build}"/>
+  </target>
+  <target name="test-trs-to-pdf" depends="trs-to-pdf"
+          description="Test Transcriber to Pdf converter" >
+    <!-- compile unit tests -->
+    <javac srcdir="${src}" destdir="."
+	   includes="nzilbb/converter/test/TestTrsToPdf.java"
+	   classpath=".;${junitjar};${dist}/trs-to-pdf.jar"
+	   listfiles="yes" target="8" source="8" debug="on" includeAntRuntime="false" >
+      <compilerarg value="-Xlint"/>
+    </javac>
+    <junit haltonfailure="true" fork="true" showoutput="true">
+      <classpath><pathelement path=".;${junitjar};${dist}/trs-to-pdf.jar"/></classpath>
+      <jvmarg value="-ea"/>
+      <formatter type="plain" usefile="false" />
+      <test name="nzilbb.converter.test.TestTrsToPdf"/>
+    </junit>
+  </target>
+
 </project>

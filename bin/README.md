@@ -18,6 +18,7 @@ to another, including:
 * [vtt-to-eaf.jar](https://github.com/nzilbb/ag/blob/master/bin/vtt-to-eaf.jar?raw=true) - convert from web subtitles (Web VTT) to ELAN files (.eaf)
 * [trs-to-textgrid.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-textgrid.jar?raw=true) - convert from Transcriber transcripts (.trs) to Praat TextGrid
 * [trs-to-eaf.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-eaf.jar?raw=true) - convert from Transcriber transcripts (.trs) to ELAN files (.eaf)
+* [trs-to-pdf.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-pdf.jar?raw=true) - convert from Transcriber transcripts (.trs) to PDF files
 
 To use a particular converter, you need to have Java installed on your
 system. Download the file, and double-click it to run.
