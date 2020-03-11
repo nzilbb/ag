@@ -21,45 +21,48 @@
 //
 package nzilbb.converter;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Vector;
-import java.util.List;
-import java.util.ListIterator;
-import java.awt.Component;
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.FlowLayout;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetAdapter;
 import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JFileChooser;
-import javax.swing.JList;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Vector;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import nzilbb.util.IO;
-import nzilbb.util.GuiProgram;
-import nzilbb.util.ProgramDescription;
-import nzilbb.util.Switch;
-import nzilbb.configure.ParameterSet;
-
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.IDeserializer;
 import nzilbb.ag.serialize.ISerializer;
 import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
-import nzilbb.webvtt.VttSerialization;
+import nzilbb.configure.Parameter;
+import nzilbb.configure.ParameterSet;
 import nzilbb.praat.TextGridSerialization;
+import nzilbb.util.GuiProgram;
+import nzilbb.util.IO;
+import nzilbb.util.ProgramDescription;
+import nzilbb.util.Switch;
+import nzilbb.webvtt.VttSerialization;
 
 /**
  * Base class for converters, which implements a number of common functions for
@@ -69,6 +72,24 @@ import nzilbb.praat.TextGridSerialization;
 public abstract class Converter extends GuiProgram {
    
    // Attributes:
+   
+   /**
+    * Display help info about available serialization parameters.
+    * @see #getHelp()
+    * @see #setHelp(Boolean)
+    */
+   protected Boolean help = Boolean.FALSE;
+   /**
+    * Getter for {@link #help}: Display help info about available serialization parameters.
+    * @return Display help info about available serialization parameters.
+    */
+   public Boolean getHelp() { return help; }
+   /**
+    * Setter for {@link #help}: Display help info about available serialization parameters.
+    * @param newHelp Display help info about available serialization parameters.
+    */
+   @Switch(value="Display help info about available serialization parameters",compulsory=false)
+   public Converter setHelp(Boolean newHelp) { help = newHelp; return this; }
    
    /**
     * Whether detailed verbose output is printed or not.
@@ -110,6 +131,18 @@ public abstract class Converter extends GuiProgram {
     */
    @Switch(value="Start processing immediately, rather than waiting for the user to press Convert",compulsory=false)
    public void setBatchMode(Boolean newBatchMode) { batchMode = newBatchMode; }
+
+   /**
+    * Configuration parameters found on the command line.
+    * @see #getConfiguration()
+    * @see #setConfiguration(Map<String,String>)
+    */
+   protected Map<String,String> configuration = new HashMap<String,String>();
+   /**
+    * Getter for {@link #configuration}: Configuration parameters found on the command line.
+    * @return Configuration parameters found on the command line.
+    */
+   public Map<String,String> getConfiguration() { return configuration; }
 
    // UI
    protected JButton btnAdd = new JButton("+");
@@ -189,11 +222,33 @@ public abstract class Converter extends GuiProgram {
       if (verbose) System.out.println("Deserializing with " + deserializer.getDescriptor());
 
       // configure deserializer
-      ParameterSet defaultConfig = deserializer.configure(new ParameterSet(), schema);
-      deserializer.configure(defaultConfig, schema);
+      ParameterSet deserializerConfig = deserializer.configure(new ParameterSet(), schema);
+      configureFromCommandLine(deserializerConfig, schema);
+      if (verbose) {
+         if (deserializerConfig.size() == 0) {
+            System.out.println("No deserializer configuration parameters are required.");
+         } else {
+            System.out.println("Deserializer configuration:");
+            for (Parameter p : deserializerConfig.values()) {
+               System.out.println("\t" + p.getName() + " = " + p.getValue());
+            }
+         }
+      }
+      deserializer.configure(deserializerConfig, schema);
 
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
+      configureFromCommandLine(defaultParameters, schema);
+      if (verbose) {
+         if (defaultParameters.size() == 0) {
+            System.out.println("No deserialization parameters are required.");            
+         } else {
+            System.out.println("Deserialization parameters:");
+            for (Parameter p : defaultParameters.values()) {
+               System.out.println("\t" + p.getName() + " = " + p.getValue());
+            }
+         }
+      }
       
       // configure the deserialization
       deserializer.setParameters(defaultParameters);
@@ -214,8 +269,19 @@ public abstract class Converter extends GuiProgram {
       if (verbose) System.out.println("Serializing with " + serializer.getDescriptor());
       
       // configure serializer
-      ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
-      serializer.configure(configuration, schema);
+      ParameterSet serializerConfig = serializer.configure(new ParameterSet(), schema);
+      configureFromCommandLine(serializerConfig, g.getSchema());
+      if (verbose) {
+         if (serializerConfig.size() == 0) {
+            System.out.println("No serializer serializerConfig parameters are required.");
+         } else {
+            System.out.println("Serializer serializerConfig:");
+            for (Parameter p : serializerConfig.values()) {
+               System.out.println("\t" + p.getName() + " = " + p.getValue());
+            }
+         }
+      }
+      serializer.configure(serializerConfig, schema);
 
       // serialize
       final File dir = (inputFile.getParentFile() != null? inputFile.getParentFile()
@@ -349,6 +415,16 @@ public abstract class Converter extends GuiProgram {
 	 });
       target.setActive(true);
 
+      // look for configuration parameters on the command line
+      Iterator<String> args = arguments.iterator();
+      while (args.hasNext()) {
+         String[] parts = args.next().split("=");
+         if (parts.length == 2) {
+            // foo=bar
+            configuration.put(parts[0], parts[1]);
+            args.remove();
+         }
+      }
    }
 
    @SuppressWarnings("unchecked")
@@ -356,6 +432,34 @@ public abstract class Converter extends GuiProgram {
       
       if (arguments.size() == 0) {
 	 System.err.println("Nothing to do yet. (Try using --usage command line switch)");
+      }
+      if (getHelp()) {
+         // display info about serialization parameters
+         Schema schema = getSchema();
+         IDeserializer deserializer = getDeserializer();
+         System.err.println("Deserializing with " + deserializer.getDescriptor());
+         ParameterSet config = deserializer.configure(new ParameterSet(), schema);
+         if (config.size() == 0) {
+            System.err.println("There are no configuration parameters for deserialization");
+         } else {
+            System.err.println("Command-line configuration parameters for deserialization:");
+            for (Parameter p : config.values()) {
+               System.err.println(
+                  "\t" + p.getName() + "=" + p.getType().getSimpleName() + "\t" + p.getHint());
+            }
+         }
+         ISerializer serializer = getSerializer();
+         System.err.println("Deserializing with " + serializer.getDescriptor());
+         config = serializer.configure(new ParameterSet(), schema);
+         if (config.size() == 0) {
+            System.err.println("There are no configuration parameters for serialization");
+         } else {
+            System.err.println("Command-line configuration parameters for serialization:");
+            for (Parameter p : config.values()) {
+               System.err.println(
+                  "\t" + p.getName() + "=" + p.getType().getSimpleName() + "\t" + p.getHint());
+            }
+         }
       }
       for (String argument: arguments) {
       	 if (verbose) System.out.println("argument: " + argument);
@@ -413,6 +517,34 @@ public abstract class Converter extends GuiProgram {
       } // next file
       progress.setString("Finished.");
    } // end of convertBatch()
+
+   
+   /**
+    * Sets any parameter values that might have been specified on the the command line -
+    * i.e. that are in the {@link #configuration} map. 
+    * @param parameters The parameters to configure.
+    * @param schema The source of any layers specified.
+    * @return The given parameter set.
+    */
+   public ParameterSet configureFromCommandLine(ParameterSet parameters, Schema schema)
+   {
+      for (Parameter p : parameters.values()) {
+         if (configuration.containsKey(p.getName())) {
+            if (p.getType().equals(Layer.class)) {               
+               p.setValue(schema.getLayer(configuration.get(p.getName())));
+            } else if (p.getType().equals(Integer.class)) {               
+               p.setValue(Integer.valueOf(configuration.get(p.getName())));
+            } else if (p.getType().equals(Double.class)) {               
+               p.setValue(Double.valueOf(configuration.get(p.getName())));
+            } else if (p.getType().equals(Boolean.class)) {               
+               p.setValue(Boolean.valueOf(configuration.get(p.getName())));
+            } else {
+               p.setValue(configuration.get(p.getName()));
+            }
+         } // there is a value in configuration
+      } // next parameter
+      return parameters;
+   } // end of configureFromCommandLine()
    
    private static final long serialVersionUID = -1;
 } // end of class Converter
