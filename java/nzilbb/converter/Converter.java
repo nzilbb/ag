@@ -415,7 +415,7 @@ public abstract class Converter extends GuiProgram {
          // display info about serialization parameters
          Schema schema = getSchema();
          IDeserializer deserializer = getDeserializer();
-         System.err.println("Deserializing with " + deserializer.getDescriptor());
+         System.err.println("Deserializing from " + deserializer.getDescriptor());
          ParameterSet config = deserializer.configure(new ParameterSet(), schema);
          if (config.size() == 0) {
             System.err.println("There are no configuration parameters for deserialization");
@@ -427,7 +427,7 @@ public abstract class Converter extends GuiProgram {
             }
          }
          ISerializer serializer = getSerializer();
-         System.err.println("Deserializing with " + serializer.getDescriptor());
+         System.err.println("Serializing to " + serializer.getDescriptor());
          config = serializer.configure(new ParameterSet(), schema);
          if (config.size() == 0) {
             System.err.println("There are no configuration parameters for serialization");
@@ -438,20 +438,23 @@ public abstract class Converter extends GuiProgram {
                   "\t--" + p.getName() + "=" + p.getType().getSimpleName() + "\t" + p.getHint());
             }
          }
+         
+         System.exit(1);         
       }
+         
       for (String argument: arguments) {
-      	 if (verbose) System.out.println("argument: " + argument);
-      	 try {
-      	    File file = new File(argument);
-      	    if (verbose) System.out.println("file: " + file.getPath());
-      	    ((DefaultListModel)files.getModel()).add(files.getModel().getSize(), file);
-      	 } catch(Exception exception) {
-      	    System.err.println("Error processing: " + argument + " : " + exception.getMessage());
-      	    exception.printStackTrace(System.err);
-      	 }
+         if (verbose) System.out.println("argument: " + argument);
+         try {
+            File file = new File(argument);
+            if (verbose) System.out.println("file: " + file.getPath());
+            ((DefaultListModel)files.getModel()).add(files.getModel().getSize(), file);
+         } catch(Exception exception) {
+            System.err.println("Error processing: " + argument + " : " + exception.getMessage());
+            exception.printStackTrace(System.err);
+         }
       } // next argument
       if (getBatchMode()) {
-	 convertFiles();
+         convertFiles();
       }
    }
    
