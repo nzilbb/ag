@@ -255,4 +255,51 @@
     </junit>
   </target>
 
+  <target name="trs-to-text"
+          description="Transcriber to plain text converter" >
+    <mkdir dir="${build}"/>
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}"
+	   classpath="${dist}/nzilbb.ag.jar;${dist}/nzilbb.transcriber.jar;${dist}/nzilbb.text.jar"
+	   includes="nzilbb/converter/TrsToText.java"
+	   listfiles="yes"
+	   includeantruntime="false"
+	   target="8" source="8"
+	   debug="on"
+	   >
+      <compilerarg value="-Xlint"/>
+    </javac>
+    <!-- Put everything in ${build} into the ${ant.project.name}.jar file -->
+    <jar jarfile="${dist}/trs-to-text.jar" basedir="${build}">
+      <manifest>
+	<attribute name="Application-Name" value="Transcriber to Text Converter"/>
+	<attribute name="Permissions" value="all-permissions"/>
+	<attribute name="Main-Class" value="nzilbb.converter.TrsToText"/>
+      </manifest>
+      <!-- icon -->
+      <fileset dir="${src}" includes="nzilbb/converter/TrsToText.png" />
+      <!-- add required jars -->
+      <zipfileset src="${dist}/nzilbb.ag.jar" />
+      <zipfileset src="${dist}/nzilbb.transcriber.jar" />
+      <zipfileset src="${dist}/nzilbb.text.jar" />      
+    </jar>    
+    <delete dir="${build}"/>
+  </target>
+  <target name="test-trs-to-text" depends="trs-to-text"
+          description="Test Transcriber to Text converter" >
+    <!-- compile unit tests -->
+    <javac srcdir="${src}" destdir="."
+	   includes="nzilbb/converter/test/TestTrsToText.java"
+	   classpath=".;${junitjar};${dist}/trs-to-text.jar"
+	   listfiles="yes" target="8" source="8" debug="on" includeAntRuntime="false" >
+      <compilerarg value="-Xlint"/>
+    </javac>
+    <junit haltonfailure="true" fork="true" showoutput="true">
+      <classpath><pathelement path=".;${junitjar};${dist}/trs-to-text.jar"/></classpath>
+      <jvmarg value="-ea"/>
+      <formatter type="plain" usefile="false" />
+      <test name="nzilbb.converter.test.TestTrsToText"/>
+    </junit>
+  </target>
+
 </project>
