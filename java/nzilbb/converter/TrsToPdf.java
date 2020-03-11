@@ -104,5 +104,19 @@ public class TrsToPdf extends Converter {
       return new PdfSerializer();
    }   
    
+   /**
+    * Specify the schema to used by  {@link #convert(File)}.
+    * @return The schema.
+    */
+   public Schema getSchema() {
+      Schema schema = super.getSchema();
+      // noise layer
+      schema.addLayer(
+         new Layer("noise", "Noise")         
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false));
+      return schema;
+   } // end of getSchema()
+   
    private static final long serialVersionUID = -1;
 } // end of class TrsToPdf
