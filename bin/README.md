@@ -21,6 +21,7 @@ to another, including:
 * [trs-to-pdf.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-pdf.jar?raw=true) - convert from Transcriber transcripts (.trs) to PDF files
 * [trs-to-text.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-text.jar?raw=true) - convert from Transcriber transcripts (.trs) to plain text files
 * [trs-to-vtt.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-vtt.jar?raw=true) - convert from Transcriber transcripts (.trs) to Web VTT subtitle files
+* [vtt-to-trs.jar](https://github.com/nzilbb/ag/blob/master/bin/vtt-to-trs.jar?raw=true) - convert from Web VTT subtitle files to Transcriber transcripts (.trs) 
 
 To use a particular converter, you need to have Java installed on your
 system. Download the file, and double-click it to run.

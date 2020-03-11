@@ -7,9 +7,9 @@
   <property name="build" location="build_${ant.project.name}"/>
   <property name="dist"  location="../bin"/>
   
-  <target name="all" depends="serializations,vtt-to-textgrid,trs-to-textgrid,vtt-to-eaf,trs-to-eaf,trs-to-pdf,trs-to-vtt">
+  <target name="all" depends="serializations,vtt-to-textgrid,trs-to-textgrid,vtt-to-eaf,trs-to-eaf,trs-to-pdf,trs-to-vtt,vtt-to-trs">
   </target>
-  <target name="test" depends="test-vtt-to-textgrid,test-trs-to-textgrid,test-trs-to-eaf,test-vtt-to-eaf,test-trs-to-pdf,test-trs-to-vtt">    
+  <target name="test" depends="test-vtt-to-textgrid,test-trs-to-textgrid,test-trs-to-eaf,test-vtt-to-eaf,test-trs-to-pdf,test-trs-to-vtt,test-vtt-to-trs">    
   </target>
 
   <target name="serializations">
@@ -349,4 +349,51 @@
     </junit>
   </target>
 
+  <target name="vtt-to-trs"
+          description="VTT to Transcriber converter" >
+    <mkdir dir="${build}"/>
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}"
+	   classpath="${dist}/nzilbb.ag.jar;${dist}/nzilbb.webvtt.jar;${dist}/nzilbb.praat.jar"
+	   includes="nzilbb/converter/VttToTrs.java"
+	   listfiles="yes"
+	   includeantruntime="false"
+	   target="8" source="8"
+	   debug="on"
+	   >
+      <compilerarg value="-Xlint"/>
+    </javac>
+    <!-- Put everything in ${build} into the ${ant.project.name}.jar file -->
+    <jar jarfile="${dist}/vtt-to-trs.jar" basedir="${build}">
+      <manifest>
+	<attribute name="Application-Name" value="VTT to Transcriber Converter"/>
+	<attribute name="Permissions" value="all-permissions"/>
+	<attribute name="Main-Class" value="nzilbb.converter.VttToTrs"/>
+      </manifest>
+      <!-- icon -->
+      <fileset dir="${src}" includes="nzilbb/converter/VttToTrs.png" />
+      <!-- add required jars -->
+      <zipfileset src="${dist}/nzilbb.ag.jar" />
+      <zipfileset src="${dist}/nzilbb.webvtt.jar" />
+      <zipfileset src="${dist}/nzilbb.praat.jar" />      
+    </jar>    
+    <delete dir="${build}"/>
+  </target>
+  <target name="test-vtt-to-trs" depends="vtt-to-trs"
+          description="Test VTT to Transcriber converter" >
+    <!-- compile unit tests -->
+    <javac srcdir="${src}" destdir="."
+	   includes="nzilbb/converter/test/TestVttToTrs.java"
+	   classpath=".;${junitjar};${dist}/vtt-to-trs.jar"
+	   listfiles="yes" target="8" source="8" debug="on" includeAntRuntime="false" >
+      <compilerarg value="-Xlint"/>
+    </javac>
+    <junit haltonfailure="true" fork="true" showoutput="true">
+      <classpath><pathelement path=".;${junitjar};${dist}/vtt-to-trs.jar"/></classpath>
+      <jvmarg value="-ea"/>
+      <formatter type="plain" usefile="false" />
+      <test name="nzilbb.converter.test.TestVttToTrs"/>
+    </junit>
+  </target>
+  
 </project>
