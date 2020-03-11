@@ -19,6 +19,7 @@ to another, including:
 * [trs-to-textgrid.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-textgrid.jar?raw=true) - convert from Transcriber transcripts (.trs) to Praat TextGrid
 * [trs-to-eaf.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-eaf.jar?raw=true) - convert from Transcriber transcripts (.trs) to ELAN files (.eaf)
 * [trs-to-pdf.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-pdf.jar?raw=true) - convert from Transcriber transcripts (.trs) to PDF files
+* [trs-to-text.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-text.jar?raw=true) - convert from Transcriber transcripts (.trs) to plain text files
 
 To use a particular converter, you need to have Java installed on your
 system. Download the file, and double-click it to run.
@@ -36,3 +37,19 @@ automatically convert a list of files using the command line - e.g.
 ```
 java -jar trs-to-textgrid.jar --batchmode *.trs
 ```
+
+Some conversions have configurable about, e.g.
+
+```
+java -jar trs-to-text.jar --textonly *.txt
+```
+
+...will include annotations and participant names in the output text files, but
+
+```
+java -jar trs-to-text.jar --batchmode --textonly *.txt
+```
+
+...produces text files that exclude all annotations and participant names.
+
+The `--usage` command-line switch prints information about command-line options.
