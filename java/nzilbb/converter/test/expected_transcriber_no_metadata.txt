@@ -1,7 +1,3 @@
-scribe=Robert Fromont
-version=7
-versiondate=130825
-language=en
 
 mop03-2b:  and ah . Cyril would arrive at the door
  with this letter for Mum

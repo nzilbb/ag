@@ -30,13 +30,45 @@ import nzilbb.converter.TrsToText;
 
 public class TestTrsToText extends UnitTestBase {
    
-   @Test public void transcriber() throws Exception {
+   @Test public void defaultConfig() throws Exception {
       File dir = getDir();
       File input = new File(dir, "transcriber.trs");
       TrsToText converter = new TrsToText();
       converter.convert(input);
       File actual = new File(dir, "transcriber.txt");
       File expected = new File(dir, "expected_transcriber.txt");
+      String differences = diff(expected, actual);
+      if (differences != null) {
+         fail(differences);
+      } else {
+         actual.delete();
+      }
+   }
+   
+   @Test public void noMetaData() throws Exception {
+      File dir = getDir();
+      File input = new File(dir, "transcriber.trs");
+      TrsToText converter = new TrsToText();
+      converter.setMetaData(false);
+      converter.convert(input);
+      File actual = new File(dir, "transcriber.txt");
+      File expected = new File(dir, "expected_transcriber_no_metadata.txt");
+      String differences = diff(expected, actual);
+      if (differences != null) {
+         fail(differences);
+      } else {
+         actual.delete();
+      }
+   }
+
+   @Test public void textOnly() throws Exception {
+      File dir = getDir();
+      File input = new File(dir, "transcriber.trs");
+      TrsToText converter = new TrsToText();
+      converter.setTextOnly(true);
+      converter.convert(input);
+      File actual = new File(dir, "transcriber.txt");
+      File expected = new File(dir, "expected_transcriber_textonly.txt");
       String differences = diff(expected, actual);
       if (differences != null) {
          fail(differences);
