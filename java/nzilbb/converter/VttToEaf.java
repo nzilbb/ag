@@ -21,43 +21,14 @@
 //
 package nzilbb.converter;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.FlowLayout;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetAdapter;
-import java.awt.dnd.DropTargetDragEvent;
-import java.awt.dnd.DropTargetDropEvent;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Vector;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import nzilbb.ag.*;
+import nzilbb.ag.Constants;
+import nzilbb.ag.Layer;
+import nzilbb.ag.Schema;
 import nzilbb.ag.serialize.IDeserializer;
 import nzilbb.ag.serialize.ISerializer;
-import nzilbb.ag.serialize.SerializationException;
-import nzilbb.ag.serialize.util.NamedStream;
-import nzilbb.ag.serialize.util.Utility;
-import nzilbb.configure.ParameterSet;
 import nzilbb.elan.EAFSerialization;
-import nzilbb.util.GuiProgram;
-import nzilbb.util.IO;
 import nzilbb.util.ProgramDescription;
-import nzilbb.util.Switch;
 import nzilbb.webvtt.VttSerialization;
 
 /**
