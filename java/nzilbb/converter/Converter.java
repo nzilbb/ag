@@ -132,18 +132,6 @@ public abstract class Converter extends GuiProgram {
    @Switch(value="Start processing immediately, rather than waiting for the user to press Convert",compulsory=false)
    public void setBatchMode(Boolean newBatchMode) { batchMode = newBatchMode; }
 
-   /**
-    * Configuration parameters found on the command line.
-    * @see #getConfiguration()
-    * @see #setConfiguration(Map<String,String>)
-    */
-   protected Map<String,String> configuration = new HashMap<String,String>();
-   /**
-    * Getter for {@link #configuration}: Configuration parameters found on the command line.
-    * @return Configuration parameters found on the command line.
-    */
-   public Map<String,String> getConfiguration() { return configuration; }
-
    // UI
    protected JButton btnAdd = new JButton("+");
    protected JButton btnRemove = new JButton("-");
@@ -308,6 +296,7 @@ public abstract class Converter extends GuiProgram {
       setDefaultWindowTitle("Converter");
       setDefaultWidth(800);
       setDefaultHeight(600);
+      extraSwitches = new HashMap<String,String>();
    } // end of constructor
    
    @SuppressWarnings({"unchecked","rawtypes"})
@@ -414,17 +403,6 @@ public abstract class Converter extends GuiProgram {
 	    }	    
 	 });
       target.setActive(true);
-
-      // look for configuration parameters on the command line
-      Iterator<String> args = arguments.iterator();
-      while (args.hasNext()) {
-         String[] parts = args.next().split("=");
-         if (parts.length == 2) {
-            // foo=bar
-            configuration.put(parts[0], parts[1]);
-            args.remove();
-         }
-      }
    }
 
    @SuppressWarnings("unchecked")
@@ -445,7 +423,7 @@ public abstract class Converter extends GuiProgram {
             System.err.println("Command-line configuration parameters for deserialization:");
             for (Parameter p : config.values()) {
                System.err.println(
-                  "\t" + p.getName() + "=" + p.getType().getSimpleName() + "\t" + p.getHint());
+                  "\t--" + p.getName() + "=" + p.getType().getSimpleName() + "\t" + p.getHint());
             }
          }
          ISerializer serializer = getSerializer();
@@ -457,7 +435,7 @@ public abstract class Converter extends GuiProgram {
             System.err.println("Command-line configuration parameters for serialization:");
             for (Parameter p : config.values()) {
                System.err.println(
-                  "\t" + p.getName() + "=" + p.getType().getSimpleName() + "\t" + p.getHint());
+                  "\t--" + p.getName() + "=" + p.getType().getSimpleName() + "\t" + p.getHint());
             }
          }
       }
@@ -521,7 +499,7 @@ public abstract class Converter extends GuiProgram {
    
    /**
     * Sets any parameter values that might have been specified on the the command line -
-    * i.e. that are in the {@link #configuration} map. 
+    * i.e. that are in the {@link GuiProgram#extraSwitches} map. 
     * @param parameters The parameters to configure.
     * @param schema The source of any layers specified.
     * @return The given parameter set.
@@ -529,19 +507,19 @@ public abstract class Converter extends GuiProgram {
    public ParameterSet configureFromCommandLine(ParameterSet parameters, Schema schema)
    {
       for (Parameter p : parameters.values()) {
-         if (configuration.containsKey(p.getName())) {
+         if (extraSwitches.containsKey(p.getName())) {
             if (p.getType().equals(Layer.class)) {               
-               p.setValue(schema.getLayer(configuration.get(p.getName())));
+               p.setValue(schema.getLayer(extraSwitches.get(p.getName())));
             } else if (p.getType().equals(Integer.class)) {               
-               p.setValue(Integer.valueOf(configuration.get(p.getName())));
+               p.setValue(Integer.valueOf(extraSwitches.get(p.getName())));
             } else if (p.getType().equals(Double.class)) {               
-               p.setValue(Double.valueOf(configuration.get(p.getName())));
+               p.setValue(Double.valueOf(extraSwitches.get(p.getName())));
             } else if (p.getType().equals(Boolean.class)) {               
-               p.setValue(Boolean.valueOf(configuration.get(p.getName())));
+               p.setValue(Boolean.valueOf(extraSwitches.get(p.getName())));
             } else {
-               p.setValue(configuration.get(p.getName()));
+               p.setValue(extraSwitches.get(p.getName()));
             }
-         } // there is a value in configuration
+         } // there is a value in extraSwitches
       } // next parameter
       return parameters;
    } // end of configureFromCommandLine()

@@ -210,6 +210,12 @@ public class GuiProgram extends JApplet {
     * interpreted as <i>switches</i>, which set bean attributes.
     */
    protected Vector<String> arguments = new Vector<String>();
+
+   /**
+    * Extra switches (arguments starting with '--') that weren't processed. Derived
+    * classes should set this if they implement their own ad-hoc switches.
+    */
+   protected Map<String,String> extraSwitches = null;
    
    // Methods:
    
@@ -273,7 +279,11 @@ public class GuiProgram extends JApplet {
                                         + " : " + t);
                   }
                } else {
-                  System.err.println("Ignoring unknown switch: " + sArg);
+                  if (extraSwitches == null) {
+                     System.err.println("Ignoring unknown switch: " + sArg);
+                  } else {
+                     extraSwitches.put(sName, sValue);
+                  }
                }
             } // sName is not ""
          } else { // argument
