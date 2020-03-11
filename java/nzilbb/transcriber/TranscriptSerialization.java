@@ -721,7 +721,7 @@ public class TranscriptSerialization
 
       layerToPossibilities.put(
 	 new Parameter("airDateLayer", Layer.class, "Air-date layer", "Date the program aired"), 
-	 Arrays.asList("transcriptairdate","airedate", "transcriptrecordingdate","recordingdate"));
+	 Arrays.asList("transcriptairdate","airdate", "transcriptrecordingdate","recordingdate"));
       layerToCandidates.put("airDateLayer", graphTagLayers);
 
       layerToPossibilities.put(
