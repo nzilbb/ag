@@ -1,15 +1,15 @@
 # Binary Files
 
-These are various compiled binary files, representing the latest
+This direcotry contains various compiled binary files, representing the latest
 version of various *nzilbb.ag* components.
 
 These include:
 * nzilbb.ag.jar - the primary API/object model for nzilbb.ag
-* nzilbb.???.jar - a number of serialization modules that cane, for example, be installed in
+* nzilbb.???.jar - a number of serialization modules that can, for example, be installed in
   LaBB-CAT to add support for format conversions.
 * ???-to-???.jar - stand-alone utilities to perform specific format conversions - see below...
 
-## Stand-alone Format Converters
+## Standalone Format Converters
 
 There are a number converter utilities that can be used to convert files from one format
 to another, including:
@@ -34,22 +34,22 @@ java -jar vtt-to-textgrid.jar
 
 By default converters display a window on to which you can drag and drop files for
 converting. However, they can also be run in 'batch mode', which allows you to
-automatically convert a list of files using the command line - e.g.
+automatically convert a list of files from the command line - e.g.
 
 ```
 java -jar trs-to-textgrid.jar --batchmode *.trs
 ```
 
-Some conversions have configurable about, e.g.
+Some conversions have configurable output, e.g.
+
+```
+java -jar trs-to-text.jar *.txt
+```
+
+...will include annotations and participant names in the output text files, but:
 
 ```
 java -jar trs-to-text.jar --textonly *.txt
-```
-
-...will include annotations and participant names in the output text files, but
-
-```
-java -jar trs-to-text.jar --batchmode --textonly *.txt
 ```
 
 ...produces text files that exclude all annotations and participant names.
