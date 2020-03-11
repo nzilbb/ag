@@ -21,6 +21,10 @@ includes extra features that allow tier hierarchies and parent/child constraints
 More details on extra features are available in
 [http://dx.doi.org/10.1016/j.csl.2017.01.004](http://dx.doi.org/10.1016/j.csl.2017.01.004)
 
+More API documentation is available [here](https://nzilbb.github.io/ag/)
+
+## Format Conversion
+
 Apart from use within LaBB-CAT, the object model can be used for other purposes like
 format conversion, e.g. 
  * [vtt-to-textgrid](https://github.com/nzilbb/ag/blob/master/bin/vtt-to-textgrid.jar?raw=true) -
@@ -34,4 +38,3 @@ format conversion, e.g.
 More format conversions are available
 [here](https://github.com/nzilbb/ag/blob/master/bin/README.md)
 
-More API documentation is available [here](https://nzilbb.github.io/ag/)
