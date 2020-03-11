@@ -108,28 +108,13 @@ public class TrsToEaf extends Converter {
     * @return The schema.
     */
    public Schema getSchema() {
-      return new Schema(
-         "who", "turn", "utterance", "word",
-         // include topic layer
-         new Layer("topic", "Topic")
-         
+      Schema schema = super.getSchema();
+      // include topic layer
+      schema.addLayer(
+         new Layer("topic", "Topic")         
          .setAlignment(Constants.ALIGNMENT_INTERVAL)
-         .setPeers(true).setPeersOverlap(false).setSaturated(false),
-         new Layer("who", "Participants")
-         .setAlignment(Constants.ALIGNMENT_NONE)
-         .setPeers(true).setPeersOverlap(true).setSaturated(true),
-	 new Layer("turn", "Speaker turns")
-         .setAlignment(Constants.ALIGNMENT_INTERVAL)
-         .setPeers(true).setPeersOverlap(false).setSaturated(false)
-         .setParentId("who").setParentIncludes(true),
-	 new Layer("utterance", "Utterances")
-         .setAlignment(Constants.ALIGNMENT_INTERVAL)
-         .setPeers(true).setPeersOverlap(false).setSaturated(true)
-         .setParentId("turn").setParentIncludes(true),
-         new Layer("word", "Words")
-         .setAlignment(Constants.ALIGNMENT_INTERVAL)
-         .setPeers(true).setPeersOverlap(false).setSaturated(false)
-         .setParentId("turn").setParentIncludes(true));
+         .setPeers(true).setPeersOverlap(false).setSaturated(false));
+      return schema;
    } // end of getSchema()
 
    /**
