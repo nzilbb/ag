@@ -106,7 +106,7 @@ public abstract class Converter extends GuiProgram {
     * Setter for {@link #verbose}: Whether detailed verbose output is printed or not.
     * @param newVerbose Whether detailed verbose output is printed or not.
     */
-   @Switch(value="Whether detailed verbose output is printed or not",compulsory=false)
+   @Switch(value="Print verbose output",compulsory=false)
    public void setVerbose(Boolean newVerbose) { verbose = newVerbose; }
    
    /**
@@ -439,7 +439,7 @@ public abstract class Converter extends GuiProgram {
             }
          }
          
-         System.exit(1);         
+         System.exit(1);
       }
          
       for (String argument: arguments) {
@@ -497,8 +497,8 @@ public abstract class Converter extends GuiProgram {
 	 progress.setValue(++f);
       } // next file
       progress.setString("Finished.");
+      if (batchMode) System.exit(0);
    } // end of convertBatch()
-
    
    /**
     * Sets any parameter values that might have been specified on the the command line -
