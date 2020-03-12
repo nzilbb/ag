@@ -30,13 +30,28 @@ import nzilbb.converter.EafToTrs;
 
 public class TestEafToTrs extends UnitTestBase {
    
-   @Test public void transcriber() throws Exception {
+   @Test public void utterancesOnly() throws Exception {
       File dir = getDir();
       File input = new File(dir, "elan.eaf");
       EafToTrs converter = new EafToTrs();
       converter.convert(input);
       File actual = new File(dir, "elan.trs");
       File expected = new File(dir, "expected_elan.trs");
+      String differences = diff(expected, actual);
+      if (differences != null) {
+         fail(differences);
+      } else {
+         actual.delete();
+      }
+   }
+   
+   @Test public void utterance_word_phone() throws Exception {
+      File dir = getDir();
+      File input = new File(dir, "elan_word_phone.eaf");
+      EafToTrs converter = new EafToTrs();
+      converter.convert(input);
+      File actual = new File(dir, "elan_word_phone.trs");
+      File expected = new File(dir, "expected_elan_word_phone.trs");
       String differences = diff(expected, actual);
       if (differences != null) {
          fail(differences);
