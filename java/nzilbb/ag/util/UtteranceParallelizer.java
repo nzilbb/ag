@@ -45,6 +45,8 @@ import nzilbb.ag.*;
  * format) 
  * <p>Turns are also split on topic changes (i.e. when a topic layer annotation
  * starts/ends), mainly because that suits Transcriber.
+ * <p><em>NB</em> If there are anchors with unset offsets, the {@link DefaultOffsetGenerator} is
+ * used to assign them.
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class UtteranceParallelizer implements IGraphTransformer {
@@ -113,6 +115,19 @@ public class UtteranceParallelizer implements IGraphTransformer {
          ourTracker.reset(); // in case there were any lingering creates/destroys in the graph
       } else {
          originalTracker.addListener(ourTracker);
+      }
+
+      // this only works if offsets are set
+      boolean unsetOffsets = graph.getAnchors().values().stream()         
+         .map(a->a.getOffset() == null) // stream of 'true if no offset'
+         .reduce(Boolean::logicalOr)    // 'or' them together
+         .orElse(false);                // false if there are no anchors
+      if (unsetOffsets) {
+         // use the DefaultOffsetGenerator to ensure offsets are set
+         new DefaultOffsetGenerator()
+            // only set unset offsets
+            .setDefaultOffsetThreshold(Constants.CONFIDENCE_NONE - 1)
+            .transform(graph);
       }
 
       LayerHierarchyTraversal<Vector<String>> bottomUpSelectedLayers
