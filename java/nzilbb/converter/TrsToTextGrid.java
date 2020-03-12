@@ -45,8 +45,6 @@ public class TrsToTextGrid extends Converter {
     */
    public TrsToTextGrid() {
       setDefaultWindowTitle("Transcriber to TextGrid converter");
-      setDefaultWidth(800);
-      setDefaultHeight(600);
    } // end of constructor
    
    public static void main(String argv[]) {

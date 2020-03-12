@@ -91,8 +91,6 @@ public class TrsToText extends Converter {
     */
    public TrsToText() {
       setDefaultWindowTitle("Transcriber to PDF converter");
-      setDefaultWidth(800);
-      setDefaultHeight(600);
    } // end of constructor
    
    public static void main(String argv[]) {

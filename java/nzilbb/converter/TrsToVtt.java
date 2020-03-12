@@ -45,8 +45,6 @@ public class TrsToVtt extends Converter {
     */
    public TrsToVtt() {
       setDefaultWindowTitle("Transcriber to VTT converter");
-      setDefaultWidth(800);
-      setDefaultHeight(600);
    } // end of constructor
    
    public static void main(String argv[]) {
