@@ -168,6 +168,17 @@ public abstract class Converter extends GuiProgram {
    } // end of getLayersToSerialize()
    
    /**
+    * Determine the final parameters for deserialization. Implementors can adjust the
+    * default configuration before it's applied. This method is invoked once for each
+    * input file.
+    * @param defaultConfig
+    * @return The new configuration.
+    */
+   public ParameterSet deserializationParameters(ParameterSet defaultConfig) {
+      return defaultConfig;
+   } // end of deserializationConfiguration()
+   
+   /**
     * Specify the schema to used by  {@link #convert(File)}.
     * @return The schema.
     */
@@ -228,19 +239,23 @@ public abstract class Converter extends GuiProgram {
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
       configureFromCommandLine(defaultParameters, schema);
+
+      // let the subclass adjust the config
+      ParameterSet parameters = deserializationParameters(defaultParameters);
+
       if (verbose) {
-         if (defaultParameters.size() == 0) {
+         if (parameters.size() == 0) {
             System.out.println("No deserialization parameters are required.");            
          } else {
             System.out.println("Deserialization parameters:");
-            for (Parameter p : defaultParameters.values()) {
+            for (Parameter p : parameters.values()) {
                System.out.println("\t" + p.getName() + " = " + p.getValue());
             }
          }
       }
-      
+
       // configure the deserialization
-      deserializer.setParameters(defaultParameters);
+      deserializer.setParameters(parameters);
       
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0]; // TODO support multiple graphs
