@@ -7,9 +7,9 @@
   <property name="build" location="build_${ant.project.name}"/>
   <property name="dist"  location="../bin"/>
   
-  <target name="all" depends="serializations,vtt-to-textgrid,trs-to-textgrid,vtt-to-eaf,trs-to-eaf,trs-to-pdf,trs-to-vtt,vtt-to-trs">
+  <target name="all" depends="serializations,vtt-to-textgrid,trs-to-textgrid,vtt-to-eaf,trs-to-eaf,trs-to-pdf,trs-to-vtt,vtt-to-trs,eaf-to-trs">
   </target>
-  <target name="test" depends="test-vtt-to-textgrid,test-trs-to-textgrid,test-trs-to-eaf,test-vtt-to-eaf,test-trs-to-pdf,test-trs-to-vtt,test-vtt-to-trs">    
+  <target name="test" depends="test-vtt-to-textgrid,test-trs-to-textgrid,test-trs-to-eaf,test-vtt-to-eaf,test-trs-to-pdf,test-trs-to-vtt,test-vtt-to-trs,test-eaf-to-trs">    
   </target>
 
   <target name="serializations">
@@ -375,7 +375,7 @@
       <!-- add required jars -->
       <zipfileset src="${dist}/nzilbb.ag.jar" />
       <zipfileset src="${dist}/nzilbb.webvtt.jar" />
-      <zipfileset src="${dist}/nzilbb.praat.jar" />      
+      <zipfileset src="${dist}/nzilbb.transcriber.jar" />      
     </jar>    
     <delete dir="${build}"/>
   </target>
@@ -393,6 +393,53 @@
       <jvmarg value="-ea"/>
       <formatter type="plain" usefile="false" />
       <test name="nzilbb.converter.test.TestVttToTrs"/>
+    </junit>
+  </target>
+  
+  <target name="eaf-to-trs"
+          description="ELAN to Transcriber converter" >
+    <mkdir dir="${build}"/>
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}"
+	   classpath="${dist}/nzilbb.ag.jar;${dist}/nzilbb.elan.jar;${dist}/nzilbb.praat.jar"
+	   includes="nzilbb/converter/EafToTrs.java"
+	   listfiles="yes"
+	   includeantruntime="false"
+	   target="8" source="8"
+	   debug="on"
+	   >
+      <compilerarg value="-Xlint"/>
+    </javac>
+    <!-- Put everything in ${build} into the ${ant.project.name}.jar file -->
+    <jar jarfile="${dist}/eaf-to-trs.jar" basedir="${build}">
+      <manifest>
+	<attribute name="Application-Name" value="ELAN to Transcriber Converter"/>
+	<attribute name="Permissions" value="all-permissions"/>
+	<attribute name="Main-Class" value="nzilbb.converter.EafToTrs"/>
+      </manifest>
+      <!-- icon -->
+      <fileset dir="${src}" includes="nzilbb/converter/EafToTrs.png" />
+      <!-- add required jars -->
+      <zipfileset src="${dist}/nzilbb.ag.jar" />
+      <zipfileset src="${dist}/nzilbb.elan.jar" />
+      <zipfileset src="${dist}/nzilbb.transcriber.jar" />      
+    </jar>    
+    <delete dir="${build}"/>
+  </target>
+  <target name="test-eaf-to-trs" depends="eaf-to-trs"
+          description="Test ELAN to Transcriber converter" >
+    <!-- compile unit tests -->
+    <javac srcdir="${src}" destdir="."
+	   includes="nzilbb/converter/test/TestEafToTrs.java"
+	   classpath=".;${junitjar};${dist}/eaf-to-trs.jar"
+	   listfiles="yes" target="8" source="8" debug="on" includeAntRuntime="false" >
+      <compilerarg value="-Xlint"/>
+    </javac>
+    <junit haltonfailure="true" fork="true" showoutput="true">
+      <classpath><pathelement path=".;${junitjar};${dist}/eaf-to-trs.jar"/></classpath>
+      <jvmarg value="-ea"/>
+      <formatter type="plain" usefile="false" />
+      <test name="nzilbb.converter.test.TestEafToTrs"/>
     </junit>
   </target>
   

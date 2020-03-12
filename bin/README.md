@@ -19,9 +19,10 @@ to another, including:
 * [vtt-to-trs.jar](https://github.com/nzilbb/ag/blob/master/bin/vtt-to-trs.jar?raw=true) - convert from *web subtitles (Web VTT)* to *Transcriber* transcripts (.trs) 
 * [trs-to-vtt.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-vtt.jar?raw=true) - convert from *Transcriber* transcripts (.trs) to *web subtitles (Web VTT)*
 * [trs-to-textgrid.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-textgrid.jar?raw=true) - convert from *Transcriber* transcripts (.trs) to *Praat TextGrids*
-* [trs-to-eaf.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-eaf.jar?raw=true) - convert from *Transcriber* transcripts (.trs) to *ELAN* files (.eaf)
 * [trs-to-pdf.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-pdf.jar?raw=true) - convert from *Transcriber* transcripts (.trs) to *PDF* files
 * [trs-to-text.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-text.jar?raw=true) - convert from *Transcriber* transcripts (.trs) to *plain text* files
+* [trs-to-eaf.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-eaf.jar?raw=true) - convert from *Transcriber* transcripts (.trs) to *ELAN* files (.eaf)
+* [eaf-to-trs.jar](https://github.com/nzilbb/ag/blob/master/bin/eaf-to-trs.jar?raw=true) - convert from *ELAN* files (.eaf) to *Transcriber* transcripts (.trs)
 
 To use a particular converter, you need to have Java installed on your
 system. Download the file, and double-click it to run.
