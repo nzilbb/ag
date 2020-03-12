@@ -562,10 +562,10 @@ public class TestEAFSerialization
 		   ((Layer)defaultParamaters.get("tier3").getValue()).getId());
 
       // phones tiers doesn't automatically map to phone layer, because their names don't match
-      assertEquals("phone mapping default", "utterance", 
-		   ((Layer)defaultParamaters.get("tier4").getValue()).getId());
-      assertEquals("phone mapping default", "utterance", 
-		   ((Layer)defaultParamaters.get("tier5").getValue()).getId());
+      assertNull("phone mapping default",
+                 defaultParamaters.get("tier4").getValue());
+      assertNull("phone mapping default",
+                 defaultParamaters.get("tier5").getValue());
       // but we set it 'manually'
       defaultParamaters.get("tier4").setValue(schema.getLayer("phone"));
       defaultParamaters.get("tier5").setValue(schema.getLayer("phone"));
