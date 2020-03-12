@@ -55,6 +55,7 @@ import nzilbb.ag.serialize.ISerializer;
 import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
+import nzilbb.ag.util.Normalizer;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 import nzilbb.praat.TextGridSerialization;
@@ -242,7 +243,7 @@ public abstract class Converter extends GuiProgram {
       deserializer.setParameters(defaultParameters);
       
       Graph[] graphs = deserializer.deserialize();
-      Graph g = graphs[0];     
+      Graph g = graphs[0]; // TODO support multiple graphs
       for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
@@ -250,6 +251,9 @@ public abstract class Converter extends GuiProgram {
       // strip extension off name
       g.setId(IO.WithoutExtension(g.getId()));
 
+      new Normalizer().transform(g);
+      g.commit();
+      
       // serialize...
 
       // create serializer
@@ -296,6 +300,8 @@ public abstract class Converter extends GuiProgram {
       setDefaultWindowTitle("Converter");
       setDefaultWidth(800);
       setDefaultHeight(600);
+
+      // allow extra command-line switches - they might be for configuring serializations
       extraSwitches = new HashMap<String,String>();
    } // end of constructor
    
