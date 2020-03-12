@@ -37,7 +37,7 @@ public class TestVttToTrs extends UnitTestBase {
       converter.convert(input);
       File actual = new File(dir, "webvtt.trs");
       File expected = new File(dir, "expected_webvtt.trs");
-      String differences = diff(expected, actual);
+      String differences = diff(expected, actual, ".*version_date.*");
       if (differences != null) {
          fail(differences);
       } else {

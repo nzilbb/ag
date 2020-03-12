@@ -37,7 +37,7 @@ public class TestEafToTrs extends UnitTestBase {
       converter.convert(input);
       File actual = new File(dir, "elan.trs");
       File expected = new File(dir, "expected_elan.trs");
-      String differences = diff(expected, actual);
+      String differences = diff(expected, actual, ".*version_date.*");
       if (differences != null) {
          fail(differences);
       } else {
@@ -52,7 +52,7 @@ public class TestEafToTrs extends UnitTestBase {
       converter.convert(input);
       File actual = new File(dir, "elan_word_phone.trs");
       File expected = new File(dir, "expected_elan_word_phone.trs");
-      String differences = diff(expected, actual);
+      String differences = diff(expected, actual, ".*version_date.*");
       if (differences != null) {
          fail(differences);
       } else {
@@ -67,7 +67,7 @@ public class TestEafToTrs extends UnitTestBase {
       converter.convert(input);
       File actual = new File(dir, "elan_topic.trs");
       File expected = new File(dir, "expected_elan_topic.trs");
-      String differences = diff(expected, actual);
+      String differences = diff(expected, actual, ".*version_date.*");
       if (differences != null) {
          fail(differences);
       } else {
@@ -83,7 +83,7 @@ public class TestEafToTrs extends UnitTestBase {
       converter.convert(input);
       File actual = new File(dir, "elan_annotations.trs");
       File expected = new File(dir, "expected_elan_annotations.trs");
-      String differences = diff(expected, actual);
+      String differences = diff(expected, actual, ".*version_date.*");
       if (differences != null) {
          fail(differences);
       } else {

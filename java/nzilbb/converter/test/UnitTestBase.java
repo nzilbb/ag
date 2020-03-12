@@ -44,6 +44,17 @@ public class UnitTestBase {
     * @return null if the files are the same, and a String describing differences if not.
     */
    public String diff(File expected, File actual) {
+      return diff(expected, actual, null);
+   }
+   
+   /**
+    * Diffs two files.
+    * @param expected
+    * @param actual
+    * @param ignorePattern An optional regular expression identifying changes to ignore.
+    * @return null if the files are the same, and a String describing differences if not.
+    */
+   public String diff(File expected, File actual, String ignorePattern) {
       
       StringBuffer d = new StringBuffer();      
       try {
@@ -65,6 +76,11 @@ public class UnitTestBase {
          MinimumEditPath<String> comparator = new MinimumEditPath<String>();
          List<EditStep<String>> path = comparator.minimumEditPath(expectedLines, actualLines);
          for (EditStep<String> step : path) {
+
+            // ignore this difference?
+            if (ignorePattern != null && step.getFrom().matches(ignorePattern)) continue;
+
+            // report the difference
             switch (step.getOperation()) {
                case CHANGE:
                   d.append("\n"+expected.getPath()+":"+(step.getFromIndex()+1)+": Expected:\n" 
