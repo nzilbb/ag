@@ -1009,8 +1009,18 @@ public class Annotation
          Layer layer = getGraph().getLayer(layerId);
          Layer commonAncestorLayer = getLayer().getFirstCommonAncestor(layer);
          if (commonAncestorLayer == null) return null; // invalid layer
+         if (commonAncestorLayer == graph.getSchema().getRoot())
+         { // related only temporally
+            Annotation[] other = includingAnnotationsOn(layerId);
+            // if there are none, true in the other direction
+            if (other.length == 0) other = includedAnnotationsOn(layerId);
+            if (other.length > 0)
+            {
+               return other[0];
+            }
+         }
          // is our layer an ancestor of layerId
-         if (commonAncestorLayer.getId().equals(getLayer().getId()))
+         else if (commonAncestorLayer.getId().equals(getLayer().getId()))
          { // we are an ancestor of the target layer
             // annotations should come out in ordinal order when they have the same parent
             // and in ancestor start order otherwise, where the ancestor used comes from the
@@ -1569,7 +1579,7 @@ public class Annotation
       Vector<Annotation> includingAnnotations = new Vector<Annotation>();
       if (graph != null && getAnchored())
       {
-         for (Annotation other : graph.listNear(layerId, getStart().getOffset()))
+         for (Annotation other : graph.list(layerId))
          {
             if (other.getChange() == Change.Operation.Destroy) continue;
             if (other == this) continue; // exclude ourselves

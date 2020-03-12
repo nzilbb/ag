@@ -891,8 +891,8 @@ public class TestGraph
 
       // includingAnnotationsOn
       Annotation[] including = the.includingAnnotationsOn("turn");
-      assertEquals("includingAnnotationsOn - unrelated", turn2, including[0]);
-      assertEquals("includingAnnotationsOn - related", turn1, including[1]);
+      assertEquals("includingAnnotationsOn - related", turn1, including[0]);
+      assertEquals("includingAnnotationsOn - unrelated", turn2, including[1]);
       assertEquals(2, including.length);
       including = the.includingAnnotationsOn("pos");
       assertEquals(DT, including[0]);
@@ -1883,8 +1883,10 @@ public class TestGraph
       g.addAnchor(new Anchor("turnEnd", 6.0));
 
       Annotation corpus = new Annotation("corpus1", "CC", "corpus", "turnStart", "turnEnd", "my graph");
+      Annotation topic = new Annotation("topic", "Topic", "topic", "turnStart", "turnEnd", "my graph");
       Annotation who1 = new Annotation("who1", "john smith", "who", "turnStart", "turnEnd", "my graph");
       Annotation who2 = new Annotation("who2", "jane doe", "who", "turnStart", "turnEnd", "my graph");
+
 
       Annotation turn1 = new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "who1");
       Annotation turn2 = new Annotation("turn2", "jane doe", "turn", "turnStart", "turnEnd", "who2");
@@ -1916,6 +1918,7 @@ public class TestGraph
       Annotation s = new Annotation("phone9", "s", "phone", "a2.24", "a3.2", "word5");
 
       g.addAnnotation(corpus);
+      g.addAnnotation(topic);
       g.addAnnotation(who1);
       g.addAnnotation(turn1);
       g.addAnnotation(utterance1);
@@ -1965,6 +1968,7 @@ public class TestGraph
 
       assertEquals("my: ancestor child (peer layers)", utterance1, the.my("utterance"));
       assertEquals("my: ancestor child (non-peers)", utterance1, th.my("utterance"));
+      assertEquals("my: ancestor child (non-peers, top level)", topic, turn1.my("topic"));
       assertEquals("my: ancestor child (child of graph)", corpus, the.my("corpus"));
 
       Annotation[] list = the.list("turn");
