@@ -590,7 +590,8 @@ public class Transcript
 	 return sRaw
 	    .replaceAll("&", "&amp;")
 	    .replaceAll(">", "&gt;")
-	    .replaceAll("<", "&lt;");
+	    .replaceAll("<", "&lt;")
+	    .replaceAll("\"", "&quot;");
       }
    } // end of xmlEscaped()
    
