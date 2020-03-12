@@ -1696,13 +1696,13 @@ public class TranscriptSerialization
 		  {
 		     thisSync.setText(anWord.getLabel());
 		  }
-		  if (anWord.my(lexicalLayer.getId()) != null)
+		  if (lexicalLayer != null && anWord.my(lexicalLayer.getId()) != null)
 		  { // lexical tag
 		     thisSync.addEvent(new Event(
 					  anWord.my(lexicalLayer.getId()).getLabel(),
 					  "lexical", "previous"));
 		  }
-		  if (anWord.my(pronounceLayer.getId()) != null)
+		  if (pronounceLayer != null && anWord.my(pronounceLayer.getId()) != null)
 		  { // lexical tag
 		     thisSync.addEvent(new Event(
 					  anWord.my(pronounceLayer.getId()).getLabel(),
