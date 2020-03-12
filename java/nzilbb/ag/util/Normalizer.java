@@ -111,8 +111,6 @@ public class Normalizer
 	 throw new TransformationException(this, "No turn layer specified.");
       if (schema.getUtteranceLayerId() == null) 
 	 throw new TransformationException(this, "No utterance layer specified.");
-      if (schema.getWordLayerId() == null) 
-	 throw new TransformationException(this, "No word layer specified.");
 
       // ensure we can track our changes
       ChangeTracker ourTracker = new ChangeTracker();
@@ -151,33 +149,36 @@ public class Normalizer
 	    {
                turn.setLabel(participant.getLabel());
 	    }
-	    Annotation lastUtterance = null;
-	    for (Annotation utterance : turn.getAnnotations(schema.getUtteranceLayerId()))
-	    {
-	       if (!participant.getLabel().equals(utterance.getLabel()))
-	       {
-                  utterance.setLabel(participant.getLabel());
-	       }
-	       // check utterances are chained together
-	       if (lastUtterance != null 
-		   && !utterance.getStartId().equals(lastUtterance.getEndId()))
-	       { // not chained
-		  // change the last utterance end
-		  Anchor newEnd = utterance.getStart();
-		  // change all annotations with this turn that end there
-		  // to instead end at the start of this utterance
-		  // this will include lastUtterance itself, and any words/phones it might 
-		  // share anchors with
-		  for (Annotation ending : lastUtterance.getEnd().getEndingAnnotations())
-		  {
-		     if (turn == ending.my(schema.getTurnLayerId()))
-		     {
-                        ending.setEnd(newEnd);
-		     }
-		  } // next ending annotation
-	       }
-	       lastUtterance = utterance;
-	    } // next utterance
+            if (schema.getWordLayerId() != null)
+            {
+               Annotation lastUtterance = null;
+               for (Annotation utterance : turn.getAnnotations(schema.getUtteranceLayerId()))
+               {
+                  if (!participant.getLabel().equals(utterance.getLabel()))
+                  {
+                     utterance.setLabel(participant.getLabel());
+                  }
+                  // check utterances are chained together
+                  if (lastUtterance != null 
+                      && !utterance.getStartId().equals(lastUtterance.getEndId()))
+                  { // not chained
+                     // change the last utterance end
+                     Anchor newEnd = utterance.getStart();
+                     // change all annotations with this turn that end there
+                     // to instead end at the start of this utterance
+                     // this will include lastUtterance itself, and any words/phones it might 
+                     // share anchors with
+                     for (Annotation ending : lastUtterance.getEnd().getEndingAnnotations())
+                     {
+                        if (turn == ending.my(schema.getTurnLayerId()))
+                        {
+                           ending.setEnd(newEnd);
+                        }
+                     } // next ending annotation
+                  }
+                  lastUtterance = utterance;
+               } // next utterance
+            }
 	 } // next turn
       } // next participant
 
@@ -221,70 +222,71 @@ public class Normalizer
 
       } // next turn parent
 
-      // disconnect words from turns and utterances
-      for (Annotation word : graph.list(schema.getWordLayerId()))
+      if (schema.getWordLayerId() != null)
       {
-	 // check start anchor
-	 if (word.getStart().isStartOn(schema.getTurnLayerId())
-	     || word.getStart().isEndOn(schema.getTurnLayerId())
-	     || word.getStart().isStartOn(schema.getUtteranceLayerId())
-	     || word.getStart().isEndOn(schema.getUtteranceLayerId()))
-	 { // disconnect start
-	    final Anchor oldStart = word.getStart();
-
-	    // create a new anchor
-	    final Anchor newStart = new Anchor(
-	       null, word.getStart().getOffset(),
-	       // if the word end has the same confidence, just copy it, otherwise use "default"
-	       oldStart.getConfidence() != null
-	       && oldStart.getConfidence().equals(word.getEnd().getConfidence())?
-	       oldStart.getConfidence():Constants.CONFIDENCE_DEFAULT);
-	    graph.addAnchor(newStart);
-
-	    // assign it to the word and any descendants that use it
-	    LayerTraversal<Vector<Change>> descendantTraverser = new LayerTraversal<Vector<Change>>(new Vector<Change>(), word)
-	    {
-	       protected void pre(Annotation annotation)
-	       {
-		  if (annotation.getStart().equals(oldStart))
-		  {
-                     annotation.setStart(newStart);
-		  }
-	       }
-	    };
-	 } // disconnect start
-	 
-	 // check end anchor
-	 if (word.getEnd().isStartOn(schema.getTurnLayerId())
-	     || word.getEnd().isEndOn(schema.getTurnLayerId())
-	     || word.getEnd().isStartOn(schema.getUtteranceLayerId())
-	     || word.getEnd().isEndOn(schema.getUtteranceLayerId()))
-	 { // disconnect end
-	    final Anchor oldEnd = word.getEnd();
-
-	    // create a new anchor
-	    final Anchor newEnd = new Anchor(
-	       null, word.getEnd().getOffset(),
-	       // if the word start has the same confidence, just copy it, otherwise use "default"
-	       word.getEnd().getConfidence() != null
-	       && oldEnd.getConfidence().equals(word.getStart().getConfidence())?
-	       oldEnd.getConfidence():Constants.CONFIDENCE_DEFAULT); 
-	    graph.addAnchor(newEnd);
-
-	    // assign it to the word and any descendants that use it
-	    LayerTraversal<Vector<Change>> descendantTraverser = new LayerTraversal<Vector<Change>>(new Vector<Change>(), word)
-	    {
-	       protected void pre(Annotation annotation)
-	       {
-		  if (annotation.getEnd().equals(oldEnd))
-		  {
-                     annotation.setEnd(newEnd);
-		  }
-	       }
-	    };
-	 } // disconnect end
-      } // next word
-
+         // disconnect words from turns and utterances
+         for (Annotation word : graph.list(schema.getWordLayerId()))
+         {
+            // check start anchor
+            if (word.getStart().isStartOn(schema.getTurnLayerId())
+                || word.getStart().isEndOn(schema.getTurnLayerId())
+                || word.getStart().isStartOn(schema.getUtteranceLayerId())
+                || word.getStart().isEndOn(schema.getUtteranceLayerId()))
+            { // disconnect start
+               final Anchor oldStart = word.getStart();
+               
+               // create a new anchor
+               final Anchor newStart = new Anchor(
+                  null, word.getStart().getOffset(),
+                  // if the word end has the same confidence, just copy it, otherwise use "default"
+                  oldStart.getConfidence() != null
+                  && oldStart.getConfidence().equals(word.getEnd().getConfidence())?
+                  oldStart.getConfidence():Constants.CONFIDENCE_DEFAULT);
+               graph.addAnchor(newStart);
+               
+               // assign it to the word and any descendants that use it
+               LayerTraversal<Vector<Change>> descendantTraverser = new LayerTraversal<Vector<Change>>(new Vector<Change>(), word)
+                                                                    {
+                                                                       protected void pre(Annotation annotation)
+                                                                       {
+                                                                          if (annotation.getStart().equals(oldStart))
+                                                                          {
+                                                                             annotation.setStart(newStart);
+                                                                          }
+                                                                       }
+                  };
+            } // disconnect start
+            
+            // check end anchor
+            if (word.getEnd().isStartOn(schema.getTurnLayerId())
+                || word.getEnd().isEndOn(schema.getTurnLayerId())
+                || word.getEnd().isStartOn(schema.getUtteranceLayerId())
+                || word.getEnd().isEndOn(schema.getUtteranceLayerId()))
+            { // disconnect end
+               final Anchor oldEnd = word.getEnd();
+               
+               // create a new anchor
+               final Anchor newEnd = new Anchor(
+                  null, word.getEnd().getOffset(),
+                  // if the word start has the same confidence, just copy it, otherwise use "default"
+                  word.getEnd().getConfidence() != null
+                  && oldEnd.getConfidence().equals(word.getStart().getConfidence())?
+                  oldEnd.getConfidence():Constants.CONFIDENCE_DEFAULT); 
+               graph.addAnchor(newEnd);
+               
+               // assign it to the word and any descendants that use it
+               LayerTraversal<Vector<Change>> descendantTraverser = new LayerTraversal<Vector<Change>>(new Vector<Change>(), word) {
+                     protected void pre(Annotation annotation)
+                     {
+                        if (annotation.getEnd().equals(oldEnd))
+                        {
+                           annotation.setEnd(newEnd);
+                        }
+                     }
+                  };
+            } // disconnect end
+         } // next word
+      }
       if (maxLabelLength != null)
       {
 	 // ensure no annotation has a label longer than the limit

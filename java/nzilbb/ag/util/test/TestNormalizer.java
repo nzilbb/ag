@@ -1132,6 +1132,66 @@ public class TestNormalizer
       }
    }
 
+   @Test public void turnLabelsOnly() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");      
+      Layer[] layers = {
+	 new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+		   true, // peers
+		   true, // peersOverlap
+		   true), // saturated
+	 new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   false, // saturated
+		   "who", // parentId
+		   true), // parentIncludes
+	 new Layer("utterance", "Utterance", Constants.ALIGNMENT_INTERVAL,
+		   true, // peers
+		   false, // peersOverlap
+		   true, // saturated
+		   "turn", // parentId
+		   true) // parentIncludes
+         // no word layer
+      }; // parentIncludes
+
+      // no word layer
+      g.setSchema(new Schema(layers, "who", "turn", "utterance", null));
+
+      g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
+      g.addAnchor(new Anchor("utteranceChange", 0.4, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+      g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE_MANUAL)); // turn end
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+      
+      // turn label doesn't match partipant
+      g.addAnnotation(new Annotation("turn1", "Speaker 1", "turn", "turnStart", "turnEnd", "participant1"));
+
+      // utterance labels don't match partipant
+      g.addAnnotation(new Annotation("utterance1", "the quick brown fox", "utterance", "turnStart", "utteranceChange", "turn1"));
+      g.addAnnotation(new Annotation("utterance2", "jumps over the lazy dog", "utterance", "utteranceChange", "turnEnd", "turn1"));
+      
+      g.setTracker(new ChangeTracker());
+      Normalizer n = new Normalizer();
+      try
+      {
+	 List<Change> changes = n.transform(g);
+	 assertNotEquals("there are changes", 0, changes.size());
+
+	 assertEquals("turn changed: " + g.getAnnotation("turn1").getLabel(), 
+		      "john smith", g.getAnnotation("turn1").getLabel());
+	 assertEquals("utterance not changed: " + g.getAnnotation("utterance1").getLabel(), 
+		      "the quick brown fox", g.getAnnotation("utterance1").getLabel());
+	 assertEquals("utterance not changed: " + g.getAnnotation("utterance2").getLabel(), 
+		      "jumps over the lazy dog", g.getAnnotation("utterance2").getLabel());      
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+   }
+
    @Test public void nameLoneSpeakerAfterEpisode() 
    {
       Graph g = new Graph();
