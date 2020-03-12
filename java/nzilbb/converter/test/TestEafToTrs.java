@@ -60,6 +60,37 @@ public class TestEafToTrs extends UnitTestBase {
       }
    }
 
+   @Test public void topic() throws Exception {
+      File dir = getDir();
+      File input = new File(dir, "elan_topic.eaf");
+      EafToTrs converter = new EafToTrs();
+      converter.convert(input);
+      File actual = new File(dir, "elan_topic.trs");
+      File expected = new File(dir, "expected_elan_topic.trs");
+      String differences = diff(expected, actual);
+      if (differences != null) {
+         fail(differences);
+      } else {
+         actual.delete();
+      }
+   }
+
+   @Test public void withAnnotations() throws Exception {
+      File dir = getDir();
+      File input = new File(dir, "elan_annotations.eaf");
+      EafToTrs converter = new EafToTrs();
+      converter.getTiersToIgnore().add("annotations");
+      converter.convert(input);
+      File actual = new File(dir, "elan_annotations.trs");
+      File expected = new File(dir, "expected_elan_annotations.trs");
+      String differences = diff(expected, actual);
+      if (differences != null) {
+         fail(differences);
+      } else {
+         actual.delete();
+      }
+   }
+
    public static void main(String args[]) {
       org.junit.runner.JUnitCore.main("nzilbb.converter.test.TestEafToTrs");
    }

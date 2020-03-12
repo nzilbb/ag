@@ -21,15 +21,20 @@
 //
 package nzilbb.converter;
 
+import java.util.HashSet;
+import java.util.Set;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import nzilbb.ag.Constants;
 import nzilbb.ag.Layer;
 import nzilbb.ag.Schema;
 import nzilbb.ag.serialize.IDeserializer;
 import nzilbb.ag.serialize.ISerializer;
+import nzilbb.configure.Parameter;
+import nzilbb.configure.ParameterSet;
 import nzilbb.elan.EAFSerialization;
 import nzilbb.transcriber.TranscriptSerialization;
 import nzilbb.util.ProgramDescription;
+import nzilbb.util.Switch;
 
 /**
  * Converts ELAN .eaf files to Transcriber .trs files.
@@ -37,6 +42,20 @@ import nzilbb.util.ProgramDescription;
  */
 @ProgramDescription(value="Converts ELAN .eaf files to Transcriber .trs transcripts",arguments="file1.eaf file2.eaf ...")
 public class EafToTrs extends Converter {
+
+   // Attributes:
+   
+   /**
+    * A list of names of tiers to ignore.
+    * @see #getTiersToIgnore()
+    * @see #setTiersToIgnore(Set<String>)
+    */
+   protected Set<String> tiersToIgnore = new HashSet<String>();
+   /**
+    * Getter for {@link #tiersToIgnore}: A list of names of tiers to ignore.
+    * @return A list of names of tiers to ignore.
+    */
+   public Set<String> getTiersToIgnore() { return tiersToIgnore; }
    
    // Methods:
    
@@ -85,6 +104,37 @@ public class EafToTrs extends Converter {
          .setPeers(true).setPeersOverlap(false).setSaturated(false));
       return schema;
    } // end of getSchema()
+
+   /**
+    * Command-line-accessible setter for {@link #tiersToIgnore}: A list of names of tiers
+    * to ignore.  
+    * @param tiers A comma-separated list of ELAN tiers to ignore.
+    */
+   @Switch(value="A comma-separated list of ELAN tiers to ignore",compulsory=false)
+   public EafToTrs setIgnoreTiers(String tiers)
+   {
+      if (tiers != null) {
+         for (String tier : tiers.split(",")) tiersToIgnore.add(tier);
+      }
+      return this;
+   }
+   
+   /**
+    * Determine the final parameters for deserialization. Implementors can adjust the
+    * default configuration before it's applied. This method is invoked once for each
+    * input file.
+    * @param defaultConfig
+    * @return The new configuration.
+    */
+   public ParameterSet deserializationParameters(ParameterSet defaultConfig) {
+      // ignore specified tiers
+      for (Parameter p : defaultConfig.values()) {
+         if (p.getName().startsWith("tier") && tiersToIgnore.contains(p.getLabel())) {
+            p.setValue(null);
+         }
+      } // next parameter
+      return defaultConfig;
+   } // end of deserializationConfiguration()
 
    /**
     * Specifies which layers should be given to the serializer. The default implementaion
