@@ -47,9 +47,8 @@ import nzilbb.ag.*;
  * starts/ends), mainly because that suits Transcriber.
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class UtteranceParallelizer
-   implements IGraphTransformer
-{
+public class UtteranceParallelizer implements IGraphTransformer {
+   
    // Attributes:
    
    /**
@@ -74,15 +73,13 @@ public class UtteranceParallelizer
    /**
     * Default constructor.
     */
-   public UtteranceParallelizer()
-   {
+   public UtteranceParallelizer() {
    } // end of constructor
    
    /**
     * Constructor from Schema, which automatically adds the turn and utterance layers.
     */
-   public UtteranceParallelizer(Schema schema)
-   {
+   public UtteranceParallelizer(Schema schema) {
       if (schema.getTurnLayerId() != null)
          addLayerId(schema.getTurnLayerId());
       if (schema.getUtteranceLayerId() != null)
@@ -94,8 +91,7 @@ public class UtteranceParallelizer
     * @param layerId
     * @return this, so that method calls can be chained together.
     */
-   public UtteranceParallelizer addLayerId(String layerId)
-   {
+   public UtteranceParallelizer addLayerId(String layerId) {
       layerIds.add(layerId);
       return this;
    } // end of addLayerId()
@@ -107,18 +103,15 @@ public class UtteranceParallelizer
     * @return The changes introduced by the tranformation.
     * @throws TransformationException If the transformation cannot be completed.
     */
-   public List<Change> transform(Graph graph) throws TransformationException
-   {
+   public List<Change> transform(Graph graph) throws TransformationException {
+      
       // ensure we can track our changes
       ChangeTracker ourTracker = new ChangeTracker();
       ChangeTracker originalTracker = graph.getTracker();
-      if (originalTracker == null)
-      {
+      if (originalTracker == null) {
          graph.setTracker(ourTracker);
          ourTracker.reset(); // in case there were any lingering creates/destroys in the graph
-      }
-      else
-      {
+      } else {
          originalTracker.addListener(ourTracker);
       }
 
@@ -131,36 +124,34 @@ public class UtteranceParallelizer
       // order utterances by anchor so that simultaneous speech comes out in offset order
       AnnotationComparatorByAnchor byAnchor = new AnnotationComparatorByAnchor();
 
-      for (String layerId : bottomUpSelectedLayers.getResult())
-      {
+      for (String layerId : bottomUpSelectedLayers.getResult()) {
+         
          // order annotations by anchor so that simultaneous speech comes out in offset order
          TreeSet<Annotation> annotationsByAnchor = new TreeSet<Annotation>(byAnchor);
          for (Annotation a : graph.list(layerId)) annotationsByAnchor.add(a);
 
          // loop until there are no annotations left...
-         while (annotationsByAnchor.size() > 0)
-         {
+         while (annotationsByAnchor.size() > 0) {
+            
             // find the next batch of annotations that start at the same time
             Double startOffset = null;
             Anchor nextStart = null;
             TreeSet<Annotation> startingHere = new TreeSet<Annotation>(byAnchor);
             Iterator<Annotation> iCurrentAnnotations = annotationsByAnchor.iterator();
-            while (iCurrentAnnotations.hasNext())
-            {
+            while (iCurrentAnnotations.hasNext()) {
+               
                Annotation annotation = iCurrentAnnotations.next();
-               if (startOffset == null)
-               { // starting the list
+               if (startOffset == null) {
+                  // starting the list
                   startOffset = annotation.getStart().getOffset();
                   startingHere.add(annotation);
                   iCurrentAnnotations.remove();
-               }
-               else if (annotation.getStart().getOffset().equals(startOffset))
-               { // add this to our list
+               } else if (annotation.getStart().getOffset().equals(startOffset)) {
+                  // add this to our list
                   startingHere.add(annotation);
                   iCurrentAnnotations.remove();
-               }
-               else
-               { // start must be greater, so that becomes the next start offset
+               } else {
+                  // start must be greater, so that becomes the next start offset
                   nextStart = annotation.getStart();
                   break;
                }
@@ -174,16 +165,16 @@ public class UtteranceParallelizer
             
             // if the shortest one ends before nextStart
             if (nextStart == null
-                || shortestStartingHere.getEnd().getOffset() < nextStart.getOffset())
-            { // use its end as the next start
+                || shortestStartingHere.getEnd().getOffset() < nextStart.getOffset()) {
+               // use its end as the next start
                nextStart = shortestStartingHere.getEnd();
             }
             
             // split any that end after the next start time
-            for (Annotation annotation : startingHere)
-            {
-               if (annotation.getEnd().getOffset() > nextStart.getOffset())
-               {
+            for (Annotation annotation : startingHere) {
+               
+               if (annotation.getEnd().getOffset() > nextStart.getOffset()) {
+                  
                   // split annotation at nextStart 
                   Annotation following = new Annotation(annotation);
                   annotation.setEnd(nextStart);
@@ -195,16 +186,15 @@ public class UtteranceParallelizer
                   annotationsByAnchor.add(following);
                   
                   // move children appropriately
-                  for (String childLayerId : annotation.getAnnotations().keySet())
-                  {
+                  for (String childLayerId : annotation.getAnnotations().keySet()) {
+                     
                      Vector<Annotation> children // use a copy to avoid concurrent modification
                         = new Vector<Annotation>(annotation.getAnnotations().get(childLayerId));
-                     for (Annotation child : children)
-                     {
+                     for (Annotation child : children) {
+                        
                         // use includesMidpointOf so that t-inclusion doesn't have to be
                         // strict - i.e. children can overlap the parent at this point
-                        if (following.includesMidpointOf(child))
-                        {
+                        if (following.includesMidpointOf(child)) {
                            child.setParent(following);
                         }
                      } // next child
@@ -215,12 +205,9 @@ public class UtteranceParallelizer
       } // next layer
       
       // set the tracker back how it was
-      if (originalTracker == null)
-      {
+      if (originalTracker == null) {
          graph.setTracker(null);
-      }
-      else
-      {
+      } else {
          originalTracker.removeListener(ourTracker);
       }
       return new Vector<Change>(ourTracker.getChanges());
