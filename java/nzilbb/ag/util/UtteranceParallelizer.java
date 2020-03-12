@@ -161,7 +161,8 @@ public class UtteranceParallelizer implements IGraphTransformer {
                   startOffset = annotation.getStart().getOffset();
                   startingHere.add(annotation);
                   iCurrentAnnotations.remove();
-               } else if (annotation.getStart().getOffset().equals(startOffset)) {
+               } else if (graph.compareOffsets(annotation.getStart().getOffset(), startOffset) == 0) {
+                     // same offset (or close enough)
                   // add this to our list
                   startingHere.add(annotation);
                   iCurrentAnnotations.remove();
@@ -218,6 +219,46 @@ public class UtteranceParallelizer implements IGraphTransformer {
             } // next annotation that starts here
          } // process annotationsByAnchor again
       } // next layer
+
+      // on selected layers, use only one anchor where there are multiple with the same
+      // offset
+      for (String layerId : layerIds) {
+         Anchor lastStartAnchor = null;
+         Anchor lastEndAnchor = null;
+         for (Annotation annotation : new AnnotationsByAnchor(graph.list(layerId))) {
+
+            // start anchor
+            if (lastStartAnchor == null) {
+               lastStartAnchor = annotation.getStart();
+            } else {
+               if (lastStartAnchor != annotation.getStart()) {
+                  if (graph.compareOffsets(
+                         lastStartAnchor.getOffset(), annotation.getStart().getOffset()) == 0) {
+                     // same offset (or close enough)
+                     annotation.setStart(lastStartAnchor);
+                  } else { // different offset
+                     lastStartAnchor = annotation.getStart();
+                  }
+               } // not the same as the last
+            } // lastStartAnchor is set
+
+            // end anchor
+            if (lastEndAnchor == null) {
+               lastEndAnchor = annotation.getEnd();
+            } else {
+               if (lastEndAnchor != annotation.getEnd()) {
+                  if (graph.compareOffsets(
+                         lastEndAnchor.getOffset(), annotation.getEnd().getOffset()) == 0) {
+                     // same offset (or close enough)
+                     annotation.setEnd(lastEndAnchor);
+                  } else { // different offset
+                     lastEndAnchor = annotation.getEnd();
+                  }
+               } // not the same as the last
+            } // lastEndAnchor is set
+            
+         } // next annotation
+      } // next layerId
       
       // set the tracker back how it was
       if (originalTracker == null) {

@@ -351,13 +351,16 @@ public class TestUtteranceParallelizer
       graph.addAnnotation(new Annotation("g2", "F", "gender", "a0", "a15", "p2"));
       // turns
       graph.addAnnotation(new Annotation("t1", "p1", "turn", "a0", "a15", "p1"));
+      // simultaneous non-shared anchors will be shared
       graph.addAnchor(new Anchor("a5", 5.0));
+      graph.addAnchor(new Anchor("a5b", 5.0));
       graph.addAnchor(new Anchor("a10", 10.0));
+      graph.addAnchor(new Anchor("a10b", 10.0));
       graph.addAnnotation(new Annotation("t2", "p2", "turn", "a5", "a10", "p2"));
       // utterances
       graph.addAnnotation(new Annotation("u1-1", "p1", "utterance", "a0", "a5", "t1"));
       graph.addAnnotation(new Annotation("u1-2", "p1", "utterance", "a5", "a10", "t1"));
-      graph.addAnnotation(new Annotation("u2-1", "p2", "utterance", "a5", "a10", "t2"));
+      graph.addAnnotation(new Annotation("u2-1", "p2", "utterance", "a5b", "a10b", "t2"));
       graph.addAnnotation(new Annotation("u1-3", "p1", "utterance", "a10", "a15", "t1"));
 
       // words - with null intervening anchor offsets
@@ -443,6 +446,14 @@ public class TestUtteranceParallelizer
                             2, t.list("word").length);
             }
          } // next turn
+
+         // anchor sharing
+         assertEquals("simultaneous non-shared start anchors are now shared",
+                      graph.getAnnotation("u1-2").getStartId(),
+                      graph.getAnnotation("u2-1").getStartId());
+         assertEquals("simultaneous non-shared end anchors are now shared",
+                      graph.getAnnotation("u1-2").getEndId(),
+                      graph.getAnnotation("u2-1").getEndId());
       }
       catch(TransformationException exception)
       {
