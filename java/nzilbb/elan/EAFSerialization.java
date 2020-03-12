@@ -1989,10 +1989,10 @@ public class EAFSerialization
       Element timeOrder = document.createElement("TIME_ORDER");
       annotationDocument.appendChild(timeOrder);
       HashMap<String,String> mapAnchorToTimeslotId = new HashMap<String,String>();
-      for (Anchor a : graph.getSortedAnchors())
-      {
-         ensureAnchorHasTimeslot(a, document, timeOrder, mapAnchorToTimeslotId);
-      } // next anchor
+      // for (Anchor a : graph.getSortedAnchors())
+      // {
+      //    ensureAnchorHasTimeslot(a, document, timeOrder, mapAnchorToTimeslotId);
+      // } // next anchor
       
       // a line tier for each speaker
       HashMap<String,Element> mSpeakerTiers = new HashMap<String,Element>();
