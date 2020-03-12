@@ -442,7 +442,7 @@ public class EAFSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "ELAN EAF Transcript", "1.03", "text/x-eaf+xml", ".eaf", "20200306.1746",
+         "ELAN EAF Transcript", "1.04", "text/x-eaf+xml", ".eaf", "20200306.1746",
          getClass().getResource("icon.png"));
    }
    
@@ -954,9 +954,9 @@ public class EAFSerialization
             { // there is a matching layer
                if (layer.getAlignment() != 1) p.setValue(layer);
             }
-            else
-            { // no name match, assume it's a tier named after a speaker
-               // make the utteranceLayer the default
+            else if (tier.getAttributes().getNamedItem("PARENT_REF") == null)
+            { // no name match, and it's not a child tier
+               // assume it's a tier named after a speaker - make the utteranceLayer the default
                p.setValue(getUtteranceLayer());
             }
             p.setPossibleValues(vPossiblLayers);
