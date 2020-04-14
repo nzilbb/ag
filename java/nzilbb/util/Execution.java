@@ -156,6 +156,22 @@ public class Execution implements Runnable {
       setExe(exe);
       setArguments(arguments);
    } // end of constructor
+   
+   /**
+    * Builder-style method for adding an argment to {@link #arguments}.
+    * @param argument The argument to add.
+    * @return A reference to this object.
+    */
+   public Execution arg(String argument)
+   {
+      if (argument != null) {
+         if (arguments == null) {
+            arguments = new Vector<String>();
+         }
+         arguments.add(argument);
+      }
+      return this;
+   } // end of arg()
 
    /**
     * Runs the executable, monitors it, and returns when done.
