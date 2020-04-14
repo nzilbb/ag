@@ -1,5 +1,5 @@
 //
-// Copyright 2017 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2017-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -30,10 +30,8 @@ import java.io.InputStream;
  * Manages the execution of an external program, ensuring that streams are processed, etc.
  * @author Robert Fromont robert@fromont.net.nz
  */
-
-public class Execution
-   implements Runnable
-{
+public class Execution implements Runnable {
+   
    // Attributes:
    
    /**
@@ -148,15 +146,13 @@ public class Execution
    /**
     * Default constructor.
     */
-   public Execution()
-   {
+   public Execution() {
    } // end of constructor
 
    /**
     * Constructor from attributes.
     */
-   public Execution(File exe, Vector<String> arguments)
-   {
+   public Execution(File exe, Vector<String> arguments) {
       setExe(exe);
       setArguments(arguments);
    } // end of constructor
@@ -164,8 +160,7 @@ public class Execution
    /**
     * Runs the executable, monitors it, and returns when done.
     */
-   public void run()
-   {
+   public void run() {
       running = true;
       finished = false;
       input = new StringBuffer();
@@ -174,8 +169,8 @@ public class Execution
       Vector<String> vArguments = new Vector<String>();
       vArguments.add(exe.getPath());
       vArguments.addAll(arguments);
-      try
-      {
+      try {
+         
 	 setProcess(Runtime.getRuntime().exec(vArguments.toArray(new String[0])));
 	 
 	 InputStream inStream = process.getInputStream();
@@ -191,23 +186,18 @@ public class Execution
 	 // So we start with short sleeps, and exponentially increase the 
 	 // wait time, with a maximum sleep of 30 seconds
 	 int iMSSleep = 1;
-	 while (running)
-	 {
+	 while (running) {
 	    try
 	    {
 	       int iReturnValue = process.exitValue();		     
 	       // if exitValue returns, the process has finished
 	       running = false;
 	    }
-	    catch(IllegalThreadStateException exception)
-	    { // still executing		     
+	    catch(IllegalThreadStateException exception) { // still executing		     
 	       // sleep for a while
-	       try
-	       {
+	       try {
 		  Thread.sleep(iMSSleep);
-	       }
-	       catch(Exception sleepX)
-	       {
+	       } catch(Exception sleepX) {
 		  System.err.println("Execution: " + exe.getName() + " Exception while sleeping: "
 				     + sleepX.toString() + "\r\n");	
 	       }
@@ -215,13 +205,11 @@ public class Execution
 	       if (iMSSleep > 10000) iMSSleep = 10000; // max 10 sec
 	    }
 	    
-	    try
-	    {
+	    try {
 	       // data ready?
 	       int bytesRead = inStream.available();
 	       String sMessages = "";
-	       while(bytesRead > 0)
-	       {
+	       while(bytesRead > 0) {
 		  // if there's data coming, sleep a shorter time
 		  iMSSleep = 1;		     
 		  // write to the log file
@@ -229,21 +217,16 @@ public class Execution
 		  input.append(new String(buffer, 0, bytesRead));
 		  // data ready?
 		  bytesRead = inStream.available();
-	       } // next chunk of data
-	       
-	    }
-	    catch(IOException exception)
-	    {
+	       } // next chunk of data	       
+	    } catch(IOException exception) {
 	       System.err.println("Execution: ERROR reading conversion input stream: "
 				  + exe.getName() + " - " + exception);
 	    }
 	    
-	    try
-	    {
+	    try {
 	       // data ready from error stream?
 	       int bytesRead = errStream.available();
-	       while(bytesRead > 0)
-	       {
+	       while(bytesRead > 0) {
 		  // if there's data coming, sleep a shorter time
 		  iMSSleep = 1;	    
 		  bytesRead = errStream.read(buffer);
@@ -252,16 +235,12 @@ public class Execution
 		  // data ready?
 		  bytesRead = errStream.available();
 	       } // next chunk of data
-	    }
-	    catch(IOException exception)
-	    {
+	    } catch(IOException exception) {
 	       System.err.println("Execution: ERROR reading conversion error stream: "
 				  + exe.getName() + " - " + exception);
 	    }
 	 } // running
-      }
-      catch(IOException exception)
-      {
+      } catch(IOException exception) {
 	 System.err.println("Execution: Could not execute: " + exception);
 	 error.append("Could not execute: " + exception);
       }
