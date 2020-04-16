@@ -98,9 +98,8 @@ import java.awt.event.*;
  * <tt>java Useful --SomeString=Hello --SomeBoolean sundryArg1 sundryArg2</tt>
  * @author Robert Fromont robert@fromont.net.nz
  */
-
-public class CommandLineProgram
-{
+public class CommandLineProgram {
+   
    static final long serialVersionUID = 1;      
 
    // Attributes:
@@ -122,7 +121,6 @@ public class CommandLineProgram
     */
    @Switch("Whether or not to display usage information")
    public CommandLineProgram setUsage(Boolean bNewUsage) { usage = bNewUsage; return this; }
-  
 
    /**
     * Arguments passed in on the command line.  i.e. command line arguments that
@@ -139,91 +137,65 @@ public class CommandLineProgram
     * @param argv Command-line arguments.
     * @return true if all obligatory arguments were present, false otherwise
     */
-   public boolean processArguments(String argv[])
-   {
+   public boolean processArguments(String argv[]) {
+      
       interpretPropertiesParameters();
 
       @SuppressWarnings("rawtypes")
       Class myClass = getClass();
       Method[] methods = myClass.getMethods();
       // arguments
-      for (String sArg : argv)
-      {
+      for (String sArg : argv) {
 	 if (sArg.equals("-help") || sArg.equals("--help") || sArg.equals("-h")
-	     || sArg.equals("--usage"))
-	 { // recognise common ways of asking for usage info
+	     || sArg.equals("--usage")) {
+            // recognise common ways of asking for usage info
 	    setUsage(true);
-	 }
-	 else if (sArg.startsWith("--"))
-	 { // switch
+	 } else if (sArg.startsWith("--")) { // switch
 	    sArg = sArg.substring(2);
 	    int iEquals = sArg.indexOf('=');
 	    String sName = sArg;
 	    String sValue = "true";
-	    if (iEquals >= 0)
-	    {
+	    if (iEquals >= 0) {
 	       sName = sArg.substring(0, iEquals);
 	       sValue = sArg.substring(iEquals + 1);
 	    }
-	    if (sName.length() > 0)
-	    {
+	    if (sName.length() > 0) {
 	       // check for a bean setter with that name
 	       Method setter = null;
-	       for (Method method : methods)
-	       {
+	       for (Method method : methods) {
 		  if (method.getAnnotation(Switch.class) != null
 		      && method.getName().equalsIgnoreCase("set" + sName)
-		      && method.getParameterTypes().length == 1)
-		  {
+		      && method.getParameterTypes().length == 1) {
 		     setter = method;
 		     break;
 		  }
 	       } // next method
-	       if (setter != null)
-	       {
-		  try
-		  {
+	       if (setter != null) {
+		  try {
 		     @SuppressWarnings("rawtypes")
 		     Class parameterClass = setter.getParameterTypes()[0];
-		     if (parameterClass.equals(String.class))
-		     {
+		     if (parameterClass.equals(String.class)) {
 			setter.invoke(this, sValue);
-		     }
-		     else if (parameterClass.equals(Boolean.class))
-		     {
+		     } else if (parameterClass.equals(Boolean.class)) {
 			setter.invoke(this, Boolean.valueOf(sValue));
-		     }
-		     else if (parameterClass.equals(Integer.class))
-		     {
+		     } else if (parameterClass.equals(Integer.class)) {
 			setter.invoke(this, Integer.valueOf(sValue));
-		     }
-		     else if (parameterClass.equals(Double.class))
-		     {
+		     } else if (parameterClass.equals(Double.class)) {
 			setter.invoke(this, Double.valueOf(sValue));
-		     }
-		     else if (parameterClass.equals(URL.class))
-		     {
+		     } else if (parameterClass.equals(URL.class)) {
 			setter.invoke(this, new URL(sValue));
-		     }
-		     else if (parameterClass.equals(File.class))
-		     {
+		     } else if (parameterClass.equals(File.class)) {
 			setter.invoke(this, new File(sValue));
 		     }
-		  }
-		  catch (Throwable t)
-		  {
+		  } catch (Throwable t) {
 		     System.err.println("Error interpreting switch: " + sArg 
 					+ " : " + t);
 		  }
-	       } // found the setter
-	       else
-	       {
+	       } else {
 		  System.err.println("Ignoring unknown switch: " + sArg);
 	       }
 	    } // sName is not ""
-	 }
-	 else
-	 { // argument
+	 } else { // argument
 	    arguments.add(sArg);
 	 }
 	 
@@ -235,63 +207,45 @@ public class CommandLineProgram
       Vector<String> vSwitches = new Vector<String>();
       Vector<String> vCompulsorySwitches = new Vector<String>();
       Vector<String> vOptionalSwitches = new Vector<String>();
-      for (Method method : methods)
-      {
+      for (Method method : methods) {
 	 Switch switchAnnotation = method.getAnnotation(Switch.class);
-	 if (switchAnnotation != null && method.getParameterTypes().length == 1)
-	 {	    
+	 if (switchAnnotation != null && method.getParameterTypes().length == 1) {
 	    String sSwitchName = method.getName().replaceFirst("set", "");
 	    @SuppressWarnings("rawtypes")
 	    Class parameterClass = method.getParameterTypes()[0];
 	    String sEg = "--" + sSwitchName + "=<value>";
-	    if (parameterClass.equals(Boolean.class))
-	    {
+	    if (parameterClass.equals(Boolean.class)) {
 	       if (sSwitchName.equals("Usage"))
 	       {
 		  sEg = "--" + sSwitchName;
-	       }
-	       else
-	       {
+	       } else {
 		  sEg = "--" + sSwitchName + " or --" + sSwitchName + "=false";
 	       }
-	    }
-	    else if (parameterClass.equals(Integer.class)
-	       || parameterClass.equals(Double.class))
-	    {
+	    } else if (parameterClass.equals(Integer.class)
+	       || parameterClass.equals(Double.class)) {
 	       sEg = "--" + sSwitchName + "=<number>";
-	    }
-	    else if (parameterClass.equals(URL.class))
-	    {
+	    } else if (parameterClass.equals(URL.class)) {
 	       sEg = "--" + sSwitchName + "=<URL>";
-	    }
-	    else if (method.getParameterTypes()[0].equals(File.class))
-	    {
+	    } else if (method.getParameterTypes()[0].equals(File.class)) {
 	       sEg = "--" + sSwitchName + "=<path>";
 	    }
 	    String sUsage = sEg + "\t" + switchAnnotation.value();
-	    if (switchAnnotation.compulsory())
-	    {
+	    if (switchAnnotation.compulsory()) {
 	       try
 	       {
 		  @SuppressWarnings("unchecked")
 		  Method getter = myClass.getMethod(method.getName().replaceFirst("set", "get"));
-		  if (getter != null)
-		  {
+		  if (getter != null) {
 		     try
 		     {
-			if (getter.invoke(this) == null)
-			{
+			if (getter.invoke(this) == null) {
 			   bArgsOk = false;
 			   System.err.println("compulsory switch '"  + sSwitchName + "' not specified");
 			   setUsage(true);
 			}
-		     }
-		     catch (IllegalAccessException x)
-		     {
+		     } catch (IllegalAccessException x) {
 			System.err.println(x.toString());
-		     }
-		     catch (InvocationTargetException y)
-		     {
+		     } catch (InvocationTargetException y) {
 			System.err.println(y.toString());
 		     }
 		  }
@@ -299,9 +253,7 @@ public class CommandLineProgram
 		  vSwitches.add(sEg);
 	       }
 	       catch (NoSuchMethodException x){}
-	    } // compulsory
-	    else
-	    { // optional
+	    } else { // optional
 	       vOptionalSwitches.add(sUsage);
 	       vSwitches.add("[" + sEg + "]");
 	    } // optional
@@ -309,8 +261,7 @@ public class CommandLineProgram
       } // next method
       
       // display usage?
-      if (getUsage())
-      {
+      if (getUsage()) {
 	 System.err.println(myClass.getSimpleName() + " usage:");
 	 @SuppressWarnings("unchecked")
 	 ProgramDescription myAnnotation 
@@ -323,13 +274,11 @@ public class CommandLineProgram
 			    + (myAnnotation != null 
 			       && myAnnotation.arguments().length() > 0?
 			       " "+myAnnotation.arguments():""));
-	 if (vCompulsorySwitches.size() > 0)
-	 {
+	 if (vCompulsorySwitches.size() > 0) {
 	    System.err.println("compulsory switches:");
 	    for (String s : vCompulsorySwitches) System.err.println("\t"+s);
 	 }
-	 if (vOptionalSwitches.size() > 0)
-	 {
+	 if (vOptionalSwitches.size() > 0) {
 	    System.err.println("optional switches:");
 	    for (String s : vOptionalSwitches) System.err.println("\t"+s);
 	 }
@@ -340,18 +289,16 @@ public class CommandLineProgram
    }
 
    /**
-    * This method looks for a .properties file matching the class name, and if it finds one, uses it to set bean attributes and arguments appropiately.
+    * This method looks for a .properties file matching the class name, and if it finds
+    * one, uses it to set bean attributes and arguments appropiately. 
     * Arguments are interpreted is being the values of Properties named arg[0], arg[1], etc.
     */
-   public void interpretPropertiesParameters()
-   {
+   public void interpretPropertiesParameters() {
       // look for properties file
       URL settingsUrl = getClass().getResource(
 	 getClass().getSimpleName() + ".properties");
-      if (settingsUrl != null)
-      {
-	 try
-	 {
+      if (settingsUrl != null) {
+	 try {
 	    URLConnection cnxn = settingsUrl.openConnection();
 	    InputStream is = cnxn.getInputStream();
 	    Properties settings = new Properties();
@@ -359,46 +306,29 @@ public class CommandLineProgram
 	    is.close();
 	    
 	    // set switches from parameters
-	    for (Method setter : getClass().getMethods())
-	    {
+	    for (Method setter : getClass().getMethods()) {
 	       Switch switchAnnotation = setter.getAnnotation(Switch.class);
-	       if (switchAnnotation != null && setter.getParameterTypes().length == 1)
-	       {	    
+	       if (switchAnnotation != null && setter.getParameterTypes().length == 1) {
 		  String sSwitchName = setter.getName().replaceFirst("set", "");
 		  String sValue = settings.getProperty(sSwitchName);
-		  if (sValue != null)
-		  {
-		     try
-		     {
+		  if (sValue != null) {
+		     try {
 			@SuppressWarnings("rawtypes")
 			Class parameterClass = setter.getParameterTypes()[0];
-			if (parameterClass.equals(String.class))
-			{
+			if (parameterClass.equals(String.class)) {
 			   setter.invoke(this, sValue);
-			}
-			else if (parameterClass.equals(Boolean.class))
-			{
+			} else if (parameterClass.equals(Boolean.class)) {
 			   setter.invoke(this, Boolean.valueOf(sValue));
-			}
-			else if (parameterClass.equals(Integer.class))
-			{
+			} else if (parameterClass.equals(Integer.class)) {
 			   setter.invoke(this, Integer.valueOf(sValue));
-			}
-			else if (parameterClass.equals(Double.class))
-			{
+			} else if (parameterClass.equals(Double.class)) {
 			   setter.invoke(this, Boolean.valueOf(sValue));
-			}
-			else if (parameterClass.equals(URL.class))
-			{
+			} else if (parameterClass.equals(URL.class)) {
 			   setter.invoke(this, new URL(sValue));
-			}
-			else if (parameterClass.equals(File.class))
-			{
+			} else if (parameterClass.equals(File.class)) {
 			   setter.invoke(this, new File(sValue));
 			}
-		     }
-		     catch (Throwable t)
-		     {
+		     } catch (Throwable t) {
 			System.err.println("Error interpreting parameter: " 
 					   + sSwitchName + " : " + t);
 		     }
@@ -408,38 +338,31 @@ public class CommandLineProgram
 
 	    // now look for (unnamed) arguments
 	    int i = 0;
-	    while (settings.getProperty("arg["+i+"]") != null)
-	    {
+	    while (settings.getProperty("arg["+i+"]") != null) {
 	       arguments.add(settings.getProperty("arg["+i+"]"));
 	       i++;
 	    } // next argument
-
-	 }
-	 catch(Exception exception)
-	 {
+            
+	 } catch(Exception exception) {
 	    System.err.println(exception.toString());
 	 }
       }
 
    } // end of interpretPropertiesParameters()
-
    
    /**
     * Display a message
     * @param message The message to display.
     */
-   public void message(String message)
-   {
+   public void message(String message) {
       System.out.println(message);
    } // end of message()
-
    
    /**
     * Show error message
     * @param message The error message.
     */
-   public void error(String message)
-   {
+   public void error(String message) {
       System.err.println(message);
    } // end of error()
 
@@ -447,8 +370,7 @@ public class CommandLineProgram
     * Show error message
     * @param t The error.
     */
-   public void error(Throwable t)
-   {
+   public void error(Throwable t) {
       System.err.println(t.toString());
    } // end of error()
 
@@ -456,8 +378,7 @@ public class CommandLineProgram
     * Show warning message
     * @param message The warning message.
     */
-   public void warning(String message)
-   {
+   public void warning(String message) {
       System.err.println("WARNING: " + message);
    } // end of error()
 
@@ -465,8 +386,7 @@ public class CommandLineProgram
     * Show warning message
     * @param t The error.
     */
-   public void warning(Throwable t)
-   {
+   public void warning(Throwable t) {
       message("WARNING: " + t.toString());
    } // end of error()
    

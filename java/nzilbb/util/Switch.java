@@ -24,14 +24,15 @@ package nzilbb.util;
 import java.lang.annotation.*;
 
 /**
- * Annotation for a {@link CommandLineProgram} or {@link GuiProgram} switch - used to inform command-line and applet parameter interpretation, and to product usage information.
+ * Annotation for a {@link CommandLineProgram} or {@link GuiProgram} switch - used to
+ * inform command-line and applet parameter interpretation, and to product usage
+ * information. 
  * @author Robert Fromont robert@fromont.net.nz
  */
 @Documented
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Switch
-{
+public @interface Switch {
    /**
     * 'Usage' description of the switch.
     * @return 'Usage' description of the switch.
@@ -53,5 +54,4 @@ public @interface Switch
     * @return A short label for the switch.
     */
    String label() default "";
-
 } // end of class Switch
