@@ -73,13 +73,13 @@ separate files.
 
 It has many useful command-line options:
 
-1. `--help` -- Displays information about all the other command-line options.
-2.  `-f` -- Sets the format for the video, e.g. `-f wav` should download WAV files,
+* `--help` - Displays information about all the other command-line options.
+*  `-f` - Sets the format for the video, e.g. `-f wav` should download WAV files,
   `mp4` will download MP4's, etc.
-3. `--extract-audio` -- Extracts the audio from the video after downloading it. This
+* `--extract-audio` - Extracts the audio from the video after downloading it. This
   option is useful if `-f wav` doesn't work because WAV is not available.
-4. `--audio-format` -- Specifies what format to use if you're using `--extract-audio`
-5. `--sub-lang` -- Downloads subtitle/closed-caption files for the given ISO language
+* `--audio-format` - Specifies what format to use if you're using `--extract-audio`
+* `--sub-lang` - Downloads subtitle/closed-caption files for the given ISO language
   code. e.g. `--sub-lang en-GB` will download British English subtitles.  The subtitle files
   are saved in ...vtt files.
 
