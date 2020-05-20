@@ -64,7 +64,7 @@ The basic process of making a YouTube video corpus with TextGrid transcripts is:
 1. Download Youtube videos with their closed-caption subtitle files.
 2. Convert the closed-caption subtitle files to TextGrids.
 
-### 1. Download Youtube videos with subtitles}
+### 1. Download Youtube videos with subtitles
 
 There's a tool called [youtube-dl](https://rg3.github.io/youtube-dl/) which can be used for
 downloading videos from YouTube. It's a command-line program that can be given a URL for
