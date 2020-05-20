@@ -105,6 +105,10 @@ ensure the results are what you expect!
 [vtt-to-textgrid.jar](https://github.com/nzilbb/ag/blob/master/bin/vtt-to-textgrid.jar?raw=true) 
 is a utility for converting VTT files to TextGrids.
 
+(If you prefer ELAN transcripts, try
+[vtt-to-eaf.jar](https://github.com/nzilbb/ag/blob/master/bin/vtt-to-eaf.jar?raw=true)
+instead)
+
 It's a Java program, so you must have a recent version of Java installed for it to work.
 
 Downloading the 
