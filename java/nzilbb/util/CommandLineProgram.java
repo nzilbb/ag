@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -22,15 +22,16 @@
 package nzilbb.util;
 
 import java.applet.*;
-import javax.swing.*;
-import javax.swing.table.*;
-import java.lang.*;
-import java.lang.reflect.*;
-import java.util.*;
-import java.io.*;
-import java.net.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.*;
+import java.lang.*;
+import java.lang.reflect.*;
+import java.net.*;
+import java.util.*;
+import java.util.jar.JarFile;
+import javax.swing.*;
+import javax.swing.table.*;
 
 /**
  * Base class that standardizes various common functions for utilitiy applications -
@@ -123,6 +124,41 @@ public class CommandLineProgram {
    public CommandLineProgram setUsage(Boolean bNewUsage) { usage = bNewUsage; return this; }
 
    /**
+    * Version information.
+    * @see #getV()
+    * @see #setV(String)
+    */
+   protected String v;
+   /**
+    * Getter for {@link #v}: Version information.
+    * @return Version information.
+    */
+   public String getV() { return v; }
+   /**
+    * Setter for {@link #v}: Version information.
+    * @param newV Version information.
+    */
+   public CommandLineProgram setV(String newV) { v = newV; return this; }
+
+   /**
+    * Print version information.
+    * @see #getVersion()
+    * @see #setVersion(Boolean)
+    */
+   protected Boolean version = Boolean.FALSE;
+   /**
+    * Getter for {@link #version}: Print version information.
+    * @return Print version information.
+    */
+   public Boolean getVersion() { return version; }
+   /**
+    * Setter for {@link #version}: Print version information.
+    * @param newVersion Print version information.
+    */
+   @Switch("Print version information.")
+   public CommandLineProgram setVersion(Boolean newVersion) { version = newVersion; return this; }
+
+   /**
     * Arguments passed in on the command line.  i.e. command line arguments that
     * don't start with '--'.  Command-line arguments that start with '--' are 
     * interpreted as <i>switches</i>, which set bean attributes.
@@ -130,6 +166,20 @@ public class CommandLineProgram {
    protected Vector<String> arguments = new Vector<String>();
    
    // Methods:
+
+   /** Constructor */
+   public CommandLineProgram() {
+      // get our version info from the comment of the jar file we're built into
+      try {
+         URL thisClassUrl = getClass().getResource(getClass().getSimpleName() + ".class");
+         if (thisClassUrl.toString().startsWith("jar:")) {
+            URI thisJarUri = new URI(thisClassUrl.toString().replaceAll("jar:(.*)!.*","$1"));
+            JarFile thisJarFile = new JarFile(new File(thisJarUri));
+            v = thisJarFile.getComment();
+         }
+      } catch (Throwable t) {
+      }      
+   }
    
    /**
     * Main entrypoint if run as an application - this should be called by the
@@ -215,7 +265,7 @@ public class CommandLineProgram {
 	    Class parameterClass = method.getParameterTypes()[0];
 	    String sEg = "--" + sSwitchName + "=<value>";
 	    if (parameterClass.equals(Boolean.class)) {
-	       if (sSwitchName.equals("Usage"))
+	       if (sSwitchName.equals("Usage") || sSwitchName.equals("Version"))
 	       {
 		  sEg = "--" + sSwitchName;
 	       } else {
@@ -262,7 +312,7 @@ public class CommandLineProgram {
       
       // display usage?
       if (getUsage()) {
-	 System.err.println(myClass.getSimpleName() + " usage:");
+	 System.err.println(myClass.getSimpleName() + (v==null?"":" " + v) + " usage:");
 	 @SuppressWarnings("unchecked")
 	 ProgramDescription myAnnotation 
 	    = (ProgramDescription)myClass.getAnnotation(ProgramDescription.class);
@@ -284,6 +334,10 @@ public class CommandLineProgram {
 	 }
 	 return bArgsOk;		    
       } // usage
+      else if (version)
+      {
+         System.err.println(myClass.getSimpleName() + (v==null?" version unknown":" " + v));
+      }
 
       return bArgsOk;
    }
