@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.io.ByteArrayOutputStream;
 import java.io.BufferedReader;
-import java.io.StringBufferInputStream;
+import java.io.StringReader;
 import java.io.CharArrayReader;
 import java.util.Vector;
 import java.util.Properties;
@@ -42,6 +42,7 @@ import java.util.Enumeration;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import org.xml.sax.InputSource;
 
 /**
  * Transcriber transcript - a representation of the internal structure of the XML document, including speakers, topics, sections, turns, etc.
@@ -318,10 +319,10 @@ public class Transcript
       DocumentBuilder builder = builderFactory.newDocumentBuilder();   
       
       // now read from the string
-      StringBufferInputStream sbis = new StringBufferInputStream(strFile.toString());
+      StringReader sbis = new StringReader(strFile.toString());
       
       // parse
-      Document document = builder.parse(sbis);
+      Document document = builder.parse(new InputSource(sbis));
       
       build(document);
    } // end of load()
@@ -632,38 +633,82 @@ public class Transcript
    {
       Vector<String> vErrors = new Vector<String>();
       // check for simultaneous speech turns where the speakers are the same
-      
-      // for each turn
-      for (Turn turn : getTurns())
-      {
-	 // for each sync
-	 Enumeration<Sync> syncsEnum = turn.getSyncs().elements();
-	 while(syncsEnum.hasMoreElements())
-	 {
-	    Sync sync = syncsEnum.nextElement();	       
-	    if (sync.isSimultaneousSpeech())
-	    {
-	       // whole bunch of syncs at once
-	       Vector<String> vSpeakers = new Vector<String>();
-	       Enumeration<SimultaneousSync> enSimultaneousSyncs 
-		  = sync.getSimultaneousSyncs().elements();
-	       while (enSimultaneousSyncs.hasMoreElements())
-	       {
-		  SimultaneousSync sim = enSimultaneousSyncs.nextElement();
-		  if (vSpeakers.contains(sim.getWho()))
-		  {
-		     vErrors.add(
-			"Simultaneous speech at " + sync.getTime()
-			+"s contains the same speaker more than once.");
-		  }
-		  else
-		  {
-		     vSpeakers.add(sim.getWho());
-		  }
-	       } // next sync
-	    } // simultaneous speech
-	 } // next sync
-      } // next turn
+
+      for (Section section : getSections()) {
+         Turn lastTurn = null;
+         // for each turn
+         for (Turn turn : section.getTurns())
+         {
+            // for each sync
+            Enumeration<Sync> syncsEnum = turn.getSyncs().elements();
+            while(syncsEnum.hasMoreElements())
+            {
+               Sync sync = syncsEnum.nextElement();	       
+               if (sync.isSimultaneousSpeech())
+               {
+                  // whole bunch of syncs at once
+                  Vector<String> vSpeakers = new Vector<String>();
+                  Enumeration<SimultaneousSync> enSimultaneousSyncs 
+                     = sync.getSimultaneousSyncs().elements();
+                  while (enSimultaneousSyncs.hasMoreElements())
+                  {
+                     SimultaneousSync sim = enSimultaneousSyncs.nextElement();
+                     if (vSpeakers.contains(sim.getWho()))
+                     {
+                        vErrors.add(
+                           "Simultaneous speech at " + sync.getTime()
+                           +"s contains the same speaker more than once.");
+                     }
+                     else
+                     {
+                        vSpeakers.add(sim.getWho());
+                     }
+                  } // next sync
+               } // simultaneous speech
+            } // next sync
+            
+            // Check the turn start is the same as the last end.
+            if (lastTurn != null)
+            {
+               if (!lastTurn.getEndTime().equals(turn.getStartTime()))
+               {
+                  // choose the earlier of the two times for the boundary
+                  if (lastTurn.getEndTimeAsDouble() < turn.getStartTimeAsDouble())
+                  {
+                     vErrors.add(
+                        "Turn's end " + lastTurn.getEndTime()
+                        +" before next turn start " + turn.getStartTime()
+                        +": using " + lastTurn.getEndTime());
+                     turn.setStartTime(lastTurn.getEndTime());
+                     
+                     // need to change the first Sync too
+                     if (turn.getSyncs().size() > 0)
+                     {
+                        turn.getSyncs().firstElement()
+                           .setTime(lastTurn.getEndTime());
+                     }
+                  }
+                  else
+                  {
+                     vErrors.add(
+                        "Turn's end " + lastTurn.getEndTime()
+                        +" after next turn start " + turn.getStartTime()
+                        +": using " + turn.getStartTime());
+                     lastTurn.setEndTime(turn.getStartTime());
+                     
+                     // need to change the last Sync too
+                     if (lastTurn.getSyncs().size() > 0)
+                     {
+                        lastTurn.getSyncs().lastElement()
+                           .setEndTime(turn.getStartTime());
+                     }
+                  }               
+               } // boundary inconsistency
+            } // lastTurn is set
+            
+            lastTurn = turn;
+         } // next turn
+      } // next section
       
       if (vErrors.size() > 0)
       {
@@ -674,5 +719,7 @@ public class Transcript
 	 return null;
       }
    } // end of validationErrors()
+
+   
    
 } // end of class Transcript
