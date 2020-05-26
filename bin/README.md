@@ -126,3 +126,41 @@ When it starts, it looks like this:
 You need to drag/drop vtt files into the big white space (or use the + button), and then click
 *Convert*. This will save each TextGrid in the same folder as the VTT file.
 
+## Validate Transcriber Transcripts
+
+Some earlier versions of [Transcriber](http://trans.sourceforge.net) sometimes output
+transcript files that had inconsistent turn alignments: the end time of a turn could be
+after the start time of the next turn.
+
+These transcripts cause problems when processing transcripts for force-alignment, etc.
+
+The transcriber deserialization module here,
+[nzilbb.transcriber.jar](https://github.com/nzilbb/ag/blob/master/bin/nzilbb.transcriber.jar?raw=true),
+includes a command-line tool that can be used to fix up such corrupted transcripts. If you
+download nzilbb.transcriber.jar, you can invoke it using your command shell, like this:
+
+```
+java -jar nzilbb.transcriber.jar some-transcript.trs
+```
+
+By default, the utility checks and validates the given transcript(s), saving the results
+in a subdirectory called *valid*. This ensures that transcripts are copied rather that
+directly changed, and so the original transcript files are untouched.
+
+Transcripts can be changed in-situ if required (i.e. changing the original file) by using
+the `--replace` command-line switch.
+
+And if you name a directory instead of a .trs file, then the directory is recursively
+scanned for .trs files to process.
+
+So check/fix all transcripts in a given directory, use the command:
+
+```
+java -jar nzilbb.transcriber.jar --replace /path/to/directory/with/trs/files
+```
+
+For full information about command line options:
+
+```
+java -jar nzilbb.transcriber.jar --usage
+```
