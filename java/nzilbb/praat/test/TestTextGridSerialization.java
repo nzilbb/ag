@@ -1583,6 +1583,7 @@ public class TestTextGridSerialization
          new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
          new Layer("word", "Words", 2, true, false, false, "turn", true),
          new Layer("phone", "Phones", 2, true, true, true, "word", true),
+         new Layer("f1", "First Formant", 1, true, true, false, "phone", false),
          new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
          new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
       File dir = getDir();
@@ -1659,6 +1660,7 @@ public class TestTextGridSerialization
          new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
          new Layer("word", "Words", 2, true, false, false, "turn", true),
          new Layer("phone", "Phones", 2, true, true, true, "word", true),
+         new Layer("f1", "First Formant", 1, true, true, false, "phone", false),
          new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
          new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
       File dir = getDir();
@@ -1713,6 +1715,84 @@ public class TestTextGridSerialization
       // test using diff
       File expected = new File(dir, "expected_selected_layers__212.400-216.363.TextGrid");
       File actual = new File(dir, "selected_layers__212.400-216.363.TextGrid");
+      String differences = diff(expected, actual);
+      if (differences != null)
+      {
+         fail(differences);
+      }
+      else
+      {
+         actual.delete();
+      }
+   }
+
+   @Test public void serialize_selected_layers_including_empty() 
+      throws Exception
+   {
+      Schema schema = new Schema(
+         "who", "turn", "utterance", "word",
+         new Layer("who", "Participants", 0, true, true, true),
+         new Layer("comment", "Comment", 2, true, false, true),
+         new Layer("noise", "Noise", 2, true, false, true),
+         new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+         new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+         new Layer("word", "Words", 2, true, false, false, "turn", true),
+         new Layer("phone", "Phones", 2, true, true, true, "word", true),
+         new Layer("f1", "First Formant", 1, true, true, false, "phone", false),
+         new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
+         new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
+      File dir = getDir();
+      // access file
+      NamedStream[] jsonStreams = { new NamedStream(new File(dir, "serialize_utterance_word.json")) };
+      
+      // deserialize graph from JSON
+      JSONSerialization json = new JSONSerialization();
+      json.configure(json.configure(new ParameterSet(), schema), schema);
+      json.setParameters(json.load(jsonStreams, schema));
+      Graph[] graphs = json.deserialize();
+
+      // extract fragment
+      double fragmentFrom = 0.0;
+      double fragmentTo = 44.255; // exactly on the offset of the last anchor
+      String [] layerIds = { "utterance", "word", "phone", "f1" };
+      Graph fragment = graphs[0].getFragment(fragmentFrom, fragmentTo, layerIds);
+      fragment.shiftAnchors(-fragmentFrom);
+      assertEquals("serialize_utterance_word__0.000-44.255", fragment.getId());
+      Graph[] fragments = { fragment };
+
+      // create serializer
+      TextGridSerialization serializer = new TextGridSerialization();
+      
+      // general configuration
+      ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
+      //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      assertEquals(6, serializer.configure(configuration, schema).size());
+
+      String[] needLayers = serializer.getRequiredLayers();
+      assertEquals(8, needLayers.length);
+      assertEquals("who", needLayers[0]);
+      assertEquals("turn", needLayers[1]);
+      assertEquals("utterance", needLayers[2]);
+      assertEquals("word", needLayers[3]);
+      assertEquals("lexical", needLayers[4]);
+      assertEquals("pronounce", needLayers[5]);
+      assertEquals("comment", needLayers[6]);
+      assertEquals("noise", needLayers[7]);
+	 
+      String[] selectedLayers = { "word", "phone", "f1" };
+      // serialize
+      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+      final Vector<NamedStream> streams = new Vector<NamedStream>();
+      serializer.serialize(Arrays.spliterator(fragments), selectedLayers,
+                           stream -> streams.add(stream),
+                           warning -> System.out.println(warning),
+                           exception -> exceptions.add(exception));
+      streams.elementAt(0).setName("selected_layers__0.000-44.255.TextGrid");
+      streams.elementAt(0).save(dir);
+
+      // test using diff
+      File expected = new File(dir, "expected_selected_layers__0.000-44.255.TextGrid");
+      File actual = new File(dir, "selected_layers__0.000-44.255.TextGrid");
       String differences = diff(expected, actual);
       if (differences != null)
       {

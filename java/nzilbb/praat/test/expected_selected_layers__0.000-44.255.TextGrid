@@ -1,0 +1,572 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 44.255 
+tiers? <exists> 
+size = 4 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "word - participant" 
+        xmin = 0 
+        xmax = 44.255 
+        intervals: size = 131 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.71875 
+            text = "and" 
+        intervals [2]:
+            xmin = 0.71875 
+            xmax = 1.4375 
+            text = "ah ." 
+        intervals [3]:
+            xmin = 1.4375 
+            xmax = 2.15625 
+            text = "Cyril" 
+        intervals [4]:
+            xmin = 2.15625 
+            xmax = 2.875 
+            text = "" 
+        intervals [5]:
+            xmin = 2.875 
+            xmax = 3.59375 
+            text = "arrive" 
+        intervals [6]:
+            xmin = 3.59375 
+            xmax = 4.3125 
+            text = "at" 
+        intervals [7]:
+            xmin = 4.3125 
+            xmax = 5.03125 
+            text = "the" 
+        intervals [8]:
+            xmin = 5.03125 
+            xmax = 5.75 
+            text = "door" 
+        intervals [9]:
+            xmin = 5.75 
+            xmax = 5.9814 
+            text = "with" 
+        intervals [10]:
+            xmin = 5.9814 
+            xmax = 6.2128 
+            text = "this" 
+        intervals [11]:
+            xmin = 6.2128 
+            xmax = 6.4442 
+            text = "letter" 
+        intervals [12]:
+            xmin = 6.4442 
+            xmax = 6.6756 
+            text = "for" 
+        intervals [13]:
+            xmin = 6.6756 
+            xmax = 6.907 
+            text = "Mum" 
+        intervals [14]:
+            xmin = 6.907 
+            xmax = 7.224 
+            text = "and" 
+        intervals [15]:
+            xmin = 7.224 
+            xmax = 7.541 
+            text = "and" 
+        intervals [16]:
+            xmin = 7.541 
+            xmax = 7.858 
+            text = "then" 
+        intervals [17]:
+            xmin = 7.858 
+            xmax = 8.175 
+            text = "there" 
+        intervals [18]:
+            xmin = 8.175 
+            xmax = 8.492 
+            text = "was" 
+        intervals [19]:
+            xmin = 8.492 
+            xmax = 8.809 
+            text = "a" 
+        intervals [20]:
+            xmin = 8.809 
+            xmax = 9.126 
+            text = "message ." 
+        intervals [21]:
+            xmin = 9.126 
+            xmax = 9.5545714286 
+            text = "and" 
+        intervals [22]:
+            xmin = 9.5545714286 
+            xmax = 9.9831428571 
+            text = "I" 
+        intervals [23]:
+            xmin = 9.9831428571 
+            xmax = 10.4117142857 
+            text = "think" 
+        intervals [24]:
+            xmin = 10.4117142857 
+            xmax = 10.8402857143 
+            text = "they" 
+        intervals [25]:
+            xmin = 10.8402857143 
+            xmax = 11.2688571429 
+            text = "both" 
+        intervals [26]:
+            xmin = 11.2688571429 
+            xmax = 11.6974285714 
+            text = "had" 
+        intervals [27]:
+            xmin = 11.6974285714 
+            xmax = 12.126 
+            text = "telephones ." 
+        intervals [28]:
+            xmin = 12.126 
+            xmax = 12.3995 
+            text = "ah" 
+        intervals [29]:
+            xmin = 12.3995 
+            xmax = 12.673 
+            text = "at" 
+        intervals [30]:
+            xmin = 12.673 
+            xmax = 12.9465 
+            text = "that" 
+        intervals [31]:
+            xmin = 12.9465 
+            xmax = 13.22 
+            text = "time" 
+        intervals [32]:
+            xmin = 13.22 
+            xmax = 13.571625 
+            text = "we" 
+        intervals [33]:
+            xmin = 13.571625 
+            xmax = 13.92325 
+            text = "certainly" 
+        intervals [34]:
+            xmin = 13.92325 
+            xmax = 14.274875 
+            text = "had" 
+        intervals [35]:
+            xmin = 14.274875 
+            xmax = 14.6265 
+            text = "a" 
+        intervals [36]:
+            xmin = 14.6265 
+            xmax = 14.978125 
+            text = "telephone" 
+        intervals [37]:
+            xmin = 14.978125 
+            xmax = 15.32975 
+            text = "at" 
+        intervals [38]:
+            xmin = 15.32975 
+            xmax = 15.681375 
+            text = "our" 
+        intervals [39]:
+            xmin = 15.681375 
+            xmax = 16.033 
+            text = "place --" 
+        intervals [40]:
+            xmin = 16.033 
+            xmax = 16.2865555556 
+            text = "and" 
+        intervals [41]:
+            xmin = 16.2865555556 
+            xmax = 16.5401111111 
+            text = "I" 
+        intervals [42]:
+            xmin = 16.5401111111 
+            xmax = 16.7936666667 
+            text = "think" 
+        intervals [43]:
+            xmin = 16.7936666667 
+            xmax = 17.0472222222 
+            text = "Molly" 
+        intervals [44]:
+            xmin = 17.0472222222 
+            xmax = 17.3007777778 
+            text = "always" 
+        intervals [45]:
+            xmin = 17.3007777778 
+            xmax = 17.5543333333 
+            text = "had" 
+        intervals [46]:
+            xmin = 17.5543333333 
+            xmax = 17.8078888889 
+            text = "a" 
+        intervals [47]:
+            xmin = 17.8078888889 
+            xmax = 18.0614444444 
+            text = "telephone" 
+        intervals [48]:
+            xmin = 18.0614444444 
+            xmax = 18.315 
+            text = "so ." 
+        intervals [49]:
+            xmin = 18.315 
+            xmax = 18.622 
+            text = "then" 
+        intervals [50]:
+            xmin = 18.622 
+            xmax = 18.929 
+            text = "I" 
+        intervals [51]:
+            xmin = 18.929 
+            xmax = 19.236 
+            text = "suppose" 
+        intervals [52]:
+            xmin = 19.236 
+            xmax = 19.4055714286 
+            text = "there" 
+        intervals [53]:
+            xmin = 19.4055714286 
+            xmax = 19.5751428571 
+            text = "was" 
+        intervals [54]:
+            xmin = 19.5751428571 
+            xmax = 19.7447142857 
+            text = "a" 
+        intervals [55]:
+            xmin = 19.7447142857 
+            xmax = 19.9142857143 
+            text = "phone" 
+        intervals [56]:
+            xmin = 19.9142857143 
+            xmax = 20.0838571429 
+            text = "call" 
+        intervals [57]:
+            xmin = 20.0838571429 
+            xmax = 20.2534285714 
+            text = "to" 
+        intervals [58]:
+            xmin = 20.2534285714 
+            xmax = 20.423 
+            text = "say" 
+        intervals [59]:
+            xmin = 20.423 
+            xmax = 20.61825 
+            text = "oh" 
+        intervals [60]:
+            xmin = 20.61825 
+            xmax = 20.8135 
+            text = "yeah" 
+        intervals [61]:
+            xmin = 20.8135 
+            xmax = 21.00875 
+            text = "yeah" 
+        intervals [62]:
+            xmin = 21.00875 
+            xmax = 21.204 
+            text = "and" 
+        intervals [63]:
+            xmin = 21.204 
+            xmax = 21.39925 
+            text = "we'll" 
+        intervals [64]:
+            xmin = 21.39925 
+            xmax = 21.5945 
+            text = "see" 
+        intervals [65]:
+            xmin = 21.5945 
+            xmax = 21.78975 
+            text = "you" 
+        intervals [66]:
+            xmin = 21.78975 
+            xmax = 21.985 
+            text = "there" 
+        intervals [67]:
+            xmin = 21.985 
+            xmax = 22.3006 
+            text = "or" 
+        intervals [68]:
+            xmin = 22.3006 
+            xmax = 22.6162 
+            text = "whatever" 
+        intervals [69]:
+            xmin = 22.6162 
+            xmax = 22.9318 
+            text = "<mmm>" 
+        intervals [70]:
+            xmin = 22.9318 
+            xmax = 23.2474 
+            text = "you" 
+        intervals [71]:
+            xmin = 23.2474 
+            xmax = 23.563 
+            text = "know -" 
+        intervals [72]:
+            xmin = 23.563 
+            xmax = 23.9506 
+            text = "but" 
+        intervals [73]:
+            xmin = 23.9506 
+            xmax = 24.3382 
+            text = "then" 
+        intervals [74]:
+            xmin = 24.3382 
+            xmax = 24.7258 
+            text = "Molly" 
+        intervals [75]:
+            xmin = 24.7258 
+            xmax = 25.1134 
+            text = "walked" 
+        intervals [76]:
+            xmin = 25.1134 
+            xmax = 25.501 
+            text = "in ." 
+        intervals [77]:
+            xmin = 25.501 
+            xmax = 25.9074 
+            text = "and" 
+        intervals [78]:
+            xmin = 25.9074 
+            xmax = 26.3138 
+            text = "immediately" 
+        intervals [79]:
+            xmin = 26.3138 
+            xmax = 26.7202 
+            text = "I" 
+        intervals [80]:
+            xmin = 26.7202 
+            xmax = 27.1266 
+            text = "grabbed" 
+        intervals [81]:
+            xmin = 27.1266 
+            xmax = 27.533 
+            text = "Molly" 
+        intervals [82]:
+            xmin = 27.533 
+            xmax = 27.896375 
+            text = "because" 
+        intervals [83]:
+            xmin = 27.896375 
+            xmax = 28.25975 
+            text = "I" 
+        intervals [84]:
+            xmin = 28.25975 
+            xmax = 28.623125 
+            text = "knew" 
+        intervals [85]:
+            xmin = 28.623125 
+            xmax = 28.9865 
+            text = "se" 
+        intervals [86]:
+            xmin = 28.9865 
+            xmax = 29.349875 
+            text = "she" 
+        intervals [87]:
+            xmin = 29.349875 
+            xmax = 29.71325 
+            text = "was" 
+        intervals [88]:
+            xmin = 29.71325 
+            xmax = 30.076625 
+            text = "so" 
+        intervals [89]:
+            xmin = 30.076625 
+            xmax = 30.44 
+            text = "close ." 
+        intervals [90]:
+            xmin = 30.44 
+            xmax = 30.6632857143 
+            text = "and" 
+        intervals [91]:
+            xmin = 30.6632857143 
+            xmax = 30.8865714286 
+            text = "I" 
+        intervals [92]:
+            xmin = 30.8865714286 
+            xmax = 31.1098571429 
+            text = "told" 
+        intervals [93]:
+            xmin = 31.1098571429 
+            xmax = 31.3331428571 
+            text = "her" 
+        intervals [94]:
+            xmin = 31.3331428571 
+            xmax = 31.5564285714 
+            text = "all" 
+        intervals [95]:
+            xmin = 31.5564285714 
+            xmax = 31.7797142857 
+            text = "about" 
+        intervals [96]:
+            xmin = 31.7797142857 
+            xmax = 32.003 
+            text = "it ." 
+        intervals [97]:
+            xmin = 32.003 
+            xmax = 32.847 
+            text = "<yeah>" 
+        intervals [98]:
+            xmin = 32.847 
+            xmax = 33.691 
+            text = "and" 
+        intervals [99]:
+            xmin = 33.691 
+            xmax = 34.535 
+            text = "ah -" 
+        intervals [100]:
+            xmin = 34.535 
+            xmax = 34.914 
+            text = "ah ." 
+        intervals [101]:
+            xmin = 34.914 
+            xmax = 35.293 
+            text = "and" 
+        intervals [102]:
+            xmin = 35.293 
+            xmax = 35.672 
+            text = "I" 
+        intervals [103]:
+            xmin = 35.672 
+            xmax = 36.051 
+            text = "said" 
+        intervals [104]:
+            xmin = 36.051 
+            xmax = 36.43 
+            text = "come" 
+        intervals [105]:
+            xmin = 36.43 
+            xmax = 36.809 
+            text = "quick" 
+        intervals [106]:
+            xmin = 36.809 
+            xmax = 37.188 
+            text = "come" 
+        intervals [107]:
+            xmin = 37.188 
+            xmax = 37.567 
+            text = "quick ." 
+        intervals [108]:
+            xmin = 37.567 
+            xmax = 37.9733333333 
+            text = "Dad's" 
+        intervals [109]:
+            xmin = 37.9733333333 
+            xmax = 38.3796666667 
+            text = "at" 
+        intervals [110]:
+            xmin = 38.3796666667 
+            xmax = 38.786 
+            text = "home" 
+        intervals [111]:
+            xmin = 38.786 
+            xmax = 39.027 
+            text = "and" 
+        intervals [112]:
+            xmin = 39.027 
+            xmax = 39.268 
+            text = "he's" 
+        intervals [113]:
+            xmin = 39.268 
+            xmax = 39.509 
+            text = "a" 
+        intervals [114]:
+            xmin = 39.509 
+            xmax = 39.75 
+            text = "hell" 
+        intervals [115]:
+            xmin = 39.75 
+            xmax = 39.991 
+            text = "of" 
+        intervals [116]:
+            xmin = 39.991 
+            xmax = 40.232 
+            text = "a" 
+        intervals [117]:
+            xmin = 40.232 
+            xmax = 40.473 
+            text = "mess" 
+        intervals [118]:
+            xmin = 40.473 
+            xmax = 40.723 
+            text = "<yeah>" 
+        intervals [119]:
+            xmin = 40.723 
+            xmax = 40.973 
+            text = "sort" 
+        intervals [120]:
+            xmin = 40.973 
+            xmax = 41.223 
+            text = "of" 
+        intervals [121]:
+            xmin = 41.223 
+            xmax = 41.473 
+            text = "words" 
+        intervals [122]:
+            xmin = 41.473 
+            xmax = 41.723 
+            text = "you" 
+        intervals [123]:
+            xmin = 41.723 
+            xmax = 41.973 
+            text = "know ?" 
+        intervals [124]:
+            xmin = 41.973 
+            xmax = 42.223 
+            text = "<yeah>" 
+        intervals [125]:
+            xmin = 42.223 
+            xmax = 42.5132857143 
+            text = "which" 
+        intervals [126]:
+            xmin = 42.5132857143 
+            xmax = 42.8035714286 
+            text = "he" 
+        intervals [127]:
+            xmin = 42.8035714286 
+            xmax = 43.0938571429 
+            text = "was" 
+        intervals [128]:
+            xmin = 43.0938571429 
+            xmax = 43.3841428571 
+            text = "he" 
+        intervals [129]:
+            xmin = 43.3841428571 
+            xmax = 43.6744285714 
+            text = "was" 
+        intervals [130]:
+            xmin = 43.6744285714 
+            xmax = 43.9647142857 
+            text = "beside" 
+        intervals [131]:
+            xmin = 43.9647142857 
+            xmax = 44.255 
+            text = "himself" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "word - participant" 
+        xmin = 0 
+        xmax = 44.255 
+        intervals: size = 3 
+        intervals [1]:
+            xmin = 0 
+            xmax = 2 
+            text = "" 
+        intervals [2]:
+            xmin = 2 
+            xmax = 2.875 
+            text = "would" 
+        intervals [3]:
+            xmin = 2.875 
+            xmax = 44.255 
+            text = "" 
+    item [3]:
+        class = "IntervalTier" 
+        name = "phone" 
+        xmin = 0 
+        xmax = 44.255 
+        intervals: size = 1 
+        intervals [1]:
+            xmin = 0 
+            xmax = 44.255 
+            text = "" 
+    item [4]:
+        class = "TextTier" 
+        name = "f1" 
+        xmin = 0 
+        xmax = 0 
+        points: size = 0

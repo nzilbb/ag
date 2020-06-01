@@ -1585,6 +1585,14 @@ public class TextGridSerialization
                   tier.setXmax(Math.max(tier.getXmax(), a.getStart().getOffset()));
                }
             } // next annotation	    
+
+            // ensure there's at least one tier for the layer
+            if (tiers.size() == 0)
+            {
+               tiers.put("", new TextTier(layer.getId(), 0, 0));
+            }
+
+            // add tiers to the grid
             for (Tier tier : tiers.values())
             {
                addTier(tier);
@@ -1682,6 +1690,16 @@ public class TextGridSerialization
                   tier.setXmax(Math.max(tier.getXmax(), a.getEnd().getOffset()));
                }
             } // next annotation
+
+            // ensure there's at least one tier for the layer
+            if (tiers.size() == 0)
+            {
+               Vector<IntervalTier> list = new Vector<IntervalTier>();
+               list.add(new IntervalTier(layer.getId(), 0, 0));
+               tiers.put("", list);
+            }
+
+            // add tiers to the grid
             for (Vector<IntervalTier> list : tiers.values())
             {
                for (Tier tier : list)
