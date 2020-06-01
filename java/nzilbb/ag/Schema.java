@@ -23,6 +23,7 @@ package nzilbb.ag;
 
 import java.util.LinkedHashMap;
 import java.util.Collection;
+import java.util.Vector;
 import nzilbb.ag.util.LayerHierarchyTraversal;
 import org.json.IJSONableBean;
 
@@ -177,6 +178,8 @@ public class Schema
    */
   public Schema setCorpusLayerId(String newCorpusLayerId) { corpusLayerId = newCorpusLayerId; return this; }
    
+  private LinkedHashMap<String,Vector<Layer>> pendingParents = new LinkedHashMap<String,Vector<Layer>>();
+
   // Methods:
    
   /**
@@ -184,7 +187,7 @@ public class Schema
    */
   public Schema()
   {
-    addLayer(getRoot());
+    addLayer(root);
   } // end of constructor
 
   /**
@@ -193,7 +196,7 @@ public class Schema
    */
   public Schema(Layer[] layers)
   {
-    addLayer(getRoot());
+    addLayer(root);
     for (Layer layer : layers)
     {
       addLayer(layer);
@@ -206,7 +209,7 @@ public class Schema
    */
   public Schema(Collection<Layer> layers)
   {
-    addLayer(getRoot());
+    addLayer(root);
     for (Layer layer : layers)
     {
       addLayer(layer);
@@ -223,7 +226,7 @@ public class Schema
    */
   public Schema(Layer[] layers, String participantLayerId, String turnLayerId, String utteranceLayerId, String wordLayerId)
   {
-    addLayer(getRoot());
+    addLayer(root);
     for (Layer layer : layers)
     {
       addLayer(layer);
@@ -244,7 +247,7 @@ public class Schema
    */
   public Schema(String participantLayerId, String turnLayerId, String utteranceLayerId, String wordLayerId, Layer... layers)
   {
-    addLayer(getRoot());
+    addLayer(root);
     for (Layer layer : layers)
     {
       addLayer(layer);
@@ -265,7 +268,7 @@ public class Schema
    */
   public Schema(Collection<Layer> layers, String participantLayerId, String turnLayerId, String utteranceLayerId, String wordLayerId)
   {
-    addLayer(getRoot());
+    addLayer(root);
     for (Layer layer : layers)
     {
       addLayer(layer);
@@ -288,7 +291,7 @@ public class Schema
    */
   public Schema(Layer[] layers, String participantLayerId, String turnLayerId, String utteranceLayerId, String wordLayerId, String episodeLayerId, String corpusLayerId)
   {
-    addLayer(getRoot());
+    addLayer(root);
     for (Layer layer : layers)
     {
       addLayer(layer);
@@ -313,7 +316,7 @@ public class Schema
    */
   public Schema(Collection<Layer> layers, String participantLayerId, String turnLayerId, String utteranceLayerId, String wordLayerId, String episodeLayerId, String corpusLayerId)
   {
-    addLayer(getRoot());
+    addLayer(root);
     for (Layer layer : layers)
     {
       addLayer(layer);
@@ -334,32 +337,43 @@ public class Schema
    */
   public Layer addLayer(Layer layer)
   {
-    if (getLayers().containsKey(layer.getId())) return getLayer(layer.getId());
+    if (layers.containsKey(layer.getId())) return getLayer(layer.getId());
 
-    getLayers().put(layer.getId(), layer);
+    layers.put(layer.getId(), layer);
 
     if (layer.getParentId() == null
-        && !layer.getId().equals(getRoot().getId()))
+        && !layer.getId().equals(root.getId()))
     {
-      layer.setParentId(getRoot().getId());
+      layer.setParentId(root.getId());
     }
     // set their parent
     if (layer.getParentId() != null)
     {
-      layer.setParent(getLayer(layer.getParentId()));
+       if (layers.containsKey(layer.getParentId()))
+       {
+          layer.setParent(layers.get(layer.getParentId()));
+       }
+       else
+       {
+          if (!pendingParents.containsKey(layer.getParentId()))
+          {
+             pendingParents.put(layer.getParentId(), new Vector<Layer>());
+          }
+          pendingParents.get(layer.getParentId()).add(layer);
+       }
     }
 
     // check whether any child layers have already been added
-    for (Layer otherLayer : getLayers().values())
-    {
-      if (layer.getId().equals(otherLayer.getParentId()))
+   if (pendingParents.containsKey(layer.getId()))
+   {
+      for (Layer otherLayer : pendingParents.get(layer.getId()))
       {
-        otherLayer.setParent(layer);
+         otherLayer.setParent(layer);
       }
+      pendingParents.remove(layer.getId());
     }
     return layer;
   } // end of addLayer()
-
    
   /**
    * Gets the named layer.
@@ -368,7 +382,7 @@ public class Schema
    */
   public Layer getLayer(String id)
   {
-    return getLayers().get(id);
+    return layers.get(id);
   } // end of getLayer()
    
   /**
@@ -377,7 +391,7 @@ public class Schema
    */
   public Layer getEpisodeLayer()
   {
-    return getLayer(getEpisodeLayerId());
+    return getLayer(episodeLayerId);
   } // end of getEpisodeLayer()
 
   /**
@@ -386,7 +400,7 @@ public class Schema
    */
   public Layer getParticipantLayer()
   {
-    return getLayer(getParticipantLayerId());
+    return getLayer(participantLayerId);
   } // end of getParticipantLayer()
 
   /**
@@ -395,7 +409,7 @@ public class Schema
    */
   public Layer getTurnLayer()
   {
-    return getLayer(getTurnLayerId());
+    return getLayer(turnLayerId);
   } // end of getTurnLayer()
 
   /**
@@ -404,7 +418,7 @@ public class Schema
    */
   public Layer getUtteranceLayer()
   {
-    return getLayer(getUtteranceLayerId());
+    return getLayer(utteranceLayerId);
   } // end of getUtteranceLayer()
 
   /**
@@ -413,7 +427,7 @@ public class Schema
    */
   public Layer getWordLayer()
   {
-    return getLayer(getWordLayerId());
+    return getLayer(wordLayerId);
   } // end of getWordLayer()
 
    
