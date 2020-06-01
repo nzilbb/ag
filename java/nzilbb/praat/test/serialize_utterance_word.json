@@ -21,7 +21,11 @@
                   "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
                   "children":{
                     "phone":{"description":"Phones", "alignment":2,
-                      "peers":true, "peersOverlap":true, "parentIncludes":true, "saturated":true}
+                      "peers":true, "peersOverlap":true, "parentIncludes":true, "saturated":true,
+                      "children":{
+                          "f1":{"description":"First formant", "alignment":1,
+                                "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false}}
+                    }
                   }}
               }}
           }}
