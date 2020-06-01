@@ -132,7 +132,7 @@ public class Validator extends CommandLineProgram {
             transcript.load(new FileInputStream(trs));
             
             Vector<String> errors = transcript.validationErrors();
-            if (verbose) {
+            if (verbose && errors != null) {
                for (String error : errors) {
                   System.out.println(trs.getPath() + " : " + error);
                } // next error
@@ -152,6 +152,7 @@ public class Validator extends CommandLineProgram {
             System.out.println(trs.getPath());
          } catch (Exception x) {
             System.err.println("Error processing " + trs.getPath() + ": " + x);
+            x.printStackTrace(System.err);
          }
    } // end of validateTranscript()
 
