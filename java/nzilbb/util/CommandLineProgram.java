@@ -253,6 +253,8 @@ public class CommandLineProgram {
 
       boolean bArgsOk = true;
 
+      Vector<String> errors = new Vector<String>();
+
       // check that all compulsory switches are set
       Vector<String> vSwitches = new Vector<String>();
       Vector<String> vCompulsorySwitches = new Vector<String>();
@@ -290,7 +292,7 @@ public class CommandLineProgram {
 		     {
 			if (getter.invoke(this) == null) {
 			   bArgsOk = false;
-			   System.err.println("compulsory switch '"  + sSwitchName + "' not specified");
+			   errors.add("compulsory switch '"  + sSwitchName + "' not specified");
 			   setUsage(true);
 			}
 		     } catch (IllegalAccessException x) {
@@ -309,34 +311,38 @@ public class CommandLineProgram {
 	    } // optional
 	 } // method is annotated
       } // next method
-      
-      // display usage?
-      if (getUsage()) {
-	 System.err.println(myClass.getSimpleName() + (v==null?"":" " + v) + " usage:");
-	 @SuppressWarnings("unchecked")
-	 ProgramDescription myAnnotation 
-	    = (ProgramDescription)myClass.getAnnotation(ProgramDescription.class);
-	 if (myAnnotation != null) System.err.println(myAnnotation.value());
-	 String sSwitchEgs = "";
-	 for (String s : vSwitches) sSwitchEgs += " " + s;
-	 System.err.println("java " 
-			    + myClass.getName() + sSwitchEgs
-			    + (myAnnotation != null 
-			       && myAnnotation.arguments().length() > 0?
-			       " "+myAnnotation.arguments():""));
-	 if (vCompulsorySwitches.size() > 0) {
-	    System.err.println("compulsory switches:");
-	    for (String s : vCompulsorySwitches) System.err.println("\t"+s);
-	 }
-	 if (vOptionalSwitches.size() > 0) {
-	    System.err.println("optional switches:");
-	    for (String s : vOptionalSwitches) System.err.println("\t"+s);
-	 }
-	 return bArgsOk;		    
-      } // usage
-      else if (version)
-      {
-         System.err.println(myClass.getSimpleName() + (v==null?" version unknown":" " + v));
+
+      if (version) {
+         System.err.println(myClass.getSimpleName() + " ("+(v==null?"version unknown":v)+")");
+         bArgsOk = false;
+      } else {
+         for (String error : errors) System.err.println(error);
+         
+         // display usage?
+         if (getUsage()) {
+            System.err.println(
+               myClass.getSimpleName() + " ("+(v==null?"version unknown":v)+"):");
+            @SuppressWarnings("unchecked")
+               ProgramDescription myAnnotation 
+               = (ProgramDescription)myClass.getAnnotation(ProgramDescription.class);
+            if (myAnnotation != null) System.err.println(myAnnotation.value());
+            String sSwitchEgs = "";
+            for (String s : vSwitches) sSwitchEgs += " " + s;
+            System.err.println("java " 
+                               + myClass.getName() + sSwitchEgs
+                               + (myAnnotation != null 
+                                  && myAnnotation.arguments().length() > 0?
+                                  " "+myAnnotation.arguments():""));
+            if (vCompulsorySwitches.size() > 0) {
+               System.err.println("compulsory switches:");
+               for (String s : vCompulsorySwitches) System.err.println("\t"+s);
+            }
+            if (vOptionalSwitches.size() > 0) {
+               System.err.println("optional switches:");
+               for (String s : vOptionalSwitches) System.err.println("\t"+s);
+            }
+            return bArgsOk;		    
+         } // usage
       }
 
       return bArgsOk;
