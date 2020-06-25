@@ -85,7 +85,30 @@ public class StandAloneWebApp extends CommandLineProgram {
    public StandAloneWebApp setPort(Integer newPort) { port = newPort; return this; }
 
    /**
-    * The HTML document to show when /finished is called.
+    * The URI path (excluding leading '/') for the request that terminates the web
+    * app. Default is "finished". 
+    * @see #getFinishedPath()
+    * @see #setFinishedPath(String)
+    */
+   protected String finishedPath = "finished";
+   /**
+    * Getter for {@link #finishedPath}: The URI path (excluding leading '/') for the
+    * request that terminates the web app. Default is "finished". 
+    * @return The URI path (excluding leading '/') for the request that terminates the web
+    * app. Default is "finished". 
+    */
+   public String getFinishedPath() { return finishedPath; }
+   /**
+    * Setter for {@link #finishedPath}: The URI path (excluding leading '/') for the
+    * request that terminates the web app. Default is "finished". 
+    * @param newFinishedPath The URI path (excluding leading '/') for the request that
+    * terminates the web app. Default is "finished". 
+    */
+   @Switch("The URI pathfor the request that terminates the web app. Default is 'finished'")
+   public StandAloneWebApp setFinishedPath(String newFinishedPath) { finishedPath = newFinishedPath; return this; }
+
+   /**
+    * The HTML document to show when /{@link #finishedPath} is called.
     * @see #getFinishedResponse()
     * @see #setFinishedResponse(String)
     */
@@ -97,15 +120,15 @@ public class StandAloneWebApp extends CommandLineProgram {
       +"<script type='text/javascript'>window.close();</script>"
       +"</body></html>";
    /**
-    * Getter for {@link #finishedResponse}: The HTML document to show when /finished is called.
-    * @return The HTML document to show when /finished is called.
+    * Getter for {@link #finishedResponse}: The HTML document to show when /{@link #finishedPath} is called.
+    * @return The HTML document to show when /{@link #finishedPath} is called.
     */
    public String getFinishedResponse() { return finishedResponse; }
    /**
-    * Setter for {@link #finishedResponse}: The HTML document to show when /finished is called.
-    * @param newFinishedResponse The HTML document to show when /finished is called.
+    * Setter for {@link #finisheisdResponse}: The HTML document to show when /{@link #finishedPath} is called.
+    * @param newFinishedResponse The HTML document to show when /{@link #finishedPath} is called.
     */
-   @Switch("The HTML document to show when /finished is called")
+   @Switch("The HTML document to show when /finishedPath is called")
    public StandAloneWebApp setFinishedResponse(String newFinishedResponse) { finishedResponse = newFinishedResponse; return this; }
 
    class ResourceHandler implements HttpHandler {
@@ -168,7 +191,7 @@ public class StandAloneWebApp extends CommandLineProgram {
          recursivelyAddHandlers("", root);
 
          // handler for signalling the app is finished
-         server.createContext("/finished", new HttpHandler() {
+         server.createContext("/" + finishedPath, new HttpHandler() {
                public void handle(HttpExchange he) throws IOException {
                   System.out.println("Stopping.");
                   String result = IO.InputStreamToString(he.getRequestBody());
