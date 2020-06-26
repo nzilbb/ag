@@ -32,18 +32,5 @@ import java.util.function.Consumer;
  * @author Robert Fromont robert@fromont.net.nz
  */
 
-public interface MonitorableSeries<T>
-  extends Spliterator<T>
-{
-   /**
-    * Determines how far through the serialization is.
-    * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
-    */
-   public Integer getPercentComplete();
-   
-   /**
-    * Cancels spliteration; the next call to tryAdvance will return false.
-    */
-   public void cancel();
-   
+public interface MonitorableSeries<T> extends Spliterator<T>, MonitorableTask {
 } // end of class MonitorableSeries

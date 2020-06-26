@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -19,27 +19,32 @@
 //    along with nzilbb.ag; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.ag;
+package nzilbb.util;
 
-import java.util.List;
+import java.sql.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.function.Consumer;
 
 /**
- * Interface for transformer that transforms a Graph in some way.  This might include
- * tokenizers, valitors, and taggers. 
+ * A task whose progress can be monitored, and which can be cancelled.
  * @author Robert Fromont robert@fromont.net.nz
  */
 
-public interface IGraphTransformer // TODO maybe instead: implements UnaryOperator<Graph>x
-{
+public interface MonitorableTask {
    /**
-    * Transforms the graph.
-    * @param graph The graph to transform.
-    * @return The changes introduced by the tranformation.
-    * @throws TransformationException If the transformation cannot be completed.
+    * Determines how far through the serialization is.
+    * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
     */
-   public List<Change> transform(Graph graph) throws TransformationException;
-
-   // TODO maybe instead:
-   // TODO public Graph apply(Graph graph)
+   public Integer getPercentComplete();
    
-} // end of interface IGraphTransformer
+   /**
+    * Cancels spliteration; the next call to tryAdvance will return false.
+    */
+   public void cancel();
+
+   // TODO getId()
+   // TODO getStatus()
+   
+} // end of class MonitorableSeries

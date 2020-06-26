@@ -22,69 +22,52 @@
 package nzilbb.ag;
 
 /**
- * An exception ocurring during a graph transformation.
+ * Thrown when an IAnnotator configuration is invalid.
  * @author Robert Fromont robert@fromont.net.nz
- * @see IGraphTransformer
  */
 @SuppressWarnings("serial")
-public class TransformationException
-   extends Exception
-{
+public class InvalidConfigurationException extends TransformationException {
+   
+   // Attributes:
    
    /**
-    * The transformer rasing the exception.
-    * @see #getTransformer()
-    * @see #setTransformer(IGraphTransformer)
+    * The {@link IAnnotator} rasing the exception.
+    * @return The {@link IAnnotator} rasing the exception.
     */
-   protected IGraphTransformer transformer;
-   /**
-    * Getter for {@link #transformer}: The transformer rasing the exception.
-    * @return The transformer rasing the exception.
-    */
-   public IGraphTransformer getTransformer() { return transformer; }
-   /**
-    * Setter for {@link #transformer}: The transformer rasing the exception.
-    * @param newTransformer The transformer rasing the exception.
-    */
-   public TransformationException setTransformer(IGraphTransformer newTransformer) { transformer = newTransformer; return this; }
-
+   public IAnnotator getTransformer() { return (IAnnotator)transformer; }
+   
+   // Methods:
+   
    /**
     * Constructor.
     * @param transformer The transformer rasing the exception.
     */
-   public TransformationException(IGraphTransformer transformer)
-   {
-      setTransformer(transformer);
+   public InvalidConfigurationException(IAnnotator annotator) {
+      super(annotator);
    } // end of constructor
    /**
     * Constructor with message.
-    * @param transformer The transformer rasing the exception.
+    * @param annotator The annotator rasing the exception.
     * @param message The error message.
     */
-   public TransformationException(IGraphTransformer transformer, String message)
-   {
-      super(message);
-      setTransformer(transformer);
+   public InvalidConfigurationException(IAnnotator annotator, String message) {
+      super(annotator, message);
    } // end of constructor
    /**
     * Constructor with cause.
-    * @param transformer The transformer rasing the exception.
+    * @param annotator The annotator rasing the exception.
     * @param cause The root cause of the error.
     */
-   public TransformationException(IGraphTransformer transformer, Throwable cause)
-   {
-      super(cause);
-      setTransformer(transformer);
+   public InvalidConfigurationException(IAnnotator annotator, Throwable cause) {
+      super(annotator, cause);
    } // end of constructor
    /**
     * Constructor with message and cause.
-    * @param transformer The transformer rasing the exception.
+    * @param annotator The annotator rasing the exception.
     * @param message The error message.
     * @param cause The root cause of the error.
     */
-   public TransformationException(IGraphTransformer transformer, String message, Throwable cause)
-   {
-      super(message, cause);
-      setTransformer(transformer);
+   public InvalidConfigurationException(IAnnotator annotator, String message, Throwable cause) {
+      super(annotator, message, cause);
    } // end of constructor
-} // end of class TransformationException
+} // end of class InvalidConfigurationException
