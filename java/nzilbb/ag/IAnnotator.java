@@ -31,19 +31,31 @@ import nzilbb.util.MonitorableTask;
 public interface IAnnotator extends IGraphTransformer, MonitorableTask {
 
    /**
+    * Unique name for the annotator.
+    * @return The annotator's ID.
+    */
+   public String getId();
+
+   /**
+    * Version of this implementation.
+    * @return Annotator version.
+    */
+   public String version();
+   
+   /**
     * Sets the layer schema.
-    * @param schema
+    * @param schema The layer schema.
     * @return A reference to this object.
     */
    public IAnnotator setSchema(Schema schema);
    
    /**
-    * Sets the annotators configuration.
+    * Sets the configuration for a given annotation task.
     * @param configuration The configuration of the annotator.
     * @return A reference to this object.
     * @throws InvalidConfigurationException
     */
-   public IAnnotator setConfiguration(String configuration) throws InvalidConfigurationException;
+   public IAnnotator setTaskConfiguration(String configuration) throws InvalidConfigurationException;
    
    /**
     * Determines which layers the annotator requires in order to annotate a graph.
@@ -51,7 +63,7 @@ public interface IAnnotator extends IGraphTransformer, MonitorableTask {
     * @throws InvalidConfigurationException If {@link #setConfiguration(String)} has not
     * yet been called.
     */
-   public String[] getInputLayers() throws InvalidConfigurationException;
+   public String[] getRequiredLayers() throws InvalidConfigurationException;
 
    /**
     * Determines which layers the annotator will create/update/delete annotations on.
