@@ -22,15 +22,16 @@
 package nzilbb.ag;
 
 import java.util.List;
-
+import java.util.function.UnaryOperator;
 /**
  * Interface for transformer that transforms a Graph in some way.  This might include
  * tokenizers, valitors, and taggers. 
+ * <p> Note that it is valid (indeed, normal) for the Graph returned by
+ * <code>apply(Graph)</code> to be the same object as the one passed in.
  * @author Robert Fromont robert@fromont.net.nz
  */
-
-public interface IGraphTransformer // TODO maybe instead: implements UnaryOperator<Graph>x
-{
+public interface IGraphTransformer extends UnaryOperator<Graph> {
+   
    /**
     * Transforms the graph.
     * @param graph The graph to transform.
@@ -39,7 +40,12 @@ public interface IGraphTransformer // TODO maybe instead: implements UnaryOperat
     */
    public List<Change> transform(Graph graph) throws TransformationException;
 
-   // TODO maybe instead:
-   // TODO public Graph apply(Graph graph)
-   
+   default public Graph apply(Graph graph) {
+      try {
+         transform(graph);
+         return graph;
+      } catch(TransformationException exception) {
+         throw new RuntimeException(exception);
+      }
+   }
 } // end of interface IGraphTransformer
