@@ -19,32 +19,21 @@
 //    along with nzilbb.ag; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.util;
+package nzilbb.ag.automation;
 
-import java.sql.*;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Spliterator;
-import java.util.function.Consumer;
+import java.io.File;
 
 /**
- * A task whose progress can be monitored, and which can be cancelled.
+ * Extend this interface if your {@link Annotator} needs access to a persistent directory
+ * for saving and loading working files.
  * @author Robert Fromont robert@fromont.net.nz
  */
-public interface MonitorableTask {
-   /**
-    * Determines how far through the task is is.
-    * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
-    */
-   public Integer getPercentComplete();
-   
-   /**
-    * Cancels the task.
-    */
-   public void cancel();
+public interface UsesFileSystem {
 
-   // TODO getTaskId()
-   // TODO getStatus()
-   // TODO getRunning()
-   
-} // end of class MonitorableSeries
+   /**
+    * Provides a persisent directory in which files can be saved and accessed.
+    * @param directory
+    */
+   public void setWorkingDirectory(File directory);
+
+} // end of class Annotator

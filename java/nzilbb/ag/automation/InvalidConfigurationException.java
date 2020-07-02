@@ -19,10 +19,12 @@
 //    along with nzilbb.ag; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.ag;
+package nzilbb.ag.automation;
+
+import nzilbb.ag.TransformationException;
 
 /**
- * Thrown when an IAnnotator configuration is invalid.
+ * Thrown when an Annotator configuration is invalid.
  * @author Robert Fromont robert@fromont.net.nz
  */
 @SuppressWarnings("serial")
@@ -31,18 +33,18 @@ public class InvalidConfigurationException extends TransformationException {
    // Attributes:
    
    /**
-    * The {@link IAnnotator} rasing the exception.
-    * @return The {@link IAnnotator} rasing the exception.
+    * The {@link Annotator} rasing the exception.
+    * @return The {@link Annotator} rasing the exception.
     */
-   public IAnnotator getTransformer() { return (IAnnotator)transformer; }
+   public Annotator getTransformer() { return (Annotator)transformer; }
    
    // Methods:
    
    /**
     * Constructor.
-    * @param transformer The transformer rasing the exception.
+    * @param annotator The annotator rasing the exception.
     */
-   public InvalidConfigurationException(IAnnotator annotator) {
+   public InvalidConfigurationException(Annotator annotator) {
       super(annotator);
    } // end of constructor
    /**
@@ -50,7 +52,7 @@ public class InvalidConfigurationException extends TransformationException {
     * @param annotator The annotator rasing the exception.
     * @param message The error message.
     */
-   public InvalidConfigurationException(IAnnotator annotator, String message) {
+   public InvalidConfigurationException(Annotator annotator, String message) {
       super(annotator, message);
    } // end of constructor
    /**
@@ -58,7 +60,7 @@ public class InvalidConfigurationException extends TransformationException {
     * @param annotator The annotator rasing the exception.
     * @param cause The root cause of the error.
     */
-   public InvalidConfigurationException(IAnnotator annotator, Throwable cause) {
+   public InvalidConfigurationException(Annotator annotator, Throwable cause) {
       super(annotator, cause);
    } // end of constructor
    /**
@@ -67,7 +69,7 @@ public class InvalidConfigurationException extends TransformationException {
     * @param message The error message.
     * @param cause The root cause of the error.
     */
-   public InvalidConfigurationException(IAnnotator annotator, String message, Throwable cause) {
+   public InvalidConfigurationException(Annotator annotator, String message, Throwable cause) {
       super(annotator, message, cause);
    } // end of constructor
 } // end of class InvalidConfigurationException

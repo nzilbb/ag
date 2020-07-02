@@ -120,12 +120,14 @@ public class StandAloneWebApp extends CommandLineProgram {
       +"<script type='text/javascript'>window.close();</script>"
       +"</body></html>";
    /**
-    * Getter for {@link #finishedResponse}: The HTML document to show when /{@link #finishedPath} is called.
+    * Getter for {@link #finishedResponse}: The HTML document to show when /{@link
+    * #finishedPath} is called. 
     * @return The HTML document to show when /{@link #finishedPath} is called.
     */
    public String getFinishedResponse() { return finishedResponse; }
    /**
-    * Setter for {@link #finisheisdResponse}: The HTML document to show when /{@link #finishedPath} is called.
+    * Setter for {@link #finishedResponse}: The HTML document to show when 
+    * /{@link #finishedPath} is called. 
     * @param newFinishedResponse The HTML document to show when /{@link #finishedPath} is called.
     */
    @Switch("The HTML document to show when /finishedPath is called")

@@ -19,32 +19,20 @@
 //    along with nzilbb.ag; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.util;
+package nzilbb.ag.automation;
 
-import java.sql.*;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Spliterator;
-import java.util.function.Consumer;
+import java.sql.Connection;
 
 /**
- * A task whose progress can be monitored, and which can be cancelled.
+ * Extend this interface if your {@link Annotator} needs a relational database to function.
  * @author Robert Fromont robert@fromont.net.nz
  */
-public interface MonitorableTask {
-   /**
-    * Determines how far through the task is is.
-    * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
-    */
-   public Integer getPercentComplete();
+public interface UsesRelationalDatabase {
    
    /**
-    * Cancels the task.
+    * Sets the connection for the relational database.
+    * @param database
     */
-   public void cancel();
+   public void setConnection(Connection database);
 
-   // TODO getTaskId()
-   // TODO getStatus()
-   // TODO getRunning()
-   
-} // end of class MonitorableSeries
+} // end of class Annotator
