@@ -1,0 +1,37 @@
+body {
+    background-color:#ffffff;
+    color:#353833;
+    font-family:'DejaVu Sans', Arial, Helvetica, sans-serif;
+    font-size:12px;
+    margin:0;
+    padding:0;
+    height:100%;
+    width:100%;
+}
+
+h1 { font-size: 17pt; color: #859044; text-align: center; }
+h2 { font-size: 16pt; color: #859044; }
+h3 { font-size: 15pt; color: #859044; font-style:italic; }
+h4 { font-size: 14pt; color: #859044; }
+h5 { font-size: 13pt; color: #859044; }
+h6 { font-size: 12pt; color: #859044; }
+
+.form {
+    margin: auto;
+    width: 50vw;
+}
+.field {
+    display: flex;
+    flex-direction: row;
+}
+.field label {
+    width: 30%;
+    display: block;
+    font-weight: bold;
+}
+.field div {
+    width: 70%;
+}
+.field input[type="number"] {
+    width: 50px;
+}

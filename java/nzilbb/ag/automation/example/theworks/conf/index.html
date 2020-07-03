@@ -1,0 +1,67 @@
+<html>
+  <head>
+    <title>Configure The Works Annotator</title>    
+    <link rel="stylesheet" href="index.css" type="text/css">
+  </head>
+  <body>
+
+    <h1>The Works annotator configuration <span id="version"></span></h1>
+
+    <div class="form">
+      <p> This is an example annotator which implements all possible features of an annotator. </p>
+      <div class="field">
+        <label for="reverse">Reverse</label>
+        <span><input id="reverse" type="checkbox"></span>
+      </div>
+      <div class="field">
+        <label for="leftPadding">Left Padding</label>
+        <span><input id="leftPadding" type="number" step="1" min="0"></span>
+      </div>
+      <div class="field">
+        <label for="rightPadding">Right Padding</label>
+        <span><input id="rightPadding" type="number" step="1" min="0"></span>
+      </div>
+      <div class="controls">
+        <button onclick="finished();">Close</button>
+      </div>
+    </div>
+    
+
+    <script type="text/javascript">
+      function get(path, onload) {
+          var request = new XMLHttpRequest();
+          request.open("GET", path);
+          request.addEventListener("load", onload, false);
+          request.send();
+      }
+
+      get("getVersion", function(e) {
+          document.getElementById("version").innerHTML = "version " + this.responseText;
+      });
+      get("getReverse", function(e) {
+          document.getElementById("reverss").checked = this.responseText=="true";
+      });
+      get("getLeftPadding", function(e) {
+          document.getElementById("leftPadding").value = this.responseText;
+      });
+      get("getRightPadding", function(e) {
+          document.getElementById("rightPadding").value = this.responseText;
+      });
+      
+      // Interaction with server:
+      function finished() {
+          get("setReverse?"
+              + document.getElementById("reverse").checked, function(e) {
+                  get("setPadding?"
+                      + document.getElementById("leftPadding").value + ","
+                      + document.getElementById("rightPadding").value, function(e) {
+                          get("install", function(e) {
+                              window.close();
+                          });
+                      });
+              });
+      }
+    </script>
+    
+  </body>
+</html>

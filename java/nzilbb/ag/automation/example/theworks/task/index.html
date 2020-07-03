@@ -1,0 +1,16 @@
+<html>
+  <head><title>Configure Task for The Works Annotator</title></head>
+  <body>
+    <script type="text/javascript">
+      // Interaction with server:
+      function finished() {
+          // to indicate to the server we are finished, make a request to "install"
+	  new XMLHttpRequest().open("GET", "setTaskParameters");
+      }
+    </script>
+
+    <h1>Configure Task for The Works Annotator</h1>
+    <p> This is an example annotator which implements all possible features of an annotator. </p>
+    <div> <button>Close</button></div> 
+  </body>
+</html>

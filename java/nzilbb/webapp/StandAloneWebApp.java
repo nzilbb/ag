@@ -35,9 +35,13 @@ import nzilbb.util.ProgramDescription;
 import nzilbb.util.Switch;
 import nzilbb.util.IO;
 
+/**
+ * Utility for running stand-alone webapps.
+ */
 @ProgramDescription(value="Utility for running stand-alone webapps")
 public class StandAloneWebApp extends CommandLineProgram {
-   
+
+   /** Command-line entrypoint */
    public static void main(String argv[]) {
       StandAloneWebApp application = new StandAloneWebApp();
       if (application.processArguments(argv)) {
@@ -138,32 +142,41 @@ public class StandAloneWebApp extends CommandLineProgram {
       String contentType;
       public ResourceHandler(File resource) {
          this.resource = resource;
-         if (resource.getName().endsWith(".html"))
-            contentType = "text/html";
-         else if (resource.getName().endsWith(".js"))
-            contentType = "text/javascript";
-         else if (resource.getName().endsWith(".json"))
-            contentType = "application/json";
-         else if (resource.getName().endsWith(".css"))
-            contentType = "text/css";
-         else if (resource.getName().endsWith(".png"))
-            contentType = "image/png";
-         else if (resource.getName().endsWith(".jpg"))
-            contentType = "image/jpeg";
-         else if (resource.getName().endsWith(".svg"))
-            contentType = "image/svg";
-         else if (resource.getName().endsWith(".ico"))
-            contentType = "image/vnd.microsoft.icon";
-         else
-            contentType = "application/octet-stream";
+         contentType = ContentTypeForName(resource.getName());
       }
       public void handle(HttpExchange he) throws IOException {
-         System.out.println("Serve: " + resource.getName() + " " + contentType);
          he.getResponseHeaders().add("Content-Type", contentType);
          he.sendResponseHeaders(200, resource.length());
          IO.Pump(new FileInputStream(resource), he.getResponseBody());
       }
    }
+
+   
+   /**
+    * Determines the content-type for a given resource name, using the file extension.
+    * @param name
+    * @return A valid content-type
+    */
+   public static String ContentTypeForName(String name) {
+      if (name.endsWith(".html"))
+         return "text/html";
+      else if (name.endsWith(".js"))
+         return "text/javascript";
+      else if (name.endsWith(".json"))
+         return "application/json";
+      else if (name.endsWith(".css"))
+         return "text/css";
+      else if (name.endsWith(".png"))
+         return "image/png";
+      else if (name.endsWith(".jpg"))
+         return "image/jpeg";
+      else if (name.endsWith(".svg"))
+         return "image/svg";
+      else if (name.endsWith(".ico"))
+         return "image/vnd.microsoft.icon";
+      else
+         return "application/octet-stream";
+   } // end of ContentTypeForName()   
    
    /**
     * Recursively adds resource handlers
@@ -176,7 +189,6 @@ public class StandAloneWebApp extends CommandLineProgram {
             recursivelyAddHandlers(context + "/" + f.getName(), f);
          } // next file
       } else {
-         System.out.println("context " + context + " resource " + resource.getPath());
          server.createContext(context, new ResourceHandler(resource));
          if (resource.getName().equals("index.html")) {
             server.createContext(
@@ -184,31 +196,56 @@ public class StandAloneWebApp extends CommandLineProgram {
          }
       }
    } // end of resource()
+
+   /**
+    * Creates the web server.
+    */
+   protected void createServer() throws IOException {
+      // create web server
+      server = HttpServer.create(new InetSocketAddress(port), 0);
+   } // end of createServer()
    
+   /**
+    * Adds handlers to the web server.
+    * <p> The default implementation adds handlers for all files under {@link #root}. 
+    * Subclass can replace/augment this behaviour by overriding this method.
+    */
+   protected void addHandlers() throws IOException {
+      if (server == null) createServer();
+      if (root != null) recursivelyAddHandlers("", root);      
+   } // end of addHandlers()
+   
+   /**
+    * Adds a handler for the {@link #finishedPath}.
+    */
+   protected void addFinishedHandler() throws IOException {
+      if (server == null) createServer();
+      // handler for signalling the app is finished
+      server.createContext("/" + finishedPath, new HttpHandler() {
+            public void handle(HttpExchange he) throws IOException {
+               String result = IO.InputStreamToString(he.getRequestBody());
+               if (result.length() == 0) result = he.getRequestURI().getQuery();
+               he.sendResponseHeaders(200, finishedResponse.length());
+               OutputStream os = he.getResponseBody();
+               os.write(finishedResponse.getBytes());
+               os.close();
+               new Thread(new Runnable() { public void run() {
+                  server.stop(0); // this never seems to return??
+               } }).start();
+               try { Thread.sleep(500); } catch (Exception x) {}
+               finished(result);
+            }});      
+   } // end of addFinishedHandler()   
+
+   /** Start handling requests, and  */
    public void start() {
       try {
-         // create web server
-         server = HttpServer.create(new InetSocketAddress(port), 0);
-         System.out.println("server started at " + port);
-         recursivelyAddHandlers("", root);
+         if (server == null) {
+            createServer();
+            addHandlers();
+         }
+         addFinishedHandler();
 
-         // handler for signalling the app is finished
-         server.createContext("/" + finishedPath, new HttpHandler() {
-               public void handle(HttpExchange he) throws IOException {
-                  System.out.println("Stopping.");
-                  String result = IO.InputStreamToString(he.getRequestBody());
-                  if (result.length() == 0) result = he.getRequestURI().getQuery();
-                  he.sendResponseHeaders(200, finishedResponse.length());
-                  OutputStream os = he.getResponseBody();
-                  os.write(finishedResponse.getBytes());
-                  os.close();
-                  new Thread(new Runnable() { public void run() {
-                     server.stop(0); // this never seems to return??
-                  } }).start();
-                  try { Thread.sleep(500); } catch (Exception x) {}
-                  finished(result);
-               }});
-         
          server.setExecutor(null);
          server.start();
 

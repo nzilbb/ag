@@ -73,7 +73,7 @@ public abstract class Annotator implements IGraphTransformer, MonitorableTask {
     * invoking <tt> install </tt> when configuration is ready.
     * @throws InvalidConfigurationException
     */
-   public abstract void install() throws InvalidConfigurationException;
+   public void install() throws InvalidConfigurationException { setPercentComplete(100); }
    
    /**
     * Runs any processing required to uninstall the annotator.

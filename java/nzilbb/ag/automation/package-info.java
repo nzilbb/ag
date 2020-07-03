@@ -7,14 +7,27 @@
  *  <li> a class that implements the {@link Annotator} interface, </li>
  *  <li> a manifest attribute called <q>nzilbb-ag-automation-Annotator</q> whose value
  *       is the fully-qualified class name of the Annotator-implementing class, </li>
- *  <li> <i> info.html </i> - a file containing a description of the type of annotation 
- *       tasks the annotator can do, which is displayed to users before they install the
- *       module. </li>
- *  <li> <i> config/&hellip; </i> - a directory containing a general configuration webapp,
- *       if the annotator needs overall configuration. </li>
- *  <li> <i> task/&hellip; </i> - a directory containing a task configuration webapp for
- *       defining annotation task parameters. </li>
+ *  <li> <i> info.html </i> - a file in the directory containing the Annotator class
+ *       containing a description of the type of annotation tasks the annotator can do,
+ *       which is displayed to users before they install the module. </li>
+ *  <li> <i> &hellip;/conf/&hellip; </i> - a subdirectory of the directory containing
+ *       the Annotator class containing a general configuration webapp, if the annotator
+ *       needs overall configuration. </li> 
+ *  <li> <i> &hellip;/task/&hellip; </i> - a a subdirectory of the directory containing
+ *       the Annotator class containing a task configuration webapp for defining
+ *       annotation task parameters. </li> 
  * </ul>
+ *
+ * <p> e.g. a module implementing an Annotator class called <tt> org.fancy.Tagger </tt>
+ * should be deployed in a .jar archive with a <q>nzilbb-ag-automation-Annotator</q>
+ * manifest attribute with the value <q>org.fancy.Tagger</q>, and the following contents:
+ * <ul>
+ *  <li>org/fancy/Tagger.class</li>
+ *  <li>org/fancy/info.html</li>
+ *  <li>org/fancy/conf/index.html</li>
+ *  <li>org/fancy/task/index.html</li>
+ * </ul>
+ * 
  * <p> Annotators may require access to the file system or a relational database in order
  * to function. In order to ensure the correct resources are made available, the class
  * that implements {@link Annotator} should also implement {@link UsesFileSystem} and/or
@@ -33,7 +46,7 @@
  * </ol>
  * <p> The configuration user interface is provided by packing a file called 
  * <q>index.html</q> and any other script/style-sheet files that might be required into
- * the deployed .jar archive, in a top-level directory called <i>config</i>. 
+ * the deployed .jar archive, in a top-level directory called <i>conf</i>. 
  * <p> This web
  * application can assume that it can communicate with the Annotator class by making
  * requests to its host, where the URL path is the name of the class method to call.
@@ -58,7 +71,7 @@
  * <tt>install</tt>
  * &hellip; which will invoke the Annotator class's <code>install()</code> method.
  *
- * <p> If no <q>config/index.html</q> file is provided in the .jar archive, 
+ * <p> If no <q>conf/index.html</q> file is provided in the .jar archive, 
  * <code>install()</code> is invoked as soon as the module is installed/upgraded.
  *
  * <p> The <code>install()</code> method is assumed to be synchronous (this method doesn't
