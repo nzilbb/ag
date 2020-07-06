@@ -58,8 +58,8 @@
       
       <!-- include source code -->
       <fileset dir="${src}" includes="${srcfiles}" />
-      <!-- include images -->
-      <fileset dir="${src}" includes="nzilbb/**/*.svg" />
+      <!-- include resources -->
+      <fileset dir="${src}" includes="nzilbb/**/*.svg nzilbb/**/*.html nzilbb/**/*.css nzilbb/**/*.js" />
       <!-- include this build file -->
       <fileset dir="." includes="build.xml" />
       <!-- include antlr base classes -->
@@ -126,7 +126,7 @@
         <fileset dir="." includes="nzilbb/ag/*/Test*.java"/>
         <fileset dir="." includes="nzilbb/ag/util/**/Test*.java" excludes="nzilbb/ag/util/test/TestMerger.java"/>
         <fileset dir="." includes="nzilbb/ag/serialize/**/Test*.java"/>
-        <fileset dir="." includes="nzilbb/ag/sql/**/Test*.java"/>        
+        <fileset dir="." includes="nzilbb/ag/automation/**/Test*.java"/>        
         <fileset dir="." includes="nzilbb/ag/util/test/TestMerger.java"/>
       </batchtest>
     </junit>
@@ -162,7 +162,7 @@
 
   <target name="testql" depends="dist" description="run nzilbb.ag.ql.* unit tests">
     <javac srcdir="${src}" destdir="."
-	       includes="nzilbb/ag/ql/test/Test*.java nzilbb/ag/sql/test/Test*.java"
+	       includes="nzilbb/ag/ql/test/Test*.java"
 	       classpath=".;${junitjar};${dist}/${ant.project.name}.jar;lib/antlr-4.7.2-complete.jar"
 	       listfiles="yes"
 	       target="8"
@@ -183,7 +183,6 @@
       <formatter type="plain" usefile="false" />
       <batchtest>
         <fileset dir="." includes="nzilbb/ag/ql/test/Test*.java"/>
-        <fileset dir="." includes="nzilbb/ag/sql/test/Test*.java"/>
       </batchtest>
     </junit>
   </target>
