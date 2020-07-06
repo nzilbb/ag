@@ -229,11 +229,13 @@ public class StandAloneWebApp extends CommandLineProgram {
                OutputStream os = he.getResponseBody();
                os.write(finishedResponse.getBytes());
                os.close();
-               new Thread(new Runnable() { public void run() {
-                  server.stop(0); // this never seems to return??
-               } }).start();
-               try { Thread.sleep(500); } catch (Exception x) {}
-               finished(result);
+               final String finalResult = result;
+               // call finished in a new thread, so we can continue serving requests in this one
+               new Thread(()-> {
+                     try { Thread.sleep(500); } catch (Exception x) {}
+                     finished(finalResult);
+                     server.stop(0); // this never seems to return??
+               }).start();
             }});      
    } // end of addFinishedHandler()   
 
