@@ -126,11 +126,11 @@ public class AnnotatorDescriptor {
    /**
     * Determines whether the annotator includes a web-app for installation or general
     * configuration.
-    * @return true if the class includes a web-app at conf/index.html, false otherwise.
+    * @return true if the class includes a web-app at config/index.html, false otherwise.
     */
-   public boolean hasConfWebapp() {
-      return annotatorClass.getResource("conf/index.html") != null;
-   } // end of hasConfWebapp()
+   public boolean hasConfigWebapp() {
+      return annotatorClass.getResource("config/index.html") != null;
+   } // end of hasConfigWebapp()
 
    /**
     * Determines whether the annotator includes a web-app for task parameter configuration.
@@ -138,7 +138,7 @@ public class AnnotatorDescriptor {
     */
    public boolean hasTaskWebapp() {
       return annotatorClass.getResource("task/index.html") != null;
-   } // end of hasConfWebapp()
+   } // end of hasTaskWebapp()
 
    
    /**

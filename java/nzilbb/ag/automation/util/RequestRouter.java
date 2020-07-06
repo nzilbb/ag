@@ -66,13 +66,13 @@ public class RequestRouter
       // index method names as routes
       routes = new HashMap<String,List<Method>>();
       for (Method method : annotator.getClass().getDeclaredMethods()) {
-         // ensure the index has an entry for this route
-         if (!routes.containsKey(method.getName())) {
-            routes.put(method.getName(), new Vector<Method>());
-         }
-         // add this method to the route
-         routes.get(method.getName()).add(method);
+         registerMethod(method);
       } // next method
+
+      // allow progress to be trackked too
+      try {
+       registerMethod(annotator.getClass().getMethod("getPercentComplete"));
+      } catch(NoSuchMethodException impossible) {}
       
       return this;
    }
@@ -84,6 +84,21 @@ public class RequestRouter
     */
    public RequestRouter() {
    } // end of constructor
+
+   
+   /**
+    * Registers a method as a possible route.
+    * @param method
+    */
+   protected void registerMethod(Method method) {
+      // ensure the index has an entry for this route
+      if (!routes.containsKey(method.getName())) {
+         routes.put(method.getName(), new Vector<Method>());
+      }
+      // add this method to the route
+      routes.get(method.getName()).add(method);
+   } // end of registerMethod()
+
    
    /**
     * Constructor.

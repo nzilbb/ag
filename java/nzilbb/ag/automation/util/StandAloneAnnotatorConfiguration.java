@@ -30,6 +30,7 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import nzilbb.ag.automation.Annotator;
+import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.util.AnnotatorDescriptor;
 import nzilbb.ag.automation.util.RequestRouter;
 import nzilbb.util.IO;
@@ -165,7 +166,7 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
                   x.getResponseHeaders().add("Content-Type", ContentTypeForName(path));
                   if (debug) System.err.println("getResource: conf"+path);
                   try {
-                     response = descriptor.getResource("conf"+path);
+                     response = descriptor.getResource("config"+path);
                   } catch(Throwable exception) {
                      if (debug) System.err.println("could not getResource: "+exception);
                   }
@@ -196,7 +197,7 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
 
    /** Constructor */
    public StandAloneAnnotatorConfiguration() {
-      setFinishedPath("install");
+      setFinishedPath("setConfig");
    }
 
    /**
@@ -215,14 +216,42 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
       descriptor = new AnnotatorDescriptor(getClassName(), getClass().getClassLoader());
       annotator = descriptor.getInstance();
       router = new RequestRouter(annotator);
+
+      // set a response that will follow the progress of the installation
+      finishedResponse = "<html><head><title>Installing...</title></head><body>"
+         +"<progress id='p' value='0' max='100' style='width: 100%'>Installing...</progress>"
+         +"<script type='text/javascript'>"
+         +"function p() {"
+         +" var request = new XMLHttpRequest();"
+         +" request.open('GET', 'getPercentComplete');"
+         +" request.addEventListener('load', function(e) {"
+         +"  var progress = document.getElementById('p');"
+         +"  progress.value = this.responseText;"
+         +"  if (progress.value < 100) window.setTimeout(p, 500);"
+         +" }, false);"
+         +" request.send();"
+         +"}"
+         +"p();"
+         +"</script>"
+         +"</body></html>";
    } // end of init()
 
    /**
     * Called when the web app is finished and the server has been stopped.
     * @param result The body of the /finished request.
     */
+   @Override
    protected void finished(String result) {
-      System.err.println(result);
+      System.err.println("finished: " + result);
+      try {
+       annotator.setConfig(result);
+      } catch(InvalidConfigurationException exception) {
+         System.err.println(""+exception);
+         exception.printStackTrace(System.err);
+      }
+      try {
+       Thread.sleep(1000); // give the browser a chance to get the last status
+      } catch(Exception exception) {}
       System.exit(0);
    } // end of finished()
 

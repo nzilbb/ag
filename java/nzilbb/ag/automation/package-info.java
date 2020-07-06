@@ -1,4 +1,4 @@
-// TODO recap with example JavaScript code showing lifecycle of each webapp
+// TODO add the possibility of a third webapp called something like extra/ or ext/ or extensions/ or more/ for visualizations, etc.
 /**
  * These are classes and interface for supporting automated annotation modules.
  * <p> Modules can be defined which perform specific annotation annotation tasks
@@ -10,7 +10,7 @@
  *  <li> <i> info.html </i> - a file in the directory containing the Annotator class
  *       containing a description of the type of annotation tasks the annotator can do,
  *       which is displayed to users before they install the module. </li>
- *  <li> <i> &hellip;/conf/&hellip; </i> - a subdirectory of the directory containing
+ *  <li> <i> &hellip;/config/&hellip; </i> - a subdirectory of the directory containing
  *       the Annotator class containing a general configuration webapp, if the annotator
  *       needs overall configuration. </li> 
  *  <li> <i> &hellip;/task/&hellip; </i> - a a subdirectory of the directory containing
@@ -24,7 +24,7 @@
  * <ul>
  *  <li>org/fancy/Tagger.class</li>
  *  <li>org/fancy/info.html</li>
- *  <li>org/fancy/conf/index.html</li>
+ *  <li>org/fancy/config/index.html</li>
  *  <li>org/fancy/task/index.html</li>
  * </ul>
  * 
@@ -41,12 +41,12 @@
  * <ol>
  *  <li> The annotator can provide a user interface for specifying configuration, in the
  * form of a browser-based web-application. </li>
- *  <li> The annotator implements {@link Annotator#install()} which completes any
+ *  <li> The annotator implements {@link Annotator#setConfig(String)} which completes any
  * install-time processing required.</li>
  * </ol>
  * <p> The configuration user interface is provided by packing a file called 
  * <q>index.html</q> and any other script/style-sheet files that might be required into
- * the deployed .jar archive, in a top-level directory called <i>conf</i>. 
+ * the deployed .jar archive, in a top-level directory called <i>config</i>. 
  * <p> This web
  * application can assume that it can communicate with the Annotator class by making
  * requests to its host, where the URL path is the name of the class method to call.
@@ -67,14 +67,46 @@
  * <tt>/uploadLexicon</tt> <br>
  * &hellip; which will get as a response whatever calling
  * <code>uploadLexicon(tempFileContainingContent)</code> returns.
- * <p> Once the configuration web-app is finished, it must make a request to the URL path: <br> 
- * <tt>install</tt>
- * &hellip; which will invoke the Annotator class's <code>install()</code> method.
+ * <p> Once the configuration web-app is finished, it must make a POST request to the URL
+ * path: <br> 
+ * <tt>setConfig</tt>
+ * &hellip; which will invoke the Annotator class's <code>setConfig(config)</code> method.
+ * <p> The <var>config</var> string passed into the <code>setConfig</code> method is the
+ * body of the POST request. 
  *
- * <p> If no <q>conf/index.html</q> file is provided in the .jar archive, 
- * <code>install()</code> is invoked as soon as the module is installed/upgraded.
+ * <p> Below is a simple example of a <i>config/index.html</i> webapp that loads any
+ *  current configuration from the annotator, presents a form for the user to fill out,
+ *  and posts the new configuration back to the annotator:<pre>&lt;html&gt;
+ *  &lt;head&gt;&lt;title&gt;Configure Annotator&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&lt;h1&gt;Configure Annotator&lt;/h1&gt;
+ *    &lt;form method="POST" action="setConfig"&gt; &lt;!-- POST to setConfig --&gt;
+ *        &lt;label for="reverse"&gt;Setting for Foo&lt;/label&gt;
+ *        &lt;input id="foo" name="foo" type="text"&gt; &lt;!-- an example bean property --&gt;
+ *        &lt;input type="submit" value="Install"&gt;
+ *    &lt;/form&gt;
+ *    &lt;script type="text/javascript"&gt;
+ *      function get(path, onload) { // make a GET request of the annotator
+ *          var request = new XMLHttpRequest();
+ *          request.open("GET", path);
+ *          request.addEventListener("load", onload, false);
+ *          request.send();
+ *      }
+ *      // GET request to getConfig retrieves the current setup configuration, if any
+ *      get("getConfig", function(e) {
+ *          var parameters = new URLSearchParams(this.responseText);
+ *          // set initial values of properties in the form above
+ *          // (this assumes bean property names match input id's in the form above)
+ *          for (const [key, value] of parameterd) {
+ *            document.getElementById(key).value = value;
+ *          }
+ *      });      
+ *    &lt;/script&gt;    
+ *  &lt;/body&gt;
+ *&lt;/html&gt;</pre>
  *
- * <p> The <code>install()</code> method is assumed to be synchronous (this method doesn't
+ * <p> If no <q>config/index.html</q> file is provided in the .jar archive, 
+ * <code>setConfig(null)</code> is invoked as soon as the module is installed/upgraded.
+ *
+ * <p> The <code>setConfig(config)</code> method is assumed to be synchronous (this method doesn't
  * return until it's complete) and long-running, so the Annotator class should provide an
  * indication of progress by calling {@link Annotator#setPercentComplete(Integer)} and
  * should regularly check {@link Annotator#isCancelling()} to determine if installation

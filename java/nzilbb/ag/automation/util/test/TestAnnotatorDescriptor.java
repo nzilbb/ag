@@ -46,8 +46,8 @@ public class TestAnnotatorDescriptor {
                    d.getAnnotatorClass().getName());
       assertTrue("Annotator instance type correct",
                  d.getInstance() instanceof nzilbb.ag.automation.example.minimal.MinimalExample);
-      assertFalse("No conf webapp",
-                   d.hasConfWebapp());
+      assertFalse("No config webapp",
+                   d.hasConfigWebapp());
       assertFalse("No task webapp",
                    d.hasTaskWebapp());
       assertTrue("Info is accessible",
@@ -66,8 +66,8 @@ public class TestAnnotatorDescriptor {
                    d.getAnnotatorClass().getName());
       assertTrue("Annotator instace type correct",
                  d.getInstance() instanceof nzilbb.ag.automation.example.theworks.TheWorksExample);
-      assertTrue("conf webapp detected",
-                  d.hasConfWebapp());
+      assertTrue("config webapp detected",
+                  d.hasConfigWebapp());
       assertTrue("task webapp detected",
                   d.hasTaskWebapp());
       assertTrue("Info is accessible",

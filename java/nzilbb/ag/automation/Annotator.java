@@ -21,6 +21,10 @@
 //
 package nzilbb.ag.automation;
 
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.util.Vector;
 import nzilbb.ag.*;
 import nzilbb.util.MonitorableTask;
@@ -34,9 +38,13 @@ public abstract class Annotator implements IGraphTransformer, MonitorableTask {
 
    /**
     * Unique name for the annotator, which is immutable across versions of the implemetantation.
+    * <p> The default implementation returns the (simple) name of the annotator
+    * implementation class. 
     * @return The annotator's ID.
     */
-   public abstract String getAnnotatorId();
+   public String getAnnotatorId() {
+      return getClass().getSimpleName();
+   }
 
    /**
     * Version of this implementation; versions will typically be numeric, but this is not
@@ -63,17 +71,164 @@ public abstract class Annotator implements IGraphTransformer, MonitorableTask {
    public Annotator setSchema(Schema newSchema) { schema = newSchema; return this; }
    
    /**
-    * Runs any processing required to install the annotator.
+    * Provides the overall configuration of the annotator. 
+    * @return The overall configuration of the annotator, which will be passed to the
+    * <i> config/index.html </i> configuration webapp, if any. This configuration may be null, or a
+    * string that serializes the annotators configuration state in any encoding the
+    * implementor prefers. The resulting string must be interpretable by the
+    * <i> config/index.html </i> webapp. 
+    * @see #setConfig(String)
+    * @see #beanPropertiesToQueryString()
+    */
+   public String getConfig() { return null; }
+   
+   /**
+    * Specifies the overall configuration of the annotator, and runs any processing
+    * required to install the annotator.
     * <p> This processing is assumed to be synchronous (this method doesn't return until
     * it's complete) and long-running, so the {@link MonitorableTask} methods should
-    * provide a way for the caller to monitor/cancel processing.
+    * provide a way for the caller to monitor/cancel processing - i.e. the Annotator class
+    * should provide an indication of progress by calling
+    * {@link Annotator#setPercentComplete(Integer)} and should regularly check 
+    * {@link Annotator#isCancelling()} to determine if installation should be stopped.
     * <p> If the user should provide information before this method is called, a 
     * <tt> config </tt> web-app must be provided to implement the user interface, which sets
     * any required configuration by invoking methods of the annotator as required, and
-    * invoking <tt> install </tt> when configuration is ready.
+    * invoking <tt> setConfig </tt> when configuration is ready.
+    * <p> If the configuration needs to be persistent between installing the annotator the
+    * first time and subsequently upgrading it, then it is the annotator's responsibility
+    * to serialize it in a form which can be retrieved for a later call to {@link #getConfig()}.
     * @throws InvalidConfigurationException
+    * @see #getConfig()
+    * @see #beanPropertiesFromQueryString(String)
+    */ 
+   public void setConfig(String config) throws InvalidConfigurationException { setPercentComplete(100); }
+   
+   /**
+    * Converts bean properties to a query string.
+    * <p> This utility method uses introspection to discover bean property getters
+    * (i.e. methods of the form <code> getAbc() </code> where <tt>abc</tt> is taken to be
+    * the name of an object property) that are declared by the annotator class. Getters
+    * are called and the property names and their values concatenated into an HTTP query
+    * string. 
+    * <p> e.g. if the annotator object has:
+    * <ul>
+    * <li> a method called <code>getFoo()</code> which returns the value <q>bar</q>, and</li> 
+    * <li> a method called <code>getBar()</code> which returns the value <q>fubar</q>,</li> 
+    * </ul>
+    * &hellip; then this method will return <q>foo=bar&amp;bar=fubar</q>
+    * @return An HTTP query string representing the state of the annotator object.
     */
-   public void install() throws InvalidConfigurationException { setPercentComplete(100); }
+   protected String beanPropertiesToQueryString() {
+      StringBuilder query = new StringBuilder();
+      for (Method method : getClass().getDeclaredMethods()) {
+         if (method.getName().equals("getAnnotatorId")
+             || method.getName().equals("getVersion")
+             || method.getName().equals("getSchema")
+             || method.getName().equals("getConfig")
+             || method.getName().equals("getRequiredLayers")
+             || method.getName().equals("getOutputLayers")
+             || method.getName().equals("getPercentComplete")) continue;
+         
+         try {
+            if (method.getName().startsWith("get")) { // found a getter
+               String property =
+                  method.getName().substring(3,4).toLowerCase()
+                  + method.getName().substring(4);
+               Object value = method.invoke(this);
+               if (value != null) {
+                  if (query.length() > 0) query.append("&");
+                  query.append(property);
+                  query.append("=");
+                  query.append(URLEncoder.encode(value.toString(), "UTF-8"));
+               } // there is a value
+            } // found a getter
+         } catch(Throwable t) {
+            System.out.println(""+t);
+         }
+      } // next declared method
+      return query.toString();
+   } // end of beanPropertiesToQueryString()
+   
+   /**
+    * Converts a query string to bean properties.
+    * <p> This utility method parses the given query string (most likely the body of a
+    * POST request generated by an HTML form implemented by <i>config/index.html</i>), and
+    * calls setters on this object that are named after the parameters found.
+    * <p> e.g. if <var> query </var> is <q>foo=bar&amp;bar=fubar</q> then 
+    * <ul>
+    * <li> the annotation class's <code>setFoo</code> would be called with the value
+    *      <q>bar</q>, and</li> 
+    * <li> the annotation class's <code>setBar</code> would be called with the value
+    *      <q>fubar</q>.</li> 
+    * </ul>
+    * @param query
+    */
+   @SuppressWarnings({"rawtypes","unchecked"})
+   protected void beanPropertiesFromQueryString(String query) {
+      if (query == null) return;
+      for (String parameter : query.split("&")) {
+         int equals = parameter.indexOf('=');
+         if (equals <= 0) continue;
+         String property = parameter.substring(0, equals);
+         String valueString = parameter.substring(equals + 1);
+         Class annotatorClass = getClass();
+         try {
+            Method setter = annotatorClass.getMethod(
+               "set" + property.substring(0,1).toUpperCase() + property.substring(1), String.class);
+            setter.invoke(this, URLDecoder.decode(valueString, "UTF-8"));
+         } catch(Throwable notString) {
+            try {
+               Method setter = annotatorClass.getMethod(
+                  "set" + property.substring(0,1).toUpperCase() + property.substring(1), Boolean.class);
+               setter.invoke(this, Boolean.valueOf(valueString));            
+            } catch(Throwable notBoolean) {
+               try {
+                  Method setter = annotatorClass.getMethod(
+                     "set" + property.substring(0,1).toUpperCase() + property.substring(1), boolean.class);
+                  setter.invoke(this, Boolean.valueOf(valueString));            
+               } catch(Throwable notBool) {
+                  try {
+                     Method setter = annotatorClass.getMethod(
+                        "set" + property.substring(0,1).toUpperCase() + property.substring(1), Integer.class);
+                     setter.invoke(this, Integer.valueOf(valueString));            
+                  } catch(Throwable notInteger) {
+                     try {
+                        Method setter = annotatorClass.getMethod(
+                           "set" + property.substring(0,1).toUpperCase() + property.substring(1), int.class);
+                        setter.invoke(this, Integer.valueOf(valueString));            
+                     } catch(Throwable notInt) {
+                        try {
+                           Method setter = annotatorClass.getMethod(
+                              "set" + property.substring(0,1).toUpperCase() + property.substring(1), Double.class);
+                           setter.invoke(this, Double.valueOf(valueString));            
+                        } catch(Throwable notDouble) {
+                           try {
+                              Method setter = annotatorClass.getMethod(
+                                 "set" + property.substring(0,1).toUpperCase() + property.substring(1), double.class);
+                              setter.invoke(this, Double.valueOf(valueString));            
+                           } catch(Throwable notD) {
+                              try {
+                                 Method setter = annotatorClass.getMethod(
+                                    "set" + property.substring(0,1).toUpperCase() + property.substring(1), Float.class);
+                                 setter.invoke(this, Float.valueOf(valueString));            
+                              } catch(Throwable notFloat) {
+                                 try {
+                                    Method setter = annotatorClass.getMethod(
+                                       "set" + property.substring(0,1).toUpperCase() + property.substring(1), float.class);
+                                    setter.invoke(this, Float.valueOf(valueString));            
+                                 } catch(Throwable notF) {
+                                 } // not float
+                              } // not Float
+                           } // not double
+                        } // not Double
+                     } // not int
+                  } // not Integer
+               } // not boolean
+            } // not Boolean
+         } // not String
+      }  // next parameter
+   } // end of beanPropertiessFromQueryString()
    
    /**
     * Runs any processing required to uninstall the annotator.

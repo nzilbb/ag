@@ -34,11 +34,6 @@ import nzilbb.ag.*;
  * annotator.
  */
 public class MinimalExample extends Annotator {
-   /**
-    * Unique name for the annotator, which is immutable across versions of the implemetantation.
-    * @return The annotator's ID.
-    */
-   public String getAnnotatorId() { return getClass().getSimpleName(); }
 
    /**
     * Version of this implementation. 

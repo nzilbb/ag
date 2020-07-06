@@ -90,7 +90,6 @@ public class RequestException extends Exception {
    /**
     * Constructor.
     * @param httpStatus The HTTP status code to return.
-    * @param message The error message.
     * @param method The request method.
     * @param uri The request URI.
     * @param cause The root cause of the exception.

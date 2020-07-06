@@ -1,0 +1,67 @@
+<html>
+  <head>
+    <title>Configure The Works Annotator</title>    
+    <link rel="stylesheet" href="index.css" type="text/css">
+  </head>
+  <body>
+
+    <h1>The Works annotator configuration <span id="version"></span></h1>
+
+    <form method="POST" action="setConfig">
+      <p> This is an example annotator which implements all possible features of an annotator. </p>
+      <div class="field">
+        <label for="reverse">Reverse</label>
+        <span><input id="reverse" name="reverse" type="checkbox"></span>
+      </div>
+      <div class="field">
+        <label for="leftPadding">Left Padding</label>
+        <span><input id="leftPadding" name="leftPadding" type="number" step="1" min="0"></span>
+      </div>
+      <div class="field">
+        <label for="rightPadding">Right Padding</label>
+        <span><input id="rightPadding" name="rightPadding" type="number" step="1" min="0"></span>
+      </div>
+      <div class="field">
+        <label for="rightPadding">Simulated Installation Duration (s)</label>
+        <span><input id="simulatedInstallationDuration" name="simulatedInstallationDuration"
+                     type="number" step="1" min="0"></span>
+      </div>
+      <div class="controls">
+        <input type="submit" value="Close">
+      </div>
+    </form>
+
+    <script type="text/javascript">
+      function get(path, onload) {
+          var request = new XMLHttpRequest();
+          request.open("GET", path);
+          request.addEventListener("load", onload, false);
+          request.send();
+      }
+
+      // any annotator method can be called to interrogate the annotator
+      get("getVersion", function(e) {
+          document.getElementById("version").innerHTML = "version " + this.responseText;
+      });
+
+      // getConfig gets the current setup configuration, if any
+      // in this case, it gets the values of all declared properties of the annotator
+      // encoded as an HTML query string
+      get("getConfig", function(e) {
+          console.log("config: " + this.responseText);
+          var parameters = new URLSearchParams(this.responseText);
+
+          document.getElementById("reverse").checked
+              = parameters.get("reverse");
+          document.getElementById("leftPadding").value
+              = parameters.get("leftPadding");
+          document.getElementById("rightPadding").value
+              = parameters.get("rightPadding");
+          document.getElementById("simulatedInstallationDuration").value
+              = parameters.get("simulatedInstallationDuration");
+      });
+      
+    </script>
+    
+  </body>
+</html>
