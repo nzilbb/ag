@@ -282,7 +282,6 @@ public class StandAloneTaskConfiguration extends StandAloneWebApp {
       try { // try as a jar file
          descriptor = new AnnotatorDescriptor(new File(annotatorName));
       } catch (Throwable notAJarName) { // try as a class name
-         notAJarName.printStackTrace(System.err);
          descriptor = new AnnotatorDescriptor(annotatorName, getClass().getClassLoader());
       }
       if (!descriptor.hasTaskWebapp()) {
