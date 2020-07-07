@@ -24,9 +24,12 @@ package nzilbb.ag.automation.util;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.File;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import nzilbb.ag.automation.Annotator;
@@ -39,15 +42,15 @@ import nzilbb.util.Switch;
 import nzilbb.webapp.StandAloneWebApp;
 
 /**
- * Utility for running a stand-alone webapp for configuring an
- * {@link nzilbb.ag.automation.Annotator} installation.
+ * Utility for running a stand-alone webapp for configuring the parameters of an
+ * annotation task.
  */
-@ProgramDescription(value="Utility for configuring an annotator installation.")
-public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
+@ProgramDescription(value="Utility for configuring the parameters of an annotation task.")
+public class StandAloneTaskConfiguration extends StandAloneWebApp {
 
    /** Command-line entrypoint */
    public static void main(String argv[]) {
-      StandAloneAnnotatorConfiguration application = new StandAloneAnnotatorConfiguration();
+      StandAloneTaskConfiguration application = new StandAloneTaskConfiguration();
       if (application.processArguments(argv)) {
          try {
             application.init();
@@ -74,7 +77,7 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
     * @param newDebug Whether to print debug tracing.
     */
    @Switch("Whether to print debug tracing")
-   public StandAloneAnnotatorConfiguration setDebug(Boolean newDebug) { debug = newDebug; return this; }
+   public StandAloneTaskConfiguration setDebug(Boolean newDebug) { debug = newDebug; return this; }
 
    /**
     * Annotator class name.
@@ -92,7 +95,7 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
     * @param newClassName Annotator class name.
     */
    @Switch(value="Annotator class name",compulsory=true)
-   public StandAloneAnnotatorConfiguration setClassName(String newClassName) { className = newClassName; return this; }
+   public StandAloneTaskConfiguration setClassName(String newClassName) { className = newClassName; return this; }
 
    /**
     * Descriptor for the annotator.
@@ -109,7 +112,7 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
     * Setter for {@link #descriptor}: Descriptor for the annotator.
     * @param newDescriptor Descriptor for the annotator.
     */
-   public StandAloneAnnotatorConfiguration setDescriptor(AnnotatorDescriptor newDescriptor) { descriptor = newDescriptor; return this; }
+   public StandAloneTaskConfiguration setDescriptor(AnnotatorDescriptor newDescriptor) { descriptor = newDescriptor; return this; }
 
    /**
     * The annotator to configure.
@@ -126,8 +129,8 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
     * Setter for {@link #annotator}: The annotator to configure.
     * @param newAnnotator The annotator to configure.
     */
-   public StandAloneAnnotatorConfiguration setAnnotator(Annotator newAnnotator) { annotator = newAnnotator; return this; }
-
+   public StandAloneTaskConfiguration setAnnotator(Annotator newAnnotator) { annotator = newAnnotator; return this; }
+   
    /**
     * Router for sending requests to annotator.
     * @see #getRouter()
@@ -143,14 +146,50 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
     * Setter for {@link #router}: Router for sending requests to annotator.
     * @param newRouter Router for sending requests to annotator.
     */
-   public StandAloneAnnotatorConfiguration setRouter(RequestRouter newRouter) { router = newRouter; return this; }
+   public StandAloneTaskConfiguration setRouter(RequestRouter newRouter) { router = newRouter; return this; }
 
+   /**
+    * Identifier of the task to be configured.
+    * @see #getAnnotationTaskId()
+    * @see #setAnnotationTaskId(String)
+    */
+   protected String annotationTaskId;
+   /**
+    * Getter for {@link #annotationTaskId}: Identifier of the task to be configured.
+    * @return Identifier of the task to be configured.
+    */
+   public String getAnnotationTaskId() { return annotationTaskId; }
+   /**
+    * Setter for {@link #annotationTaskId}: Identifier of the task to be configured.
+    * @param newAnnotationTaskId Identifier of the task to be configured.
+    */
+   @Switch(value="Identifier of the task to be configured",compulsory=true)
+   public StandAloneTaskConfiguration setAnnotationTaskId(String newAnnotationTaskId) { annotationTaskId = newAnnotationTaskId; return this; }
+   
    /**
     * Adds handlers which routes webapp resource requests to the Annotators "conf" webapp,
     * and routes server requests to Annotator.
     */
    protected void addHandlers() throws IOException {
       if (server == null) createServer();
+
+      // add getTaskParameters handler
+      server.createContext("/getTaskParameters", new HttpHandler() {
+            public void handle(HttpExchange x) throws IOException {
+               String parameters = "";
+               // load previous parameters if any
+               File f = new File(annotator.getAnnotatorId() + "-" + annotationTaskId + ".cfg");
+               if (f.exists()) {
+                  try {
+                     parameters = IO.InputStreamToString(new FileInputStream(f));
+                  } catch(IOException exception) {}
+               }
+               x.sendResponseHeaders(200, parameters.length());
+               OutputStream os = x.getResponseBody();
+               os.write(parameters.getBytes());
+               os.close();
+            }});      
+      
       // all (not otherwise handled) requests:
       server.createContext("/", new HttpHandler() {
             public void handle(HttpExchange x) throws IOException {
@@ -166,7 +205,7 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
                   x.getResponseHeaders().add("Content-Type", ContentTypeForName(path));
                   if (debug) System.err.println("getResource: conf"+path);
                   try {
-                     response = descriptor.getResource("config"+path);
+                     response = descriptor.getResource("task"+path);
                   } catch(Throwable exception) {
                      if (debug) System.err.println("could not getResource: "+exception);
                   }
@@ -196,8 +235,8 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
    } // end of addHandlers()
 
    /** Constructor */
-   public StandAloneAnnotatorConfiguration() {
-      setFinishedPath("setConfig");
+   public StandAloneTaskConfiguration() {
+      setFinishedPath("setTaskParameters");
    }
 
    /**
@@ -216,44 +255,36 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
       descriptor = new AnnotatorDescriptor(getClassName(), getClass().getClassLoader());
       annotator = descriptor.getInstance();
       router = new RequestRouter(annotator);
+      query = annotationTaskId;
 
       // set a response that will follow the progress of the installation
-      finishedResponse = "<html><head><title>Installing...</title></head><body>"
-         +"<progress id='p' value='0' max='100' style='width: 100%'>Installing...</progress>"
-         +"<p id='m' style='text-align:center;'></p>"
-         +"<script type='text/javascript'>"
-         +"function p() {"
-         +" var request = new XMLHttpRequest();"
-         +" request.open('GET', 'getPercentComplete');"
-         +" request.addEventListener('load', function(e) {"
-         +"  var progress = document.getElementById('p');"
-         +"  progress.value = this.responseText;"
-         +"  if (progress.value < 100) window.setTimeout(p, 500);"
-         +"  else document.getElementById('m').innerHTML = 'You can close this window.';"
-         +" }, false);"
-         +" request.send();"
-         +"}"
-         +"p();"
-         +"</script>"
+      finishedResponse = "<html><head><title>Task Configuration</title></head><body>"
+         +"<p style='text-align: center;'><big>Thanks</big></p>"
+         +"<p style='text-align: center;'>You can close this window.</p>"
          +"</body></html>";
    } // end of init()
 
    /**
     * Called when the web app is finished and the server has been stopped.
-    * @param result The body of the /finished request.
+    * @param parameters The body of the /setTaskParameters request.
     */
    @Override
-   protected void finished(String result) {
-      System.err.println("finished: " + result);
+   protected void finished(String parameters) {
       try {
-       annotator.setConfig(result);
+       annotator.setTaskParameters(parameters);
+       // save result in file named after annotationTaskId
+       try {
+          File f = new File(annotator.getAnnotatorId() + "-" + annotationTaskId + ".cfg");
+          FileWriter out = new FileWriter(f);
+          out.write(parameters);
+          out.close();
+       } catch(IOException exception) {
+          System.err.println(""+exception);
+       }
       } catch(InvalidConfigurationException exception) {
          System.err.println(""+exception);
          exception.printStackTrace(System.err);
       }
-      try {
-       Thread.sleep(1000); // give the browser a chance to get the last status
-      } catch(Exception exception) {}
       System.exit(0);
    } // end of finished()
 

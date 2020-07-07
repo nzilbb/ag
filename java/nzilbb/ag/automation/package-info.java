@@ -11,10 +11,10 @@
  *       containing a description of the type of annotation tasks the annotator can do,
  *       which is displayed to users before they install the module. </li>
  *  <li> <i> &hellip;/config/&hellip; </i> - a subdirectory of the directory containing
- *       the Annotator class containing a general configuration webapp, if the annotator
+ *       the Annotator class, containing a general configuration webapp, if the annotator
  *       needs overall configuration. </li> 
- *  <li> <i> &hellip;/task/&hellip; </i> - a a subdirectory of the directory containing
- *       the Annotator class containing a task configuration webapp for defining
+ *  <li> <i> &hellip;/task/&hellip; </i> - a subdirectory of the directory containing
+ *       the Annotator class, containing a task configuration webapp for defining
  *       annotation task parameters. </li> 
  * </ul>
  *
@@ -79,7 +79,7 @@
  *  and posts the new configuration back to the annotator:<pre>&lt;html&gt;
  *  &lt;head&gt;&lt;title&gt;Configure Annotator&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&lt;h1&gt;Configure Annotator&lt;/h1&gt;
  *    &lt;form method="POST" action="setConfig"&gt; &lt;!-- POST to setConfig --&gt;
- *        &lt;label for="reverse"&gt;Setting for Foo&lt;/label&gt;
+ *        &lt;label for="foo"&gt;Setting for Foo&lt;/label&gt;
  *        &lt;input id="foo" name="foo" type="text"&gt; &lt;!-- an example bean property --&gt;
  *        &lt;input type="submit" value="Install"&gt;
  *    &lt;/form&gt;
@@ -95,7 +95,7 @@
  *          var parameters = new URLSearchParams(this.responseText);
  *          // set initial values of properties in the form above
  *          // (this assumes bean property names match input id's in the form above)
- *          for (const [key, value] of parameterd) {
+ *          for (const [key, value] of parameters) {
  *            document.getElementById(key).value = value;
  *          }
  *      });      
@@ -131,12 +131,51 @@
  * </ol>
  * <p> The configuration user interface is provided by packing a file called 
  * <q>index.html</q> and any other script/style-sheet files that might be required into
- * the deployed .jar archive, in a top-level directory called <tt>task</tt>. 
+ * the deployed .jar archive, in a subdirectory of the directory containing the annotator
+ * class, called <tt>task</tt>.  
+ * <p> Each annotation task is identified by an ID, which is passed as the query string
+ * when the task configuration web app is run; e.g. if the annotation task ID is
+ * <q>pos-tagging</q> then the web app will be started with the URL like
+ * <tt>&hellip;/task/index.html?pos-tagging</tt> 
  * <p> The first thing the web app should do is make a GET request to
- * <tt>getTaskParameters</tt> in order to retrieve and interpret any existing parameter
- * configuration for the task
- * <p>It can also assume that it can communicate with the Annotator class by making
- * requests to its host, where the URL path is the name of the class method to call.
+ * <tt>getTaskParameters</tt> with the annotation task ID as the query string, in order to
+ * retrieve and interpret any existing parameter configuration for the task;
+ * e.g. <tt>getTaskParameters?pos-tagging</tt> 
+ * <p> If the task has been configured before, then the result of this request will be
+ * text using encoding was used by the web app to save the task configuration last time.
+ * <p> Simple task configuration parameters can be easily encoded as query string
+ * parameters, which is automatically achieved by using an HTML form that POSTs to
+ * <tt>setTaskParameters</tt> - below is an example of a <i>task/index.html</i> webapp
+ * that loads any current configuration from the annotator, presents a form for the user
+ * to fill out, and posts the new configuration back to the annotator:<pre>&lt;html&gt;
+ *  &lt;head&gt;&lt;title&gt;Configure Annotation Task&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&lt;h1&gt;Configure Annotation Task&lt;/h1&gt;
+ *    &lt;form method="POST" action="setTaskParameters"&gt; &lt;!-- POST to setTaskParameters --&gt;
+ *        &lt;label for="bar"&gt;Setting for Bar&lt;/label&gt;
+ *        &lt;input id="bar" name="bar" type="text"&gt; &lt;!-- an example task parameter --&gt;
+ *        &lt;input type="submit" value="Install"&gt;
+ *    &lt;/form&gt;
+ *    &lt;script type="text/javascript"&gt;
+ *      function get(path, onload) { // make a GET request of the annotator
+ *          var request = new XMLHttpRequest();
+ *          request.open("GET", path);
+ *          request.addEventListener("load", onload, false);
+ *          request.send();
+ *      }
+ *      // GET request to getConfig retrieves the current setup configuration, if any
+ *      get("getTaskParameters?"+window.location.search, function(e) {
+ *          var parameters = new URLSearchParams(this.responseText);
+ *          // set initial values of properties in the form above
+ *          // (this assumes bean property names match input id's in the form above)
+ *          for (const [key, value] of parameters) {
+ *            document.getElementById(key).value = value;
+ *          }
+ *      });      
+ *    &lt;/script&gt;    
+ *  &lt;/body&gt;
+ *&lt;/html&gt;</pre>
+ *
+ * <p> The web app can also assume that it can communicate with an instance of the Annotator class
+ * by making requests to its host, where the URL path is the name of the class method to call.
  * For GET requests, the query string contains the method parameter values, in order,
  * seperated by commas. Whatever the given method returns is passed back as the response.
  * <p> For example if the Annotation class has the method: <br>

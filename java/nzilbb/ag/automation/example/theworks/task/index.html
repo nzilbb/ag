@@ -1,16 +1,53 @@
 <html>
-  <head><title>Configure Task for The Works Annotator</title></head>
+  <head>
+    <title>Configure Task for The Works Annotator</title>
+    <link rel="stylesheet" href="index.css" type="text/css">
+  </head>
   <body>
-    <script type="text/javascript">
-      // Interaction with server:
-      function finished() {
-          // to indicate to the server we are finished, make a request to "install"
-	  new XMLHttpRequest().open("GET", "setTaskParameters");
-      }
-    </script>
+    <h1>The Works annotator Task configuration <span id="version"></span></h1>
+    <h2>Task: <span id="task"></span></h2>
 
-    <h1>Configure Task for The Works Annotator</h1>
-    <p> This is an example annotator which implements all possible features of an annotator. </p>
-    <div> <button>Close</button></div> 
+    <form method="POST" action="setTaskParameters">
+      <p> This is an example annotator which implements all possible features of an annotator. </p>
+      <div class="field">
+        <label for="prefix">Prefix</label>
+        <span><input id="prefix" name="prefix" type="text"></span>
+      </div>
+      <div class="field">
+        <label for="labelConfidence">Label Confidence</label>
+        <span><input id="labelConfidence" name="labelConfidence" type="number"
+                     step="0.1" min="0" max="1"></span>
+      </div>
+      <div class="controls">
+        <input type="submit" value="Close">
+      </div>
+    </form>
+    <script type="text/javascript">
+      function get(path, onload) { // make a GET request of the annotator
+          var request = new XMLHttpRequest();
+          request.open("GET", path);
+          request.addEventListener("load", onload, false);
+          request.send();
+      }
+
+      // the task ID is the query string without the initial ?
+      document.getElementById("task").innerHTML = window.location.search.substring(1);
+      
+      // any annotator method can be called to interrogate the annotator
+      get("getVersion", function(e) {
+          document.getElementById("version").innerHTML = "version " + this.responseText;
+      });
+      
+      // GET request to getConfig retrieves the current setup configuration, if any
+      get("getTaskParameters"+window.location.search, function(e) {
+          var parameters = new URLSearchParams(this.responseText);
+          // set initial values of properties in the form above
+          // (this assumes bean property names match input id's in the form above)
+          for (const [key, value] of parameters) {
+              document.getElementById(key).value = value;
+          }
+      });
+    </script>
+    
   </body>
 </html>

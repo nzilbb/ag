@@ -112,7 +112,9 @@ public class TheWorksExample extends Annotator {
     * parmeter web-app, so <var> parameters </var> will always be null.
     * @throws InvalidConfigurationException
     */
-   public void setTaskParameters(String parameters) throws InvalidConfigurationException { }
+   public void setTaskParameters(String parameters) throws InvalidConfigurationException {
+      beanPropertiesFromQueryString(parameters);
+   }
 
    /**
     * Determines which layers the annotator requires in order to annotate a graph.

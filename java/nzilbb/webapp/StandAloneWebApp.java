@@ -89,6 +89,23 @@ public class StandAloneWebApp extends CommandLineProgram {
    public StandAloneWebApp setPort(Integer newPort) { port = newPort; return this; }
 
    /**
+    * The query string to use when opening the web-app.
+    * @see #getQuery()
+    * @see #setQuery(String)
+    */
+   protected String query;
+   /**
+    * Getter for {@link #query}: The query string to use when opening the web-app.
+    * @return The query string to use when opening the web-app.
+    */
+   public String getQuery() { return query; }
+   /**
+    * Setter for {@link #query}: The query string to use when opening the web-app.
+    * @param newQuery The query string to use when opening the web-app.
+    */
+   public StandAloneWebApp setQuery(String newQuery) { query = newQuery; return this; }
+
+   /**
     * The URI path (excluding leading '/') for the request that terminates the web
     * app. Default is "finished". 
     * @see #getFinishedPath()
@@ -252,7 +269,8 @@ public class StandAloneWebApp extends CommandLineProgram {
          server.start();
 
          // open browser
-         java.awt.Desktop.getDesktop().browse(new URI("http://localhost:" + port));
+         java.awt.Desktop.getDesktop().browse(
+            new URI("http://localhost:" + port + "/" + (query==null?"":"?"+query)));
          
       } catch(Exception exception) {
          System.err.println("ERROR: " + exception);
