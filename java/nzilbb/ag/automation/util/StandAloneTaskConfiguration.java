@@ -35,6 +35,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.InvalidConfigurationException;
+import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.util.AnnotatorDescriptor;
 import nzilbb.ag.automation.util.RequestRouter;
 import nzilbb.util.IO;
@@ -171,6 +172,24 @@ public class StandAloneTaskConfiguration extends StandAloneWebApp {
     */
    @Switch(value="Identifier of the task to be configured",compulsory=true)
    public StandAloneTaskConfiguration setAnnotationTaskId(String newAnnotationTaskId) { annotationTaskId = newAnnotationTaskId; return this; }
+
+   /**
+    * Working directory.
+    * @see #getWorkingDir()
+    * @see #setWorkingDir(File)
+    */
+   protected File workingDir = new File(".");
+   /**
+    * Getter for {@link #workingDir}: Working directory.
+    * @return Working directory.
+    */
+   public File getWorkingDir() { return workingDir; }
+   /**
+    * Setter for {@link #workingDir}: Working directory.
+    * @param newWorkingDir Working directory.
+    */
+   @Switch("Directory for working/config files (default is the current directory)")
+   public StandAloneTaskConfiguration setWorkingDir(File newWorkingDir) { workingDir = newWorkingDir; return this; }
    
    /**
     * Adds handlers which routes webapp resource requests to the Annotators "conf" webapp,
@@ -279,6 +298,10 @@ public class StandAloneTaskConfiguration extends StandAloneWebApp {
          +"<p style='text-align: center;'><big>Thanks</big></p>"
          +"<p style='text-align: center;'>You can close this window.</p>"
          +"</body></html>";
+
+      if (annotator instanceof UsesFileSystem) {
+         ((UsesFileSystem)annotator).setWorkingDirectory(workingDir);
+      }
    } // end of init()
 
    /**

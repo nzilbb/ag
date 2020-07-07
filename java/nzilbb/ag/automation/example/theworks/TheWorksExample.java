@@ -21,13 +21,18 @@
 //
 package nzilbb.ag.automation.example.theworks;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
-import nzilbb.util.MonitorableTask;
+import nzilbb.util.IO;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.InvalidConfigurationException;
+import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.*;
 
 /**
@@ -38,7 +43,7 @@ import nzilbb.ag.*;
  *  <li>Includes a <i> task </i> web-app</li>
  * </ul>
  */
-public class TheWorksExample extends Annotator {
+public class TheWorksExample extends Annotator implements UsesFileSystem {
 
    /**
     * This class implements its own version of {@link Annotator#getAnnotatorId()} which is
@@ -56,6 +61,24 @@ public class TheWorksExample extends Annotator {
     * @return Annotator version.
     */
    public String getVersion() { return "0.1"; }
+
+   private File workingDir;
+   /**
+    * {@link UsesFileSystem} implementation: Provides a persisent directory in which files
+    * can be saved and accessed.
+    * @param directory
+    */
+   public void setWorkingDirectory(File directory) {
+      workingDir = directory;
+      
+      // load configuration, if any
+      File f = new File(workingDir, getAnnotatorId() + ".cfg");
+      if (f.exists()) {
+         try {
+            beanPropertiesFromQueryString(IO.InputStreamToString(new FileInputStream(f)));
+         } catch(IOException exception) {}
+      }
+   }
 
    /**
     * Provides the overall configuration of the annotator. 
@@ -103,6 +126,19 @@ public class TheWorksExample extends Annotator {
             } catch(Exception exception) {}
          }
       } // simulate a long installation
+
+      // persist the configuration to a file in the working directory
+      if (workingDir != null) {
+         try {
+            File f = new File(workingDir, getAnnotatorId() + ".cfg");
+            FileWriter out = new FileWriter(f);
+            out.write(config);
+            out.close();
+         } catch(IOException exception) {
+            System.err.println(""+exception);
+         }
+      }
+      
       setPercentComplete(100);
    }
    

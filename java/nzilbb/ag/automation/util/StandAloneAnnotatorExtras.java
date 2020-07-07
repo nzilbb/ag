@@ -32,6 +32,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.InvalidConfigurationException;
+import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.util.AnnotatorDescriptor;
 import nzilbb.ag.automation.util.RequestRouter;
 import nzilbb.util.IO;
@@ -151,6 +152,24 @@ public class StandAloneAnnotatorExtras extends StandAloneWebApp {
    public StandAloneAnnotatorExtras setRouter(RequestRouter newRouter) { router = newRouter; return this; }
 
    /**
+    * Working directory.
+    * @see #getWorkingDir()
+    * @see #setWorkingDir(File)
+    */
+   protected File workingDir = new File(".");
+   /**
+    * Getter for {@link #workingDir}: Working directory.
+    * @return Working directory.
+    */
+   public File getWorkingDir() { return workingDir; }
+   /**
+    * Setter for {@link #workingDir}: Working directory.
+    * @param newWorkingDir Working directory.
+    */
+   @Switch("Directory for working/config files (default is the current directory)")
+   public StandAloneAnnotatorExtras setWorkingDir(File newWorkingDir) { workingDir = newWorkingDir; return this; }
+
+   /**
     * Adds handlers which routes webapp resource requests to the Annotators "conf" webapp,
     * and routes server requests to Annotator.
     */
@@ -237,8 +256,12 @@ public class StandAloneAnnotatorExtras extends StandAloneWebApp {
       finishedResponse = "<html><head><title>Finished</title></head><body>"
          +"<p style='text-align:center;'>You can close this window.</p>"
          +"</body></html>";
-   } // end of init()
 
+      if (annotator instanceof UsesFileSystem) {
+         ((UsesFileSystem)annotator).setWorkingDirectory(workingDir);
+      }
+   } // end of init()
+   
    /** Override this setter so it's not required as a command line switch */
    @Override public StandAloneWebApp setRoot(File newRoot) { return super.setRoot(newRoot); }
    
