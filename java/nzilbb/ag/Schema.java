@@ -24,6 +24,7 @@ package nzilbb.ag;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Vector;
+import javax.script.*;
 import nzilbb.ag.util.LayerHierarchyTraversal;
 import org.json.IJSONableBean;
 
@@ -416,7 +417,6 @@ public class Schema implements Cloneable, IJSONableBean {
    public Layer getWordLayer() {
       return getLayer(wordLayerId);
    } // end of getWordLayer()
-
    
    /**
     * Return the layers as an array.
@@ -425,7 +425,33 @@ public class Schema implements Cloneable, IJSONableBean {
    public Layer[] layers() {
       return layers.values().toArray(new Layer[0]);
    } // end of layers()
-  
+   
+   /**
+    * Returns layers that match the given expression.
+    * <p> The expression is evaluated as a JavaScript boolean expressin and can assume
+    * that <var> layer </var> is a reference to a candidate layer and <var> schema </var>
+    * is a reference to this schema.
+    * <p> e.g. <q>parentId == schema.participantLayerId &amp;&amp; alignment == 0</q>
+    * should match all un-aligned children of the participant layer; i.e. participant attributes.
+    * @param expression A Javascript boolean expression to use to filter layers.
+    * @return A list of matching layers, which may be empty.
+    */
+   public Layer[] getMatchingLayers(String expression) throws ScriptException {
+      Vector<Layer> layers = new Vector<Layer>();
+      ScriptEngineManager manager = new ScriptEngineManager();
+      ScriptEngine engine = manager.getEngineByExtension("js");
+      ScriptEngineFactory factory = engine.getFactory();
+      ScriptContext context = engine.getContext();
+      context.setAttribute("schema", this, ScriptContext.ENGINE_SCOPE);
+      for (Layer layer : layers()) {
+         context.setAttribute("layer", layer, ScriptContext.ENGINE_SCOPE);
+         if ((Boolean)engine.eval(expression)) {
+            layers.add(layer);
+         }
+      } // next layer
+      return layers.toArray(new Layer[0]);
+   } // end of getMatchingLayers()
+
    /**
     * Copies the IDs of the special layers identified by the given schema.
     * @param source The source schema.
