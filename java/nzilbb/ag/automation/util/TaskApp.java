@@ -48,11 +48,11 @@ import nzilbb.webapp.StandAloneWebApp;
  * annotation task.
  */
 @ProgramDescription(value="Utility for configuring the parameters of an annotation task.")
-public class StandAloneTaskConfiguration extends StandAloneWebApp {
+public class TaskApp extends StandAloneWebApp {
 
    /** Command-line entrypoint */
    public static void main(String argv[]) {
-      StandAloneTaskConfiguration application = new StandAloneTaskConfiguration();
+      TaskApp application = new TaskApp();
       if (application.processArguments(argv)) {
          try {
             application.init();
@@ -79,7 +79,7 @@ public class StandAloneTaskConfiguration extends StandAloneWebApp {
     * @param newDebug Whether to print debug tracing.
     */
    @Switch("Whether to print debug tracing")
-   public StandAloneTaskConfiguration setDebug(Boolean newDebug) { debug = newDebug; return this; }
+   public TaskApp setDebug(Boolean newDebug) { debug = newDebug; return this; }
 
    /**
     * The name of either a .jar file, or a class (if it's on the classpath), which
@@ -102,7 +102,7 @@ public class StandAloneTaskConfiguration extends StandAloneWebApp {
     * classpath), which implements the annotator. 
     */
    @Switch(value="Name of annotator .jar file or class",compulsory=true)
-   public StandAloneTaskConfiguration setAnnotatorName(String newAnnotatorName) { annotatorName = newAnnotatorName; return this; }
+   public TaskApp setAnnotatorName(String newAnnotatorName) { annotatorName = newAnnotatorName; return this; }
 
    /**
     * Descriptor for the annotator.
@@ -119,7 +119,7 @@ public class StandAloneTaskConfiguration extends StandAloneWebApp {
     * Setter for {@link #descriptor}: Descriptor for the annotator.
     * @param newDescriptor Descriptor for the annotator.
     */
-   public StandAloneTaskConfiguration setDescriptor(AnnotatorDescriptor newDescriptor) { descriptor = newDescriptor; return this; }
+   public TaskApp setDescriptor(AnnotatorDescriptor newDescriptor) { descriptor = newDescriptor; return this; }
 
    /**
     * The annotator to configure.
@@ -136,7 +136,7 @@ public class StandAloneTaskConfiguration extends StandAloneWebApp {
     * Setter for {@link #annotator}: The annotator to configure.
     * @param newAnnotator The annotator to configure.
     */
-   public StandAloneTaskConfiguration setAnnotator(Annotator newAnnotator) { annotator = newAnnotator; return this; }
+   public TaskApp setAnnotator(Annotator newAnnotator) { annotator = newAnnotator; return this; }
    
    /**
     * Router for sending requests to annotator.
@@ -153,7 +153,7 @@ public class StandAloneTaskConfiguration extends StandAloneWebApp {
     * Setter for {@link #router}: Router for sending requests to annotator.
     * @param newRouter Router for sending requests to annotator.
     */
-   public StandAloneTaskConfiguration setRouter(RequestRouter newRouter) { router = newRouter; return this; }
+   public TaskApp setRouter(RequestRouter newRouter) { router = newRouter; return this; }
 
    /**
     * Identifier of the task to be configured.
@@ -171,7 +171,7 @@ public class StandAloneTaskConfiguration extends StandAloneWebApp {
     * @param newAnnotationTaskId Identifier of the task to be configured.
     */
    @Switch(value="Identifier of the task to be configured",compulsory=true)
-   public StandAloneTaskConfiguration setAnnotationTaskId(String newAnnotationTaskId) { annotationTaskId = newAnnotationTaskId; return this; }
+   public TaskApp setAnnotationTaskId(String newAnnotationTaskId) { annotationTaskId = newAnnotationTaskId; return this; }
 
    /**
     * Working directory.
@@ -189,7 +189,7 @@ public class StandAloneTaskConfiguration extends StandAloneWebApp {
     * @param newWorkingDir Working directory.
     */
    @Switch("Directory for working/config files (default is the current directory)")
-   public StandAloneTaskConfiguration setWorkingDir(File newWorkingDir) { workingDir = newWorkingDir; return this; }
+   public TaskApp setWorkingDir(File newWorkingDir) { workingDir = newWorkingDir; return this; }
    
    /**
     * Adds handlers which routes webapp resource requests to the Annotators "conf" webapp,
@@ -260,7 +260,7 @@ public class StandAloneTaskConfiguration extends StandAloneWebApp {
    } // end of addHandlers()
 
    /** Constructor */
-   public StandAloneTaskConfiguration() {
+   public TaskApp() {
       setFinishedPath("setTaskParameters");
    }
 

@@ -41,15 +41,14 @@ import nzilbb.util.Switch;
 import nzilbb.webapp.StandAloneWebApp;
 
 /**
- * Utility for running a stand-alone webapp for configuring an
- * {@link nzilbb.ag.automation.Annotator} installation.
+ * Utility for running a stand-alone webapp for  {@link nzilbb.ag.automation.Annotator} extras.
  */
-@ProgramDescription(value="Utility for configuring an annotator installation.")
-public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
+@ProgramDescription(value="Utility for running annotator 'ext' web app.")
+public class ExtApp extends StandAloneWebApp {
 
    /** Command-line entrypoint */
    public static void main(String argv[]) {
-      StandAloneAnnotatorConfiguration application = new StandAloneAnnotatorConfiguration();
+      ExtApp application = new ExtApp();
       if (application.processArguments(argv)) {
          try {
             application.init();
@@ -76,7 +75,7 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
     * @param newDebug Whether to print debug tracing.
     */
    @Switch("Whether to print debug tracing")
-   public StandAloneAnnotatorConfiguration setDebug(Boolean newDebug) { debug = newDebug; return this; }
+   public ExtApp setDebug(Boolean newDebug) { debug = newDebug; return this; }
 
    /**
     * The name of either a .jar file, or a class (if it's on the classpath), which
@@ -99,7 +98,7 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
     * classpath), which implements the annotator. 
     */
    @Switch(value="Name of annotator .jar file or class",compulsory=true)
-   public StandAloneAnnotatorConfiguration setAnnotatorName(String newAnnotatorName) { annotatorName = newAnnotatorName; return this; }
+   public ExtApp setAnnotatorName(String newAnnotatorName) { annotatorName = newAnnotatorName; return this; }
 
    /**
     * Descriptor for the annotator.
@@ -116,7 +115,7 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
     * Setter for {@link #descriptor}: Descriptor for the annotator.
     * @param newDescriptor Descriptor for the annotator.
     */
-   public StandAloneAnnotatorConfiguration setDescriptor(AnnotatorDescriptor newDescriptor) { descriptor = newDescriptor; return this; }
+   public ExtApp setDescriptor(AnnotatorDescriptor newDescriptor) { descriptor = newDescriptor; return this; }
 
    /**
     * The annotator to configure.
@@ -133,7 +132,7 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
     * Setter for {@link #annotator}: The annotator to configure.
     * @param newAnnotator The annotator to configure.
     */
-   public StandAloneAnnotatorConfiguration setAnnotator(Annotator newAnnotator) { annotator = newAnnotator; return this; }
+   public ExtApp setAnnotator(Annotator newAnnotator) { annotator = newAnnotator; return this; }
 
    /**
     * Router for sending requests to annotator.
@@ -150,8 +149,8 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
     * Setter for {@link #router}: Router for sending requests to annotator.
     * @param newRouter Router for sending requests to annotator.
     */
-   public StandAloneAnnotatorConfiguration setRouter(RequestRouter newRouter) { router = newRouter; return this; }
-   
+   public ExtApp setRouter(RequestRouter newRouter) { router = newRouter; return this; }
+
    /**
     * Working directory.
     * @see #getWorkingDir()
@@ -168,7 +167,7 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
     * @param newWorkingDir Working directory.
     */
    @Switch("Directory for working/config files (default is the current directory)")
-   public StandAloneAnnotatorConfiguration setWorkingDir(File newWorkingDir) { workingDir = newWorkingDir; return this; }   
+   public ExtApp setWorkingDir(File newWorkingDir) { workingDir = newWorkingDir; return this; }
 
    /**
     * Adds handlers which routes webapp resource requests to the Annotators "conf" webapp,
@@ -191,7 +190,7 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
                   x.getResponseHeaders().add("Content-Type", ContentTypeForName(path));
                   if (debug) System.err.println("getResource: conf"+path);
                   try {
-                     response = descriptor.getResource("config"+path);
+                     response = descriptor.getResource("ext"+path);
                   } catch(Throwable exception) {
                      if (debug) System.err.println("could not getResource: "+exception);
                   }
@@ -221,8 +220,7 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
    } // end of addHandlers()
 
    /** Constructor */
-   public StandAloneAnnotatorConfiguration() {
-      setFinishedPath("setConfig");
+   public ExtApp() {
    }
 
    /**
@@ -246,57 +244,23 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
       } catch (Throwable notAJarName) { // try as a class name
          descriptor = new AnnotatorDescriptor(annotatorName, getClass().getClassLoader());
       }
-      if (!descriptor.hasConfigWebapp()) {
-         throw new FileNotFoundException("Annotator has no 'config' web app.");
+      if (!descriptor.hasExtWebapp()) {
+         throw new FileNotFoundException("Annotator has no 'ext' web app.");
       }
       
-      annotator = descriptor.getInstance();
+      annotator = descriptor.getInstance();      
       router = new RequestRouter(annotator);
 
       // set a response that will follow the progress of the installation
-      finishedResponse = "<html><head><title>Installing...</title></head><body>"
-         +"<progress id='p' value='0' max='100' style='width: 100%'>Installing...</progress>"
-         +"<p id='m' style='text-align:center;'></p>"
-         +"<script type='text/javascript'>"
-         +"function p() {"
-         +" var request = new XMLHttpRequest();"
-         +" request.open('GET', 'getPercentComplete');"
-         +" request.addEventListener('load', function(e) {"
-         +"  var progress = document.getElementById('p');"
-         +"  progress.value = this.responseText;"
-         +"  if (progress.value < 100) window.setTimeout(p, 500);"
-         +"  else document.getElementById('m').innerHTML = 'You can close this window.';"
-         +" }, false);"
-         +" request.send();"
-         +"}"
-         +"p();"
-         +"</script>"
+      finishedResponse = "<html><head><title>Finished</title></head><body>"
+         +"<p style='text-align:center;'>You can close this window.</p>"
          +"</body></html>";
-      
+
       if (annotator instanceof UsesFileSystem) {
          ((UsesFileSystem)annotator).setWorkingDirectory(workingDir);
       }
    } // end of init()
-
-   /**
-    * Called when the web app is finished and the server has been stopped.
-    * @param result The body of the /finished request.
-    */
-   @Override
-   protected void finished(String result) {
-      System.err.println("finished: " + result);
-      try {
-         annotator.setConfig(result);
-      } catch(InvalidConfigurationException exception) {
-         System.err.println(""+exception);
-         exception.printStackTrace(System.err);
-      }
-      try {
-       Thread.sleep(1000); // give the browser a chance to get the last status
-      } catch(Exception exception) {}
-      System.exit(0);
-   } // end of finished()
-
+   
    /** Override this setter so it's not required as a command line switch */
    @Override public StandAloneWebApp setRoot(File newRoot) { return super.setRoot(newRoot); }
    
