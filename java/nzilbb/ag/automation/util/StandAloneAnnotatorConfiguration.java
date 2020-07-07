@@ -24,9 +24,9 @@ package nzilbb.ag.automation.util;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import nzilbb.ag.automation.Annotator;
@@ -77,22 +77,27 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
    public StandAloneAnnotatorConfiguration setDebug(Boolean newDebug) { debug = newDebug; return this; }
 
    /**
-    * Annotator class name.
-    * @see #getClassName()
-    * @see #setClassName(String)
+    * The name of either a .jar file, or a class (if it's on the classpath), which
+    * implements the annotator. 
+    * @see #getAnnotatorName()
+    * @see #setAnnotatorName(String)
     */
-   protected String className;
+   protected String annotatorName;
    /**
-    * Getter for {@link #className}: Annotator class name.
-    * @return Annotator class name.
+    * Getter for {@link #annotatorName}: The name of either a .jar file, or a class (if
+    * it's on the classpath), which implements the annotator. 
+    * @return The name of either a .jar file, or a class (if it's on the classpath), which
+    * implements the annotator. 
     */
-   public String getClassName() { return className; }
+   public String getAnnotatorName() { return annotatorName; }
    /**
-    * Setter for {@link #className}: Annotator class name.
-    * @param newClassName Annotator class name.
+    * Setter for {@link #annotatorName}: The name of either a .jar file, or a class (if
+    * it's on the classpath), which implements the annotator. 
+    * @param newAnnotatorName The name of either a .jar file, or a class (if it's on the
+    * classpath), which implements the annotator. 
     */
-   @Switch(value="Annotator class name",compulsory=true)
-   public StandAloneAnnotatorConfiguration setClassName(String newClassName) { className = newClassName; return this; }
+   @Switch(value="Name of annotator .jar file or class",compulsory=true)
+   public StandAloneAnnotatorConfiguration setAnnotatorName(String newAnnotatorName) { annotatorName = newAnnotatorName; return this; }
 
    /**
     * Descriptor for the annotator.
@@ -202,18 +207,27 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
 
    /**
     * Initialize the application.
-    * @throws ClassNotFoundException If the implemenation for {@link #className} cannot be found.
+    * @throws ClassNotFoundException If the implemenation for {@link #annotatorName}
+    * cannot be found. 
     * @throws NoSuchMethodException If the annotator has no default constructor.
     * @throws IllegalAccessException If the annotator's default constructor is not public.
     * @throws InvocationTargetException If the annotator's constructor throws an exception.
     * @throws InstantiationException If the annotator is an abstract class.
     * @throws ClassCastException If the annotator does not extend {@link Annotator}.
+    * @throws IOException If the annotator jar file cannot be opened.
     */
    public void init() throws ClassNotFoundException, NoSuchMethodException,
       InvocationTargetException, IllegalAccessException, InstantiationException,
-      ClassCastException {
-      // TODO handle loading from a specified jar file
-      descriptor = new AnnotatorDescriptor(getClassName(), getClass().getClassLoader());
+      ClassCastException, IOException {
+
+      // is the name a jar file name or a class name
+      try { // try as a jar file
+         descriptor = new AnnotatorDescriptor(new File(annotatorName));
+      } catch (Throwable notAJarName) { // try as a class name
+         notAJarName.printStackTrace(System.err);
+         descriptor = new AnnotatorDescriptor(annotatorName, getClass().getClassLoader());
+      }
+      
       annotator = descriptor.getInstance();
       router = new RequestRouter(annotator);
 
@@ -246,7 +260,7 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
    protected void finished(String result) {
       System.err.println("finished: " + result);
       try {
-       annotator.setConfig(result);
+         annotator.setConfig(result);
       } catch(InvalidConfigurationException exception) {
          System.err.println(""+exception);
          exception.printStackTrace(System.err);

@@ -21,10 +21,16 @@
 //
 package nzilbb.ag.automation.util;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.io.InputStream;
-import java.io.IOException;
+import java.net.URLClassLoader;
+import java.util.jar.Attributes;
+import java.util.jar.JarFile;
+import java.util.jar.JarException;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.util.IO;
 
@@ -36,6 +42,23 @@ import nzilbb.util.IO;
 public class AnnotatorDescriptor {
    
    // Attributes:
+
+   /**
+    * Java archive containing the annotator implementation.
+    * @see #getAnnotatorJar()
+    * @see #setAnnotatorJar(JarFile)
+    */
+   protected JarFile annotatorJar;
+   /**
+    * Getter for {@link #annotatorJar}: Java archive containing the annotator implementation.
+    * @return Java archive containing the annotator implementation.
+    */
+   public JarFile getAnnotatorJar() { return annotatorJar; }
+   /**
+    * Setter for {@link #annotatorJar}: Java archive containing the annotator implementation.
+    * @param newAnnotatorJar Java archive containing the annotator implementation.
+    */
+   public AnnotatorDescriptor setAnnotatorJar(JarFile newAnnotatorJar) { annotatorJar = newAnnotatorJar; return this; }
 
    /**
     * Fully-qualified annotator class name.
@@ -105,6 +128,45 @@ public class AnnotatorDescriptor {
       this.annotatorClassLoader = annotatorClassLoader;
       this.annotatorClass = Class.forName(annotatorClassName, true, annotatorClassLoader);
       this.instance = (Annotator)this.annotatorClass.getConstructor().newInstance();
+   } // end of constructor
+
+   /**
+    * Constructor.
+    * @param annotatorJar Java archive that contains the annotator implementation.
+    * @throws ClassNotFoundException If the annotator is not found by 
+    * <var>annotatorClassLoader</var>.
+    * @throws NoSuchMethodException If the annotator has no default constructor.
+    * @throws IllegalAccessException If the annotator's default constructor is not public.
+    * @throws InvocationTargetException If the annotator's constructor throws an exception.
+    * @throws InstantiationException If the annotator is an abstract class.
+    * @throws ClassCastException If the annotator does not extend {@link Annotator}.
+    */
+   @SuppressWarnings("unchecked")
+   public AnnotatorDescriptor(File annotatorJar)
+      throws ClassNotFoundException, NoSuchMethodException, InstantiationException,
+      IllegalAccessException, InvocationTargetException, ClassCastException, IOException {
+
+      if (!annotatorJar.exists()) {
+         throw new FileNotFoundException(annotatorJar.getPath());
+      }
+      
+      this.annotatorJar = new JarFile(annotatorJar);
+      
+      // get the class name from the jar manifest
+      annotatorClassName = (String)this.annotatorJar.getManifest().getMainAttributes().get(
+         new Attributes.Name("nzilbb-ag-automation-Annotator"));
+
+      if (annotatorClassName == null) {
+         throw new JarException("No attribute: nzilbb-ag-automation-Annotator");
+      }
+      
+      // get the class
+      URL[] urls = { annotatorJar.toURI().toURL() };
+      annotatorClassLoader = URLClassLoader.newInstance(urls, getClass().getClassLoader());
+      annotatorClass = annotatorClassLoader.loadClass(this.annotatorClassName);
+
+      // get an instance
+      instance = (Annotator)this.annotatorClass.getConstructor().newInstance();
    } // end of constructor
 
    /**

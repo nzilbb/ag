@@ -80,22 +80,27 @@ public class StandAloneTaskConfiguration extends StandAloneWebApp {
    public StandAloneTaskConfiguration setDebug(Boolean newDebug) { debug = newDebug; return this; }
 
    /**
-    * Annotator class name.
-    * @see #getClassName()
-    * @see #setClassName(String)
+    * The name of either a .jar file, or a class (if it's on the classpath), which
+    * implements the annotator. 
+    * @see #getAnnotatorName()
+    * @see #setAnnotatorName(String)
     */
-   protected String className;
+   protected String annotatorName;
    /**
-    * Getter for {@link #className}: Annotator class name.
-    * @return Annotator class name.
+    * Getter for {@link #annotatorName}: The name of either a .jar file, or a class (if
+    * it's on the classpath), which implements the annotator. 
+    * @return The name of either a .jar file, or a class (if it's on the classpath), which
+    * implements the annotator. 
     */
-   public String getClassName() { return className; }
+   public String getAnnotatorName() { return annotatorName; }
    /**
-    * Setter for {@link #className}: Annotator class name.
-    * @param newClassName Annotator class name.
+    * Setter for {@link #annotatorName}: The name of either a .jar file, or a class (if
+    * it's on the classpath), which implements the annotator. 
+    * @param newAnnotatorName The name of either a .jar file, or a class (if it's on the
+    * classpath), which implements the annotator. 
     */
-   @Switch(value="Annotator class name",compulsory=true)
-   public StandAloneTaskConfiguration setClassName(String newClassName) { className = newClassName; return this; }
+   @Switch(value="Name of annotator .jar file or class",compulsory=true)
+   public StandAloneTaskConfiguration setAnnotatorName(String newAnnotatorName) { annotatorName = newAnnotatorName; return this; }
 
    /**
     * Descriptor for the annotator.
@@ -241,7 +246,8 @@ public class StandAloneTaskConfiguration extends StandAloneWebApp {
 
    /**
     * Initialize the application.
-    * @throws ClassNotFoundException If the implemenation for {@link #className} cannot be found.
+    * @throws ClassNotFoundException If the implemenation for {@link #annotatorName}
+    * cannot be found. 
     * @throws NoSuchMethodException If the annotator has no default constructor.
     * @throws IllegalAccessException If the annotator's default constructor is not public.
     * @throws InvocationTargetException If the annotator's constructor throws an exception.
@@ -251,8 +257,15 @@ public class StandAloneTaskConfiguration extends StandAloneWebApp {
    public void init() throws ClassNotFoundException, NoSuchMethodException,
       InvocationTargetException, IllegalAccessException, InstantiationException,
       ClassCastException {
-      // TODO handle loading from a specified jar file
-      descriptor = new AnnotatorDescriptor(getClassName(), getClass().getClassLoader());
+      
+      // is the name a jar file name or a class name
+      try { // try as a jar file
+         descriptor = new AnnotatorDescriptor(new File(annotatorName));
+      } catch (Throwable notAJarName) { // try as a class name
+         notAJarName.printStackTrace(System.err);
+         descriptor = new AnnotatorDescriptor(annotatorName, getClass().getClassLoader());
+      }
+
       annotator = descriptor.getInstance();
       router = new RequestRouter(annotator);
       query = annotationTaskId;
