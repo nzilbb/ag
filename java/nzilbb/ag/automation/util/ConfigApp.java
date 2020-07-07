@@ -28,8 +28,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import nzilbb.ag.Constants;
+import nzilbb.ag.Layer;
+import nzilbb.ag.Schema;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
@@ -39,6 +43,7 @@ import nzilbb.util.IO;
 import nzilbb.util.ProgramDescription;
 import nzilbb.util.Switch;
 import nzilbb.webapp.StandAloneWebApp;
+import org.json.JSONObject;
 
 /**
  * Utility for running a stand-alone webapp for configuring an
@@ -178,6 +183,18 @@ public class ConfigApp extends StandAloneWebApp {
     */
    protected void addHandlers() throws IOException {
       if (server == null) createServer();
+
+      // add getSchema handler
+      server.createContext("/getSchema", new HttpHandler() {
+            public void handle(HttpExchange x) throws IOException {
+               String json = new JSONObject(annotator.getSchema()).toString();
+               x.getResponseHeaders().add("Content-Type", "application/json");
+               x.sendResponseHeaders(200, json.length());
+               OutputStream os = x.getResponseBody();
+               os.write(json.getBytes());
+               os.close();
+            }});      
+      
       // all (not otherwise handled) requests:
       server.createContext("/", new HttpHandler() {
             public void handle(HttpExchange x) throws IOException {
@@ -274,6 +291,23 @@ public class ConfigApp extends StandAloneWebApp {
          +"p();"
          +"</script>"
          +"</body></html>";
+      
+      // give the annotator the resources it needs...
+      
+      annotator.setSchema( // TODO make this configurable?
+         new Schema(
+            "who", "turn", "utterance", "word",
+            new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+            .setPeers(true).setPeersOverlap(true).setSaturated(true),
+            new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+            .setPeers(true).setPeersOverlap(false).setSaturated(false)
+            .setParentId("who").setParentIncludes(true),
+            new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+            .setPeers(true).setPeersOverlap(false).setSaturated(true)
+            .setParentId("turn").setParentIncludes(true),
+            new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+            .setPeers(true).setPeersOverlap(false).setSaturated(false)
+            .setParentId("turn").setParentIncludes(true)));
       
       if (annotator instanceof UsesFileSystem) {
          ((UsesFileSystem)annotator).setWorkingDirectory(workingDir);

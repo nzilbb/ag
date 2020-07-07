@@ -1,5 +1,6 @@
 /**
  * These are classes and interface for supporting automated annotation modules.
+ *
  * <p> Modules can be defined which perform specific annotation annotation tasks
  * automatically. Such a module must be packaged in a .jar file with the following:
  * <ul>
@@ -47,33 +48,39 @@
  *  <li> The annotator implements {@link Annotator#setConfig(String)} which completes any
  * install-time processing required.</li>
  * </ol>
+ *
  * <p> The configuration user interface is provided by packing a file called 
  * <q>index.html</q> and any other script/style-sheet files that might be required into
  * the deployed .jar archive, in a top-level directory called <i>config</i>. 
- * <p> This web
- * application can assume that it can communicate with the Annotator class by making
+ *
+ * <p> This web application can assume that it can communicate with the Annotator class by making
  * requests to its host, where the URL path is the name of the class method to call.
  * For GET requests, the query string contains the method parameter values, in order,
  * seperated by commas. Whatever the given method returns is passed back as the response.
+ *
  * <p> For example if the Annotation class has the method: <br>
  * <code>public String setFoo(String foo, String bar)</code><br>
  * &hellip; then the web-app can make the GET request: <br> 
  * <tt>/setFoo?fooValue,barValue</tt> <br>
  * &hellip; will get as a response whatever calling <code>setFoo("fooValue", "barValue")</code>
  * returns.
+ *
  * <p> To upload a file, the web-app can make a POST request, where the body of the
  * request is assumed to be the file contents. The corresponding Annotator class method
  * must take one File parameter.
+ *
  * <p> For example if the Annotation class has the method: <br>
  * <code>public String uploadLexicon(File lexicon)</code><br>
  * &hellip; then the web-app can make the POST request to <br>
  * <tt>/uploadLexicon</tt> <br>
  * &hellip; which will get as a response whatever calling
  * <code>uploadLexicon(tempFileContainingContent)</code> returns.
+ *
  * <p> Once the configuration web-app is finished, it must make a POST request to the URL
  * path: <br> 
  * <tt>setConfig</tt>
  * &hellip; which will invoke the Annotator class's <code>setConfig(config)</code> method.
+ *
  * <p> The <var>config</var> string passed into the <code>setConfig</code> method is the
  * body of the POST request. 
  *
@@ -125,6 +132,7 @@
  * user must set the task parameters, which are expressed using a String, which the
  * Annotator class can encode/interpret in whatever way is most convenient (e.g. it could
  * be serialization of Properties object, JSON, etc.). 
+ *
  * <p> There are two mechanisms for achieving this:
  * <ol>
  *  <li> The annotator can provide a user interface for specifying task parameters, in the
@@ -132,20 +140,25 @@
  *  <li> The annotator implements {@link Annotator#setTaskParameters(String)} which
  * complete provides the annotator with the resulting configuration.</li>
  * </ol>
+ *
  * <p> The configuration user interface is provided by packing a file called 
  * <q>index.html</q> and any other script/style-sheet files that might be required into
  * the deployed .jar archive, in a subdirectory of the directory containing the annotator
  * class, called <tt>task</tt>.  
+ *
  * <p> Each annotation task is identified by an ID, which is passed as the query string
  * when the task configuration web app is run; e.g. if the annotation task ID is
  * <q>pos-tagging</q> then the web app will be started with the URL like
  * <tt>&hellip;/task/index.html?pos-tagging</tt> 
+ *
  * <p> The first thing the web app should do is make a GET request to
  * <tt>getTaskParameters</tt> with the annotation task ID as the query string, in order to
  * retrieve and interpret any existing parameter configuration for the task;
  * e.g. <tt>getTaskParameters?pos-tagging</tt> 
+ *
  * <p> If the task has been configured before, then the result of this request will be
  * text using encoding was used by the web app to save the task configuration last time.
+ *
  * <p> Simple task configuration parameters can be easily encoded as query string
  * parameters, which is automatically achieved by using an HTML form that POSTs to
  * <tt>setTaskParameters</tt> - below is an example of a <i>task/index.html</i> webapp
@@ -181,12 +194,57 @@
  * by making requests to its host, where the URL path is the name of the class method to call.
  * For GET requests, the query string contains the method parameter values, in order,
  * seperated by commas. Whatever the given method returns is passed back as the response.
+ *
  * <p> For example if the Annotation class has the method: <br>
  * <code>public String testLookup(String word, String query)</code><br>
  * &hellip; then the web-app can make the GET request to <br>
  * <tt>/testQuery?test,phonology</tt> 
  * &hellip; to get as a response whatever calling <code>setFoo("test", "phonology")</code>
  * returns.
+ *
+ * <p> The web app can also ask for information about the annoation layer schema by
+ * making a GET request to <tt>getSchema</tt> which will return the schema encoded as
+ * JSON, e.g.: <pre>{
+ *    "participantLayerId":"who",
+ *    "turnLayerId":"turn",
+ *    "utteranceLayerId":"utterance",
+ *    "wordLayerId":"word",
+ *    "episodeLayerId":null,
+ *    "corpusLayerId":null,
+ *    "root" : {
+ *        "id":"graph", "parentId":null, "description":"The graph as a whole",
+ *        "alignment":2,
+ *        "peers":false, "peersOverlap":false, "parentIncludes":true, "saturated":true,
+ *        "type":"string" },
+ *    "layers" : {
+ *        "graph" : {
+ *            "id":"graph", "parentId":null, "description":"The graph as a whole",
+ *            "alignment":2,
+ *            "peers":false, "peersOverlap":false, "parentIncludes":true, "saturated":true,
+ *            "type":"string" },
+ *        "who" : {
+ *            "id":"who", "parentId":"graph", "description":"Participants",
+ *            "alignment":0,
+ *            "peers":true, "peersOverlap":true, "parentIncludes":true, "saturated":true,
+ *            "type":"string" },
+ *        "turn" : {
+ *            "id":"turn", "parentId":"who", "description":"Speaker turns",
+ *            "alignment":2,
+ *            "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
+ *            "type":"string" },
+ *        "utterance" : {
+ *            "id":"utterance", "parentId":"turn", "description":"Utterances",
+ *            "alignment":2,
+ *            "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true,
+ *            "type":"string" },
+ *        "word" : {
+ *            "id":"word", "parentId":"turn", "description":"Words",
+ *            "alignment":2,
+ *            "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
+ *            "type":"string" }
+ *    }
+ *}</pre>
+ *
  * <p> Once the task configuration web-app is finished, it must make a POST request to the
  * URL path: <br>
  * <tt>setTaskParameters</tt>
