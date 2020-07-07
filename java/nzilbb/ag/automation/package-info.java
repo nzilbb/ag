@@ -16,6 +16,10 @@
  *  <li> <i> &hellip;/task/&hellip; </i> - a subdirectory of the directory containing
  *       the Annotator class, containing a task configuration webapp for defining
  *       annotation task parameters. </li> 
+ *  <li> <i> &hellip;/ext/&hellip; </i> - a subdirectory of the directory containing
+ *       the Annotator class, containing a webapp providing any extra user interfaces that
+ *       might be useful for the annotator, including post-annotation visualizations,
+ *       lexicons or models, etc... </li>  
  * </ul>
  *
  * <p> e.g. a module implementing an Annotator class called <tt> org.fancy.Tagger </tt>
@@ -33,7 +37,7 @@
  * that implements {@link Annotator} should also implement {@link UsesFileSystem} and/or
  * {@link UsesRelationalDatabase} as well.
  *
- * <h2> General Installation/Configuration </h2>
+ * <h2 id="config"> General Installation/Configuration </h2>
  *
  * <p> Many annotators require install-time setup processing, e.g. to allow the user to
  * specify URLs/credentials for web-services, upload lexicon files, etc. There are two
@@ -112,7 +116,7 @@
  * should regularly check {@link Annotator#isCancelling()} to determine if installation
  * should be stopped.
  *
- * <h2> Annotation Task Parameter Configuration </h2>
+ * <h2 id="task"> Annotation Task Parameter Configuration </h2>
  *
  * <p> There are likely to be many different variations on the ways that a particular
  * annotator behaves, and so most annotators need the user to specify the parameters of a
@@ -194,5 +198,24 @@
  * <p> If no <q>task/index.html</q> file is provided in the .jar archive, 
  * <code>setTaskParameters(null)</code> is invoked as soon as the module is triggered for
  * an annotation task.
+ *
+ * <h2 id="ext"> Extending Beyond the Configuration / Task Parameter Interfaces </h2>
+ *
+ * <p> Some annotators perform analysis or data extraction beyond directly annotating the
+ * transcripts, and may need to provide post-processing visualizations, or access to
+ * analytics.
+ *
+ * <p> The annotator can provide a user interface for this by deploying a web app similar
+ * to the <i><a href="#config"> config </a></i> and <i><a href="#task"> task </a></i> web
+ * apps descibed above.  In this case, the web app should be deployed in a relative
+ * subdirectory called <i>ext</i>. 
+ *
+ * <p> As such a user interface is open-ended, unlike the <i> config </i> web app (which
+ * makes a request to <tt>setConfig</tt>) and the <i> task </i> web app (which makes a
+ * request to <tt>setTaskParameters</tt>), no final request is required to 'save' the
+ * results. However, if this is desired, the web app can make a request to: <tt>finished</tt> 
+ *
+ * <p> Otherwise, the <i> ext </i> web app can access the Annotator object using GET
+ * requests, in a similar fashion to the other web apps.
  */
 package nzilbb.ag.automation;

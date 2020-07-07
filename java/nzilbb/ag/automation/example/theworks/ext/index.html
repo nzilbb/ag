@@ -1,0 +1,73 @@
+<html>
+  <head>
+    <title>Extended Interface for The Works Annotator</title>
+    <link rel="stylesheet" href="index.css" type="text/css">
+  </head>
+  <body>
+    <h1>The Works annotator extra web-app</h1>
+
+    <p> This is an example of a web app that can provide any extra user-interface that
+      might be required for the annotator. It could provide: </p>
+
+    <ul>
+      <li> data visualizations, </li>
+      <li> access to statistics, </li>
+      <li> access to models or lexicons generated during processing, </li>
+      <li> &vellip; </li>
+    </ul>
+
+    <p> In this specific case, the web app just interrogates the annotator object for its
+    properties: </p>
+    
+    <div class="form">
+      <div class="field"><label>Annotator Version</label><span id="version"></span></div>
+      <div class="field"><label>Reverse</label><span id="reverse"></span></div>
+      <div class="field"><label>Left Padding</label><span id="leftPadding"></span></div>
+      <div class="field"><label>Right Padding</label><span id="rightPadding"></span></div>
+      <div class="field"><label>Prefix</label><span id="prefix"></span></div>
+      <div class="field"><label>Label Confidence</label><span id="labelConfidence"></span></div>
+      <div class="field">
+        <label>Simulated Installation Duration</label>
+        <span id="simulatedInstallationDuration"></span></div>
+      <div class="field">
+        <label>Configuration String</label>
+        <span id="config"></span></div>
+    </div>
+    
+    <script type="text/javascript">
+      function get(path, onload) { // make a GET request of the annotator
+          var request = new XMLHttpRequest();
+          request.open("GET", path);
+          request.addEventListener("load", onload, false);
+          request.send();
+      }
+      
+      // any annotator method can be called to interrogate the annotator
+      get("getVersion", function(e) {
+          document.getElementById("version").innerHTML = this.responseText;
+      });
+      get("getReverse", function(e) {
+          document.getElementById("reverse").innerHTML = this.responseText;
+      });
+      get("getLeftPadding", function(e) {
+          document.getElementById("leftPadding").innerHTML = this.responseText;
+      });
+      get("getRightPadding", function(e) {
+          document.getElementById("rightPadding").innerHTML = this.responseText;
+      });
+      get("getPrefix", function(e) {
+          document.getElementById("prefix").innerHTML = this.responseText;
+      });
+      get("getLabelConfidence", function(e) {
+          document.getElementById("labelConfidence").innerHTML = this.responseText;
+      });
+      get("getSimulatedInstallationDuration", function(e) {
+          document.getElementById("simulatedInstallationDuration").innerHTML = this.responseText;
+      });
+      get("getConfig", function(e) {
+          document.getElementById("config").innerHTML = this.responseText;
+      });
+    </script>
+    
+  </body>
+</html>

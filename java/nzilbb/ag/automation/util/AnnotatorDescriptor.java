@@ -202,6 +202,13 @@ public class AnnotatorDescriptor {
       return annotatorClass.getResource("task/index.html") != null;
    } // end of hasTaskWebapp()
 
+   /**
+    * Determines whether the annotator includes an extras web-app.
+    * @return true if the class includes a web-app at ext/index.html, false otherwise.
+    */
+   public boolean hasExtWebapp() {
+      return annotatorClass.getResource("ext/index.html") != null;
+   } // end of hasTaskWebapp()
    
    /**
     * Provides access to the given resource, supplied by the annotator class.

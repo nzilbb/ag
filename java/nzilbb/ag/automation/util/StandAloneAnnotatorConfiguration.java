@@ -25,6 +25,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -226,6 +227,9 @@ public class StandAloneAnnotatorConfiguration extends StandAloneWebApp {
       } catch (Throwable notAJarName) { // try as a class name
          notAJarName.printStackTrace(System.err);
          descriptor = new AnnotatorDescriptor(annotatorName, getClass().getClassLoader());
+      }
+      if (!descriptor.hasConfigWebapp()) {
+         throw new FileNotFoundException("Annotator has no 'config' web app.");
       }
       
       annotator = descriptor.getInstance();

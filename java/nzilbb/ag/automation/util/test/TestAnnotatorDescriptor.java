@@ -50,6 +50,8 @@ public class TestAnnotatorDescriptor {
                    d.hasConfigWebapp());
       assertFalse("No task webapp",
                    d.hasTaskWebapp());
+      assertFalse("No ext webapp",
+                   d.hasExtWebapp());
       assertTrue("Info is accessible",
                  d.getInfo().startsWith("<html><head><title>MinimalExample"));
    }
@@ -70,6 +72,8 @@ public class TestAnnotatorDescriptor {
                   d.hasConfigWebapp());
       assertTrue("task webapp detected",
                   d.hasTaskWebapp());
+      assertTrue("ext webapp detected",
+                  d.hasExtWebapp());
       assertTrue("Info is accessible",
                  d.getInfo().startsWith("<html><head><title>TheWorksExample"));
    }

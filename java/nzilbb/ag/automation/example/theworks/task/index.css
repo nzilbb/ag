@@ -16,7 +16,7 @@ h4 { font-size: 14pt; color: #859044; }
 h5 { font-size: 13pt; color: #859044; }
 h6 { font-size: 12pt; color: #859044; }
 
-form {
+form, div.form {
     display: block;
     margin: auto;
     width: 75vw;
@@ -30,7 +30,7 @@ form {
     display: block;
     font-weight: bold;
 }
-.field div {
+.field span {
     width: 50%;
 }
 .field input[type="number"] {
