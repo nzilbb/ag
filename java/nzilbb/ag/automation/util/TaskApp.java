@@ -46,6 +46,8 @@ import nzilbb.webapp.StandAloneWebApp;
 /**
  * Utility for running a stand-alone webapp for configuring the parameters of an
  * annotation task.
+ * <p> This can be run from the command like this:
+ * <p><tt> java -classpath nzilbb.ag.jar nzilbb.ag.automation.util.TaskApp --annotationTaskId=test myjar.jar </tt>
  */
 @ProgramDescription(value="Utility for configuring the parameters of an annotation task.")
 public class TaskApp extends StandAloneWebApp {

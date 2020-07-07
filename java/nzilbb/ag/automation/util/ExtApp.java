@@ -42,6 +42,8 @@ import nzilbb.webapp.StandAloneWebApp;
 
 /**
  * Utility for running a stand-alone webapp for  {@link nzilbb.ag.automation.Annotator} extras.
+ * <p> This can be run from the command like this:
+ * <p><tt> java -classpath nzilbb.ag.jar nzilbb.ag.automation.util.ExtApp myjar.jar </tt>
  */
 @ProgramDescription(value="Utility for running annotator 'ext' web app.")
 public class ExtApp extends StandAloneWebApp {

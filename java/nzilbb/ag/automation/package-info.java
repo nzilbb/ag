@@ -223,32 +223,32 @@
  * executing webapps from the command line which may be useful during development of new
  * annotators: </p>
  *
- * <h3 id="AnnotatorInfo"> AnnotatorInfo </h3>
+ * <h3 id="Info"> Info </h3>
  *
  * <p>This utility displays the <i> info.html </i> page of a given annotator, e.g.</p>
  *
- * <tt> java -classpath nzilbb.ag.jar nzilbb.ag.automation.util.AnnotatorInfo myjar.jar </tt>
+ * <p><tt> java -classpath nzilbb.ag.jar nzilbb.ag.automation.util.Info myjar.jar </tt></p>
  *
- * <h3 id="StandAloneAnnotatorConfiguration"> StandAloneAnnotatorConfiguration </h3>
+ * <h3 id="ConfigApp"> ConfigApp </h3>
  *
  * <p>This utility runs an annotator's <i> config </i> web app for installation-time
  * overall configuration, e.g.</p>
  *
- * <tt> java -classpath nzilbb.ag.jar nzilbb.ag.automation.util.ConfigApp myjar.jar </tt>
+ * <p><tt> java -classpath nzilbb.ag.jar nzilbb.ag.automation.util.ConfigApp myjar.jar </tt></p>
  *
- * <h3 id="StandAloneTaskConfiguration"> StandAloneTaskConfiguration </h3>
+ * <h3 id="TaskApp"> TaskApp </h3>
  *
  * <p>This utility runs an annotator's <i> task </i> web app for annotation task specific
  * configuration, e.g. </p>
  *
- * <tt> java -classpath nzilbb.ag.jar nzilbb.ag.automation.util.TaskApp --annotationTaskId=test myjar.jar </tt>
+ * <p><tt> java -classpath nzilbb.ag.jar nzilbb.ag.automation.util.TaskApp --annotationTaskId=test myjar.jar </tt></p>
  *
- * <h3 id="StandAloneAnnotatorExtras"> StandAloneAnnotatorExtras </h3>
+ * <h3 id="ExtApp"> ExtApp </h3>
  *
  * <p>This utility runs an annotator's <i> ext </i> web app, if any, for post-processing
  * visualizations etc., e.g. </p>
  *
- * <tt> java -classpath nzilbb.ag.jar nzilbb.ag.automation.util.ExtApp myjar.jar </tt>
+ * <p><tt> java -classpath nzilbb.ag.jar nzilbb.ag.automation.util.ExtApp myjar.jar </tt></p>
  *
  * <p>This utility </p>
  *

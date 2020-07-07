@@ -39,12 +39,14 @@ import nzilbb.util.IO;
 
 /**
  * Utility for displaying annotator information.
+ * <p> This can be run from the command like this:
+ * <p><tt> java -classpath nzilbb.ag.jar nzilbb.ag.automation.util.Info myjar.jar </tt>
  */
 @ProgramDescription(value="Utility for running stand-alone webapps",arguments="class.or.jar")
-public class AnnotatorInfo extends CommandLineProgram {
+public class Info extends CommandLineProgram {
    /** Command-line entrypoint */
    public static void main(String argv[]) {
-      AnnotatorInfo application = new AnnotatorInfo();
+      Info application = new Info();
       if (application.processArguments(argv)) {
          try {
             application.start();
@@ -74,7 +76,7 @@ public class AnnotatorInfo extends CommandLineProgram {
     * stdout (false). Default is true. 
     */
    @Switch("Whether to show a graphical user interface or not")
-   public AnnotatorInfo setGui(Boolean newGui) { gui = newGui; return this; }
+   public Info setGui(Boolean newGui) { gui = newGui; return this; }
 
    /**
     * The name of either a .jar file, or a class (if it's on the classpath), which
@@ -96,7 +98,7 @@ public class AnnotatorInfo extends CommandLineProgram {
     * @param newAnnotatorName The name of either a .jar file, or a class (if it's on the
     * classpath), which implements the annotator. 
     */
-   public AnnotatorInfo setAnnotatorName(String newAnnotatorName) { annotatorName = newAnnotatorName; return this; }
+   public Info setAnnotatorName(String newAnnotatorName) { annotatorName = newAnnotatorName; return this; }
 
    /**
     * Descriptor for the annotator.
@@ -113,7 +115,7 @@ public class AnnotatorInfo extends CommandLineProgram {
     * Setter for {@link #descriptor}: Descriptor for the annotator.
     * @param newDescriptor Descriptor for the annotator.
     */
-   public AnnotatorInfo setDescriptor(AnnotatorDescriptor newDescriptor) { descriptor = newDescriptor; return this; }
+   public Info setDescriptor(AnnotatorDescriptor newDescriptor) { descriptor = newDescriptor; return this; }
 
    /**
     * The annotator to configure.
@@ -130,7 +132,7 @@ public class AnnotatorInfo extends CommandLineProgram {
     * Setter for {@link #annotator}: The annotator to configure.
     * @param newAnnotator The annotator to configure.
     */
-   public AnnotatorInfo setAnnotator(Annotator newAnnotator) { annotator = newAnnotator; return this; }
+   public Info setAnnotator(Annotator newAnnotator) { annotator = newAnnotator; return this; }
 
    /** Start handling requests, and  */
    public void start() {
