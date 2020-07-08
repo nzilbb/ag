@@ -26,15 +26,15 @@ import org.junit.*;
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Collectors;
-import nzilbb.ag.Schema;
-import nzilbb.ag.Graph;
-import nzilbb.ag.Layer;
 import nzilbb.ag.Anchor;
 import nzilbb.ag.Annotation;
 import nzilbb.ag.Constants;
+import nzilbb.ag.Graph;
+import nzilbb.ag.Layer;
+import nzilbb.ag.Schema;
 import nzilbb.annotator.porterstemmer.PorterStemmer;
 
 public class TestPorterStemmer {
