@@ -238,6 +238,12 @@ public class AnnotatorWebApp extends StandAloneWebApp {
       InvocationTargetException, IllegalAccessException, InstantiationException,
       ClassCastException, IOException {
 
+      if (arguments.size() == 0) {
+         throw new ClassCastException(
+            "No annotator .jar file or class name provided.\nTry --usage.");
+      }
+      annotatorName = arguments.firstElement();
+
       // is the name a jar file name or a class name
       try { // try as a jar file
          descriptor = new AnnotatorDescriptor(new File(annotatorName));

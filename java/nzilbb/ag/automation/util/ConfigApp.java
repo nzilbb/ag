@@ -51,7 +51,9 @@ import org.json.JSONObject;
  * <p> This can be run from the command like this:
  * <p><tt> java -classpath nzilbb.ag.jar nzilbb.ag.automation.util.ConfigApp myjar.jar </tt>
  */
-@ProgramDescription(value="Utility for configuring an annotator installation.")
+@ProgramDescription(
+   value="Utility for configuring an annotator installation.",
+   arguments="name.of.annotator.class.or.jar")
 public class ConfigApp extends AnnotatorWebApp {
 
    /** Command-line entrypoint */
@@ -73,15 +75,6 @@ public class ConfigApp extends AnnotatorWebApp {
     */
    @Switch("Whether to print debug tracing")
    public ConfigApp setDebug(Boolean newDebug) { debug = newDebug; return this; }
-
-   /**
-    * Setter for {@link #annotatorName}: The name of either a .jar file, or a class (if
-    * it's on the classpath), which implements the annotator. 
-    * @param newAnnotatorName The name of either a .jar file, or a class (if it's on the
-    * classpath), which implements the annotator. 
-    */
-   @Switch(value="Name of annotator .jar file or class",compulsory=true)
-   public ConfigApp setAnnotatorName(String newAnnotatorName) { annotatorName = newAnnotatorName; return this; }
 
    /**
     * Setter for {@link #workingDir}: Working directory.

@@ -53,7 +53,9 @@ import org.json.JSONObject;
  * <p> This can be run from the command like this:
  * <p><tt> java -classpath nzilbb.ag.jar nzilbb.ag.automation.util.TaskApp --annotationTaskId=test myjar.jar </tt>
  */
-@ProgramDescription(value="Utility for configuring the parameters of an annotation task.")
+@ProgramDescription(
+   value="Utility for configuring the parameters of an annotation task.",
+   arguments="name.of.annotator.class.or.jar taskId")
 public class TaskApp extends AnnotatorWebApp {
 
    /** Command-line entrypoint */
@@ -77,15 +79,6 @@ public class TaskApp extends AnnotatorWebApp {
    public TaskApp setDebug(Boolean newDebug) { debug = newDebug; return this; }
 
    /**
-    * Setter for {@link #annotatorName}: The name of either a .jar file, or a class (if
-    * it's on the classpath), which implements the annotator. 
-    * @param newAnnotatorName The name of either a .jar file, or a class (if it's on the
-    * classpath), which implements the annotator. 
-    */
-   @Switch(value="Name of annotator .jar file or class",compulsory=true)
-   public TaskApp setAnnotatorName(String newAnnotatorName) { annotatorName = newAnnotatorName; return this; }
-
-   /**
     * Identifier of the task to be configured.
     * @see #getAnnotationTaskId()
     * @see #setAnnotationTaskId(String)
@@ -100,7 +93,6 @@ public class TaskApp extends AnnotatorWebApp {
     * Setter for {@link #annotationTaskId}: Identifier of the task to be configured.
     * @param newAnnotationTaskId Identifier of the task to be configured.
     */
-   @Switch(value="Identifier of the task to be configured",compulsory=true)
    public TaskApp setAnnotationTaskId(String newAnnotationTaskId) { annotationTaskId = newAnnotationTaskId; return this; }
 
    /**
@@ -156,6 +148,12 @@ public class TaskApp extends AnnotatorWebApp {
       InvocationTargetException, IllegalAccessException, InstantiationException,
       ClassCastException, IOException {
       super.init();
+      
+      if (arguments.size() < 2) {
+         throw new ClassCastException("No taskId provided.\nTry --usage.");
+      }
+      annotationTaskId = arguments.elementAt(1);
+      setQuery(annotationTaskId);
       
       if (!descriptor.hasTaskWebapp()) {
          throw new FileNotFoundException("Annotator has no 'task' web app.");
