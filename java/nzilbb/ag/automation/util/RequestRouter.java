@@ -69,7 +69,12 @@ public class RequestRouter
          registerMethod(method);
       } // next method
 
-      // allow progress to be trackked too
+      // allow version to be retrieved
+      try {
+       registerMethod(annotator.getClass().getMethod("getVersion"));
+      } catch(NoSuchMethodException impossible) {}
+      
+      // allow progress to be tracked too
       try {
        registerMethod(annotator.getClass().getMethod("getPercentComplete"));
       } catch(NoSuchMethodException impossible) {}
