@@ -30,6 +30,7 @@
  *  <li>org/fancy/info.html</li>
  *  <li>org/fancy/config/index.html</li>
  *  <li>org/fancy/task/index.html</li>
+ *  <li>org/fancy/ext/index.html</li>
  * </ul>
  * 
  * <p> Annotators may require access to the file system or a relational database in order
@@ -63,7 +64,7 @@
  * &hellip; then the web-app can make the GET request: <br> 
  * <tt>/setFoo?fooValue,barValue</tt> <br>
  * &hellip; will get as a response whatever calling <code>setFoo("fooValue", "barValue")</code>
- * returns.
+ * returns. (Currently there can be up to five parameters)
  *
  * <p> To upload a file, the web-app can make a POST request, where the body of the
  * request is assumed to be the file contents. The corresponding Annotator class method
@@ -79,7 +80,8 @@
  * <p> Once the configuration web-app is finished, it must make a POST request to the URL
  * path: <br> 
  * <tt>setConfig</tt>
- * &hellip; which will invoke the Annotator class's <code>setConfig(config)</code> method.
+ * &hellip; which will invoke the Annotator class's
+ * {@link Annotator#setConfig(String) setConfig(config)} method.
  *
  * <p> The <var>config</var> string passed into the <code>setConfig</code> method is the
  * body of the POST request. 
@@ -113,14 +115,18 @@
  *  &lt;/body&gt;
  *&lt;/html&gt;</pre>
  *
+ * <p> (This example is self-contained an assumes no web-app frameworks. The web-app can
+ * use JQuery, Angular, or any other frameworks or libraries, as long as they are bundled
+ * into the <i> config </i> directory with <i> index.html </i>)
+ *
  * <p> If no <q>config/index.html</q> file is provided in the .jar archive, 
  * <code>setConfig(null)</code> is invoked as soon as the module is installed/upgraded.
  *
- * <p> The <code>setConfig(config)</code> method is assumed to be synchronous (this method doesn't
- * return until it's complete) and long-running, so the Annotator class should provide an
- * indication of progress by calling {@link Annotator#setPercentComplete(Integer)} and
- * should regularly check {@link Annotator#isCancelling()} to determine if installation
- * should be stopped.
+ * <p> The {@link Annotator#setConfig(String) setConfig(config)} method is assumed to be
+ * synchronous (this method doesn't return until it's complete) and long-running, so the
+ * Annotator class should provide an indication of progress by calling
+ * {@link Annotator#setPercentComplete(Integer)} and should regularly check
+ * {@link Annotator#isCancelling()} to determine if installation should be stopped.
  *
  * <h2 id="task"> Annotation Task Parameter Configuration </h2>
  *
@@ -190,6 +196,10 @@
  *  &lt;/body&gt;
  *&lt;/html&gt;</pre>
  *
+ * <p> (This example is self-contained an assumes no web-app frameworks. The web-app can
+ * use JQuery, Angular, or any other frameworks or libraries, as long as they are bundled
+ * into the <i> task </i> directory with <i> index.html </i>)
+ *
  * <p> The web app can also assume that it can communicate with an instance of the Annotator class
  * by making requests to its host, where the URL path is the name of the class method to call.
  * For GET requests, the query string contains the method parameter values, in order,
@@ -249,8 +259,8 @@
  * URL path: <br>
  * <tt>setTaskParameters</tt>
  * &hellip; with the resulting parameter string as the body of
- * the request, which will invoke the Annotator class's <code>setTaskParameters(String)</code> 
- * method.
+ * the request, which will invoke the Annotator class's
+ * {@link Annotator#setTaskParameters(String) setTaskParameters(parameters)} method.
  *
  * <p> If no <q>task/index.html</q> file is provided in the .jar archive, 
  * <code>setTaskParameters(null)</code> is invoked as soon as the module is triggered for
