@@ -54,12 +54,12 @@
     <!-- Put everything in ${build} into the ${ant.project.name}.jar file -->
     <jar jarfile="${dist}/${ant.project.name}.jar" 
 	 basedir="${build}"
-         comment="version ${DSTAMP}.${TSTAMP}">
+         comment="${DSTAMP}.${TSTAMP}">
       
       <!-- include source code -->
       <fileset dir="${src}" includes="${srcfiles}" />
       <!-- include resources -->
-      <fileset dir="${src}" includes="nzilbb/**/*.svg nzilbb/**/*.html nzilbb/**/*.css nzilbb/**/*.js" />
+      <fileset dir="${src}" includes="nzilbb/**/*.svg nzilbb/ag/**/*.html nzilbb/ag/**/*.css nzilbb/ag/**/*.js" />
       <!-- include this build file -->
       <fileset dir="." includes="build.xml" />
       <!-- include antlr base classes -->
@@ -73,8 +73,14 @@
           description="Generate javadoc for all source files" >
     <mkdir dir="${javadoc}"/>
     <javadoc destdir="${javadoc}"
-	     classpath=".;lib/antlr-4.7.2-complete.jar"
-	     Author="yes" Windowtitle="nzilbb.ag" >
+             classpath=".;lib/antlr-4.7.2-complete.jar"
+             Author="yes"
+             Windowtitle="nzilbb.ag"
+             stylesheetfile="doc-files/style.css"
+             Overview="nzilbb/ag/overview.html"
+             noqualifier="all"
+             bottom="&lt;i&gt;&amp;copy; NZILBB - ${TODAY}&lt;/i&gt;"
+             >
       <fileset dir="${src}"
                includes="${srcfiles}"
                excludes="nzilbb/ag/**/test/*.java ${srctestseditpath} nzilbb/ag/ql/**/*.java" />
