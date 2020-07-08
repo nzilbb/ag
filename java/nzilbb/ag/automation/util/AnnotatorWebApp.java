@@ -188,7 +188,7 @@ public class AnnotatorWebApp extends StandAloneWebApp {
                   // e.g. index.html
                   if (debug) System.err.println("resource: " + uri);
                   x.getResponseHeaders().add("Content-Type", ContentTypeForName(path));
-                  if (debug) System.err.println("getResource: conf"+path);
+                  if (debug) System.err.println("getResource: "+subdirectory+path);
                   try {
                      response = descriptor.getResource(subdirectory+path);
                   } catch(Throwable exception) {
