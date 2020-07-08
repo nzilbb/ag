@@ -23,15 +23,75 @@ package nzilbb.ag.automation;
 
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.net.URL;
+import java.net.URI;
 import java.io.UnsupportedEncodingException;
+import java.io.File;
+import java.util.jar.JarFile;
 import java.lang.reflect.Method;
 import java.util.Vector;
 import nzilbb.ag.*;
 import nzilbb.util.MonitorableTask;
 
 /**
- * Interface an automated annotation module must implement.
- * <p> When {@link IGraphTransformer#transform(Graph)} is invoked, it 
+ * Base class for an automated annotation module.
+ * <p> When {@link IGraphTransformer#transform(Graph)} is invoked, it should perform
+ * whatever annotation task has been configured by the last call to
+ * {@link #setTaskParameters(String)}.
+ * <p> The typical lifecycle of an annotator is:
+ * <ol>
+ *  <li> The module is installed:
+ *       <ol>
+ *         <li> {@link #setSchema(Schema)} is invoked. </li>
+ *         <li> {@link #getConfig()} is invoked, in case the annotator has a default
+ *              configuration. </li>
+ *         <li> the user is presentated with the <a href="package-summary.html#config">
+ *              config web app</a>, if any, and </li> 
+ *         <li> {@link #setConfig(String)} is invoked. </li>
+ *       </ol>
+ *  </li>
+ *  <li> One or more annotation tasks are created; for each one: 
+ *       <ol>
+ *         <li> {@link #setSchema(Schema)} is invoked. </li>
+ *         <li> the user is presentated with the <a href="package-summary.html#task">
+ *              task web app</a>, if any, and </li> 
+ *         <li> {@link #setTaskParameters(String)} is invoked to allow any installation
+ *              processing to occur; e.g. persisting configuration, loading lexicons, etc. </li>
+ *       </ol>
+ *  </li>
+ *  <li> Annotation tasks may be then run one or more times:
+ *       <ol>
+ *         <li> {@link #setSchema(Schema)} is invoked to provide the current schema. </li>
+ *         <li> {@link #setTaskParameters(String)} is invoked to provide the parameters. </li>
+ *         <li> {@link #getRequiredLayers()} is invoked to determine which layers are neede. </li>
+ *         <li> {@link #getOutputLayers()} is invoked to determine which layer are annotated. </li> 
+ *         <li> {@link IGraphTransformer#transform(Graph) transform(graph)} is invoked
+ *              with a graph that should be annotated. It can be assumed to have
+ *              annotations on its input layers, and possible annotations on its output
+ *              layers as well (produced by previous calls to
+ *              {@link IGraphTransformer#transform(Graph) transform(graph)} or by other
+ *              annotators
+ *              - i.e. <em>the annotator should not assume the output layer is empty</em>) </li>
+ *       </ol>
+ *  </li>
+ *  <li> If there is an  <a href="package-summary.html#ext"> extensions web app</a> the
+ *       user may visit it to access data, visualizations, etc.</li>
+ *  <li> The module may be upgraded, in which case:
+ *       <ol>
+ *         <li> {@link #setSchema(Schema)} is invoked. </li>
+ *         <li> {@link #getConfig()} is invoked, to determine the pre-upgrade conofiguration. </li>
+ *         <li> the user is presentated with the <a href="package-summary.html#config">
+ *              config web app</a>, if any, and </li> 
+ *         <li> {@link #setConfig(String)} is invoked to allow any upgrade processing to
+ *              occur, e.g. updating configuration, changes in data schema, etc. </li>
+ *       </ol>
+ *  </li>
+ *  <li> The module is uninstalled, in which case {@link #uninstall()} is invoked, which
+ *       should remove all persistent data on the system - e.g. DROP database tables,
+ *       delete data files, etc. </li>
+ * </ol>
+ * <p> The methods below marked in <b> bold </b> are those that an Annotator subclass
+ * should implement, in addition to {@link IGraphTransformer#transform(Graph) transform(graph)}.
  * @author Robert Fromont robert@fromont.net.nz
  */
 public abstract class Annotator implements IGraphTransformer, MonitorableTask {
@@ -48,10 +108,28 @@ public abstract class Annotator implements IGraphTransformer, MonitorableTask {
 
    /**
     * Version of this implementation; versions will typically be numeric, but this is not
-    * a requirement. 
+    * a requirement.
+    * <p> The default implementation assumes that the .jar file the annotator is deployed
+    * in has a 'comment' defined which contains the version (e.g. <q>20200708.1646</q>).
+    * <p> If this is not the case, or some other versioning scheme is desired, the derived
+    * class should override this method.
     * @return Annotator version.
     */
-   public abstract String getVersion();
+   public String getVersion() {
+      // get our version info from the comment of the jar file we're built into
+      try {
+         URL thisClassUrl = getClass().getResource(getClass().getSimpleName() + ".class");
+         if (thisClassUrl.toString().startsWith("jar:")) {
+            URI thisJarUri = new URI(thisClassUrl.toString().replaceAll("jar:(.*)!.*","$1"));
+            JarFile thisJarFile = new JarFile(new File(thisJarUri));
+            return thisJarFile.getComment();
+         }
+      } catch (Throwable t) {
+         System.err.println("Annotator.getVersion: " + t);
+         t.printStackTrace(System.err);
+      }
+      return null;
+   }
    
    /**
     * The layer schema.
@@ -83,8 +161,8 @@ public abstract class Annotator implements IGraphTransformer, MonitorableTask {
    public String getConfig() { return null; }
    
    /**
-    * Specifies the overall configuration of the annotator, and runs any processing
-    * required to install the annotator.
+    * <b> Specifies the overall configuration of the annotator, and runs any processing
+    * required to install the annotator. </b>
     * <p> This processing is assumed to be synchronous (this method doesn't return until
     * it's complete) and long-running, so the {@link MonitorableTask} methods should
     * provide a way for the caller to monitor/cancel processing - i.e. the Annotator class
@@ -231,12 +309,12 @@ public abstract class Annotator implements IGraphTransformer, MonitorableTask {
    } // end of beanPropertiessFromQueryString()
    
    /**
-    * Runs any processing required to uninstall the annotator.
+    * <b> Runs any processing required to uninstall the annotator. </b>
     */
    public void uninstall() { }
    
    /**
-    * Sets the configuration for a given annotation task.
+    * <b> Sets the configuration for a given annotation task. </b>
     * <p> If the user should provide information before an annotation task is run for the
     * first time, a <tt> task </tt> web-app must be provided to implement the user
     * interface, which may be provided with an existing configurtaion, and invoking
@@ -248,7 +326,7 @@ public abstract class Annotator implements IGraphTransformer, MonitorableTask {
    public abstract void setTaskParameters(String parameters) throws InvalidConfigurationException;
    
    /**
-    * Determines which layers the annotator requires in order to annotate a graph.
+    * <b> Determines which layers the annotator requires in order to annotate a graph. </b>
     * @return A list of layer IDs.
     * @throws InvalidConfigurationException If {@link #setTaskParameters(String)} or 
     * {@link #setSchema(Schema)} have not yet been called.
@@ -256,7 +334,7 @@ public abstract class Annotator implements IGraphTransformer, MonitorableTask {
    public abstract String[] getRequiredLayers() throws InvalidConfigurationException;
 
    /**
-    * Determines which layers the annotator will create/update/delete annotations on.
+    * <b> Determines which layers the annotator will create/update/delete annotations on. </b>
     * @return A list of layer IDs.
     * @throws InvalidConfigurationException If {@link #setTaskParameters(String)} or 
     * {@link #setSchema(Schema)} have not yet been called.

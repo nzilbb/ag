@@ -57,12 +57,6 @@ public class TheWorksExample extends Annotator implements UsesFileSystem {
       return getClass().getSimpleName();
    }
 
-   /**
-    * Version of this implementation. 
-    * @return Annotator version.
-    */
-   public String getVersion() { return "0.1"; }
-
    private File workingDir;
    /**
     * {@link UsesFileSystem} implementation: Provides a persisent directory in which files

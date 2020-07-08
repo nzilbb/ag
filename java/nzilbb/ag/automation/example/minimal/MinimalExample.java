@@ -36,12 +36,6 @@ import nzilbb.ag.*;
 public class MinimalExample extends Annotator {
 
    /**
-    * Version of this implementation. 
-    * @return Annotator version.
-    */
-   public String getVersion() { return "0.1"; }
-   
-   /**
     * Sets the configuration for a given annotation task.
     * @param parameters The configuration of the annotator; This annotator has no task
     * parmeter web-app, so <var> parameters </var> will always be null.
