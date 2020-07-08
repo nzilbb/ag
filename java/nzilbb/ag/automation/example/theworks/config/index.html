@@ -41,7 +41,7 @@
       getText( // (the getText function is defined in index.js)
           "getVersion", // <- the URL to GET from
           function(e) { // <- a function to execute when we have a response
-              document.getElementById("version").innerHTML = "version " + this.responseText;
+              document.getElementById("version").innerHTML = this.responseText;
           });
       
       // getConfig gets the current setup configuration, if any
