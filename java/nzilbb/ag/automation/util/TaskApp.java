@@ -120,6 +120,7 @@ public class TaskApp extends AnnotatorWebApp {
                      parameters = IO.InputStreamToString(new FileInputStream(f));
                   } catch(IOException exception) {}
                }
+               echoContentType(x);
                x.sendResponseHeaders(200, parameters.length());
                OutputStream os = x.getResponseBody();
                os.write(parameters.getBytes());

@@ -54,7 +54,6 @@ public class AnnotatorWebApp extends StandAloneWebApp {
    /**
     * Whether to print debug tracing.
     * @see #getDebug()
-    * @see #setDebug(Boolean)
     */
    protected Boolean debug = Boolean.FALSE;
    /**
@@ -67,7 +66,6 @@ public class AnnotatorWebApp extends StandAloneWebApp {
     * The name of either a .jar file, or a class (if it's on the classpath), which
     * implements the annotator. 
     * @see #getAnnotatorName()
-    * @see #setAnnotatorName(String)
     */
    protected String annotatorName;
    /**
@@ -115,7 +113,6 @@ public class AnnotatorWebApp extends StandAloneWebApp {
    /**
     * Router for sending requests to annotator.
     * @see #getRouter()
-    * @see #setRouter(RequestRouter)
     */
    protected RequestRouter router;
    /**
@@ -127,7 +124,6 @@ public class AnnotatorWebApp extends StandAloneWebApp {
    /**
     * Working directory.
     * @see #getWorkingDir()
-    * @see #setWorkingDir(File)
     */
    protected File workingDir = new File(".");
    /**
@@ -156,6 +152,10 @@ public class AnnotatorWebApp extends StandAloneWebApp {
     * directory of the Annotator class. 
     */
    public AnnotatorWebApp setSubdirectory(String newSubdirectory) { subdirectory = newSubdirectory; return this; }
+
+   /** Constructor */
+   public AnnotatorWebApp() {
+   }
 
    /**
     * Adds handlers which routes webapp resource requests to the Annotators "conf" webapp,
@@ -197,11 +197,12 @@ public class AnnotatorWebApp extends StandAloneWebApp {
                   if (response == null) status = 404;
                } else {
                   if (debug) System.err.println("annotator: " + uri);
-                  // everything else is routed to the annotator
+                  // everything else is routed to the annotator...
                   try {
                      response = router.request(
                         x.getRequestMethod(), uri, x.getRequestHeaders().getFirst("Content-Type"),
-                        x.getRequestBody());                     
+                        x.getRequestBody());
+                     echoContentType(x);
                   } catch(RequestException exception) {
                      if (debug) System.err.println("RequestException: " + exception);
                      status = exception.getHttpStatus();
@@ -218,10 +219,27 @@ public class AnnotatorWebApp extends StandAloneWebApp {
                }
             }});      
    } // end of addHandlers()
+   
+   /**
+    * If the request specifies an expected content type, set the reponse Content-Type to that.
+    * @param x
+    */
+   public void echoContentType(HttpExchange x) {
+      String accept = x.getRequestHeaders().getFirst("Accept");
+      if (accept != null) {
+         // Something like "*/*"
+         // or "text/html, application/xhtml+xml, application/xml;q=0.9, */*;q=0.8" 
+         // we'll take the first one
+         String contentType = accept.split(",")[0].trim();
+         // strip any q parameter
+         contentType = contentType.split(";")[0].trim();
+         // ignore */*
+         if (!contentType.equals("*/*")) {
+            x.getResponseHeaders().add("Content-Type", contentType);
+         }
+      }
+   } // end of echoContentType()
 
-   /** Constructor */
-   public AnnotatorWebApp() {
-   }
 
    /**
     * Initialize the application.

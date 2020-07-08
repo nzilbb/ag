@@ -151,7 +151,50 @@ public class TheWorksExample extends Annotator implements UsesFileSystem {
     */
    public void setTaskParameters(String parameters) throws InvalidConfigurationException {
       beanPropertiesFromQueryString(parameters);
+      
+      // does the outputLayer need to be added to the schema?
+      if (schema.getLayer(outputLayer) == null) {
+         schema.addLayer(
+            new Layer(outputLayer)
+            .setAlignment(Constants.ALIGNMENT_NONE)
+            .setPeers(false)
+            .setParentId(schema.getWordLayerId()));
+      }
    }
+   
+   /**
+    * ID of input layer.
+    * @see #getInputLayer()
+    * @see #setInputLayer(String)
+    */
+   protected String inputLayer;
+   /**
+    * Getter for {@link #inputLayer}: ID of input layer.
+    * @return ID of input layer.
+    */
+   public String getInputLayer() { return inputLayer; }
+   /**
+    * Setter for {@link #inputLayer}: ID of input layer.
+    * @param newInputLayer ID of input layer.
+    */
+   public TheWorksExample setInputLayer(String newInputLayer) { inputLayer = newInputLayer; return this; }
+
+   /**
+    * ID of output layer.
+    * @see #getOutputLayer()
+    * @see #setOutputLayer(String)
+    */
+   protected String outputLayer;
+   /**
+    * Getter for {@link #outputLayer}: ID of output layer.
+    * @return ID of output layer.
+    */
+   public String getOutputLayer() { return outputLayer; }
+   /**
+    * Setter for {@link #outputLayer}: ID of output layer.
+    * @param newOutputLayer ID of output layer.
+    */
+   public TheWorksExample setOutputLayer(String newOutputLayer) { outputLayer = newOutputLayer; return this; }
 
    /**
     * Determines which layers the annotator requires in order to annotate a graph.
@@ -163,9 +206,9 @@ public class TheWorksExample extends Annotator implements UsesFileSystem {
    public String[] getRequiredLayers() throws InvalidConfigurationException {
       if (schema == null)
          throw new InvalidConfigurationException(this, "Schema is not set.");
-      if (schema.getWordLayerId() == null)
-         throw new InvalidConfigurationException(this, "Schema has no word layer.");
-      String[] layers = { schema.getWordLayerId() };
+      if (inputLayer == null)
+         throw new InvalidConfigurationException(this, "No input layer set.");
+      String[] layers = { inputLayer };
       return layers;
    }
    
@@ -178,7 +221,10 @@ public class TheWorksExample extends Annotator implements UsesFileSystem {
     * {@link #setSchema(Schema)} have not yet been called.
     */
    public String[] getOutputLayers() throws InvalidConfigurationException {
-      return new String[0];
+      if (outputLayer == null)
+         throw new InvalidConfigurationException(this, "No output layer set.");
+      String[] layers = { outputLayer };
+      return layers;
    }
    
    /**

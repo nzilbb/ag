@@ -256,6 +256,15 @@
  * <code>setTaskParameters(null)</code> is invoked as soon as the module is triggered for
  * an annotation task.
  *
+ * <p>If the task parameters require the creation of a new layer, it should be added to
+ * the Schema that the annotator was given by {@link Annotator#setSchema(Schema)},
+ * e.g.</p>
+ * <pre>schema.addLayer(
+ *   new Layer("pos", "Part of Speech")
+ *   .setAlignment(Constants.ALIGNMENT_NONE)
+ *   .setPeers(false)
+ *   .setParentId(schema.getWordLayerId()));</pre>
+ *
  * <h2 id="ext"> Extending Beyond the Configuration / Task Parameter Interfaces </h2>
  *
  * <p> Some annotators perform analysis or data extraction beyond directly annotating the

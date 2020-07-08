@@ -1,7 +1,11 @@
+<!DOCTYPE html>
 <html>
   <head>
     <title>Extended Interface for The Works Annotator</title>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
     <link rel="stylesheet" href="index.css" type="text/css">
+    <script src="index.js" type="text/javascript"></script>
   </head>
   <body>
     <h1>The Works annotator extra web-app</h1>
@@ -35,36 +39,31 @@
     </div>
     
     <script type="text/javascript">
-      function get(path, onload) { // make a GET request of the annotator
-          var request = new XMLHttpRequest();
-          request.open("GET", path);
-          request.addEventListener("load", onload, false);
-          request.send();
-      }
-      
       // any annotator method can be called to interrogate the annotator
-      get("getVersion", function(e) {
-          document.getElementById("version").innerHTML = this.responseText;
-      });
-      get("getReverse", function(e) {
+      getText( // (the getText function is defined in index.js)
+          "getVersion", // <- the URL to GET from
+          function(e) { // <- a function to execute when we have a response
+              document.getElementById("version").innerHTML = this.responseText;
+          });
+      getText("getReverse", function(e) {
           document.getElementById("reverse").innerHTML = this.responseText;
       });
-      get("getLeftPadding", function(e) {
+      getText("getLeftPadding", function(e) {
           document.getElementById("leftPadding").innerHTML = this.responseText;
       });
-      get("getRightPadding", function(e) {
+      getText("getRightPadding", function(e) {
           document.getElementById("rightPadding").innerHTML = this.responseText;
       });
-      get("getPrefix", function(e) {
+      getText("getPrefix", function(e) {
           document.getElementById("prefix").innerHTML = this.responseText;
       });
-      get("getLabelConfidence", function(e) {
+      getText("getLabelConfidence", function(e) {
           document.getElementById("labelConfidence").innerHTML = this.responseText;
       });
-      get("getSimulatedInstallationDuration", function(e) {
+      getText("getSimulatedInstallationDuration", function(e) {
           document.getElementById("simulatedInstallationDuration").innerHTML = this.responseText;
       });
-      get("getConfig", function(e) {
+      getText("getConfig", function(e) {
           document.getElementById("config").innerHTML = this.responseText;
       });
     </script>

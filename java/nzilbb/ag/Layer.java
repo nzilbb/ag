@@ -370,6 +370,24 @@ public class Layer
    } // end of constructor
 
    /**
+    * Bare name constructor where the name and description are the same. This is provided
+    * for 'builder pattern' style contruction, like: 
+    * <code>
+    *  Layer layer = new Layer("phone")
+    *    .setParentId("word")
+    *    .setAlignment(Constants.ALIGNMENT_INTERVAL)
+    *    .setPeers(true)
+    *    .setPeersOverlap(false)
+    * </code>
+    * @param id The layer's identifier.
+    */
+   public Layer(String id)
+   {
+      setId(id);
+      setDescription(id);
+   } // end of constructor
+
+   /**
     * Attribute constructor.
     * @param id The layer's identifier.
     * @param description The description of the layer.

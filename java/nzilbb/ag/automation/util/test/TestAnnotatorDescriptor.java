@@ -75,7 +75,7 @@ public class TestAnnotatorDescriptor {
       assertTrue("ext webapp detected",
                   d.hasExtWebapp());
       assertTrue("Info is accessible",
-                 d.getInfo().startsWith("<html><head><title>TheWorksExample"));
+                 d.getInfo().startsWith("<!DOCTYPE html>\n<html>\n  <head>\n    <title>TheWorksExample"));
    }
 
    public static void main(String args[]) 
