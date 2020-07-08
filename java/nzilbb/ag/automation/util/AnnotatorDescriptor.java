@@ -216,9 +216,7 @@ public class AnnotatorDescriptor {
     * @return The content of the resource.
     */
    public InputStream getResource(String path) {
-      System.out.println("getResource " + path);
       URL url = annotatorClass.getResource(path);
-      System.out.println("url " + url);
       if (url == null) return null;
       try {
          return url.openConnection().getInputStream();

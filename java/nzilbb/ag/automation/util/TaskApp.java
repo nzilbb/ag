@@ -54,7 +54,7 @@ import org.json.JSONObject;
  * <p><tt> java -classpath nzilbb.ag.jar nzilbb.ag.automation.util.TaskApp --annotationTaskId=test myjar.jar </tt>
  */
 @ProgramDescription(value="Utility for configuring the parameters of an annotation task.")
-public class TaskApp extends StandAloneWebApp {
+public class TaskApp extends AnnotatorWebApp {
 
    /** Command-line entrypoint */
    public static void main(String argv[]) {
@@ -70,37 +70,12 @@ public class TaskApp extends StandAloneWebApp {
    }
 
    /**
-    * Whether to print debug tracing.
-    * @see #getDebug()
-    * @see #setDebug(Boolean)
-    */
-   protected Boolean debug = Boolean.FALSE;
-   /**
-    * Getter for {@link #debug}: Whether to print debug tracing.
-    * @return Whether to print debug tracing.
-    */
-   public Boolean getDebug() { return debug; }
-   /**
     * Setter for {@link #debug}: Whether to print debug tracing.
     * @param newDebug Whether to print debug tracing.
     */
    @Switch("Whether to print debug tracing")
    public TaskApp setDebug(Boolean newDebug) { debug = newDebug; return this; }
 
-   /**
-    * The name of either a .jar file, or a class (if it's on the classpath), which
-    * implements the annotator. 
-    * @see #getAnnotatorName()
-    * @see #setAnnotatorName(String)
-    */
-   protected String annotatorName;
-   /**
-    * Getter for {@link #annotatorName}: The name of either a .jar file, or a class (if
-    * it's on the classpath), which implements the annotator. 
-    * @return The name of either a .jar file, or a class (if it's on the classpath), which
-    * implements the annotator. 
-    */
-   public String getAnnotatorName() { return annotatorName; }
    /**
     * Setter for {@link #annotatorName}: The name of either a .jar file, or a class (if
     * it's on the classpath), which implements the annotator. 
@@ -109,57 +84,6 @@ public class TaskApp extends StandAloneWebApp {
     */
    @Switch(value="Name of annotator .jar file or class",compulsory=true)
    public TaskApp setAnnotatorName(String newAnnotatorName) { annotatorName = newAnnotatorName; return this; }
-
-   /**
-    * Descriptor for the annotator.
-    * @see #getDescriptor()
-    * @see #setDescriptor(AnnotatorDescriptor)
-    */
-   protected AnnotatorDescriptor descriptor;
-   /**
-    * Getter for {@link #descriptor}: Descriptor for the annotator.
-    * @return Descriptor for the annotator.
-    */
-   public AnnotatorDescriptor getDescriptor() { return descriptor; }
-   /**
-    * Setter for {@link #descriptor}: Descriptor for the annotator.
-    * @param newDescriptor Descriptor for the annotator.
-    */
-   public TaskApp setDescriptor(AnnotatorDescriptor newDescriptor) { descriptor = newDescriptor; return this; }
-
-   /**
-    * The annotator to configure.
-    * @see #getAnnotator()
-    * @see #setAnnotator(Annotator)
-    */
-   protected Annotator annotator;
-   /**
-    * Getter for {@link #annotator}: The annotator to configure.
-    * @return The annotator to configure.
-    */
-   public Annotator getAnnotator() { return annotator; }
-   /**
-    * Setter for {@link #annotator}: The annotator to configure.
-    * @param newAnnotator The annotator to configure.
-    */
-   public TaskApp setAnnotator(Annotator newAnnotator) { annotator = newAnnotator; return this; }
-   
-   /**
-    * Router for sending requests to annotator.
-    * @see #getRouter()
-    * @see #setRouter(RequestRouter)
-    */
-   protected RequestRouter router;
-   /**
-    * Getter for {@link #router}: Router for sending requests to annotator.
-    * @return Router for sending requests to annotator.
-    */
-   public RequestRouter getRouter() { return router; }
-   /**
-    * Setter for {@link #router}: Router for sending requests to annotator.
-    * @param newRouter Router for sending requests to annotator.
-    */
-   public TaskApp setRouter(RequestRouter newRouter) { router = newRouter; return this; }
 
    /**
     * Identifier of the task to be configured.
@@ -180,17 +104,6 @@ public class TaskApp extends StandAloneWebApp {
    public TaskApp setAnnotationTaskId(String newAnnotationTaskId) { annotationTaskId = newAnnotationTaskId; return this; }
 
    /**
-    * Working directory.
-    * @see #getWorkingDir()
-    * @see #setWorkingDir(File)
-    */
-   protected File workingDir = new File(".");
-   /**
-    * Getter for {@link #workingDir}: Working directory.
-    * @return Working directory.
-    */
-   public File getWorkingDir() { return workingDir; }
-   /**
     * Setter for {@link #workingDir}: Working directory.
     * @param newWorkingDir Working directory.
     */
@@ -202,7 +115,7 @@ public class TaskApp extends StandAloneWebApp {
     * and routes server requests to Annotator.
     */
    protected void addHandlers() throws IOException {
-      if (server == null) createServer();
+      super.addHandlers();
 
       // add getTaskParameters handler
       server.createContext("/getTaskParameters", new HttpHandler() {
@@ -221,64 +134,12 @@ public class TaskApp extends StandAloneWebApp {
                os.close();
             }});      
       
-      // add getSchema handler
-      server.createContext("/getSchema", new HttpHandler() {
-            public void handle(HttpExchange x) throws IOException {
-               String json = new JSONObject(annotator.getSchema()).toString();
-               x.getResponseHeaders().add("Content-Type", "application/json");
-               x.sendResponseHeaders(200, json.length());
-               OutputStream os = x.getResponseBody();
-               os.write(json.getBytes());
-               os.close();
-            }});      
-      
-      // all (not otherwise handled) requests:
-      server.createContext("/", new HttpHandler() {
-            public void handle(HttpExchange x) throws IOException {
-               URI uri = x.getRequestURI();
-               String path = uri.getPath();
-               if (path.equals("/")) path = "/index.html";
-               InputStream response = null;
-               int status = 200;
-               if (path.indexOf('.') > 0) {
-                  // requests with a dot are taken to be resources for the webapp,
-                  // e.g. index.html
-                  if (debug) System.err.println("resource: " + uri);
-                  x.getResponseHeaders().add("Content-Type", ContentTypeForName(path));
-                  if (debug) System.err.println("getResource: conf"+path);
-                  try {
-                     response = descriptor.getResource("task"+path);
-                  } catch(Throwable exception) {
-                     if (debug) System.err.println("could not getResource: "+exception);
-                  }
-                  if (response == null) status = 404;
-               } else {
-                  if (debug) System.err.println("annotator: " + uri);
-                  // everything else is routed to the annotator
-                  try {
-                     response = router.request(
-                        x.getRequestMethod(), uri, x.getRequestHeaders().getFirst("Content-Type"),
-                        x.getRequestBody());                     
-                  } catch(RequestException exception) {
-                     if (debug) System.err.println("RequestException: " + exception);
-                     status = exception.getHttpStatus();
-                     response = new ByteArrayInputStream(exception.getMessage().getBytes());
-                  }
-               }
-               if (debug) {
-                  System.err.println(
-                     "response: " + status + (response==null?" no content":" with content"));
-               }
-               x.sendResponseHeaders(status, response == null?-1:0);
-               if (response != null) {
-                  IO.Pump(response, x.getResponseBody());
-               }
-            }});      
    } // end of addHandlers()
 
    /** Constructor */
    public TaskApp() {
       setFinishedPath("setTaskParameters");
+      setSubdirectory("task");
    }
 
    /**
@@ -294,20 +155,11 @@ public class TaskApp extends StandAloneWebApp {
    public void init() throws ClassNotFoundException, NoSuchMethodException,
       InvocationTargetException, IllegalAccessException, InstantiationException,
       ClassCastException, IOException {
+      super.init();
       
-      // is the name a jar file name or a class name
-      try { // try as a jar file
-         descriptor = new AnnotatorDescriptor(new File(annotatorName));
-      } catch (Throwable notAJarName) { // try as a class name
-         descriptor = new AnnotatorDescriptor(annotatorName, getClass().getClassLoader());
-      }
       if (!descriptor.hasTaskWebapp()) {
          throw new FileNotFoundException("Annotator has no 'task' web app.");
       }
-
-      annotator = descriptor.getInstance();
-      router = new RequestRouter(annotator);
-      query = annotationTaskId;
 
       // set a response that will follow the progress of the installation
       finishedResponse = "<html><head><title>Task Configuration</title></head><body>"
@@ -315,26 +167,6 @@ public class TaskApp extends StandAloneWebApp {
          +"<p style='text-align: center;'>You can close this window.</p>"
          +"</body></html>";
 
-      // give the annotator the resources it needs...
-      
-      annotator.setSchema( // TODO make this configurable?
-         new Schema(
-            "who", "turn", "utterance", "word",
-            new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
-            .setPeers(true).setPeersOverlap(true).setSaturated(true),
-            new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
-            .setPeers(true).setPeersOverlap(false).setSaturated(false)
-            .setParentId("who").setParentIncludes(true),
-            new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
-            .setPeers(true).setPeersOverlap(false).setSaturated(true)
-            .setParentId("turn").setParentIncludes(true),
-            new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
-            .setPeers(true).setPeersOverlap(false).setSaturated(false)
-            .setParentId("turn").setParentIncludes(true)));
-      
-      if (annotator instanceof UsesFileSystem) {
-         ((UsesFileSystem)annotator).setWorkingDirectory(workingDir);
-      }
    } // end of init()
 
    /**
