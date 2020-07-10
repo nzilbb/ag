@@ -93,7 +93,7 @@ public class IO
     * @return The extension (not including the dot) of the given file.
     */
    public static String Extension(String name) {
-      return name.replaceAll(".*(\\.[^.]*[a-zA-Z][^.]*)$","$1");
+      return name.replaceAll(".*\\.([^.]*[a-zA-Z][^.]*)$","$1");
    } // end of Extension()
 
    /**
@@ -218,6 +218,35 @@ public class IO
       return totalBytes;
    } // end of Pump()
    
+   /**
+    * Scans the given jar file for an instance of a particular class/interface.
+    * The implementor must be registered in the jar file, by way of a manifest attribute named
+    * after the class (with dots converted to hyphens to meet the attribute name requirements of
+    * jar manifests). e.g. if <var>c</var> = <code>nzilbb.ag.serialize.IDeserializer</code> and
+    * <var>file</var> contains a class called <code>nzilbb.praat.TextGridDeserializer</code> that
+    * implements <code>nzilbb.ag.serialize.IDeserializer</code>, in order to be returned by this
+    * method, <var>file</var> must also have a manifest attribute called 
+    * <q>nzilbb-ag-serialize-IDeserializer</q> whose value is 
+    * <q>nzilbb.praat.TextGridDeserializer</q>.
+    * <p>If there are multiple implementing classes registered in the <var>file</var>,
+    * only the first one is returned.
+    * @param file The jar file.
+    * @param parentLoader The parent class loader.
+    * @param c The class/interface to search for.
+    * @return An of objects that implement the given class/interface, or null if none was found.
+    * @throws IOException On file IO error.
+    */
+   @SuppressWarnings("rawtypes")
+   public static Object FindImplementorInJar(File file, ClassLoader parentLoader, Class c)
+      throws IOException {
+      Vector implementors = FindImplementorsInJar(file, parentLoader, c);
+      if (implementors.size() > 0) {
+         return implementors.firstElement();
+      } else {
+         return null;
+      }
+   }
+
    /**
     * Scans the given jar file for instances of a particular class/interface.
     * The implementors must be registered in the jar file, by way of a manifest attribute named
