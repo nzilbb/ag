@@ -21,6 +21,8 @@
 //
 package nzilbb.ag.serialize.util;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -49,6 +51,17 @@ public class Utility {
     return Arrays.spliterator(graphs);
   } // end of OneGraphArray()
 
+  /**
+   * Creates an array of {@link NamedStream}s from one file. Handy for calling
+   * {@link IDeserializer#load(NamedStream[],Schema)} when you have only one graph.
+   * @param file The file.
+   * @return A graph with one element.
+   * @throws FileNotFoundException If the given file does not exist.
+   */
+  public static NamedStream[] OneNamedStreamArray(File file) throws FileNotFoundException {
+     return OneNamedStreamArray(new NamedStream(file));
+  } // end of OneNamedStreamArray()
+   
   /**
    * Creates an array of {@link NamedStream}s from one stream. Handy for calling
    * {@link IDeserializer#load(NamedStream[],Schema)} when you have only one graph.
