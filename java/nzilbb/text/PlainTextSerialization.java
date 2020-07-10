@@ -651,7 +651,7 @@ public class PlainTextSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "Plain Text Document", "1.04", "text/plain", ".txt", "20191031.1734",
+         "Plain Text Document", "1.05", "text/plain", ".txt", "20191031.1734",
          getClass().getResource("icon.png"));
    }
 
@@ -1789,7 +1789,7 @@ public class PlainTextSerialization
             if (layer != null)
             {
                selectedLayers.add(l);
-               if (layer.getParentId().equals(getWordLayer().getId())
+               if (getWordLayer().getId().equals(layer.getParentId())
                    && (lexicalLayer == null || !layer.getId().equals(lexicalLayer.getId()))
                    && (pronounceLayer == null || !layer.getId().equals(pronounceLayer.getId())))
                {
@@ -1977,7 +1977,9 @@ public class PlainTextSerialization
          TempFileInputStream in = new TempFileInputStream(f);
          
          // return a named stream from the file
-         return new NamedStream(in, IO.SafeFileNameUrl(graph.getId()) + ".txt");
+         String streamName = graph.getId();
+         if (!IO.Extension(streamName).equals("txt")) streamName += ".txt";
+         return new NamedStream(in, IO.SafeFileNameUrl(streamName));
       }
       catch(Exception exception)
       {

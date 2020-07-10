@@ -132,6 +132,7 @@ public class TestPlainTextSerialization
       
       assertEquals("comment.txt", g.getId());
       assertEquals("text units", Constants.UNIT_CHARACTERS, g.getOffsetUnits());
+      assertNotNull("schema set", g.getSchema());
 
       // meta data
       assertEquals("graph meta data", 
