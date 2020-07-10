@@ -1,5 +1,5 @@
 //
-// Copyright 2016-2019 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -36,15 +36,16 @@ import nzilbb.configure.ParameterSet;
  * <ol>
  *  <li>Configure serializer using {@link #configure(ParameterSet,Schema)}</li>
  *  <li>Determine which (if any) layers are required for the serialization by calling
- *   {@link #getRequiredLayers()}, which returns a list of layer IDs.</li>
- *  <li>Serialize the graph using {@link #serialize(Spliterator,String[],Consumer,Consumer,Consumer)}</li>
+ *      {@link #getRequiredLayers()}, which returns a list of layer IDs.</li>
+ *  <li>Serialize the graph using
+ *      {@link #serialize(Spliterator,String[],Consumer,Consumer,Consumer)}</li>
  *  <li>Possibly display or log warnings consumed during serialize() by 
  *      {@link #serialize(Spliterator,String[],Consumer,Consumer,Consumer)}</li>
  * </ol>
  * @author Robert Fromont robert@fromont.net.nz
  */
-public interface ISerializer
-{
+public interface ISerializer {
+   
    /**
     * Returns the deserializer's descriptor
     * @return The deserializer's descriptor
@@ -97,8 +98,7 @@ public interface ISerializer
     * vs. multiple streams that should be zipped into a single stream result.
     * @return The cardinality between graphs and serialized streams.
     */
-   default public Cardinality getCardinality()
-   {
+   default public Cardinality getCardinality() {
       return Cardinality.NToM;
    }
    
@@ -117,7 +117,9 @@ public interface ISerializer
     * @param errors A consumer for (fatal) error messages.
     * @throws SerializerNotConfiguredException if the object has not been configured.
     */
-   public void serialize(Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
+   public void serialize(
+      Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer,
+      Consumer<String> warnings, Consumer<SerializationException> errors) 
       throws SerializerNotConfiguredException;
    
    /**
