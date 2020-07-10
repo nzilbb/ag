@@ -126,7 +126,8 @@ public class Parameter {
     */
    protected boolean required = false;
    /**
-    * Getter for {@link #required}: Whether the parameter is required (true) or optional (false - the default).
+    * Getter for {@link #required}: Whether the parameter is required (true) or optional
+    * (false - the default). 
     * @return Whether the parameter is required (true) or optional (false).
     */
    public boolean getRequired() { return required; }
@@ -137,24 +138,31 @@ public class Parameter {
    public Parameter setRequired(boolean newRequired) { required = newRequired; return this; }
 
    /**
-    * A list of possible values for {@link #value}, or null if the possible values is not a closed set.
+    * A list of possible values for {@link #value}, or null if the possible values is not
+    * a closed set. 
     * @see #getPossibleValues()
     * @see #setPossibleValues(Collection)
     */
    protected Collection possibleValues;
    /**
-    * Getter for {@link #possibleValues}: A list of possible values for {@link #value}, or null if the possible values is not a closed set.
-    * @return A list of possible values for {@link #value}, or null if the possible values is not a closed set.
+    * Getter for {@link #possibleValues}: A list of possible values for {@link #value}, or
+    * null if the possible values is not a closed set. 
+    * @return A list of possible values for {@link #value}, or null if the possible values
+    * is not a closed set. 
     */
    public Collection getPossibleValues() { return possibleValues; }
    /**
-    * Setter for {@link #possibleValues}: A list of possible values for {@link #value}, or null if the possible values is not a closed set.
-    * @param newPossibleValues A list of possible values for {@link #value}, or null if the possible values is not a closed set.
+    * Setter for {@link #possibleValues}: A list of possible values for {@link #value}, or
+    * null if the possible values is not a closed set. 
+    * @param newPossibleValues A list of possible values for {@link #value}, or null if
+    * the possible values is not a closed set. 
     */
    public Parameter setPossibleValues(Collection newPossibleValues) { possibleValues = newPossibleValues; return this; }
    /**
-    * Array getter for {@link #possibleValues}: A list of possible values for {@link #value}, or null if the possible values is not a closed set.
-    * @return An array of possible values for {@link #value}, or null if the possible values is not a closed set.
+    * Array getter for {@link #possibleValues}: A list of possible values for {@link
+    * #value}, or null if the possible values is not a closed set. 
+    * @return An array of possible values for {@link #value}, or null if the possible
+    * values is not a closed set. 
     */
    @SuppressWarnings("unchecked")
    public Object[] getPossibleValuesArray() { 
@@ -310,7 +318,8 @@ public class Parameter {
    } // end of addPossibleValue()
    
    /**
-    * Sets the value of the attribute named after {@link #name} of the given bean with the parameter's {@link value}.
+    * Sets the value of the attribute named after {@link #name} of the given bean with the
+    * parameter's {@link value}. 
     * <p>e.g. if the parameter's name is "foo" and it's value is "bar", then the effect
     * of this method is the same as invoking <code>bean.setFoo("bar")</code>.
     * @param bean The object whose bean attribute should be set.
@@ -327,8 +336,8 @@ public class Parameter {
    } // end of apply()
 
    /**
-    * Sets the {@link value} of the parameter with the value of the attribute named after {@link
-    * #name} of the given bean. 
+    * Sets the {@link value} of the parameter with the value of the attribute named after 
+    * {@link #name} of the given bean. 
     * <p>e.g. if the parameter's name is "foo" and the bean has a getter called "getFoo()", then
     * the effect of this method is the same as invoking <code>setValue(bead.getFoo())</code>, if
     * the value is not null.
@@ -338,7 +347,8 @@ public class Parameter {
    public Object extractValue(Object bean) {
       Object value = null;
       try {
-         Method getter = bean.getClass().getMethod("get" + name.substring(0,1).toUpperCase() + name.substring(1));
+         Method getter = bean.getClass().getMethod(
+            "get" + name.substring(0,1).toUpperCase() + name.substring(1));
          value = getter.invoke(bean);
          if (value != null) setValue(value);
       } catch(NoSuchMethodException exception) {
