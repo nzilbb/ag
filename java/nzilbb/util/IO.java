@@ -54,22 +54,19 @@ public class IO
    // Methods:
 
    /**
-    * If the given file exists, it's renamed to a filename with the last modification timestamp included.
+    * If the given file exists, it's renamed to a filename with the last modification
+    * timestamp included.  
     * @param file The file to backup.
     * @throws IOException On IO error.
     */
-   public static void Backup(File file)
-      throws IOException
-   {
-      if (file.exists())
-      {
+   public static void Backup(File file) throws IOException {
+      if (file.exists()) {
          // there's and older version of the file, take a backup
          File backup = new File(
             file.getParentFile(), file.getName()  + ".bak"
             + new SimpleDateFormat("-yyyy-MM-dd-HH-mm-ss")
             .format(new java.util.Date(file.lastModified())) + "." + Extension(file));
-         if (!file.renameTo(backup))
-         {
+         if (!file.renameTo(backup)) {
             Copy(file, backup);
          }
       }
@@ -83,8 +80,7 @@ public class IO
     * @param file The file.
     * @return The extension (not including the dot) of the given file.
     */
-   public static String Extension(File file)
-   {
+   public static String Extension(File file) {
       return Extension(file.getName());
    } // end of Extension()
 
@@ -96,8 +92,7 @@ public class IO
     * @param name The file name.
     * @return The extension (not including the dot) of the given file.
     */
-   public static String Extension(String name)
-   {
+   public static String Extension(String name) {
       return name.replaceAll(".*(\\.[^.]*[a-zA-Z][^.]*)$","$1");
    } // end of Extension()
 
@@ -109,8 +104,7 @@ public class IO
     * @param file The file.
     * @return The name of the given file without extension (not including the dot).
     */
-   public static String WithoutExtension(File file)
-   {
+   public static String WithoutExtension(File file) {
       return WithoutExtension(file.getName());
    } // end of Extension()
    
@@ -122,8 +116,7 @@ public class IO
     * @param name The file name.
     * @return The name of the given file without extension (not including the dot).
     */
-   public static String WithoutExtension(String name)
-   {
+   public static String WithoutExtension(String name) {
       return name.replaceAll("\\.[^.]*[a-zA-Z][^.]*$","");
    } // end of Extension()
    
@@ -133,9 +126,7 @@ public class IO
     * @param destination The new file.
     * @throws IOException On file IO error.
     */
-   public static void Copy(File source, File destination)
-      throws IOException
-   {
+   public static void Copy(File source, File destination) throws IOException {
       SaveUrlToFile(source.toURI().toURL(), destination);
    } // end of copy()
    
@@ -146,9 +137,7 @@ public class IO
     * @return The number size of the content in bytes.
     * @throws IOException On file IO error.
     */
-   public static long SaveUrlToFile(URL url, File file)
-      throws IOException
-   {
+   public static long SaveUrlToFile(URL url, File file) throws IOException {
       return SaveUrlConnectionToFile(url.openConnection(), file);
    } // end of SaveUrlToFile()
 
@@ -160,8 +149,7 @@ public class IO
     * @throws IOException On file IO error.
     */
    public static long SaveUrlConnectionToFile(URLConnection connection, File file)
-      throws IOException
-   {
+      throws IOException {
       FileOutputStream output = new FileOutputStream(file);
       InputStream input = connection.getInputStream();
       return Pump(input, output);
@@ -175,14 +163,12 @@ public class IO
     * @throws IOException
     */
    public static String InputStreamToString(InputStream input)
-      throws IOException
-   {
+      throws IOException {
       StringBuilder content = new StringBuilder();
       BufferedReader reader = new BufferedReader(
          new InputStreamReader(input, StandardCharsets.UTF_8));
       String line = reader.readLine();
-      while (line != null)
-      {
+      while (line != null) {
          if (content.length() > 0) content.append("\n");
          content.append(line);
       
@@ -199,35 +185,32 @@ public class IO
     * @return The number of bytes copied.
     * @throws IOException On file IO error.
     */
-   public static long Pump(InputStream input, OutputStream output)
-      throws IOException
-   {
+   public static long Pump(InputStream input, OutputStream output) throws IOException {
       return Pump(input, output, true);
    }
    /**
     * Copy all data from an input stream to an output stream.
     * @param input Source of data.
     * @param output Destination for data.
-    * @param closeStreams true if the streams should be closed after the data is exhausted, false otherwise.
+    * @param closeStreams true if the streams should be closed after the data is
+    * exhausted, false otherwise. 
     * @return The number of bytes copied.
     * @throws IOException On file IO error.
     */
    public static long Pump(InputStream input, OutputStream output, boolean closeStreams)
-      throws IOException
-   {
+      throws IOException {
+      
       long totalBytes = 0;
       
       byte[] buffer = new byte[1024];
       int bytesRead = input.read(buffer);
-      while (bytesRead >= 0)
-      {
+      while (bytesRead >= 0) {
          totalBytes += bytesRead;
          output.write(buffer, 0, bytesRead);
          bytesRead = input.read(buffer);
       } // next chunk	
       output.flush();
-      if (closeStreams)
-      {
+      if (closeStreams) {
          output.close();
          input.close();
       }
@@ -243,7 +226,8 @@ public class IO
     * <var>file</var> contains a class called <code>nzilbb.praat.TextGridDeserializer</code> that
     * implements <code>nzilbb.ag.serialize.IDeserializer</code>, in order to be returned by this
     * method, <var>file</var> must also have a manifest attribute called 
-    * <q>nzilbb-ag-serialize-IDeserializer</q> whose value is <q>nzilbb.praat.TextGridDeserializer</q>.
+    * <q>nzilbb-ag-serialize-IDeserializer</q> whose value is 
+    * <q>nzilbb.praat.TextGridDeserializer</q>.
     * <p>There can be multiple implementing classes registered in the <var>file</var>; the value of
     * the manifest attribute is assumed to be a space-delimited list.
     * @param file The jar file.
@@ -254,32 +238,26 @@ public class IO
     */
    @SuppressWarnings({"rawtypes","unchecked"})
    public static Vector FindImplementorsInJar(File file, ClassLoader parentLoader, Class c)
-      throws IOException
-   {
+      throws IOException {
       Vector implementors = new Vector();
-      try
-      {
+      try {
          JarFile jar = new JarFile(file);
          URL[] url = new URL[] { file.toURI().toURL() };
          Manifest manifest = jar.getManifest();
-         if (manifest != null)
-         {
+         if (manifest != null) {
             Attributes attributes = manifest.getMainAttributes();
-            Object convertersAtt = attributes.get(new Attributes.Name(c.getName().replace('.','-')));
-            if (convertersAtt != null)
-            {
-               for (String className : convertersAtt.toString().split(" "))
-               {
+            Object convertersAtt = attributes.get(
+               new Attributes.Name(c.getName().replace('.','-')));
+            if (convertersAtt != null) {
+               for (String className : convertersAtt.toString().split(" ")) {
                   URLClassLoader classLoader = URLClassLoader.newInstance(url, parentLoader);
-                  try
-                  {
-                     Object instance = classLoader.loadClass(className).getDeclaredConstructor().newInstance();
-                     if (c.isInstance(instance))
-                     {
+                  try {
+                     Object instance = classLoader.loadClass(className)
+                        .getDeclaredConstructor().newInstance();
+                     if (c.isInstance(instance)) {
                         implementors.add(instance);
                      }
-                  }
-                  catch(Throwable t) {}
+                  } catch(Throwable t) {}
                } // next class
             }
          }
@@ -291,28 +269,22 @@ public class IO
    /**
     * Determines the jar file that the given class comes from.
     * @param c The class implemented.
-    * @return The jar file the given class implementation comes from, or null if it's not from a jar file.
+    * @return The jar file the given class implementation comes from, or null if it's not
+    * from a jar file. 
     */
    @SuppressWarnings("rawtypes")
-   public static File JarFileOfClass(Class c)
-   {
+   public static File JarFileOfClass(Class c) {
       URL url = c.getResource(c.getSimpleName() + ".class");
       String sUrl = url.toString();
-      if (!sUrl.startsWith("jar:"))
-      {
+      if (!sUrl.startsWith("jar:")) {
          return null;
-      }
-      else
-      {
+      } else {
          int iUriStart = 4;
          int iUriEnd = sUrl.indexOf("!");
          String sFileUri = sUrl.substring(iUriStart, iUriEnd);
-         try
-         {
+         try {
             return new File(new URI(sFileUri));
-         }
-         catch(URISyntaxException exception)
-         {
+         } catch(URISyntaxException exception) {
             return null;
          }
       }
@@ -323,12 +295,9 @@ public class IO
     * @param dir The directory to delete.
     * @return true if the the directory was successfully deleted, false otherwise.
     */
-   public static boolean RecursivelyDelete(File dir)
-   {
-      if (dir.isDirectory())
-      {
-         for (File file : dir.listFiles())
-         {
+   public static boolean RecursivelyDelete(File dir) {
+      if (dir.isDirectory()) {
+         for (File file : dir.listFiles()) {
             if (!RecursivelyDelete(file)) return false;
          }
       }
@@ -341,9 +310,7 @@ public class IO
     * @return A BASE64-encoded representation of the content.
     * @throws IOException
     */
-   public static String Base64Encode(String url)
-      throws IOException
-   {
+   public static String Base64Encode(String url) throws IOException {
       return Base64Encode(new URL(url).openStream());
    }
 
@@ -353,9 +320,7 @@ public class IO
     * @return A BASE64-encoded representation of the content.
     * @throws IOException
     */
-   public static String Base64Encode(URL url)
-      throws IOException
-   {
+   public static String Base64Encode(URL url) throws IOException {
       return Base64Encode(url.openStream());
    }
   
@@ -365,9 +330,7 @@ public class IO
     * @return A BASE64-encoded representation of the content.
     * @throws IOException
     */
-   public static String Base64Encode(InputStream content)
-      throws IOException
-   {
+   public static String Base64Encode(InputStream content) throws IOException {
       ByteArrayOutputStream base64Out = new ByteArrayOutputStream();
       OutputStream bytesOut = Base64.getEncoder().wrap(base64Out);
       byte[] buffer = new byte[1024];
@@ -387,14 +350,12 @@ public class IO
     * @param s The possibly unsafe string.
     * @return The given string with characters that are unsafe for file names or URLs removed.
     */
-   public static String SafeFileNameUrl(String s)
-   {
+   public static String SafeFileNameUrl(String s) {
       if (s == null) return "";
       return s.replaceAll("[\\\\\\?\\*\\+\\$]", "")
          .replaceAll("[\\|\\:\\!\\>\\<\\=\\^ ]", "_")	
          .replaceAll("@","-at-")
          .replaceAll("&","-amp-");
    } // end of SafeFileNameUrl()
-
    
 } // end of class IO
