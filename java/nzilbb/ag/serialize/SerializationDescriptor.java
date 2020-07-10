@@ -348,14 +348,13 @@ public class SerializationDescriptor {
    public int hashCode() {
       return (name+version+mimeType).hashCode();
    } // end of hashCode()
-
    
    /**
     * Override that describes the serialization.
     */
    @Override
    public String toString() {
-      return "\""+getName()+"\" " + getMimeType() + " (v"+getVersion()+")";
+      return "\""+getName()+"\" " + getMimeType() + " ("+getVersion()+")";
    } // end of toString()
    
 } // end of class SerializationDescriptor
