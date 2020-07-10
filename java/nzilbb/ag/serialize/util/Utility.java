@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -35,9 +35,7 @@ import nzilbb.ag.serialize.*;
  * Useful functions for serialization.
  * @author Robert Fromont robert@fromont.net.nz
  */
-
-public class Utility
-{
+public class Utility {
   /**
    * Creates an array of {@link Graph}s from one graph. Handy for calling
    * {@link nzilbb.ag.serialize.ISerializer#serialize(Spliterator,String[],Consumer,Consumer,Consumer)}
@@ -46,8 +44,7 @@ public class Utility
    * @param graph The graph.
    * @return A graph with one element.
    */
-  public static Spliterator<Graph> OneGraphSpliterator(Graph graph)
-  {
+  public static Spliterator<Graph> OneGraphSpliterator(Graph graph) {
     Graph[] graphs = { graph };
     return Arrays.spliterator(graphs);
   } // end of OneGraphArray()
@@ -58,8 +55,7 @@ public class Utility
    * @param stream The named stream.
    * @return A graph with one element.
    */
-  public static NamedStream[] OneNamedStreamArray(NamedStream stream)
-  {
+  public static NamedStream[] OneNamedStreamArray(NamedStream stream) {
     NamedStream[] streams = new NamedStream[1];
     streams[0] = stream;
     return streams;
@@ -70,15 +66,15 @@ public class Utility
    * @param streams The streams to search.
    * @param nameSuffix The file extension to check the name for.
    * @param mimeType The MIME type to match.
-   * @return The first stream whose {@link NamedStream#name} ends with <var>nameSuffix</var> or whose {@link NamedStream#mimeType} is the same as <var>mimeType</var>, or null if no such stream was found.
+   * @return The first stream whose {@link NamedStream#name} ends with
+   * <var>nameSuffix</var> or whose {@link NamedStream#mimeType} is the same as
+   * <var>mimeType</var>, or null if no such stream was found. 
    */
-  public static NamedStream FindSingleStream(NamedStream[] streams, String nameSuffix, String mimeType)
-  {      
-    for (NamedStream stream : streams)
-    {	 
+  public static NamedStream FindSingleStream(
+     NamedStream[] streams, String nameSuffix, String mimeType) {
+    for (NamedStream stream : streams) {
       if (stream.getName().toLowerCase().endsWith(nameSuffix) 
-          || (mimeType != null && mimeType.equals(stream.getMimeType())))
-      {
+          || (mimeType != null && mimeType.equals(stream.getMimeType()))) {
         return stream;
       }
     } // next stream
@@ -94,14 +90,12 @@ public class Utility
    * <var>nameSuffix</var> or whose {@link NamedStream#mimeType} is the same as
    * <var>mimeType</var>. 
    */
-  public static NamedStream[] FindStreams(NamedStream[] streams, String nameSuffix, String mimeType)
-  {
+  public static NamedStream[] FindStreams(
+     NamedStream[] streams, String nameSuffix, String mimeType) {
     Vector<NamedStream> matching = new Vector<NamedStream>();
-    for (NamedStream stream : streams)
-    {	 
+    for (NamedStream stream : streams) {
       if (stream.getName().toLowerCase().endsWith(nameSuffix) 
-          || (mimeType != null && mimeType.equals(stream.getMimeType())))
-      {
+          || (mimeType != null && mimeType.equals(stream.getMimeType()))) {
         matching.add(stream);
       }
     } // next stream
@@ -115,22 +109,20 @@ public class Utility
    * @param possibleIds Guesses at possible layer IDs.
    * @return The first matching layer, or null if none matched.
    */
-  public static Layer FindLayerById(LinkedHashMap<String,Layer> possibleLayers, List<String> possibleIds)
-  {
+  public static Layer FindLayerById(
+     LinkedHashMap<String,Layer> possibleLayers, List<String> possibleIds) {
     LinkedHashMap<String,Layer> possibleLayersSimplifiedIds = new LinkedHashMap<String,Layer>();
-    for (String id : possibleLayers.keySet())
-    {
-      possibleLayersSimplifiedIds.put(id.toLowerCase().replaceAll("[^a-zA-Z0-9]",""), possibleLayers.get(id));
+    for (String id : possibleLayers.keySet()) {
+      possibleLayersSimplifiedIds.put(
+         id.toLowerCase().replaceAll("[^a-zA-Z0-9]",""), possibleLayers.get(id));
     }
-    for (String id : possibleIds)
-    {
-      if (possibleLayersSimplifiedIds.containsKey(id.toLowerCase().replaceAll("[^a-zA-Z0-9]","")))
-      {
+    for (String id : possibleIds) {
+      if (possibleLayersSimplifiedIds.containsKey(
+             id.toLowerCase().replaceAll("[^a-zA-Z0-9]",""))) {
         return possibleLayersSimplifiedIds.get(id.toLowerCase().replaceAll("[^a-zA-Z0-9]",""));
       }
     }
     return null;
   } // end of findLayerById()
-
 
 } // end of class Utility
