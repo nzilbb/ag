@@ -199,5 +199,14 @@ public class AnnotatorDescriptor {
          return null;
       }
    } // end of getResource()
+   
+   /**
+    * A description of the annotator.
+    * @return A description of the annotator.
+    */
+   @Override
+   public String toString() {
+      return instance.getAnnotatorId() + " ("+instance.getVersion()+")";
+   } // end of toString()
 
 } // end of class AnnotatorDescriptor
