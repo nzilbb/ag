@@ -11,13 +11,13 @@
  *       containing a description of the type of annotation tasks the annotator can do,
  *       which is displayed to users before they install the module. </li>
  *  <li> <i> &hellip;/config/&hellip; </i> - a subdirectory of the directory containing
- *       the Annotator class, containing a general configuration webapp, if the annotator
+ *       the Annotator class, containing a general configuration web-app, if the annotator
  *       needs overall configuration. </li> 
  *  <li> <i> &hellip;/task/&hellip; </i> - a subdirectory of the directory containing
- *       the Annotator class, containing a task configuration webapp for defining
+ *       the Annotator class, containing a task configuration web-app for defining
  *       annotation task parameters. </li> 
  *  <li> <i> &hellip;/ext/&hellip; </i> - a subdirectory of the directory containing
- *       the Annotator class, containing a webapp providing any extra user interfaces that
+ *       the Annotator class, containing a web-app providing any extra user interfaces that
  *       might be useful for the annotator, including post-annotation visualizations,
  *       lexicons or models, etc... </li>  
  * </ul>
@@ -54,7 +54,7 @@
  * <q>index.html</q> and any other script/style-sheet files that might be required into
  * the deployed .jar archive, in a top-level directory called <i>config</i>. 
  *
- * <p> This web application can assume that it can communicate with the Annotator class by making
+ * <p> This web-application can assume that it can communicate with the Annotator class by making
  * requests to its host, where the URL path is the name of the class method to call.
  * For GET requests, the query string contains the method parameter values, in order,
  * seperated by commas. Whatever the given method returns is passed back as the response.
@@ -86,7 +86,7 @@
  * <p> The <var>config</var> string passed into the <code>setConfig</code> method is the
  * body of the POST request. 
  *
- * <p> Below is a simple example of a <i>config/index.html</i> webapp that loads any
+ * <p> Below is a simple example of a <i>config/index.html</i> web-app that loads any
  *  current configuration from the annotator, presents a form for the user to fill out,
  *  and posts the new configuration back to the annotator:<pre>&lt;html&gt;
  *  &lt;head&gt;&lt;title&gt;Configure Annotator&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&lt;h1&gt;Configure Annotator&lt;/h1&gt;
@@ -153,21 +153,21 @@
  * class, called <tt>task</tt>.  
  *
  * <p> Each annotation task is identified by an ID, which is passed as the query string
- * when the task configuration web app is run; e.g. if the annotation task ID is
- * <q>pos-tagging</q> then the web app will be started with the URL like
+ * when the task configuration web-app is run; e.g. if the annotation task ID is
+ * <q>pos-tagging</q> then the web-app will be started with the URL like
  * <tt>&hellip;/task/index.html?pos-tagging</tt> 
  *
- * <p> The first thing the web app should do is make a GET request to
+ * <p> The first thing the web-app should do is make a GET request to
  * <tt>getTaskParameters</tt> with the annotation task ID as the query string, in order to
  * retrieve and interpret any existing parameter configuration for the task;
  * e.g. <tt>getTaskParameters?pos-tagging</tt> 
  *
  * <p> If the task has been configured before, then the result of this request will be
- * text using encoding was used by the web app to save the task configuration last time.
+ * text using encoding was used by the web-app to save the task configuration last time.
  *
  * <p> Simple task configuration parameters can be easily encoded as query string
  * parameters, which is automatically achieved by using an HTML form that POSTs to
- * <tt>setTaskParameters</tt> - below is an example of a <i>task/index.html</i> webapp
+ * <tt>setTaskParameters</tt> - below is an example of a <i>task/index.html</i> web-app
  * that loads any current configuration from the annotator, presents a form for the user
  * to fill out, and posts the new configuration back to the annotator:<pre>&lt;html&gt;
  *  &lt;head&gt;&lt;title&gt;Configure Annotation Task&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&lt;h1&gt;Configure Annotation Task&lt;/h1&gt;
@@ -200,7 +200,7 @@
  * use JQuery, Angular, or any other frameworks or libraries, as long as they are bundled
  * into the <i> task </i> directory with <i> index.html </i>)
  *
- * <p> The web app can also assume that it can communicate with an instance of the Annotator class
+ * <p> The web-app can also assume that it can communicate with an instance of the Annotator class
  * by making requests to its host, where the URL path is the name of the class method to call.
  * For GET requests, the query string contains the method parameter values, in order,
  * seperated by commas. Whatever the given method returns is passed back as the response.
@@ -212,7 +212,7 @@
  * &hellip; to get as a response whatever calling <code>setFoo("test", "phonology")</code>
  * returns.
  *
- * <p> The web app can also ask for information about the annoation layer schema by
+ * <p> The web-app can also ask for information about the annoation layer schema by
  * making a GET request to <tt>getSchema</tt> which will return the schema encoded as
  * JSON, e.g.: <pre>{
  *    "participantLayerId":"who",
@@ -281,23 +281,23 @@
  * transcripts, and may need to provide post-processing visualizations, or access to
  * analytics.
  *
- * <p> The annotator can provide a user interface for this by deploying a web app similar
+ * <p> The annotator can provide a user interface for this by deploying a web-app similar
  * to the <i><a href="#config"> config </a></i> and <i><a href="#task"> task </a></i> web
- * apps descibed above.  In this case, the web app should be deployed in a relative
+ * apps descibed above.  In this case, the web-app should be deployed in a relative
  * subdirectory called <i>ext</i>. 
  *
- * <p> As such a user interface is open-ended, unlike the <i> config </i> web app (which
- * makes a request to <tt>setConfig</tt>) and the <i> task </i> web app (which makes a
+ * <p> As such a user interface is open-ended, unlike the <i> config </i> web-app (which
+ * makes a request to <tt>setConfig</tt>) and the <i> task </i> web-app (which makes a
  * request to <tt>setTaskParameters</tt>), no final request is required to 'save' the
- * results. However, if this is desired, the web app can make a request to: <tt>finished</tt> 
+ * results. However, if this is desired, the web-app can make a request to: <tt>finished</tt> 
  *
- * <p> Otherwise, the <i> ext </i> web app can access the Annotator object using GET
- * requests, in a similar fashion to the other web apps.
+ * <p> Otherwise, the <i> ext </i> web-app can access the Annotator object using GET
+ * requests, in a similar fashion to the other web-apps.
  *
  * <h2 id="util"> Utilities to Facilitate Development </h2>
  *
  * <p> <i>nzilbb.ag.jar</i> contains some utilities for displaying information and
- * executing webapps from the command line which may be useful during development of new
+ * executing web-apps from the command line which may be useful during development of new
  * annotators: </p>
  *
  * <h3 id="Info"> Info </h3>
@@ -308,21 +308,21 @@
  *
  * <h3 id="ConfigApp"> ConfigApp </h3>
  *
- * <p>This utility runs an annotator's <i> config </i> web app for installation-time
+ * <p>This utility runs an annotator's <i> config </i> web-app for installation-time
  * overall configuration, e.g.</p>
  *
  * <p><tt> java -classpath nzilbb.ag.jar nzilbb.ag.automation.util.ConfigApp myjar.jar </tt></p>
  *
  * <h3 id="TaskApp"> TaskApp </h3>
  *
- * <p>This utility runs an annotator's <i> task </i> web app for annotation task specific
+ * <p>This utility runs an annotator's <i> task </i> web-app for annotation task specific
  * configuration, e.g. </p>
  *
  * <p><tt> java -classpath nzilbb.ag.jar nzilbb.ag.automation.util.TaskApp --annotationTaskId=test myjar.jar </tt></p>
  *
  * <h3 id="ExtApp"> ExtApp </h3>
  *
- * <p>This utility runs an annotator's <i> ext </i> web app, if any, for post-processing
+ * <p>This utility runs an annotator's <i> ext </i> web-app, if any, for post-processing
  * visualizations etc., e.g. </p>
  *
  * <p><tt> java -classpath nzilbb.ag.jar nzilbb.ag.automation.util.ExtApp myjar.jar </tt></p>

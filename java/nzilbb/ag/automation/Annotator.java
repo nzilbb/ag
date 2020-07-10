@@ -46,15 +46,17 @@ import nzilbb.util.MonitorableTask;
  *         <li> {@link #getConfig()} is invoked, in case the annotator has a default
  *              configuration. </li>
  *         <li> the user is presentated with the <a href="package-summary.html#config">
- *              config web app</a>, if any, and </li> 
- *         <li> {@link #setConfig(String)} is invoked. </li>
+ *              config web-app</a>, if any, and </li> 
+ *         <li> {@link #setConfig(String)} is invoked. (if there's no config web-app,
+ *              then the config string passed will be the result of the earlier 
+ *              <tt>getConfig()</tt> invocation) </li>
  *       </ol>
  *  </li>
  *  <li> One or more annotation tasks are created; for each one: 
  *       <ol>
  *         <li> {@link #setSchema(Schema)} is invoked. </li>
- *         <li> the user is presentated with the <a href="package-summary.html#task">
- *              task web app</a>, if any, and </li> 
+ *         <li> the user is presented with the <a href="package-summary.html#task">
+ *              task web-app</a>, if any, and </li> 
  *         <li> {@link #setTaskParameters(String)} is invoked to allow any installation
  *              processing to occur; e.g. persisting configuration, loading lexicons, etc. </li>
  *       </ol>
@@ -62,8 +64,10 @@ import nzilbb.util.MonitorableTask;
  *  <li> Annotation tasks may be then run one or more times:
  *       <ol>
  *         <li> {@link #setSchema(Schema)} is invoked to provide the current schema. </li>
- *         <li> {@link #setTaskParameters(String)} is invoked to provide the parameters. </li>
- *         <li> {@link #getRequiredLayers()} is invoked to determine which layers are neede. </li>
+ *         <li> {@link #setTaskParameters(String)} is invoked to provide the parameters. 
+ *              (it's possibel that this will be invoked with null parameters to determine
+ *              whether the annotator has a default task configuration) </li>
+ *         <li> {@link #getRequiredLayers()} is invoked to determine which layers are needed. </li>
  *         <li> {@link #getOutputLayers()} is invoked to determine which layer are annotated. </li> 
  *         <li> {@link IGraphTransformer#transform(Graph) transform(graph)} is invoked
  *              with a graph that should be annotated. It can be assumed to have
@@ -74,14 +78,14 @@ import nzilbb.util.MonitorableTask;
  *              - i.e. <em>the annotator should not assume the output layer is empty</em>) </li>
  *       </ol>
  *  </li>
- *  <li> If there is an  <a href="package-summary.html#ext"> extensions web app</a> the
+ *  <li> If there is an  <a href="package-summary.html#ext"> extensions web-app</a> the
  *       user may visit it to access data, visualizations, etc.</li>
  *  <li> The module may be upgraded, in which case:
  *       <ol>
  *         <li> {@link #setSchema(Schema)} is invoked. </li>
  *         <li> {@link #getConfig()} is invoked, to determine the pre-upgrade conofiguration. </li>
  *         <li> the user is presentated with the <a href="package-summary.html#config">
- *              config web app</a>, if any, and </li> 
+ *              config web-app</a>, if any, and </li> 
  *         <li> {@link #setConfig(String)} is invoked to allow any upgrade processing to
  *              occur, e.g. updating configuration, changes in data schema, etc. </li>
  *       </ol>
@@ -151,10 +155,10 @@ public abstract class Annotator implements IGraphTransformer, MonitorableTask {
    /**
     * Provides the overall configuration of the annotator. 
     * @return The overall configuration of the annotator, which will be passed to the
-    * <i> config/index.html </i> configuration webapp, if any. This configuration may be null, or a
+    * <i> config/index.html </i> configuration web-app, if any. This configuration may be null, or a
     * string that serializes the annotators configuration state in any encoding the
     * implementor prefers. The resulting string must be interpretable by the
-    * <i> config/index.html </i> webapp. 
+    * <i> config/index.html </i> web-app. 
     * @see #setConfig(String)
     * @see #beanPropertiesToQueryString()
     */
