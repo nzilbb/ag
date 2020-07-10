@@ -36,4 +36,4 @@ public interface UsesFileSystem {
     */
    public void setWorkingDirectory(File directory);
 
-} // end of class Annotator
+} // end of class UsesFileSystem
