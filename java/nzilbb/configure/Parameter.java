@@ -331,7 +331,8 @@ public class Parameter {
    public void apply(Object bean)
       throws NoSuchMethodException, SecurityException, IllegalAccessException,
       InvocationTargetException {
-      Method setter = bean.getClass().getMethod("set" + name.substring(0,1).toUpperCase() + name.substring(1), type);
+      Method setter = bean.getClass().getMethod(
+         "set" + name.substring(0,1).toUpperCase() + name.substring(1), type);
       setter.invoke(bean, value);
    } // end of apply()
 
