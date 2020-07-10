@@ -32,16 +32,13 @@ import java.lang.annotation.Annotation;
  * @author Robert Fromont robert@fromont.net.nz
  */
 @SuppressWarnings("serial")
-public class ParameterSet
-  extends LinkedHashMap<String,Parameter>
-{   
+public class ParameterSet extends LinkedHashMap<String,Parameter> {   
   // Methods:
   
   /**
    * Default constructor
    */
-  public ParameterSet()
-  {
+  public ParameterSet() {
   } // end of constructor
   
   /**
@@ -49,8 +46,7 @@ public class ParameterSet
    * @param parameter The parameter to add.
    * @return The parmeter added.
    */
-  public Parameter addParameter(Parameter parameter)
-  {
+  public Parameter addParameter(Parameter parameter) {
     put(parameter.getName(), parameter);
     return parameter;
   } // end of addParameter()
@@ -59,15 +55,11 @@ public class ParameterSet
    * Invokes {@link Parameter#apply(Object)} for all parameters in the collection.
    * @param bean The object whose bean attribute should be set.
    */
-  public void apply(Object bean)
-  {
-    for (Parameter parameter : values())
-    {
-      try
-      {
+  public void apply(Object bean) {
+    for (Parameter parameter : values()) {
+      try {
         parameter.apply(bean);
-      }
-      catch(Exception exception) {}
+      } catch(Exception exception) {}
     }
   } // end of apply()  
   
@@ -78,16 +70,12 @@ public class ParameterSet
    * @return A reference to this set.
    */
   @SuppressWarnings("rawtypes")
-  public ParameterSet addParameters(Object bean)
-  {
+  public ParameterSet addParameters(Object bean) {
     Class c = bean.getClass();
-    for (Field field : c.getDeclaredFields())
-    {
-      if (field.isAnnotationPresent(ParameterField.class))
-      {
+    for (Field field : c.getDeclaredFields()) {
+      if (field.isAnnotationPresent(ParameterField.class)) {
         ParameterField annotation = field.getAnnotation(ParameterField.class);
-        if (!containsKey(field.getName()))
-        { // parameter is not present
+        if (!containsKey(field.getName())) { // parameter is not present
           // so add it
           String label = annotation.label();
           if (label.length() == 0) label = field.getName();
@@ -106,13 +94,10 @@ public class ParameterSet
    * Returns a list of {@link Parameter}s that are marked as required, but which have no value set.
    * @return A possibly empty list of parameters that should have a value but don't.
    */
-  public ParameterSet unsetRequiredParameters()
-  {
+  public ParameterSet unsetRequiredParameters() {
     ParameterSet unset = new ParameterSet();
-    for (Parameter p : values())
-    {
-      if (p.getRequired() && p.getValue() == null)
-      {
+    for (Parameter p : values()) {
+      if (p.getRequired() && p.getValue() == null) {
         unset.addParameter(p);
       }
     }
@@ -124,15 +109,12 @@ public class ParameterSet
    * assigned value is not among them.
    * @return A possibly empty list of parameters that have a value not in {@link Parameter#possibleValues}.
    */
-  public ParameterSet invalidValueParameters()
-  {
+  public ParameterSet invalidValueParameters() {
     ParameterSet invalid = new ParameterSet();
-    for (Parameter p : values())
-    {
+    for (Parameter p : values()) {
       if (p.getPossibleValues() != null
           && p.getValue() != null
-          && !p.getPossibleValues().contains(p.getValue()))
-      {
+          && !p.getPossibleValues().contains(p.getValue())) {
         invalid.addParameter(p);
       }
     }
