@@ -256,7 +256,7 @@ public class StandAloneWebApp extends CommandLineProgram {
             }});      
    } // end of addFinishedHandler()   
 
-   /** Start handling requests, and  */
+   /** Start handling requests  */
    public void start() {
       try {
          if (server == null) {
