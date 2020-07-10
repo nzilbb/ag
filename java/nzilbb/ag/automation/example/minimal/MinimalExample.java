@@ -34,6 +34,8 @@ import nzilbb.ag.*;
  * annotator.
  */
 public class MinimalExample extends Annotator {
+   /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
+   public String getMinimumApiVersion() { return "20200708.2018"; }
 
    /**
     * Sets the configuration for a given annotation task.

@@ -136,6 +136,13 @@ public abstract class Annotator implements IGraphTransformer, MonitorableTask {
    }
    
    /**
+    * Get the minimum version of the nzilbb.ag API supported by the serializer. 
+    * @return Minimum version of the nzilbb.ag API supported by the serializer.
+    * @see Constants#VERSION
+    */
+   public abstract String getMinimumApiVersion();
+   
+   /**
     * The layer schema.
     * @see #getSchema()
     * @see #setSchema(Schema)

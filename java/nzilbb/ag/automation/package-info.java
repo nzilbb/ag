@@ -1,8 +1,8 @@
 /**
  * These are classes and interface for supporting automated annotation modules.
  *
- * <p> Modules can be defined which perform specific annotation annotation tasks
- * automatically. Such a module must be packaged in a .jar file with the following:
+ * <p> Modules can be defined which perform specific annotation tasks automatically. Such
+ * a module must be packaged in a .jar file with the following: 
  * <ul>
  *  <li> a class that implements the {@link Annotator} interface, </li>
  *  <li> a manifest attribute called <q>nzilbb-ag-automation-Annotator</q> whose value

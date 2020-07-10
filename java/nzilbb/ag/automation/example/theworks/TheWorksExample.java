@@ -45,6 +45,8 @@ import nzilbb.ag.*;
  * </ul>
  */
 public class TheWorksExample extends Annotator implements UsesFileSystem {
+   /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
+   public String getMinimumApiVersion() { return "20200708.2018"; }
 
    /**
     * This class implements its own version of {@link Annotator#getAnnotatorId()} which is

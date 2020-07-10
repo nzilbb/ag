@@ -38,6 +38,8 @@ import nzilbb.ag.automation.InvalidConfigurationException;
  * http://www.tartarus.org/~martin/PorterStemmer</a>.
  */
 public class PorterStemmer extends Annotator {
+   /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
+   public String getMinimumApiVersion() { return "20200708.2018"; }
    
    /** The porter stemmer */
    Stemmer stemmer = new Stemmer();
@@ -149,7 +151,7 @@ public class PorterStemmer extends Annotator {
       Layer stemLayer = graph.getSchema().getLayer(stemLayerId);
       if (stemLayer == null) {
          throw new InvalidConfigurationException(
-            this, "Invalid output stem layer: " + tokenLayerId);
+            this, "Invalid output stem layer: " + stemLayerId);
       }
 
       // tag only tokens that are not already tagged
