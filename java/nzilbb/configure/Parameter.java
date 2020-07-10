@@ -341,15 +341,15 @@ public class Parameter {
          Method getter = bean.getClass().getMethod("get" + name.substring(0,1).toUpperCase() + name.substring(1));
          value = getter.invoke(bean);
          if (value != null) setValue(value);
+      } catch(NoSuchMethodException exception) {
+         System.out.println(exception.toString());
+      } catch(SecurityException exception) {
+         System.out.println(exception.toString());
+      } catch(IllegalAccessException exception) {
+         System.out.println(exception.toString());
+      } catch(InvocationTargetException exception) {
+         System.out.println(exception.toString());
       }
-      catch(NoSuchMethodException exception) {
-         System.out.println(exception.toString());}
-      catch(SecurityException exception) {
-         System.out.println(exception.toString());}
-      catch(IllegalAccessException exception) {
-         System.out.println(exception.toString());}
-      catch(InvocationTargetException exception) {
-         System.out.println(exception.toString());}
       return value;
    } // end of extractValue()
 
