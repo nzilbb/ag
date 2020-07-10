@@ -30,9 +30,11 @@ import java.sql.Connection;
 public interface UsesRelationalDatabase {
    
    /**
-    * Sets the connection for the relational database.
-    * @param database
+    * Sets the information required for connecting to the relational database.
+    * @param url URL for relational database, e.g. <q>jdbc:mysql://localhost/labbcat</q>
+    * @param user Username for connecting to the database, if any.
+    * @param password Password for connecting to the database, if any.
     */
-   public void setConnection(Connection database);
+   public void rdbConnectionDetails(String url, String user, String password);
 
-} // end of class Annotator
+} // end of class UsesRelationalDatabase
