@@ -78,12 +78,21 @@ public class PorterStemmer extends Annotator {
    
    /**
     * Sets the configuration for a given annotation task.
-    * @param parameters The configuration of the annotator; This annotator has no task
-    * parmeter web-app, so <var> parameters </var> will always be null.
+    * @param parameters The configuration of the annotator; a value of <tt> null </tt>
+    * will apply the default task parameters, with {@link #tokenLayerId} set to the
+    * {@link Schema#wordLayerId} and {@link #stemLayerId} set to <q>stem</q>.
     * @throws InvalidConfigurationException
     */
    public void setTaskParameters(String parameters) throws InvalidConfigurationException {
-      beanPropertiesFromQueryString(parameters);
+      if (schema == null)
+         throw new InvalidConfigurationException(this, "Schema is not set.");
+
+      if (parameters == null) { // apply default configuration
+         tokenLayerId = schema.getWordLayerId();
+         stemLayerId = "stem";
+      } else {
+         beanPropertiesFromQueryString(parameters);
+      }
       
       // does the outputLayer need to be added to the schema?
       if (schema.getLayer(stemLayerId) == null) {
@@ -131,7 +140,7 @@ public class PorterStemmer extends Annotator {
     * @return The changes introduced by the tranformation.
     * @throws TransformationException If the transformation cannot be completed.
     */
-   public List<Change> transform(Graph graph) throws TransformationException {
+   public List<Change> transform(Graph graph) throws TransformationException { // TODO avoid tagging non-english
       Layer tokenLayer = graph.getSchema().getLayer(tokenLayerId);
       if (tokenLayer == null) {
          throw new InvalidConfigurationException(

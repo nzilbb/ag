@@ -58,7 +58,146 @@ public class TestPorterStemmer {
       annotator.setSchema(schema);
       
       // stem to a new layer
-      annotator.setTaskParameters("tokenLayerId=word&stemLayerId=stem");
+      annotator.setTaskParameters("tokenLayerId=word&stemLayerId=porterstem");
+      
+      assertEquals("token layer",
+                   "word", annotator.getTokenLayerId());
+      assertEquals("stem layer",
+                   "porterstem", annotator.getStemLayerId());
+      assertNotNull("stem layer was created",
+                    schema.getLayer(annotator.getStemLayerId()));
+      assertEquals("stem layer child of word",
+                    "word", schema.getLayer(annotator.getStemLayerId()).getParentId());
+      assertEquals("stem layer no aligned",
+                   Constants.ALIGNMENT_NONE,
+                   schema.getLayer(annotator.getStemLayerId()).getAlignment());
+      String[] layers = annotator.getRequiredLayers();
+      assertEquals("1 required layer: "+Arrays.asList(layers),
+                   1, layers.length);
+      assertEquals("required layer correct "+Arrays.asList(layers),
+                   "word", layers[0]);
+      layers = annotator.getOutputLayers();
+      assertEquals("1 output layer: "+Arrays.asList(layers),
+                   1, layers.length);
+      assertEquals("output layer correct "+Arrays.asList(layers),
+                   "porterstem", layers[0]);
+
+      // annotate a graph
+      Graph g = new Graph()
+         .setSchema(schema);
+      Anchor start = g.getOrCreateAnchorAt(1);
+      Anchor end = g.getOrCreateAnchorAt(100);
+      g.addAnnotation(
+         new Annotation().setLayerId("participant").setLabel("someone")
+         .setStart(start).setEnd(end));
+      Annotation turn = g.addAnnotation(
+         new Annotation().setLayerId("turn").setLabel("someone")
+         .setStart(start).setEnd(end)
+         .setParent(g.my("participant")));
+      g.addAnnotation(
+         new Annotation().setLayerId("utterance").setLabel("someone")
+         .setStart(start).setEnd(end)
+         .setParent(turn));
+      
+      Annotation firstWord
+         = g.addAnnotation(new Annotation().setLayerId("word").setLabel("I")
+                           .setStart(g.getOrCreateAnchorAt(10)).setEnd(g.getOrCreateAnchorAt(20))
+                           .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("sang")
+                      .setStart(g.getOrCreateAnchorAt(20)).setEnd(g.getOrCreateAnchorAt(30))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("and")
+                      .setStart(g.getOrCreateAnchorAt(30)).setEnd(g.getOrCreateAnchorAt(40))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("walked")
+                      .setStart(g.getOrCreateAnchorAt(40)).setEnd(g.getOrCreateAnchorAt(50))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("about")
+                      .setStart(g.getOrCreateAnchorAt(50)).setEnd(g.getOrCreateAnchorAt(60))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("my")
+                      .setStart(g.getOrCreateAnchorAt(60)).setEnd(g.getOrCreateAnchorAt(70))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("blogging-posting")
+                      .setStart(g.getOrCreateAnchorAt(70)).setEnd(g.getOrCreateAnchorAt(80))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("lazily")
+                      .setStart(g.getOrCreateAnchorAt(80)).setEnd(g.getOrCreateAnchorAt(90))
+                      .setParent(turn));
+      
+      assertEquals("double check there are tokens: "+Arrays.asList(g.list("word")),
+                   8, g.list("word").length);
+      assertEquals("double check there are no stems: "+Arrays.asList(g.list("porterstem")),
+                   0, g.list("porterstem").length);
+      // run the annotator
+      annotator.transform(g);
+      List<String> stemLabels = Arrays.stream(g.list("porterstem"))
+         .map(annotation->annotation.getLabel()).collect(Collectors.toList());
+      assertEquals("one stem per token: "+stemLabels,
+                   8, stemLabels.size());
+      Iterator<String> stems = stemLabels.iterator();
+      assertEquals("down-case",
+                   "i", stems.next());
+      assertEquals("doesn't handle irregular verbs",
+                   "sang", stems.next());
+      assertEquals("and", stems.next());
+      assertEquals("handles regular verbs",
+                   "walk", stems.next());
+      assertEquals("about", stems.next());
+      assertEquals("my", stems.next());
+      assertEquals("handles compounds",
+                   "blog-post", stems.next());
+      assertEquals("lazili", stems.next());
+
+      // add a word
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("new")
+                      .setStart(g.getOrCreateAnchorAt(90)).setEnd(g.getOrCreateAnchorAt(100))
+                      .setParent(turn));
+
+      // change a word
+      firstWord.setLabel("we");
+      
+      // run the annotator again
+      annotator.transform(g);
+      stemLabels = Arrays.stream(g.list("porterstem"))
+         .map(annotation->annotation.getLabel()).collect(Collectors.toList());
+      assertEquals("one more stem: "+stemLabels,
+                   9, stemLabels.size());
+      stems = stemLabels.iterator();
+      assertEquals("changed label not re-annotated",
+                   "i", stems.next());
+      assertEquals("previous stem unchanged", "sang", stems.next());
+      assertEquals("previous stem unchanged", "and", stems.next());
+      assertEquals("previous stem unchanged", "walk", stems.next());
+      assertEquals("previous stem unchanged", "about", stems.next());
+      assertEquals("previous stem unchanged", "my", stems.next());
+      assertEquals("previous stem unchanged", "blog-post", stems.next());
+      assertEquals("previous stem unchanged", "lazili", stems.next());
+      assertEquals("new token has stem",
+                   "new", stems.next());
+
+   }
+
+   @Test public void defaultParameters() throws Exception {
+      
+      PorterStemmer annotator = new PorterStemmer();
+      Schema schema = new Schema(
+            "who", "turn", "utterance", "word",
+            new Layer("participant", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+            .setPeers(true).setPeersOverlap(true).setSaturated(true),
+            new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+            .setPeers(true).setPeersOverlap(false).setSaturated(false)
+            .setParentId("participant").setParentIncludes(true),
+            new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+            .setPeers(true).setPeersOverlap(false).setSaturated(true)
+            .setParentId("turn").setParentIncludes(true),
+            new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+            .setPeers(true).setPeersOverlap(false).setSaturated(false)
+            .setParentId("turn").setParentIncludes(true));
+      annotator.setSchema(schema);
+      
+      // use default configuration
+      annotator.setTaskParameters(null);
       
       assertEquals("token layer",
                    "word", annotator.getTokenLayerId());

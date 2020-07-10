@@ -319,6 +319,10 @@ public abstract class Annotator implements IGraphTransformer, MonitorableTask {
     * first time, a <tt> task </tt> web-app must be provided to implement the user
     * interface, which may be provided with an existing configurtaion, and invoking
     * <tt> setTaskParameters </tt> when ready.
+    * <p> If the Annotator performs exclusively (or mainly) one annotation task only
+    * (e.g. the PorterStemmer) then calling this method with 
+    * <code> <var> parameters </var> = null </code> should apply any default parameters so
+    * that the Annotator can be used without invoking the <tt> task </tt> web-app.
     * @param parameters The configuration of the annotator, encoded in a String using
     * whatever mechanism is preferred (serialization of Properties object, JSON, etc.)
     * @throws InvalidConfigurationException
