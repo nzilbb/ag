@@ -93,7 +93,9 @@ public class IO
     * @return The extension (not including the dot) of the given file.
     */
    public static String Extension(String name) {
-      return name.replaceAll(".*\\.([^.]*[a-zA-Z][^.]*)$","$1");
+      String ext = name.replaceAll(".*\\.([^.]*[a-zA-Z][^.]*)$","$1");
+      if (ext.equals(name)) return "";
+      return ext;
    } // end of Extension()
 
    /**
@@ -117,8 +119,9 @@ public class IO
     * @return The name of the given file without extension (not including the dot).
     */
    public static String WithoutExtension(String name) {
+      if (name.endsWith(".")) return name;
       return name.replaceAll("\\.[^.]*[a-zA-Z][^.]*$","");
-   } // end of Extension()
+   } // end of WithoutExtension()
    
    /**
     * Copies a file.

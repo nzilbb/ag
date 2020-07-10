@@ -37,22 +37,27 @@ public class TestIO {
                    "TextGrid", IO.Extension("something__1.234-5.678.TextGrid"));
       assertEquals("Consecutive dots",
                    "trs", IO.Extension("something..trs"));
-      assertEquals("Ending dot",
+      assertEquals("No dot = no extension",
+                   "", IO.Extension("something."));
+      assertEquals("Ending dot = no extension",
                    "", IO.Extension("something."));
       assertEquals("Graph fragment suffix",
                    "", IO.Extension("something__1.234-5.678"));
    }
    @Test public void WithoutExtension() throws Exception {
       assertEquals("Simple case",
-                   "name", IO.Extension("name.ext"));
+                   "name", IO.WithoutExtension("name.ext"));
       assertEquals("Multiple dots",
-                   "something__1.234-5.678", IO.Extension("something__1.234-5.678.TextGrid"));
+                   "something__1.234-5.678",
+                   IO.WithoutExtension("something__1.234-5.678.TextGrid"));
       assertEquals("Consecutive dots",
-                   "something.", IO.Extension("something..trs"));
-      assertEquals("Ending dot",
-                   "something", IO.Extension("something."));
+                   "something.", IO.WithoutExtension("something..trs"));
+      assertEquals("No dot = no extension",
+                   "something", IO.WithoutExtension("something"));
+      assertEquals("Ending dot = no extension",
+                   "something.", IO.WithoutExtension("something."));
       assertEquals("Graph fragment suffix",
-                   "something__1.234-5.678", IO.Extension("something__1.234-5.678"));
+                   "something__1.234-5.678", IO.WithoutExtension("something__1.234-5.678"));
    }
    
    public static void main(String args[]) {
