@@ -44,23 +44,6 @@ public class AnnotatorDescriptor {
    // Attributes:
 
    /**
-    * Java archive containing the annotator implementation.
-    * @see #getAnnotatorJar()
-    * @see #setAnnotatorJar(JarFile)
-    */
-   protected JarFile annotatorJar;
-   /**
-    * Getter for {@link #annotatorJar}: Java archive containing the annotator implementation.
-    * @return Java archive containing the annotator implementation.
-    */
-   public JarFile getAnnotatorJar() { return annotatorJar; }
-   /**
-    * Setter for {@link #annotatorJar}: Java archive containing the annotator implementation.
-    * @param newAnnotatorJar Java archive containing the annotator implementation.
-    */
-   public AnnotatorDescriptor setAnnotatorJar(JarFile newAnnotatorJar) { annotatorJar = newAnnotatorJar; return this; }
-
-   /**
     * Fully-qualified annotator class name.
     * @see #getAnnotatorClassName()
     */
@@ -142,31 +125,22 @@ public class AnnotatorDescriptor {
     * @throws ClassCastException If the annotator does not extend {@link Annotator}.
     */
    @SuppressWarnings("unchecked")
-   public AnnotatorDescriptor(File annotatorJar)
-      throws ClassNotFoundException, NoSuchMethodException, InstantiationException,
-      IllegalAccessException, InvocationTargetException, ClassCastException, IOException {
+   public AnnotatorDescriptor(File annotatorJar) throws ClassNotFoundException, IOException {
 
       if (!annotatorJar.exists()) {
          throw new FileNotFoundException(annotatorJar.getPath());
       }
       
-      this.annotatorJar = new JarFile(annotatorJar);
-      
-      // get the class name from the jar manifest
-      annotatorClassName = (String)this.annotatorJar.getManifest().getMainAttributes().get(
-         new Attributes.Name("nzilbb-ag-automation-Annotator"));
+      instance = (Annotator)IO.FindImplementorInJar(
+         annotatorJar, getClass().getClassLoader(), Annotator.class);
+      if (instance == null) throw new ClassNotFoundException(Annotator.class.getName());
 
-      if (annotatorClassName == null) {
-         throw new JarException("No attribute: nzilbb-ag-automation-Annotator");
-      }
-      
-      // get the class
-      URL[] urls = { annotatorJar.toURI().toURL() };
-      annotatorClassLoader = URLClassLoader.newInstance(urls, getClass().getClassLoader());
-      annotatorClass = annotatorClassLoader.loadClass(this.annotatorClassName);
+      annotatorClass = instance.getClass();
 
-      // get an instance
-      instance = (Annotator)this.annotatorClass.getConstructor().newInstance();
+      annotatorClassName = annotatorClass.getName();
+
+      annotatorClassLoader = annotatorClass.getClassLoader();
+      
    } // end of constructor
 
    /**
