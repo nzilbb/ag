@@ -98,7 +98,7 @@ import nzilbb.util.MonitorableTask;
  * should implement, in addition to {@link IGraphTransformer#transform(Graph) transform(graph)}.
  * @author Robert Fromont robert@fromont.net.nz
  */
-public abstract class Annotator implements IGraphTransformer, MonitorableTask {
+public abstract class Annotator implements GraphTransformer, MonitorableTask {
 
    /**
     * Unique name for the annotator, which is immutable across versions of the implemetantation.
@@ -395,7 +395,7 @@ public abstract class Annotator implements IGraphTransformer, MonitorableTask {
     * <p> This can be overridden for optimized cross-graph updates. The default
     * implementation simply calls {@link IGraphStoreQuery#getMatchingTranscriptIds(String)}
     * and calls {@link IGraphStoreQuery#getGraph(String,String[])} and 
-    * {@link IGraphTransformer#transform(Graph)} serially for each returned ID.
+    * {@link GraphTransformer#transform(Graph)} serially for each returned ID.
     * @param store
     * @param expression
     * @throws TransformationException
@@ -404,7 +404,7 @@ public abstract class Annotator implements IGraphTransformer, MonitorableTask {
     * @throws StoreException If one of the <var> store </var> methods throws this exception.
     * @throws PermissionException If one of the <var> store </var> methods throws this exception.
     */
-   public void transformTranscripts(IGraphStore store, String expression)
+   public void transformTranscripts(GraphStore store, String expression)
       throws TransformationException, InvalidConfigurationException, StoreException, PermissionException {
       Vector<String> layerIds = new Vector<String>();
       for (String layerId : getRequiredLayers()) layerIds.add(layerId);

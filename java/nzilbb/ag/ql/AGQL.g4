@@ -64,12 +64,12 @@ patternMatchExpression
   ; 
 
 operand
-  : idExpression               # IdOperand
-  | ordinalExpression          # OrdinalOperand
+  : ordinalExpression          # OrdinalOperand
   | labelExpression            # LabelOperand
   | annotatorExpression        # AnnotatorOperand
   | whenExpression             # WhenOperand
   | layerExpression            # LayerOperand
+  | idExpression               # IdOperand
   | parentIdExpression         # ParentIdOperand
   | confidenceExpression       # ConfidenceOperand
   | anchorIdExpression         # AnchorIdOperand

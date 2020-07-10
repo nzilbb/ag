@@ -54,8 +54,7 @@ import org.xml.sax.SAXException;
  * Deserializer for trs files produced with Transcriber.
  * @author Robert Fromont robert@fromont.net.nz
  */
-
-public class TranscriptSerialization extends Transcript implements IDeserializer, ISerializer {
+public class TranscriptSerialization extends Transcript implements GraphDeserializer, GraphSerializer {
    
    // Attributes:
    protected Vector<String> warnings;
@@ -503,7 +502,7 @@ public class TranscriptSerialization extends Transcript implements IDeserializer
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-	 "Transcriber transcript", "1.62", "text/xml-transcriber", ".trs", "20191211.1902",
+	 "Transcriber transcript", "1.62", "text/xml-transcriber", ".trs", "20200710.1904",
          getClass().getResource("icon.png"));
    }
 
@@ -515,7 +514,7 @@ public class TranscriptSerialization extends Transcript implements IDeserializer
     *  interface for setting/confirming these parameters.  
     * @param configuration The configuration for the deserializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
-    * @return A list of configuration parameters (still) must be set before {@link IDeserializer#setParameters()} can be invoked. If this is an empty list, {@link IDeserializer#setParameters()} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
+    * @return A list of configuration parameters (still) must be set before {@link GraphDeserializer#setParameters()} can be invoked. If this is an empty list, {@link GraphDeserializer#setParameters()} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
     */
    public ParameterSet configure(ParameterSet configuration, Schema schema) {
       setSchema(schema);
@@ -781,11 +780,11 @@ public class TranscriptSerialization extends Transcript implements IDeserializer
     * @param streams A list of named streams that contain all the
     *  transcription/annotation data required, and possibly (a) stream(s) for the media annotated.
     * @param schema The layer schema, definining layers and the way they interrelate.
-    * @return A list of parameters that require setting before {@link IDeserializer#deserialize()}
+    * @return A list of parameters that require setting before {@link GraphDeserializer#deserialize()}
     * can be invoked. This may be an empty list, and may include parameters with the value already
     * set to a workable default. If there are parameters, and user interaction is possible, then
     * the user may be presented with an interface for setting/confirming these parameters, before
-    * they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
+    * they are then passed to {@link GraphDeserializer#setParameters(ParameterSet)}.
     * @throws SerializationException If the graph could not be loaded.
     * @throws IOException On IO error.
     */
@@ -1282,11 +1281,11 @@ public class TranscriptSerialization extends Transcript implements IDeserializer
       // TODO check for turns with no speaker assigned.
       return warnings;
    }
-   // ISerializer methods
+   // GraphSerializer methods
    
    /**
     * Determines which layers, if any, must be present in the graph that will be serialized.
-    * <p>{@link ISerializer} method.
+    * <p>{@link GraphSerializer} method.
     * @return A list of IDs of layers that must be present in the graph that will be serialized.
     * @throws SerializationParametersMissingException If not all required parameters have a value.
     */
@@ -1319,7 +1318,7 @@ public class TranscriptSerialization extends Transcript implements IDeserializer
 
    /**
     * Determines the cardinality between graphs and serialized streams.
-    * @return {@link nzilbb.ag.serialize.ISerializer#Cardinality}.NtoN as there is one
+    * @return {@link nzilbb.ag.serialize.GraphSerializer#Cardinality}.NtoN as there is one
     * stream produced for each graph to serialize.
     */
    public Cardinality getCardinality() {

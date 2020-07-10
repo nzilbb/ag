@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -49,7 +49,7 @@ import nzilbb.ag.*;
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class Validator
-   implements IGraphTransformer
+   implements GraphTransformer
 {
    // Attributes:
    
@@ -197,7 +197,7 @@ public class Validator
    {
    } // end of constructor
 
-   // IGraphTransformer method
+   // GraphTransformer method
 
    /**
     * Checks the graph structure, and makes changes in order to ensure the graph structure is valid.

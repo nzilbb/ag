@@ -1,5 +1,5 @@
 //
-// Copyright 2019 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2019-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -41,7 +41,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nzilbb.ag.*;
-import nzilbb.ag.serialize.ISerializer;
+import nzilbb.ag.serialize.GraphSerializer;
 import nzilbb.ag.serialize.SerializationDescriptor;
 import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.SerializationParametersMissingException;
@@ -58,7 +58,7 @@ import org.apache.commons.csv.*;
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class CsvSerializer
-   implements ISerializer
+   implements GraphSerializer
 {
    // Attributes:
    
@@ -70,7 +70,7 @@ public class CsvSerializer
    protected Vector<String> warnings;
    /**
     * Returns any warnings that may have arisen during the last execution of {@link #deserialize()}.
-    * <p>{@link ISerializer} and {@link IDeserializer} method.
+    * <p>{@link GraphSerializer} and {@link GraphDeserializer} method.
     * @return A possibly empty list of warnings.
     */
    public String[] getWarnings()
@@ -176,13 +176,13 @@ public class CsvSerializer
 
    /**
     * Returns the deserializer's descriptor.
-    * <p>{@link ISerializer} and {@link IDeserializer} method.
+    * <p>{@link GraphSerializer} and {@link GraphDeserializer} method.
     * @return The deserializer's descriptor
     */
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Comma Separated Values", "1.01", "text/csv", ".csv", "20191031.1734", getClass().getResource("icon.png"));
+	 "Comma Separated Values", "1.1", "text/csv", ".csv", "20200710.1904", getClass().getResource("icon.png"));
    }
 
    /**
@@ -191,10 +191,10 @@ public class CsvSerializer
     *  set, to discover what (if any) general configuration is required. If parameters are
     *  returned, and user interaction is possible, then the user may be presented with an
     *  interface for setting/confirming these parameters.
-    * <p>{@link ISerializer} and {@link IDeserializer} method.
+    * <p>{@link GraphSerializer} and {@link GraphDeserializer} method.
     * @param configuration The configuration for the deserializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
-    * @return A list of configuration parameters (still) must be set before {@link IDeserializer#setParameters()} can be invoked. If this is an empty list, {@link IDeserializer#setParameters()} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
+    * @return A list of configuration parameters (still) must be set before {@link GraphDeserializer#setParameters()} can be invoked. If this is an empty list, {@link GraphDeserializer#setParameters()} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
     */
    public ParameterSet configure(ParameterSet configuration, Schema schema)
    {
@@ -205,7 +205,7 @@ public class CsvSerializer
 
    /**
     * Determines which layers, if any, must be present in the graph that will be serialized.
-    * <p>{@link ISerializer} method.
+    * <p>{@link GraphSerializer} method.
     * @return A list of IDs of layers that must be present in the graph that will be serialized.
     * @throws SerializationParametersMissingException If not all required parameters have a value.
     */
@@ -216,7 +216,7 @@ public class CsvSerializer
 
    /**
     * Determines the cardinality between graphs and serialized streams.
-    * @return {@link ISerializer#Cardinality}.NtoOne as there is one stream produced
+    * @return {@link GraphSerializer#Cardinality}.NtoOne as there is one stream produced
     * regardless of  how many graphs are serialized.
     */
    public Cardinality getCardinality()
@@ -224,7 +224,7 @@ public class CsvSerializer
       return Cardinality.NToOne;
    }
 
-   // ISerializer method
+   // GraphSerializer method
    
    /**
     * Serializes the given graph, generating one or more {@link NamedStream}s.

@@ -36,7 +36,7 @@ import nzilbb.ag.*;
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class DefaultOffsetGenerator
-  implements IGraphTransformer
+  implements GraphTransformer
 {
    // Attributes:
    
@@ -196,7 +196,7 @@ public class DefaultOffsetGenerator
       setDefaultOffsetThreshold(defaultOffsetThreshold);
    } // end of constructor
 
-   // IGraphTransformer method
+   // GraphTransformer method
 
    /**
     * Generates default anchor offsets.

@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -40,19 +40,19 @@ public class MinimumEditPath<T>
    /**
     * The comparator used when determining the distance between two sequence elements.
     * @see #getComparator()
-    * @see #setComparator(IEditComparator)
+    * @see #setComparator(EditComparator)
     */
-   protected IEditComparator<T> comparator;
+   protected EditComparator<T> comparator;
    /**
     * Getter for {@link #comparator}: The comparator used when determining the distance between two sequence elements.
     * @return The comparator used when determining the distance between two sequence elements.
     */
-   public IEditComparator<T> getComparator() { return comparator; }
+   public EditComparator<T> getComparator() { return comparator; }
    /**
     * Setter for {@link #comparator}: The comparator used when determining the distance between two sequence elements.
     * @param Newcomparator The comparator used when determining the distance between two sequence elements.
     */
-   public MinimumEditPath<T> setComparator(IEditComparator<T> Newcomparator) { comparator = Newcomparator; return this; }
+   public MinimumEditPath<T> setComparator(EditComparator<T> Newcomparator) { comparator = Newcomparator; return this; }
    
    
    // Methods:
@@ -69,7 +69,7 @@ public class MinimumEditPath<T>
     * Constructor
     * @param comparator Element comparator to use.
     */
-   public MinimumEditPath(IEditComparator<T> comparator)
+   public MinimumEditPath(EditComparator<T> comparator)
    {
       setComparator(comparator);
    } // end of constructor

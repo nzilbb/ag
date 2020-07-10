@@ -68,9 +68,8 @@ import nzilbb.util.Timers;
  * <p>These can be written documents, or transcripts of speech. Interlocutors, if any, may be identified with a configurable line-start pattern.
  * @author Robert Fromont robert@fromont.net.nz
  */
-
 public class PlainTextSerialization
-   implements IDeserializer, ISerializer
+   implements GraphDeserializer, GraphSerializer
 {
    // Attributes:
    protected Vector<String> warnings;
@@ -532,19 +531,19 @@ public class PlainTextSerialization
    /**
     * Utterance tokenizer.  The default is {@link SimpleTokenizer}.
     * @see #getTokenizer()
-    * @see #setTokenizer(IGraphTransformer)
+    * @see #setTokenizer(GraphTransformer)
     */
-   protected IGraphTransformer tokenizer;
+   protected GraphTransformer tokenizer;
    /**
     * Getter for {@link #tokenizer}: Utterance tokenizer.
     * @return Utterance tokenizer.
     */
-   public IGraphTransformer getTokenizer() { return tokenizer; }
+   public GraphTransformer getTokenizer() { return tokenizer; }
    /**
     * Setter for {@link #tokenizer}: Utterance tokenizer.
     * @param newTokenizer Utterance tokenizer.
     */
-   public PlainTextSerialization setTokenizer(IGraphTransformer newTokenizer) { tokenizer = newTokenizer; return this; }
+   public PlainTextSerialization setTokenizer(GraphTransformer newTokenizer) { tokenizer = newTokenizer; return this; }
 
    /**
     * Maximum lines in a header
@@ -651,7 +650,7 @@ public class PlainTextSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "Plain Text Document", "1.05", "text/plain", ".txt", "20191031.1734",
+         "Plain Text Document", "1.1", "text/plain", ".txt", "20200710.1904",
          getClass().getResource("icon.png"));
    }
 
@@ -665,8 +664,8 @@ public class PlainTextSerialization
     * @param configuration The configuration for the deserializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of configuration parameters (still) must be set before {@link
-    * IDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty list,
-    * {@link IDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an
+    * GraphDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty list,
+    * {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an
     * empty list, this method must be invoked again with the returned parameters' values
     * set. 
     */
@@ -950,11 +949,11 @@ public class PlainTextSerialization
     * @param streams A list of named streams that contain all the
     *  transcription/annotation data required, and possibly (a) stream(s) for the media annotated.
     * @param schema The layer schema, definining layers and the way they interrelate.
-    * @return A list of parameters that require setting before {@link IDeserializer#deserialize()}
+    * @return A list of parameters that require setting before {@link GraphDeserializer#deserialize()}
     * can be invoked. This may be an empty list, and may include parameters with the value already
     * set to a workable default. If there are parameters, and user interaction is possible, then
     * the user may be presented with an interface for setting/confirming these parameters, before
-    * they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
+    * they are then passed to {@link GraphDeserializer#setParameters(ParameterSet)}.
     * @throws SerializationException If the graph could not be loaded.
     * @throws IOException On IO error.
     */
@@ -1700,7 +1699,7 @@ public class PlainTextSerialization
       return warnings;
    }
 
-   // ISerializer methods
+   // GraphSerializer methods
 
    /**
     * Determines which layers, if any, must be present in the graph that will be serialized.
@@ -1727,7 +1726,7 @@ public class PlainTextSerialization
    /**
     * Determines the cardinality between graphs and serialized streams.
     * <p>The cardinatlity of this deseerializer is NToN.
-    * @return {@link nzilbb.ag.serialize.ISerializer#Cardinality}.NToN.
+    * @return {@link nzilbb.ag.serialize.GraphSerializer#Cardinality}.NToN.
     */
    public Cardinality getCardinality()
    {

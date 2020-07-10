@@ -26,40 +26,7 @@ import nzilbb.configure.ParameterSet;
 
 /**
  * Converts media from one format to another.
+ * @deprecated Use {@link MediaConverter} instead.
  * @author Robert Fromont robert@fromont.net.nz
  */
-
-public interface IMediaConverter
-{
-   /**
-    * Configure the converter.  This might include executable paths, conversion parameters, etc.
-    * <p>This method can be invoked with an empty parameter set, to discover what (if any)
-    *  parameters are required. If parameters are returned, and user interaction is possible, 
-    *  then the user may be presented with an interface for setting/confirming these parameters. 
-    * @param configuration The configuration for the converter. 
-    * @return A list of configuration parameters must be set before the converter can be used.
-    * @throws MediaException If an error occurs.
-    */
-   public ParameterSet configure(ParameterSet configuration) throws MediaException;
-   
-   /**
-    * Determines whether this converter supports conversion between the given types.
-    * @param sourceType The MIME type of the source media.
-    * @param destinationType The MIME type of the destination format.
-    * @return true if the converter can convert from the sourceType to the destinationType, false otherwise.
-    * @throws MediaException If an error occurs.
-    */
-   public boolean conversionSupported(String sourceType, String destinationType) throws MediaException;
-
-   /**
-    * Starts conversion.
-    * @param sourceType The MIME type of the source media.
-    * @param source The source file.
-    * @param destinationType The MIME type of the destination format.
-    * @param destination The destination file.
-    * @return A thread that is processing the media.
-    * @throws MediaException If an error occurs.
-    */
-   public MediaThread start(String sourceType, File source, String destinationType, File destination) throws MediaException;
-   
-} // end of IMediaConverter
+@Deprecated public interface IMediaConverter extends MediaConverter {}

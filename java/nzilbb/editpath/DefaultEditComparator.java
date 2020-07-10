@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -29,7 +29,7 @@ import java.util.Comparator;
  */
 
 public class DefaultEditComparator<T>
-   implements IEditComparator<T>
+   implements EditComparator<T>
 {
    // Attributes:
    
@@ -149,7 +149,7 @@ public class DefaultEditComparator<T>
    } // end of constructor
 
    /**
-    * {@link IEditComparator} method: Compares two sequence elements, and evaluates the distance between them.
+    * {@link EditComparator} method: Compares two sequence elements, and evaluates the distance between them.
     * @param from The element from the source sequence, which may be null.
     * @param to The element from the destination sequence, which may be null.
     * @return An edit step between the two elements. {@link EditStep#getFrom()} is set to <var>from</var>, {@link EditStep#getTo()} is set to <var>to</var>, {@link EditStep#getStepDistance()} is set to the computed edit distance between these two elements, and {@link EditStep#getOperation()} is set to either <var>EditStep.StepOperation.NONE</var> or <var>EditStep.StepOperation.CHANGE</var>.

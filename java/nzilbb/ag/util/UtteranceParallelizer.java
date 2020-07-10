@@ -1,5 +1,5 @@
 //
-// Copyright 2019 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2019-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -43,13 +43,13 @@ import nzilbb.ag.*;
  * The turns all share anchors, rather than having simultaneous but distinct anchors, so
  * that simultaneous speech can easily be detected (e.g. for converting to the Transcriber
  * format) 
- * <p>Turns are also split on topic changes (i.e. when a topic layer annotation
+ * <p>TODO Turns are also split on topic changes (i.e. when a topic layer annotation
  * starts/ends), mainly because that suits Transcriber.
  * <p><em>NB</em> If there are anchors with unset offsets, the {@link DefaultOffsetGenerator} is
  * used to assign them.
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class UtteranceParallelizer implements IGraphTransformer {
+public class UtteranceParallelizer implements GraphTransformer {
    
    // Attributes:
    

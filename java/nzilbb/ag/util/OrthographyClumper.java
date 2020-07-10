@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -32,7 +32,7 @@ import nzilbb.ag.*;
  * @author Robert Fromont robert@fromont.net.nz
  */
 
-public class OrthographyClumper implements IGraphTransformer
+public class OrthographyClumper implements GraphTransformer
 {
    // Attributes
    
@@ -301,4 +301,4 @@ public class OrthographyClumper implements IGraphTransformer
    }
    
    
-} // end of class IGraphTransformer
+} // end of class GraphTransformer

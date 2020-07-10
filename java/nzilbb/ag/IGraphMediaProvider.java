@@ -1,5 +1,5 @@
 //
-// Copyright 2019 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2019-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -23,37 +23,7 @@ package nzilbb.ag;
 
 /**
  * Interface for objects that provide access to media for a given graph.
+ * @deprecated Use {@link GraphMediaProvider} instead.
  * @author Robert Fromont robert@fromont.net.nz
  */
-public interface IGraphMediaProvider
-{
-  /**
-   * List the media available for the graph.
-   * @return List of media files available for the given graph.
-   * @throws StoreException If an error occurs.
-   * @throws PermissionException If the operation is not permitted.
-   */
-  public MediaFile[] getAvailableMedia() 
-    throws StoreException, PermissionException;
-  
-  /**
-   * Gets a given media track for the graph.
-   * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
-   * @param mimeType The MIME type of the media.
-   * @return A URL to the given media for the given graph, or null if the given media doesn't exist.
-   * @throws StoreException If an error occurs.
-   * @throws PermissionException If the operation is not permitted.
-   */
-  public String getMedia(String trackSuffix, String mimeType) 
-    throws StoreException, PermissionException;
-  
-  /**
-   * Provides another instance of the implementing class, for the given graph. The main use for
-   * this method is to allow graphs to generate fragments that have their own media providers.
-   * @param graph
-   * @return A new object that can provide media for the given graph, or null if none can be
-   * provided. 
-   */
-  public IGraphMediaProvider providerForGraph(Graph graph);
-  
-} // end of interface IGraphMediaProvider
+@Deprecated public interface IGraphMediaProvider extends GraphMediaProvider {}

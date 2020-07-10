@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -50,7 +50,7 @@ import org.json.*;
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class JSONSerialization
-   implements ISerializer
+   implements GraphSerializer
 {
    // Attributes:
 
@@ -137,13 +137,13 @@ public class JSONSerialization
 
    /**
     * Returns the serialization descriptor.
-    * <p>{@link ISerializer} and {@link IDeserializer} method.
+    * <p>{@link GraphSerializer} and {@link IDeserializer} method.
     * @return The deserializer's descriptor
     */
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "JSON (JavaScript Object Notation)", "0.1", "application/json", ".json", "20190912.1504", 
+	 "JSON (JavaScript Object Notation)", "0.2", "application/json", ".json", "20200710.1904", 
 	 getClass().getResource(getClass().getSimpleName() + ".png"));
    }
 
@@ -157,7 +157,7 @@ public class JSONSerialization
 
    /**
     * Returns any warnings that may have arisen during the last execution of {@link #deserialize()}.
-    * <p>{@link ISerializer} and {@link IDeserializer} method.
+    * <p>{@link GraphSerializer} and {@link IDeserializer} method.
     * @return A possibly empty list of warnings.
     */
    public String[] getWarnings()
@@ -172,12 +172,12 @@ public class JSONSerialization
     *  set, to discover what (if any) general configuration is required. If parameters are
     *  returned, and user interaction is possible, then the user may be presented with an
     *  interface for setting/confirming these parameters. 
-    * <p>{@link ISerializer} and {@link IDeserializer} method.
+    * <p>{@link GraphSerializer} and {@link IDeserializer} method.
     * @param configuration The general configuration for the serializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of configuration parameters (still) must be set before
-    *  {@link ISerializer#getRequiredLayers()} can be called. If this is an empty list,
-    *  {@link ISerializer#getRequiredLayers()} can be called. If it's not an empty list,
+    *  {@link GraphSerializer#getRequiredLayers()} can be called. If this is an empty list,
+    *  {@link GraphSerializer#getRequiredLayers()} can be called. If it's not an empty list,
     *  this method must be invoked again with the returned parameters' values set.
     */
    public ParameterSet configure(ParameterSet configuration, Schema schema)
@@ -494,7 +494,7 @@ public class JSONSerialization
 
    /**
     * Determines which layers, if any, must be present in the graph that will be serialized.
-    * <p>{@link ISerializer} method.
+    * <p>{@link GraphSerializer} method.
     * @return An empty array, as no particular layers are required.
     * @throws SerializationParametersMissingException If not all required parameters have a value.
     */
@@ -505,7 +505,7 @@ public class JSONSerialization
 
    /**
     * Determines the cardinality between graphs and serialized streams.
-    * @return {@link nzilbb.ag.serialize.ISerializer.Cardinality}.NtoN as there is one
+    * @return {@link nzilbb.ag.serialize.GraphSerializer.Cardinality}.NtoN as there is one
     * stream produced per graph. 
     */
    public Cardinality getCardinality()

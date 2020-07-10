@@ -58,7 +58,7 @@ import org.xml.sax.*;
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class EAFSerialization
-   implements IDeserializer, ISerializer
+   implements GraphDeserializer, GraphSerializer
 {
    // Attributes:     
    protected Vector<String> warnings;
@@ -442,7 +442,7 @@ public class EAFSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "ELAN EAF Transcript", "1.04", "text/x-eaf+xml", ".eaf", "20200306.1746",
+         "ELAN EAF Transcript", "1.1", "text/x-eaf+xml", ".eaf", "20200710.1904",
          getClass().getResource("icon.png"));
    }
    
@@ -466,19 +466,19 @@ public class EAFSerialization
    /**
     * Utterance tokenizer.  The default is {@link SimpleTokenizer}.
     * @see #getTokenizer()
-    * @see #setTokenizer(IGraphTransformer)
+    * @see #setTokenizer(GraphTransformer)
     */
-   protected IGraphTransformer tokenizer;
+   protected GraphTransformer tokenizer;
    /**
     * Getter for {@link #tokenizer}: Utterance tokenizer.
     * @return Utterance tokenizer.
     */
-   public IGraphTransformer getTokenizer() { return tokenizer; }
+   public GraphTransformer getTokenizer() { return tokenizer; }
    /**
     * Setter for {@link #tokenizer}: Utterance tokenizer.
     * @param newTokenizer Utterance tokenizer.
     */
-   public EAFSerialization setTokenizer(IGraphTransformer newTokenizer) { tokenizer = newTokenizer; return this; }
+   public EAFSerialization setTokenizer(GraphTransformer newTokenizer) { tokenizer = newTokenizer; return this; }
 
    private boolean mappingsDependOnTurn = false;
    
@@ -546,7 +546,7 @@ public class EAFSerialization
    } // end of reset()
 
    
-   // IDeserializer methods
+   // GraphDeserializer methods
 
    protected ParameterSet mappings;
 
@@ -560,8 +560,8 @@ public class EAFSerialization
     * @param configuration The configuration for the deserializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of configuration parameters (still) must be set before 
-    * {@link IDeserializer#setParameters()} can be invoked. If this is an empty list,
-    * {@link IDeserializer#setParameters()} can be invoked. If it's not an empty list,
+    * {@link GraphDeserializer#setParameters()} can be invoked. If this is an empty list,
+    * {@link GraphDeserializer#setParameters()} can be invoked. If it's not an empty list,
     * this method must be invoked again with the returned parameters' values set. 
     */
    public ParameterSet configure(ParameterSet configuration, Schema schema)
@@ -799,11 +799,11 @@ public class EAFSerialization
     * @param streams A list of named streams that contain all the
     *  transcription/annotation data required, and possibly (a) stream(s) for the media annotated.
     * @param schema The layer schema, definining layers and the way they interrelate.
-    * @return A list of parameters that require setting before {@link IDeserializer#deserialize()}
+    * @return A list of parameters that require setting before {@link GraphDeserializer#deserialize()}
     * can be invoked. This may be an empty list, and may include parameters with the value already
     * set to a workable default. If there are parameters, and user interaction is possible, then
     * the user may be presented with an interface for setting/confirming these parameters, before
-    * they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
+    * they are then passed to {@link GraphDeserializer#setParameters(ParameterSet)}.
     * @throws SerializationException If the graph could not be loaded.
     * @throws IOException On IO error.
     */
@@ -1806,11 +1806,11 @@ public class EAFSerialization
       } // next child layer
    } // end of joinTurns()
 
-   // ISerializer methods
+   // GraphSerializer methods
    
    /**
     * Determines which layers, if any, must be present in the graph that will be serialized.
-    * <p>{@link ISerializer} method.
+    * <p>{@link GraphSerializer} method.
     * @return A list of IDs of layers that must be present in the graph that will be serialized.
     * @throws SerializationParametersMissingException If not all required parameters have a value.
     */
@@ -1833,7 +1833,7 @@ public class EAFSerialization
 
    /**
     * Determines the cardinality between graphs and serialized streams.
-    * @return {@link nzilbb.ag.serialize.ISerializer#Cardinality}.NtoN as there is one
+    * @return {@link nzilbb.ag.serialize.GraphSerializer#Cardinality}.NtoN as there is one
     * stream produced for each graph to serialize.
     */
    public Cardinality getCardinality()

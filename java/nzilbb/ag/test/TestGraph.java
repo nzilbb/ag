@@ -1039,21 +1039,21 @@ public class TestGraph
    {
       Graph g = new Graph();
       g.setId("my graph");
-      g.setMediaProvider(new IGraphMediaProvider() {
+      g.setMediaProvider(new GraphMediaProvider() {
           public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
           { return null; }
           public String getMedia(String trackSuffix, String mimeType)
             throws StoreException, PermissionException
           { return "GraphMediaProvider"; }
-          public IGraphMediaProvider providerForGraph(Graph graph)
+          public GraphMediaProvider providerForGraph(Graph graph)
           {
-            return new IGraphMediaProvider() {
+            return new GraphMediaProvider() {
               public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
               { return null; }
               public String getMedia(String trackSuffix, String mimeType)
                 throws StoreException, PermissionException
               { return "FragmentMediaProvider"; }
-              public IGraphMediaProvider providerForGraph(Graph graph)
+              public GraphMediaProvider providerForGraph(Graph graph)
               { return this; }
             };
           }
@@ -1250,21 +1250,21 @@ public class TestGraph
    {
       Graph g = new Graph();
       g.setId("my graph");
-      g.setMediaProvider(new IGraphMediaProvider() {
+      g.setMediaProvider(new GraphMediaProvider() {
           public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
           { return null; }
           public String getMedia(String trackSuffix, String mimeType)
             throws StoreException, PermissionException
           { return "GraphMediaProvider"; }
-          public IGraphMediaProvider providerForGraph(Graph graph)
+          public GraphMediaProvider providerForGraph(Graph graph)
           {
-            return new IGraphMediaProvider() {
+            return new GraphMediaProvider() {
               public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
               { return null; }
               public String getMedia(String trackSuffix, String mimeType)
                 throws StoreException, PermissionException
               { return "FragmentMediaProvider"; }
-              public IGraphMediaProvider providerForGraph(Graph graph)
+              public GraphMediaProvider providerForGraph(Graph graph)
               { return this; }
             };
           }
@@ -1430,21 +1430,21 @@ public class TestGraph
    {
       Graph g = new Graph();
       g.setId("XXX");
-      g.setMediaProvider(new IGraphMediaProvider() {
+      g.setMediaProvider(new GraphMediaProvider() {
           public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
           { return null; }
           public String getMedia(String trackSuffix, String mimeType)
             throws StoreException, PermissionException
           { return "GraphMediaProvider"; }
-          public IGraphMediaProvider providerForGraph(Graph graph)
+          public GraphMediaProvider providerForGraph(Graph graph)
           {
-            return new IGraphMediaProvider() {
+            return new GraphMediaProvider() {
               public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
               { return null; }
               public String getMedia(String trackSuffix, String mimeType)
                 throws StoreException, PermissionException
               { return "FragmentMediaProvider"; }
-              public IGraphMediaProvider providerForGraph(Graph graph)
+              public GraphMediaProvider providerForGraph(Graph graph)
               { return this; }
             };
           }
@@ -1618,21 +1618,21 @@ public class TestGraph
    {
       Graph g = new Graph();
       g.setId("my graph");
-      g.setMediaProvider(new IGraphMediaProvider() {
+      g.setMediaProvider(new GraphMediaProvider() {
           public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
           { return null; }
           public String getMedia(String trackSuffix, String mimeType)
             throws StoreException, PermissionException
           { return "GraphMediaProvider"; }
-          public IGraphMediaProvider providerForGraph(Graph graph)
+          public GraphMediaProvider providerForGraph(Graph graph)
           {
-            return new IGraphMediaProvider() {
+            return new GraphMediaProvider() {
               public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
               { return null; }
               public String getMedia(String trackSuffix, String mimeType)
                 throws StoreException, PermissionException
               { return "FragmentMediaProvider"; }
-              public IGraphMediaProvider providerForGraph(Graph graph)
+              public GraphMediaProvider providerForGraph(Graph graph)
               { return this; }
             };
           }

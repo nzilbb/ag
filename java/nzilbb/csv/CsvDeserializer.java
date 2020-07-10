@@ -63,9 +63,8 @@ import nzilbb.configure.ParameterSet;
  * </table>
  * @author Robert Fromont robert@fromont.net.nz
  */
-
 public class CsvDeserializer
-   implements IDeserializer
+   implements GraphDeserializer
 {
    // Attributes:
    protected Vector<String> warnings;
@@ -197,19 +196,19 @@ public class CsvDeserializer
    /**
     * Utterance tokenizer.  The default is {@link SimpleTokenizer}.
     * @see #getTokenizer()
-    * @see #setTokenizer(IGraphTransformer)
+    * @see #setTokenizer(GraphTransformer)
     */
-   protected IGraphTransformer tokenizer;
+   protected GraphTransformer tokenizer;
    /**
     * Getter for {@link #tokenizer}: Utterance tokenizer.
     * @return Utterance tokenizer.
     */
-   public IGraphTransformer getTokenizer() { return tokenizer; }
+   public GraphTransformer getTokenizer() { return tokenizer; }
    /**
     * Setter for {@link #tokenizer}: Utterance tokenizer.
     * @param newTokenizer Utterance tokenizer.
     */
-   public void setTokenizer(IGraphTransformer newTokenizer) { tokenizer = newTokenizer; }
+   public void setTokenizer(GraphTransformer newTokenizer) { tokenizer = newTokenizer; }
    
    /**
     * CSV parser.
@@ -263,7 +262,7 @@ public class CsvDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "CSV text collection", "0.12", "text/csv", ".csv", "20191031.1734", getClass().getResource("icon.png"));
+	 "CSV text collection", "0.2", "text/csv", ".csv", "20200710.1904", getClass().getResource("icon.png"));
    }
    
    /**
@@ -274,7 +273,7 @@ public class CsvDeserializer
     *  interface for setting/confirming these parameters.  
     * @param configuration The configuration for the deserializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
-    * @return A list of configuration parameters (still) must be set before {@link IDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty list, {@link IDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
+    * @return A list of configuration parameters (still) must be set before {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty list, {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
     */
    public ParameterSet configure(ParameterSet configuration, Schema schema)
    {
@@ -438,11 +437,11 @@ public class CsvDeserializer
     * @param streams A list of named streams that contain all the
     *  transcription/annotation data required, and possibly (a) stream(s) for the media annotated.
     * @param schema The layer schema, definining layers and the way they interrelate.
-    * @return A list of parameters that require setting before {@link IDeserializer#deserialize()}
+    * @return A list of parameters that require setting before {@link GraphDeserializer#deserialize()}
     * can be invoked. This may be an empty list, and may include parameters with the value already
     * set to a workable default. If there are parameters, and user interaction is possible, then
     * the user may be presented with an interface for setting/confirming these parameters, before
-    * they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
+    * they are then passed to {@link GraphDeserializer#setParameters(ParameterSet)}.
     * @throws SerializationException If the graph could not be loaded.
     * @throws IOException On IO error.
     */

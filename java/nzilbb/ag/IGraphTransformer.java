@@ -26,26 +26,7 @@ import java.util.function.UnaryOperator;
 /**
  * Interface for transformer that transforms a Graph in some way.  This might include
  * tokenizers, valitors, and taggers. 
- * <p> Note that it is valid (indeed, normal) for the Graph returned by
- * <code>apply(Graph)</code> to be the same object as the one passed in.
+ * @deprecated Use {@link GraphTransformer} instead.
  * @author Robert Fromont robert@fromont.net.nz
  */
-public interface IGraphTransformer extends UnaryOperator<Graph> {
-   
-   /**
-    * Transforms the graph.
-    * @param graph The graph to transform.
-    * @return The changes introduced by the tranformation.
-    * @throws TransformationException If the transformation cannot be completed.
-    */
-   public List<Change> transform(Graph graph) throws TransformationException;
-
-   default public Graph apply(Graph graph) {
-      try {
-         transform(graph);
-         return graph;
-      } catch(TransformationException exception) {
-         throw new RuntimeException(exception);
-      }
-   }
-} // end of interface IGraphTransformer
+@Deprecated public interface IGraphTransformer extends GraphTransformer {}

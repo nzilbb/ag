@@ -1,5 +1,5 @@
 //
-// Copyright 2018 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2018-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -23,7 +23,7 @@ package nzilbb.media.wav;
 
 import java.util.Vector;
 import java.io.File;
-import nzilbb.media.IMediaConverter;
+import nzilbb.media.MediaConverter;
 import nzilbb.media.MediaException;
 import nzilbb.media.MediaThread;
 import nzilbb.configure.Parameter;
@@ -31,12 +31,12 @@ import nzilbb.configure.ParameterSet;
 import javax.sound.sampled.*;
 
 /**
- * IMediaConverter that converts sound samples using the javax.sound.sampled API.
+ * MediaConverter that converts sound samples using the javax.sound.sampled API.
  * @author Robert Fromont robert@fromont.net.nz
  */
 
 public class Resampler
-  implements IMediaConverter
+  implements MediaConverter
 {
   // Attributes:   
    
@@ -67,7 +67,7 @@ public class Resampler
   {
   } // end of constructor
 
-  // IMediaConverter methods
+  // MediaConverter methods
    
   /**
    * Configure the converter.  This might include executable paths, conversion parameters, etc.

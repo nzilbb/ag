@@ -287,20 +287,20 @@ public class Graph
    /**
     * An optional provider for media associated with the graph.
     * @see #getMediaProvider()
-    * @see #setMediaProvider(IGraphMediaProvider)
+    * @see #setMediaProvider(GraphMediaProvider)
     */
-   protected IGraphMediaProvider mediaProvider;
+   protected GraphMediaProvider mediaProvider;
    /**
     * Getter for {@link #mediaProvider}.
     * @return An optional provider for media associated with the graph.
     */
-   public IGraphMediaProvider getMediaProvider() { return mediaProvider; }
+   public GraphMediaProvider getMediaProvider() { return mediaProvider; }
    /**
     * Setter for {@link #mediaProvider}.
     * @param mediaProvider An optional provider for media associated with the graph.
     * @return <var>this</var>.
     */
-   public Graph setMediaProvider(IGraphMediaProvider mediaProvider) { this.mediaProvider = mediaProvider; return this; }
+   public Graph setMediaProvider(GraphMediaProvider mediaProvider) { this.mediaProvider = mediaProvider; return this; }
    
    // Methods:
       

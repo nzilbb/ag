@@ -35,8 +35,8 @@ import nzilbb.ag.Layer;
 import nzilbb.ag.TransformationException;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.InvalidConfigurationException;
-import nzilbb.ag.serialize.IDeserializer;
-import nzilbb.ag.serialize.ISerializer;
+import nzilbb.ag.serialize.GraphDeserializer;
+import nzilbb.ag.serialize.GraphSerializer;
 import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.SerializerNotConfiguredException;
 import nzilbb.ag.serialize.SerializationParametersMissingException;
@@ -103,22 +103,22 @@ public class Annotate extends CommandLineProgram {
    public Annotate setAnnotator(File newAnnotator) { annotator = newAnnotator; return this; }
 
    /**
-    * Serialization .jar file that implements both ISerializer and IDeserializer.
+    * Serialization .jar file that implements both GraphSerializer and GraphDeserializer.
     * @see #getSerialization()
     * @see #setSerialization(File)
     */
    protected File serialization;
    /**
     * Getter for {@link #serialization}: Serialization .jar file that implements
-    * both ISerializer and IDeserializer. 
-    * @return Serialization .jar file that implements both ISerializer and IDeserializer.
+    * both GraphSerializer and GraphDeserializer. 
+    * @return Serialization .jar file that implements both GraphSerializer and GraphDeserializer.
     */
    public File getSerialization() { return serialization; }
    /**
     * Setter for {@link #serialization}: Serialization .jar file that implements
-    * both ISerializer and IDeserializer. 
+    * both GraphSerializer and GraphDeserializer. 
     * @param newSerialization Serialization .jar file that implements both
-    * ISerializer and IDeserializer. 
+    * GraphSerializer and GraphDeserializer. 
     */
    @Switch(value="Serialization .jar for the transcript format conversion",compulsory=true)
    public Annotate setSerialization(File newSerialization) { serialization = newSerialization; return this; }
@@ -188,8 +188,8 @@ public class Annotate extends CommandLineProgram {
 
    protected Schema schema;
    protected AnnotatorDescriptor descriptor;
-   protected ISerializer serializer;
-   protected IDeserializer deserializer;
+   protected GraphSerializer serializer;
+   protected GraphDeserializer deserializer;
    
    // Methods:
    
@@ -311,8 +311,8 @@ public class Annotate extends CommandLineProgram {
    public void initDeserializer() throws IOException {
       
       // load deserializer
-      deserializer = (IDeserializer)IO.FindImplementorInJar(
-         serialization, getClass().getClassLoader(), IDeserializer.class);
+      deserializer = (GraphDeserializer)IO.FindImplementorInJar(
+         serialization, getClass().getClassLoader(), GraphDeserializer.class);
       if (debug) System.out.println("Deserializer: " + deserializer.getDescriptor());
       // check API version
       if (Constants.VERSION.compareTo(deserializer.getDescriptor().getMinimumApiVersion()) < 0) {
@@ -348,8 +348,8 @@ public class Annotate extends CommandLineProgram {
     */
    public void initSerializer() throws IOException {
       // load serializer
-      serializer = (ISerializer)IO.FindImplementorInJar(
-         serialization, getClass().getClassLoader(), ISerializer.class);
+      serializer = (GraphSerializer)IO.FindImplementorInJar(
+         serialization, getClass().getClassLoader(), GraphSerializer.class);
       if (debug) System.out.println("Serializer: " + serializer.getDescriptor());
       // check API version
       if (Constants.VERSION.compareTo(serializer.getDescriptor().getMinimumApiVersion()) < 0) {
@@ -497,7 +497,7 @@ public class Annotate extends CommandLineProgram {
             System.err.println("ERROR saving: " + destination.getPath() + ": " + x);
          }
       };
-      if (serializer.getCardinality() == ISerializer.Cardinality.NToM) { // multiple output files
+      if (serializer.getCardinality() == GraphSerializer.Cardinality.NToM) { // multiple output files
          // destination will be a directory for output files
          if (!destination.exists()) {
             if (!destination.mkdir()) {

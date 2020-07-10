@@ -1,5 +1,5 @@
 //
-// Copyright 2016-2019 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -51,7 +51,7 @@ import nzilbb.ag.*;
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class Merger
-  implements IGraphTransformer
+  implements GraphTransformer
 {
   // Attributes:
    
@@ -270,8 +270,8 @@ public class Merger
   private Schema schema = null;
 
   /** Default edit-path comparator for annotations */
-  private IEditComparator<Annotation> defaultComparator
-  = new IEditComparator<Annotation>()
+  private EditComparator<Annotation> defaultComparator
+  = new EditComparator<Annotation>()
     {
       int NO_WAY = 200; // weight for ensuring they don't map to each other
       MinimumEditPathString stringComparator = new MinimumEditPathString();
@@ -503,7 +503,7 @@ public class Merger
     setEditedGraph(editedGraph);
   } // end of constructor
    
-  // IGraphTransformer method
+  // GraphTransformer method
    
   /**
    * Merges {@link #editedGraph} into the given graph.  

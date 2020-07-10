@@ -1,5 +1,5 @@
 //
-// Copyright 2019 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2019-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -26,27 +26,27 @@ package nzilbb.ag;
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class StoreGraphMediaProvider
-  implements IGraphMediaProvider
+  implements GraphMediaProvider
 {
   // Attributes:
   
   /**
    * The graph store for accessing media.
    * @see #getStore()
-   * @see #setStore(IGraphStoreQuery)
+   * @see #setStore(GraphStoreQuery)
    */
-  protected IGraphStoreQuery store;
+  protected GraphStoreQuery store;
   /**
    * Getter for {@link #store}.
    * @return The graph store for accessing media.
    */
-  public IGraphStoreQuery getStore() { return store; }
+  public GraphStoreQuery getStore() { return store; }
   /**
    * Setter for {@link #store}.
    * @param store The graph store for accessing media.
    * @return <var>this</var>.
    */
-  public StoreGraphMediaProvider setStore(IGraphStoreQuery store) { this.store = store; return this; }
+  public StoreGraphMediaProvider setStore(GraphStoreQuery store) { this.store = store; return this; }
   
   /**
    * The graph.
@@ -87,13 +87,13 @@ public class StoreGraphMediaProvider
    * @param graph The graph.
    * @param store The graph store for accessing media.
    */
-  public StoreGraphMediaProvider(Graph graph, IGraphStoreQuery store)
+  public StoreGraphMediaProvider(Graph graph, GraphStoreQuery store)
   {
     setGraph(graph);
     setStore(store);
   } // end of constructor
 
-  // IGraphMediaProvider methods.
+  // GraphMediaProvider methods.
 
   /**
    * List the media available for the graph.
@@ -151,7 +151,7 @@ public class StoreGraphMediaProvider
    * @return A new object that can provide media for the given graph, or null if none can be
    * provided. 
    */
-  public IGraphMediaProvider providerForGraph(Graph graph)
+  public GraphMediaProvider providerForGraph(Graph graph)
   {
     return new StoreGraphMediaProvider(graph, store);
   } // end of providerForGraph()

@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -34,25 +34,25 @@ public class TransformationException
    /**
     * The transformer rasing the exception.
     * @see #getTransformer()
-    * @see #setTransformer(IGraphTransformer)
+    * @see #setTransformer(GraphTransformer)
     */
-   protected IGraphTransformer transformer;
+   protected GraphTransformer transformer;
    /**
     * Getter for {@link #transformer}: The transformer rasing the exception.
     * @return The transformer rasing the exception.
     */
-   public IGraphTransformer getTransformer() { return transformer; }
+   public GraphTransformer getTransformer() { return transformer; }
    /**
     * Setter for {@link #transformer}: The transformer rasing the exception.
     * @param newTransformer The transformer rasing the exception.
     */
-   public TransformationException setTransformer(IGraphTransformer newTransformer) { transformer = newTransformer; return this; }
+   public TransformationException setTransformer(GraphTransformer newTransformer) { transformer = newTransformer; return this; }
 
    /**
     * Constructor.
     * @param transformer The transformer rasing the exception.
     */
-   public TransformationException(IGraphTransformer transformer)
+   public TransformationException(GraphTransformer transformer)
    {
       setTransformer(transformer);
    } // end of constructor
@@ -61,7 +61,7 @@ public class TransformationException
     * @param transformer The transformer rasing the exception.
     * @param message The error message.
     */
-   public TransformationException(IGraphTransformer transformer, String message)
+   public TransformationException(GraphTransformer transformer, String message)
    {
       super(message);
       setTransformer(transformer);
@@ -71,7 +71,7 @@ public class TransformationException
     * @param transformer The transformer rasing the exception.
     * @param cause The root cause of the error.
     */
-   public TransformationException(IGraphTransformer transformer, Throwable cause)
+   public TransformationException(GraphTransformer transformer, Throwable cause)
    {
       super(cause);
       setTransformer(transformer);
@@ -82,7 +82,7 @@ public class TransformationException
     * @param message The error message.
     * @param cause The root cause of the error.
     */
-   public TransformationException(IGraphTransformer transformer, String message, Throwable cause)
+   public TransformationException(GraphTransformer transformer, String message, Throwable cause)
    {
       super(message, cause);
       setTransformer(transformer);

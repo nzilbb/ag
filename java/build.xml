@@ -83,7 +83,7 @@
              >
       <fileset dir="${src}"
                includes="${srcfiles}"
-               excludes="nzilbb/ag/**/test/*.java ${srctestseditpath} nzilbb/ag/ql/**/*.java" />
+               excludes="nzilbb/**/test/*.java ${srctestseditpath} nzilbb/ag/ql/**/*.java" />
     </javadoc>
   </target>
 

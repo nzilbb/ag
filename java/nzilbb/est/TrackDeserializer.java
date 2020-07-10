@@ -1,5 +1,5 @@
 //
-// Copyright 2017 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2017-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -72,7 +72,7 @@ import nzilbb.configure.ParameterSet;
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class TrackDeserializer
-  implements IDeserializer
+  implements GraphDeserializer
 {
    // Attributes:
    protected Vector<String> warnings;
@@ -190,7 +190,7 @@ public class TrackDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "EST Track", "0.2", "text/x-est-track", ".f0", "20190906.1040", getClass().getResource("icon.png"));
+	 "EST Track", "0.3", "text/x-est-track", ".f0", "20200710.1904", getClass().getResource("icon.png"));
    }
 
    /**
@@ -203,8 +203,8 @@ public class TrackDeserializer
     * invoked again with the required values. 
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of configuration parameters that must be set before
-    * {@link IDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty list,
-    * {@link IDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an empty list,
+    * {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty list,
+    * {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an empty list,
     * this method must be invoked again with the returned parameters' values set.
     */
    public ParameterSet configure(ParameterSet configuration, Schema schema)
@@ -218,7 +218,7 @@ public class TrackDeserializer
     * Loads the serialized form of the graph, using the given set of named streams.
     * @param streams A list of named streams that contain all the transcription/annotation data required.
     * @param schema The layer schema, definining layers and the way they interrelate.
-    * @return A list of parameters that require setting before {@link IDeserializer#deserialize()} can be invoked. This may be an empty list, and may include parameters with the value already set to a workable default. If there are parameters, and user interaction is possible, then the user may be presented with an interface for setting/confirming these parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
+    * @return A list of parameters that require setting before {@link GraphDeserializer#deserialize()} can be invoked. This may be an empty list, and may include parameters with the value already set to a workable default. If there are parameters, and user interaction is possible, then the user may be presented with an interface for setting/confirming these parameters, before they are then passed to {@link GraphDeserializer#setParameters(ParameterSet)}.
     * @throws SerializationException If the graph could not be loaded.
     * @throws IOException On IO error.
     * @throws SerializerNotConfiguredException If the configuration is not sufficient for deserialization.

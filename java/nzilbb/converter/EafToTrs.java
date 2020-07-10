@@ -27,8 +27,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import nzilbb.ag.Constants;
 import nzilbb.ag.Layer;
 import nzilbb.ag.Schema;
-import nzilbb.ag.serialize.IDeserializer;
-import nzilbb.ag.serialize.ISerializer;
+import nzilbb.ag.serialize.GraphDeserializer;
+import nzilbb.ag.serialize.GraphSerializer;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 import nzilbb.elan.EAFSerialization;
@@ -79,7 +79,7 @@ public class EafToTrs extends Converter {
     * Gets the deserializer that #convert(File) uses.
     * @return The deserializer to use.
     */
-   public IDeserializer getDeserializer() {
+   public GraphDeserializer getDeserializer() {
       return new EAFSerialization();
    }
 
@@ -87,7 +87,7 @@ public class EafToTrs extends Converter {
     * Gets the serializer that #convert(File) uses.
     * @return The serializer to use.
     */
-   public ISerializer getSerializer() {
+   public GraphSerializer getSerializer() {
       return new TranscriptSerialization();
    }
 

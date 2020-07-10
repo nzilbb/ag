@@ -63,7 +63,7 @@ import org.json.*;
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class BundleSerialization
-   implements ISerializer, ISchemaSerializer, IDeserializer
+   implements GraphSerializer, SchemaSerializer, GraphDeserializer
 {
    // Attributes:
   
@@ -921,7 +921,7 @@ public class BundleSerialization
       }      
    }
 
-   // ISerializer and IDeserializer methods
+   // GraphSerializer and GraphDeserializer methods
   
    /**
     * Returns the deserializer's descriptor
@@ -930,7 +930,7 @@ public class BundleSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "EMU-SDMS Bundle", "1.12", "application/emusdms+json", ".json", "20191031.1734",
+         "EMU-SDMS Bundle", "1.2", "application/emusdms+json", ".json", "20200710.1904",
          getClass().getResource("icon.png"));
    }
   
@@ -946,8 +946,8 @@ public class BundleSerialization
     * @param configuration The general configuration for the serializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of configuration parameters (still) must be set before
-    *  {@link ISerializer#getRequiredLayers()} can be called. If this is an empty list,
-    *  {@link ISerializer#getRequiredLayers()} can be called. If it's not an empty list,
+    *  {@link GraphSerializer#getRequiredLayers()} can be called. If this is an empty list,
+    *  {@link GraphSerializer#getRequiredLayers()} can be called. If it's not an empty list,
     *  this method must be invoked again with the returned parameters' values set.
     */
    public ParameterSet configure(ParameterSet configuration, Schema schema)
@@ -973,7 +973,7 @@ public class BundleSerialization
    }
 
 
-   // ISerializer methods
+   // GraphSerializer methods
   
    /**
     * Determines which layers, if any, must be present in the graph that will be serialized.
@@ -988,7 +988,7 @@ public class BundleSerialization
   
    /**
     * Determines the cardinality between graphs and serialized streams.
-    * @return {@link ISerializer#Cardinality}.NtoN as there is one stream produced per graph.
+    * @return {@link GraphSerializer#Cardinality}.NtoN as there is one stream produced per graph.
     * regardless of  how many graphs are serialized.
     */
    public Cardinality getCardinality()
@@ -1028,7 +1028,7 @@ public class BundleSerialization
          }); // next graph
    }
   
-   // ISchemaSerializer methods
+   // SchemaSerializer methods
 
    /**
     * Serializes the given schema, generating one or more {@link NamedStream}s.
@@ -1069,19 +1069,19 @@ public class BundleSerialization
       }
    }
 
-   // IDeserializer methods
+   // GraphDeserializer methods
   
    /**
     * Loads the serialized form of the graph, using the given set of named streams.
-    * <p>{@link IDeserializer} method.
+    * <p>{@link GraphDeserializer} method.
     * @param streams A list of named streams that contain all the
     *  transcription/annotation data required, and possibly (a) stream(s) for the media annotated.
     * @param schema The layer schema, definining layers and the way they interrelate.
-    * @return A list of parameters that require setting before {@link IDeserializer#deserialize()}
+    * @return A list of parameters that require setting before {@link GraphDeserializer#deserialize()}
     * can be invoked. This may be an empty list, and may include parameters with the value already
     * set to a workable default. If there are parameters, and user interaction is possible, then
     * the user may be presented with an interface for setting/confirming these parameters, before
-    * they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
+    * they are then passed to {@link GraphDeserializer#setParameters(ParameterSet)}.
     * @throws SerializationException If the graph could not be loaded.
     * @throws IOException On IO error.
     */
@@ -1237,7 +1237,7 @@ public class BundleSerialization
     * Sets parameters for a given deserialization operation, after loading the serialized form of
     * the graph. This might include mappings from format-specific objects like tiers to graph
     * layers, etc. 
-    * <p>{@link IDeserializer} method.
+    * <p>{@link GraphDeserializer} method.
     * @param parameters The configuration for a given deserialization operation.
     * @throws SerializationParametersMissingException If not all required parameters have a value.
     */
@@ -1299,7 +1299,7 @@ public class BundleSerialization
     * are capable of storing multiple transcripts in the same file
     * (e.g. AGTK, Transana XML export), which is why this method
     * returns a list.
-    * <p>{@link IDeserializer} method.
+    * <p>{@link GraphDeserializer} method.
     * @return A list of valid (if incomplete) {@link Graph}s. 
     * @throws SerializerNotConfiguredException if the object has not been configured.
     * @throws SerializationParametersMissingException if the parameters for this particular graph have not been set.

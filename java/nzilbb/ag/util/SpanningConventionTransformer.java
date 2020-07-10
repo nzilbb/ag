@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -79,7 +79,7 @@ import nzilbb.ag.*;
  */
 
 public class SpanningConventionTransformer // TODO implementation that handles nested extraction, for phrae structure
-  implements IGraphTransformer
+  implements GraphTransformer
 {
    // Attributes:
    

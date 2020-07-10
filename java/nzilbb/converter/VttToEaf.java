@@ -25,8 +25,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import nzilbb.ag.Constants;
 import nzilbb.ag.Layer;
 import nzilbb.ag.Schema;
-import nzilbb.ag.serialize.IDeserializer;
-import nzilbb.ag.serialize.ISerializer;
+import nzilbb.ag.serialize.GraphDeserializer;
+import nzilbb.ag.serialize.GraphSerializer;
 import nzilbb.elan.EAFSerialization;
 import nzilbb.util.ProgramDescription;
 import nzilbb.webvtt.VttSerialization;
@@ -58,7 +58,7 @@ public class VttToEaf extends Converter {
     * Gets the deserializer that #convert(File) uses.
     * @return The deserializer to use.
     */
-   public IDeserializer getDeserializer() {
+   public GraphDeserializer getDeserializer() {
       return new VttSerialization();
    }
 
@@ -66,7 +66,7 @@ public class VttToEaf extends Converter {
     * Gets the serializer that #convert(File) uses.
     * @return The serializer to use.
     */
-   public ISerializer getSerializer() {
+   public GraphSerializer getSerializer() {
       return new EAFSerialization();
    }
    

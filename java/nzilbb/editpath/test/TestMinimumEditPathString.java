@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-202 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -564,7 +564,7 @@ public class TestMinimumEditPathString
    public void customComparator()
    {
       MinimumEditPathString mp = new MinimumEditPathString(
-	 new IEditComparator<Character>()
+	 new EditComparator<Character>()
 	 {
 	    public EditStep<Character> compare(Character from, Character to)
 	    {

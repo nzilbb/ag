@@ -35,7 +35,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Vector;
 import nzilbb.ag.*;
-import nzilbb.ag.serialize.ISerializer;
+import nzilbb.ag.serialize.GraphSerializer;
 import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.json.*;
 import nzilbb.ag.serialize.util.NamedStream;
@@ -191,7 +191,7 @@ public class TestJSONSerialization
       assertEquals(0, s.getRequiredLayers().length);
 
       // cardinality is known
-      assertEquals(ISerializer.Cardinality.NToN, s.getCardinality());
+      assertEquals(GraphSerializer.Cardinality.NToN, s.getCardinality());
 
       // serialize
       File dir = getDir();

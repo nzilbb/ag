@@ -69,7 +69,7 @@ import nzilbb.util.Timers;
  */
 
 public class LatexSerializer
-   implements ISerializer
+   implements GraphSerializer
 {
    /**
     * Participant information layer.
@@ -295,7 +295,7 @@ public class LatexSerializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "LaTeX Document", "0.02", "application/x-tex", ".tex", "20191206.1545",
+         "LaTeX Document", "0.1", "application/x-tex", ".tex", "20200710.1904",
          getClass().getResource("icon.png"));
    }
 
@@ -309,8 +309,8 @@ public class LatexSerializer
     * @param configuration The configuration for the deserializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of configuration parameters (still) must be set before {@link
-    * IDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty list,
-    * {@link IDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an
+    * GraphDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty list,
+    * {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an
     * empty list, this method must be invoked again with the returned parameters' values
     * set. 
     */
@@ -523,7 +523,7 @@ public class LatexSerializer
       return configuration;
    }
 
-   // ISerializer methods
+   // GraphSerializer methods
 
    /**
     * Determines which layers, if any, must be present in the graph that will be serialized.
@@ -543,7 +543,7 @@ public class LatexSerializer
    /**
     * Determines the cardinality between graphs and serialized streams.
     * <p>The cardinatlity of this deseerializer is NToN.
-    * @return {@link nzilbb.ag.serialize.ISerializer#Cardinality}.NToN.
+    * @return {@link nzilbb.ag.serialize.GraphSerializer#Cardinality}.NToN.
     */
    public Cardinality getCardinality()
    {

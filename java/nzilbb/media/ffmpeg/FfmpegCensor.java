@@ -1,5 +1,5 @@
 //
-// Copyright 2017 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2017-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -27,19 +27,19 @@ import java.io.File;
 import java.io.IOException;
 import nzilbb.util.Execution;
 import nzilbb.util.IO;
-import nzilbb.media.IMediaCensor;
+import nzilbb.media.MediaCensor;
 import nzilbb.media.MediaException;
 import nzilbb.media.MediaThread;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 
 /**
- * IMediaCensor implemented by executing ffmpeg
+ * MediaCensor implemented by executing ffmpeg
  * @author Robert Fromont robert@fromont.net.nz
  */
 
 public class FfmpegCensor
-  implements IMediaCensor
+  implements MediaCensor
 {
    // Attributes:
    
@@ -110,7 +110,7 @@ public class FfmpegCensor
    {
    } // end of constructor
 
-   // IMediaCensor methods
+   // MediaCensor methods
    
    /**
     * Configure the censor.  This might include executable paths, obfuscation parameters, etc.

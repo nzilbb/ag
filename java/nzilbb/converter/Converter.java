@@ -50,8 +50,8 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import nzilbb.ag.*;
-import nzilbb.ag.serialize.IDeserializer;
-import nzilbb.ag.serialize.ISerializer;
+import nzilbb.ag.serialize.GraphDeserializer;
+import nzilbb.ag.serialize.GraphSerializer;
 import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
@@ -149,13 +149,13 @@ public abstract class Converter extends GuiProgram {
     * Gets the deserializer that {@link #convert(File)} uses.
     * @return The deserializer to use.
     */
-   public abstract IDeserializer getDeserializer();
+   public abstract GraphDeserializer getDeserializer();
 
    /**
     * Gets the serializer that {@link #convert(File)} uses.
     * @return The serializer to use.
     */
-   public abstract ISerializer getSerializer();
+   public abstract GraphSerializer getSerializer();
    
    /**
     * Specifies which layers should be given to the serializer. The default implementaion
@@ -218,7 +218,7 @@ public abstract class Converter extends GuiProgram {
       NamedStream[] streams = { new NamedStream(inputFile) };
       
       // create deserializer
-      IDeserializer deserializer = getDeserializer();
+      GraphDeserializer deserializer = getDeserializer();
       if (verbose) System.out.println("Deserializing with " + deserializer.getDescriptor());
 
       // configure deserializer
@@ -272,7 +272,7 @@ public abstract class Converter extends GuiProgram {
       // serialize...
 
       // create serializer
-      ISerializer serializer = getSerializer();
+      GraphSerializer serializer = getSerializer();
       if (verbose) System.out.println("Serializing with " + serializer.getDescriptor());
       
       // configure serializer
@@ -435,7 +435,7 @@ public abstract class Converter extends GuiProgram {
       if (getHelp()) {
          // display info about serialization parameters
          Schema schema = getSchema();
-         IDeserializer deserializer = getDeserializer();
+         GraphDeserializer deserializer = getDeserializer();
          System.err.println("Deserializing from " + deserializer.getDescriptor());
          ParameterSet config = deserializer.configure(new ParameterSet(), schema);
          if (config.size() == 0) {
@@ -447,7 +447,7 @@ public abstract class Converter extends GuiProgram {
                   "\t--" + p.getName() + "=" + p.getType().getSimpleName() + "\t" + p.getHint());
             }
          }
-         ISerializer serializer = getSerializer();
+         GraphSerializer serializer = getSerializer();
          System.err.println("Serializing to " + serializer.getDescriptor());
          config = serializer.configure(new ParameterSet(), schema);
          if (config.size() == 0) {

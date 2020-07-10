@@ -1,5 +1,5 @@
 //
-// Copyright 2017 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2017-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -24,19 +24,19 @@ package nzilbb.media.ffmpeg;
 import java.util.Vector;
 import java.io.File;
 import nzilbb.util.Execution;
-import nzilbb.media.IMediaConverter;
+import nzilbb.media.MediaConverter;
 import nzilbb.media.MediaException;
 import nzilbb.media.MediaThread;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 
 /**
- * IMediaConverter implemented by executing ffmpeg
+ * MediaConverter implemented by executing ffmpeg
  * @author Robert Fromont robert@fromont.net.nz
  */
 
 public class FfmpegConverter
-  implements IMediaConverter
+  implements MediaConverter
 {
    // Attributes:
    
@@ -88,7 +88,7 @@ public class FfmpegConverter
    {
    } // end of constructor
 
-   // IMediaConverter methods
+   // MediaConverter methods
    
    /**
     * Configure the converter.  This might include executable paths, conversion parameters, etc.

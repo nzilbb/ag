@@ -27,21 +27,7 @@ import nzilbb.configure.ParameterSet;
 
 /**
  * Graph deserializer that retrieves identified graphs from a store such as a relational database.
- * @see IDeserializer
+ * @deprecated Use {@link StoreGraphDeserializer} instead.
  * @author Robert Fromont robert@fromont.net.nz
  */
-
-public interface IStoreDeserializer
-   extends IDeserializer
-{
-   
-   /**
-    * Loads the serialized form of the graph, using the given identifier.
-    * @param graphId Identifier for the graph to serialize.
-    * @return A list of parameters that require setting before {@link IDeserializer#deserialize()} can be invoked. This may be an empty list, and may include parameters with the value already set to a workable default. If there are parameters, and user interaction is possible, then the user may be presented with an interface for setting/confirming these parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
-    * @throws Exception If the graph could not be loaded.
-    */
-   public ParameterSet load(String graphId) throws Exception;
-
-   
-} // end of interface IStoreDeserializer
+@Deprecated public interface IStoreDeserializer extends StoreGraphDeserializer {}

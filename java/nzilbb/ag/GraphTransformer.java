@@ -19,19 +19,33 @@
 //    along with nzilbb.ag; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.ag.serialize;
+package nzilbb.ag;
 
-import java.util.Vector;
-import java.io.IOException;
-import nzilbb.ag.Graph;
-import nzilbb.ag.Schema;
-import nzilbb.ag.serialize.util.NamedStream;
-import nzilbb.configure.Parameter;
-import nzilbb.configure.ParameterSet;
-
+import java.util.List;
+import java.util.function.UnaryOperator;
 /**
- * Deprecated nterface for deserializing a graph from streams of data.
- * @deprecated Use {@link GraphSerializer} instead
+ * Interface for transformer that transforms a Graph in some way.  This might include
+ * tokenizers, valitors, and taggers. 
+ * <p> Note that it is valid (indeed, normal) for the Graph returned by
+ * <code>apply(Graph)</code> to be the same object as the one passed in.
  * @author Robert Fromont robert@fromont.net.nz
  */
-@Deprecated public interface IDeserializer extends GraphDeserializer {}
+public interface GraphTransformer extends UnaryOperator<Graph> {
+   
+   /**
+    * Transforms the graph.
+    * @param graph The graph to transform.
+    * @return The changes introduced by the tranformation.
+    * @throws TransformationException If the transformation cannot be completed.
+    */
+   public List<Change> transform(Graph graph) throws TransformationException;
+
+   default public Graph apply(Graph graph) {
+      try {
+         transform(graph);
+         return graph;
+      } catch(TransformationException exception) {
+         throw new RuntimeException(exception);
+      }
+   }
+} // end of interface GraphTransformer

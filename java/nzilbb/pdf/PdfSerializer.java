@@ -76,9 +76,8 @@ import nzilbb.util.Timers;
  * Serializer to PDF files.
  * @author Robert Fromont robert@fromont.net.nz
  */
-
 public class PdfSerializer
-   implements ISerializer
+   implements GraphSerializer
 {
    /**
     * Participant information layer.
@@ -292,7 +291,7 @@ public class PdfSerializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "PDF Document", "0.04", "application/pdf", ".pdf", "20191206.1545",
+         "PDF Document", "0.1", "application/pdf", ".pdf", "20200710.1904",
          getClass().getResource("icon.png"));
    }
 
@@ -306,8 +305,8 @@ public class PdfSerializer
     * @param configuration The configuration for the deserializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of configuration parameters (still) must be set before {@link
-    * IDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty list,
-    * {@link IDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an
+    * GraphDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty list,
+    * {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an
     * empty list, this method must be invoked again with the returned parameters' values
     * set. 
     */
@@ -504,7 +503,7 @@ public class PdfSerializer
       return configuration;
    }
 
-   // ISerializer methods
+   // GraphSerializer methods
 
    /**
     * Determines which layers, if any, must be present in the graph that will be serialized.
@@ -525,7 +524,7 @@ public class PdfSerializer
    /**
     * Determines the cardinality between graphs and serialized streams.
     * <p>The cardinatlity of this deseerializer is NToN.
-    * @return {@link nzilbb.ag.serialize.ISerializer#Cardinality}.NToN.
+    * @return {@link nzilbb.ag.serialize.GraphSerializer#Cardinality}.NToN.
     */
    public Cardinality getCardinality()
    {
