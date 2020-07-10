@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -34,16 +34,18 @@ import nzilbb.configure.ParameterSet;
  * <p>Deserialization takes place in the following phases:
  * <ol>
  *  <li>Configure deserializer using {@link #configure(ParameterSet,Schema)}</li>
- *  <li>Load serialized form using {@link #load(NamedStream[],Schema)}, which returns a list of parameters that should be set.</li>
+ *  <li>Load serialized form using {@link #load(NamedStream[],Schema)}, which returns a
+ *      list of parameters that should be set.</li>
  *  <li>Set deserialization parameters using {@link #setParameters(ParameterSet)}</li>
  *  <li>Generation graph(s) using {@link #deserialize()}</li>
  *  <li>Possibly display or log warnings returned by {@link #getWarnings()}</li>
  * </ol>
- * TODO it should be possible to not start with a schema.
+ * 
  * @author Robert Fromont robert@fromont.net.nz
  */
-public interface IDeserializer
-{
+public interface IDeserializer {
+   // TODO it should be possible to not start with a schema.
+   
    /**
     * Returns the deserializer's descriptor
     * @return The deserializer's descriptor
@@ -76,12 +78,15 @@ public interface IDeserializer
     *  can be invoked. This may be an empty list, and may include parameters with the value
     *  already set to a workable default. If there are parameters, and user interaction is
     *  possible, then the user may be presented with an interface for setting/confirming these
-    *  parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
+    *  parameters, before they are then passed to 
+    *  {@link IDeserializer#setParameters(ParameterSet)}. 
     * @throws SerializationException If the graph could not be loaded.
     * @throws IOException On IO error.
-    * @throws SerializerNotConfiguredException If the configuration is not sufficient for deserialization.
+    * @throws SerializerNotConfiguredException If the configuration is not sufficient for
+    * deserialization. 
     */
-   public ParameterSet load(NamedStream[] streams, Schema schema) throws SerializationException, IOException, SerializerNotConfiguredException;
+   public ParameterSet load(NamedStream[] streams, Schema schema)
+      throws SerializationException, IOException, SerializerNotConfiguredException;
 
    /**
     * Sets parameters for a given deserialization operation, after loading the serialized form
@@ -90,7 +95,8 @@ public interface IDeserializer
     * @param parameters The configuration for a given deserialization operation.
     * @throws SerializationParametersMissingException If not all required parameters have a value.
     */
-   public void setParameters(ParameterSet parameters) throws SerializationParametersMissingException;
+   public void setParameters(ParameterSet parameters)
+      throws SerializationParametersMissingException;
 
 
    /**
@@ -102,17 +108,18 @@ public interface IDeserializer
     * returns a list.
     * @return A list of valid (if incomplete) {@link Graph}s. 
     * @throws SerializerNotConfiguredException if the object has not been configured.
-    * @throws SerializationParametersMissingException if the parameters for this particular graph have not been set.
+    * @throws SerializationParametersMissingException if the parameters for this
+    * particular graph have not been set. 
     * @throws SerializationException if errors occur during deserialization.
     */
    public Graph[] deserialize() 
       throws SerializerNotConfiguredException, SerializationParametersMissingException, SerializationException;
 
    /**
-    * Returns any warnings that may have arisen during the last execution of {@link #deserialize()}.
+    * Returns any warnings that may have arisen during the last execution of
+    * {@link #deserialize()}. 
     * @return A possibly empty list of warnings.
     */
    public String[] getWarnings();
-
 
 } // end of interface IDeserialize
