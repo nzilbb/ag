@@ -30,8 +30,8 @@ import java.lang.reflect.InvocationTargetException;
  * @author Robert Fromont robert@fromont.net.nz
  */
 @SuppressWarnings("rawtypes")
-public class Parameter
-{
+public class Parameter {
+   
    // Attributes:
 
    /**
