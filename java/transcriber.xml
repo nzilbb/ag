@@ -10,8 +10,8 @@
   <property name="srctests" value="nzilbb/transcriber/test/Test*.java"/>
   <property name="icon" value="nzilbb/transcriber/icon.png"/>
   <property name="junitjar" value="/usr/share/java/junit4.jar"/>
-  <property name="nzilbb-ag-serialize-IDeserializer" value="nzilbb.transcriber.TranscriptSerialization" />
-  <property name="nzilbb-ag-serialize-ISerializer" value="nzilbb.transcriber.TranscriptSerialization" />
+  <property name="nzilbb-ag-serialize-GraphDeserializer" value="nzilbb.transcriber.TranscriptSerialization" />
+  <property name="nzilbb-ag-serialize-GraphSerializer" value="nzilbb.transcriber.TranscriptSerialization" />
   
   <target name="init">
     <!-- Create the time stamp -->
@@ -50,8 +50,8 @@
 	 basedir="${build}"
          comment="version ${DSTAMP}.${TSTAMP}">
       <manifest>
-        <attribute name="nzilbb-ag-serialize-IDeserializer" value="${nzilbb-ag-serialize-IDeserializer}"/>
-        <attribute name="nzilbb-ag-serialize-ISerializer" value="${nzilbb-ag-serialize-ISerializer}"/>
+        <attribute name="nzilbb-ag-serialize-GraphDeserializer" value="${nzilbb-ag-serialize-GraphDeserializer}"/>
+        <attribute name="nzilbb-ag-serialize-GraphSerializer" value="${nzilbb-ag-serialize-GraphSerializer}"/>
 	<attribute name="Main-Class" value="nzilbb.transcriber.Validator"/>
 	<attribute name="Class-Path" value="nzilbb.ag.jar"/>
       </manifest>

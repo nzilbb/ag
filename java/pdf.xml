@@ -10,7 +10,7 @@
   <property name="srctests" value="nzilbb/pdf/test/Test*.java"/>
   <property name="icon" value="nzilbb/pdf/icon.png"/>
   <property name="junitjar" value="/usr/share/java/junit4.jar"/>
-  <property name="nzilbb-ag-serialize-ISerializer" value="nzilbb.pdf.PdfSerializer" />
+  <property name="nzilbb-ag-serialize-GraphSerializer" value="nzilbb.pdf.PdfSerializer" />
   
   <target name="init">
     <!-- Create the time stamp -->
@@ -48,7 +48,7 @@
     <jar jarfile="${dist}/${ant.project.name}.jar" 
 	 basedir="${build}">
       <manifest>
-        <attribute name="nzilbb-ag-serialize-ISerializer" value="${nzilbb-ag-serialize-ISerializer}"/>
+        <attribute name="nzilbb-ag-serialize-GraphSerializer" value="${nzilbb-ag-serialize-GraphSerializer}"/>
       </manifest>
       
       <!-- include source code -->
