@@ -323,6 +323,22 @@ public class IO
    } // end of JarFileOfClass()
 
    /**
+    * Determines the 'comment' of the jar file that the given class comes from, which is
+    * is often used to store the version of modules and libraries.
+    * @param c The class implemented.
+    * @return The comment of the jar file the given class implementation comes from, or
+    * null if it's not from a jar file or there's no comment. 
+    */
+   @SuppressWarnings("rawtypes")
+   public static String JarCommentOfClass(Class c) {
+      try {
+         return new JarFile(JarFileOfClass(c)).getComment();
+      } catch(Throwable t) {
+         return null;
+      }
+   } // end of JarCommentOfClass()
+
+   /**
     * Recursively deletes a directory.
     * @param dir The directory to delete.
     * @return true if the the directory was successfully deleted, false otherwise.

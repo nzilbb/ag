@@ -171,12 +171,7 @@ public class CommandLineProgram {
    public CommandLineProgram() {
       // get our version info from the comment of the jar file we're built into
       try {
-         URL thisClassUrl = getClass().getResource(getClass().getSimpleName() + ".class");
-         if (thisClassUrl.toString().startsWith("jar:")) {
-            URI thisJarUri = new URI(thisClassUrl.toString().replaceAll("jar:(.*)!.*","$1"));
-            JarFile thisJarFile = new JarFile(new File(thisJarUri));
-            v = thisJarFile.getComment();
-         }
+         v = IO.JarCommentOfClass(getClass());
       } catch (Throwable t) {
       }      
    }
