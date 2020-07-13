@@ -502,7 +502,7 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-	 "Transcriber transcript", "1.62", "text/xml-transcriber", ".trs", "20200710.1904",
+	 "Transcriber transcript", "1.7", "text/xml-transcriber", ".trs", "20200710.1904",
          getClass().getResource("icon.png"));
    }
 
