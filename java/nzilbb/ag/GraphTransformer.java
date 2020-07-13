@@ -35,10 +35,10 @@ public interface GraphTransformer extends UnaryOperator<Graph> {
    /**
     * Transforms the graph.
     * @param graph The graph to transform.
-    * @return The changes introduced by the tranformation.
+    * @return The given graph, transformed.
     * @throws TransformationException If the transformation cannot be completed.
     */
-   public List<Change> transform(Graph graph) throws TransformationException;
+   public Graph transform(Graph graph) throws TransformationException;
 
    default public Graph apply(Graph graph) {
       try {

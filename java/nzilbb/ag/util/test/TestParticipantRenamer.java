@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -26,7 +26,7 @@ import org.junit.*;
 import static org.junit.Assert.*;
 
 import java.util.Iterator;
-import java.util.List;
+import java.util.Set;
 import nzilbb.ag.*;
 import nzilbb.ag.util.*;
 
@@ -114,7 +114,9 @@ public class TestParticipantRenamer
       ParticipantRenamer renamer = new ParticipantRenamer("jane doe", "jane doe");
       try
       {
-	 List<Change> changes = renamer.transform(g);
+         g.trackChanges();
+	 renamer.transform(g);
+         Set<Change> changes = g.getTracker().getChanges();
 	 assertEquals("no changes: " + changes, 0, changes.size());
       }
       catch(TransformationException exception)
@@ -205,7 +207,9 @@ public class TestParticipantRenamer
       ParticipantRenamer renamer = new ParticipantRenamer("john smith", "john doe");
       try
       {
-	 List<Change> changes = renamer.transform(g);
+         g.trackChanges();
+	 renamer.transform(g);
+         Set<Change> changes = g.getTracker().getChanges();
 	 assertNotEquals("changes are returned", 0, changes.size());
 	 assertNotEquals("name is changed", "john smith", g.getAnnotation("participant1").getLabel());
 	 assertNotEquals("name is changed", "john smith", g.getAnnotation("turn1").getLabel());
@@ -307,7 +311,9 @@ public class TestParticipantRenamer
       renamer.rename("jane doe", "jane smith");
       try
       {
-	 List<Change> changes = renamer.transform(g);
+         g.trackChanges();
+	 renamer.transform(g);
+         Set<Change> changes = g.getTracker().getChanges();
 	 assertNotEquals("changes are returned", 0, changes.size());
 	 assertNotEquals("name is changed", "john smith", g.getAnnotation("participant1").getLabel());
 	 assertNotEquals("name is changed", "john smith", g.getAnnotation("turn1").getLabel());

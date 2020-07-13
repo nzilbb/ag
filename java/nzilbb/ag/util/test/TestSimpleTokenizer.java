@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -79,7 +79,7 @@ public class TestSimpleTokenizer
       {
          g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word");
-	 List<Change> changes = tokenizer.transform(g);
+	 tokenizer.transform(g);
 	 Annotation[] words = g.getAnnotation("turn1").list("word");
 	 assertEquals(6, words.length);
 
@@ -178,7 +178,7 @@ public class TestSimpleTokenizer
       {
          g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word");
-	 List<Change> changes = tokenizer.transform(g);
+	 tokenizer.transform(g);
 	 Annotation[] words = g.getAnnotation("turn1").list("word");
 	 assertEquals(6, words.length);
 
@@ -278,7 +278,7 @@ public class TestSimpleTokenizer
       {
          g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word");
-	 List<Change> changes = tokenizer.transform(g);
+	 tokenizer.transform(g);
 	 Annotation[] words = g.getAnnotation("turn1").list("word");
 	 assertEquals(6, words.length);
 
@@ -359,7 +359,7 @@ public class TestSimpleTokenizer
       {
          g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word", "\\|");
-	 List<Change> changes = tokenizer.transform(g);
+	 tokenizer.transform(g);
 	 Annotation[] words = g.getAnnotation("turn1").list("word");
 	 assertEquals(6, words.length);
 
@@ -469,7 +469,7 @@ public class TestSimpleTokenizer
       {
          g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("word", "linkage", "_", true);
-	 List<Change> changes = tokenizer.transform(g);
+	 tokenizer.transform(g);
 	 Annotation[] words = g.getAnnotation("turn1").list("word");
 	 assertEquals(10, words.length);
 
@@ -581,7 +581,7 @@ public class TestSimpleTokenizer
       {
          g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word");
-	 List<Change> changes = tokenizer.transform(g);
+	 tokenizer.transform(g);
 	 Annotation[] words = g.getAnnotation("turn1").list("word");
 	 assertEquals(6, words.length);
 
@@ -677,7 +677,7 @@ public class TestSimpleTokenizer
       {
          g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word");
-	 List<Change> changes = tokenizer.transform(g);
+	 tokenizer.transform(g);
 	 Annotation[] words = g.getAnnotation("turn1").list("word");
 	 assertEquals(6, words.length);
 

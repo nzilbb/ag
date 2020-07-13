@@ -80,7 +80,7 @@ public class MinimalExample extends Annotator {
     * @return The changes introduced by the tranformation.
     * @throws TransformationException If the transformation cannot be completed.
     */
-   public List<Change> transform(Graph graph) throws TransformationException {
+   public Graph transform(Graph graph) throws TransformationException {
       if (schema == null)
          throw new InvalidConfigurationException(this, "Schema is not set.");
       if (schema.getWordLayerId() == null)
@@ -104,7 +104,7 @@ public class MinimalExample extends Annotator {
          System.out.println(type + "\t" + typesCounts.get(type) );
       } // next type
       
-      return new Vector<Change>();
+      return graph;
    }
 
 }

@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -27,6 +27,7 @@ import static org.junit.Assert.*;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import nzilbb.ag.*;
 import nzilbb.ag.util.*;
 
@@ -108,11 +109,12 @@ public class TestNormalizer
       g.getAnnotation("jumps").setLabel("test");
       g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
-      g.setTracker(new ChangeTracker());
+      g.trackChanges();
       Normalizer n = new Normalizer();
       try
       {
-	 List<Change> changes = n.transform(g);
+	 n.transform(g);
+         Set<Change> changes = g.getTracker().getChanges();
 
 	 assertEquals("no changes: " + changes, 0, changes.size());
       }
@@ -199,11 +201,12 @@ public class TestNormalizer
       g.getAnnotation("jumps").setLabel("test");
       g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
-      g.setTracker(new ChangeTracker());
+      g.trackChanges();
       Normalizer n = new Normalizer();
       try
       {
-	 List<Change> changes = n.transform(g);
+	 n.transform(g);
+         Set<Change> changes = g.getTracker().getChanges();
 
 	 assertNotEquals("changes: " + changes, 0, changes.size());
 
@@ -310,12 +313,13 @@ public class TestNormalizer
       g.getAnnotation("jumps").setLabel("test");
       g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
-      g.setTracker(new ChangeTracker());
+      g.trackChanges();
       Normalizer n = new Normalizer();
       // no minimumTurnPauseLength, so the gap between turns is not bridged
       try
       {
-	 List<Change> changes = n.transform(g);
+	 n.transform(g);
+         Set<Change> changes = g.getTracker().getChanges();
 
 	 assertEquals("changes: " + changes, 0, changes.size());
 
@@ -412,14 +416,15 @@ public class TestNormalizer
       g.getAnnotation("jumps").setLabel("test");
       g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
-      g.setTracker(new ChangeTracker());
+      g.trackChanges();
       Normalizer n = new Normalizer();
       // minimum long enough to bridge the gap
       n.setMinimumTurnPauseLength(1.0);
       try
       {
-	 List<Change> changes = n.transform(g);
-
+	 n.transform(g);
+         Set<Change> changes = g.getTracker().getChanges();
+      
 	 assertNotEquals("changes: " + changes, 0, changes.size());
 
 	 assertEquals("turn1 end later", "turnEnd", g.getAnnotation("turn1").getEndId());
@@ -525,13 +530,14 @@ public class TestNormalizer
       g.getAnnotation("jumps").setLabel("test");
       g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
-      g.setTracker(new ChangeTracker());
+      g.trackChanges();
       Normalizer n = new Normalizer();
       // minimum is too short to bridge the gap
       n.setMinimumTurnPauseLength(0.5);
       try
       {
-	 List<Change> changes = n.transform(g);
+	 n.transform(g);
+         Set<Change> changes = g.getTracker().getChanges();
 
 	 assertEquals("changes: " + changes, 0, changes.size());
 
@@ -635,13 +641,14 @@ public class TestNormalizer
       g.getAnnotation("jumps").setLabel("test");
       g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
-      g.setTracker(new ChangeTracker());
+      g.trackChanges();
       Normalizer n = new Normalizer();
       // minimum long enough to bridge the gap, but there's an intervening speaker
       n.setMinimumTurnPauseLength(1.0);
       try
       {
-	 List<Change> changes = n.transform(g);
+	 n.transform(g);
+         Set<Change> changes = g.getTracker().getChanges();
 
 	 assertEquals("changes: " + changes, 0, changes.size());
 
@@ -736,11 +743,12 @@ public class TestNormalizer
       g.getAnnotation("jumps").setLabel("test");
       g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
-      g.setTracker(new ChangeTracker());
+      g.trackChanges();
       Normalizer n = new Normalizer();
       try
       {
-	 List<Change> changes = n.transform(g);
+	 n.transform(g);
+         Set<Change> changes = g.getTracker().getChanges();
 
 	 assertNotEquals("changes: " + changes, 0, changes.size());
 
@@ -862,11 +870,12 @@ public class TestNormalizer
       g.getAnnotation("jumps").setLabel("test");
       g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
-      g.setTracker(new ChangeTracker());
+      g.trackChanges();
       Normalizer n = new Normalizer();
       try
       {
-	 List<Change> changes = n.transform(g);
+	 n.transform(g);
+         Set<Change> changes = g.getTracker().getChanges();
 
 	 assertNotEquals("changes: " + changes, 0, changes.size());
 
@@ -992,11 +1001,12 @@ public class TestNormalizer
       g.getAnnotation("jumps").setLabel("test");
       g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
-      g.setTracker(new ChangeTracker());
+      g.trackChanges();
       Normalizer n = new Normalizer();
       try
       {
-	 List<Change> changes = n.transform(g);
+	 n.transform(g);
+         Set<Change> changes = g.getTracker().getChanges();
 
 	 assertNotEquals("changes: " + changes, 0, changes.size());
 
@@ -1112,11 +1122,12 @@ public class TestNormalizer
       g.getAnnotation("jumps").setLabel("test");
       g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
-      g.setTracker(new ChangeTracker());
+      g.trackChanges();
       Normalizer n = new Normalizer();
       try
       {
-	 List<Change> changes = n.transform(g);
+	 n.transform(g);
+         Set<Change> changes = g.getTracker().getChanges();
 	 assertNotEquals("there are changes", 0, changes.size());
 
 	 assertEquals("turn changed: " + g.getAnnotation("turn1").getLabel(), 
@@ -1172,12 +1183,13 @@ public class TestNormalizer
       g.addAnnotation(new Annotation("utterance1", "the quick brown fox", "utterance", "turnStart", "utteranceChange", "turn1"));
       g.addAnnotation(new Annotation("utterance2", "jumps over the lazy dog", "utterance", "utteranceChange", "turnEnd", "turn1"));
       
-      g.setTracker(new ChangeTracker());
+      g.trackChanges();
       Normalizer n = new Normalizer();
       try
       {
-	 List<Change> changes = n.transform(g);
-	 assertNotEquals("there are changes", 0, changes.size());
+	 n.transform(g);
+         Set<Change> changes = g.getTracker().getChanges();
+         assertNotEquals("there are changes", 0, changes.size());
 
 	 assertEquals("turn changed: " + g.getAnnotation("turn1").getLabel(), 
 		      "john smith", g.getAnnotation("turn1").getLabel());
@@ -1275,11 +1287,12 @@ public class TestNormalizer
       g.getAnnotation("jumps").setLabel("test");
       g.createTag(g.getAnnotation("jumps"), "pos", "V");
 
-      g.setTracker(new ChangeTracker());
+      g.trackChanges();
       Normalizer n = new Normalizer();
       try
       {
-	 List<Change> changes = n.transform(g);
+	 n.transform(g);
+         Set<Change> changes = g.getTracker().getChanges();
 	 assertNotEquals("there are changes", 0, changes.size());
 
 	 assertEquals("participant changed: " + g.getAnnotation("participant1").getLabel(), 
@@ -1370,12 +1383,13 @@ public class TestNormalizer
       g.addAnnotation(new Annotation("lazy",  "lazy",  "word", "a34",  "a44", "turn1"));
       g.addAnnotation(new Annotation("dog",  "dog",    "word", "a44",  "a54", "turn1"));
 
-      g.setTracker(new ChangeTracker());
+      g.trackChanges();
       Normalizer n = new Normalizer();
       n.setMaxLabelLength(4);
       try
       {
-	 List<Change> changes = n.transform(g);
+	 n.transform(g);
+         Set<Change> changes = g.getTracker().getChanges();
 
 	 assertEquals("changes: " + changes, 7, changes.size());
 	 assertEquals("quic", g.getAnnotation("quick").getLabel());

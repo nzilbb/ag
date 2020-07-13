@@ -1,5 +1,5 @@
 //
-// Copyright 2019 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2019-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Set;
 import nzilbb.ag.*;
 import nzilbb.ag.util.*;
 
@@ -139,7 +139,8 @@ public class TestUtteranceParallelizer
       UtteranceParallelizer parallelizer = new UtteranceParallelizer(schema);
       try
       {
-	 List<Change> changes = parallelizer.transform(graph);
+	 parallelizer.transform(graph);
+         Set<Change> changes = graph.getTracker().getChanges();
 
 	 assertNotEquals("changes: " + changes, 0, changes.size());
 
@@ -276,7 +277,8 @@ public class TestUtteranceParallelizer
          .addLayerId("utterance").addLayerId("turn");
       try
       {
-	 List<Change> changes = parallelizer.transform(graph);
+	 parallelizer.transform(graph);
+         Set<Change> changes = graph.getTracker().getChanges();
 
 	 assertNotEquals("changes: " + changes, 0, changes.size());
 
@@ -419,7 +421,8 @@ public class TestUtteranceParallelizer
       UtteranceParallelizer parallelizer = new UtteranceParallelizer(schema);
       try
       {
-	 List<Change> changes = parallelizer.transform(graph);
+	 parallelizer.transform(graph);
+         Set<Change> changes = graph.getTracker().getChanges();
 
 	 assertNotEquals("changes: " + changes, 0, changes.size());
 

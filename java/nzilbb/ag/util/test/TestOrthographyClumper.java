@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -95,7 +95,7 @@ public class TestOrthographyClumper
       {
          g.setTracker(new ChangeTracker());
 	 OrthographyClumper transformer = new OrthographyClumper("word");
-	 List<Change> changes = transformer.transform(g);
+	 transformer.transform(g);
 	 g.commit();
 	 Annotation words[] = g.list("word");
 	 assertEquals("- \" the '", words[0].getLabel());
@@ -195,7 +195,7 @@ public class TestOrthographyClumper
       {
          g.setTracker(new ChangeTracker());
 	 OrthographyClumper transformer = new OrthographyClumper("word", "line");
-	 List<Change> changes = transformer.transform(g);
+	 transformer.transform(g);
 	 g.commit();
 	 Annotation words[] = g.list("word");
 	 assertEquals("- \" the '", words[0].getLabel());
@@ -313,7 +313,7 @@ public class TestOrthographyClumper
       {
          g.setTracker(new ChangeTracker());
 	 OrthographyClumper transformer = new OrthographyClumper("word");
-	 List<Change> changes = transformer.transform(g);
+	 transformer.transform(g);
 	 g.commit();
 	 Annotation words[] = g.list("word");
 	 assertEquals("- \" the '", words[0].getLabel());
@@ -434,7 +434,7 @@ public class TestOrthographyClumper
       {
          g.setTracker(new ChangeTracker());
 	 OrthographyClumper transformer = new OrthographyClumper("word");
-	 List<Change> changes = transformer.transform(g);
+	 transformer.transform(g);
 	 g.commit();
 	 Annotation words[] = g.list("word");
 	 assertEquals("a1", words[0].getStartId());
@@ -552,7 +552,7 @@ public class TestOrthographyClumper
       {
          g.setTracker(new ChangeTracker());
          OrthographyClumper transformer = new OrthographyClumper("word");
-	 List<Change> changes = transformer.transform(g);
+	 transformer.transform(g);
 	 g.commit();
 	 Annotation words[] = g.list("word");
 	 assertEquals("- \" the", words[0].getLabel());
@@ -630,7 +630,7 @@ public class TestOrthographyClumper
       {
          g.setTracker(new ChangeTracker());
 	 OrthographyClumper transformer = new OrthographyClumper("word");
-	 List<Change> changes = transformer.transform(g);
+	 transformer.transform(g);
 	 g.commit();
 	 Annotation words[] = g.list("word");
 	 assertEquals("그게", words[0].getLabel());
@@ -704,7 +704,7 @@ public class TestOrthographyClumper
       {
          g.setTracker(new ChangeTracker());
 	 OrthographyClumper transformer = new OrthographyClumper("word");
-	 List<Change> changes = transformer.transform(g);
+	 transformer.transform(g);
 	 g.commit();
 	 Annotation words[] = g.list("word");
 	 assertEquals("emoji counts as word",

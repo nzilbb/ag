@@ -142,7 +142,7 @@ public class PorterStemmer extends Annotator {
     * @return The changes introduced by the tranformation.
     * @throws TransformationException If the transformation cannot be completed.
     */
-   public List<Change> transform(Graph graph) throws TransformationException { // TODO avoid tagging non-english
+   public Graph transform(Graph graph) throws TransformationException { // TODO avoid tagging non-english
       Layer tokenLayer = graph.getSchema().getLayer(tokenLayerId);
       if (tokenLayer == null) {
          throw new InvalidConfigurationException(
@@ -162,7 +162,7 @@ public class PorterStemmer extends Annotator {
          } // not tagged yet
       } // next token
       
-      return new Vector<Change>();
+      return graph;
    }
 
    /**

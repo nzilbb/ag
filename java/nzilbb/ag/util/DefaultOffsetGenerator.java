@@ -229,24 +229,11 @@ public class DefaultOffsetGenerator
     * @return The changes introduced by the tranformation.
     * @throws TransformationException If the transformation cannot be completed.
     */
-   public List<Change> transform(Graph graph)
+   public Graph transform(Graph graph)
       throws TransformationException
    {
       if (debug) setLog(new Vector<String>());
       setErrors(new Vector<String>());
-
-      // ensure we can track our changes
-      ChangeTracker ourTracker = new ChangeTracker();
-      ChangeTracker originalTracker = graph.getTracker();
-      if (originalTracker == null)
-      {
-         graph.setTracker(ourTracker);
-         ourTracker.reset(); // in case there were any lingering creates/destroys in the graph
-      }
-      else
-      {
-         originalTracker.addListener(ourTracker);
-      }
 
       // before going to great effort, check there are any anchors at all that might be affected
       boolean anchorsUnderThreshold = false;
@@ -337,17 +324,7 @@ public class DefaultOffsetGenerator
       {
 	 log("There are no anchors with confidence <= ", defaultOffsetThreshold);
       }
-      
-      // set the tracker back how it was
-      if (originalTracker == null)
-      {
-         graph.setTracker(null);
-      }
-      else
-      {
-         originalTracker.removeListener(ourTracker);
-      }
-      return new Vector<Change>(ourTracker.getChanges());
+      return graph;
    }
    
    /**

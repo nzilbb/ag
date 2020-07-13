@@ -123,8 +123,9 @@ public class TestValidator
     v.setDefaultOffsetThreshold(null);
     try
     {
-       g.trackChanges();
-      List<Change> changes = v.transform(g);
+      g.trackChanges();
+      v.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       assertEquals("no changes to valid graph", 0, changes.size());
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
@@ -255,8 +256,9 @@ public class TestValidator
     v.setDefaultOffsetThreshold(null);
     try
     {
-       g.trackChanges();
-      List<Change> changes = v.transform(g);
+      g.trackChanges();
+      v.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       Set<String> changeStrings = changes.stream()
          .map(Change::toString).collect(Collectors.toSet());
@@ -393,7 +395,10 @@ public class TestValidator
     v.setDefaultOffsetThreshold(null);
     try
     {
-      List<Change> changes = v.transform(g);
+      ChangeTracker ourTracker = new ChangeTracker();
+      g.getTracker().addListener(ourTracker);
+      v.transform(g);
+      Set<Change> changes = ourTracker.getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       assertEquals("a?1", g.getAnnotation("pos4").getStartId());
       assertEquals("a?2", g.getAnnotation("pos4").getOriginalStartId());
@@ -514,7 +519,8 @@ public class TestValidator
     v.setDefaultOffsetThreshold(null);
     try
     {
-      List<Change> changes = v.transform(g);
+      v.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       Set<String> changeStrings = changes.stream()
          .map(Change::toString).collect(Collectors.toSet());
@@ -649,8 +655,9 @@ public class TestValidator
     v.setDefaultOffsetThreshold(null);
     try
     {
-       g.trackChanges();
-      List<Change> changes = v.transform(g);
+      g.trackChanges();
+      v.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       Set<String> changeStrings = changes.stream()
          .map(Change::toString).collect(Collectors.toSet());
@@ -786,8 +793,9 @@ public class TestValidator
     v.setDefaultOffsetThreshold(null);
     try
     {
-       g.trackChanges();
-      List<Change> changes = v.transform(g);
+      g.trackChanges();
+      v.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
 
       // check the anchoring is what we expect
@@ -991,7 +999,8 @@ public class TestValidator
     v.setDefaultOffsetThreshold(null);
     try
     {
-      List<Change> changes = v.transform(g);
+      v.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
 
       // check the anchoring is what we expect
@@ -1172,8 +1181,9 @@ public class TestValidator
     v.setDefaultOffsetThreshold(null);
     try
     {
-       g.trackChanges();
-      List<Change> changes = v.transform(g);
+      g.trackChanges();
+      v.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
 
       // check the anchoring is what we expect
@@ -1290,8 +1300,9 @@ public class TestValidator
     v.setDefaultOffsetThreshold(null);
     try
     {
-       g.trackChanges();
-      List<Change> changes = v.transform(g);
+      g.trackChanges();
+      v.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
 
       // check the anchoring is what we expect
@@ -1385,8 +1396,9 @@ public class TestValidator
     v.setDefaultOffsetThreshold(null);
     try
     {
-       g.trackChanges();
-      List<Change> changes = v.transform(g);
+      g.trackChanges();
+      v.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
 
       // check the anchoring is what we expect
@@ -1480,8 +1492,9 @@ public class TestValidator
     v.setDefaultOffsetThreshold(null);
     try
     {
-       g.trackChanges();
-      List<Change> changes = v.transform(g);
+      g.trackChanges();
+      v.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
 
       // check the anchoring is what we expect
@@ -1565,8 +1578,9 @@ public class TestValidator
     v.setDefaultOffsetThreshold(null);
     try
     {
-       g.trackChanges();
-      List<Change> changes = v.transform(g);
+      g.trackChanges();
+      v.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
 
       // check the anchoring is what we expect
@@ -1656,8 +1670,9 @@ public class TestValidator
     v.setDefaultOffsetThreshold(null);
     try
     {
-       g.trackChanges();
-      List<Change> changes = v.transform(g);
+      g.trackChanges();
+      v.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
 
       // check the anchoring is what we expect
@@ -1766,8 +1781,9 @@ public class TestValidator
     v.setDefaultOffsetThreshold(null);
     try
     {
-       g.trackChanges();
-      List<Change> changes = v.transform(g);
+      g.trackChanges();
+      v.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
 
       assertEquals("no changes: " + changes, 0, changes.size());
@@ -1853,8 +1869,9 @@ public class TestValidator
     v.setDefaultOffsetThreshold(null);
     try
     {
-       g.trackChanges();
-      List<Change> changes = v.transform(g);
+      g.trackChanges();
+      v.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
 
       assertNull("reset", g.getAnchor("a0").getOffset());
@@ -1943,7 +1960,8 @@ public class TestValidator
     v.setDefaultOffsetThreshold(null);
     try
     {
-      List<Change> changes = v.transform(g);
+      v.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       assertNotEquals("changes applied", 0, changes.size());
       assertEquals("extra peer deleted", Change.Operation.Destroy, g.getAnnotation("orth2.5").getChange());
@@ -2067,7 +2085,9 @@ public class TestValidator
     // v.setDebug(true);
     try
     {
-      List<Change> changes = v.transform(f);
+      f.trackChanges();
+      v.transform(f);
+      Set<Change> changes = f.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       assertEquals(2, f.getAnnotation("utterance2").getOrdinal());
       assertNotEquals(f.getAnnotation("turn1").getStart(), 
@@ -2180,7 +2200,9 @@ public class TestValidator
       v.setDefaultOffsetThreshold(null);
       try
       {
-         List<Change> changes = v.transform(g);
+         g.trackChanges();
+         v.transform(g);
+         Set<Change> changes = g.getTracker().getChanges();
          if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
          assertEquals("one error: " + v.getErrors(),
                       1, v.getErrors().size());

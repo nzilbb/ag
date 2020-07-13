@@ -40,6 +40,7 @@ import java.util.Arrays;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 import nzilbb.ag.*;
@@ -67,12 +68,13 @@ public class TestMerger
       
     Graph originalGraph = loadGraphFromJSON(f, schema);
 
-    originalGraph.setTracker(new ChangeTracker());
+    originalGraph.trackChanges();
     Merger m = new Merger();
 
     try
     {
-      List<Change> changes = m.transform(originalGraph);
+      m.transform(originalGraph);
+      Set<Change> changes = originalGraph.getTracker().getChanges();
       fail("Doesn't throw exception when editedGraph is unset: " + changes);
     }
     catch(TransformationException exception)
@@ -84,7 +86,8 @@ public class TestMerger
 
     try
     {
-      List<Change> changes = m.transform(originalGraph);
+      m.transform(originalGraph);
+      Set<Change> changes = originalGraph.getTracker().getChanges();
       if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
       assertEquals("No changes - " + changes, 0, changes.size());
     }
@@ -106,11 +109,12 @@ public class TestMerger
     //m.setDebug(true);
 
     Graph originalGraph = loadGraphFromJSON(f, schema);
-    originalGraph.setTracker(new ChangeTracker());
+    originalGraph.trackChanges();
 
     try
     {
-      List<Change> changes = m.transform(originalGraph);
+      m.transform(originalGraph);
+      Set<Change> changes = originalGraph.getTracker().getChanges();
       if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
       assertEquals("No changes - " + changes, 0, changes.size());
     }
@@ -278,7 +282,7 @@ public class TestMerger
     m.getNoChangeLayers().add("word");
     try
     {
-      List<Change> changes = m.transform(g);
+      m.transform(g);
       if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
       g.commit();
 
@@ -461,7 +465,7 @@ public class TestMerger
     // m.setDebug(true);
     try
     {
-      List<Change> changes = m.transform(originalFragment);
+      m.transform(originalFragment);
       if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
       g.commit();
 
@@ -641,7 +645,7 @@ public class TestMerger
         m.setDebug(log != null && fragmentName.indexOf(log) >= 0);
         try
         {
-          List<Change> changes = m.transform(originalGraph);
+          m.transform(originalGraph);
         }
         catch(TransformationException exception)
         {

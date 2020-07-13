@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -26,7 +26,7 @@ import org.junit.*;
 import static org.junit.Assert.*;
 
 import java.util.Iterator;
-import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 import nzilbb.ag.*;
 import nzilbb.ag.util.*;
@@ -96,7 +96,7 @@ public class TestSpanningConventionTransformer
          g.setTracker(new ChangeTracker());
 	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
 	    "word", "\\{(.*)", "(.*)\\}", true, null, null, "comment", "$1", "$1", false, true);
-	 List<Change> changes = transformer.transform(g);
+	 transformer.transform(g);
 	 assertEquals("the", g.getAnnotation("word1").getLabel());
 	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word2").getChange());
 	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word3").getChange());
@@ -180,7 +180,7 @@ public class TestSpanningConventionTransformer
 	    "word", "\\{(.*)", "(.*)\\}", true, null, null, "comment", "$1", "$1", false, 
 	    // this time don't close gaps:
 	    false);
-	 List<Change> changes = transformer.transform(g);
+	 transformer.transform(g);
 	 assertEquals("the", g.getAnnotation("word1").getLabel());
 	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word2").getChange());
 	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word3").getChange());
@@ -258,7 +258,7 @@ public class TestSpanningConventionTransformer
          g.setTracker(new ChangeTracker());
 	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
 	    "word", "\\{(.*)", "(.*)\\}", true, null, null, "comment", "$1", "$1", false, true);
-	 List<Change> changes = transformer.transform(g);
+	 transformer.transform(g);
 	 assertEquals("the", g.getAnnotation("word1").getLabel());
 	 assertEquals("start = end", Change.Operation.Destroy, g.getAnnotation("word2").getChange());
 	 assertEquals("chained across gap", g.getAnnotation("word1").getEnd(), g.getAnnotation("word3").getStart());
@@ -344,7 +344,7 @@ public class TestSpanningConventionTransformer
          g.setTracker(new ChangeTracker());
 	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
 	    "word", "\\{(.*)", "(.*)\\}", true, null, null, "comment", "$1", "$1");
-	 List<Change> changes = transformer.transform(g);
+	 transformer.transform(g);
 	 assertEquals("the", g.getAnnotation("word1").getLabel());
 	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word2").getChange());
 	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word3").getChange());
@@ -418,10 +418,11 @@ public class TestSpanningConventionTransformer
 
       try
       {
-         g.setTracker(new ChangeTracker());
+         g.trackChanges();
 	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
 	    "word", "\\{(.*)", "(.*)\\}", true, null, null, "comment", "$1", "$1");
-	 List<Change> changes = transformer.transform(g);
+	 transformer.transform(g);
+         Set<Change> changes = g.getTracker().getChanges();
 	 // there should be no changes
 	 for (Change change : changes) System.out.println(change.toString());
 	 assertEquals("the", g.getAnnotation("word1").getLabel());
@@ -497,10 +498,10 @@ public class TestSpanningConventionTransformer
 
       try
       {
-         g.setTracker(new ChangeTracker());
+         g.trackChanges();
 	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
 	    "word", "\\[(.*)", "(.*)\\]", false, null, "$1", "phrase", "$1", null);
-	 List<Change> changes = transformer.transform(g);
+	 transformer.transform(g);
 	 assertEquals("the", g.getAnnotation("word1").getLabel());
 	 assertEquals("ordinal corrected", 1, g.getAnnotation("word1").getOrdinal());
 	 assertEquals("quick", g.getAnnotation("word2").getLabel());
@@ -589,10 +590,10 @@ public class TestSpanningConventionTransformer
 
       try
       {
-         g.setTracker(new ChangeTracker());
+         g.trackChanges();
 	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
 	    "word", "\\[:", "(.*)\\]", true, null, null, "expansion", null, "$1", true, true);
-	 List<Change> changes = transformer.transform(g);
+	 transformer.transform(g);
 	 assertEquals("gonna", g.getAnnotation("word1").getLabel());
 	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word2").getChange());
 	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word3").getChange());
@@ -683,10 +684,10 @@ public class TestSpanningConventionTransformer
       try
       {
 	 // transformer allows suffix after closing ]
-         g.setTracker(new ChangeTracker());
+         g.trackChanges();
 	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
 	    "word", "\\[:", "(.*)\\](.*)", true, null, "$2", "expansion", null, "$1", true, true);
-	 List<Change> changes = transformer.transform(g);
+	 transformer.transform(g);
 	 assertEquals("gonna", g.getAnnotation("word1").getLabel());
 	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word2").getChange());
 	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word3").getChange());
@@ -777,10 +778,10 @@ public class TestSpanningConventionTransformer
       try
       {
 	 // transformer allows suffix after closing ]
-         g.setTracker(new ChangeTracker());
+         g.trackChanges();
 	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
 	    "word", "\\[:", "(.*)\\](.*)", true, null, "$2", "expansion", null, "$1", true, true);
-	 List<Change> changes = transformer.transform(g);
+	 transformer.transform(g);
 	 assertEquals("gonna", g.getAnnotation("word1").getLabel());
 	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word2").getChange());
 	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word3").getChange());
@@ -870,10 +871,10 @@ public class TestSpanningConventionTransformer
 
       try
       {
-         g.setTracker(new ChangeTracker());
+         g.trackChanges();
 	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
 	    "word", "<(.*)", "(.*)>(.*)", false, "$1", "$1$2", "span", "-", "$1", "$1", false);
-	 List<Change> changes = transformer.transform(g);
+	 transformer.transform(g);
 	 assertEquals("we", g.getAnnotation("word1").getLabel());
 	 assertEquals("are", g.getAnnotation("word2").getLabel());
 	 assertEquals("going", g.getAnnotation("word3").getLabel());
@@ -951,10 +952,10 @@ public class TestSpanningConventionTransformer
       try
       {
 	 // delete span by setting destination layer to null
-         g.setTracker(new ChangeTracker());
+         g.trackChanges();
 	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
 	    "word", "\\{(.*)", "(.*)\\}", true, null, null, null, null, null);
-	 List<Change> changes = transformer.transform(g);
+	 transformer.transform(g);
 	 assertEquals("the", g.getAnnotation("word1").getLabel());
 	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word2").getChange());
 	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word3").getChange());

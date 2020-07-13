@@ -102,7 +102,7 @@ public class Normalizer
     * @return The changes introduced by the tranformation.
     * @throws TransformationException If the transformation cannot be completed.
     */
-   public List<Change> transform(Graph graph) throws TransformationException
+   public Graph transform(Graph graph) throws TransformationException
    {
       Schema schema = graph.getSchema();
       if (schema.getParticipantLayerId() == null) 
@@ -111,19 +111,6 @@ public class Normalizer
 	 throw new TransformationException(this, "No turn layer specified.");
       if (schema.getUtteranceLayerId() == null) 
 	 throw new TransformationException(this, "No utterance layer specified.");
-
-      // ensure we can track our changes
-      ChangeTracker ourTracker = new ChangeTracker();
-      ChangeTracker originalTracker = graph.getTracker();
-      if (originalTracker == null)
-      {
-         graph.setTracker(ourTracker);
-         ourTracker.reset(); // in case there were any lingering creates/destroys in the graph
-      }
-      else
-      {
-         originalTracker.addListener(ourTracker);
-      }
 
       if (schema.getEpisodeLayerId() != null)
       {
@@ -300,17 +287,7 @@ public class Normalizer
 	    }
 	 } // next annotation
       }
-
-      // set the tracker back how it was
-      if (originalTracker == null)
-      {
-         graph.setTracker(null);
-      }
-      else
-      {
-         originalTracker.removeListener(ourTracker);
-      }
-      return new Vector<Change>(ourTracker.getChanges());
+      return graph;
    }
 
    

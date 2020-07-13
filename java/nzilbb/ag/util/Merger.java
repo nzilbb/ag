@@ -528,27 +528,14 @@ public class Merger
    * @return The changes introduced by the tranformation.
    * @throws TransformationException If the transformation cannot be completed.
    */
-  public List<Change> transform(Graph graph) 
+  public Graph transform(Graph graph) 
     throws TransformationException
   {
     if (debug) setLog(new Vector<String>());
     setErrors(new Vector<String>());
     schema = graph.getSchema();
-    if (graph == editedGraph) return new Vector<Change>();
+    if (graph == editedGraph) return graph;
     if (editedGraph == null) throw new TransformationException(this, "Edited graph is no set.", new NullPointerException());
-
-    // ensure we can track our changes
-    ChangeTracker ourTracker = new ChangeTracker();
-    ChangeTracker originalTracker = graph.getTracker();
-    if (originalTracker == null)
-    {
-       graph.setTracker(ourTracker);
-       ourTracker.reset(); // in case there were any lingering creates/destroys in the graph
-    }
-    else
-    {
-       originalTracker.addListener(ourTracker);
-    }
 
     // ensure that all annotations have an anchor
     dummyAnchors = new HashSet<Anchor>();
@@ -754,17 +741,7 @@ public class Merger
       if (editedGraph.getLayer(layerId) != null) 
         editedGraph.getLayer(layerId).remove("@noChange");
     }
-
-    // set the tracker back how it was
-    if (originalTracker == null)
-    {
-       graph.setTracker(null);
-    }
-    else
-    {
-       originalTracker.removeListener(ourTracker);
-    }
-    return new Vector<Change>(ourTracker.getChanges());
+    return graph;
   }
    
   /**

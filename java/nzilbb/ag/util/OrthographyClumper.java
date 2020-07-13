@@ -123,24 +123,11 @@ public class OrthographyClumper implements GraphTransformer
     * @return The changes introduced by the tranformation.
     * @throws TransformationException If the transformation cannot be completed.
     */
-   public List<Change> transform(Graph graph) throws TransformationException
+   public Graph transform(Graph graph) throws TransformationException
    {
       Layer wordLayer = graph.getLayer(getWordLayerId());
       if (wordLayer == null) 
 	 throw new TransformationException(this, "No layer: " + getWordLayerId());
-
-      // ensure we can track our changes
-      ChangeTracker ourTracker = new ChangeTracker();
-      ChangeTracker originalTracker = graph.getTracker();
-      if (originalTracker == null)
-      {
-         graph.setTracker(ourTracker);
-         ourTracker.reset(); // in case there were any lingering creates/destroys in the graph
-      }
-      else
-      {
-         originalTracker.addListener(ourTracker);
-      }
 
       // for each parent
       for (Annotation parent : graph.list(wordLayer.getParentId()))
@@ -287,17 +274,7 @@ public class OrthographyClumper implements GraphTransformer
 	 }
 
       } // next utterance
-
-      // set the tracker back how it was
-      if (originalTracker == null)
-      {
-         graph.setTracker(null);
-      }
-      else
-      {
-         originalTracker.removeListener(ourTracker);
-      }
-      return new Vector<Change>(ourTracker.getChanges());
+      return graph;
    }
    
    

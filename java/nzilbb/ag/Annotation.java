@@ -102,11 +102,7 @@ public class Annotation
     */
    public Annotation setLabel(String label) 
    { 
-      // if (this.label != null && !this.label.equals(label))  // is it actually changing?
-      {
-         registerChange("label", label);
-      }
-
+      registerChange("label", label);
       this.label = label; 
       return this;
    }
@@ -151,11 +147,7 @@ public class Annotation
       {
          start.startOf(getLayerId()).remove(this);
       }
-
-      // if (this.startId != null && !this.startId.equals(startId))  // is it actually changing?
-      {
-         registerChange("startId", startId);
-      }
+      registerChange("startId", startId);
 
       // set the ID
       this.startId = startId; 
@@ -215,11 +207,7 @@ public class Annotation
       {
          end.endOf(getLayerId()).remove(this);
       }
-
-      // if (this.endId != null && !this.endId.equals(endId))  // is it actually changing?
-      {
-         registerChange("endId", endId);
-      }
+      registerChange("endId", endId);
 
       // set the ID
       this.endId = endId; 
@@ -271,10 +259,7 @@ public class Annotation
     */
    public synchronized Annotation setParentId(String parentId) 
    { 
-      // if (this.parentId != null && !this.parentId.equals(parentId))  // is it actually changing?
-      {
-         registerChange("parentId", parentId);
-      }
+      registerChange("parentId", parentId);
       this.parentId = parentId;
       // if we're on an unaligned layer, set start/end Ids to match parent
       Layer layer = getLayer();
@@ -1574,12 +1559,12 @@ public class Annotation
     * @return A list of annotations on the given layer that include this annotation. This
     * uses {@link #includes(Annotation)} to determine inclusion. 
     */
-   public Annotation[] includingAnnotationsOn(String layerId)
+   public Annotation[] includingAnnotationsOn(String layerId) // TODO find a way to do this without enumerating all annotations on layerId 
    {
       Vector<Annotation> includingAnnotations = new Vector<Annotation>();
       if (graph != null && getAnchored())
       {
-         for (Annotation other : graph.list(layerId))
+         for (Annotation other : graph.list(layerId)) 
          {
             if (other.getChange() == Change.Operation.Destroy) continue;
             if (other == this) continue; // exclude ourselves

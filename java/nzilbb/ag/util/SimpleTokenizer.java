@@ -181,7 +181,7 @@ public class SimpleTokenizer
     * @return The changes introduced by the tranformation.
     * @throws TransformationException If the transformation cannot be completed.
     */
-   public List<Change> transform(Graph graph) throws TransformationException
+   public Graph transform(Graph graph) throws TransformationException
    {
       if (graph.getLayer(getSourceLayerId()) == null) 
 	 throw new TransformationException(this, "No source layer: " + getSourceLayerId());
@@ -189,20 +189,6 @@ public class SimpleTokenizer
 	 throw new TransformationException(this, "No destination layer: " + getDestinationLayerId());
       if (getDestinationLayerId().equals(getSourceLayerId())) 
 	 throw new TransformationException(this, "Source and destination layer are the same: " + getDestinationLayerId());
-
-      // ensure we can track our changes
-      ChangeTracker ourTracker = new ChangeTracker();
-      ChangeTracker originalTracker = graph.getTracker();
-      if (originalTracker == null)
-      {
-         graph.setTracker(ourTracker);
-         ourTracker.reset(); // in case there were any lingering creates/destroys in the graph
-      }
-      else
-      {
-         originalTracker.addListener(ourTracker);
-      }
-
       Layer sourceParent = graph.getLayer(graph.getLayer(getSourceLayerId()).getParentId());
       boolean sharedParent = sourceParent.getId()
 	 .equals(graph.getLayer(getDestinationLayerId()).getParentId());
@@ -331,17 +317,7 @@ public class SimpleTokenizer
 	 }
 	 
       } // next parent
-
-      // set the tracker back how it was
-      if (originalTracker == null)
-      {
-         graph.setTracker(null);
-      }
-      else
-      {
-         originalTracker.removeListener(ourTracker);
-      }
-      return new Vector<Change>(ourTracker.getChanges());
+      return graph;
    }
 
 } // end of class SimpleTokenizer

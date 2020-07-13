@@ -252,24 +252,11 @@ public class ConventionTransformer
    * @return The changes introduced by the tranformation.
    * @throws TransformationException If the transformation cannot be completed.
    */
-  public List<Change> transform(Graph graph) throws TransformationException
+  public Graph transform(Graph graph) throws TransformationException
   {
     if (graph.getLayer(getSourceLayerId()) == null) 
       throw new TransformationException(this, "No source layer: " + getSourceLayerId());
     
-    // ensure we can track our changes
-    ChangeTracker ourTracker = new ChangeTracker();
-    ChangeTracker originalTracker = graph.getTracker();
-    if (originalTracker == null)
-    {
-       graph.setTracker(ourTracker);
-       ourTracker.reset(); // in case there were any lingering creates/destroys in the graph
-    }
-    else
-    {
-       originalTracker.addListener(ourTracker);
-    }
-
     try
     {
       Pattern sourceRegexp = Pattern.compile(getSourcePattern());
@@ -305,17 +292,7 @@ public class ConventionTransformer
           }
         } // label matches
       } // next source annotation
-      
-      // set the tracker back how it was
-      if (originalTracker == null)
-      {
-         graph.setTracker(null);
-      }
-      else
-      {
-         originalTracker.removeListener(ourTracker);
-      }
-      return new Vector<Change>(ourTracker.getChanges());
+      return graph;
     }
     catch(PatternSyntaxException exception)
     {

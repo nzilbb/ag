@@ -92,7 +92,8 @@ public class TestDefaultOffsetGenerator
     // generator.setDebug(true);
     try
     {
-      List<Change> changes = generator.transform(g);
+      generator.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
 
       // test the values are what we expected
@@ -203,7 +204,8 @@ public class TestDefaultOffsetGenerator
     // generator.setDebug(true);
     try
     {
-      List<Change> changes = generator.transform(g);
+      generator.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
 
       // test the values are what we expected
@@ -320,8 +322,9 @@ public class TestDefaultOffsetGenerator
     // generator.setDebug(true);
     try
     {
-      List<Change> changes = generator.transform(g);
+      generator.transform(g);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
+      Set<Change> changes = g.getTracker().getChanges();
 
       // test the values are what we expected
 
@@ -444,8 +447,9 @@ public class TestDefaultOffsetGenerator
     // generator.setDebug(true);
     try
     {
-      List<Change> changes = generator.transform(g);
+      generator.transform(g);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
+      Set<Change> changes = g.getTracker().getChanges();
 
       // test the values are what we expected
       assertEquals(Double.valueOf(0.0), g.getAnchor("a0").getOffset());
@@ -564,8 +568,9 @@ public class TestDefaultOffsetGenerator
     // generator.setDebug(true);
     try
     {
-      List<Change> changes = generator.transform(g);
+      generator.transform(g);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
+      Set<Change> changes = g.getTracker().getChanges();
 
       // test the values are what we expected
 
@@ -743,8 +748,9 @@ public class TestDefaultOffsetGenerator
     // generator.setDebug(true);
     try
     {
-      List<Change> changes = generator.transform(g);
+      generator.transform(g);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
+      Set<Change> changes = g.getTracker().getChanges();
 
       // test the values are what we expected
       assertEquals(Double.valueOf(0.0), g.getAnchor("a0").getOffset());
@@ -895,7 +901,8 @@ public class TestDefaultOffsetGenerator
     // generator.setDebug(true);
     try
     {
-      List<Change> changes = generator.transform(f);
+      generator.transform(f);
+      Set<Change> changes = f.getTracker().getChanges();
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
       for (String m : generator.getErrors()) System.out.println("ERROR: " + m);
 
@@ -922,7 +929,7 @@ public class TestDefaultOffsetGenerator
     // generator.setDebug(true);
     try
     {
-      List<Change> changes = generator.transform(f);
+      generator.transform(f);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
       for (String m : generator.getErrors()) System.out.println("ERROR: " + m);
 
@@ -1013,8 +1020,9 @@ public class TestDefaultOffsetGenerator
     // generator.setDebug(true);
     try
     {
-      List<Change> changes = generator.transform(g);
+      generator.transform(g);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
+      Set<Change> changes = g.getTracker().getChanges();
 
       // test the values are what we expected
 
