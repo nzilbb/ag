@@ -30,7 +30,10 @@ public class Constants
 {
 
    /** API version */
-   public static final String VERSION = "20200710.1904";
+   public static final String VERSION;
+   static {
+      VERSION = nzilbb.util.IO.JarCommentOfClass(Constants.class);
+   }
    
    /** Standardized possible value for anchor offset or annotation label confidence - no confidence. Value is 0. */
    public static final int CONFIDENCE_NONE = 0;
