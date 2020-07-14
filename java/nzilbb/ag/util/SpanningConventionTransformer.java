@@ -594,7 +594,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 	 Pattern endRegexp = Pattern.compile(getEndPattern());
 	 // group the source annotations by parent...
 	 // for each parent
-	 for (Annotation parent : graph.list(graph.getLayer(getSourceLayerId()).getParentId()))
+	 for (Annotation parent : graph.all(graph.getLayer(getSourceLayerId()).getParentId()))
 	 {
 	    Vector<Annotation> span = null;
 	    Annotation previousSource = null;

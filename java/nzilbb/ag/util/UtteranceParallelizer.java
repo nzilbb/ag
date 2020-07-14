@@ -133,7 +133,7 @@ public class UtteranceParallelizer implements GraphTransformer {
          
          // order annotations by anchor so that simultaneous speech comes out in offset order
          TreeSet<Annotation> annotationsByAnchor = new TreeSet<Annotation>(byAnchor);
-         for (Annotation a : graph.list(layerId)) annotationsByAnchor.add(a);
+         for (Annotation a : graph.all(layerId)) annotationsByAnchor.add(a);
 
          // loop until there are no annotations left...
          while (annotationsByAnchor.size() > 0) {
@@ -215,7 +215,7 @@ public class UtteranceParallelizer implements GraphTransformer {
       for (String layerId : layerIds) {
          Anchor lastStartAnchor = null;
          Anchor lastEndAnchor = null;
-         for (Annotation annotation : new AnnotationsByAnchor(graph.list(layerId))) {
+         for (Annotation annotation : new AnnotationsByAnchor(graph.all(layerId))) {
 
             // start anchor
             if (lastStartAnchor == null) {

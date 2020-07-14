@@ -1481,7 +1481,7 @@ public class TEIDeserializer
 	    participant.setParentId(graph.getId());
 	    graph.addAnnotation(participant);
 	 }
-	 if (graph.list(getParticipantLayer().getId()).length > 1)
+	 if (graph.all(getParticipantLayer().getId()).length > 1)
 	 { // don't default to the single participant
 	    participant = null;
 	 }
@@ -1872,7 +1872,7 @@ public class TEIDeserializer
 	 SortedSet<Anchor> anchors = graph.getSortedAnchors();
 	 Anchor firstAnchor = anchors.first();
 	 lastAnchor = anchors.last();
-	 for (Annotation a : graph.list(getParticipantLayer().getId()))
+	 for (Annotation a : graph.all(getParticipantLayer().getId()))
 	 {
 	    a.setStartId(firstAnchor.getId());
 	    a.setEndId(lastAnchor.getId());

@@ -155,8 +155,8 @@ public class PorterStemmer extends Annotator {
       }
 
       // tag only tokens that are not already tagged
-      for (Annotation token : graph.list(tokenLayerId)) {
-         if (token.my(stemLayerId) == null) { // not tagged yet
+      for (Annotation token : graph.all(tokenLayerId)) {
+         if (token.first(stemLayerId) == null) { // not tagged yet
             token.createTag(stemLayerId, stem(token.getLabel()))
                .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
          } // not tagged yet

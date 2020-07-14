@@ -1311,7 +1311,7 @@ public class EAFSerialization
          // given there are no utterance/turn intervals, 
          // we assume that the tier name for words is the speaker name	 
          HashMap<String,Annotation> turnsByName = new HashMap<String,Annotation>();
-         for (Annotation word : graph.list(wordLayer.getId()))
+         for (Annotation word : graph.all(wordLayer.getId()))
          {
             String participant = (String)word.get("@participant");
             Annotation turn = turnsByName.get(participant);
@@ -1335,7 +1335,7 @@ public class EAFSerialization
       } 
       else if (turnLayerMapped && !utteranceLayerMapped)
       { // create utterances from turns
-         for (Annotation turn : graph.list(turnLayer.getId()))
+         for (Annotation turn : graph.all(turnLayer.getId()))
          {
             Annotation utterance = new Annotation(turn);
             utterance.setLayerId(utteranceLayer.getId());
@@ -1350,7 +1350,7 @@ public class EAFSerialization
       }
       else if (utteranceLayerMapped && !turnLayerMapped)
       { // create turns from utterances
-         for (Annotation utterance : graph.list(utteranceLayer.getId()))
+         for (Annotation utterance : graph.all(utteranceLayer.getId()))
          {
             Annotation turn = new Annotation(utterance);
             turn.setLayerId(turnLayer.getId());
@@ -1364,7 +1364,7 @@ public class EAFSerialization
       else if (utteranceLayerMapped && turnLayerMapped)
       {
          // ensure utterance parent turns are set
-         for (Annotation utterance : graph.list(utteranceLayer.getId()))
+         for (Annotation utterance : graph.all(utteranceLayer.getId()))
          {
             Annotation[] possibleTurns = utterance.includingAnnotationsOn(turnLayer.getId());
             if (possibleTurns.length == 1)
@@ -1409,7 +1409,7 @@ public class EAFSerialization
          // ensure participants are set
          HashMap<String,Annotation> participantsByName = new HashMap<String,Annotation>();
          int ordinal = 1;
-         for (Annotation turn : graph.list(turnLayer.getId()))
+         for (Annotation turn : graph.all(turnLayer.getId()))
          {
             if (!participantsByName.containsKey(turn.getLabel()))
             { // create participant
@@ -1428,7 +1428,7 @@ public class EAFSerialization
          
          // join subsequent turns by the same speaker...
          // for each participant (assumed to be parent of turn)
-         for (Annotation participant : graph.list(participantLayer.getId()))
+         for (Annotation participant : graph.all(participantLayer.getId()))
          {
             TreeSet<Annotation> annotations
                = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
@@ -1551,7 +1551,7 @@ public class EAFSerialization
          else
          { // word layer mapped
             // ensure word parent turns are set
-            for (Annotation word : graph.list(wordLayer.getId()))
+            for (Annotation word : graph.all(wordLayer.getId()))
             {
                if (word.getParent() == null)
                {
@@ -1655,7 +1655,7 @@ public class EAFSerialization
                for (Annotation possibleParent : possibleParents)
                {
                   // is the label (the speaker) a part of the utterance's tier name?
-                  Annotation who = possibleParent.my("who");
+                  Annotation who = possibleParent.first("who");
                   if (who != null)
                   {
                      if (tier.indexOf(who.getLabel()) >= 0
@@ -1696,7 +1696,7 @@ public class EAFSerialization
                for (Annotation possibleParent : possibleParents)
                {
                   // is the label (the speaker) a part of the utterance's tier name?
-                  Annotation who = possibleParent.my("who");
+                  Annotation who = possibleParent.first("who");
                   if (who != null)
                   {
                      if (tier.indexOf(who.getLabel()) >= 0
@@ -1727,7 +1727,7 @@ public class EAFSerialization
       {
          if (l.getSaturated() && l.getAlignment() == Constants.ALIGNMENT_INTERVAL)
          {
-            for (Annotation parent : graph.list(l.getParentId()))
+            for (Annotation parent : graph.all(l.getParentId()))
             {
                SortedSet<Annotation> children = parent.getAnnotations(l.getId());
                if (children.size() > 0)
@@ -1750,7 +1750,7 @@ public class EAFSerialization
       }
 
       // set end anchors of graph tags
-      for (Annotation a : graph.list(getParticipantLayer().getId()))
+      for (Annotation a : graph.all(getParticipantLayer().getId()))
       {
          a.setStartId(graphStart.getId());
          a.setEndId(graphEnd.getId());
@@ -1900,7 +1900,7 @@ public class EAFSerialization
       String language = null;
       if (languageLayer != null)
       {
-         Annotation lang = graph.my(languageLayer.getId());
+         Annotation lang = graph.first(languageLayer.getId());
          if (lang != null) language = lang.getLabel();
       }
 
@@ -1933,7 +1933,7 @@ public class EAFSerialization
       document.setXmlStandalone(true);
       Element annotationDocument = document.createElement("ANNOTATION_DOCUMENT");
       document.appendChild(annotationDocument);
-      Annotation author = authorLayer==null?null:graph.my(authorLayer.getId());
+      Annotation author = authorLayer==null?null:graph.first(authorLayer.getId());
       if (author != null)
       {
          annotationDocument.setAttribute("AUTHOR", author.getLabel());
@@ -1942,7 +1942,7 @@ public class EAFSerialization
       {
          annotationDocument.setAttribute("AUTHOR", "");
       }
-      Annotation date = dateLayer==null?null:graph.my(dateLayer.getId());
+      Annotation date = dateLayer==null?null:graph.first(dateLayer.getId());
       if (date != null)
       {
          annotationDocument.setAttribute("DATE", date.getLabel());
@@ -1996,7 +1996,7 @@ public class EAFSerialization
       
       // a line tier for each speaker
       HashMap<String,Element> mSpeakerTiers = new HashMap<String,Element>();
-      for (Annotation participant : graph.list(participantLayer.getId()))
+      for (Annotation participant : graph.all(participantLayer.getId()))
       {
          Element utterances = document.createElement("TIER");
          annotationDocument.appendChild(utterances);
@@ -2023,7 +2023,7 @@ public class EAFSerialization
       }
       
       // utterances
-      for (Annotation utterance : graph.list(utteranceLayer.getId()))
+      for (Annotation utterance : graph.all(utteranceLayer.getId()))
       {
          // find the speaker's tier
          Element tier = mSpeakerTiers.get(utterance.getLabel());
@@ -2047,7 +2047,7 @@ public class EAFSerialization
          alignableAnnotation.appendChild(annotationValue);
          StringBuffer sUtteranceText = new StringBuffer();
          
-         for (Annotation word : utterance.list(wordLayer.getId()))
+         for (Annotation word : utterance.all(wordLayer.getId()))
          {
             if (sUtteranceText.length() > 0) sUtteranceText.append(" ");
             sUtteranceText.append(word.getLabel());
@@ -2286,7 +2286,7 @@ public class EAFSerialization
       // TreeSet<Annotation> annotations 
       //    = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
       // annotations.addAll(ag.getLayer(layer.getId()));
-      Annotation[] annotations = graph.list(layer.getId());
+      Annotation[] annotations = graph.all(layer.getId());
 
       // what relationship are we using, if any
       Layer dominatingLayer = layer.getParent();
@@ -2334,7 +2334,7 @@ public class EAFSerialization
          Annotation participant = null;
          if (ancestorOfParticipant)
          {
-            participant = annotation.my(participantLayer.getId());
+            participant = annotation.first(participantLayer.getId());
          }
          String participantId = participant != null?participant.getId():"";
          String participantName = participant != null?participant.getLabel():"";

@@ -130,7 +130,7 @@ public class OrthographyClumper implements GraphTransformer
 	 throw new TransformationException(this, "No layer: " + getWordLayerId());
 
       // for each parent
-      for (Annotation parent : graph.list(wordLayer.getParentId()))
+      for (Annotation parent : graph.all(wordLayer.getParentId()))
       {
 	 Annotation last = null;
 	 Annotation toPrepend = null;

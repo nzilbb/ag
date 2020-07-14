@@ -260,7 +260,7 @@ public class ConventionTransformer
     try
     {
       Pattern sourceRegexp = Pattern.compile(getSourcePattern());
-      for (Annotation source : graph.list(getSourceLayerId()))
+      for (Annotation source : graph.all(getSourceLayerId()))
       {
         Matcher matcher = sourceRegexp.matcher(source.getLabel());
         if (matcher.matches())

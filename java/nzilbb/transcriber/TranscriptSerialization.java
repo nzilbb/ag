@@ -1379,7 +1379,7 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
       transcript.setId(graph.getId());
       transcript.setVersion("0");
       if (versionLayer != null) {
-         Annotation tag = graph.my(versionLayer.getId());
+         Annotation tag = graph.first(versionLayer.getId());
          if (tag != null) {
             transcript.setVersion(tag.getLabel());
          }
@@ -1388,12 +1388,12 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
       String sVersionDate = fmtTranscriberDate.format(new java.util.Date());
       transcript.setVersionDate(sVersionDate);
       if (versionDateLayer != null) {
-         Annotation tag = graph.my(versionDateLayer.getId());
+         Annotation tag = graph.first(versionDateLayer.getId());
          if (tag != null) {
             transcript.setVersionDate(tag.getLabel());}
       }
       if (scribeLayer != null) {
-         Annotation tag = graph.my(scribeLayer.getId());
+         Annotation tag = graph.first(scribeLayer.getId());
          if (tag != null) {
             transcript.setScribe(tag.getLabel());
          }
@@ -1412,13 +1412,13 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
          }
       }
       if (programLayer != null) {
-         Annotation tag = graph.my(programLayer.getId());
+         Annotation tag = graph.first(programLayer.getId());
          if (tag != null) {
             transcript.setProgram(tag.getLabel());
          }
       }
       if (transcriptLanguageLayer != null) {
-         Annotation tag = graph.my(transcriptLanguageLayer.getId());
+         Annotation tag = graph.first(transcriptLanguageLayer.getId());
          if (tag != null) {
             transcript.setLanguage(tag.getLabel());
          }
@@ -1427,7 +1427,7 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
       // speakers
       int iSpk = 0;
       HashMap<String,String> mSpeakerToSpk = new HashMap<String,String>();
-      for (Annotation participant : graph.list(participantLayer.getId())) {
+      for (Annotation participant : graph.all(participantLayer.getId())) {
          
 	 Speaker speaker = new Speaker(transcript);
 	 speaker.setId("spk" + (++iSpk));
@@ -1437,31 +1437,31 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
 
          // participant attributes?
          if (genderLayer != null) {
-            Annotation tag = participant.my(genderLayer.getId());
+            Annotation tag = participant.first(genderLayer.getId());
             if (tag != null) {
                speaker.setType(tag.getLabel());
             }
          }
          if (participantCheckLayer != null) {
-            Annotation tag = participant.my(participantCheckLayer.getId());
+            Annotation tag = participant.first(participantCheckLayer.getId());
             if (tag != null) {
                speaker.setCheck(tag.getLabel());
             }
          }
          if (scopeLayer != null) {
-            Annotation tag = participant.my(scopeLayer.getId());
+            Annotation tag = participant.first(scopeLayer.getId());
             if (tag != null) {
                speaker.setScope(tag.getLabel());
             }
          }
          if (accentLayer != null) {
-            Annotation tag = participant.my(accentLayer.getId());
+            Annotation tag = participant.first(accentLayer.getId());
             if (tag != null) {
                speaker.setAccent(tag.getLabel());
             }
          }
          if (dialectLayer != null) {
-            Annotation tag = participant.my(dialectLayer.getId());
+            Annotation tag = participant.first(dialectLayer.getId());
             if (tag != null) {
                speaker.setDialect(tag.getLabel());
             }
@@ -1487,14 +1487,14 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
 
       Annotation currentTopic = null;
       HashSet<String> consumed = new HashSet<String>();
-      for (Annotation anTurn : graph.list(turnLayer.getId())) {
+      for (Annotation anTurn : graph.all(turnLayer.getId())) {
          
 	 // ignore it if we've already added it (because it's simultaneous)
 	 if (consumed.contains(anTurn.getId())) continue;
 
 	 // check for new topic
          if (topicLayer != null) {
-            Annotation topic = anTurn.my(topicLayer.getId());
+            Annotation topic = anTurn.first(topicLayer.getId());
             if (currentTopic != topic) {
                currentTopic = topic;
                section = new Section(transcript);
@@ -1532,7 +1532,7 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
 	 } // next turn
 
 	 // utterances
-	 for (Annotation anLine : anTurn.list(utteranceLayer.getId())) {
+	 for (Annotation anLine : anTurn.all(utteranceLayer.getId())) {
             
 	    // ignore it if we've already added it (because it's simultaneous)
 	    if (consumed.contains(anLine.getId())) continue;
@@ -1553,7 +1553,7 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
 	       }
 	       // words 
 	       thisSync.setText(""); // TODO handle events
-	       for (Annotation anWord : anThisLine.list(wordLayer.getId())) {
+	       for (Annotation anWord : anThisLine.all(wordLayer.getId())) {
                   
 		  checkForNonWordEvents(anWord.getStart(), thisSync);
 		  if (thisSync.getText().length() > 0) {
@@ -1561,16 +1561,16 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
 		  } else {
 		     thisSync.setText(anWord.getLabel());
 		  }
-		  if (lexicalLayer != null && anWord.my(lexicalLayer.getId()) != null) {
+		  if (lexicalLayer != null && anWord.first(lexicalLayer.getId()) != null) {
                      // lexical tag
 		     thisSync.addEvent(new Event(
-					  anWord.my(lexicalLayer.getId()).getLabel(),
+					  anWord.first(lexicalLayer.getId()).getLabel(),
 					  "lexical", "previous"));
 		  }
-		  if (pronounceLayer != null && anWord.my(pronounceLayer.getId()) != null) {
+		  if (pronounceLayer != null && anWord.first(pronounceLayer.getId()) != null) {
                      // lexical tag
 		     thisSync.addEvent(new Event(
-					  anWord.my(pronounceLayer.getId()).getLabel(),
+					  anWord.first(pronounceLayer.getId()).getLabel(),
 					  "pronounce", "previous"));
 		  }
 		  checkForNonWordEvents(anWord.getEnd(), thisSync);

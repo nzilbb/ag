@@ -90,7 +90,7 @@ public class MinimalExample extends Annotator {
       TreeMap<String,Integer> typesCounts = new TreeMap<String,Integer>();
 
       // count tokens of each type
-      for (Annotation token : graph.list(schema.getWordLayerId())) {
+      for (Annotation token : graph.all(schema.getWordLayerId())) {
          if (typesCounts.containsKey(token.getLabel())) {
             typesCounts.put(token.getLabel(), 1);
          } else {

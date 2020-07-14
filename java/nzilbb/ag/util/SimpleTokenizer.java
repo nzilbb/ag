@@ -196,7 +196,7 @@ public class SimpleTokenizer
       
       Pattern regexDelimiters = Pattern.compile(getDelimiters());
       // for each parent
-      for (Annotation parent : graph.list(sourceParent.getId()))
+      for (Annotation parent : graph.all(sourceParent.getId()))
       {
 	 int ordinal = 0;
 	 // we'll build a new list of children in the right order

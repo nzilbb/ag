@@ -751,7 +751,7 @@ public class CsvDeserializer
 	 if (errors != null) throw errors;
 
 	 // set end anchors of graph tags
-	 for (Annotation a : graph.list(getParticipantLayer().getId()))
+	 for (Annotation a : graph.all(getParticipantLayer().getId()))
 	 {
 	    a.setStartId(firstAnchor.getId());
 	    a.setEndId(lastAnchor.getId());

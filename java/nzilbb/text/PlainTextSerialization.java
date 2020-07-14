@@ -1301,7 +1301,7 @@ public class PlainTextSerialization
                else if (getEpisodeLayer() != null
                         && layer.getParentId().equals(getEpisodeLayer().getId())) // episode tag
                {
-                  Annotation episode = graph.my(getEpisodeLayer().getId());
+                  Annotation episode = graph.first(getEpisodeLayer().getId());
                   if (episode == null)
                   {
                      episode = graph.createTag(graph, getEpisodeLayer().getId(), graph.getLabel());
@@ -1625,7 +1625,7 @@ public class PlainTextSerialization
       if (timers != null) timers.start("finalization");
 
       // now that we've got the whole text, we know who the participant(s) is for tagging
-      participant = graph.my(getParticipantLayer().getId());
+      participant = graph.first(getParticipantLayer().getId());
       for (Annotation tag : participantTags)
       {
          tag.setParentId(participant.getId());
@@ -1635,14 +1635,14 @@ public class PlainTextSerialization
       if (errors != null) throw errors;
 
       // set end anchors of graph tags
-      for (Annotation a : graph.list(getParticipantLayer().getId()))
+      for (Annotation a : graph.all(getParticipantLayer().getId()))
       {
          a.setStartId(firstAnchor.getId());
          a.setEndId(lastAnchor.getId());
       }
       if (getEpisodeLayer() != null)
       {
-         for (Annotation a : graph.list(getEpisodeLayer().getId()))
+         for (Annotation a : graph.all(getEpisodeLayer().getId()))
          {
             a.setStartId(firstAnchor.getId());
             a.setEndId(lastAnchor.getId());
@@ -1822,7 +1822,7 @@ public class PlainTextSerialization
                 && layer.getAlignment() == Constants.ALIGNMENT_NONE
                 && !layer.equals(getParticipantLayer()))
             { // it's a graph tag
-               for (Annotation a : graph.list(id))
+               for (Annotation a : graph.all(id))
                {
                   thereWereAttributes = true;
                   Object[] metadata = { id, a.getLabel() }; 
@@ -1837,7 +1837,7 @@ public class PlainTextSerialization
          if (noiseLayer != null && getUseConventions())
          {
             // list all anchored noises
-            for (Annotation n : graph.list(noiseLayer.getId())) if (n.getAnchored()) noisesByAnchor.add(n);
+            for (Annotation n : graph.all(noiseLayer.getId())) if (n.getAnchored()) noisesByAnchor.add(n);
          }
          Iterator<Annotation> noises = noisesByAnchor.iterator();
          Annotation nextNoise = noises.hasNext()?noises.next():null;
@@ -1848,7 +1848,7 @@ public class PlainTextSerialization
          if (commentLayer != null && getUseConventions())
          {
             // list all anchored noises
-            for (Annotation n : graph.list(commentLayer.getId())) if (n.getAnchored()) commentsByAnchor.add(n);
+            for (Annotation n : graph.all(commentLayer.getId())) if (n.getAnchored()) commentsByAnchor.add(n);
          }
          Iterator<Annotation> comments = commentsByAnchor.iterator();
          Annotation nextComment = comments.hasNext()?comments.next():null;
@@ -1860,13 +1860,13 @@ public class PlainTextSerialization
          // order utterances by anchor so that simultaneous speech comes out in utterance order
          TreeSet<Annotation> utterancesByAnchor
             = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
-         for (Annotation u : graph.list(getUtteranceLayer().getId())) utterancesByAnchor.add(u);
+         for (Annotation u : graph.all(getUtteranceLayer().getId())) utterancesByAnchor.add(u);
 
          for (Annotation utterance : utterancesByAnchor)
          {
             if (cancelling) break;
             // is the participant changing?
-            Annotation participant = utterance.my(getParticipantLayer().getId());
+            Annotation participant = utterance.first(getParticipantLayer().getId());
             if (participant != currentParticipant)
             { // participant change
                currentParticipant = participant;
@@ -1875,7 +1875,7 @@ public class PlainTextSerialization
                writer.print(fmtParticipant.format(participantLabel));
             } // participant change
 
-            for (Annotation token : utterance.list(getWordLayer().getId()))
+            for (Annotation token : utterance.all(getWordLayer().getId()))
             {
                writer.print(" ");
                
@@ -1905,7 +1905,7 @@ public class PlainTextSerialization
                Annotation orthography = token;
                if (orthographyLayer != null && selectedLayers.contains(orthographyLayer.getId()))
                {
-                  orthography = token.my(orthographyLayer.getId());
+                  orthography = token.first(orthographyLayer.getId());
                   if (orthography == null) orthography = token;
                }
                writer.print(orthography.getLabel()); // TODO transcript convention support
@@ -1916,7 +1916,7 @@ public class PlainTextSerialization
                       && (orthographyLayer == null || !layerId.equals(orthographyLayer.getId())))
                   {
                      writer.print("_");
-                     Annotation tag = token.my(layerId);
+                     Annotation tag = token.first(layerId);
                      if (tag != null)
                      {
                         writer.print(tag.getLabel());
@@ -1928,7 +1928,7 @@ public class PlainTextSerialization
                {
                   if (lexicalLayer != null)
                   {
-                     Annotation tag = token.my(lexicalLayer.getId());
+                     Annotation tag = token.first(lexicalLayer.getId());
                      if (tag != null)
                      {
                         writer.print("(");
@@ -1938,7 +1938,7 @@ public class PlainTextSerialization
                   }
                   if (pronounceLayer != null)
                   {
-                     Annotation tag = token.my(pronounceLayer.getId());
+                     Annotation tag = token.first(pronounceLayer.getId());
                      if (tag != null)
                      {
                         writer.print("[");

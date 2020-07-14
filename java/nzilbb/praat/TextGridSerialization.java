@@ -963,7 +963,7 @@ public class TextGridSerialization
          // we assume that the tier name for words is the speaker name	 
          if (timers != null) timers.start("create turns/utterances");
          HashMap<String,Annotation> turnsByName = new HashMap<String,Annotation>();
-         for (Annotation word : graph.list(wordLayer.getId()))
+         for (Annotation word : graph.all(wordLayer.getId()))
          {
             String participantName = ((Tier)word.get("@tier")).getName();
             // if the tier name is something like "transcript - foo"...
@@ -998,7 +998,7 @@ public class TextGridSerialization
       else if (turnLayerMapped && !utteranceLayerMapped)
       { // create utterances from turns
          if (timers != null) timers.start("create utterances from turns");
-         for (Annotation turn : graph.list(turnLayer.getId()))
+         for (Annotation turn : graph.all(turnLayer.getId()))
          {
             Annotation utterance = new Annotation(turn);
             utterance.setLayerId(utteranceLayer.getId());
@@ -1015,7 +1015,7 @@ public class TextGridSerialization
       else if (utteranceLayerMapped && !turnLayerMapped)
       { // create turns from utterances
          if (timers != null) timers.start("create turns from utterances");
-         for (Annotation utterance : graph.list(utteranceLayer.getId()))
+         for (Annotation utterance : graph.all(utteranceLayer.getId()))
          {
             Annotation turn = new Annotation(utterance);
             turn.setLayerId(turnLayer.getId());
@@ -1031,7 +1031,7 @@ public class TextGridSerialization
       {
          // ensure utterance parent turns are set
          if (timers != null) timers.start("set utterance turns");
-         for (Annotation utterance : graph.list(utteranceLayer.getId()))
+         for (Annotation utterance : graph.all(utteranceLayer.getId()))
          {
             Annotation[] possibleTurns = utterance.includingAnnotationsOn(turnLayer.getId());
             if (possibleTurns.length == 1)
@@ -1073,7 +1073,7 @@ public class TextGridSerialization
       HashMap<String,Annotation> participantsByName = new HashMap<String,Annotation>();
       if (timers != null) timers.start("set turn participants");
       int ordinal = 1;
-      for (Annotation turn : graph.list(turnLayer.getId()))
+      for (Annotation turn : graph.all(turnLayer.getId()))
       {
          if (!participantsByName.containsKey(turn.getLabel()))
          { // create participant
@@ -1095,7 +1095,7 @@ public class TextGridSerialization
       // join subsequent turns by the same speaker...
       // for each participant (assumed to be parent of turn)
       if (timers != null) timers.start("join subsequent turns");
-      for (Annotation participant : graph.list(participantLayer.getId()))
+      for (Annotation participant : graph.all(participantLayer.getId()))
       {
          TreeSet<Annotation> annotations = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
          annotations.addAll(participant.getAnnotations(turnLayer.getId()));
@@ -1197,7 +1197,7 @@ public class TextGridSerialization
       { // word layer mapped
          if (timers != null) timers.start("set word turns");
          // ensure word parent turns are set
-         for (Annotation word : graph.list(wordLayer.getId()))
+         for (Annotation word : graph.all(wordLayer.getId()))
          {
             if (word.getParent() == null)
             {
@@ -1297,7 +1297,7 @@ public class TextGridSerialization
                for (Annotation possibleParent : possibleParents)
                {
                   // is the label (the speaker) a part of the utterance's tier name?
-                  Annotation who = possibleParent.my("who");
+                  Annotation who = possibleParent.first("who");
                   if (who != null)
                   {
                      if (tier.getName().indexOf(who.getLabel()) >= 0)
@@ -1338,7 +1338,7 @@ public class TextGridSerialization
                for (Annotation possibleParent : possibleParents)
                {
                   // is the label (the speaker) a part of the utterance's tier name?
-                  Annotation who = possibleParent.my("who");
+                  Annotation who = possibleParent.first("who");
                   if (who != null)
                   {
                      if (tier.getName().indexOf(who.getLabel()) >= 0)
@@ -1375,7 +1375,7 @@ public class TextGridSerialization
       {
          if (l.getSaturated() && l.getAlignment() == Constants.ALIGNMENT_INTERVAL)
          {
-            for (Annotation parent : graph.list(l.getParentId()))
+            for (Annotation parent : graph.all(l.getParentId()))
             {
                SortedSet<Annotation> children = parent.getAnnotations(l.getId());
                if (children.size() > 0)
@@ -1397,7 +1397,7 @@ public class TextGridSerialization
       if (timers != null) timers.end("remove tier references");
 
       // set end anchors of graph tags
-      for (Annotation a : graph.list(getParticipantLayer().getId()))
+      for (Annotation a : graph.all(getParticipantLayer().getId()))
       {
          a.setStartId(graphStart.getId());
          a.setEndId(graphEnd.getId());
@@ -1562,7 +1562,7 @@ public class TextGridSerialization
          if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT)
          { // layer of instants
             TreeMap<String,TextTier> tiers = new TreeMap<String,TextTier>();
-            for (Annotation a : graph.list(layer.getId()))
+            for (Annotation a : graph.all(layer.getId()))
             {
                if (a.getAnchored())
                {
@@ -1570,7 +1570,7 @@ public class TextGridSerialization
                   String who = "";
                   if (assignedToParticipant)
                   {
-                     Annotation participant = a.my(participantLayerId);
+                     Annotation participant = a.first(participantLayerId);
                      if (participant != null) who = participant.getLabel();
                   }
                   if (!tiers.containsKey(who))
@@ -1601,7 +1601,7 @@ public class TextGridSerialization
          else
          { // layer of intervals
             TreeMap<String,Vector<IntervalTier>> tiers = new TreeMap<String,Vector<IntervalTier>>();
-            for (Annotation a : graph.list(layer.getId()))
+            for (Annotation a : graph.all(layer.getId()))
             {
                if (a.getAnchored())
                {
@@ -1609,7 +1609,7 @@ public class TextGridSerialization
                   String who = "";
                   if (assignedToParticipant)
                   {
-                     Annotation participant = a.my(participantLayerId);
+                     Annotation participant = a.first(participantLayerId);
                      if (participant != null) who = participant.getLabel();
                   }
                   if (!tiers.containsKey(who))
@@ -1671,7 +1671,7 @@ public class TextGridSerialization
                       && getWordLayer() != null)
                   { // turn/utterances layers are filled by their word token labels
                      StringBuffer l = new StringBuffer();
-                     for (Annotation token : a.list(getWordLayer().getId()))
+                     for (Annotation token : a.all(getWordLayer().getId()))
                      {
                         if (l.length() > 0) l.append(" ");
                         l.append(token.getLabel()); // TODO transcript convention support

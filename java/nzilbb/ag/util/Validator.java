@@ -426,7 +426,7 @@ public class Validator
       for (Layer layer : alignedLayersTopDown)
       {
          // log("Layer: ", layer);
-         for (Annotation annotation : graph.list(layer.getId()))
+         for (Annotation annotation : graph.all(layer.getId()))
          {
             if (annotation.getChange() == Change.Operation.Destroy) continue;
             // log("Annotation: ", logAnnotation(annotation));
@@ -731,7 +731,7 @@ public class Validator
          Layer parentLayer = childLayer.getParent();
          // TODO not turn/utterance for some reason?
 
-         // we cannot use graph.list() because that assumes correct parent/child layer hierarchy
+         // we cannot use graph.all() because that assumes correct parent/child layer hierarchy
          // which is pare of what we're validating.
          // instead, we traverse all annotations in the graph to tease out the children, 
          // regardless of what their parent happens to be.
@@ -936,7 +936,7 @@ public class Validator
       if (!getFullValidation())
       {
          boolean childChanged = false;
-         for (Annotation child : graph.list(childLayer.getId()))
+         for (Annotation child : graph.all(childLayer.getId()))
          {
             if (child.getChange() != Change.Operation.NoChange)
             {
@@ -957,7 +957,7 @@ public class Validator
       if (!childLayer.getPeers())
       {
          // for each parent
-         for (Annotation parent : graph.list(childLayer.getParentId()))
+         for (Annotation parent : graph.all(childLayer.getParentId()))
          { 
             if (parent.getChange() == Change.Operation.Destroy) continue; // ignore deleted annotations
 	    
@@ -986,7 +986,7 @@ public class Validator
          )
       {
          // for each parent
-         for (Annotation parent : graph.list(childLayer.getParentId()))
+         for (Annotation parent : graph.all(childLayer.getParentId()))
          { 
             if (parent.getChange() == Change.Operation.Destroy) continue; // ignore deleted annotations
 	    
@@ -1014,7 +1014,7 @@ public class Validator
       // check anchors
       
       // for each parent
-      for (Annotation parent : graph.list(childLayer.getParentId()))
+      for (Annotation parent : graph.all(childLayer.getParentId()))
       { 
          if (parent.getChange() == Change.Operation.Destroy) continue; // ignore deleted annotations
          // log("Parent: ", parent);

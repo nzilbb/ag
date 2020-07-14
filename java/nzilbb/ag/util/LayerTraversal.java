@@ -236,7 +236,7 @@ public class LayerTraversal<R>
     */
    protected void traverseLayer(Layer layer)
    {
-      for (Annotation annotation : graph.list(layer.getId()))
+      for (Annotation annotation : graph.all(layer.getId()))
       {
 	 // only visit a node once (even if the parent/child hierarchy is corrupt)
 	 if (!visited.contains(annotation))
@@ -249,7 +249,7 @@ public class LayerTraversal<R>
       {
 	 traverseLayer(childLayer);
       } // next child layer
-      for (Annotation annotation : graph.list(layer.getId()))
+      for (Annotation annotation : graph.all(layer.getId()))
       {
 	 // only visit a node once (even if the parent/child hierarchy is corrupt)
 	 if (!visited.contains(annotation))

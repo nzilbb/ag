@@ -405,7 +405,7 @@ public class Graph
          {
             if (layer.getId().equals(getSchema().getRoot().getId())) continue;
             fragment.addLayer((Layer)layer.clone());
-            for (Annotation annotation : list(layer.getId()))
+            for (Annotation annotation : all(layer.getId()))
             {
                Double min = annotation.getStart().getOffsetMin();
                Double max = annotation.getEnd().getOffsetMax();
@@ -494,8 +494,8 @@ public class Graph
          {
             fragment.addLayer((Layer)layer.clone());
             // TODO this could be more efficient by traversing definingAnnotation first
-            // TODO and then using definingAnnotation.list(layerId) for any remaining layers
-            for (Annotation annotation : definingAnnotation.list(layerId))
+            // TODO and then using definingAnnotation.all(layerId) for any remaining layers
+            for (Annotation annotation : definingAnnotation.all(layerId))
             {
                ensureAllAncestorsPresentInFragment(annotation, fragment);
                // add the anchors that fit
@@ -571,7 +571,7 @@ public class Graph
             if (layer != null)
             {
                fragment.addLayer((Layer)layer.clone());
-               for (Annotation annotation : list(layerId))
+               for (Annotation annotation : all(layerId))
                {
                   Double min = annotation.getStart().getOffsetMin();
                   Double max = annotation.getEnd().getOffsetMax();
@@ -1079,7 +1079,7 @@ public class Graph
     */
    public String[] labels(String layerId)
    {
-      Annotation[] annotations = list(layerId);
+      Annotation[] annotations = all(layerId);
       String[] labels = new String[annotations.length];
       int i = 0;
       for (Annotation annotation : annotations)
@@ -1187,7 +1187,7 @@ public class Graph
    public Annotation createSpan(Annotation from, Annotation to, String layerId, String label)
    {
       Layer spanLayer = getLayer(layerId);
-      Annotation parent = null; // TODO can't we just use from.my(spanLayer.getParentId()) || to.my(spanLayer.getParentId()); ??
+      Annotation parent = null; // TODO can't we just use from.first(spanLayer.getParentId()) || to.first(spanLayer.getParentId()); ??
       if (spanLayer.getParentId().equals(from.getLayer().getParentId()))
       { // "from" layer and span layer share a parent
          parent = from.getParent();
@@ -1315,7 +1315,7 @@ public class Graph
    public Annotation[] overlappingAnnotations(double start, double end, String layerId)
    {
       Vector<Annotation> matches = new Vector<Annotation>();
-      for (Annotation annotation : list(layerId))
+      for (Annotation annotation : all(layerId))
       {
          if (annotation.getAnchored()
              && annotation.getEnd().getOffset() > start
@@ -1478,32 +1478,32 @@ public class Graph
     * <p>This utility method makes navigating the layer hierarchy easier and with less prior
     * knowledge of it. e.g.:
     * <ul>
-    *  <li><code>word.my("turn")</code> for the (parent) turn</li>
-    *  <li><code>phone.my("turn")</code> for the (grandparent) turn</li>
-    *  <li><code>word.my("POS")</code> for the (first) part of speech annotation</li>
-    *  <li><code>phone.my("POS")</code> for the (first) part of speech annotation, which
+    *  <li><code>word.first("turn")</code> for the (parent) turn</li>
+    *  <li><code>phone.first("turn")</code> for the (grandparent) turn</li>
+    *  <li><code>word.first("POS")</code> for the (first) part of speech annotation</li>
+    *  <li><code>phone.first("POS")</code> for the (first) part of speech annotation, which
     *    is neither an ancestor nor descendant, but rather is a child of an ancestor
-    *    (<code>phone.my("word")</code>)</li> 
-    *  <li><code>word.my("who")</code> for the speaker</li>
-    *  <li><code>word.my("graph")</code> for the graph</li>
-    *  <li><code>word.my("utterance")</code> for the utterance, which is neither an
+    *    (<code>phone.first("word")</code>)</li> 
+    *  <li><code>word.first("who")</code> for the speaker</li>
+    *  <li><code>word.first("graph")</code> for the graph</li>
+    *  <li><code>word.first("utterance")</code> for the utterance, which is neither an
     *    ancestor nor descendant, but rather is a child of an ancestor
-    *    (<code>word.my("turn")</code>)</li> 
-    *  <li><code>word.my("corpus")</code> for the graph's corpus, which is neither an
+    *    (<code>word.first("turn")</code>)</li> 
+    *  <li><code>word.first("corpus")</code> for the graph's corpus, which is neither an
     *    ancestor nor descendant, but rather is a child of an ancestor
-    *    (<code>word.my("graph")</code>)</li> 
+    *    (<code>word.first("graph")</code>)</li> 
     * </ul>
     * <p>{@link #setGraph(Graph)} must have been previously called, and the graph must
     * have a correct layer hierarchy for this method to work correctly. 
-    * <p>This override of {@link Annotation#my(String)} ensures that even orphaned annotations 
+    * <p>This override of {@link Annotation#first(String)} ensures that even orphaned annotations 
     * on the given layer are returned.
     * @param layerId The layer of the desired annotation.
     * @return The related annotation (or the first one if there are many), or null if none
     * could be found on the given layer. 
     */
-   public Annotation my(final String layerId)
+   public Annotation first(final String layerId)
    {
-      Annotation my = super.my(layerId);
+      Annotation my = super.first(layerId);
       if (my == null && orphans.containsKey(layerId))
       {
          Iterator<Annotation> orphansOnLayer = orphans.get(layerId).iterator();
@@ -1523,6 +1523,7 @@ public class Graph
       }
       return my;
    }
+   
    /**
     * Gets a list of related annotations on the given layer.
     * <p>"Related" means that <var>layerId</var> identifies the parent layer, an ancestor layer,
@@ -1530,36 +1531,36 @@ public class Graph
     * <p>This utility method makes navigating the layer hierarchy easier and with less prior
     * knowledge of it. e.g.:
     * <ul>
-    *  <li><code>word.list("turn")[0]</code> for the (parent) turn</li>
-    *  <li><code>phone.list("turn")[0]</code> for the (grandparent) turn</li>
-    *  <li><code>word.list("POS")</code> for all (child) part of speech annotations</li>
-    *  <li><code>word.list("phone")</code> for all (child) phones in a word</li>
-    *  <li><code>turn.list("phone")</code> for all (grandchild) phones in a turn</li>
-    *  <li><code>phone.list("POS")</code> for the all (peer) part of speech annotation,
+    *  <li><code>word.all("turn")[0]</code> for the (parent) turn</li>
+    *  <li><code>phone.all("turn")[0]</code> for the (grandparent) turn</li>
+    *  <li><code>word.all("POS")</code> for all (child) part of speech annotations</li>
+    *  <li><code>word.all("phone")</code> for all (child) phones in a word</li>
+    *  <li><code>turn.all("phone")</code> for all (grandchild) phones in a turn</li>
+    *  <li><code>phone.all("POS")</code> for the all (peer) part of speech annotation,
     *   which are neither ancestors nor descendants, but rather children of an ancestor
-    *   (<code>phone.my("word")</code>)</li> 
-    *  <li><code>word.list("who")[0]</code> for the (grandparent) speaker</li>
-    *  <li><code>word.list("graph")[0]</code> for the (great-grandparent) graph</li>
-    *  <li><code>word.list("utterance")[0]</code> for the (peer) utterance, which is
+    *   (<code>phone.first("word")</code>)</li> 
+    *  <li><code>word.all("who")[0]</code> for the (grandparent) speaker</li>
+    *  <li><code>word.all("graph")[0]</code> for the (great-grandparent) graph</li>
+    *  <li><code>word.all("utterance")[0]</code> for the (peer) utterance, which is
     *   neither an ancestor nor descendant, but rather is a child of an ancestor
     *   (<code>word.my"turn")</code>)</li> 
-    *  <li><code>utterace.list("word")</code> for the utterance's (peer) words, which are
+    *  <li><code>utterace.all("word")</code> for the utterance's (peer) words, which are
     *   neither an ancestors nor descendants, but rather are children of an ancestor
     *   (<code>utterance.my"turn")</code>)</li> 
-    *  <li><code>word.list("corpus")[0]</code> for the graph's (child of grandparent)
+    *  <li><code>word.all("corpus")[0]</code> for the graph's (child of grandparent)
     *   corpus, which is neither an ancestor nor descendant, but rather is a child of an
-    *   ancestor (<code>word.my("graph")</code>)</li> 
+    *   ancestor (<code>word.first("graph")</code>)</li> 
     * </ul>
     * <p>{@link #setGraph(Graph)} must have been previously called, and the graph must have a
     * correct layer hierarchy for this method to work correctly.
-    * <p>This override of {@link Annotation#list(String)} ensures that even orphaned annotations 
+    * <p>This override of {@link Annotation#all(String)} ensures that even orphaned annotations 
     * on the given layer are returned.
     * @param layerId The layer of the desired annotations.
     * @return The related annotations, or an empty array if none could be found on the given layer.
     */
-   public Annotation[] list(final String layerId)
+   public Annotation[] all(final String layerId)
    {
-      Annotation[] annotations = super.list(layerId);
+      Annotation[] annotations = super.all(layerId);
       if (orphans.containsKey(layerId))
       {
          Vector<Annotation> orphansToAdd = new Vector<Annotation>();
@@ -1612,7 +1613,7 @@ public class Graph
          // System.out.println("Build index for " + layerId);
          HashMap<Integer,Set<Annotation>> index = new HashMap<Integer,Set<Annotation>>();
          indicesByLayer.put(layerId, index);
-         for (Annotation a : list(layerId))
+         for (Annotation a : all(layerId))
          {
             if (a.getAnchored())
             {

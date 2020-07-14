@@ -640,13 +640,13 @@ public class PdfSerializer
 
          boolean transcriptHeading = false;
          
-         Annotation[] participants = graph.list(participantLayer.getId());
+         Annotation[] participants = graph.all(participantLayer.getId());
          if (participants.length > 1)
          {
-            for (Annotation participant : graph.list(participantLayer.getId()))
+            for (Annotation participant : graph.all(participantLayer.getId()))
             {
                boolean highlight = mainParticipantLayer != null
-                  && participant.my(mainParticipantLayer.getId()) != null;
+                  && participant.first(mainParticipantLayer.getId()) != null;
                p = new Paragraph(
                   "Participant: " + participant.getLabel(),
                   FontFactory.getFont(
@@ -692,13 +692,13 @@ public class PdfSerializer
          // order utterances by anchor so that simultaneous speech comes out in utterance order
          TreeSet<Annotation> utterancesByAnchor
             = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
-         for (Annotation u : graph.list(utteranceLayer.getId())) utterancesByAnchor.add(u);
+         for (Annotation u : graph.all(utteranceLayer.getId())) utterancesByAnchor.add(u);
          TreeSet<Annotation> noisesByAnchor
             = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
          if (noiseLayer != null)
          {
             // list all anchored noises
-            for (Annotation n : graph.list(noiseLayer.getId())) if (n.getAnchored()) noisesByAnchor.add(n);
+            for (Annotation n : graph.all(noiseLayer.getId())) if (n.getAnchored()) noisesByAnchor.add(n);
          }
          Iterator<Annotation> noises = noisesByAnchor.iterator();
          Annotation nextNoise = noises.hasNext()?noises.next():null;
@@ -709,7 +709,7 @@ public class PdfSerializer
             Paragraph pSpeaker = null;
             
             // is the participant changing?
-            Annotation participant = utterance.my(getParticipantLayer().getId());
+            Annotation participant = utterance.first(getParticipantLayer().getId());
             if (participant != currentParticipant)
             { // participant change
                pSpeaker = new Paragraph(
@@ -724,7 +724,7 @@ public class PdfSerializer
             p.setSpacingBefore(7);
             Chunk line = new Chunk();
             boolean bEmpty = true;
-            for (Annotation token : utterance.list(getWordLayer().getId()))
+            for (Annotation token : utterance.all(getWordLayer().getId()))
             {
 	       // space precedes all but the first word
                if (bEmpty) bEmpty = false; else line.append(" ");
@@ -746,7 +746,7 @@ public class PdfSerializer
                Annotation orthography = token;
                if (orthographyLayer != null && selectedLayers.contains(orthographyLayer.getId()))
                {
-                  orthography = token.my(orthographyLayer.getId());
+                  orthography = token.first(orthographyLayer.getId());
                   if (orthography == null) orthography = token;
                }
                else if (!selectedLayers.contains(getWordLayer().getId()))
@@ -754,7 +754,7 @@ public class PdfSerializer
                   // pick the first tag layer
                   if (firstTagLayerId != null)
                   {
-                     orthography = token.my(firstTagLayerId);
+                     orthography = token.first(firstTagLayerId);
                   }
                }
                if (orthography != null) line.append(orthography.getLabel());
@@ -767,7 +767,7 @@ public class PdfSerializer
                       && !layerId.equals(orthography.getLayerId())) 
                   {
                      line.append("_");
-                     Annotation tag = token.my(layerId);
+                     Annotation tag = token.first(layerId);
                      if (tag != null)
                      {
                         line.append(tag.getLabel());

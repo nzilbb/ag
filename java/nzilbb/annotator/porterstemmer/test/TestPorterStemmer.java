@@ -40,21 +40,10 @@ import nzilbb.annotator.porterstemmer.PorterStemmer;
 public class TestPorterStemmer {
    
    @Test public void transform() throws Exception {
-      
+
+      Graph g = graph();
+      Schema schema = g.getSchema();
       PorterStemmer annotator = new PorterStemmer();
-      Schema schema = new Schema(
-            "who", "turn", "utterance", "word",
-            new Layer("participant", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
-            .setPeers(true).setPeersOverlap(true).setSaturated(true),
-            new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
-            .setPeers(true).setPeersOverlap(false).setSaturated(false)
-            .setParentId("participant").setParentIncludes(true),
-            new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
-            .setPeers(true).setPeersOverlap(false).setSaturated(true)
-            .setParentId("turn").setParentIncludes(true),
-            new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
-            .setPeers(true).setPeersOverlap(false).setSaturated(false)
-            .setParentId("turn").setParentIncludes(true));
       annotator.setSchema(schema);
       
       // stem to a new layer
@@ -67,7 +56,7 @@ public class TestPorterStemmer {
       assertNotNull("stem layer was created",
                     schema.getLayer(annotator.getStemLayerId()));
       assertEquals("stem layer child of word",
-                    "word", schema.getLayer(annotator.getStemLayerId()).getParentId());
+                   "word", schema.getLayer(annotator.getStemLayerId()).getParentId());
       assertEquals("stem layer no aligned",
                    Constants.ALIGNMENT_NONE,
                    schema.getLayer(annotator.getStemLayerId()).getAlignment());
@@ -81,54 +70,16 @@ public class TestPorterStemmer {
                    1, layers.length);
       assertEquals("output layer correct "+Arrays.asList(layers),
                    "porterstem", layers[0]);
-
-      // annotate a graph
-      Graph g = new Graph()
-         .setSchema(schema);
-      Anchor start = g.getOrCreateAnchorAt(1);
-      Anchor end = g.getOrCreateAnchorAt(100);
-      g.addAnnotation(
-         new Annotation().setLayerId("participant").setLabel("someone")
-         .setStart(start).setEnd(end));
-      Annotation turn = g.addAnnotation(
-         new Annotation().setLayerId("turn").setLabel("someone")
-         .setStart(start).setEnd(end)
-         .setParent(g.my("participant")));
-      g.addAnnotation(
-         new Annotation().setLayerId("utterance").setLabel("someone")
-         .setStart(start).setEnd(end)
-         .setParent(turn));
       
-      Annotation firstWord
-         = g.addAnnotation(new Annotation().setLayerId("word").setLabel("I")
-                           .setStart(g.getOrCreateAnchorAt(10)).setEnd(g.getOrCreateAnchorAt(20))
-                           .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("sang")
-                      .setStart(g.getOrCreateAnchorAt(20)).setEnd(g.getOrCreateAnchorAt(30))
-                      .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("and")
-                      .setStart(g.getOrCreateAnchorAt(30)).setEnd(g.getOrCreateAnchorAt(40))
-                      .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("walked")
-                      .setStart(g.getOrCreateAnchorAt(40)).setEnd(g.getOrCreateAnchorAt(50))
-                      .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("about")
-                      .setStart(g.getOrCreateAnchorAt(50)).setEnd(g.getOrCreateAnchorAt(60))
-                      .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("my")
-                      .setStart(g.getOrCreateAnchorAt(60)).setEnd(g.getOrCreateAnchorAt(70))
-                      .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("blogging-posting")
-                      .setStart(g.getOrCreateAnchorAt(70)).setEnd(g.getOrCreateAnchorAt(80))
-                      .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("lazily")
-                      .setStart(g.getOrCreateAnchorAt(80)).setEnd(g.getOrCreateAnchorAt(90))
-                      .setParent(turn));
+      Annotation firstWord = g.my("word");
+      assertEquals("double check the first word is what we think it is: "+firstWord,
+                   "I", firstWord.getLabel());
       
       assertEquals("double check there are tokens: "+Arrays.asList(g.list("word")),
                    8, g.list("word").length);
       assertEquals("double check there are no stems: "+Arrays.asList(g.list("porterstem")),
                    0, g.list("porterstem").length);
+   
       // run the annotator
       annotator.transform(g);
       List<String> stemLabels = Arrays.stream(g.list("porterstem"))
@@ -152,7 +103,7 @@ public class TestPorterStemmer {
       // add a word
       g.addAnnotation(new Annotation().setLayerId("word").setLabel("new")
                       .setStart(g.getOrCreateAnchorAt(90)).setEnd(g.getOrCreateAnchorAt(100))
-                      .setParent(turn));
+                      .setParent(g.my("turn")));
 
       // change a word
       firstWord.setLabel("we");
@@ -180,20 +131,9 @@ public class TestPorterStemmer {
 
    @Test public void defaultParameters() throws Exception {
       
+      Graph g = graph();
+      Schema schema = g.getSchema();
       PorterStemmer annotator = new PorterStemmer();
-      Schema schema = new Schema(
-            "who", "turn", "utterance", "word",
-            new Layer("participant", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
-            .setPeers(true).setPeersOverlap(true).setSaturated(true),
-            new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
-            .setPeers(true).setPeersOverlap(false).setSaturated(false)
-            .setParentId("participant").setParentIncludes(true),
-            new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
-            .setPeers(true).setPeersOverlap(false).setSaturated(true)
-            .setParentId("turn").setParentIncludes(true),
-            new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
-            .setPeers(true).setPeersOverlap(false).setSaturated(false)
-            .setParentId("turn").setParentIncludes(true));
       annotator.setSchema(schema);
       
       // use default configuration
@@ -221,48 +161,9 @@ public class TestPorterStemmer {
       assertEquals("output layer correct "+Arrays.asList(layers),
                    "stem", layers[0]);
 
-      // annotate a graph
-      Graph g = new Graph()
-         .setSchema(schema);
-      Anchor start = g.getOrCreateAnchorAt(1);
-      Anchor end = g.getOrCreateAnchorAt(100);
-      g.addAnnotation(
-         new Annotation().setLayerId("participant").setLabel("someone")
-         .setStart(start).setEnd(end));
-      Annotation turn = g.addAnnotation(
-         new Annotation().setLayerId("turn").setLabel("someone")
-         .setStart(start).setEnd(end)
-         .setParent(g.my("participant")));
-      g.addAnnotation(
-         new Annotation().setLayerId("utterance").setLabel("someone")
-         .setStart(start).setEnd(end)
-         .setParent(turn));
-      
-      Annotation firstWord
-         = g.addAnnotation(new Annotation().setLayerId("word").setLabel("I")
-                           .setStart(g.getOrCreateAnchorAt(10)).setEnd(g.getOrCreateAnchorAt(20))
-                           .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("sang")
-                      .setStart(g.getOrCreateAnchorAt(20)).setEnd(g.getOrCreateAnchorAt(30))
-                      .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("and")
-                      .setStart(g.getOrCreateAnchorAt(30)).setEnd(g.getOrCreateAnchorAt(40))
-                      .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("walked")
-                      .setStart(g.getOrCreateAnchorAt(40)).setEnd(g.getOrCreateAnchorAt(50))
-                      .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("about")
-                      .setStart(g.getOrCreateAnchorAt(50)).setEnd(g.getOrCreateAnchorAt(60))
-                      .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("my")
-                      .setStart(g.getOrCreateAnchorAt(60)).setEnd(g.getOrCreateAnchorAt(70))
-                      .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("blogging-posting")
-                      .setStart(g.getOrCreateAnchorAt(70)).setEnd(g.getOrCreateAnchorAt(80))
-                      .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("lazily")
-                      .setStart(g.getOrCreateAnchorAt(80)).setEnd(g.getOrCreateAnchorAt(90))
-                      .setParent(turn));
+      Annotation firstWord = g.my("word");
+      assertEquals("double check the first word is what we think it is: "+firstWord,
+                   "I", firstWord.getLabel());
       
       assertEquals("double check there are tokens: "+Arrays.asList(g.list("word")),
                    8, g.list("word").length);
@@ -291,7 +192,7 @@ public class TestPorterStemmer {
       // add a word
       g.addAnnotation(new Annotation().setLayerId("word").setLabel("new")
                       .setStart(g.getOrCreateAnchorAt(90)).setEnd(g.getOrCreateAnchorAt(100))
-                      .setParent(turn));
+                      .setParent(g.my("turn")));
 
       // change a word
       firstWord.setLabel("we");
@@ -316,6 +217,70 @@ public class TestPorterStemmer {
                    "new", stems.next());
 
    }
+
+   
+   /**
+    * Returns a graph for annotating.
+    * @return The graph for testing with.
+    */
+   public Graph graph() {
+      Schema schema = new Schema(
+         "who", "turn", "utterance", "word",
+         new Layer("participant", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(true).setPeersOverlap(true).setSaturated(true),
+         new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false)
+         .setParentId("participant").setParentIncludes(true),
+         new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(true)
+         .setParentId("turn").setParentIncludes(true),
+         new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false)
+         .setParentId("turn").setParentIncludes(true));
+      // annotate a graph
+      Graph g = new Graph()
+         .setSchema(schema);
+      Anchor start = g.getOrCreateAnchorAt(1);
+      Anchor end = g.getOrCreateAnchorAt(100);
+      g.addAnnotation(
+         new Annotation().setLayerId("participant").setLabel("someone")
+         .setStart(start).setEnd(end));
+      Annotation turn = g.addAnnotation(
+         new Annotation().setLayerId("turn").setLabel("someone")
+         .setStart(start).setEnd(end)
+         .setParent(g.my("participant")));
+      g.addAnnotation(
+         new Annotation().setLayerId("utterance").setLabel("someone")
+         .setStart(start).setEnd(end)
+         .setParent(turn));
+      
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("I")
+                           .setStart(g.getOrCreateAnchorAt(10)).setEnd(g.getOrCreateAnchorAt(20))
+                           .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("sang")
+                      .setStart(g.getOrCreateAnchorAt(20)).setEnd(g.getOrCreateAnchorAt(30))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("and")
+                      .setStart(g.getOrCreateAnchorAt(30)).setEnd(g.getOrCreateAnchorAt(40))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("walked")
+                      .setStart(g.getOrCreateAnchorAt(40)).setEnd(g.getOrCreateAnchorAt(50))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("about")
+                      .setStart(g.getOrCreateAnchorAt(50)).setEnd(g.getOrCreateAnchorAt(60))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("my")
+                      .setStart(g.getOrCreateAnchorAt(60)).setEnd(g.getOrCreateAnchorAt(70))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("blogging-posting")
+                      .setStart(g.getOrCreateAnchorAt(70)).setEnd(g.getOrCreateAnchorAt(80))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("lazily")
+                      .setStart(g.getOrCreateAnchorAt(80)).setEnd(g.getOrCreateAnchorAt(90))
+                      .setParent(turn));
+      return g;
+   } // end of graph()
+   
 
    public static void main(String args[]) {
       org.junit.runner.JUnitCore.main("nzilbb.annotator.porterstemmer.test.TestPorterStemmer");

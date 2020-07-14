@@ -678,17 +678,17 @@ public class BundleSerialization
                   layer.put("@hasItems", Boolean.TRUE);
             
                   // for each parent layer annotation
-                  for (Annotation parent : graph.list(layer.getId()))
+                  for (Annotation parent : graph.all(layer.getId()))
                   {
                      // if it has no children
-                     if (parent.list(alignedPeer.get().getId()).length == 0)
+                     if (parent.all(alignedPeer.get().getId()).length == 0)
                      {
                         // create a dummy child so that there are no aligned items
                         graph.addTag(parent, layer.getId(), "?")
                            .setConfidence(Constants.CONFIDENCE_NONE);
                      }
                      // create links
-                     for (Annotation child : parent.list(alignedPeer.get().getId()))
+                     for (Annotation child : parent.all(alignedPeer.get().getId()))
                      {
                         child.put("@link", parent);
                      }
@@ -701,7 +701,7 @@ public class BundleSerialization
                   layer.getParent().put("@hasItems", Boolean.TRUE);
             
                   // for each parent layer annotation
-                  for (Annotation parent : graph.list(layer.getParentId()))
+                  for (Annotation parent : graph.all(layer.getParentId()))
                   {
                      // if it has no childrent
                      if (parent.getAnnotations(layer.getId()).size() == 0)
@@ -1530,7 +1530,7 @@ public class BundleSerialization
             }.getResult();
          for (Layer layer : layersBottomUp)
          {
-            for (Annotation annotation : graph.list(layer.getId()))
+            for (Annotation annotation : graph.all(layer.getId()))
             {
                if (!annotation.getAnchored()) continue;
               

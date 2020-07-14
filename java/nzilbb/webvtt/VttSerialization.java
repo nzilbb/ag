@@ -664,9 +664,9 @@ public class VttSerialization
 	 // so use a default speaker
 	 graph.addAnnotation(new Annotation(null, "speaker", schema.getParticipantLayerId()));
       }
-      String currentSpeaker = graph.my(schema.getParticipantLayerId()).getLabel();
+      String currentSpeaker = graph.first(schema.getParticipantLayerId()).getLabel();
       Annotation currentTurn = new Annotation(
-	 null, graph.my(schema.getParticipantLayerId()).getLabel(), schema.getTurnLayerId(), graphStart.getId(), graphStart.getId(), graph.my(schema.getParticipantLayerId()).getId());
+	 null, graph.first(schema.getParticipantLayerId()).getLabel(), schema.getTurnLayerId(), graphStart.getId(), graphStart.getId(), graph.first(schema.getParticipantLayerId()).getId());
       graph.addAnnotation(currentTurn);
       Annotation currentUtterance = new Annotation(
 	 null, "", schema.getUtteranceLayerId(), graphStart.getId(), graphStart.getId(), currentTurn.getId());
@@ -779,7 +779,7 @@ public class VttSerialization
 	    }
 
             // utterance annotations are speaker labels then
-            for (Annotation utterance : graph.list(utteranceLayer.getId()))
+            for (Annotation utterance : graph.all(utteranceLayer.getId()))
             {
                utterance.setLabel(utterance.getParent().getLabel());
             } // next turn
@@ -794,7 +794,7 @@ public class VttSerialization
       }
 
       // set end anchors of graph tags
-      for (Annotation a : graph.list(getParticipantLayer().getId()))
+      for (Annotation a : graph.all(getParticipantLayer().getId()))
       {
 	 a.setStartId(graphStart.getId());
 	 a.setEndId(currentUtterance.getEnd().getId());
@@ -900,7 +900,7 @@ public class VttSerialization
 
          // number each participant
          int s = 0;
-         for (Annotation participant : graph.list(participantLayer.getId()))
+         for (Annotation participant : graph.all(participantLayer.getId()))
          {
             participant.put("@serial", Integer.valueOf(s++));
          } // next participant
@@ -908,7 +908,7 @@ public class VttSerialization
          // order utterances by anchor so that simultaneous speech comes out in utterance order
          TreeSet<Annotation> utterancesByAnchor
             = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
-         for (Annotation u : graph.list(getUtteranceLayer().getId())) utterancesByAnchor.add(u);
+         for (Annotation u : graph.all(getUtteranceLayer().getId())) utterancesByAnchor.add(u);
          
          int iSubtitle = 0;
          for (Annotation utterance : utterancesByAnchor)
@@ -920,11 +920,11 @@ public class VttSerialization
                            + VttTime(utterance.getEnd().getOffset()));
 
             // is the participant changing?
-            Annotation participant = utterance.my(participantLayer.getId());
+            Annotation participant = utterance.first(participantLayer.getId());
 	    writer.print("<v " + participant.get("@serial") + ">");
 
             boolean firstWord = true;
-            for (Annotation token : utterance.list(getWordLayer().getId()))
+            for (Annotation token : utterance.all(getWordLayer().getId()))
             {
                if (firstWord)
                {

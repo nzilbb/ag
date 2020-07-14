@@ -308,7 +308,7 @@ public class CsvSerializer
                   for (Layer targetLayer : temporalLayers)
                   {
                      // there's one CSV row per annotation
-                     for (Annotation annotation : graph.list(targetLayer.getId()))
+                     for (Annotation annotation : graph.all(targetLayer.getId()))
                      {
                         // graph ID
                         csv.print(graph.getId());
@@ -322,7 +322,7 @@ public class CsvSerializer
                                  // multiple values are represented with multiple lines in the cell
                                  String.join("\n",
                                              // stream all annotations on the attribute layer
-                                             Arrays.stream(annotation.list(attributeLayer.getId()))
+                                             Arrays.stream(annotation.all(attributeLayer.getId()))
                                              // convert to a stream of labels
                                              .map(a -> a.getLabel())
                                              // and convert the stream to an array

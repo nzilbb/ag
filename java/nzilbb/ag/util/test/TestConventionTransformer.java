@@ -96,12 +96,12 @@ public class TestConventionTransformer
       assertEquals("jumps", g.getAnnotation("word5").getLabel());
       assertEquals("over", g.getAnnotation("word6").getLabel());
 
-      assertNull(g.getAnnotation("word1").my("disfluency"));
-      assertEquals("DIS", g.getAnnotation("word2").my("disfluency").getLabel());
-      assertNull(g.getAnnotation("word3").my("disfluency"));
-      assertNull(g.getAnnotation("word4").my("disfluency"));
-      assertNull(g.getAnnotation("word5").my("disfluency"));
-      assertNull(g.getAnnotation("word6").my("disfluency"));
+      assertNull(g.getAnnotation("word1").first("disfluency"));
+      assertEquals("DIS", g.getAnnotation("word2").first("disfluency").getLabel());
+      assertNull(g.getAnnotation("word3").first("disfluency"));
+      assertNull(g.getAnnotation("word4").first("disfluency"));
+      assertNull(g.getAnnotation("word5").first("disfluency"));
+      assertNull(g.getAnnotation("word6").first("disfluency"));
 
     }
     catch(TransformationException exception)
@@ -172,12 +172,12 @@ public class TestConventionTransformer
       assertEquals("jumps", g.getAnnotation("word5").getLabel());
       assertEquals("over", g.getAnnotation("word6").getLabel());
 
-      assertEquals("DT", g.getAnnotation("word1").my("pos").getLabel());
-      assertEquals("A", g.getAnnotation("word2").my("pos").getLabel());
-      assertEquals("A", g.getAnnotation("word3").my("pos").getLabel());
-      assertEquals("N", g.getAnnotation("word4").my("pos").getLabel());
-      assertEquals("V", g.getAnnotation("word5").my("pos").getLabel());
-      assertNull(g.getAnnotation("word6").my("pos"));
+      assertEquals("DT", g.getAnnotation("word1").first("pos").getLabel());
+      assertEquals("A", g.getAnnotation("word2").first("pos").getLabel());
+      assertEquals("A", g.getAnnotation("word3").first("pos").getLabel());
+      assertEquals("N", g.getAnnotation("word4").first("pos").getLabel());
+      assertEquals("V", g.getAnnotation("word5").first("pos").getLabel());
+      assertNull(g.getAnnotation("word6").first("pos"));
 
     }
     catch(TransformationException exception)
@@ -335,31 +335,31 @@ public class TestConventionTransformer
       // ensure the order of the conventions doesn't matter
 
       Annotation token = g.getAnnotation("word2");
-      assertNotNull("pron-before-lex: pron", token.my("pron"));
-      assertEquals("pron-before-lex: pron label", "kwik", token.my("pron").getLabel());
-      assertNotNull("pron-before-lex: lex", token.my("lex"));
-      assertEquals("pron-before-lex: lex label", "quick", token.my("lex").getLabel());
+      assertNotNull("pron-before-lex: pron", token.first("pron"));
+      assertEquals("pron-before-lex: pron label", "kwik", token.first("pron").getLabel());
+      assertNotNull("pron-before-lex: lex", token.first("lex"));
+      assertEquals("pron-before-lex: lex label", "quick", token.first("lex").getLabel());
       assertEquals("pron-before-lex: token label", "qweek", token.getLabel());
 
       token = g.getAnnotation("word3");
-      assertNotNull("lex-before-pron: pron", token.my("pron"));
-      assertEquals("lex-before-pron: pron label", "kwik", token.my("pron").getLabel());
-      assertNotNull("lex-before-pron: lex", token.my("lex"));
-      assertEquals("lex-before-pron: lex label", "quick", token.my("lex").getLabel());
+      assertNotNull("lex-before-pron: pron", token.first("pron"));
+      assertEquals("lex-before-pron: pron label", "kwik", token.first("pron").getLabel());
+      assertNotNull("lex-before-pron: lex", token.first("lex"));
+      assertEquals("lex-before-pron: lex label", "quick", token.first("lex").getLabel());
       assertEquals("pron-before-lex: token label", "qweek", token.getLabel());
 
       token = g.getAnnotation("word4");
-      assertNotNull("~ pron-before-lex: pron", token.my("pron"));
-      assertEquals("~ pron-before-lex: pron label", "kw@", token.my("pron").getLabel());
-      assertNotNull("~ pron-before-lex: lex", token.my("lex"));
-      assertEquals("~ pron-before-lex: lex label", "quick", token.my("lex").getLabel());
+      assertNotNull("~ pron-before-lex: pron", token.first("pron"));
+      assertEquals("~ pron-before-lex: pron label", "kw@", token.first("pron").getLabel());
+      assertNotNull("~ pron-before-lex: lex", token.first("lex"));
+      assertEquals("~ pron-before-lex: lex label", "quick", token.first("lex").getLabel());
       assertEquals("pron-before-lex: token label", "qu~", token.getLabel());
 
       token = g.getAnnotation("word5");
-      assertNotNull("~ lex-before-pron: pron", token.my("pron"));
-      assertEquals("~ lex-before-pron: pron label", "kw@", token.my("pron").getLabel());
-      assertNotNull("~ lex-before-pron: lex", token.my("lex"));
-      assertEquals("~ lex-before-pron: lex label", "quick", token.my("lex").getLabel());
+      assertNotNull("~ lex-before-pron: pron", token.first("pron"));
+      assertEquals("~ lex-before-pron: pron label", "kw@", token.first("pron").getLabel());
+      assertNotNull("~ lex-before-pron: lex", token.first("lex"));
+      assertEquals("~ lex-before-pron: lex label", "quick", token.first("lex").getLabel());
       assertEquals("pron-before-lex: token label", "qu~", token.getLabel());
 
     }
@@ -448,31 +448,31 @@ public class TestConventionTransformer
       // ensure the order of the conventions doesn't matter
 
       Annotation token = g.getAnnotation("word2");
-      assertNotNull("pron-before-lex: pron", token.my("pron"));
-      assertEquals("pron-before-lex: pron label", "kwik", token.my("pron").getLabel());
-      assertNotNull("pron-before-lex: lex", token.my("lex"));
-      assertEquals("pron-before-lex: lex label", "quick", token.my("lex").getLabel());
+      assertNotNull("pron-before-lex: pron", token.first("pron"));
+      assertEquals("pron-before-lex: pron label", "kwik", token.first("pron").getLabel());
+      assertNotNull("pron-before-lex: lex", token.first("lex"));
+      assertEquals("pron-before-lex: lex label", "quick", token.first("lex").getLabel());
       assertEquals("pron-before-lex: token label", "qweek", token.getLabel());
 
       token = g.getAnnotation("word3");
-      assertNotNull("lex-before-pron: pron", token.my("pron"));
-      assertEquals("lex-before-pron: pron label", "kwik", token.my("pron").getLabel());
-      assertNotNull("lex-before-pron: lex", token.my("lex"));
-      assertEquals("lex-before-pron: lex label", "quick", token.my("lex").getLabel());
+      assertNotNull("lex-before-pron: pron", token.first("pron"));
+      assertEquals("lex-before-pron: pron label", "kwik", token.first("pron").getLabel());
+      assertNotNull("lex-before-pron: lex", token.first("lex"));
+      assertEquals("lex-before-pron: lex label", "quick", token.first("lex").getLabel());
       assertEquals("pron-before-lex: token label", "qweek", token.getLabel());
 
       token = g.getAnnotation("word4");
-      assertNotNull("~ pron-before-lex: pron", token.my("pron"));
-      assertEquals("~ pron-before-lex: pron label", "kw@", token.my("pron").getLabel());
-      assertNotNull("~ pron-before-lex: lex", token.my("lex"));
-      assertEquals("~ pron-before-lex: lex label", "quick", token.my("lex").getLabel());
+      assertNotNull("~ pron-before-lex: pron", token.first("pron"));
+      assertEquals("~ pron-before-lex: pron label", "kw@", token.first("pron").getLabel());
+      assertNotNull("~ pron-before-lex: lex", token.first("lex"));
+      assertEquals("~ pron-before-lex: lex label", "quick", token.first("lex").getLabel());
       assertEquals("pron-before-lex: token label", "qu~", token.getLabel());
 
       token = g.getAnnotation("word5");
-      assertNotNull("~ lex-before-pron: pron", token.my("pron"));
-      assertEquals("~ lex-before-pron: pron label", "kw@", token.my("pron").getLabel());
-      assertNotNull("~ lex-before-pron: lex", token.my("lex"));
-      assertEquals("~ lex-before-pron: lex label", "quick", token.my("lex").getLabel());
+      assertNotNull("~ lex-before-pron: pron", token.first("pron"));
+      assertEquals("~ lex-before-pron: pron label", "kw@", token.first("pron").getLabel());
+      assertNotNull("~ lex-before-pron: lex", token.first("lex"));
+      assertEquals("~ lex-before-pron: lex label", "quick", token.first("lex").getLabel());
       assertEquals("pron-before-lex: token label", "qu~", token.getLabel());
 
     }
@@ -599,8 +599,8 @@ public class TestConventionTransformer
       assertEquals("one underscore", "Scarface_Claw", g.getAnnotation("word1").getLabel());
       assertEquals("two underscores", "B_B_C", g.getAnnotation("word6").getLabel());
 
-      assertEquals("Scarface Claw", g.getAnnotation("word1").my("acronym").getLabel());
-      assertEquals("two underscores TODO make this B B C", "B_B C", g.getAnnotation("word6").my("acronym").getLabel());
+      assertEquals("Scarface Claw", g.getAnnotation("word1").first("acronym").getLabel());
+      assertEquals("two underscores TODO make this B B C", "B_B C", g.getAnnotation("word6").first("acronym").getLabel());
 
     }
     catch(TransformationException exception)

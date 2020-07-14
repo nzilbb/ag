@@ -213,7 +213,7 @@ public class TestGraph
       assertNull(turn1.getNext());
 
       // graph's layer contains annotation
-      List<Annotation> words = Arrays.asList(g.list("word"));
+      List<Annotation> words = Arrays.asList(g.all("word"));
       assertTrue(words.contains(the));
       assertTrue(words.contains(quick));
       assertTrue(words.contains(brown));
@@ -221,14 +221,14 @@ public class TestGraph
       assertTrue("graph lists orphans", words.contains(orphan));
       assertTrue(words.size() == 5);
       // TODO graph 'contains' itself
-      // assertEquals(g.list("graph")[0], g);
-      // assertEquals(1, g.list("graph").length);
+      // assertEquals(g.all("graph")[0], g);
+      // assertEquals(1, g.all("graph").length);
       
-      List<Annotation> turns = Arrays.asList(g.list("turn"));
+      List<Annotation> turns = Arrays.asList(g.all("turn"));
       assertTrue(turns.contains(turn1));
 
       // array version for top level only
-      assertTrue(g.list("who")[0] == g.getAnnotations("who").first());
+      assertTrue(g.all("who")[0] == g.getAnnotations("who").first());
 
 
       // graph inherits from annotation, but some annotation behavrious are special
@@ -349,7 +349,7 @@ public class TestGraph
       assertEquals(the.getId(), posThe.getParentId());
       assertEquals(the, posThe.getParent());
       assertTrue(the.getAnnotations("pos").contains(posThe));
-      assertEquals(posThe, g.list("pos")[0]);
+      assertEquals(posThe, g.all("pos")[0]);
 
       // ID creation
       assertNotNull(posThe.getId());
@@ -781,12 +781,12 @@ public class TestGraph
       assertEquals("Ordinals ignore insertion order:", 4, fox.getOrdinal());
 
       // layer contains annotation
-      List<Annotation> words = Arrays.asList(g.list("word"));
+      List<Annotation> words = Arrays.asList(g.all("word"));
       assertTrue(words.contains(the));
       assertTrue(words.contains(quick));
       assertTrue(words.contains(brown));
       assertTrue(words.contains(fox));
-      List<Annotation> turns = Arrays.asList(g.list("turn"));
+      List<Annotation> turns = Arrays.asList(g.all("turn"));
       assertTrue(turns.contains(turn1));
 
       // parents are set
@@ -1203,7 +1203,7 @@ public class TestGraph
       assertFalse("excluded layer", f.getSchema().getLayers().containsKey("phrase"));
 
       // check hierarchy traversal
-      Annotation[] words = f.list("word");
+      Annotation[] words = f.all("word");
       assertEquals("list words", "word1", words[0].getId());
       assertEquals("list words", "word2", words[1].getId());
       assertEquals("list all and only words", 2, words.length);
@@ -1597,7 +1597,7 @@ public class TestGraph
       assertFalse("excluded layer", f.getSchema().getLayers().containsKey("phrase"));
       
       // check list
-      Annotation[] words = f.list("word");
+      Annotation[] words = f.all("word");
       assertEquals(2, words.length);
 
       // check media provider handling
@@ -1952,48 +1952,48 @@ public class TestGraph
       g.addAnnotation(yes);
 
       assertEquals("layerId: graph", "graph", g.getLayerId());
-      assertEquals("my: graph", g, g.my("graph"));
+      assertEquals("my: graph", g, g.first("graph"));
 
-      assertEquals("my: parent", turn1, the.my("turn"));
-      assertEquals("my: ancestor", who1, the.my("who"));
-      assertEquals("my: graph", g, the.my("graph"));
-      assertEquals("my: child", th, the.my("phone"));
-      assertNull("my: none", fox.my("phone"));
+      assertEquals("my: parent", turn1, the.first("turn"));
+      assertEquals("my: ancestor", who1, the.first("who"));
+      assertEquals("my: graph", g, the.first("graph"));
+      assertEquals("my: child", th, the.first("phone"));
+      assertNull("my: none", fox.first("phone"));
 
-      assertEquals("my: parent - other speaker", turn2, yes.my("turn"));
-      assertEquals("my: ancestor - other speaker", who2, yes.my("who"));
-      assertEquals("my: graph - other speaker", g, yes.my("graph"));
-      assertEquals("my: child - other speaker", yes, turn2.my("word"));
-      assertNull("my: none - other speaker", yes.my("pos"));
+      assertEquals("my: parent - other speaker", turn2, yes.first("turn"));
+      assertEquals("my: ancestor - other speaker", who2, yes.first("who"));
+      assertEquals("my: graph - other speaker", g, yes.first("graph"));
+      assertEquals("my: child - other speaker", yes, turn2.first("word"));
+      assertNull("my: none - other speaker", yes.first("pos"));
 
-      assertEquals("my: ancestor child (peer layers)", utterance1, the.my("utterance"));
-      assertEquals("my: ancestor child (non-peers)", utterance1, th.my("utterance"));
-      assertEquals("my: ancestor child (non-peers, top level)", topic, turn1.my("topic"));
-      assertEquals("my: ancestor child (child of graph)", corpus, the.my("corpus"));
+      assertEquals("my: ancestor child (peer layers)", utterance1, the.first("utterance"));
+      assertEquals("my: ancestor child (non-peers)", utterance1, th.first("utterance"));
+      assertEquals("my: ancestor child (non-peers, top level)", topic, turn1.first("topic"));
+      assertEquals("my: ancestor child (child of graph)", corpus, the.first("corpus"));
 
-      Annotation[] list = the.list("turn");
+      Annotation[] list = the.all("turn");
       assertEquals("list: parent", turn1, list[0]);
       assertEquals("list: parent", 1, list.length);
-      list = the.list("who");
+      list = the.all("who");
       assertEquals("list: ancestor", who1, list[0]);
       assertEquals("list: ancestor", 1, list.length);
-      list = the.list("graph");
+      list = the.all("graph");
       assertEquals("list: graph", g, list[0]);
       assertEquals("list: graph", 1, list.length);
-      assertEquals("list: child", the.annotations("phone"), the.list("phone"));
-      assertEquals("list: none", 0, fox.list("phone").length);
+      assertEquals("list: child", the.annotations("phone"), the.all("phone"));
+      assertEquals("list: none", 0, fox.all("phone").length);
 
-      list = the.list("utterance");
+      list = the.all("utterance");
       assertEquals("list: ancestor child (peer layers)", utterance1, list[0]);
       assertEquals("list: ancestor child (peer layers)", 1, list.length);
-      list = utterance1.list("word");
+      list = utterance1.all("word");
       assertEquals("list: ancestor child (peer layers) - reflexive", 2, list.length);
       assertEquals("list: ancestor child (peer layers) - reflexive", the, list[0]);
       assertEquals("list: ancestor child (peer layers) - reflexive", quick, list[1]);
-      list = th.list("utterance");
+      list = th.all("utterance");
       assertEquals("list: ancestor child (non-peers)", utterance1, list[0]);
       assertEquals("list: ancestor child (non-peers)", 1, list.length);
-      list = utterance1.list("phone");
+      list = utterance1.all("phone");
       assertEquals("list: ancestor child (non-peers) - reflexive", 6, list.length);
       assertEquals("list: ancestor child (non-peers) - reflexive", th, list[0]);
       assertEquals("list: ancestor child (non-peers) - reflexive", e, list[1]);
@@ -2002,21 +2002,21 @@ public class TestGraph
       assertEquals("list: ancestor child (non-peers) - reflexive", I, list[4]);
       assertEquals("list: ancestor child (non-peers) - reflexive", ck, list[5]);
       
-      list = yes.list("turn");
+      list = yes.all("turn");
       assertEquals("list: parent - other speaker", turn2, list[0]);
       assertEquals("list: parent - other speaker", 1, list.length);
-      list = yes.list("who");
+      list = yes.all("who");
       assertEquals("list: ancestor - other speaker", who2, list[0]);
       assertEquals("list: ancestor - other speaker", 1, list.length);
-      list = yes.list("graph");
+      list = yes.all("graph");
       assertEquals("list: graph - other speaker", g, list[0]);
       assertEquals("list: graph - other speaker", 1, list.length);
-      assertEquals("list: child - other speaker", turn2.annotations("word"), turn2.list("word"));
-      assertEquals("list: none - other speaker", 0, yes.list("pos").length);
+      assertEquals("list: child - other speaker", turn2.annotations("word"), turn2.all("word"));
+      assertEquals("list: none - other speaker", 0, yes.all("pos").length);
 
-      list = turn1.list("word");
+      list = turn1.all("word");
 
-      list = g.list("word");
+      list = g.all("word");
       assertEquals("list: graph", the, list[0]);
       assertEquals("list: graph", quick, list[1]);
       assertEquals("list: graph", brown, list[2]);
@@ -2024,19 +2024,19 @@ public class TestGraph
       assertEquals("list: graph", yes, list[4]);
       assertEquals("list: graph", 5, list.length);
 
-      list = turn1.list("pos");
+      list = turn1.all("pos");
       assertEquals("list: grandchild", DT, list[0]);
       assertEquals("list: grandchild", A, list[1]);
       assertEquals("list: grandchild", N, list[2]);
       assertEquals("list: grandchild", 3, list.length);
 
-      list = g.list("pos");
+      list = g.all("pos");
       assertEquals("list: distant descenant", DT, list[0]);
       assertEquals("list: distant descenant", A, list[1]);
       assertEquals("list: distant descenant", N, list[2]);
       assertEquals("list: distant descenant", 3, list.length);
 
-      list = g.list("phone");
+      list = g.all("phone");
       assertEquals("list: distant descenant", th, list[0]);
       assertEquals("list: distant descenant", e, list[1]);
       assertEquals("list: distant descenant", k, list[2]);
@@ -2048,13 +2048,13 @@ public class TestGraph
       assertEquals("list: distant descenant", s, list[8]);
       assertEquals("list: distant descenant", 9, list.length);
 
-      list = the.list("graph");
-      assertEquals("annotation.list('graph') contains one element", 1, list.length);
-      assertEquals("annotation.list('graph') contains the graph", g, list[0]);
+      list = the.all("graph");
+      assertEquals("annotation.all('graph') contains one element", 1, list.length);
+      assertEquals("annotation.all('graph') contains the graph", g, list[0]);
 
-      list = g.list("graph");
-      assertEquals("graph.list('graph') contains one element", 1, list.length);
-      assertEquals("graph.list('graph') contains the graph", g, list[0]);
+      list = g.all("graph");
+      assertEquals("graph.all('graph') contains one element", 1, list.length);
+      assertEquals("graph.all('graph') contains the graph", g, list[0]);
    }
 
    @Test public void easyAnchorChaining() 

@@ -601,11 +601,11 @@ public class Merger
     {
       TreeSet<Annotation> uneditedAnnotations 
         = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
-      uneditedAnnotations.addAll(Arrays.asList(graph.list(layer.getId())));
+      uneditedAnnotations.addAll(Arrays.asList(graph.all(layer.getId())));
 	 
       TreeSet<Annotation> editedAnnotations 
         = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
-      editedAnnotations.addAll(Arrays.asList(editedGraph.list(layer.getId())));
+      editedAnnotations.addAll(Arrays.asList(editedGraph.all(layer.getId())));
 	 
       // (no changes to track:)
       mapAnnotationsForMerge(layer, uneditedAnnotations, editedAnnotations); 
@@ -799,7 +799,7 @@ public class Merger
       {
         String who = "";
         Annotation turn = layer.getId().equals(schema.getTurnLayerId())?
-          an:an.my(schema.getTurnLayerId());
+          an:an.first(schema.getTurnLayerId());
         if (turn != null) who = turn.getLabel();
         if (!theseByParticipant.containsKey(who))
         {
@@ -811,7 +811,7 @@ public class Merger
       {
         String who = "";
         Annotation turn = layer.getId().equals(schema.getTurnLayerId())?
-          an:an.my(schema.getTurnLayerId());
+          an:an.first(schema.getTurnLayerId());
         if (turn != null) who = turn.getLabel();
         if (!thoseByParticipant.containsKey(who))
         {
@@ -940,7 +940,7 @@ public class Merger
   {
     String layerId = layer.getId();
     // unmapped annotations in graph are for deletion
-    for (Annotation an : graph.list(layer.getId()))
+    for (Annotation an : graph.all(layer.getId()))
     {
       if (!hasCounterpart(an))
       {
@@ -959,7 +959,7 @@ public class Merger
       
     // unmapped annotations of theirs are for addition 
     Annotation anLastOriginal = null;
-    for (Annotation anEdited : editedGraph.list(layerId))
+    for (Annotation anEdited : editedGraph.all(layerId))
     {
       if (!hasCounterpart(anEdited))
       {
@@ -1046,7 +1046,7 @@ public class Merger
           if (layerId.equals(schema.getTurnLayerId()) 
               && schema.getParticipantLayerId() != null)
           {
-            for (Annotation participant : graph.list(schema.getParticipantLayerId()))
+            for (Annotation participant : graph.all(schema.getParticipantLayerId()))
             {
               if (participant.getLabel().equals(newAnnotation.getLabel()))
               {
@@ -1569,7 +1569,7 @@ public class Merger
   protected void computeLabelDeltasForMerge(Layer layer, Graph graph)
     throws TransformationException
   {
-    for (Annotation an : graph.list(layer.getId()))
+    for (Annotation an : graph.all(layer.getId()))
     {
       Annotation anEdited = getCounterpart(an);
       if (anEdited == null) continue;
@@ -1597,7 +1597,7 @@ public class Merger
     Annotation anLastOriginal = null;
     // traverse the edited version of the graph, to ensure we're all in the new order
     TreeSet<Annotation> editedAnnotations = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
-    editedAnnotations.addAll(Arrays.asList(editedGraph.list(layer.getId())));
+    editedAnnotations.addAll(Arrays.asList(editedGraph.all(layer.getId())));
     for (Annotation anEdited : editedAnnotations)
     {
       // get our mapped annotation
@@ -2225,7 +2225,7 @@ public class Merger
         && layer.getAlignment() == Constants.ALIGNMENT_NONE)
     { // edited graph has both parent and child layer
       // detect parent changes
-      for (Annotation child : graph.list(layerId))
+      for (Annotation child : graph.all(layerId))
       {
         Annotation editedChild = getCounterpart(child);
         if (editedChild == null) continue;
@@ -2288,7 +2288,7 @@ public class Merger
       bothLayers.add(parentLayerId);
       Annotation anLastOriginalParentsLastChild = null;
       // for each parent in the edited graph
-      for (Annotation anParent : editedGraph.list(parentLayerId))
+      for (Annotation anParent : editedGraph.all(parentLayerId))
       {
         Annotation anOriginalParent = getCounterpart(anParent);
         log(layerId, ": Parent ", anOriginalParent);

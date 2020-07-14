@@ -1457,7 +1457,7 @@ public class ChatDeserializer
 	 if (errorsLayerId != null)
 	 {
 	    // if they coincide with the ends of spans, then they annotate the span
-	    for (Annotation error : graph.list(errorsLayerId))
+	    for (Annotation error : graph.all(errorsLayerId))
 	    {
 	       LinkedHashSet<Annotation> endingSpans = error.getEnd().endOf("@span");
 	       if (endingSpans.size() > 0)
@@ -1478,7 +1478,7 @@ public class ChatDeserializer
 	 if (repetitionsLayerId != null)
 	 {
 	    // if they coincide with the ends of spans, then they annotate the span
-	    for (Annotation repetition : graph.list(repetitionsLayerId))
+	    for (Annotation repetition : graph.all(repetitionsLayerId))
 	    {
 	       LinkedHashSet<Annotation> endingSpans = repetition.getEnd().endOf("@span");
 	       if (endingSpans.size() > 0)
@@ -1499,7 +1499,7 @@ public class ChatDeserializer
 	 if (retracingLayerId != null)
 	 {
 	    // if they coincide with the ends of spans, then they annotate the span
-	    for (Annotation retrace : graph.list(retracingLayerId))
+	    for (Annotation retrace : graph.all(retracingLayerId))
 	    {
 	       LinkedHashSet<Annotation> endingSpans = retrace.getEnd().endOf("@span");
 	       if (endingSpans.size() > 0)
@@ -1542,7 +1542,7 @@ public class ChatDeserializer
 	 graph.commit();
 
 	 // remove temporary span annotations
-	 for (Annotation span : graph.list("@span"))
+	 for (Annotation span : graph.all("@span"))
 	 {
 	    span.destroy();
 	 } // next span	

@@ -669,13 +669,13 @@ public class LatexSerializer
          // order utterances by anchor so that simultaneous speech comes out in utterance order
          TreeSet<Annotation> utterancesByAnchor
             = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
-         for (Annotation u : graph.list(utteranceLayer.getId())) utterancesByAnchor.add(u);
+         for (Annotation u : graph.all(utteranceLayer.getId())) utterancesByAnchor.add(u);
          TreeSet<Annotation> noisesByAnchor
             = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
          if (noiseLayer != null)
          {
             // list all anchored noises
-            for (Annotation n : graph.list(noiseLayer.getId())) if (n.getAnchored()) noisesByAnchor.add(n);
+            for (Annotation n : graph.all(noiseLayer.getId())) if (n.getAnchored()) noisesByAnchor.add(n);
          }
          Iterator<Annotation> noises = noisesByAnchor.iterator();
          Annotation nextNoise = noises.hasNext()?noises.next():null;
@@ -684,7 +684,7 @@ public class LatexSerializer
          {
             if (cancelling) break;
             // is the participant changing?
-            Annotation participant = utterance.my(getParticipantLayer().getId());
+            Annotation participant = utterance.first(getParticipantLayer().getId());
             if (participant != currentParticipant)
             { // participant change
                if (currentParticipant != null)
@@ -699,7 +699,7 @@ public class LatexSerializer
 	    if (!firstUtterance) turnText.append("\\\\\n");
 
 	    boolean firstWord = true;
-            for (Annotation token : utterance.list(getWordLayer().getId()))
+            for (Annotation token : utterance.all(getWordLayer().getId()))
             {
 	       // space precedes all but the first word
 	       if (firstWord) { firstWord = false; } else { turnText.append(" "); }
@@ -717,7 +717,7 @@ public class LatexSerializer
                Annotation orthography = token;
                if (orthographyLayer != null && selectedLayers.contains(orthographyLayer.getId()))
                {
-                  orthography = token.my(orthographyLayer.getId());
+                  orthography = token.first(orthographyLayer.getId());
                   if (orthography == null) orthography = token;
                }
                turnText.append(orthography.getLabel());
@@ -728,7 +728,7 @@ public class LatexSerializer
                       && (orthographyLayer == null || !layerId.equals(orthographyLayer.getId())))
                   {
                      turnText.append("\\_");
-                     Annotation tag = token.my(layerId);
+                     Annotation tag = token.first(layerId);
                      if (tag != null)
                      {
                         turnText.append(tag.getLabel());
