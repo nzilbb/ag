@@ -277,6 +277,9 @@ public class AnnotatorWebApp extends StandAloneWebApp {
       annotator.setSchema( // TODO make this configurable?
          new Schema(
             "who", "turn", "utterance", "word",
+            new Layer("transcript_language", "Overall Language")
+            .setAlignment(Constants.ALIGNMENT_NONE)
+            .setPeers(false).setPeersOverlap(false).setSaturated(true),
             new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
             .setPeers(true).setPeersOverlap(true).setSaturated(true),
             new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
@@ -284,6 +287,9 @@ public class AnnotatorWebApp extends StandAloneWebApp {
             .setParentId("who").setParentIncludes(true),
             new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
             .setPeers(true).setPeersOverlap(false).setSaturated(true)
+            .setParentId("turn").setParentIncludes(true),
+            new Layer("language", "Phrase Language").setAlignment(Constants.ALIGNMENT_INTERVAL)
+            .setPeers(true).setPeersOverlap(false).setSaturated(false)
             .setParentId("turn").setParentIncludes(true),
             new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
             .setPeers(true).setPeersOverlap(false).setSaturated(false)

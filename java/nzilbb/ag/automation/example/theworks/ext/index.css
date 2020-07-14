@@ -31,3 +31,8 @@ h6 { font-size: 12pt; color: #859044; }
 .field input[type="number"] {
     width: 75px;
 }
+
+footer {
+    text-align: center;
+    font-style: italic;
+}
