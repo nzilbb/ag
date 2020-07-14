@@ -431,7 +431,7 @@ public class Schema implements Cloneable, IJSONableBean {
     * <p> The expression is evaluated as a JavaScript boolean expressin and can assume
     * that <var> layer </var> is a reference to a candidate layer and <var> schema </var>
     * is a reference to this schema.
-    * <p> e.g. <q>parentId == schema.participantLayerId &amp;&amp; alignment == 0</q>
+    * <p> e.g. <q>layer.parentId == schema.participantLayerId &amp;&amp; layer.alignment == 0</q>
     * should match all un-aligned children of the participant layer; i.e. participant attributes.
     * @param expression A Javascript boolean expression to use to filter layers.
     * @return A list of matching layers, which may be empty.
