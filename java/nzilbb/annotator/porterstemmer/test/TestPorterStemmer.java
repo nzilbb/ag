@@ -28,6 +28,7 @@ import static org.junit.Assert.*;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import nzilbb.ag.Anchor;
 import nzilbb.ag.Annotation;
@@ -47,10 +48,14 @@ public class TestPorterStemmer {
       annotator.setSchema(schema);
       
       // stem to a new layer
-      annotator.setTaskParameters("tokenLayerId=word&stemLayerId=porterstem");
+      annotator.setTaskParameters("tokenLayerId=word&stemLayerId=porterstem"); // TODO include language layers
       
       assertEquals("token layer",
                    "word", annotator.getTokenLayerId());
+      assertNull("transcript language layer",
+                 annotator.getTranscriptLanguageLayerId());
+      assertNull("phrase language layer",
+                 annotator.getPhraseLanguageLayerId());
       assertEquals("stem layer",
                    "porterstem", annotator.getStemLayerId());
       assertNotNull("stem layer was created",
@@ -71,18 +76,18 @@ public class TestPorterStemmer {
       assertEquals("output layer correct "+Arrays.asList(layers),
                    "porterstem", layers[0]);
       
-      Annotation firstWord = g.my("word");
+      Annotation firstWord = g.first("word");
       assertEquals("double check the first word is what we think it is: "+firstWord,
                    "I", firstWord.getLabel());
       
-      assertEquals("double check there are tokens: "+Arrays.asList(g.list("word")),
-                   8, g.list("word").length);
-      assertEquals("double check there are no stems: "+Arrays.asList(g.list("porterstem")),
-                   0, g.list("porterstem").length);
+      assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
+                   8, g.all("word").length);
+      assertEquals("double check there are no stems: "+Arrays.asList(g.all("porterstem")),
+                   0, g.all("porterstem").length);
    
       // run the annotator
       annotator.transform(g);
-      List<String> stemLabels = Arrays.stream(g.list("porterstem"))
+      List<String> stemLabels = Arrays.stream(g.all("porterstem"))
          .map(annotation->annotation.getLabel()).collect(Collectors.toList());
       assertEquals("one stem per token: "+stemLabels,
                    8, stemLabels.size());
@@ -103,14 +108,14 @@ public class TestPorterStemmer {
       // add a word
       g.addAnnotation(new Annotation().setLayerId("word").setLabel("new")
                       .setStart(g.getOrCreateAnchorAt(90)).setEnd(g.getOrCreateAnchorAt(100))
-                      .setParent(g.my("turn")));
+                      .setParent(g.first("turn")));
 
       // change a word
       firstWord.setLabel("we");
       
       // run the annotator again
       annotator.transform(g);
-      stemLabels = Arrays.stream(g.list("porterstem"))
+      stemLabels = Arrays.stream(g.all("porterstem"))
          .map(annotation->annotation.getLabel()).collect(Collectors.toList());
       assertEquals("one more stem: "+stemLabels,
                    9, stemLabels.size());
@@ -132,6 +137,8 @@ public class TestPorterStemmer {
    @Test public void defaultParameters() throws Exception {
       
       Graph g = graph();
+      // tag the graph as being in New Zealand English
+      g.addTag(g, "transcript_language", "en-NZ");
       Schema schema = g.getSchema();
       PorterStemmer annotator = new PorterStemmer();
       annotator.setSchema(schema);
@@ -141,6 +148,10 @@ public class TestPorterStemmer {
       
       assertEquals("token layer",
                    "word", annotator.getTokenLayerId());
+      assertEquals("transcript language layer",
+                   "transcript_language", annotator.getTranscriptLanguageLayerId());
+      assertEquals("phrase language layer",
+                   "lang", annotator.getPhraseLanguageLayerId());
       assertEquals("stem layer",
                    "stem", annotator.getStemLayerId());
       assertNotNull("stem layer was created",
@@ -150,28 +161,33 @@ public class TestPorterStemmer {
       assertEquals("stem layer no aligned",
                    Constants.ALIGNMENT_NONE,
                    schema.getLayer(annotator.getStemLayerId()).getAlignment());
-      String[] layers = annotator.getRequiredLayers();
-      assertEquals("1 required layer: "+Arrays.asList(layers),
-                   1, layers.length);
-      assertEquals("required layer correct "+Arrays.asList(layers),
-                   "word", layers[0]);
-      layers = annotator.getOutputLayers();
-      assertEquals("1 output layer: "+Arrays.asList(layers),
-                   1, layers.length);
-      assertEquals("output layer correct "+Arrays.asList(layers),
-                   "stem", layers[0]);
+      Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
+         .collect(Collectors.toSet());
+      assertEquals("3 required layer: "+requiredLayers,
+                   3, requiredLayers.size());
+      assertTrue("word required "+requiredLayers,
+                 requiredLayers.contains("word"));
+      assertTrue("transcript_language required "+requiredLayers,
+                 requiredLayers.contains("transcript_language"));
+      assertTrue("lang required "+requiredLayers,
+                 requiredLayers.contains("lang"));
+      String outputLayers[] = annotator.getOutputLayers();
+      assertEquals("1 output layer: "+Arrays.asList(outputLayers),
+                   1, outputLayers.length);
+      assertEquals("output layer correct "+Arrays.asList(outputLayers),
+                   "stem", outputLayers[0]);
 
-      Annotation firstWord = g.my("word");
+      Annotation firstWord = g.first("word");
       assertEquals("double check the first word is what we think it is: "+firstWord,
                    "I", firstWord.getLabel());
       
-      assertEquals("double check there are tokens: "+Arrays.asList(g.list("word")),
-                   8, g.list("word").length);
-      assertEquals("double check there are no stems: "+Arrays.asList(g.list("stem")),
-                   0, g.list("stem").length);
+      assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
+                   8, g.all("word").length);
+      assertEquals("double check there are no stems: "+Arrays.asList(g.all("stem")),
+                   0, g.all("stem").length);
       // run the annotator
       annotator.transform(g);
-      List<String> stemLabels = Arrays.stream(g.list("stem"))
+      List<String> stemLabels = Arrays.stream(g.all("stem"))
          .map(annotation->annotation.getLabel()).collect(Collectors.toList());
       assertEquals("one stem per token: "+stemLabels,
                    8, stemLabels.size());
@@ -192,14 +208,14 @@ public class TestPorterStemmer {
       // add a word
       g.addAnnotation(new Annotation().setLayerId("word").setLabel("new")
                       .setStart(g.getOrCreateAnchorAt(90)).setEnd(g.getOrCreateAnchorAt(100))
-                      .setParent(g.my("turn")));
+                      .setParent(g.first("turn")));
 
       // change a word
       firstWord.setLabel("we");
       
       // run the annotator again
       annotator.transform(g);
-      stemLabels = Arrays.stream(g.list("stem"))
+      stemLabels = Arrays.stream(g.all("stem"))
          .map(annotation->annotation.getLabel()).collect(Collectors.toList());
       assertEquals("one more stem: "+stemLabels,
                    9, stemLabels.size());
@@ -217,8 +233,230 @@ public class TestPorterStemmer {
                    "new", stems.next());
 
    }
-
    
+   @Test public void nonEnglish() throws Exception {
+
+      Graph g = graph();
+
+      // tag the graph as being in Te Reo Māori
+      g.addTag(g, "transcript_language", "mi");
+      
+      Schema schema = g.getSchema();
+      PorterStemmer annotator = new PorterStemmer();
+      annotator.setSchema(schema);
+      
+      // stem to a new layer
+      annotator.setTaskParameters(
+         "tokenLayerId=word&stemLayerId=porterstem"
+         +"&transcriptLanguageLayerId=transcript_language&phraseLanguageLayerId=lang");
+      
+      assertEquals("token layer",
+                   "word", annotator.getTokenLayerId());
+      assertEquals("transcript language layer",
+                   "transcript_language", annotator.getTranscriptLanguageLayerId());
+      assertEquals("phrase language layer",
+                   "lang", annotator.getPhraseLanguageLayerId());
+      assertEquals("stem layer",
+                   "porterstem", annotator.getStemLayerId());
+      assertNotNull("stem layer was created",
+                    schema.getLayer(annotator.getStemLayerId()));
+      assertEquals("stem layer child of word",
+                   "word", schema.getLayer(annotator.getStemLayerId()).getParentId());
+      assertEquals("stem layer no aligned",
+                   Constants.ALIGNMENT_NONE,
+                   schema.getLayer(annotator.getStemLayerId()).getAlignment());
+      Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
+         .collect(Collectors.toSet());
+      assertEquals("3 required layer: "+requiredLayers,
+                   3, requiredLayers.size());
+      assertTrue("word required "+requiredLayers,
+                 requiredLayers.contains("word"));
+      assertTrue("transcript_language required "+requiredLayers,
+                 requiredLayers.contains("transcript_language"));
+      assertTrue("lang required "+requiredLayers,
+                 requiredLayers.contains("lang"));
+      String outputLayers[] = annotator.getOutputLayers();
+      assertEquals("1 output layer: "+Arrays.asList(outputLayers),
+                   1, outputLayers.length);
+      assertEquals("output layer correct "+Arrays.asList(outputLayers),
+                   "porterstem", outputLayers[0]);
+      
+      Annotation firstWord = g.first("word");
+      assertEquals("double check the first word is what we think it is: "+firstWord,
+                   "I", firstWord.getLabel());
+      
+      assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
+                   8, g.all("word").length);
+      assertEquals("double check there are no stems: "+Arrays.asList(g.all("porterstem")),
+                   0, g.all("porterstem").length);
+   
+      // run the annotator
+      annotator.transform(g);
+      List<String> stemLabels = Arrays.stream(g.all("porterstem"))
+         .map(annotation->annotation.getLabel()).collect(Collectors.toList());
+      assertEquals("no annotations token: "+stemLabels,
+                   0, stemLabels.size());
+   }
+
+   @Test public void mostlyNonEnglish() throws Exception {
+
+      Graph g = graph();
+
+      // tag the graph as being in Te Reo Māori
+      g.addTag(g, "transcript_language", "mi");
+
+      // tag some words as being in NZ English
+      g.addAnnotation(new Annotation().setLayerId("lang").setLabel("en-NZ")
+                      .setStart(g.getOrCreateAnchorAt(40))
+                      // 40."walked".50."about".60."my".70
+                      .setEnd(g.getOrCreateAnchorAt(70))
+                      .setParent(g.first("turn")));
+      
+      Schema schema = g.getSchema();
+      PorterStemmer annotator = new PorterStemmer();
+      annotator.setSchema(schema);
+      
+      // stem to a new layer
+      annotator.setTaskParameters(
+         "tokenLayerId=word&stemLayerId=porterstem"
+         +"&transcriptLanguageLayerId=transcript_language&phraseLanguageLayerId=lang");
+      
+      assertEquals("token layer",
+                   "word", annotator.getTokenLayerId());
+      assertEquals("transcript language layer",
+                   "transcript_language", annotator.getTranscriptLanguageLayerId());
+      assertEquals("phrase language layer",
+                   "lang", annotator.getPhraseLanguageLayerId());
+      assertEquals("stem layer",
+                   "porterstem", annotator.getStemLayerId());
+      assertNotNull("stem layer was created",
+                    schema.getLayer(annotator.getStemLayerId()));
+      assertEquals("stem layer child of word",
+                   "word", schema.getLayer(annotator.getStemLayerId()).getParentId());
+      assertEquals("stem layer no aligned",
+                   Constants.ALIGNMENT_NONE,
+                   schema.getLayer(annotator.getStemLayerId()).getAlignment());
+      Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
+         .collect(Collectors.toSet());
+      assertEquals("3 required layer: "+requiredLayers,
+                   3, requiredLayers.size());
+      assertTrue("word required "+requiredLayers,
+                 requiredLayers.contains("word"));
+      assertTrue("transcript_language required "+requiredLayers,
+                 requiredLayers.contains("transcript_language"));
+      assertTrue("lang required "+requiredLayers,
+                 requiredLayers.contains("lang"));
+      String outputLayers[] = annotator.getOutputLayers();
+      assertEquals("1 output layer: "+Arrays.asList(outputLayers),
+                   1, outputLayers.length);
+      assertEquals("output layer correct "+Arrays.asList(outputLayers),
+                   "porterstem", outputLayers[0]);
+      
+      assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
+                   8, g.all("word").length);
+      assertEquals("double check there are no stems: "+Arrays.asList(g.all("porterstem")),
+                   0, g.all("porterstem").length);
+   
+      // run the annotator
+      annotator.transform(g);
+      List<String> stemLabels = Arrays.stream(g.all("porterstem"))
+         .map(annotation->annotation.getLabel()).collect(Collectors.toList());
+      assertEquals("no annotations token: "+stemLabels,
+                   3, stemLabels.size());
+      Iterator<String> stems = stemLabels.iterator();
+      assertEquals("correct start word",
+                   "walk", stems.next());
+      assertEquals("about", stems.next());
+      assertEquals("correct end word",
+                   "my", stems.next());
+   }
+
+   @Test public void mostlyEnglish() throws Exception {
+      
+      Graph g = graph();
+      
+      // tag the graph as being in English - strictly it should be the ISO code,
+      // but "English" should also work
+      g.addTag(g, "transcript_language", "English"); 
+
+      // tag some words as being in Te Reo Māori
+      g.addAnnotation(new Annotation().setLayerId("lang").setLabel("mi")
+                      .setStart(g.getOrCreateAnchorAt(40))
+                      // 40."walked".50."about".60."my".70
+                      .setEnd(g.getOrCreateAnchorAt(70))
+                      .setParent(g.first("turn")));
+
+      // tag some as being in NZ English
+      g.addAnnotation(new Annotation().setLayerId("lang").setLabel("en-NZ")
+                      .setStart(g.getOrCreateAnchorAt(20))
+                      // 20."sang".30."and".40
+                      .setEnd(g.getOrCreateAnchorAt(40))
+                      .setParent(g.first("turn")));
+      
+      Schema schema = g.getSchema();
+      PorterStemmer annotator = new PorterStemmer();
+      annotator.setSchema(schema);
+      
+      // stem to a new layer
+      annotator.setTaskParameters(
+         "tokenLayerId=word&stemLayerId=porterstem"
+         +"&transcriptLanguageLayerId=transcript_language&phraseLanguageLayerId=lang");
+      
+      assertEquals("token layer",
+                   "word", annotator.getTokenLayerId());
+      assertEquals("transcript language layer",
+                   "transcript_language", annotator.getTranscriptLanguageLayerId());
+      assertEquals("phrase language layer",
+                   "lang", annotator.getPhraseLanguageLayerId());
+      assertEquals("stem layer",
+                   "porterstem", annotator.getStemLayerId());
+      assertNotNull("stem layer was created",
+                    schema.getLayer(annotator.getStemLayerId()));
+      assertEquals("stem layer child of word",
+                   "word", schema.getLayer(annotator.getStemLayerId()).getParentId());
+      assertEquals("stem layer no aligned",
+                   Constants.ALIGNMENT_NONE,
+                   schema.getLayer(annotator.getStemLayerId()).getAlignment());
+      Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
+         .collect(Collectors.toSet());
+      assertEquals("3 required layer: "+requiredLayers,
+                   3, requiredLayers.size());
+      assertTrue("word required "+requiredLayers,
+                 requiredLayers.contains("word"));
+      assertTrue("transcript_language required "+requiredLayers,
+                 requiredLayers.contains("transcript_language"));
+      assertTrue("lang required "+requiredLayers,
+                 requiredLayers.contains("lang"));
+      String outputLayers[] = annotator.getOutputLayers();
+      assertEquals("1 output layer: "+Arrays.asList(outputLayers),
+                   1, outputLayers.length);
+      assertEquals("output layer correct "+Arrays.asList(outputLayers),
+                   "porterstem", outputLayers[0]);
+      
+      assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
+                   8, g.all("word").length);
+      assertEquals("double check there are no stems: "+Arrays.asList(g.all("porterstem")),
+                   0, g.all("porterstem").length);
+   
+      // run the annotator
+      annotator.transform(g);
+      List<String> stemLabels = Arrays.stream(g.all("porterstem"))
+         .map(annotation->annotation.getLabel()).collect(Collectors.toList());
+      assertEquals("no annotations token: "+stemLabels,
+                   5, stemLabels.size());
+      Iterator<String> stems = stemLabels.iterator();
+      assertEquals("first stem correct",
+                   "i", stems.next());
+      assertEquals("stem for tagged-in-English words",
+                   "sang", stems.next());
+      assertEquals("stem for tagged-in-English words",
+                   "and", stems.next());
+      assertEquals("skips non-English phrase",
+                   "blog-post", stems.next());
+      assertEquals("last stem correct",
+                   "lazili", stems.next());
+   }
+
    /**
     * Returns a graph for annotating.
     * @return The graph for testing with.
@@ -226,6 +464,9 @@ public class TestPorterStemmer {
    public Graph graph() {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
+         new Layer("transcript_language", "Overall Language")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
          new Layer("participant", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
          .setPeers(true).setPeersOverlap(true).setSaturated(true),
          new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
@@ -233,6 +474,9 @@ public class TestPorterStemmer {
          .setParentId("participant").setParentIncludes(true),
          new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
          .setPeers(true).setPeersOverlap(false).setSaturated(true)
+         .setParentId("turn").setParentIncludes(true),
+         new Layer("lang", "Phrase Language").setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false)
          .setParentId("turn").setParentIncludes(true),
          new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
          .setPeers(true).setPeersOverlap(false).setSaturated(false)
@@ -248,7 +492,7 @@ public class TestPorterStemmer {
       Annotation turn = g.addAnnotation(
          new Annotation().setLayerId("turn").setLabel("someone")
          .setStart(start).setEnd(end)
-         .setParent(g.my("participant")));
+         .setParent(g.first("participant")));
       g.addAnnotation(
          new Annotation().setLayerId("utterance").setLabel("someone")
          .setStart(start).setEnd(end)

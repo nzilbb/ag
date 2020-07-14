@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
+import javax.script.ScriptException;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.InvalidConfigurationException;
@@ -59,7 +60,62 @@ public class PorterStemmer extends Annotator {
     * Setter for {@link #tokenLayerId}: ID of the input layer containing word tokens.
     * @param newTokenLayerId ID of the input layer containing word tokens.
     */
-   public PorterStemmer setTokenLayerId(String newTokenLayerId) { tokenLayerId = newTokenLayerId; return this; }
+   public PorterStemmer setTokenLayerId(String newTokenLayerId) {
+      tokenLayerId = newTokenLayerId; return this; }
+
+   /**
+    * ID of the layer that determines the language of the whole transcript.
+    * @see #getTranscriptLanguageLayerId()
+    * @see #setTranscriptLanguageLayerId(String)
+    */
+   protected String transcriptLanguageLayerId;
+   /**
+    * Getter for {@link #transcriptLanguageLayerId}: ID of the layer that determines the
+    * language of the whole transcript. 
+    * @return ID of the layer that determines the language of the whole transcript.
+    */
+   public String getTranscriptLanguageLayerId() { return transcriptLanguageLayerId; }
+   /**
+    * Setter for {@link #transcriptLanguageLayerId}: ID of the layer that determines the
+    * language of the whole transcript. 
+    * @param newTranscriptLanguageLayerId ID of the layer that determines the language of
+    * the whole transcript. 
+    */
+   public PorterStemmer setTranscriptLanguageLayerId(String newTranscriptLanguageLayerId) {
+      if (newTranscriptLanguageLayerId != null // empty string means null
+          && newTranscriptLanguageLayerId.trim().length() == 0) {
+         newTranscriptLanguageLayerId = null;
+      }
+      transcriptLanguageLayerId = newTranscriptLanguageLayerId;
+      return this;
+   }
+
+   /**
+    * ID of the layer that determines the language of individual phrases.
+    * @see #getPhraseLanguageLayerId()
+    * @see #setPhraseLanguageLayerId(String)
+    */
+   protected String phraseLanguageLayerId;
+   /**
+    * Getter for {@link #phraseLanguageLayerId}: ID of the layer that determines the
+    * language of individual phrases. 
+    * @return ID of the layer that determines the language of individual phrases.
+    */
+   public String getPhraseLanguageLayerId() { return phraseLanguageLayerId; }
+   /**
+    * Setter for {@link #phraseLanguageLayerId}: ID of the layer that determines the
+    * language of individual phrases. 
+    * @param newPhraseLanguageLayerId ID of the layer that determines the language of
+    * individual phrases. 
+    */
+   public PorterStemmer setPhraseLanguageLayerId(String newPhraseLanguageLayerId) {
+      if (newPhraseLanguageLayerId != null // empty string means null
+          && newPhraseLanguageLayerId.trim().length() == 0) {
+         newPhraseLanguageLayerId = null;
+      }
+      phraseLanguageLayerId = newPhraseLanguageLayerId;
+      return this;
+   }
 
    /**
     * ID of the stem layer that the annotator outputs its annotations to.
@@ -68,15 +124,18 @@ public class PorterStemmer extends Annotator {
     */
    protected String stemLayerId;
    /**
-    * Getter for {@link #stemLayerId}: ID of the stem layer that the annotator outputs its annotations to.
+    * Getter for {@link #stemLayerId}: ID of the stem layer that the annotator outputs its
+    * annotations to. 
     * @return ID of the stem layer that the annotator outputs its annotations to.
     */
    public String getStemLayerId() { return stemLayerId; }
    /**
-    * Setter for {@link #stemLayerId}: ID of the stem layer that the annotator outputs its annotations to.
+    * Setter for {@link #stemLayerId}: ID of the stem layer that the annotator outputs its
+    * annotations to. 
     * @param newStemLayerId ID of the stem layer that the annotator outputs its annotations to.
     */
-   public PorterStemmer setStemLayerId(String newStemLayerId) { stemLayerId = newStemLayerId; return this; }
+   public PorterStemmer setStemLayerId(String newStemLayerId) {
+      stemLayerId = newStemLayerId; return this; }
    
    /**
     * Sets the configuration for a given annotation task.
@@ -90,8 +149,23 @@ public class PorterStemmer extends Annotator {
          throw new InvalidConfigurationException(this, "Schema is not set.");
 
       if (parameters == null) { // apply default configuration
+         
          tokenLayerId = schema.getWordLayerId();
+         
+         try {
+            Layer[] candidates = schema.getMatchingLayers(
+               "layer.parentId == schema.root.id && layer.alignment == 0" // transcript attribute
+               +" && /.*lang.*/.test(layer.id)"); // with 'lang' in the name
+            if (candidates.length > 0) transcriptLanguageLayerId = candidates[0].getId();
+            
+            candidates = schema.getMatchingLayers(
+               "layer.parentId == schema.turnLayerId" // child of turn
+               +" && /.*lang.*/.test(layer.id)"); // with 'lang' in the name
+            if (candidates.length > 0) phraseLanguageLayerId = candidates[0].getId();
+         } catch(ScriptException impossible) {}
+         
          stemLayerId = "stem";
+         
       } else {
          beanPropertiesFromQueryString(parameters);
       }
@@ -118,7 +192,11 @@ public class PorterStemmer extends Annotator {
          throw new InvalidConfigurationException(this, "Schema is not set.");
       if (tokenLayerId == null)
          throw new InvalidConfigurationException(this, "No input token layer set.");
-      return new String[] { tokenLayerId };
+      Vector<String> requiredLayers = new Vector<String>();
+      requiredLayers.add(tokenLayerId);
+      if (transcriptLanguageLayerId != null) requiredLayers.add(transcriptLanguageLayerId);
+      if (phraseLanguageLayerId != null) requiredLayers.add(phraseLanguageLayerId);
+      return requiredLayers.toArray(new String[0]);
    }
 
    /**
@@ -142,7 +220,8 @@ public class PorterStemmer extends Annotator {
     * @return The changes introduced by the tranformation.
     * @throws TransformationException If the transformation cannot be completed.
     */
-   public Graph transform(Graph graph) throws TransformationException { // TODO avoid tagging non-english
+   public Graph transform(Graph graph) throws TransformationException {
+      
       Layer tokenLayer = graph.getSchema().getLayer(tokenLayerId);
       if (tokenLayer == null) {
          throw new InvalidConfigurationException(
@@ -154,13 +233,72 @@ public class PorterStemmer extends Annotator {
             this, "Invalid output stem layer: " + stemLayerId);
       }
 
-      // tag only tokens that are not already tagged
-      for (Annotation token : graph.all(tokenLayerId)) {
-         if (token.first(stemLayerId) == null) { // not tagged yet
-            token.createTag(stemLayerId, stem(token.getLabel()))
-               .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-         } // not tagged yet
-      } // next token
+      // what languages are in the transcript?
+      boolean transcriptIsMainlyEnglish = true;
+      if (transcriptLanguageLayerId != null) {
+         Annotation transcriptLanguage = graph.first(transcriptLanguageLayerId);
+         if (transcriptLanguage != null) {
+            if (!transcriptLanguage.getLabel().toLowerCase().startsWith("en")) { // not English
+               transcriptIsMainlyEnglish = false;
+            }
+         }
+      }
+      boolean thereArePhraseTags = false;
+      if (phraseLanguageLayerId != null) {
+         if (graph.first(phraseLanguageLayerId) != null) {
+            thereArePhraseTags = true;
+         }
+      }
+      
+      // should we just tag everything?
+      if (transcriptIsMainlyEnglish && !thereArePhraseTags) {
+         // process all tokens
+         for (Annotation token : graph.all(tokenLayerId)) {
+            // tag only tokens that are not already tagged
+            if (token.first(stemLayerId) == null) { // not tagged yet
+               token.createTag(stemLayerId, stem(token.getLabel()))
+                  .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+            } // not tagged yet
+         } // next token
+      } else if (transcriptIsMainlyEnglish) {
+         // process all but the phrase-tagged tokens
+
+         // tag the exceptions
+         for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
+            if (!phrase.getLabel().toLowerCase().startsWith("en")) { // not English
+               for (Annotation token : phrase.all(tokenLayerId)) {
+                  // mark the token as an exception
+                  token.put("@notEnglish", Boolean.TRUE);
+               } // next token in the phrase
+            } // non-English phrase
+         } // next phrase
+         
+         for (Annotation token : graph.all(tokenLayerId)) {
+            if (token.containsKey("@notEnglish")) {
+               // while we're here, we remove the @notEnglish mark
+               token.remove("@notEnglish");
+            } else { // English, so tag it
+               // tag only tokens that are not already tagged
+               if (token.first(stemLayerId) == null) { // not tagged yet
+                  token.createTag(stemLayerId, stem(token.getLabel()))
+                     .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+               } // not tagged yet
+            } // English, so tag it
+         } // next token
+      } else if (thereArePhraseTags) {
+         // process only the tokens phrase-tagged as English
+         for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
+            if (phrase.getLabel().toLowerCase().startsWith("en")) {
+               for (Annotation token : phrase.all(tokenLayerId)) {
+                  // tag only tokens that are not already tagged
+                  if (token.first(stemLayerId) == null) { // not tagged yet
+                     token.createTag(stemLayerId, stem(token.getLabel()))
+                        .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                  } // not tagged yet
+               } // next token in the phrase
+            } // English phrase
+         } // next phrase
+      } // thereArePhraseTags
       
       return graph;
    }
