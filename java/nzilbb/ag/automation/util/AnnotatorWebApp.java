@@ -31,14 +31,17 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.sql.SQLException;
 import nzilbb.ag.Constants;
 import nzilbb.ag.Layer;
 import nzilbb.ag.Schema;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
+import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.ag.automation.util.AnnotatorDescriptor;
 import nzilbb.ag.automation.util.RequestRouter;
+import nzilbb.ag.automation.util.VanillaSQLTranslator;
 import nzilbb.util.IO;
 import nzilbb.util.ProgramDescription;
 import nzilbb.util.Switch;
@@ -254,7 +257,7 @@ public class AnnotatorWebApp extends StandAloneWebApp {
     */
    public void init() throws ClassNotFoundException, NoSuchMethodException,
       InvocationTargetException, IllegalAccessException, InstantiationException,
-      ClassCastException, IOException {
+      ClassCastException, IOException, SQLException {
 
       if (arguments.size() == 0) {
          throw new ClassCastException(
@@ -269,7 +272,7 @@ public class AnnotatorWebApp extends StandAloneWebApp {
          descriptor = new AnnotatorDescriptor(annotatorName, getClass().getClassLoader());
       }
       
-      annotator = descriptor.getInstance();      
+      annotator = descriptor.getInstance();
       router = new RequestRouter(annotator);
 
       // give the annotator the resources it needs...
@@ -298,6 +301,15 @@ public class AnnotatorWebApp extends StandAloneWebApp {
       if (annotator instanceof UsesFileSystem) {
          ((UsesFileSystem)annotator).setWorkingDirectory(workingDir);
       }
+      
+      if (annotator instanceof UsesRelationalDatabase) {
+         String rdbURL = "jdbc:derby:"
+            +workingDir.getPath().replace('\\','/')
+            +"/rdb;create=true";
+         ((UsesRelationalDatabase)annotator).rdbConnectionDetails(
+            new VanillaSQLTranslator(), rdbURL, null, null);
+      }
+      
    } // end of init()
    
    /** Override this setter so it's not required as a command line switch */

@@ -17,6 +17,20 @@
     <tstamp/>
     <!-- Create the build directory structure used by compile -->
     <mkdir dir="${build}"/>
+    <!-- Get derby for command-line RDB -->
+    <get src="https://downloads.apache.org/db/derby/db-derby-10.14.2.0/db-derby-10.14.2.0-lib.zip" 
+	 dest="lib/db-derby-10.14.2.0-lib.zip" 
+	 skipexisting="true"
+	 verbose="true"
+	 usetimestamp="true"/>
+    <unzip src="lib/db-derby-10.14.2.0-lib.zip" dest="lib">
+      <patternset>
+        <include name="db-derby-10.14.2.0-lib/lib/*.jar"/>
+      </patternset>
+    </unzip>
+    <move todir="lib">
+      <fileset dir="lib/db-derby-10.14.2.0-lib/lib"/>
+    </move>
   </target>
   
   <target name="all" depends="compile,dist">
@@ -33,7 +47,7 @@
           description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
     <javac srcdir="${src}" destdir="${build}"
-	       classpath="lib/antlr-4.7.2-complete.jar"
+	       classpath="lib/antlr-4.7.2-complete.jar;lib/derby.jar"
 	       includes="${srcfiles}"
 	       excludes="${srctests} ${srctestseditpath} **/package-info.java"
 	       listfiles="yes"
@@ -55,6 +69,9 @@
     <jar jarfile="${dist}/${ant.project.name}.jar" 
 	 basedir="${build}"
          comment="${DSTAMP}.${TSTAMP}">
+      <manifest>
+	<attribute name="Class-Path" value="../lib/derby.jar derby.jar"/>
+      </manifest>
       
       <!-- include source code -->
       <fileset dir="${src}" includes="${srcfiles}" />
@@ -73,7 +90,7 @@
           description="Generate javadoc for all source files" >
     <mkdir dir="${javadoc}"/>
     <javadoc destdir="${javadoc}"
-             classpath=".;lib/antlr-4.7.2-complete.jar"
+             classpath=".;lib/antlr-4.7.2-complete.jar;lib/derby.jar"
              Author="yes"
              Windowtitle="nzilbb.ag"
              stylesheetfile="doc-files/style.css"
@@ -91,7 +108,7 @@
           description="Generate javadoc documentation for public parts of main packages" >
     <mkdir dir="${docs}"/>
     <javadoc destdir="${docs}"
-	     classpath=".;lib/antlr-4.7.2-complete.jar"
+	     classpath=".;lib/antlr-4.7.2-complete.jar;lib/derby.jar"
              packagenames="nzilbb.ag"
              access="public"
 	     Author="yes"
@@ -109,7 +126,7 @@
   <target name="test" depends="dist" description="run nzilbb.ag annotation-graph unit tests">
     <javac srcdir="${src}" destdir="."
 	       includes="${srctests} ${srctestseditpath}"
-	       classpath=".;${junitjar};${dist}/${ant.project.name}.jar;lib/antlr-4.7.2-complete.jar"
+	       classpath=".;${junitjar};${dist}/${ant.project.name}.jar;lib/antlr-4.7.2-complete.jar;lib/derby.jar"
 	       listfiles="yes"
 	       target="8"
 	       source="8"

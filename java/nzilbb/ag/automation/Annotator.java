@@ -162,9 +162,9 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
    /**
     * Provides the overall configuration of the annotator. 
     * @return The overall configuration of the annotator, which will be passed to the
-    * <i> config/index.html </i> configuration web-app, if any. This configuration may be null, or a
-    * string that serializes the annotators configuration state in any encoding the
-    * implementor prefers. The resulting string must be interpretable by the
+    * <i> config/index.html </i> configuration web-app, if any. This configuration may be
+    * null, or a string that serializes the annotators configuration state in any encoding
+    * the implementor prefers. The resulting string must be interpretable by the
     * <i> config/index.html </i> web-app. 
     * @see #setConfig(String)
     * @see #beanPropertiesToQueryString()

@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.sql.SQLException;
 import nzilbb.ag.Constants;
 import nzilbb.ag.Layer;
 import nzilbb.ag.Schema;
@@ -67,6 +68,7 @@ public class TaskApp extends AnnotatorWebApp {
             application.start();
          } catch(Exception exception) {
             System.err.println("Could not start: "+exception.toString());
+            exception.printStackTrace(System.err);
          }
       }
    }
@@ -147,7 +149,7 @@ public class TaskApp extends AnnotatorWebApp {
     */
    public void init() throws ClassNotFoundException, NoSuchMethodException,
       InvocationTargetException, IllegalAccessException, InstantiationException,
-      ClassCastException, IOException {
+      ClassCastException, IOException, SQLException {
       super.init();
       
       if (arguments.size() < 2) {

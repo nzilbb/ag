@@ -21,20 +21,27 @@
 //
 package nzilbb.ag.automation;
 
-import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * Extend this interface if your {@link Annotator} needs a relational database to function.
+ * <p> If an annotator creates its own tables, it is recommended to prefix all table names
+ * with the value of {@link Annotator#getAnnotatorId()} to avoid clashes with other
+ * annotators and the annotator store.
  * @author Robert Fromont robert@fromont.net.nz
  */
 public interface UsesRelationalDatabase {
    
    /**
     * Sets the information required for connecting to the relational database.
+    * @param sqlTranslator SQL statement translator.
     * @param url URL for relational database, e.g. <q>jdbc:mysql://localhost/labbcat</q>
     * @param user Username for connecting to the database, if any.
     * @param password Password for connecting to the database, if any.
+    * @throws SQLException If the annotator can't connect to the given database.
     */
-   public void rdbConnectionDetails(String url, String user, String password);
+   public void rdbConnectionDetails(
+      MySQLTranslator sqlTranslator, String url, String user, String password)
+      throws SQLException;
 
 } // end of class UsesRelationalDatabase

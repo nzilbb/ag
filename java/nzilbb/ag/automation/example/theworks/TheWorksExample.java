@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.*;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -33,7 +34,9 @@ import nzilbb.util.IO;
 import nzilbb.util.MonitorableTask; // for javadoc
 import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.InvalidConfigurationException;
+import nzilbb.ag.automation.MySQLTranslator;
 import nzilbb.ag.automation.UsesFileSystem;
+import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.ag.*;
 
 /**
@@ -44,7 +47,8 @@ import nzilbb.ag.*;
  *  <li>Includes a <i> task </i> web-app</li>
  * </ul>
  */
-public class TheWorksExample extends Annotator implements UsesFileSystem {
+public class TheWorksExample extends Annotator
+   implements UsesFileSystem, UsesRelationalDatabase {
    /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
    public String getMinimumApiVersion() { return "20200708.2018"; }
 
@@ -76,6 +80,71 @@ public class TheWorksExample extends Annotator implements UsesFileSystem {
          } catch(IOException exception) {}
       }
    }
+
+   private MySQLTranslator sqlx;
+   private String rdbUrl;
+   private String rdbUser;
+   private String rdbPassword;
+   /**
+    * {@link UsesRelationalDatabase} method that sets the information required for
+    * connecting to the relational database. 
+    * @param sqlTranslator SQL statement translator.
+    * @param url URL for relational database, e.g. <q>jdbc:mysql://localhost/labbcat</q>
+    * @param user Username for connecting to the database, if any.
+    * @param password Password for connecting to the database, if any.
+    * @throws SQLException If the annotator can't connect to the given database.
+    */
+   public void rdbConnectionDetails(
+      MySQLTranslator sqlTranslator, String url, String user, String password)
+      throws SQLException {
+      
+      this.sqlx = sqlTranslator;
+      rdbUrl = url;
+      rdbUser = user;
+      rdbPassword = password;
+      
+      // check we can connect
+      Connection rdb = newConnection();      
+      try {
+         
+         // check the schema has been created
+         try {
+            PreparedStatement sql = rdb.prepareStatement(
+               sqlx.apply("SELECT COUNT(*) AS theCount FROM "+getAnnotatorId()+"_table"));
+
+            try {
+               ResultSet rsCheck = sql.executeQuery();
+               rsCheck.close();
+            } finally {
+               sql.close();
+            }
+         } catch(SQLException exception) {
+            
+            PreparedStatement sql = rdb.prepareStatement(
+               sqlx.apply(
+                  "CREATE TABLE "+getAnnotatorId()+"_table ("
+                  +" id varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
+                  +" COMMENT 'This is a comment on the ID field',"
+                  +" a_number smallint NOT NULL"
+                  +" COMMENT 'Does smallint work?',"
+                  +" PRIMARY KEY (id)"
+                  +") ENGINE=MyISAM"));
+	    sql.executeUpdate();
+	    sql.close();
+         }
+      } finally {
+         try { rdb.close(); } catch(SQLException x) {}
+      }      
+   }
+   
+   /**
+    * Get a new connection to the database.
+    * @return A connection to the RDBMS.
+    * @throws SQLException If a database access error occurs
+    */
+   public Connection newConnection() throws SQLException {
+      return DriverManager.getConnection(rdbUrl, rdbUser, rdbPassword);
+   } // end of newConnection()
 
    /**
     * Provides the overall configuration of the annotator. 

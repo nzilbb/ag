@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.sql.SQLException;
 import nzilbb.ag.Constants;
 import nzilbb.ag.Layer;
 import nzilbb.ag.Schema;
@@ -65,6 +66,7 @@ public class ConfigApp extends AnnotatorWebApp {
             application.start();
          } catch(Exception exception) {
             System.err.println("Could not start: "+exception.toString());
+            exception.printStackTrace(System.err);
          }
       }
    }
@@ -103,7 +105,7 @@ public class ConfigApp extends AnnotatorWebApp {
    @Override
    public void init() throws ClassNotFoundException, NoSuchMethodException,
       InvocationTargetException, IllegalAccessException, InstantiationException,
-      ClassCastException, IOException {
+      ClassCastException, IOException, SQLException {
       super.init();
       
       if (!descriptor.hasConfigWebapp()) {
