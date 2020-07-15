@@ -15,7 +15,7 @@
     <form method="POST" action="setTaskParameters">
       <div class="field" title="Input layer from which words come">
         <label for="tokenLayerId">Token Layer</label>
-        <span><select id="tokenLayerId" name="tokenLayerId"></select></span>
+        <span><select id="tokenLayerId" name="tokenLayerId" required></select></span>
       </div>
       <div class="field" title="Transcript attribute for overall language">
         <label for="transcriptLanguageLayerId">Transcript Language Attribute</label>
@@ -36,7 +36,8 @@
       <div class="field" title="Output layer on which stem annotations are added">
         <label for="stemLayerId">Stem Layer</label>
         <span>
-          <select id="stemLayerId" name="stemLayerId" onChange="changedLayer(this);">
+          <select id="stemLayerId" name="stemLayerId" required
+                  onChange="changedLayer(this);">
             <option disabled>[select layer]</option> <!-- force choice the first time -->
             <option>[add new layer]</option>         <!-- allow adding a new layer -->
           </select>
@@ -183,6 +184,6 @@
         http://www.tartarus.org/~martin/PorterStemmer</a>
     </p>
 
-    <footer><div>Porter Stemmer <small id="version"></small></div> </footer>
+    <footer><div> Porter Stemmer <small id="version"></small> </div></footer>
   </body>
 </html>
