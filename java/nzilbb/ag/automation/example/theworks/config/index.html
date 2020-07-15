@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Configure The Works Annotator</title>    
+    <title> Configure The Works Annotator </title>    
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
     <link rel="stylesheet" href="index.css" type="text/css">
@@ -9,26 +9,26 @@
   </head>
   <body>
 
-    <h1>The Works annotator configuration</h1>
-
+    <h1> The Works annotator configuration </h1>
+    <p> This is an example annotator which implements all possible features of an annotator. </p>
+      
     <form method="POST" action="setConfig">
-      <p> This is an example annotator which implements all possible features of an annotator. </p>
       <div class="field">
-        <label for="reverse">Reverse</label>
+        <label for="reverse"> Reverse </label>
         <span><input id="reverse" name="reverse" type="checkbox"></span>
       </div>
       <div class="field">
-        <label for="leftPadding">Left Padding</label>
+        <label for="leftPadding"> Left Padding </label>
         <span><input id="leftPadding" name="leftPadding" type="number" step="1" min="0"></span>
       </div>
       <div class="field">
-        <label for="rightPadding">Right Padding</label>
+        <label for="rightPadding"> Right Padding </label>
         <span><input id="rightPadding" name="rightPadding" type="number" step="1" min="0"></span>
       </div>
       <div class="field">
-        <label for="rightPadding">Simulated Installation Duration (s)</label>
+        <label for="rightPadding"> Simulated Installation Duration (s) </label>
         <span><input id="simulatedInstallationDuration" name="simulatedInstallationDuration"
-                     type="number" step="1" min="0"></span>
+                     required type="number" step="1" min="0"></span>
       </div>
       <div class="controls">
         <input type="submit" value="Close">
@@ -67,6 +67,6 @@
       
     </script>
     
-    <footer><div>The Works Annotator <small id="version"></small></div> </footer>
+    <footer><div> The Works Annotator <small id="version"></small> </div></footer>
   </body>
 </html>
