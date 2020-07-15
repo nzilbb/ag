@@ -98,7 +98,7 @@ public class TheWorksExample extends Annotator
       MySQLTranslator sqlTranslator, String url, String user, String password)
       throws SQLException {
       
-      this.sqlx = sqlTranslator;
+      sqlx = sqlTranslator;
       rdbUrl = url;
       rdbUser = user;
       rdbPassword = password;
