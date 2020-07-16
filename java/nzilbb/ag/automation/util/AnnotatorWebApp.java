@@ -305,7 +305,7 @@ public class AnnotatorWebApp extends StandAloneWebApp {
       if (annotator instanceof UsesRelationalDatabase) {
          String rdbURL = "jdbc:derby:"
             +workingDir.getPath().replace('\\','/')
-            +"/rdb;create=true";
+            +"/derby;create=true";
          ((UsesRelationalDatabase)annotator).rdbConnectionDetails(
             new VanillaSQLTranslator(), rdbURL, null, null);
       }
