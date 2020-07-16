@@ -86,25 +86,32 @@ public class MinimalExample extends Annotator {
       if (schema.getWordLayerId() == null)
          throw new InvalidConfigurationException(this, "Schema has no word layer.");
 
-      // maintain a list of counts
-      TreeMap<String,Integer> typesCounts = new TreeMap<String,Integer>();
-
-      // count tokens of each type
-      for (Annotation token : graph.all(schema.getWordLayerId())) {
-         if (typesCounts.containsKey(token.getLabel())) {
-            typesCounts.put(token.getLabel(), 1);
-         } else {
-            typesCounts.put(token.getLabel(), typesCounts.get(token.getLabel()) + 1);
-         }
-      } // next token
-
-      // print out the results
-      System.out.println(graph.getId());
-      for (String type : typesCounts.keySet()) {
-         System.out.println(type + "\t" + typesCounts.get(type) );
-      } // next type
+      running = true;
       
-      return graph;
+      try {
+         
+         // maintain a list of counts
+         TreeMap<String,Integer> typesCounts = new TreeMap<String,Integer>();
+         
+         // count tokens of each type
+         for (Annotation token : graph.all(schema.getWordLayerId())) {
+            if (typesCounts.containsKey(token.getLabel())) {
+               typesCounts.put(token.getLabel(), 1);
+            } else {
+               typesCounts.put(token.getLabel(), typesCounts.get(token.getLabel()) + 1);
+            }
+         } // next token
+         
+         // print out the results
+         System.out.println(graph.getId());
+         for (String type : typesCounts.keySet()) {
+            System.out.println(type + "\t" + typesCounts.get(type) );
+         } // next type
+         
+         return graph;
+      } finally {
+         running = false;
+      }
    }
 
 }
