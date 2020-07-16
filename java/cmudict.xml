@@ -8,6 +8,7 @@
   <property name="dist"     location="../bin"/>
   <property name="srcfiles" value="nzilbb/annotator/cmudict/**/*.java"/> 
   <property name="webapps"  value="nzilbb/annotator/cmudict/**/*.html nzilbb/annotator/cmudict/**/*.js nzilbb/annotator/cmudict/**/*.css"/> 
+  <property name="dictionary"  value="nzilbb/annotator/cmudict/cmudict.txt"/> 
   <property name="srctests" value="nzilbb/annotator/cmudict/test/Test*.java"/>
   <property name="junitjar" value="/usr/share/java/junit4.jar"/>
   <property name="nzilbb-ag-automation-Annotator" value="nzilbb.annotator.cmudict.CMUDict" />
@@ -54,6 +55,8 @@
       </manifest>      
       <!-- include this source -->
       <fileset dir="${src}" includes="${srcfiles}" />
+      <!-- include the dictionary -->
+      <fileset dir="${src}" includes="${dictionary}" />
       <!-- include webapps -->
       <fileset dir="${src}" includes="${webapps}" />      
       <!-- include this build file -->

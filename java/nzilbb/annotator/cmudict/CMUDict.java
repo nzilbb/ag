@@ -21,31 +21,44 @@
 //
 package nzilbb.annotator.cmudict;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.Vector;
 import javax.script.ScriptException;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
+import nzilbb.ag.automation.Dictionary;
+import nzilbb.ag.automation.DictionaryException;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.MySQLTranslator;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
+import nzilbb.ag.automation.ImplementsDictionaries;
 
 /**
  * Annotator that tags words with their pronunciations according to the 
  * <a href="http://www.speech.cs.cmu.edu/cgi-bin/cmudict"> CMU Pronouncing Dictionary </a>.
  */
 public class CMUDict extends Annotator
-   implements UsesRelationalDatabase, UsesFileSystem {
+   implements UsesRelationalDatabase, UsesFileSystem, ImplementsDictionaries {
    /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
    public String getMinimumApiVersion() { return "20200708.2018"; }
 
@@ -73,6 +86,56 @@ public class CMUDict extends Annotator
    private String rdbUrl;
    private String rdbUser;
    private String rdbPassword;
+   
+   private PrintWriter log;
+   private static SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+   static {
+      time.setTimeZone(TimeZone.getTimeZone("UTC"));
+   }
+
+   /**
+    * Open the log for logging statuses.
+    */
+   public void openLog() {
+      if (log == null) {
+         try {
+            log = new PrintWriter(new FileWriter(new File(workingDirectory, "status.log")));
+         } catch(Throwable t) {
+            System.err.println("CMUDict.openLog: " + t);
+            t.printStackTrace(System.err);
+            setStatus("Could not open log: " + t);
+         }
+      }
+   } // end of openLog()
+
+   /**
+    * Closes the log for logging statuses.
+    */
+   public void closeLog() {
+      if (log != null) {
+         try {
+            log.close();
+         } catch(Throwable t) {
+            System.err.println("CMUDict.closeLog: " + t);
+            t.printStackTrace(System.err);
+            setStatus("Could not close log: " + t);
+         }
+         log = null;
+      }
+   } // end of closeLog()
+
+   
+   /**
+    * Setter for {@link #status}: The current status of the task.
+    * @param status The current status of the task.
+    */
+   @Override
+   public Annotator setStatus(String status) {
+      super.setStatus(status);
+      if (log != null) log.println(time.format(new Date()) + ": " +status);
+      return this;
+   }
+
    /**
     * {@link UsesRelationalDatabase} method that sets the information required for
     * connecting to the relational database. 
@@ -95,7 +158,8 @@ public class CMUDict extends Annotator
       Connection rdb = newConnection();
 
       try {
-         
+
+         sqlTranslator.setTrace(true); // TODO remove
          // check the schema has been created
          try { // either of prepareStatement or executeQuery may fail if the table doesn't exist
             PreparedStatement sql = rdb.prepareStatement(
@@ -107,26 +171,23 @@ public class CMUDict extends Annotator
                sql.close();
             }
          } catch(SQLException exception) {
-            sql.close();
             
-            sql = rdb.prepareStatement(
+            PreparedStatement sql = rdb.prepareStatement(
                sqlx.apply(
                   "CREATE TABLE "+getAnnotatorId()+"_wordform ("
-                  +" wordform varchar(100)"
+                  +" wordform VARCHAR(100)"
                   +" CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
                   +" COMMENT 'Orthographic spelling of the word, in lowercase letters',"
-                  +" variant smallint NOT NULL"
+                  +" variant SMALLINT NOT NULL"
                   +" COMMENT 'Pronunciation number, zero-based',"
-                  +" pron_cmudict varchar(200)"
+                  +" pron_cmudict VARCHAR(200)"
                   +" CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL"
                   +" COMMENT 'Original pronunciation in ARPAbet, from the cmudict file',"
-                  +" pron_disc varchar(100)"
-                  +" CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
-                  +" COMMENT 'Pronunciation in the CELEX DISC character set',"
-                  +" supplemental bit NOT NULL DEFAULT 0"
-                  +" COMMENT 'Whether the word/variant has been manually added since uploading from the cmudict file',"		  
+                  +" supplemental BIT NOT NULL DEFAULT 0"
+                  +" COMMENT 'Whether the word/variant has been manually added"
+                  +" since uploading from the cmudict file',"		  
                   +" PRIMARY KEY (wordform,variant)"
-                  +") ENGINE=MyISAM;"));
+                  +") ENGINE=MyISAM"));
 	    sql.executeUpdate();
 	    sql.close();
          }
@@ -163,9 +224,121 @@ public class CMUDict extends Annotator
     * @see #beanPropertiesFromQueryString(String)
     */ 
    public void setConfig(String config) throws InvalidConfigurationException {
-      // TODO update dictionary if a file was provided
-      setPercentComplete(100);
+      running = true;
+      try {
+         openLog();
+         setStatus(""); // clear any residual status from the last run...
+         
+         // has the dictionary data been added?
+         Connection rdb = newConnection();
+         
+         try { // (but finally close rdb...)
+            
+            PreparedStatement sql = rdb.prepareStatement(
+               sqlx.apply("SELECT COUNT(*) AS theCount FROM "+getAnnotatorId()+"_wordform"));
+            ResultSet rs = sql.executeQuery();
+            rs.next();
+            int wordCount = wordCount = rs.getInt(1);
+            rs.close();
+            sql.close();
+            
+            if (wordCount == 0) {
+               // load data into the table
+               setStatus("Loading pronunciations into wordform table from build-in file...");
+               URL urlCmudictTxt = getClass().getResource("cmudict.txt");
+               if (urlCmudictTxt == null) {
+                  setStatus("ERROR: Could not find cmudict.txt");
+                  throw new InvalidConfigurationException(this, "Could not find cmudict.txt");
+               }
+               wordCount = loadDictionary(urlCmudictTxt.openStream(), rdb);
+               setStatus("Number of pronunciations processed: " + wordCount);               
+            } else {
+               setStatus("Dictionary already loaded.");
+            }
+            
+            setPercentComplete(100);
+         } finally {
+            rdb.close();
+         }
+      } catch (SQLException sqlX) {
+         setStatus("ERROR: " + sqlX);
+         throw new InvalidConfigurationException(
+            this, "Error configuring database: " + sqlX.getMessage(), sqlX);
+      } catch (IOException ioX) {
+         setStatus("ERROR: " + ioX);
+         throw new InvalidConfigurationException(
+            this, "Error reading dictionary file: " + ioX.getMessage(), ioX);
+      } finally {
+         closeLog();
+         running = false;
+      }
    }
+
+   /**
+    * Reads the given stream and loads the corresponding dictionary entries into the
+    * wordform table. 
+    * @param is
+    * @return The number of pronunciations found.
+    * @throws IOException
+    * @throws SQLException
+    */
+   public int loadDictionary(InputStream is, Connection connection)
+      throws IOException, SQLException
+   {
+      PreparedStatement sql = connection.prepareStatement(
+	 sqlx.apply("REPLACE INTO "+getAnnotatorId()+"_wordform"
+                    +" (wordform, variant, pron_cmudict) VALUES (?,?,?)"));
+      BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+      int pronunciationCount = 0;
+      int lineCount = 0;
+      try {
+	 String line = reader.readLine();
+	 while (line != null) {
+	    if (isCancelling()) break;
+	    lineCount++;
+	    if (line.startsWith(";;;")) { // comment
+	       if (line.startsWith(";;; # CMUdict")) {
+                  // note the header, which contains the version
+                  FileWriter version = new FileWriter(new File(workingDirectory, "version.txt"));
+                  version.write(line);
+                  version.close();
+	       }
+	    } else if (line.trim().length() > 0) { // not a comment
+	       try {
+		  String delimiter = "  ";
+		  int delimiterPos = line.indexOf(delimiter);
+		  String wordForm = line.substring(0, delimiterPos);
+		  int variant = 0;
+		  if (wordForm.endsWith(")")) { // variant something like "ABKHAZIAN(3)"
+		     int openParenthesisPos = wordForm.lastIndexOf('(');
+		     if (openParenthesisPos > 0) {
+			variant = Integer.parseInt(
+			   wordForm.substring(openParenthesisPos+1, wordForm.length() - 1));
+		     }
+		     wordForm = wordForm.substring(0, openParenthesisPos);
+		  } // variant
+		  wordForm = wordForm.toLowerCase();
+		  String pronunciation = line.substring(delimiterPos + delimiter.length());
+		  sql.setString(1, wordForm);
+		  sql.setInt(2, variant);
+		  sql.setString(3, pronunciation);
+		  sql.executeUpdate();
+		  pronunciationCount++;
+		  
+		  setPercentComplete((wordForm.charAt(0) - 'a') * 100/26);
+	       } catch (Throwable t) {
+		  setStatus("ERROR line "+lineCount+" \""+line+"\": " + t);
+	       }
+	    } // not a comment
+            
+	    line = reader.readLine();
+	 } // next line
+      } finally {
+	 reader.close();
+	 sql.close();
+      }
+      return pronunciationCount;
+   } // end of loadDictionary()
 
    /**
     * ID of the input layer containing word tokens.
@@ -351,86 +524,133 @@ public class CMUDict extends Annotator
     * @throws TransformationException If the transformation cannot be completed.
     */
    public Graph transform(Graph graph) throws TransformationException {
-      
-      Layer tokenLayer = graph.getSchema().getLayer(tokenLayerId);
-      if (tokenLayer == null) {
-         throw new InvalidConfigurationException(
-            this, "Invalid input token layer: " + tokenLayerId);
-      }
-      Layer stemLayer = graph.getSchema().getLayer(pronunciationLayerId);
-      if (stemLayer == null) {
-         throw new InvalidConfigurationException(
-            this, "Invalid output stem layer: " + pronunciationLayerId);
-      }
-
-      // what languages are in the transcript?
-      boolean transcriptIsMainlyEnglish = true;
-      if (transcriptLanguageLayerId != null) {
-         Annotation transcriptLanguage = graph.first(transcriptLanguageLayerId);
-         if (transcriptLanguage != null) {
-            if (!transcriptLanguage.getLabel().toLowerCase().startsWith("en")) { // not English
-               transcriptIsMainlyEnglish = false;
+      running = true;
+      try {
+         openLog();
+         setStatus(""); // clear any residual status from the last run...
+         
+         Layer tokenLayer = graph.getSchema().getLayer(tokenLayerId);
+         if (tokenLayer == null) {
+            throw new InvalidConfigurationException(
+               this, "Invalid input token layer: " + tokenLayerId);
+         }
+         Layer stemLayer = graph.getSchema().getLayer(pronunciationLayerId);
+         if (stemLayer == null) {
+            throw new InvalidConfigurationException(
+               this, "Invalid output stem layer: " + pronunciationLayerId);
+         }
+         
+         // what languages are in the transcript?
+         boolean transcriptIsMainlyEnglish = true;
+         if (transcriptLanguageLayerId != null) {
+            Annotation transcriptLanguage = graph.first(transcriptLanguageLayerId);
+            if (transcriptLanguage != null) {
+               if (!transcriptLanguage.getLabel().toLowerCase().startsWith("en")) { // not English
+                  transcriptIsMainlyEnglish = false;
+               }
             }
          }
-      }
-      boolean thereArePhraseTags = false;
-      if (phraseLanguageLayerId != null) {
-         if (graph.first(phraseLanguageLayerId) != null) {
-            thereArePhraseTags = true;
+         boolean thereArePhraseTags = false;
+         if (phraseLanguageLayerId != null) {
+            if (graph.first(phraseLanguageLayerId) != null) {
+               thereArePhraseTags = true;
+            }
          }
-      }
-      
-      // should we just tag everything?
-      if (transcriptIsMainlyEnglish && !thereArePhraseTags) {
-         // process all tokens
-         for (Annotation token : graph.all(tokenLayerId)) {
-            // tag only tokens that are not already tagged
-            if (token.first(pronunciationLayerId) == null) { // not tagged yet
-//TODO               token.createTag(pronunciationLayerId, stem(token.getLabel()))
-//                  .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-            } // not tagged yet
-         } // next token
-      } else if (transcriptIsMainlyEnglish) {
-         // process all but the phrase-tagged tokens
-
-         // tag the exceptions
-         for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
-            if (!phrase.getLabel().toLowerCase().startsWith("en")) { // not English
-               for (Annotation token : phrase.all(tokenLayerId)) {
-                  // mark the token as an exception
-                  token.put("@notEnglish", Boolean.TRUE);
-               } // next token in the phrase
-            } // non-English phrase
-         } // next phrase
          
-         for (Annotation token : graph.all(tokenLayerId)) {
-            if (token.containsKey("@notEnglish")) {
-               // while we're here, we remove the @notEnglish mark
-               token.remove("@notEnglish");
-            } else { // English, so tag it
+         // should we just tag everything?
+         if (transcriptIsMainlyEnglish && !thereArePhraseTags) {
+            // process all tokens
+            for (Annotation token : graph.all(tokenLayerId)) {
                // tag only tokens that are not already tagged
                if (token.first(pronunciationLayerId) == null) { // not tagged yet
-//TODO                  token.createTag(pronunciationLayerId, stem(token.getLabel()))
-//                     .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+//TODO               token.createTag(pronunciationLayerId, stem(token.getLabel()))
+//                  .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
                } // not tagged yet
-            } // English, so tag it
-         } // next token
-      } else if (thereArePhraseTags) {
-         // process only the tokens phrase-tagged as English
-         for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
-            if (phrase.getLabel().toLowerCase().startsWith("en")) {
-               for (Annotation token : phrase.all(tokenLayerId)) {
+            } // next token
+         } else if (transcriptIsMainlyEnglish) {
+            // process all but the phrase-tagged tokens
+            
+            // tag the exceptions
+            for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
+               if (!phrase.getLabel().toLowerCase().startsWith("en")) { // not English
+                  for (Annotation token : phrase.all(tokenLayerId)) {
+                     // mark the token as an exception
+                     token.put("@notEnglish", Boolean.TRUE);
+                  } // next token in the phrase
+               } // non-English phrase
+            } // next phrase
+            
+            for (Annotation token : graph.all(tokenLayerId)) {
+               if (token.containsKey("@notEnglish")) {
+                  // while we're here, we remove the @notEnglish mark
+                  token.remove("@notEnglish");
+               } else { // English, so tag it
                   // tag only tokens that are not already tagged
                   if (token.first(pronunciationLayerId) == null) { // not tagged yet
+//TODO                  token.createTag(pronunciationLayerId, stem(token.getLabel()))
+//                     .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                  } // not tagged yet
+               } // English, so tag it
+            } // next token
+         } else if (thereArePhraseTags) {
+            // process only the tokens phrase-tagged as English
+            for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
+               if (phrase.getLabel().toLowerCase().startsWith("en")) {
+                  for (Annotation token : phrase.all(tokenLayerId)) {
+                     // tag only tokens that are not already tagged
+                     if (token.first(pronunciationLayerId) == null) { // not tagged yet
 //TODO                     token.createTag(pronunciationLayerId, stem(token.getLabel()))
 //                        .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-                  } // not tagged yet
-               } // next token in the phrase
-            } // English phrase
-         } // next phrase
-      } // thereArePhraseTags
-      
-      return graph;
+                     } // not tagged yet
+                  } // next token in the phrase
+               } // English phrase
+            } // next phrase
+         } // thereArePhraseTags
+         
+         return graph;
+      } finally {
+         closeLog();
+         running = false;
+      }
    }
    
+   /**
+    * Lists the dictionaries implemented by this Annotator.
+    * <p> This method can assume that the following methods have been previously called:
+    * <ul>
+    *  <li> {@link Annotator#setSchema(Schema)} </li>
+    *  <li> {@link Annotator#setTaskParameters(String)} </li>
+    *  <li> {@link UsesFileSystem#setWorkingDirectory(File)} (if applicable) </li>
+    *  <li> {@link UsesRelationalDatabase#rdbConnectionDetails(String,String,String)}
+    *       (if applicable) </li>
+    * </ul>
+    * @return A (possibly empty) list of IDs of dictionaries.
+    */
+   public List<String> getDictionaryIds() {
+      return new Vector<String>() {{ add("cmudict"); }};
+   }
+   
+   /**
+    * Gets the identified dictionary.
+    * <p> This method can assume that the following methods have been previously called:
+    * <ul>
+    *  <li> {@link Annotator#setSchema(Schema)} </li>
+    *  <li> {@link Annotator#setTaskParameters(String)} </li>
+    *  <li> {@link UsesFileSystem#setWorkingDirectory(File)} (if applicable) </li>
+    *  <li> {@link UsesRelationalDatabase#rdbConnectionDetails(String,String,String)}
+    *       (if applicable) </li>
+    * </ul>
+    * @return The identified dictionary.
+    * @throws DictionaryException If the given dictionary doesn't exist.
+    */
+   public Dictionary getDictionary(String id) throws DictionaryException {
+      if (!"cmudict".equals(id)) {
+         throw new DictionaryException(null, "Invalid dictionary: " + id);
+      }
+      try {
+         return new CMUDictionary(this, newConnection());
+      } catch (SQLException sqlX) {
+         throw new DictionaryException(null, sqlX);
+      }
+   }
 }
