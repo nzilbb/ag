@@ -78,8 +78,7 @@ public class TestAnnotatorDescriptor {
                  d.getInfo().startsWith("<!DOCTYPE html>\n<html>\n  <head>\n    <title>TheWorksExample"));
    }
 
-   public static void main(String args[]) 
-   {
+   public static void main(String args[]) {
       org.junit.runner.JUnitCore.main("nzilbb.ag.automation.util.test.TestAnnotatorDescriptor");
    }
 }
