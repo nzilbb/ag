@@ -33,7 +33,10 @@ import java.util.Vector;
 import nzilbb.util.IO;
 import nzilbb.util.MonitorableTask; // for javadoc
 import nzilbb.ag.automation.Annotator;
+import nzilbb.ag.automation.Dictionary;
+import nzilbb.ag.automation.DictionaryException;
 import nzilbb.ag.automation.InvalidConfigurationException;
+import nzilbb.ag.automation.ImplementsDictionaries;
 import nzilbb.ag.automation.MySQLTranslator;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
@@ -48,7 +51,7 @@ import nzilbb.ag.*;
  * </ul>
  */
 public class TheWorksExample extends Annotator
-   implements UsesFileSystem, UsesRelationalDatabase {
+   implements UsesFileSystem, UsesRelationalDatabase, ImplementsDictionaries {
    /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
    public String getMinimumApiVersion() { return "20200708.2018"; }
 
@@ -291,6 +294,8 @@ public class TheWorksExample extends Annotator
       String[] layers = { outputLayer };
       return layers;
    }
+
+   protected TheWorksExampleDictionary frequencies;
    
    /**
     * Transforms the graph. In this case, the graph is simply summarized, by counting all
@@ -305,25 +310,31 @@ public class TheWorksExample extends Annotator
       if (schema.getWordLayerId() == null)
          throw new InvalidConfigurationException(this, "Schema has no word layer.");
 
-      // maintain a list of counts
-      TreeMap<String,Integer> typesCounts = new TreeMap<String,Integer>();
+      running = true;
 
-      // count tokens of each type
-      for (Annotation token : graph.all(schema.getWordLayerId())) {
-         if (typesCounts.containsKey(token.getLabel())) {
-            typesCounts.put(token.getLabel(), 1);
-         } else {
-            typesCounts.put(token.getLabel(), typesCounts.get(token.getLabel()) + 1);
-         }
-      } // next token
-
-      // print out the results
-      System.out.println(graph.getId());
-      for (String type : typesCounts.keySet()) {
-         System.out.println(type + "\t" + typesCounts.get(type) );
-      } // next type
+      try { 
+         // maintain a list of counts
+         frequencies = new TheWorksExampleDictionary(this);
+         
+         // count tokens of each type
+         for (Annotation token : graph.all(schema.getWordLayerId())) {
+            if (frequencies.containsKey(token.getLabel())) {
+               frequencies.put(token.getLabel(), 1);
+            } else {
+               frequencies.put(token.getLabel(), frequencies.get(token.getLabel()) + 1);
+            }
+         } // next token
+         
+         // print out the results
+         System.out.println(graph.getId());
+         for (String type : frequencies.keySet()) {
+            System.out.println(type + "\t" + frequencies.get(type) );
+         } // next type
       
-      return graph;
+         return graph;
+      } finally {
+         running = false;
+      }
    }
    
    /**
@@ -441,4 +452,40 @@ public class TheWorksExample extends Annotator
     * method should take to return. 
     */
    public TheWorksExample setSimulatedInstallationDuration(Integer newSimulatedInstallationDuration) { simulatedInstallationDuration = newSimulatedInstallationDuration; return this; }
+
+   /**
+    * Lists the dictionaries implemented by this Annotator.
+    * <p> This method can assume that the following methods have been previously called:
+    * <ul>
+    *  <li> {@link Annotator#setSchema(Schema)} </li>
+    *  <li> {@link Annotator#setTaskParameters(String)} </li>
+    *  <li> {@link UsesFileSystem#setWorkingDirectory(File)} (if applicable) </li>
+    *  <li> {@link UsesRelationalDatabase#rdbConnectionDetails(String,String,String)}
+    *       (if applicable) </li>
+    * </ul>
+    * @return A (possibly empty) list of IDs of dictionaries.
+    */
+   public List<String> getDictionaryIds() {
+      return new Vector<String>() {{ add("frequencies"); }};
+   }
+
+   /**
+    * Gets the identified dictionary.
+    * <p> This method can assume that the following methods have been previously called:
+    * <ul>
+    *  <li> {@link Annotator#setSchema(Schema)} </li>
+    *  <li> {@link Annotator#setTaskParameters(String)} </li>
+    *  <li> {@link UsesFileSystem#setWorkingDirectory(File)} (if applicable) </li>
+    *  <li> {@link UsesRelationalDatabase#rdbConnectionDetails(String,String,String)}
+    *       (if applicable) </li>
+    * </ul>
+    * @return The identified dictionary.
+    * @throws DictionaryException If the given dictionary doesn't exist.
+    */
+   public Dictionary getDictionary(String id) throws DictionaryException {
+      if (!"frequencies".equals(id)) {
+         throw new DictionaryException(null, "Invalid dictionary: " + id);
+      }
+      return frequencies;
+   }
 }

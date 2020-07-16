@@ -56,22 +56,22 @@ public interface Dictionary extends Function<String,List<String>> {
    public List<String> lookup(String key) throws DictionaryException;
 
    /**
-    * Returns a count of all words in the dictionary.
-    * @return the number of words that would be returned by a call to listAllWords
+    * Returns a count of all keys in the dictionary.
+    * @return the number of keys that would be returned by a call to listAllEntries
     */
-   public int countAllWords() throws DictionaryException;
+   public int countAllKeys() throws DictionaryException;
 
    /**
-    * Returns a sub-list of all words in the dictionary - i.e. all
-    * words between the two specified indexes.  This primarily allows LaBB-CAT to
-    * paginate the list on the Edit Dictionary page.
-    * @param start the(zero-based) index of the first word to list
+    * Returns a sub-list of all entries in the dictionary - i.e. all
+    * keys between the two specified indexes.  This primarily allows pagination of the
+    * list on a Edit Dictionary page. 
+    * @param start the(zero-based) index of the first key to list
     * @param length the number of entries to return, or 0, meaning to the end of the list
     * @return a map of keys to their definitions.
     * @throws DictionaryReadOnlyException
     * @throws Exception
     */
-   public Map<String, List<String>> listAllWords(int start, int length)
+   public Map<String, List<String>> listAllEntries(int start, int length)
       throws DictionaryReadOnlyException, DictionaryException;
       
    /**
@@ -83,17 +83,17 @@ public interface Dictionary extends Function<String,List<String>> {
    default public boolean isReadOnly() { return true; }
 
    /**
-    * Returns a count of all editable words in the dictionary.
-    * @return the number of words that would be returned by a call to listEditableWords
+    * Returns a count of all editable keys in the dictionary.
+    * @return the number of keys that would be returned by a call to listEditableKeys
     * @throws DictionaryReadOnlyException
     */
-   default public int countEditableWords()
+   default public int countEditableKeys()
       throws DictionaryReadOnlyException, DictionaryException {
       return 0;
    }
 
    /**
-    * Returns an aggregrate of all values of all words in the dictionary. This default
+    * Returns an aggregrate of all values of all keys in the dictionary. This default
     * implementation always returns null. 
     * @param operation The aggregation operation - e.g. MAX, MIN, COUNT, or SUM (e.g. to
     * get the sum of all word frequencies in a frequency word-list. The supported
@@ -105,8 +105,8 @@ public interface Dictionary extends Function<String,List<String>> {
    }
 
    /**
-    * Returns an aggregrate of all words (i.e. keys) in the dictionary. This default
-    * implementation always returns null. 
+    * Returns an aggregrate of all keyss in the dictionary. This default implementation
+    * always returns null.
     * @param operation The aggregation operation - e.g. MAX, MIN, COUNT, or SUM (e.g. to
     * get the sum of all word frequencies in a frequency word-list. The supported
     * operations depend on the implementor. 
@@ -118,10 +118,10 @@ public interface Dictionary extends Function<String,List<String>> {
    }
 
    /**
-    * Adds a word to the dictionary.
+    * Adds an entry to the dictionary.
     * @param key The key to add an entry for - e.g. the word orthorgraphy.
     * @param entry The entry for the key - e.g. its pronunciation.
-    * @return the ID for the word in the dictionary, if appropriate
+    * @return the internal ID for the key in the dictionary, if appropriate
     */
    default public String add(String key, String entry)
       throws DictionaryReadOnlyException, DictionaryException {
@@ -133,10 +133,10 @@ public interface Dictionary extends Function<String,List<String>> {
     * this method simply calls {@link #add(String,String)} - i.e. the reference is ignored. 
     * @param key The key to add an entry for - e.g. the word orthorgraphy.
     * @param entry The entry for the key - e.g. its pronunciation.
-    * @param reference A reference for the word. This is implementation-specific, but is
+    * @param reference A reference for the key. This is implementation-specific, but is
     * intended as a mechanism for allowing a new wordform to be associated with an
     * existing lemma. 
-    * @return the ID for the word in the dictionary, if appropriate
+    * @return the internal ID for the key in the dictionary, if appropriate
     * @throws DictionaryReadOnlyException
     */
    default public String add(String key, String entry, String reference)
@@ -147,7 +147,7 @@ public interface Dictionary extends Function<String,List<String>> {
    /**
     * Removes a key from the dictionary.
     * @param key
-    * @return the ID for the word in the dictionary, if appropriate
+    * @return the internal ID for the key in the dictionary, if appropriate
     * @throws DictionaryReadOnlyException
     */
    default public String remove(String key)
@@ -156,10 +156,10 @@ public interface Dictionary extends Function<String,List<String>> {
    }
 
    /**
-    * Removes a word entry from the dictionary.
+    * Removes an entry from the dictionary.
     * @param key
     * @param entry
-    * @return the ID for the word in the dictionary, if appropriate
+    * @return the internal ID for the entry in the dictionary, if appropriate
     * @throws DictionaryReadOnlyException
     */
    default public String remove(String key, String entry)
@@ -168,35 +168,35 @@ public interface Dictionary extends Function<String,List<String>> {
    }
 
    /**
-    * Returns a list of all editable words in the dictionary.
+    * Returns a list of all editable entries in the dictionary.
     * @return a map of keys to lists of definitions.
     * @throws DictionaryReadOnlyException
     */
-   default public Map<String, List<String>> listEditableWords()
+   default public Map<String, List<String>> listEditableEntries()
       throws DictionaryReadOnlyException, DictionaryException {
-      return listEditableWords(0,0);
+      return listEditableEntries(0,0);
    }
 
    /**
-    * Returns a list of all words in the dictionary.
+    * Returns a list of all entries in the dictionary.
     * @return a map of keys to their definitions. 
     * @throws DictionaryReadOnlyException
     */
-   default public Map<String, List<String>> listAllWords()
+   default public Map<String, List<String>> listAllEntries()
       throws DictionaryReadOnlyException, DictionaryException {
-      return listAllWords(0,0);
+      return listAllEntries(0,0);
    }
    
    /**
-    * Returns a sub-list of editable words in the dictionary - i.e. all
-    * words between the two specified indexes.  This primarily allows LaBB-CAT to
+    * Returns a sub-list of editable entries in the dictionary - i.e. all
+    * entries between the two specified indexes.  This primarily allows LaBB-CAT to
     * paginate the list on the Edit Dictionary page.
-    * @param start the(zero-based) index of the first word to list
+    * @param start the(zero-based) index of the first key to list
     * @param length the number of entries to return, or 0, meaning to the end of the list
     * @return a map of keys to their definitions. 
     * @throws DictionaryReadOnlyException
     */
-   default public Map<String, List<String>> listEditableWords(int start, int length)
+   default public Map<String, List<String>> listEditableEntries(int start, int length)
       throws DictionaryReadOnlyException, DictionaryException {
       throw new DictionaryReadOnlyException(this);
    }
@@ -207,34 +207,40 @@ public interface Dictionary extends Function<String,List<String>> {
     * @return List of entries.
     * @throws DictionaryReadOnlyException
     */
-   default public List<String> lookupEditableWord(String key)
+   default public List<String> lookupEditableEntry(String key)
       throws DictionaryReadOnlyException, DictionaryException {
       throw new DictionaryReadOnlyException(this);
    }
 
    /**
-    * Suggests a possible entry for the given word.  This is intended for
+    * Suggests a possible entry for the given key.  This is intended for
     * words that have not yet been entered, to make it easier to add new
-    * entries based on existing entries.  If the word is already in the
+    * entries based on existing entries.  If the key is already in the
     * dictionary, then <i>OperationNotSupportedException</i> should be thrown.
     * @param key
-    * @return a suggested entry for the given word, or null if no suggestion is possible
-    * @throws OperationNotSupportedException When sWord is already in the dictionary
+    * @return a suggested entry for the given key, or null if no suggestion is possible
+    * @throws DictionaryException When key is already in the dictionary
     */
-   default public String suggest(String key) throws DictionaryException, DictionaryException {
-      throw new DictionaryException(this, "Suggest not supported.");
+   default public String suggest(String key) throws DictionaryException {
+      if (lookup(key).size() > 0) {
+         throw new DictionaryException(this, "Entry already present: " + key);
+      }
+      return null;
    }
    
    /**
     * Looks up a key and provides all possible matches, in their <q>raw</q>
     * representation for dictionary editing.   
     * <p>The default implementation returns the result of {@link #lookup(String)},
-    * but if an implementor wants to return a marked-up version of word definitions for
+    * but if an implementor wants to return a marked-up version of key definitions for
     * the purposes  of allowing the user to accurately edit the dictionary, this method
     * can be overridden. 
     */
    default public List<String> lookupRaw(String key) throws DictionaryException {
       return lookup(key); }
+
+   /** Frees any resources reserved by the dictionary */
+   default public void close() {}
 
    /** 
     * Function method that looks up all entries for the given key.
