@@ -41,11 +41,26 @@ public class VanillaSQLTranslator extends MySQLTranslator {
     * @return The translated version of the the SQL statement.
     */
    public String apply(String sql) {
-      return sql
-         .replace("ENGINE=MyISAM","")
-         .replace("CHARACTER SET utf8mb4","")
-         .replace("COLLATE utf8mb4_general_ci","")
-         .replaceAll("COMMENT '[^']*'","");
+      if (trace) System.out.println("SQL before: " + sql);
+      String translated = sql.trim();
+      // TODO COALESCE
+      if (translated.startsWith("REPLACE INTO")) {
+         translated = translated
+            .replaceFirst("REPLACE INTO","INSERT INTO"); // this isn't strictly valid!
+      } else if (translated.startsWith("CREATE TABLE")) {
+         translated = translated
+            .replace(" ENGINE=MyISAM","")
+            .replace(" CHARACTER SET utf8mb4","")
+            .replace(" COLLATE utf8mb4_general_ci","")
+            .replace(" NOT NULL","")
+            .replace(" NULL","")
+            .replace(" BIT"," SMALLINT")
+            .replaceAll(" COMMENT '[^']*'","");
+      }
+      if (translated.endsWith(";")) translated = translated.substring(0, translated.length() - 1);
+      translated = translated.trim();
+      if (trace) System.out.println("SQL after: " + translated);
+      return translated;
    }
    
 } // end of class VanillaSQLTranslator

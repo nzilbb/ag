@@ -51,12 +51,32 @@ public class MySQLTranslator implements UnaryOperator<String> {
     */
    public String getRdbms() { return rdbms; }
 
+   /**
+    * Whether to print statements passed to {@link #apply(String)}
+    * @see #getTrace()
+    * @see #setTrace(boolean)
+    */
+   protected boolean trace = true;
+   /**
+    * Getter for {@link #trace}: Whether to print statements passed to {@link #apply(String)}
+    * @return Whether to print statements passed to {@link #apply(String)}
+    */
+   public boolean getTrace() { return trace; }
+   /**
+    * Setter for {@link #trace}: Whether to print statements passed to {@link #apply(String)}
+    * @param newTrace Whether to print statements passed to {@link #apply(String)}
+    */
+   public MySQLTranslator setTrace(boolean newTrace) { trace = newTrace; return this; }
+
    /** 
     * Translate the given statement.
     * <p> This implementation simply returns the given statement.
     * @param sql The SQL statement to translate
     * @return The translated version of the the SQL statement.
     */
-   public String apply(String sql) { return sql; }
+   public String apply(String sql) {
+      if (trace) System.out.println(sql);
+      return sql;
+   }
    
 } // end of class MySQLTranslator
