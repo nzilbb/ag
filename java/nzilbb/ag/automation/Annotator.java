@@ -143,6 +143,34 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
    public abstract String getMinimumApiVersion();
    
    /**
+    * Whether the annotator is currently annotating.
+    * @see #getRunning()
+    */
+   protected boolean running = false;
+   /**
+    * Getter for {@link #running}: Whether the annotator is currently annotating.
+    * @return Whether the annotator is currently annotating.
+    */
+   public boolean getRunning() { return running; }
+
+   /**
+    * The current status of the task.
+    * @see #getStatus()
+    * @see #setStatus(String)
+    */
+   protected String status;
+   /**
+    * Getter for {@link #status}: The current status of the task.
+    * @return The current status of the task.
+    */
+   public String getStatus() { return status; }
+   /**
+    * Setter for {@link #status}: The current status of the task.
+    * @param newStatus The current status of the task.
+    */
+   public Annotator setStatus(String newStatus) { status = newStatus; return this; }
+   
+   /**
     * The layer schema.
     * @see #getSchema()
     * @see #setSchema(Schema)

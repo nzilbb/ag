@@ -38,13 +38,27 @@ public interface MonitorableTask {
     */
    public Integer getPercentComplete();
    
-   /**
-    * Cancels the task.
-    */
+   /** Cancels the task. */
    public void cancel();
 
-   // TODO getTaskId()
-   // TODO getStatus()
-   // TODO getRunning()
+   /**
+    * Reveals whether the task is still running or not.
+    * @return true if the task is currently running, false otherwise.
+    */
+   public boolean getRunning();
    
+   /**
+    * Returns a unique identifier for the task.
+    * <p> The default implementation returns the ID of the current thread.
+    * @return A unique identifier.
+    */
+   default public String getTaskId() { return ""+Thread.currentThread().getId(); }
+   
+   /**
+    * Reveals the current status of the task.
+    * <p> The default implementation always returns an empty string.
+    * @return A description of the current status of the task for displaying to the user,
+    * or an empty string.
+    */
+   default public String getStatus() { return ""; }
 } // end of class MonitorableSeries
