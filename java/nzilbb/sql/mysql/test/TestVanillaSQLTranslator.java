@@ -20,7 +20,7 @@
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-package nzilbb.ag.automation.util.test;
+package nzilbb.sql.mysql.test;
 	      
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import nzilbb.ag.automation.*;
 import nzilbb.ag.automation.util.*;
+import nzilbb.sql.mysql.VanillaSQLTranslator;
 
 public class TestVanillaSQLTranslator {
    
@@ -77,6 +78,6 @@ public class TestVanillaSQLTranslator {
    }
 
    public static void main(String args[]) {
-      org.junit.runner.JUnitCore.main("nzilbb.ag.automation.util.test.TestVanillaSQLTranslator");
+      org.junit.runner.JUnitCore.main("nzilbb.sql.mysql.test.TestVanillaSQLTranslator");
    }
 }

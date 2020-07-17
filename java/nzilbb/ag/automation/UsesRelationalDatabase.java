@@ -22,6 +22,7 @@
 package nzilbb.ag.automation;
 
 import java.sql.SQLException;
+import nzilbb.sql.mysql.MySQLTranslator;
 
 /**
  * Extend this interface if your {@link Annotator} needs a relational database to function.

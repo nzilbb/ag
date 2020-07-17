@@ -30,17 +30,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
-import nzilbb.util.IO;
-import nzilbb.util.MonitorableTask; // for javadoc
+import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.Dictionary;
 import nzilbb.ag.automation.DictionaryException;
-import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.ImplementsDictionaries;
-import nzilbb.ag.automation.MySQLTranslator;
+import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
-import nzilbb.ag.*;
+import nzilbb.sql.mysql.MySQLTranslator;
+import nzilbb.util.IO;
+import nzilbb.util.MonitorableTask; // for javadoc
 
 /**
  * This is an example annotator which implements all possible features of an annotator.

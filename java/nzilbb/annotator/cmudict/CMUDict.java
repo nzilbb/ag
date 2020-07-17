@@ -47,11 +47,11 @@ import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.Dictionary;
 import nzilbb.ag.automation.DictionaryException;
+import nzilbb.ag.automation.ImplementsDictionaries;
 import nzilbb.ag.automation.InvalidConfigurationException;
-import nzilbb.ag.automation.MySQLTranslator;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
-import nzilbb.ag.automation.ImplementsDictionaries;
+import nzilbb.sql.mysql.MySQLTranslator;
 
 /**
  * Annotator that tags words with their pronunciations according to the 

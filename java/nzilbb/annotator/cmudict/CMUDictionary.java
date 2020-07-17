@@ -34,7 +34,7 @@ import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.Dictionary;
 import nzilbb.ag.automation.DictionaryException;
 import nzilbb.ag.automation.DictionaryReadOnlyException;
-import nzilbb.ag.automation.MySQLTranslator;
+import nzilbb.sql.mysql.MySQLTranslator;
 
 /**
  * This is an example annotator dictionary.

@@ -41,7 +41,7 @@ import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.ag.automation.util.AnnotatorDescriptor;
 import nzilbb.ag.automation.util.RequestRouter;
-import nzilbb.ag.automation.util.VanillaSQLTranslator;
+import nzilbb.sql.mysql.VanillaSQLTranslator;
 import nzilbb.util.IO;
 import nzilbb.util.ProgramDescription;
 import nzilbb.util.Switch;
@@ -306,6 +306,15 @@ public class AnnotatorWebApp extends StandAloneWebApp {
          String rdbURL = "jdbc:derby:"
             +workingDir.getPath().replace('\\','/')
             +"/derby;create=true";
+         // TODO implement COALESCE function, something like:
+         // TODO  CREATE FUNCTION COALESCE
+         // TODO  ( P1 VARCHAR, P2 VARCHAR )
+         // TODO  RETURNS VARCHAR
+         // TODO  PARAMETER STYLE JAVA
+         // TODO  NO SQL LANGUAGE JAVA
+         // TODO  CALLED ON NULL INPUT
+         // TODO  DETERMINISTIC
+         // TODO  EXTERNAL NAME 'nzilbb.derby.MySQLFunction.COALESCE'
          ((UsesRelationalDatabase)annotator).rdbConnectionDetails(
             new VanillaSQLTranslator(), rdbURL, null, null);
       }
