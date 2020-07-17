@@ -196,6 +196,32 @@ public class CMUDictionary implements Dictionary {
    public boolean isReadOnly() { return false; }
 
    /**
+    * Returns a count of all editable keys in the dictionary.
+    * @return the number of keys that would be returned by a call to listEditableKeys
+    * @throws DictionaryReadOnlyException
+    */
+   public int countEditableKeys() throws DictionaryReadOnlyException, DictionaryException {
+      try {
+         PreparedStatement sql = rdb.prepareStatement(
+            sqlx.apply(
+               "SELECT COUNT(DISTINCT wordform) FROM "+annotator.getAnnotatorId()+"_wordform"
+               +" WHERE supplemental = TRUE"));
+         try {
+            ResultSet rs = sql.executeQuery();
+            try {
+               rs.next();
+               return rs.getInt(1);
+            } finally {
+               rs.close();
+            }
+         } finally {
+            sql.close();
+         }
+      } catch (SQLException sqlX) {
+         throw new DictionaryException(this, sqlX);
+      }
+   }
+   /**
     * {@link Dictionary} method - Returns a count of all editable entries in the dictionary.
     * @return the number of entries that would be returned by a call to listEditableEntries
     * @throws DictionaryReadOnlyException
@@ -205,8 +231,8 @@ public class CMUDictionary implements Dictionary {
       try {
          PreparedStatement sql = rdb.prepareStatement(
             sqlx.apply(
-               "SELECT COUNT(DISTINCT wordform) FROM "+annotator.getAnnotatorId()+"_wordform"
-               +" WHERE supplemental = true"));
+               "SELECT COUNT(*) FROM "+annotator.getAnnotatorId()+"_wordform"
+               +" WHERE supplemental = TRUE"));
          try {
             ResultSet rs = sql.executeQuery();
             try {
@@ -316,7 +342,7 @@ public class CMUDictionary implements Dictionary {
          try {
             sql.setString(1, key.toLowerCase());
             sql.setInt(2, iVariant);
-            sql.setString(3, key);
+            sql.setString(3, entry);
             sql.executeUpdate();
          } finally {
             sql.close();
@@ -371,7 +397,7 @@ public class CMUDictionary implements Dictionary {
             +" WHERE wordform = ? AND pron_cmudict = ? AND supplemental = 1");
          try {
             sql.setString(1, key);
-            sql.setString(1, entry);
+            sql.setString(2, entry);
             if (sql.executeUpdate() == 0) {
                throw new DictionaryReadOnlyException(
                   this, "No supplemental entry found for " + key + " = " + entry);

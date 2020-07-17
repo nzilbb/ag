@@ -44,7 +44,7 @@ import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.annotator.cmudict.CMUDict;
 import nzilbb.annotator.cmudict.CMUDictionary;
-import nzilbb.sql.mysql.VanillaSQLTranslator;
+import nzilbb.sql.derby.DerbySQLTranslator;
 
 public class TestCMUDictionary {
 
@@ -69,7 +69,7 @@ public class TestCMUDictionary {
          +dir.getPath().replace('\\','/')
          +"/derby;create=true";
       ((UsesRelationalDatabase)annotator).rdbConnectionDetails(
-         new VanillaSQLTranslator(), rdbURL, null, null);
+         new DerbySQLTranslator(), rdbURL, null, null);
 
       // set the annotator configuration, which will install the lexicon the first time (only)
       annotator.setConfig(annotator.getConfig());
@@ -124,6 +124,23 @@ public class TestCMUDictionary {
                       page2.keySet(), page1.keySet());
    }   
 
+   @Test public void aggregation() throws Exception {
+      
+      CMUDictionary dict = (CMUDictionary)annotator.getDictionary("cmudict");
+      assertEquals("COUNT keys",
+                   ""+dict.countAllKeys(), dict.aggregateKeys("COUNT"));
+      assertEquals("MIN key",
+                   "!exclamation-point", dict.aggregateKeys("MIN"));
+      assertEquals("MAX key",
+                   "}right-brace", dict.aggregateKeys("MAX"));
+      assertEquals("COUNT entries",
+                   "133854", dict.aggregateEntries("COUNT"));
+      assertEquals("MIN entry",
+                   "AA0 B AA0 T IY0 EH1 L OW0", dict.aggregateEntries("MIN"));
+      assertEquals("MAX entry",
+                   "ZH W EY1 D AO1 NG", dict.aggregateEntries("MAX"));
+   }   
+
    @Test public void readWrite() throws Exception {
       
       CMUDictionary dict = (CMUDictionary)annotator.getDictionary("cmudict");
@@ -131,6 +148,44 @@ public class TestCMUDictionary {
                    1, dict.lookup("test").size());
       assertEquals("lookupEditableEntry",
                    0, dict.lookupEditableEntry("test").size());
+
+      try {
+         // add an entry
+         dict.add("floof","F L UW1 F");
+         dict.add("floof","F L UH1 F");
+         dict.add("floof","F L AW1 F");
+         List<String> entries = dict.lookup("floof");
+         assertEquals("3 entries: " + entries,
+                      3, entries.size());
+         Iterator<String> pron = entries.iterator();
+         assertEquals("F L UW1 F", pron.next());
+         assertEquals("F L UH1 F", pron.next());
+         assertEquals("F L AW1 F", pron.next());
+         assertEquals("one editable key",
+                      1, dict.countEditableKeys());
+         assertEquals("one editable entry",
+                      1, dict.listEditableEntries().size());
+         List<String> editableEntries = dict.lookupEditableEntry("floof");
+         assertEquals("lookup and lookupEditableEntry return the same thing",
+                      entries, editableEntries);
+
+         dict.remove("floof", "F L UH1 F");
+         entries = dict.lookup("floof");
+         assertEquals("remove specific entry - now 2 entries: " + entries,
+                      2, entries.size());
+         pron = entries.iterator();
+         assertEquals("remove specific entry",
+                      "F L UW1 F", pron.next());
+         assertEquals("remove specific entry",
+                      "F L AW1 F", pron.next());
+
+         dict.remove("floof");
+         entries = dict.lookup("floof");
+         assertEquals("remove all entries - now no entries: " + entries,
+                      0, entries.size());
+      } finally {
+         try { dict.remove("floof"); } catch(Exception exception) {}
+      }
    }   
    
    /**
