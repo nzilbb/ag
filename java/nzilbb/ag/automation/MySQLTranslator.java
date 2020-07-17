@@ -56,7 +56,7 @@ public class MySQLTranslator implements UnaryOperator<String> {
     * @see #getTrace()
     * @see #setTrace(boolean)
     */
-   protected boolean trace = true;
+   protected boolean trace = false;
    /**
     * Getter for {@link #trace}: Whether to print statements passed to {@link #apply(String)}
     * @return Whether to print statements passed to {@link #apply(String)}
