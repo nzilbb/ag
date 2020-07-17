@@ -79,7 +79,7 @@
     <junit haltonfailure="true"
 	   fork="true" >
       <classpath>
-	<pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar};${dist}/nzilbb.ag.jar"/>
+	<pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar};${dist}/nzilbb.ag.jar;lib/derby.jar"/>
       </classpath>
       <jvmarg value="-ea"/>
       <formatter type="plain" usefile="false" />

@@ -159,7 +159,6 @@ public class CMUDict extends Annotator
 
       try {
 
-         sqlTranslator.setTrace(true); // TODO remove
          // check the schema has been created
          try { // either of prepareStatement or executeQuery may fail if the table doesn't exist
             PreparedStatement sql = rdb.prepareStatement(
@@ -431,6 +430,27 @@ public class CMUDict extends Annotator
       pronunciationLayerId = newPronunciationLayerId; return this; }
 
    /**
+    * Whether to use only the first pronunciation if there are multiple pronunciations.
+    * @see #getFirstVariantOnly()
+    * @see #setFirstVariantOnly(Boolean)
+    */
+   protected Boolean firstVariantOnly;
+   /**
+    * Getter for {@link #firstVariantOnly}: Whether to use only the first pronunciation if
+    * there are multiple pronunciations. 
+    * @return Whether to use only the first pronunciation if there are multiple pronunciations.
+    */
+   public Boolean getFirstVariantOnly() { return firstVariantOnly; }
+   /**
+    * Setter for {@link #firstVariantOnly}: Whether to use only the first pronunciation if
+    * there are multiple pronunciations. 
+    * @param newFirstVariantOnly Whether to use only the first pronunciation if there are
+    * multiple pronunciations. 
+    */
+   public CMUDict setFirstVariantOnly(Boolean newFirstVariantOnly) {
+      firstVariantOnly = newFirstVariantOnly; return this; }
+
+   /**
     * Sets the configuration for a given annotation task.
     * @param parameters The configuration of the annotator; a value of <tt> null </tt>
     * will apply the default task parameters, with {@link #tokenLayerId} set to the
@@ -444,6 +464,7 @@ public class CMUDict extends Annotator
       if (parameters == null) { // apply default configuration
          
          tokenLayerId = schema.getWordLayerId();
+         firstVariantOnly = Boolean.FALSE;
          
          try {
             // default transcript language layer
@@ -472,14 +493,38 @@ public class CMUDict extends Annotator
       } else {
          beanPropertiesFromQueryString(parameters);
       }
+      if (firstVariantOnly == null) firstVariantOnly = Boolean.FALSE;
+      
+      if (schema.getLayer(tokenLayerId) == null)
+         throw new InvalidConfigurationException(this, "Token layer not found: " + tokenLayerId);
+      if (transcriptLanguageLayerId != null && schema.getLayer(transcriptLanguageLayerId) == null) 
+         throw new InvalidConfigurationException(
+            this, "Transcript language layer not found: " + transcriptLanguageLayerId);
+      if (phraseLanguageLayerId != null && schema.getLayer(phraseLanguageLayerId) == null) 
+         throw new InvalidConfigurationException(
+            this, "Phrase language layer not found: " + phraseLanguageLayerId);
       
       // does the outputLayer need to be added to the schema?
-      if (schema.getLayer(pronunciationLayerId) == null) {
+      Layer pronunciationLayer = schema.getLayer(pronunciationLayerId);
+      if (pronunciationLayer == null) {
          schema.addLayer(
             new Layer(pronunciationLayerId)
             .setAlignment(Constants.ALIGNMENT_NONE)
-            .setPeers(false)
+            .setPeers(!firstVariantOnly)
             .setParentId(schema.getWordLayerId()));
+      } else {
+         if (pronunciationLayerId.equals(tokenLayerId)
+             || pronunciationLayerId.equals(transcriptLanguageLayerId)
+             || pronunciationLayerId.equals(phraseLanguageLayerId)) {
+                throw new InvalidConfigurationException(
+                   this, "Invalid pronunciation layer: " + pronunciationLayerId);
+             }
+         if (!pronunciationLayer.getPeers() && !firstVariantOnly) {
+            setStatus(
+               "Pronunciation layer " + pronunciationLayerId
+               + " doesn't allow peer annotations; using first variant only.");
+            firstVariantOnly = true;
+         }
       }
    }
 
@@ -534,10 +579,10 @@ public class CMUDict extends Annotator
             throw new InvalidConfigurationException(
                this, "Invalid input token layer: " + tokenLayerId);
          }
-         Layer stemLayer = graph.getSchema().getLayer(pronunciationLayerId);
-         if (stemLayer == null) {
+         Layer pronLayer = graph.getSchema().getLayer(pronunciationLayerId);
+         if (pronLayer == null) {
             throw new InvalidConfigurationException(
-               this, "Invalid output stem layer: " + pronunciationLayerId);
+               this, "Invalid output pronunciation layer: " + pronunciationLayerId);
          }
          
          // what languages are in the transcript?
@@ -556,15 +601,15 @@ public class CMUDict extends Annotator
                thereArePhraseTags = true;
             }
          }
-         
+
+         Vector<Annotation> toAnnotate = new Vector<Annotation>();
          // should we just tag everything?
          if (transcriptIsMainlyEnglish && !thereArePhraseTags) {
             // process all tokens
             for (Annotation token : graph.all(tokenLayerId)) {
                // tag only tokens that are not already tagged
                if (token.first(pronunciationLayerId) == null) { // not tagged yet
-//TODO               token.createTag(pronunciationLayerId, stem(token.getLabel()))
-//                  .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                  toAnnotate.add(token);                        
                } // not tagged yet
             } // next token
          } else if (transcriptIsMainlyEnglish) {
@@ -587,8 +632,7 @@ public class CMUDict extends Annotator
                } else { // English, so tag it
                   // tag only tokens that are not already tagged
                   if (token.first(pronunciationLayerId) == null) { // not tagged yet
-//TODO                  token.createTag(pronunciationLayerId, stem(token.getLabel()))
-//                     .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                     toAnnotate.add(token);
                   } // not tagged yet
                } // English, so tag it
             } // next token
@@ -599,14 +643,33 @@ public class CMUDict extends Annotator
                   for (Annotation token : phrase.all(tokenLayerId)) {
                      // tag only tokens that are not already tagged
                      if (token.first(pronunciationLayerId) == null) { // not tagged yet
-//TODO                     token.createTag(pronunciationLayerId, stem(token.getLabel()))
-//                        .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                        toAnnotate.add(token);                  
                      } // not tagged yet
                   } // next token in the phrase
                } // English phrase
             } // next phrase
          } // thereArePhraseTags
          
+         try {
+            Dictionary dictionary = getDictionary("cmudict");
+            try {
+               for (Annotation token : toAnnotate) {                              
+                  for (String pronunciation : dictionary.lookup(token.getLabel())) {
+                     
+                     token.createTag(pronunciationLayerId, pronunciation)
+                        .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                     
+                     // do we want the first entry only?
+                     if (firstVariantOnly) break;
+                     
+                  } // next entry
+               } // next token
+            } finally {
+               dictionary.close();
+            }
+         } catch (DictionaryException x) {
+            throw new TransformationException(this, x);
+         }
          return graph;
       } finally {
          closeLog();
@@ -648,7 +711,7 @@ public class CMUDict extends Annotator
          throw new DictionaryException(null, "Invalid dictionary: " + id);
       }
       try {
-         return new CMUDictionary(this, newConnection());
+         return new CMUDictionary(this, newConnection(), sqlx);
       } catch (SQLException sqlX) {
          throw new DictionaryException(null, sqlX);
       }

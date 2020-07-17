@@ -16,11 +16,11 @@
 
     <form method="POST" action="setTaskParameters">
       <div class="field" title="Input layer from which words come">
-        <label for="tokenLayerId">Token Layer</label>
+        <label for="tokenLayerId"> Token Layer </label>
         <span><select id="tokenLayerId" name="tokenLayerId" required></select></span>
       </div>
       <div class="field" title="Transcript attribute for overall language">
-        <label for="transcriptLanguageLayerId">Transcript Language Attribute</label>
+        <label for="transcriptLanguageLayerId"> Transcript Language Attribute </label>
         <span>
           <select id="transcriptLanguageLayerId" name="transcriptLanguageLayerId">
             <option value="">[none]</option>
@@ -28,7 +28,7 @@
         </span>
       </div>
       <div class="field" title="Layer for annotating phrases in a different language">
-        <label for="phraseLanguageLayerId">Phrase Language Layer</label>
+        <label for="phraseLanguageLayerId"> Phrase Language Layer </label>
         <span>
           <select id="phraseLanguageLayerId" name="phraseLanguageLayerId">
             <option value="">[none]</option>
@@ -36,7 +36,7 @@
         </span>
       </div>
       <div class="field" title="Output layer on which pronunciation annotations are added">
-        <label for="pronunciationLayerId">Pronunciation Layer</label>
+        <label for="pronunciationLayerId"> Pronunciation Layer </label>
         <span>
           <select id="pronunciationLayerId" name="pronunciationLayerId" required
                   onChange="changedLayer(this);">
@@ -44,6 +44,11 @@
             <option>[add new layer]</option>         <!-- allow adding a new layer -->
           </select>
         </span>
+      </div>
+      <div class="field"
+           title="If there are multiple pronunciations for the word, use only the first one.">
+        <label for="firstVariantOnly"> First variant only </label>
+        <span><input id="firstVariantOnly" name="firstVariantOnly" type="checkbox"></span>
       </div>
       <div class="controls"><input type="submit" value="Finished"></div>
     </form>
@@ -112,6 +117,9 @@
               for (const [key, value] of parameters) {
                   document.getElementById(key).value = value;
               }
+              // set the checkbox
+              document.getElementById("firstVariantOnly").checked
+                  = parameters.get("firstVariantOnly");
           });
       });
       

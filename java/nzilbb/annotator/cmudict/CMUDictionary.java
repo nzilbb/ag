@@ -25,15 +25,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.TreeMap;
-import java.util.List;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.Vector;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.Dictionary;
 import nzilbb.ag.automation.DictionaryException;
 import nzilbb.ag.automation.DictionaryReadOnlyException;
+import nzilbb.ag.automation.MySQLTranslator;
 
 /**
  * This is an example annotator dictionary.
@@ -42,35 +43,9 @@ import nzilbb.ag.automation.DictionaryReadOnlyException;
 public class CMUDictionary implements Dictionary {
 
 
-   /**
-    * Connection to the relational database.
-    * @see #getRdb()
-    * @see #setRdb(Connection)
-    */
-   protected Connection rdb;
-   /**
-    * Getter for {@link #rdb}: Connection to the relational database.
-    * @return Connection to the relational database.
-    */
-   public Connection getRdb() { return rdb; }
-   /**
-    * Setter for {@link #rdb}: Connection to the relational database.
-    * @param newRdb Connection to the relational database.
-    */
-   public CMUDictionary setRdb(Connection newRdb) { rdb = newRdb; return this; }
-
+   private Connection rdb;
+   private MySQLTranslator sqlx = new MySQLTranslator();
    private PreparedStatement sql; 
-
-   /**
-    * Constructor.
-    */
-   public CMUDictionary(CMUDict annotator, Connection rdb) throws SQLException {
-      this.annotator = annotator;
-      this.rdb = rdb;
-      sql = rdb.prepareStatement(
-	 "SELECT pron_cmudict, supplemental FROM "+annotator.getAnnotatorId()+"_wordform"
-	 +" WHERE wordform = ? ORDER BY variant");
-   }
 
    /**
     * The TheWorksExample annotator that created this dictionary.
@@ -96,6 +71,20 @@ public class CMUDictionary implements Dictionary {
    }
 
    /**
+    * Constructor.
+    */
+   public CMUDictionary(CMUDict annotator, Connection rdb, MySQLTranslator translator)
+      throws SQLException {
+      this.annotator = annotator;
+      this.rdb = rdb;
+      this.sqlx = translator;
+      sql = rdb.prepareStatement(
+         sqlx.apply(
+            "SELECT pron_cmudict, supplemental FROM "+annotator.getAnnotatorId()+"_wordform"
+            +" WHERE wordform = ? ORDER BY variant"));
+   }
+
+   /**
     * Looks up a word and provides possible matches.
     * @param key The key to look up.
     * @param supplementalOnly Whether to return only supplemental entries (true) or all
@@ -104,18 +93,21 @@ public class CMUDictionary implements Dictionary {
     * @throws SQLException
     */
    protected Vector<String> lookupEntries(String key, boolean supplementalOnly)
-      throws SQLException {
+      throws SQLException {      
       Vector<String> queryResults = new Vector<String>();
-      sql.setString(1, key);
-      ResultSet rs = sql.executeQuery();
-      try {
-         while (rs.next()) {
-            if (supplementalOnly && !rs.getBoolean("supplemental")) continue;
-            String entry = rs.getString(1);
-            if (entry != null) queryResults.add(entry);
-         } // next result
-      } finally {
-         rs.close();
+      if (key != null) {
+         key = key.toLowerCase();
+         sql.setString(1, key);
+         ResultSet rs = sql.executeQuery();
+         try {
+            while (rs.next()) {
+               if (supplementalOnly && !rs.getBoolean("supplemental")) continue;
+               String entry = rs.getString(1);
+               if (entry != null) queryResults.add(entry);
+            } // next result
+         } finally {
+            rs.close();
+         }
       }
       return queryResults;
    }
@@ -137,7 +129,8 @@ public class CMUDictionary implements Dictionary {
    public int countAllKeys() throws DictionaryException {
       try {
          PreparedStatement sql = rdb.prepareStatement(
-            "SELECT COUNT(DISTINCT wordform) FROM "+annotator.getAnnotatorId()+"_wordform");
+            sqlx.apply(
+               "SELECT COUNT(DISTINCT wordform) FROM "+annotator.getAnnotatorId()+"_wordform"));
          try {
             ResultSet rs = sql.executeQuery();
             try {
@@ -169,9 +162,10 @@ public class CMUDictionary implements Dictionary {
       try {
          Map<String,List<String>> words = new LinkedHashMap<String,List<String>>();
          PreparedStatement sql = rdb.prepareStatement(
-            "SELECT DISTINCT wordform FROM "+annotator.getAnnotatorId()+"_wordform"
-            +" ORDER BY wordform"
-            + (length > 0? " LIMIT " + start + ", " + length:""));
+            sqlx.apply(
+               "SELECT DISTINCT wordform FROM "+annotator.getAnnotatorId()+"_wordform"
+               +" ORDER BY wordform"
+               + (length > 0? " LIMIT " + start + ", " + length:"")));
          try {
             ResultSet rs = sql.executeQuery();
             try {
@@ -210,8 +204,9 @@ public class CMUDictionary implements Dictionary {
       throws DictionaryReadOnlyException, DictionaryException {
       try {
          PreparedStatement sql = rdb.prepareStatement(
-            "SELECT COUNT(DISTINCT wordform) FROM "+annotator.getAnnotatorId()+"_wordform"
-            +" WHERE supplemental = true");
+            sqlx.apply(
+               "SELECT COUNT(DISTINCT wordform) FROM "+annotator.getAnnotatorId()+"_wordform"
+               +" WHERE supplemental = true"));
          try {
             ResultSet rs = sql.executeQuery();
             try {
@@ -237,8 +232,9 @@ public class CMUDictionary implements Dictionary {
    public String aggregateEntries(String operation) throws DictionaryException {
       try {
          PreparedStatement sql = rdb.prepareStatement(
-            "SELECT "+operation+"(pron_cmudict)"
-            +" FROM "+annotator.getAnnotatorId()+"_wordform");
+            sqlx.apply(
+               "SELECT "+operation+"(pron_cmudict)"
+               +" FROM "+annotator.getAnnotatorId()+"_wordform"));
          try {
             ResultSet rs = sql.executeQuery();
             try {
