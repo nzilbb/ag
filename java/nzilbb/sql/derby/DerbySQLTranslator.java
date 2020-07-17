@@ -19,9 +19,19 @@
 //    along with nzilbb.ag; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.sql.mysql;
+package nzilbb.sql.derby;
 
 import nzilbb.sql.mysql.VanillaSQLTranslator;
+
+// TODO implement REGEXP function, something like:
+// TODO  CREATE FUNCTION COALESCE
+// TODO  ( P1 VARCHAR, P2 VARCHAR )
+// TODO  RETURNS VARCHAR
+// TODO  PARAMETER STYLE JAVA
+// TODO  NO SQL LANGUAGE JAVA
+// TODO  CALLED ON NULL INPUT
+// TODO  DETERMINISTIC
+// TODO  EXTERNAL NAME 'nzilbb.derby.MySQLFunction.REGEXP'
 
 /**
  * Object that translates statements designed for MySQL's flavour of SQL to the 
@@ -44,6 +54,11 @@ public class DerbySQLTranslator extends VanillaSQLTranslator {
     */
    public String apply(String sql) {
       String translated = super.apply(sql);
+      translated = translated
+         .replaceAll(" LIMIT ([0-9]+) *, *([0-9]+)", " OFFSET $1 ROWS FETCH NEXT $2 ROWS ONLY")
+         .replaceAll(" LIMIT ([0-9]+)", " FETCH NEXT $1 ROWS ONLY")
+         .replaceAll(" = TRUE", " <> 0")
+         .replaceAll(" = FALSE", " = 0");
       if (trace) System.out.println("SQL after: " + translated);
       return translated;
    }
