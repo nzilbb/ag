@@ -100,6 +100,64 @@ public class TestAnnotator {
       assertEquals("String", " untrimmed ", annotator.getPrefix());
       assertEquals("Double", Double.valueOf(0.25), annotator.getLabelConfidence());
    }
+   @Test public void truthyBooleanValues() throws Exception {
+
+      // subclass TheWorksExample with no getters/setters
+      TheWorksExample annotator = new TheWorksExample();
+      annotator.setConfig("reverse=true");
+      assertTrue("true", annotator.getReverse());
+      annotator.setConfig("reverse=TRUE");
+      assertTrue("TRUE", annotator.getReverse());
+      annotator.setConfig("reverse=t");
+      assertTrue("t", annotator.getReverse());
+      annotator.setConfig("reverse=T");
+      assertTrue("T", annotator.getReverse());
+      annotator.setConfig("reverse=yes");
+      assertTrue("yes", annotator.getReverse());
+      annotator.setConfig("reverse=YES");
+      assertTrue("YES", annotator.getReverse());
+      annotator.setConfig("reverse=y");
+      assertTrue("y", annotator.getReverse());
+      annotator.setConfig("reverse=Y");
+      assertTrue("Y", annotator.getReverse());
+      annotator.setConfig("reverse=on");
+      assertTrue("on - what input type checkbox sends by default",
+                 annotator.getReverse());
+      annotator.setConfig("reverse=ON");
+      assertTrue("ON", annotator.getReverse());
+      annotator.setConfig("reverse=1");
+      assertTrue("1", annotator.getReverse());
+
+      annotator.setConfig("reverse=false");
+      assertFalse("false", annotator.getReverse());
+      annotator.setConfig("reverse=FALSE");
+      assertFalse("FALSE", annotator.getReverse());
+      annotator.setConfig("reverse=f");
+      assertFalse("f", annotator.getReverse());
+      annotator.setConfig("reverse=F");
+      assertFalse("F", annotator.getReverse());
+      annotator.setConfig("reverse=no");
+      assertFalse("no", annotator.getReverse());
+      annotator.setConfig("reverse=NO");
+      assertFalse("NO", annotator.getReverse());
+      annotator.setConfig("reverse=n");
+      assertFalse("n", annotator.getReverse());
+      annotator.setConfig("reverse=N");
+      assertFalse("N", annotator.getReverse());
+      annotator.setConfig("reverse=off");
+      assertFalse("off", annotator.getReverse());
+      annotator.setConfig("reverse=OFF");
+      assertFalse("OFF", annotator.getReverse());
+      annotator.setConfig("reverse=0");
+      assertFalse("0", annotator.getReverse());
+
+      annotator.setConfig("reverse= true");
+      assertFalse("other - true but not trimmed", annotator.getReverse());
+      annotator.setConfig("reverse=100");
+      assertFalse("other - 100", annotator.getReverse());
+      annotator.setConfig("reverse=");
+      assertFalse("other - empty string", annotator.getReverse());
+   }
 
    public static void main(String args[]) 
    {

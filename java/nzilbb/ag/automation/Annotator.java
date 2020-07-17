@@ -292,47 +292,74 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
          Class annotatorClass = getClass();
          try {
             Method setter = annotatorClass.getMethod(
-               "set" + property.substring(0,1).toUpperCase() + property.substring(1), String.class);
+               "set" + property.substring(0,1).toUpperCase() + property.substring(1),
+               String.class);
             setter.invoke(this, URLDecoder.decode(valueString, "UTF-8"));
          } catch(Throwable notString) {
             try {
                Method setter = annotatorClass.getMethod(
-                  "set" + property.substring(0,1).toUpperCase() + property.substring(1), Boolean.class);
+                  "set" + property.substring(0,1).toUpperCase() + property.substring(1),
+                  Boolean.class);
+               // accept truthy values
+               if ("on".equalsIgnoreCase(valueString)
+                   || "yes".equalsIgnoreCase(valueString)
+                   || "y".equalsIgnoreCase(valueString)
+                   || "t".equalsIgnoreCase(valueString)
+                   || "1".equals(valueString)) valueString = "true";
                setter.invoke(this, Boolean.valueOf(valueString));            
             } catch(Throwable notBoolean) {
                try {
                   Method setter = annotatorClass.getMethod(
-                     "set" + property.substring(0,1).toUpperCase() + property.substring(1), boolean.class);
+                     "set" + property.substring(0,1).toUpperCase() + property.substring(1),
+                     boolean.class);
+                  // accept truthy values
+                  if ("on".equalsIgnoreCase(valueString)
+                      || "yes".equalsIgnoreCase(valueString)
+                      || "y".equalsIgnoreCase(valueString)
+                      || "t".equalsIgnoreCase(valueString)
+                      || "1".equals(valueString)) valueString = "true";
                   setter.invoke(this, Boolean.valueOf(valueString));            
                } catch(Throwable notBool) {
                   try {
                      Method setter = annotatorClass.getMethod(
-                        "set" + property.substring(0,1).toUpperCase() + property.substring(1), Integer.class);
+                        "set" + property.substring(0,1).toUpperCase() + property.substring(1),
+                        Integer.class);
                      setter.invoke(this, Integer.valueOf(valueString));            
                   } catch(Throwable notInteger) {
                      try {
                         Method setter = annotatorClass.getMethod(
-                           "set" + property.substring(0,1).toUpperCase() + property.substring(1), int.class);
+                           "set" + property.substring(0,1).toUpperCase() + property.substring(1),
+                           int.class);
                         setter.invoke(this, Integer.valueOf(valueString));            
                      } catch(Throwable notInt) {
                         try {
                            Method setter = annotatorClass.getMethod(
-                              "set" + property.substring(0,1).toUpperCase() + property.substring(1), Double.class);
+                              "set"
+                              + property.substring(0,1).toUpperCase() + property.substring(1),
+                              Double.class);
                            setter.invoke(this, Double.valueOf(valueString));            
                         } catch(Throwable notDouble) {
                            try {
                               Method setter = annotatorClass.getMethod(
-                                 "set" + property.substring(0,1).toUpperCase() + property.substring(1), double.class);
+                                 "set"
+                                 + property.substring(0,1).toUpperCase() + property.substring(1),
+                                 double.class);
                               setter.invoke(this, Double.valueOf(valueString));            
                            } catch(Throwable notD) {
                               try {
                                  Method setter = annotatorClass.getMethod(
-                                    "set" + property.substring(0,1).toUpperCase() + property.substring(1), Float.class);
+                                    "set"
+                                    + property.substring(0,1).toUpperCase()
+                                    + property.substring(1),
+                                    Float.class);
                                  setter.invoke(this, Float.valueOf(valueString));            
                               } catch(Throwable notFloat) {
                                  try {
                                     Method setter = annotatorClass.getMethod(
-                                       "set" + property.substring(0,1).toUpperCase() + property.substring(1), float.class);
+                                       "set"
+                                       + property.substring(0,1).toUpperCase()
+                                       + property.substring(1),
+                                       float.class);
                                     setter.invoke(this, Float.valueOf(valueString));            
                                  } catch(Throwable notF) {
                                  } // not float
