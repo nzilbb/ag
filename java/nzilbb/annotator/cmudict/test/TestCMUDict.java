@@ -34,15 +34,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import nzilbb.ag.Anchor;
 import nzilbb.ag.Annotation;
-import nzilbb.ag.automation.InvalidConfigurationException;
-import nzilbb.ag.automation.UsesFileSystem;
-import nzilbb.ag.automation.UsesRelationalDatabase;
-import nzilbb.ag.automation.util.VanillaSQLTranslator;
 import nzilbb.ag.Constants;
 import nzilbb.ag.Graph;
 import nzilbb.ag.Layer;
 import nzilbb.ag.Schema;
+import nzilbb.ag.automation.Dictionary;
+import nzilbb.ag.automation.InvalidConfigurationException;
+import nzilbb.ag.automation.UsesFileSystem;
+import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.annotator.cmudict.CMUDict;
+import nzilbb.annotator.cmudict.CMUDictionary;
+import nzilbb.sql.mysql.VanillaSQLTranslator;
 
 public class TestCMUDict {
 
@@ -650,6 +652,16 @@ public class TestCMUDict {
       return g;
    } // end of graph()
    
+   @Test public void dictionaryRegsitration() throws Exception {
+
+      List<String> ids = annotator.getDictionaryIds();
+      assertEquals("there's only one dictionary: " + ids,
+                   1, ids.size());
+      // (I don't actually care what the ID is)
+      Dictionary dict = annotator.getDictionary(ids.iterator().next());
+      assertTrue("Dictionary is the right type: " + dict.getClass().getName(),
+                 dict instanceof CMUDictionary);
+   }   
 
    public static void main(String args[]) {
       org.junit.runner.JUnitCore.main("nzilbb.annotator.cmudict.test.TestCMUDict");
