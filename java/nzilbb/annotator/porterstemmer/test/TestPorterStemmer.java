@@ -62,9 +62,12 @@ public class TestPorterStemmer {
                     schema.getLayer(annotator.getStemLayerId()));
       assertEquals("stem layer child of word",
                    "word", schema.getLayer(annotator.getStemLayerId()).getParentId());
-      assertEquals("stem layer no aligned",
+      assertEquals("stem layer not aligned",
                    Constants.ALIGNMENT_NONE,
                    schema.getLayer(annotator.getStemLayerId()).getAlignment());
+      assertEquals("stem layer type correct",
+                   Constants.TYPE_STRING,
+                   schema.getLayer(annotator.getStemLayerId()).getType());
       String[] layers = annotator.getRequiredLayers();
       assertEquals("1 required layer: "+Arrays.asList(layers),
                    1, layers.length);
@@ -158,7 +161,7 @@ public class TestPorterStemmer {
                     schema.getLayer(annotator.getStemLayerId()));
       assertEquals("stem layer child of word",
                     "word", schema.getLayer(annotator.getStemLayerId()).getParentId());
-      assertEquals("stem layer no aligned",
+      assertEquals("stem layer not aligned",
                    Constants.ALIGNMENT_NONE,
                    schema.getLayer(annotator.getStemLayerId()).getAlignment());
       Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
@@ -262,7 +265,7 @@ public class TestPorterStemmer {
                     schema.getLayer(annotator.getStemLayerId()));
       assertEquals("stem layer child of word",
                    "word", schema.getLayer(annotator.getStemLayerId()).getParentId());
-      assertEquals("stem layer no aligned",
+      assertEquals("stem layer not aligned",
                    Constants.ALIGNMENT_NONE,
                    schema.getLayer(annotator.getStemLayerId()).getAlignment());
       Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
@@ -333,7 +336,7 @@ public class TestPorterStemmer {
                     schema.getLayer(annotator.getStemLayerId()));
       assertEquals("stem layer child of word",
                    "word", schema.getLayer(annotator.getStemLayerId()).getParentId());
-      assertEquals("stem layer no aligned",
+      assertEquals("stem layer not aligned",
                    Constants.ALIGNMENT_NONE,
                    schema.getLayer(annotator.getStemLayerId()).getAlignment());
       Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
@@ -414,7 +417,7 @@ public class TestPorterStemmer {
                     schema.getLayer(annotator.getStemLayerId()));
       assertEquals("stem layer child of word",
                    "word", schema.getLayer(annotator.getStemLayerId()).getParentId());
-      assertEquals("stem layer no aligned",
+      assertEquals("stem layer not aligned",
                    Constants.ALIGNMENT_NONE,
                    schema.getLayer(annotator.getStemLayerId()).getAlignment());
       Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
