@@ -306,15 +306,6 @@ public class AnnotatorWebApp extends StandAloneWebApp {
          String rdbURL = "jdbc:derby:"
             +workingDir.getPath().replace('\\','/')
             +"/derby;create=true";
-         // TODO implement COALESCE function, something like:
-         // TODO  CREATE FUNCTION COALESCE
-         // TODO  ( P1 VARCHAR, P2 VARCHAR )
-         // TODO  RETURNS VARCHAR
-         // TODO  PARAMETER STYLE JAVA
-         // TODO  NO SQL LANGUAGE JAVA
-         // TODO  CALLED ON NULL INPUT
-         // TODO  DETERMINISTIC
-         // TODO  EXTERNAL NAME 'nzilbb.derby.MySQLFunction.COALESCE'
          ((UsesRelationalDatabase)annotator).rdbConnectionDetails(
             new VanillaSQLTranslator(), rdbURL, null, null);
       }
