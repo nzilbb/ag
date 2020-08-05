@@ -25,9 +25,7 @@ package nzilbb.ag;
  * Useful annotation constants.
  * @author Robert Fromont robert@fromont.net.nz
  */
-
-public class Constants
-{
+public class Constants {
 
    /** API version */
    public static final String VERSION;
@@ -35,19 +33,37 @@ public class Constants
       VERSION = nzilbb.util.IO.JarCommentOfClass(Constants.class);
    }
    
-   /** Standardized possible value for anchor offset or annotation label confidence - no confidence. Value is 0. */
+   /** 
+    * Standardized possible value for anchor offset or annotation label confidence - no
+    * confidence (value is 0). 
+    */
    public static final int CONFIDENCE_NONE = 0;
 
-   /** Standardized possible value for anchor offset or annotation label confidence - low confidence computed - e.g. anchor offsets set by linear interpolation. Value is 10. */
+   /** 
+    * Standardized possible value for anchor offset or annotation label confidence - low
+    * confidence computed (value is 10). For example anchor offsets set by linear
+    * interpolation. 
+    */
    public static final int CONFIDENCE_DEFAULT = 10;
 
-   /** Standardized possible value for anchor offset or annotation label confidence - confidence unknown - e.g. a graph that was saved with no confidence information. Value is 25. */
+   /** 
+    * Standardized possible value for anchor offset or annotation label confidence -
+    * confidence unknown (value is 25). For example a graph that was saved with no
+    * confidence information. 
+    */
    public static final int CONFIDENCE_UNKNOWN = 25;
 
-   /** Standardized possible value for anchor offset or annotation label confidence - high confidence computed - e.g. anchor offset from automated forced alignment, or annotaton label computed by an automated classifier. Value is 50. */
+   /** 
+    * Standardized possible value for anchor offset or annotation label confidence - high
+    * confidence computed (value is 50). For example anchor offset from automated forced
+    * alignment, or annotaton label computed by an automated classifier. 
+    */
    public static final int CONFIDENCE_AUTOMATIC = 50;
 
-   /** Standardized possible value for anchor offset or annotation label confidence - highest confidence, as was set by a human annotator. Value is 100. */
+   /** 
+    * Standardized possible value for anchor offset or annotation label confidence -
+    * highest confidence, as was set by a human annotator (value is 100). 
+    */
    public static final int CONFIDENCE_MANUAL = 100;
 
    /** {@link Layer#getAlignment()} value - no alignment (0). */
@@ -73,16 +89,20 @@ public class Constants
 
    /** Possible value for {@link Layer#getType()} representing a string of text - "string". */
    public static final String TYPE_STRING = "string";
-   /** Possible value for {@link Layer#getType()} representing a string of phonemes using unicode IPA - "ipa". */
+   /** 
+    * Possible value for {@link Layer#getType()} representing a string of phonemes using
+    * unicode IPA - "ipa". 
+    */
    public static final String TYPE_IPA = "ipa";
    /** Possible value for {@link Layer#getType()} representing a number - "number". */
    public static final String TYPE_NUMBER = "number";
    /** Possible value for {@link Layer#getType()} representing a number - "number". */
    public static final String TYPE_BOOLEAN = "boolean";
-   /** Possible value for {@link Layer#getType()} representing a string value select from a closed set of possibilities - "select". 
+   /** 
+    * Possible value for {@link Layer#getType()} representing a string value select from a
+    * closed set of possibilities - "select". 
     * @see Layer#getValidLabels()
     */
-   public static final String TYPE_SELECT = "select";
-   
+   public static final String TYPE_SELECT = "select";   
 
 } // end of class Constants
