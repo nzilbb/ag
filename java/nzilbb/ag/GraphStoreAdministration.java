@@ -50,15 +50,6 @@ public interface GraphStoreAdministration extends GraphStore {
       throws StoreException, PermissionException;
 
    /**
-    * Lists the descriptors of all registered deserializers.
-    * @return A list of the descriptors of all registered deserializers.
-    * @throws StoreException If an error prevents the operation.
-    * @throws PermissionException If the operation is not permitted.
-    */
-   public SerializationDescriptor[] getDeserializerDescriptors()
-      throws StoreException, PermissionException;
-   
-   /**
     * Gets the deserializer for the given MIME type.
     * @param mimeType The MIME type.
     * @return The deserializer for the given MIME type, or null if none is registered.
@@ -96,15 +87,6 @@ public interface GraphStoreAdministration extends GraphStore {
    public void deregisterSerializer(GraphSerializer serializer)
       throws StoreException, PermissionException;
 
-   /**
-    * Lists the descriptors of all registered serializers.
-    * @return A list of the descriptors of all registered serializers.
-    * @throws StoreException If an error prevents the operation.
-    * @throws PermissionException If the operation is not permitted.
-    */
-   public SerializationDescriptor[] getSerializerDescriptors()
-      throws StoreException, PermissionException;
-   
    /**
     * Gets the serializer for the given MIME type.
     * @param mimeType The MIME type.

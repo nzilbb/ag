@@ -24,6 +24,7 @@ package nzilbb.ag;
 import java.util.Iterator;
 import java.util.Vector;
 import java.util.function.Consumer;
+import nzilbb.ag.serialize.SerializationDescriptor;
 import nzilbb.util.MonitorableSeries;
 
 /**
@@ -696,4 +697,28 @@ public interface GraphStoreQuery {
    public MediaFile[] getEpisodeDocuments(String id)
       throws StoreException, PermissionException, GraphNotFoundException;
 
+   /**
+    * Lists the descriptors of all registered serializers.
+    * <p> Serializers are modules that export annotation structures as a specific file
+    * format, e.g. Praat TextGrid, plain text, etc., so the
+    * {@link SerializationDescriptor#getMimeType()} of descriptors reflects what 
+    * <var>mimeType</var>s can be specified for exporting annotation data.
+    * @return A list of the descriptors of all registered serializers.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public SerializationDescriptor[] getSerializerDescriptors()
+      throws StoreException, PermissionException;
+   
+   /**
+    * Lists the descriptors of all registered deserializers.
+    * <p> Deserializers are modules that import annotation structures from a specific file
+    * format, e.g. Praat TextGrid, plain text, etc.
+    * @return A list of the descriptors of all registered deserializers.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public SerializationDescriptor[] getDeserializerDescriptors()
+      throws StoreException, PermissionException;
+   
 } // end of interface GraphStoreQuery
