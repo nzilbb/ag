@@ -24,6 +24,8 @@ package nzilbb.ag.serialize;
 import java.net.URL;
 import java.util.Vector;
 import nzilbb.ag.*;
+import org.json.JSONObject;
+import org.json.JSONArray;
 
 /**
  * A descriptor that describes the attributes of a serializer or deserializer.
@@ -313,6 +315,32 @@ public class SerializationDescriptor {
       setVersion(version);
    } // end of constructor
 
+   /**
+    * Constructor from JSON.
+    * @param json A JSON representation of the object.
+    */
+   public SerializationDescriptor(JSONObject json) {
+      setName(json.optString("name"));
+      setVersion(json.optString("version"));
+      if (json.has("icon")) {
+         try {
+            setIcon(new URL(json.getString("icon")));
+         } catch(Throwable exception) {}
+      }
+      setName(json.optString("name"));
+      setMimeType(json.optString("mimeType"));
+      setMinimumApiVersion(json.optString("minimumApiVersion"));
+      if (json.has("numberOfInputs")) setNumberOfInputs(json.getInt("numberOfInputs"));
+      if (json.has("fileSuffixes")) {
+         JSONArray array = json.getJSONArray("fileSuffixes");
+         if (array != null) {
+            for (int i = 0; i < array.length(); i++) {
+               getFileSuffixes().add(array.getString(i));
+            }
+         }
+      }
+   } // end of constructor
+   
    /**
     * Getter for {@link #fileSuffixes}: The normal file name suffixes (extensions) of this
     * MIME type. 
