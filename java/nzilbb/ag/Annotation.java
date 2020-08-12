@@ -1644,7 +1644,8 @@ public class Annotation
    /**
     * Finds all annotations on the given layer that include the midpoint of this
     * annotation. This uses {@link #includesMidpointOf(Annotation)} to determine
-    * inclusion. Annotations marked for deletion are ignored. 
+    * inclusion. Annotations marked for deletion are ignored, as is the annotation itself
+    * (if <var>layerId</var>.equals(this.{@link #layerId}))
     * <p>A precondition is that the annotation's {@link #graph} is set.
     * @param layerId The given layer ID.
     * @return A list of annotations on the given layer that include this annotation's
