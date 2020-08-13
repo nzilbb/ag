@@ -44,7 +44,7 @@ import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.annotator.cmudict.CMUDict;
 import nzilbb.annotator.cmudict.CMUDictionary;
-import nzilbb.sql.mysql.VanillaSQLTranslator;
+import nzilbb.sql.derby.DerbySQLTranslator;
 
 public class TestCMUDict {
 
@@ -62,14 +62,13 @@ public class TestCMUDict {
       annotator.setSchema(graph().getSchema());
 
       // set the working directory
-      ((UsesFileSystem)annotator).setWorkingDirectory(dir);
+      annotator.setWorkingDirectory(dir);
 
       // use derby for relational database
       String rdbURL = "jdbc:derby:"
          +dir.getPath().replace('\\','/')
          +"/derby;create=true";
-      ((UsesRelationalDatabase)annotator).rdbConnectionDetails(
-         new VanillaSQLTranslator(), rdbURL, null, null);
+      annotator.rdbConnectionDetails(new DerbySQLTranslator(), rdbURL, null, null);
 
       // set the annotator configuration, which will install the lexicon the first time (only)
       annotator.setConfig(annotator.getConfig());

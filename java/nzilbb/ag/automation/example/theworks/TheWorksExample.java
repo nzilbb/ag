@@ -50,8 +50,10 @@ import nzilbb.util.MonitorableTask; // for javadoc
  *  <li>Includes a <i> task </i> web-app</li>
  * </ul>
  */
+@UsesFileSystem
+@UsesRelationalDatabase
 public class TheWorksExample extends Annotator
-   implements UsesFileSystem, UsesRelationalDatabase, ImplementsDictionaries {
+   implements ImplementsDictionaries {
    /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
    public String getMinimumApiVersion() { return "20200708.2018"; }
 
@@ -66,45 +68,24 @@ public class TheWorksExample extends Annotator
       return getClass().getSimpleName();
    }
 
-   private File workingDir;
    /**
-    * {@link UsesFileSystem} implementation: Provides a persisent directory in which files
-    * can be saved and accessed.
-    * @param directory
-    */
-   public void setWorkingDirectory(File directory) {
-      workingDir = directory;
-      
-      // load configuration, if any
-      File f = new File(workingDir, getAnnotatorId() + ".cfg");
-      if (f.exists()) {
-         try {
-            beanPropertiesFromQueryString(IO.InputStreamToString(new FileInputStream(f)));
-         } catch(IOException exception) {}
-      }
-   }
-
-   private MySQLTranslator sqlx;
-   private String rdbUrl;
-   private String rdbUser;
-   private String rdbPassword;
-   /**
-    * {@link UsesRelationalDatabase} method that sets the information required for
-    * connecting to the relational database. 
+    * Sets the information required for connecting to the relational database.
+    * <p> This is automatically called if the annotator is annotated with
+    * {@link UsesRelationalDatabase}, providing the implementation with access to a
+    * relational database.
     * @param sqlTranslator SQL statement translator.
     * @param url URL for relational database, e.g. <q>jdbc:mysql://localhost/labbcat</q>
     * @param user Username for connecting to the database, if any.
     * @param password Password for connecting to the database, if any.
     * @throws SQLException If the annotator can't connect to the given database.
     */
+   @Override
    public void rdbConnectionDetails(
       MySQLTranslator sqlTranslator, String url, String user, String password)
       throws SQLException {
-      
-      sqlx = sqlTranslator;
-      rdbUrl = url;
-      rdbUser = user;
-      rdbPassword = password;
+
+      // call the base class version first
+      super.rdbConnectionDetails(sqlTranslator, url, user, password);
       
       // check we can connect
       Connection rdb = newConnection();      
@@ -139,15 +120,29 @@ public class TheWorksExample extends Annotator
          try { rdb.close(); } catch(SQLException x) {}
       }      
    }
-   
+
    /**
-    * Get a new connection to the database.
-    * @return A connection to the RDBMS.
-    * @throws SQLException If a database access error occurs
+    * Runs any processing required to uninstall the annotator.
+    * <p> In this case, the table created in rdbConnectionDetails() is DROPped.
     */
-   public Connection newConnection() throws SQLException {
-      return DriverManager.getConnection(rdbUrl, rdbUser, rdbPassword);
-   } // end of newConnection()
+   @Override
+   public void uninstall() {
+      try {
+         Connection rdb = newConnection();      
+         try {
+            
+            // check the schema has been created
+            PreparedStatement sql = rdb.prepareStatement(
+               sqlx.apply("DROP TABLE "+getAnnotatorId()+"_table"));
+            sql.executeUpdate();
+	    sql.close();
+            
+         } finally {
+            try { rdb.close(); } catch(SQLException x) {}
+         }      
+      } catch (SQLException x) {
+      }
+   }
 
    /**
     * Provides the overall configuration of the annotator. 
@@ -197,9 +192,9 @@ public class TheWorksExample extends Annotator
       } // simulate a long installation
 
       // persist the configuration to a file in the working directory
-      if (workingDir != null) {
+      if (getWorkingDirectory() != null) {
          try {
-            File f = new File(workingDir, getAnnotatorId() + ".cfg");
+            File f = new File(getWorkingDirectory(), getAnnotatorId() + ".cfg");
             FileWriter out = new FileWriter(f);
             out.write(config);
             out.close();
@@ -459,8 +454,8 @@ public class TheWorksExample extends Annotator
     * <ul>
     *  <li> {@link Annotator#setSchema(Schema)} </li>
     *  <li> {@link Annotator#setTaskParameters(String)} </li>
-    *  <li> {@link UsesFileSystem#setWorkingDirectory(File)} (if applicable) </li>
-    *  <li> {@link UsesRelationalDatabase#rdbConnectionDetails(String,String,String)}
+    *  <li> {@link Annotator#setWorkingDirectoryectory(File)} (if applicable) </li>
+    *  <li> {@link Annotator#rdbConnectionDetails(String,String,String)}
     *       (if applicable) </li>
     * </ul>
     * @return A (possibly empty) list of IDs of dictionaries.
@@ -475,8 +470,8 @@ public class TheWorksExample extends Annotator
     * <ul>
     *  <li> {@link Annotator#setSchema(Schema)} </li>
     *  <li> {@link Annotator#setTaskParameters(String)} </li>
-    *  <li> {@link UsesFileSystem#setWorkingDirectory(File)} (if applicable) </li>
-    *  <li> {@link UsesRelationalDatabase#rdbConnectionDetails(String,String,String)}
+    *  <li> {@link Annotator#setWorkingDirectoryectory(File)} (if applicable) </li>
+    *  <li> {@link Annotator#rdbConnectionDetails(String,String,String)}
     *       (if applicable) </li>
     * </ul>
     * @return The identified dictionary.

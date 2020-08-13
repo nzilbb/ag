@@ -57,35 +57,12 @@ import nzilbb.sql.mysql.MySQLTranslator;
  * Annotator that tags words with their pronunciations according to the 
  * <a href="http://www.speech.cs.cmu.edu/cgi-bin/cmudict"> CMU Pronouncing Dictionary </a>.
  */
+@UsesRelationalDatabase
+@UsesFileSystem
 public class CMUDict extends Annotator
-   implements UsesRelationalDatabase, UsesFileSystem, ImplementsDictionaries {
+   implements ImplementsDictionaries {
    /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
    public String getMinimumApiVersion() { return "20200708.2018"; }
-
-   /**
-    * The working directory for the annotator.
-    * @see #getWorkingDirectory()
-    * @see #setWorkingDirectory(File)
-    */
-   protected File workingDirectory;
-   /**
-    * Getter for {@link #workingDirectory}: The working directory for the annotator.
-    * @return The working directory for the annotator.
-    */
-   public File getWorkingDirectory() { return workingDirectory; }
-   /**
-    * {@link UsesFileSystem} method that provides a persisent directory in which files can
-    * be saved and accessed. 
-    * @param directory
-    */
-   public void setWorkingDirectory(File directory) {
-      workingDirectory = directory;
-   }
-
-   private MySQLTranslator sqlx;
-   private String rdbUrl;
-   private String rdbUser;
-   private String rdbPassword;
    
    private PrintWriter log;
    private static SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
@@ -99,7 +76,7 @@ public class CMUDict extends Annotator
    public void openLog() {
       if (log == null) {
          try {
-            log = new PrintWriter(new FileWriter(new File(workingDirectory, "status.log")));
+            log = new PrintWriter(new FileWriter(new File(getWorkingDirectory(), "status.log")));
          } catch(Throwable t) {
             System.err.println("CMUDict.openLog: " + t);
             t.printStackTrace(System.err);
@@ -145,16 +122,13 @@ public class CMUDict extends Annotator
     * @param password Password for connecting to the database, if any.
     * @throws SQLException If the annotator can't connect to the given database.
     */
+   @Override
    public void rdbConnectionDetails(
       MySQLTranslator sqlTranslator, String url, String user, String password)
       throws SQLException {
+      super.rdbConnectionDetails(sqlTranslator, url, user, password);
 
-      sqlx = sqlTranslator;
-      rdbUrl = url;
-      rdbUser = user;
-      rdbPassword = password;
-
-      // check we can connect
+      // get DB connection
       Connection rdb = newConnection();
 
       try {
@@ -196,13 +170,27 @@ public class CMUDict extends Annotator
    }
    
    /**
-    * Get a new connection to the database.
-    * @return A connection to the RDBMS.
-    * @throws SQLException If a database access error occurs
+    * Runs any processing required to uninstall the annotator.
+    * <p> In this case, the table created in rdbConnectionDetails() is DROPped.
     */
-   public Connection newConnection() throws SQLException {
-      return DriverManager.getConnection(rdbUrl, rdbUser, rdbPassword);
-   } // end of newConnection()
+   @Override
+   public void uninstall() {
+      try {
+         Connection rdb = newConnection();      
+         try {
+            
+            // check the schema has been created
+            PreparedStatement sql = rdb.prepareStatement(
+               sqlx.apply("DROP TABLE "+getAnnotatorId()+"_wordform"));
+            sql.executeUpdate();
+	    sql.close();
+            
+         } finally {
+            try { rdb.close(); } catch(SQLException x) {}
+         }      
+      } catch (SQLException x) {
+      }
+   }
    
    /**
     * Provides the overall configuration of the annotator. 
@@ -298,7 +286,7 @@ public class CMUDict extends Annotator
 	    if (line.startsWith(";;;")) { // comment
 	       if (line.startsWith(";;; # CMUdict")) {
                   // note the header, which contains the version
-                  FileWriter version = new FileWriter(new File(workingDirectory, "version.txt"));
+                  FileWriter version = new FileWriter(new File(getWorkingDirectory(), "version.txt"));
                   version.write(line);
                   version.close();
 	       }
@@ -683,8 +671,8 @@ public class CMUDict extends Annotator
     * <ul>
     *  <li> {@link Annotator#setSchema(Schema)} </li>
     *  <li> {@link Annotator#setTaskParameters(String)} </li>
-    *  <li> {@link UsesFileSystem#setWorkingDirectory(File)} (if applicable) </li>
-    *  <li> {@link UsesRelationalDatabase#rdbConnectionDetails(String,String,String)}
+    *  <li> {@link Annotator#setWorkingDirectory(File)} (if applicable) </li>
+    *  <li> {@link Annotator#rdbConnectionDetails(String,String,String)}
     *       (if applicable) </li>
     * </ul>
     * @return A (possibly empty) list of IDs of dictionaries.
@@ -699,8 +687,8 @@ public class CMUDict extends Annotator
     * <ul>
     *  <li> {@link Annotator#setSchema(Schema)} </li>
     *  <li> {@link Annotator#setTaskParameters(String)} </li>
-    *  <li> {@link UsesFileSystem#setWorkingDirectory(File)} (if applicable) </li>
-    *  <li> {@link UsesRelationalDatabase#rdbConnectionDetails(String,String,String)}
+    *  <li> {@link Annotator#setWorkingDirectory(File)} (if applicable) </li>
+    *  <li> {@link Annotator#rdbConnectionDetails(String,String,String)}
     *       (if applicable) </li>
     * </ul>
     * @return The identified dictionary.

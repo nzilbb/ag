@@ -21,16 +21,21 @@
 //
 package nzilbb.ag.automation;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.net.URL;
-import java.net.URI;
-import java.io.UnsupportedEncodingException;
-import java.io.File;
-import java.util.jar.JarFile;
-import java.lang.reflect.Method;
+import java.sql.*;
 import java.util.Vector;
+import java.util.jar.JarFile;
 import nzilbb.ag.*;
+import nzilbb.sql.mysql.MySQLTranslator;
+import nzilbb.util.IO;
 import nzilbb.util.MonitorableTask;
 
 /**
@@ -142,6 +147,75 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
     */
    public abstract String getMinimumApiVersion();
    
+   /**
+    * A persistent directory in which files can be saved and accessed.
+    * @see #getWorkingDirectory()
+    * @see #setWorkingDirectory(File)
+    */
+   private File workingDirectory;
+   /**
+    * A persistent directory in which files can be saved and accessed.
+    * <p> This is automatically called if the annotator is annotated by {@link UsesFileSystem},
+    * providing the implementation with persistent access to the file system.
+    * @return A persistent directory in which files can be saved and accessed.
+    */
+   public File getWorkingDirectory() { return workingDirectory; }
+   /**
+    * Setter for {@link #workingDirectory}: A persistent directory in which files can be saved
+    * and accessed. 
+    * @param directory A persistent directory in which files can be saved and accessed.
+    */
+   public Annotator setWorkingDirectory(File directory) { 
+      workingDirectory = directory;
+      
+      // load configuration, if any
+      File f = new File(workingDirectory, getAnnotatorId() + ".cfg");
+      if (f.exists()) {
+         try {
+            beanPropertiesFromQueryString(IO.InputStreamToString(new FileInputStream(f)));
+         } catch(IOException exception) {}
+      }
+      return this;
+   }
+
+   /** 
+    * Allows MySQL-specific constructions to be automatically translated to some other
+    * dialect using <code>sqlx.apply(mySqlQuery)</code>
+    */
+   protected MySQLTranslator sqlx;
+   private String rdbUrl;
+   private String rdbUser;
+   private String rdbPassword;
+   /**
+    * Sets the information required for connecting to the relational database.
+    * <p> This is automatically called if the annotator is annotated with
+    * {@link UsesRelationalDatabase}, providing the implementation with access to a
+    * relational database.
+    * @param sqlTranslator SQL statement translator.
+    * @param url URL for relational database, e.g. <q>jdbc:mysql://localhost/labbcat</q>
+    * @param user Username for connecting to the database, if any.
+    * @param password Password for connecting to the database, if any.
+    * @throws SQLException If the annotator can't connect to the given database.
+    */
+   public void rdbConnectionDetails(
+      MySQLTranslator sqlTranslator, String url, String user, String password)
+      throws SQLException {
+      
+      sqlx = sqlTranslator;
+      rdbUrl = url;
+      rdbUser = user;
+      rdbPassword = password;
+   }
+   
+   /**
+    * Get a new connection to the database.
+    * @return A connection to the RDBMS.
+    * @throws SQLException If a database access error occurs
+    */
+   public Connection newConnection() throws SQLException {
+      return DriverManager.getConnection(rdbUrl, rdbUser, rdbPassword);
+   } // end of newConnection()
+
    /**
     * Whether the annotator is currently annotating.
     * @see #getRunning()

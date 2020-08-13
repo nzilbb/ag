@@ -298,16 +298,15 @@ public class AnnotatorWebApp extends StandAloneWebApp {
             .setPeers(true).setPeersOverlap(false).setSaturated(false)
             .setParentId("turn").setParentIncludes(true)));
       
-      if (annotator instanceof UsesFileSystem) {
-         ((UsesFileSystem)annotator).setWorkingDirectory(workingDir);
+      if (annotator.getClass().isAnnotationPresent(UsesFileSystem.class)) {
+         annotator.setWorkingDirectory(workingDir);
       }
       
-      if (annotator instanceof UsesRelationalDatabase) {
+      if (annotator.getClass().isAnnotationPresent(UsesRelationalDatabase.class)) {
          String rdbURL = "jdbc:derby:"
             +workingDir.getPath().replace('\\','/')
             +"/derby;create=true";
-         ((UsesRelationalDatabase)annotator).rdbConnectionDetails(
-            new VanillaSQLTranslator(), rdbURL, null, null);
+         annotator.rdbConnectionDetails(new VanillaSQLTranslator(), rdbURL, null, null);
       }
       
    } // end of init()

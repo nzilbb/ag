@@ -62,14 +62,13 @@ public class TestCMUDictionary {
       annotator.setSchema(schema());
 
       // set the working directory
-      ((UsesFileSystem)annotator).setWorkingDirectory(dir);
+      annotator.setWorkingDirectory(dir);
 
       // use derby for relational database
       String rdbURL = "jdbc:derby:"
          +dir.getPath().replace('\\','/')
          +"/derby;create=true";
-      ((UsesRelationalDatabase)annotator).rdbConnectionDetails(
-         new DerbySQLTranslator(), rdbURL, null, null);
+      annotator.rdbConnectionDetails(new DerbySQLTranslator(), rdbURL, null, null);
 
       // set the annotator configuration, which will install the lexicon the first time (only)
       annotator.setConfig(annotator.getConfig());

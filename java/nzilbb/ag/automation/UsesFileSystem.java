@@ -21,19 +21,17 @@
 //
 package nzilbb.ag.automation;
 
-import java.io.File;
+import java.lang.annotation.*;
 
 /**
- * Extend this interface if your {@link Annotator} needs access to a persistent directory
+ * Annotation for {@link Annotator} subclasses that need access to a persistent directory
  * for saving and loading working files.
+ * <p> Such classes can safely call {@link Annotation#newConnection()} to get a connection to a
+ * persistent relational database.
  * @author Robert Fromont robert@fromont.net.nz
  */
-public interface UsesFileSystem {
-
-   /**
-    * Provides a persisent directory in which files can be saved and accessed.
-    * @param directory
-    */
-   public void setWorkingDirectory(File directory);
-
-} // end of class UsesFileSystem
+@Documented
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface UsesFileSystem {
+} // end of annotation UsesFileSystem
