@@ -8,7 +8,7 @@
   <property name="build"   location="build_${ant.project.name}"/>
   <property name="dist"    location="../bin"/>
   <property name="srcfiles" value="nzilbb/ag/**/*.java nzilbb/editpath/**/*.java nzilbb/configure/**/*.java nzilbb/util/**/*.java nzilbb/media/**/*.java org/json/**/*.java nzilbb/webapp/**/*.java"/> 
-  <property name="srctests" value="nzilbb/ag/**/Test*.java nzilbb/util/**/Test*.java"/>
+  <property name="srctests" value="nzilbb/ag/**/Test*.java nzilbb/util/**/Test*.java nzilbb/sql/**/Test*.java"/>
   <property name="srctestseditpath" value="nzilbb/editpath/**/Test*.java"/>
   <property name="junitjar" value="/usr/share/java/junit4.jar"/>
   
@@ -147,6 +147,7 @@
       <batchtest>
         <fileset dir="." includes="${srctestseditpath}"/>
         <fileset dir="." includes="nzilbb/util/**/Test*.java"/>
+        <fileset dir="." includes="nzilbb/sql/**/Test*.java"/>
         <fileset dir="." includes="nzilbb/ag/*/Test*.java"/>
         <fileset dir="." includes="nzilbb/ag/util/**/Test*.java" excludes="nzilbb/ag/util/test/TestMerger.java"/>
         <fileset dir="." includes="nzilbb/ag/serialize/**/Test*.java"/>
