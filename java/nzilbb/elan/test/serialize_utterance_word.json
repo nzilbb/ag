@@ -22,6 +22,8 @@
                 "word":{"description":"Words", "alignment":2,
                   "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
                   "children":{
+                    "orthography":{"description":"Orthography", "alignment":0,
+                      "peers":false, "peersOverlap":false, "parentIncludes":true, "saturated":true},
                     "phone":{"description":"Phones", "alignment":2,
                       "peers":true, "peersOverlap":true, "parentIncludes":true, "saturated":true}
                   }}
@@ -1438,11 +1440,17 @@
             {"id":"x1",	"label":"the",	"startId":"wy",	"endId":"x0",	"confidence":100},
             {"id":"x3",	"label":"microphone",	"startId":"x0",	"endId":"x2",	"confidence":100},
             {"id":"x5",	"label":"is",	"startId":"x2",	"endId":"x4",	"confidence":100,
+              "orthography":[
+                {"id":"orth1",	"label":"is",	"startId":"x2",	"endId":"x4",	"confidence":50}],
               "phone":[
                 {"id":"1bk",	"label":"I",	"startId":"x2",	"endId":"1bj",	"confidence":100},
                 {"id":"1bl",	"label":"z",	"startId":"1bj",	"endId":"x4",	"confidence":100}]},
-            {"id":"x6",	"label":"malfunctioning",	"startId":"x4",	"endId":"54",	"confidence":100},
+            {"id":"x6",	"label":"malfunctioning",	"startId":"x4",	"endId":"54",	"confidence":100,
+              "orthography":[
+                {"id":"orth2",	"label":"malfunctioning",	"startId":"x4",	"endId":"54",	"confidence":50}]},
             {"id":"x8",	"label":"or",	"startId":"54",	"endId":"x7",	"confidence":100,
+              "orthography":[
+                {"id":"orth3",	"label":"or",	"startId":"54",	"endId":"x7",	"confidence":50}],
               "phone":[
                 {"id":"1bm",	"label":"$",	"startId":"54",	"endId":"x7",	"confidence":100}]},
             {"id":"xa",	"label":"some",	"startId":"x7",	"endId":"x9",	"confidence":100,
