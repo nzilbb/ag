@@ -106,7 +106,19 @@ public class StoreGraphMediaProvider
   {
     try
     {
-      return store.getAvailableMedia(graph.getId());
+       MediaFile[] media = store.getAvailableMedia(graph.sourceGraph().getId());
+       if (graph.isFragment())
+       { // for a fragment, modify the URLs for the fragment
+          for (int m = 0; m < media.length; m++)
+          {
+             media[m].setUrl(
+                store.getMedia(graph.sourceGraph().getId(),
+                               media[m].getTrackSuffix(), media[m].getMimeType(),
+                               graph.getStart().getOffset(), graph.getEnd().getOffset()));
+             media[m].setFile(null);
+          } // next file
+       }
+       return media;
     }
     catch(GraphNotFoundException exception)
     { // should be impossible, but...
