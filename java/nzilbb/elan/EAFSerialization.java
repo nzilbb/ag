@@ -442,7 +442,7 @@ public class EAFSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "ELAN EAF Transcript", "1.1", "text/x-eaf+xml", ".eaf", "20200710.1904",
+         "ELAN EAF Transcript", "1.11", "text/x-eaf+xml", ".eaf", "20200710.1904",
          getClass().getResource("icon.png"));
    }
    
@@ -1974,7 +1974,18 @@ public class EAFSerialization
             if (files.length > 0)
             {
                MediaFile firstFile = files[0];
-               mediaDescriptor.setAttribute("MEDIA_URL", firstFile.getUrl());
+               if (firstFile.getUrl() != null && firstFile.getUrl().startsWith("http"))
+               { // http URLs are not supported by ELAN
+                  // so we'll just mangle the file name so that it's probably right if they've
+                  // downloaded media too
+                  mediaDescriptor.setAttribute(
+                     "MEDIA_URL",
+                     IO.WithoutExtension(graph.getId()) + "." + firstFile.getExtension());
+               }
+               else
+               {
+                  mediaDescriptor.setAttribute("MEDIA_URL", firstFile.getUrl());
+               }
                mediaDescriptor.setAttribute("MIME_TYPE", firstFile.getMimeType());
             }
          }
