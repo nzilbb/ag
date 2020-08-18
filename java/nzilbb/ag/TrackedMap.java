@@ -116,6 +116,27 @@ public class TrackedMap
    
    /**
     * Sets the object attributes using the given JSON representation.
+    * <p> All attributes are copied, including those that are not bean attributes; other
+    * are stored as map values.
+    * @param json A JSON-encoded string.
+    * @return A reference to this object.
+    */
+   public TrackedMap fromJson(String json)
+   {
+      return fromJson(new JSONObject(json));
+   }
+   
+   /**
+    * JSON-encodes the object.
+    * @return A JSON representation of the object.
+    */
+   public String toJsonString()
+   {
+      return new JSONObject((IJSONableBean)this).toString();
+   }
+   
+   /**
+    * Sets the object attributes using the given JSON representation.
     * <p>All attributes are copied, including those that are not bean attributes; other
     * are stored as map values.
     * @param json

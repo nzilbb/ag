@@ -106,5 +106,14 @@ public interface GraphStoreAdministration extends GraphStore {
     */
    public GraphSerializer serializerForFilesSuffix(String suffix)
       throws StoreException, PermissionException;
+   
+   /**
+    * Saves changes to a layer, or adds a new layer.
+    * @param layer A new or modified layer definition.
+    * @return The resulting layer definition.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public Layer saveLayer(Layer layer) throws StoreException, PermissionException;
 
 } // end of class GraphStoreAdministration
