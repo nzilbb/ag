@@ -84,12 +84,12 @@ public class Layer
    // Attributes stored in HashMap:
    
    /**
-    * The layer's parent layer id
+    * The layer's parent layer id.
     */
    protected String parentId;
    /**
-    * Getter for <i>parentId</i>: The layer's parent layer id
-    * @return The layer's parent layer id
+    * Getter for <i>parentId</i>: The layer's parent layer id.
+    * @return The layer's parent layer id.
     */
    public String getParentId() { return parentId; }
    /**
@@ -144,17 +144,17 @@ public class Layer
    public Layer setAlignment(int alignment) { this.alignment = alignment; return this; }
 
    /**
-    * Whether children have peers or not. Defaults to <code>true</code>
+    * Whether children on this layer have peers or not. Defaults to <code>true</code>
     */
    protected boolean peers = true;
    /**
-    * Getter for <i>peers</i>: Whether children have peers or not.
-    * @return Whether children have peers or not.
+    * Getter for <i>peers</i>: Whether children on this layer have peers or not.
+    * @return Whether children on this layer have peers or not.
     */
    public boolean getPeers() { return peers; }
    /**
-    * Setter for <i>peers</i>: Whether children have peers or not.
-    * @param peers Whether children have peers or not.
+    * Setter for <i>peers</i>: Whether children on this layer have peers or not.
+    * @param peers Whether children on this layer have peers or not.
     */
    public Layer setPeers(boolean peers) { this.peers = peers; return this; }
 
@@ -189,21 +189,22 @@ public class Layer
    public Layer setParentIncludes(boolean parentIncludes) { this.parentIncludes = parentIncludes; return this; }
 
    /**
-    * Whether children must temporally fill the entire parent duration (true) or not
+    * Whether children on this layer must temporally fill the entire parent duration (true) or not
     * (false). Defaults to <code>true</code> 
     */
    protected boolean saturated = true;
    /**
-    * Getter for <i>saturated</i>: Whether children must temporally fill the entire parent
-    * duration (true) or not (false). 
+    * Getter for <i>saturated</i>: Whether children on this layer must temporally fill the entire 
+    * parent duration (true) or not (false).
     * @return Whether children must temporally fill the entire parent duration (true) or not
     * (false). 
     */
    public boolean getSaturated() { return saturated; }
    /**
-    * Setter for <i>saturated</i>: Whether children must temporally fill the entire parent
-    * duration (true) or not (false). 
-    * @param saturated Whether children must temporally fill the entire parent duration (true) or not (false).
+    * Setter for <i>saturated</i>: Whether children on this layer must temporally fill the
+    * entire parent duration (true) or not (false). 
+    * @param saturated Whether children on this layer must temporally fill the entire
+    * parent duration (true) or not (false).
     */
    public Layer setSaturated(boolean saturated) { this.saturated = saturated; return this; }
    
@@ -394,11 +395,11 @@ public class Layer
     * @param parentId The layer's parent layer id
     * @param alignment The layer's alignment - 0 for none, 1 for point alignment, 2 for interval
     * alignment. 
-    * @param peers Whether children have peers or not.
+    * @param peers Whether children on this layer have peers or not.
     * @param peersOverlap Whether child peers can overlap or not.
     * @param parentIncludes Whether the parent t-includes the child.
-    * @param saturated Whether children must temporally fill the entire parent duration (true) or
-    * not (false). 
+    * @param saturated Whether children on this layer must temporally fill the entire
+    * parent duration (true) or not (false). 
     */
    public Layer(String id, String description, int alignment, boolean peers, boolean peersOverlap, boolean saturated, String parentId, boolean parentIncludes)
    {
@@ -418,9 +419,10 @@ public class Layer
     * @param description The description of the layer.
     * @param alignment The layer's alignment - 0 for none, 1 for point alignment, 2 for interval
     * alignment. 
-    * @param peers Whether children have peers or not.
+    * @param peers Whether children on this layer have peers or not.
     * @param peersOverlap Whether child peers can overlap or not.
-    * @param saturated Whether children must temporally fill the entire parent duration (true) or not (false).
+    * @param saturated Whether children on this layer must temporally fill the entire parent 
+    * duration (true) or not (false).
     */
    public Layer(String id, String description, int alignment, boolean peers, boolean peersOverlap, boolean saturated)
    {
