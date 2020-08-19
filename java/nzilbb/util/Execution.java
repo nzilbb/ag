@@ -22,6 +22,7 @@
 package nzilbb.util;
 
 import java.util.Vector;
+import java.util.LinkedHashMap;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,6 +51,48 @@ public class Execution implements Runnable {
     * @param newExe Executable file.
     */
    public Execution setExe(File newExe) { exe = newExe; return this; }
+   /**
+    * Setter for {@link #exe}: Executable file.
+    * @param newExe Command.
+    */
+   public Execution setExe(String command) { exe = new File(command); return this; }
+
+   /**
+    * The working directory for execution, or null for the current directory.
+    * @see #getWorkingDirectory()
+    * @see #setWorkingDirectory(File)
+    */
+   protected File workingDirectory;
+   /**
+    * Getter for {@link #workingDirectory}: The working directory for execution, or null
+    * for the current directory. 
+    * @return The working directory for execution, or null for the current directory.
+    */
+   public File getWorkingDirectory() { return workingDirectory; }
+   /**
+    * Setter for {@link #workingDirectory}: The working directory for execution, or null for 
+    * the current directory. 
+    * @param newWorkingDirectory The working directory for execution, or null for the
+    * current directory. 
+    */
+   public Execution setWorkingDirectory(File newWorkingDirectory) { workingDirectory = newWorkingDirectory; return this; }
+   
+   /**
+    * Environment variables.
+    * @see #getEnvironmentVariables()
+    * @see #setEnvironmentVariables(LinkedHashMap)
+    */
+   protected LinkedHashMap<String,String> environmentVariables = new LinkedHashMap<String,String>();;
+   /**
+    * Getter for {@link #environmentVariables}: Environment variables.
+    * @return Environment variables.
+    */
+   public LinkedHashMap<String,String> getEnvironmentVariables() { return environmentVariables; }
+   /**
+    * Setter for {@link #environmentVariables}: Environment variables.
+    * @param newEnvironmentVariables Environment variables.
+    */
+   public Execution setEnvironmentVariables(LinkedHashMap<String,String> newEnvironmentVariables) { environmentVariables = newEnvironmentVariables; return this; }
    
    /**
     * Command line arguments.
@@ -158,7 +201,7 @@ public class Execution implements Runnable {
    } // end of constructor
    
    /**
-    * Builder-style method for adding an argment to {@link #arguments}.
+    * Builder-style method for adding an argument to {@link #arguments}.
     * @param argument The argument to add.
     * @return A reference to this object.
     */
@@ -170,6 +213,21 @@ public class Execution implements Runnable {
          }
          arguments.add(argument);
       }
+      return this;
+   } // end of arg()
+
+   /**
+    * Builder-style method for adding an environment variable to {@link #environmentVariables}.
+    * @param variable The variable to add.
+    * @param value The value for the variable.
+    * @return A reference to this object.
+    */
+   public Execution env(String variable, String value)
+   {
+      if (environmentVariables == null) {
+         environmentVariables = new LinkedHashMap<String,String>();
+      }
+      environmentVariables.put(variable, value);
       return this;
    } // end of arg()
 
@@ -186,11 +244,36 @@ public class Execution implements Runnable {
       vArguments.add(exe.getPath());
       vArguments.addAll(arguments);
       try {
-         
-	 setProcess(Runtime.getRuntime().exec(vArguments.toArray(new String[0])));
-	 
-	 InputStream inStream = process.getInputStream();
-	 InputStream errStream = process.getErrorStream();
+
+         Vector<String> envp = new Vector<String>();
+         for (String variable : environmentVariables.keySet()) {
+            envp.add(variable + "=" + environmentVariables.get(variable)); 
+         }
+
+         if (envp.size() == 0) {
+            if (workingDirectory != null) {
+               setProcess(Runtime.getRuntime().exec(
+                             vArguments.toArray(new String[0]),
+                             null,
+                             workingDirectory));
+            } else {
+               setProcess(Runtime.getRuntime().exec(
+                             vArguments.toArray(new String[0])));
+            }
+         } else {
+            if (workingDirectory != null) {
+               setProcess(Runtime.getRuntime().exec(
+                             vArguments.toArray(new String[0]),
+                             envp.toArray(new String[0]),
+                             workingDirectory));
+            } else {
+               setProcess(Runtime.getRuntime().exec(
+                             vArguments.toArray(new String[0]),
+                             envp.toArray(new String[0])));
+            }
+         }
+         InputStream inStream = process.getInputStream();
+            InputStream errStream = process.getErrorStream();
 	 byte[] buffer = new byte[1024];
 	 
 	 // loop waiting for the process to exit, all the while reading from
@@ -262,5 +345,26 @@ public class Execution implements Runnable {
       }
       finished = true;
    } // end of run()
+
+   /**
+    * Runs the "which" command to determine if a command is available.
+    * @param command The command we want to location of.
+    * @return The executable file for the command, or null if it can't be identified.
+    */
+   public static File Which(String command) {
+      File path = null;
+      try {
+         Execution which = new Execution()
+            .setExe(new File("/usr/bin/which"))
+            .arg(command);
+         which.run();
+         if (which.getInput().toString().trim().length() > 0) {
+            path = new File(which.getInput().toString().trim());
+         }
+      } catch (Throwable t) {
+         System.err.println("Execution.Which("+command+"): " + t);
+      }
+      return path;
+   } // end of which()
 
 } // end of class Execution
