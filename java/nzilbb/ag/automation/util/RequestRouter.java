@@ -22,6 +22,7 @@
 package nzilbb.ag.automation.util;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -163,6 +164,7 @@ public class RequestRouter
          }
       } 
       
+      Object result = null;
       if ("GET".equals(method)
           || "application/x-www-form-urlencoded".equals(contentType)) {
          // how many parameters are there?
@@ -221,7 +223,6 @@ public class RequestRouter
          } // next parameter
 
          // invoke the method
-         Object result = null;
          try {
             switch (parameterValues.length) {
                case 0:
@@ -256,18 +257,44 @@ public class RequestRouter
             throw new RequestException(400, method, uri, error);
          }
 
-         // return the result
-         if (result == null) {
-            return null;
-         } else if (result instanceof InputStream) {
-            return (InputStream)result;
-         } else if (result == annotator) { // method returns a reference to its object
-            return null;
-         } else {
-            return new ByteArrayInputStream(result.toString().getBytes());
+      } else if ("POST".equals(method)) {
+
+         // take the body of the request as the contents of the file
+         Method classMethod = null;
+         for (Method m : possibleMethods) {
+            if (m.getParameterCount() == 1 && m.getParameterTypes()[0] == File.class) {
+               classMethod = m;
+               break;
+            }
+         } // next possible method
+         if (classMethod == null) {
+            throw new RequestException(400, "Wrong number of parameters.", method, uri);
+         }
+         try {
+            // create a file
+            File file = File.createTempFile(
+               annotator.getClass().getSimpleName() + "_", "_" + classMethod.getName());
+            // save the body content into it
+            IO.SaveInputStreamToFile(body, file);
+            // invoke the method
+            result = classMethod.invoke(annotator, file);
+         } catch (IOException fileError) {
+            throw new RequestException(500, method, uri, fileError);
+         } catch (Throwable error) {
+            throw new RequestException(400, method, uri, error);
          }
       } // TODO POST multipart
-      return null; //TODO
+      
+      // return the result
+      if (result == null) {
+         return null;
+      } else if (result instanceof InputStream) {
+         return (InputStream)result;
+      } else if (result == annotator) { // method returns a reference to its object
+         return null;
+      } else {
+         return new ByteArrayInputStream(result.toString().getBytes());
+      }
    } // end of request()
 
 } // end of class RequestRouter
