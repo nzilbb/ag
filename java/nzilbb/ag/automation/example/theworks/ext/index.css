@@ -36,3 +36,10 @@ footer {
     text-align: center;
     font-style: italic;
 }
+.error {
+    color: red;
+}
+
+progress {
+    width: 100%;
+}
