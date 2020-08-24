@@ -128,7 +128,7 @@ public class AnnotatorWebApp extends StandAloneWebApp {
     * Working directory.
     * @see #getWorkingDir()
     */
-   protected File workingDir;
+   protected File workingDir = new File(".");
    /**
     * Getter for {@link #workingDir}: Working directory.
     * @return Working directory.
@@ -158,7 +158,6 @@ public class AnnotatorWebApp extends StandAloneWebApp {
 
    /** Constructor */
    public AnnotatorWebApp() {
-      workingDir = new File(getClass().getSimpleName());
    }
 
    /**
@@ -300,7 +299,9 @@ public class AnnotatorWebApp extends StandAloneWebApp {
             .setParentId("turn").setParentIncludes(true)));
       
       if (annotator.getClass().isAnnotationPresent(UsesFileSystem.class)) {
-         annotator.setWorkingDirectory(workingDir);
+         File annotatorDir = new File(workingDir, annotator.getAnnotatorId());
+         if (!annotatorDir.exists()) annotatorDir.mkdir();
+         annotator.setWorkingDirectory(annotatorDir);
       }
       
       if (annotator.getClass().isAnnotationPresent(UsesRelationalDatabase.class)) {
