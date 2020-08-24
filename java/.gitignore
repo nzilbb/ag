@@ -4,3 +4,6 @@
 
 # JUnit files
 junit*.properties
+
+# Local javadoc files
+javadoc
