@@ -203,7 +203,9 @@ public class CMUDict extends Annotator
     * @see #setConfig(String)
     * @see #beanPropertiesToQueryString()
     */
-   //TODO public String getConfig() { return null; }
+   public String getConfig() {
+      return null;
+   }
    
    /**
     * Installs or updates the database schema and the contents of the <q>cmudict.txt file</q>.
@@ -230,7 +232,8 @@ public class CMUDict extends Annotator
             rs.close();
             sql.close();
             
-            if (wordCount == 0) {
+            File cmuDictFile = new File(getWorkingDirectory(), "cmudict.txt");
+            if (wordCount == 0 || cmuDictFile.exists()) {
                // load data into the table
                URL urlCmudictTxt = getClass().getResource("cmudict.txt");
                if (urlCmudictTxt == null) {
@@ -238,15 +241,20 @@ public class CMUDict extends Annotator
                   throw new InvalidConfigurationException(this, "Could not find cmudict.txt");
                }
                // use the file they uploaded, if any
-               File cmuDictFile = new File(getWorkingDirectory(), "cmudict.txt");
                if (cmuDictFile.exists()) {
                   setStatus("Loading pronunciations into wordform table from uploaded file...");
                   urlCmudictTxt = cmuDictFile.toURI().toURL();
+                  // delete any existing entries
+                  sql = rdb.prepareStatement(
+                     sqlx.apply("DELETE FROM "+getAnnotatorId()+"_wordform"));
+                  sql.executeUpdate();
+                  sql.close();
                } else {
                   setStatus("Loading pronunciations into wordform table from build-in file...");
                }
                wordCount = loadDictionary(urlCmudictTxt.openStream(), rdb);
-               setStatus("Number of pronunciations processed: " + wordCount);               
+               setStatus("Number of pronunciations processed: " + wordCount);
+               if (cmuDictFile.exists()) cmuDictFile.delete();
             } else {
                setStatus("Dictionary already loaded.");
             }
