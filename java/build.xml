@@ -31,6 +31,35 @@
     <move todir="lib">
       <fileset dir="lib/db-derby-10.14.2.0-lib/lib"/>
     </move>
+    <!-- Get commons libraries -->
+    <get src="https://downloads.apache.org/commons/fileupload/binaries/commons-fileupload-1.4-bin.zip" 
+	 dest="lib/commons-fileupload-1.4-bin.zip" 
+	 skipexisting="true"
+	 verbose="true"
+	 usetimestamp="true"/>
+    <unzip src="lib/commons-fileupload-1.4-bin.zip" dest="lib">
+      <patternset>
+        <include name="commons-fileupload-1.4-bin/commons-fileupload-1.4.jar"/>
+      </patternset>
+    </unzip>
+    <move
+        file="lib/commons-fileupload-1.4-bin/commons-fileupload-1.4.jar"
+        tofile="lib/commons-fileupload.jar"
+        />
+    <get src="https://downloads.apache.org/commons/io/binaries/commons-io-2.7-bin.zip" 
+	 dest="lib/commons-io-2.7-bin.zip" 
+	 skipexisting="true"
+	 verbose="true"
+	 usetimestamp="true"/>
+    <unzip src="lib/commons-io-2.7-bin.zip" dest="lib">
+      <patternset>
+        <include name="commons-io-2.7/commons-io-2.7.jar"/>
+      </patternset>
+    </unzip>
+    <move
+        file="lib/commons-io-2.7/commons-io-2.7.jar"
+        tofile="lib/commons-io.jar"
+        />
   </target>
   
   <target name="all" depends="compile,dist">
@@ -47,7 +76,7 @@
           description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
     <javac srcdir="${src}" destdir="${build}"
-	       classpath="lib/antlr-4.7.2-complete.jar;lib/derby.jar"
+	       classpath="lib/antlr-4.7.2-complete.jar;lib/commons-fileupload.jar;lib/derby.jar"
 	       includes="${srcfiles}"
 	       excludes="${srctests} ${srctestseditpath} **/package-info.java"
 	       listfiles="yes"
@@ -70,7 +99,7 @@
 	 basedir="${build}"
          comment="${DSTAMP}.${TSTAMP}">
       <manifest>
-	<attribute name="Class-Path" value="../lib/derby.jar derby.jar"/>
+	<attribute name="Class-Path" value="../commons-fileupload.jar commons-fileupload.jar ../commons-io.jar commons-io.jar ../lib/derby.jar derby.jar"/>
       </manifest>
       
       <!-- include source code -->
@@ -90,7 +119,7 @@
           description="Generate javadoc for all source files" >
     <mkdir dir="${javadoc}"/>
     <javadoc destdir="${javadoc}"
-             classpath=".;lib/antlr-4.7.2-complete.jar;lib/derby.jar"
+             classpath=".;lib/antlr-4.7.2-complete.jar;lib/commons-fileupload.jar;lib/derby.jar"
              Author="yes"
              Windowtitle="nzilbb.ag"
              stylesheetfile="doc-files/style.css"
@@ -108,7 +137,7 @@
           description="Generate javadoc documentation for public parts of main packages" >
     <mkdir dir="${docs}"/>
     <javadoc destdir="${docs}"
-	     classpath=".;lib/antlr-4.7.2-complete.jar;lib/derby.jar"
+	     classpath=".;lib/antlr-4.7.2-complete.jar;lib/commons-fileupload.jar;lib/derby.jar"
              packagenames="nzilbb.ag"
              access="public"
 	     Author="yes"
@@ -126,7 +155,7 @@
   <target name="test" depends="dist" description="run nzilbb.ag annotation-graph unit tests">
     <javac srcdir="${src}" destdir="."
 	       includes="${srctests} ${srctestseditpath}"
-	       classpath=".;${junitjar};${dist}/${ant.project.name}.jar;lib/antlr-4.7.2-complete.jar;lib/derby.jar"
+	       classpath=".;${junitjar};${dist}/${ant.project.name}.jar;lib/antlr-4.7.2-complete.jar;lib/commons-fileupload.jar;lib/derby.jar"
 	       listfiles="yes"
 	       target="8"
 	       source="8"
