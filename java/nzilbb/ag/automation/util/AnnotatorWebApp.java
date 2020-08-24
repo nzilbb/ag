@@ -128,7 +128,7 @@ public class AnnotatorWebApp extends StandAloneWebApp {
     * Working directory.
     * @see #getWorkingDir()
     */
-   protected File workingDir = new File(".");
+   protected File workingDir;
    /**
     * Getter for {@link #workingDir}: Working directory.
     * @return Working directory.
@@ -158,6 +158,7 @@ public class AnnotatorWebApp extends StandAloneWebApp {
 
    /** Constructor */
    public AnnotatorWebApp() {
+      workingDir = new File(getClass().getSimpleName());
    }
 
    /**
