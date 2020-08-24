@@ -52,6 +52,7 @@ import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.sql.mysql.MySQLTranslator;
+import nzilbb.util.IO;
 
 /**
  * Annotator that tags words with their pronunciations according to the 
@@ -231,11 +232,18 @@ public class CMUDict extends Annotator
             
             if (wordCount == 0) {
                // load data into the table
-               setStatus("Loading pronunciations into wordform table from build-in file...");
                URL urlCmudictTxt = getClass().getResource("cmudict.txt");
                if (urlCmudictTxt == null) {
                   setStatus("ERROR: Could not find cmudict.txt");
                   throw new InvalidConfigurationException(this, "Could not find cmudict.txt");
+               }
+               // use the file they uploaded, if any
+               File cmuDictFile = new File(getWorkingDirectory(), "cmudict.txt");
+               if (cmuDictFile.exists()) {
+                  setStatus("Loading pronunciations into wordform table from uploaded file...");
+                  urlCmudictTxt = cmuDictFile.toURI().toURL();
+               } else {
+                  setStatus("Loading pronunciations into wordform table from build-in file...");
                }
                wordCount = loadDictionary(urlCmudictTxt.openStream(), rdb);
                setStatus("Number of pronunciations processed: " + wordCount);               
@@ -260,6 +268,24 @@ public class CMUDict extends Annotator
          running = false;
       }
    }
+   
+   /**
+    * Takes a file to be used instead of the built-in copy of cmudict.txt
+    * @param file The lexicon file.
+    * @return null if upload was successful, an error message otherwise.
+    */
+   public String uploadLexicon(File file) {
+      System.out.println("File: " + file.getPath());
+      File cmuDictFile = new File(getWorkingDirectory(), "cmudict.txt");
+      if (file.renameTo(file)) {
+         try {
+            IO.Copy(file, cmuDictFile);
+         } catch(IOException exception) {
+            return "Could not copy " + file.getName() + ": " + exception.getMessage();
+         }
+      }
+      return null;
+   } // end of uploadLexicon()
 
    /**
     * Reads the given stream and loads the corresponding dictionary entries into the
