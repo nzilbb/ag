@@ -22,9 +22,12 @@
 package nzilbb.ag.automation.util;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URI;
@@ -33,8 +36,11 @@ import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.util.IO;
+import org.apache.commons.fileupload.MultipartStream;
 
 /**
  * Routes requests from a webapp to a given Annotator.
@@ -138,13 +144,14 @@ public class RequestRouter
    /**
     * Make a request of the annotator.
     * @param method The HTTP method of the request, e.g. "GET" or "POST"
+    * @param uri The URI of the request.
     * @param contentType The encoding of the body if any, e.g. "multipart/form-data" for
     * uploading files. 
     * @param body The body of the request.
     * @return The response to the request.
     * @throws RequestException If the request was unsuccessful.
     */
-   @SuppressWarnings("rawtypes")
+   @SuppressWarnings({"rawtypes", "unchecked"})
    public InputStream request(String method, URI uri, String contentType, InputStream body)
       throws RequestException {
       if (annotator == null) throw new RequestException(404, "No annotator set.", method, uri);
@@ -223,41 +230,9 @@ public class RequestRouter
          } // next parameter
 
          // invoke the method
-         try {
-            switch (parameterValues.length) {
-               case 0:
-                  result = classMethod.invoke(annotator);
-                  break;
-               case 1:
-                  result = classMethod.invoke(annotator, parameterValues[0]);
-                  break;
-               case 2:
-                  result = classMethod.invoke(annotator, parameterValues[0], parameterValues[1]);
-                  break;
-               case 3:
-                  result = classMethod.invoke(
-                     annotator, parameterValues[0], parameterValues[1], parameterValues[2]);
-                  break;
-               case 4:
-                  result = classMethod.invoke(
-                     annotator, parameterValues[0], parameterValues[1], parameterValues[2],
-                     parameterValues[3]);
-                  break;
-               case 5:
-                  result = classMethod.invoke(
-                     annotator, parameterValues[0], parameterValues[1], parameterValues[2],
-                     parameterValues[3], parameterValues[4]);
-                  break;
-               default:
-                  throw new RequestException(
-                     500, "More than 5 parameters not unsupported, but "
-                     + parameterValues.length + " were specified.", method, uri);
-            }
-         } catch (Throwable error) {
-            throw new RequestException(400, method, uri, error);
-         }
+         result = invokeMethod(classMethod, parameterValues, method, uri);
 
-      } else if ("POST".equals(method)) {
+      } else if ("PUT".equals(method)) { // body is the file
 
          // take the body of the request as the contents of the file
          Method classMethod = null;
@@ -278,12 +253,86 @@ public class RequestRouter
             IO.SaveInputStreamToFile(body, file);
             // invoke the method
             result = classMethod.invoke(annotator, file);
+            // delete file
+            file.delete();
          } catch (IOException fileError) {
             throw new RequestException(500, method, uri, fileError);
          } catch (Throwable error) {
             throw new RequestException(400, method, uri, error);
          }
-      } // TODO POST multipart
+      } else if ("POST".equals(method)
+                 && contentType.startsWith("multipart/form-data; boundary=")) { 
+         // save files in a temp directory
+         File dir = null;
+         try {
+            dir = File.createTempFile(
+            annotator.getClass().getSimpleName() + "_", "_" + path);
+            dir.delete();
+            dir.mkdir();
+
+            // parse the parts out of the request
+            Vector parts = new Vector();
+            String boundary = contentType.substring("multipart/form-data; boundary=".length());
+            MultipartStream bodyParts = new MultipartStream(body, boundary.getBytes(), 1024, null);
+            boolean nextPart = true;
+            nextPart = bodyParts.skipPreamble();
+            while (nextPart) {
+               String headers = bodyParts.readHeaders();
+               Matcher fileNameParser = Pattern.compile("filename=\"([^\"]+)\"").matcher(headers);
+               if (fileNameParser.find()) {
+                  String fileName = fileNameParser.group(1);
+                  File file = new File(dir, fileName);
+                  FileOutputStream output = new FileOutputStream(file);
+                  bodyParts.readBodyData(output);
+                  parts.add(file);
+               } else {
+                  ByteArrayOutputStream output = new ByteArrayOutputStream();
+                  bodyParts.readBodyData(output);
+                  parts.add(output.toString("UTF-8"));
+               }
+               
+               nextPart = bodyParts.readBoundary();
+            }
+         
+            // find a methods that matches the parameters passed
+            Method classMethod = null;
+            for (Method m : possibleMethods) {
+               if (m.getParameterCount() == parts.size()) {
+                  classMethod = m;
+                  // check the parameters are the right type
+                  for (int p = 0; p < m.getParameterTypes().length; p++) {
+                     if (!m.getParameterTypes()[p].equals(parts.elementAt(p).getClass())) {
+                        // not the right type
+                        classMethod = null;
+                        break;
+                     }
+                  }
+                  if (classMethod != null) break;
+               }
+            } // next possible method
+            if (classMethod == null) {
+               throw new RequestException(400, "Wrong number of parameters.", method, uri);
+            }
+            Object[] parameterValues = parts.toArray(new Object[0]);
+            // invoke the method
+            result = invokeMethod(classMethod, parameterValues, method, uri);
+
+            
+         } catch(UnsupportedEncodingException encodingError) {
+            throw new RequestException(500, method, uri, encodingError);
+         } catch(MultipartStream.MalformedStreamException streamError) {
+            throw new RequestException(500, method, uri, streamError);
+         } catch(IOException fileError) {
+            throw new RequestException(500, method, uri, fileError);
+         } finally {
+            // delete files
+            IO.RecursivelyDelete(dir);
+         }
+      } else {
+         System.err.println(
+            "Method " + method + " Content-Type " + contentType + " not supported.");
+         
+      }
       
       // return the result
       if (result == null) {
@@ -296,5 +345,47 @@ public class RequestRouter
          return new ByteArrayInputStream(result.toString().getBytes());
       }
    } // end of request()
+   
+   /**
+    * Invokes the given method with the given parameters
+    * @param classMethod The method to invoke.
+    * @param parameterValues The parameters for the method.
+    * @param method The HTTP method of the request (for error reporting).
+    * @param uri The URI of the request (for error reporting).
+    * @return The result of the request, if any.
+    * @throws RequestException
+    */
+   protected Object invokeMethod(
+      Method classMethod, Object[] parameterValues, String method, URI uri)
+      throws RequestException {
+      try {
+         switch (parameterValues.length) {
+            case 0:
+               return classMethod.invoke(annotator);
+            case 1:
+               return classMethod.invoke(annotator, parameterValues[0]);
+            case 2:
+               return classMethod.invoke(annotator, parameterValues[0], parameterValues[1]);
+            case 3:
+               return classMethod.invoke(
+                  annotator, parameterValues[0], parameterValues[1], parameterValues[2]);
+            case 4:
+               return classMethod.invoke(
+                  annotator, parameterValues[0], parameterValues[1], parameterValues[2],
+                  parameterValues[3]);
+            case 5:
+               return classMethod.invoke(
+                  annotator, parameterValues[0], parameterValues[1], parameterValues[2],
+                  parameterValues[3], parameterValues[4]);
+            default:
+               throw new RequestException(
+                  500, "More than 5 parameters not unsupported, but "
+                  + parameterValues.length + " were specified.", method, uri);
+         }
+      } catch (Throwable error) {
+         throw new RequestException(400, method, uri, error);
+      }    
+   } // end of invokeMethod()
+
 
 } // end of class RequestRouter

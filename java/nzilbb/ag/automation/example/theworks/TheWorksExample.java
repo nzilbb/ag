@@ -205,7 +205,7 @@ public class TheWorksExample extends Annotator
       
       setPercentComplete(100);
    }
-   
+
    /**
     * Sets the configuration for a given annotation task.
     * @param parameters The configuration of the annotator; This annotator has no task
@@ -429,6 +429,17 @@ public class TheWorksExample extends Annotator
    public TheWorksExample setLabelConfidence(Double newLabelConfidence) { labelConfidence = newLabelConfidence; return this; }
 
    /**
+    * Accepts an uploaded file.
+    * @param file The file uploaded by the webapp.
+    * @return null if upload was successful, an error message otherwise.
+    */
+   public String uploadFile(File file) {
+      // file is a temporary file that will be deleted after this method finishes,
+      // so we must copy it elsewhere or process the contents now
+      return null;
+   } // end of uploadLexicon()
+   
+   /**
     * How long, in seconds, the #setConfig(String) method should take to return.
     * @see #getSimulatedInstallationDuration()
     * @see #setSimulatedInstallationDuration(Integer)
@@ -454,8 +465,8 @@ public class TheWorksExample extends Annotator
     * <ul>
     *  <li> {@link Annotator#setSchema(Schema)} </li>
     *  <li> {@link Annotator#setTaskParameters(String)} </li>
-    *  <li> {@link Annotator#setWorkingDirectoryectory(File)} (if applicable) </li>
-    *  <li> {@link Annotator#rdbConnectionDetails(String,String,String)}
+    *  <li> {@link Annotator#setWorkingDirectory(File)} (if applicable) </li>
+    *  <li> {@link Annotator#rdbConnectionDetails(MySQLTranslator,String,String,String)}
     *       (if applicable) </li>
     * </ul>
     * @return A (possibly empty) list of IDs of dictionaries.
@@ -470,8 +481,8 @@ public class TheWorksExample extends Annotator
     * <ul>
     *  <li> {@link Annotator#setSchema(Schema)} </li>
     *  <li> {@link Annotator#setTaskParameters(String)} </li>
-    *  <li> {@link Annotator#setWorkingDirectoryectory(File)} (if applicable) </li>
-    *  <li> {@link Annotator#rdbConnectionDetails(String,String,String)}
+    *  <li> {@link Annotator#setWorkingDirectory(File)} (if applicable) </li>
+    *  <li> {@link Annotator#rdbConnectionDetails(MySQLTranslator,String,String,String)}
     *       (if applicable) </li>
     * </ul>
     * @return The identified dictionary.

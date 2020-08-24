@@ -46,7 +46,6 @@ public class TheWorksExampleDictionary extends TreeMap<String,Integer> implement
    /**
     * The TheWorksExample annotator that created this dictionary.
     * @see #getAnnotator()
-    * @see #setAnnotator(Annotator)
     */
    protected Annotator annotator;
    /**

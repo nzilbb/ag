@@ -11,7 +11,20 @@
 
     <h1> The Works annotator configuration </h1>
     <p> This is an example annotator which implements all possible features of an annotator. </p>
-      
+
+    <div id="upload-form">
+      <p> Files can be uploaded using a 'file' input, and doing a separate request that
+      invokes a function that accepts a file: </p>
+      <div class="file-chooser">
+        <input id="file" type="file" onchange="selectFile(this);">
+      </div>
+      <div id="upload-progress" style="display: none;">
+        <progress id="progress"></progress>
+        <div id="upload-result"></div>
+      </div>
+    </div>
+    
+    <p> Configuration that is used when setConfig() is invoked </p>
     <form method="POST" action="setConfig">
       <div class="field">
         <label for="reverse"> Reverse </label>
@@ -64,7 +77,38 @@
               document.getElementById("simulatedInstallationDuration").value
                   = parameters.get("simulatedInstallationDuration");
           });
-      
+
+      // when the user chooses a file, it's uploaded immediately
+      function selectFile(input) {
+          document.getElementById("upload-progress").style.display = "";
+          var uploadProgress = document.getElementById("progress");
+          
+          var formData = new FormData();
+          formData.append("file", input.files[0]);
+          postForm( // (the postForm function is defined in index.js)
+              "uploadFile", formData,
+              function(e) { // onUploaded
+                  uploadProgress.max = uploadProgress.max || 100;
+                  uploadProgress.value = uploadProgress.max;
+                  var result = this.responseText;
+                  if (!result) { // no error, upload succeeded
+                      document.getElementById("upload-result").innerHTML = "<p>File uploaded.</p>";
+                  } else { // error
+                      document.getElementById("upload-result").innerHTML
+                          = "<p class='error'>"+result+"</p>";
+                  }
+              }, function(e) { // onProgress
+                  if (e.lengthComputable) {
+                      uploadProgress.max = e.total;
+                      uploadProgress.value = e.loaded;
+                  }
+              }, function(e) { // onFailed
+                  uploadProgress.max = uploadProgress.max || 100;
+                  uploadProgress.value = uploadProgress.value || 1;
+                  document.getElementById("upload-result").innerHTML
+                      = "<p class='error'>"+this.responseText+"</p>";
+              });
+      }
     </script>
     
     <footer><div> The Works Annotator <small id="version"></small> </div></footer>
