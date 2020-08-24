@@ -14,19 +14,22 @@
     <p> This annotator tags words with their pronunciations according to the
       <a href="http://www.speech.cs.cmu.edu/cgi-bin/cmudict">CMU Pronouncing dictionary</a>,
       a machine-readable pronunciation dictionary for North American English that contains
-      over 125,000 words and their transcriptions. </p> 
+      over 125,000 words and their transcriptions. </p>
+
+    <div id="upload-form">
+      <p> The annotator has a built-in copy of the <i> cmudict.txt </i> file, but if you
+        have a newer or modified version you would prefer to use, select it below:</p>
+      <div class="file-chooser">
+        <input id="file" type="file" onchange="selectFile(this);">
+      </div>
+      <div id="upload-progress" style="display: none;">
+        <progress id="progress"></progress>
+        <div id="upload-result"></div>
+      </div>
+    </div>
 
     <form method="POST" action="setConfig">
-      <p> This page allows you to install a versionn of the <q>cmudict.txt</q> file. </p>
-      <!--div class="field" 
-          title="Whether to use the copy of the cmudict.txt file built in to the anntator, or upload your own version of it.">
-        <label for="builtin"> Use built-in copy </label>
-        <span><input id="builtin" name="builtin" type="checkbox"></span>
-      </div-->
-      <!--div class="field">
-        <label for="cmudict"> Upload from file </label>
-        <span><input id="cmudict" name="cmudict" type="file"></span>
-      </div-->
+      <p> This page allows you to install a version of the <q>cmudict.txt</q> file. </p>
       <div class="controls">
         <input type="submit" value="Install">
       </div>
@@ -50,17 +53,39 @@
               // in this case, the properties of the annotator are encoded as an HTML query string
               // so we can use URLSearchParams to decode it
               var parameters = new URLSearchParams(this.responseText);
-
-              // set the input values of the form appropriately
-              document.getElementById("reverse").checked
-                  = parameters.get("reverse");
-              document.getElementById("leftPadding").value
-                  = parameters.get("leftPadding");
-              document.getElementById("rightPadding").value
-                  = parameters.get("rightPadding");
-              document.getElementById("simulatedInstallationDuration").value
-                  = parameters.get("simulatedInstallationDuration");
           });
+      
+      function selectFile(input) {
+          document.getElementById("upload-progress").style.display = "";
+          var uploadProgress = document.getElementById("progress");
+          
+          var fd = new FormData();
+          fd.append("file", input.files[0]);
+          postForm("uploadLexicon", fd, function(e) {
+              console.log("uploadResult " + this.responseText);
+              uploadProgress.max = uploadProgress.max || 100;
+              uploadProgress.value = uploadProgress.max;
+              var result = this.responseText;
+              if (!result) { // no error, upload succeeded
+                  document.getElementById("upload-result").innerHTML = "<p>File uploaded.</p>";
+              } else { // error
+                  document.getElementById("upload-result").innerHTML
+                      = "<p class='error'>"+result+"</p>";
+              }
+          }, function(e) {
+              console.log("uploadProgress " + e.loaded);
+              if (e.lengthComputable) {
+                  uploadProgress.max = e.total;
+                  uploadProgress.value = e.loaded;
+              }
+          }, function(e) {
+              console.log("uploadFailed " + this.responseText);
+              uploadProgress.max = uploadProgress.max || 100;
+              uploadProgress.value = uploadProgress.value || 1;
+              document.getElementById("upload-result").innerHTML
+                  = "<p class='error'>"+this.responseText+"</p>";
+          });
+      }
       
     </script>
     
