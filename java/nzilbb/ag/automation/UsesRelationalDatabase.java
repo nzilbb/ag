@@ -25,7 +25,7 @@ import java.lang.annotation.*;
 
 /**
  * Annotation for {@link Annotator} subclasses that need a relational database to function.
- * <p> Such classes can safely call {@link Annotation#newConnection()} to get a connection to a
+ * <p> Such classes can safely call {@link Annotator#newConnection()} to get a connection to a
  * persistent relational database, and should use the <var>sqlx</var> member variable for
  * translating MySQL-specific constructions to whatever dialect is required, using
  * <code>sqlx.apply(mySqlQuery)</code>. 

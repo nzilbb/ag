@@ -35,8 +35,8 @@ public interface ImplementsDictionaries {
     * <ul>
     *  <li> {@link Annotator#setSchema(Schema)} </li>
     *  <li> {@link Annotator#setTaskParameters(String)} </li>
-    *  <li> {@link UsesFileSystem#setWorkingDirectory(File)} (if applicable) </li>
-    *  <li> {@link UsesRelationalDatabase#rdbConnectionDetails(String,String,String)}
+    *  <li> {@link Annotator#setWorkingDirectory(File)} (if applicable) </li>
+    *  <li> {@link Annotator#rdbConnectionDetails(MySQLTranslator,String,String,String)}
     *       (if applicable) </li>
     * </ul>
     * @return A (possibly empty) list of IDs of dictionaries.
@@ -49,8 +49,8 @@ public interface ImplementsDictionaries {
     * <ul>
     *  <li> {@link Annotator#setSchema(Schema)} </li>
     *  <li> {@link Annotator#setTaskParameters(String)} </li>
-    *  <li> {@link UsesFileSystem#setWorkingDirectory(File)} (if applicable) </li>
-    *  <li> {@link UsesRelationalDatabase#rdbConnectionDetails(String,String,String)}
+    *  <li> {@link Annotator#setWorkingDirectory(File)} (if applicable) </li>
+    *  <li> {@link Annotator#rdbConnectionDetails(MySQLTranslator,String,String,String)}
     *       (if applicable) </li>
     * </ul>
     * @return The identified dictionary.

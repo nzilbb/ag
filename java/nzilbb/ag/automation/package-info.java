@@ -66,13 +66,19 @@
  * &hellip; will get as a response whatever calling <code>setFoo("fooValue", "barValue")</code>
  * returns. (Currently there can be up to five parameters)
  *
- * <p> To upload a file, the web-app can make a POST request, where the body of the
- * request is assumed to be the file contents. The corresponding Annotator class method
- * must take one File parameter.
+ * <p> To upload a file, the web-app can either:
+ * <ul>
+ *  <li> make a PUT request, where the body of the request is assumed to be the file contents
+ *       (the corresponding Annotator class method must take one File parameter), or</li>
+ *  <li> make a mutipart POST request, where the body of the request has parts for each
+ *       parameter (the parameters can include files and text parameters, and the
+ *       corresponding Annotator class method must take corresponding File or String
+ *       parameters). </li>
+ * </ul>
  *
  * <p> For example if the Annotation class has the method: <br>
  * <code>public String uploadLexicon(File lexicon)</code><br>
- * &hellip; then the web-app can make the POST request to <br>
+ * &hellip; then the web-app can make the PUT or POST request to <br>
  * <tt>/uploadLexicon</tt> <br>
  * &hellip; which will get as a response whatever calling
  * <code>uploadLexicon(tempFileContainingContent)</code> returns.

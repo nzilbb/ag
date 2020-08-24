@@ -26,7 +26,7 @@ import java.lang.annotation.*;
 /**
  * Annotation for {@link Annotator} subclasses that need access to a persistent directory
  * for saving and loading working files.
- * <p> Such classes can safely call {@link Annotation#newConnection()} to get a connection to a
+ * <p> Such classes can safely call {@link Annotator#newConnection()} to get a connection to a
  * persistent relational database.
  * @author Robert Fromont robert@fromont.net.nz
  */
