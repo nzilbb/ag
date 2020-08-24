@@ -153,8 +153,19 @@ public class IO
     */
    public static long SaveUrlConnectionToFile(URLConnection connection, File file)
       throws IOException {
+      return SaveInputStreamToFile(connection.getInputStream(), file);
+   } // end of SaveUrlConnectionToFile()
+
+   /**
+    * Saves the content of a URL to a file.
+    * @param input The input stream containing the file content.
+    * @param file The file to save the content to.
+    * @return The number size of the content in bytes.
+    * @throws IOException On file IO error.
+    */
+   public static long SaveInputStreamToFile(InputStream input, File file)
+      throws IOException {
       FileOutputStream output = new FileOutputStream(file);
-      InputStream input = connection.getInputStream();
       return Pump(input, output);
    } // end of SaveUrlConnectionToFile()
 
@@ -344,7 +355,7 @@ public class IO
     * @return true if the the directory was successfully deleted, false otherwise.
     */
    public static boolean RecursivelyDelete(File dir) {
-      if (dir.isDirectory()) {
+      if (dir != null && dir.isDirectory()) {
          for (File file : dir.listFiles()) {
             if (!RecursivelyDelete(file)) return false;
          }
