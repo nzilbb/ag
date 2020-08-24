@@ -189,7 +189,7 @@
  *          request.addEventListener("load", onload, false);
  *          request.send();
  *      }
- *      // GET request to getConfig retrieves the current setup configuration, if any
+ *      // GET request to getTaskParameters retrieves the current setup configuration, if any
  *      get("getTaskParameters?"+window.location.search, function(e) {
  *          var parameters = new URLSearchParams(this.responseText);
  *          // set initial values of properties in the form above
