@@ -242,7 +242,11 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
     * Setter for {@link #status}: The current status of the task.
     * @param newStatus The current status of the task.
     */
-   public Annotator setStatus(String newStatus) { status = newStatus; return this; }
+   public Annotator setStatus(String newStatus) {
+      status = newStatus;
+      System.out.println(getClass().getSimpleName() + ": " + status);
+      return this;
+   }
    
    /**
     * The layer schema.
