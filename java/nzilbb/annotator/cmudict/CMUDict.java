@@ -250,7 +250,7 @@ public class CMUDict extends Annotator
                   sql.executeUpdate();
                   sql.close();
                } else {
-                  setStatus("Loading pronunciations into wordform table from build-in file...");
+                  setStatus("Loading pronunciations into wordform table from built-in file...");
                }
                wordCount = loadDictionary(urlCmudictTxt.openStream(), rdb);
                setStatus("Number of pronunciations processed: " + wordCount);
