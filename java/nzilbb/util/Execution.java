@@ -53,7 +53,7 @@ public class Execution implements Runnable {
    public Execution setExe(File newExe) { exe = newExe; return this; }
    /**
     * Setter for {@link #exe}: Executable file.
-    * @param newExe Command.
+    * @param command Command.
     */
    public Execution setExe(String command) { exe = new File(command); return this; }
 
