@@ -44,3 +44,9 @@ footer {
 progress {
     width: 100%;
 }
+
+/* Layout on narrower screens */
+@media all and (max-width: 640px) {
+    .field { flex-direction: column; }
+    .field span, .field label { width: 100%; }
+}
