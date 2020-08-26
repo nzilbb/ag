@@ -1,63 +1,51 @@
-// Some useful functions:
 
-// make a GET request of the annotator
-function get(path, onload, contentType) {
-    var request = new XMLHttpRequest();
-    request.open("GET", path);
-    request.setRequestHeader("Accept", "text/plain");
-    if (contentType) request.setRequestHeader("Accept", contentType);
-    request.addEventListener("load", onload, false);
-    request.send();
+// any annotator method can be called to interrogate the annotator
+getText( // (the getText function is defined in util.js)
+    "getVersion", // <- the URL to GET from
+    function(e) { // <- a function to execute when we have a response
+        document.getElementById("version").innerHTML = this.responseText;
+    });
+
+// getConfig gets the current setup configuration, if any
+// in this case, it gets the values of all declared properties of the annotator
+// encoded as an HTML query string
+getText( // (the getText function is defined in util.js)
+    "getConfig", // <- the URL to GET from
+    function(e) { // <- a function to execute when we have a response
+        // in this case, the properties of the annotator are encoded as an HTML query string
+        // so we can use URLSearchParams to decode it
+        var parameters = new URLSearchParams(this.responseText);
+    });
+
+function selectFile(input) {
+    document.getElementById("upload-progress").style.display = "";
+    var uploadProgress = document.getElementById("progress");
+    
+    var fd = new FormData();
+    fd.append("file", input.files[0]);
+    postForm("uploadLexicon", fd, function(e) {
+        console.log("uploadResult " + this.responseText);
+        uploadProgress.max = uploadProgress.max || 100;
+        uploadProgress.value = uploadProgress.max;
+        var result = this.responseText;
+        if (!result) { // no error, upload succeeded
+            document.getElementById("upload-result").innerHTML = "<p>File uploaded.</p>";
+        } else { // error
+            document.getElementById("upload-result").innerHTML
+                = "<p class='error'>"+result+"</p>";
+        }
+    }, function(e) {
+        console.log("uploadProgress " + e.loaded);
+        if (e.lengthComputable) {
+            uploadProgress.max = e.total;
+            uploadProgress.value = e.loaded;
+        }
+    }, function(e) {
+        console.log("uploadFailed " + this.responseText);
+        uploadProgress.max = uploadProgress.max || 100;
+        uploadProgress.value = uploadProgress.value || 1;
+        document.getElementById("upload-result").innerHTML
+            = "<p class='error'>"+this.responseText+"</p>";
+    });
 }
 
-// make a GET a JSON object from the annotator
-function getJSON(path, onload) {
-    get(path, onload, "application/json");
-}
-
-// make a GET a text string from the annotator
-function getText(path, onload) {
-    get(path, onload, "text/plain");
-}
-
-// populate a <select> element with layers for which a predicate is true
-function addLayerOptions(select, schema, layerPredicate) {
-    for (var layerId in schema.layers) {
-        if (!layerPredicate || layerPredicate(schema.layers[layerId])) {
-            var option = document.createElement("option");
-            option.appendChild(document.createTextNode(layerId));
-            select.appendChild(option);
-        } // permitted layer
-    } // next layer
-}
-
-// upload a file, using PUT, which does not send the file name
-// e.g. putFile("uploadLexicon", input.files[0], function(e) { console.log(this.responseText);});
-function putFile(path, file, onUploaded, onProgress, onFailed) {
-    var request = new XMLHttpRequest();
-    request.open("PUT", path);
-    request.setRequestHeader("Accept", "text/plain");
-    if (onUploaded) {
-        request.addEventListener("load", onUploaded, false);
-        request.addEventListener("error", onFailed|onUploaded, false);
-    }
-    if (onProgress) request.addEventListener("progress", onProgress, false);
-    request.send(file);
-}
-
-// make a multipart POST request, so multiple files and other parameters are supported
-// e.g.
-//  var fd = new FormData();
-//  fd.append("file", input.files[0]);
-//  postForm("uploadLexicon", fd, function(e) { console.log(this.responseText);});
-function postForm(path, formData, onUploaded, onProgress, onFailed) {
-    var request = new XMLHttpRequest();
-    request.open("POST", path);
-    request.setRequestHeader("Accept", "text/plain");
-    console.log("onUploaded " + onUploaded);
-    if (!onFailed) onFailed = onUploaded;
-    if (onUploaded) request.addEventListener("load", onUploaded, false);
-    if (onFailed) request.addEventListener("error", onFailed, false);
-    if (onProgress) request.addEventListener("progress", onProgress, false);
-    request.send(formData);
-}
