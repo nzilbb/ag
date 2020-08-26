@@ -155,7 +155,7 @@
   <target name="test" depends="dist" description="run nzilbb.ag annotation-graph unit tests">
     <javac srcdir="${src}" destdir="."
 	       includes="${srctests} ${srctestseditpath}"
-	       classpath=".;${junitjar};${dist}/${ant.project.name}.jar;lib/antlr-4.7.2-complete.jar;lib/commons-fileupload.jar;lib/derby.jar"
+	       classpath=".;${junitjar};${dist}/${ant.project.name}.jar;lib/antlr-4.7.2-complete.jar;lib/commons-io.jar;lib/commons-fileupload.jar;lib/derby.jar"
 	       listfiles="yes"
 	       target="8"
 	       source="8"
@@ -169,7 +169,7 @@
 	    fork="true"
 	    >
       <classpath>
-	    <pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar};lib/antlr-4.7.2-complete.jar"/>
+	    <pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar};lib/antlr-4.7.2-complete.jar;lib/commons-io.jar;lib/commons-fileupload.jar"/>
       </classpath>
       <jvmarg value="-ea"/>
       <formatter type="plain" usefile="false" />
