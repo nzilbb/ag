@@ -60,7 +60,7 @@ import nzilbb.util.IO;
  */
 @UsesRelationalDatabase
 @UsesFileSystem
-public class CMUDict extends Annotator
+public class CMUDictionaryTagger extends Annotator
    implements ImplementsDictionaries {
    /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
    public String getMinimumApiVersion() { return "20200708.2018"; }
@@ -79,7 +79,7 @@ public class CMUDict extends Annotator
          try {
             log = new PrintWriter(new FileWriter(new File(getWorkingDirectory(), "status.log")));
          } catch(Throwable t) {
-            System.err.println("CMUDict.openLog: " + t);
+            System.err.println("CMUDictionaryTagger.openLog: " + t);
             t.printStackTrace(System.err);
             setStatus("Could not open log: " + t);
          }
@@ -94,7 +94,7 @@ public class CMUDict extends Annotator
          try {
             log.close();
          } catch(Throwable t) {
-            System.err.println("CMUDict.closeLog: " + t);
+            System.err.println("CMUDictionaryTagger.closeLog: " + t);
             t.printStackTrace(System.err);
             setStatus("Could not close log: " + t);
          }
@@ -376,7 +376,7 @@ public class CMUDict extends Annotator
     * Setter for {@link #tokenLayerId}: ID of the input layer containing word tokens.
     * @param newTokenLayerId ID of the input layer containing word tokens.
     */
-   public CMUDict setTokenLayerId(String newTokenLayerId) {
+   public CMUDictionaryTagger setTokenLayerId(String newTokenLayerId) {
       tokenLayerId = newTokenLayerId; return this; }
 
    /**
@@ -397,7 +397,7 @@ public class CMUDict extends Annotator
     * @param newTranscriptLanguageLayerId ID of the layer that determines the language of
     * the whole transcript. 
     */
-   public CMUDict setTranscriptLanguageLayerId(String newTranscriptLanguageLayerId) {
+   public CMUDictionaryTagger setTranscriptLanguageLayerId(String newTranscriptLanguageLayerId) {
       if (newTranscriptLanguageLayerId != null // empty string means null
           && newTranscriptLanguageLayerId.trim().length() == 0) {
          newTranscriptLanguageLayerId = null;
@@ -424,7 +424,7 @@ public class CMUDict extends Annotator
     * @param newPhraseLanguageLayerId ID of the layer that determines the language of
     * individual phrases. 
     */
-   public CMUDict setPhraseLanguageLayerId(String newPhraseLanguageLayerId) {
+   public CMUDictionaryTagger setPhraseLanguageLayerId(String newPhraseLanguageLayerId) {
       if (newPhraseLanguageLayerId != null // empty string means null
           && newPhraseLanguageLayerId.trim().length() == 0) {
          newPhraseLanguageLayerId = null;
@@ -448,7 +448,7 @@ public class CMUDict extends Annotator
     * Setter for {@link #pronunciationLayerId}: ID of the output layer.
     * @param newPronunciationLayerId ID of the output layer.
     */
-   public CMUDict setPronunciationLayerId(String newPronunciationLayerId) {
+   public CMUDictionaryTagger setPronunciationLayerId(String newPronunciationLayerId) {
       pronunciationLayerId = newPronunciationLayerId; return this; }
 
    /**
@@ -469,7 +469,7 @@ public class CMUDict extends Annotator
     * @param newFirstVariantOnly Whether to use only the first pronunciation if there are
     * multiple pronunciations. 
     */
-   public CMUDict setFirstVariantOnly(Boolean newFirstVariantOnly) {
+   public CMUDictionaryTagger setFirstVariantOnly(Boolean newFirstVariantOnly) {
       firstVariantOnly = newFirstVariantOnly; return this; }
 
    /**

@@ -11,7 +11,7 @@
   <property name="dictionary"  value="nzilbb/annotator/cmudict/cmudict.txt"/> 
   <property name="srctests" value="nzilbb/annotator/cmudict/test/Test*.java"/>
   <property name="junitjar" value="/usr/share/java/junit4.jar"/>
-  <property name="nzilbb-ag-automation-Annotator" value="nzilbb.annotator.cmudict.CMUDict" />
+  <property name="nzilbb-ag-automation-Annotator" value="nzilbb.annotator.cmudict.CMUDictionaryTagger" />
   
   <target name="init">
     <!-- Create the time stamp -->

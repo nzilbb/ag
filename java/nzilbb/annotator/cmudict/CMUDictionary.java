@@ -42,7 +42,6 @@ import nzilbb.sql.mysql.MySQLTranslator;
 @SuppressWarnings("serial")
 public class CMUDictionary implements Dictionary {
 
-
    private Connection rdb;
    private MySQLTranslator sqlx = new MySQLTranslator();
    private PreparedStatement sql; 
@@ -73,7 +72,7 @@ public class CMUDictionary implements Dictionary {
    /**
     * Constructor.
     */
-   public CMUDictionary(CMUDict annotator, Connection rdb, MySQLTranslator translator)
+   public CMUDictionary(CMUDictionaryTagger annotator, Connection rdb, MySQLTranslator translator)
       throws SQLException {
       this.annotator = annotator;
       this.rdb = rdb;

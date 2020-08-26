@@ -42,13 +42,13 @@ import nzilbb.ag.Schema;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
-import nzilbb.annotator.cmudict.CMUDict;
+import nzilbb.annotator.cmudict.CMUDictionaryTagger;
 import nzilbb.annotator.cmudict.CMUDictionary;
 import nzilbb.sql.derby.DerbySQLTranslator;
 
 public class TestCMUDictionary {
 
-   static CMUDict annotator = new CMUDict();
+   static CMUDictionaryTagger annotator = new CMUDictionaryTagger();
    
    @BeforeClass
    public static void install() throws Exception {

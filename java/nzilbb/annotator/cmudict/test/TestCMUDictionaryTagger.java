@@ -42,13 +42,13 @@ import nzilbb.ag.automation.Dictionary;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
-import nzilbb.annotator.cmudict.CMUDict;
+import nzilbb.annotator.cmudict.CMUDictionaryTagger;
 import nzilbb.annotator.cmudict.CMUDictionary;
 import nzilbb.sql.derby.DerbySQLTranslator;
 
-public class TestCMUDict {
+public class TestCMUDictionaryTagger {
 
-   static CMUDict annotator = new CMUDict();
+   static CMUDictionaryTagger annotator = new CMUDictionaryTagger();
    
    @BeforeClass
    public static void install() throws Exception {
@@ -77,8 +77,8 @@ public class TestCMUDict {
    }
 	 
    public static File dir() throws Exception { 
-      URL urlThisClass = TestCMUDict.class.getResource(
-         TestCMUDict.class.getSimpleName() + ".class");
+      URL urlThisClass = TestCMUDictionaryTagger.class.getResource(
+         TestCMUDictionaryTagger.class.getSimpleName() + ".class");
       File fThisClass = new File(urlThisClass.toURI());
       return fThisClass.getParentFile();
    }
@@ -663,6 +663,6 @@ public class TestCMUDict {
    }   
 
    public static void main(String args[]) {
-      org.junit.runner.JUnitCore.main("nzilbb.annotator.cmudict.test.TestCMUDict");
+      org.junit.runner.JUnitCore.main("nzilbb.annotator.cmudict.test.TestCMUDictionaryTagger");
    }
 }
