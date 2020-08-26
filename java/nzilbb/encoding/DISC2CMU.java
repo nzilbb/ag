@@ -24,8 +24,11 @@ package nzilbb.encoding;
 import java.util.HashMap;
 
 /**
- * A mapping for translating CMU-encoded phonemic transcriptions to CELEX-DISC-encoded
- * transcriptions. 
+ * A mapping for translating CELEX-DISC-encoded
+ * transcriptions like
+ * <tt>tr{nskrIpSVn</tt>
+ * to CMU-encoded phonemic transcriptions like
+ * <tt>T R AE2 N S K R IH1 P SH AH0 N</tt>.
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class DISC2CMU extends PhonemeTranslator {

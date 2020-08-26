@@ -24,7 +24,10 @@ package nzilbb.encoding;
 import java.util.HashMap;
 
 /**
- * A mapping for translating CMU-encoded phonemic transcriptions to CELEX-DISC-encoded
+ * A mapping for translating CMU-encoded phonemic transcriptions like 
+ * <tt>T R AE2 N S K R IH1 P SH AH0 N</tt> 
+ * to CELEX-DISC-encoded transcriptions like
+ * <tt>tr{nskrIpSVn</tt>
  * transcriptions. 
  * @author Robert Fromont robert@fromont.net.nz
  */
