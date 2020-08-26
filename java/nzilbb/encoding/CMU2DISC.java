@@ -24,11 +24,16 @@ package nzilbb.encoding;
 import java.util.HashMap;
 
 /**
- * A mapping for translating CMU-encoded phonemic transcriptions like 
- * <tt>T R AE2 N S K R IH1 P SH AH0 N</tt> 
+ * Translates CMU-encoded phonemic transcriptions like 
+ * <tt>T&nbsp;R&nbsp;AE2&nbsp;N&nbsp;S&nbsp;K&nbsp;R&nbsp;IH1&nbsp;P&nbsp;SH&nbsp;AH0&nbsp;N</tt> 
  * to CELEX-DISC-encoded transcriptions like
- * <tt>tr{nskrIpSVn</tt>
- * transcriptions. 
+ * <tt>tr{nskrIpSVn</tt>. 
+ * <p> The CMU encoding is assumed to use only the phonemes used by the CMU Pronouncing
+ * Dictionary: 
+ * <a href="http://www.speech.cs.cmu.edu/cgi-bin/cmudict">
+ *  http://www.speech.cs.cmu.edu/cgi-bin/cmudict</a>.
+ * <p> Thanks to Stefanie Jannedy for this mapping.
+ * @see DISC2CMU
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class CMU2DISC extends PhonemeTranslator {

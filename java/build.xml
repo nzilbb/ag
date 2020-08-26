@@ -148,7 +148,7 @@
              bottom="&lt;i&gt;&amp;copy; NZILBB - ${TODAY}&lt;/i&gt;"
              >
       <fileset dir="${src}"
-               includes="nzilbb/ag/*.java nzilbb/ag/util/*.java " />
+               includes="nzilbb/ag/*.java nzilbb/encoding/*.java nzilbb/ag/util/*.java " />
     </javadoc>
   </target>  
 
