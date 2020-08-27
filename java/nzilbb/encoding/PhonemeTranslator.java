@@ -24,7 +24,7 @@ package nzilbb.encoding;
 import java.util.function.UnaryOperator;
 
 /**
- * Function that converts phonemic transcriptions from one encoding to another.
+ * Base-class for Functions that convert phonemic transcriptions from one encoding to another.
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class PhonemeTranslator implements UnaryOperator<String> {
