@@ -75,6 +75,8 @@ public class TestDISC2CMU {
       };
 
       DISC2CMU translator = new DISC2CMU();
+      assertEquals("Encoding name", "DISC", translator.getSourceEncoding());
+      assertEquals("Encoding name", "CMU", translator.getDestinationEncoding());
 
       StringBuffer sDISC = new StringBuffer(aCodebook.length/2);
       StringBuffer sCMU = new StringBuffer(3*aCodebook.length/2);

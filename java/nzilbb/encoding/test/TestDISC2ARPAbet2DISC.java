@@ -97,7 +97,11 @@ public class TestDISC2ARPAbet2DISC {
       };
 
       DISC2ARPAbet disc2arpabet = new DISC2ARPAbet();
+      assertEquals("Encoding name", "DISC", disc2arpabet.getSourceEncoding());
+      assertEquals("Encoding name", "ARPAbet", disc2arpabet.getDestinationEncoding());
       ARPAbet2DISC arpabet2disc = new ARPAbet2DISC();
+      assertEquals("Encoding name", "ARPAbet", arpabet2disc.getSourceEncoding());
+      assertEquals("Encoding name", "DISC", arpabet2disc.getDestinationEncoding());
 
       StringBuffer sDISC = new StringBuffer(aCodebook.length/2);
       StringBuffer sARPAbet = new StringBuffer(3*aCodebook.length/2);
@@ -159,9 +163,9 @@ public class TestDISC2ARPAbet2DISC {
 
       assertNotEquals("Before and after are expected to be different", sDISCBefore, sDISCAfter);
       assertEquals("before",
-                   disc2arpabet.apply(sARPAbet.toString()), sDISCBefore.toString());
+                   sARPAbet.toString(), disc2arpabet.apply(sDISCBefore.toString()));
       assertEquals("after",
-                   arpabet2disc.apply(sDISCAfter.toString()), sARPAbet.toString());
+                   sDISCAfter.toString(), arpabet2disc.apply(sARPAbet.toString()));
    }
    
    public static void main(String args[]) {
