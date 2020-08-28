@@ -24,35 +24,49 @@ package nzilbb.encoding;
 import java.util.HashMap;
 
 /**
- * Translates CELEX-DISC-encodedtranscriptions like
+ * Translates CELEX-DISC-encoded transcriptions like
  * <tt>tr{nskrIpSVn</tt>
- * to CMU-encoded phonemic transcriptions like
- * <tt>T&nbsp;R&nbsp;AE2&nbsp;N&nbsp;S&nbsp;K&nbsp;R&nbsp;IH1&nbsp;P&nbsp;SH&nbsp;AH0&nbsp;N</tt>.
- * <p> The CMU encoding is assumed to use only the phonemes used by the CMU Pronouncing
- * Dictionary: 
- * <a href="http://www.speech.cs.cmu.edu/cgi-bin/cmudict">
- *  http://www.speech.cs.cmu.edu/cgi-bin/cmudict</a>.
+ * to <a href="https://en.wikipedia.org/wiki/ARPABET">ARPAbet</a>-encoded 
+ * phonemic transcriptions like
+ * <tt>T&nbsp;R&nbsp;AE2&nbsp;N&nbsp;S&nbsp;K&nbsp;R&nbsp;IH1&nbsp;P&nbsp;SH&nbsp;AX&nbsp;N</tt>.
  *
- * <p> Thanks to Stefanie Jannedy for this mapping.
+ * <p> There are differences between the {@link CMU2DISC} translation and this one:
+ * <p> ARPAbet includes phonemes not in the CMU set:
+ * <dl>
+ * <dt> 'L' </dt><dd> "DX" - flap - this is an extension to DISC </dd>
+ * <dt> '^' </dt><dd> "NX" - nasal flap - doesn't exist in DISC, we make it /n/ </dd>
+ * <dt> '?' </dt><dd> "TQ" - glottal stop - this is an extension to DISC </dd>
+ * </dl>
  *
- * <p> There are differences between the {@link ARPAbet2DISC} translation and this one,
- * primarily that this translation is strict; phonemes that are not explicitly present in
- * the phone set are dropped, where {@link ARPAbet2DISC} includes extra phonemes, includes
- * some extensions to ARPAbet and DISC, and passes through unknown phonemes unchanged.
+ * <p> Also {@link CMU2DISC} strictly uses only phonemes in the CMU dictionary set, where
+ * the "ARPAbet" translation may also contain phonemes corresponding to those that exist
+ * in DISC but not in ARPAbet: 
+ * <dl>
+ * <dt> 'F' </dt><dd> "EM" - e.g. idealism </dd>
+ * <dt> 'H' </dt><dd> "EN" - e.g. burden </dd>
+ * <dt> 'P' </dt><dd> "EL" - e.g. dangle </dd>
+ * <dt> 'C' </dt><dd> "UN" - e.g. bacon </dd>
+ * <dt> '0' </dt><dd> "VN" - e.g. lingerie </dd>
+ * <dt> '~' </dt><dd> "ON" - e.g. bouillon </dd>
+ * <dt> 'c' </dt><dd> "IM" - e.g. timbre </dd>
+ * <dt> 'q' </dt><dd> "IN" - e.g. detente </dd>
+ * </dl> 
+ * <p> ... and any other phones encountered that are in neither set are passed through
+ * unchanged.
+ * @see ARPAbet2DISC 
  * @see CMU2DISC
- * @see DISC2ARPAbet
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class DISC2CMU extends PhonemeTranslator {
-
+public class DISC2ARPAbet extends PhonemeTranslator {
+   
    private static HashMap<Character,String> map;
    
    /**
     * Default constructor.
     */
-   public DISC2CMU() {
+   public DISC2ARPAbet() {
       sourceEncoding = "DISC";
-      destinationEncoding = "CMU";
+      destinationEncoding = "ARPAbet";
       
       // populate the static map of individual phones, if it's not already initialized...
       if (map == null) {
@@ -68,7 +82,7 @@ public class DISC2CMU extends PhonemeTranslator {
          map.put('Q',"AO"); // LOT         - ought/off
          
          map.put('6',"AW"); // MOUTH       - cow/how
-         map.put('@',"IH"); // schwa       - discuss - doesn't exist in CMU
+         map.put('@',"AX"); // schwa       - discuss
          map.put('2',"AY"); // PRICE       - hide/my
          map.put('b',"B");
          map.put('J',"CH");
@@ -106,22 +120,22 @@ public class DISC2CMU extends PhonemeTranslator {
          map.put('Z',"ZH");
 	 
          // Not in the CMU set but exist in Buckeye corpus
-         map.put('L',"D"); // flap - this is an extension to DISC
-         //map.put('n',"NX"); // nasal flap - doesn't exist in DISC, we make it /n/
-         map.put('?',"K"); // glottal stop - this is an extension to DISC
+         map.put('L',"DX"); // flap - this is an extension to DISC
+         map.put('^',"NX"); // nasal flap - doesn't exist in DISC, we make it /n/
+         map.put('?',"TQ"); // glottal stop - this is an extension to DISC
 	 
          // Not in CMU set but exist in DISC
          map.put('7',"IY R"); // NEAR
          map.put('8',"EH R"); // SQUARE
          map.put('9',"UH R"); // CURE
-         map.put('F',"IH M"); // idealism
-         map.put('H',"IH N"); // burden
-         map.put('P',"IH L"); // dangle
-         map.put('C',"IH NG"); // bacon
-         map.put('0',"AO N"); // lingerie
-         map.put('~',"AO N"); // bouillon
-         map.put('c',"AO M"); // timbre
-         map.put('q',"AO N"); // detente
+         map.put('F',"EM"); // idealism
+         map.put('H',"EN"); // burden
+         map.put('P',"EL"); // dangle
+         map.put('C',"UN"); // bacon
+         map.put('0',"VN"); // lingerie
+         map.put('~',"ON"); // bouillon
+         map.put('c',"IM"); // timbre
+         map.put('q',"IN"); // detente
       }
    } // end of constructor
    
@@ -131,18 +145,19 @@ public class DISC2CMU extends PhonemeTranslator {
     * @return Phonemic transcription in the destination encoding.
     */ 
    public String apply(String source) {
-      StringBuffer CMU = new StringBuffer(source.length() * 3);
+      StringBuffer ARPAbet = new StringBuffer(source.length() * 3);
       // for each phone
       for (int c = 0; c < source.length(); c++) {
+         if (ARPAbet.length() > 0) ARPAbet.append(" ");
          if (map.containsKey(source.charAt(c))) {
-            if (CMU.length() > 0) CMU.append(" ");
-            CMU.append(map.get(source.charAt(c)));
+            ARPAbet.append(map.get(source.charAt(c)));
+         } else { // unknown phones are passed through
+            ARPAbet.append(source.charAt(c));
          }
-         // unknown phones are dropped
       } // next phoneme
-      return CMU.toString()
+      return ARPAbet.toString()
          // get rid of doubled R's caused by r-coloured vowels followed by possible linking r
          .replaceAll("R R", "R");
    }
    
-} // end of class DISC2CMU
+} // end of class DISC2ARPAbet

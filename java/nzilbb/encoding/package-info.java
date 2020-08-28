@@ -132,3 +132,9 @@
  * @author Robert Fromont robert@fromont.net.nz
  */
 package nzilbb.encoding;
+// TODO HTK<->DISC
+// TODO SAMPA<->DISC
+// TODO XSAMPA<->DISC
+// TODO Kirshenbaum<->DISC
+// TODO Unisyn<->DISC
+// TODO ARPAbet<->DISC
