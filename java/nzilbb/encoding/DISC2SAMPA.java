@@ -24,10 +24,10 @@ package nzilbb.encoding;
 import java.util.HashMap;
 
 /**
- * Translates CELEX-DISC-encodedtranscriptions like
- * <tt>tr{nskrIpSVn</tt>
+ * Translates CELEX-DISC-encoded transcriptions like
+ * <tt>J1n_</tt>
  * to SAMPA-encoded phonemic transcriptions like
- * <tt>T&nbsp;R&nbsp;AE2&nbsp;N&nbsp;S&nbsp;K&nbsp;R&nbsp;IH1&nbsp;P&nbsp;SH&nbsp;AH0&nbsp;N</tt>.
+ * <tt>tSeIndZ</tt>.
  * <p> The SAMPA encoding is assumed to use only the phonemes used by the SAMPA Pronouncing
  * Dictionary: 
  * <a href="http://www.speech.cs.cmu.edu/cgi-bin/cmudict">

@@ -24,10 +24,10 @@ package nzilbb.encoding;
 import java.util.HashMap;
 
 /**
- * Translates CELEX-DISC-encodedtranscriptions like
+ * Translates CELEX-DISC-encoded transcriptions like
  * <tt>tr{nskrIpSVn</tt>
  * to CMU-encoded phonemic transcriptions like
- * <tt>T&nbsp;R&nbsp;AE2&nbsp;N&nbsp;S&nbsp;K&nbsp;R&nbsp;IH1&nbsp;P&nbsp;SH&nbsp;AH0&nbsp;N</tt>.
+ * <tt>T&nbsp;R&nbsp;AE&nbsp;N&nbsp;S&nbsp;K&nbsp;R&nbsp;IH&nbsp;P&nbsp;SH&nbsp;AH&nbsp;N</tt>.
  * <p> The CMU encoding is assumed to use only the phonemes used by the CMU Pronouncing
  * Dictionary: 
  * <a href="http://www.speech.cs.cmu.edu/cgi-bin/cmudict">

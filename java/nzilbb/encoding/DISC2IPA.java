@@ -24,10 +24,10 @@ package nzilbb.encoding;
 import java.util.HashMap;
 
 /**
- * Translates CELEX-DISC-encodedtranscriptions like
+ * Translates CELEX-DISC-encoded transcriptions like
  * <tt>tr{nskrIpS@n</tt>
  * to IPA-encoded phonemic transcriptions using Unicode characters like
- * <tt></tt>.
+ * <tt>tɹænskɹɪpʃən</tt>.
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class DISC2IPA extends PhonemeTranslator {
@@ -104,41 +104,41 @@ public class DISC2IPA extends PhonemeTranslator {
          map.put('9', "ʊə");
          map.put('W', "ai");
          map.put('B', "au");
-        map.put('X', "ɔy");
-        
-        // affricates
-        map.put('_', "d͜ʒ");
-        map.put('J', "t͜ʃ");
-        
-        map.put('E', "ɛ");
-        
-        map.put('=', "t͜s");
-        
-        // glottal stop
-        map.put('?', "ʔ");
-        // flap
-        map.put('L', "œy");
-        
-        // consonants
-        map.put('N', "ŋ");
-        map.put('T', "θ");
-        map.put('D', "ð");
-        map.put('S', "ʃ");
-        map.put('Z', "ʒ");
-        map.put('+', "pf");
-	
-        // vowels
-        map.put('3', "ɜː");
-        map.put('{', "æ");
-        map.put('}', "ʉ");
-        map.put('$', "ɔː");
-        map.put('I', "ɪ");
-        map.put('Y', "ʏ");
-        map.put('V', "ʌ");
-        map.put('Q', "ɒ");
-        map.put('O', "ɔ");
-        map.put('U', "ʊ");
-        map.put('@', "ə");
+         map.put('X', "ɔy");
+         
+         // affricates
+         map.put('_', "d͜ʒ");
+         map.put('J', "t͜ʃ");
+         
+         map.put('E', "ɛ");
+         
+         map.put('=', "t͜s");
+         
+         // glottal stop
+         map.put('?', "ʔ");
+         // flap
+         map.put('L', "œy");
+         
+         // consonants
+         map.put('N', "ŋ");
+         map.put('T', "θ");
+         map.put('D', "ð");
+         map.put('S', "ʃ");
+         map.put('Z', "ʒ");
+         map.put('+', "pf");
+         
+         // vowels
+         map.put('3', "ɜː");
+         map.put('{', "æ");
+         map.put('}', "ʉ");
+         map.put('$', "ɔː");
+         map.put('I', "ɪ");
+         map.put('Y', "ʏ");
+         map.put('V', "ʌ");
+         map.put('Q', "ɒ");
+         map.put('O', "ɔ");
+         map.put('U', "ʊ");
+         map.put('@', "ə");
       }
    } // end of constructor
    

@@ -33,23 +33,23 @@ import java.util.HashMap;
  * <p> There are differences between the {@link DISC2CMU} translation and this one:
  * <p> ARPAbet includes phonemes not in the CMU set:
  * <dl>
- * <dt> 'L' </dt><dd> "DX" - flap - this is an extension to DISC </dd>
- * <dt> '^' </dt><dd> "NX" - nasal flap - doesn't exist in DISC, we make it /n/ </dd>
- * <dt> '?' </dt><dd> "TQ" - glottal stop - this is an extension to DISC </dd>
+ *  <dt> 'L' </dt> <dd> "DX" - flap - this is an extension to DISC </dd>
+ *  <dt> '^' </dt> <dd> "NX" - nasal flap - doesn't exist in DISC, we make it /n/ </dd>
+ *  <dt> '?' </dt> <dd> "TQ" - glottal stop - this is an extension to DISC </dd>
  * </dl>
  *
  * <p> Also {@link CMU2DISC} strictly uses only phonemes in the CMU dictionary set, where
  * the "ARPAbet" translation may also contain phonemes corresponding to those that exist
  * in DISC but not in ARPAbet: 
  * <dl>
- * <dt> 'F' </dt><dd> "EM" - e.g. idealism </dd>
- * <dt> 'H' </dt><dd> "EN" - e.g. burden </dd>
- * <dt> 'P' </dt><dd> "EL" - e.g. dangle </dd>
- * <dt> 'C' </dt><dd> "UN" - e.g. bacon </dd>
- * <dt> '0' </dt><dd> "VN" - e.g. lingerie </dd>
- * <dt> '~' </dt><dd> "ON" - e.g. bouillon </dd>
- * <dt> 'c' </dt><dd> "IM" - e.g. timbre </dd>
- * <dt> 'q' </dt><dd> "IN" - e.g. detente </dd>
+ *  <dt> 'F' </dt> <dd> "EM" - e.g. idealism </dd>
+ *  <dt> 'H' </dt> <dd> "EN" - e.g. burden </dd>
+ *  <dt> 'P' </dt> <dd> "EL" - e.g. dangle </dd>
+ *  <dt> 'C' </dt> <dd> "UN" - e.g. bacon </dd>
+ *  <dt> '0' </dt> <dd> "VN" - e.g. lingerie </dd>
+ *  <dt> '~' </dt> <dd> "ON" - e.g. bouillon </dd>
+ *  <dt> 'c' </dt> <dd> "IM" - e.g. timbre </dd>
+ *  <dt> 'q' </dt> <dd> "IN" - e.g. detente </dd>
  * </dl> 
  * <p> ... and any other phones encountered that are in neither set are passed through
  * unchanged.

@@ -23,8 +23,8 @@
  * <p>The following table presents some common encodings and equivalences or near-equivalences
  * between phonemes.
  * <a class="sdfootnoteanc" href="#sdfootnote209sym" name="sdfootnote209anc"><sup>209</sup></a></p>
- * <style type="text/css"> td:not(:first-child) { text-align: center; } </style>
- * <table border="1" style="border-collapse: collapse;">
+ * <style type="text/css"> #equiv td:not(:first-child) { text-align: center; } </style>
+ * <table id="equiv" border="1" style="border-collapse: collapse;">
  *  <thead><tr>
  *    <th> Example </th>
  *    <th> IPA </th>
@@ -133,8 +133,5 @@
  */
 package nzilbb.encoding;
 // TODO HTK<->DISC
-// TODO SAMPA<->DISC
-// TODO XSAMPA<->DISC
 // TODO Kirshenbaum<->DISC
 // TODO Unisyn<->DISC
-// TODO ARPAbet<->DISC

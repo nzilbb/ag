@@ -28,7 +28,7 @@ import java.util.HashMap;
  * <tt>tr{nskrIpSVn</tt>
  * to <a href="https://en.wikipedia.org/wiki/ARPABET">ARPAbet</a>-encoded 
  * phonemic transcriptions like
- * <tt>T&nbsp;R&nbsp;AE2&nbsp;N&nbsp;S&nbsp;K&nbsp;R&nbsp;IH1&nbsp;P&nbsp;SH&nbsp;AX&nbsp;N</tt>.
+ * <tt>T&nbsp;R&nbsp;AE&nbsp;N&nbsp;S&nbsp;K&nbsp;R&nbsp;IH&nbsp;P&nbsp;SH&nbsp;AX&nbsp;N</tt>.
  *
  * <p> There are differences between the {@link CMU2DISC} translation and this one:
  * <p> ARPAbet includes phonemes not in the CMU set:
