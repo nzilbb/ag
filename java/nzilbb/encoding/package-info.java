@@ -133,5 +133,3 @@
  */
 package nzilbb.encoding;
 // TODO HTK<->DISC
-// TODO Kirshenbaum<->DISC
-// TODO Unisyn<->DISC
