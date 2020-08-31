@@ -28,8 +28,9 @@ import java.util.HashMap;
  * <tt>J1n_</tt>
  * to X-SAMPA-encoded phonemic transcriptions like
  * <tt>tSeIndZ</tt>.
+ *
+ * <style type="text/css"> tt:before { content: '/'; } tt:after { content: '/'; } </style>
  * @see XSAMPA2DISC
- * @see DISC2ARPAbet
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class DISC2XSAMPA extends PhonemeTranslator {

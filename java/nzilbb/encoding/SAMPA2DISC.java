@@ -29,6 +29,8 @@ import java.util.Vector;
  * <tt>tSeIndZ</tt> 
  * to CELEX-DISC-encoded transcriptions like
  * <tt>J1n_</tt>. 
+ *
+ * <style type="text/css"> tt:before { content: '/'; } tt:after { content: '/'; } </style>
  * @see DISC2SAMPA
  * @author Robert Fromont robert@fromont.net.nz
  */

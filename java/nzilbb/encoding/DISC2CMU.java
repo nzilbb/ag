@@ -39,6 +39,8 @@ import java.util.HashMap;
  * primarily that this translation is strict; phonemes that are not explicitly present in
  * the phone set are dropped, where {@link ARPAbet2DISC} includes extra phonemes, includes
  * some extensions to ARPAbet and DISC, and passes through unknown phonemes unchanged.
+ *
+ * <style type="text/css"> tt:before { content: '/'; } tt:after { content: '/'; } </style>
  * @see CMU2DISC
  * @see DISC2ARPAbet
  * @author Robert Fromont robert@fromont.net.nz

@@ -28,6 +28,8 @@ import java.util.HashMap;
  * <tt>tr{nskrIpS@n</tt>
  * to IPA-encoded phonemic transcriptions using Unicode characters like
  * <tt>tɹænskɹɪpʃən</tt>.
+ *
+ * <style type="text/css"> tt:before { content: '/'; } tt:after { content: '/'; } </style>
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class DISC2IPA extends PhonemeTranslator {

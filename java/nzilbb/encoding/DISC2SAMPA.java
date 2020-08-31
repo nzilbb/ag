@@ -28,19 +28,9 @@ import java.util.HashMap;
  * <tt>J1n_</tt>
  * to SAMPA-encoded phonemic transcriptions like
  * <tt>tSeIndZ</tt>.
- * <p> The SAMPA encoding is assumed to use only the phonemes used by the SAMPA Pronouncing
- * Dictionary: 
- * <a href="http://www.speech.cs.cmu.edu/cgi-bin/cmudict">
- *  http://www.speech.cs.cmu.edu/cgi-bin/cmudict</a>.
  *
- * <p> Thanks to Stefanie Jannedy for this mapping.
- *
- * <p> There are differences between the {@link ARPAbet2DISC} translation and this one,
- * primarily that this translation is strict; phonemes that are not explicitly present in
- * the phone set are dropped, where {@link ARPAbet2DISC} includes extra phonemes, includes
- * some extensions to ARPAbet and DISC, and passes through unknown phonemes unchanged.
+ * <style type="text/css"> tt:before { content: '/'; } tt:after { content: '/'; } </style>
  * @see SAMPA2DISC
- * @see DISC2ARPAbet
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class DISC2SAMPA extends PhonemeTranslator {
