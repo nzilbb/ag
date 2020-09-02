@@ -57,6 +57,18 @@ import nzilbb.util.IO;
 /**
  * Annotator that tags words with their pronunciations according to the 
  * <a href="http://www.speech.cs.cmu.edu/cgi-bin/cmudict"> CMU Pronouncing Dictionary </a>.
+ *
+ * <p> In addition to looking up the CMU dictionary, the annotator can store labels using
+ * the CELEX DISC encoding system as well as the native ARPAbet encoding.
+ * <p> If the DISC encoding is used, the annotator also supports automatically tagging
+ * short hesitations with pronunciations. Orthographies with trailing '~' are recognized
+ * as short hesitations  e.g.
+ * <ul>
+ *  <li> <q> s~ </q> → <tt> s@ </tt></li>
+ *  <li> <q> se~ </q> → <tt> s@ </tt></li>
+ *  <li> <q> a~ </q> → <tt> { </tt></li>
+ *  <li> <q> ph~ </q> → <tt> f@ </tt></li>
+ * </ul>
  */
 @UsesRelationalDatabase
 @UsesFileSystem
@@ -692,9 +704,11 @@ public class CMUDictionaryTagger extends Annotator
          try {
             Dictionary dictionary = getDictionary("cmudict");
             try {
-               for (Annotation token : toAnnotate) {                              
+               for (Annotation token : toAnnotate) {
+                  boolean found = false;
                   for (String pronunciation : dictionary.lookup(token.getLabel())) {
-                     
+
+                     found = true;
                      token.createTag(pronunciationLayerId, pronunciation)
                         .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
                      
@@ -702,6 +716,13 @@ public class CMUDictionaryTagger extends Annotator
                      if (firstVariantOnly) break;
                      
                   } // next entry
+                  if (!found) { // might be a hesitation?
+                     String pronunciation = hesitationToDISC(token.getLabel());
+                     if (pronunciation != null) {
+                        token.createTag(pronunciationLayerId, pronunciation)
+                           .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                     }
+                  }
                } // next token
             } finally {
                dictionary.close();
@@ -757,4 +778,109 @@ public class CMUDictionaryTagger extends Annotator
          throw new DictionaryException(null, sqlX);
       }
    }
+
+   /**
+    * Converts a possible single-phoneme hesitation into it's DISC phonology
+    * representation.  Orthographies with trailing '~' are recognized as short hesitations
+    * - e.g. 's~' is converted to 's@', 'a~' to 'a', 'ph~' to 'f@'.  
+    * <p>This also recognizes consonant-followed-by-vowel hesitiations - e.g. 'se~' is
+    * also converted to 's@'. 
+    * @param orthography Source orthography. If this does not have a trailing '~' or
+    * contains too many letters, the method will return null. 
+    * @return The DISC phonological representation of the given source orthography, or
+    * null if {@link #encoding} != "DISC" or no orthography is appropriate. Consonants
+    * have schwa appended.  
+    */
+   public String hesitationToDISC(String orthography) {
+      if (orthography == null) return null;
+      if (!"DISC".equals(encoding)) return null;
+      String disc = null;
+      if (orthography.endsWith("~")) {
+         // strip of trailing ~
+         orthography = orthography.substring(0, orthography.length() - 1);
+         
+         // if it's a consonant followed by a vowel
+         if (orthography.matches("^[^aieou][aieou]$")) {	       
+            // then strip off the vowel, so that cases like
+            // 'fi~' are treated like 'f~'
+            orthography = orthography.substring(0,1);
+         }
+         // if it's two consonants followed by a vowel
+         if (orthography.matches("^[^aieou][^aieou][aieou]$")) {	       
+            // then strip off the vowel, so that cases like
+            // 'shi~' are treated like 'sh~'
+            orthography = orthography.substring(0,2);
+         }
+         
+         // is it a single character?
+         if (orthography.length() == 1) {
+            // the phoneme is the character
+            // ... but deal with exceptional cases
+            switch (orthography.charAt(0)) {
+               // these whouldn't be used, but just in case...
+               case 'c': { disc = "k"; break; }
+               case 'q': { disc = "k"; break; }
+                  
+                  // consonants
+               case 'j': { disc = "_"; break; }
+               case 'y': { disc = "j"; break; }
+                  
+                  // vowels
+               case 'a': { disc = "{"; break; } // trap
+               case 'e': { disc = "E"; break; } // dress
+               case 'i': { disc = "I"; break; } // kit
+               case 'o': { disc = "Q"; break; } // lot
+               case 'u': { disc = "V"; break; } // strut
+                  
+                  // otherwise, just pass it through
+               default: { disc = orthography; }
+            }
+         } else if (orthography.length() == 2) {
+            // deal with multi-letter possibilities
+            if (orthography.equals("ng")) { // ngati
+               disc = "N"; 
+            } else if (orthography.equals("th")) { // think, thought
+               disc = "T";
+            } else if (orthography.equals("dh")) { // then, they
+               disc = "D";
+            } else if (orthography.equals("sh")) { // sheet shine
+               disc = "S";
+            } else if (orthography.equals("ch")) { // cheat, china
+               disc = "J";
+            } else if (orthography.equals("wh")) { // what, which
+               disc = "hw"; // taken to be aspirated
+            } else if (orthography.equals("ph")) { // phonology, phew
+               disc = "f";
+            } else if (orthography.equals("gn")) { // gnome, gnash
+               disc = "n";
+            } else if (orthography.equals("kn")) { // know, knife
+               disc = "n";
+            } else if (orthography.equals("pn")) { // pneumatic, pneumonia
+               disc = "nj";
+            } else if (orthography.equals("ps")) { // psychology, psalm
+               disc = "s";
+            } else if (orthography.equals("pt")) { // ptomaine, pterodactyl
+               disc = "t";
+            } else if (orthography.equals("wr")) { // wrack, write
+               disc = "r";
+            }
+         }
+         
+         if (disc != null) {
+            // if it's not a vowel, append schwa
+            switch (disc.charAt(0)) {
+               // vowels
+               case 'I': case 'E': case '{': case 'V': case 'Q': case '@':
+               case 'i': case '#': case '$': case 'u': case '3': case '1':
+               case '2': case '4': case '5': case '6': case '7': case '8':
+               case '9': case 'c': case 'q': case '0': case '"': 
+                  break; // do nothing
+               default: 
+                  disc += "@";
+            }
+         }
+      }
+      return disc;
+   } // end of hestitationToDISC()
+
 }

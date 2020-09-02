@@ -135,7 +135,7 @@ public class TestCMUDictionaryTagger {
                    "I", firstWord.getLabel());
       
       assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
-                   8, g.all("word").length);
+                   9, g.all("word").length);
       assertEquals("double check there are no pronunciations: "+Arrays.asList(g.all("phonemes")),
                    0, g.all("phonemes").length);
       // run the annotator
@@ -243,7 +243,7 @@ public class TestCMUDictionaryTagger {
                    "I", firstWord.getLabel());
       
       assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
-                   8, g.all("word").length);
+                   9, g.all("word").length);
       assertEquals("double check there are no pronunciations: "+Arrays.asList(g.all("cmudict")),
                    0, g.all("cmudict").length);
       // run the annotator
@@ -349,7 +349,7 @@ public class TestCMUDictionaryTagger {
                       "I", firstWord.getLabel());
          
          assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
-                      8, g.all("word").length);
+                      9, g.all("word").length);
          assertEquals("double check there are no pronunciations: "+Arrays.asList(g.all("cmudict")),
                       0, g.all("cmudict").length);
          // run the annotator
@@ -357,23 +357,20 @@ public class TestCMUDictionaryTagger {
          List<String> pronLabels = Arrays.stream(g.all("cmudict"))
             .map(annotation->annotation.getLabel()).collect(Collectors.toList());
          assertEquals("Correct number of tokens "+pronLabels,
-                      7, pronLabels.size());
+                      8, pronLabels.size());
          Iterator<String> prons = pronLabels.iterator();
          assertEquals("2", prons.next());
          assertEquals("s{N", prons.next());
          assertEquals("First pronunciation only",
                       "Vnd", prons.next());
-         assertEquals("Second pronunciation of 'and' skipped",
-                      "w$kt", prons.next());
+         assertEquals("Second pronunciation of 'and' skipped, hesitation tagged",
+                      "w@", prons.next());
+         assertEquals("w$kt", prons.next());
          assertEquals("Vb6t", prons.next());
          assertEquals("m2", prons.next());
          assertEquals("blogging-posting skipped as it's not in the dictionary",
                       "l{zVli", prons.next());
          
-         // add a word
-         g.addAnnotation(new Annotation().setLayerId("word").setLabel("new")
-                         .setStart(g.getOrCreateAnchorAt(90)).setEnd(g.getOrCreateAnchorAt(100))
-                         .setParent(g.first("turn")));
       } finally {
          // reset encoding for other tests
          annotator.setEncoding("CMU");
@@ -446,6 +443,45 @@ public class TestCMUDictionaryTagger {
       assertTrue("firstVariantOnly has been corrected", annotator.getFirstVariantOnly());
    }   
 
+   @Test public void hesitationToDISC() throws Exception {
+
+      try {
+         assertNull("Not DISC", annotator.hesitationToDISC("s~"));
+         
+         annotator.setEncoding("DISC");
+         assertNull("Non-hesitation", annotator.hesitationToDISC("blog"));
+         
+         assertEquals("s~", "s@", annotator.hesitationToDISC("s~"));
+         assertEquals("se~", "s@", annotator.hesitationToDISC("se~"));
+         assertEquals("c~", "k@", annotator.hesitationToDISC("c~"));
+         assertEquals("q~", "k@", annotator.hesitationToDISC("c~"));
+         assertEquals("j~", "_@", annotator.hesitationToDISC("j~"));
+         assertEquals("y~", "j@", annotator.hesitationToDISC("y~"));
+         assertEquals("q~", "k@", annotator.hesitationToDISC("c~"));
+         assertEquals("a~", "{", annotator.hesitationToDISC("a~"));
+         assertEquals("e~", "E", annotator.hesitationToDISC("e~"));
+         assertEquals("i~", "I", annotator.hesitationToDISC("i~"));
+         assertEquals("o~", "Q", annotator.hesitationToDISC("o~"));
+         assertEquals("u~", "V", annotator.hesitationToDISC("u~"));
+         assertEquals("shi~", "S@", annotator.hesitationToDISC("shi~"));
+         assertEquals("ph~", "f@", annotator.hesitationToDISC("ph~"));
+         assertEquals("ng~", "N@", annotator.hesitationToDISC("ng~"));
+         assertEquals("th~", "T@", annotator.hesitationToDISC("th~"));
+         assertEquals("ch~", "J@", annotator.hesitationToDISC("ch~"));
+         assertEquals("wh~", "hw@", annotator.hesitationToDISC("wh~"));
+         assertEquals("gn~", "n@", annotator.hesitationToDISC("gn~"));
+         assertEquals("kn~", "n@", annotator.hesitationToDISC("kn~"));
+         assertEquals("pn~", "nj@", annotator.hesitationToDISC("pn~"));
+         assertEquals("ps~", "s@", annotator.hesitationToDISC("ps~"));
+         assertEquals("pt~", "t@", annotator.hesitationToDISC("pt~"));
+         assertEquals("wr~", "r@", annotator.hesitationToDISC("wr~"));
+
+      } finally {
+         // reset encoding for other tests
+         annotator.setEncoding("CMU");
+      }
+   }   
+
    @Test public void nonEnglish() throws Exception {
       
       Graph g = graph();
@@ -502,7 +538,7 @@ public class TestCMUDictionaryTagger {
                    "I", firstWord.getLabel());
       
       assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
-                   8, g.all("word").length);
+                   9, g.all("word").length);
       assertEquals("double check there are no pronunciations: "+Arrays.asList(g.all("phonemes")),
                    0, g.all("phonemes").length);
       // run the annotator
@@ -572,7 +608,7 @@ public class TestCMUDictionaryTagger {
                    "phonemes", outputLayers[0]);
 
       assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
-                   8, g.all("word").length);
+                   9, g.all("word").length);
       assertEquals("double check there are no pronunciations: "+Arrays.asList(g.all("phonemes")),
                    0, g.all("phonemes").length);
       // run the annotator
@@ -656,7 +692,7 @@ public class TestCMUDictionaryTagger {
                    "phonemes", outputLayers[0]);
 
       assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
-                   8, g.all("word").length);
+                   9, g.all("word").length);
       assertEquals("double check there are no pronunciations: "+Arrays.asList(g.all("phonemes")),
                    0, g.all("phonemes").length);
       // run the annotator
@@ -725,8 +761,11 @@ public class TestCMUDictionaryTagger {
       g.addAnnotation(new Annotation().setLayerId("word").setLabel("and")
                       .setStart(g.getOrCreateAnchorAt(30)).setEnd(g.getOrCreateAnchorAt(40))
                       .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("w~")
+                      .setStart(g.getOrCreateAnchorAt(40)).setEnd(g.getOrCreateAnchorAt(45))
+                      .setParent(turn));
       g.addAnnotation(new Annotation().setLayerId("word").setLabel("walked")
-                      .setStart(g.getOrCreateAnchorAt(40)).setEnd(g.getOrCreateAnchorAt(50))
+                      .setStart(g.getOrCreateAnchorAt(45)).setEnd(g.getOrCreateAnchorAt(50))
                       .setParent(turn));
       g.addAnnotation(new Annotation().setLayerId("word").setLabel("about")
                       .setStart(g.getOrCreateAnchorAt(50)).setEnd(g.getOrCreateAnchorAt(60))
