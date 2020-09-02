@@ -16,6 +16,12 @@ h4 { font-size: 14pt; color: #859044; }
 h5 { font-size: 13pt; color: #859044; }
 h6 { font-size: 12pt; color: #859044; }
 
+label {
+    font-weight: bold;
+}
+label:after {
+    content: ':';
+}
 .field {
     display: flex;
     flex-direction: row;
@@ -23,7 +29,6 @@ h6 { font-size: 12pt; color: #859044; }
 .field label {
     width: 50%;
     display: block;
-    font-weight: bold;
 }
 .field span {
     width: 50%;

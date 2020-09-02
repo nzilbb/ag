@@ -85,3 +85,12 @@ function changedLayer(select) {
         }
     }
 }
+
+// this function detects when the user changes the encoding, and shows an example:
+function changedEncoding(select) {
+    var example = "T R AE2 N S K R IH1 P SH AH0 N"; // CMU
+    if (select.value == "DISC") {
+        example = "tr{nskrIpSVn";
+    }
+    document.getElementById("encoding-example").innerHTML = example;
+}

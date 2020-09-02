@@ -45,6 +45,18 @@
           </select>
         </span>
       </div>
+      <div class="field" title="Which encoding to annotate the token with">
+        <label for="encoding"> Encoding </label>
+        <span>
+          <select id="encoding" name="encoding" onChange="changedEncoding(this)">
+            <option value="CMU">CMU ARPAbet</option>
+            <option value="DISC">CELEX DISC</option>
+            <!-- TODO addd IPA as an option -->
+          </select>
+          <label id="encoding-example-label">Example</label>
+          <tt id="encoding-example">T R AE2 N S K R IH1 P SH AH0 N</tt>
+        </span>
+      </div>
       <div class="field"
            title="If there are multiple pronunciations for the word, use only the first one.">
         <label for="firstVariantOnly"> First variant only </label>

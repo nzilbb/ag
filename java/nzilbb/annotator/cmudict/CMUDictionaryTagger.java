@@ -452,6 +452,23 @@ public class CMUDictionaryTagger extends Annotator
       pronunciationLayerId = newPronunciationLayerId; return this; }
 
    /**
+    * Phoneme encoding - "CMU" or "DISC".
+    * @see #getEncoding()
+    * @see #setEncoding(String)
+    */
+   protected String encoding;
+   /**
+    * Getter for {@link #encoding}: Phoneme encoding - "CMU" or "DISC".
+    * @return Phoneme encoding - "CMU" or "DISC".
+    */
+   public String getEncoding() { return encoding; }
+   /**
+    * Setter for {@link #encoding}: Phoneme encoding - "CMU" or "DISC".
+    * @param newEncoding Phoneme encoding - "CMU" or "DISC".
+    */
+   public CMUDictionaryTagger setEncoding(String newEncoding) { encoding = newEncoding; return this; }
+
+   /**
     * Whether to use only the first pronunciation if there are multiple pronunciations.
     * @see #getFirstVariantOnly()
     * @see #setFirstVariantOnly(Boolean)
@@ -733,7 +750,9 @@ public class CMUDictionaryTagger extends Annotator
          throw new DictionaryException(null, "Invalid dictionary: " + id);
       }
       try {
-         return new CMUDictionary(this, newConnection(), sqlx);
+         return new CMUDictionary(this, newConnection(), sqlx)
+            .setEncoding(
+               "DISC".equals(encoding)?CMUDictionary.Encoding.DISC:CMUDictionary.Encoding.CMU);
       } catch (SQLException sqlX) {
          throw new DictionaryException(null, sqlX);
       }

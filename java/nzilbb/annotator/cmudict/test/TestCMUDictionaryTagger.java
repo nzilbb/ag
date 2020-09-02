@@ -201,6 +201,7 @@ public class TestCMUDictionaryTagger {
          +"&transcriptLanguageLayerId="   // no transcript language layer
          +"&phraseLanguageLayerId="       // no phrase language layer
          +"&pronunciationLayerId=cmudict" // non-default layer
+         +"&encoding=CMU"                 // CMU ARPAbet encoding
          +"&firstVariantOnly=on");        // firstVariantOnly
       
       assertEquals("token layer",
@@ -221,6 +222,8 @@ public class TestCMUDictionaryTagger {
       assertEquals("pronunciation layer type correct",
                    Constants.TYPE_STRING,
                    schema.getLayer(annotator.getPronunciationLayerId()).getType());
+      assertEquals("encoding",
+                   "CMU", annotator.getEncoding());
       assertFalse("pronunciation layer disallows peers (firstVariantOnly=true)",
                   schema.getLayer(annotator.getPronunciationLayerId()).getPeers());
       Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
@@ -286,6 +289,95 @@ public class TestCMUDictionaryTagger {
       assertEquals("previous pron unchanged", "L AE1 Z AH0 L IY0", prons.next());
       assertEquals("new token has first pronunciation",
                    "N UW1", prons.next());
+
+   }   
+
+   @Test public void DISC() throws Exception {
+
+      try {
+         Graph g = graph();
+         // tag the graph as being in New Zealand English
+         g.addTag(g, "transcript_language", "en-NZ");
+         Schema schema = g.getSchema();
+         annotator.setSchema(schema);
+         
+         // use specified configuration
+         annotator.setTaskParameters(
+            "tokenLayerId=word"
+            +"&transcriptLanguageLayerId="   // no transcript language layer
+            +"&phraseLanguageLayerId="       // no phrase language layer
+            +"&pronunciationLayerId=cmudict" // non-default layer
+            +"&encoding=DISC"                // DISC encoding
+            +"&firstVariantOnly=on");        // firstVariantOnly
+         
+         assertEquals("token layer",
+                      "word", annotator.getTokenLayerId());
+         assertNull("transcript language layer",
+                    annotator.getTranscriptLanguageLayerId());
+         assertNull("phrase language layer",
+                    annotator.getPhraseLanguageLayerId());
+         assertEquals("pronunciation layer",
+                      "cmudict", annotator.getPronunciationLayerId());
+         assertNotNull("pronunciation layer was created",
+                       schema.getLayer(annotator.getPronunciationLayerId()));
+         assertEquals("pronunciation layer child of word",
+                      "word", schema.getLayer(annotator.getPronunciationLayerId()).getParentId());
+         assertEquals("pronunciation layer not aligned",
+                      Constants.ALIGNMENT_NONE,
+                      schema.getLayer(annotator.getPronunciationLayerId()).getAlignment());
+         assertEquals("pronunciation layer type correct",
+                      Constants.TYPE_STRING,
+                      schema.getLayer(annotator.getPronunciationLayerId()).getType());
+         assertEquals("encoding",
+                      "DISC", annotator.getEncoding());
+         assertFalse("pronunciation layer disallows peers (firstVariantOnly=true)",
+                     schema.getLayer(annotator.getPronunciationLayerId()).getPeers());
+         Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
+            .collect(Collectors.toSet());
+         assertEquals("1 required layer: "+requiredLayers,
+                      1, requiredLayers.size());
+         assertTrue("word required "+requiredLayers,
+                    requiredLayers.contains("word"));
+         String outputLayers[] = annotator.getOutputLayers();
+         assertEquals("1 output layer: "+Arrays.asList(outputLayers),
+                      1, outputLayers.length);
+         assertEquals("output layer correct "+Arrays.asList(outputLayers),
+                      "cmudict", outputLayers[0]);
+         
+         Annotation firstWord = g.first("word");
+         assertEquals("double check the first word is what we think it is: "+firstWord,
+                      "I", firstWord.getLabel());
+         
+         assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
+                      8, g.all("word").length);
+         assertEquals("double check there are no pronunciations: "+Arrays.asList(g.all("cmudict")),
+                      0, g.all("cmudict").length);
+         // run the annotator
+         annotator.transform(g);
+         List<String> pronLabels = Arrays.stream(g.all("cmudict"))
+            .map(annotation->annotation.getLabel()).collect(Collectors.toList());
+         assertEquals("Correct number of tokens "+pronLabels,
+                      7, pronLabels.size());
+         Iterator<String> prons = pronLabels.iterator();
+         assertEquals("2", prons.next());
+         assertEquals("s{N", prons.next());
+         assertEquals("First pronunciation only",
+                      "Vnd", prons.next());
+         assertEquals("Second pronunciation of 'and' skipped",
+                      "w$kt", prons.next());
+         assertEquals("Vb6t", prons.next());
+         assertEquals("m2", prons.next());
+         assertEquals("blogging-posting skipped as it's not in the dictionary",
+                      "l{zVli", prons.next());
+         
+         // add a word
+         g.addAnnotation(new Annotation().setLayerId("word").setLabel("new")
+                         .setStart(g.getOrCreateAnchorAt(90)).setEnd(g.getOrCreateAnchorAt(100))
+                         .setParent(g.first("turn")));
+      } finally {
+         // reset encoding for other tests
+         annotator.setEncoding("CMU");
+      }
 
    }   
 

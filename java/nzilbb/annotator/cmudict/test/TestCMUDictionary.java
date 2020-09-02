@@ -110,6 +110,15 @@ public class TestCMUDictionary {
                    0, dict.lookup("Fizzgig").size());
    }   
    
+   @Test public void DISC() throws Exception {
+      
+      CMUDictionary dict = ((CMUDictionary)annotator.getDictionary("cmudict"))
+         .setEncoding(CMUDictionary.Encoding.DISC);
+      List<String> entries = dict.lookup("transcription");
+      assertEquals("DSIC",
+                   "tr{nskrIpSVn", entries.iterator().next());
+   }   
+   
    @Test public void pagination() throws Exception {
       
       CMUDictionary dict = (CMUDictionary)annotator.getDictionary("cmudict");
@@ -151,14 +160,14 @@ public class TestCMUDictionary {
       try {
          // add an entry
          dict.add("floof","F L UW1 F");
-         dict.add("floof","F L UH1 F");
+         dict.add("floof","F L UH F"); // not UH1 because otherwise DISC->CMU doesn't match
          dict.add("floof","F L AW1 F");
          List<String> entries = dict.lookup("floof");
          assertEquals("3 entries: " + entries,
                       3, entries.size());
          Iterator<String> pron = entries.iterator();
          assertEquals("F L UW1 F", pron.next());
-         assertEquals("F L UH1 F", pron.next());
+         assertEquals("F L UH F", pron.next());
          assertEquals("F L AW1 F", pron.next());
          assertEquals("one editable key",
                       1, dict.countEditableKeys());
@@ -168,14 +177,27 @@ public class TestCMUDictionary {
          assertEquals("lookup and lookupEditableEntry return the same thing",
                       entries, editableEntries);
 
-         dict.remove("floof", "F L UH1 F");
+         // DISC encoding
+         dict.setEncoding(CMUDictionary.Encoding.DISC);
          entries = dict.lookup("floof");
-         assertEquals("remove specific entry - now 2 entries: " + entries,
-                      2, entries.size());
          pron = entries.iterator();
-         assertEquals("remove specific entry",
+         assertEquals("fluf", pron.next());
+         assertEquals("flUf", pron.next());
+         assertEquals("fl6f", pron.next());
+
+         dict.remove("floof", "flUf");
+         entries = dict.lookup("floof");
+         assertEquals("remove specific DISC-encoded entry - now 2 entries: " + entries,
+                      2, entries.size());
+
+         // back to CMU encoding
+         dict.setEncoding(CMUDictionary.Encoding.CMU);
+                     
+         entries = dict.lookup("floof");
+         pron = entries.iterator();
+         assertEquals("remove specific CMU-encoded entry",
                       "F L UW1 F", pron.next());
-         assertEquals("remove specific entry",
+         assertEquals("remove specific CMU-encoded entry",
                       "F L AW1 F", pron.next());
 
          dict.remove("floof");

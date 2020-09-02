@@ -34,6 +34,8 @@ import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.Dictionary;
 import nzilbb.ag.automation.DictionaryException;
 import nzilbb.ag.automation.DictionaryReadOnlyException;
+import nzilbb.encoding.CMU2DISC;
+import nzilbb.encoding.DISC2CMU;
 import nzilbb.sql.mysql.MySQLTranslator;
 
 /**
@@ -42,9 +44,13 @@ import nzilbb.sql.mysql.MySQLTranslator;
 @SuppressWarnings("serial")
 public class CMUDictionary implements Dictionary {
 
+   public enum Encoding { CMU, DISC };
+
    private Connection rdb;
    private MySQLTranslator sqlx = new MySQLTranslator();
    private PreparedStatement sql; 
+   private CMU2DISC cmu2disc = new CMU2DISC();
+   private DISC2CMU disc2cmu = new DISC2CMU();
 
    /**
     * The TheWorksExample annotator that created this dictionary.
@@ -68,6 +74,23 @@ public class CMUDictionary implements Dictionary {
    public String getDictionaryId() {
       return "frequencies";
    }
+
+   /**
+    * The phoneme encoding to use.
+    * @see #getEncoding()
+    * @see #setEncoding(Encoding)
+    */
+   protected Encoding encoding;
+   /**
+    * Getter for {@link #encoding}: The phoneme encoding to use.
+    * @return The phoneme encoding to use.
+    */
+   public Encoding getEncoding() { return encoding; }
+   /**
+    * Setter for {@link #encoding}: The phoneme encoding to use.
+    * @param newEncoding The phoneme encoding to use.
+    */
+   public CMUDictionary setEncoding(Encoding newEncoding) { encoding = newEncoding; return this; }
 
    /**
     * Constructor.
@@ -102,7 +125,10 @@ public class CMUDictionary implements Dictionary {
             while (rs.next()) {
                if (supplementalOnly && !rs.getBoolean("supplemental")) continue;
                String entry = rs.getString(1);
-               if (entry != null) queryResults.add(entry);
+               if (entry != null) {
+                  if (encoding == Encoding.DISC) entry = cmu2disc.apply(entry);
+                  queryResults.add(entry);
+               }
             } // next result
          } finally {
             rs.close();
@@ -341,6 +367,7 @@ public class CMUDictionary implements Dictionary {
          try {
             sql.setString(1, key.toLowerCase());
             sql.setInt(2, iVariant);
+            if (encoding == Encoding.DISC) entry = disc2cmu.apply(entry);
             sql.setString(3, entry);
             sql.executeUpdate();
          } finally {
@@ -396,6 +423,9 @@ public class CMUDictionary implements Dictionary {
             +" WHERE wordform = ? AND pron_cmudict = ? AND supplemental = 1");
          try {
             sql.setString(1, key);
+            if (encoding == Encoding.DISC) {
+               entry = disc2cmu.apply(entry);
+            }
             sql.setString(2, entry);
             if (sql.executeUpdate() == 0) {
                throw new DictionaryReadOnlyException(
@@ -559,6 +589,9 @@ public class CMUDictionary implements Dictionary {
       }
       
       // return whatever suggestion we may have
+      if (encoding == Encoding.DISC) {
+         suggestedPhonology = cmu2disc.apply(suggestedPhonology);
+      }
       return suggestedPhonology;	 
    }
    
