@@ -21,6 +21,7 @@
 //
 package nzilbb.ag;
 
+import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -33,42 +34,51 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
-import org.json.IJSONableBean;
-import org.json.JSONObject;
+import javax.json.Json;
+import javax.json.JsonNumber;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonString;
+import javax.json.JsonValue;
+import javax.json.stream.JsonParser;
+import nzilbb.util.CloneableBean;
+import nzilbb.util.ClonedProperty;
 
 /**
- * Base class for annotation graph classes, which encapsulates two common features of
+ * Base class for annotation graph classes, which encapsulates three common features of
  * these classes:
  * <ol>
- *  <li>Changes to specific attributes can be tracked and rolled back, by setting
+ *  <li> Changes to specific attributes can be tracked and rolled back, by setting
  *   {@link #getTracker()}, which receives notification of all relevant changes.  Before 
  *   {@link #getTracker()} is set, no change registration is done, which the exception of calls
  *   to {@link #create()} and {@link #destroy()}, changes which are remembered and passed
  *   to the {@link ChangeTracker} when {@link #setTracker(ChangeTracker)} is called (this
  *   is done so that {@link Anchor}s/{@link Annotation}s can be marked for creation before
  *   being added to a {@link Graph}). </li>
- *  <li>Annotation graph classes (in particular {@link Annotation} and {@link Anchor} are
+ *  <li> Annotation graph classes (in particular {@link Annotation} and {@link Anchor} are
  *   defined as Maps not just to allow tracking of changes to registered attributes
  *   (key/value pairs), but also to allow them to easily be informally extended or tagged at
  *   runtime. This is with two particular possibilities in mind: 
  *   <ul>
- *    <li>An annotation is defined as a directed graph edge with a <var>label</var> and a
+ *    <li> An annotation is defined as a directed graph edge with a <var>label</var> and a
  *     <var>type</var> (which in this implementation is actually <var>layerId</var>), and an
  *     anchor is a  graph node with an optional <var>offset</var>, but there is scope of an
  *     annotation to include other attributes - not alternative annotation labels, but rather
  *     extra information about the annotation itself, which might include provenance,
  *     authorship, etc. This information can be set with arbitrarily named keys in the map
  *     as required.</li> 
- *    <li>During processing, it may be desirable or necessary to tag annotations or anchors
+ *    <li> During processing, it may be desirable or necessary to tag annotations or anchors
  *     in some way, e.g. to mark them as 'already visited' or 'already processed' by some
  *     traversal process, or to link together entities during merging of graphs, etc. This can
  *     be easily achieved by simply setting ad-hoc attributes on the entity as required.  Such
  *     'transient' attributes, which should ideally not be serialized for storage or transfer,
  *     are assumed to have keys that start with a non-alphabetic character -
  *     e.g. <var>"@otherGraphConterpart</var> - in contrast to 'sticky' attributes mentioned
- *     above.</li> 
+ *     above. </li> 
  *   </ul>
  *  </li>
+ *  <li> All need specific behaviour for object cloning and JSON
+ *   serialization/deserialization </li> 
  * </ol>
  * <p>
  * @author Robert Fromont robert@fromont.net.nz
@@ -76,7 +86,7 @@ import org.json.JSONObject;
 @SuppressWarnings("serial")
 public class TrackedMap
    extends LinkedHashMap<String,Object>
-   implements Cloneable, IJSONableBean
+   implements Cloneable, CloneableBean
 {
    // Attributes stored in HashMap:
    
@@ -92,27 +102,18 @@ public class TrackedMap
     */
    public Set<String> getTrackedAttributes()
    {
-      return trackedAttributes;
+      TreeSet<String> properties = new TreeSet<String>();
+      Method[] methods = getClass().getMethods();
+      for (Method method : methods) {
+	 TrackedProperty annotation = method.getAnnotation(TrackedProperty.class);
+	 if (annotation != null) {
+            String setterName = method.getName();
+            String property = setterName.substring(3,1).toLowerCase() + setterName.substring(4);
+            properties.add(property);
+         } // TrackerProperty getter
+      } // next method
+      return properties;
    } // end of getTrackedAttributes()
-
-   /**
-    * Keys for attributes that are cloned - i.e. when a subclass object is cloned, only
-    * these attributes are copied into the clone. 
-    * @return A set of attributes whose values are cloned.
-    */
-   public Set<String> getClonedAttributes()
-   {
-      return trackedAttributes;
-   } // end of getTrackedAttributes()
-
-   /**
-    * IJSONableBean implementation.
-    * @return The names of fields to be obtained from the object.
-    */
-   public String[] JSONAttributes()
-   {
-      return getClonedAttributes().toArray(new String[0]);
-   }
    
    /**
     * Sets the object attributes using the given JSON representation.
@@ -123,7 +124,7 @@ public class TrackedMap
     */
    public TrackedMap fromJson(String json)
    {
-      return fromJson(new JSONObject(json));
+      return fromJson(Json.createReader(new StringReader(json)).readObject());
    }
    
    /**
@@ -132,7 +133,85 @@ public class TrackedMap
     */
    public String toJsonString()
    {
-      return new JSONObject((IJSONableBean)this).toString();
+      return toJson().toString();
+   }
+   /**
+    * JSON-encodes the object.
+    * @return A JSON representation of the object.
+    */
+   @SuppressWarnings({"rawtypes"})
+   public JsonObject toJson()
+   {
+      JsonObjectBuilder json = Json.createObjectBuilder();
+      
+      // first add the bean property
+      for (String key : getClonedAttributes()) {
+         Method getter = getter(key);
+         try {
+            Object value = getter.invoke(this);
+            if (value != null) {
+               Class parameterClass = getter.getReturnType();
+               if (parameterClass.equals(String.class)) {
+                  json.add(key, (String)value);
+               } else if (parameterClass.equals(Integer.class)) {
+                  json.add(key, (Integer)value);
+               } else if (parameterClass.equals(int.class)) {
+                  json.add(key, (int)value);
+               } else if (parameterClass.equals(Double.class)) {
+                  json.add(key, (Double)value);
+               } else if (parameterClass.equals(double.class)) {
+                  json.add(key, (Double)value);
+               } else if (parameterClass.equals(Long.class)) {
+                  json.add(key, (Long)value);
+               } else if (parameterClass.equals(long.class)) {
+                  json.add(key, (long)value);
+               } else if (parameterClass.equals(Boolean.class)) {
+                  json.add(key, (Boolean)value);
+               } else if (parameterClass.equals(boolean.class)) {
+                  json.add(key, (boolean)value);
+               }
+               // ignore any other types
+            } // value isn't null
+         } catch(IllegalAccessException exception) {
+            System.err.println(
+               "TrackedMap.toJsonString - can't set " + key + ": " + exception);
+         } catch(InvocationTargetException exception) {
+            System.err.println(
+               "TrackedMap.toJsonString - can't set " + key + ": " + exception);
+         }
+      } // next bean property
+
+      // now anything 'non-transient' in the map
+      for (String key : keySet()) {
+         if (Character.isLetterOrDigit(key.charAt(0))) {
+            Object value = get(key);
+            if (value != null) {
+               Class parameterClass = value.getClass();
+               if (parameterClass.equals(String.class)) {
+                  json.add(key, (String)value);
+               } else if (parameterClass.equals(Integer.class)) {
+                  json.add(key, (Integer)value);
+               } else if (parameterClass.equals(int.class)) {
+                  json.add(key, (int)value);
+               } else if (parameterClass.equals(Double.class)) {
+                  json.add(key, (Double)value);
+               } else if (parameterClass.equals(double.class)) {
+                  json.add(key, (Double)value);
+               } else if (parameterClass.equals(Long.class)) {
+                  json.add(key, (Long)value);
+               } else if (parameterClass.equals(long.class)) {
+                  json.add(key, (long)value);
+               } else if (parameterClass.equals(Boolean.class)) {
+                  json.add(key, (Boolean)value);
+               } else if (parameterClass.equals(boolean.class)) {
+                  json.add(key, (boolean)value);
+               }
+               // ignore any other types
+            } // value isn't null
+         } // isn't 'transient'
+      } // next bean property
+
+      return json.build();
    }
    
    /**
@@ -143,11 +222,11 @@ public class TrackedMap
     * @return A reference to this object.
     */
    @SuppressWarnings({"rawtypes","unchecked"})
-   public TrackedMap fromJson(JSONObject json)
+   public TrackedMap fromJson(JsonObject json)
    {
       HashSet<String> beanAttributes = new HashSet<String>();
-      for (String a : JSONAttributes()) beanAttributes.add(a);
-
+      for (String a : getClonedAttributes()) beanAttributes.add(a);
+      
       for (String key : json.keySet())
       {
          if (!json.isNull(key))
@@ -155,10 +234,10 @@ public class TrackedMap
             Object value = json.get(key);
             if (beanAttributes.contains(key))
             { // is a bean attribute
-               Method setter = setter(this, key);
-               if (value instanceof JSONObject)
+               Method setter = setter(key);
+               if (value instanceof JsonObject)
                { // complex object value
-                  JSONObject objectValue = (JSONObject)value;
+                  JsonObject objectValue = (JsonObject)value;
                   // what type are we expecting?
                   Class type = setter.getParameterTypes()[0];
                   boolean isMap = false;
@@ -173,38 +252,85 @@ public class TrackedMap
                         Map map = (Map)type.getConstructor().newInstance();
                         for (String k : objectValue.keySet())
                         {
-                           map.put(k, objectValue.get(k));
+                           Object v = objectValue.get(k);
+                           if (v instanceof JsonString) {
+                              v = ((JsonString)v).getString();
+                           } else if (v instanceof JsonNumber) {
+                              v = Double.valueOf(((JsonNumber)v).doubleValue());
+                           } else if (v instanceof JsonValue) {
+                              if (v.equals(JsonValue.TRUE)) {
+                                 v = true;
+                              } else if (v.equals(JsonValue.FALSE)) {
+                                 v = false;
+                              } else if (v.equals(JsonValue.NULL)) {
+                                 v = null;
+                              }
+                           }
+                           map.put(k, v);
                         } // next key/value pair
                         setter.invoke(this, map); 
                      }
                      catch(Exception exception)
                      {
                         System.err.println(
-                           "TrackedMap.fromJson - can't set " + key + ": " + exception);
+                           "TrackedMap.fromJson - can't set complex " + key + ": " + exception);
                      }
                   }
                } // complex object value
                else
                { // simple value
+                  Class parameterClass = setter.getParameterTypes()[0];
+                  if (value instanceof JsonString) {
+                     value = ((JsonString)value).getString();
+                  } else if (value instanceof JsonNumber) {
+                     if (parameterClass.equals(Integer.class)) {
+                        value = Integer.valueOf(((JsonNumber)value).intValue());
+                     } else if (parameterClass.equals(int.class)) {
+                        value = Integer.valueOf(((JsonNumber)value).intValue());
+                     } else if (parameterClass.equals(Double.class)) {
+                        value = Double.valueOf(((JsonNumber)value).doubleValue());
+                     } else if (parameterClass.equals(double.class)) {
+                        value = Double.valueOf(((JsonNumber)value).doubleValue());
+                     } else if (parameterClass.equals(Long.class)) {
+                        value = Long.valueOf(((JsonNumber)value).longValueExact());
+                     } else if (parameterClass.equals(long.class)) {
+                        value = Long.valueOf(((JsonNumber)value).longValueExact());
+                     }
+                  } else if (value instanceof JsonValue) {
+                     if (value.equals(JsonValue.TRUE)) {
+                        value = true;
+                     } else if (value.equals(JsonValue.FALSE)) {
+                        value = false;
+                     } else if (value.equals(JsonValue.NULL)) {
+                        value = null;
+                     } 
+                  }
                   try
                   {
                      setter.invoke(this, value);
                   }
                   catch(Exception exception)
                   {
-                     System.err.println("TrackedMap.fromJson - can't set " + key + ": " + exception);
+                     System.err.println(
+                        "TrackedMap.fromJson - can't set "
+                        + key + " ("+value.getClass().getName()+"): " + exception);
                      put(key, value);
                   }
                } // simple value
             } // is a bean attribute
             else
             { // not a bean attribute
-               put(key, value);
+               // any map key that doesn's start with an alphanumeric is assumed to be transient
+               // and thuse not copied
+               if (Character.isLetterOrDigit(key.charAt(0))) {
+                  // key starts with alphanumeric, so is copied into the map
+                  put(key, value);
+               }
             } // not a bean attribute
          } // value is not null
       } // next attribute
       return this;
-   } // end of fromJson()
+   } // end of fromJsonObject()
 
    /**
     * Object that tracks all changes to this object.
@@ -255,6 +381,7 @@ public class TrackedMap
     * Getter for <i>id</i>: The object's identifier.
     * @return The object's identifier.
     */
+   @ClonedProperty
    public String getId() { return id; }
    /**
     * Setter for <i>id</i>: The object's identifier.
@@ -282,6 +409,7 @@ public class TrackedMap
     * obtained by automatic annotation).
     * @return Confidence rating.
     */
+   @ClonedProperty
    public Integer getConfidence() { return confidence; }
    /**
     * Setter for {@link #confidence}: Confidence rating.
@@ -373,7 +501,7 @@ public class TrackedMap
       Change change = null;
       try
       {
-         Method getter = getter(this, key);
+         Method getter = getter(key);
          assert getter != null : "registerChange: getter != null : "
             + key + ", " + value + " - " + this.getClass().getName();
          Object oldValue = getter.invoke(this);
@@ -542,7 +670,7 @@ public class TrackedMap
             {
                try
                {
-                  Method getter = getter(this, key);
+                  Method getter = getter(key);
                   Object value = getter.invoke(this);
                   if (value != null)
                   {
@@ -593,7 +721,7 @@ public class TrackedMap
       if (value == null) // there's no value in the map
       {
          String keyString = key.toString();
-         Method getter = getter(this, keyString);
+         Method getter = getter(keyString);
          // ...and there's a getter
          if (getter != null)
          { // use the getter
@@ -614,7 +742,7 @@ public class TrackedMap
       try
       {
          TrackedMap copy = getClass().getDeclaredConstructor().newInstance();
-         copy.cloneAttributesFrom(this, null);
+         copy.clonePropertiesFrom(this, null);
          return copy;
       }
       catch(Exception exception)
@@ -626,29 +754,6 @@ public class TrackedMap
       }
    } // end of clone()
    
-   /**
-    * Override of Map's clone method, to copy only tracked attributes plus "id".
-    */
-   public void cloneAttributesFrom(TrackedMap other, String except)
-   {
-      try
-      {
-         for (String key : getClonedAttributes())
-         { // copy tracked attributes
-            if (key.equals(except)) continue;	    
-            Method getter = getter(other, key);
-            Method setter = setter(this, key);
-            setter.invoke(this, getter.invoke(other));
-         }
-      }
-      catch(Exception exception)
-      {
-         System.err.println(
-            "TrackedMap.cloneAttributesFrom(): Could not copy " + other.getId() + ": " + exception);
-         exception.printStackTrace(System.err);
-      }
-   } // end of clone()
-
    // java.lang.Object overrides:
       
    /**
@@ -693,80 +798,4 @@ public class TrackedMap
       return false;
    } // end of equals()
 
-   /**
-    * Access the class's getter for the given attribute.
-    * @param object
-    * @param key
-    * @return The getter, or null if there isn't one.
-    */
-   public Method getter(TrackedMap object, String key)
-   {
-      try
-      {
-         String getterName = "get" + key.substring(0,1).toUpperCase() + key.substring(1);
-         return object.getClass().getMethod(getterName);
-      }
-      catch(Throwable exception)
-      {
-         // System.err.println("getter [" + object + "] - " + key + " :: " + exception);
-         // exception.printStackTrace(System.err);
-         return null;
-      }	 
-   } // end of getter()
-
-   /**
-    * Access the class's getter for the given attribute.
-    * @param object
-    * @param key
-    * @return The getter, or null if there isn't one.
-    */
-   public static Method setter(TrackedMap object, String key)
-   {
-      try
-      {
-         String setterName = "set" + key.substring(0,1).toUpperCase() + key.substring(1);
-         try
-         {
-            return object.getClass().getMethod(setterName, String.class); // labels, etc.
-         }
-         catch(NoSuchMethodException x1)
-         {
-            try
-            {
-               return object.getClass().getMethod(setterName, int.class); // Annotation.ordinal
-            }
-            catch(NoSuchMethodException x2)
-            {
-               try
-               {
-                  return object.getClass().getMethod(setterName, Integer.class); // confidence
-               }
-               catch(NoSuchMethodException x3)
-               {
-                  try
-                  {
-                     return object.getClass().getMethod(setterName, boolean.class); // Layer.peers, etc...
-                  }
-                  catch(NoSuchMethodException x4)
-                  {
-                     try
-                     {
-                        return object.getClass().getMethod(setterName, LinkedHashMap.class); // Layer.validLabels
-                     }
-                     catch(NoSuchMethodException x5)
-                     {
-                        return object.getClass().getMethod(setterName, Double.class); // Anchor.offset
-                     }
-                  }
-               }
-            }
-         }
-      }
-      catch(Throwable exception)
-      {
-         System.err.println("" + exception);
-         return null;
-      }	 
-   } // end of getter()
-   
 } // end of class Annotation

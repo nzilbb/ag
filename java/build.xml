@@ -17,6 +17,17 @@
     <tstamp/>
     <!-- Create the build directory structure used by compile -->
     <mkdir dir="${build}"/>
+    <!-- Get glassfish open-source implementation of javax.json -->    
+    <get src="http://www.java2s.com/Code/JarDownload/javax.json/javax.json-1.0.jar.zip" 
+	 dest="lib/javax.json-1.0.jar.zip" 
+	 skipexisting="true"
+	 verbose="true"
+	 usetimestamp="true"/>
+    <unzip src="lib/javax.json-1.0.jar.zip" dest="lib"></unzip>
+    <move
+        file="lib/javax.json-1.0.jar"
+        tofile="lib/javax.json.jar"
+        />
     <!-- Get derby for command-line RDB -->
     <get src="https://downloads.apache.org/db/derby/db-derby-10.14.2.0/db-derby-10.14.2.0-lib.zip" 
 	 dest="lib/db-derby-10.14.2.0-lib.zip" 
@@ -76,7 +87,7 @@
           description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
     <javac srcdir="${src}" destdir="${build}"
-	       classpath="lib/antlr-4.7.2-complete.jar;lib/commons-fileupload.jar;lib/derby.jar"
+	       classpath="lib/javax.json.jar;lib/antlr-4.7.2-complete.jar;lib/commons-fileupload.jar;lib/derby.jar"
 	       includes="${srcfiles}"
 	       excludes="${srctests} ${srctestseditpath} **/package-info.java"
 	       listfiles="yes"
@@ -119,7 +130,7 @@
           description="Generate javadoc for all source files" >
     <mkdir dir="${javadoc}"/>
     <javadoc destdir="${javadoc}"
-             classpath=".;lib/antlr-4.7.2-complete.jar;lib/commons-fileupload.jar;lib/derby.jar"
+             classpath=".;lib/javax.json.jar;lib/antlr-4.7.2-complete.jar;lib/commons-fileupload.jar;lib/derby.jar"
              Author="yes"
              Windowtitle="nzilbb.ag"
              stylesheetfile="doc-files/style.css"
@@ -137,7 +148,7 @@
           description="Generate javadoc documentation for public parts of main packages" >
     <mkdir dir="${docs}"/>
     <javadoc destdir="${docs}"
-	     classpath=".;lib/antlr-4.7.2-complete.jar;lib/commons-fileupload.jar;lib/derby.jar"
+	     classpath=".;lib/javax.json.jar;lib/antlr-4.7.2-complete.jar;lib/commons-fileupload.jar;lib/derby.jar"
              packagenames="nzilbb.ag"
              access="public"
 	     Author="yes"
@@ -155,7 +166,7 @@
   <target name="test" depends="dist" description="run nzilbb.ag annotation-graph unit tests">
     <javac srcdir="${src}" destdir="."
 	       includes="${srctests} ${srctestseditpath}"
-	       classpath=".;${junitjar};${dist}/${ant.project.name}.jar;lib/antlr-4.7.2-complete.jar;lib/commons-io.jar;lib/commons-fileupload.jar;lib/derby.jar"
+	       classpath=".;${junitjar};${dist}/${ant.project.name}.jar;lib/javax.json.jar;lib/antlr-4.7.2-complete.jar;lib/commons-io.jar;lib/commons-fileupload.jar;lib/derby.jar"
 	       listfiles="yes"
 	       target="8"
 	       source="8"
@@ -169,7 +180,7 @@
 	    fork="true"
 	    >
       <classpath>
-	    <pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar};lib/antlr-4.7.2-complete.jar;lib/commons-io.jar;lib/commons-fileupload.jar"/>
+	    <pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar};lib/javax.json.jar;lib/antlr-4.7.2-complete.jar;lib/commons-io.jar;lib/commons-fileupload.jar"/>
       </classpath>
       <jvmarg value="-ea"/>
       <formatter type="plain" usefile="false" />
@@ -190,7 +201,7 @@
   <target name="testmerger" depends="dist" description="run nzilbb.ag.util.Merger unit tests">
     <javac srcdir="${src}" destdir="."
 	       includes="nzilbb/ag/util/test/TestMerger.java"
-	       classpath=".;${junitjar};${dist}/${ant.project.name}.jar"
+	       classpath=".;${junitjar};lib/javax.json.jar;${dist}/${ant.project.name}.jar"
 	       listfiles="yes"
 	       target="8"
 	       source="8"
@@ -204,7 +215,7 @@
 	    fork="true"
 	    >
       <classpath>
-	    <pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar}"/>
+	    <pathelement path=".;${dist}/${ant.project.name}.jar;lib/javax.json.jar;${junitjar}"/>
       </classpath>
       <jvmarg value="-ea"/>
       <formatter type="plain" usefile="false" />
@@ -218,7 +229,7 @@
   <target name="testql" depends="dist" description="run nzilbb.ag.ql.* unit tests">
     <javac srcdir="${src}" destdir="."
 	       includes="nzilbb/ag/ql/test/Test*.java"
-	       classpath=".;${junitjar};${dist}/${ant.project.name}.jar;lib/antlr-4.7.2-complete.jar"
+	       classpath=".;${junitjar};${dist}/${ant.project.name}.jar;lib/javax.json.jar;lib/antlr-4.7.2-complete.jar"
 	       listfiles="yes"
 	       target="8"
 	       source="8"
@@ -232,7 +243,7 @@
 	    fork="true"
 	    >
       <classpath>
-	    <pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar};lib/antlr-4.7.2-complete.jar"/>
+	    <pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar};lib/javax.json.jar;lib/antlr-4.7.2-complete.jar"/>
       </classpath>
       <jvmarg value="-ea"/>
       <formatter type="plain" usefile="false" />

@@ -23,15 +23,16 @@ package nzilbb.ag.serialize;
 
 import java.net.URL;
 import java.util.Vector;
+import javax.json.JsonObject;
 import nzilbb.ag.*;
-import org.json.JSONObject;
-import org.json.JSONArray;
+import nzilbb.util.CloneableBean;
+import nzilbb.util.ClonedProperty;
 
 /**
  * A descriptor that describes the attributes of a serializer or deserializer.
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class SerializationDescriptor {
+public class SerializationDescriptor implements CloneableBean {
    
    // Attributes:
 
@@ -47,6 +48,7 @@ public class SerializationDescriptor {
     * @return The name of the format or storage system that is used for
     * serialization/deserialization. 
     */
+   @ClonedProperty
    public String getName() { return name; }
    /**
     * Setter for {@link #name}: The name of the format or storage system that is used for
@@ -66,6 +68,7 @@ public class SerializationDescriptor {
     * Getter for {@link #mimeType}: The MIME type of the format.
     * @return The MIME type of the format.
     */
+   @ClonedProperty
    public String getMimeType() { return mimeType; }
    /**
     * Setter for {@link #mimeType}: The MIME type of the format.
@@ -84,6 +87,7 @@ public class SerializationDescriptor {
     * MIME type. 
     * @return The normal file name suffixes (extensions) of this MIME type.
     */
+   @ClonedProperty
    public Vector<String> getFileSuffixes() { return fileSuffixes; }
    /**
     * Setter for {@link #fileSuffixes}: The normal file name suffixes (extensions) of this
@@ -101,6 +105,7 @@ public class SerializationDescriptor {
     * Getter for {@link #version}: The version of the serializer/deserializer.
     * @return The version of the serializer/deserializer.
     */
+   @ClonedProperty
    public String getVersion() { return version; }
    /**
     * Setter for {@link #version}: The version of the serializer/deserializer.
@@ -119,6 +124,7 @@ public class SerializationDescriptor {
     * Getter for {@link #icon}: URL to an icon for this MIME type.
     * @return URL to an icon for this MIME type.
     */
+   @ClonedProperty
    public URL getIcon() { 
       if (icon == null) {
          // no specific icon, so return a generic one
@@ -145,6 +151,7 @@ public class SerializationDescriptor {
     * @return The (maximum) number of inputs required - e.g. the number of annotation
     * files that make up a graph.  
     */
+   @ClonedProperty
    public int getNumberOfInputs() { return numberOfInputs; }
    /**
     * Setter for {@link #numberOfInputs}: The (maximum) number of inputs required -
@@ -166,6 +173,7 @@ public class SerializationDescriptor {
     * supported by the serializer. 
     * @return Minimum version of the nzilbb.ag API supported by the serializer.
     */
+   @ClonedProperty
    public String getMinimumApiVersion() { return minimumApiVersion; }
    /**
     * Setter for {@link #minimumApiVersion}: Minimum version of the nzilbb.ag API
@@ -319,26 +327,8 @@ public class SerializationDescriptor {
     * Constructor from JSON.
     * @param json A JSON representation of the object.
     */
-   public SerializationDescriptor(JSONObject json) {
-      setName(json.optString("name"));
-      setVersion(json.optString("version"));
-      if (json.has("icon")) {
-         try {
-            setIcon(new URL(json.getString("icon")));
-         } catch(Throwable exception) {}
-      }
-      setName(json.optString("name"));
-      setMimeType(json.optString("mimeType"));
-      setMinimumApiVersion(json.optString("minimumApiVersion"));
-      if (json.has("numberOfInputs")) setNumberOfInputs(json.getInt("numberOfInputs"));
-      if (json.has("fileSuffixes")) {
-         JSONArray array = json.getJSONArray("fileSuffixes");
-         if (array != null) {
-            for (int i = 0; i < array.length(); i++) {
-               getFileSuffixes().add(array.getString(i));
-            }
-         }
-      }
+   public SerializationDescriptor(JsonObject json) {
+      fromJson(json);
    } // end of constructor
    
    /**

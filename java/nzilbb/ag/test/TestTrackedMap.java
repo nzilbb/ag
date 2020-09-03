@@ -28,8 +28,9 @@ import static org.junit.Assert.*;
 import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.LinkedHashSet;
+import javax.json.Json;
+import javax.json.JsonObject;
 import nzilbb.ag.*;
-import org.json.JSONObject;
 
 public class TestTrackedMap
 {   
@@ -265,16 +266,42 @@ public class TestTrackedMap
       assertFalse("don't copy non-tracked values", c.containsKey("notTracked"));      
    }
 
+   @Test public void fromJsonObject() 
+   {
+      JsonObject json = Json.createObjectBuilder()
+         .add("tracked1", "1")
+         .add("tracked2", "2")
+         .add("notTracked", "not")
+         .add("extra", "extra")
+         .build();
+      
+      MapTest m = (MapTest)new MapTest().fromJson(json.toString());
+      
+      assertEquals("copy cloned property",
+                   "1", m.getTracked1());
+      assertEquals("copy cloned property",
+                   "2", m.getTracked2());
+      assertNull("don't copy nonexistent cloned property",
+                 m.getTracked3());
+      assertNull("don't copy non-cloned property",
+                 m.getNotTracked());
+      assertTrue("copy non-tracked properties in map",
+                 m.containsKey("notTracked"));      
+      assertTrue("copy other values in map",
+                 m.containsKey("extra"));      
+   }
+
    @Test public void fromJson() 
    {
       Annotation a = new Annotation(
-         new JSONObject()
-         .put("id", "123")
-         .put("layer", "layer")
-         .put("startId", "value1")
-         .put("endId", "value2")
-         .put("confidence", 100)
-         .put("notTracked", "value4"));
+         Json.createObjectBuilder()
+         .add("id", "123")
+         .add("layer", "layer")
+         .add("startId", "value1")
+         .add("endId", "value2")
+         .add("confidence", 100)
+         .add("notTracked", "value4")
+         .build());
       
       assertEquals("123", a.getId());
       assertEquals("copy tracked values", "value1", a.getStartId());
@@ -283,21 +310,38 @@ public class TestTrackedMap
       assertNull("don't copy nonexistent tracked values", a.getLabel());
       assertTrue("copy non-tracked values", a.containsKey("notTracked"));      
    }
+   
+   @Test public void toJson() 
+   {
+      Annotation a = new Annotation("123", null, "layer", "value1", "value2");
+      a.put("a-tag", "yes");
+      a.put("@transient", "no");
+      assertEquals("{"
+                   // alphabetical order for bean properties
+                   +"\"endId\":\"value2\""
+                   +",\"id\":\"123\""
+                   +",\"layerId\":\"layer\""
+                   +",\"ordinal\":0" // not explicitly set
+                   +",\"startId\":\"value1\""
+                   // map entries have unpredictable order
+                   +",\"a-tag\":\"yes\"}", a.toJsonString());
+   }
 
    @Test public void fromJsonWithMapAttribute() 
    {
       // Layer has an attribute that's a map, so we need to ensure it's interpreted
       Layer l = new Layer(
-         new JSONObject()
-         .put("id", "layer")
-         .put("parentId", "parent")
-         .put("description", "Desc")
-         .put("alignment", 2)
-         .put("peers", true)
-         .put("peersOverlap", false)
-         .put("validLabels", new JSONObject()
-              .put("v1", "value1")
-              .put("v2", "value2")));
+         Json.createObjectBuilder()
+         .add("id", "layer")
+         .add("parentId", "parent")
+         .add("description", "Desc")
+         .add("alignment", 2)
+         .add("peers", true)
+         .add("peersOverlap", false)
+         .add("validLabels", Json.createObjectBuilder()
+              .add("v1", "value1")
+              .add("v2", "value2"))
+         .build());
       
       assertEquals("layer", l.getId());
       assertEquals("parent", l.getParentId());

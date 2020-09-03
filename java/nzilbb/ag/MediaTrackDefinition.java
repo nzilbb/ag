@@ -21,14 +21,15 @@
 //
 package nzilbb.ag;
 
-import org.json.JSONObject;
+import javax.json.JsonObject;
+import nzilbb.util.CloneableBean;
+import nzilbb.util.ClonedProperty;
 
 /**
  * Definition of a possible media track that a graph might be associated with.
  * @author Robert Fromont robert@fromont.net.nz
  */
-
-public class MediaTrackDefinition
+public class MediaTrackDefinition implements CloneableBean
 {
    // Attributes:
    
@@ -42,6 +43,7 @@ public class MediaTrackDefinition
     * Getter for {@link #suffix}: The file suffix associated with the track.
     * @return The file suffix associated with the track.
     */
+   @ClonedProperty
    public String getSuffix() { return suffix; }
    /**
     * Setter for {@link #suffix}: The file suffix associated with the track.
@@ -59,6 +61,7 @@ public class MediaTrackDefinition
     * Getter for {@link #description}: The description of the track.
     * @return The description of the track.
     */
+   @ClonedProperty
    public String getDescription() { return description; }
    /**
     * Setter for {@link #description}: The description of the track.
@@ -90,9 +93,8 @@ public class MediaTrackDefinition
     * Constructor from JSON.
     * @param json A JSON representation of the object.
     */
-   public MediaTrackDefinition(JSONObject json)
+   public MediaTrackDefinition(JsonObject json)
    {
-      setSuffix(json.optString("suffix"));
-      setDescription(json.optString("description"));
+      fromJson(json);
    } // end of constructor
 } // end of class MediaTrackDefinition

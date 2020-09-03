@@ -24,7 +24,9 @@ package nzilbb.ag;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import org.json.JSONObject;
+import javax.json.JsonObject;
+import nzilbb.util.CloneableBean;
+import nzilbb.util.ClonedProperty;
 
 /**
  * A single media file, which may exist or may be creatable by conversion from some other
@@ -32,7 +34,7 @@ import org.json.JSONObject;
  * @author Robert Fromont robert@fromont.net.nz
  */
 
-public class MediaFile
+public class MediaFile implements CloneableBean
 {
    // Attributes:
    
@@ -46,6 +48,7 @@ public class MediaFile
     * Getter for {@link #trackSuffix}: The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
     * @return The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
     */
+   @ClonedProperty
    public String getTrackSuffix() { return trackSuffix; }
    /**
     * Setter for {@link #trackSuffix}: The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
@@ -63,6 +66,7 @@ public class MediaFile
     * Getter for {@link #mimeType}: The MIME type of the file.
     * @return The MIME type of the file.
     */
+   @ClonedProperty
    public String getMimeType() { return mimeType; }
    /**
     * Setter for {@link #mimeType}: The MIME type of the file.
@@ -80,6 +84,7 @@ public class MediaFile
     * Getter for {@link #url}: URL to the content of the file.
     * @return URL to the content of the file.
     */
+   @ClonedProperty
    public String getUrl() { return url; }
    /**
     * Setter for {@link #url}: URL to the content of the file.
@@ -97,6 +102,7 @@ public class MediaFile
     * Getter for {@link #name}: Name of the file
     * @return Name of the file
     */
+   @ClonedProperty
    public String getName() { return name; }
    /**
     * Setter for {@link #name}: Name of the file
@@ -181,15 +187,9 @@ public class MediaFile
     * Constructor from JSON.
     * @param json A JSON representation of the object.
     */
-   public MediaFile(JSONObject json)
+   public MediaFile(JsonObject json)
    {
-      setTrackSuffix(json.optString("trackSuffix"));
-      setMimeType(json.optString("mimeType"));
-      setUrl(json.optString("url"));
-      setName(json.optString("name"));
-      setMimeType(json.optString("mimeType"));
-      setMimeType(json.optString("mimeType"));
-      setMimeType(json.optString("mimeType"));
+      fromJson(json);
    } // end of constructor
 
    /**

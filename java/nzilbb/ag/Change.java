@@ -185,7 +185,7 @@ public class Change
 	 case Update:
             try
             {
-               TrackedMap.setter(object, key).invoke(object, value);
+               object.setter(key).invoke(object, value);
             }
             catch(IllegalAccessException x) {}
             catch(InvocationTargetException x) {}
@@ -207,7 +207,7 @@ public class Change
 	 case Update:
             try
             {
-               TrackedMap.setter(object, key).invoke(object, oldValue); 
+               object.setter(key).invoke(object, oldValue); 
             }
             catch(IllegalAccessException x) {}
             catch(InvocationTargetException x) {}

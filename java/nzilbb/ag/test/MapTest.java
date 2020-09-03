@@ -25,6 +25,8 @@ package nzilbb.ag.test;
 import java.util.Set;
 import java.util.LinkedHashSet;
 import nzilbb.ag.*;
+import nzilbb.ag.TrackedProperty;
+import nzilbb.util.ClonedProperty;
 
 // subclass that defines some tracked attributes
 @SuppressWarnings("serial")
@@ -37,6 +39,7 @@ public class MapTest extends TrackedMap
    public Set<String> getTrackedAttributes() { return trackedAttributes; }
    
    protected String tracked1;
+   @TrackedProperty @ClonedProperty
    public String getTracked1() { return tracked1; }
    public void setTracked1(String newTracked1)
    {
@@ -45,6 +48,7 @@ public class MapTest extends TrackedMap
    }
    
    protected String tracked2;
+   @TrackedProperty @ClonedProperty
    public String getTracked2() { return tracked2; }
    public void setTracked2(String newTracked2)
    {
@@ -53,6 +57,7 @@ public class MapTest extends TrackedMap
    }
    
    protected String tracked3;
+   @TrackedProperty @ClonedProperty
    public String getTracked3() { return tracked3; }
    public void setTracked3(String newTracked3)
    {

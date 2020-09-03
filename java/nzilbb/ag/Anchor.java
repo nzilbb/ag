@@ -28,7 +28,8 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Vector;
-import org.json.JSONObject;
+import javax.json.JsonObject;
+import nzilbb.util.ClonedProperty;
 
 /**
  * Annotation graph anchor - a node of the graph.
@@ -59,27 +60,6 @@ public class Anchor
       return trackedAttributes;
    } // end of getTrackedAttributes()
 
-   // NB if this is updated, please also update the @return javadoc attribute on getClonedAttributes()
-   private static String[] aClonedAttributes = {"id", "offset", "confidence"};
-   /**
-    * Keys for attributes that are cloned - i.e. when an object is cloned, only these
-    * attributes are copied into the clone. 
-    * <p>LinkedHashSet is used so that attributes are iterated in the order they're
-    * defined in aClonedAttributes (which is the order shown in the documentation of
-    * {@link #getClonedAttributes()}). 
-    */
-   protected static final Set<String> clonedAttributes = new LinkedHashSet<String>(java.util.Arrays.asList(aClonedAttributes));
-
-   /**
-    * Keys for attributes that are cloned - i.e. when an object is cloned, only these
-    * attributes are copied into the clone. 
-    * @return "id", "offset", "confidence"
-    */
-   public Set<String> getClonedAttributes()
-   {
-      return clonedAttributes;
-   } // end of getClonedAttributes()
-
    // Attributes stored in HashMap:
 
    /**
@@ -90,6 +70,7 @@ public class Anchor
     * Getter for <i>offset</i>: The anchor's time/character offset.
     * @return The anchor's time/character offset.
     */
+   @ClonedProperty @TrackedProperty
    public Double getOffset() { return offset; }
    /**
     * Setter for <i>offset</i>: The anchor's time/character offset.
@@ -255,7 +236,7 @@ public class Anchor
       for (String key : keysToRemove) remove(key);
       put("startOf", getStartOf());
       put("endOf", getEndOf());
-      cloneAttributesFrom(other, "id");
+      clonePropertiesFrom(other, "id");
    } // end of constructor
 
    /**
@@ -264,7 +245,7 @@ public class Anchor
     * are stored as map values.
     * @param json JSON representation of the anchor.
     */
-   public Anchor(JSONObject json)
+   public Anchor(JsonObject json)
    {
       fromJson(json);
    } // end of constructor

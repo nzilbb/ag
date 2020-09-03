@@ -32,10 +32,11 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
+import javax.json.JsonObject;
 import nzilbb.ag.util.AnnotationComparatorByAnchor;
 import nzilbb.ag.util.AnnotationComparatorByOrdinal;
 import nzilbb.ag.util.LayerTraversal;
-import org.json.JSONObject;
+import nzilbb.util.ClonedProperty;
 
 /**
  * Annotation graph annotation - an edge of the graph.
@@ -64,24 +65,6 @@ public class Annotation
     */
    public Set<String> getTrackedAttributes() { return trackedAttributes; }
 
-   // NB if this is updated, please also update the @return javadoc attribute on getClonedAttributes()
-   private static String[] aClonedAttributes = {"id", "layerId", "label", "startId", "endId", "parentId", "ordinal", "confidence"};
-   /**
-    * Keys for attributes that are cloned - i.e. when an object is cloned, only these
-    * attributes are copied into the clone. 
-    * <p>LinkedHashSet is used so that attributes are iterated in the order they're
-    * defined in aClonedAttributes (which is the order shown in the documentation of
-    * {@link #getClonedAttributes()}). 
-    */
-   protected static final Set<String> clonedAttributes = new LinkedHashSet<String>(java.util.Arrays.asList(aClonedAttributes));
-
-   /**
-    * Keys for attributes that are cloned - i.e. when an object is cloned, only these
-    * attributes are copied into the clone. 
-    * @return "id", "layerId", "label", "startId", "endId", "parentId", "ordinal", "confidence"
-    */
-   public Set<String> getClonedAttributes() { return clonedAttributes; }
-
    // Attributes stored in HashMap:
 
    /**
@@ -92,6 +75,7 @@ public class Annotation
     * Getter for <i>label</i>: The annotation's label.
     * @return The annotation's label.
     */
+   @ClonedProperty @TrackedProperty
    public String getLabel() { return label; }
    /**
     * Setter for <i>label</i>: The annotation's label.
@@ -113,6 +97,7 @@ public class Annotation
     * Getter for <i>layerId</i>: The identifier of the annotation's layer.
     * @return The identifier of the annotation's layer.
     */
+   @ClonedProperty
    public String getLayerId() { return layerId; }
    /**
     * Setter for <i>layerId</i>: The identifier of the annotation's layer.
@@ -128,6 +113,7 @@ public class Annotation
     * Getter for <i>startId</i>: ID of the annotation's start anchor.
     * @return ID of the annotation's start anchor.
     */
+   @ClonedProperty @TrackedProperty
    public String getStartId() 
    { 
       return startId; 
@@ -188,6 +174,7 @@ public class Annotation
     * Getter for <i>endId</i>: ID of the annotation's end anchor.
     * @return ID of the annotation's end anchor.
     */
+   @ClonedProperty @TrackedProperty
    public String getEndId() 
    {
       return endId;
@@ -249,6 +236,7 @@ public class Annotation
     * Getter for <i>parentId</i>: The annotation's parent annotation ID, if any.
     * @return The annotation's parent annotation ID, if any.
     */
+   @ClonedProperty @TrackedProperty
    public String getParentId() { return parentId; }
    /**
     * Setter for <i>parentId</i>: The annotation's parent annotation ID, if any.
@@ -284,6 +272,7 @@ public class Annotation
     * children.  Ordinal is 1-based - i.e. the first child has ordinal = 1. 
     * @return The annotation's ordinal position amongst the parent's children.
     */
+   @ClonedProperty @TrackedProperty
    public int getOrdinal() 
    { 
       int ordinalToReturn = 0;
@@ -803,7 +792,7 @@ public class Annotation
     */
    public Annotation(Annotation other)
    {
-      cloneAttributesFrom(other, "id");
+      clonePropertiesFrom(other, "id");
       putAll(other);
       Vector<String> keysToRemove = new Vector<String>();
       for (String key : keySet())
@@ -823,7 +812,7 @@ public class Annotation
     * are stored as map values.
     * @param json JSON representation of the annotation.
     */
-   public Annotation(JSONObject json)
+   public Annotation(JsonObject json)
    {
       fromJson(json);
    } // end of constructor

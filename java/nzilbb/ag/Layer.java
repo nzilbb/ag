@@ -27,8 +27,9 @@ import java.util.HashSet;
 import java.util.TreeSet;
 import java.util.SortedSet;
 import java.util.Set;
+import javax.json.JsonObject;
 import nzilbb.ag.util.AnnotationComparatorByOrdinal;
-import org.json.JSONObject;
+import nzilbb.util.ClonedProperty;
 
 /**
  * Annotation graph layer.
@@ -63,24 +64,6 @@ import org.json.JSONObject;
 public class Layer
    extends TrackedMap
 {
-   // NB if this is updated, please also update the @return javadoc attribute on getClonedAttributes()
-   private static String[] aClonedAttributes = {"id", "parentId", "description", "alignment", "peers", "peersOverlap", "parentIncludes", "saturated", "type", "validLabels", "category"};
-   /**
-    * Keys for attributes that are cloned - i.e. when an object is cloned, only these attributes are copied into the clone.
-    * <p>LinkedHashSet is used so that attributes are iterated in the order they're defined in aClonedAttributes (which is the order shown in the documentation of {@link #getClonedAttributes()}).
-    */
-   protected static final Set<String> clonedAttributes = new LinkedHashSet<String>(java.util.Arrays.asList(aClonedAttributes));
-
-   /**
-    * Keys for attributes that are cloned - i.e. when an object is cloned, only these attributes
-    * are copied into the clone. 
-    * @return "id", "parentId", "description", "alignment", "peers", "peersOverlap", "parentIncludes", "saturated", "type", "validLabels", "category"
-    */
-   public Set<String> getClonedAttributes()
-   {
-      return clonedAttributes;
-   } // end of getTrackedAttributes()
-
    // Attributes stored in HashMap:
    
    /**
@@ -91,6 +74,7 @@ public class Layer
     * Getter for <i>parentId</i>: The layer's parent layer id.
     * @return The layer's parent layer id.
     */
+   @ClonedProperty
    public String getParentId() { return parentId; }
    /**
     * Setter for <i>parentId</i>: The layer's parent layer id
@@ -106,6 +90,7 @@ public class Layer
     * Getter for <i>description</i>: The description of the layer.
     * @return The description of the layer.
     */
+   @ClonedProperty @TrackedProperty
    public String getDescription() { return description; }
    /**
     * Setter for <i>description</i>: The description of the layer.
@@ -131,6 +116,7 @@ public class Layer
     * @see Constants#ALIGNMENT_INSTANT
     * @see Constants#ALIGNMENT_INTERVAL
     */
+   @ClonedProperty @TrackedProperty
    public int getAlignment() { return alignment; }
    /**
     * Setter for <i>alignment</i>: The layer's alignment - 0 for none, 1 for point alignment, 2
@@ -151,6 +137,7 @@ public class Layer
     * Getter for <i>peers</i>: Whether children on this layer have peers or not.
     * @return Whether children on this layer have peers or not.
     */
+   @ClonedProperty @TrackedProperty
    public boolean getPeers() { return peers; }
    /**
     * Setter for <i>peers</i>: Whether children on this layer have peers or not.
@@ -166,6 +153,7 @@ public class Layer
     * Getter for <i>peersOverlap</i>: Whether child peers can overlap or not.
     * @return Whether child peers can overlap or not.
     */
+   @ClonedProperty @TrackedProperty
    public boolean getPeersOverlap() { return peersOverlap; }
    /**
     * Setter for <i>peersOverlap</i>: Whether child peers can overlap or not.
@@ -181,6 +169,7 @@ public class Layer
     * Getter for <i>parentIncludes</i>: Whether the parent t-includes the child.
     * @return Whether the parent t-includes the child.
     */
+   @ClonedProperty @TrackedProperty
    public boolean getParentIncludes() { return parentIncludes; }
    /**
     * Setter for <i>parentIncludes</i>: Whether the parent t-includes the child.
@@ -199,6 +188,7 @@ public class Layer
     * @return Whether children must temporally fill the entire parent duration (true) or not
     * (false). 
     */
+   @ClonedProperty @TrackedProperty
    public boolean getSaturated() { return saturated; }
    /**
     * Setter for <i>saturated</i>: Whether children on this layer must temporally fill the
@@ -280,6 +270,7 @@ public class Layer
     *  </ul>
     * @return The type for labels on this layer.
     */
+   @ClonedProperty @TrackedProperty
    public String getType() { return type; }
    /**
     * Setter for {@link #type}: The type for labels on this layer.
@@ -301,6 +292,7 @@ public class Layer
     * @return List of valid label values for this layer, or null if the layer values are not
     * restricted. 
     */
+   @ClonedProperty @TrackedProperty
    public LinkedHashMap<String,String> getValidLabels()
    {
       if (validLabels == null) validLabels = new LinkedHashMap<String,String>();
@@ -337,6 +329,7 @@ public class Layer
     * Getter for {@link #category}: Category for the layer, if any.
     * @return Category for the layer, if any.
     */
+   @ClonedProperty @TrackedProperty
    public String getCategory() { return category; }
    /**
     * Setter for {@link #category}: Category for the layer, if any.
@@ -442,7 +435,7 @@ public class Layer
     * are stored as map values.
     * @param json JSON representation of the layer.
     */
-   public Layer(JSONObject json)
+   public Layer(JsonObject json)
    {
       fromJson(json);
    } // end of constructor

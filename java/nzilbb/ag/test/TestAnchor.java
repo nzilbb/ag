@@ -27,6 +27,8 @@ import static org.junit.Assert.*;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import javax.json.Json;
+import javax.json.JsonObject;
 import nzilbb.ag.*;
 
 public class TestAnchor 
@@ -169,6 +171,25 @@ public class TestAnchor
       assertEquals(Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC), c.getConfidence());
       assertEquals(Double.valueOf(99.0), c.getOffset());
       assertFalse(c.containsKey("foo"));     
+   }
+
+   @Test public void fromJson() 
+   {
+      JsonObject json = Json.createObjectBuilder()
+         .add("id", "123")
+         .add("offset", 99.0)
+         .add("confidence", Constants.CONFIDENCE_AUTOMATIC)
+         .add("foo", "foo") // copied
+         .add("@bar", "bar") // not copied
+         .build();
+      Anchor c = (Anchor)new Anchor().fromJson(json.toString());
+      assertEquals("123", c.getId());
+      assertEquals(Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC), c.getConfidence());
+      assertEquals(Double.valueOf(99.0), c.getOffset());
+      assertTrue("arbitrary values starting with alphanumeric are copied",
+                 c.containsKey("foo"));     
+      assertFalse("arbitrary values starting with non alphanumeric are copied",
+                  c.containsKey("@bar"));     
    }
 
    @Test public void nullInitialOffset() 
