@@ -87,7 +87,7 @@
 	fork="true"
 	>
       <classpath>
-	<pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar};${dist}/nzilbb.ag.jar"/>
+	<pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar};${dist}/nzilbb.ag.jar;lib/javax.json.jar"/>
       </classpath>
       <jvmarg value="-ea"/>
       <formatter type="plain" usefile="false" />

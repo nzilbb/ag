@@ -293,7 +293,7 @@ public class TestTrackedMap
 
    @Test public void fromJson() 
    {
-      Annotation a = new Annotation(
+      Annotation a = (Annotation)(new Annotation().fromJson(
          Json.createObjectBuilder()
          .add("id", "123")
          .add("layer", "layer")
@@ -301,7 +301,7 @@ public class TestTrackedMap
          .add("endId", "value2")
          .add("confidence", 100)
          .add("notTracked", "value4")
-         .build());
+         .build()));
       
       assertEquals("123", a.getId());
       assertEquals("copy tracked values", "value1", a.getStartId());

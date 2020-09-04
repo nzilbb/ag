@@ -807,17 +807,6 @@ public class Annotation
    } // end of constructor
 
    /**
-    * JSON constructor.
-    * <p>All attributes are copied, including those that are not bean attributes; other
-    * are stored as map values.
-    * @param json JSON representation of the annotation.
-    */
-   public Annotation(JsonObject json)
-   {
-      fromJson(json);
-   } // end of constructor
-
-   /**
     * Setter for <i>id</i>: The annotation's identifier.
     * @param id The annotation's identifier.
     */
