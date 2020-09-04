@@ -46,7 +46,6 @@ import nzilbb.util.IO;
 import nzilbb.util.ProgramDescription;
 import nzilbb.util.Switch;
 import nzilbb.webapp.StandAloneWebApp;
-import org.json.JSONObject;
 
 /**
  * Base class for collecting together common functionality of Annatotor web app
@@ -170,7 +169,7 @@ public class AnnotatorWebApp extends StandAloneWebApp {
       // add getSchema handler
       server.createContext("/getSchema", new HttpHandler() {
             public void handle(HttpExchange x) throws IOException {
-               String json = new JSONObject(annotator.getSchema()).toString();
+               String json = annotator.getSchema().toJson().toString();
                x.getResponseHeaders().add("Content-Type", "application/json");
                x.sendResponseHeaders(200, json.length());
                OutputStream os = x.getResponseBody();

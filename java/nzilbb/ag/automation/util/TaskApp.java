@@ -46,7 +46,6 @@ import nzilbb.util.IO;
 import nzilbb.util.ProgramDescription;
 import nzilbb.util.Switch;
 import nzilbb.webapp.StandAloneWebApp;
-import org.json.JSONObject;
 
 /**
  * Utility for running a stand-alone webapp for configuring the parameters of an
