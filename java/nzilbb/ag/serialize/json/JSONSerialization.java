@@ -23,6 +23,7 @@ package nzilbb.ag.serialize.json;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -37,13 +38,16 @@ import java.util.Spliterator;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.function.Consumer;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonException;
+import javax.json.JsonObject;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 import nzilbb.util.TempFileInputStream;
-import org.json.*;
 
 /**
  * Annotation Graph serializer/deserializer for JSON.
@@ -77,7 +81,7 @@ public class JSONSerialization
    
    protected Vector<String> warnings;
    private Schema schema;
-   private LinkedHashMap<String, JSONObject> jsons;
+   private LinkedHashMap<String, JsonObject> jsons;
 
    
    /**
@@ -205,12 +209,12 @@ public class JSONSerialization
       warnings = new Vector<String>();
       this.schema = schema;
 
-      jsons = new LinkedHashMap<String, JSONObject>();
+      jsons = new LinkedHashMap<String, JsonObject>();
       for (NamedStream stream : streams)
       {	 
 	 if (stream.getName().endsWith(".json") || "application/json".equals(stream.getMimeType()))
 	 {
-	    jsons.put(stream.getName(), new JSONObject(new JSONTokener(stream.getStream())));
+	    jsons.put(stream.getName(), Json.createReader(new InputStreamReader(stream.getStream())).readObject());
 	 }
       } // next stream
 
@@ -250,7 +254,7 @@ public class JSONSerialization
 
       Vector<Graph> graphs = new Vector<Graph>();
 
-      for (JSONObject o : jsons.values())
+      for (JsonObject o : jsons.values())
       {
 	 try
 	 {
@@ -275,39 +279,39 @@ public class JSONSerialization
     * @return The graph
     * @throws SerializationException On error.
     */
-   protected Graph jsonToGraph(JSONObject json)
+   protected Graph jsonToGraph(JsonObject json)
       throws SerializationException
    {
       try
       {
 	 Graph graph = new Graph();
 	 graph.setId(json.getString("id"));
-	 if (json.has("offsetGranularity"))
+	 if (json.containsKey("offsetGranularity"))
 	 {
-	    graph.setOffsetGranularity(json.getDouble("offsetGranularity"));
+	    graph.setOffsetGranularity(json.getJsonNumber("offsetGranularity").doubleValue());
 	 }
 
 	 // schema
-	 graph.setSchema(jsonToSchema(json.getJSONObject("schema")));
+	 graph.setSchema(jsonToSchema(json.getJsonObject("schema")));
 
 	 // anchors
-	 JSONObject anchors = json.getJSONObject("anchors");
+	 JsonObject anchors = json.getJsonObject("anchors");
 	 for (String anchorId : anchors.keySet())
 	 {
-	    graph.addAnchor(jsonToAnchor(anchorId, anchors.getJSONObject(anchorId)));
+	    graph.addAnchor(jsonToAnchor(anchorId, anchors.getJsonObject(anchorId)));
 	 } // next child
 	 
 	 // annotations
 	 for (String topLevelId : graph.getSchema().getRoot().getChildren().keySet())
 	 {
-	    if (json.has(topLevelId))
+	    if (json.containsKey(topLevelId))
 	    {
-	       jsonToAnnotations(graph, topLevelId, graph.getId(), json.getJSONArray(topLevelId));
+	       jsonToAnnotations(graph, topLevelId, graph.getId(), json.getJsonArray(topLevelId));
 	    }
 	 } // next top level layer
 	 return graph;
       }
-      catch (JSONException x)
+      catch (JsonException x)
       {
 	 throw new SerializationException(x);
       }
@@ -319,34 +323,34 @@ public class JSONSerialization
     * @return The schema
     * @throws SerializationException On error.
     */
-   protected Schema jsonToSchema(JSONObject json)
+   protected Schema jsonToSchema(JsonObject json)
       throws SerializationException
    {
       try
       {
 	 Schema s = new Schema();
-	 if (json.has("participantLayerId")) 
+	 if (json.containsKey("participantLayerId")) 
 	    s.setParticipantLayerId(json.getString("participantLayerId"));
-	 if (json.has("turnLayerId")) 
+	 if (json.containsKey("turnLayerId")) 
 	    s.setTurnLayerId(json.getString("turnLayerId"));
-	 if (json.has("utteranceLayerId")) 
+	 if (json.containsKey("utteranceLayerId")) 
 	    s.setUtteranceLayerId(json.getString("utteranceLayerId"));
-	 if (json.has("wordLayerId")) 
+	 if (json.containsKey("wordLayerId")) 
 	    s.setWordLayerId(json.getString("wordLayerId"));
-	 if (json.has("episodeLayerId")) 
+	 if (json.containsKey("episodeLayerId")) 
 	    s.setEpisodeLayerId(json.getString("episodeLayerId"));
-	 if (json.has("corpusLayerId")) 
+	 if (json.containsKey("corpusLayerId")) 
 	    s.setCorpusLayerId(json.getString("corpusLayerId"));
 
-	 JSONObject root = json.getJSONObject("graph");
-	 JSONObject topLevel = root.getJSONObject("children");
+	 JsonObject root = json.getJsonObject("graph");
+	 JsonObject topLevel = root.getJsonObject("children");
 	 for (String childId : topLevel.keySet())
 	 {
-	    jsonToLayer(s, "graph", childId, topLevel.getJSONObject(childId));
+	    jsonToLayer(s, "graph", childId, topLevel.getJsonObject(childId));
 	 } // next child
 	 return s;
       }
-      catch (JSONException x)
+      catch (JsonException x)
       {
 	 throw new SerializationException(x);
       }
@@ -361,7 +365,7 @@ public class JSONSerialization
     * @return The layer
     * @throws SerializationException On error.
     */
-   protected Layer jsonToLayer(Schema s, String parentId, String layerId, JSONObject json)
+   protected Layer jsonToLayer(Schema s, String parentId, String layerId, JsonObject json)
       throws SerializationException
    {
       try
@@ -376,17 +380,17 @@ public class JSONSerialization
 	 l.setParentIncludes(json.getBoolean("parentIncludes"));
 	 l.setSaturated(json.getBoolean("saturated"));
 	 s.addLayer(l);
-	 if (json.has("children"))
+	 if (json.containsKey("children"))
 	 {
-	    JSONObject children = json.getJSONObject("children");
+	    JsonObject children = json.getJsonObject("children");
 	    for (String childId : children.keySet())
 	    {
-	       jsonToLayer(s, layerId, childId, children.getJSONObject(childId));
+	       jsonToLayer(s, layerId, childId, children.getJsonObject(childId));
 	    } // next child
 	 }
 	 return l;
       }
-      catch (JSONException x)
+      catch (JsonException x)
       {
 	 throw new SerializationException(x);
       }
@@ -399,22 +403,22 @@ public class JSONSerialization
     * @return The anchor
     * @throws SerializationException On error.
     */
-   protected Anchor jsonToAnchor(String anchorId, JSONObject json)
+   protected Anchor jsonToAnchor(String anchorId, JsonObject json)
       throws SerializationException
    {
       try
       {
 	 Anchor a = new Anchor();
 	 a.setId(anchorId);
-	 if (json.has("offset") && !json.isNull("offset")) 
-	    a.setOffset(json.getDouble("offset"));
-	 if (json.has("confidence")) 
+	 if (json.containsKey("offset") && !json.isNull("offset")) 
+	    a.setOffset(json.getJsonNumber("offset").doubleValue());
+	 if (json.containsKey("confidence")) 
 	    a.setConfidence(json.getInt("confidence"));
-	 if (json.has(Constants.COMMENT)) 
+	 if (json.containsKey(Constants.COMMENT)) 
 	    a.put(Constants.COMMENT, json.getString(Constants.COMMENT));
 	 return a;
       }
-      catch (JSONException x)
+      catch (JsonException x)
       {
 	 throw new SerializationException(x);
       }
@@ -428,17 +432,17 @@ public class JSONSerialization
     * @param json JSON array
     * @throws SerializationException On error.
     */
-   protected void jsonToAnnotations(Graph graph, String layerId, String parentId, JSONArray json)
+   protected void jsonToAnnotations(Graph graph, String layerId, String parentId, JsonArray json)
       throws SerializationException
    {
       try
       {
-	 for (int i = 0; i < json.length(); i++)
+	 for (int i = 0; i < json.size(); i++)
 	 {
-	    jsonToAnnotation(graph, layerId, parentId, i+1, json.getJSONObject(i));
+	    jsonToAnnotation(graph, layerId, parentId, i+1, json.getJsonObject(i));
 	 } // next annotation
       }
-      catch (JSONException x)
+      catch (JsonException x)
       {
 	 throw new SerializationException(x);
       }
@@ -453,7 +457,7 @@ public class JSONSerialization
     * @return The anchor
     * @throws SerializationException On error.
     */
-   protected Annotation jsonToAnnotation(Graph graph, String layerId, String parentId, int ordinal, JSONObject json)
+   protected Annotation jsonToAnnotation(Graph graph, String layerId, String parentId, int ordinal, JsonObject json)
       throws SerializationException
    {
       try
@@ -462,31 +466,31 @@ public class JSONSerialization
 	 a.setLayerId(layerId);
 	 a.setParentId(parentId);
 	 a.setOrdinal(ordinal);
-	 if (json.has("id")) 
+	 if (json.containsKey("id")) 
 	    a.setId(json.getString("id"));
-	 if (json.has("label")) 
+	 if (json.containsKey("label")) 
 	    a.setLabel(json.getString("label"));
-	 if (json.has("startId")) 
+	 if (json.containsKey("startId")) 
 	    a.setStartId(json.getString("startId"));
-	 if (json.has("endId")) 
+	 if (json.containsKey("endId")) 
 	    a.setEndId(json.getString("endId"));
-	 if (json.has("confidence")) 
+	 if (json.containsKey("confidence")) 
 	    a.setConfidence(json.getInt("confidence"));
-	 if (json.has(Constants.COMMENT)) 
+	 if (json.containsKey(Constants.COMMENT)) 
 	    a.put(Constants.COMMENT, json.getString(Constants.COMMENT));
 	 graph.addAnnotation(a);
 
 	 // children
 	 for (String childLayerId : graph.getLayer(layerId).getChildren().keySet())
 	 {
-	    if (json.has(childLayerId))
+	    if (json.containsKey(childLayerId))
 	    {
-	       jsonToAnnotations(graph, childLayerId, a.getId(), json.getJSONArray(childLayerId));
+	       jsonToAnnotations(graph, childLayerId, a.getId(), json.getJsonArray(childLayerId));
 	    }
 	 } // next top level layer
 	 return a;
       }
-      catch (JSONException x)
+      catch (JsonException x)
       {
 	 throw new SerializationException(x);
       }

@@ -25,10 +25,10 @@
                     "pos":{"description":"Part of speec", "alignment":0,
                       "peers":false, "peersOverlap":false, "parentIncludes":true, "saturated":true},
                     "phone":{"description":"Phones", "alignment":2,
-                      "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true},
+                      "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true}
                   }},
                 "utterance":{"description":"Utterances", "alignment":2,
-                  "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true},
+                  "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true}
               }}
           }}
       }}
