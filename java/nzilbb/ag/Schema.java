@@ -26,25 +26,15 @@ import java.util.LinkedHashMap;
 import java.util.Vector;
 import javax.script.*;
 import nzilbb.ag.util.LayerHierarchyTraversal;
-import org.json.IJSONableBean;
+import nzilbb.util.CloneableBean;
+import nzilbb.util.ClonedProperty;
 
 /**
  * Definition of layers and their interrelations.
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class Schema implements Cloneable, IJSONableBean {
+public class Schema implements Cloneable, CloneableBean {
    // Attributes:
-
-   private static String[] jsonAttributes = {
-      "participantLayerId", "turnLayerId", "utteranceLayerId", "wordLayerId", "episodeLayerId",
-      "corpusLayerId", "root", "layers" };
-   /**
-    * IJSONableBean implementation.
-    * @return The names of fields to be obtained from the object.
-    */
-   public String[] JSONAttributes() {
-      return jsonAttributes;
-   }
 
    /**
     * The root of the layer hierarchy, representing the graph as a whole.
@@ -55,6 +45,7 @@ public class Schema implements Cloneable, IJSONableBean {
     * Getter for {@link #root}: The root of the layer hierarchy, representing the graph as a whole.
     * @return The root of the layer hierarchy, representing the graph as a whole.
     */
+   @ClonedProperty
    public Layer getRoot() { return root; }
    
    /**
@@ -67,6 +58,7 @@ public class Schema implements Cloneable, IJSONableBean {
     * Getter for {@link #layers}: Layers, indexed by ID.
     * @return Layers, indexed by ID.
     */
+   @ClonedProperty
    public LinkedHashMap<String,Layer> getLayers() { return layers; }
    /**
     * Setter for {@link #layers}: Layers, indexed by ID.
@@ -85,6 +77,7 @@ public class Schema implements Cloneable, IJSONableBean {
     * Getter for {@link #participantLayerId}: ID of the layer that contains participants.
     * @return ID of the layer that contains participants.
     */
+   @ClonedProperty
    public String getParticipantLayerId() { return participantLayerId; }
    /**
     * Setter for {@link #participantLayerId}: ID of the layer that contains participants.
@@ -103,6 +96,7 @@ public class Schema implements Cloneable, IJSONableBean {
     * Getter for {@link #turnLayerId}: ID of the layer that contains speaker turns.
     * @return ID of the layer that contains speaker turns.
     */
+   @ClonedProperty
    public String getTurnLayerId() { return turnLayerId; }
    /**
     * Setter for {@link #turnLayerId}: ID of the layer that contains speaker turns.
@@ -121,6 +115,7 @@ public class Schema implements Cloneable, IJSONableBean {
     * Getter for {@link #utteranceLayerId}: ID of the layer that contains speaker utterances.
     * @return ID of the layer that contains speaker utterances.
     */
+   @ClonedProperty
    public String getUtteranceLayerId() { return utteranceLayerId; }
    /**
     * Setter for {@link #utteranceLayerId}: ID of the layer that contains speaker utterances.
@@ -139,6 +134,7 @@ public class Schema implements Cloneable, IJSONableBean {
     * Getter for {@link #wordLayerId}: ID of the layer that contains individual word tokens.
     * @return ID of the layer that contains individual word tokens.
     */
+   @ClonedProperty
    public String getWordLayerId() { return wordLayerId; }
    /**
     * Setter for {@link #wordLayerId}: ID of the layer that contains individual word tokens.
@@ -158,6 +154,7 @@ public class Schema implements Cloneable, IJSONableBean {
     * episode name, if any. 
     * @return ID of the layer that tags the graph with its episode name, if any.
     */
+   @ClonedProperty
    public String getEpisodeLayerId() { return episodeLayerId; }
    /**
     * Setter for {@link #episodeLayerId}: ID of the layer that tags the graph with its
@@ -178,6 +175,7 @@ public class Schema implements Cloneable, IJSONableBean {
     * corpus name, if any. 
     * @return ID of the layer that tags the graph with its corpus name, if any.
     */
+   @ClonedProperty
    public String getCorpusLayerId() { return corpusLayerId; }
    /**
     * Setter for {@link #corpusLayerId}: ID of the layer that tags the graph with its
