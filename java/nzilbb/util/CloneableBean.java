@@ -105,12 +105,25 @@ public interface CloneableBean {
                      json.add(key, (boolean)value);
                   } else if (parameterClass.equals(URL.class)) {
                      json.add(key, value.toString());
+                  } else if (value instanceof CloneableBean) {
+                     json.add(key, ((CloneableBean)value).toJson());
                   } else if (value instanceof List) {
                      JsonArrayBuilder list = Json.createArrayBuilder();
                      for (Object e : (List)value) {
                         list.add(e.toString());
                      }
                      json.add(key, list);
+                  } else if (value instanceof Map) {
+                     JsonObjectBuilder map = Json.createObjectBuilder();
+                     for (Object k : ((Map)value).keySet()) {
+                        Object v = ((Map)value).get(k);
+                        if (v instanceof CloneableBean) {
+                           map.add(k.toString(), ((CloneableBean)v).toJson());
+                        } else {
+                           map.add(k.toString(), v.toString());
+                        }
+                     }
+                     json.add(key, map);
                   }
                   // ignore any other types
                } // value isn't null
