@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,6 +44,15 @@ import java.util.Vector;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonException;
+import javax.json.JsonWriter;
+import javax.json.JsonWriterFactory;
+import javax.json.stream.JsonGenerator;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
@@ -56,7 +66,6 @@ import nzilbb.configure.ParameterField;
 import nzilbb.configure.ParameterSet;
 import nzilbb.util.IO;
 import nzilbb.util.TempFileInputStream;
-import org.json.*;
 
 /**
  * Serializer that produces JSON-encoded 'bundles' for consumption by the EMU-webapp.
@@ -341,18 +350,18 @@ public class BundleSerialization
     * @see #getJsonBundles()
     * @see #setJsonBundles(LinkedHashMap)
     */
-   protected LinkedHashMap<String,JSONObject> jsonBundles;
+   protected LinkedHashMap<String,JsonObject> jsonBundles;
    /**
     * Getter for {@link #jsonBundles}.
     * @return A list of JSON bundles to deserialize.
     */
-   public LinkedHashMap<String,JSONObject> getJsonBundles() { return jsonBundles; }
+   public LinkedHashMap<String,JsonObject> getJsonBundles() { return jsonBundles; }
    /**
     * Setter for {@link #jsonBundles}.
     * @param jsonBundles A list of JSON bundles to deserialize.
     * @return <var>this</var>.
     */
-   public BundleSerialization setJsonBundles(LinkedHashMap<String,JSONObject> jsonBundles)
+   public BundleSerialization setJsonBundles(LinkedHashMap<String,JsonObject> jsonBundles)
    { this.jsonBundles = jsonBundles; return this; }
   
    /**
@@ -447,8 +456,8 @@ public class BundleSerialization
                              boolean useLargeTextInputField, boolean saveBundle,
                              boolean showHierarchy)
    {
-      HashMap<String,JSONObject> levelsToAdd = new HashMap<String,JSONObject>();
-      HashMap<String,JSONArray> attributeDefinitions = new HashMap<String,JSONArray>();
+      HashMap<String,JsonObjectBuilder> levelsToAdd = new HashMap<String,JsonObjectBuilder>();
+      HashMap<String,JsonArrayBuilder> attributeDefinitions = new HashMap<String,JsonArrayBuilder>();
       Comparator<Layer> shallowToDeep = new Comparator<Layer>() {
             // comparator orders layers by 'depth', shallowest first
             // e.g. utterance at the top, then transcript, then segment
@@ -494,7 +503,7 @@ public class BundleSerialization
       } // next selected layer
     
       TreeSet<Layer> canvasOrder = new TreeSet<Layer>(shallowToDeep);
-      JSONArray linkDefinitions = new JSONArray();
+      JsonArrayBuilder linkDefinitions = Json.createArrayBuilder();
       for (Layer layer : layersShallowToDeep)
       {
          Layer alignedLayer = null; // corresponds to a SEGMENT layer
@@ -520,14 +529,14 @@ public class BundleSerialization
          if (!levelsToAdd.containsKey(alignedLayer.getId()))
          { // define segment level
             // TODO include 'legalLabels' if any - array of strings
-            attributeDefinitions.put(alignedLayer.getId(), new JSONArray()
-                                     .put(new JSONObject()
-                                          .put("name", alignedLayer.getId())
+            attributeDefinitions.put(alignedLayer.getId(), Json.createArrayBuilder()
+                                     .add(Json.createObjectBuilder()
+                                          .add("name", alignedLayer.getId())
                                           // as at 2019-06-10, the only supported type:
-                                          .put("type", "STRING")));
-            levelsToAdd.put(alignedLayer.getId(), new JSONObject()
-                            .put("name", alignedLayer.getId())
-                            .put("type", "SEGMENT"));
+                                          .add("type", "STRING")));
+            levelsToAdd.put(alignedLayer.getId(), Json.createObjectBuilder()
+                            .add("name", alignedLayer.getId())
+                            .add("type", "SEGMENT"));
             canvasOrder.add(alignedLayer);
 
             if (getOneToManyRelationships())
@@ -543,13 +552,13 @@ public class BundleSerialization
                { // there's an aligned peer layer
             
                   // make the peer an item - e.g. utterance is ITEM of word
-                  levelsToAdd.get(alignedPeer.get().getId()).put("type", "ITEM");
+                  levelsToAdd.get(alignedPeer.get().getId()).add("type", "ITEM");
                   canvasOrder.remove(alignedPeer.get());
                   // and we add a link between them
-                  linkDefinitions.put(new JSONObject()
-                                      .put("type", "ONE_TO_MANY")
-                                      .put("superlevelName", alignedPeer.get().getId())
-                                      .put("sublevelName", alignedLayer.getId()));
+                  linkDefinitions.add(Json.createObjectBuilder()
+                                      .add("type", "ONE_TO_MANY")
+                                      .add("superlevelName", alignedPeer.get().getId())
+                                      .add("sublevelName", alignedLayer.getId()));
                }
                // if we're also exporting the parent
                else if (levelsToAdd.containsKey(alignedLayer.getParentId())
@@ -559,13 +568,13 @@ public class BundleSerialization
                         && alignedLayer.getSaturated()
                   )
                { // the parent is actually an "ITEM" layer, not a "SEGMENT" layer
-                  levelsToAdd.get(alignedLayer.getParentId()).put("type", "ITEM");
+                  levelsToAdd.get(alignedLayer.getParentId()).add("type", "ITEM");
                   canvasOrder.remove(alignedLayer.getParent());
                   // and we add a link between them
-                  linkDefinitions.put(new JSONObject()
-                                      .put("type", "ONE_TO_MANY")
-                                      .put("superlevelName", alignedLayer.getParentId())
-                                      .put("sublevelName", alignedLayer.getId()));
+                  linkDefinitions.add(Json.createObjectBuilder()
+                                      .add("type", "ONE_TO_MANY")
+                                      .add("superlevelName", alignedLayer.getParentId())
+                                      .add("sublevelName", alignedLayer.getId()));
                }
             } // oneToManyRelationships
          } // define segment level
@@ -573,71 +582,79 @@ public class BundleSerialization
          { // need to define an attribute
             // TODO include 'legal labels' if any
             attributeDefinitions.get(alignedLayer.getId())
-               .put(new JSONObject()
-                    .put("name", tagLayer.getId())
+               .add(Json.createObjectBuilder()
+                    .add("name", tagLayer.getId())
                     // as at 2019-06-10, the only supported type:
-                    .put("type", "STRING"));
+                    .add("type", "STRING"));
          }
       } // next layer
 
       // add level definitions into the data
-      JSONArray levelDefinitions = new JSONArray();
+      JsonArrayBuilder levelDefinitions = Json.createArrayBuilder();
       for (String id : levelsToAdd.keySet())
       {
-         JSONObject level = levelsToAdd.get(id);
-         level.put("attributeDefinitions", attributeDefinitions.get(id));
-         levelDefinitions.put(level);
+         JsonObjectBuilder level = levelsToAdd.get(id);
+         level.add("attributeDefinitions", attributeDefinitions.get(id));
+         levelDefinitions.add(level);
       } // next level to add
 
       // now we've got all the levels, order them shallowest to deepest
-      JSONArray levelCanvasesOrder = new JSONArray();
+      JsonArrayBuilder levelCanvasesOrder = Json.createArrayBuilder();
       for (Layer layer : canvasOrder)
       {
-         levelCanvasesOrder.put(layer.getId());
+         levelCanvasesOrder.add(layer.getId());
       }
     
-      JSONObject data = new JSONObject()
-         .put("name", name)
-         .put("UUID", uuid)
-         .put("mediafileExtension", "wav")
-         .put("ssffTrackDefinitions", new JSONArray()
-              .put(new JSONObject()
-                   .put("name", "FORMANTS")
-                   .put("columnName", "fm")
-                   .put("fileExtension", "fms"))) 
-         .put("levelDefinitions", levelDefinitions)
-         .put("linkDefinitions", linkDefinitions)
-         .put("EMUwebAppConfig", new JSONObject()
-              .put("perspectives", new JSONArray()
-                   .put(new JSONObject()
-                        .put("name", "default")
-                        .put("signalCanvases", new JSONObject()
-                             .put("order", new JSONArray()
-                                  .put("OSCI")
-                                  .put("SPEC"))
-                             .put("assign", new JSONArray()
-                                  .put(new JSONObject()
-                                       .put("signalCanvasName", "SPEC")
-                                       .put("ssffTrackName", "FORMANTS")))
-                             .put("contourLims", new JSONArray()
-                                  .put(new JSONObject()
-                                       .put("ssffTrackName", "FORMANTS")
-                                       .put("minContourIdx", 0)
-                                       .put("maxContourIdx", 1))))
-                        .put("levelCanvases", new JSONObject()
-                             .put("order", levelCanvasesOrder))
-                        .put("twoDimCanvases", new JSONObject()
-                             .put("order", new JSONArray()))))
-              .put("restrictions", new JSONObject()            
-                   .put("showPerspectivesSidebar", showPerspectivesSidebar)
-                   .put("playback", playback)
-                   .put("correctionTool", correctionTool)
-                   .put("editItemSize", editItemSize)
-                   .put("useLargeTextInputField", useLargeTextInputField))
-              .put("activeButtons", new JSONObject()
-                   .put("saveBundle", saveBundle)
-                   .put("showHierarchy", showHierarchy)));
-      return data.toString(jsonIndentFactor);
+      JsonObjectBuilder data = Json.createObjectBuilder()
+         .add("name", name)
+         .add("UUID", uuid)
+         .add("mediafileExtension", "wav")
+         .add("ssffTrackDefinitions", Json.createArrayBuilder()
+              .add(Json.createObjectBuilder()
+                   .add("name", "FORMANTS")
+                   .add("columnName", "fm")
+                   .add("fileExtension", "fms"))) 
+         .add("levelDefinitions", levelDefinitions)
+         .add("linkDefinitions", linkDefinitions)
+         .add("EMUwebAppConfig", Json.createObjectBuilder()
+              .add("perspectives", Json.createArrayBuilder()
+                   .add(Json.createObjectBuilder()
+                        .add("name", "default")
+                        .add("signalCanvases", Json.createObjectBuilder()
+                             .add("order", Json.createArrayBuilder()
+                                  .add("OSCI")
+                                  .add("SPEC"))
+                             .add("assign", Json.createArrayBuilder()
+                                  .add(Json.createObjectBuilder()
+                                       .add("signalCanvasName", "SPEC")
+                                       .add("ssffTrackName", "FORMANTS")))
+                             .add("contourLims", Json.createArrayBuilder()
+                                  .add(Json.createObjectBuilder()
+                                       .add("ssffTrackName", "FORMANTS")
+                                       .add("minContourIdx", 0)
+                                       .add("maxContourIdx", 1))))
+                        .add("levelCanvases", Json.createObjectBuilder()
+                             .add("order", levelCanvasesOrder))
+                        .add("twoDimCanvases", Json.createObjectBuilder()
+                             .add("order", Json.createArrayBuilder()))))
+              .add("restrictions", Json.createObjectBuilder()            
+                   .add("showPerspectivesSidebar", showPerspectivesSidebar)
+                   .add("playback", playback)
+                   .add("correctionTool", correctionTool)
+                   .add("editItemSize", editItemSize)
+                   .add("useLargeTextInputField", useLargeTextInputField))
+              .add("activeButtons", Json.createObjectBuilder()
+                   .add("saveBundle", saveBundle)
+                   .add("showHierarchy", showHierarchy)));
+      JsonWriterFactory writerFactory = Json.createWriterFactory(
+         new HashMap<String,Boolean>() {{ if (jsonIndentFactor > 0) {
+                  put(JsonGenerator.PRETTY_PRINTING, Boolean.TRUE);
+               }}});
+      StringWriter buffer = new StringWriter();
+      JsonWriter writer = writerFactory.createWriter(buffer);
+      writer.writeObject(data.build());
+      writer.close();
+      return buffer.toString();
    } // end of getDbConfig()
   
    /**
@@ -654,7 +671,7 @@ public class BundleSerialization
       // offset times by how far through the graph is
       final double graphOffset = graph.getStart().getOffset();
       final TreeSet<String> tagLayersWithMultipleValues = new TreeSet<String>();
-      final JSONArray links = new JSONArray();
+      final JsonArrayBuilder links = Json.createArrayBuilder();
 
       final Schema schema = graph.getSchema();
 
@@ -722,8 +739,14 @@ public class BundleSerialization
       }
     
       // traverse the graph depth first
-      LayerTraversal<HashMap<String,JSONObject>> traversal
-         = new LayerTraversal<HashMap<String,JSONObject>>(new HashMap<String,JSONObject>(), graph) {
+
+      // need to make several passes because Json...Builders are immutable...
+
+      // first, create labels collections ...
+      
+      final HashMap<String,Long> endSamplesByLayer = new HashMap<String,Long>();
+      LayerTraversal<HashMap<String,JsonObjectBuilder>> traversal
+         = new LayerTraversal<HashMap<String,JsonObjectBuilder>>(new HashMap<String,JsonObjectBuilder>(), graph) {
                int itemId = 0;
                protected void pre(Annotation annotation)
                {
@@ -737,23 +760,13 @@ public class BundleSerialization
                         case Constants.ALIGNMENT_INSTANT: // TODO
                         { // aligned layers are SEGMENT levels
                            boolean isItem = layer.containsKey("@hasItems");
-                           // is the level already defined?
-                           if (!result.containsKey(layer.getId()))
-                           { // define the level
-                              result.put(layer.getId(), new JSONObject()
-                                         .put("name", layer.getId())
-                                         // TODO if ONE_TO_MANY, then the parent will be type:ITEM
-                                         .put("type", isItem?"ITEM":"SEGMENT")
-                                         .put("items", new JSONArray()));
-                           }
-                           JSONArray items = result.get(layer.getId()).getJSONArray("items");
-                           JSONArray labels = new JSONArray()
-                              .put(new JSONObject()
-                                   .put("name", layer.getId())
-                                   .put("value", annotation.getLabel()));
-                           JSONObject item = new JSONObject()
-                              .put("id", itemId++)
-                              .put("labels", labels);
+                           JsonArrayBuilder labels = Json.createArrayBuilder()
+                              .add(Json.createObjectBuilder()
+                                   .add("name", layer.getId())
+                                   .add("value", annotation.getLabel()));
+                           int thisItemId = itemId++;
+                           JsonObjectBuilder item = Json.createObjectBuilder()
+                              .add("id", thisItemId);
                            if (!isItem)
                            { // SEGMENT
                               assert annotation.getStart() != null
@@ -772,50 +785,44 @@ public class BundleSerialization
                               // so insert blank labels before pauses
                               double startOffset = annotation.getStart().getOffset() - graphOffset;
                               long startOffsetSamples = Math.round(startOffset * sampleRate);
-                              if (items.length() > 0)
+                              if (endSamplesByLayer.containsKey(layer.getId()))
                               {
-                                 // get last item
-                                 JSONObject previous = (JSONObject)items.get(items.length()-1);
-                                 // and get the end time in samples
-                                 long endSamples = previous.getLong("sampleStart")
-                                    + previous.getLong("sampleDur");
+                                 // get the end time in samples
+                                 long endSamples = endSamplesByLayer.get(layer.getId());
                                  if (startOffsetSamples > endSamples)
                                  { // there is a gap
                                     // insert a blank item
-                                    JSONObject pauseItem = new JSONObject()
-                                       .put("id", itemId++)
-                                       .put("sampleStart", endSamples)
-                                       .put("sampleDur", startOffsetSamples - endSamples)
+                                    JsonObjectBuilder pauseItem = Json.createObjectBuilder()
+                                       .add("id", itemId++)
+                                       .add("sampleStart", endSamples)
+                                       .add("sampleDur", startOffsetSamples - endSamples)
                                        // no labels in pauses
-                                       .put("labels", new JSONArray());
-                                    items.put(pauseItem);
+                                       .add("labels", Json.createArrayBuilder());
+                                    annotation.put("@pauseItem", pauseItem);
                                  } // there is a gap
                               } // there is a previous annotation
                     
                               double endOffset = annotation.getEnd().getOffset() - graphOffset;
                               long endOffsetSamples = Math.round(endOffset * sampleRate);
-                              item
-                                 .put("sampleStart", startOffsetSamples)
-                                 .put("sampleDur", endOffsetSamples - startOffsetSamples);
-
+                              annotation.put("@sampleStart", startOffsetSamples);
+                              annotation.put("@sampleDur", endOffsetSamples - startOffsetSamples);
+                              endSamplesByLayer.put(layer.getId(), endOffsetSamples);
                            } // SEGMENT
                            // if the annotation has a link to another...
                            if (annotation.containsKey("@link"))
                            { // add link to parent
                               Annotation linkedAnnotation = (Annotation)annotation.get("@link");
-                              JSONObject parentItem = (JSONObject)linkedAnnotation.get("@item");
-                              if (parentItem != null)
+                              if (linkedAnnotation.containsKey("@itemId"))
                               {
-                                 links.put(new JSONObject()
-                                           .put("fromID", parentItem.getInt("id"))
-                                           .put("toID", item.getInt("id")));
+                                 links.add(Json.createObjectBuilder()
+                                           .add("fromID", (int)linkedAnnotation.get("@itemId"))
+                                           .add("toID", thisItemId));
                               }
                            }
-                           // make sure child tags can find the labels and item
+                           // make sure child tags and subsequetn traversal can find the labels and item I
                            annotation.put("@labels", labels);
                            annotation.put("@item", item);
-                           // add the item to the serialization
-                           items.put(item);
+                           annotation.put("@itemId", thisItemId);
                            break;
                         } // aligned
                         default: // Constants.ALIGNMENT_NONE:
@@ -828,10 +835,11 @@ public class BundleSerialization
                               {
                                  if (ancestor.containsKey("@labels"))
                                  { // found the nearest aligned ancestor
-                                    JSONArray labels = (JSONArray)ancestor.get("@labels");
-                                    labels.put(new JSONObject()
-                                               .put("name", layer.getId())
-                                               .put("value", annotation.getLabel()));
+                                    JsonArrayBuilder labels = (JsonArrayBuilder)ancestor.get("@labels");
+                                    labels.add(Json.createObjectBuilder()
+                                               .add("name", layer.getId())
+                                               .add("value", annotation.getLabel()));
+                                    ancestor.put("@labels", labels);
                                     break;
                                  } // found the nearest aligned ancestor
                               } // next ancestor
@@ -845,6 +853,66 @@ public class BundleSerialization
                   } // a layer below turn
                } // end of pre()
             };
+      
+      // now collate labels into items ....
+      
+      final HashMap<String,JsonArrayBuilder> itemsBuilders = new HashMap<String,JsonArrayBuilder>();
+      
+      traversal
+         = new LayerTraversal<HashMap<String,JsonObjectBuilder>>(new HashMap<String,JsonObjectBuilder>(), graph) {
+               protected void pre(Annotation annotation)
+               {
+                  Layer layer = annotation.getLayer();
+                  // only things below turn
+                  if (layer.isAncestor(schema.getTurnLayerId()))
+                  {
+                     switch (layer.getAlignment())
+                     {
+                        case Constants.ALIGNMENT_INTERVAL:
+                        case Constants.ALIGNMENT_INSTANT: // TODO
+                        { // aligned layers are SEGMENT levels
+                           boolean isItem = layer.containsKey("@hasItems");
+                           // is the level already defined?
+                           if (!result.containsKey(layer.getId()))
+                           { // define the level
+                              itemsBuilders.put(layer.getId(), Json.createArrayBuilder());
+                              result.put(layer.getId(), Json.createObjectBuilder()
+                                         .add("name", layer.getId())
+                                         // TODO if ONE_TO_MANY, then the parent will be type:ITEM
+                                         .add("type", isItem?"ITEM":"SEGMENT"));
+                           }
+                           JsonArrayBuilder items = itemsBuilders.get(layer.getId());
+                           JsonArrayBuilder labels = (JsonArrayBuilder)annotation.get("@labels");
+                           int thisItemId = (Integer)annotation.get("@itemId");
+                           JsonObjectBuilder pauseItem = (JsonObjectBuilder)annotation.get("@pauseItem");
+                           if (pauseItem != null) items = items.add(pauseItem);
+                           JsonObjectBuilder item = (JsonObjectBuilder)annotation.get("@item");
+                           // now that all labels are present, we can add them to the item
+                           item = item.add("labels", labels);
+                           if (!isItem)
+                           {
+                              item = item.add("sampleStart", (Long)annotation.get("@sampleStart"))
+                                 .add("sampleDur", (Long)annotation.get("@sampleDur"));
+                           }
+                           // add the item to the serialization
+                           items = items.add(item);
+                           itemsBuilders.put(layer.getId(), items);
+                           break;
+                        } // aligned
+                        default: // Constants.ALIGNMENT_NONE:
+                        { // unaligned layers are attributes on a parent SEGMENT level
+                           // already added
+                        } // not aligned                
+                     } // switch (layer.getAlignment())
+                  } // a layer below turn
+               } // end of pre()
+            };
+
+      for (String id : traversal.getResult().keySet())
+      {
+         traversal.getResult().put(
+            id, traversal.getResult().get(id).add("items", itemsBuilders.get(id)));
+      }
 
       if (tagLayersWithMultipleValues.size() > 0)
       {
@@ -854,20 +922,20 @@ public class BundleSerialization
                       + tagLayersWithMultipleValues);
       }
     
-      JSONArray levels = new JSONArray();
-      for (JSONObject level : traversal.getResult().values()) levels.put(level);
+      JsonArrayBuilder levels = Json.createArrayBuilder();
+      for (JsonObjectBuilder level : traversal.getResult().values()) levels.add(level);
     
-      JSONObject data = new JSONObject()
-         .put("annotation", new JSONObject()
-              .put("name", graph.getId())
-              .put("annotates", graph.sourceGraph().getLabel()
+      JsonObjectBuilder data = Json.createObjectBuilder()
+         .add("annotation", Json.createObjectBuilder()
+              .add("name", graph.getId())
+              .add("annotates", graph.sourceGraph().getLabel()
                    .replaceAll("\\.[^.]+$","")+".wav?t="+graphOffset)
-              .put("sampleRate", getSampleRate())
-              .put("levels", levels)
+              .add("sampleRate", getSampleRate())
+              .add("levels", levels)
               // TODO links define parent ITEM / child SEGMENT relationships
               // [{"fromID": 2, "toID": 102}, from is parent, to is child
-              .put("links", links))
-         .put("ssffFiles", new JSONArray());
+              .add("links", links))
+         .add("ssffFiles", Json.createArrayBuilder());
     
       if (graph.getMediaProvider() != null)
       {
@@ -884,9 +952,9 @@ public class BundleSerialization
                // TODO delete the file if the mediaUrl is a file:// URL
           
                // add it to the bundle
-               data.put("mediaFile", new JSONObject()
-                        .put("encoding", "BASE64")
-                        .put("data", base64EncodedContent));
+               data.add("mediaFile", Json.createObjectBuilder()
+                        .add("encoding", "BASE64")
+                        .add("data", base64EncodedContent));
             }
          }
          catch(Exception exception)
@@ -903,9 +971,13 @@ public class BundleSerialization
       {
          // write the bundle to a temporary file
          File f = File.createTempFile(graph.getId(), ".json");
-         FileOutputStream out = new FileOutputStream(f);	 
-         PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, "utf-8"));
-         writer.print(data.toString(jsonIndentFactor));
+         FileOutputStream out = new FileOutputStream(f);
+         JsonWriterFactory writerFactory = Json.createWriterFactory(
+            new HashMap<String,Boolean>() {{ if (jsonIndentFactor > 0) {
+                     put(JsonGenerator.PRETTY_PRINTING, Boolean.TRUE);
+                  }}});
+         JsonWriter writer = writerFactory.createWriter(new OutputStreamWriter(out, "utf-8"));
+         writer.writeObject(data.build());
          writer.close();
          TempFileInputStream in = new TempFileInputStream(f);
 
@@ -1098,16 +1170,15 @@ public class BundleSerialization
       }
 
       // parse the JSON of all streams
-      jsonBundles = new LinkedHashMap<String,JSONObject>();
+      jsonBundles = new LinkedHashMap<String,JsonObject>();
       try
       {
          for (NamedStream stream : jsonStreams)
          {
-            String json = IO.InputStreamToString(stream.getStream());
-            jsonBundles.put(stream.getName(), new JSONObject(json));
+            jsonBundles.put(stream.getName(), Json.createReader(stream.getStream()).readObject());
          } // next stream
       }
-      catch(JSONException exception)
+      catch(JsonException exception)
       {
          throw new SerializationException(
             SerializationException.ErrorType.InvalidDocument, exception.getMessage());
@@ -1144,11 +1215,11 @@ public class BundleSerialization
       {
          // Assume first stream is representative, and discover what levels/labels it has,
          // for mapping to layers
-         JSONObject firstBundle = jsonBundles.values().iterator().next();
-         JSONArray levels = firstBundle.getJSONObject("annotation").getJSONArray("levels");
-         for (int l = 0; l < levels.length(); l++)
+         JsonObject firstBundle = jsonBundles.values().iterator().next();
+         JsonArray levels = firstBundle.getJsonObject("annotation").getJsonArray("levels");
+         for (int l = 0; l < levels.size(); l++)
          {
-            JSONObject level = levels.getJSONObject(l);
+            JsonObject level = levels.getJsonObject(l);
             if (!level.getString("type").equals("SEGMENT")
                 && !level.getString("type").equals("ITEM"))
             {
@@ -1174,15 +1245,15 @@ public class BundleSerialization
             mappings.addParameter(levelParameter);
 
             // read all item labels
-            JSONArray items = level.getJSONArray("items");
-            for (int i = 0; i < items.length(); i++)
+            JsonArray items = level.getJsonArray("items");
+            for (int i = 0; i < items.size(); i++)
             {
-               JSONObject item = items.getJSONObject(i);
+               JsonObject item = items.getJsonObject(i);
                // read all labels
-               JSONArray labels = item.getJSONArray("labels");
-               for (int lb = 0; lb < labels.length(); lb++)
+               JsonArray labels = item.getJsonArray("labels");
+               for (int lb = 0; lb < labels.size(); lb++)
                {
-                  JSONObject label = labels.getJSONObject(lb);
+                  JsonObject label = labels.getJsonObject(lb);
                   String labelName = label.getString("name");
                   if (labelName.equals(levelName)) continue;
                   if (!mappings.containsKey(labelName))
@@ -1224,7 +1295,7 @@ public class BundleSerialization
          } // next level
       
       }
-      catch(JSONException exception)
+      catch(JsonException exception)
       {
          throw new SerializationException(
             SerializationException.ErrorType.InvalidDocument,
@@ -1325,13 +1396,13 @@ public class BundleSerialization
     * @throws SerializationParametersMissingException
     * @throws SerializationException
     */
-   private Graph deserializeJson(String name, JSONObject bundle)
+   private Graph deserializeJson(String name, JsonObject bundle)
       throws SerializerNotConfiguredException, SerializationParametersMissingException, SerializationException
    {
       try
       {
-         JSONObject top = bundle.getJSONObject("annotation");
-         double sampleRate = top.getDouble("sampleRate");
+         JsonObject top = bundle.getJsonObject("annotation");
+         double sampleRate = top.getJsonNumber("sampleRate").doubleValue();
          Graph graph = new Graph();
          graph.setId(top.getString("name"));
          graph.setOffsetGranularity(1/sampleRate);
@@ -1364,13 +1435,13 @@ public class BundleSerialization
       
          graph.setOffsetUnits(Constants.UNIT_SECONDS);
       
-         JSONArray levels = top.getJSONArray("levels");
+         JsonArray levels = top.getJsonArray("levels");
 
          HashMap<Integer,Annotation> idToAnnotation = new HashMap<Integer,Annotation>();
       
-         for (int l = 0; l < levels.length(); l++)
+         for (int l = 0; l < levels.size(); l++)
          {
-            JSONObject level = levels.getJSONObject(l);
+            JsonObject level = levels.getJsonObject(l);
             if (!level.getString("type").equals("SEGMENT")
                 && !level.getString("type").equals("ITEM"))
             {
@@ -1382,22 +1453,24 @@ public class BundleSerialization
             Layer levelLayer = (Layer)mappings.get("level_"+levelName).getValue();
 
             // read all item labels
-            JSONArray items = level.getJSONArray("items");
-            for (int i = 0; i < items.length(); i++)
+            JsonArray items = level.getJsonArray("items");
+            for (int i = 0; i < items.size(); i++)
             {
-               JSONObject item = items.getJSONObject(i);
+               JsonObject item = items.getJsonObject(i);
                String startId = null;
                String endId = null;
                if (level.getString("type").equals("SEGMENT"))
                {
                   // get anchors
                   Anchor start = graph.getOrCreateAnchorAt(
-                     item.getDouble("sampleStart")/sampleRate, Constants.CONFIDENCE_MANUAL);
+                     item.getJsonNumber("sampleStart").doubleValue()/sampleRate,
+                     Constants.CONFIDENCE_MANUAL);
                   startId = start.getId();
             
                   Anchor end = graph.getOrCreateAnchorAt(
                      // to avoid rounding errors, get end time in samples, then divide by sampleRate:
-                     (item.getDouble("sampleStart") + item.getDouble("sampleDur"))/sampleRate,
+                     (item.getJsonNumber("sampleStart").doubleValue()
+                      + item.getJsonNumber("sampleDur").doubleValue())/sampleRate,
                      Constants.CONFIDENCE_MANUAL);
                   endId = end.getId();
                }
@@ -1409,10 +1482,10 @@ public class BundleSerialization
                   levelAnnotation.setEndId(endId);
                }
                // read all labels
-               JSONArray labels = item.getJSONArray("labels");
-               for (int lb = 0; lb < labels.length(); lb++)
+               JsonArray labels = item.getJsonArray("labels");
+               for (int lb = 0; lb < labels.size(); lb++)
                {
-                  JSONObject label = labels.getJSONObject(lb);
+                  JsonObject label = labels.getJsonObject(lb);
                   String labelName = label.getString("name");
                   String labelValue = label.getString("value");
                   if (labelValue.length() == 0) continue;
@@ -1439,16 +1512,16 @@ public class BundleSerialization
          } // next level
 
          // now link parents to children
-         JSONArray links = top.getJSONArray("links");
+         JsonArray links = top.getJsonArray("links");
          TreeSet<Integer> unalignedItems = new TreeSet<Integer>();
          unalignedItems.add(-1);
          int loopCount = 0;
          do
          {
             unalignedItems = new TreeSet<Integer>();
-            for (int l = 0; l < links.length(); l++)
+            for (int l = 0; l < links.size(); l++)
             {
-               JSONObject link = links.getJSONObject(l);
+               JsonObject link = links.getJsonObject(l);
                Annotation parent = idToAnnotation.get(link.getInt("fromID"));
                if (parent == null)
                {
@@ -1601,7 +1674,7 @@ public class BundleSerialization
       
          return graph;
       }
-      catch(JSONException exception)
+      catch(JsonException exception)
       {
          throw new SerializationException(
             SerializationException.ErrorType.InvalidDocument,

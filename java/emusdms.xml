@@ -27,7 +27,7 @@
           description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
     <javac srcdir="${src}" destdir="${build}"
-	   classpath="${dist}/nzilbb.ag.jar"
+	   classpath="${dist}/nzilbb.ag.jar;lib/javax.json.jar"
 	   includes="${srcfiles}"
 	   excludes="${srctests}"
 	   listfiles="yes"
@@ -65,7 +65,7 @@
   <target name="test" depends="dist" description="run nzilbb.praat annotation-graph unit tests">
     <javac srcdir="${src}" destdir="."
 	   includes="${srctests}"
-	   classpath=".;${junitjar};${dist}/${ant.project.name}.jar;${dist}/nzilbb.ag.jar"
+	   classpath=".;${junitjar};${dist}/${ant.project.name}.jar;${dist}/nzilbb.ag.jar;lib/javax.json.jar"
 	   listfiles="yes"
 	   target="8"
 	   source="8"
@@ -79,7 +79,7 @@
 	fork="true"
 	>
       <classpath>
-	<pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar};${dist}/nzilbb.ag.jar;lib/javax.json.jar"/>
+	<pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar};${dist}/nzilbb.ag.jar;lib/javax.json.jar;lib/javax.json.jar"/>
       </classpath>
       <jvmarg value="-ea"/>
       <formatter type="plain" usefile="false" />
@@ -95,7 +95,7 @@
           description="document the source" >
     <mkdir dir="${javadoc}"/>
     <javadoc destdir="${javadoc}"
-	     classpath=".;${dist}/nzilbb.ag.jar"
+	     classpath=".;${dist}/nzilbb.ag.jar;lib/javax.json.jar"
 	     Author="yes"
 	     >
       <fileset dir="${src}" includes="${srcfiles}" excludes="${srctests}" />
