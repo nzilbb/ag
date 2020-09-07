@@ -27,6 +27,7 @@ import static org.junit.Assert.*;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import javax.json.JsonObject;
 import nzilbb.ag.*;
 
 public class TestLayer 
@@ -266,12 +267,13 @@ public class TestLayer
 
   @Test public void cloning() 
   {
-    Layer l = new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                        true, // peers
-                        false, // peersOverlap
-                        false, // saturated
-                        "turn", // parentId
-                        true); // parentIncludes
+     Layer l = new Layer("word", "Words")
+        .setAlignment(Constants.ALIGNMENT_INTERVAL)
+        .setPeers(true)
+        .setPeersOverlap(false)
+        .setSaturated(false)
+        .setParentId("turn")
+        .setParentIncludes(true);
     l.getValidLabels().put("bar", "bar");
     l.put("foo", "foo");
     Layer c = (Layer)l.clone();
@@ -285,6 +287,34 @@ public class TestLayer
     assertEquals(true, c.getParentIncludes());
     assertTrue(c.getValidLabels().containsKey("bar"));     
     assertFalse(c.containsKey("foo"));     
+  }
+
+  @Test public void toJson() 
+  {
+     Layer l = new Layer("word", "Words")
+        .setAlignment(Constants.ALIGNMENT_INTERVAL)
+        .setPeers(true)
+        .setPeersOverlap(false)
+        .setSaturated(false)
+        .setParentId("turn")
+        .setParentIncludes(true);
+     l.getValidLabels().put("bar", "bar");
+     l.put("foo", "foo");
+     l.put("@not", "not");
+     JsonObject j = l.toJson();
+     assertEquals("word", j.getString("id"));
+     assertEquals("Words", j.getString("description"));
+     assertEquals(Constants.ALIGNMENT_INTERVAL, j.getJsonNumber("alignment").intValue());
+     assertEquals(true, j.getBoolean("peers"));
+     assertEquals(false, j.getBoolean("peersOverlap"));
+     assertEquals(false, j.getBoolean("saturated"));
+     assertEquals("turn", j.getString("parentId"));
+     assertEquals(true, j.getBoolean("parentIncludes"));
+     assertEquals("validLabels", true, j.containsKey("validLabels"));
+     JsonObject jsonLabels = j.getJsonObject("validLabels");
+     assertTrue("validLabels value", jsonLabels.containsKey("bar"));     
+     assertTrue("cloneable entry included", j.containsKey("foo"));     
+     assertFalse("transient entry excluded", j.containsKey("@not"));     
   }
 
   public static void main(String args[]) 

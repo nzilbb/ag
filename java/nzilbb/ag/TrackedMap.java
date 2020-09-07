@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -169,6 +170,23 @@ public class TrackedMap
                   json.add(key, (Boolean)value);
                } else if (parameterClass.equals(boolean.class)) {
                   json.add(key, (boolean)value);
+               } else if (value instanceof List) {
+                  JsonArrayBuilder list = Json.createArrayBuilder();
+                  for (Object e : (List)value) {
+                     list.add(e.toString());
+                  }
+                  json.add(key, list);
+               } else if (value instanceof Map) {
+                  JsonObjectBuilder map = Json.createObjectBuilder();
+                  for (Object k : ((Map)value).keySet()) {
+                     Object v = ((Map)value).get(k);
+                     if (v instanceof CloneableBean) {
+                        map.add(k.toString(), ((CloneableBean)v).toJson());
+                     } else {
+                        map.add(k.toString(), v.toString());
+                     }
+                  }
+                  json.add(key, map);
                }
                // ignore any other types
             } // value isn't null
