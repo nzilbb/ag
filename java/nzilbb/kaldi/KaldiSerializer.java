@@ -228,7 +228,7 @@ public class KaldiSerializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Kaldi Files", "1.01", "text/x-kaldi-text", ".kaldi", "20191031.1734", getClass().getResource("icon.png"));
+	 "Kaldi Files", "1.1", "text/x-kaldi-text", ".kaldi", "20200909.1954", getClass().getResource("icon.png"));
    }
 
    /**

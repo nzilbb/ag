@@ -291,7 +291,7 @@ public class PdfSerializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "PDF Document", "0.2", "application/pdf", ".pdf", "20200710.1904",
+         "PDF Document", "0.3", "application/pdf", ".pdf", "20200909.1954",
          getClass().getResource("icon.png"));
    }
 

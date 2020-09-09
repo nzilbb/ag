@@ -82,7 +82,7 @@ public class VttSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "WebVTT subtitles", "0.3", "text/vtt", ".vtt", "20191031.1734", getClass().getResource("icon.png"));
+	 "WebVTT subtitles", "0.4", "text/vtt", ".vtt", "20200909.1954", getClass().getResource("icon.png"));
    }
 
    /**

@@ -1002,7 +1002,7 @@ public class BundleSerialization
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "EMU-SDMS Bundle", "1.2", "application/emusdms+json", ".json", "20200710.1904",
+         "EMU-SDMS Bundle", "1.3", "application/emusdms+json", ".json", "20200909.1954",
          getClass().getResource("icon.png"));
    }
   

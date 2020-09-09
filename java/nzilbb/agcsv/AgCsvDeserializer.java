@@ -130,7 +130,7 @@ public class AgCsvDeserializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "LaBB-CAT legacy CSV files", "0.2", "text/csv", ".csv", "20190906.1040", getClass().getResource(getClass().getSimpleName() + ".png"));
+	 "LaBB-CAT legacy CSV files", "0.1", "text/csv", ".csv", "20200909.1954", getClass().getResource(getClass().getSimpleName() + ".png"));
    }
 
    /**

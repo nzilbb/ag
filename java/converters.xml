@@ -6,6 +6,7 @@
   <property name="junitjar" value="/usr/share/java/junit4.jar"/>
   <property name="build" location="build_${ant.project.name}"/>
   <property name="dist"  location="../bin"/>
+  <property name="lib"  location="lib"/>
   
   <target name="all" depends="serializations,vtt-to-textgrid,trs-to-textgrid,vtt-to-eaf,trs-to-eaf,trs-to-pdf,trs-to-vtt,vtt-to-trs,eaf-to-trs">
   </target>
@@ -44,6 +45,7 @@
       <!-- icon -->
       <fileset dir="${src}" includes="nzilbb/converter/VttToTextGrid.png" />
       <!-- add required jars -->
+      <zipfileset src="${lib}/javax.json.jar" />
       <zipfileset src="${dist}/nzilbb.ag.jar" />
       <zipfileset src="${dist}/nzilbb.webvtt.jar" />
       <zipfileset src="${dist}/nzilbb.praat.jar" />      
@@ -91,6 +93,7 @@
       <!-- icon -->
       <fileset dir="${src}" includes="nzilbb/converter/TrsToTextGrid.png" />
       <!-- add required jars -->
+      <zipfileset src="${lib}/javax.json.jar" />
       <zipfileset src="${dist}/nzilbb.ag.jar" />
       <zipfileset src="${dist}/nzilbb.transcriber.jar" />
       <zipfileset src="${dist}/nzilbb.praat.jar" />      
@@ -138,6 +141,7 @@
       <!-- icon -->
       <fileset dir="${src}" includes="nzilbb/converter/TrsToEaf.png" />
       <!-- add required jars -->
+      <zipfileset src="${lib}/javax.json.jar" />
       <zipfileset src="${dist}/nzilbb.ag.jar" />
       <zipfileset src="${dist}/nzilbb.transcriber.jar" />
       <zipfileset src="${dist}/nzilbb.elan.jar" />      
@@ -185,6 +189,7 @@
       <!-- icon -->
       <fileset dir="${src}" includes="nzilbb/converter/VttToEaf.png" />
       <!-- add required jars -->
+      <zipfileset src="${lib}/javax.json.jar" />
       <zipfileset src="${dist}/nzilbb.ag.jar" />
       <zipfileset src="${dist}/nzilbb.webvtt.jar" />
       <zipfileset src="${dist}/nzilbb.elan.jar" />      
@@ -232,6 +237,7 @@
       <!-- icon -->
       <fileset dir="${src}" includes="nzilbb/converter/TrsToPdf.png" />
       <!-- add required jars -->
+      <zipfileset src="${lib}/javax.json.jar" />
       <zipfileset src="${dist}/nzilbb.ag.jar" />
       <zipfileset src="${dist}/nzilbb.transcriber.jar" />
       <zipfileset src="${dist}/nzilbb.pdf.jar" />      
@@ -279,6 +285,7 @@
       <!-- icon -->
       <fileset dir="${src}" includes="nzilbb/converter/TrsToText.png" />
       <!-- add required jars -->
+      <zipfileset src="${lib}/javax.json.jar" />
       <zipfileset src="${dist}/nzilbb.ag.jar" />
       <zipfileset src="${dist}/nzilbb.transcriber.jar" />
       <zipfileset src="${dist}/nzilbb.text.jar" />      
@@ -326,6 +333,7 @@
       <!-- icon -->
       <fileset dir="${src}" includes="nzilbb/converter/TrsToVtt.png" />
       <!-- add required jars -->
+      <zipfileset src="${lib}/javax.json.jar" />
       <zipfileset src="${dist}/nzilbb.ag.jar" />
       <zipfileset src="${dist}/nzilbb.transcriber.jar" />
       <zipfileset src="${dist}/nzilbb.webvtt.jar" />      
@@ -373,6 +381,7 @@
       <!-- icon -->
       <fileset dir="${src}" includes="nzilbb/converter/VttToTrs.png" />
       <!-- add required jars -->
+      <zipfileset src="${lib}/javax.json.jar" />
       <zipfileset src="${dist}/nzilbb.ag.jar" />
       <zipfileset src="${dist}/nzilbb.webvtt.jar" />
       <zipfileset src="${dist}/nzilbb.transcriber.jar" />      
@@ -420,6 +429,7 @@
       <!-- icon -->
       <fileset dir="${src}" includes="nzilbb/converter/EafToTrs.png" />
       <!-- add required jars -->
+      <zipfileset src="${lib}/javax.json.jar" />
       <zipfileset src="${dist}/nzilbb.ag.jar" />
       <zipfileset src="${dist}/nzilbb.elan.jar" />
       <zipfileset src="${dist}/nzilbb.transcriber.jar" />      

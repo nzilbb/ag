@@ -295,7 +295,7 @@ public class LatexSerializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "LaTeX Document", "0.1", "application/x-tex", ".tex", "20200710.1904",
+         "LaTeX Document", "0.2", "application/x-tex", ".tex", "20200909.1954",
          getClass().getResource("icon.png"));
    }
 
