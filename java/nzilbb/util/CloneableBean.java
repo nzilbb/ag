@@ -86,33 +86,33 @@ public interface CloneableBean {
                      + method.getName().substring(4);
                   Class parameterClass = method.getReturnType();
                   if (parameterClass.equals(String.class)) {
-                     json.add(key, (String)value);
+                     json = json.add(key, (String)value);
                   } else if (parameterClass.equals(Integer.class)) {
-                     json.add(key, (Integer)value);
+                     json = json.add(key, (Integer)value);
                   } else if (parameterClass.equals(int.class)) {
-                     json.add(key, (int)value);
+                     json = json.add(key, (int)value);
                   } else if (parameterClass.equals(Double.class)) {
-                     json.add(key, (Double)value);
+                     json = json.add(key, (Double)value);
                   } else if (parameterClass.equals(double.class)) {
-                     json.add(key, (Double)value);
+                     json = json.add(key, (Double)value);
                   } else if (parameterClass.equals(Long.class)) {
-                     json.add(key, (Long)value);
+                     json = json.add(key, (Long)value);
                   } else if (parameterClass.equals(long.class)) {
-                     json.add(key, (long)value);
+                     json = json.add(key, (long)value);
                   } else if (parameterClass.equals(Boolean.class)) {
-                     json.add(key, (Boolean)value);
+                     json = json.add(key, (Boolean)value);
                   } else if (parameterClass.equals(boolean.class)) {
-                     json.add(key, (boolean)value);
+                     json = json.add(key, (boolean)value);
                   } else if (parameterClass.equals(URL.class)) {
-                     json.add(key, value.toString());
+                     json = json.add(key, value.toString());
                   } else if (value instanceof CloneableBean) {
-                     json.add(key, ((CloneableBean)value).toJson());
+                     json = json.add(key, ((CloneableBean)value).toJson());
                   } else if (value instanceof List) {
                      JsonArrayBuilder list = Json.createArrayBuilder();
                      for (Object e : (List)value) {
                         list.add(e.toString());
                      }
-                     json.add(key, list);
+                     json = json.add(key, list);
                   } else if (value instanceof Map) {
                      JsonObjectBuilder map = Json.createObjectBuilder();
                      for (Object k : ((Map)value).keySet()) {
@@ -123,7 +123,7 @@ public interface CloneableBean {
                            map.add(k.toString(), v.toString());
                         }
                      }
-                     json.add(key, map);
+                     json = json.add(key, map);
                   }
                   // ignore any other types
                } // value isn't null
