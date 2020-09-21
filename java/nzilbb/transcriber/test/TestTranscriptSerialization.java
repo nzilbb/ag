@@ -150,11 +150,11 @@ public class TestTranscriptSerialization
       assertEquals(1, languages.length);
       assertEquals("en", languages[0]);
 
-      assertEquals("7", g.my("transcript_version").getLabel());
-      assertEquals("130825", g.my("transcript_version_date").getLabel());
+      assertEquals("7", g.first("transcript_version").getLabel());
+      assertEquals("130825", g.first("transcript_version_date").getLabel());
 
       // participants     
-      assertEquals(2, g.list("who").length);
+      assertEquals(2, g.all("who").length);
       assertEquals("Interviewer", g.getAnnotation("spk1").getLabel());
       assertEquals("who", g.getAnnotation("spk1").getLayerId());
       assertEquals("mop03-2b", g.getAnnotation("spk2").getLabel());
@@ -162,21 +162,21 @@ public class TestTranscriptSerialization
 
       // participant meta data
       assertEquals("Gender label is normalized",
-		   "F", g.getAnnotation("spk1").my("gender").getLabel());
+		   "F", g.getAnnotation("spk1").first("gender").getLabel());
       assertEquals("Gender label is normalized",
-		   "M", g.getAnnotation("spk2").my("gender").getLabel());
-      assertEquals("no", g.getAnnotation("spk1").my("participant_check").getLabel());
-      assertEquals("yes", g.getAnnotation("spk2").my("participant_check").getLabel());
-      assertEquals("native", g.getAnnotation("spk1").my("participant_dialect").getLabel());
-      assertEquals("native", g.getAnnotation("spk2").my("participant_dialect").getLabel());
-      assertEquals("ame", g.getAnnotation("spk1").my("participant_accent").getLabel());
-      assertEquals("nze", g.getAnnotation("spk2").my("participant_accent").getLabel());
-      assertEquals("local", g.getAnnotation("spk1").my("participant_scope").getLabel());
-      assertEquals("local", g.getAnnotation("spk2").my("participant_scope").getLabel());
+		   "M", g.getAnnotation("spk2").first("gender").getLabel());
+      assertEquals("no", g.getAnnotation("spk1").first("participant_check").getLabel());
+      assertEquals("yes", g.getAnnotation("spk2").first("participant_check").getLabel());
+      assertEquals("native", g.getAnnotation("spk1").first("participant_dialect").getLabel());
+      assertEquals("native", g.getAnnotation("spk2").first("participant_dialect").getLabel());
+      assertEquals("ame", g.getAnnotation("spk1").first("participant_accent").getLabel());
+      assertEquals("nze", g.getAnnotation("spk2").first("participant_accent").getLabel());
+      assertEquals("local", g.getAnnotation("spk1").first("participant_scope").getLabel());
+      assertEquals("local", g.getAnnotation("spk2").first("participant_scope").getLabel());
 
 
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(26, turns.length);
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals(Double.valueOf(23.563), turns[0].getEnd().getOffset());
@@ -188,7 +188,7 @@ public class TestTranscriptSerialization
       assertEquals(g.getAnnotation("spk1"), turns[24].getParent());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(140, utterances.length);
       assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       assertEquals(Double.valueOf(5.75), utterances[0].getEnd().getOffset());
@@ -200,7 +200,7 @@ public class TestTranscriptSerialization
       assertEquals("mop03-2b", utterances[1].getParent().getLabel());
 
       
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       assertEquals(Double.valueOf(0), words[0].getStart().getOffset());
       // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
       assertEquals("and", words[0].getLabel());
@@ -214,7 +214,7 @@ public class TestTranscriptSerialization
       assertEquals(Double.valueOf(5.75), words[7].getEnd().getOffset());
 
       // topic
-      Annotation[] topics = g.list("topic");
+      Annotation[] topics = g.all("topic");
       assertEquals(9, topics.length);
 
       assertEquals(Double.valueOf(0.0), topics[0].getStart().getOffset());
@@ -233,7 +233,7 @@ public class TestTranscriptSerialization
       assertEquals(g, topics[8].getParent());
 
       // noise
-      Annotation[] noises = g.list("noise");
+      Annotation[] noises = g.all("noise");
       assertEquals(4, noises.length);
 
       assertEquals(Double.valueOf(174.168), noises[0].getStart().getOffsetMin());
@@ -254,7 +254,7 @@ public class TestTranscriptSerialization
       assertEquals(g, noises[3].getParent());
 
       // comment
-      Annotation[] comments = g.list("comment");
+      Annotation[] comments = g.all("comment");
       assertEquals(6, comments.length);
 
       assertEquals(Double.valueOf(55.444), comments[0].getStart().getOffsetMin());
@@ -265,10 +265,10 @@ public class TestTranscriptSerialization
       assertEquals(g, comments[0].getParent());
 
       // TODO should test these
-      assertEquals(0, g.list("entities").length);
-      assertEquals(0, g.list("language").length);
-      assertEquals(0, g.list("lexical").length);
-      assertEquals(0, g.list("pronounce").length);
+      assertEquals(0, g.all("entities").length);
+      assertEquals(0, g.all("language").length);
+      assertEquals(0, g.all("lexical").length);
+      assertEquals(0, g.all("pronounce").length);
 
    }
 
@@ -329,14 +329,14 @@ public class TestTranscriptSerialization
       assertEquals("test.trs", g.getId());
 
       // participants     
-      assertEquals(2, g.list("who").length);
+      assertEquals(2, g.all("who").length);
       assertEquals("Interviewer", g.getAnnotation("spk1").getLabel());
       assertEquals("who", g.getAnnotation("spk1").getLayerId());
       assertEquals("mop03-2b", g.getAnnotation("spk2").getLabel());
       assertEquals("who", g.getAnnotation("spk2").getLayerId());
 
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(26, turns.length);
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals(Double.valueOf(23.563), turns[0].getEnd().getOffset());
@@ -348,7 +348,7 @@ public class TestTranscriptSerialization
       assertEquals(g.getAnnotation("spk1"), turns[24].getParent());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(140, utterances.length);
       assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       assertEquals(Double.valueOf(5.75), utterances[0].getEnd().getOffset());
@@ -359,7 +359,7 @@ public class TestTranscriptSerialization
       assertEquals(Double.valueOf(6.907), utterances[1].getEnd().getOffset());
       assertEquals("mop03-2b", utterances[1].getParent().getLabel());
       
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       assertEquals(Double.valueOf(0), words[0].getStart().getOffset());
       // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
       assertEquals("and", words[0].getLabel());
@@ -593,7 +593,7 @@ public class TestTranscriptSerialization
       graph.addAnnotation(new Annotation("ent1", "animal", "entity", "a12", "a14", "t1-3"));
 
       // add a media handler to test MEDIA_DESCRIPTOR
-      graph.setMediaProvider(new IGraphMediaProvider() {
+      graph.setMediaProvider(new GraphMediaProvider() {
             public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
             {
                MediaFile[] media = {
@@ -604,12 +604,12 @@ public class TestTranscriptSerialization
             public String getMedia(String trackSuffix, String mimeType)
                throws StoreException, PermissionException
             { return "file://test.wav"; }
-            public IGraphMediaProvider providerForGraph(Graph graph)
+            public GraphMediaProvider providerForGraph(Graph graph)
             { return this; }
          });  
 
       // add orthography tags that should not be used because orthography is not selected
-      for (Annotation word : graph.list("word"))
+      for (Annotation word : graph.all("word"))
       {
          graph.addTag(word, "orthography", word.getLabel()+"-orthography");
       }
@@ -898,7 +898,7 @@ public class TestTranscriptSerialization
       graph.addAnnotation(new Annotation("ent1", "animal", "entity", "a12", "a14"));
 
       // add a media handler to test MEDIA_DESCRIPTOR
-      graph.setMediaProvider(new IGraphMediaProvider() {
+      graph.setMediaProvider(new GraphMediaProvider() {
             public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
             {
                MediaFile[] media = {
@@ -909,12 +909,12 @@ public class TestTranscriptSerialization
             public String getMedia(String trackSuffix, String mimeType)
                throws StoreException, PermissionException
             { return "file://test.wav"; }
-            public IGraphMediaProvider providerForGraph(Graph graph)
+            public GraphMediaProvider providerForGraph(Graph graph)
             { return this; }
          });  
 
       // add orthography tags that should not be used because orthography is not selected
-      for (Annotation word : graph.list("word"))
+      for (Annotation word : graph.all("word"))
       {
          graph.addTag(word, "orthography", word.getLabel()+"-orthography");
       }
