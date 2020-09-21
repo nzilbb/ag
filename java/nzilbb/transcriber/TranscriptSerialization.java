@@ -1077,7 +1077,6 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
 		  
 		  // words
 		  Annotation lastWord = null;
-		  Vector<Annotation> endingEvents = new Vector<Annotation>();
 		  for (Word word : thisSync.getWords()) {
                      
 		     Annotation anWord
@@ -1085,7 +1084,6 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
 		     anWord.setParentId(anTurn.getId());
 		     graph.addAnnotation(anWord);
 		     if (lastWord == null) anWord.setStartId(anLine.getStartId());
-		     endingEvents.clear();
 		     lastWord = anWord;
 		     
 		     // line-start events that need a word set?
@@ -1134,18 +1132,14 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
 			      if (anEvent != null) {
 				 anEvent.setEnd(anWord.getEnd());
 				 graph.addAnnotation(anEvent);
-				 endingEvents.add(anEvent);
-
 			      }
 			   } else if (event.getExtent().equals("instantaneous")) {
 			      anEvent.setStart(anWord.getEnd());
 			      anEvent.setEnd(anWord.getEnd());
-			      endingEvents.add(anEvent);
 			      graph.addAnnotation(anEvent);
 			   } else { // wrap around the current word 
 			      anEvent.setStart(anWord.getStart());
 			      anEvent.setEnd(anWord.getEnd());
-			      endingEvents.add(anEvent);
 			      graph.addAnnotation(anEvent);
 			   }
 			}
