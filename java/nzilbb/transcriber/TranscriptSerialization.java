@@ -502,7 +502,7 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-	 "Transcriber transcript", "1.8", "text/xml-transcriber", ".trs", "20200909.1954",
+	 "Transcriber transcript", "1.81", "text/xml-transcriber", ".trs", "20200909.1954",
          getClass().getResource("icon.png"));
    }
 
@@ -1077,6 +1077,7 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
 		  
 		  // words
 		  Annotation lastWord = null;
+		  Vector<Annotation> endingEvents = new Vector<Annotation>();
 		  for (Word word : thisSync.getWords()) {
                      
 		     Annotation anWord
@@ -1084,6 +1085,7 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
 		     anWord.setParentId(anTurn.getId());
 		     graph.addAnnotation(anWord);
 		     if (lastWord == null) anWord.setStartId(anLine.getStartId());
+		     endingEvents.clear();
 		     lastWord = anWord;
 		     
 		     // line-start events that need a word set?
@@ -1132,14 +1134,18 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
 			      if (anEvent != null) {
 				 anEvent.setEnd(anWord.getEnd());
 				 graph.addAnnotation(anEvent);
+				 endingEvents.add(anEvent);
+
 			      }
 			   } else if (event.getExtent().equals("instantaneous")) {
 			      anEvent.setStart(anWord.getEnd());
 			      anEvent.setEnd(anWord.getEnd());
+			      endingEvents.add(anEvent);
 			      graph.addAnnotation(anEvent);
 			   } else { // wrap around the current word 
 			      anEvent.setStart(anWord.getStart());
 			      anEvent.setEnd(anWord.getEnd());
+			      endingEvents.add(anEvent);
 			      graph.addAnnotation(anEvent);
 			   }
 			}
@@ -1151,7 +1157,12 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
 			thisSync.getEndTimeAsDouble(), Constants.CONFIDENCE_AUTOMATIC));
 		  
 		  if (lastWord != null) {
-		     lastWord.setEnd(anLine.getEnd());
+                     Vector<Annotation> ending = new Vector<Annotation>(
+                        lastWord.getEnd().getEndingAnnotations());
+                     Vector<Annotation> starting = new Vector<Annotation>(
+                        lastWord.getEnd().getStartingAnnotations());
+                     for (Annotation a : ending) a.setEnd(anLine.getEnd());
+                     for (Annotation a : starting) a.setStart(anLine.getEnd());
 		  }
                   
 	       } // next sub-sync
