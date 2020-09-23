@@ -35,7 +35,7 @@
  * 
  * <p> Annotators may require access to the file system or a relational database in order
  * to function. In order to ensure the correct resources are made available, the class
- * that implements {@link Annotator} should also implement {@link UsesFileSystem} and/or
+ * that implements {@link Annotator} should be annotated with {@link UsesFileSystem} and/or
  * {@link UsesRelationalDatabase} as well.
  *
  * <h2 id="config"> General Installation/Configuration </h2>
