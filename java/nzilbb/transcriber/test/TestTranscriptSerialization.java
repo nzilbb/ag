@@ -234,7 +234,7 @@ public class TestTranscriptSerialization
 
       // noise
       Annotation[] noises = g.all("noise");
-      assertEquals(4, noises.length);
+      assertEquals(5, noises.length);
 
       assertEquals(Double.valueOf(174.168), noises[0].getStart().getOffsetMin());
       assertEquals(Double.valueOf(177.59), noises[0].getEnd().getOffsetMax());
@@ -248,10 +248,20 @@ public class TestTranscriptSerialization
       assertEquals("both laugh", noises[1].getLabel());
       assertEquals(g, noises[1].getParent());
 
-      assertEquals(Double.valueOf(233.727), noises[3].getStart().getOffsetMin());
-      assertEquals(Double.valueOf(236.946), noises[3].getEnd().getOffsetMax());
-      assertEquals("microphone movement noise", noises[3].getLabel());
+      assertEquals(Double.valueOf(189.464), noises[2].getStart().getOffset());
+      assertEquals(Double.valueOf(189.464), noises[2].getEnd().getOffset());
+      assertEquals("test", noises[2].getLabel());
+      assertEquals(g, noises[2].getParent());
+
+      assertEquals(Double.valueOf(223.227), noises[3].getStart().getOffset());
+      assertEquals(Double.valueOf(223.227), noises[3].getEnd().getOffset());
+      assertEquals("cough", noises[3].getLabel());
       assertEquals(g, noises[3].getParent());
+
+      assertEquals(Double.valueOf(233.727), noises[4].getStart().getOffsetMin());
+      assertEquals(Double.valueOf(236.946), noises[4].getEnd().getOffsetMax());
+      assertEquals("microphone movement noise", noises[4].getLabel());
+      assertEquals(g, noises[4].getParent());
 
       // comment
       Annotation[] comments = g.all("comment");
@@ -264,9 +274,33 @@ public class TestTranscriptSerialization
       assertEquals("--", comments[0].getEnd().startOf("word").iterator().next().getLabel());
       assertEquals(g, comments[0].getParent());
 
+      // language tags are anchored
+      Annotation[] language = g.all("language");
+      assertEquals("There are language tags " + Arrays.asList(language),
+                   2, language.length);
+      
+      assertEquals("Language tag has the right label",
+                   "es", language[0].getLabel());
+      assertEquals("Language tag has the right start offset",
+                   Double.valueOf(181.652), language[0].getStart().getOffset());
+      assertEquals("Language tag has the right end offset",
+                   Double.valueOf(183.995), language[0].getEnd().getOffset());
+      assertEquals("Language tag tags the right word",
+                   "vaya", language[0].getStart().startOf("word").iterator().next().getLabel());
+
+      assertEquals("Language tag has the right label",
+                   "es", language[1].getLabel());
+      assertEquals("Language tag has the right start offset",
+                   Double.valueOf(195.025), language[1].getStart().getOffsetMin());
+      assertEquals("Language tag has the right end offset",
+                   Double.valueOf(197.181), language[1].getEnd().getOffsetMax());
+      assertEquals("Language tag tags the right start word",
+                   "donde", language[1].getStart().startOf("word").iterator().next().getLabel());
+      assertEquals("Language tag tags the right end word",
+                   "está", language[1].getEnd().endOf("word").iterator().next().getLabel());
+
       // TODO should test these
       assertEquals(0, g.all("entities").length);
-      assertEquals(0, g.all("language").length);
       assertEquals(0, g.all("lexical").length);
       assertEquals(0, g.all("pronounce").length);
 

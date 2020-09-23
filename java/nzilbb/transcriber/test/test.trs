@@ -319,7 +319,9 @@ learned all the . disaster --
 </Turn>
 <Turn speaker="spk1" startTime="181.652" endTime="183.995">
 <Sync time="181.652"/>
-goodness
+<Event desc="es" type="language" extent="begin"/>
+vaya
+<Event desc="es" type="language" extent="end"/>
 </Turn>
 </Section>
 <Section type="report" topic="to60" startTime="183.995" endTime="197.181">
@@ -334,6 +336,7 @@ and have you got all that ?
  well the funny light hasn't gone on -
 <Sync time="188.932"/>
 again
+<Event desc="test" type="noise" extent="instantaneous"/>
 </Turn>
 <Turn speaker="spk2" startTime="189.464" endTime="191.682">
 <Sync time="189.464"/>
@@ -345,7 +348,10 @@ well I turned it over --
 <Sync time="193.65"/>
 I thought it might be something to do with
 <Sync time="195.025"/>
-where it was on the tape
+<Event desc="es" type="language" extent="begin"/>
+donde está
+<Event desc="es" type="language" extent="end"/>
+ on the tape
 </Turn>
 </Section>
 <Section type="report" topic="to56" startTime="197.181" endTime="201.775">
