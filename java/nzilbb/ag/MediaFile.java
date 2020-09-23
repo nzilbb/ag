@@ -187,7 +187,6 @@ public class MediaFile implements CloneableBean
     * Constructor from another file that it can be generated from.
     * @param file The file.
     * @param from The MediaFile it can be generated from.
-    * @param trackSuffix The suffix.
     */
    public MediaFile(File file, MediaFile from)
    {

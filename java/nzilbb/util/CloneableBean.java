@@ -296,7 +296,6 @@ public interface CloneableBean {
 
    /**
     * Access the class's getter for the given attribute.
-    * @param object
     * @param key
     * @return The getter, or null if there isn't one.
     */
@@ -311,7 +310,6 @@ public interface CloneableBean {
 
    /**
     * Access the class's setter for the given attribute.
-    * @param object
     * @param key
     * @return The setter, or null if there isn't one.
     */
