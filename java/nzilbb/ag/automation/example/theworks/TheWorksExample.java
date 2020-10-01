@@ -38,6 +38,7 @@ import nzilbb.ag.automation.ImplementsDictionaries;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
+import nzilbb.sql.ConnectionFactory;
 import nzilbb.sql.mysql.MySQLTranslator;
 import nzilbb.util.IO;
 import nzilbb.util.MonitorableTask; // for javadoc
@@ -73,19 +74,13 @@ public class TheWorksExample extends Annotator
     * <p> This is automatically called if the annotator is annotated with
     * {@link UsesRelationalDatabase}, providing the implementation with access to a
     * relational database.
-    * @param sqlTranslator SQL statement translator.
-    * @param url URL for relational database, e.g. <q>jdbc:mysql://localhost/labbcat</q>
-    * @param user Username for connecting to the database, if any.
-    * @param password Password for connecting to the database, if any.
+    * @param db Factory for making new connections to the database.
     * @throws SQLException If the annotator can't connect to the given database.
     */
-   @Override
-   public void rdbConnectionDetails(
-      MySQLTranslator sqlTranslator, String url, String user, String password)
-      throws SQLException {
+   public void rdbConnectionFactory(ConnectionFactory db) throws SQLException {
 
       // call the base class version first
-      super.rdbConnectionDetails(sqlTranslator, url, user, password);
+      super.rdbConnectionFactory(db);
       
       // check we can connect
       Connection rdb = newConnection();      
@@ -123,7 +118,7 @@ public class TheWorksExample extends Annotator
 
    /**
     * Runs any processing required to uninstall the annotator.
-    * <p> In this case, the table created in rdbConnectionDetails() is DROPped.
+    * <p> In this case, the table created in rdbConnectionFactory() is DROPped.
     */
    @Override
    public void uninstall() {
@@ -466,7 +461,7 @@ public class TheWorksExample extends Annotator
     *  <li> {@link Annotator#setSchema(Schema)} </li>
     *  <li> {@link Annotator#setTaskParameters(String)} </li>
     *  <li> {@link Annotator#setWorkingDirectory(File)} (if applicable) </li>
-    *  <li> {@link Annotator#rdbConnectionDetails(MySQLTranslator,String,String,String)}
+    *  <li> {@link Annotator#rdbConnectionFactory(MySQLTranslator,String,String,String)}
     *       (if applicable) </li>
     * </ul>
     * @return A (possibly empty) list of IDs of dictionaries.
@@ -482,7 +477,7 @@ public class TheWorksExample extends Annotator
     *  <li> {@link Annotator#setSchema(Schema)} </li>
     *  <li> {@link Annotator#setTaskParameters(String)} </li>
     *  <li> {@link Annotator#setWorkingDirectory(File)} (if applicable) </li>
-    *  <li> {@link Annotator#rdbConnectionDetails(MySQLTranslator,String,String,String)}
+    *  <li> {@link Annotator#rdbConnectionFactory(ConnectionFactory)}
     *       (if applicable) </li>
     * </ul>
     * @return The identified dictionary.

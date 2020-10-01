@@ -34,6 +34,7 @@ import java.sql.*;
 import java.util.Vector;
 import java.util.jar.JarFile;
 import nzilbb.ag.*;
+import nzilbb.sql.ConnectionFactory;
 import nzilbb.sql.mysql.MySQLTranslator;
 import nzilbb.util.IO;
 import nzilbb.util.MonitorableTask;
@@ -183,28 +184,18 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
     * dialect using <code>sqlx.apply(mySqlQuery)</code>
     */
    protected MySQLTranslator sqlx;
-   private String rdbUrl;
-   private String rdbUser;
-   private String rdbPassword;
+   private ConnectionFactory db;
    /**
     * Sets the information required for connecting to the relational database.
     * <p> This is automatically called if the annotator is annotated with
     * {@link UsesRelationalDatabase}, providing the implementation with access to a
     * relational database.
-    * @param sqlTranslator SQL statement translator.
-    * @param url URL for relational database, e.g. <q>jdbc:mysql://localhost/labbcat</q>
-    * @param user Username for connecting to the database, if any.
-    * @param password Password for connecting to the database, if any.
+    * @param db Factory for making new connections to the database.
     * @throws SQLException If the annotator can't connect to the given database.
     */
-   public void rdbConnectionDetails(
-      MySQLTranslator sqlTranslator, String url, String user, String password)
-      throws SQLException {
-      
-      sqlx = sqlTranslator;
-      rdbUrl = url;
-      rdbUser = user;
-      rdbPassword = password;
+   public void rdbConnectionFactory(ConnectionFactory db) throws SQLException {      
+      this.sqlx = db.newSQLTranslator();
+      this.db = db;
    }
    
    /**
@@ -213,7 +204,7 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
     * @throws SQLException If a database access error occurs
     */
    public Connection newConnection() throws SQLException {
-      return DriverManager.getConnection(rdbUrl, rdbUser, rdbPassword);
+      return db.newConnection();
    } // end of newConnection()
 
    /**
@@ -512,7 +503,7 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
       return cancelling;
    } // end of isCancelling()
    /**
-    * Cancels spliteration; the next call to tryAdvance will return false.
+    * Cancels the current operation, if any.
     */
    public void cancel() {
       cancelling = true;

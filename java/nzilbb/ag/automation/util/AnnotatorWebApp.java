@@ -41,7 +41,7 @@ import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.ag.automation.util.AnnotatorDescriptor;
 import nzilbb.ag.automation.util.RequestRouter;
-import nzilbb.sql.mysql.VanillaSQLTranslator;
+import nzilbb.sql.derby.DerbyConnectionFactory;
 import nzilbb.util.IO;
 import nzilbb.util.ProgramDescription;
 import nzilbb.util.Switch;
@@ -304,10 +304,7 @@ public class AnnotatorWebApp extends StandAloneWebApp {
       }
       
       if (annotator.getClass().isAnnotationPresent(UsesRelationalDatabase.class)) {
-         String rdbURL = "jdbc:derby:"
-            +workingDir.getPath().replace('\\','/')
-            +"/derby;create=true";
-         annotator.rdbConnectionDetails(new VanillaSQLTranslator(), rdbURL, null, null);
+         annotator.rdbConnectionFactory(new DerbyConnectionFactory(workingDir));
       }
       
    } // end of init()

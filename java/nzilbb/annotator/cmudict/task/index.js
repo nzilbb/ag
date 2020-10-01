@@ -4,9 +4,6 @@ getText("getVersion", function(e) {
     document.getElementById("version").innerHTML = this.responseText;
 });
 
-// show the task ID
-document.getElementById("task").innerHTML = window.location.search.substring(1);
-
 // first, get the layer schema
 var schema = null;
 getJSON("getSchema", function(e) {

@@ -32,6 +32,8 @@ import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.JarException;
 import nzilbb.ag.automation.Annotator;
+import nzilbb.util.CloneableBean;
+import nzilbb.util.ClonedProperty;
 import nzilbb.util.IO;
 
 /**
@@ -39,7 +41,7 @@ import nzilbb.util.IO;
  * provides and requires. 
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class AnnotatorDescriptor {
+public class AnnotatorDescriptor implements CloneableBean {
    
    // Attributes:
 
@@ -89,6 +91,34 @@ public class AnnotatorDescriptor {
     */
    public Annotator getInstance() { return instance; }
    
+   /**
+    * Unique name for the annotator, which is immutable across versions of the implemetantation.
+    * @return The annotator's ID.
+    */
+   @ClonedProperty
+   public String getAnnotatorId() {
+      return instance.getAnnotatorId();
+   }
+
+   /**
+    * Version of this implementation; versions will typically be numeric, but this is not
+    * a requirement.
+    * @return Annotator version.
+    */
+   @ClonedProperty
+   public String getVersion() {
+      return instance.getVersion();
+   }
+   /**
+    * Get the minimum version of the nzilbb.ag API supported by the serializer. 
+    * @return Minimum version of the nzilbb.ag API supported by the serializer.
+    * @see Constants#VERSION
+    */
+   @ClonedProperty
+   public String getMinimumApiVersion() {
+      return instance.getMinimumApiVersion();
+   }
+   
    // Methods:
    
    /**
@@ -116,8 +146,7 @@ public class AnnotatorDescriptor {
    /**
     * Constructor.
     * @param annotatorJar Java archive that contains the annotator implementation.
-    * @throws ClassNotFoundException If the annotator is not found by 
-    * <var>annotatorClassLoader</var>.
+    * @throws ClassNotFoundException If no annotator is found.
     * @throws NoSuchMethodException If the annotator has no default constructor.
     * @throws IllegalAccessException If the annotator's default constructor is not public.
     * @throws InvocationTargetException If the annotator's constructor throws an exception.
@@ -149,6 +178,7 @@ public class AnnotatorDescriptor {
     * @return The contents of the info.html file deployed with the annotator, or null if
     * no information was provided. 
     */
+   @ClonedProperty
    public String getInfo() {
       URL url = annotatorClass.getResource("info.html");
       if (url == null) return null;
@@ -169,6 +199,14 @@ public class AnnotatorDescriptor {
    } // end of hasConfigWebapp()
 
    /**
+    * Bean-getter version of {@link #hasConfigWebapp}
+    */
+   @ClonedProperty
+   public Boolean getHasConfigWebapp() {
+      return hasConfigWebapp();
+   }
+
+   /**
     * Determines whether the annotator includes a web-app for task parameter configuration.
     * @return true if the class includes a web-app at task/index.html, false otherwise.
     */
@@ -177,13 +215,29 @@ public class AnnotatorDescriptor {
    } // end of hasTaskWebapp()
 
    /**
+    * Bean-getter version of {@link #hasTaskWebapp}
+    */
+   @ClonedProperty
+   public Boolean getHasTaskWebapp() {
+      return hasTaskWebapp();
+   }
+
+   /**
     * Determines whether the annotator includes an extras web-app.
     * @return true if the class includes a web-app at ext/index.html, false otherwise.
     */
    public boolean hasExtWebapp() {
       return annotatorClass.getResource("ext/index.html") != null;
    } // end of hasTaskWebapp()
-   
+
+   /**
+    * Bean-getter version of {@link #hasExtWebapp}
+    */
+   @ClonedProperty
+   public Boolean getHasExtWebapp() {
+      return hasExtWebapp();
+   }
+
    /**
     * Provides access to the given resource, supplied by the annotator class.
     * @param path The path to the resource, relative to the annotator class.

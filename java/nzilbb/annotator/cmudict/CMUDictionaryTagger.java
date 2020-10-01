@@ -51,8 +51,10 @@ import nzilbb.ag.automation.ImplementsDictionaries;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
-import nzilbb.sql.mysql.MySQLTranslator;
+import nzilbb.sql.ConnectionFactory;
 import nzilbb.util.IO;
+
+// TODO migration from layer manager: rename database table
 
 /**
  * Annotator that tags words with their pronunciations according to the 
@@ -113,7 +115,6 @@ public class CMUDictionaryTagger extends Annotator
          log = null;
       }
    } // end of closeLog()
-
    
    /**
     * Setter for {@link #status}: The current status of the task.
@@ -136,10 +137,9 @@ public class CMUDictionaryTagger extends Annotator
     * @throws SQLException If the annotator can't connect to the given database.
     */
    @Override
-   public void rdbConnectionDetails(
-      MySQLTranslator sqlTranslator, String url, String user, String password)
+   public void rdbConnectionFactory(ConnectionFactory db)
       throws SQLException {
-      super.rdbConnectionDetails(sqlTranslator, url, user, password);
+      super.rdbConnectionFactory(db);
 
       // get DB connection
       Connection rdb = newConnection();
@@ -184,7 +184,7 @@ public class CMUDictionaryTagger extends Annotator
    
    /**
     * Runs any processing required to uninstall the annotator.
-    * <p> In this case, the table created in rdbConnectionDetails() is DROPped.
+    * <p> In this case, the table created in rdbConnectionFactory() is DROPped.
     */
    @Override
    public void uninstall() {
@@ -744,7 +744,7 @@ public class CMUDictionaryTagger extends Annotator
     *  <li> {@link Annotator#setSchema(Schema)} </li>
     *  <li> {@link Annotator#setTaskParameters(String)} </li>
     *  <li> {@link Annotator#setWorkingDirectory(File)} (if applicable) </li>
-    *  <li> {@link Annotator#rdbConnectionDetails(String,String,String)}
+    *  <li> {@link Annotator#rdbConnectionFactory(String,String,String)}
     *       (if applicable) </li>
     * </ul>
     * @return A (possibly empty) list of IDs of dictionaries.
@@ -760,7 +760,7 @@ public class CMUDictionaryTagger extends Annotator
     *  <li> {@link Annotator#setSchema(Schema)} </li>
     *  <li> {@link Annotator#setTaskParameters(String)} </li>
     *  <li> {@link Annotator#setWorkingDirectory(File)} (if applicable) </li>
-    *  <li> {@link Annotator#rdbConnectionDetails(String,String,String)}
+    *  <li> {@link Annotator#rdbConnectionFactory(ConnectionFactory)}
     *       (if applicable) </li>
     * </ul>
     * @return The identified dictionary.

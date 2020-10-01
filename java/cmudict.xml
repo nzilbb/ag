@@ -27,7 +27,7 @@
           description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
     <javac srcdir="${src}" destdir="${build}"
-	   classpath="${dist}/nzilbb.ag.jar"
+	   classpath="${dist}/nzilbb.ag.jar;lib/javax.json.jar"
 	   includes="${srcfiles}"
 	   excludes="${srctests}"
 	   listfiles="yes"
