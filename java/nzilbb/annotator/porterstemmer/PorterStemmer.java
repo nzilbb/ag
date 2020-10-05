@@ -150,7 +150,11 @@ public class PorterStemmer extends Annotator {
 
       if (parameters == null) { // apply default configuration
          
-         tokenLayerId = schema.getWordLayerId();
+         if (schema.getLayer("orthography") != null) {
+            tokenLayerId = "orthography";
+         } else {
+            tokenLayerId = schema.getWordLayerId();
+         }
          
          try {
             Layer[] candidates = schema.getMatchingLayers(

@@ -68,7 +68,11 @@
               layer => layer.id == schema.wordLayerId
                   || (layer.parentId == schema.wordLayerId && layer.alignment == 0));
           // default value:
-          tokenLayerId.value = schema.wordLayerId;
+          if (schema.layers["orthography"]) {
+              tokenLayerId.value = "orthography";
+          } else {
+              tokenLayerId.value = schema.wordLayerId;
+          }
 
           // populate the language layers...
           
@@ -93,8 +97,14 @@
           addLayerOptions(
               stemLayerId, schema,
               layer => layer.parentId == schema.wordLayerId && layer.alignment == 0);
-          stemLayerId.selectedIndex = 0;
-          
+          if (schema.layers["stem"]) {
+              tokenLayerId.value = "stem";
+          } else if (schema.layers["lemma"]) {
+              tokenLayerId.value = "lemma";
+          } else {
+              orthographyLayerId.selectedIndex = 0;
+          }
+         
           // GET request to getTaskParameters retrieves the current task parameters, if any
           getText( "getTaskParameters"+window.location.search, function(e) {
               var parameters = new URLSearchParams(this.responseText);

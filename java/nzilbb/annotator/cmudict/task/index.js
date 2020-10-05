@@ -17,7 +17,11 @@ getJSON("getSchema", function(e) {
         layer => layer.id == schema.wordLayerId
             || (layer.parentId == schema.wordLayerId && layer.alignment == 0));
     // default value:
-    tokenLayerId.value = schema.wordLayerId;
+    if (schema.layers["orthography"]) {
+        tokenLayerId.value = "orthography";
+    } else {
+        tokenLayerId.value = schema.wordLayerId;
+    }
     
     // populate the language layers...
     

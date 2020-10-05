@@ -514,7 +514,11 @@ public class CMUDictionaryTagger extends Annotator
 
       if (parameters == null) { // apply default configuration
          
-         tokenLayerId = schema.getWordLayerId();
+         if (schema.getLayer("orthography") != null) {
+            tokenLayerId = "orthography";
+         } else {
+            tokenLayerId = schema.getWordLayerId();
+         }
          firstVariantOnly = Boolean.FALSE;
          
          try {

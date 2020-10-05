@@ -1,10 +1,3 @@
-function get(path, onload) { // make a GET request of the annotator
-    var request = new XMLHttpRequest();
-    request.open("GET", path);
-    request.addEventListener("load", onload, false);
-    request.send();
-}
-
 // show annotator version
 getText("getVersion", function(e) {
     document.getElementById("version").innerHTML = this.responseText;
@@ -70,7 +63,7 @@ getJSON("getSchema", function(e) {
         orthographyLayerId, schema,
         layer => layer.parentId == schema.wordLayerId && layer.alignment == 0);
     if (schema.layers["orthography"]) {
-        tokenLayerId.value = "orthography";
+        orthographyLayerId.value = "orthography";
     } else {
         orthographyLayerId.selectedIndex = 0;
     }
@@ -92,9 +85,7 @@ getJSON("getSchema", function(e) {
 // this function detects when the user selects [add new layer]:
 function changedLayer(select) {
     if (select.value == "[add new layer]") {
-        var newLayer = prompt("Please enter the new layer ID",
-                              // default is task ID
-                              window.location.search.substring(1));
+        var newLayer = prompt("Please enter the new layer ID", "orthography");
         if (newLayer) { // they didn't cancel
             // check there's not already a layer with that name
             for (var l in schema.layers) {
