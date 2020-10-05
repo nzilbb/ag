@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title>Orthography Standardizer</title>
+    <link rel="stylesheet" href="index.css" type="text/css">
+    <script src="util.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <p> The Orthography Standardizer annotator takes tokens from the word layer and
+      'cleans up' their labels, creating tags on a new layer with standardized labels,
+      which should be optimal for looking up lexicons, frequency computation, etc. </p>
+
+    <form method="POST" action="setTaskParameters"><!-- TODO validate removalPattern -->
+      <div class="field" title="Input layer from which words come">
+        <label for="tokenLayerId">Token Layer</label>
+        <span><select id="tokenLayerId" name="tokenLayerId" required></select></span>
+      </div>
+      <div class="field" title="Regular expression for identifying characters to remove">
+        <label for="removalPattern">Removal Pattern</label>
+        <span><input id="removalPattern" name="removalPattern" type="text"
+                     onKeyUp="testRemovalPattern();"></span>
+      </div>
+      <fieldset class="test" title="You can test the removal pattern by entering text in the box below">
+        <legend> Test Removal Pattern </legend>
+        <input id="textTranscript" type="text" value="“Test—word’s? -"
+               onKeyUp="testRemovalPattern();">
+        <span id="arrow">&nbsp;</span>
+        <input id="textOrthography" type="text" disabled>
+      </fieldset>
+      <div class="field" title="Output layer on which orthography annotations are added">
+        <label for="orthographyLayerId">Orthography Layer</label>
+        <span>
+          <select id="orthographyLayerId" name="orthographyLayerId" required
+                  onChange="changedLayer(this);">
+            <option disabled>[select layer]</option> <!-- force choice the first time -->
+            <option>[add new layer]</option>         <!-- allow adding a new layer -->
+          </select>
+        </span>
+      </div>
+      <div class="controls"><input type="submit" value="Set Parameters"></div>
+    </form>
+    
+    <hr>
+    
+    <p> The Orthography Standardizer annotator takes tokens from the word layer and
+      'cleans up' their labels, creating tags on a new layer with standardized labels,
+      which should be optimal for looking up lexicons, frequency computation, etc.
+      With the default configuration: </p>
+    
+    <ol>
+      <li> the word label is converted to all lowercase, </li>
+      <li> standardizes characters sometimes produced by word-processing software -
+        e.g. em-dashes are converted to hyphens, 'smart-quote' apostrophes <tt> ’ </tt> are
+        converted to plain apostrophes <tt> ' </tt>, </li>
+      <li> removes characters identified by the <i> Removal Pattern </i> regular
+        expression, which can be customized, but by default is set to 
+        <tt> [\\p{Punct}&&[^~\\-:']] </tt> to remove all punctuation characters
+        <b> except: </b> <tt> ~ - ' : </tt> </li> 
+      <li> trailing aprostrophes and hyphens are removed (leaving word-internal ones
+        intact), and </li>
+      <li> leading/trailing whitespace is trimmed off. </li>
+    </ol>
+    
+    <p> For example: </p> 
+    
+    <table>
+      <tr><th> word   </th> <td> </td> <th> orthography </th></tr>
+      <tr><td> “Why   </td> <td>→</td> <td> why </td></tr>
+      <tr><td> hasn’t </td> <td>→</td> <td> hasn't </td></tr>
+      <tr><td> Inés   </td> <td>→</td> <td> inés </td></tr>
+      <tr><td> d~     </td> <td>→</td> <td> d~ </td></tr>
+      <tr><td> got —  </td> <td>→</td> <td> got - </td></tr>
+      <tr><td> her    </td> <td>→</td> <td> her </td></tr>
+      <tr><td> X-ray  </td> <td>→</td> <td> x-ray </td></tr>
+      <tr><td> yet?”  </td> <td>→</td> <td> yet </td></tr>
+      <tr><td> 😉  </td> <td>→</td> <td> 😉 </td></tr>
+    </table>
+
+    <footer><div> Orthography Standardizer <small id="version"></small> </div></footer>
+    <script src="index.js" type="text/javascript"></script>
+  </body>
+</html>
