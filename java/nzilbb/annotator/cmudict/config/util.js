@@ -4,8 +4,7 @@
 function get(path, onload, contentType) {
     var request = new XMLHttpRequest();
     request.open("GET", path);
-    request.setRequestHeader("Accept", "text/plain");
-    if (contentType) request.setRequestHeader("Accept", contentType);
+    request.setRequestHeader("Accept", contentType || "text/plain");
     request.addEventListener("load", onload, false);
     request.send();
 }
@@ -18,6 +17,11 @@ function getJSON(path, onload) {
 // make a GET a text string from the annotator
 function getText(path, onload) {
     get(path, onload, "text/plain");
+}
+
+// encode a function parameter
+function encode(parameter) {
+    return encodeURI(parameter).replace(",","%2C");
 }
 
 // populate a <select> element with layers for which a predicate is true
