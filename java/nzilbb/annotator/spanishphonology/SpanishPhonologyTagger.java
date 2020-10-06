@@ -257,7 +257,7 @@ public class SpanishPhonologyTagger extends Annotator {
       if (transcriptLanguageLayerId != null) {
          Annotation transcriptLanguage = graph.first(transcriptLanguageLayerId);
          if (transcriptLanguage != null) {
-            if (!transcriptLanguage.getLabel().toLowerCase().startsWith("es")) { // not Spanish
+            if (!transcriptLanguage.getLabel().startsWith("es")) { // not Spanish
                transcriptIsMainlySpanish = false;
             }
          }
@@ -284,7 +284,7 @@ public class SpanishPhonologyTagger extends Annotator {
 
          // tag the exceptions
          for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
-            if (!phrase.getLabel().toLowerCase().startsWith("es")) { // not Spanish
+            if (!phrase.getLabel().startsWith("es")) { // not Spanish
                for (Annotation token : phrase.all(tokenLayerId)) {
                   // mark the token as an exception
                   token.put("@notSpanish", Boolean.TRUE);
@@ -307,7 +307,7 @@ public class SpanishPhonologyTagger extends Annotator {
       } else if (thereArePhraseTags) {
          // process only the tokens phrase-tagged as Spanish
          for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
-            if (phrase.getLabel().toLowerCase().startsWith("es")) {
+            if (phrase.getLabel().startsWith("es")) {
                for (Annotation token : phrase.all(tokenLayerId)) {
                   // tag only tokens that are not already tagged
                   if (token.first(phonemeLayerId) == null) { // not tagged yet
@@ -323,7 +323,7 @@ public class SpanishPhonologyTagger extends Annotator {
    }
 
    /**
-    * Phoneically transcribes the given word.
+    * Phonetically transcribes the given word.
     * @param word The word to transcribe.
     * @return The phonemic transcription of the given word.
     */
