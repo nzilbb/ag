@@ -188,7 +188,7 @@ public class StandAloneWebApp extends CommandLineProgram {
       else if (name.endsWith(".jpg"))
          return "image/jpeg";
       else if (name.endsWith(".svg"))
-         return "image/svg";
+         return "image/svg+xml";
       else if (name.endsWith(".ico"))
          return "image/vnd.microsoft.icon";
       else
