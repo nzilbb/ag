@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html><head><title>Pattern Tagger</title></head>
+  <body>
+    <h1>Pattern Tagger</h1>
+
+    <p> The Pattern Tagger generates new annotations by applying regular expressions to
+      annotations on a selected layer.</p> 
+
+    <p> For example, it could be used to identify filled pauses that might be variously
+      transcribed as <q>um</q>, <q>ummm</q>, <q>ahm</q>, <q>ah</q>, <q>aah</q>, <q>er</q>,
+      <q>erm</q>, etc...</p>  
+
+    <p>To do this, you would configure an annotator task with the following regular
+      expressions applied to the <i> orthography </i> layer to create new annotations on
+      a new <i> filled pauses </i> word-tag layer: </p>
+    
+    <table style="margin: auto;">
+      <tr><th> Regular Expression </th> <td> </td> <th> Label </th></tr>        
+      <tr><td><code> [ua]+h*m+ </code></td><td>→</td><td> um </td></tr>
+      <tr><td><code> e+r*m+    </code></td><td>→</td><td> um </td></tr>
+      <tr><td><code> a+h+      </code></td><td>→</td><td> ah </td></tr>
+      <tr><td><code> e+r+      </code></td><td>→</td><td> er </td></tr>
+    </table>
+    
+    <p> The result would be that every instance of words like <q>um</q>, <q>ummm</q>,
+      <q>ahm</q>, <q>ah</q>, <q>aah</q>, <q>er</q>, <q>erm</q>, etc... would be tagged
+      with either <q>um</q> or <q>ah</q> or <q>er</q>. </p> 
+    
+    <p> The Pattern Matcher can also be used to tag combinations of words.  For example,
+      you might want to identify all instances of the expression <q>kind of thing</q>. </p> 
+    
+    <p>To do this, you would, you would configure an annotator task with the following regular
+      expressions applied to the <i> orthography </i> layer to create new annotations on
+      a new <i> ellipsis </i> phrase layer: </p>
+    <table style="margin: auto;">
+      <tr><th> Regular Expression </th> <td> </td> <th> Label </th></tr>        
+      <tr><td><code> kind(a|( of)) thing</code></td><td>→</td><td> ... </td></tr>
+    </table>
+
+    <p> The result would be that every instance the sequence of words <q>kind of thing</q> or
+      <q>kinda thing</q> would be tagged with <q>...</q>. </p> 
+    
+  </body>
+</html>
