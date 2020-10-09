@@ -251,6 +251,9 @@ ul.subNavList li {
     margin:0 20px;
     padding:5px 0 0 0;
 }
+.legalCopy img { /* CC-BY-SA logo */
+    height:14px;
+}
 .indexNav {
     position:relative;
     font-size:12px;
