@@ -304,7 +304,7 @@ public class AnnotatorWebApp extends StandAloneWebApp {
       }
       
       if (annotator.getClass().isAnnotationPresent(UsesRelationalDatabase.class)) {
-         annotator.rdbConnectionFactory(new DerbyConnectionFactory(workingDir));
+         annotator.setRdbConnectionFactory(new DerbyConnectionFactory(workingDir));
       }
       
    } // end of init()

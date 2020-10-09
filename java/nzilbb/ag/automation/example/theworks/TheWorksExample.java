@@ -56,7 +56,7 @@ import nzilbb.util.MonitorableTask; // for javadoc
 public class TheWorksExample extends Annotator
    implements ImplementsDictionaries {
    /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
-   public String getMinimumApiVersion() { return "20200708.2018"; }
+   @Override public String getMinimumApiVersion() { return "20200708.2018"; }
 
    /**
     * This class implements its own version of {@link Annotator#getAnnotatorId()} which is
@@ -65,7 +65,7 @@ public class TheWorksExample extends Annotator
     * than <code>getClass().getSimpleName()</code>.
     * @return The annotator's ID.
     */
-   public String getAnnotatorId() {
+   @Override public String getAnnotatorId() {
       return getClass().getSimpleName();
    }
 
@@ -77,10 +77,10 @@ public class TheWorksExample extends Annotator
     * @param db Factory for making new connections to the database.
     * @throws SQLException If the annotator can't connect to the given database.
     */
-   public void rdbConnectionFactory(ConnectionFactory db) throws SQLException {
+   @Override public void setRdbConnectionFactory(ConnectionFactory db) throws SQLException {
 
       // call the base class version first
-      super.rdbConnectionFactory(db);
+      super.setRdbConnectionFactory(db);
       
       // check we can connect
       Connection rdb = newConnection();      
@@ -120,8 +120,7 @@ public class TheWorksExample extends Annotator
     * Runs any processing required to uninstall the annotator.
     * <p> In this case, the table created in rdbConnectionFactory() is DROPped.
     */
-   @Override
-   public void uninstall() {
+   @Override public void uninstall() {
       try {
          Connection rdb = newConnection();      
          try {
@@ -151,7 +150,7 @@ public class TheWorksExample extends Annotator
     * @see #setConfig(String)
     * @see #beanPropertiesToQueryString()
     */
-   public String getConfig() { return beanPropertiesToQueryString(); }
+   @Override public String getConfig() { return beanPropertiesToQueryString(); }
    
    /**
     * Specifies the overall configuration of the annotator, and runs any processing
@@ -175,7 +174,7 @@ public class TheWorksExample extends Annotator
     * @see #getConfig()
     * @see #beanPropertiesFromQueryString(String)
     */ 
-   public void setConfig(String config) throws InvalidConfigurationException {
+   @Override public void setConfig(String config) throws InvalidConfigurationException {
       beanPropertiesFromQueryString(config);
       if (simulatedInstallationDuration != null && simulatedInstallationDuration >= 0) {
          for (int p = 0; p < 100; p += 10) {
@@ -207,6 +206,7 @@ public class TheWorksExample extends Annotator
     * parmeter web-app, so <var> parameters </var> will always be null.
     * @throws InvalidConfigurationException
     */
+   @Override
    public void setTaskParameters(String parameters) throws InvalidConfigurationException {
       beanPropertiesFromQueryString(parameters);
       
@@ -261,6 +261,7 @@ public class TheWorksExample extends Annotator
     * @throws InvalidConfigurationException If {@link #setTaskParameters(String)} or 
     * {@link #setSchema(Schema)} have not yet been called.
     */
+   @Override 
    public String[] getRequiredLayers() throws InvalidConfigurationException {
       if (schema == null)
          throw new InvalidConfigurationException(this, "Schema is not set.");
@@ -278,6 +279,7 @@ public class TheWorksExample extends Annotator
     * @throws InvalidConfigurationException If {@link #setTaskParameters(String)} or 
     * {@link #setSchema(Schema)} have not yet been called.
     */
+   @Override 
    public String[] getOutputLayers() throws InvalidConfigurationException {
       if (outputLayer == null)
          throw new InvalidConfigurationException(this, "No output layer set.");
@@ -294,6 +296,7 @@ public class TheWorksExample extends Annotator
     * @return The changes introduced by the tranformation.
     * @throws TransformationException If the transformation cannot be completed.
     */
+   @Override 
    public Graph transform(Graph graph) throws TransformationException {
       if (schema == null)
          throw new InvalidConfigurationException(this, "Schema is not set.");
@@ -461,7 +464,7 @@ public class TheWorksExample extends Annotator
     *  <li> {@link Annotator#setSchema(Schema)} </li>
     *  <li> {@link Annotator#setTaskParameters(String)} </li>
     *  <li> {@link Annotator#setWorkingDirectory(File)} (if applicable) </li>
-    *  <li> {@link Annotator#rdbConnectionFactory(MySQLTranslator,String,String,String)}
+    *  <li> {@link Annotator#setRdbConnectionFactory(ConnectionFactory)}
     *       (if applicable) </li>
     * </ul>
     * @return A (possibly empty) list of IDs of dictionaries.
@@ -477,7 +480,7 @@ public class TheWorksExample extends Annotator
     *  <li> {@link Annotator#setSchema(Schema)} </li>
     *  <li> {@link Annotator#setTaskParameters(String)} </li>
     *  <li> {@link Annotator#setWorkingDirectory(File)} (if applicable) </li>
-    *  <li> {@link Annotator#rdbConnectionFactory(ConnectionFactory)}
+    *  <li> {@link Annotator#setRdbConnectionFactory(ConnectionFactory)}
     *       (if applicable) </li>
     * </ul>
     * @return The identified dictionary.

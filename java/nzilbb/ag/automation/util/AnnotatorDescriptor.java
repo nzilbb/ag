@@ -112,7 +112,7 @@ public class AnnotatorDescriptor implements CloneableBean {
    /**
     * Get the minimum version of the nzilbb.ag API supported by the serializer. 
     * @return Minimum version of the nzilbb.ag API supported by the serializer.
-    * @see Constants#VERSION
+    * @see nzilbb.ag.Constants#VERSION
     */
    @ClonedProperty
    public String getMinimumApiVersion() {

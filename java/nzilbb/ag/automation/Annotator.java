@@ -193,7 +193,7 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
     * @param db Factory for making new connections to the database.
     * @throws SQLException If the annotator can't connect to the given database.
     */
-   public void rdbConnectionFactory(ConnectionFactory db) throws SQLException {      
+   public void setRdbConnectionFactory(ConnectionFactory db) throws SQLException {      
       this.sqlx = db.newSQLTranslator();
       this.db = db;
    }
