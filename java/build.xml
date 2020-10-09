@@ -156,7 +156,7 @@
              stylesheetfile="doc-files/style.css"
              Overview="nzilbb/ag/overview.html"
              noqualifier="all"
-             bottom="&lt;i&gt;&amp;copy; NZILBB - ${TODAY}&lt;/i&gt;"
+             bottom="&lt;i&gt;&lt;img src='/ag/cc-by-sa.svg' alt='CC-BY-SA'&gt; NZILBB - ${TODAY}&lt;/i&gt;"
              >
       <fileset dir="${src}"
                includes="nzilbb/ag/*.java nzilbb/encoding/*.java nzilbb/ag/util/*.java " />
