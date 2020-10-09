@@ -252,7 +252,8 @@ ul.subNavList li {
     padding:5px 0 0 0;
 }
 .legalCopy img { /* CC-BY-SA logo */
-    height:14px;
+    height:19px;
+    vertical-align:middle;
 }
 .indexNav {
     position:relative;
