@@ -1,31 +1,91 @@
-// Some useful functions:
 
-// make a GET request of the annotator
-function get(path, onload, contentType) {
-    var request = new XMLHttpRequest();
-    request.open("GET", path);
-    if (contentType) request.setRequestHeader("Accept", contentType);
-    request.addEventListener("load", onload, false);
-          request.send();
-}
+// show annotator version
+getVersion(version => {
+    document.getElementById("version").innerHTML = version;
+});
+      
+// first, get the layer schema
+var schema = null;
+getSchema(s => {
+    schema = s;
+    
+    // populate layer input select options...          
+    var tokenLayerId = document.getElementById("tokenLayerId");
+    addLayerOptions(
+        tokenLayerId, schema,
+        // this is a function that takes a layer and returns true for the ones we want
+        layer => layer.id == schema.wordLayerId
+            || (layer.parentId == schema.wordLayerId && layer.alignment == 0));
+    // default value:
+    if (schema.layers["orthography"]) {
+        tokenLayerId.value = "orthography";
+    } else {
+        tokenLayerId.value = schema.wordLayerId;
+    }
+    
+    // populate the language layers...
+    
+    var transcriptLanguageLayerId = document.getElementById("transcriptLanguageLayerId");
+    addLayerOptions(
+        transcriptLanguageLayerId, schema,
+        layer => layer.parentId == schema.root.id && layer.alignment == 0
+            && /.*lang.*/.test(layer.id));
+    // select the first one by default
+    transcriptLanguageLayerId.selectedIndex = 1;
+    
+    var phraseLanguageLayerId = document.getElementById("phraseLanguageLayerId");
+    addLayerOptions(
+        phraseLanguageLayerId, schema,
+        layer => layer.parentId == schema.turnLayerId && layer.alignment == 2
+            && /.*lang.*/.test(layer.id));
+    // select the first one by default
+    phraseLanguageLayerId.selectedIndex = 1;
+    
+    // populate layer output select options...          
+    var stemLayerId = document.getElementById("stemLayerId");
+    addLayerOptions(
+        stemLayerId, schema,
+        layer => layer.parentId == schema.wordLayerId && layer.alignment == 0);
+    if (schema.layers["stem"]) {
+        tokenLayerId.value = "stem";
+    } else if (schema.layers["lemma"]) {
+        tokenLayerId.value = "lemma";
+    } else {
+        stemLayerId.selectedIndex = 0;
+    }
+    
+    // GET request to getTaskParameters retrieves the current task parameters, if any
+    getText("getTaskParameters", text => {
+        var parameters = new URLSearchParams(text);
+        
+        // set initial values of properties in the form above
+        // (this assumes bean property names match input id's in the form above)
+        for (const [key, value] of parameters) {
+            document.getElementById(key).value = value;
+        }
+    });
+});
 
-// make a GET a JSON object from the annotator
-function getJSON(path, onload) {
-    get(path, onload, "application/json");
-}
-
-// make a GET a text string from the annotator
-function getText(path, onload) {
-    get(path, onload, "text/plain");
-}
-
-// populate a <select> element with layers for which a predicate is true
-function addLayerOptions(select, schema, layerPredicate) {
-    for (var layerId in schema.layers) {
-        if (!layerPredicate || layerPredicate(schema.layers[layerId])) {
-            var option = document.createElement("option");
-            option.appendChild(document.createTextNode(layerId));
-            select.appendChild(option);
-        } // permitted layer
-    } // next layer
+// this function detects when the user selects [add new layer]:
+function changedLayer(select) {
+    if (select.value == "[add new layer]") {
+        var newLayer = prompt("Please enter the new layer ID", "stem");
+        if (newLayer) { // they didn't cancel
+            // check there's not already a layer with that name
+            for (var l in schema.layers) {
+                var layer = schema.layers[l];
+                if (layer.id == newLayer) {
+                    alert("A layer called "+newLayer+" already exists");
+                    select.selectedIndex = 0;
+                    return;
+                }
+            } // next layer
+            // add the layer to the list
+            var layerOption = document.createElement("option");
+            layerOption.appendChild(document.createTextNode(newLayer));
+            select.appendChild(layerOption);
+            // select it
+            select.selectedIndex = select.children.length - 1;
+        }
+    }
 }

@@ -137,9 +137,9 @@ public class CMUDictionaryTagger extends Annotator
     * @throws SQLException If the annotator can't connect to the given database.
     */
    @Override
-   public void rdbConnectionFactory(ConnectionFactory db)
+   public void setRdbConnectionFactory(ConnectionFactory db)
       throws SQLException {
-      super.rdbConnectionFactory(db);
+      super.setRdbConnectionFactory(db);
 
       // get DB connection
       Connection rdb = newConnection();

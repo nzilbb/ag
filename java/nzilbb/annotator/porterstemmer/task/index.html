@@ -1,14 +1,63 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
     <title>Porter Stemmer</title>
     <link rel="stylesheet" href="index.css" type="text/css">
-    <script src="index.js" type="text/javascript"></script>
+    <script src="util.js" type="text/javascript"></script>
   </head>
   <body>
-    <p> The Porter Stemmer annotator uses the Porter Algorithm to compute the stems of
-      English words from their orthography. </p>
+    <details>
+      <summary> The Porter Stemmer annotator uses the Porter Algorithm to compute the stems of
+        English words from their orthography. </summary>
+      
+      <p> It achieves this by systematically stripping
+        off or converting suffixes of word orthographies, in several passes, until a 'stem'
+        remains, which is the same as the 'stem' for other forms of the same word. </p>
+      
+      <p> It's important to realise that, in the words of M. F. Porter himself,
+        <q> the suffixes are being removed simply to improve IR performance, and not as a
+          linguistic exercise</q>.
+        It doesn't get the stems 100% right. It is pretty good for regular words, e.g.</p> 
+      
+      <table>
+        <tr><td> walk    </td> <td>→</td> <td> walk </td></tr>
+        <tr><td> walks   </td> <td>→</td> <td> walk </td></tr>
+        <tr><td> walked  </td> <td>→</td> <td> walk </td></tr>
+        <tr><td> walking </td> <td>→</td> <td> walk </td></tr>
+      </table>
+      
+      <p>&hellip;however, it behaves less well for irregular cases, e.g.</p>
+      
+      <p><table>
+          <tr><td> sing    </td> <td>→</td> <td>    sing     </td></tr>
+          <tr><td> sings   </td> <td>→</td> <td>    sing     </td></tr>
+          <tr><td> sang    </td> <td>→</td> <td><b> sang </b></td></tr>
+          <tr><td> sung    </td> <td>→</td> <td><b> sung </b></td></tr>
+          <tr><td> singing </td> <td>→</td> <td>    sing     </td></tr>
+      </table></p>
+      
+      <p>However, it's also worth noting that it will do better than lexicon-based methods
+        when it comes to new words, e.g.</p> 
+      
+      <p><table>
+          <tr><td> blog     </td> <td>→</td> <td> blog </td></tr>
+          <tr><td> blogs    </td> <td>→</td> <td> blog </td></tr>
+          <tr><td> blogging </td> <td>→</td> <td> blog </td></tr>
+          <tr><td> blogged  </td> <td>→</td> <td> blog </td></tr>
+      </table></p>
+      
+      <p>For more information about the algorithm, see
+        <em>Porter, 1980, An algorithm for suffix stripping, Program, Vol. 14, no. 3, pp 130-137,</em>
+        
+        or <a href="http://www.tartarus.org/~martin/PorterStemmer" target="_blank">
+          http://www.tartarus.org/~martin/PorterStemmer</a>
+      </p>
 
+      <hr>
+    </details>
+    
     <form method="POST" action="setTaskParameters">
       <div class="field" title="Input layer from which words come">
         <label for="tokenLayerId">Token Layer</label>
@@ -42,152 +91,8 @@
       </div>
       <div class="controls"><input type="submit" value="Set Parameters"></div>
     </form>
-    <script type="text/javascript">
-      function get(path, onload) { // make a GET request of the annotator
-          var request = new XMLHttpRequest();
-          request.open("GET", path);
-          request.addEventListener("load", onload, false);
-          request.send();
-      }
-
-      // show annotator version
-      getText("getVersion", function(e) {
-          document.getElementById("version").innerHTML = this.responseText;
-      });
-      
-      // first, get the layer schema
-      var schema = null;
-      getJSON("getSchema", function(e) {
-          schema = JSON.parse(this.responseText);
-              
-          // populate layer input select options...          
-          var tokenLayerId = document.getElementById("tokenLayerId");
-          addLayerOptions(
-              tokenLayerId, schema,
-              // this is a function that takes a layer and returns true for the ones we want
-              layer => layer.id == schema.wordLayerId
-                  || (layer.parentId == schema.wordLayerId && layer.alignment == 0));
-          // default value:
-          if (schema.layers["orthography"]) {
-              tokenLayerId.value = "orthography";
-          } else {
-              tokenLayerId.value = schema.wordLayerId;
-          }
-
-          // populate the language layers...
-          
-          var transcriptLanguageLayerId = document.getElementById("transcriptLanguageLayerId");
-          addLayerOptions(
-              transcriptLanguageLayerId, schema,
-              layer => layer.parentId == schema.root.id && layer.alignment == 0
-                  && /.*lang.*/.test(layer.id));
-          // select the first one by default
-          transcriptLanguageLayerId.selectedIndex = 1;
-          
-          var phraseLanguageLayerId = document.getElementById("phraseLanguageLayerId");
-          addLayerOptions(
-              phraseLanguageLayerId, schema,
-              layer => layer.parentId == schema.turnLayerId && layer.alignment == 2
-                  && /.*lang.*/.test(layer.id));
-          // select the first one by default
-          phraseLanguageLayerId.selectedIndex = 1;
-          
-          // populate layer output select options...          
-          var stemLayerId = document.getElementById("stemLayerId");
-          addLayerOptions(
-              stemLayerId, schema,
-              layer => layer.parentId == schema.wordLayerId && layer.alignment == 0);
-          if (schema.layers["stem"]) {
-              tokenLayerId.value = "stem";
-          } else if (schema.layers["lemma"]) {
-              tokenLayerId.value = "lemma";
-          } else {
-              orthographyLayerId.selectedIndex = 0;
-          }
-         
-          // GET request to getTaskParameters retrieves the current task parameters, if any
-          getText( "getTaskParameters"+window.location.search, function(e) {
-              var parameters = new URLSearchParams(this.responseText);
-              
-              // set initial values of properties in the form above
-              // (this assumes bean property names match input id's in the form above)
-              for (const [key, value] of parameters) {
-                  document.getElementById(key).value = value;
-              }
-          });
-      });
-      
-      // this function detects when the user selects [add new layer]:
-      function changedLayer(select) {
-          if (select.value == "[add new layer]") {
-              var newLayer = prompt("Please enter the new layer ID", "stem");
-              if (newLayer) { // they didn't cancel
-                  // check there's not already a layer with that name
-                  for (var l in schema.layers) {
-                      var layer = schema.layers[l];
-                      if (layer.id == newLayer) {
-                          alert("A layer called "+newLayer+" already exists");
-                          select.selectedIndex = 0;
-                          return;
-                      }
-                  } // next layer
-                  // add the layer to the list
-                  var layerOption = document.createElement("option");
-                  layerOption.appendChild(document.createTextNode(newLayer));
-                  select.appendChild(layerOption);
-                  // select it
-                  select.selectedIndex = select.children.length - 1;
-              }
-          }
-      }
-    </script>
+    <script src="index.js" type="text/javascript"></script>
     
-    <hr>
-    
-    <p> The Porter Stemmer annotator uses the Porter Algorithm to compute the stems of
-      English words from their orthography. It achieves this by systematically stripping
-      off or converting suffixes of word orthographies, in several passes, until a 'stem'
-      remains, which is the same as the 'stem' for other forms of the same word. </p>
-
-    <p> It's important to realise that, in the words of M. F. Porter himself,
-      <q> the suffixes are being removed simply to improve IR performance, and not as a
-        linguistic exercise</q>.
-      It doesn't get the stems 100% right. It is pretty good for regular words, e.g.</p> 
-    
-    <table>
-      <tr><td> walk    </td> <td>&rarr;</td> <td> walk </td></tr>
-      <tr><td> walks   </td> <td>&rarr;</td> <td> walk </td></tr>
-      <tr><td> walked  </td> <td>&rarr;</td> <td> walk </td></tr>
-      <tr><td> walking </td> <td>&rarr;</td> <td> walk </td></tr>
-    </table>
-    
-    <p>&hellip;however, it behaves less well for irregular cases, e.g.</p>
-    
-    <p><table>
-      <tr><td> sing    </td> <td>&rarr;</td> <td>    sing     </td></tr>
-      <tr><td> sings   </td> <td>&rarr;</td> <td>    sing     </td></tr>
-      <tr><td> sang    </td> <td>&rarr;</td> <td><b> sang </b></td></tr>
-      <tr><td> sung    </td> <td>&rarr;</td> <td><b> sung </b></td></tr>
-      <tr><td> singing </td> <td>&rarr;</td> <td>    sing     </td></tr>
-    </table></p>
-    
-    <p>However, it's also worth noting that it will do better than lexicon-based methods
-    when it comes to new words, e.g.</p> 
-    
-    <p><table>
-      <tr><td> blog     </td> <td>&rarr;</td> <td> blog </td></tr>
-      <tr><td> blogs    </td> <td>&rarr;</td> <td> blog </td></tr>
-      <tr><td> blogging </td> <td>&rarr;</td> <td> blog </td></tr>
-      <tr><td> blogged  </td> <td>&rarr;</td> <td> blog </td></tr>
-    </table></p>
-    
-    <p>For more information about the algorithm, see
-      <em>Porter, 1980, An algorithm for suffix stripping, Program, Vol. 14, no. 3, pp 130-137,</em>
-      
-      or <a href="http://www.tartarus.org/~martin/PorterStemmer" target="_blank">
-        http://www.tartarus.org/~martin/PorterStemmer</a>
-    </p>
-
     <footer><div> Porter Stemmer <small id="version"></small> </div></footer>
   </body>
 </html>

@@ -1,14 +1,14 @@
 // TODO handle phrase/spanning destination layer
 
 // show annotator version
-getText("getVersion", function(e) {
-    document.getElementById("version").innerHTML = this.responseText;
+getVersion(version=>{
+    document.getElementById("version").innerHTML = version;
 });
 
 // first, get the layer schema
 var schema = null;
-getJSON("getSchema", function(e) {
-    schema = JSON.parse(this.responseText);
+getSchema(s => {
+    schema = s;
     
     // populate layer input select options...          
     var sourceLayerId = document.getElementById("sourceLayerId");
@@ -50,11 +50,10 @@ getJSON("getSchema", function(e) {
     destinationLayerId.selectedIndex = 0;
     
     // GET request to getTaskParameters retrieves the current task parameters, if any
-    getJSON("getTaskParameters"+window.location.search, function(e) {
-        if (!this.responseText) {
+    getJSON("getTaskParameters", parameters => {
+        if (parameters == null) {
             newMapping("", ""); // no parameters, start off with a blank one
         } else {
-            var parameters = JSON.parse(this.responseText);
             
             // set initial values of properties in the form
             document.getElementById("sourceLayerId").value = parameters.sourceLayerId;
@@ -63,15 +62,23 @@ getJSON("getSchema", function(e) {
             document.getElementById("phraseLanguageLayerId").value
                 = parameters.phraseLanguageLayerId;
             document.getElementById("language").value = parameters.language;
-            document.getElementById("nonMatchAction").value = parameters.nonMatchAction;
-            document.getElementById("destinationLayerId").value = parameters.destinationLayerId;
+            document.getElementById("deleteOnNoMatch").value = parameters.deleteOnNoMatch;
+            destinationLayerId = document.getElementById("destinationLayerId");
+            destinationLayerId.value = parameters.destinationLayerId;
+            // if there's no option for that layer, add one
+            if (destinationLayerId.value != parameters.destinationLayerId) {
+                var layerOption = document.createElement("option");
+                layerOption.appendChild(document.createTextNode(parameters.destinationLayerId));
+                destinationLayerId.appendChild(layerOption);
+                destinationLayerId.value = parameters.destinationLayerId;
+            }
             
             // insert current mappings
             if (!parameters.mappings) {
                 newMapping("", ""); // no mappings, start off with a blank one
             } else {
                 for (var mapping of parameters.mappings) {
-                    newMapping(mapping.pattern, mapping.representation);
+                    newMapping(mapping.pattern, mapping.label);
                 } // next mapping
             }
         }
@@ -111,37 +118,36 @@ var lastMapping = null;
 
 // Manage mappings
 
-function newMapping(pattern, representation) {
+function newMapping(pattern, label) {
     
     var divMapping = document.createElement("div");
     
-    var inputSource = document.createElement("input");
-    inputSource.type = "text";
-    inputSource.name = "pattern";
-    inputSource.value = pattern;
-    inputSource.title = "regular-expression pattern to match source annotations";
-    inputSource.placeholder = "Source Pattern";
-    inputSource.style.width = "25%";
-    inputSource.style.textAlign = "center";
-    inputSource.onfocus = function() { lastMapping = this.parentNode; };
-    inputSource.onkeyup = function() { validateRegularExpression(inputSource); };
+    var patternInput = document.createElement("input");
+    patternInput.type = "text";
+    patternInput.dataset.role = "pattern";
+    patternInput.value = pattern;
+    patternInput.title = "Regular-expression pattern to match source annotations";
+    patternInput.placeholder = "Source Pattern";
+    patternInput.style.width = "25%";
+    patternInput.style.textAlign = "center";
+    patternInput.onfocus = function() { lastMapping = this.parentNode; };
+    patternInput.onkeyup = function() { validateRegularExpression(patternInput); };
     
-    var inputDestination = document.createElement("input");
-    inputDestination.type = "text";
-    inputDestination.name = "representation";
-    inputDestination.title = "You can type text or select a layer to copy from."
+    var labelInput = document.createElement("input");
+    labelInput.type = "text";
+    labelInput.dataset.role = "label";
+    labelInput.title = "You can type text or select a layer to copy from."
 	+"\nLeaving this blank saves no representation, but"
 	+" prevents the patterns below from matching.";
-    inputDestination.placeholder = "Destination Label";
-    inputDestination.value = representation;
-    inputDestination.style.width = "25%";
-    inputDestination.style.textAlign = "center";
-    inputDestination.onfocus = function() { lastMapping = this.parentNode; };
+    labelInput.placeholder = "Destination Label";
+    labelInput.value = label;
+    labelInput.style.width = "25%";
+    labelInput.style.textAlign = "center";
+    labelInput.onfocus = function() { lastMapping = this.parentNode; };
 
     // TODO <c:if test="${!spanningLayer}">
     var COPY_FROM_LAYER_TEXT = "Copy from layer: ";
     var copyFromLayer = document.createElement("select");
-    copyFromLayer.name = "copy";
     copyFromLayer.title = "Label for annotation can be copied from another layer, or some specified text.";
     copyFromLayer.onfocus = function() { lastMapping = this.parentNode; };
     var option = document.createElement("option");
@@ -151,13 +157,12 @@ function newMapping(pattern, representation) {
     var copying = false;
     
     for (var layerId in schema.layers) {
-        console.log("layer " + layerId + " - " + JSON.stringify(schema.layers[layerId]));
         var layer = schema.layers[layerId];
         if (layer.parentId == schema.wordLayerId && layer.alignment == 0) { // word tag
             option = document.createElement("option");
             option.value = COPY_FROM_LAYER_TEXT + layer.id;
             option.appendChild(document.createTextNode(COPY_FROM_LAYER_TEXT + layer.description));
-            if (representation == COPY_FROM_LAYER_TEXT + layer.id) {
+            if (label == COPY_FROM_LAYER_TEXT + layer.id) {
                 option.selected = true;
                 copying = true;
             }
@@ -165,31 +170,34 @@ function newMapping(pattern, representation) {
         } // permitted layer
     } // next layer
 
-    copyFromLayer.inputDestination = inputDestination;
+    copyFromLayer.labelInput = labelInput;
     copyFromLayer.onchange = function() {
-        this.inputDestination.style.display = this.selectedIndex > 0?"none":"";
+        this.labelInput.style.display = this.selectedIndex > 0?"none":"";
     };
     if (copying) {
-        inputDestination.style.display = "none";
+        labelInput.style.display = "none";
     }
     
     var arrow = document.createElement("span");
     arrow.innerHTML = " → ";
     
-    divMapping.appendChild(inputSource);
+    divMapping.appendChild(patternInput);
+    divMapping.patternInput = patternInput;
     divMapping.appendChild(arrow);
     // TODO <c:if test="${!spanningLayer}">:
     divMapping.appendChild(copyFromLayer);    
-    divMapping.appendChild(inputDestination);
+    divMapping.appendChild(labelInput);
+    divMapping.labelInput = labelInput;
 
     document.getElementById("mappings").appendChild(divMapping);
-    inputSource.focus();
+    patternInput.focus();
     
     enableRemoveButton();
+    
+    return false; // so form doesn't submit
 }
 
 function enableRemoveButton() {
-    console.log("enableRemoveButton " + document.getElementById("mappings").childElementCount);
     document.getElementById("removeButton").disabled = 
         document.getElementById("mappings").childElementCount <= 1;
 }
@@ -200,6 +208,7 @@ function removeMapping() {
         lastMapping = null;
         enableRemoveButton();
     }
+    return false; // so form doesn't submit
 }
 
 function moveMappingUp() {
@@ -211,6 +220,7 @@ function moveMappingUp() {
             mappings.insertBefore(lastMapping, previousMapping);
         }
     }
+    return false; // so form doesn't submit
 }
 
 function moveMappingDown() {
@@ -227,6 +237,7 @@ function moveMappingDown() {
             }
         }
     }
+    return false; // so form doesn't submit
 }
 
 function validateRegularExpression(input) {
@@ -247,3 +258,33 @@ function validateRegularExpression(input) {
         }
     }
 }
+
+function setTaskParameters(form) {
+
+    // we use the convertFormBodyToJSON from util.js to send the form as JSON, but we want to
+    // to add the mappings as an array of objects, so we add them to the parameters 
+    // (convertFormBodyToJSON will take care of the rest of the form inputs)
+    var parameters = {
+        mappings: []
+    };
+    var mappingDivs = document.getElementById("mappings").children;
+    var mappings = [];
+    for (var m = 0; m < mappingDivs.length; m++) {
+        var div = mappingDivs[m];
+        parameters.mappings.push({
+            pattern: div.patternInput.value,
+            label: div.labelInput.value
+        });
+    }
+    
+    return convertFormBodyToJSON(form, parameters);
+}
+
+// add event handlers
+document.getElementById("addButton").onclick = e=>newMapping('','');
+document.getElementById("upButton").onclick = e=>moveMappingUp();
+document.getElementById("downButton").onclick = e=>moveMappingDown();
+document.getElementById("removeButton").onclick = e=>removeMapping();
+document.getElementById("destinationLayerId").onchange = function(e) { changedLayer(this); };
+document.getElementById("form").onsubmit = function(e) { setTaskParameters(this); };
+

@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.net.URL;
 import java.sql.SQLException;
 import nzilbb.ag.Constants;
 import nzilbb.ag.Layer;
@@ -175,6 +176,21 @@ public class AnnotatorWebApp extends StandAloneWebApp {
                OutputStream os = x.getResponseBody();
                os.write(json.getBytes());
                os.close();
+            }});      
+      
+      // add util.js handler, providing some useful javascript functions for webapp implementations
+      server.createContext("/util.js", new HttpHandler() {
+            public void handle(HttpExchange x) throws IOException {
+               URL url = getClass().getResource("util.js");
+               if (url != null) {
+                  try {
+                     x.getResponseHeaders().add("Content-Type", "text/javascript");
+                     x.sendResponseHeaders(200, 0);
+                     IO.Pump(url.openConnection().getInputStream(), x.getResponseBody());
+                  } catch(IOException exception) {}
+               }
+               // if we got here, it went wrong
+               x.sendResponseHeaders(404, -1);
             }});      
       
       // all (not otherwise handled) requests:

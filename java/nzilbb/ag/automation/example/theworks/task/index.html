@@ -49,10 +49,9 @@
       
       // first, get the layer schema
       var schema = null;
-      getJSON( // (the getJSON function is defined in util.js)
-          "getSchema", // <- the URL to GET from
-          function(e) { // <- a function to execute when we have a response
-              schema = JSON.parse(this.responseText);
+      getSchema( // (the getSchema function is defined in util.js)
+          json => { // <- a function to execute when we have a response
+              schema = json;
               
               // populate layer input select options...          
               var inputLayer = document.getElementById("inputLayer");
@@ -73,9 +72,9 @@
               
               // GET request to getTaskParameters retrieves the current task parameters, if any
               getText( // (the getText function is defined in util.js)
-                  "getTaskParameters"+window.location.search, // <- the URL to GET from
-                  function(e) { // <- a function to execute when we have a response
-                      var parameters = new URLSearchParams(this.responseText);
+                  "getTaskParameters", // <- the URL to GET from
+                  text => { // <- a function to execute when we have a response
+                      var parameters = new URLSearchParams(text);
                       
                       // set initial values of properties in the form above
                       // (this assumes bean property names match input id's in the form above)
@@ -87,12 +86,11 @@
           });
       
       // any annotator method can be called to interrogate the annotator:
-      getText( // (the getText function is defined in util.js)
-          "getVersion", // <- the URL to GET from
-          function(e) { // <- a function to execute when we have a response
-              document.getElementById("version").innerHTML = this.responseText;
+      getVersion( // (the getVersion function is defined in util.js)
+          version => { // <- a function to execute when we have a response
+              document.getElementById("version").innerHTML = version;
           });
-
+      
       // this function detects when the user selects [add new layer]:
       function changedLayer(select) {
           if (select.value == "[add new layer]") {

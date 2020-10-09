@@ -21,11 +21,9 @@ function testRemovalPattern() {
 
         // show the test word transformation by using the annotator's orthography function        
         getText(
-            "orthography?"+encode(textTranscript.value)+","+encode(removalPattern.value),
-            function(e) {
-                textOrthography.value = this.responseText;
-            });
-
+            resourceForFunction("orthography?", textTranscript.value, removalPattern.value),
+            text => { textOrthography.value = text; });
+        
     } catch(error) {
         // pattern is invalid, so don't mark it as an error
         removalPattern.className = "error";
@@ -35,13 +33,12 @@ function testRemovalPattern() {
         textOrthography.title = error;
     }
 
-    textOrthography.value = textTranscript.value.replace()
 }
 
 // first, get the layer schema
 var schema = null;
-getJSON("getSchema", function(e) {
-    schema = JSON.parse(this.responseText);
+getSchema(s => {
+    schema = s;
     
     // populate layer input select options...          
     var tokenLayerId = document.getElementById("tokenLayerId");
@@ -69,7 +66,7 @@ getJSON("getSchema", function(e) {
     }
     
     // GET request to getTaskParameters retrieves the current task parameters, if any
-    getText( "getTaskParameters"+window.location.search, function(e) {
+    getText("getTaskParameters", function(e) {
         var parameters = new URLSearchParams(this.responseText);
         
         // set initial values of properties in the form above

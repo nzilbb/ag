@@ -1,12 +1,12 @@
 // show annotator version
-getText("getVersion", function(e) {
-    document.getElementById("version").innerHTML = this.responseText;
+getVersion(version => {
+    document.getElementById("version").innerHTML = version;
 });
 
 // first, get the layer schema
 var schema = null;
-getJSON("getSchema", function(e) {
-    schema = JSON.parse(this.responseText);
+getSchema(s => {
+    schema = s;
     
     // populate layer input select options...          
     var tokenLayerId = document.getElementById("tokenLayerId");
@@ -52,8 +52,8 @@ getJSON("getSchema", function(e) {
     }
     
     // GET request to getTaskParameters retrieves the current task parameters, if any
-    getText( "getTaskParameters"+window.location.search, function(e) {
-        var parameters = new URLSearchParams(this.responseText);
+    getText("getTaskParameters", text => {
+        var parameters = new URLSearchParams(text);
         
         // set initial values of properties in the form above
         // (this assumes bean property names match input id's in the form above)
@@ -86,4 +86,3 @@ function changedLayer(select) {
         }
     }
 }
-
