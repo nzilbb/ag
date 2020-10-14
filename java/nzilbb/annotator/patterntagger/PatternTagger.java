@@ -25,6 +25,10 @@ import java.util.LinkedHashSet;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.InvalidConfigurationException;
@@ -198,15 +202,65 @@ public class PatternTagger extends Annotator {
          throw new InvalidConfigurationException(this, "Parameters not set.");         
       }
 
-      // TODO parse JSON parameters
+      // parse JSON parameters...
+
+      // set basic attributes
+      JsonObject json = beanPropertiesFromJSON(parameters);
+
+      // set mappings
+      JsonArray jsonMappings = json.getJsonArray("mappings");
+      mappings.clear();
+      for (JsonValue element : jsonMappings) {
+         if (element instanceof JsonObject) {
+            JsonObject jsonMapping = (JsonObject)element;
+            try {
+               mappings.add(new Mapping(
+                               Pattern.compile(jsonMapping.getString("pattern")),
+                               jsonMapping.getString("label")));
+            } catch(PatternSyntaxException exception) {
+               throw new InvalidConfigurationException(
+                  this, "Invalid pattern \"" + jsonMapping.getString("pattern") + "\": "
+                  + exception.getMessage());
+            } catch (NullPointerException exception) {
+               throw new InvalidConfigurationException(
+                  this, "Missing pattern/label: " + element);
+            }
+         } else { // not a JsonObject
+            throw new InvalidConfigurationException(this, "Invalid mappings element: " + element);
+         }
+      } // next array element      
       
+      // validate parameters
+      if (sourceLayerId == null)
+         throw new InvalidConfigurationException(this, "No input token layer set.");
+      if (schema.getLayer(sourceLayerId) == null) 
+         throw new InvalidConfigurationException(this, "Invalid source layer: " + sourceLayerId);
+      if (destinationLayerId == null)
+         throw new InvalidConfigurationException(this, "Destination layer not set.");
+      if (transcriptLanguageLayerId != null && schema.getLayer(transcriptLanguageLayerId) == null)
+         throw new InvalidConfigurationException(
+            this, "Invalid transcript language layer: " + transcriptLanguageLayerId);
+      if (phraseLanguageLayerId != null && schema.getLayer(phraseLanguageLayerId) == null)
+         throw new InvalidConfigurationException(
+            this, "Invalid phrase language layer: " + phraseLanguageLayerId);
+      if (language != null && language.length() > 0) {
+         try {
+            Pattern.compile(language);            
+         } catch(PatternSyntaxException exception) {
+            throw new InvalidConfigurationException(
+               this, "Invalid language pattern \""+language+"\": " + exception.getMessage());
+         }
+      }
+
+      // TODO check for new layer parent specifier
+         
       // does the outputLayer need to be added to the schema?
       if (schema.getLayer(destinationLayerId) == null) {
          schema.addLayer(
             new Layer(destinationLayerId)
             .setAlignment(Constants.ALIGNMENT_NONE) // TODO or interval
             .setPeers(false)                        // TODO or true
-            .setParentId(schema.getWordLayerId())   // TODO or turn
+            .setParentId(schema.getWordLayerId())   // TODO or turn or graph
             .setType(Constants.TYPE_STRING));
       }
    }
