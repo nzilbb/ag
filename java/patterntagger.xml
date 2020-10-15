@@ -65,7 +65,7 @@
   <target name="test" depends="dist" description="run annotator unit tests">
     <javac srcdir="${src}" destdir="."
 	   includes="${srctests}"
-	   classpath=".;${junitjar};${dist}/${ant.project.name}.jar;${dist}/nzilbb.ag.jar"
+	   classpath=".;${junitjar};${dist}/${ant.project.name}.jar;${dist}/nzilbb.ag.jar;lib/javax.json.jar"
 	   listfiles="yes"
 	   target="8"
 	   source="8"
@@ -76,7 +76,7 @@
     <junit haltonfailure="true"
 	   fork="true" >
       <classpath>
-	<pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar};${dist}/nzilbb.ag.jar"/>
+	<pathelement path=".;${dist}/${ant.project.name}.jar;${junitjar};${dist}/nzilbb.ag.jar;lib/javax.json.jar"/>
       </classpath>
       <jvmarg value="-ea"/>
       <formatter type="plain" usefile="false" />
