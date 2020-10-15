@@ -21,6 +21,7 @@
 //
 package nzilbb.annotator.patterntagger;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -273,8 +274,10 @@ public class PatternTagger extends Annotator {
       }
 
       // does the outputLayer need to be added to the schema?
-      if (schema.getLayer(destinationLayerId) == null) {
+      Layer destinationLayer = schema.getLayer(destinationLayerId);
+      if (destinationLayer == null) {
          Layer destinationLayerParent = schema.getLayer(destinationLayerParentId);
+         setStatus("destinationLayerParentId " + destinationLayerParentId);
          if (destinationLayerParent == null
              || destinationLayerParent.getId().equals(schema.getWordLayerId())) {
             // word tag layer
@@ -284,6 +287,7 @@ public class PatternTagger extends Annotator {
                .setPeers(false)
                .setParentId(schema.getWordLayerId())
                .setType(Constants.TYPE_STRING));
+            destinationLayerParentId = schema.getWordLayerId();
          } else {
             // spanning layer
             schema.addLayer(
@@ -293,6 +297,9 @@ public class PatternTagger extends Annotator {
                .setParentId(destinationLayerParentId)
                .setType(Constants.TYPE_STRING));
          }
+      } else { // destination layer exists
+         // make sure destinationLayerParentId is correct
+         destinationLayerParentId = destinationLayer.getParentId();
       }
    }
    
@@ -308,13 +315,21 @@ public class PatternTagger extends Annotator {
          throw new InvalidConfigurationException(this, "Schema is not set.");
       if (sourceLayerId == null)
          throw new InvalidConfigurationException(this, "No input token layer set.");
-      Vector<String> requiredLayers = new Vector<String>();
+      HashSet<String> requiredLayers = new HashSet<String>();
       requiredLayers.add(sourceLayerId);
-      if (transcriptLanguageLayerId != null) requiredLayers.add(transcriptLanguageLayerId);
+      // we need its parent too
+      requiredLayers.add(schema.getLayer(sourceLayerId).getParentId());
+      // get destination parent too
+      requiredLayers.add(destinationLayerParentId);
+      // language layers
+      if (transcriptLanguageLayerId != null) requiredLayers.add(transcriptLanguageLayerId);      
       if (phraseLanguageLayerId != null) requiredLayers.add(phraseLanguageLayerId);
-      // TODO if we're copying from layers for labels, we need those layers too
-      // TODO we may need to iterate by turn for phrase layers
-      // TODO get source parent if it's a word layer - we one one peer per word if it's not aligned
+      // we're copying from layers for labels, we need those layers too
+      for (Mapping mapping : mappings) {
+         if (mapping.label.startsWith(COPY_FROM_LAYER_TEXT)) { 
+            requiredLayers.add(mapping.label.substring(COPY_FROM_LAYER_TEXT.length()));
+         }
+      } // next mapping
       return requiredLayers.toArray(new String[0]);
    }
 
@@ -353,215 +368,235 @@ public class PatternTagger extends Annotator {
       }
 
       if (destinationLayer.getParentId().equals(schema.getWordLayerId())) { // token-based tagging
-
-         // we match against individual word tokens and tag them with word-tags...
-         
-         // what languages are in the transcript?
-         boolean transcriptIsMainlyTarget = true;
-         if (language != null && language.length() > 0) {
-            if (transcriptLanguageLayerId != null) {
-               Annotation transcriptLanguage = graph.first(transcriptLanguageLayerId);
-               if (transcriptLanguage != null) {
-                  if (!transcriptLanguage.getLabel().matches(language)) {
-                     // not the target language
-                     transcriptIsMainlyTarget = false;
-                  }
-               }
-            }
-         }
-         boolean thereArePhraseTags = false;
-         if (language != null && language.length() > 0) {
-            if (phraseLanguageLayerId != null) {
-               if (graph.first(phraseLanguageLayerId) != null) {
-                  thereArePhraseTags = true;
-               }
-            }
-         }
-         
-         // should we just tag everything?
-         if (transcriptIsMainlyTarget && !thereArePhraseTags) {
-            // process all tokens
-            for (Annotation token : graph.all(sourceLayerId)) {
-               matchToken(token);
-            } // next token
-         } else if (transcriptIsMainlyTarget) {
-            // process all but the phrase-tagged tokens
-            
-            // tag the exceptions
-            for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
-               if (!phrase.getLabel().matches(language)) { // not target
-                  for (Annotation token : phrase.all(sourceLayerId)) {
-                     // mark the token as an exception
-                     token.put("@notTarget", Boolean.TRUE);
-                  } // next token in the phrase
-               } // non-Spanish phrase
-            } // next phrase
-            
-            for (Annotation token : graph.all(sourceLayerId)) {
-               if (token.containsKey("@notTarget")) {
-                  // while we're here, we remove the @notSpanish mark
-                  token.remove("@notTarget");
-               } else { // Target language, so tag it
-                  matchToken(token);
-               } // Spanish, so tag it
-            } // next token
-         } else if (thereArePhraseTags) {
-            // process only the tokens phrase-tagged as Spanish
-            for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
-               if (phrase.getLabel().matches(language)) {
-                  for (Annotation token : phrase.all(sourceLayerId)) {
-                     matchToken(token);
-                  } // next token in the phrase
-               } // Spanish phrase
-            } // next phrase
-         } // thereArePhraseTags
-         
+         annotateWords(graph, sourceLayer, destinationLayer);
       } else { // span-based tagging
-
-         boolean tagsLayer = sourceLayer.getAlignment() == Constants.ALIGNMENT_NONE
-            && sourceLayer.getPeers();
-         Layer sourceParentLayer = sourceLayer.getParent();
-         
-         int newAnnotationCount = 0;
-         int updatedAnnotationCount = 0;
-
-         Annotation[] turns = graph.all(schema.getTurnLayerId()); // TODO turn->parent
-         for (int t = 0; t < turns.length; t++) {
-            if (isCancelling()) break;
-            Annotation turn = turns[t];
-            
-            // we're going to construct a parallel graph with character offsets
-            Graph textGraph = new Graph();
-            textGraph.setOffsetUnits(Constants.UNIT_CHARACTERS);
-            textGraph.addLayer(new Layer("||", "Character-offset annotations",
-                                         Constants.ALIGNMENT_INTERVAL, true, false, false,
-                                         textGraph.getLayerId(), true));
-            
-            // get all the annotations in the source layer in range
-            StringBuffer sText = new StringBuffer();
-            Vector<Annotation> layer = new Vector<Annotation>();
-            if (tagsLayer) { // tag layer, so we want one tag per parent
-               for (Annotation parent : turn.all(sourceParentLayer.getId())) {
-                  Annotation a = parent.first(sourceLayer.getId());
-                  //if (debug) setStatus("token: " + parent + " #" + parent.getOrdinal() +  " - " + a);
-                  if (a != null) layer.add(a);
-               } // next parent
-            } else { // just get the list directly from the turn
-               for (Annotation a : turn.all(sourceLayer.getId())) layer.add(a);
-            }
-            if (layer.size() == 0) {
-               setStatus("Skipping turn as there are no "+sourceParentLayer.getId()+" annotations: "
-                         + turn);
-               continue;
-            }
-            int ordinal = 1;
-            for (Annotation source : layer) { // TODO create builder for this!
-               if (isCancelling()) break;
-               if (source.get("||") != null) continue; // should be impossible
-               Anchor aTextStart = new Anchor(null, Double.valueOf(sText.length()));
-               textGraph.addAnchor(aTextStart);
-               sText.append(source.getLabel());
-               Anchor aTextEnd = new Anchor(null, Double.valueOf(sText.length()));
-               textGraph.addAnchor(aTextEnd);
-               
-               // create a parallel annotation that marks the extent of this annotation in sAnnotations
-               Annotation anText = new Annotation(
-                  null, source.getLabel(), "||",
-                  aTextStart.getId(), aTextEnd.getId(),
-                  textGraph.getId(), ordinal++);
-               textGraph.addAnnotation(anText);
-               // link corresponding annotations together
-               anText.put("||", source);
-               source.put("||", anText);
-		     
-               sText.append(" ");
-            } // next annotation
-            if (sText.length() == 0)
-            {
-               setStatus("Skipping turn " + turn + " as there's no text to match");
-               continue;
-            }
-            
-            // now that we've got some text to match against, start matching
-            String sFinalText = sText.toString();
-            //if (debug) setStatus("Matching against: " + sFinalText);
-            Annotation[] textAnnotations = textGraph.all("||");
-            for (Mapping mapping : mappings) {
-               if (isCancelling()) break;
-               Pattern pattern = mapping.pattern;
-               Matcher matcher = pattern.matcher(sFinalText);
-               while (matcher.find()) { // found a match 
-                  String sMatch = sFinalText.substring(matcher.start(), matcher.end());
-                  if (sMatch.length() > 40) {
-                     sMatch = sMatch.substring(0, 15)
-                        + "..." + sMatch.substring(sMatch.length() - 15);
-                  }
-                  setStatus("Match:" + sMatch + "("+matcher.start()+"-"+matcher.end()+")");
-                  // find the start annotation
-                  int a = 0;
-                  Annotation anStart = textAnnotations[a];
-                  for (a = 0; a < textAnnotations.length; a++) {
-                     if (textAnnotations[a].getEnd().getOffset().intValue() >= matcher.start()) {
-                        anStart = textAnnotations[a];
-                        break;
-                     }
-                  } // next text annotation
-                  // continue from there, looking for the end annotation
-                  Annotation anEnd = anStart;
-                  for (; a < textAnnotations.length; a++) {
-                     if (textAnnotations[a].getStart().getOffset().intValue() >= matcher.end()) {
-                        break;
-                     }
-                     anEnd = textAnnotations[a];
-                  } // next text annotation
-                  
-                  // we're actually interested in the AG annotations
-                  anStart = (Annotation)anStart.get("||");
-                  anEnd = (Annotation)anEnd.get("||");
-                  
-                  //if (debug) setStatus("From " + anStart + " to " + anEnd);
-			
-                  // create an annotation on our layer that spans
-                  // the start and end annotations
-                  
-                  Annotation annotation = null;
-                  if (!deleteOnNoMatch) {
-                     // if there's an annotation in the same  place, update that one instead
-                     // so get the intersection of annotations that start and the start and
-                     // and end at the end
-                     LinkedHashSet<Annotation> linkingAnnotations = new LinkedHashSet<Annotation>(
-                        anStart.getStart().startOf(destinationLayerId));
-                     linkingAnnotations.retainAll(anEnd.getEnd().endOf(destinationLayerId));
-                     if (linkingAnnotations.size() > 0) {
-                        annotation = linkingAnnotations.iterator().next();
-                        //if (debug) setStatus("Updating " + annotation);
-                        updatedAnnotationCount++;
-                     }
-                  }
-                  if (annotation == null) {
-                     annotation = graph.createAnnotation(
-                        anStart.getStart(), anEnd.getEnd(), destinationLayerId, mapping.label,
-                        turn);
-                     newAnnotationCount++;
-                     //if (debug) setStatus("Added annotation: " + annotation);
-                  }
-                  if (annotation.getLabel().indexOf('$') >= 0) { // group substitution
-                     annotation.setLabel(
-                        sText.substring(matcher.start(), matcher.end())
-                        .replaceAll(pattern.toString(), annotation.getLabel()));
-                  }
-                  annotation.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-                  
-               } // next match
-            } // next pattern
-            
-            setPercentComplete(t * 100 / turns.length);
-         } // next turn
-
+         annotateSpans(graph, sourceLayer, destinationLayer);
       } // span-based tagging
       
       return graph;
    }
+   
+   /**
+    * Annotate word tokens in the transcript, based on their language if configured.
+    * @param graph The graph to transform.
+    * @param sourceLayer
+    * @param destinationLayer
+    * @throws InvalidConfigurationException
+    */
+   protected void annotateWords(Graph graph, Layer sourceLayer, Layer destinationLayer)
+      throws InvalidConfigurationException {
+      // we match against individual word tokens and tag them with word-tags...
+      
+      // what languages are in the transcript?
+      boolean transcriptIsMainlyTarget = true;
+      if (language != null && language.length() > 0) {
+         if (transcriptLanguageLayerId != null) {
+            Annotation transcriptLanguage = graph.first(transcriptLanguageLayerId);
+            if (transcriptLanguage != null) {
+               if (!transcriptLanguage.getLabel().matches(language)) {
+                  // not the target language
+                  transcriptIsMainlyTarget = false;
+               }
+            }
+         }
+      }
+      boolean thereArePhraseTags = false;
+      if (language != null && language.length() > 0) {
+         if (phraseLanguageLayerId != null) {
+            if (graph.first(phraseLanguageLayerId) != null) {
+               thereArePhraseTags = true;
+            }
+         }
+      }
+      
+      // should we just tag everything?
+      if (transcriptIsMainlyTarget && !thereArePhraseTags) {
+         // process all tokens
+         for (Annotation token : graph.all(sourceLayerId)) {
+            matchToken(token);
+         } // next token
+      } else if (transcriptIsMainlyTarget) {
+         // process all but the phrase-tagged tokens
+         
+         // tag the exceptions
+         for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
+            if (!phrase.getLabel().matches(language)) { // not target
+               for (Annotation token : phrase.all(sourceLayerId)) {
+                  // mark the token as an exception
+                  token.put("@notTarget", Boolean.TRUE);
+               } // next token in the phrase
+            } // non-Spanish phrase
+         } // next phrase
+         
+         for (Annotation token : graph.all(sourceLayerId)) {
+            if (token.containsKey("@notTarget")) {
+               // while we're here, we remove the @notSpanish mark
+               token.remove("@notTarget");
+            } else { // Target language, so tag it
+               matchToken(token);
+            } // Spanish, so tag it
+         } // next token
+      } else if (thereArePhraseTags) {
+         // process only the tokens phrase-tagged as Spanish
+         for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
+            if (phrase.getLabel().matches(language)) {
+               for (Annotation token : phrase.all(sourceLayerId)) {
+                  matchToken(token);
+               } // next token in the phrase
+            } // Spanish phrase
+         } // next phrase
+      } // thereArePhraseTags         
+   } // end of annotateWords()
+
+   /**
+    * Annotate spans of multiple tokens.
+    * @param graph The graph to transform.
+    * @param sourceLayer
+    * @param destinationLayer
+    * @throws InvalidConfigurationException
+    */
+   protected void annotateSpans(Graph graph, Layer sourceLayer, Layer destinationLayer)
+      throws InvalidConfigurationException {
+      boolean tagsLayer = sourceLayer.getAlignment() == Constants.ALIGNMENT_NONE
+         && sourceLayer.getPeers();
+      Layer sourceParentLayer = sourceLayer.getParent();
+      
+      int newAnnotationCount = 0;
+      int updatedAnnotationCount = 0;
+      
+      Annotation[] parents = graph.all(destinationLayerParentId);
+      for (int t = 0; t < parents.length; t++) {
+         if (isCancelling()) break;
+         Annotation parent = parents[t];
+         
+         // we're going to construct a parallel graph with character offsets
+         Graph textGraph = new Graph();
+         textGraph.setOffsetUnits(Constants.UNIT_CHARACTERS);
+         textGraph.addLayer(
+            new Layer("||", "Character-offset annotations")
+            .setAlignment(Constants.ALIGNMENT_INTERVAL)
+            .setPeers(true).setPeersOverlap(false).setSaturated(false)
+            .setParentId(textGraph.getLayerId()).setParentIncludes(true));
+         
+         // get all the annotations in the source layer in range
+         StringBuffer sText = new StringBuffer();
+         Vector<Annotation> layer = new Vector<Annotation>();
+         if (tagsLayer) { // tag layer, so we want one tag per parent
+            for (Annotation sourceParent : parent.all(sourceParentLayer.getId())) {
+               Annotation a = sourceParent.first(sourceLayer.getId());
+               // setStatus("token: " + sourceParent + " #" + sourceParent.getOrdinal() +  " - " + a);
+               if (a != null) layer.add(a);
+            } // next parent
+         } else { // just get the list directly from the parent
+            for (Annotation a : parent.all(sourceLayer.getId())) layer.add(a);
+         }
+         if (layer.size() == 0) {
+            setStatus("Skipping parent as there are no "+sourceLayer.getId()+" annotations: "
+                      + parent);
+            continue;
+         }
+         int ordinal = 1;
+         for (Annotation source : layer) { // TODO create builder for this!
+            if (isCancelling()) break;
+            if (source.get("||") != null) continue; // should be impossible
+            Anchor aTextStart = new Anchor(null, Double.valueOf(sText.length()));
+            textGraph.addAnchor(aTextStart);
+            sText.append(source.getLabel());
+            Anchor aTextEnd = new Anchor(null, Double.valueOf(sText.length()));
+            textGraph.addAnchor(aTextEnd);
+            
+            // create a parallel annotation that marks the extent of this annotation in sAnnotations
+            Annotation anText = new Annotation(
+               null, source.getLabel(), "||",
+               aTextStart.getId(), aTextEnd.getId(),
+               textGraph.getId(), ordinal++);
+            textGraph.addAnnotation(anText);
+            // link corresponding annotations together
+            anText.put("||", source);
+            source.put("||", anText);
+            
+            sText.append(" ");
+         } // next annotation
+         if (sText.length() == 0) {
+            setStatus("Skipping parent " + parent + " as there's no text to match");
+            continue;
+         }
+
+         // now that we've got some text to match against, start matching
+         String sFinalText = sText.toString();
+         //if (debug) setStatus("Matching against: " + sFinalText);
+         Annotation[] textAnnotations = textGraph.all("||");
+         for (Mapping mapping : mappings) {
+            if (isCancelling()) break;
+            Pattern pattern = mapping.pattern;
+            Matcher matcher = pattern.matcher(sFinalText);
+            while (matcher.find()) { // found a match 
+               String sMatch = sFinalText.substring(matcher.start(), matcher.end());
+               if (sMatch.length() > 40) {
+                  sMatch = sMatch.substring(0, 15)
+                     + "..." + sMatch.substring(sMatch.length() - 15);
+               }
+               setStatus("Match:" + sMatch + "("+matcher.start()+"-"+matcher.end()+")");
+               // find the start annotation
+               int a = 0;
+               Annotation anStart = textAnnotations[a];
+               for (a = 0; a < textAnnotations.length; a++) {
+                  if (textAnnotations[a].getEnd().getOffset().intValue() >= matcher.start()) {
+                     anStart = textAnnotations[a];
+                     break;
+                  }
+               } // next text annotation
+               // continue from there, looking for the end annotation
+               Annotation anEnd = anStart;
+               for (; a < textAnnotations.length; a++) {
+                  if (textAnnotations[a].getStart().getOffset().intValue() >= matcher.end()) {
+                     break;
+                  }
+                  anEnd = textAnnotations[a];
+               } // next text annotation
+               
+               // we're actually interested in the AG annotations
+               anStart = (Annotation)anStart.get("||");
+               anEnd = (Annotation)anEnd.get("||");
+               
+               //if (debug) setStatus("From " + anStart + " to " + anEnd);
+               
+               // create an annotation on our layer that spans
+               // the start and end annotations
+               
+               Annotation annotation = null;
+               if (!deleteOnNoMatch) {
+                  // if there's an annotation in the same  place, update that one instead
+                  // so get the intersection of annotations that start and the start and
+                  // and end at the end
+                  LinkedHashSet<Annotation> linkingAnnotations = new LinkedHashSet<Annotation>(
+                     anStart.getStart().startOf(destinationLayerId));
+                  linkingAnnotations.retainAll(anEnd.getEnd().endOf(destinationLayerId));
+                  if (linkingAnnotations.size() > 0) {
+                     annotation = linkingAnnotations.iterator().next();
+                     //if (debug) setStatus("Updating " + annotation);
+                     updatedAnnotationCount++;
+                  }
+               }
+               if (annotation == null) {
+                  annotation = graph.createAnnotation(
+                     anStart.getStart(), anEnd.getEnd(), destinationLayerId, mapping.label,
+                     parent);
+                  newAnnotationCount++;
+                  //if (debug) setStatus("Added annotation: " + annotation);
+               }
+               if (annotation.getLabel().indexOf('$') >= 0) { // group substitution
+                  annotation.setLabel(
+                     sText.substring(matcher.start(), matcher.end())
+                     .replaceAll(pattern.toString(), annotation.getLabel()));
+               }
+               annotation.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+               
+            } // next match
+         } // next pattern
+         setPercentComplete(t * 100 / parents.length);
+      } // next parent
+   } // end of annotateSpans()
    
    /**
     * Annotate the given token if appropriate.

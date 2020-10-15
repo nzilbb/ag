@@ -211,10 +211,12 @@ public class TestPatternTagger {
                   annotator.getDeleteOnNoMatch());
       Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
          .collect(Collectors.toSet());
-      assertEquals("1 required layer: "+requiredLayers,
-                   1, requiredLayers.size());
+      assertEquals("2 required layer: "+requiredLayers,
+                   2, requiredLayers.size());
       assertTrue("word required "+requiredLayers,
                  requiredLayers.contains("word"));
+      assertTrue("turn required "+requiredLayers,
+                 requiredLayers.contains("turn"));
       String outputLayers[] = annotator.getOutputLayers();
       assertEquals("1 output layer: "+Arrays.asList(outputLayers),
                    1, outputLayers.length);
@@ -271,10 +273,12 @@ public class TestPatternTagger {
                  annotator.getDeleteOnNoMatch());
       Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
          .collect(Collectors.toSet());
-      assertEquals("1 required layer: "+requiredLayers,
-                   1, requiredLayers.size());
+      assertEquals("2 required layer: "+requiredLayers,
+                   2, requiredLayers.size());
       assertTrue("word required "+requiredLayers,
                  requiredLayers.contains("word"));
+      assertTrue("turn required "+requiredLayers,
+                 requiredLayers.contains("turn"));
       String outputLayers[] = annotator.getOutputLayers();
       assertEquals("1 output layer: "+Arrays.asList(outputLayers),
                    1, outputLayers.length);
@@ -396,10 +400,14 @@ public class TestPatternTagger {
                  annotator.getDeleteOnNoMatch());
       Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
          .collect(Collectors.toSet());
-      assertEquals("1 required layer: "+requiredLayers,
-                   1, requiredLayers.size());
+      assertEquals("3 required layer: "+requiredLayers,
+                   3, requiredLayers.size());
+      assertTrue("turn required "+requiredLayers,
+                 requiredLayers.contains("turn"));
       assertTrue("word required "+requiredLayers,
                  requiredLayers.contains("word"));
+      assertTrue("index required "+requiredLayers,
+                 requiredLayers.contains("index"));
       String outputLayers[] = annotator.getOutputLayers();
       assertEquals("1 output layer: "+Arrays.asList(outputLayers),
                    1, outputLayers.length);
@@ -478,10 +486,12 @@ public class TestPatternTagger {
                  annotator.getDeleteOnNoMatch());
       Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
          .collect(Collectors.toSet());
-      assertEquals("1 required layer: "+requiredLayers,
-                   1, requiredLayers.size());
+      assertEquals("2 required layer: "+requiredLayers,
+                   2, requiredLayers.size());
       assertTrue("word required "+requiredLayers,
                  requiredLayers.contains("word"));
+      assertTrue("turn required "+requiredLayers,
+                 requiredLayers.contains("turn"));
       String outputLayers[] = annotator.getOutputLayers();
       assertEquals("1 output layer: "+Arrays.asList(outputLayers),
                    1, outputLayers.length);
@@ -563,10 +573,12 @@ public class TestPatternTagger {
                  annotator.getDeleteOnNoMatch());
       Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
          .collect(Collectors.toSet());
-      assertEquals("1 required layer: "+requiredLayers,
-                   1, requiredLayers.size());
+      assertEquals("2 required layer: "+requiredLayers,
+                   2, requiredLayers.size());
       assertTrue("word required "+requiredLayers,
                  requiredLayers.contains("word"));
+      assertTrue("turn required "+requiredLayers,
+                 requiredLayers.contains("turn"));
       String outputLayers[] = annotator.getOutputLayers();
       assertEquals("1 output layer: "+Arrays.asList(outputLayers),
                    1, outputLayers.length);
@@ -696,14 +708,16 @@ public class TestPatternTagger {
                  annotator.getDeleteOnNoMatch());
       Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
          .collect(Collectors.toSet());
-      assertEquals("3 required layer: "+requiredLayers,
-                   3, requiredLayers.size());
+      assertEquals("4 required layer: "+requiredLayers,
+                   4, requiredLayers.size());
       assertTrue("word required "+requiredLayers,
                  requiredLayers.contains("word"));
       assertTrue("transcript language required "+requiredLayers,
                  requiredLayers.contains("transcript_language"));
       assertTrue("phrase lanaguage required "+requiredLayers,
                  requiredLayers.contains("lang"));
+      assertTrue("turn required "+requiredLayers,
+                 requiredLayers.contains("turn"));
       String outputLayers[] = annotator.getOutputLayers();
       assertEquals("1 output layer: "+Arrays.asList(outputLayers),
                    1, outputLayers.length);
@@ -782,14 +796,16 @@ public class TestPatternTagger {
                  annotator.getDeleteOnNoMatch());
       Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
          .collect(Collectors.toSet());
-      assertEquals("3 required layer: "+requiredLayers,
-                   3, requiredLayers.size());
+      assertEquals("4 required layer: "+requiredLayers,
+                   4, requiredLayers.size());
       assertTrue("word required "+requiredLayers,
                  requiredLayers.contains("word"));
       assertTrue("transcript language required "+requiredLayers,
                  requiredLayers.contains("transcript_language"));
       assertTrue("phrase lanaguage required "+requiredLayers,
                  requiredLayers.contains("lang"));
+      assertTrue("turn required "+requiredLayers,
+                 requiredLayers.contains("turn"));
       String outputLayers[] = annotator.getOutputLayers();
       assertEquals("1 output layer: "+Arrays.asList(outputLayers),
                    1, outputLayers.length);
@@ -845,6 +861,7 @@ public class TestPatternTagger {
       // annotate a graph
       Graph g = new Graph()
          .setSchema(schema);
+      g.setId("pauseGraph");
       Anchor start = g.getOrCreateAnchorAt(1);
       Anchor end = g.getOrCreateAnchorAt(100);
       g.addAnnotation(
@@ -916,6 +933,7 @@ public class TestPatternTagger {
          +"\"deleteOnNoMatch\":\"false\","
          +"\"destinationLayerId\":\"story\","
          +"\"mappings\":["
+         // NB the graph token "after" is actually "after," - it should work with partial words
          +" {\"pattern\":\"once upon a time .* happily ever after\",\"label\":\"story\"}"
          +"]}");
       
@@ -945,10 +963,12 @@ public class TestPatternTagger {
                   annotator.getDeleteOnNoMatch());
       Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
          .collect(Collectors.toSet());
-      assertEquals("1 required layer: "+requiredLayers,
-                   1, requiredLayers.size());
+      assertEquals("2 required layer: "+requiredLayers,
+                   2, requiredLayers.size());
       assertTrue("word required "+requiredLayers,
                  requiredLayers.contains("word"));
+      assertTrue("turn required "+requiredLayers,
+                 requiredLayers.contains("turn"));
       String outputLayers[] = annotator.getOutputLayers();
       assertEquals("1 output layer: "+Arrays.asList(outputLayers),
                    1, outputLayers.length);
@@ -1040,10 +1060,12 @@ public class TestPatternTagger {
                   annotator.getDeleteOnNoMatch());
       Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
          .collect(Collectors.toSet());
-      assertEquals("1 required layer: "+requiredLayers,
-                   1, requiredLayers.size());
+      assertEquals("2 required layer: "+requiredLayers,
+                   2, requiredLayers.size());
       assertTrue("word required "+requiredLayers,
                  requiredLayers.contains("word"));
+      assertTrue("turn required "+requiredLayers,
+                 requiredLayers.contains("turn"));
       String outputLayers[] = annotator.getOutputLayers();
       assertEquals("1 output layer: "+Arrays.asList(outputLayers),
                    1, outputLayers.length);
@@ -1132,10 +1154,14 @@ public class TestPatternTagger {
                   annotator.getDeleteOnNoMatch());
       Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
          .collect(Collectors.toSet());
-      assertEquals("1 required layer: "+requiredLayers,
-                   1, requiredLayers.size());
+      assertEquals("3 required layer: "+requiredLayers,
+                   3, requiredLayers.size());
       assertTrue("orthography required "+requiredLayers,
                  requiredLayers.contains("orthography"));
+      assertTrue("turn required "+requiredLayers,
+                 requiredLayers.contains("turn"));
+      assertTrue("word required "+requiredLayers,
+                 requiredLayers.contains("word"));
       String outputLayers[] = annotator.getOutputLayers();
       assertEquals("1 output layer: "+Arrays.asList(outputLayers),
                    1, outputLayers.length);
@@ -1171,7 +1197,7 @@ public class TestPatternTagger {
    }
    
    /* Test tagging across turn boundaries */
-   /*@Test TODO*/ public void spanTagging() throws Exception {
+   @Test public void spanTagging() throws Exception {
       PatternTagger annotator = new PatternTagger();
       
       Graph g = spanGraph();
@@ -1197,9 +1223,8 @@ public class TestPatternTagger {
          +"\"deleteOnNoMatch\":\"false\","
          +"\"destinationLayerId\":\"joke\","
          +"\"mappings\":["
-         +" {\"pattern\":\"knock knock .* who.\",\"label\":\"joke\"}"
-         +"]}");
-      
+         +" {\"pattern\":\"knock knock .* who\\\\?\",\"label\":\"joke\"}"
+         +"]}");      
       assertEquals("token layer",
                    "word", annotator.getSourceLayerId());
       assertNull("transcript language layer",
@@ -1227,10 +1252,14 @@ public class TestPatternTagger {
                   annotator.getDeleteOnNoMatch());
       Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
          .collect(Collectors.toSet());
-      assertEquals("1 required layer: "+requiredLayers,
-                   1, requiredLayers.size());
+      assertEquals("3 required layer: "+requiredLayers,
+                   3, requiredLayers.size());
       assertTrue("word required "+requiredLayers,
                  requiredLayers.contains("word"));
+      assertTrue("turn required "+requiredLayers,
+                 requiredLayers.contains("turn"));
+      assertTrue("graph required "+requiredLayers,
+                 requiredLayers.contains("graph"));
       String outputLayers[] = annotator.getOutputLayers();
       assertEquals("1 output layer: "+Arrays.asList(outputLayers),
                    1, outputLayers.length);
@@ -1261,7 +1290,7 @@ public class TestPatternTagger {
          .toString(); // concatenate elements
       
       assertEquals("Correct tokens tagged",
-                   "[knock, knock, who's, there, dejav, dejav, who?,]", tagged);
+                   "[knock, knock, who's, there?, dejav, dejav, who?]", tagged);
    }
    
    /**
@@ -1285,6 +1314,7 @@ public class TestPatternTagger {
       // annotate a graph
       Graph g = new Graph()
          .setSchema(schema);
+      g.setId("spanGraph");
       Anchor start = g.getOrCreateAnchorAt(1);
       Anchor aStory = g.getOrCreateAnchorAt(10);
       Anchor aKnockKnock = g.getOrCreateAnchorAt(20);
