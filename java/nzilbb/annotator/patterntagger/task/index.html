@@ -18,6 +18,24 @@
           checked against each regular expression. </p>
       
       </details>
+      <details><summary><b> Destination Layer </b></summary>
+        <p> This is the layer that new annotations will be added to. You can pick an
+          existing layer, or add a new layer: </p>
+        <dl>
+          <dt> [add new word layer] </dt>
+          <dd> Use this option if your <b> Source Layer </b> is a word layer and your mappings
+            define tags for individual word tokens. </dd>
+          
+          <dt> [add new phrase layer] </dt>
+          <dd> Use this option if your tags could span multiple word tokens, but will
+            always be within the same speaker turn. </dd>
+          
+          <dt> [add new span layer] </dt>
+          <dd> Use this option if your tags could span multiple word tokens, and could
+            span words from different speaker-turns. </dd>
+          
+        </dl>
+      </details>
       <details><summary><b> Language </b></summary>
         
         <p> The <i>Language</i> setting determines which language to target for
@@ -30,18 +48,18 @@
           annotated. There are three factors that determine the language of an utterance:</p> 
         <ol>
           <li> The text may be language-tagged - i.e. be enclosed by an annotation on
-            the <i>Language</i> layer. </li> 
-          <li> If not, the transcript's <i>Language</i> attribute is used to determine the
-            language.</li> 
-          <li> If the transcript has no <i>Language</i> specified, then the language of the
-            corpus is assumed.</li> 
+            the layer selected for <b> Phrase Language Layer </b>. </li> 
+          <li> If not, the layer selected for <b> Transcript Language Attribute </b> is
+            used to determine the language.</li>  
+          <li> If the transcript has no language otherwise explicitly specified, then the
+            language of the corpus is assumed.</li> 
         </ol>
         
-        <p> <b>NB</b> The language setting only applies if word or segment layers are being
-          annotated, not for phrase/span layer annotation. </p>
+        <p> <b>NB</b> The language setting only applies if the <b> Desination Layer </b>
+          is word or segment layer, not for phrase/span layer annotation. </p>
         
       </details>
-      <details><summary><b> Patterns </b></summary>
+      <details><summary><b> Mappings </b></summary>
       
       <p> The main area of the configuration form is a list of regular expressions to match
         against, which starts of empty. </p>
@@ -115,7 +133,7 @@
         </ul>
 
       </details>
-      <details><summary><b>Some examples</b></summary>
+      <details><summary><b> Some examples </b></summary>
 
         <p> For example, you might want to identify filled pauses that might be variously
           transcribed as <q>um</q>, <q>ummm</q>, <q>ahm</q>, <q>ah</q>, <q>aah</q>, <q>er</q>,
@@ -620,7 +638,20 @@
         <label for="sourceLayerId">Source Layer</label>
         <span><select id="sourceLayerId" name="sourceLayerId" required></select></span>
       </div>
-      <div class="field" title="Transcript attribute for overall language">
+      
+      <div class="field" title="Output layer on which new annotations are added">
+        <label for="destinationLayerId">Destination Layer</label>
+        <span>
+          <select id="destinationLayerId" name="destinationLayerId" required>
+            <option disabled>[select layer]</option> <!-- force choice the first time -->
+            <option>[add new word layer]</option>    <!-- allow adding a new word layer -->
+            <option>[add new phrase layer]</option>  <!-- allow adding a new turn layer -->
+            <option>[add new span layer]</option>    <!-- allow adding a new graph layer -->
+          </select>
+          <input type="hidden" id="destinationLayerParentId" name="destinationLayerParentId">
+        </span>
+      </div>
+      <div class="field language-field" title="Transcript attribute for overall language">
         <label for="transcriptLanguageLayerId">Transcript Language Attribute</label>
         <span>
           <select id="transcriptLanguageLayerId" name="transcriptLanguageLayerId">
@@ -628,7 +659,8 @@
           </select>
         </span>
       </div>
-      <div class="field" title="Layer for annotating phrases in a different language">
+      <div class="field language-field"
+           title="Layer for annotating phrases in a different language">
         <label for="phraseLanguageLayerId">Phrase Language Layer</label>
         <span>
           <select id="phraseLanguageLayerId" name="phraseLanguageLayerId">
@@ -636,7 +668,7 @@
           </select>
         </span>
       </div>
-      <div class="field"
+      <div class="field language-field"
            id="languageField"
            title="Regular expression for the ISO language codes of the languages to target, or blank for all">
         <label for="language">Language</label>
@@ -680,16 +712,7 @@
           </select> annotations in target layer whose source matches no pattern
         </div>
       </div><!-- mappingsDiv -->
-      
-      <div class="field" title="Output layer on which new annotations are added">
-        <label for="destinationLayerId">Destination Layer</label>
-        <span>
-          <select id="destinationLayerId" name="destinationLayerId" required>
-            <option disabled>[select layer]</option> <!-- force choice the first time -->
-            <option>[add new layer]</option>         <!-- allow adding a new layer -->
-          </select>
-        </span>
-      </div>
+
       <div class="controls"><input type="submit" value="Set Parameters"></div>
     </form>
     

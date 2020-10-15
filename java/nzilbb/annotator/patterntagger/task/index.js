@@ -72,7 +72,6 @@ getSchema(s => {
                 destinationLayerId.appendChild(layerOption);
                 destinationLayerId.value = parameters.destinationLayerId;
             }
-            
             // insert current mappings
             if (!parameters.mappings) {
                 newMapping("", ""); // no mappings, start off with a blank one
@@ -81,13 +80,28 @@ getSchema(s => {
                     newMapping(mapping.pattern, mapping.label);
                 } // next mapping
             }
+            
+            // set destination parent layer
+            var destinationLayerParentId = schema.destinationLayerParentId;
+            if (!destinationLayerParentId) { // infer it
+                var destinationLayer = schema.layers[parameters.destinationLayerId];
+                destinationLayerParentId = schema.wordLayerId;
+                if (destinationLayer) {
+                    destinationLayerParentId = destinationLayer.parentId;
+                }
+            }
+            document.getElementById("destinationLayerParentId").value = destinationLayerParentId;
+            enableLanguageParameters();
+            
         }
     });
 });
 
-// this function detects when the user selects [add new layer]:
+// this function detects when the user selects [add new layer]
 function changedLayer(select) {
-    if (select.value == "[add new layer]") {
+    if (select.value == "[add new word layer]"
+        || select.value == "[add new phrase layer]"
+        || select.value == "[add new span layer]") {
         var newLayer = prompt( //  default is the task ID
             "Please enter the new layer ID", window.location.search.substring(1));
         if (newLayer) { // they didn't cancel
@@ -104,9 +118,36 @@ function changedLayer(select) {
             var layerOption = document.createElement("option");
             layerOption.appendChild(document.createTextNode(newLayer));
             select.appendChild(layerOption);
+            var parentId = schema.wordLayerId;
+            if (select.value == "[add new phrase layer]") {
+                parentId = schema.turnLayerId;
+            } else if (select.value == "[add new span layer]") {
+                parentId = schema.root.id;
+            }
+            document.getElementById("destinationLayerParentId").value = parentId;
             // select it
             select.selectedIndex = select.children.length - 1;
         }
+    } else {
+        var selectedLayer = schema.layers[select.value];
+        if (selectedLayer) {
+            document.getElementById("destinationLayerParentId").value = selectedLayer.parentId;
+        }
+    }
+    enableLanguageParameters();
+}
+
+// check whether languguage-related fields should be visible
+function enableLanguageParameters() {
+    var destinationLayerParentId = document.getElementById("destinationLayerParentId").value;
+    var displayLanguageFields = destinationLayerParentId == schema.wordLayerId?"":"none";
+    var languageFields = document.getElementsByClassName("language-field");
+    for (var f = 0; f < languageFields.length; f++) {
+        languageFields[f].style.display = displayLanguageFields;
+    }
+    var mappingOptions = document.getElementsByClassName("label-processing");
+    for (var o = 0; o < mappingOptions.length; o++) {
+        mappingOptions[o].style.display = displayLanguageFields;
     }
 }
 
@@ -148,6 +189,7 @@ function newMapping(pattern, label) {
     // TODO <c:if test="${!spanningLayer}">
     var COPY_FROM_LAYER_TEXT = "Copy from layer: ";
     var copyFromLayer = document.createElement("select");
+    copyFromLayer.className = "label-processing";
     copyFromLayer.title = "Label for annotation can be copied from another layer, or some specified text.";
     copyFromLayer.onfocus = function() { lastMapping = this.parentNode; };
     var option = document.createElement("option");

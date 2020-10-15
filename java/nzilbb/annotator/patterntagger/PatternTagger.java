@@ -186,7 +186,27 @@ public class PatternTagger extends Annotator {
     * @param newDestinationLayerId ID of the output layer.
     */
    public PatternTagger setDestinationLayerId(String newDestinationLayerId) { destinationLayerId = newDestinationLayerId; return this; }
-
+   
+   /**
+    * ID of the parent layer of {@link #destinationLayerId}, used if it doesn't exist yet.
+    * @see #getDestinationParentLayerId()
+    * @see #setDestinationParentLayerId(String)
+    */
+   protected String destinationLayerParentId;
+   /**
+    * Getter for {@link #destinationLayerParentId}: ID of the parent layer of
+    * {@link #destinationLayerId}, used if it doesn't exist yet. 
+    * @return ID of the parent layer of {@link #destinationLayerId}, used if it doesn't exist yet.
+    */
+   public String getDestinationLayerParentId() { return destinationLayerParentId; }
+   /**
+    * Setter for {@link #destinationLayerParentId}: ID of the parent layer of 
+    * {@link #destinationLayerId}, used if it doesn't exist yet. 
+    * @param newDestinationLayerParentId ID of the parent layer of {@link #destinationLayerId},  
+    * used if it doesn't exist yet. 
+    */
+   public PatternTagger setDestinationLayerParentId(String newDestinationLayerParentId) { destinationLayerParentId = newDestinationLayerParentId; return this; }
+   
    /**
     * Sets the configuration for a given annotation task.
     * @param parameters The configuration of the annotator; a value of <tt> null </tt>
@@ -252,16 +272,27 @@ public class PatternTagger extends Annotator {
          }
       }
 
-      // TODO check for new layer parent specifier
-         
       // does the outputLayer need to be added to the schema?
       if (schema.getLayer(destinationLayerId) == null) {
-         schema.addLayer(
-            new Layer(destinationLayerId)
-            .setAlignment(Constants.ALIGNMENT_NONE) // TODO or interval
-            .setPeers(false)                        // TODO or true
-            .setParentId(schema.getWordLayerId())   // TODO or turn or graph
-            .setType(Constants.TYPE_STRING));
+         Layer destinationLayerParent = schema.getLayer(destinationLayerParentId);
+         if (destinationLayerParent == null
+             || destinationLayerParent.getId().equals(schema.getWordLayerId())) {
+            // word tag layer
+            schema.addLayer(
+               new Layer(destinationLayerId)
+               .setAlignment(Constants.ALIGNMENT_NONE)
+               .setPeers(false)
+               .setParentId(schema.getWordLayerId())
+               .setType(Constants.TYPE_STRING));
+         } else {
+            // spanning layer
+            schema.addLayer(
+               new Layer(destinationLayerId)
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setParentId(destinationLayerParentId)
+               .setType(Constants.TYPE_STRING));
+         }
       }
    }
    
