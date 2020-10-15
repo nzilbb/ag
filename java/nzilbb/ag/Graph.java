@@ -1253,7 +1253,13 @@ public class Graph
    {
       if (from.getId() == null) getGraph().addAnchor(from);
       if (to.getId() == null) getGraph().addAnchor(to);
-      if (parent.getId() == null) getGraph().addAnnotation(parent);
+      if (parent.getId() == null) {
+         if (parent != getGraph() ) {
+            getGraph().addAnnotation(parent);
+         } else {
+            throw new NullPointerException("Null graph ID");
+         }
+      }
       Annotation span = new Annotation(null, label, layerId, from.getId(), to.getId(), parent.getId());
       getGraph().addAnnotation(span);
       return span;
