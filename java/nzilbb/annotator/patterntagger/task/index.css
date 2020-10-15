@@ -24,6 +24,9 @@ label {
 label:after {
     content: ':';
 }
+form {
+    width: max-content;
+}
 .field {
     display: flex;
     flex-direction: row;
