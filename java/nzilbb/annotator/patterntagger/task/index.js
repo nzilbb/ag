@@ -82,7 +82,7 @@ getSchema(s => {
             }
             
             // set destination parent layer
-            var destinationLayerParentId = schema.destinationLayerParentId;
+            var destinationLayerParentId = parameters.destinationLayerParentId;
             if (!destinationLayerParentId) { // infer it
                 var destinationLayer = schema.layers[parameters.destinationLayerId];
                 destinationLayerParentId = schema.wordLayerId;
