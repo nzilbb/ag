@@ -229,15 +229,19 @@ public class TestAnchor
 
       g.addAnchor(new Anchor("earliest", null));
       g.addAnnotation(new Annotation("toEarliest", "direct to earliest", "layer2", "earliest", "test"));
+      for (Anchor x : g.getAnchors().values()) x.remove("@offsetMin"); // remove cached values
       assertNull("offsetMin - null offsets, multiple paths preceding", a.getOffsetMin());
 
       g.getAnchor("earliest").setOffset(1.0);
+      for (Anchor x : g.getAnchors().values()) x.remove("@offsetMin"); // remove cached values
       assertEquals("offsetMin - earliest", Double.valueOf(1.0), a.getOffsetMin());
 
       g.getAnchor("earlier").setOffset(2.0);
+      for (Anchor x : g.getAnchors().values()) x.remove("@offsetMin"); // remove cached values
       assertEquals("offsetMin - chain overrides direct connection", Double.valueOf(2.0), a.getOffsetMin());
 
       g.getAnchor("early").setOffset(3.0);
+      for (Anchor x : g.getAnchors().values()) x.remove("@offsetMin"); // remove cached values
       assertEquals("offsetMin - direct connection overrides chain", Double.valueOf(3.0), a.getOffsetMin());
 
       assertNull("offsetMax - null offset, no following", a.getOffsetMax());
@@ -255,12 +259,15 @@ public class TestAnchor
       assertNull("offsetMax - null offsets, multiple paths following", a.getOffsetMax());
 
       g.getAnchor("latest").setOffset(7.0);
+      for (Anchor x : g.getAnchors().values()) x.remove("@offsetMax"); // remove cached values
       assertEquals("offsetMax - latest", Double.valueOf(7.0), a.getOffsetMax());
 
       g.getAnchor("later").setOffset(6.0);
+      for (Anchor x : g.getAnchors().values()) x.remove("@offsetMax"); // remove cached values
       assertEquals("offsetMax - chain overrides direct connection", Double.valueOf(6.0), a.getOffsetMax());
 
       g.getAnchor("late").setOffset(5.0);
+      for (Anchor x : g.getAnchors().values()) x.remove("@offsetMax"); // remove cached values
       assertEquals("offsetMax - direct connection overrides chain", Double.valueOf(5.0), a.getOffsetMax());
       
       a.setOffset(5.0);
