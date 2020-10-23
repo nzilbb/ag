@@ -781,6 +781,28 @@ public class Annotation
    } // end of constructor
 
    /**
+    * Basic constructor including anchor and parent ids and ordinal and confidence.
+    * @param id The annotation's identifier.
+    * @param label The annotation's label.
+    * @param layerId The identifier of the annotation's layer.
+    * @param startId ID of the annotation's start anchor.
+    * @param endId ID of the annotation's end anchor.
+    * @param parentId The annotation's parent annotation ID.
+    * @param ordinal The annotation's ordinal position amongst the parent's children.
+    */
+   public Annotation(String id, String label, String layerId, String startId, String endId, String parentId, int ordinal, Integer confidence)
+   {
+      setId(id);
+      setLabel(label);
+      setLayerId(layerId);
+      setStartId(startId);
+      setEndId(endId);
+      setParentId(parentId);
+      setOrdinal(ordinal);
+      setConfidence(confidence);
+   } // end of constructor
+
+   /**
     * Copy constructor.  This copies all attributes of the anchor <em>except</em>
     * <var>id</var>, tracked original values (e.g. <var>originalLabel</var>), and
     * attributes whose keys do not begin with an alphanumeric (by convention these are
