@@ -244,6 +244,9 @@ public class DefaultOffsetGenerator
 	    anchorsUnderThreshold = true;
 	    break;
 	 }
+         // clear any cached min/max offsets - see Anchor.getOffsetMin()/getOffsetMax()
+         a.remove("@offsetMin");
+         a.remove("@offsetMax");
       } // next anchor
       if (anchorsUnderThreshold)
       {

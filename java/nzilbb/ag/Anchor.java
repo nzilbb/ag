@@ -467,12 +467,15 @@ public class Anchor
     * Returns the minimum possible offset for this anchor.  If the offset is set,
     * the minimum possible offset is the same as {@link #getOffset()}. Otherwise
     * the annotation graph is traversed to find the anchor with highest preceding offset.
+    * <p> If the graph is traversed, the resultinf offset is cached in an attribute called 
+    * <q>"@offsetMin"</q>.
     * @return The minimum possible offset for this anchor, or null if the it can't be determined
     * from the anchor or its graph.
     */
    public Double getOffsetMin()
    {
       if (getOffset() != null) return getOffset();
+      if (containsKey("@offsetMin")) return (Double)get("@offsetMin");
 
       // go backward through the graph to find all following set offsets
       Double dGreatestPrecedingOffset = null;
@@ -489,6 +492,7 @@ public class Anchor
             }
          }
       }
+      put("@offsetMin", dGreatestPrecedingOffset);
       return dGreatestPrecedingOffset;
    } // end of getOffsetMin()
 
@@ -496,12 +500,15 @@ public class Anchor
     * Returns the maximum possible offset for this anchor.  If the offset is set,
     * the maximum possible offset is the same as {@link #getOffset()}. Otherwise
     * the annotation graph is traversed to find the anchor with lowest following offset.
+    * <p> If the graph is traversed, the resultinf offset is cached in an attribute called 
+    * <q>"@offsetMax"</q>.
     * @return The maximum possible offset for this anchor, or null if the it can't be determined
     * from the anchor or its graph.
     */
    public Double getOffsetMax()
    {
       if (getOffset() != null) return getOffset();
+      if (containsKey("@offsetMax")) return (Double)get("@offsetMax");
       // go forward through the graph to find all following set offsets
       Double dLeastFollowingOffset = null;
       for(Annotation a : getStartingAnnotations())
@@ -517,6 +524,7 @@ public class Anchor
             }
          }
       }
+      put("@offsetMax", dLeastFollowingOffset);
       return dLeastFollowingOffset;
    } // end of getOffsetMax()
 
