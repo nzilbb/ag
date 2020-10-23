@@ -78,12 +78,18 @@ public class TestConventionTransformer
 
     g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a6", "participant1"));
 
-    g.addAnnotation(new Annotation("word1", "the", "word", "a1", "a2", "turn1"));
-    g.addAnnotation(new Annotation("word2", "&qui", "word", "a2", "a3", "turn1"));
-    g.addAnnotation(new Annotation("word3", "quick", "word", "a3", "a4", "turn1"));
-    g.addAnnotation(new Annotation("word4", "fox&hound", "word", "a4", "a?1", "turn1"));
-    g.addAnnotation(new Annotation("word5", "jumps", "word", "a?1", "a?2", "turn1"));
-    g.addAnnotation(new Annotation("word6", "over", "word", "a?2", "a5", "turn1"));
+    g.addAnnotation(new Annotation("word1", "the", "word", "a1", "a2", "turn1",
+                                   1, Constants.CONFIDENCE_MANUAL));
+    g.addAnnotation(new Annotation("word2", "&qui", "word", "a2", "a3", "turn1",
+                                   2, Constants.CONFIDENCE_MANUAL));
+    g.addAnnotation(new Annotation("word3", "quick", "word", "a3", "a4", "turn1",
+                                   3, Constants.CONFIDENCE_MANUAL));
+    g.addAnnotation(new Annotation("word4", "fox&hound", "word", "a4", "a?1", "turn1",
+                                   4, Constants.CONFIDENCE_MANUAL));
+    g.addAnnotation(new Annotation("word5", "jumps", "word", "a?1", "a?2", "turn1",
+                                   5, Constants.CONFIDENCE_MANUAL));
+    g.addAnnotation(new Annotation("word6", "over", "word", "a?2", "a5", "turn1",
+                                   6, Constants.CONFIDENCE_MANUAL));
 
     try
     {
@@ -98,6 +104,9 @@ public class TestConventionTransformer
 
       assertNull(g.getAnnotation("word1").first("disfluency"));
       assertEquals("DIS", g.getAnnotation("word2").first("disfluency").getLabel());
+      assertEquals("Confidence is copied from original annotation",
+                   Integer.valueOf(Constants.CONFIDENCE_MANUAL),
+                   g.getAnnotation("word2").first("disfluency").getConfidence());
       assertNull(g.getAnnotation("word3").first("disfluency"));
       assertNull(g.getAnnotation("word4").first("disfluency"));
       assertNull(g.getAnnotation("word5").first("disfluency"));

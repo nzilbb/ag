@@ -78,10 +78,14 @@ public class TestUtteranceParallelizer
       graph.addAnchor(new Anchor("a10", 10.0));
       graph.addAnnotation(new Annotation("t2", "p2", "turn", "a5", "a10", "p2"));
       // utterances
-      graph.addAnnotation(new Annotation("u1-1", "p1", "utterance", "a0", "a5", "t1"));
-      graph.addAnnotation(new Annotation("u1-2", "p1", "utterance", "a5", "a10", "t1"));
-      graph.addAnnotation(new Annotation("u2-1", "p2", "utterance", "a5", "a10", "t2"));
-      graph.addAnnotation(new Annotation("u1-3", "p1", "utterance", "a10", "a15", "t1"));
+      graph.addAnnotation(new Annotation("u1-1", "p1", "utterance", "a0", "a5", "t1",
+                                         1, Constants.CONFIDENCE_MANUAL));
+      graph.addAnnotation(new Annotation("u1-2", "p1", "utterance", "a5", "a10", "t1",
+                                         2, Constants.CONFIDENCE_MANUAL));
+      graph.addAnnotation(new Annotation("u2-1", "p2", "utterance", "a5", "a10", "t2",
+                                         1, Constants.CONFIDENCE_MANUAL));
+      graph.addAnnotation(new Annotation("u1-3", "p1", "utterance", "a10", "a15", "t1",
+                                         3, Constants.CONFIDENCE_MANUAL));
 
       // words
       graph.addAnnotation(new Annotation("w1-1", "w1-1", "word", 
@@ -166,6 +170,14 @@ public class TestUtteranceParallelizer
                             2, t.list("word").length);
             }
          } // next turn
+
+         // all utterances have their confidence set
+         for (Annotation utterance : graph.all("utterance"))
+         {
+            assertEquals("Confidence is correct: " + utterance,
+                         Integer.valueOf(Constants.CONFIDENCE_MANUAL),
+                         utterance.getConfidence());                         
+         }
       }
       catch(TransformationException exception)
       {

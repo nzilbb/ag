@@ -248,6 +248,7 @@ public class SimpleTokenizer
 		  getDestinationLayerId(), 
 		  source.getStart().getId(), source.getEnd().getId(), 
 		  source.getParentId());
+               span.setConfidence(source.getConfidence());
 	       graph.addAnnotation(span);
 	       
 	       // and the source gets deleted (to be replaced by individual tokens)
@@ -282,6 +283,7 @@ public class SimpleTokenizer
 		  null, sToken, 
 		  getTokensInSourceLayer()?getSourceLayerId():getDestinationLayerId(), 
 		  start.getId(), end.getId());
+               token.setConfidence(source.getConfidence());
 	       if (getTokensInSourceLayer() || sharedParent)
 	       {
 		  // explicitly set the ordinal

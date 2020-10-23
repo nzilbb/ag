@@ -688,6 +688,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
 			   startSpan, endSpan, 
 			   getDestinationLayerId(), label.toString(), 
 			   spanParent);
+                        annotation.setConfidence(startSpan.getConfidence());
 		     } // non-null destination
 
 		     // source annotations: 

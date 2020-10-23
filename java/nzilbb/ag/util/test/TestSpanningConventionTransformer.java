@@ -81,12 +81,18 @@ public class TestSpanningConventionTransformer
 
       g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a6", "participant1"));
 
-      g.addAnnotation(new Annotation("word1", "the", "word", "a1", "a2", "turn1"));
-      g.addAnnotation(new Annotation("word2", "{quick", "word", "a2", "a3", "turn1"));
-      g.addAnnotation(new Annotation("word3", "brown", "word", "a3", "a4", "turn1"));
-      g.addAnnotation(new Annotation("word4", "fox}", "word", "a4", "a?1", "turn1"));
-      g.addAnnotation(new Annotation("word5", "jumps", "word", "a?1", "a?2", "turn1"));
-      g.addAnnotation(new Annotation("word6", "over", "word", "a?2", "a5", "turn1"));
+      g.addAnnotation(new Annotation("word1", "the", "word", "a1", "a2", "turn1",
+                                     1, Constants.CONFIDENCE_MANUAL));
+      g.addAnnotation(new Annotation("word2", "{quick", "word", "a2", "a3", "turn1",
+                                     2, Constants.CONFIDENCE_MANUAL));
+      g.addAnnotation(new Annotation("word3", "brown", "word", "a3", "a4", "turn1",
+                                     3, Constants.CONFIDENCE_AUTOMATIC));
+      g.addAnnotation(new Annotation("word4", "fox}", "word", "a4", "a?1", "turn1",
+                                     4, Constants.CONFIDENCE_DEFAULT));
+      g.addAnnotation(new Annotation("word5", "jumps", "word", "a?1", "a?2", "turn1",
+                                     5, Constants.CONFIDENCE_MANUAL));
+      g.addAnnotation(new Annotation("word6", "over", "word", "a?2", "a5", "turn1",
+                                     6, Constants.CONFIDENCE_MANUAL));
 
       // span for word1, to test its anchor moves with word1's
       g.addAnnotation(new Annotation("span", "span", "span", "a1", "a2", "turn1"));
@@ -112,6 +118,8 @@ public class TestSpanningConventionTransformer
 	 assertEquals("a2", span.getStartId());
 	 assertEquals("a?1", span.getEndId());
 	 assertEquals("parent set", "my graph", span.getParentId());
+	 assertEquals("confidence matches first token",
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), span.getConfidence());
 
 	 span = g.list("span")[0];
 	 assertEquals("a1", span.getStartId());

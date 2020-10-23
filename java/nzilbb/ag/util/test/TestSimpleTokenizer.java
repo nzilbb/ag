@@ -71,16 +71,19 @@ public class TestSimpleTokenizer
       g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a3", "participant1"));
       g.addAnnotation(new Annotation("turn2", "jane doe", "turn", "a2", "a3", "participant2"));
 
-      g.addAnnotation(new Annotation("utterance1", "the quick brown fox", "utterance", "a0", "a1", "turn1"));
-      g.addAnnotation(new Annotation("utterance2", "jumps over", "utterance", "a1", "a3", "turn1"));
-      g.addAnnotation(new Annotation("utterance3", "the lazy dog", "utterance", "a2", "a3", "turn2"));
+      g.addAnnotation(new Annotation("utterance1", "the quick brown fox", "utterance",
+                                     "a0", "a1", "turn1", 1, Constants.CONFIDENCE_MANUAL));
+      g.addAnnotation(new Annotation("utterance2", "jumps over", "utterance", "a1", "a3", "turn1",
+                                     2, Constants.CONFIDENCE_MANUAL));
+      g.addAnnotation(new Annotation("utterance3", "the lazy dog", "utterance",
+                                     "a2", "a3", "turn2", 1, Constants.CONFIDENCE_MANUAL));
 
       try
       {
          g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word");
 	 tokenizer.transform(g);
-	 Annotation[] words = g.getAnnotation("turn1").list("word");
+	 Annotation[] words = g.getAnnotation("turn1").all("word");
 	 assertEquals(6, words.length);
 
 	 assertEquals("first word shares start with utterance", "a0", words[0].getStartId());
@@ -99,7 +102,7 @@ public class TestSimpleTokenizer
 	 assertEquals("over", words[5].getLabel());
 	 assertEquals("last word shares end with utterance", "a3", words[5].getEndId());
 
-	 words = g.getAnnotation("turn2").list("word");
+	 words = g.getAnnotation("turn2").all("word");
 	 assertEquals(3, words.length);
 	 assertEquals("first word shares start with utterance", "a2", words[0].getStartId());
 	 assertEquals("the", words[0].getLabel());
@@ -107,16 +110,18 @@ public class TestSimpleTokenizer
 	 assertEquals("dog", words[2].getLabel());
 	 assertEquals("first word shares end with utterance", "a3", words[2].getEndId());
 
-	 for (Annotation word : g.list("word"))
+	 for (Annotation word : g.all("word"))
 	 {
+            assertEquals("Tokens have same confidence as original annotation: " + word,
+                         Integer.valueOf(Constants.CONFIDENCE_MANUAL), word.getConfidence());
 	    if (!word.getStart().isStartOn("utterance"))
 	    {
-	       assertNull("Ensure word start anchors have no confidence: " + word + " - " + word.getStart() + ":" + word.getStart().getConfidence(),
+	       assertNull("Word start anchors have no confidence: " + word + " - " + word.getStart() + ":" + word.getStart().getConfidence(),
 			  word.getStart().getConfidence());
 	    }
 	    if (!word.getEnd().isEndOn("utterance"))
 	    {
-	       assertNull("Ensure word end anchors have no confidence: " + word + " - " + word.getEnd() + ":" + word.getEnd().getConfidence(),
+	       assertNull("Word end anchors have no confidence: " + word + " - " + word.getEnd() + ":" + word.getEnd().getConfidence(),
 			  word.getEnd().getConfidence());
 	    }
 	 } // next word
@@ -179,7 +184,7 @@ public class TestSimpleTokenizer
          g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word");
 	 tokenizer.transform(g);
-	 Annotation[] words = g.getAnnotation("turn1").list("word");
+	 Annotation[] words = g.getAnnotation("turn1").all("word");
 	 assertEquals(6, words.length);
 
 	 assertEquals("first word shares start with utterance", "a0", words[0].getStartId());
@@ -206,7 +211,7 @@ public class TestSimpleTokenizer
 	 assertEquals("offsets set", Double.valueOf(31), words[5].getEnd().getOffset());
 	 assertEquals("last word shares end with utterance", "a2", words[5].getEndId());
 
-	 words = g.getAnnotation("turn2").list("word");
+	 words = g.getAnnotation("turn2").all("word");
 	 assertEquals(3, words.length);
 	 assertEquals("first word shares start with utterance", "a2", words[0].getStartId());
 	 assertEquals("the", words[0].getLabel());
@@ -279,7 +284,7 @@ public class TestSimpleTokenizer
          g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word");
 	 tokenizer.transform(g);
-	 Annotation[] words = g.getAnnotation("turn1").list("word");
+	 Annotation[] words = g.getAnnotation("turn1").all("word");
 	 assertEquals(6, words.length);
 
 	 assertEquals("first word shares start with utterance", "a0", words[0].getStartId());
@@ -298,7 +303,7 @@ public class TestSimpleTokenizer
 	 assertEquals("over", words[5].getLabel());
 	 assertEquals("last word shares end with utterance", "a3", words[5].getEndId());
 
-	 words = g.getAnnotation("turn2").list("word");
+	 words = g.getAnnotation("turn2").all("word");
 	 assertEquals(3, words.length);
 	 assertEquals("first word shares start with utterance", "a2", words[0].getStartId());
 	 assertEquals("the", words[0].getLabel());
@@ -360,7 +365,7 @@ public class TestSimpleTokenizer
          g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word", "\\|");
 	 tokenizer.transform(g);
-	 Annotation[] words = g.getAnnotation("turn1").list("word");
+	 Annotation[] words = g.getAnnotation("turn1").all("word");
 	 assertEquals(6, words.length);
 
 	 assertEquals("first word shares start with utterance", "a0", words[0].getStartId());
@@ -379,7 +384,7 @@ public class TestSimpleTokenizer
 	 assertEquals("over", words[5].getLabel());
 	 assertEquals("last word shares end with utterance", "a3", words[5].getEndId());
 
-	 words = g.getAnnotation("turn2").list("word");
+	 words = g.getAnnotation("turn2").all("word");
 	 assertEquals(3, words.length);
 	 assertEquals("first word shares start with utterance", "a2", words[0].getStartId());
 	 assertEquals("the", words[0].getLabel());
@@ -470,7 +475,7 @@ public class TestSimpleTokenizer
          g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("word", "linkage", "_", true);
 	 tokenizer.transform(g);
-	 Annotation[] words = g.getAnnotation("turn1").list("word");
+	 Annotation[] words = g.getAnnotation("turn1").all("word");
 	 assertEquals(10, words.length);
 
 	 assertEquals("the", words[0].getLabel());
@@ -507,7 +512,7 @@ public class TestSimpleTokenizer
 	 assertEquals("anchor link", words[8].getEnd(), words[9].getStart());
 
 	 // destination
-	 Annotation[] linkage = g.getAnnotation("turn1").list("linkage");
+	 Annotation[] linkage = g.getAnnotation("turn1").all("linkage");
 	 assertEquals("" + linkage, 1, linkage.length);
 	 assertEquals(words[2].getLabel(), linkage[0].getLabel());
 	 assertEquals(words[1].getStart(), linkage[0].getStart());
@@ -520,7 +525,7 @@ public class TestSimpleTokenizer
 	    assertEquals("turn1", word.getParentId());
 	 }
 	 
-	 words = g.getAnnotation("turn2").list("word");
+	 words = g.getAnnotation("turn2").all("word");
 	 assertEquals(6, words.length);
 	 // ordinals correct
 	 for (int i = 0; i < words.length; i++)
@@ -582,7 +587,7 @@ public class TestSimpleTokenizer
          g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word");
 	 tokenizer.transform(g);
-	 Annotation[] words = g.getAnnotation("turn1").list("word");
+	 Annotation[] words = g.getAnnotation("turn1").all("word");
 	 assertEquals(6, words.length);
 
 	 assertEquals("first word shares start with utterance", "a0", words[0].getStartId());
@@ -601,7 +606,7 @@ public class TestSimpleTokenizer
 	 assertEquals("이제", words[5].getLabel());
 	 assertEquals("last word shares end with utterance", "a3", words[5].getEndId());
 
-	 words = g.getAnnotation("turn2").list("word");
+	 words = g.getAnnotation("turn2").all("word");
 	 assertEquals(3, words.length);
 	 assertEquals("first word shares start with utterance", "a2", words[0].getStartId());
 	 assertEquals("선", words[0].getLabel());
@@ -609,7 +614,7 @@ public class TestSimpleTokenizer
 	 assertEquals("데도", words[2].getLabel());
 	 assertEquals("first word shares end with utterance", "a3", words[2].getEndId());
 
-	 for (Annotation word : g.list("word"))
+	 for (Annotation word : g.all("word"))
 	 {
 	    if (!word.getStart().isStartOn("utterance"))
 	    {
@@ -678,7 +683,7 @@ public class TestSimpleTokenizer
          g.setTracker(new ChangeTracker());
 	 SimpleTokenizer tokenizer = new SimpleTokenizer("utterance", "word");
 	 tokenizer.transform(g);
-	 Annotation[] words = g.getAnnotation("turn1").list("word");
+	 Annotation[] words = g.getAnnotation("turn1").all("word");
 	 assertEquals(6, words.length);
 
 	 assertEquals("first word shares start with utterance", "a0", words[0].getStartId());
@@ -697,7 +702,7 @@ public class TestSimpleTokenizer
 	 assertEquals("🅼🅴🅼🅴🆂", words[5].getLabel());
 	 assertEquals("last word shares end with utterance", "a3", words[5].getEndId());
 
-	 words = g.getAnnotation("turn2").list("word");
+	 words = g.getAnnotation("turn2").all("word");
 	 assertEquals(3, words.length);
 	 assertEquals("first word shares start with utterance", "a2", words[0].getStartId());
 	 assertEquals("༼つ", words[0].getLabel());
@@ -705,7 +710,7 @@ public class TestSimpleTokenizer
 	 assertEquals("༽つ", words[2].getLabel());
 	 assertEquals("first word shares end with utterance", "a3", words[2].getEndId());
 
-	 for (Annotation word : g.list("word"))
+	 for (Annotation word : g.all("word"))
 	 {
 	    if (!word.getStart().isStartOn("utterance"))
 	    {

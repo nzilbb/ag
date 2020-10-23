@@ -282,7 +282,9 @@ public class ConventionTransformer
             }
             else
             {
-              Annotation tag = graph.createTag(source, destinationLayerId, matcher.replaceAll(result));
+              Annotation tag = graph.createTag(
+                 source, destinationLayerId, matcher.replaceAll(result));
+              tag.setConfidence(source.getConfidence());
             }
           } // next destination result
           // if the source layer isn't a destination layer
