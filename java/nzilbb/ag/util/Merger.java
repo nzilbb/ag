@@ -592,7 +592,7 @@ public class Merger
       }
     } // next layer
 
-      // phase 1. - map annotations in graph to annotations in editedGraph horizontally
+    // phase 1. - map annotations in graph to annotations in editedGraph horizontally
     log("phase 1: map annotations");
 
     // map graphs together manually, to help top-level parent determination
@@ -2645,10 +2645,17 @@ public class Merger
                   if (predecessor == anchor) continue; // skip the one we just got
                   if (predecessor.getOffset() == null) continue; // skip no-offset anchors
 
-                  dLowestOriginalOffset = Math.min(dLowestOriginalOffset, predecessor.getOriginalOffset());
+                  dLowestOriginalOffset = dLowestOriginalOffset;
+                  dLowestOriginalOffset = dLowestOriginalOffset;
+                  if (predecessor.getOriginalOffset() != null)
+                  {
+                     dLowestOriginalOffset = Math.min(
+                        dLowestOriginalOffset, predecessor.getOriginalOffset());
+                  }
 
                   // if we get to anchor that has a higher confidence than anchor.confidence, we stop
-                  if (getConfidence(predecessor) > getConfidence(anchor))
+                  if (getConfidence(predecessor) > getConfidence(anchor)
+                      && predecessor.getOriginalOffset() != null)
                   {
                     if (predecessor.getOriginalOffset() > dFutureOriginalOffset) bRevertWouldSolve = false;
                     bChangeCurrentAnchor = true; // change anchor as well as those prior to it
@@ -2656,7 +2663,8 @@ public class Merger
                     break;
                   }
                   // if we've gone far enough back
-                  else if (predecessor.getOffset() < anchor.getOffset())
+                  else if (predecessor.getOffset() < anchor.getOffset()
+                           && predecessor.getOriginalOffset() != null)
                   {
                     if (predecessor.getOriginalOffset() > dFutureOriginalOffset) bRevertWouldSolve = false;
                     itAnchors.next(); // reset iterator so that next = first anchor to change
@@ -2671,7 +2679,11 @@ public class Merger
                       bChangeCurrentAnchor = false; // change anchor as well as those prior to it
                     }
                     // would reverting to the original offset help?
-                    if (predecessor.getOriginalOffset() > dFutureOriginalOffset) bRevertWouldSolve = false;
+                    if (predecessor.getOriginalOffset() != null
+                        && predecessor.getOriginalOffset() > dFutureOriginalOffset)
+                    {
+                       bRevertWouldSolve = false;
+                    }
                     dFutureOriginalOffset = predecessor.getOffset();
                     iChangeCount++;
                   }
