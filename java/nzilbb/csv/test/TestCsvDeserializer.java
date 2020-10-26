@@ -34,11 +34,9 @@ import nzilbb.ag.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.csv.*;
 
-public class TestCsvDeserializer
-{      
-   @Test public void basicDeserialization() 
-      throws Exception
-   {
+public class TestCsvDeserializer {
+   
+   @Test public void basicDeserialization()  throws Exception {
       Schema schema = new Schema(
 	 "who", "turns", "utterances", "transcript",
 	 new Layer("who", "Participants", 0, true, true, true),
@@ -89,8 +87,7 @@ public class TestCsvDeserializer
       // build the graphs
       Graph[] graphs = deserializer.deserialize();
       assertEquals("Right number of graphs returned", 4, graphs.length);      
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
 
@@ -99,8 +96,7 @@ public class TestCsvDeserializer
 	 assertEquals("name correct", "clairemtimmins_953247839433510912", g.getId());
 	 
 	 // layers
-	 for (Layer gLayer : g.getSchema().getLayers().values())
-	 {
+	 for (Layer gLayer : g.getSchema().getLayers().values()) {
 	    Layer sLayer = schema.getLayer(gLayer.getId());
 	    assertNotNull(gLayer.getId(), sLayer);
 	    assertEquals(sLayer.getId(), gLayer.getId());
@@ -134,8 +130,7 @@ public class TestCsvDeserializer
 	 String[] wordLabels = {
 	    "Shame", "our", "next", "meeting", "wasn't", "before", "this", "deadline",
 	    "@KSavage_Strath", "@SFaulknerPandO", "@g_efthimiou", "@JMcKerrecher"};
-	 for (int i = 0; i < wordLabels.length; i++)
-	 {
+	 for (int i = 0; i < wordLabels.length; i++) {
 	    assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 }
       
@@ -151,8 +146,7 @@ public class TestCsvDeserializer
 	 assertEquals("name correct", "ProfMarkLevine_952155167188836352", g.getId());
 	 
 	 // layers
-	 for (Layer gLayer : g.getSchema().getLayers().values())
-	 {
+	 for (Layer gLayer : g.getSchema().getLayers().values()) {
 	    Layer sLayer = schema.getLayer(gLayer.getId());
 	    assertNotNull(gLayer.getId(), sLayer);
 	    assertEquals(sLayer.getId(), gLayer.getId());
@@ -188,8 +182,7 @@ public class TestCsvDeserializer
 	    "in", "selfies", "relate", "to", "grooming,", "presentation,", "and", "lifestyle — that",
 	    "is,", "differences", "in", "culture,", "not", "in", "facial", "structure.”",
 	    "Algorithms", "and", "the", "junk", "science", "of", "physiognomy", "@blaiseaguera"};
-	 for (int i = 0; i < wordLabels.length; i++)
-	 {
+	 for (int i = 0; i < wordLabels.length; i++) {
 	    assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 }
       
@@ -205,8 +198,7 @@ public class TestCsvDeserializer
 	 assertEquals("name correct", "robdrummond_953211091416420352", g.getId());
 	 
 	 // layers
-	 for (Layer gLayer : g.getSchema().getLayers().values())
-	 {
+	 for (Layer gLayer : g.getSchema().getLayers().values()) {
 	    Layer sLayer = schema.getLayer(gLayer.getId());
 	    assertNotNull(gLayer.getId(), sLayer);
 	    assertEquals(sLayer.getId(), gLayer.getId());
@@ -239,8 +231,7 @@ public class TestCsvDeserializer
 	 assertEquals(5, words.length);
 	 String[] wordLabels = {
 	    "'Awash", "with", "contemporary", "teenspeak'", "😀👍"};
-	 for (int i = 0; i < wordLabels.length; i++)
-	 {
+	 for (int i = 0; i < wordLabels.length; i++) {
 	    assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 }
       
@@ -256,8 +247,7 @@ public class TestCsvDeserializer
 	 assertEquals("name correct", "theirishfor_953177367505264640", g.getId());
 	 
 	 // layers
-	 for (Layer gLayer : g.getSchema().getLayers().values())
-	 {
+	 for (Layer gLayer : g.getSchema().getLayers().values()) {
 	    Layer sLayer = schema.getLayer(gLayer.getId());
 	    assertNotNull(gLayer.getId(), sLayer);
 	    assertEquals(sLayer.getId(), gLayer.getId());
@@ -291,8 +281,7 @@ public class TestCsvDeserializer
 	 String[] wordLabels = {
 	    "Duolingo", "has", "brought", "the", "joys", "of", "Irish", "to", "people",
 	    "all", "over", "the", "world.", "💚"};
-	 for (int i = 0; i < wordLabels.length; i++)
-	 {
+	 for (int i = 0; i < wordLabels.length; i++) {
 	    assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 }
       
@@ -304,9 +293,7 @@ public class TestCsvDeserializer
       } // row 4
    }
 
-   @Test public void metaData() 
-      throws Exception
-   {
+   @Test public void metaData()  throws Exception {
       Schema schema = new Schema(
 	 "who", "turns", "utterances", "transcript",
 	 new Layer("transcript_time", "Tweet time", 0, false, false, true),
@@ -361,8 +348,7 @@ public class TestCsvDeserializer
       // build the graphs
       Graph[] graphs = deserializer.deserialize();
       assertEquals("Right number of graphs returned", 4, graphs.length);      
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
 
@@ -371,8 +357,7 @@ public class TestCsvDeserializer
 	 assertEquals("name correct", "clairemtimmins_953247839433510912", g.getId());
 	 
 	 // layers
-	 for (Layer gLayer : g.getSchema().getLayers().values())
-	 {
+	 for (Layer gLayer : g.getSchema().getLayers().values()) {
 	    Layer sLayer = schema.getLayer(gLayer.getId());
 	    assertNotNull(gLayer.getId(), sLayer);
 	    assertEquals(sLayer.getId(), gLayer.getId());
@@ -406,8 +391,7 @@ public class TestCsvDeserializer
 	 String[] wordLabels = {
 	    "Shame", "our", "next", "meeting", "wasn't", "before", "this", "deadline",
 	    "@KSavage_Strath", "@SFaulknerPandO", "@g_efthimiou", "@JMcKerrecher"};
-	 for (int i = 0; i < wordLabels.length; i++)
-	 {
+	 for (int i = 0; i < wordLabels.length; i++) {
 	    assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 }
 	 
@@ -449,8 +433,7 @@ public class TestCsvDeserializer
 	 assertEquals("name correct", "ProfMarkLevine_952155167188836352", g.getId());
 	 
 	 // layers
-	 for (Layer gLayer : g.getSchema().getLayers().values())
-	 {
+	 for (Layer gLayer : g.getSchema().getLayers().values()) {
 	    Layer sLayer = schema.getLayer(gLayer.getId());
 	    assertNotNull(gLayer.getId(), sLayer);
 	    assertEquals(sLayer.getId(), gLayer.getId());
@@ -486,8 +469,7 @@ public class TestCsvDeserializer
 	    "in", "selfies", "relate", "to", "grooming,", "presentation,", "and", "lifestyle — that",
 	    "is,", "differences", "in", "culture,", "not", "in", "facial", "structure.”",
 	    "Algorithms", "and", "the", "junk", "science", "of", "physiognomy", "@blaiseaguera"};
-	 for (int i = 0; i < wordLabels.length; i++)
-	 {
+	 for (int i = 0; i < wordLabels.length; i++) {
 	    assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 }
 	 
@@ -528,8 +510,7 @@ public class TestCsvDeserializer
 	 assertEquals("name correct", "robdrummond_953211091416420352", g.getId());
 	 
 	 // layers
-	 for (Layer gLayer : g.getSchema().getLayers().values())
-	 {
+	 for (Layer gLayer : g.getSchema().getLayers().values()) {
 	    Layer sLayer = schema.getLayer(gLayer.getId());
 	    assertNotNull(gLayer.getId(), sLayer);
 	    assertEquals(sLayer.getId(), gLayer.getId());
@@ -562,8 +543,7 @@ public class TestCsvDeserializer
 	 assertEquals(5, words.length);
 	 String[] wordLabels = {
 	    "'Awash", "with", "contemporary", "teenspeak'", "😀👍"};
-	 for (int i = 0; i < wordLabels.length; i++)
-	 {
+	 for (int i = 0; i < wordLabels.length; i++) {
 	    assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 }
 	 
@@ -604,8 +584,7 @@ public class TestCsvDeserializer
 	 assertEquals("name correct", "theirishfor_953177367505264640", g.getId());
 	 
 	 // layers
-	 for (Layer gLayer : g.getSchema().getLayers().values())
-	 {
+	 for (Layer gLayer : g.getSchema().getLayers().values()) {
 	    Layer sLayer = schema.getLayer(gLayer.getId());
 	    assertNotNull(gLayer.getId(), sLayer);
 	    assertEquals(sLayer.getId(), gLayer.getId());
@@ -639,8 +618,7 @@ public class TestCsvDeserializer
 	 String[] wordLabels = {
 	    "Duolingo", "has", "brought", "the", "joys", "of", "Irish", "to", "people",
 	    "all", "over", "the", "world.", "💚"};
-	 for (int i = 0; i < wordLabels.length; i++)
-	 {
+	 for (int i = 0; i < wordLabels.length; i++) {
 	    assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 }
 	 
@@ -677,9 +655,7 @@ public class TestCsvDeserializer
       } // row 4      
    }
    
-   @Test public void badHeaders() 
-      throws Exception
-   {
+   @Test public void badHeaders()  throws Exception {
       Schema schema = new Schema(
 	 "who", "turns", "utterances", "transcript",
 	 new Layer("who", "Participants", 0, true, true, true),
@@ -720,8 +696,7 @@ public class TestCsvDeserializer
       // build the graphs
       Graph[] graphs = deserializer.deserialize();
       assertEquals("Right number of graphs returned", 4, graphs.length);      
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
 
@@ -730,8 +705,7 @@ public class TestCsvDeserializer
 	 assertEquals("name correct", "badheaders.csv-1", g.getId());
 	 
 	 // layers
-	 for (Layer gLayer : g.getSchema().getLayers().values())
-	 {
+	 for (Layer gLayer : g.getSchema().getLayers().values()) {
 	    Layer sLayer = schema.getLayer(gLayer.getId());
 	    assertNotNull(gLayer.getId(), sLayer);
 	    assertEquals(sLayer.getId(), gLayer.getId());
@@ -765,8 +739,7 @@ public class TestCsvDeserializer
 	 String[] wordLabels = {
 	    "Shame", "our", "next", "meeting", "wasn't", "before", "this", "deadline",
 	    "@KSavage_Strath", "@SFaulknerPandO", "@g_efthimiou", "@JMcKerrecher"};
-	 for (int i = 0; i < wordLabels.length; i++)
-	 {
+	 for (int i = 0; i < wordLabels.length; i++) {
 	    assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 }
          
@@ -782,8 +755,7 @@ public class TestCsvDeserializer
 	 assertEquals("name correct", "badheaders.csv-2", g.getId());
 	 
 	 // layers
-	 for (Layer gLayer : g.getSchema().getLayers().values())
-	 {
+	 for (Layer gLayer : g.getSchema().getLayers().values()) {
 	    Layer sLayer = schema.getLayer(gLayer.getId());
 	    assertNotNull(gLayer.getId(), sLayer);
 	    assertEquals(sLayer.getId(), gLayer.getId());
@@ -819,8 +791,7 @@ public class TestCsvDeserializer
 	    "in", "selfies", "relate", "to", "grooming,", "presentation,", "and", "lifestyle — that",
 	    "is,", "differences", "in", "culture,", "not", "in", "facial", "structure.”",
 	    "Algorithms", "and", "the", "junk", "science", "of", "physiognomy", "@blaiseaguera"};
-	 for (int i = 0; i < wordLabels.length; i++)
-	 {
+	 for (int i = 0; i < wordLabels.length; i++) {
 	    assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 }
          
@@ -836,8 +807,7 @@ public class TestCsvDeserializer
 	 assertEquals("name correct", "badheaders.csv-3", g.getId());
 	 
 	 // layers
-	 for (Layer gLayer : g.getSchema().getLayers().values())
-	 {
+	 for (Layer gLayer : g.getSchema().getLayers().values()) {
 	    Layer sLayer = schema.getLayer(gLayer.getId());
 	    assertNotNull(gLayer.getId(), sLayer);
 	    assertEquals(sLayer.getId(), gLayer.getId());
@@ -870,8 +840,7 @@ public class TestCsvDeserializer
 	 assertEquals(5, words.length);
 	 String[] wordLabels = {
 	    "'Awash", "with", "contemporary", "teenspeak'", "😀👍"};
-	 for (int i = 0; i < wordLabels.length; i++)
-	 {
+	 for (int i = 0; i < wordLabels.length; i++) {
 	    assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 }
 
@@ -887,8 +856,7 @@ public class TestCsvDeserializer
 	 assertEquals("name correct", "badheaders.csv-4", g.getId());
 	 
 	 // layers
-	 for (Layer gLayer : g.getSchema().getLayers().values())
-	 {
+	 for (Layer gLayer : g.getSchema().getLayers().values()) {
 	    Layer sLayer = schema.getLayer(gLayer.getId());
 	    assertNotNull(gLayer.getId(), sLayer);
 	    assertEquals(sLayer.getId(), gLayer.getId());
@@ -922,8 +890,7 @@ public class TestCsvDeserializer
 	 String[] wordLabels = {
 	    "Duolingo", "has", "brought", "the", "joys", "of", "Irish", "to", "people",
 	    "all", "over", "the", "world.", "💚"};
-	 for (int i = 0; i < wordLabels.length; i++)
-	 {
+	 for (int i = 0; i < wordLabels.length; i++) {
 	    assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 }
          
@@ -945,18 +912,13 @@ public class TestCsvDeserializer
     * Getter for {@link #fDir}: Directory for text files.
     * @return Directory for text files.
     */
-   public File getDir() 
-   { 
-      if (fDir == null)
-      {
-	 try
-	 {
+   public File getDir() { 
+      if (fDir == null) {
+	 try {
 	    URL urlThisClass = getClass().getResource(getClass().getSimpleName() + ".class");
 	    File fThisClass = new File(urlThisClass.toURI());
 	    fDir = fThisClass.getParentFile();
-	 }
-	 catch(Throwable t)
-	 {
+	 } catch(Throwable t) {
 	    System.out.println("" + t);
 	 }
       }
@@ -968,8 +930,7 @@ public class TestCsvDeserializer
     */
    public void setDir(File fNewDir) { fDir = fNewDir; }
 
-   public static void main(String args[]) 
-   {
+   public static void main(String args[]) {
       org.junit.runner.JUnitCore.main("nzilbb.ag.serialize.csv.test.TestCsvDeserializer");
    }
 }

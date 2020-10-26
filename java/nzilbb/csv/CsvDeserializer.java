@@ -63,9 +63,7 @@ import nzilbb.configure.ParameterSet;
  * </table>
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class CsvDeserializer
-   implements GraphDeserializer
-{
+public class CsvDeserializer implements GraphDeserializer {
    // Attributes:
    protected Vector<String> warnings;
    
@@ -188,8 +186,7 @@ public class CsvDeserializer
     * @throws SerializationParametersMissingException If not all required parameters have a value.
     */
    public void setParameters(ParameterSet newParameters)
-       throws SerializationParametersMissingException
-   {
+      throws SerializationParametersMissingException {
       parameters = newParameters;
    }
 
@@ -249,8 +246,7 @@ public class CsvDeserializer
    /**
     * Default constructor.
     */
-   public CsvDeserializer()
-   {
+   public CsvDeserializer() {
    } // end of constructor
    
    // IStreamDeserializer methods:
@@ -259,8 +255,7 @@ public class CsvDeserializer
     * Returns the deserializer's descriptor
     * @return The deserializer's descriptor
     */
-   public SerializationDescriptor getDescriptor()
-   {
+   public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
 	 "CSV text collection", "0.3", "text/csv", ".csv", "20200909.1954", getClass().getResource("icon.png"));
    }
@@ -275,8 +270,7 @@ public class CsvDeserializer
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of configuration parameters (still) must be set before {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty list, {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
     */
-   public ParameterSet configure(ParameterSet configuration, Schema schema)
-   {
+   public ParameterSet configure(ParameterSet configuration, Schema schema) {
       setSchema(schema);
       setParticipantLayer(schema.getParticipantLayer());
       setTurnLayer(schema.getTurnLayer());
@@ -297,34 +291,25 @@ public class CsvDeserializer
       LinkedHashMap<String,Layer> wordTagLayers = new LinkedHashMap<String,Layer>();
       LinkedHashMap<String,Layer> participantTagLayers = new LinkedHashMap<String,Layer>();
       if (getParticipantLayer() == null || getTurnLayer() == null 
-	  || getUtteranceLayer() == null || getWordLayer() == null)
-      {
-	 for (Layer top : schema.getRoot().getChildren().values())
-	 {
-	    if (top.getAlignment() == Constants.ALIGNMENT_NONE)
-	    {
-	       if (top.getChildren().size() == 0)
-	       { // unaligned childless children of graph
+	  || getUtteranceLayer() == null || getWordLayer() == null) {
+	 for (Layer top : schema.getRoot().getChildren().values()) {
+	    if (top.getAlignment() == Constants.ALIGNMENT_NONE) {
+	       if (top.getChildren().size() == 0) { // unaligned childless children of graph
 		  participantTagLayers.put(top.getId(), top);
-	       }
-	       else
-	       { // unaligned children of graph, with children of their own
+	       } else { // unaligned children of graph, with children of their own
 		  possibleParticipantLayers.put(top.getId(), top);
-		  for (Layer turn : top.getChildren().values())
-		  {
+		  for (Layer turn : top.getChildren().values()) {
 		     if (turn.getAlignment() == Constants.ALIGNMENT_INTERVAL
-			 && turn.getChildren().size() > 0)
-		     { // aligned children of who with their own children
+			 && turn.getChildren().size() > 0) {
+                        // aligned children of who with their own children
 			possibleTurnLayers.put(turn.getId(), turn);
-			for (Layer turnChild : turn.getChildren().values())
-			{
-			   if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL)
-			   { // aligned children of turn
+			for (Layer turnChild : turn.getChildren().values()) {
+			   if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
+                              // aligned children of turn
 			      possibleTurnChildLayers.put(turnChild.getId(), turnChild);
-			      for (Layer tag : turnChild.getChildren().values())
-			      {
-				 if (tag.getAlignment() == Constants.ALIGNMENT_NONE)
-				 { // unaligned children of word
+			      for (Layer tag : turnChild.getChildren().values()) {
+				 if (tag.getAlignment() == Constants.ALIGNMENT_NONE) {
+                                    // unaligned children of word
 				    wordTagLayers.put(tag.getId(), tag);
 				 }
 			      } // next possible word tag layer
@@ -335,59 +320,47 @@ public class CsvDeserializer
 	       } // with children
 	    } // unaligned
 	 } // next possible participant layer
-      } // missing special layers
-      else
-      {
-	 for (Layer turnChild : getTurnLayer().getChildren().values())
-	 {
-	    if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL)
-	    {
+      } else {
+	 for (Layer turnChild : getTurnLayer().getChildren().values()) {
+	    if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
 	       possibleTurnChildLayers.put(turnChild.getId(), turnChild);
 	    }
 	 } // next possible word tag layer
-	 for (Layer tag : getWordLayer().getChildren().values())
-	 {
+	 for (Layer tag : getWordLayer().getChildren().values()) {
 	    if (tag.getAlignment() == Constants.ALIGNMENT_NONE
-		&& tag.getChildren().size() == 0)
-	    {
+		&& tag.getChildren().size() == 0) {
 	       wordTagLayers.put(tag.getId(), tag);
 	    }
 	 } // next possible word tag layer
-	 for (Layer tag : getParticipantLayer().getChildren().values())
-	 {
+	 for (Layer tag : getParticipantLayer().getChildren().values()) {
 	    if (tag.getAlignment() == Constants.ALIGNMENT_NONE
-		&& tag.getChildren().size() == 0)
-	    {
+		&& tag.getChildren().size() == 0) {
 	       participantTagLayers.put(tag.getId(), tag);
 	    }
 	 } // next possible word tag layer
       }
       participantTagLayers.remove("main_participant");
-      if (getParticipantLayer() == null)
-      {
+      if (getParticipantLayer() == null) {
 	 layerToPossibilities.put(
 	    new Parameter("participantLayer", Layer.class, "Participant layer", 
 			  "Layer for speaker/participant identification", true), 
 	    Arrays.asList("participant","participants","who","speaker","speakers"));
 	 layerToCandidates.put("participantLayer", possibleParticipantLayers);
       }
-      if (getTurnLayer() == null)
-      {
+      if (getTurnLayer() == null) {
 	 layerToPossibilities.put(
 	    new Parameter("turnLayer", Layer.class, "Turn layer", "Layer for speaker turns", true),
 	    Arrays.asList("turn","turns"));
 	 layerToCandidates.put("turnLayer", possibleTurnLayers);
       }
-      if (getUtteranceLayer() == null)
-      {
+      if (getUtteranceLayer() == null) {
 	 layerToPossibilities.put(
 	    new Parameter("utteranceLayer", Layer.class, "Utterance layer", 
 			  "Layer for speaker utterances", true), 
 	    Arrays.asList("utterance","utterances","line","lines"));
 	 layerToCandidates.put("utteranceLayer", possibleTurnChildLayers);
       }
-      if (getWordLayer() == null)
-      {
+      if (getWordLayer() == null) {
 	 layerToPossibilities.put(
 	    new Parameter("wordLayer", Layer.class, "Word layer", 
 			  "Layer for individual word tokens", true), 
@@ -396,11 +369,9 @@ public class CsvDeserializer
       }
 
       LinkedHashMap<String,Layer> graphTagLayers = new LinkedHashMap<String,Layer>();
-      for (Layer top : schema.getRoot().getChildren().values())
-      {
+      for (Layer top : schema.getRoot().getChildren().values()) {
 	 if (top.getAlignment() == Constants.ALIGNMENT_NONE
-	     && top.getChildren().size() == 0)
-	 { // unaligned childless children of graph
+	     && top.getChildren().size() == 0) { // unaligned childless children of graph
 	    graphTagLayers.put(top.getId(), top);
 	 }
       } // next top level layer
@@ -410,20 +381,15 @@ public class CsvDeserializer
       // other layers...
 
       // add parameters that aren't in the configuration yet, and set possibile/default values
-      for (Parameter p : layerToPossibilities.keySet())
-      {
+      for (Parameter p : layerToPossibilities.keySet()) {
 	 List<String> possibleNames = layerToPossibilities.get(p);
 	 LinkedHashMap<String,Layer> candidateLayers = layerToCandidates.get(p.getName());
-	 if (configuration.containsKey(p.getName()))
-	 {
+	 if (configuration.containsKey(p.getName())) {
 	    p = configuration.get(p.getName());
-	 }
-	 else
-	 {
+	 } else {
 	    configuration.addParameter(p);
 	 }
-	 if (p.getValue() == null)
-	 {
+	 if (p.getValue() == null) {
 	    p.setValue(Utility.FindLayerById(candidateLayers, possibleNames));
 	 }
 	 p.setPossibleValues(candidateLayers.values());
@@ -446,8 +412,9 @@ public class CsvDeserializer
     * @throws IOException On IO error.
     */
    @SuppressWarnings({"rawtypes", "unchecked"})
-   public ParameterSet load(NamedStream[] streams, Schema schema) throws SerializationException, IOException
-   {
+   public ParameterSet load(
+      NamedStream[] streams, Schema schema) throws SerializationException, IOException {
+      
       // take the first stream, ignore all others.
       NamedStream csv = Utility.FindSingleStream(streams, ".csv", "text/csv");
       if (csv == null) throw new SerializationException("No CSV stream found");
@@ -460,19 +427,15 @@ public class CsvDeserializer
       HashMap<String,LinkedHashMap<String,Layer>> layerToCandidates = new HashMap<String,LinkedHashMap<String,Layer>>();	 
       
       LinkedHashMap<String,Layer> metadataLayers = new LinkedHashMap<String,Layer>();
-      for (Layer layer : schema.getRoot().getChildren().values())
-      {
-	 if (layer.getAlignment() == Constants.ALIGNMENT_NONE)
-	 {
+      for (Layer layer : schema.getRoot().getChildren().values()) {
+	 if (layer.getAlignment() == Constants.ALIGNMENT_NONE) {
 	    metadataLayers.put(layer.getId(), layer);
 	 }
       } // next turn child layer
 
       // look for person attributes
-      for (Layer layer : schema.getParticipantLayer().getChildren().values())
-      {
-	 if (layer.getAlignment() == Constants.ALIGNMENT_NONE)
-	 {
+      for (Layer layer : schema.getParticipantLayer().getChildren().values()) {
+	 if (layer.getAlignment() == Constants.ALIGNMENT_NONE) {
 	    metadataLayers.put(layer.getId(), layer);
 	 }
       } // next turn child layer
@@ -491,8 +454,7 @@ public class CsvDeserializer
       Vector<String> possibleIDHeaders = new Vector<String>();
       Vector<String> possibleUtteranceHeaders = new Vector<String>();
       Vector<String> possibleParticipantHeaders = new Vector<String>();
-      for (String header : getHeaderMap().keySet())
-      {
+      for (String header : getHeaderMap().keySet()) {
 	 if (header.trim().length() == 0) continue;
 	 Vector<String> possibleMatches = new Vector<String>();
 	 possibleMatches.add("transcript" + header);
@@ -502,19 +464,15 @@ public class CsvDeserializer
 
 	 // special cases
 	 if (header.equalsIgnoreCase("id")
-	     || header.equalsIgnoreCase("transcript"))
-	 {
+	     || header.equalsIgnoreCase("transcript")) {
 	    possibleIDHeaders.add(header);
-	 }
-	 else if (header.equalsIgnoreCase("text")
-	     || header.equalsIgnoreCase("document"))
-	 {
+	 } else if (header.equalsIgnoreCase("text")
+	     || header.equalsIgnoreCase("document")) {
 	    possibleUtteranceHeaders.add(header);
 	 }
 	 else if (header.equalsIgnoreCase("name")
 	     || header.equalsIgnoreCase("participant")
-	     || header.equalsIgnoreCase("participantid"))
-	 {
+	     || header.equalsIgnoreCase("participantid")) {
 	    possibleParticipantHeaders.add(header);
 	 }
 	 
@@ -532,25 +490,20 @@ public class CsvDeserializer
       // if there are no obvious participant column possibilities...      
       Parameter idColumn = new Parameter(
 	 "id", String.class, "ID Column", "Column containing the ID of the text.", false);
-      if (possibleIDHeaders.size() == 0)
-      { // ...include all columns
+      if (possibleIDHeaders.size() == 0) { // ...include all columns
 	 possibleIDHeaders.addAll(getHeaderMap().keySet());
-      }
-      else
-      {
+      } else {
 	 idColumn.setValue(possibleIDHeaders.firstElement());
       }
       idColumn.setPossibleValues(possibleIDHeaders);
       parameters.addParameter(idColumn);
 
       // if there are no obvious participant column possibilities...      
-      if (possibleParticipantHeaders.size() == 0)
-      { // ...include all columns
+      if (possibleParticipantHeaders.size() == 0) { // ...include all columns
 	 possibleParticipantHeaders.addAll(getHeaderMap().keySet());
 	 // default participant column will be the first column,
 	 // so default utterance should be the second (if we didn't find obvious possible text column)
-	 if (possibleParticipantHeaders.size() > 1) // but only if there's more than one column
-	 {
+	 if (possibleParticipantHeaders.size() > 1) { // but only if there's more than one column
 	    defaultUtterancePossibilityIndex = 1;
 	 }
       }
@@ -561,12 +514,9 @@ public class CsvDeserializer
       parameters.addParameter(participantColumn);
       
       // if there are no obvious text column possibilities...
-      if (possibleUtteranceHeaders.size() == 0)
-      { // ...include all columns
+      if (possibleUtteranceHeaders.size() == 0) { // ...include all columns
 	 possibleUtteranceHeaders.addAll(getHeaderMap().keySet());
-      }
-      else
-      {
+      } else {
 	 // we found a possible text column, so run with it regardless of whether we also found
 	 // a possible participant column
 	 defaultUtterancePossibilityIndex = 0;
@@ -578,17 +528,14 @@ public class CsvDeserializer
       parameters.addParameter(utteranceColumn);
       
       // add column-mapping parameters, and set possibile/default values
-      for (Parameter p : layerToPossibilities.keySet())
-      {
+      for (Parameter p : layerToPossibilities.keySet()) {
 	 List<String> possibleNames = layerToPossibilities.get(p);
 	 LinkedHashMap<String,Layer> candidateLayers = layerToCandidates.get(p.getName());
 	 parameters.addParameter(p);
-	 if (p.getValue() == null && candidateLayers != null && possibleNames != null)
-	 {
+	 if (p.getValue() == null && candidateLayers != null && possibleNames != null) {
 	    p.setValue(Utility.FindLayerById(candidateLayers, possibleNames));
 	 }
-	 if (p.getPossibleValues() == null && candidateLayers != null)
-	 {
+	 if (p.getPossibleValues() == null && candidateLayers != null) {
 	    p.setPossibleValues(candidateLayers.values());
 	 }
       }
@@ -609,8 +556,9 @@ public class CsvDeserializer
     * @throws SerializationException if errors occur during deserialization.
     */
    public Graph[] deserialize() 
-      throws SerializerNotConfiguredException, SerializationParametersMissingException, SerializationException
-   {
+      throws SerializerNotConfiguredException, SerializationParametersMissingException,
+      SerializationException {
+      
       if (participantLayer == null) throw new SerializerNotConfiguredException("Participant layer not set");
       if (turnLayer == null) throw new SerializerNotConfiguredException("Turn layer not set");
       if (utteranceLayer == null) throw new SerializerNotConfiguredException("Utterance layer not set");
@@ -627,16 +575,13 @@ public class CsvDeserializer
 
       Vector<Graph> graphs = new Vector<Graph>();
       Iterator<CSVRecord> records = getParser().iterator();
-      while (records.hasNext())
-      {
+      while (records.hasNext()) {
 	 CSVRecord record = records.next();
 	 Graph graph = new Graph();
-	 if (parameters == null || parameters.get("id") == null || parameters.get("id").getValue() == null)
-	 {
+	 if (parameters == null || parameters.get("id") == null
+             || parameters.get("id").getValue() == null) {
 	    graph.setId(getName() + "-" + record.getRecordNumber());
-	 }
-	 else
-	 {
+	 } else {
 	    graph.setId(record.get((String)parameters.get("id").getValue()));
 	 }
 	 graph.setOffsetUnits(Constants.UNIT_CHARACTERS);
@@ -656,15 +601,12 @@ public class CsvDeserializer
 	 graph.getSchema().setUtteranceLayerId(utteranceLayer.getId());
 	 graph.addLayer((Layer)wordLayer.clone());
 	 graph.getSchema().setWordLayerId(wordLayer.getId());
-	 if (parameters != null)
-	 {
-	    for (Parameter p : parameters.values())
-	    {
-	       if (p.getValue() instanceof Layer)
-	       {
+	 if (parameters != null) {
+	    for (Parameter p : parameters.values()) {
+	       if (p.getValue() instanceof Layer) {
 		  Layer layer = (Layer)p.getValue();
-		  if (layer != null && graph.getLayer(layer.getId()) == null)
-		  { // haven't added this layer yet
+		  if (layer != null && graph.getLayer(layer.getId()) == null) {
+                     // haven't added this layer yet
 		     graph.addLayer((Layer)layer.clone());
 		  }
 	       }
@@ -677,21 +619,16 @@ public class CsvDeserializer
          participant.setConfidence(Constants.CONFIDENCE_MANUAL);
 
 	 // meta-data
-	 for (String header : getHeaderMap().keySet())
-	 {
+	 for (String header : getHeaderMap().keySet()) {
 	    if (header.trim().length() == 0) continue;
 	    Parameter p = parameters.get("header_"+getHeaderMap().get(header));
-	    if (p != null && p.getValue() != null)
-	    {
+	    if (p != null && p.getValue() != null) {
 	       Layer layer = (Layer)p.getValue();
 	       String value = record.get(header);
-	       if (layer.getParentId().equals(schema.getRoot().getId())) // graph tag
-	       {
+	       if (layer.getParentId().equals(schema.getRoot().getId())) { // graph tag
 		  graph.addTag(graph, layer.getId(), value)
                      .setConfidence(Constants.CONFIDENCE_MANUAL);
-	       }
-	       else // participant tag
-	       {
+	       } else { // participant tag
 		  graph.addTag(participant, layer.getId(), value)
                      .setConfidence(Constants.CONFIDENCE_MANUAL);
 	       }
@@ -724,16 +661,12 @@ public class CsvDeserializer
 	 graph.addAnnotation(line);
 
 	 // ensure we have an utterance tokenizer
-	 if (getTokenizer() == null)
-	 {
+	 if (getTokenizer() == null) {
 	    setTokenizer(new SimpleTokenizer(getUtteranceLayer().getId(), getWordLayer().getId()));
 	 }
-	 try
-	 {
+	 try {
 	    tokenizer.transform(graph);
-	 }
-	 catch(TransformationException exception)
-	 {
+	 } catch(TransformationException exception) {
 	    if (errors == null) errors = new SerializationException();
 	    if (errors.getCause() == null) errors.initCause(exception);
 	    errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
@@ -741,14 +674,11 @@ public class CsvDeserializer
 	 graph.commit();
 
 	 OrthographyClumper clumper = new OrthographyClumper(wordLayer.getId(), utteranceLayer.getId());
-	 try
-	 {
+	 try {
 	    // clump non-orthographic 'words' with real words
 	    clumper.transform(graph);
 	    graph.commit();
-	 }
-	 catch(TransformationException exception)
-	 {
+	 } catch(TransformationException exception) {
 	    if (errors == null) errors = new SerializationException();
 	    if (errors.getCause() == null) errors.initCause(exception);
 	    errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
@@ -757,8 +687,7 @@ public class CsvDeserializer
 	 if (errors != null) throw errors;
 
 	 // set end anchors of graph tags
-	 for (Annotation a : graph.all(getParticipantLayer().getId()))
-	 {
+	 for (Annotation a : graph.all(getParticipantLayer().getId())) {
 	    a.setStartId(firstAnchor.getId());
 	    a.setEndId(lastAnchor.getId());
 	 }
@@ -775,8 +704,7 @@ public class CsvDeserializer
     * Returns any warnings that may have arisen during the last execution of {@link #deserialize()}.
     * @return A possibly empty list of warnings.
     */
-   public String[] getWarnings()
-   {
+   public String[] getWarnings() {
       return warnings.toArray(new String[0]);
    }
 
@@ -787,8 +715,7 @@ public class CsvDeserializer
     * <p>This implementation checks for simultaneous speaker turns that have the same speaker mentioned more than once, speakers that have the same name, and mismatched start/end events.
     * @return A list of errors, which will be empty if there were no validation errors.
     */
-   public Vector<String> validate()
-   {     
+   public Vector<String> validate() {     
       warnings = new Vector<String>();
       return warnings;
    }
