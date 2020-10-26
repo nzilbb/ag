@@ -47,11 +47,9 @@ import nzilbb.editpath.EditStep;
 import nzilbb.editpath.MinimumEditPath;
 import nzilbb.praat.*;
 
-public class TestTextGridSerialization
-{
-   @Test public void utterance() 
-      throws Exception
-   {
+public class TestTextGridSerialization {
+   
+   @Test public void utterance()  throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants", 0, true, true, true),
@@ -85,8 +83,7 @@ public class TestTextGridSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
          System.out.println(warning);
       }
       assertEquals("No warnings",
@@ -216,8 +213,7 @@ public class TestTextGridSerialization
          "and", "and", "then", "there", "was", "a", "message .", 
          "and", "I", "think", "they", "both", "had", "telephones ."
       };
-      for (int i = 0; i < wordLabels.length; i++)
-      {
+      for (int i = 0; i < wordLabels.length; i++) {
          assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
          assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
                       i+1, words[i].getOrdinal());
@@ -280,9 +276,7 @@ public class TestTextGridSerialization
       }
    }
 
-   @Test public void utterance_utf8() 
-      throws Exception
-   {
+   @Test public void utterance_utf8()  throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants", 0, true, true, true),
@@ -316,8 +310,7 @@ public class TestTextGridSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
          System.out.println(warning);
       }
       assertEquals("No warnings",
@@ -352,8 +345,7 @@ public class TestTextGridSerialization
          "and", "and", "then", "there", "was", "a", "message .", 
          "and", "I", "think", "they", "both", "had", "telephones ."
       };
-      for (int i = 0; i < wordLabels.length; i++)
-      {
+      for (int i = 0; i < wordLabels.length; i++) {
          assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
          assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
                       i+1, words[i].getOrdinal());
@@ -367,9 +359,7 @@ public class TestTextGridSerialization
       }
    }
 
-   @Test public void utterance_utf16() 
-      throws Exception
-   {
+   @Test public void utterance_utf16()  throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants", 0, true, true, true),
@@ -403,8 +393,7 @@ public class TestTextGridSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
          System.out.println(warning);
       }
       assertEquals("No warnings",
@@ -439,8 +428,7 @@ public class TestTextGridSerialization
          "and", "and", "then", "there", "was", "a", "message .", 
          "and", "I", "think", "they", "both", "had", "telephones ."
       };
-      for (int i = 0; i < wordLabels.length; i++)
-      {
+      for (int i = 0; i < wordLabels.length; i++) {
          assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
          assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
                       i+1, words[i].getOrdinal());
@@ -454,9 +442,7 @@ public class TestTextGridSerialization
       }
    }
 
-   @Test public void utterance_latin1() 
-      throws Exception
-   {
+   @Test public void utterance_latin1()  throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants", 0, true, true, true),
@@ -490,8 +476,7 @@ public class TestTextGridSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
          System.out.println(warning);
       }
       assertEquals("No warnings",
@@ -526,8 +511,7 @@ public class TestTextGridSerialization
          "and", "and", "then", "there", "was", "a", "message .", 
          "and", "I", "think", "they", "both", "had", "telephones ."
       };
-      for (int i = 0; i < wordLabels.length; i++)
-      {
+      for (int i = 0; i < wordLabels.length; i++) {
          assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
          assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
                       i+1, words[i].getOrdinal());
@@ -541,9 +525,7 @@ public class TestTextGridSerialization
       }
    }
 
-   @Test public void utterance_word() 
-      throws Exception
-   {
+   @Test public void utterance_word()  throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants", 0, true, true, true),
@@ -578,8 +560,7 @@ public class TestTextGridSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
          System.out.println(warning);
       }
       assertEquals("No warnings",
@@ -637,8 +618,7 @@ public class TestTextGridSerialization
          "and", "and", "then", "there", "was", "a", "message .", 
          "and", "I", "think", "they", "both", "had", "telephones ."
       };
-      for (int i = 0; i < wordLabels.length; i++)
-      {
+      for (int i = 0; i < wordLabels.length; i++) {
          assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
          assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
                       i+1, words[i].getOrdinal());
@@ -698,9 +678,7 @@ public class TestTextGridSerialization
       assertEquals("phone parent simultaneous speech", "yeah --", phones[12].getParent().getLabel());
    }
 
-   @Test public void utterance_word_ignorePhones() 
-      throws Exception
-   {
+   @Test public void utterance_word_ignorePhones()  throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants", 0, true, true, true),
@@ -733,8 +711,7 @@ public class TestTextGridSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
          System.out.println(warning);
       }
       assertEquals("No warnings",
@@ -816,9 +793,7 @@ public class TestTextGridSerialization
       }
    }
 
-   @Test public void word_only() 
-      throws Exception
-   {
+   @Test public void word_only()  throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants", 0, true, true, true),
@@ -857,8 +832,7 @@ public class TestTextGridSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
          System.out.println(warning);
       }
       assertEquals("No warnings",
@@ -903,8 +877,7 @@ public class TestTextGridSerialization
          "and", "and", "then", "there", "was", "a", "message .", 
          "and", "I", "think", "they", "both", "had", "telephones ."
       };
-      for (int i = 0; i < wordLabels.length; i++)
-      {
+      for (int i = 0; i < wordLabels.length; i++) {
          assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
          assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
                       i+1, words[i].getOrdinal());
@@ -929,9 +902,7 @@ public class TestTextGridSerialization
       }
    }
 
-   @Test public void turn_utterance_word() 
-      throws Exception
-   {
+   @Test public void turn_utterance_word()  throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants", 0, true, true, true),
@@ -965,8 +936,7 @@ public class TestTextGridSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
          System.out.println(warning);
       }
       assertEquals("No warnings",
@@ -1099,8 +1069,7 @@ public class TestTextGridSerialization
          "and", "and", "then", "there", "was", "a", "message .", 
          "and", "I", "think", "they", "both", "had", "telephones ."
       };
-      for (int i = 0; i < wordLabels.length; i++)
-      {
+      for (int i = 0; i < wordLabels.length; i++) {
          assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
          assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
                       i+1, words[i].getOrdinal());
@@ -1110,8 +1079,7 @@ public class TestTextGridSerialization
       // check the simultaneous speech worked out all right
       words = turns[13].annotations("word");
       String[] simultaneousSpeech = {"yeah","yeah", "yeah --", "well", "that's", "right"};
-      for (int i = 0; i < simultaneousSpeech.length; i++)
-      {
+      for (int i = 0; i < simultaneousSpeech.length; i++) {
          assertEquals("simultaneous speech " + i, simultaneousSpeech[i], words[i].getLabel());
          assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
                       i+1, words[i].getOrdinal());
@@ -1131,9 +1099,7 @@ public class TestTextGridSerialization
       }
    }
 
-   @Test public void speaker_word() 
-      throws Exception
-   {
+   @Test public void speaker_word()  throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants", 0, true, true, true),
@@ -1169,8 +1135,7 @@ public class TestTextGridSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
          System.out.println(warning);
       }
       assertEquals("No warnings",
@@ -1297,8 +1262,7 @@ public class TestTextGridSerialization
          "and", "and", "then", "there", "was", "a", "message .", 
          "and", "I", "think", "they", "both", "had", "telephones ."
       };
-      for (int i = 0; i < wordLabels.length; i++)
-      {
+      for (int i = 0; i < wordLabels.length; i++) {
          assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
          assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
                       i+1, words[i].getOrdinal());
@@ -1307,8 +1271,7 @@ public class TestTextGridSerialization
 
       words = turns[13].annotations("word");
       String[] simultaneousSpeech = {"ah", "yeah", "just", "turn", "left", "there"};
-      for (int i = 0; i < simultaneousSpeech.length; i++)
-      {
+      for (int i = 0; i < simultaneousSpeech.length; i++) {
          assertEquals("other speaker words " + i, simultaneousSpeech[i], words[i].getLabel());
          assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
                       i+1, words[i].getOrdinal());
@@ -1362,9 +1325,7 @@ public class TestTextGridSerialization
       }
    }
 
-   @Test public void basFragment() 
-      throws Exception
-   {
+   @Test public void basFragment()  throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants", 0, true, true, true),
@@ -1404,8 +1365,7 @@ public class TestTextGridSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
          System.out.println(warning);
       }
       assertEquals("Two warnings (about orphans)",
@@ -1443,8 +1403,7 @@ public class TestTextGridSerialization
       String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
          "so", "what", "is", "your", "name"
       };
-      for (int i = 0; i < wordLabels.length; i++)
-      {
+      for (int i = 0; i < wordLabels.length; i++) {
          assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
          assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
                       i+1, words[i].getOrdinal());
@@ -1508,9 +1467,7 @@ public class TestTextGridSerialization
       }
    }
 
-   @Test public void performance() 
-      throws Exception
-   {
+   @Test public void performance()  throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "tranascript",
          new Layer("who", "Participants", 0, true, true, true),
@@ -1565,9 +1522,7 @@ public class TestTextGridSerialization
       }
    }
 
-   @Test public void serialize_utterance_word() 
-      throws Exception
-   {
+   @Test public void serialize_utterance_word()  throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants", 0, true, true, true),
@@ -1621,19 +1576,14 @@ public class TestTextGridSerialization
       File expected = new File(dir, "expected_serialize_utterance_word.TextGrid");
       File actual = new File(dir, "serialize_utterance_word.TextGrid");
       String differences = diff(expected, actual);
-      if (differences != null)
-      {
+      if (differences != null) {
          fail(differences);
-      }
-      else
-      {
+      } else {
          actual.delete();
       }
    }
 
-   @Test public void serialize_fragment_utterance_word() 
-      throws Exception
-   {
+   @Test public void serialize_fragment_utterance_word()  throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants", 0, true, true, true),
@@ -1698,19 +1648,14 @@ public class TestTextGridSerialization
       File expected = new File(dir, "expected_serialize_utterance_word__212.4-216.36333.TextGrid");
       File actual = new File(dir, "serialize_utterance_word__212.400-216.363.TextGrid");
       String differences = diff(expected, actual);
-      if (differences != null)
-      {
+      if (differences != null) {
          fail(differences);
-      }
-      else
-      {
+      } else {
          actual.delete();
       }
    }
 
-   @Test public void serialize_selected_layer() 
-      throws Exception
-   {
+   @Test public void serialize_selected_layer()  throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants", 0, true, true, true),
@@ -1776,19 +1721,14 @@ public class TestTextGridSerialization
       File expected = new File(dir, "expected_selected_layers__212.400-216.363.TextGrid");
       File actual = new File(dir, "selected_layers__212.400-216.363.TextGrid");
       String differences = diff(expected, actual);
-      if (differences != null)
-      {
+      if (differences != null) {
          fail(differences);
-      }
-      else
-      {
+      } else {
          actual.delete();
       }
    }
 
-   @Test public void serialize_selected_layers_including_empty() 
-      throws Exception
-   {
+   @Test public void serialize_selected_layers_including_empty()  throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants", 0, true, true, true),
@@ -1854,19 +1794,14 @@ public class TestTextGridSerialization
       File expected = new File(dir, "expected_selected_layers__0.000-44.255.TextGrid");
       File actual = new File(dir, "selected_layers__0.000-44.255.TextGrid");
       String differences = diff(expected, actual);
-      if (differences != null)
-      {
+      if (differences != null) {
          fail(differences);
-      }
-      else
-      {
+      } else {
          actual.delete();
       }
    }
 
-   @Test public void serialize_fragment_trailing_utterance_word()  // TODO test serialization of point tiers
-      throws Exception
-   {
+   @Test public void serialize_fragment_trailing_utterance_word()  // TODO test serialization of point tiers throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants", 0, true, true, true),
@@ -1929,12 +1864,9 @@ public class TestTextGridSerialization
       File expected = new File(dir, "expected_serialize_utterance_word__212.4-216.500.TextGrid");
       File actual = new File(dir, "serialize_utterance_word__212.400-216.500.TextGrid");
       String differences = diff(expected, actual);
-      if (differences != null)
-      {
+      if (differences != null) {
          fail(differences);
-      }
-      else
-      {
+      } else {
          actual.delete();
       }
    }   
@@ -1945,35 +1877,29 @@ public class TestTextGridSerialization
     * @param actual
     * @return null if the files are the same, and a String describing differences if not.
     */
-   public String diff(File expected, File actual)
-   {
+   public String diff(File expected, File actual) {
       StringBuffer d = new StringBuffer();
       
-      try
-      {
+      try {
          // compare with what we expected
          Vector<String> actualLines = new Vector<String>();
          BufferedReader reader = new BufferedReader(new FileReader(actual));
          String line = reader.readLine();
-         while (line != null)
-         {
+         while (line != null) {
             actualLines.add(line);
             line = reader.readLine();
          }
          Vector<String> expectedLines = new Vector<String>();
          reader = new BufferedReader(new FileReader(expected));
          line = reader.readLine();
-         while (line != null)
-         {
+         while (line != null) {
             expectedLines.add(line);
             line = reader.readLine();
          }
          MinimumEditPath<String> comparator = new MinimumEditPath<String>();
          List<EditStep<String>> path = comparator.minimumEditPath(expectedLines, actualLines);
-         for (EditStep<String> step : path)
-         {
-            switch (step.getOperation())
-            {
+         for (EditStep<String> step : path) {
+            switch (step.getOperation()) {
                case CHANGE:
                   d.append("\n"+expected.getPath()+":"+(step.getFromIndex()+1)+": Expected:\n" 
                            + step.getFrom() 
@@ -1991,9 +1917,7 @@ public class TestTextGridSerialization
                   break;
             }
          } // next step
-      }
-      catch(Exception exception)
-      {
+      } catch(Exception exception) {
          d.append("\n" + exception);
       }
       if (d.length() > 0) return d.toString();
@@ -2010,8 +1934,7 @@ public class TestTextGridSerialization
     * Getter for {@link #fDir}: Directory for text files.
     * @return Directory for text files.
     */
-   public File getDir() 
-   { 
+   public File getDir() { 
       if (fDir == null)
       {
          try
@@ -2033,9 +1956,7 @@ public class TestTextGridSerialization
     */
    public void setDir(File fNewDir) { fDir = fNewDir; }
 
-
-   public static void main(String args[]) 
-   {
+   public static void main(String args[]) {
       org.junit.runner.JUnitCore.main("nzilbb.praat.test.TestTextGridSerialization");
    }
 }
