@@ -71,9 +71,8 @@ import nzilbb.configure.ParameterSet;
  * </ol>
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class TrackDeserializer
-  implements GraphDeserializer
-{
+public class TrackDeserializer implements GraphDeserializer {
+   
    // Attributes:
    protected Vector<String> warnings;
 
@@ -167,15 +166,13 @@ public class TrackDeserializer
    /**
     * Default constructor.
     */
-   public TrackDeserializer()
-   {
+   public TrackDeserializer() {
    } // end of constructor
    
    /**
     * Resete state.
     */
-   public void reset()
-   {
+   public void reset() {
       warnings = new Vector<String>();
       lines = new Vector<String>();
       header = new HashMap<String,String>();
@@ -187,8 +184,7 @@ public class TrackDeserializer
     * Returns the deserializer's descriptor
     * @return The deserializer's descriptor
     */
-   public SerializationDescriptor getDescriptor()
-   {
+   public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
 	 "EST Track", "0.4", "text/x-est-track", ".f0", "20200909.1954", getClass().getResource("icon.png"));
    }
@@ -207,8 +203,7 @@ public class TrackDeserializer
     * {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an empty list,
     * this method must be invoked again with the returned parameters' values set.
     */
-   public ParameterSet configure(ParameterSet configuration, Schema schema)
-   {
+   public ParameterSet configure(ParameterSet configuration, Schema schema) {
       setSchema(schema);
       annotationLayer = null;
       return configuration;
@@ -224,17 +219,15 @@ public class TrackDeserializer
     * @throws SerializerNotConfiguredException If the configuration is not sufficient for deserialization.
     */
    @SuppressWarnings({"rawtypes", "unchecked"})
-   public ParameterSet load(NamedStream[] streams, Schema schema) throws IOException, SerializationException, SerializerNotConfiguredException
-   {
+   public ParameterSet load(NamedStream[] streams, Schema schema)
+      throws IOException, SerializationException, SerializerNotConfiguredException {
       reset();
 
       // take the first cha stream, ignore all others.
       NamedStream track = null;
-      for (NamedStream stream : streams)
-      {	 
+      for (NamedStream stream : streams) {	 
 	 if (stream.getName().toLowerCase().endsWith(".f0") 
-	     || "text/x-est-track".equals(stream.getMimeType()))
-	 {
+	     || "text/x-est-track".equals(stream.getMimeType())) {
 	    track = stream;
 	    break;
 	 }
@@ -247,56 +240,43 @@ public class TrackDeserializer
       BufferedReader reader = new BufferedReader(new InputStreamReader(track.getStream(), "UTF-8"));
       String line = reader.readLine();
       int headerLines = 0;
-      while (line != null)
-      {
-	 if (inHeader)
-	 {
+      while (line != null) {
+	 if (inHeader) {
 	    headerLines++;
-	    if (line.equalsIgnoreCase("EST_Header_End"))
-	    {
+	    if (line.equalsIgnoreCase("EST_Header_End")) {
 	       inHeader = false;
 	       // save the number of header lines
 	       header.put("EST_Header_End", ""+headerLines);
-	    }
-	    else
-	    {
+	    } else {
 	       // a key/value separated by whitespace something like:
 	       // NumFrames 60117
 	       String[] kv = line.split(" ");
 	       if (kv.length < 2) kv = line.split("\t");
-	       if (kv.length >= 2)
-	       {
+	       if (kv.length >= 2) {
 		  header.put(kv[0], kv[1]);
 	       }
 	    }
-	 }
-	 else
-	 { // data line
+	 } else { // data line
 	    lines.add(line);
 	 }
 	 
 	 line = reader.readLine();
       } // next line
 
-      if (inHeader)
-      {
+      if (inHeader) {
 	 throw new SerializationException("No EST_Header_End sentinel found");
       }
-      if (!header.containsKey("EST_File"))
-      {
+      if (!header.containsKey("EST_File")) {
 	 throw new SerializationException("No EST_File header found");
       }
-      if (!header.get("EST_File").equalsIgnoreCase("track"))
-      {
+      if (!header.get("EST_File").equalsIgnoreCase("track")) {
 	 throw new SerializationException("Expected file type \"Track\" but found \""+header.get("EST_File")+"\"");
       }
       ParameterSet mappings = new ParameterSet();
 
       HashMap<String,Layer> instantLayers = new HashMap<String,Layer>();
-      for (Layer layer : getSchema().getLayers().values()) // TODO got to be top-level layers
-      {
-	 if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT)
-	 {
+      for (Layer layer : getSchema().getLayers().values()) { // TODO got to be top-level layers
+	 if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT) {
 	    // key by lowercase ID, so that matching is case-insensitive
 	    instantLayers.put(layer.getId().toLowerCase(), layer);
 	 }
@@ -304,10 +284,8 @@ public class TrackDeserializer
       Parameter p = new Parameter(
 	 "labels", Layer.class, "Labels",
 	 "Layer for annotation labels", true);
-      for (String filePart : getName().split("\\."))
-      {
-	 if (instantLayers.containsKey(filePart.toLowerCase()))
-	 {
+      for (String filePart : getName().split("\\.")) {
+	 if (instantLayers.containsKey(filePart.toLowerCase())) {
 	    p.setValue(instantLayers.get(filePart.toLowerCase()));
 	    break;
 	 }
@@ -322,15 +300,13 @@ public class TrackDeserializer
     * @param parameters The configuration for a given deserialization operation.
     * @throws SerializationParametersMissingException If not all required parameters have a value.
     */
-   public void setParameters(ParameterSet parameters) throws SerializationParametersMissingException
-   {
-      if (!parameters.containsKey("labels"))
-      {
+   public void setParameters(ParameterSet parameters)
+      throws SerializationParametersMissingException {
+      if (!parameters.containsKey("labels")) {
 	 throw new SerializationParametersMissingException();
       }
       setAnnotationLayer((Layer)parameters.get("labels").getValue());
-      if (getAnnotationLayer() == null)
-      {
+      if (getAnnotationLayer() == null) {
 	 throw new SerializationParametersMissingException();
       }
    }
@@ -348,8 +324,8 @@ public class TrackDeserializer
     * @throws SerializationException if errors occur during deserialization.
     */
    public Graph[] deserialize() 
-      throws SerializerNotConfiguredException, SerializationParametersMissingException, SerializationException
-   {
+      throws SerializerNotConfiguredException, SerializationParametersMissingException,
+      SerializationException {
       // if there are errors, accumlate as many as we can before throwing SerializationException
       SerializationException errors = null;
 
@@ -365,32 +341,24 @@ public class TrackDeserializer
       int l = Integer.parseInt(header.get("EST_Header_End"));
       int ordinal = 1;
       double lastOffset = Double.MIN_VALUE;
-      for (String line : getLines())
-      {
+      for (String line : getLines()) {
 	 l++;
 	 String[] fields = line.split(" ");
 	 if (fields.length < 3) fields = line.split("\t");
-	 if (fields.length < 3)
-	 {
+	 if (fields.length < 3) {
 	    warnings.add("Invalid line " + l + ": only " + fields.length + " field"+(fields.length==1?"":"s"));
-	 }
-	 else
-	 {
+	 } else {
 	    String time = fields[0];
 	    String flag = fields[1];
 	    String label = fields[2];
-	    if (!flag.equals("0")) // ignore lines flagged with 0
-	    {
-	       if (!flag.equals("1"))
-	       {
+	    if (!flag.equals("0")) { // ignore lines flagged with 0
+	       if (!flag.equals("1")) {
 		  warnings.add("Line " + l + " unexpected flag: " + flag);
 	       }
 	       
-	       try
-	       {
+	       try {
 		  double offset = Double.parseDouble(time);
-		  if (lastOffset >= offset)
-		  {
+		  if (lastOffset >= offset) {
 		     warnings.add("Line " + l + " out of order: time " + offset + " is not greater than previous time " + lastOffset);
 		  }
 		  lastOffset = offset;
@@ -399,9 +367,7 @@ public class TrackDeserializer
 	 	  Annotation annotation = new Annotation(null, label, layerId, anchor.getId(), anchor.getId(), graph.getId(), ordinal++);
                   annotation.setConfidence(Constants.CONFIDENCE_MANUAL);
 	 	  graph.addAnnotation(annotation);
-	       }
-	       catch (NumberFormatException x)
-	       {
+	       } catch (NumberFormatException x) {
 	 	  warnings.add("Invalid line " + l + ": invalid time " + time + " - " + x.getMessage());
 	       }
 	    } // flagged
@@ -416,8 +382,7 @@ public class TrackDeserializer
     * Returns any warnings that may have arisen during the last execution of {@link #deserialize()}.
     * @return A possibly empty lilayersst of warnings.
     */
-   public String[] getWarnings()
-   {
+   public String[] getWarnings() {
       return warnings.toArray(new String[0]);
    }
 

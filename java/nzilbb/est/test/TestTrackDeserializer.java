@@ -37,11 +37,9 @@ import nzilbb.ag.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.est.*;
 
-public class TestTrackDeserializer
-{
-   @Test public void f0ReaperFileExtension() 
-      throws Exception
-   {
+public class TestTrackDeserializer {
+   
+   @Test public void f0ReaperFileExtension()  throws Exception {
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
 	 new Layer("topic", "Topics", 2, true, true, true),
@@ -73,8 +71,7 @@ public class TestTrackDeserializer
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
 
@@ -119,9 +116,7 @@ public class TestTrackDeserializer
 
    }
 
-   @Test public void f0ReaperFileName() 
-      throws Exception
-   {
+   @Test public void f0ReaperFileName()  throws Exception {
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
 	 new Layer("topic", "Topics", 2, true, true, true),
@@ -153,8 +148,7 @@ public class TestTrackDeserializer
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
 
@@ -199,9 +193,7 @@ public class TestTrackDeserializer
 
    }
 
-   @Test public void f0ReaperFilePreferNameoverExtension() 
-      throws Exception
-   {
+   @Test public void f0ReaperFilePreferNameoverExtension()  throws Exception {
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
 	 new Layer("topic", "Topics", 2, true, true, true),
@@ -233,8 +225,7 @@ public class TestTrackDeserializer
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
 
@@ -279,9 +270,7 @@ public class TestTrackDeserializer
 
    }
 
-   @Test public void errorDetectionAndTolerance() 
-      throws Exception
-   {
+   @Test public void errorDetectionAndTolerance()  throws Exception {
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
 	 new Layer("f0", "Points", 1, true, true, true));
@@ -310,8 +299,7 @@ public class TestTrackDeserializer
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
 
@@ -366,18 +354,13 @@ public class TestTrackDeserializer
     * Getter for {@link #fDir}: Directory for text files.
     * @return Directory for text files.
     */
-   public File getDir() 
-   { 
-      if (fDir == null)
-      {
-	 try
-	 {
+   public File getDir() { 
+      if (fDir == null) {
+	 try {
 	    URL urlThisClass = getClass().getResource(getClass().getSimpleName() + ".class");
 	    File fThisClass = new File(urlThisClass.toURI());
 	    fDir = fThisClass.getParentFile();
-	 }
-	 catch(Throwable t)
-	 {
+	 } catch(Throwable t) {
 	    System.out.println("" + t);
 	 }
       }
@@ -389,9 +372,7 @@ public class TestTrackDeserializer
     */
    public void setDir(File fNewDir) { fDir = fNewDir; }
 
-
-   public static void main(String args[]) 
-   {
+   public static void main(String args[]) {
       org.junit.runner.JUnitCore.main("nzilbb.clan.test.TestTrackDeserializer");
    }
 }
