@@ -81,35 +81,41 @@ public class TestTrackDeserializer
       assertEquals("test.f0", g.getId());
       
       // labels and times
-      Annotation[] annotations = g.list("f0");
+      Annotation[] annotations = g.all("f0");
 
-      assertEquals(new Double(1.41), annotations[0].getStart().getOffset());
+      assertEquals(Double.valueOf(1.41), annotations[0].getStart().getOffset());
       assertTrue(annotations[0].getInstantaneous());
       assertEquals("183.908051", annotations[0].getLabel());
       assertEquals(g, annotations[0].getParent());
 
-      assertEquals(new Double(1.415), annotations[1].getStart().getOffset());
+      assertEquals(Double.valueOf(1.415), annotations[1].getStart().getOffset());
       assertTrue(annotations[1].getInstantaneous());
       assertEquals("177.777771", annotations[1].getLabel());
       assertEquals(g, annotations[1].getParent());
 
-      assertEquals(new Double(1.42), annotations[2].getStart().getOffset());
+      assertEquals(Double.valueOf(1.42), annotations[2].getStart().getOffset());
       assertTrue(annotations[2].getInstantaneous());
       assertEquals("179.775284", annotations[2].getLabel());
       assertEquals(g, annotations[2].getParent());
 
-      assertEquals(new Double(1.425), annotations[3].getStart().getOffset());
+      assertEquals(Double.valueOf(1.425), annotations[3].getStart().getOffset());
       assertTrue(annotations[3].getInstantaneous());
       assertEquals("179.775284", annotations[3].getLabel());
       assertEquals(g, annotations[3].getParent());
 
-      assertEquals(new Double(300.559998), annotations[annotations.length-1].getStart().getOffset());
+      assertEquals(Double.valueOf(300.559998), annotations[annotations.length-1].getStart().getOffset());
       assertTrue(annotations[annotations.length-1].getInstantaneous());
       assertEquals("205.128204", annotations[annotations.length-1].getLabel());
       assertEquals(g, annotations[annotations.length-1].getParent());
       
       assertEquals(39515, annotations.length);
       assertEquals(39515, g.getAnchors().size());
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
 
    }
 
@@ -155,35 +161,41 @@ public class TestTrackDeserializer
       assertEquals("test.f0", g.getId());
       
       // labels and times
-      Annotation[] annotations = g.list("test");
+      Annotation[] annotations = g.all("test");
 
-      assertEquals(new Double(1.41), annotations[0].getStart().getOffset());
+      assertEquals(Double.valueOf(1.41), annotations[0].getStart().getOffset());
       assertTrue(annotations[0].getInstantaneous());
       assertEquals("183.908051", annotations[0].getLabel());
       assertEquals(g, annotations[0].getParent());
 
-      assertEquals(new Double(1.415), annotations[1].getStart().getOffset());
+      assertEquals(Double.valueOf(1.415), annotations[1].getStart().getOffset());
       assertTrue(annotations[1].getInstantaneous());
       assertEquals("177.777771", annotations[1].getLabel());
       assertEquals(g, annotations[1].getParent());
 
-      assertEquals(new Double(1.42), annotations[2].getStart().getOffset());
+      assertEquals(Double.valueOf(1.42), annotations[2].getStart().getOffset());
       assertTrue(annotations[2].getInstantaneous());
       assertEquals("179.775284", annotations[2].getLabel());
       assertEquals(g, annotations[2].getParent());
 
-      assertEquals(new Double(1.425), annotations[3].getStart().getOffset());
+      assertEquals(Double.valueOf(1.425), annotations[3].getStart().getOffset());
       assertTrue(annotations[3].getInstantaneous());
       assertEquals("179.775284", annotations[3].getLabel());
       assertEquals(g, annotations[3].getParent());
 
-      assertEquals(new Double(300.559998), annotations[annotations.length-1].getStart().getOffset());
+      assertEquals(Double.valueOf(300.559998), annotations[annotations.length-1].getStart().getOffset());
       assertTrue(annotations[annotations.length-1].getInstantaneous());
       assertEquals("205.128204", annotations[annotations.length-1].getLabel());
       assertEquals(g, annotations[annotations.length-1].getParent());
       
       assertEquals(39515, annotations.length);
       assertEquals(39515, g.getAnchors().size());
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
 
    }
 
@@ -229,35 +241,41 @@ public class TestTrackDeserializer
       assertEquals("test.f0", g.getId());
       
       // labels and times
-      Annotation[] annotations = g.list("test");
+      Annotation[] annotations = g.all("test");
 
-      assertEquals(new Double(1.41), annotations[0].getStart().getOffset());
+      assertEquals(Double.valueOf(1.41), annotations[0].getStart().getOffset());
       assertTrue(annotations[0].getInstantaneous());
       assertEquals("183.908051", annotations[0].getLabel());
       assertEquals(g, annotations[0].getParent());
 
-      assertEquals(new Double(1.415), annotations[1].getStart().getOffset());
+      assertEquals(Double.valueOf(1.415), annotations[1].getStart().getOffset());
       assertTrue(annotations[1].getInstantaneous());
       assertEquals("177.777771", annotations[1].getLabel());
       assertEquals(g, annotations[1].getParent());
 
-      assertEquals(new Double(1.42), annotations[2].getStart().getOffset());
+      assertEquals(Double.valueOf(1.42), annotations[2].getStart().getOffset());
       assertTrue(annotations[2].getInstantaneous());
       assertEquals("179.775284", annotations[2].getLabel());
       assertEquals(g, annotations[2].getParent());
 
-      assertEquals(new Double(1.425), annotations[3].getStart().getOffset());
+      assertEquals(Double.valueOf(1.425), annotations[3].getStart().getOffset());
       assertTrue(annotations[3].getInstantaneous());
       assertEquals("179.775284", annotations[3].getLabel());
       assertEquals(g, annotations[3].getParent());
 
-      assertEquals(new Double(300.559998), annotations[annotations.length-1].getStart().getOffset());
+      assertEquals(Double.valueOf(300.559998), annotations[annotations.length-1].getStart().getOffset());
       assertTrue(annotations[annotations.length-1].getInstantaneous());
       assertEquals("205.128204", annotations[annotations.length-1].getLabel());
       assertEquals(g, annotations[annotations.length-1].getParent());
       
       assertEquals(39515, annotations.length);
       assertEquals(39515, g.getAnchors().size());
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
 
    }
 
@@ -300,35 +318,41 @@ public class TestTrackDeserializer
       assertEquals("errors.f0", g.getId());
       
       // labels and times
-      Annotation[] annotations = g.list("f0");
+      Annotation[] annotations = g.all("f0");
 
-      assertEquals(new Double(1.41), annotations[0].getStart().getOffset());
+      assertEquals(Double.valueOf(1.41), annotations[0].getStart().getOffset());
       assertTrue(annotations[0].getInstantaneous());
       assertEquals("183.908051", annotations[0].getLabel());
       assertEquals(g, annotations[0].getParent());
 
-      assertEquals(new Double(1.415), annotations[1].getStart().getOffset());
+      assertEquals(Double.valueOf(1.415), annotations[1].getStart().getOffset());
       assertTrue(annotations[1].getInstantaneous());
       assertEquals("177.777771", annotations[1].getLabel());
       assertEquals(g, annotations[1].getParent());
 
-      assertEquals(new Double(1.42), annotations[2].getStart().getOffset());
+      assertEquals(Double.valueOf(1.42), annotations[2].getStart().getOffset());
       assertTrue(annotations[2].getInstantaneous());
       assertEquals("179.775284", annotations[2].getLabel());
       assertEquals(g, annotations[2].getParent());
 
-      assertEquals(new Double(1.425), annotations[3].getStart().getOffset());
+      assertEquals(Double.valueOf(1.425), annotations[3].getStart().getOffset());
       assertTrue(annotations[3].getInstantaneous());
       assertEquals("179.775284", annotations[3].getLabel());
       assertEquals(g, annotations[3].getParent());
 
-      assertEquals(new Double(300.559998), annotations[annotations.length-1].getStart().getOffset());
+      assertEquals(Double.valueOf(300.559998), annotations[annotations.length-1].getStart().getOffset());
       assertTrue(annotations[annotations.length-1].getInstantaneous());
       assertEquals("205.128204", annotations[annotations.length-1].getLabel());
       assertEquals(g, annotations[annotations.length-1].getParent());
       
       assertEquals(39515, annotations.length);
       assertEquals(39515, g.getAnchors().size());
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
 
    }
 

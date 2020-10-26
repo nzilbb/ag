@@ -393,10 +393,11 @@ public class TrackDeserializer
 		  {
 		     warnings.add("Line " + l + " out of order: time " + offset + " is not greater than previous time " + lastOffset);
 		  }
-		  lastOffset = offset;		 
+		  lastOffset = offset;
 	 	  Anchor anchor = graph.getOrCreateAnchorAt(offset, Constants.CONFIDENCE_MANUAL);
 	 	  graph.addAnchor(anchor);
 	 	  Annotation annotation = new Annotation(null, label, layerId, anchor.getId(), anchor.getId(), graph.getId(), ordinal++);
+                  annotation.setConfidence(Constants.CONFIDENCE_MANUAL);
 	 	  graph.addAnnotation(annotation);
 	       }
 	       catch (NumberFormatException x)
