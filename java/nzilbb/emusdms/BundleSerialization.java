@@ -1475,6 +1475,7 @@ public class BundleSerialization
                   endId = end.getId();
                }
                Annotation levelAnnotation = new Annotation().setLayerId(levelLayer.getId());
+               levelAnnotation.setConfidence(Constants.CONFIDENCE_MANUAL);
                idToAnnotation.put(item.getInt("id"), levelAnnotation);
                if (startId != null)
                {
@@ -1503,7 +1504,8 @@ public class BundleSerialization
                         // ensure the level annotation is in the graph, as it's the parent
                         if (levelAnnotation.getId() == null) graph.addAnnotation(levelAnnotation);
                         // create a tag annotation
-                        graph.addTag(levelAnnotation, labelLayer.getId(), labelValue);
+                        graph.addTag(levelAnnotation, labelLayer.getId(), labelValue)
+                           .setConfidence(Constants.CONFIDENCE_MANUAL);;
                      } // label is mapped to a layer
                   } // a tag layer
                } // next label
@@ -1631,6 +1633,7 @@ public class BundleSerialization
                      Annotation dummy = graph.addAnnotation(
                         new Annotation(null, "", annotation.getLayer().getParentId(),
                                        start.getId(), end.getId()));
+                     dummy.setConfidence(Constants.CONFIDENCE_MANUAL);
                      // later we need to unhook the anchors, so tag this as a dummy
                      dummy.put("@dummy", Boolean.TRUE);
               

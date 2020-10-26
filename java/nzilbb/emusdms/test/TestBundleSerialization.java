@@ -296,7 +296,7 @@ public class TestBundleSerialization
       Graph fragment = graphs[0].getFragment(graphs[0].getAnnotation("57"), layerIds);
       fragment.shiftAnchors(-214.822);
       assertEquals("serialize_utterance_word__214.822-218.290", fragment.getId());
-      fragment.setMediaProvider(new IGraphMediaProvider() {
+      fragment.setMediaProvider(new GraphMediaProvider() {
             public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
             {
                return null;
@@ -313,7 +313,7 @@ public class TestBundleSerialization
                   throw new StoreException(exception);
                }
             }
-            public IGraphMediaProvider providerForGraph(Graph graph) { return this; }
+            public GraphMediaProvider providerForGraph(Graph graph) { return this; }
          });
       Graph[] fragments = { fragment };
 
@@ -411,7 +411,7 @@ public class TestBundleSerialization
       assertEquals("serialize_utterance_word__214.822-218.290", fragment.getId());
       fragment.setId("onetomany_serialize_utterance_word__214.822-218.290");
       assertEquals("onetomany_serialize_utterance_word__214.822-218.290", fragment.getId());
-      fragment.setMediaProvider(new IGraphMediaProvider() {
+      fragment.setMediaProvider(new GraphMediaProvider() {
             public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
             {
                return null;
@@ -428,7 +428,7 @@ public class TestBundleSerialization
                   throw new StoreException(exception);
                }
             }
-            public IGraphMediaProvider providerForGraph(Graph graph) { return this; }
+            public GraphMediaProvider providerForGraph(Graph graph) { return this; }
          });
       Graph[] fragments = { fragment };
 
@@ -585,11 +585,11 @@ public class TestBundleSerialization
       g.shiftAnchors(214.822);
 
       // utterances
-      Annotation[] annotations = g.list("utterance");
+      Annotation[] annotations = g.all("utterance");
       assertEquals("utterance count", 0, annotations.length);
 
       // words
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       String[] wordLabels = { "or", "some", "and", "there's", "nothing", "much", "on", "it", "or" };
       // use original offsets
       double[] wordStarts = { 214.822, 215.3, 215.5926666667, 215.978, 216.36333, 216.7486666667, 217.134, 217.5193333333, 217.9046666667 };
@@ -611,14 +611,14 @@ public class TestBundleSerialization
       } // next annotation
 
       // tags
-      Annotation[] tags = g.list("tag");
+      Annotation[] tags = g.all("tag");
       assertEquals("tag count", 1, tags.length);
       assertEquals("tag label", "first-tag", tags[0].getLabel());
       assertTrue("tag word", tags[0].tags(words[1]));    
       assertEquals("tag parent", words[1], tags[0].getParent());    
 
       // phones
-      annotations = g.list("phone");
+      annotations = g.all("phone");
       assertEquals("phone count", 5, annotations.length);
       String[] phoneLabels = { "$", "s", "V", "m", "n" };
       String[] parentLabels = { "or", "some", "some", "some", "and" };
@@ -636,6 +636,12 @@ public class TestBundleSerialization
          assertNotNull("no null offsets " + a.getId() + ":" + a.getOffset(),
                        a.getOffset());
          assertEquals("anchor set to manual confidence " + a.getId() + ":" + a.getOffset(),
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
+
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
                       Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
    }
@@ -729,7 +735,7 @@ public class TestBundleSerialization
       g.shiftAnchors(214.822);
 
       // utterances
-      Annotation[] annotations = g.list("utterance");
+      Annotation[] annotations = g.all("utterance");
       assertEquals("utterance count", 1, annotations.length);
       assertEquals("utterance label", "participant", annotations[0].getLabel());
       // assertNotNull("utterance parent is set",
@@ -742,7 +748,7 @@ public class TestBundleSerialization
       //             annotations[0].getLabel(), annotations[0].getParent().getLabel());
 
       // words
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       String[] wordLabels = { "or", "some", "and", "there's", "nothing", "much", "on", "it", "or" };
       // use original offsets
       double[] wordStarts = { 214.822, 215.3, 215.5926666667, 215.978, 216.36333, 216.7486666667, 217.134, 217.5193333333, 217.9046666667 };
@@ -764,14 +770,14 @@ public class TestBundleSerialization
       } // next annotation
 
       // tags
-      Annotation[] tags = g.list("tag");
+      Annotation[] tags = g.all("tag");
       assertEquals("tag count", 1, tags.length);
       assertEquals("tag label", "first-tag", tags[0].getLabel());
       assertTrue("tag word", tags[0].tags(words[1]));    
       assertEquals("tag parent", words[1], tags[0].getParent());    
 
       // phones
-      annotations = g.list("phone");
+      annotations = g.all("phone");
       assertEquals("phone count", 11, annotations.length);
       String[] phoneLabels = { "$", "s", "V", "m", "n",
                                // and the dummy ones
@@ -794,8 +800,14 @@ public class TestBundleSerialization
                        a.getOffset());
          assertEquals("anchor set to manual confidence " + a.getId() + ":" + a.getOffset(),
                       Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      } 
+
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
-   }
+  }
 
    /**
     * Diffs two files.
