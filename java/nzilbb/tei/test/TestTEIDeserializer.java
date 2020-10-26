@@ -40,9 +40,7 @@ import nzilbb.tei.*;
 
 public class TestTEIDeserializer
 {
-   @Test public void song() 
-      throws Exception
-   {
+   @Test public void song()  throws Exception {
       Schema schema = new Schema("who", "turn", "utterance", "word",
 	 new Layer("scribe", "Transcriber", 0, true, true, true),
 	 new Layer("transcript_language", "Graph language", 0, false, false, true),
@@ -107,8 +105,7 @@ public class TestTEIDeserializer
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -209,9 +206,7 @@ public class TestTEIDeserializer
 
    }
 
-   @Test public void cmc() 
-      throws Exception
-   {
+   @Test public void cmc()  throws Exception {
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
 	 new Layer("scribe", "Transcriber", 0, true, true, true),
@@ -290,8 +285,7 @@ public class TestTEIDeserializer
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -482,9 +476,7 @@ public class TestTEIDeserializer
 
    }
 
-   @Test public void cmcWithAttributes() 
-      throws Exception
-   {
+   @Test public void cmcWithAttributes()  throws Exception {
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
 	 new Layer("scribe", "Transcriber", 0, true, true, true),
@@ -551,8 +543,7 @@ public class TestTEIDeserializer
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -624,9 +615,7 @@ public class TestTEIDeserializer
 
    }
 
-   @Test public void writing() 
-      throws Exception
-   {
+   @Test public void writing()  throws Exception {
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
 	 new Layer("scribe", "Transcriber", 0, true, true, true),
@@ -735,8 +724,7 @@ public class TestTEIDeserializer
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -892,9 +880,7 @@ public class TestTEIDeserializer
 
    }
 
-   @Test public void wav() 
-      throws Exception
-   {
+   @Test public void wav()  throws Exception {
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
 	 new Layer("scribe", "Transcriber", 0, true, true, true),
@@ -974,8 +960,7 @@ public class TestTEIDeserializer
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -997,9 +982,7 @@ public class TestTEIDeserializer
       }
    }
 
-   @Test public void mp3() 
-      throws Exception
-   {
+   @Test public void mp3()  throws Exception {
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
 	 new Layer("scribe", "Transcriber", 0, true, true, true),
@@ -1079,8 +1062,7 @@ public class TestTEIDeserializer
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -1106,18 +1088,13 @@ public class TestTEIDeserializer
     * Getter for {@link #fDir}: Directory for text files.
     * @return Directory for text files.
     */
-   public File getDir() 
-   { 
-      if (fDir == null)
-      {
-	 try
-	 {
+   public File getDir() { 
+      if (fDir == null) {
+	 try {
 	    URL urlThisClass = getClass().getResource(getClass().getSimpleName() + ".class");
 	    File fThisClass = new File(urlThisClass.toURI());
 	    fDir = fThisClass.getParentFile();
-	 }
-	 catch(Throwable t)
-	 {
+	 } catch(Throwable t) {
 	    System.out.println("" + t);
 	 }
       }
@@ -1129,9 +1106,7 @@ public class TestTEIDeserializer
     */
    public void setDir(File fNewDir) { fDir = fNewDir; }
 
-
-   public static void main(String args[]) 
-   {
+   public static void main(String args[]) {
       org.junit.runner.JUnitCore.main("nzilbb.ag.test.TestTEIDeserializer");
    }
 }

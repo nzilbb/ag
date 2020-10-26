@@ -96,9 +96,8 @@ import nzilbb.configure.ParameterSet;
  * </ul>
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class TEIDeserializer
-   implements GraphDeserializer
-{
+public class TEIDeserializer implements GraphDeserializer {
+   
    // Attributes:
    protected Vector<String> warnings;
 
@@ -440,8 +439,7 @@ public class TEIDeserializer
     * @throws SerializationParametersMissingException If not all required parameters have a value.
     */
    public void setParameters(ParameterSet newParameters)
-       throws SerializationParametersMissingException
-   {
+       throws SerializationParametersMissingException {
       parameters = newParameters;
    }
 
@@ -484,8 +482,7 @@ public class TEIDeserializer
    /**
     * Default constructor.
     */
-   public TEIDeserializer()
-   {
+   public TEIDeserializer() {
    } // end of constructor
    
    // IStreamDeserializer methods:
@@ -494,8 +491,7 @@ public class TEIDeserializer
     * Returns the deserializer's descriptor
     * @return The deserializer's descriptor
     */
-   public SerializationDescriptor getDescriptor()
-   {
+   public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
 	 "TEI Document", "0.3", "application/tei+xml", ".xml", "20200909.1954", getClass().getResource("icon.png"));
    }
@@ -510,8 +506,7 @@ public class TEIDeserializer
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of configuration parameters (still) must be set before {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty list, {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
     */
-   public ParameterSet configure(ParameterSet configuration, Schema schema)
-   {
+   public ParameterSet configure(ParameterSet configuration, Schema schema) {
       setSchema(schema);
       setParticipantLayer(schema.getParticipantLayer());
       setTurnLayer(schema.getTurnLayer());
@@ -532,34 +527,25 @@ public class TEIDeserializer
       LinkedHashMap<String,Layer> wordTagLayers = new LinkedHashMap<String,Layer>();
       LinkedHashMap<String,Layer> participantTagLayers = new LinkedHashMap<String,Layer>();
       if (getParticipantLayer() == null || getTurnLayer() == null 
-	  || getUtteranceLayer() == null || getWordLayer() == null)
-      {
-	 for (Layer top : schema.getRoot().getChildren().values())
-	 {
-	    if (top.getAlignment() == Constants.ALIGNMENT_NONE)
-	    {
-	       if (top.getChildren().size() == 0)
-	       { // unaligned childless children of graph
+	  || getUtteranceLayer() == null || getWordLayer() == null) {
+	 for (Layer top : schema.getRoot().getChildren().values()) {
+	    if (top.getAlignment() == Constants.ALIGNMENT_NONE) {
+	       if (top.getChildren().size() == 0) { // unaligned childless children of graph
 		  participantTagLayers.put(top.getId(), top);
-	       }
-	       else
-	       { // unaligned children of graph, with children of their own
+	       } else { // unaligned children of graph, with children of their own
 		  possibleParticipantLayers.put(top.getId(), top);
-		  for (Layer turn : top.getChildren().values())
-		  {
+		  for (Layer turn : top.getChildren().values()) {
 		     if (turn.getAlignment() == Constants.ALIGNMENT_INTERVAL
-			 && turn.getChildren().size() > 0)
-		     { // aligned children of who with their own children
+			 && turn.getChildren().size() > 0) {
+                        // aligned children of who with their own children
 			possibleTurnLayers.put(turn.getId(), turn);
-			for (Layer turnChild : turn.getChildren().values())
-			{
-			   if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL)
-			   { // aligned children of turn
+			for (Layer turnChild : turn.getChildren().values()) {
+			   if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
+                              // aligned children of turn
 			      possibleTurnChildLayers.put(turnChild.getId(), turnChild);
-			      for (Layer tag : turnChild.getChildren().values())
-			      {
-				 if (tag.getAlignment() == Constants.ALIGNMENT_NONE)
-				 { // unaligned children of word
+			      for (Layer tag : turnChild.getChildren().values()) {
+				 if (tag.getAlignment() == Constants.ALIGNMENT_NONE) {
+                                    // unaligned children of word
 				    wordTagLayers.put(tag.getId(), tag);
 				 }
 			      } // next possible word tag layer
@@ -570,59 +556,47 @@ public class TEIDeserializer
 	       } // with children
 	    } // unaligned
 	 } // next possible participant layer
-      } // missing special layers
-      else
-      {
-	 for (Layer turnChild : getTurnLayer().getChildren().values())
-	 {
-	    if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL)
-	    {
+      } else {
+	 for (Layer turnChild : getTurnLayer().getChildren().values()) {
+	    if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
 	       possibleTurnChildLayers.put(turnChild.getId(), turnChild);
 	    }
 	 } // next possible word tag layer
-	 for (Layer tag : getWordLayer().getChildren().values())
-	 {
+	 for (Layer tag : getWordLayer().getChildren().values()) {
 	    if (tag.getAlignment() == Constants.ALIGNMENT_NONE
-		&& tag.getChildren().size() == 0)
-	    {
+		&& tag.getChildren().size() == 0) {
 	       wordTagLayers.put(tag.getId(), tag);
 	    }
 	 } // next possible word tag layer
 	 for (Layer tag : getParticipantLayer().getChildren().values())
-	 {
-	    if (tag.getAlignment() == Constants.ALIGNMENT_NONE
-		&& tag.getChildren().size() == 0)
-	    {
+	 {if (tag.getAlignment() == Constants.ALIGNMENT_NONE
+		&& tag.getChildren().size() == 0) {
 	       participantTagLayers.put(tag.getId(), tag);
 	    }
 	 } // next possible word tag layer
       }
       participantTagLayers.remove("main_participant");
-      if (getParticipantLayer() == null)
-      {
+      if (getParticipantLayer() == null) {
 	 layerToPossibilities.put(
 	    new Parameter("participantLayer", Layer.class, "Participant layer", 
 			  "Layer for speaker/participant identification", true), 
 	    Arrays.asList("participant","participants","who","speaker","speakers"));
 	 layerToCandidates.put("participantLayer", possibleParticipantLayers);
       }
-      if (getTurnLayer() == null)
-      {
+      if (getTurnLayer() == null) {
 	 layerToPossibilities.put(
 	    new Parameter("turnLayer", Layer.class, "Turn layer", "Layer for speaker turns", true),
 	    Arrays.asList("turn","turns"));
 	 layerToCandidates.put("turnLayer", possibleTurnLayers);
       }
-      if (getUtteranceLayer() == null)
-      {
+      if (getUtteranceLayer() == null) {
 	 layerToPossibilities.put(
 	    new Parameter("utteranceLayer", Layer.class, "Utterance layer", 
 			  "Layer for speaker utterances", true), 
 	    Arrays.asList("utterance","utterances","line","lines"));
 	 layerToCandidates.put("utteranceLayer", possibleTurnChildLayers);
       }
-      if (getWordLayer() == null)
-      {
+      if (getWordLayer() == null) {
 	 layerToPossibilities.put(
 	    new Parameter("wordLayer", Layer.class, "Word layer", 
 			  "Layer for individual word tokens", true), 
@@ -631,20 +605,16 @@ public class TEIDeserializer
       }
 
       LinkedHashMap<String,Layer> topLevelLayers = new LinkedHashMap<String,Layer>();
-      for (Layer top : schema.getRoot().getChildren().values())
-      {
-	 if (top.getAlignment() == Constants.ALIGNMENT_INTERVAL)
-	 { // aligned children of graph
+      for (Layer top : schema.getRoot().getChildren().values()) {
+	 if (top.getAlignment() == Constants.ALIGNMENT_INTERVAL) { // aligned children of graph
 	    topLevelLayers.put(top.getId(), top);
 	 }
       } // next top level layer
 
       LinkedHashMap<String,Layer> graphTagLayers = new LinkedHashMap<String,Layer>();
-      for (Layer top : schema.getRoot().getChildren().values())
-      {
+      for (Layer top : schema.getRoot().getChildren().values()) {
 	 if (top.getAlignment() == Constants.ALIGNMENT_NONE
-	     && top.getChildren().size() == 0)
-	 { // unaligned childless children of graph
+	     && top.getChildren().size() == 0) { // unaligned childless children of graph
 	    graphTagLayers.put(top.getId(), top);
 	 }
       } // next top level layer
@@ -719,20 +689,15 @@ public class TEIDeserializer
       layerToCandidates.put("birthLayer", participantTagLayers);
 
       // add parameters that aren't in the configuration yet, and set possibile/default values
-      for (Parameter p : layerToPossibilities.keySet())
-      {
+      for (Parameter p : layerToPossibilities.keySet()) {
 	 List<String> possibleNames = layerToPossibilities.get(p);
 	 LinkedHashMap<String,Layer> candidateLayers = layerToCandidates.get(p.getName());
-	 if (configuration.containsKey(p.getName()))
-	 {
+	 if (configuration.containsKey(p.getName())) {
 	    p = configuration.get(p.getName());
-	 }
-	 else
-	 {
+	 } else {
 	    configuration.addParameter(p);
 	 }
-	 if (p.getValue() == null)
-	 {
+	 if (p.getValue() == null) {
 	    p.setValue(Utility.FindLayerById(candidateLayers, possibleNames));
 	 }
 	 p.setPossibleValues(candidateLayers.values());
@@ -755,8 +720,8 @@ public class TEIDeserializer
     * @throws IOException On IO error.
     */
    @SuppressWarnings({"rawtypes", "unchecked"})
-   public ParameterSet load(NamedStream[] streams, Schema schema) throws SerializationException, IOException
-   {
+   public ParameterSet load(NamedStream[] streams, Schema schema)
+      throws SerializationException, IOException {
       // take the first stream, ignore all others.
       NamedStream tei = Utility.FindSingleStream(streams, ".xml", "application/tei+xml");
       if (tei == null) throw new SerializationException("No TEI document stream found");
@@ -764,21 +729,18 @@ public class TEIDeserializer
 
       // media duration
       NamedStream wav = Utility.FindSingleStream(streams, ".wav", "audio/wav");
-      if (wav != null)
-      {
+      if (wav != null) {
 	 // save the media file
 	 File fMedia = File.createTempFile("PlainTextDeserializer-", wav.getName());
 	 fMedia.deleteOnExit();
-	 try
-	 {
+	 try {
 	    // we cannot just use the stream directly, because AudioSystem.getAudioInputStream()
 	    // requires a mark/reset-able stream, which we can't guarantee that we have
 	    // so we save the stream to a file, and give AudioSystem.getAudioInputStream() that file
 	    FileOutputStream outStream = new FileOutputStream(fMedia);
 	    byte[] buffer = new byte[1024];
 	    int bytesRead = wav.getStream().read(buffer);
-	    while(bytesRead >= 0)
-	    {
+	    while(bytesRead >= 0) {
 	       outStream.write(buffer, 0, bytesRead);
 	       bytesRead = wav.getStream().read(buffer);
 	    } // next chunk of data
@@ -789,47 +751,34 @@ public class TEIDeserializer
 	    AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(fMedia);
 	    AudioFormat format = audioInputStream.getFormat();
 	    long frames = audioInputStream.getFrameLength();
-	    if (frames > 0)
-	    {
+	    if (frames > 0) {
 	       double durationInSeconds = ((double)frames) / format.getFrameRate(); 
 	       setMediaDurationSeconds(durationInSeconds);
-	    }
-	    else
-	    {
+	    } else {
 	       setMediaError("Ignoring media: " + wav.getName() + " is valid but contains no frames.");
 	    }
-	 }
-	 catch(Exception exception)
-	 {
+	 } catch(Exception exception) {
 	    setMediaError("Ignoring media: " + wav.getName() + " ERROR: " + exception);
-	 }	 
-	 finally
-	 {
+	 } finally {
 	    fMedia.delete();
 	 }
-      } // there is a WAV file
-      else
-      {
+      } else {
 	 NamedStream video = Utility.FindSingleStream(streams, ".webm", "video/webm");
 	 if (video == null) video = Utility.FindSingleStream(streams, ".mp4", "video/mp4");
 	 if (video == null) video = Utility.FindSingleStream(streams, ".mov", "video/quicktime");
 	 if (video == null) video = Utility.FindSingleStream(streams, ".mp3", "audio/mp3");
-	 if (video != null)
-	 {
+	 if (video != null) {
 	    setMediaDurationSeconds(100.0); // TODO find the actual length of the video
 	 }
       }
 
       // Document factory
       DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-      try
-      {
+      try {
 	 DocumentBuilder builder = builderFactory.newDocumentBuilder();   
-	 builder.setEntityResolver(new EntityResolver()
-	    {
+	 builder.setEntityResolver(new EntityResolver() {
 	       public InputSource resolveEntity(String publicId, String systemId)
-		  throws SAXException, IOException
-	       {
+		  throws SAXException, IOException {
 		  // Get DTDs locally, to prevent not found errors
 		  String sName = systemId.substring(
 		     systemId.lastIndexOf('/') + 1);
@@ -839,23 +788,20 @@ public class TEIDeserializer
 		  else
 		     return null;
 	       }
-	    }
-	    );
+	    });
 	 
 	 // parse
 	 Document document = builder.parse(new InputSource(tei.getStream()));
 	 XPathFactory xpathFactory = XPathFactory.newInstance();
 	 xpath = xpathFactory.newXPath();
 	 root = (Node) xpath.evaluate("/TEI", document, XPathConstants.NODE);
-	 if (root == null)
-	 {
+	 if (root == null) {
 	    throw new SerializationException("XML root is not TEI: " + root.getNodeName());
 	 }
 	 header = (Node) xpath.evaluate("//teiHeader", document, XPathConstants.NODE);
 	 text = (Node) xpath.evaluate("//text", document, XPathConstants.NODE);
 	 
-	 if (text == null)
-	 {
+	 if (text == null) {
 	    throw new SerializationException("Document has no text node");
 	 }
 	 
@@ -866,28 +812,22 @@ public class TEIDeserializer
 	 HashMap<String,LinkedHashMap<String,Layer>> layerToCandidates = new HashMap<String,LinkedHashMap<String,Layer>>();	 
 
 	 LinkedHashMap<String,Layer> graphTagLayers = new LinkedHashMap<String,Layer>();
-	 for (Layer layer : schema.getRoot().getChildren().values())
-	 {
-	    if (layer.getAlignment() == Constants.ALIGNMENT_NONE)
-	    {
+	 for (Layer layer : schema.getRoot().getChildren().values()) {
+	    if (layer.getAlignment() == Constants.ALIGNMENT_NONE) {
 	       graphTagLayers.put(layer.getId(), layer);
 	    }
 	 } // next turn child layer
 
 	 // transcript attributes
 	 NodeList items = (NodeList) xpath.evaluate("fileDesc/sourceDesc/msDesc/msIdentifier/idno[@type='URL']", header, XPathConstants.NODESET);
-	 if (items != null && items.getLength() > 0)
-	 {
+	 if (items != null && items.getLength() > 0) {
 	    layerToPossibilities.put(
 	       new Parameter("idnoUrl", Layer.class, "ID URL"), 
 	       Arrays.asList("url","transcripturl","documenturl","sourceurl","transcriptidno"));
 	    layerToCandidates.put("idnoUrl", graphTagLayers);
-	 }
-	 else
-	 {
+	 } else {
 	    items = (NodeList) xpath.evaluate("fileDesc/sourceDesc/msDesc/msIdentifier/idno", header, XPathConstants.NODESET);
-	    if (items != null && items.getLength() > 0)
-	    {
+	    if (items != null && items.getLength() > 0) {
 	       layerToPossibilities.put(
 		  new Parameter("idno", Layer.class, "ID"), 
 		  Arrays.asList("idno", "transcriptidno"));
@@ -896,15 +836,12 @@ public class TEIDeserializer
 	 }
 
 	 items = (NodeList) xpath.evaluate("//notesStmt/note/@type", header, XPathConstants.NODESET);
-	 if (items != null && items.getLength() > 0)
-	 {
+	 if (items != null && items.getLength() > 0) {
 	    // typed <note>s can be mapped to graph tags
-	    for (int p = 0; p < items.getLength(); p++)
-	    {
+	    for (int p = 0; p < items.getLength(); p++) {
 	       Attr noteType = (Attr)items.item(p);
 	       String keyName = "header_note_type_"+noteType.getValue();
-	       if (!layerToCandidates.containsKey(keyName))
-	       {
+	       if (!layerToCandidates.containsKey(keyName)) {
 		  Vector<String> possibleMatches = new Vector<String>();
 		  possibleMatches.add(noteType.getValue());
 		  possibleMatches.add("transcript" + noteType.getValue());
@@ -918,37 +855,28 @@ public class TEIDeserializer
 
 	 LinkedHashMap<String,Layer> instantLayers = new LinkedHashMap<String,Layer>();
 	 LinkedHashMap<String,Layer> intervalTurnPeerAndChildLayers = new LinkedHashMap<String,Layer>();
-	 for (Layer layer : schema.getRoot().getChildren().values())
-	 {
-	    if (layer.getAlignment() == Constants.ALIGNMENT_INTERVAL)
-	    { // aligned children of graph
+	 for (Layer layer : schema.getRoot().getChildren().values()) {
+	    if (layer.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
+               // aligned children of graph
 	       intervalTurnPeerAndChildLayers.put(layer.getId(), layer);
-	    }
-	    else if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT)
-	    {
+	    } else if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT) {
 	       instantLayers.put(layer.getId(), layer);
 	    }
 	 } // next top level layer
 
 	 LinkedHashMap<String,Layer> intervalTurnChildLayers = new LinkedHashMap<String,Layer>();
-	 for (Layer layer : schema.getTurnLayer().getChildren().values())
-	 {
-	    if (layer.getAlignment() == Constants.ALIGNMENT_INTERVAL)
-	    {
+	 for (Layer layer : schema.getTurnLayer().getChildren().values()) {
+	    if (layer.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
 	       intervalTurnChildLayers.put(layer.getId(), layer);
 	       intervalTurnPeerAndChildLayers.put(layer.getId(), layer);
-	    }
-	    else if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT)
-	    {
+	    } else if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT) {
 	       instantLayers.put(layer.getId(), layer);
 	    }
 	 } // next turn child layer
 
 	 LinkedHashMap<String,Layer> wordTagLayers = new LinkedHashMap<String,Layer>();
-	 for (Layer layer : schema.getWordLayer().getChildren().values())
-	 {
-	    if (layer.getAlignment() == Constants.ALIGNMENT_NONE)
-	    {
+	 for (Layer layer : schema.getWordLayer().getChildren().values()) {
+	    if (layer.getAlignment() == Constants.ALIGNMENT_NONE) {
 	       wordTagLayers.put(layer.getId(), layer);
 	    }
 	 } // next turn child layer
@@ -957,21 +885,16 @@ public class TEIDeserializer
 	 //  e.g.  in the case of <w lemma="Niitty" msd="Nom SG" type="Noun">Niittykin</w>
 	 //  potential extra layers are lemma, msd, and type
 	 items = (NodeList) xpath.evaluate("//w", text, XPathConstants.NODESET);
-	 if (items != null)	    
-	 {
-	    for (int w = 0; w < items.getLength(); w++)
-	    {
+	 if (items != null) {
+	    for (int w = 0; w < items.getLength(); w++) {
 	       Node item = items.item(w);
 	       NamedNodeMap attributes = item.getAttributes();
-	       for (int a = 0; a < attributes.getLength(); a++)
-	       {
+	       for (int a = 0; a < attributes.getLength(); a++) {
 		  Attr attribute = (Attr)attributes.item(a);
-		  if (!layerToCandidates.containsKey(attribute.getName()))
-		  {
+		  if (!layerToCandidates.containsKey(attribute.getName())) {
 		     Vector<String> possibleMatches = new Vector<String>();
 		     possibleMatches.add(attribute.getName());
-		     if (attribute.getName().equals("type"))
-		     {
+		     if (attribute.getName().equals("type")) {
 			possibleMatches.add("pos");
 			possibleMatches.add("partofspeech");
 		     }
@@ -985,23 +908,16 @@ public class TEIDeserializer
 	 } // there are w's
 	 
 	 // default to namedEntitiesLayer for nodes
-	 for (String sType : distinctNonPWNodeTypes(text))
-	 {
+	 for (String sType : distinctNonPWNodeTypes(text)) {
 	    // these are automatically mapped...
 	    if (sType.equals("l") // utterance
-		|| sType.equals("lb")) // utterance
-	    {
+		|| sType.equals("lb")) { // utterance 
 	       continue;
-	    }
-	    else
-	    {
+	    } else {
 	       Vector<String> possibleMatches = new Vector<String>();
-	       if (sType.equals("foreign") && getLanguageLayer() != null)
-	       {
+	       if (sType.equals("foreign") && getLanguageLayer() != null) {
 		  possibleMatches.add(getLanguageLayer().getId());
-	       }
-	       else if (sType.equals("note") && getCommentLayer() != null)
-	       {
+	       } else if (sType.equals("note") && getCommentLayer() != null) {
 		  possibleMatches.add(getCommentLayer().getId());
 	       }
 	       possibleMatches.add(sType);
@@ -1009,27 +925,20 @@ public class TEIDeserializer
 	       layerToPossibilities.put(
 		  new Parameter(sType, Layer.class, "Tag: " + sType), possibleMatches);
 	       if (sType.equals("figure")
-		   || sType.equals("note"))
-	       { // could be turn peer or child
+		   || sType.equals("note")) { // could be turn peer or child
 		  layerToCandidates.put(sType, intervalTurnPeerAndChildLayers);
-	       }
-	       else if (sType.equals("pb"))
-	       { // instant
+	       } else if (sType.equals("pb")) { // instant
 		  layerToCandidates.put(sType, instantLayers);
-	       }
-	       else
-	       {
+	       } else {
 		  layerToCandidates.put(sType, intervalTurnChildLayers);
 	       }
 	    }
 	 } // next tag type	    
 
 	 items = (NodeList) xpath.evaluate("//ab/@type", text, XPathConstants.NODESET);
-	 if (items != null && items.getLength() > 0)
-	 {
+	 if (items != null && items.getLength() > 0) {
 	    Vector<String> possibleMatches = new Vector<String>();
-	    if (intervalTurnChildLayers.containsKey("type"))
-	    {
+	    if (intervalTurnChildLayers.containsKey("type")) {
 	       possibleMatches.add("type");
 	    }
 	    if (getEntityLayer() != null) possibleMatches.add(getEntityLayer().getId());
@@ -1039,15 +948,12 @@ public class TEIDeserializer
 	 } // there are instances of <ab type="...">
 
 	 items = (NodeList) xpath.evaluate("//pc/@type", text, XPathConstants.NODESET);
-	 if (items != null && items.getLength() > 0)
-	 {
+	 if (items != null && items.getLength() > 0) {
 	    // typed <pc>s (punctuation characters) can be mapped to their own layer
-	    for (int p = 0; p < items.getLength(); p++)
-	    {
+	    for (int p = 0; p < items.getLength(); p++) {
 	       Attr pcType = (Attr)items.item(p);
 	       String keyName = "pc_type_"+pcType.getValue();
-	       if (!layerToCandidates.containsKey(keyName))
-	       {
+	       if (!layerToCandidates.containsKey(keyName)) {
 		  Vector<String> possibleMatches = new Vector<String>();
 		  possibleMatches.add(pcType.getValue());
 		  if (getEntityLayer() != null) possibleMatches.add(getEntityLayer().getId());
@@ -1061,24 +967,20 @@ public class TEIDeserializer
 
 	 // look for person attributes
 	 LinkedHashMap<String,Layer> participantTagLayers = new LinkedHashMap<String,Layer>();
-	 for (Layer layer : schema.getParticipantLayer().getChildren().values())
-	 {
-	    if (layer.getAlignment() == Constants.ALIGNMENT_NONE)
-	    {
+	 for (Layer layer : schema.getParticipantLayer().getChildren().values()) {
+	    if (layer.getAlignment() == Constants.ALIGNMENT_NONE) {
 	       participantTagLayers.put(layer.getId(), layer);
 	    }
 	 } // next turn child layer
 	 Node particDesc = (Node) xpath.evaluate("//particDesc/listPerson", header, XPathConstants.NODE);
-	 if (particDesc == null)
-	 { // person may be a child of listPerson or directly of particDesc
+	 if (particDesc == null) {
+            // person may be a child of listPerson or directly of particDesc
 	    particDesc = (Node) xpath.evaluate("//particDesc", header, XPathConstants.NODE);
 	 }
-	 for (String sType : distinctPersonNodes(particDesc)) // TODO treat person/note separately
-	 {
+	 for (String sType : distinctPersonNodes(particDesc)) { // TODO treat person/note separately 
 	    Vector<String> possibleMatches = new Vector<String>();
 	    possibleMatches.add(sType);
-	    if (sType.startsWith("note_type_"))
-	    { // person/note
+	    if (sType.startsWith("note_type_")) { // person/note
 	       possibleMatches.add(sType.replaceAll("^note_type",""));
 	       possibleMatches.add("participant"+sType.replaceAll("^note_type",""));
 	       possibleMatches.add("speaker"+sType.replaceAll("^note_type",""));
@@ -1090,8 +992,7 @@ public class TEIDeserializer
 	 
 	 ParameterSet parameters = new ParameterSet();
 	 // add parameters that aren't in the configuration yet, and set possibile/default values
-	 for (Parameter p : layerToPossibilities.keySet())
-	 {
+	 for (Parameter p : layerToPossibilities.keySet()) {
 	    List<String> possibleNames = layerToPossibilities.get(p);
 	    LinkedHashMap<String,Layer> candidateLayers = layerToCandidates.get(p.getName());
 	    parameters.addParameter(p);
@@ -1099,10 +1000,13 @@ public class TEIDeserializer
 	    p.setPossibleValues(candidateLayers.values());
 	 }
 	 return parameters;
+      } catch(ParserConfigurationException x) {
+         throw new SerializationException(x);
+      } catch(SAXException x) {
+         throw new SerializationException(x);
+      } catch(XPathExpressionException x) {
+         throw new SerializationException(x);
       }
-      catch(ParserConfigurationException x) { throw new SerializationException(x); }
-      catch(SAXException x) { throw new SerializationException(x); }
-      catch(XPathExpressionException x) { throw new SerializationException(x); }
    }
 
    /**
@@ -1110,8 +1014,7 @@ public class TEIDeserializer
     * @param n Node to traverse.
     * @return Set of node type names
     */
-   protected HashSet<String> distinctNonPWNodeTypes(Node n)
-   {
+   protected HashSet<String> distinctNonPWNodeTypes(Node n) {
       HashSet<String> types = new HashSet<String>();
       String sType = n.getNodeName();
       if (!sType.equals("w") 
@@ -1128,16 +1031,13 @@ public class TEIDeserializer
 	  && !sType.equals("posting") // http://jtei.revues.org/476
 	  && !sType.equals("interactionTerm")
 	  // choice/orig/reg constructions have special handling, mapping just "orig" is sufficient
-	  && !sType.equals("choice") && !sType.equals("reg")) 
-      {
+	  && !sType.equals("choice") && !sType.equals("reg")) {
 	 types.add(sType);
       }
       NodeList children = n.getChildNodes();
-      for (int c = 0; c < children.getLength(); c++)
-      {
+      for (int c = 0; c < children.getLength(); c++) {
 	 Node child = children.item(c);
-	 if (!(child instanceof Text))
-	 {	    
+	 if (!(child instanceof Text)) {	    
 	    types.addAll(distinctNonPWNodeTypes(child));
 	 }
       } // next child
@@ -1149,20 +1049,15 @@ public class TEIDeserializer
     * @param n Note to traverse.
     * @return Set of node type names
     */
-   protected HashSet<String> distinctPersonNodes(Node n)
-   {
+   protected HashSet<String> distinctPersonNodes(Node n) {
       HashSet<String> types = new HashSet<String>();
-      try
-      {
+      try {
 	 NodeList items = (NodeList) xpath.evaluate("person", n, XPathConstants.NODESET);
-	 if (items != null)	    
-	 {
-	    for (int w = 0; w < items.getLength(); w++)
-	    {
+	 if (items != null) {
+	    for (int w = 0; w < items.getLength(); w++) {
 	       Node person = items.item(w);
 	       NodeList children = person.getChildNodes();
-	       for (int c = 0; c < children.getLength(); c++)
-	       {
+	       for (int c = 0; c < children.getLength(); c++) {
 		  Node child = children.item(c);	       
 		  String sType = child.getNodeName();
 		  if (!sType.equals("idno") 
@@ -1171,21 +1066,17 @@ public class TEIDeserializer
 		      && !sType.equals("persName")
 		      && !sType.equals("#text") 
 		      && !sType.equals("#comment")
-		      && !sType.equals("note"))
-		  {
+		      && !sType.equals("note")) {
 		     types.add(sType);
-		  }
-		  else if (sType.equals("note"))
-		  {
+		  } else if (sType.equals("note")) {
 		     Attr type = (Attr)child.getAttributes().getNamedItem("type");
 		     types.add("note_type_"+type.getValue());
 		  }
 	       } // next child
 	    } // next person
 	 } // there are persons
+      } catch(XPathExpressionException exception) {
       }
-      catch(XPathExpressionException exception)
-      {}
       return types;
    } // end of distinctNonPWNodeTypes()
 
@@ -1202,8 +1093,9 @@ public class TEIDeserializer
     * @throws SerializationException if errors occur during deserialization.
     */
    public Graph[] deserialize() 
-      throws SerializerNotConfiguredException, SerializationParametersMissingException, SerializationException
-   {
+      throws SerializerNotConfiguredException, SerializationParametersMissingException,
+      SerializationException {
+      
       if (participantLayer == null) throw new SerializerNotConfiguredException("Participant layer not set");
       if (turnLayer == null) throw new SerializerNotConfiguredException("Turn layer not set");
       if (utteranceLayer == null) throw new SerializerNotConfiguredException("Utterance layer not set");
@@ -1223,14 +1115,11 @@ public class TEIDeserializer
       Anchor endAnchor = null;
       boolean characterOffsets = true;
 
-      if (getMediaDurationSeconds() != null)
-      {
+      if (getMediaDurationSeconds() != null) {
 	 graph.setOffsetUnits(Constants.UNIT_SECONDS);
 	 endAnchor = graph.getOrCreateAnchorAt(getMediaDurationSeconds(), Constants.CONFIDENCE_MANUAL);
 	 characterOffsets = false;
-      }
-      else
-      {
+      } else {
 	 graph.setOffsetUnits(Constants.UNIT_CHARACTERS); // TODO look for timeline
       }
 
@@ -1258,88 +1147,70 @@ public class TEIDeserializer
       if (ageLayer != null) graph.addLayer((Layer)ageLayer.clone());
       if (birthLayer != null) graph.addLayer((Layer)birthLayer.clone());
       if (parameters == null) setParameters(new ParameterSet());
-      for (Parameter p : parameters.values())
-      {
+      for (Parameter p : parameters.values()) {
 	 Layer layer = (Layer)p.getValue();
-	 if (layer != null && graph.getLayer(layer.getId()) == null)
-	 { // haven't added this layer yet
+	 if (layer != null && graph.getLayer(layer.getId()) == null) {
+            // haven't added this layer yet
 	    graph.addLayer((Layer)layer.clone());
 	 }
       }
       
-      try
-      {
+      try {
 	 // attributes
 	 String sResult = xpath.evaluate("fileDesc/titleStmt/respStmt/name/text()", header);
-	 if (sResult != null && sResult.length() > 0 && scribeLayer != null)
-	 {
+	 if (sResult != null && sResult.length() > 0 && scribeLayer != null) {
 	    graph.addTag(graph, scribeLayer.getId(), sResult)
                .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	 }
 	 sResult = xpath.evaluate("revisionDesc/change/respStmt/name/text()", header);
-	 if (sResult != null && sResult.length() > 0 && scribeLayer != null)
-	 {
+	 if (sResult != null && sResult.length() > 0 && scribeLayer != null) {
 	    graph.addTag(graph, scribeLayer.getId(), sResult)
                .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	 }
 	 sResult = xpath.evaluate("fileDesc/titleStmt/title/text()", header);
-	 if (sResult != null && sResult.length() > 0 && titleLayer != null)
-	 {
+	 if (sResult != null && sResult.length() > 0 && titleLayer != null) {
 	    graph.addTag(graph, titleLayer.getId(), sResult)
                .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	 }
 	 sResult = xpath.evaluate("revisionDesc/change/date/text()", header);
-	 if (sResult != null && sResult.length() > 0 && versionDateLayer != null)
-	 {
+	 if (sResult != null && sResult.length() > 0 && versionDateLayer != null) {
 	    graph.addTag(graph, versionDateLayer.getId(), sResult)
                .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	 }
 	 sResult = xpath.evaluate("profileDesc/creation/date/text()", header);
-	 if (sResult != null && sResult.length() > 0 && publicationDateLayer != null)
-	 {
+	 if (sResult != null && sResult.length() > 0 && publicationDateLayer != null) {
 	    graph.addTag(graph, publicationDateLayer.getId(), sResult)
                .setConfidence(Constants.CONFIDENCE_MANUAL);;
-	 }
-	 else
-	 { // might be CDC-style - i.e. on a timeline
+	 } else { // might be CDC-style - i.e. on a timeline
 	    sResult = xpath.evaluate("front/timeline/when/@absolute", text);
-	    if (sResult != null && sResult.length() > 0 && publicationDateLayer != null)
-	    {
+	    if (sResult != null && sResult.length() > 0 && publicationDateLayer != null) {
 	       graph.addTag(graph, publicationDateLayer.getId(), sResult)
                   .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	    }
 	 }
 	 sResult = xpath.evaluate("profileDesc/langUsage/language/@ident", header);
-	 if (sResult != null && sResult.length() > 0 && transcriptLanguageLayer != null)
-	 {
+	 if (sResult != null && sResult.length() > 0 && transcriptLanguageLayer != null) {
 	    graph.addTag(graph, transcriptLanguageLayer.getId(), sResult)
                .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	 }
 	 Attr lang = (Attr)text.getAttributes().getNamedItem("lang");
-	 if (lang != null)
-	 {
+	 if (lang != null) {
 	    graph.addTag(graph, transcriptLanguageLayer.getId(), lang.getValue().toLowerCase())
                .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	 }
 	 NodeList items = (NodeList) xpath.evaluate("fileDesc/sourceDesc/msDesc/msIdentifier/idno", header, XPathConstants.NODESET);
-	 if (items != null && items.getLength() > 0)
-	 {
+	 if (items != null && items.getLength() > 0) {
 	    Element idno = (Element)items.item(0);
 	    String value = idno.getTextContent();
 	    if (value != null) value = value.trim();
-	    if (value != null && value.length() > 0)
-	    { // there's value
+	    if (value != null && value.length() > 0) { // there's value
 	       Layer layer = null;	       
-	       if (parameters.containsKey("idnoUrl"))
-	       { // idno is URL
+	       if (parameters.containsKey("idnoUrl")) { // idno is URL
 		  layer = (Layer) parameters.get("idnoUrl").getValue();
-	       }
-	       else if (parameters.containsKey("idno"))
-	       { // idno isn't URL
+	       } else if (parameters.containsKey("idno")) { // idno isn't URL
 		  layer = (Layer) parameters.get("idno").getValue();
 	       }
-	       if (layer != null)
-	       { // it's mapped to a layer
+	       if (layer != null) { // it's mapped to a layer
 		  graph.addTag(graph, layer.getId(), value)
                      .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	       }
@@ -1347,23 +1218,18 @@ public class TEIDeserializer
 	 }
 
 	 items = (NodeList) xpath.evaluate("//note[@type]", header, XPathConstants.NODESET);
-	 if (items != null && items.getLength() > 0)
-	 {
+	 if (items != null && items.getLength() > 0) {
 	    // typed <note>s can be mapped to graph tags
-	    for (int p = 0; p < items.getLength(); p++)
-	    {
+	    for (int p = 0; p < items.getLength(); p++) {
 	       Element note = (Element)items.item(p);
 	       String value = note.getTextContent();
 	       if (value != null) value = value.trim();
-	       if (value != null && value.length() > 0)
-	       { // there's value
+	       if (value != null && value.length() > 0) { // there's value
 		  String noteType = note.getAttribute("type");
 		  String keyName = "header_note_type_"+noteType;
-		  if (parameters.containsKey(keyName))
-		  { // there is a parameter
+		  if (parameters.containsKey(keyName)) { // there is a parameter
 		     Layer layer = (Layer) parameters.get(keyName).getValue();
-		     if (layer != null)
-		     { // mapped to a layer
+		     if (layer != null) { // mapped to a layer
 			graph.addTag(graph, layer.getId(), value)
                            .setConfidence(Constants.CONFIDENCE_MANUAL);;
 		     }
@@ -1379,36 +1245,27 @@ public class TEIDeserializer
 	    // person may be a child of listPerson or directly of particDesc
 	    "profileDesc/particDesc/listPerson/person|profileDesc/particDesc/person",
 	    header, XPathConstants.NODESET);
-	 if (items != null && items.getLength() > 0)
-	 {
-	    for (int p = 0; p < items.getLength(); p++)
-	    {
+	 if (items != null && items.getLength() > 0) {
+	    for (int p = 0; p < items.getLength(); p++) {
 	       participant = new Annotation(
                   null, "author", schema.getParticipantLayerId(), startAnchor.getId(),
                   startAnchor.getId());
                participant.setConfidence(Constants.CONFIDENCE_MANUAL);
 	       Element person = (Element)items.item(p);
 	       // set ID
-	       if (person.getAttribute("xml:id").length() > 0)
-	       { // @id attribute
+	       if (person.getAttribute("xml:id").length() > 0) { // @id attribute
 		  participant.setId(person.getAttribute("xml:id"));
-	       }
-	       else
-	       { // no @id, so look for idno element
+	       } else { // no @id, so look for idno element
 		  sResult = xpath.evaluate("idno/text()", person);
-		  if (sResult != null && sResult.length() > 0)
-		  {
+		  if (sResult != null && sResult.length() > 0) {
 		     participant.setId(sResult);
 		  }
 	       }
 	       // set name
 	       sResult = xpath.evaluate("persName/text()", person);
-	       if (sResult != null && sResult.length() > 0)
-	       {
+	       if (sResult != null && sResult.length() > 0) {
 		  participant.setLabel(sResult);
-	       }
-	       else if (participant.getId() != null)
-	       { // no name, so use the ID as the name
+	       } else if (participant.getId() != null) { // no name, so use the ID as the name
 		  participant.setLabel(participant.getId());
 	       }
 	       participant.setParentId(graph.getId());
@@ -1418,59 +1275,48 @@ public class TEIDeserializer
 	       
 	       // sex
 	       if (person.getAttribute("sex").length() > 0
-		   && getSexLayer() != null)
-	       {
+		   && getSexLayer() != null) {
 		  graph.addTag(participant, sexLayer.getId(), person.getAttribute("sex"))
                      .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	       }
 	       // age
 	       sResult = xpath.evaluate("age/text()", person);
 	       if (sResult != null && sResult.length() > 0
-		   && getAgeLayer() != null)
-	       {
+		   && getAgeLayer() != null) {
 		  graph.addTag(participant, ageLayer.getId(), sResult)
                      .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	       }
 	       // birth
 	       sResult = xpath.evaluate("birth/@when", person);
 	       if (sResult != null && sResult.length() > 0
-		   && getBirthLayer() != null)
-	       {
+		   && getBirthLayer() != null) {
 		  graph.addTag(participant, birthLayer.getId(), sResult)
                      .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	       }
 	       
 	       // other tags...
 	       NodeList children = person.getChildNodes();
-	       for (int c = 0; c < children.getLength(); c++)
-	       {
+	       for (int c = 0; c < children.getLength(); c++) {
 		  Node child = children.item(c);
-		  if (child instanceof Element && child.getChildNodes().getLength() > 0)
-		  {
+		  if (child instanceof Element && child.getChildNodes().getLength() > 0) {
 		     String name = child.getNodeName();
 		     if (!name.equals("idno")
 			 && !name.equals("birth")
 			 && !name.equals("age")
 			 && !name.equals("persName")
-			 && !name.equals("note"))
-		     {
+			 && !name.equals("note")) {
 			String value = child.getChildNodes().item(0).getNodeValue();
 			Layer layer = (Layer)parameters.get("person_" + name).getValue();
-			if (layer != null)
-			{
+			if (layer != null) {
 			   graph.addTag(participant, layer.getId(), value)
                               .setConfidence(Constants.CONFIDENCE_MANUAL);;
 			}
-		     }
-		     else if (name.equals("note"))
-		     {
+		     } else if (name.equals("note")) {
 			Attr noteType = (Attr)child.getAttributes().getNamedItem("type");
 			String keyName = "person_note_type_" + noteType.getValue();
-			if (noteType != null && parameters.containsKey(keyName))
-			{		     
+			if (noteType != null && parameters.containsKey(keyName)) {
 			   Layer layer = (Layer)parameters.get(keyName).getValue();
-			   if (layer != null)
-			   {
+			   if (layer != null) {
 			      String value = child.getTextContent();
 			      graph.addTag(participant, layer.getId(), value)
                                  .setConfidence(Constants.CONFIDENCE_MANUAL);;
@@ -1481,27 +1327,22 @@ public class TEIDeserializer
 	       } // next child
 	       
 	    } // next participant
-	 }
-	 else
-	 { // no participants, so use an "author"
+	 } else { // no participants, so use an "author"
 	    participant = new Annotation(null, "author", schema.getParticipantLayerId());
             participant.setConfidence(Constants.CONFIDENCE_MANUAL);
 	    // maybe the author is named
 	    sResult = xpath.evaluate("fileDesc/sourceDesc/biblStruct/monogr/author/text()", header);
-	    if (sResult != null && sResult.length() > 0)
-	    {
+	    if (sResult != null && sResult.length() > 0) {
 	       participant.setLabel(sResult);
-	    }
-	    else
-	    {
+	    } else {
 	       sResult = xpath.evaluate("fileDesc/titleStmt/author/text()", header);
 	       if (sResult != null && sResult.length() > 0) participant.setLabel(sResult);
 	    }
 	    participant.setParentId(graph.getId());
 	    graph.addAnnotation(participant);
 	 }
-	 if (graph.all(getParticipantLayer().getId()).length > 1)
-	 { // don't default to the single participant
+	 if (graph.all(getParticipantLayer().getId()).length > 1) {
+            // don't default to the single participant
 	    participant = null;
 	 }
 	 
@@ -1527,30 +1368,24 @@ public class TEIDeserializer
 	 Anchor aChoiceStarted = null;
 	 Annotation anCurrentOrig = null;
 	 Anchor lastAnchor = startAnchor;
-	 for (Node n : vNodes)
-	 {
+	 for (Node n : vNodes) {
 	    boolean finishHere = false;
-	    if (n instanceof Text)
-	    {
+	    if (n instanceof Text) {
 	       StringTokenizer words = new StringTokenizer(n.getNodeValue()); // TODO use configured tokenizer
 
-	       while (words.hasMoreTokens())
-	       {
+	       while (words.hasMoreTokens()) {
 		  Annotation anWord = new Annotation(
                      null, words.nextToken(), wordLayerId, turn.getId());
 		  anWord.setOrdinal(w++)
                      .setConfidence(Constants.CONFIDENCE_MANUAL);;
 		  //TODO anWord.setLabelStatus(Labbcat.LABEL_STATUS_USER);
-		  if (characterOffsets)
-		  {
+		  if (characterOffsets) {
 		     anWord.setStartId(graph.getOrCreateAnchorAt(
 					  (double)iLastPosition, Constants.CONFIDENCE_MANUAL).getId());
 		     iLastPosition += anWord.getLabel().length() + 1; // include inter-word space
 		     anWord.setEndId(graph.getOrCreateAnchorAt(
 					(double)iLastPosition, Constants.CONFIDENCE_MANUAL).getId());
-		  }
-		  else
-		  {
+		  } else {
 		     anWord.setStartId(lastAnchor.getId());
 		     lastAnchor = new Anchor();
 		     graph.addAnchor(lastAnchor);
@@ -1561,27 +1396,22 @@ public class TEIDeserializer
 		  
 		  anLastWord = anWord;
 	       } // next word
-	    }
-	    else if (n.getNodeName().equals("p")
+	    } else if (n.getNodeName().equals("p")
 		     || n.getNodeName().equals("div")
 		     || n.getNodeName().equals("ab")
 		     || n.getNodeName().equals("l")
-		     || n.getNodeName().equals("lb"))
-	    {
+		     || n.getNodeName().equals("lb")) {
 	       // end the last line
-	       if (characterOffsets)
-	       {
+	       if (characterOffsets) {
 		  line.setEnd(graph.getOrCreateAnchorAt(
 				 (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
-	       }
-	       else
-	       {
+	       } else {
 		  lastAnchor = new Anchor();
 		  graph.addAnchor(lastAnchor);
 		  line.setEnd(lastAnchor);
 	       }
-	       if (!line.getStartId().equals(line.getEndId()))
-	       { // if we have <div><p>... don't create an instantaneous, empty line
+	       if (!line.getStartId().equals(line.getEndId())) {
+                  // if we have <div><p>... don't create an instantaneous, empty line
 		  graph.addAnnotation(line);
 	       }
 	       
@@ -1590,167 +1420,121 @@ public class TEIDeserializer
 	       line.setParentId(turn.getId())
                   .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	       //graph.addAnnotation(line);
-	       if (characterOffsets)
-	       {
+	       if (characterOffsets) {
 		  line.setStart(graph.getOrCreateAnchorAt(
 				   (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
-	       }
-	       else
-	       {
+	       } else {
 		  line.setStart(lastAnchor);
 	       }
-	    } // line
-	    else if (n.getNodeName().equals("u")
-		     || n.getNodeName().equals("posting"))
-	    {
-	       if (turn.getLabel().length() == 0)
-	       { // default empty starting turn
+	    } else if (n.getNodeName().equals("u")
+		     || n.getNodeName().equals("posting")) {
+	       if (turn.getLabel().length() == 0) { // default empty starting turn
 		  // set participant
 		  Element attributable = (Element)n;
-		  if (attributable.getAttribute("who").length() > 0)
-		  {		  
+		  if (attributable.getAttribute("who").length() > 0) {		  
 		     Annotation who = graph.getAnnotation(attributable.getAttribute("who")
 							  .replaceAll("^#","")); // ignore leading #
-		     if (who != null)
-		     {
+		     if (who != null) {
 			participant = who;
 			turn.setLabel(participant.getLabel());
 			turn.setParentId(participant.getId());
 		     }
 		  }
-	       }
-	       else
-	       { // new turn
+	       } else { // new turn
 		  // "attributable" spans, utterance, etc.
-		  if (characterOffsets)
-		  {
+		  if (characterOffsets) {
 		     turn.setEnd(graph.getOrCreateAnchorAt(
 				    (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
-		  }
-		  else
-		  {
+		  } else {
 		     lastAnchor = new Anchor();
 		     graph.addAnchor(lastAnchor);
 		     turn.setEnd(lastAnchor);
 		  }
-		  if (!turn.getStartId().equals(turn.getEndId()))
-		  { // don't create an instantaneous, empty turn
+		  if (!turn.getStartId().equals(turn.getEndId())) {
+                     // don't create an instantaneous, empty turn
 		     graph.addAnnotation(turn);
 		  }
 		  
 		  // set participant
 		  Element attributable = (Element)n;
-		  if (attributable.getAttribute("who").length() > 0)
-		  {		  
+		  if (attributable.getAttribute("who").length() > 0) {
 		     Annotation who = graph.getAnnotation(attributable.getAttribute("who")
 							  .replaceAll("^#","")); // ignore leading #
-		     if (who != null)
-		     {
+		     if (who != null) {
 			participant = who;
 		     }
 		  }
 		  
 		  // start a new turn
-		  if (!turn.getStartId().equals(turn.getEndId()))
-		  {
+		  if (!turn.getStartId().equals(turn.getEndId())) {
 		     turn = new Annotation(null, participant.getLabel(), getTurnLayer().getId());
 		     turn.setParentId(participant.getId())
                         .setConfidence(Constants.CONFIDENCE_MANUAL);;
 		     graph.addAnnotation(turn);
-		     if (characterOffsets)
-		     {
+		     if (characterOffsets) {
 			turn.setStart(graph.getOrCreateAnchorAt(
 					 (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
-		     }
-		     else
-		     {
+		     } else {
 			turn.setStart(lastAnchor);
 		     }
-		  }
-		  else
-		  {
+		  } else {
 		     turn.setParentId(participant.getId());
 		  }
 		  // start a new line too
-		  if (characterOffsets)
-		  {
+		  if (characterOffsets) {
 		     line.setEnd(graph.getOrCreateAnchorAt(
 				    (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
-		  }
-		  else
-		  {
+		  } else {
 		     line.setEnd(lastAnchor);
 		  }
-		  if (!line.getStartId().equals(line.getEndId()))
-		  { // if we have <div><p>... don't create an instantaneous, empty line
+		  if (!line.getStartId().equals(line.getEndId())) {
+                     // if we have <div><p>... don't create an instantaneous, empty line
 		     graph.addAnnotation(line);
 		  }
 		  line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
 		  line.setParentId(turn.getId())
                      .setConfidence(Constants.CONFIDENCE_MANUAL);;
-		  if (characterOffsets)
-		  {
+		  if (characterOffsets) {
 		     line.setStart(graph.getOrCreateAnchorAt(
 				      (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
-		  }
-		  else
-		  {
+		  } else {
 		     line.setStart(lastAnchor);
 		  }
 	       }
-	    } // turn
-	    else if (n.getNodeName().equals("choice"))
-	    {
-	       if (aChoiceStarted == null)
-	       { // opening a new choice tag
-		  if (characterOffsets)
-		  {
+	    } else if (n.getNodeName().equals("choice")) {
+	       if (aChoiceStarted == null) { // opening a new choice tag
+		  if (characterOffsets) {
 		     aChoiceStarted = graph.getOrCreateAnchorAt(
 			(double)iLastPosition, Constants.CONFIDENCE_MANUAL);
-		  }
-		  else
-		  {
+		  } else {
 		     aChoiceStarted = lastAnchor;
 		  }
 		  anCurrentOrig = null;
-	       }
-	       else
-	       { // closing an opened choice tag
-		  if (anCurrentOrig != null)
-		  {
-		     if (characterOffsets)
-		     {
+	       } else { // closing an opened choice tag
+		  if (anCurrentOrig != null) {
+		     if (characterOffsets) {
 			anCurrentOrig.setEnd(
 			   graph.getOrCreateAnchorAt(
 			      (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
-		     }
-		     else
-		     {
+		     } else {
 			anCurrentOrig.setEnd(lastAnchor);
 		     }
 		     anCurrentOrig = null;
 		  }
 		  aChoiceStarted = null;
 	       }
-	    }
-	    else
-	    { // some other entity
-	       if (!mFoundEntities.containsKey(n))
-	       { // new named entity
+	    } else { // some other entity
+	       if (!mFoundEntities.containsKey(n)) { // new named entity
 		  Layer layer = (Layer)parameters.get(n.getNodeName()).getValue();
-		  if (n.getNodeName().equals("pc"))
-		  { // <pc> tags can be mapped by type attribute
+		  if (n.getNodeName().equals("pc")) { // <pc> tags can be mapped by type attribute
 		     Attr att = (Attr)n.getAttributes().getNamedItem("type");
-		     if (att != null && parameters.containsKey("pc_type_" + att.getValue()))
-		     {		     
+		     if (att != null && parameters.containsKey("pc_type_" + att.getValue())) {
 			layer = (Layer)parameters.get("pc_type_" + att.getValue()).getValue();
 		     }
 		  }
-		  if (layer != null)
-		  {
+		  if (layer != null) {
 		     String label = n.getNodeName();
-		     if (n.getChildNodes().getLength() > 0)
-		     {
+		     if (n.getChildNodes().getLength() > 0) {
 			label = n.getChildNodes().item(0).getNodeValue();
 		     }
 		     Annotation anEntity = new Annotation(null, label, layer.getId());
@@ -1759,93 +1543,66 @@ public class TEIDeserializer
 				       graph.getOrCreateAnchorAt(
 					  (double)iLastPosition, Constants.CONFIDENCE_MANUAL)
 				       :lastAnchor);
-		     if (n.getNodeName().equals("orig"))
-		     {
-			if (aChoiceStarted != null)
-			{
+		     if (n.getNodeName().equals("orig")) {
+			if (aChoiceStarted != null) {
 			   anEntity.setStart(aChoiceStarted);
 			   anCurrentOrig = anEntity;
 			}
-		     }
-		     else if (n.getNodeName().equals("note"))
-		     {
+		     } else if (n.getNodeName().equals("note")) {
 			finishHere = true;			
-		     }
-		     else if (n.getNodeName().equals("pc"))
-		     {
+		     } else if (n.getNodeName().equals("pc")) {
 			finishHere = true;
-		     }
-		     else if (n.getNodeName().equals("pb"))
-		     { // page break
+		     } else if (n.getNodeName().equals("pb")) { // page break
 			finishHere = true;
-		     }
-		     else if (n.getNodeName().equals("foreign"))
-		     {
+		     } else if (n.getNodeName().equals("foreign")) {
 			Attr att = (Attr)n.getAttributes().getNamedItem("xml:lang");
-			if (att != null)
-			{
+			if (att != null) {
 			   // the label is the language
 			   anEntity.setLabel(att.getValue());
 			}
-		     }
-		     else if (n.getNodeName().equals("unclear"))
-		     {
+		     } else if (n.getNodeName().equals("unclear")) {
 			anEntity.setLabel(n.getNodeName());
 			Attr att = (Attr)n.getAttributes().getNamedItem("reason");
-			if (att != null)
-			{
+			if (att != null) {
 			   if (getEntityLayer() != null
-			       || !layer.getId().equals(getEntityLayer().getId()))
-			   { // tags have their own layer, so the label doesn't need the tag name
+			       || !layer.getId().equals(getEntityLayer().getId())) {
+                              // tags have their own layer, so the label doesn't need the tag name
 			      anEntity.setLabel(att.getValue());
-			   }
-			   else
-			   {
+			   } else {
 			      anEntity.setLabel(anEntity.getLabel() + ": " + att.getValue());
 			   }
 			}
 			att = (Attr)n.getAttributes().getNamedItem("cert");
-			if (att != null)
-			{
+			if (att != null) {
 			   anEntity.setLabel(anEntity.getLabel() + " (" + att.getValue() + ")");
 			}
-		     }
-		     else
-		     { // everything that's not "orig" nor "note" nor "foreign" nor "unclear"
+		     } else { // everything that's not "orig" nor "note" nor "foreign" nor "unclear"
 			anEntity.setLabel(n.getNodeName());
 			Attr att = (Attr)n.getAttributes().getNamedItem("type");
-			if (att != null)
-			{
+			if (att != null) {
 			   if (getEntityLayer() == null
-			       || !layer.getId().equals(getEntityLayer()))
-			   { // tags have their own layer, so the label doesn't need the tag name
+			       || !layer.getId().equals(getEntityLayer())) {
+                               // tags have their own layer, so the label doesn't need the tag name
 			      anEntity.setLabel(att.getValue());
-			   }
-			   else
-			   {
+			   } else {
 			      anEntity.setLabel(anEntity.getLabel() + ": " + att.getValue());
 			   }
 			}
 		     } // not "orig" nor "note" nor "foreign" nor "unclear"
 		     anEntity.setConfidence(Constants.CONFIDENCE_MANUAL);
-		     if (layer.getParentId().equals(getTurnLayer().getId()))
-		     {
+		     if (layer.getParentId().equals(getTurnLayer().getId())) {
 			anEntity.setParentId(turn.getId());
 		     }
-		     else if (layer.getParentId().equals(schema.getRoot().getId()))
-		     {
+		     else if (layer.getParentId().equals(schema.getRoot().getId())) {
 			anEntity.setParentId(graph.getId());
 		     }
 		     mFoundEntities.put(n, anEntity);
 		  }
-	       } // new entity
-	       else // previously started entity
-	       {
+	       } else // previously started entity {
 		  finishHere = true;
 	       }
 	       
-	       if (finishHere)
-	       { // close the entity
+	       if (finishHere) { // close the entity
 		  Annotation anEntity = mFoundEntities.get(n);
 		  anEntity.setEnd(characterOffsets?
 				  graph.getOrCreateAnchorAt(
@@ -1861,18 +1618,16 @@ public class TEIDeserializer
 	 {
 	    turn.setEnd(graph.getOrCreateAnchorAt(
 			   (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
-	 }
-	 else
-	 {
+	 } else {
 	    turn.setEnd(endAnchor);
 	 }
-	 if (!turn.getStartId().equals(turn.getEndId()))
-	 { // don't create an instantaneous, empty turn
+	 if (!turn.getStartId().equals(turn.getEndId())) {
+            // don't create an instantaneous, empty turn
 	    graph.addAnnotation(turn);
 	 }
 	 line.setEnd(turn.getEnd());
-	 if (!line.getStartId().equals(line.getEndId()))
-	 { // don't create an instantaneous, empty line
+	 if (!line.getStartId().equals(line.getEndId())) {
+            // don't create an instantaneous, empty line
 	    graph.addAnnotation(line);
 	 }
 
@@ -1882,14 +1637,11 @@ public class TEIDeserializer
 	 // orthographic characters include not only letters and numbers,
 	 // but also @, so that tweet addressee annotations aren't clumped
 	 clumper.setNonOrthoCharacterPattern("[^\\p{javaLetter}\\p{javaDigit}@]");
-	 try
-	 {
+	 try {
 	    // clump non-orthographic 'words' with real words
 	    clumper.transform(graph);
 	    graph.commit();
-	 }
-	 catch(TransformationException exception)
-	 {
+	 } catch(TransformationException exception) {
 	    if (errors == null) errors = new SerializationException();
 	    if (errors.getCause() == null) errors.initCause(exception);
 	    errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
@@ -1899,20 +1651,16 @@ public class TEIDeserializer
 	 SortedSet<Anchor> anchors = graph.getSortedAnchors();
 	 Anchor firstAnchor = anchors.first();
 	 lastAnchor = anchors.last();
-	 for (Annotation a : graph.all(getParticipantLayer().getId()))
-	 {
+	 for (Annotation a : graph.all(getParticipantLayer().getId())) {
 	    a.setStartId(firstAnchor.getId());
 	    a.setEndId(lastAnchor.getId());
 	 }
 
-	 if (!characterOffsets)
-	 { // set default offsets
+	 if (!characterOffsets) { // set default offsets
 	    try
 	    {
 	       new DefaultOffsetGenerator().transform(graph);	    
-	    }
-	    catch(TransformationException exception)
-	    {
+	    } catch(TransformationException exception) {
 	       if (errors == null) errors = new SerializationException();
 	       if (errors.getCause() == null) errors.initCause(exception);
 	       errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
@@ -1938,25 +1686,17 @@ public class TEIDeserializer
     * @param n Node to traverse.
     * @return An ordered list of Node objects that are either &lt;w&gt; nodes, or character data nodes that correspond to words, or &lt;p&gt; or &lt;s&gt; nodes
     */
-   protected Vector<Node> flattenToWords(Node n)
-   {
+   protected Vector<Node> flattenToWords(Node n) {
       Vector<Node> vNodes = new Vector<Node>();
       NodeList children = n.getChildNodes();
-      for (int c = 0; c < children.getLength(); c++)
-      {
+      for (int c = 0; c < children.getLength(); c++) {
 	 Node child = children.item(c);
-	 if (child instanceof Text)
-	 {	    
+	 if (child instanceof Text) {	    
 	    if (child.getNodeValue().trim().length() > 0) vNodes.add(child);
-	 }
-	 else if (child instanceof Element)
-	 {
-	    if (child.getNodeName().equals("w"))
-	    {
+	 } else if (child instanceof Element) {
+	    if (child.getNodeName().equals("w")) {
 	       vNodes.add(child);
-	    }
-	    else
-	    {
+	    } else {
 	       if (child.getNodeName().equals("p")
 		   || child.getNodeName().equals("div")
 		   || child.getNodeName().equals("ab")
@@ -1972,15 +1712,13 @@ public class TEIDeserializer
 		   // we need the node of "orig" tags
 		   || child.getNodeName().equals("orig")
 		   // and other spans
-		   || parameters.containsKey(child.getNodeName()))
-	       {
+		   || parameters.containsKey(child.getNodeName())) {
 		  vNodes.add(child);
 	       }
 	       // we don't pass back the children of "orig" nor "note" nor "pc"
 	       if (!child.getNodeName().equals("orig")
 		   && !child.getNodeName().equals("note")
-		   && !child.getNodeName().equals("pc"))
-	       {
+		   && !child.getNodeName().equals("pc")) {
 		  vNodes.addAll(flattenToWords(child));
 	       }
 	       // we need the (start and) end of "choice" tags to correctly handle "orig" tags
@@ -1989,8 +1727,7 @@ public class TEIDeserializer
 		   || (parameters.containsKey(child.getNodeName())
 		       && !child.getNodeName().equals("note")
 		       && !child.getNodeName().equals("pc")
-		       && !child.getNodeName().equals("pb"))) // page break
-	       {
+		       && !child.getNodeName().equals("pb"))) // page break {
 		  vNodes.add(child);
 	       }
 	    }
@@ -2003,8 +1740,7 @@ public class TEIDeserializer
     * Returns any warnings that may have arisen during the last execution of {@link #deserialize()}.
     * @return A possibly empty list of warnings.
     */
-   public String[] getWarnings()
-   {
+   public String[] getWarnings() {
       return warnings.toArray(new String[0]);
    }
 
@@ -2015,8 +1751,7 @@ public class TEIDeserializer
     * <p>This implementation checks for simultaneous speaker turns that have the same speaker mentioned more than once, speakers that have the same name, and mismatched start/end events.
     * @return A list of errors, which will be empty if there were no validation errors.
     */
-   public Vector<String> validate()
-   {     
+   public Vector<String> validate() {     
       warnings = new Vector<String>();
       if (mediaError != null) warnings.add(mediaError);
       mediaError = null;
