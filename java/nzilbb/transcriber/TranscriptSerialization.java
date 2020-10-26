@@ -54,7 +54,8 @@ import org.xml.sax.SAXException;
  * Deserializer for trs files produced with Transcriber.
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class TranscriptSerialization extends Transcript implements GraphDeserializer, GraphSerializer {
+public class TranscriptSerialization
+   extends Transcript implements GraphDeserializer, GraphSerializer {
    
    // Attributes:
    protected Vector<String> warnings;
@@ -456,8 +457,7 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
     * Determines how far through the serialization is.
     * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
     */
-   public Integer getPercentComplete()
-   {
+   public Integer getPercentComplete() {
       if (graphCount < 0) return null;
       return (int)((consumedGraphCount * 100) / graphCount);
    }
@@ -481,8 +481,7 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
    /**
     * Cancel the serialization in course (if any).
     */
-   public void cancel()
-   {
+   public void cancel() {
       setCancelling(true);
    }
    
@@ -576,9 +575,7 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
 	       } // with children
 	    } // unaligned
 	 } // next possible participant layer
-      } // missing special layers
-      else
-      {
+      } else {
 	 for (Layer turnChild : getTurnLayer().getChildren().values()) {
             
 	    if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL) {

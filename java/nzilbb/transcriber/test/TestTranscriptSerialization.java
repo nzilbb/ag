@@ -47,11 +47,9 @@ import nzilbb.editpath.MinimumEditPath;
 import nzilbb.transcriber.*;
 
 // TODO add a test for turns with no speaker assigned.
-public class TestTranscriptSerialization
-{
-   @Test public void basicConversion() 
-      throws Exception
-   {
+public class TestTranscriptSerialization {
+   
+   @Test public void basicConversion()  throws Exception {
       Schema schema = new Schema("who", "turn", "utterance", "word",
 	 new Layer("transcriber", "Transcribers", 0, true, true, true),
 	 new Layer("transcript_language", "Graph language", 0, false, false, true),
@@ -137,8 +135,7 @@ public class TestTranscriptSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -312,9 +309,7 @@ public class TestTranscriptSerialization
 
    }
 
-   @Test public void transcriptOnly() 
-      throws Exception
-   {
+   @Test public void transcriptOnly()  throws Exception {
       Schema schema = new Schema("who", "turn", "utterance", "word",
 	 new Layer("who", "Participants", 0, true, true, true),
 	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
@@ -361,8 +356,7 @@ public class TestTranscriptSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -420,9 +414,7 @@ public class TestTranscriptSerialization
 
    }
 
-   @Test public void basicSerialization()
-      throws Exception
-   {
+   @Test public void basicSerialization() throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("version_date", "Date")
@@ -640,23 +632,23 @@ public class TestTranscriptSerialization
 
       // add a media handler to test MEDIA_DESCRIPTOR
       graph.setMediaProvider(new GraphMediaProvider() {
-            public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
-            {
+            public MediaFile[] getAvailableMedia() throws StoreException, PermissionException {
                MediaFile[] media = {
                   new MediaFile().setMimeType("audio/wav").setName("test.wav")
                };
                return media;
             }
             public String getMedia(String trackSuffix, String mimeType)
-               throws StoreException, PermissionException
-            { return "file://test.wav"; }
-            public GraphMediaProvider providerForGraph(Graph graph)
-            { return this; }
+               throws StoreException, PermissionException {
+               return "file://test.wav";
+            }
+            public GraphMediaProvider providerForGraph(Graph graph) {
+               return this;
+            }
          });  
 
       // add orthography tags that should not be used because orthography is not selected
-      for (Annotation word : graph.all("word"))
-      {
+      for (Annotation word : graph.all("word")) {
          graph.addTag(word, "orthography", word.getLabel()+"-orthography");
       }
       
@@ -745,19 +737,14 @@ public class TestTranscriptSerialization
       // test using diff
       File result = new File(dir, graph.getId() + ".trs");
       String differences = diff(new File(dir, "expected_" + graph.getId() + ".trs"), result);
-      if (differences != null)
-      {
+      if (differences != null) {
          fail(differences);
-      }
-      else
-      {
+      } else {
          result.delete();
       }
    }
    
-   @Test public void simultaneousSpeechSerialization()
-      throws Exception
-   {
+   @Test public void simultaneousSpeechSerialization() throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("version_date", "Date")
@@ -945,23 +932,23 @@ public class TestTranscriptSerialization
 
       // add a media handler to test MEDIA_DESCRIPTOR
       graph.setMediaProvider(new GraphMediaProvider() {
-            public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
-            {
+            public MediaFile[] getAvailableMedia() throws StoreException, PermissionException {
                MediaFile[] media = {
                   new MediaFile().setMimeType("audio/wav").setName("test.wav")
                };
                return media;
             }
             public String getMedia(String trackSuffix, String mimeType)
-               throws StoreException, PermissionException
-            { return "file://test.wav"; }
-            public GraphMediaProvider providerForGraph(Graph graph)
-            { return this; }
+               throws StoreException, PermissionException {
+               return "file://test.wav";
+            }
+            public GraphMediaProvider providerForGraph(Graph graph) {
+               return this;
+            }
          });  
 
       // add orthography tags that should not be used because orthography is not selected
-      for (Annotation word : graph.all("word"))
-      {
+      for (Annotation word : graph.all("word")) {
          graph.addTag(word, "orthography", word.getLabel()+"-orthography");
       }
       
@@ -1046,19 +1033,14 @@ public class TestTranscriptSerialization
       // test using diff
       File result = new File(dir, graph.getId() + ".trs");
       String differences = diff(new File(dir, "expected_" + graph.getId() + ".trs"), result);
-      if (differences != null)
-      {
+      if (differences != null) {
          fail(differences);
-      }
-      else
-      {
+      } else {
          result.delete();
       }
    }
 
-   @Test public void serialize()
-      throws Exception
-   {
+   @Test public void serialize() throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
 	 new Layer("scribe", "Transcriber")
@@ -1168,12 +1150,9 @@ public class TestTranscriptSerialization
       // test using diff
       File result = new File(dir, "serialize_utterance_word.trs");
       String differences = diff(new File(dir, "expected_serialize_utterance_word.trs"), result);
-      if (differences != null)
-      {
+      if (differences != null) {
          fail(differences);
-      }
-      else
-      {
+      } else {
          result.delete();
       }
    }
@@ -1184,35 +1163,29 @@ public class TestTranscriptSerialization
     * @param actual
     * @return null if the files are the same, and a String describing differences if not.
     */
-   public String diff(File expected, File actual)
-   {
+   public String diff(File expected, File actual) {
       StringBuffer d = new StringBuffer();
       
-      try
-      {
+      try {
          // compare with what we expected
          Vector<String> actualLines = new Vector<String>();
          BufferedReader reader = new BufferedReader(new FileReader(actual));
          String line = reader.readLine();
-         while (line != null)
-         {
+         while (line != null) {
             actualLines.add(line);
             line = reader.readLine();
          }
          Vector<String> expectedLines = new Vector<String>();
          reader = new BufferedReader(new FileReader(expected));
          line = reader.readLine();
-         while (line != null)
-         {
+         while (line != null) {
             expectedLines.add(line);
             line = reader.readLine();
          }
          MinimumEditPath<String> comparator = new MinimumEditPath<String>();
          List<EditStep<String>> path = comparator.minimumEditPath(expectedLines, actualLines);
-         for (EditStep<String> step : path)
-         {
-            switch (step.getOperation())
-            {
+         for (EditStep<String> step : path) {
+            switch (step.getOperation()) {
                case CHANGE:
                   d.append("\n"+expected.getPath()+":"+(step.getFromIndex()+1)+": Expected:\n" 
                            + step.getFrom() 
@@ -1230,9 +1203,7 @@ public class TestTranscriptSerialization
                   break;
             }
          } // next step
-      }
-      catch(Exception exception)
-      {
+      } catch(Exception exception) {
          d.append("\n" + exception);
       }
       if (d.length() > 0) return d.toString();
@@ -1249,18 +1220,13 @@ public class TestTranscriptSerialization
     * Getter for {@link #fDir}: Directory for text files.
     * @return Directory for text files.
     */
-   public File getDir() 
-   { 
-      if (fDir == null)
-      {
-	 try
-	 {
+   public File getDir() { 
+      if (fDir == null) {
+	 try {
 	    URL urlThisClass = getClass().getResource(getClass().getSimpleName() + ".class");
 	    File fThisClass = new File(urlThisClass.toURI());
 	    fDir = fThisClass.getParentFile();
-	 }
-	 catch(Throwable t)
-	 {
+	 } catch(Throwable t) {
 	    System.out.println("" + t);
 	 }
       }
@@ -1272,9 +1238,7 @@ public class TestTranscriptSerialization
     */
    public void setDir(File fNewDir) { fDir = fNewDir; }
 
-
-   public static void main(String args[]) 
-   {
+   public static void main(String args[]) {
       org.junit.runner.JUnitCore.main("nzilbb.ag.test.TestTranscriptSerialization");
    }
 }
