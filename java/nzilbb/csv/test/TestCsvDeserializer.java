@@ -114,22 +114,22 @@ public class TestCsvDeserializer
 	 }
 	 
 	 // participants     
-	 Annotation[] who = g.list("who");
+	 Annotation[] who = g.all("who");
 	 assertEquals(1, who.length);
 	 assertEquals("@clairemtimmins", who[0].getLabel());
 	 
 	 // turns
-	 Annotation[] turns = g.list("turns");
+	 Annotation[] turns = g.all("turns");
 	 assertEquals(1, turns.length);
 	 assertEquals("@clairemtimmins", turns[0].getLabel());
 	 
 	 // utterances
-	 Annotation[] utterances = g.list("utterances");
+	 Annotation[] utterances = g.all("utterances");
 	 assertEquals(1, utterances.length);
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.list("transcript");
+	 Annotation[] words = g.all("transcript");
 	 assertEquals(12, words.length);
 	 String[] wordLabels = {
 	    "Shame", "our", "next", "meeting", "wasn't", "before", "this", "deadline",
@@ -138,6 +138,12 @@ public class TestCsvDeserializer
 	 {
 	    assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 }
+      
+         // check all annotations have 'manual' confidence
+         for (Annotation a : g.getAnnotationsById().values()) {
+            assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                         Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+         }
       } // row 1
       
       { // row 2
@@ -160,22 +166,22 @@ public class TestCsvDeserializer
 	 }
 	 
 	 // participants     
-	 Annotation[] who = g.list("who");
+	 Annotation[] who = g.all("who");
 	 assertEquals(1, who.length);
 	 assertEquals("@ProfMarkLevine", who[0].getLabel());
 	 
 	 // turns
-	 Annotation[] turns = g.list("turns");
+	 Annotation[] turns = g.all("turns");
 	 assertEquals(1, turns.length);
 	 assertEquals("@ProfMarkLevine", turns[0].getLabel());
 	 
 	 // utterances
-	 Annotation[] utterances = g.list("utterances");
+	 Annotation[] utterances = g.all("utterances");
 	 assertEquals(1, utterances.length);
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.list("transcript");
+	 Annotation[] words = g.all("transcript");
 	 assertEquals(32, words.length);
 	 String[] wordLabels = {
 	    "“differences", "between", "lesbian", "or", "gay", "and", "straight", "faces",
@@ -186,6 +192,12 @@ public class TestCsvDeserializer
 	 {
 	    assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 }
+      
+         // check all annotations have 'manual' confidence
+         for (Annotation a : g.getAnnotationsById().values()) {
+            assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                         Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+         }
       } // row 2
 
       { // row 3
@@ -208,22 +220,22 @@ public class TestCsvDeserializer
 	 }
 	 
 	 // participants     
-	 Annotation[] who = g.list("who");
+	 Annotation[] who = g.all("who");
 	 assertEquals(1, who.length);
 	 assertEquals("@robdrummond", who[0].getLabel());
 	 
 	 // turns
-	 Annotation[] turns = g.list("turns");
+	 Annotation[] turns = g.all("turns");
 	 assertEquals(1, turns.length);
 	 assertEquals("@robdrummond", turns[0].getLabel());
 	 
 	 // utterances
-	 Annotation[] utterances = g.list("utterances");
+	 Annotation[] utterances = g.all("utterances");
 	 assertEquals(1, utterances.length);
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.list("transcript");
+	 Annotation[] words = g.all("transcript");
 	 assertEquals(5, words.length);
 	 String[] wordLabels = {
 	    "'Awash", "with", "contemporary", "teenspeak'", "😀👍"};
@@ -231,6 +243,12 @@ public class TestCsvDeserializer
 	 {
 	    assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 }
+      
+         // check all annotations have 'manual' confidence
+         for (Annotation a : g.getAnnotationsById().values()) {
+            assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                         Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+         }
       } // row 3
       
       { // row 4
@@ -253,22 +271,22 @@ public class TestCsvDeserializer
 	 }
 	 
 	 // participants     
-	 Annotation[] who = g.list("who");
+	 Annotation[] who = g.all("who");
 	 assertEquals(1, who.length);
 	 assertEquals("@theirishfor", who[0].getLabel());
 	 
 	 // turns
-	 Annotation[] turns = g.list("turns");
+	 Annotation[] turns = g.all("turns");
 	 assertEquals(1, turns.length);
 	 assertEquals("@theirishfor", turns[0].getLabel());
 	 
 	 // utterances
-	 Annotation[] utterances = g.list("utterances");
+	 Annotation[] utterances = g.all("utterances");
 	 assertEquals(1, utterances.length);
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.list("transcript");
+	 Annotation[] words = g.all("transcript");
 	 assertEquals(14, words.length);
 	 String[] wordLabels = {
 	    "Duolingo", "has", "brought", "the", "joys", "of", "Irish", "to", "people",
@@ -277,6 +295,12 @@ public class TestCsvDeserializer
 	 {
 	    assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 }
+      
+         // check all annotations have 'manual' confidence
+         for (Annotation a : g.getAnnotationsById().values()) {
+            assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                         Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+         }
       } // row 4
    }
 
@@ -362,22 +386,22 @@ public class TestCsvDeserializer
 	 }
 	 
 	 // participants     
-	 Annotation[] who = g.list("who");
+	 Annotation[] who = g.all("who");
 	 assertEquals(1, who.length);
 	 assertEquals("@clairemtimmins", who[0].getLabel());
 	 
 	 // turns
-	 Annotation[] turns = g.list("turns");
+	 Annotation[] turns = g.all("turns");
 	 assertEquals(1, turns.length);
 	 assertEquals("@clairemtimmins", turns[0].getLabel());
 
 	 // utterances
-	 Annotation[] utterances = g.list("utterances");
+	 Annotation[] utterances = g.all("utterances");
 	 assertEquals(1, utterances.length);
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.list("transcript");
+	 Annotation[] words = g.all("transcript");
 	 assertEquals(12, words.length);
 	 String[] wordLabels = {
 	    "Shame", "our", "next", "meeting", "wasn't", "before", "this", "deadline",
@@ -389,29 +413,35 @@ public class TestCsvDeserializer
 	 
 	 // meta data
 	 
-	 assertEquals("row 1: One time tag", 1, g.list("transcript_time").length);
-	 Annotation tag = g.my("transcript_time");
+	 assertEquals("row 1: One time tag", 1, g.all("transcript_time").length);
+	 Annotation tag = g.first("transcript_time");
 	 assertEquals("row 1: time tag - correct parent: " + tag.getParent(), g, tag.getParent());
 	 assertEquals("row 1: time tag - correct label: " + tag.getLabel(),
 		      "4:49 AM - 16 Jan 2018", tag.getLabel());
 	 
-	 assertEquals("row 1: One url tag", 1, g.list("transcript_url").length);
-	 tag = g.my("transcript_url");
+	 assertEquals("row 1: One url tag", 1, g.all("transcript_url").length);
+	 tag = g.first("transcript_url");
 	 assertEquals("row 1: url tag - correct parent: " + tag.getParent(), g, tag.getParent());
 	 assertEquals("row 1: url tag - correct label: " + tag.getLabel(),
 		      "https://twitter.com/clairemtimmins/status/953247839433510912", tag.getLabel());
 	 
-	 assertEquals("row 1: One corpus tag", 1, g.list("corpus").length);
-	 tag = g.my("corpus");
+	 assertEquals("row 1: One corpus tag", 1, g.all("corpus").length);
+	 tag = g.first("corpus");
 	 assertEquals("row 1: corpus tag - correct parent: " + tag.getParent(), g, tag.getParent());
 	 assertEquals("row 1: corpus tag - correct label: " + tag.getLabel(),
 		      "Twitter", tag.getLabel());
 	 
-	 assertEquals("row 1: One name tag", 1, g.list("participant_name").length);
-	 tag = g.my("participant_name");
+	 assertEquals("row 1: One name tag", 1, g.all("participant_name").length);
+	 tag = g.first("participant_name");
 	 assertEquals("row 1: name tag - correct parent: " + tag.getParent(), who[0], tag.getParent());
 	 assertEquals("row 1: name tag - correct label: " + tag.getLabel(),
 		      "Claire Timmins", tag.getLabel());
+      
+         // check all annotations have 'manual' confidence
+         for (Annotation a : g.getAnnotationsById().values()) {
+            assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                         Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+         }
       } // row 1      
       
       { // row 2
@@ -434,22 +464,22 @@ public class TestCsvDeserializer
 	 }
 	 
 	 // participants     
-	 Annotation[] who = g.list("who");
+	 Annotation[] who = g.all("who");
 	 assertEquals(1, who.length);
 	 assertEquals("@ProfMarkLevine", who[0].getLabel());
 	 
 	 // turns
-	 Annotation[] turns = g.list("turns");
+	 Annotation[] turns = g.all("turns");
 	 assertEquals(1, turns.length);
 	 assertEquals("@ProfMarkLevine", turns[0].getLabel());
 	 
 	 // utterances
-	 Annotation[] utterances = g.list("utterances");
+	 Annotation[] utterances = g.all("utterances");
 	 assertEquals(1, utterances.length);
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.list("transcript");
+	 Annotation[] words = g.all("transcript");
 	 assertEquals(32, words.length);
 	 String[] wordLabels = {
 	    "“differences", "between", "lesbian", "or", "gay", "and", "straight", "faces",
@@ -463,29 +493,34 @@ public class TestCsvDeserializer
 	 
 	 // meta data
 	 
-	 assertEquals("row 2: One time tag", 1, g.list("transcript_time").length);
-	 Annotation tag = g.my("transcript_time");
+	 assertEquals("row 2: One time tag", 1, g.all("transcript_time").length);
+	 Annotation tag = g.first("transcript_time");
 	 assertEquals("row 2: time tag - correct parent: " + tag.getParent(), g, tag.getParent());
 	 assertEquals("row 2: time tag - correct label: " + tag.getLabel(),
 		      "4:27 AM - 13 Jan 2018", tag.getLabel());
 	 
-	 assertEquals("row 2: One url tag", 1, g.list("transcript_url").length);
-	 tag = g.my("transcript_url");
+	 assertEquals("row 2: One url tag", 1, g.all("transcript_url").length);
+	 tag = g.first("transcript_url");
 	 assertEquals("row 2: url tag - correct parent: " + tag.getParent(), g, tag.getParent());
 	 assertEquals("row 2: url tag - correct label: " + tag.getLabel(),
 		      "https://twitter.com/ProfMarkLevine/status/952155167188836352", tag.getLabel());
 	 
-	 assertEquals("row 2: One corpus tag", 1, g.list("corpus").length);
-	 tag = g.my("corpus");
+	 assertEquals("row 2: One corpus tag", 1, g.all("corpus").length);
+	 tag = g.first("corpus");
 	 assertEquals("row 2: corpus tag - correct parent: " + tag.getParent(), g, tag.getParent());
 	 assertEquals("row 2: corpus tag - correct label: " + tag.getLabel(),
 		      "Twitter", tag.getLabel());
 	 
-	 assertEquals("row 2: One name tag", 1, g.list("participant_name").length);
-	 tag = g.my("participant_name");
+	 assertEquals("row 2: One name tag", 1, g.all("participant_name").length);
+	 tag = g.first("participant_name");
 	 assertEquals("row 2: name tag - correct parent: " + tag.getParent(), who[0], tag.getParent());
 	 assertEquals("row 2: name tag - correct label: " + tag.getLabel(),
 		      "Mark Levine", tag.getLabel());
+         // check all annotations have 'manual' confidence
+         for (Annotation a : g.getAnnotationsById().values()) {
+            assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                         Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+         }
       } // row 2
 
       { // row 3
@@ -508,22 +543,22 @@ public class TestCsvDeserializer
 	 }
 	 
 	 // participants     
-	 Annotation[] who = g.list("who");
+	 Annotation[] who = g.all("who");
 	 assertEquals(1, who.length);
 	 assertEquals("@robdrummond", who[0].getLabel());
 	 
 	 // turns
-	 Annotation[] turns = g.list("turns");
+	 Annotation[] turns = g.all("turns");
 	 assertEquals(1, turns.length);
 	 assertEquals("@robdrummond", turns[0].getLabel());
 	 
 	 // utterances
-	 Annotation[] utterances = g.list("utterances");
+	 Annotation[] utterances = g.all("utterances");
 	 assertEquals(1, utterances.length);
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.list("transcript");
+	 Annotation[] words = g.all("transcript");
 	 assertEquals(5, words.length);
 	 String[] wordLabels = {
 	    "'Awash", "with", "contemporary", "teenspeak'", "😀👍"};
@@ -534,29 +569,34 @@ public class TestCsvDeserializer
 	 
 	 // meta data
 	 
-	 assertEquals("row 3: One time tag", 1, g.list("transcript_time").length);
-	 Annotation tag = g.my("transcript_time");
+	 assertEquals("row 3: One time tag", 1, g.all("transcript_time").length);
+	 Annotation tag = g.first("transcript_time");
 	 assertEquals("row 3: time tag - correct parent: " + tag.getParent(), g, tag.getParent());
 	 assertEquals("row 3: time tag - correct label: " + tag.getLabel(),
 		      "2:23 AM - 16 Jan 2018", tag.getLabel());
 	 
-	 assertEquals("row 3: One url tag", 1, g.list("transcript_url").length);
-	 tag = g.my("transcript_url");
+	 assertEquals("row 3: One url tag", 1, g.all("transcript_url").length);
+	 tag = g.first("transcript_url");
 	 assertEquals("row 3: url tag - correct parent: " + tag.getParent(), g, tag.getParent());
 	 assertEquals("row 3: url tag - correct label: " + tag.getLabel(),
 		      "https://twitter.com/robdrummond/status/953211091416420352", tag.getLabel());
 	 
-	 assertEquals("row 3: One corpus tag", 1, g.list("corpus").length);
-	 tag = g.my("corpus");
+	 assertEquals("row 3: One corpus tag", 1, g.all("corpus").length);
+	 tag = g.first("corpus");
 	 assertEquals("row 3: corpus tag - correct parent: " + tag.getParent(), g, tag.getParent());
 	 assertEquals("row 3: corpus tag - correct label: " + tag.getLabel(),
 		      "Twitter", tag.getLabel());
 	 
-	 assertEquals("row 3: One name tag", 1, g.list("participant_name").length);
-	 tag = g.my("participant_name");
+	 assertEquals("row 3: One name tag", 1, g.all("participant_name").length);
+	 tag = g.first("participant_name");
 	 assertEquals("row 3: name tag - correct parent: " + tag.getParent(), who[0], tag.getParent());
 	 assertEquals("row 3: name tag - correct label: " + tag.getLabel(),
 		      " Rob Drummond", tag.getLabel());
+         // check all annotations have 'manual' confidence
+         for (Annotation a : g.getAnnotationsById().values()) {
+            assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                         Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+         }
       } // row 3
       
       { // row 4
@@ -579,22 +619,22 @@ public class TestCsvDeserializer
 	 }
 	 
 	 // participants     
-	 Annotation[] who = g.list("who");
+	 Annotation[] who = g.all("who");
 	 assertEquals(1, who.length);
 	 assertEquals("@theirishfor", who[0].getLabel());
 	 
 	 // turns
-	 Annotation[] turns = g.list("turns");
+	 Annotation[] turns = g.all("turns");
 	 assertEquals(1, turns.length);
 	 assertEquals("@theirishfor", turns[0].getLabel());
 	 
 	 // utterances
-	 Annotation[] utterances = g.list("utterances");
+	 Annotation[] utterances = g.all("utterances");
 	 assertEquals(1, utterances.length);
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.list("transcript");
+	 Annotation[] words = g.all("transcript");
 	 assertEquals(14, words.length);
 	 String[] wordLabels = {
 	    "Duolingo", "has", "brought", "the", "joys", "of", "Irish", "to", "people",
@@ -606,30 +646,35 @@ public class TestCsvDeserializer
 	 
 	 // meta data
 	 
-	 assertEquals("row 4: One time tag", 1, g.list("transcript_time").length);
-	 Annotation tag = g.my("transcript_time");
+	 assertEquals("row 4: One time tag", 1, g.all("transcript_time").length);
+	 Annotation tag = g.first("transcript_time");
 	 assertEquals("row 4: time tag - correct parent: " + tag.getParent(), g, tag.getParent());
 	 assertEquals("row 4: time tag - correct label: " + tag.getLabel(),
 		      "12:09 AM - 16 Jan 2018", tag.getLabel());
 	 
-	 assertEquals("row 4: One url tag", 1, g.list("transcript_url").length);
-	 tag = g.my("transcript_url");
+	 assertEquals("row 4: One url tag", 1, g.all("transcript_url").length);
+	 tag = g.first("transcript_url");
 	 assertEquals("row 4: url tag - correct parent: " + tag.getParent(), g, tag.getParent());
 	 assertEquals("row 4: url tag - correct label: " + tag.getLabel(),
 		      "https://twitter.com/theirishfor/status/953177367505264640", tag.getLabel());
 	 
-	 assertEquals("row 4: One corpus tag", 1, g.list("corpus").length);
-	 tag = g.my("corpus");
+	 assertEquals("row 4: One corpus tag", 1, g.all("corpus").length);
+	 tag = g.first("corpus");
 	 assertEquals("row 4: corpus tag - correct parent: " + tag.getParent(), g, tag.getParent());
 	 assertEquals("row 4: corpus tag - correct label: " + tag.getLabel(),
 		      "Twitter", tag.getLabel());
 	 
-	 assertEquals("row 4: One name tag", 1, g.list("participant_name").length);
-	 tag = g.my("participant_name");
+	 assertEquals("row 4: One name tag", 1, g.all("participant_name").length);
+	 tag = g.first("participant_name");
 	 assertEquals("row 4: name tag - correct parent: " + tag.getParent(), who[0], tag.getParent());
 	 assertEquals("row 4: name tag - correct label: " + tag.getLabel(),
 		      "The Irish For 😚\n🐊", tag.getLabel());
-      } // row 4
+         // check all annotations have 'manual' confidence
+         for (Annotation a : g.getAnnotationsById().values()) {
+            assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                         Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+         }
+      } // row 4      
    }
    
    @Test public void badHeaders() 
@@ -700,22 +745,22 @@ public class TestCsvDeserializer
 	 }
 	 
 	 // participants     
-	 Annotation[] who = g.list("who");
+	 Annotation[] who = g.all("who");
 	 assertEquals(1, who.length);
 	 assertEquals("@clairemtimmins", who[0].getLabel());
 	 
 	 // turns
-	 Annotation[] turns = g.list("turns");
+	 Annotation[] turns = g.all("turns");
 	 assertEquals(1, turns.length);
 	 assertEquals("@clairemtimmins", turns[0].getLabel());
 	 
 	 // utterances
-	 Annotation[] utterances = g.list("utterances");
+	 Annotation[] utterances = g.all("utterances");
 	 assertEquals(1, utterances.length);
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.list("transcript");
+	 Annotation[] words = g.all("transcript");
 	 assertEquals(12, words.length);
 	 String[] wordLabels = {
 	    "Shame", "our", "next", "meeting", "wasn't", "before", "this", "deadline",
@@ -724,6 +769,12 @@ public class TestCsvDeserializer
 	 {
 	    assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 }
+         
+         // check all annotations have 'manual' confidence
+         for (Annotation a : g.getAnnotationsById().values()) {
+            assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                         Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+         }
       } // row 1
       
       { // row 2
@@ -746,22 +797,22 @@ public class TestCsvDeserializer
 	 }
 	 
 	 // participants     
-	 Annotation[] who = g.list("who");
+	 Annotation[] who = g.all("who");
 	 assertEquals(1, who.length);
 	 assertEquals("@ProfMarkLevine", who[0].getLabel());
 	 
 	 // turns
-	 Annotation[] turns = g.list("turns");
+	 Annotation[] turns = g.all("turns");
 	 assertEquals(1, turns.length);
 	 assertEquals("@ProfMarkLevine", turns[0].getLabel());
 	 
 	 // utterances
-	 Annotation[] utterances = g.list("utterances");
+	 Annotation[] utterances = g.all("utterances");
 	 assertEquals(1, utterances.length);
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.list("transcript");
+	 Annotation[] words = g.all("transcript");
 	 assertEquals(32, words.length);
 	 String[] wordLabels = {
 	    "“differences", "between", "lesbian", "or", "gay", "and", "straight", "faces",
@@ -772,6 +823,12 @@ public class TestCsvDeserializer
 	 {
 	    assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 }
+         
+         // check all annotations have 'manual' confidence
+         for (Annotation a : g.getAnnotationsById().values()) {
+            assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                         Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+         }
       } // row 2
 
       { // row 3
@@ -794,22 +851,22 @@ public class TestCsvDeserializer
 	 }
 	 
 	 // participants     
-	 Annotation[] who = g.list("who");
+	 Annotation[] who = g.all("who");
 	 assertEquals(1, who.length);
 	 assertEquals("@robdrummond", who[0].getLabel());
 	 
 	 // turns
-	 Annotation[] turns = g.list("turns");
+	 Annotation[] turns = g.all("turns");
 	 assertEquals(1, turns.length);
 	 assertEquals("@robdrummond", turns[0].getLabel());
 	 
 	 // utterances
-	 Annotation[] utterances = g.list("utterances");
+	 Annotation[] utterances = g.all("utterances");
 	 assertEquals(1, utterances.length);
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.list("transcript");
+	 Annotation[] words = g.all("transcript");
 	 assertEquals(5, words.length);
 	 String[] wordLabels = {
 	    "'Awash", "with", "contemporary", "teenspeak'", "😀👍"};
@@ -817,6 +874,12 @@ public class TestCsvDeserializer
 	 {
 	    assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 }
+
+         // check all annotations have 'manual' confidence
+         for (Annotation a : g.getAnnotationsById().values()) {
+            assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                         Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+         }
       } // row 3
       
       { // row 4
@@ -839,22 +902,22 @@ public class TestCsvDeserializer
 	 }
 	 
 	 // participants     
-	 Annotation[] who = g.list("who");
+	 Annotation[] who = g.all("who");
 	 assertEquals(1, who.length);
 	 assertEquals("@theirishfor", who[0].getLabel());
 	 
 	 // turns
-	 Annotation[] turns = g.list("turns");
+	 Annotation[] turns = g.all("turns");
 	 assertEquals(1, turns.length);
 	 assertEquals("@theirishfor", turns[0].getLabel());
 	 
 	 // utterances
-	 Annotation[] utterances = g.list("utterances");
+	 Annotation[] utterances = g.all("utterances");
 	 assertEquals(1, utterances.length);
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.list("transcript");
+	 Annotation[] words = g.all("transcript");
 	 assertEquals(14, words.length);
 	 String[] wordLabels = {
 	    "Duolingo", "has", "brought", "the", "joys", "of", "Irish", "to", "people",
@@ -863,6 +926,12 @@ public class TestCsvDeserializer
 	 {
 	    assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 }
+         
+         // check all annotations have 'manual' confidence
+         for (Annotation a : g.getAnnotationsById().values()) {
+            assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                         Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+         }
       } // row 4
    }
 

@@ -672,8 +672,9 @@ public class CsvDeserializer
 	 }
 
 	 // participant/author
-	 Annotation participant = graph.createTag(
+	 Annotation participant = graph.addTag(
 	    graph, schema.getParticipantLayerId(), record.get(participantColumn));
+         participant.setConfidence(Constants.CONFIDENCE_MANUAL);
 
 	 // meta-data
 	 for (String header : getHeaderMap().keySet())
@@ -686,11 +687,13 @@ public class CsvDeserializer
 	       String value = record.get(header);
 	       if (layer.getParentId().equals(schema.getRoot().getId())) // graph tag
 	       {
-		  graph.createTag(graph, layer.getId(), value);
+		  graph.addTag(graph, layer.getId(), value)
+                     .setConfidence(Constants.CONFIDENCE_MANUAL);
 	       }
 	       else // participant tag
 	       {
-		  graph.createTag(participant, layer.getId(), value);
+		  graph.addTag(participant, layer.getId(), value)
+                     .setConfidence(Constants.CONFIDENCE_MANUAL);
 	       }
 	    } // parameter set
 	 } // next header
@@ -698,20 +701,23 @@ public class CsvDeserializer
 	 // text
 	 Annotation turn = new Annotation(
 	    null, participant.getLabel(), getTurnLayer().getId());
+         turn.setConfidence(Constants.CONFIDENCE_MANUAL);
 	 graph.addAnnotation(turn);
 	 turn.setParent(participant);
 	 turn.setStart(
 	    graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL));
 	 Annotation line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
-	 line.setParentId(turn.getId());
-	 line.setStart(turn.getStart());
+	 line.setParentId(turn.getId())
+            .setStart(turn.getStart())
+            .setConfidence(Constants.CONFIDENCE_MANUAL);
 	 int iLastPosition = 0;
 
 	 String sLine = record.get(textColumn).trim();	 
 	 int iNumChars = sLine.length();
 	 line = new Annotation(null, sLine, getUtteranceLayer().getId());
-	 line.setParentId(turn.getId());
-	 line.setStart(turn.getStart());	 
+	 line.setParentId(turn.getId())
+            .setStart(turn.getStart())
+            .setConfidence(Constants.CONFIDENCE_MANUAL);	 
 	 Anchor end = graph.getOrCreateAnchorAt(
 	    ((double)iNumChars + 1), Constants.CONFIDENCE_MANUAL);
 	 line.setEnd(end);
