@@ -57,9 +57,8 @@ import org.apache.commons.csv.*;
  * Converter that generates CSV files from annotation graphs.
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class CsvSerializer
-   implements GraphSerializer
-{
+public class CsvSerializer implements GraphSerializer {
+   
    // Attributes:
    
    /** Static format so we don't keep creating and destroying one */
@@ -73,8 +72,7 @@ public class CsvSerializer
     * <p>{@link GraphSerializer} and {@link GraphDeserializer} method.
     * @return A possibly empty list of warnings.
     */
-   public String[] getWarnings()
-   {
+   public String[] getWarnings() {
       return warnings.toArray(new String[0]);
    }
    
@@ -135,8 +133,7 @@ public class CsvSerializer
     * Determines how far through the serialization is.
     * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
     */
-   public Integer getPercentComplete()
-   {
+   public Integer getPercentComplete() {
       if (graphCount < 0) return null;
       return (int)((consumedGraphCount * 100) / graphCount);
    }
@@ -160,8 +157,7 @@ public class CsvSerializer
    /**
     * Cancel the serialization in course (if any).
     */
-   public void cancel()
-   {
+   public void cancel() {
       setCancelling(true);
    }
 
@@ -170,8 +166,7 @@ public class CsvSerializer
    /**
     * Default constructor.
     */
-   public CsvSerializer()
-   {
+   public CsvSerializer() {
    } // end of constructor
 
    /**
@@ -179,8 +174,7 @@ public class CsvSerializer
     * <p>{@link GraphSerializer} and {@link GraphDeserializer} method.
     * @return The deserializer's descriptor
     */
-   public SerializationDescriptor getDescriptor()
-   {
+   public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
 	 "Comma Separated Values", "1.2", "text/csv", ".csv", "20200909.1954", getClass().getResource("icon.png"));
    }
@@ -196,8 +190,7 @@ public class CsvSerializer
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of configuration parameters (still) must be set before {@link GraphDeserializer#setParameters()} can be invoked. If this is an empty list, {@link GraphDeserializer#setParameters()} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
     */
-   public ParameterSet configure(ParameterSet configuration, Schema schema)
-   {
+   public ParameterSet configure(ParameterSet configuration, Schema schema) {
       setSchema(schema);
       setParticipantLayer(schema.getParticipantLayer());
       return configuration;
@@ -209,8 +202,7 @@ public class CsvSerializer
     * @return A list of IDs of layers that must be present in the graph that will be serialized.
     * @throws SerializationParametersMissingException If not all required parameters have a value.
     */
-   public String[] getRequiredLayers() throws SerializationParametersMissingException
-   {
+   public String[] getRequiredLayers() throws SerializationParametersMissingException {
       return new String[0];
    }
 
@@ -219,8 +211,7 @@ public class CsvSerializer
     * @return {@link GraphSerializer#Cardinality}.NtoOne as there is one stream produced
     * regardless of  how many graphs are serialized.
     */
-   public Cardinality getCardinality()
-   {
+   public Cardinality getCardinality() {
       return Cardinality.NToOne;
    }
 
@@ -240,12 +231,13 @@ public class CsvSerializer
     * @return A list of named streams that contain the serialization in the given format. 
     * @throws SerializerNotConfiguredException if the object has not been configured.
     */
-   public void serialize(Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
-      throws SerializerNotConfiguredException
-   {
+   public void serialize(
+      Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer,
+      Consumer<String> warnings, Consumer<SerializationException> errors) 
+      throws SerializerNotConfiguredException {
+      
       graphCount = graphs.getExactSizeIfKnown();
-      try
-      {
+      try {
          final StringBuffer fileName = new StringBuffer();
          File csvFile = File.createTempFile("annotations.",".csv");
          final CSVPrinter csv = new CSVPrinter(
@@ -254,33 +246,26 @@ public class CsvSerializer
          csv.print("graph");
          Vector<Layer> attributeLayers = new Vector<Layer>();
          Vector<Layer> temporalLayers = new Vector<Layer>();
-         for (String layerId : layerIds)
-         {
+         for (String layerId : layerIds) {
             Layer layer = schema.getLayer(layerId);
             if ((layer.getParentId().equals(schema.getRoot().getId())
                  || layer.getParentId().equals(schema.getParticipantLayerId()))
-                && layer.getAlignment() == Constants.ALIGNMENT_NONE)
-            {
+                && layer.getAlignment() == Constants.ALIGNMENT_NONE) {
                attributeLayers.add(layer);
-            }
-            else
-            {
+            } else {
                temporalLayers.add(layer);
             }
          } // next layerId
 
          // there will be an attribute layer value, but no offsets, for every CSV row
-         for (Layer layer : attributeLayers)
-         {
+         for (Layer layer : attributeLayers) {
             csv.print(layer.getId());
          }
 
          // there will be one temporal layer/value per CSV row
-         for (Layer layer : temporalLayers)
-         {
+         for (Layer layer : temporalLayers) {
             csv.print(layer.getId());
-            switch (layer.getAlignment())
-            {
+            switch (layer.getAlignment()) {
                case Constants.ALIGNMENT_INSTANT:
                   csv.print(layer.getId() + " offset");
                   break;
@@ -293,31 +278,23 @@ public class CsvSerializer
          csv.println();
          graphs.forEachRemaining(graph -> {
                if (getCancelling()) return;
-               if (fileName.length() == 0)
-               {
+               if (fileName.length() == 0) {
                   fileName.append(graph.getId().replaceAll("\\.[^.]+$",""));
-               }
-               else if (!fileName.toString().endsWith("-etc"))
-               {
+               } else if (!fileName.toString().endsWith("-etc")) {
                   fileName.append("-etc");
                }
 
-               try
-               {
+               try {
                   // target one temporal layer at a time
-                  for (Layer targetLayer : temporalLayers)
-                  {
+                  for (Layer targetLayer : temporalLayers) {
                      // there's one CSV row per annotation
-                     for (Annotation annotation : graph.all(targetLayer.getId()))
-                     {
+                     for (Annotation annotation : graph.all(targetLayer.getId())) {
                         // graph ID
                         csv.print(graph.getId());
                         
                         // all the attribute layers
-                        for (Layer attributeLayer : attributeLayers)
-                        {
-                           try
-                           {
+                        for (Layer attributeLayer : attributeLayers) {
+                           try {
                               csv.print(
                                  // multiple values are represented with multiple lines in the cell
                                  String.join("\n",
@@ -327,22 +304,17 @@ public class CsvSerializer
                                              .map(a -> a.getLabel())
                                              // and convert the stream to an array
                                              .collect(Collectors.toList()).toArray(new String[0])));
-                           }
-                           catch(NullPointerException exception)
-                           {
+                           } catch(NullPointerException exception) {
                               csv.print("");
                            }
                         } // next attribute layer
                         
                         // now iterate through the temporal layers, inserting the label in the
                         // right column, and adding blanks in the other columns
-                        for (Layer columnLayer : temporalLayers)
-                        {
-                           if (columnLayer == targetLayer)
-                           { // put values in these columns
+                        for (Layer columnLayer : temporalLayers) {
+                           if (columnLayer == targetLayer) { // put values in these columns
                               csv.print(annotation.getLabel());
-                              switch (columnLayer.getAlignment())
-                              {
+                              switch (columnLayer.getAlignment()) {
                                  case Constants.ALIGNMENT_INSTANT:
                                     csv.print(offset(annotation.getStart()));
                                     break;
@@ -351,12 +323,9 @@ public class CsvSerializer
                                     csv.print(offset(annotation.getEnd()));
                                     break;
                               }
-                           } // columnLayer == targetLayer
-                           else
-                           { // blank columns
+                           } else { // blank columns
                               csv.print("");
-                              switch (columnLayer.getAlignment())
-                              {
+                              switch (columnLayer.getAlignment()) {
                                  case Constants.ALIGNMENT_INSTANT:
                                     csv.print("");
                                     break;
@@ -371,9 +340,7 @@ public class CsvSerializer
                      } // next annotation
                   } // next layer
                   consumedGraphCount++;
-               }
-               catch(Exception exception)
-               {
+               } catch(Exception exception) {
                   errors.accept(new SerializationException(exception));
                }
             }); // next graph
@@ -381,9 +348,7 @@ public class CsvSerializer
          csv.close();
          consumer.accept(
             new NamedStream(new TempFileInputStream(csvFile), fileName+".csv", "text/csv"));     
-      }
-      catch(Exception exception)
-      {
+      } catch(Exception exception) {
          errors.accept(new SerializationException(exception));
       }
    }
@@ -394,12 +359,10 @@ public class CsvSerializer
     * @param anchor
     * @return A string representing the offset, or an empty string if the offset is not set, or it's below #minimumAnchorConfidence.
     */
-   public String offset(Anchor anchor)
-   {
+   public String offset(Anchor anchor) {
       if (anchor == null) return "";
       if (anchor.getOffset() == null) return "";
-      if (minimumAnchorConfidence != null)
-      {
+      if (minimumAnchorConfidence != null) {
          if (anchor.getConfidence() == null) return "";
          if (anchor.getConfidence() < minimumAnchorConfidence) return "";
       }
