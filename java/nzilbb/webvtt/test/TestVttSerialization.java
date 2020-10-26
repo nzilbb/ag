@@ -98,17 +98,17 @@ public class TestVttSerialization
 
       // meta data
       assertEquals("graph meta data", 
-		   "en-GB", g.my("transcript_language").getLabel());
+		   "en-GB", g.first("transcript_language").getLabel());
       assertEquals("graph meta data", 
-		   "captions", g.my("kind").getLabel());
+		   "captions", g.first("kind").getLabel());
 
       // participants     
-      Annotation[] authors = g.list("who"); 
+      Annotation[] authors = g.all("who"); 
       assertEquals(1, authors.length);
       assertEquals("speaker", authors[0].getLabel());
 
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(1, turns.length);
       assertEquals("Turn label is speaker name",
                    "speaker", turns[0].getLabel());
@@ -116,7 +116,7 @@ public class TestVttSerialization
       assertEquals(Double.valueOf(2782.55), turns[0].getEnd().getOffset());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals("Utterance label is speaker name",
                    "speaker", utterances[0].getLabel());
       assertEquals(Double.valueOf(1.849), utterances[0].getStart().getOffset());
@@ -129,7 +129,7 @@ public class TestVttSerialization
       assertEquals(Double.valueOf(2782.55), utterances[utterances.length-1].getEnd().getOffset());
 
       // words
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       assertEquals(7728, words.length);
       String[] checkWords = {
 	 "Before","we","move","to","the","first","question","to","the",
@@ -141,6 +141,12 @@ public class TestVttSerialization
       {
 	 assertEquals("check word " + w + ": " + checkWords[w], checkWords[w], words[w].getLabel());
       } // next word
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
    }
 
    @Test public void noMetaData() 
@@ -186,22 +192,22 @@ public class TestVttSerialization
       assertEquals("time units", Constants.UNIT_SECONDS, g.getOffsetUnits());
 
       // meta data
-      assertNull("graph meta data", g.my("transcript_language"));
-      assertNull("graph meta data", g.my("kind"));
+      assertNull("graph meta data", g.first("transcript_language"));
+      assertNull("graph meta data", g.first("kind"));
 
       // participants     
-      Annotation[] authors = g.list("who"); 
+      Annotation[] authors = g.all("who"); 
       assertEquals(1, authors.length);
       assertEquals("speaker", authors[0].getLabel());
 
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(1, turns.length);
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals(Double.valueOf(2782.55), turns[0].getEnd().getOffset());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(Double.valueOf(1.849), utterances[0].getStart().getOffset());
       assertEquals(Double.valueOf(6.43), utterances[0].getEnd().getOffset());
 
@@ -212,7 +218,7 @@ public class TestVttSerialization
       assertEquals(Double.valueOf(2782.55), utterances[utterances.length-1].getEnd().getOffset());
 
       // utterances
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       assertEquals(7728, words.length);
       String[] checkWords = {
 	 "Before","we","move","to","the","first","question","to","the",
@@ -224,6 +230,12 @@ public class TestVttSerialization
       {
 	 assertEquals("check word " + w + ": " + checkWords[w], checkWords[w], words[w].getLabel());
       } // next word
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
    }
 
    @Test public void noWordLayer()
@@ -273,23 +285,23 @@ public class TestVttSerialization
 
       // meta data
       assertEquals("graph meta data", 
-		   "en-GB", g.my("transcript_language").getLabel());
+		   "en-GB", g.first("transcript_language").getLabel());
       assertEquals("graph meta data", 
-		   "captions", g.my("kind").getLabel());
+		   "captions", g.first("kind").getLabel());
 
       // participants     
-      Annotation[] authors = g.list("who"); 
+      Annotation[] authors = g.all("who"); 
       assertEquals(1, authors.length);
       assertEquals("speaker", authors[0].getLabel());
 
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(1, turns.length);
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals(Double.valueOf(2782.55), turns[0].getEnd().getOffset());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals("Utterance label is transcript",
                    "Before we move to the first question to the First Minister, I invite the First Minister",
                    utterances[0].getLabel());
@@ -303,6 +315,12 @@ public class TestVttSerialization
       assertEquals(Double.valueOf(2777.96), utterances[utterances.length-1].getStart().getOffset());
       assertEquals(Double.valueOf(2782.55), utterances[utterances.length-1].getEnd().getOffset());
 
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
    }
 
    @Test public void serializeSimultaneousSpeech()
@@ -483,18 +501,18 @@ public class TestVttSerialization
       assertEquals("time units", Constants.UNIT_SECONDS, g.getOffsetUnits());
 
       // participants     
-      Annotation[] authors = g.list("who"); 
+      Annotation[] authors = g.all("who"); 
       assertEquals(1, authors.length);
       assertEquals("speaker", authors[0].getLabel());
 
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(1, turns.length);
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals(Double.valueOf(15.0), turns[0].getEnd().getOffset());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(4, utterances.length);
       assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       assertEquals(Double.valueOf(5.0), utterances[0].getEnd().getOffset());
@@ -504,6 +522,12 @@ public class TestVttSerialization
 
       assertEquals(Double.valueOf(10.0), utterances[utterances.length-1].getStart().getOffset());
       assertEquals(Double.valueOf(15.0), utterances[utterances.length-1].getEnd().getOffset());
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
 
    }
 

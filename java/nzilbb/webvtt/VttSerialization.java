@@ -637,7 +637,8 @@ public class VttSerialization
 	 if (layer != null && !layer.getId().equals("[ignore]"))
 	 {
 	    graph.addLayer((Layer)schema.getLayer(layer.getId()).clone());
-	    graph.createTag(graph, layer.getId(), getMetaData().get(key));
+	    graph.addTag(graph, layer.getId(), getMetaData().get(key))
+               .setConfidence(Constants.CONFIDENCE_MANUAL);
 	 } // there's a layer mapping
       } // next meta-data item
      
@@ -656,20 +657,24 @@ public class VttSerialization
 	 if (mappedLayer != null && mappedLayer.getId().equals(getUtteranceLayer().getId()))
 	 {	    
 	    graph.addAnnotation(
-	       new Annotation(null, cue.getName(), schema.getParticipantLayerId()));
+	       new Annotation(null, cue.getName(), schema.getParticipantLayerId()))
+               .setConfidence(Constants.CONFIDENCE_MANUAL);
 	 }
       } // next cue/participant
       if (graph.getAnnotations(schema.getParticipantLayerId()).size() == 0)
       {
 	 // so use a default speaker
-	 graph.addAnnotation(new Annotation(null, "speaker", schema.getParticipantLayerId()));
+	 graph.addAnnotation(new Annotation(null, "speaker", schema.getParticipantLayerId()))
+            .setConfidence(Constants.CONFIDENCE_MANUAL);;
       }
       String currentSpeaker = graph.first(schema.getParticipantLayerId()).getLabel();
       Annotation currentTurn = new Annotation(
 	 null, graph.first(schema.getParticipantLayerId()).getLabel(), schema.getTurnLayerId(), graphStart.getId(), graphStart.getId(), graph.first(schema.getParticipantLayerId()).getId());
       graph.addAnnotation(currentTurn);
+      currentTurn.setConfidence(Constants.CONFIDENCE_MANUAL);
       Annotation currentUtterance = new Annotation(
 	 null, "", schema.getUtteranceLayerId(), graphStart.getId(), graphStart.getId(), currentTurn.getId());
+      currentUtterance.setConfidence(Constants.CONFIDENCE_MANUAL);
       try
       {
 	 // For each line...
@@ -720,6 +725,7 @@ public class VttSerialization
                   
                   currentUtterance = new Annotation(
                      null, "", schema.getUtteranceLayerId(), start.getId(), end.getId(), currentTurn.getId());
+                  currentUtterance.setConfidence(Constants.CONFIDENCE_MANUAL);
                   currentTurn.setEndId(end.getId());
                   
                   line = vtt.readLine();
