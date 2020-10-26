@@ -889,22 +889,28 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
 
       // attributes
       if (getScribe() != null && getScribe().length() > 0 && scribeLayer != null) {
-	 graph.createTag(graph, scribeLayer.getId(), getScribe());
+	 graph.addTag(graph, scribeLayer.getId(), getScribe())
+            .setConfidence(Constants.CONFIDENCE_MANUAL);
       }
       if (getVersion() != null && getVersion().length() > 0 && versionLayer != null) {
-	 graph.createTag(graph, versionLayer.getId(), getVersion());
+	 graph.addTag(graph, versionLayer.getId(), getVersion())
+            .setConfidence(Constants.CONFIDENCE_MANUAL);
       }
       if (getVersionDate() != null && getVersionDate().length() > 0 && versionDateLayer != null) {
-	 graph.createTag(graph, versionDateLayer.getId(), getVersionDate());
+	 graph.addTag(graph, versionDateLayer.getId(), getVersionDate())
+            .setConfidence(Constants.CONFIDENCE_MANUAL);
       }
       if (getProgram() != null && getProgram().length() > 0 && programLayer != null) {
-	 graph.createTag(graph, programLayer.getId(), getProgram());
+	 graph.addTag(graph, programLayer.getId(), getProgram())
+            .setConfidence(Constants.CONFIDENCE_MANUAL);
       }
       if (getAirDate() != null && getAirDate().length() > 0 && airDateLayer != null) {
-	 graph.createTag(graph, airDateLayer.getId(), getAirDate());
+	 graph.addTag(graph, airDateLayer.getId(), getAirDate())
+            .setConfidence(Constants.CONFIDENCE_MANUAL);
       }
       if (getLanguage() != null && getLanguage().length() > 0 && transcriptLanguageLayer != null) {
-	 graph.createTag(graph, transcriptLanguageLayer.getId(), getLanguage());
+	 graph.addTag(graph, transcriptLanguageLayer.getId(), getLanguage())
+            .setConfidence(Constants.CONFIDENCE_MANUAL);
       }
 
       // participants
@@ -914,11 +920,13 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
 	    speaker.getId(), 
 	    speaker.getName(), 
 	    schema.getParticipantLayerId());
-	 participant.setParentId(graph.getId());
+	 participant.setParentId(graph.getId())
+            .setConfidence(Constants.CONFIDENCE_MANUAL);
 	 graph.addAnnotation(participant);
 
 	 if (speaker.getCheck().length() > 0 && participantCheckLayer != null) {
-	    graph.createTag(participant, participantCheckLayer.getId(), speaker.getCheck());
+	    graph.addTag(participant, participantCheckLayer.getId(), speaker.getCheck())
+               .setConfidence(Constants.CONFIDENCE_MANUAL);
 	 }
 	 if (speaker.getType().length() > 0 && genderLayer != null) {
 	    String genderLabel = speaker.getType();
@@ -935,16 +943,20 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
 		  }		     
 	       } // next label
 	    } // normalize label if possible
-	    graph.createTag(participant, genderLayer.getId(), genderLabel);
+	    graph.addTag(participant, genderLayer.getId(), genderLabel)
+               .setConfidence(Constants.CONFIDENCE_MANUAL);
 	 }
 	 if (speaker.getDialect().length() > 0 && dialectLayer != null) {
-	    graph.createTag(participant, dialectLayer.getId(), speaker.getDialect());
+	    graph.addTag(participant, dialectLayer.getId(), speaker.getDialect())
+               .setConfidence(Constants.CONFIDENCE_MANUAL);
 	 }
 	 if (speaker.getAccent().length() > 0 && accentLayer != null) {
-	    graph.createTag(participant, accentLayer.getId(), speaker.getAccent());
+	    graph.addTag(participant, accentLayer.getId(), speaker.getAccent())
+               .setConfidence(Constants.CONFIDENCE_MANUAL);
 	 }
 	 if (speaker.getScope().length() > 0 && scopeLayer != null) {
-	    graph.createTag(participant, scopeLayer.getId(), speaker.getScope());
+	    graph.addTag(participant, scopeLayer.getId(), speaker.getScope())
+               .setConfidence(Constants.CONFIDENCE_MANUAL);
 	 }
       }
 
@@ -958,6 +970,7 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
 	 String sTopic = section.getTopicName();
 	 if (sTopic != null && sTopic.length() > 0 && topicLayer != null) {            
 	    anTopic = new Annotation(null, sTopic, topicLayer.getId());
+            anTopic.setConfidence(Constants.CONFIDENCE_MANUAL);
 	    anTopic.setStart(
 	       graph.getOrCreateAnchorAt(
 		  section.getStartTimeAsDouble(), Constants.CONFIDENCE_AUTOMATIC));
@@ -979,6 +992,7 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
 	       String label = sSpeakerId;
 	       if (getSpeaker(sSpeakerId) != null) label = getSpeaker(sSpeakerId).getName();
 	       Annotation anTurn = new Annotation(null, label, schema.getTurnLayerId());
+               anTurn.setConfidence(Constants.CONFIDENCE_MANUAL);
 	       if (graph.getAnnotation(sSpeakerId) != null) {
 		  anTurn.setParentId(graph.getAnnotation(sSpeakerId).getId());
 	       }
@@ -1010,10 +1024,11 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
 		  Annotation anTurn = htTurnAnnotations.get(thisSync.getWho());
 		  Annotation anLine = new Annotation(
 		     null, anTurn.getLabel(), schema.getUtteranceLayerId());
-		  anLine.setParentId(anTurn.getId());
-		  anLine.setStart(
-		     graph.getOrCreateAnchorAt(
-			thisSync.getTimeAsDouble(), Constants.CONFIDENCE_AUTOMATIC));
+                  anLine.setConfidence(Constants.CONFIDENCE_MANUAL);
+		  anLine.setParentId(anTurn.getId())
+                     .setStart(
+                        graph.getOrCreateAnchorAt(
+                           thisSync.getTimeAsDouble(), Constants.CONFIDENCE_AUTOMATIC));
 		  graph.addAnnotation(anLine);
 		  
 		  // force Events to assign to their given Words where poss.
@@ -1047,7 +1062,8 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
 			   if (commentLayer != null) anEvent.setLayerId(commentLayer.getId());
 			   anEvent.setParentId(graph.getId());			   
 			}
-			anEvent.setLabel(event.getDescription());
+			anEvent.setLabel(event.getDescription())
+                           .setConfidence(Constants.CONFIDENCE_MANUAL);
 			
 			if (anEvent.getLayerId() != null) {
                            // we have a layer for this type of event
@@ -1081,7 +1097,8 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
                      
 		     Annotation anWord
                         = new Annotation(null, word.getRawOrthography(), schema.getWordLayerId());
-		     anWord.setParentId(anTurn.getId());
+		     anWord.setParentId(anTurn.getId())
+                        .setConfidence(Constants.CONFIDENCE_MANUAL);;
 		     graph.addAnnotation(anWord);
 		     if (lastWord == null) anWord.setStartId(anLine.getStartId());
 		     lastWord = anWord;
@@ -1115,7 +1132,8 @@ public class TranscriptSerialization extends Transcript implements GraphDeserial
 			   if (commentLayer != null) anEvent.setLayerId(commentLayer.getId());
 			   anEvent.setParentId(anTurn.getId());
 			}
-			anEvent.setLabel(event.getDescription());
+			anEvent.setLabel(event.getDescription())
+                           .setConfidence(Constants.CONFIDENCE_MANUAL);;
 			if (anEvent.getLayerId() != null) {
                            // we have a layer for this type of event
 			   if (event.getExtent().equals("begin")) {

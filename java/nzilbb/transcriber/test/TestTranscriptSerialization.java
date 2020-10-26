@@ -303,6 +303,12 @@ public class TestTranscriptSerialization
       assertEquals(0, g.all("entities").length);
       assertEquals(0, g.all("lexical").length);
       assertEquals(0, g.all("pronounce").length);
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
 
    }
 
@@ -405,6 +411,12 @@ public class TestTranscriptSerialization
       assertEquals("the", words[6].getLabel());
       assertEquals("door", words[7].getLabel());
       assertEquals(Double.valueOf(5.75), words[7].getEnd().getOffset());
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
 
    }
 
