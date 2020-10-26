@@ -537,6 +537,12 @@ public class Merger
     if (graph == editedGraph) return graph;
     if (editedGraph == null) throw new TransformationException(this, "Edited graph is no set.", new NullPointerException());
 
+    ChangeTracker originalTracker = graph.getTracker();
+    if (originalTracker == null) {
+       // we must have a change tracker, because we might want to roll back changes
+       graph.trackChanges();
+    }
+
     // ensure that all annotations have an anchor
     dummyAnchors = new HashSet<Anchor>();
     for (Annotation a : graph.getAnnotationsById().values())
@@ -740,6 +746,11 @@ public class Merger
         graph.getLayer(layerId).remove("@noChange");
       if (editedGraph.getLayer(layerId) != null) 
         editedGraph.getLayer(layerId).remove("@noChange");
+    }
+
+    // remove tracker if we added it
+    if (originalTracker == null) {
+       graph.setTracker(null);
     }
     return graph;
   }
