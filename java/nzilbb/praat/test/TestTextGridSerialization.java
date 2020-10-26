@@ -1801,7 +1801,7 @@ public class TestTextGridSerialization {
       }
    }
 
-   @Test public void serialize_fragment_trailing_utterance_word()  // TODO test serialization of point tiers throws Exception {
+   @Test public void serialize_fragment_trailing_utterance_word() throws Exception { // TODO test serialization of point tiers 
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants", 0, true, true, true),
