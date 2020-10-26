@@ -51,9 +51,7 @@ import nzilbb.util.Timers;
 
 public class TestPlainTextSerialization
 {
-   @Test public void comment() 
-      throws Exception
-   {
+   @Test public void comment()  throws Exception {
       Schema schema = new Schema("who", "turn", "utterance", "word",
 	 new Layer("scribe", "Transcriber", 0, true, true, true),
 	 new Layer("subreddit", "Subreddit name", 0, false, false, true),
@@ -125,8 +123,7 @@ public class TestPlainTextSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -206,9 +203,7 @@ public class TestPlainTextSerialization
 
    }
 
-   @Test public void comment2() 
-      throws Exception
-   {
+   @Test public void comment2()  throws Exception {
       Schema schema = new Schema("who", "turn", "utterance", "word",
 	 new Layer("scribe", "Transcriber", 0, true, true, true),
 	 new Layer("subreddit", "Subreddit name", 0, false, false, true),
@@ -279,8 +274,7 @@ public class TestPlainTextSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -408,9 +402,7 @@ public class TestPlainTextSerialization
 
    }
 
-   @Test public void elicited() 
-      throws Exception
-   {
+   @Test public void elicited()  throws Exception {
       Schema schema = new Schema("who", "turn", "utterance", "word",
 	 new Layer("app", "App", 0, true, true, true),
 	 new Layer("appVersion", "Version", 0, false, false, true),
@@ -475,8 +467,7 @@ public class TestPlainTextSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -568,9 +559,7 @@ public class TestPlainTextSerialization
       }
    }
 
-   @Test public void invalidAudio() 
-      throws Exception
-   {
+   @Test public void invalidAudio()  throws Exception {
       Schema schema = new Schema("who", "turn", "utterance", "word",
 	 new Layer("app", "App", 0, true, true, true),
 	 new Layer("appVersion", "Version", 0, false, false, true),
@@ -635,8 +624,7 @@ public class TestPlainTextSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -734,9 +722,7 @@ public class TestPlainTextSerialization
 
    }
 
-   @Test public void interview() 
-      throws Exception
-   {
+   @Test public void interview()  throws Exception {
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
 	 new Layer("scribe", "Transcriber", 0, true, true, true),
@@ -793,8 +779,7 @@ public class TestPlainTextSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
       
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -868,9 +853,7 @@ public class TestPlainTextSerialization
 
    }
 
-   @Test public void transcribeme() 
-      throws Exception
-   {
+   @Test public void transcribeme()  throws Exception {
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
 	 new Layer("scribe", "Transcriber", 0, true, true, true),
@@ -932,8 +915,7 @@ public class TestPlainTextSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
       
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -990,9 +972,7 @@ public class TestPlainTextSerialization
 	    
    }
 
-   @Test public void cmsw() 
-      throws Exception
-   {
+   @Test public void cmsw()  throws Exception {
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
 	 new Layer("title", "Title", 0, true, true, true),
@@ -1055,8 +1035,7 @@ public class TestPlainTextSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
       
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -1085,8 +1064,7 @@ public class TestPlainTextSerialization
       // assertEquals("utterance ends at end of recording",
       // 		   Double.valueOf(5.2941875), utterances[0].getEnd().getOffset());
       // assertEquals("test", utterances[0].getParent().getLabel());
-      for (int l = 0; l < utterances.length; l++)
-      {
+      for (int l = 0; l < utterances.length; l++) {
 	 assertEquals("turn for line " + (l+1), turns[0], utterances[l].getParent());
       } // next line
       Annotation[] words = g.all("word");
@@ -1096,8 +1074,7 @@ public class TestPlainTextSerialization
 	 "grussyn,", "we", "did,", "3rd", "tense,", "R", "1341.",
 	 "gruga", "(that)", "I", "did,", "3rd", "tense,", "D", "1434.",
 	 "When", "the", "present", "participle", "governs", "a", "pronoun,", "it", "is"};
-      for (int w = 0; w < checkWords.length; w++)
-      {
+      for (int w = 0; w < checkWords.length; w++) {
 	 assertEquals("check word " + w + ": " + checkWords[w], checkWords[w], words[w].getLabel());
       } // next word
 
@@ -1106,10 +1083,8 @@ public class TestPlainTextSerialization
       assertEquals("Header comment",
 		   "Corpus of Modern Scottish Writing (CMSW) - www.scottishcorpus.ac.uk/cmsw/", comments[0].getLabel());
 
-      for (Anchor a : g.getAnchors().values())
-      {
-	 if (a.getStartingAnnotations().size() + a.getEndingAnnotations().size() > 0)
-	 {
+      for (Anchor a : g.getAnchors().values()) {
+	 if (a.getStartingAnnotations().size() + a.getEndingAnnotations().size() > 0) {
 	    assertNotNull("ensure all anchors have confidence: " + a + ": " + a.getEndingAnnotations() + "." + a.getStartingAnnotations(),
 			  a.getConfidence());
 	    assertEquals("ensure all anchors have high confidence: " + a, Constants.CONFIDENCE_MANUAL, a.getConfidence().longValue());
@@ -1120,10 +1095,8 @@ public class TestPlainTextSerialization
       normalizer.setMinimumTurnPauseLength(0.5); // TODO this should be configurable
       normalizer.transform(g);
 
-      for (Anchor a : g.getAnchors().values())
-      {
-	 if (a.getStartingAnnotations().size() + a.getEndingAnnotations().size() > 0)
-	 {
+      for (Anchor a : g.getAnchors().values()) {
+	 if (a.getStartingAnnotations().size() + a.getEndingAnnotations().size() > 0) {
 	    assertNotNull("ensure all anchors have confidence: " + a + ": " + a.getEndingAnnotations() + "." + a.getStartingAnnotations(),
 			  a.getConfidence());
 	    assertEquals("ensure all anchors have high confidence: " + a, Constants.CONFIDENCE_MANUAL, a.getConfidence().longValue());
@@ -1142,9 +1115,7 @@ public class TestPlainTextSerialization
 
    }
 
-   /*@Test*/ public void speed() 
-      throws Exception
-   {
+   /*@Test*/ public void speed()  throws Exception {
       Timers timers = new Timers();
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
@@ -1211,8 +1182,7 @@ public class TestPlainTextSerialization
       timers.end("deserialize");
       Graph g = graphs[0];
       
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -1242,9 +1212,7 @@ public class TestPlainTextSerialization
 
    }
 
-   @Test public void serialize()
-      throws Exception
-   {
+   @Test public void serialize() throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
 	 new Layer("scribe", "Transcriber")
@@ -1311,19 +1279,14 @@ public class TestPlainTextSerialization
       // test using diff
       File result = new File(dir, "serialize_utterance_word.txt");
       String differences = diff(new File(dir, "expected_serialize_utterance_word.txt"), result);
-      if (differences != null)
-      {
+      if (differences != null) {
          fail(differences);
-      }
-      else
-      {
+      } else {
          result.delete();
       }
    }
 
-   @Test public void serializeSimultaneousSpeech()
-      throws Exception
-   {
+   @Test public void serializeSimultaneousSpeech() throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("comment", "Comment")
@@ -1485,19 +1448,14 @@ public class TestPlainTextSerialization
       // test using diff
       File result = new File(dir, graph.getId() + ".txt");
       String differences = diff(new File(dir, "expected_" + graph.getId() + ".txt"), result);
-      if (differences != null)
-      {
+      if (differences != null) {
          fail(differences);
-      }
-      else
-      {
+      } else {
          result.delete();
       }
    }
 
-   @Test public void serializeWithTags()
-      throws Exception
-   {
+   @Test public void serializeWithTags() throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants")
@@ -1658,12 +1616,9 @@ public class TestPlainTextSerialization
       // test using diff
       File result = new File(dir, graph.getId() + ".txt");
       String differences = diff(new File(dir, "expected_" + graph.getId() + ".txt"), result);
-      if (differences != null)
-      {
+      if (differences != null) {
          fail(differences);
-      }
-      else
-      {
+      } else {
          result.delete();
       }
    }
@@ -1674,35 +1629,29 @@ public class TestPlainTextSerialization
     * @param actual
     * @return null if the files are the same, and a String describing differences if not.
     */
-   public String diff(File expected, File actual)
-   {
+   public String diff(File expected, File actual) {
       StringBuffer d = new StringBuffer();
       
-      try
-      {
+      try {
          // compare with what we expected
          Vector<String> actualLines = new Vector<String>();
          BufferedReader reader = new BufferedReader(new FileReader(actual));
          String line = reader.readLine();
-         while (line != null)
-         {
+         while (line != null) {
             actualLines.add(line);
             line = reader.readLine();
          }
          Vector<String> expectedLines = new Vector<String>();
          reader = new BufferedReader(new FileReader(expected));
          line = reader.readLine();
-         while (line != null)
-         {
+         while (line != null) {
             expectedLines.add(line);
             line = reader.readLine();
          }
          MinimumEditPath<String> comparator = new MinimumEditPath<String>();
          List<EditStep<String>> path = comparator.minimumEditPath(expectedLines, actualLines);
-         for (EditStep<String> step : path)
-         {
-            switch (step.getOperation())
-            {
+         for (EditStep<String> step : path) {
+            switch (step.getOperation()) {
                case CHANGE:
                   d.append("\n"+expected.getPath()+":"+(step.getFromIndex()+1)+": Expected:\n" 
                            + step.getFrom() 
@@ -1720,9 +1669,7 @@ public class TestPlainTextSerialization
                   break;
             }
          } // next step
-      }
-      catch(Exception exception)
-      {
+      } catch(Exception exception) {
          d.append("\n" + exception);
       }
       if (d.length() > 0) return d.toString();
@@ -1739,18 +1686,13 @@ public class TestPlainTextSerialization
     * Getter for {@link #fDir}: Directory for text files.
     * @return Directory for text files.
     */
-   public File getDir() 
-   { 
-      if (fDir == null)
-      {
-	 try
-	 {
+   public File getDir() { 
+      if (fDir == null) {
+	 try {
 	    URL urlThisClass = getClass().getResource(getClass().getSimpleName() + ".class");
 	    File fThisClass = new File(urlThisClass.toURI());
 	    fDir = fThisClass.getParentFile();
-	 }
-	 catch(Throwable t)
-	 {
+	 } catch(Throwable t) {
 	    System.out.println("" + t);
 	 }
       }
@@ -1762,9 +1704,7 @@ public class TestPlainTextSerialization
     */
    public void setDir(File fNewDir) { fDir = fNewDir; }
 
-
-   public static void main(String args[]) 
-   {
+   public static void main(String args[]) {
       org.junit.runner.JUnitCore.main("nzilbb.text.test.TestPlainTextSerialization");
    }
 }
