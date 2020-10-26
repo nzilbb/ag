@@ -1281,6 +1281,7 @@ public class PlainTextSerialization
 
       HashMap<String,Annotation> participants = new HashMap<String,Annotation>();
       Annotation participant = new Annotation(null, "author", schema.getParticipantLayerId());
+      participant.setConfidence(Constants.CONFIDENCE_MANUAL);
       Vector<Annotation> participantTags = new Vector<Annotation>();
       MessageFormat fmtMetaDataFormat = new MessageFormat(metaDataFormat);
       for (String header : getHeaderLines())
@@ -1296,7 +1297,8 @@ public class PlainTextSerialization
                String value = (String)oMetaData[1];
                if (layer.getParentId().equals(schema.getRoot().getId())) // graph tag
                {
-                  graph.createTag(graph, layer.getId(), value);
+                  graph.addTag(graph, layer.getId(), value)
+                     .setConfidence(Constants.CONFIDENCE_MANUAL);
                }
                else if (getEpisodeLayer() != null
                         && layer.getParentId().equals(getEpisodeLayer().getId())) // episode tag
@@ -1304,13 +1306,17 @@ public class PlainTextSerialization
                   Annotation episode = graph.first(getEpisodeLayer().getId());
                   if (episode == null)
                   {
-                     episode = graph.createTag(graph, getEpisodeLayer().getId(), graph.getLabel());
+                     episode = graph.addTag(graph, getEpisodeLayer().getId(), graph.getLabel());
+                     episode.setConfidence(Constants.CONFIDENCE_MANUAL);
                   }
-                  graph.createTag(episode, layer.getId(), value);
+                  graph.addTag(episode, layer.getId(), value)
+                     .setConfidence(Constants.CONFIDENCE_MANUAL);
                }
                else // participant tag
                {
-                  participantTags.add(new Annotation(null, value, layer.getId()));
+                  Annotation tag = new Annotation(null, value, layer.getId());
+                  tag.setConfidence(Constants.CONFIDENCE_MANUAL);
+                  participantTags.add(tag);
                }
             }
          } // parse meta data header
@@ -1323,6 +1329,7 @@ public class PlainTextSerialization
                   null, header, getCommentLayer().getId(),
                   graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL).getId(),
                   graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL).getId());
+               anComment.setConfidence(Constants.CONFIDENCE_MANUAL);
                graph.addAnnotation(anComment);
             } // there is a comment layer
          } // comment header
@@ -1334,13 +1341,15 @@ public class PlainTextSerialization
       // graph
       Annotation turn = new Annotation(
          null, participant.getLabel(), getTurnLayer().getId());
+      turn.setConfidence(Constants.CONFIDENCE_MANUAL);
       graph.addAnnotation(turn);
       turn.setParent(participant);
       turn.setStart(
          graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL));
       Annotation line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
-      line.setParentId(turn.getId());
-      line.setStart(turn.getStart());
+      line.setParentId(turn.getId())
+         .setStart(turn.getStart())
+         .setConfidence(Constants.CONFIDENCE_MANUAL);;
       int iLastPosition = 0;	 
 
       MessageFormat fmtSpeakerFormat = new MessageFormat(participantFormat);
@@ -1368,9 +1377,10 @@ public class PlainTextSerialization
 	 
          int iNumChars = sLine.length();
          line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
-         line.setParentId(turn.getId());
-         line.setStart(turn.getStart());
-         line.setOrdinal(lineOrdinal++);
+         line.setParentId(turn.getId())
+            .setStart(turn.getStart())
+            .setOrdinal(lineOrdinal++)
+            .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	 
          line.setStart(lastAnchor);
          if (lastLine != null)
@@ -1402,6 +1412,7 @@ public class PlainTextSerialization
                   if (participant == null)
                   {
                      participant = new Annotation(null, sSpeakerId, schema.getParticipantLayerId());
+                     participant.setConfidence(Constants.CONFIDENCE_MANUAL);
                      graph.addAnnotation(participant);
                      participants.put(sSpeakerId, participant);
                   }
@@ -1428,7 +1439,8 @@ public class PlainTextSerialization
 		     
                      // new turn		  
                      turn = new Annotation(null, participant.getLabel(), getTurnLayer().getId());
-                     turn.setParentId(participant.getId());
+                     turn.setParentId(participant.getId())
+                        .setConfidence(Constants.CONFIDENCE_MANUAL);
                      if (timers != null) timers.start("add new turn annotation");
                      graph.addAnnotation(turn);
                      if (timers != null) timers.end("add new turn annotation");
@@ -1441,8 +1453,9 @@ public class PlainTextSerialization
                         graph.addAnnotation(line);
                      }
                      line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
-                     line.setParentId(turn.getId());
-                     line.setStart(lastAnchor);
+                     line.setParentId(turn.getId())
+                        .setStart(lastAnchor)
+                        .setConfidence(Constants.CONFIDENCE_MANUAL);
 
                   }
                   // consume the speaker ID
@@ -1496,7 +1509,8 @@ public class PlainTextSerialization
             else
             { // no speaker, so taken as comments
                Annotation anComment = new Annotation(null, sLine, getCommentLayer().getId());
-               anComment.setStart(lastAnchor);	       
+               anComment.setStart(lastAnchor)
+                  .setConfidence(Constants.CONFIDENCE_MANUAL);	       
                lastLine = anComment;
             } // comments
          } // there is text on this line

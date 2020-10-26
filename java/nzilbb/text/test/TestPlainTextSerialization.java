@@ -136,36 +136,36 @@ public class TestPlainTextSerialization
 
       // meta data
       assertEquals("graph meta data", 
-		   "exmormon", g.my("subreddit").getLabel());
+		   "exmormon", g.first("subreddit").getLabel());
       assertEquals("graph meta data", 
-		   "https://www.reddit.com/r/exmormon/comments/2qyr1a#cnas8zv", g.my("url").getLabel());
+		   "https://www.reddit.com/r/exmormon/comments/2qyr1a#cnas8zv", g.first("url").getLabel());
       assertEquals("graph meta data", 
-		   "2015-01-01T00:00:00.000Z", g.my("air_date").getLabel());
+		   "2015-01-01T00:00:00.000Z", g.first("air_date").getLabel());
       assertEquals("graph meta data", 
-		   "2015-02-28T11:51:22.000Z", g.my("transcript_version_date").getLabel());
+		   "2015-02-28T11:51:22.000Z", g.first("transcript_version_date").getLabel());
 
       // participants     
-      Annotation[] authors = g.list("who"); 
+      Annotation[] authors = g.all("who"); 
       assertEquals(1, authors.length);
       assertEquals("YoungModern", authors[0].getLabel());
-      assertEquals("?", authors[0].my("participant_gender").getLabel());
+      assertEquals("?", authors[0].first("participant_gender").getLabel());
 
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(1, turns.length);
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       //assertEquals(Double.valueOf(23.563), turns[0].getEnd().getOffset()); // TODO
       assertEquals("YoungModern", turns[0].getLabel());
-      assertEquals(g.my("who"), turns[0].getParent());
+      assertEquals(g.first("who"), turns[0].getParent());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(1, utterances.length);
       assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       assertEquals("YoungModern", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
       
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       assertEquals(Double.valueOf(0), words[0].getStart().getOffset());
       // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
       assertEquals("Most", words[0].getLabel());
@@ -194,9 +194,15 @@ public class TestPlainTextSerialization
       assertEquals("like", words[7].getLabel());
       assertEquals(Double.valueOf(41), words[7].getEnd().getOffset());
 
-      assertEquals(0, g.list("entities").length);
-      assertEquals(0, g.list("language").length);
-      assertEquals(0, g.list("lexical").length);
+      assertEquals(0, g.all("entities").length);
+      assertEquals(0, g.all("language").length);
+      assertEquals(0, g.all("lexical").length);
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
 
    }
 
@@ -283,16 +289,16 @@ public class TestPlainTextSerialization
 
       // meta data
       assertEquals("graph meta data", 
-		   "StrangerThings", g.my("subreddit").getLabel());
+		   "StrangerThings", g.first("subreddit").getLabel());
       assertEquals("graph meta data", 
-		   "https://www.reddit.com/r/StrangerThings/comments/5rxk10#ddb3r2n", g.my("url").getLabel());
+		   "https://www.reddit.com/r/StrangerThings/comments/5rxk10#ddb3r2n", g.first("url").getLabel());
       assertEquals("graph meta data", 
-		   "2017-02-04T02:47:49.000Z", g.my("publication_time").getLabel());
+		   "2017-02-04T02:47:49.000Z", g.first("publication_time").getLabel());
       assertEquals("graph meta data", 
-		   "t3_5rxk10", g.my("parent_id").getLabel());
+		   "t3_5rxk10", g.first("parent_id").getLabel());
 
       // participants     
-      Annotation[] authors = g.list("who"); 
+      Annotation[] authors = g.all("who"); 
       assertEquals(1, authors.length);
       assertEquals("tgflp", authors[0].getLabel());
       assertNotNull("start ID set", authors[0].getStartId());
@@ -300,18 +306,19 @@ public class TestPlainTextSerialization
 
       // tag participant as main one
       g.addLayer(schema.getLayer("main_participant"));
-      g.createTag(authors[0], "main_participant", authors[0].getLabel());
+      g.addTag(authors[0], "main_participant", authors[0].getLabel())
+         .setConfidence(Constants.CONFIDENCE_MANUAL);
       
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       //assertEquals(1, turns.length);
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       //assertEquals(Double.valueOf(23.563), turns[0].getEnd().getOffset()); // TODO
       assertEquals("tgflp", turns[0].getLabel());
-      assertEquals(g.my("who"), turns[0].getParent());
+      assertEquals(g.first("who"), turns[0].getParent());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(5, utterances.length);
       assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       assertEquals("tgflp", utterances[0].getParent().getLabel());
@@ -338,7 +345,7 @@ public class TestPlainTextSerialization
       assertEquals(turns[0], utterances[4].getParent());
       assertEquals(Double.valueOf(454.0), utterances[4].getEnd().getOffset());
       
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       assertEquals(Double.valueOf(0), words[0].getStart().getOffset());
       // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
       assertEquals("Jesus", words[0].getLabel());
@@ -381,9 +388,9 @@ public class TestPlainTextSerialization
       assertEquals("line boundary",
 		   Double.valueOf(284), words[50].getEnd().getOffset());
 
-      assertEquals(0, g.list("entities").length);
-      assertEquals(0, g.list("language").length);
-      assertEquals(0, g.list("lexical").length);
+      assertEquals(0, g.all("entities").length);
+      assertEquals(0, g.all("language").length);
+      assertEquals(0, g.all("lexical").length);
 
       // test validator runs
       Normalizer normalizer = new Normalizer();
@@ -392,6 +399,12 @@ public class TestPlainTextSerialization
       g.create();
       Validator v = new Validator();
       v.transform(g);
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
 
    }
 
@@ -472,11 +485,11 @@ public class TestPlainTextSerialization
 
       // meta data
       assertEquals("graph meta data", 
-		   "Elicit Speech", g.my("app").getLabel());
+		   "Elicit Speech", g.first("app").getLabel());
       assertEquals("graph meta data", 
-		   "1.0.0", g.my("appVersion").getLabel());
+		   "1.0.0", g.first("appVersion").getLabel());
       assertEquals("graph meta data", 
-		   "2017-01-13T15:49:55.575Z", g.my("creation_date").getLabel());
+		   "2017-01-13T15:49:55.575Z", g.first("creation_date").getLabel());
       String[] multilineAttribute = g.labels("speech_migraine");
       assertEquals("graph meta data - multiline", 
 		   2, multilineAttribute.length);
@@ -486,21 +499,21 @@ public class TestPlainTextSerialization
 		   "second value", multilineAttribute[1]);
 
       // participants     
-      Annotation[] authors = g.list("who"); 
+      Annotation[] authors = g.all("who"); 
       assertEquals(1, authors.length);
       assertEquals("test", authors[0].getLabel());
 
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(1, turns.length);
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals("turn ends at end of recording",
 		   Double.valueOf(5.2941875), turns[0].getEnd().getOffset());
       assertEquals("test", turns[0].getLabel());
-      assertEquals(g.my("who"), turns[0].getParent());
+      assertEquals(g.first("who"), turns[0].getParent());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(1, utterances.length);
       assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       assertEquals("utterance ends at end of recording",
@@ -508,7 +521,7 @@ public class TestPlainTextSerialization
       assertEquals("test", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
       
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       assertEquals(9, words.length);
       assertNull("first word anchor unset because of preceding comment",
 		 words[0].getStart().getOffset());
@@ -541,12 +554,18 @@ public class TestPlainTextSerialization
       assertEquals("last word ends at end of recording",
 		   Double.valueOf(5.2941875), words[8].getEnd().getOffset());
 
-      Annotation[] comments = g.list("comment");
+      Annotation[] comments = g.all("comment");
       assertEquals(1, comments.length);
       assertEquals("Please read the following aloud:", comments[0].getLabel());
       assertEquals(Double.valueOf(0), comments[0].getStart().getOffset());
 
       assertNull("Hack to skip validation for texts isn't activated for transcripts", g.get("@valid"));
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
    }
 
    @Test public void invalidAudio() 
@@ -627,11 +646,11 @@ public class TestPlainTextSerialization
 
       // meta data
       assertEquals("graph meta data", 
-		   "Elicit Speech", g.my("app").getLabel());
+		   "Elicit Speech", g.first("app").getLabel());
       assertEquals("graph meta data", 
-		   "1.0.0", g.my("appVersion").getLabel());
+		   "1.0.0", g.first("appVersion").getLabel());
       assertEquals("graph meta data", 
-		   "2017-01-13T15:49:55.575Z", g.my("creation_date").getLabel());
+		   "2017-01-13T15:49:55.575Z", g.first("creation_date").getLabel());
       String[] multilineAttribute = g.labels("speech_migraine");
       assertEquals("graph meta data - multiline", 
 		   2, multilineAttribute.length);
@@ -641,21 +660,21 @@ public class TestPlainTextSerialization
 		   "second value", multilineAttribute[1]);
 
       // participants     
-      Annotation[] authors = g.list("who"); 
+      Annotation[] authors = g.all("who"); 
       assertEquals(1, authors.length);
       assertEquals("test", authors[0].getLabel());
 
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(1, turns.length);
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals("turn ends at last character",
 		   Double.valueOf(100), turns[0].getEnd().getOffset());
       assertEquals("test", turns[0].getLabel());
-      assertEquals(g.my("who"), turns[0].getParent());
+      assertEquals(g.first("who"), turns[0].getParent());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(1, utterances.length);
       assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       assertEquals("utterance ends at last character",
@@ -663,7 +682,7 @@ public class TestPlainTextSerialization
       assertEquals("test", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
       
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       assertEquals(9, words.length);
       // System.out.println("" + Arrays.asList(words));
       assertEquals("The", words[0].getLabel());
@@ -702,10 +721,16 @@ public class TestPlainTextSerialization
       assertEquals("last word ends at last character",
 		   Double.valueOf(100), words[8].getEnd().getOffset());
 
-      Annotation[] comments = g.list("comment");
+      Annotation[] comments = g.all("comment");
       assertEquals(1, comments.length);
       assertEquals("Please read the following aloud:", comments[0].getLabel());
       assertEquals(Double.valueOf(0), comments[0].getStart().getOffset());
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
 
    }
 
@@ -778,14 +803,14 @@ public class TestPlainTextSerialization
 
 
       // participants     
-      Annotation[] authors = g.list("who"); 
+      Annotation[] authors = g.all("who"); 
       assertEquals(2, authors.length);
       assertEquals("BOM is stripped from speaker name",
 		   "mop03-2b", authors[0].getLabel());
       assertEquals("Interviewer", authors[1].getLabel());
 
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(13, turns.length);
       // assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       // assertEquals("turn ends at end of recording",
@@ -798,7 +823,7 @@ public class TestPlainTextSerialization
       assertEquals(authors[1], turns[1].getParent());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(149, utterances.length);
       // assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       // assertEquals("utterance ends at end of recording",
@@ -812,7 +837,7 @@ public class TestPlainTextSerialization
 
       assertEquals(turns[1], utterances[5].getParent());
 	    
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       assertEquals(804, words.length);
       // System.out.println("" + Arrays.asList(words));
       assertEquals("This", words[0].getLabel());
@@ -827,13 +852,19 @@ public class TestPlainTextSerialization
       assertEquals("is", words[8].getLabel());
       assertEquals("kept", words[9].getLabel());
 
-      Annotation[] comments = g.list("comment");
+      Annotation[] comments = g.all("comment");
       assertEquals(1, comments.length);
       assertEquals("unclear", comments[0].getLabel());
 
-      Annotation[] noises = g.list("noise");
+      Annotation[] noises = g.all("noise");
       assertEquals(1, noises.length);
       assertEquals("click", noises[0].getLabel());
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
 
    }
 
@@ -910,13 +941,13 @@ public class TestPlainTextSerialization
       assertEquals("time units", Constants.UNIT_SECONDS, g.getOffsetUnits());
 
       // participants     
-      Annotation[] participants = g.list("who"); 
+      Annotation[] participants = g.all("who"); 
       assertEquals(2, participants.length);
       assertEquals("S1", participants[0].getLabel());
       assertEquals("S2", participants[1].getLabel());
 
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       //assertEquals(4, turns.length);
       assertEquals("S1", turns[0].getLabel());
       assertEquals(participants[0], turns[0].getParent());
@@ -925,14 +956,14 @@ public class TestPlainTextSerialization
       //assertEquals(participants[1], turns[1].getParent());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(4, utterances.length);
       assertEquals(turns[0], utterances[0].getParent());
       assertEquals(turns[1], utterances[1].getParent());
       assertEquals(turns[2], utterances[2].getParent());
       assertEquals(turns[3], utterances[3].getParent());
 	    
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       assertEquals(9, words.length);
       // System.out.println("" + Arrays.asList(words));
       assertEquals("The", words[0].getLabel());
@@ -950,6 +981,12 @@ public class TestPlainTextSerialization
       assertEquals(Double.valueOf(4.395), utterances[1].getStart().getOffset());
       assertEquals(Double.valueOf(8.692), utterances[2].getStart().getOffset());
       assertEquals(Double.valueOf(75.835), utterances[3].getStart().getOffset());
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
 	    
    }
 
@@ -1025,15 +1062,15 @@ public class TestPlainTextSerialization
       
       assertEquals("ID", "cmsw-0002.txt", g.getId());
       assertEquals("time units", Constants.UNIT_CHARACTERS, g.getOffsetUnits());
-      assertEquals("Title meta-data", "An Essay on the Scoto-English Dialect", g.my("title").getLabel());
+      assertEquals("Title meta-data", "An Essay on the Scoto-English Dialect", g.first("title").getLabel());
 
       // participants     
-      Annotation[] authors = g.list("who"); 
+      Annotation[] authors = g.all("who"); 
       assertEquals(1, authors.length);
       assertEquals("Collin, Zacharias", authors[0].getLabel());
 
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(1, turns.length);
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals("turn ends at end of recording",
@@ -1042,7 +1079,7 @@ public class TestPlainTextSerialization
       assertEquals(authors[0], turns[0].getParent());
       
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(3331, utterances.length);
       // assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       // assertEquals("utterance ends at end of recording",
@@ -1052,7 +1089,7 @@ public class TestPlainTextSerialization
       {
 	 assertEquals("turn for line " + (l+1), turns[0], utterances[l].getParent());
       } // next line
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       //assertEquals(804, words.length);
       String[] checkWords = {
 	 "gurellough,", "you", "may", "do,", "2nd", "tense,", "D", "2196.",
@@ -1064,7 +1101,7 @@ public class TestPlainTextSerialization
 	 assertEquals("check word " + w + ": " + checkWords[w], checkWords[w], words[w].getLabel());
       } // next word
 
-      Annotation[] comments = g.list("comment");
+      Annotation[] comments = g.all("comment");
       assertEquals(1, comments.length);
       assertEquals("Header comment",
 		   "Corpus of Modern Scottish Writing (CMSW) - www.scottishcorpus.ac.uk/cmsw/", comments[0].getLabel());
@@ -1091,6 +1128,12 @@ public class TestPlainTextSerialization
 			  a.getConfidence());
 	    assertEquals("ensure all anchors have high confidence: " + a, Constants.CONFIDENCE_MANUAL, a.getConfidence().longValue());
 	 }
+      }
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
 
       // Validator v = new Validator();
@@ -1175,10 +1218,10 @@ public class TestPlainTextSerialization
       
       assertEquals("ID", "lockhartpapersco02lockuoft_djvu.txt", g.getId());
       assertEquals("time units", Constants.UNIT_CHARACTERS, g.getOffsetUnits());
-      assertEquals("Title meta-data", "The Lockhart papers: containing memoirs and commentaries upon the affairs of Scotland from 1702 to 1715, his secret correspondence with the son of King James the Second from 1718 to 1728, and his other political writings; also, journals and memoirs of the Young Pretender's expedition in 1745", g.my("title").getLabel());
+      assertEquals("Title meta-data", "The Lockhart papers: containing memoirs and commentaries upon the affairs of Scotland from 1702 to 1715, his secret correspondence with the son of King James the Second from 1718 to 1728, and his other political writings; also, journals and memoirs of the Young Pretender's expedition in 1745", g.first("title").getLabel());
 
       // participants     
-      Annotation[] authors = g.list("who"); 
+      Annotation[] authors = g.all("who"); 
       assertEquals(1, authors.length);
       assertEquals("Lockhart, George", authors[0].getLabel());
 
@@ -1393,7 +1436,7 @@ public class TestPlainTextSerialization
                                          "t2"));
 
       // add orthography tags that should not be used because orthography is not selected
-      for (Annotation word : graph.list("word"))
+      for (Annotation word : graph.all("word"))
       {
          graph.addTag(word, "orthography", word.getLabel()+"-orthography");
       }
