@@ -37,11 +37,9 @@ import nzilbb.ag.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.clan.*;
 
-public class TestChatDeserializer
-{
-   @Test public void minimalConversion() 
-      throws Exception
-   {
+public class TestChatDeserializer {
+   
+   @Test public void minimalConversion()  throws Exception {
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
 	 new Layer("transcriber", "Transcribers", 0, true, true, true),
@@ -84,8 +82,7 @@ public class TestChatDeserializer
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -214,12 +211,10 @@ public class TestChatDeserializer
 	 "abcd", "abcdefg", "ab", "abc", "abcdef", "abcde", "abc", "ab", "abc", "abcdefgh", "abc", "abcdef", "abc",
 	 "ab", "abcde", "until", "she's", "abc", "ab", "abcde", "abcdef", "abcde", "ab", "abc", "baby's", "crib", 
 	 "abc", "abcdefg", "abc", "abcd", "abcde", "abc", "abcd", "abc", "a", "b", "c", "d"};
-      for (int i = 0; i < wordLabels.length; i++)
-      {
+      for (int i = 0; i < wordLabels.length; i++) {
 	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
       }
-      for (int i = 0; i < words.length; i++)
-      {
+      for (int i = 0; i < words.length; i++) {
 	 assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
 	 	      i+1, words[i].getOrdinal());
       }
@@ -241,8 +236,7 @@ public class TestChatDeserializer
       assertEquals(turns[0].getId(), words[276].getParentId());
       assertEquals(turns[0].getId(), words[277].getParentId());
 
-      for (int i = 0; i < words.length; i++)
-      {	 
+      for (int i = 0; i < words.length; i++) {	 
 	 assertEquals("ordinals correct " + words[i], i+1, words[i].getOrdinal());
 	 assertEquals("tagged as manual: " + words[i], 
 		      Integer.valueOf(Constants.CONFIDENCE_MANUAL), words[i].getConfidence());
@@ -274,8 +268,7 @@ public class TestChatDeserializer
       assertEquals("unsynchronised last utterance - last c-unit end", 
 		   utterances[utterances.length-1].getEnd(), cUnits[cUnits.length-1].getEnd());
 
-      for (Annotation a : cUnits)
-      {
+      for (Annotation a : cUnits) {
 	 assertEquals("tagged as manual: " + a + " " + a.getStart() + "-" + a.getEnd(), 
 		      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
 	 assertEquals("parent set: " + a + " " + a.getStart() + "-" + a.getEnd(), 
@@ -287,8 +280,7 @@ public class TestChatDeserializer
       assertEquals("&", words[18].first("disfluency").getLabel());
       assertEquals("word is parent", words[18], words[18].first("disfluency").getParent());
       // ensure they're marked as manual annotations
-      for (Annotation a : g.all("disfluency"))
-      {
+      for (Annotation a : g.all("disfluency")) {
 	 assertEquals("tagged as manual: " + a, 
 		      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
@@ -303,8 +295,7 @@ public class TestChatDeserializer
       assertEquals("Pre expansion ordinal", 5, words[4].getOrdinal());
       assertEquals("Post expansion ordinal", "lie", words[5].getLabel());
       assertEquals("Post expansion ordinal", 6, words[5].getOrdinal());
-      for (Annotation a : expansions)
-      {
+      for (Annotation a : expansions) {
 	 assertEquals("tagged as manual: " + a, 
 		      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
@@ -347,8 +338,7 @@ public class TestChatDeserializer
       // completion
       Annotation[] completions = g.all("completion");
       assertEquals(3, completions.length);
-      for (Annotation a : completions)
-      {
+      for (Annotation a : completions) {
 	 assertEquals("tagged as manual: " + a, 
 		      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
@@ -365,8 +355,7 @@ public class TestChatDeserializer
       // retracing
       Annotation[] retracing = g.all("retracing");
       assertEquals(6, retracing.length);
-      for (Annotation a : retracing)
-      {
+      for (Annotation a : retracing) {
 	 assertEquals("tagged as manual: " + a, 
 		      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
@@ -417,8 +406,7 @@ public class TestChatDeserializer
       assertEquals("tag previous word", "Saturday", 
 		   repetition[2].getEnd().endOf("word").iterator().next().getLabel());
 
-      for (Annotation a : repetition)
-      {
+      for (Annotation a : repetition) {
 	 assertEquals("tagged as manual: " + a, 
 		      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
@@ -462,8 +450,7 @@ public class TestChatDeserializer
       assertEquals(Double.valueOf(657.253), gems[10].getStart().getOffset());
       assertEquals("cat", gems[10].getLabel());
       assertEquals(turns[0].getEnd(), gems[10].getEnd());
-      for (Annotation a : gems)
-      {
+      for (Annotation a : gems) {
 	 assertEquals("tagged as manual: " + a, 
 		      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
@@ -476,9 +463,7 @@ public class TestChatDeserializer
 
    }
 
-   @Test public void minimalConversionWithoutAnnotations() 
-      throws Exception
-   {
+   @Test public void minimalConversionWithoutAnnotations()  throws Exception {
       Layer[] layers = {
 	 new Layer("transcriber", "Transcribers", 0, true, true, true),
 	 new Layer("languages", "Graph language", 0, true, true, true),
@@ -513,8 +498,7 @@ public class TestChatDeserializer
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -629,12 +613,10 @@ public class TestChatDeserializer
 	 "abcd", "abcdefg", "ab", "abc", "abcdef", "abcde", "abc", "ab", "abc", "abcdefgh", "abc", "abcdef", "abc", "+//?",
 	 "ab", "abcde", "until", "she's", "abc", "ab", "abcde", "abcdef", "abcde", "ab", "abc", "baby's", "crib", 
 	 "abc", "abcdefg", "abc", "abcd", "abcde", "abc", "abcd", "abc", "a_b_c_d."};
-      for (int i = 0; i < wordLabels.length; i++)
-      {	 
+      for (int i = 0; i < wordLabels.length; i++) {
 	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
       }
-      for (int i = 0; i < words.length; i++)
-      {
+      for (int i = 0; i < words.length; i++) {
 	 assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
 	 	      i+1, words[i].getOrdinal());
       }
@@ -699,18 +681,13 @@ public class TestChatDeserializer
     * Getter for {@link #fDir}: Directory for text files.
     * @return Directory for text files.
     */
-   public File getDir() 
-   { 
-      if (fDir == null)
-      {
-	 try
-	 {
+   public File getDir() { 
+      if (fDir == null) {
+	 try {
 	    URL urlThisClass = getClass().getResource(getClass().getSimpleName() + ".class");
 	    File fThisClass = new File(urlThisClass.toURI());
 	    fDir = fThisClass.getParentFile();
-	 }
-	 catch(Throwable t)
-	 {
+	 } catch(Throwable t) {
 	    System.out.println("" + t);
 	 }
       }
@@ -722,9 +699,7 @@ public class TestChatDeserializer
     */
    public void setDir(File fNewDir) { fDir = fNewDir; }
 
-
-   public static void main(String args[]) 
-   {
+   public static void main(String args[]) {
       org.junit.runner.JUnitCore.main("nzilbb.clan.test.TestChatDeserializer");
    }
 }
