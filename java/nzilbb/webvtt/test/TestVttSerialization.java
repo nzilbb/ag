@@ -50,9 +50,7 @@ import nzilbb.webvtt.*;
 
 public class TestVttSerialization
 {
-   @Test public void youtube() 
-      throws Exception
-   {
+   @Test public void youtube()  throws Exception {
       Schema schema = new Schema("who", "turn", "utterance", "word",
 	 new Layer("transcript_language", "Language", 0, true, true, true),
 	 new Layer("kind", "Kind", 0, false, false, true),
@@ -88,8 +86,7 @@ public class TestVttSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -137,8 +134,7 @@ public class TestVttSerialization
 	 "to","make","a","few","remarks","following","the","tragic",
 	 "events","in","Christchurch","in","New","Zealand.",
 	 "The","First","Minister","(Nicola","Sturgeon):"};
-      for (int w = 0; w < checkWords.length; w++)
-      {
+      for (int w = 0; w < checkWords.length; w++) {
 	 assertEquals("check word " + w + ": " + checkWords[w], checkWords[w], words[w].getLabel());
       } // next word
       
@@ -149,9 +145,7 @@ public class TestVttSerialization
       }
    }
 
-   @Test public void noMetaData() 
-      throws Exception
-   {
+   @Test public void noMetaData()  throws Exception {
       Schema schema = new Schema("who", "turn", "utterance", "word",
 	 new Layer("who", "Participants", 0, true, true, true),
 	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
@@ -183,8 +177,7 @@ public class TestVttSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -238,9 +231,7 @@ public class TestVttSerialization
       }
    }
 
-   @Test public void noWordLayer()
-      throws Exception
-   {
+   @Test public void noWordLayer() throws Exception {
       Schema schema = new Schema("who", "turn", "utterance", null,
 	 new Layer("transcript_language", "Language", 0, true, true, true),
 	 new Layer("kind", "Kind", 0, false, false, true),
@@ -323,9 +314,7 @@ public class TestVttSerialization
       }
    }
 
-   @Test public void serializeSimultaneousSpeech()
-      throws Exception
-   {
+   @Test public void serializeSimultaneousSpeech() throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants")
@@ -446,19 +435,14 @@ public class TestVttSerialization
       // test using diff
       File result = new File(dir, graph.getId() + ".vtt");
       String differences = diff(new File(dir, "expected_" + graph.getId() + ".vtt"), result);
-      if (differences != null)
-      {
+      if (differences != null) {
          fail(differences);
-      }
-      else
-      {
+      } else {
          result.delete();
       }
    }
 
-   @Test public void canReadOwnOutput() 
-      throws Exception
-   {
+   @Test public void canReadOwnOutput()  throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("transcript_language", "Language", 0, true, true, true),
@@ -492,8 +476,7 @@ public class TestVttSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -531,42 +514,35 @@ public class TestVttSerialization
 
    }
 
-
    /**
     * Diffs two files.
     * @param expected
     * @param actual
     * @return null if the files are the same, and a String describing differences if not.
     */
-   public String diff(File expected, File actual)
-   {
+   public String diff(File expected, File actual) {
       StringBuffer d = new StringBuffer();
       
-      try
-      {
+      try {
          // compare with what we expected
          Vector<String> actualLines = new Vector<String>();
          BufferedReader reader = new BufferedReader(new FileReader(actual));
          String line = reader.readLine();
-         while (line != null)
-         {
+         while (line != null) {
             actualLines.add(line);
             line = reader.readLine();
          }
          Vector<String> expectedLines = new Vector<String>();
          reader = new BufferedReader(new FileReader(expected));
          line = reader.readLine();
-         while (line != null)
-         {
+         while (line != null) {
             expectedLines.add(line);
             line = reader.readLine();
          }
          MinimumEditPath<String> comparator = new MinimumEditPath<String>();
          List<EditStep<String>> path = comparator.minimumEditPath(expectedLines, actualLines);
-         for (EditStep<String> step : path)
-         {
-            switch (step.getOperation())
-            {
+         for (EditStep<String> step : path) {
+            switch (step.getOperation()) {
                case CHANGE:
                   d.append("\n"+expected.getPath()+":"+(step.getFromIndex()+1)+": Expected:\n" 
                            + step.getFrom() 
@@ -584,9 +560,7 @@ public class TestVttSerialization
                   break;
             }
          } // next step
-      }
-      catch(Exception exception)
-      {
+      } catch(Exception exception) {
          d.append("\n" + exception);
       }
       if (d.length() > 0) return d.toString();
@@ -603,18 +577,13 @@ public class TestVttSerialization
     * Getter for {@link #fDir}: Directory for text files.
     * @return Directory for text files.
     */
-   public File getDir() 
-   { 
-      if (fDir == null)
-      {
-	 try
-	 {
+   public File getDir() { 
+      if (fDir == null) {
+	 try {
 	    URL urlThisClass = getClass().getResource(getClass().getSimpleName() + ".class");
 	    File fThisClass = new File(urlThisClass.toURI());
 	    fDir = fThisClass.getParentFile();
-	 }
-	 catch(Throwable t)
-	 {
+	 } catch(Throwable t) {
 	    System.out.println("" + t);
 	 }
       }
@@ -626,8 +595,7 @@ public class TestVttSerialization
     */
    public void setDir(File fNewDir) { fDir = fNewDir; }
 
-   public static void main(String args[]) 
-   {
+   public static void main(String args[]) {
       org.junit.runner.JUnitCore.main("nzilbb.text.test.TestVttSerialization");
    }
 }

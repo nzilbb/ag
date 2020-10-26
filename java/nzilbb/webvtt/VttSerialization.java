@@ -59,9 +59,8 @@ import nzilbb.util.Timers;
  * (De)serializes VTT subtitle/caption files.
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class VttSerialization
-   implements GraphDeserializer, GraphSerializer
-{
+public class VttSerialization implements GraphDeserializer, GraphSerializer {
+   
    // Attributes:
    protected Vector<String> warnings;
    /**
@@ -79,8 +78,7 @@ public class VttSerialization
     * <p>{@link GraphDeserializer} method.
     * @return The deserializer's descriptor
     */
-   public SerializationDescriptor getDescriptor()
-   {
+   public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
 	 "WebVTT subtitles", "0.4", "text/vtt", ".vtt", "20200909.1954", getClass().getResource("icon.png"));
    }
@@ -274,8 +272,7 @@ public class VttSerialization
     * Determines how far through the serialization is.
     * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
     */
-   public Integer getPercentComplete()
-   {
+   public Integer getPercentComplete() {
       if (graphCount < 0) return null;
       return (int)((consumedGraphCount * 100) / graphCount);
    }
@@ -299,8 +296,7 @@ public class VttSerialization
    /**
     * Cancel the serialization in course (if any).
     */
-   public void cancel()
-   {
+   public void cancel() {
       setCancelling(true);
    }
 
@@ -309,8 +305,7 @@ public class VttSerialization
    /**
     * Default constructor.
     */
-   public VttSerialization()
-   {
+   public VttSerialization() {
    } // end of constructor
 
    // GraphDeserializer methods
@@ -327,8 +322,7 @@ public class VttSerialization
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of configuration parameters (still) must be set before {@link GraphDeserializer#setParameters()} can be invoked. If this is an empty list, {@link GraphDeserializer#setParameters()} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
     */
-   public ParameterSet configure(ParameterSet configuration, Schema schema)
-   {
+   public ParameterSet configure(ParameterSet configuration, Schema schema) {
       setSchema(schema);
       setParticipantLayer(schema.getParticipantLayer());
       setTurnLayer(schema.getTurnLayer());
@@ -348,30 +342,24 @@ public class VttSerialization
       LinkedHashMap<String,Layer> possibleTurnChildLayers = new LinkedHashMap<String,Layer>();
       LinkedHashMap<String,Layer> wordTagLayers = new LinkedHashMap<String,Layer>();
       if (getParticipantLayer() == null || getTurnLayer() == null 
-	  || getUtteranceLayer() == null || getWordLayer() == null)
-      {
-	 for (Layer top : schema.getRoot().getChildren().values())
-	 {
-	    if (top.getAlignment() == Constants.ALIGNMENT_NONE)
-	    {
-	       if (top.getChildren().size() != 0)
-	       { // unaligned children of graph, with children of their own
+	  || getUtteranceLayer() == null || getWordLayer() == null) {
+	 for (Layer top : schema.getRoot().getChildren().values()) {
+	    if (top.getAlignment() == Constants.ALIGNMENT_NONE) {
+	       if (top.getChildren().size() != 0) {
+                  // unaligned children of graph, with children of their own
 		  possibleParticipantLayers.put(top.getId(), top);
-		  for (Layer turn : top.getChildren().values())
-		  {
+		  for (Layer turn : top.getChildren().values()) {
 		     if (turn.getAlignment() == Constants.ALIGNMENT_INTERVAL
-			 && turn.getChildren().size() > 0)
-		     { // aligned children of who with their own children
+			 && turn.getChildren().size() > 0) {
+                        // aligned children of who with their own children
 			possibleTurnLayers.put(turn.getId(), turn);
-			for (Layer turnChild : turn.getChildren().values())
-			{
-			   if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL)
-			   { // aligned children of turn
+			for (Layer turnChild : turn.getChildren().values()) {
+			   if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
+                              // aligned children of turn
 			      possibleTurnChildLayers.put(turnChild.getId(), turnChild);
-			      for (Layer tag : turnChild.getChildren().values())
-			      {
-				 if (tag.getAlignment() == Constants.ALIGNMENT_NONE)
-				 { // unaligned children of word
+			      for (Layer tag : turnChild.getChildren().values()) {
+				 if (tag.getAlignment() == Constants.ALIGNMENT_NONE) {
+                                    // unaligned children of word
 				    wordTagLayers.put(tag.getId(), tag);
 				 }
 			      } // next possible word tag layer
@@ -382,53 +370,42 @@ public class VttSerialization
 	       } // with children
 	    } // unaligned
 	 } // next possible participant layer
-      } // missing special layers
-      else
-      {
-	 for (Layer turnChild : getTurnLayer().getChildren().values())
-	 {
-	    if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL)
-	    {
+      } else {
+	 for (Layer turnChild : getTurnLayer().getChildren().values()) {
+	    if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
 	       possibleTurnChildLayers.put(turnChild.getId(), turnChild);
 	    }
 	 } // next possible word tag layer
-	 if (getWordLayer() != null)
-	 {
-	    for (Layer tag : getWordLayer().getChildren().values())
-	    {
+	 if (getWordLayer() != null) {
+	    for (Layer tag : getWordLayer().getChildren().values()) {
 	       if (tag.getAlignment() == Constants.ALIGNMENT_NONE
-		   && tag.getChildren().size() == 0)
-	       {
+		   && tag.getChildren().size() == 0) {
 		  wordTagLayers.put(tag.getId(), tag);
 	       }
 	    } // next possible word tag layer
 	 }
       }
-      if (getParticipantLayer() == null)
-      {
+      if (getParticipantLayer() == null) {
 	 layerToPossibilities.put(
 	    new Parameter("participantLayer", Layer.class, "Participant layer", 
 			  "Layer for speaker/participant identification", true), 
 	    Arrays.asList("participant","participants","who","speaker","speakers"));
 	 layerToCandidates.put("participantLayer", possibleParticipantLayers);
       }
-      if (getTurnLayer() == null)
-      {
+      if (getTurnLayer() == null) {
 	 layerToPossibilities.put(
 	    new Parameter("turnLayer", Layer.class, "Turn layer", "Layer for speaker turns", true),
 	    Arrays.asList("turn","turns"));
 	 layerToCandidates.put("turnLayer", possibleTurnLayers);
       }
-      if (getUtteranceLayer() == null)
-      {
+      if (getUtteranceLayer() == null) {
 	 layerToPossibilities.put(
 	    new Parameter("utteranceLayer", Layer.class, "Utterance layer", 
 			  "Layer for speaker utterances", true), 
 	    Arrays.asList("utterance","utterances","line","lines"));
 	 layerToCandidates.put("utteranceLayer", possibleTurnChildLayers);
       }
-      if (getWordLayer() == null)
-      {
+      if (getWordLayer() == null) {
 	 layerToPossibilities.put(
 	    new Parameter("wordLayer", Layer.class, "Word layer", 
 			  "Layer for individual word tokens", false), 
@@ -437,20 +414,16 @@ public class VttSerialization
       }
 
       LinkedHashMap<String,Layer> topLevelLayers = new LinkedHashMap<String,Layer>();
-      for (Layer top : schema.getRoot().getChildren().values())
-      {
-	 if (top.getAlignment() == Constants.ALIGNMENT_INTERVAL)
-	 { // aligned children of graph
+      for (Layer top : schema.getRoot().getChildren().values()) {
+	 if (top.getAlignment() == Constants.ALIGNMENT_INTERVAL) { // aligned children of graph
 	    topLevelLayers.put(top.getId(), top);
 	 }
       } // next top level layer
 
       LinkedHashMap<String,Layer> graphTagLayers = new LinkedHashMap<String,Layer>();
-      for (Layer top : schema.getRoot().getChildren().values())
-      {
+      for (Layer top : schema.getRoot().getChildren().values()) {
 	 if (top.getAlignment() == Constants.ALIGNMENT_NONE
-	     && top.getChildren().size() == 0)
-	 { // unaligned childless children of graph
+	     && top.getChildren().size() == 0) { // unaligned childless children of graph
 	    graphTagLayers.put(top.getId(), top);
 	 }
       } // next top level layer
@@ -458,20 +431,15 @@ public class VttSerialization
       graphTagLayers.remove("transcript_type");
       
       // add parameters that aren't in the configuration yet, and set possibile/default values
-      for (Parameter p : layerToPossibilities.keySet())
-      {
+      for (Parameter p : layerToPossibilities.keySet()) {
 	 List<String> possibleNames = layerToPossibilities.get(p);
 	 LinkedHashMap<String,Layer> candidateLayers = layerToCandidates.get(p.getName());
-	 if (configuration.containsKey(p.getName()))
-	 {
+	 if (configuration.containsKey(p.getName())) {
 	    p = configuration.get(p.getName());
-	 }
-	 else
-	 {
+	 } else {
 	    configuration.addParameter(p);
 	 }
-	 if (p.getValue() == null)
-	 {
+	 if (p.getValue() == null) {
 	    p.setValue(Utility.FindLayerById(candidateLayers, possibleNames));
 	 }
 	 p.setPossibleValues(candidateLayers.values());
@@ -495,8 +463,8 @@ public class VttSerialization
     * @throws IOException On IO error.
     */
    @SuppressWarnings({"rawtypes", "unchecked"})
-   public ParameterSet load(NamedStream[] streams, Schema schema) throws SerializationException, IOException
-   {
+   public ParameterSet load(NamedStream[] streams, Schema schema)
+      throws SerializationException, IOException {
       if (timers != null) timers.start("load");
       setSchema(schema);
 
@@ -510,17 +478,13 @@ public class VttSerialization
       HashMap<String,LinkedHashMap<String,Layer>> layerToCandidates = new HashMap<String,LinkedHashMap<String,Layer>>();	 
 
       LinkedHashMap<String,Layer> metadataLayers = new LinkedHashMap<String,Layer>();
-      for (Layer layer : schema.getRoot().getChildren().values())
-      {
-	 if (layer.getAlignment() == Constants.ALIGNMENT_NONE)
-	 {
+      for (Layer layer : schema.getRoot().getChildren().values()) {
+	 if (layer.getAlignment() == Constants.ALIGNMENT_NONE) {
 	    metadataLayers.put(layer.getId(), layer);
 	 }
       } // next graph child layer
-      for (Layer layer : schema.getParticipantLayer().getChildren().values())
-      {
-	 if (layer.getAlignment() == Constants.ALIGNMENT_NONE)
-	 {
+      for (Layer layer : schema.getParticipantLayer().getChildren().values()) {
+	 if (layer.getAlignment() == Constants.ALIGNMENT_NONE) {
 	    metadataLayers.put(layer.getId(), layer);
 	 }
       } // next participant child layer
@@ -529,15 +493,12 @@ public class VttSerialization
       MessageFormat metaDataFormat = new MessageFormat("{0}:{1}");
       setMetaData(new HashMap<String,String>());
       String line = vtt.readLine();
-      while (line != null && line.length() > 0)
-      {
-	 try
-	 {
+      while (line != null && line.length() > 0) {
+	 try {
 	    Object[] oMetaData = metaDataFormat.parse(line);
 	    String key = ((String)oMetaData[0]).trim();
 	    String value = ((String)oMetaData[1]).trim();
-	    if (key.length() > 0 && value.length() > 0)
-	    {
+	    if (key.length() > 0 && value.length() > 0) {
 	       Vector<String> possibleMatches = new Vector<String>();
 	       possibleMatches.add("transcript" + key);
 	       possibleMatches.add("participant" + key);
@@ -551,8 +512,8 @@ public class VttSerialization
 
 	       getMetaData().put(key, value);
 	    }
-	 }
-	 catch(ParseException exception) {} // not parseable
+	 } catch(ParseException exception) { // not parseable
+         }
 	 
 	 line = vtt.readLine();
       } // next header line
@@ -562,8 +523,7 @@ public class VttSerialization
       if (timers != null) timers.end("load");
       ParameterSet parameters = new ParameterSet();
       // add parameters that aren't in the configuration yet, and set possibile/default values
-      for (Parameter p : layerToPossibilities.keySet())
-      {
+      for (Parameter p : layerToPossibilities.keySet()) {
 	 List<String> possibleNames = layerToPossibilities.get(p);
 	 LinkedHashMap<String,Layer> candidateLayers = layerToCandidates.get(p.getName());
 	 parameters.addParameter(p);
@@ -579,8 +539,8 @@ public class VttSerialization
     * @param parameters The configuration for a given deserialization operation.
     * @throws SerializationParametersMissingException If not all required parameters have a value.
     */
-   public void setParameters(ParameterSet parameters) throws SerializationParametersMissingException
-   {
+   public void setParameters(ParameterSet parameters)
+      throws SerializationParametersMissingException {
       this.parameters = parameters;
    }
 
@@ -598,8 +558,8 @@ public class VttSerialization
     * @throws SerializationException if errors occur during deserialization.
     */
    public Graph[] deserialize() 
-      throws SerializerNotConfiguredException, SerializationParametersMissingException, SerializationException
-   {
+      throws SerializerNotConfiguredException, SerializationParametersMissingException,
+      SerializationException {
       if (timers != null) timers.start("deserialize");
       if (schema == null) throw new SerializerNotConfiguredException("Layer schema not set");
 
@@ -623,19 +583,16 @@ public class VttSerialization
       graph.getSchema().setTurnLayerId(turnLayer.getId());
       graph.addLayer((Layer)utteranceLayer.clone());
       graph.getSchema().setUtteranceLayerId(utteranceLayer.getId());
-      if (wordLayer != null)
-      {
+      if (wordLayer != null) {
 	 graph.addLayer((Layer)wordLayer.clone());
 	 graph.getSchema().setWordLayerId(wordLayer.getId());
       }
 
       // meta-data
-      for (String key : getMetaData().keySet())
-      {
+      for (String key : getMetaData().keySet()) {
 	 Parameter p = getParameters().get(key);
 	 Layer layer = (Layer)p.getValue();
-	 if (layer != null && !layer.getId().equals("[ignore]"))
-	 {
+	 if (layer != null && !layer.getId().equals("[ignore]")) {
 	    graph.addLayer((Layer)schema.getLayer(layer.getId()).clone());
 	    graph.addTag(graph, layer.getId(), getMetaData().get(key))
                .setConfidence(Constants.CONFIDENCE_MANUAL);
@@ -651,18 +608,15 @@ public class VttSerialization
       MessageFormat intervalFormat = new MessageFormat(
 	 "{0,number,integer}:{1,number,integer}:{2,number,integer}.{3,number,integer} --> {4,number,integer}:{5,number,integer}:{6,number,integer}.{7,number,integer}{8}");
 
-      for (Parameter cue : parameters.values())
-      {
+      for (Parameter cue : parameters.values()) {
 	 Layer mappedLayer = (Layer)cue.getValue();
-	 if (mappedLayer != null && mappedLayer.getId().equals(getUtteranceLayer().getId()))
-	 {	    
+	 if (mappedLayer != null && mappedLayer.getId().equals(getUtteranceLayer().getId())) {
 	    graph.addAnnotation(
 	       new Annotation(null, cue.getName(), schema.getParticipantLayerId()))
                .setConfidence(Constants.CONFIDENCE_MANUAL);
 	 }
       } // next cue/participant
-      if (graph.getAnnotations(schema.getParticipantLayerId()).size() == 0)
-      {
+      if (graph.getAnnotations(schema.getParticipantLayerId()).size() == 0) {
 	 // so use a default speaker
 	 graph.addAnnotation(new Annotation(null, "speaker", schema.getParticipantLayerId()))
             .setConfidence(Constants.CONFIDENCE_MANUAL);;
@@ -675,19 +629,15 @@ public class VttSerialization
       Annotation currentUtterance = new Annotation(
 	 null, "", schema.getUtteranceLayerId(), graphStart.getId(), graphStart.getId(), currentTurn.getId());
       currentUtterance.setConfidence(Constants.CONFIDENCE_MANUAL);
-      try
-      {
+      try {
 	 // For each line...
 	 String line = vtt.readLine();
-	 while (line != null)
-	 {
+	 while (line != null) {
 	    // skip comment lines
 	    if (!line.startsWith("NOTE ")
                 // skip cue-number lines
-                && !line.matches("^[0-9]+$"))
-            {            
-               try
-               {
+                && !line.matches("^[0-9]+$")) {
+               try {
                   Object[] intervalLine = intervalFormat.parse(line);
                   // this is an interval line...
                   
@@ -730,9 +680,7 @@ public class VttSerialization
                   
                   line = vtt.readLine();
                   continue;
-               }
-               catch(ParseException exception)
-               {
+               } catch(ParseException exception) {
                }
                
                // not an interval definition, so add the text to the utterance
@@ -743,65 +691,53 @@ public class VttSerialization
 	    line = vtt.readLine();
 	 } // next line
 	 // finish last utterance
-	 if (currentUtterance.getLabel().trim().length() > 0)
-	 { // the utterance actually contains something
+	 if (currentUtterance.getLabel().trim().length() > 0) {
+            // the utterance actually contains something
 	    graph.addAnnotation(currentUtterance);
 	 }
 	 
 	 // ensure we have an utterance tokenizer
-	 if (getWordLayer() != null)
-	 {
+	 if (getWordLayer() != null) {
             graph.trackChanges();
-	    if (getTokenizer() == null)
-	    {
+	    if (getTokenizer() == null) {
 	       setTokenizer(new SimpleTokenizer(getUtteranceLayer().getId(), getWordLayer().getId()));
 	    }
-	    try
-	    {
+	    try {
 	       if (timers != null) timers.start("tokenization");
 	       tokenizer.transform(graph);
 	       if (timers != null) timers.end("tokenization");
-	    }
-	    catch(TransformationException exception)
-	    {
+	    } catch(TransformationException exception) {
 	       if (errors == null) errors = new SerializationException();
 	       if (errors.getCause() == null) errors.initCause(exception);
 	       errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
 	    }
 	    
 	    OrthographyClumper clumper = new OrthographyClumper(wordLayer.getId(), utteranceLayer.getId());
-	    try
-	    {
+	    try {
 	       // clump non-orthographic 'words' with real words
 	       if (timers != null) timers.start("orthography clumping");
 	       clumper.transform(graph);
 	       if (timers != null) timers.end("orthography clumping");
-	    }
-	    catch(TransformationException exception)
-	    {
+	    } catch(TransformationException exception) {
 	       if (errors == null) errors = new SerializationException();
 	       if (errors.getCause() == null) errors.initCause(exception);
 	       errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
 	    }
 
             // utterance annotations are speaker labels then
-            for (Annotation utterance : graph.all(utteranceLayer.getId()))
-            {
+            for (Annotation utterance : graph.all(utteranceLayer.getId())) {
                utterance.setLabel(utterance.getParent().getLabel());
             } // next turn
          } // there is a word layer
 	 graph.commit();
-      }
-      catch(IOException exception)
-      {
+      } catch(IOException exception) {
 	 if (errors == null) errors = new SerializationException();
 	 if (errors.getCause() == null) errors.initCause(exception);
 	 errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
       }
 
       // set end anchors of graph tags
-      for (Annotation a : graph.all(getParticipantLayer().getId()))
-      {
+      for (Annotation a : graph.all(getParticipantLayer().getId())) {
 	 a.setStartId(graphStart.getId());
 	 a.setEndId(currentUtterance.getEnd().getId());
       }
@@ -810,8 +746,7 @@ public class VttSerialization
       if (errors != null) throw errors;
 
       // reset all change tracking
-      if (graph.getTracker() != null)
-      {
+      if (graph.getTracker() != null) {
          graph.getTracker().reset();
          graph.setTracker(null);
       }
@@ -828,8 +763,7 @@ public class VttSerialization
     * @return A list of IDs of layers that must be present in the graph that will be serialized.
     * @throws SerializationParametersMissingException If not all required parameters have a value.
     */
-   public String[] getRequiredLayers() throws SerializationParametersMissingException
-   {
+   public String[] getRequiredLayers() throws SerializationParametersMissingException {
       Vector<String> requiredLayers = new Vector<String>();
       if (getParticipantLayer() != null) requiredLayers.add(getParticipantLayer().getId());
       if (getTurnLayer() != null) requiredLayers.add(getTurnLayer().getId());
@@ -843,8 +777,7 @@ public class VttSerialization
     * <p>The cardinatlity of this deseerializer is NToN.
     * @return {@link nzilbb.ag.serialize.GraphSerializer#Cardinality}.NToN.
     */
-   public Cardinality getCardinality()
-   {
+   public Cardinality getCardinality() {
       return Cardinality.NToN;
    }
    
@@ -864,17 +797,13 @@ public class VttSerialization
     * @throws SerializerNotConfiguredException if the object has not been configured.
     */
    public void serialize(Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
-      throws SerializerNotConfiguredException
-   {
+      throws SerializerNotConfiguredException {
       graphCount = graphs.getExactSizeIfKnown();
       graphs.forEachRemaining(graph -> {
             if (getCancelling()) return;
-            try
-            {
+            try {
                consumer.accept(serializeGraph(graph, layerIds));
-            }
-            catch(SerializationException exception)
-            {
+            } catch(SerializationException exception) {
                errors.accept(exception);
             }
             consumedGraphCount++;
@@ -887,12 +816,11 @@ public class VttSerialization
     * @return A named stream that contains the TextGrid. 
     * @throws SerializationException if errors occur during deserialization.
     */
-   protected NamedStream serializeGraph(Graph graph, String[] layerIds) 
-      throws SerializationException
-   {
+   protected NamedStream serializeGraph(Graph graph, String[] layerIds)
+      throws SerializationException {
+      
       SerializationException errors = null;
-      try
-      {
+      try {
          // write the text to a temporary file
          File f = File.createTempFile(graph.getId(), ".txt");
          PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(f), "utf-8"));
@@ -906,8 +834,7 @@ public class VttSerialization
 
          // number each participant
          int s = 0;
-         for (Annotation participant : graph.all(participantLayer.getId()))
-         {
+         for (Annotation participant : graph.all(participantLayer.getId())) {
             participant.put("@serial", Integer.valueOf(s++));
          } // next participant
          
@@ -917,8 +844,7 @@ public class VttSerialization
          for (Annotation u : graph.all(getUtteranceLayer().getId())) utterancesByAnchor.add(u);
          
          int iSubtitle = 0;
-         for (Annotation utterance : utterancesByAnchor)
-         {
+         for (Annotation utterance : utterancesByAnchor) {
             if (cancelling) break;
 	    writer.println("" + (++iSubtitle));
 	    writer.println(VttTime(utterance.getStart().getOffset())
@@ -930,14 +856,10 @@ public class VttSerialization
 	    writer.print("<v " + participant.get("@serial") + ">");
 
             boolean firstWord = true;
-            for (Annotation token : utterance.all(getWordLayer().getId()))
-            {
-               if (firstWord)
-               {
+            for (Annotation token : utterance.all(getWordLayer().getId())) {
+               if (firstWord) {
                   firstWord = false;
-               }
-               else
-               {
+               } else {
                   writer.print(" ");
                }
                writer.print(token.getLabel());
@@ -951,9 +873,7 @@ public class VttSerialization
          
          // return a named stream from the file
          return new NamedStream(in, IO.SafeFileNameUrl(graph.getId()) + ".vtt");
-      }
-      catch(Exception exception)
-      {
+      } catch(Exception exception) {
          errors = new SerializationException();
          errors.initCause(exception);
          errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
@@ -968,8 +888,7 @@ public class VttSerialization
     * @param dSeconds
     * @return The time in HH:MM:SS,mmm format.
     */
-   public static String VttTime(double dSeconds)
-   {
+   public static String VttTime(double dSeconds) {
       Integer iHours = Integer.valueOf((int)(dSeconds / 3600));
       dSeconds -= (iHours * 3600);
       Integer iMinutes = Integer.valueOf((int)(dSeconds / 60));
