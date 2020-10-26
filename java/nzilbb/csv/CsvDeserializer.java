@@ -257,7 +257,7 @@ public class CsvDeserializer implements GraphDeserializer {
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-	 "CSV text collection", "0.3", "text/csv", ".csv", "20200909.1954", getClass().getResource("icon.png"));
+	 "CSV text collection", "0.4", "text/csv", ".csv", "20200909.1954", getClass().getResource("icon.png"));
    }
    
    /**

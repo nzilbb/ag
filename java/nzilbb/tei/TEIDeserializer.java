@@ -493,7 +493,7 @@ public class TEIDeserializer implements GraphDeserializer {
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-	 "TEI Document", "0.3", "application/tei+xml", ".xml", "20200909.1954", getClass().getResource("icon.png"));
+	 "TEI Document", "0.4", "application/tei+xml", ".xml", "20200909.1954", getClass().getResource("icon.png"));
    }
 
    /**
@@ -1598,7 +1598,7 @@ public class TEIDeserializer implements GraphDeserializer {
 		     }
 		     mFoundEntities.put(n, anEntity);
 		  }
-	       } else // previously started entity {
+	       } else { // previously started entity
 		  finishHere = true;
 	       }
 	       
@@ -1727,7 +1727,7 @@ public class TEIDeserializer implements GraphDeserializer {
 		   || (parameters.containsKey(child.getNodeName())
 		       && !child.getNodeName().equals("note")
 		       && !child.getNodeName().equals("pc")
-		       && !child.getNodeName().equals("pb"))) // page break {
+		       && !child.getNodeName().equals("pb"))) { // page break
 		  vNodes.add(child);
 	       }
 	    }

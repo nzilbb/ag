@@ -257,7 +257,7 @@ public class TextGridSerialization
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-         "Praat TextGrid", "2.3", "text/praat-textgrid", ".textgrid", "20200909.1954",
+         "Praat TextGrid", "2.4", "text/praat-textgrid", ".textgrid", "20200909.1954",
          getClass().getResource("icon.png"));
    }
    
@@ -656,7 +656,7 @@ public class TextGridSerialization
          if (layer != null) { // there is a matching layer
             if (tier instanceof IntervalTier) { // interval layer?
                if (layer.getAlignment() != 1) p.setValue(layer);
-            } else // TextTier { // point layer?
+            } else { // point layer?
                if (layer.getAlignment() == 1) p.setValue(layer);
             }
          } else if (tier instanceof IntervalTier) {
@@ -908,7 +908,7 @@ public class TextGridSerialization
             utterance.setLayerId(utteranceLayer.getId())
                .setParentId(turn.getId())
                .setConfidence(Constants.CONFIDENCE_MANUAL);;
-            if (!wordLayerMapped) // no word layer {
+            if (!wordLayerMapped) { // no word layer 
                // ...which means the label must be the untokenized words
                
                // and so the turn's tier name must be the speaker name

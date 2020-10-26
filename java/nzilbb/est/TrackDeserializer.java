@@ -186,7 +186,7 @@ public class TrackDeserializer implements GraphDeserializer {
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-	 "EST Track", "0.4", "text/x-est-track", ".f0", "20200909.1954", getClass().getResource("icon.png"));
+	 "EST Track", "0.5", "text/x-est-track", ".f0", "20200909.1954", getClass().getResource("icon.png"));
    }
 
    /**

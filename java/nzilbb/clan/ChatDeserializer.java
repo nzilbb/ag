@@ -550,7 +550,7 @@ public class ChatDeserializer implements GraphDeserializer {
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-	 "CLAN CHAT transcript", "0.8", "text/x-chat", ".cha", "20200909.1954", getClass().getResource("icon.gif"));
+	 "CLAN CHAT transcript", "0.9", "text/x-chat", ".cha", "20200909.1954", getClass().getResource("icon.gif"));
    }
 
    /**
