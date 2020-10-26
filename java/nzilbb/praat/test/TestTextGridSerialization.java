@@ -1,4 +1,4 @@
-//
+ //
 // Copyright 2015-2019 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
@@ -95,7 +95,7 @@ public class TestTextGridSerialization
       assertEquals("test_utterance.TextGrid", g.getId());
 
       // participants     
-      Annotation[] who = g.list("who");
+      Annotation[] who = g.all("who");
       assertEquals(2, who.length);
       assertEquals("participant", who[0].getLabel());
       assertEquals(g, who[0].getParent());
@@ -105,7 +105,7 @@ public class TestTextGridSerialization
       assertEquals(g, who[1].getParent());
       
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(20, turns.length);
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals(Double.valueOf(44.255), turns[0].getEnd().getOffset());
@@ -192,7 +192,7 @@ public class TestTextGridSerialization
       assertEquals("participant", turns[19].getLabel());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(139, utterances.length);
       assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       assertEquals(Double.valueOf(5.75), utterances[0].getEnd().getOffset());
@@ -209,7 +209,7 @@ public class TestTextGridSerialization
       assertEquals("interviewer", utterances[21].getParent().getLabel());
       assertEquals(turns[1], utterances[21].getParent());
 
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
          "and", "ah .", "Cyril", "would", "arrive", "at", "the", "door",
          "with", "this", "letter", "for", "Mum", 
@@ -225,7 +225,7 @@ public class TestTextGridSerialization
       }
 
       // comment
-      Annotation[] comments = g.list("comment");
+      Annotation[] comments = g.all("comment");
       assertEquals("unclear", comments[0].getLabel());
       assertEquals("in", comments[0].getStart().endOf("word").iterator().next().getLabel());
       assertEquals("-- and", comments[0].getEnd().startOf("word").iterator().next().getLabel());
@@ -241,7 +241,7 @@ public class TestTextGridSerialization
       assertEquals(6, comments.length);
 
       // noise
-      Annotation[] noises = g.list("noise");
+      Annotation[] noises = g.all("noise");
       assertEquals("throatclear", noises[0].getLabel());
       assertEquals(words[1].getEnd(), noises[0].getStart());
       assertEquals(words[2].getStart(), noises[0].getEnd());
@@ -258,20 +258,26 @@ public class TestTextGridSerialization
       assertEquals("microphone movement noise", noises[4].getLabel());
 
       // pronounce
-      Annotation[] pronounce = g.list("pronounce");
+      Annotation[] pronounce = g.all("pronounce");
       assertEquals("sIr@l", pronounce[0].getLabel());
       assertTrue(pronounce[0].tags(words[2]));
       assertEquals("o", pronounce[1].getLabel());
-      assertEquals("o~", pronounce[1].my("word").getLabel());
+      assertEquals("o~", pronounce[1].first("word").getLabel());
       assertEquals(2, pronounce.length);
 
       // lexical
-      Annotation[] lexical = g.list("lexical");
+      Annotation[] lexical = g.all("lexical");
       assertEquals("Cyril", lexical[0].getLabel());
       assertTrue(lexical[0].tags(words[2]));
       assertEquals("often", lexical[1].getLabel());
-      assertEquals("o~", lexical[1].my("word").getLabel());
+      assertEquals("o~", lexical[1].first("word").getLabel());
       assertEquals(2, lexical.length);
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
    }
 
    @Test public void utterance_utf8() 
@@ -320,7 +326,7 @@ public class TestTextGridSerialization
       assertEquals("test_utterance_utf-8.TextGrid", g.getId());
 
       // participants     
-      Annotation[] who = g.list("who");
+      Annotation[] who = g.all("who");
       assertEquals(2, who.length);
       assertEquals("participant", who[0].getLabel());
       assertEquals(g, who[0].getParent());
@@ -332,14 +338,14 @@ public class TestTextGridSerialization
       assertEquals(g, who[1].getParent());
       
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(20, turns.length);
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals(Double.valueOf(44.255), turns[0].getEnd().getOffset());
       assertEquals("participant", turns[0].getLabel());
       assertEquals(who[0], turns[0].getParent());
       
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
          "and", "äh .", "Cyril", "would", "arrive", "at", "the", "door",
          "with", "this", "letter", "for", "Mum", 
@@ -352,6 +358,12 @@ public class TestTextGridSerialization
          assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
                       i+1, words[i].getOrdinal());
          assertEquals(turns[0].getId(), words[i].getParentId());
+      }
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
    }
 
@@ -401,7 +413,7 @@ public class TestTextGridSerialization
       assertEquals("test_utterance_utf-16.TextGrid", g.getId());
 
       // participants     
-      Annotation[] who = g.list("who");
+      Annotation[] who = g.all("who");
       assertEquals(2, who.length);
       assertEquals("participant", who[0].getLabel());
       assertEquals(g, who[0].getParent());
@@ -413,14 +425,14 @@ public class TestTextGridSerialization
       assertEquals(g, who[1].getParent());
       
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(20, turns.length);
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals(Double.valueOf(44.255), turns[0].getEnd().getOffset());
       assertEquals("participant", turns[0].getLabel());
       assertEquals(who[0], turns[0].getParent());
       
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
          "and", "äh .", "Cyril", "would", "arrive", "at", "the", "door",
          "with", "this", "letter", "for", "Mum", 
@@ -433,6 +445,12 @@ public class TestTextGridSerialization
          assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
                       i+1, words[i].getOrdinal());
          assertEquals(turns[0].getId(), words[i].getParentId());
+      }
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
    }
 
@@ -482,7 +500,7 @@ public class TestTextGridSerialization
       assertEquals("test_utterance_latin1.TextGrid", g.getId());
 
       // participants     
-      Annotation[] who = g.list("who");
+      Annotation[] who = g.all("who");
       assertEquals(2, who.length);
       assertEquals("participant", who[0].getLabel());
       assertEquals(g, who[0].getParent());
@@ -494,14 +512,14 @@ public class TestTextGridSerialization
       assertEquals(g, who[1].getParent());
       
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(20, turns.length);
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals(Double.valueOf(44.255), turns[0].getEnd().getOffset());
       assertEquals("participant", turns[0].getLabel());
       assertEquals(who[0], turns[0].getParent());
       
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
          "and", "äh .", "Cyril", "would", "arrive", "at", "the", "door",
          "with", "this", "letter", "for", "Mum", 
@@ -514,6 +532,12 @@ public class TestTextGridSerialization
          assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
                       i+1, words[i].getOrdinal());
          assertEquals(turns[0].getId(), words[i].getParentId());
+      }
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
    }
 
@@ -564,7 +588,7 @@ public class TestTextGridSerialization
       assertEquals("test_utterance_word.TextGrid", g.getId());
 
       // participants     
-      Annotation[] who = g.list("who");
+      Annotation[] who = g.all("who");
       assertEquals(2, who.length);
       assertEquals("participant", who[0].getLabel());
       assertEquals(g, who[0].getParent());
@@ -576,7 +600,7 @@ public class TestTextGridSerialization
       assertEquals(g, who[1].getParent());
       
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(20, turns.length);
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals(Double.valueOf(44.255), turns[0].getEnd().getOffset());
@@ -589,7 +613,7 @@ public class TestTextGridSerialization
       assertEquals(who[1], turns[1].getParent());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(139, utterances.length);
       assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       assertEquals(Double.valueOf(5.75), utterances[0].getEnd().getOffset());
@@ -606,7 +630,7 @@ public class TestTextGridSerialization
       assertEquals("interviewer", utterances[21].getParent().getLabel());
       assertEquals(turns[1], utterances[21].getParent());
 
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
          "and", "ah .", "Cyril", "would", "arrive", "at", "the", "door",
          "with", "this", "letter", "for", "Mum", 
@@ -622,13 +646,13 @@ public class TestTextGridSerialization
       }
 
       // no convention annotations, because the utterances are not tokenized
-      assertEquals("no conventional comments", 0, g.list("comment").length);
-      assertEquals("no conventional noises", 0, g.list("noise").length);
-      assertEquals("no conventional pronounce annotations", 0, g.list("pronounce").length);
-      assertEquals("no conventional lexical annotations", 0, g.list("lexical").length);
+      assertEquals("no conventional comments", 0, g.all("comment").length);
+      assertEquals("no conventional noises", 0, g.all("noise").length);
+      assertEquals("no conventional pronounce annotations", 0, g.all("pronounce").length);
+      assertEquals("no conventional lexical annotations", 0, g.all("lexical").length);
 
       // phones
-      Annotation[] phones = g.list("phone");
+      Annotation[] phones = g.all("phone");
       assertEquals("phones", 13, phones.length);
 
       // participant
@@ -719,7 +743,7 @@ public class TestTextGridSerialization
       assertEquals("test_utterance_word.TextGrid", g.getId());
 
       // participants     
-      Annotation[] who = g.list("who");
+      Annotation[] who = g.all("who");
       assertEquals(2, who.length);
       assertEquals("participant", who[0].getLabel());
       assertEquals(g, who[0].getParent());
@@ -731,7 +755,7 @@ public class TestTextGridSerialization
       assertEquals(g, who[1].getParent());
       
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(20, turns.length);
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals(Double.valueOf(44.255), turns[0].getEnd().getOffset());
@@ -744,7 +768,7 @@ public class TestTextGridSerialization
       assertEquals(who[1], turns[1].getParent());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(139, utterances.length);
       assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       assertEquals(Double.valueOf(5.75), utterances[0].getEnd().getOffset());
@@ -761,7 +785,7 @@ public class TestTextGridSerialization
       assertEquals("interviewer", utterances[21].getParent().getLabel());
       assertEquals(turns[1], utterances[21].getParent());
 
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
          "and", "ah .", "Cyril", "would", "arrive", "at", "the", "door",
          "with", "this", "letter", "for", "Mum", 
@@ -777,13 +801,19 @@ public class TestTextGridSerialization
       }
 
       // no convention annotations, because the utterances are not tokenized
-      assertEquals("no conventional comments", 0, g.list("comment").length);
-      assertEquals("no conventional noises", 0, g.list("noise").length);
-      assertEquals("no conventional pronounce annotations", 0, g.list("pronounce").length);
-      assertEquals("no conventional lexical annotations", 0, g.list("lexical").length);
+      assertEquals("no conventional comments", 0, g.all("comment").length);
+      assertEquals("no conventional noises", 0, g.all("noise").length);
+      assertEquals("no conventional pronounce annotations", 0, g.all("pronounce").length);
+      assertEquals("no conventional lexical annotations", 0, g.all("lexical").length);
 
       // phones
-      assertEquals("no phones", 0, g.list("phone").length);
+      assertEquals("no phones", 0, g.all("phone").length);
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
    }
 
    @Test public void word_only() 
@@ -837,7 +867,7 @@ public class TestTextGridSerialization
       assertEquals("test_utterance_word.TextGrid", g.getId());
 
       // participants     
-      Annotation[] who = g.list("who");
+      Annotation[] who = g.all("who");
       assertEquals(2, who.length);
       assertEquals("participant", who[0].getLabel());
       assertEquals(g, who[0].getParent());
@@ -851,7 +881,7 @@ public class TestTextGridSerialization
       assertEquals(g, who[1].getParent());
       
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(2, turns.length);
       assertEquals("participant", turns[0].getLabel());
       assertEquals(who[0], turns[0].getParent());
@@ -859,14 +889,14 @@ public class TestTextGridSerialization
       assertEquals(who[1], turns[1].getParent());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(2, utterances.length);
       assertEquals("participant", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
       assertEquals("interviewer", utterances[1].getParent().getLabel());
       assertEquals(turns[1], utterances[1].getParent());
 
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
          "and", "ah .", "Cyril", "would", "arrive", "at", "the", "door",
          "with", "this", "letter", "for", "Mum", 
@@ -882,15 +912,21 @@ public class TestTextGridSerialization
       }
 
       // no convention annotations, because the utterances are not tokenized
-      assertEquals("no conventional comments", 0, g.list("comment").length);
-      assertEquals("no conventional noises", 0, g.list("noise").length);
-      assertEquals("no conventional pronounce annotations", 0, g.list("pronounce").length);
-      assertEquals("no conventional lexical annotations", 0, g.list("lexical").length);
+      assertEquals("no conventional comments", 0, g.all("comment").length);
+      assertEquals("no conventional noises", 0, g.all("noise").length);
+      assertEquals("no conventional pronounce annotations", 0, g.all("pronounce").length);
+      assertEquals("no conventional lexical annotations", 0, g.all("lexical").length);
 
       // phones
-      Annotation[] phones = g.list("phone");
+      Annotation[] phones = g.all("phone");
       assertEquals("phones", 0, phones.length);
 
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
    }
 
    @Test public void turn_utterance_word() 
@@ -939,7 +975,7 @@ public class TestTextGridSerialization
       assertEquals("test_turn_utterance_word.TextGrid", g.getId());
 
       // participants     
-      Annotation[] who = g.list("who");
+      Annotation[] who = g.all("who");
       assertEquals(2, who.length);
       assertEquals("participant", who[0].getLabel());
       assertEquals(g, who[0].getParent());
@@ -951,7 +987,7 @@ public class TestTextGridSerialization
       assertEquals(g, who[1].getParent());
       
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals(Double.valueOf(44.255), turns[0].getEnd().getOffset());
       assertEquals("participant", turns[0].getLabel());
@@ -1039,7 +1075,7 @@ public class TestTextGridSerialization
       assertEquals(20, turns.length);
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(139, utterances.length);
       assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       assertEquals(Double.valueOf(5.75), utterances[0].getEnd().getOffset());
@@ -1056,7 +1092,7 @@ public class TestTextGridSerialization
       assertEquals("interviewer", utterances[21].getParent().getLabel());
       assertEquals(turns[1], utterances[21].getParent());
 
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       String[] wordLabels = {
          "and", "ah .", "Cyril", "would", "arrive", "at", "the", "door",
          "with", "this", "letter", "for", "Mum", 
@@ -1083,10 +1119,16 @@ public class TestTextGridSerialization
       assertEquals("simultaneous speech", simultaneousSpeech.length, words.length);
 
       // no convention annotations, because the utterances are not tokenized
-      assertEquals("no conventional comments", 0, g.list("comment").length);
-      assertEquals("no conventional noises", 0, g.list("noise").length);
-      assertEquals("no conventional pronounce annotations", 0, g.list("pronounce").length);
-      assertEquals("no conventional lexical annotations", 0, g.list("lexical").length);
+      assertEquals("no conventional comments", 0, g.all("comment").length);
+      assertEquals("no conventional noises", 0, g.all("noise").length);
+      assertEquals("no conventional pronounce annotations", 0, g.all("pronounce").length);
+      assertEquals("no conventional lexical annotations", 0, g.all("lexical").length);
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
    }
 
    @Test public void speaker_word() 
@@ -1137,7 +1179,7 @@ public class TestTextGridSerialization
       assertEquals("test_speaker_word.TextGrid", g.getId());
 
       // participants     
-      Annotation[] who = g.list("who");
+      Annotation[] who = g.all("who");
       assertEquals(2, who.length);
       assertEquals("participant", who[0].getLabel());
       assertEquals(g, who[0].getParent());
@@ -1149,7 +1191,7 @@ public class TestTextGridSerialization
       assertEquals(g, who[1].getParent());
       
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals(Double.valueOf(44.255), turns[0].getEnd().getOffset());
       assertEquals("participant", turns[0].getLabel());
@@ -1231,7 +1273,7 @@ public class TestTextGridSerialization
       assertEquals(19, turns.length);
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(138, utterances.length);
       assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       assertEquals(Double.valueOf(5.75), utterances[0].getEnd().getOffset());
@@ -1248,7 +1290,7 @@ public class TestTextGridSerialization
       assertEquals("interviewer", utterances[21].getParent().getLabel());
       assertEquals(turns[1], utterances[21].getParent());
 
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       String[] wordLabels = {
          "and", "ah .", "Cyril", "would", "arrive", "at", "the", "door",
          "with", "this", "letter", "for", "Mum", 
@@ -1274,13 +1316,13 @@ public class TestTextGridSerialization
       assertEquals("other speaker words", simultaneousSpeech.length, words.length);
 
       // no convention annotations, because the utterances are not tokenized
-      assertEquals("no conventional comments", 0, g.list("comment").length);
-      assertEquals("no conventional noises", 0, g.list("noise").length);
-      assertEquals("no conventional pronounce annotations", 0, g.list("pronounce").length);
-      assertEquals("no conventional lexical annotations", 0, g.list("lexical").length);
+      assertEquals("no conventional comments", 0, g.all("comment").length);
+      assertEquals("no conventional noises", 0, g.all("noise").length);
+      assertEquals("no conventional pronounce annotations", 0, g.all("pronounce").length);
+      assertEquals("no conventional lexical annotations", 0, g.all("lexical").length);
 
       // topic
-      Annotation[] topics = g.list("topic");
+      Annotation[] topics = g.all("topic");
       assertEquals(2, topics.length);
       assertEquals(Double.valueOf(79.726), topics[0].getStart().getOffset());
       assertEquals(Double.valueOf(107.804), topics[0].getEnd().getOffset());
@@ -1293,7 +1335,7 @@ public class TestTextGridSerialization
       assertEquals(g, topics[1].getParent());
 
       // named entity
-      Annotation[] entities = g.list("entity");
+      Annotation[] entities = g.all("entity");
       assertEquals(6, entities.length);
       assertEquals("person", entities[0].getLabel());
       assertEquals("Cyril", entities[0].tagsOn("word")[0].getLabel());
@@ -1312,6 +1354,12 @@ public class TestTextGridSerialization
 
       assertEquals("place", entities[5].getLabel());
       assertEquals("Ohakia .", entities[5].tagsOn("word")[0].getLabel());
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
    }
 
    @Test public void basFragment() 
@@ -1366,7 +1414,7 @@ public class TestTextGridSerialization
       assertEquals("fragment__1_890-3_830.TextGrid", g.getId());
 
       // participants     
-      Annotation[] who = g.list("who");
+      Annotation[] who = g.all("who");
       assertEquals(1, who.length);
       assertEquals("ORT", who[0].getLabel());
       assertEquals(g, who[0].getParent());
@@ -1376,7 +1424,7 @@ public class TestTextGridSerialization
       assertNotNull("participants are anchored in time", who[0].getEnd().getOffset());
       
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(1, turns.length);
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals(Double.valueOf(1.93), turns[0].getEnd().getOffset());
@@ -1384,14 +1432,14 @@ public class TestTextGridSerialization
       assertEquals(who[0], turns[0].getParent());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(1, utterances.length);
       assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       assertEquals(Double.valueOf(1.93), utterances[0].getEnd().getOffset());
       assertEquals("ORT", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
 
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
          "so", "what", "is", "your", "name"
       };
@@ -1404,13 +1452,13 @@ public class TestTextGridSerialization
       }
 
       // no convention annotations, because the utterances are not tokenized
-      assertEquals("no conventional comments", 0, g.list("comment").length);
-      assertEquals("no conventional noises", 0, g.list("noise").length);
-      assertEquals("no conventional pronounce annotations", 0, g.list("pronounce").length);
-      assertEquals("no conventional lexical annotations", 0, g.list("lexical").length);
+      assertEquals("no conventional comments", 0, g.all("comment").length);
+      assertEquals("no conventional noises", 0, g.all("noise").length);
+      assertEquals("no conventional pronounce annotations", 0, g.all("pronounce").length);
+      assertEquals("no conventional lexical annotations", 0, g.all("lexical").length);
 
       // phones
-      Annotation[] phones = g.list("phone");
+      Annotation[] phones = g.all("phone");
       assertEquals("phones", 14, phones.length);
 
       // participant
@@ -1452,6 +1500,12 @@ public class TestTextGridSerialization
 
       assertEquals("orphan phone", "<p:>", phones[13].getLabel());
       assertNull("no phone parent", phones[13].getParent());
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
    }
 
    @Test public void performance() 
@@ -1503,6 +1557,12 @@ public class TestTextGridSerialization
 
       assertTrue("Deserialization too slow:\n" + deserializer.getTimers().toString(),
                  25000 /* TODO we want this to be around 2s*/ > deserializer.getTimers().getTotals().get("deserialize"));
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
    }
 
    @Test public void serialize_utterance_word() 

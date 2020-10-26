@@ -981,13 +981,15 @@ public class TextGridSerialization
                // create turn 
                turn = new Annotation(
                   null, participantName, turnLayer.getId(), graphStart.getId(), graphEnd.getId());
+               turn.setConfidence(Constants.CONFIDENCE_MANUAL);
                graph.addAnnotation(turn);
                turnsByName.put(participantName, turn);
 
                // create utterance
                Annotation utterance = new Annotation(turn);
-               utterance.setLayerId(utteranceLayer.getId());
-               utterance.setParentId(turn.getId());
+               utterance.setLayerId(utteranceLayer.getId())
+                  .setParentId(turn.getId())
+                  .setConfidence(Constants.CONFIDENCE_MANUAL);;
                graph.addAnnotation(utterance);
             }
             // set parent of word
@@ -1001,8 +1003,9 @@ public class TextGridSerialization
          for (Annotation turn : graph.all(turnLayer.getId()))
          {
             Annotation utterance = new Annotation(turn);
-            utterance.setLayerId(utteranceLayer.getId());
-            utterance.setParentId(turn.getId());
+            utterance.setLayerId(utteranceLayer.getId())
+               .setParentId(turn.getId())
+               .setConfidence(Constants.CONFIDENCE_MANUAL);;
             if (!wordLayerMapped) // no word layer
             { // ...which means the label must be the untokenized words
                // and so the turn's tier name must be the speaker name
@@ -1018,9 +1021,10 @@ public class TextGridSerialization
          for (Annotation utterance : graph.all(utteranceLayer.getId()))
          {
             Annotation turn = new Annotation(utterance);
-            turn.setLayerId(turnLayer.getId());
-            // the utterance's tier name taken to be the speaker name
-            turn.setLabel(((Tier)utterance.get("@tier")).getName());
+            turn.setLayerId(turnLayer.getId())
+               // the utterance's tier name taken to be the speaker name
+               .setLabel(((Tier)utterance.get("@tier")).getName())
+               .setConfidence(Constants.CONFIDENCE_MANUAL);
             graph.addAnnotation(turn);
             // now turn will have an ID, and we can set it to be the parent of utterance
             utterance.setParent(turn);
@@ -1078,6 +1082,7 @@ public class TextGridSerialization
          if (!participantsByName.containsKey(turn.getLabel()))
          { // create participant
             Annotation who = new Annotation(null, turn.getLabel(), participantLayer.getId());
+            who.setConfidence(Constants.CONFIDENCE_MANUAL);
             graph.addAnnotation(who);
             participantsByName.put(turn.getLabel(), who);
          }
