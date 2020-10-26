@@ -48,10 +48,9 @@ import nzilbb.editpath.EditStep;
 import nzilbb.editpath.MinimumEditPath;
 import nzilbb.emusdms.*;
 
-public class TestBundleSerialization
-{
-   @Test public void dbConfigAllSegements() throws Exception
-   {
+public class TestBundleSerialization {
+   
+   @Test public void dbConfigAllSegements() throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
@@ -150,18 +149,14 @@ public class TestBundleSerialization
     
       // test using diff
       String differences = diff(new File(dir, "expected_dbconfig.json"), actual);
-      if (differences != null)
-      {
+      if (differences != null) {
          fail(differences);
-      }
-      else
-      {
+      } else {
          actual.delete();
       }
    }
   
-   @Test public void dbConfigOneToMany() throws Exception
-   {
+   @Test public void dbConfigOneToMany() throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
@@ -257,19 +252,14 @@ public class TestBundleSerialization
     
       // test using diff
       String differences = diff(new File(dir, "expected_onetomany_dbconfig.json"), actual);
-      if (differences != null)
-      {
+      if (differences != null) {
          fail(differences);
-      }
-      else
-      {
+      } else {
          actual.delete();
       }
    }
   
-   @Test public void serialize_fragment_utterance_word_AllSegements() 
-      throws Exception
-   {
+   @Test public void serialize_fragment_utterance_word_AllSegements()  throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants", 0, true, true, true),
@@ -297,19 +287,14 @@ public class TestBundleSerialization
       fragment.shiftAnchors(-214.822);
       assertEquals("serialize_utterance_word__214.822-218.290", fragment.getId());
       fragment.setMediaProvider(new GraphMediaProvider() {
-            public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
-            {
+            public MediaFile[] getAvailableMedia() throws StoreException, PermissionException {
                return null;
             }
             public String getMedia(String trackSuffix, String mimeType) 
-               throws StoreException, PermissionException
-            {          
-               try
-               {
+               throws StoreException, PermissionException {          
+               try {
                   return new File(dir, "silence.wav").toURI().toString();
-               }
-               catch(Exception exception)
-               {
+               } catch(Exception exception) {
                   throw new StoreException(exception);
                }
             }
@@ -370,19 +355,14 @@ public class TestBundleSerialization
     
       // test using diff
       String differences = diff(new File(dir, "expected_"+actual.getName()), actual);
-      if (differences != null)
-      {
+      if (differences != null) {
          fail(differences);
-      }
-      else
-      {
+      } else {
          actual.delete();
       }
    }
 
-   @Test public void serialize_fragment_utterance_word_OneToMany() 
-      throws Exception
-   {
+   @Test public void serialize_fragment_utterance_word_OneToMany()  throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants", 0, true, true, true),
@@ -412,19 +392,14 @@ public class TestBundleSerialization
       fragment.setId("onetomany_serialize_utterance_word__214.822-218.290");
       assertEquals("onetomany_serialize_utterance_word__214.822-218.290", fragment.getId());
       fragment.setMediaProvider(new GraphMediaProvider() {
-            public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
-            {
+            public MediaFile[] getAvailableMedia() throws StoreException, PermissionException {
                return null;
             }
             public String getMedia(String trackSuffix, String mimeType) 
-               throws StoreException, PermissionException
-            {          
-               try
-               {
+               throws StoreException, PermissionException {          
+               try {
                   return new File(dir, "silence.wav").toURI().toString();
-               }
-               catch(Exception exception)
-               {
+               } catch(Exception exception) {
                   throw new StoreException(exception);
                }
             }
@@ -483,19 +458,14 @@ public class TestBundleSerialization
     
       // test using diff
       String differences = diff(new File(dir, "expected_"+actual.getName()), actual);
-      if (differences != null)
-      {
+      if (differences != null) {
          fail(differences);
-      }
-      else
-      {
+      } else {
          actual.delete();
       }
    }
 
-   @Test public void deserialize_fragment_utterance_word_AllSegements() 
-      throws Exception
-   {
+   @Test public void deserialize_fragment_utterance_word_AllSegements()  throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants", 0, true, true, true),
@@ -595,8 +565,7 @@ public class TestBundleSerialization
       double[] wordStarts = { 214.822, 215.3, 215.5926666667, 215.978, 216.36333, 216.7486666667, 217.134, 217.5193333333, 217.9046666667 };
       double[] wordEnds = { 215.2073333333, 215.5926666667, 215.978, 216.36333, 216.7486666667, 217.134, 217.5193333333, 217.9046666667, 218.29 };
       assertEquals("word count", wordLabels.length, words.length);
-      for (int i = 0; i < wordLabels.length; i++)
-      {
+      for (int i = 0; i < wordLabels.length; i++) {
          assertEquals("word label " + i, wordLabels[i], words[i].getLabel());
          assertEquals("word start " + i + " " + wordStarts[i] + " vs " + words[i].getStart().getOffset(),
                       0, g.compareOffsets(wordStarts[i], words[i].getStart().getOffset()));
@@ -624,15 +593,13 @@ public class TestBundleSerialization
       String[] parentLabels = { "or", "some", "some", "some", "and" };
       int[] phoneOrdinals = { 1, 1, 2, 3, 1 };
       assertEquals("phone count", phoneLabels.length, annotations.length);
-      for (int i = 0; i < phoneLabels.length; i++)
-      {
+      for (int i = 0; i < phoneLabels.length; i++) {
          assertEquals("phone label " + i, phoneLabels[i], annotations[i].getLabel());
          assertEquals("phone parent " + i, parentLabels[i], annotations[i].getParent().getLabel());
       } // next annotation
 
       // anchors
-      for (Anchor a : g.getAnchors().values())
-      {
+      for (Anchor a : g.getAnchors().values()) {
          assertNotNull("no null offsets " + a.getId() + ":" + a.getOffset(),
                        a.getOffset());
          assertEquals("anchor set to manual confidence " + a.getId() + ":" + a.getOffset(),
@@ -646,9 +613,7 @@ public class TestBundleSerialization
       }
    }
 
-   @Test public void deserialize_fragment_utterance_word_OneToMany() 
-      throws Exception
-   {
+   @Test public void deserialize_fragment_utterance_word_OneToMany()  throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants", 0, true, true, true),
@@ -754,8 +719,7 @@ public class TestBundleSerialization
       double[] wordStarts = { 214.822, 215.3, 215.5926666667, 215.978, 216.36333, 216.7486666667, 217.134, 217.5193333333, 217.9046666667 };
       double[] wordEnds = { 215.2073333333, 215.5926666667, 215.978, 216.36333, 216.7486666667, 217.134, 217.5193333333, 217.9046666667, 218.29 };
       assertEquals("word count", wordLabels.length, words.length);
-      for (int i = 0; i < wordLabels.length; i++)
-      {
+      for (int i = 0; i < wordLabels.length; i++) {
          assertEquals("word label " + i, wordLabels[i], words[i].getLabel());
          assertEquals("word start " + i + " " + wordStarts[i] + " vs " + words[i].getStart().getOffset(),
                       0, g.compareOffsets(wordStarts[i], words[i].getStart().getOffset()));
@@ -787,15 +751,13 @@ public class TestBundleSerialization
       int[] phoneOrdinals = { 1, 1, 2, 3, 1,
                               1, 1, 1, 1, 1, 1 };
       assertEquals("phone count", phoneLabels.length, annotations.length);
-      for (int i = 0; i < phoneLabels.length; i++)
-      {
+      for (int i = 0; i < phoneLabels.length; i++) {
          assertEquals("phone label " + i, phoneLabels[i], annotations[i].getLabel());
          assertEquals("phone parent " + i, parentLabels[i], annotations[i].getParent().getLabel());
       } // next annotation
 
       // anchors
-      for (Anchor a : g.getAnchors().values())
-      {
+      for (Anchor a : g.getAnchors().values()) {
          assertNotNull("no null offsets " + a.getId() + ":" + a.getOffset(),
                        a.getOffset());
          assertEquals("anchor set to manual confidence " + a.getId() + ":" + a.getOffset(),
@@ -815,8 +777,7 @@ public class TestBundleSerialization
     * @param actual
     * @return null if the files are the same, and a String describing differences if not.
     */
-   public String diff(File expected, File actual)
-   {
+   public String diff(File expected, File actual) {
       StringBuffer d = new StringBuffer();
       
       try
@@ -825,25 +786,21 @@ public class TestBundleSerialization
          Vector<String> actualLines = new Vector<String>();
          BufferedReader reader = new BufferedReader(new FileReader(actual));
          String line = reader.readLine();
-         while (line != null)
-         {
+         while (line != null) {
             actualLines.add(line);
             line = reader.readLine();
          }
          Vector<String> expectedLines = new Vector<String>();
          reader = new BufferedReader(new FileReader(expected));
          line = reader.readLine();
-         while (line != null)
-         {
+         while (line != null) {
             expectedLines.add(line);
             line = reader.readLine();
          }
          MinimumEditPath<String> comparator = new MinimumEditPath<String>();
          List<EditStep<String>> path = comparator.minimumEditPath(expectedLines, actualLines);
-         for (EditStep<String> step : path)
-         {
-            switch (step.getOperation())
-            {
+         for (EditStep<String> step : path) {
+            switch (step.getOperation()) {
                case CHANGE:
                   d.append("\n"+expected.getPath()+":"+(step.getFromIndex()+1)+": Expected:\n" 
                            + step.getFrom() 
@@ -861,9 +818,7 @@ public class TestBundleSerialization
                   break;
             }
          } // next step
-      }
-      catch(Exception exception)
-      {
+      } catch(Exception exception) {
          d.append("\n" + exception);
       }
       if (d.length() > 0) return d.toString();
@@ -880,18 +835,13 @@ public class TestBundleSerialization
     * Getter for {@link #fDir}: Directory for text files.
     * @return Directory for text files.
     */
-   public File getDir() 
-   { 
-      if (fDir == null)
-      {
-         try
-         {
+   public File getDir() { 
+      if (fDir == null) {
+         try {
             URL urlThisClass = getClass().getResource(getClass().getSimpleName() + ".class");
             File fThisClass = new File(urlThisClass.toURI());
             fDir = fThisClass.getParentFile();
-         }
-         catch(Throwable t)
-         {
+         } catch(Throwable t) {
             System.out.println("" + t);
          }
       }
@@ -903,8 +853,7 @@ public class TestBundleSerialization
     */
    public void setDir(File fNewDir) { fDir = fNewDir; }
 
-   public static void main(String args[]) 
-   {
+   public static void main(String args[]) {
       org.junit.runner.JUnitCore.main("nzilbb.emusdms.test.TestBundleSerialization");
    }
 }
