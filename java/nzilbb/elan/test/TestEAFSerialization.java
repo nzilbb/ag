@@ -125,12 +125,12 @@ public class TestEAFSerialization
       assertEquals("test_utterance.eaf", g.getId());
 
       // attributes
-      assertEquals("transcriber", "Robert", g.my("scribe").getLabel());
-      assertEquals("language", "eng", g.my("lang").getLabel());
-      assertEquals("version date", "2017-08-28T16:48:05-03:00", g.my("version_date").getLabel());
+      assertEquals("transcriber", "Robert", g.first("scribe").getLabel());
+      assertEquals("language", "eng", g.first("lang").getLabel());
+      assertEquals("version date", "2017-08-28T16:48:05-03:00", g.first("version_date").getLabel());
 
       // participants     
-      Annotation[] who = g.list("who");
+      Annotation[] who = g.all("who");
       assertEquals(2, who.length);
       assertEquals("interviewer", who[0].getLabel());
       assertEquals(g, who[0].getParent());
@@ -138,7 +138,7 @@ public class TestEAFSerialization
       assertEquals(g, who[1].getParent());
       
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(13, turns.length);
       assertEquals(Double.valueOf(4.675), turns[0].getStart().getOffset());
       assertEquals(Double.valueOf(6.752), turns[0].getEnd().getOffset());
@@ -200,7 +200,7 @@ public class TestEAFSerialization
       assertEquals("participant", turns[12].getLabel());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(147, utterances.length);
       assertEquals(Double.valueOf(4.675), utterances[0].getStart().getOffset());
       assertEquals(Double.valueOf(6.752), utterances[0].getEnd().getOffset());
@@ -219,7 +219,7 @@ public class TestEAFSerialization
       assertEquals("interviewer", utterances[4].getParent().getLabel());
       assertEquals(turns[2], utterances[4].getParent());
 
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       String[] wordLabels = {
 	 ". rest", "of", "that", "side", "of", "the", "famly", "so", "he --"
       };
@@ -244,7 +244,7 @@ public class TestEAFSerialization
       }
 
       // comment
-      Annotation[] comments = g.list("comment");
+      Annotation[] comments = g.all("comment");
       assertEquals("unclear", comments[0].getLabel());
       assertEquals("whatever", comments[0].getStart().endOf("word").iterator().next().getLabel());
       assertEquals("and", comments[0].getEnd().startOf("word").iterator().next().getLabel());
@@ -252,7 +252,7 @@ public class TestEAFSerialization
       assertEquals(1, comments.length);
 
       // noise
-      Annotation[] noises = g.list("noise");
+      Annotation[] noises = g.all("noise");
       assertEquals("click", noises[0].getLabel());
       assertEquals("um --", noises[0].getStart().endOf("word").iterator().next().getLabel());
       assertEquals(Double.valueOf(132.992), noises[0].getEnd().getOffset());
@@ -262,20 +262,26 @@ public class TestEAFSerialization
       // ensure order of word tags isn't important
       
       // pronounce
-      Annotation[] pronounce = g.list("pronounce");
+      Annotation[] pronounce = g.all("pronounce");
       assertEquals("f{mli", pronounce[0].getLabel());
-      assertEquals("famly", pronounce[0].my("word").getLabel());
+      assertEquals("famly", pronounce[0].first("word").getLabel());
       assertEquals("@grid", pronounce[1].getLabel());
-      assertEquals("agreed", pronounce[1].my("word").getLabel());
+      assertEquals("agreed", pronounce[1].first("word").getLabel());
       assertEquals(2, pronounce.length);
 
       // lexical
-      Annotation[] lexical = g.list("lexical");
+      Annotation[] lexical = g.all("lexical");
       assertEquals("family", lexical[0].getLabel());
-      assertEquals("famly", lexical[0].my("word").getLabel());
+      assertEquals("famly", lexical[0].first("word").getLabel());
       assertEquals("agrees", lexical[1].getLabel());
-      assertEquals("agreed", lexical[1].my("word").getLabel());
+      assertEquals("agreed", lexical[1].first("word").getLabel());
       assertEquals(2, lexical.length);
+
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
    }
 
    @Test public void utterance_word() 
@@ -357,12 +363,12 @@ public class TestEAFSerialization
       assertEquals("test_utterance_word.eaf", g.getId());
 
       // attributes
-      assertNull("no transcriber", g.my("scribe"));
-      assertNull("no language specified", g.my("lang"));
-      assertEquals("version date", "2017-03-16T11:20:04-03:00", g.my("version_date").getLabel());
+      assertNull("no transcriber", g.first("scribe"));
+      assertNull("no language specified", g.first("lang"));
+      assertEquals("version date", "2017-03-16T11:20:04-03:00", g.first("version_date").getLabel());
 
       // participants     
-      Annotation[] who = g.list("who");
+      Annotation[] who = g.all("who");
       assertEquals(2, who.length);
       assertEquals("interviewer", who[0].getLabel());
       assertEquals(g, who[0].getParent());
@@ -374,7 +380,7 @@ public class TestEAFSerialization
       assertNotNull("participant anchors set", who[1].getEnd());
       
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(12, turns.length);
       assertEquals(Double.valueOf(4.675), turns[0].getStart().getOffset());
       assertEquals(Double.valueOf(14.889000000000001), turns[0].getEnd().getOffset());
@@ -429,7 +435,7 @@ public class TestEAFSerialization
       assertEquals("participant", turns[11].getLabel());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(148, utterances.length);
       assertEquals(Double.valueOf(4.675), utterances[0].getStart().getOffset());
       assertEquals(Double.valueOf(6.752), utterances[0].getEnd().getOffset());
@@ -446,7 +452,7 @@ public class TestEAFSerialization
       assertEquals("interviewer", utterances[4].getParent().getLabel());
       assertEquals(turns[1], utterances[4].getParent());
 
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       String[] wordLabels = {
 	 "  . rest", "of", "that", "side", "of", "the", "family", "so", "he -- ",
 	 " generously", "agreed", "that", "she", "could", "go", "with", "him", "but ", 
@@ -478,26 +484,32 @@ public class TestEAFSerialization
       }
 
       // comment
-      Annotation[] comments = g.list("comment");
+      Annotation[] comments = g.all("comment");
       assertEquals(1, comments.length);
       assertEquals("unclear", comments[0].getLabel());
       assertEquals(Double.valueOf(102.164), comments[0].getStart().getOffset());
       assertEquals(Double.valueOf(102.424), comments[0].getEnd().getOffset());
 
       // noise
-      Annotation[] noises = g.list("noise");
+      Annotation[] noises = g.all("noise");
       assertEquals(1, noises.length);
       assertEquals("click", noises[0].getLabel());
       assertEquals(Double.valueOf(129.612), noises[0].getStart().getOffset());
       assertEquals(Double.valueOf(130.242), noises[0].getEnd().getOffset());
 
       // pronounce
-      Annotation[] pronounce = g.list("pronounce");
+      Annotation[] pronounce = g.all("pronounce");
       assertEquals(0, pronounce.length);
 
       // lexical
-      Annotation[] lexical = g.list("lexical");
+      Annotation[] lexical = g.all("lexical");
       assertEquals(0, lexical.length);
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
    }
 
    @Test public void utterance_word_phone() 
@@ -585,12 +597,12 @@ public class TestEAFSerialization
       assertEquals("test_utterance_word_phone.eaf", g.getId());
 
       // attributes
-      assertNull("no transcriber", g.my("scribe"));
-      assertNull("no language specified", g.my("lang"));
-      assertEquals("version date", "2017-03-16T11:45:39-03:00", g.my("version_date").getLabel());
+      assertNull("no transcriber", g.first("scribe"));
+      assertNull("no language specified", g.first("lang"));
+      assertEquals("version date", "2017-03-16T11:45:39-03:00", g.first("version_date").getLabel());
 
       // participants     
-      Annotation[] who = g.list("who");
+      Annotation[] who = g.all("who");
       assertEquals(2, who.length);
       assertEquals("interviewer", who[0].getLabel());
       assertEquals(g, who[0].getParent());
@@ -598,7 +610,7 @@ public class TestEAFSerialization
       assertEquals(g, who[1].getParent());
       
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(12, turns.length);
       assertEquals(Double.valueOf(4.675), turns[0].getStart().getOffset());
       assertEquals(Double.valueOf(14.889000000000001), turns[0].getEnd().getOffset());
@@ -653,7 +665,7 @@ public class TestEAFSerialization
       assertEquals("participant", turns[11].getLabel());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(148, utterances.length);
       assertEquals(Double.valueOf(4.675), utterances[0].getStart().getOffset());
       assertEquals(Double.valueOf(6.752), utterances[0].getEnd().getOffset());
@@ -670,7 +682,7 @@ public class TestEAFSerialization
       assertEquals("interviewer", utterances[4].getParent().getLabel());
       assertEquals(turns[1], utterances[4].getParent());
 
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       String[] wordLabels = {
 	 "  . rest", "of", "that", "side", "of", "the", "family", "so", "he -- ",
 	 " generously", "agreed", "that", "she", "could", "go", "with", "him", "but ", 
@@ -702,20 +714,26 @@ public class TestEAFSerialization
       }
 
       // comment
-      Annotation[] comments = g.list("comment");
+      Annotation[] comments = g.all("comment");
       assertEquals(0, comments.length);
 
       // noise
-      Annotation[] noises = g.list("noise");
+      Annotation[] noises = g.all("noise");
       assertEquals(0, noises.length);
 
       // pronounce
-      Annotation[] pronounce = g.list("pronounce");
+      Annotation[] pronounce = g.all("pronounce");
       assertEquals(0, pronounce.length);
 
       // lexical
-      Annotation[] lexical = g.list("lexical");
+      Annotation[] lexical = g.all("lexical");
       assertEquals(0, lexical.length);
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
    }
 
    /**
@@ -799,18 +817,18 @@ public class TestEAFSerialization
       assertEquals("test_utterance.eaf", g.getId());
 
       // attributes
-      assertEquals("transcriber", "Robert", g.my("scribe").getLabel());
-      assertEquals("language", "eng", g.my("lang").getLabel());
-      assertEquals("version date", "2017-08-28T16:48:05-03:00", g.my("version_date").getLabel());
+      assertEquals("transcriber", "Robert", g.first("scribe").getLabel());
+      assertEquals("language", "eng", g.first("lang").getLabel());
+      assertEquals("version date", "2017-08-28T16:48:05-03:00", g.first("version_date").getLabel());
 
       // participants     
-      assertEquals(0, g.list("who").length);
+      assertEquals(0, g.all("who").length);
       
       // turns
-      assertEquals(0, g.list("turn").length);
+      assertEquals(0, g.all("turn").length);
       
       // interviewer
-      Annotation[] utterances = g.list("i");
+      Annotation[] utterances = g.all("i");
       assertEquals(17, utterances.length);
 
       assertEquals(Double.valueOf(14.889000000000001), utterances[0].getStart().getOffset());
@@ -819,14 +837,19 @@ public class TestEAFSerialization
       assertEquals(g, utterances[0].getParent());
 
       // participant
-      utterances = g.list("p");
+      utterances = g.all("p");
       assertEquals(131, utterances.length);
 
       assertEquals(Double.valueOf(4.675), utterances[0].getStart().getOffset());
       assertEquals(Double.valueOf(6.752), utterances[0].getEnd().getOffset());
       assertEquals("  . rest of that side of the famly[f{mli](family) so he -- ", utterances[0].getLabel());
       assertEquals(g, utterances[0].getParent());
-
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
    }
 
    /**
@@ -907,18 +930,18 @@ public class TestEAFSerialization
       assertEquals("test_utterance.eaf", g.getId());
 
       // attributes
-      assertEquals("transcriber", "Robert", g.my("scribe").getLabel());
-      assertEquals("language", "eng", g.my("lang").getLabel());
-      assertEquals("version date", "2017-08-28T16:48:05-03:00", g.my("version_date").getLabel());
+      assertEquals("transcriber", "Robert", g.first("scribe").getLabel());
+      assertEquals("language", "eng", g.first("lang").getLabel());
+      assertEquals("version date", "2017-08-28T16:48:05-03:00", g.first("version_date").getLabel());
 
       // participants     
-      assertEquals(0, g.list("who").length);
+      assertEquals(0, g.all("who").length);
       
       // turns
-      assertEquals(0, g.list("turn").length);
+      assertEquals(0, g.all("turn").length);
       
       // interviewer
-      Annotation[] utterances = g.list("i");
+      Annotation[] utterances = g.all("i");
       assertEquals(17, utterances.length);
 
       assertEquals(Double.valueOf(14.889000000000001), utterances[0].getStart().getOffset());
@@ -927,13 +950,19 @@ public class TestEAFSerialization
       assertEquals(g, utterances[0].getParent());
 
       // participant
-      utterances = g.list("p");
+      utterances = g.all("p");
       assertEquals(130, utterances.length);
 
       assertEquals(Double.valueOf(4.675), utterances[0].getStart().getOffset());
       assertEquals(Double.valueOf(6.752), utterances[0].getEnd().getOffset());
       assertEquals("  . rest of that side of the famly[f{mli](family) so he -- ", utterances[0].getLabel());
       assertEquals(g, utterances[0].getParent());
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
 
    }
 
@@ -1079,7 +1108,7 @@ public class TestEAFSerialization
       graph.addAnnotation(new Annotation("pron2", "pron-1-8", "pronounce", "a8", "a9", "w1-7"));
 
       // add a media handler to test MEDIA_DESCRIPTOR
-      graph.setMediaProvider(new IGraphMediaProvider() {
+      graph.setMediaProvider(new GraphMediaProvider() {
             public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
             {
                MediaFile[] media = {
@@ -1090,12 +1119,12 @@ public class TestEAFSerialization
             public String getMedia(String trackSuffix, String mimeType)
                throws StoreException, PermissionException
             { return "file://test.wav"; }
-            public IGraphMediaProvider providerForGraph(Graph graph)
+            public GraphMediaProvider providerForGraph(Graph graph)
             { return this; }
          });  
 
       // add orthography tags that should not be used because orthography is not selected
-      for (Annotation word : graph.list("word"))
+      for (Annotation word : graph.all("word"))
       {
          graph.addTag(word, "orthography", word.getLabel()+"-orthography");
       }

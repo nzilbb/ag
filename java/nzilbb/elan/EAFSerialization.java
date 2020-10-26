@@ -1115,12 +1115,14 @@ public class EAFSerialization
          String sResult = xpath.evaluate("/ANNOTATION_DOCUMENT/@AUTHOR", root);
          if (sResult != null && sResult.length() > 0 && authorLayer != null)
          {
-            graph.createTag(graph, authorLayer.getId(), sResult);
+            graph.addTag(graph, authorLayer.getId(), sResult)
+               .setConfidence(Constants.CONFIDENCE_MANUAL);;
          }
          sResult = xpath.evaluate("/ANNOTATION_DOCUMENT/@DATE", root);
          if (sResult != null && sResult.length() > 0 && dateLayer != null)
          {
-            graph.createTag(graph, dateLayer.getId(), sResult);
+            graph.addTag(graph, dateLayer.getId(), sResult)
+               .setConfidence(Constants.CONFIDENCE_MANUAL);;
          }
          sResult = xpath.evaluate("/ANNOTATION_DOCUMENT/TIER/@LANG_REF", root);
          if (sResult == null || sResult.length() == 0)
@@ -1129,7 +1131,8 @@ public class EAFSerialization
          }
          if (sResult != null && sResult.length() > 0 && languageLayer != null)
          {
-            graph.createTag(graph, languageLayer.getId(), sResult);
+            graph.addTag(graph, languageLayer.getId(), sResult)
+               .setConfidence(Constants.CONFIDENCE_MANUAL);;
          }	 
       }
       catch(XPathExpressionException x)
@@ -1277,6 +1280,7 @@ public class EAFSerialization
                      Anchor end = mTimeslotIdToAnchor.get(sTimeSlotRef2);
                      Annotation annotation = new Annotation(
                         sAnnotationId, sAnnotationValue, layer.getId(), start.getId(), end.getId());
+                     annotation.setConfidence(Constants.CONFIDENCE_MANUAL);
                      annotation.put("@tierId", sTierId); // this might come in handy later
                      annotation.put("@participant", sSpeakerName); // this might come in handy later
                      mAnnotationIdToAnnotation.put(sAnnotationId, annotation);
@@ -1320,13 +1324,15 @@ public class EAFSerialization
                // create turn 
                turn = new Annotation(
                   null, participant, turnLayer.getId(), graphStart.getId(), graphEnd.getId());
+               turn.setConfidence(Constants.CONFIDENCE_MANUAL);
                graph.addAnnotation(turn);
                turnsByName.put(participant, turn);
 
                // create utterance
                Annotation utterance = new Annotation(turn);
-               utterance.setLayerId(utteranceLayer.getId());
-               utterance.setParentId(turn.getId());
+               utterance.setLayerId(utteranceLayer.getId())
+                  .setParentId(turn.getId())
+                  .setConfidence(Constants.CONFIDENCE_MANUAL);               
                graph.addAnnotation(utterance);
             }
             // set parent of word
@@ -1338,8 +1344,9 @@ public class EAFSerialization
          for (Annotation turn : graph.all(turnLayer.getId()))
          {
             Annotation utterance = new Annotation(turn);
-            utterance.setLayerId(utteranceLayer.getId());
-            utterance.setParentId(turn.getId());
+            utterance.setLayerId(utteranceLayer.getId())
+               .setParentId(turn.getId())
+               .setConfidence(Constants.CONFIDENCE_MANUAL);;
             if (!wordLayerMapped) // no word layer
             { // ...which means the label must be the untokenized words
                // and so the turn's @participant must be the speaker name
@@ -1353,9 +1360,10 @@ public class EAFSerialization
          for (Annotation utterance : graph.all(utteranceLayer.getId()))
          {
             Annotation turn = new Annotation(utterance);
-            turn.setLayerId(turnLayer.getId());
+            turn.setLayerId(turnLayer.getId())
             // the utterance's @participant is taken to be the speaker name
-            turn.setLabel((String)utterance.get("@participant"));
+               .setLabel((String)utterance.get("@participant"))
+               .setConfidence(Constants.CONFIDENCE_MANUAL);
             graph.addAnnotation(turn);
             // now turn will have an ID, and we can set it to be the parent of utterance
             utterance.setParent(turn);
@@ -1414,6 +1422,7 @@ public class EAFSerialization
             if (!participantsByName.containsKey(turn.getLabel()))
             { // create participant
                Annotation who = new Annotation(null, turn.getLabel(), participantLayer.getId());
+               who.setConfidence(Constants.CONFIDENCE_MANUAL);
                graph.addAnnotation(who);
                participantsByName.put(turn.getLabel(), who);
             }
