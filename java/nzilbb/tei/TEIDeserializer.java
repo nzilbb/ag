@@ -1273,45 +1273,53 @@ public class TEIDeserializer
 	 String sResult = xpath.evaluate("fileDesc/titleStmt/respStmt/name/text()", header);
 	 if (sResult != null && sResult.length() > 0 && scribeLayer != null)
 	 {
-	    graph.createTag(graph, scribeLayer.getId(), sResult);
+	    graph.addTag(graph, scribeLayer.getId(), sResult)
+               .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	 }
 	 sResult = xpath.evaluate("revisionDesc/change/respStmt/name/text()", header);
 	 if (sResult != null && sResult.length() > 0 && scribeLayer != null)
 	 {
-	    graph.createTag(graph, scribeLayer.getId(), sResult);
+	    graph.addTag(graph, scribeLayer.getId(), sResult)
+               .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	 }
 	 sResult = xpath.evaluate("fileDesc/titleStmt/title/text()", header);
 	 if (sResult != null && sResult.length() > 0 && titleLayer != null)
 	 {
-	    graph.createTag(graph, titleLayer.getId(), sResult);
+	    graph.addTag(graph, titleLayer.getId(), sResult)
+               .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	 }
 	 sResult = xpath.evaluate("revisionDesc/change/date/text()", header);
 	 if (sResult != null && sResult.length() > 0 && versionDateLayer != null)
 	 {
-	    graph.createTag(graph, versionDateLayer.getId(), sResult);
+	    graph.addTag(graph, versionDateLayer.getId(), sResult)
+               .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	 }
 	 sResult = xpath.evaluate("profileDesc/creation/date/text()", header);
 	 if (sResult != null && sResult.length() > 0 && publicationDateLayer != null)
 	 {
-	    graph.createTag(graph, publicationDateLayer.getId(), sResult);
+	    graph.addTag(graph, publicationDateLayer.getId(), sResult)
+               .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	 }
 	 else
 	 { // might be CDC-style - i.e. on a timeline
 	    sResult = xpath.evaluate("front/timeline/when/@absolute", text);
 	    if (sResult != null && sResult.length() > 0 && publicationDateLayer != null)
 	    {
-	       graph.createTag(graph, publicationDateLayer.getId(), sResult);
+	       graph.addTag(graph, publicationDateLayer.getId(), sResult)
+                  .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	    }
 	 }
 	 sResult = xpath.evaluate("profileDesc/langUsage/language/@ident", header);
 	 if (sResult != null && sResult.length() > 0 && transcriptLanguageLayer != null)
 	 {
-	    graph.createTag(graph, transcriptLanguageLayer.getId(), sResult);
+	    graph.addTag(graph, transcriptLanguageLayer.getId(), sResult)
+               .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	 }
 	 Attr lang = (Attr)text.getAttributes().getNamedItem("lang");
 	 if (lang != null)
 	 {
-	    graph.createTag(graph, transcriptLanguageLayer.getId(), lang.getValue().toLowerCase());
+	    graph.addTag(graph, transcriptLanguageLayer.getId(), lang.getValue().toLowerCase())
+               .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	 }
 	 NodeList items = (NodeList) xpath.evaluate("fileDesc/sourceDesc/msDesc/msIdentifier/idno", header, XPathConstants.NODESET);
 	 if (items != null && items.getLength() > 0)
@@ -1332,7 +1340,8 @@ public class TEIDeserializer
 	       }
 	       if (layer != null)
 	       { // it's mapped to a layer
-		  graph.createTag(graph, layer.getId(), value);
+		  graph.addTag(graph, layer.getId(), value)
+                     .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	       }
 	    } // there's a value
 	 }
@@ -1355,7 +1364,8 @@ public class TEIDeserializer
 		     Layer layer = (Layer) parameters.get(keyName).getValue();
 		     if (layer != null)
 		     { // mapped to a layer
-			graph.createTag(graph, layer.getId(), value);
+			graph.addTag(graph, layer.getId(), value)
+                           .setConfidence(Constants.CONFIDENCE_MANUAL);;
 		     }
 		  } // there is a parameter
 	       } // there's value
@@ -1373,7 +1383,10 @@ public class TEIDeserializer
 	 {
 	    for (int p = 0; p < items.getLength(); p++)
 	    {
-	       participant = new Annotation(null, "author", schema.getParticipantLayerId(), startAnchor.getId(), startAnchor.getId());
+	       participant = new Annotation(
+                  null, "author", schema.getParticipantLayerId(), startAnchor.getId(),
+                  startAnchor.getId());
+               participant.setConfidence(Constants.CONFIDENCE_MANUAL);
 	       Element person = (Element)items.item(p);
 	       // set ID
 	       if (person.getAttribute("xml:id").length() > 0)
@@ -1407,21 +1420,24 @@ public class TEIDeserializer
 	       if (person.getAttribute("sex").length() > 0
 		   && getSexLayer() != null)
 	       {
-		  graph.createTag(participant, sexLayer.getId(), person.getAttribute("sex"));
+		  graph.addTag(participant, sexLayer.getId(), person.getAttribute("sex"))
+                     .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	       }
 	       // age
 	       sResult = xpath.evaluate("age/text()", person);
 	       if (sResult != null && sResult.length() > 0
 		   && getAgeLayer() != null)
 	       {
-		  graph.createTag(participant, ageLayer.getId(), sResult);
+		  graph.addTag(participant, ageLayer.getId(), sResult)
+                     .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	       }
 	       // birth
 	       sResult = xpath.evaluate("birth/@when", person);
 	       if (sResult != null && sResult.length() > 0
 		   && getBirthLayer() != null)
 	       {
-		  graph.createTag(participant, birthLayer.getId(), sResult);
+		  graph.addTag(participant, birthLayer.getId(), sResult)
+                     .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	       }
 	       
 	       // other tags...
@@ -1442,7 +1458,8 @@ public class TEIDeserializer
 			Layer layer = (Layer)parameters.get("person_" + name).getValue();
 			if (layer != null)
 			{
-			   graph.createTag(participant, layer.getId(), value);
+			   graph.addTag(participant, layer.getId(), value)
+                              .setConfidence(Constants.CONFIDENCE_MANUAL);;
 			}
 		     }
 		     else if (name.equals("note"))
@@ -1455,7 +1472,8 @@ public class TEIDeserializer
 			   if (layer != null)
 			   {
 			      String value = child.getTextContent();
-			      graph.createTag(participant, layer.getId(), value);
+			      graph.addTag(participant, layer.getId(), value)
+                                 .setConfidence(Constants.CONFIDENCE_MANUAL);;
 			   }
 			}
 		     }
@@ -1467,6 +1485,7 @@ public class TEIDeserializer
 	 else
 	 { // no participants, so use an "author"
 	    participant = new Annotation(null, "author", schema.getParticipantLayerId());
+            participant.setConfidence(Constants.CONFIDENCE_MANUAL);
 	    // maybe the author is named
 	    sResult = xpath.evaluate("fileDesc/sourceDesc/biblStruct/monogr/author/text()", header);
 	    if (sResult != null && sResult.length() > 0)
@@ -1489,10 +1508,12 @@ public class TEIDeserializer
 	 // graph
 	 Annotation turn = new Annotation(
 	    null, participant != null?participant.getLabel():"", getTurnLayer().getId());
+         turn.setConfidence(Constants.CONFIDENCE_MANUAL);
 	 graph.addAnnotation(turn);
 	 if (participant != null) turn.setParent(participant);
 	 turn.setStart(startAnchor);
 	 Annotation line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
+         line.setConfidence(Constants.CONFIDENCE_MANUAL);
 	 line.setParentId(turn.getId());
 	 line.setStart(turn.getStart());
 	 int iLastPosition = 0;	 
@@ -1515,8 +1536,10 @@ public class TEIDeserializer
 
 	       while (words.hasMoreTokens())
 	       {
-		  Annotation anWord = new Annotation(null, words.nextToken(), wordLayerId, turn.getId());
-		  anWord.setOrdinal(w++);
+		  Annotation anWord = new Annotation(
+                     null, words.nextToken(), wordLayerId, turn.getId());
+		  anWord.setOrdinal(w++)
+                     .setConfidence(Constants.CONFIDENCE_MANUAL);;
 		  //TODO anWord.setLabelStatus(Labbcat.LABEL_STATUS_USER);
 		  if (characterOffsets)
 		  {
@@ -1564,7 +1587,8 @@ public class TEIDeserializer
 	       
 	       // start a new line
 	       line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
-	       line.setParentId(turn.getId());
+	       line.setParentId(turn.getId())
+                  .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	       //graph.addAnnotation(line);
 	       if (characterOffsets)
 	       {
@@ -1630,7 +1654,8 @@ public class TEIDeserializer
 		  if (!turn.getStartId().equals(turn.getEndId()))
 		  {
 		     turn = new Annotation(null, participant.getLabel(), getTurnLayer().getId());
-		     turn.setParentId(participant.getId());
+		     turn.setParentId(participant.getId())
+                        .setConfidence(Constants.CONFIDENCE_MANUAL);;
 		     graph.addAnnotation(turn);
 		     if (characterOffsets)
 		     {
@@ -1661,7 +1686,8 @@ public class TEIDeserializer
 		     graph.addAnnotation(line);
 		  }
 		  line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
-		  line.setParentId(turn.getId());
+		  line.setParentId(turn.getId())
+                     .setConfidence(Constants.CONFIDENCE_MANUAL);;
 		  if (characterOffsets)
 		  {
 		     line.setStart(graph.getOrCreateAnchorAt(
@@ -1728,6 +1754,7 @@ public class TEIDeserializer
 			label = n.getChildNodes().item(0).getNodeValue();
 		     }
 		     Annotation anEntity = new Annotation(null, label, layer.getId());
+                     anEntity.setConfidence(Constants.CONFIDENCE_MANUAL);
 		     anEntity.setStart(characterOffsets?
 				       graph.getOrCreateAnchorAt(
 					  (double)iLastPosition, Constants.CONFIDENCE_MANUAL)

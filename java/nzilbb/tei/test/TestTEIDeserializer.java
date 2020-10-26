@@ -118,22 +118,22 @@ public class TestTEIDeserializer
       assertEquals("Everything's Gonna Be Alright", title[0]);
 
       // participants     
-      Annotation[] author = g.list("who"); 
+      Annotation[] author = g.all("who"); 
       assertEquals(1, author.length);
       assertEquals("Aaliyah", author[0].getLabel());
       assertNotNull("participant anchored", author[0].getStartId());
       assertNotNull("participant anchored", author[0].getEndId());
 
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(1, turns.length);
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       //assertEquals(Double.valueOf(23.563), turns[0].getEnd().getOffset()); // TODO
       assertEquals("Aaliyah", turns[0].getLabel());
-      assertEquals(g.my("who"), turns[0].getParent());
+      assertEquals(g.first("who"), turns[0].getParent());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(45, utterances.length);
       assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       assertEquals("inter-line space", Double.valueOf(10.0), utterances[0].getEnd().getOffset());
@@ -144,7 +144,7 @@ public class TestTEIDeserializer
       assertEquals("inter-line space", Double.valueOf(31.0), utterances[1].getEnd().getOffset());
       assertEquals("Aaliyah", utterances[1].getParent().getLabel());
       
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       assertEquals(Double.valueOf(0), words[0].getStart().getOffset());
       // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
       assertEquals("[Aaliyah]", words[0].getLabel());
@@ -174,7 +174,7 @@ public class TestTEIDeserializer
       assertEquals(Double.valueOf(47), words[7].getEnd().getOffset());
 
       // lg
-      Annotation[] verses = g.list("lg");
+      Annotation[] verses = g.all("lg");
       assertEquals(16, verses.length);
 
       assertEquals(Double.valueOf(0), verses[0].getStart().getOffset());
@@ -197,9 +197,15 @@ public class TestTEIDeserializer
       assertEquals("lg with type is labelled with type", "chorus", verses[3].getLabel());
       assertEquals(turns[0], verses[3].getParent());
 
-      assertEquals(0, g.list("entities").length);
-      assertEquals(0, g.list("language").length);
-      assertEquals(0, g.list("lexical").length);
+      assertEquals(0, g.all("entities").length);
+      assertEquals(0, g.all("language").length);
+      assertEquals(0, g.all("lexical").length);
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
 
    }
 
@@ -298,7 +304,7 @@ public class TestTEIDeserializer
       assertEquals(Constants.UNIT_CHARACTERS, g.getOffsetUnits());
 
       // participants     
-      Annotation[] author = g.list("who"); 
+      Annotation[] author = g.all("who"); 
       assertEquals(3, author.length);
       assertEquals("Rachael Tatman", author[0].getLabel());
       assertEquals("rctatman", author[0].getId());
@@ -308,22 +314,22 @@ public class TestTEIDeserializer
       assertEquals("allisons", author[2].getId());
 
       // participant attributes - sex
-      assertEquals("F", author[0].my("sex").getLabel());
-      assertEquals("F", author[1].my("sex").getLabel());
-      assertNull("Missing attribute", author[2].my("sex"));
+      assertEquals("F", author[0].first("sex").getLabel());
+      assertEquals("F", author[1].first("sex").getLabel());
+      assertNull("Missing attribute", author[2].first("sex"));
 
       // participant attributes - age
-      assertEquals("1", author[0].my("age").getLabel());
-      assertEquals("10", author[1].my("age").getLabel());
-      assertEquals("100", author[2].my("age").getLabel());
+      assertEquals("1", author[0].first("age").getLabel());
+      assertEquals("10", author[1].first("age").getLabel());
+      assertEquals("100", author[2].first("age").getLabel());
 
       // participant attributes - birth
-      assertEquals("2016-02-20", author[0].my("dob").getLabel());
-      assertEquals("2007-02-20", author[1].my("dob").getLabel());
-      assertEquals("1917-02-20", author[2].my("dob").getLabel());
+      assertEquals("2016-02-20", author[0].first("dob").getLabel());
+      assertEquals("2007-02-20", author[1].first("dob").getLabel());
+      assertEquals("1917-02-20", author[2].first("dob").getLabel());
 
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(9, turns.length);
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       //assertEquals(Double.valueOf(23.563), turns[0].getEnd().getOffset()); // TODO
@@ -339,7 +345,7 @@ public class TestTEIDeserializer
       assertEquals("Allison", turns[8].getLabel());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(11, utterances.length);
       assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       assertEquals("inter-line space", Double.valueOf(40.0), utterances[0].getEnd().getOffset());
@@ -371,7 +377,7 @@ public class TestTEIDeserializer
       assertEquals("Lauren Ackerman", utterances[5].getParent().getLabel());
       assertEquals("Turn change", turns[3], utterances[5].getParent());
 
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       assertEquals(Double.valueOf(0), words[0].getStart().getOffset());
       // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
       assertEquals("Two", words[0].getLabel());
@@ -418,7 +424,7 @@ public class TestTEIDeserializer
 
 
       // addressee tags
-      Annotation[] entities = g.list("entities");
+      Annotation[] entities = g.all("entities");
       assertEquals(19, entities.length);
       assertEquals("emoticon", "face with tears of joy", entities[18].getLabel());
       assertTrue("emoticon tags last word", entities[18].tags(words[words.length-1]));
@@ -465,8 +471,14 @@ public class TestTEIDeserializer
       assertEquals("addressingTerm ends at addressee",
 		   addressee.getEnd(), entities[8].getEnd());
 
-      assertEquals(0, g.list("language").length);
-      assertEquals(0, g.list("lexical").length);
+      assertEquals(0, g.all("language").length);
+      assertEquals(0, g.all("lexical").length);
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
 
    }
 
@@ -553,22 +565,22 @@ public class TestTEIDeserializer
 		   Constants.UNIT_CHARACTERS, g.getOffsetUnits());
 
       // participants     
-      Annotation[] author = g.list("who"); 
+      Annotation[] author = g.all("who"); 
       assertEquals(1, author.length);
       assertEquals("Genkaichan", author[0].getLabel());
       assertEquals("Genkaichan", author[0].getId());
 
       // meta data
-      assertEquals("english", author[0].my("participant_language").getLabel());
+      assertEquals("english", author[0].first("participant_language").getLabel());
 
-      assertEquals("2017-02-01T03:00:59.000Z", g.my("air_date").getLabel());
-      assertEquals("StrangerThings", g.my("subreddit").getLabel());
-      assertEquals("t1_dd5f8en", g.my("parent_id").getLabel());
+      assertEquals("2017-02-01T03:00:59.000Z", g.first("air_date").getLabel());
+      assertEquals("StrangerThings", g.first("subreddit").getLabel());
+      assertEquals("t1_dd5f8en", g.first("parent_id").getLabel());
       assertEquals("https://www.reddit.com/r/StrangerThings/comments/t1_dd5f8en#dd6aabs",
-		   g.my("url").getLabel());
+		   g.first("url").getLabel());
 
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals("one turn " + Arrays.asList(turns), 1, turns.length);
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals(Double.valueOf(104.0), turns[0].getEnd().getOffset());
@@ -576,13 +588,13 @@ public class TestTEIDeserializer
       assertEquals(g.getAnnotation("Genkaichan"), turns[0].getParent());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(1, utterances.length);
       assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       assertEquals("Genkaichan", utterances[0].getParent().getLabel());
       assertEquals(turns[0], utterances[0].getParent());
 
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       assertEquals(Double.valueOf(0), words[0].getStart().getOffset());
       // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
       assertEquals("Such", words[0].getLabel());
@@ -603,6 +615,12 @@ public class TestTEIDeserializer
       assertEquals("were", words[15].getLabel());
       assertEquals("quickly", words[16].getLabel());
       assertEquals("dismissed...", words[17].getLabel());
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
 
    }
 
@@ -726,24 +744,24 @@ public class TestTEIDeserializer
       String[] title = g.labels("title"); 
       assertEquals(1, title.length);
       assertEquals("Writing Transcription Example", title[0]);
-      assertEquals("mi", g.my("transcript_language").getLabel());
-      assertEquals("2017-02-20", g.my("publication_date").getLabel());
-      //assertEquals("writing", g.my("transcript_type").getLabel());
+      assertEquals("mi", g.first("transcript_language").getLabel());
+      assertEquals("2017-02-20", g.first("publication_date").getLabel());
+      //assertEquals("writing", g.first("transcript_type").getLabel());
 
       // participants     
-      Annotation[] author = g.list("who"); 
+      Annotation[] author = g.all("who"); 
       assertEquals(1, author.length);
       assertEquals("ABCD", author[0].getId());
       assertEquals("Participant name defaults to ID", "ABCD", author[0].getLabel());
 
       // participant attributes - age
-      assertEquals("44", author[0].my("age").getLabel());
+      assertEquals("44", author[0].first("age").getLabel());
 
       // participant attributes - education
-      assertEquals("year 3", author[0].my("education").getLabel());
+      assertEquals("year 3", author[0].first("education").getLabel());
 
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(1, turns.length);
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       //assertEquals(Double.valueOf(23.563), turns[0].getEnd().getOffset()); // TODO
@@ -751,7 +769,7 @@ public class TestTEIDeserializer
       assertEquals(g.getAnnotation("ABCD"), turns[0].getParent());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(5, utterances.length);
       assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
       assertEquals("inter-line space", Double.valueOf(41.0), utterances[0].getEnd().getOffset());
@@ -764,7 +782,7 @@ public class TestTEIDeserializer
       assertEquals(turns[0], utterances[1].getParent());
 
 
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       assertEquals(28, words.length);
       assertEquals(Double.valueOf(0), words[0].getStart().getOffset());
       // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
@@ -814,7 +832,7 @@ public class TestTEIDeserializer
       assertEquals("xaxaxixi .", words[27].getLabel());
 
       // entities
-      Annotation[] entities = g.list("entities");
+      Annotation[] entities = g.all("entities");
       assertEquals(2, entities.length);
       
       assertEquals("name", entities[0].getLabel());
@@ -823,32 +841,32 @@ public class TestTEIDeserializer
       assertEquals("name", entities[1].getLabel());
       assertTrue(entities[1].tags(words[7]));
 
-      Annotation[] pc = g.list("pc");
+      Annotation[] pc = g.all("pc");
       assertEquals(1, pc.length);
       assertEquals("xxx", pc[0].getLabel());
       assertEquals(words[9].getEnd(), pc[0].getStart());
 
-      Annotation[] emoticon = g.list("emoticon");
+      Annotation[] emoticon = g.all("emoticon");
       assertEquals(1, emoticon.length);
       assertEquals(":-)", emoticon[0].getLabel());
       assertEquals(words[10].getEnd(), emoticon[0].getStart());
 
-      Annotation[] comment = g.list("comment");
+      Annotation[] comment = g.all("comment");
       assertEquals(1, comment.length);
       assertEquals("This is a comment", comment[0].getLabel());
       assertEquals(words[11].getEnd(), comment[0].getStart());
 
-      Annotation[] figure = g.list("figure");
+      Annotation[] figure = g.all("figure");
       assertEquals(1, figure.length);
       assertEquals("photo", figure[0].getLabel());
       assertEquals(words[12].getStart(), figure[0].getStart());
 
-      Annotation[] unclear = g.list("unclear");
+      Annotation[] unclear = g.all("unclear");
       assertEquals(1, unclear.length);
       assertEquals("unclear (medium)", unclear[0].getLabel());
       assertEquals(words[20].getStart(), unclear[0].getStart());
 
-      Annotation[] language = g.list("language");
+      Annotation[] language = g.all("language");
       assertEquals(1, language.length);
       assertEquals("es", language[0].getLabel());
       Annotation[] languageWords = language[0].includedAnnotationsOn("word");
@@ -856,15 +874,21 @@ public class TestTEIDeserializer
       assertEquals("es", languageWords[0].getLabel());
       assertEquals("medio", languageWords[1].getLabel());
 
-      Annotation[] sic = g.list("sic");
+      Annotation[] sic = g.all("sic");
       assertEquals(1, sic.length);
       assertEquals("sic", sic[0].getLabel());
       assertEquals(words[23].getStart(), sic[0].getStart());
 
-      Annotation[] orig = g.list("orig");
+      Annotation[] orig = g.all("orig");
       assertEquals(1, orig.length);
       assertEquals("xuxaxixi", orig[0].getLabel());
       assertTrue("orig choice tags corrected word", orig[0].tags(words[11]));
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
 
    }
 
@@ -965,6 +989,12 @@ public class TestTEIDeserializer
 		   Constants.UNIT_SECONDS, g.getOffsetUnits());
       assertEquals("Length is based on media",
        		   Double.valueOf(5.2941875), g.getEnd().getOffset());
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
    }
 
    @Test public void mp3() 
@@ -1058,6 +1088,12 @@ public class TestTEIDeserializer
 		   Constants.UNIT_SECONDS, g.getOffsetUnits());
       // TODO assertEquals("Length is based on media",
       // 		   Double.valueOf(5.32), g.getEnd().getOffset());
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
    }
    
    /**
