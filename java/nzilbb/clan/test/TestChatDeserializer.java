@@ -99,22 +99,22 @@ public class TestChatDeserializer
       assertEquals("en", languages[0]);
 
       // participants     
-      assertEquals(2, g.list("who").length);
+      assertEquals(2, g.all("who").length);
       assertEquals("Nony_mouse", g.getAnnotation("SUB").getLabel());
       assertEquals("who", g.getAnnotation("SUB").getLayerId());
       assertEquals("Investigator", g.getAnnotation("EXA").getLabel());
       assertEquals("who", g.getAnnotation("EXA").getLayerId());
 
       // participant meta data
-      assertEquals("en", g.getAnnotation("SUB").my("language").getLabel());
-      assertEquals("en", g.getAnnotation("EXA").my("language").getLabel());
-      assertEquals("W", g.getAnnotation("SUB").my("corpus").getLabel());
-      assertEquals("W", g.getAnnotation("EXA").my("corpus").getLabel());
-      assertEquals("Participant", g.getAnnotation("SUB").my("role").getLabel());
-      assertEquals("Investigator", g.getAnnotation("EXA").my("role").getLabel());
+      assertEquals("en", g.getAnnotation("SUB").first("language").getLabel());
+      assertEquals("en", g.getAnnotation("EXA").first("language").getLabel());
+      assertEquals("W", g.getAnnotation("SUB").first("corpus").getLabel());
+      assertEquals("W", g.getAnnotation("EXA").first("corpus").getLabel());
+      assertEquals("Participant", g.getAnnotation("SUB").first("role").getLabel());
+      assertEquals("Investigator", g.getAnnotation("EXA").first("role").getLabel());
 
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(1, turns.length);
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals("unaligned final utterance - turn has end time", 
@@ -122,7 +122,7 @@ public class TestChatDeserializer
       assertEquals(g.getAnnotation("SUB"), turns[0].getParent());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(Double.valueOf(0.001), utterances[0].getStart().getOffset());
       assertEquals(Double.valueOf(21.510), utterances[0].getEnd().getOffset());
       assertEquals("SUB", utterances[0].getParent().getLabel());
@@ -206,7 +206,7 @@ public class TestChatDeserializer
 		   Constants.CONFIDENCE_DEFAULT, 
 		   utterances[utterances.length-2].getEnd().getConfidence().intValue());
       
-      Annotation[] words = g.list("turn")[0].list("word");
+      Annotation[] words = g.all("turn")[0].all("word");
       String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
 	 "ab", "abc", "abcdef", "abcd", "gonna", "lie", "abcd", "abc", "pet", "abcdefghij", 
 	 "abc", "abcde", "abc", "ab", "abcd", "ab", "abc", "worryin", "i", "abcd",
@@ -249,7 +249,7 @@ public class TestChatDeserializer
       }
 
       // c-units
-      Annotation[] cUnits = g.list("c-unit");
+      Annotation[] cUnits = g.all("c-unit");
       assertEquals(150, cUnits.length);
       assertEquals(".", cUnits[0].getLabel());
       assertEquals(utterances[0].getStart(), cUnits[0].getStart());
@@ -284,21 +284,21 @@ public class TestChatDeserializer
 
       // disfluency
       assertEquals("i", words[18].getLabel());
-      assertEquals("&", words[18].my("disfluency").getLabel());
-      assertEquals("word is parent", words[18], words[18].my("disfluency").getParent());
+      assertEquals("&", words[18].first("disfluency").getLabel());
+      assertEquals("word is parent", words[18], words[18].first("disfluency").getParent());
       // ensure they're marked as manual annotations
-      for (Annotation a : g.list("disfluency"))
+      for (Annotation a : g.all("disfluency"))
       {
 	 assertEquals("tagged as manual: " + a, 
 		      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
 
-      Annotation[] expansions = g.list("expansion");
+      Annotation[] expansions = g.all("expansion");
       assertEquals(1, expansions.length);
       assertEquals("going to", expansions[0].getLabel());
-      assertEquals("gonna", expansions[0].my("word").getLabel());
-      assertEquals(expansions[0].my("word"), expansions[0].getParent());
-      assertEquals(expansions[0].my("word"), words[4]);
+      assertEquals("gonna", expansions[0].first("word").getLabel());
+      assertEquals(expansions[0].first("word"), expansions[0].getParent());
+      assertEquals(expansions[0].first("word"), words[4]);
       assertEquals("Pre expansion ordinal", "gonna", words[4].getLabel());
       assertEquals("Pre expansion ordinal", 5, words[4].getOrdinal());
       assertEquals("Post expansion ordinal", "lie", words[5].getLabel());
@@ -310,12 +310,12 @@ public class TestChatDeserializer
       }
 
       // linkages
-      Annotation[] linkages = g.list("linkage");
+      Annotation[] linkages = g.all("linkage");
       assertEquals(1, linkages.length);
       assertEquals("a_b_c_d", linkages[0].getLabel());
 
       // errors
-      Annotation[] errors = g.list("error");
+      Annotation[] errors = g.all("error");
       assertEquals(8, errors.length);
 
       // tag marked span
@@ -345,7 +345,7 @@ public class TestChatDeserializer
       }
 
       // completion
-      Annotation[] completions = g.list("completion");
+      Annotation[] completions = g.all("completion");
       assertEquals(3, completions.length);
       for (Annotation a : completions)
       {
@@ -354,16 +354,16 @@ public class TestChatDeserializer
       }
 
       assertEquals("leading completion", "nd", words[22].getLabel());
-      assertEquals("leading completion", "and", words[22].my("completion").getLabel());
-      assertEquals("completion - word is parent", words[22], words[22].my("completion").getParent());
+      assertEquals("leading completion", "and", words[22].first("completion").getLabel());
+      assertEquals("completion - word is parent", words[22], words[22].first("completion").getParent());
       assertEquals("trailing completion", "worryin", words[17].getLabel());
-      assertEquals("trailing completion", "worrying", words[17].my("completion").getLabel());
+      assertEquals("trailing completion", "worrying", words[17].first("completion").getLabel());
 
       assertEquals("leading/trailing completion", "fridge", words[280].getLabel());
-      assertEquals("leading/trailing completion", "refridgerator", words[280].my("completion").getLabel());
+      assertEquals("leading/trailing completion", "refridgerator", words[280].first("completion").getLabel());
 
       // retracing
-      Annotation[] retracing = g.list("retracing");
+      Annotation[] retracing = g.all("retracing");
       assertEquals(6, retracing.length);
       for (Annotation a : retracing)
       {
@@ -393,7 +393,7 @@ public class TestChatDeserializer
 		   retracing[3].getEnd().endOf("word").iterator().next().getLabel());
 
       // repetition
-      Annotation[] repetition = g.list("repetition");
+      Annotation[] repetition = g.all("repetition");
       assertEquals(3, repetition.length);
 
       // tag marked word
@@ -424,7 +424,7 @@ public class TestChatDeserializer
       }
 
       // gems
-      Annotation[] gems = g.list("gem");
+      Annotation[] gems = g.all("gem");
       assertEquals(11, gems.length);
       assertEquals(Double.valueOf(0.001), gems[0].getStart().getOffset());
       assertEquals("gdc", gems[0].getLabel());
@@ -466,6 +466,12 @@ public class TestChatDeserializer
       {
 	 assertEquals("tagged as manual: " + a, 
 		      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
 
    }
@@ -522,22 +528,22 @@ public class TestChatDeserializer
       assertEquals("en", languages[0]);
 
       // participants     
-      assertEquals(2, g.list("who").length);
+      assertEquals(2, g.all("who").length);
       assertEquals("Nony_mouse", g.getAnnotation("SUB").getLabel());
       assertEquals("who", g.getAnnotation("SUB").getLayerId());
       assertEquals("Investigator", g.getAnnotation("EXA").getLabel());
       assertEquals("who", g.getAnnotation("EXA").getLayerId());
 
       // participant meta data
-      assertEquals("en", g.getAnnotation("SUB").my("language").getLabel());
-      assertEquals("en", g.getAnnotation("EXA").my("language").getLabel());
-      assertEquals("W", g.getAnnotation("SUB").my("corpus").getLabel());
-      assertEquals("W", g.getAnnotation("EXA").my("corpus").getLabel());
-      assertEquals("Participant", g.getAnnotation("SUB").my("role").getLabel());
-      assertEquals("Investigator", g.getAnnotation("EXA").my("role").getLabel());
+      assertEquals("en", g.getAnnotation("SUB").first("language").getLabel());
+      assertEquals("en", g.getAnnotation("EXA").first("language").getLabel());
+      assertEquals("W", g.getAnnotation("SUB").first("corpus").getLabel());
+      assertEquals("W", g.getAnnotation("EXA").first("corpus").getLabel());
+      assertEquals("Participant", g.getAnnotation("SUB").first("role").getLabel());
+      assertEquals("Investigator", g.getAnnotation("EXA").first("role").getLabel());
 
       // turns
-      Annotation[] turns = g.list("turn");
+      Annotation[] turns = g.all("turn");
       assertEquals(1, turns.length);
       assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
       assertEquals("unaligned final utterance - turn has end time", 
@@ -545,7 +551,7 @@ public class TestChatDeserializer
       assertEquals(g.getAnnotation("SUB"), turns[0].getParent());
 
       // utterances
-      Annotation[] utterances = g.list("utterance");
+      Annotation[] utterances = g.all("utterance");
       assertEquals(Double.valueOf(0.001), utterances[0].getStart().getOffset());
       assertEquals(Double.valueOf(21.510), utterances[0].getEnd().getOffset());
       assertEquals("SUB", utterances[0].getParent().getLabel());
@@ -613,7 +619,7 @@ public class TestChatDeserializer
 		   Constants.CONFIDENCE_DEFAULT, 
 		   utterances[utterances.length-2].getEnd().getConfidence().intValue());
       
-      Annotation[] words = g.list("word");
+      Annotation[] words = g.all("word");
       String[] wordLabels = { 
 	 // NB we have no c-unit layer, so terminators are still present
 	 // NB we have no linkage layer, so linkages are not split
@@ -635,18 +641,18 @@ public class TestChatDeserializer
 
       // disfluency
       assertEquals("i", words[18].getLabel());
-      assertNull("disfluency not tagged", words[18].my("disfluency"));
-      assertEquals("no disfluencies", 0, g.list("disfluency").length);
+      assertNull("disfluency not tagged", words[18].first("disfluency"));
+      assertEquals("no disfluencies", 0, g.all("disfluency").length);
 
       // expansions
-      assertEquals("no expansions", 0, g.list("expansion").length);
+      assertEquals("no expansions", 0, g.all("expansion").length);
       assertEquals("Pre expansion ordinal", "gonna", words[4].getLabel());
       assertEquals("Pre expansion ordinal", 5, words[4].getOrdinal());
       assertEquals("Post expansion ordinal", "lie", words[5].getLabel());
       assertEquals("Post expansion ordinal", 6, words[5].getOrdinal());
 
       // errors
-      assertEquals("errors not tagged", 0, g.list("error").length);
+      assertEquals("errors not tagged", 0, g.all("error").length);
 
       assertEquals("they've", words[268].getLabel());
       assertEquals("work", words[269].getLabel());
@@ -665,16 +671,22 @@ public class TestChatDeserializer
       assertEquals(turns[0].getId(), words[273].getParentId());
 
       // completion
-      assertEquals("no completions", 0, g.list("completion").length);
+      assertEquals("no completions", 0, g.all("completion").length);
 
       // retracing
-      assertEquals("no retracing", 0, g.list("retracing").length);
+      assertEquals("no retracing", 0, g.all("retracing").length);
 
       // repetition
-      assertEquals("no repetitions", 0, g.list("repetition").length);
+      assertEquals("no repetitions", 0, g.all("repetition").length);
 
       // gems
-      assertEquals("no gems", 0, g.list("gem").length);
+      assertEquals("no gems", 0, g.all("gem").length);
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
    }
 
    /**
