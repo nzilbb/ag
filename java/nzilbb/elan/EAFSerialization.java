@@ -57,9 +57,8 @@ import org.xml.sax.*;
  * <a href="http://www.mpi.nl/tools/elan/EAFv2.7.xsd">http://www.mpi.nl/tools/elan/EAFv2.7.xsd</a>
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class EAFSerialization
-   implements GraphDeserializer, GraphSerializer
-{
+public class EAFSerialization implements GraphDeserializer, GraphSerializer {
+   
    // Attributes:     
    protected Vector<String> warnings;
    /**
@@ -67,8 +66,7 @@ public class EAFSerialization
     * {@link #deserialize()}.
     * @return A possibly empty list of warnings.
     */
-   public String[] getWarnings()
-   {
+   public String[] getWarnings() {
       return warnings.toArray(new String[0]);
    }
 
@@ -415,8 +413,7 @@ public class EAFSerialization
     * intervening speaker, for which the inter-turn pause counts as a turn change
     * boundary. If the pause is shorter than this, the turns are merged into one.
     */
-   public Double getMinimumTurnPauseLength()
-   {
+   public Double getMinimumTurnPauseLength() {
       if (minimumTurnPauseLength == null) minimumTurnPauseLength = Double.valueOf(0.0);
       return minimumTurnPauseLength;
    }
@@ -439,8 +436,7 @@ public class EAFSerialization
     * Returns the deserializer's descriptor
     * @return The deserializer's descriptor
     */
-   public SerializationDescriptor getDescriptor()
-   {
+   public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
          "ELAN EAF Transcript", "1.2", "text/x-eaf+xml", ".eaf", "20200909.1954",
          getClass().getResource("icon.png"));
@@ -488,8 +484,7 @@ public class EAFSerialization
     * Determines how far through the serialization is.
     * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
     */
-   public Integer getPercentComplete()
-   {
+   public Integer getPercentComplete() {
       if (graphCount < 0) return null;
       return (int)((consumedGraphCount * 100) / graphCount);
    }
@@ -513,8 +508,7 @@ public class EAFSerialization
    /**
     * Cancel the serialization in course (if any).
     */
-   public void cancel()
-   {
+   public void cancel() {
       setCancelling(true);
    }
    
@@ -523,15 +517,13 @@ public class EAFSerialization
    /**
     * Constructor
     */
-   public EAFSerialization()
-   {
+   public EAFSerialization() {
    } // end of constructor
    
    /**
     * Resets the state of the converter, ready to convert again.
     */
-   public void reset()
-   {
+   public void reset() {
       root = null;
       header = null;
       timeOrder = null;
@@ -564,8 +556,7 @@ public class EAFSerialization
     * {@link GraphDeserializer#setParameters()} can be invoked. If it's not an empty list,
     * this method must be invoked again with the returned parameters' values set. 
     */
-   public ParameterSet configure(ParameterSet configuration, Schema schema)
-   {
+   public ParameterSet configure(ParameterSet configuration, Schema schema) {
       setSchema(schema);
       setParticipantLayer(schema.getParticipantLayer());
       setTurnLayer(schema.getTurnLayer());
@@ -587,30 +578,24 @@ public class EAFSerialization
       LinkedHashMap<String,Layer> possibleTurnChildLayers = new LinkedHashMap<String,Layer>();
       LinkedHashMap<String,Layer> wordTagLayers = new LinkedHashMap<String,Layer>();
       if (getParticipantLayer() == null || getTurnLayer() == null 
-          || getUtteranceLayer() == null || getWordLayer() == null)
-      {
-         for (Layer top : schema.getRoot().getChildren().values())
-         {
-            if (top.getAlignment() == Constants.ALIGNMENT_NONE)
-            {
-               if (top.getChildren().size() != 0)
-               { // unaligned children of graph, with children of their own
+          || getUtteranceLayer() == null || getWordLayer() == null) {
+         for (Layer top : schema.getRoot().getChildren().values()) {
+            if (top.getAlignment() == Constants.ALIGNMENT_NONE) {
+               if (top.getChildren().size() != 0) {
+                  // unaligned children of graph, with children of their own
                   possibleParticipantLayers.put(top.getId(), top);
-                  for (Layer turn : top.getChildren().values())
-                  {
+                  for (Layer turn : top.getChildren().values()) {
                      if (turn.getAlignment() == Constants.ALIGNMENT_INTERVAL
-                         && turn.getChildren().size() > 0)
-                     { // aligned children of who with their own children
+                         && turn.getChildren().size() > 0) {
+                        // aligned children of who with their own children
                         possibleTurnLayers.put(turn.getId(), turn);
-                        for (Layer turnChild : turn.getChildren().values())
-                        {
-                           if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL)
-                           { // aligned children of turn
+                        for (Layer turnChild : turn.getChildren().values()) {
+                           if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
+                              // aligned children of turn
                               possibleTurnChildLayers.put(turnChild.getId(), turnChild);
-                              for (Layer tag : turnChild.getChildren().values())
-                              {
-                                 if (tag.getAlignment() == Constants.ALIGNMENT_NONE)
-                                 { // unaligned children of word
+                              for (Layer tag : turnChild.getChildren().values()) {
+                                 if (tag.getAlignment() == Constants.ALIGNMENT_NONE) {
+                                    // unaligned children of word
                                     wordTagLayers.put(tag.getId(), tag);
                                  }
                               } // next possible word tag layer
@@ -621,50 +606,40 @@ public class EAFSerialization
                } // with children
             } // unaligned
          } // next possible participant layer
-      } // missing special layers
-      else
-      {
-         for (Layer turnChild : getTurnLayer().getChildren().values())
-         {
-            if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL)
-            {
+      } else {
+         for (Layer turnChild : getTurnLayer().getChildren().values()) {
+            if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
                possibleTurnChildLayers.put(turnChild.getId(), turnChild);
             }
          } // next possible word tag layer
-         for (Layer tag : getWordLayer().getChildren().values())
-         {
+         for (Layer tag : getWordLayer().getChildren().values()) {
             if (tag.getAlignment() == Constants.ALIGNMENT_NONE
-                && tag.getChildren().size() == 0)
-            {
+                && tag.getChildren().size() == 0) {
                wordTagLayers.put(tag.getId(), tag);
             }
          } // next possible word tag layer
       }
-      if (getParticipantLayer() == null)
-      {
+      if (getParticipantLayer() == null) {
          layerToPossibilities.put(
             new Parameter("participantLayer", Layer.class, "Participant layer", 
                           "Layer for speaker/participant identification", true), 
             Arrays.asList("participant","participants","who","speaker","speakers"));
          layerToCandidates.put("participantLayer", possibleParticipantLayers);
       }
-      if (getTurnLayer() == null)
-      {
+      if (getTurnLayer() == null) {
          layerToPossibilities.put(
             new Parameter("turnLayer", Layer.class, "Turn layer", "Layer for speaker turns", true),
             Arrays.asList("turn","turns"));
          layerToCandidates.put("turnLayer", possibleTurnLayers);
       }
-      if (getUtteranceLayer() == null)
-      {
+      if (getUtteranceLayer() == null) {
          layerToPossibilities.put(
             new Parameter("utteranceLayer", Layer.class, "Utterance layer", 
                           "Layer for speaker utterances", true), 
             Arrays.asList("utterance","utterances","line","lines"));
          layerToCandidates.put("utteranceLayer", possibleTurnChildLayers);
       }
-      if (getWordLayer() == null)
-      {
+      if (getWordLayer() == null) {
          layerToPossibilities.put(
             new Parameter("wordLayer", Layer.class, "Word layer", 
                           "Layer for individual word tokens", true), 
@@ -673,20 +648,16 @@ public class EAFSerialization
       }
 
       LinkedHashMap<String,Layer> topLevelLayers = new LinkedHashMap<String,Layer>();
-      for (Layer top : schema.getRoot().getChildren().values())
-      {
-         if (top.getAlignment() == Constants.ALIGNMENT_INTERVAL)
-         { // aligned children of graph
+      for (Layer top : schema.getRoot().getChildren().values()) {
+         if (top.getAlignment() == Constants.ALIGNMENT_INTERVAL) { // aligned children of graph
             topLevelLayers.put(top.getId(), top);
          }
       } // next top level layer
 
       LinkedHashMap<String,Layer> graphTagLayers = new LinkedHashMap<String,Layer>();
-      for (Layer top : schema.getRoot().getChildren().values())
-      {
+      for (Layer top : schema.getRoot().getChildren().values()) {
          if (top.getAlignment() == Constants.ALIGNMENT_NONE
-             && top.getChildren().size() == 0)
-         { // unaligned childless children of graph
+             && top.getChildren().size() == 0) { // unaligned childless children of graph
             graphTagLayers.put(top.getId(), top);
          }
       } // next top level layer
@@ -733,51 +704,41 @@ public class EAFSerialization
       layerToCandidates.put("languageLayer", graphTagLayers);
 
       // add parameters that aren't in the configuration yet, and set possibile/default values
-      for (Parameter p : layerToPossibilities.keySet())
-      {
+      for (Parameter p : layerToPossibilities.keySet()) {
          List<String> possibleNames = layerToPossibilities.get(p);
          LinkedHashMap<String,Layer> candidateLayers = layerToCandidates.get(p.getName());
-         if (configuration.containsKey(p.getName()))
-         {
+         if (configuration.containsKey(p.getName())) {
             p = configuration.get(p.getName());
-         }
-         else
-         {
+         } else {
             configuration.addParameter(p);
          }
-         if (p.getValue() == null)
-         {
+         if (p.getValue() == null) {
             p.setValue(Utility.FindLayerById(candidateLayers, possibleNames));
          }
          p.setPossibleValues(candidateLayers.values());
       }
 
-      if (!configuration.containsKey("useConventions"))
-      {
+      if (!configuration.containsKey("useConventions")) {
          configuration.addParameter(
             new Parameter("useConventions", Boolean.class, 
                           "Use Annotation Conventions",
                           "Whether to use text conventions for comment, noise, lexical, and pronounce annotations", true));
       }
-      if (configuration.get("useConventions").getValue() == null)
-      {
+      if (configuration.get("useConventions").getValue() == null) {
          configuration.get("useConventions").setValue(Boolean.TRUE);
       }
 
-      if (!configuration.containsKey("ignoreBlankAnnotations"))
-      {
+      if (!configuration.containsKey("ignoreBlankAnnotations")) {
          configuration.addParameter(
             new Parameter("ignoreBlankAnnotations", Boolean.class, 
                           "Ignore Blank Annotations",
                           "Whether to skip annotations with no label, or process them", true));
       }
-      if (configuration.get("ignoreBlankAnnotations").getValue() == null)
-      {
+      if (configuration.get("ignoreBlankAnnotations").getValue() == null) {
          configuration.get("ignoreBlankAnnotations").setValue(Boolean.TRUE);
       }
 
-      if (!configuration.containsKey("minimumTurnPauseLength"))
-      {
+      if (!configuration.containsKey("minimumTurnPauseLength")) {
          configuration.addParameter(
             new Parameter("minimumTurnPauseLength", Double.class, 
                           "Min. Turn Pause Length",
@@ -786,8 +747,7 @@ public class EAFSerialization
                           +" counts as a turn change boundary. If the pause is shorter than"
                           +" this, the turns are merged into one.", true));
       }
-      if (configuration.get("minimumTurnPauseLength").getValue() == null)
-      {
+      if (configuration.get("minimumTurnPauseLength").getValue() == null) {
          configuration.get("minimumTurnPauseLength").setValue(Double.valueOf(0.0));
       }
 
@@ -808,8 +768,9 @@ public class EAFSerialization
     * @throws IOException On IO error.
     */
    @SuppressWarnings({"rawtypes", "unchecked"})
-   public ParameterSet load(NamedStream[] streams, Schema schema) throws SerializationException, IOException
-   {
+   public ParameterSet load(NamedStream[] streams, Schema schema)
+      throws SerializationException, IOException {
+      
       reset();
       setSchema(schema);
 
@@ -823,8 +784,7 @@ public class EAFSerialization
 
       // Document factory
       DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-      try
-      {
+      try {
          DocumentBuilder builder = builderFactory.newDocumentBuilder();   
          builder.setEntityResolver(new EntityResolver() {
                public InputSource resolveEntity(String publicId, String systemId)
@@ -839,8 +799,7 @@ public class EAFSerialization
          Document document = builder.parse(new InputSource(in));
 	  
          root = document.getFirstChild();
-         if (!root.getNodeName().equalsIgnoreCase("ANNOTATION_DOCUMENT"))
-         {
+         if (!root.getNodeName().equalsIgnoreCase("ANNOTATION_DOCUMENT")) {
             throw new SerializationException(SerializationException.ErrorType.InvalidDocument,
                                              "XML top node is not ANNOTATION_DOCUMENT");
          }
@@ -850,30 +809,25 @@ public class EAFSerialization
          timeOrder = (Node) xpath.evaluate("//TIME_ORDER", document, XPathConstants.NODE);
          tiers = (NodeList) xpath.evaluate("//TIER", root, XPathConstants.NODESET);
 	  
-         if (timeOrder == null)
-         {
+         if (timeOrder == null) {
             throw new SerializationException(SerializationException.ErrorType.InvalidDocument,
                                              "Document has no TIME_ORDER node");
          }
-         if (tiers == null || tiers.getLength() == 0)
-         {
+         if (tiers == null || tiers.getLength() == 0) {
             throw new SerializationException(SerializationException.ErrorType.InvalidDocument,
                                              "Document has no TIER nodes");
          }
 	  
          ParameterSet mappings = new ParameterSet();
          Vector<Layer> vIntervalLayers = new Vector<Layer>();
-         for (Layer layer : getSchema().getLayers().values())
-         {
+         for (Layer layer : getSchema().getLayers().values()) {
             if (!layer.getId().equals(getSchema().getRoot().getId())
-                && !layer.getId().equals(getParticipantLayer().getId()))
-            {
-               switch (layer.getAlignment())
-               {
+                && !layer.getId().equals(getParticipantLayer().getId())) {
+               switch (layer.getAlignment()) {
                   case 0: 
                      if (!layer.getParentId().equals(getSchema().getRoot().getId())
-                         && !layer.getParentId().equals(getParticipantLayer().getId()))
-                     { // not graph or participant tags
+                         && !layer.getParentId().equals(getParticipantLayer().getId())) {
+                        // not graph or participant tags
                         vIntervalLayers.add(layer); 
                      }
                      break; 
@@ -886,8 +840,7 @@ public class EAFSerialization
          // map tiers to layers by name
          Layer ignore = new Layer();
          ignore.setId("[ignore tier]");      
-         for (int t = 0; t < tiers.getLength(); t++)
-         {
+         for (int t = 0; t < tiers.getLength(); t++) {
             Node tier = tiers.item(t);
             Attr tierId = (Attr)tier.getAttributes().getNamedItem("TIER_ID");
             String tierName = tierId.getValue();
@@ -902,60 +855,48 @@ public class EAFSerialization
 	     
             // look for a layer with the same name
             if (tierName.equalsIgnoreCase("lines")
-                || tierName.equalsIgnoreCase("utterances"))
-            {
+                || tierName.equalsIgnoreCase("utterances")) {
                tierName = getUtteranceLayer().getId();
-            }
-            else if (tierName.equalsIgnoreCase("speakers")
+            } else if (tierName.equalsIgnoreCase("speakers")
                      || tierName.equalsIgnoreCase("speaker")
                      || tierName.equalsIgnoreCase("turns")
-                     || tierName.equalsIgnoreCase("turn"))
-            {
+                     || tierName.equalsIgnoreCase("turn")) {
                tierName = getTurnLayer().getId();
-            }
-            else if (tierName.toLowerCase().startsWith("word")
+            } else if (tierName.toLowerCase().startsWith("word")
                      || tierName.toLowerCase().endsWith("word")
                      || tierName.toLowerCase().startsWith("words")
-                     || tierName.toLowerCase().endsWith("words"))
-            {
+                     || tierName.toLowerCase().endsWith("words")) {
                tierName = getWordLayer().getId();
             }
             Layer layer = getSchema().getLayer(tierName);
-            if (layer == null)
-            { // no exact match
+            if (layer == null) { // no exact match
                // try a case-insensitive match
                // ignore spaces too
                String tierNameNoWhitespace = tierName.toLowerCase().replaceAll("\\s","");
-               for (Layer mappableLayer : vPossiblLayers)
-               {
+               for (Layer mappableLayer : vPossiblLayers) {
                   if (tierNameNoWhitespace.equals(
-                         mappableLayer.getId().toLowerCase().replaceAll("\\s","")))
-                  {
+                         mappableLayer.getId().toLowerCase().replaceAll("\\s",""))) {
                      layer = mappableLayer;
                      break;
                   }
                } // next layer
             }
-            if (layer == null)
-            { // no exact match
+            if (layer == null) { // no exact match
                // try a prefix-match - i.e. "transcript - John Smith" should map to the "transcript" layer
                // ignore spaces too
                String tierNameNoWhitespace = tierName.replaceAll("\\s","");
-               for (Layer mappableLayer : vPossiblLayers)
-               {
-                  if (tierNameNoWhitespace.startsWith(mappableLayer.getId().replaceAll("\\s","")))
-                  {
+               for (Layer mappableLayer : vPossiblLayers) {
+                  if (tierNameNoWhitespace.startsWith(mappableLayer.getId().replaceAll("\\s",""))) {
                      layer = mappableLayer;
                      break;
                   }
                } // next layer
             }
-            if (layer != null)
-            { // there is a matching layer
+            if (layer != null) { // there is a matching layer
                if (layer.getAlignment() != 1) p.setValue(layer);
-            }
-            else if (tier.getAttributes().getNamedItem("PARENT_REF") == null)
-            { // no name match, and it's not a child tier
+            } else if (tier.getAttributes().getNamedItem("PARENT_REF") == null) {
+               // no name match, and it's not a child tier
+               
                // assume it's a tier named after a speaker - make the utteranceLayer the default
                p.setValue(getUtteranceLayer());
             }
@@ -965,10 +906,13 @@ public class EAFSerialization
 	  
          return mappings;
 	  
-      }      
-      catch(ParserConfigurationException x) { throw new SerializationException(x); }
-      catch(SAXException x) { throw new SerializationException(x); }
-      catch(XPathExpressionException x) { throw new SerializationException(x); }
+      } catch(ParserConfigurationException x) {
+         throw new SerializationException(x);
+      } catch(SAXException x) {
+         throw new SerializationException(x);
+      } catch(XPathExpressionException x) {
+         throw new SerializationException(x);
+      }
    }
 
    /**
@@ -980,8 +924,8 @@ public class EAFSerialization
     * a value.
     */
    public void setParameters(ParameterSet parameters)
-      throws SerializationParametersMissingException
-   {
+      throws SerializationParametersMissingException {
+      
       mappings = parameters;
       
       // check we've got enough mappings for turns and words
@@ -990,61 +934,43 @@ public class EAFSerialization
       int iUtteranceLayerMapped = 0;
       int iWordLayerMapped = 0;
       mappingsDependOnTurn = false;
-      for (int t = 0; t < tiers.getLength(); t++)
-      {
+      for (int t = 0; t < tiers.getLength(); t++) {
          Node tier = tiers.item(t);
          // is there a mapping for this tier?
          Layer layer = (Layer)mappings.get("tier"+t).getValue();
-         if (layer != null)
-         {
+         if (layer != null) {
             if (layer.equals(getTurnLayer())
-                || layer.getAncestors().contains(getTurnLayer()))
-            {
+                || layer.getAncestors().contains(getTurnLayer())) {
                mappingsDependOnTurn = true;
             }
 	    
-            if (layer.equals(getTurnLayer()))
-            {
+            if (layer.equals(getTurnLayer())) {
                iTurnLayerMapped++;
-            }
-            else if (layer.equals(getUtteranceLayer()))
-            {
+            } else if (layer.equals(getUtteranceLayer())) {
                iUtteranceLayerMapped++;
-            }
-            else if (layer.equals(getWordLayer()))
-            {
+            } else if (layer.equals(getWordLayer())) {
                iWordLayerMapped++;
             }
          }
       }
       if (iTurnLayerMapped + iUtteranceLayerMapped + iWordLayerMapped == 0
-          && mappingsDependOnTurn)
-      {
+          && mappingsDependOnTurn) {
          throw new SerializationParametersMissingException(
             "There are no turn, utterance, or word mappings, but at least one is required");
       }
       String sTimeUnits = "milliseconds";
-      try
-      {
+      try {
          sTimeUnits = ((Attr)header.getAttributes().getNamedItem("TIME_UNITS")).getValue();
+      } catch(Throwable exception) {
       }
-      catch(Throwable exception)
-      {}
       
-      if (sTimeUnits.equalsIgnoreCase("milliseconds"))
-      {
+      if (sTimeUnits.equalsIgnoreCase("milliseconds")) {
          timeFactor = (1.0/1000.0);
-      }
-      else if (sTimeUnits.equalsIgnoreCase("NTSC-frames"))
-      {
+      } else if (sTimeUnits.equalsIgnoreCase("NTSC-frames")) {
          timeFactor = (1.0/30.0);
-      }
-      else if (sTimeUnits.equalsIgnoreCase("PAL-frames"))
-      {
+      } else if (sTimeUnits.equalsIgnoreCase("PAL-frames")) {
          timeFactor = (1.0/25.0);
-      }
-      else
-      {
+      } else {
          warnings.add("Unkown TIME_UNITS: " + sTimeUnits);
       }
    }
@@ -1062,10 +988,10 @@ public class EAFSerialization
     * @throws SerializationException if errors occur during deserialization.
     */
    public Graph[] deserialize() 
-      throws SerializerNotConfiguredException, SerializationParametersMissingException, SerializationException
-   {
-      if (mappingsDependOnTurn)
-      {
+      throws SerializerNotConfiguredException, SerializationParametersMissingException,
+      SerializationException {
+      
+      if (mappingsDependOnTurn) {
          if (participantLayer == null)
             throw new SerializerNotConfiguredException("Participant layer not set");
          if (turnLayer == null)
@@ -1089,8 +1015,7 @@ public class EAFSerialization
       Anchor graphStart = graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL);
 
       // add layers to the graph
-      if (mappingsDependOnTurn)
-      {
+      if (mappingsDependOnTurn) {
          // we don't just copy the whole schema, because that would imply that all the extra layers
          // contained no annotations, which is not necessarily true
          graph.addLayer((Layer)participantLayer.clone());
@@ -1110,50 +1035,40 @@ public class EAFSerialization
       graph.setOffsetGranularity(timeFactor);
 
       // attributes
-      try
-      {
+      try {
          String sResult = xpath.evaluate("/ANNOTATION_DOCUMENT/@AUTHOR", root);
-         if (sResult != null && sResult.length() > 0 && authorLayer != null)
-         {
+         if (sResult != null && sResult.length() > 0 && authorLayer != null) {
             graph.addTag(graph, authorLayer.getId(), sResult)
                .setConfidence(Constants.CONFIDENCE_MANUAL);;
          }
          sResult = xpath.evaluate("/ANNOTATION_DOCUMENT/@DATE", root);
-         if (sResult != null && sResult.length() > 0 && dateLayer != null)
-         {
+         if (sResult != null && sResult.length() > 0 && dateLayer != null) {
             graph.addTag(graph, dateLayer.getId(), sResult)
                .setConfidence(Constants.CONFIDENCE_MANUAL);;
          }
          sResult = xpath.evaluate("/ANNOTATION_DOCUMENT/TIER/@LANG_REF", root);
-         if (sResult == null || sResult.length() == 0)
-         { // for backward compatibility
+         if (sResult == null || sResult.length() == 0) { // for backward compatibility
             sResult = xpath.evaluate("/ANNOTATION_DOCUMENT/TIER/@DEFAULT_LOCALE", root);
          }
-         if (sResult != null && sResult.length() > 0 && languageLayer != null)
-         {
+         if (sResult != null && sResult.length() > 0 && languageLayer != null) {
             graph.addTag(graph, languageLayer.getId(), sResult)
                .setConfidence(Constants.CONFIDENCE_MANUAL);;
          }	 
-      }
-      catch(XPathExpressionException x)
-      {
+      } catch(XPathExpressionException x) {
          warnings.add("Error determining document attributes: " + x);
       }
       
       // first of all, create Anchors from TIME_SLOTs
       HashMap<String,Anchor> mTimeslotIdToAnchor = new HashMap<String,Anchor>();
-      try
-      {
+      try {
          NodeList timeslots = (NodeList)xpath.evaluate(
             "./TIME_SLOT", timeOrder, XPathConstants.NODESET);
-         for (int t = 0; t < timeslots.getLength(); t++)
-         {
+         for (int t = 0; t < timeslots.getLength(); t++) {
             Node timeslot = timeslots.item(t);
             String sTimeSlotId =
                ((Attr)timeslot.getAttributes().getNamedItem("TIME_SLOT_ID")).getValue();
 	    
-            try
-            {
+            try {
                String sTimeValue =
                   ((Attr)timeslot.getAttributes().getNamedItem("TIME_VALUE")).getValue();
                mTimeslotIdToAnchor.put(
@@ -1161,16 +1076,12 @@ public class EAFSerialization
                      sTimeSlotId,
                      Double.valueOf(timeFactor * Double.parseDouble(sTimeValue)),
                      Constants.CONFIDENCE_MANUAL));
-            }
-            catch(NullPointerException exception)
-            {
+            } catch(NullPointerException exception) {
                mTimeslotIdToAnchor.put(sTimeSlotId, new Anchor(sTimeSlotId, null));
             }
             // don't add them to the graph yet - we'll do that as we go...
          } // next timeslot
-      }
-      catch(XPathExpressionException x)
-      {
+      } catch(XPathExpressionException x) {
          throw new SerializationException("Error finding TIME_SLOT tags: " + x);
       }	 
 
@@ -1180,38 +1091,28 @@ public class EAFSerialization
       boolean turnLayerMapped = false;
       boolean utteranceLayerMapped = false;
       boolean wordLayerMapped = false;
-      for (int t = 0; t < tiers.getLength(); t++)
-      {
+      for (int t = 0; t < tiers.getLength(); t++) {
          Node tier = tiers.item(t);
          // is there a mapping for this tier?
          Layer layer = (Layer)mappings.get("tier"+t).getValue();
-         if (layer != null && !layer.getId().equals("[ignore tier]"))
-         {
-            if (layer.getId().equals(getTurnLayer().getId()))
-            {
+         if (layer != null && !layer.getId().equals("[ignore tier]")) {
+            if (layer.getId().equals(getTurnLayer().getId())) {
                turnLayerMapped = true;
-            }
-            else if (layer.getId().equals(getUtteranceLayer().getId()))
-            {
+            } else if (layer.getId().equals(getUtteranceLayer().getId())) {
                utteranceLayerMapped = true;
-            }
-            else if (layer.getId().equals(getWordLayer().getId()))
-            {
+            } else if (layer.getId().equals(getWordLayer().getId())) {
                wordLayerMapped = true;
             }
 	    
-            if (graph.getLayer(layer.getId()) == null)
-            {
+            if (graph.getLayer(layer.getId()) == null) {
                graph.addLayer((Layer)layer.clone());
             }
 	    
          } // tier is mapped to a layer
       } // next tier
 
-      if (mappingsDependOnTurn)
-      {
-         if (!wordLayerMapped) 
-         {
+      if (mappingsDependOnTurn) {
+         if (!wordLayerMapped) {
             // add convention layers, as we'll be breaking utterances into tokens
             if (lexicalLayer != null) graph.addLayer((Layer)lexicalLayer.clone());
             if (pronounceLayer != null) graph.addLayer((Layer)pronounceLayer.clone());
@@ -1224,8 +1125,7 @@ public class EAFSerialization
          if((turnLayerMapped && utteranceLayerMapped)
             || (turnLayerMapped && wordLayerMapped)
             || (utteranceLayerMapped && wordLayerMapped)
-            )
-         {
+            ) {
             setUtterancesAreSpeakerNames(true);
          }
       }
@@ -1233,31 +1133,25 @@ public class EAFSerialization
       int iLastWordOrdinal = 0;
       
       // turn tiers of annotations into layers of annotations
-      for (int t = 0; t < tiers.getLength(); t++)
-      {
+      for (int t = 0; t < tiers.getLength(); t++) {
          Node tier = tiers.item(t);
          // is there a mapping for this tier?
          Layer layer = (Layer)mappings.get("tier"+t).getValue();
-         if (layer != null && !layer.getId().equals("[ignore tier]"))
-         {
+         if (layer != null && !layer.getId().equals("[ignore tier]")) {
             String sTierId = ((Attr)tier.getAttributes().getNamedItem("TIER_ID")).getValue();
             String sSpeakerName = sTierId;
             Attr participant = (Attr)tier.getAttributes().getNamedItem("PARTICIPANT");
             if (participant != null) sSpeakerName = participant.getValue();
 
             // process annotations
-            try
-            {
+            try {
                NodeList annotations = (NodeList)
                   xpath.evaluate("ANNOTATION/REF_ANNOTATION", tier, XPathConstants.NODESET);
-               if (annotations != null && annotations.getLength() > 0) 
-               { // reference annotations TODO
-               } // reference annotations
-               else // alignable annotations
-               {
+               if (annotations != null && annotations.getLength() > 0) { // reference annotations
+                  // reference annotations TODO
+               } else { // alignable annotations
                   annotations = (NodeList) xpath.evaluate("ANNOTATION/ALIGNABLE_ANNOTATION", tier, XPathConstants.NODESET);
-                  for (int a = 0; a < annotations.getLength(); a++)
-                  {
+                  for (int a = 0; a < annotations.getLength(); a++) {
                      Node annotationNode = annotations.item(a);
                      String sAnnotationId =
                         ((Attr)annotationNode.getAttributes().getNamedItem("ANNOTATION_ID"))
@@ -1270,8 +1164,7 @@ public class EAFSerialization
                         .getValue();
                      String sAnnotationValue = (String)xpath.evaluate(
                         "ANNOTATION_VALUE/text()", annotationNode, XPathConstants.STRING);
-                     if (getIgnoreBlankAnnotations())
-                     {
+                     if (getIgnoreBlankAnnotations()) {
                         // ignore empty intervals...
                         if (sAnnotationValue.trim().length() == 0) continue; 
                      }
@@ -1296,9 +1189,7 @@ public class EAFSerialization
                mTierMessages.put(
                   sTierId, "" + annotations.getLength() + " annotation" 
                   + (annotations.getLength()==1?"":"s") + " added to graph.");
-            }
-            catch (Throwable t2)
-            {
+            } catch (Throwable t2) {
                mTierMessages.put(sTierId, t2.getMessage());
                if (errors == null) errors = new SerializationException(t2);
                if (errors.getCause() == null) errors.initCause(t2);
@@ -1310,17 +1201,16 @@ public class EAFSerialization
       Anchor graphEnd = graph.getEnd();
 
       // ensure both turns and utterances exist, and parents are set
-      if (wordLayerMapped && !turnLayerMapped && !utteranceLayerMapped)
-      { // create utterances and turns from words	 
+      if (wordLayerMapped && !turnLayerMapped && !utteranceLayerMapped) {
+         // create utterances and turns from words
+         
          // given there are no utterance/turn intervals, 
          // we assume that the tier name for words is the speaker name	 
          HashMap<String,Annotation> turnsByName = new HashMap<String,Annotation>();
-         for (Annotation word : graph.all(wordLayer.getId()))
-         {
+         for (Annotation word : graph.all(wordLayer.getId())) {
             String participant = (String)word.get("@participant");
             Annotation turn = turnsByName.get(participant);
-            if (turn == null)
-            {
+            if (turn == null) {
                // create turn 
                turn = new Annotation(
                   null, participant, turnLayer.getId(), graphStart.getId(), graphEnd.getId());
@@ -1338,27 +1228,21 @@ public class EAFSerialization
             // set parent of word
             word.setParent(turn);
          } // next turn
-      } 
-      else if (turnLayerMapped && !utteranceLayerMapped)
-      { // create utterances from turns
-         for (Annotation turn : graph.all(turnLayer.getId()))
-         {
+      } else if (turnLayerMapped && !utteranceLayerMapped) { // create utterances from turns
+         for (Annotation turn : graph.all(turnLayer.getId())) {
             Annotation utterance = new Annotation(turn);
             utterance.setLayerId(utteranceLayer.getId())
                .setParentId(turn.getId())
                .setConfidence(Constants.CONFIDENCE_MANUAL);;
-            if (!wordLayerMapped) // no word layer
-            { // ...which means the label must be the untokenized words
+            if (!wordLayerMapped) { // no word layer 
+               // ...which means the label must be the untokenized words
                // and so the turn's @participant must be the speaker name
                turn.setLabel((String)turn.get("@participant"));
             }
             graph.addAnnotation(utterance);
          } // next turn
-      }
-      else if (utteranceLayerMapped && !turnLayerMapped)
-      { // create turns from utterances
-         for (Annotation utterance : graph.all(utteranceLayer.getId()))
-         {
+      } else if (utteranceLayerMapped && !turnLayerMapped) { // create turns from utterances
+         for (Annotation utterance : graph.all(utteranceLayer.getId())) {
             Annotation turn = new Annotation(utterance);
             turn.setLayerId(turnLayer.getId())
             // the utterance's @participant is taken to be the speaker name
@@ -1368,38 +1252,29 @@ public class EAFSerialization
             // now turn will have an ID, and we can set it to be the parent of utterance
             utterance.setParent(turn);
          } // next utterance
-      }
-      else if (utteranceLayerMapped && turnLayerMapped)
-      {
+      } else if (utteranceLayerMapped && turnLayerMapped) {
          // ensure utterance parent turns are set
-         for (Annotation utterance : graph.all(utteranceLayer.getId()))
-         {
+         for (Annotation utterance : graph.all(utteranceLayer.getId())) {
             Annotation[] possibleTurns = utterance.includingAnnotationsOn(turnLayer.getId());
-            if (possibleTurns.length == 1)
-            { // must be this one
+            if (possibleTurns.length == 1) { // must be this one
                utterance.setParent(possibleTurns[0]);
-            }
-            else if (possibleTurns.length > 1)
-            { // multiple possible turns
+            } else if (possibleTurns.length > 1) { // multiple possible turns
                // use the turn whose label is included in the utterance's tier name
                // e.g. the turn might be "John Smith" and the utterance tier might be
                // "utterance - John Smith"
                String utteranceTier = (String)utterance.get("@tierId");
                String utteranceParticipant = (String)utterance.get("@participant");
                Annotation turn = null;
-               for (Annotation possibleTurn : possibleTurns)
-               {
+               for (Annotation possibleTurn : possibleTurns) {
                   // is the label (the speaker) a part of the utterance's tier name?
                   if (utteranceTier.indexOf(possibleTurn.getLabel()) >= 0
-                      || utteranceParticipant.equals(possibleTurn.getLabel()))
-                  {
+                      || utteranceParticipant.equals(possibleTurn.getLabel())) {
                      // multiple parents could match 
                      // e.g. "sp1" and "Interviewer sp1" both are suffixes of
                      // "utterance - Interviewer sp1"
                      // so we go with the longest one
                      if (turn == null
-                         || possibleTurn.getLabel().length() > turn.getLabel().length())
-                     {
+                         || possibleTurn.getLabel().length() > turn.getLabel().length()) {
                         turn = possibleTurn;
                      } // longest match so far
                   } // label is a part of the tier name
@@ -1409,18 +1284,15 @@ public class EAFSerialization
          } // next utterance
       } // both utterance and turn layers mapped
 
-      if (mappingsDependOnTurn)
-      {
+      if (mappingsDependOnTurn) {
          // now we have turns with participant name labels, 
          // and utterances with parents, that maybe need tokenizing
 	 
          // ensure participants are set
          HashMap<String,Annotation> participantsByName = new HashMap<String,Annotation>();
          int ordinal = 1;
-         for (Annotation turn : graph.all(turnLayer.getId()))
-         {
-            if (!participantsByName.containsKey(turn.getLabel()))
-            { // create participant
+         for (Annotation turn : graph.all(turnLayer.getId())) {
+            if (!participantsByName.containsKey(turn.getLabel())) { // create participant
                Annotation who = new Annotation(null, turn.getLabel(), participantLayer.getId());
                who.setConfidence(Constants.CONFIDENCE_MANUAL);
                graph.addAnnotation(who);
@@ -1437,41 +1309,35 @@ public class EAFSerialization
          
          // join subsequent turns by the same speaker...
          // for each participant (assumed to be parent of turn)
-         for (Annotation participant : graph.all(participantLayer.getId()))
-         {
+         for (Annotation participant : graph.all(participantLayer.getId())) {
             TreeSet<Annotation> annotations
                = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
             annotations.addAll(participant.getAnnotations(turnLayer.getId()));
             Annotation[] turns = annotations.toArray(new Annotation[0]);
             // go back through all the turns, looking for a turn for the same speaker that is
             // joined to, or overlaps, this one
-            for (int i = turns.length - 2; i >= 0; i--)
-            {
+            for (int i = turns.length - 2; i >= 0; i--) {
                Annotation preceding = turns[i];
                Annotation following = turns[i + 1];
                boolean mergeTurns = false;
                if (preceding.getEnd().getOffset() != null
-                   && following.getStart().getOffset() != null)
-               {
-                  if (preceding.getEnd().getOffset() >= following.getStart().getOffset())
-                  {
+                   && following.getStart().getOffset() != null) {
+                  if (preceding.getEnd().getOffset() >= following.getStart().getOffset()) {
                      mergeTurns = true;
-                  }
-                  else if (getMinimumTurnPauseLength() > 0
-                           && preceding.getEnd().getOffset() + getMinimumTurnPauseLength()
-                           >= following.getStart().getOffset())
-                  { // there is a short enough pause between two turns of the same participant
+                  } else if (getMinimumTurnPauseLength() > 0
+                             && preceding.getEnd().getOffset() + getMinimumTurnPauseLength()
+                             >= following.getStart().getOffset()) {
+                     // there is a short enough pause between two turns of the same participant
+                     
                      // but there also must be no intervening speakers
                      if (graph.overlappingAnnotations(
                             preceding.getEnd(), following.getStart(), turnLayer.getId())
-                         .length == 0)
-                     {
+                         .length == 0) {
                         mergeTurns = true;
                      }
                   }
                }
-               if (mergeTurns)
-               {
+               if (mergeTurns) {
                   mergeTurns(preceding, following);
                   following.destroy();
                }
@@ -1484,32 +1350,25 @@ public class EAFSerialization
          // and rationalized turns with participant name labels and parents, 
          // and utterances with parents, that maybe need tokenizing
 	 
-         if (!wordLayerMapped)
-         { // tokenize utterances and apply conventions
+         if (!wordLayerMapped) { // tokenize utterances and apply conventions
             // ensure we have an utterance tokenizer
-            if (getTokenizer() == null)
-            {
+            if (getTokenizer() == null) {
                setTokenizer(
                   new SimpleTokenizer(getUtteranceLayer().getId(), getWordLayer().getId()));
             }
-            try
-            {
+            try {
                tokenizer.transform(graph);
                // TODO annotation.setAnnotator(...) for all tokens, from the tier's settings.
 	       
-            }
-            catch(TransformationException exception)
-            {
+            } catch(TransformationException exception) {
                if (errors == null) errors = new SerializationException();
                if (errors.getCause() == null) errors.initCause(exception);
                errors.addError(
                   SerializationException.ErrorType.Tokenization, exception.getMessage());
             }
             graph.commit();
-            if (getUseConventions())
-            {
-               try
-               {
+            if (getUseConventions()) {
+               try {
                   // word {comment comment} word
                   SpanningConventionTransformer commentTransformer = new SpanningConventionTransformer(
                      getWordLayer().getId(), "\\{(.*)", "(.*)\\}", true, null, null, 
@@ -1547,48 +1406,36 @@ public class EAFSerialization
                   OrthographyClumper clumper = new OrthographyClumper(wordLayer.getId());	  
                   clumper.transform(graph);
                   graph.commit();
-               }
-               catch(TransformationException exception)
-               {
+               } catch(TransformationException exception) {
                   if (errors == null) errors = new SerializationException();
                   if (errors.getCause() == null) errors.initCause(exception);
                   errors.addError(
                      SerializationException.ErrorType.Tokenization, exception.getMessage());
                }
             } // apply transcription conventions
-         } // tokenize utterances
-         else
-         { // word layer mapped
+         } else { // word layer mapped
             // ensure word parent turns are set
-            for (Annotation word : graph.all(wordLayer.getId()))
-            {
-               if (word.getParent() == null)
-               {
+            for (Annotation word : graph.all(wordLayer.getId())) {
+               if (word.getParent() == null) {
                   Annotation[] possibleTurns = word.includingAnnotationsOn(turnLayer.getId());
-                  if (possibleTurns.length == 1)
-                  { // must be this one
+                  if (possibleTurns.length == 1) { // must be this one
                      word.setParent(possibleTurns[0]);
-                  }
-                  else if (possibleTurns.length > 1)
-                  { // multiple possible turns
+                  } else if (possibleTurns.length > 1) { // multiple possible turns
                      // use the turn whose label is included in the utterance's tier name
                      // e.g. the turn might be "John Smith" and the utterance tier might
                      // be "utterance - John Smith"
                      String wordTier = (String)word.get("@tierId");
                      String wordParticipant = (String)word.get("@participant");
                      Annotation turn = null;
-                     for (Annotation possibleTurn : possibleTurns)
-                     {
+                     for (Annotation possibleTurn : possibleTurns) {
                         // is the label (the speaker) a part of the utterance's tier name?
                         if (wordTier.indexOf(possibleTurn.getLabel()) >= 0
-                            || wordParticipant.equals(possibleTurn.getLabel()))
-                        {
+                            || wordParticipant.equals(possibleTurn.getLabel())) {
                            // multiple parents could match 
                            // e.g. "sp1" and "Interviewer sp1" both are suffixes of "word
                            // - Interviewer sp1" so we go with the longest one
                            if (turn == null
-                               || possibleTurn.getLabel().length() > turn.getLabel().length())
-                           {
+                               || possibleTurn.getLabel().length() > turn.getLabel().length()) {
                               turn = possibleTurn;
                            } // longest match so far
                         } // label is a part of the tier name
@@ -1600,31 +1447,26 @@ public class EAFSerialization
                { // parent still not set
                   // maybe children don't quite line up with parents, so use
                   // midpoint-including instead 
-                  Annotation[] possibleTurns = word.midpointIncludingAnnotationsOn(turnLayer.getId());
-                  if (possibleTurns.length == 1)
-                  { // must be this one
+                  Annotation[] possibleTurns
+                     = word.midpointIncludingAnnotationsOn(turnLayer.getId());
+                  if (possibleTurns.length == 1) { // must be this one
                      word.setParent(possibleTurns[0]);
-                  }
-                  else if (possibleTurns.length > 1)
-                  { // multiple possible turns
+                  } else if (possibleTurns.length > 1) { // multiple possible turns
                      // use the turn whose label is included in the utterance's tier name
                      // e.g. the turn might be "John Smith" and the utterance tier might
                      // be "utterance - John Smith"
                      String wordTier = (String)word.get("@tierId");
                      String wordParticipant = (String)word.get("@participant");
                      Annotation turn = null;
-                     for (Annotation possibleTurn : possibleTurns)
-                     {
+                     for (Annotation possibleTurn : possibleTurns) {
                         // is the label (the speaker) a part of the utterance's tier name?
                         if (wordTier.indexOf(possibleTurn.getLabel()) >= 0
-                            || wordParticipant.equals(possibleTurn.getLabel()))
-                        {
+                            || wordParticipant.equals(possibleTurn.getLabel())) {
                            // multiple parents could match 
                            // e.g. "sp1" and "Interviewer sp1" both are suffixes of
                            // "word - Interviewer sp1" so we go with the longest one
                            if (turn == null
-                               || possibleTurn.getLabel().length() > turn.getLabel().length())
-                           {
+                               || possibleTurn.getLabel().length() > turn.getLabel().length()) {
                               turn = possibleTurn;
                            } // longest match so far
                         } // label is a part of the tier name
@@ -1643,17 +1485,12 @@ public class EAFSerialization
       } // mappingsDependOnTurn
       
       // need to ensure that other required parents are set
-      for (Annotation a : graph.getAnnotationsById().values())
-      {
-         if (a.getParentId() == null)
-         {
+      for (Annotation a : graph.getAnnotationsById().values()) {
+         if (a.getParentId() == null) {
             Annotation[] possibleParents = a.includingAnnotationsOn(a.getLayer().getParentId());
-            if (possibleParents.length == 1)
-            { // must be this one
+            if (possibleParents.length == 1) { // must be this one
                a.setParent(possibleParents[0]);
-            }
-            else if (possibleParents.length > 1)
-            { // multiple possible parents
+            } else if (possibleParents.length > 1) { // multiple possible parents
                // use the turn whose label is included in the utterance's tier name
                // e.g. the turn might be "John Smith" and the utterance tier might be
                // "utterance - John Smith"
@@ -1661,21 +1498,17 @@ public class EAFSerialization
                String participant = (String)a.get("@participant");
                Annotation parent = null;
                Annotation parentWho = null;
-               for (Annotation possibleParent : possibleParents)
-               {
+               for (Annotation possibleParent : possibleParents) {
                   // is the label (the speaker) a part of the utterance's tier name?
                   Annotation who = possibleParent.first("who");
-                  if (who != null)
-                  {
+                  if (who != null) {
                      if (tier.indexOf(who.getLabel()) >= 0
-                         || participant.equals(who.getLabel()))
-                     {
+                         || participant.equals(who.getLabel())) {
                         // multiple parents could match 
                         // e.g. "sp1" and "Interviewer sp1" both are suffixes of
                         // "segment - Interviewer sp1" so we go with the longest one
                         if (parent == null
-                            || who.getLabel().length() > parentWho.getLabel().length())
-                        {
+                            || who.getLabel().length() > parentWho.getLabel().length()) {
                            parent = possibleParent;
                            parentWho = who;
                         } // longest match so far
@@ -1686,37 +1519,29 @@ public class EAFSerialization
             } // multiple possible parents
          } // parent not set
 
-         if (a.getParentId() == null)
-         { // still not set
+         if (a.getParentId() == null) { // still not set
             // maybe children don't quite line up with parents, so use midpoint-including instead
             Annotation[] possibleParents = a.midpointIncludingAnnotationsOn(a.getLayer().getParentId());
-            if (possibleParents.length == 1)
-            { // must be this one
+            if (possibleParents.length == 1) { // must be this one
                a.setParent(possibleParents[0]);
-            }
-            else if (possibleParents.length > 1)
-            { // multiple possible parents
+            } else if (possibleParents.length > 1) { // multiple possible parents
                // use the turn whose label is included in the utterance's tier name
                // e.g. the turn might be "John Smith" and the utterance tier might be
                // "utterance - John Smith"
                String tier = (String)a.get("@tierId");
                String participant = (String)a.get("@participant");
                Annotation parent = null;
-               for (Annotation possibleParent : possibleParents)
-               {
+               for (Annotation possibleParent : possibleParents) {
                   // is the label (the speaker) a part of the utterance's tier name?
                   Annotation who = possibleParent.first("who");
-                  if (who != null)
-                  {
+                  if (who != null) {
                      if (tier.indexOf(who.getLabel()) >= 0
-                         || participant.equals(who.getLabel()))
-                     {
+                         || participant.equals(who.getLabel())) {
                         // multiple parents could match 
                         // e.g. "sp1" and "Interviewer sp1" both are suffixes of
                         // "segment - Interviewer sp1" so we go with the longest one
                         if (parent == null
-                            || possibleParent.getLabel().length() > parent.getLabel().length())
-                        {
+                            || possibleParent.getLabel().length() > parent.getLabel().length()) {
                            parent = possibleParent;
                         } // longest match so far
                      } // label is a part of the tier name
@@ -1732,15 +1557,11 @@ public class EAFSerialization
       Vector<Layer> layers = graph.getLayersTopDown();
       // (bottom up to propagate changes from below)
       Collections.reverse(layers);
-      for (Layer l : layers)
-      {
-         if (l.getSaturated() && l.getAlignment() == Constants.ALIGNMENT_INTERVAL)
-         {
-            for (Annotation parent : graph.all(l.getParentId()))
-            {
+      for (Layer l : layers) {
+         if (l.getSaturated() && l.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
+            for (Annotation parent : graph.all(l.getParentId())) {
                SortedSet<Annotation> children = parent.getAnnotations(l.getId());
-               if (children.size() > 0)
-               {
+               if (children.size() > 0) {
                   if (children.first().getStart() != null)
                      parent.setStart(children.first().getStart());
                   if (children.last().getEnd() != null)
@@ -1752,15 +1573,13 @@ public class EAFSerialization
       graph.commit();
 
       // remove references to tier information
-      for (Annotation a : graph.getAnnotationsById().values())
-      {
+      for (Annotation a : graph.getAnnotationsById().values()) {
          a.remove("@tierId");
          a.remove("@participant");
       }
 
       // set end anchors of graph tags
-      for (Annotation a : graph.all(getParticipantLayer().getId()))
-      {
+      for (Annotation a : graph.all(getParticipantLayer().getId())) {
          a.setStartId(graphStart.getId());
          a.setEndId(graphEnd.getId());
       }
@@ -1770,8 +1589,7 @@ public class EAFSerialization
       if (errors != null) throw errors;
 
       // reset all change tracking
-      if (graph.getTracker() != null)
-      {
+      if (graph.getTracker() != null) {
          graph.getTracker().reset();
          graph.setTracker(null);
       }
@@ -1788,27 +1606,22 @@ public class EAFSerialization
     * @param following The following turn, which will be deleted.
     * @return The changes for this merge.
     */
-   public void mergeTurns(Annotation preceding, Annotation following)
-   {
+   public void mergeTurns(Annotation preceding, Annotation following) {
       // set anchor
       if (preceding.getEnd().getOffset() == null
           || following.getEnd().getOffset() == null
-          || preceding.getEnd().getOffset() < following.getEnd().getOffset()) 
-      {
+          || preceding.getEnd().getOffset() < following.getEnd().getOffset()) {
          preceding.setEnd(following.getEnd());
       }
 
       // for each child layer
-      for (String childLayerId : following.getAnnotations().keySet())
-      {
+      for (String childLayerId : following.getAnnotations().keySet()) {
          // move everything from following to preceding
          int ordinal = 1;
-         if (preceding.getAnnotations().containsKey(childLayerId))
-         {
+         if (preceding.getAnnotations().containsKey(childLayerId)) {
             ordinal = preceding.getAnnotations().get(childLayerId).size() + 1;
          }
-         for (Annotation child : following.annotations(childLayerId))
-         {
+         for (Annotation child : following.annotations(childLayerId)) {
             child.setParent(preceding);
             child.setOrdinal(ordinal++);
          } // next child annotation
@@ -1823,15 +1636,13 @@ public class EAFSerialization
     * @return A list of IDs of layers that must be present in the graph that will be serialized.
     * @throws SerializationParametersMissingException If not all required parameters have a value.
     */
-   public String[] getRequiredLayers() throws SerializationParametersMissingException
-   {
+   public String[] getRequiredLayers() throws SerializationParametersMissingException {
       Vector<String> requiredLayers = new Vector<String>();
       if (getParticipantLayer() != null) requiredLayers.add(getParticipantLayer().getId());
       if (getTurnLayer() != null) requiredLayers.add(getTurnLayer().getId());
       if (getUtteranceLayer() != null) requiredLayers.add(getUtteranceLayer().getId());
       if (getWordLayer() != null) requiredLayers.add(getWordLayer().getId());
-      if (bUseConventions != null && bUseConventions)
-      {
+      if (bUseConventions != null && bUseConventions) {
          if (getLexicalLayer() != null) requiredLayers.add(getLexicalLayer().getId());
          if (getPronounceLayer() != null) requiredLayers.add(getPronounceLayer().getId());
          if (getCommentLayer() != null) requiredLayers.add(getCommentLayer().getId());
@@ -1845,8 +1656,7 @@ public class EAFSerialization
     * @return {@link nzilbb.ag.serialize.GraphSerializer#Cardinality}.NtoN as there is one
     * stream produced for each graph to serialize.
     */
-   public Cardinality getCardinality()
-   {
+   public Cardinality getCardinality() {
       return Cardinality.NToN;
    }
 
@@ -1865,18 +1675,17 @@ public class EAFSerialization
     * @return A list of named streams that contain the serialization in the given format. 
     * @throws SerializerNotConfiguredException if the object has not been configured.
     */
-   public void serialize(Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
-      throws SerializerNotConfiguredException
-   {
+   public void serialize(
+      Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer,
+      Consumer<String> warnings, Consumer<SerializationException> errors) 
+      throws SerializerNotConfiguredException {
+      
       graphCount = graphs.getExactSizeIfKnown();
       graphs.forEachRemaining(graph -> {
             if (getCancelling()) return;
-            try
-            {
+            try {
                consumer.accept(serializeGraph(graph, layerIds, warnings));
-            }
-            catch(SerializationException exception)
-            {
+            } catch(SerializationException exception) {
                errors.accept(exception);
             }
             consumedGraphCount++;
@@ -1889,26 +1698,21 @@ public class EAFSerialization
     * @return A named stream that contains the TextGrid. 
     * @throws SerializationException if errors occur during serialization.
     */
-   protected NamedStream serializeGraph(Graph graph, String[] layerIds, Consumer<String> warnings) 
-      throws SerializationException
-   {
+   protected NamedStream serializeGraph(
+      Graph graph, String[] layerIds, Consumer<String> warnings) throws SerializationException {
       SerializationException errors = null;
       Schema schema = graph.getSchema();
 
       HashSet<String> selectedLayers = new HashSet<String>();
-      if (layerIds != null)
-      {
+      if (layerIds != null) {
          for (String l : layerIds) selectedLayers.add(l);
-      }
-      else
-      {
+      } else {
          for (Layer l : schema.getLayers().values()) selectedLayers.add(l.getId());
       }
 
       graph.setOffsetGranularity(Constants.GRANULARITY_MILLISECONDS);
       String language = null;
-      if (languageLayer != null)
-      {
+      if (languageLayer != null) {
          Annotation lang = graph.first(languageLayer.getId());
          if (lang != null) language = lang.getLabel();
       }
@@ -1916,12 +1720,9 @@ public class EAFSerialization
       // create a new XML document
       DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
       DocumentBuilder builder = null;   
-      try
-      {
+      try {
          builder = builderFactory.newDocumentBuilder();   
-      }
-      catch(Exception exception)
-      {
+      } catch(Exception exception) {
          errors = new SerializationException(exception);
       }
       builder.setEntityResolver(new EntityResolver() {
@@ -1943,21 +1744,15 @@ public class EAFSerialization
       Element annotationDocument = document.createElement("ANNOTATION_DOCUMENT");
       document.appendChild(annotationDocument);
       Annotation author = authorLayer==null?null:graph.first(authorLayer.getId());
-      if (author != null)
-      {
+      if (author != null) {
          annotationDocument.setAttribute("AUTHOR", author.getLabel());
-      }
-      else
-      {
+      } else {
          annotationDocument.setAttribute("AUTHOR", "");
       }
       Annotation date = dateLayer==null?null:graph.first(dateLayer.getId());
-      if (date != null)
-      {
+      if (date != null) {
          annotationDocument.setAttribute("DATE", date.getLabel());
-      }
-      else
-      {
+      } else {
          annotationDocument.setAttribute("DATE", "");
       }
       annotationDocument.setAttribute("FORMAT", "2.7");
@@ -1975,24 +1770,20 @@ public class EAFSerialization
       header.appendChild(mediaDescriptor);
       mediaDescriptor.setAttribute("MEDIA_URL", "");
       mediaDescriptor.setAttribute("MIME_TYPE", "");
-      if (graph.getMediaProvider() != null)
-      {
-         try
-         {
+      if (graph.getMediaProvider() != null) {
+         try {
             MediaFile[] files = graph.getMediaProvider().getAvailableMedia();
-            if (files.length > 0)
-            {
+            if (files.length > 0) {
                MediaFile firstFile = files[0];
-               if (firstFile.getUrl() != null && firstFile.getUrl().startsWith("http"))
-               { // http URLs are not supported by ELAN
+               if (firstFile.getUrl() != null && firstFile.getUrl().startsWith("http")) {
+                  // http URLs are not supported by ELAN
+                  
                   // so we'll just mangle the file name so that it's probably right if they've
                   // downloaded media too
                   mediaDescriptor.setAttribute(
                      "MEDIA_URL",
                      IO.WithoutExtension(graph.getId()) + "." + firstFile.getExtension());
-               }
-               else
-               {
+               } else {
                   mediaDescriptor.setAttribute("MEDIA_URL", firstFile.getUrl());
                }
                mediaDescriptor.setAttribute("MIME_TYPE", firstFile.getMimeType());
@@ -2016,8 +1807,7 @@ public class EAFSerialization
       
       // a line tier for each speaker
       HashMap<String,Element> mSpeakerTiers = new HashMap<String,Element>();
-      for (Annotation participant : graph.all(participantLayer.getId()))
-      {
+      for (Annotation participant : graph.all(participantLayer.getId())) {
          Element utterances = document.createElement("TIER");
          annotationDocument.appendChild(utterances);
          utterances.setAttribute("LINGUISTIC_TYPE_REF", "default-lt");
@@ -2035,16 +1825,15 @@ public class EAFSerialization
                       || layer.getParent().equals(graph.getSchema().getRoot()))
               // is aligned
               .filter(layer -> layer.getAlignment() != Constants.ALIGNMENT_NONE)
-              .collect(Collectors.toList()))
-      {
+              .collect(Collectors.toList())) {
+         
          lLastUnusedAnnotationId = insertTier(
             layer, graph, document, annotationDocument, timeOrder, mapAnchorToTimeslotId,
             lLastUnusedAnnotationId, warnings, language);
       }
       
       // utterances
-      for (Annotation utterance : graph.all(utteranceLayer.getId()))
-      {
+      for (Annotation utterance : graph.all(utteranceLayer.getId())) {
          // find the speaker's tier
          Element tier = mSpeakerTiers.get(utterance.getLabel());
          if (tier == null) continue;
@@ -2067,8 +1856,7 @@ public class EAFSerialization
          alignableAnnotation.appendChild(annotationValue);
          StringBuffer sUtteranceText = new StringBuffer();
          
-         for (Annotation word : utterance.all(wordLayer.getId()))
-         {
+         for (Annotation word : utterance.all(wordLayer.getId())) {
             if (sUtteranceText.length() > 0) sUtteranceText.append(" ");
             sUtteranceText.append(word.getLabel());
             
@@ -2089,8 +1877,8 @@ public class EAFSerialization
               // nor word
               .filter(layer -> wordLayer != null
                       && layer.getId().equals(wordLayer.getId()))
-              .collect(Collectors.toList()))
-      {
+              .collect(Collectors.toList())) {
+         
          lLastUnusedAnnotationId = insertTier(
             layer, graph, document, annotationDocument, timeOrder, mapAnchorToTimeslotId,
             lLastUnusedAnnotationId, warnings, language);
@@ -2124,8 +1912,7 @@ public class EAFSerialization
          // or there are segment layers selected
          || segmentLayers.size() > 0;
 
-      if (wordTokens)
-      {
+      if (wordTokens) {
          // now word layer
          lLastUnusedAnnotationId = insertTier(
             wordLayer, graph, document, annotationDocument, timeOrder, mapAnchorToTimeslotId,
@@ -2133,16 +1920,14 @@ public class EAFSerialization
       }
       
       // word tag layers
-      for (Layer layer : wordTagLayers)
-      {
+      for (Layer layer : wordTagLayers) {
          lLastUnusedAnnotationId = insertTier(
             layer, graph, document, annotationDocument, timeOrder, mapAnchorToTimeslotId,
             lLastUnusedAnnotationId, warnings, language);
       }
       
       // segment layers
-      for (Layer layer : segmentLayers)
-      {
+      for (Layer layer : segmentLayers) {
          lLastUnusedAnnotationId = insertTier(
             layer, graph, document, annotationDocument, timeOrder, mapAnchorToTimeslotId,
             lLastUnusedAnnotationId, warnings, language);
@@ -2199,16 +1984,14 @@ public class EAFSerialization
       lastUnusedAnnotationId.setTextContent(""+(++lLastUnusedAnnotationId));
 
       // unlink the graph objects frome the XML elements
-      for (Annotation a : graph.getAnnotationsById().values())
-      {
+      for (Annotation a : graph.getAnnotationsById().values()) {
          a.remove("@alignableAnnotation");
          a.remove("@utterance");
       } // next annotation
       
       if (errors != null) throw errors;
       
-      try
-      {
+      try {
          TransformerFactory transformerFactory = TransformerFactory.newInstance();
          Transformer transformer = transformerFactory.newTransformer();
          
@@ -2226,9 +2009,7 @@ public class EAFSerialization
          // return a named stream from the file
          String name = IO.SafeFileNameUrl(IO.WithoutExtension(graph.getId())) + ".eaf";
          return new NamedStream(in, name);
-      }
-      catch(Exception exception)
-      {
+      } catch(Exception exception) {
          errors = new SerializationException();
          errors.initCause(exception);
          errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
@@ -2244,25 +2025,22 @@ public class EAFSerialization
     * @param mapAnchorToTimeslotId
     * @return The TIME_SLOT_ID for the anchor
     */
-   protected String ensureAnchorHasTimeslot(Anchor anchor, Document document, Element timeOrder, HashMap<String,String> mapAnchorToTimeslotId)
-   {
+   protected String ensureAnchorHasTimeslot(
+      Anchor anchor, Document document, Element
+      timeOrder, HashMap<String,String> mapAnchorToTimeslotId) {
+      
       if (mapAnchorToTimeslotId.containsKey(anchor.getId()))
       {
 	 return mapAnchorToTimeslotId.get(anchor.getId());
-      }
-      else
-      {
+      } else {
 	 Element timeSlot = document.createElement("TIME_SLOT");
 	 timeOrder.appendChild(timeSlot);
 	 String sId = "ts"+(mapAnchorToTimeslotId.size() + 1);
 	 timeSlot.setAttribute("TIME_SLOT_ID", sId);
 	 mapAnchorToTimeslotId.put(anchor.getId(), sId);
-	 if (anchor.getOffset() == null)
-	 {
+	 if (anchor.getOffset() == null) {
 	    System.err.println("Anchor " + anchor.getId() + " has no offset, and will be ignored.");
-	 }
-	 else
-	 {
+	 } else {
 	    long lMs = (long)((anchor.getOffset() * 1000)
 			      + 0.5); // rounding, not truncating
 	    timeSlot.setAttribute("TIME_VALUE", ""+lMs);
@@ -2282,10 +2060,12 @@ public class EAFSerialization
     * @param lLastUnusedAnnotationId The last unused annotation ID 
     * @return The new value for lLastUnusedAnnotationId
     */
-   protected long insertTier(Layer layer, Graph graph, Document document, Element annotationDocument, Element timeOrder, HashMap<String,String> mapAnchorToTimeslotId, long lLastUnusedAnnotationId, Consumer<String> warnings, String language)
-   {
-      if (layer.getAlignment() == 1)
-      { // point layer
+   protected long insertTier(
+      Layer layer, Graph graph, Document document, Element annotationDocument, Element timeOrder,
+      HashMap<String,String> mapAnchorToTimeslotId, long lLastUnusedAnnotationId,
+      Consumer<String> warnings, String language) {
+      
+      if (layer.getAlignment() == 1) { // point layer
          warnings.accept("Cannot serialize time-point layers: " + layer.getId());
 	 return lLastUnusedAnnotationId; // can't represent points is EAF
       }
@@ -2315,19 +2095,13 @@ public class EAFSerialization
       if (!layer.getPeers()
           && layer.getSaturated()
           && layer.getAlignment() == Constants.ALIGNMENT_NONE
-          && dominatingLayer.getId().equals(wordLayer.getId()))
-      { // word tag layer
+          && dominatingLayer.getId().equals(wordLayer.getId())) { // word tag layer
          sLinguisticTypeRef = "tag-lt";
          sAnnotationTag = "REF_ANNOTATION";
-      }
-      else if (layer.getPeers())
-      {
-         if (layer.getSaturated())
-         {
+      } else if (layer.getPeers()) {
+         if (layer.getSaturated()) {
             sLinguisticTypeRef = "partition-lt";
-         }
-         else
-         {
+         } else {
             sLinguisticTypeRef = "subinterval-lt";
          }
       }
@@ -2337,23 +2111,19 @@ public class EAFSerialization
       
       // for each annotation
       HashMap<String,Double> mapTierIdToLastOffset = new HashMap<String,Double>();
-      for (Annotation annotation : annotations)
-      {
-         if (annotation.getStart().getOffset() == null)
-         {
+      for (Annotation annotation : annotations) {
+         if (annotation.getStart().getOffset() == null) {
             warnings.accept("Annotation " + annotation.getId() + " \"" + annotation.getLabel()
                             + "\" has no start offset, and will be ignored.");
             continue;
          }
-         if (annotation.getEnd().getOffset() == null)
-         {
+         if (annotation.getEnd().getOffset() == null) {
             warnings.accept("Annotation " + annotation.getId() + " \"" + annotation.getLabel()
                             + "\" has no end offset, and will be ignored.");
             continue;
          }
          Annotation participant = null;
-         if (ancestorOfParticipant)
-         {
+         if (ancestorOfParticipant) {
             participant = annotation.first(participantLayer.getId());
          }
          String participantId = participant != null?participant.getId():"";
@@ -2365,8 +2135,7 @@ public class EAFSerialization
             :annotation.getParent();
          
          Vector<Element> vTiers = mSpeakerTiers.get(participantId);
-         if (vTiers == null)
-         {
+         if (vTiers == null) {
             // create a new tier
             vTiers = new Vector<Element>();
             Element firstTier = document.createElement("TIER");
@@ -2376,11 +2145,9 @@ public class EAFSerialization
             firstTier.setAttribute("TIER_ID", sId);
             firstTier.setAttribute("PARTICIPANT", participantName);
             if (language != null) firstTier.setAttribute("LANG_REF", language);
-            if (anDominating != null)
-            {
+            if (anDominating != null) {
                Element dominatingElement = (Element)anDominating.get("@alignableAnnotation");
-               if (dominatingElement != null)
-               {
+               if (dominatingElement != null) {
                   firstTier.setAttribute(
                      "PARENT_REF", 
                      ((Element)dominatingElement.getParentNode().getParentNode()).getAttribute("TIER_ID"));
@@ -2394,28 +2161,22 @@ public class EAFSerialization
          // find a tier to add the interval to - i.e. the first
          // one whose last interval is before this one
          Element tier = null;
-         for (Element t : vTiers)
-         {
+         for (Element t : vTiers) {
             // can we add to this tier?			
             if (mapTierIdToLastOffset.get(t.getAttribute("TIER_ID")).doubleValue()
-                <= annotation.getStart().getOffset())
-            {
+                <= annotation.getStart().getOffset()) {
                tier = t;
                break;
             }
          } // next possible tier
-         if (tier == null)
-         {
+         if (tier == null) {
             if (layer.getAlignment() == Constants.ALIGNMENT_NONE 
-                && layer.getParent().getId().equals(wordLayer.getId()))
-            { // unaligned word layer
+                && layer.getParent().getId().equals(wordLayer.getId())) { // unaligned word layer
                // subsequent annotations are alternatives,
                // so after we have the first one, skip the rest
                // TODO check for conjuctive (rather than disjunctive) cases like clitics dividing the word in two
                continue;
-            }
-            else
-            {
+            } else {
                // can't add to any current tier, so add a new one
                tier = document.createElement("TIER");
                annotationDocument.appendChild(tier);
@@ -2424,11 +2185,9 @@ public class EAFSerialization
                tier.setAttribute("TIER_ID", sId);
                tier.setAttribute("PARTICIPANT", participantName);
                if (language != null) tier.setAttribute("LANG_REF", language);
-               if (anDominating != null)
-               {
+               if (anDominating != null) {
                   Element dominatingElement = (Element)anDominating.get("@alignableAnnotation");
-                  if (dominatingElement != null)
-                  {
+                  if (dominatingElement != null) {
                      tier.setAttribute(
                         "PARENT_REF", 
                         ((Element)dominatingElement.getParentNode().getParentNode()).getAttribute("TIER_ID"));
@@ -2449,29 +2208,23 @@ public class EAFSerialization
          annotation.put("@alignableAnnotation", alignableAnnotation);
          
          // anchors?
-         if (layer.getAlignment() != Constants.ALIGNMENT_NONE)
-         {
+         if (layer.getAlignment() != Constants.ALIGNMENT_NONE) {
             alignableAnnotation.setAttribute(
                "TIME_SLOT_REF1", ensureAnchorHasTimeslot(
                   annotation.getStart(), document, timeOrder, mapAnchorToTimeslotId));
             alignableAnnotation.setAttribute(
                "TIME_SLOT_REF2", ensureAnchorHasTimeslot(
                   annotation.getEnd(), document, timeOrder, mapAnchorToTimeslotId));
-         }
-         else
-         {
+         } else {
             // hopefully it's in the map!
-            if (!anDominating.containsKey("@alignableAnnotation"))
-            {
+            if (!anDominating.containsKey("@alignableAnnotation")) {
                warnings.accept("Cannot link to dominating ANNOTATION_ID: "
                                + annotation.getLayerId() + ":" + annotation.getLabel()
                                + " (" + annotation.getStart() + "-" + annotation.getEnd() + ")"
                                +" - dominated by: "
                                + anDominating.getLayerId() + ":" + anDominating.getLabel()
                                + " (" + anDominating.getStart() + "-" + anDominating.getEnd() + ")");
-            }
-            else
-            {
+            } else {
                alignableAnnotation.setAttribute(
                   "ANNOTATION_REF",
                   ((Element)anDominating.get("@alignableAnnotation")).getAttribute("ANNOTATION_ID"));
@@ -2489,14 +2242,10 @@ public class EAFSerialization
       } // next annotation
 	 
       // add all the tiers we created
-      if (mSpeakerTiers.size() > 0)
-      {
-         for (String s : mSpeakerTiers.keySet())
-         {
-            for (Element t : mSpeakerTiers.get(s))
-            {
-               if (mSpeakerTiers.size() == 1)
-               {
+      if (mSpeakerTiers.size() > 0) {
+         for (String s : mSpeakerTiers.keySet()) {
+            for (Element t : mSpeakerTiers.get(s)) {
+               if (mSpeakerTiers.size() == 1) {
                   // no need to distinguish tiers using speaker name...
                   t.setAttribute("TIER_ID", layer.getId());
                }

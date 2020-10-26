@@ -47,11 +47,9 @@ import nzilbb.editpath.EditStep;
 import nzilbb.editpath.MinimumEditPath;
 import nzilbb.elan.*;
 
-public class TestEAFSerialization
-{
-   @Test public void utterance() 
-      throws Exception
-   {
+public class TestEAFSerialization {
+   
+   @Test public void utterance()  throws Exception {
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
 	 new Layer("scribe", "Author", 0, true, true, true),
@@ -223,8 +221,7 @@ public class TestEAFSerialization
       String[] wordLabels = {
 	 ". rest", "of", "that", "side", "of", "the", "famly", "so", "he --"
       };
-      for (int i = 0; i < wordLabels.length; i++)
-      {
+      for (int i = 0; i < wordLabels.length; i++) {
 	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
 	 	      i+1, words[i].getOrdinal());
@@ -235,8 +232,7 @@ public class TestEAFSerialization
 	 "there", "were", "so", "many", "people", "there", 
 	 "that", "nothing", "was", "done", "constructively"
       };
-      for (int i = 0; i < wordLabelsAfterPause.length; i++)
-      {
+      for (int i = 0; i < wordLabelsAfterPause.length; i++) {
 	 assertEquals("word labels " + (i+wordLabels.length), wordLabelsAfterPause[i], words[i+wordLabels.length].getLabel());
 	 assertEquals("Correct ordinal: " + i + " " + words[i+wordLabels.length].getLabel(), 
 	 	      i+1, words[i+wordLabels.length].getOrdinal());
@@ -284,9 +280,7 @@ public class TestEAFSerialization
       }
    }
 
-   @Test public void utterance_word() 
-      throws Exception
-   {
+   @Test public void utterance_word()  throws Exception {
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
 	 new Layer("scribe", "Author", 0, true, true, true),
@@ -355,8 +349,7 @@ public class TestEAFSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -471,8 +464,7 @@ public class TestEAFSerialization
 	 10.791, 11.067, 11.343, 11.619, 11.895, 12.171,
 	 12.411, 12.811, 12.991, 13.346, 14.889000000000001
       };
-      for (int i = 0; i < wordLabels.length; i++)
-      {
+      for (int i = 0; i < wordLabels.length; i++) {
 	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
 	 	      i+1, words[i].getOrdinal());
@@ -512,9 +504,7 @@ public class TestEAFSerialization
       }
    }
 
-   @Test public void utterance_word_phone() 
-      throws Exception
-   {
+   @Test public void utterance_word_phone() throws Exception {
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
 	 new Layer("scribe", "Author", 0, true, true, true),
@@ -589,8 +579,7 @@ public class TestEAFSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -701,8 +690,7 @@ public class TestEAFSerialization
 	 10.791, 11.067, 11.343, 11.619, 11.895, 12.171,
 	 12.411, 12.811, 12.991, 13.346, 14.889000000000001
       };
-      for (int i = 0; i < wordLabels.length; i++)
-      {
+      for (int i = 0; i < wordLabels.length; i++) {
 	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
 	 assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
 	 	      i+1, words[i].getOrdinal());
@@ -740,9 +728,7 @@ public class TestEAFSerialization
     * This tests that it's possible to deserialize without reference to a turn/utternance/word hierarchy.
     * In this case the utterances are simple 'freeform' annotations that are not tokenized.
     */
-   @Test public void freeform_keep_empty_utterances() 
-      throws Exception
-   {
+   @Test public void freeform_keep_empty_utterances()  throws Exception {
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
 	 new Layer("scribe", "Author", 0, true, true, true),
@@ -809,8 +795,7 @@ public class TestEAFSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -856,9 +841,7 @@ public class TestEAFSerialization
     * This tests that it's possible to deserialize without reference to a turn/utternance/word hierarchy.
     * In this case the utterances are simple 'freeform' annotations that are not tokenized.
     */
-   @Test public void freeform_ignore_empty_utterances() 
-      throws Exception
-   {
+   @Test public void freeform_ignore_empty_utterances()  throws Exception {
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
 	 new Layer("scribe", "Author", 0, true, true, true),
@@ -922,8 +905,7 @@ public class TestEAFSerialization
       Graph[] graphs = deserializer.deserialize();
       Graph g = graphs[0];
 
-      for (String warning : deserializer.getWarnings())
-      {
+      for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
       
@@ -966,9 +948,7 @@ public class TestEAFSerialization
 
    }
 
-   @Test public void basicSerialization()
-      throws Exception
-   {
+   @Test public void basicSerialization() throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("version_date", "Date")
@@ -1109,8 +1089,7 @@ public class TestEAFSerialization
 
       // add a media handler to test MEDIA_DESCRIPTOR
       graph.setMediaProvider(new GraphMediaProvider() {
-            public MediaFile[] getAvailableMedia() throws StoreException, PermissionException
-            {
+            public MediaFile[] getAvailableMedia() throws StoreException, PermissionException {
                MediaFile[] media = {
                   new MediaFile().setMimeType("audio/wav").setUrl("file://test.wav")
                };
@@ -1124,8 +1103,7 @@ public class TestEAFSerialization
          });  
 
       // add orthography tags that should not be used because orthography is not selected
-      for (Annotation word : graph.all("word"))
-      {
+      for (Annotation word : graph.all("word")) {
          graph.addTag(word, "orthography", word.getLabel()+"-orthography");
       }
       
@@ -1185,19 +1163,14 @@ public class TestEAFSerialization
       // test using diff
       File result = new File(dir, graph.getId() + ".eaf");
       String differences = diff(new File(dir, "expected_" + graph.getId() + ".eaf"), result);
-      if (differences != null)
-      {
+      if (differences != null) {
          fail(differences);
-      }
-      else
-      {
+      } else {
          result.delete();
       }
    }
 
-   @Test public void serialize()
-      throws Exception
-   {
+   @Test public void serialize() throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
 	 new Layer("scribe", "Transcriber")
@@ -1284,19 +1257,14 @@ public class TestEAFSerialization
       // test using diff
       File result = new File(dir, "serialize_utterance_word.eaf");
       String differences = diff(new File(dir, "expected_serialize_utterance_word.eaf"), result);
-      if (differences != null)
-      {
+      if (differences != null) {
          fail(differences);
-      }
-      else
-      {
+      } else {
          result.delete();
       }
    }
 
-   @Test public void serializeTags()
-      throws Exception
-   {
+   @Test public void serializeTags() throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
 	 new Layer("scribe", "Transcriber")
@@ -1387,19 +1355,14 @@ public class TestEAFSerialization
       // test using diff
       File result = new File(dir, "serialize_utterance_word_orthography.eaf");
       String differences = diff(new File(dir, "expected_serialize_utterance_word_orthography.eaf"), result);
-      if (differences != null)
-      {
+      if (differences != null) {
          fail(differences);
-      }
-      else
-      {
+      } else {
          result.delete();
       }
    }
 
-   @Test public void serializeNoWordTokens()
-      throws Exception
-   {
+   @Test public void serializeNoWordTokens() throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
 	 new Layer("scribe", "Transcriber")
@@ -1489,12 +1452,9 @@ public class TestEAFSerialization
       // test using diff
       File result = new File(dir, "serialize_utterance_no_word.eaf");
       String differences = diff(new File(dir, "expected_serialize_utterance_no_word.eaf"), result);
-      if (differences != null)
-      {
+      if (differences != null) {
          fail(differences);
-      }
-      else
-      {
+      } else {
          result.delete();
       }
    }
@@ -1505,35 +1465,29 @@ public class TestEAFSerialization
     * @param actual
     * @return null if the files are the same, and a String describing differences if not.
     */
-   public String diff(File expected, File actual)
-   {
+   public String diff(File expected, File actual) {
       StringBuffer d = new StringBuffer();
       
-      try
-      {
+      try {
          // compare with what we expected
          Vector<String> actualLines = new Vector<String>();
          BufferedReader reader = new BufferedReader(new FileReader(actual));
          String line = reader.readLine();
-         while (line != null)
-         {
+         while (line != null) {
             actualLines.add(line);
             line = reader.readLine();
          }
          Vector<String> expectedLines = new Vector<String>();
          reader = new BufferedReader(new FileReader(expected));
          line = reader.readLine();
-         while (line != null)
-         {
+         while (line != null) {
             expectedLines.add(line);
             line = reader.readLine();
          }
          MinimumEditPath<String> comparator = new MinimumEditPath<String>();
          List<EditStep<String>> path = comparator.minimumEditPath(expectedLines, actualLines);
-         for (EditStep<String> step : path)
-         {
-            switch (step.getOperation())
-            {
+         for (EditStep<String> step : path) {
+            switch (step.getOperation()) {
                case CHANGE:
                   d.append("\n"+expected.getPath()+":"+(step.getFromIndex()+1)+": Expected:\n" 
                            + step.getFrom() 
@@ -1551,9 +1505,7 @@ public class TestEAFSerialization
                   break;
             }
          } // next step
-      }
-      catch(Exception exception)
-      {
+      } catch(Exception exception) {
          d.append("\n" + exception);
       }
       if (d.length() > 0) return d.toString();
@@ -1570,18 +1522,13 @@ public class TestEAFSerialization
     * Getter for {@link #fDir}: Directory for text files.
     * @return Directory for text files.
     */
-   public File getDir() 
-   { 
-      if (fDir == null)
-      {
-	 try
-	 {
+   public File getDir() { 
+      if (fDir == null) {
+	 try {
 	    URL urlThisClass = getClass().getResource(getClass().getSimpleName() + ".class");
 	    File fThisClass = new File(urlThisClass.toURI());
 	    fDir = fThisClass.getParentFile();
-	 }
-	 catch(Throwable t)
-	 {
+	 } catch(Throwable t) {
 	    System.out.println("" + t);
 	 }
       }
@@ -1593,8 +1540,7 @@ public class TestEAFSerialization
     */
    public void setDir(File fNewDir) { fDir = fNewDir; }
 
-   public static void main(String args[]) 
-   {
+   public static void main(String args[]) {
       org.junit.runner.JUnitCore.main("nzilbb.praat.test.TestEAFSerialization");
    }
 }
