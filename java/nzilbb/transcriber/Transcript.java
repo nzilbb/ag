@@ -605,7 +605,21 @@ public class Transcript {
             // for each sync
             Enumeration<Sync> syncsEnum = turn.getSyncs().elements();
             while(syncsEnum.hasMoreElements()) {
-               Sync sync = syncsEnum.nextElement();	       
+               Sync sync = syncsEnum.nextElement();
+               String[] who = sync.getWho().split(" ");
+               if (!sync.isSimultaneousSpeech() && who.length > 1) {
+                  vErrors.add(
+                     "Simultaneous speech at " + sync.getTime() +"s contains no speakers.");
+                  // add syncs; the first with the existing text, the rest empty
+                  String text = sync.getText();
+                  sync.setText("");
+                  for (String w : who) {
+                     sync.addWho(w);
+                     sync.appendText(text);
+                     text = "";
+                  } // next speaker
+                  
+               }
                if (sync.isSimultaneousSpeech()) {
                   // whole bunch of syncs at once
                   Vector<String> vSpeakers = new Vector<String>();

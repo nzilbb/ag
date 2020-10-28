@@ -501,7 +501,7 @@ public class TranscriptSerialization
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-	 "Transcriber transcript", "1.9", "text/xml-transcriber", ".trs", "20200909.1954",
+	 "Transcriber transcript", "1.91", "text/xml-transcriber", ".trs", "20200909.1954",
          getClass().getResource("icon.png"));
    }
 
@@ -1019,6 +1019,7 @@ public class TranscriptSerialization
                   
 		  // lookup the turn annotation
 		  Annotation anTurn = htTurnAnnotations.get(thisSync.getWho());
+                  assert anTurn != null : "anTurn != null - " + thisSync + " : " + thisSync.getWho();
 		  Annotation anLine = new Annotation(
 		     null, anTurn.getLabel(), schema.getUtteranceLayerId());
                   anLine.setConfidence(Constants.CONFIDENCE_MANUAL);
@@ -1207,12 +1208,15 @@ public class TranscriptSerialization
     * Validates the input and returns a list of errors that would
     * prevent the input from being converted into an {@link AnnotationGraph}
     * when {@link #toAnnotationGraphs(LinkedHashMap)} is called.
-    * <p>This implementation checks for simultaneous speaker turns that have the same speaker mentioned more than once, speakers that have the same name, and mismatched start/end events.
+    * <p>This implementation checks for simultaneous speaker turns that have the same
+    * speaker mentioned more than once, speakers that have the same name, and mismatched
+    * start/end events.  
     * @return A list of errors, which will be empty if there were no validation errors.
     */
    public Vector<String> validate() {
       
-      warnings = new Vector<String>();
+      warnings = validationErrors();
+      if (warnings == null) warnings = new Vector<String>();
       // check there are speakers
       if (getSpeakers().size() == 0) {
 	 warnings.addElement("Transcript contains  no speakers.");
