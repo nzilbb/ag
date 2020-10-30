@@ -1132,7 +1132,9 @@ public class Graph
     * @param label The tag label.
     * @return The tag annotation created.
     * @see #createTag(Annotation,String,String)
+    * @deprecated  use {@link #createTag(Annotation,String,String)} instead.
     */
+   @Deprecated
    public Annotation addTag(Annotation toTag, String layerId, String label)
    {
       return addAnnotation(createTag(toTag, layerId, label));
@@ -1168,7 +1170,9 @@ public class Graph
     * @param parent The new annotation's parent.
     * @return The new annotation.
     * @see #createSpan(Annotation,Annotation,String,String,Annotation)
+    * @deprecated Use {@link #createSpan(Annotation,Annotation,String,String,Annotation)}
     */
+   @Deprecated
    public Annotation addSpan(Annotation from, Annotation to, String layerId, String label, Annotation parent)
    {
       return addAnnotation(createSpan(from, to, layerId, label, parent));
@@ -1234,7 +1238,9 @@ public class Graph
     * @param label The label of the resulting annotation.
     * @return The new annotation.
     * @see #createSpan(Annotation,Annotation,String,String)
+    * @deprecated Use {@link #createSpan(Annotation,Annotation,String,String)}
     */
+   @Deprecated
    public Annotation addSpan(Annotation from, Annotation to, String layerId, String label)
    {
       return addAnnotation(createSpan(from, to, layerId, label));
@@ -1277,7 +1283,9 @@ public class Graph
     * @param label The label of the resulting annotation.
     * @param parent The new annotation's parent.
     * @return The new annotation.
+    * @deprecated Use {@link #createAnnotation(Anchor,Anchor,String,String,Annotation)}
     */
+   @Deprecated
    public Annotation addAnnotation(Anchor from, Anchor to, String layerId, String label, Annotation parent)
    {
       return addAnnotation(createAnnotation(from, to, layerId, label, parent));
