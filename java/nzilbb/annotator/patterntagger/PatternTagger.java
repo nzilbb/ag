@@ -258,6 +258,11 @@ public class PatternTagger extends Annotator {
          throw new InvalidConfigurationException(this, "Invalid source layer: " + sourceLayerId);
       if (destinationLayerId == null)
          throw new InvalidConfigurationException(this, "Destination layer not set.");
+      // source and destination can't be the same
+      if (sourceLayerId.equals(destinationLayerId)) {
+         throw new InvalidConfigurationException(
+            this, "Source and destination layers cannot be the dame: " + sourceLayerId);
+      }
       if (transcriptLanguageLayerId != null && schema.getLayer(transcriptLanguageLayerId) == null)
          throw new InvalidConfigurationException(
             this, "Invalid transcript language layer: " + transcriptLanguageLayerId);

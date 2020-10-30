@@ -124,7 +124,7 @@ public class TestPatternTagger {
          annotator.setTaskParameters(
             "{\"sourceLayerId\":\"word\","
             +"\"transcriptLanguageLayerId\":\"transcript_language\","
-            +"\"phraseLanguageLayerId\":\"nonexistent\","
+            +"\"phraseLanguageLayerId\":\"language\","
             // invalid regular expression:
             +"\"language\":\"*\","
             +"\"deleteOnNoMatch\":\"false\","
@@ -156,7 +156,7 @@ public class TestPatternTagger {
          annotator.setTaskParameters(
             "{\"sourceLayerId\":\"word\","
             +"\"transcriptLanguageLayerId\":\"transcript_language\","
-            +"\"phraseLanguageLayerId\":\"language\","
+            +"\"phraseLanguageLayerId\":\"lang\","
             +"\"language\":\"en.*\","
             +"\"deleteOnNoMatch\":\"false\","
             +"\"destinationLayerId\":\"word\","
@@ -356,7 +356,7 @@ public class TestPatternTagger {
          .setParentId(schema.getWordLayerId())
          .setType(Constants.TYPE_NUMBER));
       int i = 0;
-      for (Annotation word : g.all("word")) g.addTag(word, "index", ""+(++i));
+      for (Annotation word : g.all("word")) g.createTag(word, "index", ""+(++i));
       
       g.trackChanges();
       annotator.setSchema(schema);
@@ -593,7 +593,7 @@ public class TestPatternTagger {
       assertEquals("double check the fifth word is what we think it is: "+fifthWord,
                    "ah...", fifthWord.getLabel());
       // tag the fifth word manually
-      g.addTag(fifthWord, "pause", "manually-added");
+      g.createTag(fifthWord, "pause", "manually-added");
       
       assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
                    9, g.all("word").length);
@@ -656,7 +656,7 @@ public class TestPatternTagger {
       
       Graph g = pauseGraph();
       // tag the graph as being in Spanish
-      g.addTag(g, "transcript_language", "es");
+      g.createTag(g, "transcript_language", "es");
       
       Schema schema = g.getSchema();
       // pre-add the output layer, but aligned
@@ -729,7 +729,7 @@ public class TestPatternTagger {
                    "aah", firstWord.getLabel());
       
       // tag the first word as being in New Zealand English
-      g.addTag(firstWord, "lang", "en-NZ");
+      g.createTag(firstWord, "lang", "en-NZ");
       
       assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
                    9, g.all("word").length);
@@ -752,7 +752,7 @@ public class TestPatternTagger {
       
       Graph g = pauseGraph();
       // tag the graph as being in New Zealand English
-      g.addTag(g, "transcript_language", "en-NZ");
+      g.createTag(g, "transcript_language", "en-NZ");
       
       Schema schema = g.getSchema();
       annotator.setSchema(schema);
@@ -817,7 +817,7 @@ public class TestPatternTagger {
                    "aah", firstWord.getLabel());
       
       // tag the first word as being in Spanish
-      g.addTag(firstWord, "lang", "es");
+      g.createTag(firstWord, "lang", "es");
       
       assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
                    9, g.all("word").length);
@@ -1115,7 +1115,7 @@ public class TestPatternTagger {
          .setPeers(false)
          .setParentId(schema.getWordLayerId())
          .setType(Constants.TYPE_STRING));
-      for (Annotation word : g.all("word")) g.addTag(word, "orthography", word.getLabel());
+      for (Annotation word : g.all("word")) g.createTag(word, "orthography", word.getLabel());
       
       annotator.setSchema(schema);
       
@@ -1358,15 +1358,15 @@ public class TestPatternTagger {
          new Annotation().setLayerId("turn").setLabel("jester")
          .setStart(aPunchline).setEnd(end)
          .setParent(jester));
-      g.addTag(story, "utterance",
+      g.createTag(story, "utterance",
                "ok, once upon a time there was a jester who told a great joke"
                +" and then everyone lived happily ever after, do you want to hear it?");
-      g.addTag(ok, "utterance",         "ok");
-      g.addTag(knockKnock, "utterance", "knock knock");
-      g.addTag(whosThere, "utterance",  "who's there?");
-      g.addTag(dejav, "utterance",      "dejav");
-      g.addTag(dejavWho, "utterance",   "dejav who?");
-      g.addTag(punchline, "utterance",  "knock knock");
+      g.createTag(ok, "utterance",         "ok");
+      g.createTag(knockKnock, "utterance", "knock knock");
+      g.createTag(whosThere, "utterance",  "who's there?");
+      g.createTag(dejav, "utterance",      "dejav");
+      g.createTag(dejavWho, "utterance",   "dejav who?");
+      g.createTag(punchline, "utterance",  "knock knock");
 
       try {
          new SimpleTokenizer("utterance", "word").transform(g);
