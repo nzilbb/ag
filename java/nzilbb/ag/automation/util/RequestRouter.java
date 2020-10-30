@@ -39,6 +39,7 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import nzilbb.ag.automation.Annotator;
+import nzilbb.util.CloneableBean;
 import nzilbb.util.IO;
 import org.apache.commons.fileupload.MultipartStream;
 
@@ -341,6 +342,8 @@ public class RequestRouter
          return (InputStream)result;
       } else if (result == annotator) { // method returns a reference to its object
          return null;
+      } else if (result instanceof CloneableBean) {
+         return new ByteArrayInputStream(((CloneableBean)result).toJson().toString().getBytes());
       } else {
          return new ByteArrayInputStream(result.toString().getBytes());
       }
