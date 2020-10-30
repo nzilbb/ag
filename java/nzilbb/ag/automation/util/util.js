@@ -125,8 +125,12 @@ function convertFormBodyToJSON(form, body) {
     var inputs = form.elements;
     for (i = 0; i < inputs.length; i++) {
         if (inputs[i].name) {
-            // add the parameter to the body
-            body[inputs[i].name] = inputs[i].value;
+            // skip unchecked radio buttons / checkboxes
+            if ((inputs[i].type != "radio" && inputs[i].type != "checkbox")
+                || inputs[i].checked) {
+                // add the parameter to the body
+                body[inputs[i].name] = inputs[i].value;
+            }
         }
         // disable the input
         inputs[i].setAttribute("disabled", "");
