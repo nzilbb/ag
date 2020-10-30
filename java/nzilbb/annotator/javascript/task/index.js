@@ -51,10 +51,10 @@ getSchema(s => {
         if (parameters == null || parameters == "") {
             document.getElementById("labelMappingFalse").checked = true;
             setScript("// for each turn in the transcript\n"
-		      +"for each (turn in transcript.list(\"turns\")) {\n"
+		      +"for each (turn in transcript.all(\""+schema.turnLayerId+"\")) {\n"
 		      +"  if (annotator.cancelling) break; // cancelled by the user\n"
 		      +"  // for each word\n"
-		      +"  for each (word in turn.list(\"transcript\")) {\n"
+		      +"  for each (word in turn.all(\""+schema.wordLayerId+"\")) {\n"
 		      +"    // ** change the following line to tag the word as desired **\n"
 		      +"    tag = word.createTag(\""+window.location.search.substring(1)+"\", \"length: \" + word.label.length());\n"
 		      +"    log(\"Tagged word \" + word.label + \" with \" + tag.label);\n"

@@ -56,7 +56,7 @@
       length:</p> 
 <pre>
 <span style="color:#8b4513;">// for each turn in the transcript</span>
-<span style="color:#800080;">for</span> each (turn <span style="color:#800080;">in</span> transcript.list(&quot;turns&quot;)) {
+<span style="color:#800080;">for</span> each (turn <span style="color:#800080;">in</span> transcript.all(&quot;turns&quot;)) {
 &nbsp; <span style="color:#800080;">if</span> (annotator.cancelling) <span style="color:#800080;">break</span>; <span style="color:#8b4513;">// cancelled by the user</span>
 &nbsp; <span style="color:#8b4513;">// for each word</span>
 &nbsp; <span style="color:#800080;">for</span> each (word <span style="color:#800080;">in</span> turn.all(&quot;transcript&quot;)) {

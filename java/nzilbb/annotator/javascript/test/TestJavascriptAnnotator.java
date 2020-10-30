@@ -403,9 +403,6 @@ public class TestJavascriptAnnotator {
       Schema schema = g.getSchema();
       annotator.setSchema(schema);
 
-      // create the output layer
-      annotator.newLayer("test", schema.getRoot().getId(), Constants.ALIGNMENT_INTERVAL);
-
       String[] scripts = {
          "for each (w in transcript.all('word')) w.createTag(\\\"test\\\", \\\"l\\\");",
          "for each (w in transcript.all('word')) transcript.createTag(w, \\\"test\\\", \\\"l\\\");",
@@ -462,7 +459,18 @@ public class TestJavascriptAnnotator {
                       "test", outputLayers[0]);
          
       } // next script
-   }
+
+      assertNotNull("default output layer was created",
+                    schema.getLayer("test"));
+      assertEquals("default output layer child of root",
+                   schema.getRoot().getId(), schema.getLayer("test").getParentId());
+      assertEquals("default output layer not aligned",
+                   Constants.ALIGNMENT_INTERVAL,
+                   schema.getLayer("test").getAlignment());
+      assertEquals("default output layer type correct",
+                   Constants.TYPE_STRING,
+                   schema.getLayer("test").getType());
+}
 
    /**
     * Returns a graph with word-spans for annotating.

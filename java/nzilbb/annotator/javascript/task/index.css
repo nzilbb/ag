@@ -61,6 +61,10 @@ button img {
     height: 12pt;
 }
 
+td {
+    vertical-align: top;
+}
+
 /* Layout on narrower screens */
 @media all and (max-width: 640px) {
     .field { flex-direction: column; }

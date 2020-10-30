@@ -325,8 +325,12 @@ public class JavascriptAnnotator extends Annotator {
          // ensure all output layers exist
          for (String layerId : outputLayers) {
             if (schema.getLayer(layerId) == null) {
-               throw new InvalidConfigurationException(
-                  this, "Invalid output layer: " + layerId);
+               schema.addLayer(
+                  new Layer(layerId)
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true)
+                  .setParentId(schema.getRoot().getId())
+                  .setType(Constants.TYPE_STRING));
             }
          }
       } // full script
