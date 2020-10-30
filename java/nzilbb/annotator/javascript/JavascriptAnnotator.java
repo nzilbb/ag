@@ -256,10 +256,6 @@ public class JavascriptAnnotator extends Annotator {
       }
       // there must be at least one destination layer
       String[] outputLayers = getOutputLayers();
-      if (outputLayers.length == 0) {
-         throw new InvalidConfigurationException(
-            this, "There are no destination layers specified.");
-      }
       if (getLabelMapping()) {
          // if the destination layer doesn't exist yet, create it
          Layer sourceLayer = schema.getLayer(sourceLayerId);
@@ -364,6 +360,7 @@ public class JavascriptAnnotator extends Annotator {
             "\\.last\\(\"([^\"]+)\"\\)",       "\\.last\\('([^']+)'\\)",
             "\\.getAnnotations\\(\"([^\"]+)\"\\)"
             ,                                  "\\.getAnnotations\\('([^']+)'\\)",
+            "\\.annotations\\(\"([^\"]+)\"\\)","\\.annotations\\('([^']+)'\\)",
             "\\.includingAnnotationsOn\\(\"([^\"]+)\"\\)"
             ,                                  "\\.includingAnnotationsOn\\('([^']+)'\\)",
             "\\.includedAnnotationsOn\\(\"([^\"]+)\"\\)"
@@ -406,23 +403,23 @@ public class JavascriptAnnotator extends Annotator {
             "\\.createTag\\(\"([^\"]+)\",[^)]+\\)", 
             "\\.createTag\\('([^']+)',[^)]+\\)",
             // Graph.createTag(annotation, layerId, label)
-            "transcript\\.createTag\\([^,]+,\\w*\"([^\"]+)\",[^)]+\\)", 
-            "transcript\\.createTag\\([^,]+,\\w*'([^']+)',[^)]+\\)",
+            "transcript\\.createTag\\([^,]+,\\s*\"([^\"]+)\",[^)]+\\)", 
+            "transcript\\.createTag\\([^,]+,\\s*'([^']+)',[^)]+\\)",
             // Graph.addTag(annotation, layerId, label)
-            "\\.addTag\\([^,]+,\\w*\"([^\"]+)\",[^)]+\\)",
-            "\\.addTag\\([^,]+,\\w*'([^']+)',[^)]+\\)",
+            "\\.addTag\\([^,]+,\\s*\"([^\"]+)\",[^)]+\\)",
+            "\\.addTag\\([^,]+,\\s*'([^']+)',[^)]+\\)",
             // Graph.createSpan(from, to, layerId, label[, parent])
-            "\\.createSpan\\([^)]+,\\w*\"([^\"]+)\"[^)]*\\)", 
-            "\\.createSpan\\([^)]+,\\w*'([^']+)'[^)]*\\)", 
+            "\\.createSpan\\([^)\"]+,\\s*\"([^\"]+)\"[^)]*\\)", 
+            "\\.createSpan\\([^)']+,\\s*'([^']+)'[^)]*\\)", 
             // Graph.addSpan(from, to, layerId, label[, parent])
-            "\\.addSpan\\([^)]+,\\w*\"([^\"]+)\"[^)]*\\)", 
-            "\\.addSpan\\([^)]+,\\w*'([^']+)'[^)]*\\)", 
+            "\\.addSpan\\([^)\"]+,\\s*\"([^\"]+)\"[^)]*\\)", 
+            "\\.addSpan\\([^)']+,\\s*'([^']+)'[^)]*\\)", 
             // Graph.createAnnotation(from, to, layerId, label[, parent])
-            "\\.createAnnotation\\([^)]+,\\w*\"([^\"]+)\"[^)]*\\)", 
-            "\\.createAnnotation\\([^)]+,\\w*'([^']+)'[^)]*\\)", 
+            "\\.createAnnotation\\([^\"]+,\\s*\"([^\"]+)\"[^)]*\\)", 
+            "\\.createAnnotation\\([^']+,\\s*'([^']+)'[^)]*\\)", 
             // Graph.addAnnotation(from, to, layerId, label[, parent])
-            "\\.addAnnotation\\([^)]+,\\w*\"([^\"]+)\"[^)]*\\)", 
-            "\\.addAnnotation\\([^)]+,\\w*'([^']+)'[^)]*\\)", 
+            "\\.addAnnotation\\([^\"]+,\\s*\"([^\"]+)\"[^)]*\\)", 
+            "\\.addAnnotation\\([^']+,\\s*'([^']+)'[^)]*\\)", 
          };
          for (String pattern : patterns) {
             Matcher matcher = Pattern.compile(pattern).matcher(script);

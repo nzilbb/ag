@@ -321,6 +321,149 @@ public class TestJavascriptAnnotator {
       } // next check
    }
 
+   /* Test detection of input layers. */
+   @Test public void inputLayerDetection() throws Exception {
+      JavascriptAnnotator annotator = new JavascriptAnnotator();
+      
+      Graph g = graph();
+      Schema schema = g.getSchema();
+      annotator.setSchema(schema);
+
+      // create the output layer
+      annotator.newLayer("cv", schema.getWordLayerId(), Constants.ALIGNMENT_NONE);
+
+      String[] scripts = {
+         "for each (w in transcript.all(\\\"word\\\")) w.createTag('cv', 'test');",
+         "for each (w in transcript.list(\\\"word\\\")) w.createTag('cv', 'test');",
+         "transcript.first(\\\"word\\\").createTag('cv', 'test');",
+         "transcript.last(\\\"word\\\").createTag('cv', 'test');",
+         "transcript.my(\\\"word\\\").createTag('cv', 'test');",
+         "for each (w in transcript.getAnnotations(\\\"word\\\")) w.createTag('cv', 'test');",
+         "for each (w in transcript.annotations(\\\"word\\\")) w.createTag('cv', 'test');",
+         "for each (w in transcript.includingAnnotationsOn(\\\"word\\\")) w.createTag('cv', 'test');",
+         "for each (w in transcript.includedAnnotationsOn(\\\"word\\\")) w.createTag('cv', 'test');",
+         "for each (w in transcript.midpointIncludingAnnotationsOn(\\\"word\\\")) w.createTag('cv', 'test');",
+         "for each (w in transcript.tagsOn(\\\"word\\\")) w.createTag('cv', 'test');",
+         "for each (w in transcript.getAncestor(\\\"word\\\")) w.createTag('cv', 'test');",
+         "for each (w in transcript.overlappingAnnotations(transcript, \\\"word\\\")) w.createTag('cv', 'test');",
+      };
+         
+      for (String script : scripts) {
+         
+         // double-quotes version
+         try {
+            annotator.setTaskParameters(
+               "{\"sourceLayerId\":\"word\","
+               +"\"destinationLayerId\":\"\","
+               +"\"labelMapping\":\"false\","
+               +"\"transcriptLanguageLayerId\":\"\"," // no transcript language layer
+               +"\"phraseLanguageLayerId\":null,"     // null phrase language layer
+               +"\"language\":\"\","
+               +"\"script\":\""+script+"\""
+            +"}");
+         } catch (InvalidConfigurationException x) {
+            fail("Double-quotes: setTaskParameters: "+script+" : "+x);
+         }
+         String[] requiredLayers = annotator.getRequiredLayers();
+         assertEquals("Double-quotes: 1 required layer: "+script+" : "+requiredLayers,
+                      1, requiredLayers.length);
+         assertEquals("Double-quotes: word required: "+script+" : "+requiredLayers,
+                      "word", requiredLayers[0]);
+
+         // single-quotes version
+         script = script.replace("\\\"","'");
+         try {
+            annotator.setTaskParameters(
+               "{\"sourceLayerId\":\"word\","
+               +"\"destinationLayerId\":\"\","
+               +"\"labelMapping\":\"false\","
+               +"\"transcriptLanguageLayerId\":\"\"," // no transcript language layer
+               +"\"phraseLanguageLayerId\":null,"     // null phrase language layer
+               +"\"language\":\"\","
+               +"\"script\":\""+script+"\""
+               +"}");
+         } catch (InvalidConfigurationException x) {
+            fail("Double-quotes: setTaskParameters: "+script+" : "+x);
+         }
+         
+         requiredLayers = annotator.getRequiredLayers();
+         assertEquals("Single-quotes: 1 required layer: "+script+" : "+requiredLayers,
+                      1, requiredLayers.length);
+         assertEquals("Single-quotes: word required: "+script+" : "+requiredLayers,
+                      "word", requiredLayers[0]);
+         
+      } // next script
+   }
+
+   /* Test detection of output layers. */
+   @Test public void outputLayerDetection() throws Exception {
+      JavascriptAnnotator annotator = new JavascriptAnnotator();
+      
+      Graph g = graph();
+      Schema schema = g.getSchema();
+      annotator.setSchema(schema);
+
+      // create the output layer
+      annotator.newLayer("test", schema.getRoot().getId(), Constants.ALIGNMENT_INTERVAL);
+
+      String[] scripts = {
+         "for each (w in transcript.all('word')) w.createTag(\\\"test\\\", \\\"l\\\");",
+         "for each (w in transcript.all('word')) transcript.createTag(w, \\\"test\\\", \\\"l\\\");",
+         "for each (w in transcript.all('word')) transcript.addTag(w, \\\"test\\\", \\\"l\\\");",
+         "for each (w in transcript.all('word')) transcript.createSpan(w, w, \\\"test\\\", \\\"l\\\");",
+         "for each (w in transcript.all('word')) transcript.createSpan(w, w, \\\"test\\\", \\\"l\\\", transcript);",
+         "for each (w in transcript.all('word')) transcript.addSpan(w, w, \\\"test\\\", \\\"l\\\", transcript);",
+         "for each (w in transcript.all('word')) transcript.createAnnotation(w.getStart(), w.getEnd(), \\\"test\\\", \\\"l\\\");",
+         "for each (w in transcript.all('word')) transcript.addAnnotation(w.getStart(), w.getEnd(), \\\"test\\\", \\\"l\\\");",
+      };
+         
+      for (String script : scripts) {
+         
+         // double-quotes version
+         try {
+            annotator.setTaskParameters(
+               "{\"sourceLayerId\":\"word\","
+               +"\"destinationLayerId\":\"\","
+               +"\"labelMapping\":\"false\","
+               +"\"transcriptLanguageLayerId\":\"\"," // no transcript language layer
+               +"\"phraseLanguageLayerId\":null,"     // null phrase language layer
+               +"\"language\":\"\","
+               +"\"script\":\""+script+"\""
+            +"}");
+         } catch (InvalidConfigurationException x) {
+            fail("Double-quotes: setTaskParameters: "+script+" : "+x);
+         }
+         String[] outputLayers = annotator.getOutputLayers();
+         assertEquals("Double-quotes: 1 required layer: "+script+": "+Arrays.asList(outputLayers),
+                      1, outputLayers.length);
+         assertEquals("Double-quotes: word required: "+script+" : "+Arrays.asList(outputLayers),
+                      "test", outputLayers[0]);
+
+         // single-quotes version
+         script = script.replace("\\\"","'");
+         try {
+            annotator.setTaskParameters(
+               "{\"sourceLayerId\":\"word\","
+               +"\"destinationLayerId\":\"\","
+               +"\"labelMapping\":\"false\","
+               +"\"transcriptLanguageLayerId\":\"\"," // no transcript language layer
+               +"\"phraseLanguageLayerId\":null,"     // null phrase language layer
+               +"\"language\":\"\","
+               +"\"script\":\""+script+"\""
+               +"}");
+         } catch (InvalidConfigurationException x) {
+            fail("Double-quotes: setTaskParameters: "+script+" : "+x);
+         }
+         
+         outputLayers = annotator.getOutputLayers();
+         assertEquals("Single-quotes: 1 required layer: "+script+": "+Arrays.asList(outputLayers),
+                      1, outputLayers.length);
+         assertEquals("Single-quotes: word required: "+script+" : "+Arrays.asList(outputLayers),
+                      "test", outputLayers[0]);
+         
+      } // next script
+   }
+
    /**
     * Returns a graph with word-spans for annotating.
     * @return The graph for testing with.
