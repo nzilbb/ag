@@ -1,0 +1,75 @@
+body {
+    background-color: #ffffff;
+    color: #353833;
+    font-family: 'DejaVu Sans', Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    margin: auto;
+    height: 100%;
+    width: 100%;
+    max-width: 800px;
+}
+
+h1 { font-size: 17pt; color: #859044; text-align: center; }
+h2 { font-size: 16pt; color: #859044; text-align: center; }
+h3 { font-size: 15pt; color: #859044; font-style:italic; }
+h4 { font-size: 14pt; color: #859044; }
+h5 { font-size: 13pt; color: #859044; }
+h6 { font-size: 12pt; color: #859044; }
+
+summary { padding: 10px; }
+
+label {
+    font-weight: bold;
+}
+form {
+    width: max-content;
+}
+.field {
+    display: flex;
+    flex-direction: row;
+}
+.field label {
+    width: 50%;
+    display: block;
+}
+.field span {
+    width: 50%;
+}
+.field input[type="number"] {
+    width: 75px;
+}
+
+footer {
+    text-align: center;
+    font-style: italic;
+}
+
+.error {
+    color: red;
+}
+
+progress {
+    width: 100%;
+}
+
+button img {
+    height: 20px;
+}
+
+#labelScript {
+    vertical-align: middle;
+    height: 12pt;
+}
+
+td {
+    vertical-align: top;
+}
+
+/* Layout on narrower screens */
+@media all and (max-width: 640px) {
+    .field { flex-direction: column; }
+    .field span, .field label { width: 100%; }
+    .test { display: flex; flex-direction: column; }
+    .test input { width: 50%; }
+    #arrow:before {content: "↓"; }
+}
