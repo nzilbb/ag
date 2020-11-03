@@ -39,6 +39,8 @@ import java.text.SimpleDateFormat;
 import java.util.Vector;
 import java.util.Enumeration;
 import java.util.Base64;
+import java.util.function.IntConsumer;
+import java.util.function.LongConsumer;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.jar.Attributes;
@@ -137,6 +139,58 @@ public class IO
     * Saves the content of a URL to a file.
     * @param url The URL of the content.
     * @param file The file to save the content to.
+    * @param percentComplete A monitor object that receives progress updates, as an
+    * integer representing percent complete. Can be null. 
+    * @return The number size of the content in bytes.
+    * @throws IOException On file IO error.
+    */
+   public static long SaveUrlToFile(URL url, File file, IntConsumer percentComplete)
+      throws IOException {
+      return SaveUrlConnectionToFile(url.openConnection(), file, percentComplete);
+   } // end of SaveUrlToFile()
+
+   /**
+    * Saves the content of a URL to a file.
+    * @param connection The URL connection to the content.
+    * @param file The file to save the content to.
+    * @param percentComplete A monitor object that receives progress updates, as an
+    * integer representing percent complete. Can be null. 
+    * @return The number size of the content in bytes.
+    * @throws IOException On file IO error.
+    */
+   public static long SaveUrlConnectionToFile(
+      URLConnection connection, File file, IntConsumer percentComplete) throws IOException {
+      final long totalBytes = connection.getContentLengthLong();
+      return SaveInputStreamToFile(
+         connection.getInputStream(),
+         file,
+         percentComplete == null || totalBytes < 0?null:
+         new LongConsumer() {
+            public void accept(long bytesSoFar) {
+               percentComplete.accept((int)((double)(bytesSoFar * 100) / (double)totalBytes));
+            }
+         });
+   } // end of SaveUrlConnectionToFile()
+
+   /**
+    * Saves the content of a URL to a file.
+    * @param input The input stream containing the file content.
+    * @param file The file to save the content to.
+    * @param bytesCopied A monitor object that receives progress updates, as a long
+    * representing the number of bytes saved. Can be null.
+    * @return The number size of the content in bytes.
+    * @throws IOException On file IO error.
+    */
+   public static long SaveInputStreamToFile(InputStream input, File file, LongConsumer bytesSaved)
+      throws IOException {
+      FileOutputStream output = new FileOutputStream(file);
+      return Pump(input, output, true, bytesSaved);
+   } // end of SaveUrlConnectionToFile()
+
+   /**
+    * Saves the content of a URL to a file.
+    * @param url The URL of the content.
+    * @param file The file to save the content to.
     * @return The number size of the content in bytes.
     * @throws IOException On file IO error.
     */
@@ -200,7 +254,7 @@ public class IO
     * @throws IOException On file IO error.
     */
    public static long Pump(InputStream input, OutputStream output) throws IOException {
-      return Pump(input, output, true);
+      return Pump(input, output, true, null);
    }
    /**
     * Copy all data from an input stream to an output stream.
@@ -213,6 +267,22 @@ public class IO
     */
    public static long Pump(InputStream input, OutputStream output, boolean closeStreams)
       throws IOException {
+      return Pump(input, output, closeStreams, null);
+   } // end of Pump()
+   
+   /**
+    * Copy all data from an input stream to an output stream.
+    * @param input Source of data.
+    * @param output Destination for data.
+    * @param closeStreams true if the streams should be closed after the data is
+    * exhausted, false otherwise. 
+    * @param bytesCopied A monitor object that receives progress updates, as a long
+    * representing the number of bytes copied. Can be null.
+    * @return The number of bytes copied.
+    * @throws IOException On file IO error.
+    */
+   public static long Pump(InputStream input, OutputStream output, boolean closeStreams, LongConsumer bytesCopied)
+      throws IOException {
       
       long totalBytes = 0;
       
@@ -221,6 +291,9 @@ public class IO
       while (bytesRead >= 0) {
          totalBytes += bytesRead;
          output.write(buffer, 0, bytesRead);
+         if (bytesCopied != null) {
+            bytesCopied.accept(totalBytes);
+         }
          bytesRead = input.read(buffer);
       } // next chunk	
       output.flush();
