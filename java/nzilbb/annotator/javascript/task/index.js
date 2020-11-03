@@ -213,7 +213,6 @@ function setTaskParameters(form) {
     var labelMapping = document.getElementById("labelMappingTrue").checked;
     
     // validate script
-    var jsSource = document.getElementById("script");
     if (labelMapping) {
         var jsSource = document.getElementById("labelScript");
         if (jsSource.value.length == 0) {
