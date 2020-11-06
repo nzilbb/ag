@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title> Label Mapper </title>
+    <style type="text/css"> td { text-align: center; } </style>
+  </head>
+  <body>
+    <h1> Label Mapper </h1>
+    
+    <p> This annotator creates a mapping between the labels of two layers, by finding the
+      minimum edit path between them. </p> 
+    
+    <p> For example, this layer manager can be used to tag each phone in a word with its
+      likely counterpart in another phonemic transcription: </p>
+    
+    <table>
+      <tr><td>d</td><td>ɪ</td><td>f</td><td>ə</td><td>ɹ</td><td>n̩</td><td>t</td></tr>
+      <tr><td>↓</td><td>↓</td><td>↓</td><td></td><td>↓</td><td>↓</td><td>↓</td></tr>
+      <tr><td>d</td><td>ɪ</td><td>f</td><td></td><td>ɹ</td><td>ən</td><td>t</td></tr>
+    </table>
+    
+    <p> &hellip; or phonemic encoding: </p>
+    
+    <table>
+      <tr><td>d</td><td>ɪ</td><td>f</td><td>ə</td><td>ɹ</td><td>n̩</td><td>n</td><td>t</td></tr>
+      <tr><td>↓</td><td>↓</td><td>↓</td><td>↓</td><td>↓</td><td>↓</td><td>↓</td><td>↓</td></tr>
+      <tr><td>D</td><td>IH1</td><td>F</td><td>ER0</td><td>R</td><td>AH0</td><td>N</td><td>T</td></tr>
+    </table>
+    
+    <p> One possible use is to map non-rhotic phones to their equivalent rhotic
+      transcription: </p>
+    
+    <table>
+      <tr><td>f</td><td>αɪ</td><td>ə</td><td>f</td><td>αɪ</td><td>t</td><td>ə</td></tr>
+      <tr><td>↓</td><td>↓</td><td>↓</td><td>↓</td><td>↓</td><td>↓</td><td>↓</td></tr>
+      <tr><td>f</td><td>αɪ</td><td>əɹ</td><td>f</td><td>αɪ</td><td>t</td><td>əɹ</td></tr>
+    </table>
+  </body>
+</html>

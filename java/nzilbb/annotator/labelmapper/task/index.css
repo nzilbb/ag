@@ -1,0 +1,77 @@
+body {
+    background-color: #ffffff;
+    color: #353833;
+    font-family: 'DejaVu Sans', Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    margin: auto;
+    height: 100%;
+    width: 100%;
+    max-width: 800px;
+}
+
+h1 { font-size: 17pt; color: #859044; text-align: center; }
+h2 { font-size: 16pt; color: #859044; text-align: center; }
+h3 { font-size: 15pt; color: #859044; font-style:italic; }
+h4 { font-size: 14pt; color: #859044; }
+h5 { font-size: 13pt; color: #859044; }
+h6 { font-size: 12pt; color: #859044; }
+
+#settings-help > details > summary {
+    font-weight: bold;
+}
+#settings-help > details > details {
+    margin-left: 10px;
+}
+#settings-help, #examples {
+    padding-bottom: 5px;
+}
+#examples > details > details {
+    padding: 10px;
+}
+td {
+    text-align: center;
+}
+th, th + td  {
+    text-align: left;
+}
+
+label {
+    font-weight: bold;
+}
+label:after {
+    content: ':';
+}
+.field {
+    display: flex;
+    flex-direction: row;
+}
+.field > label {
+    width: 33%;
+    display: block;
+}
+.field > span {
+    width: 33%;
+}
+.field > span:last-child {
+    text-align: center;
+    font-family: monospace;
+    white-space: pre;
+}
+footer {
+    text-align: center;
+    font-style: italic;
+}
+
+.error {
+    color: red;
+}
+
+progress {
+    width: 100%;
+}
+
+/* Layout on narrower screens */
+@media all and (max-width: 640px) {
+    .field { flex-direction: column; }
+    .field span, .field label { width: 100%; }
+}
