@@ -25,6 +25,8 @@ import java.util.Iterator;
 import java.util.Vector;
 import java.util.function.Consumer;
 import nzilbb.ag.serialize.SerializationDescriptor;
+import nzilbb.ag.serialize.GraphDeserializer;
+import nzilbb.ag.serialize.GraphSerializer;
 import nzilbb.util.MonitorableSeries;
 
 /**
@@ -719,6 +721,46 @@ public interface GraphStoreQuery {
     * @throws PermissionException If the operation is not permitted.
     */
    public SerializationDescriptor[] getDeserializerDescriptors()
+      throws StoreException, PermissionException;
+   
+   /**
+    * Gets the deserializer for the given MIME type.
+    * @param mimeType The MIME type.
+    * @return The deserializer for the given MIME type, or null if none is registered.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public GraphDeserializer deserializerForMimeType(String mimeType)
+      throws StoreException, PermissionException;
+
+   /**
+    * Gets the deserializer for the given file suffix (extension).
+    * @param suffix The file extension.
+    * @return The deserializer for the given suffix, or null if none is registered.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public GraphDeserializer deserializerForFilesSuffix(String suffix)
+      throws StoreException, PermissionException;
+
+   /**
+    * Gets the serializer for the given MIME type.
+    * @param mimeType The MIME type.
+    * @return The serializer for the given MIME type, or null if none is registered.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public GraphSerializer serializerForMimeType(String mimeType)
+      throws StoreException, PermissionException;
+
+   /**
+    * Gets the serializer for the given file suffix (extension).
+    * @param suffix The file extension.
+    * @return The serializer for the given suffix, or null if none is registered.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public GraphSerializer serializerForFilesSuffix(String suffix)
       throws StoreException, PermissionException;
    
 } // end of interface GraphStoreQuery

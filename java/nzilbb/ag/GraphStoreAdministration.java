@@ -50,26 +50,6 @@ public interface GraphStoreAdministration extends GraphStore {
       throws StoreException, PermissionException;
 
    /**
-    * Gets the deserializer for the given MIME type.
-    * @param mimeType The MIME type.
-    * @return The deserializer for the given MIME type, or null if none is registered.
-    * @throws StoreException If an error prevents the operation.
-    * @throws PermissionException If the operation is not permitted.
-    */
-   public GraphDeserializer deserializerForMimeType(String mimeType)
-      throws StoreException, PermissionException;
-
-   /**
-    * Gets the deserializer for the given file suffix (extension).
-    * @param suffix The file extension.
-    * @return The deserializer for the given suffix, or null if none is registered.
-    * @throws StoreException If an error prevents the operation.
-    * @throws PermissionException If the operation is not permitted.
-    */
-   public GraphDeserializer deserializerForFilesSuffix(String suffix)
-      throws StoreException, PermissionException;
-
-   /**
     * Registers a transcript serializer.
     * @param serializer The serializer to register.
     * @throws StoreException If an error prevents the operation.
@@ -87,26 +67,6 @@ public interface GraphStoreAdministration extends GraphStore {
    public void deregisterSerializer(GraphSerializer serializer)
       throws StoreException, PermissionException;
 
-   /**
-    * Gets the serializer for the given MIME type.
-    * @param mimeType The MIME type.
-    * @return The serializer for the given MIME type, or null if none is registered.
-    * @throws StoreException If an error prevents the operation.
-    * @throws PermissionException If the operation is not permitted.
-    */
-   public GraphSerializer serializerForMimeType(String mimeType)
-      throws StoreException, PermissionException;
-
-   /**
-    * Gets the serializer for the given file suffix (extension).
-    * @param suffix The file extension.
-    * @return The serializer for the given suffix, or null if none is registered.
-    * @throws StoreException If an error prevents the operation.
-    * @throws PermissionException If the operation is not permitted.
-    */
-   public GraphSerializer serializerForFilesSuffix(String suffix)
-      throws StoreException, PermissionException;
-   
    /**
     * Saves changes to a layer, or adds a new layer.
     * @param layer A new or modified layer definition.
