@@ -485,7 +485,7 @@ public class IO
    public static String SafeFileNameUrl(String s) {
       if (s == null) return "";
       return s.replaceAll("[\\\\\\?\\*\\+\\$]", "")
-         .replaceAll("[\\|\\:\\!\\>\\<\\=\\^ ]", "_")	
+         .replaceAll("[\\|\\:\\!\\>\\<\\=\\^]", "_")	
          .replaceAll("@","-at-")
          .replaceAll("&","-amp-");
    } // end of SafeFileNameUrl()
