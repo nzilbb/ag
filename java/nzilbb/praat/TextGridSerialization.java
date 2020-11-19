@@ -257,7 +257,7 @@ public class TextGridSerialization
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-         "Praat TextGrid", "2.4", "text/praat-textgrid", ".textgrid", "20200909.1954",
+         "Praat TextGrid", "2.41", "text/praat-textgrid", ".textgrid", "20200909.1954",
          getClass().getResource("icon.png"));
    }
    
@@ -671,6 +671,13 @@ public class TextGridSerialization
             }
          }
          p.setPossibleValues(vPossiblLayers);
+         if (p.getValue() != null) {
+            String layerManager = (String)((Layer)p.getValue()).get("layer_manager_id");
+            if (layerManager != null && layerManager.length() > 0) {
+               // never suggest a generated layer by default TODO find a formal way to avoid this hack
+               p.setValue(null);
+            }
+         }
          mappings.addParameter(p);
       } // next tier
 
