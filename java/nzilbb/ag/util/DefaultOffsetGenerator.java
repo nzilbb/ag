@@ -573,9 +573,13 @@ public class DefaultOffsetGenerator
 		  if (link.getStart() != null) anchors.add(link.getStart());
 		  if (link.getEnd() != null) anchors.add(link.getEnd());
 	       } // next link
+               Integer startConfidence = null;
+               if (child.getStart() != null) startConfidence = child.getStart().getConfidence();
+               Integer endConfidence = null;
+               if (child.getEnd() != null) endConfidence = child.getEnd().getConfidence();
 	       log(" child: ", child, " ",
-                   child.getStart(), "(", child.getStart().getConfidence(), ")-",
-                   child.getEnd(), "(", child.getEnd().getConfidence(), ")");
+                   child.getStart(), "(", startConfidence, ")-",
+                   child.getEnd(), "(", endConfidence, ")");
 	       if (child.getStart() != null) anchors.add(child.getStart());
 	       // log("added start ", child.getStart());
 	       if (child.getEnd() != null) anchors.add(child.getEnd());
