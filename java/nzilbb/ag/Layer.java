@@ -315,7 +315,7 @@ public class Layer
     */
    public String[] getValidLabelsArray() 
    { 
-      if (getValidLabels() == null) return null; 
+      if (validLabels == null) return null; 
       return getValidLabels().keySet().toArray(new String[0]); 
    }
    

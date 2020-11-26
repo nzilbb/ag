@@ -68,12 +68,29 @@ public interface GraphStoreAdministration extends GraphStore {
       throws StoreException, PermissionException;
 
    /**
-    * Saves changes to a layer, or adds a new layer.
-    * @param layer A new or modified layer definition.
+    * Adds a new layer to the scheam.
+    * @param layer A new layer definition.
+    * @return The resulting layer definition.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public Layer newLayer(Layer layer) throws StoreException, PermissionException;
+   
+   /**
+    * Saves changes to a layer.
+    * @param layer A modified layer definition.
     * @return The resulting layer definition.
     * @throws StoreException If an error prevents the operation.
     * @throws PermissionException If the operation is not permitted.
     */
    public Layer saveLayer(Layer layer) throws StoreException, PermissionException;
+   
+   /**
+    * Deletes the given layer, and all associated annotations.
+    * @param id The ID layer to delete.
+    * @throws StoreException If an error prevents the transcript from being saved.
+    * @throws PermissionException If saving the transcript is not permitted.
+    */
+   public void deleteLayer(String id) throws StoreException, PermissionException;
 
 } // end of class GraphStoreAdministration
