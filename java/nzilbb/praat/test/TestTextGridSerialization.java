@@ -1469,15 +1469,15 @@ public class TestTextGridSerialization {
 
    @Test public void performance()  throws Exception {
       Schema schema = new Schema(
-         "who", "turn", "utterance", "tranascript",
-         new Layer("who", "Participants", 0, true, true, true),
+         "participant", "turn", "utterance", "word",
+         new Layer("participant", "Participants", 0, true, true, true),
          new Layer("middle-750", "middle-750", 2, true, false, true),
-         new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+         new Layer("turn", "Speaker turns", 2, true, false, false, "participant", true),
          new Layer("disfluency", "disfluency", 2, true, false, false, "turn", true),
          new Layer("IntS", "IntS", 2, true, false, false, "turn", true),
          new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
-         new Layer("transcript", "Words", 2, true, false, false, "turn", true),
-         new Layer("segments", "Phones", 2, true, false, true, "transcript", true),
+         new Layer("word", "Words", 2, true, false, false, "turn", true),
+         new Layer("segment", "Phones", 2, true, false, true, "word", true),
          new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
       // access file
       NamedStream[] streams = { new NamedStream(new File(getDir(), "performance.TextGrid")) };
@@ -1489,7 +1489,7 @@ public class TestTextGridSerialization {
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-      assertEquals(7, deserializer.configure(configuration, schema).size());
+      assertEquals(6, deserializer.configure(configuration, schema).size());
 
       // load the stream
       ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -1507,7 +1507,7 @@ public class TestTextGridSerialization {
       {
          System.out.println(warning);
       }
-      assertEquals("Four warnings (about orphans)",
+      assertEquals("Four warnings (about orphans) " + deserializer.getWarnings(),
                    4, deserializer.getWarnings().length);
 
       assertEquals("performance.TextGrid", g.getId());

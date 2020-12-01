@@ -257,7 +257,7 @@ public class TextGridSerialization
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-         "Praat TextGrid", "2.41", "text/praat-textgrid", ".textgrid", "20200909.1954",
+         "Praat TextGrid", "2.50", "text/praat-textgrid", ".textgrid", "20200909.1954",
          getClass().getResource("icon.png"));
    }
    
@@ -631,7 +631,11 @@ public class TextGridSerialization
          }	 
          // look for a layer with the same name
          String sName = tier.getName();
+         if (sName.equalsIgnoreCase("transcript")) { // "word" used to be called "transcript"
+            sName = getWordLayer().getId();
+         }
          if (sName.equalsIgnoreCase("lines")
+             || sName.equalsIgnoreCase("utterance")
              || sName.equalsIgnoreCase("utterances")) {
             sName = getUtteranceLayer().getId();
          }
