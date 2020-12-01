@@ -438,7 +438,7 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-         "ELAN EAF Transcript", "1.3", "text/x-eaf+xml", ".eaf", "20200909.1954",
+         "ELAN EAF Transcript", "1.4", "text/x-eaf+xml", ".eaf", "20200909.1954",
          getClass().getResource("icon.png"));
    }
    
