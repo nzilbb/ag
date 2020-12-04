@@ -4,9 +4,9 @@
     "participantLayerId":"who",
     "turnLayerId":"turns",
     "utteranceLayerId":"utterances",
-    "wordLayerId":"transcript",
+    "wordLayerId":"token",
 
-    "graph":{"description":"The graph as a whole",
+    "transcript":{"description":"The annotation graph as a whole",
       "children":{
         "who":{"description":"participants", "alignment":0,
           "peers":true, "peersOverlap":true, "parentIncludes":true, "saturated":true,
@@ -14,7 +14,7 @@
             "turns":{"description":"turns", "alignment":2,
               "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
               "children":{
-                "transcript":{"description":"transcript", "alignment":2,
+                "token":{"description":"transcript", "alignment":2,
                   "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
                   "children":{
                     "segments":{"description":"segments", "alignment":2,
@@ -54,7 +54,7 @@
     {"id":"Maxwell Smart",	"label":"Maxwell Smart",	"startId":"n_100",	"endId":"n_700",
       "turns":[
         {"id":"em_11_0",	"label":"Maxwell Smart",	"startId":"n_100",	"endId":"n_700",	"confidence":100,
-          "transcript":[
+          "token":[
             {"id":"ew_0_1",	"label":"86-1-1",	"startId":"n_101",	"endId":"n_150",	"confidence":100,
               "segments":[
                 {"id":"es_1_11",	"label":"1",	"startId":"n_101",	"endId":"n_120",	"confidence":100,	"comment":"DELETED AFTER THIS"},

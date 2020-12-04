@@ -40,7 +40,7 @@ public class Schema implements Cloneable, CloneableBean {
     * The root of the layer hierarchy, representing the graph as a whole.
     * @see #getRoot()
     */
-   protected final Layer root = new Layer("graph", "The graph as a whole", 2, false, false, true);
+   protected final Layer root = new Layer("transcript", "The annotation graph as a whole", 2, false, false, true);
    /**
     * Getter for {@link #root}: The root of the layer hierarchy, representing the graph as a whole.
     * @return The root of the layer hierarchy, representing the graph as a whole.

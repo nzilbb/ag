@@ -407,7 +407,7 @@ public class Layer
    } // end of constructor
 
    /**
-    * Top-level layer constructor.  The <var>parentId</var> is taken to be "graph".
+    * Top-level layer constructor.  The <var>parentId</var> is taken to be "transcript".
     * @param id The layer's identifier.
     * @param description The description of the layer.
     * @param alignment The layer's alignment - 0 for none, 1 for point alignment, 2 for interval
@@ -425,7 +425,7 @@ public class Layer
       setPeers(peers);
       setPeersOverlap(peersOverlap);
       setSaturated(saturated);
-      if (!id.equals("graph")) setParentId("graph");
+      if (!id.equals("transcript")) setParentId("transcript");
       setParentIncludes(true);
    } // end of constructor
 

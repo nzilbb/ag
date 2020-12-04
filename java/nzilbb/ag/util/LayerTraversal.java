@@ -170,7 +170,7 @@ public class LayerTraversal<R>
       setGraph(graph);
       
       // for each top-level layer
-      for (Layer layer : graph.getLayer("graph").getChildren().values())
+      for (Layer layer : graph.getLayer("transcript").getChildren().values())
       {
 	 if (breadthFirst)
 	 { // process all annotations on one layer before moving to chlid layers

@@ -342,11 +342,11 @@ public class JSONSerialization
 	 if (json.containsKey("corpusLayerId")) 
 	    s.setCorpusLayerId(json.getString("corpusLayerId"));
 
-	 JsonObject root = json.getJsonObject("graph");
+	 JsonObject root = json.getJsonObject("transcript");
 	 JsonObject topLevel = root.getJsonObject("children");
 	 for (String childId : topLevel.keySet())
 	 {
-	    jsonToLayer(s, "graph", childId, topLevel.getJsonObject(childId));
+	    jsonToLayer(s, "transcript", childId, topLevel.getJsonObject(childId));
 	 } // next child
 	 return s;
       }

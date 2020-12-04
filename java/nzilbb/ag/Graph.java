@@ -767,8 +767,8 @@ public class Graph
          } // next child layer
          if (timers != null) timers.end("Graph.addAnnotation: find children");
 
-         // also set the parent if it's a child of "graph"
-         if (layer.getParentId() == null || layer.getParentId().equals("graph"))
+         // also set the parent if it's a child of "transcript"
+         if (layer.getParentId() == null || layer.getParentId().equals("transcript"))
          {
             if (timers != null) timers.start("Graph.addAnnotation: setParent = graph");
             annotation.setParent(this, false);
@@ -1499,13 +1499,13 @@ public class Graph
     *    is neither an ancestor nor descendant, but rather is a child of an ancestor
     *    (<code>phone.first("word")</code>)</li> 
     *  <li><code>word.first("who")</code> for the speaker</li>
-    *  <li><code>word.first("graph")</code> for the graph</li>
+    *  <li><code>word.first("transcript")</code> for the transcript</li>
     *  <li><code>word.first("utterance")</code> for the utterance, which is neither an
     *    ancestor nor descendant, but rather is a child of an ancestor
     *    (<code>word.first("turn")</code>)</li> 
     *  <li><code>word.first("corpus")</code> for the graph's corpus, which is neither an
     *    ancestor nor descendant, but rather is a child of an ancestor
-    *    (<code>word.first("graph")</code>)</li> 
+    *    (<code>word.first("transcript")</code>)</li> 
     * </ul>
     * <p>{@link #setGraph(Graph)} must have been previously called, and the graph must
     * have a correct layer hierarchy for this method to work correctly. 
@@ -1554,7 +1554,7 @@ public class Graph
     *   which are neither ancestors nor descendants, but rather children of an ancestor
     *   (<code>phone.first("word")</code>)</li> 
     *  <li><code>word.all("who")[0]</code> for the (grandparent) speaker</li>
-    *  <li><code>word.all("graph")[0]</code> for the (great-grandparent) graph</li>
+    *  <li><code>word.all("transcript")[0]</code> for the (great-grandparent) transcript</li>
     *  <li><code>word.all("utterance")[0]</code> for the (peer) utterance, which is
     *   neither an ancestor nor descendant, but rather is a child of an ancestor
     *   (<code>word.my"turn")</code>)</li> 
@@ -1563,7 +1563,7 @@ public class Graph
     *   (<code>utterance.my"turn")</code>)</li> 
     *  <li><code>word.all("corpus")[0]</code> for the graph's (child of grandparent)
     *   corpus, which is neither an ancestor nor descendant, but rather is a child of an
-    *   ancestor (<code>word.first("graph")</code>)</li> 
+    *   ancestor (<code>word.first("transcript")</code>)</li> 
     * </ul>
     * <p>{@link #setGraph(Graph)} must have been previously called, and the graph must have a
     * correct layer hierarchy for this method to work correctly.

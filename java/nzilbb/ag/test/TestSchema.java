@@ -95,7 +95,7 @@ public class TestSchema {
       assertEquals("hierarchy", s.getLayer("turn"), s.getLayer("utterance").getParent());
       assertEquals("hierarchy", s.getLayer("word"), s.getLayer("phone").getParent());
 
-      assertEquals("graph layer", s.getRoot(), s.getLayer("graph"));
+      assertEquals("graph layer", s.getRoot(), s.getLayer("transcript"));
 
       assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("who").getParent());
       assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("topic").getParent());
@@ -168,7 +168,7 @@ public class TestSchema {
       assertEquals("hierarchy", s.getLayer("turn"), s.getLayer("utterance").getParent());
       assertEquals("hierarchy", s.getLayer("word"), s.getLayer("phone").getParent());
       
-      assertEquals("graph layer", s.getRoot(), s.getLayer("graph"));
+      assertEquals("graph layer", s.getRoot(), s.getLayer("transcript"));
 
       assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("who").getParent());
       assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("topic").getParent());      
@@ -227,7 +227,7 @@ public class TestSchema {
       assertEquals("hierarchy", s.getLayer("turn"), s.getLayer("utterance").getParent());
       assertEquals("hierarchy", s.getLayer("word"), s.getLayer("phone").getParent());
       
-      assertEquals("graph layer", s.getRoot(), s.getLayer("graph"));
+      assertEquals("graph layer", s.getRoot(), s.getLayer("transcript"));
 
       assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("who").getParent());
       assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("topic").getParent());      
@@ -287,7 +287,7 @@ public class TestSchema {
       assertEquals("hierarchy", s.getLayer("turn"), s.getLayer("utterance").getParent());
       assertEquals("hierarchy", s.getLayer("word"), s.getLayer("phone").getParent());
       
-      assertEquals("graph layer", s.getRoot(), s.getLayer("graph"));
+      assertEquals("graph layer", s.getRoot(), s.getLayer("transcript"));
 
       assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("who").getParent());
       assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("topic").getParent());      
@@ -352,14 +352,14 @@ public class TestSchema {
       assertEquals("hierarchy", c.getLayer("turn"), s.getLayer("word").getParent());
       assertEquals("hierarchy", c.getLayer("turn"), s.getLayer("utterance").getParent());
       assertEquals("hierarchy", c.getLayer("word"), s.getLayer("phone").getParent());      
-      assertEquals("graph layer", c.getRoot(), s.getLayer("graph"));
+      assertEquals("graph layer", c.getRoot(), s.getLayer("transcript"));
       assertEquals("hierarchy - top level", c.getRoot(), c.getLayer("who").getParent());
       assertEquals("hierarchy - top level", c.getRoot(), c.getLayer("topic").getParent());
 
       // check Layer objects are copies
       for (Layer layerCopy : c.getLayers().values()) {
          assertTrue("copy: " + layerCopy.getId(), layerCopy != s.getLayer(layerCopy.getId()));
-         if (!layerCopy.getId().equals("graph")) {
+         if (!layerCopy.getId().equals("transcript")) {
             assertTrue("parent copy: " + layerCopy.getId(),
                        layerCopy.getParent() != s.getLayer(layerCopy.getParentId()));
          }
@@ -460,7 +460,7 @@ public class TestSchema {
       // assertEquals("hierarchy", c.getLayer("turn"), s.getLayer("word").getParent());
       // assertEquals("hierarchy", c.getLayer("turn"), s.getLayer("utterance").getParent());
       // assertEquals("hierarchy", c.getLayer("word"), s.getLayer("phone").getParent());      
-      // assertEquals("graph layer", c.getRoot(), s.getLayer("graph"));
+      // assertEquals("graph layer", c.getRoot(), s.getLayer("transcript"));
       // assertEquals("hierarchy - top level", c.getRoot(), c.getLayer("who").getParent());
       // assertEquals("hierarchy - top level", c.getRoot(), c.getLayer("topic").getParent());
 

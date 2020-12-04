@@ -219,7 +219,7 @@ public class TestLayer
     assertTrue("ancestor parent", ancestors.contains(g.getLayer("word")));
     assertTrue("ancestor grandparent", ancestors.contains(g.getLayer("turn")));
     assertTrue("ancestor great grandparent", ancestors.contains(g.getLayer("who")));
-    assertTrue("ancestor graph", ancestors.contains(g.getLayer("graph"))); 
+    assertTrue("ancestor graph", ancestors.contains(g.getLayer("transcript"))); 
     assertFalse("ancestor not self", ancestors.contains(g.getLayer("phone")));
     assertFalse("ancestor not grandparet peer", ancestors.contains(g.getLayer("utterance")));
     assertFalse("ancestor not other top-level layer", ancestors.contains(g.getLayer("topic")));
@@ -253,13 +253,13 @@ public class TestLayer
     assertEquals("descendant depth - topic", 0, g.getLayer("topic").getDescendentDepth());
 
     assertTrue("isAncestor", g.getLayer("word").isAncestor("turn"));
-    assertTrue("isAncestor", g.getLayer("word").isAncestor("graph"));
+    assertTrue("isAncestor", g.getLayer("word").isAncestor("transcript"));
     assertFalse("isAncestor - peer", g.getLayer("word").isAncestor("utterance"));
     assertFalse("isAncestor - descendant", g.getLayer("word").isAncestor("phone"));
     assertFalse("isAncestor - reflexive", g.getLayer("word").isAncestor("word"));
 
     assertFalse("isDescendant", g.getLayer("word").isDescendant("turn"));
-    assertFalse("isDescendant", g.getLayer("word").isDescendant("graph"));
+    assertFalse("isDescendant", g.getLayer("word").isDescendant("transcript"));
     assertFalse("isDescendant - peer", g.getLayer("word").isDescendant("utterance"));
     assertTrue("isDescendant - descendant", g.getLayer("word").isDescendant("phone"));
     assertFalse("isDescendant - reflexive", g.getLayer("word").isDescendant("word"));

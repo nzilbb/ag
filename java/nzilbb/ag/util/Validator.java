@@ -700,7 +700,7 @@ public class Validator
       for (Layer childLayer : layersTopDown)
       {
          if (childLayer.getParent() == null) continue; // top level layer or incomplete hierarchy
-         if (childLayer.getParentId().equals("graph")) continue; // top level layer
+         if (childLayer.getParentId().equals("transcript")) continue; // top level layer
          // log("reconcile orphans: ", parentLayer, "/", childLayer);
          reconcileOrphans(childLayer, graph);
       } // next layer

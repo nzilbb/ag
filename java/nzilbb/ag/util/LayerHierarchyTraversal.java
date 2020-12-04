@@ -264,13 +264,13 @@ public class LayerHierarchyTraversal<R>
     */
    public R traverseLayers(Collection<Layer> layers)
    {
-      // a top level layer is any layer with "graph" as a parent, 
+      // a top level layer is any layer with "transcript" as a parent, 
       // or any layer whose parent is not in the graph 
       // (this ensures all layers are included, even for partial graphs)
       Stream<Layer> topLevelLayersStream = layers.stream()
-         .filter(layer -> !layer.getId().equals("graph"))
+         .filter(layer -> !layer.getId().equals("transcript"))
          .filter(layer -> layer.getParentId() != null)
-         .filter(layer -> layer.getParentId().equals("graph")
+         .filter(layer -> layer.getParentId().equals("transcript")
                  || (schema != null && !schema.getLayers().containsKey(layer.getParentId())));
       if (peerComparator != null)
       {
@@ -291,13 +291,13 @@ public class LayerHierarchyTraversal<R>
    {
       setSchema(schema);
       
-      // a top level layer is any layer with "graph" as a parent, 
+      // a top level layer is any layer with "transcript" as a parent, 
       // or any layer whose parent is not in the graph 
       // (this ensures all layers are included, even for partial graphs)
       Stream<Layer> topLevelLayersStream = schema.getLayers().values().stream()
-         .filter(layer -> !layer.getId().equals("graph"))
+         .filter(layer -> !layer.getId().equals("transcript"))
          .filter(layer -> layer.getParentId() != null)
-         .filter(layer -> layer.getParentId().equals("graph")
+         .filter(layer -> layer.getParentId().equals("transcript")
                  || !schema.getLayers().containsKey(layer.getParentId()));
       if (peerComparator != null)
       {

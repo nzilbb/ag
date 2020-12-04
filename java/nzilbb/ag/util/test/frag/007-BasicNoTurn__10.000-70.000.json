@@ -4,9 +4,9 @@
     "participantLayerId":"who",
     "turnLayerId":"turns",
     "utteranceLayerId":"utterances",
-    "wordLayerId":"transcript",
+    "wordLayerId":"token",
 
-    "graph":{"description":"The graph as a whole",
+    "transcript":{"description":"The annotation graph as a whole",
       "children":{
         "who":{"description":"participants", "alignment":0,
           "peers":true, "peersOverlap":true, "parentIncludes":true, "saturated":true,
@@ -14,7 +14,7 @@
             "turns":{"description":"turns", "alignment":2,
               "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
               "children":{
-                "transcript":{"description":"transcript", "alignment":2,
+                "token":{"description":"transcript", "alignment":2,
                   "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false},
                 "utterances":{"description":"utterances", "alignment":2,
                   "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true}
@@ -38,7 +38,7 @@
     {"id":"Bond",	"label":"Bond",	"startId":"n_100",	"endId":"n_700",
       "turns":[
         {"id":"em_11_0",	"label":"Bond",	"startId":"n_100",	"endId":"n_700",
-          "transcript":[
+          "token":[
             {"id":"ew_0_1",	"label":"86-1-1",	"startId":"n_101",	"endId":"n_200",	"confidence":100,	"comment":"DELETE THIS TO ENSURE ITS ORDINAL GETS USED"},
             {"id":"ew_0_2",	"label":"86-1-2-before",	"startId":"n_200",	"endId":"n_300",	"confidence":100,	"comment":"INSERT A WORD AFTER THIS"},
             {"id":"ew_0_3",	"label":"86-1-3-after",	"startId":"n_300",	"endId":"n_399",	"confidence":100,	"comment":"INSERT A WORD BEFORE THIS"},

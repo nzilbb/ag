@@ -270,7 +270,7 @@ public class DefaultOffsetGenerator
 		  // if the parent is not a top-level layer
 		  if (parent != null // may be incomplete graph
 		      && parent.getParentId() != null 
-		      && !parent.getParentId().equals("graph")
+		      && !parent.getParentId().equals("transcript")
 		      // and children can have peers
 		      && child.getPeers()
 		      // and child peers cannot overlap

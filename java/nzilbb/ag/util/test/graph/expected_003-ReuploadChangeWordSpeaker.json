@@ -4,9 +4,9 @@
     "participantLayerId":"who",
     "turnLayerId":"turns",
     "utteranceLayerId":"utterances",
-    "wordLayerId":"transcript",
+    "wordLayerId":"token",
 
-    "graph":{"description":"The graph as a whole",
+    "transcript":{"description":"The annotation graph as a whole",
       "children":{
         "who":{"description":"participants", "alignment":0,
           "peers":true, "peersOverlap":true, "parentIncludes":true, "saturated":true,
@@ -16,7 +16,7 @@
               "children":{
                 "language":{"description":"Language", "alignment":2,
                   "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false},
-                "transcript":{"description":"transcript", "alignment":2,
+                "token":{"description":"transcript", "alignment":2,
                   "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
                   "children":{
                     "lexical":{"description":"lexical", "alignment":0,
@@ -117,7 +117,7 @@
         {"id":"em_11_1",	"label":"Maxwell Smart",	"startId":"n_1010",	"endId":"n_1100",	"confidence":100,
           "language":[
             {"id":"em_20_1",	"label":"es",	"startId":"n_1030",	"endId":"n_1060",	"confidence":100}],
-          "transcript":[
+          "token":[
             {"id":"ew_0_1101",	"label":"86-1-1",	"startId":"n_1011",	"endId":"n_1020",	"confidence":100,	"comment":"86 - JOINED TO NEXT",
               "lexical":[
                 {"id":"ew_22_1101",	"label":"l-1-1",	"startId":"n_1011",	"endId":"n_1020",	"confidence":100}],
@@ -201,7 +201,7 @@
             {"id":"em_12_12",	"label":"Maxwell Smart",	"startId":"n_1040",	"endId":"n_1070",	"confidence":100},
             {"id":"em_12_13",	"label":"Maxwell Smart",	"startId":"n_1070",	"endId":"n_1100",	"confidence":100}]},
         {"id":"em_11_3",	"label":"Maxwell Smart",	"startId":"n_1200",	"endId":"n_1400",	"confidence":100,
-          "transcript":[
+          "token":[
             {"id":"3",	"label":"99-2-4-to-86",	"startId":"1",	"endId":"n_1211",	"confidence":100,
               "lexical":[
                 {"id":"7",	"label":"l-99-2-4-to-86",	"startId":"1",	"endId":"n_1211",	"confidence":100}]},
@@ -228,7 +228,7 @@
     {"id":"Ninety Nine",	"label":"Ninety Nine",	"startId":"n_1010",	"endId":"n_1500",
       "turns":[
         {"id":"em_11_2",	"label":"Ninety Nine",	"startId":"n_1100",	"endId":"n_1200",	"confidence":100,
-          "transcript":[
+          "token":[
             {"id":"ew_0_2101",	"label":"99-1-1",	"startId":"n_1101",	"endId":"n_1120",	"confidence":100,	"comment":"99 - ALL JOINED, DEFAULT ALIGNMENTS, NO SEGMENTS..."},
             {"id":"ew_0_2102",	"label":"99-1-2",	"startId":"n_1120",	"endId":"n_1130",	"confidence":100},
             {"id":"ew_0_2103",	"label":"99-1-3",	"startId":"n_1130",	"endId":"n_1149",	"confidence":100},
@@ -241,7 +241,7 @@
             {"id":"em_12_21",	"label":"Ninety Nine",	"startId":"n_1100",	"endId":"n_1150",	"confidence":100},
             {"id":"em_12_22",	"label":"Ninety Nine",	"startId":"n_1150",	"endId":"n_1200",	"confidence":100}]},
         {"id":"em_11_4",	"label":"Ninety Nine",	"startId":"n_1301",	"endId":"n_1500",	"confidence":100,
-          "transcript":[
+          "token":[
             {"id":"ew_0_4101",	"label":"99-1-one",	"startId":"n_1303",	"endId":"n_1320",	"confidence":100,	"comment":"99 - SIMULTANEOUS SPEECH"},
             {"id":"ew_0_4102",	"label":"99-1-two",	"startId":"n_1320",	"endId":"4",	"confidence":100,	"comment":"99 - SIMULTANEOUS SPEECH"},
             {"id":"6",	"label":"86-2-two-to-99",	"startId":"4",	"endId":"n_1340",	"confidence":100},

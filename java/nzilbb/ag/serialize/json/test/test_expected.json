@@ -7,7 +7,7 @@
     "utteranceLayerId":"utterance",
     "wordLayerId":"word",
 
-    "graph":{"description":"The graph as a whole",
+    "transcript":{"description":"The annotation graph as a whole",
       "children":{
         "topic":{"description":"Topics", "alignment":2,
           "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false},

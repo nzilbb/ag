@@ -221,8 +221,8 @@ public class TestGraph
       assertTrue("graph lists orphans", words.contains(orphan));
       assertTrue(words.size() == 5);
       // TODO graph 'contains' itself
-      // assertEquals(g.all("graph")[0], g);
-      // assertEquals(1, g.all("graph").length);
+      // assertEquals(g.all("transcript")[0], g);
+      // assertEquals(1, g.all("transcript").length);
       
       List<Annotation> turns = Arrays.asList(g.all("turn"));
       assertTrue(turns.contains(turn1));
@@ -233,8 +233,8 @@ public class TestGraph
 
       // graph inherits from annotation, but some annotation behavrious are special
       assertEquals(g.getId(), g.getLabel());
-      assertEquals("graph", g.getLayerId());
-      assertNotNull("graph", g.getLayer());
+      assertEquals("transcript", g.getLayerId());
+      assertNotNull("transcript", g.getLayer());
       assertEquals("who", turn1.getLayer().getParentId());
       assertEquals(who1.getId(), turn1.getParentId());
       assertEquals(who1, turn1.getParent());
@@ -382,7 +382,7 @@ public class TestGraph
       Graph g = new Graph();
       g.setId("my graph");
 
-      g.addLayer(new Layer("turn", "Speaker turns", 2, true, true, false, "graph", true));
+      g.addLayer(new Layer("turn", "Speaker turns", 2, true, true, false, "transcript", true));
       g.addLayer(new Layer("word", "Words", 2, true, false, false, "turn", true));
       g.addLayer(new Layer("phone", "Phones", 2, true, false, true, "word", true));
       g.addLayer(new Layer("pos", "Part of speech", 0, false, false, true, "word", true));
@@ -715,7 +715,7 @@ public class TestGraph
       // add word layer before its parent turn layer
       Layer word = new Layer("word", "Words", 2, true, false, false, "turn", true);
       g.addLayer(word);
-      Layer turn = new Layer("turn", "Speaker turns", 2, true, true, false, "graph", true);
+      Layer turn = new Layer("turn", "Speaker turns", 2, true, true, false, "transcript", true);
       g.addLayer(turn);
 
       assertEquals(turn, g.getLayer("turn"));
@@ -1011,7 +1011,7 @@ public class TestGraph
       assertFalse("ancestors", order.hasNext());
       assertEquals("ancestors - parent", the, th.getAncestor("word"));
       assertEquals("ancestors - grandparent", turn1, th.getAncestor("turn"));
-      assertEquals("ancestors - graph", g, th.getAncestor("graph"));
+      assertEquals("ancestors - graph", g, th.getAncestor("transcript"));
       assertNull("ancestors - none", th.getAncestor("pos"));
 
       // getFirstCommonAncestor
@@ -1951,18 +1951,18 @@ public class TestGraph
       g.addAnnotation(utterance3);
       g.addAnnotation(yes);
 
-      assertEquals("layerId: graph", "graph", g.getLayerId());
-      assertEquals("my: graph", g, g.first("graph"));
+      assertEquals("layerId: graph", "transcript", g.getLayerId());
+      assertEquals("my: graph", g, g.first("transcript"));
 
       assertEquals("my: parent", turn1, the.first("turn"));
       assertEquals("my: ancestor", who1, the.first("who"));
-      assertEquals("my: graph", g, the.first("graph"));
+      assertEquals("my: graph", g, the.first("transcript"));
       assertEquals("my: child", th, the.first("phone"));
       assertNull("my: none", fox.first("phone"));
 
       assertEquals("my: parent - other speaker", turn2, yes.first("turn"));
       assertEquals("my: ancestor - other speaker", who2, yes.first("who"));
-      assertEquals("my: graph - other speaker", g, yes.first("graph"));
+      assertEquals("my: graph - other speaker", g, yes.first("transcript"));
       assertEquals("my: child - other speaker", yes, turn2.first("word"));
       assertNull("my: none - other speaker", yes.first("pos"));
 
@@ -1977,7 +1977,7 @@ public class TestGraph
       list = the.all("who");
       assertEquals("list: ancestor", who1, list[0]);
       assertEquals("list: ancestor", 1, list.length);
-      list = the.all("graph");
+      list = the.all("transcript");
       assertEquals("list: graph", g, list[0]);
       assertEquals("list: graph", 1, list.length);
       assertEquals("list: child", the.annotations("phone"), the.all("phone"));
@@ -2008,7 +2008,7 @@ public class TestGraph
       list = yes.all("who");
       assertEquals("list: ancestor - other speaker", who2, list[0]);
       assertEquals("list: ancestor - other speaker", 1, list.length);
-      list = yes.all("graph");
+      list = yes.all("transcript");
       assertEquals("list: graph - other speaker", g, list[0]);
       assertEquals("list: graph - other speaker", 1, list.length);
       assertEquals("list: child - other speaker", turn2.annotations("word"), turn2.all("word"));
@@ -2048,13 +2048,13 @@ public class TestGraph
       assertEquals("list: distant descenant", s, list[8]);
       assertEquals("list: distant descenant", 9, list.length);
 
-      list = the.all("graph");
-      assertEquals("annotation.all('graph') contains one element", 1, list.length);
-      assertEquals("annotation.all('graph') contains the graph", g, list[0]);
+      list = the.all("transcript");
+      assertEquals("annotation.all('transcript') contains one element", 1, list.length);
+      assertEquals("annotation.all('transcript') contains the graph", g, list[0]);
 
-      list = g.all("graph");
-      assertEquals("graph.all('graph') contains one element", 1, list.length);
-      assertEquals("graph.all('graph') contains the graph", g, list[0]);
+      list = g.all("transcript");
+      assertEquals("graph.all('transcript') contains one element", 1, list.length);
+      assertEquals("graph.all('transcript') contains the graph", g, list[0]);
    }
 
    @Test public void easyAnchorChaining() 

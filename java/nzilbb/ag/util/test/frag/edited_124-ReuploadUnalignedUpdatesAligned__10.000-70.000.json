@@ -4,9 +4,9 @@
     "participantLayerId":"who",
     "turnLayerId":"turns",
     "utteranceLayerId":"utterances",
-    "wordLayerId":"transcript",
+    "wordLayerId":"token",
 
-    "graph":{"description":"The graph as a whole",
+    "transcript":{"description":"The annotation graph as a whole",
       "children":{
         "who":{"description":"participants", "alignment":0,
           "peers":true, "peersOverlap":true, "parentIncludes":true, "saturated":true,
@@ -14,7 +14,7 @@
             "turns":{"description":"turns", "alignment":2,
               "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
               "children":{
-                "transcript":{"description":"transcript", "alignment":2,
+                "token":{"description":"transcript", "alignment":2,
                   "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false},
                 "utterances":{"description":"utterances", "alignment":2,
                   "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true}
@@ -44,7 +44,7 @@
     {"id":"Maxwell Smart",	"label":"Maxwell Smart",	"startId":"n_1010",	"endId":"n_1100",
       "turns":[
         {"id":"em_11_0",	"label":"Maxwell Smart",	"startId":"n_1010",	"endId":"n_1100",	"confidence":100,
-          "transcript":[
+          "token":[
             {"id":"ew_0_1",	"label":"86-1-1",	"startId":"n_1011",	"endId":"n_1020",	"confidence":100},
             {"id":"ew_0_2",	"label":"86-1-2",	"startId":"n_1020",	"endId":"n_1030",	"confidence":100,	"comment":"JOINED TO 86-1-3"},
             {"id":"ew_0_3",	"label":"86-1-3",	"startId":"n_1030",	"endId":"n_1039",	"confidence":100},

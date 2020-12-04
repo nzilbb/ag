@@ -350,11 +350,11 @@ public class Merger
             LinkedHashSet<Layer> layerLineage = new LinkedHashSet<Layer>();
             layerLineage.add(layer);
             layerLineage.addAll(layer.getAncestors());
-            boolean graphTagLayer = !layer.getId().equals("graph");
+            boolean graphTagLayer = !layer.getId().equals("transcript");
             for (Layer l : layerLineage)
             {
               if (l.getAlignment() != Constants.ALIGNMENT_NONE
-                  && !l.getId().equals("graph"))
+                  && !l.getId().equals("transcript"))
               {
                 graphTagLayer = false;
                 break;
@@ -592,7 +592,7 @@ public class Merger
     {
       Layer layer = iLayersTopDown.next();
       if (editedGraph.getLayer(layer.getId()) == null
-          || layer.getId().equals("graph"))
+          || layer.getId().equals("transcript"))
       {
         iLayersTopDown.remove();
       }
@@ -846,7 +846,7 @@ public class Merger
 
       // if it's a graph tag layer, sort annotations by label
       // this ensures, e.g., that mapping the "who" layer lines the speakers up by name
-      if (layer.getParentId().equals("graph") && layer.getAlignment() == Constants.ALIGNMENT_NONE)
+      if (layer.getParentId().equals("transcript") && layer.getAlignment() == Constants.ALIGNMENT_NONE)
       {
         AnnotationComparatorByOrdinal byLabel = new AnnotationComparatorByOrdinal() {
             public int compare(Annotation o1, Annotation o2)

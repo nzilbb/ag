@@ -587,7 +587,7 @@ public class SpanningConventionTransformer // TODO implementation that handles n
       boolean sourceDestinationOfParent = destinationLayer != null 
 	 && destinationLayer.getParentId().equals(getSourceLayerId());
       boolean graphDestinationOfParent = destinationLayer != null 
-	 && destinationLayer.getParentId().equals("graph");
+	 && destinationLayer.getParentId().equals("transcript");
       try
       {
 	 Pattern startRegexp = Pattern.compile(getStartPattern());
