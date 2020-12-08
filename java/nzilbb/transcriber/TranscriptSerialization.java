@@ -501,7 +501,7 @@ public class TranscriptSerialization
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-	 "Transcriber transcript", "1.91", "text/xml-transcriber", ".trs", "20200909.1954",
+	 "Transcriber transcript", "1.92", "text/xml-transcriber", ".trs", "20200909.1954",
          getClass().getResource("icon.png"));
    }
 
@@ -1463,7 +1463,14 @@ public class TranscriptSerialization
          if (genderLayer != null) {
             Annotation tag = participant.first(genderLayer.getId());
             if (tag != null) {
-               speaker.setType(tag.getLabel());
+               // gender must be one of: male, female, child, unknown
+               String type = "unknown";
+               if (tag.getLabel().matches("^[fF].*")) {
+                  type = "female";
+               } else if (tag.getLabel().matches("^[mM].*")) {
+                  type = "male";
+               }
+               speaker.setType(type);
             }
          }
          if (participantCheckLayer != null) {

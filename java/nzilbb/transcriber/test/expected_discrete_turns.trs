@@ -5,8 +5,8 @@
 <Topic id="to1" desc="testing"/>
 </Topics>
 <Speakers>
-<Speaker id="spk1" name="p1" check="Y" type="M" dialect="Y" accent="" scope=""/>
-<Speaker id="spk2" name="p2" check="" type="F" dialect="" accent="N" scope="N"/>
+<Speaker id="spk1" name="p1" check="Y" type="male" dialect="Y" accent="" scope=""/>
+<Speaker id="spk2" name="p2" check="" type="female" dialect="" accent="N" scope="N"/>
 </Speakers>
 <Episode>
 <Section type="report" topic="to1" startTime="0.000" endTime="10.000">
