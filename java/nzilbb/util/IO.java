@@ -176,7 +176,7 @@ public class IO
     * Saves the content of a URL to a file.
     * @param input The input stream containing the file content.
     * @param file The file to save the content to.
-    * @param bytesCopied A monitor object that receives progress updates, as a long
+    * @param bytesSaved A monitor object that receives progress updates, as a long
     * representing the number of bytes saved. Can be null.
     * @return The number size of the content in bytes.
     * @throws IOException On file IO error.
