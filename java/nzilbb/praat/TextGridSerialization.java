@@ -1308,8 +1308,8 @@ public class TextGridSerialization
       if (getParticipantLayer() != null) requiredLayers.add(getParticipantLayer().getId());
       if (getTurnLayer() != null) requiredLayers.add(getTurnLayer().getId());
       if (getUtteranceLayer() != null) requiredLayers.add(getUtteranceLayer().getId());
+      if (getWordLayer() != null) requiredLayers.add(getWordLayer().getId());
       if (bUseConventions != null && bUseConventions) {
-         if (getWordLayer() != null) requiredLayers.add(getWordLayer().getId());
          if (getLexicalLayer() != null) requiredLayers.add(getLexicalLayer().getId());
          if (getPronounceLayer() != null) requiredLayers.add(getPronounceLayer().getId());
          if (getCommentLayer() != null) requiredLayers.add(getCommentLayer().getId());

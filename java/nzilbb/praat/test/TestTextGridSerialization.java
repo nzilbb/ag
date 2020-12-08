@@ -68,6 +68,7 @@ public class TestTextGridSerialization {
       
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      configuration.get("useConventions").setValue(Boolean.TRUE);
       //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
       assertEquals(6, deserializer.configure(configuration, schema).size());
 
@@ -295,6 +296,7 @@ public class TestTextGridSerialization {
       
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      configuration.get("useConventions").setValue(Boolean.TRUE);
       //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
       assertEquals(6, deserializer.configure(configuration, schema).size());
 
@@ -378,6 +380,7 @@ public class TestTextGridSerialization {
       
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      configuration.get("useConventions").setValue(Boolean.TRUE);
       //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
       assertEquals(6, deserializer.configure(configuration, schema).size());
 
@@ -461,6 +464,7 @@ public class TestTextGridSerialization {
       
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      configuration.get("useConventions").setValue(Boolean.TRUE);
       //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
       assertEquals(6, deserializer.configure(configuration, schema).size());
 
@@ -1553,15 +1557,11 @@ public class TestTextGridSerialization {
       assertEquals(6, serializer.configure(configuration, schema).size());
 
       String[] needLayers = serializer.getRequiredLayers();
-      assertEquals(8, needLayers.length);
+      assertEquals(4, needLayers.length);
       assertEquals("who", needLayers[0]);
       assertEquals("turn", needLayers[1]);
       assertEquals("utterance", needLayers[2]);
       assertEquals("word", needLayers[3]);
-      assertEquals("lexical", needLayers[4]);
-      assertEquals("pronounce", needLayers[5]);
-      assertEquals("comment", needLayers[6]);
-      assertEquals("noise", needLayers[7]);
 	 
       // serialize
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
@@ -1624,15 +1624,11 @@ public class TestTextGridSerialization {
       assertEquals(6, serializer.configure(configuration, schema).size());
 
       String[] needLayers = serializer.getRequiredLayers();
-      assertEquals(8, needLayers.length);
+      assertEquals(4, needLayers.length);
       assertEquals("who", needLayers[0]);
       assertEquals("turn", needLayers[1]);
       assertEquals("utterance", needLayers[2]);
       assertEquals("word", needLayers[3]);
-      assertEquals("lexical", needLayers[4]);
-      assertEquals("pronounce", needLayers[5]);
-      assertEquals("comment", needLayers[6]);
-      assertEquals("noise", needLayers[7]);
 	 
       // serialize
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
@@ -1696,15 +1692,11 @@ public class TestTextGridSerialization {
       assertEquals(6, serializer.configure(configuration, schema).size());
 
       String[] needLayers = serializer.getRequiredLayers();
-      assertEquals(8, needLayers.length);
+      assertEquals(4, needLayers.length);
       assertEquals("who", needLayers[0]);
       assertEquals("turn", needLayers[1]);
       assertEquals("utterance", needLayers[2]);
       assertEquals("word", needLayers[3]);
-      assertEquals("lexical", needLayers[4]);
-      assertEquals("pronounce", needLayers[5]);
-      assertEquals("comment", needLayers[6]);
-      assertEquals("noise", needLayers[7]);
 	 
       String[] selectedLayers = { "phone" };
       // serialize
@@ -1769,15 +1761,11 @@ public class TestTextGridSerialization {
       assertEquals(6, serializer.configure(configuration, schema).size());
 
       String[] needLayers = serializer.getRequiredLayers();
-      assertEquals(8, needLayers.length);
+      assertEquals(4, needLayers.length);
       assertEquals("who", needLayers[0]);
       assertEquals("turn", needLayers[1]);
       assertEquals("utterance", needLayers[2]);
       assertEquals("word", needLayers[3]);
-      assertEquals("lexical", needLayers[4]);
-      assertEquals("pronounce", needLayers[5]);
-      assertEquals("comment", needLayers[6]);
-      assertEquals("noise", needLayers[7]);
 	 
       String[] selectedLayers = { "word", "phone", "f1" };
       // serialize
@@ -1841,15 +1829,11 @@ public class TestTextGridSerialization {
       assertEquals(6, serializer.configure(configuration, schema).size());
 
       String[] needLayers = serializer.getRequiredLayers();
-      assertEquals(8, needLayers.length);
+      assertEquals(4, needLayers.length);
       assertEquals("who", needLayers[0]);
       assertEquals("turn", needLayers[1]);
       assertEquals("utterance", needLayers[2]);
       assertEquals("word", needLayers[3]);
-      assertEquals("lexical", needLayers[4]);
-      assertEquals("pronounce", needLayers[5]);
-      assertEquals("comment", needLayers[6]);
-      assertEquals("noise", needLayers[7]);
 	 
       // serialize
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
