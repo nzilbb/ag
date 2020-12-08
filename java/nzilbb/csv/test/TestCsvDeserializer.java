@@ -38,11 +38,11 @@ public class TestCsvDeserializer {
    
    @Test public void basicDeserialization()  throws Exception {
       Schema schema = new Schema(
-	 "who", "turns", "utterances", "transcript",
+	 "who", "turns", "utterances", "word",
 	 new Layer("who", "Participants", 0, true, true, true),
 	 new Layer("turns", "Speaker turns", 2, true, false, false, "who", true),
 	 new Layer("utterances", "Utterances", 2, true, false, true, "turns", true),
-	 new Layer("transcript", "Words", 2, true, false, false, "turns", true)
+	 new Layer("word", "Words", 2, true, false, false, "turns", true)
 	 );
       // access file
       NamedStream[] streams = { new NamedStream(new File(getDir(), "tweets.csv")) };
@@ -125,7 +125,7 @@ public class TestCsvDeserializer {
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.all("transcript");
+	 Annotation[] words = g.all("word");
 	 assertEquals(12, words.length);
 	 String[] wordLabels = {
 	    "Shame", "our", "next", "meeting", "wasn't", "before", "this", "deadline",
@@ -175,7 +175,7 @@ public class TestCsvDeserializer {
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.all("transcript");
+	 Annotation[] words = g.all("word");
 	 assertEquals(32, words.length);
 	 String[] wordLabels = {
 	    "“differences", "between", "lesbian", "or", "gay", "and", "straight", "faces",
@@ -227,7 +227,7 @@ public class TestCsvDeserializer {
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.all("transcript");
+	 Annotation[] words = g.all("word");
 	 assertEquals(5, words.length);
 	 String[] wordLabels = {
 	    "'Awash", "with", "contemporary", "teenspeak'", "😀👍"};
@@ -276,7 +276,7 @@ public class TestCsvDeserializer {
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.all("transcript");
+	 Annotation[] words = g.all("word");
 	 assertEquals(14, words.length);
 	 String[] wordLabels = {
 	    "Duolingo", "has", "brought", "the", "joys", "of", "Irish", "to", "people",
@@ -295,7 +295,7 @@ public class TestCsvDeserializer {
 
    @Test public void metaData()  throws Exception {
       Schema schema = new Schema(
-	 "who", "turns", "utterances", "transcript",
+	 "who", "turns", "utterances", "word",
 	 new Layer("transcript_time", "Tweet time", 0, false, false, true),
 	 new Layer("transcript_url", "URL", 0, false, false, true),
 	 new Layer("corpus", "Corpus", 0, false, false, true),
@@ -303,7 +303,7 @@ public class TestCsvDeserializer {
 	 new Layer("participant_name", "Participant Name", 0, false, false, true, "who", true),
 	 new Layer("turns", "Speaker turns", 2, true, false, false, "who", true),
 	 new Layer("utterances", "Utterances", 2, true, false, true, "turns", true),
-	 new Layer("transcript", "Words", 2, true, false, false, "turns", true)
+	 new Layer("word", "Words", 2, true, false, false, "turns", true)
 	 );
       // access file
       NamedStream[] streams = { new NamedStream(new File(getDir(), "tweets.csv")) };
@@ -386,7 +386,7 @@ public class TestCsvDeserializer {
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.all("transcript");
+	 Annotation[] words = g.all("word");
 	 assertEquals(12, words.length);
 	 String[] wordLabels = {
 	    "Shame", "our", "next", "meeting", "wasn't", "before", "this", "deadline",
@@ -462,7 +462,7 @@ public class TestCsvDeserializer {
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.all("transcript");
+	 Annotation[] words = g.all("word");
 	 assertEquals(32, words.length);
 	 String[] wordLabels = {
 	    "“differences", "between", "lesbian", "or", "gay", "and", "straight", "faces",
@@ -539,7 +539,7 @@ public class TestCsvDeserializer {
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.all("transcript");
+	 Annotation[] words = g.all("word");
 	 assertEquals(5, words.length);
 	 String[] wordLabels = {
 	    "'Awash", "with", "contemporary", "teenspeak'", "😀👍"};
@@ -613,7 +613,7 @@ public class TestCsvDeserializer {
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.all("transcript");
+	 Annotation[] words = g.all("word");
 	 assertEquals(14, words.length);
 	 String[] wordLabels = {
 	    "Duolingo", "has", "brought", "the", "joys", "of", "Irish", "to", "people",
@@ -657,11 +657,11 @@ public class TestCsvDeserializer {
    
    @Test public void badHeaders()  throws Exception {
       Schema schema = new Schema(
-	 "who", "turns", "utterances", "transcript",
+	 "who", "turns", "utterances", "word",
 	 new Layer("who", "Participants", 0, true, true, true),
 	 new Layer("turns", "Speaker turns", 2, true, false, false, "who", true),
 	 new Layer("utterances", "Utterances", 2, true, false, true, "turns", true),
-	 new Layer("transcript", "Words", 2, true, false, false, "turns", true)
+	 new Layer("word", "Words", 2, true, false, false, "turns", true)
 	 );
       // access file
       NamedStream[] streams = { new NamedStream(new File(getDir(), "badheaders.csv")) };
@@ -734,7 +734,7 @@ public class TestCsvDeserializer {
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.all("transcript");
+	 Annotation[] words = g.all("word");
 	 assertEquals(12, words.length);
 	 String[] wordLabels = {
 	    "Shame", "our", "next", "meeting", "wasn't", "before", "this", "deadline",
@@ -784,7 +784,7 @@ public class TestCsvDeserializer {
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.all("transcript");
+	 Annotation[] words = g.all("word");
 	 assertEquals(32, words.length);
 	 String[] wordLabels = {
 	    "“differences", "between", "lesbian", "or", "gay", "and", "straight", "faces",
@@ -836,7 +836,7 @@ public class TestCsvDeserializer {
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.all("transcript");
+	 Annotation[] words = g.all("word");
 	 assertEquals(5, words.length);
 	 String[] wordLabels = {
 	    "'Awash", "with", "contemporary", "teenspeak'", "😀👍"};
@@ -885,7 +885,7 @@ public class TestCsvDeserializer {
 	 assertEquals(turns[0], utterances[0].getParent());
 	 
 	 // words
-	 Annotation[] words = g.all("transcript");
+	 Annotation[] words = g.all("word");
 	 assertEquals(14, words.length);
 	 String[] wordLabels = {
 	    "Duolingo", "has", "brought", "the", "joys", "of", "Irish", "to", "people",
