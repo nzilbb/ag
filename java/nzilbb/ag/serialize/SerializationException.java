@@ -119,7 +119,7 @@ public class SerializationException
     s.append(super.toString());
     for (String error : errors.values())
     {
-      if (!error.equals(getMessage()))
+      if (error != null && !error.equals(getMessage()))
       {
         s.append("\n");
         s.append(error);
