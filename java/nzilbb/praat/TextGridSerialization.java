@@ -219,7 +219,7 @@ public class TextGridSerialization
     * @see #getUseConventions()
     * @see #setUseConventions(Boolean)
     */
-   protected Boolean bUseConventions = Boolean.TRUE;
+   protected Boolean bUseConventions = Boolean.FALSE;
    /**
     * Getter for {@link #bUseConventions}: Whether to use text conventions for comment, noise, lexical, and pronounce annotations.
     * @return Whether to use text conventions for comment, noise, lexical, and pronounce annotations.
@@ -257,7 +257,7 @@ public class TextGridSerialization
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-         "Praat TextGrid", "2.51", "text/praat-textgrid", ".textgrid", "20200909.1954",
+         "Praat TextGrid", "2.52", "text/praat-textgrid", ".textgrid", "20200909.1954",
          getClass().getResource("icon.png"));
    }
    
@@ -1304,20 +1304,18 @@ public class TextGridSerialization
     * @throws SerializationParametersMissingException If not all required parameters have a value.
     */
    public String[] getRequiredLayers() throws SerializationParametersMissingException {
+      Vector<String> requiredLayers = new Vector<String>();
+      if (getParticipantLayer() != null) requiredLayers.add(getParticipantLayer().getId());
+      if (getTurnLayer() != null) requiredLayers.add(getTurnLayer().getId());
+      if (getUtteranceLayer() != null) requiredLayers.add(getUtteranceLayer().getId());
       if (bUseConventions != null && bUseConventions) {
-         Vector<String> requiredLayers = new Vector<String>();
-         if (getParticipantLayer() != null) requiredLayers.add(getParticipantLayer().getId());
-         if (getTurnLayer() != null) requiredLayers.add(getTurnLayer().getId());
-         if (getUtteranceLayer() != null) requiredLayers.add(getUtteranceLayer().getId());
          if (getWordLayer() != null) requiredLayers.add(getWordLayer().getId());
          if (getLexicalLayer() != null) requiredLayers.add(getLexicalLayer().getId());
          if (getPronounceLayer() != null) requiredLayers.add(getPronounceLayer().getId());
          if (getCommentLayer() != null) requiredLayers.add(getCommentLayer().getId());
          if (getNoiseLayer() != null) requiredLayers.add(getNoiseLayer().getId());
-         return requiredLayers.toArray(new String[0]);
-      } else {
-         return new String[0];
       }
+      return requiredLayers.toArray(new String[0]);
    }
 
    /**
