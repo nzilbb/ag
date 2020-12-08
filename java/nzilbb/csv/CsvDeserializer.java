@@ -614,7 +614,7 @@ public class CsvDeserializer implements GraphDeserializer {
 	 }
 
 	 // participant/author
-	 Annotation participant = graph.addTag(
+	 Annotation participant = graph.createTag(
 	    graph, schema.getParticipantLayerId(), record.get(participantColumn));
          participant.setConfidence(Constants.CONFIDENCE_MANUAL);
 
@@ -626,10 +626,10 @@ public class CsvDeserializer implements GraphDeserializer {
 	       Layer layer = (Layer)p.getValue();
 	       String value = record.get(header);
 	       if (layer.getParentId().equals(schema.getRoot().getId())) { // graph tag
-		  graph.addTag(graph, layer.getId(), value)
+		  graph.createTag(graph, layer.getId(), value)
                      .setConfidence(Constants.CONFIDENCE_MANUAL);
 	       } else { // participant tag
-		  graph.addTag(participant, layer.getId(), value)
+		  graph.createTag(participant, layer.getId(), value)
                      .setConfidence(Constants.CONFIDENCE_MANUAL);
 	       }
 	    } // parameter set

@@ -681,7 +681,7 @@ public class BundleSerialization implements GraphSerializer, SchemaSerializer, G
                      // if it has no children
                      if (parent.all(alignedPeer.get().getId()).length == 0) {
                         // create a dummy child so that there are no aligned items
-                        graph.addTag(parent, layer.getId(), "?")
+                        graph.createTag(parent, layer.getId(), "?")
                            .setConfidence(Constants.CONFIDENCE_NONE);
                      }
                      // create links
@@ -698,7 +698,7 @@ public class BundleSerialization implements GraphSerializer, SchemaSerializer, G
                      // if it has no childrent
                      if (parent.getAnnotations(layer.getId()).size() == 0) {
                         // create a dummy child so that there are no aligned items
-                        graph.addTag(parent, layer.getId(), "?")
+                        graph.createTag(parent, layer.getId(), "?")
                            .setConfidence(Constants.CONFIDENCE_NONE);
                      }
                      // create links
@@ -1396,7 +1396,7 @@ public class BundleSerialization implements GraphSerializer, SchemaSerializer, G
                         // ensure the level annotation is in the graph, as it's the parent
                         if (levelAnnotation.getId() == null) graph.addAnnotation(levelAnnotation);
                         // create a tag annotation
-                        graph.addTag(levelAnnotation, labelLayer.getId(), labelValue)
+                        graph.createTag(levelAnnotation, labelLayer.getId(), labelValue)
                            .setConfidence(Constants.CONFIDENCE_MANUAL);;
                      } // label is mapped to a layer
                   } // a tag layer

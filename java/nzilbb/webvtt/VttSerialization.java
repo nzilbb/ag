@@ -594,7 +594,7 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
 	 Layer layer = (Layer)p.getValue();
 	 if (layer != null && !layer.getId().equals("[ignore]")) {
 	    graph.addLayer((Layer)schema.getLayer(layer.getId()).clone());
-	    graph.addTag(graph, layer.getId(), getMetaData().get(key))
+	    graph.createTag(graph, layer.getId(), getMetaData().get(key))
                .setConfidence(Constants.CONFIDENCE_MANUAL);
 	 } // there's a layer mapping
       } // next meta-data item

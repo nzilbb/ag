@@ -1039,12 +1039,12 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
       try {
          String sResult = xpath.evaluate("/ANNOTATION_DOCUMENT/@AUTHOR", root);
          if (sResult != null && sResult.length() > 0 && authorLayer != null) {
-            graph.addTag(graph, authorLayer.getId(), sResult)
+            graph.createTag(graph, authorLayer.getId(), sResult)
                .setConfidence(Constants.CONFIDENCE_MANUAL);;
          }
          sResult = xpath.evaluate("/ANNOTATION_DOCUMENT/@DATE", root);
          if (sResult != null && sResult.length() > 0 && dateLayer != null) {
-            graph.addTag(graph, dateLayer.getId(), sResult)
+            graph.createTag(graph, dateLayer.getId(), sResult)
                .setConfidence(Constants.CONFIDENCE_MANUAL);;
          }
          sResult = xpath.evaluate("/ANNOTATION_DOCUMENT/TIER/@LANG_REF", root);
@@ -1052,7 +1052,7 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
             sResult = xpath.evaluate("/ANNOTATION_DOCUMENT/TIER/@DEFAULT_LOCALE", root);
          }
          if (sResult != null && sResult.length() > 0 && languageLayer != null) {
-            graph.addTag(graph, languageLayer.getId(), sResult)
+            graph.createTag(graph, languageLayer.getId(), sResult)
                .setConfidence(Constants.CONFIDENCE_MANUAL);;
          }	 
       } catch(XPathExpressionException x) {

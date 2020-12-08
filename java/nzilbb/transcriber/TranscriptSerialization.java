@@ -886,27 +886,27 @@ public class TranscriptSerialization
 
       // attributes
       if (getScribe() != null && getScribe().length() > 0 && scribeLayer != null) {
-	 graph.addTag(graph, scribeLayer.getId(), getScribe())
+	 graph.createTag(graph, scribeLayer.getId(), getScribe())
             .setConfidence(Constants.CONFIDENCE_MANUAL);
       }
       if (getVersion() != null && getVersion().length() > 0 && versionLayer != null) {
-	 graph.addTag(graph, versionLayer.getId(), getVersion())
+	 graph.createTag(graph, versionLayer.getId(), getVersion())
             .setConfidence(Constants.CONFIDENCE_MANUAL);
       }
       if (getVersionDate() != null && getVersionDate().length() > 0 && versionDateLayer != null) {
-	 graph.addTag(graph, versionDateLayer.getId(), getVersionDate())
+	 graph.createTag(graph, versionDateLayer.getId(), getVersionDate())
             .setConfidence(Constants.CONFIDENCE_MANUAL);
       }
       if (getProgram() != null && getProgram().length() > 0 && programLayer != null) {
-	 graph.addTag(graph, programLayer.getId(), getProgram())
+	 graph.createTag(graph, programLayer.getId(), getProgram())
             .setConfidence(Constants.CONFIDENCE_MANUAL);
       }
       if (getAirDate() != null && getAirDate().length() > 0 && airDateLayer != null) {
-	 graph.addTag(graph, airDateLayer.getId(), getAirDate())
+	 graph.createTag(graph, airDateLayer.getId(), getAirDate())
             .setConfidence(Constants.CONFIDENCE_MANUAL);
       }
       if (getLanguage() != null && getLanguage().length() > 0 && transcriptLanguageLayer != null) {
-	 graph.addTag(graph, transcriptLanguageLayer.getId(), getLanguage())
+	 graph.createTag(graph, transcriptLanguageLayer.getId(), getLanguage())
             .setConfidence(Constants.CONFIDENCE_MANUAL);
       }
 
@@ -922,7 +922,7 @@ public class TranscriptSerialization
 	 graph.addAnnotation(participant);
 
 	 if (speaker.getCheck().length() > 0 && participantCheckLayer != null) {
-	    graph.addTag(participant, participantCheckLayer.getId(), speaker.getCheck())
+	    graph.createTag(participant, participantCheckLayer.getId(), speaker.getCheck())
                .setConfidence(Constants.CONFIDENCE_MANUAL);
 	 }
 	 if (speaker.getType().length() > 0 && genderLayer != null) {
@@ -940,19 +940,19 @@ public class TranscriptSerialization
 		  }		     
 	       } // next label
 	    } // normalize label if possible
-	    graph.addTag(participant, genderLayer.getId(), genderLabel)
+	    graph.createTag(participant, genderLayer.getId(), genderLabel)
                .setConfidence(Constants.CONFIDENCE_MANUAL);
 	 }
 	 if (speaker.getDialect().length() > 0 && dialectLayer != null) {
-	    graph.addTag(participant, dialectLayer.getId(), speaker.getDialect())
+	    graph.createTag(participant, dialectLayer.getId(), speaker.getDialect())
                .setConfidence(Constants.CONFIDENCE_MANUAL);
 	 }
 	 if (speaker.getAccent().length() > 0 && accentLayer != null) {
-	    graph.addTag(participant, accentLayer.getId(), speaker.getAccent())
+	    graph.createTag(participant, accentLayer.getId(), speaker.getAccent())
                .setConfidence(Constants.CONFIDENCE_MANUAL);
 	 }
 	 if (speaker.getScope().length() > 0 && scopeLayer != null) {
-	    graph.addTag(participant, scopeLayer.getId(), speaker.getScope())
+	    graph.createTag(participant, scopeLayer.getId(), speaker.getScope())
                .setConfidence(Constants.CONFIDENCE_MANUAL);
 	 }
       }

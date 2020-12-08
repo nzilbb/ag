@@ -1159,43 +1159,43 @@ public class TEIDeserializer implements GraphDeserializer {
 	 // attributes
 	 String sResult = xpath.evaluate("fileDesc/titleStmt/respStmt/name/text()", header);
 	 if (sResult != null && sResult.length() > 0 && scribeLayer != null) {
-	    graph.addTag(graph, scribeLayer.getId(), sResult)
+	    graph.createTag(graph, scribeLayer.getId(), sResult)
                .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	 }
 	 sResult = xpath.evaluate("revisionDesc/change/respStmt/name/text()", header);
 	 if (sResult != null && sResult.length() > 0 && scribeLayer != null) {
-	    graph.addTag(graph, scribeLayer.getId(), sResult)
+	    graph.createTag(graph, scribeLayer.getId(), sResult)
                .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	 }
 	 sResult = xpath.evaluate("fileDesc/titleStmt/title/text()", header);
 	 if (sResult != null && sResult.length() > 0 && titleLayer != null) {
-	    graph.addTag(graph, titleLayer.getId(), sResult)
+	    graph.createTag(graph, titleLayer.getId(), sResult)
                .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	 }
 	 sResult = xpath.evaluate("revisionDesc/change/date/text()", header);
 	 if (sResult != null && sResult.length() > 0 && versionDateLayer != null) {
-	    graph.addTag(graph, versionDateLayer.getId(), sResult)
+	    graph.createTag(graph, versionDateLayer.getId(), sResult)
                .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	 }
 	 sResult = xpath.evaluate("profileDesc/creation/date/text()", header);
 	 if (sResult != null && sResult.length() > 0 && publicationDateLayer != null) {
-	    graph.addTag(graph, publicationDateLayer.getId(), sResult)
+	    graph.createTag(graph, publicationDateLayer.getId(), sResult)
                .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	 } else { // might be CDC-style - i.e. on a timeline
 	    sResult = xpath.evaluate("front/timeline/when/@absolute", text);
 	    if (sResult != null && sResult.length() > 0 && publicationDateLayer != null) {
-	       graph.addTag(graph, publicationDateLayer.getId(), sResult)
+	       graph.createTag(graph, publicationDateLayer.getId(), sResult)
                   .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	    }
 	 }
 	 sResult = xpath.evaluate("profileDesc/langUsage/language/@ident", header);
 	 if (sResult != null && sResult.length() > 0 && transcriptLanguageLayer != null) {
-	    graph.addTag(graph, transcriptLanguageLayer.getId(), sResult)
+	    graph.createTag(graph, transcriptLanguageLayer.getId(), sResult)
                .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	 }
 	 Attr lang = (Attr)text.getAttributes().getNamedItem("lang");
 	 if (lang != null) {
-	    graph.addTag(graph, transcriptLanguageLayer.getId(), lang.getValue().toLowerCase())
+	    graph.createTag(graph, transcriptLanguageLayer.getId(), lang.getValue().toLowerCase())
                .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	 }
 	 NodeList items = (NodeList) xpath.evaluate("fileDesc/sourceDesc/msDesc/msIdentifier/idno", header, XPathConstants.NODESET);
@@ -1211,7 +1211,7 @@ public class TEIDeserializer implements GraphDeserializer {
 		  layer = (Layer) parameters.get("idno").getValue();
 	       }
 	       if (layer != null) { // it's mapped to a layer
-		  graph.addTag(graph, layer.getId(), value)
+		  graph.createTag(graph, layer.getId(), value)
                      .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	       }
 	    } // there's a value
@@ -1230,7 +1230,7 @@ public class TEIDeserializer implements GraphDeserializer {
 		  if (parameters.containsKey(keyName)) { // there is a parameter
 		     Layer layer = (Layer) parameters.get(keyName).getValue();
 		     if (layer != null) { // mapped to a layer
-			graph.addTag(graph, layer.getId(), value)
+			graph.createTag(graph, layer.getId(), value)
                            .setConfidence(Constants.CONFIDENCE_MANUAL);;
 		     }
 		  } // there is a parameter
@@ -1276,21 +1276,21 @@ public class TEIDeserializer implements GraphDeserializer {
 	       // sex
 	       if (person.getAttribute("sex").length() > 0
 		   && getSexLayer() != null) {
-		  graph.addTag(participant, sexLayer.getId(), person.getAttribute("sex"))
+		  graph.createTag(participant, sexLayer.getId(), person.getAttribute("sex"))
                      .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	       }
 	       // age
 	       sResult = xpath.evaluate("age/text()", person);
 	       if (sResult != null && sResult.length() > 0
 		   && getAgeLayer() != null) {
-		  graph.addTag(participant, ageLayer.getId(), sResult)
+		  graph.createTag(participant, ageLayer.getId(), sResult)
                      .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	       }
 	       // birth
 	       sResult = xpath.evaluate("birth/@when", person);
 	       if (sResult != null && sResult.length() > 0
 		   && getBirthLayer() != null) {
-		  graph.addTag(participant, birthLayer.getId(), sResult)
+		  graph.createTag(participant, birthLayer.getId(), sResult)
                      .setConfidence(Constants.CONFIDENCE_MANUAL);;
 	       }
 	       
@@ -1308,7 +1308,7 @@ public class TEIDeserializer implements GraphDeserializer {
 			String value = child.getChildNodes().item(0).getNodeValue();
 			Layer layer = (Layer)parameters.get("person_" + name).getValue();
 			if (layer != null) {
-			   graph.addTag(participant, layer.getId(), value)
+			   graph.createTag(participant, layer.getId(), value)
                               .setConfidence(Constants.CONFIDENCE_MANUAL);;
 			}
 		     } else if (name.equals("note")) {
@@ -1318,7 +1318,7 @@ public class TEIDeserializer implements GraphDeserializer {
 			   Layer layer = (Layer)parameters.get(keyName).getValue();
 			   if (layer != null) {
 			      String value = child.getTextContent();
-			      graph.addTag(participant, layer.getId(), value)
+			      graph.createTag(participant, layer.getId(), value)
                                  .setConfidence(Constants.CONFIDENCE_MANUAL);;
 			   }
 			}

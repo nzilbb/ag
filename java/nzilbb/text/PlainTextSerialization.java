@@ -1198,16 +1198,16 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
             if (layer != null) {
                String value = (String)oMetaData[1];
                if (layer.getParentId().equals(schema.getRoot().getId())) { // graph tag
-                  graph.addTag(graph, layer.getId(), value)
+                  graph.createTag(graph, layer.getId(), value)
                      .setConfidence(Constants.CONFIDENCE_MANUAL);
                } else if (getEpisodeLayer() != null
                         && layer.getParentId().equals(getEpisodeLayer().getId())) { // episode tag
                   Annotation episode = graph.first(getEpisodeLayer().getId());
                   if (episode == null) {
-                     episode = graph.addTag(graph, getEpisodeLayer().getId(), graph.getLabel());
+                     episode = graph.createTag(graph, getEpisodeLayer().getId(), graph.getLabel());
                      episode.setConfidence(Constants.CONFIDENCE_MANUAL);
                   }
-                  graph.addTag(episode, layer.getId(), value)
+                  graph.createTag(episode, layer.getId(), value)
                      .setConfidence(Constants.CONFIDENCE_MANUAL);
                } else { // participant tag
                   Annotation tag = new Annotation(null, value, layer.getId());
