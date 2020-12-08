@@ -521,7 +521,7 @@ public class TextGridSerialization
                           "Whether to use text conventions for comment, noise, lexical, and pronounce annotations", true));
       }
       if (configuration.get("useConventions").getValue() == null) {
-         configuration.get("useConventions").setValue(Boolean.TRUE);
+         configuration.get("useConventions").setValue(Boolean.FALSE);
       }
 
       return configuration;
