@@ -21,17 +21,19 @@
 //
 package nzilbb.htk.mlf;
 
-import java.util.Vector;
-import java.util.HashSet;
-import java.util.Set;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.util.Vector;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
@@ -167,7 +169,8 @@ public class MlfDeserializer implements GraphDeserializer {
    public MlfDeserializer setPhoneLayer(Layer newPhoneLayer) { phoneLayer = newPhoneLayer; return this; }
    
    /**
-    * The layer for confidence scores.
+    * The layer for confidence scores. 
+    * <p> This must be set iff the MLF includes scores.
     * @see #getScoreLayer()
     * @see #setScoreLayer(Layer)
     */
@@ -179,12 +182,33 @@ public class MlfDeserializer implements GraphDeserializer {
    public Layer getScoreLayer() { return scoreLayer; }
    /**
     * Setter for {@link #scoreLayer}: The layer for confidence scores.
+    * <p> This must be set iff the MLF includes scores.
     * @param newScoreLayer The layer for confidence scores.
     */
    public MlfDeserializer setScoreLayer(Layer newScoreLayer) { scoreLayer = newScoreLayer; return this; }
-   
+
+   /**
+    * Layer for noise annotations.
+    * @see #getNoiseLayer()
+    * @see #setNoiseLayer(Layer)
+    */
+   protected Layer noiseLayer;
+   /**
+    * Getter for {@link #noiseLayer}: Layer for noise annotations.
+    * @return Layer for noise annotations.
+    */
+   public Layer getNoiseLayer() { return noiseLayer; }
+   /**
+    * Setter for {@link #noiseLayer}: Layer for noise annotations.
+    * @param newNoiseLayer Layer for noise annotations.
+    */
+   public MlfDeserializer setNoiseLayer(Layer newNoiseLayer) { noiseLayer = newNoiseLayer; return this; }
+
    /**
     * A set of labels that identify noise tokens.
+    * <p> If there are noise intervals in the MLF, this must be set even if 
+    * {@link #noiseLayer} is <em>not</em> set. Otherwise, the noise intervals will be
+    * taken as words.
     * @see #getNoiseIdentifiers()
     * @see #setNoiseIdentifiers(Set<String>)
     */
@@ -279,8 +303,124 @@ public class MlfDeserializer implements GraphDeserializer {
     */
    public ParameterSet configure(ParameterSet configuration, Schema schema) {
       setSchema(schema);
-      // TODO useP2FACorrection
-      // TODO noiseIdentifiers
+
+      // set any values that have been passed in
+      for (Parameter p : configuration.values()) {
+         if (p.getName().equals("noiseIdentifiersString")) {
+            String[] noiseIdentifiersArray = p.getValue().toString().split(" ");
+            noiseIdentifiers.clear();
+            noiseIdentifiers.addAll(Arrays.asList(noiseIdentifiersArray));
+         } else {
+            try { p.apply(this); } catch(Exception x) {}
+         }
+      } // next parameters
+
+      // validate
+      if (phoneLayer != null && scoreLayer != null) {
+         if (!scoreLayer.getParentId().equals(phoneLayer.getId())) {
+            // score layer must be a phone layer child
+            scoreLayer = null;
+            if (configuration.containsKey("scoreLayer")) {
+               configuration.get("scoreLayer").setValue(null);
+            }
+         }
+      }
+
+      LinkedHashMap<String,Layer> topLevelLayers = new LinkedHashMap<String,Layer>();
+      for (Layer top : schema.getRoot().getChildren().values()) {
+         
+	 if (top.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
+            // aligned children of graph
+	    topLevelLayers.put(top.getId(), top);
+	 }
+      } // next top level layer 
+      LinkedHashMap<String,Layer> wordPartitionLayers = new LinkedHashMap<String,Layer>();
+      LinkedHashMap<String,Layer> phoneTagLayers = new LinkedHashMap<String,Layer>();
+      for (Layer layer : getSchema().getWordLayer().getChildren().values()) {
+	 if (layer.getAlignment() == Constants.ALIGNMENT_INTERVAL && layer.getPeers()) {
+	    // key by lowercase ID, so that matching is case-insensitive
+	    wordPartitionLayers.put(layer.getId().toLowerCase(), layer);
+
+            // look for possible tags of this child layer
+            for (Layer grandchild : layer.getChildren().values()) {
+               if (grandchild.getAlignment() == Constants.ALIGNMENT_NONE) {
+                  // key by lowercase ID, so that matching is case-insensitive
+                  phoneTagLayers.put(grandchild.getId().toLowerCase(), grandchild);
+               }
+            }
+	 }
+      } // next layer
+      if (phoneLayer != null) { // if we already know the phone layer
+         // ensure only child tags are available as scoreLayer options
+         phoneTagLayers.clear();
+         for (Layer grandchild : phoneLayer.getChildren().values()) {
+            if (grandchild.getAlignment() == Constants.ALIGNMENT_NONE) {
+               // key by lowercase ID, so that matching is case-insensitive
+               phoneTagLayers.put(grandchild.getId().toLowerCase(), grandchild);
+            }
+         }
+      }
+     
+      // create a list of layers we need and possible matching layer names
+      LinkedHashMap<Parameter,List<String>> layerToPossibilities = new LinkedHashMap<Parameter,List<String>>();
+      HashMap<String,LinkedHashMap<String,Layer>> layerToCandidates = new HashMap<String,LinkedHashMap<String,Layer>>();
+      
+      layerToPossibilities.put(
+	 new Parameter("noiseLayer", Layer.class, "Noise layer", "Noise annotations"), 
+	 Arrays.asList("noise","noises","backgroundnoise"));
+      layerToCandidates.put("noiseLayer", topLevelLayers);
+      
+      layerToPossibilities.put(
+	 new Parameter("phoneLayer", Layer.class, "Phones layer", "Layer for aligned phones"), 
+	 Arrays.asList("phone","phones","segment", "segments"));
+      layerToCandidates.put("phoneLayer", wordPartitionLayers);
+      
+      layerToPossibilities.put(
+	 new Parameter("scoreLayer", Layer.class, "Score layer", "Layer for HTK confidence score"), 
+	 Arrays.asList("score","scores","confidence"));
+      layerToCandidates.put("scoreLayer", phoneTagLayers);
+      
+      // add parameters that aren't in the configuration yet, and set possibile/default values
+      for (Parameter p : layerToPossibilities.keySet()) {
+         
+	 List<String> possibleNames = layerToPossibilities.get(p);
+	 LinkedHashMap<String,Layer> candidateLayers = layerToCandidates.get(p.getName());
+	 if (configuration.containsKey(p.getName())) {
+            
+	    p = configuration.get(p.getName());
+	 } else {            
+	    configuration.addParameter(p);
+	 }
+	 if (p.getValue() == null) {
+	    p.setValue(Utility.FindLayerById(candidateLayers, possibleNames));
+	 }
+	 p.setPossibleValues(candidateLayers.values());
+      }
+      
+      // useP2FACorrection
+      if (!configuration.containsKey("useP2FACorrection")) {
+         configuration.addParameter(
+            new Parameter("useP2FACorrection", Boolean.class, 
+                          "P2FA 11,025Hz Correction",
+                          "Whether the P2FA 11,025Hz alignment correction should be applied",
+                          true));
+      }
+      if (configuration.get("useP2FACorrection").getValue() == null) {
+         configuration.get("useP2FACorrection").setValue(Boolean.FALSE);
+      }
+      
+      // noiseIdentifiers
+      if (!configuration.containsKey("noiseIdentifiersString")) {
+         configuration.addParameter(
+            new Parameter("noiseIdentifiersString", Boolean.class, 
+                          "Noise identifiers",
+                          "Space-separated list of noise labels",
+                          true));
+      }
+      if (configuration.get("noiseIdentifiersString").getValue() == null) {
+         configuration.get("noiseIdentifiersString").setValue("");
+      }
+
       return configuration;
    }
 
@@ -320,28 +460,8 @@ public class MlfDeserializer implements GraphDeserializer {
 	 }
       } // next stream
       if (mlf == null) throw new SerializationException("No Master Label File stream found");
-      
-      ParameterSet mappings = new ParameterSet();
 
-      LinkedHashMap<String,Layer> wordPartitionLayers = new LinkedHashMap<String,Layer>();
-      for (Layer layer : getSchema().getWordLayer().getChildren().values()) {
-	 if (layer.getAlignment() == Constants.ALIGNMENT_INTERVAL && layer.getPeers()) {
-	    // key by lowercase ID, so that matching is case-insensitive
-	    wordPartitionLayers.put(layer.getId().toLowerCase(), layer);
-	 }
-      } // next layer
-      Parameter p = new Parameter(
-	 "phones", Layer.class, "Phone Layer", "Layer for aligned phones", false);
-      Vector<String> possibleNames = new Vector<String>() {{
-            add("phone");
-            add("phones");
-            add("segment");
-            add("segments"); }};
-      p.setValue(Utility.FindLayerById(wordPartitionLayers, possibleNames));
-      p.setPossibleValues(wordPartitionLayers.values());
-      mappings.addParameter(p);
-      // TODO scoreLayer
-      return mappings;
+      return new ParameterSet();
    }
 
    /**
@@ -353,7 +473,6 @@ public class MlfDeserializer implements GraphDeserializer {
     */
    public void setParameters(ParameterSet parameters)
       throws SerializationParametersMissingException {
-      setPhoneLayer((Layer)parameters.get("phones").getValue());
    }
 
    /**
@@ -450,11 +569,16 @@ public class MlfDeserializer implements GraphDeserializer {
                if (phoneLayer != null) {
                   fragment.addLayer((Layer)phoneLayer.clone());
                }
+               if (noiseLayer != null) {
+                  fragment.addLayer((Layer)noiseLayer.clone());
+               }
+               if (scoreLayer != null) {
+                  fragment.addLayer((Layer)scoreLayer.clone());
+               }
                fragment.setOffsetUnits(Constants.UNIT_SECONDS);
                
                LabFileNameParser labFile = new LabFileNameParser(
                   line.replaceFirst("^\"","").replaceFirst("\"$",""));
-               System.out.println("LabFileNameParser: " + line + " - " + labFile.transcriptName);
                fragment.setId(Graph.FragmentId(
                                  labFile.transcriptName, labFile.startTime, labFile.endTime));
                Graph sourceGraph = new Graph();
@@ -479,7 +603,7 @@ public class MlfDeserializer implements GraphDeserializer {
             } else { // annotation line
                
                StringTokenizer stTokens = new StringTokenizer(line, " ");
-               
+
                if (stTokens.countTokens() >= 4 + scoreOffset) { // word line
                   try {
                      String sStartTime = stTokens.nextToken();
@@ -490,11 +614,23 @@ public class MlfDeserializer implements GraphDeserializer {
                      //System.out.println("StartTime: " + sStartTime + ", EndTime: " + sEndTime + ", Phoneme: " + sPhoneme + ", Word: " + sWord);
                      double dStart = timestampToSeconds(sStartTime);
                      double dEnd = timestampToSeconds(sEndTime);
-                     
-                     if (!sWord.equals("SILENCE")
-                         && !sWord.equals("PAUSE")
-                         && !sWord.equals("SHORTPAUSE")
-                         && !noiseIdentifiers.contains(sWord)) {
+
+                     if (noiseIdentifiers.contains(sPhoneme)) { // a noise
+
+                        if (noiseLayer != null) {
+                           Annotation noise = new Annotation()
+                              .setLabel(sWord)
+                              .setLayerId(noiseLayer.getId())
+                              .setStart(fragment.getOrCreateAnchorAt(dStart, anchorConfidence))
+                              .setEnd(fragment.getOrCreateAnchorAt(dEnd, anchorConfidence));
+                           noise.setConfidence(annotationConfidence);
+                           fragment.addAnnotation(noise);
+                        }
+                        
+                     } else if (!sWord.equals("SILENCE") 
+                                && !sWord.equals("PAUSE")
+                                && !sWord.equals("SHORTPAUSE")) { // a word
+                        
                         word = new Annotation()
                            .setLabel(sWord)
                            .setLayerId(schema.getWordLayerId())
@@ -502,30 +638,34 @@ public class MlfDeserializer implements GraphDeserializer {
                            .setEnd(fragment.getOrCreateAnchorAt(dEnd, anchorConfidence));
                         word.setConfidence(annotationConfidence);
                         fragment.addAnnotation(word);
-                        
-                        // add the phoneme to the phoneme layer
-                        sPhoneme = decodeOctal(sPhoneme);
-                        
-                        Annotation segment = new Annotation()
-                           .setLabel(sPhoneme)
-                           .setLayerId(phoneLayer.getId())
-                           .setStart(word.getStart())
-                           .setEnd(word.getEnd())
-                           .setParent(word);
-                        segment.setConfidence(annotationConfidence);
-                        fragment.addAnnotation(segment);
-                        
-                        // save score?
-                        if (sScore.length() > 0) {
-                           Annotation score = new Annotation()
-                              .setLabel(sScore)
-                              .setLayerId(scoreLayer.getId())
-                              .setParent(segment)
-                              .setStart(segment.getStart())
-                              .setEnd(segment.getEnd());
-                           score.setConfidence(annotationConfidence);
-                           fragment.addAnnotation(score);
-                        }		     
+
+                        if (phoneLayer != null) {
+                           // add the phoneme to the phoneme layer
+                           sPhoneme = decodeOctal(sPhoneme);
+                           
+                           Annotation segment = new Annotation()
+                              .setLabel(sPhoneme)
+                              .setLayerId(phoneLayer.getId())
+                              .setStart(word.getStart())
+                              .setEnd(word.getEnd())
+                              .setParent(word);
+                           segment.setConfidence(annotationConfidence);
+                           fragment.addAnnotation(segment);
+                           
+                           // save score?
+                           if (sScore.length() > 0) {
+                              if (scoreLayer != null) {
+                                 Annotation score = new Annotation()
+                                    .setLabel(sScore)
+                                    .setLayerId(scoreLayer.getId())
+                                    .setParent(segment)
+                                    .setStart(segment.getStart())
+                                    .setEnd(segment.getEnd());
+                                 score.setConfidence(annotationConfidence);
+                                 fragment.addAnnotation(score);
+                              } // score layer set
+                           } // score
+                        } // phoneLayer set		     
                      } // not silence
                   } catch (Exception exWord) {
                      throw exWord;
@@ -548,31 +688,35 @@ public class MlfDeserializer implements GraphDeserializer {
                            double dStart = timestampToSeconds(sPhonemeStartTime);
                            double dEnd = timestampToSeconds(sPhonemeEndTime);
                            //System.out.println("Phoneme: " + sPhoneme + ", StartTime: " + dStart + ", EndTime: " + dEnd);
+
+                           word.setEnd(fragment.getOrCreateAnchorAt(dEnd, anchorConfidence));
                            
-                           Annotation segment = new Annotation()
-                              .setLabel(sPhoneme)
-                              .setLayerId(phoneLayer.getId())
-                              .setStart(fragment.getOrCreateAnchorAt(dStart, anchorConfidence))
-                              .setEnd(fragment.getOrCreateAnchorAt(dEnd, anchorConfidence))
-                              .setParent(word);
-                           segment.setConfidence(annotationConfidence);
-                           
-                           
-                           // add it to the fragment
-                           fragment.addAnnotation(segment);
-                           word.setEnd(segment.getEnd());
-                           
-                           // save score?
-                           if (sScore.length() > 0) {
-                              Annotation score = new Annotation()
-                                 .setLabel(sScore)
-                                 .setLayerId(scoreLayer.getId())
-                                 .setParent(segment)
-                                 .setStart(segment.getStart())
-                                 .setEnd(segment.getEnd());
-                              score.setConfidence(annotationConfidence);
-                              fragment.addAnnotation(score);
-                           }		     
+                           if (phoneLayer != null) {
+                              Annotation segment = new Annotation()
+                                 .setLabel(sPhoneme)
+                                 .setLayerId(phoneLayer.getId())
+                                 .setStart(fragment.getOrCreateAnchorAt(dStart, anchorConfidence))
+                                 .setEnd(fragment.getOrCreateAnchorAt(dEnd, anchorConfidence))
+                                 .setParent(word);
+                              segment.setConfidence(annotationConfidence);
+                              
+                              // add it to the fragment
+                              fragment.addAnnotation(segment);
+                              
+                              // save score?
+                              if (sScore.length() > 0) {
+                                 if (scoreLayer != null) {
+                                    Annotation score = new Annotation()
+                                       .setLabel(sScore)
+                                       .setLayerId(scoreLayer.getId())
+                                       .setParent(segment)
+                                       .setStart(segment.getStart())
+                                       .setEnd(segment.getEnd());
+                                    score.setConfidence(annotationConfidence);
+                                    fragment.addAnnotation(score);
+                                 } // scoreLayer set
+                              } // score
+                           } // phoneLayer set
                         } // phoneme
                      } // we are currently processing a word
                   }  catch (Exception exWord) {
