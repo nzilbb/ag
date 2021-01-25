@@ -60,6 +60,10 @@ public class ConfigurationHelper
       {
         properties.setProperty(parameter.getName(), parameter.getValue().toString());
       }
+      else
+      {
+        properties.setProperty(parameter.getName(), "");
+      }
     }
     properties.storeToXML(new FileOutputStream(xmlFile), descriptor.getName());
     return xmlFile;
@@ -87,25 +91,32 @@ public class ConfigurationHelper
         if (properties.containsKey(parameter.getName()))
         {
           String value = properties.getProperty(parameter.getName());
-          if (parameter.getType().equals(Layer.class))
+          if (value.length() > 0)
           {
-            parameter.setValue(schema.getLayer(value));
+             if (parameter.getType().equals(Layer.class))
+             {
+                parameter.setValue(schema.getLayer(value));
+             }
+             else if (parameter.getType().equals(Integer.class))
+             {
+                parameter.setValue(Integer.valueOf(value));
+             }
+             else if (parameter.getType().equals(Double.class))
+             {
+                parameter.setValue(Double.valueOf(value));
+             }
+             else if (parameter.getType().equals(Boolean.class))
+             {
+                parameter.setValue(Boolean.valueOf(value));
+             }
+             else
+             { // everything else given a string
+                parameter.setValue(value);
+             }
           }
-          else if (parameter.getType().equals(Integer.class))
+          else // empty string means null value
           {
-            parameter.setValue(Integer.valueOf(value));
-          }
-          else if (parameter.getType().equals(Double.class))
-          {
-            parameter.setValue(Double.valueOf(value));
-          }
-          else if (parameter.getType().equals(Boolean.class))
-          {
-            parameter.setValue(Boolean.valueOf(value));
-          }
-          else
-          { // everything else given a string
-            parameter.setValue(value);
+             parameter.setValue(null);
           }
         }
       } // next parameter
