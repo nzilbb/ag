@@ -291,7 +291,7 @@ public class PdfSerializer
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-         "PDF Document", "0.3", "application/pdf", ".pdf", "20200909.1954",
+         "PDF Document", "0.4", "application/pdf", ".pdf", "20200909.1954",
          getClass().getResource("icon.png"));
    }
 
@@ -316,6 +316,8 @@ public class PdfSerializer
       setUtteranceLayer(schema.getUtteranceLayer());
       setWordLayer(schema.getWordLayer());
       setParticipantLayer(schema.getParticipantLayer());
+
+      boolean firstTime = configuration.size() == 0;
 
       // set any values that have been passed in
       for (Parameter p : configuration.values()) try { p.apply(this); } catch(Exception x) {}
@@ -479,7 +481,7 @@ public class PdfSerializer
          {
             configuration.addParameter(p);
          }
-         if (p.getValue() == null)
+         if (p.getValue() == null && firstTime)
          {
             p.setValue(Utility.FindLayerById(candidateLayers, possibleNames));
          }
