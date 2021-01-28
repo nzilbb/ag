@@ -183,12 +183,12 @@ anchorIdExpression
 anchorOffsetExpression : anchorExpression DOT OFFSET ;
 anchorConfidenceExpression : anchorExpression DOT CONFIDENCE ;
 
-myMethodCall
+myMethodCall /* TODO add "first" */
   : MY OPEN_PAREN layer=stringLiteral CLOSE_PAREN
 /*  | annotationExpression DOT MY OPEN_PAREN stringLiteral CLOSE_PAREN # OtherMyMethodCall*/
   ;
 
-listMethodCall
+listMethodCall /* TODO add "all" */
   : LIST OPEN_PAREN layer=stringLiteral CLOSE_PAREN
   | other=annotationExpression LIST OPEN_PAREN stringLiteral CLOSE_PAREN
   ;
