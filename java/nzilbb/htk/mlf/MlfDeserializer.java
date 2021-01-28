@@ -514,10 +514,27 @@ public class MlfDeserializer implements GraphDeserializer {
 	 
          // start from the end and work back - this allows the transcript
          // name to contain _s
-         endTime = Double.valueOf(sTrimmedLine.substring(sTrimmedLine.lastIndexOf('_') + 1));
-         sTrimmedLine = sTrimmedLine.substring(0, sTrimmedLine.lastIndexOf('_'));
-         startTime = Double.valueOf(sTrimmedLine.substring(sTrimmedLine.lastIndexOf('_') + 1));
-         transcriptName = sTrimmedLine.substring(0, sTrimmedLine.lastIndexOf('_'));
+        
+         try {
+            int lastDelimiter = sTrimmedLine.lastIndexOf('_');
+            endTime = Double.valueOf(sTrimmedLine.substring(lastDelimiter + 1));
+            sTrimmedLine = sTrimmedLine.substring(0, lastDelimiter);
+            lastDelimiter = sTrimmedLine.lastIndexOf('_');
+            startTime = Double.valueOf(sTrimmedLine.substring(lastDelimiter + 1));
+            transcriptName = sTrimmedLine.substring(0, lastDelimiter);
+         } catch (NumberFormatException x) {
+            // might be with a hyphen between times - e.g.
+            // */001-94-baigentcarla-03.trs__0.0-5.281.lab
+            int lastDelimiter = sTrimmedLine.lastIndexOf('-');
+            endTime = Double.valueOf(sTrimmedLine.substring(lastDelimiter + 1));
+            sTrimmedLine = sTrimmedLine.substring(0, lastDelimiter);
+            lastDelimiter = sTrimmedLine.lastIndexOf('_');
+            startTime = Double.valueOf(sTrimmedLine.substring(lastDelimiter + 1));
+            transcriptName = sTrimmedLine.substring(0, lastDelimiter);
+            if (transcriptName.endsWith("_")) { // it was __ before the start time
+               transcriptName = transcriptName.substring(0, transcriptName.length() - 1);
+            }
+         }
       }
       
       /** Represents the object as a string */
