@@ -189,7 +189,7 @@ public class FragmentExtractor
       AudioFormat format = audioInputStream.getFormat();
       if (getSampleRate() != null)
       {
-         format = new AudioFormat(getSampleRate(), 16, 1, true, true);
+         format = new AudioFormat(getSampleRate(), 16, format.getChannels(), true, true);
       }
       audioInputStream = AudioSystem.getAudioInputStream(format, audioInputStream);
       final AudioInputStream stream
