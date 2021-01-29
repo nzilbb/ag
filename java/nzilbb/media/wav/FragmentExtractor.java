@@ -181,13 +181,16 @@ public class FragmentExtractor
    */
   public MediaThread start(String sourceType, File source, String destinationType, File destination) throws MediaException
   {
-    if (getSampleRate() == null) throw new MediaException("Sample rate not specified.");
     final File finalDestination = destination;
 
     try
     {
       AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(source);
-      AudioFormat format = new AudioFormat(getSampleRate(), 16, 1, true, true);
+      AudioFormat format = audioInputStream.getFormat();
+      if (getSampleRate() != null)
+      {
+         format = new AudioFormat(getSampleRate(), 16, 1, true, true);
+      }
       audioInputStream = AudioSystem.getAudioInputStream(format, audioInputStream);
       final AudioInputStream stream
         = new TruncatingAudioInputStream(audioInputStream, getStart(), getEnd());
