@@ -136,6 +136,19 @@ public class IO
    } // end of copy()
    
    /**
+    * Renames a file.
+    * @param source The original file.
+    * @param destination The new file.
+    * @throws IOException On file IO error.
+    */
+   public static void Rename(File source, File destination) throws IOException {
+      if (!source.renameTo(destination)) {
+         Copy(source, destination);
+         source.delete();
+      }
+   } // end of copy()
+   
+   /**
     * Saves the content of a URL to a file.
     * @param url The URL of the content.
     * @param file The file to save the content to.
