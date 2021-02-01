@@ -84,7 +84,7 @@ public class TestDISC2CMU {
       for (int i = 0; i < aCodebook.length; i += 2)
       {
 	 // check  mapping
-	 assertEquals("DISC " + aCodebook[i], translator.apply(aCodebook[i]), aCodebook[i+1]);
+	 assertEquals("DISC " + aCodebook[i], aCodebook[i+1], translator.apply(aCodebook[i]));
          
 	 // accumulate the whole set into strings
 	 sDISC.append(aCodebook[i]);
@@ -92,7 +92,84 @@ public class TestDISC2CMU {
 	 sCMU.append(aCodebook[i+1]);
       } // next pair
       
-      assertEquals(translator.apply(sDISC.toString()), sCMU.toString());      
+      assertEquals(sCMU.toString(), translator.apply(sDISC.toString()));
+      
+      // non-CMU dipthongs
+      assertEquals("N IY R", translator.apply("n7")); // NEAR
+      assertEquals("S K W EH R", translator.apply("skw8")); // SQUARE
+      assertEquals("K UH R", translator.apply("k9")); // CURE
+   }
+   
+   @Test public void defaultStress() throws Exception {
+      // CMU is a little one-to-one to DISC      
+      String[] aCodebook = {
+	 "@", /* <-> */"IH0", // schwa       - discuss
+	 "#", /* <-> */"AA1", // BATH        - odd/father
+	 "{", /* <-> */"AE1", // TRAP        - at/fast
+	 "V", /* <-> */"AH1", // STRUT       - hut/but
+	 "$", /* <-> */"AO1", // THOUGHT     - ought/fall
+	 "6", /* <-> */"AW1", // MOUTH       - cow/how
+	 "2", /* <-> */"AY1", // PRICE       - hide/my
+	 "b", /* <-> */"B",
+	 "J", /* <-> */"CH",
+	 "d", /* <-> */"D",
+	 "D", /* <-> */"DH",
+	 "E", /* <-> */"EH1", // DRESS       - Ed/red
+	 "3", /* <-> */"ER1", // NURSE       - hurt/her
+	 "1", /* <-> */"EY1", // FACE        - ate/say
+	 "f", /* <-> */"F", 
+	 "g", /* <-> */"G",
+	 "h", /* <-> */"HH",
+	 "I", /* <-> */"IH1", // KIT         - it/big
+	 "i", /* <-> */"IY1", // FLEECE      - eat/bee
+	 "_", /* <-> */"JH",
+	 "k", /* <-> */"K",
+	 "l", /* <-> */"L",
+	 "m", /* <-> */"M",
+	 "n", /* <-> */"N",
+	 "N", /* <-> */"NG",
+	 "5", /* <-> */"OW1", // GOAT        - oat/show
+	 "4", /* <-> */"OY1", // CHOICE      - toy/boy
+	 "p", /* <-> */"P",
+	 "r", /* <-> */"R",
+	 "s", /* <-> */"S",
+	 "S", /* <-> */"SH",
+	 "t", /* <-> */"T",
+	 "T", /* <-> */"TH",
+	 "U", /* <-> */"UH1", // FOOT        - hood/should
+	 "u", /* <-> */"UW1", // GOOSE       - two/you
+	 "v", /* <-> */"V",
+	 "w", /* <-> */"W",
+	 "j", /* <-> */"Y",
+	 "z", /* <-> */"Z",
+	 "Z", /* <-> */"ZH"
+      };
+
+      DISC2CMU translator = new DISC2CMU().setDefaultStress("1");
+      assertEquals("Default stess set", "1", translator.getDefaultStress());
+      assertEquals("Encoding name", "DISC", translator.getSourceEncoding());
+      assertEquals("Encoding name", "CMU", translator.getDestinationEncoding());
+
+      StringBuffer sDISC = new StringBuffer(aCodebook.length/2);
+      StringBuffer sCMU = new StringBuffer(3*aCodebook.length/2);
+      // for each pair of elements into the array
+      for (int i = 0; i < aCodebook.length; i += 2)
+      {
+	 // check  mapping
+	 assertEquals("DISC " + aCodebook[i], aCodebook[i+1], translator.apply(aCodebook[i]));
+         
+	 // accumulate the whole set into strings
+	 sDISC.append(aCodebook[i]);
+	 if (sCMU.length() > 0) sCMU.append(" ");
+	 sCMU.append(aCodebook[i+1]);
+      } // next pair
+      
+      assertEquals(sCMU.toString(), translator.apply(sDISC.toString()));
+
+      // non-CMU dipthongs
+      assertEquals("N IY1 R", translator.apply("n7")); // NEAR
+      assertEquals("S K W EH1 R", translator.apply("skw8")); // SQUARE
+      assertEquals("K UH1 R", translator.apply("k9")); // CURE
    }
    
    @Test public void roundTripExceptions() throws Exception {

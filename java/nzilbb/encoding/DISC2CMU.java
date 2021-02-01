@@ -46,8 +46,33 @@ import java.util.HashMap;
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class DISC2CMU extends PhonemeTranslator {
-
+   
    private static HashMap<Character,String> map;
+   
+
+   /**
+    * Default stress value to append to vowels. 
+    * <p> The default is <tt>null</tt> which means no lexical stress value is added.
+    * <p> Otherwise, this value appended to all phonemes that begin with a vowel, with the
+    * exception of "@" which will have "0" appended always. 
+    * e.g. if this is set to "1", then 
+    * <tt>tr{nskrIpS@n</tt>
+    * will be transformed to:
+    * <tt>T&nbsp;R&nbsp;AE1&nbsp;N&nbsp;S&nbsp;K&nbsp;R&nbsp;IH1&nbsp;P&nbsp;SH&nbsp;AH0&nbsp;N</tt>.
+    * @see #getDefaultStress()
+    * @see #setDefaultStress(String)
+    */
+   protected String defaultStress;
+   /**
+    * Getter for {@link #defaultStress}: Default stress value to append to vowels. 
+    * @return Default stress value to append to vowels. 
+    */
+   public String getDefaultStress() { return defaultStress; }
+   /**
+    * Setter for {@link #defaultStress}: Default stress value to append to vowels. 
+    * @param newDefaultStress Default stress value to append to vowels. 
+    */
+   public DISC2CMU setDefaultStress(String newDefaultStress) { defaultStress = newDefaultStress; return this; }
    
    /**
     * Default constructor.
@@ -138,7 +163,16 @@ public class DISC2CMU extends PhonemeTranslator {
       for (int c = 0; c < source.length(); c++) {
          if (map.containsKey(source.charAt(c))) {
             if (CMU.length() > 0) CMU.append(" ");
-            CMU.append(map.get(source.charAt(c)));
+            String phoneme = map.get(source.charAt(c));
+            if (defaultStress != null && phoneme.matches("[AEIOU].*")) {
+               if (source.charAt(c) == '@') { // schwa is an exception; stress is always "0"
+                  phoneme += "0";
+               } else { // append defaultStress to vowel
+                  // which might be embedded in something like "EH R"
+                  phoneme = phoneme.replaceFirst("( |$)", defaultStress + "$1");
+               }                  
+            } 
+            CMU.append(phoneme);
          }
          // unknown phones are dropped
       } // next phoneme
