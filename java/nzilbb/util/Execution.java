@@ -241,8 +241,12 @@ public class Execution implements Runnable {
       error = new StringBuffer();
        
       Vector<String> vArguments = new Vector<String>();
-      vArguments.add(exe.getPath());
-      vArguments.addAll(arguments);
+      if (exe.exists()) {
+         vArguments.add(exe.getPath());
+      } else { // let the shell find it?
+         vArguments.add(exe.getName());
+      }
+      if (arguments != null) vArguments.addAll(arguments);
       try {
 
          Vector<String> envp = new Vector<String>();
@@ -273,7 +277,7 @@ public class Execution implements Runnable {
             }
          }
          InputStream inStream = process.getInputStream();
-            InputStream errStream = process.getErrorStream();
+         InputStream errStream = process.getErrorStream();
 	 byte[] buffer = new byte[1024];
 	 
 	 // loop waiting for the process to exit, all the while reading from
