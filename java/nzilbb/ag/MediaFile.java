@@ -208,6 +208,7 @@ public class MediaFile implements CloneableBean
     * The file's extension, not including the dot.
     * @return The file's extension.
     */
+   @ClonedProperty
    public String getExtension()
    {
       if (getName().indexOf('.') < 0) return "";
@@ -236,6 +237,7 @@ public class MediaFile implements CloneableBean
     * Strip of the existension of the file name.
     * @return The file name, without the extension.
     */
+   @ClonedProperty
    public String getNameWithoutSuffix()
    {
       if (getName().indexOf('.') < 0) return getName();
@@ -256,6 +258,7 @@ public class MediaFile implements CloneableBean
     * Gets the media type of the file.
     * @return The top-level type of the file, based on the MIME type - i.e. "audio", "video", "image", or "other".
     */
+   @ClonedProperty
    public String getType()
    {
       if (mimeType == null) return "other";
