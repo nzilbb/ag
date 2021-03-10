@@ -136,68 +136,15 @@ public class TrackedMap
    {
       return toJson().toString();
    }
+
    /**
-    * JSON-encodes the object.
-    * @return A JSON representation of the object.
+    * {@link CloneableBean} methods that adds non-transient map attributes to JSON object
+    * (i.e. those with keys that start with a letter or digit).
+    * @param json The JSON object being built.
+    * @return The builder with any added properties.
     */
    @SuppressWarnings({"rawtypes"})
-   public JsonObject toJson()
-   {
-      JsonObjectBuilder json = Json.createObjectBuilder();
-      
-      // first add the bean property
-      for (String key : getClonedAttributes()) {
-         Method getter = getter(key);
-         try {
-            Object value = getter.invoke(this);
-            if (value != null) {
-               Class parameterClass = getter.getReturnType();
-               if (parameterClass.equals(String.class)) {
-                  json.add(key, (String)value);
-               } else if (parameterClass.equals(Integer.class)) {
-                  json.add(key, (Integer)value);
-               } else if (parameterClass.equals(int.class)) {
-                  json.add(key, (int)value);
-               } else if (parameterClass.equals(Double.class)) {
-                  json.add(key, (Double)value);
-               } else if (parameterClass.equals(double.class)) {
-                  json.add(key, (Double)value);
-               } else if (parameterClass.equals(Long.class)) {
-                  json.add(key, (Long)value);
-               } else if (parameterClass.equals(long.class)) {
-                  json.add(key, (long)value);
-               } else if (parameterClass.equals(Boolean.class)) {
-                  json.add(key, (Boolean)value);
-               } else if (parameterClass.equals(boolean.class)) {
-                  json.add(key, (boolean)value);
-               } else if (value instanceof List) {
-                  JsonArrayBuilder list = Json.createArrayBuilder();
-                  for (Object e : (List)value) {
-                     list.add(e.toString());
-                  }
-                  json.add(key, list);
-               } else if (value instanceof Map) {
-                  JsonObjectBuilder map = Json.createObjectBuilder();
-                  for (Object k : ((Map)value).keySet()) {
-                     Object v = ((Map)value).get(k);
-                     if (v instanceof CloneableBean) {
-                        map.add(k.toString(), ((CloneableBean)v).toJson());
-                     } else {
-                        map.add(k.toString(), v.toString());
-                     }
-                  }
-                  json.add(key, map);
-               }
-               // ignore any other types
-            } // value isn't null
-         } catch(IllegalAccessException exception) {
-            System.err.println(
-               "TrackedMap.toJsonString - can't set " + key + ": " + exception);
-         } catch(InvocationTargetException exception) {
-            System.err.println(
-               "TrackedMap.toJsonString - can't set " + key + ": " + exception);
-         }
-      } // next bean property
+   public JsonObjectBuilder addExtraJsonAttributes(JsonObjectBuilder json) {
 
       // now anything 'non-transient' in the map
       for (String key : keySet()) {
@@ -229,7 +176,7 @@ public class TrackedMap
          } // isn't 'transient'
       } // next bean property
 
-      return json.build();
+      return json;
    }
    
    /**

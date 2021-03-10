@@ -71,73 +71,84 @@ public interface CloneableBean {
     * @return A JSON representation of the bean.
     */
    @SuppressWarnings({"rawtypes"})
-   default public JsonObject toJson() {      
+   default public JsonObject toJson() {
+      
       JsonObjectBuilder json = Json.createObjectBuilder();
-      // look for getters annotated with @ClonedProperty
-      Method[] methods = getClass().getMethods();
-      for (Method method : methods) {
-	 ClonedProperty annotation = method.getAnnotation(ClonedProperty.class);
-	 if (annotation != null) {
-            // add the value to the JSON object
-            try {
-               Object value = method.invoke(this);
-               if (value != null) {
-                  String key = method.getName().substring(3,4).toLowerCase()
-                     + method.getName().substring(4);
-                  Class parameterClass = method.getReturnType();
-                  if (parameterClass.equals(String.class)) {
-                     json = json.add(key, (String)value);
-                  } else if (parameterClass.equals(Integer.class)) {
-                     json = json.add(key, (Integer)value);
-                  } else if (parameterClass.equals(int.class)) {
-                     json = json.add(key, (int)value);
-                  } else if (parameterClass.equals(Double.class)) {
-                     json = json.add(key, (Double)value);
-                  } else if (parameterClass.equals(double.class)) {
-                     json = json.add(key, (Double)value);
-                  } else if (parameterClass.equals(Long.class)) {
-                     json = json.add(key, (Long)value);
-                  } else if (parameterClass.equals(long.class)) {
-                     json = json.add(key, (long)value);
-                  } else if (parameterClass.equals(Boolean.class)) {
-                     json = json.add(key, (Boolean)value);
-                  } else if (parameterClass.equals(boolean.class)) {
-                     json = json.add(key, (boolean)value);
-                  } else if (parameterClass.equals(URL.class)) {
-                     json = json.add(key, value.toString());
-                  } else if (value instanceof CloneableBean) {
-                     json = json.add(key, ((CloneableBean)value).toJson());
-                  } else if (value instanceof List) {
-                     JsonArrayBuilder list = Json.createArrayBuilder();
-                     for (Object e : (List)value) {
-                        list.add(e.toString());
-                     }
-                     json = json.add(key, list);
-                  } else if (value instanceof Map) {
-                     JsonObjectBuilder map = Json.createObjectBuilder();
-                     for (Object k : ((Map)value).keySet()) {
-                        Object v = ((Map)value).get(k);
-                        if (v instanceof CloneableBean) {
-                           map.add(k.toString(), ((CloneableBean)v).toJson());
-                        } else {
-                           map.add(k.toString(), v.toString());
-                        }
-                     }
-                     json = json.add(key, map);
+
+      
+      // first add the bean property
+      for (String key : getClonedAttributes()) {
+         Method getter = getter(key);
+         try {
+            Object value = getter.invoke(this);
+            if (value != null) {
+               Class parameterClass = getter.getReturnType();
+               if (parameterClass.equals(String.class)) {
+                  json.add(key, (String)value);
+               } else if (parameterClass.equals(Integer.class)) {
+                  json.add(key, (Integer)value);
+               } else if (parameterClass.equals(int.class)) {
+                  json.add(key, (int)value);
+               } else if (parameterClass.equals(Double.class)) {
+                  json.add(key, (Double)value);
+               } else if (parameterClass.equals(double.class)) {
+                  json.add(key, (Double)value);
+               } else if (parameterClass.equals(Long.class)) {
+                  json.add(key, (Long)value);
+               } else if (parameterClass.equals(long.class)) {
+                  json.add(key, (long)value);
+               } else if (parameterClass.equals(Boolean.class)) {
+                  json.add(key, (Boolean)value);
+               } else if (parameterClass.equals(boolean.class)) {
+                  json.add(key, (boolean)value);
+               } else if (parameterClass.equals(URL.class)) {
+                  json = json.add(key, value.toString());
+               } else if (value instanceof CloneableBean) {
+                  json = json.add(key, ((CloneableBean)value).toJson());
+               } else if (value instanceof List) {
+                  JsonArrayBuilder list = Json.createArrayBuilder();
+                  for (Object e : (List)value) {
+                     list.add(e.toString());
                   }
-                  // ignore any other types
-               } // value isn't null
-            } catch(IllegalAccessException exception) {
-               System.err.println(
-                  "CloneableBean.toJsonObject - can't " + method.getName() + ": " + exception);
-            } catch(InvocationTargetException exception) {
-               System.err.println(
-                  "CloneableBean.toJsonObject - can't " + method.getName() + ": " + exception);
-            }
-         } // ClonedProperty getter
-      } // next method
+                  json.add(key, list);
+               } else if (value instanceof Map) {
+                  JsonObjectBuilder map = Json.createObjectBuilder();
+                  for (Object k : ((Map)value).keySet()) {
+                     Object v = ((Map)value).get(k);
+                     if (v instanceof CloneableBean) {
+                        map.add(k.toString(), ((CloneableBean)v).toJson());
+                     } else {
+                        map.add(k.toString(), v.toString());
+                     }
+                  }
+                  json.add(key, map);
+               }
+               // ignore any other types
+            } // value isn't null
+         } catch(IllegalAccessException exception) {
+            System.err.println(
+               "TrackedMap.toJsonString - can't set " + key + ": " + exception);
+         } catch(InvocationTargetException exception) {
+            System.err.println(
+               "TrackedMap.toJsonString - can't set " + key + ": " + exception);
+         }
+      } // next bean property
+      
+      // add anything extra the implementor wants to add
+      json = addExtraJsonAttributes(json);
       return json.build();
    } // end of toJson()
+   
+   /**
+    * Called at the end of the default implementation of {@link #toJson()}, this method
+    * allows implementors to add any extra properties required to the JsonObjectBuilder
+    * before it's built. 
+    * @param json The JSON object being built.
+    * @return The builder with any added properties.
+    */
+   default JsonObjectBuilder addExtraJsonAttributes(JsonObjectBuilder json) {
+      return json;
+   } // end of addExtraJsonAttributes()
    
    /**
     * Initializes the bean with the given JSON representation.

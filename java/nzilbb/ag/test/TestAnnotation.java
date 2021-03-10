@@ -217,6 +217,31 @@ public class TestAnnotation
       assertEquals(Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC), c.getConfidence());
       assertFalse(c.containsKey("foo"));     
    }
+   
+   @Test public void toJson() 
+   {
+      Annotation a = new Annotation("123", "LABEL", "word", "start", "end", "parent", 99);
+      a.put("foo", "bar");
+      a.put("@bar", "foo");
+      a.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+      assertEquals("Basic JSON serialization",
+                   "{\"confidence\":50,\"endId\":\"end\",\"id\":\"123\",\"label\":\"LABEL\","
+                   +"\"layerId\":\"word\",\"ordinal\":99,\"parentId\":\"parent\","
+                   +"\"startId\":\"start\",\"foo\":\"bar\"}",
+                   a.toJsonString());
+
+      // add a child annotation
+      a.getAnnotations("childLayer").add(new Annotation("456", "child", "childLayer"));
+      assertEquals("Child annotations included",
+                   "{\"confidence\":50,\"endId\":\"end\",\"id\":\"123\",\"label\":\"LABEL\","
+                   +"\"layerId\":\"word\",\"ordinal\":99,\"parentId\":\"parent\","
+                   +"\"startId\":\"start\","
+                   +"\"annotations\":{\"childLayer\":["
+                   +"{\"id\":\"456\",\"label\":\"child\",\"layerId\":\"childLayer\",\"ordinal\":0}"
+                   +"]},"
+                   +"\"foo\":\"bar\"}",
+                   a.toJsonString());
+   }
 
    @Test public void copyConstructor() 
    {

@@ -107,11 +107,28 @@ public interface GraphStoreQuery {
     * Gets the participant record specified by the given identifier.
     * @param id The ID of the participant, which could be their name or their database annotation
     * ID. 
-    * @return An annotation representing the participant, or null if the participant was not found.
+    * @return An annotation representing the participant, or null if the participant was
+    * not found.
     * @throws StoreException
     * @throws PermissionException
     */
-   public Annotation getParticipant(String id)
+   default public Annotation getParticipant(String id)
+      throws StoreException, PermissionException {
+      return getParticipant(id, null);
+   }
+
+   /**
+    * Gets the participant record specified by the given identifier.
+    * @param id The ID of the participant, which could be their name or their database annotation
+    * ID. 
+    * @param layerIds The IDs of the participant attribute layers to load, or null if only
+    * participant data is required. 
+    * @return An annotation representing the participant, or null if the participant was
+    * not found.
+    * @throws StoreException
+    * @throws PermissionException
+    */
+   public Annotation getParticipant(String id, String[] layerIds)
       throws StoreException, PermissionException;
 
    /**

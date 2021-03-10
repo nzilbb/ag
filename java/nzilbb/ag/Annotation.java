@@ -32,7 +32,10 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import nzilbb.ag.util.AnnotationComparatorByAnchor;
 import nzilbb.ag.util.AnnotationComparatorByOrdinal;
 import nzilbb.ag.util.LayerTraversal;
@@ -1985,6 +1988,34 @@ public class Annotation
       return tag;
    } // end of createTag()
 
+   // CloneableBean implementations
+
+   /**
+    * {@link CloneableBean} methods that adds child annotations, if there are any.
+    * @param json The JSON object being built.
+    * @return The builder with any added properties.
+    */
+   @SuppressWarnings({"rawtypes"})
+   public JsonObjectBuilder addExtraJsonAttributes(JsonObjectBuilder json) {
+
+      boolean thereAreChildren = false;
+      JsonObjectBuilder map = Json.createObjectBuilder();
+      for (String layerId : annotations.keySet()) {
+         Set<Annotation> children = annotations.get(layerId);
+         JsonArrayBuilder list = Json.createArrayBuilder();
+         for (Annotation child : children) {
+            thereAreChildren = true;
+            list.add(child.toJson());
+         } // next annotation
+         map.add(layerId, list);
+      } // next layer
+      if (thereAreChildren) {
+         json = json.add("annotations", map);
+      }
+
+      return super.addExtraJsonAttributes(json);
+   }
+   
    // java.lang.Object overrides:
    
    /**
