@@ -25,17 +25,25 @@ package nzilbb.clan.test;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-import java.util.LinkedHashMap;
-import java.util.SortedSet;
-import java.util.LinkedHashSet;
-import java.util.Iterator;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.net.URL;
-import nzilbb.configure.ParameterSet;
-import nzilbb.configure.Parameter;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.Vector;
 import nzilbb.ag.*;
+import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.clan.*;
+import nzilbb.configure.Parameter;
+import nzilbb.configure.ParameterSet;
+import nzilbb.editpath.EditStep;
+import nzilbb.editpath.MinimumEditPath;
 
 public class TestChatSerialization {
    
@@ -69,7 +77,7 @@ public class TestChatSerialization {
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(20, deserializer.configure(configuration, schema).size());
+      assertEquals(21, deserializer.configure(configuration, schema).size());
 
       // load the stream
       ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -485,7 +493,7 @@ public class TestChatSerialization {
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(20, deserializer.configure(configuration, schema).size());
+      assertEquals(21, deserializer.configure(configuration, schema).size());
 
       // load the stream
       ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -670,6 +678,211 @@ public class TestChatSerialization {
                       Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
    }
+
+   @Test public void serialize() throws Exception {
+      Schema schema = new Schema(
+         "who", "turn", "utterance", "word",
+	 new Layer("scribe", "Transcriber")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(true).setPeersOverlap(true).setSaturated(true),
+         new Layer("transcript_language", "Language")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+         new Layer("who", "Participants")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(true).setPeersOverlap(true).setSaturated(true),
+         new Layer("main_participant", "Main speaker")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true)
+         .setParentId("who").setParentIncludes(true),
+         new Layer("participant_gender", "Gender")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true)
+         .setParentId("who").setParentIncludes(true),
+         new Layer("turn", "Speaker turns")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false)
+         .setParentId("who").setParentIncludes(true),
+         new Layer("utterance", "Utterances")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(true)
+         .setParentId("turn").setParentIncludes(true),
+         new Layer("word", "Words")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false)
+         .setParentId("turn").setParentIncludes(true));
+      
+      File dir = getDir();
+      Graph graph = new Graph()
+         .setId("serialize-test.txt")
+         .setSchema(schema);
+      graph.addAnchor(new Anchor("a0", 0.0));
+      graph.addAnchor(new Anchor("a5", 5.0));
+      graph.addAnchor(new Anchor("a10", 10.0));
+      graph.addAnchor(new Anchor("a15", 15.0));
+      // language
+      graph.addAnnotation(new Annotation("lang", "eng", "transcript_language", "a0", "a15"));
+      // participants
+      graph.addAnnotation(new Annotation("child", "John Smith", "who", "a0", "a15"));
+      graph.addAnnotation(new Annotation("mother", "Mrs. Smith", "who", "a0", "a15"));
+      graph.addAnnotation(new Annotation("child-main", "John Smith", "main_participant", "a0", "a15",
+                                         "child"));
+      // turns
+      graph.addAnnotation(new Annotation("t1", "John Smith", "turn", "a0", "a10", "child"));
+      graph.addAnnotation(new Annotation("t2", "Mrs. Smith", "turn", "a10", "a15", "mother"));
+      // utterances
+      graph.addAnnotation(new Annotation("u1", "John Smith", "utterance", "a0", "a5", "t1"));
+      graph.addAnnotation(new Annotation("u2", "John Smith", "utterance", "a5", "a10", "t1"));
+      graph.addAnnotation(new Annotation("u3", "Mrs. Smith", "utterance", "a10", "a10", "t2"));
+      
+      // words
+      graph.addAnnotation(new Annotation("the", "The", "word",
+                                         "a0",
+                                         graph.addAnchor(new Anchor("a1", 1.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("quick", "'quick", "word", 
+                                         "a1",
+                                         graph.addAnchor(new Anchor("a2", 2.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("brown", "brown'", "word", 
+                                         "a2",
+                                         graph.addAnchor(new Anchor("a3", 3.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("fox", "fox", "word", 
+                                         "a3",
+                                         "a5",
+                                         "t1"));
+      
+      graph.addAnnotation(new Annotation("jumps", "jumps -", "word", 
+                                         "a5",
+                                         graph.addAnchor(new Anchor("a6", 6.0)).getId(),
+                                         "t1"));      
+      graph.addAnnotation(new Annotation("over", "over", "word",
+                                         "a6",
+                                         "a10",
+                                         "t1"));
+      
+      graph.addAnnotation(new Annotation("the2", "the", "word", 
+                                         "a10",
+                                         graph.addAnchor(new Anchor("a12", 12.0)).getId(),
+                                         "t2"));
+      graph.addAnnotation(new Annotation("lazy", "lazy", "word", 
+                                         "a12",
+                                         graph.addAnchor(new Anchor("a13", 13.0)).getId(),
+                                         "t2"));
+      graph.addAnnotation(new Annotation("dog", "\"dog\"", "word", 
+                                         "a13",
+                                         graph.addAnchor(new Anchor("a14", 14.0)).getId(),
+                                         "t2"));
+      graph.addAnnotation(new Annotation(".", ".", "word", 
+                                         "a14",
+                                         "a15",
+                                         "t2"));
+      
+      // create serializer
+      ChatSerialization serializer = new ChatSerialization();
+      
+      // general configuration
+      ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
+      for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      configuration = serializer.configure(configuration, schema);
+      assertEquals(21, configuration.size());
+      assertEquals("scribe attribute", "scribe", 
+		   ((Layer)configuration.get("transcriberLayer").getValue()).getId());
+      assertEquals("languages attribute", "transcript_language", 
+		   ((Layer)configuration.get("languagesLayer").getValue()).getId());
+      assertEquals("main participant attribute", "main_participant", 
+		   ((Layer)configuration.get("mainParticipantLayer").getValue()).getId());
+      assertNull("sex attribute not automatically mapped to gender",
+                 configuration.get("sexLayer").getValue());
+
+      LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
+         Arrays.asList(serializer.getRequiredLayers()));
+      assertEquals("Needed layers: " + needLayers,
+                   7, needLayers.size());
+      assertTrue(needLayers.contains("who"));
+      assertTrue(needLayers.contains("main_participant"));
+      assertTrue(needLayers.contains("scribe"));
+      assertTrue(needLayers.contains("transcript_language"));
+      assertTrue(needLayers.contains("turn"));
+      assertTrue(needLayers.contains("utterance"));
+      assertTrue(needLayers.contains("word"));
+      
+      // serialize
+      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+      final Vector<NamedStream> streams = new Vector<NamedStream>();
+      String[] layers = {"word","transcript_language"};
+      Graph[] graphs = { graph };
+      serializer.serialize(Arrays.spliterator(graphs), layers,
+                           stream -> streams.add(stream),
+                           warning -> System.out.println(warning),
+                           exception -> exceptions.add(exception));
+      if (exceptions.size() > 0) fail(""+exceptions);
+      
+      streams.elementAt(0).save(dir);
+      
+      // test using diff
+      File result = new File(dir, "serialize-test.cha");
+      String differences = diff(new File(dir, "expected_serialize-test.cha"), result);
+      if (differences != null) {
+         fail(differences);
+      } else {
+         result.delete();
+      }
+   }
+
+   /**
+    * Diffs two files.
+    * @param expected
+    * @param actual
+    * @return null if the files are the same, and a String describing differences if not.
+    */
+   public String diff(File expected, File actual) {
+      StringBuffer d = new StringBuffer();
+      
+      try {
+         // compare with what we expected
+         Vector<String> actualLines = new Vector<String>();
+         BufferedReader reader = new BufferedReader(new FileReader(actual));
+         String line = reader.readLine();
+         while (line != null) {
+            actualLines.add(line);
+            line = reader.readLine();
+         }
+         Vector<String> expectedLines = new Vector<String>();
+         reader = new BufferedReader(new FileReader(expected));
+         line = reader.readLine();
+         while (line != null) {
+            expectedLines.add(line);
+            line = reader.readLine();
+         }
+         MinimumEditPath<String> comparator = new MinimumEditPath<String>();
+         List<EditStep<String>> path = comparator.minimumEditPath(expectedLines, actualLines);
+         for (EditStep<String> step : path) {
+            switch (step.getOperation()) {
+               case CHANGE:
+                  d.append("\n"+expected.getPath()+":"+(step.getFromIndex()+1)+": Expected:\n" 
+                           + step.getFrom() 
+                           + "\n"+actual.getPath()+":"+(step.getToIndex()+1)+": Found:\n" + step.getTo());
+                  break;
+               case DELETE:
+                  d.append("\n"+expected.getPath()+":"+(step.getFromIndex()+1)+": Deleted:\n" 
+                           + step.getFrom()
+                           + "\n"+actual.getPath()+":"+(step.getToIndex()+1)+": Missing");
+                  break;
+               case INSERT:
+                  d.append("\n"+expected.getPath()+":"+(step.getFromIndex()+1)+": Missing" 
+                           + "\n"+actual.getPath()+":"+(step.getToIndex()+1)+": Inserted:\n" 
+                           + step.getTo());
+                  break;
+            }
+         } // next step
+      } catch(Exception exception) {
+         d.append("\n" + exception);
+      }
+      if (d.length() > 0) return d.toString();
+      return null;
+   } // end of diff()
 
    /**
     * Directory for text files.

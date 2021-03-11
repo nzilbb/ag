@@ -1,5 +1,5 @@
 //
-// Copyright 2016-2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -21,25 +21,35 @@
 //
 package nzilbb.clan;
 
-import java.util.Vector;
-import java.util.HashSet;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Spliterator;
 import java.util.StringTokenizer;
-import java.util.regex.Pattern;
+import java.util.TreeSet;
+import java.util.Vector;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
+import java.util.regex.Pattern;
 import nzilbb.ag.*;
-import nzilbb.ag.util.SimpleTokenizer;
-import nzilbb.ag.util.ConventionTransformer;
-import nzilbb.ag.util.SpanningConventionTransformer;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
+import nzilbb.ag.util.AnnotationComparatorByAnchor;
+import nzilbb.ag.util.ConventionTransformer;
+import nzilbb.ag.util.SimpleTokenizer;
+import nzilbb.ag.util.SpanningConventionTransformer;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
+import nzilbb.util.IO;
+import nzilbb.util.TempFileInputStream;
 
 /**
  * Serialization for CHAT files produced by CLAN.
@@ -62,7 +72,7 @@ import nzilbb.configure.ParameterSet;
  * </ul>
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class ChatSerialization implements GraphDeserializer {
+public class ChatSerialization implements GraphDeserializer, GraphSerializer {
    
    // Attributes:
    protected Vector<String> warnings;
@@ -236,6 +246,23 @@ public class ChatSerialization implements GraphDeserializer {
     * @param newParticipantLayer Participant layer.
     */
    public void setParticipantLayer(Layer newParticipantLayer) { participantLayer = newParticipantLayer; }
+
+   /**
+    * Layer that marks target participants.
+    * @see #getMainParticipantLayer()
+    * @see #setMainParticipantLayer(Layer)
+    */
+   protected Layer mainParticipantLayer;
+   /**
+    * Getter for {@link #mainParticipantLayer}: Layer that marks target participants.
+    * @return Layer that marks target participants.
+    */
+   public Layer getMainParticipantLayer() { return mainParticipantLayer; }
+   /**
+    * Setter for {@link #mainParticipantLayer}: Layer that marks target participants.
+    * @param newMainParticipantLayer Layer that marks target participants.
+    */
+   public ChatSerialization setMainParticipantLayer(Layer newMainParticipantLayer) { mainParticipantLayer = newMainParticipantLayer; return this; }
    
    /**
     * Turn layer.
@@ -510,6 +537,41 @@ public class ChatSerialization implements GraphDeserializer {
     */
    public void setTokenizer(GraphTransformer newTokenizer) { tokenizer = newTokenizer; }
    
+   private long graphCount = 0;
+   private long consumedGraphCount = 0;
+   /**
+    * Determines how far through the serialization is.
+    * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
+    */
+   public Integer getPercentComplete() {
+      if (graphCount < 0) return null;
+      return (int)((consumedGraphCount * 100) / graphCount);
+   }
+
+   /**
+    * Serialization marked for cancelling.
+    * @see #getCancelling()
+    * @see #setCancelling(boolean)
+    */
+   protected boolean cancelling;
+   /**
+    * Getter for {@link #cancelling}: Serialization marked for cancelling.
+    * @return Serialization marked for cancelling.
+    */
+   public boolean getCancelling() { return cancelling; }
+   /**
+    * Setter for {@link #cancelling}: Serialization marked for cancelling.
+    * @param newCancelling Serialization marked for cancelling.
+    */
+   public ChatSerialization setCancelling(boolean newCancelling) { cancelling = newCancelling; return this; }
+   
+   /**
+    * Cancel the serialization in course (if any).
+    */
+   public void cancel() {
+      setCancelling(true);
+   }
+   
    // Methods:
    
    /**
@@ -550,7 +612,7 @@ public class ChatSerialization implements GraphDeserializer {
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-	 "CLAN CHAT transcript", "0.9", "text/x-chat", ".cha", "20200909.1954", getClass().getResource("icon.gif"));
+	 "CLAN CHAT transcript", "1.0", "text/x-chat", ".cha", "20200909.1954", getClass().getResource("icon.gif"));
    }
 
    /**
@@ -578,6 +640,7 @@ public class ChatSerialization implements GraphDeserializer {
       gemLayer = null;
       transcriberLayer = null;
       languagesLayer = null;
+      mainParticipantLayer = null;
       expansionLayer = null;
       errorsLayer = null;
       retracingLayer = null;
@@ -630,6 +693,9 @@ public class ChatSerialization implements GraphDeserializer {
 	 }
 	 if (configuration.containsKey("languagesLayer")) {
 	    setLanguagesLayer((Layer)configuration.get("languagesLayer").getValue());
+	 }
+	 if (configuration.containsKey("mainParticipantLayer")) {
+	    setMainParticipantLayer((Layer)configuration.get("mainParticipantLayer").getValue());
 	 }
 	 for (String attribute : participantLayers.keySet()) {
 	    if (configuration.containsKey(attribute + "Layer")) {
@@ -692,7 +758,6 @@ public class ChatSerialization implements GraphDeserializer {
 	    }
 	 } // next possible word tag layer
       }
-      participantTagLayers.remove("main_participant");
       
       if (getParticipantLayer() == null) {
 	 Parameter p = configuration.containsKey("participantLayer")?configuration.get("participantLayer")
@@ -818,6 +883,19 @@ public class ChatSerialization implements GraphDeserializer {
       if (p.getValue() == null) p.setValue(findLayerById(graphTagLayers, possibilities_transcript));
       p.setPossibleValues(graphTagLayers.values());
 
+      // main participant layer
+      p = configuration.containsKey("mainParticipantLayer")?configuration.get("mainParticipantLayer")
+         :configuration.addParameter(
+            new Parameter("mainParticipantLayer", Layer.class, "Main participant layer",
+                          "Layer for identifying target participants"));
+      // if we have a layer called that
+      String[] possibilities_main_participant = {
+         "main_participant", "main", "target", "participant_target"};
+      if (p.getValue() == null) {
+         p.setValue(findLayerById(participantTagLayers, possibilities_main_participant));
+      }
+      p.setPossibleValues(participantTagLayers.values());
+      
       // participant meta data layers
       for (String attribute : participantLayers.keySet()) {
 	 p = configuration.containsKey(attribute + "Layer")?configuration.get(attribute + "Layer")
@@ -1519,11 +1597,220 @@ public class ChatSerialization implements GraphDeserializer {
    } // end of checkAlignmentAgainstLastUtterance()
 
    /**
-    * Returns any warnings that may have arisen during the last execution of {@link #deserialize()}.
+    * Returns any warnings that may have arisen during the last execution of
+    * {@link #deserialize()}.
     * @return A possibly empty lilayersst of warnings.
     */
    public String[] getWarnings() {
       return warnings.toArray(new String[0]);
+   }
+   
+   // GraphSerializer methods
+   
+   /**
+    * Determines which layers, if any, must be present in the graph that will be serialized.
+    * @return A list of IDs of layers that must be present in the graph that will be serialized.
+    * @throws SerializationParametersMissingException If not all required parameters have a value.
+    */
+   public String[] getRequiredLayers() throws SerializationParametersMissingException {
+      Vector<String> requiredLayers = new Vector<String>();
+      if (getParticipantLayer() != null) requiredLayers.add(getParticipantLayer().getId());
+      if (getMainParticipantLayer() != null) requiredLayers.add(getMainParticipantLayer().getId());
+      if (getTurnLayer() != null) requiredLayers.add(getTurnLayer().getId());
+      if (getUtteranceLayer() != null) requiredLayers.add(getUtteranceLayer().getId());
+      if (getWordLayer() != null) requiredLayers.add(getWordLayer().getId());
+      if (getDisfluencyLayer() != null) requiredLayers.add(getDisfluencyLayer().getId());
+      if (getExpansionLayer() != null) requiredLayers.add(getExpansionLayer().getId());
+      if (getErrorsLayer() != null) requiredLayers.add(getErrorsLayer().getId());
+      if (getRetracingLayer() != null) requiredLayers.add(getRetracingLayer().getId());
+      if (getRepetitionsLayer() != null) requiredLayers.add(getRepetitionsLayer().getId());
+      if (getCompletionLayer() != null) requiredLayers.add(getCompletionLayer().getId());
+      if (getLinkageLayer() != null) requiredLayers.add(getLinkageLayer().getId());
+      if (getCUnitLayer() != null) requiredLayers.add(getCUnitLayer().getId());
+      if (getGemLayer() != null) requiredLayers.add(getGemLayer().getId());
+      if (getTranscriberLayer() != null) requiredLayers.add(getTranscriberLayer().getId());
+      if (getLanguagesLayer() != null) requiredLayers.add(getLanguagesLayer().getId());
+      return requiredLayers.toArray(new String[0]);
+   } // getRequiredLayers()
+   
+   /**
+    * Determines the cardinality between graphs and serialized streams.
+    * <p>The cardinality of this deseerializer is NToN.
+    * @return {@link nzilbb.ag.serialize.GraphSerializer#Cardinality}.NToN.
+    */
+   public Cardinality getCardinality() {
+      return Cardinality.NToN;
+   }
+
+   /**
+    * Serializes the given series of graphs, generating one or more {@link NamedStream}s.
+    * <p>Many data formats will only yield one stream per graph (e.g. Transcriber
+    * transcript or Praat textgrid), however there are formats that use multiple files for
+    * the same transcript (e.g. XWaves, EmuR), and others still that will produce one
+    * stream from many Graphs (e.g. CSV).
+    * <p>The method is synchronous in the sense that it should not return until all graphs
+    * have been serialized.
+    * @param graphs The graphs to serialize.
+    * @param layerIds The IDs of the layers to include, or null for all layers.
+    * @param consumer The consumer receiving the streams.
+    * @param warnings A consumer for (non-fatal) warning messages.
+    * @param errors A consumer for (fatal) error messages.
+    * @throws SerializerNotConfiguredException if the object has not been configured.
+    */
+   public void serialize(
+      Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer,
+      Consumer<String> warnings, Consumer<SerializationException> errors) 
+      throws SerializerNotConfiguredException {
+      graphCount = graphs.getExactSizeIfKnown();
+      graphs.forEachRemaining(graph -> {
+            if (getCancelling()) return;
+            try {
+               consumer.accept(serializeGraph(graph, layerIds));
+            } catch(SerializationException exception) {
+               errors.accept(exception);
+            }
+            consumedGraphCount++;
+         }); // next graph
+   }
+
+   /**
+    * Serializes the given graph, generating a {@link NamedStream}.
+    * @param graph The graph to serialize.
+    * @return A named stream that contains the TextGrid. 
+    * @throws SerializationException if errors occur during deserialization.
+    */
+   protected NamedStream serializeGraph(Graph graph, String[] layerIds)
+      throws SerializationException {
+      SerializationException errors = null;
+      
+      LinkedHashSet<String> selectedLayers = new LinkedHashSet<String>();
+      if (layerIds != null) {
+         for (String l : layerIds) {
+            Layer layer = graph.getSchema().getLayer(l);
+            if (layer != null) {
+               selectedLayers.add(l);
+            }
+         } // next layeyId
+      } else {
+         for (Layer l : graph.getSchema().getLayers().values()) selectedLayers.add(l.getId());
+      }
+      
+      try {
+         // write the text to a temporary file
+         File f = File.createTempFile(graph.getId(), ".cha");
+         PrintWriter writer = new PrintWriter(
+            new OutputStreamWriter(new FileOutputStream(f), "utf-8"));
+         writer.println("@Begin");
+
+         Schema schema = graph.getSchema();
+         
+         // meta-data first
+         if (languagesLayer != null) {
+            Annotation[] annotations = graph.all(languagesLayer.getId());
+            StringBuilder languages = new StringBuilder();
+            for (Annotation a : annotations) {
+               if (languages.length() == 0) {
+                  languages.append("@Languages\t");
+               } else {
+                  languages.append(",");
+               }
+               languages.append(a.getLabel()); // TODO convert to 3-letter code
+            }
+            if (languages.length() > 0) writer.println(languages);
+         }
+         // TODO more metadata
+         
+         // participants
+         StringBuilder participantsHeader = new StringBuilder();
+         HashMap<String,Annotation> participants = new HashMap<String,Annotation>();
+         int subCount = 0;
+         int intCount = 0;
+         for (Annotation participant : graph.all(participantLayer.getId())) {
+            String speakerId = null;
+            String role = null;
+            if (mainParticipantLayer != null
+                && participant.first(mainParticipantLayer.getId()) != null) {
+               role = "Participant";
+               subCount++;
+               if (!participants.containsKey("SUB")) {
+                  speakerId = "SUB";
+               } else {
+                  speakerId = "SU"+subCount;
+               }
+            } else {
+               role = "Investigator";
+               intCount++;
+               if (!participants.containsKey("INT")) {
+                  speakerId = "INT";
+               } else {
+                  speakerId = "IN"+subCount;
+               }
+            }
+            participant.put("@SpeakerId", speakerId);
+            participants.put(speakerId, participant);
+            if (participantsHeader.length() == 0) {
+               participantsHeader.append("@Participants:\t");
+            } else {
+               participantsHeader.append(",");
+            }
+            participantsHeader.append(speakerId);
+            participantsHeader.append(" ");
+            participantsHeader.append(participant.getLabel().replace(' ', '_'));
+            participantsHeader.append(" ");
+            participantsHeader.append(role);
+         } // next participant
+         writer.println(participantsHeader);
+         
+         // for each utterance...
+         Annotation currentParticipant = null;
+         
+         // order utterances by anchor so that simultaneous speech comes out in utterance order
+         TreeSet<Annotation> utterancesByAnchor
+            = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
+         for (Annotation u : graph.all(getUtteranceLayer().getId())) utterancesByAnchor.add(u);
+
+         for (Annotation utterance : utterancesByAnchor) {
+            if (cancelling) break;
+            // is the participant changing?
+            Annotation participant = utterance.first(getParticipantLayer().getId());
+            if (participant != currentParticipant) { // participant change
+               currentParticipant = participant;
+               Object[] participantLabel = { currentParticipant.getLabel() }; 
+               writer.print("*" + participant.get("@SpeakerId"));
+            } // participant change
+
+            String delimiter = "\t";
+            for (Annotation token : utterance.all(getWordLayer().getId())) {
+               writer.print(delimiter); // tab if it's the first word, space otherwise
+               delimiter = " ";               
+               writer.print(token.getLabel());
+            } // next token            
+
+            // time code
+            writer.print(" ");
+            int ms = (int)(utterance.getStart().getOffset() * 1000);
+            writer.print("" + ms);
+            writer.print("_");
+            ms = (int)(utterance.getEnd().getOffset() * 1000);
+            writer.print("" + ms);
+            writer.println("");
+         } // next utterance
+         writer.close();
+
+         TempFileInputStream in = new TempFileInputStream(f);
+         
+         // return a named stream from the file
+         String streamName = graph.getId();
+         if (!IO.Extension(streamName).equals("cha")) {
+            streamName = IO.WithoutExtension(streamName) + ".cha";
+         }
+         return new NamedStream(in, IO.SafeFileNameUrl(streamName));
+      } catch(Exception exception) {
+         errors = new SerializationException();
+         errors.initCause(exception);
+         errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
+         throw errors;
+      }      
    }
 
 } // end of class ChatSerialization

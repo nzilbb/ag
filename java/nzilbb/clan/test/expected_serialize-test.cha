@@ -1,0 +1,6 @@
+@Begin
+@Languages	eng
+@Participants:	SUB John_Smith Participant,INT Mrs._Smith Investigator
+*SUB	The 'quick brown' fox 0_5000
+	jumps - over 5000_10000
+*INT	the 10000_10000
