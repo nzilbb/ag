@@ -37,7 +37,7 @@ import nzilbb.ag.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.clan.*;
 
-public class TestChatDeserializer {
+public class TestChatSerialization {
    
    @Test public void minimalConversion()  throws Exception {
       Schema schema = new Schema(
@@ -64,7 +64,7 @@ public class TestChatDeserializer {
       NamedStream[] streams = { new NamedStream(new File(getDir(), "test.cha")) };
 
       // create deserializer
-      ChatDeserializer deserializer = new ChatDeserializer();
+      ChatSerialization deserializer = new ChatSerialization();
 
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
@@ -480,7 +480,7 @@ public class TestChatDeserializer {
       NamedStream[] streams = { new NamedStream(new File(getDir(), "test.cha")) };
 
       // create deserializer
-      ChatDeserializer deserializer = new ChatDeserializer();
+      ChatSerialization deserializer = new ChatSerialization();
 
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
@@ -700,6 +700,6 @@ public class TestChatDeserializer {
    public void setDir(File fNewDir) { fDir = fNewDir; }
 
    public static void main(String args[]) {
-      org.junit.runner.JUnitCore.main("nzilbb.clan.test.TestChatDeserializer");
+      org.junit.runner.JUnitCore.main("nzilbb.clan.test.TestChatSerialization");
    }
 }

@@ -10,7 +10,7 @@
   <property name="srctests" value="nzilbb/clan/test/Test*.java"/>
   <property name="icon" value="nzilbb/clan/icon.gif"/>
   <property name="junitjar" value="/usr/share/java/junit4.jar"/>
-  <property name="nzilbb-ag-serialize-GraphDeserializer" value="nzilbb.clan.ChatDeserializer" />
+  <property name="nzilbb-ag-serialize-GraphDeserializer" value="nzilbb.clan.ChatSerialization" />
   
   <target name="init">
     <!-- Create the time stamp -->

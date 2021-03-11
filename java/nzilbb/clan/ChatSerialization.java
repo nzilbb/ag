@@ -42,7 +42,7 @@ import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 
 /**
- * Deserializer for CHAT files produced by CLAN.
+ * Serialization for CHAT files produced by CLAN.
  * <p><em>NB</em> the current implementation is <em>not exhaustive</em>; it only covers:
  * <ul>
  *  <li>Time synchronization codes, including mid-line synchronization.
@@ -62,7 +62,7 @@ import nzilbb.configure.ParameterSet;
  * </ul>
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class ChatDeserializer implements GraphDeserializer {
+public class ChatSerialization implements GraphDeserializer {
    
    // Attributes:
    protected Vector<String> warnings;
@@ -515,7 +515,7 @@ public class ChatDeserializer implements GraphDeserializer {
    /**
     * Default constructor.
     */
-   public ChatDeserializer() {
+   public ChatSerialization() {
       participantLayers = new HashMap<String,Layer>();
       participantLayers.put("language", null);
       participantLayers.put("corpus", null);
@@ -1526,4 +1526,4 @@ public class ChatDeserializer implements GraphDeserializer {
       return warnings.toArray(new String[0]);
    }
 
-} // end of class ChatDeserializer
+} // end of class ChatSerialization
