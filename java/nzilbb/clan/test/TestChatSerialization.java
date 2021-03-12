@@ -28,6 +28,8 @@ import static org.junit.Assert.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -36,6 +38,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.Vector;
+import java.util.stream.Collectors;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.util.NamedStream;
@@ -706,6 +709,10 @@ public class TestChatSerialization {
          .setAlignment(Constants.ALIGNMENT_NONE)
          .setPeers(false).setPeersOverlap(false).setSaturated(true)
          .setParentId("who").setParentIncludes(true),
+         new Layer("participant_language", "Language")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true)
+         .setParentId("who").setParentIncludes(true),
          new Layer("turn", "Speaker turns")
          .setAlignment(Constants.ALIGNMENT_INTERVAL)
          .setPeers(true).setPeersOverlap(false).setSaturated(false)
@@ -728,7 +735,7 @@ public class TestChatSerialization {
       graph.addAnchor(new Anchor("a10", 10.0));
       graph.addAnchor(new Anchor("a15", 15.0));
       // language
-      graph.addAnnotation(new Annotation("lang", "eng", "transcript_language", "a0", "a15"));
+      graph.addAnnotation(new Annotation("lang", "en", "transcript_language", "a0", "a15"));
       // participants
       graph.addAnnotation(new Annotation("child", "John Smith", "who", "a0", "a15"));
       graph.addAnnotation(new Annotation("mother", "Mrs. Smith", "who", "a0", "a15"));
@@ -738,6 +745,10 @@ public class TestChatSerialization {
                                          "child"));
       graph.addAnnotation(new Annotation("child-gender", "M", "participant_gender", "a0", "a15",
                                          "child"));
+      graph.addAnnotation(new Annotation("child-language", "en", "participant_language", "a0", "a15",
+                                         "child"));
+      graph.addAnnotation(new Annotation("mother-language", "Spanish", "participant_language", "a0", "a15",
+                                         "mother"));
       // turns
       graph.addAnnotation(new Annotation("t1", "John Smith", "turn", "a0", "a10", "child"));
       graph.addAnnotation(new Annotation("t2", "Mrs. Smith", "turn", "a10", "a15", "mother"));
@@ -844,7 +855,16 @@ public class TestChatSerialization {
                            stream -> streams.add(stream),
                            warning -> System.out.println(warning),
                            exception -> exceptions.add(exception));
-      if (exceptions.size() > 0) fail(""+exceptions);
+      if (exceptions.size() > 0) {
+         fail(exceptions.stream()
+              .map(x -> {
+                    StringWriter sw = new StringWriter();
+                    PrintWriter pw = new PrintWriter(sw);
+                    x.printStackTrace(pw);
+                    return x.toString() + ": " + sw;
+                 })
+              .collect(Collectors.joining("\n","","")));
+      }
       
       streams.elementAt(0).save(dir);
       

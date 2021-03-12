@@ -50,6 +50,7 @@ import nzilbb.ag.util.SpanningConventionTransformer;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 import nzilbb.util.IO;
+import nzilbb.util.ISO639;
 import nzilbb.util.TempFileInputStream;
 
 /**
@@ -76,6 +77,7 @@ import nzilbb.util.TempFileInputStream;
 public class ChatSerialization implements GraphDeserializer, GraphSerializer {
    
    // Attributes:
+   private ISO639 iso639 = new ISO639(); // for standard ISO 639 language code processing
    protected Vector<String> warnings;
 
    /**
@@ -630,7 +632,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-	 "CLAN CHAT transcript", "1.01", "text/x-chat", ".cha", "20200909.1954", getClass().getResource("icon.png"));
+	 "CLAN CHAT transcript", "1.01", "text/x-chat", ".cha", "20210312.1430", getClass().getResource("icon.png"));
    }
 
    /**
@@ -1769,7 +1771,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                } else {
                   languages.append(",");
                }
-               languages.append(a.getLabel()); // TODO convert to 3-letter code
+               languages.append(iso639.alpha3(a.getLabel()).orElse(""));
             }
             if (languages.length() > 0) writer.println(languages);
          }
@@ -1854,7 +1856,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                         } else {
                            value = "";
                         }
-                     } else if (field.equals("language")) { // TODO 3-letter label
+                     } else if (field.equals("language")) { 
+                        value = iso639.alpha3(value).orElse("");
                      } else if (field.equals("corpus")) {
                         // one lowercase word
                         value = value.toLowerCase().replaceAll("\\s","_");
@@ -1959,7 +1962,6 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       }      
    }
 
-
    private static String[] standardNonWords = {
       "belches","coughs","cries","gasps","groans","growls","hisses","hums","laughs","moans",
       "mumbles","pants","grunts","roars","sneezes","sighs","sings","squeals","whines",
@@ -1987,6 +1989,5 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       }
       return null;
    } // end of standardNonWordLabel()
-
 
 } // end of class ChatSerialization

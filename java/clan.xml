@@ -8,7 +8,7 @@
   <property name="dist"  location="../bin"/>
   <property name="srcfiles" value="nzilbb/clan/**/*.java"/> 
   <property name="srctests" value="nzilbb/clan/test/Test*.java"/>
-  <property name="icon" value="nzilbb/clan/icon.gif"/>
+  <property name="icon" value="nzilbb/clan/icon.png"/>
   <property name="junitjar" value="/usr/share/java/junit4.jar"/>
   <property name="nzilbb-ag-serialize-GraphDeserializer" value="nzilbb.clan.ChatSerialization" />
   <property name="nzilbb-ag-serialize-GraphSerializer" value="nzilbb.clan.ChatSerialization" />
