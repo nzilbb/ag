@@ -11,6 +11,7 @@
   <property name="icon" value="nzilbb/clan/icon.gif"/>
   <property name="junitjar" value="/usr/share/java/junit4.jar"/>
   <property name="nzilbb-ag-serialize-GraphDeserializer" value="nzilbb.clan.ChatSerialization" />
+  <property name="nzilbb-ag-serialize-GraphSerializer" value="nzilbb.clan.ChatSerialization" />
   
   <target name="init">
     <!-- Create the time stamp -->
@@ -47,7 +48,10 @@
     <!-- Put everything in ${build} into the ${ant.project.name}.jar file -->
     <jar jarfile="${dist}/${ant.project.name}.jar" 
 	 basedir="${build}">
-      <manifest><attribute name="nzilbb-ag-serialize-GraphDeserializer" value="${nzilbb-ag-serialize-GraphDeserializer}"/></manifest>
+      <manifest>
+        <attribute name="nzilbb-ag-serialize-GraphDeserializer" value="${nzilbb-ag-serialize-GraphDeserializer}"/>
+        <attribute name="nzilbb-ag-serialize-GraphSerializer" value="${nzilbb-ag-serialize-GraphSerializer}"/>
+      </manifest>
       
       <!-- include this build file -->
       <fileset dir="." includes="build.xml" />
