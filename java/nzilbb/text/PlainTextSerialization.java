@@ -1586,7 +1586,7 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
 
    /**
     * Determines the cardinality between graphs and serialized streams.
-    * <p>The cardinatlity of this deseerializer is NToN.
+    * <p>The cardinality of this deseerializer is NToN.
     * @return {@link nzilbb.ag.serialize.GraphSerializer#Cardinality}.NToN.
     */
    public Cardinality getCardinality() {
@@ -1692,7 +1692,7 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
          TreeSet<Annotation> commentsByAnchor
             = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
          if (commentLayer != null && getUseConventions()) {
-            // list all anchored noises
+            // list all anchored comments
             for (Annotation n : graph.all(commentLayer.getId())) if (n.getAnchored()) commentsByAnchor.add(n);
          }
          Iterator<Annotation> comments = commentsByAnchor.iterator();
@@ -1807,7 +1807,9 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
          
          // return a named stream from the file
          String streamName = graph.getId();
-         if (!IO.Extension(streamName).equals("txt")) streamName += ".txt";
+         if (!IO.Extension(streamName).equals("txt")) {
+            streamName = IO.WithoutExtension(streamName) + ".txt";
+         }
          return new NamedStream(in, IO.SafeFileNameUrl(streamName));
       } catch(Exception exception) {
          errors = new SerializationException();

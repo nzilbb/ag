@@ -1330,7 +1330,7 @@ public class TestPlainTextSerialization
       // create a graph with simultaneous speech turns
 
       Graph graph = new Graph()
-         .setId("simultaneous_speech")
+         .setId("simultaneous_speech.eaf")
          .setSchema(schema);
       graph.addAnchor(new Anchor("a0", 0.0));
       graph.addAnchor(new Anchor("a15", 15.0));
@@ -1446,8 +1446,8 @@ public class TestPlainTextSerialization
       streams.elementAt(0).save(dir);
 
       // test using diff
-      File result = new File(dir, graph.getId() + ".txt");
-      String differences = diff(new File(dir, "expected_" + graph.getId() + ".txt"), result);
+      File result = new File(dir, "simultaneous_speech.txt"); // ensure name strips extension
+      String differences = diff(new File(dir, "expected_simultaneous_speech.txt"), result);
       if (differences != null) {
          fail(differences);
       } else {
