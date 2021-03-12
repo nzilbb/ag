@@ -77,7 +77,7 @@ public class TestChatSerialization {
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(21, deserializer.configure(configuration, schema).size());
+      assertEquals(22, deserializer.configure(configuration, schema).size());
 
       // load the stream
       ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -493,7 +493,7 @@ public class TestChatSerialization {
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(21, deserializer.configure(configuration, schema).size());
+      assertEquals(22, deserializer.configure(configuration, schema).size());
 
       // load the stream
       ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -688,6 +688,9 @@ public class TestChatSerialization {
          new Layer("transcript_language", "Language")
          .setAlignment(Constants.ALIGNMENT_NONE)
          .setPeers(false).setPeersOverlap(false).setSaturated(true),
+         new Layer("noise", "Non-speech noises")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false),
          new Layer("who", "Participants")
          .setAlignment(Constants.ALIGNMENT_NONE)
          .setPeers(true).setPeersOverlap(true).setSaturated(true),
@@ -696,6 +699,10 @@ public class TestChatSerialization {
          .setPeers(false).setPeersOverlap(false).setSaturated(true)
          .setParentId("who").setParentIncludes(true),
          new Layer("participant_gender", "Gender")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true)
+         .setParentId("who").setParentIncludes(true),
+         new Layer("participant_age", "Age")
          .setAlignment(Constants.ALIGNMENT_NONE)
          .setPeers(false).setPeersOverlap(false).setSaturated(true)
          .setParentId("who").setParentIncludes(true),
@@ -717,7 +724,7 @@ public class TestChatSerialization {
          .setId("serialize-test.txt")
          .setSchema(schema);
       graph.addAnchor(new Anchor("a0", 0.0));
-      graph.addAnchor(new Anchor("a5", 5.0));
+      graph.addAnchor(new Anchor("a5", 5.4321)); // will be rendered 5432
       graph.addAnchor(new Anchor("a10", 10.0));
       graph.addAnchor(new Anchor("a15", 15.0));
       // language
@@ -727,17 +734,22 @@ public class TestChatSerialization {
       graph.addAnnotation(new Annotation("mother", "Mrs. Smith", "who", "a0", "a15"));
       graph.addAnnotation(new Annotation("child-main", "John Smith", "main_participant", "a0", "a15",
                                          "child"));
+      graph.addAnnotation(new Annotation("child-age", "2;10.10", "participant_age", "a0", "a15",
+                                         "child"));
+      graph.addAnnotation(new Annotation("child-gender", "M", "participant_gender", "a0", "a15",
+                                         "child"));
       // turns
       graph.addAnnotation(new Annotation("t1", "John Smith", "turn", "a0", "a10", "child"));
       graph.addAnnotation(new Annotation("t2", "Mrs. Smith", "turn", "a10", "a15", "mother"));
       // utterances
       graph.addAnnotation(new Annotation("u1", "John Smith", "utterance", "a0", "a5", "t1"));
       graph.addAnnotation(new Annotation("u2", "John Smith", "utterance", "a5", "a10", "t1"));
-      graph.addAnnotation(new Annotation("u3", "Mrs. Smith", "utterance", "a10", "a10", "t2"));
+      graph.addAnnotation(new Annotation("u3", "Mrs. Smith", "utterance", "a10", "a15", "t2"));
       
       // words
       graph.addAnnotation(new Annotation("the", "The", "word",
                                          "a0",
+                                         // 1.2345 will become ..._1234
                                          graph.addAnchor(new Anchor("a1", 1.0)).getId(),
                                          "t1"));
       graph.addAnnotation(new Annotation("quick", "'quick", "word", 
@@ -759,6 +771,16 @@ public class TestChatSerialization {
                                          "t1"));      
       graph.addAnnotation(new Annotation("over", "over", "word",
                                          "a6",
+                                         graph.addAnchor(new Anchor("a7", 8.0)).getId(),
+                                         "t1"));
+      // noise
+      graph.addAnnotation(new Annotation("cough", "coughs", "noise",
+                                         "a7",
+                                         graph.addAnchor(new Anchor("a8", 8.0)).getId(),
+                                         "t1"));
+      
+      graph.addAnnotation(new Annotation("th~", "th~", "word", // th~ becomes &th
+                                         "a8",
                                          "a10",
                                          "t1"));
       
@@ -786,20 +808,24 @@ public class TestChatSerialization {
       ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
       for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
       configuration = serializer.configure(configuration, schema);
-      assertEquals(21, configuration.size());
+      assertEquals(22, configuration.size());
       assertEquals("scribe attribute", "scribe", 
 		   ((Layer)configuration.get("transcriberLayer").getValue()).getId());
       assertEquals("languages attribute", "transcript_language", 
 		   ((Layer)configuration.get("languagesLayer").getValue()).getId());
-      assertEquals("main participant attribute", "main_participant", 
-		   ((Layer)configuration.get("mainParticipantLayer").getValue()).getId());
-      assertNull("sex attribute not automatically mapped to gender",
-                 configuration.get("sexLayer").getValue());
+      assertEquals("target participant attribute", "main_participant", 
+		   ((Layer)configuration.get("targetParticipantLayer").getValue()).getId());
+      assertEquals("non-word layer", "noise", 
+		   ((Layer)configuration.get("nonWordLayer").getValue()).getId());
+      assertEquals("sex attribute mapped to gender", "participant_gender",
+                   ((Layer)configuration.get("sexLayer").getValue()).getId());
+      assertEquals("age attribute", "participant_age",
+                   ((Layer)configuration.get("ageLayer").getValue()).getId());
 
       LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
          Arrays.asList(serializer.getRequiredLayers()));
       assertEquals("Needed layers: " + needLayers,
-                   7, needLayers.size());
+                   8, needLayers.size());
       assertTrue(needLayers.contains("who"));
       assertTrue(needLayers.contains("main_participant"));
       assertTrue(needLayers.contains("scribe"));
@@ -807,6 +833,7 @@ public class TestChatSerialization {
       assertTrue(needLayers.contains("turn"));
       assertTrue(needLayers.contains("utterance"));
       assertTrue(needLayers.contains("word"));
+      assertTrue(needLayers.contains("noise"));
       
       // serialize
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
