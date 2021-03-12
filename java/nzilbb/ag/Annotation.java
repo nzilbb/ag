@@ -33,9 +33,11 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 import nzilbb.ag.util.AnnotationComparatorByAnchor;
 import nzilbb.ag.util.AnnotationComparatorByOrdinal;
 import nzilbb.ag.util.LayerTraversal;
@@ -2016,6 +2018,37 @@ public class Annotation
       return super.addExtraJsonAttributes(json);
    }
    
+   /**
+    * Sets the object attributes using the given JSON representation.
+    * <p> All attributes are copied, including those that are not bean attributes; other
+    * are stored as map values.
+    * <p> Serialized child annotations are also parsed and added to {@link #annotations}.
+    * @param json
+    * @return A reference to this object.
+    */
+   @SuppressWarnings({"rawtypes","unchecked"})
+   public TrackedMap fromJson(JsonObject json)
+   {
+      // parse the annotation attributes
+      super.fromJson(json);
+
+      // if there's an "annotations" attribute
+      if (json.containsKey("annotations")) {
+         // child annotations are present, so parse them
+         JsonObject layers = json.getJsonObject("annotations");
+         // for each layer
+         for (String layerId : layers.keySet()) {
+            JsonArray children = layers.getJsonArray(layerId);
+            for (JsonValue jsonAnnotation : children) {
+               Annotation child = new Annotation();
+               child.fromJson((JsonObject)jsonAnnotation);
+               getAnnotations(layerId).add(child);
+            } // next child
+         } // next child layer
+      } // there are annotations
+      
+      return this;
+   }
    // java.lang.Object overrides:
    
    /**
