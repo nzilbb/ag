@@ -60,6 +60,8 @@ includesExpression
 
 patternMatchExpression
   : singletonOperand=operand negation=NOT? MATCHES patternOperand=stringLiteral
+  /* ad-hockery: operand for pattern match can also be a list, meaning 'any member matches'*/
+  | negation=NOT? patternOperand=stringLiteral DOT TEST OPEN_PAREN listOperand=listExpression CLOSE_PAREN
   | negation=NOT? patternOperand=stringLiteral DOT TEST OPEN_PAREN singletonOperand=operand CLOSE_PAREN
   ; 
 
