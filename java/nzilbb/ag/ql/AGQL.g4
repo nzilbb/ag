@@ -1,6 +1,6 @@
 /**
  * Annotation Graph Query Language grammar.
- * Copyright 2015-2020 New Zealand Institute of Language, Brain and Behaviour, 
+ * Copyright 2015-2021 New Zealand Institute of Language, Brain and Behaviour, 
  * University of Canterbury
  * Written by Robert Fromont - robert.fromont@canterbury.ac.nz
  *
@@ -92,7 +92,7 @@ valueListExpression
   ;
 
 annotationListExpression
-  : listMethodCall
+  : allMethodCall
   ;
 
 listLengthExpression
@@ -100,7 +100,7 @@ listLengthExpression
   ;
 
 annotationExpression
-  : myMethodCall
+  : firstMethodCall
   | parentExpression
   | nextExpression
   | previousExpression
@@ -183,14 +183,14 @@ anchorIdExpression
 anchorOffsetExpression : anchorExpression DOT OFFSET ;
 anchorConfidenceExpression : anchorExpression DOT CONFIDENCE ;
 
-myMethodCall /* TODO add "first" */
-  : MY OPEN_PAREN layer=stringLiteral CLOSE_PAREN
-/*  | annotationExpression DOT MY OPEN_PAREN stringLiteral CLOSE_PAREN # OtherMyMethodCall*/
+firstMethodCall
+  : FIRST OPEN_PAREN layer=stringLiteral CLOSE_PAREN
+/*  | annotationExpression DOT FIRST OPEN_PAREN stringLiteral CLOSE_PAREN # OtherFirstMethodCall*/
   ;
 
-listMethodCall /* TODO add "all" */
-  : LIST OPEN_PAREN layer=stringLiteral CLOSE_PAREN
-  | other=annotationExpression LIST OPEN_PAREN stringLiteral CLOSE_PAREN
+allMethodCall
+  : ALL OPEN_PAREN layer=stringLiteral CLOSE_PAREN
+  | other=annotationExpression ALL OPEN_PAREN stringLiteral CLOSE_PAREN
   ;
 
 labelsMethodCall
@@ -273,8 +273,8 @@ ENDID                 : 'endId' ;
 OFFSET                : 'offset' ;
 
 /* methods */
-MY                    : 'my' ;
-LIST                  : 'list' ;
+FIRST                 : 'first' | 'my' ; /* 'my' for backward compatibility */
+ALL                   : 'all' | 'list' ; /* 'list; for backward compatibility */
 LABELS                : 'labels' ;
 ANNOTATORS            : 'annotators' ;
 INCLUDES              : 'includes' ;

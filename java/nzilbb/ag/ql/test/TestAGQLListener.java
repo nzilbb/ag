@@ -37,7 +37,7 @@ public class TestAGQLListener {
       final StringBuffer parse = new StringBuffer();
       final StringBuffer error = new StringBuffer();
       AGQLListener listener = new AGQLBaseListener() {
-            @Override public void exitMyMethodCall(AGQLParser.MyMethodCallContext ctx) {
+            @Override public void exitFirstMethodCall(AGQLParser.FirstMethodCallContext ctx) {
                parse.append("layer:"+ctx.layer.quotedString.getText());
             }
             @Override public void exitLabelExpression(AGQLParser.LabelExpressionContext ctx) { 
@@ -55,7 +55,7 @@ public class TestAGQLListener {
          };
 
       AGQLLexer lexer = new AGQLLexer(
-         CharStreams.fromString("my('graph').label = \"something\""));
+         CharStreams.fromString("first('graph').label = \"something\""));
       CommonTokenStream tokens = new CommonTokenStream(lexer);
       AGQLParser parser = new AGQLParser(tokens);
       AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
@@ -101,7 +101,7 @@ public class TestAGQLListener {
       final StringBuffer parse = new StringBuffer();
       final StringBuffer error = new StringBuffer();
       AGQLListener listener = new AGQLBaseListener() {
-            @Override public void exitMyMethodCall(AGQLParser.MyMethodCallContext ctx) {
+            @Override public void exitFirstMethodCall(AGQLParser.FirstMethodCallContext ctx) {
                parse.append("layer:"+ctx.layer.quotedString.getText());
             }
             @Override public void exitLabelExpression(AGQLParser.LabelExpressionContext ctx) { 
@@ -154,7 +154,7 @@ public class TestAGQLListener {
       final StringBuffer parse = new StringBuffer();
       final StringBuffer error = new StringBuffer();
       AGQLListener listener = new AGQLBaseListener() {
-            @Override public void exitMyMethodCall(AGQLParser.MyMethodCallContext ctx) {
+            @Override public void exitFirstMethodCall(AGQLParser.FirstMethodCallContext ctx) {
                parse.append("layer:"+ctx.layer.quotedString.getText());
             }
             @Override public void exitLabelExpression(AGQLParser.LabelExpressionContext ctx) { 
@@ -179,7 +179,7 @@ public class TestAGQLListener {
       final StringBuffer parse = new StringBuffer();
       final StringBuffer error = new StringBuffer();
       AGQLListener listener = new AGQLBaseListener() {
-            @Override public void exitMyMethodCall(AGQLParser.MyMethodCallContext ctx) {
+            @Override public void exitFirstMethodCall(AGQLParser.FirstMethodCallContext ctx) {
                parse.append("layer:"+ctx.layer.quotedString.getText());
             }
             @Override public void exitLabelExpression(AGQLParser.LabelExpressionContext ctx) { 
@@ -403,7 +403,7 @@ public class TestAGQLListener {
       final StringBuffer parse = new StringBuffer();
       final StringBuffer error = new StringBuffer();
       AGQLListener listener = new AGQLBaseListener() {
-            @Override public void exitMyMethodCall(AGQLParser.MyMethodCallContext ctx) {
+            @Override public void exitFirstMethodCall(AGQLParser.FirstMethodCallContext ctx) {
                parse.append("layer:"+ctx.layer.quotedString.getText());
             }
             @Override public void exitLabelExpression(AGQLParser.LabelExpressionContext ctx) { 
@@ -444,7 +444,7 @@ public class TestAGQLListener {
             // {
             //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
             // }
-            @Override public void exitMyMethodCall(AGQLParser.MyMethodCallContext ctx) {
+            @Override public void exitFirstMethodCall(AGQLParser.FirstMethodCallContext ctx) {
                parse.append("layer:"+ctx.layer.quotedString.getText());
             }
             @Override public void exitIdExpression(AGQLParser.IdExpressionContext ctx) { 
@@ -486,7 +486,7 @@ public class TestAGQLListener {
             // {
             //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
             // }
-            @Override public void exitListMethodCall(AGQLParser.ListMethodCallContext ctx) {
+            @Override public void exitAllMethodCall(AGQLParser.AllMethodCallContext ctx) {
                parse.append("layer:"+ctx.layer.quotedString.getText()+"->list");
             }
             @Override public void visitErrorNode(ErrorNode node) {
@@ -508,6 +508,36 @@ public class TestAGQLListener {
 
    }
 
+   @Test public void all() {
+      final StringBuffer parse = new StringBuffer();
+      final StringBuffer error = new StringBuffer();
+      AGQLListener listener = new AGQLBaseListener() {
+            // @Override public void exitEveryRule(ParserRuleContext ctx)
+            // {
+            //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
+            // }
+            @Override public void exitAllMethodCall(AGQLParser.AllMethodCallContext ctx) {
+               parse.append("layer:"+ctx.layer.quotedString.getText()+"->list");
+            }
+            @Override public void visitErrorNode(ErrorNode node) {
+               // System.out.println(node.getText());
+               error.append(node.getText());
+            }
+         };
+
+      AGQLLexer lexer = new AGQLLexer(
+         CharStreams.fromString("all('transcript').includes('something')"));
+      CommonTokenStream tokens = new CommonTokenStream(lexer);
+      AGQLParser parser = new AGQLParser(tokens);
+      AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
+
+      ParseTreeWalker.DEFAULT.walk(listener, tree);
+      assertTrue("No errors: " + error.toString(), error.length() == 0);
+      assertEquals("Parse structure: " + parse,
+                   "layer:'transcript'->list", parse.toString());
+
+   }
+
    @Test public void listLength() {
       final StringBuffer parse = new StringBuffer();
       final StringBuffer error = new StringBuffer();
@@ -516,7 +546,7 @@ public class TestAGQLListener {
             // {
             //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
             // }
-            @Override public void exitListMethodCall(AGQLParser.ListMethodCallContext ctx) {
+            @Override public void exitAllMethodCall(AGQLParser.AllMethodCallContext ctx) {
                parse.append("layer:"+ctx.layer.quotedString.getText()+"->list");
             }
             @Override public void exitLabelsMethodCall(AGQLParser.LabelsMethodCallContext ctx) { 
@@ -533,6 +563,51 @@ public class TestAGQLListener {
 
       AGQLLexer lexer = new AGQLLexer(
          CharStreams.fromString("list('transcript').length == 0"));
+      CommonTokenStream tokens = new CommonTokenStream(lexer);
+      AGQLParser parser = new AGQLParser(tokens);
+      AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
+
+      ParseTreeWalker.DEFAULT.walk(listener, tree);
+      assertTrue("No errors: " + error.toString(), error.length() == 0);
+      assertEquals("Parse structure: " + parse,
+                   "layer:'transcript'->list->length", parse.toString());
+
+      parse.setLength(0);
+      lexer.setInputStream(CharStreams.fromString("labels('transcript').length = 0"));
+      tokens = new CommonTokenStream(lexer);
+      parser = new AGQLParser(tokens);
+      tree = parser.booleanExpression();
+      ParseTreeWalker.DEFAULT.walk(listener, tree);
+      assertTrue("No errors: " + error.toString(), error.length() == 0);
+      assertEquals("Parse structure: " + parse,
+                   "layer:'transcript'->labels->length", parse.toString());
+   }
+  
+   @Test public void allLength() {
+      final StringBuffer parse = new StringBuffer();
+      final StringBuffer error = new StringBuffer();
+      AGQLListener listener = new AGQLBaseListener() {
+            // @Override public void exitEveryRule(ParserRuleContext ctx)
+            // {
+            //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
+            // }
+            @Override public void exitAllMethodCall(AGQLParser.AllMethodCallContext ctx) {
+               parse.append("layer:"+ctx.layer.quotedString.getText()+"->list");
+            }
+            @Override public void exitLabelsMethodCall(AGQLParser.LabelsMethodCallContext ctx) { 
+               parse.append("layer:"+ctx.layer.quotedString.getText()+"->labels");
+            }
+            @Override public void exitListLengthExpression(AGQLParser.ListLengthExpressionContext ctx) {
+               parse.append("->length");
+            }
+            @Override public void visitErrorNode(ErrorNode node) {
+               // System.out.println(node.getText());
+               error.append(node.getText());
+            }
+         };
+
+      AGQLLexer lexer = new AGQLLexer(
+         CharStreams.fromString("all('transcript').length == 0"));
       CommonTokenStream tokens = new CommonTokenStream(lexer);
       AGQLParser parser = new AGQLParser(tokens);
       AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
@@ -587,7 +662,7 @@ public class TestAGQLListener {
       final StringBuffer parse = new StringBuffer();
       final StringBuffer error = new StringBuffer();
       AGQLListener listener = new AGQLBaseListener() {
-            @Override public void exitMyMethodCall(AGQLParser.MyMethodCallContext ctx) {
+            @Override public void exitFirstMethodCall(AGQLParser.FirstMethodCallContext ctx) {
                parse.append("layer:"+ctx.layer.quotedString.getText());
             }
             @Override public void exitAnnotatorExpression(AGQLParser.AnnotatorExpressionContext ctx) { 
@@ -657,7 +732,7 @@ public class TestAGQLListener {
       final StringBuffer parse = new StringBuffer();
       final StringBuffer error = new StringBuffer();
       AGQLListener listener = new AGQLBaseListener() {
-            @Override public void exitMyMethodCall(AGQLParser.MyMethodCallContext ctx) {
+            @Override public void exitFirstMethodCall(AGQLParser.FirstMethodCallContext ctx) {
                parse.append("layer:"+ctx.layer.quotedString.getText());
             }
             @Override public void exitOrdinalOperand(AGQLParser.OrdinalOperandContext ctx) {
@@ -701,7 +776,7 @@ public class TestAGQLListener {
             // {
             //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
             // }
-            @Override public void exitMyMethodCall(AGQLParser.MyMethodCallContext ctx) {
+            @Override public void exitFirstMethodCall(AGQLParser.FirstMethodCallContext ctx) {
                parse.append("layer:"+ctx.layer.quotedString.getText());
             }
             @Override public void exitWhenExpression(AGQLParser.WhenExpressionContext ctx) { 
@@ -767,7 +842,7 @@ public class TestAGQLListener {
          };
 
       AGQLLexer lexer = new AGQLLexer(
-         CharStreams.fromString("/Ada.+/.test(id) AND my('corpus').label = 'CC'"));
+         CharStreams.fromString("/Ada.+/.test(id) AND first('corpus').label = 'CC'"));
       CommonTokenStream tokens = new CommonTokenStream(lexer);
       AGQLParser parser = new AGQLParser(tokens);
       AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
@@ -791,7 +866,7 @@ public class TestAGQLListener {
       parse.setLength(0);
       lexer.setInputStream(CharStreams.fromString(
                               "!/Ada.+/.test(id)"
-                              +" AND my('corpus').label = 'CC'"
+                              +" AND first('corpus').label = 'CC'"
                               +" AND !annotators('transcript_rating').includes('labbcat')"));
       tokens = new CommonTokenStream(lexer);
       parser = new AGQLParser(tokens);
@@ -831,7 +906,7 @@ public class TestAGQLListener {
          };
 
       AGQLLexer lexer = new AGQLLexer(
-         CharStreams.fromString("!/Ada.+/.test(id) && my('corpus').label = 'CC'"));
+         CharStreams.fromString("!/Ada.+/.test(id) && first('corpus').label = 'CC'"));
       CommonTokenStream tokens = new CommonTokenStream(lexer);
       AGQLParser parser = new AGQLParser(tokens);
       AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
