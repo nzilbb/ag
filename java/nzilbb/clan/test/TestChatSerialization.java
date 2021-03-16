@@ -836,7 +836,7 @@ public class TestChatSerialization {
       LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
          Arrays.asList(serializer.getRequiredLayers()));
       assertEquals("Needed layers: " + needLayers,
-                   8, needLayers.size());
+                   11, needLayers.size());
       assertTrue(needLayers.contains("who"));
       assertTrue(needLayers.contains("main_participant"));
       assertTrue(needLayers.contains("scribe"));
@@ -845,6 +845,9 @@ public class TestChatSerialization {
       assertTrue(needLayers.contains("utterance"));
       assertTrue(needLayers.contains("word"));
       assertTrue(needLayers.contains("noise"));
+      assertTrue(needLayers.contains("participant_age"));
+      assertTrue(needLayers.contains("participant_gender"));
+      assertTrue(needLayers.contains("participant_language"));
       
       // serialize
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();

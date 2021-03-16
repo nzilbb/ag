@@ -632,7 +632,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-	 "CLAN CHAT transcript", "1.01", "text/x-chat", ".cha", "20210312.1430", getClass().getResource("icon.png"));
+	 "CLAN CHAT transcript", "1.02", "text/x-chat", ".cha", "20210312.1430", getClass().getResource("icon.png"));
    }
 
    /**
@@ -1673,6 +1673,12 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       if (getGemLayer() != null) requiredLayers.add(getGemLayer().getId());
       if (getTranscriberLayer() != null) requiredLayers.add(getTranscriberLayer().getId());
       if (getLanguagesLayer() != null) requiredLayers.add(getLanguagesLayer().getId());
+      for (String key : participantLayers.keySet()) {
+         Layer layer = participantLayers.get(key);
+         if (layer != null) {
+            requiredLayers.add(layer.getId());
+         }
+      }
       return requiredLayers.toArray(new String[0]);
    } // getRequiredLayers()
    
@@ -1846,6 +1852,12 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                       // standardize value...
                      if (field.equals("sex")) {
                         value = value.toLowerCase();
+                        if (!value.matches("[fwgmb]") // not something we recgonize
+                            && layer.getValidLabels().containsKey(annotation.getLabel())) {
+                           // try the label description?
+                           value = layer.getValidLabels().get(annotation.getLabel())
+                              .toLowerCase();
+                        }
                         if (value.startsWith("f") // female?
                             || value.startsWith("w") // woman?
                             || value.startsWith("g")) { // girl?
@@ -1854,7 +1866,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                                    || value.startsWith("b")) { // boy?
                            value = "male";
                         } else {
-                           value = "";
+                           value = ""+annotation.getLabel()+" " + layer.getValidLabels().get(annotation.getLabel());
                         }
                      } else if (field.equals("language")) { 
                         value = iso639.alpha3(value).orElse("");
