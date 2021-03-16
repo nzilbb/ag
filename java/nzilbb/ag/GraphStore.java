@@ -147,4 +147,14 @@ public interface GraphStore extends GraphStoreQuery {
    public void deleteTranscript(String id)
       throws StoreException, PermissionException, GraphNotFoundException;
    
+   /**
+    * Deletes the given participant, and all associated meta-data.
+    * @param id The ID participant to delete.
+    * @throws StoreException If an error prevents the transcript from being saved.
+    * @throws PermissionException If saving the transcript is not permitted.
+    * @throws GraphNotFoundException If the transcript doesn't exist.
+    */
+   public void deleteParticipant(String id)
+      throws StoreException, PermissionException, GraphNotFoundException;
+   
 } // end of interface GraphStore
