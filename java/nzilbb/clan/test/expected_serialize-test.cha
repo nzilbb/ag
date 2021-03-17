@@ -3,6 +3,6 @@
 @Participants:	SUB John_Smith Participant,INT Mrs._Smith Investigator
 @ID:	eng||SUB|2;10.10|male|||Participant|||
 @ID:	spa||INT|||||Investigator|||
-*SUB	The 'quick brown' fox ·0_5432·
+*SUB:	The 'quick brown' fox ·0_5432·
 	jumps - over &=coughs &th ·5432_10000·
-*INT	the lazy "dog" . ·10000_15000·
+*INT:	the lazy "dog" . ·10000_15000·

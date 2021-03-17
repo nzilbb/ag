@@ -632,7 +632,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-	 "CLAN CHAT transcript", "1.02", "text/x-chat", ".cha", "20210312.1430", getClass().getResource("icon.png"));
+	 "CLAN CHAT transcript", "1.03", "text/x-chat", ".cha", "20210312.1430", getClass().getResource("icon.png"));
    }
 
    /**
@@ -1917,7 +1917,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
             if (participant != currentParticipant) { // participant change
                currentParticipant = participant;
                Object[] participantLabel = { currentParticipant.getLabel() }; 
-               writer.print("*" + participant.first("@code").getLabel());
+               writer.print("*" + participant.first("@code").getLabel() + ":");
             } // participant change
 
             String delimiter = "\t";

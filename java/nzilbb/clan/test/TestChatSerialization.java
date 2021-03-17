@@ -817,7 +817,7 @@ public class TestChatSerialization {
       
       // general configuration
       ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
-      for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
       configuration = serializer.configure(configuration, schema);
       assertEquals(22, configuration.size());
       assertEquals("scribe attribute", "scribe", 
