@@ -102,7 +102,6 @@ public class RequestRouter
     */
    public RequestRouter() {
    } // end of constructor
-
    
    /**
     * Registers a method as a possible route.
@@ -116,7 +115,6 @@ public class RequestRouter
       // add this method to the route
       routes.get(method.getName()).add(method);
    } // end of registerMethod()
-
    
    /**
     * Constructor.
@@ -389,6 +387,5 @@ public class RequestRouter
          throw new RequestException(400, method, uri, error);
       }    
    } // end of invokeMethod()
-
 
 } // end of class RequestRouter

@@ -42,7 +42,7 @@ import nzilbb.util.IO;
  * <p> This can be run from the command like this:
  * <p><tt> java -classpath nzilbb.ag.jar nzilbb.ag.automation.util.Info myjar.jar </tt>
  */
-@ProgramDescription(value="Utility for running stand-alone webapps",arguments="class.or.jar")
+@ProgramDescription(value="Utility for displaying automatic annotator information",arguments="class.or.jar")
 public class Info extends CommandLineProgram {
    /** Command-line entrypoint */
    public static void main(String argv[]) {
@@ -57,7 +57,8 @@ public class Info extends CommandLineProgram {
    }   
 
    /**
-    * Whether to show a graphical user interface (true) or write info to stdout (false). Default is true.
+    * Whether to show a graphical user interface (true) or write info to stdout (false). 
+    * Default is true.
     * @see #getGui()
     * @see #setGui(Boolean)
     */
