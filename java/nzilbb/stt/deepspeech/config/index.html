@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title> DeepSpeech Transcriber </title>    
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <link rel="stylesheet" href="index.css" type="text/css">
+    <script src="util.js" type="text/javascript"></script>
+  </head>
+  <body>
+
+    <h1> DeepSpeech Transcriber </h1>
+
+    <p> Automatic transcriber that uses locally-installed
+      <a target="deepspeech" href="https://github.com/mozilla/DeepSpeech/"> DeepSpeech </a> 
+      to perform speech-to-text. </p>
+
+    <p>
+      <label>DeepSpeech version</label>
+      <span id="deepSpeechVersion">In order to function, DeepSpeech must already be installed on the local system.</span>
+    </p>
+    
+    <div id="upload-form">
+      <p> The transcriber requires language-specific models to work.</p>
+      <div class="file-chooser">
+        <label for="file">Upload new models file</label>
+        <input id="file" type="file" onchange="selectFile(this);">
+      </div>
+      <div id="upload-progress" style="display: none;">
+        <progress id="progress"></progress>
+        <div id="upload-result"></div>
+      </div>
+    </div>
+
+    <form method="POST" action="setConfig">
+      <div class="field">
+        <label>Available Models</label>
+        <span id="models">
+        </span>
+      </div>
+      <div class="controls">
+        <input type="submit" value="Configure">
+      </div>
+    </form>
+
+    <footer><div> DeepSpeech Transcriber <small id="version"></small> </div></footer>
+    
+    <script src="index.js" type="text/javascript"></script>
+  </body>
+</html>
