@@ -644,7 +644,7 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-         "Plain Text Document", "1.3", "text/plain", ".txt", "20200909.1954",
+         "Plain Text Document", "1.4", "text/plain", ".txt", "20200909.1954",
          getClass().getResource("icon.png"));
    }
 
@@ -1108,11 +1108,21 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
       SerializationException {
       if (timers != null) timers.start("initialization");
       
-      if (participantLayer == null) throw new SerializerNotConfiguredException("Participant layer not set");
-      if (turnLayer == null) throw new SerializerNotConfiguredException("Turn layer not set");
-      if (utteranceLayer == null) throw new SerializerNotConfiguredException("Utterance layer not set");
-      if (wordLayer == null) throw new SerializerNotConfiguredException("Word layer not set");
-      if (schema == null) throw new SerializerNotConfiguredException("Layer schema not set");
+      if (participantLayer == null) {
+         throw new SerializerNotConfiguredException("Participant layer not set");
+      }
+      if (turnLayer == null) {
+         throw new SerializerNotConfiguredException("Turn layer not set");
+      }
+      if (utteranceLayer == null) {
+         throw new SerializerNotConfiguredException("Utterance layer not set");
+      }
+      if (wordLayer == null) {
+         throw new SerializerNotConfiguredException("Word layer not set");
+      }
+      if (schema == null) {
+         throw new SerializerNotConfiguredException("Layer schema not set");
+      }
 
       validate();
 
@@ -1185,8 +1195,14 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
       }
 
       HashMap<String,Annotation> participants = new HashMap<String,Annotation>();
-      Annotation participant = new Annotation(null, "author", schema.getParticipantLayerId());
-      participant.setConfidence(Constants.CONFIDENCE_MANUAL);
+      Annotation participant = new Annotation(
+         null,
+         // default participant name is "author" for texts...
+         graph.getOffsetUnits() == Constants.UNIT_CHARACTERS?"author"
+         // ...but is the name of the file for recordings
+         :IO.WithoutExtension(graph.getId()),
+         schema.getParticipantLayerId());
+      participant.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
       Vector<Annotation> participantTags = new Vector<Annotation>();
       MessageFormat fmtMetaDataFormat = new MessageFormat(metaDataFormat);
       for (String header : getHeaderLines()) {
@@ -1240,7 +1256,7 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
       turn.setParent(participant);
       turn.setStart(
          graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL));
-      Annotation line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
+      Annotation line = new Annotation(null, "", getUtteranceLayer().getId());
       line.setParentId(turn.getId())
          .setStart(turn.getStart())
          .setConfidence(Constants.CONFIDENCE_MANUAL);;
@@ -1268,7 +1284,7 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
          // }
 	 
          int iNumChars = sLine.length();
-         line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
+         line = new Annotation(null, "", getUtteranceLayer().getId());
          line.setParentId(turn.getId())
             .setStart(turn.getStart())
             .setOrdinal(lineOrdinal++)
@@ -1337,7 +1353,7 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
                         // if we have <div><p>... don't create an instantaneous, empty line
                         graph.addAnnotation(line);
                      }
-                     line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
+                     line = new Annotation(null, "", getUtteranceLayer().getId());
                      line.setParentId(turn.getId())
                         .setStart(lastAnchor)
                         .setConfidence(Constants.CONFIDENCE_MANUAL);
@@ -1403,8 +1419,15 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
       setLines(null); // allow lines to be garbage collected
 
       if (getMediaDurationSeconds() != null) {
-         lastAnchor.setOffset(getMediaDurationSeconds());
-         lastAnchor.setConfidence(Constants.CONFIDENCE_MANUAL);
+         if (firstAnchor == lastAnchor) {
+            // no utterances - create a new lastAnchor
+            lastAnchor = graph.getOrCreateAnchorAt(
+               getMediaDurationSeconds(), Constants.CONFIDENCE_MANUAL);
+            graph.addAnchor(lastAnchor);
+         } else {
+            lastAnchor.setOffset(getMediaDurationSeconds());
+            lastAnchor.setConfidence(Constants.CONFIDENCE_MANUAL);
+         }
       }
       if (lastLine != null) {
          if (lastAnchor.getId() == null) {
@@ -1493,6 +1516,11 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
       }
 
       if (timers != null) timers.start("finalization");
+
+      if (graph.first(getParticipantLayer().getId()) == null) {
+         // we haven't added a participant yet, so add the default one
+         graph.addAnnotation(participant);
+      }
 
       // now that we've got the whole text, we know who the participant(s) is for tagging
       participant = graph.first(getParticipantLayer().getId());

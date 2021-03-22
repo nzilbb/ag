@@ -300,7 +300,7 @@ public class TestPlainTextSerialization
 
       // tag participant as main one
       g.addLayer(schema.getLayer("main_participant"));
-      g.addTag(authors[0], "main_participant", authors[0].getLabel())
+      g.createTag(authors[0], "main_participant", authors[0].getLabel())
          .setConfidence(Constants.CONFIDENCE_MANUAL);
       
       // turns
@@ -1401,7 +1401,7 @@ public class TestPlainTextSerialization
       // add orthography tags that should not be used because orthography is not selected
       for (Annotation word : graph.all("word"))
       {
-         graph.addTag(word, "orthography", word.getLabel()+"-orthography");
+         graph.createTag(word, "orthography", word.getLabel()+"-orthography");
       }
       
       // add some comments, noises, lexical and pronounce tags
@@ -1550,26 +1550,26 @@ public class TestPlainTextSerialization
                                          "a9",
                                          "a10",
                                          "t1"));
-      graph.addTag(graph.getAnnotation("the"), "orthography", "the");
-      graph.addTag(graph.getAnnotation("quick"), "orthography", "quick");
-      graph.addTag(graph.getAnnotation("brown"), "orthography", "brown");
-      graph.addTag(graph.getAnnotation("fox"), "orthography", "fox");
-      graph.addTag(graph.getAnnotation("jumps"), "orthography", "jumps");
-      graph.addTag(graph.getAnnotation("over"), "orthography", "over");
-      graph.addTag(graph.getAnnotation("the2"), "orthography", "the");
-      graph.addTag(graph.getAnnotation("lazy"), "orthography", "lazy");
-      graph.addTag(graph.getAnnotation("dog"), "orthography", "dog");
+      graph.createTag(graph.getAnnotation("the"), "orthography", "the");
+      graph.createTag(graph.getAnnotation("quick"), "orthography", "quick");
+      graph.createTag(graph.getAnnotation("brown"), "orthography", "brown");
+      graph.createTag(graph.getAnnotation("fox"), "orthography", "fox");
+      graph.createTag(graph.getAnnotation("jumps"), "orthography", "jumps");
+      graph.createTag(graph.getAnnotation("over"), "orthography", "over");
+      graph.createTag(graph.getAnnotation("the2"), "orthography", "the");
+      graph.createTag(graph.getAnnotation("lazy"), "orthography", "lazy");
+      graph.createTag(graph.getAnnotation("dog"), "orthography", "dog");
 
-      graph.addTag(graph.getAnnotation("the"), "pos", "DET");
-      graph.addTag(graph.getAnnotation("quick"), "pos", "ADJ");
-      graph.addTag(graph.getAnnotation("brown"), "pos", "ADJ");
-      graph.addTag(graph.getAnnotation("fox"), "pos", "N");
-      graph.addTag(graph.getAnnotation("jumps"), "pos", "V");
-      graph.addTag(graph.getAnnotation("over"), "pos", "PREP");
-      graph.addTag(graph.getAnnotation("the2"), "pos", "DET");
-      graph.addTag(graph.getAnnotation("lazy"), "pos", "ADJ");
-      graph.addTag(graph.getAnnotation("dog"), "pos", "N");
-      graph.addTag(graph.getAnnotation("."), "pos", "PUNC");
+      graph.createTag(graph.getAnnotation("the"), "pos", "DET");
+      graph.createTag(graph.getAnnotation("quick"), "pos", "ADJ");
+      graph.createTag(graph.getAnnotation("brown"), "pos", "ADJ");
+      graph.createTag(graph.getAnnotation("fox"), "pos", "N");
+      graph.createTag(graph.getAnnotation("jumps"), "pos", "V");
+      graph.createTag(graph.getAnnotation("over"), "pos", "PREP");
+      graph.createTag(graph.getAnnotation("the2"), "pos", "DET");
+      graph.createTag(graph.getAnnotation("lazy"), "pos", "ADJ");
+      graph.createTag(graph.getAnnotation("dog"), "pos", "N");
+      graph.createTag(graph.getAnnotation("."), "pos", "PUNC");
 
       // add some comments, noises, lexical and pronounce tags
       graph.addAnnotation(new Annotation("comment1", "some preamble", "comment", "a0", "a1"));
@@ -1621,6 +1621,114 @@ public class TestPlainTextSerialization
       } else {
          result.delete();
       }
+   }
+
+   @Test public void blank()  throws Exception {
+      Schema schema = new Schema(
+         "who", "turn", "utterance", "word",
+         new Layer("who", "Participants")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(true).setPeersOverlap(true).setSaturated(true),
+         new Layer("comment", "Comment")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(true),
+	 new Layer("turn", "Speaker turns")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false)
+         .setParentId("who").setParentIncludes(true),
+	 new Layer("utterance", "Utterances")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(true)
+         .setParentId("turn").setParentIncludes(true),
+	 new Layer("word", "Words")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false)
+         .setParentId("turn").setParentIncludes(true));
+      
+      // access file
+      NamedStream[] streams = {
+	 new NamedStream(new File(getDir(), "blank.txt")), // transcript
+	 new NamedStream(new File(getDir(), "elicited.wav")) // media file gives max anchor offset
+      };
+      
+      // create deserializer
+      PlainTextSerialization deserializer = new PlainTextSerialization();
+      
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals("Configuration parameters" + configuration,
+                   11, deserializer.configure(configuration, schema).size());      
+      assertEquals("comment", "comment", 
+		   ((Layer)configuration.get("commentLayer").getValue()).getId());
+      assertNull("noise", configuration.get("noiseLayer").getValue());
+      assertNull("lexical", configuration.get("lexicalLayer").getValue());
+      assertNull("pronounce", configuration.get("pronounceLayer").getValue());
+      assertEquals("use conventions", Boolean.TRUE, configuration.get("useConventions").getValue());
+      assertEquals("maxParticipantLength",
+		   Integer.valueOf(20), configuration.get("maxParticipantLength").getValue());
+      assertEquals("maxHeaderLines",
+		   Integer.valueOf(50), configuration.get("maxHeaderLines").getValue());
+      assertEquals("participantFormat", "{0}: ",
+		   configuration.get("participantFormat").getValue());
+      assertEquals("metaDataFormat", "{0}={1}",
+		   configuration.get("metaDataFormat").getValue());
+      assertEquals("timestampFormat",
+                   "HH:mm:ss.SSS",
+		   configuration.get("timestampFormat").getValue());
+      
+      // load the stream
+      ParameterSet defaultParameters = deserializer.load(streams, schema);
+      // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals(0, defaultParameters.size());
+      
+      // configure the deserialization
+      deserializer.setParameters(defaultParameters);
+      
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+      
+      for (String warning : deserializer.getWarnings()) {
+	 System.out.println(warning);
+      }
+      
+      assertEquals("blank.txt", g.getId());
+      assertEquals("time units", Constants.UNIT_SECONDS, g.getOffsetUnits());
+
+      // participants     
+      Annotation[] participants = g.all("who"); 
+      assertEquals("One participant", 1, participants.length);
+      assertEquals("blank", participants[0].getLabel());
+      
+      // one empty turn
+      Annotation[] turns = g.all("turn");
+      assertEquals("one turn", 1, turns.length);
+      assertEquals("turn is child of participant", participants[0], turns[0].getParent());
+
+      // one empty utterance
+      Annotation[] utterances = g.all("utterance");
+      assertEquals("one utterance", 1, utterances.length);
+      assertEquals("utterance is child of turn", turns[0], utterances[0].getParent());
+
+      // no words
+      Annotation[] words = g.all("word");
+      assertEquals("no words" + Arrays.asList(words), 0, words.length);
+
+      // start/end anchors
+      assertNotEquals("There are two anchors: " + g.getAnchors(),
+                      2, g.getAnchors().size());
+      Anchor start = g.getStart();
+      Anchor end = g.getEnd();
+      assertNotEquals("Start and end are distinct: " + start,
+                      start, end);
+      assertEquals("Start at zero: " + start,
+                   Double.valueOf(0.0), start.getOffset());
+      assertEquals("Start at length of recording: " + end,
+                   Double.valueOf(5.2941875), end.getOffset());
+      assertEquals("Participant annotation start",
+                   start, participants[0].getStart());
+      assertEquals("Participant annotation end",
+                   end, participants[0].getEnd());
    }
 
    /**
