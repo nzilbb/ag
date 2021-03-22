@@ -34,10 +34,13 @@
       </div>
     </div>
 
-    <form method="POST" action="setConfig">
+    <form method="POST" action="setConfig" onsubmit="validateConfig();">
       <div class="field">
-        <label>Available Models</label>
-        <span id="models">
+        <label>Models to use</label>
+        <span>
+          <select id="models" name="models">
+            <option value="" disabled="true" selected>[upload new models file above]</option>
+          </select>
         </span>
       </div>
       <div class="controls">

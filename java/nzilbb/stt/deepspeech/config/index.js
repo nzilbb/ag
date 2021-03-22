@@ -20,6 +20,7 @@ function selectFile(input) {
             document.getElementById("upload-result").innerHTML
                 = "<p class='error'>"+result+"</p>";
         }
+        availableModels();
     }, function(e) {
         console.log("uploadProgress " + e.loaded);
         if (e.lengthComputable) {
@@ -39,32 +40,38 @@ var models = "";
 
 function availableModels() {
     getJSON("availableModels", modelsOptions => {
+        
+        // if there are no models available, do nothing
+        if (modelsOptions.length == 0) return;
+        
         // if there's only one option, select it
         if (modelsOptions.length == 1) models = modelsOptions[0];
-
+        
         // list options...
-        spanModels = document.getElementById("models");
+        selectModels = document.getElementById("models");
         // remove all current options
-        spanModels.textContent = "";
+        selectModels.textContent = "";
         // populate the span with options
         for (m in modelsOptions) {
             var modelsOption = modelsOptions[m];
-            console.log("models " + modelsOption);
-            var label = document.createElement("label");
-            label.className="checkbox"
-            var input = document.createElement("input");
-            input.type = "radio";
-            input.name = "models";
-            input.title = "Select to use this model";
-            input.value = modelsOption;
+            var option = document.createElement("option");
+            option.value=modelsOption
             if (modelsOption == models) {
-                input.checked = true;
+                option.selected = true;
             }
-            label.appendChild(input);
-            label.appendChild(document.createTextNode(modelsOption));
-            spanModels.appendChild(label);
+            option.appendChild(document.createTextNode(modelsOption));
+            selectModels.appendChild(option);
         }
     })
+}
+
+function validateConfig() {
+    selectModels = document.getElementById("models");
+    if (!selectModels.value) {
+        alert("You must upload pre-trained DeepSpeech models above.");
+        return false;
+    }
+    return true;
 }
 
 getText("getConfig", parameters => {

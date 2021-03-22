@@ -196,13 +196,12 @@ public class DeepSpeechTranscriber extends Transcriber {
     * graph. 
     * @param speech An audio file containing the speech to transcribe.
     * @param transcript The annotation graph that should contain the transcription. 
-    * <p> If the transcriber's {@link #getDiarizationRequired()} returns false, it should
-    * be assumed that the annotation graph has no annotations on the
+    * <p> If the transcriber's {@link #getDiarizationRequired()} returns false, the
+    * annotation graph may or may not have any annotations on the
     * {@link Schema#getTurnLayerId() turn}, {@link Schema#getUtteranceLayerId() utterance}, and
-    * {@link Schema#getWordLayerId() word} layers.  However, it <em> may </em> have
-    * annotations on meta-data layers, and also may already contain participant
-    * annotations, in which case those participants should be assigned to the resulting
-    * transcript, if possible.
+    * {@link Schema#getWordLayerId() word} layers. If there are existing annotations, they
+    * should be re-used if possible, or {@link Annotation#destroy()} should be called on
+    * each to ensure they're removed from the graph.
     * <p> If the transcriber's {@link #getDiarizationRequired()} returns true, it should
     * be assumed that the annotation graph has annotations on the
     * {@link Schema#getParticipantLayerId() participant}, {@link Schema#getTurnLayerId() turn}, 
@@ -229,6 +228,8 @@ public class DeepSpeechTranscriber extends Transcriber {
     */
    @Override
    public Graph transcribe(File speech, Graph transcript) throws Exception {
+
+      if (deepSpeechExe == null) throw new Exception("DeepSpeech is not installed.");
       
       // run deepspeech recognizer
       Execution deepspeech = new Execution()
@@ -239,6 +240,7 @@ public class DeepSpeechTranscriber extends Transcriber {
       
       // pass through stderr...
       System.err.println(deepspeech.getError().toString());
+      System.err.println(deepspeech.getInput().toString());
 
       // get duration of audio...
 
@@ -292,13 +294,22 @@ public class DeepSpeechTranscriber extends Transcriber {
       }
 
       // add turn
-      Annotation turn = transcript.createTag(
-         participant, schema.getTurnLayerId(), participant.getLabel());
+      Annotation turn = participant.first(schema.getTurnLayerId());
+      if (turn == null) {
+         transcript.createTag(
+            participant, schema.getTurnLayerId(), participant.getLabel());
+      }
       turn.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
 
       // add transcription
-      Annotation utterance = transcript.createTag(
-         turn, schema.getUtteranceLayerId(), deepspeech.getInput().toString());
+      String transcription = deepspeech.getInput().toString();
+      Annotation utterance = turn.first(schema.getUtteranceLayerId());      
+      if (utterance == null) {
+         utterance = transcript.createTag(
+            turn, schema.getUtteranceLayerId(), transcription);
+      } else {
+         utterance.setLabel(transcription);
+      }
       utterance.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
       
       return transcript;
