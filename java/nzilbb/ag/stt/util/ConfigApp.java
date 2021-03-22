@@ -151,7 +151,6 @@ public class ConfigApp extends TranscriberWebApp {
          transcriber.setConfig(result);
 
          // save the configuration in a local file
-         // load configuration, if any
          File f = new File(
             transcriber.getWorkingDirectory(), transcriber.getTranscriberId() + ".cfg");
          try {

@@ -145,7 +145,7 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
    }
    
    /**
-    * Get the minimum version of the nzilbb.ag API supported by the serializer. 
+    * <b> Get the minimum version of the nzilbb.ag API supported by the serializer. </b>
     * @return Minimum version of the nzilbb.ag API supported by the serializer.
     * @see Constants#VERSION
     */
