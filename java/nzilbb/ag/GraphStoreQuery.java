@@ -27,6 +27,7 @@ import java.util.function.Consumer;
 import nzilbb.ag.serialize.SerializationDescriptor;
 import nzilbb.ag.serialize.GraphDeserializer;
 import nzilbb.ag.serialize.GraphSerializer;
+import nzilbb.ag.stt.util.TranscriberDescriptor;
 import nzilbb.util.MonitorableSeries;
 
 /**
@@ -779,5 +780,11 @@ public interface GraphStoreQuery {
     */
    public GraphSerializer serializerForFilesSuffix(String suffix)
       throws StoreException, PermissionException;
-   
+
+   /**
+    * Lists descriptors of all transcribers that are installed.
+    * @return A list of descriptors of all transcribers that are installed.
+    */
+   public TranscriberDescriptor[] getTranscriberDescriptors();
+
 } // end of interface GraphStoreQuery
