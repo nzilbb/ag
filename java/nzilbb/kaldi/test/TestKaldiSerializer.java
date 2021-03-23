@@ -57,38 +57,26 @@ public class TestKaldiSerializer
       
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
-	 new Layer("episode", "Episode", Constants.ALIGNMENT_NONE, 
-		   false, // peers
-		   false, // peersOverlap
-		   true), // saturated
-	 new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-		   true, // peers
-		   true, // peersOverlap
-		   true), // saturated
-	 new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-		   true, // peers
-		   false, // peersOverlap
-		   false, // saturated
-		   "who", // parentId
-		   true), // parentIncludes
-	 new Layer("utterance", "Utterances", Constants.ALIGNMENT_INTERVAL,
-		   true, // peers
-		   false, // peersOverlap
-		   true, // saturated
-		   "turn", // parentId
-		   true), // parentIncludes
-	 new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-		   true, // peers
-		   false, // peersOverlap
-		   false, // saturated
-		   "turn", // parentId
-		   true), // parentIncludes
-	 new Layer("orthography", "Orthography", Constants.ALIGNMENT_NONE,
-		   false, // peers
-		   false, // peersOverlap
-		   true, // saturated
-		   "word", // parentId
-		   true) // parentIncludes
+	 new Layer("episode", "Episode").setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(true).setPeersOverlap(true).setSaturated(true),
+         new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false)
+         .setParentId("who").setParentIncludes(true),
+	 new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(true)
+         .setParentId("turn").setParentIncludes(true),
+	 new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false)
+         .setParentId("turn").setParentIncludes(true),
+	 new Layer("orthography", "Orthography").setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true)
+         .setParentId("word").setParentIncludes(true),
+	 new Layer("phonemes", "Pronunciation").setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(true).setPeersOverlap(false).setSaturated(true)
+         .setParentId("word").setParentIncludes(true)
+         .setType(Constants.TYPE_IPA)
 	 );
       schema.setEpisodeLayerId("episode");
       g.setSchema(schema);
@@ -115,13 +103,18 @@ public class TestKaldiSerializer
 
       g.addAnnotation(new Annotation("word1", "The", "word", "a1", "a2", "turn1"));
       g.addAnnotation(new Annotation("orth1", "the", "orthography", "a1", "a2", "word1"));
+      g.addAnnotation(new Annotation("pron1a", "D@", "phonemes", "a1", "a2", "word1"));
+      g.addAnnotation(new Annotation("pron1b", "Di", "phonemes", "a1", "a2", "word1"));
       g.addAnnotation(new Annotation("word2", "quick", "word", "a2", "a3a", "turn1"));
       g.addAnnotation(new Annotation("orth2", "quick", "orthography", "a2", "a3a", "word2"));
+      g.addAnnotation(new Annotation("pron2", "kwIk", "phonemes", "a2", "a3a", "word2"));
       g.addAnnotation(new Annotation("word3", "BROWN", "word", "a3b", "a4", "turn1"));
-      g.addAnnotation(new Annotation("ord3", "brown", "orthography", "a2", "a4", "word3"));
+      g.addAnnotation(new Annotation("orth3", "brown", "orthography", "a2", "a4", "word3"));
+      g.addAnnotation(new Annotation("pron3", "br6n", "phonemes", "a2", "a4", "word3"));
       g.addAnnotation(new Annotation("word4", "fox", "word", "a4", "a5", "turn1"));
-      g.addAnnotation(new Annotation("orth3", "fox", "orthography", "a4", "a5", "word4"));
-      
+      g.addAnnotation(new Annotation("orth4", "fox", "orthography", "a4", "a5", "word4"));
+      g.addAnnotation(new Annotation("pron4", "f$ks", "phonemes", "a4", "a5", "word4"));
+
       // create deserializer
       KaldiSerializer serializer = new KaldiSerializer();
 
@@ -130,18 +123,20 @@ public class TestKaldiSerializer
       // configuration.get("episodeLayer").setValue(schema.getLayer("episode"));
       // configuration.get("orthographyLayer").setValue(schema.getLayer("orthography"));
       // configuration.get("prefixUtteranceId").setValue(Boolean.FALSE);
-      assertEquals(3, serializer.configure(configuration, schema).size());
+      assertEquals(4, serializer.configure(configuration, schema).size());
 
       // some layers required
       String[] requiredLayers = serializer.getRequiredLayers();
-      assertEquals(4, requiredLayers.length);
+      assertEquals(5, requiredLayers.length);
       assertEquals("episode", requiredLayers[0]);
       assertEquals("who", requiredLayers[1]);
       assertEquals("utterance", requiredLayers[2]);
       assertEquals("orthography", requiredLayers[3]);
+      assertEquals("phonemes", requiredLayers[4]);
 
       // split out fragments
-      String[] allLayers = {"episode", "who", "turn", "utterance", "word", "orthography"};
+      String[] allLayers = {
+         "episode", "who", "turn", "utterance", "word", "orthography", "phonemes"};
       Graph[] fragments = {
 	 g.getFragment(g.getAnnotation("utterance1"), allLayers),
 	 g.getFragment(g.getAnnotation("utterance2"), allLayers)
@@ -160,7 +155,7 @@ public class TestKaldiSerializer
                            stream -> streams.add(stream),
                            warning -> System.out.println(warning),
                            exception -> exceptions.add(exception));
-      assertEquals(5, streams.size());
+      assertEquals(6, streams.size());
       for (NamedStream stream: streams)
       {
 	 stream.save(dir);

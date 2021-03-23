@@ -29,10 +29,12 @@ import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.SortedSet;
 import java.util.Spliterator;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.function.Consumer;
@@ -46,6 +48,8 @@ import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
+import nzilbb.encoding.DISC2IPA;
+import nzilbb.encoding.PhonemeTranslator;
 import nzilbb.util.TempFileInputStream;
 
 /**
@@ -104,6 +108,23 @@ public class KaldiSerializer implements GraphSerializer {
     * @param newOrthographyLayer Layer for orthography tags.
     */
    public KaldiSerializer setOrthographyLayer(Layer newOrthographyLayer) { orthographyLayer = newOrthographyLayer; return this; }
+   
+   /**
+    * Layer for pronunciation word tags.
+    * @see #getPronunciationLayer()
+    * @see #setPronunciationLayer(Layer)
+    */
+   protected Layer pronunciationLayer;
+   /**
+    * Getter for {@link #pronunciationLayer}: Layer for pronunciation word tags.
+    * @return Layer for pronunciation word tags.
+    */
+   public Layer getPronunciationLayer() { return pronunciationLayer; }
+   /**
+    * Setter for {@link #pronunciationLayer}: Layer for pronunciation word tags.
+    * @param newPronunciationLayer Layer for pronunciation word tags.
+    */
+   public KaldiSerializer setPronunciationLayer(Layer newPronunciationLayer) { pronunciationLayer = newPronunciationLayer; return this; }
 
    /**
     * Whether to prefix utterance IDs with the speaker ID or not.
@@ -222,9 +243,14 @@ public class KaldiSerializer implements GraphSerializer {
       layerToCandidates.put("episodeLayer", possibleEpisodeLayers);
 
       layerToPossibilities.put(
-	 new Parameter("orthographyLayer", Layer.class, "Orthography layer", "Orthography tags"), 
+	 new Parameter("orthographyLayer", Layer.class, "Orthography layer", "Orthography tags", true), 
 	 Arrays.asList("orthography"));
       layerToCandidates.put("orthographyLayer", wordTagLayers);
+
+      layerToPossibilities.put(
+	 new Parameter("pronunciationLayer", Layer.class, "Pronunciation layer", "Pronunciation tags", false), 
+	 Arrays.asList("pronuncation", "phonemes", "phonology"));
+      layerToCandidates.put("pronunciationLayer", wordTagLayers);
 
       // add parameters that aren't in the configuration yet, and set possibile/default values
       for (Parameter p : layerToPossibilities.keySet()) {
@@ -265,6 +291,7 @@ public class KaldiSerializer implements GraphSerializer {
       requiredLayers.add(schema.getParticipantLayerId());
       requiredLayers.add(schema.getUtteranceLayerId());
       if (getOrthographyLayer() != null) requiredLayers.add(getOrthographyLayer().getId());
+      if (getPronunciationLayer() != null) requiredLayers.add(getPronunciationLayer().getId());
       return requiredLayers.toArray(new String[0]);
    }
 
@@ -304,6 +331,9 @@ public class KaldiSerializer implements GraphSerializer {
 	 // File segmentsFile = File.createTempFile(getClass().getSimpleName()+"-","-segments");
 	 // final PrintWriter segmentsWriter = new PrintWriter(segmentsFile, "utf-8");
 	 // NamedStream segmentsStream = new NamedStream(new TempFileInputStream(segmentsFile), "segments");
+
+         final TreeMap<String,LinkedHashSet<String>> lexicon
+            = new TreeMap<String,LinkedHashSet<String>>();
 	 
 	 File utt2spkFile = File.createTempFile(getClass().getSimpleName()+"-","-utt2spk");
 	 final PrintWriter utt2spkWriter = new PrintWriter(utt2spkFile, "utf-8");
@@ -320,7 +350,8 @@ public class KaldiSerializer implements GraphSerializer {
 	 NamedStream wavStream = new NamedStream(new TempFileInputStream(wavFile), "wav.scp");
 
 	 String utt = schema.getUtteranceLayerId();
-	 String orthography = getOrthographyLayer().getId();
+	 String orthography = orthographyLayer.getId();
+	 String pron = pronunciationLayer == null?null:pronunciationLayer.getId();
 	 String speaker = schema.getParticipantLayerId();
 	 String episode = schema.getEpisodeLayerId();
 
@@ -360,6 +391,18 @@ public class KaldiSerializer implements GraphSerializer {
                      corpusWriter.print(token.getLabel());
                      
                      words.add(token.getLabel());
+
+                     if (pronunciationLayer != null) {
+                        Annotation[] prons = token.all(pron);
+                        if (prons.length > 0) {
+                           if (!lexicon.containsKey(token.getLabel())) {
+                              lexicon.put(token.getLabel(), new LinkedHashSet<String>());
+                           }
+                           for (Annotation p : token.all(pronunciationLayer.getId())) {
+                              lexicon.get(token.getLabel()).add(p.getLabel());
+                           } // next pronunciation
+                        } // there are pronunciations
+                     }
                   } // next word token
                   textWriter.println();
                   corpusWriter.println();
@@ -406,6 +449,34 @@ public class KaldiSerializer implements GraphSerializer {
 	    for (String word : words) wordsWriter.println(word);
 	    wordsWriter.close();
 	    consumer.accept(wordsStream);
+
+            // ... and lexicon
+            if (pronunciationLayer != null) {
+               
+               // if the pronunciations are DISC encoded, convert to IPA and add space delimiters
+               PhonemeTranslator encoding = new PhonemeTranslator();
+               if (pronunciationLayer.getType().equals(Constants.TYPE_IPA)) {
+                  encoding = new DISC2IPA().setDelimiter(" ");
+               }
+               
+               File lexiconFile
+                  = File.createTempFile(getClass().getSimpleName()+"-","-lexicon.txt");
+               PrintWriter lexiconWriter = new PrintWriter(lexiconFile, "utf-8");
+               NamedStream lexiconStream
+                  = new NamedStream(new TempFileInputStream(lexiconFile), "lexicon.txt");
+               lexiconWriter.println("!SIL\tsil");
+               lexiconWriter.println("<UNK>\tspn");
+               for (String word : lexicon.keySet()) {
+                  LinkedHashSet<String> pronunciations = lexicon.get(word);
+                  for (String pronunciation : pronunciations) {
+                     lexiconWriter.print(word);
+                     lexiconWriter.print("\t");
+                     lexiconWriter.println(encoding.apply(pronunciation));
+                  } // next pronunciation
+               } // next word
+               lexiconWriter.close();
+               consumer.accept(lexiconStream);
+            }
 	 }
       } catch(Exception exception) {
 	 errors.accept(new SerializationException(exception));
