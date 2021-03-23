@@ -37,7 +37,7 @@ import java.util.TreeSet;
 import java.util.Vector;
 import java.util.function.Consumer;
 import nzilbb.ag.*;
-import nzilbb.ag.serialize.ISerializer;
+import nzilbb.ag.serialize.GraphSerializer;
 import nzilbb.ag.serialize.SerializationDescriptor;
 import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.SerializationParametersMissingException;
@@ -52,8 +52,9 @@ import nzilbb.util.TempFileInputStream;
  * Converter that generates Kaldi files from annotation graphs.
  * @author Robert Fromont robert@fromont.net.nz
  */
+// TODO include lexicon.txt - dictionary encoded as IPA
 public class KaldiSerializer
-   implements ISerializer
+   implements GraphSerializer
 {
    // Attributes:
 
@@ -65,7 +66,7 @@ public class KaldiSerializer
    protected Vector<String> warnings;
    /**
     * Returns any warnings that may have arisen during the last execution of {@link #deserialize()}.
-    * <p>{@link ISerializer} and {@link IDeserializer} method.
+    * <p>{@link GraphSerializer} and {@link IDeserializer} method.
     * @return A possibly empty list of warnings.
     */
    public String[] getWarnings()
@@ -222,13 +223,14 @@ public class KaldiSerializer
 
    /**
     * Returns the deserializer's descriptor.
-    * <p>{@link ISerializer} and {@link IDeserializer} method.
+    * <p>{@link GraphSerializer} and {@link IDeserializer} method.
     * @return The deserializer's descriptor
     */
    public SerializationDescriptor getDescriptor()
    {
       return new SerializationDescriptor(
-	 "Kaldi Files", "1.1", "text/x-kaldi-text", ".kaldi", "20200909.1954", getClass().getResource("icon.png"));
+	 "Kaldi Files", "1.2", "text/x-kaldi-text", ".kaldi", "20200909.1954",
+         getClass().getResource("icon.png"));
    }
 
    /**
@@ -237,7 +239,7 @@ public class KaldiSerializer
     *  set, to discover what (if any) general configuration is required. If parameters are
     *  returned, and user interaction is possible, then the user may be presented with an
     *  interface for setting/confirming these parameters.
-    * <p>{@link ISerializer} and {@link IDeserializer} method.
+    * <p>{@link GraphSerializer} and {@link IDeserializer} method.
     * @param configuration The configuration for the deserializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
     * @return A list of configuration parameters (still) must be set before {@link IDeserializer#setParameters()} can be invoked. If this is an empty list, {@link IDeserializer#setParameters()} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
@@ -403,7 +405,7 @@ public class KaldiSerializer
 
    /**
     * Determines which layers, if any, must be present in the graph that will be serialized.
-    * <p>{@link ISerializer} method.
+    * <p>{@link GraphSerializer} method.
     * @return A list of IDs of layers that must be present in the graph that will be serialized.
     * @throws SerializationParametersMissingException If not all required parameters have a value.
     */
@@ -417,7 +419,7 @@ public class KaldiSerializer
       return requiredLayers.toArray(new String[0]);
    }
 
-   // ISerializer methods   
+   // GraphSerializer methods   
 
    /**
     * Serializes the given graph, generating one or more {@link NamedStream}s.
@@ -449,9 +451,9 @@ public class KaldiSerializer
 	 PrintWriter corpusWriter = new PrintWriter(corpusFile, "utf-8");
 	 NamedStream corpusStream = new NamedStream(new TempFileInputStream(corpusFile), "corpus.txt");
 	 
-	 File segmentsFile = File.createTempFile(getClass().getSimpleName()+"-","-segments");
-	 final PrintWriter segmentsWriter = new PrintWriter(segmentsFile, "utf-8");
-	 NamedStream segmentsStream = new NamedStream(new TempFileInputStream(segmentsFile), "segments");
+	 // File segmentsFile = File.createTempFile(getClass().getSimpleName()+"-","-segments");
+	 // final PrintWriter segmentsWriter = new PrintWriter(segmentsFile, "utf-8");
+	 // NamedStream segmentsStream = new NamedStream(new TempFileInputStream(segmentsFile), "segments");
 	 
 	 File utt2spkFile = File.createTempFile(getClass().getSimpleName()+"-","-utt2spk");
 	 final PrintWriter utt2spkWriter = new PrintWriter(utt2spkFile, "utf-8");
@@ -477,14 +479,22 @@ public class KaldiSerializer
          graphs.forEachRemaining(graph -> {
                if (getCancelling()) return;
                String transcriptName = graph.getId().replaceAll("__[0-9.]+-[0-9.]+$","");
+               // String startTime = ""+graph.getStart().getOffset();
+               // String endTime = ""+graph.getEnd().getOffset();
+               // String[] fragmentIdParts = Graph.ParseFragmentId(graph.getId());
+               // if (fragmentIdParts != null) {
+               //    transcriptName = fragmentIdParts[0];
+               //    startTime = fragmentIdParts[1];
+               //    endTime = fragmentIdParts[2];
+               // }
                String wavName = transcriptName.replaceAll("\\.[^.]+$","")+".wav";
                boolean firstWord = true;
-               for (Annotation utterance : graph.list(utt))
+               for (Annotation utterance : graph.all(utt))
                {
-                  String speakerId = utterance.my(speaker).getId();
+                  String speakerId = utterance.first(speaker).getId();
                   String utteranceId = speakerId + "-" + graph.getId();
                   textWriter.print(utteranceId);
-                  for (Annotation token : utterance.list(orthography))
+                  for (Annotation token : utterance.all(orthography))
                   {
                      textWriter.print(" ");
                      textWriter.print(token.getLabel());
@@ -504,19 +514,16 @@ public class KaldiSerializer
                   textWriter.println();
                   corpusWriter.println();
                   
-                  segmentsWriter.println(
-                     utteranceId
-                     + " " + transcriptName
-                     + " " + fmt.format(graph.getStart().getOffset())
-                     + " " + fmt.format(graph.getEnd().getOffset()));
+                  // segmentsWriter.println(
+                  //    utteranceId + " " + transcriptName + " " + startTime + " " + endTime);
                   
-                  utt2spkWriter.println(utteranceId + " " + utterance.my(speaker).getId());
+                  utt2spkWriter.println(utteranceId + " " + utterance.first(speaker).getId());
 
                   if (!wavs.contains(transcriptName))
                   {
                      wavs.add(transcriptName);
                      wavWriter.println(transcriptName
-                                       + " " + graph.my(episode).getLabel() + "/wav/" + wavName); // TODO just point to original files
+                                       + " " + graph.first(episode).getLabel() + "/wav/" + wavName); // TODO just point to original files
                   }
                } // next utterance
                consumedGraphCount++;
@@ -527,7 +534,7 @@ public class KaldiSerializer
 	    // close the streams
 	    textWriter.close();
 	    corpusWriter.close();
-	    segmentsWriter.close();
+	    // segmentsWriter.close();
 	    utt2spkWriter.close();
 	    wavWriter.close();
 	    wordsWriter.close();
@@ -537,14 +544,14 @@ public class KaldiSerializer
 	    // close the streams
 	    textWriter.close();
 	    corpusWriter.close();
-	    segmentsWriter.close();
+	    // segmentsWriter.close();
 	    utt2spkWriter.close();
 	    wavWriter.close();
 	    
 	    // pass them to the consumer
 	    consumer.accept(textStream);
 	    consumer.accept(corpusStream);
-	    consumer.accept(segmentsStream);
+	    // consumer.accept(segmentsStream);
 	    consumer.accept(utt2spkStream);
 	    consumer.accept(wavStream);
 	    

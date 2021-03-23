@@ -145,6 +145,11 @@ public class TestKaldiSerializer
 	 g.getFragment(g.getAnnotation("utterance2"), allLayers)
       };
 
+      // offset anchors of fragments
+      for (Graph fragment : fragments) {
+         fragment.shiftAnchors(-fragment.getStart().getOffset());
+      }
+
       // serialize
       File dir = getDir();
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
@@ -153,7 +158,7 @@ public class TestKaldiSerializer
                            stream -> streams.add(stream),
                            warning -> System.out.println(warning),
                            exception -> exceptions.add(exception));
-      assertEquals(6, streams.size());
+      assertEquals(5, streams.size());
       for (NamedStream stream: streams)
       {
 	 stream.save(dir);
