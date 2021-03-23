@@ -90,6 +90,7 @@ public class TestKaldiSerializer
 		   "word", // parentId
 		   true) // parentIncludes
 	 );
+      schema.setEpisodeLayerId("episode");
       g.setSchema(schema);
 
       g.addAnchor(new Anchor("turnStart", 0.0));
