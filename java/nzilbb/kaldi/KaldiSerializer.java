@@ -50,6 +50,7 @@ import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 import nzilbb.encoding.DISC2IPA;
 import nzilbb.encoding.PhonemeTranslator;
+import nzilbb.util.IO;
 import nzilbb.util.TempFileInputStream;
 
 /**
@@ -370,7 +371,7 @@ public class KaldiSerializer implements GraphSerializer {
                //    startTime = fragmentIdParts[1];
                //    endTime = fragmentIdParts[2];
                // }
-               String wavName = transcriptName.replaceAll("\\.[^.]+$","")+".wav";
+               String wavName = IO.WithoutExtension(IO.SafeFileNameUrl(graph.getId())) + ".wav";
                boolean firstWord = true;
                for (Annotation utterance : graph.all(utt)) {
                   String speakerId = utterance.first(speaker).getLabel()
@@ -412,12 +413,7 @@ public class KaldiSerializer implements GraphSerializer {
                   
                   utt2spkWriter.println(utteranceId + " " + speakerId);
 
-                  if (!wavs.contains(transcriptName)) {
-                     wavs.add(transcriptName);
-                     wavWriter.println(
-                        transcriptName
-                        + " " + graph.first(episode).getLabel() + "/wav/" + wavName); // TODO just point to original files
-                  }
+                  wavWriter.println(utteranceId + " " + wavName);
                } // next utterance
                consumedGraphCount++;
             }); // next graph
