@@ -126,9 +126,10 @@ public class TestKaldiSerializer
 
       ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-      configuration.get("episodeLayer").setValue(schema.getLayer("episode"));
-      configuration.get("orthographyLayer").setValue(schema.getLayer("orthography"));
-      assertEquals(2, serializer.configure(configuration, schema).size());
+      // configuration.get("episodeLayer").setValue(schema.getLayer("episode"));
+      // configuration.get("orthographyLayer").setValue(schema.getLayer("orthography"));
+      // configuration.get("prefixUtteranceId").setValue(Boolean.FALSE);
+      assertEquals(3, serializer.configure(configuration, schema).size());
 
       // some layers required
       String[] requiredLayers = serializer.getRequiredLayers();

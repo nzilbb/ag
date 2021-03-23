@@ -194,6 +194,22 @@ public class KaldiSerializer
     */
    public void setEpisodeLayer(Layer newEpisodeLayer) { episodeLayer = newEpisodeLayer; }
 
+   /**
+    * Whether to prefix utterance IDs with the speaker ID or not.
+    * @see #getPrefixUtteranceId()
+    * @see #setPrefixUtteranceId(Boolean)
+    */
+   protected Boolean prefixUtteranceId = Boolean.FALSE;
+   /**
+    * Getter for {@link #prefixUtteranceId}: Whether to prefix utterance IDs with the speaker ID or not.
+    * @return Whether to prefix utterance IDs with the speaker ID or not.
+    */
+   public Boolean getPrefixUtteranceId() { return prefixUtteranceId; }
+   /**
+    * Setter for {@link #prefixUtteranceId}: Whether to prefix utterance IDs with the speaker ID or not.
+    * @param newPrefixUtteranceId Whether to prefix utterance IDs with the speaker ID or not.
+    */
+   public KaldiSerializer setPrefixUtteranceId(Boolean newPrefixUtteranceId) { prefixUtteranceId = newPrefixUtteranceId; return this; }
 
    /**
     * Serialization marked for cancellation.
@@ -400,6 +416,15 @@ public class KaldiSerializer
 	 p.setPossibleValues(candidateLayers.values());
       }
 
+      if (!configuration.containsKey("prefixUtteranceId")) {
+         configuration.addParameter(
+            new Parameter("prefixUtteranceId", Boolean.class, 
+                          "Prefix utterance with speaker",
+                          "Whether to prefix utterance IDs with the speaker ID or not.", true));
+      }
+      if (configuration.get("prefixUtteranceId").getValue() == null) {
+         configuration.get("prefixUtteranceId").setValue(Boolean.FALSE);
+      }
       return configuration;
    }   
 
@@ -491,8 +516,11 @@ public class KaldiSerializer
                boolean firstWord = true;
                for (Annotation utterance : graph.all(utt))
                {
-                  String speakerId = utterance.first(speaker).getId();
-                  String utteranceId = speakerId + "-" + graph.getId();
+                  String speakerId = utterance.first(speaker).getLabel()
+                     .replaceAll("[\\p{Punct}&&[^_\\-]]", "")
+                     .replaceAll("\\s", "_");
+                  String utteranceId = (prefixUtteranceId?speakerId + "-":"")
+                     + graph.getId();
                   textWriter.print(utteranceId);
                   for (Annotation token : utterance.all(orthography))
                   {
@@ -517,7 +545,7 @@ public class KaldiSerializer
                   // segmentsWriter.println(
                   //    utteranceId + " " + transcriptName + " " + startTime + " " + endTime);
                   
-                  utt2spkWriter.println(utteranceId + " " + utterance.first(speaker).getId());
+                  utt2spkWriter.println(utteranceId + " " + speakerId);
 
                   if (!wavs.contains(transcriptName))
                   {
