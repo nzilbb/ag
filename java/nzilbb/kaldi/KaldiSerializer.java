@@ -53,9 +53,7 @@ import nzilbb.util.TempFileInputStream;
  * @author Robert Fromont robert@fromont.net.nz
  */
 // TODO include lexicon.txt - dictionary encoded as IPA
-public class KaldiSerializer
-   implements GraphSerializer
-{
+public class KaldiSerializer implements GraphSerializer {
    // Attributes:
 
    /** Static format so we don't keep creating and destroying one */
@@ -69,8 +67,7 @@ public class KaldiSerializer
     * <p>{@link GraphSerializer} and {@link IDeserializer} method.
     * @return A possibly empty list of warnings.
     */
-   public String[] getWarnings()
-   {
+   public String[] getWarnings() {
       return warnings.toArray(new String[0]);
    }
    
@@ -233,8 +230,7 @@ public class KaldiSerializer
    /**
     * Default constructor.
     */
-   public KaldiSerializer()
-   {
+   public KaldiSerializer() {
    } // end of constructor
 
    /**
@@ -242,15 +238,15 @@ public class KaldiSerializer
     * <p>{@link GraphSerializer} and {@link IDeserializer} method.
     * @return The deserializer's descriptor
     */
-   public SerializationDescriptor getDescriptor()
-   {
+   public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
 	 "Kaldi Files", "1.2", "text/x-kaldi-text", ".kaldi", "20200909.1954",
          getClass().getResource("icon.png"));
    }
 
    /**
-    * Sets parameters for deserializer as a whole.  This might include database connection parameters, locations of supporting files, etc.
+    * Sets parameters for deserializer as a whole.  This might include database connection
+    * parameters, locations of supporting files, etc. 
     * <p>When the deserializer is installed, this method should be invoked with an empty parameter
     *  set, to discover what (if any) general configuration is required. If parameters are
     *  returned, and user interaction is possible, then the user may be presented with an
@@ -258,10 +254,12 @@ public class KaldiSerializer
     * <p>{@link GraphSerializer} and {@link IDeserializer} method.
     * @param configuration The configuration for the deserializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
-    * @return A list of configuration parameters (still) must be set before {@link IDeserializer#setParameters()} can be invoked. If this is an empty list, {@link IDeserializer#setParameters()} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
+    * @return A list of configuration parameters (still) must be set before 
+    * {@link GraphDeserializer#setParameters()} can be invoked. If this is an empty list, 
+    * {@link GraphDeserializer#setParameters()} can be invoked. If it's not an empty list, this
+    * method must be invoked again with the returned parameters' values set. 
     */
-   public ParameterSet configure(ParameterSet configuration, Schema schema)
-   {
+   public ParameterSet configure(ParameterSet configuration, Schema schema) {
       setSchema(schema);
       setParticipantLayer(schema.getParticipantLayer());
       setTurnLayer(schema.getTurnLayer());
@@ -272,15 +270,15 @@ public class KaldiSerializer
       for (Parameter p : configuration.values()) try { p.apply(this); } catch(Exception x) {}
 
       // create a list of layers we need and possible matching layer names
-      LinkedHashMap<Parameter,List<String>> layerToPossibilities = new LinkedHashMap<Parameter,List<String>>();
-      HashMap<String,LinkedHashMap<String,Layer>> layerToCandidates = new HashMap<String,LinkedHashMap<String,Layer>>();
+      LinkedHashMap<Parameter,List<String>> layerToPossibilities
+         = new LinkedHashMap<Parameter,List<String>>();
+      HashMap<String,LinkedHashMap<String,Layer>> layerToCandidates
+         = new HashMap<String,LinkedHashMap<String,Layer>>();
 
       // do we need to ask for participant/turn/utterance/word layers?
       LinkedHashMap<String,Layer> possibleEpisodeLayers = new LinkedHashMap<String,Layer>();
-      for (Layer top : schema.getRoot().getChildren().values())
-      {
-	 if (top.getAlignment() == Constants.ALIGNMENT_NONE)
-	 {
+      for (Layer top : schema.getRoot().getChildren().values()) {
+	 if (top.getAlignment() == Constants.ALIGNMENT_NONE) {
 	    possibleEpisodeLayers.put(top.getId(), top);
 	 } // unaligned
       } // next possible participant layer
@@ -325,49 +323,40 @@ public class KaldiSerializer
 	    } // unaligned
 	 } // next possible participant layer
       } // missing special layers
-      else
-      {
-	 for (Layer turnChild : getTurnLayer().getChildren().values())
-	 {
-	    if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL)
-	    {
+      else {
+	 for (Layer turnChild : getTurnLayer().getChildren().values()) {
+	    if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
 	       possibleTurnChildLayers.put(turnChild.getId(), turnChild);
 	    }
 	 } // next possible word tag layer
-	 for (Layer tag : getWordLayer().getChildren().values())
-	 {
+	 for (Layer tag : getWordLayer().getChildren().values()) {
 	    if (tag.getAlignment() == Constants.ALIGNMENT_NONE
-		&& tag.getChildren().size() == 0)
-	    {
+		&& tag.getChildren().size() == 0) {
 	       wordTagLayers.put(tag.getId(), tag);
 	    }
 	 } // next possible word tag layer
       }
-      if (getParticipantLayer() == null)
-      {
+      if (getParticipantLayer() == null) {
 	 layerToPossibilities.put(
 	    new Parameter("participantLayer", Layer.class, "Participant layer", 
 			  "Layer for speaker/participant identification", true), 
 	    Arrays.asList("participant","participants","who","speaker","speakers"));
 	 layerToCandidates.put("participantLayer", possibleParticipantLayers);
       }
-      if (getTurnLayer() == null)
-      {
+      if (getTurnLayer() == null) {
 	 layerToPossibilities.put(
 	    new Parameter("turnLayer", Layer.class, "Turn layer", "Layer for speaker turns", true),
 	    Arrays.asList("turn","turns"));
 	 layerToCandidates.put("turnLayer", possibleTurnLayers);
       }
-      if (getUtteranceLayer() == null)
-      {
+      if (getUtteranceLayer() == null) {
 	 layerToPossibilities.put(
 	    new Parameter("utteranceLayer", Layer.class, "Utterance layer", 
 			  "Layer for speaker utterances", true), 
 	    Arrays.asList("utterance","utterances","line","lines"));
 	 layerToCandidates.put("utteranceLayer", possibleTurnChildLayers);
       }
-      if (getWordLayer() == null)
-      {
+      if (getWordLayer() == null) {
 	 layerToPossibilities.put(
 	    new Parameter("wordLayer", Layer.class, "Word layer", 
 			  "Layer for individual word tokens", true), 
@@ -376,10 +365,8 @@ public class KaldiSerializer
       }
 
       LinkedHashMap<String,Layer> topLevelLayers = new LinkedHashMap<String,Layer>();
-      for (Layer top : schema.getRoot().getChildren().values())
-      {
-	 if (top.getAlignment() == Constants.ALIGNMENT_INTERVAL)
-	 { // aligned children of graph
+      for (Layer top : schema.getRoot().getChildren().values()) {
+	 if (top.getAlignment() == Constants.ALIGNMENT_INTERVAL) { // aligned children of graph
 	    topLevelLayers.put(top.getId(), top);
 	 }
       } // next top level layer
@@ -397,20 +384,15 @@ public class KaldiSerializer
       layerToCandidates.put("orthographyLayer", wordTagLayers);
 
       // add parameters that aren't in the configuration yet, and set possibile/default values
-      for (Parameter p : layerToPossibilities.keySet())
-      {
+      for (Parameter p : layerToPossibilities.keySet()) {
 	 List<String> possibleNames = layerToPossibilities.get(p);
 	 LinkedHashMap<String,Layer> candidateLayers = layerToCandidates.get(p.getName());
-	 if (configuration.containsKey(p.getName()))
-	 {
+	 if (configuration.containsKey(p.getName())) {
 	    p = configuration.get(p.getName());
-	 }
-	 else
-	 {
+	 } else {
 	    configuration.addParameter(p);
 	 }
-	 if (p.getValue() == null)
-	 {
+	 if (p.getValue() == null) {
 	    p.setValue(Utility.FindLayerById(candidateLayers, possibleNames));
 	 }
 	 p.setPossibleValues(candidateLayers.values());
@@ -434,8 +416,7 @@ public class KaldiSerializer
     * @return A list of IDs of layers that must be present in the graph that will be serialized.
     * @throws SerializationParametersMissingException If not all required parameters have a value.
     */
-   public String[] getRequiredLayers() throws SerializationParametersMissingException
-   {
+   public String[] getRequiredLayers() throws SerializationParametersMissingException {
       Vector<String> requiredLayers = new Vector<String>();
       if (getEpisodeLayer() != null) requiredLayers.add(getEpisodeLayer().getId());
       if (getParticipantLayer() != null) requiredLayers.add(getParticipantLayer().getId());
@@ -460,12 +441,12 @@ public class KaldiSerializer
     * @return A list of named streams that contain the serialization in the given format. 
     * @throws SerializerNotConfiguredException if the object has not been configured.
     */
-   public void serialize(Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
-      throws SerializerNotConfiguredException
-   {
+   public void serialize(
+      Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer,
+      Consumer<String> warnings, Consumer<SerializationException> errors) 
+      throws SerializerNotConfiguredException {
       graphCount = graphs.getExactSizeIfKnown();
-      try
-      {
+      try {
 	 // prepare streams for writing...
 	 
 	 File textFile = File.createTempFile(getClass().getSimpleName()+"-","-text");
@@ -482,11 +463,13 @@ public class KaldiSerializer
 	 
 	 File utt2spkFile = File.createTempFile(getClass().getSimpleName()+"-","-utt2spk");
 	 final PrintWriter utt2spkWriter = new PrintWriter(utt2spkFile, "utf-8");
-	 NamedStream utt2spkStream = new NamedStream(new TempFileInputStream(utt2spkFile), "utt2spk");
+	 NamedStream utt2spkStream = new NamedStream(
+            new TempFileInputStream(utt2spkFile), "utt2spk");
 	 
 	 File wordsFile = File.createTempFile(getClass().getSimpleName()+"-","-words.txt");
 	 final PrintWriter wordsWriter = new PrintWriter(wordsFile, "utf-8");
-	 NamedStream wordsStream = new NamedStream(new TempFileInputStream(wordsFile), "words.txt");
+	 NamedStream wordsStream = new NamedStream(
+            new TempFileInputStream(wordsFile), "words.txt");
 	 
 	 File wavFile = File.createTempFile(getClass().getSimpleName()+"-","-wav.scp");
 	 final PrintWriter wavWriter = new PrintWriter(wavFile, "utf-8");
@@ -514,25 +497,20 @@ public class KaldiSerializer
                // }
                String wavName = transcriptName.replaceAll("\\.[^.]+$","")+".wav";
                boolean firstWord = true;
-               for (Annotation utterance : graph.all(utt))
-               {
+               for (Annotation utterance : graph.all(utt)) {
                   String speakerId = utterance.first(speaker).getLabel()
                      .replaceAll("[\\p{Punct}&&[^_\\-]]", "")
                      .replaceAll("\\s", "_");
                   String utteranceId = (prefixUtteranceId?speakerId + "-":"")
                      + graph.getId();
                   textWriter.print(utteranceId);
-                  for (Annotation token : utterance.all(orthography))
-                  {
+                  for (Annotation token : utterance.all(orthography)) {
                      textWriter.print(" ");
                      textWriter.print(token.getLabel());
                      
-                     if (firstWord)
-                     {
+                     if (firstWord) {
                         firstWord = false;
-                     }
-                     else
-                     {
+                     } else {
                         corpusWriter.print(" ");
                      }
                      corpusWriter.print(token.getLabel());
@@ -547,8 +525,7 @@ public class KaldiSerializer
                   
                   utt2spkWriter.println(utteranceId + " " + speakerId);
 
-                  if (!wavs.contains(transcriptName))
-                  {
+                  if (!wavs.contains(transcriptName)) {
                      wavs.add(transcriptName);
                      wavWriter.println(transcriptName
                                        + " " + graph.first(episode).getLabel() + "/wav/" + wavName); // TODO just point to original files
@@ -557,8 +534,7 @@ public class KaldiSerializer
                consumedGraphCount++;
             }); // next graph
          
-	 if (getCancelling())
-	 {
+	 if (getCancelling()) {
 	    // close the streams
 	    textWriter.close();
 	    corpusWriter.close();
@@ -566,9 +542,7 @@ public class KaldiSerializer
 	    utt2spkWriter.close();
 	    wavWriter.close();
 	    wordsWriter.close();
-	 }
-	 else
-	 {
+	 } else {
 	    // close the streams
 	    textWriter.close();
 	    corpusWriter.close();
@@ -588,9 +562,7 @@ public class KaldiSerializer
 	    wordsWriter.close();
 	    consumer.accept(wordsStream);
 	 }
-      }
-      catch(Exception exception)
-      {
+      } catch(Exception exception) {
 	 errors.accept(new SerializationException(exception));
       }
    }
@@ -601,8 +573,7 @@ public class KaldiSerializer
     * Determines how far through the serialization is.
     * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
     */
-   public Integer getPercentComplete()
-   {
+   public Integer getPercentComplete() {
       if (graphCount < 0) return null;
       return (int)((consumedGraphCount * 100) / graphCount);
    }
@@ -610,8 +581,7 @@ public class KaldiSerializer
    /**
     * Cancel the serialization in course (if any).
     */
-   public void cancel()
-   {
+   public void cancel() {
       setCancelling(true);
    }
    
