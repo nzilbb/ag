@@ -296,7 +296,7 @@ public class DeepSpeechTranscriber extends Transcriber {
       // add turn
       Annotation turn = participant.first(schema.getTurnLayerId());
       if (turn == null) {
-         transcript.createTag(
+         turn = transcript.createTag(
             participant, schema.getTurnLayerId(), participant.getLabel());
       }
       turn.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
