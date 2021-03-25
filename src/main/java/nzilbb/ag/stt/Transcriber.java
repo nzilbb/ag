@@ -97,18 +97,7 @@ public abstract class Transcriber implements MonitorableTask {
     * @return Transcriber version.
     */
    public String getVersion() {
-      // get our version info from the comment of the jar file we're built into
-      try {
-         URL thisClassUrl = getClass().getResource(getClass().getSimpleName() + ".class");
-         if (thisClassUrl.toString().startsWith("jar:")) {
-            URI thisJarUri = new URI(thisClassUrl.toString().replaceAll("jar:(.*)!.*","$1"));
-            JarFile thisJarFile = new JarFile(new File(thisJarUri));
-            return thisJarFile.getComment();
-         }
-      } catch (Throwable t) {
-         System.err.println("Transcriber.getVersion: " + t);
-         t.printStackTrace(System.err);
-      }
+      nzilbb.util.IO.ProjectProperties(getClass()).getProperty("version");
       return null;
    }
    
