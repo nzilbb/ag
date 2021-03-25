@@ -323,5 +323,11 @@
 
 <p><tt> java -classpath nzilbb.ag.jar nzilbb.ag.stt.util.ConfigApp myjar.jar </tt></p>
  
+<h3 id="Transcribe"> Transcribe </h3>
+
+<p>This utility uses the transcriber to transcribe a given audio file, e.g.</p>
+
+<p><tt> java -classpath nzilbb.ag.jar nzilbb.ag.stt.util.Transcribe myjar.jar myrecording.wav </tt></p>
+ 
  */
 package nzilbb.ag.stt;
