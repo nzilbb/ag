@@ -232,7 +232,8 @@ public class GoogleTranscriber extends Transcriber {
       }
       // add anchors
       Anchor graphStart = transcript.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL);
-      Anchor graphEnd = transcript.getOrCreateAnchorAt(duration, Constants.CONFIDENCE_MANUAL);      
+      Anchor graphEnd = transcript.getOrCreateAnchorAt(duration, Constants.CONFIDENCE_MANUAL);
+      
       // add participant if required
       Annotation participant = transcript.first(schema.getParticipantLayerId());
       if (participant == null) {
@@ -262,10 +263,12 @@ public class GoogleTranscriber extends Transcriber {
             turn, schema.getUtteranceLayerId(), turn.getLabel());
       }
 
-      // Upload file to Google Cloud Storage TODO
-      //String gcsUri = "gs://cloud-samples-data/speech/brooklyn_bridge.raw";
-      String uri = uploadObject(
-         projectId, bucketName, speech.getName(), speech.getPath());
+      // Upload file to Google Cloud Storage 
+      Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
+      BlobId blobId = BlobId.of(bucketName, speech.getName());
+      BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
+      Blob blob = storage.create(blobInfo, Files.readAllBytes(speech.toPath()));
+      String uri = "gs://"+blob.getBucket()+"/"+blob.getName();
 
       // Instantiate a client
       // SpeechSettings speechSettings = // TODO
@@ -322,39 +325,13 @@ public class GoogleTranscriber extends Transcriber {
                // TODO automatically break into utterances based on pauses between words?
             } // next word
          }
+      } finally {
+         // delete the file from Google Cloud Storage
+         storage.delete(blobId);
       }
+      
             
       return transcript;
    }
-
-   /** 
-    * Uploads a file to Google Storage.
-    * Based on https://cloud.google.com/storage/docs/uploading-objects#storage-upload-object-code-sample
-    */
-   public String uploadObject(
-      String projectId, String bucketName, String objectName, String filePath) throws IOException {
-      // The ID of your GCP project
-      // String projectId = "your-project-id";
-      
-      // The ID of your GCS bucket
-      // String bucketName = "your-unique-bucket-name";
-      
-      // The ID of your GCS object
-      // String objectName = "your-object-name";
-      
-      // The path to your file to upload
-      // String filePath = "path/to/your/file"
-      
-      Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
-      BlobId blobId = BlobId.of(bucketName, objectName);
-      BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
-      Blob blob = storage.create(blobInfo, Files.readAllBytes(Paths.get(filePath)));
-
-      System.out.println(
-         "File " + filePath + " uploaded to bucket " + bucketName + " as " + objectName
-         + " - " + blob.getSelfLink());
-
-      return "gs://"+bucketName+"/"+objectName;
-  }
    
 } // end of class GoogleTranscriber
