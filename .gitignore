@@ -2,3 +2,5 @@
 # test derby directories
 derby
 derby.log
+# maven target directory
+target
