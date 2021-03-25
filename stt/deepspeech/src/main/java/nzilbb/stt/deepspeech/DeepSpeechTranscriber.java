@@ -129,7 +129,7 @@ public class DeepSpeechTranscriber extends Transcriber {
     *  Runs any processing required to uninstall the transcriber. 
     */
    @Override
-   public void uninstall() { }
+   public void uninstall() { } // TODO delete models and config?
 
    /**
     *  Specify whether the transcriber needs the audio to be split into utterance chunks
