@@ -269,6 +269,7 @@
                   <version>1.0.10</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
+                
                 <artifactItem>
                   <groupId>com.google.cloud</groupId>
                   <artifactId>google-cloud-core</artifactId>
