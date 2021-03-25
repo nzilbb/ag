@@ -38,3 +38,20 @@ format conversion, e.g.
 More format conversions are available
 [here](https://github.com/nzilbb/ag/blob/master/bin/README.md)
 
+## Building from source
+
+### Prerequisites
+
+* Maven
+
+### Build the nzilbb.ag jar
+
+```
+mvn package
+```
+
+### Run unit tests
+
+```
+mvn test
+```
