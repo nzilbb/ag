@@ -1,0 +1,2118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Trans SYSTEM "trans-14.dtd">
+<Trans scribe="LangAge corpora" audio_filename="e025a" version="22" version_date="201026" xml:lang="fr">
+<Speakers>
+<Speaker id="spk1" name="c999" check="no" type="female" dialect="nonnative" accent="fr" scope="local"/>
+<Speaker id="spk2" name="e025" check="no" type="female" dialect="native" accent="fr" scope="local"/>
+</Speakers>
+<Episode program="LangAge 2015" air_date="20160311">
+<Section type="nontrans" startTime="0" endTime="29.594">
+<Turn speaker="spk1" startTime="0" endTime="29.594">
+<Sync time="0"/>
+<Event desc="buzz" type="noise" extent="begin"/>
+ anon 
+<Event desc="buzz" type="noise" extent="end"/>
+
+</Turn>
+</Section>
+<Section type="report" startTime="29.594" endTime="1003.359">
+<Turn speaker="spk1" startTime="29.594" endTime="31.369">
+<Sync time="29.594"/>et euh la santÃ© Ã§a va ?
+</Turn>
+<Turn speaker="spk2 spk1" startTime="31.369" endTime="34.333">
+<Sync time="31.369"/>
+<Who nb="1"/>Ã§a va
+<Who nb="2"/>vous maintenant
+<Sync time="33.043"/>
+<Who nb="1"/>quatre-vingt-quatorze ans Ã§a va
+<Who nb="2"/>Ã§a va
+</Turn>
+<Turn speaker="spk1" startTime="34.333" endTime="36.428">
+<Sync time="34.333"/>oui 
+<Event desc="rir" type="noise" extent="instantaneous"/>
+
+</Turn>
+<Turn speaker="spk2" startTime="36.428" endTime="38.704">
+<Sync time="36.428"/>je je me plains pas
+<Sync time="37.508"/>il y a pire que moi
+</Turn>
+<Turn speaker="spk1" startTime="38.704" endTime="41.462">
+<Sync time="38.704"/>hein hein 
+<Event desc="rir" type="noise" extent="instantaneous"/>
+
+<Sync time="40.174"/>et vous Ãªtes bien ici ?
+</Turn>
+<Turn speaker="spk2" startTime="41.462" endTime="48.720">
+<Sync time="41.462"/>oui je suis bien
+<Sync time="42.203"/>
+<Sync time="43.699"/>je me plains pas
+<Sync time="44.351"/>je suis bien
+<Sync time="44.867"/>
+<Sync time="46.014"/>je suis au chaud
+<Sync time="46.782"/>
+</Turn>
+<Turn speaker="spk1" startTime="48.720" endTime="49.374">
+<Sync time="48.720"/>et euh l' ambiance ?
+</Turn>
+<Turn speaker="spk2" startTime="49.374" endTime="85.131">
+<Sync time="49.374"/>j' ai des visites
+<Sync time="50.313"/>
+<Sync time="51.180"/>je ne suis pas abandonnÃ©e
+<Sync time="52.492"/>
+<Sync time="53.007"/>j' ai des petits enfants vous voyez
+<Sync time="54.162"/>
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+ et 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="57.152"/>mes petits-en(fants) arriÃ¨re-petits-enfants 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+parce que j' ai un fils
+<Sync time="61.103"/>
+<Sync time="61.847"/>mh j' ai un fils 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+qui m() qui m' abandonne pas
+<Sync time="65.303"/>il ne m' abandonne pas hein 
+<Event desc="mic" type="noise" extent="instantaneous"/>
+non non non mais
+<Sync time="67.717"/>puis j' ai mon petit-fils lÃ 
+<Sync time="69.028"/>
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+ et 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+ma petite sa petite sa petite-fille
+<Sync time="72.515"/>
+<Sync time="73.988"/>ah Ã§a c' est autre chose
+<Sync time="75.13"/>c' est une autre famille Ã§a
+<Sync time="76.729"/>j' ai mon mari lÃ -bas avec ma fille 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="79.117"/>
+<Sync time="81.027"/>c' est loin tout Ã§a
+<Sync time="81.911"/>
+<Sync time="82.729"/>vous Ãªtes venues au 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPl
+<Event desc="buzz" type="noise" extent="end"/>
+alors
+</Turn>
+<Turn speaker="spk1" startTime="85.131" endTime="88.145">
+<Sync time="85.131"/>oui l' autre fois si 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+oui 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+oui c' Ã©tait Ã§a
+</Turn>
+<Turn speaker="spk2" startTime="88.145" endTime="89.122">
+<Sync time="88.145"/>
+<Event desc="buzz" type="noise" extent="begin"/>
+NPl
+<Event desc="buzz" type="noise" extent="end"/>
+
+</Turn>
+<Turn speaker="spk1" startTime="89.122" endTime="90.324">
+<Sync time="89.122"/>oui oui on s' est vu lÃ -bas
+</Turn>
+<Turn speaker="spk2" startTime="90.324" endTime="93.621">
+<Sync time="90.324"/>j' Ã©tais Ã  cÃ´tÃ© 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+Ã  cÃ´tÃ© d' elle
+<Sync time="92.18"/>elle adore elle est toujours lÃ -bas
+</Turn>
+<Turn speaker="spk1" startTime="93.621" endTime="95.723">
+<Sync time="93.621"/>oui 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+oui oui oui
+</Turn>
+<Turn speaker="spk2" startTime="95.723" endTime="102.306">
+<Sync time="95.723"/>elle a toujours 
+<Event desc="buzz" type="noise" extent="begin"/>
+anon 
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="99.948"/>
+</Turn>
+<Turn speaker="spk1" startTime="102.306" endTime="104.562">
+<Sync time="102.306"/>et euh vous aimez bien les activitÃ©s ici ?
+</Turn>
+<Turn speaker="spk2" startTime="104.562" endTime="107.205">
+<Sync time="104.562"/>oui oui oui Ã§a va
+<Sync time="105.497"/>quand il y en a j' y vais
+</Turn>
+<Turn speaker="spk1" startTime="107.205" endTime="110.958">
+<Sync time="107.205"/>oui 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+qu' est-ce qu' il y a comme activitÃ©s
+<Sync time="109.537"/>
+</Turn>
+<Turn speaker="spk2" startTime="110.958" endTime="133.493">
+<Sync time="110.958"/>alors lÃ  
+<Event desc="pau" type="noise" extent="instantaneous"/>
+qu' est-ce qu' on a eu l' autre jour
+<Sync time="113.533"/>l' atelier peinture
+<Sync time="115.071"/>
+<Sync time="117.315"/>on a eu 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+une soirÃ©e musicale
+<Sync time="119.435"/>
+<Sync time="120.766"/>elles font toujours d()
+<Sync time="121.348"/>elle fait toujours de la musique 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="123.549"/>
+<Sync time="125.215"/>et sa soeur aussi d'ailleurs
+<Sync time="126.628"/>
+<Sync time="127.729"/>non ben je j' y vais quand il y a une activitÃ© j' y vais
+<Sync time="130.183"/>
+<Sync time="130.919"/>j' ai j() j' ai pas le temps de m' ennuyer
+<Sync time="132.302"/>
+</Turn>
+<Turn speaker="spk1" startTime="133.493" endTime="136.02">
+<Sync time="133.493"/>et vous avez des amitiÃ©s ici Ã  la maison ?
+</Turn>
+<Turn speaker="spk2 spk1" startTime="136.02" endTime="138.876">
+<Sync time="136.02"/>
+<Who nb="1"/>dans la maison non non pas dans la maison
+<Who nb="2"/>des bons Ã©changes ?
+</Turn>
+<Turn speaker="spk2" startTime="138.876" endTime="154.495">
+<Sync time="138.876"/>mais dans OrlÃ©ans oui
+<Sync time="140.37"/>
+<Sync time="141.689"/>parce qu' il y a longtemps que je suis OrlÃ©anaise hein
+<Sync time="143.403"/>
+<Sync time="145.066"/>autrement Ã§a va
+<Sync time="145.908"/>il y a pas de problÃ¨me 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+de ce cÃ´tÃ© lÃ 
+<Sync time="148.339"/>
+<Sync time="149.866"/>rien de plus autrement
+<Sync time="150.93"/>tout est calme
+<Sync time="152.044"/>on est bien ici
+<Sync time="153.251"/>je me trouve bien
+</Turn>
+<Turn speaker="spk1" startTime="154.495" endTime="156.222">
+<Sync time="154.495"/>oui
+<Sync time="155.189"/>vous avez la tÃ©lÃ© ?
+</Turn>
+<Turn speaker="spk2" startTime="156.222" endTime="160.168">
+<Sync time="156.222"/>oui oui j' ai la tÃ©lÃ©
+<Sync time="157.405"/>oh mais je la regarde pas souvent
+<Sync time="158.892"/>
+</Turn>
+<Turn speaker="spk1" startTime="160.168" endTime="162.658">
+<Sync time="160.168"/>la radio 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+et la radio ?
+</Turn>
+<Turn speaker="spk2 spk1" startTime="162.658" endTime="165.474">
+<Sync time="162.658"/>
+<Who nb="1"/>oui il y a la radio
+<Who nb="2"/>Ã§a vous aimez mieux
+<Sync time="163.788"/>
+<Who nb="1"/>
+<Who nb="2"/>
+</Turn>
+<Turn speaker="spk2" startTime="165.474" endTime="167.374">
+<Sync time="165.474"/>je prÃ©fÃ¨re la radio Ã  la tÃ©lÃ©
+</Turn>
+<Turn speaker="spk1" startTime="167.374" endTime="168.409">
+<Sync time="167.374"/>qu' est-ce que vous Ã©coutez ?
+</Turn>
+<Turn speaker="spk2" startTime="168.409" endTime="180.517">
+<Sync time="168.409"/>oh pff ce qu' il y a
+<Sync time="169.778"/>
+<Sync time="171.622"/>quand il y a des chanteurs quand il y a
+<Sync time="173.891"/>c' est tout
+<Sync time="174.348"/>parce que autrement bon ben je comprends mal autrement
+<Sync time="176.840"/>j' entends mal
+<Sync time="177.843"/>alors c' est tout
+<Sync time="178.921"/>
+</Turn>
+<Turn speaker="spk1" startTime="180.517" endTime="182.421">
+<Sync time="180.517"/>et internet Ã§a vous connaissez ?
+</Turn>
+<Turn speaker="spk2" startTime="182.421" endTime="182.957">
+<Sync time="182.421"/>hein ?
+</Turn>
+<Turn speaker="spk1" startTime="182.957" endTime="184.395">
+<Sync time="182.957"/>internet vous connaissez Ã§a ?
+</Turn>
+<Turn speaker="spk2" startTime="184.395" endTime="239.529">
+<Sync time="184.395"/>non non 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+connais pas 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+pas du tout
+<Sync time="188.7"/>je sais mÃªme pas ce que Ã§a veut dire internet
+<Sync time="190.543"/>
+<Sync time="192.861"/>non dÃ©() Ã§a me suffit ce que j' ai Ã§a me suffit
+<Sync time="195.598"/>je me couche
+<Sync time="196.336"/>et puis j' Ã©coute la radio
+<Sync time="198.059"/>Ã§a m' endort d'ailleurs 
+<Event desc="rir" type="noise" extent="instantaneous"/>
+
+<Sync time="199.738"/>des fois je dors la la tÃ©l() la la radio marche toujours
+<Sync time="203.450"/>et je dors
+<Sync time="203.892"/>
+<Sync time="205.362"/>je me plains pas ici
+<Sync time="206.261"/>on est bien ici
+<Sync time="207.699"/>faut pas se plaindre
+<Sync time="208.404"/>ceux qui se plaignent
+<Sync time="209.355"/>il Ã©tait il avait bien moins chez il Ã©tait moins bien chez lui
+<Sync time="212.723"/>non on est bien ici
+<Sync time="213.901"/>on est trÃ¨s bien mÃªme 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+pas de problÃ¨me
+<Sync time="217.153"/>je n' ai pas de problÃ¨me avec Ã§a
+<Sync time="218.794"/>
+<Sync time="219.804"/>j' ai des visites 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+mes enfants mes petits-enfants 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+ et 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="224.449"/>
+<Sync time="225.882"/>et puis euh c' est tout
+<Sync time="227.888"/>mon petit-fils lÃ  
+<Event desc="pau" type="noise" extent="instantaneous"/>
+
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+ avec 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="231.555"/>
+<Sync time="232.82"/>j' ai des visites
+<Sync time="233.567"/>je suis pas abandonnÃ©e hein
+<Sync time="234.676"/>
+<Sync time="236.308"/>je suis pas la mamie abandonnÃ©e 
+<Event desc="rir" type="noise" extent="instantaneous"/>
+loin de lÃ 
+</Turn>
+<Turn speaker="spk2 spk1" startTime="239.529" endTime="240.947">
+<Sync time="239.529"/>
+<Who nb="1"/>non non
+<Who nb="2"/>et d() des lectures
+</Turn>
+<Turn speaker="spk2" startTime="240.947" endTime="241.481">
+<Sync time="240.947"/>hein ?
+</Turn>
+<Turn speaker="spk1" startTime="241.481" endTime="242.947">
+<Sync time="241.481"/>vous lisez toujours ?
+</Turn>
+<Turn speaker="spk2" startTime="242.947" endTime="248.754">
+<Sync time="242.947"/>oh je lis un petit peu
+<Sync time="243.804"/>mais enfin 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+Ã§a me fait mal aux yeux
+<Sync time="245.726"/>mes mes lunettes je sais mÃªme pas oÃ¹ elles sont
+<Sync time="247.394"/>
+</Turn>
+<Turn speaker="spk2 spk1" startTime="248.754" endTime="251.170">
+<Sync time="248.754"/>
+<Who nb="1"/>les lunettes
+<Who nb="2"/>ben je les ai pendu au cou
+<Sync time="249.991"/>
+<Who nb="1"/>test
+<Who nb="2"/>
+</Turn>
+<Turn speaker="spk2" startTime="251.170" endTime="266.483">
+<Sync time="251.170"/>sont lÃ  mes lunettes 
+<Event desc="rir" type="noise" extent="instantaneous"/>
+
+<Sync time="252.611"/>
+<Sync time="255.621"/>je les ai perdues
+<Sync time="256.384"/>je les ai retrouvÃ©es
+<Sync time="257.472"/>je 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+je perds tout
+<Sync time="259.15"/>mais je retrouve
+<Sync time="259.978"/>
+<Sync time="263.186"/>elles seraient sur mon nez je les perdrais pas
+<Sync time="265.039"/>
+</Turn>
+<Turn speaker="spk1" startTime="266.483" endTime="269.292">
+<Sync time="266.483"/>et vous avez toujours des souvenirs Ã  l' Ã©cole ?
+</Turn>
+<Turn speaker="spk2" startTime="269.292" endTime="290.202">
+<Sync time="269.292"/>ah oui de l' Ã©cole oui oui bien sÃ»r l' Ã©cole quand j' Ã©tais 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+dans l() dans le dÃ©partement de l' Ain
+<Sync time="275.586"/>chef-lieu Bourg-en Bourg-en-Bresse 
+<Event desc="buRk" type="pronounce" extent="previous"/>
+Bourg-en-Bresse
+<Sync time="279.127"/>des souvenirs d' Ã©cole
+<Sync time="280.217"/>
+<Sync time="280.762"/>je suis pas allÃ©e Ã  l' Ã©cole Ã  Or(lÃ©ans) je suis pas venue Ã  l' Ã©cole Ã  OrlÃ©ans hein
+<Sync time="283.729"/>
+<Event desc="ins" type="noise" extent="instantaneous"/>
+
+<Sync time="284.289"/>non non j' ai connu mon mari
+<Sync time="285.763"/>il Ã©tait Ã  l' Ã©cole militaire d' Autun
+<Sync time="287.971"/>
+</Turn>
+<Turn speaker="spk1" startTime="290.202" endTime="296.243">
+<Sync time="290.202"/>l' Ã©ducation linguistique Ã©tait trÃ¨s stricte Ã  l' Ã©cole ?
+<Sync time="293.28"/>Ã  l' Ã©cole c' Ã©tait trÃ¨s strict l' orthographe la grammaire ?
+</Turn>
+<Turn speaker="spk2 spk1" startTime="296.243" endTime="298.923">
+<Sync time="296.243"/>
+<Who nb="1"/>ah oui ah oui ah oui ah oui tous les matins on avait
+<Who nb="2"/>le franÃ§ais
+</Turn>
+<Turn speaker="spk2" startTime="298.923" endTime="327.077">
+<Sync time="298.923"/>une une journÃ©e fallait Ã©crire
+<Sync time="301.263"/>fallait faire les pleins et les dÃ©liÃ©s 
+<Event desc="rir" type="noise" extent="instantaneous"/>
+
+<Sync time="303.211"/>
+<Sync time="304.786"/>oui 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+mon mon fils Ã©crivait trÃ¨s mal il il dÃ©() il dÃ©passait les lignes
+<Sync time="309.196"/>il allait jusqu' en 
+<Event desc="rir" type="noise" extent="instantaneous"/>
+haut lui
+<Sync time="311.453"/>bon autrement j' ai pas de mauv(ais) mauvais souvenirs de l' Ã©cole du tout du tout
+<Sync time="315.542"/>on avait une maÃ®tresse qui Ã©tait pas gentille Mademoiselle 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="318.107"/>je me rappelle toujours de son nom
+<Sync time="319.398"/>
+<Sync time="320.453"/>elle me elle nous tapait sur les doigts
+<Sync time="322.791"/>elle Ã©tait mÃ©chante
+<Sync time="323.915"/>
+<Sync time="326.326"/>bah
+</Turn>
+<Turn speaker="spk1" startTime="327.077" endTime="330.388">
+<Sync time="327.077"/>parler correctement le franÃ§ais Ã§a compte beaucoup pour vous ?
+</Turn>
+<Turn speaker="spk2" startTime="330.388" endTime="330.835">
+<Sync time="330.388"/>hm ?
+</Turn>
+<Turn speaker="spk1" startTime="330.835" endTime="333.045">
+<Sync time="330.835"/>parler correctement Ã§a compte beaucoup pour vous ?
+</Turn>
+<Turn speaker="spk2" startTime="333.045" endTime="362.378">
+<Sync time="333.045"/>ben bien sÃ»r oui oui oui
+<Sync time="334.898"/>j' aime pas la vulgaritÃ©
+<Sync time="336.218"/>
+<Sync time="336.941"/>quand c' est trop vulgaire j' aime pas Ã§a
+<Sync time="338.697"/>
+<Sync time="339.860"/>j' ai jamais aimÃ© Ã§a
+<Sync time="340.835"/>
+<Sync time="341.785"/>il fallait pas dire de gros mots Ã  l' Ã©poque
+<Sync time="343.743"/>
+<Sync time="346.861"/>mais on les disait pas
+<Sync time="347.724"/>
+<Sync time="348.789"/>on n' Ã©tait pas puni pour Ã§a
+<Sync time="350.177"/>
+<Sync time="352.585"/>non moi je me plains pas de l' Ã©cole
+<Sync time="354.008"/>j' Ã©tais dans l' Ain Bellegarde-sur-Valserine
+<Sync time="356.359"/>
+<Sync time="358.000"/>c' est loin tout Ã§a
+<Sync time="358.723"/>
+<Sync time="359.819"/>mais je m' en () je m' en souviens quand mÃªme
+</Turn>
+<Turn speaker="spk1" startTime="362.378" endTime="369.000">
+<Sync time="362.378"/>vous avez eu un un une langue de jeune un argot entre vous ?
+<Sync time="367.493"/>entre les Ã©lÃ¨ves ?
+</Turn>
+<Turn speaker="spk2" startTime="369.000" endTime="369.897">
+<Sync time="369.000"/>il y avait quoi ?
+</Turn>
+<Turn speaker="spk1" startTime="369.897" endTime="375.032">
+<Sync time="369.897"/>euh un l() une langue un peu spÃ©ciale un argot des des mots particuliers entre vous ?
+</Turn>
+<Turn speaker="spk2" startTime="375.032" endTime="403.471">
+<Sync time="375.032"/>oh non non non non on jouait Ã  la marelle
+<Sync time="376.916"/>
+<Sync time="378.101"/>on on sautait Ã  la corde
+<Sync time="379.457"/>
+<Sync time="381.612"/>je ne me suis jamais ennuyÃ©e Ã  l' Ã©cole jamais 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+jamais jamais
+<Sync time="385.725"/>
+<Sync time="387.030"/>on le professeur ben fallait les respecter
+<Sync time="388.735"/>fallait leur dire bon(jour)
+<Sync time="389.787"/>fallait se lever
+<Sync time="390.839"/>et fallait at(tendre)
+<Sync time="391.906"/>on Ã©tait debout
+<Sync time="393.080"/>et on attendait qu' elle nous dise de nous asseoir
+<Sync time="395.590"/>
+<Event desc="dir" type="noise" extent="begin"/>
+ asseyez vous 
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="396.241"/>
+<Sync time="396.919"/>on s' ass()
+<Sync time="397.394"/>on o() on obÃ©issait Ã  l' Ã©poque
+<Sync time="398.844"/>
+<Sync time="399.940"/>c' Ã©tait pas une punition pour obÃ©ir
+<Sync time="401.621"/>
+</Turn>
+<Turn speaker="spk1" startTime="403.471" endTime="408.428">
+<Sync time="403.471"/>et aujourd'hui les jeunes vous observez euh une langue des jeunes aujourd'hui ?
+</Turn>
+<Turn speaker="spk2" startTime="408.428" endTime="408.845">
+<Sync time="408.428"/>hein ?
+</Turn>
+<Turn speaker="spk1" startTime="408.845" endTime="412.849">
+<Sync time="408.845"/>la langue des jeunes c' est diffÃ©rent aujourd'hui ?
+<Sync time="411.613"/>
+</Turn>
+<Turn speaker="spk2" startTime="412.849" endTime="416.048">
+<Sync time="412.849"/>il y a beaucoup de vul() beaucoup de vulgaritÃ© maintenant
+<Sync time="415.102"/>
+</Turn>
+<Turn speaker="spk1" startTime="416.048" endTime="418.952">
+<Sync time="416.048"/>vous trouvez ?
+<Sync time="416.866"/>
+</Turn>
+<Turn speaker="spk2" startTime="418.952" endTime="452.682">
+<Sync time="418.952"/>avant fallait pas dire des gros mots
+<Sync time="420.587"/>
+<Sync time="421.753"/>on disait disait 
+<Event desc="dir" type="noise" extent="begin"/>
+mer(de) merde 
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="423.327"/>fallait pas le dire
+<Sync time="424.347"/>
+<Sync time="425.279"/>et on ne le dis() on le disait pas
+<Sync time="426.799"/>fallait pas le dire
+<Sync time="427.452"/>et on ne le disait p()
+<Sync time="428.103"/>on obÃ©issait
+<Sync time="428.912"/>
+<Sync time="429.803"/>maintenant je sais pas si les jeunes obÃ©issent
+<Sync time="431.518"/>si quand mÃªme
+<Sync time="432.502"/>c' est les parents qui font obÃ©ir hein surtout
+<Sync time="435.204"/>Ã§a vient des parents quand c' est comme Ã§a
+<Sync time="436.733"/>
+<Sync time="438.613"/>autrement non non non moi j' ai pas un mauvais souvenir de l' Ã©cole
+<Sync time="442.259"/>on en avait que des plus plus gentils que d' autres
+<Sync time="444.533"/>c' Ã©tait normal hein
+<Sync time="446.194"/>elles Ã©taient elles Ã©taient sÃ©vÃ¨res avec nous
+<Sync time="448.091"/>
+<Sync time="450.132"/>c' est tout
+<Sync time="450.410"/>
+</Turn>
+<Turn speaker="spk1" startTime="452.682" endTime="456.366">
+<Sync time="452.682"/>et euh vos petits-enfants quand ils viennent ils s' adaptent
+</Turn>
+<Turn speaker="spk2" startTime="456.366" endTime="456.648">
+<Sync time="456.366"/>oui
+</Turn>
+<Turn speaker="spk1" startTime="456.648" endTime="459.367">
+<Sync time="456.648"/>ils ont un peu un autre euh un autre franÃ§ais
+</Turn>
+<Turn speaker="spk2" startTime="459.367" endTime="460.312">
+<Sync time="459.367"/>mais bien sÃ»r mais bien s()
+</Turn>
+<Turn speaker="spk1" startTime="460.312" endTime="461.480">
+<Sync time="460.312"/>ils parlent correctement ?
+</Turn>
+<Turn speaker="spk2" startTime="461.480" endTime="501.963">
+<Sync time="461.480"/>oui 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+ils parlent bien
+<Sync time="462.987"/>
+<Sync time="464.406"/>
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+ils sont lÃ  vous voyez
+<Sync time="465.807"/>
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+ et 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+ils sont en photo lÃ 
+<Sync time="467.797"/>
+<Sync time="468.494"/>je les ai tous les deux
+<Sync time="469.254"/>
+<Sync time="471.156"/>ils sont non ils sont gentils
+<Sync time="472.462"/>c' est des gamins
+<Sync time="473.490"/>c' est pareils ils sont pas
+<Sync time="474.251"/>ils sont bien Ã©levÃ©s disons
+<Sync time="475.562"/>
+<Sync time="477.673"/>et Ã§a Ã§a vient surtout des parents hein
+<Sync time="479.721"/>si les parents sont vulgaires
+<Sync time="480.775"/>les gamins le sont aussi
+<Sync time="482.110"/>
+<Sync time="483.447"/>mais non le petit il est il est 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+il est peinÃ© il est peinÃ©
+<Sync time="486.794"/>il est amusant parce qu' il fait de la gymnastique
+<Sync time="489.702"/>sa soeur fait la gym
+<Sync time="490.63"/>mais il veut faire comme elle
+<Sync time="492.722"/>vous allez me dire qu() qu' il f()
+<Sync time="494.443"/>bon il fait le pitre hein
+<Sync time="495.852"/>il s' amuse
+<Sync time="496.536"/>
+<Sync time="498.254"/>voilÃ  autrement mais rien de plus
+<Sync time="499.965"/>tout est calme
+<Sync time="500.771"/>
+</Turn>
+<Turn speaker="spk1" startTime="501.963" endTime="510.279">
+<Sync time="501.963"/>les personnes Ã¢gÃ©es en France qu' est-ce vous pe() pensez de la personne Ã¢() de la situation des personnes Ã¢gÃ©es en France
+<Sync time="509.132"/>
+</Turn>
+<Turn speaker="spk2" startTime="510.279" endTime="539.783">
+<Sync time="510.279"/>bon 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+je trouve que c' () bon
+<Sync time="511.783"/>si on s' en occupe bien
+<Sync time="513.169"/>on s' en occupe
+<Sync time="514.088"/>c' est-Ã -dire autrefois 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+les parents les parents prenaient les parents les enfants
+<Sync time="518.838"/>maintenant non non
+<Sync time="519.686"/>puis je voudrais pas je voudrais pas embÃªter mes enfants
+<Sync time="522.480"/>j' aime mieux rester indÃ©pendante 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+mais pas dÃ©pendante d' eux
+<Sync time="526.328"/>et j' aime pas de non non 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+non non
+<Sync time="528.488"/>j' aime mieux rester toute seule
+<Sync time="530.274"/>Ã§a me gÃªne pas d' Ãªtre res() rester toute seule dans la journÃ©e
+<Sync time="532.978"/>
+<Sync time="536.299"/>voilÃ  c' est tout
+<Sync time="537.972"/>qu' est-ce que vous voulez que je vous dise de plus
+</Turn>
+<Turn speaker="spk1" startTime="539.783" endTime="544.741">
+<Sync time="539.783"/>et les jeunes qu' est-ce que vous en pensez la situation des jeunes en France ?
+<Sync time="543.558"/>
+</Turn>
+<Turn speaker="spk2" startTime="544.741" endTime="630.920">
+<Sync time="544.741"/>euh je voudrais pas Ãªtre Ã  leur place
+<Sync time="546.596"/>je voudrais bien
+<Sync time="547.337"/>j' aimerais mieux reculer
+<Sync time="548.548"/>je r() on r() on s' occupait bien d' eux
+<Sync time="551.519"/>on s' occupait d' eux
+<Sync time="552.651"/>on leur on leur trouvait du ()
+<Sync time="553.953"/>et maintenant ils n' ont plus de travail
+<Sync time="555.29"/>alors qu' est-ce qu' ils font
+<Sync time="556.58"/>ils font des bÃªtises
+<Sync time="558.058"/>ils traÃ®nent dans les rues hm
+<Sync time="560.229"/>et puis c' est tout
+<Sync time="560.952"/>
+<Sync time="564.336"/>la jeunesse est pas belle
+<Sync time="565.229"/>non elle est pas belle
+<Sync time="566.31"/>je voudrais pas revenir en arriÃ¨re
+<Sync time="567.605"/>moi j' estime que j' ai eu une belle jeunesse 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+que mes enfants n' auront pas
+<Sync time="574.067"/>
+<Sync time="575.081"/>je crois faut pas qu' il se plaignent
+<Sync time="576.319"/>encore ils sont bien
+<Sync time="577.742"/>ils sont trÃ¨s bien
+<Sync time="578.395"/>ils sont dans un petit pays
+<Sync time="579.446"/>c' est bien Ã  cÃ´tÃ© de OrlÃ©ans
+<Sync time="581.17"/>je sais mÃªme plus le nom 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+oÃ¹ c' est qu' ils sont 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+Ã  
+<Event desc="pau" type="noise" extent="instantaneous"/>
+Ã  
+<Event desc="buzz" type="noise" extent="begin"/>
+NPl
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="587.083"/>je crois que c' est 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPl 
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="588.235"/>j() je sais jamais oÃ¹ ils sont
+<Sync time="589.174"/>c' est Ã  
+<Event desc="buzz" type="noise" extent="begin"/>
+NPl
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="590.068"/>Ã§a s' appelle 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPl
+<Event desc="buzz" type="noise" extent="end"/>
+il me semble
+<Sync time="591.598"/>
+<Sync time="592.838"/>du cÃ´tÃ© de 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPl
+<Event desc="buzz" type="noise" extent="end"/>
+par lÃ 
+<Sync time="594.44"/>je sais pas vous connaissez peut Ãªtre pas le Loiret
+<Sync time="596.857"/>moi je connais pas beaucoup le Loiret mais enfin
+<Sync time="599.169"/>je me rappelle quand mÃªme que j() je vais chez eux 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+pas de problÃ¨me
+<Sync time="604.677"/>mais mon petit mon petit 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+il fait il fait il fait le clown lui
+<Sync time="607.51"/>
+<Sync time="608.536"/>il aime Ã§a 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+et sa soeur aussi
+<Sync time="611.001"/>et d'ailleurs elle a un vÃªtement
+<Sync time="612.052"/>elle a fait le carnaval elle a fait carnaval
+<Sync time="613.993"/>
+<Sync time="615.578"/>elle s' est amusÃ©e Ã  faire Ã§a
+<Sync time="616.792"/>bon ben Ã§a va
+<Sync time="617.864"/>puis son petit frÃ¨re voulait faire comme elle
+<Sync time="619.779"/>
+<Sync time="621.636"/>c' est normal les petits imitent les grands hein
+<Sync time="623.657"/>
+<Sync time="624.741"/>non non pas de problÃ¨me 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+je n' ai pas de problÃ¨me avec eux aucun
+<Sync time="628.531"/>
+</Turn>
+<Turn speaker="spk1" startTime="630.920" endTime="632.31">
+<Sync time="630.920"/>le futur c' est quoi ?
+</Turn>
+<Turn speaker="spk2" startTime="632.31" endTime="632.795">
+<Sync time="632.31"/>hein ?
+</Turn>
+<Turn speaker="spk1" startTime="632.795" endTime="634.108">
+<Sync time="632.795"/>le futur c' est quoi ?
+</Turn>
+<Turn speaker="spk2" startTime="634.108" endTime="724.220">
+<Sync time="634.108"/>oh je sais pas trop ce que Ã§a va donner
+<Sync time="636.066"/>j' en sais rien
+<Sync time="636.630"/>
+<Sync time="639.279"/>(je) sais pas
+<Sync time="639.621"/>
+<Sync time="640.616"/>pour certaines choses j' aime() j' aimerais mieux revenir en arriÃ¨re 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+pour certaines choses 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+pas pour tout mais pour certaines choses oui
+<Sync time="648.377"/>j' aimerais mieux revenir en arriÃ¨re
+<Sync time="650.012"/>ah ben je me rappelle quand on allait
+<Sync time="651.673"/>il y avait le cirque
+<Sync time="652.313"/>on avait tout Ã§a
+<Sync time="653.286"/>on avait 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+on avait du cinÃ©ma 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+avec l' Ã©cole on avait du cinÃ©ma
+<Sync time="657.614"/>on avait tout Ã§a
+<Sync time="658.528"/>
+<Sync time="661.495"/>c' est l() c' est loin tout Ã§a
+<Sync time="663.111"/>mais je m' en souviens bien
+<Sync time="664.721"/>on a fait des 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+comment je vous dirais 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+des piÃ¨ces de thÃ©Ã¢tre 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+les deux orphÃ©lines les les et tout Ã§a les
+<Sync time="672.711"/>je me rappelle plus mÃªme plus des noms
+<Sync time="674.326"/>non non au thÃ©Ã¢tre au thÃ©Ã¢tre Ã  OrlÃ©ans 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+sur la place 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+en bas
+<Sync time="679.839"/>(je) me rappelle de Ã§a
+<Sync time="681.491"/>pourtant je suis il y a longtemps que je suis OrlÃ©anaise hein
+<Sync time="683.636"/>
+<Sync time="686.519"/>voilÃ  autrement ben rien de plus tout est calme
+<Sync time="689.276"/>c' est une ville calme quand mÃªme OrlÃ©ans
+<Sync time="691.114"/>
+<Sync time="693.611"/>il y a de l' animation quand il y a les fÃªtes de Jeanne_d'Arc
+<Sync time="695.836"/>
+<Sync time="698.879"/>et 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+c' est loin tout Ã§a
+<Sync time="701.101"/>
+<Sync time="702.223"/>si mais pour certaines choses j' aimerais bien revenir en arriÃ¨re
+<Sync time="704.839"/>
+<Sync time="706.737"/>oui pour mon mon mari 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+mon petit-fils 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+ et ma petite-fille mon arriÃ¨re-petite-fille 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Event desc="pau" type="noise" extent="instantaneous"/>
+
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+ et 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="715.892"/>
+<Sync time="718.326"/>je me plains pas je ne me plains pas du tout du tout
+<Sync time="721.203"/>je suis bien ici
+<Sync time="722.065"/>
+</Turn>
+<Turn speaker="spk1" startTime="724.220" endTime="725.368">
+<Sync time="724.220"/>une conclusion ?
+</Turn>
+<Turn speaker="spk2" startTime="725.368" endTime="725.907">
+<Sync time="725.368"/>mh ?
+</Turn>
+<Turn speaker="spk1" startTime="725.907" endTime="727.066">
+<Sync time="725.907"/>une conclusion ?
+</Turn>
+<Turn speaker="spk2" startTime="727.066" endTime="727.998">
+<Sync time="727.066"/>une
+</Turn>
+<Turn speaker="spk1" startTime="727.998" endTime="729.817">
+<Sync time="727.998"/>une conclusion ?
+</Turn>
+<Turn speaker="spk2" startTime="729.817" endTime="730.609">
+<Sync time="729.817"/>une ?
+</Turn>
+<Turn speaker="spk1" startTime="730.609" endTime="732.314">
+<Sync time="730.609"/>une conclusion ?
+</Turn>
+<Turn speaker="spk2" startTime="732.314" endTime="786.682">
+<Sync time="732.314"/>en conclusion ?
+<Sync time="733.087"/>
+<Sync time="735.242"/>mais je voudrais pas revenir en arriÃ¨re
+<Sync time="737.035"/>je suis trÃ¨s bien actuellement
+<Sync time="738.455"/>
+<Sync time="740.736"/>oÃ¹ voulez vous allez
+<Sync time="741.741"/>pour Ãªtre mieux non 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+je serais jamais mieux
+<Sync time="745.067"/>je suis trÃ¨s bien ici
+<Sync time="746.547"/>je me trouve bien
+<Sync time="747.649"/>
+<Sync time="748.984"/>je ne m' ennuie pas
+<Sync time="749.715"/>j' ai pas le temps de m' ennuyer
+<Sync time="751.35"/>j' Ã©coute la radio euh la tÃ©lÃ© si je veux l' Ã©cou() si je veux la regarder
+<Sync time="755.701"/>
+<Sync time="757.057"/>Ã§a m' endort la tÃ©lÃ© 
+<Event desc="rir" type="noise" extent="instantaneous"/>
+
+<Sync time="758.388"/>
+<Sync time="761.208"/>autrement ben rien de plus
+<Sync time="762.388"/>tout est calme
+<Sync time="763.149"/>j' ai des visites
+<Sync time="764.459"/>j' ai 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+elle vient me voir
+<Sync time="766.144"/>
+<Sync time="768.531"/>c' est 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+ sa soeur 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="770.212"/>
+<Sync time="771.073"/>et son euh son son son beau-frÃ¨re
+<Sync time="773.917"/>
+<Sync time="775.544"/>sais plus comment il s' appelle
+<Sync time="776.718"/>
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Event desc="buzz" type="noise" extent="begin"/>
+ NPf 
+<Event desc="buzz" type="noise" extent="end"/>
+la famille 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPf
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="780.989"/>non non je ne m' ennuie pas
+<Sync time="783.305"/>j' ai pas le temps de m' ennuyer
+<Sync time="784.392"/>
+</Turn>
+<Turn speaker="spk1" startTime="786.682" endTime="793.036">
+<Sync time="786.682"/>oui 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+les jeux d' enfance vous avez jouÃ© beaucoup avec euh les garÃ§ons aussi ?
+</Turn>
+<Turn speaker="spk2" startTime="793.036" endTime="916.041">
+<Sync time="793.036"/>oui oui tout le temps
+<Sync time="793.87"/>j' ai toujours jouÃ© avec des garÃ§ons
+<Sync time="796.167"/>j' aimais mieux jouer avec les garÃ§ons qu' avec les filles
+<Sync time="798.137"/>on jouait Ã  cache-cache-la-bague-tu-l'auras
+<Sync time="800.368"/>on a jouÃ© 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+euh 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+le man() euh comment
+<Sync time="803.733"/>
+<Sync time="804.968"/>on jouait Ã  la corde
+<Sync time="805.895"/>on sautait Ã  la corde
+<Sync time="806.952"/>
+<Sync time="808.093"/>les garÃ§ons sautaient avec nous
+<Sync time="809.354"/>il n' y avait pas de problÃ¨mes 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+aucun problÃ¨mes avec les garÃ§ons
+<Sync time="812.882"/>
+<Sync time="814.670"/>il y en a un qui Ã©tait plus mÃ©chant que les autres
+<Sync time="816.454"/>
+<Sync time="817.822"/>d'accord c' Ã©tait 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Event desc="buzz" type="noise" extent="begin"/>
+NPf
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="819.604"/>je me rappelle de son nom 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Event desc="buzz" type="noise" extent="begin"/>
+NPf
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="821.485"/>
+<Sync time="822.791"/>il Ã©tait pas gentil
+<Sync time="824.375"/>il y en a un autre par contre 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Event desc="buzz" type="noise" extent="begin"/>
+NPf
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="826.584"/>je lui avais dit 
+<Event desc="dir" type="noise" extent="begin"/>
+tu seras mon
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="827.804"/>oh je sais plus
+<Sync time="828.49"/>je l' avais je l' avais baptisÃ©
+<Sync time="830.262"/>mais il Ã©tait il Ã©tait gentil
+<Sync time="831.83"/>il est devenu commandant je crois Ã  la commune de je sais plus quoi 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+comme aviateur
+<Sync time="836.187"/>
+<Sync time="837.841"/>j' Ã©tais gamine hein
+<Sync time="839.82"/>
+<Event desc="buzz" type="noise" extent="begin"/>
+[adresse complÃ¨te]NPl
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="842.461"/>
+<Sync time="845.122"/>si si j' ai de bons souvenirs d' enfance avec avec les garÃ§ons 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+aucun aucun problÃ¨me
+<Sync time="851.302"/>maintenant je sais pas ce qu' ils font
+<Sync time="852.959"/>j' en sais r()
+<Sync time="853.388"/>on s' est jamais battu 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+jamais jamais
+<Sync time="855.608"/>
+<Sync time="858.502"/>puis j' avais mes cousines mes cousines mes cousins mes cousines autour de moi qui Ã©taient avec moi 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+pas de problÃ¨me
+<Sync time="864.321"/>
+<Sync time="866.368"/>on peut dire que j' ai j' ai eu une jolie enfance 
+<Event desc="a~fe~s" type="pronounce" extent="instantaneous"/>
+
+<Sync time="868.689"/>mon pÃ¨re Ã©tait douanier
+<Sync time="869.735"/>il Ã©tait dans la douane 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+Ã  la frontiÃ¨re de Suisse prÃ¨s de GenÃ¨ve 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+
+<Event desc="buzz" type="noise" extent="begin"/>
+Npl
+<Event desc="buzz" type="noise" extent="end"/>
+exactement
+<Sync time="879.242"/>Ã§a s' appelait 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPl
+<Event desc="buzz" type="noise" extent="end"/>
+ au pied du 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPl
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="881.955"/>vous connaissez peut Ãªtre pas 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+le 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPl
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="885.642"/>non ?
+<Sync time="886.342"/>pas de problÃ¨me
+<Sync time="886.955"/>
+<Sync time="889.281"/>voilÃ  tout 
+<Event desc="tut" type="pronounce" extent="previous"/>
+le X le nouveau que je peux vous dire
+<Sync time="891.227"/>j' ai j' ai rien de changÃ© 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+rien n' est changÃ© 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+rien absolument rien
+<Sync time="896.818"/>je suis bien lÃ  que je suis bien ici
+<Sync time="898.922"/>
+<Sync time="901.546"/>on a des activitÃ©s de temps en temps
+<Sync time="903.308"/>je sais plus ce qu' il y a 
+<Event desc="ins" type="noise" extent="instantaneous"/>
+ou de la musique 
+<Event desc="ins" type="noise" extent="instantaneous"/>
+ou
+<Sync time="906.0"/>l' autre fois qu' est ce qu' on avait
+<Sync time="907.57"/>on a de la gymnastique
+<Sync time="908.460"/>c' est de la gym
+<Sync time="909.135"/>
+<Sync time="911.309"/>non non m' ennuie pas
+<Sync time="913.039"/>j' ai pas le temps de m' ennuyer
+<Sync time="914.135"/>
+</Turn>
+<Turn speaker="spk1" startTime="916.041" endTime="920.483">
+<Sync time="916.041"/>il y avait euh des membres de famille qui Ã©taient Ã  la RÃ©sistance ?
+</Turn>
+<Turn speaker="spk2" startTime="920.483" endTime="971.420">
+<Sync time="920.483"/>Ã  la RÃ©sistance ?
+<Sync time="922.201"/>bon ben mon mari en a fait de la RÃ©sistance
+<Sync time="923.896"/>
+<Sync time="925.455"/>il Ã©tait prisonnier au camp de Miranda d' Ebro
+<Sync time="928.117"/>
+<Sync time="929.759"/>mon mon mari Ã©tait prisonnier 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+en Espagne camp Miranda d' Ebro
+<Sync time="935.004"/>
+<Sync time="937.095"/>il a Ã©tÃ© malheu() lÃ  il a Ã©tÃ© malheureux hein
+<Sync time="939.566"/>on peut dire malheureux
+<Sync time="940.688"/>
+<Sync time="941.974"/>mais je vous dis 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+enfin
+<Sync time="943.714"/>il avait malgrÃ© tout il Ã©tait il a pas Ã©tÃ© abandonnÃ© hein
+<Sync time="946.557"/>
+<Sync time="947.695"/>mon beau-pÃ¨re Ã©tait dans l' armÃ©e
+<Sync time="948.832"/>
+<Sync time="951.576"/>et lui a Ã©tÃ© dans l' armÃ©e un peu
+<Sync time="953.108"/>et aprÃ¨s il a laissÃ© 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+il a laissÃ© l' armÃ©e pour le Chemin_de_fer
+<Sync time="956.139"/>
+<Sync time="957.577"/>il a quittÃ© l' armÃ©e pour entrer au Chemin_de_fer
+<Sync time="960.326"/>et il a fait sa carriÃ¨re au Chemin_de_fer
+<Sync time="961.792"/>
+<Sync time="963.225"/>il a fait une jolie carriÃ¨re en Ã  la SNCF
+<Sync time="965.369"/>
+<Sync time="967.578"/>c' est loin tout Ã§a
+<Sync time="968.439"/>on Ã©tait jeune
+<Sync time="969.531"/>
+</Turn>
+<Turn speaker="spk1" startTime="971.420" endTime="975.704">
+<Sync time="971.420"/>et vous aussi vous avez travaillÃ© Ã  la SNCF ?
+<Sync time="973.910"/>
+</Turn>
+<Turn speaker="spk2" startTime="975.704" endTime="1003.359">
+<Sync time="975.704"/>trente-cinq ans neuf jours 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+toujours dans le mÃªme Ã©tablissement
+<Sync time="981.390"/>
+<Sync time="982.575"/>
+<Event desc="buzz" type="noise" extent="begin"/>
+NPl
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="983.834"/>
+<Sync time="986.317"/>et oui 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+d'ailleurs j' ai encore une collÃ¨gue ici qui (est) qui Ã©tait aussi elle
+<Sync time="990.452"/>Madame Madame 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPf 
+<Event desc="buzz" type="noise" extent="end"/>
+elle Ã©tait avec moi 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+et voilÃ 
+<Sync time="994.14"/>autrement ben rien de plus tout est calme
+<Sync time="996.840"/>on peut dire que c' est calme ici
+<Sync time="998.272"/>
+<Sync time="1001.111"/>voilÃ  qu' est-ce que voulez que je vous dise de plus
+</Turn>
+</Section>
+<Section type="nontrans" startTime="1003.359" endTime="2520.573">
+<Turn speaker="spk1" startTime="1003.359" endTime="1473.158">
+<Sync time="1003.359"/>
+<Event desc="buzz" type="noise" extent="begin"/>
+ anon 
+<Event desc="buzz" type="noise" extent="end"/>
+
+</Turn>
+<Turn speaker="spk1" startTime="1473.158" endTime="1477.754">
+<Sync time="1473.158"/>l' autre fois vous m' avez racontÃ© beaucoup de choses
+<Event desc="pau" type="noise" extent="instantaneous"/>
+
+<Event desc="pau" type="noise" extent="instantaneous"/>
+(re) le faire dÃ©sordonnÃ© il n' y a j' ai rien alors non j' ai j' ai toujours Ã©tÃ© assez ordonnÃ©e
+</Turn>
+<Turn speaker="spk2" startTime="1477.754" endTime="1479.14">
+<Sync time="1477.754"/>Ã  quel sujet
+</Turn>
+<Turn speaker="spk1" startTime="1479.14" endTime="1481.721">
+<Sync time="1479.14"/>sur votre votre enfance par exemple
+</Turn>
+<Turn speaker="spk2" startTime="1481.721" endTime="1482.124">
+<Sync time="1481.721"/>ah d'accord
+</Turn>
+<Turn speaker="spk1" startTime="1482.124" endTime="1484.92">
+<Sync time="1482.124"/>les garÃ§ons que vous ont attachÃ©e
+<Sync time="1483.834"/>c' est Ã§a ?
+</Turn>
+<Turn speaker="spk2" startTime="1484.92" endTime="1515.05">
+<Sync time="1484.92"/>ah d'accord ils m' ont attachÃ©e
+<Sync time="1486.396"/>ils m' ont attachÃ©e ils me re() ils me rede(tachaient)
+<Sync time="1487.885"/>j' avais peur qu' ils ne me redÃ©tachent pas
+<Sync time="1490.355"/>
+<Sync time="1492.266"/>oh j' a() j' ai j' ai toujours jouÃ© avec des garÃ§ons
+<Sync time="1494.663"/>les jeux de filles ne m' intÃ©ressaient pas
+<Sync time="1497.059"/>on jouait Ã  cache-cache-la-bague-tu-l'auras
+<Sync time="1499.49"/>
+<Sync time="1501.476"/>on jouait Ã  cache-cache
+<Sync time="1502.591"/>
+<Sync time="1505.553"/>on travaillait sur dans sur les bois
+<Sync time="1507.52"/>on appelait Ã§a
+<Sync time="1507.992"/>c' Ã©tait c' Ã©tait dans une scierie
+<Sync time="1509.55"/>on avait des gros billons 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+d'ailleurs c' Ã©tait mÃªme dangereux parce que ils ils pouvaient nous rouler dessus d'ailleurs
+</Turn>
+<Turn speaker="spk1" startTime="1515.05" endTime="1521.439">
+<Sync time="1515.05"/>m-hm
+<Sync time="1518.156"/>mais les garÃ§ons ils Ã©taient gentils mais mÃªme
+</Turn>
+<Turn speaker="spk2 spk1" startTime="1521.439" endTime="1523.444">
+<Sync time="1521.439"/>
+<Who nb="1"/>oui oui il n' y en avait aucun
+<Who nb="2"/>si ils vous ont rattachÃ©e ?
+</Turn>
+<Turn speaker="spk2" startTime="1523.444" endTime="1567.928">
+<Sync time="1523.444"/>il y en avait un qui n' Ã©tait pas gentil
+<Sync time="1525.049"/>il nous attachait
+<Sync time="1525.754"/>
+<Sync time="1526.539"/>j' avais peur qu' il ne nous dÃ©tache pas
+<Sync time="1527.775"/>
+<Sync time="1533.252"/>non j' ai beaucoup d' amis des amis garÃ§ons Ã  l' Ã©poque 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+que j' ai pas gardÃ©s parce que ils sont tous morts aussi
+<Sync time="1538.904"/>
+<Sync time="1541.635"/>c'est toujours pareil
+<Sync time="1542.425"/>
+<Sync time="1543.013"/>c' est pas des jeunes hein
+<Sync time="1544.052"/>
+<Sync time="1547.037"/>on travaillait prÃ¨s de la Loire
+<Sync time="1552.668"/>on allait on allait faire de la X dans la neige
+<Sync time="1555.427"/>
+<Sync time="1556.342"/>j' ai fait de la luge
+<Sync time="1557.876"/>
+<Sync time="1559.568"/>dans les ri() on faisait des glissades
+<Sync time="1561.493"/>
+<Sync time="1562.67"/>on se faisait disputer parce que Ã§a faisait glisser les gens
+<Sync time="1565.04"/>
+</Turn>
+<Turn speaker="spk1" startTime="1567.928" endTime="1573.403">
+<Sync time="1567.928"/>ah oui
+<Sync time="1568.271"/>
+<Sync time="1569.563"/>et aprÃ¨s oui vous avez Ã©changÃ© des cartes postales et des timbres
+</Turn>
+<Turn speaker="spk2 spk1" startTime="1573.403" endTime="1575.241">
+<Sync time="1573.403"/>
+<Who nb="1"/>oui il y avait des cartes postales
+<Who nb="2"/>il y avait
+</Turn>
+<Turn speaker="spk2" startTime="1575.241" endTime="1607.246">
+<Sync time="1575.241"/>j' ai toujours mon album de cartes postales
+<Sync time="1577.804"/>je l' ai toujours je l' ai chez moi d'ailleurs
+<Sync time="1580.07"/>
+<Sync time="1580.933"/>j' ai un gros album comme Ã§a de cartes postales 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+que j' ai toujours gardÃ©
+<Sync time="1585.05"/>
+<Sync time="1586.896"/>j' en ai des anciennes
+<Sync time="1588.101"/>j' en ai des j' en ai mÃªme de 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+de ma tante de mon oncle 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+de la guerre quatorze dix-huit
+<Sync time="1593.165"/>alors voyez c' est vieux hein
+<Sync time="1594.347"/>
+<Sync time="1595.015"/>non non j' ai toujours les cartes postales
+<Sync time="1596.503"/>
+<Sync time="1597.023"/>j' ai jamais dÃ©chirÃ© une carte postale jamais
+<Sync time="1598.887"/>
+<Sync time="1599.643"/>je gardais
+<Sync time="1600.205"/>
+<Sync time="1603.629"/>c' est loin tout Ã§a
+<Sync time="1604.51"/>
+<Sync time="1605.022"/>j' Ã©tais jeune
+<Sync time="1605.64"/>
+</Turn>
+<Turn speaker="spk1" startTime="1607.246" endTime="1612.986">
+<Sync time="1607.246"/>et vous avez eu beaucoup de nouvelles
+<Sync time="1609.338"/>Ã  votre enfance des nouvelles des membres de famille
+</Turn>
+<Turn speaker="spk2" startTime="1612.986" endTime="1613.457">
+<Sync time="1612.986"/>des
+</Turn>
+<Turn speaker="spk1" startTime="1613.457" endTime="1615.963">
+<Sync time="1613.457"/>Ã§a on s' Ã©crivait des lettres
+</Turn>
+<Turn speaker="spk2 spk1" startTime="1615.963" endTime="1616.601">
+<Sync time="1615.963"/>
+<Who nb="1"/>oui
+<Who nb="2"/>aussi
+</Turn>
+<Turn speaker="spk2" startTime="1616.601" endTime="1617.245">
+<Sync time="1616.601"/>oui
+</Turn>
+<Turn speaker="spk1" startTime="1617.245" endTime="1619.017">
+<Sync time="1617.245"/>on Ã©changeait des des nouvelles
+</Turn>
+<Turn speaker="spk2" startTime="1619.017" endTime="1651.66">
+<Sync time="1619.017"/>oui oui bien sÃ»r tout le temps
+<Sync time="1620.579"/>
+<Sync time="1621.309"/>j' ai toujours eu les nouvelles de mes mes parents mes grands-parents mes cousines
+<Sync time="1625.164"/>
+<Sync time="1626.45"/>j' ai encore des cousins et des cousines
+<Sync time="1628.062"/>j' en ai encore pas mal
+<Sync time="1629.177"/>
+<Sync time="1629.627"/>c' est une nombreuse famille
+<Sync time="1631.156"/>
+<Sync time="1631.761"/>ils Ã©taient douze ou treize
+<Sync time="1632.768"/>si je crois
+<Sync time="1633.325"/>je sais plus combien
+<Sync time="1633.987"/>non non j' ai toujours des nouvelles pas de problÃ¨mes
+<Sync time="1636.251"/>
+<Sync time="1637.507"/>mon cousin qui vient de temps en temps
+<Sync time="1638.983"/>
+<Sync time="1640.119"/>il vient du dÃ©partement de d' Ain
+<Sync time="1645.106"/>
+<Sync time="1646.484"/>il vient de temps en temps
+<Sync time="1647.5"/>
+<Sync time="1648.338"/>non non je suis pas abandonnÃ©e j' en suis loin
+<Sync time="1650.264"/>
+</Turn>
+<Turn speaker="spk1" startTime="1651.66" endTime="1654.839">
+<Sync time="1651.66"/>et les jeux d' enfance Ã§a vous avez aussi des souvenirs ?
+</Turn>
+<Turn speaker="spk2" startTime="1654.839" endTime="1741.823">
+<Sync time="1654.839"/>oui mais bien sÃ»r on jouait Ã  la
+<Sync time="1656.386"/>on jouait
+<Sync time="1656.573"/>on appelait Ã§a
+<Sync time="1657.429"/>on jouait Ã  la marelle
+<Sync time="1658.729"/>
+<Sync time="1660.964"/>on jouait Ã  cache-cache-la-bague
+<Sync time="1662.358"/>on cachait la bague
+<Sync time="1663.677"/>
+<Sync time="1664.638"/>on avait un caillou n' importe
+<Sync time="1666.011"/>on disait 
+<Event desc="dir" type="noise" extent="begin"/>
+cache-cache-la-bague
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="1667.216"/>tu l' auras
+<Sync time="1667.99"/>il fallait mettre Ã§a
+<Sync time="1668.908"/>alors fallait X
+<Sync time="1670.12"/>je je euh je 
+<Event desc="dir" type="noise" extent="begin"/>
+avez vous ma bague 
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="1672.375"/>alors on on disait 
+<Event desc="dir" type="noise" extent="begin"/>
+non prenez ma place et j' irais la chercher
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="1675.962"/>
+<Sync time="1676.803"/>et puis X on disait 
+<Event desc="dir" type="noise" extent="begin"/>
+avec un doux baiser vous l' aurez
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="1679.544"/>
+<Sync time="1680.946"/>que faut-il pour la
+<Sync time="1681.778"/>on disait 
+<Event desc="dir" type="noise" extent="begin"/>
+qu' est-ce qu' il faut-il
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="1683.016"/>mais avec un doux bai()
+<Sync time="1684.191"/>alors fallait embrasser
+<Sync time="1685.557"/>et on s' arrangeait toujours pour embrasser un garÃ§on
+<Sync time="1687.670"/>
+<Sync time="1688.585"/>mÃªme en Ã©tant gamine
+<Sync time="1689.627"/>
+<Sync time="1691.048"/>fallait embrasser les garÃ§ons
+<Sync time="1692.153"/>
+<Sync time="1694.081"/>c' est vieux oh lÃ  lÃ 
+<Sync time="1695.152"/>
+<Sync time="1695.785"/>m' en souviens 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPl
+<Event desc="buzz" type="noise" extent="end"/>
+ Ã§a s' appelait 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPl
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="1698.887"/>
+<Sync time="1700.450"/>et oui 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+c' est loin tout Ã§a
+<Sync time="1702.005"/>
+<Sync time="1703.776"/>je montais dans mon petit bled en haut en X 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+
+<Event desc="buzz" type="noise" extent="begin"/>
+NPl
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="1707.481"/>
+<Sync time="1709.408"/>on montait
+<Sync time="1709.833"/>j' aimais bien y aller lÃ  haut
+<Sync time="1711.000"/>
+<Sync time="1711.931"/>j' avais des copains des copines dans le dans le petit pays
+<Sync time="1714.550"/>
+<Sync time="1716.001"/>je me suis toujours amusÃ©e avec les garÃ§ons
+<Sync time="1717.608"/>j' aimais les jeux des filles
+<Sync time="1719.018"/>j' aimais mieux jouer aux garÃ§ons 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+avec les garÃ§ons
+<Sync time="1721.279"/>
+<Sync time="1722.767"/>d'ailleurs mon oncle m' appelait toujours la garÃ§onniÃ¨re
+<Sync time="1725.253"/>
+<Sync time="1725.906"/>j' Ã©tais une garÃ§onniÃ¨re parce que on aimait j' aimais j' aimais mieux jouer les garÃ§ons
+<Sync time="1729.902"/>les jeux de filles m' intÃ©ressaient pas du tout
+<Sync time="1731.568"/>
+<Sync time="1734.671"/>c' est loin tout Ã§a j' Ã©tais jeune hein
+<Sync time="1736.178"/>
+<Sync time="1738.775"/>et c' est loin
+<Sync time="1739.593"/>
+<Sync time="1740.427"/>on vieillit
+<Sync time="1740.975"/>
+</Turn>
+<Turn speaker="spk1" startTime="1741.823" endTime="1743.816">
+<Sync time="1741.823"/>et il y avait les Allemands ?
+</Turn>
+<Turn speaker="spk2" startTime="1743.816" endTime="1801.445">
+<Sync time="1743.816"/>ah oui les Allemands j' en ai connu
+<Sync time="1746.225"/>hm on avait les Allemands Ã  l' Ã©poque
+<Sync time="1748.143"/>moi Ã§a m' a jamais gÃªnÃ©e
+<Sync time="1749.426"/>ils ne m' ont jamais emb()
+<Sync time="1750.453"/>ils m' ont jamais gÃªnÃ©e hein 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+jamais jamais jamais
+<Sync time="1753.362"/>
+<Sync time="1754.345"/>je les ai vu dÃ©filer 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+Ã  Paris
+<Sync time="1756.495"/>
+<Sync time="1761.303"/>et je me rappelle quand ils ont mis quand ils ont brÃ»lÃ© 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+ah je sais plus comment Ã§a s' appellait Ã  Oradour-sur-Glane
+<Sync time="1767.613"/>
+<Sync time="1769.883"/>il y avait mille feux Ã  Oradour-sur-Glane
+<Sync time="1772.611"/>
+<Sync time="1773.177"/>ils s' Ã©taient trompÃ©s de pays je crois tant que je me souvienne
+<Sync time="1775.684"/>
+<Sync time="1776.033"/>j' Ã©tais jeune hein
+<Sync time="1776.681"/>
+<Sync time="1777.318"/>oh non ils m' ont jamais fait peur
+<Sync time="1779.004"/>(j' ai) alors j'Ã©tais montÃ©e
+<Sync time="1779.974"/>j' ait dit 
+<Event desc="dir" type="noise" extent="begin"/>
+moi j' ai pas eu peur
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="1781.465"/>ils m' ont jamais fait peur 
+<Event desc="rir" type="noise" extent="instantaneous"/>
+
+<Event desc="pau" type="noise" extent="instantaneous"/>
+jamais
+<Sync time="1784.106"/>ils Ã©taient les hommes comme les autres
+<Sync time="1785.27"/>ils font leur travail
+<Sync time="1786.136"/>et puis c' est tout
+<Sync time="1786.680"/>
+<Sync time="1791.317"/>c' est vieux Ã§a
+<Sync time="1791.943"/>
+<Sync time="1793.729"/>c' Ã©tait mais je me rappelle d' Oradour-sur-Glane par contre
+<Sync time="1796.797"/>vous avez pas connu Ã§a 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+de nom peut Ãªtre
+<Sync time="1799.635"/>Ã§a vous dit quelque chose Oradour-sur-Glane
+</Turn>
+<Turn speaker="spk1" startTime="1801.445" endTime="1804.677">
+<Sync time="1801.445"/>ah oui
+<Sync time="1801.686"/>
+</Turn>
+<Turn speaker="spk2" startTime="1804.677" endTime="1884.878">
+<Sync time="1804.677"/>je me souviens
+<Sync time="1805.187"/>je m' en souviens 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+trÃ¨s bien mÃªme 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+pas de problÃ¨me 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+aucun problÃ¨me
+<Sync time="1810.102"/>
+<Sync time="1811.025"/>moi je dis 
+<Event desc="dir" type="noise" extent="begin"/>
+moi ils ne m' ont pas fait peur 
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="1812.502"/>je dis j' avais rien Ã  me reprocher qu' est qu' est ce que vous voulez qu' ils me reprochent ?
+<Sync time="1816.209"/>j' avais rien Ã  ne me reprocher 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+de l' autre cÃ´tÃ© lÃ  alors
+<Sync time="1818.783"/>
+<Sync time="1819.557"/>j' avais pas peur non non
+<Sync time="1820.673"/>
+<Sync time="1823.486"/>je sais pas actuellement comment Ã§a marche
+<Sync time="1825.321"/>j' en sais rien
+<Sync time="1825.72"/>c' est pareil
+<Sync time="1826.785"/>pers(onne) les jeunes ne s' en occupent pas
+<Sync time="1828.235"/>
+<Sync time="1829.321"/>c' est des copains comme des autres hein
+<Sync time="1830.936"/>
+<Sync time="1834.872"/>je m' en fiche des X des camarades anglais allemands 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+mh 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+sais plus leurs noms d'ailleurs
+<Sync time="1840.631"/>
+<Sync time="1841.263"/>mon fils en avait des un copain allemand
+<Sync time="1843.331"/>
+<Sync time="1845.534"/>comment il s' appellait d'ailleurs
+<Sync time="1846.647"/>
+<Sync time="1847.629"/>non non il y avait pas de problÃ¨me hein
+<Sync time="1849.441"/>c' est fini ce temps-lÃ 
+<Sync time="1850.672"/>
+<Sync time="1852.354"/>c' est fini la la la vieille la la rancoeur qu' on avait contre les Allemands
+<Sync time="1856.384"/>
+<Sync time="1857.388"/>c' est fini ce temps-lÃ  quand mÃªme 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+
+<Sync time="1859.307"/>je pense
+<Sync time="1859.969"/>
+<Sync time="1862.006"/>je pense
+<Sync time="1862.68"/>
+<Sync time="1864.556"/>bon je ne m' en occupe pas alors
+<Sync time="1865.658"/>
+<Sync time="1866.979"/>et j' ai mon fils qui est lÃ  (avec) avec euh ma petite-fille
+<Sync time="1870.193"/>
+<Sync time="1870.803"/>Ã§a c' est mon arriÃ¨re-petit-fils 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPl
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="1872.712"/>
+<Sync time="1873.591"/>et le 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPl
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="1874.297"/>
+<Sync time="1876.396"/>ben j' ai pas de problÃ¨me avec les Allemands
+<Sync time="1878.164"/>pourquoi voulez-vous qu' on aie des problÃ¨mes maintenant
+<Sync time="1880.311"/>c' est fini ce temps-lÃ 
+<Sync time="1881.306"/>
+<Sync time="1883.248"/>vous croyez qu' il y en a encore ?
+<Sync time="1884.502"/>
+</Turn>
+<Turn speaker="spk1" startTime="1884.878" endTime="1887.217">
+<Sync time="1884.878"/>non
+<Sync time="1885.106"/>
+</Turn>
+<Turn speaker="spk2" startTime="1887.217" endTime="1910.640">
+<Sync time="1887.217"/>il y en a peut Ãªtre encore
+<Sync time="1888.219"/>on disait 
+<Event desc="dir" type="noise" extent="begin"/>
+les boches
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="1889.476"/>
+<Sync time="1892.088"/>j' ai jamais voulu qu' ils s' appellent les les
+<Sync time="1894.388"/>c' est des hommes comme des autres ils font leur boulot un point c' est tout
+<Sync time="1897.238"/>
+<Sync time="1898.019"/>j' ai j' ai jamais aimÃ© que mon fils Ã§a les 
+<Event desc="dir" type="noise" extent="begin"/>
+boches 
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="1900.427"/>non non j' ai dit 
+<Event desc="dir" type="noise" extent="begin"/>
+ce sont des Allemands 
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="1902.944"/>
+<Event desc="dir" type="noise" extent="begin"/>
+toi tu es franÃ§ais et eux sont allemands
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="1904.475"/>
+<Sync time="1905.443"/>c' est tout
+<Sync time="1905.703"/>
+<Sync time="1907.258"/>j' ai jamais aimÃ© 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+qu' on les appelle 
+<Event desc="dir" type="noise" extent="begin"/>
+les boches 
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="1909.710"/>
+</Turn>
+<Turn speaker="spk1" startTime="1910.640" endTime="1912.666">
+<Sync time="1910.640"/>on a parlÃ© beaucoup de Hitler ?
+</Turn>
+<Turn speaker="spk2" startTime="1912.666" endTime="1913.059">
+<Sync time="1912.666"/>eh ?
+</Turn>
+<Turn speaker="spk1" startTime="1913.059" endTime="1915.002">
+<Sync time="1913.059"/>de HItler on en a beaucoup parlÃ© ?
+</Turn>
+<Turn speaker="spk2" startTime="1915.002" endTime="1915.507">
+<Sync time="1915.002"/>de ?
+</Turn>
+<Turn speaker="spk1" startTime="1915.507" endTime="1916.168">
+<Sync time="1915.507"/>Hitler ?
+</Turn>
+<Turn speaker="spk2" startTime="1916.168" endTime="1963.105">
+<Sync time="1916.168"/>ah oui ah oui ah oui ah oui alors lÃ 
+<Sync time="1918.766"/>je me rapelle les montÃ©es Ã  sa dans dans dans son comment Ã§a s' appellait son nid d' aigle
+<Sync time="1924.000"/>
+<Sync time="1924.915"/>je m' en souviens je m' en souviens j' y suis allÃ©e
+<Sync time="1926.817"/>
+<Sync time="1929.079"/>Hitler 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+et Mussolini
+<Sync time="1930.867"/>
+<Sync time="1931.998"/>
+<Event desc="dir" type="noise" extent="begin"/>
+Mussolini
+<Event desc="dir" type="noise" extent="end"/>
+qu' on disait
+<Sync time="1933.53"/>moi j' avais beaucoup d' it(aliens) comme on Ã©tait Ã  la frontiÃ¨re j' avais beaucoup de camarades qui Ã©taient italiennes
+<Sync time="1937.694"/>
+<Sync time="1938.208"/>j' avais une tante d'ailleurs 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="1941.326"/>
+<Sync time="1942.985"/>c' Ã©tait ma tante
+<Sync time="1943.627"/>
+<Sync time="1944.944"/>j' ai jamais 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+j' ai jamais prÃªtÃ© attention Ã  tout Ã§a jamais jamais jamais 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+jamais
+<Sync time="1949.869"/>on s' amusait avec les autres comme les comme les copains
+<Sync time="1952.242"/>
+<Sync time="1954.150"/>les gamines c' est pareil on jouait avec
+<Sync time="1955.821"/>
+<Sync time="1957.064"/>moi j' ai jamais eu de rancoeur contre pas que Ã§a existe encore la rancoeur contre les Allemands
+<Sync time="1960.923"/>
+<Sync time="1961.853"/>vous croyez ?
+</Turn>
+<Turn speaker="spk1" startTime="1963.105" endTime="1965.611">
+<Sync time="1963.105"/>pas celle de la Seconde Guerre Mondiale
+</Turn>
+<Turn speaker="spk2" startTime="1965.611" endTime="1966.127">
+<Sync time="1965.611"/>eh ?
+</Turn>
+<Turn speaker="spk1" startTime="1966.127" endTime="1968.051">
+<Sync time="1966.127"/>pas celle des annÃ©es quarante
+</Turn>
+<Turn speaker="spk2" startTime="1968.051" endTime="2000.658">
+<Sync time="1968.051"/>ah
+<Sync time="1968.231"/>
+<Sync time="1969.295"/>en quarante c' est vieux Ã§a
+<Sync time="1970.576"/>
+<Sync time="1971.796"/>mais plus maintenant
+<Sync time="1972.719"/>
+<Sync time="1973.604"/>pense pas
+<Sync time="1974.095"/>
+<Sync time="1975.516"/>pense pas 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+non
+<Sync time="1977.071"/>
+<Sync time="1978.046"/>je suis allÃ©e en Italie
+<Sync time="1978.991"/>
+<Sync time="1980.754"/>je suis allÃ©e en Espagne
+<Sync time="1981.776"/>mon mon mon fils a a Ã©tÃ© mon mari a Ã©tÃ© prisonnier Miranda de Ebro
+<Sync time="1985.653"/>
+<Sync time="1988.954"/>j' ai des cousines j' ai eu des cousines qui se sont mariÃ©es avec des Allemands
+<Sync time="1991.662"/>
+<Sync time="1996.558"/>c' est ce que j' ai dit 
+<Event desc="dir" type="noise" extent="begin"/>
+c' est des hommes comme des autres 
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="1998.723"/>
+<Event desc="dir" type="noise" extent="begin"/>
+ils font leur boulot 
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="1999.906"/>
+</Turn>
+<Turn speaker="spk1" startTime="2000.658" endTime="2004.405">
+<Sync time="2000.658"/>vous vous souvenez des chansons que vous avez eues ?
+</Turn>
+<Turn speaker="spk2" startTime="2004.405" endTime="2005.316">
+<Sync time="2004.405"/>quand j' Ã©tais gamine ?
+</Turn>
+<Turn speaker="spk1" startTime="2005.316" endTime="2005.929">
+<Sync time="2005.316"/>oui
+</Turn>
+<Turn speaker="spk2" startTime="2005.929" endTime="2006.786">
+<Sync time="2005.929"/>les chansons franÃ§aises
+</Turn>
+<Turn speaker="spk1" startTime="2006.786" endTime="2011.807">
+<Sync time="2006.786"/>oui
+<Sync time="2007.038"/>
+</Turn>
+<Turn speaker="spk2" startTime="2011.807" endTime="2017.62">
+<Sync time="2011.807"/>on a chantÃ© la chanson du MarÃ©chal 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+MarÃ©chal 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+MarÃ©chal PÃ©tain
+<Sync time="2015.850"/>
+</Turn>
+<Turn speaker="spk1" startTime="2017.62" endTime="2019.972">
+<Sync time="2017.62"/>c' Ã©tait comment ?
+</Turn>
+<Turn speaker="spk2" startTime="2019.972" endTime="2026.458">
+<Sync time="2019.972"/>MarÃ©chal PÃ©tain
+<Sync time="2022.074"/>
+<Sync time="2023.733"/>il Ã©tait parent avec De Gaulle d'ailleurs
+<Sync time="2025.884"/>
+</Turn>
+<Turn speaker="spk1" startTime="2026.458" endTime="2031.000">
+<Sync time="2026.458"/>vous la connaissez toujours ?
+</Turn>
+<Turn speaker="spk2" startTime="2031.000" endTime="2246.188">
+<Sync time="2031.000"/>MarÃ©chal Atnous voilÃ 
+<Sync time="2032.749"/>devant toi le seigneur sauveur de la France
+<Sync time="2035.9"/>tu nous jurons nous tes gars de servir et de suivre tes pas
+<Sync time="2040.608"/>MarÃ©chal nous voilÃ 
+<Sync time="2042.372"/>tu nous a redonnÃ© l' espÃ©rance
+<Sync time="2044.946"/>la patrie renaÃ®tra
+<Sync time="2047.455"/>MarÃ©chal MarÃ©chal nous voilÃ 
+<Sync time="2049.998"/>une flamme sacrÃ©e monte du sol natal
+<Sync time="2055.453"/>et la France agitÃ©e
+<Sync time="2058.058"/>de sa MarÃ©chal
+<Sync time="2060.396"/>chantant ton nom
+<Sync time="2061.414"/>(en)fant qui t' aime
+<Sync time="2063.194"/>et vÃ©nÃ¨rent 
+<Event desc="tenER@" type="pronounce" extent="previous"/>
+tes hommes Ã  ton appel suprÃªme
+<Sync time="2067.802"/>ont repondu prÃ©sent
+<Sync time="2070.2"/>MarÃ©chal nous voilÃ 
+<Sync time="2071.981"/>
+<Sync time="2072.867"/>plus c' est souvent
+<Sync time="2074.176"/>c' est toujours pareil
+<Sync time="2075.433"/>si si je m' en souviens bien de la chanson
+<Sync time="2077.650"/>
+<Sync time="2078.584"/>j' ai vu
+<Sync time="2079.095"/>mais enfin ils m' ont ja(mais) ils m' ont jamais fait peur hein
+<Sync time="2081.526"/>
+<Sync time="2082.812"/>puisque j' avais rien Ã  me reprocher
+<Sync time="2084.315"/>qu' est ce que vous voulez qu' ils me reprochent ?
+<Sync time="2085.534"/>
+<Sync time="2086.941"/>je me rappelle des je me rappelle des bombardements quand mÃªme
+<Sync time="2089.365"/>
+<Sync time="2092.773"/>et j' ai vu tomber les bombes
+<Sync time="2094.437"/>c' Ã©tait pas beau hein
+<Sync time="2097.978"/>
+<Sync time="2099.362"/>c' est une pÃ©riode que je voudrais pas revenir
+<Sync time="2101.646"/>
+<Sync time="2102.099"/>j' Ã©tais Ã  Choisy-le-Roi Ã  l' Ã©poque
+<Sync time="2103.905"/>et on les regardait tomber
+<Sync time="2105.609"/>
+<Sync time="2106.524"/>on voyait tomber les bombes
+<Sync time="2107.641"/>
+<Sync time="2112.484"/>on disait maintenant 
+<Event desc="dir" type="noise" extent="begin"/>
+il descend des saucisses 
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="2114.329"/>ils descendaient pour euh empÃªcher des avions de passer
+<Sync time="2117.663"/>ils descendaient des ils appellaient Ã§a 
+<Event desc="dir" type="noise" extent="begin"/>
+des saucisses
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="2120.336"/>
+<Sync time="2121.059"/>on voyait descendre des saucisses
+<Sync time="2122.679"/>
+<Sync time="2124.242"/>Ã§a m' a jamais gÃªnÃ© hein
+<Sync time="2125.199"/>
+<Sync time="2126.025"/>j' avais rien Ã  me reprocher alors
+<Sync time="2127.595"/>
+<Sync time="2129.88"/>j' avais beacoup de camarades allemands hein
+<Sync time="2131.358"/>
+<Sync time="2134.445"/>il y avait par()
+<Sync time="2135.596"/>il y avait la cinquiÃ¨me colonne
+<Sync time="2136.871"/>
+<Sync time="2137.236"/>vous n' avez pas connu la cinquiÃ¨me colonne 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+vous ?
+<Sync time="2140.336"/>
+<Sync time="2142.431"/>moi je m' en souviens
+<Sync time="2143.006"/>
+<Sync time="2144.401"/>je travaillais dans un un ho() un X
+<Sync time="2146.760"/>j' Ã©tais au bureau de l' hotel
+<Sync time="2147.928"/>
+<Sync time="2148.374"/>il y avait il y avait le petit allemand
+<Sync time="2149.884"/>
+<Sync time="2151.335"/>il nous apportait du pain
+<Sync time="2152.570"/>
+<Sync time="2153.381"/>on Ã©tait parce que Ã  l' Ã©poque on Ã©tait rationnÃ© hein
+<Sync time="2155.926"/>
+<Sync time="2156.513"/>on Ã©tait rationnÃ©
+<Sync time="2157.377"/>on avait pas beaucoup de pain
+<Sync time="2158.311"/>
+<Sync time="2158.771"/>mais ils nous apportaient du pain
+<Sync time="2159.990"/>
+<Sync time="2160.474"/>ils nous courraient aprÃ¨s 
+<Event desc="dir" type="noise" extent="begin"/>
+Mademoiselle Mademoiselle
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="2162.554"/>je je les entends encore
+<Sync time="2163.807"/>
+<Event desc="ins" type="noise" extent="instantaneous"/>
+ils nous courraientt aprÃ¨s puis ils nous donnaient du pain
+<Sync time="2165.727"/>on Ã©tait content
+<Sync time="2166.500"/>
+<Sync time="2170.072"/>des gÃ¢teaux des X c' Ã©tait du pain mie mais enfin Ã§a fait rien
+<Sync time="2173.92"/>on Ã©tait content X on Ã©tait rationnÃ© on Ã©tait vraiment rationnÃ© en pain
+<Sync time="2177.714"/>
+<Sync time="2178.413"/>et on grattait on grattait les 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+les cinquante gr() de X
+<Sync time="2181.097"/>on avait fait des Ã  l' atelier
+<Sync time="2183.185"/>il nous avait fait des des cachets avec sept-cents-cinquante
+<Sync time="2185.883"/>
+<Sync time="2186.493"/>c' est vieux Ã§a
+<Sync time="2187.036"/>
+<Sync time="2188.145"/>on grattait de cinq() de cinquante fallait se faire sept-cents-cinquante grammes
+<Sync time="2192.009"/>
+<Sync time="2192.543"/>on avait sept cents
+<Sync time="2193.489"/>alors la la boulangÃ¨re nous disait 
+<Event desc="dir" type="noise" extent="begin"/>
+ils sont vieux 
+<Event desc="rir" type="noise" extent="instantaneous"/>
+ils sont vieux
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="2196.986"/>parce que il y avait des fausses il y avait des fausses cartes Ã  l' Ã©poque hein
+<Sync time="2199.485"/>
+<Sync time="2200.073"/>il y avait des des c' est c' est plus X
+<Sync time="2201.900"/>c' est mieux que les que les faux grasses
+<Sync time="2203.545"/>
+<Sync time="2203.924"/>alors fallait pas faire les trous
+<Sync time="2205.182"/>
+<Sync time="2207.168"/>je sais pas mais c' est pourtant vrai
+<Sync time="2208.935"/>on faisait Ã§a 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+au magasin 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPe
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="2211.968"/>
+<Sync time="2212.987"/>et ma soeur Ã©tait sous les bombes 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+elle
+<Sync time="2218.441"/>
+<Sync time="2219.676"/>il y a eu un camp de concentration d'ailleurs Ã  Beaune
+<Sync time="2221.950"/>
+<Sync time="2222.872"/>Baume non c' est pas la
+<Sync time="2224.566"/>c' est un un
+<Sync time="2225.646"/>Baume-les-Dames et Beaume-les-Messieurs
+<Sync time="2227.693"/>Baume-les-Dames et Beaume-les-Messieurs
+<Sync time="2229.081"/>c' est c' est dans le Jura Ã§a
+<Sync time="2230.999"/>c' est pas pareil mais enfin
+<Sync time="2232.667"/>Ã§a c' est autre chose
+<Sync time="2233.073"/>c' est encore un autre une autre pÃ©riode
+<Sync time="2234.764"/>
+<Sync time="2236.552"/>c' est loin tout Ã§a
+<Sync time="2237.350"/>
+<Sync time="2237.975"/>moi Ã§a commence Ã§a commence Ã  se mÃ©langer tout Ã§a ha
+<Sync time="2240.92"/>
+<Sync time="2242.368"/>voilÃ 
+<Sync time="2242.692"/>
+<Sync time="2243.831"/>vous avez Ã©tÃ© au 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPl 
+<Event desc="buzz" type="noise" extent="end"/>
+alors chez 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp 
+<Event desc="buzz" type="noise" extent="end"/>
+?
+</Turn>
+<Turn speaker="spk1" startTime="2246.188" endTime="2249.529">
+<Sync time="2246.188"/>euh non Ã  
+<Event desc="buzz " type="noise" extent="begin"/>
+NPl
+<Event desc="buzz " type="noise" extent="end"/>
+
+</Turn>
+<Turn speaker="spk2" startTime="2249.529" endTime="2250.885">
+<Sync time="2249.529"/>ah 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPl
+<Event desc="buzz" type="noise" extent="end"/>
+?
+</Turn>
+<Turn speaker="spk1" startTime="2250.885" endTime="2252.722">
+<Sync time="2250.885"/>m-hm
+</Turn>
+<Turn speaker="spk2" startTime="2252.722" endTime="2259.362">
+<Sync time="2252.722"/>
+<Event desc="buzz" type="noise" extent="begin"/>
+NPe
+<Event desc="buzz" type="noise" extent="end"/>
+qu' elle a toujours d'ailleurs
+<Sync time="2255.77"/>
+<Sync time="2257.639"/>avec 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+
+</Turn>
+<Turn speaker="spk1" startTime="2259.362" endTime="2262.641">
+<Sync time="2259.362"/>m-hm
+</Turn>
+<Turn speaker="spk2" startTime="2262.641" endTime="2303.664">
+<Sync time="2262.641"/>et c' est loin tout Ã§a
+<Sync time="2264.541"/>mais enfin elle a toujours son 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPe
+<Event desc="buzz" type="noise" extent="end"/>
+hein
+<Sync time="2265.976"/>
+<Sync time="2271.418"/>et 
+<Event desc="buzz" type="noise" extent="begin"/>
+NPp
+<Event desc="buzz" type="noise" extent="end"/>
+il fait toujours le pitre
+<Sync time="2273.022"/>
+<Sync time="2277.416"/>et c' est loin tout Ã§a
+<Sync time="2279.221"/>Ã§a nous X gÃªnÃ©
+<Sync time="2280.079"/>
+<Sync time="2283.485"/>mais enfin mais c' est quand mÃªme enregistrÃ© tout Ã§a
+<Sync time="2285.452"/>
+<Sync time="2287.111"/>c' est pas encore partie
+<Sync time="2288.026"/>
+<Sync time="2289.008"/>il y a des choses qui s' effacent mais il y en a qui restent hein automatiquement
+<Sync time="2292.187"/>
+<Sync time="2294.665"/>non non mais rien de plus
+<Sync time="2295.721"/>
+<Sync time="2296.264"/>tout est calme
+<Sync time="2297.041"/>je suis calme
+<Sync time="2297.675"/>lÃ  je suis bien
+<Sync time="2298.344"/>
+</Turn>
+<Turn speaker="spk1" startTime="2303.664" endTime="2304.464">
+<Sync time="2303.664"/>merci
+</Turn>
+<Turn speaker="spk2" startTime="2304.464" endTime="2304.913">
+<Sync time="2304.464"/>mh ?
+</Turn>
+<Turn speaker="spk1" startTime="2304.913" endTime="2305.641">
+<Sync time="2304.913"/>merci
+</Turn>
+<Turn speaker="spk2" startTime="2305.641" endTime="2320.069">
+<Sync time="2305.641"/>ben de rien
+<Sync time="2306.252"/>
+<Sync time="2307.77"/>j' ai racontÃ© que des bÃªtises mais enfin 
+<Event desc="ins" type="noise" extent="instantaneous"/>
+
+<Sync time="2309.94"/>non mais c' est c' est pas de mensonges hein
+<Sync time="2312.149"/>
+<Sync time="2312.641"/>je vous ai dit que les vÃ©ritÃ©s
+<Sync time="2313.948"/>
+<Sync time="2315.258"/>on dit que 
+<Event desc="dir" type="noise" extent="begin"/>
+toute vÃ©ritÃ© n' est pas bonne Ã  dire 
+<Event desc="dir" type="noise" extent="end"/>
+mais enfin
+<Sync time="2317.666"/>
+<Sync time="2318.313"/>lÃ  c' est pas pareil hein
+<Sync time="2319.169"/>
+</Turn>
+<Turn speaker="spk1" startTime="2320.069" endTime="2323.046">
+<Sync time="2320.069"/>vous avez toujours beaucoup aimÃ© le franÃ§ais
+</Turn>
+<Turn speaker="spk2 spk1" startTime="2323.046" endTime="2324.089">
+<Sync time="2323.046"/>
+<Who nb="1"/>beaucoup beaucoup
+<Who nb="2"/>le franÃ§ais
+</Turn>
+<Turn speaker="spk1" startTime="2324.089" endTime="2325.252">
+<Sync time="2324.089"/>la langue franÃ§aise
+</Turn>
+<Turn speaker="spk2" startTime="2325.252" endTime="2363.793">
+<Sync time="2325.252"/>oui
+<Sync time="2325.689"/>
+<Sync time="2326.478"/>elle est difficile
+<Sync time="2327.289"/>
+<Sync time="2327.773"/>pour un Ã©tranger cÂ´est diffi(cile)
+<Sync time="2328.971"/>la langue franÃ§aise est difficile 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+Ã  apprendre
+<Sync time="2331.794"/>
+<Sync time="2335.292"/>le franÃ§ais est difficile 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+trÃ¨s difficile paraÃ®t-il
+<Sync time="2338.269"/>
+<Sync time="2339.891"/>je me rappelle hein quand on Ã©tait
+<Sync time="2341.498"/>tous les jours on avait un cours de franÃ§ais quand mÃªme
+<Sync time="2344.046"/>on apprenait le franÃ§ais Ã  l' Ã©poque Ã  l' Ã©cole
+<Sync time="2346.524"/>
+<Sync time="2347.217"/>je sais pas s' ils le font encore
+<Sync time="2348.527"/>s' ils le () on l' apprend encore
+<Sync time="2349.855"/>
+<Sync time="2352.474"/>et l' an(glais) moi j' ai fait j' ai fait de l' anglais
+<Sync time="2354.376"/>
+<Sync time="2355.355"/>j' ai pas fait de l' allemand mais mon fils a fait de l' allemand
+<Sync time="2357.424"/>
+<Sync time="2357.629"/>moi j' ai fait de l' anglais
+<Sync time="2358.867"/>
+<Sync time="2360.474"/>je m' en souviens plus 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+plus du tout
+<Sync time="2363.711"/>
+</Turn>
+<Turn speaker="spk2 spk1" startTime="2363.793" endTime="2364.765">
+<Sync time="2363.793"/>
+<Who nb="1"/>c' est rentrÃ©
+<Who nb="2"/>
+</Turn>
+<Turn speaker="spk2" startTime="2364.765" endTime="2367.801">
+<Sync time="2364.765"/>c' est rentrÃ© d' un cÃ´tÃ© puis c' est sorti 
+<Event desc="rir" type="noise" extent="instantaneous"/>
+de l' autre
+<Sync time="2367.452"/>
+</Turn>
+<Turn speaker="spk1" startTime="2367.801" endTime="2372.273">
+<Sync time="2367.801"/>
+</Turn>
+<Turn speaker="spk2" startTime="2372.273" endTime="2436.628">
+<Sync time="2372.273"/>maintenant ils ils ne s' en occuppent plus
+<Sync time="2374.45"/>
+<Sync time="2375.32"/>ils ne s' en occuppent plus du tout
+<Sync time="2376.526"/>
+<Sync time="2377.245"/>ils font des fautes de franÃ§ais
+<Sync time="2378.601"/>
+<Sync time="2379.602"/>j' avais ma tante elle disait toujours fallait pas faire conjuguer le verbe Ãªtre 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+
+<Event desc="dir" type="noise" extent="begin"/>
+je suis Ã©tÃ© 
+<Event desc="dir" type="noise" extent="end"/>
+elle disait toujours 
+<Event desc="dir" type="noise" extent="begin"/>
+je suis Ã©tÃ© 
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="2385.944"/>mais j' ai jamis osÃ© la reprendre parce qu' elle (elle) parce qu' elle elle n' ai(mait) elle n' aimait pas Ã§a
+<Sync time="2390.175"/>elle disait toujours 
+<Event desc="dir" type="noise" extent="begin"/>
+je suis Ã©tÃ© 
+<Event desc="dir" type="noise" extent="end"/>
+
+<Event desc="pau" type="noise" extent="instantaneous"/>
+fallait pas 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+fallait pas conjuguer le verbe Ãªtre avec lui
+<Sync time="2395.673"/>
+<Sync time="2397.363"/>c' Ã©tait c' est difficile
+<Sync time="2398.521"/>
+<Sync time="2399.255"/>on Ã©(tait) on disait 
+<Event desc="dir" type="noise" extent="begin"/>
+je suis malade je suis 
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="2401.137"/>alors elle disait toujours 
+<Event desc="dir" type="noise" extent="begin"/>
+je suis Ã©tÃ© 
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="2402.689"/>
+<Sync time="2403.15"/>je n' osais lui dire je suis 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+on Ã§a se dit pas on dit 
+<Event desc="dir" type="noise" extent="begin"/>
+je suis allÃ©e 
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="2407.52"/>
+<Sync time="2407.986"/>
+<Event desc="dir" type="noise" extent="begin"/>
+ je suis partie 
+<Event desc="dir" type="noise" extent="end"/>
+c' est pas 
+<Event desc="dir" type="noise" extent="begin"/>
+je suis Ã©tÃ© 
+<Event desc="dir" type="noise" extent="end"/>
+ou 
+<Event desc="dir" type="noise" extent="begin"/>
+j' ai eu 
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="2410.543"/>
+<Sync time="2411.53"/>le verbe avoir peut se conjuguer par lui mÃªme mais pas le verbe Ãªtre
+<Sync time="2414.488"/>
+<Sync time="2415.128"/>je me rappelle d' avoir appris Ã§a Ã  l' Ã©cole 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+parce que le franÃ§ais est difficile difficle Ã  apprendre je crois
+<Sync time="2421.051"/>
+<Sync time="2421.896"/>pour un Ã©tranger de le franÃ§ais est dur
+<Sync time="2424.217"/>
+<Sync time="2428.141"/>c' est tout ce que je peux voux dire
+<Sync time="2429.283"/>qu' est-ce que vous voulez que je vous dise de plus
+<Sync time="2430.597"/>
+<Sync time="2432.171"/>que je suis contente d' Ãªtre franÃ§aise
+<Sync time="2433.871"/>
+</Turn>
+<Turn speaker="spk1" startTime="2436.628" endTime="2439.824">
+<Sync time="2436.628"/>non c' Ã©tait plus sur le langage d' aujourd'hui
+</Turn>
+<Turn speaker="spk2" startTime="2439.824" endTime="2440.3">
+<Sync time="2439.824"/>eh ?
+</Turn>
+<Turn speaker="spk1" startTime="2440.3" endTime="2441.231">
+<Sync time="2440.3"/>le langage d' aujourd'hui
+</Turn>
+<Turn speaker="spk2" startTime="2441.231" endTime="2504.639">
+<Sync time="2441.231"/>oh ben les gamins sont vulgaires
+<Sync time="2442.605"/>
+<Sync time="2443.543"/>il y a trop de vulgaritÃ© maintenant
+<Sync time="2444.946"/>
+<Sync time="2447.111"/>quand vous vous promenez vous voyez des des gamins qui qui qui derriÃ¨re vous qui disent que des gros mots
+<Sync time="2451.479"/>
+<Sync time="2453.417"/>alors non non 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+d'ailleurs mon petit-fils il n' accepte pas que les gamins disent des gros mots
+<Sync time="2458.049"/>
+<Event desc="dir" type="noise" extent="begin"/>
+ c' est pas beau ce que tu dis 
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="2459.225"/>
+<Sync time="2459.765"/>alors je lui dis 
+<Event desc="dir" type="noise" extent="begin"/>
+je je je vais lui faire caca 
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="2462.911"/>c' Ã©tait c' Ã©tait dÃ©goÃ»tant
+<Sync time="2464.24"/>
+<Sync time="2464.765"/>
+<Event desc="dir" type="noise" extent="begin"/>
+ Ã§a pu 
+<Event desc="dir" type="noise" extent="end"/>
+qu' il disait
+<Sync time="2466.009"/>le petit disait 
+<Event desc="dir" type="noise" extent="begin"/>
+a pu a pu a mÃ©mÃ©
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="2468.275"/>
+<Event desc="dir" type="noise" extent="begin"/>
+ mais oui t' a fait caca dans ta culotte 
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="2470.753"/>
+<Event desc="dir" type="noise" extent="begin"/>
+ ah bon ? 
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="2471.573"/>il disait 
+<Event desc="dir" type="noise" extent="begin"/>
+ah ouais 
+<Event desc="dir" type="noise" extent="end"/>
+
+<Sync time="2473.19"/>il a trois ans 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+mais il faisait caca dans sa culotte
+<Sync time="2475.412"/>
+<Sync time="2476.689"/>mais c' Ã©tait c' Ã©tait Ã  l' Ã©poque
+<Sync time="2478.598"/>c' Ã©tait pas c' Ã©tait pas vulgaire
+<Sync time="2480.131"/>
+<Sync time="2481.24"/>moi j' ai jamais connu des gamins vulgaires 
+<Event desc="pau" type="noise" extent="instantaneous"/>
+jamais jamais jamais
+<Sync time="2485.307"/>
+<Sync time="2487.506"/>enfin c' est vieux tout Ã§a
+<Sync time="2488.572"/>
+<Sync time="2490.571"/>j' allais Ã  l' Ã©cole
+<Sync time="2491.29"/>
+<Sync time="2492.671"/>puis c' est tout fallait aller Ã  l' Ã©cole ben j' allais Ã  l' Ã©cole
+<Sync time="2494.617"/>
+<Sync time="2495.644"/>on avait un examen Ã  passer et puis c' est tout
+<Sync time="2497.512"/>
+<Sync time="2498.179"/>
+<Event desc="buzz" type="noise" extent="begin"/>
+NPl
+<Event desc="buzz" type="noise" extent="end"/>
+
+<Sync time="2499.456"/>
+<Sync time="2503.24"/>voilÃ  rien de plus
+</Turn>
+<Turn speaker="spk1" startTime="2504.639" endTime="2520.573">
+<Sync time="2504.639"/>merci
+<Sync time="2505.47"/>mais de rien hein
+<Sync time="2507.026"/>j' ai pas dit grand chose de
+<Sync time="2508.611"/>mais enfin je vous ai jamais dit de mensonges hein
+<Sync time="2510.361"/>
+</Turn>
+</Section>
+</Episode>
+</Trans>
