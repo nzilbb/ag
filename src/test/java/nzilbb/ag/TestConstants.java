@@ -33,8 +33,8 @@ public class TestConstants {
    @Test public void versionExtraction() {
       assertNotNull("Constants.VERSION is set ",
                     Constants.VERSION);
-      assertTrue("Constants.VERSION a decimal version: " + Constants.VERSION,
-                 Constants.VERSION.matches("\\d+\\.\\d+(-\\w*)?"));
+      assertTrue("Constants.VERSION a semantic version: " + Constants.VERSION,
+                 Constants.VERSION.matches("\\d+\\.\\d+.\\d+(-\\w*)?"));
    }
 
    public static void main(String args[]) {

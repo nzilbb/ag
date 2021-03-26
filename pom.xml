@@ -7,7 +7,7 @@
   <groupId>nz.ac.canterbury.nzilbb</groupId>
   <artifactId>nzilbb.ag</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.1.0-SNAPSHOT</version>
   <name>nzilbb.ag</name>
   <description>Implementation of an Annotation Graph API for linguistic annotations.</description>
   <url>https://github.com/nzilbb/ag/</url>

@@ -6,7 +6,7 @@
 
   <groupId>nz.ac.canterburyl.nzilbb</groupId>
   <artifactId>nzilbb.stt.google</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.1.0-SNAPSHOT</version>
   <name>nzilbb.stt.google</name>
   <description>Google Speech To Text transcriber</description>
 
@@ -32,7 +32,7 @@
     <dependency>
       <groupId>nz.ac.canterbury.nzilbb</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>0.1.0-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
