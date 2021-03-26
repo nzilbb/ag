@@ -9,6 +9,11 @@
   <version>0.1.0-SNAPSHOT</version>
   <name>nzilbb.stt.google</name>
   <description>Google Speech To Text transcriber</description>
+  <parent>
+    <groupId>nz.ac.canterbury.nzilbb</groupId>
+    <artifactId>nzilbb.stt</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

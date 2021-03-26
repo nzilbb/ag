@@ -42,15 +42,42 @@ More format conversions are available
 
 ### Prerequisites
 
+* The JDK for at least Java 8
+  ```
+  sudo apt install default-jdk
+  ```
 * Maven
+  ```
+  sudo apt install maven
+  ```
 
-### Build the nzilbb.ag jar
+### Build nzilbb.ag.jar and also all format, annotator, and transcriber modules 
 
 ```
 mvn package
 ```
 
-### Run unit tests
+### Build only nzilbb.ag.jar
+
+```
+mvn package -pl :nzilbb.ag
+```
+
+### Build all transcriber modules only
+
+```
+mvn package -pl :nzilbb.stt
+```
+
+### Build a specific transcriber module
+
+```
+mvn package -pl :nzilbb.stt.deepspeech
+```
+
+etc...
+
+### Run all unit tests
 
 ```
 mvn test
