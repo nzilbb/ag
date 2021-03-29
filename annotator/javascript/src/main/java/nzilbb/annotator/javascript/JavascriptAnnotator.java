@@ -48,7 +48,7 @@ import nzilbb.util.IO;
 //  - cancelling() references -> isCancelling()
 public class JavascriptAnnotator extends Annotator {
    /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
-   public String getMinimumApiVersion() { return "20200708.2018"; }
+   public String getMinimumApiVersion() { return "1.0.0"; }
 
    /**
     * The Javascript script engine.

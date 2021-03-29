@@ -55,7 +55,7 @@ import nzilbb.util.IO;
 @UsesFileSystem
 public class JythonAnnotator extends Annotator {
    /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
-   public String getMinimumApiVersion() { return "20201103.1514"; }
+   public String getMinimumApiVersion() { return "1.0.0"; }
 
    /**
     * The URL for downloading Jython.

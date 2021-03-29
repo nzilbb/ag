@@ -77,7 +77,7 @@ import nzilbb.util.IO;
 public class CMUDictionaryTagger extends Annotator
    implements ImplementsDictionaries {
    /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
-   public String getMinimumApiVersion() { return "20200708.2018"; }
+   public String getMinimumApiVersion() { return "1.0.0"; }
    
    private PrintWriter log;
    private static SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
