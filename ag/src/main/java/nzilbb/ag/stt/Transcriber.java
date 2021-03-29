@@ -97,8 +97,7 @@ public abstract class Transcriber implements MonitorableTask {
     * @return Transcriber version.
     */
    public String getVersion() {
-      nzilbb.util.IO.ProjectProperties(getClass()).getProperty("version");
-      return null;
+      return getClass().getPackage().getImplementationVersion();
    }
    
    /**

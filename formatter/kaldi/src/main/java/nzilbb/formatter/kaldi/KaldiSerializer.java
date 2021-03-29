@@ -176,7 +176,8 @@ public class KaldiSerializer implements GraphSerializer {
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-	 "Kaldi Files", "1.2", "text/x-kaldi-text", ".kaldi", "20200909.1954",
+	 "Kaldi Files", getClass().getPackage().getImplementationVersion(),
+         "text/x-kaldi-text", ".kaldi", "20200909.1954",
          getClass().getResource("icon.png"));
    }
 

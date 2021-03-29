@@ -10,9 +10,11 @@
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.formatter.csv</artifactId>
   <name>nzilbb.formatter.csv</name>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.5.0</version>
 
   <properties>
+    <package.path>nzilbb/formatter/csv/</package.path>
+    <formatter.class>nzilbb.formatter.clan.CsvSerializer</formatter.class>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -41,6 +43,23 @@
 
   <build>
     <plugins>
+      <!-- add manifest attributes required for identifying the formatter class -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest addDefaultImplementationEntries="true" />
+            <manifestEntries>
+              <nzilbb-ag-serialize-GraphSerializer>${formatter.class}</nzilbb-ag-serialize-GraphSerializer>
+              <Name>${package.path}</Name>
+              <Implementation-Title>${project.description}</Implementation-Title>
+              <Implementation-Version>${project.version}</Implementation-Version>
+              <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
       <!-- include commons-csv in our jar -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

@@ -644,7 +644,8 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-         "Plain Text Document", "1.4", "text/plain", ".txt", "20200909.1954",
+         "Plain Text Document", getClass().getPackage().getImplementationVersion(),
+         "text/plain", ".txt", "20200909.1954",
          getClass().getResource("icon.png"));
    }
 

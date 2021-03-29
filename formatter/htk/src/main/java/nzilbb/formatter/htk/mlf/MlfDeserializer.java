@@ -281,7 +281,8 @@ public class MlfDeserializer implements GraphDeserializer {
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-	 "HTK Labels", "1.21", "text/x-htk+plain", ".mlf", "20200909.1954",
+	 "HTK Labels", getClass().getPackage().getImplementationVersion(),
+         "text/x-htk+plain", ".mlf", "20200909.1954",
          getClass().getResource("icon.png"));
    }
 

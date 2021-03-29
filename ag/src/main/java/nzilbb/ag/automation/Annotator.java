@@ -129,19 +129,7 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
     * @return Annotator version.
     */
    public String getVersion() {
-      // get our version info from the comment of the jar file we're built into
-      try {
-         URL thisClassUrl = getClass().getResource(getClass().getSimpleName() + ".class");
-         if (thisClassUrl.toString().startsWith("jar:")) {
-            URI thisJarUri = new URI(thisClassUrl.toString().replaceAll("jar:(.*)!.*","$1"));
-            JarFile thisJarFile = new JarFile(new File(thisJarUri));
-            return thisJarFile.getComment();
-         }
-      } catch (Throwable t) {
-         System.err.println("Annotator.getVersion: " + t);
-         t.printStackTrace(System.err);
-      }
-      return null;
+      return getClass().getPackage().getImplementationVersion();
    }
    
    /**

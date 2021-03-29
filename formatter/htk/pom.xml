@@ -10,9 +10,11 @@
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.formatter.htk</artifactId>
   <name>nzilbb.formatter.htk</name>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>1.3.0</version>
 
   <properties>
+    <package.path>nzilbb/formatter/htk/mlf/</package.path>
+    <formatter.class>nzilbb.formatter.htk.mlf.MlfDeserializer</formatter.class>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -34,6 +36,26 @@
   </dependencies>
 
   <build>
+    <plugins>
+      <!-- add manifest attributes required for identifying the formatter class -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest addDefaultImplementationEntries="true" />
+            <manifestEntries>
+              <nzilbb-ag-serialize-GraphDeserializer>${formatter.class}</nzilbb-ag-serialize-GraphDeserializer>
+              <Name>${package.path}</Name>
+              <Implementation-Title>${project.description}</Implementation-Title>
+              <Implementation-Version>${project.version}</Implementation-Version>
+              <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+    </plugins>
+
     <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>
         <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->

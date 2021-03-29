@@ -16,6 +16,7 @@
   <description>DeepSpeech transcriber</description>
 
   <properties>
+    <package.path>nzilbb/transcriber/deepspeech/</package.path>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -37,12 +38,6 @@
   </dependencies>
 
   <build>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
     <plugins>
       <!-- add manifest attribute required for identifying the transcriber class -->
       <plugin>
@@ -53,7 +48,11 @@
             <manifest addDefaultImplementationEntries="true">
             </manifest>
             <manifestEntries>
-              <nzilbb-ag-transcriber-Transcriber>nzilbb.transcriber.deepspeech.DeepSpeechTranscriber</nzilbb-ag-transcriber-Transcriber>
+              <nzilbb-ag-stt-Transcriber>nzilbb.transcriber.deepspeech.DeepSpeechTranscriber</nzilbb-ag-stt-Transcriber>
+              <Name>${package.path}</Name>
+              <Implementation-Title>${project.description}</Implementation-Title>
+              <Implementation-Version>${project.version}</Implementation-Version>
+              <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
             </manifestEntries>
           </archive>
         </configuration>

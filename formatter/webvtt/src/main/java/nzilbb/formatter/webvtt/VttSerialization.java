@@ -80,7 +80,8 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-	 "WebVTT subtitles", "0.5", "text/vtt", ".vtt", "20200909.1954", getClass().getResource("icon.png"));
+	 "WebVTT subtitles", getClass().getPackage().getImplementationVersion(),
+         "text/vtt", ".vtt", "20200909.1954", getClass().getResource("icon.png"));
    }
 
    /**

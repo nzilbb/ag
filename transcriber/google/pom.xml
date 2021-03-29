@@ -16,6 +16,7 @@
   <description>Google Speech To Text transcriber</description>
 
   <properties>
+    <package.path>nzilbb/transcriber/deepspeech/</package.path>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -59,12 +60,6 @@
   </dependencies>
 
   <build>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
     <plugins>
       
       <!-- add manifest attribute required for identifying the transcriber class -->
@@ -75,7 +70,11 @@
           <archive>
             <manifest addDefaultImplementationEntries="true" />
             <manifestEntries>
-              <nzilbb-ag-transcriber-Transcriber>nzilbb.transcriber.google.GoogleTranscriber</nzilbb-ag-transcriber-Transcriber>
+              <nzilbb-ag-stt-Transcriber>nzilbb.transcriber.google.GoogleTranscriber</nzilbb-ag-stt-Transcriber>
+              <Name>${package.path}</Name>
+              <Implementation-Title>${project.description}</Implementation-Title>
+              <Implementation-Version>${project.version}</Implementation-Version>
+              <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
             </manifestEntries>
           </archive>
         </configuration>
