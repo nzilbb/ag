@@ -116,7 +116,7 @@ public class GoogleTranscriber extends Transcriber {
     * @see Constants#VERSION
     */
    public String getMinimumApiVersion() {
-      return "20210319.1109";
+      return "1.0.0";
    }
    
    /**
