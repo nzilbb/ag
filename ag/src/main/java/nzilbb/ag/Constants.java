@@ -30,7 +30,7 @@ public class Constants {
    /** API version */
    public static final String VERSION;
    static {
-      VERSION = nzilbb.util.IO.ProjectProperties(Constants.class).getProperty("version");
+      VERSION = Constants.class.getPackage().getImplementationVersion();
    }
    
    /** 

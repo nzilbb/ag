@@ -12,6 +12,7 @@
   <description>Implementation of an Annotation Graph API for linguistic annotations.</description>
 
   <properties>
+    <package.path>nzilbb/ag/</package.path>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -107,6 +108,12 @@
             <manifest addDefaultImplementationEntries="true">
               <addClasspath>true</addClasspath>
             </manifest>
+            <manifestEntries>
+              <Name>${package.path}</Name>
+              <Implementation-Title>${project.description}</Implementation-Title>
+              <Implementation-Version>${project.version}</Implementation-Version>
+              <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
+            </manifestEntries>
           </archive>
         </configuration>
       </plugin>
