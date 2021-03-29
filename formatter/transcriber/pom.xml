@@ -53,6 +53,7 @@
               <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
             </manifestEntries>
           </archive>
+          <outputDirectory>../../bin</outputDirectory>
         </configuration>
       </plugin>
     </plugins>

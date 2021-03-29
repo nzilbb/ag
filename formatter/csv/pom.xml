@@ -4,7 +4,7 @@
   <parent>
     <artifactId>nzilbb.formatter</artifactId>
     <groupId>nzilbb</groupId>
-    <version>[1.0.0,)</version>
+    <version>1.0.0</version>
   </parent>
 
   <groupId>nzilbb</groupId>
@@ -58,6 +58,7 @@
               <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
             </manifestEntries>
           </archive>
+          <outputDirectory>../../bin</outputDirectory>
         </configuration>
       </plugin>
       <!-- include commons-csv in our jar -->
