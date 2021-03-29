@@ -4,7 +4,7 @@
   <parent>
     <artifactId>nzilbb.formatter</artifactId>
     <groupId>nzilbb</groupId>
-    <version>[1.0.0,)</version>
+    <version>1.0.0</version>
   </parent>
 
   <groupId>nzilbb</groupId>

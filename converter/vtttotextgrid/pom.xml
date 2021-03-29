@@ -22,17 +22,17 @@
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>nzilbb.formatter.praat</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <version>[2.6.0,)</version>
     </dependency>
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>nzilbb.formatter.webvtt</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <version>[0.6.0,)</version>
     </dependency>
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>converter-base</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -71,25 +71,25 @@
                 <artifactItem>
                   <groupId>nzilbb</groupId>
                   <artifactId>nzilbb.formatter.praat</artifactId>
-                  <version>0.1.0-SNAPSHOT</version>
+                  <version>2.6.0</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>nzilbb</groupId>
                   <artifactId>nzilbb.formatter.webvtt</artifactId>
-                  <version>0.1.0-SNAPSHOT</version>
+                  <version>0.6.0</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>nzilbb</groupId>
                   <artifactId>converter-base</artifactId>
-                  <version>0.1.0-SNAPSHOT</version>
+                  <version>1.0.0</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>nzilbb</groupId>
                   <artifactId>nzilbb.ag</artifactId>
-                  <version>0.1.0-SNAPSHOT</version>
+                  <version>1.0.0</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
               </artifactItems>

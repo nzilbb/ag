@@ -5,11 +5,12 @@
   <parent>
     <groupId>nzilbb</groupId>
     <artifactId>annotation-graphs</artifactId>
-    <version>[1.0.0,)</version>
+    <version>1.0.0</version>
   </parent>
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.formatter</artifactId>
   <name>nzilbb.formatter</name>
+  <version>1.0.0</version>
   <description>
     Modules that convert annotation graphs to and from various tool-specific formats.
   </description>
