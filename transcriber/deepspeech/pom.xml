@@ -4,16 +4,16 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>nz.ac.canterbury.nzilbb</groupId>
-  <artifactId>nzilbb.stt.deepspeech</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
-  <name>nzilbb.stt.deepspeech</name>
-  <description>DeepSpeech transcriber</description>
   <parent>
-    <groupId>nz.ac.canterbury.nzilbb</groupId>
-    <artifactId>nzilbb.stt</artifactId>
+    <groupId>nzilbb</groupId>
+    <artifactId>nzilbb.transcriber</artifactId>
     <version>0.1.0-SNAPSHOT</version>
   </parent>
+  <groupId>nzilbb</groupId>
+  <artifactId>nzilbb.transcriber.deepspeech</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <name>nzilbb.transcriber.deepspeech</name>
+  <description>DeepSpeech transcriber</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -23,7 +23,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>nz.ac.canterbury.nzilbb</groupId>
+      <groupId>nzilbb</groupId>
       <artifactId>nzilbb.ag</artifactId>
       <version>0.1.0-SNAPSHOT</version>
       <scope>compile</scope>
@@ -53,7 +53,7 @@
             <manifest addDefaultImplementationEntries="true">
             </manifest>
             <manifestEntries>
-              <nzilbb-ag-stt-Transcriber>nzilbb.stt.deepspeech.DeepSpeechTranscriber</nzilbb-ag-stt-Transcriber>
+              <nzilbb-ag-transcriber-Transcriber>nzilbb.transcriber.deepspeech.DeepSpeechTranscriber</nzilbb-ag-transcriber-Transcriber>
             </manifestEntries>
           </archive>
         </configuration>

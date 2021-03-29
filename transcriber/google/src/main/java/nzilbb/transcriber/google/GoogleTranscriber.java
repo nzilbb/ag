@@ -19,7 +19,7 @@
 //    along with nzilbb.ag; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.stt.google;
+package nzilbb.transcriber.google;
 
 import com.google.api.gax.longrunning.OperationFuture;
 import com.google.cloud.speech.v1p1beta1.LongRunningRecognizeMetadata;

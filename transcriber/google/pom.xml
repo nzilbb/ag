@@ -4,16 +4,16 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>nz.ac.canterburyl.nzilbb</groupId>
-  <artifactId>nzilbb.stt.google</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
-  <name>nzilbb.stt.google</name>
-  <description>Google Speech To Text transcriber</description>
   <parent>
-    <groupId>nz.ac.canterbury.nzilbb</groupId>
-    <artifactId>nzilbb.stt</artifactId>
+    <groupId>nzilbb</groupId>
+    <artifactId>nzilbb.transcriber</artifactId>
     <version>0.1.0-SNAPSHOT</version>
   </parent>
+  <groupId>nzilbb</groupId>
+  <artifactId>nzilbb.transcriber.google</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <name>nzilbb.transcriber.google</name>
+  <description>Google Speech To Text transcriber</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -35,7 +35,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>nz.ac.canterbury.nzilbb</groupId>
+      <groupId>nzilbb</groupId>
       <artifactId>nzilbb.ag</artifactId>
       <version>0.1.0-SNAPSHOT</version>
       <scope>compile</scope>
@@ -75,7 +75,7 @@
           <archive>
             <manifest addDefaultImplementationEntries="true" />
             <manifestEntries>
-              <nzilbb-ag-stt-Transcriber>nzilbb.stt.google.GoogleTranscriber</nzilbb-ag-stt-Transcriber>
+              <nzilbb-ag-transcriber-Transcriber>nzilbb.transcriber.google.GoogleTranscriber</nzilbb-ag-transcriber-Transcriber>
             </manifestEntries>
           </archive>
         </configuration>
