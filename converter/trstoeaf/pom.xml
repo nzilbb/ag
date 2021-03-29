@@ -4,12 +4,12 @@
   <parent>
     <artifactId>nzilbb.converter</artifactId>
     <groupId>nzilbb</groupId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>[1.0.0,)</version>
   </parent>
 
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.converter.trstoeaf</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <name>nzilbb.converter.trstoeaf</name>
 
   <properties>

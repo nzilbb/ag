@@ -4,7 +4,7 @@
   <parent>
     <artifactId>nzilbb.formatter</artifactId>
     <groupId>nzilbb</groupId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>[1.0.0,)</version>
   </parent>
 
   <groupId>nzilbb</groupId>
@@ -22,7 +22,7 @@
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <version>[1.0.0,)</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
