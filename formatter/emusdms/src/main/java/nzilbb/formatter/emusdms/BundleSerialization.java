@@ -952,7 +952,7 @@ public class BundleSerialization implements GraphSerializer, SchemaSerializer, G
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
          "EMU-SDMS Bundle", getClass().getPackage().getImplementationVersion(),
-         "application/emusdms+json", ".json", "20200909.1954",
+         "application/emusdms+json", ".json", "1.0.0",
          getClass().getResource("icon.png"));
    }
   

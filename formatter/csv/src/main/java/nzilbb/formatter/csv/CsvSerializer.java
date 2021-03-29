@@ -176,7 +176,7 @@ public class CsvSerializer implements GraphSerializer {
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
-	 "Comma Separated Values", "1.2", "text/csv", ".csv", "20200909.1954", getClass().getResource("icon.png"));
+	 "Comma Separated Values", "1.2", "text/csv", ".csv", "1.0.0", getClass().getResource("icon.png"));
    }
 
    /**

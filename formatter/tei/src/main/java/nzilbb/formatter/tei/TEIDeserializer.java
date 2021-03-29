@@ -494,7 +494,7 @@ public class TEIDeserializer implements GraphDeserializer {
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
 	 "TEI Document", getClass().getPackage().getImplementationVersion(),
-         "application/tei+xml", ".xml", "20200909.1954", getClass().getResource("icon.png"));
+         "application/tei+xml", ".xml", "1.0.0", getClass().getResource("icon.png"));
    }
 
    /**

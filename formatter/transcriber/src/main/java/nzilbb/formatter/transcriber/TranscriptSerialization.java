@@ -502,7 +502,7 @@ public class TranscriptSerialization
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
 	 "Transcriber transcript", getClass().getPackage().getImplementationVersion(),
-         "text/xml-transcriber", ".trs", "20200909.1954",
+         "text/xml-transcriber", ".trs", "1.0.0",
          getClass().getResource("icon.png"));
    }
 

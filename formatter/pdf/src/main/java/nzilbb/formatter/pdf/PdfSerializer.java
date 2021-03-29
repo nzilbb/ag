@@ -292,7 +292,7 @@ public class PdfSerializer
    {
       return new SerializationDescriptor(
          "PDF Document", getClass().getPackage().getImplementationVersion(),
-         "application/pdf", ".pdf", "20200909.1954",
+         "application/pdf", ".pdf", "1.0.0",
          getClass().getResource("icon.png"));
    }
 

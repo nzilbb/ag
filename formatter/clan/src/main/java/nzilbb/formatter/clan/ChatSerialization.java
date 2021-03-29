@@ -633,7 +633,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
 	 "CLAN CHAT transcript", getClass().getPackage().getImplementationVersion(),
-         "text/x-chat", ".cha", "20210312.1430", getClass().getResource("icon.png"));
+         "text/x-chat", ".cha", "1.0.0", getClass().getResource("icon.png"));
    }
 
    /**
