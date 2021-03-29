@@ -37,9 +37,9 @@ Modules that perform automatic annotation tasks on annotation graphs.
    ```
    mkdir src/main/java/nzilbb
    mkdir src/main/java/nzilbb/annotator
-   mkdir src/main/java/nzilbb/annotator/javascript
+   mkdir src/main/java/nzilbb/annotator/myannotator
    mkdir src/test/java/nzilbb
    mkdir src/test/java/nzilbb/annotator
-   mkdir src/test/java/nzilbb/annotator/javascript
+   mkdir src/test/java/nzilbb/annotator/myannotator
    ```
 5. Add your implementation to *myannotator/src/main/java/nzilbb/annotator/myannotator*

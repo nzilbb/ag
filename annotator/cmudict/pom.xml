@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>nzilbb.annotator</artifactId>
-    <groupId>nz.ac.canterbury.nzilbb</groupId>
+    <groupId>nzilbb</groupId>
     <version>0.1.0-SNAPSHOT</version>
   </parent>
 
-  <groupId>nz.ac.canterbury.nzilbb</groupId>
+  <groupId>nzilbb</groupId>
   <artifactId>nzilbb.annotator.cmudict</artifactId>
   <name>nzilbb.annotator.cmudict</name>
   <version>0.1.0-SNAPSHOT</version>
@@ -20,7 +20,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>nz.ac.canterbury.nzilbb</groupId>
+      <groupId>nzilbb</groupId>
       <artifactId>nzilbb.ag</artifactId>
       <version>0.1.0-SNAPSHOT</version>
       <scope>compile</scope>
