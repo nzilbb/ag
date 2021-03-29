@@ -8,7 +8,7 @@
   </parent>
 
   <groupId>nzilbb</groupId>
-  <artifactId>nzilbb.converter.trstotxt</artifactId>
+  <artifactId>trs-to-txt</artifactId>
   <name>nzilbb.converter.trstotxt</name>
   <version>1.0.0</version>
 
@@ -53,6 +53,7 @@
               <mainClass>nzilbb.converter.TrsToTxt</mainClass>
             </manifest>
           </archive>
+          <outputDirectory>../../bin</outputDirectory>
         </configuration>
       </plugin>
       <!-- include all the necessary dependencies in our jar for it to run standalone -->

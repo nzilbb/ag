@@ -8,7 +8,7 @@
   </parent>
 
   <groupId>nzilbb</groupId>
-  <artifactId>nzilbb.converter.eaftotrs</artifactId>
+  <artifactId>eaf-to-trs</artifactId>
   <version>1.0.0</version>
 
   <name>nzilbb.converter.eaftotrs</name>
@@ -54,6 +54,7 @@
               <mainClass>nzilbb.converter.EafToTrs</mainClass>
             </manifest>
           </archive>
+          <outputDirectory>../../bin</outputDirectory>
         </configuration>
       </plugin>
       <!-- include all the necessary dependencies in our jar for it to run standalone -->
