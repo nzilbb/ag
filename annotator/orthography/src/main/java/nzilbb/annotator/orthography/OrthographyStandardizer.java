@@ -233,6 +233,8 @@ public class OrthographyStandardizer extends Annotator {
          .trim()
          // remove trailing hyphens/apostrophes
          .replaceAll("[\\-']*$", "")
+         // remove leading hyphens/apostrophes
+         .replaceAll("^[\\-']*", "")
          // might be spaces left after stripping
          .trim();
       return orth;

@@ -77,7 +77,7 @@ public class TestOrthographyStandardizer {
       
       Annotation firstWord = g.first("word");
       assertEquals("double check the first word is what we think it is: "+firstWord,
-                   "“Why", firstWord.getLabel());
+                   "“'Why", firstWord.getLabel());
       
       assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
                    10, g.all("word").length);
@@ -176,7 +176,7 @@ public class TestOrthographyStandardizer {
       
       Annotation firstWord = g.first("word");
       assertEquals("double check the first word is what we think it is: "+firstWord,
-                   "“Why", firstWord.getLabel());
+                   "“'Why", firstWord.getLabel());
       
       assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
                    10, g.all("word").length);
@@ -253,7 +253,7 @@ public class TestOrthographyStandardizer {
       
       Annotation firstWord = g.first("word");
       assertEquals("double check the first word is what we think it is: "+firstWord,
-                   "“Why", firstWord.getLabel());
+                   "“'Why", firstWord.getLabel());
       
       assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
                    10, g.all("word").length);
@@ -268,7 +268,7 @@ public class TestOrthographyStandardizer {
                    9, orthographyLabels.size());
       Iterator<String> orthographies = orthographyLabels.iterator();
       assertEquals("down-case",
-                   "\"why", orthographies.next());
+                   "\"'why", orthographies.next());
       assertEquals("internal apostrophes",
                    "hasn't", orthographies.next());
       assertEquals("accented characters",
@@ -281,7 +281,7 @@ public class TestOrthographyStandardizer {
       assertEquals("internal hyphens retained",
                    "x-ray", orthographies.next());
       assertEquals("punctuation stripped",
-                   "yet?\"", orthographies.next());
+                   "yet?'\"", orthographies.next());
       assertEquals("Hyphen-only omitted, Emoji conserved",
                    "😉", orthographies.next());
 
@@ -328,13 +328,13 @@ public class TestOrthographyStandardizer {
          .setStart(start).setEnd(end)
          .setParent(turn));
       
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("“Why")
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("“'Why")
                            .setStart(g.getOrCreateAnchorAt(10)).setEnd(g.getOrCreateAnchorAt(20))
                            .setParent(turn));
       g.addAnnotation(new Annotation().setLayerId("word").setLabel("hasn’t")
                       .setStart(g.getOrCreateAnchorAt(20)).setEnd(g.getOrCreateAnchorAt(30))
                       .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("Inés")
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("'Inés'")
                       .setStart(g.getOrCreateAnchorAt(30)).setEnd(g.getOrCreateAnchorAt(40))
                       .setParent(turn));
       g.addAnnotation(new Annotation().setLayerId("word").setLabel("d~")
@@ -349,7 +349,7 @@ public class TestOrthographyStandardizer {
       g.addAnnotation(new Annotation().setLayerId("word").setLabel("X-ray")
                       .setStart(g.getOrCreateAnchorAt(70)).setEnd(g.getOrCreateAnchorAt(80))
                       .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("yet?”")
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("yet?'”")
                       .setStart(g.getOrCreateAnchorAt(80)).setEnd(g.getOrCreateAnchorAt(85))
                       .setParent(turn));
       g.addAnnotation(new Annotation().setLayerId("word").setLabel("—")
