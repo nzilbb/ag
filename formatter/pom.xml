@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  
   <parent>
     <groupId>nzilbb</groupId>
     <artifactId>annotation-graphs</artifactId>
@@ -14,9 +13,10 @@
   <description>
     Modules that convert annotation graphs to and from various tool-specific formats.
   </description>
+    
   <packaging>pom</packaging>
-
   <modules>
+    <!--module>agcsv</module-->
     <module>clan</module>
     <module>csv</module>
     <module>elan</module>
@@ -31,20 +31,7 @@
     <module>text</module>
     <module>transcriber</module>
     <module>webvtt</module>
-    <!--module>agcsv</module-->
+    <module>salt</module>
   </modules>
-                            
-
-
-
-
-
-
-
-
-
-
-
-
 
 </project>

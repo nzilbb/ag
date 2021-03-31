@@ -10,39 +10,60 @@ the file extension, e.g `nzilbb.formatter.praat.TextGridSerialization`
 1. In this directory, run the following command (change *myformatter* to the required name):
    ```
    mvn archetype:generate \
-     -DgroupId=nz.ac.canterbury.nzilbb \
+     -DgroupId=nzilbb \
      -DartifactId=myformatter \
      -DarchetypeArtifactId=maven-archetype-quickstart \
      -DarchetypeVersion=1.4 \
      -DinteractiveMode=false
    ```
-2. In *myformatter/pom.xml*:
+2. In *myformatter/pom.xml*:  
    - prefix the *artifactId* and *name* with "nzilbb.formatter."
-   - change *version* to "0.1.0-SNAPSHOT" - i.e. use semantic versioning.
+   - change *version* to "0.1.0" - i.e. use semantic versioning.
    - remove the *url* tag (so it can be inherited from the master pom.xml)
    - change *maven.compiler.source* and *maven.compiler.target* to "1.8"
+   - add the following to *properties*
+   ```
+    <package.path>nzilbb/formatter/myformatter/</package.path>
+    <formatter.class>nzilbb.formatter.myformatter.MyFormatterClass</formatter.class>
+   ```
    - add the following to *dependencies*
    ```
     <dependency>
-      <groupId>nz.ac.canterbury.nzilbb</groupId>
+      <groupId>nzilbb</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <version>[1.0.0,)</version>
       <scope>compile</scope>
     </dependency>
    ```
-3. Remove the groupId-based source code structure:
+   - add the following to *build*:
    ```
-   cd myformatter
-   rm -r src/main/java/nz
-   rm -r src/test/java/nz
+    <plugins>
+      <!-- add manifest attributes required for identifying the formatter class -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest addDefaultImplementationEntries="true" />
+            <manifestEntries>
+              <nzilbb-ag-serialize-GraphSerializer>${formatter.class}</nzilbb-ag-serialize-GraphSerializer>
+              <nzilbb-ag-serialize-GraphDeserializer>${formatter.class}</nzilbb-ag-serialize-GraphDeserializer>
+              <Name>${package.path}</Name>
+              <Implementation-Title>${project.description}</Implementation-Title>
+              <Implementation-Version>${project.version}</Implementation-Version>
+              <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
+            </manifestEntries>
+          </archive>
+          <outputDirectory>../../bin</outputDirectory>
+        </configuration>
+      </plugin>
+    </plugins>    
    ```
-4. Add directory structure for the formatter code:
+3. Add directory structure for the formatter code:
    ```
-   mkdir src/main/java/nzilbb
    mkdir src/main/java/nzilbb/formatter
    mkdir src/main/java/nzilbb/formatter/myformatter
-   mkdir src/test/java/nzilbb
    mkdir src/test/java/nzilbb/formatter
-   mkdir src/test/java/nzilbb/formatter/myformatter
+   mkdir src/test/java/nzilbb/formatter/
    ```
-5. Add your implementation to *myformatter/src/main/java/nzilbb/formatter/myformatter*
+4. Add your implementation to *myformatter/src/main/java/nzilbb/formatter/myformatter*
