@@ -7,7 +7,7 @@ Modules that perform automatic annotation tasks on annotation graphs.
 1. In this directory, run the following command (change *myannotator* to the required name):
    ```
    mvn archetype:generate \
-     -DgroupId=nz.ac.canterbury.nzilbb \
+     -DgroupId=nzilbb \
      -DartifactId=myannotator \
      -DarchetypeArtifactId=maven-archetype-quickstart \
      -DarchetypeVersion=1.4 \
@@ -21,7 +21,7 @@ Modules that perform automatic annotation tasks on annotation graphs.
    - add the following to *dependencies*
    ```
     <dependency>
-      <groupId>nz.ac.canterbury.nzilbb</groupId>
+      <groupId>nzilbb</groupId>
       <artifactId>nzilbb.ag</artifactId>
       <version>0.1.0-SNAPSHOT</version>
       <scope>compile</scope>
