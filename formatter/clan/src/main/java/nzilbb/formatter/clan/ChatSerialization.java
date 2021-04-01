@@ -1105,7 +1105,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     * @param possibleIds Guesses at possible layer IDs.
     * @return The first matching layer, or null if none matched.
     */
-   public Layer findLayerById(LinkedHashMap<String,Layer> possibleLayers, String[] possibleIds) {
+  public Layer findLayerById(LinkedHashMap<String,Layer> possibleLayers, String[] possibleIds) { // TODO replace with Utility.FindLayerById
       HashSet<String> possibleLayerIds = new HashSet<String>();
       for (String id : possibleLayers.keySet()) possibleLayerIds.add(id.toLowerCase());
       for (String id : possibleIds) {

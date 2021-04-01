@@ -1016,8 +1016,8 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
                   "Layer for marking missing words")));
     String[] omissionLayerPossibilities = { "omission", "omissions", "missing" };
     p.setValue(Utility.FindLayerById(
-                 wordTagLayers, Arrays.asList(omissionLayerPossibilities)));
-    p.setPossibleValues(wordTagLayers.values());
+                 phraseLayers, Arrays.asList(omissionLayerPossibilities)));
+    p.setPossibleValues(phraseLayers.values());
       
     p = Optional.ofNullable(configuration.get("codeLayer"))
       .orElse(configuration.addParameter(
@@ -1256,19 +1256,24 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
     SerializationException {
     // if there are errors, accumlate as many as we can before throwing SerializationException
     SerializationException errors = null;
+
+    Layer participantLayer = schema.getParticipantLayer();
+    Layer turnLayer = schema.getTurnLayer();
+    Layer utteranceLayer = schema.getUtteranceLayer();
+    Layer wordLayer = schema.getWordLayer();
     
     Graph graph = new Graph();
     graph.setId(getName());
     // add layers to the graph
     // we don't just copy the whole schema, because that would imply that all the extra layers
     // contained no annotations, which is not necessarily true
-    graph.addLayer((Layer)schema.getParticipantLayer().clone());
-    graph.getSchema().setParticipantLayerId(schema.getParticipantLayerId());
-    graph.addLayer((Layer)schema.getTurnLayer().clone());
-    graph.getSchema().setTurnLayerId(schema.getTurnLayerId());
-    graph.addLayer((Layer)schema.getUtteranceLayer().clone());
-    graph.getSchema().setUtteranceLayerId(schema.getUtteranceLayerId());
-    graph.addLayer((Layer)schema.getWordLayer().clone());
+    graph.addLayer((Layer)participantLayer.clone());
+    graph.getSchema().setParticipantLayerId(participantLayer.getId());
+    graph.addLayer((Layer)turnLayer.clone());
+    graph.getSchema().setTurnLayerId(turnLayer.getId());
+    graph.addLayer((Layer)utteranceLayer.clone());
+    graph.getSchema().setUtteranceLayerId(utteranceLayer.getId());
+    graph.addLayer((Layer)wordLayer.clone());
     graph.getSchema().setWordLayerId(schema.getWordLayerId());
     
     if (targetParticipantLayer != null) graph.addLayer((Layer)targetParticipantLayer.clone());
@@ -1308,14 +1313,12 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       p = p.trim();
       String id = p.substring(0,1); // Child -> C, Examiner -> E, etc.
       String name = p; // TODO prepend file name
-      Annotation participant = graph.createTag(graph, schema.getParticipantLayerId(), name);
-      participant.setConfidence(Constants.CONFIDENCE_MANUAL);
+      Annotation participant = graph.createTag(graph, participantLayer.getId(), name);
       idToParticipant.put(id, participant);
       if (targetParticipant == null) { // first participant is target
         targetParticipant = participant;
         if (targetParticipantLayer != null) {
-          graph.createTag(participant, targetParticipantLayer.getId(), name)
-            .setConfidence(Constants.CONFIDENCE_MANUAL);
+          graph.createTag(participant, targetParticipantLayer.getId(), name);
         }
       }
     } // next participant
@@ -1328,45 +1331,35 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         String value = header.substring(colon + 1).trim();
         if (value.length() > 0) {
           if (key.equals("language") && languageLayer != null) {
-            graph.createTag(graph, languageLayer.getId(), value)
-              .setConfidence(Constants.CONFIDENCE_MANUAL); // TODO convert to ISO639 code
+            graph.createTag(graph, languageLayer.getId(),
+                            // ISO639 alpha-2 code if possible
+                            iso639.alpha2(value).orElse(value));
           } else if (key.equals("participantid") && participantIdLayer != null) {
-            graph.createTag(targetParticipant, participantIdLayer.getId(), value)
-              .setConfidence(Constants.CONFIDENCE_MANUAL);
+            graph.createTag(targetParticipant, participantIdLayer.getId(), value);
           } else if (key.equals("gender") && genderLayer != null) {
-            graph.createTag(targetParticipant, genderLayer.getId(), value)
-              .setConfidence(Constants.CONFIDENCE_MANUAL);
+            graph.createTag(targetParticipant, genderLayer.getId(), value);
           } else if (key.equals("dob") && dobLayer != null) {
-            graph.createTag(targetParticipant, dobLayer.getId(), value)
-              .setConfidence(Constants.CONFIDENCE_MANUAL); // TODO ISO format
+            graph.createTag(targetParticipant, dobLayer.getId(), value); // TODO ISO format
           } else if (key.equals("doe") && doeLayer != null) {
-            graph.createTag(graph, doeLayer.getId(), value)
-              .setConfidence(Constants.CONFIDENCE_MANUAL); // TODO ISO format
+            graph.createTag(graph, doeLayer.getId(), value); // TODO ISO format
           } else if (key.equals("ca") && caLayer != null) {
-            if (schema.getParticipantLayerId().equals(caLayer.getParentId())) {
+            if (participantLayer.getId().equals(caLayer.getParentId())) {
               // participant attribute
-              graph.createTag(targetParticipant, caLayer.getId(), value)
-                .setConfidence(Constants.CONFIDENCE_MANUAL); // TODO validate? format?
+              graph.createTag(targetParticipant, caLayer.getId(), value); // TODO validate? format?
             } else {
               // transcript attribute
-              graph.createTag(graph, caLayer.getId(), value)
-                .setConfidence(Constants.CONFIDENCE_MANUAL); // TODO validate? format?
+              graph.createTag(graph, caLayer.getId(), value); // TODO validate? format?
             }
           } else if (key.equals("ethnicity") && ethnicityLayer != null) {
-            graph.createTag(targetParticipant, ethnicityLayer.getId(), value)
-              .setConfidence(Constants.CONFIDENCE_MANUAL);
+            graph.createTag(targetParticipant, ethnicityLayer.getId(), value);
           } else if (key.equals("context") && contextLayer != null) {
-            graph.createTag(graph, contextLayer.getId(), value)
-              .setConfidence(Constants.CONFIDENCE_MANUAL);
+            graph.createTag(graph, contextLayer.getId(), value);
           } else if (key.equals("subgroup") && subgroupLayer != null) {
-            graph.createTag(graph, subgroupLayer.getId(), value)
-              .setConfidence(Constants.CONFIDENCE_MANUAL);
+            graph.createTag(graph, subgroupLayer.getId(), value);
           } else if (key.equals("collect") && collectLayer != null) {
-            graph.createTag(graph, collectLayer.getId(), value)
-              .setConfidence(Constants.CONFIDENCE_MANUAL);
+            graph.createTag(graph, collectLayer.getId(), value);
           } else if (key.equals("location") && locationLayer != null) {
-            graph.createTag(graph, locationLayer.getId(), value)
-              .setConfidence(Constants.CONFIDENCE_MANUAL);
+            graph.createTag(graph, locationLayer.getId(), value);
           }
         } // there's a value specified
       } // there's a colon separator
@@ -1374,17 +1367,18 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
 
     // ensure we have an utterance tokenizer
     if (getTokenizer() == null) {
-      setTokenizer(new SimpleTokenizer(schema.getUtteranceLayerId(), schema.getWordLayerId()));
+      setTokenizer(new SimpleTokenizer(utteranceLayer.getId(), wordLayer.getId()));
     }
 
     // regular expressions
     Pattern timeStampPattern = Pattern.compile("^-\\s([0-9]+):([0-9]+)");
 
     // utterances
-    Annotation currentTurn = new Annotation(null, "", schema.getTurnLayerId());
+    Annotation currentTurn = new Annotation(null, "", turnLayer.getId());
     Annotation cUnit = null;
     Anchor lastAnchor = start;
     Anchor lastAlignedAnchor = start;
+    String prefixNextUtterance = "";
     for (String line : lines) {
       // skip blank lines
       if (line.trim().length() == 0) continue;
@@ -1392,6 +1386,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       // is it a time stamp?
       Matcher sync = timeStampPattern.matcher(line);
       if (sync.matches()) { // time stamp
+        
         int minutes = Integer.parseInt(sync.group(1));
         int seconds = Integer.parseInt(sync.group(2));
         double offset = minutes * 60 + seconds;
@@ -1402,8 +1397,41 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
           lastAnchor = graph.getOrCreateAnchorAt(offset, Constants.CONFIDENCE_MANUAL);
         }
         lastAlignedAnchor = lastAnchor;
-      } else if (line.startsWith("+") || line.startsWith("=")) { // TODO comment line
-      } else if (line. startsWith(";")) { // TODO pause line
+        
+      } else if (line.startsWith("+") || line.startsWith("=")) { // comment line
+        
+        if (commentLayer != null) {
+          graph.addAnnotation(
+            new Annotation()
+            .setLayerId(commentLayer.getId())
+            .setLabel(line.substring(1).trim())
+            .setStartId(lastAnchor.getId())
+            .setEndId(lastAnchor.getId()));
+        }
+        
+      } else if (line. startsWith(";") || line. startsWith(":")) { // pause line
+        
+        if (pauseLayer != null) {
+          String pauseLabel = line.substring(1).trim();
+          if (lastAnchor == lastAlignedAnchor) { // pause line is after a time stamp
+            // prefix it to the next line
+            prefixNextUtterance += pauseLabel + " ";
+          } else { // append it to the last line
+            LinkedHashSet<Annotation> endingUtterances = lastAnchor.endOf(utteranceLayer.getId());
+            if (endingUtterances.size() == 0) { // no prior utterance
+              // prefix it to the next line
+              prefixNextUtterance += pauseLabel + " ";
+            } else {
+              Annotation lastUtterance = endingUtterances.iterator().next();
+              lastUtterance.setLabel(
+                lastUtterance.getLabel()
+                // insert before utterance code if any
+                .replaceFirst("(?<utterance>.*)(?<code> \\[[\\w0-9:]+\\])$",
+                              "${utterance} " + pauseLabel + "${code}"));
+            }
+          }
+        }
+        
       } else { // utterance
         
         String p = line.substring(0,1);
@@ -1418,22 +1446,26 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         // new speaker?
         if (!participant.getLabel().equals(currentTurn.getLabel())) {
           currentTurn = new Annotation()
-            .setLayerId(schema.getTurnLayerId())
+            .setLayerId(turnLayer.getId())
             .setLabel(participant.getLabel())
             .setStartId(utteranceStart.getId())
             .setEndId(utteranceEnd.getId())
-            .setParentId(participant.getId());          
-          currentTurn.setConfidence(Constants.CONFIDENCE_MANUAL);
+            .setParentId(participant.getId());
           graph.addAnnotation(currentTurn);
         } // new turn
 
+        String label = line.substring(1).trim();
+        if (prefixNextUtterance.length() > 0) {
+          label = prefixNextUtterance + label;
+          prefixNextUtterance = "";
+        }
+
         Annotation utterance = new Annotation()
-          .setLayerId(schema.getUtteranceLayerId())
-          .setLabel(line.substring(1).trim())
+          .setLayerId(utteranceLayer.getId())
+          .setLabel(label)
           .setStartId(utteranceStart.getId())
           .setEndId(utteranceEnd.getId())
-          .setParentId(currentTurn.getId());          
-        utterance.setConfidence(Constants.CONFIDENCE_MANUAL);
+          .setParentId(currentTurn.getId());
         graph.addAnnotation(utterance);
         currentTurn.setEndId(utteranceEnd.getId());
         lastAnchor = utteranceEnd;
@@ -1448,33 +1480,192 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       lastAnchor.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
     }
 
-    // TODO parse out utterance codes
+    // at this point, each utterance is labelled with the line transcript, and there are
+    // no word tokens yet
     
-    // tokenize utterances into words
+    graph.trackChanges();
     try {
+      
+      // non-error utterance codes
+      ConventionTransformer transformer = new ConventionTransformer(
+        utteranceLayer.getId(), "(?<line>.*) \\[(?<code>[^E][\\w0-9:]+)\\]$", "${line}");
+      if (codeLayer != null) {
+        transformer.addDestinationResult(codeLayer.getId(), "${code}");
+      }
+      transformer.transform(graph).commit();
+
+      // utterance error codes
+      transformer = new ConventionTransformer(
+        utteranceLayer.getId(), "(?<line>.*) \\[(?<code>E[\\w0-9:]+)\\]$", "${line}");
+      if (errorLayer != null) {
+        transformer.addDestinationResult(errorLayer.getId(), "${code}");
+      }
+      transformer.transform(graph).commit();
+      
+    } catch(TransformationException exception) {
+      if (errors == null) errors = new SerializationException();
+      if (errors.getCause() == null) errors.initCause(exception);
+      errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
+    }    
+        
+    try { // tokenize utterances into words
       getTokenizer().transform(graph);
+      graph.commit();
     } catch(TransformationException exception) {
       if (errors == null) errors = new SerializationException();
       if (errors.getCause() == null) errors.initCause(exception);
       errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
     }
+    
+    try { // parse out in-situ word/phrase annotations
 
-    graph.trackChanges();
-    // try {
-    //   graph.trackChanges();
+      // sound effects
+      ConventionTransformer transformer = new ConventionTransformer(
+        wordLayer.getId(), "%(?<sound>.+)");
+      if (soundEffectLayer != null) {
+        transformer.addDestinationResult(soundEffectLayer.getId(), "${sound}");
+      }
+      transformer.transform(graph).commit();
 
-    //   // TODO parse out in-situ annotations
+      // repetitions - something like "heaps_and_heaps|heaps"
+      // in order to not confuse these with proper names and with root forms, we annotate
+      // them beforehand in three phases:
+      // 1. identify the w_x[_y]...|z pattern, and create repetition annotions, marking the
+      // words with w#_x[_y] along the way
+      // 2. convert the w#_x[_y] words to w#x#y
+      // 3. split #-containing words into multiple tokens
 
-    //   // set all annotations to manual confidence
-    //   for (Annotation a : graph.getAnnotationsById().values()) {
-    //     a.setConfidence(Constants.CONFIDENCE_MANUAL);
-    //   }
+      // phase 1: split off annotation 'root'
+      transformer = new ConventionTransformer(
+        wordLayer.getId(),
+        "(?<first>[a-zA-Z0-9]+)(?<subsequent>_[^|]+)\\|(?<word>[a-zA-Z0-9]+)(?<punctuation>\\W*)",
+        "${first}#${subsequent}${punctuation}"
+        );
+      if (repetitionsLayer != null) {
+        transformer.addDestinationResult(repetitionsLayer.getId(), "$3");
+      }
+      transformer.transform(graph).commit();
 
-    // } catch(TransformationException exception) {
-    //   if (errors == null) errors = new SerializationException();
-    //   if (errors.getCause() == null) errors.initCause(exception);
-    //   errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
-    // }
+      // phase 2: delimited repetitions with #
+      for (Annotation word : graph.all(wordLayer.getId())) {
+        if (word.getLabel().contains("#_")) { // a label created in phase 1
+          // convert _ into #
+          word.setLabel(word.getLabel().replaceAll("#","").replaceAll("_","#"));
+        } // a label created in phase 1
+      } // next word
+
+      // phase 3: split words on #
+      SimpleTokenizer repetitionSplitter = new SimpleTokenizer(
+        wordLayer.getId(), null, "#", true);
+      repetitionSplitter.transform(graph).commit();
+      
+      // proper names
+      SimpleTokenizer linkageSplitter = new SimpleTokenizer(
+        wordLayer.getId(), properNameLayer != null?properNameLayer.getId():null, "_", true);
+      linkageSplitter.transform(graph).commit();
+
+      // non-error codes
+      transformer = new ConventionTransformer(
+        wordLayer.getId(),
+        "(?<word>.+)\\[(?<code>[^E][\\w0-9:]+)\\](?<punctuation>\\W*)",
+        "${word}${punctuation}");
+      if (codeLayer != null) {
+        transformer.addDestinationResult(codeLayer.getId(), "${code}");
+      }
+      transformer.transform(graph).commit();      
+
+      // error codes
+      transformer = new ConventionTransformer(
+        wordLayer.getId(),
+        "(?<word>.+)\\[(?<code>E[\\w0-9:]+)\\](?<punctuation>\\W*)",
+        "${word}${punctuation}");
+      if (errorLayer != null) {
+        transformer.addDestinationResult(errorLayer.getId(), "${code}");
+      }
+      transformer.transform(graph).commit();      
+
+      // root forms
+      transformer = new ConventionTransformer(
+        wordLayer.getId(),
+        "(?<word>[^|]+)\\|(?<root>\\w+)(?<punctuation>\\W*)",
+        "${word}${punctuation}");
+      if (rootLayer != null) {
+        transformer.addDestinationResult(rootLayer.getId(), "${root}");
+      }
+      transformer.transform(graph).commit();      
+
+      // bound morphemes
+      transformer = new ConventionTransformer(
+        wordLayer.getId(),
+        "(?<word>[^/]+)\\/(?<morpheme>[\\w0-9']+)(?<binding2>/(?<morpheme2>[\\w0-9']+))?"
+        +"(?<punctuation>\\W*)",
+        "${word}${morpheme}${morpheme2}${punctuation}"); // TODO fix invalid cases like babysz
+      if (boundMorphemeLayer != null) {
+        // on the bound morpheme layer, include the base word
+        transformer.addDestinationResult(
+          boundMorphemeLayer.getId(), "${word}/${morpheme}${binding2}");
+      }
+      transformer.transform(graph).commit();
+
+      // infra-line comments
+      SpanningConventionTransformer spanningTransformer = new SpanningConventionTransformer(
+        wordLayer.getId(), "\\{(.*)", "(.*)\\}", true, null, null, 
+        commentLayer==null?null:commentLayer.getId(), "$1", "$1", false, false);
+      spanningTransformer.transform(graph).commit();
+
+      // parentheticals
+      spanningTransformer = new SpanningConventionTransformer(
+        wordLayer.getId(), "\\(\\((.*)", "(.*)\\)\\)", false, "$1", "$1", 
+        parentheticalLayer==null?null:parentheticalLayer.getId(), "(($1...", "...$1))",
+        false, false);
+      spanningTransformer.transform(graph).commit();      
+
+      // mazes
+      spanningTransformer = new SpanningConventionTransformer(
+        wordLayer.getId(), "\\((.*)", "(.*)\\)", false, "$1", "$1", 
+        mazeLayer==null?null:mazeLayer.getId(), "($1...", "...$1)", false, false);
+      spanningTransformer.transform(graph).commit();      
+
+      // pauses
+      transformer = new ConventionTransformer(wordLayer.getId(), ":(?<pause>.+)");
+      if (pauseLayer != null) {
+        transformer.addDestinationResult(pauseLayer.getId(), "${pause}");
+      }
+      transformer.transform(graph).commit();      
+
+      // omissions
+      transformer = new ConventionTransformer(wordLayer.getId(), "\\*(?<omission>.+)");
+      if (omissionLayer != null) {
+        transformer.addDestinationResult(omissionLayer.getId(), "${omission}");
+      }
+      transformer.transform(graph).commit();      
+
+      // c-units
+      if (cUnitLayer != null) {
+        // multi-word c-units
+        spanningTransformer = new SpanningConventionTransformer(
+          wordLayer.getId(),
+          "(?<firstWord>.+)", "(?<lastWord>.*)(?<terminator>[.?!~^>])", false,
+          "${firstWord}", "${lastWord}${terminator}", 
+          cUnitLayer.getId(), null, "${terminator}", false, false);
+        spanningTransformer.transform(graph).commit();
+      }
+
+      // partial words 
+      transformer = new ConventionTransformer(
+        wordLayer.getId(), "(?<partial>.+)\\*", "${partial}~");
+      transformer.transform(graph).commit();      
+
+      // set all annotations to manual confidence
+      for (Annotation a : graph.getAnnotationsById().values()) {
+        a.setConfidence(Constants.CONFIDENCE_MANUAL);
+      }
+      graph.commit();
+    } catch(TransformationException exception) {
+      if (errors == null) errors = new SerializationException();
+      if (errors.getCause() == null) errors.initCause(exception);
+      errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
+    }
     if (errors != null) throw errors;
       
     // reset all change tracking
@@ -1660,7 +1851,8 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         Annotation annotation = graph.first(languageLayer.getId());
         if (annotation != null) {
           writer.println("+ Language: ");
-          writer.println(annotation.getLabel()); // TODO code->name
+          writer.println(iso639.name(annotation.getLabel()) // language name if possible
+                         .orElse(annotation.getLabel()));
         }
       }
       if (participantIdLayer != null) {

@@ -10,10 +10,10 @@
 + Subgroup: TEST
 + Collect: 1
 - 0:00
-E I'm at Byron kindergarten on the 30th of March 2021. 
+E I'm at Byron kindergarten on ((what date is it)) the 30th of March 2021? 
 
 - 00:05
-E My name is X[REDACTED], and I'm here with X[REDACTED], doing the oral language assessment [CENSOR]. 
+E My name is X[REDACTED]. and I'm here with X[REDACTED], doing the oral language assessment. [CENSOR]
 
 - 00:12
 E Okay, so now Ada it's your turn to tell the story. 
@@ -26,10 +26,10 @@ E So let's start at the beginning.
 
 - 00:23
 E What was the story about?
-
++ This is a plus line comment
 - 00:29
-C (Um the kids) the kid/s, they quickly put their gumboot/s on.
-
+C (Um the kids) the kid/s, {in-situ comment} they quickly put their gumboot/s on.
+= This is an equals line comment
 - 00:34
 E Ah Mm hmm. 
 
@@ -37,27 +37,29 @@ E Ah Mm hmm.
 E Anything else?
 
 - 00:39
-C And please go for a walk [EU]? 
+C And please go for a walk? [EU] 
+: :01 
 
 - 00:41
 C You need to put your gumboot/s on. 
 
 - 00:46
-C It/'s too dark.
+C It/'s too dark^
 
 - 00:47
 E What happened in this one?
 
 - 00:52
-C And then it/'s too dark.
+C And then it/'s heaps_and_heaps|heaps dark.
 
 - 01:02
 E What happened next?
 
 - 01:03
-C Schnitzel_von_Krumm s* fell out *of the nest.
+C %yip_yip Schnitzel_von_Krumm s* :02 falled|fall[EW] out *of the  bird/s/z nest.
 
 - 01:09
+: :03 
 E What happened next?
 
 - 01:11

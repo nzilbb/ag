@@ -122,6 +122,9 @@ public class TestSltSerialization {
       new Layer("entity", "Proper Names").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId("turn").setParentIncludes(true),
+      new Layer("omission", "Omissions").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
 
       new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(false)
@@ -134,9 +137,6 @@ public class TestSltSerialization {
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId("word").setParentIncludes(true),
       new Layer("partial_word", "Partial Words").setAlignment(Constants.ALIGNMENT_NONE)
-      .setPeers(false).setPeersOverlap(false).setSaturated(true)
-      .setParentId("word").setParentIncludes(true),
-      new Layer("omission", "Omissions").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId("word").setParentIncludes(true)
       );
@@ -152,58 +152,58 @@ public class TestSltSerialization {
     //   System.out.println("" + p.getName() + " = " + p.getValue());
     // }
     assertEquals("Correct number of configuration parameters", 26, configuration.size());
-    assertEquals("cunit",
-                 ((Layer)configuration.get("cUnitLayer").getValue()).getId());
-    assertEquals("main_participant",
-                 ((Layer)configuration.get("targetParticipantLayer").getValue()).getId());
-    assertEquals("comment",
-                 ((Layer)configuration.get("commentLayer").getValue()).getId());
-    assertEquals("parenthetical",
-                 ((Layer)configuration.get("parentheticalLayer").getValue()).getId());
-    assertEquals("entity",
-                 ((Layer)configuration.get("properNameLayer").getValue()).getId());
-    assertEquals("repetition",
-                 ((Layer)configuration.get("repetitionsLayer").getValue()).getId());
-    assertEquals("root",
-                 ((Layer)configuration.get("rootLayer").getValue()).getId());
-    assertEquals("error",
-                 ((Layer)configuration.get("errorLayer").getValue()).getId());
-    assertEquals("noise",
-                 ((Layer)configuration.get("soundEffectLayer").getValue()).getId());
-    assertEquals("pause",
-                 ((Layer)configuration.get("pauseLayer").getValue()).getId());
-    assertEquals("bound_morpheme",
-                 ((Layer)configuration.get("boundMorphemeLayer").getValue()).getId());
-    assertEquals("maze",
-                 ((Layer)configuration.get("mazeLayer").getValue()).getId());
-    assertEquals("partial_word",
-                 ((Layer)configuration.get("partialWordLayer").getValue()).getId());
-    assertEquals("omission",
-                 ((Layer)configuration.get("omissionLayer").getValue()).getId());
-    assertEquals("code",
-                 ((Layer)configuration.get("codeLayer").getValue()).getId());
-    assertEquals("transcript_language",
-                 ((Layer)configuration.get("languageLayer").getValue()).getId());
-    assertEquals("participant_id",
-                 ((Layer)configuration.get("participantIdLayer").getValue()).getId());
-    assertEquals("participant_gender",
-                 ((Layer)configuration.get("genderLayer").getValue()).getId());
-    assertEquals("participant_dob",
-                 ((Layer)configuration.get("dobLayer").getValue()).getId());
-    assertEquals("transcript_doe",
-                 ((Layer)configuration.get("doeLayer").getValue()).getId());
-    assertEquals("transcript_ca",
-                 ((Layer)configuration.get("caLayer").getValue()).getId());
-    assertEquals("participant_ethnicity",
-                 ((Layer)configuration.get("ethnicityLayer").getValue()).getId());
-    assertEquals("transcript_context",
-                 ((Layer)configuration.get("contextLayer").getValue()).getId());
-    assertEquals("transcript_subgroup",
-                 ((Layer)configuration.get("subgroupLayer").getValue()).getId());
-    assertEquals("transcript_collect",
-                 ((Layer)configuration.get("collectLayer").getValue()).getId());
-    assertEquals("transcript_location",
-                 ((Layer)configuration.get("locationLayer").getValue()).getId());
+    assertEquals(schema.getLayer("cunit"),
+                 configuration.get("cUnitLayer").getValue());
+    assertEquals(schema.getLayer("main_participant"),
+                 configuration.get("targetParticipantLayer").getValue());
+    assertEquals(schema.getLayer("comment"),
+                 configuration.get("commentLayer").getValue());
+    assertEquals(schema.getLayer("parenthetical"),
+                 configuration.get("parentheticalLayer").getValue());
+    assertEquals(schema.getLayer("entity"),
+                 configuration.get("properNameLayer").getValue());
+    assertEquals(schema.getLayer("repetition"),
+                 configuration.get("repetitionsLayer").getValue());
+    assertEquals(schema.getLayer("root"),
+                 configuration.get("rootLayer").getValue());
+    assertEquals(schema.getLayer("error"),
+                 configuration.get("errorLayer").getValue());
+    assertEquals(schema.getLayer("noise"),
+                 configuration.get("soundEffectLayer").getValue());
+    assertEquals(schema.getLayer("pause"),
+                 configuration.get("pauseLayer").getValue());
+    assertEquals(schema.getLayer("bound_morpheme"),
+                 configuration.get("boundMorphemeLayer").getValue());
+    assertEquals(schema.getLayer("maze"),
+                 configuration.get("mazeLayer").getValue());
+    assertEquals(schema.getLayer("partial_word"),
+                 configuration.get("partialWordLayer").getValue());
+    assertEquals(schema.getLayer("omission"),
+                 configuration.get("omissionLayer").getValue());
+    assertEquals(schema.getLayer("code"),
+                 configuration.get("codeLayer").getValue());
+    assertEquals(schema.getLayer("transcript_language"),
+                 configuration.get("languageLayer").getValue());
+    assertEquals(schema.getLayer("participant_id"),
+                 configuration.get("participantIdLayer").getValue());
+    assertEquals(schema.getLayer("participant_gender"),
+                 configuration.get("genderLayer").getValue());
+    assertEquals(schema.getLayer("participant_dob"),
+                 configuration.get("dobLayer").getValue());
+    assertEquals(schema.getLayer("transcript_doe"),
+                 configuration.get("doeLayer").getValue());
+    assertEquals(schema.getLayer("transcript_ca"),
+                 configuration.get("caLayer").getValue());
+    assertEquals(schema.getLayer("participant_ethnicity"),
+                 configuration.get("ethnicityLayer").getValue());
+    assertEquals(schema.getLayer("transcript_context"),
+                 configuration.get("contextLayer").getValue());
+    assertEquals(schema.getLayer("transcript_subgroup"),
+                 configuration.get("subgroupLayer").getValue());
+    assertEquals(schema.getLayer("transcript_collect"),
+                 configuration.get("collectLayer").getValue());
+    assertEquals(schema.getLayer("transcript_location"),
+                 configuration.get("locationLayer").getValue());
 
     // final configuration
     deserializer.configure(configuration, schema);
@@ -231,7 +231,7 @@ public class TestSltSerialization {
 
     // meta-data
     assertEquals("Language set", 1, g.all("transcript_language").length);
-    assertEquals("Language correct", "English", g.first("transcript_language").getLabel()); // TODO ISO code
+    assertEquals("Language correct", "en", g.first("transcript_language").getLabel());
     assertEquals("Doe set", 1, g.all("transcript_doe").length);
     assertEquals("Doe correct", "30/3/2021", g.first("transcript_doe").getLabel()); // TODO ISO format
     assertEquals("Ca set", 1, g.all("transcript_ca").length);
@@ -345,26 +345,30 @@ public class TestSltSerialization {
                  Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC),
                  lastUtterance.getEnd().getConfidence());
 
+    // words
+    Annotation[] words = g.all("word");
+    assertEquals(138, words.length);
+
     // check utterance transcriptions
-    String[] lines = { // TODO strip out annotations
-      "I'm at Byron kindergarten on the 30th of March 2021.",
-      "My name is X[REDACTED], and I'm here with X[REDACTED], doing the oral language assessment [CENSOR].",
+    String[] lines = {
+      "I'm at Byron kindergarten on what date is it the 30th of March 2021?",
+      "My name is X. and I'm here with X, doing the oral language assessment.",
       "Okay, so now Ada it's your turn to tell the story.",
       "You can look at the pictures when you're telling the story.",
       "So let's start at the beginning.",
       "What was the story about?",
-      "(Um the kids) the kid/s, they quickly put their gumboot/s on.",
+      "Um the kids the kids, they quickly put their gumboots on.",
       "Ah Mm hmm.",
       "Anything else?",
-      "And please go for a walk [EU]?",
-      "You need to put your gumboot/s on.",
-      "It/'s too dark.",
+      "And please go for a walk?",
+      "You need to put your gumboots on.",
+      "It's too dark^",
       "What happened in this one?",
-      "And then it/'s too dark.",
+      "And then it's heaps and heaps dark.",
       "What happened next?",
-      "Schnitzel_von_Krumm s* fell out *of the nest.",
+      "Schnitzel von Krumm s~ falled out the birdsz nest.",
       "What happened next?",
-      "They (put them) put it back in the nest.",
+      "They put them put it back in the nest.",
       "Bye bye little bird.",
       "Anything else that happened?",
       "x."
@@ -382,7 +386,214 @@ public class TestSltSerialization {
       assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
                    Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
     }
+
+    // codes
+    Annotation[] codes = g.all("code");
+    assertEquals("Correct number of codes: " + Arrays.asList(codes),
+                 3, codes.length);
+    assertEquals("Censor label", "CENSOR", codes[0].getLabel());
+    assertEquals("Censor code tags an utterance",
+                 1, codes[0].tagsOn("utterance").length);
+    assertEquals("Censor code tags the second utterance",
+                 utterances[1].getId(), codes[0].tagsOn("utterance")[0].getId());
+    assertEquals("First Redacted label", "REDACTED", codes[1].getLabel());
+    assertEquals("First Redacted code tags a word",
+                 1, codes[1].tagsOn("word").length);
+    assertEquals("First Redacted tags the 18th word: " + codes[1].tagsOn("word"),
+                 words[17].getId(), codes[1].tagsOn("word")[0].getId());
+    assertEquals("Second Redacted label", "REDACTED", codes[2].getLabel());
+    assertEquals("Second Redacted code tags a word",
+                 1, codes[2].tagsOn("word").length);
+    assertEquals("Second Redacted tags the 23rd word: " + codes[2].tagsOn("word")[0],
+                 words[22].getId(), codes[2].tagsOn("word")[0].getId());
+
+    // errors
+    Annotation[] errors = g.all("error");
+    assertEquals("Correct number of error codes: " + Arrays.asList(errors),
+                 2, errors.length);
+    assertEquals("Utterance Error label", "EU", errors[0].getLabel());
+    assertEquals("Utterance Error code tags an utterance",
+                 1, errors[0].tagsOn("utterance").length);
+    assertEquals("Utterance Error code tags the tenth utterance",
+                 utterances[9].getId(), errors[0].tagsOn("utterance")[0].getId());
+    assertEquals("EW label", "EW", errors[1].getLabel());
+    assertEquals("EW code tags a word",
+                 1, errors[1].tagsOn("word").length);
+    assertEquals("EW tags the word 'falled': " + Arrays.asList(errors[1].tagsOn("word")),
+                 "falled", errors[1].tagsOn("word")[0].getLabel());
     
+    // root forms
+    Annotation[] roots = g.all("root");
+    assertEquals("Correct number of root forms: " + Arrays.asList(roots),
+                 1, roots.length);
+    assertEquals("root label", "fall", roots[0].getLabel());
+    assertEquals("root tags a word",
+                 1, roots[0].tagsOn("word").length);
+    assertEquals("root tags the word 'falled': " + Arrays.asList(roots[0].tagsOn("word")),
+                 "falled", roots[0].tagsOn("word")[0].getLabel());
+
+    // bound morphemes
+    Annotation[] boundMorphemes = g.all("bound_morpheme");
+    assertEquals("Correct number of bound morphemes: " + Arrays.asList(boundMorphemes),
+                 6, boundMorphemes.length);
+    String[] morphemeLabels = {
+      "kid/s", "gumboot/s", "gumboot/s", "It/'s", "it/'s", "bird/s/z"
+    };
+    String[] wordLabels = {
+      "kids,", "gumboots", "gumboots", "It's", "it's", "birdsz"
+    };
+    for (int m = 0; m < boundMorphemes.length; m++) {
+      assertEquals("label of bound morpheme " + m + ": " + boundMorphemes[m],
+                   morphemeLabels[m], boundMorphemes[m].getLabel());
+      assertEquals(
+        "bound morpheme "+m+" tags a word: " + Arrays.asList(boundMorphemes[m].tagsOn("word")),
+        1, boundMorphemes[m].tagsOn("word").length);
+      assertEquals(
+        "bound morpheme word label "+m+": " + Arrays.asList(boundMorphemes[m].tagsOn("word")),
+        wordLabels[m], boundMorphemes[m].tagsOn("word")[0].getLabel());
+    } // next bound morpheme
+
+    // comments
+    Annotation[] comments = g.all("comment");
+    assertEquals("Correct number of comments: " + Arrays.asList(comments),
+                 3, comments.length);
+    assertEquals("first comment label",
+                 "This is a plus line comment", comments[0].getLabel());
+    assertEquals("first comment alignment",
+                 Double.valueOf(29.0), comments[0].getStart().getOffset());
+    assertEquals("second comment label",
+                 "This is an equals line comment", comments[1].getLabel());
+    assertEquals("second comment alignment",
+                 Double.valueOf(34.0), comments[1].getStart().getOffset());
+    assertEquals("third comment label",
+                 "in-situ comment", comments[2].getLabel());
+    assertEquals("third comment preceding word: " + comments[2].getStart().endOf("word"),
+                 "kids,", comments[2].getStart().endOf("word").iterator().next().getLabel());
+    assertEquals("third comment following word: " + comments[2].getEnd().startOf("word"),
+                 "they", comments[2].getEnd().startOf("word").iterator().next().getLabel());
+
+    // parentheticals
+    Annotation[] parentheticals = g.all("parenthetical");
+    assertEquals("Correct number of parentheticals: " + Arrays.asList(parentheticals),
+                 1, parentheticals.length);
+    assertEquals("parenthetical label",
+                 "((what... ...it))", parentheticals[0].getLabel());
+    // assertEquals("parenthetical words: " + Arrays.asList(parentheticals[0].all("word")),
+    //              "what date is it",
+    //              Arrays.stream(parentheticals[0].all("word")) // TODO this should work!
+    //              .map(word -> word.getLabel())
+    //              .collect(Collectors.joining(" ")));
+    assertEquals(
+      "parenthetical first word: " + parentheticals[0].getStart().startOf("word"),
+      "what", parentheticals[0].getStart().startOf("word").iterator().next().getLabel());
+    assertEquals(
+      "parenthetical last word: " + parentheticals[0].getEnd().endOf("word"),
+      "it", parentheticals[0].getEnd().endOf("word").iterator().next().getLabel());
+    assertEquals(
+      "parenthetical parent: " + parentheticals[0].getParent(),
+      parentheticals[0].getStart().startOf("word").iterator().next().getParent(),
+      parentheticals[0].getParent());
+
+    // mazes
+    Annotation[] mazes = g.all("maze");
+    assertEquals("Correct number of mazes: " + Arrays.asList(mazes),
+                 2, mazes.length);
+    assertEquals("first maze label",
+                 "(Um... ...kids)", mazes[0].getLabel());
+    assertEquals(
+      "first maze first word: " + mazes[0].getStart().startOf("word"),
+      "Um", mazes[0].getStart().startOf("word").iterator().next().getLabel());
+    assertEquals(
+      "first maze last word: " + mazes[0].getEnd().endOf("word"),
+      "kids", mazes[0].getEnd().endOf("word").iterator().next().getLabel());
+    assertEquals("second maze label",
+                 "(put... ...them)", mazes[1].getLabel());
+    assertEquals(
+      "second maze first word: " + mazes[1].getStart().startOf("word"),
+      "put", mazes[1].getStart().startOf("word").iterator().next().getLabel());
+    assertEquals(
+      "second maze last word: " + mazes[1].getEnd().endOf("word"),
+      "them", mazes[1].getEnd().endOf("word").iterator().next().getLabel());
+
+    // sound effects
+    Annotation[] soundEffects = g.all("noise");
+    assertEquals("Correct number of sound effects: " + Arrays.asList(soundEffects),
+                 1, soundEffects.length);
+    assertEquals("sound effect label",
+                 "yip_yip", soundEffects[0].getLabel());
+    assertEquals(
+      "sound effect starts at utterance start: "+soundEffects[0].getStart().startOf("utterance"),
+      1, soundEffects[0].getStart().startOf("utterance").size());
+    assertEquals(
+      "sound effect folloring word: " + soundEffects[0].getEnd().startOf("word"),
+      "Schnitzel", soundEffects[0].getEnd().startOf("word").iterator().next().getLabel());
+
+    // proper names
+    Annotation[] properNames = g.all("entity");
+    assertEquals("Correct number of proper names: " + Arrays.asList(properNames),
+                 1, properNames.length);
+    assertEquals("proper names label",
+                 "Schnitzel_von_Krumm", properNames[0].getLabel());
+    assertEquals(
+      "proper name first word: " + properNames[0].getStart().startOf("word"),
+      "Schnitzel", properNames[0].getStart().startOf("word").iterator().next().getLabel());
+    assertEquals(
+      "proper name last word: " + properNames[0].getEnd().endOf("word"),
+      "Krumm", properNames[0].getEnd().endOf("word").iterator().next().getLabel());
+
+    // repetitions
+    Annotation[] repetitions = g.all("repetition");
+    assertEquals("Correct number of repetitions: " + Arrays.asList(repetitions),
+                 1, repetitions.length);
+    assertEquals("repetitions label",
+                 "heaps", repetitions[0].getLabel());
+    // assertEquals("repetition words: " + Arrays.asList(repetitions[0].all("word")),
+    //              "heaps and heaps",
+    //              Arrays.stream(repetitions[0].all("word")) // TODO this should work!
+    //              .map(word -> word.getLabel())
+    //              .collect(Collectors.joining(" ")));
+    assertEquals(
+      "repetition first word: " + repetitions[0].getStart().startOf("word"),
+      "heaps", repetitions[0].getStart().startOf("word").iterator().next().getLabel());
+    assertEquals(
+      "repetition last word: " + repetitions[0].getEnd().endOf("word"),
+      "heaps", repetitions[0].getEnd().endOf("word").iterator().next().getLabel());
+
+    // pauses
+    Annotation[] pauses = g.all("pause");
+    assertEquals("Correct number of pauses: " + Arrays.asList(pauses),
+                 3, pauses.length);
+    assertEquals("first pause label", "01", pauses[0].getLabel());
+    assertEquals("first pause time", Double.valueOf(41), pauses[0].getEnd().getOffset());
+    assertEquals("second pause label", "02", pauses[1].getLabel());
+    assertEquals("second pause previous word",
+                 "s~", pauses[1].getStart().endOf("word").iterator().next().getLabel());
+    assertEquals("second pause next word",
+                 "falled", pauses[1].getEnd().startOf("word").iterator().next().getLabel());
+    assertEquals("third pause label", "03", pauses[2].getLabel());
+    assertEquals("third pause time", Double.valueOf(69), pauses[2].getStart().getOffset());
+
+    // omissions
+    Annotation[] omissions = g.all("omission");
+    assertEquals("Correct number of omissions: " + Arrays.asList(omissions),
+                 1, omissions.length);
+    assertEquals("omission label", "of", omissions[0].getLabel());
+    assertEquals("omission previous word",
+                 "out", omissions[0].getStart().endOf("word").iterator().next().getLabel());
+    assertEquals("omission next word",
+                 "the", omissions[0].getEnd().startOf("word").iterator().next().getLabel());
+
+    // C-Units
+    Annotation[] cUnits = g.all("cunit");
+    assertEquals(22, cUnits.length);
+    String[] cUnitLabels = {
+      "?", ".", ".", ".", ".", ".", "?", ".", ".", "?", "?", ".", "^", "?", ".", "?", ".", "?",
+      ".", ".", "?", "."
+    };
+    for (int c = 0; c < cUnits.length; c++) {
+      assertEquals("C-Unit "+c+" label",
+                   cUnitLabels[c], cUnits[c].getLabel());
+    }
   }
 
    // @Test public void serialize() throws Exception {
