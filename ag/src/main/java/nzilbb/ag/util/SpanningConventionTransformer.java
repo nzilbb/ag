@@ -631,11 +631,13 @@ public class SpanningConventionTransformer implements GraphTransformer {  // TOD
                 if (getDestinationStartResult() != null) {
                   // add start annotation to label
                   label.append(startMatcher.replaceAll(getDestinationStartResult()));
-                }
+                } 
                 if (span.size() == 1) { // special case: span a single source annotation
-                  if (getDestinationEndResult() != null) {
+                  if (getDestinationStartResult() != null) {
                     endMatcher = endRegexp.matcher(label.toString());
                     label = new StringBuffer();
+                  }
+                  if (getDestinationEndResult() != null) {
                     label.append(endMatcher.replaceAll(getDestinationEndResult()));
                   }
                 } else { // span longer than 1
