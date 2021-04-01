@@ -199,6 +199,24 @@ public class ConventionTransformer
   } // end of constructor
 
   /**
+   * Constructor from attribute values. Destination results must be subsequently added
+   * using {@link #setDestinationResults(HashMap)} or 
+   * {@link #addDestinationResult(String,String)}. 
+   * @param sourceLayerId Layer ID of the annotations to transform.
+   * @param sourcePattern Regular expression in the source layer which triggers
+   * transformation of the annotation. This may capture groups, which can be copied into
+   * the destination or source layers. 
+   * @param sourceResult The result on the source layer.
+   */
+  public ConventionTransformer(String sourceLayerId, String sourcePattern, String sourceResult)
+  {
+    setSourceLayerId(sourceLayerId);
+    setSourcePattern(sourcePattern);
+    destinationResults.put(sourceLayerId, sourceResult);
+    setDestinationResults(destinationResults);
+  } // end of constructor
+
+  /**
    * Utility constructor for the common scenario of identifying a pattern on one layer
    * and, where it occurs, changing the label on the source label and adding an annotation
    * on a second layer. 
