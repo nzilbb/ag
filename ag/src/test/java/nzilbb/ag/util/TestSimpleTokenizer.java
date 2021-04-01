@@ -403,28 +403,17 @@ public class TestSimpleTokenizer
       Graph g = new Graph();
       g.setId("my graph");
 
-      g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-			   true, // peers
-			   true, // peersOverlap
-			   true)); // saturated
-      g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-			   true, // peers
-			   false, // peersOverlap
-			   false, // saturated
-			   "who", // parentId
-			   true)); // parentIncludes
-      g.addLayer(new Layer("linkage", "Linkages", Constants.ALIGNMENT_INTERVAL,
-			   true, // peers
-			   false, // peersOverlap
-			   false, // saturated
-			   "turn", // parentId
-			   true)); // parentIncludes
-      g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-			   true, // peers
-			   false, // peersOverlap
-			   false, // saturated
-			   "turn", // parentId
-			   true)); // parentIncludes
+      g.addLayer(new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+                 .setPeers(true).setPeersOverlap(true).setSaturated(true));
+      g.addLayer(new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+                 .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                 .setParentId("who").setParentIncludes(true));
+      g.addLayer(new Layer("linkage", "Linkages").setAlignment(Constants.ALIGNMENT_INTERVAL)
+                 .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                 .setParentId("turn").setParentIncludes(true)); 
+      g.addLayer(new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+                 .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                 .setParentId("turn").setParentIncludes(true));
 
       // john smith
       g.addAnchor(new Anchor("turn1Start", 0.0)); // turn start
@@ -524,6 +513,119 @@ public class TestSimpleTokenizer
 	 {
 	    assertEquals("turn1", word.getParentId());
 	 }
+	 
+	 words = g.getAnnotation("turn2").all("word");
+	 assertEquals(6, words.length);
+	 // ordinals correct
+	 for (int i = 0; i < words.length; i++)
+	 {
+	    assertEquals("ordinal check: " + words[i], i+1, words[i].getOrdinal());
+	 }
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+   }
+
+   @Test public void tokensInSourceNoDestination()
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+
+      g.addLayer(new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+                 .setPeers(true).setPeersOverlap(true).setSaturated(true));
+      g.addLayer(new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+                 .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                 .setParentId("who").setParentIncludes(true));
+      g.addLayer(new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+                 .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                 .setParentId("turn").setParentIncludes(true));
+
+      // john smith
+      g.addAnchor(new Anchor("turn1Start", 0.0)); // turn start
+      g.addAnchor(new Anchor("a0", null)); // the
+      g.addAnchor(new Anchor("a1", null)); // B_B_C
+      g.addAnchor(new Anchor("a2", null)); // jumps
+      g.addAnchor(new Anchor("a5", null)); // over
+      g.addAnchor(new Anchor("a6", null)); // a
+      g.addAnchor(new Anchor("a7", null)); // lazy
+      g.addAnchor(new Anchor("a8", null)); // dog
+      g.addAnchor(new Anchor("a9", null)); // end of dog
+      g.addAnchor(new Anchor("turn1End", 9.0)); // turn end
+
+      // jane doe
+      g.addAnchor(new Anchor("turn2Start", 6.5)); // turn start
+      g.addAnchor(new Anchor("b6", null)); // roses
+      g.addAnchor(new Anchor("b7", null)); // are
+      g.addAnchor(new Anchor("b8", null)); // red
+      g.addAnchor(new Anchor("b9", null)); // violets
+      g.addAnchor(new Anchor("b10", null)); // are
+      g.addAnchor(new Anchor("b11", null)); // blue
+      g.addAnchor(new Anchor("b12", null)); // end of blue
+      g.addAnchor(new Anchor("turn2End", 12.5)); // turn end
+
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "turn1Start", "turn2End", "my graph"));
+      g.addAnnotation(new Annotation("participant2", "jane doe", "who", "turn1Start", "turn2End", "my graph"));
+      
+      g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turn1Start", "turn1End", "participant1"));
+      g.addAnnotation(new Annotation("turn2", "jane doe", "turn", "turn2Start", "turn2End", "participant2"));
+      
+      g.addAnnotation(new Annotation("the",   "the",   "word", "a0", "a1", "turn1"));
+      g.addAnnotation(new Annotation("B_B_C", "B_B_C", "word", "a1", "a2", "turn1"));
+      g.addAnnotation(new Annotation("jumps", "jumps", "word", "a2", "a5", "turn1"));
+      g.addAnnotation(new Annotation("over",  "over",  "word", "a5", "a6", "turn1"));
+      g.addAnnotation(new Annotation("a",     "a",     "word", "a6", "a7", "turn1"));
+      g.addAnnotation(new Annotation("lazy",  "lazy",  "word", "a7", "a8", "turn1"));
+      g.addAnnotation(new Annotation("dog",  "dog",    "word", "a8", "a9", "turn1"));
+
+      g.addAnnotation(new Annotation("roses",   "roses",   "word", "b6",  "b7", "turn2"));
+      g.addAnnotation(new Annotation("are",     "are",     "word", "b7",  "b8", "turn2"));
+      g.addAnnotation(new Annotation("red",     "red",     "word", "b8",  "b9", "turn2"));
+      g.addAnnotation(new Annotation("violets", "violets", "word", "b9",  "b10", "turn2"));
+      g.addAnnotation(new Annotation("are2",    "are",     "word", "b10", "b11", "turn2"));
+      g.addAnnotation(new Annotation("blue",    "roses",   "word", "b11", "b12", "turn2"));
+
+      try
+      {
+         g.setTracker(new ChangeTracker());
+	 SimpleTokenizer tokenizer = new SimpleTokenizer("word", null, "_", true);
+	 tokenizer.transform(g);
+	 Annotation[] words = g.getAnnotation("turn1").all("word");
+	 assertEquals(10, words.length);
+
+	 assertEquals("the", words[0].getLabel());
+	 assertEquals("B", words[1].getLabel());
+	 assertEquals("B_B_C", words[2].getLabel());
+	 assertEquals(Change.Operation.Destroy, words[2].getChange());
+	 assertEquals("B", words[3].getLabel());
+	 assertEquals("C", words[4].getLabel());
+	 assertEquals("jumps", words[5].getLabel());
+	 assertEquals("over", words[6].getLabel());
+	 assertEquals("a", words[7].getLabel());
+	 assertEquals("lazy", words[8].getLabel());
+	 assertEquals("dog", words[9].getLabel());
+
+	 // ordinals correct
+	 assertEquals("ordinal check", 1, words[0].getOrdinal());
+	 assertEquals("ordinal check", 2, words[1].getOrdinal());
+	 assertEquals("ordinal check", 3, words[3].getOrdinal());
+	 assertEquals("ordinal check", 4, words[4].getOrdinal());
+	 assertEquals("ordinal check", 5, words[5].getOrdinal());
+	 assertEquals("ordinal check", 6, words[6].getOrdinal());
+	 assertEquals("ordinal check", 7, words[7].getOrdinal());
+	 assertEquals("ordinal check", 8, words[8].getOrdinal());
+	 assertEquals("ordinal check", 9, words[9].getOrdinal());
+
+	 // anchors
+	 assertEquals("anchor link", words[0].getEnd(), words[1].getStart());
+	 assertEquals("anchor link", words[1].getEnd(), words[3].getStart());
+	 assertEquals("anchor link", words[3].getEnd(), words[4].getStart());
+	 assertEquals("anchor link", words[4].getEnd(), words[5].getStart());
+	 assertEquals("anchor link", words[5].getEnd(), words[6].getStart());
+	 assertEquals("anchor link", words[6].getEnd(), words[7].getStart());
+	 assertEquals("anchor link", words[7].getEnd(), words[8].getStart());
+	 assertEquals("anchor link", words[8].getEnd(), words[9].getStart());
 	 
 	 words = g.getAnnotation("turn2").all("word");
 	 assertEquals(6, words.length);

@@ -185,13 +185,15 @@ public class SimpleTokenizer
    {
       if (graph.getLayer(getSourceLayerId()) == null) 
 	 throw new TransformationException(this, "No source layer: " + getSourceLayerId());
-      if (graph.getLayer(getDestinationLayerId()) == null) 
-	 throw new TransformationException(this, "No destination layer: " + getDestinationLayerId());
-      if (getDestinationLayerId().equals(getSourceLayerId())) 
-	 throw new TransformationException(this, "Source and destination layer are the same: " + getDestinationLayerId());
+      if (getDestinationLayerId() != null && graph.getLayer(getDestinationLayerId()) == null) 
+	 throw new TransformationException(
+           this, "No destination layer: " + getDestinationLayerId());
+      if (getSourceLayerId().equals(getDestinationLayerId())) 
+	 throw new TransformationException(
+           this, "Source and destination layer are the same: " + getDestinationLayerId());
       Layer sourceParent = graph.getLayer(graph.getLayer(getSourceLayerId()).getParentId());
-      boolean sharedParent = sourceParent.getId()
-	 .equals(graph.getLayer(getDestinationLayerId()).getParentId());
+      boolean sharedParent = getDestinationLayerId() != null
+        && sourceParent.getId().equals(graph.getLayer(getDestinationLayerId()).getParentId());
       if (getTokensInSourceLayer()) sharedParent = true;
       
       Pattern regexDelimiters = Pattern.compile(getDelimiters());
@@ -243,13 +245,16 @@ public class SimpleTokenizer
 	       }
 	       
 	       // the destination layer receives the original label
-	       Annotation span = new Annotation(
-		  null, source.getLabel(), 
-		  getDestinationLayerId(), 
-		  source.getStart().getId(), source.getEnd().getId(), 
-		  source.getParentId());
-               span.setConfidence(source.getConfidence());
-	       graph.addAnnotation(span);
+               if (getDestinationLayerId() != null)
+               {
+                 Annotation span = new Annotation(
+                   null, source.getLabel(), 
+                   getDestinationLayerId(), 
+                   source.getStart().getId(), source.getEnd().getId(), 
+                   source.getParentId());
+                 span.setConfidence(source.getConfidence());
+                 graph.addAnnotation(span);
+               }
 	       
 	       // and the source gets deleted (to be replaced by individual tokens)
 	       source.destroy();

@@ -205,6 +205,7 @@ public class ConventionTransformer implements GraphTransformer {
   public ConventionTransformer(String sourceLayerId, String sourcePattern, String sourceResult) {
     setSourceLayerId(sourceLayerId);
     setSourcePattern(sourcePattern);
+    HashMap<String,String> destinationResults = new HashMap<String,String>();
     destinationResults.put(sourceLayerId, sourceResult);
     setDestinationResults(destinationResults);
   } // end of constructor
