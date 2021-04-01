@@ -279,12 +279,12 @@ public class ConventionTransformer implements GraphTransformer {
                 String label = matcher.replaceAll(result);
                 // check it's really a change
                 if (!label.equals(source.getLabel())) {
-                   source.setLabel(label);
+                  source.setLabel(label);
                 }
               }
             } else {
               Annotation tag = graph.createTag(
-                 source, destinationLayerId, matcher.replaceAll(result));
+                source, destinationLayerId, matcher.replaceAll(result));
               tag.setConfidence(source.getConfidence());
             }
           } // next destination result
