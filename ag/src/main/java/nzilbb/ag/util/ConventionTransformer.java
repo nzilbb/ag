@@ -1,5 +1,5 @@
 //
-// Copyright 2016-2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -235,14 +235,16 @@ public class ConventionTransformer
    * which case no destination is specified, resulting in the annotations being stripped
    * out. 
    * @param label The label for the destination annotation, which may include groups
-   * captured in {@link #sourcePattern}. 
+   * captured in {@link #sourcePattern}.
+   * @return This object.
    */
-  public void addDestinationResult(String layerId, String label)
+  public ConventionTransformer addDestinationResult(String layerId, String label)
   {
     if (layerId != null)
     {
       getDestinationResults().put(layerId, label);
     }
+    return this;
   } // end of addDestinationResult()
 
 
