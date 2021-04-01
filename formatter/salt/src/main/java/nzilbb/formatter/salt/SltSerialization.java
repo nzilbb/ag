@@ -1519,7 +1519,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
     
     try { // parse out in-situ word/phrase annotations
 
-      // sound effects
+      // sound effects - something like "%yip_yip"
       ConventionTransformer transformer = new ConventionTransformer(
         wordLayer.getId(), "%(?<sound>.+)");
       if (soundEffectLayer != null) {
@@ -1559,12 +1559,12 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         wordLayer.getId(), null, "#", true);
       repetitionSplitter.transform(graph).commit();
       
-      // proper names
+      // proper names - something like "Schnitzel_von_Crumm"
       SimpleTokenizer linkageSplitter = new SimpleTokenizer(
         wordLayer.getId(), properNameLayer != null?properNameLayer.getId():null, "_", true);
       linkageSplitter.transform(graph).commit();
 
-      // non-error codes
+      // non-error codes - something like "John[NAME]"
       transformer = new ConventionTransformer(
         wordLayer.getId(),
         "(?<word>.+)\\[(?<code>[^E][\\w0-9:]+)\\](?<punctuation>\\W*)",
@@ -1574,7 +1574,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       }
       transformer.transform(graph).commit();      
 
-      // error codes
+      // error codes - something like "falled[EW]"
       transformer = new ConventionTransformer(
         wordLayer.getId(),
         "(?<word>.+)\\[(?<code>E[\\w0-9:]+)\\](?<punctuation>\\W*)",
@@ -1584,7 +1584,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       }
       transformer.transform(graph).commit();      
 
-      // root forms
+      // root forms - something like "falled|fall"
       transformer = new ConventionTransformer(
         wordLayer.getId(),
         "(?<word>[^|]+)\\|(?<root>\\w+)(?<punctuation>\\W*)",
@@ -1594,7 +1594,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       }
       transformer.transform(graph).commit();      
 
-      // bound morphemes
+      // bound morphemes  - something like "bird/s/z"
       transformer = new ConventionTransformer(
         wordLayer.getId(),
         "(?<word>[^/]+)\\/(?<morpheme>[\\w0-9']+)(?<binding2>/(?<morpheme2>[\\w0-9']+))?"
@@ -1607,33 +1607,33 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       }
       transformer.transform(graph).commit();
 
-      // infra-line comments
+      // infra-line comments - something like "{points to self}"
       SpanningConventionTransformer spanningTransformer = new SpanningConventionTransformer(
         wordLayer.getId(), "\\{(.*)", "(.*)\\}", true, null, null, 
         commentLayer==null?null:commentLayer.getId(), "$1", "$1", false, false);
       spanningTransformer.transform(graph).commit();
 
-      // parentheticals
+      // parentheticals - something like "((where was I))"
       spanningTransformer = new SpanningConventionTransformer(
         wordLayer.getId(), "\\(\\((.*)", "(.*)\\)\\)", false, "$1", "$1", 
         parentheticalLayer==null?null:parentheticalLayer.getId(), "(($1...", "...$1))",
         false, false);
       spanningTransformer.transform(graph).commit();      
 
-      // mazes
+      // mazes - something like "They (put them) put it"
       spanningTransformer = new SpanningConventionTransformer(
         wordLayer.getId(), "\\((.*)", "(.*)\\)", false, "$1", "$1", 
         mazeLayer==null?null:mazeLayer.getId(), "($1...", "...$1)", false, false);
       spanningTransformer.transform(graph).commit();      
 
-      // pauses
+      // pauses - something like ":03"
       transformer = new ConventionTransformer(wordLayer.getId(), ":(?<pause>.+)");
       if (pauseLayer != null) {
         transformer.addDestinationResult(pauseLayer.getId(), "${pause}");
       }
       transformer.transform(graph).commit();      
 
-      // omissions
+      // omissions - something like "We *went home"
       transformer = new ConventionTransformer(wordLayer.getId(), "\\*(?<omission>.+)");
       if (omissionLayer != null) {
         transformer.addDestinationResult(omissionLayer.getId(), "${omission}");
@@ -1651,7 +1651,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         spanningTransformer.transform(graph).commit();
       }
 
-      // partial words 
+      // partial words  - something like "stu*"
       transformer = new ConventionTransformer(
         wordLayer.getId(), "(?<partial>.+)\\*", "${partial}~");
       transformer.transform(graph).commit();      
