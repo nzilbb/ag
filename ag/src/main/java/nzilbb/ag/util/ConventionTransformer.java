@@ -79,10 +79,7 @@ import nzilbb.ag.*;
  * layer, so the source annotation is deleted.
  * @author Robert Fromont robert@fromont.net.nz
  */
-
-public class ConventionTransformer
-  implements GraphTransformer
-{
+public class ConventionTransformer implements GraphTransformer {
   // Attributes:
    
   /**
@@ -129,7 +126,6 @@ public class ConventionTransformer
    */
   public ConventionTransformer setSourcePattern(String newSourcePattern) { sourcePattern = newSourcePattern; return this; }
 
-
   /**
    * A map of layer IDs to label values which may include references to groups captured in
    * the {@link #sourcePattern}.  If there is no key for {@link #sourceLayerId} then the
@@ -161,8 +157,7 @@ public class ConventionTransformer
   /**
    * Default constructor.
    */
-  public ConventionTransformer()
-  {
+  public ConventionTransformer() {
     setDestinationResults(new HashMap<String,String>());
   } // end of constructor
 
@@ -175,8 +170,8 @@ public class ConventionTransformer
    * @param destinationResults A map of layer IDs to label values which may include
    * references to groups captured in the {@link #sourcePattern}. 
    */
-  public ConventionTransformer(String sourceLayerId, String sourcePattern, HashMap<String,String> destinationResults)
-  {
+  public ConventionTransformer(
+    String sourceLayerId, String sourcePattern, HashMap<String,String> destinationResults) {
     setSourceLayerId(sourceLayerId);
     setSourcePattern(sourcePattern);
     setDestinationResults(destinationResults);
@@ -191,8 +186,7 @@ public class ConventionTransformer
    * transformation of the annotation. This may capture groups, which can be copied into
    * the destination or source layers. 
    */
-  public ConventionTransformer(String sourceLayerId, String sourcePattern)
-  {
+  public ConventionTransformer(String sourceLayerId, String sourcePattern) {
     setSourceLayerId(sourceLayerId);
     setSourcePattern(sourcePattern);
     setDestinationResults(new HashMap<String,String>());
@@ -208,8 +202,7 @@ public class ConventionTransformer
    * the destination or source layers. 
    * @param sourceResult The result on the source layer.
    */
-  public ConventionTransformer(String sourceLayerId, String sourcePattern, String sourceResult)
-  {
+  public ConventionTransformer(String sourceLayerId, String sourcePattern, String sourceResult) {
     setSourceLayerId(sourceLayerId);
     setSourcePattern(sourcePattern);
     destinationResults.put(sourceLayerId, sourceResult);
@@ -233,14 +226,14 @@ public class ConventionTransformer
    * @param destinationLayerId The ID of the destination layer.
    * @param destinationResult The result on the destination layer.
    */
-  public ConventionTransformer(String sourceLayerId, String sourcePattern, String sourceResult, String destinationLayerId, String destinationResult)
-  {
+  public ConventionTransformer(
+    String sourceLayerId, String sourcePattern, String sourceResult, String destinationLayerId,
+    String destinationResult) {
     setSourceLayerId(sourceLayerId);
     setSourcePattern(sourcePattern);
     HashMap<String,String> destinationResults = new HashMap<String,String>();
     destinationResults.put(sourceLayerId, sourceResult);
-    if (destinationLayerId != null)
-    {
+    if (destinationLayerId != null) {
       destinationResults.put(destinationLayerId, destinationResult);
     }
     setDestinationResults(destinationResults);
@@ -256,10 +249,8 @@ public class ConventionTransformer
    * captured in {@link #sourcePattern}.
    * @return This object.
    */
-  public ConventionTransformer addDestinationResult(String layerId, String label)
-  {
-    if (layerId != null)
-    {
+  public ConventionTransformer addDestinationResult(String layerId, String label) {
+    if (layerId != null) {
       getDestinationResults().put(layerId, label);
     }
     return this;
@@ -272,52 +263,40 @@ public class ConventionTransformer
    * @return The changes introduced by the tranformation.
    * @throws TransformationException If the transformation cannot be completed.
    */
-  public Graph transform(Graph graph) throws TransformationException
-  {
+  public Graph transform(Graph graph) throws TransformationException {
     if (graph.getLayer(getSourceLayerId()) == null) 
       throw new TransformationException(this, "No source layer: " + getSourceLayerId());
     
-    try
-    {
+    try {
       Pattern sourceRegexp = Pattern.compile(getSourcePattern());
-      for (Annotation source : graph.all(getSourceLayerId()))
-      {
+      for (Annotation source : graph.all(getSourceLayerId())) {
         Matcher matcher = sourceRegexp.matcher(source.getLabel());
-        if (matcher.matches())
-        {
-          for (String destinationLayerId : getDestinationResults().keySet())
-          {
+        if (matcher.matches()) {
+          for (String destinationLayerId : getDestinationResults().keySet()) {
             String result = getDestinationResults().get(destinationLayerId);
-            if (destinationLayerId.equals(getSourceLayerId()))
-            {
-              if (!result.equals("$0"))
-              {
+            if (destinationLayerId.equals(getSourceLayerId())) {
+              if (!result.equals("$0")) {
                 String label = matcher.replaceAll(result);
                 // check it's really a change
-                if (!label.equals(source.getLabel()))
-                {
+                if (!label.equals(source.getLabel())) {
                    source.setLabel(label);
                 }
               }
-            }
-            else
-            {
+            } else {
               Annotation tag = graph.createTag(
                  source, destinationLayerId, matcher.replaceAll(result));
               tag.setConfidence(source.getConfidence());
             }
           } // next destination result
           // if the source layer isn't a destination layer
-          if (!getDestinationResults().containsKey(getSourceLayerId()))
-          { // delete the source annotation
+          if (!getDestinationResults().containsKey(getSourceLayerId())) {
+            // delete the source annotation
             source.destroy();
           }
         } // label matches
       } // next source annotation
       return graph;
-    }
-    catch(PatternSyntaxException exception)
-    {
+    } catch(PatternSyntaxException exception) {
       throw new TransformationException(this, exception);
     }
   }
