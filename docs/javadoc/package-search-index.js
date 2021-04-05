@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"nzilbb.ag"},{"l":"nzilbb.ag.util"},{"l":"nzilbb.encoding"}]

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+    xmlns="http://maven.apache.org/DECORATION/1.8.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.0 https://maven.apache.org/xsd/decoration-1.8.0.xsd"
+    name="nzilbb.ag">
+  <bannerLeft>
+    <name>nzilbb.ag</name>
+    <src>https://nzilbb.github.io/ag/images/labbcat.png</src>
+    <href>https://nzilbb.github.io/ag/</href>
+  </bannerLeft>
+  <bannerRight>
+    <name>NZILBB</name>
+    <src>https://nzilbb.github.io/ag/images/nzilbb.svg</src>
+    <href>https://www.canterbury.ac.nz/nzilbb/</href>
+  </bannerRight>
+  
+  <body>
+    <links>
+      <item name="CC-BY-SA" href="http://creativecommons.org/licenses/by-sa/2.0/"/>
+      <item name="LaBB-CAT" href="https://labbcat.canterbury.ac.nz/"/>
+      <item name="Fromont (2017)" href="https://labbcat.canterbury.ac.nz/"/>
+    </links>
+     
+    <menu name="nzilbb.ag">
+      <item name="Introduction" href="index.html"/>
+      <item name="Documentation" href="apidocs/nzilbb/ag/package-summary.html"/>
+    </menu>
+    
+    <menu ref="reports"/>
+    <footer>&lt;a rel='license' href='http://creativecommons.org/licenses/by-sa/2.0/'&gt;&lt;img alt='CC-BY-SA Creative Commons Licence ' src='/ag/images/cc-by-sa.svg' title='This work is licensed under a Creative Commons Attribution-ShareAlike 2.0 Generic License' /&gt;&lt;/a&gt;&lt;a rel='author' href='https://www.canterbury.ac.nz/nzilbb/'&gt;&lt;img src='/ag/images/nzilbb.svg' alt='Te Kāhui Roro Reo | The New Zealand Institute of Language, Brain and Behaviour' title='&amp;copy; ${TODAY} NZILBB'&gt;&lt;/a&gt;</footer>
+  </body>
+</project>

@@ -13,6 +13,14 @@
     Implementation of an Annotation Graph API for linguistic annotations, and related modules.
   </description>
   <url>https://github.com/nzilbb/ag/</url>
+  <licenses>
+    <license>
+      <name>AGPL-3.0-or-later</name>
+      <comments>GNU Affero General Public License v3.0 or later</comments>
+      <url>https://www.gnu.org/licenses/agpl.txt</url>
+      <distribution>manual</distribution><!-- change to repo once it's in there -->
+    </license>
+  </licenses>
 
   <developers>
     <developer>

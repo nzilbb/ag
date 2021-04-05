@@ -82,3 +82,10 @@ etc...
 ```
 mvn test
 ```
+
+## Build documentation site
+
+```
+cd ag
+mvn site
+```

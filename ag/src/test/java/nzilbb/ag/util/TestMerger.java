@@ -870,7 +870,6 @@ public class TestMerger
    * Loads an annotation graph from a JSON file.
    * @param file The JSON file.
    * @param graph The graph to save.
-   * @return The annotation graph represented by the file.
    * @throws SerializationException If the graph could not be loaded.
    * @throws SerializerNotConfiguredException
    * @throws IOException On IO error.

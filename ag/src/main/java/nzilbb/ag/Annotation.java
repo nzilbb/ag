@@ -41,6 +41,7 @@ import javax.json.JsonValue;
 import nzilbb.ag.util.AnnotationComparatorByAnchor;
 import nzilbb.ag.util.AnnotationComparatorByOrdinal;
 import nzilbb.ag.util.LayerTraversal;
+import nzilbb.util.CloneableBean;
 import nzilbb.util.ClonedProperty;
 
 /**

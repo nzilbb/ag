@@ -181,7 +181,7 @@ public class ISO639 {
    
    /**
     * Gets the alpha 2 code of a language, given its alpha-3 code. Case is ignored.
-    * @param name
+    * @param code An alpha-3 code.
     * @return The two-letter code of a language with the given three-letter code, or an
     * empty Optional if the name is unknown.
     */
@@ -192,7 +192,7 @@ public class ISO639 {
 
    /**
     * Gets the alpha 3 code of a language, given its alpha-2 code. Case is ignored.
-    * @param name
+    * @param code An alpha-2 code.
     * @return The three-letter code of a language with the given two-letter code, or an empty
     * Optional if the name is unknown.
     */
