@@ -64,7 +64,7 @@ import nzilbb.util.TempFileInputStream;
  *      <li>If overlap is total, the two utterances are chained together with a non-aligned anchor between them.</li>
  *    </ul>
  *  </li>
- *  <li>Disfluency marking with &amp; - e.g. <tt>so &amp;sund Sunday</tt></li>
+ *  <li>Disfluency marking with &amp;+ - e.g. <tt>so &amp;+sund Sunday</tt></li>
  *  <li>Non-standard form expansion - e.g. <tt>gonna [: going to]</tt></li>
  *  <li>Incomplete word completion - e.g. <tt>dinner doin(g) all</tt></li>
  *  <li>Acronym/proper name joining with _ - e.g. <tt>no T_V in my room</tt></li>
@@ -1416,10 +1416,11 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 	 graph.commit();
 
 	 // disfluencies
-	 ConventionTransformer transformer = new ConventionTransformer(getWordLayer().getId(), "&(\\w+)");
+	 ConventionTransformer transformer = new ConventionTransformer(
+           getWordLayer().getId(), "&+(\\w+)");
 	 transformer.addDestinationResult(getWordLayer().getId(), "$1");
 	 if (getDisfluencyLayer() != null) {
-	    transformer.addDestinationResult(getDisfluencyLayer().getId(), "&");
+	    transformer.addDestinationResult(getDisfluencyLayer().getId(), "&+");
 	 }
 	 transformer.transform(graph);
 	 graph.commit();
@@ -1754,16 +1755,16 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 
          Schema schema = graph.getSchema();
 
-         // convert stutters X~ to &X
+         // convert stutters X~ to &+X
          if (disfluencyLayer == null) {
             new ConventionTransformer(
-               wordLayer.getId(), "(.+)~", "&$1", null, null)
+               wordLayer.getId(), "(.+)~", "&+$1", null, null)
                .transform(graph);
-         } else { // prefix words with &
+         } else { // prefix words with &+
             for (Annotation disfluency : graph.all(disfluencyLayer.getId())) {
                Annotation word = disfluency.first(wordLayer.getId());
                if (word != null) {
-                  word.setLabel("&"+word.getLabel());
+                  word.setLabel("&+"+word.getLabel());
                }
             }
          }
