@@ -151,6 +151,7 @@ public class ISO639 {
     */
    public Optional<String> nameFromAlpha3(String code) {
       if (code == null) return Optional.empty();
+      if (!alpha3ToAlpha2.containsKey(code.toLowerCase())) return Optional.empty();
       return Optional.ofNullable(
          alpha2ToName.getProperty(
             alpha3ToAlpha2.getProperty(code.toLowerCase())));
@@ -244,9 +245,9 @@ public class ISO639 {
       if (id == null) return Optional.empty();
       if (isName(id)) return Optional.of(id);
       return Optional.ofNullable(
-         nameFromAlpha3(id)
-         .orElse(nameFromAlpha3(id)
-                 .orElse(null)));
+        nameFromAlpha2(id)
+        .orElse(nameFromAlpha3(id)
+                .orElse(null)));
    } // end of codeFromName()
    
    /**

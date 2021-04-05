@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
 import java.util.Arrays;
@@ -1479,8 +1480,9 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
               lastUtterance.setLabel(
                 lastUtterance.getLabel()
                 // insert before utterance code if any
-                .replaceFirst("(?<utterance>.*)(?<code> \\[[\\w0-9:]+\\])$",
-                              "${utterance} " + pauseLabel + "${code}"));
+                .replaceFirst(
+                  "(?<utterance>.*)(?<terminator>[.?!~^>]?)(?<code> \\[[\\w0-9:]+\\])$",
+                  "${utterance} " + pauseLabel + "${terminator}${code}"));
             }
           }
         }
@@ -1708,7 +1710,13 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
 
       // partial words  - something like "stu*"
       transformer = new ConventionTransformer(
-        wordLayer.getId(), "(?<partial>.+)\\*", "${partial}~");
+        wordLayer.getId(),
+        "(?<word>[^/]+)\\*(?<punctuation>\\W*)",
+        "${word}~${punctuation}");
+      if (partialWordLayer != null) {
+        transformer.addDestinationResult(
+          partialWordLayer.getId(), "${word}");
+      }
       transformer.transform(graph).commit();
 
       // unintelligible speech:
@@ -1866,30 +1874,33 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       // write the text to a temporary file
       File f = File.createTempFile(graph.getId(), ".slt");
       PrintWriter writer = new PrintWriter(
-        new OutputStreamWriter(new FileOutputStream(f), "utf-8"));
-      writer.println("@Begin");
+        new OutputStreamWriter(new FileOutputStream(f), "UTF-8"));
 
       Schema schema = graph.getSchema();
 
-      // convert stutters X~ to &X
+      // partial words X~ to X*
       if (partialWordLayer == null) {
         new ConventionTransformer(
           schema.getWordLayerId(), "(.+)~", "$1*", null, null)
           .transform(graph);
-      } else { // prefix words with &
+      } else { // suffix words with *
         for (Annotation partialWord : graph.all(partialWordLayer.getId())) {
           Annotation word = partialWord.first(schema.getWordLayerId());
           if (word != null) {
-            word.setLabel(partialWord.getLabel());
+            word.setLabel(partialWord.getLabel() + "*");
           }
         }
       }
-         
-      // participants
+
+      // participants...
+      
+      // target participant
       StringBuilder participantsHeader = new StringBuilder();
       Annotation targetParticipant = null;
+      String participantPrefix = IO.WithoutExtension(graph.getLabel()) + "-";
       if (targetParticipantLayer != null) { // target participant first
         for (Annotation participant : graph.all(targetParticipantLayer.getId())) {
+          participant = participant.getParent(); // it's the parent we want
           if (targetParticipant == null) targetParticipant = participant;
           
           if (participantsHeader.length() == 0) {
@@ -1897,6 +1908,12 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
           } else {
             participantsHeader.append(", ");
           }
+          // remove filename prefix, if any
+          if (participant.getLabel().startsWith(participantPrefix)) {
+            participant.setLabel(participant.getLabel().substring(participantPrefix.length()));
+          }
+
+          // write participant name
           participantsHeader.append(participant.getLabel());
         } // next target participant
       }
@@ -1913,6 +1930,12 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         } else {
           participantsHeader.append(", ");
         }
+        // remove filename prefix, if any
+        if (participant.getLabel().startsWith(participantPrefix)) {
+          participant.setLabel(participant.getLabel().substring(participantPrefix.length()));
+        }
+        
+        // write participant name
         participantsHeader.append(participant.getLabel());
       } // next participant
       writer.println(participantsHeader);
@@ -1921,7 +1944,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       if (languageLayer != null) {
         Annotation annotation = graph.first(languageLayer.getId());
         if (annotation != null) {
-          writer.println("+ Language: ");
+          writer.print("+ Language: ");
           writer.println(iso639.name(annotation.getLabel()) // language name if possible
                          .orElse(annotation.getLabel()));
         }
@@ -1929,70 +1952,88 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       if (participantIdLayer != null) {
         Annotation annotation = targetParticipant.first(participantIdLayer.getId());
         if (annotation != null) {
-          writer.println("+ ParticipantId: ");
+          writer.print("+ ParticipantId: ");
           writer.println(annotation.getLabel());
         }
       }
       if (genderLayer != null) {
         Annotation annotation = targetParticipant.first(genderLayer.getId());
         if (annotation != null) {
-          writer.println("+ Gender: ");
+          writer.print("+ Gender: ");
           writer.println(annotation.getLabel());
         }
       }
+      SimpleDateFormat saltDateFormat = new SimpleDateFormat(dateFormat);
+      SimpleDateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd");
       if (dobLayer != null) {
         Annotation annotation = targetParticipant.first(dobLayer.getId());
         if (annotation != null) {
-          writer.println("+ Dob: ");
-          writer.println(annotation.getLabel()); // TODO dd/m/yyyy
+          writer.print("+ Dob: ");
+          try { // parse as iso format
+            Date date = isoDateFormat.parse(annotation.getLabel());
+            // but save with configured format
+            writer.println(saltDateFormat.format(date));
+          } catch(ParseException exception) {
+              warnings.add(
+                "Could not parse dob \""+annotation.getLabel()+"\": " + exception.getMessage());
+              writer.println(annotation.getLabel());
+          }          
         }
       }
       if (doeLayer != null) {
         Annotation annotation = graph.first(doeLayer.getId());
         if (annotation != null) {
-          writer.println("+ Doe: ");
-          writer.println(annotation.getLabel()); // TODO dd/m/yyyy
+          writer.print("+ Doe: ");
+          try { // parse as iso format
+            Date date = isoDateFormat.parse(annotation.getLabel());
+            // but save with configured format
+            writer.println(saltDateFormat.format(date));
+          } catch(ParseException exception) {
+              warnings.add(
+                "Could not parse doe \""+annotation.getLabel()+"\": " + exception.getMessage());
+              writer.println(annotation.getLabel());
+          }
         }
       }
       if (caLayer != null) {
         Annotation annotation = graph.first(caLayer.getId());
         if (annotation != null) {
-          writer.println("+ Ca: ");
+          writer.print("+ Ca: ");
           writer.println(annotation.getLabel()); // TODO standardize?
         }
       }
       if (ethnicityLayer != null) {
         Annotation annotation = targetParticipant.first(ethnicityLayer.getId());
         if (annotation != null) {
-          writer.println("+ Ethnicity: ");
+          writer.print("+ Ethnicity: ");
           writer.println(annotation.getLabel());
         }
       }
       if (contextLayer != null) {
         Annotation annotation = graph.first(contextLayer.getId());
         if (annotation != null) {
-          writer.println("+ Context: ");
+          writer.print("+ Context: ");
           writer.println(annotation.getLabel());
         }
       }
       if (subgroupLayer != null) {
         Annotation annotation = graph.first(subgroupLayer.getId());
         if (annotation != null) {
-          writer.println("+ Subgroup: ");
+          writer.print("+ Subgroup: ");
           writer.println(annotation.getLabel());
         }
       }
       if (collectLayer != null) {
         Annotation annotation = graph.first(collectLayer.getId());
         if (annotation != null) {
-          writer.println("+ Collect: ");
+          writer.print("+ Collect: ");
           writer.println(annotation.getLabel());
         }
       }
       if (locationLayer != null) {
         Annotation annotation = graph.first(locationLayer.getId());
         if (annotation != null) {
-          writer.println("+ Location: ");
+          writer.print("+ Location: ");
           writer.println(annotation.getLabel());
         }
       }
@@ -2010,20 +2051,254 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       printTimeStamp(firstUtterance.getStart(), writer);
 
       // for each utterance
+      Pattern tokenPattern = Pattern.compile("^(?<word>\\w+)(?<punctuation>\\W*)$");
+      String delimiter = " ";
       for (Annotation utterance : utterancesByAnchor) {
         if (cancelling) break;
 
-        writer.print(utterance.first(participantIdLayer.getId()).getLabel().substring(0,1));
+        // preceding pause lines
+        if (pauseLayer != null) {
+          for (Annotation pause : utterance.getStart().startOf(pauseLayer.getId())) {
+            if (!pause.containsKey("@alreadyPrinted")) {
+              writer.print(": :");
+              writer.println(pause.getLabel());
+              pause.put("@alreadyPrinted", Boolean.TRUE);
+            }
+          } // next code
+        }        
+
+        // preceding comment lines
+        if (commentLayer != null) {
+          for (Annotation comment : utterance.getStart().endOf(commentLayer.getId())) {
+            if (!comment.containsKey("@alreadyPrinted")) {
+              writer.print("+ ");
+              writer.println(comment.getLabel());
+              comment.put("@alreadyPrinted", Boolean.TRUE);
+            }
+          } // next code
+        }        
+
+        writer.print(utterance.getParent().getParent().getLabel().substring(0,1));
         for (Annotation token : utterance.all(schema.getWordLayerId())) {
-          writer.print(" ");
-          // TODO annotions!
-          // TODO _ -> X
-          writer.print(token.getLabel());
+          writer.print(delimiter);
+          
+          // preceding annotions...
+          
+          // comment?
+          if (commentLayer != null) {
+            for (Annotation comment : token.getStart().endOf(commentLayer.getId())) {
+              if (!comment.containsKey("@alreadyPrinted")) {
+                writer.write("{");
+                writer.write(comment.getLabel());
+                writer.write("} ");
+                comment.put("@alreadyPrinted", Boolean.TRUE);
+              }
+            } // next comment
+          }
+
+          // pause?
+          if (pauseLayer != null) {
+            for (Annotation pause : token.getStart().endOf(pauseLayer.getId())) {
+              if (!pause.containsKey("@alreadyPrinted")) {
+                writer.write(":");
+                writer.write(pause.getLabel());
+                writer.write(" ");
+                pause.put("@alreadyPrinted", Boolean.TRUE);
+              }
+            } // next pause
+          }
+
+          // soundEffect?
+          if (soundEffectLayer != null) {
+            for (Annotation soundEffect : token.getStart().endOf(soundEffectLayer.getId())) {
+              writer.write("%");
+              writer.write(soundEffect.getLabel());
+              writer.write(" ");
+            } // next soundEffect
+          }
+
+          // omission?
+          if (omissionLayer != null) {
+            for (Annotation omission : token.getStart().endOf(omissionLayer.getId())) {
+              writer.write("*");
+              writer.write(omission.getLabel());
+              writer.write(" ");
+            } // next omission
+          }
+
+          // in a repetition?
+          if (repetitionsLayer != null) {
+            if (token.getStart().isStartOn(repetitionsLayer.getId())) {
+              delimiter = "_"; // underscores between words
+            }
+          }
+          // in a proper name?
+          if (properNameLayer != null) {
+            if (token.getStart().isStartOn(properNameLayer.getId())) {
+              delimiter = "_"; // underscores between words
+            }
+          }
+
+          // parentheticals
+          if (parentheticalLayer != null) {
+            if (token.getStart().isStartOn(parentheticalLayer.getId())) {
+              writer.print("((");
+            }
+          }
+
+          // mazes
+          if (mazeLayer != null) {
+            if (token.getStart().isStartOn(mazeLayer.getId())) {
+              writer.print("(");
+            }
+          }
+
+          // split word from any trailing punctuation
+          String word = token.getLabel();
+          String trailingPuncuation = "";
+          Matcher tokenParts = tokenPattern.matcher(word);
+          if (tokenParts.matches()) {
+            word = tokenParts.group("word");
+            trailingPuncuation = tokenParts.group("punctuation");
+          }
+          
+          // _ -> X (unintelligible)
+          word = word.replace('_', 'X');
+
+          // partial word?
+          Annotation partialWordTag = partialWordLayer != null?
+            token.first(partialWordLayer.getId()) : null;
+          if (partialWordTag != null) {
+            word = partialWordTag.getLabel();
+          } else { // change the convention: ~ -> *
+            word = word.replace('~', '*');
+          }
+
+          // bound morpheme tag?
+          Annotation boundMorphemeTag = boundMorphemeLayer != null?
+            token.first(boundMorphemeLayer.getId()) : null;
+          if (boundMorphemeTag != null) {
+            word = boundMorphemeTag.getLabel();
+          }
+          
+          writer.print(word);
+          
+          // following annotions...
+          
+          // finishing a repetition?
+          if (repetitionsLayer != null) {
+            if (token.getEnd().isEndOn(repetitionsLayer.getId())) {
+              for (Annotation repeated : token.getEnd().endOf(repetitionsLayer.getId())) {
+                writer.print("|");
+                writer.print(repeated.getLabel());
+                // there's only one
+                break;
+              }
+              delimiter = " "; // back to spaces between words
+            }
+          }
+          // finished a proper name?
+          if (properNameLayer != null) {
+            if (token.getEnd().isEndOn(properNameLayer.getId())) {
+              delimiter = " "; // back to spaces between words
+            }
+          }
+
+          // root?
+          Annotation rootTag = rootLayer != null?
+            token.first(rootLayer.getId()) : null;
+          if (rootTag != null) {
+            writer.write("|");
+            writer.write(rootTag.getLabel());
+          }
+
+          // non-error codes
+          if (codeLayer != null) {
+            for (Annotation code : token.tagsOn(codeLayer.getId())) {
+              writer.print("[");
+              writer.print(code.getLabel());
+              writer.print("]");
+            } // next code
+          }
+          
+          // error codes
+          if (errorLayer != null) {
+            for (Annotation code : token.tagsOn(errorLayer.getId())) {
+              writer.print("[");
+              writer.print(code.getLabel());
+              writer.print("]");
+            } // next code
+          }
+
+          if (trailingPuncuation.length() > 0) writer.print(trailingPuncuation);
+
+          // mazes
+          if (mazeLayer != null) {
+            if (token.getEnd().isEndOn(mazeLayer.getId())) {
+              writer.print(")");
+            }
+          }
+
+          // parentheticals
+          if (parentheticalLayer != null) {
+            if (token.getEnd().isEndOn(parentheticalLayer.getId())) {
+              writer.print("))");
+            }
+          }
+
         } // next token
 
-        // TODO utterance codes
+        // utterance codes
+        boolean firstUtteranceCode = true;
+        
+        // non-error codes
+        if (codeLayer != null) {
+          for (Annotation code : utterance.tagsOn(codeLayer.getId())) {
+            if (firstUtteranceCode) {
+              writer.print(" ");
+              firstUtteranceCode = false;
+            }
+            writer.print("[");
+            writer.print(code.getLabel());
+            writer.print("]");
+          } // next code
+        }        
+        // error codes
+        if (errorLayer != null) {
+          for (Annotation code : utterance.tagsOn(errorLayer.getId())) {
+            if (firstUtteranceCode) {
+              writer.print(" ");
+              firstUtteranceCode = false;
+            }
+            writer.print("[");
+            writer.print(code.getLabel());
+            writer.print("]");
+          } // next code
+        }
         
         writer.println();
+
+        // following comment lines
+        if (commentLayer != null) {
+          for (Annotation comment : utterance.getEnd().startOf(commentLayer.getId())) {
+            if (!comment.containsKey("@alreadyPrinted")) {
+              writer.print("+ ");
+              writer.println(comment.getLabel());
+              comment.put("@alreadyPrinted", Boolean.TRUE);
+            }
+          } // next code
+        }        
+
+        // following pause lines
+        if (pauseLayer != null) {
+          for (Annotation pause : utterance.getEnd().endOf(pauseLayer.getId())) {
+            if (!pause.containsKey("@alreadyPrinted")) {
+              writer.print(": :");
+              writer.println(pause.getLabel());
+              pause.put("@alreadyPrinted", Boolean.TRUE);
+            }
+          } // next code
+        }        
 
         // time stamp
         printTimeStamp(utterance.getEnd(), writer);
@@ -2047,6 +2322,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
     }      
   }
 
+  MessageFormat timesStampFormat = new MessageFormat("- {0,number,00}:{1,number,00}");  
   
   /**
    * Prints a time stamp line for the given anchor.
@@ -2054,12 +2330,16 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
    * @param writer
    */
   public void printTimeStamp(Anchor anchor, PrintWriter writer) {
-    if (anchor.getOffset() != null) {
-      int seconds = anchor.getOffset().intValue();
-      int minutes = seconds / 60;
-      seconds = seconds % 60;
-      writer.println(""+minutes+":"+seconds); // TODO format properly!
-    }
+    if (anchor.getConfidence() != null
+        && anchor.getConfidence() > Constants.CONFIDENCE_AUTOMATIC) {
+      if (anchor.getOffset() != null) {
+        int seconds = anchor.getOffset().intValue();
+        int minutes = seconds / 60;
+        seconds = seconds % 60;
+        Object[] parts = { minutes, seconds };
+        writer.println(timesStampFormat.format(parts));
+      } // offset set
+    } // confidence high
   } // end of printTimeStamp()
 
 } // end of class SltSerialization

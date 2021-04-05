@@ -132,6 +132,89 @@ public class TestSpanningConventionTransformer
       }
    }
 
+   @Test public void basicConvertNoDestination() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");
+
+      g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+			   true, // peers
+			   true, // peersOverlap
+			   true)); // saturated
+      g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "who", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "turn", // parentId
+			   true)); // parentIncludes
+      g.addLayer(new Layer("span", "Spans", Constants.ALIGNMENT_INTERVAL,
+			   true, // peers
+			   false, // peersOverlap
+			   false, // saturated
+			   "turn", // parentId
+			   true)); // parentIncludes
+
+      g.addAnchor(new Anchor("a0", 0.0)); // turn start
+      g.addAnchor(new Anchor("a1", 1.0)); // the
+      g.addAnchor(new Anchor("a2", 2.0)); // quick
+      g.addAnchor(new Anchor("a3", 3.0)); // brown
+      g.addAnchor(new Anchor("a4", 4.0)); // fox
+      // unset offsets
+      g.addAnchor(new Anchor("a?1", null)); // jumps
+      g.addAnchor(new Anchor("a?2", null)); // over
+      g.addAnchor(new Anchor("a5", 5.0)); // end of over
+      g.addAnchor(new Anchor("a6", 6.0)); // turn end
+
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "a0", "a6", "my graph"));
+
+      g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a6", "participant1"));
+
+      g.addAnnotation(new Annotation("word1", "the", "word", "a1", "a2", "turn1",
+                                     1, Constants.CONFIDENCE_MANUAL));
+      g.addAnnotation(new Annotation("word2", "{quick", "word", "a2", "a3", "turn1",
+                                     2, Constants.CONFIDENCE_MANUAL));
+      g.addAnnotation(new Annotation("word3", "brown", "word", "a3", "a4", "turn1",
+                                     3, Constants.CONFIDENCE_AUTOMATIC));
+      g.addAnnotation(new Annotation("word4", "fox}", "word", "a4", "a?1", "turn1",
+                                     4, Constants.CONFIDENCE_DEFAULT));
+      g.addAnnotation(new Annotation("word5", "jumps", "word", "a?1", "a?2", "turn1",
+                                     5, Constants.CONFIDENCE_MANUAL));
+      g.addAnnotation(new Annotation("word6", "over", "word", "a?2", "a5", "turn1",
+                                     6, Constants.CONFIDENCE_MANUAL));
+
+      // span for word1, to test its anchor moves with word1's
+      g.addAnnotation(new Annotation("span", "span", "span", "a1", "a2", "turn1"));
+
+      try
+      {
+         g.setTracker(new ChangeTracker());
+	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
+           "word", "\\{(.*)", "(.*)\\}", true, null, null, null, "$1", "$1", false, true);
+	 transformer.transform(g);
+	 assertEquals("the", g.getAnnotation("word1").getLabel());
+	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word2").getChange());
+	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word3").getChange());
+	 assertEquals(Change.Operation.Destroy, g.getAnnotation("word4").getChange());
+	 assertEquals("jumps", g.getAnnotation("word5").getLabel());
+	 assertEquals("ordinal corrected", 2, g.getAnnotation("word5").getOrdinal());
+	 assertEquals("over", g.getAnnotation("word6").getLabel());
+	 assertEquals("ordinal corrected", 3, g.getAnnotation("word6").getOrdinal());
+	 assertEquals("chained across gap", g.getAnnotation("word1").getEnd(), g.getAnnotation("word5").getStart());
+
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+   }
+
    @Test public void basicConvertLeaveGaps() 
    {
       Graph g = new Graph();
@@ -528,6 +611,72 @@ public class TestSpanningConventionTransformer
 	 assertEquals("a?1", span.getStartId());
 	 assertEquals("a5", span.getEndId());
 	 assertEquals("parent set", "turn1", span.getParentId());
+
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+   }
+
+   @Test public void basicExtractNoOutputLayer() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");
+
+      g.addLayer(new Layer("who", "Participants")
+                 .setAlignment(Constants.ALIGNMENT_NONE)
+                 .setPeers(true).setPeersOverlap(true).setSaturated(true));
+      g.addLayer(new Layer("turn", "Speaker turns")
+                 .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                 .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                 .setParentId("who").setParentIncludes(true));
+      g.addLayer(new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+                 .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                 .setParentId("turn").setParentIncludes(true));
+
+      g.addAnchor(new Anchor("a0", 0.0)); // turn start
+      g.addAnchor(new Anchor("a1", 1.0)); // the
+      g.addAnchor(new Anchor("a2", 2.0)); // quick
+      g.addAnchor(new Anchor("a3", 3.0)); // brown
+      g.addAnchor(new Anchor("a4", 4.0)); // fox
+      // unset offsets
+      g.addAnchor(new Anchor("a?1", null)); // VP
+      g.addAnchor(new Anchor("a?", null)); // jumps
+      g.addAnchor(new Anchor("a?2", null)); // over
+      g.addAnchor(new Anchor("a5", 5.0)); // end of over
+      g.addAnchor(new Anchor("a6", 6.0)); // turn end
+
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "a0", "a6", "my graph"));
+
+      g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a6", "participant1"));
+
+      g.addAnnotation(new Annotation("NP", "(NP", "word", "a0", "a1", "turn1"));
+      g.addAnnotation(new Annotation("word1", "the", "word", "a1", "a2", "turn1"));
+      g.addAnnotation(new Annotation("word2", "quick", "word", "a2", "a3", "turn1"));
+      g.addAnnotation(new Annotation("word3", "brown", "word", "a3", "a4", "turn1"));
+      g.addAnnotation(new Annotation("word4", "fox)", "word", "a4", "a?1", "turn1"));
+      g.addAnnotation(new Annotation("VP", "(VP", "word", "a?1", "a?", "turn1"));
+      g.addAnnotation(new Annotation("word5", "jumps", "word", "a?", "a?2", "turn1"));
+      g.addAnnotation(new Annotation("word6", "over)", "word", "a?2", "a5", "turn1"));
+
+      try
+      {
+         g.trackChanges();
+	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
+	    "word", "\\((.*)", "(.*)\\)", false, "$1", "$1", null, "$1...", "...$1");
+	 transformer.transform(g);
+	 assertEquals("NP", g.getAnnotation("NP").getLabel());
+	 assertEquals("the", g.getAnnotation("word1").getLabel());
+	 assertEquals("quick", g.getAnnotation("word2").getLabel());
+	 assertEquals("brown", g.getAnnotation("word3").getLabel());
+	 assertEquals("fox", g.getAnnotation("word4").getLabel());
+	 assertEquals("VP", g.getAnnotation("VP").getLabel());
+	 assertEquals("jumps", g.getAnnotation("word5").getLabel());
+	 assertEquals("over", g.getAnnotation("word6").getLabel());
+	 assertEquals(Change.Operation.Update, g.getAnnotation("NP").getChange());
+	 assertEquals(Change.Operation.Update, g.getAnnotation("VP").getChange());
 
       }
       catch(TransformationException exception)
