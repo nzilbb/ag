@@ -40,6 +40,7 @@ import java.util.SortedSet;
 import java.util.Vector;
 import java.util.stream.Collectors;
 import nzilbb.ag.*;
+import nzilbb.ag.util.DefaultOffsetGenerator;
 import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.configure.Parameter;
@@ -248,7 +249,8 @@ public class TestSltSerialization {
     assertEquals("Two participants", 2, g.all("participant").length);
     assertEquals("One target", 1, g.all("main_participant").length);
     Annotation child = g.first("main_participant").getParent();
-    assertEquals("Target partcipant correct", "Child", child.getLabel()); // TODO name after the graph
+    assertEquals("Target participant prefixed with file name",
+                 "test-Child", child.getLabel());
     Annotation examiner = null;
     for (Annotation p : g.all("participant")) {
       if (!p.getId().equals(child.getId())) {
@@ -257,6 +259,8 @@ public class TestSltSerialization {
       }
     }
     assertNotNull("Examiner found", examiner);
+    assertEquals("Examiner name prefixed with file name",
+                 "test-Examiner", examiner.getLabel());
     
     // participant meta data
     assertEquals("ParticipantId correct",
@@ -280,7 +284,7 @@ public class TestSltSerialization {
     double[] turnTimeStamps = {
       0, 29, 34, 39, 47, 52, 62, 63, 69, 71, 86, 93 };
     Annotation lastTurn = null;
-    assertEquals("Examiner is first", "Examiner", turns[0].getLabel());
+    assertEquals("Examiner is first", "test-Examiner", turns[0].getLabel());
     for (int t = 0; t < turns.length; t++) {
       assertEquals("start of turn " + t,
                    Double.valueOf(turnTimeStamps[t]), turns[t].getStart().getOffset());
@@ -310,18 +314,18 @@ public class TestSltSerialization {
     double[] utteranceTimeStamps = {
       0, 5, 12, 16, 19, 23, 29, 34, 37, 39, 41, 46, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
     String[] utteranceSpeakers = {
-      "Examiner", "Examiner", "Examiner", "Examiner", "Examiner", "Examiner",
-      "Child",
-      "Examiner", "Examiner",
-      "Child", "Child", "Child",
-      "Examiner",
-      "Child",
-      "Examiner",
-      "Child",
-      "Examiner",
-      "Child", "Child",
-      "Examiner",
-      "Child"
+      "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner",
+      "test-Child",
+      "test-Examiner", "test-Examiner",
+      "test-Child", "test-Child", "test-Child",
+      "test-Examiner",
+      "test-Child",
+      "test-Examiner",
+      "test-Child",
+      "test-Examiner",
+      "test-Child", "test-Child",
+      "test-Examiner",
+      "test-Child"
     };
     Annotation lastUtterance = null;
     for (int u = 0; u < utterances.length; u++) {
@@ -352,7 +356,7 @@ public class TestSltSerialization {
     // check utterance transcriptions
     String[] lines = {
       "I'm at Byron kindergarten on what date is it the 30th of March 2021?",
-      "My name is X. and I'm here with X, doing the oral language assessment.",
+      "My name is _. and I'm here with _, doing the oral language assessment.",
       "Okay, so now Ada it's your turn to tell the story.",
       "You can look at the pictures when you're telling the story.",
       "So let's start at the beginning.",
@@ -593,6 +597,226 @@ public class TestSltSerialization {
     for (int c = 0; c < cUnits.length; c++) {
       assertEquals("C-Unit "+c+" label",
                    cUnitLabels[c], cUnits[c].getLabel());
+    }
+  }
+
+  @Test public void deserializeNoAnnotations()  throws Exception {
+    // just a basic schema, nothing SALT-specific
+    Schema schema = new Schema(
+      "participant", "turn", "utterance", "word",      
+      new Layer("participant", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("main_participant", "Target Speaker").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("participant").setParentIncludes(true),      
+      new Layer("turn", "Speaker Turn").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("participant").setParentIncludes(true),
+      new Layer("utterance", "Lines").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true)
+      );
+    // access file
+    NamedStream[] streams = { new NamedStream(new File(getDir(), "test.slt")) };
+    
+    // create deserializer
+    SltSerialization deserializer = new SltSerialization();
+    
+    // general configuration
+    ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+    // for (Parameter p : configuration.values()) {
+    //   System.out.println("" + p.getName() + " = " + p.getValue());
+    // }
+    assertEquals("Correct number of configuration parameters", 26, configuration.size());
+    assertEquals(schema.getLayer("main_participant"),
+                 configuration.get("targetParticipantLayer").getValue());
+    assertNull(configuration.get("cUnitLayer").getValue());
+    assertNull(configuration.get("commentLayer").getValue());
+    assertNull(configuration.get("parentheticalLayer").getValue());
+    assertNull(configuration.get("properNameLayer").getValue());
+    assertNull(configuration.get("repetitionsLayer").getValue());
+    assertNull(configuration.get("rootLayer").getValue());
+    assertNull(configuration.get("errorLayer").getValue());
+    assertNull(configuration.get("soundEffectLayer").getValue());
+    assertNull(configuration.get("pauseLayer").getValue());
+    assertNull(configuration.get("boundMorphemeLayer").getValue());
+    assertNull(configuration.get("mazeLayer").getValue());
+    assertNull(configuration.get("partialWordLayer").getValue());
+    assertNull(configuration.get("omissionLayer").getValue());
+    assertNull(configuration.get("codeLayer").getValue());
+    assertNull(configuration.get("languageLayer").getValue());
+    assertNull(configuration.get("participantIdLayer").getValue());
+    assertNull(configuration.get("genderLayer").getValue());
+    assertNull(configuration.get("dobLayer").getValue());
+    assertNull(configuration.get("doeLayer").getValue());
+    assertNull(configuration.get("caLayer").getValue());
+    assertNull(configuration.get("ethnicityLayer").getValue());
+    assertNull(configuration.get("contextLayer").getValue());
+    assertNull(configuration.get("subgroupLayer").getValue());
+    assertNull(configuration.get("collectLayer").getValue());
+    assertNull(configuration.get("locationLayer").getValue());
+
+    // final configuration
+    deserializer.configure(configuration, schema);
+    
+    // load the stream
+    ParameterSet defaultParameters = deserializer.load(streams, schema);
+    for (Parameter p : defaultParameters.values()) {
+      System.out.println("" + p.getName() + " = " + p.getValue());
+    }
+    assertEquals("No stream-specific parameters", 0, defaultParameters.size());
+
+    // configure the deserialization
+    deserializer.setParameters(defaultParameters);
+    
+    // build the graph
+    Graph[] graphs = deserializer.deserialize();
+    assertEquals("conversion is 1-1", 1, graphs.length);
+    Graph g = graphs[0];
+    
+    for (String warning : deserializer.getWarnings()) {
+      System.out.println(warning);
+    }
+    
+    assertEquals("test.slt", g.getId());
+
+    // participants     
+    assertEquals("Two participants", 2, g.all("participant").length);
+    assertEquals("One target", 1, g.all("main_participant").length);
+    Annotation child = g.first("main_participant").getParent();
+    assertEquals("Target participant prefixed with file name",
+                 "test-Child", child.getLabel());
+    Annotation examiner = null;
+    for (Annotation p : g.all("participant")) {
+      if (!p.getId().equals(child.getId())) {
+        examiner = p;
+        break;
+      }
+    }
+    assertNotNull("Examiner found", examiner);
+    assertEquals("Examiner name prefixed with file name",
+                 "test-Examiner", examiner.getLabel());
+    
+     // turns
+    Annotation[] turns = g.all("turn");
+    assertEquals(12, turns.length);
+
+    // check turn timestamps
+    double[] turnTimeStamps = {
+      0, 29, 34, 39, 47, 52, 62, 63, 69, 71, 86, 93 };
+    Annotation lastTurn = null;
+    assertEquals("Examiner is first", "test-Examiner", turns[0].getLabel());
+    for (int t = 0; t < turns.length; t++) {
+      assertEquals("start of turn " + t,
+                   Double.valueOf(turnTimeStamps[t]), turns[t].getStart().getOffset());
+      assertEquals("confidence of start of turn " + t + " " + turns[t].getStart(),
+                   Integer.valueOf(Constants.CONFIDENCE_MANUAL),
+                   turns[t].getStart().getConfidence());
+      if (lastTurn != null) {
+        assertEquals("End of turn " + (t-1),
+                     turns[t].getStart(), lastTurn.getEnd());
+        assertNotEquals("Speaker has changed",
+                        lastTurn.getLabel(), turns[t].getLabel());
+      }
+      lastTurn = turns[t];
+    } // next turn
+    // transcript has no end timestamp, so it should be 1s after the last known timestamp
+    assertEquals("Dummy last timestamp (" + lastTurn.getStart() + "-" + lastTurn.getEnd() + ")",
+                 Double.valueOf(94.0), lastTurn.getEnd().getOffset());
+    assertEquals("Dummy last timestamp has low confidence",
+                 Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC),
+                 lastTurn.getEnd().getConfidence());
+      
+    // utterances
+    Annotation[] utterances = g.all("utterance");
+    assertEquals(21, utterances.length);
+    
+    // check utterance timestamps and speakers
+    double[] utteranceTimeStamps = {
+      0, 5, 12, 16, 19, 23, 29, 34, 37, 39, 41, 46, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
+    String[] utteranceSpeakers = {
+      "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner",
+      "test-Child",
+      "test-Examiner", "test-Examiner",
+      "test-Child", "test-Child", "test-Child",
+      "test-Examiner",
+      "test-Child",
+      "test-Examiner",
+      "test-Child",
+      "test-Examiner",
+      "test-Child", "test-Child",
+      "test-Examiner",
+      "test-Child"
+    };
+    Annotation lastUtterance = null;
+    for (int u = 0; u < utterances.length; u++) {
+      assertEquals("start of utterance " + u,
+                   Double.valueOf(utteranceTimeStamps[u]), utterances[u].getStart().getOffset());
+      assertEquals("confidence of start of utterance " + u,
+                   Integer.valueOf(Constants.CONFIDENCE_MANUAL),
+                   utterances[u].getStart().getConfidence());
+      assertEquals("speaker of utterance " + u + " ("+utterances[u].getStart()+")",
+                   utteranceSpeakers[u], utterances[u].getParent().getLabel());
+      if (lastUtterance != null) {
+        assertEquals("End of utterance " + (u-1) + " ("+utterances[u-1].getStart()+")",
+                     utterances[u].getStart(), lastUtterance.getEnd());
+      }
+      lastUtterance = utterances[u];
+    } // next utterance
+    // transcript has no end timestamp, so it should be 1s after the last known timestamp
+    assertEquals("Dummy last timestamp",
+                 Double.valueOf(94.0), lastUtterance.getEnd().getOffset());
+    assertEquals("Dummy last timestamp has low confidence",
+                 Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC),
+                 lastUtterance.getEnd().getConfidence());
+
+    // words
+    Annotation[] words = g.all("word");
+    assertEquals(138, words.length);
+
+    // check utterance transcriptions
+    String[] lines = {
+      "I'm at Byron kindergarten on what date is it the 30th of March 2021?",
+      "My name is _. and I'm here with _, doing the oral language assessment.",
+      "Okay, so now Ada it's your turn to tell the story.",
+      "You can look at the pictures when you're telling the story.",
+      "So let's start at the beginning.",
+      "What was the story about?",
+      "Um the kids the kids, they quickly put their gumboots on.",
+      "Ah Mm hmm.",
+      "Anything else?",
+      "And please go for a walk?",
+      "You need to put your gumboots on.",
+      "It's too dark^",
+      "What happened in this one?",
+      "And then it's heaps and heaps dark.",
+      "What happened next?",
+      "Schnitzel von Krumm s~ falled out the birdsz nest.",
+      "What happened next?",
+      "They put them put it back in the nest.",
+      "Bye bye little bird.",
+      "Anything else that happened?",
+      "x."
+    };
+
+    // setting default anchor offsets ensures that the utterance words are found
+    new DefaultOffsetGenerator().transform(g).commit();
+    
+    for (int u = 0; u < utterances.length; u++) {
+      String transcription = Arrays.stream(utterances[u].all("word"))
+        .map(word -> word.getLabel())
+        .collect(Collectors.joining(" "));
+      assertEquals("Transcription of utterance " + u + " ("+utterances[u].getStart()+")",
+                   lines[u], transcription);
+    }        
+      
+    // check all annotations have 'manual' confidence
+    for (Annotation a : g.getAnnotationsById().values()) {
+      assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                   Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
     }
   }
 
