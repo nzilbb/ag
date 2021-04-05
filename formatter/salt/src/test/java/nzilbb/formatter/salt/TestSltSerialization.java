@@ -374,7 +374,7 @@ public class TestSltSerialization {
       "What happened in this one?",
       "And then it's heaps and heaps dark.",
       "What happened next?",
-      "Schnitzel von Krumm s~ falled out the birdsz nest.",
+      "Schnitzel von Krumm s~ falled out the babies' nest.",
       "What happened next?",
       "They put them put it back in the nest.",
       "Bye bye little bird.",
@@ -445,10 +445,10 @@ public class TestSltSerialization {
     assertEquals("Correct number of bound morphemes: " + Arrays.asList(boundMorphemes),
                  6, boundMorphemes.length);
     String[] morphemeLabels = {
-      "kid/s", "gumboot/s", "gumboot/s", "It/'s", "it/'s", "bird/s/z"
+      "kid/s", "gumboot/s", "gumboot/s", "It/'s", "it/'s", "baby/s/z"
     };
     String[] wordLabels = {
-      "kids,", "gumboots", "gumboots", "It's", "it's", "birdsz"
+      "kids,", "gumboots", "gumboots", "It's", "it's", "babies'"
     };
     for (int m = 0; m < boundMorphemes.length; m++) {
       assertEquals("label of bound morpheme " + m + ": " + boundMorphemes[m],
@@ -810,7 +810,7 @@ public class TestSltSerialization {
       "What happened in this one?",
       "And then it's heaps and heaps dark.",
       "What happened next?",
-      "Schnitzel von Krumm s~ falled out the birdsz nest.",
+      "Schnitzel von Krumm s~ falled out the babies' nest.",
       "What happened next?",
       "They put them put it back in the nest.",
       "Bye bye little bird.",

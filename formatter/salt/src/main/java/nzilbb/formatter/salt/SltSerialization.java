@@ -1647,14 +1647,46 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       if (rootLayer != null) {
         transformer.addDestinationResult(rootLayer.getId(), "${root}");
       }
-      transformer.transform(graph).commit();      
+      transformer.transform(graph).commit();
 
-      // bound morphemes  - something like "bird/s/z"
+      // bound morphemes  - something like "bird/s/z" ...
+
+      // first make ...y/s/z -> ...ies'
+      transformer = new ConventionTransformer(
+        wordLayer.getId(),
+        "(?<word>[^/]+)y\\/s\\/z(?<punctuation>\\W*)", "${word}ies'${punctuation}");
+      if (boundMorphemeLayer != null) {
+        // on the bound morpheme layer, include the base word
+        transformer.addDestinationResult(boundMorphemeLayer.getId(), "${word}y/s/z");
+      }
+      transformer.transform(graph).commit();
+
+      // now make ...y/s -> ...ies
+      transformer = new ConventionTransformer(
+        wordLayer.getId(),
+        "(?<word>[^/]+)y\\/s(?<punctuation>\\W*)", "${word}ies${punctuation}");
+      if (boundMorphemeLayer != null) {
+        // on the bound morpheme layer, include the base word
+        transformer.addDestinationResult(boundMorphemeLayer.getId(), "${word}y/s");
+      }
+      transformer.transform(graph).commit();
+      
+      // now make .../s/z -> ...s'
+      transformer = new ConventionTransformer(
+        wordLayer.getId(),
+        "(?<word>[^/]+)\\/s\\/z(?<punctuation>\\W*)", "${word}s'${punctuation}");
+      if (boundMorphemeLayer != null) {
+        // on the bound morpheme layer, include the base word
+        transformer.addDestinationResult(boundMorphemeLayer.getId(), "${word}/s/z");
+      }
+      transformer.transform(graph).commit();
+
+      // and finally, any others just get the slashes stripped
       transformer = new ConventionTransformer(
         wordLayer.getId(),
         "(?<word>[^/]+)\\/(?<morpheme>[\\w0-9']+)(?<binding2>/(?<morpheme2>[\\w0-9']+))?"
         +"(?<punctuation>\\W*)",
-        "${word}${morpheme}${morpheme2}${punctuation}"); // TODO fix invalid cases like babysz
+        "${word}${morpheme}${morpheme2}${punctuation}");
       if (boundMorphemeLayer != null) {
         // on the bound morpheme layer, include the base word
         transformer.addDestinationResult(
@@ -2179,6 +2211,8 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
             token.first(boundMorphemeLayer.getId()) : null;
           if (boundMorphemeTag != null) {
             word = boundMorphemeTag.getLabel();
+            // remove any possessive apostrophes
+            trailingPuncuation = trailingPuncuation.replaceAll("^'","");
           }
           
           writer.print(word);
