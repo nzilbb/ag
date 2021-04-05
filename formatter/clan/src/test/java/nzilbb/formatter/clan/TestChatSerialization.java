@@ -80,7 +80,7 @@ public class TestChatSerialization {
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(22, deserializer.configure(configuration, schema).size());
+      assertEquals(23, deserializer.configure(configuration, schema).size());
 
       // load the stream
       ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -496,7 +496,7 @@ public class TestChatSerialization {
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(22, deserializer.configure(configuration, schema).size());
+      assertEquals(23, deserializer.configure(configuration, schema).size());
 
       // load the stream
       ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -819,7 +819,7 @@ public class TestChatSerialization {
       ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
       //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
       configuration = serializer.configure(configuration, schema);
-      assertEquals(22, configuration.size());
+      assertEquals(23, configuration.size());
       assertEquals("scribe attribute", "scribe", 
 		   ((Layer)configuration.get("transcriberLayer").getValue()).getId());
       assertEquals("languages attribute", "transcript_language", 
@@ -832,6 +832,8 @@ public class TestChatSerialization {
                    ((Layer)configuration.get("sexLayer").getValue()).getId());
       assertEquals("age attribute", "participant_age",
                    ((Layer)configuration.get("ageLayer").getValue()).getId());
+      assertEquals("includeTimeCodes", Boolean.TRUE, 
+		   configuration.get("includeTimeCodes").getValue());
 
       LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
          Arrays.asList(serializer.getRequiredLayers()));
@@ -874,6 +876,208 @@ public class TestChatSerialization {
       // test using diff
       File result = new File(dir, "serialize-test.cha");
       String differences = diff(new File(dir, "expected_serialize-test.cha"), result);
+      if (differences != null) {
+         fail(differences);
+      } else {
+         result.delete();
+      }
+   }
+
+   @Test public void serializeWithoutSynchronization() throws Exception {
+      Schema schema = new Schema(
+         "who", "turn", "utterance", "word",
+	 new Layer("scribe", "Transcriber")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(true).setPeersOverlap(true).setSaturated(true),
+         new Layer("transcript_language", "Language")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+         new Layer("noise", "Non-speech noises")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false),
+         new Layer("who", "Participants")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(true).setPeersOverlap(true).setSaturated(true),
+         new Layer("main_participant", "Main speaker")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true)
+         .setParentId("who").setParentIncludes(true),
+         new Layer("participant_gender", "Gender")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true)
+         .setParentId("who").setParentIncludes(true),
+         new Layer("participant_age", "Age")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true)
+         .setParentId("who").setParentIncludes(true),
+         new Layer("participant_language", "Language")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true)
+         .setParentId("who").setParentIncludes(true),
+         new Layer("turn", "Speaker turns")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false)
+         .setParentId("who").setParentIncludes(true),
+         new Layer("utterance", "Utterances")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(true)
+         .setParentId("turn").setParentIncludes(true),
+         new Layer("word", "Words")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false)
+         .setParentId("turn").setParentIncludes(true));
+      
+      File dir = getDir();
+      Graph graph = new Graph()
+         .setId("serialize-test-nosync.txt")
+         .setSchema(schema);
+      graph.addAnchor(new Anchor("a0", 0.0));
+      graph.addAnchor(new Anchor("a5", 5.4321)); // will be rendered 5432
+      graph.addAnchor(new Anchor("a10", 10.0));
+      graph.addAnchor(new Anchor("a15", 15.0));
+      // language
+      graph.addAnnotation(new Annotation("lang", "en", "transcript_language", "a0", "a15"));
+      // participants
+      graph.addAnnotation(new Annotation("child", "John Smith", "who", "a0", "a15"));
+      graph.addAnnotation(new Annotation("mother", "Mrs. Smith", "who", "a0", "a15"));
+      graph.addAnnotation(new Annotation("child-main", "John Smith", "main_participant", "a0", "a15",
+                                         "child"));
+      graph.addAnnotation(new Annotation("child-age", "2;10.10", "participant_age", "a0", "a15",
+                                         "child"));
+      graph.addAnnotation(new Annotation("child-gender", "M", "participant_gender", "a0", "a15",
+                                         "child"));
+      graph.addAnnotation(new Annotation("child-language", "en", "participant_language", "a0", "a15",
+                                         "child"));
+      graph.addAnnotation(new Annotation("mother-language", "Spanish", "participant_language", "a0", "a15",
+                                         "mother"));
+      // turns
+      graph.addAnnotation(new Annotation("t1", "John Smith", "turn", "a0", "a10", "child"));
+      graph.addAnnotation(new Annotation("t2", "Mrs. Smith", "turn", "a10", "a15", "mother"));
+      // utterances
+      graph.addAnnotation(new Annotation("u1", "John Smith", "utterance", "a0", "a5", "t1"));
+      graph.addAnnotation(new Annotation("u2", "John Smith", "utterance", "a5", "a10", "t1"));
+      graph.addAnnotation(new Annotation("u3", "Mrs. Smith", "utterance", "a10", "a15", "t2"));
+      
+      // words
+      graph.addAnnotation(new Annotation("the", "The", "word",
+                                         "a0",
+                                         // 1.2345 will become ..._1234
+                                         graph.addAnchor(new Anchor("a1", 1.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("quick", "'quick", "word", 
+                                         "a1",
+                                         graph.addAnchor(new Anchor("a2", 2.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("brown", "brown'", "word", 
+                                         "a2",
+                                         graph.addAnchor(new Anchor("a3", 3.0)).getId(),
+                                         "t1"));
+      graph.addAnnotation(new Annotation("fox", "fox", "word", 
+                                         "a3",
+                                         "a5",
+                                         "t1"));
+      
+      graph.addAnnotation(new Annotation("jumps", "jumps -", "word", 
+                                         "a5",
+                                         graph.addAnchor(new Anchor("a6", 6.0)).getId(),
+                                         "t1"));      
+      graph.addAnnotation(new Annotation("over", "over", "word",
+                                         "a6",
+                                         graph.addAnchor(new Anchor("a7", 8.0)).getId(),
+                                         "t1"));
+      // noise
+      graph.addAnnotation(new Annotation("cough", "coughs", "noise",
+                                         "a7",
+                                         graph.addAnchor(new Anchor("a8", 8.0)).getId(),
+                                         "t1"));
+      
+      graph.addAnnotation(new Annotation("th~", "th~", "word", // th~ becomes &th
+                                         "a8",
+                                         "a10",
+                                         "t1"));
+      
+      graph.addAnnotation(new Annotation("the2", "the", "word", 
+                                         "a10",
+                                         graph.addAnchor(new Anchor("a12", 12.0)).getId(),
+                                         "t2"));
+      graph.addAnnotation(new Annotation("lazy", "lazy", "word", 
+                                         "a12",
+                                         graph.addAnchor(new Anchor("a13", 13.0)).getId(),
+                                         "t2"));
+      graph.addAnnotation(new Annotation("dog", "\"dog\"", "word", 
+                                         "a13",
+                                         graph.addAnchor(new Anchor("a14", 14.0)).getId(),
+                                         "t2"));
+      graph.addAnnotation(new Annotation(".", ".", "word", 
+                                         "a14",
+                                         "a15",
+                                         "t2"));
+      
+      // create serializer
+      ChatSerialization serializer = new ChatSerialization();
+      
+      // general configuration
+      ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
+      //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      configuration.get("includeTimeCodes").setValue(Boolean.FALSE);
+      configuration = serializer.configure(configuration, schema);
+      assertEquals(23, configuration.size());
+      assertEquals("scribe attribute", "scribe", 
+		   ((Layer)configuration.get("transcriberLayer").getValue()).getId());
+      assertEquals("languages attribute", "transcript_language", 
+		   ((Layer)configuration.get("languagesLayer").getValue()).getId());
+      assertEquals("target participant attribute", "main_participant", 
+		   ((Layer)configuration.get("targetParticipantLayer").getValue()).getId());
+      assertEquals("non-word layer", "noise", 
+		   ((Layer)configuration.get("nonWordLayer").getValue()).getId());
+      assertEquals("sex attribute mapped to gender", "participant_gender",
+                   ((Layer)configuration.get("sexLayer").getValue()).getId());
+      assertEquals("age attribute", "participant_age",
+                   ((Layer)configuration.get("ageLayer").getValue()).getId());
+      assertEquals("includeTimeCodes", Boolean.FALSE, 
+		   configuration.get("includeTimeCodes").getValue());
+
+      LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
+         Arrays.asList(serializer.getRequiredLayers()));
+      assertEquals("Needed layers: " + needLayers,
+                   11, needLayers.size());
+      assertTrue(needLayers.contains("who"));
+      assertTrue(needLayers.contains("main_participant"));
+      assertTrue(needLayers.contains("scribe"));
+      assertTrue(needLayers.contains("transcript_language"));
+      assertTrue(needLayers.contains("turn"));
+      assertTrue(needLayers.contains("utterance"));
+      assertTrue(needLayers.contains("word"));
+      assertTrue(needLayers.contains("noise"));
+      assertTrue(needLayers.contains("participant_age"));
+      assertTrue(needLayers.contains("participant_gender"));
+      assertTrue(needLayers.contains("participant_language"));
+      
+      // serialize
+      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+      final Vector<NamedStream> streams = new Vector<NamedStream>();
+      String[] layers = {"word","transcript_language"};
+      Graph[] graphs = { graph };
+      serializer.serialize(Arrays.spliterator(graphs), layers,
+                           stream -> streams.add(stream),
+                           warning -> System.out.println(warning),
+                           exception -> exceptions.add(exception));
+      if (exceptions.size() > 0) {
+         fail(exceptions.stream()
+              .map(x -> {
+                    StringWriter sw = new StringWriter();
+                    PrintWriter pw = new PrintWriter(sw);
+                    x.printStackTrace(pw);
+                    return x.toString() + ": " + sw;
+                 })
+              .collect(Collectors.joining("\n","","")));
+      }
+      
+      streams.elementAt(0).save(dir);
+      
+      // test using diff
+      File result = new File(dir, "serialize-test-nosync.cha");
+      String differences = diff(new File(dir, "expected_serialize-test-nosync.cha"), result);
       if (differences != null) {
          fail(differences);
       } else {

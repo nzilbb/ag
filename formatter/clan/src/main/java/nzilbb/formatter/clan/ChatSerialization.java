@@ -539,7 +539,24 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     * @param newParticipantLayers Required participant meta-data layers.
     */
    public void setParticipantLayers(HashMap<String,Layer> newParticipantLayers) { participantLayers = newParticipantLayers; }
-   
+
+   /**
+    * Whether to include utterance time codes when exporting transcripts.
+    * @see #getIncludeTimeCodes()
+    * @see #setIncludeTimeCodes(Boolean)
+    */
+   protected Boolean includeTimeCodes = Boolean.TRUE;
+   /**
+    * Getter for {@link #includeTimeCodes}: Whether to include utterance time codes when exporting transcripts.
+    * @return Whether to include utterance time codes when exporting transcripts.
+    */
+   public Boolean getIncludeTimeCodes() { return includeTimeCodes; }
+   /**
+    * Setter for {@link #includeTimeCodes}: Whether to include utterance time codes when exporting transcripts.
+    * @param newIncludeTimeCodes Whether to include utterance time codes when exporting transcripts.
+    */
+   public ChatSerialization setIncludeTimeCodes(Boolean newIncludeTimeCodes) { includeTimeCodes = newIncludeTimeCodes; return this; }
+      
    /**
     * Utterance tokenizer.  The default is {@link SimpleTokenizer}.
     * @see #getTokenizer()
@@ -671,57 +688,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       nonWordLayer = null;
 
       if (configuration.size() > 0) {
-	 if (configuration.containsKey("participantLayer")) {
-	    setParticipantLayer((Layer)configuration.get("participantLayer").getValue());
-	 }
-	 if (configuration.containsKey("turnLayer")) {
-	    setTurnLayer((Layer)configuration.get("turnLayer").getValue());
-	 }
-	 if (configuration.containsKey("utteranceLayer")) {
-	    setUtteranceLayer((Layer)configuration.get("utteranceLayer").getValue());
-	 }
-	 if (configuration.containsKey("wordLayer")) {
-	    setWordLayer((Layer)configuration.get("wordLayer").getValue());
-	 }
-	 if (configuration.containsKey("disfluencyLayer")) {
-	    setDisfluencyLayer((Layer)configuration.get("disfluencyLayer").getValue());
-	 }
-	 if (configuration.containsKey("nonWordLayer")) {
-	    setNonWordLayer((Layer)configuration.get("nonWordLayer").getValue());
-	 }
-	 if (configuration.containsKey("expansionLayer")) {
-	    setExpansionLayer((Layer)configuration.get("expansionLayer").getValue());
-	 }
-	 if (configuration.containsKey("errorsLayer")) {
-	    setErrorsLayer((Layer)configuration.get("errorsLayer").getValue());
-	 }
-	 if (configuration.containsKey("repetitionsLayer")) {
-	    setRepetitionsLayer((Layer)configuration.get("repetitionsLayer").getValue());
-	 }
-	 if (configuration.containsKey("retracingLayer")) {
-	    setRetracingLayer((Layer)configuration.get("retracingLayer").getValue());
-	 }
-	 if (configuration.containsKey("completionLayer")) {
-	    setCompletionLayer((Layer)configuration.get("completionLayer").getValue());
-	 }
-	 if (configuration.containsKey("gemLayer")) {
-	    setGemLayer((Layer)configuration.get("gemLayer").getValue());
-	 }
-	 if (configuration.containsKey("linkageLayer")) {
-	    setLinkageLayer((Layer)configuration.get("linkageLayer").getValue());
-	 }
-	 if (configuration.containsKey("cUnitLayer")) {
-	    setCUnitLayer((Layer)configuration.get("cUnitLayer").getValue());
-	 }
-	 if (configuration.containsKey("transcriberLayer")) {
-	    setTranscriberLayer((Layer)configuration.get("transcriberLayer").getValue());
-	 }
-	 if (configuration.containsKey("languagesLayer")) {
-	    setLanguagesLayer((Layer)configuration.get("languagesLayer").getValue());
-	 }
-	 if (configuration.containsKey("targetParticipantLayer")) {
-	    setTargetParticipantLayer((Layer)configuration.get("targetParticipantLayer").getValue());
-	 }
+        configuration.apply(this);
 	 for (String attribute : participantLayers.keySet()) {
 	    if (configuration.containsKey(attribute + "Layer")) {
 	       participantLayers.put(attribute, ((Layer)configuration.get(attribute + "Layer").getValue()));
@@ -947,6 +914,17 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
          }
 	 if (p.getValue() == null) p.setValue(findLayerById(participantTagLayers, possibilities_participant));
 	 p.setPossibleValues(participantTagLayers.values());
+      }
+      
+      Parameter includeTimeCodes = configuration.get("includeTimeCodes");
+      if (includeTimeCodes == null) {
+        includeTimeCodes = new Parameter(
+          "includeTimeCodes", Boolean.class, "Include Time Codes",
+          "Include utterance sychronization information when exporting transcripts");
+        configuration.addParameter(includeTimeCodes);
+      }
+      if (includeTimeCodes.getValue() == null) {
+        includeTimeCodes.setValue(Boolean.TRUE);
       }
       
       return configuration;
@@ -1949,14 +1927,18 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                nextNonWord = nonWords.hasNext()?nonWords.next():null;
             } // next noise
 
-            // time code
-            writer.print(" ·");
-            int ms = (int)(utterance.getStart().getOffset() * 1000);
-            writer.print("" + ms);
-            writer.print("_");
-            ms = (int)(utterance.getEnd().getOffset() * 1000);
-            writer.print("" + ms);
-            writer.println("·");
+            if (includeTimeCodes) {
+              // time code
+              writer.print(" ·");
+              int ms = (int)(utterance.getStart().getOffset() * 1000);
+              writer.print("" + ms);
+              writer.print("_");
+              ms = (int)(utterance.getEnd().getOffset() * 1000);
+              writer.print("" + ms);
+              writer.println("·");
+            } else {
+              writer.println();
+            }
          } // next utterance
          writer.close();
 
