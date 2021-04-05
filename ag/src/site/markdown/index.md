@@ -27,7 +27,7 @@ More details on extra features are available in
 
 ![A graph arcs labelled with word orthographies, and with speaker names, but also with arcs between those arcs, indicating what the who spoke each word](images/annotation-graph-example.svg "An example of a heirarchical annotation graph")
 
-More API documentation is available [here](https://nzilbb.github.io/ag/)
+More API documentation is available [here](https://nzilbb.github.io/ag/apidocs/nzilbb/ag/package-summary.html)
 
 ## Format Conversion
 
