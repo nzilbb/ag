@@ -152,7 +152,7 @@ public class TestSltSerialization {
     // for (Parameter p : configuration.values()) {
     //   System.out.println("" + p.getName() + " = " + p.getValue());
     // }
-    assertEquals("Correct number of configuration parameters", 26, configuration.size());
+    assertEquals("Correct number of configuration parameters", 27, configuration.size());
     assertEquals(schema.getLayer("cunit"),
                  configuration.get("cUnitLayer").getValue());
     assertEquals(schema.getLayer("main_participant"),
@@ -205,6 +205,10 @@ public class TestSltSerialization {
                  configuration.get("collectLayer").getValue());
     assertEquals(schema.getLayer("transcript_location"),
                  configuration.get("locationLayer").getValue());
+    assertEquals("Date format is month-first by default",
+                 "M/d/yyyy", configuration.get("dateFormat").getValue());
+    // change to day-first
+    configuration.get("dateFormat").setValue("d/M/yyyy");
 
     // final configuration
     deserializer.configure(configuration, schema);
@@ -234,7 +238,7 @@ public class TestSltSerialization {
     assertEquals("Language set", 1, g.all("transcript_language").length);
     assertEquals("Language correct", "en", g.first("transcript_language").getLabel());
     assertEquals("Doe set", 1, g.all("transcript_doe").length);
-    assertEquals("Doe correct", "30/3/2021", g.first("transcript_doe").getLabel()); // TODO ISO format
+    assertEquals("Doe correct", "2021-03-30", g.first("transcript_doe").getLabel());
     assertEquals("Ca set", 1, g.all("transcript_ca").length);
     assertEquals("Ca correct", "4;4", g.first("transcript_ca").getLabel());
     assertEquals("Context set", 1, g.all("transcript_context").length);
@@ -268,7 +272,7 @@ public class TestSltSerialization {
     assertEquals("Gender correct",
                  "F", child.first("participant_gender").getLabel());
     assertEquals("Dob correct",
-                 "26/9/1972", child.first("participant_dob").getLabel());
+                 "1972-09-26", child.first("participant_dob").getLabel());
     assertEquals("Ethnicity correct",
                  "NZ European", child.first("participant_ethnicity").getLabel());
     assertNull("Examiner ParticipantId not set", examiner.first("participant_id"));
@@ -630,7 +634,7 @@ public class TestSltSerialization {
     // for (Parameter p : configuration.values()) {
     //   System.out.println("" + p.getName() + " = " + p.getValue());
     // }
-    assertEquals("Correct number of configuration parameters", 26, configuration.size());
+    assertEquals("Correct number of configuration parameters", 27, configuration.size());
     assertEquals(schema.getLayer("main_participant"),
                  configuration.get("targetParticipantLayer").getValue());
     assertNull(configuration.get("cUnitLayer").getValue());
@@ -658,6 +662,10 @@ public class TestSltSerialization {
     assertNull(configuration.get("subgroupLayer").getValue());
     assertNull(configuration.get("collectLayer").getValue());
     assertNull(configuration.get("locationLayer").getValue());
+    assertEquals("Date format is month-first by default",
+                 "M/d/yyyy", configuration.get("dateFormat").getValue());
+    // change to day-first
+    configuration.get("dateFormat").setValue("d/M/yyyy");
 
     // final configuration
     deserializer.configure(configuration, schema);

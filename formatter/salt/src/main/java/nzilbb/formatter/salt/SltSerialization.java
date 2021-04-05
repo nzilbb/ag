@@ -28,7 +28,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -700,7 +703,24 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
    * @param newLocationLayer Location layer.
    */
   public SltSerialization setLocationLayer(Layer newLocationLayer) { locationLayer = newLocationLayer; return this; }
-   
+
+  /**
+   * Format for dates in the SALT file. The default is "M/d/YYYY".
+   * @see #getDateFormat()
+   * @see #setDateFormat(String)
+   */
+  protected String dateFormat = "M/d/YYYY";
+  /**
+   * Getter for {@link #dateFormat}: Format for dates in the SALT file. The default is "M/d/YYYY".
+   * @return Format for dates in the SALT file. The default is "M/d/YYYY".
+   */
+  public String getDateFormat() { return dateFormat; }
+  /**
+   * Setter for {@link #dateFormat}: Format for dates in the SALT file.
+   * @param newDateFormat Format for dates in the SALT file.
+   */
+  public SltSerialization setDateFormat(String newDateFormat) { dateFormat = newDateFormat; return this; }
+  
   /**
    * Utterance tokenizer.  The default is {@link SimpleTokenizer}.
    * @see #getTokenizer()
@@ -1148,7 +1168,20 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
     p.setValue(Utility.FindLayerById(
                  transcriptTagLayers, Arrays.asList(locationLayerPossibilities)));
     p.setPossibleValues(transcriptTagLayers.values());
-      
+
+    Parameter dateFormat = configuration.get("dateFormat");
+    if (dateFormat == null) {
+      dateFormat = new Parameter(
+        "dateFormat", String.class, "Date format",
+        "Format used in SALT files for dates (e.g. Dob, Doe)");
+      dateFormat.setPossibleValues(Arrays.asList("M/d/yyyy", "d/M/yyyy", "M/d/yy", "d/M/yy"));
+      configuration.addParameter(dateFormat);
+    }
+    if (dateFormat.getValue() == null) {
+      // default to US month-first format
+      dateFormat.setValue("M/d/yyyy");
+    }
+
     return configuration;
   }
 
@@ -1328,6 +1361,8 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
     } // next participant
 
     // headers
+    SimpleDateFormat saltDateFormat = new SimpleDateFormat(dateFormat);
+    SimpleDateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     for (String header : headers) {
       int colon = header.indexOf(':');
       if (colon > 0) {
@@ -1343,9 +1378,23 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
           } else if (key.equals("gender") && genderLayer != null) {
             graph.createTag(targetParticipant, genderLayer.getId(), value);
           } else if (key.equals("dob") && dobLayer != null) {
-            graph.createTag(targetParticipant, dobLayer.getId(), value); // TODO ISO format
+            try { // parse as configured format
+              Date date = saltDateFormat.parse(value);
+              // but save with ISO format
+              graph.createTag(targetParticipant, dobLayer.getId(), isoDateFormat.format(date));
+            } catch(ParseException exception) {
+              warnings.add("Could not parse dob \""+value+"\": " + exception.getMessage());
+              graph.createTag(targetParticipant, dobLayer.getId(), value);
+            }
           } else if (key.equals("doe") && doeLayer != null) {
-            graph.createTag(graph, doeLayer.getId(), value); // TODO ISO format
+            try { // parse as configured format
+              Date date = saltDateFormat.parse(value);
+              // but save with ISO format
+              graph.createTag(targetParticipant, doeLayer.getId(), isoDateFormat.format(date));
+            } catch(ParseException exception) {
+              warnings.add("Could not parse dob \""+value+"\": " + exception.getMessage());
+              graph.createTag(targetParticipant, doeLayer.getId(), value);
+            }
           } else if (key.equals("ca") && caLayer != null) {
             if (participantLayer.getId().equals(caLayer.getParentId())) {
               // participant attribute
