@@ -1309,10 +1309,14 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
     // the header is something like "Child, Examiner"
     HashMap<String,Annotation> idToParticipant = new HashMap<String,Annotation>();
     Annotation targetParticipant = null;
+    // In SALT files, participants are named a general code like 'Child', 'Parent' etc.
+    // to uniquify these for insertion into large corpora, we prepent this with the name
+    // of the file
+    String participantPrefix = IO.WithoutExtension(getName()) + "-";
     for (String p : participantsHeader.split(",")) {
       p = p.trim();
       String id = p.substring(0,1); // Child -> C, Examiner -> E, etc.
-      String name = p; // TODO prepend file name
+      String name = participantPrefix + p;
       Annotation participant = graph.createTag(graph, participantLayer.getId(), name);
       idToParticipant.put(id, participant);
       if (targetParticipant == null) { // first participant is target
@@ -1610,7 +1614,9 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       // infra-line comments - something like "{points to self}"
       SpanningConventionTransformer spanningTransformer = new SpanningConventionTransformer(
         wordLayer.getId(), "\\{(.*)", "(.*)\\}", true, null, null, 
-        commentLayer==null?null:commentLayer.getId(), "$1", "$1", false, false);
+        commentLayer==null?null:commentLayer.getId(), "$1", "$1", false,
+        // if we're not keeping comments, close up the resulting gaps between words
+        commentLayer==null);
       spanningTransformer.transform(graph).commit();
 
       // parentheticals - something like "((where was I))"
@@ -1654,7 +1660,23 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       // partial words  - something like "stu*"
       transformer = new ConventionTransformer(
         wordLayer.getId(), "(?<partial>.+)\\*", "${partial}~");
-      transformer.transform(graph).commit();      
+      transformer.transform(graph).commit();
+
+      // unintelligible speech:
+      //  - "X" - for a single word
+      //  - "XX" - for multiple words
+      //  - "XXX" - for the entire utterance
+      // we change these to underscores, to ensure that dictionary lookups fail
+      // (e.g. we don't want the pronunciation of "X" being tagged as /eks/)
+      new ConventionTransformer(
+        wordLayer.getId(), "X(?<punctuation>\\W*)", "_${punctuation}")
+        .transform(graph);
+      new ConventionTransformer(
+        wordLayer.getId(), "XX(?<punctuation>\\W*)", "__${punctuation}")
+        .transform(graph);
+      new ConventionTransformer(
+        wordLayer.getId(), "XXX(?<punctuation>\\W*)", "___${punctuation}")
+        .transform(graph);
 
       // set all annotations to manual confidence
       for (Annotation a : graph.getAnnotationsById().values()) {
@@ -1946,6 +1968,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         for (Annotation token : utterance.all(schema.getWordLayerId())) {
           writer.print(" ");
           // TODO annotions!
+          // TODO _ -> X
           writer.print(token.getLabel());
         } // next token
 
