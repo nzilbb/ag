@@ -1417,7 +1417,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 
 	 // disfluencies
 	 ConventionTransformer transformer = new ConventionTransformer(
-           getWordLayer().getId(), "&+(\\w+)");
+           getWordLayer().getId(), "&\\+(\\w+)");
 	 transformer.addDestinationResult(getWordLayer().getId(), "$1");
 	 if (getDisfluencyLayer() != null) {
 	    transformer.addDestinationResult(getDisfluencyLayer().getId(), "&+");

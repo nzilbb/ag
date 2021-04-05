@@ -288,7 +288,7 @@ public class TestChatSerialization {
 
       // disfluency
       assertEquals("i", words[18].getLabel());
-      assertEquals("&", words[18].first("disfluency").getLabel());
+      assertEquals("&+", words[18].first("disfluency").getLabel());
       assertEquals("word is parent", words[18], words[18].first("disfluency").getParent());
       // ensure they're marked as manual annotations
       for (Annotation a : g.all("disfluency")) {
