@@ -1,338 +1,338 @@
 
 {
-    "annotation":{
-        "name":"onetomany_serialize_utterance_word__214.822-218.290",
-        "annotates":"serialize_utterance_word.wav?t=-2.4999999993724487E-5",
-        "sampleRate":16000,
-        "levels":[
+    "annotation": {
+        "name": "onetomany_serialize_utterance_word__214.822-218.290",
+        "annotates": "serialize_utterance_word.wav?t=-2.4999999993724487E-5",
+        "sampleRate": 16000,
+        "levels": [
             {
-                "name":"phone",
-                "type":"SEGMENT",
-                "items":[
+                "name": "phone",
+                "type": "SEGMENT",
+                "items": [
                     {
-                        "id":2,
-                        "labels":[
+                        "id": 2,
+                        "labels": [
                             {
-                                "name":"phone",
-                                "value":"$"
+                                "name": "phone",
+                                "value": "$"
                             }
                         ],
-                        "sampleStart":0,
-                        "sampleDur":6166
+                        "sampleStart": 0,
+                        "sampleDur": 6166
                     },
                     {
-                        "id":5,
-                        "sampleStart":6166,
-                        "sampleDur":1482,
-                        "labels":[
+                        "id": 5,
+                        "sampleStart": 6166,
+                        "sampleDur": 1482,
+                        "labels": [
                         ]
                     },
                     {
-                        "id":4,
-                        "labels":[
+                        "id": 4,
+                        "labels": [
                             {
-                                "name":"phone",
-                                "value":"s"
+                                "name": "phone",
+                                "value": "s"
                             }
                         ],
-                        "sampleStart":7648,
-                        "sampleDur":561
+                        "sampleStart": 7648,
+                        "sampleDur": 561
                     },
                     {
-                        "id":6,
-                        "labels":[
+                        "id": 6,
+                        "labels": [
                             {
-                                "name":"phone",
-                                "value":"V"
+                                "name": "phone",
+                                "value": "V"
                             }
                         ],
-                        "sampleStart":8209,
-                        "sampleDur":1626
+                        "sampleStart": 8209,
+                        "sampleDur": 1626
                     },
                     {
-                        "id":7,
-                        "labels":[
+                        "id": 7,
+                        "labels": [
                             {
-                                "name":"phone",
-                                "value":"m"
+                                "name": "phone",
+                                "value": "m"
                             }
                         ],
-                        "sampleStart":9835,
-                        "sampleDur":2496
+                        "sampleStart": 9835,
+                        "sampleDur": 2496
                     },
                     {
-                        "id":9,
-                        "labels":[
+                        "id": 9,
+                        "labels": [
                             {
-                                "name":"phone",
-                                "value":"n"
+                                "name": "phone",
+                                "value": "n"
                             }
                         ],
-                        "sampleStart":12331,
-                        "sampleDur":6165
+                        "sampleStart": 12331,
+                        "sampleDur": 6165
                     },
                     {
-                        "id":11,
-                        "labels":[
+                        "id": 11,
+                        "labels": [
                             {
-                                "name":"phone",
-                                "value":"?"
+                                "name": "phone",
+                                "value": "?"
                             }
                         ],
-                        "sampleStart":18496,
-                        "sampleDur":6166
+                        "sampleStart": 18496,
+                        "sampleDur": 6166
                     },
                     {
-                        "id":13,
-                        "labels":[
+                        "id": 13,
+                        "labels": [
                             {
-                                "name":"phone",
-                                "value":"?"
+                                "name": "phone",
+                                "value": "?"
                             }
                         ],
-                        "sampleStart":24662,
-                        "sampleDur":6165
+                        "sampleStart": 24662,
+                        "sampleDur": 6165
                     },
                     {
-                        "id":15,
-                        "labels":[
+                        "id": 15,
+                        "labels": [
                             {
-                                "name":"phone",
-                                "value":"?"
+                                "name": "phone",
+                                "value": "?"
                             }
                         ],
-                        "sampleStart":30827,
-                        "sampleDur":6165
+                        "sampleStart": 30827,
+                        "sampleDur": 6165
                     },
                     {
-                        "id":17,
-                        "labels":[
+                        "id": 17,
+                        "labels": [
                             {
-                                "name":"phone",
-                                "value":"?"
+                                "name": "phone",
+                                "value": "?"
                             }
                         ],
-                        "sampleStart":36992,
-                        "sampleDur":6166
+                        "sampleStart": 36992,
+                        "sampleDur": 6166
                     },
                     {
-                        "id":19,
-                        "labels":[
+                        "id": 19,
+                        "labels": [
                             {
-                                "name":"phone",
-                                "value":"?"
+                                "name": "phone",
+                                "value": "?"
                             }
                         ],
-                        "sampleStart":43158,
-                        "sampleDur":6165
+                        "sampleStart": 43158,
+                        "sampleDur": 6165
                     },
                     {
-                        "id":21,
-                        "labels":[
+                        "id": 21,
+                        "labels": [
                             {
-                                "name":"phone",
-                                "value":"?"
+                                "name": "phone",
+                                "value": "?"
                             }
                         ],
-                        "sampleStart":49323,
-                        "sampleDur":6165
+                        "sampleStart": 49323,
+                        "sampleDur": 6165
                     }
                 ]
             },
             {
-                "name":"word",
-                "type":"ITEM",
-                "items":[
+                "name": "word",
+                "type": "ITEM",
+                "items": [
                     {
-                        "id":1,
-                        "labels":[
+                        "id": 1,
+                        "labels": [
                             {
-                                "name":"word",
-                                "value":"or"
+                                "name": "word",
+                                "value": "or"
                             }
                         ]
                     },
                     {
-                        "id":3,
-                        "labels":[
+                        "id": 3,
+                        "labels": [
                             {
-                                "name":"word",
-                                "value":"some"
+                                "name": "word",
+                                "value": "some"
                             },
                             {
-                                "name":"tag",
-                                "value":"first-tag"
+                                "name": "tag",
+                                "value": "first-tag"
                             }
                         ]
                     },
                     {
-                        "id":8,
-                        "labels":[
+                        "id": 8,
+                        "labels": [
                             {
-                                "name":"word",
-                                "value":"and"
+                                "name": "word",
+                                "value": "and"
                             }
                         ]
                     },
                     {
-                        "id":10,
-                        "labels":[
+                        "id": 10,
+                        "labels": [
                             {
-                                "name":"word",
-                                "value":"there's"
+                                "name": "word",
+                                "value": "there's"
                             }
                         ]
                     },
                     {
-                        "id":12,
-                        "labels":[
+                        "id": 12,
+                        "labels": [
                             {
-                                "name":"word",
-                                "value":"nothing"
+                                "name": "word",
+                                "value": "nothing"
                             }
                         ]
                     },
                     {
-                        "id":14,
-                        "labels":[
+                        "id": 14,
+                        "labels": [
                             {
-                                "name":"word",
-                                "value":"much"
+                                "name": "word",
+                                "value": "much"
                             }
                         ]
                     },
                     {
-                        "id":16,
-                        "labels":[
+                        "id": 16,
+                        "labels": [
                             {
-                                "name":"word",
-                                "value":"on"
+                                "name": "word",
+                                "value": "on"
                             }
                         ]
                     },
                     {
-                        "id":18,
-                        "labels":[
+                        "id": 18,
+                        "labels": [
                             {
-                                "name":"word",
-                                "value":"it"
+                                "name": "word",
+                                "value": "it"
                             }
                         ]
                     },
                     {
-                        "id":20,
-                        "labels":[
+                        "id": 20,
+                        "labels": [
                             {
-                                "name":"word",
-                                "value":"or"
+                                "name": "word",
+                                "value": "or"
                             }
                         ]
                     }
                 ]
             },
             {
-                "name":"utterance",
-                "type":"ITEM",
-                "items":[
+                "name": "utterance",
+                "type": "ITEM",
+                "items": [
                     {
-                        "id":0,
-                        "labels":[
+                        "id": 0,
+                        "labels": [
                             {
-                                "name":"utterance",
-                                "value":"participant"
+                                "name": "utterance",
+                                "value": "participant"
                             }
                         ]
                     }
                 ]
             }
         ],
-        "links":[
+        "links": [
             {
-                "fromID":0,
-                "toID":1
+                "fromID": 0,
+                "toID": 1
             },
             {
-                "fromID":1,
-                "toID":2
+                "fromID": 1,
+                "toID": 2
             },
             {
-                "fromID":0,
-                "toID":3
+                "fromID": 0,
+                "toID": 3
             },
             {
-                "fromID":3,
-                "toID":4
+                "fromID": 3,
+                "toID": 4
             },
             {
-                "fromID":3,
-                "toID":6
+                "fromID": 3,
+                "toID": 6
             },
             {
-                "fromID":3,
-                "toID":7
+                "fromID": 3,
+                "toID": 7
             },
             {
-                "fromID":0,
-                "toID":8
+                "fromID": 0,
+                "toID": 8
             },
             {
-                "fromID":8,
-                "toID":9
+                "fromID": 8,
+                "toID": 9
             },
             {
-                "fromID":0,
-                "toID":10
+                "fromID": 0,
+                "toID": 10
             },
             {
-                "fromID":10,
-                "toID":11
+                "fromID": 10,
+                "toID": 11
             },
             {
-                "fromID":0,
-                "toID":12
+                "fromID": 0,
+                "toID": 12
             },
             {
-                "fromID":12,
-                "toID":13
+                "fromID": 12,
+                "toID": 13
             },
             {
-                "fromID":0,
-                "toID":14
+                "fromID": 0,
+                "toID": 14
             },
             {
-                "fromID":14,
-                "toID":15
+                "fromID": 14,
+                "toID": 15
             },
             {
-                "fromID":0,
-                "toID":16
+                "fromID": 0,
+                "toID": 16
             },
             {
-                "fromID":16,
-                "toID":17
+                "fromID": 16,
+                "toID": 17
             },
             {
-                "fromID":0,
-                "toID":18
+                "fromID": 0,
+                "toID": 18
             },
             {
-                "fromID":18,
-                "toID":19
+                "fromID": 18,
+                "toID": 19
             },
             {
-                "fromID":0,
-                "toID":20
+                "fromID": 0,
+                "toID": 20
             },
             {
-                "fromID":20,
-                "toID":21
+                "fromID": 20,
+                "toID": 21
             }
         ]
     },
-    "ssffFiles":[
+    "ssffFiles": [
     ],
-    "mediaFile":{
-        "encoding":"BASE64",
-        "data":"UklGRsYCAABXQVZFZm10IBAAAAABAAEAgD4AAAB9AAACABAATElTVBoAAABJTkZPSVNGVA4AAABMYXZmNTguMjAuMTAwAGRhdGGAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+    "mediaFile": {
+        "encoding": "BASE64",
+        "data": "UklGRsYCAABXQVZFZm10IBAAAAABAAEAgD4AAAB9AAACABAATElTVBoAAABJTkZPSVNGVA4AAABMYXZmNTguMjAuMTAwAGRhdGGAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
     }
 }

@@ -1,88 +1,88 @@
 
 {
-    "name":"actual_dbconfig",
-    "UUID":"fc379152-0381-4efc-b4c1-e90d696f5373",
-    "mediafileExtension":"wav",
-    "ssffTrackDefinitions":[
+    "name": "actual_dbconfig",
+    "UUID": "fc379152-0381-4efc-b4c1-e90d696f5373",
+    "mediafileExtension": "wav",
+    "ssffTrackDefinitions": [
         {
-            "name":"FORMANTS",
-            "columnName":"fm",
-            "fileExtension":"fms"
+            "name": "FORMANTS",
+            "columnName": "fm",
+            "fileExtension": "fms"
         }
     ],
-    "levelDefinitions":[
+    "levelDefinitions": [
         {
-            "name":"phone",
-            "type":"SEGMENT",
-            "attributeDefinitions":[
+            "name": "phone",
+            "type": "SEGMENT",
+            "attributeDefinitions": [
                 {
-                    "name":"phone",
-                    "type":"STRING"
+                    "name": "phone",
+                    "type": "STRING"
                 }
             ]
         },
         {
-            "name":"word",
-            "type":"SEGMENT",
-            "attributeDefinitions":[
+            "name": "word",
+            "type": "SEGMENT",
+            "attributeDefinitions": [
                 {
-                    "name":"word",
-                    "type":"STRING"
+                    "name": "word",
+                    "type": "STRING"
                 },
                 {
-                    "name":"pronounce",
-                    "type":"STRING"
+                    "name": "pronounce",
+                    "type": "STRING"
                 }
             ]
         }
     ],
-    "linkDefinitions":[
+    "linkDefinitions": [
     ],
-    "EMUwebAppConfig":{
-        "perspectives":[
+    "EMUwebAppConfig": {
+        "perspectives": [
             {
-                "name":"default",
-                "signalCanvases":{
-                    "order":[
+                "name": "default",
+                "signalCanvases": {
+                    "order": [
                         "OSCI",
                         "SPEC"
                     ],
-                    "assign":[
+                    "assign": [
                         {
-                            "signalCanvasName":"SPEC",
-                            "ssffTrackName":"FORMANTS"
+                            "signalCanvasName": "SPEC",
+                            "ssffTrackName": "FORMANTS"
                         }
                     ],
-                    "contourLims":[
+                    "contourLims": [
                         {
-                            "ssffTrackName":"FORMANTS",
-                            "minContourIdx":0,
-                            "maxContourIdx":1
+                            "ssffTrackName": "FORMANTS",
+                            "minContourIdx": 0,
+                            "maxContourIdx": 1
                         }
                     ]
                 },
-                "levelCanvases":{
-                    "order":[
+                "levelCanvases": {
+                    "order": [
                         "word",
                         "phone"
                     ]
                 },
-                "twoDimCanvases":{
-                    "order":[
+                "twoDimCanvases": {
+                    "order": [
                     ]
                 }
             }
         ],
-        "restrictions":{
-            "showPerspectivesSidebar":false,
-            "playback":true,
-            "correctionTool":false,
-            "editItemSize":true,
-            "useLargeTextInputField":false
+        "restrictions": {
+            "showPerspectivesSidebar": false,
+            "playback": true,
+            "correctionTool": false,
+            "editItemSize": true,
+            "useLargeTextInputField": false
         },
-        "activeButtons":{
-            "saveBundle":true,
-            "showHierarchy":false
+        "activeButtons": {
+            "saveBundle": true,
+            "showHierarchy": false
         }
     }
 }
