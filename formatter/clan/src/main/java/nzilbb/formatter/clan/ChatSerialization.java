@@ -1929,13 +1929,13 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 
             if (includeTimeCodes) {
               // time code
-              writer.print(" ·");
+              writer.print(" ");
               int ms = (int)(utterance.getStart().getOffset() * 1000);
               writer.print("" + ms);
               writer.print("_");
               ms = (int)(utterance.getEnd().getOffset() * 1000);
               writer.print("" + ms);
-              writer.println("·");
+              writer.println("");
             } else {
               writer.println();
             }
