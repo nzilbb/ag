@@ -355,7 +355,7 @@ public class TestSltSerialization {
 
     // words
     Annotation[] words = g.all("word");
-    assertEquals(149, words.length);
+    assertEquals(152, words.length);
 
     // check utterance transcriptions
     String[] lines = {
@@ -366,7 +366,7 @@ public class TestSltSerialization {
       "So let's start at the beginning.",
       "What was the story about?",
       "Um the kids the kids, they quickly put their gumboots on.",
-      "saved muddy putting girl's wants goes shopping running dropped aunty's stopped leaving coming its lift.",
+      "saved muddy bushes buses putting girl's wants goes shopping running dropped helped aunty's stopped leaving coming its lift.",
       "Anything else?",
       "And please go for a walk?",
       "You need to put your gumboots on.",
@@ -418,17 +418,22 @@ public class TestSltSerialization {
     // errors
     Annotation[] errors = g.all("error");
     assertEquals("Correct number of error codes: " + Arrays.asList(errors),
-                 2, errors.length);
-    assertEquals("Utterance Error label", "EU", errors[0].getLabel());
+                 3, errors.length);
+    assertEquals("first EW label", "EP:boy/z", errors[0].getLabel());
+    assertEquals("first EW code tags a word",
+                 1, errors[0].tagsOn("word").length);
+    assertEquals("first EW tags the word \"girl's\": " + Arrays.asList(errors[0].tagsOn("word")),
+                 "girl's", errors[0].tagsOn("word")[0].getLabel());    
+    assertEquals("Utterance Error label", "EU", errors[1].getLabel());
     assertEquals("Utterance Error code tags an utterance",
-                 1, errors[0].tagsOn("utterance").length);
+                 1, errors[1].tagsOn("utterance").length);
     assertEquals("Utterance Error code tags the tenth utterance",
-                 utterances[9].getId(), errors[0].tagsOn("utterance")[0].getId());
-    assertEquals("EW label", "EW", errors[1].getLabel());
-    assertEquals("EW code tags a word",
-                 1, errors[1].tagsOn("word").length);
-    assertEquals("EW tags the word 'falled': " + Arrays.asList(errors[1].tagsOn("word")),
-                 "falled", errors[1].tagsOn("word")[0].getLabel());
+                 utterances[9].getId(), errors[1].tagsOn("utterance")[0].getId());
+    assertEquals("second EW label", "EW", errors[2].getLabel());
+    assertEquals("second EW code tags a word",
+                 1, errors[2].tagsOn("word").length);
+    assertEquals("second EW tags the word 'falled': " + Arrays.asList(errors[2].tagsOn("word")),
+                 "falled", errors[2].tagsOn("word")[0].getLabel());
     
     // root forms
     Annotation[] roots = g.all("root");
@@ -443,17 +448,19 @@ public class TestSltSerialization {
     // bound morphemes
     Annotation[] boundMorphemes = g.all("bound_morpheme");
     assertEquals("Correct number of bound morphemes: " + Arrays.asList(boundMorphemes),
-                 21, boundMorphemes.length);
+                 24, boundMorphemes.length);
     String[] morphemeLabels = {
       "kid/s", "gumboot/s",
-      "save/ed", "mud/y", "put/ing", "girl/z", "want/3s", "go/3s", "shop/ing", "run/ing",
-      "drop/ed", "aunty/z", "stop/ed", "leave/ing", "come/ing", "it/z", "lift/*ed",
+      "save/ed", "mud/y", "bush/s", "bus/s", "put/ing", "girl/z", "want/3s", "go/3s", "shop/ing",
+      "run/ing", "drop/ed", "help/ed", "aunty/z", "stop/ed", "leave/ing", "come/ing", "it/z",
+      "lift/*ed",
       "gumboot/s", "It/'s", "it/'s", "baby/s/z"
     };
     String[] wordLabels = {
       "kids,", "gumboots",
-      "saved", "muddy", "putting", "girl's", "wants", "goes", "shopping", "running",
-      "dropped", "aunty's", "stopped", "leaving", "coming", "its", "lift.",
+      "saved", "muddy", "bushes", "buses", "putting", "girl's", "wants", "goes", "shopping",
+      "running", "dropped", "helped", "aunty's", "stopped", "leaving", "coming", "its",
+      "lift.",
       "gumboots", "It's", "it's", "babies'"
     };
     for (int m = 0; m < boundMorphemes.length; m++) {
@@ -797,7 +804,7 @@ public class TestSltSerialization {
 
     // words
     Annotation[] words = g.all("word");
-    assertEquals(149, words.length);
+    assertEquals(152, words.length);
 
     // check utterance transcriptions
     String[] lines = {
@@ -808,7 +815,7 @@ public class TestSltSerialization {
       "So let's start at the beginning.",
       "What was the story about?",
       "Um the kids the kids, they quickly put their gumboots on.",
-      "saved muddy putting girl's wants goes shopping running dropped aunty's stopped leaving coming its lift.",
+      "saved muddy bushes buses putting girl's wants goes shopping running dropped helped aunty's stopped leaving coming its lift.",
       "Anything else?",
       "And please go for a walk?",
       "You need to put your gumboots on.",

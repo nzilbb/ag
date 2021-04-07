@@ -1541,7 +1541,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       
       // non-error utterance codes
       ConventionTransformer transformer = new ConventionTransformer(
-        utteranceLayer.getId(), "(?<line>.*) \\[(?<code>[^E][\\w0-9:]+)\\]$", "${line}");
+        utteranceLayer.getId(), "(?<line>.*) \\[(?<code>[^E][^\\]]+)\\]$", "${line}");
       if (codeLayer != null) {
         transformer.addDestinationResult(codeLayer.getId(), "${code}");
       }
@@ -1549,7 +1549,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
 
       // utterance error codes
       transformer = new ConventionTransformer(
-        utteranceLayer.getId(), "(?<line>.*) \\[(?<code>E[\\w0-9:]+)\\]$", "${line}");
+        utteranceLayer.getId(), "(?<line>.*) \\[(?<code>E[^\\]]+)\\]$", "${line}");
       if (errorLayer != null) {
         transformer.addDestinationResult(errorLayer.getId(), "${code}");
       }
@@ -1620,7 +1620,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       // non-error codes - something like "John[NAME]"
       transformer = new ConventionTransformer(
         wordLayer.getId(),
-        "(?<word>.+)\\[(?<code>[^E][\\w0-9:]+)\\](?<punctuation>\\W*)",
+        "(?<word>.+)\\[(?<code>[^E][^\\]]+)\\](?<punctuation>\\W*)",
         "${word}${punctuation}");
       if (codeLayer != null) {
         transformer.addDestinationResult(codeLayer.getId(), "${code}");
@@ -1630,7 +1630,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       // error codes - something like "falled[EW]"
       transformer = new ConventionTransformer(
         wordLayer.getId(),
-        "(?<word>.+)\\[(?<code>E[\\w0-9:]+)\\](?<punctuation>\\W*)",
+        "(?<word>.+)\\[(?<code>E[^\\]]+)\\](?<punctuation>\\W*)",
         "${word}${punctuation}");
       if (errorLayer != null) {
         transformer.addDestinationResult(errorLayer.getId(), "${code}");
@@ -1657,6 +1657,10 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         // /s/z - Plural and Possessive. Example: baby/s/z ...        
         // first make ...y/s/z -> ...ies' - e.g. "babies'"
         "(?<w>[^/]+)y\\/s\\/z(?<punc>\\W*)", "${w}ies'${punc}", "${w}y/s/z",
+        // and make ...s/s/z -> ...ses' - e.g. "buses'"
+        "(?<w>[^/]+)s\\/s\\/z(?<punc>\\W*)", "${w}ses'${punc}", "${w}s/s/z",
+        // and make ...sh/s/z -> ...shes' - e.g. "bushes'"
+        "(?<w>[^/]+)sh\\/s\\/z(?<punc>\\W*)", "${w}shes'${punc}", "${w}sh/s/z",
         // now make .../s/z -> ...s'
         "(?<w>[^/]+)\\/s\\/z(?<punc>\\W*)", "${w}s'${punc}", "${w}/s/z",
 
@@ -1669,6 +1673,10 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         // /s - Plural noun. Examples: doggie/s, baby/s...
         // first make ...y/s -> ...ies - e.g. "babies"
         "(?<w>[^/]+)y\\/s(?<punc>\\W*)", "${w}ies${punc}", "${w}y/s",
+        // and make ...s/s -> ...ses - e.g. "buses"
+        "(?<w>[^/]+)s\\/s(?<punc>\\W*)", "${w}ses${punc}", "${w}s/s",
+        // and make ...sh/s -> ...shes - e.g. "bushes"
+        "(?<w>[^/]+)sh\\/s(?<punc>\\W*)", "${w}shes${punc}", "${w}sh/s",
         // make .../s -> ...s
         "(?<w>[^/]+)\\/s(?<punc>\\W*)", "${w}s${punc}", "${w}/s",
 
@@ -1691,16 +1699,18 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         // /ed - Past tense. Examples: love/ed, die/ed
         // first make ...e/ed -> ...ed - e.g. "loved"
         "(?<w>[^/]+)e\\/ed(?<punc>\\W*)", "${w}ed${punc}", "${w}e/ed",
-        // and make ...p/ed -> ...pped - e.g. "dropped"
-        "(?<w>[^/]+)p\\/ed(?<punc>\\W*)", "${w}pped${punc}", "${w}p/ed",
+        // and make ...[vowel]p/ed -> ...pped - e.g. "dropped" but "helped"
+        "(?<w>[^/]+[aeiou])p\\/ed(?<punc>\\W*)", "${w}pped${punc}", "${w}p/ed",
+        // and make ...b/ed -> ...bbed - e.g. "grabbed"
+        "(?<w>[^/]+[aeiou])b\\/ed(?<punc>\\W*)", "${w}bbed${punc}", "${w}b/ed",
         // make .../ed -> ...ed
         "(?<w>[^/]+)\\/ed(?<punc>\\W*)", "${w}ed${punc}", "${w}/ed",
         
         // /ed2 - Extension: Past participle. Examples: "I had climb/ed2 to the top."
         // first make ...e/ed2 -> ...ed - e.g. "had loved"
         "(?<w>[^/]+)e\\/ed2(?<punc>\\W*)", "${w}ed${punc}", "${w}e/ed2",
-        // and make ...p/ed2 -> ...pped - e.g. "had dropped"
-        "(?<w>[^/]+)p\\/ed2(?<punc>\\W*)", "${w}pped${punc}", "${w}p/ed2",
+        // and make ...[vowel]p/ed2 -> ...pped - e.g. "had dropped" but "had helped"
+        "(?<w>[^/]+[aeiou])p\\/ed2(?<punc>\\W*)", "${w}pped${punc}", "${w}p/ed2",
         // make .../ed2 -> ...ed
         "(?<w>[^/]+)\\/ed2(?<punc>\\W*)", "${w}ed${punc}", "${w}/ed2",
         
@@ -1713,7 +1723,9 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         // /ing - Progressive verb form. Examples: go/ing, run/ing, bike/ing
         // first make ...e/ing -> ...ing - e.g. "biking"
         "(?<w>[^/]+)e\\/ing(?<punc>\\W*)", "${w}ing${punc}", "${w}e/ing",
-        // and make ...n/ing -> ...nning - e.g. "running"
+        // and make ...ain/ing -> ...aining - e.g. "raining"
+        "(?<w>[^/]+)ain\\/ing(?<punc>\\W*)", "${w}aining${punc}", "${w}ain/ing",
+        // but make ...n/ing -> ...nning - e.g. "running"
         "(?<w>[^/]+)n\\/ing(?<punc>\\W*)", "${w}nning${punc}", "${w}n/ing",
         // and make ...t/ing -> ...tting - e.g. "putting"
         "(?<w>[^/]+)t\\/ing(?<punc>\\W*)", "${w}tting${punc}", "${w}t/ing",
