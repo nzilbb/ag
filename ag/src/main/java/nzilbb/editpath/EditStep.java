@@ -31,7 +31,7 @@ public class EditStep<T>
 {
 
    /**
-    * Enumarator for representing the operation represented by a step 
+    * Enumeration for representing the operation represented by a step 
     * @see #getOperation()
     */
    public enum StepOperation { NONE, DELETE, CHANGE, INSERT }; // TODO Add the possiblity of merge? i.e. two subsequent symbols converting to one symbol
