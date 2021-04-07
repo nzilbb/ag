@@ -898,194 +898,192 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       attributeLayers.put(id, transcriptTagLayers.get(id));
     }
          
-    Parameter p = Optional.ofNullable(configuration.get("cUnitLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "cUnitLayer", Layer.class, "C-Unit layer", "Layer for marking c-units")));
+    Parameter p = configuration.containsKey("cUnitLayer")?configuration.get("cUnitLayer")
+      :configuration.addParameter(
+        new Parameter("cUnitLayer", Layer.class, "C-Unit layer", "Layer for marking c-units"));
     String[] possibilitiesCUnit = {"c-unit","cunit","sentence"};
     p.setValue(Utility.FindLayerById(phraseLayers, Arrays.asList(possibilitiesCUnit)));
     p.setPossibleValues(phraseLayers.values());
 
-    p = Optional.ofNullable(configuration.get("targetParticipantLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "targetParticipantLayer", Layer.class, "Target Participant Layer",
-                  "Layer for marking the target participant")));
+    p = configuration.containsKey("targetParticipantLayer")?
+      configuration.get("targetParticipantLayer"):
+      configuration.addParameter(
+        new Parameter("targetParticipantLayer", Layer.class, "Target Participant Layer",
+                      "Layer for marking the target participant"));
     String[] targetParticipantLayerPossibilities = {
       "main_participant", "main", "target", "participant_target"};
     p.setValue(Utility.FindLayerById(
                  participantTagLayers, Arrays.asList(targetParticipantLayerPossibilities)));
     p.setPossibleValues(participantTagLayers.values());
       
-    p = Optional.ofNullable(configuration.get("commentLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "commentLayer", Layer.class, "Comment Layer", "Layer for comments")));
+    p = configuration.containsKey("commentLayer")?
+      configuration.get("commentLayer"):
+      configuration.addParameter(
+        new Parameter("commentLayer", Layer.class, "Comment Layer", "Layer for comments"));
     String[] commentLayerPossibilities = {"comment", "comments" };
     p.setValue(Utility.FindLayerById(
                  spanLayers, Arrays.asList(commentLayerPossibilities)));
     p.setPossibleValues(spanLayers.values());
       
-    p = Optional.ofNullable(configuration.get("parentheticalLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "parentheticalLayer", Layer.class, "Parenthetical Layer",
-                  "Layer for marking parenthetical remarks by the speaker")));
+    p = configuration.containsKey("parentheticalLayer")?
+      configuration.get("parentheticalLayer"):
+      configuration.addParameter(
+                new Parameter("parentheticalLayer", Layer.class, "Parenthetical Layer",
+                              "Layer for marking parenthetical remarks by the speaker"));
     String[] parentheticalLayerPossibilities = {"parenthetical", "parentheticals" };
     p.setValue(Utility.FindLayerById(
                  phraseLayers, Arrays.asList(parentheticalLayerPossibilities)));
     p.setPossibleValues(phraseLayers.values());
       
-    p = Optional.ofNullable(configuration.get("properNameLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "properNameLayer", Layer.class, "Proper Name Layer",
-                  "Layer for tagging proper names")));
+    p = configuration.containsKey("properNameLayer")?
+      configuration.get("properNameLayer"):
+      configuration.addParameter(
+        new Parameter("properNameLayer", Layer.class, "Proper Name Layer",
+                      "Layer for tagging proper names"));
     String[] properNameLayerPossibilities = {
       "propername", "name", "namedentity", "entity"};
     p.setValue(Utility.FindLayerById(
                  phraseLayers, Arrays.asList(properNameLayerPossibilities)));
     p.setPossibleValues(phraseLayers.values());
       
-    p = Optional.ofNullable(configuration.get("repetitionsLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "repetitionsLayer", Layer.class, "Repetitions Layer",
-                  "Layer for annotating repetitions")));
+    p = configuration.containsKey("repetitionsLayer")?
+      configuration.get("repetitionsLayer"):
+      configuration.addParameter(
+        new Parameter("repetitionsLayer", Layer.class, "Repetitions Layer",
+                      "Layer for annotating repetitions"));
     String[] repetitionsLayerPossibilities = {
       "repetition", "repetitions", "repeat", "repeated"};
     p.setValue(Utility.FindLayerById(
                  phraseLayers, Arrays.asList(repetitionsLayerPossibilities)));
     p.setPossibleValues(phraseLayers.values());
       
-    p = Optional.ofNullable(configuration.get("rootLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "rootLayer", Layer.class, "Root Layer",
-                  "Layer for tagging words with their root form")));
+    p = configuration.containsKey("rootLayer")?
+      configuration.get("rootLayer"):
+      configuration.addParameter(
+        new Parameter("rootLayer", Layer.class, "Root Layer",
+                      "Layer for tagging words with their root form"));
     String[] rootLayerPossibilities = {
       "root", "rootform", "lemma", "stem"};
     p.setValue(Utility.FindLayerById(
                  wordTagLayers, Arrays.asList(rootLayerPossibilities)));
     p.setPossibleValues(wordTagLayers.values());
       
-    p = Optional.ofNullable(configuration.get("errorLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "errorLayer", Layer.class, "Error Layer", "Layer for marking errors")));
+    p = configuration.containsKey("errorLayer")?
+      configuration.get("errorLayer"):
+      configuration.addParameter(
+        new Parameter("errorLayer", Layer.class, "Error Layer", "Layer for marking errors"));
     String[] errorLayerPossibilities = {"error", "errors"};
     p.setValue(Utility.FindLayerById(
                  phraseLayers, Arrays.asList(errorLayerPossibilities)));
     p.setPossibleValues(phraseLayers.values());
       
-    p = Optional.ofNullable(configuration.get("soundEffectLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "soundEffectLayer", Layer.class, "Sound Effects Layer",
-                  "Layer for marking non-word verbal sound effects")));
+    p = configuration.containsKey("soundEffectLayer")?
+      configuration.get("soundEffectLayer"):
+      configuration.addParameter(
+        new Parameter("soundEffectLayer", Layer.class, "Sound Effects Layer",
+                      "Layer for marking non-word verbal sound effects"));
     String[] soundEffectLayerPossibilities = {
       "soundeffect", "soundeffects", "sound", "nonword", "noise"};
     p.setValue(Utility.FindLayerById(
                  phraseLayers, Arrays.asList(soundEffectLayerPossibilities)));
     p.setPossibleValues(phraseLayers.values());
       
-    p = Optional.ofNullable(configuration.get("pauseLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "pauseLayer", Layer.class, "Pause Layer",
-                  "Layer for marking pauses in speech")));
+    p = configuration.containsKey("pauseLayer")?
+      configuration.get("pauseLayer"):
+      configuration.addParameter(
+        new Parameter("pauseLayer", Layer.class, "Pause Layer",
+                      "Layer for marking pauses in speech"));
     String[] pauseLayerPossibilities = { "pause", "pauses", "silence" };
     p.setValue(Utility.FindLayerById(
                  phraseLayers, Arrays.asList(pauseLayerPossibilities)));
     p.setPossibleValues(phraseLayers.values());
       
-    p = Optional.ofNullable(configuration.get("boundMorphemeLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "boundMorphemeLayer", Layer.class, "Bound Morpheme Layer",
-                  "Layer for marking bound morpheme annotations")));
+    p = configuration.containsKey("boundMorphemeLayer")?
+      configuration.get("boundMorphemeLayer"):
+      configuration.addParameter(
+        new Parameter("boundMorphemeLayer", Layer.class, "Bound Morpheme Layer",
+                      "Layer for marking bound morpheme annotations"));
     String[] boundMorphemeLayerPossibilities = {"boundmorpheme", "morpheme" };
     p.setValue(Utility.FindLayerById(
                  wordTagLayers, Arrays.asList(boundMorphemeLayerPossibilities)));
     p.setPossibleValues(wordTagLayers.values());
       
-    p = Optional.ofNullable(configuration.get("mazeLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "mazeLayer", Layer.class, "Maze Layer",
-                  "Layer for marking false starts, repetitions, and reformulations")));
+    p = configuration.containsKey("mazeLayer")?
+      configuration.get("mazeLayer"):
+      configuration.addParameter(
+        new Parameter("mazeLayer", Layer.class, "Maze Layer",
+                      "Layer for marking false starts, repetitions, and reformulations"));
     String[] mazeLayerPossibilities = { "maze", "mazes", };
     p.setValue(Utility.FindLayerById(
                  phraseLayers, Arrays.asList(mazeLayerPossibilities)));
     p.setPossibleValues(phraseLayers.values());
       
-    p = Optional.ofNullable(configuration.get("partialWordLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "partialWordLayer", Layer.class, "Partial Word Layer",
-                  "Layer for marking stuttered or interrupted words")));
+    p = configuration.containsKey("partialWordLayer")?
+      configuration.get("partialWordLayer"):
+      configuration.addParameter(
+        new Parameter("partialWordLayer", Layer.class, "Partial Word Layer",
+                      "Layer for marking stuttered or interrupted words"));
     String[] partialWordLayerPossibilities = {
       "partialword", "incomplete", "fragment", "wordfragment"};
     p.setValue(Utility.FindLayerById(
                  wordTagLayers, Arrays.asList(partialWordLayerPossibilities)));
     p.setPossibleValues(wordTagLayers.values());
       
-    p = Optional.ofNullable(configuration.get("omissionLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "omissionLayer", Layer.class, "Omission Layer",
-                  "Layer for marking missing words")));
+    p = configuration.containsKey("omissionLayer")?
+      configuration.get("omissionLayer"):
+      configuration.addParameter(
+        new Parameter("omissionLayer", Layer.class, "Omission Layer",
+                      "Layer for marking missing words"));
     String[] omissionLayerPossibilities = { "omission", "omissions", "missing" };
     p.setValue(Utility.FindLayerById(
                  phraseLayers, Arrays.asList(omissionLayerPossibilities)));
     p.setPossibleValues(phraseLayers.values());
       
-    p = Optional.ofNullable(configuration.get("codeLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "codeLayer", Layer.class, "Code Layer",
-                  "Layer for non-error codes")));
+    p = configuration.containsKey("codeLayer")?
+      configuration.get("codeLayer"):
+      configuration.addParameter(
+        new Parameter("codeLayer", Layer.class, "Code Layer", "Layer for non-error codes"));
     String[] codeLayerPossibilities = { "code", "codes" };
     p.setValue(Utility.FindLayerById(
                  phraseLayers, Arrays.asList(codeLayerPossibilities)));
     p.setPossibleValues(phraseLayers.values());
       
-    p = Optional.ofNullable(configuration.get("languageLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "languageLayer", Layer.class, "Language Attribute",
-                  "Layer for recording the language of the speech")));
+    p = configuration.containsKey("languageLayer")?
+      configuration.get("languageLayer"):
+      configuration.addParameter(
+        new Parameter("languageLayer", Layer.class, "Language Attribute",
+                      "Layer for recording the language of the speech"));
     String[] languageLayerPossibilities = { "transcript_language", "language", "lang" };
     p.setValue(Utility.FindLayerById(
                  transcriptTagLayers, Arrays.asList(languageLayerPossibilities)));
     p.setPossibleValues(transcriptTagLayers.values());
       
-    p = Optional.ofNullable(configuration.get("participantIdLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "participantIdLayer", Layer.class, "Participant ID Attribute",
-                  "Layer for recording the target participant's ID")));
+    p = configuration.containsKey("participantIdLayer")?
+      configuration.get("participantIdLayer"):
+      configuration.addParameter(
+        new Parameter("participantIdLayer", Layer.class, "Participant ID Attribute",
+                      "Layer for recording the target participant's ID"));
     String[] participantIdLayerPossibilities = { "participant_id", "id" };
     p.setValue(Utility.FindLayerById(
                  participantTagLayers, Arrays.asList(participantIdLayerPossibilities)));
     p.setPossibleValues(participantTagLayers.values());
       
-    p = Optional.ofNullable(configuration.get("genderLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "genderLayer", Layer.class, "Gender Attribute",
-                  "Layer for recording the gender of the target participant")));
+    p = configuration.containsKey("genderLayer")?
+      configuration.get("genderLayer"):
+      configuration.addParameter(
+        new Parameter("genderLayer", Layer.class, "Gender Attribute",
+                      "Layer for recording the gender of the target participant"));
     String[] genderLayerPossibilities = {
       "participant_gender", "gender", "participant_sex", "sex"};
     p.setValue(Utility.FindLayerById(
                  participantTagLayers, Arrays.asList(genderLayerPossibilities)));
     p.setPossibleValues(participantTagLayers.values());
       
-    p = Optional.ofNullable(configuration.get("dobLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "dobLayer", Layer.class, "Date of Birth Attribute",
-                  "Layer for recording the birth date of the target participant")));
+    p = configuration.containsKey("dobLayer")?
+      configuration.get("dobLayer"):
+      configuration.addParameter(
+        new Parameter("dobLayer", Layer.class, "Date of Birth Attribute",
+                      "Layer for recording the birth date of the target participant"));
     String[] dobLayerPossibilities = {
       "participant_dob", "participant_date_of_birth", "participant_birth_date",
       "dob", "date_of_birth", "birth_date"};
@@ -1093,23 +1091,23 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
                  participantTagLayers, Arrays.asList(dobLayerPossibilities)));
     p.setPossibleValues(participantTagLayers.values());
       
-    p = Optional.ofNullable(configuration.get("doeLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "doeLayer", Layer.class, "Date of Sample Attribute",
-                  "Layer for recording the date the recording was elicited")));
+    p = configuration.containsKey("doeLayer")?
+      configuration.get("doeLayer"):
+      configuration.addParameter(
+        new Parameter("doeLayer", Layer.class, "Date of Sample Attribute",
+                      "Layer for recording the date the recording was elicited"));
     String[] doeLayerPossibilities = {
-      "transcriptdoe", "transcriptrecordingdate", "transcriptairedate",
-      "doe", "recordingdate", "airdate" };
+      "transcriptdoe", "transcriptrecordingdate", "transcriptairedate", "transcriptcreationdate",
+      "doe", "recordingdate", "airdate", "creationdate" };
     p.setValue(Utility.FindLayerById(
                  transcriptTagLayers, Arrays.asList(doeLayerPossibilities)));
     p.setPossibleValues(transcriptTagLayers.values());
       
-    p = Optional.ofNullable(configuration.get("caLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "caLayer", Layer.class, "Current Age Attribute",
-                  "Layer for recording the target participant's age when recorded")));
+    p = configuration.containsKey("caLayer")?
+      configuration.get("caLayer"):
+      configuration.addParameter(
+                new Parameter("caLayer", Layer.class, "Current Age Attribute",
+                              "Layer for recording the target participant's age when recorded"));
     String[] caLayerPossibilities = {
       "participantca", "participantage", "participantcurrentage",
       "transcriptca", "transcriptage", "transcriptcurrentage",
@@ -1118,53 +1116,53 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
                  attributeLayers, Arrays.asList(caLayerPossibilities)));
     p.setPossibleValues(attributeLayers.values());
       
-    p = Optional.ofNullable(configuration.get("ethnicityLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "ethnicityLayer", Layer.class, "Ethnicity Attribute",
-                  "Layer for recording the ethnicity of the target participant")));
+    p = configuration.containsKey("ethnicityLayer")?
+      configuration.get("ethnicityLayer"):
+      configuration.addParameter(
+        new Parameter("ethnicityLayer", Layer.class, "Ethnicity Attribute",
+                      "Layer for recording the ethnicity of the target participant"));
     String[] ethnicityLayerPossibilities = { "participant_ethnicity", "ethnicity" };
     p.setValue(Utility.FindLayerById(
                  participantTagLayers, Arrays.asList(ethnicityLayerPossibilities)));
     p.setPossibleValues(participantTagLayers.values());
       
-    p = Optional.ofNullable(configuration.get("contextLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "contextLayer", Layer.class, "Context Attribute",
-                  "Layer for recording the sampling context")));
+    p = configuration.containsKey("contextLayer")?
+      configuration.get("contextLayer"):
+      configuration.addParameter(
+        new Parameter("contextLayer", Layer.class, "Context Attribute",
+                      "Layer for recording the sampling context"));
     String[] contextLayerPossibilities = { "transcriptcontext", "context" };
     p.setValue(Utility.FindLayerById(
                  transcriptTagLayers, Arrays.asList(contextLayerPossibilities)));
     p.setPossibleValues(transcriptTagLayers.values());
       
-    p = Optional.ofNullable(configuration.get("subgroupLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "subgroupLayer", Layer.class, "Sub-Group Attribute",
-                  "Layer for recording the sub-group/story")));
+    p = configuration.containsKey("subgroupLayer")?
+      configuration.get("subgroupLayer"):
+      configuration.addParameter(
+        new Parameter("subgroupLayer", Layer.class, "Sub-Group Attribute",
+                      "Layer for recording the sub-group/story"));
     String[] subgroupLayerPossibilities = {
       "transcriptsubgroup", "transcriptstory", "subgroup", "story"};
     p.setValue(Utility.FindLayerById(
                  transcriptTagLayers, Arrays.asList(subgroupLayerPossibilities)));
     p.setPossibleValues(transcriptTagLayers.values());
       
-    p = Optional.ofNullable(configuration.get("collectLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "collectLayer", Layer.class, "Collection Point Attribute",
-                  "Layer for recording the collection point of the elicitation")));
+    p = configuration.containsKey("collectLayer")?
+      configuration.get("collectLayer"):
+      configuration.addParameter(
+        new Parameter("collectLayer", Layer.class, "Collection Point Attribute",
+                      "Layer for recording the collection point of the elicitation"));
     String[] collectLayerPossibilities = {
       "transcriptcollectionpoint", "transcriptcollect", "collectionpoint", "collect"};
     p.setValue(Utility.FindLayerById(
                  transcriptTagLayers, Arrays.asList(collectLayerPossibilities)));
     p.setPossibleValues(transcriptTagLayers.values());
       
-    p = Optional.ofNullable(configuration.get("locationLayer"))
-      .orElse(configuration.addParameter(
-                new Parameter(
-                  "locationLayer", Layer.class, "Location Attribute",
-                  "Layer for recording the location of the elicitation")));
+    p = configuration.containsKey("locationLayer")?
+      configuration.get("locationLayer"):
+      configuration.addParameter(
+        new Parameter("locationLayer", Layer.class, "Location Attribute",
+                      "Layer for recording the location of the elicitation"));
     String[] locationLayerPossibilities = {"transcriptlocation", "location" };
     p.setValue(Utility.FindLayerById(
                  transcriptTagLayers, Arrays.asList(locationLayerPossibilities)));

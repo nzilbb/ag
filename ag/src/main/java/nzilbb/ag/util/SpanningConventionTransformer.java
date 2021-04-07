@@ -685,45 +685,80 @@ public class SpanningConventionTransformer implements GraphTransformer {  // TOD
               // source annotations: 
               Anchor endOfGap = null;
 
-              if (getSourceStartResult() == null) { // delete start annotation
-                endOfGap = span.firstElement().getEnd();
-                span.firstElement().destroy();
-              } else { // change the label
-                String l = startMatcher.replaceAll(getSourceStartResult());
-                if (l.length() == 0) { // treat empty label as a delete
+              if (span.size() == 1 // special case: span a single source annotation
+                  && !getDeleteInSource()) {
+                
+                if (getSourceStartResult() == null && getSourceEndResult() == null) { // delete
+                  span.firstElement().destroy();
+                } else { // at least one source pattern defined
+                  
+                  if (getSourceStartResult() != null) { // use the start label definition
+                    String l = startMatcher.replaceAll(getSourceStartResult());
+                    if (!l.equals(span.firstElement().getLabel())) {
+                      // only change if it's different
+                      span.firstElement().setLabel(l);
+                      // update end matcher to take the label change into account
+                      endMatcher = endRegexp.matcher(l);
+                    }
+                  }
+                  if (getSourceEndResult() != null) { // use the end label definition
+                    String l = endMatcher.replaceAll(getSourceEndResult());
+                    if (!l.equals(span.lastElement().getLabel())) {
+                      // only change if it's different
+                      span.lastElement().setLabel(l);
+                    }
+                  }
+                  
+                  if (span.lastElement().getLabel().length() == 0) { // empty label is a delete
+                    endOfGap = span.lastElement().getEnd();
+                    span.lastElement().destroy();
+                  } 
+                  
+                } // at least onesource pattern defined
+                
+              } else { // multi-word span
+                
+                if (getSourceStartResult() == null) { // delete start annotation
                   endOfGap = span.firstElement().getEnd();
                   span.firstElement().destroy();
-                } else {
-                  if (!l.equals(span.firstElement().getLabel())) {
-                    // only change if it's different
-                    span.firstElement().setLabel(l);
+                } else { // change the label
+                  String l = startMatcher.replaceAll(getSourceStartResult());
+                  if (l.length() == 0) { // treat empty label as a delete
+                    endOfGap = span.firstElement().getEnd();
+                    span.firstElement().destroy();
+                  } else {
+                    if (!l.equals(span.firstElement().getLabel())) {
+                      // only change if it's different
+                      span.firstElement().setLabel(l);
+                    }
                   }
                 }
-              }
-		     
-              if (getDeleteInSource()) { // intervening annotations
-                // for each annotation between the start and the end
-                for (int i = 1; i < span.size() - 1; i++) {
-                  endOfGap = span.elementAt(i).getEnd();
-                  span.elementAt(i).destroy();
-                }
-              } // intervening annotations
-
-              if (getSourceEndResult() == null) { // delete end annotation
-                endOfGap = span.lastElement().getEnd();
-                span.lastElement().destroy();
-              } else { // change the label
-                String l = endMatcher.replaceAll(getSourceEndResult());
-                if (l.length() == 0) { // treat empty label as a delete
+                
+                if (getDeleteInSource()) { // intervening annotations
+                  // for each annotation between the start and the end
+                  for (int i = 1; i < span.size() - 1; i++) {
+                    endOfGap = span.elementAt(i).getEnd();
+                    span.elementAt(i).destroy();
+                  }
+                } // intervening annotations
+                
+                if (getSourceEndResult() == null) { // delete end annotation
                   endOfGap = span.lastElement().getEnd();
                   span.lastElement().destroy();
-                } else {
-                  if (!l.equals(span.lastElement().getLabel())) {
-                    // only change if it's different
-                    span.lastElement().setLabel(l);
+                } else { // change the label
+                  String l = endMatcher.replaceAll(getSourceEndResult());
+                  if (l.length() == 0) { // treat empty label as a delete
+                    endOfGap = span.lastElement().getEnd();
+                    span.lastElement().destroy();
+                  } else {
+                    if (!l.equals(span.lastElement().getLabel())) {
+                      // only change if it's different
+                      span.lastElement().setLabel(l);
+                    }
                   }
                 }
-              }
+
+              } // multi-word span
 
               if (getCloseGaps()) {
                 if (getDeleteInSource()) {

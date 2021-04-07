@@ -355,7 +355,7 @@ public class TestSltSerialization {
 
     // words
     Annotation[] words = g.all("word");
-    assertEquals(138, words.length);
+    assertEquals(137, words.length);
 
     // check utterance transcriptions
     String[] lines = {
@@ -376,7 +376,7 @@ public class TestSltSerialization {
       "What happened next?",
       "Schnitzel von Krumm s~ falled out the babies' nest.",
       "What happened next?",
-      "They put them put it back in the nest.",
+      "They put them it back in the nest.",
       "Bye bye little bird.",
       "Anything else that happened?",
       "x."
@@ -791,7 +791,7 @@ public class TestSltSerialization {
 
     // words
     Annotation[] words = g.all("word");
-    assertEquals(138, words.length);
+    assertEquals(137, words.length);
 
     // check utterance transcriptions
     String[] lines = {
@@ -812,7 +812,7 @@ public class TestSltSerialization {
       "What happened next?",
       "Schnitzel von Krumm s~ falled out the babies' nest.",
       "What happened next?",
-      "They put them put it back in the nest.",
+      "They put them it back in the nest.",
       "Bye bye little bird.",
       "Anything else that happened?",
       "x."

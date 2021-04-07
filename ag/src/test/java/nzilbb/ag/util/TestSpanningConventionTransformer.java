@@ -652,14 +652,17 @@ public class TestSpanningConventionTransformer
 
       g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a6", "participant1"));
 
+      // five word span
       g.addAnnotation(new Annotation("NP", "(NP", "word", "a0", "a1", "turn1"));
       g.addAnnotation(new Annotation("word1", "the", "word", "a1", "a2", "turn1"));
       g.addAnnotation(new Annotation("word2", "quick", "word", "a2", "a3", "turn1"));
       g.addAnnotation(new Annotation("word3", "brown", "word", "a3", "a4", "turn1"));
       g.addAnnotation(new Annotation("word4", "fox)", "word", "a4", "a?1", "turn1"));
-      g.addAnnotation(new Annotation("VP", "(VP", "word", "a?1", "a?", "turn1"));
+      
+      // one-word span
+      g.addAnnotation(new Annotation("VP", "(VP)", "word", "a?1", "a?", "turn1"));
       g.addAnnotation(new Annotation("word5", "jumps", "word", "a?", "a?2", "turn1"));
-      g.addAnnotation(new Annotation("word6", "over)", "word", "a?2", "a5", "turn1"));
+      g.addAnnotation(new Annotation("word6", "over", "word", "a?2", "a5", "turn1"));
 
       try
       {
