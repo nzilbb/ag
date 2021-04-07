@@ -24,10 +24,10 @@ package nzilbb.ag;
 import java.util.Iterator;
 import java.util.Vector;
 import java.util.function.Consumer;
+import nzilbb.ag.automation.util.AnnotatorDescriptor;
 import nzilbb.ag.serialize.SerializationDescriptor;
 import nzilbb.ag.serialize.GraphDeserializer;
 import nzilbb.ag.serialize.GraphSerializer;
-import nzilbb.ag.stt.util.TranscriberDescriptor;
 import nzilbb.util.MonitorableSeries;
 
 /**
@@ -785,6 +785,6 @@ public interface GraphStoreQuery {
     * Lists descriptors of all transcribers that are installed.
     * @return A list of descriptors of all transcribers that are installed.
     */
-   public TranscriberDescriptor[] getTranscriberDescriptors();
+   public AnnotatorDescriptor[] getTranscriberDescriptors();
 
 } // end of interface GraphStoreQuery
