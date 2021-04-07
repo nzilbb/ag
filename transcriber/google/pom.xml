@@ -70,7 +70,7 @@
           <archive>
             <manifest addDefaultImplementationEntries="true" />
             <manifestEntries>
-              <nzilbb-ag-stt-Transcriber>nzilbb.transcriber.google.GoogleTranscriber</nzilbb-ag-stt-Transcriber>
+              <nzilbb-ag-automation-Annotator>nzilbb.transcriber.google.GoogleTranscriber</nzilbb-ag-automation-Annotator>
               <Name>${package.path}</Name>
               <Implementation-Title>${project.description}</Implementation-Title>
               <Implementation-Version>${project.version}</Implementation-Version>

@@ -19,7 +19,7 @@
 //    along with nzilbb.ag; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.ag.stt.util;
+package nzilbb.ag.automation.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -30,10 +30,9 @@ import nzilbb.ag.Constants;
 import nzilbb.ag.Layer;
 import nzilbb.ag.Schema;
 import nzilbb.ag.serialize.json.JSONSerialization;
-import nzilbb.ag.stt.Transcriber;
-import nzilbb.ag.stt.InvalidConfigurationException;
-import nzilbb.ag.stt.util.TranscriberDescriptor;
-import nzilbb.ag.stt.util.RequestRouter;
+import nzilbb.ag.automation.Annotator;
+import nzilbb.ag.automation.Transcriber;
+import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.util.IO;
 import nzilbb.configure.ParameterSet;
 import nzilbb.util.ProgramDescription;
@@ -94,17 +93,17 @@ public class Transcribe extends CommandLineProgram {
     * @see #getDescriptor()
     * @see #setDescriptor(TranscriberDescriptor)
     */
-   protected TranscriberDescriptor descriptor;
+   protected AnnotatorDescriptor descriptor;
    /**
     * Getter for {@link #descriptor}: Descriptor for the transcriber.
     * @return Descriptor for the transcriber.
     */
-   public TranscriberDescriptor getDescriptor() { return descriptor; }
+   public AnnotatorDescriptor getDescriptor() { return descriptor; }
    /**
     * Setter for {@link #descriptor}: Descriptor for the transcriber.
     * @param newDescriptor Descriptor for the transcriber.
     */
-   public Transcribe setDescriptor(TranscriberDescriptor newDescriptor) { descriptor = newDescriptor; return this; }
+   public Transcribe setDescriptor(AnnotatorDescriptor newDescriptor) { descriptor = newDescriptor; return this; }
 
    /**
     * The transcriber to configure.
@@ -149,16 +148,20 @@ public class Transcribe extends CommandLineProgram {
       
       // is the name a jar file name or a class name
       try { // try as a jar file
-         descriptor = new TranscriberDescriptor(new File(transcriberName));
+         descriptor = new AnnotatorDescriptor(new File(transcriberName));
       } catch (Throwable notAJarName) { // try as a class name
          try {
-            descriptor = new TranscriberDescriptor(transcriberName, getClass().getClassLoader());
+            descriptor = new AnnotatorDescriptor(transcriberName, getClass().getClassLoader());
          } catch(Throwable exception) {
             System.err.println("Could not get transcriber: " + transcriberName);
          }
       }
-      
-      transcriber = descriptor.getInstance();
+      Annotator annotator = descriptor.getInstance();
+      if (!(annotator instanceof Transcriber)) {
+        System.err.println("Annotator: " + transcriberName + " is not a transcriber");
+        return;
+      }
+      transcriber = (Transcriber)annotator;
       
       // give the transcriber the resources it needs...
       
@@ -177,7 +180,7 @@ public class Transcribe extends CommandLineProgram {
             .setPeers(true).setPeersOverlap(false).setSaturated(false)
             .setParentId("turn").setParentIncludes(true)));
       
-      File transcriberDir = new File(workingDir, transcriber.getTranscriberId());
+      File transcriberDir = new File(workingDir, transcriber.getAnnotatorId());
       if (!transcriberDir.exists()) transcriberDir.mkdir();
       transcriber.setWorkingDirectory(transcriberDir);      
       // TODO transcriber.getDiarizationRequired()

@@ -438,7 +438,17 @@
     
 </details>
 
-  <h2 id="util"> Utilities to Facilitate Development </h2> </p>
+<h2 id="transcriber"> Transcribers </h2>
+
+<p> {@link Transcriber}s are a specialized type of {@link Annotator} whose purpose is to
+  transcribe audio and fill in the utterance and/or word layer of the annotation
+  graph. </p>
+
+<p> Implementation of a transcriber generally involves specifying a configuration webapp
+  (as above), and implementing the {@link Transcriber#transcribe(File,Graph)} method; the
+  base class generally provides default implementations for other Annotator methods. </p>
+
+<h2 id="util"> Utilities to Facilitate Development </h2> </p>
 
 <p> <i>nzilbb.ag.jar</i> contains some utilities for displaying information and
   executing web-apps from the command line which may be useful during development of new
@@ -471,6 +481,12 @@
 
 <p><tt> java -classpath nzilbb.ag.jar nzilbb.ag.automation.util.ExtApp myjar.jar </tt></p>
 
+<h3 id="Transcribe"> Transcribe </h3>
+
+<p>This utility, which works for {@link Transcriber}s only, uses the given transcriber to
+  transcribe a given audio file, e.g.</p> 
+
+<p><tt> java -classpath nzilbb.ag.jar nzilbb.ag.automation.util.Transcribe myjar.jar myrecording.wav </tt></p>
  
  */
 package nzilbb.ag.automation;

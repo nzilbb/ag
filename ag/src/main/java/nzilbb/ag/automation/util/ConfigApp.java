@@ -29,6 +29,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.sql.SQLException;
@@ -149,6 +150,21 @@ public class ConfigApp extends AnnotatorWebApp {
       System.err.println("finished: " + result);
       try {
          annotator.setConfig(result);
+
+         if (annotator.getWorkingDirectory() != null) {
+           // save the configuration in a local file
+           File f = new File(
+             annotator.getWorkingDirectory(), annotator.getAnnotatorId() + ".cfg");
+           try {
+             PrintWriter writer = new PrintWriter(f, "UTF-8");
+             writer.write(result);
+             writer.close();
+           } catch(IOException x) {
+             System.err.println("Could not write configuration file "+f.getPath()+": "+x);
+             x.printStackTrace(System.err);
+           }
+         }
+
       } catch(InvalidConfigurationException exception) {
          System.err.println(""+exception);
          exception.printStackTrace(System.err);

@@ -32,8 +32,9 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import nzilbb.ag.*;
-import nzilbb.ag.stt.InvalidConfigurationException;
-import nzilbb.ag.stt.Transcriber;
+import nzilbb.ag.automation.InvalidConfigurationException;
+import nzilbb.ag.automation.Transcriber;
+import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.util.Execution;
 import nzilbb.util.IO;
 
@@ -43,6 +44,7 @@ import nzilbb.util.IO;
  * to perform speech-to-text.
  * @author Robert Fromont robert@fromont.net.nz
  */
+@UsesFileSystem
 public class DeepSpeechTranscriber extends Transcriber {
 
    File deepSpeechExe;
@@ -120,7 +122,7 @@ public class DeepSpeechTranscriber extends Transcriber {
       running = true;
       setPercentComplete(0);
       setStatus(""); // clear any residual status from the last run...      
-      beanPropertiesFromQueryString(config);      
+      beanPropertiesFromQueryString(config);
       setPercentComplete(100);
       running = false;
    }
@@ -168,7 +170,7 @@ public class DeepSpeechTranscriber extends Transcriber {
     */
    public String uploadModels(File file) {
       File localFile = new File(getWorkingDirectory(), file.getName());
-      if (file.renameTo(file)) {
+      if (!file.renameTo(localFile)) {
          try {
             IO.Copy(file, localFile);
          } catch(IOException exception) {
@@ -186,7 +188,7 @@ public class DeepSpeechTranscriber extends Transcriber {
       return Arrays.asList(
          getWorkingDirectory().list(new FilenameFilter() {
                public boolean accept(File dir, String name) {
-                  return !name.equals(getTranscriberId() + ".cfg");
+                  return !name.equals(getAnnotatorId() + ".cfg");
                }
             }));
    } // end of availableModels()

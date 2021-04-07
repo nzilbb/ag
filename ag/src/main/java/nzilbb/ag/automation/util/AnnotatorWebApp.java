@@ -220,11 +220,15 @@ public class AnnotatorWebApp extends StandAloneWebApp {
                      response = router.request(
                         x.getRequestMethod(), uri, x.getRequestHeaders().getFirst("Content-Type"),
                         x.getRequestBody());
+                     if (debug) System.err.println("annotator: response: " + response);
                      echoContentType(x);
                   } catch(RequestException exception) {
                      if (debug) System.err.println("RequestException: " + exception);
                      status = exception.getHttpStatus();
                      response = new ByteArrayInputStream(exception.getMessage().getBytes());
+                  } catch(Throwable t) {
+                     if (debug) System.err.println("Throwable: " + t);
+                     throw t;
                   }
                }
                if (debug) {

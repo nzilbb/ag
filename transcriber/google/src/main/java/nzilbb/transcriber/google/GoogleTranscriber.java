@@ -52,8 +52,8 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import nzilbb.ag.*;
-import nzilbb.ag.stt.InvalidConfigurationException;
-import nzilbb.ag.stt.Transcriber;
+import nzilbb.ag.automation.InvalidConfigurationException;
+import nzilbb.ag.automation.Transcriber;
 import nzilbb.util.Execution;
 import nzilbb.util.IO;
 //import com.google.api.gax.core.FixedCredentialsProvider;
@@ -203,7 +203,7 @@ public class GoogleTranscriber extends Transcriber {
       return Arrays.asList(
          getWorkingDirectory().list(new FilenameFilter() {
                public boolean accept(File dir, String name) {
-                  return !name.equals(getTranscriberId() + ".cfg");
+                  return !name.equals(getAnnotatorId() + ".cfg");
                }
             }));
    } // end of availableModels()

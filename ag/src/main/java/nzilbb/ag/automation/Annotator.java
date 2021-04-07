@@ -44,7 +44,7 @@ import nzilbb.util.MonitorableTask;
 
 /**
  * Base class for an automated annotation module.
- * <p> When {@link IGraphTransformer#transform(Graph)} is invoked, it should perform
+ * <p> When {@link GraphTransformer#transform(Graph)} is invoked, it should perform
  * whatever annotation task has been configured by the last call to
  * {@link #setTaskParameters(String)}.
  * <p> The typical lifecycle of an annotator is:

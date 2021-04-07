@@ -1,5 +1,5 @@
 //
-// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -38,6 +38,8 @@ import java.util.List;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.util.CloneableBean;
 import nzilbb.util.IO;
@@ -342,6 +344,12 @@ public class RequestRouter
          return null;
       } else if (result instanceof CloneableBean) {
          return new ByteArrayInputStream(((CloneableBean)result).toJson().toString().getBytes());
+      } else if (result instanceof List) {
+         JsonArrayBuilder list = Json.createArrayBuilder();
+         for (Object e : (List)result) {
+            list.add(e.toString());
+         }
+         return new ByteArrayInputStream(list.build().toString().getBytes());
       } else {
          return new ByteArrayInputStream(result.toString().getBytes());
       }

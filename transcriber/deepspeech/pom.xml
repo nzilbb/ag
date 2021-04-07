@@ -11,7 +11,7 @@
   </parent>
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.transcriber.deepspeech</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.1.0</version>
   <name>nzilbb.transcriber.deepspeech</name>
   <description>DeepSpeech transcriber</description>
 
@@ -48,7 +48,7 @@
             <manifest addDefaultImplementationEntries="true">
             </manifest>
             <manifestEntries>
-              <nzilbb-ag-stt-Transcriber>nzilbb.transcriber.deepspeech.DeepSpeechTranscriber</nzilbb-ag-stt-Transcriber>
+              <nzilbb-ag-automation-Annotator>nzilbb.transcriber.deepspeech.DeepSpeechTranscriber</nzilbb-ag-automation-Annotator>
               <Name>${package.path}</Name>
               <Implementation-Title>${project.description}</Implementation-Title>
               <Implementation-Version>${project.version}</Implementation-Version>
