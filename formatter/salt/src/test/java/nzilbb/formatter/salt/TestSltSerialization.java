@@ -379,7 +379,7 @@ public class TestSltSerialization {
       "They put them it back in the nest.",
       "Bye bye little bird.",
       "Anything else that happened?",
-      "x."
+      "_."
     };
     for (int u = 0; u < utterances.length; u++) {
       String transcription = Arrays.stream(utterances[u].all("word"))
@@ -821,7 +821,7 @@ public class TestSltSerialization {
       "They put them it back in the nest.",
       "Bye bye little bird.",
       "Anything else that happened?",
-      "x."
+      "_."
     };
 
     // setting default anchor offsets ensures that the utterance words are found

@@ -1852,14 +1852,15 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       //  - "XXX" - for the entire utterance
       // we change these to underscores, to ensure that dictionary lookups fail
       // (e.g. we don't want the pronunciation of "X" being tagged as /eks/)
+      // As some transcribers seem to use lowercase, we tolerate that too
       new ConventionTransformer(
-        wordLayer.getId(), "X(?<punctuation>\\W*)", "_${punctuation}")
+        wordLayer.getId(), "[Xx](?<punctuation>\\W*)", "_${punctuation}")
         .transform(graph);
       new ConventionTransformer(
-        wordLayer.getId(), "XX(?<punctuation>\\W*)", "__${punctuation}")
+        wordLayer.getId(), "[Xx][Xx](?<punctuation>\\W*)", "__${punctuation}")
         .transform(graph);
       new ConventionTransformer(
-        wordLayer.getId(), "XXX(?<punctuation>\\W*)", "___${punctuation}")
+        wordLayer.getId(), "[Xx][Xx][Xx](?<punctuation>\\W*)", "___${punctuation}")
         .transform(graph);
 
       // set all annotations to manual confidence
