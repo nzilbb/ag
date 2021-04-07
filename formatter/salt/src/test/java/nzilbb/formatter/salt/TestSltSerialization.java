@@ -355,7 +355,7 @@ public class TestSltSerialization {
 
     // words
     Annotation[] words = g.all("word");
-    assertEquals(137, words.length);
+    assertEquals(149, words.length);
 
     // check utterance transcriptions
     String[] lines = {
@@ -366,7 +366,7 @@ public class TestSltSerialization {
       "So let's start at the beginning.",
       "What was the story about?",
       "Um the kids the kids, they quickly put their gumboots on.",
-      "Ah Mm hmm.",
+      "saved muddy putting girl's wants goes shopping running dropped aunty's stopped leaving coming its lift.",
       "Anything else?",
       "And please go for a walk?",
       "You need to put your gumboots on.",
@@ -443,12 +443,18 @@ public class TestSltSerialization {
     // bound morphemes
     Annotation[] boundMorphemes = g.all("bound_morpheme");
     assertEquals("Correct number of bound morphemes: " + Arrays.asList(boundMorphemes),
-                 6, boundMorphemes.length);
+                 21, boundMorphemes.length);
     String[] morphemeLabels = {
-      "kid/s", "gumboot/s", "gumboot/s", "It/'s", "it/'s", "baby/s/z"
+      "kid/s", "gumboot/s",
+      "save/ed", "mud/y", "put/ing", "girl/z", "want/3s", "go/3s", "shop/ing", "run/ing",
+      "drop/ed", "aunty/z", "stop/ed", "leave/ing", "come/ing", "it/z", "lift/*ed",
+      "gumboot/s", "It/'s", "it/'s", "baby/s/z"
     };
     String[] wordLabels = {
-      "kids,", "gumboots", "gumboots", "It's", "it's", "babies'"
+      "kids,", "gumboots",
+      "saved", "muddy", "putting", "girl's", "wants", "goes", "shopping", "running",
+      "dropped", "aunty's", "stopped", "leaving", "coming", "its", "lift.",
+      "gumboots", "It's", "it's", "babies'"
     };
     for (int m = 0; m < boundMorphemes.length; m++) {
       assertEquals("label of bound morpheme " + m + ": " + boundMorphemes[m],
@@ -470,7 +476,7 @@ public class TestSltSerialization {
     assertEquals("first comment alignment",
                  Double.valueOf(29.0), comments[0].getStart().getOffset());
     assertEquals("second comment label",
-                 "This is an equals line comment", comments[1].getLabel());
+                 "Bound morpheme tests", comments[1].getLabel());
     assertEquals("second comment alignment",
                  Double.valueOf(34.0), comments[1].getStart().getOffset());
     assertEquals("third comment label",
@@ -515,12 +521,12 @@ public class TestSltSerialization {
       "first maze last word: " + mazes[0].getEnd().endOf("word"),
       "kids", mazes[0].getEnd().endOf("word").iterator().next().getLabel());
     assertEquals("second maze label",
-                 "(put... ...them)", mazes[1].getLabel());
+                 "...(them)...", mazes[1].getLabel());
     assertEquals(
-      "second maze first word: " + mazes[1].getStart().startOf("word"),
-      "put", mazes[1].getStart().startOf("word").iterator().next().getLabel());
+      "second maze first (and only) word: " + mazes[1].getStart().startOf("word"),
+      "them", mazes[1].getStart().startOf("word").iterator().next().getLabel());
     assertEquals(
-      "second maze last word: " + mazes[1].getEnd().endOf("word"),
+      "second maze last (and only) word: " + mazes[1].getEnd().endOf("word"),
       "them", mazes[1].getEnd().endOf("word").iterator().next().getLabel());
 
     // sound effects
@@ -791,7 +797,7 @@ public class TestSltSerialization {
 
     // words
     Annotation[] words = g.all("word");
-    assertEquals(137, words.length);
+    assertEquals(149, words.length);
 
     // check utterance transcriptions
     String[] lines = {
@@ -802,7 +808,7 @@ public class TestSltSerialization {
       "So let's start at the beginning.",
       "What was the story about?",
       "Um the kids the kids, they quickly put their gumboots on.",
-      "Ah Mm hmm.",
+      "saved muddy putting girl's wants goes shopping running dropped aunty's stopped leaving coming its lift.",
       "Anything else?",
       "And please go for a walk?",
       "You need to put your gumboots on.",

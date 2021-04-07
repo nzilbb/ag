@@ -1649,48 +1649,145 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
 
       // bound morphemes  - something like "bird/s/z" ...
 
-      // first make ...y/s/z -> ...ies'
-      transformer = new ConventionTransformer(
-        wordLayer.getId(),
-        "(?<word>[^/]+)y\\/s\\/z(?<punctuation>\\W*)", "${word}ies'${punctuation}");
-      if (boundMorphemeLayer != null) {
-        // on the bound morpheme layer, include the base word
-        transformer.addDestinationResult(boundMorphemeLayer.getId(), "${word}y/s/z");
-      }
-      transformer.transform(graph).commit();
+      // just stripping out the slashes doesn't produce well-formed words
+      // so we apply a series of heuristic transformations based on English norms and exceptions
+      String[] boundMorphemeTransformations = {
+        // NOUN INFLECTIONS:
+        
+        // /s/z - Plural and Possessive. Example: baby/s/z ...        
+        // first make ...y/s/z -> ...ies' - e.g. "babies'"
+        "(?<w>[^/]+)y\\/s\\/z(?<punc>\\W*)", "${w}ies'${punc}", "${w}y/s/z",
+        // now make .../s/z -> ...s'
+        "(?<w>[^/]+)\\/s\\/z(?<punc>\\W*)", "${w}s'${punc}", "${w}/s/z",
 
-      // now make ...y/s -> ...ies
-      transformer = new ConventionTransformer(
-        wordLayer.getId(),
-        "(?<word>[^/]+)y\\/s(?<punctuation>\\W*)", "${word}ies${punctuation}");
-      if (boundMorphemeLayer != null) {
-        // on the bound morpheme layer, include the base word
-        transformer.addDestinationResult(boundMorphemeLayer.getId(), "${word}y/s");
-      }
-      transformer.transform(graph).commit();
-      
-      // now make .../s/z -> ...s'
-      transformer = new ConventionTransformer(
-        wordLayer.getId(),
-        "(?<word>[^/]+)\\/s\\/z(?<punctuation>\\W*)", "${word}s'${punctuation}");
-      if (boundMorphemeLayer != null) {
-        // on the bound morpheme layer, include the base word
-        transformer.addDestinationResult(boundMorphemeLayer.getId(), "${word}/s/z");
-      }
-      transformer.transform(graph).commit();
+        // /p - Extension: Plural Possessive. Example: "the two girl/p bicycle/s."...
+        // first make ...y/p -> ...ies' - e.g. "babies'"
+        "(?<w>[^/]+)y\\/p(?<punc>\\W*)", "${w}ies'${punc}", "${w}y/p",
+        // now make .../p -> ...s'
+        "(?<w>[^/]+)\\/p(?<punc>\\W*)", "${w}s'${punc}", "${w}/p",
 
-      // and finally, any others just get the slashes stripped
-      transformer = new ConventionTransformer(
-        wordLayer.getId(),
-        "(?<word>[^/]+)\\/(?<morpheme>[\\w0-9']+)(?<binding2>/(?<morpheme2>[\\w0-9']+))?"
-        +"(?<punctuation>\\W*)",
-        "${word}${morpheme}${morpheme2}${punctuation}");
-      if (boundMorphemeLayer != null) {
-        // on the bound morpheme layer, include the base word
-        transformer.addDestinationResult(
-          boundMorphemeLayer.getId(), "${word}/${morpheme}${binding2}");
-      }
-      transformer.transform(graph).commit();
+        // /s - Plural noun. Examples: doggie/s, baby/s...
+        // first make ...y/s -> ...ies - e.g. "babies"
+        "(?<w>[^/]+)y\\/s(?<punc>\\W*)", "${w}ies${punc}", "${w}y/s",
+        // make .../s -> ...s
+        "(?<w>[^/]+)\\/s(?<punc>\\W*)", "${w}s${punc}", "${w}/s",
+
+        // /z - Possessive inflection. Examples: dad/z, Mary/z
+        // first make it/z -> its
+        "(?<w>[iI]t)\\/z(?<punc>\\W*)", "${w}s${punc}", "${w}/z",
+        // make .../z -> ...'s
+        "(?<w>[^/]+)\\/z(?<punc>\\W*)", "${w}'s${punc}", "${w}/z",
+
+        // VERB INFLECTIONS:
+        
+        // /3s - 3 rd Person Singular verb form. Examples: go/3s, tell/3s, try/3s
+        // first make ...y/3s -> ...ies - e.g. "tries"
+        "(?<w>[^/]+)y\\/3s(?<punc>\\W*)", "${w}ies${punc}", "${w}y/3s",
+        // and make ...o/3s -> ...oes - e.g. "goes"
+        "(?<w>[^/]+)o\\/3s(?<punc>\\W*)", "${w}oes${punc}", "${w}o/3s",
+        // make .../3s -> ...s
+        "(?<w>[^/]+)\\/3s(?<punc>\\W*)", "${w}s${punc}", "${w}/3s",
+
+        // /ed - Past tense. Examples: love/ed, die/ed
+        // first make ...e/ed -> ...ed - e.g. "loved"
+        "(?<w>[^/]+)e\\/ed(?<punc>\\W*)", "${w}ed${punc}", "${w}e/ed",
+        // and make ...p/ed -> ...pped - e.g. "dropped"
+        "(?<w>[^/]+)p\\/ed(?<punc>\\W*)", "${w}pped${punc}", "${w}p/ed",
+        // make .../ed -> ...ed
+        "(?<w>[^/]+)\\/ed(?<punc>\\W*)", "${w}ed${punc}", "${w}/ed",
+        
+        // /ed2 - Extension: Past participle. Examples: "I had climb/ed2 to the top."
+        // first make ...e/ed2 -> ...ed - e.g. "had loved"
+        "(?<w>[^/]+)e\\/ed2(?<punc>\\W*)", "${w}ed${punc}", "${w}e/ed2",
+        // and make ...p/ed2 -> ...pped - e.g. "had dropped"
+        "(?<w>[^/]+)p\\/ed2(?<punc>\\W*)", "${w}pped${punc}", "${w}p/ed2",
+        // make .../ed2 -> ...ed
+        "(?<w>[^/]+)\\/ed2(?<punc>\\W*)", "${w}ed${punc}", "${w}/ed2",
+        
+        // /en - Past participle. Examples: take/en, eat/en, prove/en
+        // first make ...e/en -> ...en - e.g. "taken"
+        "(?<w>[^/]+)e\\/en(?<punc>\\W*)", "${w}en${punc}", "${w}e/en",
+        // make .../en -> ...en
+        "(?<w>[^/]+)\\/en(?<punc>\\W*)", "${w}en${punc}", "${w}/en",
+        
+        // /ing - Progressive verb form. Examples: go/ing, run/ing, bike/ing
+        // first make ...e/ing -> ...ing - e.g. "biking"
+        "(?<w>[^/]+)e\\/ing(?<punc>\\W*)", "${w}ing${punc}", "${w}e/ing",
+        // and make ...n/ing -> ...nning - e.g. "running"
+        "(?<w>[^/]+)n\\/ing(?<punc>\\W*)", "${w}nning${punc}", "${w}n/ing",
+        // and make ...t/ing -> ...tting - e.g. "putting"
+        "(?<w>[^/]+)t\\/ing(?<punc>\\W*)", "${w}tting${punc}", "${w}t/ing",
+        // and make ...p/ing -> ...pping - e.g. "shopping"
+        "(?<w>[^/]+)p\\/ing(?<punc>\\W*)", "${w}pping${punc}", "${w}p/ing",
+        // make .../ing -> ...ing
+        "(?<w>[^/]+)\\/ing(?<punc>\\W*)", "${w}ing${punc}", "${w}/ing",
+        
+        // CONTRACTIONS:
+        
+        // /n't, /'t - Negative contractions. Examples: can/'t, does/n't
+        // make .../n't -> ...n't
+        "(?<w>[^/]+)\\/n't(?<punc>\\W*)", "${w}n't${punc}", "${w}/n't",
+        // ('t handled below)
+        
+        // /'ll, /'m, /'d, /'re, /'s, /'ve - Contracted → WILL, AM, WOULD, ARE, IS, HAVE        
+        // Examples:  I/'ll, I/'m, I/'d, we/'re, he/'s, we/'ve
+        // just strip the slash from these (also handle's "'us" below...)
+        "(?<w>[^/]+)\\/'(?<suff>..?)(?<punc>\\W*)", "${w}'${suff}${punc}", "${w}/'${suff}",
+        
+        // /h's, /h'd, /d's, /d'd, /'us Contracted → HAS, HAD, DOES, DID, US
+        // Examples: He/h's been sick. We/h'd better go. What/d's he do for a living?
+        //           Why/d'd the boy look there? Let/'us go.
+        "(?<w>[^/]+)\\/(?<suff>[hd]'[ds])(?<punc>\\W*)", "${w}${suff}${punc}", "${w}/${suff}",
+
+        // EXTENSIONS - these are not in the SALT specification, but are used at UC:
+
+        // Adjectival inflections:
+        
+        // /er - comparative: a dog is fast/er than a pig. there 's a big/er cup.
+        // first make ...e/er -> ...er
+        "(?<w>[^/]+)e\\/er(?<punc>\\W*)", "${w}er${punc}", "${w}e/er",
+        // and make ...g/er -> ...gger
+        "(?<w>[^/]+)g\\/er(?<punc>\\W*)", "${w}gger${punc}", "${w}g/er",
+        // make .../er -> ...er
+        "(?<w>[^/]+)\\/er(?<punc>\\W*)", "${w}er${punc}", "${w}/er",
+
+        // /est - superlative: this is the big/est tractor. you 're the fast/est.
+        // first make ...e/est -> ...est
+        "(?<w>[^/]+)e\\/est(?<punc>\\W*)", "${w}est${punc}", "${w}e/est",
+        // and make ...g/est -> ...ggest
+        "(?<w>[^/]+)g\\/est(?<punc>\\W*)", "${w}ggest${punc}", "${w}g/est",
+        // make .../est -> ...est
+        "(?<w>[^/]+)\\/est(?<punc>\\W*)", "${w}est${punc}", "${w}/est",
+
+        // Derivational morphemes - e.g. soon/ish, it 's kind of blue/y.
+        // first make ...d/y -> ...ddy
+        "(?<w>[^/]+)d\\/y(?<punc>\\W*)", "${w}ddy${punc}", "${w}d/y",
+        // make .../y -> ...y
+        "(?<w>[^/]+)\\/y(?<punc>\\W*)", "${w}y${punc}", "${w}/y",
+        // first make ...d/ish -> ...ddish
+        "(?<w>[^/]+)d\\/ish(?<punc>\\W*)", "${w}ddish${punc}", "${w}d/ish",
+        // make .../ish -> ...ish
+        "(?<w>[^/]+)\\/ish(?<punc>\\W*)", "${w}ish${punc}", "${w}/ish",
+
+        // omitted bound morphemes
+        "(?<w>[^/]+)\\/(?<mph>\\*[\\w0-9']+)(?<punc>\\W*)", "${w}${punc}", "${w}/${mph}",
+
+        // and finally, any others just get the slashes stripped
+        "(?<w>[^/]+)\\/(?<mph>[\\w0-9']+)(?<b2>/(?<mph2>[\\w0-9']+))?(?<punc>\\W*)",
+        "${w}${mph}${mph2}${punc}", "${w}/${mph}${b2}"
+      };      
+      // process each triple in the array
+      for (int t = 0; t < boundMorphemeTransformations.length; t += 3) {
+        String sourcePattern = boundMorphemeTransformations[t];
+        String sourceResult = boundMorphemeTransformations[t + 1];
+        String destinationResult = boundMorphemeTransformations[t + 2];
+        transformer = new ConventionTransformer(wordLayer.getId(), sourcePattern, sourceResult);
+        if (boundMorphemeLayer != null) {
+          // on the bound morpheme layer, include the base word
+          transformer.addDestinationResult(boundMorphemeLayer.getId(), destinationResult);
+        }
+        transformer.transform(graph).commit();
+      } // next transformation
 
       // infra-line comments - something like "{points to self}"
       SpanningConventionTransformer spanningTransformer = new SpanningConventionTransformer(
@@ -1725,7 +1822,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       if (omissionLayer != null) {
         transformer.addDestinationResult(omissionLayer.getId(), "${omission}");
       }
-      transformer.transform(graph).commit();      
+      transformer.transform(graph).commit();
 
       // c-units
       if (cUnitLayer != null) {
