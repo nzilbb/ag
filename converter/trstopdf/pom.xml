@@ -52,6 +52,12 @@
             <manifest>
               <mainClass>nzilbb.converter.TrsToPdf</mainClass>
             </manifest>
+            <manifestEntries>
+              <Name>nzilbb/formatter/pdf/</Name>
+              <Implementation-Title>${project.description}</Implementation-Title>
+              <Implementation-Version>${project.version}</Implementation-Version>
+              <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
+            </manifestEntries>
           </archive>
           <outputDirectory>../../bin</outputDirectory>
         </configuration>
@@ -91,6 +97,12 @@
                   <groupId>nzilbb</groupId>
                   <artifactId>nzilbb.ag</artifactId>
                   <version>1.0.0</version>
+                  <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.glassfish</groupId>
+                  <artifactId>javax.json</artifactId>
+                  <version>1.1.4</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
               </artifactItems>

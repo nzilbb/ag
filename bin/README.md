@@ -20,7 +20,7 @@ to another, including:
 * [trs-to-vtt.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-vtt.jar?raw=true) - convert from *Transcriber* transcripts (.trs) to *web subtitles (Web VTT)*
 * [trs-to-textgrid.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-textgrid.jar?raw=true) - convert from *Transcriber* transcripts (.trs) to *Praat TextGrids*
 * [trs-to-pdf.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-pdf.jar?raw=true) - convert from *Transcriber* transcripts (.trs) to *PDF* files
-* [trs-to-text.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-text.jar?raw=true) - convert from *Transcriber* transcripts (.trs) to *plain text* files
+* [trs-to-txt.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-txt.jar?raw=true) - convert from *Transcriber* transcripts (.trs) to *plain text* files
 * [trs-to-eaf.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-eaf.jar?raw=true) - convert from *Transcriber* transcripts (.trs) to *ELAN* files (.eaf)
 * [eaf-to-trs.jar](https://github.com/nzilbb/ag/blob/master/bin/eaf-to-trs.jar?raw=true) - convert from *ELAN* files (.eaf) to *Transcriber* transcripts (.trs)
 
@@ -44,13 +44,13 @@ java -jar trs-to-textgrid.jar --batchmode *.trs
 Some conversions have configurable output, e.g.
 
 ```
-java -jar trs-to-text.jar *.txt
+java -jar trs-to-txt.jar *.txt
 ```
 
 ...will include annotations and participant names in the output text files, but:
 
 ```
-java -jar trs-to-text.jar --textonly *.txt
+java -jar trs-to-txt.jar --textonly *.txt
 ```
 
 ...produces text files that exclude all annotations and participant names.
