@@ -76,7 +76,7 @@ import nzilbb.util.IO;
 @UsesFileSystem
 public class CMUDictionaryTagger extends Annotator
    implements ImplementsDictionaries {
-   /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
+   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
    public String getMinimumApiVersion() { return "1.0.0"; }
    
    private PrintWriter log;
@@ -612,7 +612,7 @@ public class CMUDictionaryTagger extends Annotator
     */
    public String[] getOutputLayers() throws InvalidConfigurationException {
       if (pronunciationLayerId == null)
-         throw new InvalidConfigurationException(this, "Stem layer not set.");
+         throw new InvalidConfigurationException(this, "Pronunciation layer not set.");
       return new String[] { pronunciationLayerId };
    }
    
