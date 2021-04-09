@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>nzilbb.annotator</artifactId>
+    <groupId>nzilbb</groupId>
+    <version>1.0.0</version>
+  </parent>
+
+  <groupId>nzilbb</groupId>
+  <artifactId>nzilbb.annotator.stanfordpos</artifactId>
+  <name>nzilbb.annotator.stanfordpos</name>
+  <version>0.1.0</version>
+
+  <properties>
+    <package.path>nzilbb/annotator/stanfordpos/</package.path>
+    <annotator.class>nzilbb.annotator.stanfordpos.StanfordPosTagger</annotator.class>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+  </properties>
+
+  <dependencies>
+    <!-- there's an old version of stanford-pos-tagger in clojars:
+         https://repo.clojars.org/stanford-postagger/stanford-postagger/3.1.3/stanford-postagger-3.1.3.pom 
+         but instead we download our own newer version -->
+    <dependency>
+      <groupId>nzilbb</groupId>
+      <artifactId>nzilbb.ag</artifactId>
+      <version>[1.0.2,)</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- add manifest attributes required for identifying the annotator class -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest addDefaultImplementationEntries="true" />
+            <manifestEntries>
+              <nzilbb-ag-automation-Annotator>${annotator.class}</nzilbb-ag-automation-Annotator>
+              <Name>${package.path}</Name>
+              <Implementation-Title>${project.description}</Implementation-Title>
+              <Implementation-Version>${project.version}</Implementation-Version>
+              <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <!-- there's an old version of stanford-pos-tagger in clojars
+           but instead we download our own newer version -->
+      <plugin>
+        <groupId>com.googlecode.maven-download-plugin</groupId>
+        <artifactId>download-maven-plugin</artifactId>
+        <version>1.3.0</version>
+        <executions>
+          <execution>
+            <!-- the wget goal actually binds itself to this phase by default -->
+            <phase>process-resources</phase>
+            <goals>
+              <goal>wget</goal>
+            </goals>
+            <configuration>
+              <url>https://nlp.stanford.edu/software/stanford-tagger-4.2.0.zip</url>
+              <outputFileName>stanford-tagger-4.2.0.zip</outputFileName>
+              <!-- default target location, just to demonstrate the parameter -->
+              <outputDirectory>${project.build.directory}</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- ...and unzip the implementation to include in our build -->
+      <!-- (but we don't include the models because they're 150MB (75MB zipped) and we don't
+           want our .jar file to be that big because it will be distributed with LaBB-CAT 
+           and not everyone will actually use it) -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.6</version>
+        <executions>
+          <execution>
+            <id>prepare</id>
+            <phase>process-resources</phase>
+            <configuration>
+              <tasks>
+                <echo message="unzip stanford-tagger" />
+                <unzip src="${project.build.directory}/stanford-tagger-4.2.0.zip"
+                       dest="${project.build.directory}">
+                  <patternset>
+                    <include name="stanford-postagger-full-2020-11-17/stanford-postagger.jar"/>
+                  </patternset>
+                </unzip>
+                <unzip src="${project.build.directory}/stanford-postagger-full-2020-11-17/stanford-postagger.jar"
+                       dest="${project.build.directory}/classes" />
+              </tasks>
+            </configuration>
+            <goals>
+                <goal>run</goal>
+            </goals>
+        </execution>
+        </executions>
+      </plugin>
+    </plugins>
+
+    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+      <plugins>
+        <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+        <!-- default lifecycle, jar packaging: see https://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.8.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.22.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.2</version>
+        </plugin>
+        <!-- site lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#site_Lifecycle -->
+        <plugin>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>3.7.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-project-info-reports-plugin</artifactId>
+          <version>3.0.0</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>

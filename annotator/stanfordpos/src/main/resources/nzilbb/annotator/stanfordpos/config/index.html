@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title> Stanford POS Tagger </title>    
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <link rel="stylesheet" href="index.css" type="text/css">
+    <script src="util.js" type="text/javascript"></script>
+  </head>
+  <body>
+
+    <h1> Stanford POS Tagger </h1>
+
+    <p> This annotator tags words with their part of speech (POS) according to the
+      <a href="https://nlp.stanford.edu/software/tagger.html">Stanford POS Tagger</a>
+      developed by the
+      <a href="https://nlp.stanford.edu/">Stanford Natural Language Processing Group</a>,
+      licensed under the
+      <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">
+        GNU General Public License</a> (v2 or later). </p>
+    
+    <p> Version 4.2.0 is used; original source code and models are available here:
+      <a href="https://nlp.stanford.edu/software/stanford-tagger-4.2.0.zip">
+        https://nlp.stanford.edu/software/stanford-tagger-4.2.0.zip</a>
+    </p>
+
+    <div id="upload-form">
+      <p> The annotator downloads models of version 4.2.0 of the Stanford POS Tagger 
+        by default, if none is already installed, but if you have newer or modified
+        models you would prefer to use, select the zip file below:</p> 
+      <div class="file-chooser">
+        <label for="file">Optional stanford-tagger-<var>n.n.n</var>.zip file</label>
+        <input id="file" type="file" onchange="selectFile(this);">
+      </div>
+      <div id="upload-progress" style="display: none;">
+        <progress id="progress"></progress>
+        <div id="upload-result"></div>
+      </div>
+    </div>
+
+    <div id="models"></div>
+    
+    <form method="POST" action="setConfig">
+      <div class="controls">
+        <input type="submit" value="Configure">
+      </div>
+    </form>
+
+    <footer><div> Stanford POS Tagger <small id="version"></small> </div></footer>
+    
+    <script src="index.js" type="text/javascript"></script>
+  </body>
+</html>
