@@ -47,6 +47,8 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipEntry;
 
 /**
  * Helper functions for Input/Output operations.
@@ -435,7 +437,127 @@ public class IO
          return null;
       }
    } // end of JarCommentOfClass()
-   
+
+   /**
+    * Unzips a .zip file into teh given directory
+    * @param zip The zip file to unzip.
+    * @param dir The destination directory into which the contents should be unzipped,
+    * which must already exist.
+    * @return The number of files unzipped.
+    * @throws IOException
+    */
+   public static int Unzip(File zip, File dir) throws IOException {
+     return Unzip(zip, dir, null);
+   }
+  
+   /**
+    * Unzips a .zip file into teh given directory
+    * @param zip The zip file to unzip.
+    * @param dir The destination directory into which the contents should be unzipped,
+    * which must already exist.
+    * @param percentComplete A monitor object that receives progress updates, as an
+    * integer representing percent complete. Can be null. 
+    * @return The number of files unzipped.
+    * @throws IOException
+    */
+   public static int Unzip(File zip, File dir, IntConsumer percentComplete) throws IOException {
+     return Unzip(zip, dir, null, percentComplete);
+   }
+  
+   /**
+    * Unzips a .zip file into teh given directory
+    * @param zip The zip file to unzip.
+    * @param dir The destination directory into which the contents should be unzipped,
+    * which must already exist.
+    * @param ignorePattern A regular expression for identifying entries that should
+    * <em>not</em> be unzipped, or null to unzip all entries.
+    * @param percentComplete A monitor object that receives progress updates, as an
+    * integer representing percent complete. Can be null. 
+    * @return The number of files unzipped.
+    * @throws IOException
+    */
+  public static int Unzip(File zip, File dir, String ignorePattern, IntConsumer percentComplete) throws IOException {
+     ZipFile source = new ZipFile(zip);
+     int entryCount = source.size();
+     if (percentComplete != null) percentComplete.accept(0);
+     Enumeration enEntries = source.entries();
+     int e = 0;     
+     while (enEntries.hasMoreElements()) {
+       ZipEntry entry = (ZipEntry)enEntries.nextElement();
+       if (!entry.isDirectory()
+           && (ignorePattern == null || !entry.getName().matches(ignorePattern))) {
+         File parent = dir;
+         String sFileName = entry.getName();
+         String[] pathParts = entry.getName().split("/");
+         if (pathParts.length > 1) { // complex path
+           // ensure that the required directories exist
+           for (int d = 0; d < pathParts.length - 1; d++) {
+             sFileName = pathParts[d];
+             parent = new File(parent, sFileName);
+             if (!parent.exists()) {
+               parent.mkdir();
+             }
+           } // next part
+           sFileName = pathParts[pathParts.length - 1];
+         }
+         File file = new File(parent, sFileName);
+         
+         // get streams
+         Pump(source.getInputStream(entry), new FileOutputStream(file));
+
+         if (percentComplete != null) percentComplete.accept((++e * 100) / entryCount);
+       } // not a directory nor an ignored file
+     } // next entry
+     return e;
+   } // end of Unzip()
+  
+   /**
+    * Unzips a .zip file into teh given directory
+    * @param zip The zip file to unzip.
+    * @param dir The destination directory into which the contents should be unzipped,
+    * which must already exist.
+    * @param includePattern A regular expression for identifying the only entries that
+    * should be unzipped.
+    * @param percentComplete A monitor object that receives progress updates, as an
+    * integer representing percent complete. Can be null. 
+    * @return The number of files unzipped.
+    * @throws IOException
+    */
+  public static int UnzipOnly(File zip, File dir, String includePattern, IntConsumer percentComplete) throws IOException {
+     ZipFile source = new ZipFile(zip);
+     int entryCount = source.size();
+     if (percentComplete != null) percentComplete.accept(0);
+     Enumeration enEntries = source.entries();
+     int e = 0;     
+     while (enEntries.hasMoreElements()) {
+       ZipEntry entry = (ZipEntry)enEntries.nextElement();
+       if (!entry.isDirectory()
+           && (includePattern == null || entry.getName().matches(includePattern))) {
+         File parent = dir;
+         String sFileName = entry.getName();
+         String[] pathParts = entry.getName().split("/");
+         if (pathParts.length > 1) { // complex path
+           // ensure that the required directories exist
+           for (int d = 0; d < pathParts.length - 1; d++) {
+             sFileName = pathParts[d];
+             parent = new File(parent, sFileName);
+             if (!parent.exists()) {
+               parent.mkdir();
+             }
+           } // next part
+           sFileName = pathParts[pathParts.length - 1];
+         }
+         File file = new File(parent, sFileName);
+         
+         // get streams
+         Pump(source.getInputStream(entry), new FileOutputStream(file));
+
+         if (percentComplete != null) percentComplete.accept((++e * 100) / entryCount);
+       } // not a directory nor an ignored file
+     } // next entry
+     return e;
+   } // end of Unzip()
+  
    /**
     * Accesses the project.properties resource of the given class.
     * @param c
