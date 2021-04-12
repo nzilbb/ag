@@ -502,6 +502,8 @@ public class StanfordPosTagger extends Annotator {
         new File(new File(getWorkingDirectory(), "models"), model).getPath());
       
       for (Annotation chunk : graph.all(chunkLayerId)) {
+        if (isCancelling()) break;
+        
         Annotation[] tokens = chunk.all(tokenLayerId);
         setStatus("Tagging chunk "+chunk.getStart() + "-" + chunk.getEnd());
         if (tokens.length > 0) {
