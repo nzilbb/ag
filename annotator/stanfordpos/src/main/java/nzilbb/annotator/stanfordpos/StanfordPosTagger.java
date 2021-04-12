@@ -188,13 +188,11 @@ public class StanfordPosTagger extends Annotator {
    * @return null if upload was successful, an error message otherwise.
    */
   public String uploadZip(File file) {
-    System.out.println("uploadZip " + file.getPath());
     if (!file.getName().endsWith(".zip")) {
       return file.getName() + " is not a .zip file.";
     }
     
     File localFile = new File(getWorkingDirectory(), file.getName());
-    System.out.println("local file " + localFile.getPath());
     if (!file.renameTo(localFile)) {
       try {
         IO.Copy(file, localFile);
@@ -481,7 +479,7 @@ public class StanfordPosTagger extends Annotator {
   public Graph transform(Graph graph) throws TransformationException {
     running = true;
     try {
-      setStatus(""); // clear any residual status from the last run...
+      setStatus("Tagging " + graph.getId());
       
       Layer tokenLayer = graph.getSchema().getLayer(tokenLayerId);
       if (tokenLayer == null) {
@@ -502,20 +500,18 @@ public class StanfordPosTagger extends Annotator {
 
       MaxentTagger tagger = new MaxentTagger(
         new File(new File(getWorkingDirectory(), "models"), model).getPath());
-      System.out.println("graph "+graph.getId());
       
       for (Annotation chunk : graph.all(chunkLayerId)) {
         Annotation[] tokens = chunk.all(tokenLayerId);
-        System.out.println("tokens from "+chunkLayerId+" ("+chunk+")"+": " + tokens.length);
+        setStatus("Tagging chunk "+chunk.getStart() + "-" + chunk.getEnd());
         if (tokens.length > 0) {
+          
           List<Word> sentence = Arrays.stream(tokens)
             .map(token -> new Word(token.getLabel()))
             .collect(Collectors.toList());
-          System.out.println("About to tag sentence " + sentence);
           List<TaggedWord> taggedSentence = tagger.tagSentence(sentence);
           int t = 0;
           for (TaggedWord w : taggedSentence) {
-            System.out.println("token: " + tokens[t] + " pos: " + w.tag());
             Annotation pos = tokens[t].first(posLayerId);
             if (pos != null) { // update existing tag
               pos.setLabel(w.tag());
