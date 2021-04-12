@@ -363,7 +363,7 @@ public class TestSltSerialization {
 
     // words
     Annotation[] words = g.all("word");
-    assertEquals(152, words.length);
+    assertEquals(153, words.length);
 
     // check utterance transcriptions
     String[] lines = {
@@ -384,7 +384,7 @@ public class TestSltSerialization {
       "What happened next?",
       "Schnitzel von Krumm s~ falled out the babies' nest.",
       "What happened next?",
-      "They put them it back in the nest.",
+      "They put them it back in the nest um.",
       "Bye bye little bird.",
       "Anything else that happened?",
       "_."
@@ -526,7 +526,7 @@ public class TestSltSerialization {
     // mazes
     Annotation[] mazes = g.all("maze");
     assertEquals("Correct number of mazes: " + Arrays.asList(mazes),
-                 2, mazes.length);
+                 3, mazes.length);
     assertEquals("first maze label",
                  "(Um... ...kids)", mazes[0].getLabel());
     assertEquals(
@@ -536,13 +536,21 @@ public class TestSltSerialization {
       "first maze last word: " + mazes[0].getEnd().endOf("word"),
       "kids", mazes[0].getEnd().endOf("word").iterator().next().getLabel());
     assertEquals("second maze label",
-                 "...(them)...", mazes[1].getLabel());
+                 "(them)", mazes[1].getLabel());
     assertEquals(
       "second maze first (and only) word: " + mazes[1].getStart().startOf("word"),
       "them", mazes[1].getStart().startOf("word").iterator().next().getLabel());
     assertEquals(
       "second maze last (and only) word: " + mazes[1].getEnd().endOf("word"),
       "them", mazes[1].getEnd().endOf("word").iterator().next().getLabel());
+    assertEquals("third maze label",
+                 "(um)", mazes[2].getLabel());
+    assertEquals(
+      "third maze first (and only) word: " + mazes[2].getStart().startOf("word"),
+      "um.", mazes[2].getStart().startOf("word").iterator().next().getLabel());
+    assertEquals(
+      "thrid maze last (and only) word: " + mazes[2].getEnd().endOf("word"),
+      "um.", mazes[2].getEnd().endOf("word").iterator().next().getLabel());
 
     // sound effects
     Annotation[] soundEffects = g.all("noise");
@@ -820,7 +828,7 @@ public class TestSltSerialization {
 
     // words
     Annotation[] words = g.all("word");
-    assertEquals(152, words.length);
+    assertEquals(153, words.length);
 
     // check utterance transcriptions
     String[] lines = {
@@ -841,7 +849,7 @@ public class TestSltSerialization {
       "What happened next?",
       "Schnitzel von Krumm s~ falled out the babies' nest.",
       "What happened next?",
-      "They put them it back in the nest.",
+      "They put them it back in the nest um.",
       "Bye bye little bird.",
       "Anything else that happened?",
       "_."

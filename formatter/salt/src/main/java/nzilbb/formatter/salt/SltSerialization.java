@@ -1822,16 +1822,27 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
 
       // parentheticals - something like "((where was I))"
       spanningTransformer = new SpanningConventionTransformer(
-        wordLayer.getId(), "\\(\\((.*)", "(.*)\\)\\)", false, "$1", "$1", 
+        wordLayer.getId(), "\\(\\((.*)", "(.*)\\)\\)(?<punc>\\W*)", false, "$1", "$1${punc}", 
         parentheticalLayer==null?null:parentheticalLayer.getId(), "(($1...", "...$1))",
         false, false);
       spanningTransformer.transform(graph).commit();      
+      if (parentheticalLayer != null) {
+        // single-word parentheticals - get rid of the ellipses
+        new ConventionTransformer(
+          parentheticalLayer.getId(), "\\.\\.\\.\\(\\((.+)\\)\\)", "(($1))")
+          .transform(graph).commit();
+      }
 
       // mazes - something like "They (put them) put it"
       spanningTransformer = new SpanningConventionTransformer(
-        wordLayer.getId(), "\\((.*)", "(.*)\\)", false, "$1", "$1", 
+        wordLayer.getId(), "\\((.*)", "(.*)\\)(?<punc>\\W*)", false, "$1", "$1${punc}", 
         mazeLayer==null?null:mazeLayer.getId(), "($1...", "...$1)", false, false);
-      spanningTransformer.transform(graph).commit();      
+      spanningTransformer.transform(graph).commit();
+      if (mazeLayer != null) {
+        // single-word mazes - get rid of the ellipses
+        new ConventionTransformer(mazeLayer.getId(), "\\.\\.\\.\\((.+)\\)", "($1)")
+          .transform(graph).commit();
+      }
 
       // pauses - something like ":03"
       transformer = new ConventionTransformer(wordLayer.getId(), ":(?<pause>.+)");
@@ -2333,7 +2344,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
             // remove any possessive apostrophes
             trailingPuncuation = trailingPuncuation.replaceAll("^'","");
           }
-          
+
           writer.print(word);
           
           // following annotions...
@@ -2383,8 +2394,6 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
             } // next code
           }
 
-          if (trailingPuncuation.length() > 0) writer.print(trailingPuncuation);
-
           // mazes
           if (mazeLayer != null) {
             if (token.getEnd().isEndOn(mazeLayer.getId())) {
@@ -2398,6 +2407,8 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
               writer.print("))");
             }
           }
+          
+          if (trailingPuncuation.length() > 0) writer.print(trailingPuncuation);
 
         } // next token
 
