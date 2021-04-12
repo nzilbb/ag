@@ -316,7 +316,7 @@ public class TestSltSerialization {
     
     // check utterance timestamps and speakers
     double[] utteranceTimeStamps = {
-      0, 5, 12, 16, 19, 23, 29, 34, 37, 39, 41, 46, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
+      0, 5, 12, 16, 17, 23, 29, 34, 37, 39, 41, 46, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
     String[] utteranceSpeakers = {
       "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner",
       "test-Child",
@@ -335,9 +335,17 @@ public class TestSltSerialization {
     for (int u = 0; u < utterances.length; u++) {
       assertEquals("start of utterance " + u,
                    Double.valueOf(utteranceTimeStamps[u]), utterances[u].getStart().getOffset());
-      assertEquals("confidence of start of utterance " + u,
-                   Integer.valueOf(Constants.CONFIDENCE_MANUAL),
-                   utterances[u].getStart().getConfidence());
+      if (u != 4) {
+        assertEquals("confidence of start of utterance " + u,
+                     Integer.valueOf(Constants.CONFIDENCE_MANUAL),
+                     utterances[u].getStart().getConfidence());
+      } else { // u == 4 is a special case:
+        // it has the same start time as the previous utterance,
+        // so the offset has been bumped forward by 1s and given lower confidence
+        assertEquals("confidence of bumped start of utterance " + u,
+                     Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC),
+                     utterances[u].getStart().getConfidence());
+      }
       assertEquals("speaker of utterance " + u + " ("+utterances[u].getStart()+")",
                    utteranceSpeakers[u], utterances[u].getParent().getLabel());
       if (lastUtterance != null) {
@@ -765,7 +773,7 @@ public class TestSltSerialization {
     
     // check utterance timestamps and speakers
     double[] utteranceTimeStamps = {
-      0, 5, 12, 16, 19, 23, 29, 34, 37, 39, 41, 46, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
+      0, 5, 12, 16, 17, 23, 29, 34, 37, 39, 41, 46, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
     String[] utteranceSpeakers = {
       "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner",
       "test-Child",
@@ -784,9 +792,17 @@ public class TestSltSerialization {
     for (int u = 0; u < utterances.length; u++) {
       assertEquals("start of utterance " + u,
                    Double.valueOf(utteranceTimeStamps[u]), utterances[u].getStart().getOffset());
-      assertEquals("confidence of start of utterance " + u,
-                   Integer.valueOf(Constants.CONFIDENCE_MANUAL),
-                   utterances[u].getStart().getConfidence());
+      if (u != 4) {
+        assertEquals("confidence of start of utterance " + u,
+                     Integer.valueOf(Constants.CONFIDENCE_MANUAL),
+                     utterances[u].getStart().getConfidence());
+      } else { // u == 4 is a special case:
+        // it has the same start time as the previous utterance,
+        // so the offset has been bumped forward by 1s and given lower confidence
+        assertEquals("confidence of bumped start of utterance " + u,
+                     Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC),
+                     utterances[u].getStart().getConfidence());
+      }
       assertEquals("speaker of utterance " + u + " ("+utterances[u].getStart()+")",
                    utteranceSpeakers[u], utterances[u].getParent().getLabel());
       if (lastUtterance != null) {

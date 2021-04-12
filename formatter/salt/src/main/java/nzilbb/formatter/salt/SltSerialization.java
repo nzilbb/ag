@@ -1442,11 +1442,22 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         int minutes = Integer.parseInt(sync.group(1));
         int seconds = Integer.parseInt(sync.group(2));
         double offset = minutes * 60 + seconds;
+        int confidence = Constants.CONFIDENCE_MANUAL;
+        if (offset != 0.0
+            && lastAlignedAnchor != null && offset <= lastAlignedAnchor.getOffset()) {
+          warnings.add("Time stamp \"" + line + "\" isn't after the previous one ("
+                       +lastAlignedAnchor+") bumping this offset forward by 1.0s");
+          // the timestamp isn't after the last one, so we bump it forward 1s
+          offset += 1.0;
+          // and downgrade its confidence
+          confidence = Constants.CONFIDENCE_AUTOMATIC;
+        }
+        
         if (lastAnchor.getOffset() == null) {
           lastAnchor.setOffset(offset);
-          lastAnchor.setConfidence(Constants.CONFIDENCE_MANUAL);
+          lastAnchor.setConfidence(confidence);
         } else {
-          lastAnchor = graph.getOrCreateAnchorAt(offset, Constants.CONFIDENCE_MANUAL);
+          lastAnchor = graph.getOrCreateAnchorAt(offset, confidence);
         }
         lastAlignedAnchor = lastAnchor;
         
