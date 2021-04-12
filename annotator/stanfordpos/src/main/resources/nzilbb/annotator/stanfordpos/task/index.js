@@ -5,6 +5,8 @@ getVersion(version => {
 });
 
 var model = "english-caseless-left3words-distsim.tagger"; // a good default
+var taskId = window.location.search.substring(1);
+console.log("taskId " + taskId);
 
 // first, get the layer schema
 var schema = null;
@@ -59,28 +61,28 @@ getSchema(s => {
     posLayerId.selectedIndex = 0;
 
     // what models are available
-    getJSON("availableModels", modelsOptions => {
+    getJSON("availableModels", modelOptions => {
         
         // if there are no models available, do nothing
-        if (modelsOptions.length == 0) return;
+        if (modelOptions.length == 0) return;
         
         // if there's only one option, select it
-        if (modelsOptions.length == 1) models = modelsOptions[0];
+        if (modelOptions.length == 1) model = modelOptions[0];
         
         // list options...
-        selectModels = document.getElementById("models");
+        selectModel = document.getElementById("model");
         // remove all current options
-        selectModels.textContent = "";
+        selectModel.textContent = "";
         // populate the span with options
-        for (m in modelsOptions) {
-            var modelsOption = modelsOptions[m];
+        for (m in modelOptions) {
+            var modelOption = modelOptions[m];
             var option = document.createElement("option");
-            option.value=modelsOption
-            if (modelsOption == models) {
+            option.value=modelOption
+            if (modelOption == model) {
                 option.selected = true;
             }
-            option.appendChild(document.createTextNode(modelsOption));
-            selectModels.appendChild(option);
+            option.appendChild(document.createTextNode(modelOption));
+            selectModel.appendChild(option);
         } // next option
 
         // GET request to getTaskParameters retrieves the current task parameters, if any
@@ -109,6 +111,14 @@ getSchema(s => {
                 } // posLayerId
             } // next parameter
 
+            // if there's no pos layer defined
+            if (posLayerId.selectedIndex == 0
+                // but there's a layer named after the task
+                && schema.layers[taskId]) {
+                
+                // select that layer by default
+                posLayerId.value = taskId;
+            }
         });        
     })    
 });
