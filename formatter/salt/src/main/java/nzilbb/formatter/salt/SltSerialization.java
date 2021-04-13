@@ -723,6 +723,31 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
   public SltSerialization setDateFormat(String newDateFormat) { dateFormat = newDateFormat; return this; }
   
   /**
+   * Whether to use SALT conventions when deserializing. Default is true.
+   * <p> If false, then only meta-data headers, comment lines, and time stamps are parsed;
+   * all in-line annotation conventions are left as-is in the resulting graph. 
+   * @see #getUseConventions()
+   * @see #setUseConventions(Boolean)
+   */
+  protected Boolean useConventions = Boolean.TRUE;
+  /**
+   * Getter for {@link #useConventions}: Whether to use SALT conventions when
+   * deserializing. Default is true.
+   * <p> If false, then only meta-data headers, comment lines, and time stamps are parsed;
+   * all in-line annotation conventions are left as-is in the resulting graph. 
+   * @return Whether to use SALT conventions when deserializing. Default is TRUE.
+   */
+  public Boolean getUseConventions() { return useConventions; }
+  /**
+   * Setter for {@link #useConventions}: Whether to use SALT conventions when
+   * deserializing. Default is true. 
+   * <p> If false, then only meta-data headers, comment lines, and time stamps are parsed;
+   * all in-line annotation conventions are left as-is in the resulting graph. 
+   * @param newUseConventions Whether to use SALT conventions when deserializing. Default is TRUE.
+   */
+  public SltSerialization setUseConventions(Boolean newUseConventions) { useConventions = newUseConventions; return this; }
+  
+  /**
    * Utterance tokenizer.  The default is {@link SimpleTokenizer}.
    * @see #getTokenizer()
    * @see #setTokenizer(GraphTransformer)
@@ -1181,6 +1206,20 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       dateFormat.setValue("M/d/yyyy");
     }
 
+    Parameter useConventions = configuration.get("useConventions");
+    if (useConventions == null) {
+      useConventions = new Parameter(
+        "useConventions", Boolean.class, "Use Conventions",
+        "Whether to use SALT conventions when deserializing."
+        +" If false, then only meta-data headers, comment lines, and time stamps are parsed;"
+        +" all in-line annotation conventions are left as-is");
+      configuration.addParameter(useConventions);
+    }
+    if (useConventions.getValue() == null) {
+      // default is to use conventions
+      useConventions.setValue(Boolean.TRUE);
+    }
+
     return configuration;
   }
 
@@ -1548,29 +1587,32 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
     // no word tokens yet
     
     graph.trackChanges();
-    try {
-      
-      // non-error utterance codes
-      ConventionTransformer transformer = new ConventionTransformer(
-        utteranceLayer.getId(), "(?<line>.*) \\[(?<code>[^E][^\\]]+)\\]$", "${line}");
-      if (codeLayer != null) {
-        transformer.addDestinationResult(codeLayer.getId(), "${code}");
+    if (useConventions) {      
+      try {
+        
+        // non-error utterance codes
+        ConventionTransformer transformer = new ConventionTransformer(
+          utteranceLayer.getId(), "(?<line>.*) \\[(?<code>[^E][^\\]]+)\\]$", "${line}");
+        if (codeLayer != null) {
+          transformer.addDestinationResult(codeLayer.getId(), "${code}");
+        }
+        transformer.transform(graph).commit();
+        
+        // utterance error codes
+        transformer = new ConventionTransformer(
+          utteranceLayer.getId(), "(?<line>.*) \\[(?<code>E[^\\]]+)\\]$", "${line}");
+        if (errorLayer != null) {
+          transformer.addDestinationResult(errorLayer.getId(), "${code}");
+        }
+        transformer.transform(graph).commit();
+        
+      } catch(TransformationException exception) {
+        if (errors == null) errors = new SerializationException();
+        if (errors.getCause() == null) errors.initCause(exception);
+        errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
       }
-      transformer.transform(graph).commit();
-
-      // utterance error codes
-      transformer = new ConventionTransformer(
-        utteranceLayer.getId(), "(?<line>.*) \\[(?<code>E[^\\]]+)\\]$", "${line}");
-      if (errorLayer != null) {
-        transformer.addDestinationResult(errorLayer.getId(), "${code}");
-      }
-      transformer.transform(graph).commit();
       
-    } catch(TransformationException exception) {
-      if (errors == null) errors = new SerializationException();
-      if (errors.getCause() == null) errors.initCause(exception);
-      errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
-    }    
+    } // useConventions
         
     try { // tokenize utterances into words
       getTokenizer().transform(graph);
@@ -1581,334 +1623,337 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
     }
     
-    try { // parse out in-situ word/phrase annotations
-
-      // sound effects - something like "%yip_yip"
-      ConventionTransformer transformer = new ConventionTransformer(
-        wordLayer.getId(), "%(?<sound>.+)");
-      if (soundEffectLayer != null) {
-        transformer.addDestinationResult(soundEffectLayer.getId(), "${sound}");
-      }
-      transformer.transform(graph).commit();
-
-      // repetitions - something like "heaps_and_heaps|heaps"
-      // in order to not confuse these with proper names and with root forms, we annotate
-      // them beforehand in three phases:
-      // 1. identify the w_x[_y]...|z pattern, and create repetition annotions, marking the
-      // words with w#_x[_y] along the way
-      // 2. convert the w#_x[_y] words to w#x#y
-      // 3. split #-containing words into multiple tokens
-
-      // phase 1: split off annotation 'root'
-      transformer = new ConventionTransformer(
-        wordLayer.getId(),
-        "(?<first>[a-zA-Z0-9]+)(?<subsequent>_[^|]+)\\|(?<word>[a-zA-Z0-9]+)(?<punctuation>\\W*)",
-        "${first}#${subsequent}${punctuation}"
-        );
-      if (repetitionsLayer != null) {
-        transformer.addDestinationResult(repetitionsLayer.getId(), "$3");
-      }
-      transformer.transform(graph).commit();
-
-      // phase 2: delimited repetitions with #
-      for (Annotation word : graph.all(wordLayer.getId())) {
-        if (word.getLabel().contains("#_")) { // a label created in phase 1
-          // convert _ into #
-          word.setLabel(word.getLabel().replaceAll("#","").replaceAll("_","#"));
-        } // a label created in phase 1
-      } // next word
-
-      // phase 3: split words on #
-      SimpleTokenizer repetitionSplitter = new SimpleTokenizer(
-        wordLayer.getId(), null, "#", true);
-      repetitionSplitter.transform(graph).commit();
-      
-      // proper names - something like "Schnitzel_von_Crumm"
-      SimpleTokenizer linkageSplitter = new SimpleTokenizer(
-        wordLayer.getId(), properNameLayer != null?properNameLayer.getId():null, "_", true);
-      linkageSplitter.transform(graph).commit();
-
-      // non-error codes - something like "John[NAME]"
-      transformer = new ConventionTransformer(
-        wordLayer.getId(),
-        "(?<word>.+)\\[(?<code>[^E][^\\]]+)\\](?<punctuation>\\W*)",
-        "${word}${punctuation}");
-      if (codeLayer != null) {
-        transformer.addDestinationResult(codeLayer.getId(), "${code}");
-      }
-      transformer.transform(graph).commit();      
-
-      // error codes - something like "falled[EW]"
-      transformer = new ConventionTransformer(
-        wordLayer.getId(),
-        "(?<word>.+)\\[(?<code>E[^\\]]+)\\](?<punctuation>\\W*)",
-        "${word}${punctuation}");
-      if (errorLayer != null) {
-        transformer.addDestinationResult(errorLayer.getId(), "${code}");
-      }
-      transformer.transform(graph).commit();      
-
-      // root forms - something like "falled|fall"
-      transformer = new ConventionTransformer(
-        wordLayer.getId(),
-        "(?<word>[^|]+)\\|(?<root>\\w+)(?<punctuation>\\W*)",
-        "${word}${punctuation}");
-      if (rootLayer != null) {
-        transformer.addDestinationResult(rootLayer.getId(), "${root}");
-      }
-      transformer.transform(graph).commit();
-
-      // bound morphemes  - something like "bird/s/z" ...
-
-      // just stripping out the slashes doesn't produce well-formed words
-      // so we apply a series of heuristic transformations based on English norms and exceptions
-      String[] boundMorphemeTransformations = {
-        // NOUN INFLECTIONS:
+    if (useConventions) {      
+      try { // parse out in-situ word/phrase annotations
         
-        // /s/z - Plural and Possessive. Example: baby/s/z ...        
-        // first make ...y/s/z -> ...ies' - e.g. "babies'"
-        "(?<w>[^/]+)y\\/s\\/z(?<punc>\\W*)", "${w}ies'${punc}", "${w}y/s/z",
-        // and make ...s/s/z -> ...ses' - e.g. "buses'"
-        "(?<w>[^/]+)s\\/s\\/z(?<punc>\\W*)", "${w}ses'${punc}", "${w}s/s/z",
-        // and make ...sh/s/z -> ...shes' - e.g. "bushes'"
-        "(?<w>[^/]+)sh\\/s\\/z(?<punc>\\W*)", "${w}shes'${punc}", "${w}sh/s/z",
-        // now make .../s/z -> ...s'
-        "(?<w>[^/]+)\\/s\\/z(?<punc>\\W*)", "${w}s'${punc}", "${w}/s/z",
-
-        // /p - Extension: Plural Possessive. Example: "the two girl/p bicycle/s."...
-        // first make ...y/p -> ...ies' - e.g. "babies'"
-        "(?<w>[^/]+)y\\/p(?<punc>\\W*)", "${w}ies'${punc}", "${w}y/p",
-        // now make .../p -> ...s'
-        "(?<w>[^/]+)\\/p(?<punc>\\W*)", "${w}s'${punc}", "${w}/p",
-
-        // /s - Plural noun. Examples: doggie/s, baby/s...
-        // first make ...y/s -> ...ies - e.g. "babies"
-        "(?<w>[^/]+)y\\/s(?<punc>\\W*)", "${w}ies${punc}", "${w}y/s",
-        // and make ...s/s -> ...ses - e.g. "buses"
-        "(?<w>[^/]+)s\\/s(?<punc>\\W*)", "${w}ses${punc}", "${w}s/s",
-        // and make ...sh/s -> ...shes - e.g. "bushes"
-        "(?<w>[^/]+)sh\\/s(?<punc>\\W*)", "${w}shes${punc}", "${w}sh/s",
-        // make .../s -> ...s
-        "(?<w>[^/]+)\\/s(?<punc>\\W*)", "${w}s${punc}", "${w}/s",
-
-        // /z - Possessive inflection. Examples: dad/z, Mary/z
-        // first make it/z -> its
-        "(?<w>[iI]t)\\/z(?<punc>\\W*)", "${w}s${punc}", "${w}/z",
-        // make .../z -> ...'s
-        "(?<w>[^/]+)\\/z(?<punc>\\W*)", "${w}'s${punc}", "${w}/z",
-
-        // VERB INFLECTIONS:
-        
-        // /3s - 3 rd Person Singular verb form. Examples: go/3s, tell/3s, try/3s
-        // first make ...y/3s -> ...ies - e.g. "tries"
-        "(?<w>[^/]+)y\\/3s(?<punc>\\W*)", "${w}ies${punc}", "${w}y/3s",
-        // and make ...o/3s -> ...oes - e.g. "goes"
-        "(?<w>[^/]+)o\\/3s(?<punc>\\W*)", "${w}oes${punc}", "${w}o/3s",
-        // make .../3s -> ...s
-        "(?<w>[^/]+)\\/3s(?<punc>\\W*)", "${w}s${punc}", "${w}/3s",
-
-        // /ed - Past tense. Examples: love/ed, die/ed
-        // first make ...e/ed -> ...ed - e.g. "loved"
-        "(?<w>[^/]+)e\\/ed(?<punc>\\W*)", "${w}ed${punc}", "${w}e/ed",
-        // and make ...[vowel]p/ed -> ...pped - e.g. "dropped" but "helped"
-        "(?<w>[^/]+[aeiou])p\\/ed(?<punc>\\W*)", "${w}pped${punc}", "${w}p/ed",
-        // and make ...b/ed -> ...bbed - e.g. "grabbed"
-        "(?<w>[^/]+[aeiou])b\\/ed(?<punc>\\W*)", "${w}bbed${punc}", "${w}b/ed",
-        // make .../ed -> ...ed
-        "(?<w>[^/]+)\\/ed(?<punc>\\W*)", "${w}ed${punc}", "${w}/ed",
-        
-        // /ed2 - Extension: Past participle. Examples: "I had climb/ed2 to the top."
-        // first make ...e/ed2 -> ...ed - e.g. "had loved"
-        "(?<w>[^/]+)e\\/ed2(?<punc>\\W*)", "${w}ed${punc}", "${w}e/ed2",
-        // and make ...[vowel]p/ed2 -> ...pped - e.g. "had dropped" but "had helped"
-        "(?<w>[^/]+[aeiou])p\\/ed2(?<punc>\\W*)", "${w}pped${punc}", "${w}p/ed2",
-        // make .../ed2 -> ...ed
-        "(?<w>[^/]+)\\/ed2(?<punc>\\W*)", "${w}ed${punc}", "${w}/ed2",
-        
-        // /en - Past participle. Examples: take/en, eat/en, prove/en
-        // first make ...e/en -> ...en - e.g. "taken"
-        "(?<w>[^/]+)e\\/en(?<punc>\\W*)", "${w}en${punc}", "${w}e/en",
-        // make .../en -> ...en
-        "(?<w>[^/]+)\\/en(?<punc>\\W*)", "${w}en${punc}", "${w}/en",
-        
-        // /ing - Progressive verb form. Examples: go/ing, run/ing, bike/ing
-        // first make ...e/ing -> ...ing - e.g. "biking"
-        "(?<w>[^/]+)e\\/ing(?<punc>\\W*)", "${w}ing${punc}", "${w}e/ing",
-        // and make ...ain/ing -> ...aining - e.g. "raining"
-        "(?<w>[^/]+)ain\\/ing(?<punc>\\W*)", "${w}aining${punc}", "${w}ain/ing",
-        // but make ...n/ing -> ...nning - e.g. "running"
-        "(?<w>[^/]+)n\\/ing(?<punc>\\W*)", "${w}nning${punc}", "${w}n/ing",
-        // and make ...t/ing -> ...tting - e.g. "putting"
-        "(?<w>[^/]+)t\\/ing(?<punc>\\W*)", "${w}tting${punc}", "${w}t/ing",
-        // and make ...p/ing -> ...pping - e.g. "shopping"
-        "(?<w>[^/]+)p\\/ing(?<punc>\\W*)", "${w}pping${punc}", "${w}p/ing",
-        // make .../ing -> ...ing
-        "(?<w>[^/]+)\\/ing(?<punc>\\W*)", "${w}ing${punc}", "${w}/ing",
-        
-        // CONTRACTIONS:
-        
-        // /n't, /'t - Negative contractions. Examples: can/'t, does/n't
-        // make .../n't -> ...n't
-        "(?<w>[^/]+)\\/n't(?<punc>\\W*)", "${w}n't${punc}", "${w}/n't",
-        // ('t handled below)
-        
-        // /'ll, /'m, /'d, /'re, /'s, /'ve - Contracted → WILL, AM, WOULD, ARE, IS, HAVE        
-        // Examples:  I/'ll, I/'m, I/'d, we/'re, he/'s, we/'ve
-        // just strip the slash from these (also handle's "'us" below...)
-        "(?<w>[^/]+)\\/'(?<suff>..?)(?<punc>\\W*)", "${w}'${suff}${punc}", "${w}/'${suff}",
-        
-        // /h's, /h'd, /d's, /d'd, /'us Contracted → HAS, HAD, DOES, DID, US
-        // Examples: He/h's been sick. We/h'd better go. What/d's he do for a living?
-        //           Why/d'd the boy look there? Let/'us go.
-        "(?<w>[^/]+)\\/(?<suff>[hd]'[ds])(?<punc>\\W*)", "${w}${suff}${punc}", "${w}/${suff}",
-
-        // EXTENSIONS - these are not in the SALT specification, but are used at UC:
-
-        // Adjectival inflections:
-        
-        // /er - comparative: a dog is fast/er than a pig. there 's a big/er cup.
-        // first make ...e/er -> ...er
-        "(?<w>[^/]+)e\\/er(?<punc>\\W*)", "${w}er${punc}", "${w}e/er",
-        // and make ...g/er -> ...gger
-        "(?<w>[^/]+)g\\/er(?<punc>\\W*)", "${w}gger${punc}", "${w}g/er",
-        // make .../er -> ...er
-        "(?<w>[^/]+)\\/er(?<punc>\\W*)", "${w}er${punc}", "${w}/er",
-
-        // /est - superlative: this is the big/est tractor. you 're the fast/est.
-        // first make ...e/est -> ...est
-        "(?<w>[^/]+)e\\/est(?<punc>\\W*)", "${w}est${punc}", "${w}e/est",
-        // and make ...g/est -> ...ggest
-        "(?<w>[^/]+)g\\/est(?<punc>\\W*)", "${w}ggest${punc}", "${w}g/est",
-        // make .../est -> ...est
-        "(?<w>[^/]+)\\/est(?<punc>\\W*)", "${w}est${punc}", "${w}/est",
-
-        // Derivational morphemes - e.g. soon/ish, it 's kind of blue/y.
-        // first make ...d/y -> ...ddy
-        "(?<w>[^/]+)d\\/y(?<punc>\\W*)", "${w}ddy${punc}", "${w}d/y",
-        // make .../y -> ...y
-        "(?<w>[^/]+)\\/y(?<punc>\\W*)", "${w}y${punc}", "${w}/y",
-        // first make ...d/ish -> ...ddish
-        "(?<w>[^/]+)d\\/ish(?<punc>\\W*)", "${w}ddish${punc}", "${w}d/ish",
-        // make .../ish -> ...ish
-        "(?<w>[^/]+)\\/ish(?<punc>\\W*)", "${w}ish${punc}", "${w}/ish",
-
-        // omitted bound morphemes
-        "(?<w>[^/]+)\\/(?<mph>\\*[\\w0-9']+)(?<punc>\\W*)", "${w}${punc}", "${w}/${mph}",
-
-        // and finally, any others just get the slashes stripped
-        "(?<w>[^/]+)\\/(?<mph>[\\w0-9']+)(?<b2>/(?<mph2>[\\w0-9']+))?(?<punc>\\W*)",
-        "${w}${mph}${mph2}${punc}", "${w}/${mph}${b2}"
-      };      
-      // process each triple in the array
-      for (int t = 0; t < boundMorphemeTransformations.length; t += 3) {
-        String sourcePattern = boundMorphemeTransformations[t];
-        String sourceResult = boundMorphemeTransformations[t + 1];
-        String destinationResult = boundMorphemeTransformations[t + 2];
-        transformer = new ConventionTransformer(wordLayer.getId(), sourcePattern, sourceResult);
-        if (boundMorphemeLayer != null) {
-          // on the bound morpheme layer, include the base word
-          transformer.addDestinationResult(boundMorphemeLayer.getId(), destinationResult);
+        // sound effects - something like "%yip_yip"
+        ConventionTransformer transformer = new ConventionTransformer(
+          wordLayer.getId(), "%(?<sound>.+)");
+        if (soundEffectLayer != null) {
+          transformer.addDestinationResult(soundEffectLayer.getId(), "${sound}");
         }
         transformer.transform(graph).commit();
-      } // next transformation
-
-      // infra-line comments - something like "{points to self}"
-      SpanningConventionTransformer spanningTransformer = new SpanningConventionTransformer(
-        wordLayer.getId(), "\\{(.*)", "(.*)\\}", true, null, null, 
-        commentLayer==null?null:commentLayer.getId(), "$1", "$1", false,
-        // if we're not keeping comments, close up the resulting gaps between words
-        commentLayer==null);
-      spanningTransformer.transform(graph).commit();
-
-      // parentheticals - something like "((where was I))"
-      spanningTransformer = new SpanningConventionTransformer(
-        wordLayer.getId(), "\\(\\((.*)", "(.*)\\)\\)(?<punc>\\W*)", false, "$1", "$1${punc}", 
-        parentheticalLayer==null?null:parentheticalLayer.getId(), "(($1...", "...$1))",
-        false, false);
-      spanningTransformer.transform(graph).commit();      
-      if (parentheticalLayer != null) {
-        // single-word parentheticals - get rid of the ellipses
-        new ConventionTransformer(
-          parentheticalLayer.getId(), "\\.\\.\\.\\(\\((.+)\\)\\)", "(($1))")
-          .transform(graph).commit();
-      }
-
-      // mazes - something like "They (put them) put it"
-      spanningTransformer = new SpanningConventionTransformer(
-        wordLayer.getId(), "\\((.*)", "(.*)\\)(?<punc>\\W*)", false, "$1", "$1${punc}", 
-        mazeLayer==null?null:mazeLayer.getId(), "($1...", "...$1)", false, false);
-      spanningTransformer.transform(graph).commit();
-      if (mazeLayer != null) {
-        // single-word mazes - get rid of the ellipses
-        new ConventionTransformer(mazeLayer.getId(), "\\.\\.\\.\\((.+)\\)", "($1)")
-          .transform(graph).commit();
-      }
-
-      // pauses - something like ":03"
-      transformer = new ConventionTransformer(wordLayer.getId(), ":(?<pause>.+)");
-      if (pauseLayer != null) {
-        transformer.addDestinationResult(pauseLayer.getId(), "${pause}");
-      }
-      transformer.transform(graph).commit();      
-
-      // omissions - something like "We *went home"
-      transformer = new ConventionTransformer(wordLayer.getId(), "\\*(?<omission>.+)");
-      if (omissionLayer != null) {
-        transformer.addDestinationResult(omissionLayer.getId(), "${omission}");
-      }
-      transformer.transform(graph).commit();
-
-      // c-units
-      if (cUnitLayer != null) {
-        // multi-word c-units
-        spanningTransformer = new SpanningConventionTransformer(
+        
+        // repetitions - something like "heaps_and_heaps|heaps"
+        // in order to not confuse these with proper names and with root forms, we annotate
+        // them beforehand in three phases:
+        // 1. identify the w_x[_y]...|z pattern, and create repetition annotions, marking the
+        // words with w#_x[_y] along the way
+        // 2. convert the w#_x[_y] words to w#x#y
+        // 3. split #-containing words into multiple tokens
+        
+        // phase 1: split off annotation 'root'
+        transformer = new ConventionTransformer(
           wordLayer.getId(),
-          "(?<firstWord>.+)", "(?<lastWord>.*)(?<terminator>[.?!~^>])", false,
-          "${firstWord}", "${lastWord}${terminator}", 
-          cUnitLayer.getId(), null, "${terminator}", false, false);
+          "(?<first>[a-zA-Z0-9]+)(?<subsequent>_[^|]+)\\|(?<word>[a-zA-Z0-9]+)(?<punctuation>\\W*)",
+          "${first}#${subsequent}${punctuation}"
+          );
+        if (repetitionsLayer != null) {
+          transformer.addDestinationResult(repetitionsLayer.getId(), "$3");
+        }
+        transformer.transform(graph).commit();
+        
+        // phase 2: delimited repetitions with #
+        for (Annotation word : graph.all(wordLayer.getId())) {
+          if (word.getLabel().contains("#_")) { // a label created in phase 1
+            // convert _ into #
+            word.setLabel(word.getLabel().replaceAll("#","").replaceAll("_","#"));
+          } // a label created in phase 1
+        } // next word
+        
+        // phase 3: split words on #
+        SimpleTokenizer repetitionSplitter = new SimpleTokenizer(
+          wordLayer.getId(), null, "#", true);
+        repetitionSplitter.transform(graph).commit();
+        
+        // proper names - something like "Schnitzel_von_Crumm"
+        SimpleTokenizer linkageSplitter = new SimpleTokenizer(
+          wordLayer.getId(), properNameLayer != null?properNameLayer.getId():null, "_", true);
+        linkageSplitter.transform(graph).commit();
+        
+        // non-error codes - something like "John[NAME]"
+        transformer = new ConventionTransformer(
+          wordLayer.getId(),
+          "(?<word>.+)\\[(?<code>[^E][^\\]]+)\\](?<punctuation>\\W*)",
+          "${word}${punctuation}");
+        if (codeLayer != null) {
+          transformer.addDestinationResult(codeLayer.getId(), "${code}");
+        }
+        transformer.transform(graph).commit();      
+        
+        // error codes - something like "falled[EW]"
+        transformer = new ConventionTransformer(
+          wordLayer.getId(),
+          "(?<word>.+)\\[(?<code>E[^\\]]+)\\](?<punctuation>\\W*)",
+          "${word}${punctuation}");
+        if (errorLayer != null) {
+          transformer.addDestinationResult(errorLayer.getId(), "${code}");
+        }
+        transformer.transform(graph).commit();      
+        
+        // root forms - something like "falled|fall"
+        transformer = new ConventionTransformer(
+          wordLayer.getId(),
+          "(?<word>[^|]+)\\|(?<root>\\w+)(?<punctuation>\\W*)",
+          "${word}${punctuation}");
+        if (rootLayer != null) {
+          transformer.addDestinationResult(rootLayer.getId(), "${root}");
+        }
+        transformer.transform(graph).commit();
+        
+        // bound morphemes  - something like "bird/s/z" ...
+        
+        // just stripping out the slashes doesn't produce well-formed words
+        // so we apply a series of heuristic transformations based on English norms and exceptions
+        String[] boundMorphemeTransformations = {
+          // NOUN INFLECTIONS:
+          
+          // /s/z - Plural and Possessive. Example: baby/s/z ...        
+          // first make ...y/s/z -> ...ies' - e.g. "babies'"
+          "(?<w>[^/]+)y\\/s\\/z(?<punc>\\W*)", "${w}ies'${punc}", "${w}y/s/z",
+          // and make ...s/s/z -> ...ses' - e.g. "buses'"
+          "(?<w>[^/]+)s\\/s\\/z(?<punc>\\W*)", "${w}ses'${punc}", "${w}s/s/z",
+          // and make ...sh/s/z -> ...shes' - e.g. "bushes'"
+          "(?<w>[^/]+)sh\\/s\\/z(?<punc>\\W*)", "${w}shes'${punc}", "${w}sh/s/z",
+          // now make .../s/z -> ...s'
+          "(?<w>[^/]+)\\/s\\/z(?<punc>\\W*)", "${w}s'${punc}", "${w}/s/z",
+          
+          // /p - Extension: Plural Possessive. Example: "the two girl/p bicycle/s."...
+          // first make ...y/p -> ...ies' - e.g. "babies'"
+          "(?<w>[^/]+)y\\/p(?<punc>\\W*)", "${w}ies'${punc}", "${w}y/p",
+          // now make .../p -> ...s'
+          "(?<w>[^/]+)\\/p(?<punc>\\W*)", "${w}s'${punc}", "${w}/p",
+          
+          // /s - Plural noun. Examples: doggie/s, baby/s...
+          // first make ...y/s -> ...ies - e.g. "babies"
+          "(?<w>[^/]+)y\\/s(?<punc>\\W*)", "${w}ies${punc}", "${w}y/s",
+          // and make ...s/s -> ...ses - e.g. "buses"
+          "(?<w>[^/]+)s\\/s(?<punc>\\W*)", "${w}ses${punc}", "${w}s/s",
+          // and make ...sh/s -> ...shes - e.g. "bushes"
+          "(?<w>[^/]+)sh\\/s(?<punc>\\W*)", "${w}shes${punc}", "${w}sh/s",
+          // make .../s -> ...s
+          "(?<w>[^/]+)\\/s(?<punc>\\W*)", "${w}s${punc}", "${w}/s",
+          
+          // /z - Possessive inflection. Examples: dad/z, Mary/z
+          // first make it/z -> its
+          "(?<w>[iI]t)\\/z(?<punc>\\W*)", "${w}s${punc}", "${w}/z",
+          // make .../z -> ...'s
+          "(?<w>[^/]+)\\/z(?<punc>\\W*)", "${w}'s${punc}", "${w}/z",
+          
+          // VERB INFLECTIONS:
+          
+          // /3s - 3 rd Person Singular verb form. Examples: go/3s, tell/3s, try/3s
+          // first make ...y/3s -> ...ies - e.g. "tries"
+          "(?<w>[^/]+)y\\/3s(?<punc>\\W*)", "${w}ies${punc}", "${w}y/3s",
+          // and make ...o/3s -> ...oes - e.g. "goes"
+          "(?<w>[^/]+)o\\/3s(?<punc>\\W*)", "${w}oes${punc}", "${w}o/3s",
+          // make .../3s -> ...s
+          "(?<w>[^/]+)\\/3s(?<punc>\\W*)", "${w}s${punc}", "${w}/3s",
+          
+          // /ed - Past tense. Examples: love/ed, die/ed
+          // first make ...e/ed -> ...ed - e.g. "loved"
+          "(?<w>[^/]+)e\\/ed(?<punc>\\W*)", "${w}ed${punc}", "${w}e/ed",
+          // and make ...[vowel]p/ed -> ...pped - e.g. "dropped" but "helped"
+          "(?<w>[^/]+[aeiou])p\\/ed(?<punc>\\W*)", "${w}pped${punc}", "${w}p/ed",
+          // and make ...b/ed -> ...bbed - e.g. "grabbed"
+          "(?<w>[^/]+[aeiou])b\\/ed(?<punc>\\W*)", "${w}bbed${punc}", "${w}b/ed",
+          // make .../ed -> ...ed
+          "(?<w>[^/]+)\\/ed(?<punc>\\W*)", "${w}ed${punc}", "${w}/ed",
+          
+          // /ed2 - Extension: Past participle. Examples: "I had climb/ed2 to the top."
+          // first make ...e/ed2 -> ...ed - e.g. "had loved"
+          "(?<w>[^/]+)e\\/ed2(?<punc>\\W*)", "${w}ed${punc}", "${w}e/ed2",
+          // and make ...[vowel]p/ed2 -> ...pped - e.g. "had dropped" but "had helped"
+          "(?<w>[^/]+[aeiou])p\\/ed2(?<punc>\\W*)", "${w}pped${punc}", "${w}p/ed2",
+          // make .../ed2 -> ...ed
+          "(?<w>[^/]+)\\/ed2(?<punc>\\W*)", "${w}ed${punc}", "${w}/ed2",
+          
+          // /en - Past participle. Examples: take/en, eat/en, prove/en
+          // first make ...e/en -> ...en - e.g. "taken"
+          "(?<w>[^/]+)e\\/en(?<punc>\\W*)", "${w}en${punc}", "${w}e/en",
+          // make .../en -> ...en
+          "(?<w>[^/]+)\\/en(?<punc>\\W*)", "${w}en${punc}", "${w}/en",
+          
+          // /ing - Progressive verb form. Examples: go/ing, run/ing, bike/ing
+          // first make ...e/ing -> ...ing - e.g. "biking"
+          "(?<w>[^/]+)e\\/ing(?<punc>\\W*)", "${w}ing${punc}", "${w}e/ing",
+          // and make ...ain/ing -> ...aining - e.g. "raining"
+          "(?<w>[^/]+)ain\\/ing(?<punc>\\W*)", "${w}aining${punc}", "${w}ain/ing",
+          // but make ...n/ing -> ...nning - e.g. "running"
+          "(?<w>[^/]+)n\\/ing(?<punc>\\W*)", "${w}nning${punc}", "${w}n/ing",
+          // and make ...t/ing -> ...tting - e.g. "putting"
+          "(?<w>[^/]+)t\\/ing(?<punc>\\W*)", "${w}tting${punc}", "${w}t/ing",
+          // and make ...p/ing -> ...pping - e.g. "shopping"
+          "(?<w>[^/]+)p\\/ing(?<punc>\\W*)", "${w}pping${punc}", "${w}p/ing",
+          // make .../ing -> ...ing
+          "(?<w>[^/]+)\\/ing(?<punc>\\W*)", "${w}ing${punc}", "${w}/ing",
+          
+          // CONTRACTIONS:
+          
+          // /n't, /'t - Negative contractions. Examples: can/'t, does/n't
+          // make .../n't -> ...n't
+          "(?<w>[^/]+)\\/n't(?<punc>\\W*)", "${w}n't${punc}", "${w}/n't",
+          // ('t handled below)
+          
+          // /'ll, /'m, /'d, /'re, /'s, /'ve - Contracted → WILL, AM, WOULD, ARE, IS, HAVE        
+          // Examples:  I/'ll, I/'m, I/'d, we/'re, he/'s, we/'ve
+          // just strip the slash from these (also handle's "'us" below...)
+          "(?<w>[^/]+)\\/'(?<suff>..?)(?<punc>\\W*)", "${w}'${suff}${punc}", "${w}/'${suff}",
+          
+          // /h's, /h'd, /d's, /d'd, /'us Contracted → HAS, HAD, DOES, DID, US
+          // Examples: He/h's been sick. We/h'd better go. What/d's he do for a living?
+          //           Why/d'd the boy look there? Let/'us go.
+          "(?<w>[^/]+)\\/(?<suff>[hd]'[ds])(?<punc>\\W*)", "${w}${suff}${punc}", "${w}/${suff}",
+          
+          // EXTENSIONS - these are not in the SALT specification, but are used at UC:
+          
+          // Adjectival inflections:
+          
+          // /er - comparative: a dog is fast/er than a pig. there 's a big/er cup.
+          // first make ...e/er -> ...er
+          "(?<w>[^/]+)e\\/er(?<punc>\\W*)", "${w}er${punc}", "${w}e/er",
+          // and make ...g/er -> ...gger
+          "(?<w>[^/]+)g\\/er(?<punc>\\W*)", "${w}gger${punc}", "${w}g/er",
+          // make .../er -> ...er
+          "(?<w>[^/]+)\\/er(?<punc>\\W*)", "${w}er${punc}", "${w}/er",
+          
+          // /est - superlative: this is the big/est tractor. you 're the fast/est.
+          // first make ...e/est -> ...est
+          "(?<w>[^/]+)e\\/est(?<punc>\\W*)", "${w}est${punc}", "${w}e/est",
+          // and make ...g/est -> ...ggest
+          "(?<w>[^/]+)g\\/est(?<punc>\\W*)", "${w}ggest${punc}", "${w}g/est",
+          // make .../est -> ...est
+          "(?<w>[^/]+)\\/est(?<punc>\\W*)", "${w}est${punc}", "${w}/est",
+          
+          // Derivational morphemes - e.g. soon/ish, it 's kind of blue/y.
+          // first make ...d/y -> ...ddy
+          "(?<w>[^/]+)d\\/y(?<punc>\\W*)", "${w}ddy${punc}", "${w}d/y",
+          // make .../y -> ...y
+          "(?<w>[^/]+)\\/y(?<punc>\\W*)", "${w}y${punc}", "${w}/y",
+          // first make ...d/ish -> ...ddish
+          "(?<w>[^/]+)d\\/ish(?<punc>\\W*)", "${w}ddish${punc}", "${w}d/ish",
+          // make .../ish -> ...ish
+          "(?<w>[^/]+)\\/ish(?<punc>\\W*)", "${w}ish${punc}", "${w}/ish",
+          
+          // omitted bound morphemes
+          "(?<w>[^/]+)\\/(?<mph>\\*[\\w0-9']+)(?<punc>\\W*)", "${w}${punc}", "${w}/${mph}",
+          
+          // and finally, any others just get the slashes stripped
+          "(?<w>[^/]+)\\/(?<mph>[\\w0-9']+)(?<b2>/(?<mph2>[\\w0-9']+))?(?<punc>\\W*)",
+          "${w}${mph}${mph2}${punc}", "${w}/${mph}${b2}"
+        };      
+        // process each triple in the array
+        for (int t = 0; t < boundMorphemeTransformations.length; t += 3) {
+          String sourcePattern = boundMorphemeTransformations[t];
+          String sourceResult = boundMorphemeTransformations[t + 1];
+          String destinationResult = boundMorphemeTransformations[t + 2];
+          transformer = new ConventionTransformer(wordLayer.getId(), sourcePattern, sourceResult);
+          if (boundMorphemeLayer != null) {
+            // on the bound morpheme layer, include the base word
+            transformer.addDestinationResult(boundMorphemeLayer.getId(), destinationResult);
+          }
+          transformer.transform(graph).commit();
+        } // next transformation
+        
+        // infra-line comments - something like "{points to self}"
+        SpanningConventionTransformer spanningTransformer = new SpanningConventionTransformer(
+          wordLayer.getId(), "\\{(.*)", "(.*)\\}", true, null, null, 
+          commentLayer==null?null:commentLayer.getId(), "$1", "$1", false,
+          // if we're not keeping comments, close up the resulting gaps between words
+          commentLayer==null);
         spanningTransformer.transform(graph).commit();
+        
+        // parentheticals - something like "((where was I))"
+        spanningTransformer = new SpanningConventionTransformer(
+          wordLayer.getId(), "\\(\\((.*)", "(.*)\\)\\)(?<punc>\\W*)", false, "$1", "$1${punc}", 
+          parentheticalLayer==null?null:parentheticalLayer.getId(), "(($1...", "...$1))",
+          false, false);
+        spanningTransformer.transform(graph).commit();      
+        if (parentheticalLayer != null) {
+          // single-word parentheticals - get rid of the ellipses
+          new ConventionTransformer(
+            parentheticalLayer.getId(), "\\.\\.\\.\\(\\((.+)\\)\\)", "(($1))")
+            .transform(graph).commit();
+        }
+        
+        // mazes - something like "They (put them) put it"
+        spanningTransformer = new SpanningConventionTransformer(
+          wordLayer.getId(), "\\((.*)", "(.*)\\)(?<punc>\\W*)", false, "$1", "$1${punc}", 
+          mazeLayer==null?null:mazeLayer.getId(), "($1...", "...$1)", false, false);
+        spanningTransformer.transform(graph).commit();
+        if (mazeLayer != null) {
+          // single-word mazes - get rid of the ellipses
+          new ConventionTransformer(mazeLayer.getId(), "\\.\\.\\.\\((.+)\\)", "($1)")
+            .transform(graph).commit();
+        }
+        
+        // pauses - something like ":03"
+        transformer = new ConventionTransformer(wordLayer.getId(), ":(?<pause>.+)");
+        if (pauseLayer != null) {
+          transformer.addDestinationResult(pauseLayer.getId(), "${pause}");
+        }
+        transformer.transform(graph).commit();      
+        
+        // omissions - something like "We *went home"
+        transformer = new ConventionTransformer(wordLayer.getId(), "\\*(?<omission>.+)");
+        if (omissionLayer != null) {
+          transformer.addDestinationResult(omissionLayer.getId(), "${omission}");
+        }
+        transformer.transform(graph).commit();
+        
+        // c-units
+        if (cUnitLayer != null) {
+          // multi-word c-units
+          spanningTransformer = new SpanningConventionTransformer(
+            wordLayer.getId(),
+            "(?<firstWord>.+)", "(?<lastWord>.*)(?<terminator>[.?!~^>])", false,
+            "${firstWord}", "${lastWord}${terminator}", 
+            cUnitLayer.getId(), null, "${terminator}", false, false);
+          spanningTransformer.transform(graph).commit();
+        }
+        
+        // partial words  - something like "stu*"
+        transformer = new ConventionTransformer(
+          wordLayer.getId(),
+          "(?<word>[^/]+)\\*(?<punctuation>\\W*)",
+          "${word}~${punctuation}");
+        if (partialWordLayer != null) {
+          transformer.addDestinationResult(
+            partialWordLayer.getId(), "${word}");
+        }
+        transformer.transform(graph).commit();
+        
+        // unintelligible speech:
+        //  - "X" - for a single word
+        //  - "XX" - for multiple words
+        //  - "XXX" - for the entire utterance
+        // we change these to underscores, to ensure that dictionary lookups fail
+        // (e.g. we don't want the pronunciation of "X" being tagged as /eks/)
+        // As some transcribers seem to use lowercase, we tolerate that too
+        new ConventionTransformer(
+          wordLayer.getId(), "[Xx](?<punctuation>\\W*)", "_${punctuation}")
+          .transform(graph);
+        new ConventionTransformer(
+          wordLayer.getId(), "[Xx][Xx](?<punctuation>\\W*)", "__${punctuation}")
+          .transform(graph);
+        new ConventionTransformer(
+          wordLayer.getId(), "[Xx][Xx][Xx](?<punctuation>\\W*)", "___${punctuation}")
+          .transform(graph);
+        
+      } catch(TransformationException exception) {
+        if (errors == null) errors = new SerializationException();
+        if (errors.getCause() == null) errors.initCause(exception);
+        errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
       }
+      if (errors != null) throw errors;
+    } // useConventions
 
-      // partial words  - something like "stu*"
-      transformer = new ConventionTransformer(
-        wordLayer.getId(),
-        "(?<word>[^/]+)\\*(?<punctuation>\\W*)",
-        "${word}~${punctuation}");
-      if (partialWordLayer != null) {
-        transformer.addDestinationResult(
-          partialWordLayer.getId(), "${word}");
-      }
-      transformer.transform(graph).commit();
-
-      // unintelligible speech:
-      //  - "X" - for a single word
-      //  - "XX" - for multiple words
-      //  - "XXX" - for the entire utterance
-      // we change these to underscores, to ensure that dictionary lookups fail
-      // (e.g. we don't want the pronunciation of "X" being tagged as /eks/)
-      // As some transcribers seem to use lowercase, we tolerate that too
-      new ConventionTransformer(
-        wordLayer.getId(), "[Xx](?<punctuation>\\W*)", "_${punctuation}")
-        .transform(graph);
-      new ConventionTransformer(
-        wordLayer.getId(), "[Xx][Xx](?<punctuation>\\W*)", "__${punctuation}")
-        .transform(graph);
-      new ConventionTransformer(
-        wordLayer.getId(), "[Xx][Xx][Xx](?<punctuation>\\W*)", "___${punctuation}")
-        .transform(graph);
-
-      // set all annotations to manual confidence
-      for (Annotation a : graph.getAnnotationsById().values()) {
-        a.setConfidence(Constants.CONFIDENCE_MANUAL);
-      }
-      graph.commit();
-    } catch(TransformationException exception) {
-      if (errors == null) errors = new SerializationException();
-      if (errors.getCause() == null) errors.initCause(exception);
-      errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
+    // set all annotations to manual confidence
+    for (Annotation a : graph.getAnnotationsById().values()) {
+      a.setConfidence(Constants.CONFIDENCE_MANUAL);
     }
-    if (errors != null) throw errors;
-      
+    graph.commit();
+
     // reset all change tracking
     graph.getTracker().reset();
     graph.setTracker(null);
