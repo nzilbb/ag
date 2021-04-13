@@ -291,20 +291,22 @@ public abstract class Converter extends GuiProgram {
       // strip extension off name
       g.setId(IO.WithoutExtension(g.getId()));
 
-      // look for media
-      g.setMediaProvider(new GraphMediaProvider() {
-          public MediaFile[] getAvailableMedia() throws StoreException, PermissionException {
-            return mediaFiles.toArray(new MediaFile[0]);
-          }
-          public String getMedia(String trackSuffix, String mimeType) 
-            throws StoreException, PermissionException {
-            for (MediaFile file : mediaFiles) {
-              if (file.getMimeType().equals(mimeType)) return file.getUrl();
-            } // next file
-            return null;
-          }
-          public GraphMediaProvider providerForGraph(Graph graph) { return null; }
-        });      
+      // give access to any media media
+      if (mediaFiles.size() > 0) {
+        g.setMediaProvider(new GraphMediaProvider() {
+            public MediaFile[] getAvailableMedia() throws StoreException, PermissionException {
+              return mediaFiles.toArray(new MediaFile[0]);
+            }
+            public String getMedia(String trackSuffix, String mimeType) 
+              throws StoreException, PermissionException {
+              for (MediaFile file : mediaFiles) {
+                if (file.getMimeType().equals(mimeType)) return file.getUrl();
+              } // next file
+              return null;
+            }
+            public GraphMediaProvider providerForGraph(Graph graph) { return null; }
+          });
+      }
 
       new Normalizer().transform(g);
       g.commit();
