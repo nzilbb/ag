@@ -304,16 +304,23 @@ public class TestGraph
       Graph g = new Graph();
       g.setId("my graph");
 
-      Layer turn = new Layer("turn", "Speaker turns", 2, true, true, false);
+      Layer turn = new Layer("turn", "Speaker turns")
+        .setAlignment(2).setPeers(true).setPeersOverlap(true).setSaturated(false);
       g.addLayer(turn);
 
-      Layer word = new Layer("word", "Words", 2, true, false, false, "turn", true);
+      Layer word = new Layer("word", "Words")
+        .setAlignment(2).setPeers(true).setPeersOverlap(false).setSaturated(false)
+        .setParentId("turn").setParentIncludes(true);
       g.addLayer(word);
 
-      Layer pos = new Layer("pos", "Part of speech", 0, false, false, true, "word", true);
+      Layer pos = new Layer("pos", "Part of speech")
+        .setAlignment(0).setPeers(false).setPeersOverlap(false).setSaturated(true)
+        .setParentId("word").setParentIncludes(true);
       g.addLayer(pos);
 
-      Layer pron = new Layer("pron", "Phonemic transcription", 0, false, false, true, "word", true);
+      Layer pron = new Layer("pron", "Phonemic transcription")
+        .setAlignment(0).setPeers(true).setPeersOverlap(false).setSaturated(true)
+        .setParentId("word").setParentIncludes(true);
       g.addLayer(pron);
 
       g.addAnchor(new Anchor("turnStart", 0.0));
@@ -351,6 +358,11 @@ public class TestGraph
       assertTrue(the.getAnnotations("pos").contains(posThe));
       assertEquals(posThe, g.all("pos")[0]);
 
+      // re-tagging no-peer layers re-uses the existing tag
+      Annotation otherPosThe = the.createTag("pos", "DET");
+      assertEquals(posThe, otherPosThe);
+      assertEquals("DET", posThe.getLabel());
+      
       // ID creation
       assertNotNull(posThe.getId());
       assertEquals("1", posThe.getId());
@@ -361,6 +373,12 @@ public class TestGraph
       assertEquals("D@", pronThe.getLabel());
       assertEquals(pronThe, g.getAnnotation(pronThe.getId()));      
       assertEquals(pron, pronThe.getLayer());
+
+      // re-tagging no-peer layers re-uses the existing tag
+      Annotation otherPronThe = the.createTag("pron", "Di");
+      assertNotEquals(pronThe, otherPronThe);
+      assertEquals("D@", pronThe.getLabel());
+      assertEquals("Di", otherPronThe.getLabel());
 
       // ID creation
       assertNotNull(pronThe.getId());

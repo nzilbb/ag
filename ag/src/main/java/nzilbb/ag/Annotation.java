@@ -1953,12 +1953,24 @@ public class Annotation
    {
       if (getGraph() == null) return null;
 
-      Annotation tag = new Annotation(null, label, layerId, getStartId(), getEndId());
-      assert getGraph() != null : "getGraph() != null";
-      assert tag.getLayerId() != null : "tag.getLayerId() != null";
-      assert getGraph().getLayer(tag.getLayerId()) != null : "getGraph().getLayer(tag.getLayerId()) != null - " + tag.getLayerId();
-      assert getGraph().getLayer(tag.getLayerId()).getParent() != null : "getGraph().getLayer(tag.getLayerId()).getParent() != null";
+      assert getGraph().getLayer(layerId).getParent() != null
+        : "getGraph().getLayer(tag.getLayerId()).getParent() != null";
       assert getLayer() != null : "getLayer() != null";
+      Layer tagLayer = getGraph().getLayer(layerId);
+      assert tagLayer != null : "tagLayer != null - " + tagLayer;
+
+      Annotation tag = new Annotation(null, label, layerId, getStartId(), getEndId());
+      // if the later doesn't allow peers and there's already a tag
+      if (!tagLayer.getPeers()) {
+        Annotation existingTag = first(layerId);
+        if (existingTag != null) {
+          // relabel the existing tag
+          tag = existingTag;
+          tag.setLabel(label)
+            .setStartId(getStartId())
+            .setEndId(getEndId());
+        }
+      }
       if (getGraph().getLayer(tag.getLayerId()).getParent() == getLayer())
       { // tag is child of this
          tag.setParent(this);
