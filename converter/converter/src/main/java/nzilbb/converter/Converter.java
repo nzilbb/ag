@@ -33,6 +33,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -208,12 +210,36 @@ public abstract class Converter extends GuiProgram {
     */
    public void convert(File inputFile) throws Exception {
       if (verbose) System.out.println("Converting " + inputFile.getPath());
-      
+
+      // look for media files
+      String nameWithoutExtension = IO.WithoutExtension(inputFile.getName());
+      Vector<MediaFile> mediaFiles = new Vector<MediaFile>();
+      for (File f : inputFile.getParentFile().listFiles(new FilenameFilter() {
+          public boolean accept(File mediaDir, String name) {
+            if (name.startsWith(nameWithoutExtension)) {
+              String lowercase = name.toLowerCase();
+              for (String suffix : MediaFile.SuffixToMimeType().keySet()) {
+                if (lowercase.endsWith(suffix)) return true;
+              }
+            }
+            return false;
+          }
+        })) {
+        mediaFiles.add(new MediaFile(f).setUrl(f.toURI().toString()));
+      } // next file
+
       Schema schema = getSchema();
 
       // deserialize...
       
-      NamedStream[] streams = { new NamedStream(inputFile) };
+      Vector<NamedStream> streams = new Vector<NamedStream>();
+      // add the transcript file
+      streams.add(new NamedStream(inputFile));
+      // ... and also any media we found
+      for (MediaFile f : mediaFiles) {
+        streams.add(new NamedStream(
+                      new FileInputStream(f.getFile()), f.getName(), f.getMimeType()));
+      }
       
       // create deserializer
       GraphDeserializer deserializer = getDeserializer();
@@ -235,7 +261,8 @@ public abstract class Converter extends GuiProgram {
       deserializer.configure(deserializerConfig, schema);
 
       // load the stream
-      ParameterSet defaultParameters = deserializer.load(streams, schema);
+      ParameterSet defaultParameters = deserializer.load(
+        streams.toArray(new NamedStream[0]), schema);
       configureFromCommandLine(defaultParameters, schema);
 
       // let the subclass adjust the config
@@ -263,6 +290,21 @@ public abstract class Converter extends GuiProgram {
 
       // strip extension off name
       g.setId(IO.WithoutExtension(g.getId()));
+
+      // look for media
+      g.setMediaProvider(new GraphMediaProvider() {
+          public MediaFile[] getAvailableMedia() throws StoreException, PermissionException {
+            return mediaFiles.toArray(new MediaFile[0]);
+          }
+          public String getMedia(String trackSuffix, String mimeType) 
+            throws StoreException, PermissionException {
+            for (MediaFile file : mediaFiles) {
+              if (file.getMimeType().equals(mimeType)) return file.getUrl();
+            } // next file
+            return null;
+          }
+          public GraphMediaProvider providerForGraph(Graph graph) { return null; }
+        });      
 
       new Normalizer().transform(g);
       g.commit();
