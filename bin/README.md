@@ -5,8 +5,8 @@ version of various *nzilbb.ag* components.
 
 These include:
 * nzilbb.ag.jar - the primary API/object model for nzilbb.ag
-* nzilbb.???.jar - a number of serialization modules that can, for example, be installed in
-  LaBB-CAT to add support for format conversions.
+* nzilbb.formatter.???.jar - a number of de/serialization modules that can, for example, be
+  installed in LaBB-CAT to add support for format conversions.
 * ???-to-???.jar - stand-alone utilities to perform specific format conversions - see below...
 
 ## Standalone Format Converters
