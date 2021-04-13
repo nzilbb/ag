@@ -22,9 +22,9 @@ to another, including:
 
 | from↓ to→ | trs | eaf  | textgrid | vtt | pdf | txt |
 | --- | :---: | :---:  | :---: | :---: | :---: | :---: |
-| **trs** | | [trs-to-eaf.jar](trs-to-eaf.jar?raw=true) | [trs-to-textgrid.jar](trs-to-textgrid.jar?raw=true) | [trs-to-vtt.jar](trs-to-vtt.jar?raw=true) | [trs-to-pdf.jar](trs-to-pdf.jar?raw=true) | [trs-to-txt.jar](trs-to-txt.jar?raw=true) |
-| **eaf** | [eaf-to-trs.jar](eaf-to-trs.jar?raw=true) | | | | |
-| **vtt** | [vtt-to-trs.jar](vtt-to-trs.jar?raw=true) | [vtt-to-eaf.jar](vtt-to-eaf.jar?raw=true) | [vtt-to-textgrid.jar](vtt-to-textgrid.jar?raw=true) | | |
+| **trs** | | [trs-to-eaf](trs-to-eaf.jar?raw=true) | [trs-to-textgrid](trs-to-textgrid.jar?raw=true) | [trs-to-vtt](trs-to-vtt.jar?raw=true) | [trs-to-pdf](trs-to-pdf.jar?raw=true) | [trs-to-txt](trs-to-txt.jar?raw=true) |
+| **eaf** | [eaf-to-trs](eaf-to-trs.jar?raw=true) | | | | |
+| **vtt** | [vtt-to-trs](vtt-to-trs.jar?raw=true) | [vtt-to-eaf](vtt-to-eaf.jar?raw=true) | [vtt-to-textgrid](vtt-to-textgrid.jar?raw=true) | | |
 
 To use a particular converter, you need to have Java installed on your
 system. Download the file, and double-click it to run.
