@@ -14,15 +14,16 @@ These include:
 There are a number converter utilities that can be used to convert files from one format
 to another, including:
 
-* [vtt-to-textgrid.jar](https://github.com/nzilbb/ag/blob/master/bin/vtt-to-textgrid.jar?raw=true) - convert from *web subtitles (Web VTT)* to *Praat TextGrids*
-* [vtt-to-eaf.jar](https://github.com/nzilbb/ag/blob/master/bin/vtt-to-eaf.jar?raw=true) - convert from *web subtitles (Web VTT)* to *ELAN* files (.eaf)
-* [vtt-to-trs.jar](https://github.com/nzilbb/ag/blob/master/bin/vtt-to-trs.jar?raw=true) - convert from *web subtitles (Web VTT)* to *Transcriber* transcripts (.trs) 
-* [trs-to-vtt.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-vtt.jar?raw=true) - convert from *Transcriber* transcripts (.trs) to *web subtitles (Web VTT)*
-* [trs-to-textgrid.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-textgrid.jar?raw=true) - convert from *Transcriber* transcripts (.trs) to *Praat TextGrids*
-* [trs-to-pdf.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-pdf.jar?raw=true) - convert from *Transcriber* transcripts (.trs) to *PDF* files
-* [trs-to-txt.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-txt.jar?raw=true) - convert from *Transcriber* transcripts (.trs) to *plain text* files
-* [trs-to-eaf.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-eaf.jar?raw=true) - convert from *Transcriber* transcripts (.trs) to *ELAN* files (.eaf)
-* [eaf-to-trs.jar](https://github.com/nzilbb/ag/blob/master/bin/eaf-to-trs.jar?raw=true) - convert from *ELAN* files (.eaf) to *Transcriber* transcripts (.trs)
+* vtt - *web subtitles (Web VTT)*
+* eaf - *ELAN* files (.eaf)
+* trs - *Transcriber* transcripts (.trs) 
+* pdf - *PDF* files
+* txt - *plain text* files
+
+| from↓ to→ | trs | eaf  | textgrid | vtt | pdf | txt |
+| trs        | | [trs-to-eaf.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-eaf.jar?raw=true) | [trs-to-textgrid.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-textgrid.jar?raw=true) | [trs-to-vtt.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-vtt.jar?raw=true) | [trs-to-pdf.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-pdf.jar?raw=true) | [trs-to-txt.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-txt.jar?raw=true) |
+| eaf        | [eaf-to-trs.jar](https://github.com/nzilbb/ag/blob/master/bin/eaf-to-trs.jar?raw=true) | | | | |
+| vtt        | [vtt-to-trs.jar](https://github.com/nzilbb/ag/blob/master/bin/vtt-to-trs.jar?raw=true) | [vtt-to-eaf.jar](https://github.com/nzilbb/ag/blob/master/bin/vtt-to-eaf.jar?raw=true) | [vtt-to-textgrid.jar](https://github.com/nzilbb/ag/blob/master/bin/vtt-to-textgrid.jar?raw=true) | | |
 
 To use a particular converter, you need to have Java installed on your
 system. Download the file, and double-click it to run.
