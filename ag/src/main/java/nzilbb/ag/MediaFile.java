@@ -283,11 +283,13 @@ public class MediaFile implements CloneableBean
 	 mSuffixToMimeType.put("aif", "audio/aiff");
 	 mSuffixToMimeType.put("au", "audio/basic");
 	 mSuffixToMimeType.put("oga", "audio/ogg");
+	 mSuffixToMimeType.put("m4a", "audio/mp4");
 	 mSuffixToMimeType.put("mp4", "video/mp4");
 	 mSuffixToMimeType.put("mpg", "video/mpeg");
 	 mSuffixToMimeType.put("mpeg", "video/mpeg");
 	 mSuffixToMimeType.put("avi", "video/avi");
 	 mSuffixToMimeType.put("mov", "video/quicktime");
+	 mSuffixToMimeType.put("wma", "audio/x-ms-wma");
 	 mSuffixToMimeType.put("wmv", "video/x-ms-wmv");
 	 mSuffixToMimeType.put("ogv", "video/ogg");
 	 mSuffixToMimeType.put("ogg", "video/ogg");
@@ -319,6 +321,7 @@ public class MediaFile implements CloneableBean
 	 mMimeTypeToSuffix.put("video/mpeg", "mpg");
 	 mMimeTypeToSuffix.put("video/avi", "avi");
 	 mMimeTypeToSuffix.put("video/quicktime", "mov");
+	 mMimeTypeToSuffix.put("audio/x-ms-wma", "wma");
 	 mMimeTypeToSuffix.put("video/x-ms-wmv", "wmv");
 	 mMimeTypeToSuffix.put("video/ogg", "ogv");
 	 mMimeTypeToSuffix.put("video/webm", "webm");
