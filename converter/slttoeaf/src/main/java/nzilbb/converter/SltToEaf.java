@@ -45,7 +45,7 @@ public class SltToEaf extends Converter {
    * @param u:03 seConventions Whether to parse inline SALT annotations (true) or ignore
    * them (false). 
    */
-  @Switch(value="Whether to parse inline SALT annotations (true) or ignore them (false). Default is true.",compulsory=false)
+  @Switch(value="Whether to parse inline SALT annotations (true) or ignore them (false). Default is false.",compulsory=false)
   public SltToEaf setUseConventions(Boolean useConventions) {
     extraSwitches.put("useConventions",""+useConventions);
     return this;
@@ -56,6 +56,7 @@ public class SltToEaf extends Converter {
    */
   public SltToEaf() {
     setDefaultWindowTitle("SALT to ELAN converter");
+    setUseConventions(false);
   } // end of constructor
   
   public static void main(String argv[]) {
@@ -195,7 +196,7 @@ public class SltToEaf extends Converter {
    * @return An array of layer IDs.
    */
   public String[] getLayersToSerialize() {
-    String[] layers = { "utterance" }; // TODO
+    String[] layers = { "utterance" };
     return layers;
   } // end of getLayersToSerialize()
   

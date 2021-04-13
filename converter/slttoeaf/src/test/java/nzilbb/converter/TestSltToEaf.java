@@ -40,6 +40,7 @@ public class TestSltToEaf {
     File dir = getDir();
     File input = new File(dir, "salt.slt");
     SltToEaf converter = new SltToEaf();
+    converter.setUseConventions(true);
     converter.convert(input);
     File actual = new File(dir, "salt.eaf");
     File expected = new File(dir, "expected_salt.eaf");
