@@ -30,6 +30,7 @@ import nzilbb.ag.serialize.GraphSerializer;
 import nzilbb.formatter.elan.EAFSerialization;
 import nzilbb.formatter.salt.SltSerialization;
 import nzilbb.util.ProgramDescription;
+import nzilbb.util.Switch;
 
 /**
  * Converts SALT .slt files to ELAN .eaf files.
@@ -37,8 +38,18 @@ import nzilbb.util.ProgramDescription;
  */
 @ProgramDescription(value="Converts SALT .slt transcripts to ELAN .eaf files",arguments="file1.slt file2.slt ...")
 public class SltToEaf extends Converter {
-  
-  // Methods:
+
+  /**
+   * Whether to parse inline SALT annotations (true)
+   * or ignore them (false). 
+   * @param u:03 seConventions Whether to parse inline SALT annotations (true) or ignore
+   * them (false). 
+   */
+  @Switch(value="Whether to parse inline SALT annotations (true) or ignore them (false). Default is true.",compulsory=false)
+  public SltToEaf setUseConventions(Boolean useConventions) {
+    extraSwitches.put("useConventions",""+useConventions);
+    return this;
+  }
   
   /**
    * Default constructor.
