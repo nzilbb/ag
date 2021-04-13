@@ -25,5 +25,6 @@
     <module>vtttoeaf</module>
     <module>vtttotextgrid</module>
     <module>vtttotrs</module>
+    <module>slttoeaf</module>
   </modules>
 </project>
