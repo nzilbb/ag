@@ -1,0 +1,76 @@
+$ Child, Examiner
++ Language: English
++ ParticipantId: Ada-Lovelace
++ Gender: F
++ Dob: 26/9/1972
++ Doe: 30/3/2021
++ Ca: 4;4
++ Ethnicity: NZ European
++ Context: Nar
++ Subgroup: TEST
++ Collect: 1
+- 0:00
+E I'm at Byron kindergarten on ((what date is it)) the 30th of March 2021? 
+
+- 00:05
+E My name is X[REDACTED]. and I'm here with X[REDACTED], doing the oral language assessment. [CENSOR]
+
+- 00:12
+E Okay, so now Ada it's your turn to tell the story. 
+
+- 00:16
+E You can look at the pictures when you're telling the story. 
+
+- 00:16
+E So let's start at the beginning.
+
+- 00:23
+E What was the story about?
++ This is a plus line comment
+- 00:29
+C (Um the kids) the kid/s, {in-situ comment} they quickly put their gumboot/s on.
+= Bound morpheme tests
+- 00:34
+E save/ed mud/y bush/s bus/s put/ing girl/z[EP:boy/z] want/3s go/3s shop/ing run/ing drop/ed help/ed aunty/z stop/ed leave/ing come/ing it/z lift/*ed.
+
+- 00:37
+E Anything else?
+
+- 00:39
+C And please go for a walk? [EU] 
+: :01 
+
+- 00:41
+C You need to put your gumboot/s on. 
+
+- 00:46
+C It/'s too dark^
+
+- 00:47
+E What happened in this one?
+
+- 00:52
+C And then it/'s heaps_and_heaps|heaps dark.
+
+- 01:02
+E What happened next?
+
+- 01:03
+C %yip_yip Schnitzel_von_Krumm s* :02 falled|fall[EW] out *of the  baby/s/z nest.
+
+- 01:09
+: :03 
+E What happened next?
+
+- 01:11
+C They put (them) it back in the nest (um). 
+
+- 01:23
+C Bye bye little bird.
+
+- 01:26
+E Anything else that happened?
+
+- 01:33
+C x.
+
