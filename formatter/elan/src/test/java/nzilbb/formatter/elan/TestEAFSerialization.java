@@ -1091,7 +1091,10 @@ public class TestEAFSerialization {
       graph.setMediaProvider(new GraphMediaProvider() {
             public MediaFile[] getAvailableMedia() throws StoreException, PermissionException {
                MediaFile[] media = {
-                  new MediaFile().setMimeType("audio/wav").setUrl("file://test.wav")
+                  new MediaFile()
+                  .setMimeType("audio/wav")
+                  .setUrl("file://test.wav")
+                  .setName("test.wav")
                };
                return media;
             }

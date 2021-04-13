@@ -1768,11 +1768,11 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
       header.setAttribute("MEDIA_FILE","");
       header.setAttribute("TIME_UNITS","milliseconds");
       long lLastUnusedAnnotationId = 0;
-      Element mediaDescriptor = document.createElement("MEDIA_DESCRIPTOR");
-      header.appendChild(mediaDescriptor);
-      mediaDescriptor.setAttribute("MEDIA_URL", "");
-      mediaDescriptor.setAttribute("MIME_TYPE", "");
       if (graph.getMediaProvider() != null) {
+         Element mediaDescriptor = document.createElement("MEDIA_DESCRIPTOR");
+         header.appendChild(mediaDescriptor);
+         mediaDescriptor.setAttribute("MEDIA_URL", "");
+         mediaDescriptor.setAttribute("MIME_TYPE", "");
          try {
             MediaFile[] files = graph.getMediaProvider().getAvailableMedia();
             if (files.length > 0) {
@@ -1789,6 +1789,7 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
                   mediaDescriptor.setAttribute("MEDIA_URL", firstFile.getUrl());
                }
                mediaDescriptor.setAttribute("MIME_TYPE", firstFile.getMimeType());
+               header.setAttribute("MEDIA_FILE",firstFile.getName());
             }
          }
          catch(StoreException exception) {}
