@@ -29,8 +29,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -38,11 +38,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Spliterator;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.Vector;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,6 +52,7 @@ import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.ag.util.AnnotationComparatorByAnchor;
 import nzilbb.ag.util.ConventionTransformer;
+import nzilbb.ag.util.DefaultOffsetGenerator;
 import nzilbb.ag.util.SimpleTokenizer;
 import nzilbb.ag.util.SpanningConventionTransformer;
 import nzilbb.configure.Parameter;
@@ -1458,6 +1459,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
     Anchor lastAnchor = start;
     Anchor lastAlignedAnchor = start;
     String prefixNextUtterance = "";
+    boolean misalignedUtterancesExist = false;
     for (String line : lines) {
       // skip blank lines
       if (line.trim().length() == 0) continue;
@@ -1477,7 +1479,8 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
           // the timestamp isn't after the last one, so we bump it forward 1s
           offset += 1.0;
           // and downgrade its confidence
-          confidence = Constants.CONFIDENCE_AUTOMATIC;
+          confidence = Constants.CONFIDENCE_DEFAULT;
+          misalignedUtterancesExist = true;
         }
         
         if (lastAnchor.getOffset() == null) {
@@ -1569,6 +1572,16 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       // so we add 1s to the last known timestamp and mark it with low confidence
       lastAnchor.setOffset(lastAlignedAnchor.getOffset() + 1.0);
       lastAnchor.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+    }
+
+    if (misalignedUtterancesExist) {
+      try {
+        // we've bumped the alignments of some utterances because they didn't go forward in
+        // time, so lets spread them evenly out
+        new DefaultOffsetGenerator().transform(graph).commit();      
+      } catch(TransformationException exception) {
+        warnings.add("Could not evenly spread misaligned lines: \"" + exception);
+      }
     }
 
     // at this point, each utterance is labelled with the line transcript, and there are

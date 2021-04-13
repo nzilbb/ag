@@ -318,7 +318,7 @@ public class TestSltSerialization {
     
     // check utterance timestamps and speakers
     double[] utteranceTimeStamps = {
-      0, 5, 12, 16, 17, 23, 29, 34, 37, 39, 41, 46, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
+      0, 5, 12, 16, 19.5, 23, 29, 34, 37, 39, 41, 46, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
     String[] utteranceSpeakers = {
       "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner",
       "test-Child",
@@ -345,7 +345,7 @@ public class TestSltSerialization {
         // it has the same start time as the previous utterance,
         // so the offset has been bumped forward by 1s and given lower confidence
         assertEquals("confidence of bumped start of utterance " + u,
-                     Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC),
+                     Integer.valueOf(Constants.CONFIDENCE_DEFAULT),
                      utterances[u].getStart().getConfidence());
       }
       assertEquals("speaker of utterance " + u + " ("+utterances[u].getStart()+")",
@@ -376,7 +376,7 @@ public class TestSltSerialization {
       "So let's start at the beginning.",
       "What was the story about?",
       "Um the kids the kids, they quickly put their gumboots on.",
-      "saved muddy bushes buses putting girl's wants goes shopping running dropped helped aunty's stopped leaving coming its lift.",
+      "saved muddy bushes buses putting girl's wants goes shopping> running dropped helped aunty's stopped leaving coming its lift.",
       "Anything else?",
       "And please go for a walk?",
       "You need to put your gumboots on.",
@@ -468,7 +468,7 @@ public class TestSltSerialization {
     };
     String[] wordLabels = {
       "kids,", "gumboots",
-      "saved", "muddy", "bushes", "buses", "putting", "girl's", "wants", "goes", "shopping",
+      "saved", "muddy", "bushes", "buses", "putting", "girl's", "wants", "goes", "shopping>",
       "running", "dropped", "helped", "aunty's", "stopped", "leaving", "coming", "its",
       "lift.",
       "gumboots", "It's", "it's", "babies'"
@@ -632,9 +632,9 @@ public class TestSltSerialization {
 
     // C-Units
     Annotation[] cUnits = g.all("cunit");
-    //assertEquals(22, cUnits.length);
+    assertEquals(23, cUnits.length);
     String[] cUnitLabels = {
-      "?", ".", ".", ".", ".", ".", "?", ".", ".", "?", "?", ".", "^", "?", ".", "?", ".", "?",
+      "?", ".", ".", ".", ".", ".", "?", ".", ">", ".", "?", "?", ".", "^", "?", ".", "?", ".", "?",
       ".", ".", "?", "."
     };
     for (int c = 0; c < cUnits.length; c++) {
@@ -785,7 +785,7 @@ public class TestSltSerialization {
     
     // check utterance timestamps and speakers
     double[] utteranceTimeStamps = {
-      0, 5, 12, 16, 17, 23, 29, 34, 37, 39, 41, 46, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
+      0, 5, 12, 16, 19.5, 23, 29, 34, 37, 39, 41, 46, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
     String[] utteranceSpeakers = {
       "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner",
       "test-Child",
@@ -812,7 +812,7 @@ public class TestSltSerialization {
         // it has the same start time as the previous utterance,
         // so the offset has been bumped forward by 1s and given lower confidence
         assertEquals("confidence of bumped start of utterance " + u,
-                     Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC),
+                     Integer.valueOf(Constants.CONFIDENCE_DEFAULT),
                      utterances[u].getStart().getConfidence());
       }
       assertEquals("speaker of utterance " + u + " ("+utterances[u].getStart()+")",
@@ -843,7 +843,7 @@ public class TestSltSerialization {
       "So let's start at the beginning.",
       "What was the story about?",
       "Um the kids the kids, they quickly put their gumboots on.",
-      "saved muddy bushes buses putting girl's wants goes shopping running dropped helped aunty's stopped leaving coming its lift.",
+      "saved muddy bushes buses putting girl's wants goes shopping> running dropped helped aunty's stopped leaving coming its lift.",
       "Anything else?",
       "And please go for a walk?",
       "You need to put your gumboots on.",
@@ -1021,7 +1021,7 @@ public class TestSltSerialization {
     
     // check utterance timestamps and speakers
     double[] utteranceTimeStamps = {
-      0, 5, 12, 16, 17, 23, 29, 34, 37, 39, 41, 46, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
+      0, 5, 12, 16, 19.5, 23, 29, 34, 37, 39, 41, 46, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
     String[] utteranceSpeakers = {
       "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner",
       "test-Child",
@@ -1048,7 +1048,7 @@ public class TestSltSerialization {
         // it has the same start time as the previous utterance,
         // so the offset has been bumped forward by 1s and given lower confidence
         assertEquals("confidence of bumped start of utterance " + u,
-                     Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC),
+                     Integer.valueOf(Constants.CONFIDENCE_DEFAULT),
                      utterances[u].getStart().getConfidence());
       }
       assertEquals("speaker of utterance " + u + " ("+utterances[u].getStart()+")",
@@ -1079,7 +1079,7 @@ public class TestSltSerialization {
       "So let's start at the beginning.",
       "What was the story about?",
       "(Um the kids) the kid/s, {in-situ comment} they quickly put their gumboot/s on.",
-      "save/ed mud/y bush/s bus/s put/ing girl/z[EP:boy/z] want/3s go/3s shop/ing run/ing drop/ed help/ed aunty/z stop/ed leave/ing come/ing it/z lift/*ed.",
+      "save/ed mud/y bush/s bus/s put/ing girl/z[EP:boy/z] want/3s go/3s shop/ing> run/ing drop/ed help/ed aunty/z stop/ed leave/ing come/ing it/z lift/*ed.",
       "Anything else?",
       "And please go for a walk? [EU]",
       "You need to put your gumboot/s on.",
