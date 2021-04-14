@@ -29,37 +29,37 @@
   <TIER LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="salt-Child" TIER_ID="salt-Child">
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a7" TIME_SLOT_REF1="ts7" TIME_SLOT_REF2="ts8">
-        <ANNOTATION_VALUE>Um the kids the kids, they quickly put their gumboots on.</ANNOTATION_VALUE>
+        <ANNOTATION_VALUE>(Um the kids) the kid/s, {in-situ comment} they quickly put their gumboot/s on.</ANNOTATION_VALUE>
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a10" TIME_SLOT_REF1="ts10" TIME_SLOT_REF2="ts11">
-        <ANNOTATION_VALUE>And please go for a walk?</ANNOTATION_VALUE>
+        <ANNOTATION_VALUE>And please go for a walk? :01 [EU]</ANNOTATION_VALUE>
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a11" TIME_SLOT_REF1="ts11" TIME_SLOT_REF2="ts12">
-        <ANNOTATION_VALUE>You need to put your gumboots on.</ANNOTATION_VALUE>
+        <ANNOTATION_VALUE>You need to put your gumboot/s on.</ANNOTATION_VALUE>
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a12" TIME_SLOT_REF1="ts12" TIME_SLOT_REF2="ts13">
-        <ANNOTATION_VALUE>It's too dark^</ANNOTATION_VALUE>
+        <ANNOTATION_VALUE>It/'s too dark^</ANNOTATION_VALUE>
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a14" TIME_SLOT_REF1="ts14" TIME_SLOT_REF2="ts15">
-        <ANNOTATION_VALUE>And then it's heaps and heaps dark.</ANNOTATION_VALUE>
+        <ANNOTATION_VALUE>And then it/'s heaps_and_heaps|heaps dark.</ANNOTATION_VALUE>
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a16" TIME_SLOT_REF1="ts16" TIME_SLOT_REF2="ts17">
-        <ANNOTATION_VALUE>Schnitzel von Krumm s~ falled out the babies' nest.</ANNOTATION_VALUE>
+        <ANNOTATION_VALUE>%yip_yip Schnitzel_von_Krumm s* :02 falled|fall[EW] out *of the baby/s/z nest.</ANNOTATION_VALUE>
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a18" TIME_SLOT_REF1="ts18" TIME_SLOT_REF2="ts19">
-        <ANNOTATION_VALUE>They put them it back in the nest um.</ANNOTATION_VALUE>
+        <ANNOTATION_VALUE>They put (them) it back in the nest (um).</ANNOTATION_VALUE>
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
     <ANNOTATION>
@@ -69,19 +69,19 @@
     </ANNOTATION>
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a21" TIME_SLOT_REF1="ts21" TIME_SLOT_REF2="ts22">
-        <ANNOTATION_VALUE>_.</ANNOTATION_VALUE>
+        <ANNOTATION_VALUE>x.</ANNOTATION_VALUE>
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
   </TIER>
   <TIER LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="salt-Examiner" TIER_ID="salt-Examiner">
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a1" TIME_SLOT_REF1="ts1" TIME_SLOT_REF2="ts2">
-        <ANNOTATION_VALUE>I'm at Byron kindergarten on what date is it the 30th of March 2021?</ANNOTATION_VALUE>
+        <ANNOTATION_VALUE>I'm at Byron kindergarten on ((what date is it)) the 30th of March 2021?</ANNOTATION_VALUE>
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a2" TIME_SLOT_REF1="ts2" TIME_SLOT_REF2="ts3">
-        <ANNOTATION_VALUE>My name is _. and I'm here with _, doing the oral language assessment.</ANNOTATION_VALUE>
+        <ANNOTATION_VALUE>My name is X[REDACTED]. and I'm here with X[REDACTED], doing the oral language assessment. [CENSOR]</ANNOTATION_VALUE>
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
     <ANNOTATION>
@@ -106,7 +106,7 @@
     </ANNOTATION>
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a8" TIME_SLOT_REF1="ts8" TIME_SLOT_REF2="ts9">
-        <ANNOTATION_VALUE>saved muddy bushes buses putting girl's wants goes shopping running dropped helped aunty's stopped leaving coming its lift.</ANNOTATION_VALUE>
+        <ANNOTATION_VALUE>save/ed mud/y bush/s bus/s put/ing girl/z[EP:boy/z] want/3s go/3s shop/ing run/ing drop/ed help/ed aunty/z stop/ed leave/ing come/ing it/z lift/*ed.</ANNOTATION_VALUE>
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
     <ANNOTATION>
@@ -126,7 +126,7 @@
     </ANNOTATION>
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a17" TIME_SLOT_REF1="ts17" TIME_SLOT_REF2="ts18">
-        <ANNOTATION_VALUE>What happened next?</ANNOTATION_VALUE>
+        <ANNOTATION_VALUE>:03 What happened next?</ANNOTATION_VALUE>
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
     <ANNOTATION>
