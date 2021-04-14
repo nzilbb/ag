@@ -24,7 +24,7 @@ to another, including:
 | from↓ to→ | trs | eaf  | textgrid | vtt | pdf | txt | slt |
 | --- | :---: | :---:  | :---: | :---: | :---: | :---: | :---: |
 | **trs** | | [trs-to-eaf](trs-to-eaf.jar?raw=true) | [trs-to-textgrid](trs-to-textgrid.jar?raw=true) | [trs-to-vtt](trs-to-vtt.jar?raw=true) | [trs-to-pdf](trs-to-pdf.jar?raw=true) | [trs-to-txt](trs-to-txt.jar?raw=true) | |
-| **eaf** | [eaf-to-trs](eaf-to-trs.jar?raw=true) | | | | | [slt-to-trs](slt-to-trs.jar?raw=true) |
+| **eaf** | [eaf-to-trs](eaf-to-trs.jar?raw=true) | | | | | | [eaf-to-slt](eaf-to-slt.jar?raw=true) |
 | **vtt** | [vtt-to-trs](vtt-to-trs.jar?raw=true) | [vtt-to-eaf](vtt-to-eaf.jar?raw=true) | [vtt-to-textgrid](vtt-to-textgrid.jar?raw=true) | | | |
 | **slt** | | [slt-to-eaf](slt-to-eaf.jar?raw=true) | | | | | |
 
