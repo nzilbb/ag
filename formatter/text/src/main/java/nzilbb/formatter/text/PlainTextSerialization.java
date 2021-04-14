@@ -1025,15 +1025,7 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
             // we cannot just use the stream directly, because AudioSystem.getAudioInputStream()
             // requires a mark/reset-able stream, which we can't guarantee that we have
             // so we save the stream to a file, and give AudioSystem.getAudioInputStream() that file
-            FileOutputStream outStream = new FileOutputStream(fMedia);
-            byte[] buffer = new byte[1024];
-            int bytesRead = wav.getStream().read(buffer);
-            while(bytesRead >= 0) {
-               outStream.write(buffer, 0, bytesRead);
-               bytesRead = wav.getStream().read(buffer);
-            } // next chunk of data
-            wav.getStream().close();
-            outStream.close();
+            IO.SaveInputStreamToFile​(wav.getStream(), fMedia);
 
             // determine the duration of the media file
             AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(fMedia);
