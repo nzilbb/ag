@@ -40,23 +40,13 @@ import nzilbb.util.Switch;
 public class SltToEaf extends Converter {
 
   /**
-   * Whether to parse inline SALT annotations (true)
-   * or ignore them (false). 
-   * @param u:03 seConventions Whether to parse inline SALT annotations (true) or ignore
-   * them (false). 
-   */
-  @Switch(value="Whether to parse inline SALT annotations (true) or ignore them (false). Default is false.",compulsory=false)
-  public SltToEaf setUseConventions(Boolean useConventions) {
-    extraSwitches.put("useConventions",""+useConventions);
-    return this;
-  }
-  
-  /**
    * Default constructor.
    */
   public SltToEaf() {
     setDefaultWindowTitle("SALT to ELAN converter");
-    setUseConventions(false);
+    // default to false, as it's what users of this converter most likely expect,
+    // and it means that if the idea is a round-trip conversion, inline annotations are not lost
+    setSwitch("parseInlineConventions", "false");
   } // end of constructor
   
   public static void main(String argv[]) {
