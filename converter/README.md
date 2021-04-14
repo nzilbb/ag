@@ -2,15 +2,22 @@
 
 Standalone programs that convert transcripts from one tool format to another, e.g.
 
-* [vtt-to-textgrid.jar](https://github.com/nzilbb/ag/blob/master/bin/vtt-to-textgrid.jar?raw=true) - convert from *web subtitles (Web VTT)* to *Praat TextGrids*
-* [vtt-to-eaf.jar](https://github.com/nzilbb/ag/blob/master/bin/vtt-to-eaf.jar?raw=true) - convert from *web subtitles (Web VTT)* to *ELAN* files (.eaf)
-* [vtt-to-trs.jar](https://github.com/nzilbb/ag/blob/master/bin/vtt-to-trs.jar?raw=true) - convert from *web subtitles (Web VTT)* to *Transcriber* transcripts (.trs) 
-* [trs-to-vtt.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-vtt.jar?raw=true) - convert from *Transcriber* transcripts (.trs) to *web subtitles (Web VTT)*
-* [trs-to-textgrid.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-textgrid.jar?raw=true) - convert from *Transcriber* transcripts (.trs) to *Praat TextGrids*
-* [trs-to-pdf.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-pdf.jar?raw=true) - convert from *Transcriber* transcripts (.trs) to *PDF* files
-* [trs-to-txt.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-txt.jar?raw=true) - convert from *Transcriber* transcripts (.trs) to *plain text* files
-* [trs-to-eaf.jar](https://github.com/nzilbb/ag/blob/master/bin/trs-to-eaf.jar?raw=true) - convert from *Transcriber* transcripts (.trs) to *ELAN* files (.eaf)
-* [eaf-to-trs.jar](https://github.com/nzilbb/ag/blob/master/bin/eaf-to-trs.jar?raw=true) - convert from *ELAN* files (.eaf) to *Transcriber* transcripts (.trs)
+There are a number converter utilities that can be used to convert files from one format
+to another, including:
+
+* vtt - *web subtitles (Web VTT)*
+* eaf - *ELAN* files
+* trs - *Transcriber* transcripts
+* pdf - *PDF* files
+* txt - *plain text* files
+* slt - *SALT* transcripts
+
+| from↓ to→ | trs | eaf  | textgrid | vtt | pdf | txt |
+| --- | :---: | :---:  | :---: | :---: | :---: | :---: |
+| **trs** | | [trs-to-eaf](../bin/trs-to-eaf.jar?raw=true) | [trs-to-textgrid](../bin/trs-to-textgrid.jar?raw=true) | [trs-to-vtt](../bin/trs-to-vtt.jar?raw=true) | [trs-to-pdf](../bin/trs-to-pdf.jar?raw=true) | [trs-to-txt](../bin/trs-to-txt.jar?raw=true) |
+| **eaf** | [eaf-to-trs](../bin/eaf-to-trs.jar?raw=true) | | | | |
+| **vtt** | [vtt-to-trs](../bin/vtt-to-trs.jar?raw=true) | [vtt-to-eaf](../bin/vtt-to-eaf.jar?raw=true) | [vtt-to-textgrid](../bin/vtt-to-textgrid.jar?raw=true) | | |
+| **slt** | | [slt-to-eaf](../bin/slt-to-eaf.jar?raw=true) | | | | |
 
 These use the serializers/deserializers in the *formatters* directory to read a file in
 one format, convert it to an annotation graph, and then write that graph out as a file in
