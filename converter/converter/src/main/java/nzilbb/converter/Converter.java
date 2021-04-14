@@ -344,7 +344,7 @@ public abstract class Converter extends GuiProgram {
           System.err.println(exception.toString());
         }
       },
-      warning -> { if (verbose) System.out.println(warning); },
+      warning -> { System.out.println(inputFile.getName() + ": " + warning); },
       exception -> System.err.println(exception.toString()));
       
     if (verbose) System.out.println("Finished " + inputFile.getPath());
