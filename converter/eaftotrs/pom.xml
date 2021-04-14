@@ -14,6 +14,15 @@
   <name>nzilbb.converter.eaftotrs</name>
 
   <properties>
+    
+    <input.package>nzilbb.formatter.elan</input.package>
+    <input.path>nzilbb/formatter/elan/</input.path>
+    <input.version>1.5.0</input.version>
+    
+    <output.package>nzilbb.formatter.transcriber</output.package>
+    <output.path>nzilbb/formatter/transcriber/</output.path>
+    <output.version>2.0.0</output.version>
+    
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -22,13 +31,13 @@
   <dependencies>
     <dependency>
       <groupId>nzilbb</groupId>
-      <artifactId>nzilbb.formatter.elan</artifactId>
-      <version>[1.5.0,)</version>
+      <artifactId>${input.package}</artifactId>
+      <version>[${input.version},)</version>
     </dependency>
     <dependency>
       <groupId>nzilbb</groupId>
-      <artifactId>nzilbb.formatter.transcriber</artifactId>
-      <version>[2.0.0,)</version>
+      <artifactId>${output.package}</artifactId>
+      <version>[${output.version},)</version>
     </dependency>
     <dependency>
       <groupId>nzilbb</groupId>
@@ -53,12 +62,24 @@
             <manifest>
               <mainClass>nzilbb.converter.EafToTrs</mainClass>
             </manifest>
-            <manifestEntries>
-              <Name>nzilbb/formatter/transcriber/</Name>
-              <Implementation-Title>${project.description}</Implementation-Title>
-              <Implementation-Version>${project.version}</Implementation-Version>
-              <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
-            </manifestEntries>
+            <manifestSections>
+              <manifestSection>
+                <name>${input.path}</name>
+                <manifestEntries>
+                  <Implementation-Title>${project.description}</Implementation-Title>
+                  <Implementation-Version>${input.version}</Implementation-Version>
+                  <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
+                </manifestEntries>
+              </manifestSection>
+              <manifestSection>
+                <name>${output.path}</name>
+                <manifestEntries>
+                  <Implementation-Title>${project.description}</Implementation-Title>
+                  <Implementation-Version>${output.version}</Implementation-Version>
+                  <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
+                </manifestEntries>
+              </manifestSection>
+            </manifestSections>
           </archive>
           <outputDirectory>../../bin</outputDirectory>
         </configuration>
@@ -78,14 +99,14 @@
               <artifactItems>
                 <artifactItem>
                   <groupId>nzilbb</groupId>
-                  <artifactId>nzilbb.formatter.elan</artifactId>
-                  <version>1.5.0</version>
+                  <artifactId>${input.package}</artifactId>
+                  <version>${input.version}</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>nzilbb</groupId>
-                  <artifactId>nzilbb.formatter.transcriber</artifactId>
-                  <version>2.0.0</version>
+                  <artifactId>${output.package}</artifactId>
+                  <version>${output.version}</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
