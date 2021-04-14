@@ -43,11 +43,13 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Vector;
+import java.util.stream.Collectors;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
@@ -219,7 +221,7 @@ public abstract class Converter extends GuiProgram {
    * @param inputFile
    * @throws Exception
    */
-  public void convert(File inputFile) throws Exception {
+  public void convert(File inputFile) throws SerializationException, Exception {
     if (verbose) System.out.println("Converting " + inputFile.getPath());
 
     // look for media files
@@ -575,6 +577,7 @@ public abstract class Converter extends GuiProgram {
     progress.setValue(0);
     progress.setString("");
     int f = 0;
+    Vector<String> errors = new Vector<String>();
     for (File inputFile: files) {
       progress.setString(inputFile.getName());
       try {
@@ -583,14 +586,27 @@ public abstract class Converter extends GuiProgram {
         } else {
           convert(inputFile);
         }
+      } catch(SerializationException exception) {
+        System.err.println(inputFile.getPath() + ": " + exception.getMessage());
+        errors.add(inputFile.getName() + ": " + exception.getMessage());
       } catch(Exception exception) {
-        System.err.println("Error processing: " + inputFile.getPath() + " : " + exception.getMessage());
+        System.err.println(inputFile.getPath() + ": " + exception.getMessage());
+        errors.add(inputFile.getName() + ": " + exception.getMessage());
         exception.printStackTrace(System.err);
       }
       progress.setValue(++f);
     } // next file
     progress.setString("Finished.");
-    if (batchMode) System.exit(0);
+    if (batchMode) {
+      System.exit(0);
+    } else { // GUI
+      if (errors.size() > 0) {
+        // display errors 
+        JOptionPane.showMessageDialog(
+          this, errors.stream().collect(Collectors.joining("\n")),
+          "Error", JOptionPane.ERROR_MESSAGE);       
+      }
+    }
   } // end of convertBatch()
    
   /**
