@@ -1243,24 +1243,24 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
   @SuppressWarnings({"rawtypes", "unchecked"})
   public ParameterSet load(NamedStream[] streams, Schema schema) // TODO look for media, get length
     throws IOException, SerializationException, SerializerNotConfiguredException {
-    // take the first cha stream, ignore all others.
-    NamedStream cha = null;
+    // take the first slt stream, ignore all others.
+    NamedStream slt = null;
     for (NamedStream stream : streams) {	 
       if (stream.getName().toLowerCase().endsWith(".slt") 
           || "text/x-salt".equals(stream.getMimeType())
           || "text/x-slt".equals(stream.getMimeType())) {
-        cha = stream;
+        slt = stream;
         break;
       }
     } // next stream
-    if (cha == null) throw new SerializationException("No CHAT stream found");
-    setName(cha.getName());
+    if (slt == null) throw new SerializationException("No SALT stream found");
+    setName(slt.getName());
 
     reset();
     
     // read stream line by line
     boolean inHeader = true;
-    BufferedReader reader = new BufferedReader(new InputStreamReader(cha.getStream(), "UTF-8"));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(slt.getStream(), "UTF-8"));
     String line = reader.readLine();
     // remove byte-order-mark if any
     if (line != null) line = line.replace("\uFEFF", "");
@@ -1283,6 +1283,13 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       } // not a blank line
       line = reader.readLine();
     } // next line
+
+    // validation
+    if (participantsHeader.trim().length() == 0) {
+      throw new SerializationException(
+        SerializationException.ErrorType.InvalidDocument,
+        "No participant list was defined in the transcript header");
+    }
 
     return new ParameterSet(); // everything is in configure()
   }
@@ -1475,7 +1482,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         if (offset != 0.0
             && lastAlignedAnchor != null && offset <= lastAlignedAnchor.getOffset()) {
           warnings.add("Time stamp \"" + line + "\" isn't after the previous one ("
-                       +lastAlignedAnchor+") bumping this offset forward by 1.0s");
+                       +lastAlignedAnchor+") bumping this offset forward");
           // the timestamp isn't after the last one, so we bump it forward 1s
           offset += 1.0;
           // and downgrade its confidence
