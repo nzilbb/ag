@@ -486,9 +486,9 @@ public abstract class Converter extends GuiProgram {
       System.err.println("Deserializing from " + deserializer.getDescriptor());
       ParameterSet config = deserializer.configure(new ParameterSet(), schema);
       if (config.size() == 0) {
-        System.err.println("There are no configuration parameters for deserialization");
+        System.err.println(" There are no configuration parameters for deserialization");
       } else {
-        System.err.println("Command-line configuration parameters for deserialization:");
+        System.err.println(" Command-line configuration parameters for deserialization:");
         for (Parameter p : config.values()) {
           System.err.println(
             "\t--" + p.getName() + "=" + p.getType().getSimpleName() + "\t" + p.getHint());
@@ -498,9 +498,9 @@ public abstract class Converter extends GuiProgram {
       System.err.println("Serializing to " + serializer.getDescriptor());
       config = serializer.configure(new ParameterSet(), schema);
       if (config.size() == 0) {
-        System.err.println("There are no configuration parameters for serialization");
+        System.err.println(" There are no configuration parameters for serialization");
       } else {
-        System.err.println("Command-line configuration parameters for serialization:");
+        System.err.println(" Command-line configuration parameters for serialization:");
         for (Parameter p : config.values()) {
           System.err.println(
             "\t--" + p.getName() + "=" + p.getType().getSimpleName() + "\t" + p.getHint());
