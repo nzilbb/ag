@@ -597,6 +597,19 @@ public abstract class Converter extends GuiProgram {
     } // next parameter
     return parameters;
   } // end of configureFromCommandLine()
+
+  /**
+   * Specify the value for an extra switch, which will be passed to the deserializer and
+   * serializer. 
+   * @param name The switch name.
+   * @param value The value for the switch.
+   * @return A reference to this object, so that calls can be stacked like a builder.
+   */
+   public Converter setSwitch(String name, String value) {
+     extraSwitches.put(name, value);
+     return this;
+   } // end of setSwitch()
+
    
   private static final long serialVersionUID = -1;
 } // end of class Converter
