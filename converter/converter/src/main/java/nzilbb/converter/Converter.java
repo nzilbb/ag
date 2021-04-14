@@ -506,6 +506,7 @@ public abstract class Converter extends GuiProgram {
       // display info about serialization parameters
       Schema schema = getSchema();
       GraphDeserializer deserializer = getDeserializer();
+      System.err.println();
       System.err.println("Deserializing from " + deserializer.getDescriptor());
       ParameterSet config = deserializer.configure(new ParameterSet(), schema);
       if (config.size() == 0) {
@@ -518,6 +519,7 @@ public abstract class Converter extends GuiProgram {
         }
       }
       GraphSerializer serializer = getSerializer();
+      System.err.println();
       System.err.println("Serializing to " + serializer.getDescriptor());
       config = serializer.configure(new ParameterSet(), schema);
       if (config.size() == 0) {
