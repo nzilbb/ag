@@ -1425,14 +1425,10 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
     // the header is something like "Child, Examiner"
     HashMap<String,Annotation> idToParticipant = new HashMap<String,Annotation>();
     Annotation targetParticipant = null;
-    // In SALT files, participants are named a general code like 'Child', 'Parent' etc.
-    // to uniquify these for insertion into large corpora, we prepent this with the name
-    // of the file
-    String participantPrefix = IO.WithoutExtension(getName()) + "-";
     for (String p : participantsHeader.split(",")) {
       p = p.trim();
       String id = p.substring(0,1); // Child -> C, Examiner -> E, etc.
-      String name = participantPrefix + p;
+      String name = p;
       Annotation participant = graph.createTag(graph, participantLayer.getId(), name);
       idToParticipant.put(id, participant);
       if (targetParticipant == null) { // first participant is target
@@ -1442,7 +1438,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         }
       }
     } // next participant
-
+    
     // headers
     SimpleDateFormat saltDateFormat = new SimpleDateFormat(dateFormat);
     SimpleDateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -1452,7 +1448,10 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         String key = header.substring(0, colon).trim().toLowerCase();
         String value = header.substring(colon + 1).trim();
         if (value.length() > 0) {
-          if (key.equals("language") && languageLayer != null) {
+          if (key.equals("name")) {
+            // a Name header value is used instead of the file name for the participant prefix
+            setName(value);
+          } else if (key.equals("language") && languageLayer != null) {
             graph.createTag(graph, languageLayer.getId(),
                             // ISO639 alpha-2 code if possible
                             iso639.alpha2(value).orElse(value));
@@ -1500,6 +1499,14 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         } // there's a value specified
       } // there's a colon separator
     } // next header
+    
+    // In SALT files, participants are named a general code like 'Child', 'Parent' etc.
+    // to uniquify these for insertion into large corpora, we prepent this with the name
+    // of the file
+    String participantPrefix = IO.WithoutExtension(getName()) + "-";
+    for (Annotation participant : idToParticipant.values()) {
+      participant.setLabel(participantPrefix + participant.getLabel());
+    }
 
     // ensure we have an utterance tokenizer
     if (getTokenizer() == null) {
@@ -2164,6 +2171,76 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
 
       // participants...
       
+      // participants have to start with a unique letter
+      HashSet<Character> codes = new HashSet<Character>();
+      Annotation[] participants = graph.all(graph.getSchema().getParticipantLayerId());
+
+      String nameHeader = null;
+      // first pass looking for standard names
+      String[] standardNames = {
+        "Child", "Parent", "Mother", "Father", "Brother", "Sister", "Participant", "Investigator",
+        "Examiner", "Teacher", "Interviewer", "Unknown", "Unidentified"
+      };
+      for (Annotation participant : participants){
+        Character code = null;
+        for (String name : standardNames) {
+          if (participant.getLabel().toLowerCase().contains(name.toLowerCase())
+              && !codes.contains(name.charAt(0))) {
+            // if the label is something like "ADAL-Child" then we want "ADAL" as the name header
+            if (nameHeader == null) {
+              nameHeader = participant.getLabel().replaceAll("(?i)-"+name,"");
+              if (nameHeader.trim().length() == 0 || nameHeader.equals(participant.getLabel())) {
+                // no replacement made, so we still don't know if there should be a name header
+                nameHeader = null;
+              }
+            }
+            participant.setLabel(name);
+            code = participant.getLabel().charAt(0);
+            break;
+          } // matched a name
+        } // next standard name
+        if (code != null) {
+          codes.add(code);
+          participant.put("@code", code);
+        }
+      } // next participant
+      
+      // second pass trying to use current labels
+      boolean residualParticipants = false;
+      for (Annotation participant : participants) {
+        if (!participant.containsKey("@code")) {
+          if (!codes.contains(participant.getLabel().charAt(0))) {
+            Character code = participant.getLabel().charAt(0);
+            participant.put("@code", code);
+            codes.add(code);
+          } else {
+            residualParticipants = true;
+          }
+        } // no code yet
+      } // next participant
+
+      if (residualParticipants) {
+        // third pass - just assign them a code and prepend the label
+        char nextCode = 'A';
+        for (Annotation participant : participants) {
+          if (!participant.containsKey("@code")) {
+            // find the next available code
+            while (codes.contains(nextCode)) nextCode++;
+            // use it
+            participant.setLabel(""+nextCode+"-"+participant.getLabel());
+            codes.add(nextCode);
+            participant.put("@code", nextCode);
+          } // no code yet
+        } // next participant
+      }
+
+      // relabel all turns with participant label
+      for (Annotation participant : participants) {
+        for (Annotation turn : participant.all(graph.getSchema().getTurnLayerId())) {
+          turn.setLabel(participant.getLabel());
+        }
+      } // next participant
+
       // target participant
       StringBuilder participantsHeader = new StringBuilder();
       Annotation targetParticipant = null;
@@ -2218,6 +2295,10 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
           writer.println(iso639.name(annotation.getLabel()) // language name if possible
                          .orElse(annotation.getLabel()));
         }
+      }
+      if (nameHeader != null) {
+        writer.print("+ Name: ");
+        writer.println(nameHeader);
       }
       if (participantIdLayer != null) {
         Annotation annotation = targetParticipant.first(participantIdLayer.getId());

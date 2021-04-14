@@ -255,8 +255,8 @@ public class TestSltSerialization {
     assertEquals("Two participants", 2, g.all("participant").length);
     assertEquals("One target", 1, g.all("main_participant").length);
     Annotation child = g.first("main_participant").getParent();
-    assertEquals("Target participant prefixed with file name",
-                 "test-Child", child.getLabel());
+    assertEquals("Target participant prefixed with value of Name header",
+                 "ADAL-Child", child.getLabel());
     Annotation examiner = null;
     for (Annotation p : g.all("participant")) {
       if (!p.getId().equals(child.getId())) {
@@ -265,8 +265,8 @@ public class TestSltSerialization {
       }
     }
     assertNotNull("Examiner found", examiner);
-    assertEquals("Examiner name prefixed with file name",
-                 "test-Examiner", examiner.getLabel());
+    assertEquals("Examiner name prefixed with value of Name header",
+                 "ADAL-Examiner", examiner.getLabel());
     
     // participant meta data
     assertEquals("ParticipantId correct",
@@ -290,7 +290,7 @@ public class TestSltSerialization {
     double[] turnTimeStamps = {
       0, 29, 34, 39, 47, 52, 62, 63, 69, 71, 86, 93 };
     Annotation lastTurn = null;
-    assertEquals("Examiner is first", "test-Examiner", turns[0].getLabel());
+    assertEquals("Examiner is first", "ADAL-Examiner", turns[0].getLabel());
     for (int t = 0; t < turns.length; t++) {
       assertEquals("start of turn " + t,
                    Double.valueOf(turnTimeStamps[t]), turns[t].getStart().getOffset());
@@ -320,18 +320,18 @@ public class TestSltSerialization {
     double[] utteranceTimeStamps = {
       0, 5, 12, 16, 19.5, 23, 29, 34, 37, 39, 41, 46, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
     String[] utteranceSpeakers = {
-      "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner",
-      "test-Child",
-      "test-Examiner", "test-Examiner",
-      "test-Child", "test-Child", "test-Child",
-      "test-Examiner",
-      "test-Child",
-      "test-Examiner",
-      "test-Child",
-      "test-Examiner",
-      "test-Child", "test-Child",
-      "test-Examiner",
-      "test-Child"
+      "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner",
+      "ADAL-Child",
+      "ADAL-Examiner", "ADAL-Examiner",
+      "ADAL-Child", "ADAL-Child", "ADAL-Child",
+      "ADAL-Examiner",
+      "ADAL-Child",
+      "ADAL-Examiner",
+      "ADAL-Child",
+      "ADAL-Examiner",
+      "ADAL-Child", "ADAL-Child",
+      "ADAL-Examiner",
+      "ADAL-Child"
     };
     Annotation lastUtterance = null;
     for (int u = 0; u < utterances.length; u++) {
@@ -736,8 +736,8 @@ public class TestSltSerialization {
     assertEquals("Two participants", 2, g.all("participant").length);
     assertEquals("One target", 1, g.all("main_participant").length);
     Annotation child = g.first("main_participant").getParent();
-    assertEquals("Target participant prefixed with file name",
-                 "test-Child", child.getLabel());
+    assertEquals("Target participant prefixed with value of Name header",
+                 "ADAL-Child", child.getLabel());
     Annotation examiner = null;
     for (Annotation p : g.all("participant")) {
       if (!p.getId().equals(child.getId())) {
@@ -746,8 +746,8 @@ public class TestSltSerialization {
       }
     }
     assertNotNull("Examiner found", examiner);
-    assertEquals("Examiner name prefixed with file name",
-                 "test-Examiner", examiner.getLabel());
+    assertEquals("Examiner name prefixed with file name value of Name header",
+                 "ADAL-Examiner", examiner.getLabel());
     
      // turns
     Annotation[] turns = g.all("turn");
@@ -757,7 +757,7 @@ public class TestSltSerialization {
     double[] turnTimeStamps = {
       0, 29, 34, 39, 47, 52, 62, 63, 69, 71, 86, 93 };
     Annotation lastTurn = null;
-    assertEquals("Examiner is first", "test-Examiner", turns[0].getLabel());
+    assertEquals("Examiner is first", "ADAL-Examiner", turns[0].getLabel());
     for (int t = 0; t < turns.length; t++) {
       assertEquals("start of turn " + t,
                    Double.valueOf(turnTimeStamps[t]), turns[t].getStart().getOffset());
@@ -787,18 +787,18 @@ public class TestSltSerialization {
     double[] utteranceTimeStamps = {
       0, 5, 12, 16, 19.5, 23, 29, 34, 37, 39, 41, 46, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
     String[] utteranceSpeakers = {
-      "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner",
-      "test-Child",
-      "test-Examiner", "test-Examiner",
-      "test-Child", "test-Child", "test-Child",
-      "test-Examiner",
-      "test-Child",
-      "test-Examiner",
-      "test-Child",
-      "test-Examiner",
-      "test-Child", "test-Child",
-      "test-Examiner",
-      "test-Child"
+      "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner",
+      "ADAL-Child",
+      "ADAL-Examiner", "ADAL-Examiner",
+      "ADAL-Child", "ADAL-Child", "ADAL-Child",
+      "ADAL-Examiner",
+      "ADAL-Child",
+      "ADAL-Examiner",
+      "ADAL-Child",
+      "ADAL-Examiner",
+      "ADAL-Child", "ADAL-Child",
+      "ADAL-Examiner",
+      "ADAL-Child"
     };
     Annotation lastUtterance = null;
     for (int u = 0; u < utterances.length; u++) {
@@ -972,8 +972,8 @@ public class TestSltSerialization {
     assertEquals("Two participants", 2, g.all("participant").length);
     assertEquals("One target", 1, g.all("main_participant").length);
     Annotation child = g.first("main_participant").getParent();
-    assertEquals("Target participant prefixed with file name",
-                 "test-Child", child.getLabel());
+    assertEquals("Target participant prefixed with value of Name header",
+                 "ADAL-Child", child.getLabel());
     Annotation examiner = null;
     for (Annotation p : g.all("participant")) {
       if (!p.getId().equals(child.getId())) {
@@ -982,8 +982,8 @@ public class TestSltSerialization {
       }
     }
     assertNotNull("Examiner found", examiner);
-    assertEquals("Examiner name prefixed with file name",
-                 "test-Examiner", examiner.getLabel());
+    assertEquals("Examiner name prefixed with value of Name header",
+                 "ADAL-Examiner", examiner.getLabel());
     
      // turns
     Annotation[] turns = g.all("turn");
@@ -993,7 +993,7 @@ public class TestSltSerialization {
     double[] turnTimeStamps = {
       0, 29, 34, 39, 47, 52, 62, 63, 69, 71, 86, 93 };
     Annotation lastTurn = null;
-    assertEquals("Examiner is first", "test-Examiner", turns[0].getLabel());
+    assertEquals("Examiner is first", "ADAL-Examiner", turns[0].getLabel());
     for (int t = 0; t < turns.length; t++) {
       assertEquals("start of turn " + t,
                    Double.valueOf(turnTimeStamps[t]), turns[t].getStart().getOffset());
@@ -1023,18 +1023,18 @@ public class TestSltSerialization {
     double[] utteranceTimeStamps = {
       0, 5, 12, 16, 19.5, 23, 29, 34, 37, 39, 41, 46, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
     String[] utteranceSpeakers = {
-      "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner", "test-Examiner",
-      "test-Child",
-      "test-Examiner", "test-Examiner",
-      "test-Child", "test-Child", "test-Child",
-      "test-Examiner",
-      "test-Child",
-      "test-Examiner",
-      "test-Child",
-      "test-Examiner",
-      "test-Child", "test-Child",
-      "test-Examiner",
-      "test-Child"
+      "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner",
+      "ADAL-Child",
+      "ADAL-Examiner", "ADAL-Examiner",
+      "ADAL-Child", "ADAL-Child", "ADAL-Child",
+      "ADAL-Examiner",
+      "ADAL-Child",
+      "ADAL-Examiner",
+      "ADAL-Child",
+      "ADAL-Examiner",
+      "ADAL-Child", "ADAL-Child",
+      "ADAL-Examiner",
+      "ADAL-Child"
     };
     Annotation lastUtterance = null;
     for (int u = 0; u < utterances.length; u++) {

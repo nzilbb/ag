@@ -26,7 +26,7 @@
     <TIME_SLOT TIME_SLOT_ID="ts21" TIME_VALUE="93000"/>
     <TIME_SLOT TIME_SLOT_ID="ts22" TIME_VALUE="94000"/>
   </TIME_ORDER>
-  <TIER LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="salt-Child" TIER_ID="salt-Child">
+  <TIER LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="ADAL-Child" TIER_ID="ADAL-Child">
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a7" TIME_SLOT_REF1="ts7" TIME_SLOT_REF2="ts8">
         <ANNOTATION_VALUE>Um the kids the kids, they quickly put their gumboots on.</ANNOTATION_VALUE>
@@ -73,7 +73,7 @@
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
   </TIER>
-  <TIER LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="salt-Examiner" TIER_ID="salt-Examiner">
+  <TIER LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="ADAL-Examiner" TIER_ID="ADAL-Examiner">
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a1" TIME_SLOT_REF1="ts1" TIME_SLOT_REF2="ts2">
         <ANNOTATION_VALUE>I'm at Byron kindergarten on what date is it the 30th of March 2021?</ANNOTATION_VALUE>
