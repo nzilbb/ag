@@ -41,7 +41,7 @@
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>converter-base</artifactId>
-      <version>[1.0.0,)</version>
+      <version>[1.0.2,)</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -111,13 +111,13 @@
                 <artifactItem>
                   <groupId>nzilbb</groupId>
                   <artifactId>converter-base</artifactId>
-                  <version>1.0.0</version>
+                  <version>1.0.2</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>nzilbb</groupId>
                   <artifactId>nzilbb.ag</artifactId>
-                  <version>1.0.0</version>
+                  <version>1.0.2</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
