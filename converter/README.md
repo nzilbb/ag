@@ -33,6 +33,16 @@ another format.
    - change *version* to "0.1.0" - i.e. use semantic versioning.
    - remove the *url* tag (so it can be inherited from the master pom.xml)
    - change *maven.compiler.source* and *maven.compiler.target* to "1.8"
+   - add the following to *properties*
+   ```    
+    <input.package>nzilbb.formatter.informattool</input.package>
+    <input.path>nzilbb/formatter/informattool/</input.path>
+    <input.version>i.i.i</input.version>
+    
+    <output.package>nzilbb.formatter.outformattool</output.package>
+    <output.path>nzilbb/formatter/outformattool/</output.path>
+    <output.version>o.o.o</output.version>    
+   ```
    - add the following to *dependencies*
    ```
     <dependency>
@@ -40,18 +50,15 @@ another format.
       <artifactId>converter-base</artifactId>
       <version>[1.0.0,)</version>
     </dependency>
-   ```
-   - also add dependencies for the two serializations involved in the conversion
-   ```
     <dependency>
       <groupId>nzilbb</groupId>
-      <artifactId>nzilbb.formatter.informattool</artifactId>
-      <version>[0.1.0,)</version>
+      <artifactId>${input.package}</artifactId>
+      <version>[${input.version},)</version>
     </dependency>
     <dependency>
       <groupId>nzilbb</groupId>
-      <artifactId>nzilbb.formatter.outformattool</artifactId>
-      <version>[0.1.0,)</version>
+      <artifactId>${output.package}</artifactId>
+      <version>[${output.version},)</version>
     </dependency>
    ```
    - add the following to *build*
@@ -65,13 +72,25 @@ another format.
             <manifest>
               <mainClass>nzilbb.converter.InformatToOutformat</mainClass>
             </manifest>
-            <!-- ensure converter version is available to the serializer -->
-            <manifestEntries>
-              <Name>nzilbb/formatter/outformattool/</Name>
-              <Implementation-Title>${project.description}</Implementation-Title>
-              <Implementation-Version>${project.version}</Implementation-Version>
-              <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
-            </manifestEntries>
+            <!-- ensure version is available to the serializations -->
+            <manifestSections>
+              <manifestSection>
+                <name>${input.path}</name>
+                <manifestEntries>
+                  <Implementation-Title>${project.description}</Implementation-Title>
+                  <Implementation-Version>${input.version}</Implementation-Version>
+                  <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
+                </manifestEntries>
+              </manifestSection>
+              <manifestSection>
+                <name>${output.path}</name>
+                <manifestEntries>
+                  <Implementation-Title>${project.description}</Implementation-Title>
+                  <Implementation-Version>${output.version}</Implementation-Version>
+                  <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
+                </manifestEntries>
+              </manifestSection>
+            </manifestSections>
           </archive>
           <outputDirectory>../../bin</outputDirectory>
         </configuration>
@@ -91,26 +110,26 @@ another format.
               <artifactItems>
                 <artifactItem>
                   <groupId>nzilbb</groupId>
-                  <artifactId>nzilbb.formatter.informattool</artifactId>
-                  <version>n.n.n</version>
+                  <artifactId>${input.package}</artifactId>
+                  <version>${input.version}</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>nzilbb</groupId>
-                  <artifactId>nzilbb.formatter.outformatttool</artifactId>
-                  <version>n.n.n</version>
+                  <artifactId>${output.package}</artifactId>
+                  <version>${output.version}</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>nzilbb</groupId>
                   <artifactId>converter-base</artifactId>
-                  <version>1.0.0</version>
+                  <version>1.0.1</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>nzilbb</groupId>
                   <artifactId>nzilbb.ag</artifactId>
-                  <version>1.0.0</version>
+                  <version>n.n.n</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
