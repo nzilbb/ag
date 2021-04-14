@@ -2,9 +2,6 @@
 
 Standalone programs that convert transcripts from one tool format to another, e.g.
 
-There are a number converter utilities that can be used to convert files from one format
-to another, including:
-
 * vtt - *web subtitles (Web VTT)*
 * eaf - *ELAN* files
 * trs - *Transcriber* transcripts
