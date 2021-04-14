@@ -46,6 +46,9 @@ import java.util.Vector;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
@@ -749,6 +752,23 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
   public SltSerialization setParseInlineConventions(Boolean newParseInlineConventions) { parseInlineConventions = newParseInlineConventions; return this; }
   
   /**
+   * Duration of the media file in seconds, if known.
+   * @see #getMediaDurationSeconds()
+   * @see #setMediaDurationSeconds(Double)
+   */
+  protected Double mediaDurationSeconds;
+  /**
+   * Getter for {@link #mediaDurationSeconds}: Duration of the media file in seconds, if known.
+   * @return Duration of the media file in seconds, if known.
+   */
+  public Double getMediaDurationSeconds() { return mediaDurationSeconds; }
+  /**
+   * Setter for {@link #mediaDurationSeconds}: Duration of the media file in seconds, if known.
+   * @param newMediaDurationSeconds Duration of the media file in seconds, if known.
+   */
+  public SltSerialization setMediaDurationSeconds(Double newMediaDurationSeconds) { mediaDurationSeconds = newMediaDurationSeconds; return this; }
+  
+  /**
    * Utterance tokenizer.  The default is {@link SimpleTokenizer}.
    * @see #getTokenizer()
    * @see #setTokenizer(GraphTransformer)
@@ -1241,7 +1261,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
    * deserialization. 
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
-  public ParameterSet load(NamedStream[] streams, Schema schema) // TODO look for media, get length
+  public ParameterSet load(NamedStream[] streams, Schema schema)
     throws IOException, SerializationException, SerializerNotConfiguredException {
     // take the first slt stream, ignore all others.
     NamedStream slt = null;
@@ -1291,6 +1311,35 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         "No participant list was defined in the transcript header");
     }
 
+    // media duration
+    NamedStream wav = Utility.FindSingleStream(streams, ".wav", "audio/wav");
+    if (wav != null) {
+      // save the media file
+      File fMedia = File.createTempFile("SltSerialization-", wav.getName());
+      fMedia.deleteOnExit();
+      try {
+        
+        // we cannot just use the stream directly, because AudioSystem.getAudioInputStream()
+        // requires a mark/reset-able stream, which we can't guarantee that we have
+        // so we save the stream to a file, and give AudioSystem.getAudioInputStream() that file
+        IO.SaveInputStreamToFile​(wav.getStream(), fMedia);
+        
+        // determine the duration of the media file
+        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(fMedia);
+        AudioFormat format = audioInputStream.getFormat();
+        long frames = audioInputStream.getFrameLength();
+        if (frames > 0) {
+          double durationInSeconds = ((double)frames) / format.getFrameRate(); 
+          mediaDurationSeconds = durationInSeconds;
+        } else {
+          warnings.add("Ignoring media: " + wav.getName() + " is valid but contains no frames.");
+        }
+      } catch(Exception exception) {
+        warnings.add("Ignoring media: " + wav.getName() + " ERROR: " + exception);
+      } finally {
+        fMedia.delete();
+      }
+    }
     return new ParameterSet(); // everything is in configure()
   }
   
@@ -1576,9 +1625,15 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
 
     // sometimes there's no ending timestamp!
     if (lastAnchor.getOffset() == null) {
-      // so we add 1s to the last known timestamp and mark it with low confidence
-      lastAnchor.setOffset(lastAlignedAnchor.getOffset() + 1.0);
-      lastAnchor.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+      if (mediaDurationSeconds != null) {
+        // we know how long the media is, so use that as the end time
+        lastAnchor.setOffset(mediaDurationSeconds);
+        lastAnchor.setConfidence(Constants.CONFIDENCE_MANUAL);
+      } else { // end time unknown
+        // so we add 1s to the last known timestamp and mark it with low confidence
+        lastAnchor.setOffset(lastAlignedAnchor.getOffset() + 1.0);
+        lastAnchor.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+      }
     }
 
     if (misalignedUtterancesExist) {
