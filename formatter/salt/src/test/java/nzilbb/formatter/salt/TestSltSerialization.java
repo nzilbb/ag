@@ -205,8 +205,8 @@ public class TestSltSerialization {
                  configuration.get("collectLayer").getValue());
     assertEquals(schema.getLayer("transcript_location"),
                  configuration.get("locationLayer").getValue());
-    assertEquals("useConventions is true default",
-                 Boolean.TRUE, configuration.get("useConventions").getValue());
+    assertEquals("parseInlineConventions is true default",
+                 Boolean.TRUE, configuration.get("parseInlineConventions").getValue());
     assertEquals("Date format is month-first by default",
                  "M/d/yyyy", configuration.get("dateFormat").getValue());
     // change to day-first
@@ -701,8 +701,8 @@ public class TestSltSerialization {
     assertNull(configuration.get("subgroupLayer").getValue());
     assertNull(configuration.get("collectLayer").getValue());
     assertNull(configuration.get("locationLayer").getValue());
-    assertEquals("useConventions is true default",
-                 Boolean.TRUE, configuration.get("useConventions").getValue());
+    assertEquals("parseInlineConventions is true default",
+                 Boolean.TRUE, configuration.get("parseInlineConventions").getValue());
     assertEquals("Date format is month-first by default",
                  "M/d/yyyy", configuration.get("dateFormat").getValue());
     // change to day-first
@@ -939,10 +939,10 @@ public class TestSltSerialization {
                  "M/d/yyyy", configuration.get("dateFormat").getValue());
     // change to day-first
     configuration.get("dateFormat").setValue("d/M/yyyy");
-    assertEquals("useConventions is true default",
-                 Boolean.TRUE, configuration.get("useConventions").getValue());
+    assertEquals("parseInlineConventions is true default",
+                 Boolean.TRUE, configuration.get("parseInlineConventions").getValue());
     // change to false
-    configuration.get("useConventions").setValue(Boolean.FALSE);
+    configuration.get("parseInlineConventions").setValue(Boolean.FALSE);
 
     // final configuration
     deserializer.configure(configuration, schema);

@@ -724,29 +724,29 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
   public SltSerialization setDateFormat(String newDateFormat) { dateFormat = newDateFormat; return this; }
   
   /**
-   * Whether to use SALT conventions when deserializing. Default is true.
+   * Whether to parse the in-line conventions when deserializing. Default is true.
    * <p> If false, then only meta-data headers, comment lines, and time stamps are parsed;
    * all in-line annotation conventions are left as-is in the resulting graph. 
-   * @see #getUseConventions()
-   * @see #setUseConventions(Boolean)
+   * @see #getParseInlineConventions()
+   * @see #setParseInlineConventions(Boolean)
    */
-  protected Boolean useConventions = Boolean.TRUE;
+  protected Boolean parseInlineConventions;
   /**
-   * Getter for {@link #useConventions}: Whether to use SALT conventions when
-   * deserializing. Default is true.
+   * Getter for {@link #parseInlineConventions}: Whether to parse the in-line conventions
+   * when deserializing. Default is true. 
    * <p> If false, then only meta-data headers, comment lines, and time stamps are parsed;
    * all in-line annotation conventions are left as-is in the resulting graph. 
-   * @return Whether to use SALT conventions when deserializing. Default is TRUE.
+   * @return Whether to parse the in-line conventions when deserializing. Default is true.
    */
-  public Boolean getUseConventions() { return useConventions; }
+  public Boolean getParseInlineConventions() { return parseInlineConventions; }
   /**
-   * Setter for {@link #useConventions}: Whether to use SALT conventions when
-   * deserializing. Default is true. 
+   * Setter for {@link #parseInlineConventions}: Whether to parse the in-line conventions
+   * when deserializing. Default is true. 
    * <p> If false, then only meta-data headers, comment lines, and time stamps are parsed;
    * all in-line annotation conventions are left as-is in the resulting graph. 
-   * @param newUseConventions Whether to use SALT conventions when deserializing. Default is TRUE.
+   * @param newParseInlineConventions Whether to parse the in-line conventions when deserializing. Default is true.
    */
-  public SltSerialization setUseConventions(Boolean newUseConventions) { useConventions = newUseConventions; return this; }
+  public SltSerialization setParseInlineConventions(Boolean newParseInlineConventions) { parseInlineConventions = newParseInlineConventions; return this; }
   
   /**
    * Utterance tokenizer.  The default is {@link SimpleTokenizer}.
@@ -1207,18 +1207,18 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       dateFormat.setValue("M/d/yyyy");
     }
 
-    Parameter useConventions = configuration.get("useConventions");
-    if (useConventions == null) {
-      useConventions = new Parameter(
-        "useConventions", Boolean.class, "Use Conventions",
-        "Whether to use SALT conventions when deserializing."
+    Parameter parseInlineConventions = configuration.get("parseInlineConventions");
+    if (parseInlineConventions == null) {
+      parseInlineConventions = new Parameter(
+        "parseInlineConventions", Boolean.class, "Parse Inline Conventions",
+        "Whether to use SALT in-line conventions when deserializing."
         +" If false, then only meta-data headers, comment lines, and time stamps are parsed;"
         +" all in-line annotation conventions are left as-is");
-      configuration.addParameter(useConventions);
+      configuration.addParameter(parseInlineConventions);
     }
-    if (useConventions.getValue() == null) {
+    if (parseInlineConventions.getValue() == null) {
       // default is to use conventions
-      useConventions.setValue(Boolean.TRUE);
+      parseInlineConventions.setValue(Boolean.TRUE);
     }
 
     return configuration;
@@ -1588,7 +1588,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
     // no word tokens yet
     
     graph.trackChanges();
-    if (useConventions) {      
+    if (parseInlineConventions) {      
       try {
         
         // non-error utterance codes
@@ -1613,7 +1613,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
       }
       
-    } // useConventions
+    } // parseInlineConventions
         
     try { // tokenize utterances into words
       getTokenizer().transform(graph);
@@ -1624,7 +1624,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
     }
     
-    if (useConventions) {      
+    if (parseInlineConventions) {      
       try { // parse out in-situ word/phrase annotations
         
         // sound effects - something like "%yip_yip"
@@ -1947,7 +1947,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
       }
       if (errors != null) throw errors;
-    } // useConventions
+    } // parseInlineConventions
 
     // set all annotations to manual confidence
     for (Annotation a : graph.getAnnotationsById().values()) {
