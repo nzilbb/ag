@@ -1241,7 +1241,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
    * deserialization. 
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
-  public ParameterSet load(NamedStream[] streams, Schema schema)
+  public ParameterSet load(NamedStream[] streams, Schema schema) // TODO look for media, get length
     throws IOException, SerializationException, SerializerNotConfiguredException {
     // take the first cha stream, ignore all others.
     NamedStream cha = null;
@@ -2371,7 +2371,9 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
           }
           
           // _ -> X (unintelligible)
-          word = word.replace('_', 'X');
+          if (word.equals("_")) word = "X";
+          else if (word.equals("__")) word = "XX";
+          else if (word.equals("___")) word = "XXX";
 
           // partial word?
           Annotation partialWordTag = partialWordLayer != null?

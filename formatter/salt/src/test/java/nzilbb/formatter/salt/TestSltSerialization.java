@@ -1227,6 +1227,9 @@ public class TestSltSerialization {
     }
 
     // assume that deserialization worked (that's tested elsewhere)
+
+    // add an underscore to a word, to test it's preserved in the output
+    graphs[0].first("word").setLabel("I_m");
     
     // create new serializer
     SltSerialization serializer = new SltSerialization();

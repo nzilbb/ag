@@ -10,7 +10,7 @@ $ Child, Examiner
 + Subgroup: TEST
 + Collect: 1
 - 00:00
-E I'm at Byron kindergarten on ((what date is it)) the 30th of March 2021?
+E I_m at Byron kindergarten on ((what date is it)) the 30th of March 2021?
 - 00:05
 E My name is X[REDACTED]. and I'm here with X[REDACTED], doing the oral language assessment. [CENSOR]
 - 00:12

@@ -33,7 +33,7 @@ import nzilbb.util.ProgramDescription;
 import nzilbb.util.Switch;
 
 /**
- * Converts SALT .slt files to ELAN .eaf files.
+ * Converts SALT .slt transcripts to ELAN .eaf files.
  * @author Robert Fromont robert@fromont.net.nz
  */
 @ProgramDescription(value="Converts SALT .slt transcripts to ELAN .eaf files",arguments="file1.slt file2.slt ...")
@@ -55,7 +55,7 @@ public class SltToEaf extends Converter {
   
   /** File filter for identifying files of the correct type */
   protected FileNameExtensionFilter getFileFilter() {
-    return new FileNameExtensionFilter("SALT files", "slt");
+    return new FileNameExtensionFilter("SALT transcripts", "slt");
   }
 
   /**

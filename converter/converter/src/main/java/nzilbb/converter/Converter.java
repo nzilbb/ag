@@ -36,6 +36,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -177,6 +178,16 @@ public abstract class Converter extends GuiProgram {
   public ParameterSet deserializationParameters(ParameterSet defaultConfig) {
     return defaultConfig;
   } // end of deserializationConfiguration()
+  
+  /**
+   * Process the graphs after they were deserialized, but before they're
+   * serialized. Implementors can rename speakers, adjust meta-data, or change the graph
+   * in any other way required before serialization. 
+   * @param graphs
+   */
+  public void processGraphs(Graph[] graphs) {
+  } // end of processGraphs()
+
    
   /**
    * Specify the schema to used by  {@link #convert(File)}.
@@ -283,17 +294,27 @@ public abstract class Converter extends GuiProgram {
     deserializer.setParameters(parameters);
       
     Graph[] graphs = deserializer.deserialize();
-    Graph g = graphs[0]; // TODO support multiple graphs
     for (String warning : deserializer.getWarnings()) {
       System.out.println(inputFile.getName() + ": " + warning);
     }
 
     // strip extension off name
-    g.setId(IO.WithoutExtension(g.getId()));
+    for (Graph g : graphs) {
+      g.setId(IO.WithoutExtension(g.getId()));
+    }
 
-    // give access to any media media
+    Normalizer normalizer = new Normalizer();
+    for (Graph g : graphs) {
+      normalizer.transform(g);
+      g.commit();
+    }
+
+    // let the subclass process the graphs before they're serialized
+    processGraphs(graphs);
+    
+    // give serializer access to any media
     if (mediaFiles.size() > 0) {
-      g.setMediaProvider(new GraphMediaProvider() {
+      GraphMediaProvider provider = new GraphMediaProvider() {
           public MediaFile[] getAvailableMedia() throws StoreException, PermissionException {
             return mediaFiles.toArray(new MediaFile[0]);
           }
@@ -305,12 +326,12 @@ public abstract class Converter extends GuiProgram {
             return null;
           }
           public GraphMediaProvider providerForGraph(Graph graph) { return null; }
-        });
+        };
+      for (Graph g : graphs) {
+        g.setMediaProvider(provider);
+      }
     }
-
-    new Normalizer().transform(g);
-    g.commit();
-      
+    
     // serialize...
 
     // create serializer
@@ -319,7 +340,7 @@ public abstract class Converter extends GuiProgram {
       
     // configure serializer
     ParameterSet serializerConfig = serializer.configure(new ParameterSet(), schema);
-    configureFromCommandLine(serializerConfig, g.getSchema());
+    configureFromCommandLine(serializerConfig, graphs[0].getSchema());
     if (verbose) {
       if (serializerConfig.size() == 0) {
         System.out.println("No serializer serializerConfig parameters are required.");
@@ -336,7 +357,7 @@ public abstract class Converter extends GuiProgram {
     final File dir = (inputFile.getParentFile() != null? inputFile.getParentFile()
                       : new File("."));
     serializer.serialize(
-      Utility.OneGraphSpliterator(g), getLayersToSerialize(),
+      Arrays.spliterator(graphs), getLayersToSerialize(),
       stream -> {
         try {
           stream.save(dir);
@@ -346,7 +367,7 @@ public abstract class Converter extends GuiProgram {
       },
       warning -> { System.out.println(inputFile.getName() + ": " + warning); },
       exception -> System.err.println(exception.toString()));
-      
+    
     if (verbose) System.out.println("Finished " + inputFile.getPath());
   } // end of convert()
    
