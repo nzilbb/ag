@@ -448,11 +448,15 @@ public abstract class Converter extends GuiProgram {
               ListIterator f = droppedFiles.listIterator();
               while(f.hasNext()) {
                 File file = (File)f.next();
-                if (fileFilter.accept(file)) {
-                  if (verbose) System.out.println("Adding dropped file: " + file.getPath());
-                  ((DefaultListModel)files.getModel()).add(files.getModel().getSize(), file);
+                if (file.exists()) {
+                  if (fileFilter.accept(file)) {
+                    if (verbose) System.out.println("Adding dropped file: " + file.getPath());
+                    ((DefaultListModel)files.getModel()).add(files.getModel().getSize(), file);
+                  } else {
+                    if (verbose) System.out.println("Dropped file incorrect type: " + file.getPath());
+                  }
                 } else {
-                  if (verbose) System.out.println("Dropped file incorrect type: " + file.getPath());
+                  if (verbose) System.out.println("Dropped file doesn't exist: " + file.getPath());
                 }
               } // next file
               dtde.dropComplete(true);
@@ -510,8 +514,12 @@ public abstract class Converter extends GuiProgram {
       if (verbose) System.out.println("argument: " + argument);
       try {
         File file = new File(argument);
-        if (verbose) System.out.println("file: " + file.getPath());
-        ((DefaultListModel)files.getModel()).add(files.getModel().getSize(), file);
+        if (file.exists()) {
+          if (verbose) System.out.println("file: " + file.getPath());
+          ((DefaultListModel)files.getModel()).add(files.getModel().getSize(), file);
+        } else {
+          if (verbose) System.out.println("file doesn't exist: " + file.getPath());
+        }
       } catch(Exception exception) {
         System.err.println("Error processing: " + argument + " : " + exception.getMessage());
         exception.printStackTrace(System.err);
