@@ -36,6 +36,29 @@ import nzilbb.ag.Anchor;
 public class AnnotationComparatorByAnchor implements Comparator<Annotation> {
   
   /**
+   * If start offsets are the same, the one with the latest end anchor is first (true) or
+   * last (false). Default is true. 
+   * @see #getLongestFirst()
+   * @see #setLongestFirst(boolean)
+   */
+  protected boolean longestFirst = true;
+  /**
+   * Getter for {@link #longestFirst}: If start offsets are the same, the one with the
+   * latest end anchor is first (true) or last (false). Default is true. 
+   * @return If start offsets are the same, the one with the latest end anchor is first
+   * (true) or last (false). Default is true. 
+   */
+  public boolean getLongestFirst() { return longestFirst; }
+  /**
+   * Setter for {@link #longestFirst}: If start offsets are the same, the one with the
+   * latest end anchor is first (true) or last (false). Default is true. 
+   * @param newLongestFirst If start offsets are the same, the one with the latest end
+   * anchor is first (true) or last (false). Default is true. 
+   */
+  public AnnotationComparatorByAnchor setLongestFirst(boolean newLongestFirst) { longestFirst = newLongestFirst; return this; }
+  
+  
+  /**
    * Default constructor
    */
   public AnnotationComparatorByAnchor() {
@@ -78,13 +101,22 @@ public class AnnotationComparatorByAnchor implements Comparator<Annotation> {
 
       // ends earlier, is higher
       if (o1EndOffset < o2EndOffset) {
-        // System.out.println("end: " + o1 + " > " + o2 + " (" + o1End + " < " + o2End + ")");
-        return 8;
+        // System.out.println("end: " + o1 + " > " + o2 + " (" + o1End + " < " + o2End +
+        // ")");
+        if (longestFirst) {
+          return 8;
+        } else {
+          return -8;
+        }
       }
       // ends later, is lower
       if (o1EndOffset > o2EndOffset) {
         // System.out.println("end: " + o1 + " < " + o2 + " (" + o1End + " > " + o2End + ")");
-        return -8;
+        if (longestFirst) {
+          return -8;
+        } else {
+          return 8;
+        }
       }
     } catch(Throwable t) {
     }
