@@ -2398,7 +2398,19 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       TreeSet<Annotation> utterancesByAnchor = new TreeSet<Annotation>(
         new AnnotationComparatorByAnchor()
         .setLongestFirst(false));
-      for (Annotation u : graph.all(schema.getUtteranceLayerId())) utterancesByAnchor.add(u);
+      utterancesByAnchor.addAll(Arrays.asList(graph.all(schema.getUtteranceLayerId())));
+
+      // tag utterances that overlap
+      Annotation lastUtterance = null;
+      for (Annotation utterance : utterancesByAnchor) {
+        if (lastUtterance != null) {
+          if (lastUtterance.distance(utterance) < 0) { // utterances overlap
+            utterance.put("@simultaneousWith", lastUtterance);
+            lastUtterance.put("@simultaneousWith", utterance);
+          }
+        }
+        lastUtterance = utterance;
+      }
 
       // first timestamp
       Annotation firstUtterance = utterancesByAnchor.first();
@@ -2445,9 +2457,11 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         }        
 
         writer.print(utterance.getParent().getParent().getLabel().substring(0,1));
+        Annotation otherUtterance = (Annotation)utterance.get("@simultaneousWith");
+        boolean inOverlap = false;
         for (Annotation token : utterance.all(schema.getWordLayerId())) {
           writer.print(delimiter);
-          
+
           // preceding annotions...
           
           // comment?
@@ -2550,9 +2564,21 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
             // remove any possessive apostrophes
             trailingPuncuation = trailingPuncuation.replaceAll("^'","");
           }
+          
+          if (otherUtterance != null) { // overlaps with another utterance
+            if (!inOverlap) {
+              if (token.distance(otherUtterance) < 0) { // overlaps with otherUtterance
+                // overlap starts here
+                if (!word.startsWith("<")) { // isn't already in the transcript
+                  writer.print("<");
+                }                
+                inOverlap = true;
+              }
+            }
+          }          
 
           writer.print(word);
-          
+
           // following annotions...
           
           // finishing a repetition?
@@ -2616,7 +2642,23 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
           
           if (trailingPuncuation.length() > 0) writer.print(trailingPuncuation);
 
+          if (otherUtterance != null) { // overlaps with another utterance
+            if (inOverlap) {
+              if (token.distance(otherUtterance) >= 0) { // doesn't overlap with otherUtterance
+                // overlap ends here
+                if (!trailingPuncuation.contains(">")) { // not already in the transcript
+                  writer.print(">");
+                }
+                inOverlap = false;
+              }
+            }
+          }
+
         } // next token
+        if (inOverlap) {
+          writer.print(">");
+          inOverlap = false;
+        }
 
         // utterance codes
         boolean firstUtteranceCode = true;
