@@ -2415,7 +2415,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       // first timestamp
       Annotation firstUtterance = utterancesByAnchor.first();
       double lastOffset = printTimeStamp(
-        firstUtterance.getStart(), writer, Double.NEGATIVE_INFINITY);
+        firstUtterance.getStart(), writer, Double.NEGATIVE_INFINITY, graph);
       Anchor lastUtteranceEnd = null;
 
       // for each utterance
@@ -2426,13 +2426,14 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
 
         // time stamp(s)
         if (lastUtteranceEnd != null && utterance.getStart() != null) {
-          if (utterance.getStart().getOffset() >= lastUtteranceEnd.getOffset()) {
-            lastOffset = printTimeStamp(lastUtteranceEnd, writer, lastOffset);
+          if (graph.compareOffsets(
+                utterance.getStart().getOffset(), lastUtteranceEnd.getOffset()) >= 0) {
+            lastOffset = printTimeStamp(lastUtteranceEnd, writer, lastOffset, graph);
           } else {
             lastOffset = lastUtteranceEnd.getOffset();
           }
         }
-        lastOffset = printTimeStamp(utterance.getStart(), writer, lastOffset);
+        lastOffset = printTimeStamp(utterance.getStart(), writer, lastOffset, graph);
 
         // preceding pause lines
         if (pauseLayer != null) {
@@ -2718,7 +2719,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         
       } // next utterance
       if (lastUtteranceEnd != null) {
-        lastOffset = printTimeStamp(lastUtteranceEnd, writer, lastOffset);
+        lastOffset = printTimeStamp(lastUtteranceEnd, writer, lastOffset, graph);
       }
         
       writer.close();
@@ -2752,13 +2753,15 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
    * @param anchor The anchor whose offset should perhaps be printed.
    * @param writer Where to print the time stamp.
    * @param lastOffset The last offset that was printed.
+   * @param graph The annotato graph, so that {@link Graph#compareOffsets(douebl,double)}
+   * can be invoked to compare the offets correctly.
    * @return The new value of lastOffset.
    */
-  public double printTimeStamp(Anchor anchor, PrintWriter writer, double lastOffset) {
+  public double printTimeStamp(Anchor anchor, PrintWriter writer, double lastOffset, Graph graph) {
     if (anchor.getConfidence() != null
         && anchor.getConfidence() > Constants.CONFIDENCE_AUTOMATIC) {
       if (anchor.getOffset() != null) {
-        if (anchor.getOffset() > lastOffset) {
+        if (graph.compareOffsets(anchor.getOffset(), lastOffset) > 0) {
           int seconds = anchor.getOffset().intValue();
           int minutes = seconds / 60;
           seconds = seconds % 60;
