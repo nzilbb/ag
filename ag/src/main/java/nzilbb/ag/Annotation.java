@@ -56,7 +56,7 @@ public class Annotation
    // NB if this is updated, please also update the @return javadoc attribute on getTrackedAttributes()
    private static String[] aTrackedAttributes = {"label", "startId", "endId", "parentId", "ordinal"};
    /**
-    * Keys for attributes that are change-tracked - i.e. when a new value is set for any
+    * Keys for attributes that are change-tracked. i.e. when a new value is set for any
     * of these attributes, and {@link TrackedMap#getTracker()} is set, the change is registered. 
     * <p>LinkedHashSet is used so that attributes are iterated in the order they're
     * defined in aTrackedAttributes (which is the order shown in the documentation of
@@ -65,7 +65,7 @@ public class Annotation
    protected static final Set<String> trackedAttributes = new LinkedHashSet<String>(java.util.Arrays.asList(aTrackedAttributes));
 
    /**
-    * Keys for attributes that are change-tracked - i.e. when a new value is set for any
+    * Keys for attributes that are change-tracked. i.e. when a new value is set for any
     * of these attributes, and {@link TrackedMap#getTracker()} is set, the change is registered. 
     * @return "label", "startId", "endId", "parentId", "ordinal"
     */
@@ -1411,7 +1411,7 @@ public class Annotation
    
    /**
     * Determines whether the annotion's start/end offsets surround the given offset -
-    * i.e. whether the annotation t-includes the offset. 
+    * whether the annotation t-includes the offset. 
     * <p>A precondition is that the annotation's {@link #graph} is set.
     * @param offset The given offset.
     * @return true if getStart().getOffset() &le; offset &lt; getEnd().getOffset(), false
@@ -1494,7 +1494,7 @@ public class Annotation
    } // end of includesMidpointOf()
 
    /**
-    * Determines the offset difference between this annotation and another - i.e. the minimum
+    * Determines the offset difference between this annotation and another -  the minimum
     * distance between any of the anchors.  If the annotations overlap, the returned difference
     * will be negative, with a magnitude corresponding to the degree of overlap. 
     * @param other The given other annotation.
@@ -1559,7 +1559,7 @@ public class Annotation
    } // end of getMidpoint()
    
    /**
-    * Determines the duration of the annotation - i.e. the difference between the start
+    * Determines the duration of the annotation - the difference between the start
     * offset and the end offset. 
     * <p>A precondition is that the annotation's {@link #graph} is set.
     * @return The duration of the annotation, or null if either start or end anchors or
@@ -1580,8 +1580,8 @@ public class Annotation
 
    
    /**
-    * Determines whether this is a tag of the given annotation (or vice-versa),
-    * i.e. whether the two annotations share start/end anchors. 
+    * Determines whether this is a tag of the given annotation (or vice-versa);
+    * whether the two annotations share start/end anchors. 
     * @param other The given other annotation.
     * @return true if the start and end anchor IDs are the same for this and the other
     * annotation, false otherwise. 
@@ -1676,7 +1676,7 @@ public class Annotation
    } // end of includingAnnotationsOn()
 
    /**
-    * Finds all annotations on the given layer that tag this annotation - i.e. where start
+    * Finds all annotations on the given layer that tag this annotation; where start
     * and end anchors are shared. Annotations marked for deletion are ignored. 
     * <p>A precondition is that the annotation's {@link #graph} is set.
     * @param layerId The given layer ID.
@@ -1874,7 +1874,7 @@ public class Annotation
 
 
    /**
-    * Returns whether the annotation is formally instantaneous or not - i.e. whether or
+    * Returns whether the annotation is formally instantaneous or not; whether or
     * not its start anchor and end anchor are the same. 
     * <p><em>NB</em> If the anchors are different but their offsets are the same, this
     * method will return <em>false</em>. 
@@ -1887,8 +1887,8 @@ public class Annotation
    } // end of getInstantaneous()
 
    /**
-    * Determines the offset difference between this annotation and another
-    * - i.e. the maximum distance between the start and end anchors
+    * Determines the offset difference between this annotation and another;
+    * the maximum distance between the start and end anchors
     * - MAX(ABS(this.start-other.start),ABS(this.end-other.end)).  
     * If the annotations overlap, the returned difference will be negative, with a
     * magnitude as defined above. 
