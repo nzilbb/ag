@@ -65,10 +65,10 @@ public class FfmpegCensor implements MediaCensor {
   protected String audioFilter;
   /**
    * Getter for {@link #audioFilter}: Filter for obfuscating audio.
-   * @return Filter for obfuscating audio. Default is "lowpass=f=120";
+   * @return Filter for obfuscating audio. Default is "lowpass=f=80";
    */
   public String getAudioFilter() {
-    if (audioFilter == null) return "lowpass=f=120";
+    if (audioFilter == null) return "lowpass=f=80";
     return audioFilter;
   }
   /**
