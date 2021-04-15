@@ -1,5 +1,5 @@
 //
-// Copyright 2016-2029 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -194,8 +194,43 @@ public class GuiProgram extends JApplet {
    * Setter for {@link #usage}: Whether or not to display usage information
    * @param bNewUsage Whether or not to display usage information
    */
-  @Switch("Whether or not to display usage information")
+  @Switch("Display usage information")
   public GuiProgram setUsage(Boolean bNewUsage) { usage = bNewUsage; return this; }
+  
+  /**
+   * Version information.
+   * @see #getV()
+   * @see #setV(String)
+   */
+  protected String v;
+  /**
+   * Getter for {@link #v}: Version information.
+   * @return Version information.
+   */
+  public String getV() { return v; }
+  /**
+   * Setter for {@link #v}: Version information.
+   * @param newV Version information.
+   */
+  public GuiProgram setV(String newV) { v = newV; return this; }
+  
+  /**
+   * Print version information.
+   * @see #getVersion()
+   * @see #setVersion(Boolean)
+   */
+  protected Boolean version = Boolean.FALSE;
+  /**
+   * Getter for {@link #version}: Print version information.
+   * @return Print version information.
+   */
+  public Boolean getVersion() { return version; }
+  /**
+   * Setter for {@link #version}: Print version information.
+   * @param newVersion Print version information.
+   */
+  @Switch("Print version information.")
+  public GuiProgram setVersion(Boolean newVersion) { version = newVersion; return this; }
   
   /**
    * Arguments passed in on the command line.  i.e. command line arguments that
@@ -219,7 +254,7 @@ public class GuiProgram extends JApplet {
    */
   public void mainRun(String argv[]) {
     
-    frame_ = new JFrame(getDefaultWindowTitle());
+    frame_ = new JFrame(getDefaultWindowTitle() + (v == null?"":" ("+v+")"));
     frame_.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     
     interpretPropertiesParameters();
@@ -297,7 +332,7 @@ public class GuiProgram extends JApplet {
           Class parameterClass = method.getParameterTypes()[0];
         String sEg = "--" + sSwitchName + "=<value>";
         if (parameterClass.equals(Boolean.class)) {
-          if (sSwitchName.equals("Usage")) {
+          if (sSwitchName.equals("Usage") || sSwitchName.equals("Version")) {
             sEg = "--" + sSwitchName;
           } else {
             sEg = "--" + sSwitchName + " or --" + sSwitchName + "=false";
@@ -338,8 +373,11 @@ public class GuiProgram extends JApplet {
     } // next method
     
     // display usage?
-    if (getUsage()) {
-      System.err.println(myClass.getSimpleName() + " usage:");
+    if (version) {
+      System.err.println(myClass.getSimpleName() + " ("+(v==null?"version unknown":v)+")");
+      return;		    
+    } else  if (getUsage()) {
+      System.err.println(myClass.getSimpleName() + (v == null?"":" ("+v+")") + " usage:");
       @SuppressWarnings("unchecked")
         ProgramDescription myAnnotation 
         = (ProgramDescription)myClass.getAnnotation(ProgramDescription.class);
@@ -386,6 +424,14 @@ public class GuiProgram extends JApplet {
    * Default constructor
    */
   public GuiProgram() {
+    v = getClass().getPackage().getImplementationVersion();
+    if (v == null) {
+      // try the comment of the jar file we're built into
+      try {
+        v = IO.JarCommentOfClass(getClass());
+      } catch (Throwable t) {
+      }
+    }
   } // end of constructor
   
   /**

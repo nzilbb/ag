@@ -1,5 +1,5 @@
 //
-// Copyright 2016-2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -169,11 +169,14 @@ public class CommandLineProgram {
 
    /** Constructor */
    public CommandLineProgram() {
-      // get our version info from the comment of the jar file we're built into
-      try {
+     v = getClass().getPackage().getImplementationVersion();
+     if (v == null) {
+       // try the comment of the jar file we're built into
+       try {
          v = IO.JarCommentOfClass(getClass());
-      } catch (Throwable t) {
-      }      
+       } catch (Throwable t) {
+       }
+     }
    }
    
    /**
@@ -315,8 +318,7 @@ public class CommandLineProgram {
          
          // display usage?
          if (getUsage()) {
-            System.err.println(
-               myClass.getSimpleName() + " ("+(v==null?"version unknown":v)+"):");
+            System.err.println(myClass.getSimpleName() + (v == null?"":" ("+v+")")+":");
             @SuppressWarnings("unchecked")
                ProgramDescription myAnnotation 
                = (ProgramDescription)myClass.getAnnotation(ProgramDescription.class);
