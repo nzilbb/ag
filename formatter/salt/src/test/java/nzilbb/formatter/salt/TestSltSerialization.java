@@ -43,6 +43,7 @@ import nzilbb.ag.*;
 import nzilbb.ag.util.DefaultOffsetGenerator;
 import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.util.NamedStream;
+import nzilbb.ag.serialize.util.Utility;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 import nzilbb.editpath.EditStep;
@@ -1240,6 +1241,22 @@ public class TestSltSerialization {
     configuration.get("dateFormat").setValue("d/M/yyyy");
     serializer.configure(configuration, schema);
 
+    // TODO: LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
+    //   Arrays.asList(serializer.getRequiredLayers()));
+    // assertEquals("Needed layers: " + needLayers,
+    //              11, needLayers.size());
+    // assertTrue(needLayers.contains("who"));
+    // assertTrue(needLayers.contains("main_participant"));
+    // assertTrue(needLayers.contains("scribe"));
+    // assertTrue(needLayers.contains("transcript_language"));
+    // assertTrue(needLayers.contains("turn"));
+    // assertTrue(needLayers.contains("utterance"));
+    // assertTrue(needLayers.contains("word"));
+    // assertTrue(needLayers.contains("noise"));
+    // assertTrue(needLayers.contains("participant_age"));
+    // assertTrue(needLayers.contains("participant_gender"));
+    // assertTrue(needLayers.contains("participant_language"));
+    
     // now we serialize again...
 
     final Vector<SerializationException> exceptions = new Vector<SerializationException>();
@@ -1270,291 +1287,269 @@ public class TestSltSerialization {
     if (differences != null) {
       fail(differences);
     } else {
-//      result.delete();
+      result.delete();
     }
   }
 
-   // @Test public void serialize() throws Exception {
-   //    Schema schema = new Schema(
-   //       "who", "turn", "utterance", "word",
-   //       new Layer("scribe", "Transcriber")
-   //       .setAlignment(Constants.ALIGNMENT_NONE)
-   //       .setPeers(true).setPeersOverlap(true).setSaturated(true),
-   //       new Layer("transcript_language", "Language")
-   //       .setAlignment(Constants.ALIGNMENT_NONE)
-   //       .setPeers(false).setPeersOverlap(false).setSaturated(true),
-   //       new Layer("noise", "Non-speech noises")
-   //       .setAlignment(Constants.ALIGNMENT_INTERVAL)
-   //       .setPeers(true).setPeersOverlap(false).setSaturated(false),
-   //       new Layer("who", "Participants")
-   //       .setAlignment(Constants.ALIGNMENT_NONE)
-   //       .setPeers(true).setPeersOverlap(true).setSaturated(true),
-   //       new Layer("main_participant", "Main speaker")
-   //       .setAlignment(Constants.ALIGNMENT_NONE)
-   //       .setPeers(false).setPeersOverlap(false).setSaturated(true)
-   //       .setParentId("who").setParentIncludes(true),
-   //       new Layer("participant_gender", "Gender")
-   //       .setAlignment(Constants.ALIGNMENT_NONE)
-   //       .setPeers(false).setPeersOverlap(false).setSaturated(true)
-   //       .setParentId("who").setParentIncludes(true),
-   //       new Layer("participant_age", "Age")
-   //       .setAlignment(Constants.ALIGNMENT_NONE)
-   //       .setPeers(false).setPeersOverlap(false).setSaturated(true)
-   //       .setParentId("who").setParentIncludes(true),
-   //       new Layer("participant_language", "Language")
-   //       .setAlignment(Constants.ALIGNMENT_NONE)
-   //       .setPeers(false).setPeersOverlap(false).setSaturated(true)
-   //       .setParentId("who").setParentIncludes(true),
-   //       new Layer("turn", "Speaker turns")
-   //       .setAlignment(Constants.ALIGNMENT_INTERVAL)
-   //       .setPeers(true).setPeersOverlap(false).setSaturated(false)
-   //       .setParentId("who").setParentIncludes(true),
-   //       new Layer("utterance", "Utterances")
-   //       .setAlignment(Constants.ALIGNMENT_INTERVAL)
-   //       .setPeers(true).setPeersOverlap(false).setSaturated(true)
-   //       .setParentId("turn").setParentIncludes(true),
-   //       new Layer("word", "Words")
-   //       .setAlignment(Constants.ALIGNMENT_INTERVAL)
-   //       .setPeers(true).setPeersOverlap(false).setSaturated(false)
-   //       .setParentId("turn").setParentIncludes(true));
-      
-   //    File dir = getDir();
-   //    Graph graph = new Graph()
-   //       .setId("serialize-test.txt")
-   //       .setSchema(schema);
-   //    graph.addAnchor(new Anchor("a0", 0.0));
-   //    graph.addAnchor(new Anchor("a5", 5.4321)); // will be rendered 5432
-   //    graph.addAnchor(new Anchor("a10", 10.0));
-   //    graph.addAnchor(new Anchor("a15", 15.0));
-   //    // language
-   //    graph.addAnnotation(new Annotation("lang", "en", "transcript_language", "a0", "a15"));
-   //    // participants
-   //    graph.addAnnotation(new Annotation("child", "John Smith", "who", "a0", "a15"));
-   //    graph.addAnnotation(new Annotation("mother", "Mrs. Smith", "who", "a0", "a15"));
-   //    graph.addAnnotation(new Annotation("child-main", "John Smith", "main_participant", "a0", "a15",
-   //                                       "child"));
-   //    graph.addAnnotation(new Annotation("child-age", "2;10.10", "participant_age", "a0", "a15",
-   //                                       "child"));
-   //    graph.addAnnotation(new Annotation("child-gender", "M", "participant_gender", "a0", "a15",
-   //                                       "child"));
-   //    graph.addAnnotation(new Annotation("child-language", "en", "participant_language", "a0", "a15",
-   //                                       "child"));
-   //    graph.addAnnotation(new Annotation("mother-language", "Spanish", "participant_language", "a0", "a15",
-   //                                       "mother"));
-   //    // turns
-   //    graph.addAnnotation(new Annotation("t1", "John Smith", "turn", "a0", "a10", "child"));
-   //    graph.addAnnotation(new Annotation("t2", "Mrs. Smith", "turn", "a10", "a15", "mother"));
-   //    // utterances
-   //    graph.addAnnotation(new Annotation("u1", "John Smith", "utterance", "a0", "a5", "t1"));
-   //    graph.addAnnotation(new Annotation("u2", "John Smith", "utterance", "a5", "a10", "t1"));
-   //    graph.addAnnotation(new Annotation("u3", "Mrs. Smith", "utterance", "a10", "a15", "t2"));
-      
-   //    // words
-   //    graph.addAnnotation(new Annotation("the", "The", "word",
-   //                                       "a0",
-   //                                       // 1.2345 will become ..._1234
-   //                                       graph.addAnchor(new Anchor("a1", 1.0)).getId(),
-   //                                       "t1"));
-   //    graph.addAnnotation(new Annotation("quick", "'quick", "word", 
-   //                                       "a1",
-   //                                       graph.addAnchor(new Anchor("a2", 2.0)).getId(),
-   //                                       "t1"));
-   //    graph.addAnnotation(new Annotation("brown", "brown'", "word", 
-   //                                       "a2",
-   //                                       graph.addAnchor(new Anchor("a3", 3.0)).getId(),
-   //                                       "t1"));
-   //    graph.addAnnotation(new Annotation("fox", "fox", "word", 
-   //                                       "a3",
-   //                                       "a5",
-   //                                       "t1"));
-      
-   //    graph.addAnnotation(new Annotation("jumps", "jumps -", "word", 
-   //                                       "a5",
-   //                                       graph.addAnchor(new Anchor("a6", 6.0)).getId(),
-   //                                       "t1"));      
-   //    graph.addAnnotation(new Annotation("over", "over", "word",
-   //                                       "a6",
-   //                                       graph.addAnchor(new Anchor("a7", 8.0)).getId(),
-   //                                       "t1"));
-   //    // noise
-   //    graph.addAnnotation(new Annotation("cough", "coughs", "noise",
-   //                                       "a7",
-   //                                       graph.addAnchor(new Anchor("a8", 8.0)).getId(),
-   //                                       "t1"));
-      
-   //    graph.addAnnotation(new Annotation("th~", "th~", "word", // th~ becomes &th
-   //                                       "a8",
-   //                                       "a10",
-   //                                       "t1"));
-      
-   //    graph.addAnnotation(new Annotation("the2", "the", "word", 
-   //                                       "a10",
-   //                                       graph.addAnchor(new Anchor("a12", 12.0)).getId(),
-   //                                       "t2"));
-   //    graph.addAnnotation(new Annotation("lazy", "lazy", "word", 
-   //                                       "a12",
-   //                                       graph.addAnchor(new Anchor("a13", 13.0)).getId(),
-   //                                       "t2"));
-   //    graph.addAnnotation(new Annotation("dog", "\"dog\"", "word", 
-   //                                       "a13",
-   //                                       graph.addAnchor(new Anchor("a14", 14.0)).getId(),
-   //                                       "t2"));
-   //    graph.addAnnotation(new Annotation(".", ".", "word", 
-   //                                       "a14",
-   //                                       "a15",
-   //                                       "t2"));
-      
-   //    // create serializer
-   //    ChatSerialization serializer = new ChatSerialization();
-      
-   //    // general configuration
-   //    ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
-   //    //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-   //    configuration = serializer.configure(configuration, schema);
-   //    assertEquals(22, configuration.size());
-   //    assertEquals("scribe attribute", "scribe", 
-   //      	   ((Layer)configuration.get("transcriberLayer").getValue()).getId());
-   //    assertEquals("languages attribute", "transcript_language", 
-   //      	   ((Layer)configuration.get("languagesLayer").getValue()).getId());
-   //    assertEquals("target participant attribute", "main_participant", 
-   //      	   ((Layer)configuration.get("targetParticipantLayer").getValue()).getId());
-   //    assertEquals("non-word layer", "noise", 
-   //      	   ((Layer)configuration.get("nonWordLayer").getValue()).getId());
-   //    assertEquals("sex attribute mapped to gender", "participant_gender",
-   //                 ((Layer)configuration.get("sexLayer").getValue()).getId());
-   //    assertEquals("age attribute", "participant_age",
-   //                 ((Layer)configuration.get("ageLayer").getValue()).getId());
+  /** Test for graph that has inter-utterance gaps and overlapping speech */
+  @Test public void serializeNonSaltStyleTranscript() throws Exception {
+    Schema schema = new Schema(
+      "who", "turn", "utterance", "word",
+      new Layer("who", "Participants")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterances")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true));
+    
+    Graph graph = new Graph()
+      .setId("complex.txt")
+      .setSchema(schema);
+    graph.addAnchor(new Anchor("a0", 0.0, Constants.CONFIDENCE_MANUAL));
+    graph.addAnchor(new Anchor("a5", 5.4321, Constants.CONFIDENCE_MANUAL)); // will be rendered 5.0
+    graph.addAnchor(new Anchor("a10", 10.0, Constants.CONFIDENCE_MANUAL));
+    graph.addAnchor(new Anchor("a15", 15.0, Constants.CONFIDENCE_MANUAL));
+    graph.addAnchor(new Anchor("a20", 20.0, Constants.CONFIDENCE_MANUAL));
+    graph.addAnchor(new Anchor("a25", 25.0, Constants.CONFIDENCE_MANUAL));
+    graph.addAnchor(new Anchor("a30", 30.0, Constants.CONFIDENCE_MANUAL));
+    graph.addAnchor(new Anchor("a35", 35.0, Constants.CONFIDENCE_MANUAL));
 
-   //    LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
-   //       Arrays.asList(serializer.getRequiredLayers()));
-   //    assertEquals("Needed layers: " + needLayers,
-   //                 11, needLayers.size());
-   //    assertTrue(needLayers.contains("who"));
-   //    assertTrue(needLayers.contains("main_participant"));
-   //    assertTrue(needLayers.contains("scribe"));
-   //    assertTrue(needLayers.contains("transcript_language"));
-   //    assertTrue(needLayers.contains("turn"));
-   //    assertTrue(needLayers.contains("utterance"));
-   //    assertTrue(needLayers.contains("word"));
-   //    assertTrue(needLayers.contains("noise"));
-   //    assertTrue(needLayers.contains("participant_age"));
-   //    assertTrue(needLayers.contains("participant_gender"));
-   //    assertTrue(needLayers.contains("participant_language"));
-      
-   //    // serialize
-   //    final Vector<SerializationException> exceptions = new Vector<SerializationException>();
-   //    final Vector<NamedStream> streams = new Vector<NamedStream>();
-   //    String[] layers = {"word","transcript_language"};
-   //    Graph[] graphs = { graph };
-   //    serializer.serialize(Arrays.spliterator(graphs), layers,
-   //                         stream -> streams.add(stream),
-   //                         warning -> System.out.println(warning),
-   //                         exception -> exceptions.add(exception));
-   //    if (exceptions.size() > 0) {
-   //       fail(exceptions.stream()
-   //            .map(x -> {
-   //                  StringWriter sw = new StringWriter();
-   //                  PrintWriter pw = new PrintWriter(sw);
-   //                  x.printStackTrace(pw);
-   //                  return x.toString() + ": " + sw;
-   //               })
-   //            .collect(Collectors.joining("\n","","")));
-   //    }
-      
-   //    streams.elementAt(0).save(dir);
-      
-   //    // test using diff
-   //    File result = new File(dir, "serialize-test.cha");
-   //    String differences = diff(new File(dir, "expected_serialize-test.cha"), result);
-   //    if (differences != null) {
-   //       fail(differences);
-   //    } else {
-   //       result.delete();
-   //    }
-   // }
+    // participants
+    graph.addAnnotation(new Annotation("child", "John Smith", "who", "a0", "a35"));
+    graph.addAnnotation(new Annotation("mother", "Mrs. Smith", "who", "a0", "a35"));
+    // turns - all overlapping
+    graph.addAnnotation(new Annotation("t1", "John Smith", "turn", "a0", "a10", "child"));
+    graph.addAnnotation(new Annotation("t2", "Mrs. Smith", "turn", "a5", "a15", "mother"));
+    // gap with no speech
+    graph.addAnnotation(new Annotation("t3", "Mrs. Smith", "turn", "a20", "a30", "mother"));
+    graph.addAnnotation(new Annotation("t4", "John SMith", "turn", "a25", "a35", "child"));
+    
+    // utterances
+    graph.addAnnotation(new Annotation("u1", "John Smith", "utterance", "a0", "a5", "t1"));
+    // u2 and u3 overlap:
+    graph.addAnnotation(new Annotation("u2", "John Smith", "utterance", "a5", "a10", "t1"));
+    graph.addAnnotation(new Annotation("u3", "Mrs. Smith", "utterance", "a5", "a15", "t2"));
+    // gap 15.0-25.0
+    // u4 and u5 overlap:
+    graph.addAnnotation(new Annotation("u4", "Mrs. Smith", "utterance", "a20", "a30", "t3"));
+    graph.addAnnotation(new Annotation("u5", "John SMith", "utterance", "a25", "a35", "t4"));
 
-   /**
-    * Diffs two files.
-    * @param expected
-    * @param actual
-    * @return null if the files are the same, and a String describing differences if not.
-    */
-   public String diff(File expected, File actual) {
-      StringBuffer d = new StringBuffer();
+    // words
+
+    // u1
+    graph.addAnnotation(new Annotation("the", "The", "word",
+                                       "a0", graph.addAnchor(new Anchor("a1", 1.0)).getId(),
+                                       "t1"));
+    graph.addAnnotation(new Annotation("quick", "'quick", "word", 
+                                       "a1", graph.addAnchor(new Anchor("a2", 2.0)).getId(),
+                                       "t1"));
+    graph.addAnnotation(new Annotation("brown", "brown'", "word", 
+                                       "a2", graph.addAnchor(new Anchor("a3", 3.0)).getId(),
+                                       "t1"));
+    graph.addAnnotation(new Annotation("fox", "fox", "word", 
+                                       "a3", "a5",
+                                       "t1"));
+
+    // u2 ...
+    graph.addAnnotation(new Annotation("jumps", "jumps -", "word", 
+                                         "a5", graph.addAnchor(new Anchor("a6", 6.0)).getId(),
+                                         "t1"));      
+    graph.addAnnotation(new Annotation("over", "over", "word",
+                                       "a6", graph.addAnchor(new Anchor("a7", 8.0)).getId(),
+                                       "t1"));
+    graph.addAnnotation(new Annotation("th~", "th~", "word",
+                                       "a8", "a10",
+                                       "t1"));
+    // ... overlaps with u3
+    graph.addAnnotation(new Annotation("the2", "the", "word", 
+                                       "a5", graph.addAnchor(new Anchor("a8", 8.0)).getId(),
+                                       "t2"));
+    graph.addAnnotation(new Annotation("lazy", "lazy", "word", 
+                                       "a8", graph.addAnchor(new Anchor("a12", 12.0)).getId(),
+                                       "t2"));
+    graph.addAnnotation(new Annotation("dog", "\"dog\"", "word", 
+                                       "a12", graph.addAnchor(new Anchor("a14", 14.0)).getId(),
+                                       "t2"));
+    graph.addAnnotation(new Annotation(".", ".", "word", 
+                                       "a14", "a15",
+                                       "t2"));
+
+    // gap
+
+    // u4 ...
+    graph.addAnnotation(new Annotation("one", "one", "word", 
+                                       "a20", graph.addAnchor(new Anchor("a22", 22.0)).getId(),
+                                       "t3"));
+    graph.addAnnotation(new Annotation("two", "two", "word", 
+                                       "a22", graph.addAnchor(new Anchor("a24", 24.0)).getId(),
+                                       "t3"));
+    graph.addAnnotation(new Annotation("three", "three", "word", 
+                                       "a24", graph.addAnchor(new Anchor("a26", 26.0)).getId(),
+                                       "t3"));
+    graph.addAnnotation(new Annotation("four", "four", "word", 
+                                       "a26", graph.addAnchor(new Anchor("a28", 28.0)).getId(),
+                                       "t3"));
+    graph.addAnnotation(new Annotation("five", "five", "word", 
+                                       "a28", "a30",
+                                       "t3"));
+
+    // ... overlaps with u5
+    graph.addAnnotation(new Annotation("six", "six", "word", 
+                                       "a25", graph.addAnchor(new Anchor("a27", 27.0)).getId(),
+                                       "t4"));
+    graph.addAnnotation(new Annotation("seven", "seven", "word", 
+                                       "a27", graph.addAnchor(new Anchor("a29", 29.0)).getId(),
+                                       "t4"));
+    graph.addAnnotation(new Annotation("eight", "eight", "word", 
+                                       "a29", graph.addAnchor(new Anchor("a31", 31.0)).getId(),
+                                       "t4"));
+    graph.addAnnotation(new Annotation("nine", "nine", "word", 
+                                       "a31", graph.addAnchor(new Anchor("a33", 33.0)).getId(),
+                                       "t4"));
+    graph.addAnnotation(new Annotation("ten", "ten", "word", 
+                                       "a33", "a35",
+                                       "t4"));    
+    
+    // create serializer
+    SltSerialization serializer = new SltSerialization();
       
+    // general configuration
+    serializer.configure(
+      serializer.configure(new ParameterSet(), schema), schema);
+    
+    LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
+      Arrays.asList(serializer.getRequiredLayers()));
+    assertEquals("Needed layers: " + needLayers,
+                 4, needLayers.size());
+    assertTrue(needLayers.contains("who"));
+    assertTrue(needLayers.contains("turn"));
+    assertTrue(needLayers.contains("utterance"));
+    assertTrue(needLayers.contains("word"));
+    
+    // serialize
+    final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+    final Vector<NamedStream> outStreams = new Vector<NamedStream>();
+    serializer.serialize(Utility.OneGraphSpliterator(graph), null,
+                         stream -> outStreams.add(stream),
+                         warning -> System.out.println(warning),
+                         exception -> exceptions.add(exception));
+    if (exceptions.size() > 0) {
+      fail(exceptions.stream()
+           .map(x -> {
+               StringWriter sw = new StringWriter();
+               PrintWriter pw = new PrintWriter(sw);
+               x.printStackTrace(pw);
+               return x.toString() + ": " + sw;
+             })
+           .collect(Collectors.joining("\n","","")));
+    }
+
+    // save stream with a different name
+    outStreams.elementAt(0).setName("complex.slt");    
+    File dir = getDir();
+    outStreams.elementAt(0).save(dir);
+    
+    // test using diff
+    File result = new File(dir, "complex.slt");
+    String differences = diff(new File(dir, "expected_complex.slt"), result);
+    if (differences != null) {
+      fail(differences);
+    } else {
+      result.delete();
+    }
+  }
+  
+  /**
+   * Diffs two files.
+   * @param expected
+   * @param actual
+   * @return null if the files are the same, and a String describing differences if not.
+   */
+  public String diff(File expected, File actual) {
+    StringBuffer d = new StringBuffer();
+    
+    try {
+      // compare with what we expected
+      Vector<String> actualLines = new Vector<String>();
+      BufferedReader reader = new BufferedReader(new FileReader(actual));
+      String line = reader.readLine();
+      while (line != null) {
+        actualLines.add(line);
+        line = reader.readLine();
+      }
+      Vector<String> expectedLines = new Vector<String>();
+      reader = new BufferedReader(new FileReader(expected));
+      line = reader.readLine();
+      while (line != null) {
+        expectedLines.add(line);
+        line = reader.readLine();
+      }
+      MinimumEditPath<String> comparator = new MinimumEditPath<String>();
+      List<EditStep<String>> path = comparator.minimumEditPath(expectedLines, actualLines);
+      for (EditStep<String> step : path) {
+        switch (step.getOperation()) {
+          case CHANGE:
+            d.append("\n"+expected.getPath()+":"+(step.getFromIndex()+1)+": Expected:\n" 
+                     + step.getFrom() 
+                     + "\n"+actual.getPath()+":"+(step.getToIndex()+1)+": Found:\n" + step.getTo());
+            break;
+          case DELETE:
+            d.append("\n"+expected.getPath()+":"+(step.getFromIndex()+1)+": Deleted:\n" 
+                     + step.getFrom()
+                     + "\n"+actual.getPath()+":"+(step.getToIndex()+1)+": Missing");
+            break;
+          case INSERT:
+            d.append("\n"+expected.getPath()+":"+(step.getFromIndex()+1)+": Missing" 
+                     + "\n"+actual.getPath()+":"+(step.getToIndex()+1)+": Inserted:\n" 
+                     + step.getTo());
+            break;
+        }
+      } // next step
+    } catch(Exception exception) {
+      d.append("\n" + exception);
+    }
+    if (d.length() > 0) return d.toString();
+    return null;
+  } // end of diff()
+  
+  /**
+   * Directory for text files.
+   * @see #getDir()
+   * @see #setDir(File)
+   */
+  protected File fDir;
+  /**
+   * Getter for {@link #fDir}: Directory for text files.
+   * @return Directory for text files.
+   */
+  public File getDir() { 
+    if (fDir == null) {
       try {
-         // compare with what we expected
-         Vector<String> actualLines = new Vector<String>();
-         BufferedReader reader = new BufferedReader(new FileReader(actual));
-         String line = reader.readLine();
-         while (line != null) {
-            actualLines.add(line);
-            line = reader.readLine();
-         }
-         Vector<String> expectedLines = new Vector<String>();
-         reader = new BufferedReader(new FileReader(expected));
-         line = reader.readLine();
-         while (line != null) {
-            expectedLines.add(line);
-            line = reader.readLine();
-         }
-         MinimumEditPath<String> comparator = new MinimumEditPath<String>();
-         List<EditStep<String>> path = comparator.minimumEditPath(expectedLines, actualLines);
-         for (EditStep<String> step : path) {
-            switch (step.getOperation()) {
-               case CHANGE:
-                  d.append("\n"+expected.getPath()+":"+(step.getFromIndex()+1)+": Expected:\n" 
-                           + step.getFrom() 
-                           + "\n"+actual.getPath()+":"+(step.getToIndex()+1)+": Found:\n" + step.getTo());
-                  break;
-               case DELETE:
-                  d.append("\n"+expected.getPath()+":"+(step.getFromIndex()+1)+": Deleted:\n" 
-                           + step.getFrom()
-                           + "\n"+actual.getPath()+":"+(step.getToIndex()+1)+": Missing");
-                  break;
-               case INSERT:
-                  d.append("\n"+expected.getPath()+":"+(step.getFromIndex()+1)+": Missing" 
-                           + "\n"+actual.getPath()+":"+(step.getToIndex()+1)+": Inserted:\n" 
-                           + step.getTo());
-                  break;
-            }
-         } // next step
-      } catch(Exception exception) {
-         d.append("\n" + exception);
+        URL urlThisClass = getClass().getResource(getClass().getSimpleName() + ".class");
+        File fThisClass = new File(urlThisClass.toURI());
+        fDir = fThisClass.getParentFile();
+      } catch(Throwable t) {
+        System.out.println("" + t);
       }
-      if (d.length() > 0) return d.toString();
-      return null;
-   } // end of diff()
-
-   /**
-    * Directory for text files.
-    * @see #getDir()
-    * @see #setDir(File)
-    */
-   protected File fDir;
-   /**
-    * Getter for {@link #fDir}: Directory for text files.
-    * @return Directory for text files.
-    */
-   public File getDir() { 
-      if (fDir == null) {
-	 try {
-	    URL urlThisClass = getClass().getResource(getClass().getSimpleName() + ".class");
-	    File fThisClass = new File(urlThisClass.toURI());
-	    fDir = fThisClass.getParentFile();
-	 } catch(Throwable t) {
-	    System.out.println("" + t);
-	 }
-      }
-      return fDir; 
-   }
-   /**
-    * Setter for {@link #fDir}: Directory for text files.
-    * @param fNewDir Directory for text files.
-    */
-   public void setDir(File fNewDir) { fDir = fNewDir; }
-
-   public static void main(String args[]) {
+    }
+    return fDir; 
+  }
+  /**
+   * Setter for {@link #fDir}: Directory for text files.
+   * @param fNewDir Directory for text files.
+   */
+  public void setDir(File fNewDir) { fDir = fNewDir; }
+  
+  public static void main(String args[]) {
       org.junit.runner.JUnitCore.main("nzilbb.formatter.salt.TestSltSerialization");
-   }
+  }
 }

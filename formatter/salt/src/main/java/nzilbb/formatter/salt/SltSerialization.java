@@ -2134,7 +2134,9 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
   protected NamedStream serializeGraph(Graph graph, String[] layerIds)
     throws SerializationException {
     SerializationException errors = null;
-      
+    
+    graph.setOffsetGranularity(1.0); // seconds
+
     LinkedHashSet<String> selectedLayers = new LinkedHashSet<String>();
     if (layerIds != null) {
       for (String l : layerIds) {
@@ -2393,19 +2395,32 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       Annotation currentParticipant = null;
          
       // order utterances by anchor so that simultaneous speech comes out in utterance order
-      TreeSet<Annotation> utterancesByAnchor
-        = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
+      TreeSet<Annotation> utterancesByAnchor = new TreeSet<Annotation>(
+        new AnnotationComparatorByAnchor()
+        .setLongestFirst(false));
       for (Annotation u : graph.all(schema.getUtteranceLayerId())) utterancesByAnchor.add(u);
 
       // first timestamp
       Annotation firstUtterance = utterancesByAnchor.first();
-      printTimeStamp(firstUtterance.getStart(), writer);
+      double lastOffset = printTimeStamp(
+        firstUtterance.getStart(), writer, Double.NEGATIVE_INFINITY);
+      Anchor lastUtteranceEnd = null;
 
       // for each utterance
       Pattern tokenPattern = Pattern.compile("^(?<word>\\w+)(?<punctuation>\\W*)$");
       String delimiter = " ";
       for (Annotation utterance : utterancesByAnchor) {
         if (cancelling) break;
+
+        // time stamp(s)
+        if (lastUtteranceEnd != null && utterance.getStart() != null) {
+          if (utterance.getStart().getOffset() >= lastUtteranceEnd.getOffset()) {
+            lastOffset = printTimeStamp(lastUtteranceEnd, writer, lastOffset);
+          } else {
+            lastOffset = lastUtteranceEnd.getOffset();
+          }
+        }
+        lastOffset = printTimeStamp(utterance.getStart(), writer, lastOffset);
 
         // preceding pause lines
         if (pauseLayer != null) {
@@ -2655,10 +2670,15 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
           } // next code
         }        
 
-        // time stamp
-        printTimeStamp(utterance.getEnd(), writer);
+        if (utterance.getEnd().getOffset() != null) {
+          lastUtteranceEnd = utterance.getEnd();
+        }
         
       } // next utterance
+      if (lastUtteranceEnd != null) {
+        lastOffset = printTimeStamp(lastUtteranceEnd, writer, lastOffset);
+      }
+        
       writer.close();
 
       TempFileInputStream in = new TempFileInputStream(f);
@@ -2680,21 +2700,33 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
   MessageFormat timesStampFormat = new MessageFormat("- {0,number,00}:{1,number,00}");  
   
   /**
-   * Prints a time stamp line for the given anchor.
-   * @param anchor
-   * @param writer
+   * Conditionally prints a time stamp line for the given anchor.
+   * <p> The time stamp is <em>not</em> printed if:
+   * <ul>
+   *  <li> the offset is null, </li>
+   *  <li> the anchor confidence is not greater than CONFIDENCE_AUTOMATIC (50), </li>
+   *  <li> the offset is less than or equal to the <var>lastOffset</var>. </li>
+   * </ul>
+   * @param anchor The anchor whose offset should perhaps be printed.
+   * @param writer Where to print the time stamp.
+   * @param lastOffset The last offset that was printed.
+   * @return The new value of lastOffset.
    */
-  public void printTimeStamp(Anchor anchor, PrintWriter writer) {
+  public double printTimeStamp(Anchor anchor, PrintWriter writer, double lastOffset) {
     if (anchor.getConfidence() != null
         && anchor.getConfidence() > Constants.CONFIDENCE_AUTOMATIC) {
       if (anchor.getOffset() != null) {
-        int seconds = anchor.getOffset().intValue();
-        int minutes = seconds / 60;
-        seconds = seconds % 60;
-        Object[] parts = { minutes, seconds };
-        writer.println(timesStampFormat.format(parts));
+        if (anchor.getOffset() > lastOffset) {
+          int seconds = anchor.getOffset().intValue();
+          int minutes = seconds / 60;
+          seconds = seconds % 60;
+          Object[] parts = { minutes, seconds };
+          writer.println(timesStampFormat.format(parts));
+          lastOffset = anchor.getOffset();
+        } // offset not already past
       } // offset set
     } // confidence high
+    return lastOffset;
   } // end of printTimeStamp()
 
 } // end of class SltSerialization
