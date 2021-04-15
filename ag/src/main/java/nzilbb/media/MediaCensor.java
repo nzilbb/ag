@@ -62,7 +62,7 @@ public interface MediaCensor {
     * so only add a point at 0.0 if you want the first censored interval to start at 0s. e.g.
     * <ul>
     *  <li>If <var>boundaries</var> is empty, then <var>destination</var> will have no
-    *      obfuscated intevals (it will be a copy of <var>source</var>).</li> 
+    *      obfuscated intervals (it will be a copy of <var>source</var>).</li> 
     *  <li>If <var>boundaries</var> contains one point, at 1.0, then the media from
     *      0.0-1.0 will be uncensored, and from 1.0 onward will be obfuscated.</li> 
     *  <li>If <var>boundaries</var> contains two points, at 1.0 and 2.0, then the media
