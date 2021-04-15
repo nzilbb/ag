@@ -400,7 +400,7 @@ public abstract class Converter extends GuiProgram {
     pnlEast.add(btnRemove);
     getContentPane().add(pnlEast, BorderLayout.EAST);
 
-    files.setToolTipText("Drop/drop files to convert here");
+    files.setToolTipText("Drag/drop files to convert here");
     files.setCellRenderer(new DefaultListCellRenderer() {
         public Component getListCellRendererComponent(
           JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -503,6 +503,7 @@ public abstract class Converter extends GuiProgram {
       System.err.println("Nothing to do yet. (Try using --usage command line switch)");
     }
     if (getHelp()) {
+      System.err.println(getClass().getSimpleName() + " ("+(v==null?"version unknown":v)+")");
       // display info about serialization parameters
       Schema schema = getSchema();
       GraphDeserializer deserializer = getDeserializer();

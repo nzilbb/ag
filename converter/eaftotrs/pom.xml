@@ -64,6 +64,14 @@
             </manifest>
             <manifestSections>
               <manifestSection>
+                <name>nzilbb/converter/</name>
+                <manifestEntries>
+                  <Implementation-Title>${project.description}</Implementation-Title>
+                  <Implementation-Version>${project.version}</Implementation-Version>
+                  <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
+                </manifestEntries>
+              </manifestSection>
+              <manifestSection>
                 <name>${input.path}</name>
                 <manifestEntries>
                   <Implementation-Title>${project.description}</Implementation-Title>
