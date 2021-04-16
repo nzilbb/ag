@@ -201,11 +201,12 @@ public class SltToTrs extends Converter {
   } // end of serializerConfiguration()
 
   /**
-   * Make errors and codes comments instead 
+   * Make dob, ca, ethnicity, collection, location, errors and codes into comments.
    * @param transcripts
    */
   @Override
   public void processTranscripts(Graph[] transcripts) {
+    
     for (Graph transcript : transcripts) {
       for (Annotation code : transcript.all("code")) {
         transcript.createTag(code, "comment", "["+code.getLabel()+"]");
@@ -213,6 +214,54 @@ public class SltToTrs extends Converter {
       for (Annotation code : transcript.all("error")) {
         transcript.createTag(code, "comment", "["+code.getLabel()+"]");
       } // next code
+      
+      // add meta-data as comments at the beginning
+      // so that can be parsed back out to slt if there's a round-trip
+      String startId = transcript.getStart().getId();
+      // dob
+      Annotation metadata = transcript.first("participant_dob");
+      if (metadata != null) {
+        transcript.addAnnotation(new Annotation().setLayerId("comment")
+                                 .setLabel("+ Dob: " + metadata.getLabel())
+                                 .setStartId(startId).setEndId(startId));
+      }
+      // ethnicity
+      metadata = transcript.first("participant_ethnicity");
+      if (metadata != null) {
+        transcript.addAnnotation(new Annotation().setLayerId("comment")
+                                 .setLabel("+ Ethnicity: " + metadata.getLabel())
+                                 .setStartId(startId).setEndId(startId));
+      }
+      // participantId
+      metadata = transcript.first("participant_id");
+      if (metadata != null) {
+        transcript.addAnnotation(new Annotation().setLayerId("comment")
+                                 .setLabel("+ ParticipantId: " + metadata.getLabel())
+                                 .setStartId(startId).setEndId(startId));
+      }
+      // ca
+      metadata = transcript.first("transcript_ca");
+      if (metadata != null) {
+        transcript.addAnnotation(new Annotation().setLayerId("comment")
+                                 .setLabel("+ Ca: " + metadata.getLabel())
+                                 .setStartId(startId).setEndId(startId));
+      }
+      // collection
+      metadata = transcript.first("transcript_collect");
+      if (metadata != null) {
+        transcript.addAnnotation(new Annotation().setLayerId("comment")
+                                 .setLabel("+ Collect: " + metadata.getLabel())
+                                 .setStartId(startId).setEndId(startId));
+      }
+      // location
+      metadata = transcript.first("transcript_location");
+      if (metadata != null) {
+        transcript.addAnnotation(new Annotation().setLayerId("comment")
+                                 .setLabel("+ Location: " + metadata.getLabel())
+                                 .setStartId(startId).setEndId(startId));
+      }
+
+      
       // also ensure that the subgroup parent is set TODO find out why it's not
       Annotation subgroup = transcript.first("transcript_subgroup");
       if (subgroup != null) {

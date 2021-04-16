@@ -11,7 +11,12 @@
 <Episode program="Nar" air_date="230603">
 <Section type="report" topic="to1" startTime="0.000" endTime="94.000">
 <Turn speaker="spk2" startTime="0.000" endTime="29.000">
-<Sync time="0.000"/>I'm at Byron kindergarten on what date is it the 30th of March 2021?
+<Sync time="0.000"/>
+<Comment desc="+ Dob: 1974-02-09"/>
+<Comment desc="+ Ethnicity: NZ European"/>
+<Comment desc="+ ParticipantId: Ada-Lovelace"/>
+<Comment desc="+ Ca: 4;4"/>
+<Comment desc="+ Collect: 1"/>I'm at Byron kindergarten on what date is it the 30th of March 2021?
 <Sync time="5.000"/>My name is _.
 <Comment desc="[REDACTED]"/> and I'm here with _,
 <Comment desc="[REDACTED]"/> doing the oral language assessment.

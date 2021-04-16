@@ -9,7 +9,7 @@
 
   <groupId>nzilbb</groupId>
   <artifactId>slt-to-trs</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <name>nzilbb.converter.slttotrs</name>
   <description>Utility for converting SALT transcripts to Transcriber transcripts</description>
 
