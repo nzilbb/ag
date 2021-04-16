@@ -171,15 +171,37 @@ public abstract class Converter extends GuiProgram {
   } // end of getLayersToSerialize()
    
   /**
-   * Determine the final parameters for deserialization. Implementors can adjust the
+   * Adjust the configuration of the deserializer. Implementors can adjust the
    * default configuration before it's applied. This method is invoked once for each
    * input file.
    * @param defaultConfig
    * @return The new configuration.
    */
-  public ParameterSet deserializationParameters(ParameterSet defaultConfig) {
+  public ParameterSet deserializerConfiguration(ParameterSet defaultConfig) {
     return defaultConfig;
-  } // end of deserializationConfiguration()
+  } // end of deserializerConfiguration()
+  
+  /**
+   * Adjust the parameters for deserialization. Implementors can adjust the
+   * default configuration before it's applied. This method is invoked once for each
+   * input file.
+   * @param defaultParameters
+   * @return The new configuration.
+   */
+  public ParameterSet deserializationParameters(ParameterSet defaultParameters) {
+    return defaultParameters;
+  } // end of deserializationParameters()
+  
+  /**
+   * Adjust the configuration of the serializer. Implementors can adjust the
+   * default configuration before it's applied. This method is invoked once for each
+   * input file.
+   * @param defaultConfig
+   * @return The new configuration.
+   */
+  public ParameterSet serializerConfiguration(ParameterSet defaultConfig) {
+    return defaultConfig;
+  } // end of serializerConfiguration()
   
   /**
    * Process the graphs after they were deserialized, but before they're
@@ -189,7 +211,6 @@ public abstract class Converter extends GuiProgram {
    */
   public void processGraphs(Graph[] graphs) {
   } // end of processGraphs()
-
    
   /**
    * Specify the schema to used by  {@link #convert(File)}.
@@ -260,7 +281,11 @@ public abstract class Converter extends GuiProgram {
 
     // configure deserializer
     ParameterSet deserializerConfig = deserializer.configure(new ParameterSet(), schema);
+    // let the subclass adjust the config
+    deserializerConfig = deserializerConfiguration(deserializerConfig);
+    // let the command line options take effect
     configureFromCommandLine(deserializerConfig, schema);
+    
     if (verbose) {
       if (deserializerConfig.size() == 0) {
         System.out.println("No deserializer configuration parameters are required.");
@@ -274,26 +299,26 @@ public abstract class Converter extends GuiProgram {
     deserializer.configure(deserializerConfig, schema);
 
     // load the stream
-    ParameterSet defaultParameters = deserializer.load(
+    ParameterSet deserializationParameters = deserializer.load(
       streams.toArray(new NamedStream[0]), schema);
-    configureFromCommandLine(defaultParameters, schema);
-
-    // let the subclass adjust the config
-    ParameterSet parameters = deserializationParameters(defaultParameters);
-
+    // let the subclass adjust the parameters
+    deserializationParameters = deserializationParameters(deserializationParameters);
+    // let the command line adjuect the parameters
+    configureFromCommandLine(deserializationParameters, schema);
+    
     if (verbose) {
-      if (parameters.size() == 0) {
+      if (deserializationParameters.size() == 0) {
         System.out.println("No deserialization parameters are required.");            
       } else {
         System.out.println("Deserialization parameters:");
-        for (Parameter p : parameters.values()) {
+        for (Parameter p : deserializationParameters.values()) {
           System.out.println("\t" + p.getName() + " = " + p.getValue());
         }
       }
     }
 
     // configure the deserialization
-    deserializer.setParameters(parameters);
+    deserializer.setParameters(deserializationParameters);
       
     Graph[] graphs = deserializer.deserialize();
     for (String warning : deserializer.getWarnings()) {
@@ -342,6 +367,9 @@ public abstract class Converter extends GuiProgram {
       
     // configure serializer
     ParameterSet serializerConfig = serializer.configure(new ParameterSet(), schema);
+    // let the subclass adjust the config
+    serializerConfig = serializerConfiguration(serializerConfig);
+    // get setting from command line
     configureFromCommandLine(serializerConfig, graphs[0].getSchema());
     if (verbose) {
       if (serializerConfig.size() == 0) {
