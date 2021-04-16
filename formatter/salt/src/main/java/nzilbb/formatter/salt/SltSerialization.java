@@ -2135,8 +2135,6 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
     throws SerializationException {
     SerializationException errors = null;
     
-    graph.setOffsetGranularity(1.0); // seconds
-
     LinkedHashSet<String> selectedLayers = new LinkedHashSet<String>();
     if (layerIds != null) {
       for (String l : layerIds) {
@@ -2415,7 +2413,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       // first timestamp
       Annotation firstUtterance = utterancesByAnchor.first();
       double lastOffset = printTimeStamp(
-        firstUtterance.getStart(), writer, Double.NEGATIVE_INFINITY, graph);
+        firstUtterance.getStart(), writer, Double.NEGATIVE_INFINITY, graphg);
       Anchor lastUtteranceEnd = null;
 
       // for each utterance
@@ -2740,7 +2738,8 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
     }      
   }
 
-  MessageFormat timesStampFormat = new MessageFormat("- {0,number,00}:{1,number,00}");  
+  // TODO print fractional seconds if they're there
+  MessageFormat timesStampFormat = new MessageFormat("- {0,number,00}:{1,number,00}");
   
   /**
    * Conditionally prints a time stamp line for the given anchor.

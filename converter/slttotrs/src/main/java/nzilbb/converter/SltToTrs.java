@@ -23,12 +23,15 @@ package nzilbb.converter;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
 import nzilbb.ag.Constants;
+import nzilbb.ag.Graph;
 import nzilbb.ag.Layer;
 import nzilbb.ag.Schema;
 import nzilbb.ag.serialize.GraphDeserializer;
 import nzilbb.ag.serialize.GraphSerializer;
-import nzilbb.formatter.transcriber.TranscriptSerialization;
+import nzilbb.configure.Parameter;
+import nzilbb.configure.ParameterSet;
 import nzilbb.formatter.salt.SltSerialization;
+import nzilbb.formatter.transcriber.TranscriptSerialization;
 import nzilbb.util.ProgramDescription;
 import nzilbb.util.Switch;
 
@@ -39,7 +42,6 @@ import nzilbb.util.Switch;
 @ProgramDescription(value="Converts SALT .slt transcripts to Transcriber .trs files",arguments="file1.slt file2.slt ...")
 public class SltToTrs extends Converter {
 
-  // TODO todo doe -> recording date
   // TODO utterance codes?
   // TODO context -> program?
   // TODO subgroup -> topic?
@@ -83,14 +85,18 @@ public class SltToTrs extends Converter {
    * Specify the schema to used by  {@link #convert(File)}.
    * @return The schema.
    */
+  @Override
   public Schema getSchema() {
     Schema schema = super.getSchema();
     // include SALT layers
     schema.addLayer(
       new Layer("transcript_language", "Language").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true));
+    // transcript_recording_date is a name that both SltSerialization and TranscriptSerialization
+    // will recognize by default
     schema.addLayer(
-      new Layer("transcript_doe", "Recording date").setAlignment(Constants.ALIGNMENT_NONE)
+      new Layer("transcript_recording_date", "Recording date")
+      .setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true));
     schema.addLayer(
       new Layer("transcript_ca", "Current Age").setAlignment(Constants.ALIGNMENT_NONE)
@@ -190,10 +196,11 @@ public class SltToTrs extends Converter {
    * returns only the "utterance" layer.
    * @return An array of layer IDs.
    */
+  @Override
   public String[] getLayersToSerialize() {
     String[] layers = { "utterance", "word" };
     return layers;
   } // end of getLayersToSerialize()
-  
+
   private static final long serialVersionUID = -1;
 } // end of class SltToTrs

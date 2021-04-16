@@ -8,7 +8,7 @@
 <Speaker id="spk1" name="p1" check="Y" type="male" dialect="Y" accent="" scope=""/>
 <Speaker id="spk2" name="p2" check="" type="female" dialect="" accent="N" scope="N"/>
 </Speakers>
-<Episode>
+<Episode air_date="20191201">
 <Section type="report" topic="to1" startTime="0.000" endTime="10.000">
 <Turn speaker="spk1" startTime="0.000" endTime="5.000">
 <Sync time="0.000"/>

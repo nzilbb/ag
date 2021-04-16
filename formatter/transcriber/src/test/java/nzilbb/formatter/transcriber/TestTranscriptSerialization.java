@@ -427,7 +427,7 @@ public class TestTranscriptSerialization {
          .setPeers(false)
          .setPeersOverlap(false)
          .setSaturated(true),
-         new Layer("version_date", "Version date")
+         new Layer("air_date", "Air date")
          .setAlignment(Constants.ALIGNMENT_NONE)
          .setPeers(false)
          .setPeersOverlap(false)
@@ -544,6 +544,7 @@ public class TestTranscriptSerialization {
       graph.addAnnotation(new Annotation("by", "robert", "scribe", "a0", "a15"));
       graph.addAnnotation(new Annotation("v", "1", "version", "a0", "a15"));
       graph.addAnnotation(new Annotation("date", "20191211", "version_date", "a0", "a15"));
+      graph.addAnnotation(new Annotation("aired", "20191201", "air_date", "a0", "a15"));
       // participants
       graph.addAnnotation(new Annotation("p1", "p1", "who", "a0", "a15"));
       graph.addAnnotation(new Annotation("p2", "p2", "who", "a0", "a15"));
@@ -681,8 +682,8 @@ public class TestTranscriptSerialization {
 		   ((Layer)configuration.get("versionDateLayer").getValue()).getId());
       assertEquals("program", "episode", 
 		   ((Layer)configuration.get("programLayer").getValue()).getId());
-      assertNull("air date", 
-                 configuration.get("airDateLayer").getValue());
+      assertEquals("air date", "air_date", 
+		   ((Layer)configuration.get("airDateLayer").getValue()).getId());
       assertEquals("transcript language", "transcript_language", 
 		   ((Layer)configuration.get("transcriptLanguageLayer").getValue()).getId());
       assertEquals("participant check", "participant_check", 
@@ -699,7 +700,7 @@ public class TestTranscriptSerialization {
       LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
          Arrays.asList(serializer.getRequiredLayers()));
       assertEquals("Needed layers: " + needLayers,
-                   21, needLayers.size());
+                   22, needLayers.size());
       assertTrue(needLayers.contains("who"));
       assertTrue(needLayers.contains("turn"));
       assertTrue(needLayers.contains("utterance"));
@@ -721,6 +722,7 @@ public class TestTranscriptSerialization {
       assertTrue(needLayers.contains("scope"));
       assertTrue(needLayers.contains("dialect"));
       assertTrue(needLayers.contains("accent"));
+      assertTrue(needLayers.contains("air_date"));
 	 
       // serialize
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();

@@ -60,6 +60,9 @@ public class TranscriptSerialization
    // Attributes:
    protected Vector<String> warnings;
 
+   SimpleDateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+   SimpleDateFormat trsDateFormat = new SimpleDateFormat("yyMMdd");
+
    /**
     * Layer schema.
     * @see #getSchema()
@@ -1409,13 +1412,18 @@ public class TranscriptSerialization
             transcript.setVersion(tag.getLabel());
          }
       }
-      SimpleDateFormat fmtTranscriberDate =new SimpleDateFormat("yyMMdd");
-      String sVersionDate = fmtTranscriberDate.format(new java.util.Date());
+      String sVersionDate = trsDateFormat.format(new java.util.Date());
       transcript.setVersionDate(sVersionDate);
       if (versionDateLayer != null) {
          Annotation tag = graph.first(versionDateLayer.getId());
          if (tag != null) {
-            transcript.setVersionDate(tag.getLabel());}
+           String date = tag.getLabel();
+           try {
+             date = trsDateFormat.format(isoDateFormat.parse(date));
+           } catch(Exception exception) {
+           }
+           transcript.setVersionDate(date);
+         }
       }
       if (scribeLayer != null) {
          Annotation tag = graph.first(scribeLayer.getId());
@@ -1440,6 +1448,17 @@ public class TranscriptSerialization
          Annotation tag = graph.first(programLayer.getId());
          if (tag != null) {
             transcript.setProgram(tag.getLabel());
+         }
+      }
+      if (airDateLayer != null) {
+         Annotation tag = graph.first(airDateLayer.getId());
+         if (tag != null) {
+           String date = tag.getLabel();
+           try {
+             date = trsDateFormat.format(isoDateFormat.parse(date));
+           } catch(Exception exception) {
+           }
+           transcript.setAirDate(date);
          }
       }
       if (transcriptLanguageLayer != null) {
