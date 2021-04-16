@@ -1018,7 +1018,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       configuration.get("errorLayer"):
       configuration.addParameter(
         new Parameter("errorLayer", Layer.class, "Error Layer", "Layer for marking errors"));
-    String[] errorLayerPossibilities = {"error", "errors"};
+    String[] errorLayerPossibilities = {"error", "errors", "code", "codes"};
     p.setValue(Utility.FindLayerById(
                  phraseLayers, Arrays.asList(errorLayerPossibilities)));
     p.setPossibleValues(phraseLayers.values());
@@ -1642,6 +1642,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         lastAnchor.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
       }
     }
+    graph.setEnd(lastAnchor);
 
     if (misalignedUtterancesExist) {
       try {
@@ -2021,6 +2022,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
     // set all annotations to manual confidence
     for (Annotation a : graph.getAnnotationsById().values()) {
       a.setConfidence(Constants.CONFIDENCE_MANUAL);
+      // and ensure graph attributes 
     }
     graph.commit();
 
@@ -2413,7 +2415,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       // first timestamp
       Annotation firstUtterance = utterancesByAnchor.first();
       double lastOffset = printTimeStamp(
-        firstUtterance.getStart(), writer, Double.NEGATIVE_INFINITY, graphg);
+        firstUtterance.getStart(), writer, Double.NEGATIVE_INFINITY, graph);
       Anchor lastUtteranceEnd = null;
 
       // for each utterance

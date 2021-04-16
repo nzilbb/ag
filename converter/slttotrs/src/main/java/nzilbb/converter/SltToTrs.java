@@ -22,6 +22,7 @@
 package nzilbb.converter;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
+import nzilbb.ag.Annotation;
 import nzilbb.ag.Constants;
 import nzilbb.ag.Graph;
 import nzilbb.ag.Layer;
@@ -41,10 +42,6 @@ import nzilbb.util.Switch;
  */
 @ProgramDescription(value="Converts SALT .slt transcripts to Transcriber .trs files",arguments="file1.slt file2.slt ...")
 public class SltToTrs extends Converter {
-
-  // TODO utterance codes?
-  // TODO context -> program?
-  // TODO subgroup -> topic?
 
   /**
    * Default constructor.
@@ -190,7 +187,40 @@ public class SltToTrs extends Converter {
       .setParentId(schema.getWordLayerId()).setParentIncludes(true));
     return schema;
   } // end of getSchema()
-  
+
+  /**
+   * Map SALT Context to Transcriber Program, and SALT Subgroup to Transcriber Topic.
+   * @param config The default configuration.
+   * @return The new configuration.
+   */
+  public ParameterSet serializerConfiguration(ParameterSet config) {
+    Schema schema = getSchema();
+    config.get("programLayer").setValue(schema.getLayer("transcript_context"));
+    config.get("topicLayer").setValue(schema.getLayer("transcript_subgroup"));
+    return config;
+  } // end of serializerConfiguration()
+
+  /**
+   * Make errors and codes comments instead 
+   * @param transcripts
+   */
+  @Override
+  public void processTranscripts(Graph[] transcripts) {
+    for (Graph transcript : transcripts) {
+      for (Annotation code : transcript.all("code")) {
+        transcript.createTag(code, "comment", "["+code.getLabel()+"]");
+      } // next code
+      for (Annotation code : transcript.all("error")) {
+        transcript.createTag(code, "comment", "["+code.getLabel()+"]");
+      } // next code
+      // also ensure that the subgroup parent is set TODO find out why it's not
+      Annotation subgroup = transcript.first("transcript_subgroup");
+      if (subgroup != null) {
+        subgroup.setParent(transcript);
+      }
+    } // next transcript
+  } // end of processGraphs()
+   
   /**
    * Specifies which layers should be given to the serializer. The default implementaion
    * returns only the "utterance" layer.

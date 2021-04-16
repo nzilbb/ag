@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Trans SYSTEM "trans-14.dtd">
 <Trans scribe="&quot;Transcriber transcript&quot; text/xml-transcriber (null)" audio_filename="" version="0" version_date="210416" xml:lang="en">
+<Topics>
+<Topic id="to1" desc="TEST"/>
+</Topics>
 <Speakers>
 <Speaker id="spk1" name="ADAL-Child" check="" type="female" dialect="" accent="" scope=""/>
 <Speaker id="spk2" name="ADAL-Examiner" check="" type="" dialect="" accent="" scope=""/>
 </Speakers>
-<Episode air_date="230603">
-<Section type="report" startTime="0.000" endTime="94.000">
+<Episode program="Nar" air_date="230603">
+<Section type="report" topic="to1" startTime="0.000" endTime="94.000">
 <Turn speaker="spk2" startTime="0.000" endTime="29.000">
 <Sync time="0.000"/>I'm at Byron kindergarten on ((what date is it)) the 30th of March 2021?
 <Sync time="5.000"/>My name is X[REDACTED]. and I'm here with X[REDACTED], doing the oral language assessment. [CENSOR]

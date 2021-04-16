@@ -174,43 +174,43 @@ public abstract class Converter extends GuiProgram {
    * Adjust the configuration of the deserializer. Implementors can adjust the
    * default configuration before it's applied. This method is invoked once for each
    * input file.
-   * @param defaultConfig
+   * @param config The default configuration.
    * @return The new configuration.
    */
-  public ParameterSet deserializerConfiguration(ParameterSet defaultConfig) {
-    return defaultConfig;
+  public ParameterSet deserializerConfiguration(ParameterSet config) {
+    return config;
   } // end of deserializerConfiguration()
   
   /**
    * Adjust the parameters for deserialization. Implementors can adjust the
    * default configuration before it's applied. This method is invoked once for each
    * input file.
-   * @param defaultParameters
+   * @param parameters The default parameters.
    * @return The new configuration.
    */
-  public ParameterSet deserializationParameters(ParameterSet defaultParameters) {
-    return defaultParameters;
+  public ParameterSet deserializationParameters(ParameterSet parameters) {
+    return parameters;
   } // end of deserializationParameters()
   
   /**
    * Adjust the configuration of the serializer. Implementors can adjust the
    * default configuration before it's applied. This method is invoked once for each
    * input file.
-   * @param defaultConfig
+   * @param config The default configuration.
    * @return The new configuration.
    */
-  public ParameterSet serializerConfiguration(ParameterSet defaultConfig) {
-    return defaultConfig;
+  public ParameterSet serializerConfiguration(ParameterSet config) {
+    return config;
   } // end of serializerConfiguration()
   
   /**
-   * Process the graphs after they were deserialized, but before they're
+   * Process the transcripts after they were deserialized, but before they're
    * serialized. Implementors can rename speakers, adjust meta-data, or change the graph
    * in any other way required before serialization. 
-   * @param graphs
+   * @param transcripts
    */
-  public void processGraphs(Graph[] graphs) {
-  } // end of processGraphs()
+  public void processTranscripts(Graph[] transcripts) {
+  } // end of processTranscripts()
    
   /**
    * Specify the schema to used by  {@link #convert(File)}.
@@ -337,7 +337,7 @@ public abstract class Converter extends GuiProgram {
     }
 
     // let the subclass process the graphs before they're serialized
-    processGraphs(graphs);
+    processTranscripts(graphs);
     
     // give serializer access to any media
     if (mediaFiles.size() > 0) {

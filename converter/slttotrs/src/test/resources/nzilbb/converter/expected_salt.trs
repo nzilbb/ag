@@ -1,15 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Trans SYSTEM "trans-14.dtd">
 <Trans scribe="&quot;Transcriber transcript&quot; text/xml-transcriber (null)" audio_filename="" version="0" version_date="210416" xml:lang="en">
+<Topics>
+<Topic id="to1" desc="TEST"/>
+</Topics>
 <Speakers>
 <Speaker id="spk1" name="ADAL-Child" check="" type="female" dialect="" accent="" scope=""/>
 <Speaker id="spk2" name="ADAL-Examiner" check="" type="" dialect="" accent="" scope=""/>
 </Speakers>
-<Episode air_date="230603">
-<Section type="report" startTime="0.000" endTime="94.000">
+<Episode program="Nar" air_date="230603">
+<Section type="report" topic="to1" startTime="0.000" endTime="94.000">
 <Turn speaker="spk2" startTime="0.000" endTime="29.000">
 <Sync time="0.000"/>I'm at Byron kindergarten on what date is it the 30th of March 2021?
-<Sync time="5.000"/>My name is _. and I'm here with _, doing the oral language assessment.
+<Sync time="5.000"/>My name is _.
+<Comment desc="[REDACTED]"/> and I'm here with _,
+<Comment desc="[REDACTED]"/> doing the oral language assessment.
+<Comment desc="[CENSOR]"/>
 <Sync time="12.000"/>Okay, so now Ada it's your turn to tell the story.
 <Sync time="16.000"/>You can look at the pictures when you're telling the story.
 <Sync time="19.500"/>So let's start at the beginning.
@@ -22,11 +28,13 @@
 <Comment desc="Bound morpheme tests"/>
 </Turn>
 <Turn speaker="spk2" startTime="34.000" endTime="39.000">
-<Sync time="34.000"/>saved muddy bushes buses putting girl's wants goes shopping running dropped helped aunty's stopped leaving coming its lift.
+<Sync time="34.000"/>saved muddy bushes buses putting girl's
+<Comment desc="[EP:boy/z]"/>wants goes shopping running dropped helped aunty's stopped leaving coming its lift.
 <Sync time="37.000"/>Anything else?
 </Turn>
 <Turn speaker="spk1" startTime="39.000" endTime="47.000">
 <Sync time="39.000"/>And please go for a walk?
+<Comment desc="[EU]"/>
 <Sync time="41.000"/>You need to put your gumboots on.
 <Sync time="46.000"/>It's too dark^
 </Turn>
@@ -44,7 +52,8 @@
 <Event desc="Schnitzel_von_Krumm" type="entities" extent="begin"/>
 Schnitzel von Krumm
 <Event desc="Schnitzel_von_Krumm" type="entities" extent="end"/>
-s~ falled out the babies' nest.
+ s~ falled
+<Comment desc="[EW]"/>out the babies' nest.
 </Turn>
 <Turn speaker="spk2" startTime="69.000" endTime="71.000">
 <Sync time="69.000"/>What happened next?
