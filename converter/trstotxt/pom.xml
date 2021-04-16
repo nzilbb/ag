@@ -11,6 +11,7 @@
   <artifactId>trs-to-txt</artifactId>
   <name>nzilbb.converter.trstotxt</name>
   <version>1.0.0</version>
+  <description>Utility for converting Transcriber transcripts to plain text files</description>
 
   <properties>
     

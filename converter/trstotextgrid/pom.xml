@@ -11,6 +11,7 @@
   <artifactId>trs-to-textgrid</artifactId>
   <name>nzilbb.converter.trstotextgrid</name>
   <version>1.0.0</version>
+  <description>Utility for converting Transcriber transcripts to Praat TextGrids</description>
 
   <properties>
     

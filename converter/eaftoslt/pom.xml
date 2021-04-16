@@ -11,6 +11,7 @@
   <artifactId>eaf-to-slt</artifactId>
   <name>nzilbb.converter.eaftoslt</name>
   <version>0.1.0</version>
+  <description>Utility for converting ELAN files to SALT transcripts</description>
 
   <properties>
     <input.package>nzilbb.formatter.elan</input.package>

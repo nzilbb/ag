@@ -11,6 +11,7 @@
   <artifactId>trs-to-vtt</artifactId>
   <name>nzilbb.converter.trstovtt</name>
   <version>1.0.0</version>
+  <description>Utility for converting Transcriber transcripts to WebVTT subtitle files</description>
 
   <properties>
     

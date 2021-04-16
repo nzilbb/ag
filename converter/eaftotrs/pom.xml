@@ -10,8 +10,8 @@
   <groupId>nzilbb</groupId>
   <artifactId>eaf-to-trs</artifactId>
   <version>1.0.0</version>
-
   <name>nzilbb.converter.eaftotrs</name>
+  <description>Utility for converting ELAN files to Transcriber transcripts</description>
 
   <properties>
     

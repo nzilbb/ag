@@ -11,6 +11,7 @@
   <artifactId>vtt-to-textgrid</artifactId>
   <name>nzilbb.converter.vtttotextgrid</name>
   <version>1.0.0</version>
+  <description>Utility for converting WebVTT subtitle files to Praat TextGrids</description>
 
   <properties>
     
