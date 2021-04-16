@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Trans SYSTEM "trans-14.dtd">
+<Trans scribe="&quot;Transcriber transcript&quot; text/xml-transcriber (null)" audio_filename="" version="0" version_date="210416" xml:lang="en">
+<Speakers>
+<Speaker id="spk1" name="ADAL-Child" check="" type="female" dialect="" accent="" scope=""/>
+<Speaker id="spk2" name="ADAL-Examiner" check="" type="" dialect="" accent="" scope=""/>
+</Speakers>
+<Episode>
+<Section type="report" startTime="0.000" endTime="94.000">
+<Turn speaker="spk2" startTime="0.000" endTime="29.000">
+<Sync time="0.000"/>I'm at Byron kindergarten on what date is it the 30th of March 2021?
+<Sync time="5.000"/>My name is _. and I'm here with _, doing the oral language assessment.
+<Sync time="12.000"/>Okay, so now Ada it's your turn to tell the story.
+<Sync time="16.000"/>You can look at the pictures when you're telling the story.
+<Sync time="19.500"/>So let's start at the beginning.
+<Sync time="23.000"/>What was the story about?
+<Comment desc="This is a plus line comment"/>
+</Turn>
+<Turn speaker="spk1" startTime="29.000" endTime="34.000">
+<Sync time="29.000"/>Um the kids the kids,
+<Comment desc="in-situ comment"/> they quickly put their gumboots on.
+<Comment desc="Bound morpheme tests"/>
+</Turn>
+<Turn speaker="spk2" startTime="34.000" endTime="39.000">
+<Sync time="34.000"/>saved muddy bushes buses putting girl's wants goes shopping running dropped helped aunty's stopped leaving coming its lift.
+<Sync time="37.000"/>Anything else?
+</Turn>
+<Turn speaker="spk1" startTime="39.000" endTime="47.000">
+<Sync time="39.000"/>And please go for a walk?
+<Sync time="41.000"/>You need to put your gumboots on.
+<Sync time="46.000"/>It's too dark^
+</Turn>
+<Turn speaker="spk2" startTime="47.000" endTime="52.000">
+<Sync time="47.000"/>What happened in this one?
+</Turn>
+<Turn speaker="spk1" startTime="52.000" endTime="62.000">
+<Sync time="52.000"/>And then it's heaps and heaps dark.
+</Turn>
+<Turn speaker="spk2" startTime="62.000" endTime="63.000">
+<Sync time="62.000"/>What happened next?
+</Turn>
+<Turn speaker="spk1" startTime="63.000" endTime="69.000">
+<Sync time="63.000"/>
+<Event desc="Schnitzel_von_Krumm" type="entities" extent="begin"/>
+Schnitzel von Krumm
+<Event desc="Schnitzel_von_Krumm" type="entities" extent="end"/>
+s~ falled out the babies' nest.
+</Turn>
+<Turn speaker="spk2" startTime="69.000" endTime="71.000">
+<Sync time="69.000"/>What happened next?
+</Turn>
+<Turn speaker="spk1" startTime="71.000" endTime="86.000">
+<Sync time="71.000"/>They put them it back in the nest um.
+<Sync time="83.000"/>Bye bye little bird.
+</Turn>
+<Turn speaker="spk2" startTime="86.000" endTime="93.000">
+<Sync time="86.000"/>Anything else that happened?
+</Turn>
+<Turn speaker="spk1" startTime="93.000" endTime="94.000">
+<Sync time="93.000"/>_.
+</Turn>
+</Section>
+</Episode>
+</Trans>
