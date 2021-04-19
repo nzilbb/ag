@@ -1540,7 +1540,8 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
           warnings.add("Time stamp \"" + line + "\" isn't after the previous one ("
                        +lastAlignedAnchor+") bumping this offset forward");
           // the timestamp isn't after the last one, so we bump it forward 1s
-          offset += 1.0;
+          // offset += 1.0;
+          offset = lastAlignedAnchor.getOffset() + 1.0;
           // and downgrade its confidence
           confidence = Constants.CONFIDENCE_DEFAULT;
           misalignedUtterancesExist = true;

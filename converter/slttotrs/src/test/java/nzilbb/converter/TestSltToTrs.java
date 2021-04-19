@@ -44,7 +44,10 @@ public class TestSltToTrs {
     converter.convert(input);
     File actual = new File(dir, "salt.trs");
     File expected = new File(dir, "expected_salt.trs");
-    String differences = diff(expected, actual);
+    String differences = diff(
+      expected, actual,
+      // ignore difference in the <Trans...> tag because it includes today's date
+      "<Trans .*");
     if (differences != null) {
       fail(differences);
     } else {
@@ -60,7 +63,10 @@ public class TestSltToTrs {
     converter.convert(input);
     File actual = new File(dir, "salt.trs");
     File expected = new File(dir, "expected_salt_no_conventions.trs");
-    String differences = diff(expected, actual);
+    String differences = diff(
+      expected, actual, 
+      // ignore difference in the <Trans...> tag because it includes today's date
+      "<Trans .*");
     if (differences != null) {
       fail(differences);
     } else {
@@ -78,7 +84,7 @@ public class TestSltToTrs {
     return diff(expected, actual, null);
   }
   
-  /**
+ /**
    * Diffs two files.
    * @param expected
    * @param actual
