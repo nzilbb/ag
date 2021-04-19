@@ -21,6 +21,8 @@
 //
 package nzilbb.converter;
 
+import java.text.MessageFormat;
+import java.text.ParseException;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import nzilbb.ag.Annotation;
 import nzilbb.ag.Constants;
@@ -42,7 +44,43 @@ import nzilbb.util.Switch;
  */
 @ProgramDescription(value="Converts SALT .slt transcripts to Transcriber .trs files",arguments="file1.slt file2.slt ...")
 public class SltToTrs extends Converter {
-
+  
+  /**
+   * Pattern for 'pronounce' word codes.
+   * @see #getPronounceCodePattern()
+   * @see #setPronounceCodePattern(String)
+   */
+  protected String pronounceCodePattern = "PRON:{0}";
+  /**
+   * Getter for {@link #pronounceCodePattern}: Pattern for 'pronounce' word codes.
+   * @return Pattern for 'pronounce' word codes.
+   */
+  public String getPronounceCodePattern() { return pronounceCodePattern; }
+  /**
+   * Setter for {@link #pronounceCodePattern}: Pattern for 'pronounce' word codes.
+   * @param newPronounceCodePattern Pattern for 'pronounce' word codes.
+   */
+  @Switch("Pattern to match for converting word codes into pronounce events. Default is PRON:{0}")
+  public SltToTrs setPronounceCodePattern(String newPronounceCodePattern) { pronounceCodePattern = newPronounceCodePattern; return this; }
+  
+  /**
+   * Pattern for 'lexical' word codes.
+   * @see #getLexicalCodePattern()
+   * @see #setLexicalCodePattern(String)
+   */
+  protected String lexicalCodePattern = "LEX:{0}";
+  /**
+   * Getter for {@link #lexicalCodePattern}: Pattern for 'lexical' word codes.
+   * @return Pattern for 'lexical' word codes.
+   */
+  public String getLexicalCodePattern() { return lexicalCodePattern; }
+  /**
+   * Setter for {@link #lexicalCodePattern}: Pattern for 'lexical' word codes.
+   * @param newLexicalCodePattern Pattern for 'lexical' word codes.
+   */
+  @Switch("Pattern to match for converting word codes into lexical events. Default is LEX:{0}")
+  public SltToTrs setLexicalCodePattern(String newLexicalCodePattern) { lexicalCodePattern = newLexicalCodePattern; return this; }
+  
   /**
    * Default constructor.
    */
@@ -57,7 +95,18 @@ public class SltToTrs extends Converter {
       +"\nSALT meta-data that is not supported by Transcriber is added in comments"
       +" at the beginning of the transcript."
       +"\nBy default, inline annotations (mazes, codes, bound morphemes, etc.)"
-      +" are not iterpreted. If you want them to be processed, use --parseInlineConventions";
+      +" are not iterpreted. If you want them to be processed, use --parseInlineConventions"
+      +"\nBy default certain SALT word codes are converted into Transcriber 'pronounce'"
+      +" or 'lexical' events - i.e. those of the form \"[PRON:...]\" and \"[LEX:...]\""
+      +" respectively."
+      +" Use the command-line switches --pronounceCodePattern and --lexicalCodePattern"
+      +" to control this behaviour."
+      +"\ne.g. if you specify --pronounceCodePattern=WP:{0} then all word codes like"
+      +" [WP:...] will be pronounce events in the Transcriber transcript."
+      +"\nsimilarly if you specify --pronounceCodePattern=WL:{0} then all word codes like"
+      +" [WL:...] will be lexical events in the Transcriber transcript."
+      +"\nTo disable these conversion, use \"--pronounceCodePattern= --lexCodePattern=\""
+      +" on the command line.";
   } // end of constructor
   
   public static void main(String argv[]) {
@@ -192,6 +241,14 @@ public class SltToTrs extends Converter {
       new Layer("partial_word", "Partial Words").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId(schema.getWordLayerId()).setParentIncludes(true));
+    schema.addLayer(
+      new Layer("pronounce", "Pronunciation tags").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId(schema.getWordLayerId()).setParentIncludes(true));
+    schema.addLayer(
+      new Layer("lexical", "Lexical tags").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId(schema.getWordLayerId()).setParentIncludes(true));
     return schema;
   } // end of getSchema()
 
@@ -208,19 +265,64 @@ public class SltToTrs extends Converter {
   } // end of serializerConfiguration()
 
   /**
-   * Make dob, ca, ethnicity, collection, location, errors and codes into comments.
+   * Make dob, ca, ethnicity, collection, location, errors and codes into comments, and
+   * create lexical/pron word tags if configured.
    * @param transcripts
    */
   @Override
   public void processTranscripts(Graph[] transcripts) {
+    Schema schema = getSchema();
     
+    MessageFormat pronounceFormat = pronounceCodePattern.length()==0?null
+      : new MessageFormat(pronounceCodePattern);
+    MessageFormat lexicalFormat = lexicalCodePattern.length()==0?null
+      : new MessageFormat(lexicalCodePattern);
     for (Graph transcript : transcripts) {
+      if (pronounceFormat != null) {
+        transcript.addLayer(schema.getLayer("pronounce"));
+      }
+      if (lexicalFormat != null) {
+        transcript.addLayer(schema.getLayer("lexical"));
+      }
+      
       for (Annotation code : transcript.all("code")) {
+        
+        if (pronounceFormat != null) { // some codes are pronounce events
+          try { // does it match the pattern?
+            Object[] label = pronounceFormat.parse(code.getLabel());
+            if (label.length > 0) {
+              // the code matches the pattern, does the code tag a word?
+              Annotation[] word = code.tagsOn(transcript.getSchema().getWordLayerId());
+              if (word.length > 0) {
+                // create a pronounce tag
+                transcript.createTag(word[0], "pronounce", (String)label[0]);
+                continue;
+              }
+            }
+          } catch(ParseException exception) {}
+        }
+        
+        if (lexicalFormat != null) { // some codes are lexical events
+          try { // does it match the pattern?
+            Object[] label = lexicalFormat.parse(code.getLabel());
+            if (label.length > 0) {
+              // the code matches the pattern, does the code tag a word?
+              Annotation[] word = code.tagsOn(transcript.getSchema().getWordLayerId());
+              if (word.length > 0) {
+                // create a lexical tag
+                transcript.createTag(word[0], "lexical", (String)label[0]);
+                continue;
+              }
+            }
+          } catch(ParseException exception) {}
+        }
+        
         transcript.createTag(code, "comment", "["+code.getLabel()+"]");
       } // next code
       for (Annotation code : transcript.all("error")) {
         transcript.createTag(code, "comment", "["+code.getLabel()+"]");
       } // next code
+
       
       // add meta-data as comments at the beginning
       // so that can be parsed back out to slt if there's a round-trip

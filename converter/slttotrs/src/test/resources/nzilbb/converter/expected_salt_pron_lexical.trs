@@ -16,51 +16,66 @@
 <Comment desc="+ Ethnicity: NZ European"/>
 <Comment desc="+ ParticipantId: Ada-Lovelace"/>
 <Comment desc="+ Ca: 4;4"/>
-<Comment desc="+ Collect: 1"/>I'm at Byron kindergarten on ((what date is it)) the 30th of March 2021?
-<Sync time="5.000"/>My name is X[REDACTED]. and I'm here with X[REDACTED], doing the oral language assessment. [CENSOR]
-<Sync time="12.000"/>Okay, so now Ada[WP:VdV] it's your turn to tell the story.
+<Comment desc="+ Collect: 1"/>I'm at Byron kindergarten on what date is it the 30th of March 2021?
+<Sync time="5.000"/>My name is _.
+<Comment desc="[REDACTED]"/> and I'm here with _,
+<Comment desc="[REDACTED]"/> doing the oral language assessment.
+<Comment desc="[CENSOR]"/>
+<Sync time="12.000"/>Okay, so now Ada
+<Event desc="VdV" type="pronounce" extent="previous"/>
+it's your turn to tell the story.
 <Sync time="16.000"/>You can look at the pictures when you're telling the story.
 <Sync time="19.500"/>So let's start at the beginning.
 <Sync time="23.000"/>What was the story about?
 <Comment desc="This is a plus line comment"/>
 </Turn>
 <Turn speaker="spk1" startTime="29.000" endTime="34.000">
-<Sync time="29.000"/>(Um the kids) the kid/s, {in-situ comment} they quickly put their gumboot/s on.
+<Sync time="29.000"/>Um the kids the kids,
+<Comment desc="in-situ comment"/> they quickly put their gumboots on.
 <Comment desc="Bound morpheme tests"/>
 </Turn>
 <Turn speaker="spk2" startTime="34.000" endTime="39.000">
-<Sync time="34.000"/>save/ed mud/y bush/s bus/s put/ing girl/z[EP:boy/z] want/3s go/3s shop/ing run/ing drop/ed help/ed aunty/z stop/ed leave/ing come/ing it/z lift/*ed.
+<Sync time="34.000"/>saved muddy bushes buses putting girl's
+<Comment desc="[EP:boy/z]"/>wants goes shopping running dropped helped aunty's stopped leaving coming its lift.
 <Sync time="37.000"/>Anything else?
 </Turn>
 <Turn speaker="spk1" startTime="39.000" endTime="47.000">
-<Sync time="39.000"/>And please go for a walk? :01 [EU]
-<Sync time="41.000"/>You need to put your gumboot/s on.
-<Sync time="46.000"/>It/'s too dark^
+<Sync time="39.000"/>And please go for a walk?
+<Comment desc="[EU]"/>
+<Sync time="41.000"/>You need to put your gumboots on.
+<Sync time="46.000"/>It's too dark^
 </Turn>
 <Turn speaker="spk2" startTime="47.000" endTime="52.000">
 <Sync time="47.000"/>What happened in this one?
 </Turn>
 <Turn speaker="spk1" startTime="52.000" endTime="62.000">
-<Sync time="52.000"/>And then it/'s heaps_and_heaps|heaps dark.
+<Sync time="52.000"/>And then it's heaps and heaps dark.
 </Turn>
 <Turn speaker="spk2" startTime="62.000" endTime="63.000">
 <Sync time="62.000"/>What happened next?
 </Turn>
 <Turn speaker="spk1" startTime="63.000" endTime="69.000">
-<Sync time="63.000"/>%yip_yip Schnitzel_von_Krumm s* :02 falled|fall[EW] out *of the baby/s/z[WL:babies] nest.
+<Sync time="63.000"/>
+<Event desc="Schnitzel_von_Krumm" type="entities" extent="begin"/>
+Schnitzel von Krumm
+<Event desc="Schnitzel_von_Krumm" type="entities" extent="end"/>
+ s~ falled
+<Comment desc="[EW]"/> out the babies'
+<Event desc="babies" type="lexical" extent="previous"/>
+nest.
 </Turn>
 <Turn speaker="spk2" startTime="69.000" endTime="71.000">
-<Sync time="69.000"/>:03 What happened next?
+<Sync time="69.000"/>What happened next?
 </Turn>
 <Turn speaker="spk1" startTime="71.000" endTime="86.000">
-<Sync time="71.000"/>They put (them) it back in the nest (um).
+<Sync time="71.000"/>They put them it back in the nest um.
 <Sync time="83.000"/>Bye bye little bird.
 </Turn>
 <Turn speaker="spk2" startTime="86.000" endTime="93.000">
 <Sync time="86.000"/>Anything else that happened?
 </Turn>
 <Turn speaker="spk1" startTime="93.000" endTime="94.000">
-<Sync time="93.000"/>x.
+<Sync time="93.000"/>_.
 </Turn>
 </Section>
 </Episode>

@@ -74,6 +74,27 @@ public class TestSltToTrs {
     }
   }
   
+  @Test public void pronounceAndLexicalCodes() throws Exception {
+    File dir = getDir();
+    File input = new File(dir, "salt.slt");
+    SltToTrs converter = new SltToTrs();
+    converter.setSwitch("parseInlineConventions", "true");
+    converter.setPronounceCodePattern("WP:{0}");
+    converter.setLexicalCodePattern("WL:{0}");
+    converter.convert(input);
+    File actual = new File(dir, "salt.trs");
+    File expected = new File(dir, "expected_salt_pron_lexical.trs");
+    String differences = diff(
+      expected, actual, 
+      // ignore difference in the <Trans...> tag because it includes today's date
+      "<Trans .*");
+    if (differences != null) {
+      fail(differences);
+    } else {
+      actual.delete();
+    }
+  }
+  
   /**
    * Diffs two files.
    * @param expected

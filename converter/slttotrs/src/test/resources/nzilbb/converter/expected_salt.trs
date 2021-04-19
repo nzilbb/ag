@@ -21,7 +21,8 @@
 <Comment desc="[REDACTED]"/> and I'm here with _,
 <Comment desc="[REDACTED]"/> doing the oral language assessment.
 <Comment desc="[CENSOR]"/>
-<Sync time="12.000"/>Okay, so now Ada it's your turn to tell the story.
+<Sync time="12.000"/>Okay, so now Ada
+<Comment desc="[WP:VdV]"/>it's your turn to tell the story.
 <Sync time="16.000"/>You can look at the pictures when you're telling the story.
 <Sync time="19.500"/>So let's start at the beginning.
 <Sync time="23.000"/>What was the story about?
@@ -58,7 +59,8 @@
 Schnitzel von Krumm
 <Event desc="Schnitzel_von_Krumm" type="entities" extent="end"/>
  s~ falled
-<Comment desc="[EW]"/>out the babies' nest.
+<Comment desc="[EW]"/> out the babies'
+<Comment desc="[WL:babies]"/>nest.
 </Turn>
 <Turn speaker="spk2" startTime="69.000" endTime="71.000">
 <Sync time="69.000"/>What happened next?
