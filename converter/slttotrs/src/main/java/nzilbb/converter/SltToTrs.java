@@ -51,6 +51,13 @@ public class SltToTrs extends Converter {
     // default to false, as it's what users of this converter most likely expect,
     // and it means that if the idea is a round-trip conversion, inline annotations are not lost
     setSwitch("parseInlineConventions", "false");
+    
+    info = "The SALT 'Context' header becomes the Transcriber 'Program'."
+      +"\nThe SALT 'Subgroup' header becomes the Transcriber 'Topic'."
+      +"\nSALT meta-data that is not supported by Transcriber is added in comments"
+      +" at the beginning of the transcript."
+      +"\nBy default, inline annotations (mazes, codes, bound morphemes, etc.)"
+      +" are not iterpreted. If you want them to be processed, use --parseInlineConventions";
   } // end of constructor
   
   public static void main(String argv[]) {

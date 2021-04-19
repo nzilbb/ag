@@ -391,11 +391,11 @@ public class GuiProgram extends JApplet {
                             " "+myAnnotation.arguments():""));
       if (vCompulsorySwitches.size() > 0) {
         System.err.println("compulsory switches:");
-        for (String s : vCompulsorySwitches) System.err.println("\t"+s);
+        for (String s : vCompulsorySwitches) System.err.println(wrap("\t"+s));
       }
       if (vOptionalSwitches.size() > 0) {
         System.err.println("optional switches:");
-        for (String s : vOptionalSwitches) System.err.println("\t"+s);
+        for (String s : vOptionalSwitches) System.err.println(wrap("\t"+s));
       }
       return;		    
     } // usage
@@ -419,6 +419,51 @@ public class GuiProgram extends JApplet {
     frame_.setLocation(left, top);
     frame_.setVisible(true);
   }
+
+  
+  /**
+   * Endeavours to insert line breaks in the given string so that lines are no longer than
+   * 80 characters. 
+   * @param s
+   * @return The given string, with line breaks inserted.
+   */
+  public String wrap(String s) {
+    if (s == null) return null;
+    if (s.length() == 0) return s;
+    int wrapColumn = 70;
+    // if the string is indented with tab, indent all lines
+    boolean indent = s.charAt(0) == '\t';
+    StringBuilder lines = new StringBuilder();
+    // respect original line breaks
+    for (String originalLine : s.trim().split("\n")) {
+      // add originalLine to lines word by word, inserting line breaks as required
+      int column = 0;
+      String words[] = originalLine.trim().split(" ");
+      String beforeNextWord = indent?"\t":null;
+      for (String word : words) {
+        if (beforeNextWord != null) lines.append(beforeNextWord);
+        beforeNextWord = null;
+        lines.append(word);
+        column += word.length();
+        if (column > wrapColumn) { // new line
+          if (indent) {
+            beforeNextWord = "\n\t\t";
+          } else {
+            beforeNextWord = "\n";
+          }
+          column = indent?16:0;
+        } else {
+          lines.append(" ");
+        }
+      } // next word
+      lines.append("\n");
+    } // next (original) line
+
+    // remove last line break
+    lines.deleteCharAt(lines.length() - 1);
+    
+    return lines.toString();
+  } // end of wrap()
   
   /**
    * Default constructor

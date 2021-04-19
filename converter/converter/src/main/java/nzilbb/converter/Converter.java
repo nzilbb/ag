@@ -23,6 +23,7 @@ package nzilbb.converter;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetAdapter;
@@ -47,12 +48,18 @@ import java.util.stream.Collectors;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.GraphDeserializer;
@@ -65,6 +72,7 @@ import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 import nzilbb.util.GuiProgram;
 import nzilbb.util.IO;
+import nzilbb.util.ProgramDescription;
 import nzilbb.util.ProgramDescription;
 import nzilbb.util.Switch;
 
@@ -135,6 +143,9 @@ public abstract class Converter extends GuiProgram {
    */
   @Switch(value="Start processing immediately, rather than waiting for the user to press Convert",compulsory=false)
   public void setBatchMode(Boolean newBatchMode) { batchMode = newBatchMode; }
+
+  /** General information about the converter, for displaying to the user with the --help info */
+  protected String info = null;
 
   // UI
   protected JButton btnAdd = new JButton("+");
@@ -421,6 +432,13 @@ public abstract class Converter extends GuiProgram {
     // build UI
     frame_.getContentPane().setLayout(new BorderLayout());
 
+    JMenuBar menuBar = new JMenuBar();
+    frame_.setJMenuBar(menuBar);
+    JMenu helpMenu = new JMenu("Help");
+    menuBar.add(helpMenu);
+    JMenuItem about = new JMenuItem("About");
+    helpMenu.add(about);    
+
     JPanel pnlEast = new JPanel(new FlowLayout());
     btnAdd.setToolTipText("Add a file to the list");
     pnlEast.add(btnAdd);
@@ -450,6 +468,20 @@ public abstract class Converter extends GuiProgram {
       
     frame_.addWindowListener(new WindowAdapter() {
         public void windowClosing(WindowEvent e) { System.exit(0); }});
+
+    about.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          // create a JTextArea
+          JTextArea textArea = new JTextArea();
+          textArea.setText(help());
+          textArea.setCaretPosition(0);
+          textArea.setEditable(false);
+          JDialog dlg = new JOptionPane(new JScrollPane(textArea)).createDialog(frame_, "Help");
+          dlg.setSize(frame_.getSize());
+          dlg.setLocation(frame_.getLocation());
+          dlg.setVisible(true);
+        }
+      });
 
     final FileNameExtensionFilter fileFilter = getFileFilter();
     btnAdd.addActionListener(new ActionListener() {
@@ -531,36 +563,7 @@ public abstract class Converter extends GuiProgram {
       System.err.println("Nothing to do yet. (Try using --usage command line switch)");
     }
     if (getHelp()) {
-      System.err.println(getClass().getSimpleName() + " ("+(v==null?"version unknown":v)+")");
-      // display info about serialization parameters
-      Schema schema = getSchema();
-      GraphDeserializer deserializer = getDeserializer();
-      System.err.println();
-      System.err.println("Deserializing from " + deserializer.getDescriptor());
-      ParameterSet config = deserializer.configure(new ParameterSet(), schema);
-      if (config.size() == 0) {
-        System.err.println(" There are no configuration parameters for deserialization");
-      } else {
-        System.err.println(" Command-line configuration parameters for deserialization:");
-        for (Parameter p : config.values()) {
-          System.err.println(
-            "\t--" + p.getName() + "=" + p.getType().getSimpleName() + "\t" + p.getHint());
-        }
-      }
-      GraphSerializer serializer = getSerializer();
-      System.err.println();
-      System.err.println("Serializing to " + serializer.getDescriptor());
-      config = serializer.configure(new ParameterSet(), schema);
-      if (config.size() == 0) {
-        System.err.println(" There are no configuration parameters for serialization");
-      } else {
-        System.err.println(" Command-line configuration parameters for serialization:");
-        for (Parameter p : config.values()) {
-          System.err.println(
-            "\t--" + p.getName() + "=" + p.getType().getSimpleName() + "\t" + p.getHint());
-        }
-      }
-         
+      System.err.println(help());
       System.exit(1);
     }
          
@@ -583,6 +586,61 @@ public abstract class Converter extends GuiProgram {
       convertFiles();
     }
   }
+  
+  /**
+   * Generates help information.
+   * @return The help information for this converter, including general info, and info
+   * about the deserializer and serializer. 
+   */
+  public String help() {
+    StringBuilder helpInfo = new StringBuilder();
+    helpInfo.append(getClass().getSimpleName() + " ("+(v==null?"version unknown":v)+")");
+    helpInfo.append("\n");
+    @SuppressWarnings("unchecked")
+      ProgramDescription myAnnotation 
+      = (ProgramDescription)getClass().getAnnotation(ProgramDescription.class);
+    if (myAnnotation != null) {
+      helpInfo.append(myAnnotation.value());
+      helpInfo.append("\n");
+    }
+    // display general info, if there is any
+    if (info != null) {
+      helpInfo.append("\n");
+      helpInfo.append(wrap(info));
+      helpInfo.append("\n");
+    }
+    // display info about serialization parameters
+    Schema schema = getSchema();
+    GraphDeserializer deserializer = getDeserializer();
+    helpInfo.append("\nDeserializing from " + deserializer.getDescriptor());
+    helpInfo.append("\n");
+    ParameterSet config = deserializer.configure(new ParameterSet(), schema);
+    if (config.size() == 0) {
+      helpInfo.append(" There are no configuration parameters for deserialization\n");      
+    } else {
+      helpInfo.append(" Command-line configuration parameters for deserialization:\n");
+      for (Parameter p : config.values()) {
+        helpInfo.append(
+          wrap("\t--" + p.getName() + "=" + p.getType().getSimpleName() + "\t" + p.getHint()));
+        helpInfo.append("\n");
+      }
+    }
+    GraphSerializer serializer = getSerializer();
+    helpInfo.append("\nSerializing to " + serializer.getDescriptor());
+    helpInfo.append("\n");
+    config = serializer.configure(new ParameterSet(), schema);
+    if (config.size() == 0) {
+      helpInfo.append(" There are no configuration parameters for serialization\n");
+    } else {
+      helpInfo.append(" Command-line configuration parameters for serialization:\n");
+      for (Parameter p : config.values()) {
+        helpInfo.append(
+          wrap("\t--" + p.getName() + "=" + p.getType().getSimpleName() + "\t" + p.getHint()));
+        helpInfo.append("\n");
+      }
+    }
+    return helpInfo.toString();
+  } // end of help()
    
   /**
    * Converts the files in the <var>files</var> list.
