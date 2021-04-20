@@ -106,7 +106,9 @@ public class TrsToSlt extends Converter {
       +"\nSimilarly if you specify --pronounceCodePattern=WL:{0} then all lexical events will"
       +" become word codes like [WL:...]."
       +"\nTo disable these conversions, use \"--pronounceCodePattern= --lexCodePattern=\""
-      +" on the command line.";
+      +" on the command line."
+      +"\nThe format for dates is taken from your system settings;"
+      +" to override this, use the --dateFormat command line setting.";
   } // end of constructor
   
   public static void main(String argv[]) {
@@ -228,8 +230,8 @@ public class TrsToSlt extends Converter {
    */
   public ParameterSet deserializerConfiguration(ParameterSet config) {
     Schema schema = getSchema();
-    // config.get("programLayer").setValue(schema.getLayer("transcript_context"));
-    // config.get("topicLayer").setValue(schema.getLayer("transcript_subgroup"));
+    config.get("programLayer").setValue(schema.getLayer("transcript_context"));
+    config.get("topicLayer").setValue(schema.getLayer("transcript_subgroup"));
     return config;
   } // end of serializerConfiguration()
 

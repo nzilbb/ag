@@ -326,6 +326,13 @@ public class TestTranscriptSerialization {
                       Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
 
+      // check all utterance anchors have 'manual' confidence
+      for (Annotation u : g.all("utterance")) {
+         assertEquals("Utterance start confidence: " + u.getStart() + "-" + u.getEnd(),
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), u.getStart().getConfidence());
+         assertEquals("Utterance end confidence: " + u.getStart() + "-" + u.getEnd(),
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), u.getEnd().getConfidence());
+      }
    }
 
    @Test public void transcriptOnly()  throws Exception {

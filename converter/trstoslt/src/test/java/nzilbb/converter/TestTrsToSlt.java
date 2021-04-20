@@ -37,7 +37,7 @@ import nzilbb.editpath.MinimumEditPath;
 public class TestTrsToSlt {
 
   /**
-   * Simultate a return trip after slt-to-trs without SALT annotations, but with
+   * Simulate a return trip after slt-to-trs without SALT annotations, but with
    * <ul>
    *  <li> pronounce and lexical events </li>
    *  <li> word and utterance codes </li>
@@ -45,13 +45,34 @@ public class TestTrsToSlt {
    *  <li> named entities </li>
    * </ul>
    */
-  @Test public void pronounceLexicalCodesHeaderCommentsEntities() throws Exception {
+  @Test public void returnTripWithPronounceLexicalCodesHeaderCommentsEntities() throws Exception {
     File dir = getDir();
     File input = new File(dir, "transcriber.trs");
     TrsToSlt converter = new TrsToSlt();
+    converter.setSwitch("dateFormat", "d/M/yyyy");
     converter.convert(input);
     File actual = new File(dir, "transcriber.slt");
     File expected = new File(dir, "expected_transcriber.slt");
+    String differences = diff(expected, actual);
+    if (differences != null) {
+      fail(differences);
+    } else {
+      actual.delete();
+    }
+  }  
+  
+  /**
+   * Simultate a return trip after slt-to-trs including raw SALT annotations. 
+   * i.e. slt-to-trs did not parse them out.
+   */
+  @Test public void returnTripWithNotConventions() throws Exception {
+    File dir = getDir();
+    File input = new File(dir, "salt_no_conventions.trs");
+    TrsToSlt converter = new TrsToSlt();
+    converter.setSwitch("dateFormat", "d/M/yyyy");
+    converter.convert(input);
+    File actual = new File(dir, "salt_no_conventions.slt");
+    File expected = new File(dir, "expected_salt_no_conventions.slt");
     String differences = diff(expected, actual);
     if (differences != null) {
       fail(differences);

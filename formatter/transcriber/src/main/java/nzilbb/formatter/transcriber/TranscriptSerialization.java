@@ -863,7 +863,7 @@ public class TranscriptSerialization
     Graph graph = new Graph();
     graph.setId(getId());
     // creat the 0 anchor to prevent graph tagging from creating one with no confidence
-    graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_AUTOMATIC);
+    graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL);
 
     // add layers to the graph
     // we don't just copy the whole schema, because that would imply that all the extra layers
@@ -993,10 +993,10 @@ public class TranscriptSerialization
         anTopic.setConfidence(Constants.CONFIDENCE_MANUAL);
         anTopic.setStart(
           graph.getOrCreateAnchorAt(
-            section.getStartTimeAsDouble(), Constants.CONFIDENCE_AUTOMATIC));
+            section.getStartTimeAsDouble(), Constants.CONFIDENCE_MANUAL));
         anTopic.setEnd(
           graph.getOrCreateAnchorAt(
-            section.getEndTimeAsDouble(), Constants.CONFIDENCE_AUTOMATIC));
+            section.getEndTimeAsDouble(), Constants.CONFIDENCE_MANUAL));
         graph.addAnnotation(anTopic);
       }
 	 
@@ -1018,10 +1018,10 @@ public class TranscriptSerialization
           }
           anTurn.setStart(
             graph.getOrCreateAnchorAt(
-              turn.getStartTimeAsDouble(), Constants.CONFIDENCE_AUTOMATIC));
+              turn.getStartTimeAsDouble(), Constants.CONFIDENCE_MANUAL));
           anTurn.setEnd(
             graph.getOrCreateAnchorAt(
-              turn.getEndTimeAsDouble(), Constants.CONFIDENCE_AUTOMATIC));
+              turn.getEndTimeAsDouble(), Constants.CONFIDENCE_MANUAL));
           htTurnAnnotations.put(sSpeakerId, anTurn);
           graph.addAnnotation(anTurn);
         }
@@ -1049,7 +1049,7 @@ public class TranscriptSerialization
             anLine.setParentId(anTurn.getId())
               .setStart(
                 graph.getOrCreateAnchorAt(
-                  thisSync.getTimeAsDouble(), Constants.CONFIDENCE_AUTOMATIC));
+                  thisSync.getTimeAsDouble(), Constants.CONFIDENCE_MANUAL));
             graph.addAnnotation(anLine);
 		  
             // force Events to assign to their given Words where poss.
@@ -1187,7 +1187,7 @@ public class TranscriptSerialization
 		  
             anLine.setEnd(
               graph.getOrCreateAnchorAt(
-                thisSync.getEndTimeAsDouble(), Constants.CONFIDENCE_AUTOMATIC));
+                thisSync.getEndTimeAsDouble(), Constants.CONFIDENCE_MANUAL));
 		  
             if (lastWord != null) {
               Vector<Annotation> ending = new Vector<Annotation>(

@@ -11,11 +11,11 @@ $ Child, Examiner
 + Subgroup: TEST
 + Collect: 1
 - 00:00
-E I'm at Byron kindergarten on what date is it the 30th of March 2021?
+E I'm at Byron kindergarten on ((what date is it)) the 30th of March 2021?
 - 00:05
 E My name is X[REDACTED]. and I'm here with X[REDACTED], doing the oral language assessment. [CENSOR]
 - 00:12
-E Okay, so now Ada[PRON:VdV] it's your turn to tell the story.
+E Okay, so now Ada[WP:VdV] it's your turn to tell the story.
 - 00:16
 E You can look at the pictures when you're telling the story.
 - 00:19
@@ -24,34 +24,34 @@ E So let's start at the beginning.
 E What was the story about?
 + This is a plus line comment
 - 00:29
-C Um the kids the kids, {in-situ comment} they quickly put their gumboots on.
+C (Um the kids) the kid/s, {in-situ comment} they quickly put their gumboot/s on.
 + Bound morpheme tests
 - 00:34
-E saved muddy bushes buses putting girl's[EP:boy/z] wants goes shopping running dropped helped aunty's stopped leaving coming its lift.
+E save/ed mud/y bush/s bus/s put/ing girl/z[EP:boy/z] want/3s go/3s shop/ing run/ing drop/ed help/ed aunty/z stop/ed leave/ing come/ing it/z lift/*ed.
 - 00:37
 E Anything else?
 - 00:39
-C And please go for a walk? [EU]
+C And please go for a walk? :01 [EU]
 - 00:41
-C You need to put your gumboots on.
+C You need to put your gumboot/s on.
 - 00:46
-C It's too dark^
+C It/'s too dark^
 - 00:47
 E What happened in this one?
 - 00:52
-C And then it's heaps and heaps dark.
+C And then it/'s heaps_and_heaps|heaps dark.
 - 01:02
 E What happened next?
 - 01:03
-C Schnitzel_von_Krumm s* falled[EW] out the babies'[LEX:babies] nest.
+C %yip_yip Schnitzel_von_Krumm s* :02 falled|fall[EW] out *of the baby/s/z[WL:babies] nest.
 - 01:09
-E What happened next?
+E :03 What happened next?
 - 01:11
-C They put them it back in the nest um.
+C They put (them) it back in the nest (um).
 - 01:23
 C Bye bye little bird.
 - 01:26
 E Anything else that happened?
 - 01:33
-C X.
+C x.
 - 01:34
