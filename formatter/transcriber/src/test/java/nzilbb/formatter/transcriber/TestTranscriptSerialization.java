@@ -1,5 +1,5 @@
 //
-// Copyright 2016-2019 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -147,8 +147,9 @@ public class TestTranscriptSerialization {
       assertEquals(1, languages.length);
       assertEquals("en", languages[0]);
 
-      assertEquals("7", g.first("transcript_version").getLabel());
-      assertEquals("130825", g.first("transcript_version_date").getLabel());
+      assertEquals("8", g.first("transcript_version").getLabel());
+      assertEquals("Version date in ISO format",
+                   "2021-04-20", g.first("transcript_version_date").getLabel());
 
       // participants     
       assertEquals(2, g.all("who").length);
@@ -296,10 +297,28 @@ public class TestTranscriptSerialization {
       assertEquals("Language tag tags the right end word",
                    "está", language[1].getEnd().endOf("word").iterator().next().getLabel());
 
-      // TODO should test these
-      assertEquals(0, g.all("entities").length);
-      assertEquals(0, g.all("lexical").length);
-      assertEquals(0, g.all("pronounce").length);
+      Annotation[] entities = g.all("entities");
+      assertEquals("There is one named entity tagged", 1, entities.length);
+      assertEquals("Entity tag has the right label",
+                   "pers", entities[0].getLabel());
+      assertEquals("Entity tag starts at Cyril",
+                   "Cyril", entities[0].getStart().startOf("word").iterator().next().getLabel());
+      assertEquals("Entity tag ends at Cyril",
+                   "Cyril", entities[0].getEnd().endOf("word").iterator().next().getLabel());
+      
+      Annotation[] lexical = g.all("lexical");
+      assertEquals("There is one lexical tag", 1, lexical.length);
+      assertEquals("Lexical tag has the right label",
+                   "phone", lexical[0].getLabel());
+      assertEquals("Lexical tag tags telephone",
+                   "telephones", lexical[0].tagsOn("word")[0].getLabel());
+
+      Annotation[] pronounce = g.all("pronounce");
+      assertEquals("There is one pronounce tag", 1, pronounce.length);
+      assertEquals("Pronounce tag has the right label",
+                   "lEd@", pronounce[0].getLabel());
+      assertEquals("Pronounce tag tags letter",
+                   "letter", pronounce[0].tagsOn("word")[0].getLabel());
       
       // check all annotations have 'manual' confidence
       for (Annotation a : g.getAnnotationsById().values()) {
