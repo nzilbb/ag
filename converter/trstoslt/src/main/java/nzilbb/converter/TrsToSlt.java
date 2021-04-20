@@ -23,14 +23,19 @@ package nzilbb.converter;
 
 import java.text.MessageFormat;
 import java.text.ParseException;
+import java.util.LinkedHashSet;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import nzilbb.ag.Annotation;
 import nzilbb.ag.Constants;
 import nzilbb.ag.Graph;
 import nzilbb.ag.Layer;
 import nzilbb.ag.Schema;
+import nzilbb.ag.TransformationException;
 import nzilbb.ag.serialize.GraphDeserializer;
 import nzilbb.ag.serialize.GraphSerializer;
+import nzilbb.ag.util.DefaultOffsetGenerator;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 import nzilbb.formatter.salt.SltSerialization;
@@ -39,11 +44,11 @@ import nzilbb.util.ProgramDescription;
 import nzilbb.util.Switch;
 
 /**
- * Converts SALT .slt transcripts to Transcriber .trs transcripts.
+ * Converts Transcriber .trs transcripts to SALT .slt transcripts.
  * @author Robert Fromont robert@fromont.net.nz
  */
-@ProgramDescription(value="Converts SALT .slt transcripts to Transcriber .trs files",arguments="file1.slt file2.slt ...")
-public class SltToTrs extends Converter {
+@ProgramDescription(value="Converts Transcriber .trs files to SALT .slt transcripts",arguments="file1.trs file2.trs ...")
+public class TrsToSlt extends Converter {
   
   /**
    * Pattern for 'pronounce' word codes.
@@ -61,7 +66,7 @@ public class SltToTrs extends Converter {
    * @param newPronounceCodePattern Pattern for 'pronounce' word codes.
    */
   @Switch("Pattern to match for converting word codes into pronounce events. Default is PRON:{0}")
-  public SltToTrs setPronounceCodePattern(String newPronounceCodePattern) { pronounceCodePattern = newPronounceCodePattern; return this; }
+  public TrsToSlt setPronounceCodePattern(String newPronounceCodePattern) { pronounceCodePattern = newPronounceCodePattern; return this; }
   
   /**
    * Pattern for 'lexical' word codes.
@@ -79,43 +84,38 @@ public class SltToTrs extends Converter {
    * @param newLexicalCodePattern Pattern for 'lexical' word codes.
    */
   @Switch("Pattern to match for converting word codes into lexical events. Default is LEX:{0}")
-  public SltToTrs setLexicalCodePattern(String newLexicalCodePattern) { lexicalCodePattern = newLexicalCodePattern; return this; }
+  public TrsToSlt setLexicalCodePattern(String newLexicalCodePattern) { lexicalCodePattern = newLexicalCodePattern; return this; }
   
   /**
    * Default constructor.
    */
-  public SltToTrs() {
-    setDefaultWindowTitle("SALT to Transcriber converter");
-    // default to false, as it's what users of this converter most likely expect,
-    // and it means that if the idea is a round-trip conversion, inline annotations are not lost
-    setSwitch("parseInlineConventions", "false");
+  public TrsToSlt() {
+    setDefaultWindowTitle("Transcriber to SALT converter");
     
-    info = "The SALT 'Context' header becomes the Transcriber 'Program'."
-      +"\nThe SALT 'Subgroup' header becomes the Transcriber 'Topic'."
-      +"\nSALT meta-data that is not supported by Transcriber is added in comments"
-      +" at the beginning of the transcript."
+    info = "The Transcriber 'Program' becomes the SALT 'Context' header."
+      +"\nThe first Transcriber 'Topic' becomes the SALT 'Subgroup' header."
+      +"\nComments at the beginning of transcript that start with + become SALT meta-data headers."
       +"\nBy default, inline annotations (mazes, codes, bound morphemes, etc.)"
       +" are not iterpreted. If you want them to be processed, use --parseInlineConventions"
-      +"\nBy default certain SALT word codes are converted into Transcriber 'pronounce'"
-      +" or 'lexical' events - i.e. those of the form \"[PRON:...]\" and \"[LEX:...]\""
-      +" respectively."
+      +"\nBy default  Transcriber 'pronounce' and 'lexical' events are converted to be "
+      +" certain SALT word codes, of the form \"[PRON:...]\" and \"[LEX:...]\" respectively."
       +" Use the command-line switches --pronounceCodePattern and --lexicalCodePattern"
       +" to control this behaviour."
-      +"\ne.g. if you specify --pronounceCodePattern=WP:{0} then all word codes like"
-      +" [WP:...] will be pronounce events in the Transcriber transcript."
-      +"\nSgimilarly if you specify --pronounceCodePattern=WL:{0} then all word codes like"
-      +" [WL:...] will be lexical events in the Transcriber transcript."
+      +"\ne.g. if you specify --pronounceCodePattern=WP:{0} then all pronounce events will"
+      +" become word codes like [WP:...]"
+      +"\nSimilarly if you specify --pronounceCodePattern=WL:{0} then all lexical events will"
+      +" become word codes like [WL:...]."
       +"\nTo disable these conversions, use \"--pronounceCodePattern= --lexCodePattern=\""
       +" on the command line.";
   } // end of constructor
   
   public static void main(String argv[]) {
-    new SltToTrs().mainRun(argv);
+    new TrsToSlt().mainRun(argv);
   }
   
   /** File filter for identifying files of the correct type */
   protected FileNameExtensionFilter getFileFilter() {
-    return new FileNameExtensionFilter("SALT transcripts", "slt");
+    return new FileNameExtensionFilter("Transcriber transcripts", "trs");
   }
 
   /**
@@ -123,7 +123,7 @@ public class SltToTrs extends Converter {
    * @return The deserializer to use.
    */
   public GraphDeserializer getDeserializer() {
-    return new SltSerialization();
+    return new TranscriptSerialization();
   }
   
   /**
@@ -131,7 +131,7 @@ public class SltToTrs extends Converter {
    * @return The serializer to use.
    */
   public GraphSerializer getSerializer() {
-    return new TranscriptSerialization();
+    return new SltSerialization();
   }
   
   /**
@@ -189,20 +189,8 @@ public class SltToTrs extends Converter {
       new Layer("participant_ethnicity", "Ethnicity").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId(schema.getParticipantLayerId()).setParentIncludes(true));
-    schema.addLayer(
+    schema.addLayer( // TODO comment pauses
       new Layer("pause", "Pauses").setAlignment(Constants.ALIGNMENT_INTERVAL)
-      .setPeers(true).setPeersOverlap(false).setSaturated(false)
-      .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
-    schema.addLayer(
-      new Layer("cunit", "C-Unit").setAlignment(Constants.ALIGNMENT_INTERVAL)
-      .setPeers(true).setPeersOverlap(false).setSaturated(false)
-      .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
-    schema.addLayer(
-      new Layer("parenthetical", "Parentheticals").setAlignment(Constants.ALIGNMENT_INTERVAL)
-      .setPeers(true).setPeersOverlap(false).setSaturated(false)
-      .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
-    schema.addLayer(
-      new Layer("repetition", "Repetitions").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(false)
       .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
     schema.addLayer(
@@ -214,10 +202,6 @@ public class SltToTrs extends Converter {
       .setPeers(true).setPeersOverlap(false).setSaturated(false)
       .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
     schema.addLayer(
-      new Layer("maze", "Mazes").setAlignment(Constants.ALIGNMENT_INTERVAL)
-      .setPeers(true).setPeersOverlap(false).setSaturated(false)
-      .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
-    schema.addLayer(
       new Layer("noise", "Verbal sound effects etc.").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
@@ -225,22 +209,7 @@ public class SltToTrs extends Converter {
       new Layer("entity", "Proper Names").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
-    schema.addLayer(
-      new Layer("omission", "Omissions").setAlignment(Constants.ALIGNMENT_INTERVAL)
-      .setPeers(true).setPeersOverlap(false).setSaturated(false)
-      .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
-    schema.addLayer(
-      new Layer("root", "Root form").setAlignment(Constants.ALIGNMENT_NONE)
-      .setPeers(false).setPeersOverlap(false).setSaturated(true)
-      .setParentId(schema.getWordLayerId()).setParentIncludes(true));
-    schema.addLayer(
-      new Layer("bound_morpheme", "Bound Morphemes").setAlignment(Constants.ALIGNMENT_NONE)
-      .setPeers(false).setPeersOverlap(false).setSaturated(true)
-      .setParentId(schema.getWordLayerId()).setParentIncludes(true));
-    schema.addLayer(
-      new Layer("partial_word", "Partial Words").setAlignment(Constants.ALIGNMENT_NONE)
-      .setPeers(false).setPeersOverlap(false).setSaturated(true)
-      .setParentId(schema.getWordLayerId()).setParentIncludes(true));
+    // no partial_word layer, so that the ~ -> * transformation occurs in
     schema.addLayer(
       new Layer("pronounce", "Pronunciation tags").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
@@ -257,16 +226,28 @@ public class SltToTrs extends Converter {
    * @param config The default configuration.
    * @return The new configuration.
    */
-  public ParameterSet serializerConfiguration(ParameterSet config) {
+  public ParameterSet deserializerConfiguration(ParameterSet config) {
     Schema schema = getSchema();
-    config.get("programLayer").setValue(schema.getLayer("transcript_context"));
-    config.get("topicLayer").setValue(schema.getLayer("transcript_subgroup"));
+    // config.get("programLayer").setValue(schema.getLayer("transcript_context"));
+    // config.get("topicLayer").setValue(schema.getLayer("transcript_subgroup"));
     return config;
   } // end of serializerConfiguration()
 
   /**
-   * Make dob, ca, ethnicity, collection, location, errors and codes into comments, and
-   * create lexical/pron word tags if configured.
+   * Map SALT Context to Transcriber Program, and SALT Subgroup to Transcriber Topic.
+   * @param config The default configuration.
+   * @return The new configuration.
+   */
+  public ParameterSet serializerConfiguration(ParameterSet config) {
+    Schema schema = getSchema();
+    // config.get("programLayer").setValue(schema.getLayer("transcript_context"));
+    // config.get("topicLayer").setValue(schema.getLayer("transcript_subgroup"));
+    return config;
+  } // end of serializerConfiguration()
+
+  /**
+   * Parse comments for dob, ca, ethnicity, collection, location, errors and codes, and
+   * create lexical/pron word codes if configured.
    * @param transcripts
    */
   @Override
@@ -277,105 +258,167 @@ public class SltToTrs extends Converter {
       : new MessageFormat(pronounceCodePattern);
     MessageFormat lexicalFormat = lexicalCodePattern.length()==0?null
       : new MessageFormat(lexicalCodePattern);
-    for (Graph transcript : transcripts) {
-      if (pronounceFormat != null) {
-        transcript.addLayer(schema.getLayer("pronounce"));
-      }
-      if (lexicalFormat != null) {
-        transcript.addLayer(schema.getLayer("lexical"));
-      }
-      
-      for (Annotation code : transcript.all("code")) {
-        
-        if (pronounceFormat != null) { // some codes are pronounce events
-          try { // does it match the pattern?
-            Object[] label = pronounceFormat.parse(code.getLabel());
-            if (label.length > 0) {
-              // the code matches the pattern, does the code tag a word?
-              Annotation[] word = code.tagsOn(transcript.getSchema().getWordLayerId());
-              if (word.length > 0) {
-                // create a pronounce tag
-                transcript.createTag(word[0], "pronounce", (String)label[0]);
-                continue;
-              }
-            }
-          } catch(ParseException exception) {}
-        }
-        
-        if (lexicalFormat != null) { // some codes are lexical events
-          try { // does it match the pattern?
-            Object[] label = lexicalFormat.parse(code.getLabel());
-            if (label.length > 0) {
-              // the code matches the pattern, does the code tag a word?
-              Annotation[] word = code.tagsOn(transcript.getSchema().getWordLayerId());
-              if (word.length > 0) {
-                // create a lexical tag
-                transcript.createTag(word[0], "lexical", (String)label[0]);
-                continue;
-              }
-            }
-          } catch(ParseException exception) {}
-        }
-        
-        transcript.createTag(code, "comment", "["+code.getLabel()+"]");
-      } // next code
-      for (Annotation code : transcript.all("error")) {
-        transcript.createTag(code, "comment", "["+code.getLabel()+"]");
-      } // next code
-
-      
-      // add meta-data as comments at the beginning
-      // so that can be parsed back out to slt if there's a round-trip
-      String startId = transcript.getStart().getId();
-      // dob
-      Annotation metadata = transcript.first("participant_dob");
-      if (metadata != null) {
-        transcript.addAnnotation(new Annotation().setLayerId("comment")
-                                 .setLabel("+ Dob: " + metadata.getLabel())
-                                 .setStartId(startId).setEndId(startId));
-      }
-      // ethnicity
-      metadata = transcript.first("participant_ethnicity");
-      if (metadata != null) {
-        transcript.addAnnotation(new Annotation().setLayerId("comment")
-                                 .setLabel("+ Ethnicity: " + metadata.getLabel())
-                                 .setStartId(startId).setEndId(startId));
-      }
-      // participantId
-      metadata = transcript.first("participant_id");
-      if (metadata != null) {
-        transcript.addAnnotation(new Annotation().setLayerId("comment")
-                                 .setLabel("+ ParticipantId: " + metadata.getLabel())
-                                 .setStartId(startId).setEndId(startId));
-      }
-      // ca
-      metadata = transcript.first("transcript_ca");
-      if (metadata != null) {
-        transcript.addAnnotation(new Annotation().setLayerId("comment")
-                                 .setLabel("+ Ca: " + metadata.getLabel())
-                                 .setStartId(startId).setEndId(startId));
-      }
-      // collection
-      metadata = transcript.first("transcript_collect");
-      if (metadata != null) {
-        transcript.addAnnotation(new Annotation().setLayerId("comment")
-                                 .setLabel("+ Collect: " + metadata.getLabel())
-                                 .setStartId(startId).setEndId(startId));
-      }
-      // location
-      metadata = transcript.first("transcript_location");
-      if (metadata != null) {
-        transcript.addAnnotation(new Annotation().setLayerId("comment")
-                                 .setLabel("+ Location: " + metadata.getLabel())
-                                 .setStartId(startId).setEndId(startId));
+    Pattern codeComment = Pattern.compile("\\[([^\\]]+)\\]");
+    DefaultOffsetGenerator defaultOffsetGenerator = new DefaultOffsetGenerator();
+    for (Graph transcript : transcripts) { // for each transcript (probably only one)
+      transcript.setSchema(getSchema());
+      transcript.trackChanges();
+      try {
+        transcript = defaultOffsetGenerator.transform(transcript);
+      } catch(TransformationException exception) {
+        System.err.println(transcript.getId() + ": " + exception.getMessage());
       }
 
+      // ensure entities share starts/ends with words, so that proper names are correctly delimited
+      for (Annotation e : transcript.all("entity")) {
+
+        // start shares with word?
+        if (e.getStart().startOf(schema.getWordLayerId()).size() == 0) { // doesn't start at a word
+          LinkedHashSet<Annotation> startingUtterances
+            = e.getStart().startOf(schema.getUtteranceLayerId());
+          if (startingUtterances.size() > 0) {
+            Annotation utterance = startingUtterances.iterator().next();
+            // relink the entity to the start of the first word
+            Annotation[] words = utterance.all(schema.getWordLayerId());
+            if (words.length > 0) {
+              e.setStart(words[0].getStart());
+            }
+          }
+        }
+
+        // end shares with word?
+        if (e.getEnd().endOf(schema.getWordLayerId()).size() == 0) { // doesn't end at a word
+          LinkedHashSet<Annotation> endingUtterances
+            = e.getEnd().endOf(schema.getUtteranceLayerId());
+          if (endingUtterances.size() > 0) {
+            Annotation utterance = endingUtterances.iterator().next();
+            // relink the entity to the end of the last word
+            Annotation[] words = utterance.all(schema.getWordLayerId());
+            if (words.length > 0) {
+              e.setEnd(words[words.length-1].getEnd());
+            }
+          }
+        }
+        
+      } // next entity
+
+      // parse header comments and codes
+      Annotation participant = transcript.first(schema.getParticipantLayerId());
+      String[] headerToLayer = {
+        "+ Dob: ", "participant_dob",
+        "+ Ethnicity: ", "participant_ethnicity",
+        "+ ParticipantId: ", "participant_id",
+        "+ Ca: ", "transcript_ca",
+        "+ Collect: ", "transcript_collect",
+        "+ Location: ", "participant_location" };
+      for (Annotation comment : transcript.all("comment")) {
+
+        // header comment?
+        for (int i = 0; i < headerToLayer.length; i += 2) {
+          String headerPrefix = headerToLayer[i];
+          String layerId = headerToLayer[i+1];
+          if (comment.getLabel().startsWith(headerPrefix)) {
+            Annotation parent = layerId.startsWith("participant")?participant:transcript;
+            transcript.createTag(
+              parent, layerId, comment.getLabel().substring(headerPrefix.length()));
+            comment.destroy();            
+          }
+        } // next possible header comment
+
+        // code?
+        Matcher codeMatcher = codeComment.matcher(comment.getLabel());
+        if (codeMatcher.matches()) {
+          String codeLabel = codeMatcher.group(1);
+          Annotation parent = null;
+          LinkedHashSet<Annotation> word
+            = comment.getStart().endOf(transcript.getSchema().getWordLayerId());
+          if (word.size() > 0) {
+            parent = word.iterator().next();
+          } else {
+            LinkedHashSet<Annotation> utterance
+              = comment.getStart().endOf(transcript.getSchema().getUtteranceLayerId());
+            if (utterance.size() > 0) {
+              parent = utterance.iterator().next();
+            }
+          }
+          if (parent != null) {
+            Annotation code = transcript.createTag(parent, "code", codeLabel);
+            comment.destroy();
+          }
+        }
+      } // next comment
       
-      // also ensure that the subgroup parent is set TODO find out why it's not
-      Annotation subgroup = transcript.first("transcript_subgroup");
-      if (subgroup != null) {
-        subgroup.setParent(transcript);
-      }
+      if (pronounceFormat != null) { // some codes are pronounce events
+        for (Annotation code : transcript.all("pronounce")) {
+          // does the code tag a word?
+          Annotation[] word = code.tagsOn(transcript.getSchema().getWordLayerId());
+          if (word.length > 0) {
+            // create a code tag
+            Object[] codeLabel = { code.getLabel() }; 
+            transcript.createTag(word[0], "code", pronounceFormat.format(codeLabel));
+          }
+        } // next code
+      }  // some codes are pronounce events
+        
+      if (lexicalFormat != null) { // some codes are lexical events
+        for (Annotation code : transcript.all("lexical")) {        
+          // does the code tag a word?
+          Annotation[] word = code.tagsOn(transcript.getSchema().getWordLayerId());
+          if (word.length > 0) {
+            // create a code tag
+            Object[] codeLabel = { code.getLabel() }; 
+            transcript.createTag(word[0], "code", lexicalFormat.format(codeLabel));
+          }
+        } // next code
+      }  // some codes are lexical events
+      
+      // parse meta-data as comments at the beginning TODO
+      
+      // // so that can be parsed back out to slt if there's a round-trip
+      // String startId = transcript.getStart().getId();
+      // // dob
+      // Annotation metadata = transcript.first("participant_dob");
+      // if (metadata != null) {
+      //   transcript.addAnnotation(new Annotation().setLayerId("comment")
+      //                            .setLabel("+ Dob: " + metadata.getLabel())
+      //                            .setStartId(startId).setEndId(startId));
+      // }
+      // // ethnicity
+      // metadata = transcript.first("participant_ethnicity");
+      // if (metadata != null) {
+      //   transcript.addAnnotation(new Annotation().setLayerId("comment")
+      //                            .setLabel("+ Ethnicity: " + metadata.getLabel())
+      //                            .setStartId(startId).setEndId(startId));
+      // }
+      // // participantId
+      // metadata = transcript.first("participant_id");
+      // if (metadata != null) {
+      //   transcript.addAnnotation(new Annotation().setLayerId("comment")
+      //                            .setLabel("+ ParticipantId: " + metadata.getLabel())
+      //                            .setStartId(startId).setEndId(startId));
+      // }
+      // // ca
+      // metadata = transcript.first("transcript_ca");
+      // if (metadata != null) {
+      //   transcript.addAnnotation(new Annotation().setLayerId("comment")
+      //                            .setLabel("+ Ca: " + metadata.getLabel())
+      //                            .setStartId(startId).setEndId(startId));
+      // }
+      // // collection
+      // metadata = transcript.first("transcript_collect");
+      // if (metadata != null) {
+      //   transcript.addAnnotation(new Annotation().setLayerId("comment")
+      //                            .setLabel("+ Collect: " + metadata.getLabel())
+      //                            .setStartId(startId).setEndId(startId));
+      // }
+      // // location
+      // metadata = transcript.first("transcript_location");
+      // if (metadata != null) {
+      //   transcript.addAnnotation(new Annotation().setLayerId("comment")
+      //                            .setLabel("+ Location: " + metadata.getLabel())
+      //                            .setStartId(startId).setEndId(startId));
+      // }
+      transcript.commit();
     } // next transcript
   } // end of processGraphs()
    
@@ -391,4 +434,4 @@ public class SltToTrs extends Converter {
   } // end of getLayersToSerialize()
 
   private static final long serialVersionUID = -1;
-} // end of class SltToTrs
+} // end of class TrsToSlt

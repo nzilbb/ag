@@ -36,11 +36,11 @@ public class OrthographyClumper implements GraphTransformer {
    
   /**
    * A regular expression that identifies a non-orthographic character - the default is
-   * <code>"[^\\p{javaLetter}\\p{javaDigit}]"</code> 
+   * <code>"[\\p{Punct}&&[^_]]"</code> 
    * @see #getNonOrthoCharacterPattern()
    * @see #setNonOrthoCharacterPattern(String)
    */
-  protected String nonOrthoCharacterPattern = "[\\p{Punct}]";
+  protected String nonOrthoCharacterPattern = "[\\p{Punct}&&[^_]]";
   /**
    * Getter for {@link #nonOrthoCharacterPattern}: A regular expression that identifies a
    * non-orthographic character. 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE Trans SYSTEM "trans-14.dtd">
-<Trans scribe="Robert Fromont" audio_filename="mop03-2b-05" version="7" version_date="130825" xml:lang="en">
+<Trans scribe="Robert Fromont" audio_filename="mop03-2b-05" version="8" version_date="210420" xml:lang="en">
 <Topics>
 <Topic id="to1" desc="adult-decadeplus-friend-event"/>
 <Topic id="to2" desc="adult-decadeplus-friend-general"/>
@@ -139,13 +139,21 @@
 <Section type="report" startTime="0.0" endTime="23.563" topic="to85">
 <Turn speaker="spk2" startTime="0" endTime="23.563">
 <Sync time="0"/>
-and ah . Cyril would arrive at the door
+and ah . 
+<Event desc="pers" type="entities" extent="begin"/>
+Cyril
+<Event desc="pers" type="entities" extent="end"/>
+ would arrive at the door
 <Sync time="5.75"/>
-with this letter for Mum
+with this letter
+<Event desc="lEd@" type="pronounce" extent="previous"/>
+ for Mum
 <Sync time="6.907"/>
 and and then there was a message .
 <Sync time="9.126"/>
-and I think they both had telephones .
+and I think they both had telephones
+<Event desc="phone" type="lexical" extent="previous"/>
+ .
 <Sync time="12.126"/>
 ah at that time
 <Sync time="13.22"/>
@@ -319,9 +327,11 @@ learned all the . disaster --
 </Turn>
 <Turn speaker="spk1" startTime="181.652" endTime="183.995">
 <Sync time="181.652"/>
+
 <Event desc="es" type="language" extent="begin"/>
 vaya
 <Event desc="es" type="language" extent="end"/>
+
 </Turn>
 </Section>
 <Section type="report" topic="to60" startTime="183.995" endTime="197.181">
@@ -337,6 +347,7 @@ and have you got all that ?
 <Sync time="188.932"/>
 again
 <Event desc="test" type="noise" extent="instantaneous"/>
+
 </Turn>
 <Turn speaker="spk2" startTime="189.464" endTime="191.682">
 <Sync time="189.464"/>
@@ -348,6 +359,7 @@ well I turned it over --
 <Sync time="193.65"/>
 I thought it might be something to do with
 <Sync time="195.025"/>
+
 <Event desc="es" type="language" extent="begin"/>
 donde está
 <Event desc="es" type="language" extent="end"/>

@@ -907,7 +907,12 @@ public class TranscriptSerialization
         .setConfidence(Constants.CONFIDENCE_MANUAL);
     }
     if (getVersionDate() != null && getVersionDate().length() > 0 && versionDateLayer != null) {
-      graph.createTag(graph, versionDateLayer.getId(), getVersionDate())
+      String date = getVersionDate();
+      try {
+        date = isoDateFormat.format(trsDateFormat.parse(date));
+      } catch(Exception exception) {
+      }
+      graph.createTag(graph, versionDateLayer.getId(), date)
         .setConfidence(Constants.CONFIDENCE_MANUAL);
     }
     if (getProgram() != null && getProgram().length() > 0 && programLayer != null) {
@@ -915,7 +920,12 @@ public class TranscriptSerialization
         .setConfidence(Constants.CONFIDENCE_MANUAL);
     }
     if (getAirDate() != null && getAirDate().length() > 0 && airDateLayer != null) {
-      graph.createTag(graph, airDateLayer.getId(), getAirDate())
+      String date = getAirDate();
+      try {
+        date = isoDateFormat.format(trsDateFormat.parse(date));
+      } catch(Exception exception) {
+      }
+      graph.createTag(graph, airDateLayer.getId(), date)
         .setConfidence(Constants.CONFIDENCE_MANUAL);
     }
     if (getLanguage() != null && getLanguage().length() > 0 && transcriptLanguageLayer != null) {

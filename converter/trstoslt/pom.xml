@@ -8,21 +8,21 @@
   </parent>
 
   <groupId>nzilbb</groupId>
-  <artifactId>slt-to-trs</artifactId>
-  <version>0.1.2</version>
-  <name>nzilbb.converter.slttotrs</name>
-  <description>Utility for converting SALT transcripts to Transcriber transcripts</description>
+  <artifactId>trs-to-slt</artifactId>
+  <name>nzilbb.converter.trstoslt</name>
+  <version>0.1.0</version>
+  <description>Utility for converting Transcriber transcripts to SALT transcripts</description>
 
   <properties>
     
-    <input.package>nzilbb.formatter.salt</input.package>
-    <input.path>nzilbb/formatter/salt/</input.path>
-    <input.version>0.1.2</input.version>
+    <input.package>nzilbb.formatter.transcriber</input.package>
+    <input.path>nzilbb/formatter/transcriber/</input.path>
+    <input.version>2.0.2</input.version>    
     
-    <output.package>nzilbb.formatter.transcriber</output.package>
-    <output.path>nzilbb/formatter/transcriber/</output.path>
-    <output.version>2.0.2</output.version>    
-
+    <output.package>nzilbb.formatter.salt</output.package>
+    <output.path>nzilbb/formatter/salt/</output.path>
+    <output.version>0.1.2</output.version>
+    
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -60,7 +60,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>nzilbb.converter.SltToTrs</mainClass>
+              <mainClass>nzilbb.converter.TrsToSlt</mainClass>
             </manifest>
             <!-- ensure version is available to the serializations -->
             <manifestSections>
@@ -144,7 +144,7 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <!--trimStackTrace>false</trimStackTrace-->
+          <trimStackTrace>false</trimStackTrace>
         </configuration>
       </plugin>
     </plugins>

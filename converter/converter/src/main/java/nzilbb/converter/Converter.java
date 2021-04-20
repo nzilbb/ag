@@ -407,7 +407,10 @@ public abstract class Converter extends GuiProgram {
         }
       },
       warning -> { System.out.println(inputFile.getName() + ": " + warning); },
-      exception -> System.err.println(exception.toString()));
+      exception -> {
+        System.err.println(exception.toString());
+        exception.printStackTrace(System.err);
+      });
     
     if (verbose) System.out.println("Finished " + inputFile.getPath());
   } // end of convert()

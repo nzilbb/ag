@@ -2116,6 +2116,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
     Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer,
     Consumer<String> warnings, Consumer<SerializationException> errors) 
     throws SerializerNotConfiguredException {
+    reset();
     graphCount = graphs.getExactSizeIfKnown();
     graphs.forEachRemaining(graph -> {
         if (getCancelling()) return;
@@ -2158,7 +2159,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
 
       Schema schema = graph.getSchema();
 
-      // partial words X~ to X*
+      // partial words w~ to w*
       if (partialWordLayer == null) {
         new ConventionTransformer(
           schema.getWordLayerId(), "(.+)~", "$1*", null, null)
@@ -2420,7 +2421,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       Anchor lastUtteranceEnd = null;
 
       // for each utterance
-      Pattern tokenPattern = Pattern.compile("^(?<word>\\w+)(?<punctuation>\\W*)$");
+      Pattern tokenPattern = Pattern.compile("^(?<word>\\w+)(?<punctuation>[\\p{Punct}&&[^']]*)$");
       String delimiter = " ";
       for (Annotation utterance : utterancesByAnchor) {
         if (cancelling) break;
@@ -2537,12 +2538,14 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
 
           // split word from any trailing punctuation
           String word = token.getLabel();
+          //System.out.println("word before: " + word);
           String trailingPuncuation = "";
           Matcher tokenParts = tokenPattern.matcher(word);
           if (tokenParts.matches()) {
             word = tokenParts.group("word");
             trailingPuncuation = tokenParts.group("punctuation");
           }
+          //System.out.println("word after: \"" + word + "\" + \"" + trailingPuncuation + "\"");
           
           // _ -> X (unintelligible)
           if (word.equals("_")) word = "X";
