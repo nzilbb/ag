@@ -379,7 +379,7 @@ public class Sync
 	       {
 		  String sToken = sText.substring(iCurrentSeek, iNextSpace);
 		  // if it's really a word, not "." or similar
-		  if (sToken.replaceAll("[^\\p{javaLetter}\\p{javaDigit}]", "").length() > 0
+		  if (sToken.replaceAll("[^\\p{javaLetter}\\p{javaDigit}_]", "").length() > 0
 		      // if there's text after an event, it starts a new word
 		      // otherwise order of instantaneous annotations is lost when
 		      // converting to AG
