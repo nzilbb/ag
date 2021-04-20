@@ -10,48 +10,48 @@ $ Child, Examiner
 + Context: Nar
 + Subgroup: TEST
 + Collect: 1
-- 00:00
+- 0:00
 E I'm at Byron kindergarten on what date is it the 30th of March 2021?
-- 00:05
+- 0:05
 E My name is X[REDACTED]. and I'm here with X[REDACTED], doing the oral language assessment. [CENSOR]
-- 00:12
+- 0:12
 E Okay, so now Ada[PRON:VdV] it's your turn to tell the story.
-- 00:16
+- 0:16
 E You can look at the pictures when you're telling the story.
-- 00:19
+- 0:19.5
 E So let's start at the beginning.
-- 00:23
+- 0:23
 E What was the story about?
 + This is a plus line comment
-- 00:29
+- 0:29
 C Um the kids the kids, {in-situ comment} they quickly put their gumboots on.
 + Bound morpheme tests
-- 00:34
+- 0:34
 E saved muddy bushes buses putting girl's[EP:boy/z] wants goes shopping running dropped helped aunty's stopped leaving coming its lift.
-- 00:37
+- 0:37
 E Anything else?
-- 00:39
+- 0:39
 C And please go for a walk? [EU]
-- 00:41
+- 0:41
 C You need to put your gumboots on.
-- 00:46
+- 0:46
 C It's too dark^
-- 00:47
+- 0:47
 E What happened in this one?
-- 00:52
+- 0:52
 C And then it's heaps and heaps dark.
-- 01:02
+- 1:02
 E What happened next?
-- 01:03
+- 1:03
 C Schnitzel_von_Krumm s* falled[EW] out the babies'[LEX:babies] nest.
-- 01:09
+- 1:09
 E What happened next?
-- 01:11
+- 1:11
 C They put them it back in the nest um.
-- 01:23
+- 1:23
 C Bye bye little bird.
-- 01:26
+- 1:26
 E Anything else that happened?
-- 01:33
+- 1:33
 C X.
-- 01:34
+- 1:34

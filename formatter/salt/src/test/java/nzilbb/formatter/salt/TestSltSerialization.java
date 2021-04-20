@@ -287,7 +287,7 @@ public class TestSltSerialization {
 
     // check turn timestamps
     double[] turnTimeStamps = {
-      0, 29, 34, 39, 47, 52, 62, 63, 69, 71, 86, 93 };
+      0, 29, 34.56, 39, 47, 52, 62, 63, 69, 71, 86, 93 };
     Annotation lastTurn = null;
     assertEquals("Examiner is first", "ADAL-Examiner", turns[0].getLabel());
     for (int t = 0; t < turns.length; t++) {
@@ -317,7 +317,7 @@ public class TestSltSerialization {
     
     // check utterance timestamps and speakers
     double[] utteranceTimeStamps = {
-      0, 5, 12, 16, 20, 24, 29, 34, 37, 39, 41, 46, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
+      0, 5, 12, 16, 20, 24, 29, 34.56, 37, 39, 41, 46, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
     String[] utteranceSpeakers = {
       "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner",
       "ADAL-Child",
@@ -494,7 +494,7 @@ public class TestSltSerialization {
     assertEquals("second comment label",
                  "Bound morpheme tests", comments[1].getLabel());
     assertEquals("second comment alignment",
-                 Double.valueOf(34.0), comments[1].getStart().getOffset());
+                 Double.valueOf(34.56), comments[1].getStart().getOffset());
     assertEquals("third comment label",
                  "in-situ comment", comments[2].getLabel());
     assertEquals("third comment preceding word: " + comments[2].getStart().endOf("word"),
@@ -752,7 +752,7 @@ public class TestSltSerialization {
 
     // check turn timestamps
     double[] turnTimeStamps = {
-      0, 29, 34, 39, 47, 52, 62, 63, 69, 71, 86, 93 };
+      0, 29, 34.56, 39, 47, 52, 62, 63, 69, 71, 86, 93 };
     Annotation lastTurn = null;
     assertEquals("Examiner is first", "ADAL-Examiner", turns[0].getLabel());
     for (int t = 0; t < turns.length; t++) {
@@ -782,7 +782,7 @@ public class TestSltSerialization {
     
     // check utterance timestamps and speakers
     double[] utteranceTimeStamps = {
-      0, 5, 12, 16, 20, 24, 29, 34, 37, 39, 41, 46, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
+      0, 5, 12, 16, 20, 24, 29, 34.56, 37, 39, 41, 46, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
     String[] utteranceSpeakers = {
       "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner",
       "ADAL-Child",
@@ -986,7 +986,7 @@ public class TestSltSerialization {
 
     // check turn timestamps
     double[] turnTimeStamps = {
-      0, 29, 34, 39, 47, 52, 62, 63, 69, 71, 86, 93 };
+      0, 29, 34.56, 39, 47, 52, 62, 63, 69, 71, 86, 93 };
     Annotation lastTurn = null;
     assertEquals("Examiner is first", "ADAL-Examiner", turns[0].getLabel());
     for (int t = 0; t < turns.length; t++) {
@@ -1016,7 +1016,7 @@ public class TestSltSerialization {
     
     // check utterance timestamps and speakers
     double[] utteranceTimeStamps = {
-      0, 5, 12, 16, 20, 24, 29, 34, 37, 39, 41, 46, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
+      0, 5, 12, 16, 20, 24, 29, 34.56, 37, 39, 41, 46, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
     String[] utteranceSpeakers = {
       "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner",
       "ADAL-Child",
@@ -1312,7 +1312,7 @@ public class TestSltSerialization {
       .setId("complex.txt")
       .setSchema(schema);
     graph.addAnchor(new Anchor("a0", 0.0, Constants.CONFIDENCE_MANUAL));
-    graph.addAnchor(new Anchor("a5", 5.4321, Constants.CONFIDENCE_MANUAL)); // will be rendered 5.0
+    graph.addAnchor(new Anchor("a5", 5.4321, Constants.CONFIDENCE_MANUAL)); // decimal
     graph.addAnchor(new Anchor("a10", 10.0, Constants.CONFIDENCE_MANUAL));
     graph.addAnchor(new Anchor("a15", 15.0, Constants.CONFIDENCE_MANUAL));
     graph.addAnchor(new Anchor("a20", 20.0, Constants.CONFIDENCE_MANUAL));

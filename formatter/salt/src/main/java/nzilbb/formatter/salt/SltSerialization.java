@@ -75,6 +75,9 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
   // Attributes:
   private ISO639 iso639 = new ISO639(); // for standard ISO 639 language code processing
   protected Vector<String> warnings;
+
+  // support fractional seconds even though SALT doesn't
+  private MessageFormat timesStampFormat = new MessageFormat("- {0,number,0}:{1,number,00.###}");
   
   /**
    * Name of the .slt file.
@@ -1527,9 +1530,6 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       setTokenizer(new SimpleTokenizer(utteranceLayer.getId(), wordLayer.getId()));
     }
 
-    // regular expressions
-    Pattern timeStampPattern = Pattern.compile("^-\\s([0-9]+):([0-9]+)");
-
     // utterances
     Annotation currentTurn = new Annotation(null, "", turnLayer.getId());
     Annotation cUnit = null;
@@ -1542,11 +1542,19 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       if (line.trim().length() == 0) continue;
 
       // is it a time stamp?
-      Matcher sync = timeStampPattern.matcher(line);
-      if (sync.matches()) { // time stamp
+      Object[] timestampParts = null;
+      try { // try to parse it at a time-stamp
+        timestampParts = timesStampFormat.parse(line);
+      } catch(ParseException exception) {}      
+      if (timestampParts != null) { // time stamp
         
-        int minutes = Integer.parseInt(sync.group(1));
-        int seconds = Integer.parseInt(sync.group(2));
+        long minutes = (Long)timestampParts[0];        
+        double seconds = 0;
+        if (timestampParts[1] instanceof Long) {
+          seconds = (Long)timestampParts[1];
+        } else {
+          seconds = (Double)timestampParts[1];
+        }
         double offset = minutes * 60 + seconds;
         int confidence = Constants.CONFIDENCE_MANUAL;
         if (offset != 0.0
@@ -2672,8 +2680,8 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
 
           if (otherUtterance != null) { // overlaps with another utterance
             if (inOverlap) {
-              if (token.distance(otherUtterance) >= 0) { // doesn't overlap with otherUtterance
-                // overlap ends here
+              if (otherUtterance.getEnd().getOffset() < token.getEnd().getOffset()) {
+                // no longer during otherUtterance, so overlap ends here
                 if (!trailingPuncuation.contains(">")) { // not already in the transcript
                   writer.print(">");
                 }
@@ -2767,9 +2775,6 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
     }      
   }
 
-  // TODO print fractional seconds if they're there
-  MessageFormat timesStampFormat = new MessageFormat("- {0,number,00}:{1,number,00}");
-  
   /**
    * Conditionally prints a time stamp line for the given anchor.
    * <p> The time stamp is <em>not</em> printed if:
@@ -2785,14 +2790,15 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
    * can be invoked to compare the offets correctly.
    * @return The new value of lastOffset.
    */
-  public double printTimeStamp(Anchor anchor, PrintWriter writer, double lastOffset, Graph graph) {
+  public double printTimeStamp(
+    Anchor anchor, PrintWriter writer, double lastOffset, Graph graph) {
     if (anchor.getConfidence() != null
         && anchor.getConfidence() > Constants.CONFIDENCE_AUTOMATIC) {
       if (anchor.getOffset() != null) {
         if (graph.compareOffsets(anchor.getOffset(), lastOffset) > 0) {
-          int seconds = anchor.getOffset().intValue();
-          int minutes = seconds / 60;
-          seconds = seconds % 60;
+          double seconds = anchor.getOffset();
+          int minutes = (int)(seconds / 60);
+          seconds -= minutes * 60;
           Object[] parts = { minutes, seconds };
           writer.println(timesStampFormat.format(parts));
           lastOffset = anchor.getOffset();
