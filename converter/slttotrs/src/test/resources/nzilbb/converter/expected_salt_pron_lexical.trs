@@ -8,11 +8,11 @@
 <Speaker id="spk1" name="ADAL-Child" check="" type="female" dialect="" accent="" scope=""/>
 <Speaker id="spk2" name="ADAL-Examiner" check="" type="" dialect="" accent="" scope=""/>
 </Speakers>
-<Episode program="Nar" air_date="230603">
+<Episode program="Nar" air_date="210330">
 <Section type="report" topic="to1" startTime="0.000" endTime="94.000">
 <Turn speaker="spk2" startTime="0.000" endTime="29.000">
 <Sync time="0.000"/>
-<Comment desc="+ Dob: 1974-02-09"/>
+<Comment desc="+ Dob: 1972-09-26"/>
 <Comment desc="+ Ethnicity: NZ European"/>
 <Comment desc="+ ParticipantId: Ada-Lovelace"/>
 <Comment desc="+ Ca: 4;4"/>

@@ -41,6 +41,7 @@ public class TestSltToTrs {
     File input = new File(dir, "salt.slt");
     SltToTrs converter = new SltToTrs();
     converter.setSwitch("parseInlineConventions", "true");
+    converter.setSwitch("dateFormat", "d/M/yyyy");
     converter.convert(input);
     File actual = new File(dir, "salt.trs");
     File expected = new File(dir, "expected_salt.trs");
@@ -60,6 +61,7 @@ public class TestSltToTrs {
     File input = new File(dir, "salt.slt");
     SltToTrs converter = new SltToTrs();
     converter.setSwitch("parseInlineConventions", "false");
+    converter.setSwitch("dateFormat", "d/M/yyyy");
     converter.convert(input);
     File actual = new File(dir, "salt.trs");
     File expected = new File(dir, "expected_salt_no_conventions.trs");
@@ -79,6 +81,7 @@ public class TestSltToTrs {
     File input = new File(dir, "salt.slt");
     SltToTrs converter = new SltToTrs();
     converter.setSwitch("parseInlineConventions", "true");
+    converter.setSwitch("dateFormat", "d/M/yyyy");
     converter.setPronounceCodePattern("WP:{0}");
     converter.setLexicalCodePattern("WL:{0}");
     converter.convert(input);

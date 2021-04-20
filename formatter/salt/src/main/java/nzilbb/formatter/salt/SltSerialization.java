@@ -28,10 +28,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1218,13 +1220,25 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
     if (dateFormat == null) {
       dateFormat = new Parameter(
         "dateFormat", String.class, "Date format",
-        "Format used in SALT files for dates (e.g. Dob, Doe)");
+        "Format used in SALT files for dates (e.g. Dob, Doe) - either M/d/yyyy or d/M/yyyy."
+        +" NB: the default date format is inferred from your locale settings");
       dateFormat.setPossibleValues(Arrays.asList("M/d/yyyy", "d/M/yyyy", "M/d/yy", "d/M/yy"));
       configuration.addParameter(dateFormat);
     }
     if (dateFormat.getValue() == null) {
+      // detect the date format from the system...
+      
       // default to US month-first format
       dateFormat.setValue("M/d/yyyy");
+
+      // get a known date
+      Calendar knownDate = Calendar.getInstance();
+      knownDate.set(1972, 3, 4);
+      if (DateFormat.getDateInstance(DateFormat.SHORT).format(knownDate.getTime())
+          .startsWith("4")) {
+        // day is first
+        dateFormat.setValue("d/M/yyyy");
+      }
     }
 
     Parameter parseInlineConventions = configuration.get("parseInlineConventions");
@@ -2315,7 +2329,16 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         Annotation annotation = targetParticipant.first(genderLayer.getId());
         if (annotation != null) {
           writer.print("+ Gender: ");
-          writer.println(annotation.getLabel());
+          String gender = annotation.getLabel();
+          // try to standardize it
+          if (gender.length() > 0) {
+            if (gender.toLowerCase().charAt(0) == 'f') {
+              gender = "F";
+            } else if (gender.toLowerCase().charAt(0) == 'm') {
+              gender = "M";
+            }
+          }
+          writer.println(gender);
         }
       }
       SimpleDateFormat saltDateFormat = new SimpleDateFormat(dateFormat);

@@ -208,8 +208,6 @@ public class TestSltSerialization {
                  configuration.get("locationLayer").getValue());
     assertEquals("parseInlineConventions is true default",
                  Boolean.TRUE, configuration.get("parseInlineConventions").getValue());
-    assertEquals("Date format is month-first by default",
-                 "M/d/yyyy", configuration.get("dateFormat").getValue());
     // change to day-first
     configuration.get("dateFormat").setValue("d/M/yyyy");
 
@@ -704,8 +702,6 @@ public class TestSltSerialization {
     assertNull(configuration.get("locationLayer").getValue());
     assertEquals("parseInlineConventions is true default",
                  Boolean.TRUE, configuration.get("parseInlineConventions").getValue());
-    assertEquals("Date format is month-first by default",
-                 "M/d/yyyy", configuration.get("dateFormat").getValue());
     // change to day-first
     configuration.get("dateFormat").setValue("d/M/yyyy");
 
@@ -936,8 +932,6 @@ public class TestSltSerialization {
     assertNull(configuration.get("subgroupLayer").getValue());
     assertNull(configuration.get("collectLayer").getValue());
     assertNull(configuration.get("locationLayer").getValue());
-    assertEquals("Date format is month-first by default",
-                 "M/d/yyyy", configuration.get("dateFormat").getValue());
     // change to day-first
     configuration.get("dateFormat").setValue("d/M/yyyy");
     assertEquals("parseInlineConventions is true default",
@@ -1231,6 +1225,9 @@ public class TestSltSerialization {
 
     // add an underscore to a word, to test it's preserved in the output
     graphs[0].first("word").setLabel("I_m");
+    
+    // change gender of speaker to ensure it's standardized
+    graphs[0].first("participant_gender").setLabel("male");
     
     // create new serializer
     SltSerialization serializer = new SltSerialization();

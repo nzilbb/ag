@@ -106,7 +106,9 @@ public class SltToTrs extends Converter {
       +"\nSgimilarly if you specify --pronounceCodePattern=WL:{0} then all word codes like"
       +" [WL:...] will be lexical events in the Transcriber transcript."
       +"\nTo disable these conversions, use \"--pronounceCodePattern= --lexCodePattern=\""
-      +" on the command line.";
+      +" on the command line."
+      +"\nThe format for dates is taken from your system settings;"
+      +" to override this, use the --dateFormat command line setting.";
   } // end of constructor
   
   public static void main(String argv[]) {
