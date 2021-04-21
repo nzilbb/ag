@@ -51,7 +51,7 @@ public class SltToEaf extends Converter {
     info = "ELAN doesn't support meta-data like Dob, Doe, Ethnicity, etc."
       +" so almost all SALT header meta-data is lost when converting to .eaf."
       +"\nBy default, inline annotations (mazes, codes, bound morphemes, etc.)"
-      +" are not iterpreted. If you want them to be processed, use --parseInlineConventions";
+      +" are not interpreted. If you want them to be processed, use --parseInlineConventions";
   } // end of constructor
   
   public static void main(String argv[]) {
