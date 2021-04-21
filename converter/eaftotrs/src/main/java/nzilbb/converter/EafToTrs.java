@@ -102,6 +102,39 @@ public class EafToTrs extends Converter {
     new EafToTrs().mainRun(argv);
   }
 
+  /**
+   * Specify the schema to used by  {@link #convert(File)}.
+   * @return The schema.
+   */
+  @Override
+  public Schema getSchema() {
+    Schema schema = super.getSchema();
+    // include SALT layers
+    schema.addLayer(
+      new Layer("transcript_language", "Language").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true));
+    schema.addLayer(
+      new Layer("topic", "Topic")         
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false));
+    schema.addLayer(
+      new Layer("noise", "Noises")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false));
+    schema.addLayer(
+      new Layer("comment", "Comments").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(true).setSaturated(false));
+    schema.addLayer(
+      new Layer("pronounce", "Pronunciation tags").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId(schema.getWordLayerId()).setParentIncludes(true));
+    schema.addLayer(
+      new Layer("lexical", "Lexical tags").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId(schema.getWordLayerId()).setParentIncludes(true));
+    return schema;
+  } // end of getSchema()
+
   /** File filter for identifying files of the correct type */
   protected FileNameExtensionFilter getFileFilter() {
     return new FileNameExtensionFilter("ELAN files", "eaf");
@@ -122,20 +155,6 @@ public class EafToTrs extends Converter {
   public GraphSerializer getSerializer() {
     return new TranscriptSerialization();
   }
-
-  /**
-   * Specify the schema to used by  {@link #convert(File)}.
-   * @return The schema.
-   */
-  public Schema getSchema() {
-    Schema schema = super.getSchema();
-    // include topic layer
-    schema.addLayer(
-      new Layer("topic", "Topic")         
-      .setAlignment(Constants.ALIGNMENT_INTERVAL)
-      .setPeers(true).setPeersOverlap(false).setSaturated(false));
-    return schema;
-  } // end of getSchema()
 
   /**
    * Un-map tiers that are matched by {@link #ignoreTiers}.

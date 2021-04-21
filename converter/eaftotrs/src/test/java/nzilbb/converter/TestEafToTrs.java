@@ -52,6 +52,22 @@ public class TestEafToTrs {
       }
    }
    
+   @Test public void utterancesOnlyNoConventions() throws Exception {
+      File dir = getDir();
+      File input = new File(dir, "elan.eaf");
+      EafToTrs converter = new EafToTrs();
+      converter.setSwitch("useConventions", "false");
+      converter.convert(input);
+      File actual = new File(dir, "elan.trs");
+      File expected = new File(dir, "expected_elan_no_conventions.trs");
+      String differences = diff(expected, actual, ".*version_date.*");
+      if (differences != null) {
+         fail(differences);
+      } else {
+         actual.delete();
+      }
+   }
+   
    @Test public void utterance_word_phone() throws Exception {
       File dir = getDir();
       File input = new File(dir, "elan_word_phone.eaf");

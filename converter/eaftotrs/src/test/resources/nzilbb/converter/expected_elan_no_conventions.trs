@@ -8,18 +8,10 @@
 <Episode>
 <Section type="report" startTime="4.675" endTime="320.757">
 <Turn speaker="spk2" startTime="4.675" endTime="6.752">
-<Sync time="4.675"/>. rest of that side of the famly
-<Event desc="family" type="lexical" extent="previous"/>
-
-<Event desc="f{mli" type="pronounce" extent="previous"/>
-so he --
+<Sync time="4.675"/>. rest of that side of the famly[f{mli](family) so he --
 </Turn>
 <Turn speaker="spk2" startTime="7.658" endTime="10.348">
-<Sync time="7.658"/>generously agreed
-<Event desc="agrees" type="lexical" extent="previous"/>
-
-<Event desc="@grid" type="pronounce" extent="previous"/>
-that she could go with him but
+<Sync time="7.658"/>generously agreed(agrees)[@grid] that she could go with him but
 </Turn>
 <Turn speaker="spk2" startTime="10.515" endTime="14.889">
 <Sync time="10.515"/>there were so many people there
@@ -68,8 +60,7 @@ that she could go with him but
 <Sync time="95.922"/>out of England -
 <Sync time="97.671"/>&lt;mmm&gt; they'd come from England .
 <Sync time="99.171"/>to . establish --
-<Sync time="101.514"/>whatever
-<Comment desc="unclear"/>and their family.
+<Sync time="101.514"/>whatever {unclear} and their family.
 <Sync time="103.201"/>and so on . and
 <Sync time="103.857"/>lived in New Zealand and --
 <Sync time="106.450"/>ah Fred ah Pepper was a
@@ -82,9 +73,7 @@ that she could go with him but
 <Sync time="121.885"/>and of course if
 <Sync time="123.634"/>Arthur who was our -
 <Sync time="125.806"/>Barry and I's grandfather --
-<Sync time="127.258"/>he - was a um --
-<Event desc="click" type="noise" extent="instantaneous"/>
-
+<Sync time="127.258"/>he - was a um -- [click]
 <Sync time="132.992"/>he was always a builder
 <Sync time="134.492"/>and had a very successful building company
 <Sync time="137.398"/>and had all his sons in it &lt;mmm&gt;
