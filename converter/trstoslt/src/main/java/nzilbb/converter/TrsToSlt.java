@@ -205,7 +205,7 @@ public class TrsToSlt extends Converter {
       .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
     schema.addLayer(
       new Layer("noise", "Verbal sound effects etc.").setAlignment(Constants.ALIGNMENT_INTERVAL)
-      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
       .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
     schema.addLayer(
       new Layer("entity", "Proper Names").setAlignment(Constants.ALIGNMENT_INTERVAL)
