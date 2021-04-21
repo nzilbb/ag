@@ -10,14 +10,14 @@
   <groupId>nzilbb</groupId>
   <artifactId>slt-to-eaf</artifactId>
   <name>nzilbb.annotator.slttoeaf</name>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <description>Utility for converting SALT transcripts to ELAN files</description>
 
   <properties>
     
     <input.package>nzilbb.formatter.salt</input.package>
     <input.path>nzilbb/formatter/salt/</input.path>
-    <input.version>0.1.1</input.version>
+    <input.version>0.1.5</input.version>
     
     <output.package>nzilbb.formatter.elan</output.package>
     <output.path>nzilbb/formatter/elan/</output.path>
@@ -32,7 +32,7 @@
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>converter-base</artifactId>
-      <version>[1.0.2,)</version>
+      <version>[1.0.3,)</version>
     </dependency>
     <dependency>
       <groupId>nzilbb</groupId>
@@ -120,7 +120,7 @@
                 <artifactItem>
                   <groupId>nzilbb</groupId>
                   <artifactId>converter-base</artifactId>
-                  <version>1.0.2</version>
+                  <version>1.0.3</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>

@@ -1797,109 +1797,138 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         
         // bound morphemes  - something like "bird/s/z" ...
 
-        // TODO Hug/ing, Hunt/ing, That/s, They/re, bush/3s, can/'nt, can/n't, carry/ed, eat/ing, gentle/ly, gentle/y, girl/'z, go/s, guy/s, happen/ing, help/ing, hug/ed, hurry/ed, kid/'z, learn/ing, let/'us, say/s, see/ing, tramp/ing, try/ed, tweet/ing, wait/ing, 
-        
         // just stripping out the slashes doesn't produce well-formed words
         // so we apply a series of heuristic transformations based on English norms and exceptions
         String[] boundMorphemeTransformations = {
+          // some exceptions up front before other processing catches them...
+          
+          // the error go/s (which should be go/3s) -> "goes"
+          "go/s(?<punc>\\W*)", "goes${punc}", "go/3s",
+
+          // the error say/s (which should be say/3s) -> "says" (not "saies")
+          "say/s(?<punc>\\W*)", "says${punc}", "say/3s",
+
           // NOUN INFLECTIONS:
           
           // /s/z - Plural and Possessive. Example: baby/s/z ...        
           // first make ...y/s/z -> ...ies' - e.g. "babies'"
-          "(?<w>[^/]+)y\\/s\\/z(?<punc>\\W*)", "${w}ies'${punc}", "${w}y/s/z",
+          "(?<w>[^/]+)y/s/z(?<punc>\\W*)", "${w}ies'${punc}", "${w}y/s/z",
           // and make ...s/s/z -> ...ses' - e.g. "buses'"
-          "(?<w>[^/]+)s\\/s\\/z(?<punc>\\W*)", "${w}ses'${punc}", "${w}s/s/z",
+          "(?<w>[^/]+)s/s/z(?<punc>\\W*)", "${w}ses'${punc}", "${w}s/s/z",
           // and make ...sh/s/z -> ...shes' - e.g. "bushes'"
-          "(?<w>[^/]+)sh\\/s\\/z(?<punc>\\W*)", "${w}shes'${punc}", "${w}sh/s/z",
+          "(?<w>[^/]+)sh/s/z(?<punc>\\W*)", "${w}shes'${punc}", "${w}sh/s/z",
           // now make .../s/z -> ...s'
-          "(?<w>[^/]+)\\/s\\/z(?<punc>\\W*)", "${w}s'${punc}", "${w}/s/z",
+          "(?<w>[^/]+)/s/z(?<punc>\\W*)", "${w}s'${punc}", "${w}/s/z",
           
           // /p - Extension: Plural Possessive. Example: "the two girl/p bicycle/s."...
           // first make ...y/p -> ...ies' - e.g. "babies'"
-          "(?<w>[^/]+)y\\/p(?<punc>\\W*)", "${w}ies'${punc}", "${w}y/p",
+          "(?<w>[^/]+)y/p(?<punc>\\W*)", "${w}ies'${punc}", "${w}y/p",
           // now make .../p -> ...s'
-          "(?<w>[^/]+)\\/p(?<punc>\\W*)", "${w}s'${punc}", "${w}/p",
+          "(?<w>[^/]+)/p(?<punc>\\W*)", "${w}s'${punc}", "${w}/p",
           
           // /s - Plural noun. Examples: doggie/s, baby/s...
-          // first make ...y/s -> ...ies - e.g. "babies"
-          "(?<w>[^/]+)y\\/s(?<punc>\\W*)", "${w}ies${punc}", "${w}y/s",
+          // first make ...y/s -> ...ies - e.g. "babies" but not "guys"
+          "(?<w>[^/]+[^u])y/s(?<punc>\\W*)", "${w}ies${punc}", "${w}y/s",
           // and make ...s/s -> ...ses - e.g. "buses"
-          "(?<w>[^/]+)s\\/s(?<punc>\\W*)", "${w}ses${punc}", "${w}s/s",
+          "(?<w>[^/]+)s/s(?<punc>\\W*)", "${w}ses${punc}", "${w}s/s",
           // and make ...sh/s -> ...shes - e.g. "bushes"
-          "(?<w>[^/]+)sh\\/s(?<punc>\\W*)", "${w}shes${punc}", "${w}sh/s",
+          "(?<w>[^/]+)sh/s(?<punc>\\W*)", "${w}shes${punc}", "${w}sh/s",
           // make .../s -> ...s
-          "(?<w>[^/]+)\\/s(?<punc>\\W*)", "${w}s${punc}", "${w}/s",
+          "(?<w>[^/]+)/s(?<punc>\\W*)", "${w}s${punc}", "${w}/s",
           
           // /z - Possessive inflection. Examples: dad/z, Mary/z
           // first make it/z -> its
-          "(?<w>[iI]t)\\/z(?<punc>\\W*)", "${w}s${punc}", "${w}/z",
+          "(?<w>[iI]t)/z(?<punc>\\W*)", "${w}s${punc}", "${w}/z",
           // make .../z -> ...'s
-          "(?<w>[^/]+)\\/z(?<punc>\\W*)", "${w}'s${punc}", "${w}/z",
+          // and also the error .../'z -> ...'s
+          "(?<w>[^/]+)/'?z(?<punc>\\W*)", "${w}'s${punc}", "${w}/z",
           
           // VERB INFLECTIONS:
           
           // /3s - 3 rd Person Singular verb form. Examples: go/3s, tell/3s, try/3s
-          // first make ...y/3s -> ...ies - e.g. "tries"
-          "(?<w>[^/]+)y\\/3s(?<punc>\\W*)", "${w}ies${punc}", "${w}y/3s",
+          // first make ...ay/3s -> ...ays - e.g. "says"
+          "(?<w>[^/]+)ay/3s(?<punc>\\W*)", "${w}ays${punc}", "${w}ay/3s",
+          // but make ...y/3s -> ...ies - e.g. "tries"
+          "(?<w>[^/]+)y/3s(?<punc>\\W*)", "${w}ies${punc}", "${w}y/3s",
           // and make ...o/3s -> ...oes - e.g. "goes"
-          "(?<w>[^/]+)o\\/3s(?<punc>\\W*)", "${w}oes${punc}", "${w}o/3s",
+          "(?<w>[^/]+)o/3s(?<punc>\\W*)", "${w}oes${punc}", "${w}o/3s",
           // make .../3s -> ...s
-          "(?<w>[^/]+)\\/3s(?<punc>\\W*)", "${w}s${punc}", "${w}/3s",
+          "(?<w>[^/]+)/3s(?<punc>\\W*)", "${w}s${punc}", "${w}/3s",
           
           // /ed - Past tense. Examples: love/ed, die/ed
           // first make ...e/ed -> ...ed - e.g. "loved"
-          "(?<w>[^/]+)e\\/ed(?<punc>\\W*)", "${w}ed${punc}", "${w}e/ed",
-          // and make ...[vowel]p/ed -> ...pped - e.g. "dropped" but "helped"
-          "(?<w>[^/]+[aeiou])p\\/ed(?<punc>\\W*)", "${w}pped${punc}", "${w}p/ed",
-          // and make ...b/ed -> ...bbed - e.g. "grabbed"
-          "(?<w>[^/]+[aeiou])b\\/ed(?<punc>\\W*)", "${w}bbed${punc}", "${w}b/ed",
+          "(?<w>[^/]+)e/ed(?<punc>\\W*)", "${w}ed${punc}", "${w}e/ed",
+          // and make ...y/ed -> ...ied - e.g. "carried"
+          "(?<w>[^/]+)y/ed(?<punc>\\W*)", "${w}ied${punc}", "${w}y/ed",
+          // and make ...[vowel]b/ed -> ...bbed - e.g. "grabbed"
+          // and make ...[vowel]p/ed -> ...pped - e.g. "slapped" (but not "helped")
+          // and make ...[vowel]g/ed -> ...gged - e.g. "hugged"
+          "(?<w>[^/]+[aeiou])(?<c>[bgp])/ed(?<punc>\\W*)", "${w}${c}${c}ed${punc}", "${w}${c}/ed",
           // make .../ed -> ...ed
-          "(?<w>[^/]+)\\/ed(?<punc>\\W*)", "${w}ed${punc}", "${w}/ed",
+          "(?<w>[^/]+)/ed(?<punc>\\W*)", "${w}ed${punc}", "${w}/ed",
           
           // /ed2 - Extension: Past participle. Examples: "I had climb/ed2 to the top."
           // first make ...e/ed2 -> ...ed - e.g. "had loved"
-          "(?<w>[^/]+)e\\/ed2(?<punc>\\W*)", "${w}ed${punc}", "${w}e/ed2",
+          "(?<w>[^/]+)e/ed2(?<punc>\\W*)", "${w}ed${punc}", "${w}e/ed2",
           // and make ...[vowel]p/ed2 -> ...pped - e.g. "had dropped" but "had helped"
-          "(?<w>[^/]+[aeiou])p\\/ed2(?<punc>\\W*)", "${w}pped${punc}", "${w}p/ed2",
+          "(?<w>[^/]+[aeiou])p/ed2(?<punc>\\W*)", "${w}pped${punc}", "${w}p/ed2",
           // make .../ed2 -> ...ed
-          "(?<w>[^/]+)\\/ed2(?<punc>\\W*)", "${w}ed${punc}", "${w}/ed2",
+          "(?<w>[^/]+)/ed2(?<punc>\\W*)", "${w}ed${punc}", "${w}/ed2",
           
           // /en - Past participle. Examples: take/en, eat/en, prove/en
           // first make ...e/en -> ...en - e.g. "taken"
-          "(?<w>[^/]+)e\\/en(?<punc>\\W*)", "${w}en${punc}", "${w}e/en",
+          "(?<w>[^/]+)e/en(?<punc>\\W*)", "${w}en${punc}", "${w}e/en",
           // make .../en -> ...en
-          "(?<w>[^/]+)\\/en(?<punc>\\W*)", "${w}en${punc}", "${w}/en",
+          "(?<w>[^/]+)/en(?<punc>\\W*)", "${w}en${punc}", "${w}/en",
           
           // /ing - Progressive verb form. Examples: go/ing, run/ing, bike/ing
-          // first make ...e/ing -> ...ing - e.g. "biking"
-          "(?<w>[^/]+)e\\/ing(?<punc>\\W*)", "${w}ing${punc}", "${w}e/ing",
+          // first make ...e/ing -> ...ing - e.g. "biking" (but "seeing")
+          "(?<w>[^/]+[^e])e/ing(?<punc>\\W*)", "${w}ing${punc}", "${w}e/ing",
           // and make ...ain/ing -> ...aining - e.g. "raining"
-          "(?<w>[^/]+)ain\\/ing(?<punc>\\W*)", "${w}aining${punc}", "${w}ain/ing",
-          // but make ...n/ing -> ...nning - e.g. "running"
-          "(?<w>[^/]+)n\\/ing(?<punc>\\W*)", "${w}nning${punc}", "${w}n/ing",
-          // and make ...t/ing -> ...tting - e.g. "putting"
-          "(?<w>[^/]+)t\\/ing(?<punc>\\W*)", "${w}tting${punc}", "${w}t/ing",
-          // and make ...p/ing -> ...pping - e.g. "shopping"
-          "(?<w>[^/]+)p\\/ing(?<punc>\\W*)", "${w}pping${punc}", "${w}p/ing",
+          // and make ...ait/ing -> ...aiting - e.g. "waiting"
+          "(?<w>[^/]+)ai(?<c>[nt])/ing(?<punc>\\W*)", "${w}ai${c}ing${punc}", "${w}ai${c}/ing",
+          // and make ...en/ing -> ...ening - e.g. "happening"
+          "(?<w>[^/]+en)/ing(?<punc>\\W*)", "${w}ing${punc}", "${w}/ing",
+          // and make ...rn/ing -> ...rning - e.g. "learning"
+          "(?<w>[^/]+rn)/ing(?<punc>\\W*)", "${w}ing${punc}", "${w}/ing",
+          // and make ...eat/ing -> ...eating - e.g. "eating" "fleeting" "meeting"
+          "(?<w>[^/]*e[ea]t)/ing(?<punc>\\W*)", "${w}ing${punc}", "${w}/ing",
+          // but make ...t/ing -> ...tting - e.g. "putting" (but not ...nt/ing e.g. "hunting")
+          // and make ...d/ing -> ...dding - e.g. "nodding" (but not ...nd/ing e.g. "landing")
+          // and make ...p/ing -> ...pping - e.g. "shopping" (but not ...mp/ing e.g. "jumping")
+          //                                                 (and not ...lp/ing e.g. "helping")
+          // and make ...b/ing -> ...bbing - e.g. "mobbing" (but not ...mb/ing e.g. "numbing")
+          // and make ...g/ing -> ...gging - e.g. "hugging" (but not ...ng/ing e.g. "ringing")
+          // and make ...n/ing -> ...nning - e.g. "running"
+          // and make ...m/ing -> ...mming - e.g. "drumming"
+          "(?<w>[^/]+[^lmn])(?<c>[tdpbgnm])/ing(?<punc>\\W*)", "${w}${c}${c}ing${punc}",
+          "${w}${c}/ing",
           // make .../ing -> ...ing
-          "(?<w>[^/]+)\\/ing(?<punc>\\W*)", "${w}ing${punc}", "${w}/ing",
+          "(?<w>[^/]+)/ing(?<punc>\\W*)", "${w}ing${punc}", "${w}/ing",
           
           // CONTRACTIONS:
           
           // /n't, /'t - Negative contractions. Examples: can/'t, does/n't
-          // make .../n't -> ...n't
-          "(?<w>[^/]+)\\/n't(?<punc>\\W*)", "${w}n't${punc}", "${w}/n't",
+          // first some common errors: can/'nt can/n't
+          "(?<w>[^/]+[^n])n?/'nt(?<punc>\\W*)", "${w}n't${punc}", "${w}n/'t",
+          "(?<w>[^/]+[^n])n/n't(?<punc>\\W*)", "${w}n't${punc}", "${w}n/'t",
+          // then make .../n't -> ...n't
+          "(?<w>[^/]+)/n't(?<punc>\\W*)", "${w}n't${punc}", "${w}/n't",
           // ('t handled below)
-          
-          // /'ll, /'m, /'d, /'re, /'s, /'ve - Contracted → WILL, AM, WOULD, ARE, IS, HAVE        
-          // Examples:  I/'ll, I/'m, I/'d, we/'re, he/'s, we/'ve
-          // just strip the slash from these (also handle's "'us" below...)
-          "(?<w>[^/]+)\\/'(?<suff>..?)(?<punc>\\W*)", "${w}'${suff}${punc}", "${w}/'${suff}",
           
           // /h's, /h'd, /d's, /d'd, /'us Contracted → HAS, HAD, DOES, DID, US
           // Examples: He/h's been sick. We/h'd better go. What/d's he do for a living?
           //           Why/d'd the boy look there? Let/'us go.
-          "(?<w>[^/]+)\\/(?<suff>[hd]'[ds])(?<punc>\\W*)", "${w}${suff}${punc}", "${w}/${suff}",
+          "(?<w>[^/]+)/(?<suff>[hd]'[ds])(?<punc>\\W*)", "${w}${suff}${punc}", "${w}/${suff}",
+          
+          // contract /'us to just 's e.g. "let/'us" -> "let's"
+          "(?<w>[^/]+)/'us(?<punc>\\W*)", "${w}'s${punc}", "${w}/'us",
+
+          // /'ll, /'m, /'d, /'re, /'s, /'ve - Contracted → WILL, AM, WOULD, ARE, IS, HAVE
+          // Examples:  I/'ll, I/'m, I/'d, we/'re, he/'s, we/'ve
+
+          // just strip the slash from these
+          "(?<w>[^/]+)/'(?<suff>..?)(?<punc>\\W*)", "${w}'${suff}${punc}", "${w}/'${suff}",
           
           // EXTENSIONS - these are not in the SALT specification, but are used at UC:
           
@@ -1907,35 +1936,41 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
           
           // /er - comparative: a dog is fast/er than a pig. there 's a big/er cup.
           // first make ...e/er -> ...er
-          "(?<w>[^/]+)e\\/er(?<punc>\\W*)", "${w}er${punc}", "${w}e/er",
+          "(?<w>[^/]+)e/er(?<punc>\\W*)", "${w}er${punc}", "${w}e/er",
           // and make ...g/er -> ...gger
-          "(?<w>[^/]+)g\\/er(?<punc>\\W*)", "${w}gger${punc}", "${w}g/er",
+          "(?<w>[^/]+)g/er(?<punc>\\W*)", "${w}gger${punc}", "${w}g/er",
           // make .../er -> ...er
-          "(?<w>[^/]+)\\/er(?<punc>\\W*)", "${w}er${punc}", "${w}/er",
+          "(?<w>[^/]+)/er(?<punc>\\W*)", "${w}er${punc}", "${w}/er",
           
           // /est - superlative: this is the big/est tractor. you 're the fast/est.
           // first make ...e/est -> ...est
-          "(?<w>[^/]+)e\\/est(?<punc>\\W*)", "${w}est${punc}", "${w}e/est",
+          "(?<w>[^/]+)e/est(?<punc>\\W*)", "${w}est${punc}", "${w}e/est",
           // and make ...g/est -> ...ggest
-          "(?<w>[^/]+)g\\/est(?<punc>\\W*)", "${w}ggest${punc}", "${w}g/est",
+          "(?<w>[^/]+)g/est(?<punc>\\W*)", "${w}ggest${punc}", "${w}g/est",
           // make .../est -> ...est
-          "(?<w>[^/]+)\\/est(?<punc>\\W*)", "${w}est${punc}", "${w}/est",
+          "(?<w>[^/]+)/est(?<punc>\\W*)", "${w}est${punc}", "${w}/est",
           
           // Derivational morphemes - e.g. soon/ish, it 's kind of blue/y.
-          // first make ...d/y -> ...ddy
-          "(?<w>[^/]+)d\\/y(?<punc>\\W*)", "${w}ddy${punc}", "${w}d/y",
+          // first make ...d/y -> ...ddy e.g. "muddy"
+          // and make ...t/y -> ...tty e.g. "fatty"
+          "(?<w>[^/]+)(?<c>[td])/y(?<punc>\\W*)", "${w}${c}${c}y${punc}", "${w}${c}/y",
+          // and make ...e/y -> ...y e.g. "gently"
+          "(?<w>[^/]+)e/y(?<punc>\\W*)", "${w}y${punc}", "${w}e/y",
+          // and errors like ...le/ly -> ...ly e.g. "gentle/ly"
+          "(?<w>[^/]+)le/ly(?<punc>\\W*)", "${w}ly${punc}", "${w}le/y",
           // make .../y -> ...y
-          "(?<w>[^/]+)\\/y(?<punc>\\W*)", "${w}y${punc}", "${w}/y",
-          // first make ...d/ish -> ...ddish
-          "(?<w>[^/]+)d\\/ish(?<punc>\\W*)", "${w}ddish${punc}", "${w}d/ish",
+          "(?<w>[^/]+)/y(?<punc>\\W*)", "${w}y${punc}", "${w}/y",
+          // first make ...d/ish -> ...ddish e.g. "reddish"
+          // and make ...t/ish -> ...ttish e.g. "skittish"
+          "(?<w>[^/]+)(?<c>[td])/ish(?<punc>\\W*)", "${w}${c}${c}ish${punc}", "${w}${c}/ish",
           // make .../ish -> ...ish
-          "(?<w>[^/]+)\\/ish(?<punc>\\W*)", "${w}ish${punc}", "${w}/ish",
+          "(?<w>[^/]+)/ish(?<punc>\\W*)", "${w}ish${punc}", "${w}/ish",
           
           // omitted bound morphemes
-          "(?<w>[^/]+)\\/(?<mph>\\*[\\w0-9']+)(?<punc>\\W*)", "${w}${punc}", "${w}/${mph}",
+          "(?<w>[^/]+)/(?<mph>\\*[\\w0-9']+)(?<punc>\\W*)", "${w}${punc}", "${w}/${mph}",
           
           // and finally, any others just get the slashes stripped
-          "(?<w>[^/]+)\\/(?<mph>[\\w0-9']+)(?<b2>/(?<mph2>[\\w0-9']+))?(?<punc>\\W*)",
+          "(?<w>[^/]+)/(?<mph>[\\w0-9']+)(?<b2>/(?<mph2>[\\w0-9']+))?(?<punc>\\W*)",
           "${w}${mph}${mph2}${punc}", "${w}/${mph}${b2}"
         };      
         // process each triple in the array

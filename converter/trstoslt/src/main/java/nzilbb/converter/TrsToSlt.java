@@ -236,18 +236,6 @@ public class TrsToSlt extends Converter {
   } // end of serializerConfiguration()
 
   /**
-   * Map SALT Context to Transcriber Program, and SALT Subgroup to Transcriber Topic.
-   * @param config The default configuration.
-   * @return The new configuration.
-   */
-  public ParameterSet serializerConfiguration(ParameterSet config) {
-    Schema schema = getSchema();
-    // config.get("programLayer").setValue(schema.getLayer("transcript_context"));
-    // config.get("topicLayer").setValue(schema.getLayer("transcript_subgroup"));
-    return config;
-  } // end of serializerConfiguration()
-
-  /**
    * Parse comments for dob, ca, ethnicity, collection, location, errors and codes, and
    * create lexical/pron word codes if configured.
    * @param transcripts
@@ -374,52 +362,6 @@ public class TrsToSlt extends Converter {
         } // next code
       }  // some codes are lexical events
       
-      // parse meta-data as comments at the beginning TODO
-      
-      // // so that can be parsed back out to slt if there's a round-trip
-      // String startId = transcript.getStart().getId();
-      // // dob
-      // Annotation metadata = transcript.first("participant_dob");
-      // if (metadata != null) {
-      //   transcript.addAnnotation(new Annotation().setLayerId("comment")
-      //                            .setLabel("+ Dob: " + metadata.getLabel())
-      //                            .setStartId(startId).setEndId(startId));
-      // }
-      // // ethnicity
-      // metadata = transcript.first("participant_ethnicity");
-      // if (metadata != null) {
-      //   transcript.addAnnotation(new Annotation().setLayerId("comment")
-      //                            .setLabel("+ Ethnicity: " + metadata.getLabel())
-      //                            .setStartId(startId).setEndId(startId));
-      // }
-      // // participantId
-      // metadata = transcript.first("participant_id");
-      // if (metadata != null) {
-      //   transcript.addAnnotation(new Annotation().setLayerId("comment")
-      //                            .setLabel("+ ParticipantId: " + metadata.getLabel())
-      //                            .setStartId(startId).setEndId(startId));
-      // }
-      // // ca
-      // metadata = transcript.first("transcript_ca");
-      // if (metadata != null) {
-      //   transcript.addAnnotation(new Annotation().setLayerId("comment")
-      //                            .setLabel("+ Ca: " + metadata.getLabel())
-      //                            .setStartId(startId).setEndId(startId));
-      // }
-      // // collection
-      // metadata = transcript.first("transcript_collect");
-      // if (metadata != null) {
-      //   transcript.addAnnotation(new Annotation().setLayerId("comment")
-      //                            .setLabel("+ Collect: " + metadata.getLabel())
-      //                            .setStartId(startId).setEndId(startId));
-      // }
-      // // location
-      // metadata = transcript.first("transcript_location");
-      // if (metadata != null) {
-      //   transcript.addAnnotation(new Annotation().setLayerId("comment")
-      //                            .setLabel("+ Location: " + metadata.getLabel())
-      //                            .setStartId(startId).setEndId(startId));
-      // }
       transcript.commit();
     } // next transcript
   } // end of processGraphs()

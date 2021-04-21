@@ -28,8 +28,10 @@ import nzilbb.ag.Constants;
 import nzilbb.ag.Graph;
 import nzilbb.ag.Layer;
 import nzilbb.ag.Schema;
+import nzilbb.ag.TransformationException;
 import nzilbb.ag.serialize.GraphDeserializer;
 import nzilbb.ag.serialize.GraphSerializer;
+import nzilbb.ag.util.DefaultOffsetGenerator;
 import nzilbb.formatter.elan.EAFSerialization;
 import nzilbb.formatter.salt.SltSerialization;
 import nzilbb.util.ProgramDescription;
@@ -47,8 +49,11 @@ public class EafToSlt extends Converter {
    */
   public EafToSlt() {
     setDefaultWindowTitle("ELAN to SALT converter");
-    // default to false, as it's what users of this converter most likely expect,
+    // default ELAN setting to false, as it's what users of this converter most likely expect,
     setSwitch("useConventions", "false");
+    
+    info = "By default, inline SALT annotations (mazes, codes, bound morphemes, etc.)"
+      +" are not interpreted. If you want them to be processed, use --parseInlineConventions";
   } // end of constructor
   
   public static void main(String argv[]) {

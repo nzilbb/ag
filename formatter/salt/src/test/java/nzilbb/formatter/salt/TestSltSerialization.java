@@ -364,7 +364,7 @@ public class TestSltSerialization {
 
     // words
     Annotation[] words = g.all("word");
-    assertEquals(153, words.length);
+    assertEquals(177, words.length);
 
     // check utterance transcriptions
     String[] lines = {
@@ -375,7 +375,7 @@ public class TestSltSerialization {
       "So let's start at the beginning.",
       "What was the story about?",
       "Um the kids the kids, they quickly put their gumboots on.",
-      "saved muddy bushes buses putting girl's wants goes shopping> running dropped helped aunty's stopped leaving coming its lift.",
+      "saved muddy bushes buses putting girl's wants goes shopping> running dropped helped aunty's stopped leaving coming its lift. Hugging Hunting can't can't carried eating gently gently girl's goes guys happening helping hugged hurried kid's learning let's says seeing tramping tried tweeting waiting?",
       "Anything else?",
       "And please go for a walk?",
       "You need to put your gumboots on.",
@@ -457,12 +457,24 @@ public class TestSltSerialization {
     // bound morphemes
     Annotation[] boundMorphemes = g.all("bound_morpheme");
     assertEquals("Correct number of bound morphemes: " + Arrays.asList(boundMorphemes),
-                 24, boundMorphemes.length);
+                 48, boundMorphemes.length);
     String[] morphemeLabels = {
       "kid/s", "gumboot/s",
       "save/ed", "mud/y", "bush/s", "bus/s", "put/ing", "girl/z", "want/3s", "go/3s", "shop/ing",
       "run/ing", "drop/ed", "help/ed", "aunty/z", "stop/ed", "leave/ing", "come/ing", "it/z",
       "lift/*ed",
+      "Hug/ing", "Hunt/ing",
+      "can/'t", "can/'t", // these errors corrected
+      "carry/ed",
+      "eat/ing", "gentle/y", "gentle/y", "girl/z",
+      "go/3s", // error corrected
+      "guy/s", "happen/ing", "help/ing",
+      "hug/ed", "hurry/ed",
+      "kid/z", // error corrected
+      "learn/ing", "let/'us",
+      "say/3s", // error corrected
+      "see/ing", "tramp/ing",
+      "try/ed", "tweet/ing", "wait/ing",
       "gumboot/s", "It/'s", "it/'s", "baby/s/z"
     };
     String[] wordLabels = {
@@ -470,6 +482,10 @@ public class TestSltSerialization {
       "saved", "muddy", "bushes", "buses", "putting", "girl's", "wants", "goes", "shopping>",
       "running", "dropped", "helped", "aunty's", "stopped", "leaving", "coming", "its",
       "lift.",
+      "Hugging", "Hunting", "can't", "can't", "carried",
+      "eating", "gently", "gently", "girl's", "goes", "guys", "happening", "helping",
+      "hugged", "hurried", "kid's", "learning", "let's", "says", "seeing", "tramping",
+      "tried", "tweeting", "waiting?",
       "gumboots", "It's", "it's", "babies'"
     };
     for (int m = 0; m < boundMorphemes.length; m++) {
@@ -631,10 +647,10 @@ public class TestSltSerialization {
 
     // C-Units
     Annotation[] cUnits = g.all("cunit");
-    assertEquals(23, cUnits.length);
+    assertEquals(24, cUnits.length);
     String[] cUnitLabels = {
-      "?", ".", ".", ".", ".", ".", "?", ".", ">", ".", "?", "?", ".", "^", "?", ".", "?", ".", "?",
-      ".", ".", "?", "."
+      "?", ".", ".", ".", ".", ".", "?", ".", ">", ".", "?", "?", "?", ".", "^", "?", ".", "?",
+      ".", "?", ".", ".", "?", "."
     };
     for (int c = 0; c < cUnits.length; c++) {
       assertEquals("C-Unit "+c+" label",
@@ -829,7 +845,7 @@ public class TestSltSerialization {
 
     // words
     Annotation[] words = g.all("word");
-    assertEquals(153, words.length);
+    assertEquals(177, words.length);
 
     // check utterance transcriptions
     String[] lines = {
@@ -840,7 +856,7 @@ public class TestSltSerialization {
       "So let's start at the beginning.",
       "What was the story about?",
       "Um the kids the kids, they quickly put their gumboots on.",
-      "saved muddy bushes buses putting girl's wants goes shopping> running dropped helped aunty's stopped leaving coming its lift.",
+      "saved muddy bushes buses putting girl's wants goes shopping> running dropped helped aunty's stopped leaving coming its lift. Hugging Hunting can't can't carried eating gently gently girl's goes guys happening helping hugged hurried kid's learning let's says seeing tramping tried tweeting waiting?",
       "Anything else?",
       "And please go for a walk?",
       "You need to put your gumboots on.",
@@ -1074,7 +1090,7 @@ public class TestSltSerialization {
       "So let's start at the beginning.",
       "What was the story about?",
       "(Um the kids) the kid/s, {in-situ comment} they quickly put their gumboot/s on.",
-      "save/ed mud/y bush/s bus/s put/ing girl/z[EP:boy/z] want/3s go/3s shop/ing> run/ing drop/ed help/ed aunty/z stop/ed leave/ing come/ing it/z lift/*ed.",
+      "save/ed mud/y bush/s bus/s put/ing girl/z[EP:boy/z] want/3s go/3s shop/ing> run/ing drop/ed help/ed aunty/z stop/ed leave/ing come/ing it/z lift/*ed. Hug/ing Hunt/ing can/'nt can/n't carry/ed eat/ing gentle/ly gentle/y girl/'z go/s guy/s happen/ing help/ing hug/ed hurry/ed kid/'z learn/ing let/'us say/s see/ing tramp/ing try/ed tweet/ing wait/ing?",
       "Anything else?",
       "And please go for a walk? [EU]",
       "You need to put your gumboot/s on.",

@@ -35,12 +35,13 @@ import nzilbb.editpath.EditStep;
 import nzilbb.editpath.MinimumEditPath;
 
 public class TestEafToSlt {
-  
-  @Test public void useConventions() throws Exception {
+
+  /** Conversion that does not parse inline conventions (mazes, bound morphemes, etc.) */
+  @Test public void ignoreConventions() throws Exception {
     File dir = getDir();
     File input = new File(dir, "elan.eaf");
     EafToSlt converter = new EafToSlt();
-    converter.setSwitch("parseInlineConventions", "true");
+    converter.setSwitch("parseInlineConventions", "false");
     converter.convert(input);
     File actual = new File(dir, "elan.slt");
     File expected = new File(dir, "expected_elan.slt");
