@@ -29,5 +29,6 @@
     <module>slttoeaf</module>
     <module>slttotrs</module>
     <module>trstoslt</module>
-  </modules>  
+    <module>eaftovtt</module>
+  </modules>
 </project>
