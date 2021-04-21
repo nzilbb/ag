@@ -86,7 +86,7 @@ public class TestEafToTrs {
       File dir = getDir();
       File input = new File(dir, "elan_annotations.eaf");
       EafToTrs converter = new EafToTrs();
-      converter.getTiersToIgnore().add("annotations");
+      converter.setIgnoreTiers("annotations");
       converter.convert(input);
       File actual = new File(dir, "elan_annotations.trs");
       File expected = new File(dir, "expected_elan_annotations.trs");

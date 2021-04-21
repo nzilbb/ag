@@ -23,6 +23,8 @@ package nzilbb.converter;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import nzilbb.ag.Constants;
 import nzilbb.ag.Layer;
@@ -46,16 +48,24 @@ public class EafToTrs extends Converter {
   // Attributes:
    
   /**
-   * A list of names of tiers to ignore.
-   * @see #getTiersToIgnore()
-   * @see #setTiersToIgnore(Set<String>)
+   * Regular rexpression to match ELAN tiers to ignore during conversion.
+   * @see #getIgnoreTiers()
+   * @see #setIgnoreTiers(String)
    */
-  protected Set<String> tiersToIgnore = new HashSet<String>();
+  protected String ignoreTiers;
   /**
-   * Getter for {@link #tiersToIgnore}: A list of names of tiers to ignore.
-   * @return A list of names of tiers to ignore.
+   * Getter for {@link #ignoreTiers}: Regular rexpression to match ELAN tiers to ignore
+   * during conversion. 
+   * @return Regular rexpression to match ELAN tiers to ignore during conversion.
    */
-  public Set<String> getTiersToIgnore() { return tiersToIgnore; }
+  public String getIgnoreTiers() { return ignoreTiers; }
+  /**
+   * Setter for {@link #ignoreTiers}: Regular rexpression to match ELAN tiers to ignore
+   * during conversion. 
+   * @param newIgnoreTiers Regular rexpression to match ELAN tiers to ignore during conversion.
+   */
+  @Switch("Comma-separated list of ELAN tiers to ignore during conversion")
+  public EafToTrs setIgnoreTiers(String newIgnoreTiers) { ignoreTiers = newIgnoreTiers; return this; }
    
   // Methods:
    
@@ -64,6 +74,28 @@ public class EafToTrs extends Converter {
    */
   public EafToTrs() {
     setDefaultWindowTitle("ELAN to Transcriber converter");
+    info = "ELAN has no direct mechanism for marking non-speech annotations in their position"
+      +" within the transcript text.  However, this converter supports the use of textual"
+      +" conventions in various ways to make certain annotations: "
+      +"\n - To tag a word with its pronunciation, enter the pronunciation in square brackets,"
+      +" directly following the word (i.e. with no intervening space), e.g.: "
+      +"\n …this was at Wingatui[wIN@tui]…"
+      +"\n - To tag a word with its full orthography (if the transcript doesn't include it),"
+      +" enter the orthography in round parentheses, directly following the word (i.e. with no"
+      +" intervening space), e.g.: "
+      +"\n …I can't remem~(remember)…"
+      +"\n - To insert a noise annotation within the text, enclose it in square brackets"
+      +" (surrounded by spaces so it's not taken as a pronunciation annotation), e.g.: "
+      +"\n …sometimes me [laughs] not always but sometimes…"
+      +"\n - To insert a comment annotation within the text, enclose it in curly braces"
+      +" (surrounded by spaces), e.g.: "
+      +"\n …beautifully warm {softly} but its…"
+      +"\nTo disable these transcription conventions, use the --useConventions=false"
+      +" command-line switch."
+      +"\n\nAll tiers will be interpreted as transcription of participant speech."
+      +" If some tiers contain other annotations, use the --ignoreTiers command line switch"
+      +" to exclude them from the conversion using a regular expression, e.g.:"
+      +"\n --ignoreTiers=Noise|Topic";
   } // end of constructor
    
   public static void main(String argv[]) {
@@ -106,34 +138,25 @@ public class EafToTrs extends Converter {
   } // end of getSchema()
 
   /**
-   * Command-line-accessible setter for {@link #tiersToIgnore}: A list of names of tiers
-   * to ignore.  
-   * @param tiers A comma-separated list of ELAN tiers to ignore.
-   */
-  @Switch(value="A comma-separated list of ELAN tiers to ignore",compulsory=false)
-  public EafToTrs setIgnoreTiers(String tiers)
-  {
-    if (tiers != null) {
-      for (String tier : tiers.split(",")) tiersToIgnore.add(tier);
-    }
-    return this;
-  }
-   
-  /**
-   * Determine the final parameters for deserialization. Implementors can adjust the
-   * default configuration before it's applied. This method is invoked once for each
-   * input file.
-   * @param defaultConfig
+   * Un-map tiers that are matched by {@link #ignoreTiers}.
+   * @param parameters The default parameters.
    * @return The new configuration.
    */
-  public ParameterSet deserializationParameters(ParameterSet defaultConfig) {
-    // ignore specified tiers
-    for (Parameter p : defaultConfig.values()) {
-      if (p.getName().startsWith("tier") && tiersToIgnore.contains(p.getLabel())) {
-        p.setValue(null);
-      }
-    } // next parameter
-    return defaultConfig;
+  public ParameterSet deserializationParameters(ParameterSet parameters) {
+    if (ignoreTiers != null && ignoreTiers.length() > 0) {
+      Pattern ignorePattern = Pattern.compile(ignoreTiers);
+      // for each parameter
+      for (Parameter p : parameters.values()) {
+        // if it's a tier mapping
+        if (p.getName().startsWith("tier")
+            // and it matches ignoreTiers
+            && ignorePattern.matcher(p.getLabel()).matches()) {
+          // ignore this tier
+          p.setValue(null);
+        }
+      } // next parameter
+    } // ignoreTiers is set
+    return parameters;
   } // end of deserializationConfiguration()
 
   /**

@@ -9,7 +9,7 @@
 
   <groupId>nzilbb</groupId>
   <artifactId>eaf-to-trs</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <name>nzilbb.converter.eaftotrs</name>
   <description>Utility for converting ELAN files to Transcriber transcripts</description>
 
@@ -17,11 +17,11 @@
     
     <input.package>nzilbb.formatter.elan</input.package>
     <input.path>nzilbb/formatter/elan/</input.path>
-    <input.version>1.5.0</input.version>
+    <input.version>1.5.1</input.version>
     
     <output.package>nzilbb.formatter.transcriber</output.package>
     <output.path>nzilbb/formatter/transcriber/</output.path>
-    <output.version>2.0.0</output.version>
+    <output.version>2.0.2</output.version>
     
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -42,7 +42,7 @@
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>converter-base</artifactId>
-      <version>1.0.2</version>
+      <version>1.0.3</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -120,7 +120,7 @@
                 <artifactItem>
                   <groupId>nzilbb</groupId>
                   <artifactId>converter-base</artifactId>
-                  <version>1.0.2</version>
+                  <version>1.0.3</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>

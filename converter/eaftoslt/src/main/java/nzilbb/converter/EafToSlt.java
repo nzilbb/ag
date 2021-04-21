@@ -90,7 +90,7 @@ public class EafToSlt extends Converter {
   }
   
   /**
-   * Un-map tiers that are included in {@link #ignoreTiers}.
+   * Un-map tiers that are matched by {@link #ignoreTiers}.
    * @param parameters The default parameters.
    * @return The new configuration.
    */
