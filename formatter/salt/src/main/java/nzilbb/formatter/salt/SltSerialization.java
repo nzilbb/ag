@@ -1796,6 +1796,8 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         transformer.transform(graph).commit();
         
         // bound morphemes  - something like "bird/s/z" ...
+
+        // TODO Hug/ing, Hunt/ing, That/s, They/re, bush/3s, can/'nt, can/n't, carry/ed, eat/ing, gentle/ly, gentle/y, girl/'z, go/s, guy/s, happen/ing, help/ing, hug/ed, hurry/ed, kid/'z, learn/ing, let/'us, say/s, see/ing, tramp/ing, try/ed, tweet/ing, wait/ing, 
         
         // just stripping out the slashes doesn't produce well-formed words
         // so we apply a series of heuristic transformations based on English norms and exceptions

@@ -1256,10 +1256,10 @@ public class TranscriptSerialization
       }
     } // next speaker
       
-      // check for simultaneous speech turns where the speakers are the same
-      // and for mismatched start/end events
-      
-      // for each turn
+    // check for simultaneous speech turns where the speakers are the same
+    // and for mismatched start/end events
+    
+    // for each turn
     HashMap<String,Event> htStartedEvents = new HashMap<String,Event>();
     for (Turn turn : getTurns()) {
          
@@ -1314,7 +1314,7 @@ public class TranscriptSerialization
       } // next sync
     } // next turn
       
-      // leftover start events?
+    // leftover start events?
     for(String sKey : htStartedEvents.keySet()) {
          
       Event event = htStartedEvents.get(sKey);
@@ -1326,7 +1326,7 @@ public class TranscriptSerialization
       warnings.add(sMessage);
     } // next leftover start event
 
-      // TODO check for turns with no speaker assigned.
+    // TODO check for turns with no speaker assigned.
     return warnings;
   }
   // GraphSerializer methods

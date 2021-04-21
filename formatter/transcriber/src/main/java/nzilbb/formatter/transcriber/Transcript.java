@@ -603,10 +603,20 @@ public class Transcript {
       // for each turn
       for (Turn turn : section.getTurns()) {
         // for each sync
-           
+        double time = 0.0;
         Enumeration<Sync> syncsEnum = turn.getSyncs().elements();
         while(syncsEnum.hasMoreElements()) {
           Sync sync = syncsEnum.nextElement();
+          
+          // check syncs go forward in time
+          if (time > sync.getTimeAsDouble()) {
+            vErrors.add(
+              "Sync at " + sync.getTime() +"s is before the previous sync at " + time + "s"
+              +": changing to: " + (time + 0.5));
+            sync.setTime(""+(time+0.5));
+          }
+          time = sync.getTimeAsDouble();
+          
           String[] who = sync.getWho().split(" ");
           if (!sync.isSimultaneousSpeech() && who.length > 1) {
             vErrors.add(

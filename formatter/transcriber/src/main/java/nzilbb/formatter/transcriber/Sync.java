@@ -210,7 +210,7 @@ public class Sync
       {
 	 sync.setEndTime(newEndTime);
       } // next sub-sync
-   } // end of setTime()
+   } // end of setEndTime()
    
    /**
     * For simultaneous speech

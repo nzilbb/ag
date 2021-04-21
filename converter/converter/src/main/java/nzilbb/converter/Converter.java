@@ -84,6 +84,12 @@ import nzilbb.util.Switch;
 public abstract class Converter extends GuiProgram {
    
   // Attributes:
+
+  /** Errors preventing conversion, for reporting to the user. */
+  protected Vector<String> errors = new Vector<String>();
+  
+  /** Warnings during conversion, for reporting to the user. */
+  protected Vector<String> warnings = new Vector<String>();
    
   /**
    * Display help info about available serialization parameters.
@@ -333,7 +339,8 @@ public abstract class Converter extends GuiProgram {
       
     Graph[] graphs = deserializer.deserialize();
     for (String warning : deserializer.getWarnings()) {
-      System.out.println(inputFile.getName() + ": " + warning);
+      System.err.println(inputFile.getName() + ": " + warning);
+      warnings.add(inputFile.getName() + ": " + warning);
     }
 
     // strip extension off name
@@ -404,12 +411,17 @@ public abstract class Converter extends GuiProgram {
           stream.save(dir);
         } catch(IOException exception) {
           System.err.println(exception.toString());
+          errors.add(stream.getName() + ": " + exception.toString());
         }
       },
-      warning -> { System.out.println(inputFile.getName() + ": " + warning); },
+      warning -> {
+        System.err.println(inputFile.getName() + ": " + warning);
+        warnings.add(inputFile.getName() + ": " + warning);
+      },
       exception -> {
         System.err.println(exception.toString());
         exception.printStackTrace(System.err);
+        errors.add(inputFile.getName() + ": " + exception.toString());
       });
     
     if (verbose) System.out.println("Finished " + inputFile.getPath());
@@ -569,12 +581,13 @@ public abstract class Converter extends GuiProgram {
       System.err.println(help());
       System.exit(1);
     }
-         
+
+    FileNameExtensionFilter fileFilter = getFileFilter();
     for (String argument: arguments) {
       if (verbose) System.out.println("argument: " + argument);
       try {
         File file = new File(argument);
-        if (file.exists()) {
+        if (file.exists() && !file.isDirectory() && fileFilter.accept(file)) {
           if (verbose) System.out.println("file: " + file.getPath());
           ((DefaultListModel)files.getModel()).add(files.getModel().getSize(), file);
         } else {
@@ -669,7 +682,8 @@ public abstract class Converter extends GuiProgram {
     progress.setValue(0);
     progress.setString("");
     int f = 0;
-    Vector<String> errors = new Vector<String>();
+    errors = new Vector<String>();
+    warnings = new Vector<String>();
     for (File inputFile: files) {
       progress.setString(inputFile.getName());
       try {
@@ -692,6 +706,12 @@ public abstract class Converter extends GuiProgram {
     if (batchMode) {
       System.exit(0);
     } else { // GUI
+      if (warnings.size() > 0) {
+        // display errors 
+        JOptionPane.showMessageDialog(
+          this, warnings.stream().collect(Collectors.joining("\n")),
+          "Warning", JOptionPane.INFORMATION_MESSAGE);       
+      }
       if (errors.size() > 0) {
         // display errors 
         JOptionPane.showMessageDialog(
