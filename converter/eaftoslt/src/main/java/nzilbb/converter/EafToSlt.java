@@ -22,7 +22,10 @@
 package nzilbb.converter;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import nzilbb.ag.Annotation;
 import nzilbb.ag.Constants;
 import nzilbb.ag.Graph;
@@ -32,6 +35,8 @@ import nzilbb.ag.TransformationException;
 import nzilbb.ag.serialize.GraphDeserializer;
 import nzilbb.ag.serialize.GraphSerializer;
 import nzilbb.ag.util.DefaultOffsetGenerator;
+import nzilbb.configure.Parameter;
+import nzilbb.configure.ParameterSet;
 import nzilbb.formatter.elan.EAFSerialization;
 import nzilbb.formatter.salt.SltSerialization;
 import nzilbb.util.ProgramDescription;
@@ -43,6 +48,26 @@ import nzilbb.util.Switch;
  */
 @ProgramDescription(value="Converts ELAN .eaf files SALT .slt transcripts",arguments="file1.eaf file2.eaf ...")
 public class EafToSlt extends Converter {
+  
+  /**
+   * Regular rexpression to match ELAN tiers to ignore during conversion.
+   * @see #getIgnoreTiers()
+   * @see #setIgnoreTiers(String)
+   */
+  protected String ignoreTiers;
+  /**
+   * Getter for {@link #ignoreTiers}: Regular rexpression to match ELAN tiers to ignore
+   * during conversion. 
+   * @return Regular rexpression to match ELAN tiers to ignore during conversion.
+   */
+  public String getIgnoreTiers() { return ignoreTiers; }
+  /**
+   * Setter for {@link #ignoreTiers}: Regular rexpression to match ELAN tiers to ignore
+   * during conversion. 
+   * @param newIgnoreTiers Regular rexpression to match ELAN tiers to ignore during conversion.
+   */
+  @Switch("Comma-separated list of ELAN tiers to ignore during conversion")
+  public EafToSlt setIgnoreTiers(String newIgnoreTiers) { ignoreTiers = newIgnoreTiers; return this; }
 
   /**
    * Default constructor.
@@ -53,13 +78,39 @@ public class EafToSlt extends Converter {
     setSwitch("useConventions", "false");
     
     info = "By default, inline SALT annotations (mazes, codes, bound morphemes, etc.)"
-      +" are not interpreted. If you want them to be processed, use --parseInlineConventions";
+      +" are not interpreted. If you want them to be processed, use --parseInlineConventions"
+      +"\nAll tiers will be interpreted as transcription of participant speech."
+      +" If some tiers contain other annotations, use the --ignoreTiers command line switch"
+      +" to exclude them from the conversion using a regular expression, e.g.:"
+      +"\n --ignoreTiers=Noise|Topic";
   } // end of constructor
   
   public static void main(String argv[]) {
     new EafToSlt().mainRun(argv);
   }
   
+  /**
+   * Un-map tiers that are included in {@link #ignoreTiers}.
+   * @param parameters The default parameters.
+   * @return The new configuration.
+   */
+  public ParameterSet deserializationParameters(ParameterSet parameters) {
+    if (ignoreTiers != null && ignoreTiers.length() > 0) {
+      Pattern ignorePattern = Pattern.compile(ignoreTiers);
+      // for each parameter
+      for (Parameter p : parameters.values()) {
+        // if it's a tier mapping
+        if (p.getName().startsWith("tier")
+            // and it matches ignoreTiers
+            && ignorePattern.matcher(p.getLabel()).matches()) {
+          // ignore this tier
+          p.setValue(null);
+        }
+      } // next parameter
+    } // ignoreTiers is set
+    return parameters;
+  } // end of deserializationParameters()
+
   /** File filter for identifying files of the correct type */
   protected FileNameExtensionFilter getFileFilter() {
     return new FileNameExtensionFilter("ELAN files", "eaf");

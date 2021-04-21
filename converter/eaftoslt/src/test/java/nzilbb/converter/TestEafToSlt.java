@@ -41,10 +41,26 @@ public class TestEafToSlt {
     File dir = getDir();
     File input = new File(dir, "elan.eaf");
     EafToSlt converter = new EafToSlt();
-    converter.setSwitch("parseInlineConventions", "false");
     converter.convert(input);
     File actual = new File(dir, "elan.slt");
     File expected = new File(dir, "expected_elan.slt");
+    String differences = diff(expected, actual);
+    if (differences != null) {
+      fail(differences);
+    } else {
+      actual.delete();
+    }
+  }
+  
+  /** Conversion that ignores the ...Examiner tier */
+  @Test public void ignoreTier() throws Exception {
+    File dir = getDir();
+    File input = new File(dir, "elan.eaf");
+    EafToSlt converter = new EafToSlt();
+    converter.setIgnoreTiers(".*Examiner");
+    converter.convert(input);
+    File actual = new File(dir, "elan.slt");
+    File expected = new File(dir, "expected_elan_child_only.slt");
     String differences = diff(expected, actual);
     if (differences != null) {
       fail(differences);
