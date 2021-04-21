@@ -31,5 +31,6 @@
     <module>trstoslt</module>
     <module>eaftovtt</module>
     <module>slttovtt</module>
+    <module>slttotextgrid</module>
   </modules>
 </project>

@@ -1,0 +1,152 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 94 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "ADAL-Child" 
+        xmin = 0 
+        xmax = 94 
+        intervals: size = 15 
+        intervals [1]:
+            xmin = 0 
+            xmax = 29 
+            text = "" 
+        intervals [2]:
+            xmin = 29 
+            xmax = 34 
+            text = "Um the kids the kids, they quickly put their gumboots on." 
+        intervals [3]:
+            xmin = 34 
+            xmax = 39 
+            text = "" 
+        intervals [4]:
+            xmin = 39 
+            xmax = 41 
+            text = "And please go for a walk?" 
+        intervals [5]:
+            xmin = 41 
+            xmax = 46 
+            text = "You need to put your gumboots on." 
+        intervals [6]:
+            xmin = 46 
+            xmax = 47 
+            text = "It's too dark^" 
+        intervals [7]:
+            xmin = 47 
+            xmax = 52 
+            text = "" 
+        intervals [8]:
+            xmin = 52 
+            xmax = 62 
+            text = "And then it's heaps and heaps dark." 
+        intervals [9]:
+            xmin = 62 
+            xmax = 63 
+            text = "" 
+        intervals [10]:
+            xmin = 63 
+            xmax = 69 
+            text = "Schnitzel von Krumm s~ falled out the babies' nest." 
+        intervals [11]:
+            xmin = 69 
+            xmax = 71 
+            text = "" 
+        intervals [12]:
+            xmin = 71 
+            xmax = 83 
+            text = "They put them it back in the nest um." 
+        intervals [13]:
+            xmin = 83 
+            xmax = 86 
+            text = "Bye bye little bird." 
+        intervals [14]:
+            xmin = 86 
+            xmax = 93 
+            text = "" 
+        intervals [15]:
+            xmin = 93 
+            xmax = 94 
+            text = "_." 
+    item [2]:
+        class = "IntervalTier" 
+        name = "ADAL-Examiner" 
+        xmin = 0 
+        xmax = 94 
+        intervals: size = 18 
+        intervals [1]:
+            xmin = 0 
+            xmax = 5 
+            text = "I'm at Byron kindergarten on what date is it the 30th of March 2021?" 
+        intervals [2]:
+            xmin = 5 
+            xmax = 12 
+            text = "My name is _. and I'm here with _, doing the oral language assessment." 
+        intervals [3]:
+            xmin = 12 
+            xmax = 16 
+            text = "Okay, so now Ada it's your turn to tell the story." 
+        intervals [4]:
+            xmin = 16 
+            xmax = 19.5 
+            text = "You can look at the pictures when you're telling the story." 
+        intervals [5]:
+            xmin = 19.5 
+            xmax = 23 
+            text = "So let's start at the beginning." 
+        intervals [6]:
+            xmin = 23 
+            xmax = 29 
+            text = "What was the story about?" 
+        intervals [7]:
+            xmin = 29 
+            xmax = 34 
+            text = "" 
+        intervals [8]:
+            xmin = 34 
+            xmax = 37 
+            text = "saved muddy bushes buses putting girl's wants goes shopping running dropped helped aunty's stopped leaving coming its lift." 
+        intervals [9]:
+            xmin = 37 
+            xmax = 39 
+            text = "Anything else?" 
+        intervals [10]:
+            xmin = 39 
+            xmax = 47 
+            text = "" 
+        intervals [11]:
+            xmin = 47 
+            xmax = 52 
+            text = "What happened in this one?" 
+        intervals [12]:
+            xmin = 52 
+            xmax = 62 
+            text = "" 
+        intervals [13]:
+            xmin = 62 
+            xmax = 63 
+            text = "What happened next?" 
+        intervals [14]:
+            xmin = 63 
+            xmax = 69 
+            text = "" 
+        intervals [15]:
+            xmin = 69 
+            xmax = 71 
+            text = "What happened next?" 
+        intervals [16]:
+            xmin = 71 
+            xmax = 86 
+            text = "" 
+        intervals [17]:
+            xmin = 86 
+            xmax = 93 
+            text = "Anything else that happened?" 
+        intervals [18]:
+            xmin = 93 
+            xmax = 94 
+            text = "" 
