@@ -81,6 +81,7 @@ public class EafToVtt extends Converter {
       +" If some tiers contain other annotations, use the --ignoreTiers command line switch"
       +" to exclude them from the conversion using a regular expression, e.g.:"
       +"\n --ignoreTiers=Noise|Topic"
+      +"\n "
       +"\nELAN has no direct mechanism for marking non-speech annotations in their position"
       +" within the transcript text. However, this converter can assume the use of textual"
       +" conventions in various ways to make certain annotations: "
