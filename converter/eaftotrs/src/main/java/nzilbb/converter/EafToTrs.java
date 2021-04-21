@@ -1,5 +1,5 @@
 //
-// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -43,108 +43,108 @@ import nzilbb.util.Switch;
 @ProgramDescription(value="Converts ELAN .eaf files to Transcriber .trs transcripts",arguments="file1.eaf file2.eaf ...")
 public class EafToTrs extends Converter {
 
-   // Attributes:
+  // Attributes:
    
-   /**
-    * A list of names of tiers to ignore.
-    * @see #getTiersToIgnore()
-    * @see #setTiersToIgnore(Set<String>)
-    */
-   protected Set<String> tiersToIgnore = new HashSet<String>();
-   /**
-    * Getter for {@link #tiersToIgnore}: A list of names of tiers to ignore.
-    * @return A list of names of tiers to ignore.
-    */
-   public Set<String> getTiersToIgnore() { return tiersToIgnore; }
+  /**
+   * A list of names of tiers to ignore.
+   * @see #getTiersToIgnore()
+   * @see #setTiersToIgnore(Set<String>)
+   */
+  protected Set<String> tiersToIgnore = new HashSet<String>();
+  /**
+   * Getter for {@link #tiersToIgnore}: A list of names of tiers to ignore.
+   * @return A list of names of tiers to ignore.
+   */
+  public Set<String> getTiersToIgnore() { return tiersToIgnore; }
    
-   // Methods:
+  // Methods:
    
-   /**
-    * Default constructor.
-    */
-   public EafToTrs() {
-      setDefaultWindowTitle("ELAN to Transcriber converter");
-   } // end of constructor
+  /**
+   * Default constructor.
+   */
+  public EafToTrs() {
+    setDefaultWindowTitle("ELAN to Transcriber converter");
+  } // end of constructor
    
-   public static void main(String argv[]) {
-      new EafToTrs().mainRun(argv);
-   }
+  public static void main(String argv[]) {
+    new EafToTrs().mainRun(argv);
+  }
 
-   /** File filter for identifying files of the correct type */
-   protected FileNameExtensionFilter getFileFilter() {
-      return new FileNameExtensionFilter("ELAN files", "eaf");
-   }
+  /** File filter for identifying files of the correct type */
+  protected FileNameExtensionFilter getFileFilter() {
+    return new FileNameExtensionFilter("ELAN files", "eaf");
+  }
 
-   /**
-    * Gets the deserializer that #convert(File) uses.
-    * @return The deserializer to use.
-    */
-   public GraphDeserializer getDeserializer() {
-      return new EAFSerialization();
-   }
+  /**
+   * Gets the deserializer that #convert(File) uses.
+   * @return The deserializer to use.
+   */
+  public GraphDeserializer getDeserializer() {
+    return new EAFSerialization();
+  }
 
-   /**
-    * Gets the serializer that #convert(File) uses.
-    * @return The serializer to use.
-    */
-   public GraphSerializer getSerializer() {
-      return new TranscriptSerialization();
-   }
+  /**
+   * Gets the serializer that #convert(File) uses.
+   * @return The serializer to use.
+   */
+  public GraphSerializer getSerializer() {
+    return new TranscriptSerialization();
+  }
 
-   /**
-    * Specify the schema to used by  {@link #convert(File)}.
-    * @return The schema.
-    */
-   public Schema getSchema() {
-      Schema schema = super.getSchema();
-      // include topic layer
-      schema.addLayer(
-         new Layer("topic", "Topic")         
-         .setAlignment(Constants.ALIGNMENT_INTERVAL)
-         .setPeers(true).setPeersOverlap(false).setSaturated(false));
-      return schema;
-   } // end of getSchema()
+  /**
+   * Specify the schema to used by  {@link #convert(File)}.
+   * @return The schema.
+   */
+  public Schema getSchema() {
+    Schema schema = super.getSchema();
+    // include topic layer
+    schema.addLayer(
+      new Layer("topic", "Topic")         
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false));
+    return schema;
+  } // end of getSchema()
 
-   /**
-    * Command-line-accessible setter for {@link #tiersToIgnore}: A list of names of tiers
-    * to ignore.  
-    * @param tiers A comma-separated list of ELAN tiers to ignore.
-    */
-   @Switch(value="A comma-separated list of ELAN tiers to ignore",compulsory=false)
-   public EafToTrs setIgnoreTiers(String tiers)
-   {
-      if (tiers != null) {
-         for (String tier : tiers.split(",")) tiersToIgnore.add(tier);
+  /**
+   * Command-line-accessible setter for {@link #tiersToIgnore}: A list of names of tiers
+   * to ignore.  
+   * @param tiers A comma-separated list of ELAN tiers to ignore.
+   */
+  @Switch(value="A comma-separated list of ELAN tiers to ignore",compulsory=false)
+  public EafToTrs setIgnoreTiers(String tiers)
+  {
+    if (tiers != null) {
+      for (String tier : tiers.split(",")) tiersToIgnore.add(tier);
+    }
+    return this;
+  }
+   
+  /**
+   * Determine the final parameters for deserialization. Implementors can adjust the
+   * default configuration before it's applied. This method is invoked once for each
+   * input file.
+   * @param defaultConfig
+   * @return The new configuration.
+   */
+  public ParameterSet deserializationParameters(ParameterSet defaultConfig) {
+    // ignore specified tiers
+    for (Parameter p : defaultConfig.values()) {
+      if (p.getName().startsWith("tier") && tiersToIgnore.contains(p.getLabel())) {
+        p.setValue(null);
       }
-      return this;
-   }
-   
-   /**
-    * Determine the final parameters for deserialization. Implementors can adjust the
-    * default configuration before it's applied. This method is invoked once for each
-    * input file.
-    * @param defaultConfig
-    * @return The new configuration.
-    */
-   public ParameterSet deserializationParameters(ParameterSet defaultConfig) {
-      // ignore specified tiers
-      for (Parameter p : defaultConfig.values()) {
-         if (p.getName().startsWith("tier") && tiersToIgnore.contains(p.getLabel())) {
-            p.setValue(null);
-         }
-      } // next parameter
-      return defaultConfig;
-   } // end of deserializationConfiguration()
+    } // next parameter
+    return defaultConfig;
+  } // end of deserializationConfiguration()
 
-   /**
-    * Specifies which layers should be given to the serializer. The default implementaion
-    * returns only the "utterance" layer.
-    * @return An array of layer IDs.
-    */
-   public String[] getLayersToSerialize() {
-      String[] layers = { "utterance", "topic" };
-      return layers;
-   } // end of getLayersToSerialize()
+  /**
+   * Specifies which layers should be given to the serializer. The default implementaion
+   * returns only the "utterance" layer.
+   * @return An array of layer IDs.
+   */
+  public String[] getLayersToSerialize() {
+    String[] layers = { "utterance", "topic" };
+    return layers;
+  } // end of getLayersToSerialize()
       
-   private static final long serialVersionUID = -1;
+  private static final long serialVersionUID = -1;
 } // end of class EafToTrs
