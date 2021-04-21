@@ -39,7 +39,7 @@ import nzilbb.util.ProgramDescription;
 import nzilbb.util.Switch;
 
 /**
- * Converts ELAN .eaf files to Transcriber .trs files.
+ * Converts ELAN .eaf files to WebVTT subtitles.
  * @author Robert Fromont robert@fromont.net.nz
  */
 @ProgramDescription(value="Converts ELAN .eaf files to WebVTT subtitles",arguments="file1.eaf file2.eaf ...")
