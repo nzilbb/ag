@@ -30,5 +30,6 @@
     <module>slttotrs</module>
     <module>trstoslt</module>
     <module>eaftovtt</module>
+    <module>slttovtt</module>
   </modules>
 </project>
