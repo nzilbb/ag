@@ -21,11 +21,11 @@ to another, including:
 * txt - *plain text* files
 * slt - *SALT* transcripts
 
-| from↓ to→ | trs | eaf  | textgrid | vtt | pdf | txt | slt |
+| from↓ to→ | trs | eaf  | vtt | slt | textgrid | pdf | txt |
 | --- | :---: | :---:  | :---: | :---: | :---: | :---: | :---: |
-| **trs** | | [trs-to-eaf](trs-to-eaf.jar?raw=true) | [trs-to-textgrid](trs-to-textgrid.jar?raw=true) | [trs-to-vtt](trs-to-vtt.jar?raw=true) | [trs-to-pdf](trs-to-pdf.jar?raw=true) | [trs-to-txt](trs-to-txt.jar?raw=true) | |
-| **eaf** | [eaf-to-trs](eaf-to-trs.jar?raw=true) | | | | | | [eaf-to-slt](eaf-to-slt.jar?raw=true) |
-| **vtt** | [vtt-to-trs](vtt-to-trs.jar?raw=true) | [vtt-to-eaf](vtt-to-eaf.jar?raw=true) | [vtt-to-textgrid](vtt-to-textgrid.jar?raw=true) | | | |
+| **trs** | | [trs-to-eaf](trs-to-eaf.jar?raw=true) | [trs-to-vtt](trs-to-vtt.jar?raw=true) | [trs-to-slt](trs-to-slt.jar?raw=true) | [trs-to-textgrid](trs-to-textgrid.jar?raw=true) | [trs-to-pdf](trs-to-pdf.jar?raw=true) | [trs-to-txt](trs-to-txt.jar?raw=true) |
+| **eaf** | [eaf-to-trs](eaf-to-trs.jar?raw=true) | | | [eaf-to-slt](eaf-to-slt.jar?raw=true)| | |  |
+| **vtt** | [vtt-to-trs](vtt-to-trs.jar?raw=true) | [vtt-to-eaf](vtt-to-eaf.jar?raw=true) | | | [vtt-to-textgrid](vtt-to-textgrid.jar?raw=true) | |
 | **slt** | [slt-to-trs](slt-to-trs.jar?raw=true) | [slt-to-eaf](slt-to-eaf.jar?raw=true) | | | | | |
 
 To use a particular converter, you need to have Java installed on your
