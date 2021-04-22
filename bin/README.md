@@ -24,7 +24,7 @@ to another, including:
 * txt - *plain text* files
 
 | from↓ to→ | trs | eaf  | vtt | slt | textgrid | pdf | tex | txt |
-| --- | :---: | :---:  | :---: | :---: | :---: | :---: | :---: |
+| --- | :---: | :---:  | :---: | :---: | :---: | :---: | :---: | :---: |
 | **trs** | | [trs-to-eaf](trs-to-eaf.jar?raw=true) | [trs-to-vtt](trs-to-vtt.jar?raw=true) | [trs-to-slt](trs-to-slt.jar?raw=true) | [trs-to-textgrid](trs-to-textgrid.jar?raw=true) | [trs-to-pdf](trs-to-pdf.jar?raw=true) | [trs-to-tex](trs-to-tex.jar?raw=true)| [trs-to-txt](trs-to-txt.jar?raw=true) |
 | **eaf** | [eaf-to-trs](eaf-to-trs.jar?raw=true) | | [eaf-to-vtt](eaf-to-vtt.jar?raw=true) | [eaf-to-slt](eaf-to-slt.jar?raw=true) | | [eaf-to-pdf](eaf-to-pdf.jar?raw=true) | [eaf-to-tex](eaf-to-tex.jar?raw=true) | |
 | **vtt** | [vtt-to-trs](vtt-to-trs.jar?raw=true) | [vtt-to-eaf](vtt-to-eaf.jar?raw=true) | | | [vtt-to-textgrid](vtt-to-textgrid.jar?raw=true) | [vtt-to-pdf](vtt-to-pdf.jar?raw=true) | [vtt-to-tex](vtt-to-tex.jar?raw=true)|

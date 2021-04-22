@@ -12,7 +12,7 @@ Standalone programs that convert transcripts from one tool format to another, e.
 * txt - *plain text* files
 
 | from↓ to→ | trs | eaf  | vtt | slt | textgrid | pdf | tex | txt |
-| --- | :---: | :---:  | :---: | :---: | :---: | :---: | :---: |
+| --- | :---: | :---:  | :---: | :---: | :---: | :---: | :---: | :---: |
 | **trs** | | [trs-to-eaf](../bin/trs-to-eaf.jar?raw=true) | [trs-to-vtt](../bin/trs-to-vtt.jar?raw=true) | [trs-to-slt](../bin/trs-to-slt.jar?raw=true) | [trs-to-textgrid](../bin/trs-to-textgrid.jar?raw=true) | [trs-to-pdf](../bin/trs-to-pdf.jar?raw=true) | [trs-to-tex](../bin/trs-to-tex.jar?raw=true) | [trs-to-txt](../bin/trs-to-txt.jar?raw=true) |
 | **eaf** | [eaf-to-trs](../bin/eaf-to-trs.jar?raw=true) | | [eaf-to-vtt](../bin/eaf-to-vtt.jar?raw=true) | [eaf-to-slt](../bin/eaf-to-slt.jar?raw=true) | | [eaf-to-pdf](../bin/eaf-to-pdf.jar?raw=true) | [eaf-to-tex](../bin/eaf-to-tex.jar?raw=true) | |
 | **vtt** | [vtt-to-trs](../bin/vtt-to-trs.jar?raw=true) | [vtt-to-eaf](../bin/vtt-to-eaf.jar?raw=true) | | | [vtt-to-textgrid](../bin/vtt-to-textgrid.jar?raw=true) | [vtt-to-pdf](../bin/vtt-to-pdf.jar?raw=true) | [vtt-to-tex](../bin/vtt-to-tex.jar?raw=true) | |
