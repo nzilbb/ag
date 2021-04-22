@@ -22,12 +22,14 @@ Standalone programs that convert transcripts from one tool format to another, e.
 
 These use the serializers/deserializers in the *formatters* directory to read a file in
 one format, convert it to an annotation graph, and then write that graph out as a file in
-another format. This saves having *n<sup>2</sup> - n* explicit conversions between formats;
+another format. As pointed out by
+Cochran et al. (2007 - *Report from TILR Working Group 1 : Tools interoperability and input/output formats*)
+this saves having *n<sup>2</sup> - n* explicit conversions between formats;
 only *2n* format conversions are required.
 
 This exemplifies an approach to linguistic data interoperability called the *interlingua
 philosophy on interoperability* by
-[Witt et al. (2009)](https://www.w3.org/People/fsasaki/docs/lre-intro.pdf),
+[Witt et al. (2009)](https://www.w3.org/People/fsasaki/docs/lre-intro.pdf)
 and uses annotation graphs as an 'interlingua' similar to work by 
 [Schmidt et al. (2008)](https://ids-pub.bsz-bw.de/frontdoor/deliver/index/docId/2308/file/Schmidt%20etc_An_exchange_format_for_multimodal_annotations_2008.pdf)
 except that rather using a third file format as an intermediary, the annotation graph models
