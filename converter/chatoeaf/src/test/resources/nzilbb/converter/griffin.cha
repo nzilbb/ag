@@ -1,0 +1,71 @@
+@Font:	CAfont:12:0
+@UTF8
+@Color words:	%pic: 1 1175 40379 58715 @BG: 1 3098 54563 22810 @EG: 1 10586 51598 19548 
+@Begin
+@Languages:	eng
+@Participants:	GRI Nick_Griffin Participant, DIM Dimbleby Participant,
+	PPP Pause Unidentified, APP Applause Unidentified, UNK Unknown
+	Unidentified
+@Options:	CA
+@ID:	eng|change_corpus_later|GRI|||||Participant|||
+@ID:	eng|change_corpus_later|DIM|||||Participant|||
+@ID:	eng|change_corpus_later|PPP|||||Unidentified|||
+@ID:	eng|change_corpus_later|APP|||||Unidentified|||
+@ID:	eng|change_corpus_later|UNK|||||Unidentified|||
+@Media:	griffin, video
+@Situation:	panel debate
+@Date:
+@Location:	UK BBC London
+@Transcriber:	SH
+@Transcription:	partial
+@Comment:	Use the command window to align all the overlap markers
+	automatically (see instructions sheet included)
+*APP:	(3.1) 0_10538
+*GRI:	without (.) a shadow of a doubt i appreciate 3239_5079
+	that if you look at some of the things i'm quoted 5062_6693
+	as having said↗ (0.3) 6687_7549
+	in the daily mail n dai- an' so on (0.2) 7549_8959
+	i'd be a ↑monster↘ 8953_9760
+*PPP:	(0.2) 9743_9934
+@Bg:	denial
+*GRI:	those things are outrageous lies 9929_11705
+*DIM:	wh⌈ich⌉ is the untrue quote that's ⌈been said⌉ about you 11755_14327
+*GRI:	  ⌊⁇but⁇⌋
+*APP:	                                   ⌊mn mn⌋
+*UNK:	°⁇true⁇° 14059_14442
+*GRI:	the ⌈th-⌉ 14430_14895
+*DIM:	    ⌊the⌋ holocaust denial possibly↗ 14709_16404
+*GRI:	the- the va:st majority of them↗ 16404_18053
+@Eg:	denial
+*PPP:	(0.6) 18035_18598
+*GRI:	far too many to go into↗ (0.3) 18593_20107
+	er: but er (0.2) huh huh 20096_21367
+*UNK:	well let ⌈let let me let me let me⌉ 21355_23629
+*DIM:	         ⌊well all right let's let's just go⌋ 21904_23634
+	⁇dar-⁇ deny denying the holocaust ⁇france⁇ 23626_25741
+	did you s- did you deny the holo⌈caust↗ yes you did↘⌉ 25741_27916
+*GRI:	                                ⌊i do not⌋ have a conviction for holocaust denial↗ 27069_29066
+*DIM:	but you did deny it↘ 29077_29995
+*PPP:	(0.7) 29983_30726
+*GRI:	⌈i did⌉ 30709_31109
+*DIM:	⌊↑why⌋ are you smiling↘ 30738_31655
+	it's ⌈not⌉ a particularly amusing issue↘ 31649_33182
+*GRI:	     ⌊i:⌋
+*PPP:	(0.3) 33182_33530
+*GRI:	i:: (0.3) was very critical
+	for the way in which the holocaust (0.2) 33524_36578
+	was (0.5) and is in fa⌈ct⌉ (0.2) abused→ 36567_39636
+*DIM:	                      ⌊mn⌋
+*GRI:	∇to prevent∇ (0.2) serious discussion over immigration↘ 39619_42218
+*DIM:	                      ⌊jus- just⌋ you say you're misquoted→ 41696_43257
+	ethnicity i want to see britain become→ 43257_45451
+*APP:	(3.0) 45062_48065
+	⌈ (6.0) ⌉ 48053_54479
+*DIM:	⌊wait wait wait (1.3) ethnicity↘ (0.4) ethnicity↘ (1.4) please⌋ 48053_54038
+	ethnicity↘ i want to see britain become ninety nine percent
+	genetically white→ 54038_57858
+*PPP:	(0.8) 57852_58636
+*DIM:	just as she was eleven years before i was born↘ 58624_61195
+*PPP:	(0.7) 61180_61894
+*DIM:	on race↘ right⇗ (0.4) mixed marriages↘ 61882_64065
+@End

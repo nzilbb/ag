@@ -21,7 +21,7 @@
     
     <output.package>nzilbb.formatter.clan</output.package>
     <output.path>nzilbb/formatter/clan/</output.path>
-    <output.version>1.1.1</output.version>    
+    <output.version>1.1.2</output.version>    
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>

@@ -1075,7 +1075,6 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 
       return new ParameterSet(); // everything is in configure()
    }
-
    
    /**
     * Tries to find a layer in the given map, using an ordered list of possible IDs.
@@ -1093,7 +1092,6 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       }
       return null;
    } // end of findLayerById()
-
 
    /**
     * Sets parameters for a given deserialization operation, after loading the serialized form of the graph. This might include mappings from format-specific objects like tiers to graph layers, etc.
@@ -1277,11 +1275,12 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 	       if (!participantId.equals(currentTurn.getLabel())) { // new turn
 		  if (currentTurn.getEndId() == null) {
 		     currentTurn.setEnd(lastAnchor);
-		     currentTurn = new Annotation(null, participantId, getTurnLayer().getId());
-		     currentTurn.setStartId(lastAnchor.getId());		  
-		     currentTurn.setParentId(participantId);
-		     graph.addAnnotation(currentTurn);
-		  }
+                  }
+                  System.out.println("new turn: " + lastAnchor);
+                  currentTurn = new Annotation(null, participantId, getTurnLayer().getId());
+                  currentTurn.setStartId(lastAnchor.getId());		  
+                  currentTurn.setParentId(participantId);
+                  graph.addAnnotation(currentTurn);
 	       }
 	       line = speakerMatcher.group(2);
 	    } // participant
@@ -1321,6 +1320,11 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 		  checkAlignmentAgainstLastUtterance(
                      utterance, start, end, cUnit, lastUtterance, currentTurn, utteranceLayer, graph);
 	       }
+               if (currentTurn.all(getUtteranceLayer().getId()).length == 0) {
+                 // first utterance of this turn
+                 currentTurn.setStart(start);
+               }
+               currentTurn.setEnd(end);
 	    } // synchronised utterance
 	    graph.addAnnotation(utterance);
 	    utterance.setParent(currentTurn);
@@ -1784,6 +1788,15 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
             String role = null;
             if (targetParticipantLayer != null
                 && participant.first(targetParticipantLayer.getId()) != null) {
+               role = "Participant";
+               subCount++;
+               if (!participants.containsKey("SUB")) {
+                  speakerId = "SUB";
+               } else {
+                  speakerId = "SU"+subCount;
+               }
+            } else if (graph.getLabel().contains(participant.getLabel())) {
+              // name of the participant is part of the graph name; probably a target
                role = "Participant";
                subCount++;
                if (!participants.containsKey("SUB")) {

@@ -95,8 +95,6 @@ public class TrsToSlt extends Converter {
     info = "The Transcriber 'Program' becomes the SALT 'Context' header."
       +"\nThe first Transcriber 'Topic' becomes the SALT 'Subgroup' header."
       +"\nComments at the beginning of transcript that start with + become SALT meta-data headers."
-      +"\nBy default, inline annotations (mazes, codes, bound morphemes, etc.)"
-      +" are not iterpreted. If you want them to be processed, use --parseInlineConventions"
       +"\nBy default  Transcriber 'pronounce' and 'lexical' events are converted to be "
       +" certain SALT word codes, of the form \"[PRON:...]\" and \"[LEX:...]\" respectively."
       +" Use the command-line switches --pronounceCodePattern and --lexicalCodePattern"

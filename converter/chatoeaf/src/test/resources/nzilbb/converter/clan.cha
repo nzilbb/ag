@@ -10,8 +10,8 @@
 @G:	gdc
 *SUB:	ab abc abcdef abcd gonna [: going to] lie abcd abc pet abcdefghij 1_21510
 	abc abcde abc ab abcd ab abc worryin(g) &+i abcd. 21510_25057
-*SUB:	she'll ab (a)nd abcdefg. 21510_25057
-*EXA:	abcd abcdefg ab abc abcdef abcde abc ab abc abcdefgh abc abcdef abc +//? 25057_29994
+*EXA:	she'll ab (a)nd abcdefg. 21510_25057
+*SUB:	abcd abcdefg ab abc abcdef abcde abc ab abc abcdefgh abc abcdef abc +//? 25057_29994
 *SUB:	ab abcde until she's abc ab abcde abcdef abcde ab abc baby's crib
 	abc abcdefg abc abcd abcde abc abcd abc a_b_c_d. 34723_35752
 *SUB:	abcd abcde ab abcd abcde abcd abc mother's abcd abc abcd ab on
@@ -24,7 +24,7 @@
 *SUB:	abcd abcd abc abcd ab abc abcd ab abc abcdefg abcde ab he abc abcd 57167_60356
 	abc abc how abc abcd ab abcd. 60356_61710
 *SUB:	abc abcdefgh abc abcd abcde abcdefg. 61710_63919
-*SUB:	abcd abcde abcd abc abcdef abc abcd into abc abcdefgh abcd ab abcd abc abcd abcdefg abcdef ab abc abcd ab abcdefg abcdef. 67392_71049
+*EXA:	abcd abcde abcd abc abcdef abc abcd into abc abcdefgh abcd ab abcd abc abcd abcdefg abcdef ab abc abcd ab abcdefg abcdef. 67392_71049
 *SUB:	abc abcd gets abcd onto Carl's abcd. 71049_74113
 *SUB:	abc abcdefgh abcd ab abcd abc abcdef abcd 74113_75764
 	a abcdef abc too abcdefg ab abcd abcde abcd ab 75764_78643
@@ -63,7 +63,7 @@
 	<walk> [* m] ab abc abcde abcde. 165875_168630
 *SUB:	ab abcd down ab abcde ab abc baby's abcd ab abcd ab abcd like he
 	abc abcd abcde abc abcde abcd. 172271_173768
-*SUB:	abc abcdef abcde ab abc abcd Carl affectionately ab abc abcd and
+*EXA:	abc abcdef abcde ab abc abcd Carl affectionately ab abc abcd and
 	abcd abcde abc abcd much abc abcdefgh ab abcde while I abc abcd. 177283_180068
 @G:	picnic
 *SUB:	abc abc the <mouse> [* m] abcdef abcdefg ab go ab a abcdef. 180068_194263
