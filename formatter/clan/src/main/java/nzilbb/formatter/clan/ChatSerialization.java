@@ -1276,7 +1276,6 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 		  if (currentTurn.getEndId() == null) {
 		     currentTurn.setEnd(lastAnchor);
                   }
-                  System.out.println("new turn: " + lastAnchor);
                   currentTurn = new Annotation(null, participantId, getTurnLayer().getId());
                   currentTurn.setStartId(lastAnchor.getId());		  
                   currentTurn.setParentId(participantId);
