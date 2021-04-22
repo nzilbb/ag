@@ -14,19 +14,21 @@ These include:
 There are a number converter utilities that can be used to convert files from one format
 to another, including:
 
-* vtt - *web subtitles (Web VTT)*
-* eaf - *ELAN* files
 * trs - *Transcriber* transcripts
-* pdf - *PDF* files
-* txt - *plain text* files
+* eaf - *ELAN* files
+* vtt - *web subtitles (Web VTT)*
 * slt - *SALT* transcripts
+* textgrid - *Praat* TextGrids
+* pdf - *PDF* files
+* tex - *LaTeX* files
+* txt - *plain text* files
 
-| from↓ to→ | trs | eaf  | vtt | slt | textgrid | pdf | txt |
+| from↓ to→ | trs | eaf  | vtt | slt | textgrid | pdf | tex | txt |
 | --- | :---: | :---:  | :---: | :---: | :---: | :---: | :---: |
-| **trs** | | [trs-to-eaf](trs-to-eaf.jar?raw=true) | [trs-to-vtt](trs-to-vtt.jar?raw=true) | [trs-to-slt](trs-to-slt.jar?raw=true) | [trs-to-textgrid](trs-to-textgrid.jar?raw=true) | [trs-to-pdf](trs-to-pdf.jar?raw=true) | [trs-to-txt](trs-to-txt.jar?raw=true) |
-| **eaf** | [eaf-to-trs](eaf-to-trs.jar?raw=true) | | [eaf-to-vtt](eaf-to-vtt.jar?raw=true) | [eaf-to-slt](eaf-to-slt.jar?raw=true)| | |  |
-| **vtt** | [vtt-to-trs](vtt-to-trs.jar?raw=true) | [vtt-to-eaf](vtt-to-eaf.jar?raw=true) | | | [vtt-to-textgrid](vtt-to-textgrid.jar?raw=true) | |
-| **slt** | [slt-to-trs](slt-to-trs.jar?raw=true) | [slt-to-eaf](slt-to-eaf.jar?raw=true) | [slt-to-vtt](slt-to-vtt.jar?raw=true) | | [slt-to-textgrid](slt-to-textgrid.jar?raw=true) | | |
+| **trs** | | [trs-to-eaf](trs-to-eaf.jar?raw=true) | [trs-to-vtt](trs-to-vtt.jar?raw=true) | [trs-to-slt](trs-to-slt.jar?raw=true) | [trs-to-textgrid](trs-to-textgrid.jar?raw=true) | [trs-to-pdf](trs-to-pdf.jar?raw=true) | [trs-to-tex](trs-to-tex.jar?raw=true)| [trs-to-txt](trs-to-txt.jar?raw=true) |
+| **eaf** | [eaf-to-trs](eaf-to-trs.jar?raw=true) | | [eaf-to-vtt](eaf-to-vtt.jar?raw=true) | [eaf-to-slt](eaf-to-slt.jar?raw=true) | | [eaf-to-pdf](eaf-to-pdf.jar?raw=true) | [eaf-to-tex](eaf-to-tex.jar?raw=true) | |
+| **vtt** | [vtt-to-trs](vtt-to-trs.jar?raw=true) | [vtt-to-eaf](vtt-to-eaf.jar?raw=true) | | | [vtt-to-textgrid](vtt-to-textgrid.jar?raw=true) | [vtt-to-pdf](vtt-to-pdf.jar?raw=true) | [vtt-to-tex](vtt-to-tex.jar?raw=true)|
+| **slt** | [slt-to-trs](slt-to-trs.jar?raw=true) | [slt-to-eaf](slt-to-eaf.jar?raw=true) | [slt-to-vtt](slt-to-vtt.jar?raw=true) | | [slt-to-textgrid](slt-to-textgrid.jar?raw=true) | [slt-to-pdf](slt-to-pdf.jar?raw=true) | [slt-to-tex](slt-to-tex.jar?raw=true) | |
 
 To use a particular converter, you need to have Java installed on your
 system. Download the file, and double-click it to run.

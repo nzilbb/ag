@@ -32,5 +32,12 @@
     <module>eaftovtt</module>
     <module>slttovtt</module>
     <module>slttotextgrid</module>
+    <module>eaftopdf</module>
+    <module>vtttopdf</module>
+    <module>eaftotex</module>
+    <module>vtttotex</module>
+    <module>slttopdf</module>
+    <module>slttotex</module>
+    <module>trstotex</module>
   </modules>
 </project>

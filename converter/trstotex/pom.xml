@@ -1,57 +1,34 @@
-# Converters
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>nzilbb.converter</artifactId>
+    <groupId>nzilbb</groupId>
+    <version>1.0.0</version>
+  </parent>
 
-Standalone programs that convert transcripts from one tool format to another, e.g.
+  <groupId>nzilbb</groupId>
+  <artifactId>trs-to-tex</artifactId>
+  <version>0.1.0</version>
+  <name>nzilbb.convert.trstotex</name>
+  <description>Transcriber transcript to LaTeX document converter</description>
 
-* trs - *Transcriber* transcripts
-* eaf - *ELAN* files
-* vtt - *web subtitles (Web VTT)*
-* slt - *SALT* transcripts
-* textgrid - *Praat* TextGrids
-* pdf - *PDF* files
-* tex - *LaTeX* files
-* txt - *plain text* files
+  <properties>
 
-| from↓ to→ | trs | eaf  | vtt | slt | textgrid | pdf | tex | txt |
-| --- | :---: | :---:  | :---: | :---: | :---: | :---: | :---: |
-| **trs** | | [trs-to-eaf](../bin/trs-to-eaf.jar?raw=true) | [trs-to-vtt](../bin/trs-to-vtt.jar?raw=true) | [trs-to-slt](../bin/trs-to-slt.jar?raw=true) | [trs-to-textgrid](../bin/trs-to-textgrid.jar?raw=true) | [trs-to-pdf](../bin/trs-to-pdf.jar?raw=true) | [trs-to-tex](../bin/trs-to-tex.jar?raw=true) | [trs-to-txt](../bin/trs-to-txt.jar?raw=true) |
-| **eaf** | [eaf-to-trs](../bin/eaf-to-trs.jar?raw=true) | | [eaf-to-vtt](../bin/eaf-to-vtt.jar?raw=true) | [eaf-to-slt](../bin/eaf-to-slt.jar?raw=true) | | [eaf-to-pdf](../bin/eaf-to-pdf.jar?raw=true) | [eaf-to-tex](../bin/eaf-to-tex.jar?raw=true) | |
-| **vtt** | [vtt-to-trs](../bin/vtt-to-trs.jar?raw=true) | [vtt-to-eaf](../bin/vtt-to-eaf.jar?raw=true) | | | [vtt-to-textgrid](../bin/vtt-to-textgrid.jar?raw=true) | [vtt-to-pdf](../bin/vtt-to-pdf.jar?raw=true) | [vtt-to-tex](../bin/vtt-to-tex.jar?raw=true) | |
-| **slt** | [slt-to-trs](../bin/slt-to-trs.jar?raw=true) | [slt-to-eaf](../bin/slt-to-eaf.jar?raw=true) | [slt-to-vtt](../bin/slt-to-vtt.jar?raw=true) | | [slt-to-textgrid](../bin/slt-to-textgrid.jar?raw=true) | [slt-to-pdf](../bin/slt-to-pdf.jar?raw=true) | [slt-to-tex](../bin/slt-to-tex.jar?raw=true) | |
-
-These use the serializers/deserializers in the *formatters* directory to read a file in
-one format, convert it to an annotation graph, and then write that graph out as a file in
-another format.
-
-## Creating a new converter
-
-1. In this directory, run the following command (change *myannotator* to the required name):
-   ```
-   mvn archetype:generate \
-     -DgroupId=nzilbb \
-     -DartifactId=informattooutformat \
-     -DarchetypeArtifactId=maven-archetype-quickstart \
-     -DarchetypeVersion=1.4 \
-     -DinteractiveMode=false
-   ```
-2. In *informattooutformat/pom.xml*:
-   - set the *artifactId* as "informat-to-outformat"
-   - prefix the *name* with "nzilbb.converter."
-   - change *version* to "0.1.0" - i.e. use semantic versioning.
-   - remove the *url* tag (so it can be inherited from the master pom.xml)
-   - add a *description* tag
-   - change *maven.compiler.source* and *maven.compiler.target* to "1.8"
-   - add the following to *properties*
-   ```    
-    <input.package>nzilbb.formatter.informattool</input.package>
-    <input.path>nzilbb/formatter/informattool/</input.path>
-    <input.version>i.i.i</input.version>
+    <input.package>nzilbb.formatter.transcriber</input.package>
+    <input.path>nzilbb/formatter/transcriber/</input.path>
+    <input.version>2.0.2</input.version>
     
-    <output.package>nzilbb.formatter.outformattool</output.package>
-    <output.path>nzilbb/formatter/outformattool/</output.path>
-    <output.version>o.o.o</output.version>    
-   ```
-   - add the following to *dependencies*
-   ```
+    <output.package>nzilbb.formatter.latex</output.package>
+    <output.path>nzilbb/formatter/latex/</output.path>
+    <output.version>0.3.1</output.version>    
+    
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+  </properties>
+
+  <dependencies>
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>converter-base</artifactId>
@@ -67,9 +44,15 @@ another format.
       <artifactId>${output.package}</artifactId>
       <version>[${output.version},)</version>
     </dependency>
-   ```
-   - add the following to *build*
-   ```
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
     <plugins>
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
@@ -77,7 +60,7 @@ another format.
         <configuration>
           <archive>
             <manifest>
-              <mainClass>nzilbb.converter.InformatToOutformat</mainClass>
+              <mainClass>nzilbb.converter.TrsToTex</mainClass>
             </manifest>
             <!-- ensure version is available to the serializations -->
             <manifestSections>
@@ -159,15 +142,49 @@ another format.
         </executions>
       </plugin>
     </plugins>
-   ```
-3. Remove the groupId-based source code structure:
-   ```
-   cd informattooutformat
-   rm src/main/java/nzilbb/App.java src/test/java/nzilbb/AppTest.java
-   ```
-4. Add directory structure for the annotator code:
-   ```
-   mkdir src/main/java/nzilbb/converter
-   mkdir src/test/java/nzilbb/converter
-   ```
-5. Add your implementation to *informattooutformat/src/main/java/nzilbb/converter/InformatToOutformat.java
+
+    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+      <plugins>
+        <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+        <!-- default lifecycle, jar packaging: see https://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.8.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.22.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.2</version>
+        </plugin>
+        <!-- site lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#site_Lifecycle -->
+        <plugin>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>3.7.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-project-info-reports-plugin</artifactId>
+          <version>3.0.0</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
