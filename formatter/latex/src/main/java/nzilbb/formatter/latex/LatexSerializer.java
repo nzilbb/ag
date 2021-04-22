@@ -63,7 +63,6 @@ import nzilbb.util.IO;
 import nzilbb.util.TempFileInputStream;
 import nzilbb.util.Timers;
 
-// TODO escape _ and % in transcripts
 /**
  * Serializer to LaTeX files.
  * @author Robert Fromont robert@fromont.net.nz
@@ -664,7 +663,7 @@ public class LatexSerializer implements GraphSerializer {
             orthography = token.first(orthographyLayer.getId());
             if (orthography == null) orthography = token;
           }
-          turnText.append(orthography.getLabel());
+          turnText.append(TexSafeText(orthography.getLabel()));
           // add tags
           for (String layerId : tagLayers) {
             if (!layerId.equals(token.getLayerId())
@@ -672,7 +671,7 @@ public class LatexSerializer implements GraphSerializer {
               turnText.append("\\_");
               Annotation tag = token.first(layerId);
               if (tag != null) {
-                turnText.append(tag.getLabel());
+                turnText.append(TexSafeText(tag.getLabel()));
               }
             }
           } // next selected layer 
@@ -719,7 +718,7 @@ public class LatexSerializer implements GraphSerializer {
     return s.replace("\\","\\textbackslash ")
       .replace("#","\\# ")
       .replace("$","\\\\$ ")
-      .replace("%","\\% ")
+      .replace("%","\\%")
       .replace("{","\\{ ")
       .replace("}","\\} ")
       .replace("^","\\^{} ")

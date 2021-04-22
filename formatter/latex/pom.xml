@@ -10,7 +10,7 @@
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.formatter.latex</artifactId>
   <name>nzilbb.formatter.latex</name>
-  <version>0.3.0</version>
+  <version>0.3.1</version>
 
   <properties>
     <package.path>nzilbb/formatter/latex/</package.path>
