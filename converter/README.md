@@ -25,7 +25,8 @@ one format, convert it to an annotation graph, and then write that graph out as 
 another format. As pointed out by
 Cochran et al. (2007 - *Report from TILR Working Group 1 : Tools interoperability and input/output formats*)
 this saves having *n<sup>2</sup> - n* explicit conversions between formats;
-only *2n* format conversions are required.
+only *2n* format conversions are required
+(as some of the formats above are output-only, it's less than *2n*).
 
 This exemplifies an approach to linguistic data interoperability called the *interlingua
 philosophy on interoperability* by
