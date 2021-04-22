@@ -30,7 +30,7 @@ to another, including:
 | **eaf** | [eaf-to-trs](eaf-to-trs.jar?raw=true) | | [eaf-to-vtt](eaf-to-vtt.jar?raw=true) | [eaf-to-slt](eaf-to-slt.jar?raw=true) | [eaf-to-cha](eaf-to-cha.jar?raw=true) | | [eaf-to-pdf](eaf-to-pdf.jar?raw=true) | [eaf-to-tex](eaf-to-tex.jar?raw=true) | |
 | **vtt** | [vtt-to-trs](vtt-to-trs.jar?raw=true) | [vtt-to-eaf](vtt-to-eaf.jar?raw=true) | | | [vtt-to-cha](vtt-to-cha.jar?raw=true) | [vtt-to-textgrid](vtt-to-textgrid.jar?raw=true) | [vtt-to-pdf](vtt-to-pdf.jar?raw=true) | [vtt-to-tex](vtt-to-tex.jar?raw=true)|
 | **slt** | [slt-to-trs](slt-to-trs.jar?raw=true) | [slt-to-eaf](slt-to-eaf.jar?raw=true) | [slt-to-vtt](slt-to-vtt.jar?raw=true) | | | [slt-to-textgrid](slt-to-textgrid.jar?raw=true) | [slt-to-pdf](slt-to-pdf.jar?raw=true) | [slt-to-tex](slt-to-tex.jar?raw=true) | |
-| **cha** | [cha-to-trs](cha-to-trs.jar?raw=true) | | | | | | | | |
+| **cha** | | [cha-to-eaf](cha-to-eaf.jar?raw=true) | | | | | | | |
 
 To use a particular converter, you need to have Java installed on your
 system. Download the file, and double-click it to run.

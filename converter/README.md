@@ -18,7 +18,7 @@ Standalone programs that convert transcripts from one tool format to another, e.
 | **eaf** | [eaf-to-trs](../bin/eaf-to-trs.jar?raw=true) | | [eaf-to-vtt](../bin/eaf-to-vtt.jar?raw=true) | [eaf-to-slt](../bin/eaf-to-slt.jar?raw=true) | [eaf-to-cha](../bin/eaf-to-cha.jar?raw=true) | | [eaf-to-pdf](../bin/eaf-to-pdf.jar?raw=true) | [eaf-to-tex](../bin/eaf-to-tex.jar?raw=true) | |
 | **vtt** | [vtt-to-trs](../bin/vtt-to-trs.jar?raw=true) | [vtt-to-eaf](../bin/vtt-to-eaf.jar?raw=true) | | | [vtt-to-cha](../bin/vtt-to-cha.jar?raw=true) | [vtt-to-textgrid](../bin/vtt-to-textgrid.jar?raw=true) | [vtt-to-pdf](../bin/vtt-to-pdf.jar?raw=true) | [vtt-to-tex](../bin/vtt-to-tex.jar?raw=true) | |
 | **slt** | [slt-to-trs](../bin/slt-to-trs.jar?raw=true) | [slt-to-eaf](../bin/slt-to-eaf.jar?raw=true) | [slt-to-vtt](../bin/slt-to-vtt.jar?raw=true) | | | [slt-to-textgrid](../bin/slt-to-textgrid.jar?raw=true) | [slt-to-pdf](../bin/slt-to-pdf.jar?raw=true) | [slt-to-tex](../bin/slt-to-tex.jar?raw=true) | |
-| **cha** | [cha-to-trs](../bin/cha-to-trs.jar?raw=true) | | | | | | | | |
+| **cha** | | [cha-to-eaf](../bin/cha-to-eaf.jar?raw=true) | | | | | | | |
 
 These use the serializers/deserializers in the *formatters* directory to read a file in
 one format, convert it to an annotation graph, and then write that graph out as a file in
