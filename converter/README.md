@@ -24,6 +24,15 @@ These use the serializers/deserializers in the *formatters* directory to read a 
 one format, convert it to an annotation graph, and then write that graph out as a file in
 another format.
 
+This exemplifies an approach to linguistic data interoperability called the *interlingua
+philosophy on interoperability* by
+[Witt et al. (2009)](https://www.w3.org/People/fsasaki/docs/lre-intro.pdf),
+and uses annotation graphs as an 'interlingua' similar to work by
+[Schmidt et al. 2008](https://ids-pub.bsz-bw.de/frontdoor/deliver/index/docId/2308/file/Schmidt%20etc_An_exchange_format_for_multimodal_annotations_2008.pdf)
+except that rather using a third file format as an intermediary, the annotation graph models
+of the linguistic data are ephemeral, existing in memory only for the duration of the
+conversion.
+
 ## Creating a new converter
 
 1. In this directory, run the following command (change *myannotator* to the required name):
