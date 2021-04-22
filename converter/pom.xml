@@ -39,5 +39,8 @@
     <module>slttopdf</module>
     <module>slttotex</module>
     <module>trstotex</module>
+    <module>trstocha</module>
+    <module>eaftocha</module>
+    <module>vtttocha</module>
   </modules>
 </project>
