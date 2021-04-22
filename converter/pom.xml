@@ -43,5 +43,7 @@
     <module>eaftocha</module>
     <module>vtttocha</module>
     <module>chatoeaf</module>
+    <module>chatopdf</module>
+    <module>chatovtt</module>
   </modules>
 </project>
