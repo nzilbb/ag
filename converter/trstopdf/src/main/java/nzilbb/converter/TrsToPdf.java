@@ -38,53 +38,53 @@ import nzilbb.util.ProgramDescription;
 @ProgramDescription(value="Converts Transcriber .trs files to PDFs",arguments="file1.trs file2.trs ...")
 public class TrsToPdf extends Converter {
    
-   // Methods:
+  // Methods:
    
-   /**
-    * Default constructor.
-    */
-   public TrsToPdf() {
-      setDefaultWindowTitle("Transcriber to PDF converter");
-   } // end of constructor
+  /**
+   * Default constructor.
+   */
+  public TrsToPdf() {
+    setDefaultWindowTitle("Transcriber to PDF converter");
+  } // end of constructor
    
-   public static void main(String argv[]) {
-      new TrsToPdf().mainRun(argv);
-   }
+  public static void main(String argv[]) {
+    new TrsToPdf().mainRun(argv);
+  }
 
-   /** File filter for identifying files of the correct type */
-   protected FileNameExtensionFilter getFileFilter() {
-      return new FileNameExtensionFilter("Transcriber files", "trs");
-   }
+  /** File filter for identifying files of the correct type */
+  protected FileNameExtensionFilter getFileFilter() {
+    return new FileNameExtensionFilter("Transcriber files", "trs");
+  }
 
-   /**
-    * Gets the deserializer that #convert(File) uses.
-    * @return The deserializer to use.
-    */
-   public GraphDeserializer getDeserializer() {
-      return new TranscriptSerialization();
-   }
+  /**
+   * Gets the deserializer that #convert(File) uses.
+   * @return The deserializer to use.
+   */
+  public GraphDeserializer getDeserializer() {
+    return new TranscriptSerialization();
+  }
 
-   /**
-    * Gets the serializer that #convert(File) uses.
-    * @return The serializer to use.
-    */
-   public GraphSerializer getSerializer() {
-      return new PdfSerializer();
-   }   
+  /**
+   * Gets the serializer that #convert(File) uses.
+   * @return The serializer to use.
+   */
+  public GraphSerializer getSerializer() {
+    return new PdfSerializer();
+  }   
    
-   /**
-    * Specify the schema to used by  {@link #convert(File)}.
-    * @return The schema.
-    */
-   public Schema getSchema() {
-      Schema schema = super.getSchema();
-      // noise layer
-      schema.addLayer(
-         new Layer("noise", "Noise")         
-         .setAlignment(Constants.ALIGNMENT_INTERVAL)
-         .setPeers(true).setPeersOverlap(false).setSaturated(false));
-      return schema;
-   } // end of getSchema()
+  /**
+   * Specify the schema to used by  {@link #convert(File)}.
+   * @return The schema.
+   */
+  public Schema getSchema() {
+    Schema schema = super.getSchema();
+    // noise layer
+    schema.addLayer(
+      new Layer("noise", "Noise")         
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false));
+    return schema;
+  } // end of getSchema()
    
-   private static final long serialVersionUID = -1;
+  private static final long serialVersionUID = -1;
 } // end of class TrsToPdf
