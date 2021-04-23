@@ -10,18 +10,18 @@
   <groupId>nzilbb</groupId>
   <artifactId>trs-to-pdf</artifactId>
   <name>nzilbb.converter.trstopdf</name>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <description>Utility for converting Transcriber transcripts to PDFs</description>
 
   <properties>
     
     <input.package>nzilbb.formatter.transcriber</input.package>
     <input.path>nzilbb/formatter/transcriber/</input.path>
-    <input.version>2.0.0</input.version>
+    <input.version>2.0.2</input.version>
     
     <output.package>nzilbb.formatter.pdf</output.package>
     <output.path>nzilbb/formatter/pdf/</output.path>
-    <output.version>0.5.0</output.version>
+    <output.version>0.5.1</output.version>
     
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -42,7 +42,7 @@
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>converter-base</artifactId>
-      <version>[1.0.2,)</version>
+      <version>[1.0.3,)</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -120,7 +120,7 @@
                 <artifactItem>
                   <groupId>nzilbb</groupId>
                   <artifactId>converter-base</artifactId>
-                  <version>1.0.2</version>
+                  <version>1.0.3</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
@@ -139,6 +139,12 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!--trimStackTrace>false</trimStackTrace-->
+        </configuration>
       </plugin>
     </plugins>
 

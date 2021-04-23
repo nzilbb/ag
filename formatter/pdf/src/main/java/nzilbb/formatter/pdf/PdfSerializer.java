@@ -1,5 +1,5 @@
 //
-// Copyright 2019-2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2019-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -23,6 +23,7 @@ package nzilbb.formatter.pdf;
 
 import com.itextpdf.text.Document;
 import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Header;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Font;
@@ -540,6 +541,7 @@ public class PdfSerializer implements GraphSerializer {
       
     LinkedHashSet<String> selectedLayers = new LinkedHashSet<String>();
     LinkedHashSet<String> tagLayers = new LinkedHashSet<String>();
+    LinkedHashSet<String> transcriptMetaData = new LinkedHashSet<String>();
     String firstTagLayerId = null;
     if (layerIds != null) {
       for (String l : layerIds) {
@@ -549,6 +551,11 @@ public class PdfSerializer implements GraphSerializer {
           if (layer.getParentId().equals(getWordLayer().getId())) {
             tagLayers.add(l);
             if (firstTagLayerId == null) firstTagLayerId = l;
+          } else if ((layer.getParentId() == null
+                      || layer.getParentId().equals(graph.getSchema().getRoot().getId()))
+                     && layer.getAlignment() == Constants.ALIGNMENT_NONE
+                     && !layer.getId().equals(graph.getSchema().getParticipantLayerId())) {
+            transcriptMetaData.add(l);
           }
         }
       } // next layeyId
@@ -565,8 +572,20 @@ public class PdfSerializer implements GraphSerializer {
       document.open();
       document.addTitle(graph.getId());
       document.addCreator(getClass().getName() + " (" +getDescriptor().getVersion() + ")");
-      //if (ag.getLanguage() != null) document.addLanguage(ag.getLanguage());
-      // TODO Add meta data we know of like: document.add(new Header("AGID", ""+ag.getId())); 
+      // add headers (although actually they don't seem to be accessible with normal tools)
+      for (String id : transcriptMetaData) {
+        Annotation annotation = graph.first(id);
+        if (annotation != null && annotation.getLabel().length() > 0) {
+          String header = id.replaceAll("^transcript_","");
+          if (header.equals("lang") || header.equals("language")) {
+            document.addLanguage(annotation.getLabel());
+            System.out.println("lang: " + annotation.getLabel());
+          } else {
+            document.add(new Header(header, annotation.getLabel()));
+          }
+        }
+      }
+        
       if (logoFile != null && logoFile.length() > 0) {
         try {
           Image logo = Image.getInstance(logoFile);
