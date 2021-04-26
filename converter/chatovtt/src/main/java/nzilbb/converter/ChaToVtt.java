@@ -43,7 +43,10 @@ public class ChaToVtt extends Converter {
    * Default constructor.
    */
   public ChaToVtt() {
-    info = "The CLAN parser is *not exhaustive*; it one parses:"
+    info ="This conversion will only work well for CHAT transcripts that are fully aligned;"
+      +" i.e. all lines include time alignment bullets."
+      +"\n "
+      +"\nThe CLAN parser is *not exhaustive*; it one parses:"
       +"\n- Disfluency marking with &+ - e.g. \"so &+sund Sunday\""
       +"\n- Non-standard form expansion - e.g. \"gonna [: going to]\""
       +"\n- Incomplete word completion - e.g. \"dinner doin(g) all\""

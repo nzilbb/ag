@@ -45,5 +45,6 @@
     <module>chatoeaf</module>
     <module>chatopdf</module>
     <module>chatovtt</module>
+    <module>chatotrs</module>
   </modules>
 </project>

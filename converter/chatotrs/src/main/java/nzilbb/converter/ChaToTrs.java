@@ -28,23 +28,23 @@ import nzilbb.ag.Schema;
 import nzilbb.ag.serialize.GraphDeserializer;
 import nzilbb.ag.serialize.GraphSerializer;
 import nzilbb.formatter.clan.ChatSerialization;
-import nzilbb.formatter.elan.EAFSerialization;
+import nzilbb.formatter.transcriber.TranscriptSerialization;
 import nzilbb.util.ProgramDescription;
 import nzilbb.util.Switch;
 
 /**
- * Converts CLAN CHAT transcripts to ELAN .eaf files.
+ * Converts CLAN CHAT transcripts to Transcriber transcripts.
  * @author Robert Fromont robert@fromont.net.nz
  */
-@ProgramDescription(value="Converts CLAN CHAT transcripts to ELAN .eaf files",arguments="file1.cha file2.cha ...")
-public class ChaToEaf extends Converter {
+@ProgramDescription(value="Converts CLAN CHAT transcripts to Transcriber files",arguments="file1.cha file2.cha ...")
+public class ChaToTrs extends Converter {
 
   /**
    * Default constructor.
    */
-  public ChaToEaf() {
-    info = "ELAN doesn't support meta-data like @Date, @Location, etc."
-      +" so almost all CHAT header meta-data is lost when converting to .eaf."
+  public ChaToTrs() {
+    info = "Transcriber doesn't support meta-data like @Recording Quality, @Location, etc."
+      +" so most CHAT header meta-data is lost when converting to .trs."
       +"\n "
       +"\nThis conversion will only work well for CHAT transcripts that are fully aligned;"
       +" i.e. all lines include time alignment bullets."
@@ -60,7 +60,7 @@ public class ChaToEaf extends Converter {
   } // end of constructor
   
   public static void main(String argv[]) {
-    new ChaToEaf().mainRun(argv);
+    new ChaToTrs().mainRun(argv);
   }
   
   /** File filter for identifying files of the correct type */
@@ -81,7 +81,7 @@ public class ChaToEaf extends Converter {
    * @return The serializer to use.
    */
   public GraphSerializer getSerializer() {
-    return new EAFSerialization();
+    return new TranscriptSerialization();
   }
   
   /**
@@ -96,6 +96,22 @@ public class ChaToEaf extends Converter {
       .setPeers(false).setPeersOverlap(false).setSaturated(true));
     schema.addLayer(
       new Layer("transcript_scribe", "Transcriber").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true));
+    schema.addLayer(
+      new Layer("transcript_recording_date", "Date").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true));
+    schema.addLayer(
+      new Layer("transcript_recording_quality", "Recording Quality")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true));
+    schema.addLayer(
+      new Layer("transcript_room_layout", "Room Layout").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true));
+    schema.addLayer(
+      new Layer("transcript_tape_location", "Tape Location").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true));
+    schema.addLayer(
+      new Layer("transcript_location", "Location").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true));
     schema.addLayer(
       new Layer("main_participant", "Target Speaker").setAlignment(Constants.ALIGNMENT_NONE)
@@ -177,6 +193,20 @@ public class ChaToEaf extends Converter {
       .setPeers(true).setPeersOverlap(true).setSaturated(false));
     return schema;
   } // end of getSchema()
-  
+
+  /**
+   * Specifies which layers should be given to the serializer. The default implementaion
+   * returns only the "utterance" layer.
+   * @return An array of layer IDs.
+   */
+  @Override
+  public String[] getLayersToSerialize() {
+    String[] layers = { "utterance", "word", "noise", "topic", "comment",
+      "transcript_language", "transcript_recording_date", "transcript_scribe",
+      "participant_gender"};
+    return layers;
+  } // end of getLayersToSerialize()
+
+
   private static final long serialVersionUID = -1;
-} // end of class ChaToEaf
+} // end of class ChaToTrs
