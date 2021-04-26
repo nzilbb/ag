@@ -1,0 +1,1012 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 681.935 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "Investigator" 
+        xmin = 0 
+        xmax = 681.935 
+        intervals: size = 7 
+        intervals [1]:
+            xmin = 0 
+            xmax = 21.51 
+            text = "" 
+        intervals [2]:
+            xmin = 21.51 
+            xmax = 25.057 
+            text = "she'll ab nd abcdefg" 
+        intervals [3]:
+            xmin = 25.057 
+            xmax = 67.392 
+            text = "" 
+        intervals [4]:
+            xmin = 67.392 
+            xmax = 71.049 
+            text = "abcd abcde abcd abc abcdef abc abcd into abc abcdefgh abcd ab abcd abc abcd abcdefg abcdef ab abc abcd ab abcdefg abcdef" 
+        intervals [5]:
+            xmin = 71.049 
+            xmax = 177.283 
+            text = "" 
+        intervals [6]:
+            xmin = 177.283 
+            xmax = 180.068 
+            text = "abc abcdef abcde ab abc abcd Carl affectionately ab abc abcd and abcd abcde abc abcd much abc abcdefgh ab abcde while I abc abcd" 
+        intervals [7]:
+            xmin = 180.068 
+            xmax = 681.935 
+            text = "" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "Nony_mouse" 
+        xmin = 0 
+        xmax = 681.935 
+        intervals: size = 241 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.001 
+            text = "" 
+        intervals [2]:
+            xmin = 0.001 
+            xmax = 21.51 
+            text = "ab abc abcdef abcd gonna lie abcd abc pet abcdefghij" 
+        intervals [3]:
+            xmin = 21.51 
+            xmax = 25.057 
+            text = "abc abcde abc ab abcd ab abc worryin i abcd" 
+        intervals [4]:
+            xmin = 25.057 
+            xmax = 29.994 
+            text = "abcd abcdefg ab abc abcdef abcde abc ab abc abcdefgh abc abcdef abc" 
+        intervals [5]:
+            xmin = 29.994 
+            xmax = 34.723 
+            text = "" 
+        intervals [6]:
+            xmin = 34.723 
+            xmax = 35.752 
+            text = "ab abcde until she's abc ab abcde abcdef abcde ab abc baby's crib abc abcdefg abc abcd abcde abc abcd abc a b c d" 
+        intervals [7]:
+            xmin = 35.752 
+            xmax = 40.481 
+            text = "" 
+        intervals [8]:
+            xmin = 40.481 
+            xmax = 43.425 
+            text = "abcd abcde ab abcd abcde abcd abc mother's abcd abc abcd ab on abc abc abcdefghi abcd they abcd abc doesn't abc abcd ab abcd she's abcdef" 
+        intervals [9]:
+            xmin = 43.425 
+            xmax = 47.582 
+            text = "abcd abcd abcde abcdefg abcd abc abcdefg abcdef" 
+        intervals [10]:
+            xmin = 47.582 
+            xmax = 50.212 
+            text = "abcd abcd with abc abcdef abc her abcdefgh abcde" 
+        intervals [11]:
+            xmin = 50.212 
+            xmax = 51.081 
+            text = "" 
+        intervals [12]:
+            xmin = 51.081 
+            xmax = 52.209500000000006 
+            text = "abc abcd abc ab abcd ab abc abcdefg" 
+        intervals [13]:
+            xmin = 52.209500000000006 
+            xmax = 53.338 
+            text = "abc abcd look ab abcdefghij ab abc abcdef" 
+        intervals [14]:
+            xmin = 53.338 
+            xmax = 57.167 
+            text = "abcd abcd abcdefg ab abcd ab abc abcdefg abcde" 
+        intervals [15]:
+            xmin = 57.167 
+            xmax = 60.356 
+            text = "abcd abcd abc abcd ab abc abcd ab abc abcdefg abcde ab he abc abcd" 
+        intervals [16]:
+            xmin = 60.356 
+            xmax = 61.71 
+            text = "abc abc how abc abcd ab abcd" 
+        intervals [17]:
+            xmin = 61.71 
+            xmax = 63.919 
+            text = "abc abcdefgh abc abcd abcde abcdefg" 
+        intervals [18]:
+            xmin = 63.919 
+            xmax = 71.049 
+            text = "" 
+        intervals [19]:
+            xmin = 71.049 
+            xmax = 74.113 
+            text = "abc abcd gets abcd onto Carl's abcd" 
+        intervals [20]:
+            xmin = 74.113 
+            xmax = 75.764 
+            text = "abc abcdefgh abcd ab abcd abc abcdef abcd" 
+        intervals [21]:
+            xmin = 75.764 
+            xmax = 78.643 
+            text = "a abcdef abc too abcdefg ab abcd abcde abcd ab" 
+        intervals [22]:
+            xmin = 78.643 
+            xmax = 82.754 
+            text = "abcde abcd a abcdef abcde abcd a abcde ab abcdef ab ab" 
+        intervals [23]:
+            xmin = 82.754 
+            xmax = 85.32 
+            text = "abcd abcd abc the abcd abcdef abc abcd abcd" 
+        intervals [24]:
+            xmin = 85.32 
+            xmax = 87.873 
+            text = "abc abc abcd abcdefg ab abcde abcd ab abcde abc ab abcd" 
+        intervals [25]:
+            xmin = 87.873 
+            xmax = 91.934 
+            text = "" 
+        intervals [26]:
+            xmin = 91.934 
+            xmax = 92.573 
+            text = "ab abcd abcde abc abcd abc sit abcd abc ab abc abcd tank abc abcd abc abcdef abcdef" 
+        intervals [27]:
+            xmin = 92.573 
+            xmax = 96.151 
+            text = "abcde abcd abcdef ab abc ab abcd abcde abc abcde" 
+        intervals [28]:
+            xmin = 96.151 
+            xmax = 100.975 
+            text = "abcde abcdefg they've work ab a hunger" 
+        intervals [29]:
+            xmin = 100.975 
+            xmax = 103.576 
+            text = "ab abcd got ab abc fridge ab abc ab there's abcdefgh ab abc" 
+        intervals [30]:
+            xmin = 103.576 
+            xmax = 107.733 
+            text = "" 
+        intervals [31]:
+            xmin = 107.733 
+            xmax = 108.32 
+            text = "abcd abcdef ab abc ab abcd some abcde abc abcd a abcdef abc of abcdefg abcdefg abcdefghij abc ab abc abcdefg" 
+        intervals [32]:
+            xmin = 108.32 
+            xmax = 111.341 
+            text = "" 
+        intervals [33]:
+            xmin = 111.341 
+            xmax = 113.769 
+            text = "abcd abcd abcde abc abcd some abcdef abc abcdefg ab abcd abc baby abcd abcdefghi abcd" 
+        intervals [34]:
+            xmin = 113.769 
+            xmax = 116.663 
+            text = "abcde abcd abcdef ab abc out ab abcdefg" 
+        intervals [35]:
+            xmin = 116.663 
+            xmax = 121.738 
+            text = "" 
+        intervals [36]:
+            xmin = 121.738 
+            xmax = 123.279 
+            text = "abcde abc abcd Carl abcdefg abcd they've abcd a abc abcd ab the abcdefg abc abcd abc abcd ab abcdefg ab abcd" 
+        intervals [37]:
+            xmin = 123.279 
+            xmax = 125.83 
+            text = "" 
+        intervals [38]:
+            xmin = 125.83 
+            xmax = 127.327 
+            text = "ab ab abcdefg ab abcd abc abcd back ab abcdef abc abcd ab a abcd" 
+        intervals [39]:
+            xmin = 127.327 
+            xmax = 129.862 
+            text = "" 
+        intervals [40]:
+            xmin = 129.862 
+            xmax = 131.202 
+            text = "ab abcde ab abc abcde abc abcde abc abcd into abc abc" 
+        intervals [41]:
+            xmin = 131.202 
+            xmax = 134.188 
+            text = "" 
+        intervals [42]:
+            xmin = 134.188 
+            xmax = 136.398 
+            text = "ab abcd a abcd abc ab abcdef abcd a abcd cloth abcdefgh ab abcd soap abcdefg abcdefghij" 
+        intervals [43]:
+            xmin = 136.398 
+            xmax = 137.798 
+            text = "abc ab abcdefgh abc abcd abcd" 
+        intervals [44]:
+            xmin = 137.798 
+            xmax = 142.718 
+            text = "" 
+        intervals [45]:
+            xmin = 142.718 
+            xmax = 144.85 
+            text = "abcd ab abcd abcde abc abcd ab it doesn't abcd like abcdefgh had abcdefg abc abcde abc abcd abcdefghi abcd into abc abcd" 
+        intervals [46]:
+            xmin = 144.85 
+            xmax = 147.214 
+            text = "abcd abcd abcdefghi abc abcd abcdefghij" 
+        intervals [47]:
+            xmin = 147.214 
+            xmax = 151.696 
+            text = "" 
+        intervals [48]:
+            xmin = 151.696 
+            xmax = 153.61 
+            text = "ab abcd down abcde ab abc abcdefghi abcdef ab abcde abcdef abcd the abcdefgh abc abcde ab abc abcdefg abcd ab abc abcde" 
+        intervals [49]:
+            xmin = 153.61 
+            xmax = 155.976 
+            text = "abcd ab abcde a abcde ab abc abcdefgh" 
+        intervals [50]:
+            xmin = 155.976 
+            xmax = 157.704 
+            text = "abc abcdefg abcd abcd" 
+        intervals [51]:
+            xmin = 157.704 
+            xmax = 160.553 
+            text = "" 
+        intervals [52]:
+            xmin = 160.553 
+            xmax = 161.75 
+            text = "abcd abcdefgh abcd ab abc abcd a abc abcdefg abcd ab straighten out abc abcde" 
+        intervals [53]:
+            xmin = 161.75 
+            xmax = 165.875 
+            text = "" 
+        intervals [54]:
+            xmin = 165.875 
+            xmax = 168.63 
+            text = "ab abcd abcdefg abcdefghijk out abc bed abcd away the abcdefg abcdef abc abcdefg abc abcd abcdefg ab abc mother walk ab abc abcde abcde" 
+        intervals [55]:
+            xmin = 168.63 
+            xmax = 172.271 
+            text = "" 
+        intervals [56]:
+            xmin = 172.271 
+            xmax = 173.768 
+            text = "ab abcd down ab abcde ab abc baby's abcd ab abcd ab abcd like he abc abcd abcde abc abcde abcd" 
+        intervals [57]:
+            xmin = 173.768 
+            xmax = 180.068 
+            text = "" 
+        intervals [58]:
+            xmin = 180.068 
+            xmax = 194.263 
+            text = "abc abc the mouse abcdef abcdefg ab go ab a abcdef" 
+        intervals [59]:
+            xmin = 194.263 
+            xmax = 200.239 
+            text = "" 
+        intervals [60]:
+            xmin = 200.239 
+            xmax = 201.424 
+            text = "abcd abcd ab abc abcde abcdefgh abcd abc abcd ab abcde abcd ab truck abc abc out ab a abcd abc abcde abcd ab abcde abcd abc abcde ab be abcdefgh abcde abcde" 
+        intervals [61]:
+            xmin = 201.424 
+            xmax = 203.615 
+            text = "" 
+        intervals [62]:
+            xmin = 203.615 
+            xmax = 204.831 
+            text = "abc abcd ab up abcd abc abcd hill abc abcd abcde" 
+        intervals [63]:
+            xmin = 204.831 
+            xmax = 207.054 
+            text = "" 
+        intervals [64]:
+            xmin = 207.054 
+            xmax = 208.036 
+            text = "abc abc abcd hard abc the abcd abcdefgh ab abcd ab abc abcd ab the pickup" 
+        intervals [65]:
+            xmin = 208.036 
+            xmax = 209.949 
+            text = "" 
+        intervals [66]:
+            xmin = 209.949 
+            xmax = 212.596 
+            text = "abcd abcd abc a abcdefghijkl abcde abcd abc abcdefgh abcde falls abc abc abcd abc abcd" 
+        intervals [67]:
+            xmin = 212.596 
+            xmax = 216.004 
+            text = "" 
+        intervals [68]:
+            xmin = 216.004 
+            xmax = 218.057 
+            text = "abc abcd ab abc abcd abcdef don't abcdef abcd they've abcd the abcdefgh abcde abc abcde ab abcdefg ab abc abcd" 
+        intervals [69]:
+            xmin = 218.057 
+            xmax = 220.208 
+            text = "abc abc abcdefg ab abcd abcde abc" 
+        intervals [70]:
+            xmin = 220.208 
+            xmax = 228.33 
+            text = "" 
+        intervals [71]:
+            xmin = 228.33 
+            xmax = 229.998 
+            text = "abc abcd abcdef abcd ab abc abcd ab abcde abcdef abcde abcd abcde no abcd abcdefg abc ab abc abcde abc abcdefg abcdef abcdefg or abcdefg ab abcde ab abcdef abcd abc abcd" 
+        intervals [72]:
+            xmin = 229.998 
+            xmax = 238.167 
+            text = "" 
+        intervals [73]:
+            xmin = 238.167 
+            xmax = 239.63 
+            text = "abcd ab abc abcd abcdefgh abcd ab abc abcdef others abcd hide and abcd abcdef abcd abcdefg abc abcd abcde while abc abcdef abcd abc up abc abcd abcde they're abcde ab abc" 
+        intervals [74]:
+            xmin = 239.63 
+            xmax = 239.646 
+            text = "" 
+        intervals [75]:
+            xmin = 239.646 
+            xmax = 244.781 
+            text = "abcd abcde a abcdefghi afternoon ab abcdefg abcde" 
+        intervals [76]:
+            xmin = 244.781 
+            xmax = 245.668 
+            text = "abcdefg abcdefgh" 
+        intervals [77]:
+            xmin = 245.668 
+            xmax = 250.088 
+            text = "ab abcd abcdefgh abc abcdef ab abc abcdefgh abcde abcd abcde ab abc" 
+        intervals [78]:
+            xmin = 250.088 
+            xmax = 251.133 
+            text = "abc ab abc abcd" 
+        intervals [79]:
+            xmin = 251.133 
+            xmax = 251.146 
+            text = "" 
+        intervals [80]:
+            xmin = 251.146 
+            xmax = 254.959 
+            text = "abc abcdefgh abcde abcdefg ab abc ab abcd abcdefghi ab abc" 
+        intervals [81]:
+            xmin = 254.959 
+            xmax = 256.112 
+            text = "ab abc abcdef ab abcd abcdef" 
+        intervals [82]:
+            xmin = 256.112 
+            xmax = 257.916 
+            text = "abc abcd area ab abcdefg ab abc" 
+        intervals [83]:
+            xmin = 257.916 
+            xmax = 259.241 
+            text = "abc she's abc abcd ab ab" 
+        intervals [84]:
+            xmin = 259.241 
+            xmax = 261.946 
+            text = "" 
+        intervals [85]:
+            xmin = 261.946 
+            xmax = 262.958 
+            text = "abc abcd some ab abcdefghij abcdefg abcdef abcd ab abc ab some grass" 
+        intervals [86]:
+            xmin = 262.958 
+            xmax = 266.413 
+            text = "abc ab she's abcdef hungry abcdefg abcd they abcde ab abcde abcdef" 
+        intervals [87]:
+            xmin = 266.413 
+            xmax = 270.18 
+            text = "abcdefghi abc abcd ab abc abcde abcdef abc abcdef abcde ab abc" 
+        intervals [88]:
+            xmin = 270.18 
+            xmax = 272.952 
+            text = "abc abcd abcde abcdefg abcdefgh ab abcd ab abc abcde abcdef" 
+        intervals [89]:
+            xmin = 272.952 
+            xmax = 274.819 
+            text = "abcd abcdef abcd abc abcdefgh abcde isn't abcdef" 
+        intervals [90]:
+            xmin = 274.819 
+            xmax = 279.736 
+            text = "abc abcdef abcde picks abcd ab abc abcd abc ab abc abcdefg ab abc" 
+        intervals [91]:
+            xmin = 279.736 
+            xmax = 281.183 
+            text = "abc abcdefg abcd they abc abcde" 
+        intervals [92]:
+            xmin = 281.183 
+            xmax = 282.726 
+            text = "ab abc abcd a abcde bunch ab abcd" 
+        intervals [93]:
+            xmin = 282.726 
+            xmax = 283.595 
+            text = "abc abcd gets abcde" 
+        intervals [94]:
+            xmin = 283.595 
+            xmax = 287.5 
+            text = "abcdefghi abc abcd abcdef abc abcdefgh abcd abc abcdefgh abcde ab" 
+        intervals [95]:
+            xmin = 287.5 
+            xmax = 288.295 
+            text = "abc abcd them abcdefg" 
+        intervals [96]:
+            xmin = 288.295 
+            xmax = 291.58 
+            text = "abcd abcdefgh abc the abcdef abcd ab abcd abcdef abcde abcd ab abc" 
+        intervals [97]:
+            xmin = 291.58 
+            xmax = 293.727 
+            text = "ab abcde abc abcdefg abc abcd abcdef ab abcd abc" 
+        intervals [98]:
+            xmin = 293.727 
+            xmax = 296.669 
+            text = "abc abcde mouse abcdefgh abcd abcdef abcde abcd abc abcd abcdefg" 
+        intervals [99]:
+            xmin = 296.669 
+            xmax = 297.71 
+            text = "abcd ab abcd ab abc abcd" 
+        intervals [100]:
+            xmin = 297.71 
+            xmax = 300.091 
+            text = "abcdef ab abcdef ab abcde ab abcdef abcde" 
+        intervals [101]:
+            xmin = 300.091 
+            xmax = 302.318 
+            text = "abcdef abcd they'll abcd abcde abcdefgh abcdef" 
+        intervals [102]:
+            xmin = 302.318 
+            xmax = 306.115 
+            text = "abcdefgh abcd she's abc ab abc abcd site" 
+        intervals [103]:
+            xmin = 306.115 
+            xmax = 308.013 
+            text = "abcd abcdef ab abc abcd into abc abcde" 
+        intervals [104]:
+            xmin = 308.013 
+            xmax = 309.791 
+            text = "abc abcdefghi abcdef ab abcd abc" 
+        intervals [105]:
+            xmin = 309.791 
+            xmax = 313.399 
+            text = "" 
+        intervals [106]:
+            xmin = 313.399 
+            xmax = 315.393 
+            text = "abcdefghi abc abcdefgh abcde abc aten too abcde abc abcd ab abc abcdefg abc ab abcdefgh ab abc a stomach ache" 
+        intervals [107]:
+            xmin = 315.393 
+            xmax = 320.092 
+            text = "abc abcde abcdef drives abcd abc abcd abcdefg abc abcdefgh mouse's" 
+        intervals [108]:
+            xmin = 320.092 
+            xmax = 321.492 
+            text = "abcd abcdef abcd she'll abcd abc" 
+        intervals [109]:
+            xmin = 321.492 
+            xmax = 323.877 
+            text = "abc abcdefgh abcde hears abcd ab abc abcdefgh" 
+        intervals [110]:
+            xmin = 323.877 
+            xmax = 324.354 
+            text = "abc abcd ab" 
+        intervals [111]:
+            xmin = 324.354 
+            xmax = 326.161 
+            text = "abc abcd abc ab abc abcd" 
+        intervals [112]:
+            xmin = 326.161 
+            xmax = 328.09 
+            text = "abcde abc abcd abc abcde abcdef" 
+        intervals [113]:
+            xmin = 328.09 
+            xmax = 331.235 
+            text = "abcd abcd abc hug abc abcd ab be abcdefgh" 
+        intervals [114]:
+            xmin = 331.235 
+            xmax = 334.517 
+            text = "abc abcdefgh abc abcdefgh abcde abcdefghi abcd abc abcd abc abcde ab" 
+        intervals [115]:
+            xmin = 334.517 
+            xmax = 335.686 
+            text = "abc abcdefghij" 
+        intervals [116]:
+            xmin = 335.686 
+            xmax = 338.252 
+            text = "" 
+        intervals [117]:
+            xmin = 338.252 
+            xmax = 339.14 
+            text = "abcdefgh abc abcd back abcd ab abcd abc abcd abcde ab abc been laying" 
+        intervals [118]:
+            xmin = 339.14 
+            xmax = 341.381 
+            text = "abc abcd abcde ab up abc abcd ab abcdefghij" 
+        intervals [119]:
+            xmin = 341.381 
+            xmax = 345.492 
+            text = "" 
+        intervals [120]:
+            xmin = 345.492 
+            xmax = 347.077 
+            text = "abcd abc abcde abcdef abcdefghi ab to abc picnic abcdef site abcde abcd abc abcde a abcdef abcdefgh" 
+        intervals [121]:
+            xmin = 347.077 
+            xmax = 355.795 
+            text = "ab abcd last abcdefghi I abcd ab abcde ab abc abcdefg" 
+        intervals [122]:
+            xmin = 355.795 
+            xmax = 358.874 
+            text = "abcdefg I abc abcdef ab abcdefghi Christmas abcd ab abcdef" 
+        intervals [123]:
+            xmin = 358.874 
+            xmax = 361.723 
+            text = "abc abcd last abcdefghi abc the abcde abcd I abc abcdef ab my abc" 
+        intervals [124]:
+            xmin = 361.723 
+            xmax = 365.161 
+            text = "ab I abc ab abc ab abcde ab abcde ab my parent's abcde ab I could ab" 
+        intervals [125]:
+            xmin = 365.161 
+            xmax = 367.495 
+            text = "abcde ab abc abcdefg ab abcd abcdefghi abcdefgh abcd abcd" 
+        intervals [126]:
+            xmin = 367.495 
+            xmax = 369.8 
+            text = "" 
+        intervals [127]:
+            xmin = 369.8 
+            xmax = 371.278 
+            text = "ab ab spent abc morning op abcde abc abcdefg opening abcdefghi abcdefgh" 
+        intervals [128]:
+            xmin = 371.278 
+            xmax = 373.206 
+            text = "abc abcd ab abc a abcd abcdefghi" 
+        intervals [129]:
+            xmin = 373.206 
+            xmax = 375.636 
+            text = "abc abcd ab abcde ab abc abcdefgh abcdefghi" 
+        intervals [130]:
+            xmin = 375.636 
+            xmax = 379.511 
+            text = "ab abc abcdef ab abc abcde abc abcde ab my abcdefgh abcde abc a" 
+        intervals [131]:
+            xmin = 379.511 
+            xmax = 381.596 
+            text = "a abcde abc abcdef abcdefghijk ab abc abcde" 
+        intervals [132]:
+            xmin = 381.596 
+            xmax = 385.116 
+            text = "ab ab abc abcd a abcde ab abcdefghi abcde abcd abcde abcdef" 
+        intervals [133]:
+            xmin = 385.116 
+            xmax = 388.43 
+            text = "ab ab abcdef abcd more abcdefgh abcd they abc abcdef ab abc abcd ab" 
+        intervals [134]:
+            xmin = 388.43 
+            xmax = 389.224 
+            text = "abc abcdef abc abcd" 
+        intervals [135]:
+            xmin = 389.224 
+            xmax = 391.916 
+            text = "abc abcd ab abc abcd ab a abcd abcde abc abcdef" 
+        intervals [136]:
+            xmin = 391.916 
+            xmax = 394.716 
+            text = "" 
+        intervals [137]:
+            xmin = 394.716 
+            xmax = 397.518 
+            text = "abc ab abcde ab abc abcde ab abcdef a abcdef abcd abcde ah abcdefghijk abc abcdefg abc abcdefgh ab" 
+        intervals [138]:
+            xmin = 397.518 
+            xmax = 400.305 
+            text = "abc abcd ab abc abcd ab abc car abc abcde abcd" 
+        intervals [139]:
+            xmin = 400.305 
+            xmax = 403.531 
+            text = "abc abcd I abcde abcd ab my abcdefghi abcde I abcd ab abcde" 
+        intervals [140]:
+            xmin = 403.531 
+            xmax = 414.937 
+            text = "ab abcd abcdefg ab I didn't ab abc abcd abcd" 
+        intervals [141]:
+            xmin = 414.937 
+            xmax = 418.673 
+            text = "I ab abcde abc Saturday ab abc abcdefg I abcd ab my parent's house" 
+        intervals [142]:
+            xmin = 418.673 
+            xmax = 418.809 
+            text = "" 
+        intervals [143]:
+            xmin = 418.809 
+            xmax = 420.631 
+            text = "abc abcdef abcd abc abcd some abcd work abc abcd abcdef" 
+        intervals [144]:
+            xmin = 420.631 
+            xmax = 421.018 
+            text = "" 
+        intervals [145]:
+            xmin = 421.018 
+            xmax = 422.559 
+            text = "ab abcd abc abcdefghij abcde abcdefg" 
+        intervals [146]:
+            xmin = 422.559 
+            xmax = 425.097 
+            text = "ab I abcdef abcd you know abcd some abcde abc ab abc abcdefg" 
+        intervals [147]:
+            xmin = 425.097 
+            xmax = 427.292 
+            text = "ab abcd abcde abcd I" 
+        intervals [148]:
+            xmin = 427.292 
+            xmax = 431.281 
+            text = "abcde abcdef abcd abcdefgh abc abcd abcdefg abc a abcde ab abcd" 
+        intervals [149]:
+            xmin = 431.281 
+            xmax = 433.644 
+            text = "ab abcde abcd I abcd abcd" 
+        intervals [150]:
+            xmin = 433.644 
+            xmax = 435.744 
+            text = "abc ab abcd abcdefg abcd over abcdefgh abcde" 
+        intervals [151]:
+            xmin = 435.744 
+            xmax = 437.039 
+            text = "abc ab abcd abc abcd abcd" 
+        intervals [152]:
+            xmin = 437.039 
+            xmax = 440.631 
+            text = "abc abcd ab abcdef I abcd abcde abcd ab abcdef abcdefg abcdef" 
+        intervals [153]:
+            xmin = 440.631 
+            xmax = 442.155 
+            text = "abcdefg abc a abc" 
+        intervals [154]:
+            xmin = 442.155 
+            xmax = 446.31 
+            text = "ab I abcd back ab abcdef ab in abc abcde abcdefghi ab abcd abcde" 
+        intervals [155]:
+            xmin = 446.31 
+            xmax = 447.883 
+            text = "evening" 
+        intervals [156]:
+            xmin = 447.883 
+            xmax = 449.236 
+            text = "abc I abc a abcde ab abcdefgh I abc ab ab" 
+        intervals [157]:
+            xmin = 449.236 
+            xmax = 452.319 
+            text = "ab abc abcd ab abc abcde abc abcde abcdef abcd abcde abcdefgh" 
+        intervals [158]:
+            xmin = 452.319 
+            xmax = 455.432 
+            text = "abc abcd ab I abcd ab abc abcdef abcde ab abcdef abcde" 
+        intervals [159]:
+            xmin = 455.432 
+            xmax = 460.584 
+            text = "ab abc abcd abcdefgh I abc was ab abcdef" 
+        intervals [160]:
+            xmin = 460.584 
+            xmax = 466.385 
+            text = "some abcdefg abc I ab my abcdefghi abc a abcdef ab abc friends abc abcd ab abcde abcdefgh abc a abcdef ab abcd" 
+        intervals [161]:
+            xmin = 466.385 
+            xmax = 472.862 
+            text = "ab ab abcde a abc ab abcd abcdefgh ab abc abcdefg ab abc a abc of drinking" 
+        intervals [162]:
+            xmin = 472.862 
+            xmax = 477.296 
+            text = "ab ab abcd ab ah abcd ab abc abcd abc abcde abcd abcde abcdef abcd" 
+        intervals [163]:
+            xmin = 477.296 
+            xmax = 478.014 
+            text = "abcd abcde" 
+        intervals [164]:
+            xmin = 478.014 
+            xmax = 479.32 
+            text = "abc Circus abcdef abcdefghi abcd" 
+        intervals [165]:
+            xmin = 479.32 
+            xmax = 484.422 
+            text = "ab abcd ab abcde a abcdef abcd ab abcde ab abcd ab abc a abc abcde" 
+        intervals [166]:
+            xmin = 484.422 
+            xmax = 485.764 
+            text = "ab abc ab" 
+        intervals [167]:
+            xmin = 485.764 
+            xmax = 486.898 
+            text = "a abcd ab abc abcdefghi" 
+        intervals [168]:
+            xmin = 486.898 
+            xmax = 489.467 
+            text = "abcd a a abcde abcd that abcd with a abcdef" 
+        intervals [169]:
+            xmin = 489.467 
+            xmax = 491.397 
+            text = "ab abcd abcde ab abc abcdefgh ab in abcde ab" 
+        intervals [170]:
+            xmin = 491.397 
+            xmax = 493.327 
+            text = "ab abcde abcd" 
+        intervals [171]:
+            xmin = 493.327 
+            xmax = 496.813 
+            text = "abc ab abcdefg abcde abc way ab abcd ab my abcdefghi" 
+        intervals [172]:
+            xmin = 496.813 
+            xmax = 498.648 
+            text = "Grandma's abcde whose ab abc abc" 
+        intervals [173]:
+            xmin = 498.648 
+            xmax = 500.734 
+            text = "abc ab we abcdef abcde abc a abcde" 
+        intervals [174]:
+            xmin = 500.734 
+            xmax = 502.431 
+            text = "abc abcd ab abcde abcd abcd" 
+        intervals [175]:
+            xmin = 502.431 
+            xmax = 507.27 
+            text = "" 
+        intervals [176]:
+            xmin = 507.27 
+            xmax = 509.139 
+            text = "abcde abc abcd ab abcd abc abcde out ab abc fridge ab abc of abc abcdef abcdefgh abc abcd ab" 
+        intervals [177]:
+            xmin = 509.139 
+            xmax = 511.784 
+            text = "ab abc put abc abcdef ab abcde ab a abcde" 
+        intervals [178]:
+            xmin = 511.784 
+            xmax = 513.0605 
+            text = "abcd abc abcd some abcde abc ab abc abcdef" 
+        intervals [179]:
+            xmin = 513.0605 
+            xmax = 514.337 
+            text = "ab abc abcd some abcde" 
+        intervals [180]:
+            xmin = 514.337 
+            xmax = 517.092 
+            text = "abc abc abcd ab it ab abc abcde" 
+        intervals [181]:
+            xmin = 517.092 
+            xmax = 520.248 
+            text = "abc abc abcdef abc abcde abcdef abc abcde ab abc abcde ab abcde" 
+        intervals [182]:
+            xmin = 520.248 
+            xmax = 522.272 
+            text = "abcd ab abc abcd abc abcdef butter abc ab abc abcdef" 
+        intervals [183]:
+            xmin = 522.272 
+            xmax = 524.296 
+            text = "abc ab abc abcd some abcdef butter ab abc abcde" 
+        intervals [184]:
+            xmin = 524.296 
+            xmax = 528.329 
+            text = "abc abcdef ab on abc" 
+        intervals [185]:
+            xmin = 528.329 
+            xmax = 529.104 
+            text = "abcde abcde ab abcde" 
+        intervals [186]:
+            xmin = 529.104 
+            xmax = 531.501 
+            text = "abc abcd abc abcde abc two abc two abcdefgh" 
+        intervals [187]:
+            xmin = 531.501 
+            xmax = 535.518 
+            text = "abc abcd abc cut abc abcde ab abcde ab abcd ab abcdefg" 
+        intervals [188]:
+            xmin = 535.518 
+            xmax = 536.95 
+            text = "abc abcd abc abcde" 
+        intervals [189]:
+            xmin = 536.95 
+            xmax = 541.527 
+            text = "abcde abc abcd ab abc a abcd abc the abcdef ab go abcd" 
+        intervals [190]:
+            xmin = 541.527 
+            xmax = 545.277 
+            text = "ab abcde you've abc the abcd ab abc abcd ab abcd sure abcd it's ab" 
+        intervals [191]:
+            xmin = 545.277 
+            xmax = 548.466 
+            text = "ab abcd abcde abc abcdef abcd abc abcdef ab abcdefgh abc abcdef ab" 
+        intervals [192]:
+            xmin = 548.466 
+            xmax = 549.403 
+            text = "water" 
+        intervals [193]:
+            xmin = 549.403 
+            xmax = 552.764 
+            text = "abcd abc abcd ab abcdefghi abcd abc abcdef ab abcdef abcd abc ab" 
+        intervals [194]:
+            xmin = 552.764 
+            xmax = 555.052 
+            text = "abcdef abc abcde ab abc abcdef abcdef" 
+        intervals [195]:
+            xmin = 555.052 
+            xmax = 556.247 
+            text = "abc abcde ab abcd abc abcd" 
+        intervals [196]:
+            xmin = 556.247 
+            xmax = 558.316 
+            text = "abc abcd abc abcd abc abcd back ab" 
+        intervals [197]:
+            xmin = 558.316 
+            xmax = 562.364 
+            text = "abc ab abcde abc abcdef abcd ab abcd abcde abcd abc let ab abcd" 
+        intervals [198]:
+            xmin = 562.364 
+            xmax = 571.718 
+            text = "a abcdef abc was abcde abcd a abcdefgh abcde ab abc abcde" 
+        intervals [199]:
+            xmin = 571.718 
+            xmax = 575.125 
+            text = "abc abc had abcde abc a abcd cake abc abcd ab on abc abcdefg abcde" 
+        intervals [200]:
+            xmin = 575.125 
+            xmax = 577.041 
+            text = "abcd abc abcde abcdefg ab abc abcd" 
+        intervals [201]:
+            xmin = 577.041 
+            xmax = 580.448 
+            text = "ab abcd ab abcd went ab abc abcd ab abc abcde abcdefgh abcdef ab" 
+        intervals [202]:
+            xmin = 580.448 
+            xmax = 581.755 
+            text = "abcde abcd were abcde abcd" 
+        intervals [203]:
+            xmin = 581.755 
+            xmax = 584.853 
+            text = "abc abcdef abc abcdef ab on abc abcde abc abcd a abc abcd abc ab abc" 
+        intervals [204]:
+            xmin = 584.853 
+            xmax = 586.128 
+            text = "abcdefgh abcd" 
+        intervals [205]:
+            xmin = 586.128 
+            xmax = 587.763 
+            text = "abc abc ab abc abcd abc abcd abc abcd" 
+        intervals [206]:
+            xmin = 587.763 
+            xmax = 590.736 
+            text = "abcd ab abc and abc abcde abc abcde abcdefg ab abcd that ab abcde" 
+        intervals [207]:
+            xmin = 590.736 
+            xmax = 591.918 
+            text = "ab ab abcdefg" 
+        intervals [208]:
+            xmin = 591.918 
+            xmax = 594.565 
+            text = "abc abcdef turned abcdef abc saw abc abcd abc ab abc abcdefgh abcd" 
+        intervals [209]:
+            xmin = 594.565 
+            xmax = 598.723 
+            text = "abc abc the abcdefgh abcdefghi abcde abcdefg ab abc dog abcde abcdef" 
+        intervals [210]:
+            xmin = 598.723 
+            xmax = 599.498 
+            text = "abcde abc abcde" 
+        intervals [211]:
+            xmin = 599.498 
+            xmax = 602.348 
+            text = "abc abcdef abc abcde abcdefg ab abcdefg abc abcdefgh abcde abc" 
+        intervals [212]:
+            xmin = 602.348 
+            xmax = 604.836 
+            text = "abcdef abcde abc abcdef abcdefg abc dog abc abcdefghij ab abcd a" 
+        intervals [213]:
+            xmin = 604.836 
+            xmax = 605.459 
+            text = "broom" 
+        intervals [214]:
+            xmin = 605.459 
+            xmax = 605.552 
+            text = "" 
+        intervals [215]:
+            xmin = 605.552 
+            xmax = 611.592 
+            text = "ab a abcdef abcdefg through abc abcdefg stopped ab abc a abcdef ab" 
+        intervals [216]:
+            xmin = 611.592 
+            xmax = 613.396 
+            text = "abc abcd ab abc abcd abc abcdefghij" 
+        intervals [217]:
+            xmin = 613.396 
+            xmax = 616.541 
+            text = "ab abc abcdef abcd them abc abcd abcdefghij ab abcde abc abcd abc" 
+        intervals [218]:
+            xmin = 616.541 
+            xmax = 617.598 
+            text = "abcdef ab abc abc" 
+        intervals [219]:
+            xmin = 617.598 
+            xmax = 620.93 
+            text = "abc abcdef abcdefg abc abcdef abcde abc and abcd back ab abcdefg" 
+        intervals [220]:
+            xmin = 620.93 
+            xmax = 624.883 
+            text = "abc abcd a abc abcde later ab abc the abcdef abcd back ab abc abcd" 
+        intervals [221]:
+            xmin = 624.883 
+            xmax = 629.179 
+            text = "abcd abcdefg abcd abcde abcd abc abcdefg ab abc abcdefghi abcde abcd abcdefghij abcd abc abcd ab" 
+        intervals [222]:
+            xmin = 629.179 
+            xmax = 630.083 
+            text = "a abcdef" 
+        intervals [223]:
+            xmin = 630.083 
+            xmax = 634.749 
+            text = "a abc and a abcde abcd a abcdef abcdefgh" 
+        intervals [224]:
+            xmin = 634.749 
+            xmax = 636.991 
+            text = "ab abc abcdefghij abc abcde abcdefg abcd she's abc abcdef" 
+        intervals [225]:
+            xmin = 636.991 
+            xmax = 639.2 
+            text = "" 
+        intervals [226]:
+            xmin = 639.2 
+            xmax = 641.239 
+            text = "abc abcde ab abc abcdef abc abcd home abcde abc man abcdefgh like ab doesn't abcd" 
+        intervals [227]:
+            xmin = 641.239 
+            xmax = 645.021 
+            text = "abcde she's abcd abc man abcdef ab abc and abcdefgh abcd ab abcdef" 
+        intervals [228]:
+            xmin = 645.021 
+            xmax = 645.847 
+            text = "her" 
+        intervals [229]:
+            xmin = 645.847 
+            xmax = 649.441 
+            text = "a abc abcdefg abcde abc abcde abcd ab abcdefg abcd worn abc" 
+        intervals [230]:
+            xmin = 649.441 
+            xmax = 653.083 
+            text = "ab abcdef ab abc abcd ab abc her abcd ab abcdefg abcd abc abcdef abc" 
+        intervals [231]:
+            xmin = 653.083 
+            xmax = 656.258 
+            text = "" 
+        intervals [232]:
+            xmin = 656.258 
+            xmax = 657.253 
+            text = "abcd abcd abc abcd abc abcdefg abc car abcd a abcd ab abc >end of the> ab abc abcdefgh" 
+        intervals [233]:
+            xmin = 657.253 
+            xmax = 661.098 
+            text = "a abcdef abcd abc out abcdefg ab abc abcdefgh" 
+        intervals [234]:
+            xmin = 661.098 
+            xmax = 664.164 
+            text = "abcd abc cat abcdefg ab abcd a abcd abc got abcde" 
+        intervals [235]:
+            xmin = 664.164 
+            xmax = 667.728 
+            text = "a abc abcdefg ab abcd abc dog abcdefg ab abcd abc abcdef abcd" 
+        intervals [236]:
+            xmin = 667.728 
+            xmax = 670.235 
+            text = "ab ab abcdefg ab abcde abc abcd ab abc the abc" 
+        intervals [237]:
+            xmin = 670.235 
+            xmax = 673.908 
+            text = "abcde abcdefgh abc abcd ab abcdefgh abcd ab abc too abcd abc abcd ab" 
+        intervals [238]:
+            xmin = 673.908 
+            xmax = 675.337 
+            text = "abc abcd abcde ab abc abcd" 
+        intervals [239]:
+            xmin = 675.337 
+            xmax = 678.341 
+            text = "abc abc was abcdefg ab abc abcde abc was ab in abc abcd abcdef ab" 
+        intervals [240]:
+            xmin = 678.341 
+            xmax = 680.1379999999999 
+            text = "abc abc abcd abcde abcdefg abcdef ab to abcd both abc man abc the" 
+        intervals [241]:
+            xmin = 680.1379999999999 
+            xmax = 681.935 
+            text = "cat test" 

@@ -46,5 +46,6 @@
     <module>chatopdf</module>
     <module>chatovtt</module>
     <module>chatotrs</module>
+    <module>chatotextgrid</module>
   </modules>
 </project>
