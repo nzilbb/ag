@@ -54,8 +54,8 @@ public class TrsToCha extends Converter {
    * Default constructor.
    */
   public TrsToCha() {
-    info = "Currently all Transcriber meta-data except the transcript language and participant"
-      +" genders are lost during conversion.";
+    info = "Currently all Transcriber meta-data except the transcript language, date,"
+      +" and participant genders are lost during conversion.";
   } // end of constructor
   
   public static void main(String argv[]) {

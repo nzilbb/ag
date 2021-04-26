@@ -53,6 +53,21 @@ public class TestChatSerialization {
    @Test public void minimalConversion()  throws Exception {
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
+	 new Layer("transcript_date", "Recording date")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_location", "Location")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_recording_quality", "Recording quality")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_room_layout", "Room layout")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_tape_location", "Tape location")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
 	 new Layer("transcriber", "Transcribers", 0, true, true, true),
 	 new Layer("languages", "Graph language", 0, true, true, true),
 	 new Layer("who", "Participants", 0, true, true, true),
@@ -80,7 +95,7 @@ public class TestChatSerialization {
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(23, deserializer.configure(configuration, schema).size());
+      assertEquals(28, deserializer.configure(configuration, schema).size());
 
       // load the stream
       ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -91,20 +106,31 @@ public class TestChatSerialization {
 
       // build the graph
       Graph[] graphs = deserializer.deserialize();
+      for (String warning : deserializer.getWarnings()) System.out.println(warning);
       Graph g = graphs[0];
 
       for (String warning : deserializer.getWarnings()) {
 	 System.out.println(warning);
       }
-      
+
+      // meta data
       assertEquals("test.cha", g.getId());
       String[] transcribers = g.labels("transcriber"); 
       assertEquals(2, transcribers.length);
       assertEquals("Alan Turing", transcribers[0]);
       assertEquals("Oscar Wilde", transcribers[1]);
+      
       String[] languages = g.labels("languages"); 
       assertEquals(1, languages.length);
       assertEquals("en", languages[0]);
+      
+      assertEquals("1965-07-01", g.my("transcript_date").getLabel());
+      assertEquals("Boston, MA, USA", g.my("transcript_location").getLabel());
+      assertEquals("3", g.my("transcript_recording_quality").getLabel());
+      assertEquals(
+        "Kitchen; Table in center of room with window on west wall, door to outside on north wall",
+        g.my("transcript_room_layout").getLabel());
+      assertEquals("tape74, side a, 104", g.my("transcript_tape_location").getLabel());
 
       // participants     
       assertEquals(2, g.all("who").length);
@@ -521,7 +547,7 @@ public class TestChatSerialization {
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(23, deserializer.configure(configuration, schema).size());
+      assertEquals(28, deserializer.configure(configuration, schema).size());
 
       // load the stream
       ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -844,7 +870,7 @@ public class TestChatSerialization {
       ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
       //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
       configuration = serializer.configure(configuration, schema);
-      assertEquals(23, configuration.size());
+      assertEquals(28, configuration.size());
       assertEquals("scribe attribute", "scribe", 
 		   ((Layer)configuration.get("transcriberLayer").getValue()).getId());
       assertEquals("languages attribute", "transcript_language", 
@@ -859,6 +885,14 @@ public class TestChatSerialization {
                    ((Layer)configuration.get("ageLayer").getValue()).getId());
       assertEquals("includeTimeCodes", Boolean.TRUE, 
 		   configuration.get("includeTimeCodes").getValue());
+      assertNull("date attribute", 
+		   configuration.get("dateLayer").getValue());
+      assertNull("recording quality attribute",
+		   configuration.get("recordingQualityLayer").getValue());
+      assertNull("room layout attribute", 
+		   configuration.get("roomLayoutLayer").getValue());
+      assertNull("tape location attribute",
+		   configuration.get("tapeLocationLayer").getValue());
 
       LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
          Arrays.asList(serializer.getRequiredLayers()));
@@ -914,6 +948,21 @@ public class TestChatSerialization {
 	 new Layer("scribe", "Transcriber")
          .setAlignment(Constants.ALIGNMENT_NONE)
          .setPeers(true).setPeersOverlap(true).setSaturated(true),
+	 new Layer("transcript_date", "Recording date")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_location", "Location")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_recording_quality", "Recording quality")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_room_layout", "Room layout")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_tape_location", "Tape location")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
          new Layer("transcript_language", "Language")
          .setAlignment(Constants.ALIGNMENT_NONE)
          .setPeers(false).setPeersOverlap(false).setSaturated(true),
@@ -960,8 +1009,15 @@ public class TestChatSerialization {
       graph.addAnchor(new Anchor("a5", 5.4321)); // will be rendered 5432
       graph.addAnchor(new Anchor("a10", 10.0));
       graph.addAnchor(new Anchor("a15", 15.0));
-      // language
+      // meta-data
       graph.addAnnotation(new Annotation("lang", "en", "transcript_language", "a0", "a15"));
+      graph.addAnnotation(new Annotation("date", "1972-09-26", "transcript_date", "a0", "a15"));
+      graph.addAnnotation(
+        new Annotation("loc", "Boston, MA, USA", "transcript_location", "a0", "a15"));
+      graph.addAnnotation(new Annotation("rq", "5", "transcript_recording_quality", "a0", "a15"));
+      graph.addAnnotation(new Annotation("layout", "Kitchen; Table in center of room with window on west wall, door to outside on north wall", "transcript_room_layout", "a0", "a15"));
+      graph.addAnnotation(
+        new Annotation("tape", "tape74, side a, 104", "transcript_tape_location", "a0", "a15"));
       // participants
       graph.addAnnotation(new Annotation("child", "John Smith", "who", "a0", "a15"));
       graph.addAnnotation(new Annotation("mother", "Mrs. Smith", "who", "a0", "a15"));
@@ -1043,14 +1099,22 @@ public class TestChatSerialization {
       
       // general configuration
       ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
-      //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
       configuration.get("includeTimeCodes").setValue(Boolean.FALSE);
       configuration = serializer.configure(configuration, schema);
-      assertEquals(23, configuration.size());
+      assertEquals(28, configuration.size());
       assertEquals("scribe attribute", "scribe", 
 		   ((Layer)configuration.get("transcriberLayer").getValue()).getId());
       assertEquals("languages attribute", "transcript_language", 
 		   ((Layer)configuration.get("languagesLayer").getValue()).getId());
+      assertEquals("date attribute", "transcript_date", 
+		   ((Layer)configuration.get("dateLayer").getValue()).getId());
+      assertEquals("recording quality attribute", "transcript_recording_quality", 
+		   ((Layer)configuration.get("recordingQualityLayer").getValue()).getId());
+      assertEquals("room layout attribute", "transcript_room_layout", 
+		   ((Layer)configuration.get("roomLayoutLayer").getValue()).getId());
+      assertEquals("tape location attribute", "transcript_tape_location", 
+		   ((Layer)configuration.get("tapeLocationLayer").getValue()).getId());
       assertEquals("target participant attribute", "main_participant", 
 		   ((Layer)configuration.get("targetParticipantLayer").getValue()).getId());
       assertEquals("non-word layer", "noise", 

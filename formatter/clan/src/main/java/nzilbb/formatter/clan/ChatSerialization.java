@@ -28,9 +28,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Spliterator;
@@ -43,6 +48,7 @@ import java.util.regex.Pattern;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
+import nzilbb.ag.serialize.util.Utility;
 import nzilbb.ag.util.AnnotationComparatorByAnchor;
 import nzilbb.ag.util.ConventionTransformer;
 import nzilbb.ag.util.SimpleTokenizer;
@@ -524,6 +530,95 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
    public void setLanguagesLayer(Layer newLanguagesLayer) { languagesLayer = newLanguagesLayer; }
 
    /**
+    * Layer for recording the date of the interaction.
+    * @see #getDateLayer()
+    * @see #setDateLayer(Layer)
+    */
+   protected Layer dateLayer;
+   /**
+    * Getter for {@link #dateLayer}: Layer for recording the date of the interaction.
+    * @return Layer for recording the date of the interaction.
+    */
+   public Layer getDateLayer() { return dateLayer; }
+   /**
+    * Setter for {@link #dateLayer}: Layer for recording the date of the interaction.
+    * @param newDateLayer Layer for recording the date of the interaction.
+    */
+   public ChatSerialization setDateLayer(Layer newDateLayer) { dateLayer = newDateLayer; return this; }
+
+   /**
+    * Layer for recording to location of the interaction.
+    * @see #getLocationLayer()
+    * @see #setLocationLayer(Layer)
+    */
+   protected Layer locationLayer;
+   /**
+    * Getter for {@link #locationLayer}: Layer for recording to location of the interaction.
+    * @return Layer for recording to location of the interaction.
+    */
+   public Layer getLocationLayer() { return locationLayer; }
+   /**
+    * Setter for {@link #locationLayer}: Layer for recording to location of the interaction.
+    * @param newLocationLayer Layer for recording to location of the interaction.
+    */
+   public ChatSerialization setLocationLayer(Layer newLocationLayer) { locationLayer = newLocationLayer; return this; }
+
+   /**
+    * Layer for noting the recording quality.
+    * @see #getRecordingQualityLayer()
+    * @see #setRecordingQualityLayer(Layer)
+    */
+   protected Layer recordingQualityLayer;
+   /**
+    * Getter for {@link #recordingQualityLayer}: Layer for noting the recording quality.
+    * @return Layer for noting the recording quality.
+    */
+   public Layer getRecordingQualityLayer() { return recordingQualityLayer; }
+   /**
+    * Setter for {@link #recordingQualityLayer}: Layer for noting the recording quality.
+    * @param newRecordingQualityLayer Layer for noting the recording quality.
+    */
+   public ChatSerialization setRecordingQualityLayer(Layer newRecordingQualityLayer) { recordingQualityLayer = newRecordingQualityLayer; return this; }
+
+   /**
+    * Layer for recording the room layout.
+    * @see #getRoomLayoutLayer()
+    * @see #setRoomLayoutLayer(Layer)
+    */
+   protected Layer roomLayoutLayer;
+   /**
+    * Getter for {@link #roomLayoutLayer}: Layer for recording the room layout.
+    * @return Layer for recording the room layout.
+    */
+   public Layer getRoomLayoutLayer() { return roomLayoutLayer; }
+   /**
+    * Setter for {@link #roomLayoutLayer}: Layer for recording the room layout.
+    * @param newRoomLayoutLayer Layer for recording the room layout.
+    */
+   public ChatSerialization setRoomLayoutLayer(Layer newRoomLayoutLayer) { roomLayoutLayer = newRoomLayoutLayer; return this; }
+
+   /**
+    * Layer for recording which tape, and where on that tape, the transcript corresponds to.
+    * @see #getTapeLocationLayer()
+    * @see #setTapeLocationLayer(Layer)
+    */
+   protected Layer tapeLocationLayer;
+   /**
+    * Getter for {@link #tapeLocationLayer}: Layer for recording which tape, and where on
+    * that tape, the transcript corresponds to. 
+    * @return Layer for recording which tape, and where on that tape, the transcript
+    * corresponds to. 
+    */
+   public Layer getTapeLocationLayer() { return tapeLocationLayer; }
+   /**
+    * Setter for {@link #tapeLocationLayer}: Layer for recording which tape, and where on
+    * that tape, the transcript corresponds to. 
+    * @param newTapeLocationLayer Layer for recording which tape, and where on that tape,
+    * the transcript corresponds to. 
+    */
+   public ChatSerialization setTapeLocationLayer(Layer newTapeLocationLayer) { tapeLocationLayer = newTapeLocationLayer; return this; }
+
+   /**
     * Required participant meta-data layers.
     * @see #getParticipantLayers()
     * @see #setParticipantLayers(HashMap)
@@ -767,7 +862,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 	    :configuration.addParameter(
 	       new Parameter("participantLayer", Layer.class, "Participant layer", "Layer for speaker/participant identification", true));
 	 String[] possibilities = {"participant","participants","who","speaker","speakers"};
-	 if (p.getValue() == null) p.setValue(findLayerById(possibleParticipantLayers, possibilities));
+	 if (p.getValue() == null) p.setValue(
+           Utility.FindLayerById(possibleParticipantLayers, Arrays.asList(possibilities)));
 	 p.setPossibleValues(possibleParticipantLayers.values());
       }
       if (getTurnLayer() == null) {
@@ -775,7 +871,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 	    :configuration.addParameter(
 	       new Parameter("turnLayer", Layer.class, "Turn layer", "Layer for speaker turns", true));
 	 String[] possibilities = {"turn","turns"};
-	 if (p.getValue() == null) p.setValue(findLayerById(possibleTurnLayers, possibilities));
+	 if (p.getValue() == null) p.setValue(
+           Utility.FindLayerById(possibleTurnLayers, Arrays.asList(possibilities)));
 	 p.setPossibleValues(possibleTurnLayers.values());
       }
       if (getUtteranceLayer() == null) {
@@ -783,7 +880,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 	    :configuration.addParameter(
 	       new Parameter("utteranceLayer", Layer.class, "Utterance layer", "Layer for speaker utterances", true));
 	 String[] possibilities = {"utterance","utterances","line","lines"};
-	 if (p.getValue() == null) p.setValue(findLayerById(possibleTurnChildLayers, possibilities));
+	 if (p.getValue() == null) p.setValue(
+           Utility.FindLayerById(possibleTurnChildLayers, Arrays.asList(possibilities)));
 	 p.setPossibleValues(possibleTurnChildLayers.values());
       }
       if (getWordLayer() == null) {
@@ -791,70 +889,79 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 	    :configuration.addParameter(
 	       new Parameter("wordLayer", Layer.class, "Word layer", "Layer for individual word tokens", true));
 	 String[] possibilities = {"transcript","word","words","w"};
-	 if (p.getValue() == null) p.setValue(findLayerById(possibleTurnChildLayers, possibilities));
+	 if (p.getValue() == null) p.setValue(
+           Utility.FindLayerById(possibleTurnChildLayers, Arrays.asList(possibilities)));
 	 p.setPossibleValues(possibleTurnChildLayers.values());
       }
       Parameter pC = configuration.containsKey("cUnitLayer")?configuration.get("cUnitLayer")
 	 :configuration.addParameter(
 	    new Parameter("cUnitLayer", Layer.class, "C-Unit layer", "Layer for marking c-units"));
       String[] possibilitiesC = {"c-unit","cunit","sentence"};
-      pC.setValue(findLayerById(possibleTurnChildLayers, possibilitiesC));
+      pC.setValue(Utility.FindLayerById(possibleTurnChildLayers, Arrays.asList(possibilitiesC)));
       pC.setPossibleValues(possibleTurnChildLayers.values());
 
       Parameter p = configuration.containsKey("disfluencyLayer")?configuration.get("disfluencyLayer")
 	 :configuration.addParameter(
 	    new Parameter("disfluencyLayer", Layer.class, "Disfluency layer", "Layer for disfluency annotations"));
       String[] possibilities_disfluency = {"disfluency","disfluencies"};
-      if (p.getValue() == null) p.setValue(findLayerById(wordTagLayers, possibilities_disfluency));
+      if (p.getValue() == null) p.setValue(
+        Utility.FindLayerById(wordTagLayers, Arrays.asList(possibilities_disfluency)));
       p.setPossibleValues(wordTagLayers.values());
 
       p = configuration.containsKey("nonWordLayer")?configuration.get("nonWordLayer")
 	 :configuration.addParameter(
 	    new Parameter("nonWordLayer", Layer.class, "Non-word layer", "Layer for non-word noises"));
       String[] possibilities_nonword = {"noise","noises","nonword","background"};
-      if (p.getValue() == null) p.setValue(findLayerById(graphSpanLayers, possibilities_nonword));
+      if (p.getValue() == null) p.setValue(
+        Utility.FindLayerById(graphSpanLayers, Arrays.asList(possibilities_nonword)));
       p.setPossibleValues(graphSpanLayers.values());
 
       p = configuration.containsKey("expansionLayer")?configuration.get("expansionLayer")
 	 :configuration.addParameter(
 	    new Parameter("expansionLayer", Layer.class, "Expansion layer", "Layer for expansion annotations"));
       String[] possibilities_expansion = {"expansion","expansions"};
-      if (p.getValue() == null) p.setValue(findLayerById(wordTagLayers, possibilities_expansion));
+      if (p.getValue() == null) p.setValue(
+        Utility.FindLayerById(wordTagLayers, Arrays.asList(possibilities_expansion)));
       p.setPossibleValues(wordTagLayers.values());
 
       p = configuration.containsKey("errorsLayer")?configuration.get("errorsLayer")
 	 :configuration.addParameter(
 	    new Parameter("errorsLayer", Layer.class, "Errors layer", "Layer for error  annotations"));
       String[] possibilities_error = {"error","error"};
-      if (p.getValue() == null) p.setValue(findLayerById(possibleTurnChildLayers, possibilities_error));
+      if (p.getValue() == null) p.setValue(
+        Utility.FindLayerById(possibleTurnChildLayers, Arrays.asList(possibilities_error)));
       p.setPossibleValues(possibleTurnChildLayers.values());
 
       p = configuration.containsKey("linkageLayer")?configuration.get("linkageLayer")
 	 :configuration.addParameter(
 	    new Parameter("linkageLayer", Layer.class, "Linkages layer", "Layer for linkage annotations"));
       String[] possibilities_linkage = {"linkage","linkages"};
-      if (p.getValue() == null) p.setValue(findLayerById(possibleTurnChildLayers, possibilities_linkage));
+      if (p.getValue() == null) p.setValue(
+        Utility.FindLayerById(possibleTurnChildLayers, Arrays.asList(possibilities_linkage)));
       p.setPossibleValues(possibleTurnChildLayers.values());
 
       p = configuration.containsKey("repetitionsLayer")?configuration.get("repetitionsLayer")
 	 :configuration.addParameter(
 	    new Parameter("repetitionsLayer", Layer.class, "Repetitions layer", "Layer for repetition annotations"));
       String[] possibilities_repetition = {"repetition","repetitions"};
-      if (p.getValue() == null) p.setValue(findLayerById(possibleTurnChildLayers, possibilities_repetition));
+      if (p.getValue() == null) p.setValue(
+        Utility.FindLayerById(possibleTurnChildLayers, Arrays.asList(possibilities_repetition)));
       p.setPossibleValues(possibleTurnChildLayers.values());
 
       p = configuration.containsKey("retracingLayer")?configuration.get("retracingLayer")
 	 :configuration.addParameter(
 	    new Parameter("retracingLayer", Layer.class, "Retracing layer", "Layer for retracing annotations"));
       String[] possibilities_retrace = {"retrace","retracing","correction"};
-      if (p.getValue() == null) p.setValue(findLayerById(possibleTurnChildLayers, possibilities_retrace));
+      if (p.getValue() == null) p.setValue(
+        Utility.FindLayerById(possibleTurnChildLayers, Arrays.asList(possibilities_retrace)));
       p.setPossibleValues(possibleTurnChildLayers.values());
 
       p = configuration.containsKey("completionLayer")?configuration.get("completionLayer")
 	 :configuration.addParameter(
 	    new Parameter("completionLayer", Layer.class, "Completion layer", "Layer for completion annotations"));
       String[] possibilities_completion = {"completion","completions"};
-      if (p.getValue() == null) p.setValue(findLayerById(wordTagLayers, possibilities_completion));
+      if (p.getValue() == null) p.setValue(
+        Utility.FindLayerById(wordTagLayers, Arrays.asList(possibilities_completion)));
       p.setPossibleValues(wordTagLayers.values());
 
       LinkedHashMap<String,Layer> possibleLayers = new LinkedHashMap<String,Layer>();
@@ -867,7 +974,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 	 :configuration.addParameter(
 	    new Parameter("gemLayer", Layer.class, "Gem layer", "Layer for gems"));
       String[] possibilities_gem = {"gem","gems","topic","topics"};
-      if (p.getValue() == null) p.setValue(findLayerById(possibleLayers, possibilities_gem));
+      if (p.getValue() == null) p.setValue(
+        Utility.FindLayerById(possibleLayers, Arrays.asList(possibilities_gem)));
       p.setPossibleValues(possibleLayers.values());
 
       graphTagLayers.remove("corpus");
@@ -876,16 +984,70 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 	 :configuration.addParameter(
 	    new Parameter("transcriberLayer", Layer.class, "Transcriber layer", "Layer for transcriber name"));
       String[] possibilities_transcriber = {"transcriber","transcribers","transcript_transcriber","transcript_transcribers", "scribe","scribes", "transcript_scribe","transcript_scribes"};
-      if (p.getValue() == null) p.setValue(findLayerById(graphTagLayers, possibilities_transcriber));
+      if (p.getValue() == null) p.setValue(
+        Utility.FindLayerById(graphTagLayers, Arrays.asList(possibilities_transcriber)));
       p.setPossibleValues(graphTagLayers.values());
 
       p = configuration.containsKey("languagesLayer")?configuration.get("languagesLayer")
 	 :configuration.addParameter(
 	    new Parameter("languagesLayer", Layer.class, "Transcript language layer", "Layer for transcriber language"));
-      String[] possibilities_transcript = {"transcript_language","transcript_languages","language","languages"};
-      if (p.getValue() == null) p.setValue(findLayerById(graphTagLayers, possibilities_transcript));
+      String[] possibilities_language = {"transcript_language","transcript_languages","language","languages"};
+      if (p.getValue() == null) p.setValue(
+        Utility.FindLayerById(graphTagLayers, Arrays.asList(possibilities_language)));
       p.setPossibleValues(graphTagLayers.values());
-
+      
+      p = configuration.containsKey("dateLayer")?configuration.get("dateLayer")
+        :configuration.addParameter(
+          new Parameter("dateLayer", Layer.class, "Date layer",
+                        "Layer for date of the interaction"));
+      String[] possibilities_date = {
+        "transcriptairdate","airdate", "transcriptrecordingdate","recordingdate",
+        "transcriptcreationdate","creationdate", "transcriptdate","date"};
+      if (p.getValue() == null) p.setValue(
+        Utility.FindLayerById(graphTagLayers, Arrays.asList(possibilities_date)));
+      p.setPossibleValues(graphTagLayers.values());
+      
+      p = configuration.containsKey("locationLayer")?configuration.get("locationLayer")
+        :configuration.addParameter(
+          new Parameter("locationLayer", Layer.class, "Location layer",
+                        "Layer for location of the interaction"));
+      String[] possibilities_location = { "transcriptlocation","location" };
+      if (p.getValue() == null) p.setValue(
+        Utility.FindLayerById(graphTagLayers, Arrays.asList(possibilities_location)));
+      p.setPossibleValues(graphTagLayers.values());
+      
+      p = configuration.containsKey("recordingQualityLayer")?
+        configuration.get("recordingQualityLayer") :configuration.addParameter(
+          new Parameter("recordingQualityLayer", Layer.class, "Recording Quality layer",
+                        "Layer for recording quality"));
+      String[] possibilities_quality = {
+        "transcriptrecordingquality","recordingquality", "transcriptquality","quality"};
+      if (p.getValue() == null) p.setValue(
+        Utility.FindLayerById(graphTagLayers, Arrays.asList(possibilities_quality)));
+      p.setPossibleValues(graphTagLayers.values());
+      
+      p = configuration.containsKey("roomLayoutLayer")?configuration.get("roomLayoutLayer")
+        :configuration.addParameter(
+          new Parameter("roomLayoutLayer", Layer.class, "Room Layout layer",
+                        "Layer for room layout"));
+      String[] possibilities_layout = {
+        "transcriptroomlayout","roomlayout", "transcriptlayout","layout"};
+      if (p.getValue() == null) p.setValue(
+        Utility.FindLayerById(graphTagLayers, Arrays.asList(possibilities_layout)));
+      p.setPossibleValues(graphTagLayers.values());
+      
+      p = configuration.containsKey("tapeLocationLayer")?configuration.get("tapeLocationLayer")
+        :configuration.addParameter(
+          new Parameter("tapeLocationLayer", Layer.class, "Tape Location layer",
+                        "Layer for tape and location on the tape covered by the transcription"));
+      String[] possibilities_tape_location = {
+        "transcripttapelocation","tapelocation"};
+      if (p.getValue() == null) {
+        p.setValue(Utility.FindLayerById(
+                     graphTagLayers, Arrays.asList(possibilities_tape_location)));
+      }
+      p.setPossibleValues(graphTagLayers.values());
+      
       // target participant layer
       p = configuration.containsKey("targetParticipantLayer")?configuration.get("targetParticipantLayer")
          :configuration.addParameter(
@@ -895,7 +1057,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       String[] possibilities_target_participant = {
          "main_participant", "main", "target", "participant_target"};
       if (p.getValue() == null) {
-         p.setValue(findLayerById(participantTagLayers, possibilities_target_participant));
+        p.setValue(Utility.FindLayerById(
+                     participantTagLayers, Arrays.asList(possibilities_target_participant)));
       }
       p.setPossibleValues(participantTagLayers.values());
       
@@ -912,7 +1075,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                = {"participant_"+attribute, attribute, "participant_gender", "gender"};
             possibilities_participant = possibilities_sex_gender;
          }
-	 if (p.getValue() == null) p.setValue(findLayerById(participantTagLayers, possibilities_participant));
+	 if (p.getValue() == null) p.setValue(
+           Utility.FindLayerById(participantTagLayers, Arrays.asList(possibilities_participant)));
 	 p.setPossibleValues(participantTagLayers.values());
       }
       
@@ -991,11 +1155,84 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 	       // append this line to it
 	       lines.add(lastLine + " " + line);
 	    }
+            // TODO look for dependent tier lines to map to word/other layers e.g. "%mor: ..."
 	 }
 
 	 line = reader.readLine();
       } // next line
 
+      return new ParameterSet(); // everything is in configure()
+   }
+   
+   /**
+    * Sets parameters for a given deserialization operation, after loading the serialized form of the graph. This might include mappings from format-specific objects like tiers to graph layers, etc.
+    * @param parameters The configuration for a given deserialization operation.
+    * @throws SerializationParametersMissingException If not all required parameters have a value.
+    */
+   public void setParameters(ParameterSet parameters)
+      throws SerializationParametersMissingException {
+      if (getParticipantLayer() == null || getTurnLayer() == null
+          || getUtteranceLayer() == null || getWordLayer() == null) {
+	 throw new SerializationParametersMissingException();
+      }
+   }
+
+   /**
+    * Deserializes the serialized data, generating one or more {@link Graph}s.
+    * <p>Many data formats will only yield one graph (e.g. Transcriber
+    * transcript or Praat textgrid), however there are formats that
+    * are capable of storing multiple transcripts in the same file
+    * (e.g. AGTK, Transana XML export), which is why this method
+    * returns a list.
+    * @return A list of valid (if incomplete) {@link Graph}s. 
+    * @throws SerializerNotConfiguredException if the object has not been configured.
+    * @throws SerializationParametersMissingException if the parameters for this particular graph have not been set.
+    * @throws SerializationException if errors occur during deserialization.
+    */
+   public Graph[] deserialize() 
+      throws SerializerNotConfiguredException, SerializationParametersMissingException,
+      SerializationException {
+      // if there are errors, accumlate as many as we can before throwing SerializationException
+      SerializationException errors = null;
+
+      Graph graph = new Graph();
+      graph.setId(getName());
+      // add layers to the graph
+      // we don't just copy the whole schema, because that would imply that all the extra layers
+      // contained no annotations, which is not necessarily true
+      graph.addLayer((Layer)participantLayer.clone());
+      graph.getSchema().setParticipantLayerId(participantLayer.getId());
+      graph.addLayer((Layer)turnLayer.clone());
+      graph.getSchema().setTurnLayerId(turnLayer.getId());
+      graph.addLayer((Layer)utteranceLayer.clone());
+      graph.getSchema().setUtteranceLayerId(utteranceLayer.getId());
+      graph.addLayer((Layer)wordLayer.clone());
+      graph.getSchema().setWordLayerId(wordLayer.getId());
+      if (disfluencyLayer != null) graph.addLayer((Layer)disfluencyLayer.clone());
+      if (nonWordLayer != null) graph.addLayer((Layer)nonWordLayer.clone());
+      if (expansionLayer != null) graph.addLayer((Layer)expansionLayer.clone());
+      if (errorsLayer != null) graph.addLayer((Layer)errorsLayer.clone());
+      if (repetitionsLayer != null) graph.addLayer((Layer)repetitionsLayer.clone());
+      if (retracingLayer != null) graph.addLayer((Layer)retracingLayer.clone());
+      if (completionLayer != null) graph.addLayer((Layer)completionLayer.clone());
+      if (gemLayer != null) graph.addLayer((Layer)gemLayer.clone());
+      if (linkageLayer != null) graph.addLayer((Layer)linkageLayer.clone());
+      if (cUnitLayer != null) graph.addLayer((Layer)cUnitLayer.clone());
+      if (transcriberLayer != null) graph.addLayer((Layer)transcriberLayer.clone());
+      if (languagesLayer != null) graph.addLayer((Layer)languagesLayer.clone());
+      if (dateLayer != null) graph.addLayer((Layer)dateLayer.clone());
+      if (locationLayer != null) graph.addLayer((Layer)locationLayer.clone());
+      if (roomLayoutLayer != null) graph.addLayer((Layer)roomLayoutLayer.clone());
+      if (recordingQualityLayer != null) graph.addLayer((Layer)recordingQualityLayer.clone());
+      if (tapeLocationLayer != null) graph.addLayer((Layer)tapeLocationLayer.clone());
+      for (String attribute : participantLayers.keySet()) {
+	 Layer layer = participantLayers.get(attribute);
+	 if (layer != null) {
+	    graph.addLayer((Layer)layer.clone());
+	 }
+      } // next participant layer 
+
+      // graph meta data
       for (String header : headers) {
 	 if (header.startsWith("@")) { // @ line
 	    int iColon = header.indexOf(':');
@@ -1068,95 +1305,43 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 		  }
 	       } else if (header.startsWith("@Transcriber:")) {
 		  transcribers.add(value);
-	       }
+	       } else if (header.startsWith("@Location:")) {
+		  if (value.trim().length() > 0 && locationLayer != null) {
+                    graph.createTag(graph, locationLayer.getId(), value);
+		  }
+	       } else if (header.startsWith("@Recording Quality:")) {
+		  if (value.trim().length() > 0 && recordingQualityLayer != null) {
+                    graph.createTag(graph, recordingQualityLayer.getId(), value);
+		  }
+	       } else if (header.startsWith("@Room Layout:")) {
+		  if (value.trim().length() > 0 && roomLayoutLayer != null) {
+                    graph.createTag(graph, roomLayoutLayer.getId(), value);
+		  }
+	       } else if (header.startsWith("@Tape Location:")) {
+		  if (value.trim().length() > 0 && tapeLocationLayer != null) {
+                    graph.createTag(graph, tapeLocationLayer.getId(), value);
+		  }
+	       } else if (header.startsWith("@Date:")) {
+		  if (value.trim().length() > 0 && dateLayer != null) {
+                    SimpleDateFormat chatDateFormat
+                      // use UK locale because it doesn't expect a dot after a month abbreviation
+                      = new SimpleDateFormat("dd-MMM-yyyy",Locale.UK);
+                    SimpleDateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                    try { // parse as CHAT format
+                      Date date = chatDateFormat.parse(value.toLowerCase());
+                      // but save with ISO format
+                      graph.createTag(graph, dateLayer.getId(), isoDateFormat.format(date));
+                    } catch(ParseException exception) {
+                      warnings.add(
+                        "Could not parse date \""+value+"\": " + exception.getMessage() + "--" +chatDateFormat.format(new Date()));
+                      graph.createTag(graph, dateLayer.getId(), value);
+                    }
+		  }
+	       } 
 	    } // it's a key/value pair
 	 } // @ line
       } // next header
 
-      return new ParameterSet(); // everything is in configure()
-   }
-   
-   /**
-    * Tries to find a layer in the given map, using an ordered list of possible IDs.
-    * @param possibleLayers Collection of layers from which a possibility can be selected.
-    * @param possibleIds Guesses at possible layer IDs.
-    * @return The first matching layer, or null if none matched.
-    */
-  public Layer findLayerById(LinkedHashMap<String,Layer> possibleLayers, String[] possibleIds) { // TODO replace with Utility.FindLayerById
-      HashSet<String> possibleLayerIds = new HashSet<String>();
-      for (String id : possibleLayers.keySet()) possibleLayerIds.add(id.toLowerCase());
-      for (String id : possibleIds) {
-	 if (possibleLayerIds.contains(id.toLowerCase())) {
-	    return possibleLayers.get(id);
-	 }
-      }
-      return null;
-   } // end of findLayerById()
-
-   /**
-    * Sets parameters for a given deserialization operation, after loading the serialized form of the graph. This might include mappings from format-specific objects like tiers to graph layers, etc.
-    * @param parameters The configuration for a given deserialization operation.
-    * @throws SerializationParametersMissingException If not all required parameters have a value.
-    */
-   public void setParameters(ParameterSet parameters)
-      throws SerializationParametersMissingException {
-      if (getParticipantLayer() == null || getTurnLayer() == null
-          || getUtteranceLayer() == null || getWordLayer() == null) {
-	 throw new SerializationParametersMissingException();
-      }
-   }
-
-   /**
-    * Deserializes the serialized data, generating one or more {@link Graph}s.
-    * <p>Many data formats will only yield one graph (e.g. Transcriber
-    * transcript or Praat textgrid), however there are formats that
-    * are capable of storing multiple transcripts in the same file
-    * (e.g. AGTK, Transana XML export), which is why this method
-    * returns a list.
-    * @return A list of valid (if incomplete) {@link Graph}s. 
-    * @throws SerializerNotConfiguredException if the object has not been configured.
-    * @throws SerializationParametersMissingException if the parameters for this particular graph have not been set.
-    * @throws SerializationException if errors occur during deserialization.
-    */
-   public Graph[] deserialize() 
-      throws SerializerNotConfiguredException, SerializationParametersMissingException,
-      SerializationException {
-      // if there are errors, accumlate as many as we can before throwing SerializationException
-      SerializationException errors = null;
-
-      Graph graph = new Graph();
-      graph.setId(getName());
-      // add layers to the graph
-      // we don't just copy the whole schema, because that would imply that all the extra layers
-      // contained no annotations, which is not necessarily true
-      graph.addLayer((Layer)getParticipantLayer().clone());
-      graph.getSchema().setParticipantLayerId(getParticipantLayer().getId());
-      graph.addLayer((Layer)getTurnLayer().clone());
-      graph.getSchema().setTurnLayerId(getTurnLayer().getId());
-      graph.addLayer((Layer)getUtteranceLayer().clone());
-      graph.getSchema().setUtteranceLayerId(getUtteranceLayer().getId());
-      graph.addLayer((Layer)getWordLayer().clone());
-      graph.getSchema().setWordLayerId(getWordLayer().getId());
-      if (getDisfluencyLayer() != null) graph.addLayer((Layer)getDisfluencyLayer().clone());
-      if (getNonWordLayer() != null) graph.addLayer((Layer)getNonWordLayer().clone());
-      if (getExpansionLayer() != null) graph.addLayer((Layer)getExpansionLayer().clone());
-      if (getErrorsLayer() != null) graph.addLayer((Layer)getErrorsLayer().clone());
-      if (getRepetitionsLayer() != null) graph.addLayer((Layer)getRepetitionsLayer().clone());
-      if (getRetracingLayer() != null) graph.addLayer((Layer)getRetracingLayer().clone());
-      if (getCompletionLayer() != null) graph.addLayer((Layer)getCompletionLayer().clone());
-      if (getGemLayer() != null) graph.addLayer((Layer)getGemLayer().clone());
-      if (getLinkageLayer() != null) graph.addLayer((Layer)getLinkageLayer().clone());
-      if (getCUnitLayer() != null) graph.addLayer((Layer)getCUnitLayer().clone());
-      if (getTranscriberLayer() != null) graph.addLayer((Layer)getTranscriberLayer().clone());
-      if (getLanguagesLayer() != null) graph.addLayer((Layer)getLanguagesLayer().clone());
-      for (String attribute : participantLayers.keySet()) {
-	 Layer layer = participantLayers.get(attribute);
-	 if (layer != null) {
-	    graph.addLayer((Layer)layer.clone());
-	 }
-      } // next participant layer 
-
-      // graph meta data
       if (getTranscriberLayer() != null) {
 	 for (String transcriber : transcribers) {
 	    graph.createTag(graph, getTranscriberLayer().getId(), transcriber);
@@ -1222,8 +1407,14 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       Anchor lastAnchor = new Anchor(null, 0.0, Constants.CONFIDENCE_MANUAL);
       graph.addAnchor(lastAnchor);
       Anchor lastAlignedAnchor = null;
+      boolean tierUnsupportedWarning = false; // only warn about ignoring tiers once
       for (String line : syncLines) {
-	 if (line.startsWith("@")) {
+	 if (line.startsWith("%")) {
+           if (!tierUnsupportedWarning) {
+             warnings.add("Dependent tiers are not currently parsed; ignoring lines like \""
+                          +line+"\"");
+           }
+	 }else if (line.startsWith("@")) {
 	    if (line.startsWith("@G") || line.startsWith("@Bg")) {
 	       if (gem != null) {
 		  gem.setEnd(lastAnchor);
@@ -1764,7 +1955,6 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
             }
             if (languages.length() > 0) writer.println(languages);
          }
-         // TODO more metadata
          
          // participants
          StringBuilder participantsHeader = new StringBuilder();
@@ -1881,6 +2071,55 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
          if (participantLayers.get("role").getId().equals("@role")) {
             participantLayers.put("role", null);
          }
+
+         // more metadata
+         if (dateLayer != null) {
+            Annotation annotation = graph.my(dateLayer.getId());
+            if (annotation != null) {
+              writer.print("@Date:\t");
+              SimpleDateFormat chatDateFormat
+                // use UK locale because it doesn't expect a dot after a month abbreviation
+                = new SimpleDateFormat("dd-MMM-yyyy",Locale.UK);
+              SimpleDateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+              try { // parse as ISO format
+                Date date = isoDateFormat.parse(annotation.getLabel());
+                // but save with CHAT format
+                writer.println(chatDateFormat.format(date));
+              } catch(ParseException exception) {
+                warnings.add(
+                  "Could not parse date \""+annotation.getLabel()+"\": " + exception.getMessage());
+                writer.println(annotation.getLabel());
+              }
+            } // there is an annotation
+         } // layer is set
+         if (locationLayer != null) {
+            Annotation annotation = graph.my(locationLayer.getId());
+            if (annotation != null) {
+              writer.print("@Location:\t");
+              writer.println(annotation.getLabel());
+            } // there is an annotation
+         } // layer is set
+         if (recordingQualityLayer != null) {
+            Annotation annotation = graph.my(recordingQualityLayer.getId());
+            if (annotation != null) {
+              writer.print("@Recording Quality:\t");
+              writer.println(annotation.getLabel());
+            } // there is an annotation
+         } // layer is set
+         if (roomLayoutLayer != null) {
+            Annotation annotation = graph.my(roomLayoutLayer.getId());
+            if (annotation != null) {
+              writer.print("@Room Layout:\t");
+              writer.println(annotation.getLabel());
+            } // there is an annotation
+         } // layer is set
+         if (tapeLocationLayer != null) {
+            Annotation annotation = graph.my(tapeLocationLayer.getId());
+            if (annotation != null) {
+              writer.print("@Tape Location:\t");
+              writer.println(annotation.getLabel());
+            } // there is an annotation
+         } // layer is set
 
          // get noises if needed
          TreeSet<Annotation> noisesByAnchor

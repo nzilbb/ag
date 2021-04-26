@@ -7,10 +7,16 @@
 @Media:	test Audio
 @Transcriber:	Alan Turing
 @Transcriber:	Oscar Wilde
+@Location:	Boston, MA, USA
+@Recording Quality:	3
+@Room Layout:	Kitchen; Table in center of room with window on west wall, door to outside on north wall
+@Tape Location:	tape74, side a, 104
+@Date:	01-JUL-1965
 @G:	gdc
 *SUB:	ab abc abcdef abcd gonna [: going to] lie abcd abc pet abcdefghij 1_21510
 	abc abcde abc ab abcd ab abc worryin(g) &+i abcd. 21510_25057
 *SUB:	she'll ab (a)nd abcdefg. 21510_25057
+%mor:	ADV|she'll V|ab N|(a)nd ADV|abcdefg.
 *EXA:	abcd abcdefg ab abc abcdef abcde abc ab abc abcdefgh abc abcdef abc +//? 25057_29994
 *SUB:	ab abcde until she's abc ab abcde abcdef abcde ab abc baby's crib
 	abc abcdefg abc abcd abcde abc abcd abc a_b_c_d. 34723_35752

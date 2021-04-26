@@ -135,7 +135,7 @@
 <Speaker id="spk1" name="Interviewer" check="no" type="female" dialect="native" accent="ame" scope="local"/>
 <Speaker id="spk2" name="mop03-2b" check="yes" type="male" dialect="native" accent="nze" scope="local"/>
 </Speakers>
-<Episode>
+<Episode air_date="210426">
 <Section type="report" startTime="0.0" endTime="23.563" topic="to85">
 <Turn speaker="spk2" startTime="0" endTime="23.563">
 <Sync time="0"/>

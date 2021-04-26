@@ -3,6 +3,11 @@
 @Participants:	SUB John_Smith Participant,INT Mrs._Smith Investigator
 @ID:	eng||SUB|2;10.10|male|||Participant|||
 @ID:	spa||INT|||||Investigator|||
+@Date:	26-Sep-1972
+@Location:	Boston, MA, USA
+@Recording Quality:	5
+@Room Layout:	Kitchen; Table in center of room with window on west wall, door to outside on north wall
+@Tape Location:	tape74, side a, 104
 *SUB:	The 'quick brown' fox
 	jumps - over &=coughs &+th
 *INT:	the lazy "dog" .
