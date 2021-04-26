@@ -22,7 +22,10 @@
 package nzilbb.converter;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
+import nzilbb.ag.Annotation;
+import nzilbb.ag.Anchor;
 import nzilbb.ag.Constants;
+import nzilbb.ag.Graph;
 import nzilbb.ag.Layer;
 import nzilbb.ag.Schema;
 import nzilbb.ag.serialize.GraphDeserializer;
@@ -44,7 +47,8 @@ public class ChaToTrs extends Converter {
    */
   public ChaToTrs() {
     info = "Transcriber doesn't support meta-data like @Recording Quality, @Location, etc."
-      +" so most CHAT header meta-data is lost when converting to .trs."
+      +" so CHAT header meta-data is instead included as comments at the beginning of the"
+      +" Transcriber transcript."
       +"\n "
       +"\nThis conversion will only work well for CHAT transcripts that are fully aligned;"
       +" i.e. all lines include time alignment bullets."
@@ -190,9 +194,59 @@ public class ChaToTrs extends Converter {
       .setPeers(false).setPeersOverlap(false).setSaturated(false));
     schema.addLayer(
       new Layer("comment", "Comments").setAlignment(Constants.ALIGNMENT_INTERVAL)
-      .setPeers(true).setPeersOverlap(true).setSaturated(false));
+      .setPeers(true).setPeersOverlap(false).setSaturated(false));
     return schema;
   } // end of getSchema()
+
+  /**
+   * Make recording quality, room layout, tape location, and location into comments.
+   * @param transcripts
+   */
+  @Override
+  public void processTranscripts(Graph[] transcripts) {
+    Schema schema = getSchema();
+    
+    for (Graph transcript : transcripts) {
+      
+      // add meta-data as comments at the beginning
+      // so that can be parsed back out to slt if there's a round-trip
+      String startId = transcript.getStart().getId();
+      Annotation firstUtterance = transcript.first("utterance");
+      if (firstUtterance != null) { // use first utterance, it might not start at 0
+        startId = firstUtterance.getStart().getId();
+      }
+      // transcript_recording_quality
+      Annotation metadata = transcript.first("transcript_recording_quality");
+      if (metadata != null) {
+        transcript.addAnnotation(new Annotation().setLayerId("comment")
+                                 .setLabel("@Recording Quality: " + metadata.getLabel())
+                                 .setStartId(startId).setEndId(startId));
+      }
+      // transcript_room_layout
+      metadata = transcript.first("transcript_room_layout");
+      if (metadata != null) {
+        transcript.addAnnotation(new Annotation().setLayerId("comment")
+                                 .setLabel("@Room Layout: " + metadata.getLabel())
+                                 .setStartId(startId).setEndId(startId));
+      }
+      // transcript_tape_location
+      metadata = transcript.first("transcript_tape_location");
+      if (metadata != null) {
+        transcript.addAnnotation(new Annotation().setLayerId("comment")
+                                 .setLabel("@Tape Location: " + metadata.getLabel())
+                                 .setStartId(startId).setEndId(startId));
+      }
+      // location
+      metadata = transcript.first("transcript_location");
+      if (metadata != null) {
+        transcript.addAnnotation(new Annotation().setLayerId("comment")
+                                 .setLabel("@Location: " + metadata.getLabel())
+                                 .setStartId(startId).setEndId(startId));
+      }
+      transcript.commit();
+    } // next transcript
+  } // end of processGraphs()
+   
 
   /**
    * Specifies which layers should be given to the serializer. The default implementaion
@@ -203,7 +257,8 @@ public class ChaToTrs extends Converter {
   public String[] getLayersToSerialize() {
     String[] layers = { "utterance", "word", "noise", "topic", "comment",
       "transcript_language", "transcript_recording_date", "transcript_scribe",
-      "participant_gender"};
+      "transcript_room_layout", "transcript_recording_quality", "transcript_tape_location",
+      "transcript_location", "participant_gender"};
     return layers;
   } // end of getLayersToSerialize()
 

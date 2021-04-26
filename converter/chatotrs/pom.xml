@@ -9,7 +9,7 @@
 
   <groupId>nzilbb</groupId>
   <artifactId>cha-to-trs</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <name>nzilbb.converter.chatotrs</name>
   <description>CLAN CHAT transcript to Transcriber Transcript converter</description>
 

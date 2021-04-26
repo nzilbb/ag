@@ -12,7 +12,11 @@
 <Episode air_date="210426">
 <Section type="report" topic="to1" startTime="0.001" endTime="180.068">
 <Turn speaker="spk1" startTime="0.001" endTime="21.510">
-<Sync time="0.001"/>ab abc abcdef abcd gonna lie abcd abc pet abcdefghij
+<Sync time="0.001"/>
+<Comment desc="@Recording Quality: 3"/>
+<Comment desc="@Room Layout: Kitchen; Table in center of room with window on west wall, door to outside on north wall"/>
+<Comment desc="@Tape Location: tape74, side a, 104"/>
+<Comment desc="@Location: Boston, MA, USA"/>ab abc abcdef abcd gonna lie abcd abc pet abcdefghij
 </Turn>
 <Turn speaker="spk2 spk1" startTime="21.510" endTime="25.057">
 <Sync time="21.510"/>
