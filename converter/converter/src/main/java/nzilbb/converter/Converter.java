@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -50,6 +51,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -59,6 +61,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import nzilbb.ag.*;
@@ -152,6 +155,15 @@ public abstract class Converter extends GuiProgram {
 
   /** General information about the converter, for displaying to the user with the --help info */
   protected String info = null;
+
+  /** Source code URL */
+  protected String sourceUrl = "https://github.com/nzilbb/ag/tree/master/converter";
+
+  /** License URL */
+  protected String licenseUrl = "https://www.gnu.org/licenses/agpl.txt";
+
+  /** License Name */
+  protected String licenseName = "GNU Affero General Public License v3.0 or later";  
 
   // UI
   protected JButton btnAdd = new JButton("+");
@@ -431,7 +443,6 @@ public abstract class Converter extends GuiProgram {
    * Default constructor.
    */
   public Converter() {
-    setDefaultWindowTitle("Converter");
     setDefaultWidth(800);
     setDefaultHeight(600);
 
@@ -453,6 +464,8 @@ public abstract class Converter extends GuiProgram {
     menuBar.add(helpMenu);
     JMenuItem about = new JMenuItem("About");
     helpMenu.add(about);    
+    JMenuItem info = new JMenuItem("Information");
+    helpMenu.add(info);
 
     JPanel pnlEast = new JPanel(new FlowLayout());
     btnAdd.setToolTipText("Add a file to the list");
@@ -484,16 +497,55 @@ public abstract class Converter extends GuiProgram {
     frame_.addWindowListener(new WindowAdapter() {
         public void windowClosing(WindowEvent e) { System.exit(0); }});
 
-    about.addActionListener(new ActionListener() {
+    info.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           // create a JTextArea
           JTextArea textArea = new JTextArea();
           textArea.setText(help());
           textArea.setCaretPosition(0);
           textArea.setEditable(false);
-          JDialog dlg = new JOptionPane(new JScrollPane(textArea)).createDialog(frame_, "Help");
+          JDialog dlg = new JOptionPane(new JScrollPane(textArea)).createDialog(
+            frame_, frame_.getTitle());
           dlg.setSize(frame_.getSize());
           dlg.setLocation(frame_.getLocation());
+          dlg.setVisible(true);
+        }
+      });
+
+    about.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          JPanel aboutPanel = new JPanel(new java.awt.GridLayout(8, 1, 10, 10));
+          aboutPanel.add(new JLabel(getClass().getPackage().getImplementationTitle(),
+                                    SwingConstants.CENTER));
+          aboutPanel.add(new JLabel(
+                           "Version: " + getClass().getPackage().getImplementationVersion(),
+                           SwingConstants.CENTER));
+          aboutPanel.add(new JLabel("Input: " + getDeserializer().getDescriptor(),
+                                    SwingConstants.CENTER));
+          aboutPanel.add(new JLabel("Output: " + getSerializer().getDescriptor(),
+                                    SwingConstants.CENTER));
+          aboutPanel.add(new JLabel("This is open source software:", SwingConstants.CENTER));
+          JButton linkLabel = new JButton(licenseName);
+          linkLabel.addActionListener(new ActionListener() {
+              public void actionPerformed(ActionEvent e) {
+                try {
+                  java.awt.Desktop.getDesktop().browse(new URI(licenseUrl));
+                } catch(Exception exception) {}
+              }});
+          aboutPanel.add(linkLabel);
+          aboutPanel.add(new JLabel("Source Code:", SwingConstants.CENTER));
+          linkLabel = new JButton(sourceUrl);
+          linkLabel.addActionListener(new ActionListener() {
+              public void actionPerformed(ActionEvent e) {
+                try {
+                  java.awt.Desktop.getDesktop().browse(new URI(sourceUrl));
+                } catch(Exception exception) {}
+              }});
+          aboutPanel.add(linkLabel);
+          JDialog dlg = new JOptionPane(aboutPanel).createDialog(frame_, "About");
+          //dlg.setSize(frame_.getSize());
+          //dlg.setLocation(frame_.getLocation().getX() + );
+          dlg.setLocationRelativeTo(frame_);
           dlg.setVisible(true);
         }
       });
