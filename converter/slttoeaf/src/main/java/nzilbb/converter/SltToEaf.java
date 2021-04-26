@@ -43,7 +43,6 @@ public class SltToEaf extends Converter {
    * Default constructor.
    */
   public SltToEaf() {
-    setDefaultWindowTitle("SALT to ELAN converter");
     // default to false, as it's what users of this converter most likely expect,
     // and it means that if the idea is a round-trip conversion, inline annotations are not lost
     setSwitch("parseInlineConventions", "false");

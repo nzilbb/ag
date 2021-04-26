@@ -73,7 +73,6 @@ public class EafToSlt extends Converter {
    * Default constructor.
    */
   public EafToSlt() {
-    setDefaultWindowTitle("ELAN to SALT converter");
     // default ELAN setting to false, as it's what users of this converter most likely expect,
     setSwitch("useConventions", "false");
     

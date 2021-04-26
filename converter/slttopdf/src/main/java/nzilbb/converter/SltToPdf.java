@@ -51,7 +51,6 @@ public class SltToPdf extends Converter {
    * Default constructor.
    */
   public SltToPdf() {
-    setDefaultWindowTitle("SALT to PDF converter");
     info = "PDF doesn't support meta-data like Dob, Doe, Ethnicity, etc."
       +" so all SALT header meta-data is lost when converting to .vtt."
       +"\nAlso, inline annotations (mazes, codes, bound morphemes, etc.)"

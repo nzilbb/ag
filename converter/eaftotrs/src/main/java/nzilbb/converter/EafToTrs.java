@@ -73,7 +73,6 @@ public class EafToTrs extends Converter {
    * Default constructor.
    */
   public EafToTrs() {
-    setDefaultWindowTitle("ELAN to Transcriber converter");
     info = "ELAN has no direct mechanism for marking non-speech annotations in their position"
       +" within the transcript text.  However, this converter supports the use of textual"
       +" conventions in various ways to make certain annotations: "

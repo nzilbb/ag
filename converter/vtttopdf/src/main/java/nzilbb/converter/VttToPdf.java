@@ -42,7 +42,6 @@ public class VttToPdf extends Converter {
     * Default constructor.
     */
    public VttToPdf() {
-      setDefaultWindowTitle("WebVTT to PDF converter");
    } // end of constructor
    
    public static void main(String argv[]) {

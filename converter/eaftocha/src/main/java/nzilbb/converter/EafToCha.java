@@ -73,7 +73,6 @@ public class EafToCha extends Converter {
    * Default constructor.
    */
   public EafToCha() {
-    setDefaultWindowTitle("ELAN to CLAN converter");
     // don't use inline annotation conventions, by default
     setSwitch("useConventions","false");
     

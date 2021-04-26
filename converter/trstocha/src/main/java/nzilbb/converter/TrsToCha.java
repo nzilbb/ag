@@ -54,8 +54,6 @@ public class TrsToCha extends Converter {
    * Default constructor.
    */
   public TrsToCha() {
-    setDefaultWindowTitle("Transcriber to SALT converter");
-    
     info = "Currently all Transcriber meta-data except the transcript language and participant"
       +" genders are lost during conversion.";
   } // end of constructor

@@ -11,7 +11,7 @@
   <artifactId>eaf-to-trs</artifactId>
   <version>1.0.1</version>
   <name>nzilbb.converter.eaftotrs</name>
-  <description>Utility for converting ELAN files to Transcriber transcripts</description>
+  <description>ELAN file to Transcriber transcript converter</description>
 
   <properties>
     

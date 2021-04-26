@@ -42,7 +42,6 @@ public class VttToTex extends Converter {
    * Default constructor.
    */
   public VttToTex() {
-    setDefaultWindowTitle("WebVTT to LaTeX converter");
     info = "The resulting .tex files each include a definition for a new '\turn' command which"
       +" is used throughout the trancript to format speaker turns; this can be customized"
       +" directly in the .tex files after conversion, or with the --texTurnCommand command line"

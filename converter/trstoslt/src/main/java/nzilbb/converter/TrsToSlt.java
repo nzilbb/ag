@@ -90,8 +90,6 @@ public class TrsToSlt extends Converter {
    * Default constructor.
    */
   public TrsToSlt() {
-    setDefaultWindowTitle("Transcriber to SALT converter");
-    
     info = "The Transcriber 'Program' becomes the SALT 'Context' header."
       +"\nThe first Transcriber 'Topic' becomes the SALT 'Subgroup' header."
       +"\nComments at the beginning of transcript that start with + become SALT meta-data headers."

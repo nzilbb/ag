@@ -44,7 +44,24 @@ public class TrsToPdf extends Converter {
    * Default constructor.
    */
   public TrsToPdf() {
-    setDefaultWindowTitle("Transcriber to PDF converter");
+     info = "As PDF is not related to a linguistic annotation tool,"
+       +" all annotations that Transcriber supports are lost during this conversion, including:"
+       +"\n- topics"
+       +"\n- comments"
+       +"\n- noises"
+       +"\n- phrase language annotations"
+       +"\n- named entity annotations"
+       +"\n- lexical tags"
+       +"\n- pronounce tags"
+       +"\n- version"
+       +"\n- version date"
+       +"\n- air date"
+       +"\n- scribe"
+       +"\n- language"
+       +"\n- participant gender"
+       +"\n- participant dialect"
+       +"\n- participant accent"
+       +"\n- participant scope";
   } // end of constructor
    
   public static void main(String argv[]) {

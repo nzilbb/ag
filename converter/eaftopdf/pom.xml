@@ -11,7 +11,7 @@
   <artifactId>eaf-to-pdf</artifactId>
   <version>0.1.0</version>
   <name>nzilbb.converter.eaftopdf</name>
-  <description>ELAN .eaf file to PDF converter</description>
+  <description>ELAN file to PDF converter</description>
 
   <properties>
 

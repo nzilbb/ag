@@ -43,8 +43,6 @@ public class ChaToVtt extends Converter {
    * Default constructor.
    */
   public ChaToVtt() {
-    setDefaultWindowTitle("CLAN to WebVtt converter");
-
     info = "The CLAN parser is *not exhaustive*; it one parses:"
       +"\n- Disfluency marking with &+ - e.g. \"so &+sund Sunday\""
       +"\n- Non-standard form expansion - e.g. \"gonna [: going to]\""

@@ -90,7 +90,36 @@ public class TrsToText extends Converter {
     * Default constructor.
     */
    public TrsToText() {
-      setDefaultWindowTitle("Transcriber to PDF converter");
+     info = "The following participant meta-data is lost during conversion:"
+       +"\n- gender"
+       +"\n- dialect"
+       +"\n- accent"
+       +"\n- scope"
+       +"\n "
+       +"\nIf the --metaData command-line switch is used, then the following Transcriber"
+       +" meta-data will be included as a header to the file:"
+       +"\n- version"
+       +"\n- version date"
+       +"\n- air date"
+       +"\n- scribe"
+       +"\n- language"
+       +"\nOtherwise, this meta-data is lost during conversion"
+       +"\n "
+       +"\nThe following Transcriber annotations are lost during conversion:"
+       +"\n- phrase language annotations"
+       +"\n- named entity annotations"
+       +"\n "
+       +"\nThe following Transcriber annotations are converted using bracketed, inline"
+       +" text conventions:"
+       +"\n- comments"
+       +"\n- noises"
+       +"\n- lexical tags"
+       +"\n- pronounce tags"
+       +"\nTo disable these conventions (and thus lose these annotations during conversion)"
+       +" use the --useConventions=false command line switch."
+       +"\n "
+       +"\nIf the --textOnly command-line switch is used, then the output text includes only"
+       +" the transcribed speech, and all annotations and meta-data are lost.";
    } // end of constructor
    
    public static void main(String argv[]) {

@@ -42,7 +42,6 @@ public class VttToEaf extends Converter {
     * Default constructor.
     */
    public VttToEaf() {
-      setDefaultWindowTitle("WebVTT to ELAN converter");
    } // end of constructor
    
    public static void main(String argv[]) {

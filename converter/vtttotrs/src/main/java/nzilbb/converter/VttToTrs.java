@@ -42,7 +42,6 @@ public class VttToTrs extends Converter {
     * Default constructor.
     */
    public VttToTrs() {
-      setDefaultWindowTitle("WebVTT to Transcriber converter");
    } // end of constructor
    
    public static void main(String argv[]) {

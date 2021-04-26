@@ -11,7 +11,7 @@
   <artifactId>trs-to-pdf</artifactId>
   <name>nzilbb.converter.trstopdf</name>
   <version>1.0.1</version>
-  <description>Utility for converting Transcriber transcripts to PDFs</description>
+  <description>Transcriber transcript to PDF converter</description>
 
   <properties>
     

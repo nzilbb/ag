@@ -11,7 +11,7 @@
   <artifactId>eaf-to-tex</artifactId>
   <version>0.1.0</version>
   <name>nzilbb.converter.eaftotex</name>
-  <description>ELAN .eaf file to LaTeX converter</description>
+  <description>ELAN file to LaTeX document converter</description>
 
   <properties>
     

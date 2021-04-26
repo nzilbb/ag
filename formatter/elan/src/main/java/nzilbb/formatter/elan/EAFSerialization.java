@@ -47,6 +47,7 @@ import nzilbb.ag.util.SpanningConventionTransformer;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 import nzilbb.util.IO;
+import nzilbb.util.ISO639;
 import nzilbb.util.TempFileInputStream;
 import org.w3c.dom.*;
 import org.xml.sax.*;
@@ -60,6 +61,7 @@ import org.xml.sax.*;
 public class EAFSerialization implements GraphDeserializer, GraphSerializer {
    
    // Attributes:     
+   private ISO639 iso639 = new ISO639(); // for standard ISO 639 language code processing
    protected Vector<String> warnings;
    /**
     * Returns any warnings that may have arisen during the last execution of 
@@ -1714,9 +1716,13 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
 
       graph.setOffsetGranularity(Constants.GRANULARITY_MILLISECONDS);
       String language = null;
-      if (languageLayer != null) {
+      if (languageLayer != null && selectedLayers.contains(languageLayer.getId())) {
          Annotation lang = graph.first(languageLayer.getId());
-         if (lang != null) language = lang.getLabel();
+         if (lang != null) {
+           language = lang.getLabel();
+           // try to make it an alpha-3 code
+           language = iso639.alpha3(language).orElse(language);
+         }
       }
 
       // create a new XML document
@@ -1745,13 +1751,15 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
       document.setXmlStandalone(true);
       Element annotationDocument = document.createElement("ANNOTATION_DOCUMENT");
       document.appendChild(annotationDocument);
-      Annotation author = authorLayer==null?null:graph.first(authorLayer.getId());
+      Annotation author = authorLayer==null || !selectedLayers.contains(authorLayer.getId())?
+        null:graph.first(authorLayer.getId());
       if (author != null) {
          annotationDocument.setAttribute("AUTHOR", author.getLabel());
       } else {
          annotationDocument.setAttribute("AUTHOR", "");
       }
-      Annotation date = dateLayer==null?null:graph.first(dateLayer.getId());
+      Annotation date = dateLayer==null || !selectedLayers.contains(dateLayer.getId())?
+        null:graph.first(dateLayer.getId());
       if (date != null) {
          annotationDocument.setAttribute("DATE", date.getLabel());
       } else {
@@ -1816,6 +1824,7 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
          utterances.setAttribute("LINGUISTIC_TYPE_REF", "default-lt");
          utterances.setAttribute("TIER_ID", participant.getLabel());
          utterances.setAttribute("PARTICIPANT", participant.getLabel());
+         if (language != null) utterances.setAttribute("LANG_REF", language);
          mSpeakerTiers.put(participant.getLabel(), utterances);
       } // next participant
       
@@ -1963,7 +1972,14 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
       linguisticType.setAttribute("LINGUISTIC_TYPE_ID","partition-lt");
       linguisticType.setAttribute("TIME_ALIGNABLE","true");
       linguisticType.setAttribute("CONSTRAINTS","Time_Subdivision");
-      
+
+      if (language != null) {
+        Element languageElement = document.createElement("LANGUAGE");
+        annotationDocument.appendChild(languageElement);
+        languageElement.setAttribute("LANG_ID", language);
+        languageElement.setAttribute("LANG_LABEL", iso639.name(language).orElse(language));
+        languageElement.setAttribute("LANG_DEF", "http://cdb.iso.org/lg/CDB-00138502-001");
+      }
       Element constraint = document.createElement("CONSTRAINT");
       annotationDocument.appendChild(constraint);
       constraint.setAttribute("DESCRIPTION","Time subdivision of parent annotation's time interval, no time gaps allowed within this interval");

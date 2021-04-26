@@ -43,8 +43,6 @@ public class ChaToEaf extends Converter {
    * Default constructor.
    */
   public ChaToEaf() {
-    setDefaultWindowTitle("CLAN to ELAN converter");
-
     info = "ELAN doesn't support meta-data like @Date, @Location, etc."
       +" so almost all CHAT header meta-data is lost when converting to .eaf."
       +"\n "

@@ -11,7 +11,7 @@
   <artifactId>trs-to-slt</artifactId>
   <name>nzilbb.converter.trstoslt</name>
   <version>0.1.1</version>
-  <description>Utility for converting Transcriber transcripts to SALT transcripts</description>
+  <description>Transcriber transcript to SALT transcript converter</description>
 
   <properties>
     

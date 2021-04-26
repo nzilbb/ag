@@ -73,7 +73,6 @@ public class EafToTex extends Converter {
    * Default constructor.
    */
   public EafToTex() {
-    setDefaultWindowTitle("ELAN to LaTeX converter");
     // by default, don't parse annotation conventions
     
     setSwitch("useConventions", "false");

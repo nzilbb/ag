@@ -10,8 +10,8 @@
   <groupId>nzilbb</groupId>
   <artifactId>trs-to-vtt</artifactId>
   <name>nzilbb.converter.trstovtt</name>
-  <version>1.0.0</version>
-  <description>Utility for converting Transcriber transcripts to WebVTT subtitle files</description>
+  <version>1.0.1</version>
+  <description>Transcriber transcript to WebVTT subtitles converter</description>
 
   <properties>
     
@@ -21,7 +21,7 @@
     
     <output.package>nzilbb.formatter.webvtt</output.package>
     <output.path>nzilbb/formatter/webvtt/</output.path>
-    <output.version>0.6.0</output.version>
+    <output.version>0.6.1</output.version>
     
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -42,7 +42,7 @@
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>converter-base</artifactId>
-      <version>1.0.2</version>
+      <version>1.0.3</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -120,7 +120,7 @@
                 <artifactItem>
                   <groupId>nzilbb</groupId>
                   <artifactId>converter-base</artifactId>
-                  <version>1.0.2</version>
+                  <version>1.0.3</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>

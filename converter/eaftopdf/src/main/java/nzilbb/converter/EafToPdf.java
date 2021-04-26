@@ -73,7 +73,6 @@ public class EafToPdf extends Converter {
    * Default constructor.
    */
   public EafToPdf() {
-    setDefaultWindowTitle("ELAN to PDF converter");
     // don't use inline annotation conventions, by default
     setSwitch("useConventions","false");
     

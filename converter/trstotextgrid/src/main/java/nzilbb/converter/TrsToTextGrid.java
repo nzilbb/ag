@@ -44,7 +44,29 @@ public class TrsToTextGrid extends Converter {
     * Default constructor.
     */
    public TrsToTextGrid() {
-      setDefaultWindowTitle("Transcriber to TextGrid converter");
+     info = "Praat does not support meta-data as Transcriber does,"
+       +" so the following meta-data is lost during conversion:"
+       +"\n- version"
+       +"\n- version date"
+       +"\n- air date"
+       +"\n- scribe"
+       +"\n- language"
+       +"\n- participant gender"
+       +"\n- participant dialect"
+       +"\n- participant accent"
+       +"\n- participant scope"
+       +"\nThe following Transcriber annotations are not supported by Praat, and are lost:"
+       +"\n- phrase language annotations"
+       +"\n- named entity annotations"
+       +"\n- topic tags"
+       +"\nThe following Transcriber annotations are not directly supported by Praat, and"
+       +" are converted using bracketed, inline conventions within annotation labels:"
+       +"\n- comments"
+       +"\n- noises"
+       +"\n- lexical tags"
+       +"\n- pronounce tags"
+       +"\nTo disable these conventions (and thus lose these annotations during conversion)"
+       +" use the --useConventions=false command line switch.";
    } // end of constructor
    
    public static void main(String argv[]) {

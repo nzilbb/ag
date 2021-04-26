@@ -43,8 +43,6 @@ public class ChaToPdf extends Converter {
    * Default constructor.
    */
   public ChaToPdf() {
-    setDefaultWindowTitle("CLAN to PDF converter");
-
     info = "The CLAN parser is *not exhaustive*; it one parses:"
       +"\n- Disfluency marking with &+ - e.g. \"so &+sund Sunday\""
       +"\n- Non-standard form expansion - e.g. \"gonna [: going to]\""

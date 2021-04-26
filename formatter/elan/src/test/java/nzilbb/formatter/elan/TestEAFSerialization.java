@@ -1012,7 +1012,7 @@ public class TestEAFSerialization {
       graph.addAnchor(new Anchor("a0", 0.0));
       graph.addAnchor(new Anchor("a15", 15.0));
       // language
-      graph.addAnnotation(new Annotation("l", "en-NZ", "lang", "a0", "a15"));
+      graph.addAnnotation(new Annotation("l", "eng", "lang", "a0", "a15"));
       // participants
       graph.addAnnotation(new Annotation("p1", "p1", "who", "a0", "a15"));
       graph.addAnnotation(new Annotation("p2", "p2", "who", "a0", "a15"));
@@ -1154,7 +1154,7 @@ public class TestEAFSerialization {
       // serialize
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
-      String[] layers = {"word"}; 
+      String[] layers = {"word", "scribe", "lang"}; 
       serializer.serialize(Utility.OneGraphSpliterator(graph), layers,
                            stream -> streams.add(stream),
                            warning -> System.out.println(warning),
@@ -1443,7 +1443,7 @@ public class TestEAFSerialization {
       // serialize
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
-      String[] layers = {"utterance"}; 
+      String[] layers = {"utterance", "scribe"}; 
       serializer.serialize(Arrays.spliterator(graphs), layers,
                            stream -> streams.add(stream),
                            warning -> System.out.println(warning),

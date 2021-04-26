@@ -11,7 +11,7 @@
   <artifactId>vtt-to-eaf</artifactId>
   <name>nzilbb.converter.vtttoeaf</name>
   <version>1.0.0</version>
-  <description>Utility for converting WebVTT subtitle files to ELAN files</description>
+  <description>WebVTT subtitles to ELAN file converter</description>
 
   <properties>
     

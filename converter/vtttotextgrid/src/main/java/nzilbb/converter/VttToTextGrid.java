@@ -42,7 +42,6 @@ public class VttToTextGrid extends Converter {
     * Default constructor.
     */
    public VttToTextGrid() {
-      setDefaultWindowTitle("WebVTT to TextGrid converter");
    } // end of constructor
    
    public static void main(String argv[]) {

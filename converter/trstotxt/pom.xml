@@ -11,13 +11,13 @@
   <artifactId>trs-to-txt</artifactId>
   <name>nzilbb.converter.trstotxt</name>
   <version>1.0.0</version>
-  <description>Utility for converting Transcriber transcripts to plain text files</description>
+  <description>Transcriber transcript to plain text converter</description>
 
   <properties>
     
     <input.package>nzilbb.formatter.transcriber</input.package>
     <input.path>nzilbb/formatter/transcriber/</input.path>
-    <input.version>2.0.0</input.version>
+    <input.version>2.0.2</input.version>
     
     <output.package>nzilbb.formatter.text</output.package>
     <output.path>nzilbb/formatter/text/</output.path>
@@ -42,7 +42,7 @@
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>converter-base</artifactId>
-      <version>1.0.2</version>
+      <version>1.0.3</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -120,7 +120,7 @@
                 <artifactItem>
                   <groupId>nzilbb</groupId>
                   <artifactId>converter-base</artifactId>
-                  <version>1.0.2</version>
+                  <version>1.0.3</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>

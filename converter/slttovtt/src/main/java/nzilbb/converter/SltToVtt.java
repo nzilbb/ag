@@ -51,7 +51,6 @@ public class SltToVtt extends Converter {
    * Default constructor.
    */
   public SltToVtt() {
-    setDefaultWindowTitle("SALT to WebVTT converter");
     info = "WebVTT doesn't support meta-data like Dob, Doe, Ethnicity, etc."
       +" so all SALT header meta-data is lost when converting to .vtt."
       +"\nAlso, inline annotations (mazes, codes, bound morphemes, etc.)"

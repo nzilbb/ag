@@ -11,7 +11,7 @@
   <artifactId>slt-to-eaf</artifactId>
   <name>nzilbb.annotator.slttoeaf</name>
   <version>0.1.1</version>
-  <description>Utility for converting SALT transcripts to ELAN files</description>
+  <description>SALT transcript to ELAN file converter</description>
 
   <properties>
     

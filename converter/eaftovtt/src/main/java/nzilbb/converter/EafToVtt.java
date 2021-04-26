@@ -73,7 +73,6 @@ public class EafToVtt extends Converter {
    * Default constructor.
    */
   public EafToVtt() {
-    setDefaultWindowTitle("ELAN to WebVTT converter");
     // don't use inline annotation conventions, by default
     setSwitch("useConventions","false");
     

@@ -42,8 +42,6 @@ public class SltToTex extends Converter {
    * Default constructor.
    */
   public SltToTex() {
-    setDefaultWindowTitle("WebVTT to LaTeX converter");
-    
     info = "Almost all SALT header meta-data is lost when converting to .tex."
       +"\nBy default, inline annotations (mazes, codes, bound morphemes, etc.)"
       +" are parsed (and thus removed)."

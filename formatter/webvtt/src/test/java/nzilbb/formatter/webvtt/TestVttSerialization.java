@@ -317,9 +317,16 @@ public class TestVttSerialization
    @Test public void serializeSimultaneousSpeech() throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
+         new Layer("language", "Language")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
          new Layer("who", "Participants")
          .setAlignment(Constants.ALIGNMENT_NONE)
          .setPeers(true).setPeersOverlap(true).setSaturated(true),
+         new Layer("gender", "Gender")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(false)
+         .setParentId("who").setParentIncludes(true),
          new Layer("turn", "Speaker turns")
          .setAlignment(Constants.ALIGNMENT_INTERVAL)
          .setPeers(true).setPeersOverlap(false).setSaturated(false)
@@ -341,9 +348,11 @@ public class TestVttSerialization
          .setSchema(schema);
       graph.addAnchor(new Anchor("a0", 0.0));
       graph.addAnchor(new Anchor("a15", 15.0));
+      graph.addAnnotation(new Annotation("en", "en", "language", "a0", "a15"));
       // participants
       graph.addAnnotation(new Annotation("p1", "p1", "who", "a0", "a15"));
       graph.addAnnotation(new Annotation("p2", "p2", "who", "a0", "a15"));
+      graph.addAnnotation(new Annotation("nb", "nb", "gender", "a0", "a15", "p2"));
       // turns
       graph.addAnnotation(new Annotation("t1", "p1", "turn", "a0", "a15", "p1"));
       graph.addAnchor(new Anchor("a5", 5.0));
@@ -423,8 +432,9 @@ public class TestVttSerialization
       // serialize
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> streams = new Vector<NamedStream>();
+      String[] layers = {"language", "gender"};
       serializer.serialize(Utility.OneGraphSpliterator(graph),
-                           null, // ignored anyway
+                           layers,
                            stream -> streams.add(stream),
                            warning -> System.out.println(warning),
                            exception -> exceptions.add(exception));
@@ -466,8 +476,8 @@ public class TestVttSerialization
 
       // load the stream
       ParameterSet defaultParameters = deserializer.load(streams, schema);
-      // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(1, defaultParameters.size());
+      //for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals("Kind, and meta-data NOTEs, become parameters", 4, defaultParameters.size());
       
       // configure the deserialization
       deserializer.setParameters(defaultParameters);

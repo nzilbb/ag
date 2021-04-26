@@ -11,7 +11,7 @@
   <artifactId>eaf-to-cha</artifactId>
   <version>0.1.0</version>
   <name>nzilbb.converter.eaftocha</name>
-  <description>ELAN .eaf file to CLAN CHAT transcript converter</description>
+  <description>ELAN file to CLAN CHAT transcript converter</description>
 
   <properties>
 

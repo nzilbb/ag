@@ -42,7 +42,6 @@ public class VttToCha extends Converter {
     * Default constructor.
     */
    public VttToCha() {
-      setDefaultWindowTitle("WebVTT to CLAN converter");
    } // end of constructor
    
    public static void main(String argv[]) {
