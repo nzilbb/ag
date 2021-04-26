@@ -254,7 +254,7 @@ public class GuiProgram extends JApplet {
    */
   public void mainRun(String argv[]) {
     
-    frame_ = new JFrame(getDefaultWindowTitle() + (v == null?"":" ("+v+")"));
+    frame_ = new JFrame(getDefaultWindowTitle());
     frame_.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     
     interpretPropertiesParameters();
@@ -477,6 +477,9 @@ public class GuiProgram extends JApplet {
       } catch (Throwable t) {
       }
     }
+    sDefaultWindowTitle = getClass().getPackage().getImplementationTitle();
+    if (sDefaultWindowTitle == null) sDefaultWindowTitle = getClass().getSimpleName();
+    if (v != null) sDefaultWindowTitle += " ("+v+")";    
   } // end of constructor
   
   /**
