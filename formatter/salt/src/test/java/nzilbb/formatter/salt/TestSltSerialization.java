@@ -364,7 +364,7 @@ public class TestSltSerialization {
 
     // words
     Annotation[] words = g.all("word");
-    assertEquals(177, words.length);
+    assertEquals("Word count correct", 177, words.length);
 
     // check utterance transcriptions
     String[] lines = {
@@ -427,7 +427,7 @@ public class TestSltSerialization {
     // errors
     Annotation[] errors = g.all("error");
     assertEquals("Correct number of error codes: " + Arrays.asList(errors),
-                 3, errors.length);
+                 4, errors.length);
     assertEquals("first EW label", "EP:boy/z", errors[0].getLabel());
     assertEquals("first EW code tags a word",
                  1, errors[0].tagsOn("word").length);
@@ -438,11 +438,16 @@ public class TestSltSerialization {
                  1, errors[1].tagsOn("utterance").length);
     assertEquals("Utterance Error code tags the tenth utterance",
                  utterances[9].getId(), errors[1].tagsOn("utterance")[0].getId());
-    assertEquals("second EW label", "EW", errors[2].getLabel());
+    assertEquals("Pre-terminator Utterance Error label", "EU", errors[2].getLabel());
+    assertEquals("Pre-terminator Utterance Error code tags an utterance",
+                 1, errors[2].tagsOn("utterance").length);
+    assertEquals("Pre-terminator Utterance Error code tags the eleventh utterance",
+                 utterances[10].getId(), errors[2].tagsOn("utterance")[0].getId());
+    assertEquals("second EW label", "EW", errors[3].getLabel());
     assertEquals("second EW code tags a word",
-                 1, errors[2].tagsOn("word").length);
+                 1, errors[3].tagsOn("word").length);
     assertEquals("second EW tags the word 'falled': " + Arrays.asList(errors[2].tagsOn("word")),
-                 "falled", errors[2].tagsOn("word")[0].getLabel());
+                 "falled", errors[3].tagsOn("word")[0].getLabel());
     
     // root forms
     Annotation[] roots = g.all("root");
@@ -1093,7 +1098,7 @@ public class TestSltSerialization {
       "save/ed mud/y bush/s bus/s put/ing girl/z[EP:boy/z] want/3s go/3s shop/ing> run/ing drop/ed help/ed aunty/z stop/ed leave/ing come/ing it/z lift/*ed. Hug/ing Hunt/ing can/'nt can/n't carry/ed eat/ing gentle/ly gentle/y girl/'z go/s guy/s happen/ing help/ing hug/ed hurry/ed kid/'z learn/ing let/'us say/s see/ing tramp/ing try/ed tweet/ing wait/ing?",
       "Anything else?",
       "And please go for a walk? [EU]",
-      "You need to put your gumboot/s on.",
+      "You need to put your gumboot/s on [EU].",
       "It/'s too dark^",
       "What happened in this one?",
       "And then it/'s heaps_and_heaps|heaps dark.",

@@ -1694,7 +1694,9 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         
         // utterance error codes
         transformer = new ConventionTransformer(
-          utteranceLayer.getId(), "(?<line>.*) \\[(?<code>E[^\\]]+)\\]$", "${line}");
+          utteranceLayer.getId(),
+          // c-unit terminators after utterance error codes are invalid, but we tolerate them
+          "(?<line>.*) \\[(?<code>E[^\\]]+)\\](?<terminator>[.?!~^>]?)$", "${line}${terminator}");
         if (errorLayer != null) {
           transformer.addDestinationResult(errorLayer.getId(), "${code}");
         }
