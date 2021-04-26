@@ -18,11 +18,11 @@ Standalone programs that convert transcripts from one tool format to another, e.
 | **eaf** | [eaf-to-trs](../bin/eaf-to-trs.jar?raw=true) | | [eaf-to-vtt](../bin/eaf-to-vtt.jar?raw=true) | [eaf-to-slt](../bin/eaf-to-slt.jar?raw=true) | [eaf-to-cha](../bin/eaf-to-cha.jar?raw=true) | | [eaf-to-pdf](../bin/eaf-to-pdf.jar?raw=true) | [eaf-to-tex](../bin/eaf-to-tex.jar?raw=true) | |
 | **vtt** | [vtt-to-trs](../bin/vtt-to-trs.jar?raw=true) | [vtt-to-eaf](../bin/vtt-to-eaf.jar?raw=true) | | | [vtt-to-cha](../bin/vtt-to-cha.jar?raw=true) | [vtt-to-textgrid](../bin/vtt-to-textgrid.jar?raw=true) | [vtt-to-pdf](../bin/vtt-to-pdf.jar?raw=true) | [vtt-to-tex](../bin/vtt-to-tex.jar?raw=true) | |
 | **slt** | [slt-to-trs](../bin/slt-to-trs.jar?raw=true) | [slt-to-eaf](../bin/slt-to-eaf.jar?raw=true) | [slt-to-vtt](../bin/slt-to-vtt.jar?raw=true) | | | [slt-to-textgrid](../bin/slt-to-textgrid.jar?raw=true) | [slt-to-pdf](../bin/slt-to-pdf.jar?raw=true) | [slt-to-tex](../bin/slt-to-tex.jar?raw=true) | |
-| **cha** | | [cha-to-eaf](../bin/cha-to-eaf.jar?raw=true) | [cha-to-vtt](../bin/cha-to-vtt.jar?raw=true) | | | | [cha-to-pdf](../bin/cha-to-pdf.jar?raw=true) | | |
+| **cha** | [cha-to-trs](../bin/cha-to-trs.jar?raw=true) | [cha-to-eaf](../bin/cha-to-eaf.jar?raw=true) | [cha-to-vtt](../bin/cha-to-vtt.jar?raw=true) | | | | [cha-to-pdf](../bin/cha-to-pdf.jar?raw=true) | | |
 
-These use the serializers/deserializers in the *formatters* directory to read a file in
-one format, convert it to an annotation graph, and then write that graph out as a file in
-another format. As pointed out by
+These use the serializers/deserializers in the *formatters* directory of this repository
+to read a file in one format, convert it to an annotation graph, and then write that graph
+out as a file in another format. As pointed out by
 Cochran et al. (2007 - *Report from TILR Working Group 1 : Tools interoperability and input/output formats*)
 this saves having *n<sup>2</sup> - n* explicit conversions between formats;
 only *2n* format conversions are required
@@ -33,9 +33,14 @@ philosophy on interoperability* by
 [Witt et al. (2009)](https://www.w3.org/People/fsasaki/docs/lre-intro.pdf)
 and uses annotation graphs as an 'interlingua' similar to work by 
 [Schmidt et al. (2008)](https://ids-pub.bsz-bw.de/frontdoor/deliver/index/docId/2308/file/Schmidt%20etc_An_exchange_format_for_multimodal_annotations_2008.pdf)
-except that rather using a third file format as an intermediary, the annotation graph models
-of the linguistic data are ephemeral, existing in memory only for the duration of the
+except that rather using a third file format as a persistent intermediary, the annotation
+graph models of the linguistic data are ephemeral, existing in memory only for the duration of the
 conversion.
+
+As there is no persistent intermediate file, and many formats do not support the
+meta-data, annotation granularity or ontology of other formats, many of these conversions
+necessarily involve loss of data. However, mappings are made from one format to another
+wherever possible.
 
 ## Creating a new converter
 
