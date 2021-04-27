@@ -19,6 +19,7 @@ Standalone programs that convert transcripts from one tool format to another, e.
 | **vtt** | [vtt-to-trs](../bin/vtt-to-trs.jar?raw=true) | [vtt-to-eaf](../bin/vtt-to-eaf.jar?raw=true) | | | [vtt-to-cha](../bin/vtt-to-cha.jar?raw=true) | [vtt-to-textgrid](../bin/vtt-to-textgrid.jar?raw=true) | [vtt-to-pdf](../bin/vtt-to-pdf.jar?raw=true) | [vtt-to-tex](../bin/vtt-to-tex.jar?raw=true) | |
 | **slt** | [slt-to-trs](../bin/slt-to-trs.jar?raw=true) | [slt-to-eaf](../bin/slt-to-eaf.jar?raw=true) | [slt-to-vtt](../bin/slt-to-vtt.jar?raw=true) | | | [slt-to-textgrid](../bin/slt-to-textgrid.jar?raw=true) | [slt-to-pdf](../bin/slt-to-pdf.jar?raw=true) | [slt-to-tex](../bin/slt-to-tex.jar?raw=true) | |
 | **cha** | [cha-to-trs](../bin/cha-to-trs.jar?raw=true) | [cha-to-eaf](../bin/cha-to-eaf.jar?raw=true) | [cha-to-vtt](../bin/cha-to-vtt.jar?raw=true) | | | [cha-to-textgrid](../bin/cha-to-textgrid.jar?raw=true) | [cha-to-pdf](../bin/cha-to-pdf.jar?raw=true) | | |
+| **textgrid** | [textgrid-to-trs](../bin/textgrid-to-trs.jar?raw=true) | | [textgrid-to-vtt](../bin/textgrid-to-vtt.jar?raw=true) | | | | [textgrid-to-pdf](../bin/textgrid-to-pdf.jar?raw=true) | [textgrid-to-tex](../bin/textgrid-to-tex.jar?raw=true) | |
 
 These use the serializers/deserializers in the *formatters* directory of this repository
 to read a file in one format, convert it to an annotation graph, and then write that graph
@@ -187,7 +188,14 @@ wherever possible.
    ```
 4. Add directory structure for the annotator code:
    ```
-   mkdir src/main/java/nzilbb/converter
-   mkdir src/test/java/nzilbb/converter
+   mkdir src/main/java/nzilbb/converter src/main/resources src/main/resources/nzilbb \
+     src/main/resources/nzilbb/converter \
+     src/test/java/nzilbb/converter src/test/resources src/test/resources/nzilbb \
+     src/test/resources/nzilbb/converter
    ```
-5. Add your implementation to *informattooutformat/src/main/java/nzilbb/converter/InformatToOutformat.java
+5. Add an icon for the converter, e.g.:
+   ```
+   cp ../../ag/src/site/resources/images/labbcat.png \
+     src/main/resources/nzilbb/converter/InformatToOutformat.png
+   ```
+6. Add your implementation to *informattooutformat/src/main/java/nzilbb/converter/InformatToOutformat.java

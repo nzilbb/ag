@@ -223,6 +223,117 @@ public class TestOrthographyClumper {
     }
   }
 
+  /** Clumping across annotations at the end of a line. */
+  @Test public void clumpAcrossAnnotations() {
+    Graph g = new Graph();
+    g.setId("my graph");
+    g.setCorpus("cc");
+
+    g.addLayer(new Layer("noise", "Noise", Constants.ALIGNMENT_INTERVAL, 
+                         true, // peers
+                         false, // peersOverlap
+                         false)); // saturated
+    g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+                         true, // peers
+                         true, // peersOverlap
+                         true)); // saturated
+    g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+                         true, // peers
+                         false, // peersOverlap
+                         false, // saturated
+                         "who", // parentId
+                         true)); // parentIncludes
+    g.addLayer(new Layer("line", "Lines", Constants.ALIGNMENT_INTERVAL,
+                         true, // peers
+                         false, // peersOverlap
+                         true, // saturated
+                         "turn", // parentId
+                         true)); // parentIncludes
+    g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+                         true, // peers
+                         false, // peersOverlap
+                         false, // saturated
+                         "turn", // parentId
+                         true)); // parentIncludes
+
+    g.addAnchor(new Anchor("a0", 0.0));
+    g.addAnchor(new Anchor("a1", 1.0));
+    g.addAnchor(new Anchor("a2", 2.0));
+    g.addAnchor(new Anchor("a3", 3.0));
+    g.addAnchor(new Anchor("a4", 4.0));
+    g.addAnchor(new Anchor("a5", 5.0));
+    g.addAnchor(new Anchor("a6", 6.0));
+    g.addAnchor(new Anchor("a7", 7.0));
+    g.addAnchor(new Anchor("a8", 8.0));
+    g.addAnchor(new Anchor("a9", 9.0));
+    g.addAnchor(new Anchor("a10", 10.0));
+    g.addAnchor(new Anchor("a11", 11.0));
+    g.addAnchor(new Anchor("a12", 12.0));
+    g.addAnchor(new Anchor("a13", 13.0));
+    g.addAnchor(new Anchor("a14", 14.0));
+    g.addAnchor(new Anchor("a15", 15.0));
+
+    g.addAnnotation(new Annotation("participant1", "john smith", "who", "a0", "a15", "my graph"));
+
+    g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a15", "participant1"));
+
+    // - " the ' quick ' brown fox 
+    g.addAnnotation(new Annotation("line1", "john smith", "line", "a0", "a10", "turn1"));
+    // -- jumps over . "
+    g.addAnnotation(new Annotation("line2", "john smith", "line", "a10", "a15", "turn1"));
+    // (the leading "--" on the second line should not be joined to "fox" on the previous
+
+    g.addAnnotation(new Annotation("hyphen", "-", "word", "a1", "a2", "turn1"));
+    g.addAnnotation(new Annotation("openquote", "\"", "word", "a2", "a3", "turn1"));
+    g.addAnnotation(new Annotation("the", "the", "word", "a3", "a4", "turn1"));
+    g.addAnnotation(new Annotation("openscarequote", "'", "word", "a4", "a5", "turn1"));
+    g.addAnnotation(new Annotation("quick", "quick", "word", "a5", "a6", "turn1"));
+    g.addAnnotation(new Annotation("closescarequote", "'", "word", "a6", "a7", "turn1"));
+    g.addAnnotation(new Annotation("brown", "brown", "word", "a7", "a8", "turn1"));
+    g.addAnnotation(new Annotation("noise", "cough", "noise", "a8", "a9", "turn1"));
+    g.addAnnotation(new Annotation("longpause", "--", "word", "a9", "a10", "turn1"));
+    // line break
+    g.addAnnotation(new Annotation("jumps", "jumps", "word", "a10", "a11", "turn1"));
+    g.addAnnotation(new Annotation("over", "over", "word", "a11", "a12", "turn1"));
+    g.addAnnotation(new Annotation("fullstop", ".", "word", "a12", "a13", "turn1"));
+    g.addAnnotation(new Annotation("closequote", "\"", "word", "a13", "a14", "turn1"));
+
+    try {
+      g.setTracker(new ChangeTracker());
+      OrthographyClumper transformer = new OrthographyClumper("word", "line");
+      transformer.transform(g);
+      g.commit();
+      Annotation words[] = g.list("word");
+      assertEquals("- \" the '", words[0].getLabel());
+      assertEquals("quick '", words[1].getLabel());
+      assertEquals("brown", words[2].getLabel());
+      assertEquals("pause is not clumped",
+                   "--", words[3].getLabel());
+      assertEquals("first word on second line unchanged",
+                   "jumps", words[4].getLabel());
+      assertEquals("over . \"", words[5].getLabel());
+      assertEquals(6, words.length);
+
+      Annotation lines[] = g.list("line");
+      assertEquals("line anchors correct", "a0", lines[0].getStartId());
+      assertEquals("line 1 end still the same", "a10", lines[0].getEndId());
+
+      assertEquals("line 2 start still the same", "a10", lines[1].getStartId());
+      assertEquals("line anchors correct", "a15", lines[1].getEndId());
+      
+      for (int o = 0; o < words.length; o++) {
+        assertEquals("orthography corrected", o+1, words[o].getOrdinal());
+        if (o == 3) {
+          assertNotEquals("anchor not linking", words[o-1].getEnd(), words[o].getStart());
+        } else if (o > 0) {
+          assertEquals("anchor linking", words[o-1].getEnd(), words[o].getStart());
+        }
+      }
+    } catch(TransformationException exception) {
+      fail(exception.toString());
+    }
+  }
+
   /** Child annotations are moved to new parents when clumping occurs. */
   @Test public void childrenMove() {
     Graph g = new Graph();

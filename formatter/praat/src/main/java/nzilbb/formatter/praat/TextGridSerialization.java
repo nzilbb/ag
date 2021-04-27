@@ -1075,10 +1075,6 @@ public class TextGridSerialization
                pronounceTransformer.transform(graph);
                graph.commit();
 
-               // clump non-orthographic 'words' with real words
-               OrthographyClumper clumper = new OrthographyClumper(wordLayer.getId());	  
-               clumper.transform(graph);
-               graph.commit();
             } catch(TransformationException exception) {
                if (errors == null) errors = new SerializationException();
                if (errors.getCause() == null) errors.initCause(exception);
@@ -1086,6 +1082,17 @@ public class TextGridSerialization
             }
             if (timers != null) timers.end("conventions");
          } // apply transcription conventions
+         try {
+           // clump non-orthographic 'words' with real words
+           OrthographyClumper clumper = new OrthographyClumper(
+             wordLayer.getId(), utteranceLayer.getId());	  
+           clumper.transform(graph);
+           graph.commit();
+         } catch(TransformationException exception) {
+           if (errors == null) errors = new SerializationException();
+           if (errors.getCause() == null) errors.initCause(exception);
+           errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
+         }
       } else { // word layer mapped
          if (timers != null) timers.start("set word turns");
          // ensure word parent turns are set

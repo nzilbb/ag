@@ -49,7 +49,7 @@ import nzilbb.formatter.praat.*;
 
 public class TestTextGridSerialization {
    
-   @Test public void utterance()  throws Exception {
+   @Test public void utterance_conventions()  throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants", 0, true, true, true),
@@ -207,6 +207,17 @@ public class TestTextGridSerialization {
       assertEquals("interviewer", utterances[21].getParent().getLabel());
       assertEquals(turns[1], utterances[21].getParent());
 
+      for (Annotation u : utterances) {
+        assertNotNull("Utterance start time set: " + u + "("+u.getStart()+"-"+u.getEnd()+")",
+                      u.getStart().getOffset());
+        assertNotEquals("Utterance start time confidence: "+u+"("+u.getStart()+"-"+u.getEnd()+")",
+                        Long.valueOf(Constants.CONFIDENCE_MANUAL), u.getStart().getConfidence());
+        assertNotNull("Utterance end time set: " + u + "("+u.getStart()+"-"+u.getEnd()+")",
+                      u.getEnd().getOffset());
+        assertNotEquals("Utterance end time confidence: "+u+"("+u.getStart()+"-"+u.getEnd()+")",
+                        Long.valueOf(Constants.CONFIDENCE_MANUAL), u.getEnd().getConfidence());
+      }
+
       Annotation[] words = g.all("word");
       String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
          "and", "ah .", "Cyril", "would", "arrive", "at", "the", "door",
@@ -225,7 +236,7 @@ public class TestTextGridSerialization {
       Annotation[] comments = g.all("comment");
       assertEquals("unclear", comments[0].getLabel());
       assertEquals("in", comments[0].getStart().endOf("word").iterator().next().getLabel());
-      assertEquals("-- and", comments[0].getEnd().startOf("word").iterator().next().getLabel());
+      assertEquals("--", comments[0].getEnd().startOf("word").iterator().next().getLabel());
 
       assertEquals("break in recording", comments[3].getLabel());
       assertEquals("there", comments[3].getStart().endOf("word").iterator().next().getLabel());
@@ -245,7 +256,7 @@ public class TestTextGridSerialization {
 
       assertEquals("interviewer: clears throat", noises[1].getLabel());
       assertEquals("and -", noises[1].getStart().endOf("word").iterator().next().getLabel());
-      assertEquals("-- learned", noises[1].getEnd().startOf("word").iterator().next().getLabel());
+      assertEquals("--", noises[1].getEnd().startOf("word").iterator().next().getLabel());
 
       assertEquals("both laugh", noises[2].getLabel());
       assertEquals("that ?", noises[2].getStart().endOf("word").iterator().next().getLabel());
@@ -277,7 +288,7 @@ public class TestTextGridSerialization {
       }
    }
 
-   @Test public void utterance_utf8()  throws Exception {
+   @Test public void utterance_utf8_no_conventions()  throws Exception {
       Schema schema = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("who", "Participants", 0, true, true, true),
@@ -296,7 +307,7 @@ public class TestTextGridSerialization {
       
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
-      configuration.get("useConventions").setValue(Boolean.TRUE);
+      configuration.get("useConventions").setValue(Boolean.FALSE);
       //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
       assertEquals(6, deserializer.configure(configuration, schema).size());
 
@@ -340,9 +351,20 @@ public class TestTextGridSerialization {
       assertEquals("participant", turns[0].getLabel());
       assertEquals(who[0], turns[0].getParent());
       
+      for (Annotation u : g.all("utterance")) {
+        assertNotNull("Utterance start time set: " + u + "("+u.getStart()+"-"+u.getEnd()+")",
+                      u.getStart().getOffset());
+        assertNotEquals("Utterance start time confidence: "+u+"("+u.getStart()+"-"+u.getEnd()+")",
+                        Long.valueOf(Constants.CONFIDENCE_MANUAL), u.getStart().getConfidence());
+        assertNotNull("Utterance end time set: " + u + "("+u.getStart()+"-"+u.getEnd()+")",
+                      u.getEnd().getOffset());
+        assertNotEquals("Utterance end time confidence: "+u+"("+u.getStart()+"-"+u.getEnd()+")",
+                        Long.valueOf(Constants.CONFIDENCE_MANUAL), u.getEnd().getConfidence());
+      }
+
       Annotation[] words = g.all("word");
       String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
-         "and", "äh .", "Cyril", "would", "arrive", "at", "the", "door",
+        "and", "äh .", "[throatclear]", "Cyril[sIr@l]", "would", "arrive", "at", "the", "door",
          "with", "this", "letter", "for", "Mum", 
          "and", "and", "then", "there", "was", "a", "message .", 
          "and", "I", "think", "they", "both", "had", "telephones ."
@@ -1259,6 +1281,17 @@ public class TestTextGridSerialization {
       assertEquals("interviewer", utterances[21].getParent().getLabel());
       assertEquals(turns[1], utterances[21].getParent());
 
+      for (Annotation u : utterances) {
+        assertNotNull("Utterance start time set: " + u + "("+u.getStart()+"-"+u.getEnd()+")",
+                      u.getStart().getOffset());
+        assertNotEquals("Utterance start time confidence: "+u+"("+u.getStart()+"-"+u.getEnd()+")",
+                        Long.valueOf(Constants.CONFIDENCE_MANUAL), u.getStart().getConfidence());
+        assertNotNull("Utterance end time set: " + u + "("+u.getStart()+"-"+u.getEnd()+")",
+                      u.getEnd().getOffset());
+        assertNotEquals("Utterance end time confidence: "+u+"("+u.getStart()+"-"+u.getEnd()+")",
+                        Long.valueOf(Constants.CONFIDENCE_MANUAL), u.getEnd().getConfidence());
+      }
+
       Annotation[] words = g.all("word");
       String[] wordLabels = {
          "and", "ah .", "Cyril", "would", "arrive", "at", "the", "door",
@@ -1517,7 +1550,7 @@ public class TestTextGridSerialization {
       assertEquals("performance.TextGrid", g.getId());
 
       assertTrue("Deserialization too slow:\n" + deserializer.getTimers().toString(),
-                 25000 /* TODO we want this to be around 2s*/ > deserializer.getTimers().getTotals().get("deserialize"));
+                 35000 /* TODO we want this to be around 2s*/ > deserializer.getTimers().getTotals().get("deserialize"));
       
       // check all annotations have 'manual' confidence
       for (Annotation a : g.getAnnotationsById().values()) {

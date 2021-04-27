@@ -200,14 +200,15 @@ public class OrthographyClumper implements GraphTransformer {
           } // this is the first token
         } else { // orthographic 'word'
           if (toPrepend != null) { // something to prepend
-            if (toPrepend.getEnd() == token.getStart()) { // no intervening annotations/pauses
+            if (toPrepend.getEnd() == token.getStart() // no intervening annotations/pauses
+                // a partition isn't starting
+                && (partitionLayerId == null || !token.getStart().isEndOn(partitionLayerId))) { 
               token.setLabel(toPrepend.getLabel() + " " + token.getLabel());
-              // 	token.setOrdinal(toPrepend.getOrdinal());
               // don't change the ordinal yet, as it will move peers
               // - we'll just correct the whole lot in one pass at the end
               token.put("@newOrdinal", toPrepend.getOrdinal());
               changedOrdinals = true;
-
+              
               Anchor oldStart = token.getStart();
               // move all annotations that end at last.end to token.end
               oldStart.moveEndingAnnotations(toPrepend.getStart());		     

@@ -64,6 +64,7 @@ import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.ag.util.AnnotationComparatorByAnchor;
 import nzilbb.ag.util.ConventionTransformer;
+import nzilbb.ag.util.DefaultOffsetGenerator;
 import nzilbb.ag.util.OrthographyClumper;
 import nzilbb.ag.util.SimpleTokenizer;
 import nzilbb.ag.util.SpanningConventionTransformer;
@@ -655,6 +656,13 @@ public class PdfSerializer implements GraphSerializer {
       boolean firstUtterance = true;
          
       // order utterances by anchor so that simultaneous speech comes out in utterance order
+      try {
+        new DefaultOffsetGenerator().transform(graph);
+      } catch(TransformationException exception) {
+        System.err.println(
+          "PdfSerializer: " + graph.getId() + ": Could not generate default anchor offsets: "
+          + exception.getMessage());
+      }
       TreeSet<Annotation> utterancesByAnchor
         = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
       for (Annotation u : graph.all(utteranceLayer.getId())) utterancesByAnchor.add(u);

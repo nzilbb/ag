@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>nzilbb.converter</artifactId>
+    <groupId>nzilbb</groupId>
+    <version>1.0.0</version>
+  </parent>
+
+  <groupId>nzilbb</groupId>
+  <artifactId>textgrid-to-trs</artifactId>
+  <version>0.1.0</version>
+  <name>nzilbb.converter.textgridtotrs</name>
+  <description>Praat TextGrid to Transcriber transcript converter</description>
+
+  <properties>
+
+    <input.package>nzilbb.formatter.praat</input.package>
+    <input.path>nzilbb/formatter/praat/</input.path>
+    <input.version>2.6.1</input.version>
+    
+    <output.package>nzilbb.formatter.transcriber</output.package>
+    <output.path>nzilbb/formatter/transcriber/</output.path>
+    <output.version>2.0.2</output.version>    
+    
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>nzilbb</groupId>
+      <artifactId>converter-base</artifactId>
+      <version>[1.0.3,)</version>
+    </dependency>
+    <dependency>
+      <groupId>nzilbb</groupId>
+      <artifactId>${input.package}</artifactId>
+      <version>[${input.version},)</version>
+    </dependency>
+    <dependency>
+      <groupId>nzilbb</groupId>
+      <artifactId>${output.package}</artifactId>
+      <version>[${output.version},)</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.0.2</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>nzilbb.converter.TextGridToTrs</mainClass>
+            </manifest>
+            <!-- ensure version is available to the serializations -->
+            <manifestSections>
+              <manifestSection>
+                <name>nzilbb/converter/</name>
+                <manifestEntries>
+                  <Implementation-Title>${project.description}</Implementation-Title>
+                  <Implementation-Version>${project.version}</Implementation-Version>
+                  <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
+                </manifestEntries>
+              </manifestSection>
+              <manifestSection>
+                <name>${input.path}</name>
+                <manifestEntries>
+                  <Implementation-Title>${project.description}</Implementation-Title>
+                  <Implementation-Version>${input.version}</Implementation-Version>
+                  <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
+                </manifestEntries>
+              </manifestSection>
+              <manifestSection>
+                <name>${output.path}</name>
+                <manifestEntries>
+                  <Implementation-Title>${project.description}</Implementation-Title>
+                  <Implementation-Version>${output.version}</Implementation-Version>
+                  <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
+                </manifestEntries>
+              </manifestSection>
+            </manifestSections>
+          </archive>
+          <outputDirectory>../../bin</outputDirectory>
+        </configuration>
+      </plugin>
+      <!-- include all the necessary dependencies in our jar for it to run standalone -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>nzilbb</groupId>
+                  <artifactId>${input.package}</artifactId>
+                  <version>${input.version}</version>
+                  <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>nzilbb</groupId>
+                  <artifactId>${output.package}</artifactId>
+                  <version>${output.version}</version>
+                  <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>nzilbb</groupId>
+                  <artifactId>converter-base</artifactId>
+                  <version>1.0.3</version>
+                  <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>nzilbb</groupId>
+                  <artifactId>nzilbb.ag</artifactId>
+                  <version>1.0.2</version>
+                  <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.glassfish</groupId>
+                  <artifactId>javax.json</artifactId>
+                  <version>1.1.4</version>
+                  <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+
+    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+      <plugins>
+        <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+        <!-- default lifecycle, jar packaging: see https://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.8.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.22.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.2</version>
+        </plugin>
+        <!-- site lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#site_Lifecycle -->
+        <plugin>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>3.7.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-project-info-reports-plugin</artifactId>
+          <version>3.0.0</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
