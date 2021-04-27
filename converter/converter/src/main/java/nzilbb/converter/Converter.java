@@ -514,7 +514,7 @@ public abstract class Converter extends GuiProgram {
 
     about.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          JPanel aboutPanel = new JPanel(new java.awt.GridLayout(8, 1, 10, 10));
+          JPanel aboutPanel = new JPanel(new java.awt.GridLayout(10, 1, 3, 3));
           aboutPanel.add(new JLabel(getClass().getPackage().getImplementationTitle(),
                                     SwingConstants.CENTER));
           aboutPanel.add(new JLabel(
@@ -524,27 +524,15 @@ public abstract class Converter extends GuiProgram {
                                     SwingConstants.CENTER));
           aboutPanel.add(new JLabel("Output: " + getSerializer().getDescriptor(),
                                     SwingConstants.CENTER));
+          aboutPanel.add(new JLabel("Developed by:",
+                                    SwingConstants.CENTER));
+          aboutPanel.add(new JLabel(getClass().getPackage().getImplementationVendor(),
+                                    SwingConstants.CENTER));
           aboutPanel.add(new JLabel("This is open source software:", SwingConstants.CENTER));
-          JButton linkLabel = new JButton(licenseName);
-          linkLabel.addActionListener(new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                try {
-                  java.awt.Desktop.getDesktop().browse(new URI(licenseUrl));
-                } catch(Exception exception) {}
-              }});
-          aboutPanel.add(linkLabel);
+          aboutPanel.add(linkComponent(licenseName, licenseUrl));
           aboutPanel.add(new JLabel("Source Code:", SwingConstants.CENTER));
-          linkLabel = new JButton(sourceUrl);
-          linkLabel.addActionListener(new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                try {
-                  java.awt.Desktop.getDesktop().browse(new URI(sourceUrl));
-                } catch(Exception exception) {}
-              }});
-          aboutPanel.add(linkLabel);
+          aboutPanel.add(linkComponent(sourceUrl, sourceUrl));
           JDialog dlg = new JOptionPane(aboutPanel).createDialog(frame_, "About");
-          //dlg.setSize(frame_.getSize());
-          //dlg.setLocation(frame_.getLocation().getX() + );
           dlg.setLocationRelativeTo(frame_);
           dlg.setVisible(true);
         }
@@ -622,6 +610,25 @@ public abstract class Converter extends GuiProgram {
       });
     target.setActive(true);
   }
+  
+  /**
+   * Creates a visual component that looks and works like a hyperlink.
+   * @param label
+   * @param url
+   * @return A component that looks and works like a hyperlink.
+   */
+  protected Component linkComponent(String label, String url) {
+    JLabel linkLabel = new JLabel(label, SwingConstants.CENTER);
+    linkLabel.setForeground(java.awt.Color.BLUE);
+    linkLabel.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+    linkLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+        public void mouseClicked(java.awt.event.MouseEvent e) {
+          try {
+            java.awt.Desktop.getDesktop().browse(new URI(url));
+          } catch(Exception exception) {}
+        }});
+    return linkLabel;
+  } // end of linkComponent()
 
   @SuppressWarnings("unchecked")
   public void start() {
