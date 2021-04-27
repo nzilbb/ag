@@ -66,6 +66,13 @@ java -jar trs-to-txt.jar --textonly *.txt
 
 The `--usage` command-line switch prints information about command-line options.
 
+As many formats do not support the meta-data, annotation granularity or ontology of other
+formats, many of these conversions necessarily entail loss of data. However, mappings are
+made from one format to another wherever possible.
+
+For notes about specific correspondences or data losses, use the `--help` command-line
+switch, or use the *Help|Information* menu option of the conversion utility concerned.
+
 ## Getting TextGrid Transcripts of YouTube Videos
 
 The basic process of making a YouTube video corpus with TextGrid transcripts is:
