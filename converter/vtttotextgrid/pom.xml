@@ -42,7 +42,7 @@
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>converter-base</artifactId>
-      <version>1.0.2</version>
+      <version>1.0.3</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -120,7 +120,7 @@
                 <artifactItem>
                   <groupId>nzilbb</groupId>
                   <artifactId>converter-base</artifactId>
-                  <version>1.0.2</version>
+                  <version>1.0.3</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
