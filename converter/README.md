@@ -21,13 +21,13 @@ Standalone programs that convert transcripts from one tool format to another, e.
 | **cha** | [cha-to-trs](../bin/cha-to-trs.jar?raw=true) | [cha-to-eaf](../bin/cha-to-eaf.jar?raw=true) | [cha-to-vtt](../bin/cha-to-vtt.jar?raw=true) | | | [cha-to-textgrid](../bin/cha-to-textgrid.jar?raw=true) | [cha-to-pdf](../bin/cha-to-pdf.jar?raw=true) | | |
 | **textgrid** | [textgrid-to-trs](../bin/textgrid-to-trs.jar?raw=true) | | [textgrid-to-vtt](../bin/textgrid-to-vtt.jar?raw=true) | | | | [textgrid-to-pdf](../bin/textgrid-to-pdf.jar?raw=true) | [textgrid-to-tex](../bin/textgrid-to-tex.jar?raw=true) | |
 
-These use the serializers/deserializers in the *formatters* directory of this repository
+These use the serializers/deserializers in the *formatter* directory of this repository
 to read a file in one format, convert it to an annotation graph, and then write that graph
 out as a file in another format. As pointed out by
 Cochran et al. (2007 - *Report from TILR Working Group 1 : Tools interoperability and input/output formats*)
-this saves having *n<sup>2</sup> - n* explicit conversions between formats;
+this saves having *n<sup>2</sup> - n* explicit conversion algorithms between formats;
 only *2n* format conversions are required
-(as some of the formats above are output-only, it's actually less than *2n*).
+(as some of these formats above are output-only, it's actually less than *2n*).
 
 This exemplifies an approach to linguistic data interoperability called the *interlingua
 philosophy on interoperability* by
