@@ -65,7 +65,7 @@ public class TrsToSlt extends Converter {
    * Setter for {@link #pronounceCodePattern}: Pattern for 'pronounce' word codes.
    * @param newPronounceCodePattern Pattern for 'pronounce' word codes.
    */
-  @Switch("Pattern to match for converting word codes into pronounce events. Default is PRON:{0}")
+  @Switch("Pattern to use for converting pronounce events into word codes. Default is PRON:{0}")
   public TrsToSlt setPronounceCodePattern(String newPronounceCodePattern) { pronounceCodePattern = newPronounceCodePattern; return this; }
   
   /**
@@ -83,8 +83,26 @@ public class TrsToSlt extends Converter {
    * Setter for {@link #lexicalCodePattern}: Pattern for 'lexical' word codes.
    * @param newLexicalCodePattern Pattern for 'lexical' word codes.
    */
-  @Switch("Pattern to match for converting word codes into lexical events. Default is LEX:{0}")
+  @Switch("Pattern to use for converting lexical events into word codes. Default is LEX:{0}")
   public TrsToSlt setLexicalCodePattern(String newLexicalCodePattern) { lexicalCodePattern = newLexicalCodePattern; return this; }
+  
+  /**
+   * Pattern for noise-event comments.
+   * @see #getNoiseCommentPattern()
+   * @see #setNoiseCommentPattern(String)
+   */
+  protected String noiseCommentPattern = "NOISE:{0}";
+  /**
+   * Getter for {@link #noiseCommentPattern}: Pattern for noise-event comments.
+   * @return Pattern for noise-event comments.
+   */
+  public String getNoiseCommentPattern() { return noiseCommentPattern; }
+  /**
+   * Setter for {@link #noiseCommentPattern}: Pattern for noise-event comments.
+   * @param newNoiseCommentPattern Pattern for noise-event comments.
+   */
+  @Switch("Pattern to use for converting noise events into comments. Default is NOISE:{0}")
+  public TrsToSlt setNoiseCommentPattern(String newNoiseCommentPattern) { noiseCommentPattern = newNoiseCommentPattern; return this; }
   
   /**
    * Default constructor.
@@ -92,17 +110,24 @@ public class TrsToSlt extends Converter {
   public TrsToSlt() {
     info = "The Transcriber 'Program' becomes the SALT 'Context' header."
       +"\nThe first Transcriber 'Topic' becomes the SALT 'Subgroup' header."
-      +"\nComments at the beginning of transcript that start with + become SALT meta-data headers."
+      +"\nComments at the beginning of transcript that start with + become"
+      +" SALT meta-data headers."
       +"\nBy default  Transcriber 'pronounce' and 'lexical' events are converted to be "
       +" certain SALT word codes, of the form \"[PRON:...]\" and \"[LEX:...]\" respectively."
-      +" Use the command-line switches --pronounceCodePattern and --lexicalCodePattern"
-      +" to control this behaviour."
+      +" Noise events are converted to comments of the form \"{NOISE:...}\"."
+      +" Use the command-line switches --pronounceCodePattern, --lexicalCodePattern,"
+      +" and --noiseCommentPattern to control this behaviour."
       +"\ne.g. if you specify --pronounceCodePattern=WP:{0} then all pronounce events will"
       +" become word codes like [WP:...]"
       +"\nSimilarly if you specify --pronounceCodePattern=WL:{0} then all lexical events will"
       +" become word codes like [WL:...]."
-      +"\nTo disable these conversions, use \"--pronounceCodePattern= --lexCodePattern=\""
+      +"\nTo disable these conversions, use"
+      +" \"--pronounceCodePattern= --lexicalCodePattern= --noiseCommentPattern=\""
       +" on the command line."
+      +"\nNamed entity annotations are assumed to be proper names, which are underscore-delimited"
+      +" in the resulting SALT transcript."
+      +"\nPhrase language annnotations are lost during conversion, as there is no corresponding"
+      +" entity in the SALT conventions."
       +"\nThe format for dates is taken from your system settings;"
       +" to override this, use the --dateFormat command line setting.";
   } // end of constructor
@@ -167,6 +192,14 @@ public class TrsToSlt extends Converter {
     schema.addLayer(
       new Layer("comment", "Comments").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(true).setSaturated(false));
+    // noise layer will map automatically for Transcriber because it's top-level,
+    // but not for SALT (as the sound-effect layer), because it's not a phrase layer,
+    // but that's ok because Transcriber noise events become comments anyway
+    // (SALT sound effects are verbal noises,
+    //  but Transcriber noises are non-verbal background noise)
+    schema.addLayer(
+      new Layer("noise", "Verbal sound effects etc.").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false));
     schema.addLayer(
       new Layer("main_participant", "Target Speaker").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
@@ -197,10 +230,6 @@ public class TrsToSlt extends Converter {
       .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
     schema.addLayer(
       new Layer("code", "Non-error Codes").setAlignment(Constants.ALIGNMENT_INTERVAL)
-      .setPeers(true).setPeersOverlap(false).setSaturated(false)
-      .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
-    schema.addLayer(
-      new Layer("noise", "Verbal sound effects etc.").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(false)
       .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
     schema.addLayer(
@@ -244,6 +273,8 @@ public class TrsToSlt extends Converter {
       : new MessageFormat(pronounceCodePattern);
     MessageFormat lexicalFormat = lexicalCodePattern.length()==0?null
       : new MessageFormat(lexicalCodePattern);
+    MessageFormat noiseFormat = noiseCommentPattern.length()==0?null
+      : new MessageFormat(noiseCommentPattern);
     Pattern codeComment = Pattern.compile("\\[([^\\]]+)\\]");
     DefaultOffsetGenerator defaultOffsetGenerator = new DefaultOffsetGenerator();
     for (Graph transcript : transcripts) { // for each transcript (probably only one)
@@ -334,7 +365,7 @@ public class TrsToSlt extends Converter {
         }
       } // next comment
       
-      if (pronounceFormat != null) { // some codes are pronounce events
+      if (pronounceFormat != null) { // pronounce events become word codes
         for (Annotation code : transcript.all("pronounce")) {
           // does the code tag a word?
           Annotation[] word = code.tagsOn(transcript.getSchema().getWordLayerId());
@@ -344,9 +375,9 @@ public class TrsToSlt extends Converter {
             transcript.createTag(word[0], "code", pronounceFormat.format(codeLabel));
           }
         } // next code
-      }  // some codes are pronounce events
+      } // pronounce events become word codes
         
-      if (lexicalFormat != null) { // some codes are lexical events
+      if (lexicalFormat != null) { // lexical events become word codes
         for (Annotation code : transcript.all("lexical")) {        
           // does the code tag a word?
           Annotation[] word = code.tagsOn(transcript.getSchema().getWordLayerId());
@@ -356,7 +387,16 @@ public class TrsToSlt extends Converter {
             transcript.createTag(word[0], "code", lexicalFormat.format(codeLabel));
           }
         } // next code
-      }  // some codes are lexical events
+      } // lexical events become word codes
+
+      if (noiseFormat != null) { // noise events become comments
+        for (Annotation noise : transcript.all("noise")) {
+          Object[] noiseLabel = { noise.getLabel() }; 
+          Annotation comment = transcript.createAnnotation(
+            noise.getStart(), noise.getEnd(), "comment", noiseFormat.format(noiseLabel),
+            transcript);
+        } // next noise
+      } // noise events become comments
       
       transcript.commit();
     } // next transcript
