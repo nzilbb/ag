@@ -151,12 +151,12 @@ after the start time of the next turn.
 These transcripts cause problems when processing transcripts for force-alignment, etc.
 
 The transcriber deserialization module here,
-[nzilbb.transcriber.jar](https://github.com/nzilbb/ag/blob/master/bin/nzilbb.transcriber.jar?raw=true),
-includes a command-line tool that can be used to fix up such corrupted transcripts. If you
-download nzilbb.transcriber.jar, you can invoke it using your command shell, like this:
+[transcriber-validator.jar](https://github.com/nzilbb/ag/blob/master/bin/transcriber-validator?raw=true),
+is a command-line tool that can be used to fix up such corrupted transcripts. If you
+download transcriber-validator.jar, you can invoke it using your command shell, like this:
 
 ```
-java -jar nzilbb.transcriber.jar some-transcript.trs
+java -jar transcriber-validator.jar some-transcript.trs
 ```
 
 By default, the utility checks and validates the given transcript(s), saving the results
@@ -172,11 +172,11 @@ scanned for .trs files to process.
 So check/fix all transcripts in a given directory, use the command:
 
 ```
-java -jar nzilbb.transcriber.jar --replace /path/to/directory/with/trs/files
+java -jar transcriber-validator.jar --replace /path/to/directory/with/trs/files
 ```
 
 For full information about command line options:
 
 ```
-java -jar nzilbb.transcriber.jar --usage
+java -jar transcriber-validator.jar --usage
 ```
