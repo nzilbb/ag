@@ -430,7 +430,7 @@ public class GuiProgram extends JApplet {
   public String wrap(String s) {
     if (s == null) return null;
     if (s.length() == 0) return s;
-    int wrapColumn = 70;
+    int wrapColumn = 65;
     // if the string is indented with tab, indent all lines
     boolean indent = s.charAt(0) == '\t';
     StringBuilder lines = new StringBuilder();
@@ -445,6 +445,7 @@ public class GuiProgram extends JApplet {
         beforeNextWord = null;
         lines.append(word);
         column += word.length();
+        if (word.contains("\t")) column += 8;
         if (column > wrapColumn) { // new line
           if (indent) {
             beforeNextWord = "\n\t\t";
