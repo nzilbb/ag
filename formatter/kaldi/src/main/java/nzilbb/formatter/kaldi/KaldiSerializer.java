@@ -57,7 +57,6 @@ import nzilbb.util.TempFileInputStream;
  * Converter that generates Kaldi files from annotation graphs.
  * @author Robert Fromont robert@fromont.net.nz
  */
-// TODO include lexicon.txt - dictionary encoded as IPA
 public class KaldiSerializer implements GraphSerializer {
    // Attributes:
 
@@ -126,6 +125,23 @@ public class KaldiSerializer implements GraphSerializer {
     * @param newPronunciationLayer Layer for pronunciation word tags.
     */
    public KaldiSerializer setPronunciationLayer(Layer newPronunciationLayer) { pronunciationLayer = newPronunciationLayer; return this; }
+  
+   /**
+    * Layer for speaker gender.
+    * @see #getGenderLayer()
+    * @see #setGenderLayer(Layer)
+    */
+   protected Layer genderLayer;
+   /**
+    * Getter for {@link #genderLayer}: Layer for speaker gender.
+    * @return Layer for speaker gender.
+    */
+   public Layer getGenderLayer() { return genderLayer; }
+   /**
+    * Setter for {@link #genderLayer}: Layer for speaker gender.
+    * @param newGenderLayer Layer for speaker gender.
+    */
+   public KaldiSerializer setGenderLayer(Layer newGenderLayer) { genderLayer = newGenderLayer; return this; }
 
    /**
     * Whether to prefix utterance IDs with the speaker ID or not. // TODO remove configurability - Kaldi won't work without prefixing
@@ -217,12 +233,19 @@ public class KaldiSerializer implements GraphSerializer {
       } // next possible participant layer
       
       LinkedHashMap<String,Layer> possibleTurnChildLayers = new LinkedHashMap<String,Layer>();
-      LinkedHashMap<String,Layer> wordTagLayers = new LinkedHashMap<String,Layer>();
       for (Layer turnChild : schema.getTurnLayer().getChildren().values()) {
          if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
             possibleTurnChildLayers.put(turnChild.getId(), turnChild);
          }
+      } // next possible turn child tag layer
+      LinkedHashMap<String,Layer> participantTagLayers = new LinkedHashMap<String,Layer>();
+      for (Layer tag : schema.getParticipantLayer().getChildren().values()) {
+         if (tag.getAlignment() == Constants.ALIGNMENT_NONE
+             && tag.getChildren().size() == 0) {
+            participantTagLayers.put(tag.getId(), tag);
+         }
       } // next possible word tag layer
+      LinkedHashMap<String,Layer> wordTagLayers = new LinkedHashMap<String,Layer>();
       for (Layer tag : schema.getWordLayer().getChildren().values()) {
          if (tag.getAlignment() == Constants.ALIGNMENT_NONE
              && tag.getChildren().size() == 0) {
@@ -253,6 +276,11 @@ public class KaldiSerializer implements GraphSerializer {
 	 new Parameter("pronunciationLayer", Layer.class, "Pronunciation layer", "Pronunciation tags", false), 
 	 Arrays.asList("pronuncation", "phonemes", "phonology"));
       layerToCandidates.put("pronunciationLayer", wordTagLayers);
+
+      layerToPossibilities.put(
+	 new Parameter("genderLayer", Layer.class, "Gender layer", "Participant gender", false), 
+	 Arrays.asList("gender", "participantgender", "sex", "participantsex"));
+      layerToCandidates.put("genderLayer", participantTagLayers);
 
       // add parameters that aren't in the configuration yet, and set possibile/default values
       for (Parameter p : layerToPossibilities.keySet()) {
@@ -294,6 +322,7 @@ public class KaldiSerializer implements GraphSerializer {
       requiredLayers.add(schema.getUtteranceLayerId());
       if (getOrthographyLayer() != null) requiredLayers.add(getOrthographyLayer().getId());
       if (getPronunciationLayer() != null) requiredLayers.add(getPronunciationLayer().getId());
+      if (getGenderLayer() != null) requiredLayers.add(getGenderLayer().getId());
       return requiredLayers.toArray(new String[0]);
    }
 
@@ -342,6 +371,8 @@ public class KaldiSerializer implements GraphSerializer {
 	 NamedStream utt2spkStream = new NamedStream(
             new TempFileInputStream(utt2spkFile), "utt2spk");
 	 
+         final TreeMap<String,String> spk2gender = new TreeMap<String,String>();
+	 
 	 File wordsFile = File.createTempFile(getClass().getSimpleName()+"-","-words.txt");
 	 final PrintWriter wordsWriter = new PrintWriter(wordsFile, "utf-8");
 	 NamedStream wordsStream = new NamedStream(
@@ -352,7 +383,8 @@ public class KaldiSerializer implements GraphSerializer {
 	 NamedStream wavStream = new NamedStream(new TempFileInputStream(wavFile), "wav.scp");
 
 	 String utt = schema.getUtteranceLayerId();
-	 String orthography = orthographyLayer.getId();
+	 String orthography = orthographyLayer==null?schema.getWordLayerId()
+           :orthographyLayer.getId();
 	 String pron = pronunciationLayer == null?null:pronunciationLayer.getId();
 	 String speaker = schema.getParticipantLayerId();
 	 String episode = schema.getEpisodeLayerId();
@@ -373,24 +405,22 @@ public class KaldiSerializer implements GraphSerializer {
                //    endTime = fragmentIdParts[2];
                // }
                String wavName = IO.WithoutExtension(IO.SafeFileNameUrl(graph.getId())) + ".wav";
-               boolean firstWord = true;
                for (Annotation utterance : graph.all(utt)) {
+                  boolean firstWord = true;
                   String speakerId = utterance.first(speaker).getLabel()
                      .replaceAll("[\\p{Punct}&&[^_\\-]]", "")
                      .replaceAll("\\s", "_");
                   String utteranceId = (prefixUtteranceId?speakerId + "-":"")
                      + graph.getId();
-                  textWriter.print(utteranceId);
-                  for (Annotation token : utterance.all(orthography)) {
-                     textWriter.print(" ");
-                     textWriter.print(token.getLabel());
-                     
+                  StringBuilder line = new StringBuilder();
+                  Annotation[] tokens = utterance.all(orthography);
+                  for (Annotation token : tokens) {                     
                      if (firstWord) {
-                        firstWord = false;
+                       firstWord = false;
                      } else {
-                        corpusWriter.print(" ");
+                       line.append(" ");
                      }
-                     corpusWriter.print(token.getLabel());
+                     line.append(token.getLabel());
                      
                      words.add(token.getLabel());
 
@@ -406,8 +436,13 @@ public class KaldiSerializer implements GraphSerializer {
                         } // there are pronunciations
                      }
                   } // next word token
-                  textWriter.println();
-                  corpusWriter.println();
+                  if (firstWord) { // no words on the line
+                    continue; // skip this utterance
+                  }
+                  textWriter.print(utteranceId);
+                  textWriter.print(" ");
+                  textWriter.println(line.toString().trim());
+                  corpusWriter.println(line.toString().trim());
                   
                   // segmentsWriter.println(
                   //    utteranceId + " " + transcriptName + " " + startTime + " " + endTime);
@@ -416,6 +451,25 @@ public class KaldiSerializer implements GraphSerializer {
 
                   wavWriter.println(utteranceId + " " + wavName);
                } // next utterance
+
+               if (genderLayer != null) {
+                 // participant genders
+                 for (Annotation participant : graph.all(speaker)) {
+                   String speakerId = participant.getLabel()
+                     .replaceAll("[\\p{Punct}&&[^_\\-]]", "")
+                     .replaceAll("\\s", "_");
+                   if (!spk2gender.containsKey(speakerId)) {
+                     Annotation gender = participant.first(genderLayer.getId());
+                     if (gender != null && gender.getLabel().length() > 0) {
+                       String genderLabel = gender.getLabel();
+                       if (genderLabel.equalsIgnoreCase("female")) genderLabel = "f";
+                       else if (genderLabel.equalsIgnoreCase("male")) genderLabel = "m";
+                       spk2gender.put(speakerId, genderLabel);
+                     }
+                   } // don't already have the gender
+                 } // next participant
+               } // genderLayer is set
+               
                consumedGraphCount++;
             }); // next graph
          
@@ -474,6 +528,22 @@ public class KaldiSerializer implements GraphSerializer {
                lexiconWriter.close();
                consumer.accept(lexiconStream);
             }
+
+            if (genderLayer != null) {               
+               File spk2genderFile
+                  = File.createTempFile(getClass().getSimpleName()+"-","-spk2gender");
+               PrintWriter spk2genderWriter = new PrintWriter(spk2genderFile, "utf-8");
+               NamedStream spk2genderStream
+                  = new NamedStream(new TempFileInputStream(spk2genderFile), "spk2gender");
+               for (String spk : spk2gender.keySet()) {
+                 spk2genderWriter.print(spk);
+                 spk2genderWriter.print("\t");
+                 spk2genderWriter.println(spk2gender.get(spk));
+               } // next speaker
+               spk2genderWriter.close();
+               consumer.accept(spk2genderStream);
+            }
+
 	 }
       } catch(Exception exception) {
 	 errors.accept(new SerializationException(exception));

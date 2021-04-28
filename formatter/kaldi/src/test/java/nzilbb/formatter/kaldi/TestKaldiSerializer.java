@@ -61,6 +61,9 @@ public class TestKaldiSerializer
          .setPeers(false).setPeersOverlap(false).setSaturated(true),
 	 new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
          .setPeers(true).setPeersOverlap(true).setSaturated(true),
+         new Layer("gender", "Speaker gender").setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true)
+         .setParentId("who").setParentIncludes(true),
          new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
          .setPeers(true).setPeersOverlap(false).setSaturated(false)
          .setParentId("who").setParentIncludes(true),
@@ -94,6 +97,7 @@ public class TestKaldiSerializer
       g.addAnnotation(new Annotation("ep1", "episode", "episode", "turnStart", "turnEnd", "episode"));
       
       g.addAnnotation(new Annotation("who1", "john smith", "who", "turnStart", "turnEnd", "test.trs"));
+      g.addAnnotation(new Annotation("gender1", "male", "gender", "turnStart", "turnEnd", "who1"));
       g.addAnnotation(new Annotation("who2", "jane doe", "who", "turnStart", "turnEnd", "test.trs"));
 
       g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "who1"));
@@ -119,24 +123,25 @@ public class TestKaldiSerializer
       KaldiSerializer serializer = new KaldiSerializer();
 
       ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
-      // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
       // configuration.get("episodeLayer").setValue(schema.getLayer("episode"));
       // configuration.get("orthographyLayer").setValue(schema.getLayer("orthography"));
       // configuration.get("prefixUtteranceId").setValue(Boolean.FALSE);
-      assertEquals(4, serializer.configure(configuration, schema).size());
+      assertEquals(5, serializer.configure(configuration, schema).size());
 
       // some layers required
       String[] requiredLayers = serializer.getRequiredLayers();
-      assertEquals(5, requiredLayers.length);
+      assertEquals(6, requiredLayers.length);
       assertEquals("episode", requiredLayers[0]);
       assertEquals("who", requiredLayers[1]);
       assertEquals("utterance", requiredLayers[2]);
       assertEquals("orthography", requiredLayers[3]);
       assertEquals("phonemes", requiredLayers[4]);
+      assertEquals("gender", requiredLayers[5]);
 
       // split out fragments
       String[] allLayers = {
-         "episode", "who", "turn", "utterance", "word", "orthography", "phonemes"};
+        "episode", "who", "gender", "turn", "utterance", "word", "orthography", "phonemes"};
       Graph[] fragments = {
 	 g.getFragment(g.getAnnotation("utterance1"), allLayers),
 	 g.getFragment(g.getAnnotation("utterance2"), allLayers)
@@ -155,7 +160,7 @@ public class TestKaldiSerializer
                            stream -> streams.add(stream),
                            warning -> System.out.println(warning),
                            exception -> exceptions.add(exception));
-      assertEquals(6, streams.size());
+      assertEquals(7, streams.size());
       for (NamedStream stream: streams)
       {
 	 stream.save(dir);
