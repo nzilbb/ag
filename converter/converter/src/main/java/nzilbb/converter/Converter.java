@@ -298,71 +298,8 @@ public abstract class Converter extends GuiProgram {
       streams.add(new NamedStream(
                     new FileInputStream(f.getFile()), f.getName(), f.getMimeType()));
     }
-      
-    // create deserializer
-    GraphDeserializer deserializer = getDeserializer();
-    if (verbose) System.out.println("Deserializing with " + deserializer.getDescriptor());
 
-    // configure deserializer
-    ParameterSet deserializerConfig = deserializer.configure(new ParameterSet(), schema);
-    // let the subclass adjust the config
-    deserializerConfig = deserializerConfiguration(deserializerConfig);
-    // let the command line options take effect
-    configureFromCommandLine(deserializerConfig, schema);
-    
-    if (verbose) {
-      if (deserializerConfig.size() == 0) {
-        System.out.println("No deserializer configuration parameters are required.");
-      } else {
-        System.out.println("Deserializer configuration:");
-        for (Parameter p : deserializerConfig.values()) {
-          System.out.println("\t" + p.getName() + " = " + p.getValue());
-        }
-      }
-    }
-    deserializer.configure(deserializerConfig, schema);
-
-    // load the stream
-    ParameterSet deserializationParameters = deserializer.load(
-      streams.toArray(new NamedStream[0]), schema);
-    // let the subclass adjust the parameters
-    deserializationParameters = deserializationParameters(deserializationParameters);
-    // let the command line adjuect the parameters
-    configureFromCommandLine(deserializationParameters, schema);
-    
-    if (verbose) {
-      if (deserializationParameters.size() == 0) {
-        System.out.println("No deserialization parameters are required.");            
-      } else {
-        System.out.println("Deserialization parameters:");
-        for (Parameter p : deserializationParameters.values()) {
-          System.out.println("\t" + p.getName() + " = " + p.getValue());
-        }
-      }
-    }
-
-    // configure the deserialization
-    deserializer.setParameters(deserializationParameters);
-      
-    Graph[] graphs = deserializer.deserialize();
-    for (String warning : deserializer.getWarnings()) {
-      System.err.println(inputFile.getName() + ": " + warning);
-      warnings.add(inputFile.getName() + ": " + warning);
-    }
-
-    // strip extension off name
-    for (Graph g : graphs) {
-      g.setId(IO.WithoutExtension(g.getId()));
-    }
-
-    Normalizer normalizer = new Normalizer();
-    for (Graph g : graphs) {
-      normalizer.transform(g);
-      g.commit();
-    }
-
-    // let the subclass process the graphs before they're serialized
-    processTranscripts(graphs);
+    Graph[] graphs = deserialize(streams, schema);
     
     // give serializer access to any media
     if (mediaFiles.size() > 0) {
@@ -433,7 +370,193 @@ public abstract class Converter extends GuiProgram {
     
     if (verbose) System.out.println("Finished " + inputFile.getPath());
   } // end of convert()
-   
+
+  /**
+   * Converts all files by deserializing all first, and then serializing all resulting
+   * graphs at once. The default implementation uses a default schema, default settings 
+   * for serializations, and serializes the "utterance" layer only. 
+   * @param inputFiles
+   * @throws Exception
+   */
+  public void convert(Vector<File> inputFiles) throws SerializationException, Exception {
+    if (verbose) System.out.println("Converting " + inputFiles.size() + " files");
+    if (inputFiles.size() == 0) return;
+
+    final int fileCount = inputFiles.size() * 2;
+    progress.setMaximum(fileCount);
+
+    Schema schema = getSchema();
+
+    Vector<Graph> allGraphs = new Vector<Graph>();
+    
+    for (File inputFile : inputFiles) {
+      // look for media files
+      String nameWithoutExtension = IO.WithoutExtension(inputFile.getName());
+      Vector<MediaFile> mediaFiles = new Vector<MediaFile>();
+      for (File f : inputFile.getParentFile().listFiles(new FilenameFilter() {
+          public boolean accept(File mediaDir, String name) {
+            if (name.startsWith(nameWithoutExtension)) {
+              String lowercase = name.toLowerCase();
+              for (String suffix : MediaFile.SuffixToMimeType().keySet()) {
+                if (lowercase.endsWith(suffix)) return true;
+              }
+            }
+            return false;
+          }
+        })) {
+        mediaFiles.add(new MediaFile(f).setUrl(f.toURI().toString()));
+      } // next file
+      
+      // deserialize...
+      
+      Vector<NamedStream> streams = new Vector<NamedStream>();
+      // add the transcript file
+      streams.add(new NamedStream(inputFile));
+      // ... and also any media we found
+      for (MediaFile f : mediaFiles) {
+        streams.add(new NamedStream(
+                      new FileInputStream(f.getFile()), f.getName(), f.getMimeType()));
+      }
+
+      progress.setString(inputFile.getName());
+      Graph[] graphs = deserialize(streams, schema);
+      for (Graph graph : graphs) allGraphs.add(graph);
+      progress.setValue(progress.getValue() + 1);
+    } // next input file
+    
+    // serialize...
+
+    // create serializer
+    final GraphSerializer serializer = getSerializer();
+    if (verbose) System.out.println("Serializing with " + serializer.getDescriptor());
+      
+    // configure serializer
+    ParameterSet serializerConfig = serializer.configure(new ParameterSet(), schema);
+    // let the subclass adjust the config
+    serializerConfig = serializerConfiguration(serializerConfig);
+    // get setting from command line
+    configureFromCommandLine(serializerConfig, schema);
+    if (verbose) {
+      if (serializerConfig.size() == 0) {
+        System.out.println("No serializer serializerConfig parameters are required.");
+      } else {
+        System.out.println("Serializer serializerConfig:");
+        for (Parameter p : serializerConfig.values()) {
+          System.out.println("\t" + p.getName() + " = " + p.getValue());
+        }
+      }
+    }
+    serializer.configure(serializerConfig, schema);
+    
+    // serialize
+    final File dir = (inputFiles.elementAt(0).getParentFile() != null?
+                      inputFiles.elementAt(0).getParentFile() : new File("."));
+    progress.setString(inputFiles.elementAt(0).getName() + " ...");
+    serializer.serialize(
+      allGraphs.spliterator(), getLayersToSerialize(),
+      stream -> {
+        try {
+          stream.save(dir);
+          if (serializer.getPercentComplete() != null) {            
+            progress.setValue(fileCount + ((fileCount * serializer.getPercentComplete())/100));
+          }
+        } catch(IOException exception) {
+          System.err.println(exception.toString());
+          errors.add(stream.getName() + ": " + exception.toString());
+        }
+      },
+      warning -> {
+        System.err.println(inputFiles.elementAt(0).getName() + "...: " + warning);
+        warnings.add(inputFiles.elementAt(0).getName() + "...: " + warning);
+      },
+      exception -> {
+        System.err.println(exception.toString());
+        exception.printStackTrace(System.err);
+        errors.add(inputFiles.elementAt(0).getName() + "...: " + exception.toString());
+      });
+    
+    if (verbose) System.out.println("Finished " + inputFiles.elementAt(0).getPath() + "...");
+  }
+
+  /**
+   * Deserializes a file to one or more graphs. The default implementation uses a default
+   * schema. 
+   * @param streams An input transcript and perhaps media streams.
+   * @throws Exception
+   */
+  public Graph[] deserialize(Vector<NamedStream> streams, Schema schema)
+    throws SerializationException, Exception {
+    if (verbose) System.out.println("deserialize " + streams.size() + " streams");
+    if (streams.size() == 0) return new Graph[0];
+    
+    // create deserializer
+    GraphDeserializer deserializer = getDeserializer();
+    if (verbose) System.out.println("Deserializing with " + deserializer.getDescriptor());
+
+    // configure deserializer
+    ParameterSet deserializerConfig = deserializer.configure(new ParameterSet(), schema);
+    // let the subclass adjust the config
+    deserializerConfig = deserializerConfiguration(deserializerConfig);
+    // let the command line options take effect
+    configureFromCommandLine(deserializerConfig, schema);
+    
+    if (verbose) {
+      if (deserializerConfig.size() == 0) {
+        System.out.println("No deserializer configuration parameters are required.");
+      } else {
+        System.out.println("Deserializer configuration:");
+        for (Parameter p : deserializerConfig.values()) {
+          System.out.println("\t" + p.getName() + " = " + p.getValue());
+        }
+      }
+    }
+    deserializer.configure(deserializerConfig, schema);
+
+    // load the stream
+    ParameterSet deserializationParameters = deserializer.load(
+      streams.toArray(new NamedStream[0]), schema);
+    // let the subclass adjust the parameters
+    deserializationParameters = deserializationParameters(deserializationParameters);
+    // let the command line adjuect the parameters
+    configureFromCommandLine(deserializationParameters, schema);
+    
+    if (verbose) {
+      if (deserializationParameters.size() == 0) {
+        System.out.println("No deserialization parameters are required.");            
+      } else {
+        System.out.println("Deserialization parameters:");
+        for (Parameter p : deserializationParameters.values()) {
+          System.out.println("\t" + p.getName() + " = " + p.getValue());
+        }
+      }
+    }
+
+    // configure the deserialization
+    deserializer.setParameters(deserializationParameters);
+    
+    Graph[] graphs = deserializer.deserialize();
+    for (String warning : deserializer.getWarnings()) {
+      System.err.println(streams.elementAt(0).getName() + ": " + warning);
+      warnings.add(streams.elementAt(0).getName() + ": " + warning);
+    }
+
+    // strip extension off name
+    for (Graph g : graphs) {
+      g.setId(IO.WithoutExtension(g.getId()));
+    }
+
+    Normalizer normalizer = new Normalizer();
+    for (Graph g : graphs) {
+      normalizer.transform(g);
+      g.commit();
+    }
+
+    // let the subclass process the graphs before they're serialized
+    processTranscripts(graphs);
+    
+    return graphs;
+  }
+
   /**
    * Default constructor.
    */
@@ -741,39 +864,81 @@ public abstract class Converter extends GuiProgram {
     int f = 0;
     errors = new Vector<String>();
     warnings = new Vector<String>();
-    for (File inputFile: files) {
-      progress.setString(inputFile.getName());
-      try {
-        if (!inputFile.exists()) {
-          System.err.println("Input file doesn't exist: " + inputFile.getPath());
-        } else {
-          convert(inputFile);
+    // if the cardinality is NToN (i.e. 1 input files produces 1 output file), do them one by one
+    if (getSerializer().getCardinality() == GraphSerializer.Cardinality.NToN) {
+      for (File inputFile: files) {
+        progress.setString(inputFile.getName());
+        try {
+          if (!inputFile.exists()) {
+            System.err.println("Input file doesn't exist: " + inputFile.getPath());
+          } else {
+            convert(inputFile);
+          }
+        } catch(SerializationException exception) {
+          System.err.println(inputFile.getPath() + ": " + exception.getMessage());
+          errors.add(inputFile.getName() + ": " + exception.getMessage());
+        } catch(Exception exception) {
+          System.err.println(inputFile.getPath() + ": " + exception.getMessage());
+          errors.add(inputFile.getName() + ": " + exception.getMessage());
+          exception.printStackTrace(System.err);
         }
+        progress.setValue(++f);
+      } // next file
+    } else { // not NToN, so we have to process them all at once
+      try {
+        convert(files);
       } catch(SerializationException exception) {
-        System.err.println(inputFile.getPath() + ": " + exception.getMessage());
-        errors.add(inputFile.getName() + ": " + exception.getMessage());
+        System.err.println(exception.getMessage());
+        errors.add(exception.getMessage());
       } catch(Exception exception) {
-        System.err.println(inputFile.getPath() + ": " + exception.getMessage());
-        errors.add(inputFile.getName() + ": " + exception.getMessage());
+        System.err.println(exception.toString());
+        errors.add(exception.getMessage());
         exception.printStackTrace(System.err);
       }
-      progress.setValue(++f);
-    } // next file
+    }
     progress.setString("Finished.");
     if (batchMode) {
       System.exit(0);
     } else { // GUI
       if (warnings.size() > 0) {
-        // display errors 
-        JOptionPane.showMessageDialog(
-          this, warnings.stream().collect(Collectors.joining("\n")),
-          "Warning", JOptionPane.INFORMATION_MESSAGE);       
+        // display warnings
+        if (warnings.size() < 10) {
+          // message dialog is fine
+          JOptionPane.showMessageDialog(
+            this, warnings.stream().collect(Collectors.joining("\n")),
+            "Warning", JOptionPane.INFORMATION_MESSAGE);
+        } else { // too many messages for a message dialog
+          // create a scrollable text box
+          JTextArea textArea = new JTextArea();
+          textArea.setText(warnings.stream().collect(Collectors.joining("\n")));
+          textArea.setCaretPosition(0);
+          textArea.setEditable(false);
+          JDialog dlg = new JOptionPane(
+            new JScrollPane(textArea)).createDialog(frame_, "Warning");
+          dlg.setSize(frame_.getSize());
+          dlg.setLocation(frame_.getLocation());
+          dlg.setVisible(true);
+        }
       }
       if (errors.size() > 0) {
         // display errors 
-        JOptionPane.showMessageDialog(
-          this, errors.stream().collect(Collectors.joining("\n")),
-          "Error", JOptionPane.ERROR_MESSAGE);       
+        if (warnings.size() < 10) {
+          // message dialog is fine
+          JOptionPane.showMessageDialog(
+            this, errors.stream().collect(Collectors.joining("\n")),
+            "Error", JOptionPane.ERROR_MESSAGE);       
+        } else { // too many messages for a message dialog
+          // create a scrollable text box
+          JTextArea textArea = new JTextArea();
+          textArea.setText(errors.stream().collect(Collectors.joining("\n")));
+          textArea.setCaretPosition(0);
+          textArea.setEditable(false);
+          JDialog dlg = new JOptionPane(
+            new JScrollPane(textArea)).createDialog(frame_, "Warning");
+          dlg.setSize(frame_.getSize());
+          dlg.setLocation(frame_.getLocation());
+          dlg.setVisible(true);
+        }
       }
     }
   } // end of convertBatch()
