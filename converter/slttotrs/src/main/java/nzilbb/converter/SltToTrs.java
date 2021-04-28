@@ -50,7 +50,7 @@ public class SltToTrs extends Converter {
    * @see #getPronounceCodePattern()
    * @see #setPronounceCodePattern(String)
    */
-  protected String pronounceCodePattern = "PRON:{0}";
+  protected String pronounceCodePattern = "PRONOUNCE:{0}";
   /**
    * Getter for {@link #pronounceCodePattern}: Pattern for 'pronounce' word codes.
    * @return Pattern for 'pronounce' word codes.
@@ -60,7 +60,7 @@ public class SltToTrs extends Converter {
    * Setter for {@link #pronounceCodePattern}: Pattern for 'pronounce' word codes.
    * @param newPronounceCodePattern Pattern for 'pronounce' word codes.
    */
-  @Switch("Pattern to match for converting word codes into pronounce events. Default is PRON:{0}")
+  @Switch("Pattern to match for converting word codes into pronounce events. Default is PRONOUNCE:{0}")
   public SltToTrs setPronounceCodePattern(String newPronounceCodePattern) { pronounceCodePattern = newPronounceCodePattern; return this; }
   
   /**
@@ -68,7 +68,7 @@ public class SltToTrs extends Converter {
    * @see #getLexicalCodePattern()
    * @see #setLexicalCodePattern(String)
    */
-  protected String lexicalCodePattern = "LEX:{0}";
+  protected String lexicalCodePattern = "LEXICAL:{0}";
   /**
    * Getter for {@link #lexicalCodePattern}: Pattern for 'lexical' word codes.
    * @return Pattern for 'lexical' word codes.
@@ -78,7 +78,7 @@ public class SltToTrs extends Converter {
    * Setter for {@link #lexicalCodePattern}: Pattern for 'lexical' word codes.
    * @param newLexicalCodePattern Pattern for 'lexical' word codes.
    */
-  @Switch("Pattern to match for converting word codes into lexical events. Default is LEX:{0}")
+  @Switch("Pattern to match for converting word codes into lexical events. Default is LEXICAL:{0}")
   public SltToTrs setLexicalCodePattern(String newLexicalCodePattern) { lexicalCodePattern = newLexicalCodePattern; return this; }
   
   
@@ -115,7 +115,7 @@ public class SltToTrs extends Converter {
       +"\nBy default, inline annotations (mazes, codes, bound morphemes, etc.)"
       +" are not iterpreted. If you want them to be processed, use --parseInlineConventions"
       +"\nBy default certain SALT word codes are converted into Transcriber 'pronounce'"
-      +" or 'lexical' events - i.e. those of the form \"[PRON:...]\" and \"[LEX:...]\""
+      +" or 'lexical' events - i.e. those of the form \"[PRONOUNCE:...]\" and \"[LEXICAL:...]\""
       +" respectively."
       +"\nAlso certain SALT comments are converted into Transcriber 'noise' events"
       +" - i.e. those of the form \"{NOISE:...}\"."

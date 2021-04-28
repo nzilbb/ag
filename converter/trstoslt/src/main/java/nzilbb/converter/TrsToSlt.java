@@ -55,7 +55,7 @@ public class TrsToSlt extends Converter {
    * @see #getPronounceCodePattern()
    * @see #setPronounceCodePattern(String)
    */
-  protected String pronounceCodePattern = "PRON:{0}";
+  protected String pronounceCodePattern = "PRONOUNCE:{0}";
   /**
    * Getter for {@link #pronounceCodePattern}: Pattern for 'pronounce' word codes.
    * @return Pattern for 'pronounce' word codes.
@@ -65,7 +65,7 @@ public class TrsToSlt extends Converter {
    * Setter for {@link #pronounceCodePattern}: Pattern for 'pronounce' word codes.
    * @param newPronounceCodePattern Pattern for 'pronounce' word codes.
    */
-  @Switch("Pattern to use for converting pronounce events into word codes. Default is PRON:{0}")
+  @Switch("Pattern to use for converting pronounce events into word codes. Default is PRONOUNCE:{0}")
   public TrsToSlt setPronounceCodePattern(String newPronounceCodePattern) { pronounceCodePattern = newPronounceCodePattern; return this; }
   
   /**
@@ -73,7 +73,7 @@ public class TrsToSlt extends Converter {
    * @see #getLexicalCodePattern()
    * @see #setLexicalCodePattern(String)
    */
-  protected String lexicalCodePattern = "LEX:{0}";
+  protected String lexicalCodePattern = "LEXICAL:{0}";
   /**
    * Getter for {@link #lexicalCodePattern}: Pattern for 'lexical' word codes.
    * @return Pattern for 'lexical' word codes.
@@ -83,7 +83,7 @@ public class TrsToSlt extends Converter {
    * Setter for {@link #lexicalCodePattern}: Pattern for 'lexical' word codes.
    * @param newLexicalCodePattern Pattern for 'lexical' word codes.
    */
-  @Switch("Pattern to use for converting lexical events into word codes. Default is LEX:{0}")
+  @Switch("Pattern to use for converting lexical events into word codes. Default is LEXICAL:{0}")
   public TrsToSlt setLexicalCodePattern(String newLexicalCodePattern) { lexicalCodePattern = newLexicalCodePattern; return this; }
   
   /**
@@ -113,8 +113,8 @@ public class TrsToSlt extends Converter {
       +"\nComments at the beginning of transcript that start with + become"
       +" SALT meta-data headers."
       +"\nBy default  Transcriber 'pronounce' and 'lexical' events are converted to be "
-      +" certain SALT word codes, of the form \"[PRON:...]\" and \"[LEX:...]\" respectively."
-      +" Noise events are converted to comments of the form \"{NOISE:...}\"."
+      +" certain SALT word codes, of the form \"[PRONOUNCE:...]\" and \"[LEXICAL:...]\""
+      +" respectively. Noise events are converted to comments of the form \"{NOISE:...}\"."
       +" Use the command-line switches --pronounceCodePattern, --lexicalCodePattern,"
       +" and --noiseCommentPattern to control this behaviour."
       +"\ne.g. if you specify --pronounceCodePattern=WP:{0} then all pronounce events will"

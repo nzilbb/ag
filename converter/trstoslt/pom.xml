@@ -10,7 +10,7 @@
   <groupId>nzilbb</groupId>
   <artifactId>trs-to-slt</artifactId>
   <name>nzilbb.converter.trstoslt</name>
-  <version>0.1.2</version>
+  <version>0.1.3</version>
   <description>Transcriber transcript to SALT transcript converter</description>
 
   <properties>
