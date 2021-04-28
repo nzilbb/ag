@@ -50,8 +50,9 @@ import nzilbb.editpath.EditStep;
 import nzilbb.editpath.MinimumEditPath;
 
 public class TestSltSerialization {
-  
-  @Test public void deserialize()  throws Exception {
+
+  /** General deserialization, map some specific codes to specific layers. */
+  @Test public void deserializeMapCodesToLayers()  throws Exception {
     Schema schema = new Schema(
       "participant", "turn", "utterance", "word",
       new Layer("transcript_language", "Language").setAlignment(Constants.ALIGNMENT_NONE)
@@ -112,6 +113,9 @@ public class TestSltSerialization {
       new Layer("error", "Errors").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(false)
       .setParentId("turn").setParentIncludes(true),
+      new Layer("EU", "Utterance Errors").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
       new Layer("code", "Non-error Codes").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(false)
       .setParentId("turn").setParentIncludes(true),
@@ -139,6 +143,12 @@ public class TestSltSerialization {
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId("word").setParentIncludes(true),
       new Layer("partial_word", "Partial Words").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true),
+      new Layer("redacted", "Redacted names").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true),
+      new Layer("ep", "EP errors").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId("word").setParentIncludes(true)
       );
@@ -215,14 +225,25 @@ public class TestSltSerialization {
     deserializer.configure(configuration, schema);
     
     // load the stream
-    ParameterSet defaultParameters = deserializer.load(streams, schema);
-    for (Parameter p : defaultParameters.values()) {
-      System.out.println("" + p.getName() + " = " + p.getValue());
-    }
-    assertEquals("No stream-specific parameters", 0, defaultParameters.size());
+    ParameterSet parameters = deserializer.load(streams, schema);
+    // for (Parameter p : parameters.values()) {
+    //   System.out.println("" + p.getName() + " = " + p.getValue());
+    // }
+    assertEquals("One parameter for each type of code: " + parameters.keySet(),
+                 5, parameters.size());
+    assertEquals("REDACTED codes mapped to redacted layer",
+                 schema.getLayer("redacted"), parameters.get("code_REDACTED").getValue());
+    assertEquals("CENSORED mapped to default code layer",
+                 schema.getLayer("code"), parameters.get("code_CENSOR").getValue());
+    assertEquals("EP codes mapped to ep layer",
+                 schema.getLayer("ep"), parameters.get("code_EP").getValue());
+    assertEquals("EU codes mapped to EU layer",
+                 schema.getLayer("EU"), parameters.get("code_EU").getValue());
+    assertEquals("EW mapped to default error layer",
+                 schema.getLayer("error"), parameters.get("code_EW").getValue());
 
     // configure the deserialization
-    deserializer.setParameters(defaultParameters);
+    deserializer.setParameters(parameters);
     
     // build the graph
     Graph[] graphs = deserializer.deserialize();
@@ -407,48 +428,58 @@ public class TestSltSerialization {
     // codes
     Annotation[] codes = g.all("code");
     assertEquals("Correct number of codes: " + Arrays.asList(codes),
-                 3, codes.length);
+                 1, codes.length);
     assertEquals("Censor label", "CENSOR", codes[0].getLabel());
     assertEquals("Censor code tags an utterance",
                  1, codes[0].tagsOn("utterance").length);
     assertEquals("Censor code tags the second utterance",
                  utterances[1].getId(), codes[0].tagsOn("utterance")[0].getId());
-    assertEquals("First Redacted label", "REDACTED", codes[1].getLabel());
+
+    codes = g.all("redacted");
+    assertEquals("Correct number of codes: " + Arrays.asList(codes),
+                 2, codes.length);
+    assertEquals("First Redacted label", "REDACTED", codes[0].getLabel());
     assertEquals("First Redacted code tags a word",
-                 1, codes[1].tagsOn("word").length);
-    assertEquals("First Redacted tags the 18th word: " + codes[1].tagsOn("word"),
-                 words[17].getId(), codes[1].tagsOn("word")[0].getId());
-    assertEquals("Second Redacted label", "REDACTED", codes[2].getLabel());
+                 1, codes[0].tagsOn("word").length);
+    assertEquals("First Redacted tags the 18th word: " + codes[0].tagsOn("word"),
+                 words[17].getId(), codes[0].tagsOn("word")[0].getId());
+    assertEquals("Second Redacted label", "REDACTED", codes[1].getLabel());
     assertEquals("Second Redacted code tags a word",
-                 1, codes[2].tagsOn("word").length);
-    assertEquals("Second Redacted tags the 23rd word: " + codes[2].tagsOn("word")[0],
-                 words[22].getId(), codes[2].tagsOn("word")[0].getId());
+                 1, codes[1].tagsOn("word").length);
+    assertEquals("Second Redacted tags the 23rd word: " + codes[1].tagsOn("word")[0],
+                 words[22].getId(), codes[1].tagsOn("word")[0].getId());
 
     // errors
     Annotation[] errors = g.all("error");
     assertEquals("Correct number of error codes: " + Arrays.asList(errors),
-                 4, errors.length);
-    assertEquals("first EW label", "EP:boy/z", errors[0].getLabel());
-    assertEquals("first EW code tags a word",
+                 1, errors.length);
+    assertEquals("EW label", "EW", errors[0].getLabel());
+    assertEquals("EW code tags a word",
                  1, errors[0].tagsOn("word").length);
-    assertEquals("first EW tags the word \"girl's\": " + Arrays.asList(errors[0].tagsOn("word")),
-                 "girl's", errors[0].tagsOn("word")[0].getLabel());    
-    assertEquals("Utterance Error label", "EU", errors[1].getLabel());
+    assertEquals("EW tags the word 'falled': " + Arrays.asList(errors[0].tagsOn("word")),
+                 "falled", errors[0].tagsOn("word")[0].getLabel());
+
+    errors = g.all("ep");
+    assertEquals("EP label", "EP:boy/z", errors[0].getLabel());
+    assertEquals("EP code tags a word",
+                 1, errors[0].tagsOn("word").length);
+    assertEquals("EP tags the word \"girl's\": " + Arrays.asList(errors[0].tagsOn("word")),
+                 "girl's", errors[0].tagsOn("word")[0].getLabel());
+
+    errors = g.all("EU");
+    assertEquals("Correct number of EU codes: " + Arrays.asList(errors),
+                 2, errors.length);
+    assertEquals("Utterance Error label", "EU", errors[0].getLabel());
     assertEquals("Utterance Error code tags an utterance",
-                 1, errors[1].tagsOn("utterance").length);
+                 1, errors[0].tagsOn("utterance").length);
     assertEquals("Utterance Error code tags the tenth utterance",
-                 utterances[9].getId(), errors[1].tagsOn("utterance")[0].getId());
-    assertEquals("Pre-terminator Utterance Error label", "EU", errors[2].getLabel());
+                 utterances[9].getId(), errors[0].tagsOn("utterance")[0].getId());
+    assertEquals("Pre-terminator Utterance Error label", "EU", errors[1].getLabel());
     assertEquals("Pre-terminator Utterance Error code tags an utterance",
-                 1, errors[2].tagsOn("utterance").length);
+                 1, errors[1].tagsOn("utterance").length);
     assertEquals("Pre-terminator Utterance Error code tags the eleventh utterance",
-                 utterances[10].getId(), errors[2].tagsOn("utterance")[0].getId());
-    assertEquals("second EW label", "EW", errors[3].getLabel());
-    assertEquals("second EW code tags a word",
-                 1, errors[3].tagsOn("word").length);
-    assertEquals("second EW tags the word 'falled': " + Arrays.asList(errors[2].tagsOn("word")),
-                 "falled", errors[3].tagsOn("word")[0].getLabel());
-    
+                 utterances[10].getId(), errors[1].tagsOn("utterance")[0].getId());
+
     // root forms
     Annotation[] roots = g.all("root");
     assertEquals("Correct number of root forms: " + Arrays.asList(roots),
@@ -663,6 +694,7 @@ public class TestSltSerialization {
     }
   }
 
+  /** Parse annotations, but don't map them to layers */
   @Test public void deserializeNoAnnotations()  throws Exception {
     // just a basic schema, nothing SALT-specific
     Schema schema = new Schema(
@@ -731,10 +763,21 @@ public class TestSltSerialization {
     
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
-    for (Parameter p : defaultParameters.values()) {
-      System.out.println("" + p.getName() + " = " + p.getValue());
-    }
-    assertEquals("No stream-specific parameters", 0, defaultParameters.size());
+    // for (Parameter p : defaultParameters.values()) {
+    //   System.out.println("" + p.getName() + " = " + p.getValue());
+    // }
+    assertEquals("One parameter for each type of code: " + defaultParameters.keySet(),
+                 5, defaultParameters.size());
+    assertNull("REDACTED codes mapped to redacted layer",
+               defaultParameters.get("code_REDACTED").getValue());
+    assertNull("CENSORED mapped to default code layer",
+               defaultParameters.get("code_CENSOR").getValue());
+    assertNull("EP codes mapped to ep layer",
+               defaultParameters.get("code_EP").getValue());
+    assertNull("EU codes mapped to EU layer",
+               defaultParameters.get("code_EU").getValue());
+    assertNull("EW mapped to default error layer",
+               defaultParameters.get("code_EW").getValue());
 
     // configure the deserialization
     deserializer.setParameters(defaultParameters);
@@ -1244,6 +1287,15 @@ public class TestSltSerialization {
 
     // assume that deserialization worked (that's tested elsewhere)
 
+    // but double-check codes
+    Annotation[] codes = graphs[0].all("code");
+    assertEquals("Correct number of codes: " + Arrays.asList(codes),
+                 3, codes.length);
+    Annotation[] errors = graphs[0].all("error");
+    assertEquals("Correct number of error codes: " + Arrays.asList(errors),
+                 4, errors.length);
+    System.out.println("errors: "+Arrays.stream(errors).map(e->e.getLabel()+"("+e.getStart()+"-"+e.getEnd()+")").collect(Collectors.joining(" ")));
+    
     // add an underscore to a word, to test it's preserved in the output
     graphs[0].first("word").setLabel("I_m");
     
@@ -1255,6 +1307,61 @@ public class TestSltSerialization {
 
     // general configuration - same as above
     configuration = serializer.configure(new ParameterSet(), schema);
+    assertEquals("Correct number of configuration parameters", 28, configuration.size());
+    assertEquals(schema.getLayer("cunit"),
+                 configuration.get("cUnitLayer").getValue());
+    assertEquals(schema.getLayer("main_participant"),
+                 configuration.get("targetParticipantLayer").getValue());
+    assertEquals(schema.getLayer("comment"),
+                 configuration.get("commentLayer").getValue());
+    assertEquals(schema.getLayer("parenthetical"),
+                 configuration.get("parentheticalLayer").getValue());
+    assertEquals(schema.getLayer("entity"),
+                 configuration.get("properNameLayer").getValue());
+    assertEquals(schema.getLayer("repetition"),
+                 configuration.get("repetitionsLayer").getValue());
+    assertEquals(schema.getLayer("root"),
+                 configuration.get("rootLayer").getValue());
+    assertEquals(schema.getLayer("error"),
+                 configuration.get("errorLayer").getValue());
+    assertEquals(schema.getLayer("noise"),
+                 configuration.get("soundEffectLayer").getValue());
+    assertEquals(schema.getLayer("pause"),
+                 configuration.get("pauseLayer").getValue());
+    assertEquals(schema.getLayer("bound_morpheme"),
+                 configuration.get("boundMorphemeLayer").getValue());
+    assertEquals(schema.getLayer("maze"),
+                 configuration.get("mazeLayer").getValue());
+    assertEquals(schema.getLayer("partial_word"),
+                 configuration.get("partialWordLayer").getValue());
+    assertEquals(schema.getLayer("omission"),
+                 configuration.get("omissionLayer").getValue());
+    assertEquals(schema.getLayer("code"),
+                 configuration.get("codeLayer").getValue());
+    assertEquals(schema.getLayer("transcript_language"),
+                 configuration.get("languageLayer").getValue());
+    assertEquals(schema.getLayer("participant_id"),
+                 configuration.get("participantIdLayer").getValue());
+    assertEquals(schema.getLayer("participant_gender"),
+                 configuration.get("genderLayer").getValue());
+    assertEquals(schema.getLayer("participant_dob"),
+                 configuration.get("dobLayer").getValue());
+    assertEquals(schema.getLayer("transcript_doe"),
+                 configuration.get("doeLayer").getValue());
+    assertEquals(schema.getLayer("transcript_ca"),
+                 configuration.get("caLayer").getValue());
+    assertEquals(schema.getLayer("participant_ethnicity"),
+                 configuration.get("ethnicityLayer").getValue());
+    assertEquals(schema.getLayer("transcript_context"),
+                 configuration.get("contextLayer").getValue());
+    assertEquals(schema.getLayer("transcript_subgroup"),
+                 configuration.get("subgroupLayer").getValue());
+    assertEquals(schema.getLayer("transcript_collect"),
+                 configuration.get("collectLayer").getValue());
+    assertEquals(schema.getLayer("transcript_location"),
+                 configuration.get("locationLayer").getValue());
+    assertEquals("parseInlineConventions is true default",
+                 Boolean.TRUE, configuration.get("parseInlineConventions").getValue());
     // change to date format day-first
     configuration.get("dateFormat").setValue("d/M/yyyy");
     serializer.configure(configuration, schema);

@@ -1294,6 +1294,22 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
     setName(slt.getName());
 
     reset();
+
+    // parameters allow codes that are found in the stream to be mapped to phrase/word layers
+    ParameterSet parameters = new ParameterSet();
+    LinkedHashMap<String,Layer> phraseWordLayers = new LinkedHashMap<String,Layer>();
+    for (Layer layer : schema.getLayers().values()) {
+      if (schema.getTurnLayerId().equals(layer.getParentId())
+          && !layer.getId().equals(schema.getWordLayerId())
+          && !layer.getId().equals(schema.getUtteranceLayerId())
+          && layer.getAlignment() == Constants.ALIGNMENT_INTERVAL) { // phrase layer
+        phraseWordLayers.put(layer.getId(), layer);
+      } else if (schema.getWordLayerId().equals(layer.getParentId())
+                 && layer.getAlignment() == Constants.ALIGNMENT_NONE) { // word tag layer
+        phraseWordLayers.put(layer.getId(), layer);
+      }
+    } // next layer
+    Pattern codePattern = Pattern.compile("\\[([^\\]]+)\\]");
     
     // read stream line by line
     boolean inHeader = true;
@@ -1316,7 +1332,32 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
           }
         } else { // transcript line
           lines.add(line);
-        }
+
+          if (parseInlineConventions) {      
+            // any codes?
+            Matcher codeMatcher = codePattern.matcher(line);
+            while (codeMatcher.find()) {
+              int colon = codeMatcher.group(1).indexOf(':');
+              final String code = (colon > 0)?codeMatcher.group(1).substring(0, colon)
+                :codeMatcher.group(1);
+              // do we already have a parameter for this code?
+              if (!parameters.containsKey("code_" + code)) { // no parameter yet
+                Parameter p = new Parameter(
+                  "code_" + code, Layer.class, "Codes: " + code, "Layer for '"+code+"' codes");
+                p.setValue(Utility.FindLayerById(phraseWordLayers, new Vector(){{add(code);}}));
+                if (p.getValue() == null) {
+                  if (code.startsWith("E") && errorLayer != null) {
+                    p.setValue(errorLayer);
+                  } else if (codeLayer != null) {
+                    p.setValue(codeLayer);
+                  }
+                }
+                p.setPossibleValues(phraseWordLayers.values());
+                parameters.addParameter(p);
+              }
+            } // next code
+          } // parseInlineConventions
+        } // transcript line
       } // not a blank line
       line = reader.readLine();
     } // next line
@@ -1357,9 +1398,10 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         fMedia.delete();
       }
     }
-    return new ParameterSet(); // everything is in configure()
+    return parameters;
   }
-  
+
+  ParameterSet parameters = null;
   /**
    * Sets parameters for a given deserialization operation, after loading the serialized
    * form of the graph. This might include mappings from format-specific objects like
@@ -1369,6 +1411,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
    */
   public void setParameters(ParameterSet parameters)
     throws SerializationParametersMissingException {
+    this.parameters = parameters;
   }
   
   /**
@@ -1435,6 +1478,14 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
     if (subgroupLayer != null) graph.addLayer((Layer)subgroupLayer.clone());
     if (collectLayer != null) graph.addLayer((Layer)collectLayer.clone());
     if (locationLayer != null) graph.addLayer((Layer)locationLayer.clone());
+    for (Parameter p : parameters.values()) {
+      if (p.getName().startsWith("code_")) {
+        Layer l = (Layer)p.getValue();
+        if (l != null && graph.getLayer(l.getId()) == null) {          
+          graph.addLayer((Layer)l.clone());
+        }
+      } // next code -> layer mapping
+    } // next parameter
 
     Anchor start = graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL);
     
@@ -1684,24 +1735,20 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
     if (parseInlineConventions) {      
       try {
         
-        // non-error utterance codes
-        ConventionTransformer transformer = new ConventionTransformer(
-          utteranceLayer.getId(), "(?<line>.*) \\[(?<code>[^E][^\\]]+)\\]$", "${line}");
-        if (codeLayer != null) {
-          transformer.addDestinationResult(codeLayer.getId(), "${code}");
-        }
-        transformer.transform(graph).commit();
-        
-        // utterance error codes
-        transformer = new ConventionTransformer(
-          utteranceLayer.getId(),
-          // c-unit terminators after utterance error codes are invalid, but we tolerate them
-          "(?<line>.*) \\[(?<code>E[^\\]]+)\\](?<terminator>[.?!~^>]?)$", "${line}${terminator}");
-        if (errorLayer != null) {
-          transformer.addDestinationResult(errorLayer.getId(), "${code}");
-        }
-        transformer.transform(graph).commit();
-        
+        // utterance codes
+        for (Parameter p : parameters.values()) {
+          if (p.getName().startsWith("code_")) {
+            String code = p.getName().substring("code_".length());
+            ConventionTransformer transformer = new ConventionTransformer(
+              utteranceLayer.getId(),
+              "(?<line>.*) \\[(?<code>"+code+"(?::[^\\]]*)?)\\](?<terminator>[.?!~^>]?)$",
+              "${line}${terminator}");
+            if (p.getValue() != null) {
+              transformer.addDestinationResult(((Layer)p.getValue()).getId(), "${code}");
+            }
+            transformer.transform(graph).commit();
+          }
+        } // next parameter        
       } catch(TransformationException exception) {
         if (errors == null) errors = new SerializationException();
         if (errors.getCause() == null) errors.initCause(exception);
@@ -1766,26 +1813,21 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         SimpleTokenizer linkageSplitter = new SimpleTokenizer(
           wordLayer.getId(), properNameLayer != null?properNameLayer.getId():null, "_", true);
         linkageSplitter.transform(graph).commit();
-        
-        // non-error codes - something like "John[NAME]"
-        transformer = new ConventionTransformer(
-          wordLayer.getId(),
-          "(?<word>.+)\\[(?<code>[^E][^\\]]+)\\](?<punctuation>\\W*)",
-          "${word}${punctuation}");
-        if (codeLayer != null) {
-          transformer.addDestinationResult(codeLayer.getId(), "${code}");
+
+        // inline (word) codes
+        for (Parameter p : parameters.values()) {
+          if (p.getName().startsWith("code_")) {
+            String code = p.getName().substring("code_".length());
+            transformer = new ConventionTransformer(
+              wordLayer.getId(),
+              "(?<word>.+)\\[(?<code>"+code+"(?::[^\\]]*)?)\\](?<punctuation>\\W*)",
+              "${word}${punctuation}");
+            if (p.getValue() != null) {
+              transformer.addDestinationResult(((Layer)p.getValue()).getId(), "${code}");
+            }
+            transformer.transform(graph).commit();
+          }
         }
-        transformer.transform(graph).commit();      
-        
-        // error codes - something like "falled[EW]"
-        transformer = new ConventionTransformer(
-          wordLayer.getId(),
-          "(?<word>.+)\\[(?<code>E[^\\]]+)\\](?<punctuation>\\W*)",
-          "${word}${punctuation}");
-        if (errorLayer != null) {
-          transformer.addDestinationResult(errorLayer.getId(), "${code}");
-        }
-        transformer.transform(graph).commit();      
         
         // root forms - something like "falled|fall"
         transformer = new ConventionTransformer(
@@ -2608,14 +2650,12 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
 
           // split word from any trailing punctuation
           String word = token.getLabel();
-          //System.out.println("word before: " + word);
           String trailingPuncuation = "";
           Matcher tokenParts = tokenPattern.matcher(word);
           if (tokenParts.matches()) {
             word = tokenParts.group("word");
             trailingPuncuation = tokenParts.group("punctuation");
           }
-          //System.out.println("word after: \"" + word + "\" + \"" + trailingPuncuation + "\"");
           
           // _ -> X (unintelligible)
           if (word.equals("_")) word = "X";

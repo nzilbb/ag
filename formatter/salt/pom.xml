@@ -10,7 +10,7 @@
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.formatter.salt</artifactId>
   <name>nzilbb.formatter.salt</name>
-  <version>0.1.5</version>
+  <version>0.1.6</version>
 
   <properties>
     <package.path>nzilbb/formatter/salt/</package.path>
@@ -60,6 +60,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <!--trimStackTrace>false</trimStackTrace-->
+          <enableAssertions>true</enableAssertions>
         </configuration>
       </plugin>
     </plugins>    
