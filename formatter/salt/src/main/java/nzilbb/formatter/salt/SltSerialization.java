@@ -1296,20 +1296,29 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
     reset();
 
     // parameters allow codes that are found in the stream to be mapped to phrase/word layers
+    // (e.g. lexical/pronounce annotations)
+    // and comments of particular type to span/phrase layers (e.g. {NOISE:...} comments)
     ParameterSet parameters = new ParameterSet();
     LinkedHashMap<String,Layer> phraseWordLayers = new LinkedHashMap<String,Layer>();
+    LinkedHashMap<String,Layer> spanPhraseLayers = new LinkedHashMap<String,Layer>();
     for (Layer layer : schema.getLayers().values()) {
-      if (schema.getTurnLayerId().equals(layer.getParentId())
-          && !layer.getId().equals(schema.getWordLayerId())
-          && !layer.getId().equals(schema.getUtteranceLayerId())
-          && layer.getAlignment() == Constants.ALIGNMENT_INTERVAL) { // phrase layer
+      if ((layer.getParentId() == null || layer.getParentId().equals(schema.getRoot().getId()))
+          && (layer.getAlignment() == Constants.ALIGNMENT_INTERVAL
+              || layer.getAlignment() == Constants.ALIGNMENT_INSTANT)) { // span layer
+        spanPhraseLayers.put(layer.getId(), layer);
+      } else if (layer.getParentId().equals(schema.getTurnLayerId())
+                 && !layer.getId().equals(schema.getWordLayerId())
+                 && !layer.getId().equals(schema.getUtteranceLayerId())
+                 && layer.getAlignment() == Constants.ALIGNMENT_INTERVAL) { // phrase layer
         phraseWordLayers.put(layer.getId(), layer);
+        spanPhraseLayers.put(layer.getId(), layer);
       } else if (schema.getWordLayerId().equals(layer.getParentId())
                  && layer.getAlignment() == Constants.ALIGNMENT_NONE) { // word tag layer
         phraseWordLayers.put(layer.getId(), layer);
       }
     } // next layer
     Pattern codePattern = Pattern.compile("\\[([^\\]]+)\\]");
+    Pattern commentPattern = Pattern.compile("\\{([^\\}]+):[^\\}]+\\}");
     
     // read stream line by line
     boolean inHeader = true;
@@ -1346,13 +1355,31 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
                   "code_" + code, Layer.class, "Codes: " + code, "Layer for '"+code+"' codes");
                 p.setValue(Utility.FindLayerById(phraseWordLayers, new Vector(){{add(code);}}));
                 if (p.getValue() == null) {
+                  // error codes start with "E" by convention
                   if (code.startsWith("E") && errorLayer != null) {
                     p.setValue(errorLayer);
-                  } else if (codeLayer != null) {
+                  } else {
                     p.setValue(codeLayer);
                   }
                 }
                 p.setPossibleValues(phraseWordLayers.values());
+                parameters.addParameter(p);
+              }
+            } // next code
+            // any comments of the form {key:value}?
+            Matcher commentMatcher = commentPattern.matcher(line);
+            while (commentMatcher.find()) {
+              final String key = commentMatcher.group(1);
+              // do we already have a parameter for this key?
+              if (!parameters.containsKey("comment_" + key)) { // no parameter yet
+                Parameter p = new Parameter(
+                  "comment_" + key, Layer.class, "Comments: " + key,
+                  "Layer for '"+key+"' comments");
+                p.setValue(Utility.FindLayerById(spanPhraseLayers, new Vector(){{add(key);}}));
+                if (p.getValue() == null) {
+                  p.setValue(commentLayer);
+                }
+                p.setPossibleValues(spanPhraseLayers.values());
                 parameters.addParameter(p);
               }
             } // next code
@@ -1479,12 +1506,10 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
     if (collectLayer != null) graph.addLayer((Layer)collectLayer.clone());
     if (locationLayer != null) graph.addLayer((Layer)locationLayer.clone());
     for (Parameter p : parameters.values()) {
-      if (p.getName().startsWith("code_")) {
-        Layer l = (Layer)p.getValue();
-        if (l != null && graph.getLayer(l.getId()) == null) {          
-          graph.addLayer((Layer)l.clone());
-        }
-      } // next code -> layer mapping
+      Layer l = (Layer)p.getValue();
+      if (l != null && graph.getLayer(l.getId()) == null) {          
+        graph.addLayer((Layer)l.clone());
+      }
     } // next parameter
 
     Anchor start = graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL);
@@ -1738,15 +1763,23 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         // utterance codes
         for (Parameter p : parameters.values()) {
           if (p.getName().startsWith("code_")) {
+            Layer layer = (Layer)p.getValue();
             String code = p.getName().substring("code_".length());
             ConventionTransformer transformer = new ConventionTransformer(
               utteranceLayer.getId(),
               "(?<line>.*) \\[(?<code>"+code+"(?::[^\\]]*)?)\\](?<terminator>[.?!~^>]?)$",
               "${line}${terminator}");
-            if (p.getValue() != null) {
-              transformer.addDestinationResult(((Layer)p.getValue()).getId(), "${code}");
+            if (layer != null) {
+              transformer.addDestinationResult(layer.getId(), "${code}");
             }
             transformer.transform(graph).commit();
+            if (layer != null
+                && (codeLayer == null || !layer.getId().equals(codeLayer.getId()))
+                && (errorLayer == null || !layer.getId().equals(errorLayer.getId()))) {
+              // layer isn't the code/error layer, so strip the "${key}:" prefix off the labels
+              new ConventionTransformer(layer.getId(), code+":(?<value>.+)", "${value}")
+                .transform(graph).commit();
+            } // layer isn't the comment layer
           }
         } // next parameter        
       } catch(TransformationException exception) {
@@ -1817,15 +1850,23 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         // inline (word) codes
         for (Parameter p : parameters.values()) {
           if (p.getName().startsWith("code_")) {
+            Layer layer = (Layer)p.getValue();
             String code = p.getName().substring("code_".length());
             transformer = new ConventionTransformer(
               wordLayer.getId(),
               "(?<word>.+)\\[(?<code>"+code+"(?::[^\\]]*)?)\\](?<punctuation>\\W*)",
               "${word}${punctuation}");
-            if (p.getValue() != null) {
-              transformer.addDestinationResult(((Layer)p.getValue()).getId(), "${code}");
+            if (layer != null) {
+              transformer.addDestinationResult(layer.getId(), "${code}");
             }
             transformer.transform(graph).commit();
+            if (layer != null
+                && (codeLayer == null || !layer.getId().equals(codeLayer.getId()))
+                && (errorLayer == null || !layer.getId().equals(errorLayer.getId()))) {
+              // layer isn't the code/error layer, so strip the "${key}:" prefix off the labels
+              new ConventionTransformer(layer.getId(), code+":(?<value>.+)", "${value}")
+                .transform(graph).commit();
+            } // layer isn't the comment layer
           }
         }
         
@@ -2029,7 +2070,27 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
           }
           transformer.transform(graph).commit();
         } // next transformation
-        
+
+        // comments mapped to layers
+        for (Parameter p : parameters.values()) {
+          if (p.getName().startsWith("comment_")) {
+            Layer layer = (Layer)p.getValue();
+            String key = p.getName().substring("comment_".length());
+            SpanningConventionTransformer spanningTransformer = new SpanningConventionTransformer(
+              wordLayer.getId(), "\\{("+key+":.*)", "(.*)\\}", true, null, null, 
+              layer==null?null:layer.getId(), "$1", "$1", false,
+              // if we're not keeping comments, close up the resulting gaps between words
+              layer==null);
+            spanningTransformer.transform(graph).commit();
+            if (layer != null
+                && (commentLayer == null || !layer.getId().equals(commentLayer.getId()))) {
+              // layer isn't the comment layer, so strip the "${key}:" prefix off the labels
+              new ConventionTransformer(layer.getId(), key+":(?<value>.+)", "${value}")
+                .transform(graph).commit();
+            } // layer isn't the comment layer
+          } // comment parameter
+        } // next parameter
+
         // infra-line comments - something like "{points to self}"
         SpanningConventionTransformer spanningTransformer = new SpanningConventionTransformer(
           wordLayer.getId(), "\\{(.*)", "(.*)\\}", true, null, null, 

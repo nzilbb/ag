@@ -70,8 +70,10 @@ public class TestSltSerialization {
       new Layer("transcript_location", "Location").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true),
       
-      new Layer("comment", "Comments").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      new Layer("comment", "Comments").setAlignment(Constants.ALIGNMENT_INSTANT)
       .setPeers(true).setPeersOverlap(true).setSaturated(false),
+      new Layer("noise", "Noises").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false),
       
       new Layer("participant", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(true).setPeersOverlap(true).setSaturated(true),
@@ -122,7 +124,8 @@ public class TestSltSerialization {
       new Layer("maze", "Mazes").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(false)
       .setParentId("turn").setParentIncludes(true),
-      new Layer("noise", "Verbal sound effects etc.").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      new Layer("sound_effect", "Verbal sound effects etc.")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId("turn").setParentIncludes(true),
       new Layer("entity", "Proper Names").setAlignment(Constants.ALIGNMENT_INTERVAL)
@@ -180,7 +183,7 @@ public class TestSltSerialization {
                  configuration.get("rootLayer").getValue());
     assertEquals(schema.getLayer("error"),
                  configuration.get("errorLayer").getValue());
-    assertEquals(schema.getLayer("noise"),
+    assertEquals(schema.getLayer("sound_effect"),
                  configuration.get("soundEffectLayer").getValue());
     assertEquals(schema.getLayer("pause"),
                  configuration.get("pauseLayer").getValue());
@@ -229,8 +232,8 @@ public class TestSltSerialization {
     // for (Parameter p : parameters.values()) {
     //   System.out.println("" + p.getName() + " = " + p.getValue());
     // }
-    assertEquals("One parameter for each type of code: " + parameters.keySet(),
-                 5, parameters.size());
+    assertEquals("One parameter for each type of code, plus noise comments: "+parameters.keySet(),
+                 6, parameters.size());
     assertEquals("REDACTED codes mapped to redacted layer",
                  schema.getLayer("redacted"), parameters.get("code_REDACTED").getValue());
     assertEquals("CENSORED mapped to default code layer",
@@ -241,6 +244,8 @@ public class TestSltSerialization {
                  schema.getLayer("EU"), parameters.get("code_EU").getValue());
     assertEquals("EW mapped to default error layer",
                  schema.getLayer("error"), parameters.get("code_EW").getValue());
+    assertEquals("NOISE mapped to noise layer",
+                 schema.getLayer("noise"), parameters.get("comment_NOISE").getValue());
 
     // configure the deserialization
     deserializer.setParameters(parameters);
@@ -460,7 +465,7 @@ public class TestSltSerialization {
                  "falled", errors[0].tagsOn("word")[0].getLabel());
 
     errors = g.all("ep");
-    assertEquals("EP label", "EP:boy/z", errors[0].getLabel());
+    assertEquals("EP label", "boy/z", errors[0].getLabel());
     assertEquals("EP code tags a word",
                  1, errors[0].tagsOn("word").length);
     assertEquals("EP tags the word \"girl's\": " + Arrays.asList(errors[0].tagsOn("word")),
@@ -554,6 +559,16 @@ public class TestSltSerialization {
     assertEquals("third comment following word: " + comments[2].getEnd().startOf("word"),
                  "they", comments[2].getEnd().startOf("word").iterator().next().getLabel());
 
+    comments = g.all("noise");
+    assertEquals("Correct number of noises: " + Arrays.asList(comments),
+                 1, comments.length);
+    assertEquals("noise label",
+                 "bing", comments[0].getLabel());
+    assertEquals("noise preceding word: " + comments[0].getStart().endOf("word"),
+                 "to", comments[0].getStart().endOf("word").iterator().next().getLabel());
+    assertEquals("noise following word: " + comments[0].getEnd().startOf("word"),
+                 "put", comments[0].getEnd().startOf("word").iterator().next().getLabel());
+
     // parentheticals
     Annotation[] parentheticals = g.all("parenthetical");
     assertEquals("Correct number of parentheticals: " + Arrays.asList(parentheticals),
@@ -606,7 +621,7 @@ public class TestSltSerialization {
       "um.", mazes[2].getEnd().endOf("word").iterator().next().getLabel());
 
     // sound effects
-    Annotation[] soundEffects = g.all("noise");
+    Annotation[] soundEffects = g.all("sound_effect");
     assertEquals("Correct number of sound effects: " + Arrays.asList(soundEffects),
                  1, soundEffects.length);
     assertEquals("sound effect label",
@@ -766,18 +781,21 @@ public class TestSltSerialization {
     // for (Parameter p : defaultParameters.values()) {
     //   System.out.println("" + p.getName() + " = " + p.getValue());
     // }
-    assertEquals("One parameter for each type of code: " + defaultParameters.keySet(),
-                 5, defaultParameters.size());
-    assertNull("REDACTED codes mapped to redacted layer",
+    assertEquals("One parameter for each type of code, + noise comments: "
+                 + defaultParameters.keySet(),
+                 6, defaultParameters.size());
+    assertNull("REDACTED codes not mapped",
                defaultParameters.get("code_REDACTED").getValue());
-    assertNull("CENSORED mapped to default code layer",
+    assertNull("CENSORED code not mapped",
                defaultParameters.get("code_CENSOR").getValue());
-    assertNull("EP codes mapped to ep layer",
+    assertNull("EP codes not mapped",
                defaultParameters.get("code_EP").getValue());
-    assertNull("EU codes mapped to EU layer",
+    assertNull("EU codes not mapped",
                defaultParameters.get("code_EU").getValue());
-    assertNull("EW mapped to default error layer",
+    assertNull("EW mapped not mapped",
                defaultParameters.get("code_EW").getValue());
+    assertNull("NOISE comments not mapped",
+               defaultParameters.get("comment_NOISE").getValue());
 
     // configure the deserialization
     deserializer.setParameters(defaultParameters);
@@ -1141,7 +1159,7 @@ public class TestSltSerialization {
       "save/ed mud/y bush/s bus/s put/ing girl/z[EP:boy/z] want/3s go/3s shop/ing> run/ing drop/ed help/ed aunty/z stop/ed leave/ing come/ing it/z lift/*ed. Hug/ing Hunt/ing can/'nt can/n't carry/ed eat/ing gentle/ly gentle/y girl/'z go/s guy/s happen/ing help/ing hug/ed hurry/ed kid/'z learn/ing let/'us say/s see/ing tramp/ing try/ed tweet/ing wait/ing?",
       "Anything else?",
       "And please go for a walk? [EU]",
-      "You need to put your gumboot/s on [EU].",
+      "You need to {NOISE:bing} put your gumboot/s on [EU].",
       "It/'s too dark^",
       "What happened in this one?",
       "And then it/'s heaps_and_heaps|heaps dark.",
@@ -1239,7 +1257,8 @@ public class TestSltSerialization {
       new Layer("maze", "Mazes").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(false)
       .setParentId("turn").setParentIncludes(true),
-      new Layer("noise", "Verbal sound effects etc.").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      new Layer("sound_effect", "Verbal sound effects etc.")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId("turn").setParentIncludes(true),
       new Layer("entity", "Proper Names").setAlignment(Constants.ALIGNMENT_INTERVAL)
@@ -1324,7 +1343,7 @@ public class TestSltSerialization {
                  configuration.get("rootLayer").getValue());
     assertEquals(schema.getLayer("error"),
                  configuration.get("errorLayer").getValue());
-    assertEquals(schema.getLayer("noise"),
+    assertEquals(schema.getLayer("sound_effect"),
                  configuration.get("soundEffectLayer").getValue());
     assertEquals(schema.getLayer("pause"),
                  configuration.get("pauseLayer").getValue());
