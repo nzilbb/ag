@@ -77,8 +77,8 @@ public interface GraphSerializer {
    public String[] getRequiredLayers() throws SerializationParametersMissingException;
 
    /**
-    * Possible values for cardinality (given <var>N</var> {@link Graph}s, how many 
-    * {@link nzilbb.ag.serialize.util.NamedStream}s are produced) are:
+    * Possible values for cardinality. i.e. given <var>N</var> {@link Graph}s, how many 
+    * {@link nzilbb.ag.serialize.util.NamedStream}s are produced - possible values are:
     * <ul>
     *  <li><b>NToOne</b>: only one {@link NamedStream} is generated, regardless of the
     * number of {@link Graph}s to serialize.</li>
@@ -93,9 +93,10 @@ public interface GraphSerializer {
    
    /**
     * Determines the cardinality between graphs and serialized streams.
-    * <p>This can be useful to know when deciding, for example, whether a given
+    * <p> This can be useful to know when deciding, for example, whether a given
     * serialization with produce a single stream that can be returned directly,
     * vs. multiple streams that should be zipped into a single stream result.
+    * <p> The default implementation returns <em>NtoM</em>, override for other values.
     * @return The cardinality between graphs and serialized streams.
     */
    default public Cardinality getCardinality() {
