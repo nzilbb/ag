@@ -239,6 +239,5 @@ public class OrthographyStandardizer extends Annotator {
          .trim();
       return orth;
    } // end of orthography()
-
    
 } // end of class OrthographyStandardizer
