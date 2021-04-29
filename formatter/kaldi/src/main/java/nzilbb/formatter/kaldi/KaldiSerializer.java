@@ -452,11 +452,11 @@ public class KaldiSerializer implements GraphSerializer {
                   
             String startTime = ""+utterance.getStart().getOffset();
             String endTime = ""+utterance.getEnd().getOffset();
-            if (fragmentIdParts != null) {
-              transcriptName = fragmentIdParts[0];
-              startTime = fragmentIdParts[1];
-              endTime = fragmentIdParts[2];
-            }
+            // if (fragmentIdParts != null) {
+            //   transcriptName = fragmentIdParts[0];
+            //   startTime = fragmentIdParts[1];
+            //   endTime = fragmentIdParts[2];
+            // }
             segmentsWriter.println(
               utteranceId + " " + transcriptName + " " + startTime + " " + endTime);
                   
