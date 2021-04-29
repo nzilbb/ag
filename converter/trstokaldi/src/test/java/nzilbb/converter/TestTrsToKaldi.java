@@ -45,7 +45,7 @@ public class TestTrsToKaldi {
     TrsToKaldi converter = new TrsToKaldi();
     converter.convertBatch(corpus);
     String[] outputFiles = {
-      "corpus.txt","text","utt2spk","wav.scp","words.txt","spk2gender" };
+      "corpus.txt","segments","text","utt2spk","wav.scp","words.txt","spk2gender" };
     for (String name : outputFiles) {
       File actual = new File(dir, name);
       File expected = new File(dir, "expected_"+name);
