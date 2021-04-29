@@ -126,7 +126,7 @@ public class TestKaldiSerializer {
     // configuration.get("episodeLayer").setValue(schema.getLayer("episode"));
     // configuration.get("orthographyLayer").setValue(schema.getLayer("orthography"));
     // configuration.get("prefixUtteranceId").setValue(Boolean.FALSE);
-    assertEquals(5, serializer.configure(configuration, schema).size());
+    assertEquals(6, serializer.configure(configuration, schema).size());
 
     // some layers required
     String[] requiredLayers = serializer.getRequiredLayers();
@@ -287,7 +287,8 @@ public class TestKaldiSerializer {
     // configuration.get("episodeLayer").setValue(schema.getLayer("episode"));
     // configuration.get("orthographyLayer").setValue(schema.getLayer("orthography"));
     // configuration.get("prefixUtteranceId").setValue(Boolean.FALSE);
-    assertEquals(5, serializer.configure(configuration, schema).size());
+    configuration.get("wavBasePath").setValue("/path/to/wav/");
+    assertEquals(6, serializer.configure(configuration, schema).size());
 
     // some layers required
     String[] requiredLayers = serializer.getRequiredLayers();

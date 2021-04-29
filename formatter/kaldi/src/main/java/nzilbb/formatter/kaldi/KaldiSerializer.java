@@ -176,6 +176,23 @@ public class KaldiSerializer implements GraphSerializer {
    * @param newCancelling Serialization marked for cancellation.
    */
   public KaldiSerializer setCancelling(boolean newCancelling) { cancelling = newCancelling; return this; }
+  
+  /**
+   * Base path to prefix all wav files names.
+   * @see #getWavBasePath()
+   * @see #setWavBasePath(String)
+   */
+  protected String wavBasePath = "";
+  /**
+   * Getter for {@link #wavBasePath}: Base path to prefix all wav files names.
+   * @return Base path to prefix all wav files names.
+   */
+  public String getWavBasePath() { return wavBasePath; }
+  /**
+   * Setter for {@link #wavBasePath}: Base path to prefix all wav files names.
+   * @param newWavBasePath Base path to prefix all wav files names.
+   */
+  public KaldiSerializer setWavBasePath(String newWavBasePath) { wavBasePath = newWavBasePath; return this; }  
 
   // Methods:
    
@@ -306,6 +323,17 @@ public class KaldiSerializer implements GraphSerializer {
     if (configuration.get("prefixUtteranceId").getValue() == null) {
       configuration.get("prefixUtteranceId").setValue(Boolean.FALSE);
     }
+    
+    if (!configuration.containsKey("wavBasePath")) {
+      configuration.addParameter(
+        new Parameter("wavBasePath", String.class, 
+                      "WAV base path",
+                      "Base path to prefix all wav files names.", true));
+    }
+    if (configuration.get("wavBasePath").getValue() == null) {
+      configuration.get("wavBasePath").setValue("");
+    }
+    
     return configuration;
   }   
 
@@ -396,15 +424,6 @@ public class KaldiSerializer implements GraphSerializer {
       graphs.forEachRemaining(graph -> {
           if (getCancelling()) return;
           String transcriptName = graph.getId().replaceAll("__[0-9.]+-[0-9.]+$","");
-          // String startTime = ""+graph.getStart().getOffset();
-          // String endTime = ""+graph.getEnd().getOffset();
-          // String[] fragmentIdParts = Graph.ParseFragmentId(graph.getId());
-          // if (fragmentIdParts != null) {
-          //    transcriptName = fragmentIdParts[0];
-          //    startTime = fragmentIdParts[1];
-          //    endTime = fragmentIdParts[2];
-          // }
-          String[] fragmentIdParts = Graph.ParseFragmentId(graph.getId());
           String wavName = IO.WithoutExtension(IO.SafeFileNameUrl(graph.getId())) + ".wav";
           for (Annotation utterance : graph.all(utt)) {
             boolean firstWord = true;
@@ -452,17 +471,12 @@ public class KaldiSerializer implements GraphSerializer {
                   
             String startTime = ""+utterance.getStart().getOffset();
             String endTime = ""+utterance.getEnd().getOffset();
-            // if (fragmentIdParts != null) {
-            //   transcriptName = fragmentIdParts[0];
-            //   startTime = fragmentIdParts[1];
-            //   endTime = fragmentIdParts[2];
-            // }
             segmentsWriter.println(
               utteranceId + " " + transcriptName + " " + startTime + " " + endTime);
                   
             utt2spkWriter.println(utteranceId + " " + speakerId);
 
-            wavWriter.println(utteranceId + " " + wavName);
+            wavWriter.println(utteranceId + " " + wavBasePath + wavName);
           } // next utterance
 
           if (genderLayer != null) {
