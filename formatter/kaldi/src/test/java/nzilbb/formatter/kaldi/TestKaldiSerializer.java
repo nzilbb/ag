@@ -126,17 +126,16 @@ public class TestKaldiSerializer {
     // configuration.get("episodeLayer").setValue(schema.getLayer("episode"));
     // configuration.get("orthographyLayer").setValue(schema.getLayer("orthography"));
     // configuration.get("prefixUtteranceId").setValue(Boolean.FALSE);
-    assertEquals(6, serializer.configure(configuration, schema).size());
+    assertEquals(5, serializer.configure(configuration, schema).size());
 
     // some layers required
     String[] requiredLayers = serializer.getRequiredLayers();
-    assertEquals(6, requiredLayers.length);
-    assertEquals("episode", requiredLayers[0]);
-    assertEquals("who", requiredLayers[1]);
-    assertEquals("utterance", requiredLayers[2]);
-    assertEquals("orthography", requiredLayers[3]);
-    assertEquals("phonemes", requiredLayers[4]);
-    assertEquals("gender", requiredLayers[5]);
+    assertEquals(5, requiredLayers.length);
+    assertEquals("who", requiredLayers[0]);
+    assertEquals("utterance", requiredLayers[1]);
+    assertEquals("orthography", requiredLayers[2]);
+    assertEquals("phonemes", requiredLayers[3]);
+    assertEquals("gender", requiredLayers[4]);
 
     // split out fragments
     String[] allLayers = {
@@ -288,17 +287,16 @@ public class TestKaldiSerializer {
     // configuration.get("orthographyLayer").setValue(schema.getLayer("orthography"));
     // configuration.get("prefixUtteranceId").setValue(Boolean.FALSE);
     configuration.get("wavBasePath").setValue("/path/to/wav/");
-    assertEquals(6, serializer.configure(configuration, schema).size());
+    assertEquals(5, serializer.configure(configuration, schema).size());
 
     // some layers required
     String[] requiredLayers = serializer.getRequiredLayers();
-    assertEquals(6, requiredLayers.length);
-    assertEquals("episode", requiredLayers[0]);
-    assertEquals("who", requiredLayers[1]);
-    assertEquals("utterance", requiredLayers[2]);
-    assertEquals("orthography", requiredLayers[3]);
-    assertEquals("phonemes", requiredLayers[4]);
-    assertEquals("gender", requiredLayers[5]);
+    assertEquals(5, requiredLayers.length);
+    assertEquals("who", requiredLayers[0]);
+    assertEquals("utterance", requiredLayers[1]);
+    assertEquals("orthography", requiredLayers[2]);
+    assertEquals("phonemes", requiredLayers[3]);
+    assertEquals("gender", requiredLayers[4]);
 
     // split out fragments
     String[] allLayers = {

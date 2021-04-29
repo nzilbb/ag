@@ -242,13 +242,6 @@ public class KaldiSerializer implements GraphSerializer {
       = new HashMap<String,LinkedHashMap<String,Layer>>();
 
     // do we need to ask for participant/turn/utterance/word layers?
-    LinkedHashMap<String,Layer> possibleEpisodeLayers = new LinkedHashMap<String,Layer>();
-    for (Layer top : schema.getRoot().getChildren().values()) {
-      if (top.getAlignment() == Constants.ALIGNMENT_NONE) {
-        possibleEpisodeLayers.put(top.getId(), top);
-      } // unaligned
-    } // next possible participant layer
-      
     LinkedHashMap<String,Layer> possibleTurnChildLayers = new LinkedHashMap<String,Layer>();
     for (Layer turnChild : schema.getTurnLayer().getChildren().values()) {
       if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
@@ -278,11 +271,6 @@ public class KaldiSerializer implements GraphSerializer {
     } // next top level layer
 
       // other layers...
-
-    layerToPossibilities.put(
-      new Parameter("episodeLayer", Layer.class, "Episode layer", "Episode"), 
-      Arrays.asList("episode","series","family"));
-    layerToCandidates.put("episodeLayer", possibleEpisodeLayers);
 
     layerToPossibilities.put(
       new Parameter("orthographyLayer", Layer.class, "Orthography layer", "Orthography tags", true), 
@@ -345,7 +333,6 @@ public class KaldiSerializer implements GraphSerializer {
    */
   public String[] getRequiredLayers() throws SerializationParametersMissingException {
     Vector<String> requiredLayers = new Vector<String>();
-    requiredLayers.add(schema.getEpisodeLayerId());
     requiredLayers.add(schema.getParticipantLayerId());
     requiredLayers.add(schema.getUtteranceLayerId());
     if (getOrthographyLayer() != null) requiredLayers.add(getOrthographyLayer().getId());
@@ -415,7 +402,6 @@ public class KaldiSerializer implements GraphSerializer {
         :orthographyLayer.getId();
       String pron = pronunciationLayer == null?null:pronunciationLayer.getId();
       String speaker = schema.getParticipantLayerId();
-      String episode = schema.getEpisodeLayerId();
 
       final SortedSet<String> words = new TreeSet<String>();
       final SortedSet<String> wavs = new TreeSet<String>();
