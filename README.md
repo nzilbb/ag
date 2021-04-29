@@ -52,7 +52,7 @@ graph models of the linguistic data are ephemeral, existing in memory only for t
 conversion.
 
 More format conversions are available
-[here](https://github.com/nzilbb/ag/blob/master/bin/README.md)
+[here](https://github.com/nzilbb/ag/blob/master/bin/README.md#standalone-format-converters)
 
 ## Building from source
 
