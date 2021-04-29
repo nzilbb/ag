@@ -40,8 +40,7 @@ to read a file in one format, convert it to an annotation graph, and then write 
 out as a file in another format. As pointed out by
 Cochran et al. (2007 - *Report from TILR Working Group 1 : Tools interoperability and input/output formats*)
 this saves having order *n<sup>2</sup>* explicit conversion algorithms between formats;
-only *2n* format conversions are required
-(as some of these formats above are output-only, it's actually less than *2n*).
+only order *n* format conversions are required.
 
 This exemplifies an approach to linguistic data interoperability called the *interlingua
 philosophy on interoperability* by
