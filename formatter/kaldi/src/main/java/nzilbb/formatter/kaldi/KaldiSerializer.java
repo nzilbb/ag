@@ -1,5 +1,5 @@
 //
-// Copyright 2018 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2018-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -58,514 +58,527 @@ import nzilbb.util.TempFileInputStream;
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class KaldiSerializer implements GraphSerializer {
-   // Attributes:
+  // Attributes:
 
-   /** Static format so we don't keep creating and destroying one */
-   private static DecimalFormat fmt = new DecimalFormat(
-      // force the locale to something with . as the decimal separator
-      "0.000", new DecimalFormatSymbols(Locale.UK));
+  /** Static format so we don't keep creating and destroying one */
+  private static DecimalFormat fmt = new DecimalFormat(
+    // force the locale to something with . as the decimal separator
+    "0.000", new DecimalFormatSymbols(Locale.UK));
    
-   protected Vector<String> warnings;
-   /**
-    * Returns any warnings that may have arisen during the last execution of {@link #deserialize()}.
-    * <p>{@link GraphSerializer} and {@link IDeserializer} method.
-    * @return A possibly empty list of warnings.
-    */
-   public String[] getWarnings() {
-      return warnings.toArray(new String[0]);
-   }
+  protected Vector<String> warnings;
+  /**
+   * Returns any warnings that may have arisen during the last execution of {@link #deserialize()}.
+   * <p>{@link GraphSerializer} and {@link IDeserializer} method.
+   * @return A possibly empty list of warnings.
+   */
+  public String[] getWarnings() {
+    return warnings.toArray(new String[0]);
+  }
    
-   /**
-    * Layer schema.
-    * @see #getSchema()
-    * @see #setSchema(Schema)
-    */
-   protected Schema schema;
-   /**
-    * Getter for {@link #schema}: Layer schema.
-    * @return Layer schema.
-    */
-   public Schema getSchema() { return schema; }
-   /**
-    * Setter for {@link #schema}: Layer schema.
-    * @param newSchema Layer schema.
-    */
-   public KaldiSerializer setSchema(Schema newSchema) { schema = newSchema; return this; }
+  /**
+   * Layer schema.
+   * @see #getSchema()
+   * @see #setSchema(Schema)
+   */
+  protected Schema schema;
+  /**
+   * Getter for {@link #schema}: Layer schema.
+   * @return Layer schema.
+   */
+  public Schema getSchema() { return schema; }
+  /**
+   * Setter for {@link #schema}: Layer schema.
+   * @param newSchema Layer schema.
+   */
+  public KaldiSerializer setSchema(Schema newSchema) { schema = newSchema; return this; }
 
-   /**
-    * Layer for orthography word tags.
-    * @see #getOrthographyLayer()
-    * @see #setOrthographyLayer(Layer)
-    */
-   protected Layer orthographyLayer;
-   /**
-    * Getter for {@link #orthographyLayer}: Layer for orthography tags.
-    * @return Layer for orthography tags.
-    */
-   public Layer getOrthographyLayer() { return orthographyLayer; }
-   /**
-    * Setter for {@link #orthographyLayer}: Layer for orthography tags.
-    * @param newOrthographyLayer Layer for orthography tags.
-    */
-   public KaldiSerializer setOrthographyLayer(Layer newOrthographyLayer) { orthographyLayer = newOrthographyLayer; return this; }
+  /**
+   * Layer for orthography word tags.
+   * @see #getOrthographyLayer()
+   * @see #setOrthographyLayer(Layer)
+   */
+  protected Layer orthographyLayer;
+  /**
+   * Getter for {@link #orthographyLayer}: Layer for orthography tags.
+   * @return Layer for orthography tags.
+   */
+  public Layer getOrthographyLayer() { return orthographyLayer; }
+  /**
+   * Setter for {@link #orthographyLayer}: Layer for orthography tags.
+   * @param newOrthographyLayer Layer for orthography tags.
+   */
+  public KaldiSerializer setOrthographyLayer(Layer newOrthographyLayer) { orthographyLayer = newOrthographyLayer; return this; }
    
-   /**
-    * Layer for pronunciation word tags.
-    * @see #getPronunciationLayer()
-    * @see #setPronunciationLayer(Layer)
-    */
-   protected Layer pronunciationLayer;
-   /**
-    * Getter for {@link #pronunciationLayer}: Layer for pronunciation word tags.
-    * @return Layer for pronunciation word tags.
-    */
-   public Layer getPronunciationLayer() { return pronunciationLayer; }
-   /**
-    * Setter for {@link #pronunciationLayer}: Layer for pronunciation word tags.
-    * @param newPronunciationLayer Layer for pronunciation word tags.
-    */
-   public KaldiSerializer setPronunciationLayer(Layer newPronunciationLayer) { pronunciationLayer = newPronunciationLayer; return this; }
+  /**
+   * Layer for pronunciation word tags.
+   * @see #getPronunciationLayer()
+   * @see #setPronunciationLayer(Layer)
+   */
+  protected Layer pronunciationLayer;
+  /**
+   * Getter for {@link #pronunciationLayer}: Layer for pronunciation word tags.
+   * @return Layer for pronunciation word tags.
+   */
+  public Layer getPronunciationLayer() { return pronunciationLayer; }
+  /**
+   * Setter for {@link #pronunciationLayer}: Layer for pronunciation word tags.
+   * @param newPronunciationLayer Layer for pronunciation word tags.
+   */
+  public KaldiSerializer setPronunciationLayer(Layer newPronunciationLayer) { pronunciationLayer = newPronunciationLayer; return this; }
   
-   /**
-    * Layer for speaker gender.
-    * @see #getGenderLayer()
-    * @see #setGenderLayer(Layer)
-    */
-   protected Layer genderLayer;
-   /**
-    * Getter for {@link #genderLayer}: Layer for speaker gender.
-    * @return Layer for speaker gender.
-    */
-   public Layer getGenderLayer() { return genderLayer; }
-   /**
-    * Setter for {@link #genderLayer}: Layer for speaker gender.
-    * @param newGenderLayer Layer for speaker gender.
-    */
-   public KaldiSerializer setGenderLayer(Layer newGenderLayer) { genderLayer = newGenderLayer; return this; }
+  /**
+   * Layer for speaker gender.
+   * @see #getGenderLayer()
+   * @see #setGenderLayer(Layer)
+   */
+  protected Layer genderLayer;
+  /**
+   * Getter for {@link #genderLayer}: Layer for speaker gender.
+   * @return Layer for speaker gender.
+   */
+  public Layer getGenderLayer() { return genderLayer; }
+  /**
+   * Setter for {@link #genderLayer}: Layer for speaker gender.
+   * @param newGenderLayer Layer for speaker gender.
+   */
+  public KaldiSerializer setGenderLayer(Layer newGenderLayer) { genderLayer = newGenderLayer; return this; }
 
-   /**
-    * Whether to prefix utterance IDs with the speaker ID or not. // TODO remove configurability - Kaldi won't work without prefixing
-    * @see #getPrefixUtteranceId()
-    * @see #setPrefixUtteranceId(Boolean)
-    */
-   protected Boolean prefixUtteranceId = Boolean.FALSE;
-   /**
-    * Getter for {@link #prefixUtteranceId}: Whether to prefix utterance IDs with the speaker ID or not.
-    * @return Whether to prefix utterance IDs with the speaker ID or not.
-    */
-   public Boolean getPrefixUtteranceId() { return prefixUtteranceId; }
-   /**
-    * Setter for {@link #prefixUtteranceId}: Whether to prefix utterance IDs with the speaker ID or not.
-    * @param newPrefixUtteranceId Whether to prefix utterance IDs with the speaker ID or not.
-    */
-   public KaldiSerializer setPrefixUtteranceId(Boolean newPrefixUtteranceId) { prefixUtteranceId = newPrefixUtteranceId; return this; }
+  /**
+   * Whether to prefix utterance IDs with the speaker ID or not. // TODO remove configurability - Kaldi won't work without prefixing
+   * @see #getPrefixUtteranceId()
+   * @see #setPrefixUtteranceId(Boolean)
+   */
+  protected Boolean prefixUtteranceId = Boolean.FALSE;
+  /**
+   * Getter for {@link #prefixUtteranceId}: Whether to prefix utterance IDs with the speaker ID or not.
+   * @return Whether to prefix utterance IDs with the speaker ID or not.
+   */
+  public Boolean getPrefixUtteranceId() { return prefixUtteranceId; }
+  /**
+   * Setter for {@link #prefixUtteranceId}: Whether to prefix utterance IDs with the speaker ID or not.
+   * @param newPrefixUtteranceId Whether to prefix utterance IDs with the speaker ID or not.
+   */
+  public KaldiSerializer setPrefixUtteranceId(Boolean newPrefixUtteranceId) { prefixUtteranceId = newPrefixUtteranceId; return this; }
 
-   /**
-    * Serialization marked for cancellation.
-    * @see #getCancelling()
-    * @see #setCancelling(boolean)
-    */
-   protected boolean cancelling = false;
-   /**
-    * Getter for {@link #cancelling}: Serialization marked for cancellation.
-    * @return Serialization marked for cancellation.
-    */
-   public boolean getCancelling() { return cancelling; }
-   /**
-    * Setter for {@link #cancelling}: Serialization marked for cancellation.
-    * @param newCancelling Serialization marked for cancellation.
-    */
-   public KaldiSerializer setCancelling(boolean newCancelling) { cancelling = newCancelling; return this; }
+  /**
+   * Serialization marked for cancellation.
+   * @see #getCancelling()
+   * @see #setCancelling(boolean)
+   */
+  protected boolean cancelling = false;
+  /**
+   * Getter for {@link #cancelling}: Serialization marked for cancellation.
+   * @return Serialization marked for cancellation.
+   */
+  public boolean getCancelling() { return cancelling; }
+  /**
+   * Setter for {@link #cancelling}: Serialization marked for cancellation.
+   * @param newCancelling Serialization marked for cancellation.
+   */
+  public KaldiSerializer setCancelling(boolean newCancelling) { cancelling = newCancelling; return this; }
 
-   // Methods:
+  // Methods:
    
-   /**
-    * Default constructor.
-    */
-   public KaldiSerializer() {
-   } // end of constructor
+  /**
+   * Default constructor.
+   */
+  public KaldiSerializer() {
+  } // end of constructor
 
-   /**
-    * Returns the deserializer's descriptor.
-    * <p>{@link GraphSerializer} and {@link IDeserializer} method.
-    * @return The deserializer's descriptor
-    */
-   public SerializationDescriptor getDescriptor() {
-      return new SerializationDescriptor(
-	 "Kaldi Files", getClass().getPackage().getImplementationVersion(),
-         "text/x-kaldi-text", ".kaldi", "1.0.0",
-         getClass().getResource("icon.png"));
-   }
+  /**
+   * Returns the deserializer's descriptor.
+   * <p>{@link GraphSerializer} and {@link IDeserializer} method.
+   * @return The deserializer's descriptor
+   */
+  public SerializationDescriptor getDescriptor() {
+    return new SerializationDescriptor(
+      "Kaldi Files", getClass().getPackage().getImplementationVersion(),
+      "text/x-kaldi-text", ".kaldi", "1.0.0",
+      getClass().getResource("icon.png"));
+  }
 
-   /**
-    * Sets parameters for deserializer as a whole.  This might include database connection
-    * parameters, locations of supporting files, etc. 
-    * <p>When the deserializer is installed, this method should be invoked with an empty parameter
-    *  set, to discover what (if any) general configuration is required. If parameters are
-    *  returned, and user interaction is possible, then the user may be presented with an
-    *  interface for setting/confirming these parameters.
-    * <p>{@link GraphSerializer} and {@link IDeserializer} method.
-    * @param configuration The configuration for the deserializer. 
-    * @param schema The layer schema, definining layers and the way they interrelate.
-    * @return A list of configuration parameters (still) must be set before 
-    * {@link GraphDeserializer#setParameters()} can be invoked. If this is an empty list, 
-    * {@link GraphDeserializer#setParameters()} can be invoked. If it's not an empty list, this
-    * method must be invoked again with the returned parameters' values set. 
-    */
-   public ParameterSet configure(ParameterSet configuration, Schema schema) {
-      setSchema(schema);
+  /**
+   * Sets parameters for deserializer as a whole.  This might include database connection
+   * parameters, locations of supporting files, etc. 
+   * <p>When the deserializer is installed, this method should be invoked with an empty parameter
+   *  set, to discover what (if any) general configuration is required. If parameters are
+   *  returned, and user interaction is possible, then the user may be presented with an
+   *  interface for setting/confirming these parameters.
+   * <p>{@link GraphSerializer} and {@link IDeserializer} method.
+   * @param configuration The configuration for the deserializer. 
+   * @param schema The layer schema, definining layers and the way they interrelate.
+   * @return A list of configuration parameters (still) must be set before 
+   * {@link GraphDeserializer#setParameters()} can be invoked. If this is an empty list, 
+   * {@link GraphDeserializer#setParameters()} can be invoked. If it's not an empty list, this
+   * method must be invoked again with the returned parameters' values set. 
+   */
+  public ParameterSet configure(ParameterSet configuration, Schema schema) {
+    setSchema(schema);
 
-      // set any values that have been passed in
-      for (Parameter p : configuration.values()) try { p.apply(this); } catch(Exception x) {}
+    // set any values that have been passed in
+    for (Parameter p : configuration.values()) try { p.apply(this); } catch(Exception x) {}
 
-      // create a list of layers we need and possible matching layer names
-      LinkedHashMap<Parameter,List<String>> layerToPossibilities
-         = new LinkedHashMap<Parameter,List<String>>();
-      HashMap<String,LinkedHashMap<String,Layer>> layerToCandidates
-         = new HashMap<String,LinkedHashMap<String,Layer>>();
+    // create a list of layers we need and possible matching layer names
+    LinkedHashMap<Parameter,List<String>> layerToPossibilities
+      = new LinkedHashMap<Parameter,List<String>>();
+    HashMap<String,LinkedHashMap<String,Layer>> layerToCandidates
+      = new HashMap<String,LinkedHashMap<String,Layer>>();
 
-      // do we need to ask for participant/turn/utterance/word layers?
-      LinkedHashMap<String,Layer> possibleEpisodeLayers = new LinkedHashMap<String,Layer>();
-      for (Layer top : schema.getRoot().getChildren().values()) {
-	 if (top.getAlignment() == Constants.ALIGNMENT_NONE) {
-	    possibleEpisodeLayers.put(top.getId(), top);
-	 } // unaligned
-      } // next possible participant layer
+    // do we need to ask for participant/turn/utterance/word layers?
+    LinkedHashMap<String,Layer> possibleEpisodeLayers = new LinkedHashMap<String,Layer>();
+    for (Layer top : schema.getRoot().getChildren().values()) {
+      if (top.getAlignment() == Constants.ALIGNMENT_NONE) {
+        possibleEpisodeLayers.put(top.getId(), top);
+      } // unaligned
+    } // next possible participant layer
       
-      LinkedHashMap<String,Layer> possibleTurnChildLayers = new LinkedHashMap<String,Layer>();
-      for (Layer turnChild : schema.getTurnLayer().getChildren().values()) {
-         if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
-            possibleTurnChildLayers.put(turnChild.getId(), turnChild);
-         }
-      } // next possible turn child tag layer
-      LinkedHashMap<String,Layer> participantTagLayers = new LinkedHashMap<String,Layer>();
-      for (Layer tag : schema.getParticipantLayer().getChildren().values()) {
-         if (tag.getAlignment() == Constants.ALIGNMENT_NONE
-             && tag.getChildren().size() == 0) {
-            participantTagLayers.put(tag.getId(), tag);
-         }
-      } // next possible word tag layer
-      LinkedHashMap<String,Layer> wordTagLayers = new LinkedHashMap<String,Layer>();
-      for (Layer tag : schema.getWordLayer().getChildren().values()) {
-         if (tag.getAlignment() == Constants.ALIGNMENT_NONE
-             && tag.getChildren().size() == 0) {
-            wordTagLayers.put(tag.getId(), tag);
-         }
-      } // next possible word tag layer
+    LinkedHashMap<String,Layer> possibleTurnChildLayers = new LinkedHashMap<String,Layer>();
+    for (Layer turnChild : schema.getTurnLayer().getChildren().values()) {
+      if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
+        possibleTurnChildLayers.put(turnChild.getId(), turnChild);
+      }
+    } // next possible turn child tag layer
+    LinkedHashMap<String,Layer> participantTagLayers = new LinkedHashMap<String,Layer>();
+    for (Layer tag : schema.getParticipantLayer().getChildren().values()) {
+      if (tag.getAlignment() == Constants.ALIGNMENT_NONE
+          && tag.getChildren().size() == 0) {
+        participantTagLayers.put(tag.getId(), tag);
+      }
+    } // next possible word tag layer
+    LinkedHashMap<String,Layer> wordTagLayers = new LinkedHashMap<String,Layer>();
+    for (Layer tag : schema.getWordLayer().getChildren().values()) {
+      if (tag.getAlignment() == Constants.ALIGNMENT_NONE
+          && tag.getChildren().size() == 0) {
+        wordTagLayers.put(tag.getId(), tag);
+      }
+    } // next possible word tag layer
 
-      LinkedHashMap<String,Layer> topLevelLayers = new LinkedHashMap<String,Layer>();
-      for (Layer top : schema.getRoot().getChildren().values()) {
-	 if (top.getAlignment() == Constants.ALIGNMENT_INTERVAL) { // aligned children of graph
-	    topLevelLayers.put(top.getId(), top);
-	 }
-      } // next top level layer
+    LinkedHashMap<String,Layer> topLevelLayers = new LinkedHashMap<String,Layer>();
+    for (Layer top : schema.getRoot().getChildren().values()) {
+      if (top.getAlignment() == Constants.ALIGNMENT_INTERVAL) { // aligned children of graph
+        topLevelLayers.put(top.getId(), top);
+      }
+    } // next top level layer
 
       // other layers...
 
-      layerToPossibilities.put(
-	 new Parameter("episodeLayer", Layer.class, "Episode layer", "Episode"), 
-	 Arrays.asList("episode","series","family"));
-      layerToCandidates.put("episodeLayer", possibleEpisodeLayers);
+    layerToPossibilities.put(
+      new Parameter("episodeLayer", Layer.class, "Episode layer", "Episode"), 
+      Arrays.asList("episode","series","family"));
+    layerToCandidates.put("episodeLayer", possibleEpisodeLayers);
 
-      layerToPossibilities.put(
-	 new Parameter("orthographyLayer", Layer.class, "Orthography layer", "Orthography tags", true), 
-	 Arrays.asList("orthography"));
-      layerToCandidates.put("orthographyLayer", wordTagLayers);
+    layerToPossibilities.put(
+      new Parameter("orthographyLayer", Layer.class, "Orthography layer", "Orthography tags", true), 
+      Arrays.asList("orthography"));
+    layerToCandidates.put("orthographyLayer", wordTagLayers);
 
-      layerToPossibilities.put(
-	 new Parameter("pronunciationLayer", Layer.class, "Pronunciation layer", "Pronunciation tags", false), 
-	 Arrays.asList("pronuncation", "phonemes", "phonology"));
-      layerToCandidates.put("pronunciationLayer", wordTagLayers);
+    layerToPossibilities.put(
+      new Parameter("pronunciationLayer", Layer.class, "Pronunciation layer", "Pronunciation tags", false), 
+      Arrays.asList("pronuncation", "phonemes", "phonology"));
+    layerToCandidates.put("pronunciationLayer", wordTagLayers);
 
-      layerToPossibilities.put(
-	 new Parameter("genderLayer", Layer.class, "Gender layer", "Participant gender", false), 
-	 Arrays.asList("gender", "participantgender", "sex", "participantsex"));
-      layerToCandidates.put("genderLayer", participantTagLayers);
+    layerToPossibilities.put(
+      new Parameter("genderLayer", Layer.class, "Gender layer", "Participant gender", false), 
+      Arrays.asList("gender", "participantgender", "sex", "participantsex"));
+    layerToCandidates.put("genderLayer", participantTagLayers);
 
-      // add parameters that aren't in the configuration yet, and set possibile/default values
-      for (Parameter p : layerToPossibilities.keySet()) {
-	 List<String> possibleNames = layerToPossibilities.get(p);
-	 LinkedHashMap<String,Layer> candidateLayers = layerToCandidates.get(p.getName());
-	 if (configuration.containsKey(p.getName())) {
-	    p = configuration.get(p.getName());
-	 } else {
-	    configuration.addParameter(p);
-	 }
-	 if (p.getValue() == null) {
-	    p.setValue(Utility.FindLayerById(candidateLayers, possibleNames));
-	 }
-	 p.setPossibleValues(candidateLayers.values());
+    // add parameters that aren't in the configuration yet, and set possibile/default values
+    for (Parameter p : layerToPossibilities.keySet()) {
+      List<String> possibleNames = layerToPossibilities.get(p);
+      LinkedHashMap<String,Layer> candidateLayers = layerToCandidates.get(p.getName());
+      if (configuration.containsKey(p.getName())) {
+        p = configuration.get(p.getName());
+      } else {
+        configuration.addParameter(p);
       }
-
-      if (!configuration.containsKey("prefixUtteranceId")) {
-         configuration.addParameter(
-            new Parameter("prefixUtteranceId", Boolean.class, 
-                          "Prefix utterance with speaker",
-                          "Whether to prefix utterance IDs with the speaker ID or not.", true));
+      if (p.getValue() == null) {
+        p.setValue(Utility.FindLayerById(candidateLayers, possibleNames));
       }
-      if (configuration.get("prefixUtteranceId").getValue() == null) {
-         configuration.get("prefixUtteranceId").setValue(Boolean.FALSE);
-      }
-      return configuration;
-   }   
+      p.setPossibleValues(candidateLayers.values());
+    }
 
-   /**
-    * Determines which layers, if any, must be present in the graph that will be serialized.
-    * <p>{@link GraphSerializer} method.
-    * @return A list of IDs of layers that must be present in the graph that will be serialized.
-    * @throws SerializationParametersMissingException If not all required parameters have a value.
-    */
-   public String[] getRequiredLayers() throws SerializationParametersMissingException {
-      Vector<String> requiredLayers = new Vector<String>();
-      requiredLayers.add(schema.getEpisodeLayerId());
-      requiredLayers.add(schema.getParticipantLayerId());
-      requiredLayers.add(schema.getUtteranceLayerId());
-      if (getOrthographyLayer() != null) requiredLayers.add(getOrthographyLayer().getId());
-      if (getPronunciationLayer() != null) requiredLayers.add(getPronunciationLayer().getId());
-      if (getGenderLayer() != null) requiredLayers.add(getGenderLayer().getId());
-      return requiredLayers.toArray(new String[0]);
-   }
+    if (!configuration.containsKey("prefixUtteranceId")) {
+      configuration.addParameter(
+        new Parameter("prefixUtteranceId", Boolean.class, 
+                      "Prefix utterance with speaker",
+                      "Whether to prefix utterance IDs with the speaker ID or not.", true));
+    }
+    if (configuration.get("prefixUtteranceId").getValue() == null) {
+      configuration.get("prefixUtteranceId").setValue(Boolean.FALSE);
+    }
+    return configuration;
+  }   
 
-   // GraphSerializer methods   
+  /**
+   * Determines which layers, if any, must be present in the graph that will be serialized.
+   * <p>{@link GraphSerializer} method.
+   * @return A list of IDs of layers that must be present in the graph that will be serialized.
+   * @throws SerializationParametersMissingException If not all required parameters have a value.
+   */
+  public String[] getRequiredLayers() throws SerializationParametersMissingException {
+    Vector<String> requiredLayers = new Vector<String>();
+    requiredLayers.add(schema.getEpisodeLayerId());
+    requiredLayers.add(schema.getParticipantLayerId());
+    requiredLayers.add(schema.getUtteranceLayerId());
+    if (getOrthographyLayer() != null) requiredLayers.add(getOrthographyLayer().getId());
+    if (getPronunciationLayer() != null) requiredLayers.add(getPronunciationLayer().getId());
+    if (getGenderLayer() != null) requiredLayers.add(getGenderLayer().getId());
+    return requiredLayers.toArray(new String[0]);
+  }
 
-   /**
-    * Serializes the given graph, generating one or more {@link NamedStream}s.
-    * <p>Many data formats will only yield one stream (e.g. Transcriber transcript or Praat
-    *  textgrid), however there are formats that use multiple files for the same transcript
-    *  (e.g. XWaves, EmuR), which is why this method returns a list. There are formats that
-    *  are capable of storing multiple transcripts in the same file (e.g. AGTK, Transana XML
-    *  export), which is why this method accepts a list.
-    * @param graphs The graphs to serialize.
-    * @param layerIds The IDs of the layers to include, or null for all layers.
-    * @param consumer The object receiving the streams.
-    * @param warnings The object receiving warning messages.
-    * @return A list of named streams that contain the serialization in the given format. 
-    * @throws SerializerNotConfiguredException if the object has not been configured.
-    */
-   public void serialize(
-      Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer,
-      Consumer<String> warnings, Consumer<SerializationException> errors) 
-      throws SerializerNotConfiguredException {
-      graphCount = graphs.getExactSizeIfKnown();
-      try {
-	 // prepare streams for writing...
-	 
-	 File textFile = File.createTempFile(getClass().getSimpleName()+"-","-text");
-	 final PrintWriter textWriter = new PrintWriter(textFile, "utf-8");
-	 NamedStream textStream = new NamedStream(new TempFileInputStream(textFile), "text");
-	 
-	 File corpusFile = File.createTempFile(getClass().getSimpleName()+"-","-corpus.txt");
-	 PrintWriter corpusWriter = new PrintWriter(corpusFile, "utf-8");
-	 NamedStream corpusStream = new NamedStream(
-            new TempFileInputStream(corpusFile), "corpus.txt");
-	 
-	 // File segmentsFile = File.createTempFile(getClass().getSimpleName()+"-","-segments");
-	 // final PrintWriter segmentsWriter = new PrintWriter(segmentsFile, "utf-8");
-	 // NamedStream segmentsStream = new NamedStream(new TempFileInputStream(segmentsFile), "segments");
+  // GraphSerializer methods   
 
-         final TreeMap<String,LinkedHashSet<String>> lexicon
-            = new TreeMap<String,LinkedHashSet<String>>();
+  /**
+   * Serializes the given graph, generating one or more {@link NamedStream}s.
+   * <p>Many data formats will only yield one stream (e.g. Transcriber transcript or Praat
+   *  textgrid), however there are formats that use multiple files for the same transcript
+   *  (e.g. XWaves, EmuR), which is why this method returns a list. There are formats that
+   *  are capable of storing multiple transcripts in the same file (e.g. AGTK, Transana XML
+   *  export), which is why this method accepts a list.
+   * @param graphs The graphs to serialize.
+   * @param layerIds The IDs of the layers to include, or null for all layers.
+   * @param consumer The object receiving the streams.
+   * @param warnings The object receiving warning messages.
+   * @return A list of named streams that contain the serialization in the given format. 
+   * @throws SerializerNotConfiguredException if the object has not been configured.
+   */
+  public void serialize(
+    Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer,
+    Consumer<String> warnings, Consumer<SerializationException> errors) 
+    throws SerializerNotConfiguredException {
+    graphCount = graphs.getExactSizeIfKnown();
+    try {
+      // prepare streams for writing...
 	 
-	 File utt2spkFile = File.createTempFile(getClass().getSimpleName()+"-","-utt2spk");
-	 final PrintWriter utt2spkWriter = new PrintWriter(utt2spkFile, "utf-8");
-	 NamedStream utt2spkStream = new NamedStream(
-            new TempFileInputStream(utt2spkFile), "utt2spk");
+      File textFile = File.createTempFile(getClass().getSimpleName()+"-","-text");
+      final PrintWriter textWriter = new PrintWriter(textFile, "utf-8");
+      NamedStream textStream = new NamedStream(new TempFileInputStream(textFile), "text");
 	 
-         final TreeMap<String,String> spk2gender = new TreeMap<String,String>();
+      File corpusFile = File.createTempFile(getClass().getSimpleName()+"-","-corpus.txt");
+      PrintWriter corpusWriter = new PrintWriter(corpusFile, "utf-8");
+      NamedStream corpusStream = new NamedStream(
+        new TempFileInputStream(corpusFile), "corpus.txt");
 	 
-	 File wordsFile = File.createTempFile(getClass().getSimpleName()+"-","-words.txt");
-	 final PrintWriter wordsWriter = new PrintWriter(wordsFile, "utf-8");
-	 NamedStream wordsStream = new NamedStream(
-            new TempFileInputStream(wordsFile), "words.txt");
-	 
-	 File wavFile = File.createTempFile(getClass().getSimpleName()+"-","-wav.scp");
-	 final PrintWriter wavWriter = new PrintWriter(wavFile, "utf-8");
-	 NamedStream wavStream = new NamedStream(new TempFileInputStream(wavFile), "wav.scp");
+      File segmentsFile = File.createTempFile(getClass().getSimpleName()+"-","-segments");
+      final PrintWriter segmentsWriter = new PrintWriter(segmentsFile, "utf-8");
+      NamedStream segmentsStream = new NamedStream(new TempFileInputStream(segmentsFile), "segments");
 
-	 String utt = schema.getUtteranceLayerId();
-	 String orthography = orthographyLayer==null?schema.getWordLayerId()
-           :orthographyLayer.getId();
-	 String pron = pronunciationLayer == null?null:pronunciationLayer.getId();
-	 String speaker = schema.getParticipantLayerId();
-	 String episode = schema.getEpisodeLayerId();
+      final TreeMap<String,LinkedHashSet<String>> lexicon
+        = new TreeMap<String,LinkedHashSet<String>>();
+	 
+      File utt2spkFile = File.createTempFile(getClass().getSimpleName()+"-","-utt2spk");
+      final PrintWriter utt2spkWriter = new PrintWriter(utt2spkFile, "utf-8");
+      NamedStream utt2spkStream = new NamedStream(
+        new TempFileInputStream(utt2spkFile), "utt2spk");
+	 
+      final TreeMap<String,String> spk2gender = new TreeMap<String,String>();
+	 
+      File wordsFile = File.createTempFile(getClass().getSimpleName()+"-","-words.txt");
+      final PrintWriter wordsWriter = new PrintWriter(wordsFile, "utf-8");
+      NamedStream wordsStream = new NamedStream(
+        new TempFileInputStream(wordsFile), "words.txt");
+	 
+      File wavFile = File.createTempFile(getClass().getSimpleName()+"-","-wav.scp");
+      final PrintWriter wavWriter = new PrintWriter(wavFile, "utf-8");
+      NamedStream wavStream = new NamedStream(new TempFileInputStream(wavFile), "wav.scp");
 
-	 final SortedSet<String> words = new TreeSet<String>();
-	 final SortedSet<String> wavs = new TreeSet<String>();
+      String utt = schema.getUtteranceLayerId();
+      String orthography = orthographyLayer==null?schema.getWordLayerId()
+        :orthographyLayer.getId();
+      String pron = pronunciationLayer == null?null:pronunciationLayer.getId();
+      String speaker = schema.getParticipantLayerId();
+      String episode = schema.getEpisodeLayerId();
 
-	 StringBuffer lastMediaName = new StringBuffer();
-         graphs.forEachRemaining(graph -> {
-               if (getCancelling()) return;
-               String transcriptName = graph.getId().replaceAll("__[0-9.]+-[0-9.]+$","");
-               // String startTime = ""+graph.getStart().getOffset();
-               // String endTime = ""+graph.getEnd().getOffset();
-               // String[] fragmentIdParts = Graph.ParseFragmentId(graph.getId());
-               // if (fragmentIdParts != null) {
-               //    transcriptName = fragmentIdParts[0];
-               //    startTime = fragmentIdParts[1];
-               //    endTime = fragmentIdParts[2];
-               // }
-               String wavName = IO.WithoutExtension(IO.SafeFileNameUrl(graph.getId())) + ".wav";
-               for (Annotation utterance : graph.all(utt)) {
-                  boolean firstWord = true;
-                  String speakerId = utterance.first(speaker).getLabel()
-                     .replaceAll("[\\p{Punct}&&[^_\\-]]", "")
-                     .replaceAll("\\s", "_");
-                  String utteranceId = (prefixUtteranceId?speakerId + "-":"")
-                     + graph.getId();
-                  StringBuilder line = new StringBuilder();
-                  Annotation[] tokens = utterance.all(orthography);
-                  for (Annotation token : tokens) {                     
-                     if (firstWord) {
-                       firstWord = false;
-                     } else {
-                       line.append(" ");
-                     }
-                     line.append(token.getLabel());
+      final SortedSet<String> words = new TreeSet<String>();
+      final SortedSet<String> wavs = new TreeSet<String>();
+
+      StringBuffer lastMediaName = new StringBuffer();
+      graphs.forEachRemaining(graph -> {
+          if (getCancelling()) return;
+          String transcriptName = graph.getId().replaceAll("__[0-9.]+-[0-9.]+$","");
+          // String startTime = ""+graph.getStart().getOffset();
+          // String endTime = ""+graph.getEnd().getOffset();
+          // String[] fragmentIdParts = Graph.ParseFragmentId(graph.getId());
+          // if (fragmentIdParts != null) {
+          //    transcriptName = fragmentIdParts[0];
+          //    startTime = fragmentIdParts[1];
+          //    endTime = fragmentIdParts[2];
+          // }
+          String[] fragmentIdParts = Graph.ParseFragmentId(graph.getId());
+          String wavName = IO.WithoutExtension(IO.SafeFileNameUrl(graph.getId())) + ".wav";
+          for (Annotation utterance : graph.all(utt)) {
+            boolean firstWord = true;
+            String speakerId = utterance.first(speaker).getLabel()
+              .replaceAll("[\\p{Punct}&&[^_\\-]]", "")
+              .replaceAll("\\s", "_");
+            String utteranceId = (prefixUtteranceId?speakerId + "-":"")
+              + graph.getId();
+            if (!graph.isFragment()) {
+              utteranceId = (prefixUtteranceId?speakerId + "-":"")
+                // TODO format start/end times 
+                + Graph.FragmentId(graph.getId(), utterance.getStart().getOffset(), utterance.getEnd().getOffset());
+            }
+            StringBuilder line = new StringBuilder();
+            Annotation[] tokens = utterance.all(orthography);
+            for (Annotation token : tokens) {                     
+              if (firstWord) {
+                firstWord = false;
+              } else {
+                line.append(" ");
+              }
+              line.append(token.getLabel());
                      
-                     words.add(token.getLabel());
+              words.add(token.getLabel());
 
-                     if (pronunciationLayer != null) {
-                        Annotation[] prons = token.all(pron);
-                        if (prons.length > 0) {
-                           if (!lexicon.containsKey(token.getLabel())) {
-                              lexicon.put(token.getLabel(), new LinkedHashSet<String>());
-                           }
-                           for (Annotation p : token.all(pronunciationLayer.getId())) {
-                              lexicon.get(token.getLabel()).add(p.getLabel());
-                           } // next pronunciation
-                        } // there are pronunciations
-                     }
-                  } // next word token
-                  if (firstWord) { // no words on the line
-                    continue; // skip this utterance
+              if (pronunciationLayer != null) {
+                Annotation[] prons = token.all(pron);
+                if (prons.length > 0) {
+                  if (!lexicon.containsKey(token.getLabel())) {
+                    lexicon.put(token.getLabel(), new LinkedHashSet<String>());
                   }
-                  textWriter.print(utteranceId);
-                  textWriter.print(" ");
-                  textWriter.println(line.toString().trim());
-                  corpusWriter.println(line.toString().trim());
-                  
-                  // segmentsWriter.println(
-                  //    utteranceId + " " + transcriptName + " " + startTime + " " + endTime);
-                  
-                  utt2spkWriter.println(utteranceId + " " + speakerId);
-
-                  wavWriter.println(utteranceId + " " + wavName);
-               } // next utterance
-
-               if (genderLayer != null) {
-                 // participant genders
-                 for (Annotation participant : graph.all(speaker)) {
-                   String speakerId = participant.getLabel()
-                     .replaceAll("[\\p{Punct}&&[^_\\-]]", "")
-                     .replaceAll("\\s", "_");
-                   if (!spk2gender.containsKey(speakerId)) {
-                     Annotation gender = participant.first(genderLayer.getId());
-                     if (gender != null && gender.getLabel().length() > 0) {
-                       String genderLabel = gender.getLabel();
-                       if (genderLabel.equalsIgnoreCase("female")) genderLabel = "f";
-                       else if (genderLabel.equalsIgnoreCase("male")) genderLabel = "m";
-                       spk2gender.put(speakerId, genderLabel);
-                     }
-                   } // don't already have the gender
-                 } // next participant
-               } // genderLayer is set
-               
-               consumedGraphCount++;
-            }); // next graph
-         
-	 if (getCancelling()) {
-	    // close the streams
-	    textWriter.close();
-	    corpusWriter.close();
-	    // segmentsWriter.close();
-	    utt2spkWriter.close();
-	    wavWriter.close();
-	    wordsWriter.close();
-	 } else {
-	    // close the streams
-	    textWriter.close();
-	    corpusWriter.close();
-	    // segmentsWriter.close();
-	    utt2spkWriter.close();
-	    wavWriter.close();
-	    
-	    // pass them to the consumer
-	    consumer.accept(textStream);
-	    consumer.accept(corpusStream);
-	    // consumer.accept(segmentsStream);
-	    consumer.accept(utt2spkStream);
-	    consumer.accept(wavStream);
-	    
-	    // finally, words (sorted)
-	    for (String word : words) wordsWriter.println(word);
-	    wordsWriter.close();
-	    consumer.accept(wordsStream);
-
-            // ... and lexicon
-            if (pronunciationLayer != null) {
-               
-               // if the pronunciations are DISC encoded, convert to IPA and add space delimiters
-               PhonemeTranslator encoding = new PhonemeTranslator();
-               if (pronunciationLayer.getType().equals(Constants.TYPE_IPA)) {
-                  encoding = new DISC2IPA().setDelimiter(" ");
-               }
-               
-               File lexiconFile
-                  = File.createTempFile(getClass().getSimpleName()+"-","-lexicon.txt");
-               PrintWriter lexiconWriter = new PrintWriter(lexiconFile, "utf-8");
-               NamedStream lexiconStream
-                  = new NamedStream(new TempFileInputStream(lexiconFile), "lexicon.txt");
-               lexiconWriter.println("!SIL\tsil");
-               lexiconWriter.println("<UNK>\tspn");
-               for (String word : lexicon.keySet()) {
-                  LinkedHashSet<String> pronunciations = lexicon.get(word);
-                  for (String pronunciation : pronunciations) {
-                     lexiconWriter.print(word);
-                     lexiconWriter.print("\t");
-                     lexiconWriter.println(encoding.apply(pronunciation));
+                  for (Annotation p : token.all(pronunciationLayer.getId())) {
+                    lexicon.get(token.getLabel()).add(p.getLabel());
                   } // next pronunciation
-               } // next word
-               lexiconWriter.close();
-               consumer.accept(lexiconStream);
+                } // there are pronunciations
+              }
+            } // next word token
+            if (firstWord) { // no words on the line
+              continue; // skip this utterance
             }
-
-            if (genderLayer != null) {               
-               File spk2genderFile
-                  = File.createTempFile(getClass().getSimpleName()+"-","-spk2gender");
-               PrintWriter spk2genderWriter = new PrintWriter(spk2genderFile, "utf-8");
-               NamedStream spk2genderStream
-                  = new NamedStream(new TempFileInputStream(spk2genderFile), "spk2gender");
-               for (String spk : spk2gender.keySet()) {
-                 spk2genderWriter.print(spk);
-                 spk2genderWriter.print("\t");
-                 spk2genderWriter.println(spk2gender.get(spk));
-               } // next speaker
-               spk2genderWriter.close();
-               consumer.accept(spk2genderStream);
+            textWriter.print(utteranceId);
+            textWriter.print(" ");
+            textWriter.println(line.toString().trim());
+            corpusWriter.println(line.toString().trim());
+                  
+            String startTime = ""+utterance.getStart().getOffset();
+            String endTime = ""+utterance.getEnd().getOffset();
+            if (fragmentIdParts != null) {
+              transcriptName = fragmentIdParts[0];
+              startTime = fragmentIdParts[1];
+              endTime = fragmentIdParts[2];
             }
+            segmentsWriter.println(
+              utteranceId + " " + transcriptName + " " + startTime + " " + endTime);
+                  
+            utt2spkWriter.println(utteranceId + " " + speakerId);
 
-	 }
-      } catch(Exception exception) {
-	 errors.accept(new SerializationException(exception));
+            wavWriter.println(utteranceId + " " + wavName);
+          } // next utterance
+
+          if (genderLayer != null) {
+            // participant genders
+            for (Annotation participant : graph.all(speaker)) {
+              String speakerId = participant.getLabel()
+                .replaceAll("[\\p{Punct}&&[^_\\-]]", "")
+                .replaceAll("\\s", "_");
+              if (!spk2gender.containsKey(speakerId)) {
+                Annotation gender = participant.first(genderLayer.getId());
+                if (gender != null && gender.getLabel().length() > 0) {
+                  String genderLabel = gender.getLabel();
+                  if (genderLabel.equalsIgnoreCase("female")) genderLabel = "f";
+                  else if (genderLabel.equalsIgnoreCase("male")) genderLabel = "m";
+                  spk2gender.put(speakerId, genderLabel);
+                }
+              } // don't already have the gender
+            } // next participant
+          } // genderLayer is set
+               
+          consumedGraphCount++;
+        }); // next graph
+         
+      if (getCancelling()) {
+        // close the streams
+        textWriter.close();
+        corpusWriter.close();
+        segmentsWriter.close();
+        utt2spkWriter.close();
+        wavWriter.close();
+        wordsWriter.close();
+      } else {
+        // close the streams
+        textWriter.close();
+        corpusWriter.close();
+        segmentsWriter.close();
+        utt2spkWriter.close();
+        wavWriter.close();
+	    
+        // pass them to the consumer
+        consumer.accept(textStream);
+        consumer.accept(corpusStream);
+        consumer.accept(segmentsStream);
+        consumer.accept(utt2spkStream);
+        consumer.accept(wavStream);
+	    
+        // finally, words (sorted)
+        for (String word : words) wordsWriter.println(word);
+        wordsWriter.close();
+        consumer.accept(wordsStream);
+
+        // ... and lexicon
+        if (pronunciationLayer != null) {
+               
+          // if the pronunciations are DISC encoded, convert to IPA and add space delimiters
+          PhonemeTranslator encoding = new PhonemeTranslator();
+          if (pronunciationLayer.getType().equals(Constants.TYPE_IPA)) {
+            encoding = new DISC2IPA().setDelimiter(" ");
+          }
+               
+          File lexiconFile
+            = File.createTempFile(getClass().getSimpleName()+"-","-lexicon.txt");
+          PrintWriter lexiconWriter = new PrintWriter(lexiconFile, "utf-8");
+          NamedStream lexiconStream
+            = new NamedStream(new TempFileInputStream(lexiconFile), "lexicon.txt");
+          lexiconWriter.println("!SIL\tsil");
+          lexiconWriter.println("<UNK>\tspn");
+          for (String word : lexicon.keySet()) {
+            LinkedHashSet<String> pronunciations = lexicon.get(word);
+            for (String pronunciation : pronunciations) {
+              lexiconWriter.print(word);
+              lexiconWriter.print("\t");
+              lexiconWriter.println(encoding.apply(pronunciation));
+            } // next pronunciation
+          } // next word
+          lexiconWriter.close();
+          consumer.accept(lexiconStream);
+        }
+
+        if (genderLayer != null) {               
+          File spk2genderFile
+            = File.createTempFile(getClass().getSimpleName()+"-","-spk2gender");
+          PrintWriter spk2genderWriter = new PrintWriter(spk2genderFile, "utf-8");
+          NamedStream spk2genderStream
+            = new NamedStream(new TempFileInputStream(spk2genderFile), "spk2gender");
+          for (String spk : spk2gender.keySet()) {
+            spk2genderWriter.print(spk);
+            spk2genderWriter.print("\t");
+            spk2genderWriter.println(spk2gender.get(spk));
+          } // next speaker
+          spk2genderWriter.close();
+          consumer.accept(spk2genderStream);
+        }
+
       }
-   }
+    } catch(Exception exception) {
+      errors.accept(new SerializationException(exception));
+    }
+  }
 
-   private long graphCount = 0;
-   private long consumedGraphCount = 0;
-   /**
-    * Determines how far through the serialization is.
-    * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
-    */
-   public Integer getPercentComplete() {
-      if (graphCount < 0) return null;
-      return (int)((consumedGraphCount * 100) / graphCount);
-   }
+  private long graphCount = 0;
+  private long consumedGraphCount = 0;
+  /**
+   * Determines how far through the serialization is.
+   * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
+   */
+  public Integer getPercentComplete() {
+    if (graphCount < 0) return null;
+    return (int)((consumedGraphCount * 100) / graphCount);
+  }
 
-   /**
-    * Cancel the serialization in course (if any).
-    */
-   public void cancel() {
-      setCancelling(true);
-   }
+  /**
+   * Cancel the serialization in course (if any).
+   */
+  public void cancel() {
+    setCancelling(true);
+  }
    
 } // end of class KaldiSerializer

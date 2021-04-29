@@ -160,7 +160,7 @@ public class TestKaldiSerializer
                            stream -> streams.add(stream),
                            warning -> System.out.println(warning),
                            exception -> exceptions.add(exception));
-      assertEquals(7, streams.size());
+      assertEquals(8, streams.size());
       for (NamedStream stream: streams)
       {
 	 stream.save(dir);
