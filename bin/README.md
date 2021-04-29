@@ -14,16 +14,16 @@ These include:
 There are a number converter utilities that can be used to convert files from one format
 to another, including:
 
-* trs - *Transcriber* transcripts
-* eaf - *ELAN* files
-* vtt - *web subtitles (Web VTT)*
-* slt - *SALT* transcripts
-* cha - *CLAN* CHAT transcripts
-* textgrid - *Praat* TextGrids
+* trs - [Transcriber](http://trans.sourceforge.net/en/presentation.php) transcripts
+* eaf - [ELAN](https://archive.mpi.nl/tla/elan) files
+* vtt - [web subtitles (Web VTT)](https://en.wikipedia.org/wiki/WebVTT)
+* slt - [SALT](https://www.saltsoftware.com/) transcripts
+* cha - [CLAN](https://dali.talkbank.org/clan/) CHAT transcripts
+* textgrid - [Praat](https://praat.org) TextGrids
 * pdf - *PDF* files
 * tex - *LaTeX* files
 * txt - *plain text* files
-* kaldi - input files for the Kaldi automatic speech recognition training system
+* kaldi - input files for the [Kaldi](https://kaldi-asr.org/) automatic speech recognition training system
 
 | to↓ from→ | trs | eaf  | vtt | slt | cha | textgrid |
 | --- | :---: | :---:  | :---: | :---: | :---: | :---: |
