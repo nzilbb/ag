@@ -42,7 +42,7 @@ import nzilbb.util.Switch;
  * Converts ELAN .eaf files to corpus input files for Kaldi.
  * @author Robert Fromont robert@fromont.net.nz
  */
-@ProgramDescription(value="Converts ELAN .eaf files to corpus input files for Kaldi",arguments="file1.trs file2.trs ...")
+@ProgramDescription(value="Converts ELAN .eaf files to corpus input files for Kaldi",arguments="file1.eaf file2.eaf ...")
 public class EafToKaldi extends Converter {
   
   /**
@@ -125,7 +125,7 @@ public class EafToKaldi extends Converter {
       +"\n "
       +"\nELAN doesn't support participant meta-data, so the 'spk2gender' file is not generated."
       +"\n "
-      +"ELAN has no direct mechanism for marking non-speech annotations in their position"
+      +"\nELAN has no direct mechanism for marking non-speech annotations in their position"
       +" within the transcript text.  However, this converter supports the use of textual"
       +" conventions in various ways to make certain annotations: "
       +"\n - To tag a word with its pronunciation, enter the pronunciation in square brackets,"
