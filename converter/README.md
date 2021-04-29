@@ -24,7 +24,7 @@ Standalone programs that convert transcripts from one tool format to another, e.
 | **pdf** | [trs-to-pdf](../bin/trs-to-pdf.jar?raw=true) | [eaf-to-pdf](../bin/eaf-to-pdf.jar?raw=true) | [vtt-to-pdf](../bin/vtt-to-pdf.jar?raw=true) | [slt-to-pdf](../bin/slt-to-pdf.jar?raw=true) | [cha-to-pdf](../bin/cha-to-pdf.jar?raw=true) | [textgrid-to-pdf](../bin/textgrid-to-pdf.jar?raw=true) |
 | **tex** | [trs-to-tex](../bin/trs-to-tex.jar?raw=true) | [eaf-to-tex](../bin/eaf-to-tex.jar?raw=true) | [vtt-to-tex](../bin/vtt-to-tex.jar?raw=true) | [slt-to-tex](../bin/slt-to-tex.jar?raw=true) | | [textgrid-to-tex](../bin/textgrid-to-tex.jar?raw=true) |
 | **txt** | [trs-to-txt](../bin/trs-to-txt.jar?raw=true) | | | | | |
-| **kaldi** |  [trs-to-kaldi](../bin/trs-to-kaldi.jar?raw=true) | | | | | |
+| **kaldi** | [trs-to-kaldi](../bin/trs-to-kaldi.jar?raw=true) | [eaf-to-kaldi](../bin/eaf-to-kaldi.jar?raw=true) | | | | |
 
 
 These use the serializers/deserializers in the *formatter* directory of this repository
@@ -71,7 +71,7 @@ switch, or use the *Help|Information* menu option of the conversion utility conc
    - add a *description* tag
    - change *maven.compiler.source* and *maven.compiler.target* to "1.8"
    - add the following to *properties*
-   ```    
+   ```   
     <input.package>nzilbb.formatter.informattool</input.package>
     <input.path>nzilbb/formatter/informattool/</input.path>
     <input.version>i.i.i</input.version>
@@ -85,7 +85,7 @@ switch, or use the *Help|Information* menu option of the conversion utility conc
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>converter-base</artifactId>
-      <version>[1.0.3,)</version>
+      <version>[1.0.4,)</version>
     </dependency>
     <dependency>
       <groupId>nzilbb</groupId>
@@ -168,7 +168,7 @@ switch, or use the *Help|Information* menu option of the conversion utility conc
                 <artifactItem>
                   <groupId>nzilbb</groupId>
                   <artifactId>converter-base</artifactId>
-                  <version>1.0.3</version>
+                  <version>1.0.4</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>

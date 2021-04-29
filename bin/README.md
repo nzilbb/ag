@@ -36,7 +36,7 @@ to another, including:
 | **pdf** | [trs-to-pdf](trs-to-pdf.jar?raw=true) |  [eaf-to-pdf](eaf-to-pdf.jar?raw=true) |  [vtt-to-pdf](vtt-to-pdf.jar?raw=true) | [slt-to-pdf](slt-to-pdf.jar?raw=true) | [cha-to-pdf](cha-to-pdf.jar?raw=true) | [textgrid-to-pdf](textgrid-to-pdf.jar?raw=true) |
 | **tex** | [trs-to-tex](trs-to-tex.jar?raw=true) | [eaf-to-tex](eaf-to-tex.jar?raw=true) | [vtt-to-tex](vtt-to-tex.jar?raw=true) |  [slt-to-tex](slt-to-tex.jar?raw=true) | | [textgrid-to-tex](textgrid-to-tex.jar?raw=true) |
 | **txt** | [trs-to-txt](trs-to-txt.jar?raw=true) | | | | | |
-| **kaldi** | [trs-to-kaldi](trs-to-kaldi.jar?raw=true) | | | | | |
+| **kaldi** | [trs-to-kaldi](trs-to-kaldi.jar?raw=true) | [eaf-to-kaldi](eaf-to-kaldi.jar?raw=true) | | | | |
 
 To use a particular converter, you need to have Java installed on your
 system. Download the file, and double-click it to run.
