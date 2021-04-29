@@ -24,7 +24,7 @@ Standalone programs that convert transcripts from one tool format to another, e.
 | **pdf** | [trs-to-pdf](../bin/trs-to-pdf.jar?raw=true) | [eaf-to-pdf](../bin/eaf-to-pdf.jar?raw=true) | [vtt-to-pdf](../bin/vtt-to-pdf.jar?raw=true) | [slt-to-pdf](../bin/slt-to-pdf.jar?raw=true) | [cha-to-pdf](../bin/cha-to-pdf.jar?raw=true) | [textgrid-to-pdf](../bin/textgrid-to-pdf.jar?raw=true) |
 | **tex** | [trs-to-tex](../bin/trs-to-tex.jar?raw=true) | [eaf-to-tex](../bin/eaf-to-tex.jar?raw=true) | [vtt-to-tex](../bin/vtt-to-tex.jar?raw=true) | [slt-to-tex](../bin/slt-to-tex.jar?raw=true) | | [textgrid-to-tex](../bin/textgrid-to-tex.jar?raw=true) |
 | **txt** | [trs-to-txt](../bin/trs-to-txt.jar?raw=true) | | | | | |
-| **kaldi** | [trs-to-kaldi](../bin/trs-to-kaldi.jar?raw=true) | [eaf-to-kaldi](../bin/eaf-to-kaldi.jar?raw=true) | | | | |
+| **kaldi** | [trs-to-kaldi](../bin/trs-to-kaldi.jar?raw=true) | [eaf-to-kaldi](../bin/eaf-to-kaldi.jar?raw=true) | | | | [textgrid-to-kaldi](../bin/textgrid-to-kaldi.jar?raw=true) |
 
 
 These use the serializers/deserializers in the *formatter* directory of this repository
