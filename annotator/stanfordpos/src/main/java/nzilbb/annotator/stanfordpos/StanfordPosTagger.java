@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -422,7 +423,7 @@ public class StanfordPosTagger extends Annotator {
       schema.addLayer(
         new Layer(posLayerId)
         .setAlignment(Constants.ALIGNMENT_NONE)
-        .setPeers(false)
+        .setPeers(true)
         .setParentId(schema.getWordLayerId()));
     } else {
       if (posLayerId.equals(tokenLayerId)
@@ -507,24 +508,50 @@ public class StanfordPosTagger extends Annotator {
         Annotation[] tokens = chunk.all(tokenLayerId);
         setStatus("Tagging chunk "+chunk.getStart() + "-" + chunk.getEnd());
         if (tokens.length > 0) {
-          
-          List<Word> sentence = Arrays.stream(tokens)
-            .map(token -> new Word(token.getLabel()))
-            .collect(Collectors.toList());
-          List<TaggedWord> taggedSentence = tagger.tagSentence(sentence);
-          int t = 0;
-          for (TaggedWord w : taggedSentence) {
-            Annotation pos = tokens[t].first(posLayerId);
-            if (pos != null) { // update existing tag
-              pos.setLabel(w.tag());
-              pos.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-            } else { // create new tag
-              graph.createTag(tokens[t], posLayerId, w.tag())
-                .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-            }
 
-            t++;
+          // delete all existing tags
+          for (Annotation t : tokens) {
+            for (Annotation p: t.all(posLayerId)) {
+              p.destroy();
+            } // next pos tag
           } // next token
+
+          String text = Arrays.stream(tokens)
+            .map(token -> token.getLabel())
+            .collect(Collectors.joining(" "));
+          List<List<HasWord>> sentences = MaxentTagger.tokenizeText(new StringReader(text));
+          int t = 0;
+          for (List<HasWord> sentence : sentences) {
+            List<TaggedWord> taggedSentence = tagger.tagSentence(sentence);
+            for (TaggedWord w : taggedSentence) {
+              if (t >= tokens.length) {
+                throw new TransformationException(
+                  this, "Too many tags for tokens. Last token: "
+                  + tokens[t-1]
+                  + ", next POS tag: " + w.tag() + " for word " + w.word());
+              }
+              Annotation token = tokens[t];
+              graph.createTag(token, posLayerId, w.tag())
+                .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+              // there can be more than one tag per token
+              // e.g. "I'll" could be tagged "PRP" and "MD"
+              // so we keep a track of how much of the current token has been tagged
+              if (!token.containsKey("@tagged")) { // first tag on word
+                token.put("@tagged", w.word());
+              } else { // already partly tagged, so append to the previous syntactic word
+                token.put("@tagged", ((String)token.get("@tagged")) + w.word());
+              }
+
+              // should we move to the next token?
+              if (token.getLabel().length() <= ((String)token.get("@tagged")).length()) {
+                t++;
+              }
+            } // next token
+          } // next sentence
+          
+          // remove tags for keeping track of pos tags
+          for (Annotation token : tokens) token.remove("@tagged");
+          
         } // there are tokens
       } // next chunk
       

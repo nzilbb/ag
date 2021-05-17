@@ -78,6 +78,7 @@ public class TestStanfordPosTagger {
   @Test public void defaultParameters() throws Exception {
     
     Graph g = graph();
+    g.trackChanges();
     Schema schema = g.getSchema();
     annotator.setSchema(schema);
     
@@ -106,7 +107,7 @@ public class TestStanfordPosTagger {
                  schema.getLayer(annotator.getPosLayerId()).getType());
     assertEquals("model: english-caseless-left3words-distsim.tagger",
                  "english-caseless-left3words-distsim.tagger", annotator.getModel());
-    assertFalse("pos layer disallows peers",
+    assertTrue("pos layer allows peers", // contractions like "I'll" might have two tags
                 schema.getLayer(annotator.getPosLayerId()).getPeers());
     Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
       .collect(Collectors.toSet());
@@ -128,7 +129,7 @@ public class TestStanfordPosTagger {
     
     Annotation firstWord = g.first("word");
     assertEquals("double check the first word is what we think it is: "+firstWord,
-                 "I", firstWord.getLabel());
+                 "I'll", firstWord.getLabel());
       
     assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
                  9, g.all("word").length);
@@ -136,20 +137,43 @@ public class TestStanfordPosTagger {
                  0, g.all("pos").length);
     // run the annotator
     annotator.transform(g);
-    List<String> posLabels = Arrays.stream(g.all("pos"))
-      .map(annotation->annotation.getLabel()).collect(Collectors.toList());
-    assertEquals("Correct number of tokens "+posLabels,
-                 9, posLabels.size());
-    Iterator<String> poses = posLabels.iterator();
-    assertEquals("I", "PRP", poses.next());
-    assertEquals("sang", "VBD", poses.next());
-    assertEquals("and", "CC", poses.next());
-    assertEquals("w~ (fragment)", "NNP", poses.next());
-    assertEquals("walked", "VBD", poses.next());
-    assertEquals("about", "RB", poses.next());
-    assertEquals("my", "PRP$", poses.next());
-    assertEquals("blogging-posting (OOD)", "VBG", poses.next());
-    assertEquals("lazily", "RB", poses.next());
+    List<Annotation> posAnnotations = Arrays.stream(g.all("pos"))
+      .collect(Collectors.toList());
+    assertEquals("Correct number of tokens "+posAnnotations,
+                 13, posAnnotations.size());
+    Iterator<Annotation> poses = posAnnotations.iterator();
+    assertEquals("I'll", "PRP", poses.next().getLabel());
+    assertEquals("I'll", "MD", poses.next().getLabel());
+    assertEquals("sing", "VB", poses.next().getLabel());
+    assertEquals("and", "CC", poses.next().getLabel());
+    assertEquals("w~:w (fragment)", "IN", poses.next().getLabel());
+    assertEquals("w~:SYMBOL (fragment)", "SYM", poses.next().getLabel());
+    assertEquals("walk", "VB", poses.next().getLabel());
+    assertEquals("about (different from default model)",
+                 "IN", poses.next().getLabel());
+    assertEquals("my", "PRP$", poses.next().getLabel());
+    assertEquals("blogging-posting:blogging (OOD - different from default model)",
+                 "NN", poses.next().getLabel());
+    assertEquals("blogging-posting Hyphen",
+                 "HYPH", poses.next().getLabel());
+    assertEquals("blogging-posting:posting",
+                 "VBG", poses.next().getLabel());
+    assertEquals("lazily", "RB", poses.next().getLabel());
+
+    poses = posAnnotations.iterator();
+    String[] wordLabels = {
+      "I'll", "I'll", // I + 'll
+      "sing", "and",
+      "w~", "w~", // w + ~
+      "walk", "about", "my",
+      "blogging-posting", "blogging-posting", "blogging-posting", // blogging + - + posting
+      "lazily"
+    };
+    for (int i = 0; i < wordLabels.length; i++) {
+      assertEquals("Tag " + i + " should tag " + wordLabels[i],
+                   wordLabels[i], poses.next().first("word").getLabel());
+    }
+    assertEquals("I'll has two tags", 2, firstWord.all("pos").length);
     
     // add a word
     g.addAnnotation(new Annotation().setLayerId("word").setLabel("new")
@@ -161,36 +185,52 @@ public class TestStanfordPosTagger {
     
     // run the annotator again
     annotator.transform(g);
-    posLabels = Arrays.stream(g.all("pos"))
+    g.commit(); // have to commit to remove old tags
+    List<String> posLabels = Arrays.stream(g.all("pos"))
       .map(annotation->annotation.getLabel()).collect(Collectors.toList());
-    assertEquals("one more pos: "+posLabels,
-                 10, posLabels.size());
-    poses = posLabels.iterator();
-    assertEquals("John (updated POS)", "NNP", poses.next());
-    assertEquals("sang", "VBD", poses.next());
-    assertEquals("and", "CC", poses.next());
-    assertEquals("w~ (fragment)", "NNP", poses.next());
-    assertEquals("walked", "VBD", poses.next());
-    assertEquals("about", "RB", poses.next());
-    assertEquals("my", "PRP$", poses.next());
-    assertEquals("blogging-posting (OOD)", "VBG", poses.next());
-    assertEquals("lazily", "RB", poses.next());
-    assertEquals("new", "JJ", poses.next());
+    assertEquals("- 1 + 1 = same number of pos as before: "+posLabels,
+                 13, posLabels.size());
+    Iterator<String> posLs = posLabels.iterator();
+    assertEquals("John (updated POS)", "NNP", posLs.next());
+    assertEquals("sing", "NNP", posLs.next());
+    assertEquals("and", "CC", posLs.next());
+    assertEquals("w~:w", "NNP", posLs.next());
+    assertEquals("w~:~", "SYM", posLs.next());
+    assertEquals("walk", "NNP", posLs.next());
+    assertEquals("about", "IN", posLs.next());
+    assertEquals("my", "PRP$", posLs.next());
+    assertEquals("blogging-posting:blogging (OOD)", "NN", posLs.next());
+    assertEquals("blogging-posting:- (OOD)", "HYPH", posLs.next());
+    assertEquals("blogging-posting:posting (OOD)", "VBG", posLs.next());
+    assertEquals("lazily", "RB", posLs.next());
+    assertEquals("new", "JJ", posLs.next());
+
+    assertEquals("John has on1 tags", 1, firstWord.all("pos").length);
 
   }   
 
-  @Test public void setTaskParameters() throws Exception {
+  @Test public void setTaskParametersAndUseOrthLayer() throws Exception {
     
     Graph g = graph();
+    g.trackChanges();
     // tag the graph as being in New Zealand English
     g.addTag(g, "transcript_language", "en-NZ");
     Schema schema = g.getSchema();
+    
+    // tag based on orthpraphy tag layer
+    schema.addLayer(
+      new Layer("orth", "Orthography")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false)
+      .setParentId("word"));
+    for (Annotation w : g.all("word")) g.createTag(w, "orth", w.getLabel().toLowerCase());
+    
     annotator.setSchema(schema);
     g.setId("setTaskParameters");
 
     // use specified configuration
     annotator.setTaskParameters(
-      "tokenLayerId=word"
+      "tokenLayerId=orth"
       +"&chunkLayerId=utterance"       // non-default layer
       +"&transcriptLanguageLayerId="   // no transcript language layer
       +"&phraseLanguageLayerId="       // no phrase language layer
@@ -201,7 +241,7 @@ public class TestStanfordPosTagger {
                 g.all("utterance").length == 0);
     
     assertEquals("token layer",
-                 "word", annotator.getTokenLayerId());
+                 "orth", annotator.getTokenLayerId());
     assertEquals("chunk layer",
                  "utterance", annotator.getChunkLayerId());
     assertNull("transcript language layer",
@@ -220,7 +260,7 @@ public class TestStanfordPosTagger {
     assertEquals("pos layer type correct",
                  Constants.TYPE_STRING,
                  schema.getLayer(annotator.getPosLayerId()).getType());
-    assertFalse("pos layer disallows peers",
+    assertTrue("pos layer allows peers",  // contractions like "I'll" might have two tags
                 schema.getLayer(annotator.getPosLayerId()).getPeers());
     assertEquals("model: english-bidirectional-distsim.tagger",
                  "english-bidirectional-distsim.tagger", annotator.getModel());
@@ -230,8 +270,8 @@ public class TestStanfordPosTagger {
                  2, requiredLayers.size());
     assertTrue("utterance required "+requiredLayers,
                requiredLayers.contains("utterance"));
-    assertTrue("word required "+requiredLayers,
-               requiredLayers.contains("word"));
+    assertTrue("orth required "+requiredLayers,
+               requiredLayers.contains("orth"));
     String outputLayers[] = annotator.getOutputLayers();
     assertEquals("1 output layer: "+Arrays.asList(outputLayers),
                  1, outputLayers.length);
@@ -240,30 +280,52 @@ public class TestStanfordPosTagger {
     
     Annotation firstWord = g.first("word");
     assertEquals("double check the first word is what we think it is: "+firstWord,
-                 "I", firstWord.getLabel());
+                 "I'll", firstWord.getLabel());
     
     assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
                  9, g.all("word").length);
-    assertEquals("double check there are no poses: "+Arrays.asList(g.all("pos")),
-                 0, g.all("pos").length);
+    assertEquals("double check there are no poses: "+Arrays.asList(g.all("stanfordpos")),
+                 0, g.all("stanfordpos").length);
     // run the annotator
     annotator.transform(g);
-    List<String> posLabels = Arrays.stream(g.all("stanfordpos"))
-      .map(annotation->annotation.getLabel()).collect(Collectors.toList());
-    assertEquals("Correct number of tokens "+posLabels,
-                 9, posLabels.size());
-    Iterator<String> poses = posLabels.iterator();
-    assertEquals("I", "PRP", poses.next());
-    assertEquals("sang", "VBD", poses.next());
-    assertEquals("and", "CC", poses.next());
-    assertEquals("w~ (fragment)", "NNP", poses.next());
-    assertEquals("walked", "VBD", poses.next());
+    List<Annotation> posAnnotations = Arrays.stream(g.all("stanfordpos"))
+      .collect(Collectors.toList());
+    assertEquals("Correct number of tokens "+posAnnotations,
+                 13, posAnnotations.size());
+    Iterator<Annotation> poses = posAnnotations.iterator();
+    assertEquals("I'll", "PRP", poses.next().getLabel());
+    assertEquals("I'll", "MD", poses.next().getLabel());
+    assertEquals("sing", "VB", poses.next().getLabel());
+    assertEquals("and", "CC", poses.next().getLabel());
+    assertEquals("w~:w (fragment)", "NN", poses.next().getLabel());
+    assertEquals("w~:SYMBOL (fragment)", "SYM", poses.next().getLabel());
+    assertEquals("walk", "NN", poses.next().getLabel());
     assertEquals("about (different from default model)",
-                 "IN", poses.next());
-    assertEquals("my", "PRP$", poses.next());
-    assertEquals("blogging-posting (OOD - different from default model)",
-                 "NN", poses.next());
-    assertEquals("lazily", "RB", poses.next());
+                 "IN", poses.next().getLabel());
+    assertEquals("my", "PRP$", poses.next().getLabel());
+    assertEquals("blogging-posting:blogging (OOD - different from default model)",
+                 "NN", poses.next().getLabel());
+    assertEquals("blogging-posting Hyphen",
+                 "HYPH", poses.next().getLabel());
+    assertEquals("blogging-posting:posting",
+                 "VBG", poses.next().getLabel());
+    assertEquals("lazily", "RB", poses.next().getLabel());
+
+    poses = posAnnotations.iterator();
+    String[] wordLabels = {
+      "I'll", "I'll", // I + 'll
+      "sing", "and",
+      "w~", "w~", // w + ~
+      "walk", "about", "my",
+      "blogging-posting", "blogging-posting", "blogging-posting", // blogging + - + posting
+      "lazily"
+    };
+    for (int i = 0; i < wordLabels.length; i++) {
+      assertEquals("Tag " + i + " should tag " + wordLabels[i],
+                   wordLabels[i], poses.next().first("word").getLabel());
+    }
+    
+    assertEquals("I'll has two tags", 2, firstWord.all("stanfordpos").length);
   }   
 
   @Test public void setInvalidTaskParameters() throws Exception {
@@ -366,10 +428,10 @@ public class TestStanfordPosTagger {
       .setStart(start).setEnd(end)
       .setParent(turn));
     
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("I")
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("I'll")
                     .setStart(g.getOrCreateAnchorAt(10)).setEnd(g.getOrCreateAnchorAt(20))
                     .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("sang")
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("sing")
                     .setStart(g.getOrCreateAnchorAt(20)).setEnd(g.getOrCreateAnchorAt(30))
                     .setParent(turn));
     g.addAnnotation(new Annotation().setLayerId("word").setLabel("and")
@@ -378,7 +440,7 @@ public class TestStanfordPosTagger {
     g.addAnnotation(new Annotation().setLayerId("word").setLabel("w~")
                     .setStart(g.getOrCreateAnchorAt(40)).setEnd(g.getOrCreateAnchorAt(45))
                     .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("walked")
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("walk")
                     .setStart(g.getOrCreateAnchorAt(45)).setEnd(g.getOrCreateAnchorAt(50))
                     .setParent(turn));
     g.addAnnotation(new Annotation().setLayerId("word").setLabel("about")
