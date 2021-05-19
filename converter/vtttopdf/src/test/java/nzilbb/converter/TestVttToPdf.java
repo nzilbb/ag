@@ -49,7 +49,6 @@ public class TestVttToPdf {
     converter.convert(input);
     File actual = new File(dir, "webvtt.pdf");
     assertTrue("PDF created: " + actual.getPath(), actual.exists());
-    actual.delete();
   }
   
   /**

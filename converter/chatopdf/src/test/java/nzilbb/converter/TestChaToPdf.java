@@ -47,7 +47,6 @@ public class TestChaToPdf {
     converter.convert(input);
     File actual = new File(dir, "clan.pdf");
     assertTrue("PDF created: " + actual.getPath(), actual.exists());
-    actual.delete();
   }
   
   /**

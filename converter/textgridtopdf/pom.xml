@@ -9,7 +9,7 @@
 
   <groupId>nzilbb</groupId>
   <artifactId>textgrid-to-pdf</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
 
   <name>nzilbb.converter.textgridtopdf</name>
   <description>Praat TextGrid to PDF converter</description>
@@ -22,7 +22,7 @@
     
     <output.package>nzilbb.formatter.pdf</output.package>
     <output.path>nzilbb/formatter/pdf/</output.path>
-    <output.version>0.5.1</output.version>    
+    <output.version>0.5.2</output.version>    
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>

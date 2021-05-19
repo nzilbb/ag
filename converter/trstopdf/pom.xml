@@ -10,7 +10,7 @@
   <groupId>nzilbb</groupId>
   <artifactId>trs-to-pdf</artifactId>
   <name>nzilbb.converter.trstopdf</name>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <description>Transcriber transcript to PDF converter</description>
 
   <properties>
@@ -21,7 +21,7 @@
     
     <output.package>nzilbb.formatter.pdf</output.package>
     <output.path>nzilbb/formatter/pdf/</output.path>
-    <output.version>0.5.1</output.version>
+    <output.version>0.5.2</output.version>
     
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>

@@ -9,7 +9,7 @@
 
   <groupId>nzilbb</groupId>
   <artifactId>vtt-to-pdf</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <name>nzilbb.converter.vtttopdf</name>
   <description>WebVTT subtitles to PDF converter</description>
 
@@ -17,11 +17,11 @@
     
     <input.package>nzilbb.formatter.webvtt</input.package>
     <input.path>nzilbb/formatter/webvtt/</input.path>
-    <input.version>0.6.0</input.version>
+    <input.version>0.6.1</input.version>
     
     <output.package>nzilbb.formatter.pdf</output.package>
     <output.path>nzilbb/formatter/pdf/</output.path>
-    <output.version>0.5.0</output.version>    
+    <output.version>0.5.2</output.version>    
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>

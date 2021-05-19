@@ -581,7 +581,6 @@ public class PdfSerializer implements GraphSerializer {
           String header = id.replaceAll("^transcript_","");
           if (header.equals("lang") || header.equals("language")) {
             document.addLanguage(annotation.getLabel());
-            System.out.println("lang: " + annotation.getLabel());
           } else {
             document.add(new Header(header, annotation.getLabel()));
           }
@@ -597,7 +596,7 @@ public class PdfSerializer implements GraphSerializer {
           document.add(logo);
         } catch(Throwable exception) {
           // document.add(new Paragraph(exception.toString()));
-          System.out.println("PDFConverter: " + exception.toString());
+          System.err.println("PDFConverter: " + exception.toString());
         }
       }
 

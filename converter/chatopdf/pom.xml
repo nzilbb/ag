@@ -9,7 +9,7 @@
 
   <groupId>nzilbb</groupId>
   <artifactId>cha-to-pdf</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <name>nzilbb.converter.chatopdf</name>
   <description>CLAN CHAT transcript to PDF converter</description>
 
@@ -21,7 +21,7 @@
     
     <output.package>nzilbb.formatter.pdf</output.package>
     <output.path>nzilbb/formatter/pdf/</output.path>
-    <output.version>0.5.0</output.version>    
+    <output.version>0.5.2</output.version>    
     
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
