@@ -31,6 +31,7 @@ import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.BaseFont;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -602,10 +603,24 @@ public class PdfSerializer implements GraphSerializer {
 
       BaseColor color1 = new BaseColor(157,166,21);
       BaseColor color2 = new BaseColor(109,110,114);
+      BaseFont baseFont = BaseFont.createFont(
+        "LiberationSans-BaDn.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+      BaseFont baseFontBold = BaseFont.createFont(
+        "LiberationSansBold-1adM.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+      BaseFont baseFontBoldItalic = BaseFont.createFont(
+        "LiberationSansBoldItalic-ngV4.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+      BaseFont baseFontItalic = BaseFont.createFont(
+        "LiberationSansItalic-RJre.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+      Font headerFont = new Font(baseFontBoldItalic, 18, Font.NORMAL, color1);
+      Font participantFont = new Font(baseFontItalic, 14, Font.NORMAL, color2);
+      Font participantFontHighlight = new Font(baseFontBold, 14, Font.NORMAL, color2);
+      Font layerFont = participantFont;
+      Font header2Font = participantFont;
+      Font participantLabelFont = new Font(baseFontItalic, 12, Font.NORMAL, BaseColor.BLACK);
+      Font noiseFont = new Font(baseFontItalic, 12, Font.NORMAL, BaseColor.GRAY);
+      Font textFont = new Font(baseFont, 12, Font.NORMAL, BaseColor.BLACK);
          
-      Paragraph p = new Paragraph(
-        graph.getId(),
-        FontFactory.getFont(FontFactory.HELVETICA, 18, Font.BOLDITALIC, color1));      
+      Paragraph p = new Paragraph(graph.getId(), headerFont);      
       document.add(p);
 
       boolean transcriptHeading = false;
@@ -617,8 +632,7 @@ public class PdfSerializer implements GraphSerializer {
             && participant.first(mainParticipantLayer.getId()) != null;
           p = new Paragraph(
             "Participant: " + participant.getLabel(),
-            FontFactory.getFont(
-              FontFactory.HELVETICA, 14, highlight?Font.BOLD:Font.ITALIC, color2));
+            highlight?participantFontHighlight:participantFont);
           document.add(p);
         }
         transcriptHeading = true;
@@ -635,17 +649,14 @@ public class PdfSerializer implements GraphSerializer {
                
           legend += "_" + layerId;
         } // next layer
-        p = new Paragraph(
-          "LAYERS: " + legend,
-          FontFactory.getFont(FontFactory.HELVETICA, 14, Font.ITALIC, color2));
+        p = new Paragraph("LAYERS: " + legend, layerFont);
         p.setSpacingBefore(10);
         document.add(p);
         transcriptHeading = true;
       } // multiple layers selected
 
       if (transcriptHeading) {
-        p = new Paragraph("TRANSCRIPT:",
-                          FontFactory.getFont(FontFactory.HELVETICA, 14, Font.ITALIC, color2));
+        p = new Paragraph("TRANSCRIPT:", header2Font);
         p.setSpacingBefore(10);
         document.add(p);
       }
@@ -686,15 +697,14 @@ public class PdfSerializer implements GraphSerializer {
         // is the participant changing?
         Annotation participant = utterance.first(getParticipantLayer().getId());
         if (participant != currentParticipant) { // participant change
-          pSpeaker = new Paragraph(
-            "" + participant.getLabel() + ":",
-            FontFactory.getFont(FontFactory.HELVETICA, 12, Font.ITALIC, BaseColor.BLACK));
+          pSpeaker = new Paragraph("" + participant.getLabel() + ":", participantLabelFont);
           pSpeaker.setSpacingBefore(10);
           // only add pSpeaker if they actually say something below...
         } // participant change
 
         // utterance words
         p = new Paragraph();
+        p.setFont(textFont);
         p.setSpacingBefore(7);
         Chunk line = new Chunk();
         boolean bEmpty = true;
@@ -708,9 +718,7 @@ public class PdfSerializer implements GraphSerializer {
                  && token.getStart().getOffset() != null
                  && token.getStart().getOffset() >= nextNoise.getStart().getOffset()) {
             if (!line.isEmpty()) p.add(line);
-            p.add(new Chunk(
-                    "[" + nextNoise.getLabel() + "] ", 
-                    FontFactory.getFont(FontFactory.HELVETICA, 12, Font.ITALIC, BaseColor.GRAY)));
+            p.add(new Chunk("[" + nextNoise.getLabel() + "] ", noiseFont));
             line = new Chunk();
             nextNoise = noises.hasNext()?noises.next():null;
           } // next noise
@@ -749,9 +757,7 @@ public class PdfSerializer implements GraphSerializer {
                && utterance.getEnd().getOffset() != null
                && utterance.getEnd().getOffset() >= nextNoise.getStart().getOffset()) {
           if (!line.isEmpty()) p.add(line);
-          p.add(new Chunk(
-                  " [" + nextNoise.getLabel() + "] ", 
-                  FontFactory.getFont(FontFactory.HELVETICA, 12, Font.ITALIC, BaseColor.GRAY)));
+          p.add(new Chunk(" [" + nextNoise.getLabel() + "] ", noiseFont));
           line = new Chunk();
           nextNoise = noises.hasNext()?noises.next():null;
         } // next noise

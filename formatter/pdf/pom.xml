@@ -10,7 +10,7 @@
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.formatter.pdf</artifactId>
   <name>nzilbb.formatter.pdf</name>
-  <version>0.5.1</version>
+  <version>0.5.2</version>
 
   <properties>
     <package.path>nzilbb/formatter/pdf/</package.path>

@@ -854,7 +854,7 @@
             {"id":"15",	"label":"participant",	"startId":"12",	"endId":"14",	"confidence":100},
             {"id":"17",	"label":"participant",	"startId":"14",	"endId":"16",	"confidence":100}],
           "word":[
-            {"id":"7t",	"label":"and",	"startId":"1",	"endId":"7s",	"confidence":100},
+            {"id":"7t",	"label":"ānd",	"startId":"1",	"endId":"7s",	"confidence":100},
             {"id":"7v",	"label":"ah .",	"startId":"7s",	"endId":"7u",	"confidence":100},
             {"id":"7x",	"label":"Cyril",	"startId":"7u",	"endId":"7w",	"confidence":100},
             {"id":"7z",	"label":"would",	"startId":"7w-invalid",	"endId":"7y",	"confidence":100},
