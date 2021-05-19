@@ -773,6 +773,7 @@ public class PdfSerializer implements GraphSerializer {
       } // next utterance
       document.close();
       writer.close();
+      fontFile.delete();
 
       TempFileInputStream in = new TempFileInputStream(f);
          
