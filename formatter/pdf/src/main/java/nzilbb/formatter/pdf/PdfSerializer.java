@@ -603,21 +603,21 @@ public class PdfSerializer implements GraphSerializer {
 
       BaseColor color1 = new BaseColor(157,166,21);
       BaseColor color2 = new BaseColor(109,110,114);
+      // iTextPdf built-in fonts are all Type 1 and don't support Unicode, so we supply
+      // a Unicode-supporting font.
+      String fontName = "LiberationSans-BaDn.ttf";
+      // ... but it's packed in our .jar, and BaseFont wants a file name, so unpack the font
+      File fontFile = File.createTempFile("PdfSerializer-", "-"+fontName);
+      IO.SaveUrlToFile​(getClass().getResource(fontName), fontFile);
       BaseFont baseFont = BaseFont.createFont(
-        "LiberationSans-BaDn.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-      BaseFont baseFontBold = BaseFont.createFont(
-        "LiberationSansBold-1adM.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-      BaseFont baseFontBoldItalic = BaseFont.createFont(
-        "LiberationSansBoldItalic-ngV4.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-      BaseFont baseFontItalic = BaseFont.createFont(
-        "LiberationSansItalic-RJre.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-      Font headerFont = new Font(baseFontBoldItalic, 18, Font.NORMAL, color1);
-      Font participantFont = new Font(baseFontItalic, 14, Font.NORMAL, color2);
-      Font participantFontHighlight = new Font(baseFontBold, 14, Font.NORMAL, color2);
+        fontFile.getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+      Font headerFont = new Font(baseFont, 18, Font.BOLDITALIC, color1);
+      Font participantFont = new Font(baseFont, 14, Font.ITALIC, color2);
+      Font participantFontHighlight = new Font(baseFont, 14, Font.BOLD, color2);
       Font layerFont = participantFont;
       Font header2Font = participantFont;
-      Font participantLabelFont = new Font(baseFontItalic, 12, Font.NORMAL, BaseColor.BLACK);
-      Font noiseFont = new Font(baseFontItalic, 12, Font.NORMAL, BaseColor.GRAY);
+      Font participantLabelFont = new Font(baseFont, 12, Font.ITALIC, BaseColor.BLACK);
+      Font noiseFont = new Font(baseFont, 12, Font.ITALIC, BaseColor.GRAY);
       Font textFont = new Font(baseFont, 12, Font.NORMAL, BaseColor.BLACK);
          
       Paragraph p = new Paragraph(graph.getId(), headerFont);      
