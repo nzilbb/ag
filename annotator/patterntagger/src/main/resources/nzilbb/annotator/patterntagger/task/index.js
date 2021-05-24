@@ -5,6 +5,8 @@ getVersion(version=>{
     document.getElementById("version").innerHTML = version;
 });
 
+var taskId = window.location.search.substring(1);
+
 // first, get the layer schema
 var schema = null;
 getSchema(s => {
@@ -64,13 +66,20 @@ getSchema(s => {
             document.getElementById("language").value = parameters.language;
             document.getElementById("deleteOnNoMatch").value = parameters.deleteOnNoMatch;
             destinationLayerId = document.getElementById("destinationLayerId");
-            destinationLayerId.value = parameters.destinationLayerId;
-            // if there's no option for that layer, add one
-            if (destinationLayerId.value != parameters.destinationLayerId) {
-                var layerOption = document.createElement("option");
-                layerOption.appendChild(document.createTextNode(parameters.destinationLayerId));
-                destinationLayerId.appendChild(layerOption);
+            // if there's no destination layer defined
+            if (!parameters.destinationLayerId
+                // but there's a layer named after the task
+                && schema.layers[taskId]) {
+                destinationLayerId.value = taskId;
+            } else { // there is a destination layer defined
                 destinationLayerId.value = parameters.destinationLayerId;
+                // if there's no option for that layer, add one
+                if (destinationLayerId.value != parameters.destinationLayerId) {
+                    var layerOption = document.createElement("option");
+                    layerOption.appendChild(document.createTextNode(parameters.destinationLayerId));
+                    destinationLayerId.appendChild(layerOption);
+                    destinationLayerId.value = parameters.destinationLayerId;
+                }
             }
             // insert current mappings
             if (!parameters.mappings) {
