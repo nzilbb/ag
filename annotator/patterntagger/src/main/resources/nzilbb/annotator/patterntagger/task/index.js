@@ -1,5 +1,3 @@
-// TODO handle phrase/spanning destination layer
-
 // show annotator version
 getVersion(version=>{
     document.getElementById("version").innerHTML = version;
@@ -18,7 +16,7 @@ getSchema(s => {
         sourceLayerId, schema,
         // this is a function that takes a layer and returns true for the ones we want
         layer => layer.id == schema.wordLayerId
-            || (layer.parentId == schema.wordLayerId && layer.alignment == 0));
+            || (layer.parentId == schema.wordLayerId && layer.id != "segment"));
     // default value:
     if (schema.layers["orthography"]) {
         sourceLayerId.value = "orthography";
@@ -195,7 +193,6 @@ function newMapping(pattern, label) {
     labelInput.style.textAlign = "center";
     labelInput.onfocus = function() { lastMapping = this.parentNode; };
 
-    // TODO <c:if test="${!spanningLayer}">
     var COPY_FROM_LAYER_TEXT = "Copy from layer: ";
     var copyFromLayer = document.createElement("select");
     copyFromLayer.className = "label-processing";
@@ -228,6 +225,10 @@ function newMapping(pattern, label) {
     if (copying) {
         labelInput.style.display = "none";
     }
+    // hide layer selection options for spanning layers
+    if (document.getElementById("destinationLayerParentId").value != schema.wordLayerId) {
+        copyFromLayer.style.display = "none";
+    }
     
     var arrow = document.createElement("span");
     arrow.innerHTML = " → ";
@@ -235,7 +236,6 @@ function newMapping(pattern, label) {
     divMapping.appendChild(patternInput);
     divMapping.patternInput = patternInput;
     divMapping.appendChild(arrow);
-    // TODO <c:if test="${!spanningLayer}">:
     divMapping.appendChild(copyFromLayer);    
     divMapping.appendChild(labelInput);
     divMapping.labelInput = labelInput;

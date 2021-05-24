@@ -25,7 +25,7 @@ label:after {
     content: ':';
 }
 form {
-    width: max-content;
+    width: 100vw;
 }
 .field {
     display: flex;
@@ -59,6 +59,19 @@ button img {
     height: 20px;
 }
 
+.label-processing {
+    max-width: 25%;
+}
+#mappings, #controls {
+    display: inline-block;
+    vertical-align: top;
+}
+#mappings {
+    width: 85%;
+}
+#controls {
+    height: 100%;
+}
 /* Layout on narrower screens */
 @media all and (max-width: 640px) {
     .field { flex-direction: column; }
