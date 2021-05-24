@@ -10,7 +10,7 @@
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.annotator.spanishphonology</artifactId>
   <name>nzilbb.annotator.spanishphonology</name>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.6.0</version>
 
   <properties>
     <package.path>nzilbb/annotator/spanishphonology/</package.path>
@@ -52,6 +52,7 @@
               <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
             </manifestEntries>
           </archive>
+          <outputDirectory>../../bin</outputDirectory>
         </configuration>
       </plugin>
     </plugins>
