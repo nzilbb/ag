@@ -114,11 +114,14 @@ public interface CloneableBean {
                } else if (value instanceof Map) {
                   JsonObjectBuilder map = Json.createObjectBuilder();
                   for (Object k : ((Map)value).keySet()) {
+                    if (k == null) continue;
                      Object v = ((Map)value).get(k);
-                     if (v instanceof CloneableBean) {
-                        map.add(k.toString(), ((CloneableBean)v).toJson());
-                     } else {
-                        map.add(k.toString(), v.toString());
+                     if (v != null) {
+                       if (v instanceof CloneableBean) {
+                         map.add(k.toString(), ((CloneableBean)v).toJson());
+                       } else {
+                         map.add(k.toString(), v.toString());
+                       }
                      }
                   }
                   json.add(key, map);
