@@ -213,7 +213,7 @@ function newMapping(pattern, label) {
         if (layer.parentId == schema.wordLayerId && layer.alignment == 0) { // word tag
             option = document.createElement("option");
             option.value = COPY_FROM_LAYER_TEXT + layer.id;
-            option.appendChild(document.createTextNode(COPY_FROM_LAYER_TEXT + layer.description));
+            option.appendChild(document.createTextNode(COPY_FROM_LAYER_TEXT + layer.id));
             if (label == COPY_FROM_LAYER_TEXT + layer.id) {
                 option.selected = true;
                 copying = true;
@@ -240,7 +240,8 @@ function newMapping(pattern, label) {
     divMapping.appendChild(patternInput);
     divMapping.patternInput = patternInput;
     divMapping.appendChild(arrow);
-    divMapping.appendChild(copyFromLayer);    
+    divMapping.appendChild(copyFromLayer);
+    divMapping.copyFromLayer = copyFromLayer;
     divMapping.appendChild(labelInput);
     divMapping.labelInput = labelInput;
 
@@ -328,7 +329,7 @@ function setTaskParameters(form) {
         var div = mappingDivs[m];
         parameters.mappings.push({
             pattern: div.patternInput.value,
-            label: div.labelInput.value
+            label: div.copyFromLayer.value||div.labelInput.value
         });
     }
     
