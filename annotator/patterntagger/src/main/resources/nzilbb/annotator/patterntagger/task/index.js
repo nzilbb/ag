@@ -53,6 +53,17 @@ getSchema(s => {
     getJSON("getTaskParameters", parameters => {
         if (parameters == null) {
             newMapping("", ""); // no parameters, start off with a blank one
+            if (schema.layers[taskId]) { // there's a layer named after the task
+                // select it
+                destinationLayerId.value = taskId;
+            } else if (/.+:.+/.test(taskId)) { // might be an 'auxiliary'?
+                var layerId = taskId.replace(/:.+/,"");
+                console.log("possible layer: " + layerId);
+                if (schema.layers[layerId]) { // there's a layer named after the task
+                    // select it
+                    destinationLayerId.value = layerId;
+                }
+            }
         } else {
             
             // set initial values of properties in the form
@@ -64,20 +75,13 @@ getSchema(s => {
             document.getElementById("language").value = parameters.language;
             document.getElementById("deleteOnNoMatch").value = parameters.deleteOnNoMatch;
             destinationLayerId = document.getElementById("destinationLayerId");
-            // if there's no destination layer defined
-            if (!parameters.destinationLayerId
-                // but there's a layer named after the task
-                && schema.layers[taskId]) {
-                destinationLayerId.value = taskId;
-            } else { // there is a destination layer defined
+            destinationLayerId.value = parameters.destinationLayerId;
+            // if there's no option for that layer, add one
+            if (destinationLayerId.value != parameters.destinationLayerId) {
+                var layerOption = document.createElement("option");
+                layerOption.appendChild(document.createTextNode(parameters.destinationLayerId));
+                destinationLayerId.appendChild(layerOption);
                 destinationLayerId.value = parameters.destinationLayerId;
-                // if there's no option for that layer, add one
-                if (destinationLayerId.value != parameters.destinationLayerId) {
-                    var layerOption = document.createElement("option");
-                    layerOption.appendChild(document.createTextNode(parameters.destinationLayerId));
-                    destinationLayerId.appendChild(layerOption);
-                    destinationLayerId.value = parameters.destinationLayerId;
-                }
             }
             // insert current mappings
             if (!parameters.mappings) {
