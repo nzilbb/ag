@@ -1148,7 +1148,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         new Parameter("doeLayer", Layer.class, "Date of Sample Attribute",
                       "Layer for recording the date the recording was elicited"));
     String[] doeLayerPossibilities = {
-      "transcriptdoe", "transcriptrecordingdate", "transcriptairedate", "transcriptcreationdate",
+      "transcriptdoe", "transcriptrecordingdate", "transcriptairdate", "transcriptcreationdate",
       "doe", "recordingdate", "airdate", "creationdate" };
     p.setValue(Utility.FindLayerById(
                  transcriptTagLayers, Arrays.asList(doeLayerPossibilities)));
