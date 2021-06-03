@@ -1867,7 +1867,7 @@ public class TestGraph
 
    }
 
-   @Test public void myAndList() 
+   @Test public void firstAndAll() 
    {
       Graph g = new Graph();
       g.setId("my graph");

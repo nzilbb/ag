@@ -7,7 +7,7 @@
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.ag</artifactId>
   <name>nzilbb.ag</name>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
   <packaging>jar</packaging>
   <description>Implementation of an Annotation Graph API for linguistic annotations.</description>
   <url>https://github.com/nzilbb/ag/</url>

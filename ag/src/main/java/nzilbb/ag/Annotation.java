@@ -1005,6 +1005,11 @@ public class Annotation
       if (getGraph() != null)
       {
          Layer layer = getGraph().getLayer(layerId);
+         if (layer == null) return null; // invalid layer
+         if (layer.getParentId() != null && layer.getParentId().equals(getLayerId())) {
+           // it's a child layer but we have no child (which would have been found above)
+           return null;
+         }
          Layer commonAncestorLayer = getLayer().getFirstCommonAncestor(layer);
          if (commonAncestorLayer == null) return null; // invalid layer
          if (commonAncestorLayer == graph.getSchema().getRoot())
