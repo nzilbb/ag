@@ -660,6 +660,25 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
    * @param newMorLayer Layer for %mor annotations.
     */
   public ChatSerialization setMorLayer(Layer newMorLayer) { morLayer = newMorLayer; return this; }
+
+  /**
+   * Split alternative MOR taggings into separate annotations.
+   * @see #getSplitMorTagGroups()
+   * @see #setSplitMorTagGroups(Boolean)
+   */
+  protected Boolean splitMorTagGroups = Boolean.FALSE;
+  /**
+   * Getter for {@link #splitMorTagGroups}: Split alternative MOR taggings into separate
+   * annotations. 
+   * @return Split alternative MOR taggings into separate annotations.
+   */
+  public Boolean getSplitMorTagGroups() { return splitMorTagGroups; }
+  /**
+   * Setter for {@link #splitMorTagGroups}: Split alternative MOR taggings into separate
+   * annotations. 
+   * @param newSplitMorTagGroups Split alternative MOR taggings into separate annotations.
+   */
+   public ChatSerialization setSplitMorTagGroups(Boolean newSplitMorTagGroups) { splitMorTagGroups = newSplitMorTagGroups; return this; }
   
   /**
    * Layer for unfilled pause annotations.
@@ -1155,7 +1174,18 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     if (includeTimeCodes.getValue() == null) {
       includeTimeCodes.setValue(Boolean.TRUE);
     }
-      
+
+    Parameter splitMorTagGroups = configuration.get("splitMorTagGroups");
+    if (splitMorTagGroups == null) {
+      splitMorTagGroups = new Parameter(
+        "splitMorTagGroups", Boolean.class, "Split MOR Tag Groups",
+        "Split alternative MOR taggings into separate annotations");
+      configuration.addParameter(splitMorTagGroups);
+    }
+    if (splitMorTagGroups.getValue() == null) {
+      splitMorTagGroups.setValue(Boolean.FALSE);
+    }
+
     return configuration;
   }
 
@@ -1818,7 +1848,13 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
             for (int t = 0; t < morTags.length; t++) {
               String morTag = morTags[t].trim();
               if (morLayer != null) {
-                graph.createTag(tokens[t], morLayer.getId(), morTag);
+                String[] morTagGroups = { morTag };
+                if (splitMorTagGroups) {
+                  morTagGroups = morTag.split("\\^");
+                }
+                for (String tag : morTagGroups) {
+                  graph.createTag(tokens[t], morLayer.getId(), tag);
+                }
               } 
             } // next token          
           }
