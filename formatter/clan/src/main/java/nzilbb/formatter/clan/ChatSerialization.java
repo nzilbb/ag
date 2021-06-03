@@ -45,6 +45,7 @@ import java.util.Vector;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
@@ -82,6 +83,9 @@ import nzilbb.util.TempFileInputStream;
  *       or <tt>the Saturday [/] in the morning</tt> </li> 
  *  <li> Errors - e.g. <tt>they've &lt;work up a hunger&gt; [* s:r]</tt> or <tt>they got
  *       [* m] to</tt> </li> 
+ *  <li> Pauses - untimed, (e.g. <tt>(.)</tt>, <tt>(...)</tt>), 
+ *       or timed (e.g. <tt>(0.15)</tt>, <tt>(2.)</tt>, <tt>(1:05.15)</tt>)  </li>
+ *  <li> <tt>%mor</tt> line annottions </li>
  * </ul>
  * @author Robert Fromont robert@fromont.net.nz
  */
@@ -641,6 +645,40 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
   public void setParticipantLayers(HashMap<String,Layer> newParticipantLayers) { participantLayers = newParticipantLayers; }
 
   /**
+   * Layer for %mor annotations.
+   * @see #getMorLayer()
+   * @see #setMorLayer(Layer)
+   */
+  protected Layer morLayer;
+  /**
+   * Getter for {@link #morLayer}: Layer for %mor annotations.
+   * @return Layer for %mor annotations.
+   */
+  public Layer getMorLayer() { return morLayer; }
+  /**
+   * Setter for {@link #morLayer}: Layer for %mor annotations.
+   * @param newMorLayer Layer for %mor annotations.
+    */
+  public ChatSerialization setMorLayer(Layer newMorLayer) { morLayer = newMorLayer; return this; }
+  
+  /**
+   * Layer for unfilled pause annotations.
+   * @see #getPauseLayer()
+   * @see #setPauseLayer(Layer)
+   */
+  protected Layer pauseLayer;
+  /**
+   * Getter for {@link #pauseLayer}: Layer for unfilled pause annotations.
+   * @return Layer for unfilled pause annotations.
+   */
+  public Layer getPauseLayer() { return pauseLayer; }
+  /**
+   * Setter for {@link #pauseLayer}: Layer for unfilled pause annotations.
+   * @param newPauseLayer Layer for unfilled pause annotations.
+   */
+  public ChatSerialization setPauseLayer(Layer newPauseLayer) { pauseLayer = newPauseLayer; return this; }
+
+  /**
    * Whether to include utterance time codes when exporting transcripts.
    * @see #getIncludeTimeCodes()
    * @see #setIncludeTimeCodes(Boolean)
@@ -786,6 +824,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     completionLayer = null;
     disfluencyLayer = null;
     nonWordLayer = null;
+    morLayer = null;
+    pauseLayer = null;
 
     if (configuration.size() > 0) {
       configuration.apply(this);
@@ -955,18 +995,38 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 
     p = configuration.containsKey("retracingLayer")?configuration.get("retracingLayer")
       :configuration.addParameter(
-        new Parameter("retracingLayer", Layer.class, "Retracing layer", "Layer for retracing annotations"));
+        new Parameter(
+          "retracingLayer", Layer.class, "Retracing layer", "Layer for retracing annotations"));
     String[] possibilities_retrace = {"retrace","retracing","correction"};
     if (p.getValue() == null) p.setValue(
       Utility.FindLayerById(possibleTurnChildLayers, Arrays.asList(possibilities_retrace)));
     p.setPossibleValues(possibleTurnChildLayers.values());
 
+    p = configuration.containsKey("pauseLayer")?
+      configuration.get("pauseLayer"):
+      configuration.addParameter(
+        new Parameter(
+          "pauseLayer", Layer.class, "Pause Layer", "Layer for marking unfilled pauses"));
+    String[] possibilities_pause = { "pause", "pauses", "silence" };
+    if (p.getValue() == null) p.setValue(
+      Utility.FindLayerById(possibleTurnChildLayers, Arrays.asList(possibilities_pause)));
+    p.setPossibleValues(possibleTurnChildLayers.values());
+
     p = configuration.containsKey("completionLayer")?configuration.get("completionLayer")
       :configuration.addParameter(
-        new Parameter("completionLayer", Layer.class, "Completion layer", "Layer for completion annotations"));
+        new Parameter(
+          "completionLayer", Layer.class, "Completion layer", "Layer for completion annotations"));
     String[] possibilities_completion = {"completion","completions"};
     if (p.getValue() == null) p.setValue(
       Utility.FindLayerById(wordTagLayers, Arrays.asList(possibilities_completion)));
+    p.setPossibleValues(wordTagLayers.values());
+
+    p = configuration.containsKey("morLayer")?configuration.get("morLayer")
+      :configuration.addParameter(
+        new Parameter("morLayer", Layer.class, "MOR layer", "Layer for morphosyntactic tags"));
+    String[] possibilities_mor = {"mor","morphosyntax"};
+    if (p.getValue() == null) p.setValue(
+      Utility.FindLayerById(wordTagLayers, Arrays.asList(possibilities_mor)));
     p.setPossibleValues(wordTagLayers.values());
 
     LinkedHashMap<String,Layer> possibleLayers = new LinkedHashMap<String,Layer>();
@@ -1101,12 +1161,19 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 
   /**
    * Loads the serialized form of the graph, using the given set of named streams.
-   * @param streams A list of named streams that contain all the transcription/annotation data required.
+   * @param streams A list of named streams that contain all the transcription/annotation
+   * data required. 
    * @param schema The layer schema, definining layers and the way they interrelate.
-   * @return A list of parameters that require setting before {@link GraphDeserializer#deserialize()} can be invoked. This may be an empty list, and may include parameters with the value already set to a workable default. If there are parameters, and user interaction is possible, then the user may be presented with an interface for setting/confirming these parameters, before they are then passed to {@link GraphDeserializer#setParameters(ParameterSet)}.
+   * @return A list of parameters that require setting before 
+   * {@link GraphDeserializer#deserialize()} can be invoked. This may be an empty list, and may
+   * include parameters with the value already set to a workable default. If there are
+   * parameters, and user interaction is possible, then the user may be presented with an
+   * interface for setting/confirming these parameters, before they are then passed to
+   * {@link GraphDeserializer#setParameters(ParameterSet)}. 
    * @throws SerializationException If the graph could not be loaded.
    * @throws IOException On IO error.
-   * @throws SerializerNotConfiguredException If the configuration is not sufficient for deserialization.
+   * @throws SerializerNotConfiguredException If the configuration is not sufficient for
+   * deserialization. 
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   public ParameterSet load(NamedStream[] streams, Schema schema)
@@ -1150,8 +1217,10 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
             || line.startsWith("*")
             // or the last line was time synchronized?
             || lines.lastElement().endsWith("")
-            // or the last line was a 'gem'?
-            || lines.lastElement().startsWith("@")
+            // or the line is a 'gem'?
+            || line.startsWith("@")
+            // or the line is a dependent tier?
+            || line.startsWith("%")
           ) { // this is a new utterance
           lines.add(line);
         } else { // last line was not time-synchronized, so append this line to it
@@ -1160,7 +1229,6 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
           // append this line to it
           lines.add(lastLine + " " + line);
         }
-        // TODO look for dependent tier lines to map to word/other layers e.g. "%mor: ..."
       }
 
       line = reader.readLine();
@@ -1191,7 +1259,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
    * returns a list.
    * @return A list of valid (if incomplete) {@link Graph}s. 
    * @throws SerializerNotConfiguredException if the object has not been configured.
-   * @throws SerializationParametersMissingException if the parameters for this particular graph have not been set.
+   * @throws SerializationParametersMissingException if the parameters for this particular
+   * graph have not been set. 
    * @throws SerializationException if errors occur during deserialization.
    */
   public Graph[] deserialize() 
@@ -1220,6 +1289,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     if (repetitionsLayer != null) graph.addLayer((Layer)repetitionsLayer.clone());
     if (retracingLayer != null) graph.addLayer((Layer)retracingLayer.clone());
     if (completionLayer != null) graph.addLayer((Layer)completionLayer.clone());
+    if (morLayer != null) graph.addLayer((Layer)morLayer.clone());
     if (gemLayer != null) graph.addLayer((Layer)gemLayer.clone());
     if (linkageLayer != null) graph.addLayer((Layer)linkageLayer.clone());
     if (cUnitLayer != null) graph.addLayer((Layer)cUnitLayer.clone());
@@ -1230,6 +1300,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     if (roomLayoutLayer != null) graph.addLayer((Layer)roomLayoutLayer.clone());
     if (recordingQualityLayer != null) graph.addLayer((Layer)recordingQualityLayer.clone());
     if (tapeLocationLayer != null) graph.addLayer((Layer)tapeLocationLayer.clone());
+    if (pauseLayer != null) graph.addLayer((Layer)pauseLayer.clone());
     for (String attribute : participantLayers.keySet()) {
       Layer layer = participantLayers.get(attribute);
       if (layer != null) {
@@ -1237,7 +1308,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       }
     } // next participant layer 
 
-      // graph meta data
+    // graph meta data
     for (String header : headers) {
       if (header.startsWith("@")) { // @ line
         int iColon = header.indexOf(':');
@@ -1247,7 +1318,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
             if (value.trim().length() > 0) {
               StringTokenizer tokens = new StringTokenizer(value, ", ");
               while (tokens.hasMoreTokens()) {
-                languages.add(tokens.nextToken());
+                String lang = tokens.nextToken(); // ISO639 alpha-2 code if possible
+                languages.add(iso639.alpha2(lang).orElse(lang));
               }
             }
           } else if (header.startsWith("@Participants:")) {
@@ -1277,6 +1349,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
             // @ID: language|corpus|code|age|sex|group|SES|role|education|custom|
             String[] tokens = value.split("\\|");
             String language = tokens.length<=0?"":tokens[0];
+            // ISO639 alpha-2 code if possible
+            language = iso639.alpha2(language).orElse(language);
             String corpus = tokens.length<=1?"":tokens[1];
             String code = tokens.length<=2?"":tokens[2];
             String age = tokens.length<=3?"":tokens[3];
@@ -1413,13 +1487,32 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     graph.addAnchor(lastAnchor);
     Anchor lastAlignedAnchor = null;
     boolean tierUnsupportedWarning = false; // only warn about ignoring tiers once
+    boolean parsingMor = morLayer != null;
+    graph.addLayer(new Layer("@mor", "MOR Spans")
+                   .setAlignment(Constants.ALIGNMENT_NONE)
+                   .setPeers(false).setPeersOverlap(false).setSaturated(true)
+                   .setParentId(turnLayer.getId()).setParentIncludes(true));
     for (String line : syncLines) {
-      if (line.startsWith("%")) {
-        if (!tierUnsupportedWarning) {
-          warnings.add("Dependent tiers are not currently parsed; ignoring lines like \""
-                       +line+"\"");
+      if (line.startsWith("%mor:")) {
+        // morphosyntactic tags
+        // remember this line for after the previous turn has been tokenized into words
+        String morLine = line.startsWith("%mor:")?line.substring("%mor:".length()):line;
+        morLine = morLine.trim();
+        Annotation mor = currentTurn.first("@mor");
+        if (mor != null) { // append to the previous tags
+          mor.setLabel(mor.getLabel() + " " + morLine);
+        } else {
+          mor = graph.createTag(lastUtterance, "@mor", morLine);
         }
-      }else if (line.startsWith("@")) {
+        
+      } else if (line.startsWith("%")) { // dependent tier
+        if (!tierUnsupportedWarning) {
+          warnings.add(
+            "Dependent tiers other than %mor are not currently parsed; ignoring lines like \""
+            +line+"\"");
+        }
+        
+      } else if (line.startsWith("@")) { // gem
         if (line.startsWith("@G") || line.startsWith("@Bg")) {
           if (gem != null) {
             gem.setEnd(lastAnchor);
@@ -1438,7 +1531,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
           graph.addAnnotation(gem);
           gem = null;
         }
-      } else {
+        
+      } else { // transcript line
         Matcher speakerMatcher = speakerPattern.matcher(line);
         if (speakerMatcher.matches()) { // setting the speaker, ID is 3 characters
           if (cUnit != null && getCUnitLayer() != null) { // add last c-unit
@@ -1592,8 +1686,18 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       spanningTransformer.transform(graph);	
       graph.commit();
 
-      // disfluencies
+      // pauses
       ConventionTransformer transformer = new ConventionTransformer(
+        // e.g. (.) (...) (0.15) (2.) (1:05.15)
+        getWordLayer().getId(), "\\(([0-9:]*\\.+[0-9]*)\\)");
+      if (pauseLayer != null) {
+        transformer.addDestinationResult(pauseLayer.getId(), "$1");
+      }
+      transformer.transform(graph).commit();      
+      graph.commit();
+
+      // disfluencies
+      transformer = new ConventionTransformer(
         getWordLayer().getId(), "&\\+(\\w+)");
       transformer.addDestinationResult(getWordLayer().getId(), "$1");
       if (getDisfluencyLayer() != null) {
@@ -1697,6 +1801,31 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       } // next span	
       graph.commit();
 
+      // match %mor annotations with their tokens
+      for (Annotation m : graph.all("@mor")) {
+        if (parsingMor) {
+          String[] morTags = m.getLabel().split(" ");
+          Annotation[] tokens = m.getParent().all(wordLayer.getId());
+          if (morTags.length != tokens.length) {
+            if (errors == null) errors = new SerializationException();
+            errors.addError(
+              SerializationException.ErrorType.Tokenization,
+              "Number of %mor tags ("+Arrays.asList(morTags)
+              +") does not match number of tokens ("
+              +Arrays.stream(tokens).map(t->t.getLabel()).collect(Collectors.toList())+")");
+          } else {
+            // tag each token
+            for (int t = 0; t < morTags.length; t++) {
+              String morTag = morTags[t].trim();
+              if (morLayer != null) {
+                graph.createTag(tokens[t], morLayer.getId(), morTag);
+              } 
+            } // next token          
+          }
+        } // %mor
+        m.destroy();
+      } // next mor 
+        
       // set all annotations to manual confidence
       for (Annotation a : graph.getAnnotationsById().values()) {
         a.setConfidence(Constants.CONFIDENCE_MANUAL);
@@ -2079,7 +2208,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 
       // more metadata
       if (dateLayer != null) {
-        Annotation annotation = graph.my(dateLayer.getId());
+        Annotation annotation = graph.first(dateLayer.getId());
         if (annotation != null) {
           writer.print("@Date:\t");
           SimpleDateFormat chatDateFormat
@@ -2098,28 +2227,28 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
         } // there is an annotation
       } // layer is set
       if (locationLayer != null) {
-        Annotation annotation = graph.my(locationLayer.getId());
+        Annotation annotation = graph.first(locationLayer.getId());
         if (annotation != null) {
           writer.print("@Location:\t");
           writer.println(annotation.getLabel());
         } // there is an annotation
       } // layer is set
       if (recordingQualityLayer != null) {
-        Annotation annotation = graph.my(recordingQualityLayer.getId());
+        Annotation annotation = graph.first(recordingQualityLayer.getId());
         if (annotation != null) {
           writer.print("@Recording Quality:\t");
           writer.println(annotation.getLabel());
         } // there is an annotation
       } // layer is set
       if (roomLayoutLayer != null) {
-        Annotation annotation = graph.my(roomLayoutLayer.getId());
+        Annotation annotation = graph.first(roomLayoutLayer.getId());
         if (annotation != null) {
           writer.print("@Room Layout:\t");
           writer.println(annotation.getLabel());
         } // there is an annotation
       } // layer is set
       if (tapeLocationLayer != null) {
-        Annotation annotation = graph.my(tapeLocationLayer.getId());
+        Annotation annotation = graph.first(tapeLocationLayer.getId());
         if (annotation != null) {
           writer.print("@Tape Location:\t");
           writer.println(annotation.getLabel());

@@ -95,7 +95,7 @@ public class TestChatSerialization {
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(28, deserializer.configure(configuration, schema).size());
+      assertEquals(30, deserializer.configure(configuration, schema).size());
 
       // load the stream
       ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -547,7 +547,7 @@ public class TestChatSerialization {
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(28, deserializer.configure(configuration, schema).size());
+      assertEquals(30, deserializer.configure(configuration, schema).size());
 
       // load the stream
       ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -732,6 +732,332 @@ public class TestChatSerialization {
                       Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
       }
    }
+  
+   @Test public void deserializeMor()  throws Exception {
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("transcript_date", "Recording date")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_location", "Location")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_recording_quality", "Recording quality")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_room_layout", "Room layout")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_tape_location", "Tape location")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcriber", "Transcribers", 0, true, true, true),
+	 new Layer("languages", "Graph language", 0, true, true, true),
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("language", "Speaker language", 0, false, false, true, "who", true),
+	 new Layer("corpus", "Speaker corpus", 0, false, false, true, "who", true),
+	 new Layer("role", "Speaker role", 0, false, false, true, "who", true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("c-unit", "C-Units", 2, true, false, false, "turn", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("linkage", "Linkages", 2, true, false, false, "turn", true),
+	 new Layer("error", "Errors", 2, true, false, false, "turn", true),
+	 new Layer("retracing", "Retracing", 2, true, false, false, "turn", true),
+	 new Layer("repetition", "Repetitions", 2, true, false, false, "turn", true),
+	 new Layer("pause", "Unfilled pauses", 2, true, false, false, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true),
+	 new Layer("completion", "Completion", 0, true, false, false, "word", true),
+	 new Layer("expansion", "Expansion", 0, false, false, true, "word", true),
+	 new Layer("disfluency", "Disfluency", 0, false, false, true, "word", true),
+	 new Layer("mor", "%mor tags", 0, false, false, true, "word", true),
+	 new Layer("gem", "Gems", 2, true, false, true));
+      // access file
+      NamedStream[] streams = { new NamedStream(new File(getDir(), "griffin-mor.cha")) };
+      
+      // create deserializer
+      ChatSerialization deserializer = new ChatSerialization();
+      
+      // general configuration
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals(30, deserializer.configure(configuration, schema).size());
+      assertEquals("MOR layer", "mor",
+                   ((Layer)configuration.get("morLayer").getValue()).getId());
+      assertEquals("Pause layer", "pause",
+                   ((Layer)configuration.get("pauseLayer").getValue()).getId());
+      
+      // load the stream
+      ParameterSet defaultParamaters = deserializer.load(streams, schema);
+      // for (Parameter p : defaultParamaters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+
+      // configure the deserialization
+      deserializer.setParameters(defaultParamaters);
+
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      for (String warning : deserializer.getWarnings()) System.out.println(warning);
+      Graph g = graphs[0];
+
+      for (String warning : deserializer.getWarnings()) {
+	 System.out.println(warning);
+      }
+
+      // meta data
+      assertEquals("griffin-mor.cha", g.getId());
+      String[] transcribers = g.labels("transcriber"); 
+      assertEquals(1, transcribers.length);
+      assertEquals("SH", transcribers[0]);
+      
+      String[] languages = g.labels("languages"); 
+      assertEquals(1, languages.length);
+      assertEquals("ISO639 alpha3 is converted to alpha2", "en", languages[0]);
+      
+      // participants     
+      assertEquals(5, g.all("who").length);
+      assertEquals("Nick_Griffin", g.getAnnotation("GRI").getLabel());
+      assertEquals("who", g.getAnnotation("GRI").getLayerId());
+      assertEquals("Dimbleby", g.getAnnotation("DIM").getLabel());
+      assertEquals("who", g.getAnnotation("DIM").getLayerId());
+      assertEquals("Pause", g.getAnnotation("PPP").getLabel());
+      assertEquals("who", g.getAnnotation("PPP").getLayerId());
+      assertEquals("Applause", g.getAnnotation("APP").getLabel());
+      assertEquals("who", g.getAnnotation("APP").getLayerId());
+      assertEquals("Unknown", g.getAnnotation("UNK").getLabel());
+      assertEquals("who", g.getAnnotation("UNK").getLayerId());
+
+      // participant meta data
+      assertEquals("ISO639 alpha3 is converted to alpha2",
+                   "en", g.getAnnotation("GRI").first("language").getLabel());
+      assertEquals("ISO639 alpha3 is converted to alpha2",
+                   "en", g.getAnnotation("DIM").first("language").getLabel());
+      assertEquals("ISO639 alpha3 is converted to alpha2",
+                   "en", g.getAnnotation("PPP").first("language").getLabel());
+      assertEquals("ISO639 alpha3 is converted to alpha2",
+                   "en", g.getAnnotation("APP").first("language").getLabel());
+      assertEquals("ISO639 alpha3 is converted to alpha2",
+                   "en", g.getAnnotation("UNK").first("language").getLabel());
+      assertEquals("change_corpus_later", g.getAnnotation("GRI").first("corpus").getLabel());
+      assertEquals("change_corpus_later", g.getAnnotation("DIM").first("corpus").getLabel());
+      assertEquals("change_corpus_later", g.getAnnotation("PPP").first("corpus").getLabel());
+      assertEquals("change_corpus_later", g.getAnnotation("APP").first("corpus").getLabel());
+      assertEquals("change_corpus_later", g.getAnnotation("UNK").first("corpus").getLabel());
+      assertEquals("Participant", g.getAnnotation("GRI").first("role").getLabel());
+      assertEquals("Participant", g.getAnnotation("DIM").first("role").getLabel());
+      assertEquals("Unidentified", g.getAnnotation("PPP").first("role").getLabel());
+      assertEquals("Unidentified", g.getAnnotation("APP").first("role").getLabel());
+      assertEquals("Unidentified", g.getAnnotation("UNK").first("role").getLabel());
+
+      Annotation[] gems = g.all("gem");
+      assertEquals(1, gems.length);
+      assertEquals("Gem label", "denial", gems[0].getLabel());
+      assertEquals("Gen start", Double.valueOf(9.929), gems[0].getStart().getOffset());
+      assertEquals("Gen end", Double.valueOf(18.053), gems[0].getEnd().getOffset());
+
+      // turns
+      Annotation[] turns = g.all("turn");
+      assertEquals("Number of turns correct", 32, turns.length);
+
+      // utterances
+      Annotation[] utterances = g.all("utterance");
+      assertEquals("Number of utterances correct", 44, utterances.length);
+      Annotation[] words = g.all("turn")[1].all("word");
+      String[] wordLabels = {
+	"without", "a", "shadow", "of", "a", "doubt", "i", "appreciate",
+	"that", "if", "you", "look", "at", "some", "of", "the", "things", "i'm", "quoted",
+	"as", "having", "said↗",
+	"in", "the", "daily", "mail", "n", "dai-", "an'", "so", "on",
+	"i'd", "be", "a", "↑monster↘" };
+      for (int i = 0; i < wordLabels.length; i++) {
+	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
+      }
+      for (int i = 0; i < words.length; i++) {
+	 assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
+	 	      i+1, words[i].getOrdinal());
+      }
+
+      // morphosyntactic tags
+      Annotation[] mor = g.all("turn")[1].all("mor");
+      String[] morLabels = {
+	"prep|without", "det:art|a", "n|shadow^v|shadow", "prep|of", "det:art|a",
+        "n|doubt^v|doubt", "n:let|i", "v|appreciate",
+        "comp|that^pro:rel|that^pro:dem|that^det:dem|that", "comp|if^conj|if", "pro:per|you",
+        "cop|look^co|look^n|look^v|look", "prep|at", "qn|some^pro:indef|some", "prep|of",
+        "det:art|the", "n|thing-PL", "n:let|i~aux|be&1S^n:let|i~cop|be&1S",
+        "part|quote-PASTP^v|quote-PAST",
+	"adv|as^conj|as^prep|as", "aux|have-PRESP^n:gerund|have-PRESP^part|have-PRESP",
+        "part|say&PASTP^v|say&PAST",
+	"prep|in^adv|in", "det:art|the", "adv:tem|day&dn-LY^adj|daily", "n|mail^v|mail",
+        "n:let|n", "?|dai–", "?|an'", "co|so^adv|so^conj|so", "prep|on^adv|on",
+	"n:let|i~mod|genmod", "cop|be^aux|be", "det:art|a", "n|monster" };
+      for (int i = 0; i < wordLabels.length; i++) {
+	 assertEquals("mor labels " + i, morLabels[i], mor[i].getLabel());
+      }
+      
+      // pauses
+      Annotation[] pauses = g.all("pause");
+      String[] pauseLabels = {
+	"3.1", ".", "0.3", "0.2", "0.2", "0.6", "0.3", "0.2", "0.7", "0.3", "0.3", "0.2", "0.5",
+	"0.2", "0.2", "3.0", "6.0", "1.3", "0.4", "1.4", "0.8", "0.7", "0.4" };
+      assertEquals("Number of pauses correct", pauseLabels.length, pauses.length);
+      for (int i = 0; i < pauseLabels.length; i++) {
+	 assertEquals("pause labels " + i, pauseLabels[i], pauses[i].getLabel());
+      }
+
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
+
+   }
+  
+   @Test public void canIgnorePausesAndMor()  throws Exception {
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("transcript_date", "Recording date")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_location", "Location")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_recording_quality", "Recording quality")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_room_layout", "Room layout")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_tape_location", "Tape location")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcriber", "Transcribers", 0, true, true, true),
+	 new Layer("languages", "Graph language", 0, true, true, true),
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("language", "Speaker language", 0, false, false, true, "who", true),
+	 new Layer("corpus", "Speaker corpus", 0, false, false, true, "who", true),
+	 new Layer("role", "Speaker role", 0, false, false, true, "who", true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("c-unit", "C-Units", 2, true, false, false, "turn", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("linkage", "Linkages", 2, true, false, false, "turn", true),
+	 new Layer("error", "Errors", 2, true, false, false, "turn", true),
+	 new Layer("retracing", "Retracing", 2, true, false, false, "turn", true),
+	 new Layer("repetition", "Repetitions", 2, true, false, false, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true),
+	 new Layer("completion", "Completion", 0, true, false, false, "word", true),
+	 new Layer("expansion", "Expansion", 0, false, false, true, "word", true),
+	 new Layer("disfluency", "Disfluency", 0, false, false, true, "word", true),
+	 new Layer("gem", "Gems", 2, true, false, true));
+      // access file
+      NamedStream[] streams = { new NamedStream(new File(getDir(), "griffin-mor.cha")) };
+      
+      // create deserializer
+      ChatSerialization deserializer = new ChatSerialization();
+      
+      // general configuration
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals(30, deserializer.configure(configuration, schema).size());
+      assertNull("No MOR layer", 
+                 configuration.get("morLayer").getValue());
+      assertNull("No pause layer", 
+                 configuration.get("pauseLayer").getValue());
+      
+      // load the stream
+      ParameterSet defaultParamaters = deserializer.load(streams, schema);
+      // for (Parameter p : defaultParamaters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+
+      // configure the deserialization
+      deserializer.setParameters(defaultParamaters);
+
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      for (String warning : deserializer.getWarnings()) System.out.println(warning);
+      Graph g = graphs[0];
+
+      for (String warning : deserializer.getWarnings()) {
+	 System.out.println(warning);
+      }
+
+      // meta data
+      assertEquals("griffin-mor.cha", g.getId());
+      String[] transcribers = g.labels("transcriber"); 
+      assertEquals(1, transcribers.length);
+      assertEquals("SH", transcribers[0]);
+      
+      String[] languages = g.labels("languages"); 
+      assertEquals(1, languages.length);
+      assertEquals("ISO639 alpha3 is converted to alpha2", "en", languages[0]);
+      
+      // participants     
+      assertEquals(5, g.all("who").length);
+      assertEquals("Nick_Griffin", g.getAnnotation("GRI").getLabel());
+      assertEquals("who", g.getAnnotation("GRI").getLayerId());
+      assertEquals("Dimbleby", g.getAnnotation("DIM").getLabel());
+      assertEquals("who", g.getAnnotation("DIM").getLayerId());
+      assertEquals("Pause", g.getAnnotation("PPP").getLabel());
+      assertEquals("who", g.getAnnotation("PPP").getLayerId());
+      assertEquals("Applause", g.getAnnotation("APP").getLabel());
+      assertEquals("who", g.getAnnotation("APP").getLayerId());
+      assertEquals("Unknown", g.getAnnotation("UNK").getLabel());
+      assertEquals("who", g.getAnnotation("UNK").getLayerId());
+
+      // participant meta data
+      assertEquals("ISO639 alpha3 is converted to alpha2",
+                   "en", g.getAnnotation("GRI").first("language").getLabel());
+      assertEquals("ISO639 alpha3 is converted to alpha2",
+                   "en", g.getAnnotation("DIM").first("language").getLabel());
+      assertEquals("ISO639 alpha3 is converted to alpha2",
+                   "en", g.getAnnotation("PPP").first("language").getLabel());
+      assertEquals("ISO639 alpha3 is converted to alpha2",
+                   "en", g.getAnnotation("APP").first("language").getLabel());
+      assertEquals("ISO639 alpha3 is converted to alpha2",
+                   "en", g.getAnnotation("UNK").first("language").getLabel());
+      assertEquals("change_corpus_later", g.getAnnotation("GRI").first("corpus").getLabel());
+      assertEquals("change_corpus_later", g.getAnnotation("DIM").first("corpus").getLabel());
+      assertEquals("change_corpus_later", g.getAnnotation("PPP").first("corpus").getLabel());
+      assertEquals("change_corpus_later", g.getAnnotation("APP").first("corpus").getLabel());
+      assertEquals("change_corpus_later", g.getAnnotation("UNK").first("corpus").getLabel());
+      assertEquals("Participant", g.getAnnotation("GRI").first("role").getLabel());
+      assertEquals("Participant", g.getAnnotation("DIM").first("role").getLabel());
+      assertEquals("Unidentified", g.getAnnotation("PPP").first("role").getLabel());
+      assertEquals("Unidentified", g.getAnnotation("APP").first("role").getLabel());
+      assertEquals("Unidentified", g.getAnnotation("UNK").first("role").getLabel());
+
+      Annotation[] gems = g.all("gem");
+      assertEquals(1, gems.length);
+      assertEquals("Gem label", "denial", gems[0].getLabel());
+      assertEquals("Gen start", Double.valueOf(9.929), gems[0].getStart().getOffset());
+      assertEquals("Gen end", Double.valueOf(18.053), gems[0].getEnd().getOffset());
+
+      // turns
+      Annotation[] turns = g.all("turn");
+      assertEquals("Number of turns correct", 32, turns.length);
+
+      // utterances
+      Annotation[] utterances = g.all("utterance");
+      assertEquals("Number of utterances correct", 44, utterances.length);
+      Annotation[] words = g.all("turn")[1].all("word");
+      String[] wordLabels = {
+	"without", "a", "shadow", "of", "a", "doubt", "i", "appreciate",
+	"that", "if", "you", "look", "at", "some", "of", "the", "things", "i'm", "quoted",
+	"as", "having", "said↗",
+	"in", "the", "daily", "mail", "n", "dai-", "an'", "so", "on",
+	"i'd", "be", "a", "↑monster↘" };
+      for (int i = 0; i < wordLabels.length; i++) {
+	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
+      }
+      for (int i = 0; i < words.length; i++) {
+	 assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
+	 	      i+1, words[i].getOrdinal());
+      }
+
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
+
+   }
 
    @Test public void serialize() throws Exception {
       Schema schema = new Schema(
@@ -870,7 +1196,7 @@ public class TestChatSerialization {
       ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
       //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
       configuration = serializer.configure(configuration, schema);
-      assertEquals(28, configuration.size());
+      assertEquals(30, configuration.size());
       assertEquals("scribe attribute", "scribe", 
 		   ((Layer)configuration.get("transcriberLayer").getValue()).getId());
       assertEquals("languages attribute", "transcript_language", 
@@ -886,14 +1212,18 @@ public class TestChatSerialization {
       assertEquals("includeTimeCodes", Boolean.TRUE, 
 		   configuration.get("includeTimeCodes").getValue());
       assertNull("date attribute", 
-		   configuration.get("dateLayer").getValue());
+                 configuration.get("dateLayer").getValue());
       assertNull("recording quality attribute",
-		   configuration.get("recordingQualityLayer").getValue());
+                 configuration.get("recordingQualityLayer").getValue());
       assertNull("room layout attribute", 
-		   configuration.get("roomLayoutLayer").getValue());
+                 configuration.get("roomLayoutLayer").getValue());
       assertNull("tape location attribute",
-		   configuration.get("tapeLocationLayer").getValue());
-
+                 configuration.get("tapeLocationLayer").getValue());
+      assertNull("No mor layer", 
+                 configuration.get("morLayer").getValue());
+      assertNull("No pause layer", 
+                 configuration.get("pauseLayer").getValue());
+      
       LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
          Arrays.asList(serializer.getRequiredLayers()));
       assertEquals("Needed layers: " + needLayers,
@@ -1102,7 +1432,7 @@ public class TestChatSerialization {
       // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
       configuration.get("includeTimeCodes").setValue(Boolean.FALSE);
       configuration = serializer.configure(configuration, schema);
-      assertEquals(28, configuration.size());
+      assertEquals(30, configuration.size());
       assertEquals("scribe attribute", "scribe", 
 		   ((Layer)configuration.get("transcriberLayer").getValue()).getId());
       assertEquals("languages attribute", "transcript_language", 
@@ -1125,6 +1455,10 @@ public class TestChatSerialization {
                    ((Layer)configuration.get("ageLayer").getValue()).getId());
       assertEquals("includeTimeCodes", Boolean.FALSE, 
 		   configuration.get("includeTimeCodes").getValue());
+      assertNull("No mor layer", 
+                 configuration.get("morLayer").getValue());
+      assertNull("No pause layer", 
+                 configuration.get("pauseLayer").getValue());
 
       LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
          Arrays.asList(serializer.getRequiredLayers()));
