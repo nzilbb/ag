@@ -660,13 +660,13 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
    * @param newMorLayer Layer for %mor annotations.
     */
   public ChatSerialization setMorLayer(Layer newMorLayer) { morLayer = newMorLayer; return this; }
-
+  
   /**
    * Split alternative MOR taggings into separate annotations.
    * @see #getSplitMorTagGroups()
    * @see #setSplitMorTagGroups(Boolean)
    */
-  protected Boolean splitMorTagGroups = Boolean.FALSE;
+  protected Boolean splitMorTagGroups = Boolean.TRUE;
   /**
    * Getter for {@link #splitMorTagGroups}: Split alternative MOR taggings into separate
    * annotations. 
@@ -678,7 +678,35 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
    * annotations. 
    * @param newSplitMorTagGroups Split alternative MOR taggings into separate annotations.
    */
-   public ChatSerialization setSplitMorTagGroups(Boolean newSplitMorTagGroups) { splitMorTagGroups = newSplitMorTagGroups; return this; }
+  public ChatSerialization setSplitMorTagGroups(Boolean newSplitMorTagGroups) { splitMorTagGroups = newSplitMorTagGroups; return this; }
+  
+  /**
+   * Split MOR word groups into separate annotations. This is only supported when
+   * {@link #getSplitMorTagGroups()} is true.
+   * @see #getSplitMorWordGroups()
+   * @see #setSplitMorWordGroups(Booelan)
+   */
+  protected Boolean splitMorWordGroups = Boolean.TRUE;
+  /**
+   * Getter for {@link #splitMorWordGroups}: Split MOR word groups into separate
+   * annotations.This is only supported when {@link #getSplitMorTagGroups()} is true.
+   * @return Split MOR word groups into separate annotations.
+   */
+  public Boolean getSplitMorWordGroups() { return splitMorWordGroups; }
+  /**
+   * Setter for {@link #splitMorWordGroups}: Split MOR word groups into separate annotations.
+   * @param newSplitMorWordGroups Split MOR word groups into separate annotations.
+   */
+  public ChatSerialization setSplitMorWordGroups(Boolean newSplitMorWordGroups) { splitMorWordGroups = newSplitMorWordGroups; return this; }
+  
+
+  // TODO prefixLayer #
+  // TODO posLayer part-of-speech
+  // TODO posSubcategoryLayer :subcategory
+  // TODO |stemLayer
+  // TODO &fusionalSuffixLayer
+  // TODO -suffixLayer
+  // TODO =englishGlossLayer
   
   /**
    * Layer for unfilled pause annotations.
@@ -859,6 +887,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     LinkedHashMap<String,Layer> possibleTurnLayers = new LinkedHashMap<String,Layer>();
     LinkedHashMap<String,Layer> possibleTurnChildLayers = new LinkedHashMap<String,Layer>();
     LinkedHashMap<String,Layer> wordTagLayers = new LinkedHashMap<String,Layer>();
+    LinkedHashMap<String,Layer> wordChildLayers = new LinkedHashMap<String,Layer>();
     LinkedHashMap<String,Layer> participantTagLayers = new LinkedHashMap<String,Layer>();
     if (getParticipantLayer() == null || getTurnLayer() == null 
         || getUtteranceLayer() == null || getWordLayer() == null) {
@@ -882,6 +911,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                         // unaligned children of word
                         wordTagLayers.put(tag.getId(), tag);
                       }
+                      wordChildLayers.put(tag.getId(), tag);
                     } // next possible word tag layer
                   }
                 } // next possible turn child layer
@@ -901,6 +931,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
             && tag.getChildren().size() == 0) {
           wordTagLayers.put(tag.getId(), tag);
         }
+        wordChildLayers.put(tag.getId(), tag);
       } // next possible word tag layer
       for (Layer tag : getParticipantLayer().getChildren().values()) {
         if (tag.getAlignment() == Constants.ALIGNMENT_NONE
@@ -1045,8 +1076,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
         new Parameter("morLayer", Layer.class, "MOR layer", "Layer for morphosyntactic tags"));
     String[] possibilities_mor = {"mor","morphosyntax"};
     if (p.getValue() == null) p.setValue(
-      Utility.FindLayerById(wordTagLayers, Arrays.asList(possibilities_mor)));
-    p.setPossibleValues(wordTagLayers.values());
+      Utility.FindLayerById(wordChildLayers, Arrays.asList(possibilities_mor)));
+    p.setPossibleValues(wordChildLayers.values());
 
     LinkedHashMap<String,Layer> possibleLayers = new LinkedHashMap<String,Layer>();
     for (Layer top : schema.getRoot().getChildren().values()) {
@@ -1172,7 +1203,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       configuration.addParameter(includeTimeCodes);
     }
     if (includeTimeCodes.getValue() == null) {
-      includeTimeCodes.setValue(Boolean.TRUE);
+      includeTimeCodes.setValue(this.includeTimeCodes);
     }
 
     Parameter splitMorTagGroups = configuration.get("splitMorTagGroups");
@@ -1183,7 +1214,18 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       configuration.addParameter(splitMorTagGroups);
     }
     if (splitMorTagGroups.getValue() == null) {
-      splitMorTagGroups.setValue(Boolean.FALSE);
+      splitMorTagGroups.setValue(this.splitMorTagGroups);
+    }
+    
+    Parameter splitMorWordGroups = configuration.get("splitMorWordGroups");
+    if (splitMorWordGroups == null) {
+      splitMorWordGroups = new Parameter(
+        "splitMorWordGroups", Boolean.class, "Split MOR Word Groups",
+        "Split MOR word morphemes (clitics, components of compounds ) into separate annotations. This is only supported when Split MOR Tag Groups is also enabled.");
+      configuration.addParameter(splitMorWordGroups);
+    }
+    if (splitMorWordGroups.getValue() == null) {
+      splitMorWordGroups.setValue(this.splitMorWordGroups);
     }
 
     return configuration;
@@ -1846,15 +1888,52 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
           } else {
             // tag each token
             for (int t = 0; t < morTags.length; t++) {
+              Annotation token = tokens[t];
               String morTag = morTags[t].trim();
               if (morLayer != null) {
-                String[] morTagGroups = { morTag };
-                if (splitMorTagGroups) {
-                  morTagGroups = morTag.split("\\^");
-                }
-                for (String tag : morTagGroups) {
-                  graph.createTag(tokens[t], morLayer.getId(), tag);
-                }
+                if (!splitMorTagGroups) { // one big fat complex label
+                  graph.createTag(token, morLayer.getId(), morTag);
+                } else { // splitMorTagGroups
+                  String[] morTagGroup = morTag.split("\\^");
+                  if (!splitMorWordGroups) { // several complex labels
+                    for (String tag : morTagGroup) {
+                      graph.createTag(token, morLayer.getId(), tag);
+                    } // next tag group
+                  } else { // splitMorWordGroups
+                    // word groups are structures: preclitic$word~postclitic
+                    // e.g. dámelo: "vimpsh|da-2S&IMP~pro:clit|1S~pro:clit|OBJ&MASC=give"
+                    // - vimpsh|da-2S&IMP
+                    // - pro:clit|1S
+                    // - pro:clit|OBJ&MASC=give
+                    // or overall+component+component
+                    // e.g. angelfish: "n|+n|angel+n|fish"
+                    // - n|
+                    // - n|angel
+                    // - n|fish
+                    Vector<String> wordLabels = new Vector<String>();
+                    for (String wordGroup : morTagGroup) {
+                      // tag groups are temporally sequential, so each one is chained
+                      // across the duration of the word
+                      String[] words = wordGroup.split("[$+~]");
+                      Annotation lastTag = null;
+                      for (String subword : words) {
+                        Annotation tag = new Annotation()
+                          .setLayerId(morLayer.getId())
+                          .setLabel(subword)
+                          .setParentId(token.getId());
+                        if (lastTag == null) {
+                          tag.setStartId(token.getStartId());
+                        } else { // chain the end of the last subword the start of this subword
+                          tag.setStartId(graph.addAnchor(new Anchor()).getId());
+                          lastTag.setEndId(tag.getStartId());
+                        }
+                        tag.setEndId(token.getEndId());
+                        graph.addAnnotation(tag);
+                        lastTag = tag;
+                      } // next subword
+                    } // next word group
+                  } // splitMorWordGroups
+                } // splitMorTagGroups
               } 
             } // next token          
           }
