@@ -699,14 +699,126 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
    */
   public ChatSerialization setSplitMorWordGroups(Boolean newSplitMorWordGroups) { splitMorWordGroups = newSplitMorWordGroups; return this; }
   
-
-  // TODO prefixLayer #
-  // TODO posLayer part-of-speech
-  // TODO posSubcategoryLayer :subcategory
-  // TODO |stemLayer
-  // TODO &fusionalSuffixLayer
-  // TODO -suffixLayer
-  // TODO =englishGlossLayer
+  /**
+   * Layer for prefixes in MOR tags.
+   * @see #getMorPrefixLayer()
+   * @see #setMorPrefixLayer(Layer)
+   */
+  protected Layer morPrefixLayer;
+  /**
+   * Getter for {@link #morPrefixLayer}: Layer for prefixes in MOR tags.
+   * @return Layer for prefixes in MOR tags.
+   */
+  public Layer getMorPrefixLayer() { return morPrefixLayer; }
+  /**
+   * Setter for {@link #morPrefixLayer}: Layer for prefixes in MOR tags.
+   * @param newMorPrefixLayer Layer for prefixes in MOR tags.
+   */
+  public ChatSerialization setMorPrefixLayer(Layer newMorPrefixLayer) { morPrefixLayer = newMorPrefixLayer; return this; }
+  
+  /**
+   * Layer for parts-of-speech in MOR tags.
+   * @see #getMorPartOfSpeechLayer()
+   * @see #setMorPartOfSpeechLayer(Layer)
+   */
+  protected Layer morPartOfSpeechLayer;
+  /**
+   * Getter for {@link #morPartOfSpeechLayer}: Layer for parts-of-speech in MOR tags.
+   * @return Layer for parts-of-speech in MOR tags.
+   */
+  public Layer getMorPartOfSpeechLayer() { return morPartOfSpeechLayer; }
+  /**
+   * Setter for {@link #morPartOfSpeechLayer}: Layer for parts-of-speech in MOR tags.
+   * @param newMorPartOfSpeechLayer Layer for parts-of-speech in MOR tags.
+   */
+  public ChatSerialization setMorPartOfSpeechLayer(Layer newMorPartOfSpeechLayer) { morPartOfSpeechLayer = newMorPartOfSpeechLayer; return this; }
+  
+  /**
+   * Layer for part-of-speech subcategories in MOR tags.
+   * @see #getMorPartOfSpeechSubcategoryLayer()
+   * @see #setMorPartOfSpeechSubcategoryLayer(Layer)
+   */
+  protected Layer morPartOfSpeechSubcategoryLayer;
+  /**
+   * Getter for {@link #morPartOfSpeechSubcategoryLayer}: Layer for part-of-speech
+   * subcategories in MOR tags. 
+   * @return Layer for part-of-speech subcategories in MOR tags.
+   */
+  public Layer getMorPartOfSpeechSubcategoryLayer() { return morPartOfSpeechSubcategoryLayer; }
+  /**
+   * Setter for {@link #morPartOfSpeechSubcategoryLayer}: Layer for part-of-speech
+   * subcategories in MOR tags. 
+   * @param newMorPartOfSpeechSubcategoryLayer Layer for part-of-speech subcategories in MOR tags.
+   */
+  public ChatSerialization setMorPartOfSpeechSubcategoryLayer(Layer newMorPartOfSpeechSubcategoryLayer) { morPartOfSpeechSubcategoryLayer = newMorPartOfSpeechSubcategoryLayer; return this; }
+  
+  /**
+   * Layer for stems in MOR tags.
+   * @see #getMorStemLayer()
+   * @see #setMorStemLayer(Layer)
+   */
+  protected Layer morStemLayer;
+  /**
+   * Getter for {@link #morStemLayer}: Layer for stems in MOR tags.
+   * @return Layer for stems in MOR tags.
+   */
+  public Layer getMorStemLayer() { return morStemLayer; }
+  /**
+   * Setter for {@link #morStemLayer}: Layer for stems in MOR tags.
+   * @param newMorStemLayer Layer for stems in MOR tags.
+   */
+  public ChatSerialization setMorStemLayer(Layer newMorStemLayer) { morStemLayer = newMorStemLayer; return this; }
+  
+  /**
+   * Layer for fusional suffixes in MOR tags.
+   * @see #getMorFusionalSuffixLayer()
+   * @see #setMorFusionalSuffixLayer(Layer)
+   */
+  protected Layer morFusionalSuffixLayer;
+  /**
+   * Getter for {@link #morFusionalSuffixLayer}: Layer for fusional suffixes in MOR tags.
+   * @return Layer for fusional suffixes in MOR tags.
+   */
+  public Layer getMorFusionalSuffixLayer() { return morFusionalSuffixLayer; }
+  /**
+   * Setter for {@link #morFusionalSuffixLayer}: Layer for fusional suffixes in MOR tags.
+   * @param newMorFusionalSuffixLayer Layer for fusional suffixes in MOR tags.
+   */
+  public ChatSerialization setMorFusionalSuffixLayer(Layer newMorFusionalSuffixLayer) { morFusionalSuffixLayer = newMorFusionalSuffixLayer; return this; }
+  
+  /**
+   * Layer for (non-fusional) suffixes in MOR tags.
+   * @see #getMorSuffixLayer()
+   * @see #setMorSuffixLayer(Layer)
+   */
+  protected Layer morSuffixLayer;
+  /**
+   * Getter for {@link #morSuffixLayer}: Layer for (non-fusional) suffixes in MOR tags.
+   * @return Layer for (non-fusional) suffixes in MOR tags.
+   */
+  public Layer getMorSuffixLayer() { return morSuffixLayer; }
+  /**
+   * Setter for {@link #morSuffixLayer}: Layer for (non-fusional) suffixes in MOR tags.
+   * @param newMorSuffixLayer Layer for (non-fusional) suffixes in MOR tags.
+   */
+  public ChatSerialization setMorSuffixLayer(Layer newMorSuffixLayer) { morSuffixLayer = newMorSuffixLayer; return this; }
+  
+  /**
+   * Layer for English glosses in MOR tags.
+   * @see #getMorGlossLayer()
+   * @see #setMorGlossLayer(Layer)
+   */
+  protected Layer morGlossLayer;
+  /**
+   * Getter for {@link #morGlossLayer}: Layer for English glosses in MOR tags.
+   * @return Layer for English glosses in MOR tags.
+   */
+  public Layer getMorGlossLayer() { return morGlossLayer; }
+  /**
+   * Setter for {@link #morGlossLayer}: Layer for English glosses in MOR tags.
+   * @param newMorGlossLayer Layer for English glosses in MOR tags.
+   */
+  public ChatSerialization setMorGlossLayer(Layer newMorGlossLayer) { morGlossLayer = newMorGlossLayer; return this; }
   
   /**
    * Layer for unfilled pause annotations.
@@ -872,6 +984,14 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     disfluencyLayer = null;
     nonWordLayer = null;
     morLayer = null;
+    morPrefixLayer = null;
+    morPartOfSpeechLayer = null;
+    morPartOfSpeechSubcategoryLayer = null;
+    morStemLayer = null;
+    morFusionalSuffixLayer = null;
+    morSuffixLayer = null;
+    morGlossLayer = null;
+
     pauseLayer = null;
 
     if (configuration.size() > 0) {
@@ -1077,6 +1197,71 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     String[] possibilities_mor = {"mor","morphosyntax"};
     if (p.getValue() == null) p.setValue(
       Utility.FindLayerById(wordChildLayers, Arrays.asList(possibilities_mor)));
+    p.setPossibleValues(wordChildLayers.values());
+    
+    p = configuration.containsKey("morPrefixLayer")?configuration.get("morPrefixLayer")
+      :configuration.addParameter(
+        new Parameter("morPrefixLayer", Layer.class, "MOR prefix layer",
+                      "Layer for prefixes in MOR tags"));
+    String[] possibilities_mor_prefix = {"morprefix","prefix"};
+    if (p.getValue() == null) p.setValue(
+      Utility.FindLayerById(wordChildLayers, Arrays.asList(possibilities_mor_prefix)));
+    p.setPossibleValues(wordChildLayers.values());
+    
+    p = configuration.containsKey("morPartOfSpeechLayer")?configuration.get("morPartOfSpeechLayer")
+      :configuration.addParameter(
+        new Parameter("morPartOfSpeechLayer", Layer.class, "MOR POS layer",
+                      "Layer for parts of speech in MOR tags"));
+    String[] possibilities_mor_pos = {"morpos","morpartofspeech", "pos", "partofspeech"};
+    if (p.getValue() == null) p.setValue(
+      Utility.FindLayerById(wordChildLayers, Arrays.asList(possibilities_mor_pos)));
+    p.setPossibleValues(wordChildLayers.values());
+
+    p = configuration.containsKey("morPartOfSpeechSubcategoryLayer")
+      ?configuration.get("morPartOfSpeechSubcategoryLayer")
+      :configuration.addParameter(
+        new Parameter("morPartOfSpeechSubcategoryLayer", Layer.class, "MOR POS Subcategory layer",
+                      "Layer for subcategories of parts of speech in MOR tags"));
+    String[] possibilities_mor_pos_sc = {"morpossubcategory","morpartofspeechsubcategory", "possubcategory", "partofspeechsubcategory"};
+    if (p.getValue() == null) p.setValue(
+      Utility.FindLayerById(wordChildLayers, Arrays.asList(possibilities_mor_pos_sc)));
+    p.setPossibleValues(wordChildLayers.values());
+
+    p = configuration.containsKey("morStemLayer")?configuration.get("morStemLayer")
+      :configuration.addParameter(
+        new Parameter("morStemLayer", Layer.class, "MOR Stem layer",
+                      "Layer for stems in MOR tags"));
+    String[] possibilities_mor_stem = {"morstem","morroot","stem","root"};
+    if (p.getValue() == null) p.setValue(
+      Utility.FindLayerById(wordChildLayers, Arrays.asList(possibilities_mor_stem)));
+    p.setPossibleValues(wordChildLayers.values());
+
+    p = configuration.containsKey("morFusionalSuffixLayer")
+      ?configuration.get("morFusionalSuffixLayer")
+      :configuration.addParameter(
+        new Parameter("morFusionalSuffixLayer", Layer.class, "MOR Fusional Suffix layer",
+                      "Layer for fusional suffixes in MOR tags"));
+    String[] possibilities_mor_fs = {"morfusionalsuffix","fusionalsuffix"};
+    if (p.getValue() == null) p.setValue(
+      Utility.FindLayerById(wordChildLayers, Arrays.asList(possibilities_mor_fs)));
+    p.setPossibleValues(wordChildLayers.values());
+
+    p = configuration.containsKey("morSuffixLayer")?configuration.get("morSuffixLayer")
+      :configuration.addParameter(
+        new Parameter("morSuffixLayer", Layer.class, "MOR Suffix layer",
+                      "Layer for (non-fusional) suffixes in MOR tags"));
+    String[] possibilities_mor_suffix = {"morsuffix","suffix"};
+    if (p.getValue() == null) p.setValue(
+      Utility.FindLayerById(wordChildLayers, Arrays.asList(possibilities_mor_suffix)));
+    p.setPossibleValues(wordChildLayers.values());
+
+    p = configuration.containsKey("morGlossLayer")?configuration.get("morGlossLayer")
+      :configuration.addParameter(
+        new Parameter("morGlossLayer", Layer.class, "MOR Gloss layer",
+                      "Layer for English glosses in MOR tags"));
+    String[] possibilities_mor_gloss = {"morenglish","morgloss","gloss"};
+    if (p.getValue() == null) p.setValue(
+      Utility.FindLayerById(wordChildLayers, Arrays.asList(possibilities_mor_gloss)));
     p.setPossibleValues(wordChildLayers.values());
 
     LinkedHashMap<String,Layer> possibleLayers = new LinkedHashMap<String,Layer>();
@@ -1362,6 +1547,13 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     if (retracingLayer != null) graph.addLayer((Layer)retracingLayer.clone());
     if (completionLayer != null) graph.addLayer((Layer)completionLayer.clone());
     if (morLayer != null) graph.addLayer((Layer)morLayer.clone());
+    if (morPrefixLayer != null) graph.addLayer((Layer)morPrefixLayer.clone());
+    if (morPartOfSpeechLayer != null) graph.addLayer((Layer)morPartOfSpeechLayer.clone());
+    if (morPartOfSpeechSubcategoryLayer != null) graph.addLayer((Layer)morPartOfSpeechSubcategoryLayer.clone());
+    if (morStemLayer != null) graph.addLayer((Layer)morStemLayer.clone());
+    if (morFusionalSuffixLayer != null) graph.addLayer((Layer)morFusionalSuffixLayer.clone());
+    if (morSuffixLayer != null) graph.addLayer((Layer)morSuffixLayer.clone());
+    if (morGlossLayer != null) graph.addLayer((Layer)morGlossLayer.clone());
     if (gemLayer != null) graph.addLayer((Layer)gemLayer.clone());
     if (linkageLayer != null) graph.addLayer((Layer)linkageLayer.clone());
     if (cUnitLayer != null) graph.addLayer((Layer)cUnitLayer.clone());
@@ -1930,6 +2122,99 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                         tag.setEndId(token.getEndId());
                         graph.addAnnotation(tag);
                         lastTag = tag;
+
+                        // parse parts
+                        String label = subword;
+
+                        // tags at the start...
+
+                        // prefixes
+                        int lastHash = label.lastIndexOf('#');
+                        if (lastHash >= 0) { // there are prefixes
+                          if (morPrefixLayer != null) {
+                            String[] prefixes = label.substring(0, lastHash).split("#");
+                            for (String prefix : prefixes) {
+                              if (prefix.length() > 0) {
+                                graph.createTag(tag, morPrefixLayer.getId(), prefix);
+                              }
+                            } // next prefix
+                          } // morPrefixLayer is set
+                          // remove prefixes
+                          label = label.substring(lastHash+1);
+                        }
+
+                        // part-of-speech
+                        int bar = label.indexOf('|');
+                        if (bar >= 0) {
+                          String pos = label.substring(0,bar);
+                          String[] subcategories = pos.split(":");
+                          pos = subcategories[0];
+                          // part of speech
+                          if (morPartOfSpeechLayer != null && pos.length() > 0) {
+                            graph.createTag(tag, morPartOfSpeechLayer.getId(), pos);
+                          } // morPartOfSpeechLayer is set
+                          // subcategories
+                          if (morPartOfSpeechSubcategoryLayer != null) { 
+                            for (int s = 1; s < subcategories.length; s++) {
+                              String subcategory = subcategories[s];
+                              graph.createTag(
+                                tag, morPartOfSpeechSubcategoryLayer.getId(), subcategory);
+                            } // next subcategory
+                          } // morPartOfSpeechSubcategoryLayer is set
+                          // remove part-of-speech
+                          label = label.substring(bar+1);
+                        }
+
+                        // get tags of the end...
+
+                        // English gloss
+                        int equals = label.indexOf('=');
+                        if (equals >= 0) {
+                          if (morGlossLayer != null) {
+                            String gloss = label.substring(equals+1);
+                            if (gloss.length() > 0) {
+                              graph.createTag(tag, morGlossLayer.getId(), gloss);
+                            }
+                          } // morGlossLayer is set
+                          // remove gloss
+                          label = label.substring(0, equals);
+                        }
+
+                        // Suffixes
+                        int firstDash = label.lastIndexOf('-');
+                        if (firstDash >= 0) { // there are suffixes
+                          if (morSuffixLayer != null) {
+                            String[] suffixes = label.substring(firstDash+1).split("-");
+                            for (String suffix : suffixes) {
+                              if (suffix.length() > 0) {
+                                graph.createTag(tag, morSuffixLayer.getId(), suffix);
+                              }
+                            } // next suffix
+                          } // morSuffixLayer is set
+                          // remove suffixes
+                          label = label.substring(0, firstDash);
+                        }
+                        
+                        // Fusional suffixes
+                        int firstAmpersand = label.lastIndexOf('&');
+                        if (firstAmpersand >= 0) { // there are suffixes
+                          if (morFusionalSuffixLayer != null) {
+                            String[] suffixes = label.substring(firstAmpersand+1).split("&");
+                            for (String suffix : suffixes) {
+                              if (suffix.length() > 0) {
+                                graph.createTag(tag, morFusionalSuffixLayer.getId(), suffix);
+                              }
+                            } // next suffix
+                          } // morFusionalSuffixLayer is set
+                          // remove suffixes
+                          label = label.substring(0, firstAmpersand);
+                        }
+
+                        // whatever's left is the stem
+                        if (morStemLayer != null && label.length() > 0) {
+                          graph.createTag(tag, morStemLayer.getId(), label);
+                        }
+                        
                       } // next subword
                     } // next word group
                   } // splitMorWordGroups

@@ -95,7 +95,7 @@ public class TestChatSerialization {
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(32, deserializer.configure(configuration, schema).size());
+      assertEquals(39, deserializer.configure(configuration, schema).size());
 
       // load the stream
       ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -547,7 +547,7 @@ public class TestChatSerialization {
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(32, deserializer.configure(configuration, schema).size());
+      assertEquals(39, deserializer.configure(configuration, schema).size());
 
       // load the stream
       ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -795,7 +795,7 @@ public class TestChatSerialization {
       assertEquals("Split MOR word groups by default", Boolean.TRUE,
                    configuration.get("splitMorWordGroups").getValue());
       configuration.get("splitMorTagGroups").setValue(Boolean.FALSE);
-      assertEquals(32, deserializer.configure(configuration, schema).size());
+      assertEquals(39, deserializer.configure(configuration, schema).size());
       assertEquals("Don't split MOR tag groups",
                    Boolean.FALSE, deserializer.getSplitMorTagGroups());
       
@@ -892,7 +892,7 @@ public class TestChatSerialization {
       // morphosyntactic tags
       Annotation[] mor = g.all("turn")[1].all("mor");
       String[] morLabels = {
-	"prep|+conj|with+prep|out", "det:art|a", "n|shadow^v|shadow", "prep|of", "det:art|a",
+	"prep|+conj|with+prep|out=sin", "det:art|a=una", "n|shadow^v|shadow=sombra", "prep|of=de", "det:art|a",
         "n|doubt^v|doubt", "n:let|i", "v|appreciate",
         "comp|that^pro:rel|that^pro:dem|that^det:dem|that", "comp|if^conj|if", "pro:per|you",
         "cop|look^co|look^n|look^v|look", "prep|at", "qn|some^pro:indef|some", "prep|of",
@@ -975,7 +975,7 @@ public class TestChatSerialization {
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(32, deserializer.configure(configuration, schema).size());
+      assertEquals(39, deserializer.configure(configuration, schema).size());
       assertNull("No MOR layer", 
                  configuration.get("morLayer").getValue());
       assertNull("No pause layer", 
@@ -1140,7 +1140,7 @@ public class TestChatSerialization {
       assertEquals("Split MOR word groups by default", Boolean.TRUE,
                    configuration.get("splitMorWordGroups").getValue());
       configuration.get("splitMorWordGroups").setValue(Boolean.FALSE);
-      assertEquals(32, deserializer.configure(configuration, schema).size());
+      assertEquals(39, deserializer.configure(configuration, schema).size());
       assertEquals("Don't split MOR word groups",
                    Boolean.FALSE, deserializer.getSplitMorWordGroups());
       
@@ -1236,7 +1236,7 @@ public class TestChatSerialization {
       // morphosyntactic tags
       Annotation[] mor = g.all("turn")[1].all("mor");
       String[] morLabels = {
-	"prep|+conj|with+prep|out", "det:art|a", "n|shadow","v|shadow", "prep|of", "det:art|a",
+	"prep|+conj|with+prep|out=sin", "det:art|a=una", "n|shadow","v|shadow=sombra", "prep|of=de", "det:art|a",
         "n|doubt","v|doubt", "n:let|i", "v|appreciate",
         "comp|that","pro:rel|that","pro:dem|that","det:dem|that",
         "comp|if","conj|if", "pro:per|you",
@@ -1326,7 +1326,35 @@ public class TestChatSerialization {
 	 new Layer("disfluency", "Disfluency", 0, false, false, true, "word", true),
 	 new Layer("mor", "%mor tags")
          .setAlignment(Constants.ALIGNMENT_INTERVAL) // because sub-words are sequential
-         .setPeers(true).setPeersOverlap(true).setSaturated(true)
+         .setPeers(true).setPeersOverlap(true).setSaturated(false)
+         .setParentId("word").setParentIncludes(true),
+	 new Layer("morPrefix", "MOR Prefixes")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(true).setSaturated(false)
+         .setParentId("word").setParentIncludes(true),
+	 new Layer("pos", "MOR Part of Speech labels")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(true).setSaturated(false)
+         .setParentId("word").setParentIncludes(true),
+	 new Layer("morPOSSubcategory", "MOR Part of Speech Subcategories")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(true).setSaturated(false)
+         .setParentId("word").setParentIncludes(true),
+	 new Layer("stem", "MOR Stem")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(true).setSaturated(false)
+         .setParentId("word").setParentIncludes(true),
+	 new Layer("morFusionalSuffix", "MOR Fusional Suffixes")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(true).setSaturated(false)
+         .setParentId("word").setParentIncludes(true),
+	 new Layer("morSuffix", "MOR Suffixes")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(true).setSaturated(false)
+         .setParentId("word").setParentIncludes(true),
+	 new Layer("gloss", "MOR English Glosses")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(true).setSaturated(false)
          .setParentId("word").setParentIncludes(true),
 	 new Layer("gem", "Gems", 2, true, false, true));
       // access file
@@ -1346,7 +1374,22 @@ public class TestChatSerialization {
                    configuration.get("splitMorTagGroups").getValue());
       assertEquals("Split MOR word groups by default", Boolean.TRUE,
                    configuration.get("splitMorWordGroups").getValue());
-      assertEquals(32, deserializer.configure(configuration, schema).size());
+      assertEquals("Prefix layer", "morPrefix",
+                   ((Layer)configuration.get("morPrefixLayer").getValue()).getId());
+      assertEquals("POS layer", "pos",
+                   ((Layer)configuration.get("morPartOfSpeechLayer").getValue()).getId());
+      assertEquals("Subcategory layer", "morPOSSubcategory",
+                   ((Layer)configuration.get("morPartOfSpeechSubcategoryLayer").getValue()).getId());
+      assertEquals("Stem layer", "stem",
+                   ((Layer)configuration.get("morStemLayer").getValue()).getId());
+      assertEquals("Fusional Suffix layer", "morFusionalSuffix",
+                   ((Layer)configuration.get("morFusionalSuffixLayer").getValue()).getId());
+      assertEquals("Suffix layer", "morSuffix",
+                   ((Layer)configuration.get("morSuffixLayer").getValue()).getId());
+      assertEquals("Gloss layer", "gloss",
+                   ((Layer)configuration.get("morGlossLayer").getValue()).getId());
+      assertEquals(39, deserializer.configure(configuration, schema).size());
+      assertNotNull("Suffix layer set", deserializer.getMorSuffixLayer());
       
       // load the stream
       ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -1364,83 +1407,12 @@ public class TestChatSerialization {
 	 System.out.println(warning);
       }
 
-      // meta data
-      assertEquals("griffin-mor.cha", g.getId());
-      String[] transcribers = g.labels("transcriber"); 
-      assertEquals(1, transcribers.length);
-      assertEquals("SH", transcribers[0]);
-      
-      String[] languages = g.labels("languages"); 
-      assertEquals(1, languages.length);
-      assertEquals("ISO639 alpha3 is converted to alpha2", "en", languages[0]);
-      
-      // participants     
-      assertEquals(5, g.all("who").length);
-      assertEquals("Nick_Griffin", g.getAnnotation("GRI").getLabel());
-      assertEquals("who", g.getAnnotation("GRI").getLayerId());
-      assertEquals("Dimbleby", g.getAnnotation("DIM").getLabel());
-      assertEquals("who", g.getAnnotation("DIM").getLayerId());
-      assertEquals("Pause", g.getAnnotation("PPP").getLabel());
-      assertEquals("who", g.getAnnotation("PPP").getLayerId());
-      assertEquals("Applause", g.getAnnotation("APP").getLabel());
-      assertEquals("who", g.getAnnotation("APP").getLayerId());
-      assertEquals("Unknown", g.getAnnotation("UNK").getLabel());
-      assertEquals("who", g.getAnnotation("UNK").getLayerId());
-
-      // participant meta data
-      assertEquals("ISO639 alpha3 is converted to alpha2",
-                   "en", g.getAnnotation("GRI").first("language").getLabel());
-      assertEquals("ISO639 alpha3 is converted to alpha2",
-                   "en", g.getAnnotation("DIM").first("language").getLabel());
-      assertEquals("ISO639 alpha3 is converted to alpha2",
-                   "en", g.getAnnotation("PPP").first("language").getLabel());
-      assertEquals("ISO639 alpha3 is converted to alpha2",
-                   "en", g.getAnnotation("APP").first("language").getLabel());
-      assertEquals("ISO639 alpha3 is converted to alpha2",
-                   "en", g.getAnnotation("UNK").first("language").getLabel());
-      assertEquals("change_corpus_later", g.getAnnotation("GRI").first("corpus").getLabel());
-      assertEquals("change_corpus_later", g.getAnnotation("DIM").first("corpus").getLabel());
-      assertEquals("change_corpus_later", g.getAnnotation("PPP").first("corpus").getLabel());
-      assertEquals("change_corpus_later", g.getAnnotation("APP").first("corpus").getLabel());
-      assertEquals("change_corpus_later", g.getAnnotation("UNK").first("corpus").getLabel());
-      assertEquals("Participant", g.getAnnotation("GRI").first("role").getLabel());
-      assertEquals("Participant", g.getAnnotation("DIM").first("role").getLabel());
-      assertEquals("Unidentified", g.getAnnotation("PPP").first("role").getLabel());
-      assertEquals("Unidentified", g.getAnnotation("APP").first("role").getLabel());
-      assertEquals("Unidentified", g.getAnnotation("UNK").first("role").getLabel());
-
-      Annotation[] gems = g.all("gem");
-      assertEquals(1, gems.length);
-      assertEquals("Gem label", "denial", gems[0].getLabel());
-      assertEquals("Gen start", Double.valueOf(9.929), gems[0].getStart().getOffset());
-      assertEquals("Gen end", Double.valueOf(18.053), gems[0].getEnd().getOffset());
-
-      // turns
-      Annotation[] turns = g.all("turn");
-      assertEquals("Number of turns correct", 32, turns.length);
-
-      // utterances
-      Annotation[] utterances = g.all("utterance");
-      assertEquals("Number of utterances correct", 44, utterances.length);
-      Annotation[] words = g.all("turn")[1].all("word");
-      String[] wordLabels = {
-	"without", "a", "shadow", "of", "a", "doubt", "i", "appreciate",
-	"that", "if", "you", "look", "at", "some", "of", "the", "things", "i'm", "quoted",
-	"as", "having", "said↗",
-	"in", "the", "daily", "mail", "n", "dai-", "an'", "so", "on",
-	"i'd", "be", "a", "↑monster↘" };
-      for (int i = 0; i < wordLabels.length; i++) {
-	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
-      }
-      for (int i = 0; i < words.length; i++) {
-	 assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
-	 	      i+1, words[i].getOrdinal());
-      }
-
       // check morphosyntactic tag labels
       Annotation[] mor = g.all("turn")[1].all("mor");
+      Annotation[] pos = g.all("turn")[1].all("pos");
+      assertEquals("There's a POS for every MOR tag", mor.length, pos.length);
       String[] morLabels = {
-	"prep|","conj|with","prep|out", "det:art|a", "n|shadow","v|shadow", "prep|of", "det:art|a",
+	"prep|","conj|with","prep|out=sin", "det:art|a=una", "n|shadow","v|shadow=sombra", "prep|of=de", "det:art|a",
         "n|doubt","v|doubt", "n:let|i", "v|appreciate",
         "comp|that","pro:rel|that","pro:dem|that","det:dem|that",
         "comp|if","conj|if", "pro:per|you",
@@ -1452,6 +1424,19 @@ public class TestChatSerialization {
 	"prep|in","adv|in", "det:art|the", "adv:tem|day&dn-LY","adj|daily", "n|mail","v|mail",
         "n:let|n", "?|dai–", "?|an'", "co|so","adv|so","conj|so", "prep|on","adv|on",
 	"n:let|i","mod|genmod", "cop|be","aux|be", "det:art|a", "n|monster" };
+      String[] posLabels = {
+	"prep","conj","prep", "det", "n","v", "prep", "det",
+        "n","v", "n", "v",
+        "comp","pro","pro","det",
+        "comp","conj", "pro",
+        "cop","co","n","v", "prep", "qn","pro", "prep",
+        "det", "n", "n", "aux","n","cop",
+        "part","v",
+	"adv","conj","prep", "aux","n","part",
+        "part","v",
+	"prep","adv", "det", "adv","adj", "n","v",
+        "n", "?", "?", "co","adv","conj", "prep","adv",
+	"n","mod", "cop","aux", "det", "n" };
       String[] morWords = {
 	"without","without","without", "a", "shadow","shadow", "of", "a",
         "doubt","doubt", "i", "appreciate",
@@ -1518,14 +1503,74 @@ public class TestChatSerialization {
                        alignedWithEnd[i],
                        mor[i].getEnd().endOf("word").iterator().next().getLabel());
          }
-      }
-      
-      // check all annotations have 'manual' confidence
-      for (Annotation a : g.getAnnotationsById().values()) {
-         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
-                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+	 assertEquals("pos labels " + i, posLabels[i], pos[i].getLabel());
+	 assertEquals("pos word " + i, morWords[i], pos[i].getParent().getLabel());
       }
 
+      // check stem labels
+      Annotation[] stem = g.all("turn")[1].all("stem");      
+      String[] stemLabels = {
+	"with","out", "a", "shadow","shadow", "of", "a",
+        "doubt","doubt", "i", "appreciate",
+        "that","that","that","that",
+        "if","if", "you",
+        "look","look","look","look", "at", "some","some", "of",
+        "the", "thing", "i", "be","i","be",
+        "quote","quote",
+	"as","as","as", "have","have","have",
+        "say","say",
+	"in","in", "the", "day","daily", "mail","mail",
+        "n", "dai–", "an'", "so","so","so", "on","on",
+	"i","genmod", "be","be", "a", "monster" };
+      for (int i = 0; i < stemLabels.length; i++) {
+	 assertEquals("stem label " + i, stemLabels[i], stem[i].getLabel());
+      }
+      
+      // check POS subcategory labels
+      Annotation[] subcategory = g.all("turn")[1].all("morPOSSubcategory");      
+      String[] subcategoryLabels = {
+	"art", "art",
+        "let",
+        "rel","dem","dem",
+        "per",
+        "indef",
+        "art", "let", "let",
+	"gerund",
+	"art", "tem",
+        "let", 
+	"let","art" };
+      for (int i = 0; i < subcategoryLabels.length; i++) {
+	 assertEquals("POS subcategory label " + i,
+                      subcategoryLabels[i], subcategory[i].getLabel());
+      }
+      
+      // check fusional suffix labels
+      Annotation[] fusionalSuffix = g.all("turn")[1].all("morFusionalSuffix");      
+      String[] fusionalSuffixLabels = {
+	"1S","1S",
+        "PASTP","PAST",
+	"dn" };
+      for (int i = 0; i < fusionalSuffixLabels.length; i++) {
+	 assertEquals("Fusional suffix label " + i,
+                      fusionalSuffixLabels[i], fusionalSuffix[i].getLabel());
+      }
+      // check POS suffix labels
+      Annotation[] suffix = g.all("turn")[1].all("morSuffix");      
+      String[] suffixLabels = {
+	"PL", "PASTP","PAST",
+	"PRESP","PRESP","PRESP",
+	"LY" };
+      for (int i = 0; i < suffixLabels.length; i++) {
+	 assertEquals("Suffix label " + i, suffixLabels[i], suffix[i].getLabel());
+      }
+
+      // check gloss labels
+      Annotation[] gloss = g.all("turn")[1].all("gloss");      
+      String[] glossLabels = {
+	"sin", "una","sombra", "de" };
+      for (int i = 0; i < glossLabels.length; i++) {
+	 assertEquals("Gloss label " + i, glossLabels[i], gloss[i].getLabel());
+      }
    }
   
    @Test public void serialize() throws Exception {
@@ -1665,7 +1710,7 @@ public class TestChatSerialization {
       ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
       //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
       configuration = serializer.configure(configuration, schema);
-      assertEquals(32, configuration.size());
+      assertEquals(39, configuration.size());
       assertEquals("scribe attribute", "scribe", 
 		   ((Layer)configuration.get("transcriberLayer").getValue()).getId());
       assertEquals("languages attribute", "transcript_language", 
@@ -1903,7 +1948,7 @@ public class TestChatSerialization {
       // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
       configuration.get("includeTimeCodes").setValue(Boolean.FALSE);
       configuration = serializer.configure(configuration, schema);
-      assertEquals(32, configuration.size());
+      assertEquals(39, configuration.size());
       assertEquals("scribe attribute", "scribe", 
 		   ((Layer)configuration.get("transcriberLayer").getValue()).getId());
       assertEquals("languages attribute", "transcript_language", 
