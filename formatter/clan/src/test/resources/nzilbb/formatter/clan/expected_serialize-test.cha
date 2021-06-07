@@ -1,5 +1,5 @@
 @Begin
-@Languages	eng
+@Languages:	eng
 @Participants:	SUB John_Smith Participant,INT Mrs._Smith Investigator
 @ID:	eng||SUB|2;10.10|male|||Participant|||
 @ID:	spa||INT|||||Investigator|||

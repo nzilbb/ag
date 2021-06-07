@@ -2293,6 +2293,147 @@ public class TestChatSerialization {
       }
    }
 
+   @Test public void serializeWithMor() throws Exception {
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("transcript_date", "Recording date")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_location", "Location")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_recording_quality", "Recording quality")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_room_layout", "Room layout")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_tape_location", "Tape location")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcriber", "Transcribers", 0, true, true, true),
+	 new Layer("languages", "Graph language", 0, true, true, true),
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("language", "Speaker language", 0, false, false, true, "who", true),
+	 new Layer("corpus", "Speaker corpus", 0, false, false, true, "who", true),
+	 new Layer("role", "Speaker role", 0, false, false, true, "who", true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("c-unit", "C-Units", 2, true, false, false, "turn", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("linkage", "Linkages", 2, true, false, false, "turn", true),
+	 new Layer("error", "Errors", 2, true, false, false, "turn", true),
+	 new Layer("retracing", "Retracing", 2, true, false, false, "turn", true),
+	 new Layer("repetition", "Repetitions", 2, true, false, false, "turn", true),
+	 new Layer("pause", "Unfilled pauses", 2, true, false, false, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true),
+	 new Layer("completion", "Completion", 0, true, false, false, "word", true),
+	 new Layer("expansion", "Expansion", 0, false, false, true, "word", true),
+	 new Layer("disfluency", "Disfluency", 0, false, false, true, "word", true),
+	 new Layer("mor", "%mor tags")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL) // because sub-words are sequential
+         .setPeers(true).setPeersOverlap(true).setSaturated(false)
+         .setParentId("word").setParentIncludes(true),
+	 new Layer("gem", "Gems", 2, true, false, true));
+      // access file
+      NamedStream[] streams = { new NamedStream(new File(getDir(), "griffin-mor.cha")) };
+      
+      // create deserializer
+      ChatSerialization deserializer = new ChatSerialization();
+      
+      // general configuration
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals("MOR layer", "mor",
+                   ((Layer)configuration.get("morLayer").getValue()).getId());
+      assertEquals("Split MOR tag groups by default", Boolean.TRUE,
+                   configuration.get("splitMorTagGroups").getValue());
+      configuration.get("splitMorWordGroups").setValue(Boolean.FALSE);
+      assertEquals(39, deserializer.configure(configuration, schema).size());
+      assertFalse("Don't MOR word groups", deserializer.getSplitMorWordGroups());
+      
+      // load the stream
+      ParameterSet defaultParamaters = deserializer.load(streams, schema);
+      // for (Parameter p : defaultParamaters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+
+      // configure the deserialization
+      deserializer.setParameters(defaultParamaters);
+
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      for (String warning : deserializer.getWarnings()) System.out.println(warning);
+
+      for (String warning : deserializer.getWarnings()) {
+	 System.out.println(warning);
+      }
+      graphs[0].setId("test-mor.cha");
+      
+      // create serializer
+      ChatSerialization serializer = new ChatSerialization();
+      
+      // general configuration
+      configuration = serializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+      configuration = serializer.configure(configuration, schema);
+      assertEquals(39, configuration.size());
+      assertEquals("MOR layer", "mor",
+                   ((Layer)configuration.get("morLayer").getValue()).getId());
+
+      LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
+         Arrays.asList(serializer.getRequiredLayers()));
+      assertEquals("Needed layers: " + needLayers,
+                   19, needLayers.size());
+      assertTrue(needLayers.contains("who"));
+      assertTrue(needLayers.contains("transcriber"));
+      assertTrue(needLayers.contains("role"));
+      assertTrue(needLayers.contains("language"));
+      assertTrue(needLayers.contains("turn"));
+      assertTrue(needLayers.contains("utterance"));
+      assertTrue(needLayers.contains("word"));
+      assertTrue(needLayers.contains("corpus"));
+      assertTrue(needLayers.contains("linkage"));
+      assertTrue(needLayers.contains("c-unit"));
+      assertTrue(needLayers.contains("gem"));
+      assertTrue(needLayers.contains("disfluency"));
+      assertTrue(needLayers.contains("expansion"));
+      assertTrue(needLayers.contains("error"));
+      assertTrue(needLayers.contains("retracing"));
+      assertTrue(needLayers.contains("repetition"));
+      assertTrue(needLayers.contains("completion"));
+      assertTrue(needLayers.contains("languages"));
+      assertTrue(needLayers.contains("mor"));
+      
+      // serialize
+      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+      final Vector<NamedStream> ourStreams = new Vector<NamedStream>();
+      String[] layers = {"word","language", "mor", "transcriber", "role", "pause"};
+      serializer.serialize(Arrays.spliterator(graphs), layers,
+                           stream -> ourStreams.add(stream),
+                           warning -> System.out.println(warning),
+                           exception -> exceptions.add(exception));
+      if (exceptions.size() > 0) {
+         fail(exceptions.stream()
+              .map(x -> {
+                    StringWriter sw = new StringWriter();
+                    PrintWriter pw = new PrintWriter(sw);
+                    x.printStackTrace(pw);
+                    return x.toString() + ": " + sw;
+                 })
+              .collect(Collectors.joining("\n","","")));
+      }
+      
+      File dir = getDir();
+      ourStreams.elementAt(0).save(dir);
+      
+      // test using diff
+      File result = new File(dir, "test-mor.cha");
+      String differences = diff(new File(dir, "expected_test-mor.cha"), result);
+      if (differences != null) {
+         fail(differences);
+      } else {
+         result.delete();
+      }
+   }
+
    /**
     * Diffs two files.
     * @param expected

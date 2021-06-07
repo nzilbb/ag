@@ -2435,6 +2435,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     if (getGemLayer() != null) requiredLayers.add(getGemLayer().getId());
     if (getTranscriberLayer() != null) requiredLayers.add(getTranscriberLayer().getId());
     if (getLanguagesLayer() != null) requiredLayers.add(getLanguagesLayer().getId());
+    if (getMorLayer() != null) requiredLayers.add(getMorLayer().getId());
     for (String key : participantLayers.keySet()) {
       Layer layer = participantLayers.get(key);
       if (layer != null) {
@@ -2535,7 +2536,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
         StringBuilder languages = new StringBuilder();
         for (Annotation a : annotations) {
           if (languages.length() == 0) {
-            languages.append("@Languages\t");
+            languages.append("@Languages:\t");
           } else {
             languages.append(",");
           }
@@ -2563,8 +2564,16 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       for (Annotation participant : graph.all(participantLayer.getId())) {
         String speakerId = null;
         String role = null;
-        if (targetParticipantLayer != null
-            && participant.first(targetParticipantLayer.getId()) != null) {
+        Annotation roleTag = participant.first(participantLayers.get("role").getId());
+        if (roleTag != null) {
+          role = roleTag.getLabel();
+          subCount++;
+          speakerId = participant.getLabel().substring(0,3).toUpperCase();
+          if (participants.containsKey(speakerId)) {
+            speakerId = participant.getLabel().substring(0,2).toUpperCase()+subCount;
+          }
+        } else if (targetParticipantLayer != null
+                   && participant.first(targetParticipantLayer.getId()) != null) {
           role = "Participant";
           subCount++;
           if (!participants.containsKey("SUB")) {
@@ -2580,7 +2589,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
             speakerId = "SUB";
           } else {
             speakerId = "SU"+subCount;
-          }
+            }
         } else {
           role = "Investigator";
           intCount++;
@@ -2708,6 +2717,13 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
           writer.println(annotation.getLabel());
         } // there is an annotation
       } // layer is set
+      if (transcriberLayer != null) {
+        Annotation annotation = graph.first(transcriberLayer.getId());
+        if (annotation != null) {
+          writer.print("@Transcriber:\t");
+          writer.println(annotation.getLabel());
+        } // there is an annotation
+      } // layer is set
 
       // get noises if needed
       TreeSet<Annotation> noisesByAnchor
@@ -2729,18 +2745,47 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
         = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
       for (Annotation u : graph.all(getUtteranceLayer().getId())) utterancesByAnchor.add(u);
 
+      Vector<String> morTags = new Vector<String>();
       for (Annotation utterance : utterancesByAnchor) {
         if (cancelling) break;
         // is the participant changing?
         Annotation participant = utterance.first(getParticipantLayer().getId());
         if (participant != currentParticipant) { // participant change
+
+          // print %mor line?
+          if (morTags.size() > 0) {
+            writer.print("%mor:");
+            int maxCol = 90;
+            int col = 0;
+            String delimiter = "\t";
+            for (String mor : morTags) {
+              if (mor == null // line break matching main line
+                  || col + mor.length() + 1 > maxCol) { // line wrap
+                writer.println();
+                delimiter = "\t";
+                col = -1;
+                if (mor == null) continue;
+              } 
+              writer.print(delimiter);
+              writer.print(mor);
+              col += mor.length() + 1;
+              delimiter = " ";
+            } // next mor tag
+            writer.println();
+
+            morTags.clear();
+          } // there were mor tags
+
+          // now change participant
           currentParticipant = participant;
           Object[] participantLabel = { currentParticipant.getLabel() }; 
           writer.print("*" + participant.first("@code").getLabel() + ":");
         } // participant change
 
         String delimiter = "\t";
+        boolean printedSomething = false;
         for (Annotation token : utterance.all(getWordLayer().getId())) {
+          printedSomething = true;
           writer.print(delimiter); // tab if it's the first word, space otherwise
           delimiter = " ";
                
@@ -2754,7 +2799,21 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
             nextNonWord = nonWords.hasNext()?nonWords.next():null;
           } // next noise
           writer.print(token.getLabel());
+
+          if (morLayer != null && selectedLayers.contains(morLayer.getId())) {
+            // are there MOR tags?
+            Annotation[] mor = token.all(morLayer.getId());
+            if (mor.length > 0) {
+              // concatenate them together delimited by ^
+              morTags.add(Arrays.stream(mor)
+                          .map(m->m.getLabel())
+                          .collect(Collectors.joining("^")));
+            } // there are MOR tags
+          } // morLayer set
         } // next token
+        if (morTags.size() > 0) { // mark a line break in the %mor line
+          morTags.add(null);
+        }
             
         // is there a non-word to append to the end of the line?
         while (nextNonWord != null
@@ -2762,20 +2821,27 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                && utterance.getEnd().getOffset() != null
                && utterance.getEnd().getOffset() >= nextNonWord.getStart().getOffset()) {
           String nonWord = standardNonWordLabel(nextNonWord.getLabel());
-          if (nonWord != null) writer.print(" " + nonWord);
+          if (nonWord != null) {
+            writer.print(delimiter + nonWord);
+            delimiter = " ";
+            printedSomething = true;
+          }
           nextNonWord = nonWords.hasNext()?nonWords.next():null;
         } // next noise
 
-        if (includeTimeCodes) {
+        if (includeTimeCodes
+            && utterance.getStart().getOffset() != null
+            && utterance.getEnd().getOffset() != null) {
           // time code
-          writer.print(" ");
+          writer.print(delimiter);
+          writer.print("");
           int ms = (int)(utterance.getStart().getOffset() * 1000);
           writer.print("" + ms);
           writer.print("_");
           ms = (int)(utterance.getEnd().getOffset() * 1000);
           writer.print("" + ms);
           writer.println("");
-        } else {
+        } else if (printedSomething) {
           writer.println();
         }
       } // next utterance
