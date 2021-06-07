@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -1505,6 +1505,275 @@ public class TestChatSerialization {
          }
 	 assertEquals("pos labels " + i, posLabels[i], pos[i].getLabel());
 	 assertEquals("pos word " + i, morWords[i], pos[i].getParent().getLabel());
+      }
+
+      // check stem labels
+      Annotation[] stem = g.all("turn")[1].all("stem");      
+      String[] stemLabels = {
+	"with","out", "a", "shadow","shadow", "of", "a",
+        "doubt","doubt", "i", "appreciate",
+        "that","that","that","that",
+        "if","if", "you",
+        "look","look","look","look", "at", "some","some", "of",
+        "the", "thing", "i", "be","i","be",
+        "quote","quote",
+	"as","as","as", "have","have","have",
+        "say","say",
+	"in","in", "the", "day","daily", "mail","mail",
+        "n", "dai–", "an'", "so","so","so", "on","on",
+	"i","genmod", "be","be", "a", "monster" };
+      for (int i = 0; i < stemLabels.length; i++) {
+	 assertEquals("stem label " + i, stemLabels[i], stem[i].getLabel());
+      }
+      
+      // check POS subcategory labels
+      Annotation[] subcategory = g.all("turn")[1].all("morPOSSubcategory");      
+      String[] subcategoryLabels = {
+	"art", "art",
+        "let",
+        "rel","dem","dem",
+        "per",
+        "indef",
+        "art", "let", "let",
+	"gerund",
+	"art", "tem",
+        "let", 
+	"let","art" };
+      for (int i = 0; i < subcategoryLabels.length; i++) {
+	 assertEquals("POS subcategory label " + i,
+                      subcategoryLabels[i], subcategory[i].getLabel());
+      }
+      
+      // check fusional suffix labels
+      Annotation[] fusionalSuffix = g.all("turn")[1].all("morFusionalSuffix");      
+      String[] fusionalSuffixLabels = {
+	"1S","1S",
+        "PASTP","PAST",
+	"dn" };
+      for (int i = 0; i < fusionalSuffixLabels.length; i++) {
+	 assertEquals("Fusional suffix label " + i,
+                      fusionalSuffixLabels[i], fusionalSuffix[i].getLabel());
+      }
+      // check POS suffix labels
+      Annotation[] suffix = g.all("turn")[1].all("morSuffix");      
+      String[] suffixLabels = {
+	"PL", "PASTP","PAST",
+	"PRESP","PRESP","PRESP",
+	"LY" };
+      for (int i = 0; i < suffixLabels.length; i++) {
+	 assertEquals("Suffix label " + i, suffixLabels[i], suffix[i].getLabel());
+      }
+
+      // check gloss labels
+      Annotation[] gloss = g.all("turn")[1].all("gloss");      
+      String[] glossLabels = {
+	"sin", "una","sombra", "de" };
+      for (int i = 0; i < glossLabels.length; i++) {
+	 assertEquals("Gloss label " + i, glossLabels[i], gloss[i].getLabel());
+      }
+   }
+  
+  /* MOR tag parsing where all components are parsed and generate separate annotations,
+   * but there's no layer for raw MOR labels. 
+   * <em>NB</em> the griffin-mor.cha test file is output from MOR that has been manually
+   * edited to create test cases that will cover cases not naturally present in this test
+   * data. */ 
+   @Test public void morePartsWithoutRawMorLayer()  throws Exception {
+      Schema schema = new Schema(
+	 "who", "turn", "utterance", "word",
+	 new Layer("transcript_date", "Recording date")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_location", "Location")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_recording_quality", "Recording quality")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_room_layout", "Room layout")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcript_tape_location", "Tape location")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+	 new Layer("transcriber", "Transcribers", 0, true, true, true),
+	 new Layer("languages", "Graph language", 0, true, true, true),
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("language", "Speaker language", 0, false, false, true, "who", true),
+	 new Layer("corpus", "Speaker corpus", 0, false, false, true, "who", true),
+	 new Layer("role", "Speaker role", 0, false, false, true, "who", true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("c-unit", "C-Units", 2, true, false, false, "turn", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("linkage", "Linkages", 2, true, false, false, "turn", true),
+	 new Layer("error", "Errors", 2, true, false, false, "turn", true),
+	 new Layer("retracing", "Retracing", 2, true, false, false, "turn", true),
+	 new Layer("repetition", "Repetitions", 2, true, false, false, "turn", true),
+	 new Layer("pause", "Unfilled pauses", 2, true, false, false, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true),
+	 new Layer("completion", "Completion", 0, true, false, false, "word", true),
+	 new Layer("expansion", "Expansion", 0, false, false, true, "word", true),
+	 new Layer("disfluency", "Disfluency", 0, false, false, true, "word", true),
+	 new Layer("morPrefix", "MOR Prefixes")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(true).setSaturated(false)
+         .setParentId("word").setParentIncludes(true),
+	 new Layer("pos", "MOR Part of Speech labels")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(true).setSaturated(false)
+         .setParentId("word").setParentIncludes(true),
+	 new Layer("morPOSSubcategory", "MOR Part of Speech Subcategories")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(true).setSaturated(false)
+         .setParentId("word").setParentIncludes(true),
+	 new Layer("stem", "MOR Stem")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(true).setSaturated(false)
+         .setParentId("word").setParentIncludes(true),
+	 new Layer("morFusionalSuffix", "MOR Fusional Suffixes")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(true).setSaturated(false)
+         .setParentId("word").setParentIncludes(true),
+	 new Layer("morSuffix", "MOR Suffixes")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(true).setSaturated(false)
+         .setParentId("word").setParentIncludes(true),
+	 new Layer("gloss", "MOR English Glosses")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(true).setSaturated(false)
+         .setParentId("word").setParentIncludes(true),
+	 new Layer("gem", "Gems", 2, true, false, true));
+      // access file
+      NamedStream[] streams = { new NamedStream(new File(getDir(), "griffin-mor.cha")) };
+      
+      // create deserializer
+      ChatSerialization deserializer = new ChatSerialization();
+      
+      // general configuration
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertNull("No MOR layer",
+                 configuration.get("morLayer").getValue());
+      assertEquals("Pause layer", "pause",
+                   ((Layer)configuration.get("pauseLayer").getValue()).getId());
+      assertEquals("Split MOR tag groups by default", Boolean.TRUE,
+                   configuration.get("splitMorTagGroups").getValue());
+      assertEquals("Split MOR word groups by default", Boolean.TRUE,
+                   configuration.get("splitMorWordGroups").getValue());
+      assertEquals("Prefix layer", "morPrefix",
+                   ((Layer)configuration.get("morPrefixLayer").getValue()).getId());
+      assertEquals("POS layer", "pos",
+                   ((Layer)configuration.get("morPartOfSpeechLayer").getValue()).getId());
+      assertEquals("Subcategory layer", "morPOSSubcategory",
+                   ((Layer)configuration.get("morPartOfSpeechSubcategoryLayer").getValue()).getId());
+      assertEquals("Stem layer", "stem",
+                   ((Layer)configuration.get("morStemLayer").getValue()).getId());
+      assertEquals("Fusional Suffix layer", "morFusionalSuffix",
+                   ((Layer)configuration.get("morFusionalSuffixLayer").getValue()).getId());
+      assertEquals("Suffix layer", "morSuffix",
+                   ((Layer)configuration.get("morSuffixLayer").getValue()).getId());
+      assertEquals("Gloss layer", "gloss",
+                   ((Layer)configuration.get("morGlossLayer").getValue()).getId());
+      assertEquals(39, deserializer.configure(configuration, schema).size());
+      assertNotNull("Suffix layer set", deserializer.getMorSuffixLayer());
+      
+      // load the stream
+      ParameterSet defaultParamaters = deserializer.load(streams, schema);
+      // for (Parameter p : defaultParamaters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+
+      // configure the deserialization
+      deserializer.setParameters(defaultParamaters);
+
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      for (String warning : deserializer.getWarnings()) System.out.println(warning);
+      Graph g = graphs[0];
+
+      for (String warning : deserializer.getWarnings()) {
+	 System.out.println(warning);
+      }
+
+      // check pos labels
+      Annotation[] pos = g.all("turn")[1].all("pos");
+      String[] posLabels = {
+	"prep","conj","prep", "det", "n","v", "prep", "det",
+        "n","v", "n", "v",
+        "comp","pro","pro","det",
+        "comp","conj", "pro",
+        "cop","co","n","v", "prep", "qn","pro", "prep",
+        "det", "n", "n", "aux","n","cop",
+        "part","v",
+	"adv","conj","prep", "aux","n","part",
+        "part","v",
+	"prep","adv", "det", "adv","adj", "n","v",
+        "n", "?", "?", "co","adv","conj", "prep","adv",
+	"n","mod", "cop","aux", "det", "n" };
+      String[] morWords = {
+	"without","without","without", "a", "shadow","shadow", "of", "a",
+        "doubt","doubt", "i", "appreciate",
+        "that","that","that","that",
+        "if","if", "you",
+        "look","look","look","look", "at", "some","some", "of",
+        "the", "things", "i'm","i'm","i'm","i'm",
+        "quoted","quoted",
+	"as","as","as", "having","having","having",
+        "said↗","said↗",
+	"in","in", "the", "daily","daily", "mail","mail",
+        "n", "dai-", "an'", "so","so","so", "on","on",
+	"i'd","i'd", "be","be", "a", "↑monster↘" };
+      String[] alignedWithStart = {
+	"without",null,null, "a", "shadow","shadow", "of", "a",
+        "doubt","doubt", "i", "appreciate",
+        "that","that","that","that",
+        "if","if", "you",
+        "look","look","look","look", "at", "some","some", "of",
+        "the", "things", "i'm",null,"i'm",null,
+        "quoted","quoted",
+	"as","as","as", "having","having","having",
+        "said↗","said↗",
+	"in","in", "the", "daily","daily", "mail","mail",
+        "n", "dai-", "an'", "so","so","so", "on","on",
+	"i'd",null, "be","be", "a", "↑monster↘" };
+      String[] alignedWithEnd = {
+	null,null,"without", "a", "shadow","shadow", "of", "a",
+        "doubt","doubt", "i", "appreciate",
+        "that","that","that","that",
+        "if","if", "you",
+        "look","look","look","look", "at", "some","some", "of",
+        "the", "things", null,"i'm",null,"i'm",
+        "quoted","quoted",
+	"as","as","as", "having","having","having",
+        "said↗","said↗",
+	"in","in", "the", "daily","daily", "mail","mail",
+        "n", "dai-", "an'", "so","so","so", "on","on",
+	null,"i'd", "be","be", "a", "↑monster↘" };
+      for (int i = 0; i < posLabels.length; i++) {
+	 assertEquals("pos labels " + i, posLabels[i], pos[i].getLabel());
+	 assertEquals("mor word " + i, morWords[i], pos[i].getParent().getLabel());
+         if (alignedWithStart[i] == null) {
+           // check start doesn't align with a word
+           assertEquals("start "+i+" not aligned with word: " + pos[i].getStart().startOf("word"),
+                        0, pos[i].getStart().startOf("word").size());
+         } else {
+           // check start aligns with given word
+           assertNotEquals("start "+i+" aligned with word: " + pos[i].getStart().startOf("word"),
+                           0, pos[i].getStart().startOf("word").size());
+           assertEquals("start "+i+" aligned with correct word: "+pos[i].getStart().startOf("word"),
+                        alignedWithStart[i],
+                        pos[i].getStart().startOf("word").iterator().next().getLabel());
+         }
+         if (alignedWithEnd[i] == null) {
+           // check end doesn't align with a word
+           assertEquals("end "+i+" not aligned with word: " + pos[i].getEnd().endOf("word"),
+                        0, pos[i].getEnd().endOf("word").size());
+         } else {
+           // check word aligns with given word
+           assertNotEquals("end "+i+" aligned with word: " + pos[i].getEnd().endOf("word"),
+                           0, pos[i].getEnd().endOf("word").size());
+           assertEquals("end "+i+" aligned with correct word: " + pos[i].getEnd().endOf("word"),
+                       alignedWithEnd[i],
+                       pos[i].getEnd().endOf("word").iterator().next().getLabel());
+         }
       }
 
       // check stem labels
