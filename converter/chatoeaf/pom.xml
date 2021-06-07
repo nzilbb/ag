@@ -9,7 +9,7 @@
 
   <groupId>nzilbb</groupId>
   <artifactId>cha-to-eaf</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <name>nzilbb.converter.chatoeaf</name>
   <description>CLAN CHAT transcript to ELAN file converter</description>
 
@@ -17,7 +17,7 @@
 
     <input.package>nzilbb.formatter.clan</input.package>
     <input.path>nzilbb/formatter/clan/</input.path>
-    <input.version>1.1.2</input.version>
+    <input.version>1.2.0</input.version>
     
     <output.package>nzilbb.formatter.elan</output.package>
     <output.path>nzilbb/formatter/elan/</output.path>

@@ -9,7 +9,7 @@
 
   <groupId>nzilbb</groupId>
   <artifactId>trs-to-cha</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <name>nzilbb.converter.trstocha</name>
   <description>Transcriber transcript to CLAN CHAT transcript converter</description>
 
@@ -21,7 +21,7 @@
     
     <output.package>nzilbb.formatter.clan</output.package>
     <output.path>nzilbb/formatter/clan/</output.path>
-    <output.version>1.1.3</output.version>    
+    <output.version>1.2.0</output.version>    
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>

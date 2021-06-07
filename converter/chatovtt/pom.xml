@@ -9,7 +9,7 @@
 
   <groupId>nzilbb</groupId>
   <artifactId>cha-to-vtt</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <name>nzilbb.converter.chatovtt</name>
   <description>CLAN CHAT transcript to WebVTT subtitles converter</description>
 
@@ -17,7 +17,7 @@
 
     <input.package>nzilbb.formatter.clan</input.package>
     <input.path>nzilbb/formatter/clan/</input.path>
-    <input.version>1.1.2</input.version>
+    <input.version>1.2.0</input.version>
     
     <output.package>nzilbb.formatter.webvtt</output.package>
     <output.path>nzilbb/formatter/webvtt/</output.path>
