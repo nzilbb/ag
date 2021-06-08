@@ -67,3 +67,23 @@ Modules that perform automatic annotation tasks on annotation graphs.
    mkdir src/test/java/nzilbb/annotator/myannotator
    ```
 5. Add your implementation to *myannotator/src/main/java/nzilbb/annotator/myannotator*
+
+## Testing web-apps
+
+To test the annotator's info document, use the following command:
+
+```
+java -cp ~/.m2/repository/nzilbb/nzilbb.ag/1.0.3/nzilbb.ag-1.0.3.jar:~/.m2/repository/org/glassfish/javax.json/1.1.4/javax.json-1.1.4.jar nzilbb.ag.automation.util.Info annotator.jar
+```
+
+To test the installation/configuration web-app, use the following command:
+
+```
+java -cp ~/.m2/repository/nzilbb/nzilbb.ag/1.0.3/nzilbb.ag-1.0.3.jar:~/.m2/repository/org/glassfish/javax.json/1.1.4/javax.json-1.1.4.jar:~/.m2/repository/commons-fileupload/commons-fileupload/1.4/commons-fileupload-1.4.jar:~/.m2/repository/commons-io/commons-io/2.6/commons-io-2.6.jar  nzilbb.ag.automation.util.ConfigApp annotator.jar
+```
+
+To test the task parameters web-app, use the following command:
+
+```
+java -cp ~/.m2/repository/nzilbb/nzilbb.ag/1.0.3/nzilbb.ag-1.0.3.jar:~/.m2/repository/org/glassfish/javax.json/1.1.4/javax.json-1.1.4.jar:~/.m2/repository/commons-fileupload/commons-fileupload/1.4/commons-fileupload-1.4.jar:~/.m2/repository/commons-io/commons-io/2.6/commons-io-2.6.jar  nzilbb.ag.automation.util.TaskApp annotator.jar taskId
+```
