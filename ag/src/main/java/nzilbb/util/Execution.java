@@ -184,6 +184,23 @@ public class Execution implements Runnable {
    */
   public boolean getFinished() { return finished; }
 
+  /**
+   * Whether to log verbose debug information to stdout or not.
+   * @see #getVerbose()
+   * @see #setVerbose(boolean)
+   */
+  protected boolean verbose = false;
+  /**
+   * Getter for {@link #verbose}: Whether to log verbose debug information to stdout or not.
+   * @return Whether to log verbose debug information to stdout or not.
+   */
+  public boolean getVerbose() { return verbose; }
+  /**
+   * Setter for {@link #verbose}: Whether to log verbose debug information to stdout or not.
+   * @param newVerbose Whether to log verbose debug information to stdout or not.
+   */
+  public Execution setVerbose(boolean newVerbose) { verbose = newVerbose; return this; }
+  
   // Methods:
    
   /**
@@ -235,6 +252,7 @@ public class Execution implements Runnable {
    * Runs the executable, monitors it, and returns when done.
    */
   public void run() {
+    if (verbose) System.out.println("Execution: run...");
     running = true;
     finished = false;
     input = new StringBuffer();
@@ -247,30 +265,41 @@ public class Execution implements Runnable {
       vArguments.add(exe.getName());
     }
     if (arguments != null) vArguments.addAll(arguments);
+    
+    if (verbose) System.out.println("Execution: " + vArguments);
     try {
 
       Vector<String> envp = new Vector<String>();
       for (String variable : environmentVariables.keySet()) {
         envp.add(variable + "=" + environmentVariables.get(variable)); 
+        if (verbose) {
+          System.out.println("Execution: variable=" + environmentVariables.get(variable));
+        }
       }
 
       if (envp.size() == 0) {
         if (workingDirectory != null) {
+          if (verbose) System.out.println("Execution: exec in " + workingDirectory.getPath());
           setProcess(Runtime.getRuntime().exec(
                        vArguments.toArray(new String[0]),
                        null,
                        workingDirectory));
         } else {
+          if (verbose) System.out.println("Execution: exec");
           setProcess(Runtime.getRuntime().exec(
                        vArguments.toArray(new String[0])));
         }
       } else {
         if (workingDirectory != null) {
+          if (verbose) {
+            System.out.println("Execution: exec with envp in " + workingDirectory.getPath());
+          }
           setProcess(Runtime.getRuntime().exec(
                        vArguments.toArray(new String[0]),
                        envp.toArray(new String[0]),
                        workingDirectory));
         } else {
+          if (verbose) System.out.println("Execution: exec with envp");
           setProcess(Runtime.getRuntime().exec(
                        vArguments.toArray(new String[0]),
                        envp.toArray(new String[0])));
@@ -290,13 +319,14 @@ public class Execution implements Runnable {
       // wait time, with a maximum sleep of 30 seconds
       int iMSSleep = 1;
       while (running) {
-        try
-        {
-          int iReturnValue = process.exitValue();		     
+        try {
+          int iReturnValue = process.exitValue();
+          if (verbose) System.out.println("Execution: Return value " + iReturnValue);
+
           // if exitValue returns, the process has finished
           running = false;
-        }
-        catch(IllegalThreadStateException exception) { // still executing		     
+        } catch(IllegalThreadStateException exception) { // still executing
+          if (verbose) System.out.println("Execution: Waiting for " + iMSSleep + "ms");
           // sleep for a while
           try {
             Thread.sleep(iMSSleep);
@@ -311,15 +341,18 @@ public class Execution implements Runnable {
         try {
           // data ready?
           int bytesRead = inStream.available();
+          if (verbose) System.out.println("Execution: stdin bytes ready: " + bytesRead);
           String sMessages = "";
           while(bytesRead > 0) {
             // if there's data coming, sleep a shorter time
             iMSSleep = 1;		     
             // write to the log file
             bytesRead = inStream.read(buffer);
+            if (verbose) System.out.println("Execution: stdin read " + bytesRead + " bytes");
             input.append(new String(buffer, 0, bytesRead));
             // data ready?
             bytesRead = inStream.available();
+            if (verbose) System.out.println("Execution: stdin bytes ready: " + bytesRead);
           } // next chunk of data	       
         } catch(IOException exception) {
           System.err.println("Execution: ERROR reading conversion input stream: "
@@ -329,26 +362,50 @@ public class Execution implements Runnable {
         try {
           // data ready from error stream?
           int bytesRead = errStream.available();
+          if (verbose) System.out.println("Execution: stderr bytes ready: " + bytesRead);
           while(bytesRead > 0) {
             // if there's data coming, sleep a shorter time
             iMSSleep = 1;	    
             bytesRead = errStream.read(buffer);
+            if (verbose) System.out.println("Execution: stderr read " + bytesRead + " bytes");
             error.append(new String(buffer, 0, bytesRead));
-            System.err.println("Execution: " + exe.getName() + ": " + new String(buffer, 0, bytesRead));
+            System.err.println(
+              "Execution: " + exe.getName() + ": " + new String(buffer, 0, bytesRead));
             // data ready?
             bytesRead = errStream.available();
+            if (verbose) System.out.println("Execution: stderr bytes ready: " + bytesRead);
           } // next chunk of data
         } catch(IOException exception) {
           System.err.println("Execution: ERROR reading conversion error stream: "
                              + exe.getName() + " - " + exception);
         }
+        if (verbose) System.out.println("Execution: still running...");
       } // running
     } catch(IOException exception) {
       System.err.println("Execution: Could not execute: " + exception);
       error.append("Could not execute: " + exception);
     }
     finished = true;
+    if (verbose) System.out.println("Execution: finished.");
   } // end of run()
+  
+  /**
+   * Returns output printed to stdout.
+   * @return Output printed to stdout.
+   * @see getInput()
+   */
+  public String stdout() {
+    return getInput().toString();
+  } // end of stdout()
+
+  /**
+   * Returns output printed to stderr.
+   * @return Output printed to stderr.
+   * @see getError()
+   */
+  public String stderr() {
+    return getError().toString();
+  } // end of stderr()
 
   /**
    * Runs the "which" command to determine if a command is available.
