@@ -260,7 +260,7 @@ public class TestChatSerialization {
       Annotation[] words = g.all("turn")[0].all("word");
       String[] wordLabels = { // NB we have a c-unit layer, so terminators are stripped off 
 	 "ab", "abc", "abcdef", "abcd", "gonna", "lie", "abcd", "abc", "pet", "abcdefghij", 
-	 "abc", "abcde", "abc", "ab", "abcd", "ab", "abc", "worryin", "i", "abcd",
+	 "abc", "abcde", "abc", "ab", "abcd", "ab", "abc", "worryin", "i~", "abcd",
 	 "she'll", "ab", "nd", "abcdefg"};
       for (int i = 0; i < wordLabels.length; i++) {
 	 assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
@@ -337,7 +337,7 @@ public class TestChatSerialization {
 
       // disfluency
       words = g.all("turn")[0].all("word");
-      assertEquals("i", words[18].getLabel());
+      assertEquals("Tagged with ~", "i~", words[18].getLabel());
       assertEquals("&+", words[18].first("disfluency").getLabel());
       assertEquals("word is parent", words[18], words[18].first("disfluency").getParent());
       // ensure they're marked as manual annotations
@@ -674,7 +674,7 @@ public class TestChatSerialization {
 	 // NB we have no c-unit layer, so terminators are still present
 	 // NB we have no linkage layer, so linkages are not split
 	 "ab", "abc", "abcdef", "abcd", "gonna", "lie", "abcd", "abc", "pet", "abcdefghij", 
-	 "abc", "abcde", "abc", "ab", "abcd", "ab", "abc", "worryin", "i", "abcd.",
+	 "abc", "abcde", "abc", "ab", "abcd", "ab", "abc", "worryin", "i~", "abcd.",
 	 "she'll", "ab", "nd", "abcdefg.", 
 	 "abcd", "abcdefg", "ab", "abc", "abcdef", "abcde", "abc", "ab", "abc", "abcdefgh", "abc", "abcdef", "abc", "+//?",
 	 "ab", "abcde", "until", "she's", "abc", "ab", "abcde", "abcdef", "abcde", "ab", "abc", "baby's", "crib", 
@@ -684,7 +684,7 @@ public class TestChatSerialization {
       }
 
       // disfluency
-      assertEquals("i", words[18].getLabel());
+      assertEquals("Tagged with ~", "i~", words[18].getLabel());
       assertNull("disfluency not tagged", words[18].first("disfluency"));
       assertEquals("no disfluencies", 0, g.all("disfluency").length);
 

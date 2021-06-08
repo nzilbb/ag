@@ -1875,11 +1875,11 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
           utterance.setEnd(end);
           lastAlignedAnchor = end;
 	       
-          if (start.getOffset() > end.getOffset()) { // start and end in reverse order 
-            if (errors == null) errors = new SerializationException();
-            errors.addError(SerializationException.ErrorType.Alignment, 
-                            "Utterance start is after end: " 
-                            + synchronisedMatcher.group(2) + "_" + synchronisedMatcher.group(3));
+          if (start.getOffset() > end.getOffset()) { // start and end in reverse order
+            String message = "Utterance start is after end: " 
+              + synchronisedMatcher.group(2) + "_" + synchronisedMatcher.group(3);
+            if (errors == null) errors = new SerializationException(message);
+            errors.addError(SerializationException.ErrorType.Alignment, message);
           } else {
             checkAlignmentAgainstLastUtterance(
               utterance, start, end, cUnit, lastUtterance, currentTurn, utteranceLayer, graph);
@@ -1937,7 +1937,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     try {
       getTokenizer().transform(graph);
     } catch(TransformationException exception) {
-      if (errors == null) errors = new SerializationException();
+      if (errors == null) errors = new SerializationException(exception.getMessage());
       if (errors.getCause() == null) errors.initCause(exception);
       errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
     }
@@ -1971,10 +1971,16 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       transformer.transform(graph).commit();      
       graph.commit();
 
-      // disfluencies
+      // disfluencies...
+      // before we transform disfluencies, we'll tag them becaus we might need to know
+      // whether they've been skipped by mor
+      for (Annotation word : graph.all(getWordLayer().getId())) {
+        if (word.getLabel().startsWith("&+")) word.put("@skippedByMor", Boolean.TRUE);
+      } // next token
+      // now strip off the &+...
       transformer = new ConventionTransformer(
         getWordLayer().getId(), "&\\+(\\w+)");
-      transformer.addDestinationResult(getWordLayer().getId(), "$1");
+      transformer.addDestinationResult(getWordLayer().getId(), "$1~");
       if (getDisfluencyLayer() != null) {
         transformer.addDestinationResult(getDisfluencyLayer().getId(), "&+");
       }
@@ -2077,216 +2083,232 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       graph.commit();
 
       // match %mor annotations with their tokens
-      for (Annotation m : graph.all("@mor")) {
+      for (Annotation morLine : graph.all("@mor")) {
         if (parsingMor) {
-          String[] morTags = m.getLabel().split(" ");
-          Annotation[] tokens = m.getParent().all(wordLayer.getId());
-          if (morTags.length != tokens.length) {
-            if (errors == null) errors = new SerializationException();
-            errors.addError(
-              SerializationException.ErrorType.Tokenization,
-              "Number of %mor tags ("+Arrays.asList(morTags)
-              +") does not match number of tokens ("
-              +Arrays.stream(tokens).map(t->t.getLabel()).collect(Collectors.toList())+")");
-          } else {
-            // tag each token
-            for (int t = 0; t < morTags.length; t++) {
-              Annotation token = tokens[t];
-              String morTag = morTags[t].trim();
-              if (!splitMorTagGroups) { // one big fat complex label
+          String[] morTags = morLine.getLabel().split(" ");
+          Annotation[] tokens = morLine.getParent().all(wordLayer.getId());
+          // tag each token
+          int t = 0;
+          for (int m = 0; m < morTags.length && t < tokens.length; m++, t++) {
+            
+            Annotation token = tokens[t];
+            // skip partial words, which are not tagged by mor
+            while (token.containsKey("@skippedByMor") && t < tokens.length-1) {
+              token = tokens[++t];
+            }
+            if (token.containsKey("@skippedByMor")) {
+              String message = "There are more %mor tags ("+Arrays.asList(morTags)
+                +") than real tokens ("
+                +Arrays.stream(tokens).map(tk->tk.getLabel()).collect(Collectors.toList())+")"; 
+              if (errors == null) errors = new SerializationException(message);
+              errors.addError(SerializationException.ErrorType.Tokenization, message);
+                continue;
+            }
+            
+            String morTag = morTags[m].trim();
+            
+            if (!splitMorTagGroups) { // one big fat complex label
+              if (morLayer != null) {
+                graph.createTag(token, morLayer.getId(), morTag);
+              }
+            } else { // splitMorTagGroups
+              String[] morTagGroup = morTag.split("\\^");
+              if (!splitMorWordGroups) { // several complex labels
                 if (morLayer != null) {
-                  graph.createTag(token, morLayer.getId(), morTag);
+                  for (String tag : morTagGroup) {
+                    graph.createTag(token, morLayer.getId(), tag);
+                  } // next tag group
                 }
-              } else { // splitMorTagGroups
-                String[] morTagGroup = morTag.split("\\^");
-                if (!splitMorWordGroups) { // several complex labels
-                  if (morLayer != null) {
-                    for (String tag : morTagGroup) {
-                      graph.createTag(token, morLayer.getId(), tag);
-                    } // next tag group
-                  }
-                } else { // splitMorWordGroups
-                  // word groups are structures: preclitic$word~postclitic
-                  // e.g. dámelo: "vimpsh|da-2S&IMP~pro:clit|1S~pro:clit|OBJ&MASC=give"
-                  // - vimpsh|da-2S&IMP
-                  // - pro:clit|1S
-                  // - pro:clit|OBJ&MASC=give
-                  // or overall+component+component
-                  // e.g. angelfish: "n|+n|angel+n|fish"
-                  // - n|
-                  // - n|angel
-                  // - n|fish
-                  for (String wordGroup : morTagGroup) {
-                    // tag groups are temporally sequential, so each one is chained
-                    // across the duration of the word
-                    String[] words = wordGroup.split("[$+~]");
-                    Annotation lastTag = null;
-                    Vector<Annotation> tags = new Vector<Annotation>();
+              } else { // splitMorWordGroups
+                // word groups are structures: preclitic$word~postclitic
+                // e.g. dámelo: "vimpsh|da-2S&IMP~pro:clit|1S~pro:clit|OBJ&MASC=give"
+                // - vimpsh|da-2S&IMP
+                // - pro:clit|1S
+                // - pro:clit|OBJ&MASC=give
+                // or overall+component+component
+                // e.g. angelfish: "n|+n|angel+n|fish"
+                // - n|
+                // - n|angel
+                // - n|fish
+                for (String wordGroup : morTagGroup) {
+                  // tag groups are temporally sequential, so each one is chained
+                  // across the duration of the word
+                  String[] words = wordGroup.split("[$+~]");
+                  Annotation lastTag = null;
+                  Vector<Annotation> tags = new Vector<Annotation>();
+                  
+                  // first, tease out the words and sort out their anchors
+                  for (String subword : words) {
+                    Annotation tag = new Annotation()
+                      .setLabel(subword)
+                      .setParentId(token.getId());
+                    if (lastTag == null) {
+                      tag.setStartId(token.getStartId());
+                    } else { // chain the end of the last subword the start of this subword
+                      tag.setStartId(graph.addAnchor(new Anchor()).getId());
+                      lastTag.setEndId(tag.getStartId());
+                    }
+                    tag.setEndId(token.getEndId());                      
+                    if (morLayer != null) {
+                      tag.setLayerId(morLayer.getId());
+                      graph.addAnnotation(tag);
+                    }
+                    lastTag = tag;
+                    tags.add(tag);
+                  } // next subword
+                  
+                  // now parse the parts of each word
+                  for (Annotation tag : tags) {
+                    String label = tag.getLabel();
                     
-                    // first, tease out the words and sort out their anchors
-                    for (String subword : words) {
-                      Annotation tag = new Annotation()
-                        .setLabel(subword)
-                        .setParentId(token.getId());
-                      if (lastTag == null) {
-                        tag.setStartId(token.getStartId());
-                      } else { // chain the end of the last subword the start of this subword
-                        tag.setStartId(graph.addAnchor(new Anchor()).getId());
-                        lastTag.setEndId(tag.getStartId());
-                      }
-                      tag.setEndId(token.getEndId());                      
-                      if (morLayer != null) {
-                        tag.setLayerId(morLayer.getId());
-                        graph.addAnnotation(tag);
-                      }
-                      lastTag = tag;
-                      tags.add(tag);
-                    } // next subword
-
-                    // now parse the parts of each word
-                    for (Annotation tag : tags) {
-                      String label = tag.getLabel();
-                      
-                      // tags at the start...
-                      
-                      // prefixes
-                      int lastHash = label.lastIndexOf('#');
-                      if (lastHash >= 0) { // there are prefixes
-                        if (morPrefixLayer != null) {
-                          String[] prefixes = label.substring(0, lastHash).split("#");
-                          for (String prefix : prefixes) {
-                            if (prefix.length() > 0) {
-                              graph.addAnnotation(
-                                new Annotation().setLayerId(morPrefixLayer.getId())
-                                .setLabel(prefix)
-                                .setParentId(token.getId())
-                                .setStartId(tag.getStartId())
-                                .setEndId(tag.getEndId()));
-                            }
-                          } // next prefix
-                        } // morPrefixLayer is set
-                        // remove prefixes
-                        label = label.substring(lastHash+1);
-                      }
-                      
-                      // part-of-speech
-                      int bar = label.indexOf('|');
-                      if (bar >= 0) {
-                        String pos = label.substring(0,bar);
-                        String[] subcategories = pos.split(":");
-                        pos = subcategories[0];
-                        // part of speech
-                        if (morPartOfSpeechLayer != null && pos.length() > 0) {
-                          graph.addAnnotation(
-                            new Annotation().setLayerId(morPartOfSpeechLayer.getId())
-                            .setLabel(pos)
-                            .setParentId(token.getId())
-                            .setStartId(tag.getStartId())
-                            .setEndId(tag.getEndId()));
-                        } // morPartOfSpeechLayer is set
-                          // subcategories
-                        if (morPartOfSpeechSubcategoryLayer != null) { 
-                          for (int s = 1; s < subcategories.length; s++) {
-                            String subcategory = subcategories[s];
+                    // tags at the start...
+                    
+                    // prefixes
+                    int lastHash = label.lastIndexOf('#');
+                    if (lastHash >= 0) { // there are prefixes
+                      if (morPrefixLayer != null) {
+                        String[] prefixes = label.substring(0, lastHash).split("#");
+                        for (String prefix : prefixes) {
+                          if (prefix.length() > 0) {
                             graph.addAnnotation(
-                              new Annotation().setLayerId(morPartOfSpeechSubcategoryLayer.getId())
-                              .setLabel(subcategory)
+                              new Annotation().setLayerId(morPrefixLayer.getId())
+                              .setLabel(prefix)
                               .setParentId(token.getId())
                               .setStartId(tag.getStartId())
                               .setEndId(tag.getEndId()));
-                          } // next subcategory
-                        } // morPartOfSpeechSubcategoryLayer is set
+                          }
+                        } // next prefix
+                      } // morPrefixLayer is set
+                        // remove prefixes
+                      label = label.substring(lastHash+1);
+                    }
+                    
+                    // part-of-speech
+                    int bar = label.indexOf('|');
+                    if (bar >= 0) {
+                      String pos = label.substring(0,bar);
+                      String[] subcategories = pos.split(":");
+                      pos = subcategories[0];
+                      // part of speech
+                      if (morPartOfSpeechLayer != null && pos.length() > 0) {
+                        graph.addAnnotation(
+                          new Annotation().setLayerId(morPartOfSpeechLayer.getId())
+                          .setLabel(pos)
+                          .setParentId(token.getId())
+                          .setStartId(tag.getStartId())
+                          .setEndId(tag.getEndId()));
+                      } // morPartOfSpeechLayer is set
+                      // subcategories
+                      if (morPartOfSpeechSubcategoryLayer != null) { 
+                        for (int s = 1; s < subcategories.length; s++) {
+                          String subcategory = subcategories[s];
+                          graph.addAnnotation(
+                            new Annotation().setLayerId(morPartOfSpeechSubcategoryLayer.getId())
+                            .setLabel(subcategory)
+                            .setParentId(token.getId())
+                            .setStartId(tag.getStartId())
+                            .setEndId(tag.getEndId()));
+                        } // next subcategory
+                      } // morPartOfSpeechSubcategoryLayer is set
                         // remove part-of-speech
-                        label = label.substring(bar+1);
-                      }
-                      
-                      // get tags of the end...
-                      
-                      // English gloss
-                      int equals = label.indexOf('=');
-                      if (equals >= 0) {
-                        if (morGlossLayer != null) {
-                          String gloss = label.substring(equals+1);
-                          if (gloss.length() > 0) {
+                      label = label.substring(bar+1);
+                    }
+                    
+                    // get tags of the end...
+                    
+                    // English gloss
+                    int equals = label.indexOf('=');
+                    if (equals >= 0) {
+                      if (morGlossLayer != null) {
+                        String gloss = label.substring(equals+1);
+                        if (gloss.length() > 0) {
+                          graph.addAnnotation(new Annotation()
+                                              .setLayerId(morGlossLayer.getId())
+                                              .setLabel(gloss)
+                                              .setParentId(token.getId())
+                                              .setStartId(tag.getStartId())
+                                              .setEndId(tag.getEndId()));
+                        }
+                      } // morGlossLayer is set
+                        // remove gloss
+                      label = label.substring(0, equals);
+                    }
+                    
+                    // Suffixes
+                    int firstDash = label.lastIndexOf('-');
+                    if (firstDash >= 0) { // there are suffixes
+                      if (morSuffixLayer != null) {
+                        String[] suffixes = label.substring(firstDash+1).split("-");
+                        for (String suffix : suffixes) {
+                          if (suffix.length() > 0) {
                             graph.addAnnotation(new Annotation()
-                                                .setLayerId(morGlossLayer.getId())
-                                                .setLabel(gloss)
+                                                .setLayerId(morSuffixLayer.getId())
+                                                .setLabel(suffix)
                                                 .setParentId(token.getId())
                                                 .setStartId(tag.getStartId())
                                                 .setEndId(tag.getEndId()));
                           }
-                        } // morGlossLayer is set
-                        // remove gloss
-                        label = label.substring(0, equals);
-                      }
-                      
-                      // Suffixes
-                      int firstDash = label.lastIndexOf('-');
-                      if (firstDash >= 0) { // there are suffixes
-                        if (morSuffixLayer != null) {
-                          String[] suffixes = label.substring(firstDash+1).split("-");
-                          for (String suffix : suffixes) {
-                            if (suffix.length() > 0) {
-                              graph.addAnnotation(new Annotation()
-                                                  .setLayerId(morSuffixLayer.getId())
-                                                  .setLabel(suffix)
-                                                  .setParentId(token.getId())
-                                                  .setStartId(tag.getStartId())
-                                                  .setEndId(tag.getEndId()));
-                            }
-                          } // next suffix
-                        } // morSuffixLayer is set
+                        } // next suffix
+                      } // morSuffixLayer is set
                         // remove suffixes
-                        label = label.substring(0, firstDash);
-                      }
-                      
-                      // Fusional suffixes
-                      int firstAmpersand = label.lastIndexOf('&');
-                      if (firstAmpersand >= 0) { // there are suffixes
-                        if (morFusionalSuffixLayer != null) {
-                          String[] suffixes = label.substring(firstAmpersand+1).split("&");
-                          for (String suffix : suffixes) {
-                            if (suffix.length() > 0) {
-                              graph.addAnnotation(new Annotation()
-                                                  .setLayerId(morFusionalSuffixLayer.getId())
-                                                  .setLabel(suffix)
-                                                  .setParentId(token.getId())
-                                                  .setStartId(tag.getStartId())
-                                                  .setEndId(tag.getEndId()));
-                            }
-                          } // next suffix
-                        } // morFusionalSuffixLayer is set
+                      label = label.substring(0, firstDash);
+                    }
+                    
+                    // Fusional suffixes
+                    int firstAmpersand = label.lastIndexOf('&');
+                    if (firstAmpersand >= 0) { // there are suffixes
+                      if (morFusionalSuffixLayer != null) {
+                        String[] suffixes = label.substring(firstAmpersand+1).split("&");
+                        for (String suffix : suffixes) {
+                          if (suffix.length() > 0) {
+                            graph.addAnnotation(new Annotation()
+                                                .setLayerId(morFusionalSuffixLayer.getId())
+                                                .setLabel(suffix)
+                                                .setParentId(token.getId())
+                                                .setStartId(tag.getStartId())
+                                                .setEndId(tag.getEndId()));
+                          }
+                        } // next suffix
+                      } // morFusionalSuffixLayer is set
                         // remove suffixes
-                        label = label.substring(0, firstAmpersand);
-                      }
-                      
-                      // whatever's left is the stem
-                      if (morStemLayer != null && label.length() > 0) {
-                        graph.addAnnotation(new Annotation()
-                                            .setLayerId(morStemLayer.getId())
-                                            .setLabel(label)
-                                            .setParentId(token.getId())
-                                            .setStartId(tag.getStartId())
-                                            .setEndId(tag.getEndId()));
-                      }
-                      
-                    } // next tag
-                  } // next word group
-                } // splitMorWordGroups
-              } // splitMorTagGroups
-            } // next token          
-          } // right number of tags
+                      label = label.substring(0, firstAmpersand);
+                    }
+                    
+                    // whatever's left is the stem
+                    if (morStemLayer != null && label.length() > 0) {
+                      graph.addAnnotation(new Annotation()
+                                          .setLayerId(morStemLayer.getId())
+                                          .setLabel(label)
+                                          .setParentId(token.getId())
+                                          .setStartId(tag.getStartId())
+                                          .setEndId(tag.getEndId()));
+                    }
+                    
+                  } // next tag
+                } // next word group
+              } // splitMorWordGroups
+            } // splitMorTagGroups
+          } // next token
+          if (t < tokens.length) {
+            String message = "There are fewer %mor tags ("+Arrays.asList(morTags)
+              +") than tokens ("
+              +Arrays.stream(tokens).map(tk->tk.getLabel()).collect(Collectors.toList())+") + "+t; 
+            if (errors == null) errors = new SerializationException(message);
+            errors.addError(SerializationException.ErrorType.Tokenization, message);
+          }
         } // %mor
-        m.destroy();
+        morLine.destroy();
       } // next mor 
         
       // set all annotations to manual confidence
       for (Annotation a : graph.getAnnotationsById().values()) {
         a.setConfidence(Constants.CONFIDENCE_MANUAL);
+        // also remove mor-related tags
+        if (a.containsKey("@skippedByMor")) a.remove("@skippedByMor");
       }
 
     } catch(TransformationException exception) {
-      if (errors == null) errors = new SerializationException();
+      if (errors == null) errors = new SerializationException(exception.getMessage());
       if (errors.getCause() == null) errors.initCause(exception);
       errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
     }
@@ -2525,7 +2547,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
         for (Annotation disfluency : graph.all(disfluencyLayer.getId())) {
           Annotation word = disfluency.first(wordLayer.getId());
           if (word != null) {
-            word.setLabel("&+"+word.getLabel());
+            word.setLabel("&+"+word.getLabel().replaceAll("~$",""));
           }
         }
       }
@@ -2856,7 +2878,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       }
       return new NamedStream(in, IO.SafeFileNameUrl(streamName));
     } catch(Exception exception) {
-      errors = new SerializationException();
+      errors = new SerializationException(exception.getMessage());
       errors.initCause(exception);
       errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
       throw errors;
