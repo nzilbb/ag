@@ -2235,7 +2235,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                     }
                     
                     // Suffixes
-                    int firstDash = label.lastIndexOf('-');
+                    int firstDash = label.indexOf('-');
                     if (firstDash >= 0) { // there are suffixes
                       if (morSuffixLayer != null) {
                         String[] suffixes = label.substring(firstDash+1).split("-");
