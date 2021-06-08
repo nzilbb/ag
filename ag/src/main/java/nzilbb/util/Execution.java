@@ -341,14 +341,14 @@ public class Execution implements Runnable {
         try {
           // data ready?
           int bytesRead = inStream.available();
-          if (verbose) System.out.println("Execution: stdin bytes ready: " + bytesRead);
+          if (verbose) System.out.println("Execution: stdout bytes ready: " + bytesRead);
           String sMessages = "";
           while(bytesRead > 0) {
             // if there's data coming, sleep a shorter time
             iMSSleep = 1;		     
             // write to the log file
             bytesRead = inStream.read(buffer);
-            if (verbose) System.out.println("Execution: stdin read " + bytesRead + " bytes");
+            if (verbose) System.out.println("Execution: stdout read " + bytesRead + " bytes");
             input.append(new String(buffer, 0, bytesRead));
             // data ready?
             bytesRead = inStream.available();
