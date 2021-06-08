@@ -28,7 +28,7 @@ Modules that perform automatic annotation tasks on annotation graphs.
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>[1.0.0,)</version>
+      <version>[1.0.3,)</version>
       <scope>compile</scope>
     </dependency>
    ```
@@ -57,8 +57,7 @@ Modules that perform automatic annotation tasks on annotation graphs.
 3. Remove the groupId-based source code structure:
    ```
    cd myannotator
-   rm src/main/java/nzilbb/App.java
-   rm src/test/java/nzilbb/AppTest.java
+   rm src/main/java/nzilbb/App.java src/test/java/nzilbb/AppTest.java
    ```
 4. Add directory structure for the annotator code:
    ```

@@ -23,6 +23,7 @@
     <module>jython</module>
     <module>spanishphonology</module>
     <module>labelmapper</module>
-    <module>stanfordpos</module>      
+    <module>stanfordpos</module>
+    <module>mor</module>
   </modules>
 </project>
