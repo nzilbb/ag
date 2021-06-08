@@ -74,7 +74,8 @@ public class TestMorTagger {
     File fThisClass = new File(urlThisClass.toURI());
     return fThisClass.getParentFile();
   }
-  
+
+  /** The annotator works out of the box with not particular configuration */
   @Test public void defaultParameters() throws Exception {
     
     Graph g = graph();
@@ -85,8 +86,6 @@ public class TestMorTagger {
     // use default configuration
     annotator.setTaskParameters(null);
     
-    assertEquals("token layer",
-                 "word", annotator.getTokenLayerId());
     assertEquals("transcript language layer",
                  "transcript_language", annotator.getLanguagesLayerId());
     assertEquals("mor layer",
@@ -111,11 +110,20 @@ public class TestMorTagger {
                requiredLayers.contains("word"));
     assertTrue("transcript_language required "+requiredLayers,
                requiredLayers.contains("transcript_language"));
-    String outputLayers[] = annotator.getOutputLayers();
-    assertEquals("1 output layer: "+Arrays.asList(outputLayers),
-                 1, outputLayers.length);
-    assertEquals("output layer correct "+Arrays.asList(outputLayers),
-                 "mor", outputLayers[0]);
+    Set<String> outputLayers = Arrays.stream(annotator.getOutputLayers())
+      .collect(Collectors.toSet());;
+    assertEquals("All possibl output layers: "+outputLayers,
+                 8, outputLayers.size());
+    assertTrue("output layers includ mor", outputLayers.contains("mor"));
+    assertTrue("output layers includ morPrefix", outputLayers.contains("morPrefix"));
+    assertTrue("output layers includ morPOS", outputLayers.contains("morPOS"));
+    assertTrue("output layers includ morPOSSubcategory",
+               outputLayers.contains("morPOSSubcategory"));
+    assertTrue("output layers includ morStem", outputLayers.contains("morStem"));
+    assertTrue("output layers includ morFusionalSuffix",
+               outputLayers.contains("morFusionalSuffix"));
+    assertTrue("output layers includ morSuffix", outputLayers.contains("morSuffix"));
+    assertTrue("output layers includ morGloss", outputLayers.contains("morGloss"));
     
     Annotation firstWord = g.first("word");
     assertEquals("double check the first word is what we think it is: "+firstWord,
@@ -131,21 +139,21 @@ public class TestMorTagger {
       .collect(Collectors.toList());
     assertEquals("Correct number of tokens (disfluent w~ is skipped) "+morAnnotations,
                  12, morAnnotations.size());
-    Iterator<Annotation> mores = morAnnotations.iterator();
-    assertEquals("I'll", "pro:sub|I", mores.next().getLabel());
-    assertEquals("I'll", "mod|will", mores.next().getLabel());
-    assertEquals("sing", "v|sing", mores.next().getLabel());
-    assertEquals("and", "coord|and", mores.next().getLabel());
-    assertEquals("walk", "n|walk", mores.next().getLabel());
-    assertEquals("walk", "v|walk", mores.next().getLabel());
-    assertEquals("about", "adv|about", mores.next().getLabel());
-    assertEquals("about", "prep|about", mores.next().getLabel());
-    assertEquals("my", "det:poss|my", mores.next().getLabel());
-    assertEquals("my", "co|my", mores.next().getLabel());
-    assertEquals("blogging-morting", "?|bloggingmorting", mores.next().getLabel());
-    assertEquals("lazily", "adv|laze&dadj-Y-LY", mores.next().getLabel());
+    Iterator<Annotation> mors = morAnnotations.iterator();
+    assertEquals("I'll", "pro:sub|I", mors.next().getLabel());
+    assertEquals("I'll", "mod|will", mors.next().getLabel());
+    assertEquals("sing", "v|sing", mors.next().getLabel());
+    assertEquals("and", "coord|and", mors.next().getLabel());
+    assertEquals("walk", "n|walk", mors.next().getLabel());
+    assertEquals("walk", "v|walk", mors.next().getLabel());
+    assertEquals("about", "adv|about", mors.next().getLabel());
+    assertEquals("about", "prep|about", mors.next().getLabel());
+    assertEquals("my", "det:poss|my", mors.next().getLabel());
+    assertEquals("my", "co|my", mors.next().getLabel());
+    assertEquals("blogging-morting", "?|bloggingmorting", mors.next().getLabel());
+    assertEquals("lazily", "adv|laze&dadj-Y-LY", mors.next().getLabel());
 
-    mores = morAnnotations.iterator();
+    mors = morAnnotations.iterator();
     String[] wordLabels = {
       "I'll", "I'll", 
       "sing", "and",
@@ -157,10 +165,79 @@ public class TestMorTagger {
     };
     for (int i = 0; i < wordLabels.length; i++) {
       assertEquals("Tag " + i + " should tag " + wordLabels[i],
-                   wordLabels[i], mores.next().first("word").getLabel());
+                   wordLabels[i], mors.next().first("word").getLabel());
     }
     assertEquals("I'll has two tags", 2, firstWord.all("mor").length);
-    
+
+    // prefixes
+    Annotation[] prefixes = g.all("morPrefix");
+    assertEquals("No prefixes "+Arrays.asList(prefixes),
+                 0, prefixes.length);
+
+    // POS
+    morAnnotations = Arrays.stream(g.all("morPOS"))
+      .collect(Collectors.toList());
+    assertEquals("Correct number of POS tags "+morAnnotations,
+                 12, morAnnotations.size());
+    mors = morAnnotations.iterator();
+    assertEquals("I'll", "pro", mors.next().getLabel());
+    assertEquals("I'll", "mod", mors.next().getLabel());
+    assertEquals("sing", "v", mors.next().getLabel());
+    assertEquals("and", "coord", mors.next().getLabel());
+    assertEquals("walk", "n", mors.next().getLabel());
+    assertEquals("walk", "v", mors.next().getLabel());
+    assertEquals("about", "adv", mors.next().getLabel());
+    assertEquals("about", "prep", mors.next().getLabel());
+    assertEquals("my", "det", mors.next().getLabel());
+    assertEquals("my", "co", mors.next().getLabel());
+    assertEquals("blogging-morting", "?", mors.next().getLabel());
+    assertEquals("lazily", "adv", mors.next().getLabel());
+
+    // POS subcategory
+    morAnnotations = Arrays.stream(g.all("morPOSSubcategory"))
+      .collect(Collectors.toList());
+    assertEquals("Correct number of POS subcategories "+morAnnotations,
+                 2, morAnnotations.size());
+    mors = morAnnotations.iterator();
+    assertEquals("I'll", "sub", mors.next().getLabel());
+    assertEquals("my", "poss", mors.next().getLabel());
+
+    // stem
+    morAnnotations = Arrays.stream(g.all("morStem"))
+      .collect(Collectors.toList());
+    assertEquals("Correct number of stems "+morAnnotations,
+                 12, morAnnotations.size());
+    mors = morAnnotations.iterator();
+    assertEquals("I'll", "I", mors.next().getLabel());
+    assertEquals("I'll", "will", mors.next().getLabel());
+    assertEquals("sing", "sing", mors.next().getLabel());
+    assertEquals("and", "and", mors.next().getLabel());
+    assertEquals("walk", "walk", mors.next().getLabel());
+    assertEquals("walk", "walk", mors.next().getLabel());
+    assertEquals("about", "about", mors.next().getLabel());
+    assertEquals("about", "about", mors.next().getLabel());
+    assertEquals("my", "my", mors.next().getLabel());
+    assertEquals("my", "my", mors.next().getLabel());
+    assertEquals("blogging-morting", "bloggingmorting", mors.next().getLabel());
+    assertEquals("lazily", "laze", mors.next().getLabel());
+
+    // fusional suffixes
+    morAnnotations = Arrays.stream(g.all("morFusionalSuffix"))
+      .collect(Collectors.toList());
+    assertEquals("Correct number of fusional suffixes "+morAnnotations,
+                 1, morAnnotations.size());
+    mors = morAnnotations.iterator();
+    assertEquals("lazily", "dadj", mors.next().getLabel());
+
+    // suffixes
+    morAnnotations = Arrays.stream(g.all("morSuffix"))
+      .collect(Collectors.toList());
+    assertEquals("Correct number of suffixes "+morAnnotations,
+                 2, morAnnotations.size());
+    mors = morAnnotations.iterator();
+    assertEquals("lazily", "Y", mors.next().getLabel());
+    assertEquals("lazily", "LY", mors.next().getLabel());
+
     // add a word
     g.addAnnotation(new Annotation().setLayerId("word").setLabel("new")
                     .setStart(g.getOrCreateAnchorAt(90)).setEnd(g.getOrCreateAnchorAt(100))
@@ -192,34 +269,177 @@ public class TestMorTagger {
 
     assertEquals("John has one tag", 1, firstWord.all("mor").length);
 
-  }   
+  }
+
+  /** Can configure the annotator to target only specific outputs (pos and stem) */
+  @Test public void posStemOnly() throws Exception {
+    
+    Graph g = graph();
+    g.trackChanges();
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+    
+    // use default configuration
+    annotator.setTaskParameters("languagesLayerId=transcript_language"
+        +"&morLayerId="
+        +"&prefixLayerId="
+        +"&partOfSpeechLayerId=part-of-speech"
+        +"&partOfSpeechSubcategoryLayerId="
+        +"&stemLayerId=stem"
+        +"&fusionalSuffixLayerId="
+        +"&suffixLayerId="
+        +"&glossLayerId=");
+    
+    assertEquals("transcript language layer",
+                 "transcript_language", annotator.getLanguagesLayerId());
+    assertNull("no mor layer",
+               annotator.getMorLayerId());
+    assertNull("no prefix layer",
+               annotator.getPrefixLayerId());
+    assertNull("no subcategory layer",
+               annotator.getPartOfSpeechSubcategoryLayerId());
+    assertNull("no fusionalSuffixLayerId layer",
+               annotator.getFusionalSuffixLayerId());
+    assertNull("no suffix layer",
+               annotator.getSuffixLayerId());
+    assertNull("no gloss layer",
+               annotator.getGlossLayerId());
+    assertEquals("pos layer",
+                 "part-of-speech", annotator.getPartOfSpeechLayerId());
+    assertNotNull("pos layer was created",
+                  schema.getLayer(annotator.getPartOfSpeechLayerId()));
+    assertEquals("pos layer child of word",
+                 "word", schema.getLayer(annotator.getPartOfSpeechLayerId()).getParentId());
+    assertEquals("pos layer aligned",
+                 Constants.ALIGNMENT_INTERVAL,
+                 schema.getLayer(annotator.getPartOfSpeechLayerId()).getAlignment());
+    assertEquals("pos layer type correct",
+                 Constants.TYPE_STRING,
+                 schema.getLayer(annotator.getPartOfSpeechLayerId()).getType());
+    assertTrue("pos layer allows peers", // contractions like "I'll" might have two tags
+                schema.getLayer(annotator.getPartOfSpeechLayerId()).getPeers());
+    assertEquals("stem layer",
+                 "stem", annotator.getStemLayerId());
+    assertNotNull("stem layer was created",
+                  schema.getLayer(annotator.getStemLayerId()));
+    assertEquals("stem layer child of word",
+                 "word", schema.getLayer(annotator.getStemLayerId()).getParentId());
+    assertEquals("stem layer aligned",
+                 Constants.ALIGNMENT_INTERVAL,
+                 schema.getLayer(annotator.getStemLayerId()).getAlignment());
+    assertEquals("stem layer type correct",
+                 Constants.TYPE_STRING,
+                 schema.getLayer(annotator.getStemLayerId()).getType());
+    assertTrue("stem layer allows peers", // contractions like "I'll" might have two tags
+                schema.getLayer(annotator.getStemLayerId()).getPeers());
+    Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
+      .collect(Collectors.toSet());
+    assertEquals("Required layer: "+requiredLayers,
+                 2, requiredLayers.size());
+    assertTrue("word required "+requiredLayers,
+               requiredLayers.contains("word"));
+    assertTrue("transcript_language required "+requiredLayers,
+               requiredLayers.contains("transcript_language"));
+    Set<String> outputLayers = Arrays.stream(annotator.getOutputLayers())
+      .collect(Collectors.toSet());;
+    assertEquals("Stem and POS as output layers: "+outputLayers,
+                 2, outputLayers.size());
+    assertTrue("output layers include part-of-speech", outputLayers.contains("part-of-speech"));
+    assertTrue("output layers include stem", outputLayers.contains("stem"));
+    
+    Annotation firstWord = g.first("word");
+    assertEquals("double check the first word is what we think it is: "+firstWord,
+                 "I'll", firstWord.getLabel());
+      
+    assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
+                 9, g.all("word").length);
+    assertEquals("double check there are no POSes: "+Arrays.asList(g.all("part-of-speech")),
+                 0, g.all("part-of-speech").length);
+    // run the annotator
+    annotator.transform(g);
+    List<Annotation> morAnnotations = Arrays.stream(g.all("part-of-speech"))
+      .collect(Collectors.toList());
+    assertEquals("Correct number of tokens (disfluent w~ is skipped) "+morAnnotations,
+                 12, morAnnotations.size());
+    Iterator<Annotation> mors = morAnnotations.iterator();
+    assertEquals("I'll", "pro", mors.next().getLabel());
+    assertEquals("I'll", "mod", mors.next().getLabel());
+    assertEquals("sing", "v", mors.next().getLabel());
+    assertEquals("and", "coord", mors.next().getLabel());
+    assertEquals("walk", "n", mors.next().getLabel());
+    assertEquals("walk", "v", mors.next().getLabel());
+    assertEquals("about", "adv", mors.next().getLabel());
+    assertEquals("about", "prep", mors.next().getLabel());
+    assertEquals("my", "det", mors.next().getLabel());
+    assertEquals("my", "co", mors.next().getLabel());
+    assertEquals("blogging-morting", "?", mors.next().getLabel());
+    assertEquals("lazily", "adv", mors.next().getLabel());
+
+    mors = morAnnotations.iterator();
+    String[] wordLabels = {
+      "I'll", "I'll", 
+      "sing", "and",
+      "walk", "walk",
+      "about", "about",
+      "my", "my",
+      "blogging-morting",
+      "lazily"
+    };
+    for (int i = 0; i < wordLabels.length; i++) {
+      assertEquals("Tag " + i + " should tag " + wordLabels[i],
+                   wordLabels[i], mors.next().first("word").getLabel());
+    }
+    assertEquals("I'll has two tags", 2, firstWord.all("part-of-speech").length);
+
+    // stem
+    morAnnotations = Arrays.stream(g.all("stem"))
+      .collect(Collectors.toList());
+    assertEquals("Correct number of stems "+morAnnotations,
+                 12, morAnnotations.size());
+    mors = morAnnotations.iterator();
+    assertEquals("I'll", "I", mors.next().getLabel());
+    assertEquals("I'll", "will", mors.next().getLabel());
+    assertEquals("sing", "sing", mors.next().getLabel());
+    assertEquals("and", "and", mors.next().getLabel());
+    assertEquals("walk", "walk", mors.next().getLabel());
+    assertEquals("walk", "walk", mors.next().getLabel());
+    assertEquals("about", "about", mors.next().getLabel());
+    assertEquals("about", "about", mors.next().getLabel());
+    assertEquals("my", "my", mors.next().getLabel());
+    assertEquals("my", "my", mors.next().getLabel());
+    assertEquals("blogging-morting", "bloggingmorting", mors.next().getLabel());
+    assertEquals("lazily", "laze", mors.next().getLabel());
+  }
 
   @Test public void setInvalidTaskParameters() throws Exception {
     
     try {
       annotator.setTaskParameters(
         // doesn't exist in the schema:
-        "tokenLayerId=orthography"
-        +"&languagesLayerId=transcript_language"
-        +"&morLayerId=mor");
-      fail("Should fail with nonexistent tokenLayerId");
-    } catch (InvalidConfigurationException x) {
-    }
-    try {
-      annotator.setTaskParameters(
-        "tokenLayerId=word"
-        // doesn't exist in the schema:
-        +"&languagesLayerId=language"
-        +"&morLayerId=mor");
+        "languagesLayerId=language"
+        +"&morLayerId=mor"
+        +"&prefixLayerId=prefix"
+        +"&partOfSpeechLayerId=part-of-speech"
+        +"&partOfSpeechSubcategoryLayerId=subcategory"
+        +"&stemLayerId=stem"
+        +"&fusionalSuffixLayerId=suffix"
+        +"&suffixLayerId=suffix"
+        +"&glossLayerId=suffix");
       fail("Should fail with nonexistent languagesLayerId");
     } catch (InvalidConfigurationException x) {
     }
     try {
       annotator.setTaskParameters(
-        "tokenLayerId=word"
-        +"&languagesLayerId=transcript_language"
+        "languagesLayerId=transcript_language"
         // same as token layer:
-        +"&morLayerId=word");
+        +"&morLayerId=word"
+        +"&prefixLayerId=prefix"
+        +"&partOfSpeechLayerId=part-of-speech"
+        +"&partOfSpeechSubcategoryLayerId=subcategory"
+        +"&stemLayerId=stem"
+        +"&fusionalSuffixLayerId=suffix"
+        +"&suffixLayerId=suffix"
+        +"&glossLayerId=suffix");
       fail("Should fail with morLayerId = word");
     } catch (InvalidConfigurationException x) {
     }

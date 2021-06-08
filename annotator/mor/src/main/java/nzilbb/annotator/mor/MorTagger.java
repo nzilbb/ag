@@ -266,24 +266,6 @@ public class MorTagger extends Annotator {
   } // end of availableGrammars()
   
   /**
-   * ID of the input layer containing word tokens.
-   * @see #getTokenLayerId()
-   * @see #setTokenLayerId(String)
-   */
-  protected String tokenLayerId;
-  /**
-   * Getter for {@link #tokenLayerId}: ID of the input layer containing word tokens.
-   * @return ID of the input layer containing word tokens.
-   */
-  public String getTokenLayerId() { return tokenLayerId; }
-  /**
-   * Setter for {@link #tokenLayerId}: ID of the input layer containing word tokens.
-   * @param newTokenLayerId ID of the input layer containing word tokens.
-   */
-  public MorTagger setTokenLayerId(String newTokenLayerId) {
-    tokenLayerId = newTokenLayerId; return this; }
-
-  /**
    * ID of the layer that determines the language of the whole transcript.
    * @see #getLanguagesLayerId()
    * @see #setLanguagesLayerId(String)
@@ -325,15 +307,225 @@ public class MorTagger extends Annotator {
    * Setter for {@link #morLayerId}: ID of the output layer.
    * @param newMorLayerId ID of the output layer.
    */
-  public MorTagger setMorLayerId(String newMorLayerId) { morLayerId = newMorLayerId; return this; }
-
-  // TODO allow splitting into further layers
+  public MorTagger setMorLayerId(String newMorLayerId) {
+    if (newMorLayerId != null // empty string means null
+        && newMorLayerId.trim().length() == 0) {
+      newMorLayerId = null;
+    }
+    morLayerId = newMorLayerId;
+    return this;
+  }
+  
+  /**
+   * Split alternative MOR taggings into separate annotations.
+   * @see #getSplitMorTagGroups()
+   * @see #setSplitMorTagGroups(boolean)
+   */
+  protected boolean splitMorTagGroups = true;
+  /**
+   * Getter for {@link #splitMorTagGroups}: Split alternative MOR taggings into separate
+   * annotations. 
+   * @return Split alternative MOR taggings into separate annotations.
+   */
+  public boolean getSplitMorTagGroups() { return splitMorTagGroups; }
+  /**
+   * Setter for {@link #splitMorTagGroups}: Split alternative MOR taggings into separate
+   * annotations. 
+   * @param newSplitMorTagGroups Split alternative MOR taggings into separate annotations.
+   */
+  public MorTagger setSplitMorTagGroups(boolean newSplitMorTagGroups) { splitMorTagGroups = newSplitMorTagGroups; return this; }
+  
+  /**
+   * Split MOR word groups into separate annotations.
+   * @see #getSplitMorWordGroups()
+   * @see #setSplitMorWordGroups(boolean)
+   */
+  protected boolean splitMorWordGroups = true;
+  /**
+   * Getter for {@link #splitMorWordGroups}: Split MOR word groups into separate annotations.
+   * @return Split MOR word groups into separate annotations.
+   */
+  public boolean getSplitMorWordGroups() { return splitMorWordGroups; }
+  /**
+   * Setter for {@link #splitMorWordGroups}: Split MOR word groups into separate annotations.
+   * @param newSplitMorWordGroups Split MOR word groups into separate annotations.
+   */
+  public MorTagger setSplitMorWordGroups(boolean newSplitMorWordGroups) { splitMorWordGroups = newSplitMorWordGroups; return this; }
+  
+  /**
+   * Layer for prefixes in MOR tags.
+   * @see #getPrefixLayerId()
+   * @see #setPrefixLayerId(String)
+   */
+  protected String prefixLayerId;
+  /**
+   * Getter for {@link #prefixLayerId}: Layer for prefixes in MOR tags.
+   * @return Layer for prefixes in MOR tags.
+   */
+  public String getPrefixLayerId() { return prefixLayerId; }
+  /**
+   * Setter for {@link #prefixLayerId}: Layer for prefixes in MOR tags.
+   * @param newPrefixLayerId Layer for prefixes in MOR tags.
+   */
+  public MorTagger setPrefixLayerId(String newPrefixLayerId) {
+    if (newPrefixLayerId != null // empty string means null
+        && newPrefixLayerId.trim().length() == 0) {
+      newPrefixLayerId = null;
+    }
+    prefixLayerId = newPrefixLayerId;
+    return this;
+  }
+  
+  /**
+   * Layer for parts-of-speech in MOR tags.
+   * @see #getPartOfSpeechLayerId()
+   * @see #setPartOfSpeechLayerId(String)
+   */
+  protected String partOfSpeechLayerId;
+  /**
+   * Getter for {@link #partOfSpeechLayerId}: Layer for parts-of-speech in MOR tags.
+   * @return Layer for parts-of-speech in MOR tags.
+   */
+  public String getPartOfSpeechLayerId() { return partOfSpeechLayerId; }
+  /**
+   * Setter for {@link #partOfSpeechLayerId}: Layer for parts-of-speech in MOR tags.
+   * @param newPartOfSpeechLayerId Layer for parts-of-speech in MOR tags.
+   */
+  public MorTagger setPartOfSpeechLayerId(String newPartOfSpeechLayerId) {
+    if (newPartOfSpeechLayerId != null // empty string means null
+        && newPartOfSpeechLayerId.trim().length() == 0) {
+      newPartOfSpeechLayerId = null;
+    }
+    partOfSpeechLayerId = newPartOfSpeechLayerId;
+    return this;
+  }
+  
+  /**
+   * Layer for part-of-speech subcategories in MOR tags.
+   * @see #getPartOfSpeechSubcategoryLayerId()
+   * @see #setPartOfSpeechSubcategoryLayerId(String)
+   */
+  protected String partOfSpeechSubcategoryLayerId;
+  /**
+   * Getter for {@link #partOfSpeechSubcategoryLayerId}: Layer for part-of-speech
+   * subcategories in MOR tags. 
+   * @return Layer for part-of-speech subcategories in MOR tags.
+   */
+  public String getPartOfSpeechSubcategoryLayerId() { return partOfSpeechSubcategoryLayerId; }
+  /**
+   * Setter for {@link #partOfSpeechSubcategoryLayerId}: Layer for part-of-speech
+   * subcategories in MOR tags. 
+   * @param newPartOfSpeechSubcategoryLayerId Layer for part-of-speech subcategories in MOR tags.
+   */
+  public MorTagger setPartOfSpeechSubcategoryLayerId(String newPartOfSpeechSubcategoryLayerId) {
+    if (newPartOfSpeechSubcategoryLayerId != null // empty string means null
+        && newPartOfSpeechSubcategoryLayerId.trim().length() == 0) {
+      newPartOfSpeechSubcategoryLayerId = null;
+    }
+    partOfSpeechSubcategoryLayerId = newPartOfSpeechSubcategoryLayerId;
+    return this;
+  }
+  
+  /**
+   * Layer for stems in MOR tags.
+   * @see #getStemLayerId()
+   * @see #setStemLayerId(String)
+   */
+  protected String stemLayerId;
+  /**
+   * Getter for {@link #stemLayerId}: Layer for stems in MOR tags.
+   * @return Layer for stems in MOR tags.
+   */
+  public String getStemLayerId() { return stemLayerId; }
+  /**
+   * Setter for {@link #stemLayerId}: Layer for stems in MOR tags.
+   * @param newStemLayerId Layer for stems in MOR tags.
+   */
+  public MorTagger setStemLayerId(String newStemLayerId) {
+    if (newStemLayerId != null // empty string means null
+        && newStemLayerId.trim().length() == 0) {
+      newStemLayerId = null;
+    }
+    stemLayerId = newStemLayerId;
+    return this;
+  }
+  
+  /**
+   * Layer for fusional suffixes in MOR tags.
+   * @see #getFusionalSuffixLayerId()
+   * @see #setFusionalSuffixLayerId(String)
+   */
+  protected String fusionalSuffixLayerId;
+  /**
+   * Getter for {@link #fusionalSuffixLayerId}: Layer for fusional suffixes in MOR tags.
+   * @return Layer for fusional suffixes in MOR tags.
+   */
+  public String getFusionalSuffixLayerId() { return fusionalSuffixLayerId; }
+  /**
+   * Setter for {@link #fusionalSuffixLayerId}: Layer for fusional suffixes in MOR tags.
+   * @param newFusionalSuffixLayerId Layer for fusional suffixes in MOR tags.
+   */
+  public MorTagger setFusionalSuffixLayerId(String newFusionalSuffixLayerId) {
+    if (newFusionalSuffixLayerId != null // empty string means null
+        && newFusionalSuffixLayerId.trim().length() == 0) {
+      newFusionalSuffixLayerId = null;
+    }
+    fusionalSuffixLayerId = newFusionalSuffixLayerId;
+    return this;
+  }
+  
+  /**
+   * Layer for (non-fusional) suffixes in MOR tags.
+   * @see #getSuffixLayerId()
+   * @see #setSuffixLayerId(String)
+   */
+  protected String suffixLayerId;
+  /**
+   * Getter for {@link #suffixLayerId}: Layer for (non-fusional) suffixes in MOR tags.
+   * @return Layer for (non-fusional) suffixes in MOR tags.
+   */
+  public String getSuffixLayerId() { return suffixLayerId; }
+  /**
+   * Setter for {@link #suffixLayerId}: Layer for (non-fusional) suffixes in MOR tags.
+   * @param newSuffixLayerId Layer for (non-fusional) suffixes in MOR tags.
+   */
+  public MorTagger setSuffixLayerId(String newSuffixLayerId) {
+    if (newSuffixLayerId != null // empty string means null
+        && newSuffixLayerId.trim().length() == 0) {
+      newSuffixLayerId = null;
+    }
+    suffixLayerId = newSuffixLayerId;
+    return this;
+  }
+  
+  /**
+   * Layer for English glosses in MOR tags.
+   * @see #getGlossLayerId()
+   * @see #setGlossLayerId(String)
+   */
+  protected String glossLayerId;
+  /**
+   * Getter for {@link #glossLayerId}: Layer for English glosses in MOR tags.
+   * @return Layer for English glosses in MOR tags.
+   */
+  public String getGlossLayerId() { return glossLayerId; }
+  /**
+   * Setter for {@link #glossLayerId}: Layer for English glosses in MOR tags.
+   * @param newGlossLayerId Layer for English glosses in MOR tags.
+   */
+  public MorTagger setGlossLayerId(String newGlossLayerId) {
+    if (newGlossLayerId != null // empty string means null
+        && newGlossLayerId.trim().length() == 0) {
+      newGlossLayerId = null;
+    }
+    glossLayerId = newGlossLayerId;
+    return this;
+  }
   
   /**
    * Sets the configuration for a given annotation task.
    * @param parameters The configuration of the annotator; a value of <tt> null </tt>
-   * will apply the default task parameters, with {@link #tokenLayerId} set to the
-   * {@link Schema#wordLayerId} and {@link #stemLayerId} set to <q>stem</q>.
+   * will apply the default task parameters, with the {@link #morLayerId} set to <q>mor</q>.
    * @throws InvalidConfigurationException
    */
   public void setTaskParameters(String parameters) throws InvalidConfigurationException {
@@ -342,12 +534,6 @@ public class MorTagger extends Annotator {
 
     if (parameters == null) { // apply default configuration
       
-      if (schema.getLayer("orthography") != null) {
-        tokenLayerId = "orthography";
-      } else {
-        tokenLayerId = schema.getWordLayerId();
-      }
-         
       try {
         // default transcript language layer
         Layer[] candidates = schema.getMatchingLayers(
@@ -355,15 +541,87 @@ public class MorTagger extends Annotator {
           +" && /.*lang.*/.test(layer.id)"); // with 'lang' in the name
         if (candidates.length > 0) languagesLayerId = candidates[0].getId();
         
-        // default output layer
+        // mor layer
         candidates = schema.getMatchingLayers(
-          "layer.parentId == schema.wordLayerId && layer.alignment == 0" // word tag
-          +" && (/.*mor.*/.test(layer.id))");
+          "layer.parentId == schema.wordLayerId"
+          +" && (/^[Mm][Oo][Rr]$/.test(layer.id) || /^[Mm]orpho[Ss]yntax$/.test(layer.id))");
         if (candidates.length > 0) {
           morLayerId = candidates[0].getId();
         } else { // suggest adding a new one
           morLayerId = "mor";
         }
+
+        // prefix layer
+        candidates = schema.getMatchingLayers(
+          "layer.parentId == schema.wordLayerId"
+          +" && (/.*[Pp]refix.*/.test(layer.id))");
+        if (candidates.length > 0) {
+          prefixLayerId = candidates[0].getId();
+        } else { // suggest adding a new one
+          prefixLayerId = "morPrefix";
+        }
+
+        // pos layer
+        candidates = schema.getMatchingLayers(
+          "layer.parentId == schema.wordLayerId" // word tag
+          +" && (/.*POS.*/.test(layer.id) || /.*pos.*/.test(layer.id)"
+          +" || /.*[Pp]art.*[Oo]f.*[Ss]peech.*/.test(layer.id))");
+        if (candidates.length > 0) {
+          partOfSpeechLayerId = candidates[0].getId();
+        } else { // suggest adding a new one
+          partOfSpeechLayerId = "morPOS";
+        }
+
+        // pos subcategory layer
+        candidates = schema.getMatchingLayers(
+          "layer.parentId == schema.wordLayerId" // word tag
+          +" && (/.*[Ss]ubcategory.*/.test(layer.id))");
+        if (candidates.length > 0) {
+          partOfSpeechSubcategoryLayerId = candidates[0].getId();
+        } else { // suggest adding a new one
+          partOfSpeechSubcategoryLayerId = "morPOSSubcategory";
+        }
+
+        // stem layer
+        candidates = schema.getMatchingLayers(
+          "layer.parentId == schema.wordLayerId" // word tag
+          +" && (/.*[Ss]tem.*/.test(layer.id))");
+        if (candidates.length > 0) {
+          stemLayerId = candidates[0].getId();
+        } else { // suggest adding a new one
+          stemLayerId = "morStem";
+        }
+
+        // fusional suffix layer
+        candidates = schema.getMatchingLayers(
+          "layer.parentId == schema.wordLayerId" // word tag
+          +" && (/.*[Ff]usional.*[Ss]uffix.*/.test(layer.id))");
+        if (candidates.length > 0) {
+          fusionalSuffixLayerId = candidates[0].getId();
+        } else { // suggest adding a new one
+          fusionalSuffixLayerId = "morFusionalSuffix";
+        }
+
+        // suffix layer
+        candidates = schema.getMatchingLayers(
+          "layer.parentId == schema.wordLayerId" // word tag
+          +" && (/.*[Ss]uffix.*/.test(layer.id))");
+        if (candidates.length > 0) {
+          suffixLayerId = candidates[0].getId();
+        } else { // suggest adding a new one
+          suffixLayerId = "morSuffix";
+        }
+
+        // gloss layer
+        candidates = schema.getMatchingLayers(
+          "layer.parentId == schema.wordLayerId" // word tag
+          +" && (/.*[Gg]loss.*/.test(layer.id) || /.*[Ee]nglish.*/.test(layer.id))");
+        if (candidates.length > 0) {
+          glossLayerId = candidates[0].getId();
+        } else { // suggest adding a new one
+          glossLayerId = "morGloss";
+        }
+        
 
       } catch(ScriptException impossible) {}
       
@@ -371,24 +629,149 @@ public class MorTagger extends Annotator {
       beanPropertiesFromQueryString(parameters);
     }
     
-    if (schema.getLayer(tokenLayerId) == null)
-      throw new InvalidConfigurationException(this, "Token layer not found: " + tokenLayerId);
     if (languagesLayerId != null && schema.getLayer(languagesLayerId) == null) 
       throw new InvalidConfigurationException(
         this, "Transcript language layer not found: " + languagesLayerId);
       
-    // does the outputLayer need to be added to the schema?
-    Layer morLayer = schema.getLayer(morLayerId);
-    if (morLayer == null) {
-      schema.addLayer(
-        new Layer(morLayerId)
-        .setAlignment(Constants.ALIGNMENT_INTERVAL)
-        .setPeers(true)
-        .setParentId(schema.getWordLayerId()));
-    } else {
-      if (morLayerId.equals(tokenLayerId)
-          || morLayerId.equals(languagesLayerId)) {
-        throw new InvalidConfigurationException(this, "Invalid MOR layer: " + morLayerId);
+    // do the output layers need to be added to the schema?
+
+    // mor
+    if (morLayerId != null) {
+      Layer layer = schema.getLayer(morLayerId);
+      if (layer == null) {
+        schema.addLayer(
+          new Layer(morLayerId)
+          .setAlignment(Constants.ALIGNMENT_INTERVAL)
+          .setPeers(true)
+          .setParentId(schema.getWordLayerId()));
+      } else {
+        if (morLayerId.equals(schema.getWordLayerId())
+            || morLayerId.equals(languagesLayerId)) {
+          throw new InvalidConfigurationException(this, "Invalid MOR layer: " + morLayerId);
+        }
+      }
+    }
+
+    // prefix
+    if (prefixLayerId != null) {
+      Layer layer = schema.getLayer(prefixLayerId);
+      if (layer == null) {
+        schema.addLayer(
+          new Layer(prefixLayerId)
+          .setAlignment(Constants.ALIGNMENT_INTERVAL)
+          .setPeers(true)
+          .setParentId(schema.getWordLayerId()));
+      } else {
+        if (prefixLayerId.equals(schema.getWordLayerId())
+            || prefixLayerId.equals(languagesLayerId)) {
+          throw new InvalidConfigurationException(this, "Invalid prefix layer: " + prefixLayerId);
+        }
+      }
+    }
+
+    // POS
+    if (partOfSpeechLayerId != null) {
+      Layer layer = schema.getLayer(partOfSpeechLayerId);
+      if (layer == null) {
+        schema.addLayer(
+          new Layer(partOfSpeechLayerId)
+          .setAlignment(Constants.ALIGNMENT_INTERVAL)
+          .setPeers(true)
+          .setParentId(schema.getWordLayerId()));
+      } else {
+        if (partOfSpeechLayerId.equals(schema.getWordLayerId())
+            || partOfSpeechLayerId.equals(languagesLayerId)) {
+          throw new InvalidConfigurationException(
+            this, "Invalid POS layer: " + partOfSpeechLayerId);
+        }
+      }
+    }
+
+    // POS subcategory
+    if (partOfSpeechSubcategoryLayerId != null) {
+      Layer layer = schema.getLayer(partOfSpeechSubcategoryLayerId);
+      if (layer == null) {
+        schema.addLayer(
+          new Layer(partOfSpeechSubcategoryLayerId)
+          .setAlignment(Constants.ALIGNMENT_INTERVAL)
+          .setPeers(true)
+          .setParentId(schema.getWordLayerId()));
+      } else {
+        if (partOfSpeechSubcategoryLayerId.equals(schema.getWordLayerId())
+            || partOfSpeechSubcategoryLayerId.equals(languagesLayerId)) {
+          throw new InvalidConfigurationException(
+            this, "Invalid POS Subcategory layer: " + partOfSpeechSubcategoryLayerId);
+        }
+      }
+    }
+
+    // stem
+    if (stemLayerId != null) {
+      Layer layer = schema.getLayer(stemLayerId);
+      if (layer == null) {
+        schema.addLayer(
+          new Layer(stemLayerId)
+          .setAlignment(Constants.ALIGNMENT_INTERVAL)
+          .setPeers(true)
+          .setParentId(schema.getWordLayerId()));
+      } else {
+        if (stemLayerId.equals(schema.getWordLayerId())
+            || stemLayerId.equals(languagesLayerId)) {
+          throw new InvalidConfigurationException(this, "Invalid Stem layer: " + stemLayerId);
+        }
+      }
+    }
+
+    // fusional suffix
+    if (fusionalSuffixLayerId != null) {
+      Layer layer = schema.getLayer(fusionalSuffixLayerId);
+      if (layer == null) {
+        schema.addLayer(
+          new Layer(fusionalSuffixLayerId)
+          .setAlignment(Constants.ALIGNMENT_INTERVAL)
+          .setPeers(true)
+          .setParentId(schema.getWordLayerId()));
+      } else {
+        if (fusionalSuffixLayerId.equals(schema.getWordLayerId())
+            || fusionalSuffixLayerId.equals(languagesLayerId)) {
+          throw new InvalidConfigurationException(
+            this, "Invalid Fusion Suffix layer: " + fusionalSuffixLayerId);
+        }
+      }
+    }
+
+    // suffix
+    if (suffixLayerId != null) {
+      Layer layer = schema.getLayer(suffixLayerId);
+      if (layer == null) {
+        schema.addLayer(
+          new Layer(suffixLayerId)
+          .setAlignment(Constants.ALIGNMENT_INTERVAL)
+          .setPeers(true)
+          .setParentId(schema.getWordLayerId()));
+      } else {
+        if (suffixLayerId.equals(schema.getWordLayerId())
+            || suffixLayerId.equals(languagesLayerId)) {
+          throw new InvalidConfigurationException(this, "Invalid Suffix layer: " + suffixLayerId);
+        }
+      }
+    }
+
+    // gloss
+    if (glossLayerId != null) {
+      Layer layer = schema.getLayer(glossLayerId);
+      if (layer == null) {
+        schema.addLayer(
+          new Layer(glossLayerId)
+          .setAlignment(Constants.ALIGNMENT_INTERVAL)
+          .setPeers(true)
+          .setParentId(schema.getWordLayerId()));
+      } else {
+        if (glossLayerId.equals(schema.getWordLayerId())
+            || glossLayerId.equals(languagesLayerId)) {
+          throw new InvalidConfigurationException(
+            this, "Invalid English Gloss layer: " + glossLayerId);
+        }
       }
     }
   }
@@ -402,12 +785,10 @@ public class MorTagger extends Annotator {
   public String[] getRequiredLayers() throws InvalidConfigurationException {
     if (schema == null)
       throw new InvalidConfigurationException(this, "Schema is not set.");
-    if (tokenLayerId == null)
-      throw new InvalidConfigurationException(this, "No input token layer set.");
     if (languagesLayerId == null)
       throw new InvalidConfigurationException(this, "No input transcript language layer set.");
     Vector<String> requiredLayers = new Vector<String>();
-    requiredLayers.add(tokenLayerId);
+    requiredLayers.add(schema.getWordLayerId());
     requiredLayers.add(languagesLayerId);
     return requiredLayers.toArray(new String[0]);
   }
@@ -420,9 +801,20 @@ public class MorTagger extends Annotator {
    * {@link #setSchema(Schema)} have not yet been called.
    */
   public String[] getOutputLayers() throws InvalidConfigurationException {
-    if (morLayerId == null)
-      throw new InvalidConfigurationException(this, "MOR layer not set.");
-    return new String[] { morLayerId };
+    if (morLayerId == null && prefixLayerId == null && partOfSpeechLayerId == null
+        && partOfSpeechSubcategoryLayerId == null && stemLayerId == null
+        && fusionalSuffixLayerId == null && suffixLayerId == null && glossLayerId == null)
+      throw new InvalidConfigurationException(this, "No output layer set.");
+    Vector<String> ids = new Vector<String>();
+    if (morLayerId != null) ids.add(morLayerId);
+    if (prefixLayerId != null) ids.add(prefixLayerId);
+    if (partOfSpeechLayerId != null) ids.add(partOfSpeechLayerId);
+    if (partOfSpeechSubcategoryLayerId != null) ids.add(partOfSpeechSubcategoryLayerId);
+    if (stemLayerId != null) ids.add(stemLayerId);
+    if (fusionalSuffixLayerId != null) ids.add(fusionalSuffixLayerId);
+    if (suffixLayerId != null) ids.add(suffixLayerId);
+    if (glossLayerId != null) ids.add(glossLayerId);
+    return ids.toArray(new String[0]);
   }
   
   private ISO639 iso639 = new ISO639(); // for standard ISO 639 language code processing
@@ -439,15 +831,6 @@ public class MorTagger extends Annotator {
       setStatus("Tagging " + graph.getId());
       setPercentComplete(0);
       
-      Layer tokenLayer = graph.getSchema().getLayer(tokenLayerId);
-      if (tokenLayer == null) {
-        throw new InvalidConfigurationException(
-          this, "Invalid input token layer: " + tokenLayerId);
-      }
-      Layer morLayer = graph.getSchema().getLayer(morLayerId);
-      if (morLayer == null) {
-        throw new InvalidConfigurationException(this, "Invalid output MOR layer: " + morLayerId);
-      }
       Layer languagesLayer = graph.getSchema().getLayer(languagesLayerId);
       if (languagesLayer == null) {
         throw new InvalidConfigurationException(
@@ -472,13 +855,33 @@ public class MorTagger extends Annotator {
       // save the transcript in CHAT format
       ChatSerialization converter = new ChatSerialization();
       ParameterSet configuration = converter.configure(new ParameterSet(), schema);
-      configuration.get("morLayer").setValue(morLayer);
-      configuration.get("languagesLayer").setValue(languagesLayer);
+      configuration.get("morLayer").setValue(
+        graph.getSchema().getLayer(morLayerId));
+      configuration.get("morPrefixLayer").setValue(
+        graph.getSchema().getLayer(prefixLayerId));
+      configuration.get("morPartOfSpeechLayer").setValue(
+        graph.getSchema().getLayer(partOfSpeechLayerId));
+      configuration.get("morPartOfSpeechSubcategoryLayer").setValue(
+        graph.getSchema().getLayer(partOfSpeechSubcategoryLayerId));
+      configuration.get("morStemLayer").setValue(
+        graph.getSchema().getLayer(stemLayerId));
+      configuration.get("morFusionalSuffixLayer").setValue(
+        graph.getSchema().getLayer(fusionalSuffixLayerId));
+      configuration.get("morSuffixLayer").setValue(
+        graph.getSchema().getLayer(suffixLayerId));
+      configuration.get("morGlossLayer").setValue(
+        graph.getSchema().getLayer(glossLayerId));
+      configuration.get("languagesLayer").setValue(
+        languagesLayer);
+      configuration.get("splitMorTagGroups").setValue(
+        Boolean.valueOf(splitMorTagGroups));
+      configuration.get("splitMorWordGroups").setValue(
+        Boolean.valueOf(splitMorWordGroups));
       
       converter.configure(configuration, schema);
       final Vector<SerializationException> exceptions = new Vector<SerializationException>();
       final Vector<NamedStream> serializeStreams = new Vector<NamedStream>();
-      String[] layers = { tokenLayerId, languagesLayerId };
+      String[] layers = { schema.getWordLayerId(), languagesLayerId };
       Graph[] graphs = { graph };
       try {
         converter.serialize(Arrays.spliterator(graphs), layers,
@@ -498,7 +901,6 @@ public class MorTagger extends Annotator {
       }
       try {        
         File cha = File.createTempFile(graph.getId() + "-", ".cha");
-        System.out.println("CHA: " + cha.getPath());
         IO.SaveInputStreamToFile(serializeStreams.elementAt(0).getStream(), cha);
         setPercentComplete(25);
         
@@ -521,7 +923,7 @@ public class MorTagger extends Annotator {
           // the annotated version has been written to stdout...
           setStatus(mor.stderr()); // stderr has a whole bunch of non-error output
           setPercentComplete(50);
-          
+
           // parse the CHAT file
           NamedStream[] deserializeStreams = {
             new NamedStream(new StringBufferInputStream(mor.stdout()), graph.getId()+".cha") };

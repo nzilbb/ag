@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title> MOR Tagger </title>    
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <link rel="stylesheet" href="index.css" type="text/css">
+    <script src="util.js" type="text/javascript"></script>
+  </head>
+  <body>
+
+    <h1> MOR Tagger </h1>
+
+    <p> Annotator that tags words with morphosyntactic codes according to
+      <a target="mor" href="https://talkbank.org/manuals/MOR.pdf">MOR</a>,
+      a tool developed for the
+      <a target="mor" href="https://talkbank.org/">TalkBank project</a>. </p>
+
+    <details>
+      <summary> Tokens can be tagged one-to-one with a single complex morphosyntactic
+        annotation from MOR, or the parts of tag can be teased apart to result in
+        multiple annotations per token. </summary>
+      
+      <p> MOR tags each word token with a single complex annotation, for example: </p>
+      
+      <table>
+        <tr><td><b> Word </b></td><td> </td><td><b> MOR </b></td></tr>
+        <tr><td> I'll </td><td>     → </td><td><tt>pro:sub|I~mod|will</tt></td></tr>
+        <tr><td> sing </td><td>     → </td><td><tt>v|sing</tt></td></tr>
+        <tr><td> and </td><td>      → </td><td><tt>coord|and</tt></td></tr>
+        <tr><td> talk </td><td>     → </td><td><tt>n|talk^v|talk</tt></td></tr>
+        <tr><td> about </td><td>    → </td><td><tt>adv|about^prep|about</tt></td></tr>
+        <tr><td> my </td><td>       → </td><td><tt>det:poss|my^co|my</tt></td></tr>
+        <tr><td> blogging </td><td> → </td><td><tt>n:gerund|blog-PRESP^part|blog-PRESP</tt></td></tr>
+        <tr><td> lazily </td><td>   → </td><td><tt>adv|laze&dadj-Y-LY</tt></td></tr>
+      </table>
+      
+      <p> This annotator can simply tag each token with it's single complex tag. </p>
+      
+      <p> As can be seen above, this can include <q>tag groups</q> which represent
+        different alternative analyses of the word (e.g. <q>talk</q> can be analysed as a
+        noun <tt>n|talk</tt> or a verb <tt>v|talk</tt>), and also <q>word groups</q> which
+        represent different grammatical words within the orthographic word (e.g. <q>I'll</q>
+        is made up of a pronoun <tt>pro:sub|I</tt> and a modal verb <tt>mod|will</tt>).</p>
+      
+      <p> This annotator also supports teasing apart tag groups and word groups, so that
+        each token is tagged with possibly more than one distinct morphosyntactic
+        annotation, for example: </p>
+      
+      <table>
+        <tr><td><b>          Word </b></td><td>    </td><td><b> MOR </b></td></tr>
+        <tr><td rowspan="2"> I'll </td><td>      ↗ </td><td><tt>pro:sub|I</tt></td></tr>
+        <tr><td>                                 ↘ </td><td><tt>mod|will</tt></td></tr>
+        <tr><td>             sing </td><td>      → </td><td><tt>v|sing</tt></td></tr>
+        <tr><td>             and </td><td>       → </td><td><tt>coord|and</tt></td></tr>
+        <tr><td rowspan="2">  talk </td><td>     ↗ </td><td><tt>n|talk</tt></td></tr>
+        <tr><td>                                 ↘ </td><td><tt>v|talk</tt></td></tr>
+        <tr><td rowspan="2">  about </td><td>    ↗ </td><td><tt>adv|about</tt></td></tr>
+        <tr><td>                                 ↘ </td><td><tt>prep|about</tt></td></tr>
+        <tr><td rowspan="2">  my </td><td>       ↗ </td><td><tt>det:poss|my</tt></td></tr>
+        <tr><td>                                 ↘ </td><td><tt>co|my</tt></td></tr>
+        <tr><td rowspan="2">  blogging </td><td> ↗ </td><td><tt>n:gerund|blog-PRESP</tt></td></tr>
+        <tr><td>                                 ↘ </td><td><tt>part|blog-PRESP</tt></td></tr>
+        <tr><td>            lazily </td><td>     → </td><td><tt>adv|laze&dadj-Y-LY</tt></td></tr>
+      </table>
+      
+      <p> Furthermore, given several destination layers, the annotator can parse the
+        different parts of each morphosyntactic tag, in order to annotate separately: </p>
+      <ul>
+        <li> prefixes </li>
+        <li> part of speech </li>
+        <li> part of speech subcategories </li>
+        <li> stem </li>
+        <li> fusional suffixes </li>
+        <li> suffixes </li>
+        <li> gloss </li>
+      </ul>
+      <p> For example: </p>
+      <table>
+        <tr>
+          <td><b> Word </b></td> <td><b> </b></td>
+          <td><b> POS </b></td>
+          <td><b> POS Subcategory </b></td>
+          <td><b> Stem</b></td>
+          <td><b> Fusional Suffix </b></td>
+          <td><b> Suffix </b></td>
+        </tr><tr><td rowspan="2"> I'll </td><td> ↗ </td>
+          <td><tt>pro </tt></td>
+          <td><tt> sub </tt></td>
+          <td><tt> I </tt></td>
+        </tr><tr><td> ↘ </td>
+          <td><tt> mod </tt></td>
+          <td> </td>
+          <td><tt> will </tt></td>
+        </tr><tr><td> sing </td><td> → </td>
+          <td><tt> v </tt></td>
+          <td> </td>
+          <td><tt> sing </tt></td>
+        </tr><tr><td> and </td><td> → </td>
+          <td><tt> coord </tt></td>
+          <td> </td>
+          <td><tt> and </tt></td>
+        </tr><tr><td rowspan="2"> talk </td><td> ↗ </td>
+          <td><tt> n </tt></td>
+          <td> </td>
+          <td><tt> talk </tt></td>
+        </tr><tr><td> ↘ </td>
+          <td><tt> v </tt></td>
+          <td> </td>
+          <td><tt> talk </tt></td>
+        </tr><tr><td rowspan="2"> about </td><td> ↗ </td>
+          <td><tt> adv </tt></td>
+          <td> </td>
+          <td><tt> about </tt></td>
+        </tr><tr><td> ↘ </td>
+          <td><tt> prep </tt></td>
+          <td> </td>
+          <td><tt> about </tt></td>
+        </tr><tr><td rowspan="2"> my </td><td> ↗ </td>
+          <td><tt> det </tt></td>
+          <td><tt> poss </tt></td>
+          <td><tt> my </tt></td>
+        </tr><tr><td> ↘ </td>
+          <td><tt> co </tt></td>
+          <td> </td>
+          <td><tt> my </tt></td>
+        </tr><tr><td rowspan="2"> blogging </td><td> ↗ </td>
+          <td><tt> n </tt></td>
+          <td><tt> gerund </tt></td>
+          <td><tt> blog </tt></td>
+          <td> </td>
+          <td><tt> PRESP </tt></td>
+        </tr><tr><td> ↘ </td>
+          <td><tt> part </tt></td>
+          <td> </td>
+          <td><tt> blog </tt></td>
+          <td> </td>
+          <td><tt> PRESP </tt></td>
+        </tr><tr><td rowspan="2"> lazily </td><td> ↗ </td>
+          <td><tt> adv </tt></td>
+          <td> </td>
+          <td><tt> laze </tt></td>
+          <td><tt> dadj </tt></td>
+          <td><tt> Y </tt></td>
+        </tr><tr><td> ↘ </td>
+          <td> </td>
+          <td> </td>
+          <td> </td>
+          <td> </td>
+        <td><tt> LY </tt></td>
+        </tr>
+      </table>
+    </details>
+
+    <p> <em>NB</em> Currently the MOR Tagger only works on unix-like systems.</p>
+
+    <p> When this annotator is installed, by default it downloads the UnixCLAN source code,
+      which includes MOR, from 
+      <a target="mor" href="https://dali.talkbank.org/clan/"> https://dali.talkbank.org/clan/</a>,
+      which requires access to the internet, and also a working g++ compiler. </p>
+    
+    <p> It also downloads and installs the <i>English (eng)</i> grammar from
+      <a target="mor" href="https://talkbank.org/morgrams/">https://talkbank.org/morgrams/</a>
+      if no other grammar is supplied. </p>
+
+    <div id="upload-form">
+      <p> If you wish to manually provide the MOR source code, or you would like to
+      install your own lexicon/grammar, please supply the .zip file(s) below:</p> 
+      <div class="file-chooser">
+        <label for="file">Grammar or source code .zip file</label>
+        <input id="file" type="file" onchange="selectFile(this);">
+      </div>
+      <div id="upload-progress" style="display: none;">
+        <progress id="progress"></progress>
+        <div id="upload-result"></div>
+      </div>
+    </div>
+    
+    <div id="grammars"></div>
+
+    <p> Once ready, click the button below to confirm the installation. </p>    
+
+    <form method="POST" action="setConfig">
+      <div class="controls">
+        <input type="submit" value="Configure">
+      </div>
+    </form>
+
+    <footer><div> MOR Tagger <small id="version"></small> </div></footer>
+    
+    <script src="index.js" type="text/javascript"></script>
+  </body>
+</html>
