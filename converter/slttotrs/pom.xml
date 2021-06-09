@@ -17,7 +17,7 @@
     
     <input.package>nzilbb.formatter.salt</input.package>
     <input.path>nzilbb/formatter/salt/</input.path>
-    <input.version>0.1.5</input.version>
+    <input.version>0.1.7</input.version>
     
     <output.package>nzilbb.formatter.transcriber</output.package>
     <output.path>nzilbb/formatter/transcriber/</output.path>
