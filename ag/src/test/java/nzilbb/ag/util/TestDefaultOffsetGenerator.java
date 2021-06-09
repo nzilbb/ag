@@ -1047,6 +1047,112 @@ public class TestDefaultOffsetGenerator {
     }
   }
 
+  /** Ensure chained sub-word annotations (e.g. grammatical words within orthographic
+   * words) get offsets. */
+  @Test public void chainedSubWordAnnotations() {
+    Graph g = new Graph();
+    g.setId("my graph");
+    g.setCorpus("cc");
+    
+    g.addLayer(new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+               .setPeers(true).setPeersOverlap(true).setSaturated(true));
+    g.addLayer(new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true).setPeersOverlap(false).setSaturated(false)
+               .setParentId("who").setParentIncludes(true));
+    g.addLayer(new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true).setPeersOverlap(false).setSaturated(false)
+               .setParentId("turn").setParentIncludes(true));
+    g.addLayer(new Layer("gram", "Orthography").setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true).setPeersOverlap(false).setSaturated(true)
+               .setParentId("word").setParentIncludes(true));
+
+    // john smith
+    g.addAnchor(new Anchor("turn1Start", 0.0)); // turn start
+    g.addAnchor(new Anchor("a0", 0.0)); // I
+    g.addAnchor(new Anchor("a05", null)); // 'm
+    g.addAnchor(new Anchor("a1", 1.0)); // going
+    g.addAnchor(new Anchor("a15", null)); // to
+    g.addAnchor(new Anchor("a2", 2.0)); // jolly
+    g.addAnchor(new Anchor("a3", 3.0)); // well
+    g.addAnchor(new Anchor("a4", 4.0)); // jump
+    g.addAnchor(new Anchor("a5", 5.0)); // over
+    g.addAnchor(new Anchor("a6", 6.0)); // a
+    g.addAnchor(new Anchor("a7", 7.0)); // lazy
+    g.addAnchor(new Anchor("a8", 8.0)); // dog
+    g.addAnchor(new Anchor("a9", 9.0)); // end of dog
+    g.addAnchor(new Anchor("turn1End", 9.0)); // turn end
+
+    // participants
+    g.addAnnotation(
+      new Annotation("participant1", "john smith", "who", "turn1Start", "turn1End", "my graph"));
+      
+    // turns
+    g.addAnnotation(
+      new Annotation("turn1", "john smith", "turn", "turn1Start", "turn1End", "participant1"));
+      
+    // words
+    g.addAnnotation(new Annotation("I'm",   "I'm",   "word", "a0", "a1", "turn1"));
+    g.addAnnotation(new Annotation("gonna", "gonna", "word", "a1", "a2", "turn1"));
+    g.addAnnotation(new Annotation("jolly", "jolly", "word", "a2", "a3", "turn1"));
+    g.addAnnotation(new Annotation("well",  "well",   "word", "a3", "a4", "turn1"));
+    g.addAnnotation(new Annotation("jump",  "jump", "word", "a4", "a5", "turn1"));
+    g.addAnnotation(new Annotation("over",  "over",  "word", "a5", "a6", "turn1"));
+    g.addAnnotation(new Annotation("a",     "a",     "word", "a6", "a7", "turn1"));
+    g.addAnnotation(new Annotation("lazy",  "lazy",  "word", "a7", "a8", "turn1"));
+    g.addAnnotation(new Annotation("dog",   "dog.",   "word", "a8", "a9", "turn1"));
+
+    // grammatical words
+    g.addAnnotation(new Annotation("gram_I",   "I",   "gram", "a0", "a05", "I'm"));
+    g.addAnnotation(new Annotation("gram_'m",   "am",   "gram", "a05", "a1", "I'm"));
+    g.addAnnotation(new Annotation("gram_going", "gonna", "gram", "a1", "a15", "gonna"));
+    g.addAnnotation(new Annotation("gram_to", "gonna", "gram", "a15", "a2", "gonna"));
+    g.addAnnotation(new Annotation("gram_jolly", "jolly", "gram", "a2", "a3", "jolly"));
+    g.addAnnotation(new Annotation("gram_well",  "well",   "gram", "a3", "a4", "well"));
+    g.addAnnotation(new Annotation("gram_jump",  "jump", "gram", "a4", "a5", "jump"));
+    g.addAnnotation(new Annotation("gram_over",  "over",  "gram", "a5", "a6", "over"));
+    g.addAnnotation(new Annotation("gram_a",     "a",     "gram", "a6", "a7", "a"));
+    g.addAnnotation(new Annotation("gram_lazy",  "lazy",  "gram", "a7", "a8", "lazy"));
+    g.addAnnotation(new Annotation("gram_dog",   "dog.",   "gram", "a8", "a9", "dog"));
+
+    assertEquals("no initial changes to graph: " + g.getChanges(), 0, g.getChanges().size());
+
+    g.trackChanges();
+
+    // grammatical words are not anchored yet
+    assertNull("Grammatical word offset unset - I'm",
+               g.getAnchor("a05").getOffset());
+    assertNull("Grammatical word offset unset - gonna",
+               g.getAnchor("a15").getOffset());
+    DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
+    //generator.setDebug(true);
+    try {
+      generator.transform(g);
+      if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
+      Set<Change> changes = g.getTracker().getChanges();
+
+      // orthographic words are unchanged
+      assertEquals("Word anchors unchanged", Double.valueOf(0.0), g.getAnchor("a0").getOffset());
+      assertEquals("Word anchors unchanged", Double.valueOf(1.0), g.getAnchor("a1").getOffset());
+      assertEquals("Word anchors unchanged", Double.valueOf(2.0), g.getAnchor("a2").getOffset());
+      assertEquals("Word anchors unchanged", Double.valueOf(3.0), g.getAnchor("a3").getOffset());
+      assertEquals("Word anchors unchanged", Double.valueOf(4.0), g.getAnchor("a4").getOffset());
+      assertEquals("Word anchors unchanged", Double.valueOf(5.0), g.getAnchor("a5").getOffset());
+      assertEquals("Word anchors unchanged", Double.valueOf(6.0), g.getAnchor("a6").getOffset());
+      assertEquals("Word anchors unchanged", Double.valueOf(7.0), g.getAnchor("a7").getOffset());
+      assertEquals("Word anchors unchanged", Double.valueOf(8.0), g.getAnchor("a8").getOffset());
+      assertEquals("Word anchors unchanged", Double.valueOf(9.0), g.getAnchor("a9").getOffset());
+
+      // grammatical words are anchored
+      assertEquals("Grammatical word offset set - I'm",
+                   Double.valueOf(0.5), g.getAnchor("a05").getOffset());
+      assertEquals("Grammatical word offset set - gonna",
+                   Double.valueOf(1.5), g.getAnchor("a15").getOffset());
+
+    } catch(TransformationException exception) {
+      fail(exception.toString());
+    }
+  }
+  
   public static void main(String args[]) {
     org.junit.runner.JUnitCore.main("nzilbb.ag.util.TestDefaultOffsetGenerator");
   }

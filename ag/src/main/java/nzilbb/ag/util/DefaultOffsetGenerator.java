@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -315,7 +315,7 @@ public class DefaultOffsetGenerator implements GraphTransformer {
    * @throws TransformationException If the transformation cannot be completed.
    */
   public void setOffsetsForDescendantsOf(Annotation top) throws TransformationException {
-    //log("Top: ", top);
+    // log("Top: ", top);
     if (!top.getInstantaneous()) {	 
       // get a list of all anchors for relevant descendant annotations, 
       // ordered by offset and also by using graph structure
@@ -499,7 +499,8 @@ public class DefaultOffsetGenerator implements GraphTransformer {
       if (layer == null) continue; // unknown layer
       // log("child layer: ", layer.getId());
       boolean addAnchors = layer.getPeers() 
-        && !layer.getPeersOverlap() 
+        // (peersOverlap is allowed, as we want CLAN MOR tags to be included
+        //  and they can include multiple analyses of multiple chained children)
         && layer.getAlignment() != Constants.ALIGNMENT_NONE
         && layer.getParentIncludes();
       Anchor previousAnchor = parent.getStart(); 
@@ -606,8 +607,12 @@ public class DefaultOffsetGenerator implements GraphTransformer {
             s.append("[").append(anchor.getId()).append("]").append(anchor.getOffset());
           }
         } else {
-          s.append(m.toString());
-        }
+          if (m == null) {
+            s.append("[null]");
+          } else {
+            s.append(m.toString());
+          }
+        } 
       }	 
       log.add(s.toString());
       // System.out.println(s.toString());
