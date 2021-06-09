@@ -50,6 +50,19 @@ progress {
     width: 100%;
 }
 
+/* annotation examples */
+td {
+    text-align: center;
+}
+.C { /* annotation bracket */
+    border-left: 1px solid black;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    border-top-left-radius: 50%;
+    border-bottom-left-radius: 50%;
+    width: 5px;
+}
+
 /* Layout on narrower screens */
 @media all and (max-width: 640px) {
     .field { flex-direction: column; }

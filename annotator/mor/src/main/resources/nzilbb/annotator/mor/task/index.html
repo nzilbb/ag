@@ -20,18 +20,19 @@
       
       <p> MOR tags each word token with a single complex annotation, for example: </p>
       
-      <table>
-        <tr><td><b> Word </b></td><td> </td><td><b> MOR </b></td></tr>
-        <tr><td> I'll </td><td>     → </td><td><tt>pro:sub|I~mod|will</tt></td></tr>
-        <tr><td> sing </td><td>     → </td><td><tt>v|sing</tt></td></tr>
-        <tr><td> and </td><td>      → </td><td><tt>coord|and</tt></td></tr>
-        <tr><td> talk </td><td>     → </td><td><tt>n|talk^v|talk</tt></td></tr>
-        <tr><td> about </td><td>    → </td><td><tt>adv|about^prep|about</tt></td></tr>
-        <tr><td> my </td><td>       → </td><td><tt>det:poss|my^co|my</tt></td></tr>
-        <tr><td> blogging </td><td> → </td><td><tt>n:gerund|blog-PRESP^part|blog-PRESP</tt></td></tr>
-        <tr><td> lazily </td><td>   → </td><td><tt>adv|laze&dadj-Y-LY</tt></td></tr>
-      </table>
-      
+    <table>
+      <tr><td><b> Word </b></td><td> </td>     <td><b> MOR </b></td></tr>
+      <tr><td> I'll </td><td class="C"> </td>  <td><tt>pro:sub|I~mod|will</tt></td></tr>
+      <tr><td> sing </td><td class="C"> </td>  <td><tt>v|sing</tt></td></tr>
+      <tr><td> and </td><td class="C"> </td>   <td><tt>coord|and</tt></td></tr>
+      <tr><td> talk </td><td class="C"> </td>  <td><tt>n|talk^v|talk</tt></td></tr>
+      <tr><td> about </td><td class="C"> </td> <td><tt>adv|about^prep|about</tt></td></tr>
+      <tr><td> my </td><td class="C"> </td>    <td><tt>det:poss|my^co|my</tt></td></tr>
+      <tr><td> blogging </td><td class="C"> </td>
+                                               <td><tt>n:gerund|blog-PRESP^part|blog-PRESP</tt></td></tr>
+      <tr><td> lazily </td><td class="C"> </td><td><tt>adv|laze&dadj-Y-LY</tt></td></tr>
+    </table>
+    
       <p> This annotator can simply tag each token with it's single complex tag. </p>
       
       <p> As can be seen above, this can include <q>tag groups</q> which represent
@@ -46,19 +47,26 @@
       
       <table>
         <tr><td><b>          Word </b></td><td>    </td><td><b> MOR </b></td></tr>
-        <tr><td rowspan="2"> I'll </td><td>      ↗ </td><td><tt>pro:sub|I</tt></td></tr>
-        <tr><td>                                 ↘ </td><td><tt>mod|will</tt></td></tr>
-        <tr><td>             sing </td><td>      → </td><td><tt>v|sing</tt></td></tr>
-        <tr><td>             and </td><td>       → </td><td><tt>coord|and</tt></td></tr>
-        <tr><td rowspan="2">  talk </td><td>     ↗ </td><td><tt>n|talk</tt></td></tr>
-        <tr><td>                                 ↘ </td><td><tt>v|talk</tt></td></tr>
-        <tr><td rowspan="2">  about </td><td>    ↗ </td><td><tt>adv|about</tt></td></tr>
-        <tr><td>                                 ↘ </td><td><tt>prep|about</tt></td></tr>
-        <tr><td rowspan="2">  my </td><td>       ↗ </td><td><tt>det:poss|my</tt></td></tr>
-        <tr><td>                                 ↘ </td><td><tt>co|my</tt></td></tr>
-        <tr><td rowspan="2">  blogging </td><td> ↗ </td><td><tt>n:gerund|blog-PRESP</tt></td></tr>
-        <tr><td>                                 ↘ </td><td><tt>part|blog-PRESP</tt></td></tr>
-        <tr><td>            lazily </td><td>     → </td><td><tt>adv|laze&dadj-Y-LY</tt></td></tr>
+        <tr><td rowspan="2"> I'll </td><td rowspan="2" class="C"> </td>
+          <td><tt>pro:sub|I</tt></td></tr>
+        <tr>                           <td><tt>mod|will</tt></td></tr>
+        <tr><td>             sing </td><td class="C"> </td><td><tt>v|sing</tt></td></tr>
+        <tr><td>             and </td><td class="C"> </td>
+          <td><tt>coord|and</tt></td></tr>
+        <tr><td rowspan="2"> talk </td><td rowspan="2" class="C"> </td>
+          <td><tt>n|talk</tt></td></tr>
+        <tr>                           <td><tt>v|talk</tt></td></tr>
+        <tr><td rowspan="2"> about </td><td rowspan="2" class="C"> </td>
+          <td><tt>adv|about</tt></td></tr>
+        <tr> <td><tt>prep|about</tt></td></tr>
+        <tr><td rowspan="2"> my </td><td rowspan="2" class="C"> </td>
+          <td><tt>det:poss|my</tt></td></tr>
+        <tr>                           <td><tt>co|my</tt></td></tr>
+        <tr><td rowspan="2"> blogging </td><td rowspan="2" class="C"> </td>
+          <td><tt>n:gerund|blog-PRESP</tt></td></tr>
+        <tr>                           <td><tt>part|blog-PRESP</tt></td></tr>
+        <tr><td>             lazily </td><td class="C"> </td>
+          <td><tt>adv|laze&dadj-Y-LY</tt></td></tr>
       </table>
       
       <p> Furthermore, given several destination layers, the annotator can parse the
@@ -81,70 +89,70 @@
           <td><b> Stem</b></td>
           <td><b> Fusional Suffix </b></td>
           <td><b> Suffix </b></td>
-        </tr><tr><td rowspan="2"> I'll </td><td> ↗ </td>
+        </tr><tr><td rowspan="2"> I'll </td><td rowspan="2" class="C"> </td>
           <td><tt>pro </tt></td>
           <td><tt> sub </tt></td>
           <td><tt> I </tt></td>
-        </tr><tr><td> ↘ </td>
+        </tr><tr>
           <td><tt> mod </tt></td>
           <td> </td>
           <td><tt> will </tt></td>
-        </tr><tr><td> sing </td><td> → </td>
+        </tr><tr><td> sing </td><td class="C"> </td>
           <td><tt> v </tt></td>
           <td> </td>
           <td><tt> sing </tt></td>
-        </tr><tr><td> and </td><td> → </td>
+        </tr><tr><td> and </td><td class="C"> </td>
           <td><tt> coord </tt></td>
           <td> </td>
           <td><tt> and </tt></td>
-        </tr><tr><td rowspan="2"> talk </td><td> ↗ </td>
+        </tr><tr><td rowspan="2"> talk </td><td rowspan="2" class="C"> </td>
           <td><tt> n </tt></td>
           <td> </td>
           <td><tt> talk </tt></td>
-        </tr><tr><td> ↘ </td>
+        </tr><tr>
           <td><tt> v </tt></td>
           <td> </td>
           <td><tt> talk </tt></td>
-        </tr><tr><td rowspan="2"> about </td><td> ↗ </td>
+        </tr><tr><td rowspan="2"> about </td><td rowspan="2" class="C"> </td>
           <td><tt> adv </tt></td>
           <td> </td>
           <td><tt> about </tt></td>
-        </tr><tr><td> ↘ </td>
+        </tr><tr>
           <td><tt> prep </tt></td>
           <td> </td>
           <td><tt> about </tt></td>
-        </tr><tr><td rowspan="2"> my </td><td> ↗ </td>
+        </tr><tr><td rowspan="2"> my </td><td rowspan="2" class="C"> </td>
           <td><tt> det </tt></td>
           <td><tt> poss </tt></td>
           <td><tt> my </tt></td>
-        </tr><tr><td> ↘ </td>
+        </tr><tr>
           <td><tt> co </tt></td>
           <td> </td>
           <td><tt> my </tt></td>
-        </tr><tr><td rowspan="2"> blogging </td><td> ↗ </td>
+        </tr><tr><td rowspan="2"> blogging </td><td rowspan="2" class="C"> </td>
           <td><tt> n </tt></td>
           <td><tt> gerund </tt></td>
           <td><tt> blog </tt></td>
           <td> </td>
           <td><tt> PRESP </tt></td>
-        </tr><tr><td> ↘ </td>
+        </tr><tr>
           <td><tt> part </tt></td>
           <td> </td>
           <td><tt> blog </tt></td>
           <td> </td>
           <td><tt> PRESP </tt></td>
-        </tr><tr><td rowspan="2"> lazily </td><td> ↗ </td>
+        </tr><tr><td rowspan="2"> lazily </td><td rowspan="2" class="C"> </td>
           <td><tt> adv </tt></td>
           <td> </td>
           <td><tt> laze </tt></td>
           <td><tt> dadj </tt></td>
           <td><tt> Y </tt></td>
-        </tr><tr><td> ↘ </td>
+        </tr><tr>
           <td> </td>
           <td> </td>
           <td> </td>
           <td> </td>
-        <td><tt> LY </tt></td>
+          <td><tt> LY </tt></td>
         </tr>
       </table>
     </details>
