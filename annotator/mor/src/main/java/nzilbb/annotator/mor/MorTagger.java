@@ -895,9 +895,9 @@ public class MorTagger extends Annotator {
       if (exceptions.size() > 0) {
         Throwable firstException = null;
         for (SerializationException x : exceptions) {
-          if (firstException != null) firstException = x;
+          if (firstException == null) firstException = x;
           setStatus("ERROR: " + x.getMessage());
-          throw new TransformationException(this, firstException);
+          throw new TransformationException(this, firstException.getMessage(), firstException);
         }
       }
       try {        
