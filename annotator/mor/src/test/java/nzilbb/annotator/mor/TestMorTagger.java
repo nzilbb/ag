@@ -154,6 +154,34 @@ public class TestMorTagger {
     assertEquals("lazily", "adv|laze&dadj-Y-LY", mors.next().getLabel());
 
     mors = morAnnotations.iterator();
+    assertNotNull("pro:sub|I start anchored", mors.next().getStart().getOffset());
+    assertNotNull("mod|will start anchored", mors.next().getStart().getOffset());
+    assertNotNull("v|sing start anchored", mors.next().getStart().getOffset());
+    assertNotNull("coord|and start anchored", mors.next().getStart().getOffset());
+    assertNotNull("n|walk start anchored", mors.next().getStart().getOffset());
+    assertNotNull("v|walk start anchored", mors.next().getStart().getOffset());
+    assertNotNull("adv|about start anchored", mors.next().getStart().getOffset());
+    assertNotNull("prep|about start anchored", mors.next().getStart().getOffset());
+    assertNotNull("det:poss|my start anchored", mors.next().getStart().getOffset());
+    assertNotNull("co|my start anchored", mors.next().getStart().getOffset());
+    assertNotNull("?|bloggingmorting start anchored", mors.next().getStart().getOffset());
+    assertNotNull("adv|laze&dadj-Y-LY start anchored", mors.next().getStart().getOffset());
+
+    mors = morAnnotations.iterator();
+    assertNotNull("pro:sub|I end anchored", mors.next().getEnd().getOffset());
+    assertNotNull("mod|will end anchored", mors.next().getEnd().getOffset());
+    assertNotNull("v|sing end anchored", mors.next().getEnd().getOffset());
+    assertNotNull("coord|and end anchored", mors.next().getEnd().getOffset());
+    assertNotNull("n|walk end anchored", mors.next().getEnd().getOffset());
+    assertNotNull("v|walk end anchored", mors.next().getEnd().getOffset());
+    assertNotNull("adv|about end anchored", mors.next().getEnd().getOffset());
+    assertNotNull("prep|about end anchored", mors.next().getEnd().getOffset());
+    assertNotNull("det:poss|my end anchored", mors.next().getEnd().getOffset());
+    assertNotNull("co|my end anchored", mors.next().getEnd().getOffset());
+    assertNotNull("?|bloggingmorting end anchored", mors.next().getEnd().getOffset());
+    assertNotNull("adv|laze&dadj-Y-LY end anchored", mors.next().getEnd().getOffset());
+
+    mors = morAnnotations.iterator();
     String[] wordLabels = {
       "I'll", "I'll", 
       "sing", "and",
@@ -374,6 +402,34 @@ public class TestMorTagger {
     assertEquals("my", "co", mors.next().getLabel());
     assertEquals("blogging-morting", "?", mors.next().getLabel());
     assertEquals("lazily", "adv", mors.next().getLabel());
+
+    mors = morAnnotations.iterator();
+    assertNotNull("pro:sub|I start anchored", mors.next().getStart().getOffset());
+    assertNotNull("mod|will start anchored", mors.next().getStart().getOffset());
+    assertNotNull("v|sing start anchored", mors.next().getStart().getOffset());
+    assertNotNull("coord|and start anchored", mors.next().getStart().getOffset());
+    assertNotNull("n|walk start anchored", mors.next().getStart().getOffset());
+    assertNotNull("v|walk start anchored", mors.next().getStart().getOffset());
+    assertNotNull("adv|about start anchored", mors.next().getStart().getOffset());
+    assertNotNull("prep|about start anchored", mors.next().getStart().getOffset());
+    assertNotNull("det:poss|my start anchored", mors.next().getStart().getOffset());
+    assertNotNull("co|my start anchored", mors.next().getStart().getOffset());
+    assertNotNull("?|bloggingmorting start anchored", mors.next().getStart().getOffset());
+    assertNotNull("adv|laze&dadj-Y-LY start anchored", mors.next().getStart().getOffset());
+
+    mors = morAnnotations.iterator();
+    assertNotNull("pro:sub|I end anchored", mors.next().getEnd().getOffset());
+    assertNotNull("mod|will end anchored", mors.next().getEnd().getOffset());
+    assertNotNull("v|sing end anchored", mors.next().getEnd().getOffset());
+    assertNotNull("coord|and end anchored", mors.next().getEnd().getOffset());
+    assertNotNull("n|walk end anchored", mors.next().getEnd().getOffset());
+    assertNotNull("v|walk end anchored", mors.next().getEnd().getOffset());
+    assertNotNull("adv|about end anchored", mors.next().getEnd().getOffset());
+    assertNotNull("prep|about end anchored", mors.next().getEnd().getOffset());
+    assertNotNull("det:poss|my end anchored", mors.next().getEnd().getOffset());
+    assertNotNull("co|my end anchored", mors.next().getEnd().getOffset());
+    assertNotNull("?|bloggingmorting end anchored", mors.next().getEnd().getOffset());
+    assertNotNull("adv|laze&dadj-Y-LY end anchored", mors.next().getEnd().getOffset());
 
     mors = morAnnotations.iterator();
     String[] wordLabels = {

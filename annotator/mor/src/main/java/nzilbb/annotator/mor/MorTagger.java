@@ -45,6 +45,7 @@ import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.SerializationParametersMissingException;
 import nzilbb.ag.serialize.SerializerNotConfiguredException;
 import nzilbb.ag.serialize.util.NamedStream;
+import nzilbb.ag.util.DefaultOffsetGenerator;
 import nzilbb.ag.util.Merger;
 import nzilbb.ag.util.Normalizer;
 import nzilbb.configure.ParameterSet;
@@ -939,6 +940,14 @@ public class MorTagger extends Annotator {
           // merge the changes into our graph
           Merger merger = new Merger(tagged);
           merger.transform(graph);
+
+          boolean alignedWords = Arrays.stream(graph.all(schema.getWordLayerId()))
+            .filter(w->w.getAnchored()).findAny().isPresent();
+          if (alignedWords) { // if any words are anchored
+            // ensure mor tags are also anchored
+            // (they can be chained across the duration of the word, with null offsets)
+            new DefaultOffsetGenerator().transform(graph);
+          }
           
           setPercentComplete(100);
         } finally {
