@@ -3,7 +3,7 @@
 + ParticipantId: Ada-Lovelace
 + Name: ADAL
 + Gender: F
-+ Dob: 26/9/1972
++ DOB: 26/9/1972
 + Doe: 30/3/2021
 + Ca: 4;4
 + Ethnicity: NZ European
@@ -44,6 +44,7 @@ C And please go for a walk? [EU]
 - 00:41
 C You need to {NOISE:bing} put your gumboot/s on [EU]. 
 
++ NOISE:click
 - 00:46
 C It/'s too dark^
 

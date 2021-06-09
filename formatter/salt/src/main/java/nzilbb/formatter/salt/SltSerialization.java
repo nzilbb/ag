@@ -1655,11 +1655,37 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         
       } else if (line.startsWith("+") || line.startsWith("=")) { // comment line
         
-        if (commentLayer != null) {
+        String label = line.substring(1).trim();
+        String layerId = commentLayer == null?null:commentLayer.getId();
+        System.out.println("COMMENT: " + line + " layerId " + layerId + " label " + label);
+        
+        // look for matching comments-mapped-to-layer parameter
+        for (Parameter p : parameters.values()) {
+          if (p.getName().startsWith("comment_")) {
+            Layer layer = (Layer)p.getValue();
+            String key = p.getName().substring("comment_".length());
+            if (label.startsWith(key+":")) {
+              if (layer != null) {
+                layerId = layer.getId();
+              } else {
+                layerId = null;
+              }
+              System.out.println("+ comments " + key + " -> " + layer + " : " + line);
+              if (layer != null
+                  && (commentLayer == null || !layer.getId().equals(commentLayer.getId()))) {
+                // layer isn't the comment layer, so strip the "${key}:" prefix off the label
+                label = label.substring((key+":").length());
+              } // layer isn't the comment layer
+              break; // found it, so we can stop looking
+            } // parameter matches
+          } // comment parameter
+        } // next parameter
+
+        if (layerId != null && label.length() > 0) {            
           graph.addAnnotation(
             new Annotation()
-            .setLayerId(commentLayer.getId())
-            .setLabel(line.substring(1).trim())
+            .setLayerId(layerId)
+            .setLabel(label)
             .setStartId(lastAnchor.getId())
             .setEndId(lastAnchor.getId()));
         }
@@ -1866,7 +1892,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
               // layer isn't the code/error layer, so strip the "${key}:" prefix off the labels
               new ConventionTransformer(layer.getId(), code+":(?<value>.+)", "${value}")
                 .transform(graph).commit();
-            } // layer isn't the comment layer
+            } // layer isn't the code/error layer
           }
         }
         

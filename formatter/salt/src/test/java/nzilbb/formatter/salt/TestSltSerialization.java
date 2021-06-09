@@ -561,13 +561,17 @@ public class TestSltSerialization {
 
     comments = g.all("noise");
     assertEquals("Correct number of noises: " + Arrays.asList(comments),
-                 1, comments.length);
+                 2, comments.length);
     assertEquals("noise label",
-                 "bing", comments[0].getLabel());
-    assertEquals("noise preceding word: " + comments[0].getStart().endOf("word"),
-                 "to", comments[0].getStart().endOf("word").iterator().next().getLabel());
-    assertEquals("noise following word: " + comments[0].getEnd().startOf("word"),
-                 "put", comments[0].getEnd().startOf("word").iterator().next().getLabel());
+                 "click", comments[0].getLabel());
+    assertEquals("noise start time: " + comments[0].getStart(),
+                 Double.valueOf(46), comments[0].getStart().getOffset());
+    assertEquals("noise label",
+                 "bing", comments[1].getLabel());
+    assertEquals("noise preceding word: " + comments[1].getStart().endOf("word"),
+                 "to", comments[1].getStart().endOf("word").iterator().next().getLabel());
+    assertEquals("noise following word: " + comments[1].getEnd().startOf("word"),
+                 "put", comments[1].getEnd().startOf("word").iterator().next().getLabel());
 
     // parentheticals
     Annotation[] parentheticals = g.all("parenthetical");
