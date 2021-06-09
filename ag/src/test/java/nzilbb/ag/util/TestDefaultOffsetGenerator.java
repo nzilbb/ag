@@ -1059,19 +1059,20 @@ public class TestDefaultOffsetGenerator {
     g.addLayer(new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
                .setPeers(true).setPeersOverlap(false).setSaturated(false)
                .setParentId("who").setParentIncludes(true));
-    g.addLayer(new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+    g.addLayer(new Layer("word", "Orthographic Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
                .setPeers(true).setPeersOverlap(false).setSaturated(false)
                .setParentId("turn").setParentIncludes(true));
-    g.addLayer(new Layer("gram", "Orthography").setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(true)
+    g.addLayer(new Layer("gram", "Grammatical Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true).setPeersOverlap(true).setSaturated(true)
                .setParentId("word").setParentIncludes(true));
 
     // john smith
     g.addAnchor(new Anchor("turn1Start", 0.0)); // turn start
     g.addAnchor(new Anchor("a0", 0.0)); // I
     g.addAnchor(new Anchor("a05", null)); // 'm
-    g.addAnchor(new Anchor("a1", 1.0)); // going
-    g.addAnchor(new Anchor("a15", null)); // to
+    g.addAnchor(new Anchor("a1", 1.0)); // wanna - alternatively "want to" or "want a"
+    g.addAnchor(new Anchor("a13", null)); // to
+    g.addAnchor(new Anchor("a16", null)); // a
     g.addAnchor(new Anchor("a2", 2.0)); // jolly
     g.addAnchor(new Anchor("a3", 3.0)); // well
     g.addAnchor(new Anchor("a4", 4.0)); // jump
@@ -1091,8 +1092,10 @@ public class TestDefaultOffsetGenerator {
       new Annotation("turn1", "john smith", "turn", "turn1Start", "turn1End", "participant1"));
       
     // words
+    // "I'm" splits into "I am"
     g.addAnnotation(new Annotation("I'm",   "I'm",   "word", "a0", "a1", "turn1"));
-    g.addAnnotation(new Annotation("gonna", "gonna", "word", "a1", "a2", "turn1"));
+    // "I'm" splits two possible ways "want to" and "want a"
+    g.addAnnotation(new Annotation("wanna", "wanna", "word", "a1", "a2", "turn1"));
     g.addAnnotation(new Annotation("jolly", "jolly", "word", "a2", "a3", "turn1"));
     g.addAnnotation(new Annotation("well",  "well",   "word", "a3", "a4", "turn1"));
     g.addAnnotation(new Annotation("jump",  "jump", "word", "a4", "a5", "turn1"));
@@ -1104,8 +1107,15 @@ public class TestDefaultOffsetGenerator {
     // grammatical words
     g.addAnnotation(new Annotation("gram_I",   "I",   "gram", "a0", "a05", "I'm"));
     g.addAnnotation(new Annotation("gram_'m",   "am",   "gram", "a05", "a1", "I'm"));
-    g.addAnnotation(new Annotation("gram_going", "gonna", "gram", "a1", "a15", "gonna"));
-    g.addAnnotation(new Annotation("gram_to", "gonna", "gram", "a15", "a2", "gonna"));
+
+    // analysis 1 "want to"
+    g.addAnnotation(new Annotation("gram_want1", "want", "gram", "a1", "a13", "wanna"));
+    g.addAnnotation(new Annotation("gram_to1", "to", "gram", "a13", "a2", "wanna"));
+    
+    // analysis 2 "want a"
+    g.addAnnotation(new Annotation("gram_want2", "want", "gram", "a1", "a16", "wanna"));
+    g.addAnnotation(new Annotation("gram_a2", "a", "gram", "a16", "a2", "wanna"));
+    
     g.addAnnotation(new Annotation("gram_jolly", "jolly", "gram", "a2", "a3", "jolly"));
     g.addAnnotation(new Annotation("gram_well",  "well",   "gram", "a3", "a4", "well"));
     g.addAnnotation(new Annotation("gram_jump",  "jump", "gram", "a4", "a5", "jump"));
@@ -1121,10 +1131,12 @@ public class TestDefaultOffsetGenerator {
     // grammatical words are not anchored yet
     assertNull("Grammatical word offset unset - I'm",
                g.getAnchor("a05").getOffset());
-    assertNull("Grammatical word offset unset - gonna",
-               g.getAnchor("a15").getOffset());
+    assertNull("Grammatical word offset unset - wanna 1",
+               g.getAnchor("a13").getOffset());
+    assertNull("Grammatical word offset unset - wanna 2",
+               g.getAnchor("a16").getOffset());
     DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
-    //generator.setDebug(true);
+    // generator.setDebug(true);
     try {
       generator.transform(g);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
@@ -1143,10 +1155,16 @@ public class TestDefaultOffsetGenerator {
       assertEquals("Word anchors unchanged", Double.valueOf(9.0), g.getAnchor("a9").getOffset());
 
       // grammatical words are anchored
+
+      // I + 'm anchors at the mid point
       assertEquals("Grammatical word offset set - I'm",
                    Double.valueOf(0.5), g.getAnchor("a05").getOffset());
-      assertEquals("Grammatical word offset set - gonna",
-                   Double.valueOf(1.5), g.getAnchor("a15").getOffset());
+
+      // wann + a - two analyses, anchor points are spread evenly across the word
+      assertEquals("Grammatical word offset set - wanna 1",
+                   Double.valueOf(1.0 + 1.0/3.0), g.getAnchor("a13").getOffset());
+      assertEquals("Grammatical word offset set - wanna 2",
+                   Double.valueOf(1.0 + 2.0/3.0), g.getAnchor("a16").getOffset());
 
     } catch(TransformationException exception) {
       fail(exception.toString());
