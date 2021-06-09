@@ -379,7 +379,7 @@ public class SltToTrs extends Converter {
 
       // add meta-data as comments at the beginning
       // so that can be parsed back out to slt if there's a round-trip
-      String startId = transcript.getStart().getId();
+      String startId = transcript.first(schema.getTurnLayerId()).getStart().getId();
       // dob
       Annotation metadata = transcript.first("participant_dob");
       if (metadata != null) {
