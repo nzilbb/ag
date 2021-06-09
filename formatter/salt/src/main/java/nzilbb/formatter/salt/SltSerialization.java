@@ -1657,7 +1657,6 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         
         String label = line.substring(1).trim();
         String layerId = commentLayer == null?null:commentLayer.getId();
-        System.out.println("COMMENT: " + line + " layerId " + layerId + " label " + label);
         
         // look for matching comments-mapped-to-layer parameter
         for (Parameter p : parameters.values()) {
@@ -1670,7 +1669,6 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
               } else {
                 layerId = null;
               }
-              System.out.println("+ comments " + key + " -> " + layer + " : " + line);
               if (layer != null
                   && (commentLayer == null || !layer.getId().equals(commentLayer.getId()))) {
                 // layer isn't the comment layer, so strip the "${key}:" prefix off the label
