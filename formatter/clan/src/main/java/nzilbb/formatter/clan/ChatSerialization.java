@@ -2870,7 +2870,10 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       writer.close();
 
       TempFileInputStream in = new TempFileInputStream(f);
-         
+
+      participantLayer.getChildren().remove("@code");
+      graph.getSchema().getLayers().remove("@code");
+
       // return a named stream from the file
       String streamName = graph.getId();
       if (!IO.Extension(streamName).equals("cha")) {
