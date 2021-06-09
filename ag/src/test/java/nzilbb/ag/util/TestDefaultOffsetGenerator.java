@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -33,11 +33,9 @@ import java.util.stream.Collectors;
 import nzilbb.ag.*;
 import nzilbb.ag.util.*;
 
-public class TestDefaultOffsetGenerator
-{
+public class TestDefaultOffsetGenerator {
       
-  @Test public void basicInterpolation() 
-  {
+  @Test public void basicInterpolation() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -90,8 +88,7 @@ public class TestDefaultOffsetGenerator
 
     DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
     // generator.setDebug(true);
-    try
-    {
+    try {
       generator.transform(g);
       Set<Change> changes = g.getTracker().getChanges();
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
@@ -111,7 +108,7 @@ public class TestDefaultOffsetGenerator
       assertEquals(Double.valueOf(9.0), g.getAnchor("a9").getOffset());
 
       Set<String> changeStrings = changes.stream()
-         .map(Change::toString).collect(Collectors.toSet());
+        .map(Change::toString).collect(Collectors.toSet());
       // collapsed back to start of turn
       assertTrue(changeStrings.contains("Update a0: offset = 0.0 (was null)"));
       // collapsed forward to end of turn
@@ -127,15 +124,12 @@ public class TestDefaultOffsetGenerator
       assertTrue(changeStrings.contains("Update a8: offset = 8.0 (was null)"));
       assertEquals("no extra changes to graph: " + g.getChanges(),
                    changes.size(), g.getChanges().size());
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  @Test public void basicInterpolationWithConfidence() 
-  {
+  @Test public void basicInterpolationWithConfidence() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -202,8 +196,7 @@ public class TestDefaultOffsetGenerator
     generator.setDefaultAnchorConfidence(Constants.CONFIDENCE_NONE);
     generator.setDefaultOffsetThreshold(Constants.CONFIDENCE_AUTOMATIC);
     // generator.setDebug(true);
-    try
-    {
+    try {
       generator.transform(g);
       Set<Change> changes = g.getTracker().getChanges();
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
@@ -212,7 +205,7 @@ public class TestDefaultOffsetGenerator
 
       // test the changes are recorded
       Set<String> changeStrings = changes.stream()
-         .map(Change::toString).collect(Collectors.toSet());
+        .map(Change::toString).collect(Collectors.toSet());
       assertEquals(Double.valueOf(0.0), g.getAnchor("a0").getOffset());
       assertEquals(Double.valueOf(0.5), g.getAnchor("a05").getOffset());
       assertEquals(Double.valueOf(1.0), g.getAnchor("a1").getOffset());
@@ -239,15 +232,12 @@ public class TestDefaultOffsetGenerator
       assertTrue(changeStrings.contains("Update a6: offset = 6.0 (was 6.6)"));
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
 
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  @Test public void utterancesPartitionWordsInTurn() 
-  {
+  @Test public void utterancesPartitionWordsInTurn() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -320,8 +310,7 @@ public class TestDefaultOffsetGenerator
     generator.setDefaultAnchorConfidence(Constants.CONFIDENCE_NONE);
     generator.setDefaultOffsetThreshold(Constants.CONFIDENCE_AUTOMATIC);
     // generator.setDebug(true);
-    try
-    {
+    try {
       generator.transform(g);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
       Set<Change> changes = g.getTracker().getChanges();
@@ -330,7 +319,7 @@ public class TestDefaultOffsetGenerator
 
       // test the changes are recorded
       Set<String> changeStrings = changes.stream()
-         .map(Change::toString).collect(Collectors.toSet());
+        .map(Change::toString).collect(Collectors.toSet());
       assertEquals(Double.valueOf(0.0), g.getAnchor("a0").getOffset());
       assertEquals(Double.valueOf(0.1), g.getAnchor("a01").getOffset());
       assertEquals(Double.valueOf(0.2), g.getAnchor("a02").getOffset());
@@ -363,15 +352,12 @@ public class TestDefaultOffsetGenerator
       assertTrue(changeStrings.contains("Update a44: offset = 4.4 (was 5.1)"));
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
 
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  @Test public void overlappingInterpolation() 
-  {
+  @Test public void overlappingInterpolation() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -445,8 +431,7 @@ public class TestDefaultOffsetGenerator
 
     DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
     // generator.setDebug(true);
-    try
-    {
+    try {
       generator.transform(g);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
       Set<Change> changes = g.getTracker().getChanges();
@@ -473,7 +458,7 @@ public class TestDefaultOffsetGenerator
 
       // test the changes are recorded
       Set<String> changeStrings = changes.stream()
-         .map(Change::toString).collect(Collectors.toSet());
+        .map(Change::toString).collect(Collectors.toSet());
 
       // collapsed back to start of turn
       assertTrue(changeStrings.contains("Update a0: offset = 0.0 (was null)"));
@@ -501,15 +486,12 @@ public class TestDefaultOffsetGenerator
       assertTrue(changeStrings.contains("Update b11: offset = 11.5 (was null)"));
 
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  @Test public void padForAnnotationsOnOtherLayers() 
-  {
+  @Test public void padForAnnotationsOnOtherLayers() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -566,8 +548,7 @@ public class TestDefaultOffsetGenerator
 
     DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
     // generator.setDebug(true);
-    try
-    {
+    try {
       generator.transform(g);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
       Set<Change> changes = g.getTracker().getChanges();
@@ -576,7 +557,7 @@ public class TestDefaultOffsetGenerator
 
       // test the changes are recorded
       Set<String> changeStrings = changes.stream()
-         .map(Change::toString).collect(Collectors.toSet());
+        .map(Change::toString).collect(Collectors.toSet());
       assertEquals(Double.valueOf(1.0), g.getAnchor("a1").getOffset());
       assertEquals(Double.valueOf(2.0), g.getAnchor("a2").getOffset());
       assertEquals(Double.valueOf(3.0), g.getAnchor("a3").getOffset());
@@ -598,15 +579,12 @@ public class TestDefaultOffsetGenerator
       assertTrue(changeStrings.contains("Update a9: offset = 9.0 (was null)"));
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
 
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  @Test public void extraneousLayers() 
-  {
+  @Test public void extraneousLayers() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -746,8 +724,7 @@ public class TestDefaultOffsetGenerator
 
     DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
     // generator.setDebug(true);
-    try
-    {
+    try {
       generator.transform(g);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
       Set<Change> changes = g.getTracker().getChanges();
@@ -781,7 +758,7 @@ public class TestDefaultOffsetGenerator
 
       // test the changes are recorded
       Set<String> changeStrings = changes.stream()
-         .map(Change::toString).collect(Collectors.toSet());
+        .map(Change::toString).collect(Collectors.toSet());
 
       // collapsed back to start of turn
       assertTrue(changeStrings.contains("Update a0: offset = 0.0 (was null)"));
@@ -813,15 +790,12 @@ public class TestDefaultOffsetGenerator
       assertEquals("no extra changes to graph - " + changes + " vs. " +g.getChanges(), 
                    changes.size(), g.getChanges().size());
 
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  @Test public void fragmentWithMissingAnchors() 
-  {
+  @Test public void fragmentWithMissingAnchors() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -899,8 +873,7 @@ public class TestDefaultOffsetGenerator
     generator.setDefaultAnchorConfidence(Constants.CONFIDENCE_NONE);
     generator.setDefaultOffsetThreshold(Constants.CONFIDENCE_AUTOMATIC);
     // generator.setDebug(true);
-    try
-    {
+    try {
       generator.transform(f);
       Set<Change> changes = f.getTracker().getChanges();
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
@@ -910,7 +883,7 @@ public class TestDefaultOffsetGenerator
 
       // test the changes are recorded
       Set<String> changeStrings = changes.stream()
-         .map(Change::toString).collect(Collectors.toSet());
+        .map(Change::toString).collect(Collectors.toSet());
       assertEquals(Double.valueOf(0.0), f.getAnchor("a0").getOffset());
       assertEquals(Double.valueOf(0.1), f.getAnchor("a01").getOffset());
       assertEquals(Double.valueOf(0.2), f.getAnchor("a02").getOffset());
@@ -918,17 +891,14 @@ public class TestDefaultOffsetGenerator
       assertEquals(Double.valueOf(0.30000000000000004), f.getAnchor("a03").getOffset());
       assertEquals(Double.valueOf(0.4), f.getAnchor("a04a").getOffset());
 
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
 
     f = g.getFragment(g.getAnnotation("utterance2"), fragmentLayers.toArray(new String[0]));
 
     // generator.setDebug(true);
-    try
-    {
+    try {
       generator.transform(f);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
       for (String m : generator.getErrors()) System.out.println("ERROR: " + m);
@@ -940,15 +910,12 @@ public class TestDefaultOffsetGenerator
       assertEquals(Double.valueOf(3.4), f.getAnchor("a34").getOffset());
       assertEquals(Double.valueOf(4.4), f.getAnchor("a44").getOffset());
       assertEquals(Double.valueOf(5.4), f.getAnchor("a54").getOffset());
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  @Test public void partialAlignmentOfUnalignedFragment() 
-  {
+  @Test public void partialAlignmentOfUnalignedFragment() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -994,15 +961,15 @@ public class TestDefaultOffsetGenerator
     g.addAnchor(new Anchor("utteranceEnd", 9.0, Constants.CONFIDENCE_MANUAL)); // turn end
 
     g.addAnnotation(
-       new Annotation("participant1", "john smith", "who", "utteranceStart", "utteranceEnd",
-                      "my graph"));
+      new Annotation("participant1", "john smith", "who", "utteranceStart", "utteranceEnd",
+                     "my graph"));
       
     g.addAnnotation( // null anchors like a fragment
-       new Annotation("turn1", "john smith", "turn", "none1", "none2", "participant1"));
+      new Annotation("turn1", "john smith", "turn", "none1", "none2", "participant1"));
     
     g.addAnnotation(
-       new Annotation("utterance1", "john smith", "utterance", "utteranceStart", "utteranceEnd",
-                      "turn1"));
+      new Annotation("utterance1", "john smith", "utterance", "utteranceStart", "utteranceEnd",
+                     "turn1"));
       
     g.addAnnotation(new Annotation("the", "the", "word", "a0", "a1", "turn1", 1));
     g.addAnnotation(new Annotation("quick", "quick", "word", "a1", "a2", "turn1", 2));
@@ -1018,8 +985,7 @@ public class TestDefaultOffsetGenerator
 
     DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
     // generator.setDebug(true);
-    try
-    {
+    try {
       generator.transform(g);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
       Set<Change> changes = g.getTracker().getChanges();
@@ -1027,7 +993,7 @@ public class TestDefaultOffsetGenerator
       // test the values are what we expected
 
       Set<String> changeStrings = changes.stream()
-         .map(Change::toString).collect(Collectors.toSet());
+        .map(Change::toString).collect(Collectors.toSet());
 
       assertEquals("Anchor offset: " + changeStrings,
                    Double.valueOf(0.0), g.getAnchor("a0").getOffset());
@@ -1076,15 +1042,12 @@ public class TestDefaultOffsetGenerator
       
       assertEquals("no extra changes to graph: " + g.getChanges(),
                    changes.size(), g.getChanges().size());
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  public static void main(String args[]) 
-  {
+  public static void main(String args[]) {
     org.junit.runner.JUnitCore.main("nzilbb.ag.util.TestDefaultOffsetGenerator");
   }
 }
