@@ -1410,7 +1410,8 @@ public class TestChatSerialization {
       // check morphosyntactic tag labels
       Annotation[] mor = g.all("turn")[1].all("mor");
       Annotation[] pos = g.all("turn")[1].all("pos");
-      assertEquals("There's a POS for every MOR tag", mor.length, pos.length);
+      // because of duplicate elimination, there is one fewer pos tag
+      assertEquals("There's almost a POS for every MOR tag", mor.length - 1, pos.length);
       String[] morLabels = {
 	"prep|","conj|with","prep|out=sin", "det:art|a=una", "n|shadow","v|shadow=sombra", "prep|of=de", "det:art|a",
         "n|doubt","v|doubt", "n:let|i", "v|appreciate",
@@ -1427,7 +1428,7 @@ public class TestChatSerialization {
       String[] posLabels = {
 	"prep","conj","prep", "det", "n","v", "prep", "det",
         "n","v", "n", "v",
-        "comp","pro","pro","det",
+        "comp","pro","det",
         "comp","conj", "pro",
         "cop","co","n","v", "prep", "qn","pro", "prep",
         "det", "n", "n", "aux","n","cop",
@@ -1503,25 +1504,31 @@ public class TestChatSerialization {
                        alignedWithEnd[i],
                        mor[i].getEnd().endOf("word").iterator().next().getLabel());
          }
-	 assertEquals("pos labels " + i, posLabels[i], pos[i].getLabel());
-	 assertEquals("pos word " + i, morWords[i], pos[i].getParent().getLabel());
+         if (i < posLabels.length) {
+           assertEquals("pos labels " + i, posLabels[i], pos[i].getLabel());
+           if (i < 14) {
+             assertEquals("pos word " + i, morWords[i], pos[i].getParent().getLabel());
+           } else {
+             assertEquals("pos word " + i, morWords[i+1], pos[i].getParent().getLabel());
+           }
+         }
       }
 
       // check stem labels
       Annotation[] stem = g.all("turn")[1].all("stem");      
       String[] stemLabels = {
-	"with","out", "a", "shadow","shadow", "of", "a",
-        "doubt","doubt", "i", "appreciate",
-        "that","that","that","that",
-        "if","if", "you",
-        "look","look","look","look", "at", "some","some", "of",
+	"with","out", "a", "shadow", "of", "a",
+        "doubt", "i", "appreciate",
+        "that",
+        "if", "you",
+        "look", "at", "some", "of",
         "the", "thing", "i", "be","i","be",
-        "quote","quote",
-	"as","as","as", "have","have","have",
-        "say","say",
-	"in","in", "the", "day","daily", "mail","mail",
-        "n", "dai–", "an'", "so","so","so", "on","on",
-	"i","genmod", "be","be", "a", "monster" };
+        "quote",
+	"as", "have",
+        "say",
+	"in", "the", "day","daily", "mail",
+        "n", "dai–", "an'", "so", "on",
+	"i","genmod", "be", "a", "monster" };
       for (int i = 0; i < stemLabels.length; i++) {
 	 assertEquals("stem label " + i, stemLabels[i], stem[i].getLabel());
       }
@@ -1531,7 +1538,7 @@ public class TestChatSerialization {
       String[] subcategoryLabels = {
 	"art", "art",
         "let",
-        "rel","dem","dem",
+        "rel","dem",
         "per",
         "indef",
         "art", "let", "let",
@@ -1558,7 +1565,7 @@ public class TestChatSerialization {
       Annotation[] suffix = g.all("turn")[1].all("morSuffix");      
       String[] suffixLabels = {
 	"PL", "PASTP","PAST",
-	"PRESP","PRESP","PRESP",
+	"PRESP",
 	"LY" };
       for (int i = 0; i < suffixLabels.length; i++) {
 	 assertEquals("Suffix label " + i, suffixLabels[i], suffix[i].getLabel());
@@ -1698,7 +1705,7 @@ public class TestChatSerialization {
       String[] posLabels = {
 	"prep","conj","prep", "det", "n","v", "prep", "det",
         "n","v", "n", "v",
-        "comp","pro","pro","det",
+        "comp","pro","det",
         "comp","conj", "pro",
         "cop","co","n","v", "prep", "qn","pro", "prep",
         "det", "n", "n", "aux","n","cop",
@@ -1711,7 +1718,7 @@ public class TestChatSerialization {
       String[] morWords = {
 	"without","without","without", "a", "shadow","shadow", "of", "a",
         "doubt","doubt", "i", "appreciate",
-        "that","that","that","that",
+        "that","that","that",
         "if","if", "you",
         "look","look","look","look", "at", "some","some", "of",
         "the", "things", "i'm","i'm","i'm","i'm",
@@ -1724,7 +1731,7 @@ public class TestChatSerialization {
       String[] alignedWithStart = {
 	"without",null,null, "a", "shadow","shadow", "of", "a",
         "doubt","doubt", "i", "appreciate",
-        "that","that","that","that",
+        "that","that","that",
         "if","if", "you",
         "look","look","look","look", "at", "some","some", "of",
         "the", "things", "i'm",null,"i'm",null,
@@ -1737,7 +1744,7 @@ public class TestChatSerialization {
       String[] alignedWithEnd = {
 	null,null,"without", "a", "shadow","shadow", "of", "a",
         "doubt","doubt", "i", "appreciate",
-        "that","that","that","that",
+        "that","that","that",
         "if","if", "you",
         "look","look","look","look", "at", "some","some", "of",
         "the", "things", null,"i'm",null,"i'm",
@@ -1779,18 +1786,18 @@ public class TestChatSerialization {
       // check stem labels
       Annotation[] stem = g.all("turn")[1].all("stem");      
       String[] stemLabels = {
-	"with","out", "a", "shadow","shadow", "of", "a",
-        "doubt","doubt", "i", "appreciate",
-        "that","that","that","that",
-        "if","if", "you",
-        "look","look","look","look", "at", "some","some", "of",
+	"with","out", "a", "shadow", "of", "a",
+        "doubt", "i", "appreciate",
+        "that",
+        "if", "you",
+        "look", "at", "some", "of",
         "the", "thing", "i", "be","i","be",
-        "quote","quote",
-	"as","as","as", "have","have","have",
-        "say","say",
-	"in","in", "the", "day","daily", "mail","mail",
-        "n", "dai–", "an'", "so","so","so", "on","on",
-	"i","genmod", "be","be", "a", "monster" };
+        "quote",
+	"as", "have",
+        "say",
+	"in", "the", "day","daily", "mail",
+        "n", "dai–", "an'", "so", "on",
+	"i","genmod", "be", "a", "monster" };
       for (int i = 0; i < stemLabels.length; i++) {
 	 assertEquals("stem label " + i, stemLabels[i], stem[i].getLabel());
       }
@@ -1800,7 +1807,7 @@ public class TestChatSerialization {
       String[] subcategoryLabels = {
 	"art", "art",
         "let",
-        "rel","dem","dem",
+        "rel","dem",
         "per",
         "indef",
         "art", "let", "let",
@@ -1827,7 +1834,7 @@ public class TestChatSerialization {
       Annotation[] suffix = g.all("turn")[1].all("morSuffix");      
       String[] suffixLabels = {
 	"PL", "PASTP","PAST",
-	"PRESP","PRESP","PRESP",
+	"PRESP",
 	"LY" };
       for (int i = 0; i < suffixLabels.length; i++) {
 	 assertEquals("Suffix label " + i, suffixLabels[i], suffix[i].getLabel());

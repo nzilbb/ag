@@ -2169,17 +2169,12 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                       if (morPrefixLayer != null) {
                         String[] prefixes = label.substring(0, lastHash).split("#");
                         for (String prefix : prefixes) {
-                          if (prefix.length() > 0) {
-                            graph.addAnnotation(
-                              new Annotation().setLayerId(morPrefixLayer.getId())
-                              .setLabel(prefix)
-                              .setParentId(token.getId())
-                              .setStartId(tag.getStartId())
-                              .setEndId(tag.getEndId()));
-                          }
+                          addUniqueAnnotation(
+                            graph, morPrefixLayer, prefix,
+                            token.getId(), tag.getStartId(), tag.getEndId());
                         } // next prefix
                       } // morPrefixLayer is set
-                        // remove prefixes
+                      // remove prefixes
                       label = label.substring(lastHash+1);
                     }
                     
@@ -2190,27 +2185,17 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                       String[] subcategories = pos.split(":");
                       pos = subcategories[0];
                       // part of speech
-                      if (morPartOfSpeechLayer != null && pos.length() > 0) {
-                        graph.addAnnotation(
-                          new Annotation().setLayerId(morPartOfSpeechLayer.getId())
-                          .setLabel(pos)
-                          .setParentId(token.getId())
-                          .setStartId(tag.getStartId())
-                          .setEndId(tag.getEndId()));
-                      } // morPartOfSpeechLayer is set
+                      addUniqueAnnotation(
+                        graph, morPartOfSpeechLayer, pos, token.getId(),
+                        tag.getStartId(), tag.getEndId());
                       // subcategories
-                      if (morPartOfSpeechSubcategoryLayer != null) { 
-                        for (int s = 1; s < subcategories.length; s++) {
-                          String subcategory = subcategories[s];
-                          graph.addAnnotation(
-                            new Annotation().setLayerId(morPartOfSpeechSubcategoryLayer.getId())
-                            .setLabel(subcategory)
-                            .setParentId(token.getId())
-                            .setStartId(tag.getStartId())
-                            .setEndId(tag.getEndId()));
-                        } // next subcategory
-                      } // morPartOfSpeechSubcategoryLayer is set
-                        // remove part-of-speech
+                      for (int s = 1; s < subcategories.length; s++) {
+                        String subcategory = subcategories[s];
+                        addUniqueAnnotation(
+                          graph, morPartOfSpeechSubcategoryLayer, subcategory,
+                          token.getId(), tag.getStartId(), tag.getEndId());
+                      } // next subcategory
+                      // remove part-of-speech
                       label = label.substring(bar+1);
                     }
                     
@@ -2221,16 +2206,11 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                     if (equals >= 0) {
                       if (morGlossLayer != null) {
                         String gloss = label.substring(equals+1);
-                        if (gloss.length() > 0) {
-                          graph.addAnnotation(new Annotation()
-                                              .setLayerId(morGlossLayer.getId())
-                                              .setLabel(gloss)
-                                              .setParentId(token.getId())
-                                              .setStartId(tag.getStartId())
-                                              .setEndId(tag.getEndId()));
-                        }
+                        addUniqueAnnotation(
+                          graph, morGlossLayer, gloss,
+                          token.getId(), tag.getStartId(), tag.getEndId());
                       } // morGlossLayer is set
-                        // remove gloss
+                      // remove gloss
                       label = label.substring(0, equals);
                     }
                     
@@ -2240,17 +2220,12 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                       if (morSuffixLayer != null) {
                         String[] suffixes = label.substring(firstDash+1).split("-");
                         for (String suffix : suffixes) {
-                          if (suffix.length() > 0) {
-                            graph.addAnnotation(new Annotation()
-                                                .setLayerId(morSuffixLayer.getId())
-                                                .setLabel(suffix)
-                                                .setParentId(token.getId())
-                                                .setStartId(tag.getStartId())
-                                                .setEndId(tag.getEndId()));
-                          }
+                          addUniqueAnnotation(
+                            graph, morSuffixLayer, suffix,
+                            token.getId(), tag.getStartId(), tag.getEndId());
                         } // next suffix
                       } // morSuffixLayer is set
-                        // remove suffixes
+                      // remove suffixes
                       label = label.substring(0, firstDash);
                     }
                     
@@ -2260,29 +2235,19 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                       if (morFusionalSuffixLayer != null) {
                         String[] suffixes = label.substring(firstAmpersand+1).split("&");
                         for (String suffix : suffixes) {
-                          if (suffix.length() > 0) {
-                            graph.addAnnotation(new Annotation()
-                                                .setLayerId(morFusionalSuffixLayer.getId())
-                                                .setLabel(suffix)
-                                                .setParentId(token.getId())
-                                                .setStartId(tag.getStartId())
-                                                .setEndId(tag.getEndId()));
-                          }
+                          addUniqueAnnotation(
+                            graph, morFusionalSuffixLayer, suffix,
+                            token.getId(), tag.getStartId(), tag.getEndId());
                         } // next suffix
                       } // morFusionalSuffixLayer is set
-                        // remove suffixes
+                      // remove suffixes
                       label = label.substring(0, firstAmpersand);
                     }
                     
                     // whatever's left is the stem
-                    if (morStemLayer != null && label.length() > 0) {
-                      graph.addAnnotation(new Annotation()
-                                          .setLayerId(morStemLayer.getId())
-                                          .setLabel(label)
-                                          .setParentId(token.getId())
-                                          .setStartId(tag.getStartId())
-                                          .setEndId(tag.getEndId()));
-                    }
+                    addUniqueAnnotation(
+                      graph, morStemLayer, label,
+                      token.getId(), tag.getStartId(), tag.getEndId());
                     
                   } // next tag
                 } // next word group
@@ -2322,9 +2287,41 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     return graphs;
   }
 
+  
+   /**
+    * Adds the given annotation, but only if there isn't one already there with the same
+    * layer, label, parent, and anchors. 
+    * @param graph
+    * @param layer
+    * @param label
+    * @param parentId
+    * @param startId
+    * @param endId
+    */
+  private void addUniqueAnnotation(
+    Graph graph, Layer layer, String label, String parentId, String startId, String endId) {
+    if (layer != null && label.length() > 0) {
+      for (Annotation child : graph.getAnnotation(parentId).getAnnotations(layer.getId())) {
+        if (child.getStartId().equals(startId)
+            && child.getEndId().equals(endId)
+            && child.getLabel().equals(label)) {
+          return;
+        }
+      } // next child
+      // if we got this far, there's no other child like this
+      graph.addAnnotation(new Annotation().setLayerId(layer.getId())
+                          .setLabel(label)
+                          .setParentId(parentId)
+                          .setStartId(startId).setEndId(endId));
+    }
+  } // end of addUniqueAnnotation()
+
+
   /**
-   * Avoid the special case of a non-syncrhonised utterance sandwiched between two synchronised ones, where the third starts and the time the first ends.
-   * <p> e.g. 511.784 ...penultimateUtterance... 514.337 ...lastUtterance... 514.337 ...utterance... 517.092
+   * Avoid the special case of a non-syncrhonised utterance sandwiched between two
+   * synchronised ones, where the third starts and the time the first ends. 
+   * <p> e.g. 511.784 ...penultimateUtterance... 514.337 ...lastUtterance... 514.337
+   * ...utterance... 517.092 
    * @param start The next start anchor.
    * @param lastUtterance The last utterance.
    * @param graph The annotation graph.
@@ -2355,13 +2352,16 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
   } // end of avoidInstantaneousUtterance()
 
   /**
-   * Check the alignment of the given utterance against the given last utterance, to ensure there are no gaps if there shouldn't be, and that the anchors are in the right order.
+   * Check the alignment of the given utterance against the given last utterance, to
+   * ensure there are no gaps if there shouldn't be, and that the anchors are in the right
+   * order. 
    * @param utterance Current utterance, which is not assumed to be in the graph yet.
    * @param start The utterance's start anchor, which is assumed to be in the graph.
    * @param end The utterance's end anchor, which is assumed to be in the graph.
    * @param cUnit The current c-unit annotation, which is not assumed to be in the graph.
    * @param lastUtterance Last utterance, which is assumed to be in the graph.
-   * @param currentTurn Current turn, which is assumed to be in the graph, and the parent of <var></var>utterance
+   * @param currentTurn Current turn, which is assumed to be in the graph, and the parent
+   * of <var></var>utterance 
    * @param utteranceLayer The utterance layer definition.
    * @param graph The annotation graph.
    */
