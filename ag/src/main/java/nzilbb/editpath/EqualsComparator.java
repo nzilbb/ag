@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -24,7 +24,10 @@ package nzilbb.editpath;
 import java.util.Comparator;
 
 /**
- * Implementation of IComparator that uses java.lang.Object.equals(Object) to determine equality or not.  This is used as a default comparison method for {@link DefaultEditComparator}, but can also be used as an adapter for customising the equals comparison, e.g.:
+ * Implementation of IComparator that uses java.lang.Object.equals(Object) to determine
+ * equality or not.  This is used as a default comparison method for 
+ * {@link DefaultEditComparator}, but can also be used as an adapter for customising the
+ * equals comparison, e.g.: 
  * <pre>
  * // case-insensitive comparison
  * new EqualsComparator&lt;String&gt;()
@@ -35,38 +38,34 @@ import java.util.Comparator;
  *   }
  *  }
  * </pre>
- * <p><em>NB</em> This comparator cannot be used for ordering elements, as it only returns 0 (for "equal") or 1 (for "not equal").
+ * <p><em>NB</em> This comparator cannot be used for ordering elements, as it only returns
+ * 0 (for "equal") or 1 (for "not equal"). 
  * @author Robert Fromont robert@fromont.net.nz
  */
 @SuppressWarnings("overrides")
-public class EqualsComparator<T>
-   implements Comparator<T>
-{
-   // Methods:
+public class EqualsComparator<T> implements Comparator<T> {
+  // Methods:
    
-   /**
-    * Default constructor.
-    */
-   public EqualsComparator()
-   {
-   } // end of constructor
+  /**
+   * Default constructor.
+   */
+  public EqualsComparator() {
+  } // end of constructor
 
-   /**
-    * Compares two objects for equality only. 
-    * <p><em>NB</em> This cannot be used for ordering elements, as it only returns 0 or 1.
-    * @return 0 if o1.equals(o2), 1 otherwise,
-    */
-   public int compare(T o1,T o2)
-   {
-	 if (o1.equals(o2)) return 0;
-	 // we don't really care about inequality:
-	 return 1;
-   }
+  /**
+   * Compares two objects for equality only. 
+   * <p><em>NB</em> This cannot be used for ordering elements, as it only returns 0 or 1.
+   * @return 0 if o1.equals(o2), 1 otherwise,
+   */
+  public int compare(T o1,T o2) {
+    if (o1.equals(o2)) return 0;
+    // we don't really care about inequality:
+    return 1;
+  }
 
-   /** Returns true iff this == object */
-   public boolean equals(Object obj) 
-   { 
-      return obj == this; 
-   }
+  /** Returns true iff this == object */
+  public boolean equals(Object obj) { 
+    return obj == this; 
+  }
 
 } // end of class EqualsComparator

@@ -35,6 +35,22 @@ import java.util.Vector;
  * support different settings and methods for determining edit distance. 
  * <p>A traditional Levenstein distance calculation can be achieved with
  * MinimumEditPath&lt;Character&gt;. 
+ * <p> e.g. The edit path between two lists of Integers can be determined using:
+ * <pre>
+ * MinimumEditPath&lt;Integer&gt; mp = new MinimumEditPath&lt;Integer&gt;();
+ * List&lt;EditStep&lt;Integer&gt;&gt; path = mp.minimumEditPath(vFrom, vTo)
+ * for (EditStep&lt;Integer&gt; step: path) {
+ *   System.out.println("from " + step.getFrom() + " to " + step.getTo() 
+ *                      + " : " + step.getOperation() + " distance " + step.getStepDistance());
+ * }</pre>
+ * <p> The equality comparison can be customized, e.g.:
+ * <pre>
+ * MinimumEditPath&lt;String&gt; mp = new MinimumEditPath&lt;String&gt;(
+ *   new DefaultEditComparator&lt;String&gt;(new EqualsComparator&lt;String&gt;() {
+ *     public int compare(String o1, String o2) {
+ *      return o1.toLowerCase().compareTo(o2.toLowerCase());
+ *     }
+ *    }));</pre>
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class MinimumEditPath<T> {
