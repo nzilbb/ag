@@ -32,6 +32,7 @@ import java.io.PrintWriter;
 import java.io.StringBufferInputStream;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Vector;
 import java.util.function.IntConsumer;
@@ -789,6 +790,9 @@ public class MorTagger extends Annotator {
     if (languagesLayerId == null)
       throw new InvalidConfigurationException(this, "No input transcript language layer set.");
     Vector<String> requiredLayers = new Vector<String>();
+    requiredLayers.add(schema.getParticipantLayerId());
+    requiredLayers.add(schema.getTurnLayerId());
+    requiredLayers.add(schema.getUtteranceLayerId());
     requiredLayers.add(schema.getWordLayerId());
     requiredLayers.add(languagesLayerId);
     return requiredLayers.toArray(new String[0]);
@@ -939,6 +943,22 @@ public class MorTagger extends Annotator {
           
           // merge the changes into our graph
           Merger merger = new Merger(tagged);
+          // only allow changes to our own layers
+          HashSet<String> changeableLayers = new HashSet<String>();
+          if (morLayerId != null) changeableLayers.add(morLayerId);
+          if (prefixLayerId != null) changeableLayers.add(prefixLayerId);
+          if (partOfSpeechLayerId != null) changeableLayers.add(partOfSpeechLayerId);
+          if (partOfSpeechSubcategoryLayerId != null)
+            changeableLayers.add(partOfSpeechSubcategoryLayerId);
+          if (stemLayerId != null) changeableLayers.add(stemLayerId);
+          if (fusionalSuffixLayerId != null) changeableLayers.add(fusionalSuffixLayerId);
+          if (suffixLayerId != null) changeableLayers.add(suffixLayerId);
+          if (glossLayerId != null) changeableLayers.add(glossLayerId);
+          for (String layerId : graph.getSchema().getLayers().keySet()) {
+            if (!changeableLayers.contains(layerId)) {
+              merger.getNoChangeLayers().add(layerId);
+            }
+          } // next incoming layer
           merger.transform(graph);
 
           boolean alignedWords = Arrays.stream(graph.all(schema.getWordLayerId()))

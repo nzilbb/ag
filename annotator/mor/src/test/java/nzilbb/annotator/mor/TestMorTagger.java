@@ -104,8 +104,14 @@ public class TestMorTagger {
                 schema.getLayer(annotator.getMorLayerId()).getPeers());
     Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
       .collect(Collectors.toSet());
-    assertEquals("Required layer: "+requiredLayers,
-                 2, requiredLayers.size());
+    assertEquals("Required layers: "+requiredLayers,
+                 5, requiredLayers.size());
+    assertTrue("participants required "+requiredLayers,
+               requiredLayers.contains("who"));
+    assertTrue("turns required "+requiredLayers,
+               requiredLayers.contains("turn"));
+    assertTrue("utterances required "+requiredLayers,
+               requiredLayers.contains("utterance"));
     assertTrue("word required "+requiredLayers,
                requiredLayers.contains("word"));
     assertTrue("transcript_language required "+requiredLayers,
@@ -234,17 +240,14 @@ public class TestMorTagger {
     morAnnotations = Arrays.stream(g.all("morStem"))
       .collect(Collectors.toList());
     assertEquals("Correct number of stems "+morAnnotations,
-                 12, morAnnotations.size());
+                 9, morAnnotations.size());
     mors = morAnnotations.iterator();
     assertEquals("I'll", "I", mors.next().getLabel());
     assertEquals("I'll", "will", mors.next().getLabel());
     assertEquals("sing", "sing", mors.next().getLabel());
     assertEquals("and", "and", mors.next().getLabel());
     assertEquals("walk", "walk", mors.next().getLabel());
-    assertEquals("walk", "walk", mors.next().getLabel());
     assertEquals("about", "about", mors.next().getLabel());
-    assertEquals("about", "about", mors.next().getLabel());
-    assertEquals("my", "my", mors.next().getLabel());
     assertEquals("my", "my", mors.next().getLabel());
     assertEquals("blogging-morting", "bloggingmorting", mors.next().getLabel());
     assertEquals("lazily", "laze", mors.next().getLabel());
@@ -362,8 +365,14 @@ public class TestMorTagger {
                 schema.getLayer(annotator.getStemLayerId()).getPeers());
     Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
       .collect(Collectors.toSet());
-    assertEquals("Required layer: "+requiredLayers,
-                 2, requiredLayers.size());
+    assertEquals("Required layers: "+requiredLayers,
+                 5, requiredLayers.size());
+    assertTrue("participants required "+requiredLayers,
+               requiredLayers.contains("who"));
+    assertTrue("turns required "+requiredLayers,
+               requiredLayers.contains("turn"));
+    assertTrue("utterances required "+requiredLayers,
+               requiredLayers.contains("utterance"));
     assertTrue("word required "+requiredLayers,
                requiredLayers.contains("word"));
     assertTrue("transcript_language required "+requiredLayers,
@@ -451,17 +460,14 @@ public class TestMorTagger {
     morAnnotations = Arrays.stream(g.all("stem"))
       .collect(Collectors.toList());
     assertEquals("Correct number of stems "+morAnnotations,
-                 12, morAnnotations.size());
+                 9, morAnnotations.size());
     mors = morAnnotations.iterator();
     assertEquals("I'll", "I", mors.next().getLabel());
     assertEquals("I'll", "will", mors.next().getLabel());
     assertEquals("sing", "sing", mors.next().getLabel());
     assertEquals("and", "and", mors.next().getLabel());
     assertEquals("walk", "walk", mors.next().getLabel());
-    assertEquals("walk", "walk", mors.next().getLabel());
     assertEquals("about", "about", mors.next().getLabel());
-    assertEquals("about", "about", mors.next().getLabel());
-    assertEquals("my", "my", mors.next().getLabel());
     assertEquals("my", "my", mors.next().getLabel());
     assertEquals("blogging-morting", "bloggingmorting", mors.next().getLabel());
     assertEquals("lazily", "laze", mors.next().getLabel());
