@@ -212,18 +212,20 @@ public class LayerTraversal<R>
       {
 	 visited.add(annotation);
 	 pre(annotation);
-	 for (Layer childLayer : annotation.getLayer().getChildren().values())
-	 {
-	    // if the annotation has children on that layer
-	    if (annotation.getAnnotations().containsKey(childLayer.getId()))
-	    {
+         if (annotation.getLayer() != null) {
+           for (Layer childLayer : annotation.getLayer().getChildren().values())
+           {
+             // if the annotation has children on that layer
+             if (annotation.getAnnotations().containsKey(childLayer.getId()))
+             {
 	       // traverse them
 	       for (Annotation child : annotation.getAnnotations(childLayer.getId()))
 	       {
-		  traverseAnnotation(child);
+                 traverseAnnotation(child);
 	       } // next child
-	    } // there are children on this layer
-	 } // next child layer
+             } // there are children on this layer
+           } // next child layer
+         }
 	 post(annotation);
       }
       return getResult();
