@@ -779,7 +779,7 @@ public class Validator
                          " (", oldParent, " ", parentChangeReason, ")");
                      child.destroy();
                   } // automatically generated, so can be deleted
-                  else
+                  else if (child.getLayer() != null)
                   { // cannot delete child, need a new parent
                      log("Need new parent for ", child, 
                          " (", oldParent, " ", parentChangeReason, ")");
