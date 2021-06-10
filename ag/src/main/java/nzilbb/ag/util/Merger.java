@@ -1391,6 +1391,7 @@ public class Merger
       if (anOther == annotation) continue;
       if (anOther.getLayerId() == annotation.getLayerId()) continue;
       if (layerIdsToExclude.contains(anOther.getLayerId())) continue;
+      if (!aOriginalStart.getId().equals(anOther.getStartId())) continue;
       // do they have a relationship that would actually preclude sharing?
       Layer otherLayer = annotation.getGraph().getLayer(anOther.getLayerId());
       if (layer != null && otherLayer != null)
