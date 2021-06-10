@@ -50,7 +50,7 @@ import nzilbb.editpath.MinimumEditPath;
 
 public class TestChatSerialization {
    
-   @Test public void minimalConversion()  throws Exception {
+   @Test public void minimalDeserialization()  throws Exception {
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
 	 new Layer("transcript_date", "Recording date")
@@ -525,7 +525,7 @@ public class TestChatSerialization {
 
    }
 
-   @Test public void minimalConversionWithoutAnnotations()  throws Exception {
+   @Test public void minimalSerializationWithoutAnnotations()  throws Exception {
       Layer[] layers = {
 	 new Layer("transcriber", "Transcribers", 0, true, true, true),
 	 new Layer("languages", "Graph language", 0, true, true, true),

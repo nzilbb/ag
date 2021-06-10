@@ -124,3 +124,6 @@
 
 *PAU:	61180_61894
 *DIM:	on race↘ right⇗ mixed marriages↘ 61882_64065
+%mor:	prep|on^adv|on n|race^v|race co|right^n|right^adv|right^adj|right
+	part|mix-PASTP^v|mix-PAST n|marriage-PL
+@End

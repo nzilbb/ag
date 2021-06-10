@@ -2775,29 +2775,10 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
         if (participant != currentParticipant) { // participant change
 
           // print %mor line?
-          if (morTags.size() > 0) {
-            writer.print("%mor:");
-            int maxCol = 90;
-            int col = 0;
-            String delimiter = "\t";
-            for (String mor : morTags) {
-              if (mor == null // line break matching main line
-                  || col + mor.length() + 1 > maxCol) { // line wrap
-                writer.println();
-                delimiter = "\t";
-                col = -1;
-                if (mor == null) continue;
-              } 
-              writer.print(delimiter);
-              writer.print(mor);
-              col += mor.length() + 1;
-              delimiter = " ";
-            } // next mor tag
+          if (printMorLine(writer, morTags)) {
             writer.println();
-
-            morTags.clear();
-          } // there were mor tags
-
+          }
+          
           // now change participant
           currentParticipant = participant;
           Object[] participantLabel = { currentParticipant.getLabel() }; 
@@ -2867,12 +2848,22 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
           writer.println();
         }
       } // next utterance
+      
+      // print last %mor line?
+      printMorLine(writer, morTags);
+      writer.println("@End");
       writer.close();
 
       TempFileInputStream in = new TempFileInputStream(f);
 
+      graph.trackChanges();
+      for (Annotation code : graph.all("@code")) code.destroy();
       participantLayer.getChildren().remove("@code");
       graph.getSchema().getLayers().remove("@code");
+      for (Annotation role : graph.all("@role")) role.destroy();
+      participantLayer.getChildren().remove("@role");
+      graph.getSchema().getLayers().remove("@role");
+      graph.commit();
 
       // return a named stream from the file
       String streamName = graph.getId();
@@ -2887,7 +2878,40 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       throw errors;
     }      
   }
-
+  
+  /**
+   * Print a %mor line with the given tags.
+   * @param writer
+   * @param morTags
+   * @return true if a %mor line was printed, false otherwise.
+   * @throws IOException
+   */
+  private boolean printMorLine(PrintWriter writer, Vector<String> morTags) throws IOException {
+    // print %mor line?
+    if (morTags.size() > 0) {
+      writer.print("%mor:");
+      int maxCol = 90;
+      int col = 0;
+      String delimiter = "\t";
+      for (String mor : morTags) {
+        if (mor == null // line break matching main line
+            || col + mor.length() + 1 > maxCol) { // line wrap
+          writer.println();
+          delimiter = "\t";
+          col = -1;
+          if (mor == null) continue;
+        } 
+        writer.print(delimiter);
+        writer.print(mor);
+        col += mor.length() + 1;
+        delimiter = " ";
+      } // next mor tag
+      morTags.clear();
+      return true;
+    }
+    return false;
+  } // end of printMorLine()
+  
   private static String[] standardNonWords = {
     "belches","coughs","cries","gasps","groans","growls","hisses","hums","laughs","moans",
     "mumbles","pants","grunts","roars","sneezes","sighs","sings","squeals","whines",
