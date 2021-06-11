@@ -156,7 +156,7 @@ after the start time of the next turn.
 These transcripts cause problems when processing transcripts for force-alignment, etc.
 
 The transcriber deserialization module here,
-[transcriber-validator.jar](https://github.com/nzilbb/ag/blob/master/bin/transcriber-validator?raw=true),
+[transcriber-validator.jar](https://github.com/nzilbb/ag/raw/master/bin/transcriber-validator.jar),
 is a command-line tool that can be used to fix up such corrupted transcripts. If you
 download transcriber-validator.jar, you can invoke it using your command shell, like this:
 
