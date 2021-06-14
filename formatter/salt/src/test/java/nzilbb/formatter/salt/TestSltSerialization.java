@@ -153,6 +153,9 @@ public class TestSltSerialization {
       .setParentId("word").setParentIncludes(true),
       new Layer("ep", "EP errors").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true),
+      new Layer("lexical", "Lexical annotations").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId("word").setParentIncludes(true)
       );
     // access file
@@ -233,13 +236,15 @@ public class TestSltSerialization {
     //   System.out.println("" + p.getName() + " = " + p.getValue());
     // }
     assertEquals("One parameter for each type of code, plus noise comments: "+parameters.keySet(),
-                 6, parameters.size());
+                 7, parameters.size());
     assertEquals("REDACTED codes mapped to redacted layer",
                  schema.getLayer("redacted"), parameters.get("code_REDACTED").getValue());
     assertEquals("CENSORED mapped to default code layer",
                  schema.getLayer("code"), parameters.get("code_CENSOR").getValue());
     assertEquals("EP codes mapped to ep layer",
                  schema.getLayer("ep"), parameters.get("code_EP").getValue());
+    assertEquals("LEXICAL codes mapped to lexical layer",
+                 schema.getLayer("lexical"), parameters.get("code_LEXICAL").getValue());
     assertEquals("EU codes mapped to EU layer",
                  schema.getLayer("EU"), parameters.get("code_EU").getValue());
     assertEquals("EW mapped to default error layer",
@@ -441,7 +446,7 @@ public class TestSltSerialization {
                  utterances[1].getId(), codes[0].tagsOn("utterance")[0].getId());
 
     codes = g.all("redacted");
-    assertEquals("Correct number of codes: " + Arrays.asList(codes),
+    assertEquals("Correct number of redacted codes: " + Arrays.asList(codes),
                  2, codes.length);
     assertEquals("First Redacted label", "REDACTED", codes[0].getLabel());
     assertEquals("First Redacted code tags a word",
@@ -453,6 +458,15 @@ public class TestSltSerialization {
                  1, codes[1].tagsOn("word").length);
     assertEquals("Second Redacted tags the 23rd word: " + codes[1].tagsOn("word")[0],
                  words[22].getId(), codes[1].tagsOn("word")[0].getId());
+
+    codes = g.all("lexical");
+    assertEquals("Correct number of lexicaon codes: " + Arrays.asList(codes),
+                 1, codes.length);
+    assertEquals("lexical label", "is", codes[0].getLabel());
+    assertEquals("lexical code tags a word",
+                 1, codes[0].tagsOn("word").length);
+    assertEquals("lexical code tags \"s~\": " + codes[0].tagsOn("word")[0],
+                 "s~", codes[0].tagsOn("word")[0].getLabel());
 
     // errors
     Annotation[] errors = g.all("error");
@@ -787,13 +801,15 @@ public class TestSltSerialization {
     // }
     assertEquals("One parameter for each type of code, + noise comments: "
                  + defaultParameters.keySet(),
-                 6, defaultParameters.size());
+                 7, defaultParameters.size());
     assertNull("REDACTED codes not mapped",
                defaultParameters.get("code_REDACTED").getValue());
     assertNull("CENSORED code not mapped",
                defaultParameters.get("code_CENSOR").getValue());
     assertNull("EP codes not mapped",
                defaultParameters.get("code_EP").getValue());
+    assertNull("LEXICAL codes not mapped",
+               defaultParameters.get("code_LEXICAL").getValue());
     assertNull("EU codes not mapped",
                defaultParameters.get("code_EU").getValue());
     assertNull("EW mapped not mapped",
@@ -1168,7 +1184,7 @@ public class TestSltSerialization {
       "What happened in this one?",
       "And then it/'s heaps_and_heaps|heaps dark.",
       "What happened next?",
-      "%yip_yip Schnitzel_von_Krumm s* :02 falled|fall[EW] out *of the baby/s/z nest.",
+      "%yip_yip Schnitzel_von_Krumm s[EP:s][LEXICAL:is]* :02 falled|fall[EW] out *of the baby/s/z nest.",
       "What happened next?",
       "They put (them) it back in the nest (um).",
       "Bye bye little bird.",
@@ -1313,11 +1329,11 @@ public class TestSltSerialization {
     // but double-check codes
     Annotation[] codes = graphs[0].all("code");
     assertEquals("Correct number of codes: " + Arrays.asList(codes),
-                 3, codes.length);
+                 4, codes.length);
     Annotation[] errors = graphs[0].all("error");
     assertEquals("Correct number of error codes: " + Arrays.asList(errors),
-                 4, errors.length);
-    System.out.println("errors: "+Arrays.stream(errors).map(e->e.getLabel()+"("+e.getStart()+"-"+e.getEnd()+")").collect(Collectors.joining(" ")));
+                 5, errors.length);
+    // System.out.println("errors: "+Arrays.stream(errors).map(e->e.getLabel()+"("+e.getStart()+"-"+e.getEnd()+")").collect(Collectors.joining(" ")));
     
     // add an underscore to a word, to test it's preserved in the output
     graphs[0].first("word").setLabel("I_m");

@@ -1891,28 +1891,30 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         linkageSplitter.transform(graph).commit();
 
         // inline (word) codes
-        for (Parameter p : parameters.values()) {
-          if (p.getName().startsWith("code_")) {
-            Layer layer = (Layer)p.getValue();
-            String code = p.getName().substring("code_".length());
-            transformer = new ConventionTransformer(
-              wordLayer.getId(),
-              "(?<word>.+)\\[(?<code>"+code+"(?::[^\\]]*)?)\\](?<punctuation>\\W*)",
-              "${word}${punctuation}");
-            if (layer != null) {
-              transformer.addDestinationResult(layer.getId(), "${code}");
-            }
-            transformer.transform(graph).commit();
-            if (layer != null
-                && (codeLayer == null || !layer.getId().equals(codeLayer.getId()))
-                && (errorLayer == null || !layer.getId().equals(errorLayer.getId()))) {
-              // layer isn't the code/error layer, so strip the "${key}:" prefix off the labels
-              new ConventionTransformer(layer.getId(), code+":(?<value>.+)", "${value}")
-                .transform(graph).commit();
-            } // layer isn't the code/error layer
-          }
-        }
-        
+        int numPasses = 2; // how many stacked word tags are possible - e.g. "s[PRON:s][LEX:is]*"
+        for (int pass = 0; pass < numPasses; pass++) {
+          for (Parameter p : parameters.values()) {
+            if (p.getName().startsWith("code_")) {
+              Layer layer = (Layer)p.getValue();
+              String code = p.getName().substring("code_".length());
+              transformer = new ConventionTransformer(
+                wordLayer.getId(),
+                "(?<word>.+)\\[(?<code>"+code+"(?::[^\\]]*)?)\\](?<punctuation>\\W*)",
+                "${word}${punctuation}");
+              if (layer != null) {
+                transformer.addDestinationResult(layer.getId(), "${code}");
+              }
+              transformer.transform(graph).commit();
+              if (layer != null
+                  && (codeLayer == null || !layer.getId().equals(codeLayer.getId()))
+                  && (errorLayer == null || !layer.getId().equals(errorLayer.getId()))) {
+                // layer isn't the code/error layer, so strip the "${key}:" prefix off the labels
+                new ConventionTransformer(layer.getId(), code+":(?<value>.+)", "${value}")
+                  .transform(graph).commit();
+              } // layer isn't the code/error layer
+            } // is a mapped code
+          } // next parameter
+        } // next pass
         // root forms - something like "falled|fall"
         transformer = new ConventionTransformer(
           wordLayer.getId(),
