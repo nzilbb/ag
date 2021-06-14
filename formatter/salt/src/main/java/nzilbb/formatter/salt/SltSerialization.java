@@ -1318,7 +1318,8 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
       }
     } // next layer
     Pattern codePattern = Pattern.compile("\\[([^\\]]+)\\]");
-    Pattern commentPattern = Pattern.compile("\\{([^\\}]+):[^\\}]+\\}");
+    Pattern inlineCommentPattern = Pattern.compile("\\{([^\\}]+):[^\\}]+\\}");
+    Pattern lineCommentPattern = Pattern.compile("^\\+ ([^:]+):.+$");
     
     // read stream line by line
     boolean inHeader = true;
@@ -1367,7 +1368,7 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
               }
             } // next code
             // any comments of the form {key:value}?
-            Matcher commentMatcher = commentPattern.matcher(line);
+            Matcher commentMatcher = inlineCommentPattern.matcher(line);
             while (commentMatcher.find()) {
               final String key = commentMatcher.group(1);
               // do we already have a parameter for this key?
@@ -1382,7 +1383,25 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
                 p.setPossibleValues(spanPhraseLayers.values());
                 parameters.addParameter(p);
               }
-            } // next code
+            } // next comment
+            
+            // any whole-line comments of the form + key:value?
+            commentMatcher = lineCommentPattern.matcher(line);
+            while (commentMatcher.find()) {
+              final String key = commentMatcher.group(1);
+              // do we already have a parameter for this key?
+              if (!parameters.containsKey("comment_" + key)) { // no parameter yet
+                Parameter p = new Parameter(
+                  "comment_" + key, Layer.class, "Comments: " + key,
+                  "Layer for '"+key+"' comments");
+                p.setValue(Utility.FindLayerById(spanPhraseLayers, new Vector(){{add(key);}}));
+                if (p.getValue() == null) {
+                  p.setValue(commentLayer);
+                }
+                p.setPossibleValues(spanPhraseLayers.values());
+                parameters.addParameter(p);
+              }
+            } // next comment
           } // parseInlineConventions
         } // transcript line
       } // not a blank line
