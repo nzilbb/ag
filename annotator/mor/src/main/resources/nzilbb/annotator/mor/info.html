@@ -171,7 +171,15 @@
       <a target="mor" href="https://talkbank.org/morgrams/">https://talkbank.org/morgrams/</a>
       if no other grammar is supplied. </p>
 
-    <p> <em>NB</em> Currently the MOR Tagger only works on unix-like systems.</p>
+    <p> <em>NB</em> Currently the MOR Tagger only works on unix-like systems.
+      When the annotator is first installed, the first thing it tries to do is download
+      and compile MOR, which requires the <i>g++</i> compiler to be available on the
+      server. In order to ensure the compiler has been installed, run:
+      <ul>
+        <li> <tt>apt install g++</tt> (on Ubuntu) </li>
+        <li> <tt>yum install gcc-c++</tt> (on RHEL/CentOS) </li>
+      </ul>
+    </p>
 
   </body>
 </html>
