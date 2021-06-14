@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Vector;
 import java.util.function.IntConsumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.script.ScriptException;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
@@ -51,6 +52,7 @@ import nzilbb.ag.util.Merger;
 import nzilbb.ag.util.Normalizer;
 import nzilbb.configure.ParameterSet;
 import nzilbb.formatter.clan.ChatSerialization;
+import nzilbb.editpath.*;
 import nzilbb.util.Execution;
 import nzilbb.util.IO;
 import nzilbb.util.ISO639;
@@ -884,107 +886,212 @@ public class MorTagger extends Annotator {
         Boolean.valueOf(splitMorWordGroups));
       
       converter.configure(configuration, schema);
-      final Vector<SerializationException> exceptions = new Vector<SerializationException>();
-      final Vector<NamedStream> serializeStreams = new Vector<NamedStream>();
-      String[] layers = { schema.getWordLayerId(), languagesLayerId };
-      Graph[] graphs = { graph };
-      try {
-        converter.serialize(Arrays.spliterator(graphs), layers,
-                            stream -> serializeStreams.add(stream),
-                            warning -> setStatus(warning),
-                            exception -> exceptions.add(exception));
-      } catch(SerializerNotConfiguredException x) {
-        throw new TransformationException(this, x);
-      }
-      if (exceptions.size() > 0) {
-        Throwable firstException = null;
-        for (SerializationException x : exceptions) {
-          if (firstException == null) firstException = x;
-          setStatus("ERROR: " + x.getMessage());
-          throw new TransformationException(this, firstException.getMessage(), firstException);
-        }
-      }
-      try {        
-        File cha = File.createTempFile(graph.getId() + "-", ".cha");
-        IO.SaveInputStreamToFile(serializeStreams.elementAt(0).getStream(), cha);
-        setPercentComplete(25);
+
+      // remove any existing annotations
+      destroyAnnotations(morLayerId, graph);
+      destroyAnnotations(prefixLayerId, graph);
+      destroyAnnotations(partOfSpeechLayerId, graph);
+      destroyAnnotations(partOfSpeechSubcategoryLayerId, graph);
+      destroyAnnotations(stemLayerId, graph);
+      destroyAnnotations(fusionalSuffixLayerId, graph);
+      destroyAnnotations(suffixLayerId, graph);
+      destroyAnnotations(glossLayerId, graph);
+      
+      // break the transcript into utterance chunks, and process one utterance at a time,
+      // because MOR segmentation faults on very large files(?)
+      String[] fragmentLayers = Stream.concat(
+        Arrays.stream(getRequiredLayers()), Arrays.stream(getOutputLayers()))
+        .collect(Collectors.toList()).toArray(new String[0]);
+      Annotation[] utterances = graph.all(schema.getUtteranceLayerId());
+      int u = 0;
+      for (Annotation utterance : utterances) {
+        Graph fragment = graph.getFragment(utterance, fragmentLayers);
         
+        final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+        final Vector<NamedStream> serializeStreams = new Vector<NamedStream>();
+        String[] serializationLayers = { schema.getWordLayerId(), languagesLayerId };
+        Graph[] graphs = { fragment };
         try {
-          // run MOR on the CHAT file ...
-          // weirdly, if we run "mor +Lgrammar .cha" the process hangs
-          // so instead, we use -f, write the .cha to stdin, and read the result from stdout
-          Execution mor = new Execution()
-            .setExe(getMorExe())
-            .arg("+L"+grammar.getPath())
-            .arg("-f");
-          // start the process in its own thread
-          new Thread(mor).start();
-          // wait until we've got a process 
-          while (mor.getProcess() == null) try { Thread.sleep(500); } catch(Exception exception) {}
-          // write the .cha file to stdin
-          IO.Pump(new FileInputStream(cha), mor.getProcess().getOutputStream());
-          // wait for mor to finish
-          while (!mor.getFinished()) try { Thread.sleep(500); } catch(Exception exception) {}
-          // the annotated version has been written to stdout...
-          setStatus(mor.stderr()); // stderr has a whole bunch of non-error output
-          setPercentComplete(50);
-
-          // parse the CHAT file
-          NamedStream[] deserializeStreams = {
-            new NamedStream(new StringBufferInputStream(mor.stdout()), graph.getId()+".cha") };
-          ParameterSet defaultParamaters = converter.load(deserializeStreams, graph.getSchema());
-          converter.setParameters(defaultParamaters);
-          graphs = converter.deserialize();
-          for (String warning : converter.getWarnings()) setStatus(warning);
-          Graph tagged = graphs[0];
-          new Normalizer().transform(tagged);
-          tagged.commit();
-          setPercentComplete(75);
-          
-          // merge the changes into our graph
-          Merger merger = new Merger(tagged);
-          // only allow changes to our own layers
-          HashSet<String> changeableLayers = new HashSet<String>();
-          if (morLayerId != null) changeableLayers.add(morLayerId);
-          if (prefixLayerId != null) changeableLayers.add(prefixLayerId);
-          if (partOfSpeechLayerId != null) changeableLayers.add(partOfSpeechLayerId);
-          if (partOfSpeechSubcategoryLayerId != null)
-            changeableLayers.add(partOfSpeechSubcategoryLayerId);
-          if (stemLayerId != null) changeableLayers.add(stemLayerId);
-          if (fusionalSuffixLayerId != null) changeableLayers.add(fusionalSuffixLayerId);
-          if (suffixLayerId != null) changeableLayers.add(suffixLayerId);
-          if (glossLayerId != null) changeableLayers.add(glossLayerId);
-          for (String layerId : graph.getSchema().getLayers().keySet()) {
-            if (!changeableLayers.contains(layerId)) {
-              merger.getNoChangeLayers().add(layerId);
-            }
-          } // next incoming layer
-          merger.transform(graph);
-
-          boolean alignedWords = Arrays.stream(graph.all(schema.getWordLayerId()))
-            .filter(w->w.getAnchored()).findAny().isPresent();
-          if (alignedWords) { // if any words are anchored
-            // ensure mor tags are also anchored
-            // (they can be chained across the duration of the word, with null offsets)
-            new DefaultOffsetGenerator().transform(graph);
-          }
-          
-          setPercentComplete(100);
-        } finally {
-          cha.delete();
+          converter.serialize(Arrays.spliterator(graphs), serializationLayers,
+                              stream -> serializeStreams.add(stream),
+                              warning -> setStatus(warning),
+                              exception -> exceptions.add(exception));
+        } catch(SerializerNotConfiguredException x) {
+          throw new TransformationException(this, x);
         }
-      } catch (SerializationParametersMissingException x) {
-        throw new TransformationException(this, x);
-      } catch (SerializerNotConfiguredException x) {
-        throw new TransformationException(this, x);
-      } catch (SerializationException x) {
-        throw new TransformationException(this, x);
-      } catch (IOException x) {
-        throw new TransformationException(this, x);
+        if (exceptions.size() > 0) {
+          Throwable firstException = null;
+          for (SerializationException x : exceptions) {
+            if (firstException == null) firstException = x;
+            setStatus("ERROR: " + x.getMessage());
+            throw new TransformationException(this, firstException.getMessage(), firstException);
+          }
+        }
+        try {        
+          File cha = File.createTempFile(fragment.getId() + "-", ".cha", getWorkingDirectory());
+          IO.SaveInputStreamToFile(serializeStreams.elementAt(0).getStream(), cha);
+          
+          try {
+            // run MOR on the CHAT file ...
+            // weirdly, if we run "mor +Lgrammar .cha" the process hangs
+            // so instead, we use -f, write the .cha to stdin, and read the result from stdout
+            Execution mor = new Execution()
+              .setExe(getMorExe())
+              .arg("+L"+grammar.getPath())
+              .arg("-f");
+            // start the process in its own thread
+            new Thread(mor).start();
+            // wait until we've got a process 
+            while (mor.getProcess() == null) {
+              try { Thread.sleep(500); } catch(Exception exception) {}
+            }
+            // write the .cha file to stdin
+            IO.Pump(new FileInputStream(cha), mor.getProcess().getOutputStream());
+            // wait for mor to finish
+            while (!mor.getFinished()) try { Thread.sleep(500); } catch(Exception exception) {}
+            // the annotated version has been written to stdout...
+            //setStatus(mor.stderr()); // stderr has a whole bunch of non-error output
+            
+            // parse the CHAT file
+            NamedStream[] deserializeStreams = {
+              new NamedStream(new StringBufferInputStream(
+                                mor.stdout()), fragment.getId()+".cha") };
+            ParameterSet defaultParamaters = converter.load(
+              deserializeStreams, graph.getSchema());
+            converter.setParameters(defaultParamaters);
+            graphs = converter.deserialize();
+            for (String warning : converter.getWarnings()) setStatus(warning);
+            Graph tagged = graphs[0];
+            tagged.trackChanges();
+            new Normalizer().transform(tagged);
+            tagged.commit();
+
+            // remove words that are just "." or "-" - these are tokens added by mor
+            for (Annotation w : tagged.all(schema.getWordLayerId())) {
+              if (w.getLabel().matches("^\\W+$")) {
+                w.destroy();
+              }
+            }
+            tagged.commit();
+            
+            // merge the changes into our graph by matching up the tokens
+            // use MinimumEditPath because sometimes mor adds or removes  tokens
+            MinimumEditPath<Annotation> mp = new MinimumEditPath<Annotation>(
+              new DefaultEditComparator<Annotation>(new EqualsComparator<Annotation>() {
+                  public int compare(Annotation o1, Annotation o2) {
+                    return o1.getLabel().compareTo(o2.getLabel());
+                  }
+                }));
+            List<Annotation> originalWords = Arrays.asList(
+              utterance.all(schema.getWordLayerId()));
+            List<Annotation> chaWords = Arrays.asList(
+              tagged.all(schema.getWordLayerId()));
+            for (EditStep<Annotation> step : mp.minimumEditPath(chaWords, originalWords)) {
+              if (step.getFrom() != null && step.getTo() != null) {
+                copyAnnotations(morLayerId, step.getFrom(), step.getTo(), graph);
+                copyAnnotations(prefixLayerId, step.getFrom(), step.getTo(), graph);
+                copyAnnotations(partOfSpeechLayerId, step.getFrom(), step.getTo(), graph);
+                copyAnnotations(
+                  partOfSpeechSubcategoryLayerId, step.getFrom(), step.getTo(), graph);
+                copyAnnotations(stemLayerId, step.getFrom(), step.getTo(), graph);
+                copyAnnotations(fusionalSuffixLayerId, step.getFrom(), step.getTo(), graph);
+                copyAnnotations(suffixLayerId, step.getFrom(), step.getTo(), graph);
+                copyAnnotations(glossLayerId, step.getFrom(), step.getTo(), graph);
+              }
+            } // next token
+            if (morLayerId != null) {
+              for (Annotation w : utterance.all(schema.getWordLayerId())) {
+                Annotation t = w.first(morLayerId);
+              } // next word
+            }
+            
+            setPercentComplete(++u * 100 / utterances.length);
+          } finally {
+            cha.delete();
+          }
+	
+        } catch (SerializationParametersMissingException x) {
+          throw new TransformationException(this, x);
+        } catch (SerializerNotConfiguredException x) {
+          throw new TransformationException(this, x);
+        } catch (SerializationException x) {
+          throw new TransformationException(this, x);
+        } catch (IOException x) {
+          throw new TransformationException(this, x);
+        }
+      } // next utterance
+
+      // if any words are anchored
+      boolean alignedWords = Arrays.stream(graph.all(schema.getWordLayerId()))
+        .filter(w->w.getAnchored()).findAny().isPresent();
+      if (alignedWords) {
+        // ensure mor tags are also anchored
+        // (they can be chained across the duration of the word, with null offsets)
+        new DefaultOffsetGenerator().transform(graph);
       }
+      
+      setStatus("Finished " + graph.getId());
       return graph;
     } finally {
       running = false;
     }
   }
+  
+  /**
+   * Mark for deletion all utterances on the given layer in the given graph.
+   * @param layerId
+   * @param graph
+   */
+  public void destroyAnnotations(String layerId, Graph graph) {
+    if (layerId != null) {
+      for (Annotation a : graph.all(layerId)) {
+        a.destroy();
+      }
+    }
+  } // end of destroyAnnotations()
+  
+   /**
+    * Copy the annotations of the given cha token on the given layer to the given graph token.
+    * @param layerId
+    * @param chaWord
+    * @param originalWord
+    * @param graph
+    */
+   private void copyAnnotations(
+     String layerId, Annotation chaWord, Annotation originalWord, Graph graph) {
+     
+     if (layerId != null) {
+       for (Annotation tag : chaWord.getAnnotations(layerId)) {
+         Anchor start = originalWord.getStart();
+         if (!tag.getStartId().equals(chaWord.getStartId())) { // chained annotation
+           if (!chaWord.getStart().containsKey("@start")) {
+             // create a new anchor in the original graph
+             Anchor a = new Anchor();
+             a.create();
+             chaWord.getStart().put("@start", graph.addAnchor(a));
+           }
+           start = (Anchor)chaWord.getStart().get("@start");
+         }
+         Anchor end = originalWord.getEnd();
+         if (!tag.getEndId().equals(chaWord.getEndId())) { // chained annotation
+           if (!chaWord.getEnd().containsKey("@end")) {
+             // create a new anchor in the original graph
+             Anchor a = new Anchor();
+             a.create();
+             chaWord.getEnd().put("@end", graph.addAnchor(a));
+           }
+           end = (Anchor)chaWord.getEnd().get("@end");
+         }
+         Annotation a = new Annotation().setLayerId(layerId)
+           .setLabel(tag.getLabel())
+           .setParentId(originalWord.getId())
+           .setStartId(start.getId())
+           .setEndId(end.getId());
+         a.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+         a.create();
+         graph.addAnnotation(a);
+       }
+     }
+   } // end of copyAnnotations()
+
 }
