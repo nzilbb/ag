@@ -1972,10 +1972,16 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       graph.commit();
 
       // disfluencies...
-      // before we transform disfluencies, we'll tag them becaus we might need to know
+      // before we transform disfluencies, we'll tag them because we might need to know
       // whether they've been skipped by mor
       for (Annotation word : graph.all(getWordLayer().getId())) {
-        if (word.getLabel().startsWith("&+")) word.put("@skippedByMor", Boolean.TRUE);
+        if (word.getLabel().startsWith("&+")) {
+          word.put("@skippedByMor", Boolean.TRUE);
+        }
+        // mor also skips words containing only punctuation, except full stops
+        if (word.getLabel().matches("^\\W+$") && !word.getLabel().equals(".")) {
+          word.put("@skippedByMor", Boolean.TRUE);
+        }
       } // next token
       // now strip off the &+...
       transformer = new ConventionTransformer(
@@ -2092,7 +2098,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
           for (int m = 0; m < morTags.length && t < tokens.length; m++, t++) {
             
             Annotation token = tokens[t];
-            // skip partial words, which are not tagged by mor
+            // skip partial words, and all-punctuation words, which are not tagged by mor
             while (token.containsKey("@skippedByMor") && t < tokens.length-1) {
               token = tokens[++t];
             }

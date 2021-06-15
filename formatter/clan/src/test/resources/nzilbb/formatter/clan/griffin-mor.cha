@@ -21,12 +21,12 @@
 @Comment:	Use the command window to align all the overlap markers
 	automatically (see instructions sheet included)
 *APP:	(3.1) 0_10538
-*GRI:	without (.) a shadow of a doubt i appreciate 3239_5079
+*GRI:	without (.) a shadow . of a doubt i - appreciate 3239_5079
 	that if you look at some of the things i'm quoted 5062_6693
 	as having said↗ (0.3) 6687_7549
 	in the daily mail n dai- an' so on (0.2) 7549_8959
 	i'd be a ↑monster↘ 8953_9760
-%mor:	prep|+conj|with+prep|out=sin det:art|a=una n|shadow^v|shadow=sombra prep|of=de det:art|a
+%mor:	prep|+conj|with+prep|out=sin det:art|a=una n|shadow^v|shadow=sombra . prep|of=de det:art|a
 	n|doubt^v|doubt n:let|i v|appreciate
 	comp|that^pro:rel|that^pro:dem|that^det:dem|that comp|if^conj|if
 	pro:per|you cop|look^co|look^n|look^v|look prep|at
