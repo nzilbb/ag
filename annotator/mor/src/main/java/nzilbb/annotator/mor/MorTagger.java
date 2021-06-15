@@ -25,14 +25,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringBufferInputStream;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Vector;
 import java.util.function.IntConsumer;
@@ -48,11 +46,10 @@ import nzilbb.ag.serialize.SerializationParametersMissingException;
 import nzilbb.ag.serialize.SerializerNotConfiguredException;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.util.DefaultOffsetGenerator;
-import nzilbb.ag.util.Merger;
 import nzilbb.ag.util.Normalizer;
 import nzilbb.configure.ParameterSet;
-import nzilbb.formatter.clan.ChatSerialization;
 import nzilbb.editpath.*;
+import nzilbb.formatter.clan.ChatSerialization;
 import nzilbb.util.Execution;
 import nzilbb.util.IO;
 import nzilbb.util.ISO639;
@@ -97,6 +94,13 @@ public class MorTagger extends Annotator {
     return new File(getWorkingDirectory(), "mor"); // TODO or exe?
   } // end of getMorExe()
 
+  /**
+   * The POST executable file.
+   * @return The POST command-line program.
+   */
+  public File getPostExe() {
+    return new File(getWorkingDirectory(), "post"); // TODO or exe?
+  } // end of getMorExe()
    
   /**
    * Builds the MOR, and installs the default english grammar.
@@ -121,7 +125,8 @@ public class MorTagger extends Annotator {
 
       // is the "mor" program present?
       File mor = getMorExe();
-      if (!mor.exists()) {     
+      File post = getPostExe();
+      if (!mor.exists() || !mor.exists()) {     
         // if not, is there a source code directory?
         File unixClan = new File(getWorkingDirectory(), "unix-clan");
         // will need these later...
@@ -150,27 +155,21 @@ public class MorTagger extends Annotator {
               +"' does not contain source folder '"+unixClan.getName()+"'");
           }
           
-          // uncomment ubuntu lines
+          // prepend makefile with CFLAGS definition
           // (but only if we've just unzipped the source code, so that it's possible to
           //  manually edit the makefile to get things working)
           setStatus("Configuring makefile...");
-          BufferedReader in = new BufferedReader(new FileReader(makefile));
+          //BufferedReader in = new BufferedReader(new FileReader(makefile));
           File editedMakefile = new File(src, "makefile-edited");
-          PrintWriter out = new PrintWriter(new FileWriter(editedMakefile));
-          String line = in.readLine();
-          boolean uncommentNextLine = false;
-          while (line != null) {
-            if (line.contains("4.4.1-4ubuntu9")) {
-              uncommentNextLine = true;
-            } else if (uncommentNextLine) {
-              if (line.startsWith("#")) line = line.substring(1);
-              uncommentNextLine = false;
-            }
-            out.println(line);
-            
-            line = in.readLine();
-          } // next line
-          in.close();
+          FileOutputStream out = new FileOutputStream(editedMakefile);
+          // although the makefile includes some pre-baked lines we could un-comment,
+          // POST compiles but doesn't run on 64-bit systems without the -mx32 switch
+          // so we add our own definition of CFLAGS instead, based on the "4.4.1-4ubuntu9" config
+          out.write("CC = g++\n".getBytes());
+          out.write(
+            "CFLAGS = -DUNX -Wno-deprecated -Wno-deprecated-declarations -mx32\n".getBytes());
+          // now copy the rest of the makefiles
+          IO.Pump(new FileInputStream(makefile), out);
           out.close();
           makefile.delete();
           editedMakefile.renameTo(makefile);
@@ -189,6 +188,21 @@ public class MorTagger extends Annotator {
         setStatus(make.stdout());
         if (make.stderr().length() > 0) {
           setStatus("ERROR: " + make.stderr());
+          System.out.println(make.stderr());
+          // fall through to compiledMor check - maybe stderr output isn't fatal...
+        }
+
+        // then "make post"
+        setStatus("Running 'make post'...");
+        make = new Execution()
+          .setWorkingDirectory(src)
+          .setExe("make")
+          .arg("post");
+        make.run();
+        setStatus(make.stdout());
+        if (make.stderr().length() > 0) {
+          setStatus("ERROR: " + make.stderr());
+          System.out.println(make.stderr());
           // fall through to compiledMor check - maybe stderr output isn't fatal...
         }
         
@@ -201,6 +215,16 @@ public class MorTagger extends Annotator {
         if (!compiledMor.renameTo(mor)) {
             throw new InvalidConfigurationException(
               this, "Could not install compiled '"+mor.getName()+"'");
+        }
+        // copy post to base directory
+        File compiledPost = new File(new File(new File(unixClan, "unix"), "bin"), "post");
+        if (!compiledPost.exists()) {
+          throw new InvalidConfigurationException(
+            this, "Compilation failed to create "+compiledPost.getPath());
+        }
+        if (!compiledPost.renameTo(post)) {
+            throw new InvalidConfigurationException(
+              this, "Could not install compiled '"+post.getName()+"'");
         }
       } // mor didn't exist
       setPercentComplete(60);
@@ -940,6 +964,7 @@ public class MorTagger extends Annotator {
               .arg("+L"+grammar.getPath())
               .arg("-f");
             // start the process in its own thread
+            setStatus("Running mor...");
             new Thread(mor).start();
             // wait until we've got a process 
             while (mor.getProcess() == null) {
@@ -949,13 +974,25 @@ public class MorTagger extends Annotator {
             IO.Pump(new FileInputStream(cha), mor.getProcess().getOutputStream());
             // wait for mor to finish
             while (!mor.getFinished()) try { Thread.sleep(500); } catch(Exception exception) {}
-            // the annotated version has been written to stdout...
-            //setStatus(mor.stderr()); // stderr has a whole bunch of non-error output
-            
+            setStatus("Finished mor.");
+            // the annotated version has been written to stdout, so save it to a file...
+            IO.SaveInputStreamToFile(new StringBufferInputStream(mor.stdout()), cha);
+
+            // run POST on the CHAT file for disambiguation
+            File postDb = new File(grammar, "post.db");
+            Execution post = new Execution()
+              .setExe(getPostExe())
+              .arg("+d"+postDb.getPath())
+              .arg(cha.getPath());
+            // start the process in its own thread
+            setStatus("Running post...");
+            new Thread(post).start();
+            while (!post.getFinished()) try { Thread.sleep(500); } catch(Exception exception) {}
+            setStatus("Finished post.");            
+                                     
             // parse the CHAT file
             NamedStream[] deserializeStreams = {
-              new NamedStream(new StringBufferInputStream(
-                                mor.stdout()), fragment.getId()+".cha") };
+              new NamedStream(new FileInputStream(cha), fragment.getId()+".cha") };
             ParameterSet defaultParamaters = converter.load(
               deserializeStreams, graph.getSchema());
             converter.setParameters(defaultParamaters);

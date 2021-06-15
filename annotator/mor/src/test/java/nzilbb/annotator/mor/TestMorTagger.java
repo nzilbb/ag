@@ -144,18 +144,15 @@ public class TestMorTagger {
     List<Annotation> morAnnotations = Arrays.stream(g.all("mor"))
       .collect(Collectors.toList());
     assertEquals("Correct number of tokens (disfluent w~ is skipped) "+morAnnotations,
-                 12, morAnnotations.size());
+                 9, morAnnotations.size());
     Iterator<Annotation> mors = morAnnotations.iterator();
     assertEquals("I'll", "pro:sub|I", mors.next().getLabel());
     assertEquals("I'll", "mod|will", mors.next().getLabel());
     assertEquals("sing", "v|sing", mors.next().getLabel());
     assertEquals("and", "coord|and", mors.next().getLabel());
     assertEquals("walk", "n|walk", mors.next().getLabel());
-    assertEquals("walk", "v|walk", mors.next().getLabel());
-    assertEquals("about", "adv|about", mors.next().getLabel());
     assertEquals("about", "prep|about", mors.next().getLabel());
     assertEquals("my", "det:poss|my", mors.next().getLabel());
-    assertEquals("my", "co|my", mors.next().getLabel());
     assertEquals("blogging-morting", "?|bloggingmorting", mors.next().getLabel());
     assertEquals("lazily", "adv|laze&dadj-Y-LY", mors.next().getLabel());
 
@@ -165,11 +162,8 @@ public class TestMorTagger {
     assertNotNull("v|sing start anchored", mors.next().getStart().getOffset());
     assertNotNull("coord|and start anchored", mors.next().getStart().getOffset());
     assertNotNull("n|walk start anchored", mors.next().getStart().getOffset());
-    assertNotNull("v|walk start anchored", mors.next().getStart().getOffset());
-    assertNotNull("adv|about start anchored", mors.next().getStart().getOffset());
     assertNotNull("prep|about start anchored", mors.next().getStart().getOffset());
     assertNotNull("det:poss|my start anchored", mors.next().getStart().getOffset());
-    assertNotNull("co|my start anchored", mors.next().getStart().getOffset());
     assertNotNull("?|bloggingmorting start anchored", mors.next().getStart().getOffset());
     assertNotNull("adv|laze&dadj-Y-LY start anchored", mors.next().getStart().getOffset());
 
@@ -179,11 +173,8 @@ public class TestMorTagger {
     assertNotNull("v|sing end anchored", mors.next().getEnd().getOffset());
     assertNotNull("coord|and end anchored", mors.next().getEnd().getOffset());
     assertNotNull("n|walk end anchored", mors.next().getEnd().getOffset());
-    assertNotNull("v|walk end anchored", mors.next().getEnd().getOffset());
-    assertNotNull("adv|about end anchored", mors.next().getEnd().getOffset());
     assertNotNull("prep|about end anchored", mors.next().getEnd().getOffset());
     assertNotNull("det:poss|my end anchored", mors.next().getEnd().getOffset());
-    assertNotNull("co|my end anchored", mors.next().getEnd().getOffset());
     assertNotNull("?|bloggingmorting end anchored", mors.next().getEnd().getOffset());
     assertNotNull("adv|laze&dadj-Y-LY end anchored", mors.next().getEnd().getOffset());
 
@@ -191,9 +182,9 @@ public class TestMorTagger {
     String[] wordLabels = {
       "I'll", "I'll", 
       "sing", "and",
-      "walk", "walk",
-      "about", "about",
-      "my", "my",
+      "walk", 
+      "about",
+      "my", 
       "blogging-morting",
       "lazily"
     };
@@ -212,18 +203,15 @@ public class TestMorTagger {
     morAnnotations = Arrays.stream(g.all("morPOS"))
       .collect(Collectors.toList());
     assertEquals("Correct number of POS tags "+morAnnotations,
-                 12, morAnnotations.size());
+                 9, morAnnotations.size());
     mors = morAnnotations.iterator();
     assertEquals("I'll", "pro", mors.next().getLabel());
     assertEquals("I'll", "mod", mors.next().getLabel());
     assertEquals("sing", "v", mors.next().getLabel());
     assertEquals("and", "coord", mors.next().getLabel());
     assertEquals("walk", "n", mors.next().getLabel());
-    assertEquals("walk", "v", mors.next().getLabel());
-    assertEquals("about", "adv", mors.next().getLabel());
     assertEquals("about", "prep", mors.next().getLabel());
     assertEquals("my", "det", mors.next().getLabel());
-    assertEquals("my", "co", mors.next().getLabel());
     assertEquals("blogging-morting", "?", mors.next().getLabel());
     assertEquals("lazily", "adv", mors.next().getLabel());
 
@@ -283,17 +271,14 @@ public class TestMorTagger {
     List<String> morLabels = Arrays.stream(g.all("mor"))
       .map(annotation->annotation.getLabel()).collect(Collectors.toList());
     assertEquals("- 1 + 1 = same number of mor as before: "+morLabels,
-                 12, morLabels.size());
+                 9, morLabels.size());
     Iterator<String> morLs = morLabels.iterator();
     assertEquals("John", "n:prop|John", morLs.next());
     assertEquals("sing", "v|sing", morLs.next());
     assertEquals("and", "coord|and", morLs.next());
     assertEquals("walk", "n|walk", morLs.next());
-    assertEquals("walk", "v|walk", morLs.next());
-    assertEquals("about", "adv|about", morLs.next());
     assertEquals("about", "prep|about", morLs.next());
     assertEquals("my", "det:poss|my", morLs.next());
-    assertEquals("my", "co|my", morLs.next());
     assertEquals("blogging-morting", "?|bloggingmorting", morLs.next());
     assertEquals("lazily", "adv|laze&dadj-Y-LY", morLs.next());
     assertEquals("new", "adj|new", morLs.next());
@@ -397,18 +382,15 @@ public class TestMorTagger {
     List<Annotation> morAnnotations = Arrays.stream(g.all("part-of-speech"))
       .collect(Collectors.toList());
     assertEquals("Correct number of tokens (disfluent w~ is skipped) "+morAnnotations,
-                 12, morAnnotations.size());
+                 9, morAnnotations.size());
     Iterator<Annotation> mors = morAnnotations.iterator();
     assertEquals("I'll", "pro", mors.next().getLabel());
     assertEquals("I'll", "mod", mors.next().getLabel());
     assertEquals("sing", "v", mors.next().getLabel());
     assertEquals("and", "coord", mors.next().getLabel());
     assertEquals("walk", "n", mors.next().getLabel());
-    assertEquals("walk", "v", mors.next().getLabel());
-    assertEquals("about", "adv", mors.next().getLabel());
     assertEquals("about", "prep", mors.next().getLabel());
     assertEquals("my", "det", mors.next().getLabel());
-    assertEquals("my", "co", mors.next().getLabel());
     assertEquals("blogging-morting", "?", mors.next().getLabel());
     assertEquals("lazily", "adv", mors.next().getLabel());
 
@@ -418,11 +400,8 @@ public class TestMorTagger {
     assertNotNull("v|sing start anchored", mors.next().getStart().getOffset());
     assertNotNull("coord|and start anchored", mors.next().getStart().getOffset());
     assertNotNull("n|walk start anchored", mors.next().getStart().getOffset());
-    assertNotNull("v|walk start anchored", mors.next().getStart().getOffset());
-    assertNotNull("adv|about start anchored", mors.next().getStart().getOffset());
     assertNotNull("prep|about start anchored", mors.next().getStart().getOffset());
     assertNotNull("det:poss|my start anchored", mors.next().getStart().getOffset());
-    assertNotNull("co|my start anchored", mors.next().getStart().getOffset());
     assertNotNull("?|bloggingmorting start anchored", mors.next().getStart().getOffset());
     assertNotNull("adv|laze&dadj-Y-LY start anchored", mors.next().getStart().getOffset());
 
@@ -432,11 +411,8 @@ public class TestMorTagger {
     assertNotNull("v|sing end anchored", mors.next().getEnd().getOffset());
     assertNotNull("coord|and end anchored", mors.next().getEnd().getOffset());
     assertNotNull("n|walk end anchored", mors.next().getEnd().getOffset());
-    assertNotNull("v|walk end anchored", mors.next().getEnd().getOffset());
-    assertNotNull("adv|about end anchored", mors.next().getEnd().getOffset());
     assertNotNull("prep|about end anchored", mors.next().getEnd().getOffset());
     assertNotNull("det:poss|my end anchored", mors.next().getEnd().getOffset());
-    assertNotNull("co|my end anchored", mors.next().getEnd().getOffset());
     assertNotNull("?|bloggingmorting end anchored", mors.next().getEnd().getOffset());
     assertNotNull("adv|laze&dadj-Y-LY end anchored", mors.next().getEnd().getOffset());
 
@@ -444,9 +420,9 @@ public class TestMorTagger {
     String[] wordLabels = {
       "I'll", "I'll", 
       "sing", "and",
-      "walk", "walk",
-      "about", "about",
-      "my", "my",
+      "walk", 
+      "about", 
+      "my", 
       "blogging-morting",
       "lazily"
     };

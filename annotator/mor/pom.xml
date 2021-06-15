@@ -10,7 +10,7 @@
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.annotator.mor</artifactId>
   <name>nzilbb.annotator.mor</name>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <description>Annotator that annotates words tags from the the Talk Bank MOR morphosyntactic tagger.</description>
 
   <properties>
