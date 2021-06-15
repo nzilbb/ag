@@ -181,8 +181,8 @@ public class TestMorTagger {
     mors = morAnnotations.iterator();
     String[] wordLabels = {
       "I'll", "I'll", 
-      "sing", "and",
-      "walk", 
+      "sing .", "and",
+      "walk -", 
       "about",
       "my", 
       "blogging-morting",
@@ -419,8 +419,8 @@ public class TestMorTagger {
     mors = morAnnotations.iterator();
     String[] wordLabels = {
       "I'll", "I'll", 
-      "sing", "and",
-      "walk", 
+      "sing .", "and",
+      "walk -", 
       "about", 
       "my", 
       "blogging-morting",
@@ -529,7 +529,7 @@ public class TestMorTagger {
                     .setStart(g.getOrCreateAnchorAt(10, Constants.CONFIDENCE_MANUAL)).setEnd(
                       g.getOrCreateAnchorAt(20, Constants.CONFIDENCE_MANUAL))
                     .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("sing")
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("sing .") // dot!
                     .setStart(g.getOrCreateAnchorAt(20)).setEnd(
                       g.getOrCreateAnchorAt(30, Constants.CONFIDENCE_MANUAL))
                     .setParent(turn));
@@ -541,7 +541,7 @@ public class TestMorTagger {
                     .setStart(g.getOrCreateAnchorAt(40)).setEnd(
                       g.getOrCreateAnchorAt(45, Constants.CONFIDENCE_MANUAL))
                     .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("walk")
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("walk -") // dash!
                     .setStart(g.getOrCreateAnchorAt(45)).setEnd(
                       g.getOrCreateAnchorAt(50, Constants.CONFIDENCE_MANUAL))
                     .setParent(turn));
