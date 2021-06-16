@@ -14,7 +14,7 @@
   <description>Annotator that annotates words tags from the the Talk Bank MOR morphosyntactic tagger.</description>
 
   <properties>
-    <nzilbb.formatter.clan.version>1.2.2</nzilbb.formatter.clan.version>
+    <nzilbb.formatter.clan.version>1.2.3</nzilbb.formatter.clan.version>
     <package.path>nzilbb/annotator/mor/</package.path>
     <annotator.class>nzilbb.annotator.mor.MorTagger</annotator.class>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

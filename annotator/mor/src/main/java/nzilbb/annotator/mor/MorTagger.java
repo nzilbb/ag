@@ -983,6 +983,10 @@ public class MorTagger extends Annotator {
             Execution post = new Execution()
               .setExe(getPostExe())
               .arg("+d"+postDb.getPath())
+              // the 64 bit linux version of POST seems to contain a bug that produces
+              // corrupt output when replacing the existing %mor line, so we use +g1
+              // so that it adds a new %pos line instead:
+              .arg("+g1")
               .arg(cha.getPath());
             // start the process in its own thread
             setStatus("Running post...");
