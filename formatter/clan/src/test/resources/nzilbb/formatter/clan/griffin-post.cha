@@ -1,0 +1,188 @@
+@Font:	CAfont:12:0
+@UTF8
+@Color words:	%pic: 1 1175 40379 58715 @BG: 1 3098 54563 22810 @EG: 1 10586 51598 19548 
+@Begin
+@Languages:	eng
+@Participants:	GRI Nick_Griffin Participant, DIM Dimbleby Participant,
+	PPP Pause Unidentified, APP Applause Unidentified, UNK Unknown
+	Unidentified
+@Options:	CA
+@ID:	eng|change_corpus_later|GRI|||||Participant|||
+@ID:	eng|change_corpus_later|DIM|||||Participant|||
+@ID:	eng|change_corpus_later|PPP|||||Unidentified|||
+@ID:	eng|change_corpus_later|APP|||||Unidentified|||
+@ID:	eng|change_corpus_later|UNK|||||Unidentified|||
+@Media:	griffin, video
+@Situation:	panel debate
+@Date:
+@Location:	UK BBC London
+@Transcriber:	SH
+@Transcription:	partial
+@Comment:	Use the command window to align all the overlap markers
+	automatically (see instructions sheet included)
+*APP:	(3.1) 0_10538
+*GRI:	without (.) a shadow . of a doubt i - appreciate 3239_5079
+	that if you look at some of the things i'm quoted 5062_6693
+	as having said↗ (0.3) 6687_7549
+	in the daily mail n dai- an' so on (0.2) 7549_8959
+	i'd be a ↑monster↘ 8953_9760
+%mor:	prep|+conj|with+prep|out=sin det:art|a=una n|shadow^v|shadow=sombra . prep|of=de det:art|a
+	n|doubt^v|doubt n:let|i v|appreciate
+	comp|that^pro:rel|that^pro:dem|that^det:dem|that comp|if^conj|if
+	pro:per|you cop|look^co|look^n|look^v|look prep|at
+	qn|some^pro:indef|some prep|of det:art|the n|thing-PL
+	n:let|i$aux|be&1S^n:let|i~cop|be&1S part|quote-PASTP^v|quote-PAST
+	adv|as^conj|as^prep|as
+	aux|have-PRESP^n:gerund|have-PRESP^part|have-PRESP
+	part|say&PASTP^v|say&PAST prep|in^adv|in det:art|the
+	adv:tem|day&dn-LY^adj|daily n|mail^v|mail n:let|n ?|dai– ?|an'
+	co|so^adv|so^conj|so prep|on^adv|on n:let|i~mod|genmod cop|be^aux|be
+	det:art|a n|monster
+%pos:	prep|+conj|with+prep|out=sin det:art|a=una n|shadow . prep|of=de det:art|a
+	n|doubt n:let|i v|appreciate comp|that conj|if pro:per|you v|look prep|at
+	pro:indef|some prep|of det:art|the n|thing-PL n:let|i$aux|be&1S v|quote-PAST
+	conj|as n:gerund|have-PRESP part|say&PASTP prep|in det:art|the adj|daily
+	n|mail n:let|n ?|dai– ?|an' co|so adv|on n:let|i~mod|genmod cop|be det:art|a
+	n|monster
+*PPP:	(0.2) 9743_9934
+@Bg:	denial
+*GRI:	those things are outrageous lies 9929_11705
+%mor:	pro:dem|those^det:dem|those n|thing-PL cop|be&PRES^aux|be&PRES
+	adj|outrageous n|lie-PL^v|lie-3S
+%pos:	det:dem|those n|thing-PL cop|be&PRES adj|outrageous n|lie-PL
+*DIM:	wh⌈ich⌉ is &+th the untrue quote that's ⌈been said⌉ about you 11755_14327
+%mor:	pro:rel|which^pro:int|which^det:int|which cop|be&3S^aux|be&3S
+	det:art|the un#n|true^un#adj|true n|quote^v|quote
+	pro:rel|that~aux|be&3S^pro:rel|that~cop|be&3S^pro:dem|that~aux|be&3S^pro:dem|that~cop|be&3S
+	cop|be&PASTP^aux|be&PASTP part|say&PASTP^v|say&PAST
+	adv|about^prep|about pro:per|you
+%pos:	pro:rel|which cop|be&3S det:art|the un#adj|true n|quote pro:rel|that~aux|be&3S
+	aux|be&PASTP part|say&PASTP prep|about pro:per|you
+*GRI:	  ⌊⁇but⁇⌋
+%mor:	conj|but
+%pos:	conj|but
+*APP:	                                   ⌊mn mn⌋
+%mor:	?|mn ?|mn
+%pos:	?|mn ?|mn
+*UNK:	°⁇true⁇° 14059_14442
+%mor:	n|true^adj|true
+%pos:	adj|true
+*GRI:	the ⌈th-⌉ 14430_14895
+%mor:	det:art|the ?|th–
+%pos:	det:art|the ?|th–
+*DIM:	    ⌊the⌋ holocaust denial possibly↗ 14709_16404
+%mor:	det:art|the n|holocaust n|denial adv|possible&dadj-LY
+%pos:	det:art|the n|holocaust n|denial adv|possible&dadj-LY
+*GRI:	the- the va:st majority of them↗ 16404_18053
+%mor:	?|the– det:art|the adj|vast n|majority^n|major-ITY^n|major&dadj-ITY
+	prep|of pro:obj|them
+%pos:	?|the– det:art|the adj|vast n|majority prep|of pro:obj|them
+@Eg:	denial
+*PPP:	(0.6) 18035_18598
+*GRI:	far too many to go into↗ (0.3) 18593_20107
+	er: but er (0.2) huh huh 20096_21367
+%mor:	adv|far^adj|far adv|too^post|too qn|many^pro:indef|many
+	prep|to^inf|to v|go prep|into ?|er conj|but ?|er co|huh co|huh
+%pos:	adv|far adv|too qn|many inf|to v|go prep|into ?|er conj|but ?|er co|huh
+	co|huh
+*UNK:	well let ⌈let let me let me let me⌉ 21355_23629
+%mor:	co|well^n|well^adv|well part|let&PASTP^v|let&ZERO
+	part|let&PASTP^v|let&ZERO part|let&PASTP^v|let&ZERO pro:obj|me
+	part|let&PASTP^v|let&ZERO pro:obj|me part|let&PASTP^v|let&ZERO
+	pro:obj|me
+%pos:	co|well part|let&PASTP part|let&PASTP v|let&ZERO pro:obj|me v|let&ZERO
+	pro:obj|me v|let&ZERO pro:obj|me
+*DIM:	         ⌊well all right let's let's just go⌋ 21904_23634
+	⁇dar-⁇ deny denying the holocaust ⁇france⁇ 23626_25741
+	did you s- did you deny the holo⌈caust↗ yes you did↘⌉ 25741_27916
+%mor:	co|well^n|well^adv|well qn|all^adv|all^pro:indef|all^post|all
+	co|right^n|right^adv|right^adj|right v|let~pro:obj|us
+	v|let~pro:obj|us adv|just^adj|just v|go ?|dar– v|deny
+	n:gerund|deny-PRESP^part|deny-PRESP det:art|the n|holocaust ?|france
+	mod|do&PAST^v|do&PAST pro:per|you ?|s– mod|do&PAST^v|do&PAST
+	pro:per|you v|deny det:art|the n|holocaust co|yes pro:per|you
+	mod|do&PAST^v|do&PAST
+%pos:	co|well adv|all adj|right v|let~pro:obj|us v|let~pro:obj|us adv|just v|go
+	?|dar– v|deny part|deny-PRESP det:art|the n|holocaust ?|france mod|do&PAST
+	pro:per|you ?|s– mod|do&PAST pro:per|you v|deny det:art|the n|holocaust
+	co|yes pro:per|you v|do&PAST
+*GRI:	                                ⌊i do not⌋ have a conviction for holocaust denial↗ 27069_29066
+%mor:	n:let|i mod|do^v|do neg|not aux|have^v|have det:art|a n|conviction
+	comp|for^conj|for^prep|for n|holocaust n|denial
+%pos:	n:let|i mod|do neg|not v|have det:art|a n|conviction prep|for n|holocaust
+	n|denial
+*DIM:	but you did deny it↘ 29077_29995
+%mor:	conj|but pro:per|you mod|do&PAST^v|do&PAST v|deny pro:per|it
+%pos:	conj|but pro:per|you v|do&PAST v|deny pro:per|it
+*PPP:	(0.7) 29983_30726
+*GRI:	⌈i did⌉ 30709_31109
+%mor:	n:let|i mod|do&PAST^v|do&PAST
+%pos:	n:let|i v|do&PAST
+*DIM:	⌊↑why⌋ are you smiling↘ 30738_31655
+	it's ⌈not⌉ a particularly amusing issue↘ 31649_33182
+%mor:	pro:rel|why^pro:int|why cop|be&PRES^aux|be&PRES pro:per|you
+	n:gerund|smile-PRESP^part|smile-PRESP
+	pro:per|it~aux|be&3S^pro:per|it~cop|be&3S neg|not det:art|a
+	adv|particular&dadj-LY n:gerund|amuse-PRESP^part|amuse-PRESP
+	n|issue^v|issue
+%pos:	pro:int|why aux|be&PRES pro:per|you part|smile-PRESP pro:per|it~cop|be&3S
+	neg|not det:art|a adv|particular&dadj-LY part|amuse-PRESP n|issue
+*GRI:	     ⌊i:⌋
+%mor:	n:let|i
+%pos:	n:let|i
+*PPP:	(0.3) 33182_33530
+*GRI:	i:: (0.3) was very critical
+	for the way in which the holocaust (0.2) 33524_36578
+	was (0.5) and is in fa⌈ct⌉ (0.2) abused→ 36567_39636
+%mor:	n:let|i cop|be&PAST&13S^aux|be&PAST&13S adv|very adj|critical
+	comp|for^conj|for^prep|for det:art|the n|way^adv|way prep|in^adv|in
+	pro:rel|which^pro:int|which^det:int|which det:art|the n|holocaust
+	cop|be&PAST&13S^aux|be&PAST&13S coord|and cop|be&3S^aux|be&3S
+	prep|in^adv|in n|fact part|abuse-PASTP^v|abuse-PAST
+%pos:	n:let|i cop|be&PAST&13S adv|very adj|critical prep|for det:art|the n|way
+	prep|in pro:int|which det:art|the n|holocaust cop|be&PAST&13S coord|and
+	aux|be&3S prep|in n|fact v|abuse-PAST
+*DIM:	                      ⌊mn⌋
+%mor:	?|mn
+%pos:	?|mn
+*GRI:	∇to prevent∇ (0.2) serious discussion over immigration↘ 39619_42218
+%mor:	prep|to^inf|to v|prevent adj|serious n|discussion
+	prep|over^adv|over n|immigrate&dv-TION
+%pos:	inf|to v|prevent adj|serious n|discussion adv|over n|immigrate&dv-TION
+*DIM:	                      ⌊jus- just⌋ you say you're misquoted→ 41696_43257
+	ethnicity i want to see britain become→ 43257_45451
+%mor:	?|jus– adv|just^adj|just pro:per|you co|say^v|say
+	pro:per|you~aux|be&PRES^pro:per|you~cop|be&PRES
+	mis#part|quote-PASTP^mis#v|quote-PAST n|ethnic-ITY^n|ethnic&dadj-ITY
+	n:let|i v|want prep|to^inf|to co|see^v|see ?|britain
+	part|become&PASTP^cop|become
+%pos:	?|jus– adv|just pro:per|you v|say pro:per|you~aux|be&PRES mis#v|quote-PAST
+	n|ethnic-ITY n:let|i v|want inf|to v|see ?|britain part|become&PASTP
+*APP:	(3.0) 45062_48065
+	⌈ (6.0) ⌉ 48053_54479
+*DIM:	⌊wait wait wait (1.3) ethnicity↘ (0.4) ethnicity↘ (1.4) please⌋ 48053_54038
+	ethnicity↘ i want to see britain become ninety nine percent
+	genetically white→ 54038_57858
+%mor:	co|wait^v|wait co|wait^v|wait co|wait^v|wait
+	n|ethnic-ITY^n|ethnic&dadj-ITY n|ethnic-ITY^n|ethnic&dadj-ITY
+	co|please^v|please n|ethnic-ITY^n|ethnic&dadj-ITY n:let|i v|want
+	prep|to^inf|to co|see^v|see ?|britain part|become&PASTP^cop|become
+	det:num|ninety det:num|nine n|percent
+	adv|genetic&dadj-ALLY^adv|genetic&dadj-AL-LY n|white^adj|white
+%pos:	co|wait co|wait co|wait n|ethnic-ITY n|ethnic-ITY co|please n|ethnic-ITY
+	n:let|i v|want inf|to v|see ?|britain part|become&PASTP det:num|ninety
+	det:num|nine n|percent adv|genetic&dadj-AL-LY n|white
+*PPP:	(0.8) 57852_58636
+*DIM:	just as she was eleven years before i was born↘ 58624_61195
+%mor:	adv|just^adj|just adv|as^conj|as^prep|as pro:sub|she
+	cop|be&PAST&13S^aux|be&PAST&13S det:num|eleven n|year-PL
+	adv|before^conj|before^prep|before n:let|i
+	cop|be&PAST&13S^aux|be&PAST&13S adj|born
+%pos:	adv|just conj|as pro:sub|she cop|be&PAST&13S det:num|eleven n|year-PL
+	prep|before n:let|i cop|be&PAST&13S adj|born
+*PPP:	(0.7) 61180_61894
+*DIM:	on race↘ right⇗ (0.4) mixed marriages↘ 61882_64065
+%mor:	prep|on^adv|on n|race^v|race co|right^n|right^adv|right^adj|right
+	part|mix-PASTP^v|mix-PAST n|marriage-PL
+%pos:	prep|on n|race adv|right part|mix-PASTP n|marriage-PL
+@End

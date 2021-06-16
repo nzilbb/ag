@@ -85,7 +85,7 @@ import nzilbb.util.TempFileInputStream;
  *       [* m] to</tt> </li> 
  *  <li> Pauses - untimed, (e.g. <tt>(.)</tt>, <tt>(...)</tt>), 
  *       or timed (e.g. <tt>(0.15)</tt>, <tt>(2.)</tt>, <tt>(1:05.15)</tt>)  </li>
- *  <li> <tt>%mor</tt> line annottions </li>
+ *  <li> <tt>%mor</tt> line annotations (or %pos line annotations, if present) </li>
  * </ul>
  * @author Robert Fromont robert@fromont.net.nz
  */
@@ -853,7 +853,30 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
    * @param newIncludeTimeCodes Whether to include utterance time codes when exporting transcripts.
    */
   public ChatSerialization setIncludeTimeCodes(Boolean newIncludeTimeCodes) { includeTimeCodes = newIncludeTimeCodes; return this; }
-      
+
+  /**
+   * Prefix of the line containing morphosyntactic tags for the mor layer. By default,
+   * this is "%pos" (a possible output of POST) if present, and otherwise is "%mor". 
+   * @see #getMorphosyntaxLine()
+   * @see #setMorphosyntaxLine(String)
+   * @see #getMorLayer()
+   */
+  protected String morphosyntaxLine = "%mor:";
+  /**
+   * Getter for {@link #morphosyntaxLine}: Prefix of the line containing morphosyntactic
+   * tags for the mor layer. By default, this is "%pos" (a possible output of POST) if
+   * present, and otherwise is "%mor:". 
+   * @return Prefix of the line containing morphosyntactic tags for the mor layer.
+   */
+  public String getMorphosyntaxLine() { return morphosyntaxLine; }
+  /**
+   * Setter for {@link #morphosyntaxLine}: Prefix of the line containing morphosyntactic
+   * tags for the mor layer. 
+   * @param newMorphosyntaxLine Prefix of the line containing morphosyntactic tags for the
+   * mor layer.
+   */
+  public ChatSerialization setMorphosyntaxLine(String newMorphosyntaxLine) { morphosyntaxLine = newMorphosyntaxLine; return this; }
+  
   /**
    * Utterance tokenizer.  The default is {@link SimpleTokenizer}.
    * @see #getTokenizer()
@@ -925,7 +948,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
   } // end of constructor
    
   /**
-   * Resete state.
+   * Reset state.
    */
   public void reset() {
     warnings = new Vector<String>();
@@ -936,6 +959,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     transcribers = new Vector<String>();
     lines = new Vector<String>();
     headers = new Vector<String>();
+    morphosyntaxLine = "%mor:";
   } // end of reset()
 
   // IStreamDeserializer methods:
@@ -1481,6 +1505,10 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
             || line.startsWith("%")
           ) { // this is a new utterance
           lines.add(line);
+          if (line.startsWith("%pos:")) { // there are %pos lines
+            // so use them for morphosyntactic tags instead of %mor
+            morphosyntaxLine = "%pos:";
+          }
         } else { // last line was not time-synchronized, so append this line to it
           // remove the last line
           String lastLine = lines.remove(lines.size()-1);
@@ -1768,11 +1796,10 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                    .setPeers(false).setPeersOverlap(false).setSaturated(true)
                    .setParentId(turnLayer.getId()).setParentIncludes(true));
     for (String line : syncLines) {
-      if (line.startsWith("%mor:")) {
+      if (line.startsWith(morphosyntaxLine)) {
         // morphosyntactic tags
         // remember this line for after the previous turn has been tokenized into words
-        String morLine = line.startsWith("%mor:")?line.substring("%mor:".length()):line;
-        morLine = morLine.trim();
+        String morLine = line.substring(morphosyntaxLine.length()).trim();
         Annotation mor = currentTurn.first("@mor");
         if (mor != null) { // append to the previous tags
           mor.setLabel(mor.getLabel() + " " + morLine);
@@ -1781,12 +1808,12 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
         }
         
       } else if (line.startsWith("%")) { // dependent tier
-        if (!tierUnsupportedWarning) {
+        if (!line.startsWith("%mor") // (if there are %pos lines, this might be %mor)
+            && !tierUnsupportedWarning) {
           warnings.add(
             "Dependent tiers other than %mor are not currently parsed; ignoring lines like \""
             +line+"\"");
-        }
-        
+        }        
       } else if (line.startsWith("@")) { // gem
         if (line.startsWith("@G") || line.startsWith("@Bg")) {
           if (gem != null) {
@@ -2103,7 +2130,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
               token = tokens[++t];
             }
             if (token.containsKey("@skippedByMor")) {
-              String message = "There are more %mor tags ("+Arrays.asList(morTags)
+              String message = "There are more "+morphosyntaxLine.replace(":","")
+                +" tags ("+Arrays.asList(morTags)
                 +") than real tokens ("
                 +Arrays.stream(tokens).map(tk->tk.getLabel()).collect(Collectors.toList())+")"; 
               if (errors == null) errors = new SerializationException(message);
@@ -2260,8 +2288,14 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
               } // splitMorWordGroups
             } // splitMorTagGroups
           } // next token
+          // consume any trailing @skippedByMor tokens...
+          while (t < tokens.length && tokens[t].containsKey("@skippedByMor")) {
+            t++;
+          }
+          // then check there are no tokens left
           if (t < tokens.length) {
-            String message = "There are fewer %mor tags ("+Arrays.asList(morTags)
+            String message = "There are fewer "+morphosyntaxLine.replace(":","")
+              +" tags ("+Arrays.asList(morTags)
               +") than tokens ("
               +Arrays.stream(tokens).map(tk->tk.getLabel()).collect(Collectors.toList())+") + "+t; 
             if (errors == null) errors = new SerializationException(message);
