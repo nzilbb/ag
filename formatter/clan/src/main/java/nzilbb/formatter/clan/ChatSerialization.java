@@ -33,11 +33,11 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
 import java.util.Spliterator;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
@@ -2005,10 +2005,11 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       for (Annotation word : graph.all(getWordLayer().getId())) {
         if (word.getLabel().startsWith("&+")) {
           word.put("@skippedByMor", Boolean.TRUE);
-        } else if (word.getLabel().matches("^\\W+$") && !word.getLabel().equals(".")) {
-          // mor also skips words containing only punctuation, except full stops
+        } else if (word.getLabel().matches("^\\W+$")
+                   && !word.getLabel().matches("[,.;?!\\[\\]<>]")) {
+          // mor also skips words containing only punctuation, except specific cases
           word.put("@skippedByMor", Boolean.TRUE);
-        } else if (!word.getLabel().equals(".")) {
+        } else if (!word.getLabel().matches("[,.;?!\\[\\]<>]")) {
           allSkippeByMor = false;
         }
       } // next token
@@ -2120,28 +2121,32 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       // match %mor annotations with their tokens
       for (Annotation morLine : graph.all("@mor")) {
         if (parsingMor && !allSkippeByMor) {
-          String[] morTags = morLine.getLabel().split("\\s+");
-          Annotation[] tokens = morLine.getParent().all(wordLayer.getId());
+          List<String> morTags = Arrays.asList(morLine.getLabel().split("\\s+"));
+          List<Annotation> tokens = Arrays.stream(morLine.getParent().all(wordLayer.getId()))
+            // filter out tokens that are skipped by mor
+            .filter(token->!token.containsKey("@skippedByMor"))
+            .collect(Collectors.toList());
+
+          if (morTags.size() > tokens.size()) {
+            String message = "There are more "+morphosyntaxLine.replace(":","")
+              +" tags ("+morTags+") than real tokens ("+tokens+")"; 
+            if (errors == null) errors = new SerializationException(message);
+            errors.addError(SerializationException.ErrorType.Tokenization, message);
+            continue;
+          }
+          if (morTags.size() < tokens.size()) {
+            String message = "There are fewer "+morphosyntaxLine.replace(":","")
+              +" tags ("+morTags+") than tokens ("+tokens+")"; 
+            if (errors == null) errors = new SerializationException(message);
+            errors.addError(SerializationException.ErrorType.Tokenization, message);
+          }
+          
           // tag each token
-          int t = 0;
-          for (int m = 0; m < morTags.length && t < tokens.length; m++, t++) {
-            
-            Annotation token = tokens[t];
-            // skip partial words, and all-punctuation words, which are not tagged by mor
-            while (token.containsKey("@skippedByMor") && t < tokens.length-1) {
-              token = tokens[++t];
-            }
-            if (token.containsKey("@skippedByMor")) {
-              String message = "There are more "+morphosyntaxLine.replace(":","")
-                +" tags ("+Arrays.asList(morTags)
-                +") than real tokens ("
-                +Arrays.stream(tokens).map(tk->tk.getLabel()).collect(Collectors.toList())+")"; 
-              if (errors == null) errors = new SerializationException(message);
-              errors.addError(SerializationException.ErrorType.Tokenization, message);
-                continue;
-            }
-            
-            String morTag = morTags[m].trim();
+          Iterator<String> iMorTags = morTags.iterator();
+          Iterator<Annotation> iTokens = tokens.iterator();
+          while (iMorTags.hasNext()) {            
+            Annotation token = iTokens.next();            
+            String morTag = iMorTags.next();
             
             if (!splitMorTagGroups) { // one big fat complex label
               if (morLayer != null) {
@@ -2266,7 +2271,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                     }
                     
                     // Fusional suffixes
-                    int firstAmpersand = label.lastIndexOf('&');
+                    int firstAmpersand = label.indexOf('&');
                     if (firstAmpersand >= 0) { // there are suffixes
                       if (morFusionalSuffixLayer != null) {
                         String[] suffixes = label.substring(firstAmpersand+1).split("&");
@@ -2289,20 +2294,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                 } // next word group
               } // splitMorWordGroups
             } // splitMorTagGroups
-          } // next token
-          // consume any trailing @skippedByMor tokens...
-          while (t < tokens.length && tokens[t].containsKey("@skippedByMor")) {
-            t++;
-          }
-          // then check there are no tokens left
-          if (t < tokens.length) {
-            String message = "There are fewer "+morphosyntaxLine.replace(":","")
-              +" tags ("+Arrays.asList(morTags)
-              +") than tokens ("
-              +Arrays.stream(tokens).map(tk->tk.getLabel()).collect(Collectors.toList())+") + "+t; 
-            if (errors == null) errors = new SerializationException(message);
-            errors.addError(SerializationException.ErrorType.Tokenization, message);
-          }
+          } // next token/tag
         } // %mor
         morLine.destroy();
       } // next mor 
