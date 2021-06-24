@@ -223,7 +223,13 @@ public class TestStanfordPosTagger {
       .setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false)
       .setParentId("word"));
-    for (Annotation w : g.all("word")) g.createTag(w, "orth", w.getLabel().toLowerCase());
+    for (Annotation w : g.all("word")) {
+      if (!w.getLabel().endsWith("~")) { // skip "w~"
+        g.createTag(w, "orth", w.getLabel().toLowerCase());
+      } else {
+        g.createTag(w, "orth", "");
+      }
+    } // next token
     
     annotator.setSchema(schema);
     g.setId("setTaskParameters");
@@ -290,16 +296,15 @@ public class TestStanfordPosTagger {
     annotator.transform(g);
     List<Annotation> posAnnotations = Arrays.stream(g.all("stanfordpos"))
       .collect(Collectors.toList());
+    for (Annotation pos : posAnnotations) System.out.println(""+pos + " - " + pos.getParent());
     assertEquals("Correct number of tokens "+posAnnotations,
-                 13, posAnnotations.size());
+                 11, posAnnotations.size());
     Iterator<Annotation> poses = posAnnotations.iterator();
     assertEquals("I'll", "PRP", poses.next().getLabel());
     assertEquals("I'll", "MD", poses.next().getLabel());
     assertEquals("sing", "VB", poses.next().getLabel());
     assertEquals("and", "CC", poses.next().getLabel());
-    assertEquals("w~:w (fragment)", "NN", poses.next().getLabel());
-    assertEquals("w~:SYMBOL (fragment)", "SYM", poses.next().getLabel());
-    assertEquals("walk", "NN", poses.next().getLabel());
+    assertEquals("walk", "VB", poses.next().getLabel());
     assertEquals("about (different from default model)",
                  "IN", poses.next().getLabel());
     assertEquals("my", "PRP$", poses.next().getLabel());
@@ -315,7 +320,6 @@ public class TestStanfordPosTagger {
     String[] wordLabels = {
       "I'll", "I'll", // I + 'll
       "sing", "and",
-      "w~", "w~", // w + ~
       "walk", "about", "my",
       "blogging-posting", "blogging-posting", "blogging-posting", // blogging + - + posting
       "lazily"

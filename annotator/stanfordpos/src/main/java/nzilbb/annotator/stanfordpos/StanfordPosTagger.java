@@ -63,6 +63,9 @@ import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.sql.ConnectionFactory;
 import nzilbb.util.IO;
 
+// TODO add option to tease apart POS labels
+// TODO e.g. VBD = VB + past, VBG = VB + continuous, etc.
+
 /**
  * Annotator that tags words with their part of speech (POS) according to the 
  * <a href="https://nlp.stanford.edu/software/tagger.html">Stanford POS Tagger</a>.
@@ -74,7 +77,6 @@ public class StanfordPosTagger extends Annotator {
   
   /**
    * Runs any processing required to uninstall the annotator.
-   * <p> In this case, the table created in rdbConnectionFactory() is DROPped.
    */
   @Override
   public void uninstall() {
@@ -436,8 +438,7 @@ public class StanfordPosTagger extends Annotator {
   
   /**
    * Determines which layers the annotator requires in order to annotate a graph.
-   * @return A list of layer IDs. In this case, the annotator only requires the schema's
-   * word layer.
+   * @return A list of layer IDs.
    * @throws InvalidConfigurationException If {@link #setTaskParameters(String)} or 
    * {@link #setSchema(Schema)} have not yet been called.
    */
@@ -458,9 +459,7 @@ public class StanfordPosTagger extends Annotator {
   
   /**
    * Determines which layers the annotator will create/update/delete annotations on.
-   * @return A list of layer IDs. In this case, the annotator has no task web-app for
-   * specifying an output layer, and doesn't update any layers, so this method returns an
-   * empty array.
+   * @return A list of layer IDs. 
    * @throws InvalidConfigurationException If {@link #setTaskParameters(String)} or 
    * {@link #setSchema(Schema)} have not yet been called.
    */
@@ -471,8 +470,7 @@ public class StanfordPosTagger extends Annotator {
   }
   
   /**
-   * Transforms the graph. In this case, the graph is simply summarized, by counting all
-   * tokens of each word type, and printing out the result to stdout.
+   * Tag the transcript tokens with part-of-speech tags.
    * @param graph The graph to transform.
    * @return The changes introduced by the tranformation.
    * @throws TransformationException If the transformation cannot be completed.
@@ -531,6 +529,11 @@ public class StanfordPosTagger extends Annotator {
                   + ", next POS tag: " + w.tag() + " for word " + w.word());
               }
               Annotation token = tokens[t];
+              // skip any tokens with blank labels
+              while (token.getLabel().trim().length() == 0) {
+                token = tokens[++t];
+              }
+              
               graph.createTag(token, posLayerId, w.tag())
                 .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
               // there can be more than one tag per token
