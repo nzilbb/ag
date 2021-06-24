@@ -2001,13 +2001,15 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       // disfluencies...
       // before we transform disfluencies, we'll tag them because we might need to know
       // whether they've been skipped by mor
+      boolean allSkippeByMor = true;
       for (Annotation word : graph.all(getWordLayer().getId())) {
         if (word.getLabel().startsWith("&+")) {
           word.put("@skippedByMor", Boolean.TRUE);
-        }
-        // mor also skips words containing only punctuation, except full stops
-        if (word.getLabel().matches("^\\W+$") && !word.getLabel().equals(".")) {
+        } else if (word.getLabel().matches("^\\W+$") && !word.getLabel().equals(".")) {
+          // mor also skips words containing only punctuation, except full stops
           word.put("@skippedByMor", Boolean.TRUE);
+        } else if (!word.getLabel().equals(".")) {
+          allSkippeByMor = false;
         }
       } // next token
       // now strip off the &+...
@@ -2117,8 +2119,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 
       // match %mor annotations with their tokens
       for (Annotation morLine : graph.all("@mor")) {
-        if (parsingMor) {
-          String[] morTags = morLine.getLabel().split(" ");
+        if (parsingMor && !allSkippeByMor) {
+          String[] morTags = morLine.getLabel().split("\\s+");
           Annotation[] tokens = morLine.getParent().all(wordLayer.getId());
           // tag each token
           int t = 0;
