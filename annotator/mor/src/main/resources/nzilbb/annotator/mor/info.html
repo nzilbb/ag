@@ -25,18 +25,19 @@
       a tool developed for the
       <a target="mor" href="https://talkbank.org/">TalkBank project</a>. </p>
 
-    <p> MOR tags each word token with a single complex annotation, for example: </p>
+    <p> MOR tags each word token with multiple complex annotations, which are then
+      disambiguated with the POST tool, for example: </p>
 
     <table>
       <tr><td><b> Word </b></td><td> </td>     <td><b> MOR </b></td></tr>
       <tr><td> I'll </td><td class="C"> </td>  <td><tt>pro:sub|I~mod|will</tt></td></tr>
       <tr><td> sing </td><td class="C"> </td>  <td><tt>v|sing</tt></td></tr>
       <tr><td> and </td><td class="C"> </td>   <td><tt>coord|and</tt></td></tr>
-      <tr><td> talk </td><td class="C"> </td>  <td><tt>n|talk^v|talk</tt></td></tr>
-      <tr><td> about </td><td class="C"> </td> <td><tt>adv|about^prep|about</tt></td></tr>
-      <tr><td> my </td><td class="C"> </td>    <td><tt>det:poss|my^co|my</tt></td></tr>
+      <tr><td> talk </td><td class="C"> </td>  <td><tt>v|talk</tt></td></tr>
+      <tr><td> about </td><td class="C"> </td> <td><tt>prep|about</tt></td></tr>
+      <tr><td> my </td><td class="C"> </td>    <td><tt>det:poss|my</tt></td></tr>
       <tr><td> blogging </td><td class="C"> </td>
-                                               <td><tt>n:gerund|blog-PRESP^part|blog-PRESP</tt></td></tr>
+                                               <td><tt>n:gerund|blog-PRESP</tt></td></tr>
       <tr><td> lazily </td><td class="C"> </td><td><tt>adv|laze&dadj-Y-LY</tt></td></tr>
     </table>
 
@@ -57,21 +58,18 @@
       <tr><td rowspan="2"> I'll </td><td rowspan="2" class="C"> </td>
                                      <td><tt>pro:sub|I</tt></td></tr>
       <tr>                           <td><tt>mod|will</tt></td></tr>
-      <tr><td>             sing </td><td class="C"> </td><td><tt>v|sing</tt></td></tr>
+      <tr><td>             sing </td><td class="C"> </td>
+                                     <td><tt>v|sing</tt></td></tr>
       <tr><td>             and </td><td class="C"> </td>
                                      <td><tt>coord|and</tt></td></tr>
-      <tr><td rowspan="2"> talk </td><td rowspan="2" class="C"> </td>
-                                     <td><tt>n|talk</tt></td></tr>
-      <tr>                           <td><tt>v|talk</tt></td></tr>
-      <tr><td rowspan="2"> about </td><td rowspan="2" class="C"> </td>
-                                     <td><tt>adv|about</tt></td></tr>
-      <tr> <td><tt>prep|about</tt></td></tr>
-      <tr><td rowspan="2"> my </td><td rowspan="2" class="C"> </td>
+      <tr><td>             talk </td><td class="C"> </td>
+                                     <td><tt>v|talk</tt></td></tr>
+      <tr><td>             about </td><td class="C"> </td>
+                                     <td><tt>prep|about</tt></td></tr>
+      <tr><td>             my </td><td class="C"> </td>
                                      <td><tt>det:poss|my</tt></td></tr>
-      <tr>                           <td><tt>co|my</tt></td></tr>
-      <tr><td rowspan="2"> blogging </td><td rowspan="2" class="C"> </td>
+      <tr><td>             blogging </td><td class="C"> </td>
                                      <td><tt>n:gerund|blog-PRESP</tt></td></tr>
-      <tr>                           <td><tt>part|blog-PRESP</tt></td></tr>
       <tr><td>             lazily </td><td class="C"> </td>
                                      <td><tt>adv|laze&dadj-Y-LY</tt></td></tr>
     </table>
@@ -112,59 +110,37 @@
         <td><tt> coord </tt></td>
         <td> </td>
         <td><tt> and </tt></td>
-      </tr><tr><td rowspan="2"> talk </td><td rowspan="2" class="C"> </td>
-        <td><tt> n </tt></td>
-        <td> </td>
-        <td><tt> talk </tt></td>
-      </tr><tr>
+      </tr><tr><td> talk </td><td class="C"> </td>
         <td><tt> v </tt></td>
         <td> </td>
         <td><tt> talk </tt></td>
-      </tr><tr><td rowspan="2"> about </td><td rowspan="2" class="C"> </td>
-        <td><tt> adv </tt></td>
-        <td> </td>
-        <td><tt> about </tt></td>
-      </tr><tr>
+      </tr><tr><td> about </td><td class="C"> </td>
         <td><tt> prep </tt></td>
         <td> </td>
         <td><tt> about </tt></td>
-      </tr><tr><td rowspan="2"> my </td><td rowspan="2" class="C"> </td>
+      </tr><tr><td> my </td><td class="C"> </td>
         <td><tt> det </tt></td>
         <td><tt> poss </tt></td>
         <td><tt> my </tt></td>
-      </tr><tr>
-        <td><tt> co </tt></td>
-        <td> </td>
-        <td><tt> my </tt></td>
-      </tr><tr><td rowspan="2"> blogging </td><td rowspan="2" class="C"> </td>
+      </tr><tr><td> blogging </td><td class="C"> </td>
         <td><tt> n </tt></td>
         <td><tt> gerund </tt></td>
         <td><tt> blog </tt></td>
         <td> </td>
         <td><tt> PRESP </tt></td>
-      </tr><tr>
-        <td><tt> part </tt></td>
-        <td> </td>
-        <td><tt> blog </tt></td>
-        <td> </td>
-        <td><tt> PRESP </tt></td>
       </tr><tr><td rowspan="2"> lazily </td><td rowspan="2" class="C"> </td>
-        <td><tt> adv </tt></td>
-        <td> </td>
-        <td><tt> laze </tt></td>
-        <td><tt> dadj </tt></td>
+        <td rowspan="2"><tt> adv </tt></td>
+        <td rowspan="2"> </td>
+        <td rowspan="2"><tt> laze </tt></td>
+        <td rowspan="2"><tt> dadj </tt></td>
         <td><tt> Y </tt></td>
       </tr><tr>
-        <td> </td>
-        <td> </td>
-        <td> </td>
-        <td> </td>
         <td><tt> LY </tt></td>
       </tr>
     </table>
 
     <p> When this annotator is installed, by default it downloads the UnixCLAN source code,
-      which includes MOR, from 
+      which includes MOR and POST, from 
       <a target="mor" href="https://dali.talkbank.org/clan/"> https://dali.talkbank.org/clan/</a>,
       which requires access to the internet, and also a working g++ compiler. </p>
     <p> It also downloads and installs the <i>English (eng)</i> grammar from
@@ -173,11 +149,11 @@
 
     <p> <em>NB</em> Currently the MOR Tagger only works on unix-like systems.
       When the annotator is first installed, the first thing it tries to do is download
-      and compile MOR, which requires the <i>g++</i> compiler to be available on the
+      and compile MOR and POST, which requires the <i>g++</i> compiler to be available on the
       server. In order to ensure the compiler has been installed, run:
       <ul>
-        <li> <tt>apt install g++</tt> (on Ubuntu) </li>
-        <li> <tt>yum install gcc-c++</tt> (on RHEL/CentOS) </li>
+        <li> <tt>apt install g++ gcc-multilib g++-multilib</tt> (on Ubuntu) </li>
+        <li> <tt>yum install gcc-c++ glibc-devel glibc-devel.i686 glibc-devel.x86_64</tt> (on RHEL/CentOS) </li>
       </ul>
     </p>
 

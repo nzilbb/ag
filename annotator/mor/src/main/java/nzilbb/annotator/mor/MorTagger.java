@@ -123,10 +123,10 @@ public class MorTagger extends Annotator {
 
     try {
 
-      // is the "mor" program present?
+      // are the "mor" and "post" programs present?
       File mor = getMorExe();
       File post = getPostExe();
-      if (!mor.exists() || !mor.exists()) {     
+      if (!mor.exists() || !post.exists()) {     
         // if not, is there a source code directory?
         File unixClan = new File(getWorkingDirectory(), "unix-clan");
         // will need these later...
@@ -163,11 +163,11 @@ public class MorTagger extends Annotator {
           File editedMakefile = new File(src, "makefile-edited");
           FileOutputStream out = new FileOutputStream(editedMakefile);
           // although the makefile includes some pre-baked lines we could un-comment,
-          // POST compiles but doesn't run on 64-bit systems without the -mx32 switch
+          // POST compiles but doesn't run on 64-bit systems without the -m32 switch
           // so we add our own definition of CFLAGS instead, based on the "4.4.1-4ubuntu9" config
           out.write("CC = g++\n".getBytes());
           out.write(
-            "CFLAGS = -DUNX -Wno-deprecated -Wno-deprecated-declarations -mx32\n".getBytes());
+            "CFLAGS = -DUNX -Wno-deprecated -Wno-deprecated-declarations -m32\n".getBytes());
           // now copy the rest of the makefiles
           IO.Pump(new FileInputStream(makefile), out);
           out.close();
