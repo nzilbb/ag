@@ -249,23 +249,6 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
   public void setSchema(Schema newSchema) { schema = newSchema; }
 
   /**
-   * Participant layer.
-   * @see #getParticipantLayer()
-   * @see #setParticipantLayer(Layer)
-   */
-  protected Layer participantLayer;
-  /**
-   * Getter for {@link #participantLayer}: Participant layer.
-   * @return Participant layer.
-   */
-  public Layer getParticipantLayer() { return participantLayer; }
-  /**
-   * Setter for {@link #participantLayer}: Participant layer.
-   * @param newParticipantLayer Participant layer.
-   */
-  public void setParticipantLayer(Layer newParticipantLayer) { participantLayer = newParticipantLayer; }
-
-  /**
    * Layer that marks target participants.
    * @see #getTargetParticipantLayer()
    * @see #setTargetParticipantLayer(Layer)
@@ -282,40 +265,6 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
    */
   public ChatSerialization setTargetParticipantLayer(Layer newTargetParticipantLayer) { targetParticipantLayer = newTargetParticipantLayer; return this; }
    
-  /**
-   * Turn layer.
-   * @see #getTurnLayer()
-   * @see #setTurnLayer(Layer)
-   */
-  protected Layer turnLayer;
-  /**
-   * Getter for {@link #turnLayer}: Turn layer.
-   * @return Turn layer.
-   */
-  public Layer getTurnLayer() { return turnLayer; }
-  /**
-   * Setter for {@link #turnLayer}: Turn layer.
-   * @param newTurnLayer Turn layer.
-   */
-  public void setTurnLayer(Layer newTurnLayer) { turnLayer = newTurnLayer; }
-
-  /**
-   * Utterance layer.
-   * @see #getUtteranceLayer()
-   * @see #setUtteranceLayer(Layer)
-   */
-  protected Layer utteranceLayer;
-  /**
-   * Getter for {@link #utteranceLayer}: Utterance layer.
-   * @return Utterance layer.
-   */
-  public Layer getUtteranceLayer() { return utteranceLayer; }
-  /**
-   * Setter for {@link #utteranceLayer}: Utterance layer.
-   * @param newUtteranceLayer Utterance layer.
-   */
-  public void setUtteranceLayer(Layer newUtteranceLayer) { utteranceLayer = newUtteranceLayer; }
-
   /**
    * Word layer.
    * @see #getWordLayer()
@@ -991,10 +940,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
    */
   public ParameterSet configure(ParameterSet configuration, Schema schema) {
     setSchema(schema);
-    setParticipantLayer(schema.getParticipantLayer());
-    setTurnLayer(schema.getTurnLayer());
-    setUtteranceLayer(schema.getUtteranceLayer());
-    setWordLayer(schema.getWordLayer());
+    wordLayer = schema.getWordLayer();
     linkageLayer = null;
     cUnitLayer = null;
     gemLayer = null;
@@ -1028,63 +974,28 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       }
     }
 
-    LinkedHashMap<String,Layer> possibleParticipantLayers = new LinkedHashMap<String,Layer>();
-    LinkedHashMap<String,Layer> possibleTurnLayers = new LinkedHashMap<String,Layer>();
     LinkedHashMap<String,Layer> possibleTurnChildLayers = new LinkedHashMap<String,Layer>();
     LinkedHashMap<String,Layer> wordTagLayers = new LinkedHashMap<String,Layer>();
     LinkedHashMap<String,Layer> wordChildLayers = new LinkedHashMap<String,Layer>();
     LinkedHashMap<String,Layer> participantTagLayers = new LinkedHashMap<String,Layer>();
-    if (getParticipantLayer() == null || getTurnLayer() == null 
-        || getUtteranceLayer() == null || getWordLayer() == null) {
-      for (Layer top : schema.getRoot().getChildren().values()) {
-        if (top.getAlignment() == Constants.ALIGNMENT_NONE) {
-          if (top.getChildren().size() == 0) { // unaligned childless children of graph
-            participantTagLayers.put(top.getId(), top);
-          } else { // unaligned children of graph, with children of their own
-            possibleParticipantLayers.put(top.getId(), top);
-            for (Layer turn : top.getChildren().values()) {
-              if (turn.getAlignment() == Constants.ALIGNMENT_INTERVAL
-                  && turn.getChildren().size() > 0) {
-                // aligned children of who with their own children
-                possibleTurnLayers.put(turn.getId(), turn);
-                for (Layer turnChild : turn.getChildren().values()) {
-                  if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
-                    // aligned children of turn
-                    possibleTurnChildLayers.put(turnChild.getId(), turnChild);
-                    for (Layer tag : turnChild.getChildren().values()) {
-                      if (tag.getAlignment() == Constants.ALIGNMENT_NONE) {
-                        // unaligned children of word
-                        wordTagLayers.put(tag.getId(), tag);
-                      }
-                      wordChildLayers.put(tag.getId(), tag);
-                    } // next possible word tag layer
-                  }
-                } // next possible turn child layer
-              }
-            } // next possible turn layer
-          } // with children
-        } // unaligned
-      } // next possible participant layer
-    } else {
-      for (Layer turnChild : getTurnLayer().getChildren().values()) {
-        if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
-          possibleTurnChildLayers.put(turnChild.getId(), turnChild);
+    for (Layer turnChild : schema.getTurnLayer().getChildren().values()) {
+      if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
+        possibleTurnChildLayers.put(turnChild.getId(), turnChild);
+      }
+    } // next possible word tag layer
+    for (Layer tag : getWordLayer().getChildren().values()) {
+      if (tag.getAlignment() == Constants.ALIGNMENT_NONE
+          && tag.getChildren().size() == 0) {
+        wordTagLayers.put(tag.getId(), tag);
+      }
+      wordChildLayers.put(tag.getId(), tag);
+    } // next possible word tag layer
+    for (Layer tag : schema.getParticipantLayer().getChildren().values()) {
+      if (tag.getAlignment() == Constants.ALIGNMENT_NONE
+          && tag.getChildren().size() == 0) {
+        participantTagLayers.put(tag.getId(), tag);
         }
-      } // next possible word tag layer
-      for (Layer tag : getWordLayer().getChildren().values()) {
-        if (tag.getAlignment() == Constants.ALIGNMENT_NONE
-            && tag.getChildren().size() == 0) {
-          wordTagLayers.put(tag.getId(), tag);
-        }
-        wordChildLayers.put(tag.getId(), tag);
-      } // next possible word tag layer
-      for (Layer tag : getParticipantLayer().getChildren().values()) {
-        if (tag.getAlignment() == Constants.ALIGNMENT_NONE
-            && tag.getChildren().size() == 0) {
-          participantTagLayers.put(tag.getId(), tag);
-        }
-      } // next possible word tag layer
-    }
+    } // next possible word tag layer
     LinkedHashMap<String,Layer> graphTagLayers = new LinkedHashMap<String,Layer>();
     LinkedHashMap<String,Layer> graphSpanLayers = new LinkedHashMap<String,Layer>();
     for (Layer top : schema.getRoot().getChildren().values()) {
@@ -1097,42 +1008,6 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       } // childless
     } // next top level layer
          
-    if (getParticipantLayer() == null) {
-      Parameter p = configuration.containsKey("participantLayer")?configuration.get("participantLayer")
-        :configuration.addParameter(
-          new Parameter("participantLayer", Layer.class, "Participant layer", "Layer for speaker/participant identification", true));
-      String[] possibilities = {"participant","participants","who","speaker","speakers"};
-      if (p.getValue() == null) p.setValue(
-        Utility.FindLayerById(possibleParticipantLayers, Arrays.asList(possibilities)));
-      p.setPossibleValues(possibleParticipantLayers.values());
-    }
-    if (getTurnLayer() == null) {
-      Parameter p = configuration.containsKey("turnLayer")?configuration.get("turnLayer")
-        :configuration.addParameter(
-          new Parameter("turnLayer", Layer.class, "Turn layer", "Layer for speaker turns", true));
-      String[] possibilities = {"turn","turns"};
-      if (p.getValue() == null) p.setValue(
-        Utility.FindLayerById(possibleTurnLayers, Arrays.asList(possibilities)));
-      p.setPossibleValues(possibleTurnLayers.values());
-    }
-    if (getUtteranceLayer() == null) {
-      Parameter p = configuration.containsKey("utteranceLayer")?configuration.get("utteranceLayer")
-        :configuration.addParameter(
-          new Parameter("utteranceLayer", Layer.class, "Utterance layer", "Layer for speaker utterances", true));
-      String[] possibilities = {"utterance","utterances","line","lines"};
-      if (p.getValue() == null) p.setValue(
-        Utility.FindLayerById(possibleTurnChildLayers, Arrays.asList(possibilities)));
-      p.setPossibleValues(possibleTurnChildLayers.values());
-    }
-    if (getWordLayer() == null) {
-      Parameter p = configuration.containsKey("wordLayer")?configuration.get("wordLayer")
-        :configuration.addParameter(
-          new Parameter("wordLayer", Layer.class, "Word layer", "Layer for individual word tokens", true));
-      String[] possibilities = {"transcript","word","words","w"};
-      if (p.getValue() == null) p.setValue(
-        Utility.FindLayerById(possibleTurnChildLayers, Arrays.asList(possibilities)));
-      p.setPossibleValues(possibleTurnChildLayers.values());
-    }
     Parameter pC = configuration.containsKey("cUnitLayer")?configuration.get("cUnitLayer")
       :configuration.addParameter(
         new Parameter("cUnitLayer", Layer.class, "C-Unit layer", "Layer for marking c-units"));
@@ -1530,10 +1405,6 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
    */
   public void setParameters(ParameterSet parameters)
     throws SerializationParametersMissingException {
-    if (getParticipantLayer() == null || getTurnLayer() == null
-        || getUtteranceLayer() == null || getWordLayer() == null) {
-      throw new SerializationParametersMissingException();
-    }
   }
 
   /**
@@ -1560,14 +1431,14 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     // add layers to the graph
     // we don't just copy the whole schema, because that would imply that all the extra layers
     // contained no annotations, which is not necessarily true
-    graph.addLayer((Layer)participantLayer.clone());
-    graph.getSchema().setParticipantLayerId(participantLayer.getId());
-    graph.addLayer((Layer)turnLayer.clone());
-    graph.getSchema().setTurnLayerId(turnLayer.getId());
-    graph.addLayer((Layer)utteranceLayer.clone());
-    graph.getSchema().setUtteranceLayerId(utteranceLayer.getId());
-    graph.addLayer((Layer)wordLayer.clone());
-    graph.getSchema().setWordLayerId(wordLayer.getId());
+    graph.addLayer((Layer)schema.getParticipantLayer().clone());
+    graph.getSchema().setParticipantLayerId(schema.getParticipantLayerId());
+    graph.addLayer((Layer)schema.getTurnLayer().clone());
+    graph.getSchema().setTurnLayerId(schema.getTurnLayerId());
+    graph.addLayer((Layer)schema.getUtteranceLayer().clone());
+    graph.getSchema().setUtteranceLayerId(schema.getUtteranceLayerId());
+    graph.addLayer((Layer)schema.getWordLayer().clone());
+    graph.getSchema().setWordLayerId(schema.getWordLayerId());
     if (disfluencyLayer != null) graph.addLayer((Layer)disfluencyLayer.clone());
     if (nonWordLayer != null) graph.addLayer((Layer)nonWordLayer.clone());
     if (expansionLayer != null) graph.addLayer((Layer)expansionLayer.clone());
@@ -1731,7 +1602,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       Annotation participant = new Annotation(
         participantId, 
         attributes.containsKey("name")?attributes.get("name"):participantId, 
-        getParticipantLayer().getId());
+        schema.getParticipantLayerId());
       participant.setParentId(graph.getId());
       graph.addAnnotation(participant);
       // set the participant meta-data
@@ -1745,7 +1616,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 
     // ensure we have an utterance tokenizer
     if (getTokenizer() == null) {
-      setTokenizer(new SimpleTokenizer(getUtteranceLayer().getId(), getWordLayer().getId()));
+      setTokenizer(new SimpleTokenizer(schema.getUtteranceLayerId(), getWordLayer().getId()));
     }
 
     // regular expressions
@@ -1772,8 +1643,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     }
 
     // utterances
-    Annotation currentTurn = new Annotation(null, "", getTurnLayer().getId());
-    Annotation lastUtterance = new Annotation(null, "", getUtteranceLayer().getId());
+    Annotation currentTurn = new Annotation(null, "", schema.getTurnLayerId());
+    Annotation lastUtterance = new Annotation(null, "", schema.getUtteranceLayerId());
     Annotation gem = null;
     Annotation cUnit = null;
     Anchor lastAnchor = new Anchor(null, 0.0, Constants.CONFIDENCE_MANUAL);
@@ -1794,7 +1665,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     graph.addLayer(new Layer("@mor", "MOR Spans")
                    .setAlignment(Constants.ALIGNMENT_NONE)
                    .setPeers(false).setPeersOverlap(false).setSaturated(true)
-                   .setParentId(turnLayer.getId()).setParentIncludes(true));
+                   .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
     for (String line : syncLines) {
       if (line.startsWith(morphosyntaxLine)) {
         // morphosyntactic tags
@@ -1860,7 +1731,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
             warnings.add("Undeclared participant: " + participantId);
 		  
             Annotation participant = new Annotation(
-              participantId, participantId, getParticipantLayer().getId());
+              participantId, participantId, schema.getParticipantLayerId());
             participant.setParentId(graph.getId());
             graph.addAnnotation(participant);
           } // undeclared participant
@@ -1868,7 +1739,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
             if (currentTurn.getEndId() == null) {
               currentTurn.setEnd(lastAnchor);
             }
-            currentTurn = new Annotation(null, participantId, getTurnLayer().getId());
+            currentTurn = new Annotation(null, participantId, schema.getTurnLayerId());
             currentTurn.setStartId(lastAnchor.getId());		  
             currentTurn.setParentId(participantId);
             graph.addAnnotation(currentTurn);
@@ -1876,7 +1747,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
           line = speakerMatcher.group(2);
         } // participant
 	    
-        Annotation utterance = new Annotation(null, line, getUtteranceLayer().getId());
+        Annotation utterance = new Annotation(null, line, schema.getUtteranceLayerId());
         utterance.setStart(lastUtterance.getEnd());
         if (cUnit == null && getCUnitLayer() != null) {
           cUnit = new Annotation(null, "", getCUnitLayer().getId());
@@ -1909,9 +1780,9 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
             errors.addError(SerializationException.ErrorType.Alignment, message);
           } else {
             checkAlignmentAgainstLastUtterance(
-              utterance, start, end, cUnit, lastUtterance, currentTurn, utteranceLayer, graph);
+              utterance, start, end, cUnit, lastUtterance, currentTurn, schema.getUtteranceLayer(), graph);
           }
-          if (currentTurn.all(getUtteranceLayer().getId()).length == 0) {
+          if (currentTurn.all(schema.getUtteranceLayerId()).length == 0) {
             // first utterance of this turn
             currentTurn.setStart(start);
           }
@@ -1981,7 +1852,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       }
 
       // annotated spans marked by <...>
-      graph.addLayer(new Layer("@span", "Annotation Spans", Constants.ALIGNMENT_INTERVAL, true, true, false, getTurnLayer().getId(), true));
+      graph.addLayer(new Layer("@span", "Annotation Spans", Constants.ALIGNMENT_INTERVAL, true, true, false, schema.getTurnLayerId(), true));
       SpanningConventionTransformer spanningTransformer = new SpanningConventionTransformer(
         getWordLayer().getId(), "<(.*)", "(.*)>(.*)", false, "$1", "$1$2", 
         "@span", "-", "$1", "$1", false);	  
@@ -2374,7 +2245,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
         && lastUtterance.getEnd().getOffset() == null) { // only for unaligned middle utterances
       Anchor middleAnchor = graph.addAnchor(new Anchor());
       // can we reach back a further utterance
-      LinkedHashSet<Annotation> endingAtStart = start.endOf(getUtteranceLayer().getId());
+      LinkedHashSet<Annotation> endingAtStart = start.endOf(schema.getUtteranceLayerId());
       Annotation penultimateUtterance = null;
       if (endingAtStart.size() > 0) {
         penultimateUtterance = endingAtStart.iterator().next();
@@ -2423,7 +2294,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
           if (start.getOffset() - lastEnd.getOffset() > 0.01) {
             // add an empty filler utterance
             graph.addAnnotation(
-              new Annotation(null, "", getUtteranceLayer().getId(), 
+              new Annotation(null, "", utteranceLayer.getId(), 
                              lastEnd.getId(), start.getId(), currentTurn.getId()));
           } // gap between last utterance and this one
         } // utterance layer should be saturated
@@ -2483,24 +2354,24 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
    */
   public String[] getRequiredLayers() throws SerializationParametersMissingException {
     Vector<String> requiredLayers = new Vector<String>();
-    if (getParticipantLayer() != null) requiredLayers.add(getParticipantLayer().getId());
-    if (getTargetParticipantLayer() != null) requiredLayers.add(getTargetParticipantLayer().getId());
-    if (getTurnLayer() != null) requiredLayers.add(getTurnLayer().getId());
-    if (getUtteranceLayer() != null) requiredLayers.add(getUtteranceLayer().getId());
-    if (getWordLayer() != null) requiredLayers.add(getWordLayer().getId());
-    if (getDisfluencyLayer() != null) requiredLayers.add(getDisfluencyLayer().getId());
-    if (getNonWordLayer() != null) requiredLayers.add(getNonWordLayer().getId());
-    if (getExpansionLayer() != null) requiredLayers.add(getExpansionLayer().getId());
-    if (getErrorsLayer() != null) requiredLayers.add(getErrorsLayer().getId());
-    if (getRetracingLayer() != null) requiredLayers.add(getRetracingLayer().getId());
-    if (getRepetitionsLayer() != null) requiredLayers.add(getRepetitionsLayer().getId());
-    if (getCompletionLayer() != null) requiredLayers.add(getCompletionLayer().getId());
-    if (getLinkageLayer() != null) requiredLayers.add(getLinkageLayer().getId());
-    if (getCUnitLayer() != null) requiredLayers.add(getCUnitLayer().getId());
-    if (getGemLayer() != null) requiredLayers.add(getGemLayer().getId());
-    if (getTranscriberLayer() != null) requiredLayers.add(getTranscriberLayer().getId());
-    if (getLanguagesLayer() != null) requiredLayers.add(getLanguagesLayer().getId());
-    if (getMorLayer() != null) requiredLayers.add(getMorLayer().getId());
+    requiredLayers.add(schema.getParticipantLayerId());
+    if (targetParticipantLayer != null) requiredLayers.add(targetParticipantLayer.getId());
+    requiredLayers.add(schema.getTurnLayerId());
+    requiredLayers.add(schema.getUtteranceLayerId());
+    requiredLayers.add(schema.getWordLayerId());
+    if (disfluencyLayer != null) requiredLayers.add(disfluencyLayer.getId());
+    if (nonWordLayer != null) requiredLayers.add(nonWordLayer.getId());
+    if (expansionLayer != null) requiredLayers.add(expansionLayer.getId());
+    if (errorsLayer != null) requiredLayers.add(errorsLayer.getId());
+    if (retracingLayer != null) requiredLayers.add(retracingLayer.getId());
+    if (repetitionsLayer != null) requiredLayers.add(repetitionsLayer.getId());
+    if (completionLayer != null) requiredLayers.add(completionLayer.getId());
+    if (linkageLayer != null) requiredLayers.add(linkageLayer.getId());
+    if (cUnitLayer != null) requiredLayers.add(cUnitLayer.getId());
+    if (gemLayer != null) requiredLayers.add(gemLayer.getId());
+    if (transcriberLayer != null) requiredLayers.add(transcriberLayer.getId());
+    if (languagesLayer != null) requiredLayers.add(languagesLayer.getId());
+    if (morLayer != null) requiredLayers.add(morLayer.getId());
     for (String key : participantLayers.keySet()) {
       Layer layer = participantLayers.get(key);
       if (layer != null) {
@@ -2619,14 +2490,14 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       // annotate each participant with their code and role
       graph.getSchema().addLayer(
         new Layer("@code","SpeakerId").setAlignment(Constants.ALIGNMENT_NONE)
-        .setPeers(false).setParentId(participantLayer.getId()));
+        .setPeers(false).setParentId(schema.getParticipantLayerId()));
       if (participantLayers.get("role") == null) {
         graph.getSchema().addLayer(
           new Layer("@role","Role").setAlignment(Constants.ALIGNMENT_NONE)
-          .setPeers(false).setParentId(participantLayer.getId()));
+          .setPeers(false).setParentId(schema.getParticipantLayerId()));
         participantLayers.put("role", graph.getSchema().getLayer("@role"));
       }
-      for (Annotation participant : graph.all(participantLayer.getId())) {
+      for (Annotation participant : graph.all(schema.getParticipantLayerId())) {
         String speakerId = null;
         String role = null;
         Annotation roleTag = participant.first(participantLayers.get("role").getId());
@@ -2683,7 +2554,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       participantLayers.put("@code", graph.getSchema().getLayer("@code"));
       String[] fields = {
         "language","corpus","@code","age","sex","group","SES","role","education","custom"};
-      for (Annotation participant : graph.all(participantLayer.getId())) {
+      for (Annotation participant : graph.all(schema.getParticipantLayerId())) {
         // @ID: language|corpus|code|age|sex|group|SES|role|education|custom|
             
         writer.print("@ID:\t");
@@ -2808,13 +2679,13 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       // order utterances by anchor so that simultaneous speech comes out in utterance order
       TreeSet<Annotation> utterancesByAnchor
         = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
-      for (Annotation u : graph.all(getUtteranceLayer().getId())) utterancesByAnchor.add(u);
+      for (Annotation u : graph.all(schema.getUtteranceLayerId())) utterancesByAnchor.add(u);
 
       Vector<String> morTags = new Vector<String>();
       for (Annotation utterance : utterancesByAnchor) {
         if (cancelling) break;
         // is the participant changing?
-        Annotation participant = utterance.first(getParticipantLayer().getId());
+        Annotation participant = utterance.first(schema.getParticipantLayerId());
         if (participant != currentParticipant) { // participant change
 
           // print %mor line?
@@ -2901,10 +2772,10 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 
       graph.trackChanges();
       for (Annotation code : graph.all("@code")) code.destroy();
-      participantLayer.getChildren().remove("@code");
+      schema.getParticipantLayer().getChildren().remove("@code");
       graph.getSchema().getLayers().remove("@code");
       for (Annotation role : graph.all("@role")) role.destroy();
-      participantLayer.getChildren().remove("@role");
+      schema.getParticipantLayer().getChildren().remove("@role");
       graph.getSchema().getLayers().remove("@role");
       graph.commit();
 
