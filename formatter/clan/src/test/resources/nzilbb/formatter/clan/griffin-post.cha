@@ -22,13 +22,13 @@
 	automatically (see instructions sheet included)
 *APP:	(3.1) 0_10538
 *GRI:	without (.) a shadow . of a doubt i - - appreciate 3239_5079
-	that if you look at some of the things i'm quoted 5062_6693
+	that, if you look at some of the things i'm quoted 5062_6693
 	as having said↗ (0.3) 6687_7549
 	in the daily mail n dai- an' so on (0.2) 7549_8959
 	i'd be a ↑monster↘ 8953_9760
 %mor:	prep|+conj|with+prep|out=sin det:art|a=una n|shadow^v|shadow=sombra . prep|of=de det:art|a
 	n|doubt^v|doubt n:let|i - - v|appreciate
-	comp|that^pro:rel|that^pro:dem|that^det:dem|that comp|if^conj|if
+	comp|that^pro:rel|that^pro:dem|that^det:dem|that cm|cm comp|if^conj|if
 	pro:per|you cop|look^co|look^n|look^v|look prep|at
 	qn|some^pro:indef|some prep|of det:art|the n|thing-PL
 	n:let|i$aux|be&1S^n:let|i~cop|be&1S part|quote-PASTP^v|quote-PAST
@@ -39,7 +39,7 @@
 	co|so^adv|so^conj|so prep|on^adv|on n:let|i~mod|genmod cop|be^aux|be
 	det:art|a n|monster
 %pos:	prep|+conj|with+prep|out=sin det:art|a=una n|shadow . prep|of=de det:art|a
-	n|doubt n:let|i  v|appreciate comp|that conj|if pro:per|you v|look prep|at
+	n|doubt n:let|i  v|appreciate comp|that cm|cm conj|if pro:per|you v|look prep|at
 	pro:indef|some prep|of det:art|the n|thing-PL n:let|i$aux|be&1S v|quote-PAST
 	conj|as n:gerund|have-PRESP part|say&PASTP prep|in det:art|the adj|daily
 	n|mail n:let|n ?|dai– ?|an' co|so adv|on n:let|i~mod|genmod cop|be det:art|a

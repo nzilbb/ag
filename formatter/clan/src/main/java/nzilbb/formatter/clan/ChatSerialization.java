@@ -658,7 +658,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
   /**
    * Setter for {@link #morLayer}: Layer for %mor annotations.
    * @param newMorLayer Layer for %mor annotations.
-    */
+   */
   public ChatSerialization setMorLayer(Layer newMorLayer) { morLayer = newMorLayer; return this; }
   
   /**
@@ -2121,7 +2121,16 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       // match %mor annotations with their tokens
       for (Annotation morLine : graph.all("@mor")) {
         if (parsingMor && !allSkippeByMor) {
-          List<String> morTags = Arrays.asList(morLine.getLabel().split("\\s+"));
+          List<String> morTags = Arrays.stream(morLine.getLabel().split("\\s+"))
+            // filter out punctuation tags
+            .filter(tag->!tag.equals("cm|cm"))   // comma
+            .filter(tag->!tag.equals("end|end")) // postposed forms
+            .filter(tag->!tag.equals("beg|beg")) // preposed forms
+            .filter(tag->!tag.equals("bq|bq"))   // begin double quote
+            .filter(tag->!tag.equals("eq|eq"))   // end double quote
+            .filter(tag->!tag.equals("bq2|bq2")) // begin single quote
+            .filter(tag->!tag.equals("eq2|eq2")) // end single quote
+            .collect(Collectors.toList());
           List<Annotation> tokens = Arrays.stream(morLine.getParent().all(wordLayer.getId()))
             // filter out tokens that are skipped by mor
             .filter(token->!token.containsKey("@skippedByMor"))

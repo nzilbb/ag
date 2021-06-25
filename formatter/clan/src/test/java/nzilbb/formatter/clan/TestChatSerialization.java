@@ -2021,7 +2021,7 @@ public class TestChatSerialization {
     String[] morWords = {
       "without","without","without", "a", "shadow", ".", "of", "a",
       "doubt", "i", "appreciate",
-      "that", "if", "you",
+      "that,", "if", "you",
       "look", "at", "some", "of",
       "the", "things", "i'm","i'm",
       "quoted",
@@ -2033,7 +2033,7 @@ public class TestChatSerialization {
     String[] alignedWithStart = {
       "without",null,null, "a", "shadow", ".", "of", "a",
       "doubt", "i", "appreciate",
-      "that",
+      "that,",
       "if", "you",
       "look", "at", "some", "of",
       "the", "things", "i'm", null,
@@ -2046,7 +2046,7 @@ public class TestChatSerialization {
     String[] alignedWithEnd = {
       null,null,"without", "a", "shadow", ".", "of", "a",
       "doubt", "i", "appreciate",
-      "that",
+      "that,",
       "if", "you",
       "look", "at", "some", "of",
       "the", "things", null,"i'm",
