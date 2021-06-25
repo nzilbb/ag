@@ -266,21 +266,21 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
   public ChatSerialization setTargetParticipantLayer(Layer newTargetParticipantLayer) { targetParticipantLayer = newTargetParticipantLayer; return this; }
    
   /**
-   * Word layer.
-   * @see #getWordLayer()
-   * @see #setWordLayer(Layer)
+   * Layer for output word tokens.
+   * @see #getTokenLayer()
+   * @see #setTokenLayer(Layer)
    */
-  protected Layer wordLayer;
+  protected Layer tokenLayer;
   /**
-   * Getter for {@link #wordLayer}: Word layer.
-   * @return Word layer.
+   * Getter for {@link #tokenLayer}: Layer for output word tokens.
+   * @return Layer for output word tokens.
    */
-  public Layer getWordLayer() { return wordLayer; }
+  public Layer getTokenLayer() { return tokenLayer; }
   /**
-   * Setter for {@link #wordLayer}: Word layer.
-   * @param newWordLayer Word layer.
+   * Setter for {@link #tokenLayer}: Layer for output word tokens.
+   * @param newTokenLayer Layer for output word tokens.
    */
-  public void setWordLayer(Layer newWordLayer) { wordLayer = newWordLayer; }
+  public ChatSerialization setTokenLayer(Layer newTokenLayer) { tokenLayer = newTokenLayer; return this; }
 
   /**
    * Disfluency layer.
@@ -940,7 +940,6 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
    */
   public ParameterSet configure(ParameterSet configuration, Schema schema) {
     setSchema(schema);
-    wordLayer = schema.getWordLayer();
     linkageLayer = null;
     cUnitLayer = null;
     gemLayer = null;
@@ -983,7 +982,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
         possibleTurnChildLayers.put(turnChild.getId(), turnChild);
       }
     } // next possible word tag layer
-    for (Layer tag : getWordLayer().getChildren().values()) {
+    for (Layer tag : schema.getWordLayer().getChildren().values()) {
       if (tag.getAlignment() == Constants.ALIGNMENT_NONE
           && tag.getChildren().size() == 0) {
         wordTagLayers.put(tag.getId(), tag);
@@ -1015,7 +1014,21 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     pC.setValue(Utility.FindLayerById(possibleTurnChildLayers, Arrays.asList(possibilitiesC)));
     pC.setPossibleValues(possibleTurnChildLayers.values());
 
-    Parameter p = configuration.containsKey("disfluencyLayer")?configuration.get("disfluencyLayer")
+    Parameter p = configuration.containsKey("tokenLayer")?configuration.get("tokenLayer")
+      :configuration.addParameter(
+        new Parameter("tokenLayer", Layer.class, "Token layer", "Output word tokens come from this layer"));
+    // prefer orthography layer if it's there
+    String[] possibilities_token = {"orthography",schema.getWordLayerId()};
+    LinkedHashMap<String,Layer> wordTagsPlusWord = new LinkedHashMap<String,Layer>();
+    wordTagsPlusWord.put(schema.getWordLayerId(), schema.getWordLayer());
+    for (String id : wordTagLayers.keySet()) {
+      wordTagsPlusWord.put(id, wordTagLayers.get(id));
+    }
+    if (p.getValue() == null) p.setValue(
+      Utility.FindLayerById(wordTagsPlusWord, Arrays.asList(possibilities_token)));
+    p.setPossibleValues(wordTagsPlusWord.values());
+    
+    p = configuration.containsKey("disfluencyLayer")?configuration.get("disfluencyLayer")
       :configuration.addParameter(
         new Parameter("disfluencyLayer", Layer.class, "Disfluency layer", "Layer for disfluency annotations"));
     String[] possibilities_disfluency = {"disfluency","disfluencies"};
@@ -1616,7 +1629,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 
     // ensure we have an utterance tokenizer
     if (getTokenizer() == null) {
-      setTokenizer(new SimpleTokenizer(schema.getUtteranceLayerId(), getWordLayer().getId()));
+      setTokenizer(new SimpleTokenizer(schema.getUtteranceLayerId(), schema.getWordLayerId()));
     }
 
     // regular expressions
@@ -1846,7 +1859,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       // split linkages?
       if (getLinkageLayer() != null) { 
         SimpleTokenizer linkageSplitter 
-          = new SimpleTokenizer(getWordLayer().getId(), getLinkageLayer().getId(), "_", true);
+          = new SimpleTokenizer(schema.getWordLayerId(), getLinkageLayer().getId(), "_", true);
         linkageSplitter.transform(graph);
         graph.commit();
       }
@@ -1854,7 +1867,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       // annotated spans marked by <...>
       graph.addLayer(new Layer("@span", "Annotation Spans", Constants.ALIGNMENT_INTERVAL, true, true, false, schema.getTurnLayerId(), true));
       SpanningConventionTransformer spanningTransformer = new SpanningConventionTransformer(
-        getWordLayer().getId(), "<(.*)", "(.*)>(.*)", false, "$1", "$1$2", 
+        schema.getWordLayerId(), "<(.*)", "(.*)>(.*)", false, "$1", "$1$2", 
         "@span", "-", "$1", "$1", false);	  
       spanningTransformer.transform(graph);	
       graph.commit();
@@ -1862,7 +1875,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       // pauses
       ConventionTransformer transformer = new ConventionTransformer(
         // e.g. (.) (...) (0.15) (2.) (1:05.15)
-        getWordLayer().getId(), "\\(([0-9:]*\\.+[0-9]*)\\)");
+        schema.getWordLayerId(), "\\(([0-9:]*\\.+[0-9]*)\\)");
       if (pauseLayer != null) {
         transformer.addDestinationResult(pauseLayer.getId(), "$1");
       }
@@ -1873,7 +1886,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       // before we transform disfluencies, we'll tag them because we might need to know
       // whether they've been skipped by mor
       boolean allSkippeByMor = true;
-      for (Annotation word : graph.all(getWordLayer().getId())) {
+      for (Annotation word : graph.all(schema.getWordLayerId())) {
         if (word.getLabel().startsWith("&+")) {
           word.put("@skippedByMor", Boolean.TRUE);
         } else if (word.getLabel().matches("^\\W+$")
@@ -1886,8 +1899,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       } // next token
       // now strip off the &+...
       transformer = new ConventionTransformer(
-        getWordLayer().getId(), "&\\+(\\w+)");
-      transformer.addDestinationResult(getWordLayer().getId(), "$1~");
+        schema.getWordLayerId(), "&\\+(\\w+)");
+      transformer.addDestinationResult(schema.getWordLayerId(), "$1~");
       if (getDisfluencyLayer() != null) {
         transformer.addDestinationResult(getDisfluencyLayer().getId(), "&+");
       }
@@ -1897,7 +1910,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       // expansions
       String expansionLayerId = getExpansionLayer()!=null?getExpansionLayer().getId():null;
       spanningTransformer = new SpanningConventionTransformer(
-        getWordLayer().getId(), "\\[:", "(.*)\\]", true, null, null, 
+        schema.getWordLayerId(), "\\[:", "(.*)\\]", true, null, null, 
         expansionLayerId, null, "$1", true);	  
       spanningTransformer.transform(graph);	
       graph.commit();
@@ -1905,7 +1918,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       // errors
       String errorsLayerId = getErrorsLayer()!=null?getErrorsLayer().getId():null;
       spanningTransformer = new SpanningConventionTransformer(
-        getWordLayer().getId(), "\\[\\*", "(.*)\\](.*)", true, null, "$2", 
+        schema.getWordLayerId(), "\\[\\*", "(.*)\\](.*)", true, null, "$2", 
         errorsLayerId, "", "$1", true, true);	  
       spanningTransformer.transform(graph);	
       if (errorsLayerId != null) {
@@ -1923,7 +1936,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       // repetitions
       String repetitionsLayerId = getRepetitionsLayer()!=null?getRepetitionsLayer().getId():null;
       spanningTransformer = new SpanningConventionTransformer(
-        getWordLayer().getId(), "\\[/\\].*", "\\[/\\]", true, null, null, 
+        schema.getWordLayerId(), "\\[/\\].*", "\\[/\\]", true, null, null, 
         repetitionsLayerId, "/", "", true, true);	  
       spanningTransformer.transform(graph);	
       if (repetitionsLayerId != null) {
@@ -1941,7 +1954,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       // retracing
       String retracingLayerId = getRetracingLayer()!=null?getRetracingLayer().getId():null;
       spanningTransformer = new SpanningConventionTransformer(
-        getWordLayer().getId(), "\\[//\\]", "\\[//\\]", true, null, null, 
+        schema.getWordLayerId(), "\\[//\\]", "\\[//\\]", true, null, null, 
         retracingLayerId, "//", "", true, true);	  
       spanningTransformer.transform(graph);	
       if (retracingLayerId != null) {
@@ -1957,8 +1970,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       graph.commit();
 	 
       // completions at the start and at the end
-      transformer = new ConventionTransformer(getWordLayer().getId(), "\\((\\p{Alnum}+)\\)(.+)\\((\\p{Alnum}+)\\)");
-      transformer.addDestinationResult(getWordLayer().getId(), "$2");
+      transformer = new ConventionTransformer(schema.getWordLayerId(), "\\((\\p{Alnum}+)\\)(.+)\\((\\p{Alnum}+)\\)");
+      transformer.addDestinationResult(schema.getWordLayerId(), "$2");
       if (getCompletionLayer() != null) {
         transformer.addDestinationResult(getCompletionLayer().getId(), "$1$2$3");
       }
@@ -1966,8 +1979,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       graph.commit();
 	 
       // completions at the start
-      transformer = new ConventionTransformer(getWordLayer().getId(), "\\((\\p{Alnum}+)\\)(.+)");
-      transformer.addDestinationResult(getWordLayer().getId(), "$2");
+      transformer = new ConventionTransformer(schema.getWordLayerId(), "\\((\\p{Alnum}+)\\)(.+)");
+      transformer.addDestinationResult(schema.getWordLayerId(), "$2");
       if (getCompletionLayer() != null) {
         transformer.addDestinationResult(getCompletionLayer().getId(), "$1$2");
       }
@@ -1975,8 +1988,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       graph.commit();
 	 
       // completions at the end
-      transformer = new ConventionTransformer(getWordLayer().getId(), "(.+)\\((\\p{Alnum}+)\\)");
-      transformer.addDestinationResult(getWordLayer().getId(), "$1");
+      transformer = new ConventionTransformer(schema.getWordLayerId(), "(.+)\\((\\p{Alnum}+)\\)");
+      transformer.addDestinationResult(schema.getWordLayerId(), "$1");
       if (getCompletionLayer() != null) {
         transformer.addDestinationResult(getCompletionLayer().getId(), "$1$2");
       }
@@ -2002,7 +2015,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
             .filter(tag->!tag.equals("bq2|bq2")) // begin single quote
             .filter(tag->!tag.equals("eq2|eq2")) // end single quote
             .collect(Collectors.toList());
-          List<Annotation> tokens = Arrays.stream(morLine.getParent().all(wordLayer.getId()))
+          List<Annotation> tokens = Arrays.stream(
+            morLine.getParent().all(schema.getWordLayerId()))
             // filter out tokens that are skipped by mor
             .filter(token->!token.containsKey("@skippedByMor"))
             .collect(Collectors.toList());
@@ -2455,11 +2469,11 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       // convert stutters X~ to &+X
       if (disfluencyLayer == null) {
         new ConventionTransformer(
-          wordLayer.getId(), "(.+)~", "&+$1", null, null)
+          schema.getWordLayerId(), "(.+)~", "&+$1", null, null)
           .transform(graph);
       } else { // prefix words with &+
         for (Annotation disfluency : graph.all(disfluencyLayer.getId())) {
-          Annotation word = disfluency.first(wordLayer.getId());
+          Annotation word = disfluency.first(schema.getWordLayerId());
           if (word != null) {
             word.setLabel("&+"+word.getLabel().replaceAll("~$",""));
           }
@@ -2701,7 +2715,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 
         String delimiter = "\t";
         boolean printedSomething = false;
-        for (Annotation token : utterance.all(getWordLayer().getId())) {
+        for (Annotation token : utterance.all(tokenLayer.getId())) {
           printedSomething = true;
           writer.print(delimiter); // tab if it's the first word, space otherwise
           delimiter = " ";
