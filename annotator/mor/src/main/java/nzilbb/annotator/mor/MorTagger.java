@@ -321,6 +321,23 @@ public class MorTagger extends Annotator {
   }
   
   /**
+   * ID of the word tokens input layer.
+   * @see #getTokenLayerId()
+   * @see #setTokenLayerId(String)
+   */
+  protected String tokenLayerId;
+  /**
+   * Getter for {@link #tokenLayerId}: ID of the word tokens input layer.
+   * @return ID of the word tokens input layer.
+   */
+  public String getTokenLayerId() { return tokenLayerId; }
+  /**
+   * Setter for {@link #tokenLayerId}: ID of the word tokens input layer.
+   * @param newTokenLayerId ID of the word tokens input layer.
+   */
+  public MorTagger setTokenLayerId(String newTokenLayerId) { tokenLayerId = newTokenLayerId; return this; }
+  
+  /**
    * ID of the output layer.
    * @see #getMorLayerId()
    * @see #setMorLayerId(String)
@@ -563,6 +580,13 @@ public class MorTagger extends Annotator {
     if (parameters == null) { // apply default configuration
       
       try {
+        // default input layer
+        if (schema.getLayer("orthography") != null) {
+          tokenLayerId = "orthography";
+        } else {
+          tokenLayerId = schema.getWordLayerId();
+        }
+        
         // default transcript language layer
         Layer[] candidates = schema.getMatchingLayers(
           "layer.parentId == schema.root.id && layer.alignment == 0" // transcript attribute
@@ -656,6 +680,13 @@ public class MorTagger extends Annotator {
     } else {
       beanPropertiesFromQueryString(parameters);
     }
+    
+    if (tokenLayerId == null) {
+      throw new InvalidConfigurationException(
+        this, "Word token layer not set.");
+    } else if (schema.getLayer(tokenLayerId) == null)
+      throw new InvalidConfigurationException(
+        this, "Word token layer not found: " + tokenLayerId);
     
     if (languagesLayerId != null && schema.getLayer(languagesLayerId) == null) 
       throw new InvalidConfigurationException(
@@ -813,6 +844,8 @@ public class MorTagger extends Annotator {
   public String[] getRequiredLayers() throws InvalidConfigurationException {
     if (schema == null)
       throw new InvalidConfigurationException(this, "Schema is not set.");
+    if (tokenLayerId == null)
+      throw new InvalidConfigurationException(this, "No input word token layer set.");
     if (languagesLayerId == null)
       throw new InvalidConfigurationException(this, "No input transcript language layer set.");
     Vector<String> requiredLayers = new Vector<String>();
@@ -820,6 +853,7 @@ public class MorTagger extends Annotator {
     requiredLayers.add(schema.getTurnLayerId());
     requiredLayers.add(schema.getUtteranceLayerId());
     requiredLayers.add(schema.getWordLayerId());
+    if (!schema.getWordLayerId().equals(tokenLayerId)) requiredLayers.add(tokenLayerId);
     requiredLayers.add(languagesLayerId);
     return requiredLayers.toArray(new String[0]);
   }
@@ -886,6 +920,8 @@ public class MorTagger extends Annotator {
       // save the transcript in CHAT format
       ChatSerialization converter = new ChatSerialization();
       ParameterSet configuration = converter.configure(new ParameterSet(), schema);
+      configuration.get("tokenLayer").setValue(
+        graph.getSchema().getLayer(tokenLayerId));
       configuration.get("morLayer").setValue(
         graph.getSchema().getLayer(morLayerId));
       configuration.get("morPrefixLayer").setValue(
@@ -933,7 +969,7 @@ public class MorTagger extends Annotator {
         
         final Vector<SerializationException> exceptions = new Vector<SerializationException>();
         final Vector<NamedStream> serializeStreams = new Vector<NamedStream>();
-        String[] serializationLayers = { schema.getWordLayerId(), languagesLayerId };
+        String[] serializationLayers = { schema.getWordLayerId(), tokenLayerId, languagesLayerId };
         Graph[] graphs = { fragment };
         try {
           converter.serialize(Arrays.spliterator(graphs), serializationLayers,
@@ -1024,9 +1060,9 @@ public class MorTagger extends Annotator {
                   }
                 }));
             List<Annotation> originalWords = Arrays.asList(
-              utterance.all(schema.getWordLayerId()));
+              utterance.all(tokenLayerId)); // output was token layer, so compare against that
             List<Annotation> chaWords = Arrays.asList(
-              tagged.all(schema.getWordLayerId()));
+              tagged.all(schema.getWordLayerId())); // tokens come in on word layer
             for (EditStep<Annotation> step : mp.minimumEditPath(chaWords, originalWords)) {
               if (step.getFrom() != null && step.getTo() != null) {
                 copyAnnotations(morLayerId, step.getFrom(), step.getTo(), graph);
@@ -1040,11 +1076,6 @@ public class MorTagger extends Annotator {
                 copyAnnotations(glossLayerId, step.getFrom(), step.getTo(), graph);
               }
             } // next token
-            if (morLayerId != null) {
-              for (Annotation w : utterance.all(schema.getWordLayerId())) {
-                Annotation t = w.first(morLayerId);
-              } // next word
-            }
             
             setPercentComplete(++u * 100 / utterances.length);
           } finally {
@@ -1095,15 +1126,15 @@ public class MorTagger extends Annotator {
     * Copy the annotations of the given cha token on the given layer to the given graph token.
     * @param layerId
     * @param chaWord
-    * @param originalWord
+    * @param originalToken
     * @param graph
     */
    private void copyAnnotations(
-     String layerId, Annotation chaWord, Annotation originalWord, Graph graph) {
+     String layerId, Annotation chaWord, Annotation originalToken, Graph graph) {
      
      if (layerId != null) {
        for (Annotation tag : chaWord.getAnnotations(layerId)) {
-         Anchor start = originalWord.getStart();
+         Anchor start = originalToken.getStart();
          if (!tag.getStartId().equals(chaWord.getStartId())) { // chained annotation
            if (!chaWord.getStart().containsKey("@start")) {
              // create a new anchor in the original graph
@@ -1113,7 +1144,7 @@ public class MorTagger extends Annotator {
            }
            start = (Anchor)chaWord.getStart().get("@start");
          }
-         Anchor end = originalWord.getEnd();
+         Anchor end = originalToken.getEnd();
          if (!tag.getEndId().equals(chaWord.getEndId())) { // chained annotation
            if (!chaWord.getEnd().containsKey("@end")) {
              // create a new anchor in the original graph
@@ -1123,9 +1154,16 @@ public class MorTagger extends Annotator {
            }
            end = (Anchor)chaWord.getEnd().get("@end");
          }
+         Annotation parent = originalToken;
+         if (!tokenLayerId.equals(graph.getSchema().getWordLayerId())) {
+           // original token is a peer, so get its word
+           parent = originalToken.first(graph.getSchema().getWordLayerId());
+           assert parent != null :
+             "parent != null - " + originalToken + " ("+originalToken.getLayerId()+")";
+         }
          Annotation a = new Annotation().setLayerId(layerId)
            .setLabel(tag.getLabel())
-           .setParentId(originalWord.getId())
+           .setParentId(parent.getId())
            .setStartId(start.getId())
            .setEndId(end.getId());
          a.setConfidence(Constants.CONFIDENCE_AUTOMATIC);

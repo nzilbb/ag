@@ -12,8 +12,21 @@ var schema = null;
 getSchema(s => {
     schema = s;
     
-    // populate the language layer...
-    
+    // populate layer input select options...          
+    var tokenLayerId = document.getElementById("tokenLayerId");
+    addLayerOptions(
+        tokenLayerId, schema,
+        // this is a function that takes a layer and returns true for the ones we want
+        layer => layer.id == schema.wordLayerId
+            || (layer.parentId == schema.wordLayerId && layer.alignment == 0));
+    // default value:
+    if (schema.layers["orthography"]) {
+        tokenLayerId.value = "orthography";
+    } else {
+        tokenLayerId.value = schema.wordLayerId;
+    }
+
+    // populate the language layer...    
     var languagesLayerId = document.getElementById("languagesLayerId");
     addLayerOptions(
         languagesLayerId, schema,

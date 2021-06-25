@@ -86,6 +86,8 @@ public class TestMorTagger {
     // use default configuration
     annotator.setTaskParameters(null);
     
+    assertEquals("token layer",
+                 "word", annotator.getTokenLayerId());
     assertEquals("transcript language layer",
                  "transcript_language", annotator.getLanguagesLayerId());
     assertEquals("mor layer",
@@ -107,7 +109,7 @@ public class TestMorTagger {
     assertEquals("Required layers: "+requiredLayers,
                  5, requiredLayers.size());
     assertTrue("participants required "+requiredLayers,
-               requiredLayers.contains("who"));
+               requiredLayers.contains("participant"));
     assertTrue("turns required "+requiredLayers,
                requiredLayers.contains("turn"));
     assertTrue("utterances required "+requiredLayers,
@@ -296,18 +298,22 @@ public class TestMorTagger {
     annotator.setSchema(schema);
     
     // use default configuration
-    annotator.setTaskParameters("languagesLayerId=transcript_language"
-        +"&morLayerId="
-        +"&prefixLayerId="
-        +"&partOfSpeechLayerId=part-of-speech"
-        +"&partOfSpeechSubcategoryLayerId="
-        +"&stemLayerId=stem"
-        +"&fusionalSuffixLayerId="
-        +"&suffixLayerId="
-        +"&glossLayerId=");
+    annotator.setTaskParameters(
+      "tokenLayerId=word"
+      +"&languagesLayerId=transcript_language"
+      +"&morLayerId="
+      +"&prefixLayerId="
+      +"&partOfSpeechLayerId=part-of-speech"
+      +"&partOfSpeechSubcategoryLayerId="
+      +"&stemLayerId=stem"
+      +"&fusionalSuffixLayerId="
+      +"&suffixLayerId="
+      +"&glossLayerId=");
     
     assertEquals("transcript language layer",
                  "transcript_language", annotator.getLanguagesLayerId());
+    assertEquals("token layer",
+                 "word", annotator.getTokenLayerId());
     assertNull("no mor layer",
                annotator.getMorLayerId());
     assertNull("no prefix layer",
@@ -353,7 +359,7 @@ public class TestMorTagger {
     assertEquals("Required layers: "+requiredLayers,
                  5, requiredLayers.size());
     assertTrue("participants required "+requiredLayers,
-               requiredLayers.contains("who"));
+               requiredLayers.contains("participant"));
     assertTrue("turns required "+requiredLayers,
                requiredLayers.contains("turn"));
     assertTrue("utterances required "+requiredLayers,
@@ -449,12 +455,168 @@ public class TestMorTagger {
     assertEquals("lazily", "laze", mors.next().getLabel());
   }
 
+  /** Configuring a different input layer works */
+  @Test public void otherInputLayer() throws Exception {
+    
+    Graph g = graph();
+    g.trackChanges();
+    Schema schema = g.getSchema();
+    schema.addLayer(new Layer("token", "Word tokens")
+                    .setAlignment(Constants.ALIGNMENT_NONE)
+                    .setPeers(false).setPeersOverlap(false).setSaturated(true)
+                    .setParentId(schema.getWordLayerId()).setParentIncludes(true));
+
+    // add tokens
+    for (Annotation word : g.all(schema.getWordLayerId())) {
+      if (!word.getLabel().endsWith("~")) { // skip hesitations
+        g.createTag(word, "token", word.getLabel().replaceAll("\\W","").toLowerCase());
+      }
+    }
+    
+    annotator.setSchema(schema);
+    
+    // use default configuration
+    annotator.setTaskParameters(
+      "tokenLayerId=token"
+      +"&languagesLayerId=transcript_language"
+      +"&morLayerId="
+      +"&prefixLayerId="
+      +"&partOfSpeechLayerId=part-of-speech"
+      +"&partOfSpeechSubcategoryLayerId="
+      +"&stemLayerId=stem"
+      +"&fusionalSuffixLayerId="
+      +"&suffixLayerId="
+      +"&glossLayerId=");
+    
+    assertEquals("token layer",
+                 "token", annotator.getTokenLayerId());
+    assertEquals("transcript language layer",
+                 "transcript_language", annotator.getLanguagesLayerId());
+    assertNull("no mor layer",
+               annotator.getMorLayerId());
+    assertNull("no prefix layer",
+               annotator.getPrefixLayerId());
+    assertNull("no subcategory layer",
+               annotator.getPartOfSpeechSubcategoryLayerId());
+    assertNull("no fusionalSuffixLayerId layer",
+               annotator.getFusionalSuffixLayerId());
+    assertNull("no suffix layer",
+               annotator.getSuffixLayerId());
+    assertNull("no gloss layer",
+               annotator.getGlossLayerId());
+    assertEquals("pos layer",
+                 "part-of-speech", annotator.getPartOfSpeechLayerId());
+    assertNotNull("pos layer was created",
+                  schema.getLayer(annotator.getPartOfSpeechLayerId()));
+    assertEquals("pos layer child of word",
+                 "word", schema.getLayer(annotator.getPartOfSpeechLayerId()).getParentId());
+    assertEquals("pos layer aligned",
+                 Constants.ALIGNMENT_INTERVAL,
+                 schema.getLayer(annotator.getPartOfSpeechLayerId()).getAlignment());
+    assertEquals("pos layer type correct",
+                 Constants.TYPE_STRING,
+                 schema.getLayer(annotator.getPartOfSpeechLayerId()).getType());
+    assertTrue("pos layer allows peers", // contractions like "I'll" might have two tags
+                schema.getLayer(annotator.getPartOfSpeechLayerId()).getPeers());
+    assertEquals("stem layer",
+                 "stem", annotator.getStemLayerId());
+    assertNotNull("stem layer was created",
+                  schema.getLayer(annotator.getStemLayerId()));
+    assertEquals("stem layer child of word",
+                 "word", schema.getLayer(annotator.getStemLayerId()).getParentId());
+    assertEquals("stem layer aligned",
+                 Constants.ALIGNMENT_INTERVAL,
+                 schema.getLayer(annotator.getStemLayerId()).getAlignment());
+    assertEquals("stem layer type correct",
+                 Constants.TYPE_STRING,
+                 schema.getLayer(annotator.getStemLayerId()).getType());
+    assertTrue("stem layer allows peers", // contractions like "I'll" might have two tags
+                schema.getLayer(annotator.getStemLayerId()).getPeers());
+    Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
+      .collect(Collectors.toSet());
+    assertEquals("Required layers: "+requiredLayers,
+                 6, requiredLayers.size());
+    assertTrue("participants required "+requiredLayers,
+               requiredLayers.contains("participant"));
+    assertTrue("turns required "+requiredLayers,
+               requiredLayers.contains("turn"));
+    assertTrue("utterances required "+requiredLayers,
+               requiredLayers.contains("utterance"));
+    assertTrue("word required "+requiredLayers,
+               requiredLayers.contains("word"));
+    assertTrue("token required "+requiredLayers,
+               requiredLayers.contains("token"));
+    assertTrue("transcript_language required "+requiredLayers,
+               requiredLayers.contains("transcript_language"));
+    Set<String> outputLayers = Arrays.stream(annotator.getOutputLayers())
+      .collect(Collectors.toSet());;
+    assertEquals("Stem and POS as output layers: "+outputLayers,
+                 2, outputLayers.size());
+    assertTrue("output layers include part-of-speech", outputLayers.contains("part-of-speech"));
+    assertTrue("output layers include stem", outputLayers.contains("stem"));
+    
+    Annotation firstWord = g.first("word");
+    assertEquals("double check the first word is what we think it is: "+firstWord,
+                 "I'll", firstWord.getLabel());
+      
+    assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
+                 9, g.all("word").length);
+    assertEquals("double check there are no POSes: "+Arrays.asList(g.all("part-of-speech")),
+                 0, g.all("part-of-speech").length);
+    // run the annotator
+    annotator.transform(g);
+    List<Annotation> morAnnotations = Arrays.asList(g.all("part-of-speech"));
+    assertEquals("Correct number of tokens (disfluent w~ is skipped) "+morAnnotations,
+                 8, morAnnotations.size());
+    Iterator<Annotation> mors = morAnnotations.iterator();
+    assertEquals("ill", "adv", mors.next().getLabel());
+    assertEquals("sing", "v", mors.next().getLabel());
+    assertEquals("and", "coord", mors.next().getLabel());
+    assertEquals("walk", "n", mors.next().getLabel());
+    assertEquals("about", "prep", mors.next().getLabel());
+    assertEquals("my", "det", mors.next().getLabel());
+    assertEquals("bloggingmorting", "?", mors.next().getLabel());
+    assertEquals("lazily", "adv", mors.next().getLabel());
+
+    mors = morAnnotations.iterator();
+    String[] wordLabels = {
+      "I'll", 
+      "sing .", "and",
+      "walk -", 
+      "about", 
+      "my", 
+      "blogging-morting",
+      "lazily"
+    };
+    for (int i = 0; i < wordLabels.length; i++) {
+      assertEquals("Tag " + i + " should tag " + wordLabels[i],
+                   wordLabels[i], mors.next().first("word").getLabel());
+    }
+    assertEquals("I'll (ill) has one tag", 1, firstWord.all("part-of-speech").length);
+
+    // stem
+    morAnnotations = Arrays.stream(g.all("stem"))
+      .collect(Collectors.toList());
+    assertEquals("Correct number of stems "+morAnnotations,
+                 8, morAnnotations.size());
+    mors = morAnnotations.iterator();
+    assertEquals("I'll", "ill", mors.next().getLabel());
+    assertEquals("sing", "sing", mors.next().getLabel());
+    assertEquals("and", "and", mors.next().getLabel());
+    assertEquals("walk", "walk", mors.next().getLabel());
+    assertEquals("about", "about", mors.next().getLabel());
+    assertEquals("my", "my", mors.next().getLabel());
+    assertEquals("blogging-morting", "bloggingmorting", mors.next().getLabel());
+    assertEquals("lazily", "laze", mors.next().getLabel());
+  }
+
   @Test public void setInvalidTaskParameters() throws Exception {
     
     try {
       annotator.setTaskParameters(
+        "tokenLayerId=word"
         // doesn't exist in the schema:
-        "languagesLayerId=language"
+        +"&languagesLayerId=language"
         +"&morLayerId=mor"
         +"&prefixLayerId=prefix"
         +"&partOfSpeechLayerId=part-of-speech"
@@ -468,7 +630,24 @@ public class TestMorTagger {
     }
     try {
       annotator.setTaskParameters(
-        "languagesLayerId=transcript_language"
+        // doesn't exist in the schema:
+        "tokenLayerId=orth"
+        +"&languagesLayerId=language"
+        +"&morLayerId=mor"
+        +"&prefixLayerId=prefix"
+        +"&partOfSpeechLayerId=part-of-speech"
+        +"&partOfSpeechSubcategoryLayerId=subcategory"
+        +"&stemLayerId=stem"
+        +"&fusionalSuffixLayerId=suffix"
+        +"&suffixLayerId=suffix"
+        +"&glossLayerId=suffix");
+      fail("Should fail with nonexistent tokenLayerId");
+    } catch (InvalidConfigurationException x) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "tokenLayerId=word"
+        +"&languagesLayerId=transcript_language"
         // same as token layer:
         +"&morLayerId=word"
         +"&prefixLayerId=prefix"
@@ -489,7 +668,7 @@ public class TestMorTagger {
    */
   public static Graph graph() {
     Schema schema = new Schema(
-      "who", "turn", "utterance", "word",
+      "participant", "turn", "utterance", "word",
       new Layer("transcript_language", "Overall Language")
       .setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true),
