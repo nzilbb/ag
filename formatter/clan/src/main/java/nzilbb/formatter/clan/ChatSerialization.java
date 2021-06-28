@@ -2083,7 +2083,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                       tag.setStartId(graph.addAnchor(new Anchor()).getId());
                       lastTag.setEndId(tag.getStartId());
                     }
-                    tag.setEndId(token.getEndId());                      
+                    tag.setEndId(token.getEndId());
                     if (morLayer != null) {
                       tag.setLayerId(morLayer.getId());
                       graph.addAnnotation(tag);
