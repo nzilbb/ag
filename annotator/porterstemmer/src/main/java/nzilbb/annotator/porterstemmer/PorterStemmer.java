@@ -225,6 +225,7 @@ public class PorterStemmer extends Annotator {
     * @throws TransformationException If the transformation cannot be completed.
     */
    public Graph transform(Graph graph) throws TransformationException {
+      setRunning(true);
       
       Layer tokenLayer = graph.getSchema().getLayer(tokenLayerId);
       if (tokenLayer == null) {
@@ -303,7 +304,8 @@ public class PorterStemmer extends Annotator {
             } // English phrase
          } // next phrase
       } // thereArePhraseTags
-      
+
+      setRunning(false);
       return graph;
    }
 

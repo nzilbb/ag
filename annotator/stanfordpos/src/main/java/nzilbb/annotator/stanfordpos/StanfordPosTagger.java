@@ -106,7 +106,7 @@ public class StanfordPosTagger extends Annotator {
    * @see #beanPropertiesFromQueryString(String)
    */ 
   public void setConfig(String config) throws InvalidConfigurationException {
-    running = true;
+    setRunning(true);
     setPercentComplete(0);
     setStatus(""); // clear any residual status from the last run...
 
@@ -181,7 +181,7 @@ public class StanfordPosTagger extends Annotator {
     } catch (IOException x) {
       throw new InvalidConfigurationException(this, x);
     } finally {
-      running = false;
+      setRunning(false);
     }
   }
   
@@ -476,7 +476,7 @@ public class StanfordPosTagger extends Annotator {
    * @throws TransformationException If the transformation cannot be completed.
    */
   public Graph transform(Graph graph) throws TransformationException {
-    running = true;
+    setRunning(true);
     try {
       setStatus("Tagging " + graph.getId());
       
@@ -560,7 +560,7 @@ public class StanfordPosTagger extends Annotator {
       
       return graph;
     } finally {
-      running = false;
+      setRunning(false);
     }
   }
 }

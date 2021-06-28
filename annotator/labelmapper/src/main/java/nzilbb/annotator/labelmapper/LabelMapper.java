@@ -222,7 +222,7 @@ public class LabelMapper extends Annotator {
     * @throws TransformationException If the transformation cannot be completed.
     */
    public Graph transform(Graph graph) throws TransformationException {
-      
+      setRunning(true);      
       Layer labelLayer = graph.getSchema().getLayer(labelLayerId);
       if (labelLayer == null) {
          throw new InvalidConfigurationException(
@@ -240,7 +240,8 @@ public class LabelMapper extends Annotator {
       }
 
       // TODO
-      
+
+      setRunning(false);
       return graph;
    }   
    

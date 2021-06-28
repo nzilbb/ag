@@ -172,7 +172,7 @@ public class JythonAnnotator extends Annotator {
     * @see #beanPropertiesFromQueryString(String)
     */ 
    public void setConfig(String config) throws InvalidConfigurationException {
-      running = true;
+      setRunning(true);
       setPercentComplete(0);
       try {
          setStatus(""); // clear any residual status from the last run...
@@ -195,7 +195,7 @@ public class JythonAnnotator extends Annotator {
       } catch (IOException x) {
          throw new InvalidConfigurationException(this, "Could not get Jython from: " + jythonUrl);
       } finally {
-         running = false;
+         setRunning(false);
       }
    }
 
@@ -340,7 +340,8 @@ public class JythonAnnotator extends Annotator {
     * @throws TransformationException If the transformation cannot be completed.
     */
    public Graph transform(Graph graph) throws TransformationException {
-
+      setRunning(true);
+     
       File jythonJar = new File(getWorkingDirectory(), "jython.jar");
       if (!jythonJar.exists()) {
          throw new TransformationException(
@@ -424,6 +425,7 @@ public class JythonAnnotator extends Annotator {
       } catch (ScriptException exception) {
          throw new InvalidConfigurationException(this, exception);
       }
+      setRunning(false);
       return graph;
    }
    

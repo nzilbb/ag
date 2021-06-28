@@ -443,10 +443,15 @@ public class JavascriptAnnotator extends Annotator {
     * @throws TransformationException If the transformation cannot be completed.
     */
    public Graph transform(Graph graph) throws TransformationException {
-      if (labelMapping) {
-         mapLabels(graph);
-      } else {
-         executeScript(graph);
+      setRunning(true);
+      try {
+        if (labelMapping) {
+          mapLabels(graph);
+        } else {
+          executeScript(graph);
+        }
+      } finally {
+        setRunning(false);
       }
       return graph;
    }

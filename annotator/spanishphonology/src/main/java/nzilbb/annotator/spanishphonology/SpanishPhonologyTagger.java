@@ -240,7 +240,8 @@ public class SpanishPhonologyTagger extends Annotator {
     * @throws TransformationException If the transformation cannot be completed.
     */
    public Graph transform(Graph graph) throws TransformationException {
-      
+      setRunning(true);
+     
       Layer tokenLayer = graph.getSchema().getLayer(tokenLayerId);
       if (tokenLayer == null) {
          throw new InvalidConfigurationException(
@@ -318,7 +319,8 @@ public class SpanishPhonologyTagger extends Annotator {
             } // Spanish phrase
          } // next phrase
       } // thereArePhraseTags
-      
+
+      setRunning(false);
       return graph;
    }
 

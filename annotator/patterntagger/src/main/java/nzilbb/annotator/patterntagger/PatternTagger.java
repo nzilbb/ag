@@ -360,7 +360,8 @@ public class PatternTagger extends Annotator {
     * @throws TransformationException If the transformation cannot be completed.
     */
    public Graph transform(Graph graph) throws TransformationException {
-      
+      setRunning(true);
+     
       Layer sourceLayer = graph.getSchema().getLayer(sourceLayerId);
       if (sourceLayer == null) {
          throw new InvalidConfigurationException(
@@ -377,7 +378,8 @@ public class PatternTagger extends Annotator {
       } else { // span-based tagging
          annotateSpans(graph, sourceLayer, destinationLayer);
       } // span-based tagging
-      
+
+      setRunning(false);
       return graph;
    }
    

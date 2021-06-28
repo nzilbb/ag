@@ -175,6 +175,7 @@ public class OrthographyStandardizer extends Annotator {
     * @throws TransformationException If the transformation cannot be completed.
     */
    public Graph transform(Graph graph) throws TransformationException {
+      setRunning(true);
       
       Layer tokenLayer = graph.getSchema().getLayer(tokenLayerId);
       if (tokenLayer == null) {
@@ -198,7 +199,8 @@ public class OrthographyStandardizer extends Annotator {
             }
          } // not tagged yet
       } // next token
-      
+
+      setRunning(false);
       return graph;
    }
    

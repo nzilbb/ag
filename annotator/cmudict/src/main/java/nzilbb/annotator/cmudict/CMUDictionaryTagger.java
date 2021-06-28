@@ -226,7 +226,7 @@ public class CMUDictionaryTagger extends Annotator
     * @see #beanPropertiesFromQueryString(String)
     */ 
    public void setConfig(String config) throws InvalidConfigurationException {
-      running = true;
+      setRunning(true);
       try {
          openLog();
          setStatus(""); // clear any residual status from the last run...
@@ -285,7 +285,7 @@ public class CMUDictionaryTagger extends Annotator
             this, "Error reading dictionary file: " + ioX.getMessage(), ioX);
       } finally {
          closeLog();
-         running = false;
+         setRunning(false);
       }
    }
    
@@ -624,7 +624,7 @@ public class CMUDictionaryTagger extends Annotator
     * @throws TransformationException If the transformation cannot be completed.
     */
    public Graph transform(Graph graph) throws TransformationException {
-      running = true;
+      setRunning(true);
       try {
          openLog();
          setStatus(""); // clear any residual status from the last run...
@@ -737,7 +737,7 @@ public class CMUDictionaryTagger extends Annotator
          return graph;
       } finally {
          closeLog();
-         running = false;
+         setRunning(false);
       }
    }
    
