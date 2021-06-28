@@ -117,7 +117,7 @@ public class MorTagger extends Annotator {
    * @see #beanPropertiesFromQueryString(String)
    */ 
   public void setConfig(String config) throws InvalidConfigurationException {
-    running = true;
+    setRunning(true);
     setPercentComplete(0);
     setStatus(""); // clear any residual status from the last run...
 
@@ -257,7 +257,7 @@ public class MorTagger extends Annotator {
     } catch (IOException x) {
       throw new InvalidConfigurationException(this, x);
     } finally {
-      running = false;
+      setRunning(false);
     }
   }
   
@@ -701,7 +701,8 @@ public class MorTagger extends Annotator {
         schema.addLayer(
           new Layer(morLayerId)
           .setAlignment(Constants.ALIGNMENT_INTERVAL)
-          .setPeers(true)
+          .setPeers(true).setPeersOverlap(true)
+          .setSaturated(true) // mor tags tag the whole token
           .setParentId(schema.getWordLayerId()));
       } else {
         if (morLayerId.equals(schema.getWordLayerId())
@@ -718,7 +719,8 @@ public class MorTagger extends Annotator {
         schema.addLayer(
           new Layer(prefixLayerId)
           .setAlignment(Constants.ALIGNMENT_INTERVAL)
-          .setPeers(true)
+          .setPeers(true).setPeersOverlap(true)
+          .setSaturated(false) // prefixes cover only a part of the token
           .setParentId(schema.getWordLayerId()));
       } else {
         if (prefixLayerId.equals(schema.getWordLayerId())
@@ -735,7 +737,8 @@ public class MorTagger extends Annotator {
         schema.addLayer(
           new Layer(partOfSpeechLayerId)
           .setAlignment(Constants.ALIGNMENT_INTERVAL)
-          .setPeers(true)
+          .setPeers(true).setPeersOverlap(true)
+          .setSaturated(false) // maybe not all (sub)tags have a POS? so allow gaps
           .setParentId(schema.getWordLayerId()));
       } else {
         if (partOfSpeechLayerId.equals(schema.getWordLayerId())
@@ -753,7 +756,8 @@ public class MorTagger extends Annotator {
         schema.addLayer(
           new Layer(partOfSpeechSubcategoryLayerId)
           .setAlignment(Constants.ALIGNMENT_INTERVAL)
-          .setPeers(true)
+          .setPeers(true).setPeersOverlap(true)
+          .setSaturated(false) // not all (sub)tags have a category, so there may be gaps
           .setParentId(schema.getWordLayerId()));
       } else {
         if (partOfSpeechSubcategoryLayerId.equals(schema.getWordLayerId())
@@ -771,7 +775,8 @@ public class MorTagger extends Annotator {
         schema.addLayer(
           new Layer(stemLayerId)
           .setAlignment(Constants.ALIGNMENT_INTERVAL)
-          .setPeers(true)
+          .setPeers(true).setPeersOverlap(true)
+          .setSaturated(false) // maybe not all (sub)tags have a stem? so there may be gaps
           .setParentId(schema.getWordLayerId()));
       } else {
         if (stemLayerId.equals(schema.getWordLayerId())
@@ -788,7 +793,8 @@ public class MorTagger extends Annotator {
         schema.addLayer(
           new Layer(fusionalSuffixLayerId)
           .setAlignment(Constants.ALIGNMENT_INTERVAL)
-          .setPeers(true)
+          .setPeers(true).setPeersOverlap(true)
+          .setSaturated(false) // suffixes only cover a part of the token, so there may be gaps
           .setParentId(schema.getWordLayerId()));
       } else {
         if (fusionalSuffixLayerId.equals(schema.getWordLayerId())
@@ -806,7 +812,8 @@ public class MorTagger extends Annotator {
         schema.addLayer(
           new Layer(suffixLayerId)
           .setAlignment(Constants.ALIGNMENT_INTERVAL)
-          .setPeers(true)
+          .setPeers(true).setPeersOverlap(true)
+          .setSaturated(false) // suffixes only cover a part of the token, so there may be gaps
           .setParentId(schema.getWordLayerId()));
       } else {
         if (suffixLayerId.equals(schema.getWordLayerId())
@@ -823,7 +830,8 @@ public class MorTagger extends Annotator {
         schema.addLayer(
           new Layer(glossLayerId)
           .setAlignment(Constants.ALIGNMENT_INTERVAL)
-          .setPeers(true)
+          .setPeers(true).setPeersOverlap(true)
+          .setSaturated(false) // not all (sub)tags necessarily have a gloss, so there may be gaps
           .setParentId(schema.getWordLayerId()));
       } else {
         if (glossLayerId.equals(schema.getWordLayerId())
@@ -891,7 +899,7 @@ public class MorTagger extends Annotator {
    * @throws TransformationException If the transformation cannot be completed.
    */
   public Graph transform(Graph graph) throws TransformationException {
-    running = true;
+    setRunning(true);
     try {
       setStatus("Tagging " + graph.getId());
       setPercentComplete(0);
@@ -965,6 +973,7 @@ public class MorTagger extends Annotator {
       Annotation[] utterances = graph.all(schema.getUtteranceLayerId());
       int u = 0;
       for (Annotation utterance : utterances) {
+        if (isCancelling()) break;
         Graph fragment = graph.getFragment(utterance, fragmentLayers);
         
         final Vector<SerializationException> exceptions = new Vector<SerializationException>();
@@ -974,7 +983,7 @@ public class MorTagger extends Annotator {
         try {
           converter.serialize(Arrays.spliterator(graphs), serializationLayers,
                               stream -> serializeStreams.add(stream),
-                              warning -> setStatus(warning),
+                              warning -> setStatus(fragment.getId() + " : " + warning),
                               exception -> exceptions.add(exception));
         } catch(SerializerNotConfiguredException x) {
           throw new TransformationException(this, x);
@@ -1000,7 +1009,7 @@ public class MorTagger extends Annotator {
               .arg("+L"+grammar.getPath())
               .arg("-f");
             // start the process in its own thread
-            setStatus("Running mor...");
+            setStatus(fragment.getId() + " : Running mor...");
             new Thread(mor).start();
             // wait until we've got a process 
             while (mor.getProcess() == null) {
@@ -1010,7 +1019,7 @@ public class MorTagger extends Annotator {
             IO.Pump(new FileInputStream(cha), mor.getProcess().getOutputStream());
             // wait for mor to finish
             while (!mor.getFinished()) try { Thread.sleep(500); } catch(Exception exception) {}
-            setStatus("Finished mor.");
+            // setStatus(fragment.getId() + " : Finished mor.");
             // the annotated version has been written to stdout, so save it to a file...
             IO.SaveInputStreamToFile(new StringBufferInputStream(mor.stdout()), cha);
 
@@ -1025,10 +1034,10 @@ public class MorTagger extends Annotator {
               .arg("+g1")
               .arg(cha.getPath());
             // start the process in its own thread
-            setStatus("Running post...");
+            setStatus(fragment.getId() + " : Running post...");
             new Thread(post).start();
             while (!post.getFinished()) try { Thread.sleep(500); } catch(Exception exception) {}
-            setStatus("Finished post.");            
+            // setStatus(fragment.getId() + " : Finished post.");            
                                      
             // parse the CHAT file
             NamedStream[] deserializeStreams = {
@@ -1037,7 +1046,9 @@ public class MorTagger extends Annotator {
               deserializeStreams, graph.getSchema());
             converter.setParameters(defaultParamaters);
             graphs = converter.deserialize();
-            for (String warning : converter.getWarnings()) setStatus(warning);
+            for (String warning : converter.getWarnings()) {
+              setStatus(fragment.getId() + " : " + warning);
+            }
             Graph tagged = graphs[0];
             tagged.trackChanges();
             new Normalizer().transform(tagged);
@@ -1105,7 +1116,7 @@ public class MorTagger extends Annotator {
       setStatus("Finished " + graph.getId());
       return graph;
     } finally {
-      running = false;
+      setRunning(false);
     }
   }
   
@@ -1133,26 +1144,28 @@ public class MorTagger extends Annotator {
      String layerId, Annotation chaWord, Annotation originalToken, Graph graph) {
      
      if (layerId != null) {
-       for (Annotation tag : chaWord.getAnnotations(layerId)) {
+       for (Annotation chaTag : chaWord.getAnnotations(layerId)) {
          Anchor start = originalToken.getStart();
-         if (!tag.getStartId().equals(chaWord.getStartId())) { // chained annotation
-           if (!chaWord.getStart().containsKey("@start")) {
-             // create a new anchor in the original graph
+         if (!chaTag.getStartId().equals(chaWord.getStartId())) { // chained annotation
+           if (!chaTag.getStart().containsKey("@new")) {
+             // create a new anchor in the original graph for this anchor
              Anchor a = new Anchor();
              a.create();
-             chaWord.getStart().put("@start", graph.addAnchor(a));
+             chaTag.getStart().put("@new", graph.addAnchor(a));
            }
-           start = (Anchor)chaWord.getStart().get("@start");
+           // use new anchor in the original graph
+           start = (Anchor)chaTag.getStart().get("@new");
          }
          Anchor end = originalToken.getEnd();
-         if (!tag.getEndId().equals(chaWord.getEndId())) { // chained annotation
-           if (!chaWord.getEnd().containsKey("@end")) {
-             // create a new anchor in the original graph
+         if (!chaTag.getEndId().equals(chaWord.getEndId())) { // chained annotation
+           if (!chaTag.getEnd().containsKey("@new")) {
+             // create a new anchor in the original graph for this anchor
              Anchor a = new Anchor();
              a.create();
-             chaWord.getEnd().put("@end", graph.addAnchor(a));
+             chaTag.getEnd().put("@new", graph.addAnchor(a));
            }
-           end = (Anchor)chaWord.getEnd().get("@end");
+           // use new anchor in the original graph
+           end = (Anchor)chaTag.getEnd().get("@new");
          }
          Annotation parent = originalToken;
          if (!tokenLayerId.equals(graph.getSchema().getWordLayerId())) {
@@ -1162,7 +1175,7 @@ public class MorTagger extends Annotator {
              "parent != null - " + originalToken + " ("+originalToken.getLayerId()+")";
          }
          Annotation a = new Annotation().setLayerId(layerId)
-           .setLabel(tag.getLabel())
+           .setLabel(chaTag.getLabel())
            .setParentId(parent.getId())
            .setStartId(start.getId())
            .setEndId(end.getId());

@@ -104,6 +104,22 @@ public class TestMorTagger {
                  schema.getLayer(annotator.getMorLayerId()).getType());
     assertTrue("mor layer allows peers", // contractions like "I'll" might have two tags
                 schema.getLayer(annotator.getMorLayerId()).getPeers());
+    assertTrue("mor layer saturated",
+                schema.getLayer(annotator.getMorLayerId()).getSaturated());
+    assertFalse("pos layer not saturated",
+                schema.getLayer(annotator.getPartOfSpeechLayerId()).getSaturated());
+    assertFalse("pos subcategory not layer saturated",
+                schema.getLayer(annotator.getPartOfSpeechSubcategoryLayerId()).getSaturated());
+    assertFalse("prefix layer not saturated",
+                schema.getLayer(annotator.getPrefixLayerId()).getSaturated());
+    assertFalse("stem layer not saturated",
+                schema.getLayer(annotator.getStemLayerId()).getSaturated());
+    assertFalse("fusional suffix layer not saturated",
+                schema.getLayer(annotator.getFusionalSuffixLayerId()).getSaturated());
+    assertFalse("suffix layer not saturated",
+                schema.getLayer(annotator.getSuffixLayerId()).getSaturated());
+    assertFalse("gloss layer not saturated",
+                schema.getLayer(annotator.getGlossLayerId()).getSaturated());
     Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
       .collect(Collectors.toSet());
     assertEquals("Required layers: "+requiredLayers,
@@ -122,16 +138,16 @@ public class TestMorTagger {
       .collect(Collectors.toSet());;
     assertEquals("All possibl output layers: "+outputLayers,
                  8, outputLayers.size());
-    assertTrue("output layers includ mor", outputLayers.contains("mor"));
-    assertTrue("output layers includ morPrefix", outputLayers.contains("morPrefix"));
-    assertTrue("output layers includ morPOS", outputLayers.contains("morPOS"));
-    assertTrue("output layers includ morPOSSubcategory",
+    assertTrue("output layers include mor", outputLayers.contains("mor"));
+    assertTrue("output layers include morPrefix", outputLayers.contains("morPrefix"));
+    assertTrue("output layers include morPOS", outputLayers.contains("morPOS"));
+    assertTrue("output layers include morPOSSubcategory",
                outputLayers.contains("morPOSSubcategory"));
-    assertTrue("output layers includ morStem", outputLayers.contains("morStem"));
-    assertTrue("output layers includ morFusionalSuffix",
+    assertTrue("output layers include morStem", outputLayers.contains("morStem"));
+    assertTrue("output layers include morFusionalSuffix",
                outputLayers.contains("morFusionalSuffix"));
-    assertTrue("output layers includ morSuffix", outputLayers.contains("morSuffix"));
-    assertTrue("output layers includ morGloss", outputLayers.contains("morGloss"));
+    assertTrue("output layers include morSuffix", outputLayers.contains("morSuffix"));
+    assertTrue("output layers include morGloss", outputLayers.contains("morGloss"));
     
     Annotation firstWord = g.first("word");
     assertEquals("double check the first word is what we think it is: "+firstWord,
@@ -142,6 +158,7 @@ public class TestMorTagger {
     assertEquals("double check there are no mores: "+Arrays.asList(g.all("mor")),
                  0, g.all("mor").length);
     // run the annotator
+    annotator.getStatusObservers().add(s->System.out.println(s));
     annotator.transform(g);
     List<Annotation> morAnnotations = Arrays.stream(g.all("mor"))
       .collect(Collectors.toList());
