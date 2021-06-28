@@ -1530,6 +1530,14 @@ public class TestChatSerialization {
       }
     }
 
+    // check chaining
+    // the first three tags should be chained together across the first word
+    assertEquals("First MOR chained to second", mor[0].getEnd(), mor[1].getStart());
+    assertEquals("Second MOR chained to third", mor[1].getEnd(), mor[2].getStart());
+    Annotation firstWord = g.first("word");
+    assertEquals("First MOR starts with word", mor[0].getStart(), firstWord.getStart());
+    assertEquals("Thirs MOR ends with word", mor[2].getEnd(), firstWord.getEnd());
+
     // check stem labels
     Annotation[] stem = g.all("turn")[1].all("stem");      
     String[] stemLabels = {
@@ -2093,6 +2101,14 @@ public class TestChatSerialization {
         }
       }
     }
+    
+    // check chaining
+    // the first three tags should be chained together across the first word
+    assertEquals("First MOR chained to second", mor[0].getEnd(), mor[1].getStart());
+    assertEquals("Second MOR chained to third", mor[1].getEnd(), mor[2].getStart());
+    Annotation firstWord = g.first("word");
+    assertEquals("First MOR starts with word", mor[0].getStart(), firstWord.getStart());
+    assertEquals("Thirs MOR ends with word", mor[2].getEnd(), firstWord.getEnd());
 
     // check stem labels
     Annotation[] stem = g.all("turn")[1].all("stem");      
