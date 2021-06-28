@@ -1,0 +1,9 @@
+@Begin
+@Languages:	eng
+@Participants:	SUB John_Smith Participant,INT Mrs._Smith Investigator
+@ID:	eng||SUB|2;10.10|male|||Participant|||
+@ID:	spa||INT|||||Investigator|||
+*SUB:	the quick brown fox 0_5432
+	jumps over &=coughs 5432_10000
+*INT:	the lazy dog 10000_15000
+@End
