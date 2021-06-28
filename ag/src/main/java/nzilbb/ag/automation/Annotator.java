@@ -1,5 +1,5 @@
 //
-// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -32,7 +32,9 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.sql.*;
+import java.util.List;
 import java.util.Vector;
+import java.util.function.Consumer;
 import java.util.jar.JarFile;
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -224,7 +226,22 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
    * Setter for {@link #status}: The current status of the task.
    * @param newStatus The current status of the task.
    */
-  public Annotator setStatus(String newStatus) { status = newStatus; return this; }
+  public Annotator setStatus(String newStatus) {
+    status = newStatus;
+    for (Consumer<String> observer : statusObservers) observer.accept(status);
+    return this;
+  }
+  
+  /**
+   * Listeners for status updates.
+   * @see #getStatusObservers()
+   */
+  protected List<Consumer<String>> statusObservers = new Vector<Consumer<String>>();
+  /**
+   * Getter for {@link #statusObservers}: Listeners for status updates.
+   * @return Listeners for status updates.
+   */
+  public List<Consumer<String>> getStatusObservers() { return statusObservers; }
   
   /**
    * The layer schema.
@@ -586,7 +603,10 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
    * @param newPercentComplete Progress indicator; set to 100 when processing is complete.
    */
   protected Annotator setPercentComplete(Integer newPercentComplete) {
-    if (!ignoreSetPercentComplete) percentComplete = newPercentComplete;
+    if (!ignoreSetPercentComplete) {
+      percentComplete = newPercentComplete;
+      for (Consumer<Integer> observer : percentCompleteObservers) observer.accept(percentComplete);
+    }
     return this;
   }
   /**
@@ -595,6 +615,17 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
    * @return Progress indicator; set to 100 when processing is complete.
    */
   public Integer getPercentComplete() { return percentComplete; }
+  
+  /**
+   * Listeners for progress updates.
+   * @see #getPercentCompleteObservers()
+   */
+  protected List<Consumer<Integer>> percentCompleteObservers = new Vector<Consumer<Integer>>();
+  /**
+   * Getter for {@link #percentCompleteObservers}: Listeners for progress updates.
+   * @return Listeners for progress updates.
+   */
+  public List<Consumer<Integer>> getPercentCompleteObservers() { return percentCompleteObservers; }
   
   private boolean cancelling = false;   
   /**
@@ -609,7 +640,25 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
    */
   public void cancel() {
     cancelling = true;
+    for (Consumer<Boolean> observer : cancellationObservers) observer.accept(cancelling);
   }
+
+  /**
+   * Listeners for cancellation.
+   * @see #getCancellationObservers()
+   * @see #setCancellationObservers(List<Consumer<Boolean>>)
+   */
+  protected List<Consumer<Boolean>> cancellationObservers = new Vector<Consumer<Boolean>>();
+  /**
+   * Getter for {@link #cancellationObservers}: Listeners for cancellation.
+   * @return Listeners for cancellation.
+   */
+  public List<Consumer<Boolean>> getCancellationObservers() { return cancellationObservers; }
+  /**
+   * Setter for {@link #cancellationObservers}: Listeners for cancellation.
+   * @param newCancellationObservers Listeners for cancellation.
+   */
+  public Annotator setCancellationObservers(List<Consumer<Boolean>> newCancellationObservers) { cancellationObservers = newCancellationObservers; return this; }
   
   /**
    * Transforms all graphs from the given graph store that match the given graph
