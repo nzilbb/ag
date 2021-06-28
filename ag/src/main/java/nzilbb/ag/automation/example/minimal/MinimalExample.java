@@ -86,7 +86,7 @@ public class MinimalExample extends Annotator {
       if (schema.getWordLayerId() == null)
          throw new InvalidConfigurationException(this, "Schema has no word layer.");
 
-      running = true;
+      setRunning(true);
       
       try {
          
@@ -110,7 +110,7 @@ public class MinimalExample extends Annotator {
          
          return graph;
       } finally {
-         running = false;
+         setRunning(false);
       }
    }
 

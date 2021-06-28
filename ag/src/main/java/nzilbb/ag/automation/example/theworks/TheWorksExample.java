@@ -303,7 +303,7 @@ public class TheWorksExample extends Annotator
       if (schema.getWordLayerId() == null)
          throw new InvalidConfigurationException(this, "Schema has no word layer.");
 
-      running = true;
+      setRunning(true);
 
       try { 
          // maintain a list of counts
@@ -326,7 +326,7 @@ public class TheWorksExample extends Annotator
       
          return graph;
       } finally {
-         running = false;
+         setRunning(false);
       }
    }
    

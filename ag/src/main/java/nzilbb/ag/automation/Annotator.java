@@ -203,13 +203,35 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
   /**
    * Whether the annotator is currently annotating.
    * @see #getRunning()
+   * @see #setRunning(boolen)
    */
-  protected boolean running = false;
+  private boolean running = false;
   /**
    * Getter for {@link #running}: Whether the annotator is currently annotating.
    * @return Whether the annotator is currently annotating.
    */
   public boolean getRunning() { return running; }
+  /**
+   * Setter for {@link #running}: Whether the annotator is currently annotating.
+   * @param running Whether the annotator is currently annotating.
+   */
+  protected Annotator setRunning(boolean running) {
+    this.running = running;
+    for (Consumer<Boolean> observer : runningObservers) observer.accept(running);
+    return this;
+  }
+  
+  /**
+   * Listeners for run state.
+   * @see #getRunningObservers()
+   * @see #setRunningObservers(List<Consumer<Boolean>>)
+   */
+  protected List<Consumer<Boolean>> runningObservers = new Vector<Consumer<Boolean>>();
+  /**
+   * Getter for {@link #runningObservers}: Listeners for run state.
+   * @return Listeners for run state.
+   */
+  public List<Consumer<Boolean>> getRunningObservers() { return runningObservers; }
   
   /**
    * The current status of the task.
