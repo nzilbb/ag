@@ -1846,7 +1846,7 @@ public class Merger
                     } // next annotation that's parallel to this parallel annotation
                     log(layerId, ": Different start anchor for ", anOriginal, 
                         ": new anchor for ending ", previousAnnotation, " - ", newAnchor);
-                    previousAnnotation.setEnd(newAnchor);
+                    changeEndWithRelatedAnnotations(previousAnnotation, newAnchor);
                   } // they shouldn't be linked
                 } // there is a corresponding edited parallel annotation
               } // next anchor using this as an end anchor

@@ -766,7 +766,11 @@ public class Validator
                      // && anChild.getCounterpart() != null)) // and child is in edited graph TODO
                      )
                   {
-                     parentChangeReason = "not including";
+                    // if it's linked by an anchor, it's still a valid parent
+                    if (!child.getStartId().equals(oldParent.getStartId())
+                        && !child.getEndId().equals(oldParent.getEndId())) {
+                      parentChangeReason = "not including";
+                    }
                   }
                }
                // or the parent is on the wrong layer
