@@ -147,3 +147,24 @@ function changedLayer(select) {
     }
 }
 
+function testTokenExclusionPattern(alertOnError) {
+    var tokenExclusionPattern = document.getElementById("tokenExclusionPattern");
+    try {
+        
+        // test regular expression is valid
+        new RegExp(tokenExclusionPattern.value, "g");
+        // pattern is valid, so don't mark it as an error
+        tokenExclusionPattern.className = "";
+        tokenExclusionPattern.removeAttribute("title");
+        
+    } catch(error) {
+        // pattern is invalid, so don't mark it as an error
+        tokenExclusionPattern.className = "error";
+        tokenExclusionPattern.title = error;
+        if (alertOnError) {
+            alert("Invalid Token Exclusion Pattern - " + error);
+            tokenExclusionPattern.focus();
+        }
+    }
+    return tokenExclusionPattern.className == "";
+}

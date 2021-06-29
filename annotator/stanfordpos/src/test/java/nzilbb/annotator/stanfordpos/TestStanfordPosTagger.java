@@ -87,6 +87,8 @@ public class TestStanfordPosTagger {
     
     assertEquals("token layer",
                  "word", annotator.getTokenLayerId());
+    assertEquals("token exclusion pattern",
+                 "", annotator.getTokenExclusionPattern());
     assertEquals("chunk layer",
                  "turn", annotator.getChunkLayerId());
     assertEquals("transcript language layer",
@@ -237,6 +239,7 @@ public class TestStanfordPosTagger {
     // use specified configuration
     annotator.setTaskParameters(
       "tokenLayerId=orth"
+      +"&tokenExclusionPattern="
       +"&chunkLayerId=utterance"       // non-default layer
       +"&transcriptLanguageLayerId="   // no transcript language layer
       +"&phraseLanguageLayerId="       // no phrase language layer
@@ -248,6 +251,8 @@ public class TestStanfordPosTagger {
     
     assertEquals("token layer",
                  "orth", annotator.getTokenLayerId());
+    assertEquals("token exclusion pattern",
+                 "", annotator.getTokenExclusionPattern());
     assertEquals("chunk layer",
                  "utterance", annotator.getChunkLayerId());
     assertNull("transcript language layer",
@@ -332,12 +337,129 @@ public class TestStanfordPosTagger {
     assertEquals("I'll has two tags", 2, firstWord.all("stanfordpos").length);
   }   
 
+  @Test public void tokenExclusionPattern() throws Exception {
+    
+    Graph g = graph();
+    g.trackChanges();
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+    
+    // use specified configuration
+    annotator.setTaskParameters(
+      "tokenLayerId=word"
+      +"&tokenExclusionPattern=.*~"
+      +"&chunkLayerId=utterance"
+      +"&transcriptLanguageLayerId=transcript_language"
+      +"&phraseLanguageLayerId=lang"
+      +"&posLayerId=pos"
+      +"&model=english-bidirectional-distsim.tagger"); // non-default tagger
+    
+    assertEquals("token layer",
+                 "word", annotator.getTokenLayerId());
+    assertEquals("token exclusion pattern",
+                 ".*~", annotator.getTokenExclusionPattern());
+    assertEquals("chunk layer",
+                 "utterance", annotator.getChunkLayerId());
+    assertEquals("transcript language layer",
+                 "transcript_language", annotator.getTranscriptLanguageLayerId());
+    assertEquals("phrase language layer",
+                 "lang", annotator.getPhraseLanguageLayerId());
+    assertEquals("pos layer",
+                 "pos", annotator.getPosLayerId());
+    assertNotNull("pos layer was created",
+                  schema.getLayer(annotator.getPosLayerId()));
+    assertEquals("pos layer child of word",
+                 "word", schema.getLayer(annotator.getPosLayerId()).getParentId());
+    assertEquals("pos layer not aligned",
+                 Constants.ALIGNMENT_NONE,
+                 schema.getLayer(annotator.getPosLayerId()).getAlignment());
+    assertEquals("pos layer type correct",
+                 Constants.TYPE_STRING,
+                 schema.getLayer(annotator.getPosLayerId()).getType());
+    assertEquals("model: english-bidirectional-distsim.tagger",
+                 "english-bidirectional-distsim.tagger", annotator.getModel());
+    assertTrue("pos layer allows peers", // contractions like "I'll" might have two tags
+                schema.getLayer(annotator.getPosLayerId()).getPeers());
+    Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
+      .collect(Collectors.toSet());
+    assertEquals("4 required layer: "+requiredLayers,
+                 4, requiredLayers.size());
+    assertTrue("utterance required "+requiredLayers,
+               requiredLayers.contains("utterance"));
+    assertTrue("word required "+requiredLayers,
+               requiredLayers.contains("word"));
+    assertTrue("transcript_language required "+requiredLayers,
+               requiredLayers.contains("transcript_language"));
+    assertTrue("lang required "+requiredLayers,
+               requiredLayers.contains("lang"));
+    String outputLayers[] = annotator.getOutputLayers();
+    assertEquals("1 output layer: "+Arrays.asList(outputLayers),
+                 1, outputLayers.length);
+    assertEquals("output layer correct "+Arrays.asList(outputLayers),
+                 "pos", outputLayers[0]);
+    
+    Annotation firstWord = g.first("word");
+    assertEquals("double check the first word is what we think it is: "+firstWord,
+                 "I'll", firstWord.getLabel());
+      
+    assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
+                 9, g.all("word").length);
+    assertEquals("double check there are no poses: "+Arrays.asList(g.all("pos")),
+                 0, g.all("pos").length);
+    // run the annotator
+    annotator.transform(g);
+    List<Annotation> posAnnotations = Arrays.stream(g.all("pos"))
+      .collect(Collectors.toList());
+    assertEquals("Correct number of tokens "+posAnnotations,
+                 11, posAnnotations.size());
+    Iterator<Annotation> poses = posAnnotations.iterator();
+    assertEquals("I'll", "PRP", poses.next().getLabel());
+    assertEquals("I'll", "MD", poses.next().getLabel());
+    assertEquals("sing", "VB", poses.next().getLabel());
+    assertEquals("and", "CC", poses.next().getLabel());
+    // w~ skipped
+    assertEquals("walk", "VB", poses.next().getLabel());
+    assertEquals("about (different from default model)",
+                 "IN", poses.next().getLabel());
+    assertEquals("my", "PRP$", poses.next().getLabel());
+    assertEquals("blogging-posting:blogging (OOD - different from default model)",
+                 "NN", poses.next().getLabel());
+    assertEquals("blogging-posting Hyphen",
+                 "HYPH", poses.next().getLabel());
+    assertEquals("blogging-posting:posting",
+                 "VBG", poses.next().getLabel());
+    assertEquals("lazily", "RB", poses.next().getLabel());
+
+    poses = posAnnotations.iterator();
+    String[] wordLabels = {
+      "I'll", "I'll", // I + 'll
+      "sing", "and",
+      // w~ skipped
+      "walk", "about", "my",
+      "blogging-posting", "blogging-posting", "blogging-posting", // blogging + - + posting
+      "lazily"
+    };
+    for (int i = 0; i < wordLabels.length; i++) {
+      assertEquals("Tag " + i + " should tag " + wordLabels[i],
+                   wordLabels[i], poses.next().first("word").getLabel());
+    }
+    assertEquals("I'll has two tags", 2, firstWord.all("pos").length);
+    
+    // add a word
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("new")
+                    .setStart(g.getOrCreateAnchorAt(90)).setEnd(g.getOrCreateAnchorAt(100))
+                    .setParent(g.first("turn")));
+    
+  }   
+
   @Test public void setInvalidTaskParameters() throws Exception {
     
     try {
       annotator.setTaskParameters(
         // doesn't exist in the schema:
         "tokenLayerId=orthography"
+        +"&tokenExclusionPattern="
+        +"&chunkLayerId=utterance"
         +"&transcriptLanguageLayerId=transcript_language"
         +"&phraseLanguageLayerId=lang"
         +"&posLayerId=stanfordpos"
@@ -348,6 +470,8 @@ public class TestStanfordPosTagger {
     try {
       annotator.setTaskParameters(
         "tokenLayerId=word"
+        +"&tokenExclusionPattern="
+        +"&chunkLayerId=utterance"
         // doesn't exist in the schema:
         +"&transcriptLanguageLayerId=language"
         +"&phraseLanguageLayerId=lang"
@@ -359,6 +483,8 @@ public class TestStanfordPosTagger {
     try {
       annotator.setTaskParameters(
         "tokenLayerId=word"
+        +"&tokenExclusionPattern="
+        +"&chunkLayerId=utterance"
         +"&transcriptLanguageLayerId=transcript_language"
         // doesn't exist in the schema:
         +"&phraseLanguageLayerId=language"
@@ -370,6 +496,8 @@ public class TestStanfordPosTagger {
     try {
       annotator.setTaskParameters(
         "tokenLayerId=word"
+        +"&tokenExclusionPattern="
+        +"&chunkLayerId=utterance"
         +"&transcriptLanguageLayerId=transcript_language"
         +"&phraseLanguageLayerId=lang"
         // same as token layer:
@@ -381,12 +509,40 @@ public class TestStanfordPosTagger {
     try {
       annotator.setTaskParameters(
         "tokenLayerId=word"
+        +"&tokenExclusionPattern="
+        +"&chunkLayerId=utterance"
         +"&transcriptLanguageLayerId=transcript_language"
         +"&phraseLanguageLayerId=lang"
         +"&posLayerId=pos"
         // nonexistent model
         +"&model=nonexistent.tagger");
       fail("Should fail with model = nonexistent.tagger");
+    } catch (InvalidConfigurationException x) {
+    }    
+    try {
+      annotator.setTaskParameters(
+        "tokenLayerId=word"
+        +"&tokenExclusionPattern="
+        // nonexistent chunk layer
+        +"&chunkLayerId=line"
+        +"&transcriptLanguageLayerId=transcript_language"
+        +"&phraseLanguageLayerId=lang"
+        +"&posLayerId=pos"
+        +"&model=english-bidirectional-distsim.tagger");
+      fail("Should fail with model = nonexistent.tagger");
+    } catch (InvalidConfigurationException x) {
+    }    
+    try {
+      annotator.setTaskParameters(
+        "tokenLayerId=word"
+        // invalid regular expression
+        +"&tokenExclusionPattern=["
+        +"&chunkLayerId=utterance"
+        +"&transcriptLanguageLayerId=transcript_language"
+        +"&phraseLanguageLayerId=lang"
+        +"&posLayerId=pos"
+        +"&model=english-bidirectional-distsim.tagger");
+      fail("Should fail with invalid regular expression");
     } catch (InvalidConfigurationException x) {
     }    
   }   

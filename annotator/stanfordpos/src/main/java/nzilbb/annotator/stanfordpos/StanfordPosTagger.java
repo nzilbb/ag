@@ -50,6 +50,7 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.Vector;
 import java.util.function.IntConsumer;
+import java.util.regex.*;
 import java.util.stream.Collectors;
 import javax.script.ScriptException;
 import nzilbb.ag.*;
@@ -238,7 +239,24 @@ public class StanfordPosTagger extends Annotator {
    */
   public StanfordPosTagger setTokenLayerId(String newTokenLayerId) {
     tokenLayerId = newTokenLayerId; return this; }
-
+  
+  /**
+   * Regular expression for excluding tokens.
+   * @see #getTokenExclusionPattern()
+   * @see #setTokenExclusionPattern(String)
+   */
+  protected String tokenExclusionPattern = "";
+  /**
+   * Getter for {@link #tokenExclusionPattern}: Regular expression for excluding tokens.
+   * @return Regular expression for excluding tokens.
+   */
+  public String getTokenExclusionPattern() { return tokenExclusionPattern; }
+  /**
+   * Setter for {@link #tokenExclusionPattern}: Regular expression for excluding tokens.
+   * @param newTokenExclusionPattern Regular expression for excluding tokens.
+   */
+  public StanfordPosTagger setTokenExclusionPattern(String newTokenExclusionPattern) { tokenExclusionPattern = newTokenExclusionPattern; return this; }
+  
   /**
    * ID of the input layer that partitions the tokens into chunks for feeding to the tagger.
    * @see #getChunkLayerId()
@@ -411,6 +429,14 @@ public class StanfordPosTagger extends Annotator {
     if (phraseLanguageLayerId != null && schema.getLayer(phraseLanguageLayerId) == null) 
       throw new InvalidConfigurationException(
         this, "Phrase language layer not found: " + phraseLanguageLayerId);
+    if (tokenExclusionPattern.length() > 0) {
+      try {
+        Pattern.compile(tokenExclusionPattern);
+      } catch(PatternSyntaxException exception) {
+        throw new InvalidConfigurationException(
+          this, "Invalid token exclusion pattern: " + exception.getMessage(), exception);
+      }
+    }
 
     // valid model
     if (model == null || model.trim().length() == 0)
@@ -504,6 +530,11 @@ public class StanfordPosTagger extends Annotator {
         if (isCancelling()) break;
         
         Annotation[] tokens = chunk.all(tokenLayerId);
+        if (tokenExclusionPattern.length() > 0) {
+          final Pattern exclude = Pattern.compile(tokenExclusionPattern);
+          tokens = Arrays.stream(tokens).filter(t->!exclude.matcher(t.getLabel()).matches())
+            .toArray(Annotation[]::new);
+        }
         setStatus("Tagging chunk "+chunk.getStart() + "-" + chunk.getEnd());
         if (tokens.length > 0) {
 
