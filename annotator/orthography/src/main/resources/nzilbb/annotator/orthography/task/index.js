@@ -13,9 +13,9 @@ function testRemovalPattern() {
         new RegExp(removalPattern.value, "g");
         // pattern is valid, so don't mark it as an error
         removalPattern.className = "";
-        removalPattern.title = "";
+        removalPattern.removeAttribute("title");
         textOrthography.className = "";
-        textOrthography.title = "";
+        textOrthography.removeAttribute("title");
         
         var textTranscript = document.getElementById("textTranscript");
 
