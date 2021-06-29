@@ -33,11 +33,9 @@ import java.util.stream.Collectors;
 import nzilbb.ag.*;
 import nzilbb.ag.util.*;
 
-public class TestValidator
-{
-      
-  @Test public void valid() 
-  {
+public class TestValidator {
+  
+  @Test public void valid() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -121,23 +119,19 @@ public class TestValidator
     v.setFullValidation(true);
     // v.setDebug(true);
     v.setDefaultOffsetThreshold(null);
-    try
-    {
+    try {
       g.trackChanges();
       v.transform(g);
       Set<Change> changes = g.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       assertEquals("no changes to valid graph", 0, changes.size());
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  @Test public void reconcileOrphansNewParents() 
-  {
+  @Test public void reconcileOrphansNewParents() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -254,14 +248,13 @@ public class TestValidator
     // v.setDebug(true);
     v.setFullValidation(true);
     v.setDefaultOffsetThreshold(null);
-    try
-    {
+    try {
       g.trackChanges();
       v.transform(g);
       Set<Change> changes = g.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       Set<String> changeStrings = changes.stream()
-         .map(Change::toString).collect(Collectors.toSet());
+        .map(Change::toString).collect(Collectors.toSet());
       assertTrue("moved to new turn - different speaker",
                  changeStrings.contains("Update word3: parentId = turn2 (was turn1)"));
       assertTrue("moved to new turn - update ordinal",
@@ -284,15 +277,12 @@ public class TestValidator
       // 	      new Change(Change.Operation.Update, g.getAnnotation("word6"), "ordinal", Integer.valueOf(3)), 
       // 	      order.next());
       assertEquals("no extra changes to graph - " + changes + " vs. " +g.getChanges(), changes.size(), g.getChanges().size());
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  @Test public void reconcileOrphansDeleteChildren() 
-  {
+  @Test public void reconcileOrphansDeleteChildren() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -393,8 +383,7 @@ public class TestValidator
     v.setFullValidation(true);
     // v.setDebug(true);
     v.setDefaultOffsetThreshold(null);
-    try
-    {
+    try {
       ChangeTracker ourTracker = new ChangeTracker();
       g.getTracker().addListener(ourTracker);
       v.transform(g);
@@ -404,7 +393,7 @@ public class TestValidator
       assertEquals("a?2", g.getAnnotation("pos4").getOriginalStartId());
 
       Set<String> changeStrings = changes.stream()
-         .map(Change::toString).collect(Collectors.toSet());
+        .map(Change::toString).collect(Collectors.toSet());
       assertTrue("Delete word - manual child has new parent",
                  changeStrings.contains("Update pos4: parentId = word5 (was word6)"));
       assertTrue("Delete word - manual child shares start",
@@ -415,15 +404,12 @@ public class TestValidator
                  changeStrings.contains("Destroy pos5"));
       assertEquals("one extra change in graph - the word deletion - " + g.getChanges(), 
                    changes.size() + 1, g.getChanges().size());
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  @Test public void validateHierarchyOrdinalsAndDeletion() 
-  {
+  @Test public void validateHierarchyOrdinalsAndDeletion() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -517,13 +503,12 @@ public class TestValidator
     v.setFullValidation(true);
     // v.setDebug(true);
     v.setDefaultOffsetThreshold(null);
-    try
-    {
+    try {
       v.transform(g);
       Set<Change> changes = g.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       Set<String> changeStrings = changes.stream()
-         .map(Change::toString).collect(Collectors.toSet());
+        .map(Change::toString).collect(Collectors.toSet());
       assertTrue("children out of order - update ordinal",
                  changeStrings.contains("Update word2: ordinal = 2 (was 3)"));
       // assertEquals("children out of order - update ordinal", 
@@ -536,21 +521,18 @@ public class TestValidator
       assertEquals(5, g.getAnnotation("word6").getOrdinal());
       assertTrue("update ordinal after deleted annotation", 
                  g.getChanges().contains(
-                    new Change(Change.Operation.Update, g.getAnnotation("word5"), "ordinal", Integer.valueOf(4), Integer.valueOf(5))));
+                   new Change(Change.Operation.Update, g.getAnnotation("word5"), "ordinal", Integer.valueOf(4), Integer.valueOf(5))));
       assertTrue("update ordinal after deleted annotation", 
                  g.getChanges().contains(
-                    new Change(Change.Operation.Update, g.getAnnotation("word6"), "ordinal", Integer.valueOf(5), Integer.valueOf(6))));
+                   new Change(Change.Operation.Update, g.getAnnotation("word6"), "ordinal", Integer.valueOf(5), Integer.valueOf(6))));
       // assertEquals("three extra changes to graph, the deletion and two ordinal updates" + g.getChanges(), changes.size() + 3, g.getChanges().size());
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
       
   }
 
-  @Test public void validateHierarchyOverlappingChildren()
-  {
+  @Test public void validateHierarchyOverlappingChildren() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -653,14 +635,13 @@ public class TestValidator
     v.setFullValidation(true);
     // v.setDebug(true);
     v.setDefaultOffsetThreshold(null);
-    try
-    {
+    try {
       g.trackChanges();
       v.transform(g);
       Set<Change> changes = g.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       Set<String> changeStrings = changes.stream()
-         .map(Change::toString).collect(Collectors.toSet());
+        .map(Change::toString).collect(Collectors.toSet());
 
       assertTrue("word share start anchors - new anchor: " + changes,
                  changeStrings.contains("Create 1"));
@@ -686,15 +667,12 @@ public class TestValidator
 
       // TODO assertEquals("no extra changes to graph - " + changes + " vs. " + g.getChanges(),
       //              changes.size(), g.getChanges().size());
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  @Test public void validateHierarchyAnchorsOutOfSequence()
-  {
+  @Test public void validateHierarchyAnchorsOutOfSequence() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -791,8 +769,7 @@ public class TestValidator
     v.setFullValidation(true);
     // v.setDebug(true);
     v.setDefaultOffsetThreshold(null);
-    try
-    {
+    try {
       g.trackChanges();
       v.transform(g);
       Set<Change> changes = g.getTracker().getChanges();
@@ -879,15 +856,12 @@ public class TestValidator
                    g.getAnnotation("pos3").getEndId());
 
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  @Test public void validateHierarchyReversedAnchorsSimpleCases()
-  {
+  @Test public void validateHierarchyReversedAnchorsSimpleCases() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -997,8 +971,7 @@ public class TestValidator
     v.setFullValidation(true);
     // v.setDebug(true);
     v.setDefaultOffsetThreshold(null);
-    try
-    {
+    try {
       v.transform(g);
       Set<Change> changes = g.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
@@ -1055,20 +1028,17 @@ public class TestValidator
 
       // order of changes
       Set<String> changeStrings = changes.stream()
-         .map(Change::toString).collect(Collectors.toSet());
+        .map(Change::toString).collect(Collectors.toSet());
       assertTrue(changeStrings.contains("Update a2b: offset = null (was 3.0)"));
       assertTrue(changeStrings.contains("Update a4.75: offset = null (was 4.75)"));
       assertTrue(changeStrings.contains("Update a3a: offset = null (was 2.0)"));
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  @Test public void validateHierarchyReversedAnchorsComplexCases()
-  {
+  @Test public void validateHierarchyReversedAnchorsComplexCases() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -1179,8 +1149,7 @@ public class TestValidator
     v.setFullValidation(true);
     // v.setDebug(true);
     v.setDefaultOffsetThreshold(null);
-    try
-    {
+    try {
       g.trackChanges();
       v.transform(g);
       Set<Change> changes = g.getTracker().getChanges();
@@ -1220,21 +1189,18 @@ public class TestValidator
       assertEquals("a2.25", g.getAnnotation("phone6").getEndId());
 	 
       Set<String> changeStrings = changes.stream()
-         .map(Change::toString).collect(Collectors.toSet());
+        .map(Change::toString).collect(Collectors.toSet());
       assertTrue(changeStrings.contains("Update a2.0: offset = null (was 2.0)"));
       assertTrue(changeStrings.contains("Update a2.25: offset = null (was 2.25)"));
       assertTrue(changeStrings.contains("Update a3b: offset = null (was 3.0)"));
 
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  @Test public void anchorsOutOfOrderHigherConfidenceFollowing()
-  {
+  @Test public void anchorsOutOfOrderHigherConfidenceFollowing() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -1276,9 +1242,11 @@ public class TestValidator
     g.addAnchor(new Anchor("yeahEnd", 129.9, Constants.CONFIDENCE_MANUAL));
     g.addAnchor(new Anchor("turnEnd", 140.0, Constants.CONFIDENCE_MANUAL)); // turn end
 
-    g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+    g.addAnnotation(new Annotation(
+                      "participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
       
-    g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
+    g.addAnnotation(new Annotation(
+                      "turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
       
     g.addAnnotation(new Annotation("than", "than", "word", "thanStart", "thatStart", "turn1"));
     g.addAnnotation(new Annotation("that", "that", "word", "thatStart", "yeahStart", "turn1"));
@@ -1298,8 +1266,7 @@ public class TestValidator
     v.setFullValidation(true);
     // v.setDebug(true);
     v.setDefaultOffsetThreshold(null);
-    try
-    {
+    try {
       g.trackChanges();
       v.transform(g);
       Set<Change> changes = g.getTracker().getChanges();
@@ -1322,15 +1289,12 @@ public class TestValidator
       assertEquals("unchanged", Double.valueOf(129.9), g.getAnchor("yeahEnd").getOffset());
       assertEquals("unchanged", Double.valueOf(140.0), g.getAnchor("turnEnd").getOffset());
 
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  @Test public void anchorsOutOfOrderHigherConfidencePrior()
-  {
+  @Test public void anchorsOutOfOrderHigherConfidencePrior() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -1372,9 +1336,11 @@ public class TestValidator
     g.addAnchor(new Anchor("yeahEnd", 129.9, Constants.CONFIDENCE_DEFAULT));
     g.addAnchor(new Anchor("turnEnd", 140.0, Constants.CONFIDENCE_MANUAL)); // turn end
 
-    g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+    g.addAnnotation(new Annotation(
+                      "participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
       
-    g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
+    g.addAnnotation(new Annotation(
+                      "turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
       
     g.addAnnotation(new Annotation("than", "than", "word", "thanStart", "thatStart", "turn1"));
     g.addAnnotation(new Annotation("that", "that", "word", "thatStart", "yeahStart", "turn1"));
@@ -1394,8 +1360,7 @@ public class TestValidator
     v.setFullValidation(true);
     // v.setDebug(true);
     v.setDefaultOffsetThreshold(null);
-    try
-    {
+    try {
       g.trackChanges();
       v.transform(g);
       Set<Change> changes = g.getTracker().getChanges();
@@ -1418,15 +1383,12 @@ public class TestValidator
       // same as before...
       assertEquals("unchanged", Double.valueOf(140.0), g.getAnchor("turnEnd").getOffset());
 
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  @Test public void anchorsOutOfOrderFewerPrior()
-  {
+  @Test public void anchorsOutOfOrderFewerPrior() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -1468,9 +1430,11 @@ public class TestValidator
     g.addAnchor(new Anchor("yeahEnd", 129.9, Constants.CONFIDENCE_DEFAULT));
     g.addAnchor(new Anchor("turnEnd", 140.0, Constants.CONFIDENCE_MANUAL)); // turn end
 
-    g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+    g.addAnnotation(
+      new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
       
-    g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
+    g.addAnnotation(
+      new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
       
     g.addAnnotation(new Annotation("than", "than", "word", "thanStart", "thatStart", "turn1"));
     g.addAnnotation(new Annotation("that", "that", "word", "thatStart", "yeahStart", "turn1"));
@@ -1490,8 +1454,7 @@ public class TestValidator
     v.setFullValidation(true);
     // v.setDebug(true);
     v.setDefaultOffsetThreshold(null);
-    try
-    {
+    try {
       g.trackChanges();
       v.transform(g);
       Set<Change> changes = g.getTracker().getChanges();
@@ -1514,15 +1477,12 @@ public class TestValidator
       assertEquals("unchanged", Double.valueOf(129.9), g.getAnchor("yeahEnd").getOffset());
       assertEquals("unchanged", Double.valueOf(140.0), g.getAnchor("turnEnd").getOffset());
 
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  @Test public void anchorsOutOfOrderFewerFollowing()
-  {
+  @Test public void anchorsOutOfOrderFewerFollowing() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -1560,9 +1520,11 @@ public class TestValidator
     g.addAnchor(new Anchor("thatEnd", 129.7, Constants.CONFIDENCE_DEFAULT));
     g.addAnchor(new Anchor("turnEnd", 140.0, Constants.CONFIDENCE_MANUAL)); // turn end
 
-    g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+    g.addAnnotation(
+      new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
       
-    g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
+    g.addAnnotation(
+      new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
       
     g.addAnnotation(new Annotation("than", "than", "word", "thanStart", "thatStart", "turn1"));
     g.addAnnotation(new Annotation("that", "that", "word", "thatStart", "thatEnd", "turn1"));
@@ -1576,8 +1538,7 @@ public class TestValidator
     v.setFullValidation(true);
     // v.setDebug(true);
     v.setDefaultOffsetThreshold(null);
-    try
-    {
+    try {
       g.trackChanges();
       v.transform(g);
       Set<Change> changes = g.getTracker().getChanges();
@@ -1596,15 +1557,12 @@ public class TestValidator
       // same as before...
       assertEquals("unchanged", Double.valueOf(140.0), g.getAnchor("turnEnd").getOffset());
 
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  @Test public void anchorsOutOfOrderHigherConfidencePriorAndFollowing()
-  {
+  @Test public void anchorsOutOfOrderHigherConfidencePriorAndFollowing() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -1646,9 +1604,11 @@ public class TestValidator
     g.addAnchor(new Anchor("yeahEnd", 129.9, Constants.CONFIDENCE_MANUAL));
     g.addAnchor(new Anchor("turnEnd", 140.0, Constants.CONFIDENCE_MANUAL)); // turn end
 
-    g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+    g.addAnnotation(
+      new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
       
-    g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
+    g.addAnnotation(
+      new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
       
     g.addAnnotation(new Annotation("than", "than", "word", "thanStart", "thatStart", "turn1"));
     g.addAnnotation(new Annotation("that", "that", "word", "thatStart", "yeahStart", "turn1"));
@@ -1668,8 +1628,7 @@ public class TestValidator
     v.setFullValidation(true);
     // v.setDebug(true);
     v.setDefaultOffsetThreshold(null);
-    try
-    {
+    try {
       g.trackChanges();
       v.transform(g);
       Set<Change> changes = g.getTracker().getChanges();
@@ -1692,15 +1651,12 @@ public class TestValidator
       assertEquals("unchanged", Double.valueOf(129.9), g.getAnchor("yeahEnd").getOffset());
       assertEquals("unchanged", Double.valueOf(140.0), g.getAnchor("turnEnd").getOffset());
 
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  @Test public void utterancesPartitionWordsInTurnNoChange() 
-  {
+  @Test public void utterancesPartitionWordsInTurnNoChange() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -1753,12 +1709,18 @@ public class TestValidator
 
     g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE_MANUAL)); // turn end
 
-    g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+    g.addAnnotation(
+      new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
       
-    g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
+    g.addAnnotation(
+      new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
 
-    g.addAnnotation(new Annotation("utterance1", "john smith", "utterance", "turnStart", "utteranceChange", "turn1"));
-    g.addAnnotation(new Annotation("utterance2", "john smith", "utterance", "utteranceChange", "turnEnd", "turn1"));
+    g.addAnnotation(
+      new Annotation(
+        "utterance1", "john smith", "utterance", "turnStart", "utteranceChange", "turn1"));
+    g.addAnnotation(
+      new Annotation(
+        "utterance2", "john smith", "utterance", "utteranceChange", "turnEnd", "turn1"));
       
     g.addAnnotation(new Annotation("the",   "the",   "word", "a0",  "a01", "turn1"));
     g.addAnnotation(new Annotation("quick", "quick", "word", "a01", "a02", "turn1"));
@@ -1779,23 +1741,19 @@ public class TestValidator
     v.setFullValidation(true);
     // v.setDebug(true);
     v.setDefaultOffsetThreshold(null);
-    try
-    {
+    try {
       g.trackChanges();
       v.transform(g);
       Set<Change> changes = g.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
 
       assertEquals("no changes: " + changes, 0, changes.size());
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  @Test public void utterancesPartitionWordsInTurnAnchorsOutOfOrder() 
-  {
+  @Test public void utterancesPartitionWordsInTurnAnchorsOutOfOrder() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -1867,8 +1825,7 @@ public class TestValidator
     v.setFullValidation(true);
     // v.setDebug(true);
     v.setDefaultOffsetThreshold(null);
-    try
-    {
+    try {
       g.trackChanges();
       v.transform(g);
       Set<Change> changes = g.getTracker().getChanges();
@@ -1878,15 +1835,12 @@ public class TestValidator
       assertNull("reset", g.getAnchor("a34").getOffset());
 
       assertEquals("two changes: " + changes, 2, changes.size());
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  @Test public void deleteExtraneousPeers() 
-  {
+  @Test public void deleteExtraneousPeers() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -1958,23 +1912,19 @@ public class TestValidator
     v.setFullValidation(true);
     // v.setDebug(true);
     v.setDefaultOffsetThreshold(null);
-    try
-    {
+    try {
       v.transform(g);
       Set<Change> changes = g.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
       assertNotEquals("changes applied", 0, changes.size());
       assertEquals("extra peer deleted", Change.Operation.Destroy, g.getAnnotation("orth2.5").getChange());
       assertNotEquals("deleted peers skipped", Change.Operation.Destroy, g.getAnnotation("orth3.5").getChange());
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  @Test public void canValidateFragment() 
-  {
+  @Test public void canValidateFragment() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -2003,13 +1953,18 @@ public class TestValidator
     g.addAnchor(new Anchor("a5", 5.0));
     g.addAnchor(new Anchor("turnEnd", 6.0));
 
-    Annotation who1 = new Annotation("who1", "john smith", "who", "turnStart", "turnEnd", "my graph");
-    Annotation who2 = new Annotation("who2", "jane doe", "who", "turnStart", "turnEnd", "my graph");
+    Annotation who1 = new Annotation(
+      "who1", "john smith", "who", "turnStart", "turnEnd", "my graph");
+    Annotation who2 = new Annotation(
+      "who2", "jane doe", "who", "turnStart", "turnEnd", "my graph");
 
-    Annotation turn1 = new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "who1");
+    Annotation turn1 = new Annotation(
+      "turn1", "john smith", "turn", "turnStart", "turnEnd", "who1");
 
-    Annotation utterance1 = new Annotation("utterance1", "john smith", "utterance", "turnStart", "a3", "turn1");
-    Annotation utterance2 = new Annotation("utterance2", "john smith", "utterance", "a3", "turnEnd", "turn1");
+    Annotation utterance1 = new Annotation(
+      "utterance1", "john smith", "utterance", "turnStart", "a3", "turn1");
+    Annotation utterance2 = new Annotation(
+      "utterance2", "john smith", "utterance", "a3", "turnEnd", "turn1");
 
     Annotation the = new Annotation("word1", "the", "word", "a1", "a2", "turn1");
     Annotation DT = new Annotation("pos1", "DT", "pos", "a1", "a2", "word1");
@@ -2063,7 +2018,7 @@ public class TestValidator
     assertEquals("Turn start ID in graph",
                  "turnStart", g.getAnnotation("turn1").getStartId());
     assertNotNull("Turn start anchor in graph",
-               g.getAnchor("turnStart"));
+                  g.getAnchor("turnStart"));
     Graph f = g.getFragment(utterance2, g.getSchema().getLayers().keySet().toArray(new String[0]));
     assertEquals("Turn start ID in fragment",
                  "turnStart", f.getAnnotation("turn1").getStartId());
@@ -2083,8 +2038,7 @@ public class TestValidator
     Validator v = new Validator();
     v.setFullValidation(true);
     // v.setDebug(true);
-    try
-    {
+    try {
       f.trackChanges();
       v.transform(f);
       Set<Change> changes = f.getTracker().getChanges();
@@ -2097,134 +2051,126 @@ public class TestValidator
       assertEquals("word ordinal after validation",
                    4, f.getAnnotation("word4").getOrdinal());
       assertEquals("no changes applied", 0, changes.size());
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-   @Test public void labels() 
-   {
-      Graph g = new Graph();
-      g.setId("my graph");
-      g.setCorpus("cc");
+  @Test public void labels() {
+    Graph g = new Graph();
+    g.setId("my graph");
+    g.setCorpus("cc");
       
-      g.addLayer(new Layer("who", "Participants")
-                 .setAlignment(Constants.ALIGNMENT_NONE) 
-                 .setPeers(true)
-                 .setPeersOverlap(true)
-                 .setSaturated(true));
-      g.addLayer(new Layer("turn", "Speaker turns")
-                 .setAlignment(Constants.ALIGNMENT_INTERVAL) 
-                 .setPeers(true)
-                 .setPeersOverlap(false)
-                 .setSaturated(false)
-                 .setParentId("who")
-                 .setParentIncludes(true));
-      g.addLayer(new Layer("word", "Words")
-                 .setAlignment(Constants.ALIGNMENT_INTERVAL) 
-                 .setPeers(true)
-                 .setPeersOverlap(false)
-                 .setSaturated(false)
-                 .setParentId("turn")
-                 .setParentIncludes(true));
-      g.addLayer(new Layer("phone", "Phones")
-                 .setAlignment(Constants.ALIGNMENT_INTERVAL) 
-                 .setPeers(true)
-                 .setPeersOverlap(false)
-                 .setSaturated(true)
-                 .setParentId("word")
-                 .setParentIncludes(true));
-      g.addLayer(new Layer("pos", "Part of speech")
-                 .setAlignment(Constants.ALIGNMENT_NONE) 
-                 .setPeers(false)
-                 .setPeersOverlap(false)
-                 .setSaturated(true)
-                 .setParentId("word")
-                 .setParentIncludes(true));
-      g.addLayer(new Layer("phrase", "Phrase structure")
-                 .setAlignment(Constants.ALIGNMENT_INTERVAL) 
-                 .setPeers(true)
-                 .setPeersOverlap(true)
-                 .setSaturated(false)
-                 .setParentId("turn")
-                 .setParentIncludes(true));
+    g.addLayer(new Layer("who", "Participants")
+               .setAlignment(Constants.ALIGNMENT_NONE) 
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(true));
+    g.addLayer(new Layer("turn", "Speaker turns")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL) 
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("who")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("word", "Words")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL) 
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("phone", "Phones")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL) 
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("pos", "Part of speech")
+               .setAlignment(Constants.ALIGNMENT_NONE) 
+               .setPeers(false)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("phrase", "Phrase structure")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL) 
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
       
-      g.addAnchor(new Anchor("a0", 0.0)); // turn start
-      g.addAnchor(new Anchor("a1", 1.0)); // the & DT & D & NP
-      g.addAnchor(new Anchor("a1.5", 1.5)); // @
-      g.addAnchor(new Anchor("a2", 2.0)); // quick & A & k & AP
-      g.addAnchor(new Anchor("a2.25", 2.25)); // w
-      g.addAnchor(new Anchor("a2.5", 2.5)); // I
-      g.addAnchor(new Anchor("a2.75", 2.75)); // k
-      g.addAnchor(new Anchor("a3", 3.0)); // brown
-      g.addAnchor(new Anchor("a4", 4.0)); // fox & N
-      // unset offsets
-      g.addAnchor(new Anchor("a?1", null)); // jumps
-      g.addAnchor(new Anchor("a?2", null)); // over
-      g.addAnchor(new Anchor("a5", 5.0)); // end of over
-      g.addAnchor(new Anchor("a6", 6.0)); // turn end
+    g.addAnchor(new Anchor("a0", 0.0)); // turn start
+    g.addAnchor(new Anchor("a1", 1.0)); // the & DT & D & NP
+    g.addAnchor(new Anchor("a1.5", 1.5)); // @
+    g.addAnchor(new Anchor("a2", 2.0)); // quick & A & k & AP
+    g.addAnchor(new Anchor("a2.25", 2.25)); // w
+    g.addAnchor(new Anchor("a2.5", 2.5)); // I
+    g.addAnchor(new Anchor("a2.75", 2.75)); // k
+    g.addAnchor(new Anchor("a3", 3.0)); // brown
+    g.addAnchor(new Anchor("a4", 4.0)); // fox & N
+    // unset offsets
+    g.addAnchor(new Anchor("a?1", null)); // jumps
+    g.addAnchor(new Anchor("a?2", null)); // over
+    g.addAnchor(new Anchor("a5", 5.0)); // end of over
+    g.addAnchor(new Anchor("a6", 6.0)); // turn end
       
-      g.addAnnotation(new Annotation("participant1", "john smith", "who", "a0", "a6", "my graph"));
+    g.addAnnotation(new Annotation("participant1", "john smith", "who", "a0", "a6", "my graph"));
       
-      g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a6", "participant1"));
+    g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a6", "participant1"));
       
-      g.addAnnotation(new Annotation("phrase1", "NP", "phrase", "a1", "a4", "turn1"));
-      g.addAnnotation(new Annotation("phrase2", "AP", "phrase", "a2", "a4", "turn1"));
+    g.addAnnotation(new Annotation("phrase1", "NP", "phrase", "a1", "a4", "turn1"));
+    g.addAnnotation(new Annotation("phrase2", "AP", "phrase", "a2", "a4", "turn1"));
       
-      g.addAnnotation(new Annotation("word1", "the", "word", "a1", "a2", "turn1"));
-      g.addAnnotation(new Annotation("word2", "very-very-very-very-very-very", "word", "a2", "a3", "turn1"));
-      g.addAnnotation(new Annotation("word3", "long", "word", "a3", "a4", "turn1"));
-      g.addAnnotation(new Annotation("word4", "word", "word", "a4", "a?1", "turn1"));
-      g.addAnnotation(new Annotation("word5", "jumps", "word", "a?1", "a?2", "turn1"));
-      g.addAnnotation(new Annotation("word6", "over", "word", "a?2", "a5", "turn1"));
+    g.addAnnotation(new Annotation("word1", "the", "word", "a1", "a2", "turn1"));
+    g.addAnnotation(new Annotation("word2", "very-very-very-very-very-very", "word", "a2", "a3", "turn1"));
+    g.addAnnotation(new Annotation("word3", "long", "word", "a3", "a4", "turn1"));
+    g.addAnnotation(new Annotation("word4", "word", "word", "a4", "a?1", "turn1"));
+    g.addAnnotation(new Annotation("word5", "jumps", "word", "a?1", "a?2", "turn1"));
+    g.addAnnotation(new Annotation("word6", "over", "word", "a?2", "a5", "turn1"));
       
-      g.addAnnotation(new Annotation("pos1", "DT", "pos", "a1", "a2", "word1"));
-      g.addAnnotation(new Annotation("pos2", "A", "pos", "a2", "a3", "word2"));
-      g.addAnnotation(new Annotation("pos3", "N", "pos", "a4", "a?1", "word4"));
+    g.addAnnotation(new Annotation("pos1", "DT", "pos", "a1", "a2", "word1"));
+    g.addAnnotation(new Annotation("pos2", "A", "pos", "a2", "a3", "word2"));
+    g.addAnnotation(new Annotation("pos3", "N", "pos", "a4", "a?1", "word4"));
       
-      g.addAnnotation(new Annotation("phone1", "D", "phone", "a1", "a1.5", "word1"));
-      g.addAnnotation(new Annotation("phone2", "@", "phone", "a1.5", "a2", "word1"));
-      g.addAnnotation(new Annotation("phone3", "k", "phone", "a2", "a2.25", "word2"));
-      g.addAnnotation(new Annotation("phone4", "w", "phone", "a2.25", "a2.5", "word2"));
-      g.addAnnotation(new Annotation("phone5", "I", "phone", "a2.5", "a2.75", "word2"));
-      g.addAnnotation(new Annotation("phone6", "k", "phone", "a2.75", "a3", "word2"));
+    g.addAnnotation(new Annotation("phone1", "D", "phone", "a1", "a1.5", "word1"));
+    g.addAnnotation(new Annotation("phone2", "@", "phone", "a1.5", "a2", "word1"));
+    g.addAnnotation(new Annotation("phone3", "k", "phone", "a2", "a2.25", "word2"));
+    g.addAnnotation(new Annotation("phone4", "w", "phone", "a2.25", "a2.5", "word2"));
+    g.addAnnotation(new Annotation("phone5", "I", "phone", "a2.5", "a2.75", "word2"));
+    g.addAnnotation(new Annotation("phone6", "k", "phone", "a2.75", "a3", "word2"));
       
-      // this shouldn't be necessary: g.trackChanges();
-      Validator v = new Validator();
-      v.setMaxLabelLength(20);
-      v.setFullValidation(true);
+    // this shouldn't be necessary: g.trackChanges();
+    Validator v = new Validator();
+    v.setMaxLabelLength(20);
+    v.setFullValidation(true);
       
-      // v.setDebug(true);
-      v.setDefaultOffsetThreshold(null);
-      try
-      {
-         g.trackChanges();
-         v.transform(g);
-         Set<Change> changes = g.getTracker().getChanges();
-         if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
-         assertEquals("one error: " + v.getErrors(),
-                      1, v.getErrors().size());
-         assertEquals("Label too long (>20) for word: [word2]2#very-very-very-very-very-very(2.0-3.0)",
-                      v.getErrors().elementAt(0));
-         assertEquals("changes applied",
-                      1, changes.size());
-         assertEquals("label truncated",
-                      "very-very-very-very-", g.getAnnotation("word2").getLabel());
-    }
-    catch(TransformationException exception)
-    {
+    // v.setDebug(true);
+    v.setDefaultOffsetThreshold(null);
+    try {
+      g.trackChanges();
+      v.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
+      if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
+      assertEquals("one error: " + v.getErrors(),
+                   1, v.getErrors().size());
+      assertEquals("Label too long (>20) for word: [word2]2#very-very-very-very-very-very(2.0-3.0)",
+                   v.getErrors().elementAt(0));
+      assertEquals("changes applied",
+                   1, changes.size());
+      assertEquals("label truncated",
+                   "very-very-very-very-", g.getAnnotation("word2").getLabel());
+    } catch(TransformationException exception) {
       fail(exception.toString());
     }
   }
 
-  @Test public void validateHierarchyParentChildSynchronicity() // TODO saturated anchor sharing, and non-saturated by parent-including violations
-  {
+  @Test public void validateHierarchyParentChildSynchronicity() { // TODO saturated anchor sharing, and non-saturated by parent-including violations 
   }
 
-  public static void main(String args[]) 
-  {
+  public static void main(String args[]) {
     org.junit.runner.JUnitCore.main("nzilbb.ag.util.TestValidator");
   }
 }
