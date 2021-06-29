@@ -34,7 +34,8 @@ import nzilbb.ag.*;
 import nzilbb.ag.util.*;
 
 public class TestValidator {
-  
+
+  /** Test a valid graph is not changed. */
   @Test public void valid() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -131,6 +132,7 @@ public class TestValidator {
     }
   }
 
+  /** Test new parents are correctly allocated. */
   @Test public void reconcileOrphansNewParents() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -282,6 +284,7 @@ public class TestValidator {
     }
   }
 
+  /** Test orphaned childrent are correctly deleted. */
   @Test public void reconcileOrphansDeleteChildren() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -409,6 +412,7 @@ public class TestValidator {
     }
   }
 
+  /** Test ordinals are corrected */
   @Test public void validateHierarchyOrdinalsAndDeletion() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -532,6 +536,7 @@ public class TestValidator {
       
   }
 
+  /** Test that overlapping children are teased apart. */
   @Test public void validateHierarchyOverlappingChildren() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -672,6 +677,7 @@ public class TestValidator {
     }
   }
 
+  /** Test child anchors that are out of sequence are corrected. */
   @Test public void validateHierarchyAnchorsOutOfSequence() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -861,6 +867,7 @@ public class TestValidator {
     }
   }
 
+  /** Test correction of reversed anchors. */
   @Test public void validateHierarchyReversedAnchorsSimpleCases() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -1038,6 +1045,8 @@ public class TestValidator {
     }
   }
 
+  /** Test complicated reversed-anchor cases, where child/parent relations are affected,
+   * are handled. */ 
   @Test public void validateHierarchyReversedAnchorsComplexCases() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -1200,6 +1209,8 @@ public class TestValidator {
     }
   }
 
+  /** Test case where anchors are out of order, and higher confidence anchors follow
+   * lower confidence anchors. */
   @Test public void anchorsOutOfOrderHigherConfidenceFollowing() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -1294,6 +1305,8 @@ public class TestValidator {
     }
   }
 
+  /** Test case where anchors are out of order, and lower confidence anchors follow
+   * higher confidence anchors. */
   @Test public void anchorsOutOfOrderHigherConfidencePrior() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -1388,6 +1401,7 @@ public class TestValidator {
     }
   }
 
+  /** Test out of order anchors. */
   @Test public void anchorsOutOfOrderFewerPrior() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -1482,6 +1496,7 @@ public class TestValidator {
     }
   }
 
+  /** Test out of order anchors. */
   @Test public void anchorsOutOfOrderFewerFollowing() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -1562,6 +1577,8 @@ public class TestValidator {
     }
   }
 
+  /** Test out of order anchors where high confidence anchors have lower confidence
+   * anchors between. */
   @Test public void anchorsOutOfOrderHigherConfidencePriorAndFollowing() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -1656,6 +1673,7 @@ public class TestValidator {
     }
   }
 
+  /** Test valid case where utterances partition words. */
   @Test public void utterancesPartitionWordsInTurnNoChange() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -1753,6 +1771,7 @@ public class TestValidator {
     }
   }
 
+  /** Test case where utterances partition words and anchors are out of order. */
   @Test public void utterancesPartitionWordsInTurnAnchorsOutOfOrder() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -1840,6 +1859,7 @@ public class TestValidator {
     }
   }
 
+  /** Test extraneous peers are deleted when peers == false. */
   @Test public void deleteExtraneousPeers() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -1924,6 +1944,7 @@ public class TestValidator {
     }
   }
 
+  /** Test fragments of a larger graph can be validated. */
   @Test public void canValidateFragment() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -2056,6 +2077,7 @@ public class TestValidator {
     }
   }
 
+  /** Test that labels that are too long are truncated. */
   @Test public void labels() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -2167,7 +2189,8 @@ public class TestValidator {
     }
   }
 
-  @Test public void validateHierarchyParentChildSynchronicity() { // TODO saturated anchor sharing, and non-saturated by parent-including violations 
+  /** saturated anchor sharing, and non-saturated by parent-including violations (TODO) */
+  @Test public void validateHierarchyParentChildSynchronicity() {
   }
 
   public static void main(String args[]) {
