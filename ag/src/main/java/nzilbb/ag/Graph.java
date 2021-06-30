@@ -42,6 +42,7 @@ import nzilbb.ag.util.AnchorComparatorWithStructure;
 import nzilbb.ag.util.AnnotationComparatorByOrdinal;
 import nzilbb.ag.util.LayerHierarchyTraversal;
 import nzilbb.ag.util.LayerTraversal;
+import nzilbb.util.ClonedProperty;
 import nzilbb.util.Timers;
 
 /**
@@ -142,7 +143,7 @@ public class Graph
     * <p>In the underlying map, this is stored as the "children" attribute of a "layers" attribute.
     * @return Map of anchors (graph nodes) keyed by id.
     */
-   @SuppressWarnings("unchecked")
+   @ClonedProperty @SuppressWarnings("unchecked")
    public LinkedHashMap<String,Anchor> getAnchors() 
    { 
       if (!containsKey("anchors"))
@@ -260,6 +261,7 @@ public class Graph
     * Getter for {@link #schema}: The layer definitions and their interrelations.
     * @return The layer definitions and their interrelations.
     */
+   @ClonedProperty
    public Schema getSchema() { return schema; }
    /**
     * Setter for {@link #schema}.
