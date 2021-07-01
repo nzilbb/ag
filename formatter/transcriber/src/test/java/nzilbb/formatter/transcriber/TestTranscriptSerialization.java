@@ -335,6 +335,292 @@ public class TestTranscriptSerialization {
       }
    }
 
+   @Test public void utf8()  throws Exception {
+      Schema schema = new Schema("who", "turn", "utterance", "word",
+	 new Layer("transcriber", "Transcribers", 0, true, true, true),
+	 new Layer("transcript_language", "Graph language", 0, false, false, true),
+	 new Layer("transcript_scribe", "Transcriber", 0, false, false, true),
+	 new Layer("transcript_program", "Program", 0, false, false, true),
+	 new Layer("transcript_airdate", "Air Date", 0, false, false, true),
+	 new Layer("transcript_version", "Version", 0, false, false, true),
+	 new Layer("transcript_version_date", "Version Date", 0, false, false, true),
+	 new Layer("who", "Participants", 0, true, true, true),
+	 new Layer("participant_check", "Check", 0, false, false, true, "who", true),
+	 new Layer("gender", "Gender", 0, false, false, true, "who", true),
+	 new Layer("participant_dialect", "Dialect", 0, false, false, true, "who", true),
+	 new Layer("participant_accent", "Accent", 0, false, false, true, "who", true),
+	 new Layer("participant_scope", "Scope", 0, false, false, true, "who", true),
+	 new Layer("topic", "Topic", 2, true, false, false),
+	 new Layer("comment", "Comment", 2, true, false, true),
+	 new Layer("noise", "Noise", 2, true, false, true),
+	 new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+	 new Layer("entities", "Entities", 2, true, false, false, "turn", true),
+	 new Layer("language", "Language", 2, true, false, false, "turn", true),
+	 new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+	 new Layer("word", "Words", 2, true, false, false, "turn", true),
+	 new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
+	 new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
+      schema.getLayer("gender").getValidLabels().put("M","Male");
+      schema.getLayer("gender").getValidLabels().put("F","Female");
+
+      // access file
+      NamedStream[] streams = { new NamedStream(new File(getDir(), "test-utf-8.trs")) };
+      
+      // create deserializer
+      TranscriptSerialization deserializer = new TranscriptSerialization();
+
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals("Configuration parameters" + configuration, 18, deserializer.configure(configuration, schema).size());      
+      assertEquals("topic", "topic", 
+		   ((Layer)configuration.get("topicLayer").getValue()).getId());
+      assertEquals("comment", "comment", 
+		   ((Layer)configuration.get("commentLayer").getValue()).getId());
+      assertEquals("noise", "noise", 
+		   ((Layer)configuration.get("noiseLayer").getValue()).getId());
+      assertEquals("language", "language", 
+		   ((Layer)configuration.get("languageLayer").getValue()).getId());
+      assertEquals("lexical", "lexical", 
+		   ((Layer)configuration.get("lexicalLayer").getValue()).getId());
+      assertEquals("pronounce", "pronounce", 
+		   ((Layer)configuration.get("pronounceLayer").getValue()).getId());
+      assertEquals("entities", "entities", 
+		   ((Layer)configuration.get("entityLayer").getValue()).getId());
+      assertEquals("transcript_scribe", "transcript_scribe", 
+		   ((Layer)configuration.get("scribeLayer").getValue()).getId());
+      assertEquals("transcript_version", "transcript_version", 
+		   ((Layer)configuration.get("versionLayer").getValue()).getId());
+      assertEquals("transcript_version_date", "transcript_version_date", 
+		   ((Layer)configuration.get("versionDateLayer").getValue()).getId());
+      assertEquals("transcript_program", "transcript_program", 
+		   ((Layer)configuration.get("programLayer").getValue()).getId());
+      assertEquals("transcript_airdate", "transcript_airdate", 
+		   ((Layer)configuration.get("airDateLayer").getValue()).getId());
+      assertEquals("transcript_language", "transcript_language", 
+		   ((Layer)configuration.get("transcriptLanguageLayer").getValue()).getId());
+      assertEquals("participant_check", "participant_check", 
+		   ((Layer)configuration.get("participantCheckLayer").getValue()).getId());
+      assertEquals("gender", "gender", 
+		   ((Layer)configuration.get("genderLayer").getValue()).getId());
+      assertEquals("participant_dialect", "participant_dialect", 
+		   ((Layer)configuration.get("dialectLayer").getValue()).getId());
+      assertEquals("participant_accent", "participant_accent", 
+		   ((Layer)configuration.get("accentLayer").getValue()).getId());
+      assertEquals("participant_scope", "participant_scope", 
+		   ((Layer)configuration.get("scopeLayer").getValue()).getId());
+
+      // load the stream
+      ParameterSet defaultParamaters = deserializer.load(streams, schema);
+      //for (Parameter p : defaultParamaters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals(0, defaultParamaters.size());
+
+      // configure the deserialization
+      deserializer.setParameters(defaultParamaters);
+
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
+
+      for (String warning : deserializer.getWarnings()) {
+	 System.out.println(warning);
+      }
+      
+      assertEquals("test-utf-8.trs", g.getId());
+      String[] transcribers = g.labels("transcript_scribe"); 
+      assertEquals(1, transcribers.length);
+      assertEquals("Robert Fromont", transcribers[0]);
+      String[] languages = g.labels("transcript_language"); 
+      assertEquals(1, languages.length);
+      assertEquals("en", languages[0]);
+
+      assertEquals("8", g.first("transcript_version").getLabel());
+      assertEquals("Version date in ISO format",
+                   "2021-04-20", g.first("transcript_version_date").getLabel());
+
+      // participants     
+      assertEquals(2, g.all("who").length);
+      assertEquals("Interviewer", g.getAnnotation("spk1").getLabel());
+      assertEquals("who", g.getAnnotation("spk1").getLayerId());
+      assertEquals("mop03-2b", g.getAnnotation("spk2").getLabel());
+      assertEquals("who", g.getAnnotation("spk2").getLayerId());
+
+      // participant meta data
+      assertEquals("Gender label is normalized",
+		   "F", g.getAnnotation("spk1").first("gender").getLabel());
+      assertEquals("Gender label is normalized",
+		   "M", g.getAnnotation("spk2").first("gender").getLabel());
+      assertEquals("no", g.getAnnotation("spk1").first("participant_check").getLabel());
+      assertEquals("yes", g.getAnnotation("spk2").first("participant_check").getLabel());
+      assertEquals("native", g.getAnnotation("spk1").first("participant_dialect").getLabel());
+      assertEquals("native", g.getAnnotation("spk2").first("participant_dialect").getLabel());
+      assertEquals("ame", g.getAnnotation("spk1").first("participant_accent").getLabel());
+      assertEquals("nze", g.getAnnotation("spk2").first("participant_accent").getLabel());
+      assertEquals("local", g.getAnnotation("spk1").first("participant_scope").getLabel());
+      assertEquals("local", g.getAnnotation("spk2").first("participant_scope").getLabel());
+
+
+      // turns
+      Annotation[] turns = g.all("turn");
+      assertEquals(26, turns.length);
+      assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
+      assertEquals(Double.valueOf(23.563), turns[0].getEnd().getOffset());
+      assertEquals("mop03-2b", turns[0].getLabel());
+      assertEquals(g.getAnnotation("spk2"), turns[0].getParent());
+      assertEquals(Double.valueOf(302.834), turns[24].getStart().getOffset());
+      assertEquals(Double.valueOf(304.334), turns[24].getEnd().getOffset());
+      assertEquals("Interviewer", turns[24].getLabel());
+      assertEquals(g.getAnnotation("spk1"), turns[24].getParent());
+
+      // utterances
+      Annotation[] utterances = g.all("utterance");
+      assertEquals(140, utterances.length);
+      assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
+      assertEquals(Double.valueOf(5.75), utterances[0].getEnd().getOffset());
+      assertEquals("mop03-2b", utterances[0].getParent().getLabel());
+      assertEquals(turns[0], utterances[0].getParent());
+
+      assertEquals(Double.valueOf(5.75), utterances[1].getStart().getOffset());
+      assertEquals(Double.valueOf(6.907), utterances[1].getEnd().getOffset());
+      assertEquals("mop03-2b", utterances[1].getParent().getLabel());
+
+      
+      Annotation[] words = g.all("word");
+      assertEquals(Double.valueOf(0), words[0].getStart().getOffset());
+      // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
+      assertEquals("ánd", words[0].getLabel());
+      assertEquals("ah .", words[1].getLabel());
+      assertEquals("Cyril", words[2].getLabel());
+      assertEquals("would", words[3].getLabel());
+      assertEquals("arrive", words[4].getLabel());
+      assertEquals("at", words[5].getLabel());
+      assertEquals("the", words[6].getLabel());
+      assertEquals("door", words[7].getLabel());
+      assertEquals(Double.valueOf(5.75), words[7].getEnd().getOffset());
+
+      // topic
+      Annotation[] topics = g.all("topic");
+      assertEquals(9, topics.length);
+
+      assertEquals(Double.valueOf(0.0), topics[0].getStart().getOffset());
+      assertEquals(Double.valueOf(23.563), topics[0].getEnd().getOffset());
+      assertEquals("teen-decadeplus-friend-general", topics[0].getLabel());
+      assertEquals(g, topics[0].getParent());
+
+      assertEquals(Double.valueOf(23.563), topics[1].getStart().getOffset());
+      assertEquals(Double.valueOf(183.995), topics[1].getEnd().getOffset());
+      assertEquals("teen-decadeplus-me-event", topics[1].getLabel());
+      assertEquals(g, topics[1].getParent());
+
+      assertEquals(Double.valueOf(295.115), topics[8].getStart().getOffset());
+      assertEquals(Double.valueOf(306.920), topics[8].getEnd().getOffset());
+      assertEquals("teen-decadeplus-friend-general", topics[8].getLabel());
+      assertEquals(g, topics[8].getParent());
+
+      // noise
+      Annotation[] noises = g.all("noise");
+      assertEquals(5, noises.length);
+
+      assertEquals(Double.valueOf(174.168), noises[0].getStart().getOffsetMin());
+      assertEquals(Double.valueOf(177.59), noises[0].getEnd().getOffsetMax());
+      assertEquals("and -", noises[0].getStart().endOf("word").iterator().next().getLabel());
+      assertEquals("interviewer: clears throat", noises[0].getLabel());
+      assertEquals("--", noises[0].getEnd().startOf("word").iterator().next().getLabel());
+      assertEquals(g, noises[0].getParent());
+
+      assertEquals(Double.valueOf(185.339), noises[1].getStart().getOffset());
+      assertEquals(Double.valueOf(185.339), noises[1].getEnd().getOffset());
+      assertEquals("both laugh", noises[1].getLabel());
+      assertEquals(g, noises[1].getParent());
+
+      assertEquals(Double.valueOf(189.464), noises[2].getStart().getOffset());
+      assertEquals(Double.valueOf(189.464), noises[2].getEnd().getOffset());
+      assertEquals("test", noises[2].getLabel());
+      assertEquals(g, noises[2].getParent());
+
+      assertEquals(Double.valueOf(223.227), noises[3].getStart().getOffset());
+      assertEquals(Double.valueOf(223.227), noises[3].getEnd().getOffset());
+      assertEquals("cough", noises[3].getLabel());
+      assertEquals(g, noises[3].getParent());
+
+      assertEquals(Double.valueOf(233.727), noises[4].getStart().getOffsetMin());
+      assertEquals(Double.valueOf(236.946), noises[4].getEnd().getOffsetMax());
+      assertEquals("microphone movement noise", noises[4].getLabel());
+      assertEquals(g, noises[4].getParent());
+
+      // comment
+      Annotation[] comments = g.all("comment");
+      assertEquals(6, comments.length);
+
+      assertEquals(Double.valueOf(55.444), comments[0].getStart().getOffsetMin());
+      assertEquals(Double.valueOf(60.101), comments[0].getEnd().getOffsetMax());
+      assertEquals("in", comments[0].getStart().endOf("word").iterator().next().getLabel());
+      assertEquals("unclear", comments[0].getLabel());
+      assertEquals("--", comments[0].getEnd().startOf("word").iterator().next().getLabel());
+      assertEquals(g, comments[0].getParent());
+
+      // language tags are anchored
+      Annotation[] language = g.all("language");
+      assertEquals("There are language tags " + Arrays.asList(language),
+                   2, language.length);
+      
+      assertEquals("Language tag has the right label",
+                   "es", language[0].getLabel());
+      assertEquals("Language tag has the right start offset",
+                   Double.valueOf(181.652), language[0].getStart().getOffset());
+      assertEquals("Language tag has the right end offset",
+                   Double.valueOf(183.995), language[0].getEnd().getOffset());
+      assertEquals("Language tag tags the right word",
+                   "vaya", language[0].getStart().startOf("word").iterator().next().getLabel());
+
+      assertEquals("Language tag has the right label",
+                   "es", language[1].getLabel());
+      assertEquals("Language tag has the right start offset",
+                   Double.valueOf(195.025), language[1].getStart().getOffsetMin());
+      assertEquals("Language tag has the right end offset",
+                   Double.valueOf(197.181), language[1].getEnd().getOffsetMax());
+      assertEquals("Language tag tags the right start word",
+                   "donde", language[1].getStart().startOf("word").iterator().next().getLabel());
+      assertEquals("Language tag tags the right end word",
+                   "está", language[1].getEnd().endOf("word").iterator().next().getLabel());
+
+      Annotation[] entities = g.all("entities");
+      assertEquals("There is one named entity tagged", 1, entities.length);
+      assertEquals("Entity tag has the right label",
+                   "pers", entities[0].getLabel());
+      assertEquals("Entity tag starts at Cyril",
+                   "Cyril", entities[0].getStart().startOf("word").iterator().next().getLabel());
+      assertEquals("Entity tag ends at Cyril",
+                   "Cyril", entities[0].getEnd().endOf("word").iterator().next().getLabel());
+      
+      Annotation[] lexical = g.all("lexical");
+      assertEquals("There is one lexical tag", 1, lexical.length);
+      assertEquals("Lexical tag has the right label",
+                   "phone", lexical[0].getLabel());
+      assertEquals("Lexical tag tags telephone",
+                   "telephones", lexical[0].tagsOn("word")[0].getLabel());
+
+      Annotation[] pronounce = g.all("pronounce");
+      assertEquals("There is one pronounce tag", 1, pronounce.length);
+      assertEquals("Pronounce tag has the right label",
+                   "lEd@", pronounce[0].getLabel());
+      assertEquals("Pronounce tag tags letter",
+                   "letter", pronounce[0].tagsOn("word")[0].getLabel());
+      
+      // check all annotations have 'manual' confidence
+      for (Annotation a : g.getAnnotationsById().values()) {
+         assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
+
+      // check all utterance anchors have 'manual' confidence
+      for (Annotation u : g.all("utterance")) {
+         assertEquals("Utterance start confidence: " + u.getStart() + "-" + u.getEnd(),
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), u.getStart().getConfidence());
+         assertEquals("Utterance end confidence: " + u.getStart() + "-" + u.getEnd(),
+                      Integer.valueOf(Constants.CONFIDENCE_MANUAL), u.getEnd().getConfidence());
+      }
+   }
+
    @Test public void transcriptOnly()  throws Exception {
       Schema schema = new Schema("who", "turn", "utterance", "word",
 	 new Layer("who", "Participants", 0, true, true, true),
