@@ -220,7 +220,7 @@ public class Turn
 	    }
 	    catch (Exception ex)
 	    {
-	       System.out.println("Failed to parse speaker for Who: " + child.toString() + "\n" + ex.toString());
+              //System.out.println("Turn "+getStartTime()+": Failed to parse speaker for Who: " + child.toString() + "\n" + ex.toString());
 	    }
 	 }
 	 else if (child.getNodeType() == Node.ELEMENT_NODE

@@ -632,6 +632,10 @@ public class Transcript {
                   
           }
           if (sync.isSimultaneousSpeech()) {
+            if (who.length == 1) {
+              vErrors.add(
+                "Simultaneous speech at " + sync.getTime() +"s has only one speaker defined.");
+            }
             // whole bunch of syncs at once
             Vector<String> vSpeakers = new Vector<String>();
             Enumeration<SimultaneousSync> enSimultaneousSyncs 
