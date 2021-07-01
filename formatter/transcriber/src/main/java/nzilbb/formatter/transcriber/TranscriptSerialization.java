@@ -1117,7 +1117,7 @@ public class TranscriptSerialization
             for (Word word : thisSync.getWords()) {
                      
               Annotation anWord
-                = new Annotation(null, word.getRawOrthography(), schema.getWordLayerId());
+                = new Annotation(null, word.getRawOrthography().trim(), schema.getWordLayerId());
               anWord.setParentId(anTurn.getId())
                 .setConfidence(Constants.CONFIDENCE_MANUAL);;
               graph.addAnnotation(anWord);
@@ -1673,7 +1673,7 @@ public class TranscriptSerialization
     try {
          
       File f = File.createTempFile(IO.SafeFileNameUrl(graph.getId()), ".trs");
-      FileOutputStream out = new FileOutputStream(f);	 
+      FileOutputStream out = new FileOutputStream(f);
       OutputStreamWriter writer = new OutputStreamWriter(out, "utf-8");
       transcript.writeText(writer);
       writer.flush();

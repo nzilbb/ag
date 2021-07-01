@@ -39,9 +39,11 @@ import java.util.Vector;
 import java.util.Properties;
 import java.util.HashMap;
 import java.util.Enumeration;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 
 /**
@@ -292,39 +294,21 @@ public class Transcript {
    */
   public void load(InputStream in)
     throws IOException, ParserConfigurationException, SAXException {
-    // convert from ISO-8859-1 to UTF-8
-    ByteArrayOutputStream oBytes = new ByteArrayOutputStream();
-    byte[] aBytes = new byte[1024];
-    int iBytesRead = in.read(aBytes);
-    while (iBytesRead >= 0)
-    {
-      oBytes.write(aBytes, 0, iBytesRead);
-      iBytesRead = in.read(aBytes);
-    } // next chunk	
-    in.close();
-    Charset latin1 = Charset.forName("ISO-8859-1");
-    ByteBuffer bytes = ByteBuffer.wrap(oBytes.toByteArray());
-    CharBuffer utf8 = latin1.decode(bytes);
-      
-    // read stream into a string, stripping out DTD reference so that
-    // no attempt is made to resolve it
-    StringBuffer strFile = new StringBuffer(utf8.length());
-    BufferedReader reader = new BufferedReader(new CharArrayReader(utf8.array()));
-    String sLine = reader.readLine();
-    while (sLine != null) {
-      if (!sLine.startsWith("<!DOCTYPE Trans")) strFile.append(sLine);
-      sLine = reader.readLine();
-    } // next line
-      
-      // Document factory
+    // Document factory
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder builder = builderFactory.newDocumentBuilder();   
-      
-    // now read from the string
-    StringReader sbis = new StringReader(strFile.toString());
-      
+    builder.setEntityResolver(new EntityResolver() {
+        public InputSource resolveEntity(String publicId, String systemId)
+          throws SAXException, IOException {
+          // Get DTDs locally, to prevent not found errors
+          String name = systemId.substring(systemId.lastIndexOf('/') + 1);
+          URL url = getClass().getResource(name);
+          if (url != null) return new InputSource(url.openStream());
+          return null;
+        }});
+    
     // parse
-    Document document = builder.parse(new InputSource(sbis));
+    Document document = builder.parse(new InputSource(in));
       
     build(document);
   } // end of load()
