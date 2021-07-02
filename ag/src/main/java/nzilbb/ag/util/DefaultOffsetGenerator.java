@@ -22,11 +22,16 @@
 package nzilbb.ag.util;
 
 import java.util.HashSet;
+import java.util.Queue;
+import java.util.Optional;
+import java.util.LinkedHashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.LinkedList;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
+import java.util.stream.Collectors;
 import nzilbb.ag.*;
 
 /**
@@ -241,7 +246,9 @@ public class DefaultOffsetGenerator implements GraphTransformer {
       a.remove("@offsetMin");
       a.remove("@offsetMax");
     } // next anchor
-    if (anchorsUnderThreshold) {
+    if (!anchorsUnderThreshold) {
+      log("There are no anchors with confidence <= ", defaultOffsetThreshold);
+    } else {
       // we can't just sort the anchors of the graph all together before interpolation
       // because there may be independant spans that should be interpolated separately
       // e.g. the unaligned words of overlapping speech of two speakers
@@ -253,8 +260,9 @@ public class DefaultOffsetGenerator implements GraphTransformer {
 	 
       // traverse the layer hiercharchy to get a list of the uppermost layers that
       // are not top-level, and are peersOverlap == false      
-      LayerHierarchyTraversal<HashSet<Layer>> layerTraversal 
-        = new LayerHierarchyTraversal<HashSet<Layer>>(new HashSet<Layer>(), graph.getSchema()) {
+      LayerHierarchyTraversal<LinkedHashSet<Layer>> layerTraversal 
+        = new LayerHierarchyTraversal<LinkedHashSet<Layer>>(
+          new LinkedHashSet<Layer>(), graph.getSchema()) {
             protected void pre(Layer child) {
               Layer parent = child.getParent();
               // if the parent is not a top-level layer
@@ -271,21 +279,21 @@ public class DefaultOffsetGenerator implements GraphTransformer {
                   && child.getParentIncludes()
                   // and we haven't already added this parent
                   && !getResult().contains(parent)) {
-                // and we haven't already added an ancestor
-                boolean includesAncestor = false;
-                for (Layer ancestor : parent.getAncestors()) {
-                  if (getResult().contains(ancestor)) {
-                    includesAncestor = true;
-                    break;
-                  }
-                }
-                if (!includesAncestor) {
+                // // and we haven't already added an ancestor
+                // boolean includesAncestor = false;
+                // for (Layer ancestor : parent.getAncestors()) {
+                //   if (getResult().contains(ancestor)) {
+                //     includesAncestor = true;
+                //     break;
+                //   }
+                // }
+                // if (!includesAncestor) {
                   getResult().add(parent); // add the *parent* layer
-                }
+                // }
               } // not top level and peers don't overlap
             }
           };
-	 
+      
       // for each non-top-level children-don't-overlap parent layer
       for (Layer layer : layerTraversal.getResult()) {
         // log("Layer ", layer);
@@ -294,7 +302,7 @@ public class DefaultOffsetGenerator implements GraphTransformer {
           if (parent.getChange() == Change.Operation.Destroy) continue;
           try {
             // set the offsets of the descendants
-            setOffsetsForDescendantsOf(parent);
+            setOffsetsForChildrenOf(parent);
           } catch (TransformationException x) {
             errors.add("Could not set descendant offsets for " + logAnnotation(parent) 
                        + ": " + x.getMessage());
@@ -303,8 +311,6 @@ public class DefaultOffsetGenerator implements GraphTransformer {
         // log("Layer complete ", layer);
       } // next layer
       // log("Layers complete");
-    } else {
-      log("There are no anchors with confidence <= ", defaultOffsetThreshold);
     }
     return graph;
   }
@@ -371,119 +377,296 @@ public class DefaultOffsetGenerator implements GraphTransformer {
       boundedAnchors.add(endSentinel);
 	 
       // crawl through the anchors looking for unset offsets
-      Iterator<Anchor> anchors = boundedAnchors.iterator();
-      Anchor lastSetAnchor = null;
-      while (anchors.hasNext()) {
-        Anchor anchor = anchors.next();
-        if (anchor.getOffset() != null && getConfidence(anchor) > defaultOffsetThreshold) {
-          lastSetAnchor = anchor;
-          log("last set: ", lastSetAnchor);
-        } else {
-          if (lastSetAnchor == null) {
-            String message = "Could not determine bounds, starting from " + logAnchor(top.getStart());
-            log("ERROR: ", message);
-            throw new TransformationException(this, message);
-          }
-		  
-          Vector<Anchor> unsetAnchors = new Vector<Anchor>();
-          unsetAnchors.add(anchor);
-          log("first unset: ", anchor);
-	       
-          // scan forward from here to find the next set Anchor
-          Anchor nextSetAnchor = null;
-          while (nextSetAnchor == null) {
-            // check we haven't hit the end
-            if (!anchors.hasNext()) {
-              if (anchor.getOffset() != null && getConfidence(anchor) > defaultOffsetThreshold) {
-                // the last one we saw actually has an offset,
-                // so we use that one as the last anchor
-                unsetAnchors.remove(anchor);
-                nextSetAnchor = anchor;
-                break;
-              } else {
-                String message = "Could not determine bounds, starting from " + logAnchor(lastSetAnchor) 
-                  + " after " + logAnchor(unsetAnchors.lastElement());
-                log("ERROR: ", message);
-                throw new TransformationException(this, message);
-              }
-            }
-            anchor = anchors.next();
-            if (anchor.getOffset() == null 
-                || getConfidence(anchor) <= defaultOffsetThreshold) {
-              // add the unset anchor to the collection
-              unsetAnchors.add(anchor);
-              log("unset: ", anchor);
-            } else { // offset is set
-              // stop
-              nextSetAnchor = anchor;
-              log("next set: ", nextSetAnchor);
-            }
-          } // next anchor
-		  
-          if (unsetAnchors.size() > 0) {
-            // if there are no annotations between the last set anchor
-            // and the first unset anchor, then give the unset anchor
-            // the same offset as the last set anchor
-            Anchor firstUnset = unsetAnchors.firstElement();
-            assert lastSetAnchor != null : "lastSetAnchor != null";
-            assert firstUnset != null : "firstUnset != null";
-            if (lastSetAnchor.annotationTo(firstUnset) == null) {
-              firstUnset
-                .setOffset(lastSetAnchor.getOffset())
-                .setConfidence(getConfidence());
-              unsetAnchors.remove(firstUnset);
-              lastSetAnchor = firstUnset;
-              log("revised last: ", lastSetAnchor);
-            }
-          }
-		  
-          if (unsetAnchors.size() > 0) {
-            // if there are no annotations between the next set anchor
-            // and the last unset anchor, then give the unset anchor
-            // the same offset as the next set anchor
-            Anchor lastUnset = unsetAnchors.lastElement();
-            if (lastUnset.annotationTo(nextSetAnchor) == null) {
-              lastUnset
-                .setOffset(nextSetAnchor.getOffset())
-                .setConfidence(getConfidence());
-              unsetAnchors.remove(lastUnset);
-              nextSetAnchor = lastUnset;
-              log("revised next: ", nextSetAnchor);
-            }
-		     
-            if (unsetAnchors.size() > 0) {
-              // spread out unset anchors evenly between the bounds
-              double dStart = lastSetAnchor.getOffset();
-              double dEnd = nextSetAnchor.getOffset();
-              double dDuration = dEnd - dStart;
-              double dIncrement = dDuration / (unsetAnchors.size() + 1);
-              log("from: ", lastSetAnchor, " to ", nextSetAnchor,
-                  " duration: ", dDuration, " increment: ", dIncrement);
-              int i = 0;
-              for (Anchor unset : unsetAnchors) {
-                i++;
-                double newOffset = dStart + i * dIncrement;
-                if (unset.getOffset() == null 
-                    || unset.getOffset().doubleValue() != newOffset
-                    // upgrade confidence even if unset.offset == newOffset
-                    || getConfidence(unset) < getConfidence()) {
-                  log("setting: ", unset, " offset to ", newOffset);
-                  unset
-                    .setOffset(newOffset)
-                    .setConfidence(getConfidence());
-                }
-              } // next unset anchor
-            } // unsetAnchors.size() > 0
-          } // unsetAnchors.size() > 0
-		  
-          // update the last set anchor 
-          lastSetAnchor = nextSetAnchor;
-          log("last now: ", lastSetAnchor);
-		  
-        } // offset is not set
-      } // next anchor
+      iterpolateAnchors(boundedAnchors.iterator());
     } // not an instant
   } // end of setOffsetsForDescendantsOf()
+  
+  /**
+   * Sets offsets of anchors of children (but not other descendants) of the given annotation.
+   * @param parent
+   * @throws TransformationException
+   */
+  protected void setOffsetsForChildrenOf(Annotation parent) throws TransformationException {
+    log("setOffsetsForChildrenOf(", parent, ")");
+    // we're only interested in certain child layers
+    List<Layer> childLayers = parent.getLayer().getChildren().values().stream()
+      .filter(layer->layer.getPeers())
+      .filter(layer->!layer.getPeersOverlap())
+      .filter(layer->layer.getAlignment() == Constants.ALIGNMENT_INTERVAL)
+      .filter(layer->!layer.getPeersOverlap())
+      .filter(layer->layer.getParentIncludes())
+      .collect(Collectors.toList());
+
+    // list of anchors in the order we find them
+    // when adding an anchor, we remove it first, because if it's already there,
+    // it's probably out of order - e.g. language phrase tags have lower ordinals than
+    // the words they tag, but if they're aligned, they should come in the sequence of the
+    // words, not the language tags
+    Vector<Anchor> orderedAnchors = new Vector<Anchor>();
+    
+    // we need to traverse all child layers simultaneously
+    // because some layers (e.g. utterance) partition others (e.g. words)
+
+    Vector<Queue<Annotation>> childAnnotations = new Vector<Queue<Annotation>>();
+    for (Layer layer : childLayers) {
+      childAnnotations.add(new LinkedList<Annotation>(parent.getAnnotations(layer.getId())));
+    } // next child layer
+
+    Anchor waitingFor = null; // aligned end anchor we're waiting to catch up to
+    
+    // while there are still child annotations
+    while(childAnnotations.size() > 0) {
+      Annotation next = null;
+      // find while layer the next annotation comes from 
+      for (Queue<Annotation> layer : childAnnotations) {
+        Annotation candidate = layer.peek();
+        if (next == null) {
+          next = candidate;
+        } else if (candidate.getStart().getOffset() != null) {
+          if (next.getStart().getOffset() == null) {
+            // anchored starts first
+            next = candidate;
+          } else if (candidate.getStart().getOffset() < next.getStart().getOffset()) {
+            // earlier starts first
+            next = candidate;
+          } else if (candidate.getStart().getOffset().equals(next.getStart().getOffset())) {
+            // starts are the same, so longest first
+            if (next.getEnd().getOffset() == null) {
+              // no end offset counts as 'shorter'
+              next = candidate;
+            } else if (candidate.getEnd().getOffset() != null
+                       && candidate.getDuration() > next.getDuration()) {
+              next = candidate;
+            } // else candidate.getEnd().getOffset() == null so it's 'shorter' than next
+          }
+        }
+      } // next layer
+      log("next ", next, " - waitingFor ", waitingFor);
+
+      // pop the next annotation off whichever queue it came from
+      for (Queue<Annotation> layer : childAnnotations) {
+        if (next == layer.peek()) {
+          layer.remove();
+          if (layer.size() == 0) {
+            childAnnotations.remove(layer);
+          }
+          break;
+        }
+      } // next layer
+
+      // is the next annotation's start anchor after the one we're waiting for?
+      if (waitingFor != null && next.getStart().getOffset() != null
+          && waitingFor.getOffset() < next.getStart().getOffset()) {
+        // we've passed the offset we're waiting for, so add that anchor
+        orderedAnchors.remove(waitingFor); // (remove it first - last add counts)
+        orderedAnchors.add(waitingFor);
+        log(" reached (by start) ", waitingFor);
+        waitingFor = null;
+      }
+      // add the next annotation's start anchor to the list
+      orderedAnchors.remove(next.getStart()); // (remove it first - last add counts)
+      orderedAnchors.add(next.getStart());
+      log(" added start ", next.getStart());
+      // have we been waiting for this one?
+      if (next.getStart() == waitingFor) {
+        log(" not waiting for ", waitingFor, " any more");
+        waitingFor = null;
+      }
+
+      if (next.getEnd().getOffset() == null) {
+        orderedAnchors.remove(next.getEnd()); // (remove it first - last add counts)
+        orderedAnchors.add(next.getEnd());
+        log(" added end ", next.getEnd());
+      } else {
+        if (waitingFor == null) {
+          // wait until other offsets pass the end of this one before adding it
+          waitingFor = next.getEnd();
+          log(" now waitingFor ", waitingFor);
+        } else {
+          // we're already waiting for another offset
+          if (waitingFor.getOffset() < next.getEnd().getOffset()) {
+            // we've passed the offset we're waiting for, so add that anchor
+            orderedAnchors.remove(waitingFor); // (remove it first - last add counts)
+            orderedAnchors.add(waitingFor);
+            log(" reached ", waitingFor);
+            // and start waiting for the new offset
+            waitingFor = next.getEnd();
+            log(" now waitingFor ", waitingFor);
+          } else {
+            // haven't reached the offset we want yet, so add this end anchor
+            orderedAnchors.remove(next.getEnd()); // (remove it first - last add counts)
+            orderedAnchors.add(next.getEnd());
+            log(" added anchored end ", next.getEnd());
+          }
+        }
+      }
+      
+    } // next pass
+    if (waitingFor != null) {
+      orderedAnchors.remove(waitingFor); // (remove it first - last add counts)
+      orderedAnchors.add(waitingFor);
+    }
+
+    log("orderedAnchors: ", orderedAnchors);
+
+    // avoid unbounded anchor chain problems by starting/ending the collection with
+    // immovable start/end anchors - these come from graph.getSortedAnchors()
+    // - which includes only anchors with offsets - instead of sortedAnchors
+    // ensure that, no matter what, the bounding sentinels have offsets set
+    Anchor startSentinel = null;
+    if (parent.getStart() != null && parent.getStart().getOffset() != null) {
+      startSentinel = new Anchor(parent.getStart());
+    } else {
+        // use the lowest offset we find
+      startSentinel = new Anchor();
+      Optional<Anchor> firstAnchored = orderedAnchors.stream()
+        .filter(a->a.getOffset() != null).findFirst();
+      if (firstAnchored.isPresent()) {
+        startSentinel.setOffset(firstAnchored.get().getOffset());
+      }
+    }
+    startSentinel.setConfidence(getDefaultOffsetThreshold() + 1);
+    orderedAnchors.insertElementAt(startSentinel, 0);
+    
+    Anchor endSentinel = null;
+    if (parent.getEnd() != null && parent.getEnd().getOffset() != null) {
+        endSentinel = new Anchor(parent.getEnd());
+    } else { // use the highest offset we find
+      endSentinel = new Anchor();
+      Optional<Anchor> lastAnchored = orderedAnchors.stream()
+        .filter(a->a.getOffset() != null)
+        .max((a1,a2)->a1.getOffset().compareTo(a2.getOffset()));
+      if (lastAnchored.isPresent()) {
+        endSentinel.setOffset(lastAnchored.get().getOffset());
+      }
+    }
+    endSentinel.setConfidence(getDefaultOffsetThreshold() + 1);
+    orderedAnchors.add(endSentinel);
+    
+    // crawl through the anchors looking for unset offsets
+    iterpolateAnchors(orderedAnchors.iterator());
+    
+  } // end of setOffsetsForChildrenOf()
+  
+  /**
+   * Interpolates any unset or low-confidence anchors in the given iterator.
+   * <p> This method assumes that the first and last anchors has offsets and are high confidence.
+   * @param anchors
+   */
+  protected void iterpolateAnchors(Iterator<Anchor> anchors) throws TransformationException {
+    Anchor lastSetAnchor = null;
+    Anchor firstAnchor = null;
+    while (anchors.hasNext()) {
+      Anchor anchor = anchors.next();
+      if (firstAnchor == null) firstAnchor = anchor;
+      if (anchor.getOffset() != null && getConfidence(anchor) > defaultOffsetThreshold) {
+        lastSetAnchor = anchor;
+        log("last set: ", lastSetAnchor);
+      } else {
+        if (lastSetAnchor == null) {
+          String message = "Could not determine bounds, starting from " + logAnchor(firstAnchor);
+          log("ERROR: ", message);
+          throw new TransformationException(this, message);
+        }
+		  
+        Vector<Anchor> unsetAnchors = new Vector<Anchor>();
+        unsetAnchors.add(anchor);
+        log("first unset: ", anchor);
+	       
+        // scan forward from here to find the next set Anchor
+        Anchor nextSetAnchor = null;
+        while (nextSetAnchor == null) {
+          // check we haven't hit the end
+          if (!anchors.hasNext()) {
+            if (anchor.getOffset() != null && getConfidence(anchor) > defaultOffsetThreshold) {
+              // the last one we saw actually has an offset,
+              // so we use that one as the last anchor
+              unsetAnchors.remove(anchor);
+              nextSetAnchor = anchor;
+              break;
+            } else {
+              String message = "Could not determine bounds, starting from " + logAnchor(lastSetAnchor) 
+                + " after " + logAnchor(unsetAnchors.lastElement());
+              log("ERROR: ", message);
+              throw new TransformationException(this, message);
+            }
+          }
+          anchor = anchors.next();
+          if (anchor.getOffset() == null 
+              || getConfidence(anchor) <= defaultOffsetThreshold) {
+            // add the unset anchor to the collection
+            unsetAnchors.add(anchor);
+            log("unset: ", anchor);
+          } else { // offset is set
+            // stop
+            nextSetAnchor = anchor;
+            log("next set: ", nextSetAnchor);
+          }
+        } // next anchor
+		  
+        if (unsetAnchors.size() > 0) {
+          // if there are no annotations between the last set anchor
+          // and the first unset anchor, then give the unset anchor
+          // the same offset as the last set anchor
+          Anchor firstUnset = unsetAnchors.firstElement();
+          assert lastSetAnchor != null : "lastSetAnchor != null";
+          assert firstUnset != null : "firstUnset != null";
+          if (lastSetAnchor.annotationTo(firstUnset) == null) {
+            firstUnset
+              .setOffset(lastSetAnchor.getOffset())
+              .setConfidence(getConfidence());
+            unsetAnchors.remove(firstUnset);
+            lastSetAnchor = firstUnset;
+            log("revised last: ", lastSetAnchor);
+          }
+        }
+		  
+        if (unsetAnchors.size() > 0) {
+          // if there are no annotations between the next set anchor
+          // and the last unset anchor, then give the unset anchor
+          // the same offset as the next set anchor
+          Anchor lastUnset = unsetAnchors.lastElement();
+          if (lastUnset.annotationTo(nextSetAnchor) == null) {
+            lastUnset
+              .setOffset(nextSetAnchor.getOffset())
+              .setConfidence(getConfidence());
+            unsetAnchors.remove(lastUnset);
+            nextSetAnchor = lastUnset;
+            log("revised next: ", nextSetAnchor);
+          }
+		     
+          if (unsetAnchors.size() > 0) {
+            // spread out unset anchors evenly between the bounds
+            double dStart = lastSetAnchor.getOffset();
+            double dEnd = nextSetAnchor.getOffset();
+            double dDuration = dEnd - dStart;
+            double dIncrement = dDuration / (unsetAnchors.size() + 1);
+            log("from: ", lastSetAnchor, " to ", nextSetAnchor,
+                " duration: ", dDuration, " increment: ", dIncrement);
+            int i = 0;
+            for (Anchor unset : unsetAnchors) {
+              i++;
+              double newOffset = dStart + i * dIncrement;
+              if (unset.getOffset() == null 
+                  || unset.getOffset().doubleValue() != newOffset
+                  // upgrade confidence even if unset.offset == newOffset
+                  || getConfidence(unset) < getConfidence()) {
+                log("setting: ", unset, " offset to ", newOffset);
+                unset
+                  .setOffset(newOffset)
+                  .setConfidence(getConfidence());
+              }
+            } // next unset anchor
+          } // unsetAnchors.size() > 0
+        } // unsetAnchors.size() > 0
+		  
+          // update the last set anchor 
+        lastSetAnchor = nextSetAnchor;
+        log("last now: ", lastSetAnchor);
+		  
+      } // offset is not set
+    } // next anchor
+  } // end of iterpolateAnchors()
    
   /**
    * Recursively passes traverses child layers, adding anchors of children on
