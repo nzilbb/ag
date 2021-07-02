@@ -32,6 +32,7 @@ import java.util.Vector;
 import java.util.stream.Collectors;
 import nzilbb.ag.*;
 import nzilbb.ag.util.*;
+import nzilbb.util.Timers;
 
 public class TestDefaultOffsetGenerator {
 
@@ -1300,7 +1301,90 @@ public class TestDefaultOffsetGenerator {
       fail(exception.toString());
     }
   }
-  
+
+  /** Test offset generation completes in a timely manner */
+  @Test public void performance() {
+    Graph g = new Graph();
+    g.setId("g");
+    
+    g.addLayer(new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+               .setPeers(true).setPeersOverlap(true).setSaturated(true));
+    g.addLayer(new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true).setPeersOverlap(false).setSaturated(false)
+               .setParentId("who").setParentIncludes(true));
+    g.addLayer(new Layer("utterance", "Lines").setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true).setPeersOverlap(false).setSaturated(true)
+               .setParentId("turn").setParentIncludes(true));
+    g.addLayer(new Layer("word", "Orthographic Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true).setPeersOverlap(false).setSaturated(false)
+               .setParentId("turn").setParentIncludes(true));
+
+    // create a graph with a huge number of words
+    int wordCount = 5000; // got bored waiting for 10000 to finish
+    int wordsPerUtterance = 5;
+    int utterancesPerTurn = 2;
+    int numUtterances = wordCount/wordsPerUtterance;
+    int numTurns = numUtterances/utterancesPerTurn;
+    Anchor lastAnchor = g.getOrCreateAnchorAt(0.0);
+
+    // participant
+    Annotation participant = g.addAnnotation(
+      new Annotation("p", "participant", "who", lastAnchor.getId(), lastAnchor.getId(), "g"));
+
+    // create turns
+    for (int t = 0; t < numTurns; t++) {
+      Anchor turnEnd = g.getOrCreateAnchorAt(
+        (t+1)*utterancesPerTurn *wordsPerUtterance);
+      Annotation turn = g.addAnnotation(
+        new Annotation("turn"+t, participant.getLabel(), "turn",
+                       lastAnchor.getId(), turnEnd.getId(), "p"));
+      for (int u = 0; u < utterancesPerTurn; u++) {
+        Anchor utteranceEnd = g.getOrCreateAnchorAt(
+          lastAnchor.getOffset() + wordsPerUtterance);
+        Annotation utterance = g.addAnnotation(
+          new Annotation("turn"+t+"-utt"+u, participant.getLabel(), "utterance",
+                         lastAnchor.getId(), utteranceEnd.getId(), turn.getId()));
+        // create words
+        for (int w = 0; w < wordsPerUtterance; w++) {
+          Anchor start = new Anchor();
+          if (w == 0) {
+            start.setOffset(lastAnchor.getOffset());
+          }
+          g.addAnchor(start);
+          Anchor end = new Anchor();
+          if (w == wordsPerUtterance-1) {
+            end.setOffset(utteranceEnd.getOffset());
+          }
+          g.addAnchor(end);
+          g.addAnnotation(
+            new Annotation(null, utterance.getId() + "-word" + w, "word",
+                           start.getId(), end.getId(), turn.getId()));
+        } // next word
+        lastAnchor = utteranceEnd;
+      } // next utterance
+      
+      lastAnchor = turnEnd;
+    } // next turn
+    participant.setEndId(lastAnchor.getId());
+
+    Timers timers = new Timers();
+    DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
+    try {
+      timers.start("DefaultOffsetGenerator.transform");
+      generator.transform(g);
+      timers.end("DefaultOffsetGenerator.transform");
+      if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
+
+      System.out.println(timers.toString());
+      assertTrue(
+        "DefaultOffsetGenerator too slow:\n" + timers.toString(),
+        30000 > timers.getTotals().get("DefaultOffsetGenerator.transform"));      
+      
+    } catch(TransformationException exception) {
+      fail(exception.toString());
+    }
+  }
+
   public static void main(String args[]) {
     org.junit.runner.JUnitCore.main("nzilbb.ag.util.TestDefaultOffsetGenerator");
   }
