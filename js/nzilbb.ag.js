@@ -117,13 +117,6 @@ nzilbb.ag.Graph.prototype = {
 	annotation.layer.annotations.push(annotation);
     }
 } // Graph methods
-nzilbb.ag.Graph.coerce = function(obj)
-{
-    // call contructor
-    nzilbb.ag.Graph.call(obj);
-    // apply prototype
-    obj.__proto__ = nzilbb.ag.Graph.prototype;
-}
 nzilbb.ag.Graph.indexLayers = function(top, parent, layers)
 {
     for (var layerId in layers)
@@ -144,7 +137,9 @@ nzilbb.ag.Graph.activateAnchors = function(anchors)
     for (var a in anchors) 
     {
 	// set the id
-	nzilbb.ag.Anchor.coerce(anchors[a]);
+	var anchor = new nzilbb.ag.Anchor(anchors[a].offset, this);
+        Object.assign(anchor, anchors[a]);
+        anchors[a] = anchor;
 	anchors[a].id = a;
     }    
 }
@@ -164,8 +159,11 @@ nzilbb.ag.Graph.activateLayer = function(ag, parent, layerId, annotations)
 	    annotation.parent = parent;
 	}
 
-	// make it into an Annotation object, with all the corresponding methods
-	nzilbb.ag.Annotation.coerce(annotation);
+	// make it into an Annotation object, with all the corresponding methods        
+        var a = new nzilbb.ag.Annotation(
+            annotation.layerId, annotation.label, ag, annotation.startId, annotation.endId);
+        Object.assign(a, annotation);
+        annotation = a;
 
 	// indexing for easy lookup and iteration
 	ag.annotations[annotation.id] = annotation; // index annotations by id
@@ -239,10 +237,13 @@ nzilbb.ag.Graph.fromURL = function(url, success, error) {
 nzilbb.ag.Graph.activateObject = function(graph)
 {
     // make it into an AG
-    nzilbb.ag.Graph.coerce(graph);
+    var g = new nzilbb.ag.Graph(graph.id);
+    Object.assign(g, graph);
+    graph = g;
 
     graph.schema.layers = {};
-    nzilbb.ag.Graph.indexLayers(graph.schema.layers, graph.schema.graph, { graph: graph.schema.graph } );
+    nzilbb.ag.Graph.indexLayers(
+        graph.schema.layers, graph.schema.transcript, { transcript: graph.schema.transcript } );
     graph.layers = graph.schema.layers;
     nzilbb.ag.Graph.activateAnchors(graph.anchors);
 
@@ -329,7 +330,7 @@ nzilbb.ag.Annotation = function(layerId, label, graph, startId, endId)
 nzilbb.ag.Annotation.prototype = {
 
     // attributes
-    get layer() { return this.graph.layers[this.layerId]; },
+    get layer() { return this.graph.schema.layers[this.layerId]; },
     get ordinal() { return this.parent && this.parent[this.layerId].indexOf(this) + 1; },
     get previous() { return this.parent && this.parent[this.layerId][this.ordinal - 2]; },
     get next() { return this.parent && this.parent[this.layerId][this.ordinal]; },
@@ -383,13 +384,6 @@ nzilbb.ag.Annotation.prototype = {
     }
 
 } // Annotation methods
-nzilbb.ag.Annotation.coerce = function(obj)
-{
-    // call contructor
-    nzilbb.ag.Annotation.call(obj);
-    // apply prototype
-    obj.__proto__ = nzilbb.ag.Annotation.prototype;
-}
 
 // Anchor class
 nzilbb.ag.Anchor = function(offset, graph)
@@ -406,13 +400,6 @@ nzilbb.ag.Anchor.prototype = {
     toString : function Anchor_toString() { return this.offset; }
 
 } // Anchor methods
-nzilbb.ag.Anchor.coerce = function(obj)
-{
-    // call contructor
-    nzilbb.ag.Anchor.call(obj);
-    // apply prototype
-    obj.__proto__ = nzilbb.ag.Anchor.prototype;
-}
 
 exports.Graph = nzilbb.ag.Graph;
 exports.Annotation = nzilbb.ag.Annotation;
