@@ -44,7 +44,7 @@ public class AnnotationChain extends LinkedHashSet<Annotation> implements Sorted
   } // end of constructor
 
   /**
-   * Constructor.
+   * Copy constructor.
    * @param other Another set of annotations
    */
   public AnnotationChain(Set<Annotation> other) {
@@ -130,51 +130,69 @@ public class AnnotationChain extends LinkedHashSet<Annotation> implements Sorted
   } // end of constructor
 
   /**
-   * Constructor.
+   * Constructor for a chain between two anchors.
    * @param start Start anchor
    * @param end End anchor, different from aStart
    */
   public AnnotationChain(Anchor start, Anchor end) {
     if (start != null && end != null) {
-      findChain(start, end, new HashSet<String>(), new HashSet<Anchor>());
+      findChain(start, end, new HashSet<String>(), new HashSet<Anchor>(), 0);
     }
   }
 
   /**
-   * Constructor.
+   * Constructor for a chain between two anchors, excluding given layers.
    * @param start Start anchor
    * @param end End anchor, different from aStart
    * @param excludeLayers Layers to exclude
    */
   public AnnotationChain(Anchor start, Anchor end, Set<String> excludeLayers) {
     if (start != null && end != null) {
-      findChain(start,  end, excludeLayers, new HashSet<Anchor>());
+      findChain(start, end, excludeLayers, new HashSet<Anchor>(), 0);
     }
   }
 
   /**
-   * Constructor.
+   * Constructor for a chain between two anchors, with a given maximum length; if the
+   * given anchors are linked, but the chain includes more annotations that specified by
+   * <var>maxLength</var>, the resulting chain will be empty.
+   * @param start Start anchor
+   * @param end End anchor, different from aStart
+   * @param maxLength Maximum length for the chain, or 0 for unlimited length.
+   */
+  public AnnotationChain(Anchor start, Anchor end, int maxLength) {
+    if (start != null && end != null) {
+      findChain(start,  end, new HashSet<String>(), new HashSet<Anchor>(), 0);
+    }
+  }
+
+  /**
+   * Internal constructor for sub-chains.
    * @param start Start anchor
    * @param end End anchor, different from aStart
    * @param excludeLayers Layers to exclude
    * @param excludeAnchors Anchor to not follow
+   * @param maxLength Maximum length for the chain, or 0 for unlimited length.
    */
   protected AnnotationChain(
-    Anchor start, Anchor end, Set<String> excludeLayers, Set<Anchor> excludeAnchors) {
+    Anchor start, Anchor end, Set<String> excludeLayers, Set<Anchor> excludeAnchors,
+    int maxLength) {
     if (start != null && end != null) {
-      findChain(start,  end, excludeLayers, excludeAnchors);
+      findChain(start, end, excludeLayers, excludeAnchors, maxLength);
     }
   }
 
   /**
    * Finds a chain between two anchors.
-   * @param start Start anchor
-   * @param end End anchor, different from aStart
-   * @param excludeLayers Layers to exclude
-   * @param excludeAnchors Anchor to not follow
+   * @param start Start anchor.
+   * @param end End anchor, different from aStart.
+   * @param excludeLayers Layers to exclude.
+   * @param excludeAnchors Anchor to not follow.
+   * @param maxLength Maximum length for the chain, or 0 for unlimited length.
    */
   protected void findChain(
-    Anchor start, Anchor end, Set<String> excludeLayers, Set<Anchor> excludeAnchors) {
+    Anchor start, Anchor end, Set<String> excludeLayers, Set<Anchor> excludeAnchors,
+    int maxLength) {
     if (start.getId().equals(end.getId())) return;
     for (Annotation startsHere : start.getStartingAnnotations()) {
       if (startsHere.getChange() == Change.Operation.Destroy) continue;
@@ -201,38 +219,41 @@ public class AnnotationChain extends LinkedHashSet<Annotation> implements Sorted
         return; // done!
       }
     } // next annotation that starts here
-      
+
+    if (maxLength != 1) { // chain can be longer than 1
       // there's no single-link chain, so recursively look for a multi-link chain
-    for (Annotation startsHere : start.getStartingAnnotations()) {
-      if (startsHere.getChange() == Change.Operation.Destroy) continue;
-      if (startsHere.getEnd() == null) continue;
-      if (excludeLayers.contains(startsHere.getLayerId())) continue;
-      if (startsHere.getInstantaneous()) continue;
-      // don't follow tags (we'll already be following their parents)
-      if (startsHere.getLayer() == null) continue;
-      if (startsHere.getLayer().getAlignment() == Constants.ALIGNMENT_NONE) continue;
-      // guard against cycles, not all graphs are valid
-      if (excludeAnchors.contains(startsHere.getEnd())) continue; 
-      excludeAnchors.add(startsHere.getEnd());
-      AnnotationChain nextPart = new AnnotationChain(
-        startsHere.getEnd(), end, excludeLayers, excludeAnchors);
-      if (nextPart.size() > 0) {
-        // prefix any instants that are at the start
-        for (Annotation a : start.getStartingAnnotations()) {
-          if (a.getChange() == Change.Operation.Destroy) continue;
-          if (a.getInstantaneous()) {
-            add(a);
-          }
-        } // next starting annotation
-        add(startsHere);
-        addAll(nextPart);
-        return; // done!
-      }
-    } // next annotation that starts here
+      for (Annotation startsHere : start.getStartingAnnotations()) {
+        if (startsHere.getChange() == Change.Operation.Destroy) continue;
+        if (startsHere.getEnd() == null) continue;
+        if (excludeLayers.contains(startsHere.getLayerId())) continue;
+        if (startsHere.getInstantaneous()) continue;
+        // don't follow tags (we'll already be following their parents)
+        if (startsHere.getLayer() == null) continue;
+        if (startsHere.getLayer().getAlignment() == Constants.ALIGNMENT_NONE) continue;
+        // guard against cycles, not all graphs are valid
+        if (excludeAnchors.contains(startsHere.getEnd())) continue; 
+        excludeAnchors.add(startsHere.getEnd());
+        AnnotationChain nextPart = new AnnotationChain(
+          startsHere.getEnd(), end, excludeLayers, excludeAnchors, maxLength - 1);
+        if (nextPart.size() > 0) {
+          // prefix any instants that are at the start
+          for (Annotation a : start.getStartingAnnotations()) {
+            if (a.getChange() == Change.Operation.Destroy) continue;
+            if (a.getInstantaneous()) {
+              add(a);
+            }
+          } // next starting annotation
+          add(startsHere);
+          addAll(nextPart);
+          return; // done!
+        }
+      } // next annotation that starts here
+    } // chain can be longer than 1
   }
 
   /**
-   * Constructor.
+   * Constructor for startug at a given anchor and ending at a given offset, excluding
+   * given layers.
    * @param start Start anchor
    * @param endOffset End offset
    * @param excludeLayers Layers to exclude
@@ -243,7 +264,7 @@ public class AnnotationChain extends LinkedHashSet<Annotation> implements Sorted
     }
   }
   /**
-   * Constructor.
+   * Internal constructor for sub-chains.
    * @param start Start anchor
    * @param endOffset End offset
    * @param excludeLayers Layers to exclude
@@ -318,7 +339,8 @@ public class AnnotationChain extends LinkedHashSet<Annotation> implements Sorted
   }
 
   /**
-   * Constructor.
+   * Constructor for chains starting at a given offset and ending at a given anchor,
+   * excluding given layers.
    * @param startOffset Start offset
    * @param end End anchor
    * @param excludeLayers Layers to exclude
@@ -329,7 +351,7 @@ public class AnnotationChain extends LinkedHashSet<Annotation> implements Sorted
     }
   }
   /**
-   * Constructor.
+   * Internal constructor for sub-chains.
    * @param startOffset Start offset
    * @param end End anchor
    * @param excludeLayers Layers to exclude
