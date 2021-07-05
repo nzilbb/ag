@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -1204,6 +1204,108 @@ public class TestValidator {
       assertTrue(changeStrings.contains("Update a3b: offset = null (was 3.0)"));
 
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
+    } catch(TransformationException exception) {
+      fail(exception.toString());
+    }
+  }
+
+  /** Test that non-saturated included children that have fallen outside the boundaries of
+   * their parent are corrected. */
+  @Test public void validateHierarchyUnlinkedNonSaturatedChildren() {
+    Graph g = new Graph();
+    g.setId("my graph");
+
+    g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+                         true, // peers
+                         true, // peersOverlap
+                         true)); // saturated
+    g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+                         true, // peers
+                         false, // peersOverlap
+                         false, // saturated
+                         "who", // parentId
+                         true)); // parentIncludes
+    g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+                         true, // peers
+                         false, // peersOverlap
+                         false, // saturated
+                         "turn", // parentId
+                         true)); // parentIncludes
+    g.addLayer(new Layer("pos", "Part of speech",
+                         Constants.ALIGNMENT_INTERVAL, // could subdivide words
+                         true, // peers
+                         true, // peersOverlap
+                         false, // not saturated, like MOR POS layers
+                         "word", // parentId
+                         true)); // parentIncludes
+
+    g.addAnchor(new Anchor("a0", 0.0)); // turn1 start
+    g.addAnchor(new Anchor("a1", 1.0)); // the
+    g.addAnchor(new Anchor("a2", 2.0)); // quick
+    g.addAnchor(new Anchor("a3", 3.0, Constants.CONFIDENCE_DEFAULT)); // end of quick
+    g.addAnchor(new Anchor("a3.5", 3.5, Constants.CONFIDENCE_AUTOMATIC)); // brown
+    g.addAnchor(new Anchor("a4", 4.0)); // fox
+    g.addAnchor(new Anchor("a5", 5.0)); // jumps
+    g.addAnchor(new Anchor("a6", 6.0)); // over
+    g.addAnchor(new Anchor("a7", 7.0)); // end of over
+    g.addAnchor(new Anchor("a8", 8.0)); // turn1 end
+
+    g.addAnnotation(new Annotation("participant1", "john smith", "who", "a0", "a8", "my graph"));
+
+    g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a8", "participant1"));
+
+
+    g.addAnnotation(new Annotation("word1", "the", "word", "a1", "a2", "turn1"));
+    g.addAnnotation(new Annotation("word2", "quick", "word", "a2", "a3", "turn1"));
+    // new gap
+    g.addAnnotation(new Annotation("word3", "brown", "word", "a3.5", "a4", "turn1")); 
+    g.addAnnotation(new Annotation("word4", "fox", "word", "a4", "a5", "turn1")); 
+    g.addAnnotation(new Annotation("word5", "jumps", "word", "a5", "a6", "turn1")); 
+    g.addAnnotation(new Annotation("word6", "over", "word", "a6", "a7", "turn1")); 
+
+    g.addAnnotation(new Annotation("pos1", "DT", "pos", "a1", "a2", "word1"));
+    g.addAnnotation(new Annotation("pos2", "ADJ", "pos", "a2", "a3", "word2"));
+    g.addAnnotation(new Annotation("pos3", "ADJ", "pos", "a3", "a4", "word3"));
+    g.addAnnotation(new Annotation("pos4", "N", "pos", "a4", "a5", "word4"));
+    g.addAnnotation(new Annotation("pos5", "V", "pos", "a5", "a6", "word5"));
+    g.addAnnotation(new Annotation("pos6", "PREP", "pos", "a6", "a7", "word6"));
+
+    // check pre-conditions
+    Annotation word3 = g.getAnnotation("word3");
+    Annotation pos3 = g.getAnnotation("pos3");
+    assertFalse("parentIncludes is violated", word3.includes(pos3));
+    assertEquals(Double.valueOf(3.5), word3.getStart().getOffset());
+    assertEquals(Double.valueOf(4.0), word3.getEnd().getOffset());
+    assertEquals(Double.valueOf(3.0), pos3.getStart().getOffset());
+    assertEquals(Double.valueOf(4.0), pos3.getEnd().getOffset());
+    
+    // this shouldn't be necessary: g.trackChanges();
+    
+    Validator v = new Validator();
+    v.setFullValidation(true);
+    //v.setDebug(true);
+    v.setDefaultOffsetThreshold(null);
+    try {
+      g.trackChanges();
+      v.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
+      if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
+      Set<String> changeStrings = changes.stream()
+        .map(Change::toString).collect(Collectors.toSet());
+      
+      assertTrue("parentIncludes is now respected: "
+                 + word3 + " ("+word3.getStart()+"-"+word3.getEnd()+") "
+                 + pos3 + " ("+pos3.getStart()+"-"+pos3.getEnd()+") ",
+                 word3.includes(pos3));
+      assertEquals("Word start hasn't changed",
+                   Double.valueOf(3.5), word3.getStart().getOffset());
+      assertEquals("Word end hasn't changed",
+                   Double.valueOf(4.0), word3.getEnd().getOffset());
+      assertEquals("POS start hasn changed",
+                   Double.valueOf(3.5), pos3.getStart().getOffset());
+      assertEquals("POS end hasn't changed",
+                   Double.valueOf(4.0), word3.getEnd().getOffset());
+      
     } catch(TransformationException exception) {
       fail(exception.toString());
     }
