@@ -1,0 +1,527 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Trans SYSTEM "trans-14.dtd">
+<Trans scribe="Robert Fromont" audio_filename="mop03-2b-05" version="8" version_date="210420" xml:lang="en">
+<Topics>
+<Topic id="to1" desc="adult-decadeplus-friend-event"/>
+<Topic id="to2" desc="adult-decadeplus-friend-general"/>
+<Topic id="to3" desc="adult-decadeplus-me-event"/>
+<Topic id="to4" desc="adult-decadeplus-me-general"/>
+<Topic id="to5" desc="adult-decadeplus-other-event"/>
+<Topic id="to6" desc="adult-decadeplus-other-general"/>
+<Topic id="to7" desc="adult-decadeplus-you-event"/>
+<Topic id="to8" desc="adult-decadeplusm-friend-event"/>
+<Topic id="to9" desc="adult-decadeplusm-friend-general"/>
+<Topic id="to10" desc="adult-decadeplusm-me-event"/>
+<Topic id="to11" desc="adult-decadeplusm-me-general"/>
+<Topic id="to12" desc="adult-future-friend-event"/>
+<Topic id="to13" desc="adult-future-friend-general"/>
+<Topic id="to14" desc="adult-future-me-event"/>
+<Topic id="to15" desc="adult-future-me-general"/>
+<Topic id="to16" desc="adult-future-you-event"/>
+<Topic id="to17" desc="adult-hypfuture-friend-general"/>
+<Topic id="to18" desc="adult-hypfuture-me-event"/>
+<Topic id="to19" desc="adult-hypfuture-me-general"/>
+<Topic id="to20" desc="adult-hypfuture-you-event"/>
+<Topic id="to21" desc="adult-lastdecade-friend-event"/>
+<Topic id="to22" desc="adult-lastdecade-friend-general"/>
+<Topic id="to23" desc="adult-lastdecade-me-event"/>
+<Topic id="to24" desc="adult-lastdecade-me-general"/>
+<Topic id="to25" desc="adult-lastdecade-you-general"/>
+<Topic id="to26" desc="adult-lastdecadem-friend-event"/>
+<Topic id="to27" desc="adult-lastdecadem-friend-general"/>
+<Topic id="to28" desc="adult-lastdecadem-me-event"/>
+<Topic id="to29" desc="adult-lastdecadem-me-general"/>
+<Topic id="to30" desc="adult-lastmonth-friend-event"/>
+<Topic id="to31" desc="adult-lastmonth-me-event"/>
+<Topic id="to32" desc="adult-lastmonth-me-general"/>
+<Topic id="to33" desc="adult-lastmonthm-friend-event"/>
+<Topic id="to34" desc="adult-lastmonthm-friend-general"/>
+<Topic id="to35" desc="adult-lastmonthm-me-event"/>
+<Topic id="to36" desc="adult-lastmonthm-you-event"/>
+<Topic id="to37" desc="adult-lastmonthm-you-general"/>
+<Topic id="to38" desc="adult-lastweek-friend-event"/>
+<Topic id="to39" desc="adult-lastweek-me-event"/>
+<Topic id="to40" desc="adult-lastweek-me-general"/>
+<Topic id="to41" desc="adult-lastweek-other-event"/>
+<Topic id="to42" desc="adult-lastweek-you-event"/>
+<Topic id="to43" desc="adult-lastyear-friend-event"/>
+<Topic id="to44" desc="adult-lastyear-friend-general"/>
+<Topic id="to45" desc="adult-lastyear-me-event"/>
+<Topic id="to46" desc="adult-lastyear-me-general"/>
+<Topic id="to47" desc="adult-lastyearm-friend-event"/>
+<Topic id="to48" desc="adult-lastyearm-friend-general"/>
+<Topic id="to49" desc="adult-lastyearm-me-event"/>
+<Topic id="to50" desc="adult-lastyearm-me-general"/>
+<Topic id="to51" desc="adult-lastyearm-other-event"/>
+<Topic id="to52" desc="adult-lastyearm-other-general"/>
+<Topic id="to53" desc="adult-lastyearm-you-event"/>
+<Topic id="to54" desc="adult-now-friend-event"/>
+<Topic id="to55" desc="adult-now-friend-general"/>
+<Topic id="to56" desc="adult-now-me-event"/>
+<Topic id="to57" desc="adult-now-me-general"/>
+<Topic id="to58" desc="adult-now-other-event"/>
+<Topic id="to59" desc="adult-now-other-general"/>
+<Topic id="to60" desc="adult-now-you-event"/>
+<Topic id="to61" desc="adult-now-you-general"/>
+<Topic id="to62" desc="adult-unknownpast-friend-event"/>
+<Topic id="to63" desc="adult-unknownpast-friend-general"/>
+<Topic id="to64" desc="adult-unknownpast-me-event"/>
+<Topic id="to65" desc="adult-unknownpast-me-general"/>
+<Topic id="to66" desc="adult-unknownpast-other-event"/>
+<Topic id="to67" desc="adult-unknownpast-other-general"/>
+<Topic id="to68" desc="adult-unknownpast-you-event"/>
+<Topic id="to69" desc="beforeborn-beforeborn-friend-event"/>
+<Topic id="to70" desc="beforeborn-beforeborn-friend-general"/>
+<Topic id="to71" desc="beforeborn-beforeborn-other-general"/>
+<Topic id="to72" desc="beforeborn-unknownpast-other-general"/>
+<Topic id="to73" desc="child-decadeplus-friend-event"/>
+<Topic id="to74" desc="child-decadeplus-friend-general"/>
+<Topic id="to75" desc="child-decadeplus-me-event"/>
+<Topic id="to76" desc="child-decadeplus-me-general"/>
+<Topic id="to77" desc="child-decadeplus-other-general"/>
+<Topic id="to78" desc="child-decadeplusm-friend-general"/>
+<Topic id="to79" desc="child-decadeplusm-me-event"/>
+<Topic id="to80" desc="child-decadeplusm-me-general"/>
+<Topic id="to81" desc="child-lastdecade-me-general"/>
+<Topic id="to82" desc="child-unknownpast-friend-genera"/>
+<Topic id="to83" desc="child-unknownpast-friend-general"/>
+<Topic id="to84" desc="teen-decadeplus-friend-event"/>
+<Topic id="to85" desc="teen-decadeplus-friend-general"/>
+<Topic id="to86" desc="teen-decadeplus-me-event"/>
+<Topic id="to87" desc="teen-decadeplus-me-general"/>
+<Topic id="to88" desc="teen-decadeplus-other-event"/>
+<Topic id="to89" desc="teen-future-friend-event"/>
+<Topic id="to90" desc="teen-future-friend-general"/>
+<Topic id="to91" desc="teen-future-me-event"/>
+<Topic id="to92" desc="teen-future-me-general"/>
+<Topic id="to93" desc="teen-hypfuture-friend-event"/>
+<Topic id="to94" desc="teen-hypfuture-me-event"/>
+<Topic id="to95" desc="teen-hypfuture-me-general"/>
+<Topic id="to96" desc="teen-hypfuture-other-general"/>
+<Topic id="to97" desc="teen-lastdecade-friend-event"/>
+<Topic id="to98" desc="teen-lastdecade-friend-general"/>
+<Topic id="to99" desc="teen-lastdecade-me-event"/>
+<Topic id="to100" desc="teen-lastdecade-me-general"/>
+<Topic id="to101" desc="teen-lastdecade-you-event"/>
+<Topic id="to102" desc="teen-lastdecadem-friend-event"/>
+<Topic id="to103" desc="teen-lastdecadem-friend-general"/>
+<Topic id="to104" desc="teen-lastdecadem-me-event"/>
+<Topic id="to105" desc="teen-lastdecadem-me-general"/>
+<Topic id="to106" desc="teen-lastmonth-me-event"/>
+<Topic id="to107" desc="teen-lastmonthm-friend-event"/>
+<Topic id="to108" desc="teen-lastmonthm-me-event"/>
+<Topic id="to109" desc="teen-lastweek-me-event"/>
+<Topic id="to110" desc="teen-lastyear-friend-event"/>
+<Topic id="to111" desc="teen-lastyear-friend-general"/>
+<Topic id="to112" desc="teen-lastyear-me-event"/>
+<Topic id="to113" desc="teen-lastyear-me-general"/>
+<Topic id="to114" desc="teen-lastyear-you-event"/>
+<Topic id="to115" desc="teen-lastyearm-friend-event"/>
+<Topic id="to116" desc="teen-lastyearm-me-general"/>
+<Topic id="to117" desc="teen-lastyearm-other-event"/>
+<Topic id="to118" desc="teen-now-friend-event"/>
+<Topic id="to119" desc="teen-now-friend-general"/>
+<Topic id="to120" desc="teen-now-me-event"/>
+<Topic id="to121" desc="teen-now-me-general"/>
+<Topic id="to122" desc="teen-now-other-general"/>
+<Topic id="to123" desc="teen-now-you-event"/>
+<Topic id="to124" desc="teen-now-you-general"/>
+<Topic id="to125" desc="teen-unknownpast-friend-event"/>
+<Topic id="to126" desc="teen-unknownpast-friend-general"/>
+<Topic id="to127" desc="teen-unknownpast-me-general"/>
+<Topic id="to128" desc="teen-unknownpast-other-general"/>
+</Topics>
+<Speakers>
+<Speaker id="spk1" name="Interviewer" check="no" type="female" dialect="native" accent="ame" scope="local"/>
+<Speaker id="spk2" name="mop03-2b" check="yes" type="male" dialect="native" accent="nze" scope="local"/>
+</Speakers>
+<Episode>
+<Section type="report" startTime="0.0" endTime="23.563" topic="to85">
+<Turn speaker="spk2" startTime="0" endTime="23.563">
+<Sync time="0"/>
+ánd ah . 
+<Event desc="pers" type="entities" extent="begin"/>
+Cyril
+<Event desc="pers" type="entities" extent="end"/>
+ would arrive at the door
+<Sync time="5.75"/>
+with this letter
+<Event desc="lEd@" type="pronounce" extent="previous"/>
+ for Mum
+<Sync time="6.907"/>
+and and then there was a message .
+<Sync time="9.126"/>
+and I think they both had telephones
+<Event desc="phone" type="lexical" extent="previous"/>
+ .
+<Sync time="12.126"/>
+ah at that time
+<Sync time="13.22"/>
+we certainly had a telephone at our place --
+<Sync time="16.033"/>
+and I think Molly always had a telephone so .
+<Sync time="18.315"/>
+then I suppose
+<Sync time="19.236"/>
+there was a phone call to say
+<Sync time="20.423"/>
+oh yeah yeah and we'll see you there
+<Sync time="21.985"/>
+or whatever &lt;mmm&gt; you know -
+</Turn>
+</Section>
+<Section type="report" topic="to86" startTime="23.563" endTime="183.995">
+<Turn speaker="spk2" startTime="23.563" endTime="44.255">
+<Sync time="23.563"/>
+but then Molly walked in .
+<Sync time="25.501"/>
+and immediately I grabbed Molly
+<Sync time="27.533"/>
+because I knew se she was so close .
+<Sync time="30.44"/>
+and I told her all about it .
+<Sync time="32.003"/>
+&lt;yeah&gt; and ah -
+<Sync time="34.535"/>
+ah . and I said come quick come quick .
+<Sync time="37.567"/>
+Dad's at home
+<Sync time="38.786"/>
+and he's a hell of a mess
+<Sync time="40.473"/>
+&lt;yeah&gt; sort of words you know ? &lt;yeah&gt;
+<Sync time="42.223"/>
+which he was he was beside himself
+</Turn>
+<Turn speaker="spk1" startTime="44.255" endTime="45.505">
+<Sync time="44.255"/>
+well inconsolable I imagine
+</Turn>
+<Turn speaker="spk2" startTime="45.505" endTime="107.804">
+<Sync time="45.505"/>
+he was you know -- so -
+<Sync time="50.006"/>
+I don't know how we got back there
+<Sync time="51.631"/>
+whether we got a taxi or .
+<Sync time="53.225"/>
+the priests ran us up .
+<Sync time="54.319"/>
+you know because .
+<Sync time="55.444"/>
+the township's quite a long from where we lived in 
+<Comment desc="unclear"/>
+ --
+<Sync time="60.101"/>
+and ah -- shit --
+<Sync time="64.851"/>
+and I remember -
+<Sync time="66.664"/>
+she came home and tried to console Dad and -
+<Sync time="70.195"/>
+he said oh she's just cooked me a cake
+<Sync time="72.633"/>
+for my fiftieth birthday
+<Sync time="74.039"/>
+which was on the bench &lt;mmm&gt; -
+<Sync time="76.476"/>
+and um --
+<Sync time="79.726"/>
+at a certain stage .
+<Sync time="81.101"/>
+I had to go .
+<Sync time="82.538"/>
+the same night I think
+<Sync time="83.975"/>
+after I'd seen Molly
+<Sync time="85.163"/>
+I think she went -
+<Sync time="86.726"/>
+to my to our place
+<Sync time="88.07"/>
+to k try to find .
+<Sync time="89.508"/>
+pop and . console him --
+<Sync time="92.367"/>
+and I . had to go back with the police .
+<Sync time="95.461"/>
+to . to um --
+<Sync time="98.742"/>
+to identify Mum - &lt;right&gt; -
+<Sync time="101.398"/>
+and um --
+<Sync time="105.929"/>
+and that was very difficult -
+</Turn>
+<Turn speaker="spk1" startTime="107.804" endTime="110.335">
+<Sync time="107.804"/>
+yeah --
+</Turn>
+<Turn speaker="spk2" startTime="110.335" endTime="181.652">
+<Sync time="110.335"/>
+but later I got back home .
+<Sync time="112.397"/>
+and I remember --
+<Sync time="114.021"/>
+Molly had gone and Dad was --
+<Sync time="117.942"/>
+there but s you know . very -
+<Sync time="121.629"/>
+depressed as shit and so on -
+<Sync time="123.754"/>
+and Barry was just coming back from -
+<Sync time="126.566"/>
+camp he was at Ohakia . as a -
+<Sync time="129.425"/>
+he was in the . air force -
+<Sync time="132.268"/>
+at that time .
+<Sync time="133.174"/>
+he did air force training as an eighteen year old and .
+<Sync time="136.673"/>
+he . he was there -
+<Sync time="138.642"/>
+and he arrived back -
+<Sync time="140.111"/>
+with one of his friends .
+<Sync time="141.579"/>
+and I remember going out to the . front -
+<Sync time="145.61"/>
+ah of the house
+<Sync time="146.891"/>
+beside the garage
+<Sync time="147.797"/>
+and of course you know he'd just come in .
+<Sync time="149.828"/>
+to Wanganui and .
+<Sync time="151.734"/>
+didn't know a bloody thing
+<Sync time="152.796"/>
+and I said to him
+<Sync time="153.796"/>
+Barry Barry come in .
+<Sync time="155.14"/>
+Dad wants to talk to you --
+<Sync time="158.264"/>
+and so his friend said oh . well .
+<Sync time="160.108"/>
+oh see you later you know and .
+<Sync time="161.951"/>
+rode away on his bike or whatever he had .
+<Sync time="164.2"/>
+a motorbike or something -
+<Sync time="165.7"/>
+or a car -
+<Sync time="167.012"/>
+and of course . you know .
+<Sync time="168.887"/>
+it was just Barry and I
+<Sync time="170.074"/>
+there were no other children at that time - &lt;mmm&gt; --
+<Sync time="174.168"/>
+so he came in and - 
+<Event desc="interviewer: clears throat" type="noise" extent="instantaneous"/>
+ --
+<Sync time="177.59"/>
+learned all the . disaster --
+</Turn>
+<Turn speaker="spk1" startTime="181.652" endTime="183.995">
+<Sync time="181.652"/>
+
+<Event desc="es" type="language" extent="begin"/>
+vaya
+<Event desc="es" type="language" extent="end"/>
+
+</Turn>
+</Section>
+<Section type="report" topic="to60" startTime="183.995" endTime="197.181">
+<Turn speaker="spk2" startTime="183.995" endTime="185.339">
+<Sync time="183.995"/>
+and have you got all that ?
+</Turn>
+<Turn speaker="spk1" startTime="185.339" endTime="189.464">
+<Sync time="185.339"/>
+
+<Event desc="both laugh" type="noise" extent="instantaneous"/>
+ well the funny light hasn't gone on -
+<Sync time="188.932"/>
+again
+<Event desc="test" type="noise" extent="instantaneous"/>
+
+</Turn>
+<Turn speaker="spk2" startTime="189.464" endTime="191.682">
+<Sync time="189.464"/>
+did you switch it off or what ?
+</Turn>
+<Turn speaker="spk1" startTime="191.682" endTime="197.181">
+<Sync time="191.682"/>
+well I turned it over --
+<Sync time="193.65"/>
+I thought it might be something to do with
+<Sync time="195.025"/>
+
+<Event desc="es" type="language" extent="begin"/>
+donde está
+<Event desc="es" type="language" extent="end"/>
+ on the tape
+</Turn>
+</Section>
+<Section type="report" topic="to56" startTime="197.181" endTime="201.775">
+<Turn speaker="spk2" startTime="197.181" endTime="199.213">
+<Sync time="197.181"/>
+I must go and have a leak you know
+<Sync time="198.275"/>
+if you'll excuse me
+</Turn>
+<Turn speaker="spk1" startTime="199.213" endTime="201.775">
+<Sync time="199.213"/>
+okay --
+</Turn>
+</Section>
+<Section type="report" topic="to60" startTime="201.775" endTime="218.29">
+<Turn speaker="spk1" startTime="201.775" endTime="205.415">
+<Sync time="201.775"/>
+see if I can figure out what that light was
+</Turn>
+<Turn speaker="spk2" startTime="205.415" endTime="214.822">
+<Sync time="205.415"/>
+well I think you should .
+<Sync time="206.415"/>
+listen to it because o
+<Sync time="207.79"/>
+very often when you're recording -
+<Sync time="209.977"/>
+if you don't listen to them pretty quickly
+<Sync time="211.837"/>
+you bloody find out
+<Sync time="212.806"/>
+that the microphone is malfunctioning
+</Turn>
+<Turn speaker="spk1 spk2" startTime="214.822" endTime="218.29">
+<Sync time="214.822"/>
+<Who nb="1"/>
+yeah yeah yeah -- well that's right
+<Who nb="2"/>
+or some 
+<Comment desc="unclear"/>
+ and there's nothing much on it or 
+<Comment desc="unclear"/>
+
+</Turn>
+</Section>
+<Section type="report" topic="to56" startTime="218.29" endTime="229.852">
+<Turn speaker="spk2" startTime="218.29" endTime="220.696">
+<Sync time="218.29"/>
+now where is it in the back left ?
+</Turn>
+<Turn speaker="spk1" startTime="220.696" endTime="229.852">
+<Sync time="220.696"/>
+ah yeah just turn left there
+<Sync time="223.227"/>
+
+<Event desc="cough" type="noise" extent="instantaneous"/>
+ 
+<Comment desc="break in recording"/>
+
+</Turn>
+</Section>
+<Section type="report" topic="to85" startTime="229.852" endTime="250.522">
+<Turn speaker="spk2" startTime="229.852" endTime="250.522">
+<Sync time="229.852"/>
+that - Mum and Dad had looked at a house.
+<Sync time=" 233.727"/>
+in the country 
+<Event desc="microphone movement noise" type="noise" extent="instantaneous"/>
+--
+<Sync time=" 236.946"/>
+on the main road which
+<Sync time=" 239.039"/>
+was driving towards Taranaki --
+<Sync time=" 242.788"/>
+and it was a . country house -
+<Sync time="245.069"/>
+with a long drive in
+<Sync time="246.413"/>
+you know over the field and .
+<Sync time="248.834"/>
+into the house . and .
+</Turn>
+</Section>
+<Section type="report" topic="to87" startTime="250.522" endTime="295.115">
+<Turn speaker="spk2" startTime="250.522" endTime="285.864">
+<Sync time="250.522"/>
+and I'd said to Barry once or twice gosh .
+<Sync time="253.147"/>
+if they'd bought that house --
+<Sync time="256.928"/>
+when they first looked at it -
+<Sync time="259.053"/>
+she'd still be alive today
+<Sync time="260.741"/>
+because well this is years ago
+<Sync time="262.491"/>
+of course I made these comments -
+<Sync time="264.459"/>
+because . that would have removed .
+<Sync time="266.866"/>
+her from the danger that was present on that .
+<Sync time="270.584"/>
+main road Somme parade &lt;hm&gt;
+<Sync time="272.834"/>
+well it wasn't a main road it was --
+<Sync time="275.427"/>
+a feeder road --
+<Sync time="277.708"/>
+ah and we'd have all lived in the country and .
+<Sync time="280.114"/>
+ah well not that it wa~
+<Sync time="281.239"/>
+you know it wasn't that far out -
+<Sync time="282.77"/>
+it was up by Virginia Lake .
+<Sync time="284.458"/>
+I don't know whether you know Wanganui much but
+</Turn>
+<Turn speaker="spk1" startTime="285.864" endTime="288.646">
+<Sync time="285.864"/>
+I don't really know it at all
+<Sync time="287.177"/>
+
+<Comment desc="mop03-2b: sits down"/>
+ --
+</Turn>
+<Turn speaker="spk1" startTime="288.646" endTime="295.115">
+<Sync time="288.646"/>
+so after all that you said that .
+<Sync time="289.677"/>
+you said that .
+<Sync time="290.709"/>
+grandpop didn't let you.
+<Sync time="292.49"/>
+like he kept the family together - how
+</Turn>
+</Section>
+<Section type="report" topic="to85" startTime="295.115" endTime="306.920">
+<Turn speaker="spk2" startTime="295.115" endTime="302.834">
+<Sync time="295.115"/>
+oh well . he . of course people .
+<Sync time="298.678"/>
+al~ always come forward.
+<Sync time="300.553"/>
+and offer to take .
+<Sync time="301.678"/>
+some of the children
+</Turn>
+<Turn speaker="spk1" startTime="302.834" endTime="304.334">
+<Sync time="302.834"/>
+yeah . how many of . how many were there ?
+</Turn>
+<Turn speaker="spk2" startTime="304.334" endTime="306.920">
+<Sync time="304.334"/>
+
+<Comment desc="interviewer: unclear"/>
+ well there was five of us &lt;five&gt;
+</Turn>
+</Section>
+</Episode>
+</Trans>
