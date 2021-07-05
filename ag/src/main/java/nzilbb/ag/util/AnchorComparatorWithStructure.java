@@ -124,7 +124,7 @@ public class AnchorComparatorWithStructure
          // compare anchors at the other end of annotations
          // i.e. if one they're both end anchors, and one has a start that's earlier than
          // the other, then it's after the other.
-         // (utterance start will be ealier than word start)
+         // (utterance start will be earlier than word start)
 
          // find nearest start anchors
          OptionalDouble nearestStartOffset1 = endingAtA1.stream()
