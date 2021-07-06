@@ -573,7 +573,7 @@ public class DefaultOffsetGenerator implements GraphTransformer {
           log("Inserting chain ", chain);
           for (Annotation annotation : chain) {
             Anchor start = annotation.getStart();
-            if (start != lastAnchor) {
+            if (start != lastAnchor && !orderedAnchors.contains(start)) {
               orderedAnchors.insertElementAt(start, a++);
             }
           } // next annotation in chain

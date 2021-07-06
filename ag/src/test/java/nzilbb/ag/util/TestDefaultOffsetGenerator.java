@@ -804,6 +804,9 @@ public class TestDefaultOffsetGenerator {
     g.addLayer(new Layer("topic", "Topics")
                .setAlignment(Constants.ALIGNMENT_INTERVAL)
                .setPeers(true).setPeersOverlap(false).setSaturated(false));
+    g.addLayer(new Layer("noise", "Noises")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true).setPeersOverlap(false).setSaturated(false));
     g.addLayer(new Layer("orthography", "Orthography")
                .setAlignment(Constants.ALIGNMENT_NONE)
                .setPeers(false).setPeersOverlap(false).setSaturated(true)
@@ -854,6 +857,9 @@ public class TestDefaultOffsetGenerator {
       new Annotation("topic1", "foxes", "topic", "topicStart", "topicEnd", "my graph"));
     // and one that shares anchors with words
     g.addAnnotation(new Annotation("topic2", "dogs", "topic", "a6", "a9", "my graph"));
+
+    // instantaneous noise
+    g.addAnnotation(new Annotation("nois1", "cough", "noise", "a9", "a9", "my graph"));
 
     // participants
     g.addAnnotation(new Annotation(
