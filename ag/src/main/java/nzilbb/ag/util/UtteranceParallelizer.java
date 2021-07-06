@@ -51,204 +51,204 @@ import nzilbb.ag.*;
  */
 public class UtteranceParallelizer implements GraphTransformer {
    
-   // Attributes:
+  // Attributes:
    
-   /**
-    * Layer IDs to parallelize, e.g. "turn", "utterance".
-    * @see #getLayerIds()
-    * @see #setLayerIds(HashSet)
-    */
-   protected HashSet<String> layerIds = new HashSet<String>();
-   /**
-    * Getter for {@link #layerIds}: Layer IDs to parallelize, e.g. "turn", "utterance".
-    * @return Layer IDs to parallelize, e.g. "turn", "utterance".
-    */
-   public HashSet<String> getLayerIds() { return layerIds; }
-   /**
-    * Setter for {@link #layerIds}: Layer IDs to parallelize, e.g. "turn", "utterance".
-    * @param newLayerIds Layer IDs to parallelize, e.g. "turn", "utterance".
-    */
-   public UtteranceParallelizer setLayerIds(HashSet<String> newLayerIds) { layerIds = newLayerIds; return this; }
+  /**
+   * Layer IDs to parallelize, e.g. "turn", "utterance".
+   * @see #getLayerIds()
+   * @see #setLayerIds(HashSet)
+   */
+  protected HashSet<String> layerIds = new HashSet<String>();
+  /**
+   * Getter for {@link #layerIds}: Layer IDs to parallelize, e.g. "turn", "utterance".
+   * @return Layer IDs to parallelize, e.g. "turn", "utterance".
+   */
+  public HashSet<String> getLayerIds() { return layerIds; }
+  /**
+   * Setter for {@link #layerIds}: Layer IDs to parallelize, e.g. "turn", "utterance".
+   * @param newLayerIds Layer IDs to parallelize, e.g. "turn", "utterance".
+   */
+  public UtteranceParallelizer setLayerIds(HashSet<String> newLayerIds) { layerIds = newLayerIds; return this; }
 
-   // Methods:
+  // Methods:
    
-   /**
-    * Default constructor.
-    */
-   public UtteranceParallelizer() {
-   } // end of constructor
+  /**
+   * Default constructor.
+   */
+  public UtteranceParallelizer() {
+  } // end of constructor
    
-   /**
-    * Constructor from Schema, which automatically adds the turn and utterance layers.
-    */
-   public UtteranceParallelizer(Schema schema) {
-      if (schema.getTurnLayerId() != null)
-         addLayerId(schema.getTurnLayerId());
-      if (schema.getUtteranceLayerId() != null)
-         addLayerId(schema.getUtteranceLayerId());
-   } // end of constructor
+  /**
+   * Constructor from Schema, which automatically adds the turn and utterance layers.
+   */
+  public UtteranceParallelizer(Schema schema) {
+    if (schema.getTurnLayerId() != null)
+      addLayerId(schema.getTurnLayerId());
+    if (schema.getUtteranceLayerId() != null)
+      addLayerId(schema.getUtteranceLayerId());
+  } // end of constructor
    
-   /**
-    * Add a layerId to layerIds for parallelization.
-    * @param layerId
-    * @return this, so that method calls can be chained together.
-    */
-   public UtteranceParallelizer addLayerId(String layerId) {
-      layerIds.add(layerId);
-      return this;
-   } // end of addLayerId()
+  /**
+   * Add a layerId to layerIds for parallelization.
+   * @param layerId
+   * @return this, so that method calls can be chained together.
+   */
+  public UtteranceParallelizer addLayerId(String layerId) {
+    layerIds.add(layerId);
+    return this;
+  } // end of addLayerId()
 
 
-   /**
-    * Transforms the graph.
-    * @param graph The graph to transform.
-    * @return The changes introduced by the tranformation.
-    * @throws TransformationException If the transformation cannot be completed.
-    */
-   public Graph transform(Graph graph) throws TransformationException {
+  /**
+   * Transforms the graph.
+   * @param graph The graph to transform.
+   * @return The changes introduced by the tranformation.
+   * @throws TransformationException If the transformation cannot be completed.
+   */
+  public Graph transform(Graph graph) throws TransformationException {
       
-      // this only works if offsets are set
-      boolean unsetOffsets = graph.getAnchors().values().stream()         
-         .map(a->a.getOffset() == null) // stream of 'true if no offset'
-         .reduce(Boolean::logicalOr)    // 'or' them together
-         .orElse(false);                // false if there are no anchors
-      if (unsetOffsets) {
-         // use the DefaultOffsetGenerator to ensure offsets are set
-         new DefaultOffsetGenerator()
-            // only set unset offsets
-            .setDefaultOffsetThreshold(Constants.CONFIDENCE_NONE - 1)
-            .transform(graph);
-      }
+    // this only works if offsets are set
+    boolean unsetOffsets = graph.getAnchors().values().stream()         
+      .map(a->a.getOffset() == null) // stream of 'true if no offset'
+      .reduce(Boolean::logicalOr)    // 'or' them together
+      .orElse(false);                // false if there are no anchors
+    if (unsetOffsets) {
+      // use the DefaultOffsetGenerator to ensure offsets are set
+      new DefaultOffsetGenerator()
+        // only set unset offsets
+        .setDefaultOffsetThreshold(Constants.CONFIDENCE_NONE - 1)
+        .transform(graph);
+    }
 
-      LayerHierarchyTraversal<Vector<String>> bottomUpSelectedLayers
-         = new LayerHierarchyTraversal<Vector<String>>(new Vector<String>(), graph.getSchema()) {
-               protected void post(Layer layer) {
-                  if (layerIds.contains(layer.getId())) result.add(layer.getId());
-               }};
+    LayerHierarchyTraversal<Vector<String>> bottomUpSelectedLayers
+      = new LayerHierarchyTraversal<Vector<String>>(new Vector<String>(), graph.getSchema()) {
+          protected void post(Layer layer) {
+            if (layerIds.contains(layer.getId())) result.add(layer.getId());
+          }};
 
-      // order utterances by anchor so that simultaneous speech comes out in offset order
-      AnnotationComparatorByAnchor byAnchor = new AnnotationComparatorByAnchor();
+    // order utterances by anchor so that simultaneous speech comes out in offset order
+    AnnotationComparatorByAnchor byAnchor = new AnnotationComparatorByAnchor();
 
-      for (String layerId : bottomUpSelectedLayers.getResult()) {
+    for (String layerId : bottomUpSelectedLayers.getResult()) {
          
-         // order annotations by anchor so that simultaneous speech comes out in offset order
-         TreeSet<Annotation> annotationsByAnchor = new TreeSet<Annotation>(byAnchor);
-         for (Annotation a : graph.all(layerId)) annotationsByAnchor.add(a);
+      // order annotations by anchor so that simultaneous speech comes out in offset order
+      TreeSet<Annotation> annotationsByAnchor = new TreeSet<Annotation>(byAnchor);
+      for (Annotation a : graph.all(layerId)) annotationsByAnchor.add(a);
 
-         // loop until there are no annotations left...
-         while (annotationsByAnchor.size() > 0) {
+      // loop until there are no annotations left...
+      while (annotationsByAnchor.size() > 0) {
             
-            // find the next batch of annotations that start at the same time
-            Double startOffset = null;
-            Anchor nextStart = null;
-            TreeSet<Annotation> startingHere = new TreeSet<Annotation>(byAnchor);
-            Iterator<Annotation> iCurrentAnnotations = annotationsByAnchor.iterator();
-            while (iCurrentAnnotations.hasNext()) {
+        // find the next batch of annotations that start at the same time
+        Double startOffset = null;
+        Anchor nextStart = null;
+        TreeSet<Annotation> startingHere = new TreeSet<Annotation>(byAnchor);
+        Iterator<Annotation> iCurrentAnnotations = annotationsByAnchor.iterator();
+        while (iCurrentAnnotations.hasNext()) {
                
-               Annotation annotation = iCurrentAnnotations.next();
-               if (startOffset == null) {
-                  // starting the list
-                  startOffset = annotation.getStart().getOffset();
-                  startingHere.add(annotation);
-                  iCurrentAnnotations.remove();
-               } else if (graph.compareOffsets(annotation.getStart().getOffset(), startOffset) == 0) {
-                     // same offset (or close enough)
-                  // add this to our list
-                  startingHere.add(annotation);
-                  iCurrentAnnotations.remove();
-               } else {
-                  // start must be greater, so that becomes the next start offset
-                  nextStart = annotation.getStart();
-                  break;
-               }
-            } // next annotation
+          Annotation annotation = iCurrentAnnotations.next();
+          if (startOffset == null) {
+            // starting the list
+            startOffset = annotation.getStart().getOffset();
+            startingHere.add(annotation);
+            iCurrentAnnotations.remove();
+          } else if (graph.compareOffsets(annotation.getStart().getOffset(), startOffset) == 0) {
+            // same offset (or close enough)
+            // add this to our list
+            startingHere.add(annotation);
+            iCurrentAnnotations.remove();
+          } else {
+            // start must be greater, so that becomes the next start offset
+            nextStart = annotation.getStart();
+            break;
+          }
+        } // next annotation
             
-            // now we have a list of annotations that all start at the same time
+        // now we have a list of annotations that all start at the same time
             
-            // find the shortest annotation in the list
-            // it must be the last one because AnnotationComparatorByAnchor is longest-first
-            Annotation shortestStartingHere = startingHere.last();
+        // find the shortest annotation in the list
+        // it must be the last one because AnnotationComparatorByAnchor is longest-first
+        Annotation shortestStartingHere = startingHere.last();
             
-            // if the shortest one ends before nextStart
-            if (nextStart == null
-                || shortestStartingHere.getEnd().getOffset() < nextStart.getOffset()) {
-               // use its end as the next start
-               nextStart = shortestStartingHere.getEnd();
-            }
+        // if the shortest one ends before nextStart
+        if (nextStart == null
+            || shortestStartingHere.getEnd().getOffset() < nextStart.getOffset()) {
+          // use its end as the next start
+          nextStart = shortestStartingHere.getEnd();
+        }
             
-            // split any that end after the next start time
-            for (Annotation annotation : startingHere) {
+        // split any that end after the next start time
+        for (Annotation annotation : startingHere) {
                
-               if (annotation.getEnd().getOffset() > nextStart.getOffset()) {
+          if (annotation.getEnd().getOffset() > nextStart.getOffset()) {
                   
-                  // split annotation at nextStart 
-                  Annotation following = new Annotation(annotation);
-                  annotation.setEnd(nextStart);
-                  following.create();
-                  following.setStart(nextStart);
-                  graph.addAnnotation(following);
+            // split annotation at nextStart 
+            Annotation following = new Annotation(annotation);
+            annotation.setEnd(nextStart);
+            following.create();
+            following.setStart(nextStart);
+            graph.addAnnotation(following);
                                     
-                  // new annotation will be processed next time around the main loop
-                  annotationsByAnchor.add(following);
+            // new annotation will be processed next time around the main loop
+            annotationsByAnchor.add(following);
                   
-                  // move children appropriately
-                  for (String childLayerId : annotation.getAnnotations().keySet()) {
+            // move children appropriately
+            for (String childLayerId : annotation.getAnnotations().keySet()) {
                      
-                     Vector<Annotation> children // use a copy to avoid concurrent modification
-                        = new Vector<Annotation>(annotation.getAnnotations().get(childLayerId));
-                     for (Annotation child : children) {
+              Vector<Annotation> children // use a copy to avoid concurrent modification
+                = new Vector<Annotation>(annotation.getAnnotations().get(childLayerId));
+              for (Annotation child : children) {
                         
-                        // use includesMidpointOf so that t-inclusion doesn't have to be
-                        // strict - i.e. children can overlap the parent at this point
-                        if (following.includesMidpointOf(child)) {
-                           child.setParent(following);
-                        }
-                     } // next child
-                  } // next child layer
-               } // ends after next start
-            } // next annotation that starts here
-         } // process annotationsByAnchor again
-      } // next layer
+                // use includesMidpointOf so that t-inclusion doesn't have to be
+                // strict - i.e. children can overlap the parent at this point
+                if (following.includesMidpointOf(child)) {
+                  child.setParent(following);
+                }
+              } // next child
+            } // next child layer
+          } // ends after next start
+        } // next annotation that starts here
+      } // process annotationsByAnchor again
+    } // next layer
 
       // on selected layers, use only one anchor where there are multiple with the same
       // offset
-      for (String layerId : layerIds) {
-         Anchor lastStartAnchor = null;
-         Anchor lastEndAnchor = null;
-         for (Annotation annotation : new AnnotationsByAnchor(graph.all(layerId))) {
+    for (String layerId : layerIds) {
+      Anchor lastStartAnchor = null;
+      Anchor lastEndAnchor = null;
+      for (Annotation annotation : new AnnotationsByAnchor(graph.all(layerId))) {
 
-            // start anchor
-            if (lastStartAnchor == null) {
-               lastStartAnchor = annotation.getStart();
-            } else {
-               if (lastStartAnchor != annotation.getStart()) {
-                  if (graph.compareOffsets(
-                         lastStartAnchor.getOffset(), annotation.getStart().getOffset()) == 0) {
-                     // same offset (or close enough)
-                     annotation.setStart(lastStartAnchor);
-                  } else { // different offset
-                     lastStartAnchor = annotation.getStart();
-                  }
-               } // not the same as the last
-            } // lastStartAnchor is set
+        // start anchor
+        if (lastStartAnchor == null) {
+          lastStartAnchor = annotation.getStart();
+        } else {
+          if (lastStartAnchor != annotation.getStart()) {
+            if (graph.compareOffsets(
+                  lastStartAnchor.getOffset(), annotation.getStart().getOffset()) == 0) {
+              // same offset (or close enough)
+              annotation.setStart(lastStartAnchor);
+            } else { // different offset
+              lastStartAnchor = annotation.getStart();
+            }
+          } // not the same as the last
+        } // lastStartAnchor is set
 
-            // end anchor
-            if (lastEndAnchor == null) {
-               lastEndAnchor = annotation.getEnd();
-            } else {
-               if (lastEndAnchor != annotation.getEnd()) {
-                  if (graph.compareOffsets(
-                         lastEndAnchor.getOffset(), annotation.getEnd().getOffset()) == 0) {
-                     // same offset (or close enough)
-                     annotation.setEnd(lastEndAnchor);
-                  } else { // different offset
-                     lastEndAnchor = annotation.getEnd();
-                  }
-               } // not the same as the last
-            } // lastEndAnchor is set
+        // end anchor
+        if (lastEndAnchor == null) {
+          lastEndAnchor = annotation.getEnd();
+        } else {
+          if (lastEndAnchor != annotation.getEnd()) {
+            if (graph.compareOffsets(
+                  lastEndAnchor.getOffset(), annotation.getEnd().getOffset()) == 0) {
+              // same offset (or close enough)
+              annotation.setEnd(lastEndAnchor);
+            } else { // different offset
+              lastEndAnchor = annotation.getEnd();
+            }
+          } // not the same as the last
+        } // lastEndAnchor is set
             
-         } // next annotation
-      } // next layerId
-      return graph;
-   }
+      } // next annotation
+    } // next layerId
+    return graph;
+  }
 } // end of class UtteranceParallelizer
