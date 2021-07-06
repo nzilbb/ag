@@ -21,15 +21,12 @@
 //
 package nzilbb.ag.util;
 
-import java.util.HashSet;
 import java.util.Queue;
 import java.util.Optional;
 import java.util.LinkedHashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.LinkedList;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.Vector;
 import java.util.stream.Collectors;
 import nzilbb.ag.*;
@@ -277,7 +274,17 @@ public class DefaultOffsetGenerator implements GraphTransformer {
                   && child.getParentIncludes()
                   // and we haven't already added this parent
                   && !getResult().contains(parent)) {
-                getResult().add(parent); // add the *parent* layer
+                // and we haven't already added an ancestor
+                boolean includesAncestor = false;
+                for (Layer ancestor : parent.getAncestors()) {
+                  if (getResult().contains(ancestor)) {
+                    includesAncestor = true;
+                    break;
+                  }
+                }
+                if (!includesAncestor) {
+                  getResult().add(parent); // add the *parent* layer
+                }
               } 
             }
           };
@@ -289,9 +296,65 @@ public class DefaultOffsetGenerator implements GraphTransformer {
         // for each parent annotation
         for (Annotation parent : graph.all(layer.getId())) {
           if (parent.getChange() == Change.Operation.Destroy) continue;
+          Anchor parentStart = parent.getStart();
+          Anchor parentEnd = parent.getEnd();
+          
           try {
+            Vector<Anchor> orderedAnchors = new Vector<Anchor>();
             // set the offsets of the descendants
-            setOffsetsForChildrenOf(parent);
+            if (parentStart != null) orderedAnchors.add(parentStart);
+            orderedAnchors.addAll(
+              getOrderedAnchorsForDescendantsOf(parent).stream()
+              .filter(a->a!=null)
+              .filter(a->!orderedAnchors.contains(a))
+              .collect(Collectors.toList()));
+            if (parentEnd != null) orderedAnchors.add(parentEnd);
+            log("parent ", parent, " anchors ", orderedAnchors);
+            
+            // avoid unbounded anchor chain problems by starting/ending the collection with
+            // immovable start/end anchors - these come from graph.getSortedAnchors()
+            // - which includes only anchors with offsets - instead of sortedAnchors
+            // ensure that, no matter what, the bounding sentinels have offsets set
+            Integer parentStartConfidence = parentStart==null?null:parentStart.getConfidence();
+            Anchor startSentinel = null;
+            if (parentStart != null && parentStart.getOffset() != null) {
+              startSentinel = parentStart;
+            } else {
+              // use the lowest offset we find
+              startSentinel = new Anchor();
+              Optional<Anchor> firstAnchored = orderedAnchors.stream()
+                .filter(a->a.getOffset() != null).findFirst();
+              if (firstAnchored.isPresent()) {
+                startSentinel.setOffset(firstAnchored.get().getOffset());
+              }
+            }
+            startSentinel.setConfidence(getDefaultOffsetThreshold() + 1);
+            orderedAnchors.insertElementAt(startSentinel, 0);
+            
+            Integer parentEndConfidence = parentEnd==null?null:parentEnd.getConfidence();
+            Anchor endSentinel = null;
+            if (parentEnd != null && parentEnd.getOffset() != null) {
+              endSentinel = parentEnd;
+            } else { // use the highest offset we find
+              endSentinel = new Anchor();
+              Optional<Anchor> lastAnchored = orderedAnchors.stream()
+                .filter(a->a != null)
+                .filter(a->a.getOffset() != null)
+                .max((a1,a2)->a1.getOffset().compareTo(a2.getOffset()));
+              if (lastAnchored.isPresent()) {
+                endSentinel.setOffset(lastAnchored.get().getOffset());
+              }
+            }
+            endSentinel.setConfidence(getDefaultOffsetThreshold() + 1);
+            orderedAnchors.add(endSentinel);
+    
+            // crawl through the anchors looking for unset offsets
+            iterpolateAnchors(orderedAnchors.iterator());
+            
+            // restore parent anchor confidence
+            if (parentStart != null) parentStart.setConfidence(parentStartConfidence);
+            if (parentEnd != null) parentEnd.setConfidence(parentEndConfidence);
+            
           } catch (TransformationException x) {
             errors.add("Could not set descendant offsets for " + logAnnotation(parent) 
                        + ": " + x.getMessage());
@@ -305,22 +368,26 @@ public class DefaultOffsetGenerator implements GraphTransformer {
   }
    
   /**
-   * Sets offsets of anchors of children (but not other descendants) of the given annotation.
-   * @param parent
+   * Gets anchors of all descendants of the given annotation, in order.
+   * @param parent Parent annotation.
+   * @return A list of anchors of all descendants of <var>parent</var>, ordered by offset
+   * or stucture, but <em>excluding</em> the anchors of <var>parent</var> itself.
    * @throws TransformationException
    */
-  protected void setOffsetsForChildrenOf(Annotation parent) throws TransformationException {
-    log("setOffsetsForChildrenOf(", parent, ")");
+  protected Vector<Anchor> getOrderedAnchorsForDescendantsOf(Annotation parent)
+    throws TransformationException {
+    log("getAnchorsForDescendantsOf(", parent, ")");
+    
     // we're only interested in certain child layers
     List<Layer> childLayers = parent.getLayer().getChildren().values().stream()
       .filter(layer->layer.getPeers())
       .filter(layer->layer.getAlignment() == Constants.ALIGNMENT_INTERVAL)
       .filter(layer->layer.getParentIncludes())
       .collect(Collectors.toList());
-
+    
     Anchor parentStart = parent.getStart();
     Anchor parentEnd = parent.getEnd();
-
+    
     // list of anchors in the order we find them
     // when adding an anchor, we remove it first, because if it's already there,
     // it's probably out of order - e.g. language phrase tags have lower ordinals than
@@ -343,9 +410,11 @@ public class DefaultOffsetGenerator implements GraphTransformer {
     } // next child layer
 
     Anchor waitingFor = null; // aligned end anchor we're waiting to catch up to
-    
+
+    // temporarily add the parent start anchor
+    if (parentStart != null) orderedAnchors.add(parentStart);
+
     // while there are still child annotations
-    orderedAnchors.add(parentStart);
     while(childAnnotations.size() > 0) {
       Annotation next = null;
       // find while layer the next annotation comes from 
@@ -353,24 +422,52 @@ public class DefaultOffsetGenerator implements GraphTransformer {
         Annotation candidate = layer.peek();
         if (next == null) {
           next = candidate;
-        } else if (candidate.getStart().getOffset() != null) {
-          if (next.getStart().getOffset() == null) {
-            // anchored starts first
-            next = candidate;
-          } else if (candidate.getStart().getOffset() < next.getStart().getOffset()) {
-            // earlier starts first
-            next = candidate;
-          } else if (candidate.getStart().getOffset().equals(next.getStart().getOffset())) {
-            // starts are the same, so longest first
-            if (next.getEnd().getOffset() == null) {
-              // no end offset counts as 'shorter'
+        } else {
+          if (next.getStart().getOffset() != null && candidate.getStart().getOffset() != null) {
+            // both have start offsets so can be directly compared
+            if (candidate.getStart().getOffset() < next.getStart().getOffset()) {
+              // earlier starts first
               next = candidate;
-            } else if (candidate.getEnd().getOffset() != null
-                       && candidate.getDuration() > next.getDuration()) {
-              next = candidate;
-            } // else candidate.getEnd().getOffset() == null so it's 'shorter' than next
-          }
-        }
+            } else if (candidate.getStart().getOffset().equals(next.getStart().getOffset())) {
+              Double nextOffsetMax = next.getEnd().getOffsetMax();
+              Double candidateOffsetMax = candidate.getEnd().getOffsetMax();
+              // starts are the same, so longest first
+              if (nextOffsetMax == null) {
+                // no end offset counts as 'shorter'
+                next = candidate;
+              } else if (candidateOffsetMax != null
+                         && candidateOffsetMax > nextOffsetMax) {
+                next = candidate;
+              } // else candidateOffsetMax() == null so it's 'shorter' than next
+            } // else candidate.start > next.start, so no change in next
+          } else { // at least one of the start offsets isn't set
+            Double nextOffsetMin = next.getStart().getOffsetMin();
+            Double candidateOffsetMin = candidate.getStart().getOffsetMin();
+            if (nextOffsetMin != null && candidateOffsetMin != null) {
+              // both have offset minima so can be directly compared
+              if (candidateOffsetMin < nextOffsetMin) {
+                // earlier starts first
+                next = candidate;
+              } else if (candidateOffsetMin.equals(nextOffsetMin)) {
+                // offset minima are the same, so longest first
+                Double nextOffsetMax = next.getEnd().getOffsetMax();
+                Double candidateOffsetMax = candidate.getEnd().getOffsetMax();
+                // starts are the same, so longest first
+                if (nextOffsetMax == null) {
+                  // no end offset counts as 'shorter'
+                  next = candidate;
+                } else if (candidateOffsetMax != null
+                           && candidateOffsetMax > nextOffsetMax) {
+                  next = candidate;
+                } // else candidateOffsetMax() == null so it's 'shorter' than next
+              } // else candidateOffsetMin > nextOffsetMin, so no change in next
+            } else { // at least one of them has no offset minimum
+              if (candidateOffsetMin == null) { // candidate
+                next = candidate;
+              }
+            }
+          } // at least one of the start offsets isn't set
+        } // need to choose between next and candidate
       } // next layer
       log("next ", next, " - waitingFor ", waitingFor);
 
@@ -385,7 +482,7 @@ public class DefaultOffsetGenerator implements GraphTransformer {
           break;
         }
       } // next layer
-
+      
       // is the next annotation's start anchor after the one we're waiting for?
       if (waitingFor != null && next.getStart().getOffset() != null
           && waitingFor.getOffset() < next.getStart().getOffset()) {
@@ -400,6 +497,12 @@ public class DefaultOffsetGenerator implements GraphTransformer {
         orderedAnchors.remove(next.getStart()); // (remove it first - last add counts)
         orderedAnchors.add(next.getStart());
         log(" added start ", next.getStart());
+        // add all descendants of this child
+        orderedAnchors.addAll(
+          getOrderedAnchorsForDescendantsOf(next).stream()
+          .filter(a->a!=null)
+          .filter(a->!orderedAnchors.contains(a))
+          .collect(Collectors.toList()));
       }
       // have we been waiting for this one?
       if (next.getStart() == waitingFor) {
@@ -440,7 +543,11 @@ public class DefaultOffsetGenerator implements GraphTransformer {
       orderedAnchors.remove(waitingFor); // (remove it first - last add counts)
       orderedAnchors.add(waitingFor);
     }
-    orderedAnchors.add(parentEnd);
+    // temporarily add the parent end anchor
+    if (parentEnd != null) {
+      orderedAnchors.remove(parentEnd);
+      orderedAnchors.add(parentEnd);
+    }
 
     // remove any null entries
     Iterator<Anchor> anchors = orderedAnchors.iterator();
@@ -475,53 +582,9 @@ public class DefaultOffsetGenerator implements GraphTransformer {
       } // gap between children
     } // next anchor 
 
-    log("orderedAnchors: ", orderedAnchors);
-
-    Integer parentStartConfidence = parentStart == null?null:parentStart.getConfidence();
-    Integer parentEndConfidence = parentEnd == null?null:parentEnd.getConfidence();
-
-    // avoid unbounded anchor chain problems by starting/ending the collection with
-    // immovable start/end anchors - these come from graph.getSortedAnchors()
-    // - which includes only anchors with offsets - instead of sortedAnchors
-    // ensure that, no matter what, the bounding sentinels have offsets set
-    Anchor startSentinel = null;
-    if (parentStart != null && parentStart.getOffset() != null) {
-      startSentinel = parentStart;
-    } else {
-        // use the lowest offset we find
-      startSentinel = new Anchor();
-      Optional<Anchor> firstAnchored = orderedAnchors.stream()
-        .filter(a->a.getOffset() != null).findFirst();
-      if (firstAnchored.isPresent()) {
-        startSentinel.setOffset(firstAnchored.get().getOffset());
-      }
-    }
-    startSentinel.setConfidence(getDefaultOffsetThreshold() + 1);
-    orderedAnchors.insertElementAt(startSentinel, 0);
-    
-    Anchor endSentinel = null;
-    if (parentEnd != null && parentEnd.getOffset() != null) {
-        endSentinel = parentEnd;
-    } else { // use the highest offset we find
-      endSentinel = new Anchor();
-      Optional<Anchor> lastAnchored = orderedAnchors.stream()
-        .filter(a->a.getOffset() != null)
-        .max((a1,a2)->a1.getOffset().compareTo(a2.getOffset()));
-      if (lastAnchored.isPresent()) {
-        endSentinel.setOffset(lastAnchored.get().getOffset());
-      }
-    }
-    endSentinel.setConfidence(getDefaultOffsetThreshold() + 1);
-    orderedAnchors.add(endSentinel);
-    
-    // crawl through the anchors looking for unset offsets
-    iterpolateAnchors(orderedAnchors.iterator());
-
-    // restore parent anchor confidence
-    if (parentStart != null) parentStart.setConfidence(parentStartConfidence);
-    if (parentEnd != null) parentEnd.setConfidence(parentEndConfidence);
-    
-  } // end of setOffsetsForChildrenOf()
+    //log("orderedAnchors: ", orderedAnchors);
+    return orderedAnchors;
+  } // end of getOrderedAnchorsForDescendantsOf()
   
   /**
    * Determines whether the given anchor is the start of an annotation on any of the given layers.
@@ -685,134 +748,6 @@ public class DefaultOffsetGenerator implements GraphTransformer {
     } // next anchor
   } // end of iterpolateAnchors()
    
-  /**
-   * Sets the default offsets for anchors of all descendants of the given annotation.
-   * @param top The top of the annotation hierarchy to set anchor offsets of.
-   * @throws TransformationException If the transformation cannot be completed.
-   */
-  public void setOffsetsForDescendantsOf(Annotation top) throws TransformationException {
-    // log("Top: ", top);
-    if (!top.getInstantaneous()) {	 
-      // get a list of all anchors for relevant descendant annotations, 
-      // ordered by offset and also by using graph structure
-      // to order anchors with equal offsets and anchors with no offsets
-      TreeSet<Anchor> sortedAnchors = new TreeSet<Anchor>(new AnchorComparatorWithStructure());
-      // recursively descend through children, gathering anchors for non-overlapping child layers
-      descendantAnchors(top, sortedAnchors);
-      if (debug) {
-        log("sortedAnchors:");
-        for (Anchor a : sortedAnchors) log(a, ": ", a.getConfidence());
-      }
-
-      // avoid unbounded anchor chain problems by starting/ending the collection with
-      // immovable start/end anchors - these come from graph.getSortedAnchors()
-      // - which includes only anchors with offsets - instead of sortedAnchors
-      // ensure that, no matter what, the bounding sentinels have offsets set
-      Vector<Anchor> boundedAnchors = new Vector<Anchor>();
-      Anchor startSentinel = null;
-      if (top.getStart() != null && top.getStart().getOffset() != null) {
-        startSentinel = new Anchor(top.getStart());
-      } else {
-        // use the lowest offset we find
-        startSentinel = new Anchor();
-        for (Anchor a : sortedAnchors) {
-          if (a.getOffset() != null
-              && (startSentinel.getOffset() == null
-                  || a.getOffset() < startSentinel.getOffset())) {
-            startSentinel.setOffset(a.getOffset());
-            break;
-          }
-        } // next anchor
-      }
-      startSentinel.setConfidence(getDefaultOffsetThreshold() + 1);
-      boundedAnchors.add(startSentinel);
-
-      // then add them to our bounded anchor list
-      boundedAnchors.addAll(sortedAnchors);
-	 
-      Anchor endSentinel = null;
-      if (top.getEnd() != null && top.getEnd().getOffset() != null) {
-        endSentinel = new Anchor(top.getEnd());
-      } else { // use the highest offset we find
-        endSentinel = new Anchor();
-        for (Anchor a : sortedAnchors) {
-          if (a.getOffset() != null
-              && (endSentinel.getOffset() == null
-                  || a.getOffset() > endSentinel.getOffset())) {
-            endSentinel.setOffset(a.getOffset());
-          }
-        } // next anchor
-      }
-      endSentinel.setConfidence(getDefaultOffsetThreshold() + 1);
-      boundedAnchors.add(endSentinel);
-	 
-      // crawl through the anchors looking for unset offsets
-      iterpolateAnchors(boundedAnchors.iterator());
-    } // not an instant
-  } // end of setOffsetsForDescendantsOf()
-  
-  /**
-   * Recursively passes traverses child layers, adding anchors of children on
-   * non-peer-overlapping layers to the given set. Does not add the anchors of the parent
-   * (unless they're also anchors of some child). 
-   * @param parent The parent of the children to process.
-   * @param anchors The collection to add the anchors to.
-   */
-  protected void descendantAnchors(Annotation parent, TreeSet<Anchor> anchors) {
-    // log("Descendant anchors for ", parent);
-    for (String layerId : parent.getAnnotations().keySet()) {
-      Layer layer = parent.getGraph().getLayer(layerId);
-      if (layer == null) continue; // unknown layer
-      // log("child layer: ", layer.getId());
-      boolean addAnchors = layer.getPeers() 
-        // (peersOverlap is allowed, as we want CLAN MOR tags to be included
-        //  and they can include multiple analyses of multiple chained children)
-        && layer.getAlignment() != Constants.ALIGNMENT_NONE
-        && layer.getParentIncludes();
-      Anchor previousAnchor = parent.getStart(); 
-      for (Annotation child : parent.getAnnotations(layerId)) {
-        if (child.getChange() == Change.Operation.Destroy) continue;
-        if (addAnchors) {
-          // add anchors from any leading chain between the last anchor and the start of the wchild
-          AnnotationChain chain = new AnnotationChain(previousAnchor, child.getStart());
-          for (Annotation link : chain) {
-            // log("linked between: ", link);
-            if (link.getStart() != null) anchors.add(link.getStart());
-            if (link.getEnd() != null) anchors.add(link.getEnd());
-          } // next link
-          Integer startConfidence = null;
-          if (child.getStart() != null) startConfidence = child.getStart().getConfidence();
-          Integer endConfidence = null;
-          if (child.getEnd() != null) endConfidence = child.getEnd().getConfidence();
-          log(" child: ", child, " ",
-              child.getStart(), "(", startConfidence, ")-",
-              child.getEnd(), "(", endConfidence, ")");
-          if (child.getStart() != null) anchors.add(child.getStart());
-          // log("added start ", child.getStart());
-          if (child.getEnd() != null) anchors.add(child.getEnd());
-          // log("added end ", child.getEnd());
-          previousAnchor = child.getEnd();
-        } // add anchors
-        // recurse into all layers regardless of layer definition, to catch interesting grandchildren
-        // log("descendants for: ", child);
-        descendantAnchors(child, anchors);
-      } // next child
-	 
-      if (parent.getStart() != null
-          && addAnchors && !previousAnchor.equals(parent.getStart())) {
-        // add anchors from any trailing chain to the end of the parent
-        // log("looking for trailing links");
-        AnnotationChain chain = new AnnotationChain(previousAnchor, parent.getEnd());
-        // log("chain of ", chain.size(), " annotations");
-        for (Annotation link : chain) {
-          // log("linked after: ", link);
-          if (link.getStart() != null) anchors.add(link.getStart());
-          if (link.getEnd() != null) anchors.add(link.getEnd());
-        } // next link
-      } // add anchors from any trailing chain to the end
-    } // next child layer
-  } // end of descendantAnchors()
-
   /**
    * Gets the confidence rating of a given anchor.  If no Integer confidence attribute is
    * present, the {@link #defaultAnchorConfidence} is returned. 

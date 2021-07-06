@@ -846,7 +846,7 @@ public class TestDefaultOffsetGenerator {
     g.addAnchor(new Anchor("b12", null)); // l
     g.addAnchor(new Anchor("b13", null)); // ue
     g.addAnchor(new Anchor("b14", null)); // end of blue & ue
-    g.addAnchor(new Anchor("turn2End", 12.5)); // turn end
+    g.addAnchor(new Anchor("turn2End", 14.5)); // turn end
 
     // topics
     // one independent
@@ -910,7 +910,7 @@ public class TestDefaultOffsetGenerator {
 
     // dependency
     g.addAnnotation(new Annotation("jumpsObj", "OBJ", "dependency", "a8", "a9", "jumps"));
-    g.addAnnotation(new Annotation("jumpsSubj",   "SUBJ",   "dependency", "a3", "a4", "jumps"));
+    g.addAnnotation(new Annotation("jumpsSubj","SUBJ",   "dependency", "a3", "a4", "jumps"));
 
     assertEquals("no initial changes to graph: " + g.getChanges(), 0, g.getChanges().size());
 
@@ -942,13 +942,13 @@ public class TestDefaultOffsetGenerator {
       assertEquals(Double.valueOf(8.5),  g.getAnchor("b8").getOffset());
       assertEquals(Double.valueOf(9.5),  g.getAnchor("b9").getOffset());
       assertEquals(Double.valueOf(10.5), g.getAnchor("b10").getOffset());
-      // word anchors evenly spread amongst words only, then phones evenly spread in their word
+      // word and phone anchors evenly spread amongst each other
       assertEquals(Double.valueOf(11.5), g.getAnchor("b11").getOffset());
       assertEquals("Phones evenly spread - 1/3",
-                   Double.valueOf(11.5 + 1.0/3.0), g.getAnchor("b12").getOffset());
+                   Double.valueOf(12.5), g.getAnchor("b12").getOffset());
       assertEquals("Phones evenly spread - 2/3",
-                   Double.valueOf(11.5 + 2.0/3.0), g.getAnchor("b13").getOffset());
-      assertEquals(Double.valueOf(12.5), g.getAnchor("b14").getOffset());
+                   Double.valueOf(13.5), g.getAnchor("b13").getOffset());
+      assertEquals(Double.valueOf(14.5), g.getAnchor("b14").getOffset());
 
       // topic left unchanged (it's a top-level layer)
       assertNull(g.getAnchor("topic1Start").getOffset());
@@ -975,15 +975,15 @@ public class TestDefaultOffsetGenerator {
       // collapsed back to start of turn
       assertTrue(changeStrings.contains("Update b6: offset = 6.5 (was null)"));
       // collapsed forward to end of turn
-      assertTrue(changeStrings.contains("Update b14: offset = 12.5 (was null)"));
+      assertTrue(changeStrings.contains("Update b14: offset = 14.5 (was null)"));
       // then the rest interpolated between
       assertTrue(changeStrings.contains("Update b7: offset = 7.5 (was null)"));
       assertTrue(changeStrings.contains("Update b8: offset = 8.5 (was null)"));
       assertTrue(changeStrings.contains("Update b9: offset = 9.5 (was null)"));
       assertTrue(changeStrings.contains("Update b10: offset = 10.5 (was null)"));
       assertTrue(changeStrings.contains("Update b11: offset = 11.5 (was null)"));
-      assertTrue(changeStrings.contains("Update b12: offset = 11.833333333333334 (was null)"));
-      assertTrue(changeStrings.contains("Update b13: offset = 12.166666666666666 (was null)"));
+      assertTrue(changeStrings.contains("Update b12: offset = 12.5 (was null)"));
+      assertTrue(changeStrings.contains("Update b13: offset = 13.5 (was null)"));
 
       assertEquals("no extra changes to graph - " + changes + " vs. " +g.getChanges(), 
                    changes.size(), g.getChanges().size());
@@ -1493,6 +1493,137 @@ public class TestDefaultOffsetGenerator {
     }
   }
 
+  /** Multiple word chains, multiple utterances per turn. */
+  @Test public void multipleUnanchoredWordsMultipleUtterances() throws Exception {
+    Schema schema = new Schema(
+      "who", "turn", "utterance", "word",
+      new Layer("who", "Participants")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true)
+      .setSaturated(true),
+      new Layer("turn", "Speaker turns")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false)
+      .setSaturated(false).setParentId("who"),
+      new Layer("utterance", "Utterances")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false)
+      .setSaturated(true).setParentId("turn"),
+      new Layer("word", "Words")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false)
+      .setSaturated(false).setParentId("turn"));
+      
+    // create a graph with simultaneous speech turns
+      
+    Graph graph = new Graph()
+      .setId("simultaneous_speech")
+      .setSchema(schema);
+    graph.addAnchor(new Anchor("a0", 0.0));
+    graph.addAnchor(new Anchor("a15", 15.0));
+    // participants
+    graph.addAnnotation(new Annotation("p1", "p1", "who", "a0", "a15"));
+    graph.addAnnotation(new Annotation("p2", "p2", "who", "a0", "a15"));
+    // participant attributes
+    graph.addAnnotation(new Annotation("g1", "M", "gender", "a0", "a15", "p1"));
+    graph.addAnnotation(new Annotation("g2", "F", "gender", "a0", "a15", "p2"));
+    // turns
+    graph.addAnnotation(new Annotation("t1", "p1", "turn", "a0", "a15", "p1"));
+    // simultaneous non-shared anchors will be shared
+    graph.addAnchor(new Anchor("a5", 5.0));
+    graph.addAnchor(new Anchor("a5b", 5.0));
+    graph.addAnchor(new Anchor("a10", 10.0));
+    graph.addAnchor(new Anchor("a10b", 10.0));
+    graph.addAnnotation(new Annotation("t2", "p2", "turn", "a5b", "a10b", "p2"));
+    // utterances
+    graph.addAnnotation(new Annotation("u1-1", "p1", "utterance", "a0", "a5", "t1"));
+    graph.addAnnotation(new Annotation("u1-2", "p1", "utterance", "a5", "a10", "t1"));
+    graph.addAnnotation(new Annotation("u2-1", "p2", "utterance", "a5b", "a10b", "t2"));
+    graph.addAnnotation(new Annotation("u1-3", "p1", "utterance", "a10", "a15", "t1"));
+
+    // words - with null intervening anchor offsets
+    graph.addAnnotation(new Annotation("w1-1", "w1-1", "word", 
+                                       graph.addAnchor(new Anchor("a1", 1.0)).getId(),
+                                       graph.addAnchor(new Anchor("a2", null)).getId(),
+                                       "t1"));
+    graph.addAnnotation(new Annotation("w1-2", "w1-2", "word", 
+                                       "a2",
+                                       graph.addAnchor(new Anchor("a3", null)).getId(),
+                                       "t1"));
+    graph.addAnnotation(new Annotation("w1-3", "w1-3", "word", 
+                                       "a3",
+                                       graph.addAnchor(new Anchor("a4", 4.0)).getId(),
+                                       "t1"));
+      
+    graph.addAnnotation(new Annotation("w1-6", "w1-6", "word", 
+                                       graph.addAnchor(new Anchor("a6", 6.0)).getId(),
+                                       graph.addAnchor(new Anchor("a7", null)).getId(),
+                                       "t1"));
+    graph.addAnnotation(new Annotation("w1-7", "w1-7", "word", 
+                                       "a7", 
+                                       graph.addAnchor(new Anchor("a8", null)).getId(),
+                                       "t1"));
+    graph.addAnnotation(new Annotation("w1-8", "w1-8", "word", 
+                                       "a8",
+                                       graph.addAnchor(new Anchor("a9", 9.0)).getId(),
+                                       "t1"));
+      
+
+    graph.addAnnotation(new Annotation("w1-11", "w1-11", "word", 
+                                       graph.addAnchor(new Anchor("a11", 11.0)).getId(),
+                                       graph.addAnchor(new Anchor("a12", null)).getId(),
+                                       "t1"));
+    graph.addAnnotation(new Annotation("w1-12", "w1-12", "word", 
+                                       "a12",
+                                       graph.addAnchor(new Anchor("a13", null)).getId(),
+                                       "t1"));
+    graph.addAnnotation(new Annotation("w1-13", "w1-13", "word", 
+                                       "a13",
+                                       graph.addAnchor(new Anchor("a14", 14.0)).getId(),
+                                       "t1"));
+      
+    graph.addAnnotation(new Annotation("w2-6.5", "w2-6.5", "word", 
+                                       graph.addAnchor(new Anchor("a6.5", 6.5)).getId(),
+                                       graph.addAnchor(new Anchor("a7.5", null)).getId(),
+                                       "t2"));
+    graph.addAnnotation(new Annotation("w2-7.5", "w2-7.5", "word", 
+                                       "a7.5",
+                                       graph.addAnchor(new Anchor("a8.5", 8.5)).getId(),
+                                       "t2"));
+    assertEquals("2 turns", 2, graph.list("turn").length);
+    
+    graph.trackChanges();
+    
+    DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
+    // generator.setDebug(true);
+    try {
+      generator.transform(graph);
+      if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
+      Set<Change> changes = graph.getTracker().getChanges();
+
+      // orthographic words are unchanged
+      assertEquals("word anchors", Double.valueOf(1.0), graph.getAnchor("a1").getOffset());
+      assertEquals("word anchors", Double.valueOf(2.0), graph.getAnchor("a2").getOffset());
+      assertEquals("word anchors", Double.valueOf(3.0), graph.getAnchor("a3").getOffset());
+      assertEquals("word anchors", Double.valueOf(4.0), graph.getAnchor("a4").getOffset());
+      assertEquals("word anchors", Double.valueOf(6.0), graph.getAnchor("a6").getOffset());
+      assertEquals("word anchors", Double.valueOf(7.0), graph.getAnchor("a7").getOffset());
+      assertEquals("word anchors", Double.valueOf(8.0), graph.getAnchor("a8").getOffset());
+      assertEquals("word anchors", Double.valueOf(9.0), graph.getAnchor("a9").getOffset());
+      assertEquals("word anchors", Double.valueOf(11.0), graph.getAnchor("a11").getOffset());
+      assertEquals("word anchors", Double.valueOf(12.0), graph.getAnchor("a12").getOffset());
+      assertEquals("word anchors", Double.valueOf(13.0), graph.getAnchor("a13").getOffset());
+      assertEquals("word anchors", Double.valueOf(14.0), graph.getAnchor("a14").getOffset());
+      assertEquals("word anchors", Double.valueOf(6.5), graph.getAnchor("a6.5").getOffset());
+      assertEquals("word anchors", Double.valueOf(7.5), graph.getAnchor("a7.5").getOffset());
+      assertEquals("word anchors", Double.valueOf(8.5), graph.getAnchor("a8.5").getOffset());
+
+    } catch(TransformationException exception) {
+      fail(exception.toString());
+    }                      
+  }
+
+
   /** Test offset generation completes in a timely manner */
   @Test public void performance() {
     Graph g = new Graph();
@@ -1566,7 +1697,7 @@ public class TestDefaultOffsetGenerator {
       timers.end("DefaultOffsetGenerator.transform");
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
 
-      System.out.println(timers.toString());
+      // System.out.println(timers.toString());
       assertTrue(
         "DefaultOffsetGenerator too slow:\n" + timers.toString(),
         30000 > timers.getTotals().get("DefaultOffsetGenerator.transform"));      
