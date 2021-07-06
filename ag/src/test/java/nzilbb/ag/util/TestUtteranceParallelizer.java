@@ -32,6 +32,7 @@ import nzilbb.ag.*;
 import nzilbb.ag.util.*;
 
 public class TestUtteranceParallelizer {
+  /** Second turn start after, and ends beforem first turn. */
   @Test public void envelopedTurn() throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
@@ -174,7 +175,8 @@ public class TestUtteranceParallelizer {
       fail(exception.toString());
     }
   }
-   
+
+  /** Second turn starts after, and ends after, first turn */
   @Test public void overlappingTurn() throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
@@ -303,6 +305,7 @@ public class TestUtteranceParallelizer {
     }
   }
 
+  /** Second turn starts after but ends before first turn, words have generally null offsets. */
   @Test public void unsetOffsets() throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
@@ -348,7 +351,7 @@ public class TestUtteranceParallelizer {
     graph.addAnchor(new Anchor("a5b", 5.0));
     graph.addAnchor(new Anchor("a10", 10.0));
     graph.addAnchor(new Anchor("a10b", 10.0));
-    graph.addAnnotation(new Annotation("t2", "p2", "turn", "a5", "a10", "p2"));
+    graph.addAnnotation(new Annotation("t2", "p2", "turn", "a5b", "a10b", "p2"));
     // utterances
     graph.addAnnotation(new Annotation("u1-1", "p1", "utterance", "a0", "a5", "t1"));
     graph.addAnnotation(new Annotation("u1-2", "p1", "utterance", "a5", "a10", "t1"));
@@ -417,7 +420,7 @@ public class TestUtteranceParallelizer {
 
       // there are now four turns
       Annotation[] turns = graph.list("turn");
-      // for (Annotation t : turns) System.out.println(t.getLabel() + " ("+t.getStart()+"-"+t.getEnd()+")");
+      // for (Annotation t : turns) System.out.println(t.getId() + "-" + t.getLabel() + " ("+t.getStart()+"-"+t.getEnd()+")");
       assertEquals("now 4 turns: " + Arrays.asList(turns),
                    4, turns.length);
 
