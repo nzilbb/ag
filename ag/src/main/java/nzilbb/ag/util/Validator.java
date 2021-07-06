@@ -316,7 +316,7 @@ public class Validator implements GraphTransformer {
    * Check label length.
    * @param graph
    */
-  protected void checkLabels(Graph graph) // TODO check/enforce validLabels {
+  protected void checkLabels(Graph graph) { // TODO check/enforce validLabels
     if (maxLabelLength != null) {
       for (Annotation annotation : graph.getAnnotationsById().values()) {
         if (annotation.getChange() != Change.Operation.Destroy) {
@@ -862,7 +862,7 @@ public class Validator implements GraphTransformer {
 
     Layer parentLayer = childLayer.getParent();
     // log("validate hierarchy: ", parentLayer, "/", childLayer);
-
+    
     // ensure extra peers are deleted
     if (!childLayer.getPeers()) {
       // for each parent
@@ -880,8 +880,8 @@ public class Validator implements GraphTransformer {
         } // next child
       } // next parent
     } // there are no peers allowed
-	 
-      // ensure ordinals are set in chronological order
+    
+    // ensure ordinals are set in chronological order
     if (childLayer.getPeers() 
         // but only if chronological order is important
         // (don't check tags)
@@ -890,6 +890,7 @@ public class Validator implements GraphTransformer {
         // (external dependencies might be in some other order)
         && childLayer.getParentIncludes()
       ) {
+      
       // for each parent
       for (Annotation parent : graph.all(childLayer.getParentId())) {
         if (parent.getChange() == Change.Operation.Destroy) continue; // ignore deleted annotations
@@ -914,20 +915,22 @@ public class Validator implements GraphTransformer {
     } // there are peers
       
     // check anchors
-      
+    
     // for each parent
     for (Annotation parent : graph.all(childLayer.getParentId())) { 
       if (parent.getChange() == Change.Operation.Destroy) continue; // ignore deleted annotations
+
       // log("Parent: ", parent);
       double dLastOffset = 0.0;
       Annotation lastOffsetChild = null;
       Annotation lastChild = null;
       Annotation lastAnchoredChild = null;
-	 
+      
       for (Annotation child : parent.getAnnotations(childLayer.getId())) {
         if (child.getChange() == Change.Operation.Destroy) continue; // ignore deleted annotations
         if (!parent.getId().equals(child.getParentId())) continue; // no longer the parent
         if (child.getStart() == null) continue;
+        
         // log(" child: ", child);
         if (!childLayer.getPeersOverlap() 
             // ignore tag layers, whose anchors will follow their parents
@@ -936,7 +939,7 @@ public class Validator implements GraphTransformer {
           for (Annotation parallel : child.getStart().startOf(child.getLayerId())) {
             if (parallel.getChange() == Change.Operation.Destroy) continue; // ignore deleted
             if (parallel == child) continue; // ignore ourselves
-            if (parallel.getStartId().equals(child.getStartId())) // not already split off {
+            if (parallel.getStartId().equals(child.getStartId())) { // not already split off 
               // if we get here, there's an annotation that has our start anchor.
               // this is invalid whether it belongs to the same parent or not, so we
               // create our own anchor 
@@ -1137,7 +1140,7 @@ public class Validator implements GraphTransformer {
           for (Annotation parallel : child.getEnd().endOf(child.getLayerId())) {
             if (parallel.getChange() == Change.Operation.Destroy) continue; // ignore deleted
             if (parallel == child) continue; // ignore ourselves
-            if (!parallel.getEndId().equals(parallel.getEndId())) // not already split off {
+            if (!parallel.getEndId().equals(parallel.getEndId())) { // not already split off
               // if we get here, there's an annotation that has our end anchor.
               // this is invalid whether it belongs to the same parent or not, so we
               // create our own anchor 
@@ -1182,20 +1185,40 @@ public class Validator implements GraphTransformer {
               // check start anchors
               if (parent.getStart().getOffset() > child.getStart().getOffset()) {
                 // TODO check whether the parent is/would be an instant after this?
-                String sOriginal = logAnnotation(parent);
-                // widen parent
-                Anchor newAnchor = child.getStart();
-                if (!childLayer.getSaturated()) {
-                  // sparse children - don't share anchors with them
-                  newAnchor = new Anchor(child.getStart());
-                  graph.addAnchor(newAnchor);
+                if (Utility.getConfidence(parent.getStart(), defaultAnchorConfidence)
+                    <= Utility.getConfidence(child.getStart(), defaultAnchorConfidence)) {
+                  // widen parent
+                  String sOriginal = logAnnotation(parent);
+                  // widen parent
+                  Anchor newAnchor = child.getStart();
+                  if (!childLayer.getSaturated()) {
+                    // sparse children - don't share anchors with them
+                    newAnchor = new Anchor(child.getStart());
+                    graph.addAnchor(newAnchor);
+                  }
+                  changeStartWithRelatedAnnotations(
+                    parent, newAnchor, 
+                    // don't change other children if it's a sequential layer
+                    !childLayer.getPeersOverlap()?child.getLayerId():null);
+                  log("Widened ", sOriginal, " -> ", parent,
+                      " to ", child.getStart().getOffset(), " to include child ", child);
+                } else {
+                  // narrow child
+                  String sOriginal = logAnnotation(child);
+                  // widen parent
+                  Anchor newAnchor = parent.getStart();
+                  if (!childLayer.getSaturated()) {
+                    // sparse children - don't share anchors with them
+                    newAnchor = new Anchor(parent.getStart());
+                    graph.addAnchor(newAnchor);
+                  }
+                  changeStartWithRelatedAnnotations(
+                    child, newAnchor, 
+                    // don't change other children if it's a sequential layer
+                    !childLayer.getPeersOverlap()?child.getLayerId():null);
+                  log("Narrowing ", sOriginal, " -> ", child,
+                      " to ", parent.getStart().getOffset(), " to be included in parent ", parent);
                 }
-                changeStartWithRelatedAnnotations(
-                  parent, newAnchor, 
-                  // don't change other children if it's a sequential layer
-                  !childLayer.getPeersOverlap()?child.getLayerId():null);
-                log("Widened ", sOriginal, " -> ", parent,
-                    " to ", child.getStart().getOffset(), " to include child ", child);
               } // start anchor
             } // start anchors have offsets
 		  
@@ -1204,22 +1227,42 @@ public class Validator implements GraphTransformer {
                 && parent.getEnd().getOffset() != null) {
               // check end anchors
               if (parent.getEnd().getOffset() < child.getEnd().getOffset()) {
-                // widen parent
-                String sOriginal = logAnnotation(parent);
-			
-                Anchor newAnchor = child.getEnd();
-                if (!childLayer.getSaturated()) {
-                  // sparse children - don't share anchors with them
-                  newAnchor = new Anchor(child.getEnd());
-                  graph.addAnchor(newAnchor);
+                if (Utility.getConfidence(parent.getEnd(), defaultAnchorConfidence)
+                    <= Utility.getConfidence(child.getEnd(), defaultAnchorConfidence)) {
+                  // widen parent
+                  String sOriginal = logAnnotation(parent);
+                  
+                  Anchor newAnchor = child.getEnd();
+                  if (!childLayer.getSaturated()) {
+                    // sparse children - don't share anchors with them
+                    newAnchor = new Anchor(child.getEnd());
+                    graph.addAnchor(newAnchor);
+                  }
+                  changeEndWithRelatedAnnotations(
+                    parent, newAnchor, 
+                    // don't change other children if it's a sequential layer
+                    !childLayer.getPeersOverlap()?child.getLayerId():null);
+                  
+                  log("Widened ", sOriginal, " -> ", child,
+                      " to ", child.getEnd().getOffset(), " to include child ", child);
+                } else {
+                  // narrow child
+                  String sOriginal = logAnnotation(child);
+                  
+                  Anchor newAnchor = parent.getEnd();
+                  if (!childLayer.getSaturated()) {
+                    // sparse children - don't share anchors with them
+                    newAnchor = new Anchor(parent.getEnd());
+                    graph.addAnchor(newAnchor);
+                  }
+                  changeEndWithRelatedAnnotations(
+                    child, newAnchor, 
+                    // don't change other children if it's a sequential layer
+                    !childLayer.getPeersOverlap()?child.getLayerId():null);
+                  
+                  log("Narrowed ", sOriginal, " -> ", parent,
+                      " to ", parent.getEnd().getOffset(), " to be included in parent ", parent);
                 }
-                changeEndWithRelatedAnnotations(
-                  parent, newAnchor, 
-                  // don't change other children if it's a sequential layer
-                  !childLayer.getPeersOverlap()?child.getLayerId():null);
-			
-                log("Widened ", sOriginal, " -> ", parent,
-                    " to ", child.getEnd().getOffset(), " to include child ", child);
               } // end anchor
             } // end anchors have offsets
           } // t-included parts, not a tag
