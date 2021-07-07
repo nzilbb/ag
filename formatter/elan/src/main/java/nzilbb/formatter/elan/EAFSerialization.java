@@ -21,20 +21,35 @@
 //
 package nzilbb.formatter.elan;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
-import java.nio.*;
-import java.nio.charset.*;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.Spliterator;
+import java.util.TreeSet;
+import java.util.Vector;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import javax.xml.parsers.*;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.stream.*;
-import javax.xml.xpath.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
@@ -49,8 +64,11 @@ import nzilbb.configure.ParameterSet;
 import nzilbb.util.IO;
 import nzilbb.util.ISO639;
 import nzilbb.util.TempFileInputStream;
-import org.w3c.dom.*;
-import org.xml.sax.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * Converter that converts ELAN EAF v2.7 files to Annotation Graphs
@@ -60,7 +78,9 @@ import org.xml.sax.*;
  */
 public class EAFSerialization implements GraphDeserializer, GraphSerializer {
    
-  // Attributes:     
+  // Attributes:
+  private File eafFile;
+  private String timeUnits = "milliseconds";
   private ISO639 iso639 = new ISO639(); // for standard ISO 639 language code processing
   protected Vector<String> warnings;
   /**
@@ -72,21 +92,6 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
     return warnings.toArray(new String[0]);
   }
 
-  /** ANNOTATION_DOCUMENT root node */
-  protected Node root;
-   
-  /** HEADER node */
-  protected Node header;
-   
-  /** TIME_ORDER node */
-  protected Node timeOrder;
-   
-  /** tiers */
-  protected NodeList tiers;
-   
-  /** XPATH processor */
-  protected XPath xpath;
-   
   /** Time value multiplier, to yield time in seconds */
   protected double timeFactor = (1.0/1000.0);
 
@@ -138,23 +143,6 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
    */
   public EAFSerialization setUtterancesAreSpeakerNames(boolean newUtterancesAreSpeakerNames) { utterancesAreSpeakerNames = newUtterancesAreSpeakerNames; return this; }
    
-  /**
-   * Map of tier names to tiers.
-   * @see #getTiers()
-   * @see #setTiers(LinkedHashMap)
-   */
-  protected LinkedHashMap<String,Node> mTiers = new LinkedHashMap<String,Node>();
-  /**
-   * Getter for {@link #mTiers}: Map of tier names to tiers.
-   * @return Map of tier names to tiers.
-   */
-  public LinkedHashMap<String,Node> getTiers() { return mTiers; }
-  /**
-   * Setter for {@link #mTiers}: Map of tier names to tiers.
-   * @param mNewTiers Map of tier names to tiers.
-   */
-  public EAFSerialization setTiers(LinkedHashMap<String,Node> mNewTiers) { mTiers = mNewTiers; return this; }
-
   /**
    * Layer schema.
    * @see #getSchema()
@@ -527,15 +515,9 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
    * Resets the state of the converter, ready to convert again.
    */
   public void reset() {
-    root = null;
-    header = null;
-    timeOrder = null;
-    tiers = null;
-    xpath = null;
     warnings = new Vector<String>();
     timeFactor = (1.0/1000.0);
     utterancesAreSpeakerNames = false;
-    mTiers.clear();
     id = null;
     mTierMessages.clear();
   } // end of reset()
@@ -781,45 +763,13 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
     NamedStream eaf = Utility.FindSingleStream(streams, ".eaf", "text/x-eaf+xml");
     if (eaf == null) throw new SerializationException("No ELAN EAF stream found");
     setId(eaf.getName());
-      
-    // convert from UTF-16 to UTF-8 if necessary
-    InputStream in = eaf.getStream();
 
-    // Document factory
-    DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+    // save to a temporary file
+    eafFile = File.createTempFile(eaf.getName(), ".eaf");
+    IO.SaveInputStreamToFile​(eaf.getStream(), eafFile);
+    
+    InputStream in = new FileInputStream(eafFile);
     try {
-      DocumentBuilder builder = builderFactory.newDocumentBuilder();   
-      builder.setEntityResolver(new EntityResolver() {
-          public InputSource resolveEntity(String publicId, String systemId)
-            throws SAXException, IOException {
-            // Get DTDs locally, to prevent not found errors
-            String name = systemId.substring(systemId.lastIndexOf('/') + 1);
-            URL url = getClass().getResource(name);
-            if (url != null) return new InputSource(url.openStream());
-            return null;
-          }});
-	  
-      Document document = builder.parse(new InputSource(in));
-	  
-      root = document.getFirstChild();
-      if (!root.getNodeName().equalsIgnoreCase("ANNOTATION_DOCUMENT")) {
-        throw new SerializationException(SerializationException.ErrorType.InvalidDocument,
-                                         "XML top node is not ANNOTATION_DOCUMENT");
-      }
-      XPathFactory xpathFactory = XPathFactory.newInstance();
-      xpath = xpathFactory.newXPath();
-      header = (Node) xpath.evaluate("//HEADER", document, XPathConstants.NODE);
-      timeOrder = (Node) xpath.evaluate("//TIME_ORDER", document, XPathConstants.NODE);
-      tiers = (NodeList) xpath.evaluate("//TIER", root, XPathConstants.NODESET);
-	  
-      if (timeOrder == null) {
-        throw new SerializationException(SerializationException.ErrorType.InvalidDocument,
-                                         "Document has no TIME_ORDER node");
-      }
-      if (tiers == null || tiers.getLength() == 0) {
-        throw new SerializationException(SerializationException.ErrorType.InvalidDocument,
-                                         "Document has no TIER nodes");
-      }
 	  
       ParameterSet mappings = new ParameterSet();
       Vector<Layer> vIntervalLayers = new Vector<Layer>();
@@ -839,82 +789,106 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
           }
         }
       } // next layer
-	  
+
+      boolean foundTimeOrder = false;
+      boolean foundTiers = false;
+
       // map tiers to layers by name
       Layer ignore = new Layer();
-      ignore.setId("[ignore tier]");      
-      for (int t = 0; t < tiers.getLength(); t++) {
-        Node tier = tiers.item(t);
-        Attr tierId = (Attr)tier.getAttributes().getNamedItem("TIER_ID");
-        String tierName = tierId.getValue();
-        Attr childParticipant = (Attr)tier.getAttributes().getNamedItem("PARTICIPANT");
+      ignore.setId("[ignore tier]");
+      in = new FileInputStream(eafFile);
+      XMLStreamReader parser = XMLInputFactory.newInstance().createXMLStreamReader(in);
+      int t = 0;
+      while (parser.hasNext()) {
+        int event = parser.next();
+        if (event == XMLStreamConstants.START_ELEMENT) {
+          if (parser.getLocalName().equals("TIME_ORDER")) {
+            foundTimeOrder = true;            
+          } else if (parser.getLocalName().equals("TIER")) {
+            foundTiers = true;
+            String tierName = parser.getAttributeValue(null, "TIER_ID");
+            String parent = parser.getAttributeValue(null, "PARENT_REF");
+            // Node tier = tiers.item(t);
+            // Attr tierId = (Attr)tier.getAttributes().getNamedItem("TIER_ID");
+            // String tierName = tierId.getValue();
+            // Attr childParticipant = (Attr)tier.getAttributes().getNamedItem("PARTICIPANT");
 	     
-        Parameter p = new Parameter(
-          "tier"+t, Layer.class, tierName,
-          "Layer for tier called: " + tierName, true);
-        Vector<Layer> vPossiblLayers = new Vector<Layer>();
-        vPossiblLayers.add(ignore);
-        vPossiblLayers.addAll(vIntervalLayers);
+            Parameter p = new Parameter(
+              "tier"+(t++), Layer.class, tierName,
+              "Layer for tier called: " + tierName, true);
+            Vector<Layer> vPossiblLayers = new Vector<Layer>();
+            vPossiblLayers.add(ignore);
+            vPossiblLayers.addAll(vIntervalLayers);
 	     
-        // look for a layer with the same name
-        if (tierName.equalsIgnoreCase("lines")
-            || tierName.equalsIgnoreCase("utterances")) {
-          tierName = getUtteranceLayer().getId();
-        } else if (tierName.equalsIgnoreCase("speakers")
-                   || tierName.equalsIgnoreCase("speaker")
-                   || tierName.equalsIgnoreCase("turns")
-                   || tierName.equalsIgnoreCase("turn")) {
-          tierName = getTurnLayer().getId();
-        } else if (tierName.toLowerCase().startsWith("word")
-                   || tierName.toLowerCase().endsWith("word")
-                   || tierName.toLowerCase().startsWith("words")
-                   || tierName.toLowerCase().endsWith("words")
-                   || tierName.toLowerCase().endsWith("transcript")) {
-          tierName = getWordLayer().getId();
-        }
-        Layer layer = getSchema().getLayer(tierName);
-        if (layer == null) { // no exact match
-          // try a case-insensitive match
-          // ignore spaces too
-          String tierNameNoWhitespace = tierName.toLowerCase().replaceAll("\\s","");
-          for (Layer mappableLayer : vPossiblLayers) {
-            if (tierNameNoWhitespace.equals(
-                  mappableLayer.getId().toLowerCase().replaceAll("\\s",""))) {
-              layer = mappableLayer;
-              break;
+            // look for a layer with the same name
+            if (tierName.equalsIgnoreCase("lines")
+                || tierName.equalsIgnoreCase("utterances")) {
+              tierName = getUtteranceLayer().getId();
+            } else if (tierName.equalsIgnoreCase("speakers")
+                       || tierName.equalsIgnoreCase("speaker")
+                       || tierName.equalsIgnoreCase("turns")
+                       || tierName.equalsIgnoreCase("turn")) {
+              tierName = getTurnLayer().getId();
+            } else if (tierName.toLowerCase().startsWith("word")
+                       || tierName.toLowerCase().endsWith("word")
+                       || tierName.toLowerCase().startsWith("words")
+                       || tierName.toLowerCase().endsWith("words")
+                       || tierName.toLowerCase().endsWith("transcript")) {
+              tierName = getWordLayer().getId();
             }
-          } // next layer
-        }
-        if (layer == null) { // no exact match
-          // try a prefix-match - i.e. "transcript - John Smith" should map to the "transcript" layer
-          // ignore spaces too
-          String tierNameNoWhitespace = tierName.replaceAll("\\s","");
-          for (Layer mappableLayer : vPossiblLayers) {
-            if (tierNameNoWhitespace.startsWith(mappableLayer.getId().replaceAll("\\s",""))) {
-              layer = mappableLayer;
-              break;
+            Layer layer = getSchema().getLayer(tierName);
+            if (layer == null) { // no exact match
+              // try a case-insensitive match
+              // ignore spaces too
+              String tierNameNoWhitespace = tierName.toLowerCase().replaceAll("\\s","");
+              for (Layer mappableLayer : vPossiblLayers) {
+                if (tierNameNoWhitespace.equals(
+                      mappableLayer.getId().toLowerCase().replaceAll("\\s",""))) {
+                  layer = mappableLayer;
+                  break;
+                }
+              } // next layer
             }
-          } // next layer
-        }
-        if (layer != null) { // there is a matching layer
-          if (layer.getAlignment() != 1) p.setValue(layer);
-        } else if (tier.getAttributes().getNamedItem("PARENT_REF") == null) {
-          // no name match, and it's not a child tier
+            if (layer == null) { // no exact match
+              // try a prefix-match - i.e. "transcript - John Smith" should map to the "transcript" layer
+              // ignore spaces too
+              String tierNameNoWhitespace = tierName.replaceAll("\\s","");
+              for (Layer mappableLayer : vPossiblLayers) {
+                if (tierNameNoWhitespace.startsWith(mappableLayer.getId().replaceAll("\\s",""))) {
+                  layer = mappableLayer;
+                  break;
+                }
+              } // next layer
+            }
+            if (layer != null) { // there is a matching layer
+              if (layer.getAlignment() != 1) p.setValue(layer);
+            } else if (parent == null) {
+              // no name match, and it's not a child tier
                
-          // assume it's a tier named after a speaker - make the utteranceLayer the default
-          p.setValue(getUtteranceLayer());
-        }
-        p.setPossibleValues(vPossiblLayers);
-        mappings.addParameter(p);
-      } // next tier
-	  
+              // assume it's a tier named after a speaker - make the utteranceLayer the default
+              p.setValue(getUtteranceLayer());
+            }
+            p.setPossibleValues(vPossiblLayers);
+            mappings.addParameter(p);
+          } else if (parser.getLocalName().equals("HEADER")) {
+            timeUnits = parser.getAttributeValue(null, "TIME_UNITS");
+            if (timeUnits == null) timeUnits = "milliseconds";
+          }
+        } // START_ELEMENT
+      } // next event
+
+      if (!foundTimeOrder) {
+        throw new SerializationException(SerializationException.ErrorType.InvalidDocument,
+                                         "Document has no TIME_ORDER node");
+      }
+      if (!foundTiers) {
+        throw new SerializationException(SerializationException.ErrorType.InvalidDocument,
+                                         "Document has no TIER nodes");
+      }
+
       return mappings;
-	  
-    } catch(ParserConfigurationException x) {
-      throw new SerializationException(x);
-    } catch(SAXException x) {
-      throw new SerializationException(x);
-    } catch(XPathExpressionException x) {
+
+    } catch(XMLStreamException x) {
       throw new SerializationException(x);
     }
   }
@@ -938,44 +912,40 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
     int iUtteranceLayerMapped = 0;
     int iWordLayerMapped = 0;
     mappingsDependOnTurn = false;
-    for (int t = 0; t < tiers.getLength(); t++) {
-      Node tier = tiers.item(t);
-      // is there a mapping for this tier?
-      Layer layer = (Layer)mappings.get("tier"+t).getValue();
-      if (layer != null) {
-        if (layer.equals(getTurnLayer())
-            || layer.getAncestors().contains(getTurnLayer())) {
-          mappingsDependOnTurn = true;
-        }
+    for (Parameter p : mappings.values()) {
+      if (p.getValue() != null && p.getValue() instanceof Layer) {
+        Layer layer = (Layer)p.getValue();
+        if (!layer.getId().equals("[ignore tier]")) {
+          if (layer.equals(getTurnLayer())
+              || layer.getAncestors().contains(getTurnLayer())) {
+            mappingsDependOnTurn = true;
+          }
 	    
-        if (layer.equals(getTurnLayer())) {
-          iTurnLayerMapped++;
-        } else if (layer.equals(getUtteranceLayer())) {
-          iUtteranceLayerMapped++;
-        } else if (layer.equals(getWordLayer())) {
-          iWordLayerMapped++;
-        }
-      }
-    }
+          if (layer.equals(getTurnLayer())) {
+            iTurnLayerMapped++;
+          } else if (layer.equals(getUtteranceLayer())) {
+            iUtteranceLayerMapped++;
+          } else if (layer.equals(getWordLayer())) {
+            iWordLayerMapped++;
+          }
+        } // not ignoring this tier
+      } // a layer mapping
+    } // next parameter
+    
     if (iTurnLayerMapped + iUtteranceLayerMapped + iWordLayerMapped == 0
         && mappingsDependOnTurn) {
       throw new SerializationParametersMissingException(
         "There are no turn, utterance, or word mappings, but at least one is required");
     }
-    String sTimeUnits = "milliseconds";
-    try {
-      sTimeUnits = ((Attr)header.getAttributes().getNamedItem("TIME_UNITS")).getValue();
-    } catch(Throwable exception) {
-    }
       
-    if (sTimeUnits.equalsIgnoreCase("milliseconds")) {
+    if (timeUnits.equalsIgnoreCase("milliseconds")) {
       timeFactor = (1.0/1000.0);
-    } else if (sTimeUnits.equalsIgnoreCase("NTSC-frames")) {
+    } else if (timeUnits.equalsIgnoreCase("NTSC-frames")) {
       timeFactor = (1.0/30.0);
-    } else if (sTimeUnits.equalsIgnoreCase("PAL-frames")) {
+    } else if (timeUnits.equalsIgnoreCase("PAL-frames")) {
       timeFactor = (1.0/25.0);
     } else {
-      warnings.add("Unkown TIME_UNITS: " + sTimeUnits);
+      warnings.add("Unkown TIME_UNITS: " + timeUnits);
     }
   }
 
@@ -1038,83 +1008,29 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
     graph.setOffsetUnits(Constants.UNIT_SECONDS);
     graph.setOffsetGranularity(timeFactor);
 
-    // attributes
-    try {
-      String sResult = xpath.evaluate("/ANNOTATION_DOCUMENT/@AUTHOR", root);
-      if (sResult != null && sResult.length() > 0 && authorLayer != null) {
-        graph.createTag(graph, authorLayer.getId(), sResult)
-          .setConfidence(Constants.CONFIDENCE_MANUAL);;
-      }
-      sResult = xpath.evaluate("/ANNOTATION_DOCUMENT/@DATE", root);
-      if (sResult != null && sResult.length() > 0 && dateLayer != null) {
-        graph.createTag(graph, dateLayer.getId(), sResult)
-          .setConfidence(Constants.CONFIDENCE_MANUAL);;
-      }
-      sResult = xpath.evaluate("/ANNOTATION_DOCUMENT/TIER/@LANG_REF", root);
-      if (sResult == null || sResult.length() == 0) { // for backward compatibility
-        sResult = xpath.evaluate("/ANNOTATION_DOCUMENT/TIER/@DEFAULT_LOCALE", root);
-      }
-      if (sResult != null && sResult.length() > 0 && languageLayer != null) {
-        graph.createTag(graph, languageLayer.getId(), sResult)
-          .setConfidence(Constants.CONFIDENCE_MANUAL);;
-      }	 
-    } catch(XPathExpressionException x) {
-      warnings.add("Error determining document attributes: " + x);
-    }
-      
-    // first of all, create Anchors from TIME_SLOTs
-    HashMap<String,Anchor> mTimeslotIdToAnchor = new HashMap<String,Anchor>();
-    try {
-      NodeList timeslots = (NodeList)xpath.evaluate(
-        "./TIME_SLOT", timeOrder, XPathConstants.NODESET);
-      for (int t = 0; t < timeslots.getLength(); t++) {
-        Node timeslot = timeslots.item(t);
-        String sTimeSlotId =
-          ((Attr)timeslot.getAttributes().getNamedItem("TIME_SLOT_ID")).getValue();
-	    
-        try {
-          String sTimeValue =
-            ((Attr)timeslot.getAttributes().getNamedItem("TIME_VALUE")).getValue();
-          mTimeslotIdToAnchor.put(
-            sTimeSlotId, new Anchor(
-              sTimeSlotId,
-              Double.valueOf(timeFactor * Double.parseDouble(sTimeValue)),
-              Constants.CONFIDENCE_MANUAL));
-        } catch(NullPointerException exception) {
-          mTimeslotIdToAnchor.put(sTimeSlotId, new Anchor(sTimeSlotId, null));
-        }
-        // don't add them to the graph yet - we'll do that as we go...
-      } // next timeslot
-    } catch(XPathExpressionException x) {
-      throw new SerializationException("Error finding TIME_SLOT tags: " + x);
-    }	 
-
-    // this map keys by the ELAN ANNOTATION_ID
-    HashMap<String,Annotation> mAnnotationIdToAnnotation = new HashMap<String,Annotation>();
-
     boolean turnLayerMapped = false;
     boolean utteranceLayerMapped = false;
     boolean wordLayerMapped = false;
-    for (int t = 0; t < tiers.getLength(); t++) {
-      Node tier = tiers.item(t);
-      // is there a mapping for this tier?
-      Layer layer = (Layer)mappings.get("tier"+t).getValue();
-      if (layer != null && !layer.getId().equals("[ignore tier]")) {
-        if (layer.getId().equals(getTurnLayer().getId())) {
-          turnLayerMapped = true;
-        } else if (layer.getId().equals(getUtteranceLayer().getId())) {
-          utteranceLayerMapped = true;
-        } else if (layer.getId().equals(getWordLayer().getId())) {
-          wordLayerMapped = true;
-        }
-	    
-        if (graph.getLayer(layer.getId()) == null) {
-          graph.addLayer((Layer)layer.clone());
-        }
-	    
-      } // tier is mapped to a layer
-    } // next tier
 
+    for (Parameter p : mappings.values()) {
+      if (p.getValue() != null && p.getValue() instanceof Layer) {
+        Layer layer = (Layer)p.getValue();
+        if (!layer.getId().equals("[ignore tier]")) {
+          if (layer.getId().equals(getTurnLayer().getId())) {
+            turnLayerMapped = true;
+          } else if (layer.getId().equals(getUtteranceLayer().getId())) {
+            utteranceLayerMapped = true;
+          } else if (layer.getId().equals(getWordLayer().getId())) {
+            wordLayerMapped = true;
+          }
+          // ensure the layer is added to the graph
+          if (graph.getLayer(layer.getId()) == null) {
+            graph.addLayer((Layer)layer.clone());
+          }          
+        } // tier is mapped to a layer
+      } // Layer value
+    } // next mapping
+    
     if (mappingsDependOnTurn) {
       if (!wordLayerMapped) {
         // add convention layers, as we'll be breaking utterances into tokens
@@ -1123,7 +1039,7 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
         if (commentLayer != null) graph.addLayer((Layer)commentLayer.clone());
         if (noiseLayer != null) graph.addLayer((Layer)noiseLayer.clone());	 
       }
-	 
+      
       // are at least two of turn/utterance/word are mapped?
       // i.e. one for speaker name and other for transcription
       if((turnLayerMapped && utteranceLayerMapped)
@@ -1134,74 +1050,129 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
       }
     }
 
-    int iLastWordOrdinal = 0;
-      
-    // turn tiers of annotations into layers of annotations
-    for (int t = 0; t < tiers.getLength(); t++) {
-      Node tier = tiers.item(t);
-      // is there a mapping for this tier?
-      Layer layer = (Layer)mappings.get("tier"+t).getValue();
-      if (layer != null && !layer.getId().equals("[ignore tier]")) {
-        String sTierId = ((Attr)tier.getAttributes().getNamedItem("TIER_ID")).getValue();
-        String sSpeakerName = sTierId;
-        Attr participant = (Attr)tier.getAttributes().getNamedItem("PARTICIPANT");
-        if (participant != null) sSpeakerName = participant.getValue();
+    // some variables to remember state while parsing...
 
-        // process annotations
-        try {
-          NodeList annotations = (NodeList)
-            xpath.evaluate("ANNOTATION/REF_ANNOTATION", tier, XPathConstants.NODESET);
-          if (annotations != null && annotations.getLength() > 0) { // reference annotations
-            // reference annotations TODO
-          } else { // alignable annotations
-            annotations = (NodeList) xpath.evaluate("ANNOTATION/ALIGNABLE_ANNOTATION", tier, XPathConstants.NODESET);
-            for (int a = 0; a < annotations.getLength(); a++) {
-              Node annotationNode = annotations.item(a);
-              String sAnnotationId =
-                ((Attr)annotationNode.getAttributes().getNamedItem("ANNOTATION_ID"))
-                .getValue();
-              String sTimeSlotRef1 =
-                ((Attr)annotationNode.getAttributes().getNamedItem("TIME_SLOT_REF1"))
-                .getValue();
-              String sTimeSlotRef2 =
-                ((Attr)annotationNode.getAttributes().getNamedItem("TIME_SLOT_REF2"))
-                .getValue();
-              String sAnnotationValue = (String)xpath.evaluate(
-                "ANNOTATION_VALUE/text()", annotationNode, XPathConstants.STRING);
-              if (getIgnoreBlankAnnotations()) {
-                // ignore empty intervals...
-                if (sAnnotationValue.trim().length() == 0) continue; 
-              }
-              
-              Anchor start = mTimeslotIdToAnchor.get(sTimeSlotRef1);
-              Anchor end = mTimeslotIdToAnchor.get(sTimeSlotRef2);
+    // create Anchors from TIME_SLOTs
+    HashMap<String,Anchor> mTimeslotIdToAnchor = new HashMap<String,Anchor>();
+    int tierIndex = -1;
+    String lang = null;
+    String speaker = null;
+    String tierId = null;
+    Layer layer = null;
+    String annotationId = null;
+    String timeSlot1 = null;
+    String timeSlot2 = null;
+    
+    // parse the XML file a tag at a time
+    try {
+      InputStream in = new FileInputStream(eafFile);
+      XMLStreamReader parser = XMLInputFactory.newInstance().createXMLStreamReader(in);
+      while (parser.hasNext()) {
+        int event = parser.next();
+        if (event == XMLStreamConstants.START_ELEMENT) {
+          if (parser.getLocalName().equals("ANNOTATION_DOCUMENT")) {
+            // attributes
+            String sResult = parser.getAttributeValue(null, "AUTHOR");
+            if (sResult != null && sResult.length() > 0 && authorLayer != null) {
+              graph.createTag(graph, authorLayer.getId(), sResult)
+                .setConfidence(Constants.CONFIDENCE_MANUAL);;
+            }
+            sResult = parser.getAttributeValue(null, "DATE");
+            if (sResult != null && sResult.length() > 0 && dateLayer != null) {
+              graph.createTag(graph, dateLayer.getId(), sResult)
+                .setConfidence(Constants.CONFIDENCE_MANUAL);;
+            }
+            // TODO sResult = xpath.evaluate("/ANNOTATION_DOCUMENT/TIER/@LANG_REF", root);
+            // if (sResult == null || sResult.length() == 0) { // for backward compatibility
+            //   sResult = xpath.evaluate("/ANNOTATION_DOCUMENT/TIER/@DEFAULT_LOCALE", root);
+            // }
+            // if (sResult != null && sResult.length() > 0 && languageLayer != null) {
+            //   graph.createTag(graph, languageLayer.getId(), sResult)
+            //     .setConfidence(Constants.CONFIDENCE_MANUAL);;
+            // }
+            
+          } else if (parser.getLocalName().equals("TIME_SLOT")) { // anchor
+            
+            String timeSlotId = parser.getAttributeValue(null, "TIME_SLOT_ID");
+            String timeValue = parser.getAttributeValue(null, "TIME_VALUE");
+            if (timeValue == null) {
+              mTimeslotIdToAnchor.put(timeSlotId, new Anchor(timeSlotId, null));
+            } else {
+              mTimeslotIdToAnchor.put(
+                timeSlotId, new Anchor(
+                  timeSlotId,
+                  Double.valueOf(timeFactor * Double.parseDouble(timeValue)),
+                  Constants.CONFIDENCE_MANUAL));
+            }
+            // don't add them to the graph yet - we'll do that as we go...
+            
+          } else if (parser.getLocalName().equals("TIER")) { // layer
+            // TODO?? mTierMessages.put(
+            //   sTierId, "" + annotations.getLength() + " annotation" 
+            //   + (annotations.getLength()==1?"":"s") + " added to graph.");
+            
+            String langRef = parser.getAttributeValue(null, "LANG_REF");
+            // for backward compatibility:
+            if (langRef == null) langRef = parser.getAttributeValue(null, "DEFAULT_LOCALE");
+            if (langRef != null) lang = langRef;
+            tierId = parser.getAttributeValue(null, "TIER_ID");
+            tierIndex++;
+            speaker = parser.getAttributeValue(null, "PARTICIPANT");
+            if (speaker == null) speaker = tierId;
+            layer = (Layer)mappings.get("tier"+tierIndex).getValue();
+            
+          } else if (parser.getLocalName().equals("ALIGNABLE_ANNOTATION")) { // annotation
+
+            annotationId = parser.getAttributeValue(null, "ANNOTATION_ID");
+            timeSlot1 = parser.getAttributeValue(null, "TIME_SLOT_REF1");
+            timeSlot2 = parser.getAttributeValue(null, "TIME_SLOT_REF2");
+
+            // TODO } else if (parser.getLocalName().equals("REF_ANNOTATION")) {
+          } else if (parser.getLocalName().equals("ANNOTATION_VALUE")) { // annotation label
+
+            String value = parser.getElementText();
+            if (layer != null
+                && (!getIgnoreBlankAnnotations()
+                    || value.trim().length() > 0)) { // ignore empty intervals...
+              Anchor start = mTimeslotIdToAnchor.get(timeSlot1);
+              Anchor end = mTimeslotIdToAnchor.get(timeSlot2);
               Annotation annotation = new Annotation(
-                sAnnotationId, sAnnotationValue, layer.getId(), start.getId(), end.getId());
+                annotationId, value, layer.getId(), start.getId(), end.getId());
               annotation.setConfidence(Constants.CONFIDENCE_MANUAL);
-              annotation.put("@tierId", sTierId); // this might come in handy later
-              annotation.put("@participant", sSpeakerName); // this might come in handy later
-              mAnnotationIdToAnnotation.put(sAnnotationId, annotation);
-              annotation.setConfidence(Constants.CONFIDENCE_MANUAL);
+              annotation.put("@tierId", tierId); // this might come in handy later
+              annotation.put("@participant", speaker); // this might come in handy later
               // TODO annotation.setAnnotator(...), from the tier's settings.
               // add anchors if they're not in the graph
               if (!graph.getAnchors().containsKey(start.getId())) graph.addAnchor(start);
               if (!graph.getAnchors().containsKey(end.getId())) graph.addAnchor(end);
               // add annotation
               graph.addAnnotation(annotation);
-            } // next annotation
-          } // alignable annotations
-          mTierMessages.put(
-            sTierId, "" + annotations.getLength() + " annotation" 
-            + (annotations.getLength()==1?"":"s") + " added to graph.");
-        } catch (Throwable t2) {
-          mTierMessages.put(sTierId, t2.getMessage());
-          if (errors == null) errors = new SerializationException(t2);
-          if (errors.getCause() == null) errors.initCause(t2);
-          errors.addError(SerializationException.ErrorType.Other, t2.getMessage());
-        }
-      } // layer is mapped
-    } // next tier
+              
+            } // not an ignored annotation
+            
+          } // ANNOTATION_VALUE
+        } // START_ELEMENT
+      } // next element
+    } catch(IOException x) {
+      if (errors == null) errors = new SerializationException(x);
+      if (errors.getCause() == null) errors.initCause(x);
+      errors.addError(SerializationException.ErrorType.Other, x.getMessage());
+    } catch(XMLStreamException x) {
+      mTierMessages.put(tierId, x.getMessage());
+      if (errors == null) errors = new SerializationException(x);
+      if (errors.getCause() == null) errors.initCause(x);
+      errors.addError(SerializationException.ErrorType.InvalidDocument, x.getMessage());
+    } finally {
+      // delete input file
+      eafFile.delete();
+    }
 
+    // did we find a language?
+    if (lang != null && lang.length() > 0 && languageLayer != null) {
+      graph.createTag(graph, languageLayer.getId(), lang)
+        .setConfidence(Constants.CONFIDENCE_MANUAL);
+    }
+    
     Anchor graphEnd = graph.getEnd();
 
     // ensure both turns and utterances exist, and parents are set
@@ -1488,7 +1459,7 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
 	 
     } // mappingsDependOnTurn
       
-      // need to ensure that other required parents are set
+    // need to ensure that other required parents are set
     for (Annotation a : graph.getAnnotationsById().values()) {
       if (a.getParentId() == null) {
         Annotation[] possibleParents = a.includingAnnotationsOn(a.getLayer().getParentId());
@@ -1525,7 +1496,8 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
 
       if (a.getParentId() == null) { // still not set
         // maybe children don't quite line up with parents, so use midpoint-including instead
-        Annotation[] possibleParents = a.midpointIncludingAnnotationsOn(a.getLayer().getParentId());
+        Annotation[] possibleParents
+          = a.midpointIncludingAnnotationsOn(a.getLayer().getParentId());
         if (possibleParents.length == 1) { // must be this one
           a.setParent(possibleParents[0]);
         } else if (possibleParents.length > 1) { // multiple possible parents
@@ -1557,7 +1529,7 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
 
     } // next annotation
 
-      // ensure anchors are shared between children and parents where required
+    // ensure anchors are shared between children and parents where required
     Vector<Layer> layers = graph.getLayersTopDown();
     // (bottom up to propagate changes from below)
     Collections.reverse(layers);
@@ -1597,7 +1569,7 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
       graph.getTracker().reset();
       graph.setTracker(null);
     }
-      
+    
     Graph[] graphs = { graph };
     return graphs;
   }
