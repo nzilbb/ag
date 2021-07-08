@@ -954,6 +954,130 @@ public class TestEAFSerialization {
 
   }
 
+  /** Deserializaion of file symbolic subdivisions and symbolic associations as well as
+   * utterance divisions.  */
+  @Test public void symbolic_tiers()  throws Exception {
+    Schema schema = new Schema(
+      "who", "turn", "utterance", "word",
+      new Layer("scribe", "Author", 0, true, true, true),
+      new Layer("version_date", "Date", 0, true, true, true),
+      new Layer("lang", "Language", 0, true, true, true),
+      new Layer("who", "Participants", 0, true, true, true),
+      new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+      new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+      new Layer("word", "Word tokens", 2, true, false, false, "turn", true),
+      new Layer("orthography", "Orthography")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true));
+    // access file
+    NamedStream[] streams = { new NamedStream(new File(getDir(), "test_symbolic_tiers.eaf")) };
+      
+    // create deserializer
+    EAFSerialization deserializer = new EAFSerialization();
+      
+    // general configuration
+    ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+    // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+    assertEquals(10, deserializer.configure(configuration, schema).size());
+    assertNull("comment",
+               configuration.get("commentLayer").getValue());
+    assertNull("pronounce",
+               configuration.get("pronounceLayer").getValue());
+    assertNull("lexical",
+               configuration.get("lexicalLayer").getValue());
+    assertNull("noise",
+               configuration.get("noiseLayer").getValue());
+    assertEquals("author", "scribe", 
+                 ((Layer)configuration.get("authorLayer").getValue()).getId());
+    assertEquals("version_date", "version_date", 
+                 ((Layer)configuration.get("dateLayer").getValue()).getId());
+    assertEquals("language", "lang", 
+                 ((Layer)configuration.get("languageLayer").getValue()).getId());
+    assertEquals("useConventions", Boolean.TRUE, 
+                 (Boolean)configuration.get("useConventions").getValue());
+    assertEquals("ignoreBlankAnnotations", Boolean.TRUE, 
+                 (Boolean)configuration.get("ignoreBlankAnnotations").getValue());
+    assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
+                 (Double)configuration.get("minimumTurnPauseLength").getValue());
+    
+    // load the stream
+    ParameterSet defaultParamaters = deserializer.load(streams, schema);
+    // for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+    assertEquals(3, defaultParamaters.size());
+    assertEquals("utterance mapping", "utterance", 
+                 ((Layer)defaultParamaters.get("tier0").getValue()).getId());
+    assertEquals("word mapping", "word", 
+                 ((Layer)defaultParamaters.get("tier1").getValue()).getId());
+    assertEquals("orthography mapping", "orthography", 
+                 ((Layer)defaultParamaters.get("tier2").getValue()).getId());
+
+    // configure the deserialization
+    deserializer.setParameters(defaultParamaters);
+    
+    // build the graph
+    Graph[] graphs = deserializer.deserialize();
+    Graph g = graphs[0];
+
+    for (String warning : deserializer.getWarnings()) {
+      System.out.println(warning);
+    }
+      
+    assertEquals("test_symbolic_tiers.eaf", g.getId());
+    
+    // attributes
+    assertEquals("transcriber", "Robert", g.first("scribe").getLabel());
+    assertEquals("language", "eng", g.first("lang").getLabel()); // TODO convert to alpah2
+    assertEquals("version date", "2021-07-08T18:39:49-03:00", g.first("version_date").getLabel());
+
+    // participants     
+    Annotation[] who = g.all("who");
+    assertEquals(1, who.length);
+    assertEquals("mop03-2b", who[0].getLabel());
+    assertEquals(g, who[0].getParent());
+      
+    // turns
+    Annotation[] turns = g.all("turn");
+    assertEquals(1, turns.length);
+    assertEquals(Double.valueOf(0), turns[0].getStart().getOffset());
+    assertEquals(Double.valueOf(3.2800000000000002), turns[0].getEnd().getOffset());
+    assertEquals("mop03-2b", turns[0].getLabel());
+    assertEquals(who[0], turns[0].getParent());
+
+    // utterances
+    Annotation[] utterances = g.all("utterance");
+    assertEquals(1, utterances.length);
+    assertEquals(Double.valueOf(0), utterances[0].getStart().getOffset());
+    assertEquals(Double.valueOf(3.2800000000000002), utterances[0].getEnd().getOffset());
+    assertEquals("mop03-2b", utterances[0].getParent().getLabel());
+    assertEquals(turns[0], utterances[0].getParent());
+
+    Annotation[] words = g.all("word");
+    assertEquals(5, words.length);
+    String[] wordLabels = {"\"and", "that's", "called", "Somme", "Parade,\""};
+    String[] orthLabels = {"and", "that's", "called", "somme", "parade"};
+    Double[] wordStarts = {0.0, 0.656, 1.312, 1.968, 2.624};
+    Double[] wordEnds = {0.656, 1.312, 1.968, 2.624, 3.2800000000000002};
+    for (int i = 0; i < wordLabels.length; i++) {
+      assertEquals("word label " + i, wordLabels[i], words[i].getLabel());
+      assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
+                   i+1, words[i].getOrdinal());
+      assertEquals("word start " + i + " " + wordLabels[i],
+                   wordStarts[i], words[i].getStart().getOffset());
+      assertEquals("word end " + i + " " + wordLabels[i],
+                   wordEnds[i], words[i].getEnd().getOffset());
+      assertEquals(turns[0].getId(), words[i].getParentId());
+      assertNotNull("has orthography " + i, words[i].first("orthography"));
+      assertEquals("orthography label " + i,
+                   orthLabels[i], words[i].first("orthography").getLabel());
+      assertEquals("orthography start " + i,
+                   words[i].getStart(), words[i].first("orthography").getStart());
+      assertEquals("orthography end " + i,
+                   words[i].getEnd(), words[i].first("orthography").getEnd());
+    }
+
+  }
+  
   /** Basic serialization works. */
   @Test public void basicSerialization() throws Exception {
     Schema schema = new Schema(
