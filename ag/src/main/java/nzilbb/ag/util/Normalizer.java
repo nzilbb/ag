@@ -47,8 +47,7 @@ import nzilbb.ag.*;
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class Normalizer implements GraphTransformer {
-  // Attributes:
-   
+
   /**
    * The maximum length of a label, or null if there's no limit. Default is 255.
    * @see #getMaxLabelLength()
@@ -276,7 +275,6 @@ public class Normalizer implements GraphTransformer {
     }
     return graph;
   }
-
    
   /**
    * Moves all of the children of the following turn into the preceding turn, set the the
@@ -302,8 +300,13 @@ public class Normalizer implements GraphTransformer {
         ordinal = preceding.getAnnotations().get(childLayerId).size() + 1;
       }
       for (Annotation child : following.annotations(childLayerId)) {
-        child.setParent(preceding);
+        // in order to prevent the annotation from checking/correcting all peer ordinals
+        // which is time-consuming and unnecessary, we first unset the parent
+        child.setParent(null);
+        // then we set the ordinal
         child.setOrdinal(ordinal++);
+        // and finally, we set the new parent, without appending (to skip the peer-checking step)
+        child.setParent(preceding, false);
       } // next child annotation
     } // next child layer
 
