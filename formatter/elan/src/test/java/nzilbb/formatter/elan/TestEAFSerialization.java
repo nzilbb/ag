@@ -48,7 +48,8 @@ import nzilbb.editpath.MinimumEditPath;
 import nzilbb.formatter.elan.*;
 
 public class TestEAFSerialization {
-   
+
+  /** Basic seserialization of a transcript including utterance tiers only. */
   @Test public void utterance()  throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
@@ -280,6 +281,7 @@ public class TestEAFSerialization {
     }
   }
 
+  /** Deserializaion of file includeing word alignments as well as utterance divisions. */
   @Test public void utterance_word()  throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
@@ -504,6 +506,8 @@ public class TestEAFSerialization {
     }
   }
 
+  /** Deserializaiont of file including phone alignments, as well as word tokens and
+   * utterance divisions */
   @Test public void utterance_word_phone() throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
@@ -725,7 +729,8 @@ public class TestEAFSerialization {
   }
 
   /**
-   * This tests that it's possible to deserialize without reference to a turn/utternance/word hierarchy.
+   * This tests that it's possible to deserialize without reference to a
+   * turn/utternance/word hierarchy. 
    * In this case the utterances are simple 'freeform' annotations that are not tokenized.
    */
   @Test public void freeform_keep_empty_utterances()  throws Exception {
@@ -838,7 +843,8 @@ public class TestEAFSerialization {
   }
 
   /**
-   * This tests that it's possible to deserialize without reference to a turn/utternance/word hierarchy.
+   * This tests that it's possible to deserialize without reference to a
+   * turn/utternance/word hierarchy. 
    * In this case the utterances are simple 'freeform' annotations that are not tokenized.
    */
   @Test public void freeform_ignore_empty_utterances()  throws Exception {
@@ -948,6 +954,7 @@ public class TestEAFSerialization {
 
   }
 
+  /** Basic serialization works. */
   @Test public void basicSerialization() throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
@@ -1173,6 +1180,7 @@ public class TestEAFSerialization {
     }
   }
 
+  /** Serialize a complete graph, including word and phone alignments. */ 
   @Test public void serialize() throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
@@ -1267,6 +1275,7 @@ public class TestEAFSerialization {
     }
   }
 
+  /** Serialize a complete graph, including word tags. */
   @Test public void serializeTags() throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
@@ -1365,6 +1374,7 @@ public class TestEAFSerialization {
     }
   }
 
+  /** Serialization that doesn't include individual word tokens. */
   @Test public void serializeNoWordTokens() throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
