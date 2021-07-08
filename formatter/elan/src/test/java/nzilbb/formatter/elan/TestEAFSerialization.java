@@ -50,20 +50,36 @@ import nzilbb.formatter.elan.*;
 public class TestEAFSerialization {
 
   /** Basic seserialization of a transcript including utterance tiers only. */
-  @Test public void utterance()  throws Exception {
+  @Test public void utterance()  throws Exception {    
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
-      new Layer("scribe", "Author", 0, true, true, true),
-      new Layer("version_date", "Date", 0, true, true, true),
-      new Layer("lang", "Language", 0, true, true, true),
-      new Layer("who", "Participants", 0, true, true, true),
-      new Layer("comment", "Comment", 2, true, false, true),
-      new Layer("noise", "Noise", 2, true, false, true),
-      new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
-      new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
-      new Layer("word", "Words", 2, true, false, false, "turn", true),
-      new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
-      new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
+      new Layer("scribe", "Author").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("version_date", "Date").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("lang", "Language").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("comment", "Comment").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true),
+      new Layer("noise", "Noise").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true),
+      new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("lexical", "Lexical").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true),
+      new Layer("pronounce", "Pronounce").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true));
     // access file
     NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance.eaf")) };
       
@@ -285,17 +301,33 @@ public class TestEAFSerialization {
   @Test public void utterance_word()  throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
-      new Layer("scribe", "Author", 0, true, true, true),
-      new Layer("version_date", "Date", 0, true, true, true),
-      new Layer("lang", "Language", 0, true, true, true),
-      new Layer("who", "Participants", 0, true, true, true),
-      new Layer("comment", "Comment", 2, true, false, true),
-      new Layer("noise", "Noise", 2, true, false, true),
-      new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
-      new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
-      new Layer("word", "Words", 2, true, false, false, "turn", true),
-      new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
-      new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
+      new Layer("scribe", "Author").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("version_date", "Date").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("lang", "Language").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("comment", "Comment").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true),
+      new Layer("noise", "Noise").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true),
+      new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("lexical", "Lexical").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true),
+      new Layer("pronounce", "Pronounce").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true));
     // access file
     NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance_word.eaf")) };
       
@@ -511,18 +543,36 @@ public class TestEAFSerialization {
   @Test public void utterance_word_phone() throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
-      new Layer("scribe", "Author", 0, true, true, true),
-      new Layer("version_date", "Date", 0, true, true, true),
-      new Layer("lang", "Language", 0, true, true, true),
-      new Layer("who", "Participants", 0, true, true, true),
-      new Layer("comment", "Comment", 2, true, false, true),
-      new Layer("noise", "Noise", 2, true, false, true),
-      new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
-      new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
-      new Layer("word", "Words", 2, true, false, false, "turn", true),
-      new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
-      new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true),
-      new Layer("phone", "Phone", 2, true, false, true, "word", true));
+      new Layer("scribe", "Author").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("version_date", "Date").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("lang", "Language").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("comment", "Comment").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true),
+      new Layer("noise", "Noise").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true),
+      new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("lexical", "Lexical").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true),
+      new Layer("pronounce", "Pronounce").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true),
+      new Layer("phone", "Phone").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true));
     // access file
     NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance_word_phone.eaf")) };
       
@@ -736,15 +786,27 @@ public class TestEAFSerialization {
   @Test public void freeform_keep_empty_utterances()  throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
-      new Layer("scribe", "Author", 0, true, true, true),
-      new Layer("version_date", "Date", 0, true, true, true),
-      new Layer("lang", "Language", 0, true, true, true),
-      new Layer("who", "Participants", 0, true, true, true),
-      new Layer("i", "Interviewer", 2, true, false, true),
-      new Layer("p", "Participant", 2, true, false, true),
-      new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
-      new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
-      new Layer("word", "Words", 2, true, false, false, "turn", true));
+      new Layer("scribe", "Author").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("version_date", "Date").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("lang", "Language").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("i", "Interviewer").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true),
+      new Layer("p", "Participant").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true),
+      new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true));
     // access file
     NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance.eaf")) };
       
@@ -850,15 +912,27 @@ public class TestEAFSerialization {
   @Test public void freeform_ignore_empty_utterances()  throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
-      new Layer("scribe", "Author", 0, true, true, true),
-      new Layer("version_date", "Date", 0, true, true, true),
-      new Layer("lang", "Language", 0, true, true, true),
-      new Layer("who", "Participants", 0, true, true, true),
-      new Layer("i", "Interviewer", 2, true, false, true),
-      new Layer("p", "Participant", 2, true, false, true),
-      new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
-      new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
-      new Layer("word", "Words", 2, true, false, false, "turn", true));
+      new Layer("scribe", "Author").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("version_date", "Date").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("lang", "Language").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("i", "Interviewer").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true),
+      new Layer("p", "Participant").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true),
+      new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true));
     // access file
     NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance.eaf")) };
       
@@ -959,13 +1033,23 @@ public class TestEAFSerialization {
   @Test public void symbolic_tiers()  throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
-      new Layer("scribe", "Author", 0, true, true, true),
-      new Layer("version_date", "Date", 0, true, true, true),
-      new Layer("lang", "Language", 0, true, true, true),
-      new Layer("who", "Participants", 0, true, true, true),
-      new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
-      new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
-      new Layer("word", "Word tokens", 2, true, false, false, "turn", true),
+      new Layer("scribe", "Author").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("version_date", "Date").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("lang", "Language").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Word tokens").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
       new Layer("orthography", "Orthography")
       .setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
@@ -1028,7 +1112,7 @@ public class TestEAFSerialization {
     // attributes
     assertEquals("transcriber", "Robert", g.first("scribe").getLabel());
     assertEquals("language", "eng", g.first("lang").getLabel()); // TODO convert to alpah2
-    assertEquals("version date", "2021-07-08T18:39:49-03:00", g.first("version_date").getLabel());
+    assertEquals("version date", "2021-07-08T19:17:42-03:00", g.first("version_date").getLabel());
 
     // participants     
     Annotation[] who = g.all("who");
@@ -1084,54 +1168,42 @@ public class TestEAFSerialization {
       "who", "turn", "utterance", "word",
       new Layer("version_date", "Date")
       .setAlignment(Constants.ALIGNMENT_NONE)
-      .setPeers(false)
-      .setPeersOverlap(false)
-      .setSaturated(true),
+      .setPeers(false).setPeersOverlap(false).setSaturated(true),
       new Layer("scribe", "Transcriber")
       .setAlignment(Constants.ALIGNMENT_NONE)
-      .setPeers(false)
-      .setPeersOverlap(false)
-      .setSaturated(true),
+      .setPeers(false).setPeersOverlap(false).setSaturated(true),
       new Layer("lang", "Language")
       .setAlignment(Constants.ALIGNMENT_NONE)
-      .setPeers(false)
-      .setPeersOverlap(false)
-      .setSaturated(true),
+      .setPeers(false).setPeersOverlap(false).setSaturated(true),
       new Layer("comment", "Comment")
       .setAlignment(Constants.ALIGNMENT_INTERVAL)
-      .setPeers(true)
-      .setPeersOverlap(false)
-      .setSaturated(false),
+      .setPeers(true).setPeersOverlap(false).setSaturated(false),
       new Layer("noise", "Noise")
       .setAlignment(Constants.ALIGNMENT_INTERVAL)
-      .setPeers(true)
-      .setPeersOverlap(false)
-      .setSaturated(false),
+      .setPeers(true).setPeersOverlap(false).setSaturated(false),
       new Layer("who", "Participants")
       .setAlignment(Constants.ALIGNMENT_NONE)
-      .setPeers(true)
-      .setPeersOverlap(true)
-      .setSaturated(true),
-      new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
-      new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
-      new Layer("word", "Words", 2, true, false, false, "turn", true),
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
       new Layer("orthography", "Orthography")
       .setAlignment(Constants.ALIGNMENT_NONE)
-      .setPeers(false)
-      .setPeersOverlap(false)
-      .setSaturated(true)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId("word"),
       new Layer("lexical", "Lexical")
       .setAlignment(Constants.ALIGNMENT_NONE)
-      .setPeers(false)
-      .setPeersOverlap(false)
-      .setSaturated(true)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId("word"),
       new Layer("pronounce", "Pronunciation")
       .setAlignment(Constants.ALIGNMENT_NONE)
-      .setPeers(false)
-      .setPeersOverlap(false)
-      .setSaturated(true)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId("word"));
     File dir = getDir();
       
@@ -1318,14 +1390,28 @@ public class TestEAFSerialization {
       .setPeers(true)
       .setPeersOverlap(true)
       .setSaturated(true),
-      new Layer("comment", "Comment", 2, true, false, true),
-      new Layer("noise", "Noise", 2, true, false, true),
-      new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
-      new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
-      new Layer("word", "Words", 2, true, false, false, "turn", true),
-      new Layer("phone", "Phones", 2, true, true, true, "word", true),
-      new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
-      new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
+      new Layer("comment", "Comment").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true),
+      new Layer("noise", "Noise").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true),
+      new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("phone", "Phones").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true),
+      new Layer("lexical", "Lexical").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true),
+      new Layer("pronounce", "Pronounce").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true));
     File dir = getDir();
     // access file
     NamedStream[] jsonStreams = { new NamedStream(new File(dir, "serialize_utterance_word.json")) };
@@ -1413,15 +1499,29 @@ public class TestEAFSerialization {
       .setPeers(true)
       .setPeersOverlap(true)
       .setSaturated(true),
-      new Layer("comment", "Comment", 2, true, false, true),
-      new Layer("noise", "Noise", 2, true, false, true),
-      new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
-      new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
-      new Layer("word", "Words", 2, true, false, false, "turn", true),
+      new Layer("comment", "Comment").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true),
+      new Layer("noise", "Noise").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true),
+      new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
       new Layer("orthography", "Orthography", 1, false, false, true, "word", true),
-      new Layer("phone", "Phones", 2, true, true, true, "word", true),
-      new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
-      new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
+      new Layer("phone", "Phones").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true),
+      new Layer("lexical", "Lexical").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true),
+      new Layer("pronounce", "Pronounce").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true));
     File dir = getDir();
     // access file
     NamedStream[] jsonStreams = { new NamedStream(new File(dir, "serialize_utterance_word.json")) };
@@ -1512,14 +1612,28 @@ public class TestEAFSerialization {
       .setPeers(true)
       .setPeersOverlap(true)
       .setSaturated(true),
-      new Layer("comment", "Comment", 2, true, false, true),
-      new Layer("noise", "Noise", 2, true, false, true),
-      new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
-      new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
-      new Layer("word", "Words", 2, true, false, false, "turn", true),
-      new Layer("phone", "Phones", 2, true, true, true, "word", true),
-      new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
-      new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
+      new Layer("comment", "Comment").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true),
+      new Layer("noise", "Noise").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true),
+      new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("phone", "Phones").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true),
+      new Layer("lexical", "Lexical").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true),
+      new Layer("pronounce", "Pronounce").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true));
     File dir = getDir();
     // access file
     NamedStream[] jsonStreams = { new NamedStream(new File(dir, "serialize_utterance_word.json")) };
