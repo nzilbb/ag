@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XML Spy v4.1 U (http://www.xmlspy.com) by Hennie Brugman (Technical Group) -->
+<!--
+	VERSION 2.2
+	DATE 01 July 2004
+	- added elements: CONTROLLED_VOCABULARY, CV_ENTRY
+	- added attribute CONTROLLED_VOCABULARY_REF to element LINGUISTIC_TYPE
+	- added attribute SVG_REF to element ALIGNABLE_ANNOTATION
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:annotation>
+		<xsd:documentation xml:lang="en">
+			Eudico Annotation Format
+			version 2.2
+			July 01, 2004
+			Schema by Alexander Klassmann 17/01/03
+			Adapted by Hennie Brugman</xsd:documentation>
+	</xsd:annotation>
+	<xsd:element name="ANNOTATION_DOCUMENT">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="HEADER" type="headType"/>
+				<xsd:element name="TIME_ORDER" type="timeType"/>
+				<xsd:element name="TIER" type="tierType" minOccurs="0" maxOccurs="unbounded"/>
+				<xsd:element name="LINGUISTIC_TYPE" type="lingType" minOccurs="0" maxOccurs="unbounded"/>
+				<xsd:element name="LOCALE" type="localeType" minOccurs="0" maxOccurs="unbounded"/>
+				<xsd:element name="CONSTRAINT" type="constraintType" minOccurs="0" maxOccurs="unbounded"/>
+				<xsd:element name="CONTROLLED_VOCABULARY" type="convocType" minOccurs="0" maxOccurs="unbounded"/>
+			</xsd:sequence>
+			<xsd:attribute name="DATE" type="xsd:dateTime" use="required"/>
+			<xsd:attribute name="AUTHOR" type="xsd:string" use="required"/>
+			<xsd:attribute name="VERSION" type="xsd:string" use="required"/>
+			<xsd:attribute name="FORMAT" type="xsd:string" use="optional" fixed="2.2"/>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:complexType name="headType">
+		<xsd:sequence>
+			<xsd:element name="MEDIA_DESCRIPTOR" minOccurs="0" maxOccurs="unbounded">
+				<xsd:complexType>
+					<xsd:attribute name="MEDIA_URL" type="xsd:anyURI" use="required"/>
+					<xsd:attribute name="MIME_TYPE" type="xsd:string" use="required"/>
+					<xsd:attribute name="TIME_ORIGIN" type="xsd:long" use="optional"/>
+					<xsd:attribute name="EXTRACTED_FROM" type="xsd:anyURI" use="optional"/>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="MEDIA_FILE" type="xsd:string"/>
+		<xsd:attribute name="TIME_UNITS" use="optional" default="milliseconds">
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:enumeration value="NTSC-frames"/>
+					<xsd:enumeration value="PAL-frames"/>
+					<xsd:enumeration value="milliseconds"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+	</xsd:complexType>
+	<xsd:complexType name="timeType">
+		<xsd:sequence>
+			<xsd:element name="TIME_SLOT" minOccurs="0" maxOccurs="unbounded">
+				<xsd:complexType>
+					<xsd:attribute name="TIME_SLOT_ID" type="xsd:ID" use="required"/>
+					<xsd:attribute name="TIME_VALUE" type="xsd:unsignedInt" use="optional"/>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="tierType">
+		<xsd:sequence>
+			<xsd:element name="ANNOTATION" type="annotationType" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:attribute name="TIER_ID" type="xsd:ID" use="required"/>
+		<xsd:attribute name="PARTICIPANT" type="xsd:string" use="optional"/>
+		<xsd:attribute name="LINGUISTIC_TYPE_REF" type="xsd:IDREF" use="required"/>
+		<xsd:attribute name="DEFAULT_LOCALE" type="xsd:IDREF" use="optional"/>
+		<xsd:attribute name="PARENT_REF" type="xsd:IDREF" use="optional"/>
+	</xsd:complexType>
+	<xsd:complexType name="annotationType">
+		<xsd:choice>
+			<xsd:element name="ALIGNABLE_ANNOTATION" type="alignableType"/>
+			<xsd:element name="REF_ANNOTATION" type="refAnnoType"/>
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:complexType name="alignableType">
+		<xsd:sequence>
+			<xsd:element name="ANNOTATION_VALUE" type="xsd:string"/>
+		</xsd:sequence>
+		<xsd:attributeGroup ref="annotationAttribute"/>
+		<xsd:attribute name="TIME_SLOT_REF1" type="xsd:IDREF" use="required"/>
+		<xsd:attribute name="TIME_SLOT_REF2" type="xsd:IDREF" use="required"/>
+		<xsd:attribute name="SVG_REF" type="xsd:IDREF" use="optional"/>
+	</xsd:complexType>
+	<xsd:complexType name="refAnnoType">
+		<xsd:sequence>
+			<xsd:element name="ANNOTATION_VALUE" type="xsd:string"/>
+		</xsd:sequence>
+		<xsd:attributeGroup ref="annotationAttribute"/>
+		<xsd:attribute name="ANNOTATION_REF" type="xsd:IDREF" use="required"/>
+		<xsd:attribute name="PREVIOUS_ANNOTATION" type="xsd:IDREF" use="optional"/>
+	</xsd:complexType>
+	<xsd:complexType name="lingType">
+		<xsd:attribute name="LINGUISTIC_TYPE_ID" type="xsd:ID" use="required"/>
+		<xsd:attribute name="TIME_ALIGNABLE" type="xsd:string" use="optional"/>
+		<xsd:attribute name="CONSTRAINTS" type="xsd:IDREF" use="optional"/>
+		<xsd:attribute name="GRAPHIC_REFERENCES" type="xsd:string" use="optional"/>
+		<xsd:attribute name="CONTROLLED_VOCABULARY_REF" type="xsd:IDREF" use="optional"/>
+	</xsd:complexType>
+	<xsd:complexType name="localeType">
+		<xsd:attribute name="LANGUAGE_CODE" type="xsd:ID" use="required"/>
+		<xsd:attribute name="COUNTRY_CODE" type="xsd:string" use="optional"/>
+		<xsd:attribute name="VARIANT" type="xsd:string" use="optional"/>
+	</xsd:complexType>
+	<xsd:complexType name="constraintType">
+		<xsd:attribute name="STEREOTYPE" type="xsd:ID" use="required"/>
+		<xsd:attribute name="DESCRIPTION" type="xsd:string" use="optional"/>
+	</xsd:complexType>
+	<xsd:complexType name="convocType">
+		<xsd:sequence>
+			<xsd:element name="CV_ENTRY" type="cventryType" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:attribute name="CV_ID" type="xsd:ID" use="required"/>
+		<xsd:attribute name="DESCRIPTION" type="xsd:string" use="optional"/>
+	</xsd:complexType>
+	<xsd:complexType name="cventryType">
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:string">
+				<xsd:attribute name="DESCRIPTION" type="xsd:string" use="optional"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	<xsd:attributeGroup name="annotationAttribute">
+		<xsd:attribute name="ANNOTATION_ID" type="xsd:ID" use="required"/>
+	</xsd:attributeGroup>
+</xsd:schema>
