@@ -70,6 +70,9 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+// TODO serialize using token-lt (Symbolic subdivision) for layers that are alignment=2,peers, and no non-parent-linked anchors are aligned or have confidence above CONFIDENCE_DEFAULT
+// TODO ensure all annotations on _REF layers have ANNOTATION_REF attributeg
+
 /**
  * Converter that converts ELAN EAF v2.7 files to Annotation Graphs
  * <p>The original XSD is here:
@@ -1945,6 +1948,13 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
     linguisticType.setAttribute("TIME_ALIGNABLE","true");
     linguisticType.setAttribute("CONSTRAINTS","Time_Subdivision");
 
+    linguisticType = document.createElement("LINGUISTIC_TYPE");
+    annotationDocument.appendChild(linguisticType);
+    linguisticType.setAttribute("GRAPHIC_REFERENCES","false");
+    linguisticType.setAttribute("LINGUISTIC_TYPE_ID","token-lt");
+    linguisticType.setAttribute("TIME_ALIGNABLE","false");
+    linguisticType.setAttribute("CONSTRAINTS","Symbolic_Subdivision");
+      
     if (language != null) {
       Element languageElement = document.createElement("LANGUAGE");
       annotationDocument.appendChild(languageElement);
