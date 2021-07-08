@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Set;
 import nzilbb.ag.*;
 import nzilbb.ag.util.*;
+import nzilbb.util.Timers;
 
 public class TestNormalizer {
 
@@ -37,36 +38,27 @@ public class TestNormalizer {
   @Test public void alreadyNormalized() {
     Graph g = new Graph();
     g.setId("my graph");
-    g.setCorpus("cc");      
+    g.setCorpus("cc");
     Layer[] layers = {
-      new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                true, // peers
-                true, // peersOverlap
-                true), // saturated
-      new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "who", // parentId
-                true), // parentIncludes
-      new Layer("utterance", "Utterance", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                true, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("pos", "POS", Constants.ALIGNMENT_NONE,
-                true, // peers
-                true, // peersOverlap
-                true, // saturated
-                "word", // parentId
-                true)}; // parentIncludes
+      new Layer("who", "Participants")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterance")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("pos", "POS")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true)
+      .setParentId("word").setParentIncludes(true)};
     g.setSchema(new Schema(layers, "who", "turn", "utterance", "word"));
 
     g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
@@ -127,34 +119,25 @@ public class TestNormalizer {
     g.setId("my graph");
     g.setCorpus("cc");      
     Layer[] layers = {
-      new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                true, // peers
-                true, // peersOverlap
-                true), // saturated
-      new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "who", // parentId
-                true), // parentIncludes
-      new Layer("utterance", "Utterance", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                true, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("pos", "POS", Constants.ALIGNMENT_NONE,
-                true, // peers
-                true, // peersOverlap
-                true, // saturated
-                "word", // parentId
-                true)}; // parentIncludes
+      new Layer("who", "Participants")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterance")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("pos", "POS")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true)
+      .setParentId("word").setParentIncludes(true)};
     g.setSchema(new Schema(layers, "who", "turn", "utterance", "word"));
 
     g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
@@ -235,34 +218,25 @@ public class TestNormalizer {
     g.setId("my graph");
     g.setCorpus("cc");      
     Layer[] layers = {
-      new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                true, // peers
-                true, // peersOverlap
-                true), // saturated
-      new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "who", // parentId
-                true), // parentIncludes
-      new Layer("utterance", "Utterance", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                true, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("pos", "POS", Constants.ALIGNMENT_NONE,
-                true, // peers
-                true, // peersOverlap
-                true, // saturated
-                "word", // parentId
-                true)}; // parentIncludes
+      new Layer("who", "Participants")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterance")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("pos", "POS")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true)
+      .setParentId("word").setParentIncludes(true)};
     g.setSchema(new Schema(layers, "who", "turn", "utterance", "word"));
 
     g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
@@ -335,34 +309,25 @@ public class TestNormalizer {
     g.setId("my graph");
     g.setCorpus("cc");      
     Layer[] layers = {
-      new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                true, // peers
-                true, // peersOverlap
-                true), // saturated
-      new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "who", // parentId
-                true), // parentIncludes
-      new Layer("utterance", "Utterance", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                true, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("pos", "POS", Constants.ALIGNMENT_NONE,
-                true, // peers
-                true, // peersOverlap
-                true, // saturated
-                "word", // parentId
-                true)}; // parentIncludes
+      new Layer("who", "Participants")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterance")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("pos", "POS")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true)
+      .setParentId("word").setParentIncludes(true)};
     g.setSchema(new Schema(layers, "who", "turn", "utterance", "word"));
 
     g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
@@ -446,34 +411,25 @@ public class TestNormalizer {
     g.setId("my graph");
     g.setCorpus("cc");      
     Layer[] layers = {
-      new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                true, // peers
-                true, // peersOverlap
-                true), // saturated
-      new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "who", // parentId
-                true), // parentIncludes
-      new Layer("utterance", "Utterance", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                true, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("pos", "POS", Constants.ALIGNMENT_NONE,
-                true, // peers
-                true, // peersOverlap
-                true, // saturated
-                "word", // parentId
-                true)}; // parentIncludes
+      new Layer("who", "Participants")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterance")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("pos", "POS")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true)
+      .setParentId("word").setParentIncludes(true)};
     g.setSchema(new Schema(layers, "who", "turn", "utterance", "word"));
 
     g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
@@ -547,34 +503,25 @@ public class TestNormalizer {
     g.setId("my graph");
     g.setCorpus("cc");      
     Layer[] layers = {
-      new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                true, // peers
-                true, // peersOverlap
-                true), // saturated
-      new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "who", // parentId
-                true), // parentIncludes
-      new Layer("utterance", "Utterance", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                true, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("pos", "POS", Constants.ALIGNMENT_NONE,
-                true, // peers
-                true, // peersOverlap
-                true, // saturated
-                "word", // parentId
-                true)}; // parentIncludes
+      new Layer("who", "Participants")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterance")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("pos", "POS")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true)
+      .setParentId("word").setParentIncludes(true)};
     g.setSchema(new Schema(layers, "who", "turn", "utterance", "word"));
 
     g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
@@ -656,34 +603,25 @@ public class TestNormalizer {
     g.setId("my graph");
     g.setCorpus("cc");      
     Layer[] layers = {
-      new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                true, // peers
-                true, // peersOverlap
-                true), // saturated
-      new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "who", // parentId
-                true), // parentIncludes
-      new Layer("utterance", "Utterance", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                true, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("pos", "POS", Constants.ALIGNMENT_NONE,
-                true, // peers
-                true, // peersOverlap
-                true, // saturated
-                "word", // parentId
-                true)}; // parentIncludes
+      new Layer("who", "Participants")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterance")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("pos", "POS")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true)
+      .setParentId("word").setParentIncludes(true)};
     g.setSchema(new Schema(layers, "who", "turn", "utterance", "word"));
 
     g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
@@ -779,34 +717,25 @@ public class TestNormalizer {
     g.setId("my graph");
     g.setCorpus("cc");      
     Layer[] layers = {
-      new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                true, // peers
-                true, // peersOverlap
-                true), // saturated
-      new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "who", // parentId
-                true), // parentIncludes
-      new Layer("utterance", "Utterance", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                true, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("pos", "POS", Constants.ALIGNMENT_NONE,
-                true, // peers
-                true, // peersOverlap
-                true, // saturated
-                "word", // parentId
-                true)}; // parentIncludes
+      new Layer("who", "Participants")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterance")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("pos", "POS")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true)
+      .setParentId("word").setParentIncludes(true)};
     g.setSchema(new Schema(layers, "who", "turn", "utterance", "word"));
 
     // all word starts/ends have same confidence rating, so CONFIDENCE_DEFAULT isn't used
@@ -903,34 +832,25 @@ public class TestNormalizer {
     g.setId("my graph");
     g.setCorpus("cc");      
     Layer[] layers = {
-      new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                true, // peers
-                true, // peersOverlap
-                true), // saturated
-      new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "who", // parentId
-                true), // parentIncludes
-      new Layer("utterance", "Utterance", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                true, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("pos", "POS", Constants.ALIGNMENT_NONE,
-                true, // peers
-                true, // peersOverlap
-                true, // saturated
-                "word", // parentId
-                true)}; // parentIncludes
+      new Layer("who", "Participants")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterance")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("pos", "POS")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true)
+      .setParentId("word").setParentIncludes(true)};
     g.setSchema(new Schema(layers, "who", "turn", "utterance", "word"));
 
     g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
@@ -1024,34 +944,25 @@ public class TestNormalizer {
     g.setId("my graph");
     g.setCorpus("cc");      
     Layer[] layers = {
-      new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                true, // peers
-                true, // peersOverlap
-                true), // saturated
-      new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "who", // parentId
-                true), // parentIncludes
-      new Layer("utterance", "Utterance", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                true, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("pos", "POS", Constants.ALIGNMENT_NONE,
-                true, // peers
-                true, // peersOverlap
-                true, // saturated
-                "word", // parentId
-                true)}; // parentIncludes
+      new Layer("who", "Participants")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterance")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("pos", "POS")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true)
+      .setParentId("word").setParentIncludes(true)};
     g.setSchema(new Schema(layers, "who", "turn", "utterance", "word"));
 
     g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
@@ -1120,24 +1031,17 @@ public class TestNormalizer {
     g.setId("my graph");
     g.setCorpus("cc");      
     Layer[] layers = {
-      new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                true, // peers
-                true, // peersOverlap
-                true), // saturated
-      new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "who", // parentId
-                true), // parentIncludes
-      new Layer("utterance", "Utterance", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                true, // saturated
-                "turn", // parentId
-                true) // parentIncludes
-      // no word layer
-    }; // parentIncludes
+      new Layer("who", "Participants")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterance")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true)};
 
     // no word layer
     g.setSchema(new Schema(layers, "who", "turn", "utterance", null));
@@ -1178,38 +1082,28 @@ public class TestNormalizer {
     g.setId("my graph");
     g.setCorpus("cc");      
     Layer[] layers = {
-      new Layer("episode", "Transcript series", Constants.ALIGNMENT_NONE, 
-                false, // peers
-                false, // peersOverlap
-                true), // saturated
-      new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                true, // peers
-                true, // peersOverlap
-                true), // saturated
-      new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "who", // parentId
-                true), // parentIncludes
-      new Layer("utterance", "Utterance", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                true, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("pos", "POS", Constants.ALIGNMENT_NONE,
-                true, // peers
-                true, // peersOverlap
-                true, // saturated
-                "word", // parentId
-                true)}; // parentIncludes
+      new Layer("episode", "Transcript series")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true),
+      new Layer("who", "Participants")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterance")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("pos", "POS")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true)
+      .setParentId("word").setParentIncludes(true)};
     g.setSchema(new Schema(layers, "who", "turn", "utterance", "word", "episode", null));
       
     g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
@@ -1286,34 +1180,25 @@ public class TestNormalizer {
     g.setId("my graph");
     g.setCorpus("cc");      
     Layer[] layers = {
-      new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                true, // peers
-                true, // peersOverlap
-                true), // saturated
-      new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "who", // parentId
-                true), // parentIncludes
-      new Layer("utterance", "Utterance", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                true, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("pos", "POS", Constants.ALIGNMENT_NONE,
-                true, // peers
-                true, // peersOverlap
-                true, // saturated
-                "word", // parentId
-                true)}; // parentIncludes
+      new Layer("who", "Participants")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterance")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("pos", "POS")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true)
+      .setParentId("word").setParentIncludes(true)};
     g.setSchema(new Schema(layers, "who", "turn", "utterance", "word"));
 
     g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
