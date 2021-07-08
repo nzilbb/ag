@@ -32,6 +32,8 @@ import nzilbb.ag.*;
 import nzilbb.ag.util.*;
 
 public class TestNormalizer {
+
+  /** Test that already-normal graphs are not changed. */
   @Test public void alreadyNormalized() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -119,6 +121,7 @@ public class TestNormalizer {
     }
   }
 
+  /** Test that contiguous turns are joined. */
   @Test public void joinTurns() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -226,6 +229,7 @@ public class TestNormalizer {
     }
   }
 
+  /** Test that congtiguous turns are not joined when there's no minimum pause length. */
   @Test public void joinTurnsNoMinimumTurnPauseLength() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -325,6 +329,7 @@ public class TestNormalizer {
     }
   }
 
+  /** Test that minimum turn pause length is respected when joining contiguous turns. */
   @Test public void joinTurnsMinimumTurnPauseLength() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -435,6 +440,7 @@ public class TestNormalizer {
     }
   }
 
+  /** Ensure turns are not joined when minimum pause length is too short. */
   @Test public void joinTurnsMinimumTurnPauseLengthTooShort() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -535,6 +541,7 @@ public class TestNormalizer {
     }
   }
 
+  /** Ensure turns are not joined when there's an intervening speaker. */
   @Test public void joinTurnsMinimumTurnPauseLengthInterveningSpeaker() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -642,6 +649,8 @@ public class TestNormalizer {
     }
   }
 
+  /** Ensure words are disconnected from turns and utterances (so they can be
+   * independently aligned). */
   @Test public void disconnectFromTurnsUtterances() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -763,7 +772,8 @@ public class TestNormalizer {
       fail(exception.toString());
     }
   }
-   
+
+  /** Ensure that anchor confidence is kept when disconnecting words from turns/utterances. */
   @Test public void disconnectFromTurnsUtterancesKeepConfidence() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -887,6 +897,7 @@ public class TestNormalizer {
     }
   }
 
+  /** Ensure utterances are chained within their turns. */
   @Test public void chainUtterancesWithinTurns() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -1007,6 +1018,7 @@ public class TestNormalizer {
     }
   }
 
+  /** Ensure turn/utterance labels are made equal. */
   @Test public void turnUtteranceLabels() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -1102,6 +1114,7 @@ public class TestNormalizer {
     }
   }
 
+  /** Ensure utterance labels are set to the turn label. */
   @Test public void turnLabelsOnly() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -1159,6 +1172,7 @@ public class TestNormalizer {
     }
   }
 
+  /** Ensure unnamed speaker is named after episode. */
   @Test public void nameLoneSpeakerAfterEpisode() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -1266,6 +1280,7 @@ public class TestNormalizer {
     }
   }
 
+  /** Ensure label length is correctly limited. */
   @Test public void labelLength() {
     Graph g = new Graph();
     g.setId("my graph");
