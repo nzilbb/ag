@@ -1648,7 +1648,7 @@ public class TestDefaultOffsetGenerator {
                .setParentId("turn").setParentIncludes(true));
 
     // create a graph with a huge number of words
-    int wordCount = 10000; // got bored waiting for 10000 to finish
+    int wordCount = 10000; 
     int wordsPerUtterance = 5;
     int utterancesPerTurn = 2;
     int numUtterances = wordCount/wordsPerUtterance;
