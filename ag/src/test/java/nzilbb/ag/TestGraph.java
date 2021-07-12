@@ -473,6 +473,71 @@ public class TestGraph {
 
   }
 
+  /** Test annotation insertion results in correctly chaining. */
+  @Test public void insertBeforeAfter() {
+    Graph g = new Graph();
+    g.setId("my graph");
+
+    g.addLayer(new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true).setPeersOverlap(true).setSaturated(false)
+               .setParentId("transcript").setParentIncludes(true));
+  g.addLayer(new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true).setPeersOverlap(false).setSaturated(false)
+               .setParentId("turn").setParentIncludes(true));
+
+    g.addAnchor(new Anchor("turnStart", 0.0));
+    g.addAnchor(new Anchor("turnEnd", 6.0));
+
+    Annotation turn = new Annotation(
+      "turn", "john smith", "turn", "turnStart", "turnEnd", "my graph");
+    g.addAnnotation(turn);
+
+    // start with a word that spans the turn
+    Annotation quick = g.createTag(turn, "word", "quick");
+    assertEquals("parent - quick", "turn", quick.getParentId());
+    assertEquals("initial ordinal - quick", 1, quick.getOrdinal());
+
+    // insertBefore
+    Annotation the = g.insertBefore(quick, "word", "the");
+    assertEquals("ordinal - the", 1, the.getOrdinal());
+    assertEquals("ordinal - quick", 2, quick.getOrdinal());
+
+    // insertAfter - out of order
+    Annotation fox = g.insertAfter(quick, "word", "fox");
+    assertEquals("ordinal - quick", 2, quick.getOrdinal());
+    assertEquals("initial ordinal - fox", 3, fox.getOrdinal());
+    Annotation brown = g.insertAfter(quick, "word", "brown");
+    assertEquals("ordinal - quick", 2, quick.getOrdinal());
+    assertEquals("initial ordinal - brown", 3, brown.getOrdinal());
+    assertEquals("ordinal - fox", 4, fox.getOrdinal());
+
+    // test anchor chaining
+    assertEquals("anchor chaining - start",       "turnStart",      the.getStartId());
+    assertEquals("anchor chaining - the/quick",   the.getEndId(),   quick.getStartId());
+    assertEquals("anchor chaining - quick/brown", quick.getEndId(), brown.getStartId());
+    assertEquals("anchor chaining - brown/fox",   brown.getEndId(), fox.getStartId());
+    assertEquals("anchor chaining - end",         "turnEnd",        fox.getEndId());
+
+    // test offsets
+    assertEquals("start offset", Double.valueOf(0.0), the.getStart().getOffset());
+    assertNull("null offset - the/quick",             the.getEnd().getOffset());
+    assertNull("null offset - quick/brown",           quick.getEnd().getOffset());
+    assertNull("null offset - brown/fox",             brown.getEnd().getOffset());
+    assertEquals("end offset", Double.valueOf(6.0),   fox.getEnd().getOffset());
+
+    // test parents
+    assertEquals("parent - the",   "turn", the.getParentId());
+    assertEquals("parent - quick", "turn", quick.getParentId());
+    assertEquals("parent - brown", "turn", brown.getParentId());
+    assertEquals("parent - fox",   "turn", fox.getParentId());
+
+    // test ordinals
+    assertEquals("ordinal - the",   1, the.getOrdinal());
+    assertEquals("ordinal - quick", 2, quick.getOrdinal());
+    assertEquals("ordinal - brown", 3, brown.getOrdinal());
+    assertEquals("ordinal - fox",   4, fox.getOrdinal());
+  }
+
   /** Test graph correctly tracks Annotation/Anchor changes. */
   @Test public void basicChangeTracking() {
     Graph g = new Graph();

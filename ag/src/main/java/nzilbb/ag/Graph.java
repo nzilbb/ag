@@ -744,7 +744,7 @@ public class Graph extends Annotation {
         || annotation.getLayer().getAlignment() != Constants.ALIGNMENT_NONE) { // or it's aligned
       // should have an anchor
       if (timers != null) timers.start("Graph.addAnnotation: check anchors");
-      if (annotation.getStartId() == null) { // no anchor, so create one TODO test this behaviour
+      if (annotation.getStartId() == null) { // no anchor, so create one
         if (lastAddedAnchorId != null) {
           annotation.setStart(getAnchor(lastAddedAnchorId));
         } else { // there was no last end anchor, so create a new anchor
@@ -757,7 +757,7 @@ public class Graph extends Annotation {
         }
         unknownStartAnchor.get(annotation.getStartId()).add(annotation);
       }
-      if (annotation.getEndId() == null) { // no anchor, so create one TODO test this behaviour
+      if (annotation.getEndId() == null) { // no anchor, so create one
         annotation.setEnd(addAnchor(new Anchor()));
       } else if (annotation.getEnd() == null) {
         // there's a endId, but it references an anchor we don't yet know about
@@ -1204,6 +1204,58 @@ public class Graph extends Annotation {
     Anchor from, Anchor to, String layerId, String label, Annotation parent) {
     return addAnnotation(createAnnotation(from, to, layerId, label, parent));
   } // end of createAnnotation()
+  
+  /**
+   * Creates an annotation chained after the given annotation. This creates a new anchor,
+   * which becomes <var>before.end</var> and the new annotation's start, and the previous
+   * <var>before.end</var> becomes the new annotation's end. 
+   * <p> The new anchor, and the new annotation, are both added to the graph.
+   * @param before The annotation before the new annotation to add. 
+   * If <var>layerId</var> == <var>before.layerId</var>, the new annotation's
+   * <var>parentId</var> is set to <var>before.parentId</var>. Otherwise, it's the
+   * caller's responsibility to assign a parent to the new annotation.
+   * @param layerId The new annotation's layer ID.
+   * @param label The new annotation's label.
+   * @return The new annotation.
+   */
+  public Annotation insertAfter(Annotation before, String layerId, String label) {
+    Annotation after = new Annotation(
+      null, label, layerId,
+      addAnchor(new Anchor()).getId(), before.getEndId());
+    before.setEndId(after.getStartId());
+    addAnnotation(after);
+    if (layerId.equals(before.getLayerId())) {
+      after.setParent(before.getParent(), false);
+      after.setOrdinal(before.getOrdinal() + 1);
+    }
+    return after;
+  } // end of insertAfter()
+  
+  /**
+   * Creates an annotation chained before the given annotation. This creates a new anchor,
+   * which becomes <var>after.start</var> and the new annotation's end, and the previous
+   * <var>after.start</var> becomes the new annotation's start. 
+   * <p> The new anchor, and the new annotation, are both added to the graph.
+   * @param before The annotation before the new annotation to add. 
+   * If <var>layerId</var> == <var>before.layerId</var>, the new annotation's
+   * <var>parentId</var> is set to <var>before.parentId</var>. Otherwise, it's the
+   * caller's responsibility to assign a parent to the new annotation.
+   * @param layerId The new annotation's layer ID.
+   * @param label The new annotation's label.
+   * @return The new annotation.
+   */
+  public Annotation insertBefore(Annotation after, String layerId, String label) {
+    Annotation before = new Annotation(
+      null, label, layerId,
+      after.getStartId(), addAnchor(new Anchor()).getId());
+    after.setStartId(before.getEndId());
+    addAnnotation(before);
+    if (layerId.equals(after.getLayerId())) {
+      before.setParent(after.getParent(), false);
+      before.setOrdinal(after.getOrdinal());
+    }
+    return before;
+  } // end of insertBefore()
 
   // query methods
    
