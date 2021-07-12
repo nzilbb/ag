@@ -33,7 +33,10 @@ import java.util.LinkedHashSet;
 import java.util.Iterator;
 import nzilbb.ag.*;
 
+/** Annotation Graph unit tests. */
 public class TestGraph {
+
+  /** Test setting/getting of basic graph attributes */
   @Test public void basicAttributes() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -43,6 +46,7 @@ public class TestGraph {
     assertEquals("source graph is itself", g, g.sourceGraph());
   }
 
+  /** Test setting/getting of arbitrary attributes */
   @Test public void extendedAttributes() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -50,6 +54,7 @@ public class TestGraph {
     assertEquals("bar", g.get("foo"));
   }
 
+  /** Test relationships between graph elements are held. */
   @SuppressWarnings("unchecked")
   @Test public void basicObjectInterrelation() {
     Graph g = new Graph();
@@ -295,6 +300,7 @@ public class TestGraph {
 
   }
 
+  /** Test functionality of taggin methods */
   @Test public void basicTagging() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -390,6 +396,7 @@ public class TestGraph {
 
   }
 
+  /** Test span annotation. */
   @Test public void basicSpans() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -466,6 +473,7 @@ public class TestGraph {
 
   }
 
+  /** Test graph correctly tracks Annotation/Anchor changes. */
   @Test public void basicChangeTracking() {
     Graph g = new Graph();
     g.trackChanges();
@@ -595,6 +603,7 @@ public class TestGraph {
 
   }
 
+  /** Test grph changes are reported in the correct order. */
   @Test public void changeOrder() {
     Graph g = new Graph();
     g.trackChanges();
@@ -717,6 +726,7 @@ public class TestGraph {
     assertNull("commit removes deleted anchors", g.getAnchor("a7"));
   }
 
+  /** Ensure order of creation of Anchors/Annotations is unimportant. */
   @Test public void constructionOrder() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -834,6 +844,7 @@ public class TestGraph {
     assertNull(turn1.getNext());
   }
 
+  /** Ensure traversals and tests of annotation hierarchy. */
   @Test public void annotationHierarchy() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -1043,6 +1054,7 @@ public class TestGraph {
     assertNull("getLatestDescendant - no descendants", k.getLatestDescendant());
   }
 
+  /** Test fragment creation by offset. */
   @Test public void fragmentByOffset() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -1248,7 +1260,8 @@ public class TestGraph {
       fail("Media provider: " + exception);
     }
   }
-  
+
+  /** Test fragment creation by defining annotation. */
   @Test public void fragmentByAnnotation() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -1425,6 +1438,7 @@ public class TestGraph {
     }
   }
 
+  /** Test fragment creation by utterance. */
   @Test public void fragmentByUtterance() {
     Graph g = new Graph();
     g.setId("XXX");
@@ -1608,6 +1622,8 @@ public class TestGraph {
     }
   }
 
+  /** Test fragmnet cretion by bounding anchors and ancestor annotation 
+   * - i.e. filter by participant  */
   @Test public void fragmentByBoundingAndAncestorAnnotations() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -1785,6 +1801,7 @@ public class TestGraph {
     }
   }
 
+  /** Ensure annotions are linked to anchors correctly. */
   @Test public void orderOfAnnotationAnchorLinking() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -1837,6 +1854,7 @@ public class TestGraph {
 
   }
 
+  /** Test first() and all() function correctly. */
   @Test public void firstAndAll() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -2044,6 +2062,7 @@ public class TestGraph {
     assertEquals("graph.all('transcript') contains the graph", g, list[0]);
   }
 
+  /** Ensure addAnnotation() automatically creates new anchors as required. */
   @Test public void easyAnchorChaining() {
     Graph g = new Graph();
     g.trackChanges();
@@ -2073,7 +2092,8 @@ public class TestGraph {
     assertNull("chaining anchors with no offset", g.getAnnotation("fox").getEnd().getOffset());
       
   }
-  
+
+  /** Ensure setting offset granularity to 1/1000 works as expected. */
   @Test public void compareOffsets1000() {
     Graph g = new Graph();
     g.setOffsetGranularity(0.001);
@@ -2093,6 +2113,7 @@ public class TestGraph {
                  -0, g.compareOffsets(0.004, 0.0049));
   }
 
+  /** Ensure setting offset granularity to 1/16000 works as expected. */
   @Test public void compareOffsets16000() {
     Graph g = new Graph();
     g.setOffsetGranularity(1.0/16000.0); // 0.0000625
@@ -2112,6 +2133,7 @@ public class TestGraph {
                  -0, g.compareOffsets(0.005, 0.0050624));
   }
 
+  /** Test getAnchorAt() works correctly. */
   @Test public void getAnchorAt() {
     Graph g = new Graph();
     Anchor a = g.addAnchor(new Anchor(null, 0.005));
@@ -2137,6 +2159,7 @@ public class TestGraph {
      
   }
 
+  /** Ensure fragment IDs are correctly parsed. */
   @Test public void ParseFragmentId() {
     String[] parts = Graph.ParseFragmentId("test.trs__123.456-789.101");
     assertNotNull("full ID works", parts);
