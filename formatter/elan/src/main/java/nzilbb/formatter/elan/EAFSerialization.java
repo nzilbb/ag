@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.SortedSet;
@@ -71,7 +72,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 // TODO serialize using token-lt (Symbolic subdivision) for layers that are alignment=2,peers, and no non-parent-linked anchors are aligned or have confidence above CONFIDENCE_DEFAULT
-// TODO ensure all annotations on _REF layers have ANNOTATION_REF attributeg
+// TODO ensure all annotations on _REF layers have ANNOTATION_REF attributes
 
 /**
  * Converter that converts ELAN EAF v2.7 files to Annotation Graphs
@@ -432,7 +433,7 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
   public SerializationDescriptor getDescriptor() {
     return new SerializationDescriptor(
       "ELAN EAF Transcript", getClass().getPackage().getImplementationVersion(),
-      "text/x-eaf+xml", ".eaf", "1.0.0",
+      "text/x-eaf+xml", ".eaf", "1.0.4",
       getClass().getResource("icon.png"));
   }
    
@@ -853,11 +854,22 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
               } // next layer
             }
             if (layer == null) { // no exact match
-              // try a prefix-match - i.e. "transcript - John Smith" should map to the "transcript" layer
+              // try a prefix-match - i.e. "word - John Smith" should map to the "word" layer
               // ignore spaces too
               String tierNameNoWhitespace = tierName.replaceAll("\\s","");
               for (Layer mappableLayer : vPossiblLayers) {
                 if (tierNameNoWhitespace.startsWith(mappableLayer.getId().replaceAll("\\s",""))) {
+                  layer = mappableLayer;
+                  break;
+                }
+              } // next layer
+            }
+            if (layer == null) { // no match
+              // try a suffix-match - i.e. "John Smith - word" should map to the "word" layer
+              // ignore spaces too
+              String tierNameNoWhitespace = tierName.replaceAll("\\s","");
+              for (Layer mappableLayer : vPossiblLayers) {
+                if (tierNameNoWhitespace.endsWith(mappableLayer.getId().replaceAll("\\s",""))) {
                   layer = mappableLayer;
                   break;
                 }
@@ -1063,8 +1075,11 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
     String tierId = null;
     Layer layer = null;
     String annotationId = null;
+    String annotationRef = null;
     String timeSlot1 = null;
     String timeSlot2 = null;
+
+    Vector<Annotation> symbolicAnnotations = new Vector<Annotation>();
     
     // parse the XML file a tag at a time
     try {
@@ -1130,31 +1145,57 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
             timeSlot1 = parser.getAttributeValue(null, "TIME_SLOT_REF1");
             timeSlot2 = parser.getAttributeValue(null, "TIME_SLOT_REF2");
 
-            // TODO } else if (parser.getLocalName().equals("REF_ANNOTATION")) {
+          } else if (parser.getLocalName().equals("REF_ANNOTATION")) {
+            
+            annotationId = parser.getAttributeValue(null, "ANNOTATION_ID");
+            annotationRef = parser.getAttributeValue(null, "ANNOTATION_REF");
+            
           } else if (parser.getLocalName().equals("ANNOTATION_VALUE")) { // annotation label
 
             String value = parser.getElementText();
             if (layer != null
                 && (!getIgnoreBlankAnnotations()
                     || value.trim().length() > 0)) { // ignore empty intervals...
-              Anchor start = mTimeslotIdToAnchor.get(timeSlot1);
-              Anchor end = mTimeslotIdToAnchor.get(timeSlot2);
-              Annotation annotation = new Annotation(
-                annotationId, value, layer.getId(), start.getId(), end.getId());
-              annotation.setConfidence(Constants.CONFIDENCE_MANUAL);
-              annotation.put("@tierId", tierId); // this might come in handy later
-              annotation.put("@participant", speaker); // this might come in handy later
-              // TODO annotation.setAnnotator(...), from the tier's settings.
-              // add anchors if they're not in the graph
-              if (!graph.getAnchors().containsKey(start.getId())) graph.addAnchor(start);
-              if (!graph.getAnchors().containsKey(end.getId())) graph.addAnchor(end);
-              // add annotation
-              graph.addAnnotation(annotation);
-              
+              if (annotationRef == null) { // alignable annotation
+                Anchor start = mTimeslotIdToAnchor.get(timeSlot1);
+                Anchor end = mTimeslotIdToAnchor.get(timeSlot2);
+                Annotation annotation = new Annotation(
+                  annotationId, value, layer.getId(), start.getId(), end.getId());
+                annotation.setConfidence(Constants.CONFIDENCE_MANUAL);
+                annotation.put("@tierId", tierId); // this might come in handy later
+                annotation.put("@participant", speaker); // this might come in handy later
+                // TODO annotation.setAnnotator(...), from the tier's settings.
+                // add anchors if they're not in the graph
+                if (!graph.getAnchors().containsKey(start.getId())) graph.addAnchor(start);
+                if (!graph.getAnchors().containsKey(end.getId())) graph.addAnchor(end);
+                // add annotation
+                graph.addAnnotation(annotation);
+              } else { // symbolic reference annotation
+                // create the annotation now, but save adding it until all annotations are
+                // identified, so we know that the referent annotation is known
+                Annotation annotation = new Annotation(annotationId, value, layer.getId());
+                annotation.put("@tierId", tierId); // this might come in handy later
+                annotation.put("@participant", speaker); // this might come in handy later
+                annotation.put("@annotationRef", annotationRef); // this might come in handy later
+                // save for later...
+                symbolicAnnotations.add(annotation);
+              }              
             } // not an ignored annotation
             
           } // ANNOTATION_VALUE
-        } // START_ELEMENT
+        } else if (event == XMLStreamConstants.END_ELEMENT) {
+          if (parser.getLocalName().equals("ANNOTATION")) {
+            // reset annotation attributes
+            annotationId = null;
+            annotationRef = null;
+            timeSlot1 = null;
+            timeSlot2 = null;              
+          } else if (parser.getLocalName().equals("TIER")) {
+            // reset annotation attributes
+            tierId = null;
+            layer = null;
+          }
+        } // END_ELEMENT
       } // next element
     } catch(IOException x) {
       if (errors == null) errors = new SerializationException(x);
@@ -1170,6 +1211,55 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
       eafFile.delete();
     }
 
+    // now that we've got all annotations, add symbolic annotations    
+    while (symbolicAnnotations.size() > 0) {
+      boolean resolvedReferences = false;
+      Iterator<Annotation> symbolic = symbolicAnnotations.iterator();
+      while (symbolic.hasNext()) {
+        Annotation annotation = symbolic.next();
+        annotationRef = (String)annotation.get("@annotationRef");
+        // the 'parent' annotation is identified by annotationRef
+        Annotation ref = graph.getAnnotation(annotationRef);
+        if (ref != null) {
+          annotationId = annotation.getId();
+          tierId = (String)annotation.get("@tierId");
+          speaker = (String)annotation.get("@participant");
+          // referring children are chained across the duration of the referent
+          // so we keep track of the last link in the chain using an attribute named
+          // after the tier
+          if (!ref.containsKey("@"+tierId)) { // this is the first referring child
+            annotation = graph.createTag(ref, annotation.getLayerId(), annotation.getLabel());
+          } else { // there's already a referring child
+            Annotation lastReferrer = (Annotation)ref.get("@"+tierId);
+            annotation = graph.insertAfter(
+              lastReferrer, annotation.getLayerId(), annotation.getLabel());
+          }
+          annotation.setId(annotationId); // use EAF ID 
+          annotation.setConfidence(Constants.CONFIDENCE_MANUAL);
+          annotation.put("@tierId", tierId); // this might come in handy later
+          annotation.put("@participant", speaker); // this might come in handy later
+          annotation.put("@ref", ref); // this might come in handy later
+          // TODO annotation.setAnnotator(...), from the tier's settings.
+          ref.put("@"+tierId, annotation);
+          if (ref.getLayerId().equals(annotation.getLayer().getParentId())) {
+            // ref is parent
+            annotation.setParent(ref);
+          }
+          symbolic.remove();
+          resolvedReferences = true;
+        } // ref found
+      } // next symbolic annotation
+      if (!resolvedReferences) {
+        if (errors == null) errors = new SerializationException();
+        for (Annotation annotation : symbolicAnnotations) {
+          errors.addError(
+            SerializationException.ErrorType.InvalidDocument,
+            "Annotation " + annotation.getId() + " on tier " + annotation.get("@tierId")
+            + ": Cannot find referenced annotation: " + annotation.get("@annotationRef"));
+        } // next unreferenceable annotation
+      } // didn't resulve any references this time around
+    } // there are still symbolic annotations to process
+    
     // did we find a language?
     if (lang != null && lang.length() > 0 && languageLayer != null) {
       graph.createTag(graph, languageLayer.getId(), lang)
@@ -1394,7 +1484,16 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
       } else { // word layer mapped
         // ensure word parent turns are set
         for (Annotation word : graph.all(wordLayer.getId())) {
+          if (word.getParent() == null
+              && word.containsKey("@ref")) { // was it a referring annotation?
+            Annotation ref = (Annotation)word.get("@ref");
+            if (ref.getLayer().getParentId().equals(word.getLayer().getParentId())) {
+                // ref shares parent with word
+              word.setParent(ref.getParent());
+            }
+          }
           if (word.getParent() == null) {
+
             Annotation[] possibleTurns = word.includingAnnotationsOn(turnLayer.getId());
             if (possibleTurns.length == 1) { // must be this one
               word.setParent(possibleTurns[0]);
@@ -1421,8 +1520,7 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
               if (turn != null) word.setParent(turn);
             } // multiple possible turns
           } // parent not set
-          if (word.getParent() == null)
-          { // parent still not set
+          if (word.getParent() == null) { // parent still not set
             // maybe children don't quite line up with parents, so use
             // midpoint-including instead 
             Annotation[] possibleTurns
@@ -1803,7 +1901,7 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
       mSpeakerTiers.put(participant.getLabel(), utterances);
     } // next participant
       
-      // 'freeform' layers first - i.e. aligned children of graph
+    // 'freeform' layers first - i.e. aligned children of graph
     for (Layer layer : schema.getLayers().values().stream()
            .filter(layer -> selectedLayers.contains(layer.getId()))
            .filter(layer -> !schema.getRoot().equals(layer))
@@ -1853,7 +1951,7 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
       annotationValue.setTextContent(sUtteranceText.toString());
     } // next annotation
       
-      // 'meta' layers next - i.e. children of turn
+    // 'meta' layers next - i.e. children of turn
     for (Layer layer : schema.getLayers().values().stream()
            .filter(layer -> selectedLayers.contains(layer.getId()))
            // parent is turn

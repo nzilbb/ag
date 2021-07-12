@@ -1090,74 +1090,74 @@ public class TestEAFSerialization {
     // for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
     assertEquals(3, defaultParamaters.size());
     assertEquals("utterance mapping", "utterance", 
-                 ((Layer)defaultParamaters.get("tier0").getValue()).getId());
-    assertEquals("word mapping", "word", 
-                 ((Layer)defaultParamaters.get("tier1").getValue()).getId());
+                 ((Layer)defaultParamaters.get("tier0").getValue()).getId());    
     assertEquals("orthography mapping", "orthography", 
+                 ((Layer)defaultParamaters.get("tier1").getValue()).getId());
+    assertEquals("word mapping", "word", 
                  ((Layer)defaultParamaters.get("tier2").getValue()).getId());
 
     // configure the deserialization
     deserializer.setParameters(defaultParamaters);
     
     // build the graph
-    Graph[] graphs = deserializer.deserialize();
-    Graph g = graphs[0];
-
-    for (String warning : deserializer.getWarnings()) {
-      System.out.println(warning);
-    }
+    try {
+      Graph[] graphs = deserializer.deserialize();
+      Graph g = graphs[0];
       
-    assertEquals("test_symbolic_tiers.eaf", g.getId());
-    
-    // attributes
-    assertEquals("transcriber", "Robert", g.first("scribe").getLabel());
-    assertEquals("language", "eng", g.first("lang").getLabel()); // TODO convert to alpah2
-    assertEquals("version date", "2021-07-08T19:17:42-03:00", g.first("version_date").getLabel());
-
-    // participants     
-    Annotation[] who = g.all("who");
-    assertEquals(1, who.length);
-    assertEquals("mop03-2b", who[0].getLabel());
-    assertEquals(g, who[0].getParent());
+      for (String warning : deserializer.getWarnings()) {
+        System.out.println(warning);
+      }
       
-    // turns
-    Annotation[] turns = g.all("turn");
-    assertEquals(1, turns.length);
-    assertEquals(Double.valueOf(0), turns[0].getStart().getOffset());
-    assertEquals(Double.valueOf(3.2800000000000002), turns[0].getEnd().getOffset());
-    assertEquals("mop03-2b", turns[0].getLabel());
-    assertEquals(who[0], turns[0].getParent());
-
-    // utterances
-    Annotation[] utterances = g.all("utterance");
-    assertEquals(1, utterances.length);
-    assertEquals(Double.valueOf(0), utterances[0].getStart().getOffset());
-    assertEquals(Double.valueOf(3.2800000000000002), utterances[0].getEnd().getOffset());
-    assertEquals("mop03-2b", utterances[0].getParent().getLabel());
-    assertEquals(turns[0], utterances[0].getParent());
-
-    Annotation[] words = g.all("word");
-    assertEquals(5, words.length);
-    String[] wordLabels = {"\"and", "that's", "called", "Somme", "Parade,\""};
-    String[] orthLabels = {"and", "that's", "called", "somme", "parade"};
-    Double[] wordStarts = {0.0, 0.656, 1.312, 1.968, 2.624};
-    Double[] wordEnds = {0.656, 1.312, 1.968, 2.624, 3.2800000000000002};
-    for (int i = 0; i < wordLabels.length; i++) {
-      assertEquals("word label " + i, wordLabels[i], words[i].getLabel());
-      assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
-                   i+1, words[i].getOrdinal());
-      assertEquals("word start " + i + " " + wordLabels[i],
-                   wordStarts[i], words[i].getStart().getOffset());
-      assertEquals("word end " + i + " " + wordLabels[i],
-                   wordEnds[i], words[i].getEnd().getOffset());
-      assertEquals(turns[0].getId(), words[i].getParentId());
-      assertNotNull("has orthography " + i, words[i].first("orthography"));
-      assertEquals("orthography label " + i,
-                   orthLabels[i], words[i].first("orthography").getLabel());
-      assertEquals("orthography start " + i,
-                   words[i].getStart(), words[i].first("orthography").getStart());
-      assertEquals("orthography end " + i,
-                   words[i].getEnd(), words[i].first("orthography").getEnd());
+      assertEquals("test_symbolic_tiers.eaf", g.getId());
+      
+      // attributes
+      assertEquals("transcriber", "Robert", g.first("scribe").getLabel());
+      assertEquals("language", "eng", g.first("lang").getLabel()); // TODO convert to alpah2
+      assertEquals("version date", "2021-07-08T19:17:42-03:00", g.first("version_date").getLabel());
+      
+      // participants     
+      Annotation[] who = g.all("who");
+      assertEquals(1, who.length);
+      assertEquals("mop03-2b", who[0].getLabel());
+      assertEquals(g, who[0].getParent());
+      
+      // turns
+      Annotation[] turns = g.all("turn");
+      assertEquals(1, turns.length);
+      assertEquals(Double.valueOf(0), turns[0].getStart().getOffset());
+      assertEquals(Double.valueOf(3.2800000000000002), turns[0].getEnd().getOffset());
+      assertEquals("mop03-2b", turns[0].getLabel());
+      assertEquals(who[0], turns[0].getParent());
+      
+      // utterances
+      Annotation[] utterances = g.all("utterance");
+      assertEquals(1, utterances.length);
+      assertEquals(Double.valueOf(0), utterances[0].getStart().getOffset());
+      assertEquals(Double.valueOf(3.2800000000000002), utterances[0].getEnd().getOffset());
+      assertEquals("mop03-2b", utterances[0].getParent().getLabel());
+      assertEquals(turns[0], utterances[0].getParent());
+      
+      Annotation[] words = g.all("word");
+      assertEquals(5, words.length);
+      String[] wordLabels = {"\"and", "that's", "called", "Somme", "Parade,\""};
+      String[] orthLabels = {"and", "that's", "called", "somme", "parade"};
+      Double[] wordStarts = {0.0, 0.656, 1.312, 1.968, 2.624};
+      Double[] wordEnds = {0.656, 1.312, 1.968, 2.624, 3.2800000000000002};
+      for (int i = 0; i < wordLabels.length; i++) {
+        assertEquals("word label " + i, wordLabels[i], words[i].getLabel());
+        assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
+                     i+1, words[i].getOrdinal());
+        assertEquals(turns[0].getId(), words[i].getParentId());
+        assertNotNull("has orthography " + i, words[i].first("orthography"));
+        assertEquals("orthography label " + i,
+                     orthLabels[i], words[i].first("orthography").getLabel());
+        assertEquals("orthography start " + i,
+                     words[i].getStart(), words[i].first("orthography").getStart());
+        assertEquals("orthography end " + i,
+                     words[i].getEnd(), words[i].first("orthography").getEnd());
+      }
+    } catch (SerializationException x) {
+      fail(x.toString());
     }
 
   }
