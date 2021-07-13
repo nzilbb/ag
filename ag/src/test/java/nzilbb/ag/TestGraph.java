@@ -481,7 +481,7 @@ public class TestGraph {
     g.addLayer(new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
                .setPeers(true).setPeersOverlap(true).setSaturated(false)
                .setParentId("transcript").setParentIncludes(true));
-  g.addLayer(new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+    g.addLayer(new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
                .setPeers(true).setPeersOverlap(false).setSaturated(false)
                .setParentId("turn").setParentIncludes(true));
 
@@ -536,6 +536,104 @@ public class TestGraph {
     assertEquals("ordinal - quick", 2, quick.getOrdinal());
     assertEquals("ordinal - brown", 3, brown.getOrdinal());
     assertEquals("ordinal - fox",   4, fox.getOrdinal());
+  }
+
+  /** Test annotation subdivision. */
+  @Test public void createSubdivision() {
+    Graph g = new Graph();
+    g.setId("my graph");
+
+    g.addLayer(new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true).setPeersOverlap(true).setSaturated(false)
+               .setParentId("transcript").setParentIncludes(true));
+    g.addLayer(new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true).setPeersOverlap(false).setSaturated(false)
+               .setParentId("turn").setParentIncludes(true));
+    g.addLayer(new Layer("pos", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true).setPeersOverlap(false).setSaturated(true)
+               .setParentId("word").setParentIncludes(true));
+
+    g.getOrCreateAnchorAt(0.0);
+    Annotation Im = g.addAnnotation(
+      new Annotation()
+      .setStartId(g.getOrCreateAnchorAt(0.0).getId())
+      .setParentId("turn").setLayerId("word").setLabel("I'm")
+      .setEndId(g.getOrCreateAnchorAt(1.0).getId()));
+    Annotation forever = g.addAnnotation(
+      new Annotation()
+      .setStartId(g.getOrCreateAnchorAt(1.0).getId())
+      .setParentId("turn").setLayerId("word").setLabel("forever")
+      .setEndId(g.getOrCreateAnchorAt(2.0).getId()));
+    Annotation yours = g.addAnnotation(
+      new Annotation()
+      .setStartId(g.getOrCreateAnchorAt(3.0).getId())
+      .setParentId("turn").setLayerId("word").setLabel("- yours!")
+      .setEndId(g.getOrCreateAnchorAt(4.0).getId()));
+    
+    Annotation turn = g.addAnnotation(
+      new Annotation()
+      .setStartId(g.getOrCreateAnchorAt(0.0).getId())
+      .setId("turn").setLayerId("turn").setLabel("john smith")
+      .setEndId(g.getOrCreateAnchorAt(4.0).getId()));
+
+    // verify initial graph structure
+    assertEquals("parent - I'm",     "turn", Im.getParentId());
+    assertEquals("parent - forever", "turn", forever.getParentId());
+    assertEquals("parent - yours",   "turn", yours.getParentId());
+    assertEquals("ordinal - I'm",     1, Im.getOrdinal());
+    assertEquals("ordinal - forever", 2, forever.getOrdinal());
+    assertEquals("ordinal - yours",   3, yours.getOrdinal());
+    assertEquals("anchor - turn/I'm",         turn.getStartId(),  Im.getStartId());
+    assertEquals("anchor - I'm/forever",      Im.getEndId(),      forever.getStartId());
+    assertNotEquals("anchor - forever/yours", forever.getEndId(), yours.getStartId());
+    assertEquals("anchor - yours/turn",       yours.getEndId(),   turn.getEndId());
+
+    // add POS annotations - womtimes multiple per token
+    Annotation pron = g.createSubdivision(Im, "pos", "PRON");
+    Annotation v = g.createSubdivision(Im, "pos", "V");
+    Annotation adv = g.createSubdivision(forever, "pos", "ADV");
+    Annotation hyph = g.createSubdivision(yours, "pos", "HYPH");
+    Annotation poss = g.createSubdivision(yours, "pos", "POSS");
+    Annotation punc = g.createSubdivision(yours, "pos", "PUNC");
+
+    // test anchor chaining
+    assertEquals("anchor chaining - I'm/pron",    Im.getStartId(),      pron.getStartId());
+    assertEquals("anchor chaining - pron/v",      pron.getEndId(),      v.getStartId());
+    assertEquals("anchor chaining - v/I'm",       v.getEndId(),         Im.getEndId());
+    assertEquals("anchor chaining - forever/adv", forever.getStartId(), adv.getStartId());
+    assertEquals("anchor chaining - adv/forever", forever.getEndId(),   adv.getEndId());
+    assertEquals("anchor chaining - yours/hyph",  yours.getStartId(),   hyph.getStartId());
+    assertEquals("anchor chaining - hyph/poss",  hyph.getEndId(),       poss.getStartId());
+    assertEquals("anchor chaining - poss/punc",   poss.getEndId(),      punc.getStartId());
+    assertEquals("anchor chaining - punc/yours",  punc.getEndId(),      yours.getEndId());
+
+    // test parents
+    assertEquals("parent - pron", Im, pron.getParent());
+    assertEquals("parent - v",    Im, v.getParent());
+    assertEquals("parent - adv",  forever, adv.getParent());
+    assertEquals("parent - hyph", yours, hyph.getParent());
+    assertEquals("parent - poss", yours, poss.getParent());
+    assertEquals("parent - punc", yours, punc.getParent());
+
+    // test ordinals
+    assertEquals("ordinal - pron",   1, pron.getOrdinal());
+    assertEquals("ordinal - v", 2, v.getOrdinal());
+    assertEquals("ordinal - adv", 1, adv.getOrdinal());
+    assertEquals("ordinal - hyph",   1, hyph.getOrdinal());
+    assertEquals("ordinal - poss",   2, poss.getOrdinal());
+    assertEquals("ordinal - punc",   3, punc.getOrdinal());
+    
+    // verify final graph structure
+    assertEquals("parent - I'm",     "turn", Im.getParentId());
+    assertEquals("parent - forever", "turn", forever.getParentId());
+    assertEquals("parent - yours",   "turn", yours.getParentId());
+    assertEquals("ordinal - I'm",     1, Im.getOrdinal());
+    assertEquals("ordinal - forever", 2, forever.getOrdinal());
+    assertEquals("ordinal - yours",   3, yours.getOrdinal());
+    assertEquals("anchor - turn/I'm",         turn.getStartId(),  Im.getStartId());
+    assertEquals("anchor - I'm/forever",      Im.getEndId(),      forever.getStartId());
+    assertNotEquals("anchor - forever/yours", forever.getEndId(), yours.getStartId());
+    assertEquals("anchor - yours/turn",       yours.getEndId(),   turn.getEndId());
   }
 
   /** Test graph correctly tracks Annotation/Anchor changes. */

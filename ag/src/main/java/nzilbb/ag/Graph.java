@@ -1060,6 +1060,26 @@ public class Graph extends Annotation {
   public Annotation addTag(Annotation toTag, String layerId, String label) {
     return addAnnotation(createTag(toTag, layerId, label));
   } // end of addTag()
+  
+  /**
+   * Creates an annotation that subdivides the given annotation.
+   * <p> The first time this is called for any given annotation, a tag is created - i.e. a
+   * new annotation that shares both start and end annotations with the given
+   * annotation. Subsequent calls for the same annotation will chain new annotations
+   * across the given annotation, using {@link #insertAfter(Annotation,String,String)}.
+   * @param toSubdivide The annotation to subdivide.
+   * @param layerId The new annotation's layer ID.
+   * @param label The new annotation's label.
+   * @return The annotation just created.
+   */
+  public Annotation createSubdivision(Annotation toSubdivide, String layerId, String label) {
+    Set<Annotation> existingTags = toSubdivide.getEnd().endOf(layerId);
+    if (existingTags.size() == 0) { // there are no subdividers yet
+      return createTag(toSubdivide, layerId, label);
+    } else { // there's aleady at least one subdivider, so insert another after it
+      return insertAfter(existingTags.iterator().next(), layerId, label);
+    }
+  } // end of createSubdivision()  
 
   /**
    * Creates a spanning annotation from the beginning of the start annotation to the
