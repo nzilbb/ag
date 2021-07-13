@@ -36,8 +36,9 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import nzilbb.ag.util.AnchorComparatorWithStructure;
 import nzilbb.ag.util.AnnotationComparatorByOrdinal;
 import nzilbb.ag.util.LayerHierarchyTraversal;
@@ -1073,7 +1074,9 @@ public class Graph extends Annotation {
    * @return The annotation just created.
    */
   public Annotation createSubdivision(Annotation toSubdivide, String layerId, String label) {
-    Set<Annotation> existingTags = toSubdivide.getEnd().endOf(layerId);
+    List<Annotation> existingTags = toSubdivide.getEnd().endOf(layerId)
+      .stream().filter(a->a.getChange() != Change.Operation.Destroy)
+      .collect(Collectors.toList());
     if (existingTags.size() == 0) { // there are no subdividers yet
       return createTag(toSubdivide, layerId, label);
     } else { // there's aleady at least one subdivider, so insert another after it

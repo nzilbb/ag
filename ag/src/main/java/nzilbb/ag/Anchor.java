@@ -307,6 +307,7 @@ public class Anchor
       
    /**
     * Accesses a list of annotations on a given layer that start with this anchor.
+    * <p> This may include annotations that have been marked for destruction.
     * @param layerId The given layer ID.
     * @return A list of annotations on the given layer that start here.
     */
@@ -372,6 +373,7 @@ public class Anchor
 
    /**
     * Accesses a list of annotations on all layers that start with this anchor.
+    * <p> This may include annotations that have been marked for destruction.
     * @return A list of annotations that start here.
     */
    public LinkedHashSet<Annotation> getStartingAnnotations()
@@ -386,6 +388,7 @@ public class Anchor
 
    /**
     * Accesses a list of annotations on a given layer that end with this anchor.
+    * <p> This may include annotations that have been marked for destruction.
     * @param layerId The given layer ID.
     * @return A list of annotations on the given layer that end here.
     */
@@ -427,6 +430,7 @@ public class Anchor
 
    /**
     * Accesses a list of annotations on all layers that end with this anchor.
+    * <p> This may include annotations that have been marked for destruction.
     * @return A list of annotations that end here.
     */
    public LinkedHashSet<Annotation> getEndingAnnotations()
