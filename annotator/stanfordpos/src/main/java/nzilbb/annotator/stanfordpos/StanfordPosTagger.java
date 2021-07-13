@@ -450,7 +450,7 @@ public class StanfordPosTagger extends Annotator {
     if (posLayer == null) {
       schema.addLayer(
         new Layer(posLayerId)
-        .setAlignment(Constants.ALIGNMENT_NONE)
+        .setAlignment(Constants.ALIGNMENT_INTERVAL)
         .setPeers(true)
         .setParentId(schema.getWordLayerId()));
     } else {
@@ -565,7 +565,7 @@ public class StanfordPosTagger extends Annotator {
                 token = tokens[++t];
               }
               
-              graph.createTag(token, posLayerId, w.tag())
+              graph.createSubdivision(token, posLayerId, w.tag())
                 .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
               // there can be more than one tag per token
               // e.g. "I'll" could be tagged "PRP" and "MD"

@@ -101,8 +101,8 @@ public class TestStanfordPosTagger {
                   schema.getLayer(annotator.getPosLayerId()));
     assertEquals("pos layer child of word",
                  "word", schema.getLayer(annotator.getPosLayerId()).getParentId());
-    assertEquals("pos layer not aligned",
-                 Constants.ALIGNMENT_NONE,
+    assertEquals("pos layer aligned",
+                 Constants.ALIGNMENT_INTERVAL,
                  schema.getLayer(annotator.getPosLayerId()).getAlignment());
     assertEquals("pos layer type correct",
                  Constants.TYPE_STRING,
@@ -175,7 +175,13 @@ public class TestStanfordPosTagger {
       assertEquals("Tag " + i + " should tag " + wordLabels[i],
                    wordLabels[i], poses.next().first("word").getLabel());
     }
-    assertEquals("I'll has two tags", 2, firstWord.all("pos").length);
+    Annotation[] children = firstWord.all("pos");
+    assertEquals("I'll has two tags", 2, children.length);
+
+    // check child anchors are chained
+    assertEquals("anchor chaining - I'll/PRP", firstWord.getStartId(), children[0].getStartId());
+    assertEquals("anchor chaining - PRP/MD",   children[0].getEndId(), children[1].getStartId());
+    assertEquals("anchor chaining - MD/I'll",  children[1].getEndId(), firstWord.getEndId());
     
     // add a word
     g.addAnnotation(new Annotation().setLayerId("word").setLabel("new")
@@ -207,7 +213,10 @@ public class TestStanfordPosTagger {
     assertEquals("lazily", "RB", posLs.next());
     assertEquals("new", "JJ", posLs.next());
 
-    assertEquals("John has on1 tags", 1, firstWord.all("pos").length);
+    children = firstWord.all("pos");
+    assertEquals("John has one tag", 1, children.length);
+    assertEquals("John's tag shares start anchors", firstWord.getStart(), children[0].getStart());
+    assertEquals("John's tag shares end anchors", firstWord.getEnd(), children[0].getEnd());
 
   }   
 
@@ -265,8 +274,8 @@ public class TestStanfordPosTagger {
                   schema.getLayer(annotator.getPosLayerId()));
     assertEquals("pos layer child of word",
                  "word", schema.getLayer(annotator.getPosLayerId()).getParentId());
-    assertEquals("pos layer not aligned",
-                 Constants.ALIGNMENT_NONE,
+    assertEquals("pos layer aligned",
+                 Constants.ALIGNMENT_INTERVAL,
                  schema.getLayer(annotator.getPosLayerId()).getAlignment());
     assertEquals("pos layer type correct",
                  Constants.TYPE_STRING,
@@ -370,8 +379,8 @@ public class TestStanfordPosTagger {
                   schema.getLayer(annotator.getPosLayerId()));
     assertEquals("pos layer child of word",
                  "word", schema.getLayer(annotator.getPosLayerId()).getParentId());
-    assertEquals("pos layer not aligned",
-                 Constants.ALIGNMENT_NONE,
+    assertEquals("pos layer aligned",
+                 Constants.ALIGNMENT_INTERVAL,
                  schema.getLayer(annotator.getPosLayerId()).getAlignment());
     assertEquals("pos layer type correct",
                  Constants.TYPE_STRING,
