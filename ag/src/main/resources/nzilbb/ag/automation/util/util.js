@@ -145,6 +145,7 @@ function convertFormBodyToJSON(form, body) {
     // this cunning idea comes from:
     // https://systemoverlord.com/2016/08/24/posting-json-with-an-html-form.html
     var jsonInput = document.createElement("input");
+    jsonInput.style.display = "none";
     jsonInput.type = "text";
     jsonInput.name = JSON.stringify(body).replace(/}$/,',"":"');
     jsonInput.value = '"}';
