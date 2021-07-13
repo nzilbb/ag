@@ -72,7 +72,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 // TODO serialize using token-lt (Symbolic subdivision) for layers that are alignment=2,peers, and no non-parent-linked anchors are aligned or have confidence above CONFIDENCE_DEFAULT
-// TODO ensure all annotations on _REF layers have ANNOTATION_REF attributes
 
 /**
  * Converter that converts ELAN EAF v2.7 files to Annotation Graphs
@@ -1224,23 +1223,14 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
           annotationId = annotation.getId();
           tierId = (String)annotation.get("@tierId");
           speaker = (String)annotation.get("@participant");
-          // referring children are chained across the duration of the referent
-          // so we keep track of the last link in the chain using an attribute named
-          // after the tier
-          if (!ref.containsKey("@"+tierId)) { // this is the first referring child
-            annotation = graph.createTag(ref, annotation.getLayerId(), annotation.getLabel());
-          } else { // there's already a referring child
-            Annotation lastReferrer = (Annotation)ref.get("@"+tierId);
-            annotation = graph.insertAfter(
-              lastReferrer, annotation.getLayerId(), annotation.getLabel());
-          }
+          annotation = graph.createSubdivision(
+            ref, annotation.getLayerId(), annotation.getLabel());
           annotation.setId(annotationId); // use EAF ID 
           annotation.setConfidence(Constants.CONFIDENCE_MANUAL);
           annotation.put("@tierId", tierId); // this might come in handy later
           annotation.put("@participant", speaker); // this might come in handy later
           annotation.put("@ref", ref); // this might come in handy later
           // TODO annotation.setAnnotator(...), from the tier's settings.
-          ref.put("@"+tierId, annotation);
           if (ref.getLayerId().equals(annotation.getLayer().getParentId())) {
             // ref is parent
             annotation.setParent(ref);
