@@ -58,12 +58,18 @@ getSchema(s => {
                 destinationLayerId.value = taskId;
             } else if (/.+:.+/.test(taskId)) { // might be an 'auxiliary'?
                 var layerId = taskId.replace(/:.+/,"");
-                console.log("possible layer: " + layerId);
                 if (schema.layers[layerId]) { // there's a layer named after the task
                     // select it
                     destinationLayerId.value = layerId;
                 }
             }
+            var destinationLayer = schema.layers[destinationLayerId.value];
+            destinationLayerParentId = schema.wordLayerId;
+            if (destinationLayer) {
+                destinationLayerParentId = destinationLayer.parentId;
+            }
+            document.getElementById("destinationLayerParentId").value = destinationLayerParentId;
+            enableLanguageParameters();
         } else {
             
             // set initial values of properties in the form
@@ -102,8 +108,7 @@ getSchema(s => {
                 }
             }
             document.getElementById("destinationLayerParentId").value = destinationLayerParentId;
-            enableLanguageParameters();
-            
+            enableLanguageParameters();            
         }
     });
 });
