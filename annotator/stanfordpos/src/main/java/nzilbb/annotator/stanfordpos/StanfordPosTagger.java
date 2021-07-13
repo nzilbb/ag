@@ -412,6 +412,9 @@ public class StanfordPosTagger extends Annotator {
 
         // default model
         model = "english-caseless-left3words-distsim.tagger";
+
+        // no exclusion pattern
+        tokenExclusionPattern = "";
         
       } catch(ScriptException impossible) {}
       
@@ -530,19 +533,27 @@ public class StanfordPosTagger extends Annotator {
         if (isCancelling()) break;
         
         Annotation[] tokens = chunk.all(tokenLayerId);
+        
+        // delete all existing tags before filtering out by pattern
+        for (Annotation t : tokens) {            
+          for (Annotation p: t.all(posLayerId)) {
+            p.destroy();
+          } // next pos tag
+        } // next token
+        
         if (tokenExclusionPattern.length() > 0) {
           final Pattern exclude = Pattern.compile(tokenExclusionPattern);
           tokens = Arrays.stream(tokens).filter(t->!exclude.matcher(t.getLabel()).matches())
             .toArray(Annotation[]::new);
         }
+        
         setStatus("Tagging chunk "+chunk.getStart() + "-" + chunk.getEnd());
         if (tokens.length > 0) {
 
-          // delete all existing tags
+          // if tokens contain spaces, these are eliminated by the parser
+          // so create a space-stripped version of the label
           for (Annotation t : tokens) {
-            for (Annotation p: t.all(posLayerId)) {
-              p.destroy();
-            } // next pos tag
+            t.put("@untagged", t.getLabel().replaceAll("\\s",""));
           } // next token
 
           String text = Arrays.stream(tokens)
@@ -570,22 +581,23 @@ public class StanfordPosTagger extends Annotator {
               // there can be more than one tag per token
               // e.g. "I'll" could be tagged "PRP" and "MD"
               // so we keep a track of how much of the current token has been tagged
-              if (!token.containsKey("@tagged")) { // first tag on word
-                token.put("@tagged", w.word());
-              } else { // already partly tagged, so append to the previous syntactic word
-                token.put("@tagged", ((String)token.get("@tagged")) + w.word());
-              }
-
-              // should we move to the next token?
-              if (token.getLabel().length() <= ((String)token.get("@tagged")).length()) {
+              String untagged = (String)token.get("@untagged");              
+              if (untagged.equals(w.word())) { // finished with this token
+                token.remove("@untagged");
                 t++;
+              } else if (untagged.startsWith(w.word())) { // partial tag
+                token.put("@untagged", untagged.substring(w.word().length()));
+              } else { // something's gone wrong!
+                throw new TransformationException(
+                  this, "Chunk "+chunk.getStart() + "-" + chunk.getEnd()
+                  + ": Unexpected word in result: \"" + w.word() + "\""
+                  +" - was expecting something like: \"" + untagged + "\"."
+                  +" Tagged: " + taggedSentence.stream()
+                  .map(tok->tok.word()+"->"+tok.tag())
+                  .collect(Collectors.joining(" ")));
               }
             } // next token
-          } // next sentence
-          
-          // remove tags for keeping track of pos tags
-          for (Annotation token : tokens) token.remove("@tagged");
-          
+          } // next sentence          
         } // there are tokens
       } // next chunk
       

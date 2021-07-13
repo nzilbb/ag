@@ -74,7 +74,8 @@ public class TestStanfordPosTagger {
     File fThisClass = new File(urlThisClass.toURI());
     return fThisClass.getParentFile();
   }
-  
+
+  /** Annotation with default settings works as expected. */
   @Test public void defaultParameters() throws Exception {
     
     Graph g = graph();
@@ -220,6 +221,8 @@ public class TestStanfordPosTagger {
 
   }   
 
+  /** Ensure explicit parameters work, as well as taking tokens from a layer other than
+   * the schema word layer. */
   @Test public void setTaskParametersAndUseOrthLayer() throws Exception {
     
     Graph g = graph();
@@ -310,7 +313,7 @@ public class TestStanfordPosTagger {
     annotator.transform(g);
     List<Annotation> posAnnotations = Arrays.stream(g.all("stanfordpos"))
       .collect(Collectors.toList());
-    for (Annotation pos : posAnnotations) System.out.println(""+pos + " - " + pos.getParent());
+    // for (Annotation pos : posAnnotations) System.out.println(""+pos + " - " + pos.getParent());
     assertEquals("Correct number of tokens "+posAnnotations,
                  11, posAnnotations.size());
     Iterator<Annotation> poses = posAnnotations.iterator();
@@ -346,6 +349,7 @@ public class TestStanfordPosTagger {
     assertEquals("I'll has two tags", 2, firstWord.all("stanfordpos").length);
   }   
 
+  /** Ensure tokens can be excluded by regular expression. */
   @Test public void tokenExclusionPattern() throws Exception {
     
     Graph g = graph();
@@ -461,6 +465,140 @@ public class TestStanfordPosTagger {
     
   }   
 
+  /** Ensure raw ONZE-style transcription can be used as input - i.e. including pause
+   * annotations "." and "-" */
+  @Test public void rawWordLayer() throws Exception {
+    
+    Schema schema = graph().getSchema();
+    Graph g = new Graph().setSchema(schema);
+    Anchor start = g.getOrCreateAnchorAt(1);
+    Anchor end = g.getOrCreateAnchorAt(100);
+    g.addAnnotation(
+      new Annotation().setLayerId("participant").setLabel("someone")
+      .setStart(start).setEnd(end));
+    Annotation turn = g.addAnnotation(
+      new Annotation().setLayerId("turn").setLabel("someone")
+      .setStart(start).setEnd(end)
+      .setParent(g.first("participant")));
+    g.addAnnotation(
+      new Annotation().setLayerId("utterance").setLabel("someone")
+      .setStart(start).setEnd(end)
+      .setParent(turn));
+
+    g.createSubdivision(turn, schema.getWordLayerId(), "\"The -");
+    g.createSubdivision(turn, schema.getWordLayerId(), "quick");
+    g.createSubdivision(turn, schema.getWordLayerId(), "brown");
+    g.createSubdivision(turn, schema.getWordLayerId(), "fox,\"");
+    g.createSubdivision(turn, schema.getWordLayerId(), "he");
+    g.createSubdivision(turn, schema.getWordLayerId(), "said,");
+    g.createSubdivision(turn, schema.getWordLayerId(), "\"wouldn't");
+    g.createSubdivision(turn, schema.getWordLayerId(), "jump .");
+    g.createSubdivision(turn, schema.getWordLayerId(), "over");
+    g.createSubdivision(turn, schema.getWordLayerId(), "anything!\"");
+    
+    g.trackChanges();
+    
+    // use default configuration
+    annotator.setSchema(schema);
+    annotator.setTaskParameters(null);
+    
+    assertEquals("token layer",
+                 "word", annotator.getTokenLayerId());
+    assertEquals("token exclusion pattern",
+                 "", annotator.getTokenExclusionPattern());
+    assertEquals("chunk layer",
+                 "turn", annotator.getChunkLayerId());
+    assertEquals("transcript language layer",
+                 "transcript_language", annotator.getTranscriptLanguageLayerId());
+    assertEquals("phrase language layer",
+                 "lang", annotator.getPhraseLanguageLayerId());
+    assertEquals("pos layer",
+                 "pos", annotator.getPosLayerId());
+    assertNotNull("pos layer was created",
+                  schema.getLayer(annotator.getPosLayerId()));
+    assertEquals("pos layer child of word",
+                 "word", schema.getLayer(annotator.getPosLayerId()).getParentId());
+    assertEquals("pos layer aligned",
+                 Constants.ALIGNMENT_INTERVAL,
+                 schema.getLayer(annotator.getPosLayerId()).getAlignment());
+    assertEquals("pos layer type correct",
+                 Constants.TYPE_STRING,
+                 schema.getLayer(annotator.getPosLayerId()).getType());
+    assertEquals("model: english-caseless-left3words-distsim.tagger",
+                 "english-caseless-left3words-distsim.tagger", annotator.getModel());
+    assertTrue("pos layer allows peers", // contractions like "I'll" might have two tags
+                schema.getLayer(annotator.getPosLayerId()).getPeers());
+    Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
+      .collect(Collectors.toSet());
+    assertEquals("4 required layer: "+requiredLayers,
+                 4, requiredLayers.size());
+    assertTrue("turn required "+requiredLayers,
+               requiredLayers.contains("turn"));
+    assertTrue("word required "+requiredLayers,
+               requiredLayers.contains("word"));
+    assertTrue("transcript_language required "+requiredLayers,
+               requiredLayers.contains("transcript_language"));
+    assertTrue("lang required "+requiredLayers,
+               requiredLayers.contains("lang"));
+    String outputLayers[] = annotator.getOutputLayers();
+    assertEquals("1 output layer: "+Arrays.asList(outputLayers),
+                 1, outputLayers.length);
+    assertEquals("output layer correct "+Arrays.asList(outputLayers),
+                 "pos", outputLayers[0]);
+    
+    assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
+                 10, g.all("word").length);
+    assertEquals("double check there are no poses: "+Arrays.asList(g.all("pos")),
+                 0, g.all("pos").length);
+    
+    // run the annotator
+    annotator.transform(g);
+    List<Annotation> posAnnotations = Arrays.stream(g.all("pos"))
+      .collect(Collectors.toList());
+    assertEquals("Correct number of tokens "+posAnnotations,
+                 20, posAnnotations.size());
+    Iterator<Annotation> poses = posAnnotations.iterator();
+    assertEquals("\"", "``", poses.next().getLabel());
+    assertEquals("the", "DT", poses.next().getLabel());
+    assertEquals("-", "HYPH", poses.next().getLabel());
+    assertEquals("quick", "JJ", poses.next().getLabel());
+    assertEquals("brown", "JJ", poses.next().getLabel());
+    assertEquals("fox", "NN", poses.next().getLabel());
+    assertEquals(",", ",", poses.next().getLabel());
+    assertEquals("\"", "''", poses.next().getLabel());
+    assertEquals("he", "PRP", poses.next().getLabel());
+    assertEquals("said", "VBD", poses.next().getLabel());
+    assertEquals(",", ",", poses.next().getLabel());
+    assertEquals("\"", "''", poses.next().getLabel());
+    assertEquals("would", "MD", poses.next().getLabel());
+    assertEquals("n't", "RB", poses.next().getLabel());
+    assertEquals("jump", "VB", poses.next().getLabel());
+    assertEquals(".", ".", poses.next().getLabel());
+    assertEquals("over", "IN", poses.next().getLabel());
+    assertEquals("anything", "NN", poses.next().getLabel());
+    assertEquals("!", ".", poses.next().getLabel());
+    assertEquals("\"", "''", poses.next().getLabel());
+
+    poses = posAnnotations.iterator();
+    String[] wordLabels = {
+      "\"The -", "\"The -", "\"The -",
+      "quick",
+      "brown",
+      "fox,\"", "fox,\"", "fox,\"",
+      "he",
+      "said,", "said,",
+      "\"wouldn't", "\"wouldn't", "\"wouldn't",
+      "jump .", "jump .",
+      "over",
+      "anything!\"", "anything!\"", "anything!\""
+    };
+    for (int i = 0; i < wordLabels.length; i++) {
+      assertEquals("Tag " + i + " should tag " + wordLabels[i],
+                   wordLabels[i], poses.next().first("word").getLabel());
+    }
+  }   
+
+  /** Ensure task parameters are validated. */
   @Test public void setInvalidTaskParameters() throws Exception {
     
     try {
