@@ -157,13 +157,8 @@ function convertFormBodyToJSON(form, body) {
     return true;
 }
 
-// if there's a #loading element in the document,
-// style it so that it has a spinner and covers the whole page,
-// to prevent changes before the page is fully loaded
-function finishedLoading() {
-    var loading = document.getElementById("loading");
-    if (loading) loading.remove();
-}
+// Cover the page with a <div> element with a spinner, to prevent the user
+// from interacting with the page while data and settings are loaded.
 function startLoading() {
     if (!document.getElementById("loadingStyle")) {
         // add style for loading panel
@@ -206,4 +201,11 @@ function startLoading() {
         loading.id = "loading";
         document.body.appendChild(loading);
     }
+}
+
+// Remove the <div> element spinner element previously create by startLoading(),
+// to allow the user to interact with the page.
+function finishedLoading() {
+    var loading = document.getElementById("loading");
+    if (loading) loading.remove();
 }
