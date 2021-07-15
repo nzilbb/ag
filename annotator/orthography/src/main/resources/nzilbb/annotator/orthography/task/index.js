@@ -1,3 +1,6 @@
+// show spinner
+startLoading();
+
 // show annotator version
 getText("getVersion", function(e) {
     document.getElementById("version").innerHTML = this.responseText;
@@ -67,15 +70,20 @@ getSchema(s => {
     
     // GET request to getTaskParameters retrieves the current task parameters, if any
     getText("getTaskParameters", function(e) {
-        var parameters = new URLSearchParams(this.responseText);
-        
-        // set initial values of properties in the form above
-        // (this assumes bean property names match input id's in the form above)
-        for (const [key, value] of parameters) {
-            document.getElementById(key).value = value;
-        }
-        
-        testRemovalPattern();
+        try {
+            var parameters = new URLSearchParams(this.responseText);
+            
+            // set initial values of properties in the form above
+            // (this assumes bean property names match input id's in the form above)
+            for (const [key, value] of parameters) {
+                document.getElementById(key).value = value;
+            }
+            
+            testRemovalPattern();
+        } finally {
+            // hide spinner
+            finishedLoading();
+        }        
     });
 });
 

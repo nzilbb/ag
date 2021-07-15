@@ -1,3 +1,6 @@
+// show spinner
+startLoading();
+
 // show annotator version
 getVersion(version=>{
     document.getElementById("version").innerHTML = version;
@@ -48,51 +51,56 @@ getSchema(s => {
     
     // GET request to getTaskParameters retrieves the current task parameters, if any
     getJSON("getTaskParameters", parameters => {
-        if (parameters == null || parameters == "") {
-            document.getElementById("labelMappingFalse").checked = true;
-            setScript("// for each turn in the transcript\n"
-		      +"for each (turn in transcript.all(\""+schema.turnLayerId+"\")) {\n"
-		      +"  if (annotator.cancelling) break; // cancelled by the user\n"
-		      +"  // for each word\n"
-		      +"  for each (word in turn.all(\""+schema.wordLayerId+"\")) {\n"
-		      +"    // ** change the following line to tag the word as desired **\n"
-		      +"    tag = word.createTag(\""+window.location.search.substring(1)+"\", \"length: \" + word.label.length());\n"
-		      +"    log(\"Tagged word \" + word.label + \" with \" + tag.label);\n"
-		      +"  } // next word\n"
-		      +"} // next turn");
-        } else {
-            
-            // set initial values of properties in the form
-            setScript(parameters.script);
-            document.getElementById("transcriptLanguageLayerId").value
-                = parameters.transcriptLanguageLayerId;
-            document.getElementById("phraseLanguageLayerId").value
-                = parameters.phraseLanguageLayerId;
-            document.getElementById("language").value = parameters.language;
-            if (parameters.labelMapping == "true") {
-                document.getElementById("labelMappingTrue").checked = true;
-                document.getElementById("labelScript").value = parameters.script;
-            } else {
+        try {
+            if (parameters == null || parameters == "") {
                 document.getElementById("labelMappingFalse").checked = true;
-            }
-            if (parameters.labelMapping == "true") {
-                // source/dest layers are the first element in the corresponding arrays
-                document.getElementById("sourceLayerId").value = parameters.sourceLayerId;
-                changeSourceLayer();
-                destinationLayerId.value = parameters.destinationLayerId;
-                // if there's no option for that layer, add one
-                if (parameters.destinationLayerId
-                    && destinationLayerId.value != parameters.destinationLayerId) {
-                    var layerOption = document.createElement("option");
-                    layerOption.appendChild(
-                        document.createTextNode(parameters.destinationLayerId));
-                    destinationLayerId.appendChild(layerOption);
-                    destinationLayerId.value = parameters.destinationLayerId;
+                setScript("// for each turn in the transcript\n"
+		          +"for each (turn in transcript.all(\""+schema.turnLayerId+"\")) {\n"
+		          +"  if (annotator.cancelling) break; // cancelled by the user\n"
+		          +"  // for each word\n"
+		          +"  for each (word in turn.all(\""+schema.wordLayerId+"\")) {\n"
+		          +"    // ** change the following line to tag the word as desired **\n"
+		          +"    tag = word.createTag(\""+window.location.search.substring(1)+"\", \"length: \" + word.label.length());\n"
+		          +"    log(\"Tagged word \" + word.label + \" with \" + tag.label);\n"
+		          +"  } // next word\n"
+		          +"} // next turn");
+            } else {
+                
+                // set initial values of properties in the form
+                setScript(parameters.script);
+                document.getElementById("transcriptLanguageLayerId").value
+                    = parameters.transcriptLanguageLayerId;
+                document.getElementById("phraseLanguageLayerId").value
+                    = parameters.phraseLanguageLayerId;
+                document.getElementById("language").value = parameters.language;
+                if (parameters.labelMapping == "true") {
+                    document.getElementById("labelMappingTrue").checked = true;
+                    document.getElementById("labelScript").value = parameters.script;
+                } else {
+                    document.getElementById("labelMappingFalse").checked = true;
                 }
-            } // labelMapping
+                if (parameters.labelMapping == "true") {
+                    // source/dest layers are the first element in the corresponding arrays
+                    document.getElementById("sourceLayerId").value = parameters.sourceLayerId;
+                    changeSourceLayer();
+                    destinationLayerId.value = parameters.destinationLayerId;
+                    // if there's no option for that layer, add one
+                    if (parameters.destinationLayerId
+                        && destinationLayerId.value != parameters.destinationLayerId) {
+                        var layerOption = document.createElement("option");
+                        layerOption.appendChild(
+                        document.createTextNode(parameters.destinationLayerId));
+                        destinationLayerId.appendChild(layerOption);
+                        destinationLayerId.value = parameters.destinationLayerId;
+                    }
+                } // labelMapping
+            }
+            checkMode();
+            updateLabelScript();
+        } finally {
+            // hide spinner
+            finishedLoading();
         }
-        checkMode();
-        updateLabelScript();
     });
 });
 

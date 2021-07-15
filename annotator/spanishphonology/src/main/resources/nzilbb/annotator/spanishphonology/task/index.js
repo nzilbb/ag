@@ -1,3 +1,6 @@
+// show spinner
+startLoading();
+
 // show annotator version
 getVersion(version => {
     document.getElementById("version").innerHTML = version;
@@ -51,39 +54,44 @@ getSchema(s => {
     
     // GET request to getTaskParameters retrieves the current task parameters, if any
     getText("getTaskParameters", text => {
-        var parameters = new URLSearchParams(text);
-        
-        // set initial values of properties in the form above
-        // (this assumes bean property names match input id's in the form above)
-        for (const [key, value] of parameters) {
-            document.getElementById(key).value = value;
+        try {
+            var parameters = new URLSearchParams(text);
+            
+            // set initial values of properties in the form above
+            // (this assumes bean property names match input id's in the form above)
+            for (const [key, value] of parameters) {
+                document.getElementById(key).value = value;
                 
-            if (key == "phonemeLayerId") {
-                // if there's a pos layer defined
-                if (value
-                    // but it's not in the schema
-                    && !schema.layers[value]) {
-                    
-                    // add it to the list
-                    var select = document.getElementById("phonemeLayerId");
-                    var layerOption = document.createElement("option");
-                    layerOption.appendChild(document.createTextNode(value));
-                    select.appendChild(layerOption);
-                    // select it
-                    select.selectedIndex = select.children.length - 1;
+                if (key == "phonemeLayerId") {
+                    // if there's a pos layer defined
+                    if (value
+                        // but it's not in the schema
+                        && !schema.layers[value]) {
+                        
+                        // add it to the list
+                        var select = document.getElementById("phonemeLayerId");
+                        var layerOption = document.createElement("option");
+                        layerOption.appendChild(document.createTextNode(value));
+                        select.appendChild(layerOption);
+                        // select it
+                        select.selectedIndex = select.children.length - 1;
+                    }
+                } // phonemeLayerId
+            } // next parameter
+            
+            // if there's no phoneme layer defined
+            if (phonemeLayerId.selectedIndex == 0) {
+                // but there's a layer named after the task
+                if (schema.layers[taskId]) {            
+                    // select that layer by default
+                    phonemeLayerId.value = taskId;
+                } else if (schema.layers["phonemes"]) {
+                    phonemeLayerId.value = "phonemes";
                 }
-            } // phonemeLayerId
-        } // next parameter
-        
-        // if there's no phoneme layer defined
-        if (phonemeLayerId.selectedIndex == 0) {
-            // but there's a layer named after the task
-            if (schema.layers[taskId]) {            
-                // select that layer by default
-                phonemeLayerId.value = taskId;
-            } else if (schema.layers["phonemes"]) {
-                phonemeLayerId.value = "phonemes";
             }
+        } finally {
+            // hide spinner
+            finishedLoading();
         }
     });
 });

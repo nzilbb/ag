@@ -1,3 +1,6 @@
+// show spinner
+startLoading();
+
 // show annotator version
 getVersion(version=>{
     document.getElementById("version").innerHTML = version;
@@ -22,22 +25,27 @@ getSchema(s => {
     
     // GET request to getTaskParameters retrieves the current task parameters, if any
     getJSON("getTaskParameters", parameters => {
-        if (parameters == null || parameters == "") {
-            setScript("# for each turn in the transcript\n"
-		      +"for turn in transcript.all(\""+schema.turnLayerId+"\"):\n"
-		      +"  if annotator.cancelling: break; # cancelled by the user\n"
-		      +"  # for each word\n"
-		      +"  for word in turn.all(\""+schema.wordLayerId+"\"):\n"
-		      +"    # change the following line to tag the word as desired \n"
-		      +"    word.createTag(\""+window.location.search.substring(1)+"\", \"length: \" + str(len(word.label))\n"
-		      +"    log(\"Tagged word \" + word.label)\n");
-        } else {
-            
-            // set initial values of properties in the form
-            setScript(parameters.script);
+        try {
+            if (parameters == null || parameters == "") {
+                setScript("# for each turn in the transcript\n"
+		          +"for turn in transcript.all(\""+schema.turnLayerId+"\"):\n"
+		          +"  if annotator.cancelling: break; # cancelled by the user\n"
+		          +"  # for each word\n"
+		          +"  for word in turn.all(\""+schema.wordLayerId+"\"):\n"
+		          +"    # change the following line to tag the word as desired \n"
+		          +"    word.createTag(\""+window.location.search.substring(1)+"\", \"length: \" + str(len(word.label))\n"
+		          +"    log(\"Tagged word \" + word.label)\n");
+            } else {
+                
+                // set initial values of properties in the form
+                setScript(parameters.script);
+            }
+            checkMode();
+            updateLabelScript();
+        } finally {
+            // hide spinner
+            finishedLoading();
         }
-        checkMode();
-        updateLabelScript();
     });
 });
 

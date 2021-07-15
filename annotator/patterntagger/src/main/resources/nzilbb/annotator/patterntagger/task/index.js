@@ -1,3 +1,6 @@
+// show spinner
+startLoading();
+
 // show annotator version
 getVersion(version=>{
     document.getElementById("version").innerHTML = version;
@@ -51,64 +54,69 @@ getSchema(s => {
     
     // GET request to getTaskParameters retrieves the current task parameters, if any
     getJSON("getTaskParameters", parameters => {
-        if (parameters == null) {
-            newMapping("", ""); // no parameters, start off with a blank one
-            if (schema.layers[taskId]) { // there's a layer named after the task
-                // select it
-                destinationLayerId.value = taskId;
-            } else if (/.+:.+/.test(taskId)) { // might be an 'auxiliary'?
-                var layerId = taskId.replace(/:.+/,"");
-                if (schema.layers[layerId]) { // there's a layer named after the task
+        try {
+            if (parameters == null) {
+                newMapping("", ""); // no parameters, start off with a blank one
+                if (schema.layers[taskId]) { // there's a layer named after the task
                     // select it
-                    destinationLayerId.value = layerId;
+                    destinationLayerId.value = taskId;
+                } else if (/.+:.+/.test(taskId)) { // might be an 'auxiliary'?
+                    var layerId = taskId.replace(/:.+/,"");
+                    if (schema.layers[layerId]) { // there's a layer named after the task
+                        // select it
+                        destinationLayerId.value = layerId;
+                    }
                 }
-            }
-            var destinationLayer = schema.layers[destinationLayerId.value];
-            destinationLayerParentId = schema.wordLayerId;
-            if (destinationLayer) {
-                destinationLayerParentId = destinationLayer.parentId;
-            }
-            document.getElementById("destinationLayerParentId").value = destinationLayerParentId;
-            enableLanguageParameters();
-        } else {
-            
-            // set initial values of properties in the form
-            document.getElementById("sourceLayerId").value = parameters.sourceLayerId;
-            document.getElementById("transcriptLanguageLayerId").value
-                = parameters.transcriptLanguageLayerId;
-            document.getElementById("phraseLanguageLayerId").value
-                = parameters.phraseLanguageLayerId;
-            document.getElementById("language").value = parameters.language;
-            document.getElementById("deleteOnNoMatch").value = parameters.deleteOnNoMatch;
-            destinationLayerId = document.getElementById("destinationLayerId");
-            destinationLayerId.value = parameters.destinationLayerId;
-            // if there's no option for that layer, add one
-            if (destinationLayerId.value != parameters.destinationLayerId) {
-                var layerOption = document.createElement("option");
-                layerOption.appendChild(document.createTextNode(parameters.destinationLayerId));
-                destinationLayerId.appendChild(layerOption);
-                destinationLayerId.value = parameters.destinationLayerId;
-            }
-            // insert current mappings
-            if (!parameters.mappings) {
-                newMapping("", ""); // no mappings, start off with a blank one
-            } else {
-                for (var mapping of parameters.mappings) {
-                    newMapping(mapping.pattern, mapping.label);
-                } // next mapping
-            }
-            
-            // set destination parent layer
-            var destinationLayerParentId = parameters.destinationLayerParentId;
-            if (!destinationLayerParentId) { // infer it
-                var destinationLayer = schema.layers[parameters.destinationLayerId];
+                var destinationLayer = schema.layers[destinationLayerId.value];
                 destinationLayerParentId = schema.wordLayerId;
                 if (destinationLayer) {
                     destinationLayerParentId = destinationLayer.parentId;
                 }
+                document.getElementById("destinationLayerParentId").value = destinationLayerParentId;
+                enableLanguageParameters();
+            } else {
+                
+                // set initial values of properties in the form
+                document.getElementById("sourceLayerId").value = parameters.sourceLayerId;
+                document.getElementById("transcriptLanguageLayerId").value
+                    = parameters.transcriptLanguageLayerId;
+                document.getElementById("phraseLanguageLayerId").value
+                    = parameters.phraseLanguageLayerId;
+                document.getElementById("language").value = parameters.language;
+                document.getElementById("deleteOnNoMatch").value = parameters.deleteOnNoMatch;
+                destinationLayerId = document.getElementById("destinationLayerId");
+                destinationLayerId.value = parameters.destinationLayerId;
+                // if there's no option for that layer, add one
+                if (destinationLayerId.value != parameters.destinationLayerId) {
+                    var layerOption = document.createElement("option");
+                    layerOption.appendChild(document.createTextNode(parameters.destinationLayerId));
+                    destinationLayerId.appendChild(layerOption);
+                    destinationLayerId.value = parameters.destinationLayerId;
+                }
+                // insert current mappings
+                if (!parameters.mappings) {
+                    newMapping("", ""); // no mappings, start off with a blank one
+                } else {
+                    for (var mapping of parameters.mappings) {
+                        newMapping(mapping.pattern, mapping.label);
+                    } // next mapping
+                }
+                
+                // set destination parent layer
+                var destinationLayerParentId = parameters.destinationLayerParentId;
+                if (!destinationLayerParentId) { // infer it
+                    var destinationLayer = schema.layers[parameters.destinationLayerId];
+                    destinationLayerParentId = schema.wordLayerId;
+                    if (destinationLayer) {
+                        destinationLayerParentId = destinationLayer.parentId;
+                    }
+                }
+                document.getElementById("destinationLayerParentId").value = destinationLayerParentId;
+                enableLanguageParameters();
             }
-            document.getElementById("destinationLayerParentId").value = destinationLayerParentId;
-            enableLanguageParameters();            
+        } finally {
+            // hide spinner
+            finishedLoading();
         }
     });
 });

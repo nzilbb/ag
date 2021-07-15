@@ -1,3 +1,4 @@
+startLoading();
 
 // show annotator version
 getVersion(version => {
@@ -50,16 +51,20 @@ getSchema(s => {
     
     // GET request to getTaskParameters retrieves the current task parameters, if any
     getText("getTaskParameters", text => {
-        var parameters = new URLSearchParams(text);
-        
-        // set initial values of properties in the form above
-        // (this assumes bean property names match input id's in the form above)
-        for (const [key, value] of parameters) {
-            document.getElementById(key).value = value;
+        try {
+            var parameters = new URLSearchParams(text);
+            
+            // set initial values of properties in the form above
+            // (this assumes bean property names match input id's in the form above)
+            for (const [key, value] of parameters) {
+                document.getElementById(key).value = value;
+            }
+            // set the checkbox
+            document.getElementById("firstVariantOnly").checked
+                = parameters.get("firstVariantOnly");
+        } finally {
+            finishedLoading();
         }
-        // set the checkbox
-        document.getElementById("firstVariantOnly").checked
-            = parameters.get("firstVariantOnly");
     });
 });
 
