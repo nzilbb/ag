@@ -1,3 +1,4 @@
+startLoading();
 
 // show annotator version
 getVersion(version => {
@@ -62,62 +63,67 @@ getSchema(s => {
 
     // what models are available
     getJSON("availableModels", modelOptions => {
+        console.log("availableModels");
         
-        // if there are no models available, do nothing
-        if (modelOptions.length == 0) return;
-        
-        // if there's only one option, select it
-        if (modelOptions.length == 1) model = modelOptions[0];
-        
-        // list options...
-        selectModel = document.getElementById("model");
-        // remove all current options
-        selectModel.textContent = "";
-        // populate the span with options
-        for (m in modelOptions) {
-            var modelOption = modelOptions[m];
-            var option = document.createElement("option");
-            option.value=modelOption
-            if (modelOption == model) {
-                option.selected = true;
-            }
-            option.appendChild(document.createTextNode(modelOption));
-            selectModel.appendChild(option);
-        } // next option
+        if (modelOptions.length > 0) {
+            // if there's only one option, select it
+            if (modelOptions.length == 1) model = modelOptions[0];
+            
+            // list options...
+            selectModel = document.getElementById("model");
+            // remove all current options
+            selectModel.textContent = "";
+            // populate the span with options
+            for (m in modelOptions) {
+                var modelOption = modelOptions[m];
+                var option = document.createElement("option");
+                option.value=modelOption
+                if (modelOption == model) {
+                    option.selected = true;
+                }
+                option.appendChild(document.createTextNode(modelOption));
+                selectModel.appendChild(option);
+            } // next option
+        }
 
         // GET request to getTaskParameters retrieves the current task parameters, if any
         getText("getTaskParameters", text => {
-            var parameters = new URLSearchParams("?"+text);
-            
-            // set initial values of properties in the form above
-            // (this assumes bean property names match input id's in the form above)
-            for (const [key, value] of parameters) {
-                document.getElementById(key).value = value;
+            console.log("getTaskParameters");
+            try {
+                var parameters = new URLSearchParams("?"+text);
                 
-                if (key == "posLayerId") {
-                    // if there's a pos layer defined
-                    if (value
-                        // but it's not in the schema
-                        && !schema.layers[value]) {
+                // set initial values of properties in the form above
+                // (this assumes bean property names match input id's in the form above)
+                for (const [key, value] of parameters) {
+                    document.getElementById(key).value = value;
+                    
+                    if (key == "posLayerId") {
+                        // if there's a pos layer defined
+                        if (value
+                            // but it's not in the schema
+                            && !schema.layers[value]) {
+                            
+                            // add it to the list
+                            var select = document.getElementById("posLayerId");
+                            var layerOption = document.createElement("option");
+                            layerOption.appendChild(document.createTextNode(value));
+                            select.appendChild(layerOption);
+                            // select it
+                            select.selectedIndex = select.children.length - 1;
+                        }
+                    } // posLayerId
+                } // next parameter
                 
-                        // add it to the list
-                        var select = document.getElementById("posLayerId");
-                        var layerOption = document.createElement("option");
-                        layerOption.appendChild(document.createTextNode(value));
-                        select.appendChild(layerOption);
-                        // select it
-                        select.selectedIndex = select.children.length - 1;
-                    }
-                } // posLayerId
-            } // next parameter
-
-            // if there's no pos layer defined
-            if (posLayerId.selectedIndex == 0
-                // but there's a layer named after the task
-                && schema.layers[taskId]) {
-                
-                // select that layer by default
-                posLayerId.value = taskId;
+                // if there's no pos layer defined
+                if (posLayerId.selectedIndex == 0
+                    // but there's a layer named after the task
+                    && schema.layers[taskId]) {
+                    
+                    // select that layer by default
+                    posLayerId.value = taskId;
+                }
+            } finally {
+                finishedLoading();
             }
         });        
     })    
