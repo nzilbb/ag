@@ -184,7 +184,7 @@ function startLoading() {
             +"\n  content: '';"
             +"\n  box-sizing: border-box;"
             +"\n  position: absolute;"
-            +"\n  top: 50%;"
+            +"\n  top: 20%;"
             +"\n  left: 50%;"
             +"\n  width: 20px;"
             +"\n  height: 20px;"
