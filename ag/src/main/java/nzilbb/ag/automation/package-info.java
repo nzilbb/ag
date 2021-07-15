@@ -260,7 +260,37 @@
           </code>
     </details>
     
+    <details><summary>startLoading()</summary>
+        <p> Cover the page with a &lt;div&dt; element with a spinner, to prevent the user
+          from interacting with the page while data and settings are loaded. e.g. </p>
+        <pre>// show spinner
+startLoading();
+// load the task settings
+getText("getTaskParameters", text => {
+    try {
+        // ...process the settings, populate the form, etc...
+    } finally {
+        // hide spinner
+        finishedLoading();
+    }
+});</pre>
+    </details>
   
+    <details><summary>finishedLoading()</summary>
+        <p> Remove the &lt;div&dt; element spinner element previously create by
+          <code>startLoading()</code>, to allow the user to interact with the page. e.g. </p>
+        <pre>// show spinner
+startLoading();
+// load the task settings
+getText("getTaskParameters", text => {
+    try {
+        // ...process the settings, populate the form, etc...
+    } finally {
+        // hide spinner
+        finishedLoading();
+    }
+});</pre>
+    </details>
 </details>  
 
 <p> There are three phases during which the annotator might do processing and/or require

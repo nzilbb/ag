@@ -156,3 +156,54 @@ function convertFormBodyToJSON(form, body) {
 
     return true;
 }
+
+// if there's a #loading element in the document,
+// style it so that it has a spinner and covers the whole page,
+// to prevent changes before the page is fully loaded
+function finishedLoading() {
+    var loading = document.getElementById("loading");
+    if (loading) loading.remove();
+}
+function startLoading() {
+    if (!document.getElementById("loadingStyle")) {
+        // add style for loading panel
+        var style = document.head.appendChild(document.createElement("style"));
+        style.id = "loadingStyle";
+        // CSS-only spinner thanks to https://stephanwagner.me/only-css-loading-spinner
+        style.innerHTML
+            ="@keyframes spinner {"
+            +"\n  to {transform: rotate(360deg);}"
+            +"\n}"
+            +"\n#loading {"
+            +"\n    position: absolute;"
+            +"\n    width: 100%;"
+            +"\n    height: 100%;"
+            +"\n    left: 0px;"
+            +"\n    top: 0px;"
+            +"\n    z-index: 2;"
+            +"\n    cursor: wait;"
+            +"\n    background: white;"
+            +"\n    opacity: 0.5;"
+            +"\n}"
+            +"\n#loading:before {"
+            +"\n  content: '';"
+            +"\n  box-sizing: border-box;"
+            +"\n  position: absolute;"
+            +"\n  top: 50%;"
+            +"\n  left: 50%;"
+            +"\n  width: 20px;"
+            +"\n  height: 20px;"
+            +"\n  margin-top: -10px;"
+            +"\n  margin-left: -10px;"
+            +"\n  border-radius: 50%;"
+            +"\n  border: 2px solid #ccc;"
+            +"\n  border-top-color: #859044;"
+            +"\n  animation: spinner .6s linear infinite;"
+            +"\n}";
+    }        
+    if (!document.getElementById("loading")) {
+        var loading = document.createElement("div");
+        loading.id = "loading";
+        document.body.appendChild(loading);
+    }
+}
