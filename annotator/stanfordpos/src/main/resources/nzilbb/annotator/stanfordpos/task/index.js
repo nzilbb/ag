@@ -57,7 +57,7 @@ getSchema(s => {
     var posLayerId = document.getElementById("posLayerId");
     addLayerOptions(
         posLayerId, schema,
-        layer => layer.parentId == schema.wordLayerId && layer.alignment == 0);
+        layer => layer.parentId == schema.wordLayerId && layer.alignment == 2);
     posLayerId.selectedIndex = 0;
 
     // what models are available
