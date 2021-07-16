@@ -460,9 +460,9 @@ public class TestSltSerialization {
                  words[22].getId(), codes[1].tagsOn("word")[0].getId());
 
     codes = g.all("lexical");
-    assertEquals("Correct number of lexicaon codes: " + Arrays.asList(codes),
+    assertEquals("Correct number of lexical codes: " + Arrays.asList(codes),
                  1, codes.length);
-    assertEquals("lexical label", "is", codes[0].getLabel());
+    assertEquals("lexical label", "#is#", codes[0].getLabel());
     assertEquals("lexical code tags a word",
                  1, codes[0].tagsOn("word").length);
     assertEquals("lexical code tags \"s~\": " + codes[0].tagsOn("word")[0],
@@ -1184,7 +1184,7 @@ public class TestSltSerialization {
       "What happened in this one?",
       "And then it/'s heaps_and_heaps|heaps dark.",
       "What happened next?",
-      "%yip_yip Schnitzel_von_Krumm s[EP:s][LEXICAL:is]* :02 falled|fall[EW] out *of the baby/s/z nest.",
+      "%yip_yip Schnitzel_von_Krumm s[EP:s][LEXICAL:#is#]* :02 falled|fall[EW] out *of the baby/s/z nest.",
       "What happened next?",
       "They put (them) it back in the nest (um).",
       "Bye bye little bird.",

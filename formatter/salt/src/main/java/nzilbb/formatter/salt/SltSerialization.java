@@ -1857,32 +1857,32 @@ public class SltSerialization implements GraphDeserializer, GraphSerializer {
         // in order to not confuse these with proper names and with root forms, we annotate
         // them beforehand in three phases:
         // 1. identify the w_x[_y]...|z pattern, and create repetition annotions, marking the
-        // words with w#_x[_y] along the way
-        // 2. convert the w#_x[_y] words to w#x#y
-        // 3. split #-containing words into multiple tokens
+        // words with w`_x[_y] along the way
+        // 2. convert the w`_x[_y] words to w`x`y
+        // 3. split `-containing words into multiple tokens
         
         // phase 1: split off annotation 'root'
         transformer = new ConventionTransformer(
           wordLayer.getId(),
           "(?<first>[a-zA-Z0-9]+)(?<subsequent>_[^|]+)\\|(?<word>[a-zA-Z0-9]+)(?<punctuation>\\W*)",
-          "${first}#${subsequent}${punctuation}"
+          "${first}`${subsequent}${punctuation}"
           );
         if (repetitionsLayer != null) {
           transformer.addDestinationResult(repetitionsLayer.getId(), "$3");
         }
         transformer.transform(graph).commit();
         
-        // phase 2: delimited repetitions with #
+        // phase 2: delimited repetitions with `
         for (Annotation word : graph.all(wordLayer.getId())) {
-          if (word.getLabel().contains("#_")) { // a label created in phase 1
-            // convert _ into #
-            word.setLabel(word.getLabel().replaceAll("#","").replaceAll("_","#"));
+          if (word.getLabel().contains("`_")) { // a label created in phase 1
+            // convert _ into `
+            word.setLabel(word.getLabel().replaceAll("`","").replaceAll("_","`"));
           } // a label created in phase 1
         } // next word
         
-        // phase 3: split words on #
+        // phase 3: split words on `
         SimpleTokenizer repetitionSplitter = new SimpleTokenizer(
-          wordLayer.getId(), null, "#", true);
+          wordLayer.getId(), null, "`", true);
         repetitionSplitter.transform(graph).commit();
         
         // proper names - something like "Schnitzel_von_Crumm"
