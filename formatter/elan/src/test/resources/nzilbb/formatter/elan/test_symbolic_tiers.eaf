@@ -22,7 +22,7 @@
         </ANNOTATION>
     </TIER>
     <TIER ANNOTATOR="Robert" LINGUISTIC_TYPE_REF="tag-lt"
-        PARENT_REF="word" PARTICIPANT="mop03-2b" TIER_ID="orthography">
+        PARENT_REF="the-word-label" PARTICIPANT="mop03-2b" TIER_ID="orthography">
         <ANNOTATION>
             <REF_ANNOTATION ANNOTATION_ID="a17" ANNOTATION_REF="a12">
                 <ANNOTATION_VALUE>and</ANNOTATION_VALUE>
@@ -50,7 +50,7 @@
         </ANNOTATION>
     </TIER>
     <TIER ANNOTATOR="Robert" LINGUISTIC_TYPE_REF="token-lt"
-        PARENT_REF="mop03-2b" PARTICIPANT="mop03-2b" TIER_ID="word">
+        PARENT_REF="mop03-2b" PARTICIPANT="mop03-2b" TIER_ID="the-word-label">
         <ANNOTATION>
             <REF_ANNOTATION ANNOTATION_ID="a12" ANNOTATION_REF="a1">
                 <ANNOTATION_VALUE>"and</ANNOTATION_VALUE>

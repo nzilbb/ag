@@ -832,11 +832,9 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
                        || tierName.equalsIgnoreCase("turns")
                        || tierName.equalsIgnoreCase("turn")) {
               tierName = getTurnLayer().getId();
-            } else if (tierName.toLowerCase().startsWith("word")
-                       || tierName.toLowerCase().endsWith("word")
-                       || tierName.toLowerCase().startsWith("words")
-                       || tierName.toLowerCase().endsWith("words")
-                       || tierName.toLowerCase().endsWith("transcript")) {
+            } else if (tierName.toLowerCase().indexOf("word") >= 0
+                       || tierName.toLowerCase().indexOf("word") >= 0
+                       || tierName.toLowerCase().endsWith("transcript")) { // backwards compat.
               tierName = getWordLayer().getId();
             }
             Layer layer = getSchema().getLayer(tierName);
