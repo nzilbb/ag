@@ -1,3 +1,4 @@
+
 getVersion(version => { // <- a function to execute when we have a response
     document.getElementById("version").innerHTML = version;
 });
@@ -38,7 +39,7 @@ function selectFile(input) {
 function checkGrammars() {
     // show spinner
     startLoading();
-    
+
     try {
         getJSON("availableGrammars", grammarsOptions => {
             var grammarsDiv = document.getElementById("grammars");
@@ -54,7 +55,12 @@ function checkGrammars() {
                 for (m in grammarsOptions) {
                     var grammarsOption = grammarsOptions[m];
                     var li = document.createElement("li");
-                    li.appendChild(document.createTextNode(grammarsOption));
+                    var a = document.createElement("a");
+                    a.href = "downloadZip?" + grammarsOption + ".zip";
+                    a.download = grammarsOption + ".zip";
+                    a.title = "Download " + grammarsOption + ".zip"; // TODO i18n
+                    a.appendChild(document.createTextNode(grammarsOption));
+                    li.appendChild(a);
                     ul.appendChild(li);
                 } // next option
             }
@@ -63,5 +69,6 @@ function checkGrammars() {
         // hide spinner
         finishedLoading();
     }
+    
 }
 checkGrammars();

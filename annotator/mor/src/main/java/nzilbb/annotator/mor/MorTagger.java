@@ -27,6 +27,7 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.InputStream;
 import java.io.IOException;
 import java.io.StringBufferInputStream;
 import java.net.URL;
@@ -262,11 +263,12 @@ public class MorTagger extends Annotator {
   }
   
   /**
-   * Takes a file to be used instead of the built-in copy of cmudict.txt
+   * Saves a ZIP file (probably a grammar/lexicon).
    * @param file The lexicon file.
    * @return null if upload was successful, an error message otherwise.
    */
   public String uploadZip(File file) {
+    System.out.println("uploadZip " + file.getName());
     if (!file.getName().endsWith(".zip")) {
       return file.getName() + " is not a .zip file.";
     }
@@ -278,6 +280,30 @@ public class MorTagger extends Annotator {
     }
     return null;
   } // end of uploadLexicon()
+  
+  /**
+   * Provides access to a grammar/lexicon file.
+   * @param fileName The name of the grammar/lexicon file.
+   * @return The given file, or null if it doesn't exist or isn't a zip file.
+   */
+  public InputStream downloadZip(String fileName) {
+    if (!fileName.endsWith(".zip")) {
+      System.out.println(fileName + " isn't a zip file");
+      return null;
+    }
+    File zipFile = new File(getWorkingDirectory(), fileName);
+    if (!zipFile.exists()) {
+      System.out.println(zipFile.getPath() + " doesn't exist");
+      return null;
+    }
+    try {
+      System.out.println("Returning stream to " + zipFile.getPath());
+      return new FileInputStream(zipFile);
+    } catch(Exception exception) {
+      System.out.println(fileName + ": " + exception);
+      return null;
+    }
+  } // end of downloadZip()
   
   /**
    * Lists the grammars that are available for use.
