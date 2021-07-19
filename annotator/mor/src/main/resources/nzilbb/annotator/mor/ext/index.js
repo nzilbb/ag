@@ -55,11 +55,14 @@ function checkGrammars() {
                 for (m in grammarsOptions) {
                     var grammarsOption = grammarsOptions[m];
                     var li = document.createElement("li");
+                    li.appendChild(document.createTextNode(grammarsOption + " "));
                     var a = document.createElement("a");
                     a.href = "downloadZip?" + grammarsOption + ".zip";
                     a.download = grammarsOption + ".zip";
                     a.title = "Download " + grammarsOption + ".zip"; // TODO i18n
-                    a.appendChild(document.createTextNode(grammarsOption));
+                    var u = document.createElement("u");
+                    u.appendChild(document.createTextNode("↓"));
+                    a.appendChild(u);
                     li.appendChild(a);
                     ul.appendChild(li);
                 } // next option
