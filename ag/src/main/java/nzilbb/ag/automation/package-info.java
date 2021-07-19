@@ -88,6 +88,14 @@
     &hellip; which will get as a response whatever calling
     <code>uploadLexicon(tempFileContainingContent)</code> returns. </p>
 
+  <p> To provide for downloading of files from a web-app, the Annotation class's method
+    should return an InputStream object, e.g. if there's a method declared <br>
+    <code>public InputStream downloadLexicon()</code><br>
+    &hellip; then the web-app can make a GET request to <br>
+    <tt>/downloadLexicon</tt> <br>
+    &hellip; which will download the contents of whatever  calling
+    <code>downloadLexicon()</code> returns. </p>
+
   <p> The web-app can also ask for information about the annotation layer schema by
     making a GET request to <tt>getSchema</tt> which will return the schema encoded as
     JSON, e.g.: 
