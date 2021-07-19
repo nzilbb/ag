@@ -100,7 +100,6 @@ function postForm(path, formData, onUploaded, onProgress, onFailed) {
     var request = new XMLHttpRequest();
     request.open("POST", path);
     request.setRequestHeader("Accept", "text/plain");
-    console.log("onUploaded " + onUploaded);
     if (!onFailed) onFailed = onUploaded;
     if (onUploaded) request.addEventListener("load", onUploaded, false);
     if (onFailed) request.addEventListener("error", onFailed, false);
