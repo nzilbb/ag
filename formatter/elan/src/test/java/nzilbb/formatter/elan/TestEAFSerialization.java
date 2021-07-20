@@ -147,7 +147,7 @@ public class TestEAFSerialization {
 
     // attributes
     assertEquals("transcriber", "Robert", g.first("scribe").getLabel());
-    assertEquals("language", "eng", g.first("lang").getLabel());
+    assertEquals("language is alpha-2", "en", g.first("lang").getLabel());
     assertEquals("version date", "2017-08-28T16:48:05-03:00", g.first("version_date").getLabel());
 
     // participants     
@@ -283,7 +283,7 @@ public class TestEAFSerialization {
     // phrase language
     Annotation[] language = g.all("language");
     assertEquals("two language tags", 2, language.length);
-    assertEquals("first language tag", "mi", language[0].getLabel());
+    assertEquals("first language tag - converted to alpha-2 code", "mi", language[0].getLabel());
     assertEquals("first language tag word",
                  "whanau.", language[0].tagsOn("word")[0].getLabel());
     assertEquals("second language tag", "fr", language[1].getLabel());
@@ -896,7 +896,7 @@ public class TestEAFSerialization {
 
     // attributes
     assertEquals("transcriber", "Robert", g.first("scribe").getLabel());
-    assertEquals("language", "eng", g.first("lang").getLabel());
+    assertEquals("language", "en", g.first("lang").getLabel());
     assertEquals("version date", "2017-08-28T16:48:05-03:00", g.first("version_date").getLabel());
 
     // participants     
@@ -1021,7 +1021,7 @@ public class TestEAFSerialization {
 
     // attributes
     assertEquals("transcriber", "Robert", g.first("scribe").getLabel());
-    assertEquals("language", "eng", g.first("lang").getLabel());
+    assertEquals("language", "en", g.first("lang").getLabel());
     assertEquals("version date", "2017-08-28T16:48:05-03:00", g.first("version_date").getLabel());
 
     // participants     
@@ -1142,7 +1142,7 @@ public class TestEAFSerialization {
       
       // attributes
       assertEquals("transcriber", "Robert", g.first("scribe").getLabel());
-      assertEquals("language", "eng", g.first("lang").getLabel()); // TODO convert to alpah2
+      assertEquals("language", "en", g.first("lang").getLabel()); // TODO convert to alpah2
       assertEquals("version date", "2021-07-08T19:17:42-03:00", g.first("version_date").getLabel());
       
       // participants     
@@ -1245,7 +1245,7 @@ public class TestEAFSerialization {
     graph.addAnchor(new Anchor("a0", 0.0));
     graph.addAnchor(new Anchor("a15", 15.0));
     // language
-    graph.addAnnotation(new Annotation("l", "eng", "lang", "a0", "a15"));
+    graph.addAnnotation(new Annotation("l", "en", "lang", "a0", "a15"));
     // participants
     graph.addAnnotation(new Annotation("p1", "p1", "who", "a0", "a15"));
     graph.addAnnotation(new Annotation("p2", "p2", "who", "a0", "a15"));
@@ -1376,7 +1376,7 @@ public class TestEAFSerialization {
     LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
       Arrays.asList(serializer.getRequiredLayers()));
     assertEquals("Needed layers: " + needLayers,
-                 8, needLayers.size());
+                 9, needLayers.size());
     assertTrue(needLayers.contains("who"));
     assertTrue(needLayers.contains("turn"));
     assertTrue(needLayers.contains("utterance"));
@@ -1385,6 +1385,7 @@ public class TestEAFSerialization {
     assertTrue(needLayers.contains("lexical"));
     assertTrue(needLayers.contains("comment"));
     assertTrue(needLayers.contains("noise"));
+    assertTrue(needLayers.contains("lang"));
 	 
     // serialize
     final Vector<SerializationException> exceptions = new Vector<SerializationException>();

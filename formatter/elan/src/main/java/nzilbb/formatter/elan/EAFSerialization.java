@@ -1665,6 +1665,24 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
 
     } // next annotation
 
+    // ensure all language labels are ISO alpha-2
+    if (languageLayer != null) {
+      for (Annotation l : graph.all(languageLayer.getId())) {
+        // try to make it an alpha-2 code
+        l.setLabel(
+          iso639.alpha2(l.getLabel())
+          .orElse(l.getLabel())); // fall back to the original label
+      }
+    }
+    if (phraseLanguageLayer != null) {
+      for (Annotation l : graph.all(phraseLanguageLayer.getId())) {
+        // try to make it an alpha-2 code
+        l.setLabel(
+          iso639.alpha2(l.getLabel())
+          .orElse(l.getLabel())); // fall back to the original label
+      }
+    }
+
     // ensure anchors are shared between children and parents where required
     Vector<Layer> layers = graph.getLayersTopDown();
     // (bottom up to propagate changes from below)
@@ -1754,6 +1772,7 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
     if (getTurnLayer() != null) requiredLayers.add(getTurnLayer().getId());
     if (getUtteranceLayer() != null) requiredLayers.add(getUtteranceLayer().getId());
     if (getWordLayer() != null) requiredLayers.add(getWordLayer().getId());
+    if (getLanguageLayer() != null) requiredLayers.add(getLanguageLayer().getId());
     if (bUseConventions != null && bUseConventions) {
       if (getLexicalLayer() != null) requiredLayers.add(getLexicalLayer().getId());
       if (getPronounceLayer() != null) requiredLayers.add(getPronounceLayer().getId());
@@ -1830,6 +1849,14 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
         language = lang.getLabel();
         // try to make it an alpha-3 code
         language = iso639.alpha3(language).orElse(language);
+      }
+    }
+    if (phraseLanguageLayer != null && selectedLayers.contains(phraseLanguageLayer.getId())) {
+      for (Annotation lang : graph.all(languageLayer.getId())) {
+        // try to make it an alpha-3 code
+        lang.setLabel(
+          iso639.alpha3(lang.getLabel())
+          .orElse(lang.getLabel())); // fall back to the original label
       }
     }
 
