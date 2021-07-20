@@ -1728,8 +1728,12 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
   public Annotation createTag(String layerId, String label) {
     if (getGraph() == null) return null;
 
+    assert getGraph() != null
+      : "getGraph() != null";
+    assert getGraph().getLayer(layerId) != null
+      : "getGraph().getLayer("+layerId+") != null";
     assert getGraph().getLayer(layerId).getParent() != null
-      : "getGraph().getLayer(tag.getLayerId()).getParent() != null";
+      : "getGraph().getLayer("+layerId+").getParent() != null";
     assert getLayer() != null : "getLayer() != null";
     Layer tagLayer = getGraph().getLayer(layerId);
     assert tagLayer != null : "tagLayer != null - " + tagLayer;

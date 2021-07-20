@@ -168,41 +168,12 @@ public class Normalizer implements GraphTransformer {
         }
       } // next turn
     } // next participant
-
+   
     // join subsequent turns by the same speaker...
-    // for each participant (assumed to be parent of turn)
-    for (Annotation participant : graph.all(schema.getParticipantLayerId())) {
-      Annotation[] turns = participant.annotations(schema.getTurnLayerId());
-      // go back through all the turns, looking for a turn for the same speaker that is
-      // joined to, or overlaps, this one
-
-      for (int i = turns.length - 2; i >= 0; i--) {
-        Annotation preceding = turns[i];
-        Annotation following = turns[i + 1];
-        boolean mergeTurns = false;
-        if (preceding.getEnd().getOffset() != null
-            && following.getStart().getOffset() != null) {
-          if (preceding.getEnd().getOffset() >= following.getStart().getOffset()) {
-            mergeTurns = true;
-          }
-          else if (getMinimumTurnPauseLength() > 0
-                   && preceding.getEnd().getOffset() + getMinimumTurnPauseLength()
-                   >= following.getStart().getOffset()) {
-            // there is a short enough pause between two turns of the same participant
-            // but there also must be no intervening speakers
-            if (graph.overlappingAnnotations(
-                  preceding.getEnd(), following.getStart(), schema.getTurnLayerId())
-                .length == 0) {
-              mergeTurns = true;
-            }
-          }
-        }
-        if (mergeTurns) {
-          mergeTurns(preceding, following);
-        }
-      } // next preceding turn
-
-    } // next turn parent
+    new Coalescer()
+      .setLayerId(schema.getTurnLayerId())
+      .setMinimumPauseLength(getMinimumTurnPauseLength())
+      .transform(graph);
 
     if (schema.getWordLayerId() != null) {
       // disconnect words from turns and utterances
