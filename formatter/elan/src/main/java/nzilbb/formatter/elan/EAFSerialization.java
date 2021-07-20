@@ -56,6 +56,7 @@ import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.ag.util.AnnotationComparatorByAnchor;
+import nzilbb.ag.util.Coalescer;
 import nzilbb.ag.util.ConventionTransformer;
 import nzilbb.ag.util.OrthographyClumper;
 import nzilbb.ag.util.SimpleTokenizer;
@@ -351,6 +352,23 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
   public EAFSerialization setLanguageLayer(Layer newLanguageLayer) { languageLayer = newLanguageLayer; return this; }
 
   /**
+   * Layer for possible phrase language tags.
+   * @see #getPhraseLanguageLayer()
+   * @see #setPhraseLanguageLayer(Layer)
+   */
+  protected Layer phraseLanguageLayer;
+  /**
+   * Getter for {@link #phraseLanguageLayer}: Layer for possible phrase language tags.
+   * @return Layer for possible phrase language tags.
+   */
+  public Layer getPhraseLanguageLayer() { return phraseLanguageLayer; }
+  /**
+   * Setter for {@link #phraseLanguageLayer}: Layer for possible phrase language tags.
+   * @param newPhraseLanguageLayer Layer for possible phrase language tags.
+   */
+  public EAFSerialization setPhraseLanguageLayer(Layer newPhraseLanguageLayer) { phraseLanguageLayer = newPhraseLanguageLayer; return this; }
+  
+  /**
    * Whether to use text conventions for comment, noise, lexical, and pronounce annotations.
    * @see #getUseConventions()
    * @see #setUseConventions(Boolean)
@@ -432,7 +450,7 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
   public SerializationDescriptor getDescriptor() {
     return new SerializationDescriptor(
       "ELAN EAF Transcript", getClass().getPackage().getImplementationVersion(),
-      "text/x-eaf+xml", ".eaf", "1.0.4",
+      "text/x-eaf+xml", ".eaf", "1.0.5",
       getClass().getResource("icon.png"));
   }
    
@@ -634,6 +652,13 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
         Arrays.asList("transcript","word","words","w"));
       layerToCandidates.put("wordLayer", possibleTurnChildLayers);
     }
+    LinkedHashMap<String,Layer> possiblePhraseLayers = new LinkedHashMap<String,Layer>();
+    for (String id : possibleTurnChildLayers.keySet()) {
+      if (!id.equals(schema.getUtteranceLayerId())
+          && !id.equals(schema.getWordLayerId())) {
+        possiblePhraseLayers.put(id, possibleTurnChildLayers.get(id));
+      }
+    } // next aligned turn child layer
 
     LinkedHashMap<String,Layer> topLevelLayers = new LinkedHashMap<String,Layer>();
     for (Layer top : schema.getRoot().getChildren().values()) {
@@ -685,11 +710,19 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
       Arrays.asList("transcriptversiondate","versiondate","transcriptdate","date"));
     layerToCandidates.put("dateLayer", graphTagLayers);
 
+    // transcript language
     layerToPossibilities.put(
       new Parameter("languageLayer", Layer.class, "Transcript Language layer", 
                     "The language of the whole transcript"), 
       Arrays.asList("transcriptlanguage","language","transcriptlang","lang"));
     layerToCandidates.put("languageLayer", graphTagLayers);
+
+    // phrase language
+    layerToPossibilities.put(
+      new Parameter("phraseLanguageLayer", Layer.class, "Phrase Language layer", 
+                    "For tagging individual phrases with a language"), 
+      Arrays.asList("phraselanguage","language","phraselang","lang"));
+    layerToCandidates.put("phraseLanguageLayer", possiblePhraseLayers);
 
     // add parameters that aren't in the configuration yet, and set possibile/default values
     for (Parameter p : layerToPossibilities.keySet()) {
@@ -1016,6 +1049,7 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
     if (authorLayer != null) graph.addLayer((Layer)authorLayer.clone());
     if (dateLayer != null) graph.addLayer((Layer)dateLayer.clone());
     if (languageLayer != null) graph.addLayer((Layer)languageLayer.clone());
+    if (phraseLanguageLayer != null) graph.addLayer((Layer)phraseLanguageLayer.clone());
 
     graph.setOffsetUnits(Constants.UNIT_SECONDS);
     graph.setOffsetGranularity(timeFactor);
@@ -1437,6 +1471,19 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
               getWordLayer().getId(), "\\[(.*)", "(.*)\\]", true, null, null, 
               noiseLayer==null?null:noiseLayer.getId(), "$1", "$1", false, false);
             noiseTransformer.transform(graph);
+            graph.commit();
+		  
+            // word[CS:lang]
+            ConventionTransformer languageTransformer = new ConventionTransformer(
+              getWordLayer().getId(), "(.+)\\[CS:(.+)\\](\\p{Punct}*)", "$1$3", 
+              phraseLanguageLayer==null?null:phraseLanguageLayer.getId(), "$2");
+            languageTransformer.transform(graph);
+            if (phraseLanguageLayer != null) {
+              // join contiguous phrase language tags with the same label
+              new Coalescer()
+                .setLayerId(phraseLanguageLayer.getId())
+                .transform(graph);
+            }
             graph.commit();
 		  
             // word[pronounce]

@@ -36,6 +36,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.Vector;
+import java.util.stream.Collectors;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.json.JSONSerialization;
@@ -71,6 +72,9 @@ public class TestEAFSerialization {
       new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(true)
       .setParentId("turn").setParentIncludes(true),
+      new Layer("language", "Phrase Language").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
       new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(false)
       .setParentId("turn").setParentIncludes(true),
@@ -89,7 +93,7 @@ public class TestEAFSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(10, configuration.size());
+    assertEquals(11, configuration.size());
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("pronounce", "pronounce", 
@@ -102,8 +106,10 @@ public class TestEAFSerialization {
                  ((Layer)configuration.get("authorLayer").getValue()).getId());
     assertEquals("version_date", "version_date", 
                  ((Layer)configuration.get("dateLayer").getValue()).getId());
-    assertEquals("language", "lang", 
+    assertEquals("transcript language", "lang", 
                  ((Layer)configuration.get("languageLayer").getValue()).getId());
+    assertEquals("phrase language", "language", 
+                 ((Layer)configuration.get("phraseLanguageLayer").getValue()).getId());
     assertEquals("useConventions", Boolean.TRUE, 
                  (Boolean)configuration.get("useConventions").getValue());
     assertEquals("ignoreBlankAnnotations", Boolean.TRUE, 
@@ -112,7 +118,7 @@ public class TestEAFSerialization {
                  (Double)configuration.get("minimumTurnPauseLength").getValue());
       
     configuration.get("minimumTurnPauseLength").setValue(Double.valueOf(0.5));
-    assertEquals(10, deserializer.configure(configuration, schema).size());
+    assertEquals(11, deserializer.configure(configuration, schema).size());
     assertEquals("customize minimumTurnPauseLength", Double.valueOf(0.5), 
                  deserializer.getMinimumTurnPauseLength());
 
@@ -274,6 +280,18 @@ public class TestEAFSerialization {
 
     // ensure order of word tags isn't important
       
+    // phrase language
+    Annotation[] language = g.all("language");
+    assertEquals("two language tags", 2, language.length);
+    assertEquals("first language tag", "mi", language[0].getLabel());
+    assertEquals("first language tag word",
+                 "whanau.", language[0].tagsOn("word")[0].getLabel());
+    assertEquals("second language tag", "fr", language[1].getLabel());
+    assertEquals("second language tag word 1",
+                 "Nouvelle", language[1].getStart().startOf("word").iterator().next().getLabel());
+    assertEquals("second language tag word 2",
+                 "Zélande", language[1].getEnd().endOf("word").iterator().next().getLabel());
+
     // pronounce
     Annotation[] pronounce = g.all("pronounce");
     assertEquals("f{mli", pronounce[0].getLabel());
@@ -337,7 +355,9 @@ public class TestEAFSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(10, deserializer.configure(configuration, schema).size());
+    assertEquals(11, deserializer.configure(configuration, schema).size());
+    assertNull("phrase language",
+               configuration.get("phraseLanguageLayer").getValue());
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("pronounce", "pronounce", 
@@ -582,7 +602,9 @@ public class TestEAFSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(10, deserializer.configure(configuration, schema).size());
+    assertEquals(11, deserializer.configure(configuration, schema).size());
+    assertNull("phrase language",
+               configuration.get("phraseLanguageLayer").getValue());
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("pronounce", "pronounce", 
@@ -816,7 +838,9 @@ public class TestEAFSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(10, configuration.size());
+    assertEquals(11, configuration.size());
+    assertNull("phrase language",
+               configuration.get("phraseLanguageLayer").getValue());
     assertNull("comment", 
                configuration.get("commentLayer").getValue());
     assertNull("pronounce",
@@ -840,7 +864,9 @@ public class TestEAFSerialization {
       
     configuration.get("useConventions").setValue(Boolean.FALSE);
     configuration.get("ignoreBlankAnnotations").setValue(Boolean.FALSE);
-    assertEquals(10, deserializer.configure(configuration, schema).size());
+    assertEquals(11, deserializer.configure(configuration, schema).size());
+    assertNull("phrase language",
+               configuration.get("phraseLanguageLayer").getValue());
     assertEquals("customize useConventions", Boolean.FALSE, 
                  deserializer.getUseConventions());
     assertEquals("customize ignoreBlankAnnotations", Boolean.FALSE, 
@@ -942,7 +968,9 @@ public class TestEAFSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(10, configuration.size());
+    assertEquals(11, configuration.size());
+    assertNull("phrase language",
+               configuration.get("phraseLanguageLayer").getValue());
     assertNull("comment", 
                configuration.get("commentLayer").getValue());
     assertNull("pronounce",
@@ -965,7 +993,7 @@ public class TestEAFSerialization {
                  (Double)configuration.get("minimumTurnPauseLength").getValue());
       
     configuration.get("useConventions").setValue(Boolean.FALSE);
-    assertEquals(10, deserializer.configure(configuration, schema).size());
+    assertEquals(11, deserializer.configure(configuration, schema).size());
     assertEquals("customize useConventions", Boolean.FALSE, 
                  deserializer.getUseConventions());
 
@@ -1063,7 +1091,9 @@ public class TestEAFSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(10, deserializer.configure(configuration, schema).size());
+    assertEquals(11, deserializer.configure(configuration, schema).size());
+    assertNull("phrase language",
+               configuration.get("phraseLanguageLayer").getValue());
     assertNull("comment",
                configuration.get("commentLayer").getValue());
     assertNull("pronounce",
@@ -1319,7 +1349,9 @@ public class TestEAFSerialization {
     // general configuration
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(10, serializer.configure(configuration, schema).size());
+    assertEquals(11, serializer.configure(configuration, schema).size());
+    assertNull("phrase language",
+               configuration.get("phraseLanguageLayer").getValue());
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("pronounce", "pronounce", 
@@ -1428,7 +1460,9 @@ public class TestEAFSerialization {
     // general configuration
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(10, serializer.configure(configuration, schema).size());
+    assertEquals(11, serializer.configure(configuration, schema).size());
+    assertNull("phrase language",
+               configuration.get("phraseLanguageLayer").getValue());
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("pronounce", "pronounce", 
@@ -1541,7 +1575,9 @@ public class TestEAFSerialization {
     // general configuration
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(10, serializer.configure(configuration, schema).size());
+    assertEquals(11, serializer.configure(configuration, schema).size());
+    assertNull("phrase language",
+               configuration.get("phraseLanguageLayer").getValue());
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("pronounce", "pronounce", 
@@ -1653,7 +1689,9 @@ public class TestEAFSerialization {
     // general configuration
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(10, serializer.configure(configuration, schema).size());
+    assertEquals(11, serializer.configure(configuration, schema).size());
+    assertNull("phrase language",
+               configuration.get("phraseLanguageLayer").getValue());
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("pronounce", "pronounce", 
