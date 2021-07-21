@@ -283,14 +283,19 @@ public class TestEAFSerialization {
     // phrase language
     Annotation[] language = g.all("language");
     assertEquals("two language tags", 2, language.length);
-    assertEquals("first language tag - converted to alpha-2 code", "mi", language[0].getLabel());
-    assertEquals("first language tag word",
-                 "whanau.", language[0].tagsOn("word")[0].getLabel());
-    assertEquals("second language tag", "fr", language[1].getLabel());
-    assertEquals("second language tag word 1",
-                 "Nouvelle", language[1].getStart().startOf("word").iterator().next().getLabel());
-    assertEquals("second language tag word 2",
-                 "Zélande", language[1].getEnd().endOf("word").iterator().next().getLabel());
+    // fr is first even though it's later because phrase tags are processed before token tags
+    assertEquals("first language tag", "fr", language[0].getLabel());
+    Annotation firstWord = language[0].getStart().startOf("word").iterator().next();
+    assertEquals("first language tag word 1",
+                 "en", firstWord.getLabel());
+    assertEquals("first language tag word 2",
+                 "Nouvelle", firstWord.getNext().getLabel());
+    Annotation lastWord = language[0].getEnd().endOf("word").iterator().next();
+    assertEquals("first language tag word 3",
+                 "Zélande", lastWord.getLabel());
+    assertEquals("second language tag - converted to alpha-2 code", "mi", language[1].getLabel());
+    assertEquals("second language tag word",
+                 "whanau.", language[1].tagsOn("word")[0].getLabel());
 
     // pronounce
     Annotation[] pronounce = g.all("pronounce");

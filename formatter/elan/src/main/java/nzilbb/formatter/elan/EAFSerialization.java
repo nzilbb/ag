@@ -1466,24 +1466,35 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
             commentTransformer.transform(graph);
             graph.commit();
 		  
-            // word [noise noise] word
-            SpanningConventionTransformer noiseTransformer = new SpanningConventionTransformer(
-              getWordLayer().getId(), "\\[(.*)", "(.*)\\]", true, null, null, 
-              noiseLayer==null?null:noiseLayer.getId(), "$1", "$1", false, false);
-            noiseTransformer.transform(graph);
+            // [CS:lang]word word[CS:lang]
+            SpanningConventionTransformer phraseLanguageTransformer
+              = new SpanningConventionTransformer(
+                getWordLayer().getId(), "\\[CS:(.+)\\](.*)", "(.+)\\[CS:(.+)\\](\\p{Punct}*)",
+                false, "$2", "$1$3", 
+                phraseLanguageLayer==null?null:phraseLanguageLayer.getId(), "$1", null,
+                false, false);
+            phraseLanguageTransformer.transform(graph);
             graph.commit();
 		  
             // word[CS:lang]
-            ConventionTransformer languageTransformer = new ConventionTransformer(
+            ConventionTransformer wordLanguageTransformer = new ConventionTransformer(
               getWordLayer().getId(), "(.+)\\[CS:(.+)\\](\\p{Punct}*)", "$1$3", 
               phraseLanguageLayer==null?null:phraseLanguageLayer.getId(), "$2");
-            languageTransformer.transform(graph);
+            wordLanguageTransformer.transform(graph);
+            
             if (phraseLanguageLayer != null) {
               // join contiguous phrase language tags with the same label
               new Coalescer()
                 .setLayerId(phraseLanguageLayer.getId())
                 .transform(graph);
             }
+            graph.commit();
+		  
+            // word [noise noise] word
+            SpanningConventionTransformer noiseTransformer = new SpanningConventionTransformer(
+              getWordLayer().getId(), "\\[(.*)", "(.*)\\]", true, null, null, 
+              noiseLayer==null?null:noiseLayer.getId(), "$1", "$1", false, false);
+            noiseTransformer.transform(graph);
             graph.commit();
 		  
             // word[pronounce]
