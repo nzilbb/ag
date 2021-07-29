@@ -40,6 +40,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
   </properties>
 
   <dependencies>
@@ -242,7 +243,7 @@
 	<configuration>
           <show>public</show>
           <overview>overview.html</overview>
-	  <bottom>&lt;a rel='license' href='http://creativecommons.org/licenses/by-sa/2.0/'&gt;&lt;img alt='CC-BY-SA Creative Commons Licence ' src='/ag/images/cc-by-sa.svg' title='This work is licensed under a Creative Commons Attribution-ShareAlike 2.0 Generic License' /&gt;&lt;/a&gt;&lt;a rel='author' href='https://www.canterbury.ac.nz/nzilbb/'&gt;&lt;img src='/ag/images/nzilbb.svg' alt='Te Kāhui Roro Reo | The New Zealand Institute of Language, Brain and Behaviour' title='&amp;copy; ${TODAY} NZILBB'&gt;&lt;/a&gt;</bottom>
+	  <bottom>&lt;a rel='license' href='http://creativecommons.org/licenses/by-sa/2.0/'&gt;&lt;img alt='CC-BY-SA Creative Commons Licence ' src='/ag/images/cc-by-sa.svg' title='This work is licensed under a Creative Commons Attribution-ShareAlike 2.0 Generic License' /&gt;&lt;/a&gt;&lt;a rel='author' href='https://www.canterbury.ac.nz/nzilbb/'&gt;&lt;img src='/ag/images/nzilbb.svg' alt='Te Kāhui Roro Reo | The New Zealand Institute of Language, Brain and Behaviour' title='🄯 ${maven.build.timestamp} NZILBB'&gt;&lt;/a&gt;</bottom>
           <stylesheetfile>javadoc.css</stylesheetfile>
 	</configuration>
       </plugin>

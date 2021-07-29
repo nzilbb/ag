@@ -274,7 +274,7 @@
         <pre>// show spinner
 startLoading();
 // load the task settings
-getText("getTaskParameters", text => {
+getText("getTaskParameters", text =&gt; {
     try {
         // ...process the settings, populate the form, etc...
     } finally {
@@ -290,7 +290,7 @@ getText("getTaskParameters", text => {
         <pre>// show spinner
 startLoading();
 // load the task settings
-getText("getTaskParameters", text => {
+getText("getTaskParameters", text =&gt; {
     try {
         // ...process the settings, populate the form, etc...
     } finally {

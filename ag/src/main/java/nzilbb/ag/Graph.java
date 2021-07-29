@@ -1259,7 +1259,7 @@ public class Graph extends Annotation {
    * which becomes <var>after.start</var> and the new annotation's end, and the previous
    * <var>after.start</var> becomes the new annotation's start. 
    * <p> The new anchor, and the new annotation, are both added to the graph.
-   * @param before The annotation before the new annotation to add. 
+   * @param after The annotation after the new annotation to add. 
    * If <var>layerId</var> == <var>before.layerId</var>, the new annotation's
    * <var>parentId</var> is set to <var>before.parentId</var>. Otherwise, it's the
    * caller's responsibility to assign a parent to the new annotation.
