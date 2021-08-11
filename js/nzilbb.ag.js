@@ -143,8 +143,10 @@ nzilbb.ag.Graph.activateAnchors = function(anchors)
 	anchors[a].id = a;
     }    
 }
-nzilbb.ag.Graph.activateLayer = function(ag, parent, layerId, annotations)
-{
+nzilbb.ag.Graph.activateLayer = function(ag, parent, layerId, annotations) {
+
+    // annotations are JSON objects, we will create an array of child Annotation objects: 
+    var children = [];
     for (var i in annotations)
     {
 	var annotation = annotations[i];
@@ -164,6 +166,7 @@ nzilbb.ag.Graph.activateLayer = function(ag, parent, layerId, annotations)
             annotation.layerId, annotation.label, ag, annotation.startId, annotation.endId);
         Object.assign(a, annotation);
         annotation = a;
+        children.push(annotation);
 
 	// indexing for easy lookup and iteration
 	ag.annotations[annotation.id] = annotation; // index annotations by id
@@ -190,6 +193,9 @@ nzilbb.ag.Graph.activateLayer = function(ag, parent, layerId, annotations)
 	} // next key
 
     } // next annotation
+
+    // ensure children are the Annotation objects
+    if (parent) parent[layerId] = children;
 }
 
 /**
