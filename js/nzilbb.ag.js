@@ -249,7 +249,7 @@
 	    if (graph[key] instanceof Array // TODO we actually know what layers to look for, so should use that instead
 	        && key != "layers" && key != "anchors" && key != "participants")
 	    {
-	        nzilbb.ag.Graph.activateLayer(graph, null, key, graph[key]);
+	        nzilbb.ag.Graph.activateLayer(graph, graph, key, graph[key]);
 	    }
         }    
         return graph;
@@ -388,6 +388,50 @@
 	    return tags;
         },
 
+        first : function(layerId) {
+            // is it me?
+            if (this.layerId == layerId) {
+                return this;
+            }
+            // is it a child layer?
+            if (this[layerId]) {
+                if (this[layerId].length > 0) {
+                    return this[layerId][0];
+                }
+            }
+            // go up through ancestors
+            var ancestor = this.parent;
+            while (ancestor != null && ancestor.layerId != layerId) {
+                ancestor = ancestor.parent;
+            } // next
+            if (ancestor != null && ancestor.layerId == layerId) {
+                return ancestor;
+            }
+            // TODO traverse schema
+            return null;
+        },
+        
+        all : function(layerId) {
+            // is it me?
+            if (this.layerId == layerId) {
+                return [this];
+            }
+            // is it a child layer?
+            if (this[layerId]) {
+                return this[layerId];
+            }
+            // go up through ancestors
+            var ancestor = this.parent;
+            while (ancestor != null && ancestor.layerId != layerId) {
+                ancestor = ancestor.parent;
+            } // next
+            if (ancestor != null && ancestor.layerId == layerId) {
+                return [ancestor];
+            }
+            // TODO traverse schema
+            return [];
+        },
+
         // annotation methods
 
         createTag : function(layerId, label) {
@@ -402,7 +446,7 @@
 	    this.graph.addAnnotation(tag);
 	    return tag;
         }
-
+        
     } // Annotation methods
 
     // Anchor class
