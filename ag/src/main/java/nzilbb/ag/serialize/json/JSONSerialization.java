@@ -30,6 +30,7 @@ import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Optional;
@@ -40,10 +41,10 @@ import java.util.Vector;
 import java.util.function.Consumer;
 import javax.json.Json;
 import javax.json.JsonArray;
-import javax.json.JsonArrayBuilder;
 import javax.json.JsonException;
 import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
+import javax.json.stream.JsonGenerator;
+import javax.json.stream.JsonGeneratorFactory;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
@@ -501,62 +502,56 @@ public class JSONSerialization implements GraphSerializer {
         if (!getCancelling()) {
           try {
             File f = File.createTempFile(graph.getId(), ".json");
-            FileOutputStream out = new FileOutputStream(f);	 
-            PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, "utf-8"));
-            
-            writer.println("{");
-            json.add("id", graph.getId());
+            FileOutputStream out = new FileOutputStream(f);
+            JsonGeneratorFactory factory = Json.createGeneratorFactory(new HashMap() {{
+              if (indenter != null && indenter.length() > 0) {
+                put(JsonGenerator.PRETTY_PRINTING, Boolean.TRUE);
+              }
+            }});
+            JsonGenerator json = factory.createGenerator(out);
+            json.writeStartObject();
+            json.write("id", graph.getId());
             
             // offsetGranularity
             if (graph.getOffsetGranularity() != null) {
-              writer.println(keyValue(1, "offsetGranularity", graph.getOffsetGranularity()) + ",");
+              json.write("offsetGranularity", graph.getOffsetGranularity());
             }
             
             // layers
             Schema schema = graph.getSchema();
-            writer.println(indent(1) + "\"schema\":{");
+            json.writeStartObject("schema");
             if (schema.getCorpusLayerId() != null)
-              writer.println(keyValue(2, "corpusLayerId", schema.getCorpusLayerId()) + ",");
+              json.write("corpusLayerId", schema.getCorpusLayerId());
             if (schema.getEpisodeLayerId() != null)
-              writer.println(keyValue(2, "episodeLayerId", schema.getEpisodeLayerId()) + ",");
+              json.write("episodeLayerId", schema.getEpisodeLayerId());
             if (schema.getParticipantLayerId() != null)
-              writer.println(keyValue(2, "participantLayerId", schema.getParticipantLayerId()) + ",");
+              json.write("participantLayerId", schema.getParticipantLayerId());
             if (schema.getTurnLayerId() != null)
-              writer.println(keyValue(2, "turnLayerId", schema.getTurnLayerId()) + ",");
+              json.write("turnLayerId", schema.getTurnLayerId());
             if (schema.getUtteranceLayerId() != null)
-              writer.println(keyValue(2, "utteranceLayerId", schema.getUtteranceLayerId()) + ",");
+              json.write("utteranceLayerId", schema.getUtteranceLayerId());
             if (schema.getWordLayerId() != null)
-              writer.println(keyValue(2, "wordLayerId", schema.getWordLayerId()) + ",");
-            serializeLayer(writer, 2, schema.getRoot());
-            writer.println();
-            writer.println(indent(1) + "},");
+              json.write("wordLayerId", schema.getWordLayerId());
+            serializeLayer(json, schema.getRoot());
+            json.writeEnd();
                   
             // anchors
-            writer.println(indent(1) + "\"anchors\":{");
-            boolean firstAnchor = true;
+            json.writeStartObject("anchors");
             Collection<Anchor> anchors = graph.getAnchors().values();
             if (sortAnchors) anchors = graph.getAnchorsOrderedByStructure();
             for (Anchor anchor : anchors) {
-              if (firstAnchor)
-                firstAnchor = false;
-              else
-                writer.println(",");
-              serializeAnchor(writer, 2, anchor);
+              serializeAnchor(json, anchor);
             } // next anchor
-            writer.println();
-            writer.println(indent(1) + "},");
+            json.writeEnd();
           
             // layers in predictable (alphabetical) order
-            for (String layerId
-                   : new TreeSet<String>(schema.getRoot().getChildren().keySet())) {
-              serializeAnnotations(writer, 1, layerId, graph.getAnnotations(layerId));
+            for (String layerId : new TreeSet<String>(schema.getRoot().getChildren().keySet())) {
+              serializeAnnotations(json, layerId, graph.getAnnotations(layerId));
             }
-          
-            writer.println();
-            writer.println("}");
-          
+            
+            json.writeEnd();
+            json.close();
             // provide a stream from the buffer
-            writer.close();
             TempFileInputStream in = new TempFileInputStream(f);
             consumer.accept(new NamedStream(in, graph.getId() + ".json"));
           } catch(Exception exception) {
@@ -569,216 +564,111 @@ public class JSONSerialization implements GraphSerializer {
    
   /**
    * Recursively serializes the given layer's definition.
-   * @param writer The writer to write to.
-   * @param indent The current indent level.
+   * @param json The generator to write to.
    * @param layer The layer to serialize.
    */
-  protected void serializeLayer(PrintWriter writer, int indent, Layer layer) {
-    writer.println();
-    writer.print(indent(indent) + q(layer.getId()) + ":{");
-    writer.print(keyValue(0, "description", layer.getDescription()));
+  protected void serializeLayer(JsonGenerator json, Layer layer) {
+    json.writeStartObject(layer.getId());
+    json.write("description", layer.getDescription());
     if (layer.getParentId() != null) {
-      writer.print(", ");
-      writer.println(keyValue(0, "alignment", layer.getAlignment()) + ",");
-      writer.print(keyValue(indent+1, "peers", layer.getPeers()));
-      writer.print(", ");
-      writer.print(keyValue(0, "peersOverlap", layer.getPeersOverlap()));
-      writer.print(", ");
-      writer.print(keyValue(0, "parentIncludes", layer.getParentIncludes()));
-      writer.print(", ");
-      writer.print(keyValue(0, "saturated", layer.getSaturated()));
+      json.write("alignment", layer.getAlignment());
+      json.write("peers", layer.getPeers());
+      json.write("peersOverlap", layer.getPeersOverlap());
+      json.write("parentIncludes", layer.getParentIncludes());
+      json.write("saturated", layer.getSaturated());
     }
     if (layer.getChildren().size() > 0) {
-      writer.println(",");
-      writer.print(indent(indent+1) + "\"children\":{");
+      json.writeStartObject("children");
       // layers in predictable (alphabetical) order
-      boolean firstChild = true;
       for (String childId : new TreeSet<String>(layer.getChildren().keySet())) {
-        if (firstChild)
-          firstChild = false;
-        else
-          writer.print(",");
-        serializeLayer(writer, indent+2, layer.getChildren().get(childId));
+        serializeLayer(json, layer.getChildren().get(childId));
       } // next child
-      writer.println();
-      writer.print(indent(indent+1) + "}");
+      json.writeEnd();
     }
-    writer.print("}");
+    json.writeEnd();
   } // end of serializeLayer()
 
   /**
    * Serializes the given anchor.
-   * @param writer The writer to write to.
-   * @param indent The current indent level.
+   * @param json The generator to write to.
    * @param anchor The anchor to serialize.
    */
-  protected void serializeAnchor(PrintWriter writer, int indent, Anchor anchor) {
-    writer.print(indent(indent) + q(anchor.getId()) + ":\t{");
-    writer.print(keyValue(0, "offset", anchor.getOffset()));
+  protected void serializeAnchor(JsonGenerator json, Anchor anchor) {
+    json.writeStartObject(anchor.getId());
+    if (anchor.getOffset() != null) {
+      json.write("offset", anchor.getOffset());
+    } else {
+      json.writeNull("offset");
+    }
     if (anchor.getConfidence() != null) {
-      writer.print(",\t");
-      writer.print(keyValue(0, "confidence", anchor.getConfidence()));
+      json.write("confidence", anchor.getConfidence());
     }
     if (anchor.containsKey("comment")) {
-      writer.print(",\t");
-      writer.print(keyValue(0, "comment", anchor.get("comment").toString()));
+      json.write("comment", anchor.get("comment").toString());
     }
-    writer.print("}");
+    json.writeEnd();
   } // end of serializeAnchor()
 
   /**
    * Serializes the given annotation.
-   * @param writer The writer to write to.
-   * @param indent The current indent level.
+   * @param json The generator to write to.
    * @param layerId The ID of the annotations.
    * @param annotations A list of annotations on the same layer to serialize.
    */
   protected void serializeAnnotations(
-    PrintWriter writer, int indent, String layerId, Collection<Annotation> annotations) {
+    JsonGenerator json, String layerId, Collection<Annotation> annotations) {
     if (annotations.size() > 0) {
-      writer.print(indent(indent) + q(layerId) + ":[");
+      json.writeStartArray(layerId);
       boolean firstLayer = true;
       for (Annotation child : annotations) {
-        if (firstLayer)
-          firstLayer = false;
-        else
-          writer.print(",");
-        writer.println();
-        writer.print(indent(indent+1) + "{");
-        serializeAnnotation(writer, indent+2, child);
-        writer.print("}");
+        json.writeStartObject();
+        serializeAnnotation(json, child);
+        json.writeEnd();
       } // next child
-      writer.print("]");
+      json.writeEnd();
     } // there really are children
   }
 
   /**
    * Serializes the given annotation.
-   * @param writer The writer to write to.
-   * @param indent The current indent level.
+   * @param json The generator to write to.
    * @param annotation The annotation to serialize.
    */
-  protected void serializeAnnotation(PrintWriter writer, int indent, Annotation annotation) {
-    writer.print(keyValue(0, "id", annotation.getId()));
-    writer.print(",\t");
-    writer.print(keyValue(0, "label", annotation.getLabel()));
-    writer.print(",\t");
-    writer.print(keyValue(0, "startId", annotation.getStartId()));
-    writer.print(",\t");
-    writer.print(keyValue(0, "endId", annotation.getEndId()));
+  protected void serializeAnnotation(JsonGenerator json, Annotation annotation) {
+    if (annotation.getId() != null) {
+      json.write("id", annotation.getId());
+    } else {
+      json.writeNull("id");
+    }
+    if (annotation.getLabel() != null) {
+      json.write("label", annotation.getLabel());
+    } else {
+      json.writeNull("label");
+    }
+    if (annotation.getStartId() != null) {
+      json.write("startId", annotation.getStartId());
+    } else {
+      json.writeNull("startId");
+    }
+    if (annotation.getEndId() != null) {
+      json.write("endId", annotation.getEndId());
+    } else {
+      json.writeNull("endId");
+    }
     if (annotation.getConfidence() != null) {
-      writer.print(",\t");
-      writer.print(keyValue(0, "confidence", annotation.getConfidence()));
+      json.write("confidence", annotation.getConfidence());
     }
     if (annotation.containsKey("comment")) {
-      writer.print(",\t");
-      writer.print(keyValue(0, "comment", annotation.get("comment").toString()));
+      json.write("comment", annotation.get("comment").toString());
     }
     LinkedHashMap<String,SortedSet<Annotation>> childLayers = annotation.getAnnotations();
     // layers in predictable (alphabetical) order
     for (String layerId : new TreeSet<String>(childLayers.keySet())) {
       SortedSet<Annotation> children = childLayers.get(layerId);
       if (children.size() > 0) {
-        writer.println(",");
-        serializeAnnotations(writer, indent, layerId, children);
+        serializeAnnotations(json, layerId, children);
       }
     } // next layer
   } // end of serializeAnnotation()
-   
-  /**
-   * Expresses a key and simple string value as JSON.
-   * @param indent The current indent level.
-   * @param key The key to serialize.
-   * @param value The value to serialize.
-   * @return A string of the form {indent}"{key}":"{value}",
-   */
-  protected String keyValue(int indent, String key, String value) {
-    StringBuffer s = new StringBuffer();
-    for (int i = 0; i < indent; i++) s.append(indenter);
-    s.append(q(key));
-    s.append(":");
-    s.append(q(value));
-    return s.toString();
-  } // end of keyValue()
-
-  /**
-   * Expresses a key and simple boolean value as JSON.
-   * @param indent The current indent level.
-   * @param key The key to serialize.
-   * @param value The value to serialize.
-   * @return A string of the form {indent}{key} : {value},
-   */
-  protected String keyValue(int indent, String key, boolean value) {
-    StringBuffer s = new StringBuffer();
-    for (int i = 0; i < indent; i++) s.append(indenter);
-    s.append(q(key));
-    s.append(":");
-    s.append(value);
-    return s.toString();
-  } // end of keyValue()
-
-  /**
-   * Expresses a key and simple integer value as JSON.
-   * @param indent The current indent level.
-   * @param key The key to serialize.
-   * @param value The value to serialize.
-   * @return A string of the form {indent}{key} : {value},
-   */
-  protected String keyValue(int indent, String key, int value) {
-    StringBuffer s = new StringBuffer();
-    for (int i = 0; i < indent; i++) s.append(indenter);
-    s.append(q(key));
-    s.append(":");
-    s.append(value);
-    return s.toString();
-  } // end of keyValue()
-
-  /**
-   * Expresses a key and Double object value as JSON.
-   * @param indent The current indent level.
-   * @param key The key to serialize.
-   * @param value The value to serialize.
-   * @return A string of the form {indent}{key} : {value},
-   */
-  protected String keyValue(int indent, String key, Double value) {
-    StringBuffer s = new StringBuffer();
-    for (int i = 0; i < indent; i++) s.append(indenter);
-    s.append(q(key));
-    s.append(":");
-    if (value != null) 
-      s.append(fmtOffset.format(value));
-    else
-      s.append("null");
-    return s.toString();
-  } // end of keyValue()
-   
-  /**
-   * Write indent characters to the given level.
-   * @param indent The level to indent to.
-   * @return A string with the indent character repeated the indent level number of times.
-   */
-  protected String indent(int indent) {
-    StringBuffer s = new StringBuffer();
-    for (int i = 0; i < indent; i++) s.append(indenter);
-    return s.toString();
-  } // end of indent()
   
-  /**
-   * Escapes the given string for expression as a JSON string, and wraps it in quotes.
-   * @param s The string to quote.
-   * @return The given string, in quotes and escaped for JSON.
-   */
-  protected String q(String s) {
-    if (s == null) return "null";
-    return "\"" 
-      + s.replaceAll("\\\\", "\\\\")
-      .replaceAll("\\\"", "\\\\\"")
-      .replaceAll("\t", "\\t")
-      .replaceAll("\b", "\\b")
-      .replaceAll("\r", "\\r")
-      .replaceAll("\n", "\\n")
-      .replaceAll("\f", "\\f")
-      + "\"";
-  } // end of q()
-
 } // end of class JSONSerialization

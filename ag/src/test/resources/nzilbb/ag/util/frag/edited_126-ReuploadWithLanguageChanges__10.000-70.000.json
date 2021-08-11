@@ -1,66 +1,224 @@
-{
-  "id":"026-ReuploadWithLanguageChanges__10.000-70.000",
-  "schema":{
-    "participantLayerId":"who",
-    "turnLayerId":"turns",
-    "utteranceLayerId":"utterances",
-    "wordLayerId":"token",
 
-    "transcript":{"description":"The annotation graph as a whole",
-      "children":{
-        "who":{"description":"participants", "alignment":0,
-          "peers":true, "peersOverlap":true, "parentIncludes":true, "saturated":true,
-          "children":{
-            "turns":{"description":"turns", "alignment":2,
-              "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
-              "children":{
-                "language":{"description":"Language", "alignment":2,
-                  "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false},
-                "token":{"description":"transcript", "alignment":2,
-                  "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false},
-                "utterances":{"description":"utterances", "alignment":2,
-                  "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true}
-              }}
-          }}
-      }}
-  },
-  "anchors":{
-    "n_1010":	{"offset":10.0,	"confidence":100},
-    "n_1011":	{"offset":null},
-    "n_1020":	{"offset":null},
-    "n_1030":	{"offset":null},
-    "n_1039":	{"offset":null},
-    "n_1040":	{"offset":30.0,	"confidence":100},
-    "n_1041":	{"offset":null},
-    "n_1050":	{"offset":null},
-    "n_1060":	{"offset":null},
-    "n_1070":	{"offset":50.0,	"confidence":100},
-    "n_1071":	{"offset":null},
-    "n_1075":	{"offset":null},
-    "n_1080":	{"offset":null},
-    "n_1090":	{"offset":null},
-    "n_1099":	{"offset":null},
-    "n_1100":	{"offset":70.0,	"confidence":100}
-  },
-  "who":[
-    {"id":"Maxwell Smart",	"label":"Maxwell Smart",	"startId":"n_1010",	"endId":"n_1100",
-      "turns":[
-        {"id":"em_11_0",	"label":"Maxwell Smart",	"startId":"n_1010",	"endId":"n_1100",	"confidence":100,
-          "language":[
-            {"id":"em_20_1",	"label":"es",	"startId":"n_1020",	"endId":"n_1039",	"confidence":100},
-            {"id":"em_20_2",	"label":"es2",	"startId":"n_1075",	"endId":"n_1099",	"confidence":100}],
-          "token":[
-            {"id":"ew_0_1",	"label":"86-1-1",	"startId":"n_1011",	"endId":"n_1020",	"confidence":100},
-            {"id":"ew_0_2",	"label":"86-1-2",	"startId":"n_1020",	"endId":"n_1030",	"confidence":100,	"comment":"ES"},
-            {"id":"ew_0_3",	"label":"86-1-3",	"startId":"n_1030",	"endId":"n_1039",	"confidence":100,	"comment":"ES"},
-            {"id":"ew_0_4",	"label":"86-2-1",	"startId":"n_1041",	"endId":"n_1050",	"confidence":100},
-            {"id":"ew_0_5",	"label":"86-2-2",	"startId":"n_1050",	"endId":"n_1060",	"confidence":100},
-            {"id":"ew_0_7",	"label":"86-3-1",	"startId":"n_1071",	"endId":"n_1075",	"confidence":100},
-            {"id":"ew_0_75",	"label":"86-3-2-new",	"startId":"n_1075",	"endId":"n_1080",	"confidence":100,	"comment":"ES"},
-            {"id":"ew_0_8",	"label":"86-3-2",	"startId":"n_1080",	"endId":"n_1090",	"confidence":100,	"comment":"ES"},
-            {"id":"ew_0_9",	"label":"86-3-3",	"startId":"n_1090",	"endId":"n_1099",	"confidence":100,	"comment":"ES"}],
-          "utterances":[
-            {"id":"em_12_1",	"label":"Maxwell Smart",	"startId":"n_1010",	"endId":"n_1040",	"confidence":100},
-            {"id":"em_12_2",	"label":"Maxwell Smart",	"startId":"n_1040",	"endId":"n_1070",	"confidence":100},
-            {"id":"em_12_3",	"label":"Maxwell Smart",	"startId":"n_1070",	"endId":"n_1100",	"confidence":100}]}]}]
+{
+    "id": "026-ReuploadWithLanguageChanges__10.000-70.000",
+    "schema": {
+        "participantLayerId": "who",
+        "turnLayerId": "turns",
+        "utteranceLayerId": "utterances",
+        "wordLayerId": "token",
+        "transcript": {
+            "description": "The annotation graph as a whole",
+            "children": {
+                "who": {
+                    "description": "participants",
+                    "alignment": 0,
+                    "peers": true,
+                    "peersOverlap": true,
+                    "parentIncludes": true,
+                    "saturated": true,
+                    "children": {
+                        "turns": {
+                            "description": "turns",
+                            "alignment": 2,
+                            "peers": true,
+                            "peersOverlap": false,
+                            "parentIncludes": true,
+                            "saturated": false,
+                            "children": {
+                                "language": {
+                                    "description": "Language",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": false},
+                                "token": {
+                                    "description": "transcript",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": false},
+                                "utterances": {
+                                    "description": "utterances",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": true}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "anchors": {
+        "n_1010": {
+            "offset": 10.0,
+            "confidence": 100
+        },
+        "n_1011": {
+            "offset": null},
+        "n_1020": {
+            "offset": null},
+        "n_1030": {
+            "offset": null},
+        "n_1039": {
+            "offset": null},
+        "n_1040": {
+            "offset": 30.0,
+            "confidence": 100
+        },
+        "n_1041": {
+            "offset": null},
+        "n_1050": {
+            "offset": null},
+        "n_1060": {
+            "offset": null},
+        "n_1070": {
+            "offset": 50.0,
+            "confidence": 100
+        },
+        "n_1071": {
+            "offset": null},
+        "n_1075": {
+            "offset": null},
+        "n_1080": {
+            "offset": null},
+        "n_1090": {
+            "offset": null},
+        "n_1099": {
+            "offset": null},
+        "n_1100": {
+            "offset": 70.0,
+            "confidence": 100
+        }
+    },
+    "who": [
+        {
+            "id": "Maxwell Smart",
+            "label": "Maxwell Smart",
+            "startId": "n_1010",
+            "endId": "n_1100",
+            "turns": [
+                {
+                    "id": "em_11_0",
+                    "label": "Maxwell Smart",
+                    "startId": "n_1010",
+                    "endId": "n_1100",
+                    "confidence": 100,
+                    "language": [
+                        {
+                            "id": "em_20_1",
+                            "label": "es",
+                            "startId": "n_1020",
+                            "endId": "n_1039",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "em_20_2",
+                            "label": "es2",
+                            "startId": "n_1075",
+                            "endId": "n_1099",
+                            "confidence": 100
+                        }
+                    ],
+                    "token": [
+                        {
+                            "id": "ew_0_1",
+                            "label": "86-1-1",
+                            "startId": "n_1011",
+                            "endId": "n_1020",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "ew_0_2",
+                            "label": "86-1-2",
+                            "startId": "n_1020",
+                            "endId": "n_1030",
+                            "confidence": 100,
+                            "comment": "ES"
+                        },
+                        {
+                            "id": "ew_0_3",
+                            "label": "86-1-3",
+                            "startId": "n_1030",
+                            "endId": "n_1039",
+                            "confidence": 100,
+                            "comment": "ES"
+                        },
+                        {
+                            "id": "ew_0_4",
+                            "label": "86-2-1",
+                            "startId": "n_1041",
+                            "endId": "n_1050",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "ew_0_5",
+                            "label": "86-2-2",
+                            "startId": "n_1050",
+                            "endId": "n_1060",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "ew_0_7",
+                            "label": "86-3-1",
+                            "startId": "n_1071",
+                            "endId": "n_1075",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "ew_0_75",
+                            "label": "86-3-2-new",
+                            "startId": "n_1075",
+                            "endId": "n_1080",
+                            "confidence": 100,
+                            "comment": "ES"
+                        },
+                        {
+                            "id": "ew_0_8",
+                            "label": "86-3-2",
+                            "startId": "n_1080",
+                            "endId": "n_1090",
+                            "confidence": 100,
+                            "comment": "ES"
+                        },
+                        {
+                            "id": "ew_0_9",
+                            "label": "86-3-3",
+                            "startId": "n_1090",
+                            "endId": "n_1099",
+                            "confidence": 100,
+                            "comment": "ES"
+                        }
+                    ],
+                    "utterances": [
+                        {
+                            "id": "em_12_1",
+                            "label": "Maxwell Smart",
+                            "startId": "n_1010",
+                            "endId": "n_1040",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "em_12_2",
+                            "label": "Maxwell Smart",
+                            "startId": "n_1040",
+                            "endId": "n_1070",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "em_12_3",
+                            "label": "Maxwell Smart",
+                            "startId": "n_1070",
+                            "endId": "n_1100",
+                            "confidence": 100
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
 }

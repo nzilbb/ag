@@ -1,161 +1,685 @@
-{
-  "id":"031-ReuploadUpdateNoChange__10.000-70.000",
-  "schema":{
-    "participantLayerId":"who",
-    "turnLayerId":"turns",
-    "utteranceLayerId":"utterances",
-    "wordLayerId":"token",
 
-    "transcript":{"description":"The annotation graph as a whole",
-      "children":{
-        "who":{"description":"participants", "alignment":0,
-          "peers":true, "peersOverlap":true, "parentIncludes":true, "saturated":true,
-          "children":{
-            "turns":{"description":"turns", "alignment":2,
-              "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
-              "children":{
-                "language":{"description":"Language", "alignment":2,
-                  "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false},
-                "token":{"description":"transcript", "alignment":2,
-                  "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
-                  "children":{
-                    "lexical":{"description":"lexical", "alignment":0,
-                      "peers":false, "peersOverlap":false, "parentIncludes":true, "saturated":true},
-                    "pronounce":{"description":"pronounce", "alignment":0,
-                      "peers":false, "peersOverlap":false, "parentIncludes":true, "saturated":true},
-                    "segments":{"description":"segments", "alignment":2,
-                      "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true}
-                  }},
-                "utterances":{"description":"utterances", "alignment":2,
-                  "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true}
-              }}
-          }}
-      }}
-  },
-  "anchors":{
-    "n_1010":	{"offset":10.0,	"confidence":100},
-    "n_1011":	{"offset":11.1,	"confidence":50,	"comment":"Updated to manual confidence, but no offset change, so confidence isn't updated"},
-    "n_1012":	{"offset":11.2,	"confidence":50},
-    "n_1013":	{"offset":11.3,	"confidence":50},
-    "n_1020":	{"offset":18.8,	"confidence":50},
-    "n_1029":	{"offset":20.4,	"confidence":50},
-    "n_1030":	{"offset":24.4,	"confidence":50},
-    "n_1031":	{"offset":25.1,	"confidence":50},
-    "n_1032":	{"offset":25.2,	"confidence":50},
-    "n_1033":	{"offset":25.3,	"confidence":50},
-    "n_1039":	{"offset":29.9,	"confidence":50},
-    "n_1040":	{"offset":30.0,	"confidence":100},
-    "n_1041":	{"offset":31.1,	"confidence":50},
-    "n_1042":	{"offset":32.1,	"confidence":50},
-    "n_1043":	{"offset":33.1,	"confidence":50},
-    "n_1049":	{"offset":37.8,	"confidence":50},
-    "n_1050":	{"offset":38.8,	"confidence":50},
-    "n_1060":	{"offset":44.4,	"confidence":50},
-    "n_1061":	{"offset":45.1,	"confidence":50},
-    "n_1062":	{"offset":45.2,	"confidence":50},
-    "n_1063":	{"offset":45.3,	"confidence":50},
-    "n_1069":	{"offset":49.9,	"confidence":50},
-    "n_1070":	{"offset":50.0,	"confidence":100},
-    "n_1071":	{"offset":51.1,	"confidence":50},
-    "n_1072":	{"offset":52.0,	"confidence":50},
-    "n_1073":	{"offset":55.0,	"confidence":50},
-    "n_1079":	{"offset":58.7,	"confidence":50},
-    "n_1080":	{"offset":58.8,	"confidence":50},
-    "n_1089":	{"offset":63.4,	"confidence":50},
-    "n_1090":	{"offset":64.4,	"confidence":50},
-    "n_1091":	{"offset":65.1,	"confidence":50},
-    "n_1092":	{"offset":65.2,	"confidence":50},
-    "n_1093":	{"offset":65.3,	"confidence":50},
-    "n_1099":	{"offset":69.9,	"confidence":50},
-    "n_1100":	{"offset":70.0,	"confidence":100}
-  },
-  "who":[
-    {"id":"Maxwell Smart",	"label":"Maxwell Smart",	"startId":"n_1010",	"endId":"n_1100",
-      "turns":[
-        {"id":"em_11_0",	"label":"Maxwell Smart",	"startId":"n_1010",	"endId":"n_1100",	"confidence":100,
-          "language":[
-            {"id":"em_20_1",	"label":"es",	"startId":"n_1030",	"endId":"n_1060",	"confidence":100}],
-          "token":[
-            {"id":"ew_0_1",	"label":"86-1-1",	"startId":"n_1011",	"endId":"n_1020",	"confidence":100,
-              "lexical":[
-                {"id":"ew_22_1",	"label":"l-1-1",	"startId":"n_1011",	"endId":"n_1020",	"confidence":100}],
-              "pronounce":[
-                {"id":"ew_23_1",	"label":"pos-1-1",	"startId":"n_1011",	"endId":"n_1020",	"confidence":50}],
-              "segments":[
-                {"id":"es_1_11",	"label":"86-1-1-1",	"startId":"n_1011",	"endId":"n_1012",	"confidence":100},
-                {"id":"es_1_12",	"label":"86-1-1-2",	"startId":"n_1012",	"endId":"n_1013",	"confidence":100},
-                {"id":"es_1_13",	"label":"86-1-1-3",	"startId":"n_1013",	"endId":"n_1020",	"confidence":100}]},
-            {"id":"ew_0_2",	"label":"86-1-2",	"startId":"n_1020",	"endId":"n_1029",	"confidence":100,
-              "lexical":[
-                {"id":"ew_22_2",	"label":"l-1-2",	"startId":"n_1020",	"endId":"n_1029",	"confidence":100}],
-              "pronounce":[
-                {"id":"ew_23_2",	"label":"pos-1-2",	"startId":"n_1020",	"endId":"n_1029",	"confidence":50}],
-              "segments":[
-                {"id":"es_1_21",	"label":"86-1-2-1",	"startId":"n_1020",	"endId":"n_1029",	"confidence":100}]},
-            {"id":"ew_0_3",	"label":"86-1-3",	"startId":"n_1030",	"endId":"n_1039",	"confidence":100,
-              "lexical":[
-                {"id":"ew_22_3",	"label":"l-1-3",	"startId":"n_1030",	"endId":"n_1039",	"confidence":100}],
-              "pronounce":[
-                {"id":"ew_23_3",	"label":"pos-1-3",	"startId":"n_1030",	"endId":"n_1039",	"confidence":50}],
-              "segments":[
-                {"id":"es_1_31",	"label":"86-1-3-1",	"startId":"n_1030",	"endId":"n_1031",	"confidence":50},
-                {"id":"es_1_32",	"label":"86-1-3-2",	"startId":"n_1031",	"endId":"n_1032",	"confidence":50},
-                {"id":"es_1_33",	"label":"86-1-3-3",	"startId":"n_1032",	"endId":"n_1033",	"confidence":50},
-                {"id":"es_1_34",	"label":"86-1-3-4",	"startId":"n_1033",	"endId":"n_1039",	"confidence":50}]},
-            {"id":"ew_0_4",	"label":"86-2-1",	"startId":"n_1041",	"endId":"n_1049",	"confidence":100,
-              "lexical":[
-                {"id":"ew_22_4",	"label":"l-2-1",	"startId":"n_1041",	"endId":"n_1049",	"confidence":100}],
-              "pronounce":[
-                {"id":"ew_23_4",	"label":"pos-2-1",	"startId":"n_1041",	"endId":"n_1049",	"confidence":50}],
-              "segments":[
-                {"id":"es_1_41",	"label":"86-2-1-1",	"startId":"n_1041",	"endId":"n_1042",	"confidence":100},
-                {"id":"es_1_42",	"label":"86-2-1-2",	"startId":"n_1042",	"endId":"n_1043",	"confidence":100},
-                {"id":"es_1_43",	"label":"86-2-1-3",	"startId":"n_1043",	"endId":"n_1049",	"confidence":100}]},
-            {"id":"ew_0_5",	"label":"86-2-2",	"startId":"n_1050",	"endId":"n_1060",	"confidence":100,
-              "lexical":[
-                {"id":"ew_22_5",	"label":"l-2-2",	"startId":"n_1050",	"endId":"n_1060",	"confidence":100}],
-              "pronounce":[
-                {"id":"ew_23_5",	"label":"pos-2-2",	"startId":"n_1050",	"endId":"n_1060",	"confidence":50}],
-              "segments":[
-                {"id":"es_1_51",	"label":"86-2-2-1",	"startId":"n_1050",	"endId":"n_1060",	"confidence":100}]},
-            {"id":"ew_0_6",	"label":"86-2-3",	"startId":"n_1060",	"endId":"n_1069",	"confidence":100,
-              "lexical":[
-                {"id":"ew_22_6",	"label":"l-2-3",	"startId":"n_1060",	"endId":"n_1069",	"confidence":100}],
-              "pronounce":[
-                {"id":"ew_23_6",	"label":"pos-2-3",	"startId":"n_1060",	"endId":"n_1069",	"confidence":50}],
-              "segments":[
-                {"id":"es_1_61",	"label":"86-2-3-1",	"startId":"n_1060",	"endId":"n_1061",	"confidence":50},
-                {"id":"es_1_62",	"label":"86-2-3-2",	"startId":"n_1061",	"endId":"n_1062",	"confidence":50},
-                {"id":"es_1_63",	"label":"86-2-3-3",	"startId":"n_1062",	"endId":"n_1063",	"confidence":50},
-                {"id":"es_1_64",	"label":"86-2-3-4",	"startId":"n_1063",	"endId":"n_1069",	"confidence":50}]},
-            {"id":"ew_0_7",	"label":"86-3-1",	"startId":"n_1071",	"endId":"n_1079",	"confidence":100,
-              "lexical":[
-                {"id":"ew_22_7",	"label":"l-3-1",	"startId":"n_1071",	"endId":"n_1079",	"confidence":100}],
-              "pronounce":[
-                {"id":"ew_23_7",	"label":"pos-3-1",	"startId":"n_1071",	"endId":"n_1079",	"confidence":50}],
-              "segments":[
-                {"id":"es_1_71",	"label":"86-3-1-1",	"startId":"n_1071",	"endId":"n_1072",	"confidence":100},
-                {"id":"es_1_72",	"label":"86-3-1-2",	"startId":"n_1072",	"endId":"n_1073",	"confidence":100},
-                {"id":"es_1_73",	"label":"86-3-1-3",	"startId":"n_1073",	"endId":"n_1079",	"confidence":100}]},
-            {"id":"ew_0_8",	"label":"86-3-2",	"startId":"n_1080",	"endId":"n_1089",	"confidence":100,
-              "lexical":[
-                {"id":"ew_22_8",	"label":"l-3-2",	"startId":"n_1080",	"endId":"n_1089",	"confidence":100}],
-              "pronounce":[
-                {"id":"ew_23_8",	"label":"pos-3-2",	"startId":"n_1080",	"endId":"n_1089",	"confidence":50}],
-              "segments":[
-                {"id":"es_1_81",	"label":"86-3-2-1",	"startId":"n_1080",	"endId":"n_1089",	"confidence":100}]},
-            {"id":"ew_0_9",	"label":"86-3-3",	"startId":"n_1090",	"endId":"n_1099",	"confidence":100,
-              "lexical":[
-                {"id":"ew_22_9",	"label":"l-3-3",	"startId":"n_1090",	"endId":"n_1099",	"confidence":100}],
-              "pronounce":[
-                {"id":"ew_23_9",	"label":"pos-3-3",	"startId":"n_1090",	"endId":"n_1099",	"confidence":50}],
-              "segments":[
-                {"id":"es_1_91",	"label":"86-3-3-1",	"startId":"n_1090",	"endId":"n_1091",	"confidence":50},
-                {"id":"es_1_92",	"label":"86-3-3-2",	"startId":"n_1091",	"endId":"n_1092",	"confidence":50},
-                {"id":"es_1_93",	"label":"86-3-3-3",	"startId":"n_1092",	"endId":"n_1093",	"confidence":50},
-                {"id":"es_1_94",	"label":"86-3-3-4",	"startId":"n_1093",	"endId":"n_1099",	"confidence":50}]}],
-          "utterances":[
-            {"id":"em_12_1",	"label":"Maxwell Smart",	"startId":"n_1010",	"endId":"n_1040",	"confidence":100},
-            {"id":"em_12_2",	"label":"Maxwell Smart",	"startId":"n_1040",	"endId":"n_1070",	"confidence":100},
-            {"id":"em_12_3",	"label":"Maxwell Smart",	"startId":"n_1070",	"endId":"n_1100",	"confidence":100}]}]}]
+{
+    "id": "031-ReuploadUpdateNoChange__10.000-70.000",
+    "schema": {
+        "participantLayerId": "who",
+        "turnLayerId": "turns",
+        "utteranceLayerId": "utterances",
+        "wordLayerId": "token",
+        "transcript": {
+            "description": "The annotation graph as a whole",
+            "children": {
+                "who": {
+                    "description": "participants",
+                    "alignment": 0,
+                    "peers": true,
+                    "peersOverlap": true,
+                    "parentIncludes": true,
+                    "saturated": true,
+                    "children": {
+                        "turns": {
+                            "description": "turns",
+                            "alignment": 2,
+                            "peers": true,
+                            "peersOverlap": false,
+                            "parentIncludes": true,
+                            "saturated": false,
+                            "children": {
+                                "language": {
+                                    "description": "Language",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": false},
+                                "token": {
+                                    "description": "transcript",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": false,
+                                    "children": {
+                                        "lexical": {
+                                            "description": "lexical",
+                                            "alignment": 0,
+                                            "peers": false,
+                                            "peersOverlap": false,
+                                            "parentIncludes": true,
+                                            "saturated": true},
+                                        "pronounce": {
+                                            "description": "pronounce",
+                                            "alignment": 0,
+                                            "peers": false,
+                                            "peersOverlap": false,
+                                            "parentIncludes": true,
+                                            "saturated": true},
+                                        "segments": {
+                                            "description": "segments",
+                                            "alignment": 2,
+                                            "peers": true,
+                                            "peersOverlap": false,
+                                            "parentIncludes": true,
+                                            "saturated": true}
+                                    }
+                                },
+                                "utterances": {
+                                    "description": "utterances",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": true}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "anchors": {
+        "n_1010": {
+            "offset": 10.0,
+            "confidence": 100
+        },
+        "n_1011": {
+            "offset": 11.1,
+            "confidence": 50,
+            "comment": "Updated to manual confidence, but no offset change, so confidence isn't updated"
+        },
+        "n_1012": {
+            "offset": 11.2,
+            "confidence": 50
+        },
+        "n_1013": {
+            "offset": 11.3,
+            "confidence": 50
+        },
+        "n_1020": {
+            "offset": 18.8,
+            "confidence": 50
+        },
+        "n_1029": {
+            "offset": 20.4,
+            "confidence": 50
+        },
+        "n_1030": {
+            "offset": 24.4,
+            "confidence": 50
+        },
+        "n_1031": {
+            "offset": 25.1,
+            "confidence": 50
+        },
+        "n_1032": {
+            "offset": 25.2,
+            "confidence": 50
+        },
+        "n_1033": {
+            "offset": 25.3,
+            "confidence": 50
+        },
+        "n_1039": {
+            "offset": 29.9,
+            "confidence": 50
+        },
+        "n_1040": {
+            "offset": 30.0,
+            "confidence": 100
+        },
+        "n_1041": {
+            "offset": 31.1,
+            "confidence": 50
+        },
+        "n_1042": {
+            "offset": 32.1,
+            "confidence": 50
+        },
+        "n_1043": {
+            "offset": 33.1,
+            "confidence": 50
+        },
+        "n_1049": {
+            "offset": 37.8,
+            "confidence": 50
+        },
+        "n_1050": {
+            "offset": 38.8,
+            "confidence": 50
+        },
+        "n_1060": {
+            "offset": 44.4,
+            "confidence": 50
+        },
+        "n_1061": {
+            "offset": 45.1,
+            "confidence": 50
+        },
+        "n_1062": {
+            "offset": 45.2,
+            "confidence": 50
+        },
+        "n_1063": {
+            "offset": 45.3,
+            "confidence": 50
+        },
+        "n_1069": {
+            "offset": 49.9,
+            "confidence": 50
+        },
+        "n_1070": {
+            "offset": 50.0,
+            "confidence": 100
+        },
+        "n_1071": {
+            "offset": 51.1,
+            "confidence": 50
+        },
+        "n_1072": {
+            "offset": 52.0,
+            "confidence": 50
+        },
+        "n_1073": {
+            "offset": 55.0,
+            "confidence": 50
+        },
+        "n_1079": {
+            "offset": 58.7,
+            "confidence": 50
+        },
+        "n_1080": {
+            "offset": 58.8,
+            "confidence": 50
+        },
+        "n_1089": {
+            "offset": 63.4,
+            "confidence": 50
+        },
+        "n_1090": {
+            "offset": 64.4,
+            "confidence": 50
+        },
+        "n_1091": {
+            "offset": 65.1,
+            "confidence": 50
+        },
+        "n_1092": {
+            "offset": 65.2,
+            "confidence": 50
+        },
+        "n_1093": {
+            "offset": 65.3,
+            "confidence": 50
+        },
+        "n_1099": {
+            "offset": 69.9,
+            "confidence": 50
+        },
+        "n_1100": {
+            "offset": 70.0,
+            "confidence": 100
+        }
+    },
+    "who": [
+        {
+            "id": "Maxwell Smart",
+            "label": "Maxwell Smart",
+            "startId": "n_1010",
+            "endId": "n_1100",
+            "turns": [
+                {
+                    "id": "em_11_0",
+                    "label": "Maxwell Smart",
+                    "startId": "n_1010",
+                    "endId": "n_1100",
+                    "confidence": 100,
+                    "language": [
+                        {
+                            "id": "em_20_1",
+                            "label": "es",
+                            "startId": "n_1030",
+                            "endId": "n_1060",
+                            "confidence": 100
+                        }
+                    ],
+                    "token": [
+                        {
+                            "id": "ew_0_1",
+                            "label": "86-1-1",
+                            "startId": "n_1011",
+                            "endId": "n_1020",
+                            "confidence": 100,
+                            "lexical": [
+                                {
+                                    "id": "ew_22_1",
+                                    "label": "l-1-1",
+                                    "startId": "n_1011",
+                                    "endId": "n_1020",
+                                    "confidence": 100
+                                }
+                            ],
+                            "pronounce": [
+                                {
+                                    "id": "ew_23_1",
+                                    "label": "pos-1-1",
+                                    "startId": "n_1011",
+                                    "endId": "n_1020",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segments": [
+                                {
+                                    "id": "es_1_11",
+                                    "label": "86-1-1-1",
+                                    "startId": "n_1011",
+                                    "endId": "n_1012",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "es_1_12",
+                                    "label": "86-1-1-2",
+                                    "startId": "n_1012",
+                                    "endId": "n_1013",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "es_1_13",
+                                    "label": "86-1-1-3",
+                                    "startId": "n_1013",
+                                    "endId": "n_1020",
+                                    "confidence": 100
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_2",
+                            "label": "86-1-2",
+                            "startId": "n_1020",
+                            "endId": "n_1029",
+                            "confidence": 100,
+                            "lexical": [
+                                {
+                                    "id": "ew_22_2",
+                                    "label": "l-1-2",
+                                    "startId": "n_1020",
+                                    "endId": "n_1029",
+                                    "confidence": 100
+                                }
+                            ],
+                            "pronounce": [
+                                {
+                                    "id": "ew_23_2",
+                                    "label": "pos-1-2",
+                                    "startId": "n_1020",
+                                    "endId": "n_1029",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segments": [
+                                {
+                                    "id": "es_1_21",
+                                    "label": "86-1-2-1",
+                                    "startId": "n_1020",
+                                    "endId": "n_1029",
+                                    "confidence": 100
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_3",
+                            "label": "86-1-3",
+                            "startId": "n_1030",
+                            "endId": "n_1039",
+                            "confidence": 100,
+                            "lexical": [
+                                {
+                                    "id": "ew_22_3",
+                                    "label": "l-1-3",
+                                    "startId": "n_1030",
+                                    "endId": "n_1039",
+                                    "confidence": 100
+                                }
+                            ],
+                            "pronounce": [
+                                {
+                                    "id": "ew_23_3",
+                                    "label": "pos-1-3",
+                                    "startId": "n_1030",
+                                    "endId": "n_1039",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segments": [
+                                {
+                                    "id": "es_1_31",
+                                    "label": "86-1-3-1",
+                                    "startId": "n_1030",
+                                    "endId": "n_1031",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "es_1_32",
+                                    "label": "86-1-3-2",
+                                    "startId": "n_1031",
+                                    "endId": "n_1032",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "es_1_33",
+                                    "label": "86-1-3-3",
+                                    "startId": "n_1032",
+                                    "endId": "n_1033",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "es_1_34",
+                                    "label": "86-1-3-4",
+                                    "startId": "n_1033",
+                                    "endId": "n_1039",
+                                    "confidence": 50
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_4",
+                            "label": "86-2-1",
+                            "startId": "n_1041",
+                            "endId": "n_1049",
+                            "confidence": 100,
+                            "lexical": [
+                                {
+                                    "id": "ew_22_4",
+                                    "label": "l-2-1",
+                                    "startId": "n_1041",
+                                    "endId": "n_1049",
+                                    "confidence": 100
+                                }
+                            ],
+                            "pronounce": [
+                                {
+                                    "id": "ew_23_4",
+                                    "label": "pos-2-1",
+                                    "startId": "n_1041",
+                                    "endId": "n_1049",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segments": [
+                                {
+                                    "id": "es_1_41",
+                                    "label": "86-2-1-1",
+                                    "startId": "n_1041",
+                                    "endId": "n_1042",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "es_1_42",
+                                    "label": "86-2-1-2",
+                                    "startId": "n_1042",
+                                    "endId": "n_1043",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "es_1_43",
+                                    "label": "86-2-1-3",
+                                    "startId": "n_1043",
+                                    "endId": "n_1049",
+                                    "confidence": 100
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_5",
+                            "label": "86-2-2",
+                            "startId": "n_1050",
+                            "endId": "n_1060",
+                            "confidence": 100,
+                            "lexical": [
+                                {
+                                    "id": "ew_22_5",
+                                    "label": "l-2-2",
+                                    "startId": "n_1050",
+                                    "endId": "n_1060",
+                                    "confidence": 100
+                                }
+                            ],
+                            "pronounce": [
+                                {
+                                    "id": "ew_23_5",
+                                    "label": "pos-2-2",
+                                    "startId": "n_1050",
+                                    "endId": "n_1060",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segments": [
+                                {
+                                    "id": "es_1_51",
+                                    "label": "86-2-2-1",
+                                    "startId": "n_1050",
+                                    "endId": "n_1060",
+                                    "confidence": 100
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_6",
+                            "label": "86-2-3",
+                            "startId": "n_1060",
+                            "endId": "n_1069",
+                            "confidence": 100,
+                            "lexical": [
+                                {
+                                    "id": "ew_22_6",
+                                    "label": "l-2-3",
+                                    "startId": "n_1060",
+                                    "endId": "n_1069",
+                                    "confidence": 100
+                                }
+                            ],
+                            "pronounce": [
+                                {
+                                    "id": "ew_23_6",
+                                    "label": "pos-2-3",
+                                    "startId": "n_1060",
+                                    "endId": "n_1069",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segments": [
+                                {
+                                    "id": "es_1_61",
+                                    "label": "86-2-3-1",
+                                    "startId": "n_1060",
+                                    "endId": "n_1061",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "es_1_62",
+                                    "label": "86-2-3-2",
+                                    "startId": "n_1061",
+                                    "endId": "n_1062",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "es_1_63",
+                                    "label": "86-2-3-3",
+                                    "startId": "n_1062",
+                                    "endId": "n_1063",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "es_1_64",
+                                    "label": "86-2-3-4",
+                                    "startId": "n_1063",
+                                    "endId": "n_1069",
+                                    "confidence": 50
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_7",
+                            "label": "86-3-1",
+                            "startId": "n_1071",
+                            "endId": "n_1079",
+                            "confidence": 100,
+                            "lexical": [
+                                {
+                                    "id": "ew_22_7",
+                                    "label": "l-3-1",
+                                    "startId": "n_1071",
+                                    "endId": "n_1079",
+                                    "confidence": 100
+                                }
+                            ],
+                            "pronounce": [
+                                {
+                                    "id": "ew_23_7",
+                                    "label": "pos-3-1",
+                                    "startId": "n_1071",
+                                    "endId": "n_1079",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segments": [
+                                {
+                                    "id": "es_1_71",
+                                    "label": "86-3-1-1",
+                                    "startId": "n_1071",
+                                    "endId": "n_1072",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "es_1_72",
+                                    "label": "86-3-1-2",
+                                    "startId": "n_1072",
+                                    "endId": "n_1073",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "es_1_73",
+                                    "label": "86-3-1-3",
+                                    "startId": "n_1073",
+                                    "endId": "n_1079",
+                                    "confidence": 100
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_8",
+                            "label": "86-3-2",
+                            "startId": "n_1080",
+                            "endId": "n_1089",
+                            "confidence": 100,
+                            "lexical": [
+                                {
+                                    "id": "ew_22_8",
+                                    "label": "l-3-2",
+                                    "startId": "n_1080",
+                                    "endId": "n_1089",
+                                    "confidence": 100
+                                }
+                            ],
+                            "pronounce": [
+                                {
+                                    "id": "ew_23_8",
+                                    "label": "pos-3-2",
+                                    "startId": "n_1080",
+                                    "endId": "n_1089",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segments": [
+                                {
+                                    "id": "es_1_81",
+                                    "label": "86-3-2-1",
+                                    "startId": "n_1080",
+                                    "endId": "n_1089",
+                                    "confidence": 100
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_9",
+                            "label": "86-3-3",
+                            "startId": "n_1090",
+                            "endId": "n_1099",
+                            "confidence": 100,
+                            "lexical": [
+                                {
+                                    "id": "ew_22_9",
+                                    "label": "l-3-3",
+                                    "startId": "n_1090",
+                                    "endId": "n_1099",
+                                    "confidence": 100
+                                }
+                            ],
+                            "pronounce": [
+                                {
+                                    "id": "ew_23_9",
+                                    "label": "pos-3-3",
+                                    "startId": "n_1090",
+                                    "endId": "n_1099",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segments": [
+                                {
+                                    "id": "es_1_91",
+                                    "label": "86-3-3-1",
+                                    "startId": "n_1090",
+                                    "endId": "n_1091",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "es_1_92",
+                                    "label": "86-3-3-2",
+                                    "startId": "n_1091",
+                                    "endId": "n_1092",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "es_1_93",
+                                    "label": "86-3-3-3",
+                                    "startId": "n_1092",
+                                    "endId": "n_1093",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "es_1_94",
+                                    "label": "86-3-3-4",
+                                    "startId": "n_1093",
+                                    "endId": "n_1099",
+                                    "confidence": 50
+                                }
+                            ]
+                        }
+                    ],
+                    "utterances": [
+                        {
+                            "id": "em_12_1",
+                            "label": "Maxwell Smart",
+                            "startId": "n_1010",
+                            "endId": "n_1040",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "em_12_2",
+                            "label": "Maxwell Smart",
+                            "startId": "n_1040",
+                            "endId": "n_1070",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "em_12_3",
+                            "label": "Maxwell Smart",
+                            "startId": "n_1070",
+                            "endId": "n_1100",
+                            "confidence": 100
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
 }

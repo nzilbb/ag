@@ -1,70 +1,257 @@
-{
-  "id":"004-BasicRealignment__10.000-70.000",
-  "schema":{
-    "participantLayerId":"who",
-    "turnLayerId":"turns",
-    "utteranceLayerId":"utterances",
-    "wordLayerId":"token",
 
-    "transcript":{"description":"The annotation graph as a whole",
-      "children":{
-        "who":{"description":"participants", "alignment":0,
-          "peers":true, "peersOverlap":true, "parentIncludes":true, "saturated":true,
-          "children":{
-            "turns":{"description":"turns", "alignment":2,
-              "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
-              "children":{
-                "token":{"description":"transcript", "alignment":2,
-                  "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
-                  "children":{
-                    "segments":{"description":"segments", "alignment":2,
-                      "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false}
-                  }},
-                "utterances":{"description":"utterances", "alignment":2,
-                  "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true}
-              }}
-          }}
-      }}
-  },
-  "anchors":{
-    "n_100":	{"offset":10.0,	"confidence":100},
-    "n_101":	{"offset":10.0,	"confidence":100},
-    "n_110":	{"offset":11.0,	"confidence":50},
-    "n_120":	{"offset":12.0,	"confidence":50},
-    "n_200":	{"offset":20.0,	"confidence":50},
-    "n_300":	{"offset":30.0,	"confidence":50},
-    "n_325":	{"offset":33.0,	"confidence":50},
-    "n_350":	{"offset":35.5,	"confidence":10},
-    "n_375":	{"offset":38.0,	"confidence":50},
-    "n_399":	{"offset":40.0,	"confidence":100},
-    "n_400":	{"offset":40.0,	"confidence":100},
-    "n_401":	{"offset":40.0,	"confidence":100},
-    "n_500":	{"offset":50.0,	"confidence":50},
-    "n_600":	{"offset":60.0,	"confidence":50},
-    "n_699":	{"offset":70.0,	"confidence":100},
-    "n_700":	{"offset":70.0,	"confidence":100}
-  },
-  "who":[
-    {"id":"Maxwell Smart",	"label":"Maxwell Smart",	"startId":"n_100",	"endId":"n_700",
-      "turns":[
-        {"id":"em_11_0",	"label":"Maxwell Smart",	"startId":"n_100",	"endId":"n_700",	"confidence":100,
-          "token":[
-            {"id":"ew_0_1",	"label":"86-1-1",	"startId":"n_101",	"endId":"n_200",	"confidence":100,
-              "segments":[
-                {"id":"es_1_1",	"label":"86-1-1-1",	"startId":"n_101",	"endId":"n_110",	"confidence":100},
-                {"id":"es_1_2",	"label":"86-1-1-2",	"startId":"n_110",	"endId":"n_120",	"confidence":100},
-                {"id":"es_1_3",	"label":"86-1-1-3",	"startId":"n_120",	"endId":"n_200",	"confidence":100}]},
-            {"id":"ew_0_2",	"label":"86-1-2",	"startId":"n_200",	"endId":"n_300",	"confidence":100},
-            {"id":"ew_0_3",	"label":"86-1-3",	"startId":"n_300",	"endId":"n_399",	"confidence":100,
-              "segments":[
-                {"id":"es_1_4",	"label":"86-1-3-1",	"startId":"n_300",	"endId":"n_325",	"confidence":50},
-                {"id":"es_1_5",	"label":"86-1-3-2",	"startId":"n_325",	"endId":"n_350",	"confidence":50},
-                {"id":"es_1_6",	"label":"86-1-3-3",	"startId":"n_350",	"endId":"n_375",	"confidence":50},
-                {"id":"es_1_7",	"label":"86-1-3-4",	"startId":"n_375",	"endId":"n_399",	"confidence":50}]},
-            {"id":"ew_0_4",	"label":"86-2-1",	"startId":"n_401",	"endId":"n_500",	"confidence":100},
-            {"id":"ew_0_5",	"label":"86-2-2",	"startId":"n_500",	"endId":"n_600",	"confidence":100},
-            {"id":"ew_0_6",	"label":"86-2-3",	"startId":"n_600",	"endId":"n_699",	"confidence":100}],
-          "utterances":[
-            {"id":"em_12_1",	"label":"Maxwell Smart",	"startId":"n_100",	"endId":"n_400",	"confidence":100},
-            {"id":"em_12_2",	"label":"Maxwell Smart",	"startId":"n_400",	"endId":"n_700",	"confidence":100}]}]}]
+{
+    "id": "004-BasicRealignment__10.000-70.000",
+    "schema": {
+        "participantLayerId": "who",
+        "turnLayerId": "turns",
+        "utteranceLayerId": "utterances",
+        "wordLayerId": "token",
+        "transcript": {
+            "description": "The annotation graph as a whole",
+            "children": {
+                "who": {
+                    "description": "participants",
+                    "alignment": 0,
+                    "peers": true,
+                    "peersOverlap": true,
+                    "parentIncludes": true,
+                    "saturated": true,
+                    "children": {
+                        "turns": {
+                            "description": "turns",
+                            "alignment": 2,
+                            "peers": true,
+                            "peersOverlap": false,
+                            "parentIncludes": true,
+                            "saturated": false,
+                            "children": {
+                                "token": {
+                                    "description": "transcript",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": false,
+                                    "children": {
+                                        "segments": {
+                                            "description": "segments",
+                                            "alignment": 2,
+                                            "peers": true,
+                                            "peersOverlap": false,
+                                            "parentIncludes": true,
+                                            "saturated": false
+                                        }
+                                    }
+                                },
+                                "utterances": {
+                                    "description": "utterances",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "anchors": {
+        "n_100": {
+            "offset": 10.0,
+            "confidence": 100
+        },
+        "n_101": {
+            "offset": 10.0,
+            "confidence": 100
+        },
+        "n_110": {
+            "offset": 11.0,
+            "confidence": 50
+        },
+        "n_120": {
+            "offset": 12.0,
+            "confidence": 50
+        },
+        "n_200": {
+            "offset": 20.0,
+            "confidence": 50
+        },
+        "n_300": {
+            "offset": 30.0,
+            "confidence": 50
+        },
+        "n_325": {
+            "offset": 33.0,
+            "confidence": 50
+        },
+        "n_350": {
+            "offset": 35.5,
+            "confidence": 10
+        },
+        "n_375": {
+            "offset": 38.0,
+            "confidence": 50
+        },
+        "n_399": {
+            "offset": 40.0,
+            "confidence": 100
+        },
+        "n_400": {
+            "offset": 40.0,
+            "confidence": 100
+        },
+        "n_401": {
+            "offset": 40.0,
+            "confidence": 100
+        },
+        "n_500": {
+            "offset": 50.0,
+            "confidence": 50
+        },
+        "n_600": {
+            "offset": 60.0,
+            "confidence": 50
+        },
+        "n_699": {
+            "offset": 70.0,
+            "confidence": 100
+        },
+        "n_700": {
+            "offset": 70.0,
+            "confidence": 100
+        }
+    },
+    "who": [
+        {
+            "id": "Maxwell Smart",
+            "label": "Maxwell Smart",
+            "startId": "n_100",
+            "endId": "n_700",
+            "turns": [
+                {
+                    "id": "em_11_0",
+                    "label": "Maxwell Smart",
+                    "startId": "n_100",
+                    "endId": "n_700",
+                    "confidence": 100,
+                    "token": [
+                        {
+                            "id": "ew_0_1",
+                            "label": "86-1-1",
+                            "startId": "n_101",
+                            "endId": "n_200",
+                            "confidence": 100,
+                            "segments": [
+                                {
+                                    "id": "es_1_1",
+                                    "label": "86-1-1-1",
+                                    "startId": "n_101",
+                                    "endId": "n_110",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "es_1_2",
+                                    "label": "86-1-1-2",
+                                    "startId": "n_110",
+                                    "endId": "n_120",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "es_1_3",
+                                    "label": "86-1-1-3",
+                                    "startId": "n_120",
+                                    "endId": "n_200",
+                                    "confidence": 100
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_2",
+                            "label": "86-1-2",
+                            "startId": "n_200",
+                            "endId": "n_300",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "ew_0_3",
+                            "label": "86-1-3",
+                            "startId": "n_300",
+                            "endId": "n_399",
+                            "confidence": 100,
+                            "segments": [
+                                {
+                                    "id": "es_1_4",
+                                    "label": "86-1-3-1",
+                                    "startId": "n_300",
+                                    "endId": "n_325",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "es_1_5",
+                                    "label": "86-1-3-2",
+                                    "startId": "n_325",
+                                    "endId": "n_350",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "es_1_6",
+                                    "label": "86-1-3-3",
+                                    "startId": "n_350",
+                                    "endId": "n_375",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "es_1_7",
+                                    "label": "86-1-3-4",
+                                    "startId": "n_375",
+                                    "endId": "n_399",
+                                    "confidence": 50
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_4",
+                            "label": "86-2-1",
+                            "startId": "n_401",
+                            "endId": "n_500",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "ew_0_5",
+                            "label": "86-2-2",
+                            "startId": "n_500",
+                            "endId": "n_600",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "ew_0_6",
+                            "label": "86-2-3",
+                            "startId": "n_600",
+                            "endId": "n_699",
+                            "confidence": 100
+                        }
+                    ],
+                    "utterances": [
+                        {
+                            "id": "em_12_1",
+                            "label": "Maxwell Smart",
+                            "startId": "n_100",
+                            "endId": "n_400",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "em_12_2",
+                            "label": "Maxwell Smart",
+                            "startId": "n_400",
+                            "endId": "n_700",
+                            "confidence": 100
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
 }
