@@ -115,6 +115,19 @@
 	    }
 	    if (!annotation.layer.annotations) annotation.layer.annotations = []
 	    annotation.layer.annotations.push(annotation);
+        },
+        
+        first : function(layerId) {
+            if (this.layers[layerId] && this.layers[layerId].annotations.length > 0) {
+                return this.layers[layerId].annotations[0];
+            }
+            return null;
+        },
+        all : function(layerId) {
+            if (this.layers[layerId]) {
+                return this.layers[layerId].annotations;
+            }
+            return [];
         }
     } // Graph methods
     nzilbb.ag.Graph.indexLayers = function(top, parent, layers) {
