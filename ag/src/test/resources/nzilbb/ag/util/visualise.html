@@ -16,169 +16,236 @@
 <body>
 <div id="agvis" title="Drag an Annotation Graph .json file here"></div>
 <script type="text/javascript">
-function handleFileSelect(evt) {
-  evt.stopPropagation();
-  evt.preventDefault();
+  function handleFileSelect(evt) {
+      evt.stopPropagation();
+      evt.preventDefault();
 
-  var files = evt.dataTransfer.files; // FileList object.
+      var files = evt.dataTransfer.files; // FileList object.
 
-  // files is a FileList of File objects. List some properties.
-  var output = [];
-  for (var i = 0, f; f = files[i]; i++) {
-    if (f.name.match(/.*\.json$/)) {
-      loadGraph(f);
-      break;
-    }
-  }
-}
-
-function handleDragOver(evt) {
-  evt.stopPropagation();
-  evt.preventDefault();
-  evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
-}
-
-// Setup the dnd listeners.
-var agvis = document.getElementById('agvis');
-agvis.addEventListener('dragover', handleDragOver, false);
-agvis.addEventListener('drop', handleFileSelect, false);
-
-function setLayerLevels(layers, level) {
-   var aLayers = [];
-   for (var l in layers) aLayers.push(layers[l]);
-   if (aLayers.length == 0) return level;
-
-   // sort layers so that those with children are last, and those with fewer annotations are earlier
-   aLayers.sort(function(a,b) {
-      var childCountA = 0;
-      for (var c in a.children) childCountA++;
-      var childCountB = 0;
-      for (var c in b.children) childCountB++;
-      // all leaf nodes before any branch nodes
-      if (childCountA == 0 && childCountB > 0) return -1;
-      if (childCountB == 0 && childCountA > 0) return 1;
-      // those with fewer annotations before those with more
-      var annotationCountA = 0;
-      for (var c in a.annotations) annotationCountA++;
-      var annotationCountB = 0;
-      for (var c in b.annotations) annotationCountB++;							 return annotationCountA - annotationCountB;      
-   });
-
-   for (var l in aLayers) {
-      layer = aLayers[l];
-      layer.level = level++;
-      level = setLayerLevels(layer.children, level);
-   }
-   return level;
-}
-
-function loadGraph(f) {
-  console.log("Load graph from " + f.name);
-  document.title = f.name;
-  var reader = new FileReader();
-
-  // Closure to capture the file information.
-  reader.onload = (function(theFile) {
-    return function(e) {
-      var jsonObject = JSON.parse(e.target.result);
-      var graph = ag.Graph.activateObject(jsonObject);
-      visualiseAg(graph);
-    };
-  })(f);
-
-  // Read in the image file as a data URL.
-  reader.readAsText(f);
-}
-
-function visualiseAg(ag) {
-  // assign levels to layers
-  var level = 0;
-  level = setLayerLevels(ag.schema.transcript.children, 0);
-  var yFactor = 1000/level;
-  var maxOffset = 0;
-  for (var a in ag.anchors) maxOffset = Math.max(maxOffset, ag.anchors[a].offset);
-  var xFactor = 2000/maxOffset;
-  var nodeArray = [];
-  // ensure simultaneous anchors aren't superimposed
-  var lastOffset = -1.0;
-  var nudge = 0;
-  var sortedAnchors = ag.getSortedAnchors();
-  for (var a in sortedAnchors) {
-    var anchor = sortedAnchors[a];
-    if (anchor.offset != lastOffset) nudge = 0;
-    anchor.nudge = nudge;
-    anchor.y = (level + (nudge++ / 3)) * yFactor;
-    lastOffset = anchor.offset;
-  }
-  // anchor nodes
-  for (var a in ag.anchors) {
-    var anchor = ag.anchors[a];
-    nodeArray.push({
-     id : a, 
-     label: "[" + anchor.id + "]\n" + anchor.offset + "s",
-     title: "[" + anchor.id + "] " + anchor.offset + (anchor.confidence?" (" + anchor.confidence + "%)":"") + (anchor.comment?" {" + anchor.comment + "}":""),
-     x: (anchor.offset + (anchor.nudge/5)) * xFactor,
-     y: anchor.y,
-     group: "anchor",
-     level: level,
-     color: "rgba("+(255-anchor.confidence)+","+(255-anchor.confidence)+","+(255-anchor.confidence)+",1)"
-    });
-  }
-  // annotation nodes
-  for (var a in ag.annotations) {
-    var annotation = ag.annotations[a];
-    nodeArray.push({
-     id : a, 
-     label: "[" + annotation.id + "]\n" + annotation.label,
-     title: annotation.layerId + ": [" + annotation.id + "] " + annotation.label + (annotation.confidence?" (" + annotation.confidence + "%)":"") + " #" + annotation.ordinal + (annotation.comment?" {" + annotation.comment + "}":""),
-     x: annotation.midpoint() * xFactor,
-     y: annotation.layer.level * yFactor,
-     group: annotation.layerId,
-     level: annotation.layer.level,
-     shape: "box"
-    });
-  }
-  var edgeArray = [];
-  var smoothStart = { enabled : true, roundness: 1.0, type: "vertical"};
-  var smoothEnd = { enabled : true, roundness: 1.0, type: "horizontal"};
-  for (var a in ag.annotations) {
-    var annotation = ag.annotations[a];
-    edgeArray.push({
-       from : annotation.startId, 
-       to: a, 
-       title : annotation.startId + " → " + a, 
-       arrows: {middle:true}, 
-       color: "black", 
-       smooth : smoothStart });
-    edgeArray.push({
-       from : a, 
-       to: annotation.endId, 
-       title : a + " → " + annotation.endId, 
-       arrows: {middle:true}, 
-       color: "black", 
-       smooth : smoothEnd });
-    if (annotation.parent) edgeArray.push({from : a, to: annotation.parentId});
+      // files is a FileList of File objects. List some properties.
+      var output = [];
+      for (var i = 0, f; f = files[i]; i++) {
+          if (f.name.match(/.*\.json$/)) {
+              loadGraph(f);
+              break;
+          }
+      }
   }
 
-  // create vis
-  var nodes = new vis.DataSet(nodeArray);
-  var edges = new vis.DataSet(edgeArray);
+  function handleDragOver(evt) {
+      evt.stopPropagation();
+      evt.preventDefault();
+      evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+  }
 
-  // create a network
-  var container = document.getElementById("agvis");
+  // Setup the dnd listeners.
+  var agvis = document.getElementById('agvis');
+  agvis.addEventListener('dragover', handleDragOver, false);
+  agvis.addEventListener('drop', handleFileSelect, false);
 
-  // provide the data in the vis format
-  var data = {
-    nodes: nodes,
-    edges: edges
+  function setLayerLevels(layers, level) {
+      var aLayers = [];
+      for (var l in layers) aLayers.push(layers[l]);
+      if (aLayers.length == 0) return level;
+
+      // sort layers so that those with children are last, and those with fewer annotations are earlier
+      aLayers.sort(function(a,b) {
+          var childCountA = 0;
+          for (var c in a.children) childCountA++;
+          var childCountB = 0;
+          for (var c in b.children) childCountB++;
+          // all leaf nodes before any branch nodes
+          if (childCountA == 0 && childCountB > 0) return -1;
+          if (childCountB == 0 && childCountA > 0) return 1;
+          // those with fewer annotations before those with more
+          var annotationCountA = 0;
+          for (var c in a.annotations) annotationCountA++;
+          var annotationCountB = 0;
+          for (var c in b.annotations) annotationCountB++;							 return annotationCountA - annotationCountB;      
+      });
+
+      for (var l in aLayers) {
+          layer = aLayers[l];
+          layer.level = level++;
+          level = setLayerLevels(layer.children, level);
+      }
+      return level;
+  }
+
+  function loadGraph(f) {
+      console.log("Load graph from " + f.name);
+      document.title = f.name;
+      var reader = new FileReader();
+
+      // Closure to capture the file information.
+      reader.onload = (function(theFile) {
+          return function(e) {
+              var jsonObject = JSON.parse(e.target.result);
+              if (jsonObject instanceof Array) { // we've been given an array
+                  // use the first element
+                  jsonObject = jsonObject[0];
+              }
+              var graph = ag.Graph.activateObject(jsonObject);
+              visualiseAg(graph);
+          };
+      })(f);
+
+      // Read in the image file as a data URL.
+      reader.readAsText(f);
+  }
+
+  function visualiseAg(ag) {
+      // assign levels to layers
+      var level = 0;
+      level = setLayerLevels(ag.schema.transcript.children, 0);
+      var yFactor = 1000/level;
+      var maxOffset = 0;
+      for (var a in ag.anchors) maxOffset = Math.max(maxOffset, ag.anchors[a].offset);
+      var xFactor = maxOffset * 2;
+      var nodeArray = [];
+      // ensure simultaneous anchors aren't superimposed
+      var lastOffset = -1.0;
+      var nudge = 0;
+      var sortedAnchors = ag.getSortedAnchors();
+      for (var a in sortedAnchors) {
+          var anchor = sortedAnchors[a];
+          // nudge apart anchors that are too close
+          if (anchor.offset - lastOffset > 0.2 || nudge > 4) nudge = 0;
+          anchor.nudge = nudge;
+          anchor.y = (level + (nudge++ / 3)) * yFactor;
+          lastOffset = anchor.offset;
+      }
+      // anchor nodes
+      for (var a in ag.anchors) {
+          var anchor = ag.anchors[a];
+          nodeArray.push({
+              id : a, 
+              label: "[" + anchor.id + "]\n" + anchor.offset + "s",
+              title: "[" + anchor.id + "] "
+                  + anchor.offset
+                  + (anchor.confidence?" (" + anchor.confidence + "%)":"")
+                  + (anchor.comment?" {" + anchor.comment + "}":""),
+              x: anchor.offset * xFactor,
+              y: anchor.y,
+              group: "anchor",
+              level: level,
+              color: "rgba("
+                  +(255-anchor.confidence)
+                  +","+(255-anchor.confidence)
+                  +","+(255-anchor.confidence)+",1)"
+          });
+      }
+      // annotation nodes
+      var schema = ag.schema
+      for (var a in ag.annotations) {
+          var annotation = ag.annotations[a];
+          var participantNudge = 0;
+          if (annotation.first(schema.participantLayerId)) {
+              // put annotations from different speakers at different heights
+              participantNudge = annotation.first(schema.participantLayerId).ordinal
+                  / (ag[schema.participantLayerId].length * 2);
+          }
+          nodeArray.push({
+              id : a, 
+              label: "[" + annotation.id + "]\n" + annotation.label,
+              title: annotation.layerId
+                  + ": [" + annotation.id + "] "
+                  + annotation.label
+                  + (annotation.confidence?" (" + annotation.confidence + "%)":"")
+                  + " #" + annotation.ordinal
+                  + (annotation.comment?" {" + annotation.comment + "}":"")
+                  + (annotation.parentId?" parent: " + annotation.parent.id:"")
+                  + (annotation.first(schema.participantLayerId)?
+                     " who: " + annotation.first(schema.participantLayerId).label:""),
+              x: annotation.midpoint() * xFactor,
+              y: (annotation.layer.level + participantNudge) * yFactor,
+              group: annotation.layerId,
+              level: annotation.layer.level,
+              shape: "box"
+          });
+      }
+      var edgeArray = [];
+      var smoothStart = { enabled : true, roundness: 1.0, type: "vertical"};
+      var smoothEnd = { enabled : true, roundness: 1.0, type: "horizontal"};
+      for (var a in ag.annotations) {
+          var annotation = ag.annotations[a];
+          edgeArray.push({
+              from : annotation.startId, 
+              to: a, 
+              title : annotation.startId + " → " + a, 
+              arrows: {middle:true}, 
+              color: "black", 
+              smooth : smoothStart });
+          edgeArray.push({
+              from : a, 
+              to: annotation.endId, 
+              title : a + " → " + annotation.endId, 
+              arrows: {middle:true}, 
+              color: "black", 
+              smooth : smoothEnd });
+          if (annotation.parent) edgeArray.push({from : a, to: annotation.parentId});
+      }
+      
+      // create vis
+      var nodes = new vis.DataSet(nodeArray);
+      var edges = new vis.DataSet(edgeArray);
+      
+      // create a network
+      var container = document.getElementById("agvis");
+      
+      // provide the data in the vis format
+      var data = {
+          nodes: nodes,
+          edges: edges
+      };
+      var options = {
+          physics: false
+      };
+      
+      // create graph visualization
+      agvis = new vis.Network(container, data, options);
+
+      // zoom to show the first word and first utterance
+      agvis.fit({ nodes: [
+          ag.layers[schema.wordLayerId].annotations[0].id,
+          ag.layers[schema.utteranceLayerId].annotations[0].id ]});
+      
+      if (location.hash) showAnnotation(location.hash);
+  }
+  
+  function showAnnotation(hash) {
+      var id = hash.replace(/^#/,"");
+      agvis.fit({ nodes: [ id ], animation: true});
+      agvis.selectNodes([ id ]);
+  }
+
+  window.onhashchange = ()=> {
+      showAnnotation(location.hash);
   };
-  var options = {
-    physics: false
+  window.onkeydown = (e) => {
+      var event = window.event ? window.event : e;
+      if (event.ctrlKey) {
+          switch(event.keyCode) {
+          case 39: // right
+              agvis.moveTo({ offset: { x: -500 } });
+              event.preventDefault();
+              break;
+          case 37: // left
+              agvis.moveTo({ offset: { x: 500 } });
+              event.preventDefault();
+              break;
+          case 40: // down
+              agvis.moveTo({ scale: agvis.getScale() * 2 });
+              event.preventDefault();
+              break;
+          case 38: // up
+              agvis.moveTo({ scale: agvis.getScale() / 2 });
+              event.preventDefault();
+              break;
+          }
+      }
   };
 
-  // initialize your network!
-  var network = new vis.Network(container, data, options);
-}
 </script>
 </body>
 </html>
