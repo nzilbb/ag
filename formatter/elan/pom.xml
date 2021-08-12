@@ -10,7 +10,7 @@
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.formatter.elan</artifactId>
   <name>nzilbb.formatter.elan</name>
-  <version>1.7.0</version>
+  <version>1.7.1</version>
 
   <properties>
     <package.path>nzilbb/formatter/elan/</package.path>
@@ -41,9 +41,13 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
+        <version>3.0.2</version>
         <configuration>
           <archive>
-            <manifest addDefaultImplementationEntries="true" />
+            <manifest addDefaultImplementationEntries="true">
+              <addClasspath>true</addClasspath>
+              <mainClass>${formatter.class}</mainClass>
+            </manifest>
             <manifestEntries>
               <nzilbb-ag-serialize-GraphSerializer>${formatter.class}</nzilbb-ag-serialize-GraphSerializer>
               <nzilbb-ag-serialize-GraphDeserializer>${formatter.class}</nzilbb-ag-serialize-GraphDeserializer>

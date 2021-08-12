@@ -52,6 +52,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import nzilbb.ag.*;
+import nzilbb.ag.cli.Deserialize;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
@@ -65,6 +66,7 @@ import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 import nzilbb.util.IO;
 import nzilbb.util.ISO639;
+import nzilbb.util.Switch;
 import nzilbb.util.TempFileInputStream;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -80,7 +82,7 @@ import org.xml.sax.SAXException;
  * <a href="http://www.mpi.nl/tools/elan/EAFv2.7.xsd">http://www.mpi.nl/tools/elan/EAFv2.7.xsd</a>
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class EAFSerialization implements GraphDeserializer, GraphSerializer {
+public class EAFSerialization extends Deserialize implements GraphDeserializer, GraphSerializer {
    
   // Attributes:
   private File eafFile;
@@ -383,6 +385,7 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
    * Setter for {@link #bUseConventions}: Whether to use text conventions for comment, noise, lexical, and pronounce annotations.
    * @param bNewTranscriptOnly Whether to use text conventions for comment, noise, lexical, and pronounce annotations.
    */
+  @Switch("Use text conventions for comment, noise, lexical, and pronounce annotations")
   public EAFSerialization setUseConventions(Boolean bNewUseConventions) { bUseConventions = bNewUseConventions; return this; }
 
   /**
@@ -391,7 +394,7 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
    * @see #getIgnoreBlankAnnotations()
    * @see #setIgnoreBlankAnnotations(Boolean)
    */
-  protected Boolean ignoreBlankAnnotations;
+  protected Boolean ignoreBlankAnnotations = Boolean.TRUE;
   /**
    * Getter for {@link #ignoreBlankAnnotations}: Whether to ignore annotations with no
    * label (true), or to include them as blank-labelled annotations (false).
@@ -405,6 +408,7 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
    * @param newIgnoreBlankAnnotations Whether to ignore annotations with no label (true),
    * or to include them as blank-labelled annotations (false).
    */
+  @Switch("Ignore annotations with no label")
   public EAFSerialization setIgnoreBlankAnnotations(Boolean newIgnoreBlankAnnotations) { ignoreBlankAnnotations = newIgnoreBlankAnnotations; return this; }
    
   /**
@@ -414,7 +418,7 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
    * @see #getMinimumTurnPauseLength()
    * @see #setMinimumTurnPauseLength(Double)
    */
-  protected Double minimumTurnPauseLength;
+  protected Double minimumTurnPauseLength = Double.valueOf(0.0);
   /**
    * Getter for {@link #minimumTurnPauseLength}: Minimum amount of time between two turns
    * by the same speaker, with no intervening speaker, for which the inter-turn pause
@@ -424,6 +428,7 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
    * intervening speaker, for which the inter-turn pause counts as a turn change
    * boundary. If the pause is shorter than this, the turns are merged into one.
    */
+  @Switch("Inter-turn pauses shorter than this are merged into one turn")
   public Double getMinimumTurnPauseLength() {
     if (minimumTurnPauseLength == null) minimumTurnPauseLength = Double.valueOf(0.0);
     return minimumTurnPauseLength;
@@ -746,7 +751,7 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
                       "Whether to use text conventions for comment, noise, lexical, and pronounce annotations", true));
     }
     if (configuration.get("useConventions").getValue() == null) {
-      configuration.get("useConventions").setValue(Boolean.TRUE);
+      configuration.get("useConventions").setValue(getUseConventions());
     }
 
     if (!configuration.containsKey("ignoreBlankAnnotations")) {
@@ -756,7 +761,7 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
                       "Whether to skip annotations with no label, or process them", true));
     }
     if (configuration.get("ignoreBlankAnnotations").getValue() == null) {
-      configuration.get("ignoreBlankAnnotations").setValue(Boolean.TRUE);
+      configuration.get("ignoreBlankAnnotations").setValue(getIgnoreBlankAnnotations());
     }
 
     if (!configuration.containsKey("minimumTurnPauseLength")) {
@@ -769,7 +774,7 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
                       +" this, the turns are merged into one.", true));
     }
     if (configuration.get("minimumTurnPauseLength").getValue() == null) {
-      configuration.get("minimumTurnPauseLength").setValue(Double.valueOf(0.0));
+      configuration.get("minimumTurnPauseLength").setValue(getMinimumTurnPauseLength());
     }
 
     return configuration;
@@ -2427,5 +2432,56 @@ public class EAFSerialization implements GraphDeserializer, GraphSerializer {
     } // there were tiers created
     return lLastUnusedAnnotationId;
   } // end of insertTier
-   
+
+  /** Command line interface, which takes transcript file names, and outputs JSON-encoded
+   * annotation graphs. */
+  public static void main(String argv[]) {
+    EAFSerialization application = new EAFSerialization();
+    if (application.processArguments(argv)) {
+      application.start();
+    }
+  }
+  /**
+   * Specify the schema to used by  {@link Deserialize#convert(File)}.
+   * @return The schema.
+   */
+  @Override protected Schema getDefaultSchema() {
+    Schema schema = super.getDefaultSchema();
+    schema.addLayer(
+      new Layer("transcript_author", "Transcript Author")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true));
+    schema.addLayer(
+      new Layer("transcript_date", "Date of recording")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true));
+    schema.addLayer(
+      new Layer("transcript_language", "Transcript Language")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true));
+    schema.addLayer(
+      new Layer("language", "Phrase Language").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false).setParentId("turn"));
+    schema.addLayer(
+      new Layer("topic", "Topic")         
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false));
+    schema.addLayer(
+      new Layer("noise", "Noises")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false));
+    schema.addLayer(
+      new Layer("comment", "Comments").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(true).setSaturated(false));
+    schema.addLayer(
+      new Layer("pronounce", "Pronunciation tags").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId(schema.getWordLayerId()).setParentIncludes(true));
+    schema.addLayer(
+      new Layer("lexical", "Lexical tags").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId(schema.getWordLayerId()).setParentIncludes(true));
+    return schema;
+  }
+
 } // end of class EAFSerialization
