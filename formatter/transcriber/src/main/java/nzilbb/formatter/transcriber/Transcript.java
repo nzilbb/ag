@@ -21,30 +21,30 @@
 //
 package nzilbb.formatter.transcriber;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.Writer;
-import java.io.ByteArrayOutputStream;
 import java.io.BufferedReader;
-import java.io.StringReader;
+import java.io.ByteArrayOutputStream;
 import java.io.CharArrayReader;
-import java.util.Vector;
-import java.util.Properties;
-import java.util.HashMap;
-import java.util.Enumeration;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.io.Writer;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Properties;
+import java.util.Vector;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * Transcriber transcript - a representation of the internal structure of the XML

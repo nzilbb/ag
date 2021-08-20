@@ -10,7 +10,7 @@
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.formatter.transcriber</artifactId>
   <name>nzilbb.formatter.transcriber</name>
-  <version>2.0.3</version>
+  <version>2.0.4</version>
 
   <properties>
     <package.path>nzilbb/formatter/transcriber/</package.path>
@@ -24,7 +24,7 @@
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>[1.0.0,)</version>
+      <version>[1.0.5,)</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -44,7 +44,8 @@
         <configuration>
           <archive>
             <manifest addDefaultImplementationEntries="true"><!-- validation utility -->
-              <mainClass>nzilbb.formatter.transcriber.Validator</mainClass>
+              <addClasspath>true</addClasspath>
+              <mainClass>nzilbb.formatter.transcriber.DeserializeTranscript</mainClass>
             </manifest>
             <manifestEntries>
               <nzilbb-ag-serialize-GraphSerializer>${formatter.class}</nzilbb-ag-serialize-GraphSerializer>

@@ -44,6 +44,9 @@ import nzilbb.util.Switch;
 @ProgramDescription(value="Converts a transcript to a JSON-encoded annotation graph",arguments="formatter.jar trascript-1 [transcript-2 ...]")
 public class Deserialize extends CommandLineProgram {
 
+  /** Deserializer to use. */
+  protected static GraphDeserializer deserializer = null;
+  
   /**
    * Whether to set null anchor offsets or not.
    * @see #getDefaultOffsets()
@@ -88,12 +91,11 @@ public class Deserialize extends CommandLineProgram {
   }
   
   public void start() {
+    
     // start JSON array (because there may be more than one graph output)
     System.out.println("[");
     boolean firstGraph = true;
     
-    GraphDeserializer deserializer = null;
-
     // if a deserializer uses this as a base class, it's the deserializer to use
     if (this instanceof GraphDeserializer) deserializer = (GraphDeserializer)this;
     
@@ -163,8 +165,9 @@ public class Deserialize extends CommandLineProgram {
             // serialize as JSON
             JSONSerialization s = new JSONSerialization();
             s.configure(s.configure(new ParameterSet(), graph.getSchema()), graph.getSchema());
-              if (verbose) System.err.println(
-                graph.getId() + ": Serializing to JSON...");
+            s.setSortAnchors(true);
+            if (verbose) System.err.println(
+              graph.getId() + ": Serializing to JSON...");
             s.serialize(Utility.OneGraphSpliterator(graph), null,
                         // send stream to stdout (there will be only one):
                         stream -> {
