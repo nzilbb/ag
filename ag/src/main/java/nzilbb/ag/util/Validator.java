@@ -36,6 +36,9 @@ import java.util.Stack;
 import java.util.TreeSet;
 import java.util.Vector;
 import nzilbb.ag.*;
+import nzilbb.ag.cli.Transform;
+import nzilbb.util.ProgramDescription;
+import nzilbb.util.Switch;
 
 /**
  * Validates Graph structure.
@@ -48,7 +51,8 @@ import nzilbb.ag.*;
  * <p> TODO validate Layer.validLabels
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class Validator implements GraphTransformer {
+@ProgramDescription(value="Validates JSON-encoded annotation graphs from stdin")
+public class Validator extends Transform implements GraphTransformer {
    
   /**
    * Fatal errors raised during the last {@link #transform(Graph)}.
@@ -128,6 +132,7 @@ public class Validator implements GraphTransformer {
    * @param newDefaultAnchorConfidence Value to assume in the case of Anchors that have no
    * value for "confidence". 
    */
+  @Switch("Value to assume in the case of Anchors with no explicit confidence")
   public Validator setDefaultAnchorConfidence(Integer newDefaultAnchorConfidence) { defaultAnchorConfidence = newDefaultAnchorConfidence; return this; }
    
   /**
@@ -152,6 +157,7 @@ public class Validator implements GraphTransformer {
    * Setter for {@link #defaultOffsetThreshold}: The confidence threshold for default anchor offset computation, or null to skip default offset computation.
    * @param newDefaultOffsetThreshold The confidence threshold for default anchor offset computation, or null to skip default offset computation.
    */
+  @Switch("The confidence threshold for default anchor offset computation")
   public Validator setDefaultOffsetThreshold(Integer newDefaultOffsetThreshold) { defaultOffsetThreshold = newDefaultOffsetThreshold; return this; }
    
   /**
@@ -169,6 +175,7 @@ public class Validator implements GraphTransformer {
    * Setter for {@link #fullValidation}: Whether to validate all annotations on all layers (true) or perform a 'smart' validation tries to validate only parts of the graph that have actually changed (false - the default).
    * @param newFullValidation Whether to validate all annotations on all layers (true) or perform a 'smart' validation tries to validate only parts of the graph that have actually changed (false - the default).
    */
+  @Switch("Force full validation")
   public Validator setFullValidation(boolean newFullValidation) { fullValidation = newFullValidation; return this; }
 
   /**
@@ -186,6 +193,7 @@ public class Validator implements GraphTransformer {
    * Setter for {@link #maxLabelLength}: Maximum allowed label length, or null for no limit.
    * @param newMaxLabelLength Maximum allowed label length, or null for no limit.
    */
+  @Switch("The maximum length of a label")
   public Validator setMaxLabelLength(Integer newMaxLabelLength) { maxLabelLength = newMaxLabelLength; return this; }
    
   // Methods:
@@ -1937,5 +1945,14 @@ public class Validator implements GraphTransformer {
       System.out.println(s.toString());
     }
   } // end of log()
+
+  /** Command line interface entrypoint: reads JSON-encoded transcripts from stdin,
+   * validates them, and writes them to stdout. */
+  public static void main(String argv[]) {
+    Validator cli = new Validator();
+    if (cli.processArguments(argv)) {
+      cli.start();
+    }
+  }
 
 } // end of class Validator

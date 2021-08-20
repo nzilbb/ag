@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.Vector;
 import nzilbb.ag.*;
+import nzilbb.ag.cli.Transform;
+import nzilbb.util.ProgramDescription;
+import nzilbb.util.Switch;
 
 /**
  * Ensures the structure of the graph is normalized.
@@ -46,7 +49,8 @@ import nzilbb.ag.*;
  * and {@link Schema#episodeLayerId} set. 
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class Normalizer implements GraphTransformer {
+@ProgramDescription(value="Normalizes JSON-encoded annotation graphs from stdin")
+public class Normalizer extends Transform implements GraphTransformer {
 
   /**
    * The maximum length of a label, or null if there's no limit. Default is 255.
@@ -65,6 +69,7 @@ public class Normalizer implements GraphTransformer {
    * no limit. 
    * @param newMaxLabelLength The maximum length of a label, or null if there's no limit.
    */
+  @Switch("The maximum length of a label")
   public Normalizer setMaxLabelLength(Integer newMaxLabelLength) { maxLabelLength = newMaxLabelLength; return this; }
 
   /**
@@ -98,6 +103,7 @@ public class Normalizer implements GraphTransformer {
    * speaker, with no intervening speaker, for which the inter-turn pause counts as a turn
    * change boundary. If the pause is shorter than this, the turns are merged into one. 
    */
+  @Switch("Same-speaker inter-turn pauses shorter than this are merged into one turn")
   public Normalizer setMinimumTurnPauseLength(Double newMinimumTurnPauseLength) { minimumTurnPauseLength = newMinimumTurnPauseLength; return this; }
       
   // Methods:
@@ -283,5 +289,14 @@ public class Normalizer implements GraphTransformer {
 
     following.destroy();
   } // end of joinTurns()
+
+  /** Command line interface entrypoint: reads JSON-encoded transcripts from stdin,
+   * normalizes them, and writes them to stdout. */
+  public static void main(String argv[]) {
+    Normalizer cli = new Normalizer();
+    if (cli.processArguments(argv)) {
+      cli.start();
+    }
+  }
 
 } // end of class Normalizer

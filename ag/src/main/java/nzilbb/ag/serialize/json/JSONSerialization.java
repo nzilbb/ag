@@ -39,6 +39,7 @@ import java.util.Spliterator;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonException;
@@ -56,7 +57,7 @@ import nzilbb.util.TempFileInputStream;
  * Annotation Graph serializer/deserializer for JSON.
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class JSONSerialization implements GraphSerializer {
+public class JSONSerialization implements GraphSerializer, GraphDeserializer {
   // Attributes:
 
   /**
@@ -144,7 +145,7 @@ public class JSONSerialization implements GraphSerializer {
 
   /**
    * Returns the serialization descriptor.
-   * <p>{@link GraphSerializer} and {@link IDeserializer} method.
+   * <p>{@link GraphSerializer} and {@link GraphDeserializer} method.
    * @return The deserializer's descriptor
    */
   public SerializationDescriptor getDescriptor() {
@@ -163,7 +164,7 @@ public class JSONSerialization implements GraphSerializer {
   /**
    * Returns any warnings that may have arisen during the last execution of 
    * {@link #deserialize()}.
-   * <p>{@link GraphSerializer} and {@link IDeserializer} method.
+   * <p>{@link GraphSerializer} and {@link GraphDeserializer} method.
    * @return A possibly empty list of warnings.
    */
   public String[] getWarnings() {
@@ -177,7 +178,7 @@ public class JSONSerialization implements GraphSerializer {
    *  set, to discover what (if any) general configuration is required. If parameters are
    *  returned, and user interaction is possible, then the user may be presented with an
    *  interface for setting/confirming these parameters. 
-   * <p>{@link GraphSerializer} and {@link IDeserializer} method.
+   * <p>{@link GraphSerializer} and {@link GraphDeserializer} method.
    * @param configuration The general configuration for the serializer. 
    * @param schema The layer schema, definining layers and the way they interrelate.
    * @return A list of configuration parameters (still) must be set before
@@ -191,18 +192,22 @@ public class JSONSerialization implements GraphSerializer {
 
   /**
    * Loads the serialized form of the graph, using the given set of named streams.
-   * <p>{@link IDeserializer} method.
+   * <p>{@link GraphDeserializer} method.
    * @param streams A list of named streams that contain all the
-   *  transcription/annotation data required.
+   *  transcription/annotation data required. The application/json streams can contain a
+   *  single JSON graph object "{...}", or an array of graph objects "[{...},{...},...]".
    * @param schema The layer schema, definining layers and the way they interrelate.
-   * @return A list of parameters that require setting before {@link IDeserializer#deserialize()}
+   * @return A list of parameters that require setting before
+   *  {@link GraphDeserializer#deserialize()}
    *  can be invoked. This may be an empty list, and may include parameters with the value
    *  already set to a workable default. If there are parameters, and user interaction is
    *  possible, then the user may be presented with an interface for setting/confirming these
-   *  parameters, before they are then passed to {@link IDeserializer#setParameters(ParameterSet)}.
+   *  parameters, before they are then passed to
+   *  {@link GraphDeserializer#setParameters(ParameterSet)}.
    * @throws SerializationException If the graph could not be loaded.
    * @throws IOException On IO error.
-   * @throws SerializerNotConfiguredException If the configuration is not sufficient for deserialization.
+   * @throws SerializerNotConfiguredException If the configuration is not sufficient for
+   * deserialization. 
    */
   public ParameterSet load(NamedStream[] streams, Schema schema)
     throws IOException, SerializationException, SerializerNotConfiguredException {
@@ -213,8 +218,29 @@ public class JSONSerialization implements GraphSerializer {
     for (NamedStream stream : streams) {	 
       if (stream.getName().endsWith(".json")
           || "application/json".equals(stream.getMimeType())) {
-        jsons.put(stream.getName(), Json.createReader(new InputStreamReader(stream.getStream())).readObject());
-      }
+        boolean arrayInput = false;
+        if (stream.getStream().markSupported()) {
+          // read the first character
+          stream.getStream().mark(5);
+          byte[] buffer = new byte[5];
+          int bytesRead = stream.getStream().read(buffer);
+          if (bytesRead > 0) {
+            String start = new String(buffer);
+            arrayInput = start.trim().startsWith("[");
+          }
+          stream.getStream().reset();
+        }
+        if (!arrayInput) { // read the whole stream as one graph
+          jsons.put(stream.getName(), Json.createReader(
+                      new InputStreamReader(stream.getStream())).readObject());
+        } else { // stream is an array of graphs
+          JsonArray array = Json.createReader(
+            new InputStreamReader(stream.getStream())).readArray();
+          for (int i = 0; i < array.size(); i++) {
+            jsons.put(stream.getName()+"["+i+"]", array.getJsonObject(i));
+          } // next array element
+        } // input is a JSON array
+      } // json stream
     } // next stream
 
     return new ParameterSet();
@@ -224,7 +250,7 @@ public class JSONSerialization implements GraphSerializer {
    * Sets parameters for a given deserialization operation, after loading the serialized form
    * of the graph. This might include mappings from format-specific objects like tiers to graph
    * layers, etc.
-   * <p>{@link IDeserializer} method.
+   * <p>{@link GraphDeserializer} method.
    * @param parameters The configuration for a given deserialization operation.
    * @throws SerializationParametersMissingException If not all required parameters have a value.
    */
@@ -239,7 +265,7 @@ public class JSONSerialization implements GraphSerializer {
    * are capable of storing multiple transcripts in the same file
    * (e.g. AGTK, Transana XML export), which is why this method
    * returns a list.
-   * <p>{@link IDeserializer} method.
+   * <p>{@link GraphDeserializer} method.
    * @return A list of valid (if incomplete) {@link Graph}s. 
    * @throws SerializerNotConfiguredException if the object has not been configured.
    * @throws SerializationParametersMissingException if the parameters for this
@@ -594,19 +620,26 @@ public class JSONSerialization implements GraphSerializer {
    * @param anchor The anchor to serialize.
    */
   protected void serializeAnchor(JsonGenerator json, Anchor anchor) {
-    json.writeStartObject(anchor.getId());
-    if (anchor.getOffset() != null) {
-      json.write("offset", anchor.getOffset());
-    } else {
-      json.writeNull("offset");
-    }
-    if (anchor.getConfidence() != null) {
-      json.write("confidence", anchor.getConfidence());
-    }
-    if (anchor.containsKey("comment")) {
-      json.write("comment", anchor.get("comment").toString());
-    }
-    json.writeEnd();
+    boolean atLeastOneAnnotation = Stream.concat(
+      anchor.getStartOf().values().stream(),
+      anchor.getEndOf().values().stream())
+      .filter(annotations -> annotations.size() > 0)
+      .findAny().isPresent();
+    if (atLeastOneAnnotation) {
+      json.writeStartObject(anchor.getId());
+      if (anchor.getOffset() != null) {
+        json.write("offset", anchor.getOffset());
+      } else {
+        json.writeNull("offset");
+      }
+      if (anchor.getConfidence() != null) {
+        json.write("confidence", anchor.getConfidence());
+      }
+      if (anchor.containsKey("comment")) {
+        json.write("comment", anchor.get("comment").toString());
+      }
+      json.writeEnd();
+    } // atLeastOneAnnotation
   } // end of serializeAnchor()
 
   /**

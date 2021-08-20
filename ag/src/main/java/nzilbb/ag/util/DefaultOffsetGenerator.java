@@ -30,6 +30,9 @@ import java.util.LinkedList;
 import java.util.Vector;
 import java.util.stream.Collectors;
 import nzilbb.ag.*;
+import nzilbb.ag.cli.Transform;
+import nzilbb.util.ProgramDescription;
+import nzilbb.util.Switch;
 
 /**
  * Generates default anchor offsets. These are computed using linear interpolation between
@@ -37,7 +40,8 @@ import nzilbb.ag.*;
  * {@link #defaultOffsetThreshold} is set. 
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class DefaultOffsetGenerator implements GraphTransformer {
+@ProgramDescription(value="Generates default anchor offsets for JSON-encoded annotation graphs from stdin")
+public class DefaultOffsetGenerator extends Transform implements GraphTransformer {
   
   // Attributes:
    
@@ -121,6 +125,7 @@ public class DefaultOffsetGenerator implements GraphTransformer {
    * @param newDefaultAnchorConfidence Value to assume in the case of Anchors that have
    * no value for "confidence". 
    */
+  @Switch("Value to assume in the case of Anchors with no explicit confidence")
   public DefaultOffsetGenerator setDefaultAnchorConfidence(int newDefaultAnchorConfidence) { defaultAnchorConfidence = newDefaultAnchorConfidence; return this; }
    
   /**
@@ -148,6 +153,7 @@ public class DefaultOffsetGenerator implements GraphTransformer {
    * @param newDefaultOffsetThreshold The confidence threshold for default anchor offset
    * computation, or null to skip default offset computation. 
    */
+  @Switch("The confidence threshold for default anchor offset computation")
   public DefaultOffsetGenerator setDefaultOffsetThreshold(int newDefaultOffsetThreshold) { defaultOffsetThreshold = newDefaultOffsetThreshold; return this; }
    
   /**
@@ -171,6 +177,7 @@ public class DefaultOffsetGenerator implements GraphTransformer {
    * @param newConfidence Value to set for <var>confidence</var> for anchors that have
    * their offsets changed by this transformer. 
    */
+  @Switch("Value for confidence for anchors that have their offsets changed")
   public DefaultOffsetGenerator setConfidence(int newConfidence) { confidence = newConfidence; return this; }
 
   // Methods:
@@ -819,5 +826,14 @@ public class DefaultOffsetGenerator implements GraphTransformer {
       // System.out.println(s.toString());
     }
   } // end of log()
+
+  /** Command line interface entrypoint: reads JSON-encoded transcripts from stdin,
+   * generates default anchor offsets, and writes them to stdout. */
+  public static void main(String argv[]) {
+    Validator cli = new Validator();
+    if (cli.processArguments(argv)) {
+      cli.start();
+    }
+  }
 
 } // end of class Validator
